@@ -132,7 +132,8 @@ public:
     PARTICLE_ID = 56,
     TEMP_FOR_PID = 57,
     PID_CENSOR_FLAG = 58,
-    INPUT_FIELDS_CENSOR_FLAG = 59
+    INPUT_FIELDS_CENSOR_FLAG = 59,
+    COMBINED_CENSOR_FLAG = 60
   } output_field_id_t;
 
   typedef enum {
@@ -797,6 +798,10 @@ public:
   censored_output_field_t *_censored_output_fields;
   int censored_output_fields_n;
 
+  tdrp_bool_t censoring_fill_in_gaps;
+
+  int censoring_max_fill_gap_length;
+
   output_format_t output_format;
 
   netcdf_style_t netcdf_style;
@@ -828,7 +833,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[176];
+  mutable TDRPtable _table[178];
 
   const char *_className;
 

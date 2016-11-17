@@ -2651,7 +2651,7 @@ using namespace std;
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 60;
+        tt->struct_def.fields[0].enum_def.nfields = 61;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SNR");
@@ -2774,6 +2774,8 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[58].val = PID_CENSOR_FLAG;
         tt->struct_def.fields[0].enum_def.fields[59].name = tdrpStrDup("INPUT_FIELDS_CENSOR_FLAG");
         tt->struct_def.fields[0].enum_def.fields[59].val = INPUT_FIELDS_CENSOR_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[60].name = tdrpStrDup("COMBINED_CENSOR_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[60].val = COMBINED_CENSOR_FLAG;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
@@ -3060,6 +3062,30 @@ using namespace std;
       tt->struct_vals[3].b = pFALSE;
       tt->struct_vals[4].b = pFALSE;
       tt->struct_vals[5].b = pFALSE;
+    tt++;
+    
+    // Parameter 'censoring_fill_in_gaps'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("censoring_fill_in_gaps");
+    tt->descr = tdrpStrDup("Option to fill in small gaps in the censoring flag.");
+    tt->help = tdrpStrDup("If true, we will in small gaps in the censoring flag. A single gate is filled in if surrounded by good data. 2 consecutive censored gates are filled in if surrounded by 2 censored gates on either side. And so on.");
+    tt->val_offset = (char *) &censoring_fill_in_gaps - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'censoring_max_fill_gap_length'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("censoring_max_fill_gap_length");
+    tt->descr = tdrpStrDup("Max length of gaps filled (gates).");
+    tt->help = tdrpStrDup("See 'censoring_fill_in_gaps'.");
+    tt->val_offset = (char *) &censoring_max_fill_gap_length - &_start_;
+    tt->single_val.i = 3;
     tt++;
     
     // Parameter 'Comment 18'

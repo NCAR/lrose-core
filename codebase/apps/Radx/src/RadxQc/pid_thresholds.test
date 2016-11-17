@@ -27,8 +27,8 @@ pid.bgs      (15)	# Flying_Insects
 pid.trip2    (16)	# Second trip                  
 pid.gcl      (17)	# Ground_Clutter          
 pid.sat      (18)	# Saturated SNR
-pid.misc1    (19)	# Misc 1
-pid.misc2    (20)	# Misc 2
+pid.chaff    (19)	# Chaff
+pid.misc     (20)	# Misc
 #
 # define Cloud                        1     //   "CL"
 # define Drizzle                      2     //   "DRZ"
@@ -48,8 +48,8 @@ pid.misc2    (20)	# Misc 2
 # define Second trip                  16    //   "TRIP2"
 # define Ground_Clutter               17    //   "GCL"
 # define saturated power              18    //   "SAT"
-# define Misc_1                       19    //   "MISC1"
-# define Misc_2                       20    //   "MISC2"
+# define chaff                        19    //   "CHAFF"
+# define misc                         20    //   "MISCELLANEOUS"
 #
 mmr.Tmp     ( -100,  40,  1 )       # (min, max, & resolution) => 70 entries
 mmr.Zh      ( -10,  78,   2 )       # implies 44 entries in the table
@@ -115,7 +115,7 @@ Tbl.Zh.Zh.Sld     (-20,90)   (-20,1) (30,1)  (35,0)
 Tbl.Zh.Zh.Bgs     (-20,90)   (-7,0) (-5,1)  (30,1)   (35,0)
 Tbl.Zh.Zh.Trip2   (-20,90)   (-20,0) (30,0) (35,0)
 Tbl.Zh.Zh.Gcl     (-20,90)   (5,0) (10,1)  (70,1)
-Tbl.Zh.Zh.misc1   (-20,90)   (5,0) (10,1)  (70,1)
+Tbl.Zh.Zh.chaff   (-20,90)   (5,0) (10,1)  (70,1)
 #
 # Membership functions for ZDR
 #
@@ -226,7 +226,7 @@ Tbl.Zh.Zdr.Bgs    (0,2)     (5,0) (6,1) (12,1)
 Tbl.Zh.Zdr.Bgs    (2,35)    (6,0) (7,1) (12,1)
 Tbl.Zh.Zdr.Trip2  (-20,35)  (-3,0) (0,0) (1,0) (7,0)
 Tbl.Zh.Zdr.Gcl    (-20,70)   (-10,1) (5,1) (10,0)
-Tbl.Zh.Zdr.misc1  (-20,70)   (-10,1) (5,1) (10,0)
+Tbl.Zh.Zdr.chaff  (-20,70)   (-10,1) (5,1) (10,0)
 #
 # Membership functions for LDR
 #
@@ -362,7 +362,7 @@ Tbl.Zh.Ldr.Sld    (20,30)    (-35,1) (-33,1) (-27,1) (-25,0)
 Tbl.Zh.Ldr.Bgs    (-20,35)   (-24,0) (-20,1) (-10,1) (-5,0)
 Tbl.Zh.Ldr.Trip2  (-20,35)   (-30,0) (0,0) (1,0) (40,0)
 Tbl.Zh.Ldr.Gcl    (-20,70)   (-20,0) (-18,1) (5,1)
-Tbl.Zh.Ldr.misc1  (-20,70)   (-20,0) (-18,0) (5,0)
+Tbl.Zh.Ldr.chaff  (-20,70)   (-20,0) (-18,0) (5,0)
 #
 # Membership functions for KDP
 #
@@ -513,7 +513,7 @@ Tbl.Zh.Kdp.Sld    (35.0,37.0)   (-0.05,0) (0.0,1) (0.1312,1) (0.1512,0)
 Tbl.Zh.Kdp.Bgs    (-20,35)      (-0.1,1) (0,1) (0.05,1) (.1,0)
 Tbl.Zh.Kdp.Trip2  (-20,35.0)    (-0.1,0) (0.0,0) (0.1,0) (0.2,0)
 Tbl.Zh.Kdp.Gcl    (-20,70)       (-0.1,1) (0,1) (0.05,1) (.1,0) 
-Tbl.Zh.Kdp.misc1  (-20,70)       (-0.1,1) (0,1) (0.05,1) (.1,0) 
+Tbl.Zh.Kdp.chaff  (-20,70)       (-0.1,1) (0,1) (0.05,1) (.1,0) 
 #
 # Membership functions for RHOHV
 #
@@ -568,7 +568,7 @@ Tbl.Zh.Rhv.Bgs    (-20,35)   (0.7,0) (0.8,1) (0.9,1) (1.0,0)
 Tbl.Zh.Rhv.Trip2  (-20,35)   (0.7,0) (0.97,0) (0.98,0) (1.1,0)
 #Tbl.Zh.Rhv.Gcl    (-5,35)   (99,0) (100,1) 
 Tbl.Zh.Rhv.Gcl    (-20,70)   (.2,1) (.7,1) (.8,0)
-Tbl.Zh.Rhv.misc1  (-20,70)   (0,1) (.35,1) (.4,0)
+Tbl.Zh.Rhv.chaff  (-20,70)   (0,1) (.35,1) (.4,0)
 
 #
 # Membership functions for Temperature
@@ -590,7 +590,7 @@ Tbl.Zh.Tmp.Sld    (-20,30)  (-30,0) (-10,1) (-1,1) (1,0)
 Tbl.Zh.Tmp.Bgs    (-20,35)   (10,0) (15,1) (40,1) (50,0)
 Tbl.Zh.Tmp.Trip2  (-20,35)  (-52,0) (-50,0) (-1,0) (40,0)
 Tbl.Zh.Tmp.Gcl    (-20,70)   (-25,0) (-10,1) (40,1)(50,0)  
-Tbl.Zh.Tmp.misc1  (-20,70)   (-25,0) (-10,1) (40,1)(50,0)  
+Tbl.Zh.Tmp.chaff  (-20,70)   (-25,0) (-10,1) (40,1)(50,0)  
 #
 # Membership functions for Std dev ZDR
 #
@@ -612,7 +612,7 @@ Tbl.Zh.SDZDR.Sld    (-20,30)   (0,1)  (1,1) (1.1,0)
 Tbl.Zh.SDZDR.Bgs    (-20,35)   (0.5,0)  (0.7,1) (3,1)  (3.2,0)
 Tbl.Zh.SDZDR.Trip2  (-20,35)   (0,0)  (1,0) (1.1,0)
 Tbl.Zh.SDZDR.Gcl    (-20,70)   (2,0)  (2.3,1) (5,1)  (100,1)
-Tbl.Zh.SDZDR.misc1  (-20,70)   (2,0)  (2.3,1) (5,1)  (100,1)
+Tbl.Zh.SDZDR.chaff  (-20,70)   (2,0)  (2.3,1) (5,1)  (100,1)
 #
 # Membership functions for Std dev VR
 #
@@ -634,7 +634,7 @@ Tbl.Zh.SVR.Sld     (-20,30)   (0,1)  (1,1) (1.1,0)
 Tbl.Zh.SVR.Bgs     (-20,35)   (0,1)  (5,1) (7,0)
 Tbl.Zh.SVR.Trip2   (-20,35)   (0,0)  (1,0) (1.1,0)
 Tbl.Zh.SVR.Gcl     (-20,70)   (5,0)  (10,1) (100,1)
-Tbl.Zh.SVR.misc1   (-20,70)   (5,0)  (10,1) (100,1)
+Tbl.Zh.SVR.chaff   (-20,70)   (5,0)  (10,1) (100,1)
 #
 # Membership functions for Std dev PHI
 #
@@ -656,4 +656,4 @@ Tbl.Zh.SPHI.Sld     (-20,30)   (0,1)  (10,1) (15,0)
 Tbl.Zh.SPHI.Bgs     (-20,35)   (5,0)  (10,1) (35,1)  (40,0)
 Tbl.Zh.SPHI.Trip2   (-20,35)   (0,0)  (10,0) (15,0)
 Tbl.Zh.SPHI.Gcl     (-20,70)   (40,0)  (45,1) (100,1)
-Tbl.Zh.SPHI.misc1   (-20,70)   (40,0)  (45,1) (100,1)
+Tbl.Zh.SPHI.chaff   (-20,70)   (40,0)  (45,1) (100,1)

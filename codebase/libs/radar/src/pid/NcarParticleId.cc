@@ -81,8 +81,8 @@ NcarParticleId::NcarParticleId()
   _bgs = new Particle("bgs", "Flying_Insects", FLYING_INSECTS);
   _trip2 = new Particle("trip2", "Second_trip", SECOND_TRIP);
   _gcl = new Particle("gcl", "Ground_Clutter", GROUND_CLUTTER);
-  _chaff = new Particle("chaff", "Miscellaneous_1", CHAFF);
-  _misc = new Particle("misc", "Miscellaneous_2", MISC);
+  _chaff = new Particle("chaff", "chaff", CHAFF);
+  _misc = new Particle("misc", "miscellaneous", MISC);
 
   // add to vector
   

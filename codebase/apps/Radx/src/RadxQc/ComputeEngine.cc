@@ -124,10 +124,10 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
   RadxRay *derivedRay = new RadxRay;
   derivedRay->copyMetaData(*inputRay);
 
-  // allocate moments arrays for computing derived fields,
+  // allocate arrays for computing derived fields,
   // and load them up
   
-  _allocMomentsArrays();
+  _allocArrays();
   _loadMomentsArrays(inputRay);
   
   // set flag for input field censoring
@@ -160,7 +160,6 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
 
   // compute pid
 
-  _allocPidArrays();
   if (_params.compute_pid) {
     _pidCompute();
   }
@@ -509,6 +508,14 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           }
           break;
 
+        case Params::COMBINED_CENSOR_FLAG:
+          if (_combinedCensorFlag[igate]) {
+            *datp = 1.0;
+          } else {
+            *datp = 0.0;
+          }
+          break;
+
       } // switch
 
     } // igate
@@ -568,27 +575,49 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   if (_params.write_censored_fields_to_output) {
 
     for (int ii = 0; ii < _params.censored_output_fields_n; ii++) {
+
+      // find the field
+
       const Params::censored_output_field_t &cField =
         _params._censored_output_fields[ii];
       string inName = cField.input_name;
       RadxField *inField = inputRay->getField(inName);
-      if (inField != NULL) {
-        RadxField *outField = new RadxField(*inField);
-        outField->setName(cField.output_name);
-        if (cField.apply_rlan_censoring) {
-          _censorRlan(*outField);
-        }
-        if (cField.apply_seaclut_censoring) {
-          _censorSeaClutter(*outField);
-        }
-        if (cField.apply_pid_censoring) {
-          _censorOnPid(*outField);
-        }
-        if (cField.apply_input_field_censoring) {
-          _censorOnInputFields(*outField);
-        }
-        derivedRay->addField(outField);
+      if (inField == NULL) {
+        continue;
       }
+
+      // clear the combined censor flag
+
+      for (int igate = 0; igate < _nGates; igate++) {
+        _combinedCensorFlag[igate] = false;
+      }
+
+      // set the flag depending on censoring scheme
+      
+      if (cField.apply_rlan_censoring) {
+        _censorOnRlan();
+      }
+      if (cField.apply_seaclut_censoring) {
+        _censorOnSeaClutter();
+      }
+      if (cField.apply_pid_censoring) {
+        _censorOnPid();
+      }
+      if (cField.apply_input_field_censoring) {
+        _censorOnInputFields();
+      }
+
+      if (_params.censoring_fill_in_gaps) {
+        _fillInCensorGaps();
+      }
+
+      // create censored field
+
+      RadxField *outField = new RadxField(*inField);
+      outField->setName(cField.output_name);
+      derivedRay->addField(outField);
+      _censorOnCombinedFlag(*outField);
+
     } // ii
 
   } // if (_params.copy_input_fields_to_output)
@@ -1068,23 +1097,9 @@ void ComputeEngine::_pidCompute()
 }
 
 //////////////////////////////////////
-// alloc arrays for PID
+// alloc arrays
   
-void ComputeEngine::_allocPidArrays()
-  
-{
-
-  _pidArray = _pidArray_.alloc(_nGates);
-  _pidInterest = _pidInterest_.alloc(_nGates);
-  _tempForPid = _tempForPid_.alloc(_nGates);
-  _pidCensorFlag = _pidCensorFlag_.alloc(_nGates);
-
-}
-
-//////////////////////////////////////
-// alloc moments arrays
-  
-void ComputeEngine::_allocMomentsArrays()
+void ComputeEngine::_allocArrays()
   
 {
 
@@ -1100,6 +1115,14 @@ void ComputeEngine::_allocMomentsArrays()
   _rhohvArray = _rhohvArray_.alloc(_nGates);
   _phidpArray = _phidpArray_.alloc(_nGates);
   _dbzElevGradientArray = _dbzElevGradientArray_.alloc(_nGates);
+
+  _pidArray = _pidArray_.alloc(_nGates);
+  _pidInterest = _pidInterest_.alloc(_nGates);
+  _tempForPid = _tempForPid_.alloc(_nGates);
+
+  _pidCensorFlag = _pidCensorFlag_.alloc(_nGates);
+  _inputCensorFlag = _inputCensorFlag_.alloc(_nGates);
+  _combinedCensorFlag = _combinedCensorFlag_.alloc(_nGates);
 
 }
 
@@ -1323,14 +1346,14 @@ void ComputeEngine::_computeSnrFromDbz()
 //////////////////////////////////////////////////////////////
 // Censor gates with RLAN present
 
-void ComputeEngine::_censorRlan(RadxField &field)
+void ComputeEngine::_censorOnRlan()
 
 {
 
   const bool *rlanFlag = _intf.getRlanFlag();
   for (int igate = 0; igate < _nGates; igate++) {
     if (rlanFlag[igate]) {
-      field.setGateToMissing(igate);
+      _combinedCensorFlag[igate] = true;
     }
   } // igate
 
@@ -1339,14 +1362,14 @@ void ComputeEngine::_censorRlan(RadxField &field)
 //////////////////////////////////////////////////////////////
 // Censor gates with sea clutter present
 
-void ComputeEngine::_censorSeaClutter(RadxField &field)
+void ComputeEngine::_censorOnSeaClutter()
   
 {
 
   const bool *clutFlag = _seaclut.getClutFlag();
   for (int igate = 0; igate < _nGates; igate++) {
     if (clutFlag[igate]) {
-      field.setGateToMissing(igate);
+      _combinedCensorFlag[igate] = true;
     }
   } // igate
 
@@ -1355,13 +1378,13 @@ void ComputeEngine::_censorSeaClutter(RadxField &field)
 //////////////////////////////////////////////////////////////
 // Censor gates with given particle types
 
-void ComputeEngine::_censorOnPid(RadxField &field)
+void ComputeEngine::_censorOnPid()
 
 {
 
   for (int igate = 0; igate < _nGates; igate++) {
     if (_pidCensorFlag[igate]) {
-      field.setGateToMissing(igate);
+      _combinedCensorFlag[igate] = true;
     }
   } // igate
 
@@ -1536,12 +1559,27 @@ void ComputeEngine::_setInputCensoringFlag(RadxRay &inputRay)
 //////////////////////////////////////////////////////////////
 // Censor gates based on input field values
 
-void ComputeEngine::_censorOnInputFields(RadxField &field)
+void ComputeEngine::_censorOnInputFields()
 
 {
 
   for (int igate = 0; igate < _nGates; igate++) {
     if (_inputCensorFlag[igate]) {
+      _combinedCensorFlag[igate] = true;
+    }
+  } // igate
+
+}
+
+//////////////////////////////////////////////////////////////
+// Censor gates based on combined flag value
+
+void ComputeEngine::_censorOnCombinedFlag(RadxField &field)
+
+{
+
+  for (int igate = 0; igate < _nGates; igate++) {
+    if (_combinedCensorFlag[igate]) {
       field.setGateToMissing(igate);
     }
   } // igate
@@ -1582,3 +1620,103 @@ int ComputeEngine::_convertInterestParamsToVector(const string &label,
 }
 
 
+///////////////////////////////////////////////////////////////
+// apply in in-fill filter to remove small holes in censor flag
+
+void ComputeEngine::_fillInCensorGaps()
+{
+
+  
+  int *countSet = new int[_nGates];
+  int *countNot = new int[_nGates];
+  
+  /*
+   * compute the running count of gates which have the flag set and
+   * those which do not
+   *
+   * Go forward through the gates, counting up the number of gates set
+   * or not set and assigning that number to the arrays as we go.
+   */
+
+  int nSet = 0;
+  int nNot = 0;
+
+  for (int igate = 0; igate < _nGates; igate++) {
+    if (_combinedCensorFlag[igate]) {
+      nSet++;
+      nNot = 0;
+    } else {
+      nSet = 0;
+      nNot++;
+    }
+    countSet[igate] = nSet;
+    countNot[igate] = nNot;
+  }
+
+  /*
+   * Go in reverse through the gates, taking the max non-zero
+   * values and copying them across the set or not-set regions.
+   * This makes all the counts equal in the gaps and set areas.
+   */
+
+  for (int igate = _nGates - 2; igate >= 0; igate--) {
+    if (countSet[igate] != 0 &&
+        countSet[igate] < countSet[igate+1]) {
+      countSet[igate] = countSet[igate+1];
+    }
+    if (countNot[igate] != 0 &&
+        countNot[igate] < countNot[igate+1]) {
+      countNot[igate] = countNot[igate+1];
+    }
+  }
+
+  /*
+   * fill in gaps
+   */
+
+  for (int igate = 1; igate < _nGates - 1; igate++) {
+    /*
+     * is the gap small enough?
+     */
+    nNot = countNot[igate];
+    if (nNot > 0 && nNot <= _params.censoring_max_fill_gap_length) {
+      /*
+       * is it surrounded by regions at least as large as the gap?
+       */
+      int minGateCheck = igate - nNot;
+      if (minGateCheck < 0) {
+        minGateCheck = 0;
+      }
+      int maxGateCheck = igate + nNot;
+      if (maxGateCheck > _nGates - 1) {
+        maxGateCheck = _nGates - 1;
+      }
+      int nAdjacentBelow = 0;
+      for (int jgate = igate - 1; jgate >= minGateCheck; jgate--) {
+        nSet = countSet[jgate];
+        if (nSet != 0) {
+          nAdjacentBelow = nSet;
+          break;
+        }
+      } /* jgate */
+      int nAdjacentAbove = 0;
+      for (int jgate = igate + 1; jgate <= maxGateCheck; jgate++) {
+        nSet = countSet[jgate];
+        if (nSet != 0) {
+          nAdjacentAbove = nSet;
+          break;
+        }
+      } /* jgate */
+      int minAdjacent = nAdjacentBelow;
+      minAdjacent = MIN(minAdjacent, nAdjacentAbove);
+
+      if (minAdjacent >= nNot) {
+        _combinedCensorFlag[igate] = true;
+      }
+    }
+  } /* igate */
+
+  delete[] countSet;
+  delete[] countNot;
+
+}

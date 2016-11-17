@@ -983,8 +983,8 @@ typedef enum {
   PARTICLE_ID,
   TEMP_FOR_PID,
   PID_CENSOR_FLAG,
-
-  INPUT_FIELDS_CENSOR_FLAG
+  INPUT_FIELDS_CENSOR_FLAG,
+  COMBINED_CENSOR_FLAG
 
 } output_field_id_t;
 
@@ -1166,6 +1166,18 @@ paramdef struct censored_output_field_t {
   p_descr = "Fields to be copied from input and written to output.";
   p_help = "These fields are copied from the input, optionally censored, and written to the output file. You can change the name of the field on output. And you can specify censoring as required, based on the results of the QC steps in this app.";
 } censored_output_fields[];
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to fill in small gaps in the censoring flag.";
+  p_help = "If true, we will in small gaps in the censoring flag. A single gate is filled in if surrounded by good data. 2 consecutive censored gates are filled in if surrounded by 2 censored gates on either side. And so on.";
+} censoring_fill_in_gaps;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Max length of gaps filled (gates).";
+  p_help = "See 'censoring_fill_in_gaps'.";
+} censoring_max_fill_gap_length;
 
 commentdef {
   p_header = "OUTPUT FILE FORMAT";

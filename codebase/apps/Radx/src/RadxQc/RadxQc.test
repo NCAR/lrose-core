@@ -1205,7 +1205,7 @@ rlan_min_ray_snr_db = 0;
 // Type: double
 //
 
-rlan_min_ray_snr_for_zdr_sdev_db = 7.5;
+rlan_min_ray_snr_for_zdr_sdev_db = 8;
 
 ///////////// rlan_min_ray_fraction ///////////////////
 //
@@ -1219,7 +1219,7 @@ rlan_min_ray_snr_for_zdr_sdev_db = 7.5;
 // Type: double
 //
 
-rlan_min_ray_fraction = 0.3;
+rlan_min_ray_fraction = 0.4;
 
 ///////////// rlan_max_elev_deg ///////////////////////
 //
@@ -1231,7 +1231,7 @@ rlan_min_ray_fraction = 0.3;
 // Type: double
 //
 
-rlan_max_elev_deg = 2.25;
+rlan_max_elev_deg = 2.5;
 
 ///////////// rlan_interest_threshold /////////////////
 //
@@ -1553,7 +1553,7 @@ compute_pid = TRUE;
 // Type: string
 //
 
-pid_thresholds_file_path = "./pid_thresholds.test";
+pid_thresholds_file_path = "$(HOME)/case_studies/alg/params/pid_thresholds.test";
 
 ///////////// PID_snr_threshold ///////////////////////
 //
@@ -1776,12 +1776,9 @@ PID_median_filter_len = 7;
 //
 
 PID_censoring_flag_vals = {
-  // 15, // insects
-  // 16, // 2nd trip
-  17, // clutter residue
-  // 18, saturated
-  19, // misc_1 - e.g.UAE echoes
-  // 20  // misc_2
+ 15,
+ 17,
+ 19
 };
 
 //======================================================================
@@ -2085,6 +2082,7 @@ site_temp_search_margin_secs = 3600;
 //          TEMP_FOR_PID
 //          PID_CENSOR_FLAG
 //          INPUT_FIELDS_CENSOR_FLAG
+//          COMBINED_CENSOR_FLAG
 //      string name;
 //      string long_name;
 //      string standard_name;
@@ -2562,6 +2560,18 @@ output_fields = {
     scale = 0.01,
     offset = 0
   }
+  ,
+  {
+    id = COMBINED_CENSOR_FLAG,
+    name = "COMBINED_CENSOR_FLAG",
+    long_name = "combined_censor_flag",
+    standard_name = "combined_censor_flag",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
 };
 
 //======================================================================
@@ -2777,6 +2787,24 @@ censored_output_fields = {
   }
   ,
   {
+    input_name = "DBZ_F",
+    output_name = "DBZ_C2",
+    apply_rlan_censoring = TRUE,
+    apply_seaclut_censoring = FALSE,
+    apply_pid_censoring = FALSE,
+    apply_input_field_censoring = TRUE
+  }
+  ,
+  {
+    input_name = "DBZ_F",
+    output_name = "DBZ_C3",
+    apply_rlan_censoring = TRUE,
+    apply_seaclut_censoring = TRUE,
+    apply_pid_censoring = FALSE,
+    apply_input_field_censoring = TRUE
+  }
+  ,
+  {
     input_name = "VEL_F",
     output_name = "VEL_C",
     apply_rlan_censoring = TRUE,
@@ -2830,6 +2858,33 @@ censored_output_fields = {
     apply_input_field_censoring = TRUE
   }
 };
+
+///////////// censoring_fill_in_gaps //////////////////
+//
+// Option to fill in small gaps in the censoring flag.
+//
+// If true, we will in small gaps in the censoring flag. A single gate 
+//   is filled in if surrounded by good data. 2 consecutive censored gates 
+//   are filled in if surrounded by 2 censored gates on either side. And 
+//   so on.
+//
+//
+// Type: boolean
+//
+
+censoring_fill_in_gaps = TRUE;
+
+///////////// censoring_max_fill_gap_length ///////////
+//
+// Max length of gaps filled (gates).
+//
+// See 'censoring_fill_in_gaps'.
+//
+//
+// Type: int
+//
+
+censoring_max_fill_gap_length = 3;
 
 //======================================================================
 //

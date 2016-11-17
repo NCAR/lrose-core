@@ -139,12 +139,14 @@ private:
   RadxArray<double> _tempForPid_;
   RadxArray<bool> _pidCensorFlag_;
   RadxArray<bool> _inputCensorFlag_;
+  RadxArray<bool> _combinedCensorFlag_;
 
   int *_pidArray;
   double *_pidInterest;
   double *_tempForPid;
   bool *_pidCensorFlag;
   bool *_inputCensorFlag;
+  bool *_combinedCensorFlag;
   int _nWarnCensorPrint;
 
   // atmospheric attenuation
@@ -193,6 +195,8 @@ private:
   void _loadOutputFields(RadxRay *inputRay,
                          RadxRay *derivedRay);
     
+  void _allocArrays();
+
   void _kdpInit();
   void _kdpCompute();
 
@@ -204,9 +208,7 @@ private:
   
   int _pidInit();
   void _pidCompute();
-  void _allocPidArrays();
   
-  void _allocMomentsArrays();
   int _loadMomentsArrays(RadxRay *inputRay);
   int _loadFieldArray(RadxRay *inputRay,
                       const string &fieldName,
@@ -217,19 +219,19 @@ private:
 
   void _computeSnrFromDbz();
 
-  void _censorRlan(RadxField &field);
-
-  void _censorSeaClutter(RadxField &field);
-  
-  void _censorOnPid(RadxField &field);
-
-  void _setInputCensoringFlag(RadxRay &ray);
-  void _censorOnInputFields(RadxField &field);
+  void _censorOnRlan();
+  void _censorOnSeaClutter();
+  void _censorOnPid();
+  void _setInputCensoringFlag(RadxRay &inputRay);
+  void _censorOnInputFields();
+  void _censorOnCombinedFlag(RadxField &field);
 
   int _convertInterestParamsToVector(const string &label,
                                      const Params::interest_map_point_t *map,
                                      int nPoints,
                                      vector<InterestMap::ImPoint> &pts);
+
+  void _fillInCensorGaps();
 
 };
 
