@@ -2096,6 +2096,7 @@ int Decoders::_getLocation(){
       _lat = _params->_siteLocations[i].lat;
       _lon = _params->_siteLocations[i].lon;
       _alt = _params->_siteLocations[i].alt;
+      _stationName = _params->_siteLocations[i].name;
       return 0; // Got it.
     }
   }
@@ -2440,7 +2441,7 @@ int Decoders::write(){
   // Create and Init the object.
   //
   SoundingMerge S(_params);
-  S.Init(_dataTime, _stationID);  
+  S.Init(_dataTime, _stationID, _stationName);  
   S.setMergeEpsilon( _params->soundingMergeEpsilon );
   //
   //  Set up a sounding data holder and pass it in to be added.
