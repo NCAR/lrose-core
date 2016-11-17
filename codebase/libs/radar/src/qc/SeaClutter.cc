@@ -370,8 +370,16 @@ int SeaClutter::locate()
   
   _computeMeanInRange(_snr, _snrMean);
   _computeMeanInRange(_rhohv, _rhohvMean);
-  _computeSdevInRange(_phidp, _phidpSdev);
   _computeSdevInRange(_zdr, _zdrSdev);
+
+  // sdev of phidp is a special case since we
+  // need to compute it around the circle
+
+  _phidpProc.setRangeGeometry(_startRangeKm, _gateSpacingKm);
+  _phidpProc.computePhidpSdev(_nGates, _nGatesKernel,
+                              _phidp, _missingVal);
+  memcpy(_phidpSdev, _phidpProc.getPhidpSdev(),
+         _nGates * sizeof(double));
 
   // compute interest fields
   

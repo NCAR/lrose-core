@@ -24,7 +24,8 @@ HDRS =
 CPPC_SRCS = \
 	KdpBringi.cc \
 	KdpCompute.cc \
-	KdpFilt.cc
+	KdpFilt.cc \
+	PhidpProc.cc
 
 #
 # general targets

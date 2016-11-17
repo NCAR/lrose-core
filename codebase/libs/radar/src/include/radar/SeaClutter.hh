@@ -40,6 +40,7 @@
 #include <pthread.h>
 #include <vector>
 #include <radar/InterestMap.hh>
+#include <radar/PhidpProc.hh>
 #include <toolsa/TaArray.hh>
 using namespace std;
 
@@ -207,6 +208,10 @@ private:
   // field missing value
 
   double _missingVal;
+
+  // compute phidp sdev
+
+  PhidpProc _phidpProc;
 
   // arrays for input and computed data
   // and pointers to those arrays
