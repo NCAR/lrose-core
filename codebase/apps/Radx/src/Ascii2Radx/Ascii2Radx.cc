@@ -173,6 +173,7 @@ int Ascii2Radx::_runFilelist()
     
     RadxVol vol;
     for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
+      _sweepNum = 0;
       string inputPath = _args.inputFileList[ii];
       // read input file
       int jret = _readFile(inputPath, vol);
@@ -211,9 +212,9 @@ int Ascii2Radx::_runFilelist()
     
     // aggregate the files into a single volume on read
     
+    _sweepNum = 0;
     RadxVol vol;
     GenericRadxFile inFile;
-    _setupRead(inFile);
     vector<string> paths = _args.inputFileList;
     if (inFile.aggregateFromPaths(paths, vol)) {
       cerr << "ERROR - Ascii2Radx::_runFileList" << endl;
@@ -514,13 +515,87 @@ int Ascii2Radx::_readBufrAscii(const string &readPath,
 
   // read in the metadata
   
-  if (_readBufrMetaData(vol)) {
+  if (_readBufrMetaData()) {
     cerr << "ERROR - Ascii2Radx::_readFile" << endl;
     cerr << "  path: " << readPath << endl;
     cerr << "  cannot read metadata" << endl;
     fclose(_inFile);
     return -1;
   }
+
+  // read in the field data
+  
+  if (_readBufrFieldData()) {
+    cerr << "ERROR - Ascii2Radx::_readFile" << endl;
+    cerr << "  path: " << readPath << endl;
+    cerr << "  cannot read metadata" << endl;
+    fclose(_inFile);
+    return -1;
+  }
+
+  // create the rays
+
+  double deltaAz = 0.0;
+  double az = _startAz;
+  for (int iray = 0; iray < _nAz; iray++) {
+
+    // create a ray
+    
+    RadxRay *ray = new RadxRay;
+
+    // set metadata
+
+    ray->setVolumeNumber(_volNum);
+    ray->setSweepNumber(_sweepNum);
+    ray->setCalibIndex(0);
+    ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
+
+    RadxTime rayTime = _volStartTime + deltaAz * _antennaSpeedAz;
+    deltaAz += _azimuthResDeg;
+    ray->setTime(rayTime);
+
+    ray->setAzimuthDeg(az);
+    az += _azimuthResDeg;
+    if (az > 360.0) {
+      az -= 360.0;
+    } else if (az < 0) {
+      az += 360.0;
+    }
+    
+    ray->setElevationDeg(_elevDeg);
+    ray->setFixedAngleDeg(_elevDeg);
+
+    ray->setTrueScanRateDegPerSec(_antennaSpeedAz);
+    ray->setTargetScanRateDegPerSec(_antennaSpeedAz);
+    ray->setIsIndexed(true);
+    ray->setAngleResDeg(_azimuthResDeg);
+
+    ray->setNSamples(_nSamples);
+    ray->setPulseWidthUsec(_pulseWidthSec * 1.0e6);
+    ray->setPrtSec(1.0 / _prf);
+
+    ray->setEstimatedNoiseDbmHc(_noiseLevelDbm);
+    ray->setEstimatedNoiseDbmVc(_noiseLevelDbm);
+
+    // add field
+
+    ray->addField("DBZ", "dBZ",
+                  _nGates, Radx::missingFl64,
+                  _fieldData + iray * _nGates, true);
+
+    ray->setRangeGeom(_startRangeM / 1000.0, _gateSpacingM / 1000.0);
+
+    ray->convertToSi16();
+
+    // add to volume
+
+    vol.addRay(ray);
+
+  } // iray
+
+  // set the metadata on the volume
+
+  _finalizeVol(vol);
 
   return 0;
 
@@ -535,15 +610,23 @@ void Ascii2Radx::_finalizeVol(RadxVol &vol)
   
 {
 
-  // remove unwanted fields
-  
-  if (_params.exclude_specified_fields) {
-    for (int ii = 0; ii < _params.excluded_fields_n; ii++) {
-      if (_params.debug) {
-        cerr << "Removing field name: " << _params._excluded_fields[ii] << endl;
-      }
-      vol.removeField(_params._excluded_fields[ii]);
-    }
+  vol.setVolumeNumber(_volNum);
+
+  vol.setStartTime(_volStartTime.utime(), _volStartTime.getSubSec());
+
+  vol.setLatitudeDeg(_latitude);
+  vol.setLongitudeDeg(_longitude);
+  vol.setAltitudeKm(_altitudeM / 1000.0);
+
+  vol.setFrequencyHz(_frequencyHz);
+  vol.setRadarBeamWidthDegH(_beamWidth);
+  vol.setRadarBeamWidthDegV(_beamWidth);
+  vol.setRadarAntennaGainDbH(_antennaGain);
+  vol.setRadarAntennaGainDbV(_antennaGain);
+  vol.setRadarReceiverBandwidthMhz(_rxBandWidthHz / 1.0e6);
+
+  if (_params.set_max_range) {
+    vol.setMaxRangeKm(_params.max_range_km);
   }
 
   // override start range and/or gate spacing
@@ -621,6 +704,14 @@ void Ascii2Radx::_finalizeVol(RadxVol &vol)
     vol.adjustSweepLimitsUsingAngles();
   }
 
+  if (_params.set_fixed_angle_limits) {
+    vol.constrainByFixedAngle(_params.lower_fixed_angle_limit,
+                              _params.upper_fixed_angle_limit);
+  } else if (_params.set_sweep_num_limits) {
+    vol.constrainBySweepNum(_params.lower_sweep_num,
+                            _params.upper_sweep_num);
+  }
+
   // set number of gates constant if requested
 
   if (_params.set_ngates_constant) {
@@ -666,73 +757,6 @@ void Ascii2Radx::_finalizeVol(RadxVol &vol)
   // set global attributes
 
   _setGlobalAttr(vol);
-
-}
-
-//////////////////////////////////////////////////
-// set up read
-
-void Ascii2Radx::_setupRead(RadxFile &file)
-{
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    file.setDebug(true);
-  }
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    file.setVerbose(true);
-  }
-
-  if (_params.set_fixed_angle_limits) {
-    file.setReadFixedAngleLimits(_params.lower_fixed_angle_limit,
-                                 _params.upper_fixed_angle_limit);
-    if (_params.lower_fixed_angle_limit == _params.upper_fixed_angle_limit) {
-      // relax strict angle checking since only a single angle is specified
-      // which means the user wants the closest angle
-      file.setReadStrictAngleLimits(false);
-    }
-  } else if (_params.set_sweep_num_limits) {
-    file.setReadSweepNumLimits(_params.lower_sweep_num,
-                               _params.upper_sweep_num);
-  }
-
-  if (!_params.apply_strict_angle_limits) {
-    file.setReadStrictAngleLimits(false);
-  }
-
-  if (!_params.write_other_fields_unchanged) {
-
-    if (_params.set_output_fields) {
-      for (int ii = 0; ii < _params.output_fields_n; ii++) {
-        file.addReadField(_params._output_fields[ii].input_field_name);
-      }
-    }
-
-  }
-
-  if (_params.aggregate_sweep_files_on_read) {
-    file.setReadAggregateSweeps(true);
-  } else {
-    file.setReadAggregateSweeps(false);
-  }
-
-  file.setReadRemoveRaysAllMissing(false);
-  file.setReadPreserveSweeps(false);
-
-  if (_params.set_max_range) {
-    file.setReadMaxRangeKm(_params.max_range_km);
-  }
-
-  if (_params.change_radar_latitude_sign) {
-    file.setChangeLatitudeSignOnRead(true);
-  }
-
-  if (_params.read_set_radar_num) {
-    file.setRadarNumOnRead(_params.read_radar_num);
-  }
-  
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    file.printReadRequest(cerr);
-  }
 
 }
 
@@ -1078,9 +1102,9 @@ int Ascii2Radx::_writeVol(RadxVol &vol)
 }
 
 //////////////////////////////////////////////////
-// read in the metadata
+// read in the BUFR metadata
 
-int Ascii2Radx::_readBufrMetaData(RadxVol &vol)
+int Ascii2Radx::_readBufrMetaData()
 {
 
   _year = _month = _day = _hour = _min = _sec = 0;
@@ -1094,6 +1118,9 @@ int Ascii2Radx::_readBufrMetaData(RadxVol &vol)
 
   _latitude = 0.0;
   _readBufrMetaVariable("Latitude (high accuracy)", _latitude);
+  if (_params.change_radar_latitude_sign) {
+    _latitude *= -1.0;
+  }
 
   _longitude = 0.0;
   _readBufrMetaVariable("Longitude (high accuracy)", _longitude);
@@ -1124,6 +1151,9 @@ int Ascii2Radx::_readBufrMetaData(RadxVol &vol)
 
   _pulseWidthSec = Radx::missingFl64;
   _readBufrMetaVariable("Pulse width", _pulseWidthSec);
+
+  _rxBandWidthHz = Radx::missingFl64;
+  _readBufrMetaVariable("Intermediate frequency bandwidth", _rxBandWidthHz);
 
   _noiseLevelDbm = Radx::missingFl64;
   _readBufrMetaVariable("Minimum detectable signal", _noiseLevelDbm);
@@ -1189,6 +1219,39 @@ int Ascii2Radx::_readBufrMetaData(RadxVol &vol)
 
 }
 
+//////////////////////////////////////////////////
+// read in the BUFR field data
+
+int Ascii2Radx::_readBufrFieldData()
+{
+
+  // read in number of total points (az * gates)
+  // this also positions the file pointer to read the data
+
+  _nPtsData = 0;
+  if (_readBufrMetaVariable("Facteur super elargi de repetition differe du descripteur",
+                            _nPtsData)) {
+    cerr << "ERROR - Ascii2Radx::_readBufrFieldData()" << endl;
+    cerr << "  Cannot find variable for _nPtsData" << endl;
+    return -1;
+  }
+
+  // read in data values
+
+  _fieldData = _fieldData_.alloc(_nPtsData);
+  for (int ii = 0; ii < _nPtsData; ii++) {
+    double dval;
+    if (_readBufrDataValue("Pixel value", dval)) {
+      cerr << "ERROR - Ascii2Radx::_readBufrFieldData()" << endl;
+      cerr << "  Cannot read data value, ii: " << ii << endl;
+      return -1;
+    }
+    _fieldData[ii] = dval;
+  }
+
+  return 0;
+
+}
 //////////////////////////////////////////////////
 // read in the metadata variable - integer
 // if precedingLabel is not zero len, we first look for that
@@ -1286,6 +1349,74 @@ int Ascii2Radx::_readBufrMetaVariable(string varLabel, double &dval,
       cerr << "  valStr: " << valStr << endl;
       return -1;
     
+    } // itok
+    
+  } // while
+
+  return -1;
+
+}
+
+//////////////////////////////////////////////////
+// read in data value
+// returns 0 on success, -1 on failure
+
+int Ascii2Radx::_readBufrDataValue(string varLabel, double &dval)
+
+{
+  
+  // read in each line
+  
+  while (!feof(_inFile)) {
+
+    // get next line
+
+    char line[1024];
+    if (fgets(line, 1024, _inFile) == NULL) {
+      continue;
+    }
+
+    // check if this line has required label
+    
+    if (strstr(line, varLabel.c_str()) == NULL) {
+      continue;
+    }
+
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "Decoding data value, label: " << varLabel << endl;
+      cerr << line;
+    }
+      
+    // tokenize the line
+
+    vector<string> toks;
+    TaStr::tokenize(line, " ", toks);
+    if (toks.size() < 1) {
+      cerr << "ERROR - Ascii2Radx::_readBufrDataValue" << endl;
+      cerr << "  Bad string for label: " << varLabel << endl;
+      cerr << "  line: " << line;
+      return -1;
+    }
+    
+    // find first token with '.' - i.e. floating point number
+    
+    for (size_t itok = 0; itok < toks.size(); itok++) {
+
+      string &valStr = toks[itok];
+      if (valStr.find(".") == string::npos) {
+        continue;
+      }
+      
+      if (sscanf(valStr.c_str(), "%lg", &dval) == 1) {
+        return 0;
+      }
+      
+      cerr << "ERROR - Ascii2Radx::_readBufrDataValue" << endl;
+      cerr << "  Bad string for label: " << varLabel << endl;
+      cerr << "  line: " << line;
+      cerr << "  valStr: " << valStr << endl;
+      return -1;
+      
     } // itok
     
   } // while

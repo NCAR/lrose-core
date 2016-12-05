@@ -40,6 +40,7 @@
 #include <string>
 #include <cstdio>
 #include <Radx/RadxTime.hh>
+#include <Radx/RadxArray.hh>
 class RadxVol;
 class RadxFile;
 class RadxRay;
@@ -79,9 +80,15 @@ private:
   vector<VarTransform *> _varTrans;
 
   int _volNum;
+  int _sweepNum;
 
   int _year, _month, _day, _hour, _min, _sec;
   RadxTime _volStartTime;
+
+  int _nSamples;
+  int _nGates;
+  int _nAz;
+  int _nPtsData;
 
   double _latitude;
   double _longitude;
@@ -97,6 +104,7 @@ private:
   double _peakPowerWatts;
   double _prf;
   double _pulseWidthSec;
+  double _rxBandWidthHz;
 
   double _noiseLevelDbm;
   double _dynamicRangeDb;
@@ -106,15 +114,13 @@ private:
 
   double _azimuthResDeg;
 
-  int _nSamples;
-
   double _radarConstant;
 
   double _elevDeg;
   double _startAz;
 
-  int _nGates;
-  int _nAz;
+  RadxArray<double> _fieldData_;
+  double *_fieldData;
 
   int _runFilelist();
   int _runArchive();
@@ -123,7 +129,6 @@ private:
   int _readFile(const string &filePath,
                 RadxVol &vol);
   void _finalizeVol(RadxVol &vol);
-  void _setupRead(RadxFile &file);
   void _convertFields(RadxVol &vol);
   void _convertAllFields(RadxVol &vol);
   void _setupWrite(RadxFile &file);
@@ -132,11 +137,15 @@ private:
 
   int _readBufrAscii(const string &readPath,
                      RadxVol &vol);
-  int _readBufrMetaData(RadxVol &vol);
+
+  int _readBufrMetaData();
+  int _readBufrFieldData();
+
   int _readBufrMetaVariable(string varLabel, int &ival,
                             string precedingLabel = "");
   int _readBufrMetaVariable(string varLabel, double &dval,
                             string precedingLabel = "");
+  int _readBufrDataValue(string varLabel, double &dval);
   
 
 };

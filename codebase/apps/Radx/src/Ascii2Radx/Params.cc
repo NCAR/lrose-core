@@ -1590,50 +1590,6 @@ using namespace std;
       tt->struct_vals[17].d = 0;
     tt++;
     
-    // Parameter 'write_other_fields_unchanged'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_other_fields_unchanged");
-    tt->descr = tdrpStrDup("Option to write out the unspecified fields as they are.");
-    tt->help = tdrpStrDup("If false, only the fields listed in output_fields will be written. If this is true, all other fields will be written unchanged.");
-    tt->val_offset = (char *) &write_other_fields_unchanged - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'exclude_specified_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("exclude_specified_fields");
-    tt->descr = tdrpStrDup("Option to exclude fields in the specified list.");
-    tt->help = tdrpStrDup("If true, the specified fields will be excluded. This may be easier than specifiying all of the fields to be included, if that list is very long.");
-    tt->val_offset = (char *) &exclude_specified_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'excluded_fields'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("excluded_fields");
-    tt->descr = tdrpStrDup("List of fields to be excluded.");
-    tt->help = tdrpStrDup("List the names to be excluded");
-    tt->array_offset = (char *) &_excluded_fields - &_start_;
-    tt->array_n_offset = (char *) &excluded_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 2;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].s = tdrpStrDup("DBZ");
-      tt->array_vals[1].s = tdrpStrDup("VEL");
-    tt++;
-    
     // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));

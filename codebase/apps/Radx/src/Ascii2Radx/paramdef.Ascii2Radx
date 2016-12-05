@@ -543,24 +543,6 @@ paramdef struct output_field_t {
   p_help = "Set the details for the output fields. The output_field_name is the ndtCDF variable name. Set the long name to a more descriptive name. Set the standard name to the CF standard name for this field. If the long name or standard name are empty, the existing names are used. If SCALING_SPECIFIED, then the scale and offset is used.";
 } output_fields[];
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write out the unspecified fields as they are.";
-  p_help = "If false, only the fields listed in output_fields will be written. If this is true, all other fields will be written unchanged.";
-} write_other_fields_unchanged;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to exclude fields in the specified list.";
-  p_help = "If true, the specified fields will be excluded. This may be easier than specifiying all of the fields to be included, if that list is very long.";
-} exclude_specified_fields;
-
-paramdef string {
-  p_default = { "DBZ", "VEL" };
-  p_descr = "List of fields to be excluded.";
-  p_help = "List the names to be excluded";
-} excluded_fields[];
-
 commentdef {
   p_header = "OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS";
 }

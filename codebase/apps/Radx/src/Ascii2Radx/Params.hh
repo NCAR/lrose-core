@@ -546,13 +546,6 @@ public:
   output_field_t *_output_fields;
   int output_fields_n;
 
-  tdrp_bool_t write_other_fields_unchanged;
-
-  tdrp_bool_t exclude_specified_fields;
-
-  char* *_excluded_fields;
-  int excluded_fields_n;
-
   tdrp_bool_t set_output_encoding_for_all_fields;
 
   output_encoding_t output_encoding;
@@ -640,7 +633,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[128];
+  mutable TDRPtable _table[125];
 
   const char *_className;
 
