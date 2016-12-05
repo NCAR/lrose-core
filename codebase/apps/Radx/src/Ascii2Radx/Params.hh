@@ -64,6 +64,10 @@ public:
   } mode_t;
 
   typedef enum {
+    BUFR_ASCII = 0
+  } input_type_t;
+
+  typedef enum {
     ATTR_STRING = 0,
     ATTR_INT = 1,
     ATTR_DOUBLE = 2,
@@ -422,6 +426,8 @@ public:
 
   mode_t mode;
 
+  input_type_t input_type;
+
   int max_realtime_data_age_secs;
 
   tdrp_bool_t latest_data_info_avail;
@@ -634,7 +640,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[127];
+  mutable TDRPtable _table[128];
 
   const char *_className;
 

@@ -38,6 +38,8 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <string>
+#include <cstdio>
+#include <Radx/RadxTime.hh>
 class RadxVol;
 class RadxFile;
 class RadxRay;
@@ -72,11 +74,47 @@ private:
   Args _args;
   Params _params;
   vector<string> _readPaths;
+  FILE *_inFile;
 
   vector<VarTransform *> _varTrans;
 
   int _volNum;
-  int _nWarnCensorPrint;
+
+  int _year, _month, _day, _hour, _min, _sec;
+  RadxTime _volStartTime;
+
+  double _latitude;
+  double _longitude;
+  double _altitudeM;
+
+  double _antennaGain;
+  double _beamWidth;
+
+  double _antennaSpeedAz;
+  double _antennaSpeedEl;
+
+  double _frequencyHz;
+  double _peakPowerWatts;
+  double _prf;
+  double _pulseWidthSec;
+
+  double _noiseLevelDbm;
+  double _dynamicRangeDb;
+
+  double _gateSpacingM;
+  double _startRangeM;
+
+  double _azimuthResDeg;
+
+  int _nSamples;
+
+  double _radarConstant;
+
+  double _elevDeg;
+  double _startAz;
+
+  int _nGates;
+  int _nAz;
 
   int _runFilelist();
   int _runArchive();
@@ -92,6 +130,14 @@ private:
   void _setGlobalAttr(RadxVol &vol);
   int _writeVol(RadxVol &vol);
 
+  int _readBufrAscii(const string &readPath,
+                     RadxVol &vol);
+  int _readBufrMetaData(RadxVol &vol);
+  int _readBufrMetaVariable(string varLabel, int &ival,
+                            string precedingLabel = "");
+  int _readBufrMetaVariable(string varLabel, double &dval,
+                            string precedingLabel = "");
+  
 
 };
 

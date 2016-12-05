@@ -624,6 +624,24 @@ using namespace std;
     tt->single_val.e = REALTIME;
     tt++;
     
+    // Parameter 'input_type'
+    // ctype is '_input_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("input_type");
+    tt->descr = tdrpStrDup("Input data type");
+    tt->help = tdrpStrDup("The ASCII data can be in various representations.  The input type is specified here.");
+    tt->val_offset = (char *) &input_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("input_type_t");
+    tt->enum_def.nfields = 1;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("BUFR_ASCII");
+      tt->enum_def.fields[0].val = BUFR_ASCII;
+    tt->single_val.e = BUFR_ASCII;
+    tt++;
+    
     // Parameter 'max_realtime_data_age_secs'
     // ctype is 'int'
     

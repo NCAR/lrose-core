@@ -59,6 +59,18 @@ paramdef enum mode_t {
            "work as a file path, but ./yyyymmdd/data_file.ext will.";
 } mode;
 
+typedef enum {
+  BUFR_ASCII
+} input_type_t;
+
+paramdef enum input_type_t {
+  p_default = BUFR_ASCII;
+  p_descr = "Input data type";
+  p_help =
+  "The ASCII data can be in various representations.  "
+  "The input type is specified here.";
+} input_type;
+
 paramdef int {
   p_default = 300;
   p_descr = "Maximum age of realtime data (secs)";

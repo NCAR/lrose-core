@@ -37,7 +37,6 @@
 #include <Radx/RadxField.hh>
 #include <Mdv/GenericRadxFile.hh>
 #include <Radx/RadxGeoref.hh>
-#include <Radx/RadxTime.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
 #include <dsserver/DsLdataInfo.hh>
@@ -45,6 +44,7 @@
 #include <toolsa/TaXml.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/umisc.h>
+#include <toolsa/TaStr.hh>
 using namespace std;
 
 // Constructor
@@ -54,8 +54,8 @@ Ascii2Radx::Ascii2Radx(int argc, char **argv)
 {
 
   OK = TRUE;
-  _nWarnCensorPrint = 0;
-  _volNum = 1;
+  _volNum = 0;
+  _inFile = NULL;
 
   // set programe name
 
@@ -97,10 +97,6 @@ Ascii2Radx::Ascii2Radx(int argc, char **argv)
     }
   }
 
-  // volume number
-
-  _volNum = 0;
-
   // override missing values
 
   if (_params.override_missing_metadata_values) {
@@ -124,6 +120,11 @@ Ascii2Radx::Ascii2Radx(int argc, char **argv)
 Ascii2Radx::~Ascii2Radx()
 
 {
+
+  if (_inFile != NULL) {
+    fclose(_inFile);
+    _inFile = NULL;
+  }
 
   // unregister process
 
@@ -437,7 +438,7 @@ int Ascii2Radx::_runRealtimeNoLdata()
 //         -1 on failure
 
 int Ascii2Radx::_readFile(const string &readPath,
-                           RadxVol &vol)
+                          RadxVol &vol)
 {
 
   PMU_auto_register("Processing file");
@@ -465,19 +466,34 @@ int Ascii2Radx::_readFile(const string &readPath,
     cerr << "INFO - Ascii2Radx::Run" << endl;
     cerr << "  Input path: " << readPath << endl;
   }
-  
-  GenericRadxFile inFile;
-  _setupRead(inFile);
-  
-  // read in file
 
-  if (inFile.readFromPath(readPath, vol)) {
+  // open the file
+
+  if ((_inFile = fopen(readPath.c_str(), "r")) == NULL) {
+    int errNum = errno;
     cerr << "ERROR - Ascii2Radx::_readFile" << endl;
     cerr << "  path: " << readPath << endl;
-    cerr << inFile.getErrStr() << endl;
+    cerr << "  " << strerror(errNum) << endl;
     return -1;
   }
-  _readPaths = inFile.getReadPaths();
+
+  if (_params.input_type == Params::BUFR_ASCII) {
+    if (_readBufrAscii(readPath, vol)) {
+      cerr << "ERROR - Ascii2Radx::_readFile" << endl;
+      cerr << "  path: " << readPath << endl;
+      fclose(_inFile);
+      return -1;
+    }
+  }
+
+  // close the file
+  
+  fclose(_inFile);
+
+  // append the read path
+
+  _readPaths.push_back(readPath);
+  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     for (size_t ii = 0; ii < _readPaths.size(); ii++) {
       cerr << "  ==>> read in file: " << _readPaths[ii] << endl;
@@ -487,6 +503,29 @@ int Ascii2Radx::_readFile(const string &readPath,
   return 0;
 
 }
+
+//////////////////////////////////////////////////
+// Read in a BUFR ASCII file
+// Returns 0 on success, -1 on failure
+
+int Ascii2Radx::_readBufrAscii(const string &readPath,
+                               RadxVol &vol)
+{
+
+  // read in the metadata
+  
+  if (_readBufrMetaData(vol)) {
+    cerr << "ERROR - Ascii2Radx::_readFile" << endl;
+    cerr << "  path: " << readPath << endl;
+    cerr << "  cannot read metadata" << endl;
+    fclose(_inFile);
+    return -1;
+  }
+
+  return 0;
+
+}
+
 
 //////////////////////////////////////////////////
 // Finalize the volume based on parameters
@@ -1035,6 +1074,223 @@ int Ascii2Radx::_writeVol(RadxVol &vol)
   }
 
   return 0;
+
+}
+
+//////////////////////////////////////////////////
+// read in the metadata
+
+int Ascii2Radx::_readBufrMetaData(RadxVol &vol)
+{
+
+  _year = _month = _day = _hour = _min = _sec = 0;
+  _readBufrMetaVariable("Year", _year);
+  _readBufrMetaVariable("Month", _month);
+  _readBufrMetaVariable("Day", _day);
+  _readBufrMetaVariable("Hour", _hour);
+  _readBufrMetaVariable("Minute", _min);
+  _readBufrMetaVariable("Second", _sec);
+  _volStartTime.set(_year, _month, _day, _hour, _min, _sec);
+
+  _latitude = 0.0;
+  _readBufrMetaVariable("Latitude (high accuracy)", _latitude);
+
+  _longitude = 0.0;
+  _readBufrMetaVariable("Longitude (high accuracy)", _longitude);
+
+  _altitudeM = 0.0;
+  _readBufrMetaVariable("Height or altitude", _altitudeM);
+
+  _antennaGain = Radx::missingFl64;
+  _readBufrMetaVariable("Maximum antenna gain", _antennaGain);
+
+  _beamWidth = Radx::missingFl64;
+  _readBufrMetaVariable("3-dB beamwidth", _beamWidth);
+
+  _antennaSpeedAz = Radx::missingFl64;
+  _readBufrMetaVariable("Antenna speed (azimuth)", _antennaSpeedAz);
+
+  _antennaSpeedEl = Radx::missingFl64;
+  _readBufrMetaVariable("Antenna speed (elevation)", _antennaSpeedEl);
+
+  _frequencyHz = Radx::missingFl64;
+  _readBufrMetaVariable("Mean frequency", _frequencyHz);
+
+  _peakPowerWatts = Radx::missingFl64;
+  _readBufrMetaVariable("Peak power", _peakPowerWatts);
+
+  _prf = Radx::missingFl64;
+  _readBufrMetaVariable("Pulse repetition frequency", _prf);
+
+  _pulseWidthSec = Radx::missingFl64;
+  _readBufrMetaVariable("Pulse width", _pulseWidthSec);
+
+  _noiseLevelDbm = Radx::missingFl64;
+  _readBufrMetaVariable("Minimum detectable signal", _noiseLevelDbm);
+
+  _dynamicRangeDb = Radx::missingFl64;
+  _readBufrMetaVariable("Dynamic range", _dynamicRangeDb);
+
+  _gateSpacingM = 1000.0;
+  _readBufrMetaVariable("Longueur de la porte distance apres integration", _gateSpacingM);
+  _startRangeM = _gateSpacingM / 2.0;
+
+  _azimuthResDeg = 0.5;
+  _readBufrMetaVariable("Increment de l'azimut entre chaque tir de l'image polaire", _azimuthResDeg);
+
+  _nSamples = 1;
+  _readBufrMetaVariable("Number of integrated pulses", _nSamples);
+
+  _radarConstant = Radx::missingFl64;
+  _readBufrMetaVariable("Constante radar", _radarConstant);
+
+  _elevDeg = 0.0;
+  _readBufrMetaVariable("Antenna elevation", _elevDeg);
+
+  _startAz = 0.0;
+  _readBufrMetaVariable("Antenna beam azimuth", _startAz);
+  _startAz += _azimuthResDeg / 2.0;
+
+  _nGates = 0;
+  _readBufrMetaVariable("Number of pixels per row", _nGates);
+
+  _nAz = 0;
+  _readBufrMetaVariable("Number of pixels per column", _nAz);
+
+  if(_params.debug) {
+
+    cerr << "  _volStartTime: " << _volStartTime.asString(3) << endl;
+    cerr << "  _latitude: " << _latitude << endl;
+    cerr << "  _longitude: " << _longitude << endl;
+    cerr << "  _altitudeM: " << _altitudeM << endl;
+    cerr << "  _antennaGain: " << _antennaGain << endl;
+    cerr << "  _beamWidth: " << _beamWidth << endl;
+    cerr << "  _antennaSpeedAz: " << _antennaSpeedAz << endl;
+    cerr << "  _antennaSpeedEl: " << _antennaSpeedEl << endl;
+    cerr << "  _frequencyHz: " << _frequencyHz << endl;
+    cerr << "  _peakPowerWatts: " << _peakPowerWatts << endl;
+    cerr << "  _prf: " << _prf << endl;
+    cerr << "  _pulseWidthSec: " << _pulseWidthSec << endl;
+    cerr << "  _noiseLevelDbm: " << _noiseLevelDbm << endl;
+    cerr << "  _dynamicRangeDb: " << _dynamicRangeDb << endl;
+    cerr << "  _gateSpacingM: " << _gateSpacingM << endl;
+    cerr << "  _startRangeM: " << _startRangeM << endl;
+    cerr << "  _azimuthResDeg: " << _azimuthResDeg << endl;
+    cerr << "  _radarConstant: " << _radarConstant << endl;
+    cerr << "  _elevDeg: " << _elevDeg << endl;
+    cerr << "  _startAz: " << _startAz << endl;
+    cerr << "  _nSamples: " << _nSamples << endl;
+    cerr << "  _nGates: " << _nGates << endl;
+    cerr << "  _nAz: " << _nAz << endl;
+
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// read in the metadata variable - integer
+// if precedingLabel is not zero len, we first look for that
+// and then read in the variable
+// returns 0 on success, -1 on failure
+
+int Ascii2Radx::_readBufrMetaVariable(string varLabel, int &ival,
+                                      string precedingLabel)
+{
+  double dval;
+  if (_readBufrMetaVariable(varLabel, dval, precedingLabel)) {
+    return -1;
+  }
+  ival = (int) floor(dval + 0.5);
+  return 0;
+}
+  
+//////////////////////////////////////////////////
+// read in the metadata variable
+// if precedingLabel is not zero len, we first look for that
+// and then read in the variable
+// returns 0 on success, -1 on failure
+
+int Ascii2Radx::_readBufrMetaVariable(string varLabel, double &dval,
+                                      string precedingLabel)
+{
+  
+  // rewind file
+
+  rewind(_inFile);
+
+  // check for preceding label
+
+  if (precedingLabel.size() > 0) {
+    while (!feof(_inFile)) {
+      char line[1024];
+      if (fgets(line, 1024, _inFile) == NULL) {
+        continue;
+      }
+      if (strstr(line, precedingLabel.c_str()) != NULL) {
+        break;
+      }
+    }
+  }
+
+  // read in each line
+  
+  while (!feof(_inFile)) {
+
+    // get next line
+
+    char line[1024];
+    if (fgets(line, 1024, _inFile) == NULL) {
+      continue;
+    }
+
+    // check if this line has required label
+    
+    if (strstr(line, varLabel.c_str()) == NULL) {
+      continue;
+    }
+
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Decoding metadata variable, label: " << varLabel << endl;
+      cerr << line;
+    }
+      
+    // tokenize the line
+
+    vector<string> toks;
+    TaStr::tokenize(line, " ", toks);
+    if (toks.size() < 1) {
+      cerr << "ERROR - Ascii2Radx::_readBufrMetaVariable" << endl;
+      cerr << "  Bad string for label: " << varLabel << endl;
+      cerr << "  line: " << line;
+      return -1;
+    }
+
+    // find first token with '.' - i.e. floating point number
+
+    for (size_t itok = 0; itok < toks.size(); itok++) {
+
+      string &valStr = toks[itok];
+      if (valStr.find(".") == string::npos) {
+        continue;
+      }
+
+      if (sscanf(valStr.c_str(), "%lg", &dval) == 1) {
+        return 0;
+      }
+      
+      cerr << "ERROR - Ascii2Radx::_readBufrMetaVariable" << endl;
+      cerr << "  Bad string for label: " << varLabel << endl;
+      cerr << "  line: " << line;
+      cerr << "  valStr: " << valStr << endl;
+      return -1;
+    
+    } // itok
+    
+  } // while
+
+  return -1;
 
 }
 

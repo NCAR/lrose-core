@@ -81,8 +81,7 @@ int main(int argc, char **argv)
   
   // clean up
 
-  tidy_and_exit(iret);
-  return (iret);
+  return iret;
   
 }
 
