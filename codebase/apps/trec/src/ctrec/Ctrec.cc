@@ -976,7 +976,7 @@ bool Ctrec::_processFiles(const DsMdvx &prev_mdv_file,
 			  smoothed_u_grid,
 			  33,
 			  "U w/o temporal smoothing",
-			  "U temporal");
+			  "U_temporal");
    
     // Add the V data to the output file
 
@@ -985,7 +985,7 @@ bool Ctrec::_processFiles(const DsMdvx &prev_mdv_file,
 			  smoothed_v_grid,
 			  34,
 			  "V w/o temporal smoothing",
-			  "V temporal");
+			  "V_temporal");
   }
     
   _smoother->smoothData(curr_mdv_file.getMasterHeader().time_centroid -
@@ -1027,14 +1027,14 @@ bool Ctrec::_processFiles(const DsMdvx &prev_mdv_file,
 			  avg_u_grid,
 			  33,
 			  "U temporal smoothing average",
-			  "U avg");
+			  "U_avg");
     
     _addVectorOutputField(output_mdv_file,
 			  curr_field_hdr, curr_field->getVlevelHeader(),
 			  avg_v_grid,
 			  34,
 			  "V temporal smoothing average",
-			  "V avg");
+			  "V_avg");
     
     delete avg_u_grid;
     delete avg_v_grid;
@@ -1047,14 +1047,14 @@ bool Ctrec::_processFiles(const DsMdvx &prev_mdv_file,
 			smoothed_u_grid,
 			33,
 			"U wind component",
-			"U comp");
+			"U_comp");
    
   _addVectorOutputField(output_mdv_file,
 			curr_field_hdr, curr_field->getVlevelHeader(),
 			smoothed_v_grid,
 			34,
 			"V wind component",
-			"V comp");
+			"V_comp");
    
   // Reclaim the space from the smoothed grids
 
