@@ -254,25 +254,25 @@ commentdef {
 }
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Option to override the instrument name.";
   p_help = "If true, the name provided will be used.";
 } override_instrument_name;
 
 paramdef string {
-  p_default = "unknown";
+  p_default = "Guadeloupe";
   p_descr = "Instrument name.";
   p_help = "See override_instrument_name.";
 } instrument_name;
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Option to override the site name.";
   p_help = "If true, the name provided will be used.";
 } override_site_name;
 
 paramdef string {
-  p_default = "unknown";
+  p_default = "Guadeloupe";
   p_descr = "Site name.";
   p_help = "See override_site_name.";
 } site_name;
@@ -486,14 +486,9 @@ paramdef struct attr_t {
 } user_defined_global_attributes[];
 
 commentdef {
-  p_header = "OPTION TO SPECIFY FIELD NAMES AND OUTPUT ENCODING";
+  p_header = "SPECIFY FIELD NAMES AND OUTPUT ENCODING";
+  p_text = "At least 1 field is required.";
 }
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Set the field names and output encoding";
-  p_help = "If false, all fields will be used.";
-} set_output_fields;
 
 typedef enum {
   OUTPUT_ENCODING_ASIS,
@@ -509,11 +504,10 @@ typedef enum {
 } output_scaling_t;
 
 typedef struct {
-  string input_field_name; 
-  string output_field_name; 
+  string field_name; 
   string long_name; 
   string standard_name; 
-  string output_units;
+  string units;
   output_encoding_t encoding;
   output_scaling_t output_scaling;
   double output_scale;
@@ -523,39 +517,16 @@ typedef struct {
 paramdef struct output_field_t {
   p_default = {
     { "DBZ",
-      "DBZ",
       "reflectivity",
       "equivalent_reflectivity_factor",
       "dBZ",
-      OUTPUT_ENCODING_ASIS,
-      SCALING_DYNAMIC, 0.01, 0.0
-    },
-    { "VEL", 
-      "VEL", 
-      "radial_velocity",
-      "radial_velocity_of_scatterers_away_from_instrument",
-      "m/s", 
-      OUTPUT_ENCODING_ASIS,
+      OUTPUT_ENCODING_INT16,
       SCALING_DYNAMIC, 0.01, 0.0
     }
   };
   p_descr = "Output field details.";
   p_help = "Set the details for the output fields. The output_field_name is the ndtCDF variable name. Set the long name to a more descriptive name. Set the standard name to the CF standard name for this field. If the long name or standard name are empty, the existing names are used. If SCALING_SPECIFIED, then the scale and offset is used.";
 } output_fields[];
-
-commentdef {
-  p_header = "OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set output encoding for all fields";
-} set_output_encoding_for_all_fields;
-
-paramdef enum output_encoding_t {
-  p_default = OUTPUT_ENCODING_ASIS;
-  p_descr = "Output encoding for all fields, if requested.";
-} output_encoding;
 
 commentdef {
   p_header = "OUTPUT FORMAT";

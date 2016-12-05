@@ -130,7 +130,6 @@ private:
                 RadxVol &vol);
   void _finalizeVol(RadxVol &vol);
   void _convertFields(RadxVol &vol);
-  void _convertAllFields(RadxVol &vol);
   void _setupWrite(RadxFile &file);
   void _setGlobalAttr(RadxVol &vol);
   int _writeVol(RadxVol &vol);

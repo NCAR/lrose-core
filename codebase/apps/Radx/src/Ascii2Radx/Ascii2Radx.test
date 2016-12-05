@@ -502,7 +502,7 @@ gate_spacing_km = 0.0075;
 // Type: boolean
 //
 
-override_instrument_name = FALSE;
+override_instrument_name = TRUE;
 
 ///////////// instrument_name /////////////////////////
 //
@@ -514,7 +514,7 @@ override_instrument_name = FALSE;
 // Type: string
 //
 
-instrument_name = "unknown";
+instrument_name = "Guadeloupe";
 
 ///////////// override_site_name //////////////////////
 //
@@ -526,7 +526,7 @@ instrument_name = "unknown";
 // Type: boolean
 //
 
-override_site_name = FALSE;
+override_site_name = TRUE;
 
 ///////////// site_name ///////////////////////////////
 //
@@ -538,7 +538,7 @@ override_site_name = FALSE;
 // Type: string
 //
 
-site_name = "unknown";
+site_name = "Guadeloupe";
 
 //======================================================================
 //
@@ -948,22 +948,12 @@ user_defined_global_attributes = {
 
 //======================================================================
 //
-// OPTION TO SPECIFY FIELD NAMES AND OUTPUT ENCODING.
+// SPECIFY FIELD NAMES AND OUTPUT ENCODING.
+//
+// At least 1 field is required.
 //
 //======================================================================
  
-///////////// set_output_fields ///////////////////////
-//
-// Set the field names and output encoding.
-//
-// If false, all fields will be used.
-//
-//
-// Type: boolean
-//
-
-set_output_fields = TRUE;
-
 ///////////// output_fields ///////////////////////////
 //
 // Output field details.
@@ -977,11 +967,10 @@ set_output_fields = TRUE;
 //
 // Type: struct
 //   typedef struct {
-//      string input_field_name;
-//      string output_field_name;
+//      string field_name;
 //      string long_name;
 //      string standard_name;
-//      string output_units;
+//      string units;
 //      output_encoding_t encoding;
 //        Options:
 //          OUTPUT_ENCODING_ASIS
@@ -1002,49 +991,16 @@ set_output_fields = TRUE;
 
 output_fields = {
   {
-    input_field_name = "DBZ",
-    output_field_name = "DBZ",
+    field_name = "DBZ",
     long_name = "reflectivity",
     standard_name = "equivalent_reflectivity_factor",
-    output_units = "dBZ",
-    encoding = OUTPUT_ENCODING_ASIS,
+    units = "dBZ",
+    encoding = OUTPUT_ENCODING_INT16,
     output_scaling = SCALING_DYNAMIC,
     output_scale = 0.01,
     output_offset = 0
   }
 };
-
-//======================================================================
-//
-// OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS.
-//
-//======================================================================
- 
-///////////// set_output_encoding_for_all_fields //////
-//
-// Option to set output encoding for all fields.
-//
-//
-// Type: boolean
-//
-
-set_output_encoding_for_all_fields = FALSE;
-
-///////////// output_encoding /////////////////////////
-//
-// Output encoding for all fields, if requested.
-//
-//
-// Type: enum
-// Options:
-//     OUTPUT_ENCODING_ASIS
-//     OUTPUT_ENCODING_FLOAT32
-//     OUTPUT_ENCODING_INT32
-//     OUTPUT_ENCODING_INT16
-//     OUTPUT_ENCODING_INT08
-//
-
-output_encoding = OUTPUT_ENCODING_ASIS;
 
 //======================================================================
 //
@@ -1167,7 +1123,7 @@ compression_level = 4;
 // Type: string
 //
 
-output_dir = "$(HOME)/data/alison/cfradial";
+output_dir = "./output";
 
 ///////////// output_filename_mode ////////////////////
 //

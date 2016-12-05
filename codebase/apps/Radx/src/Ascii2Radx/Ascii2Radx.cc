@@ -82,6 +82,16 @@ Ascii2Radx::Ascii2Radx(int argc, char **argv)
     return;
   }
 
+  // check we have an output field
+
+  if (_params.output_fields_n < 1) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "  Problem with TDRP parameters." << endl;
+    cerr << "  You must specify at least 1 output field" << endl;
+    cerr << "  See output_fields[] parameter" << endl;
+    OK = FALSE;
+  }
+
   // check on overriding radar location
 
   if (_params.override_radar_location) {
@@ -550,7 +560,7 @@ int Ascii2Radx::_readBufrAscii(const string &readPath,
     ray->setCalibIndex(0);
     ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
 
-    RadxTime rayTime = _volStartTime + deltaAz * _antennaSpeedAz;
+    RadxTime rayTime = _volStartTime + deltaAz / _antennaSpeedAz;
     deltaAz += _azimuthResDeg;
     ray->setTime(rayTime);
 
@@ -579,7 +589,8 @@ int Ascii2Radx::_readBufrAscii(const string &readPath,
 
     // add field
 
-    ray->addField("DBZ", "dBZ",
+    ray->addField(_params._output_fields[0].field_name,
+                  _params._output_fields[0].units,
                   _nGates, Radx::missingFl64,
                   _fieldData + iray * _nGates, true);
 
@@ -740,10 +751,6 @@ void Ascii2Radx::_finalizeVol(RadxVol &vol)
   
   _convertFields(vol);
 
-  if (_params.set_output_encoding_for_all_fields) {
-    _convertAllFields(vol);
-  }
-
   // load sweep and/or volumen info from rays
 
   vol.loadSweepInfoFromRays();
@@ -766,19 +773,14 @@ void Ascii2Radx::_finalizeVol(RadxVol &vol)
 void Ascii2Radx::_convertFields(RadxVol &vol)
 {
 
-  if (!_params.set_output_fields) {
-    return;
-  }
-
   for (int ii = 0; ii < _params.output_fields_n; ii++) {
 
     const Params::output_field_t &ofld = _params._output_fields[ii];
     
-    string iname = ofld.input_field_name;
-    string oname = ofld.output_field_name;
+    string fname = ofld.field_name;
     string lname = ofld.long_name;
     string sname = ofld.standard_name;
-    string ounits = ofld.output_units;
+    string units = ofld.units;
     
     Radx::DataType_t dtype = Radx::ASIS;
     switch(ofld.encoding) {
@@ -800,40 +802,14 @@ void Ascii2Radx::_convertFields(RadxVol &vol)
     }
 
     if (ofld.output_scaling == Params::SCALING_DYNAMIC) {
-      vol.convertField(iname, dtype, 
-                       oname, ounits, sname, lname);
+      vol.convertField(fname, dtype, 
+                       fname, units, sname, lname);
     } else {
-      vol.convertField(iname, dtype, 
+      vol.convertField(fname, dtype, 
                        ofld.output_scale, ofld.output_offset,
-                       oname, ounits, sname, lname);
+                       fname, units, sname, lname);
     }
     
-  }
-
-}
-
-//////////////////////////////////////////////////
-// convert all fields to specified output encoding
-
-void Ascii2Radx::_convertAllFields(RadxVol &vol)
-{
-
-  switch(_params.output_encoding) {
-    case Params::OUTPUT_ENCODING_FLOAT32:
-      vol.convertToFl32();
-      return;
-    case Params::OUTPUT_ENCODING_INT32:
-      vol.convertToSi32();
-      return;
-    case Params::OUTPUT_ENCODING_INT16:
-      vol.convertToSi16();
-      return;
-    case Params::OUTPUT_ENCODING_INT08:
-      vol.convertToSi08();
-      return;
-    case Params::OUTPUT_ENCODING_ASIS:
-    default:
-      return;
   }
 
 }

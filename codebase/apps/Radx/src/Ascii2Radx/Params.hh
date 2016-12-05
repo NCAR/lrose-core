@@ -122,11 +122,10 @@ public:
   } attr_t;
 
   typedef struct {
-    char* input_field_name;
-    char* output_field_name;
+    char* field_name;
     char* long_name;
     char* standard_name;
-    char* output_units;
+    char* units;
     output_encoding_t encoding;
     output_scaling_t output_scaling;
     double output_scale;
@@ -541,14 +540,8 @@ public:
   attr_t *_user_defined_global_attributes;
   int user_defined_global_attributes_n;
 
-  tdrp_bool_t set_output_fields;
-
   output_field_t *_output_fields;
   int output_fields_n;
-
-  tdrp_bool_t set_output_encoding_for_all_fields;
-
-  output_encoding_t output_encoding;
 
   output_format_t output_format;
 
@@ -633,7 +626,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[125];
+  mutable TDRPtable _table[121];
 
   const char *_className;
 
