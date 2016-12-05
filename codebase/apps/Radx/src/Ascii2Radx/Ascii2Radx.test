@@ -962,7 +962,7 @@ user_defined_global_attributes = {
 // Type: boolean
 //
 
-set_output_fields = FALSE;
+set_output_fields = TRUE;
 
 ///////////// output_fields ///////////////////////////
 //
@@ -1007,18 +1007,6 @@ output_fields = {
     long_name = "reflectivity",
     standard_name = "equivalent_reflectivity_factor",
     output_units = "dBZ",
-    encoding = OUTPUT_ENCODING_ASIS,
-    output_scaling = SCALING_DYNAMIC,
-    output_scale = 0.01,
-    output_offset = 0
-  }
-  ,
-  {
-    input_field_name = "VEL",
-    output_field_name = "VEL",
-    long_name = "radial_velocity",
-    standard_name = "radial_velocity_of_scatterers_away_from_instrument",
-    output_units = "m/s",
     encoding = OUTPUT_ENCODING_ASIS,
     output_scaling = SCALING_DYNAMIC,
     output_scale = 0.01,
@@ -1179,7 +1167,7 @@ compression_level = 4;
 // Type: string
 //
 
-output_dir = "./output";
+output_dir = "$(HOME)/data/alison/cfradial";
 
 ///////////// output_filename_mode ////////////////////
 //
