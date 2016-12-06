@@ -821,6 +821,18 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'reorder_sweeps_by_ascending_angle'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("reorder_sweeps_by_ascending_angle");
+    tt->descr = tdrpStrDup("Option to reorder sweeps by ascending angles.");
+    tt->help = tdrpStrDup("If true, sweeps will be checked to see if they are in ascending angle order. If not they are reordered. If the sweeps are reordered, this means that the rays times will no longer be monotonically increasing");
+    tt->val_offset = (char *) &reorder_sweeps_by_ascending_angle - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));

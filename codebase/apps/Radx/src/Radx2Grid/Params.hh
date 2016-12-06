@@ -491,6 +491,8 @@ public:
 
   tdrp_bool_t override_fixed_angle_with_mean_measured_angle;
 
+  tdrp_bool_t reorder_sweeps_by_ascending_angle;
+
   tdrp_bool_t apply_time_offset;
 
   double time_offset_secs;
@@ -784,7 +786,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[193];
+  mutable TDRPtable _table[194];
 
   const char *_className;
 
