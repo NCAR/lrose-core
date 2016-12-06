@@ -21,6 +21,7 @@ SUB_DIRS = \
 	RadxEvad \
 	RadxFilter \
 	RadxMergeFields \
+	RadxMergeVols \
 	RadxMon \
 	RadxPartRain \
 	RadxPrint \
