@@ -1353,12 +1353,22 @@ string NetcdfCxxUtils::varTypeToStr(const NcVar &var)
 ///////////////////////////////////////////
 // get string representation of component
 
-string NetcdfCxxUtils::asString(const NcAtt *att)
+string NetcdfCxxUtils::asString(const NcAtt &att)
   
 {
   
   string val;
-  att->getValues(val);
+  att.getValues(val);
+  return val;
+
+}
+
+string NetcdfCxxUtils::asString(const NcGroupAtt &att)
+  
+{
+  
+  string val;
+  att.getValues(val);
   return val;
 
 }

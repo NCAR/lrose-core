@@ -282,7 +282,8 @@ public:
   
   /// get string representation of component
 
-  static string asString(const NcAtt *att);
+  static string asString(const NcAtt &att);
+  static string asString(const NcGroupAtt &att);
   
   //@}
 
@@ -301,10 +302,6 @@ public:
   /// Get the NcFile object
   
   NcFile *getNcFile() { return _ncFile; }
-
-  /// Get the NcError object
-  
-  // NcError *getNcError() { return _err; }
 
   //@}
 
@@ -349,7 +346,6 @@ private:
   
   NcFile *_ncFile;
   string _pathInUse;
-  // NcError *_err;
   NcFile::FileFormat _ncFormat;
   
   /// add integer value to error string, with label
