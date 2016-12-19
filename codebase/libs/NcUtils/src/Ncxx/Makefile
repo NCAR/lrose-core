@@ -33,6 +33,7 @@ HDRS = \
 	../include/NcUtils/NcxxDim.hh \
 	../include/NcUtils/NcxxDouble.hh \
 	../include/NcUtils/NcxxEnumType.hh \
+	../include/NcUtils/NcxxErrStr.hh \
 	../include/NcUtils/NcxxException.hh \
 	../include/NcUtils/NcxxFile.hh \
 	../include/NcUtils/NcxxFloat.hh \
@@ -61,6 +62,7 @@ CPPC_SRCS = \
 	NcxxDim.cc \
 	NcxxDouble.cc \
 	NcxxEnumType.cc \
+	NcxxErrStr.cc \
 	NcxxException.cc \
 	NcxxFile.cc \
 	NcxxFloat.cc \

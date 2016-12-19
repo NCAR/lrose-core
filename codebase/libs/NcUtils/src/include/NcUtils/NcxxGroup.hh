@@ -5,6 +5,7 @@
 #include <NcUtils/NcxxType.hh>
 #include <NcUtils/NcxxEnumType.hh>
 #include <NcUtils/NcxxGroupAtt.hh>
+#include <NcUtils/NcxxErrStr.hh>
 
 
 
@@ -24,7 +25,7 @@ namespace netCDF
   class NcxxOpaqueType;   // forward declaration.
 
   /*! Class represents a netCDF group. */
-  class NcxxGroup
+  class NcxxGroup : public NcxxErrStr
   {
 
   public:

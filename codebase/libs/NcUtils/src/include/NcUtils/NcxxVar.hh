@@ -18,6 +18,7 @@
 #include <NcUtils/NcxxFloat.hh>
 #include <NcUtils/NcxxDouble.hh>
 #include <NcUtils/NcxxString.hh>
+#include <NcUtils/NcxxErrStr.hh>
 
 #ifndef NcxxVarClass
 #define NcxxVarClass
@@ -30,7 +31,7 @@ namespace netCDF
   class NcxxType;   // forward declaration.
 
   /*! Class represents a netCDF variable. */
-  class NcxxVar
+  class NcxxVar : public NcxxErrStr
   {
   public:
 
@@ -1118,7 +1119,57 @@ namespace netCDF
     void putVar(const std::vector<size_t>& startp, const std::vector<size_t>& countp, const std::vector<ptrdiff_t>& stridep, const std::vector<ptrdiff_t>& imapp, const long long* dataValues) const;
 
 
+    //////////////////////////////////////////////////////
+    /// add attribute of various types
+    /// Returns 0 on success, -1 on failure
+    /// Sets ErrStr on failure
+    
+    int addAttr(const string &name, const string &val);
+    int addAttr(const string &name, unsigned char val);
+    int addAttr(const string &name, short val);
+    int addAttr(const string &name, int val);
+    int addAttr(const string &name, int64_t val);
+    int addAttr(const string &name, float val);
+    int addAttr(const string &name, double val);
 
+    /// get the total number of values in a variable
+    /// this is the product of the dimension sizes
+    /// and is 1 for a scalar (i.e. no dimensions)
+    
+    int64_t numVals();
+  
+    ///////////////////////////////////////////////////////////////////////////
+    /// write a scalar variables
+    /// Returns 0 on success, -1 on failure
+    /// Sets ErrStr on failure
+
+    int write(double val);
+    int write(float val);
+    int write(int val);
+
+    /// write a 1-D vector variable
+    /// number of elements specified in dimension
+    /// Returns 0 on success, -1 on failure
+    /// Sets ErrStr on failure
+
+    int write(const NcxxDim &dim, const void *data);
+  
+    /// write a 1-D vector variable
+    /// number of elements specified in arguments
+    /// Returns 0 on success, -1 on failure
+    /// Sets ErrStr on failure
+    
+    int write(const NcxxDim &dim,
+              size_t count, 
+              const void *data);
+
+    ///////////////////////////////////////////////////////////////////////////
+    /// write a string variable
+    /// Returns 0 on success, -1 on failure
+    /// Sets ErrStr on failure
+
+    int writeStrings(const void *str);
+  
   private:
 
     bool nullObject;

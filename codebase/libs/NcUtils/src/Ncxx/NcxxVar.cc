@@ -1889,3 +1889,479 @@ void NcxxVar::getVar(const vector<size_t>& startp, const vector<size_t>& countp,
 void NcxxVar::getVar(const vector<size_t>& startp, const vector<size_t>& countp, const vector<ptrdiff_t>& stridep, const vector<ptrdiff_t>& imapp, void* dataValues) const {
     ncxxCheck(nc_get_varm(groupId, myId,&startp[0],&countp[0],&stridep[0],&imapp[0],dataValues),__FILE__,__LINE__);
 }
+
+///////////////////////////////////////////
+// add string attribute
+// Returns 0 on success, -1 on failure
+
+int NcxxVar::addAttr(const string &name, const string &val)
+{
+  clearErrStr();
+  try {
+    putAtt(name.c_str(), val.c_str());
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NetcdfCxxUtils::addAttr");
+    _addErrStr("  Cannot add string var attr, name: ", name);
+    _addErrStr("  val: ", val);
+    _addErrStr("  var name: ", getName());
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// add double attribute
+// Returns 0 on success, -1 on failure
+
+int NcxxVar::addAttr(const string &name, double val)
+{
+  clearErrStr();
+  try {
+    NcxxType vtype(NcxxType::nc_DOUBLE);
+    putAtt(name.c_str(), vtype, 1, &val);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxVar::addAttr");
+    _addErrStr("  Cannot add double var attr, name: ", name);
+    _addErrDbl("  val: ", val, "%g");
+    _addErrStr("  var name: ", getName());
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// add float attribute
+// Returns 0 on success, -1 on failure
+
+int NcxxVar::addAttr(const string &name, float val)
+{
+  clearErrStr();
+  try {
+    NcxxType vtype(NcxxType::nc_FLOAT);
+    putAtt(name.c_str(), vtype, 1, &val);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxVar::addAttr");
+    _addErrStr("  Cannot add float var attr, name: ", name);
+    _addErrDbl("  val: ", val, "%g");
+    _addErrStr("  var name: ", getName());
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// add int attribute
+// Returns 0 on success, -1 on failure
+
+int NcxxVar::addAttr(const string &name, int val)
+{
+  clearErrStr();
+  try {
+    NcxxType vtype(NcxxType::nc_INT);
+    putAtt(name.c_str(), vtype, 1, &val);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxVar::addAttr");
+    _addErrStr("  Cannot add int var attr, name: ", name);
+    _addErrDbl("  val: ", val, "%d");
+    _addErrStr("  var name: ", getName());
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// add long attribute
+// Returns 0 on success, -1 on failure
+
+int NcxxVar::addAttr(const string &name, int64_t val)
+{
+  clearErrStr();
+  try {
+    NcxxType vtype(NcxxType::nc_INT64);
+    putAtt(name.c_str(), vtype, 1, &val);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxVar::addAttr");
+    _addErrStr("  Cannot add int64_t var attr, name: ", name);
+    _addErrDbl("  val: ", val, "%ld");
+    _addErrStr("  var name: ", getName());
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// add short attribute
+// Returns 0 on success, -1 on failure
+
+int NcxxVar::addAttr(const string &name, short val)
+{
+  clearErrStr();
+  try {
+    NcxxType vtype(NcxxType::nc_SHORT);
+    putAtt(name.c_str(), vtype, 1, &val);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxVar::addAttr");
+    _addErrStr("  Cannot add short var attr, name: ", name);
+    _addErrDbl("  val: ", (int) val, "%d");
+    _addErrStr("  var name: ", getName());
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// add ncbyte attribute
+// Returns 0 on success, -1 on failure
+
+int NcxxVar::addAttr(const string &name, unsigned char val)
+{
+  clearErrStr();
+  try {
+    NcxxType vtype(NcxxType::nc_UBYTE);
+    putAtt(name.c_str(), vtype, 1, &val);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxVar::addAttr");
+    _addErrStr("  Cannot add byte var attr, name: ", name);
+    _addErrDbl("  val: ", (int) val, "%d");
+    _addErrStr("  var name: ", getName());
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+////////////////////////////////////////////////
+// get the total number of values in a variable
+// this is the product of the dimension sizes
+// and is 1 for a scalar (i.e. no dimensions)
+
+int64_t NcxxVar::numVals()
+  
+{
+
+  std::vector<NcxxDim> dims = getDims();
+  int64_t prod = 1;
+  for (size_t ii = 0; ii < dims.size(); ii++) {
+    prod *=  getDim(ii).getSize();
+  }
+  return prod;
+
+}
+  
+///////////////////////////////////////////////////////////////////////////
+// write a scalar double variable
+// Returns 0 on success, -1 on failure
+
+int NcxxVar::write(double val)
+  
+{
+  
+  clearErrStr();
+
+  if (isNull()) {
+    _addErrStr("ERROR - NcxxVar::write");
+    _addErrStr("  var is NULL");
+    return -1;
+  }
+  
+  nc_type vtype = getType().getId();
+  if (vtype != NC_DOUBLE) {
+    _addErrStr("ERROR - NcxxVar::write");
+    _addErrStr("  Var type should be double, name: ", getName());
+    return -1;
+  }
+  
+  vector<size_t> index;
+  index.push_back(0);
+  try {
+    putVar(index, val);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxVar::write");
+    _addErrStr("  Cannot write scalar double var, name: ", getName());
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////////////////
+// write a scalar float variable
+// Returns 0 on success, -1 on failure
+
+int NcxxVar::write(float val)
+  
+{
+  
+  clearErrStr();
+
+  if (isNull()) {
+    _addErrStr("ERROR - NcxxVar::write");
+    _addErrStr("  var is NULL");
+    return -1;
+  }
+  
+  nc_type vtype = getType().getId();
+  if (vtype != NC_FLOAT) {
+    _addErrStr("ERROR - NcxxVar::write");
+    _addErrStr("  Var type should be float, name: ", getName());
+    return -1;
+  }
+  
+  vector<size_t> index;
+  index.push_back(0);
+  try {
+    putVar(index, val);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxVar::write");
+    _addErrStr("  Cannot write scalar float var, name: ", getName());
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////////////////
+// write a scalar int variable
+// Returns 0 on success, -1 on failure
+
+int NcxxVar::write(int val)
+  
+{
+  
+  clearErrStr();
+
+  if (isNull()) {
+    _addErrStr("ERROR - NcxxVar::write");
+    _addErrStr("  var is NULL");
+    return -1;
+  }
+  
+  nc_type vtype = getType().getId();
+  if (vtype != NC_INT) {
+    _addErrStr("ERROR - NcxxVar::write");
+    _addErrStr("  Var type should be int, name: ", getName());
+    return -1;
+  }
+  
+  vector<size_t> index;
+  index.push_back(0);
+  try {
+    putVar(index, val);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxVar::write");
+    _addErrStr("  Cannot write scalar int var, name: ", getName());
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////////////////
+// write a 1-D vector variable
+// number of elements specified in dimension
+// Returns 0 on success, -1 on failure
+
+int NcxxVar::write(const NcxxDim &dim,
+                   const void *data)
+  
+{
+  return write(dim, dim.getSize(), data);
+}
+
+///////////////////////////////////////////////////////////////////////////
+// write a 1-D vector variable
+// number of elements specified in arguments
+// Returns 0 on success, -1 on failure
+
+int NcxxVar::write(const NcxxDim &dim,
+                   size_t count, 
+                   const void *data)
+  
+{
+
+  clearErrStr();
+
+  if (isNull()) {
+    _addErrStr("ERROR - NcxxVar::write");
+    _addErrStr("  var is NULL");
+    return -1;
+  }
+
+  int iret = 0;
+  vector<size_t> starts, counts;
+  starts.push_back(0);
+  counts.push_back(count);
+  
+  nc_type vtype = getType().getId();
+  switch (vtype) {
+    case NC_DOUBLE: {
+      try {
+        putVar(starts, counts, (double *) data);
+      } catch (NcxxException& e) {
+        _addErrStr("  exception: ", e.what());
+        iret = -1;
+      }
+      break;
+    }
+    case NC_INT: {
+      try {
+        putVar(starts, counts, (int *) data);
+      } catch (NcxxException& e) {
+        _addErrStr("  exception: ", e.what());
+        iret = -1;
+      }
+      break;
+    }
+    case NC_SHORT: {
+      try {
+        putVar(starts, counts, (short *) data);
+      } catch (NcxxException& e) {
+        _addErrStr("  exception: ", e.what());
+        iret = -1;
+      }
+      break;
+    }
+    case NC_UBYTE: {
+      try {
+        putVar(starts, counts, (unsigned char *) data);
+      } catch (NcxxException& e) {
+        _addErrStr("  exception: ", e.what());
+        iret = -1;
+      }
+      break;
+    }
+    case NC_FLOAT:
+    default: {
+      try {
+        putVar(starts, counts, (float *) data);
+      } catch (NcxxException& e) {
+        _addErrStr("  exception: ", e.what());
+        iret = -1;
+      }
+      break;
+    }
+  } // switch
+  
+  if (iret) {
+    _addErrStr("ERROR - NcxxVar::write");
+    _addErrStr("  Cannot write var, name: ", getName());
+    _addErrStr("  Dim name: ", dim.getName());
+    _addErrInt("  Count: ", count);
+    return -1;
+  } else {
+    return 0;
+  }
+
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+// write a string variable
+// Returns 0 on success, -1 on failure
+
+int NcxxVar::writeStrings(const void *str)
+  
+{
+
+  clearErrStr();
+
+  if (isNull()) {
+    _addErrStr("ERROR - NcxxVar::writeStrings");
+    _addErrStr("  var is NULL");
+    return -1;
+  }
+  
+  std::vector<NcxxDim> dims = getDims();
+  size_t nDims = dims.size();
+  if (nDims < 1) {
+    _addErrStr("ERROR - NcxxVar::writeStrings");
+    _addErrStr("  var has no dimensions");
+    _addErrStr("  var name: ", getName());
+    return -1;
+  }
+
+  if (nDims == 1) {
+
+    // single dimension
+
+    NcxxDim &dim0 = dims[0];
+    if (dim0.isNull()) {
+      _addErrStr("ERROR - NcxxVar::writeStrings");
+      _addErrStr("  Canont write var, name: ", getName());
+      _addErrStr("  dim 0 is NULL");
+      return -1;
+    }
+
+    vector<size_t> starts, counts;
+    starts.push_back(0);
+    counts.push_back(dim0.getSize());
+    try {
+      putVar(starts, counts, (char *) str);
+    } catch (NcxxException& e) {
+      _addErrStr("ERROR - NcxxVar::writeStrings");
+      _addErrStr("  Canont write var, name: ", getName());
+      _addErrStr("  exception: ", e.what());
+      return -1;
+    }
+
+    return 0;
+    
+  } // if (nDims == 1)
+
+  if (nDims == 2) {
+
+    // two dimensions
+
+    NcxxDim &dim0 = dims[0];
+    if (dim0.isNull()) {
+      _addErrStr("ERROR - NcxxVar::writeStrings");
+      _addErrStr("  Canont write var, name: ", getName());
+      _addErrStr("  dim 0 is NULL");
+      return -1;
+    }
+
+    NcxxDim &dim1 = dims[1];
+    if (dim1.isNull()) {
+      _addErrStr("ERROR - NcxxVar::writeStrings");
+      _addErrStr("  Canont write var, name: ", getName());
+      _addErrStr("  dim 1 is NULL");
+      return -1;
+    }
+
+    vector<size_t> starts, counts;
+    starts.push_back(0);
+    counts.push_back(dim0.getSize() * dim1.getSize());
+    try {
+      putVar(starts, counts, (char *) str);
+    } catch (NcxxException& e) {
+      _addErrStr("ERROR - NcxxVar::writeStrings");
+      _addErrStr("  Canont write var, name: ", getName());
+      _addErrStr("  exception: ", e.what());
+      return -1;
+    }
+
+    return 0;
+
+  }
+
+  // more than 2 is an error
+  
+  _addErrStr("ERROR - NcxxVar::writeStrings");
+  _addErrStr("  Canont write var, name: ", getName());
+  _addErrInt("  more than 2 dimensions: ", nDims);
+  return -1;
+
+}
+
