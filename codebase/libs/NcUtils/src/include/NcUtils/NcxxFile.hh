@@ -76,6 +76,23 @@ namespace netCDF
                           - 'newFile' Create new file, fail it exists already.
       */
       void open(const std::string& filePath, FileMode fMode, FileFormat fFormat);
+     
+     // open file for reading
+     // Returns 0 on success, -1 on failure
+     
+     int openRead(const string &path);
+  
+     /// open file for writing
+     /// set the netcdf format, before a write
+     /// format options are:
+     ///   classic - classic format (i.e. version 1 format)
+     ///   classic64 - 64-bit offset format
+     ///   nc4 - using HDF5 format
+     ///   nc4classic - netCDF-4 using HDF5 but only netCDF-3 calls
+     /// Returns 0 on success, -1 on failure
+
+     int openWrite(const string &path,
+                   NcxxFile::FileFormat format);
 
       //! Close a file before destructor call
       void close();
@@ -90,14 +107,21 @@ namespace netCDF
       void enddef();
 
    private:
-	   /* Do not allow definition of NcxxFile involving copying any NcxxFile or NcxxGroup.
-		  Because the destructor closes the file and releases al resources such 
-		  an action could leave NcxxFile objects in an invalid state */
-	   NcxxFile& operator =(const NcxxGroup & rhs);
-	   NcxxFile& operator =(const NcxxFile & rhs);
-	   NcxxFile(const NcxxGroup& rhs);
-	   NcxxFile(const NcxxFile& rhs);
-   };
+
+     string _pathInUse;
+     FileMode _mode;
+     FileFormat _format;
+
+     /* Do not allow definition of NcxxFile involving copying any NcxxFile or NcxxGroup.
+        Because the destructor closes the file and releases al resources such 
+        an action could leave NcxxFile objects in an invalid state */
+     NcxxFile& operator =(const NcxxGroup & rhs);
+     NcxxFile& operator =(const NcxxFile & rhs);
+     NcxxFile(const NcxxGroup& rhs);
+     NcxxFile(const NcxxFile& rhs);
+     
+     
+  };
 
 }
 

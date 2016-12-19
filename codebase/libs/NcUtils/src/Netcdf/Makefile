@@ -39,11 +39,9 @@ LOC_INCLUDES = -I../include $(NETCDF4_INCS) $(UDUNITS_INCS)
 LOC_CFLAGS = 
 
 HDRS = \
-	../include/NcUtils/NetcdfCxxFile.hh \
 	../include/NcUtils/NetcdfClassic.hh
 
 CPPC_SRCS = \
-	NetcdfCxxFile.cc \
 	NetcdfClassic.cc
 
 #

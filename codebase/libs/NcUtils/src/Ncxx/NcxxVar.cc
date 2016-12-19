@@ -27,7 +27,9 @@ using namespace netCDF;
 
 // assignment operator
 NcxxVar& NcxxVar::operator=(const NcxxVar & rhs)
+
 {
+  _errStr = rhs._errStr;
   nullObject = rhs.nullObject;
   myId = rhs.myId;
   groupId = rhs.groupId;
@@ -36,10 +38,13 @@ NcxxVar& NcxxVar::operator=(const NcxxVar & rhs)
 
 // The copy constructor.
 NcxxVar::NcxxVar(const NcxxVar& rhs) :
-  nullObject(rhs.nullObject),
-  myId(rhs.myId),
-  groupId(rhs.groupId)
-{}
+        NcxxErrStr(),
+        nullObject(rhs.nullObject),
+        myId(rhs.myId),
+        groupId(rhs.groupId)
+{
+  _errStr = rhs._errStr;
+}
 
 
 // equivalence operator
@@ -61,18 +66,23 @@ bool NcxxVar::operator!=(const NcxxVar & rhs) const
 
 /////////////////
 
-// Constructor generates a null object.
-NcxxVar::NcxxVar() : nullObject(true),
-                 myId(-1),
-                 groupId(-1)
-{}
+// Default constructor generates a null object.
+NcxxVar::NcxxVar() :
+        NcxxErrStr(),
+        nullObject(true),
+        myId(-1),
+        groupId(-1)
+{
+}
 
 // Constructor for a variable (must already exist in the netCDF file.)
 NcxxVar::NcxxVar (const NcxxGroup& grp, const int& varId) :
-  nullObject (false),
-  myId (varId),
-  groupId(grp.getId())
-{}
+        NcxxErrStr(),
+        nullObject (false),
+        myId (varId),
+        groupId(grp.getId())
+{
+}
 
 
 
@@ -1900,7 +1910,7 @@ int NcxxVar::addAttr(const string &name, const string &val)
   try {
     putAtt(name.c_str(), val.c_str());
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NetcdfCxxUtils::addAttr");
+    _addErrStr("ERROR - NcxxVar::addAttr");
     _addErrStr("  Cannot add string var attr, name: ", name);
     _addErrStr("  val: ", val);
     _addErrStr("  var name: ", getName());

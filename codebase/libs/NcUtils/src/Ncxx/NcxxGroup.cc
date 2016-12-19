@@ -45,22 +45,30 @@ NcxxGroup::~NcxxGroup()
 {
 }
 
-// Constructor generates a null object.
+// Default constructor generates a null object.
 NcxxGroup::NcxxGroup() :
-  nullObject(true),
-  myId(-1)
-{}
+        NcxxErrStr(),
+        nullObject(true),
+        myId(-1)
+{
+}
 
 
 // constructor
 NcxxGroup::NcxxGroup(const int groupId) :
-  nullObject(false),
-  myId(groupId)
-{ }
+        NcxxErrStr(),
+        nullObject(false),
+        myId(groupId)
+{ 
+}
 
 // assignment operator
 NcxxGroup& NcxxGroup::operator=(const NcxxGroup & rhs)
 {
+  if (&rhs == this) {
+    return *this;
+  }
+  _errStr = rhs._errStr;
   nullObject = rhs.nullObject;
   myId = rhs.myId;
   return *this;
@@ -70,7 +78,9 @@ NcxxGroup& NcxxGroup::operator=(const NcxxGroup & rhs)
 NcxxGroup::NcxxGroup(const NcxxGroup& rhs):
   nullObject(rhs.nullObject),
   myId(rhs.myId)
-{}
+{
+  _errStr = rhs._errStr;
+}
 
 
 // equivalence operator
