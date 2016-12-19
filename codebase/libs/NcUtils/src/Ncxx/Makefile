@@ -54,6 +54,7 @@ HDRS = \
 	../include/NcUtils/NcxxVlenType.hh
 
 CPPC_SRCS = \
+	Ncxx.cc \
 	NcxxAtt.cc \
 	NcxxByte.cc \
 	NcxxChar.cc \

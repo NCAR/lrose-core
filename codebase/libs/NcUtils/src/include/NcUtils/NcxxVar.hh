@@ -1170,6 +1170,16 @@ namespace netCDF
 
     int writeStrings(const void *str);
   
+    ////////////////////////////////////////
+    // set default fill value, based on type
+    
+    void setDefaultFillvalue();
+      
+    ////////////////////////////////////////
+    // convert var type string
+    
+    string varTypeToStr();
+
   private:
 
     bool nullObject;

@@ -1,3 +1,4 @@
+#include <NcUtils/Ncxx.hh>
 #include <NcUtils/NcxxVarAtt.hh>
 #include <NcUtils/NcxxDim.hh>
 #include <NcUtils/NcxxVar.hh>
@@ -2373,5 +2374,50 @@ int NcxxVar::writeStrings(const void *str)
   _addErrInt("  more than 2 dimensions: ", nDims);
   return -1;
 
+}
+
+////////////////////////////////////////
+// set default fill value, based on type
+
+void NcxxVar::setDefaultFillvalue()
+
+{
+
+  nc_type vtype = getType().getId();
+  if (vtype == NC_DOUBLE) {
+    addAttr("_fillValue", Ncxx::missingDouble);
+    return;
+  }
+  if (vtype == NC_FLOAT) {
+    addAttr("_fillValue", Ncxx::missingFloat);
+    return;
+  }
+  if (vtype == NC_INT) {
+    addAttr("_fillValue", Ncxx::missingInt);
+    return;
+  }
+  if (vtype == NC_LONG) {
+    addAttr("_fillValue", (long) Ncxx::missingInt);
+    return;
+  }
+  if (vtype == NC_SHORT) {
+    addAttr("_fillValue", (short) Ncxx::missingInt);
+    return;
+  }
+  if (vtype == NC_UBYTE) {
+    addAttr("_fillValue", Ncxx::missingUchar);
+    return;
+  }
+  addAttr("_fillValue", Ncxx::missingInt);
+}
+
+////////////////////////////////////////
+// convert var type string
+
+string NcxxVar::varTypeToStr()
+      
+{
+  nc_type vtype = getType().getId();
+  return Ncxx::ncTypeToStr(vtype);
 }
 

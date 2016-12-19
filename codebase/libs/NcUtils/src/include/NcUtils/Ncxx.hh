@@ -2,6 +2,9 @@
 // generic include file for the Ncxx C++ API
 //
 
+#include <string>
+using namespace std;
+
 extern "C" {
 #include <netcdf.h>
 }
@@ -33,3 +36,19 @@ extern "C" {
 #include <NcUtils/NcxxVarAtt.hh>
 #include <NcUtils/NcxxVlenType.hh>
 
+class Ncxx {
+
+public:
+  static const double missingDouble;
+  static const float missingFloat;
+  static const int missingInt;
+  static const unsigned char missingUchar;
+  
+  ////////////////////////////////////////
+  // convert type enum to string
+  
+  static string ncTypeToStr(nc_type nctype);
+  
+};
+
+  

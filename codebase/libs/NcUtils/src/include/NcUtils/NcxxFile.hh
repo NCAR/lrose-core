@@ -106,6 +106,99 @@ namespace netCDF
       //! Leave define mode, used for classic model
       void enddef();
 
+     ///////////////////////////////////////////
+     // add string global attribute
+     // Returns 0 on success, -1 on failure
+     
+     int addGlobAttr(const string &name, const string &val);
+
+     ///////////////////////////////////////////
+     // add int global attribute
+     // Returns 0 on success, -1 on failure
+     
+     int addGlobAttr(const string &name, int val);
+
+     ///////////////////////////////////////////
+     // add float global attribute
+     // Returns 0 on success, -1 on failure
+     
+     int addGlobAttr(const string &name, float val);
+
+     ///////////////////////////////////////////
+     // read a global attribute
+     // Returns 0 on success, -1 on failure
+     
+     int readGlobAttr(const string &name, string &val);
+     int readGlobAttr(const string &name, int &val);
+     int readGlobAttr(const string &name, float &val);
+     int readGlobAttr(const string &name, double &val);
+
+     ///////////////////////////////////////////
+     // add a dimension
+     // Returns 0 on success, -1 on failure
+     // Side effect: dim arg is updated
+     
+     int addDim(NcxxDim &dim, const string &name, int size);
+
+     ///////////////////////////////////////////
+     // read a dimension
+     // Returns 0 on success, -1 on failure
+     // Side effect: dim arg is set
+     
+     int readDim(const string &name, NcxxDim &dim);
+
+     //////////////////////////////////////////////
+     // Add scalar var
+     // Returns 0 on success, -1 on failure
+     // Side effect: var is set
+     
+     int addVar(NcxxVar &var,
+                const string &name, 
+                const string &standardName,
+                const string &longName,
+                NcxxType ncType, 
+                const string &units = "");
+
+     ///////////////////////////////////////
+     // Add 1-D array var
+     // Returns 0 on success, -1 on failure
+     // Side effect: var is set
+     
+     int addVar(NcxxVar &var, 
+                const string &name, 
+                const string &standardName,
+                const string &longName,
+                NcxxType ncType, 
+                NcxxDim &dim, 
+                const string &units = "");
+     
+     ///////////////////////////////////////
+     // Add 2-D array var
+     // Returns 0 on success, -1 on failure
+     // Side effect: var is set
+     
+     int addVar(NcxxVar &var, 
+                const string &name,
+                const string &standardName,
+                const string &longName,
+                NcxxType ncType,
+                NcxxDim &dim0,
+                NcxxDim &dim1,
+                const string &units = "");
+
+     ///////////////////////////////////////
+     // Add var in multiple-dimensions
+     // Returns 0 on success, -1 on failure
+     // Side effect: var is set
+     
+     int addVar(NcxxVar &var, 
+                const string &name,
+                const string &standardName,
+                const string &longName,
+                NcxxType ncType,
+                vector<NcxxDim> &dims,
+                const string &units = "");
+     
    private:
 
      string _pathInUse;
