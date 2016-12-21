@@ -58,9 +58,10 @@
 #include <Radx/RadxTime.hh>
 #include <rapformats/ac_georef.hh>
 #include <Spdb/DsSpdb.hh>
-#include <NcUtils/NetcdfCxxFile.hh>
+#include <NcUtils/Ncxx.hh>
 
 using namespace std;
+using namespace netCDF;
 
 ////////////////////////
 // This class
@@ -103,13 +104,13 @@ private:
 
   // reading netcdf file
   
-  NetcdfCxxFile _file;
+  NcxxFile _file;
   string _errStr;
 
   string _callSign, _projectName, _flightNum;
   string _timeCoordName, _latCoordName, _lonCoordName;
 
-  NcVar _timeVar;
+  NcxxVar _timeVar;
   DateTime _timeBase;
   TaArray<time_t> _times_;
   size_t _nTimes;

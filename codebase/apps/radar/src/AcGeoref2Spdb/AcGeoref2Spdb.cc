@@ -934,8 +934,8 @@ int AcGeoref2Spdb::_readTimes()
   
 {
 
-  multimap<string, NcVar> allVars = _file.getNcFile()->getVars();
-  multimap<string, NcVar>::iterator it;
+  multimap<string, NcxxVar> allVars = _file.getVars();
+  multimap<string, NcxxVar>::iterator it;
   int count = 0;
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "======>> Variable list" << endl;
@@ -947,7 +947,7 @@ int AcGeoref2Spdb::_readTimes()
 
   // read the time coordinate variable
 
-  _timeVar = _file.getNcFile()->getVar(_timeCoordName);
+  _timeVar = _file.getVar(_timeCoordName);
   if (_timeVar.isNull()) {
     cerr << "ERROR - AcGeoref2Spdb::_readTimes" << endl;
     cerr << "  Cannot get time variable: " << _timeCoordName << endl;
@@ -961,7 +961,7 @@ int AcGeoref2Spdb::_readTimes()
     return -1;
   }
 
-  NcDim timeDim = _timeVar.getDim(0);
+  NcxxDim timeDim = _timeVar.getDim(0);
   if (timeDim.isNull()) {
     cerr << "ERROR - AcGeoref2Spdb::_readTimes" << endl;
     cerr << "  cannot read time dimension" << endl;
@@ -971,7 +971,7 @@ int AcGeoref2Spdb::_readTimes()
 
   // get units attribute
   
-  NcVarAtt unitsAtt = _timeVar.getAtt("units");
+  NcxxVarAtt unitsAtt = _timeVar.getAtt("units");
   if (unitsAtt.isNull()) {
     cerr << "ERROR - AcGeoref2Spdb::_readTimes" << endl;
     cerr << "  cannot read time 'units' attribute" << endl;
@@ -979,7 +979,7 @@ int AcGeoref2Spdb::_readTimes()
   }
   string units;
   unitsAtt.getValues(units);
-  units = _file.stripNulls(units);
+  units = Ncxx::stripNulls(units);
 
   // set the time base from the units
 
@@ -1115,7 +1115,7 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
 
   // get the variable
   
-  NcVar var = _file.getNcFile()->getVar(varName);
+  NcxxVar var = _file.getVar(varName);
   if (var.isNull()) {
     cerr << "ERROR - AcGeoref2Spdb::_readTimeSeriesVar" << endl;
     cerr << "  Cannot find var: " << varName << endl;
@@ -1133,7 +1133,7 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
 
   // get dim
 
-  NcDim dim = var.getDim(0);
+  NcxxDim dim = var.getDim(0);
   if (dim.isNull()) {
     cerr << "ERROR - AcGeoref2Spdb::_readTimeSeriesVar" << endl;
     cerr << "  cannot get dimension for var: " << varName << endl;
@@ -1153,16 +1153,16 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
 
   // get units
   
-  NcVarAtt unitsAtt = var.getAtt("units");
+  NcxxVarAtt unitsAtt = var.getAtt("units");
   string units;
   if (!unitsAtt.isNull()) {
     unitsAtt.getValues(units);
-    units = _file.stripNulls(units);
+    units = Ncxx::stripNulls(units);
   }
 
   // var type
 
-  NcType::ncType varType = var.getType().getTypeClass();
+  NcxxType::ncType varType = var.getType().getTypeClass();
 
   // get fill value
   
@@ -1170,7 +1170,7 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
   float ffill = -9999.0f;
   double dfill = -9999.0;
 
-  NcVarAtt fillValAtt = var.getAtt("_FillValue");
+  NcxxVarAtt fillValAtt = var.getAtt("_FillValue");
   if (fillValAtt.isNull()) {
     fillValAtt = var.getAtt("missing_value");
   }
