@@ -227,10 +227,10 @@ namespace netCDF
       \param location Enumeration type controlling the groups to search.
       \return         A STL multimap object, containing pairs of <attribute name, NcxxVar object> entities.
     */
-   std::multimap<std::string,NcxxVar> getVars(NcxxGroup::Location location=Current) const;
+    std::multimap<std::string,NcxxVar> getVars(NcxxGroup::Location location=Current) const;
 
-   /*!
-     Gets all NcxxVar objects with a given name.
+    /*!
+      Gets all NcxxVar objects with a given name.
       \param name     Name of attribute
       \param location Enumeration type controlling the groups to search.
       \return         Set of NcxxVar objects.
@@ -244,7 +244,7 @@ namespace netCDF
       \return         A NcxxVar object. If there are multiple objects indentied with the
       same name, the object closest  to the current group is returned.
       If no valid object is found , a \ref NcxxVar::isNull "null node" is returned.
-     */
+    */
     NcxxVar getVar(const std::string& name,NcxxGroup::Location location=Current) const;
 
     /*!
@@ -325,7 +325,7 @@ namespace netCDF
     std::multimap<std::string,NcxxGroupAtt> getAtts(NcxxGroup::Location location=Current) const;
 
     /*!
-    Gets all NcxxGroupAtt objects with a given name.
+      Gets all NcxxGroupAtt objects with a given name.
       \param name     Name of attribute
       \param location Enumeration type controlling the groups to search.
       \return         Set of NcxxGroupAtt objects.
@@ -505,7 +505,7 @@ namespace netCDF
       Gets the collection of NcxxType objects.
       \param location Enumeration type controlling the groups to search.
       \return         A STL multimap object, on return contains pairs of <Type name, NcxxType object> entities.
-                      For atomic types, the type returned is the CDL name.
+      For atomic types, the type returned is the CDL name.
     */
     std::multimap<std::string,NcxxType> getTypes(NcxxGroup::Location location=Current) const;
 
@@ -513,7 +513,7 @@ namespace netCDF
     /*!
       Gets the collection of NcxxType objects with a given name.
       \param name     Name of type. For atomic types, the CDL name is expected. This is consistent with the
-                         string returned from NcxxType::getName().
+      string returned from NcxxType::getName().
       \param location Enumeration type controlling the groups to search.
       \return         Set of  NcxxType objects.
     */
@@ -531,7 +531,7 @@ namespace netCDF
     /*!
       Gets the collection of NcxxType objects with a given name and data type.
       \param name     Name of type. For atomic types, the CDL name is expected. This is consistent with the
-                         string returned from NcxxType::getName().
+      string returned from NcxxType::getName().
       \param enumType Enumeration type specifying the data type.
       \param location Enumeration type controlling the groups to search.
       \return         Set of Nctype objects.
@@ -542,7 +542,7 @@ namespace netCDF
     /*!
       Gets the NcxxType object with a given name.
       \param name     Name of type. For atomic types, the CDL name is expected. This is consistent with the
-                         string returned from NcxxType::getName().
+      string returned from NcxxType::getName().
       \param location Enumeration type controlling the groups to search.
       \return         NcxxType object. If there are multiple objects indentied with the same name,
       the object closest to the current group is returned.  If no valid object is found , a \ref NcxxType::isNull "null node" is returned.
@@ -554,7 +554,7 @@ namespace netCDF
     /*!
       Adds a new netCDF enum type.
       \param name        Name of type. For atomic types, the CDL name is expected. This is consistent with the
-                         string returned from NcxxType::getName().
+      string returned from NcxxType::getName().
       \param enumType    The enumeration value of the object type.
       \return            The NcxxEnumType object for this new netCDF enum type.
     */
@@ -613,6 +613,99 @@ namespace netCDF
     void getCoordVar(std::string& coordVarName, NcxxDim& ncDim, NcxxVar& ncVar, NcxxGroup::Location location=Current) const;
 
 
+    ///////////////////////////////////////////
+    // add string global attribute
+    // Returns 0 on success, -1 on failure
+     
+    int addGlobAttr(const string &name, const string &val);
+
+    ///////////////////////////////////////////
+    // add int global attribute
+    // Returns 0 on success, -1 on failure
+     
+    int addGlobAttr(const string &name, int val);
+
+    ///////////////////////////////////////////
+    // add float global attribute
+    // Returns 0 on success, -1 on failure
+     
+    int addGlobAttr(const string &name, float val);
+
+    ///////////////////////////////////////////
+    // read a global attribute
+    // Returns 0 on success, -1 on failure
+     
+    int readGlobAttr(const string &name, string &val);
+    int readGlobAttr(const string &name, int &val);
+    int readGlobAttr(const string &name, float &val);
+    int readGlobAttr(const string &name, double &val);
+
+    ///////////////////////////////////////////
+    // add a dimension
+    // Returns 0 on success, -1 on failure
+    // Side effect: dim arg is updated
+     
+    int addDim(NcxxDim &dim, const string &name, int size);
+
+    ///////////////////////////////////////////
+    // read a dimension
+    // Returns 0 on success, -1 on failure
+    // Side effect: dim arg is set
+     
+    int readDim(const string &name, NcxxDim &dim);
+
+    //////////////////////////////////////////////
+    // Add scalar var
+    // Returns 0 on success, -1 on failure
+    // Side effect: var is set
+     
+    int addVar(NcxxVar &var,
+               const string &name, 
+               const string &standardName,
+               const string &longName,
+               NcxxType ncType, 
+               const string &units = "");
+
+    ///////////////////////////////////////
+    // Add 1-D array var
+    // Returns 0 on success, -1 on failure
+    // Side effect: var is set
+     
+    int addVar(NcxxVar &var, 
+               const string &name, 
+               const string &standardName,
+               const string &longName,
+               NcxxType ncType, 
+               NcxxDim &dim, 
+               const string &units = "");
+     
+    ///////////////////////////////////////
+    // Add 2-D array var
+    // Returns 0 on success, -1 on failure
+    // Side effect: var is set
+     
+    int addVar(NcxxVar &var, 
+               const string &name,
+               const string &standardName,
+               const string &longName,
+               NcxxType ncType,
+               NcxxDim &dim0,
+               NcxxDim &dim1,
+               const string &units = "");
+
+    ///////////////////////////////////////
+    // Add var in multiple-dimensions
+    // Returns 0 on success, -1 on failure
+    // Side effect: var is set
+     
+    int addVar(NcxxVar &var, 
+               const string &name,
+               const string &standardName,
+               const string &longName,
+               NcxxType ncType,
+               vector<NcxxDim> &dims,
+               const string &units = "");
+     
   protected:
 
     /*! assignment operator  */

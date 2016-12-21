@@ -437,7 +437,7 @@ int NcxxRadxFile::getTimeFromPath(const string &path, RadxTime &rtime)
 ////////////////////////////////////////
 // convert Radx::DataType_t to NcType
 
-NcType NcxxRadxFile::_getNcType(Radx::DataType_t dtype)
+NcxxType NcxxRadxFile::_getNcType(Radx::DataType_t dtype)
 
 {
   switch (dtype) {
@@ -458,23 +458,23 @@ NcType NcxxRadxFile::_getNcType(Radx::DataType_t dtype)
 //////////////////////////////////////////////////////////
 // convert RadxFile::netcdf_format_t to NcFile::FileFormat
 
-NcFile::FileFormat 
+NcxxFile::FileFormat 
   NcxxRadxFile::_getFileFormat(RadxFile::netcdf_format_t format)
 
 {
   switch (format) {
     case NETCDF4_CLASSIC:
-      return NcFile::nc4classic;
+      return NcxxFile::nc4classic;
       break;
     case NETCDF_OFFSET_64BIT:
-      return NcFile::classic64;
+      return NcxxFile::classic64;
       break;
     case NETCDF4:
-      return NcFile::nc4;
+      return NcxxFile::nc4;
       break;
     case NETCDF_CLASSIC:
     default:
-      return NcFile::classic;
+      return NcxxFile::classic;
   }
 }
 

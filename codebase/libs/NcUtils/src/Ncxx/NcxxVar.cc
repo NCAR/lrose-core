@@ -80,6 +80,9 @@ using namespace netCDF;
 NcxxVar& NcxxVar::operator=(const NcxxVar & rhs)
 
 {
+  if (&rhs == this) {
+    return *this;
+  }
   _errStr = rhs._errStr;
   nullObject = rhs.nullObject;
   myId = rhs.myId;

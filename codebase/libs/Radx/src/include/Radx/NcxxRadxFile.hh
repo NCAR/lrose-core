@@ -48,7 +48,7 @@
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxGeoref.hh>
-#include <Radx/NetcdfCxxUtils.hh>
+#include <NcUtils/Ncxx.hh>
 
 class RadxField;
 class RadxVol;
@@ -56,6 +56,7 @@ class RadxRay;
 class RadxSweep;
 class RadxRcalib;
 using namespace std;
+using namespace netCDF;
 
 ///////////////////////////////////////////////////////////////
 /// CXX FILE IO CLASS FOR NETCDF CF/RADIAL FILE FORMAT
@@ -208,164 +209,164 @@ private:
   
   // netcdf file
   
-  NetcdfCxxUtils _file;
+  NcxxFile _file;
   string _tmpPath;
 
   // dimensions
 
-  NcDim _timeDim;
-  NcDim _rangeDim;
-  NcDim _nPointsDim;
-  NcDim _sweepDim;
-  NcDim _calDim;
-  NcDim _stringLen8Dim;
-  NcDim _stringLen32Dim;
-  NcDim _statusXmlDim;
-  NcDim _frequencyDim;
+  NcxxDim _timeDim;
+  NcxxDim _rangeDim;
+  NcxxDim _nPointsDim;
+  NcxxDim _sweepDim;
+  NcxxDim _calDim;
+  NcxxDim _stringLen8Dim;
+  NcxxDim _stringLen32Dim;
+  NcxxDim _statusXmlDim;
+  NcxxDim _frequencyDim;
 
   // coordinate variables
 
-  NcVar _timeVar;
-  NcVar _rangeVar;
+  NcxxVar _timeVar;
+  NcxxVar _rangeVar;
 
   // gate geometry variables
   
-  NcVar _rayNGatesVar;
-  NcVar _rayStartIndexVar;
+  NcxxVar _rayNGatesVar;
+  NcxxVar _rayStartIndexVar;
 
-  NcVar _rayStartRangeVar;
-  NcVar _rayGateSpacingVar;
+  NcxxVar _rayStartRangeVar;
+  NcxxVar _rayGateSpacingVar;
   bool _gateGeomVaries;
 
   // scalar variables
   
-  NcVar _volumeNumberVar;
-  NcVar _instrumentTypeVar;
-  NcVar _platformTypeVar;
-  NcVar _primaryAxisVar;
-  NcVar _statusXmlVar;
-  NcVar _startTimeVar;
-  NcVar _endTimeVar;
+  NcxxVar _volumeNumberVar;
+  NcxxVar _instrumentTypeVar;
+  NcxxVar _platformTypeVar;
+  NcxxVar _primaryAxisVar;
+  NcxxVar _statusXmlVar;
+  NcxxVar _startTimeVar;
+  NcxxVar _endTimeVar;
 
   // frequencies
 
-  NcVar _frequencyVar;
+  NcxxVar _frequencyVar;
 
   // projection variables
   
-  NcVar _projVar;
-  NcVar _latitudeVar;
-  NcVar _longitudeVar;
-  NcVar _altitudeVar;
-  NcVar _altitudeAglVar;
+  NcxxVar _projVar;
+  NcxxVar _latitudeVar;
+  NcxxVar _longitudeVar;
+  NcxxVar _altitudeVar;
+  NcxxVar _altitudeAglVar;
   
   // operational modes
 
-  NcVar _polModeVar;
-  NcVar _prtModeVar;
+  NcxxVar _polModeVar;
+  NcxxVar _prtModeVar;
 
   // sweep variables
 
-  NcVar _sweepNumberVar;
-  NcVar _sweepModeVar;
-  NcVar _sweepFollowModeVar;
-  NcVar _sweepFixedAngleVar;
+  NcxxVar _sweepNumberVar;
+  NcxxVar _sweepModeVar;
+  NcxxVar _sweepFollowModeVar;
+  NcxxVar _sweepFixedAngleVar;
   bool _fixedAnglesFound;
-  NcVar _targetScanRateVar;
-  NcVar _sweepStartRayIndexVar;
-  NcVar _sweepEndRayIndexVar;
-  NcVar _raysAreIndexedVar;
-  NcVar _rayAngleResVar;
-  NcVar _intermedFreqHzVar;
+  NcxxVar _targetScanRateVar;
+  NcxxVar _sweepStartRayIndexVar;
+  NcxxVar _sweepEndRayIndexVar;
+  NcxxVar _raysAreIndexedVar;
+  NcxxVar _rayAngleResVar;
+  NcxxVar _intermedFreqHzVar;
 
   // radar param variables
 
-  NcVar _radarAntennaGainHVar;
-  NcVar _radarAntennaGainVVar;
-  NcVar _radarBeamWidthHVar;
-  NcVar _radarBeamWidthVVar;
-  NcVar _radarRxBandwidthVar;
+  NcxxVar _radarAntennaGainHVar;
+  NcxxVar _radarAntennaGainVVar;
+  NcxxVar _radarBeamWidthHVar;
+  NcxxVar _radarBeamWidthVVar;
+  NcxxVar _radarRxBandwidthVar;
 
   // lidar param variables
 
-  NcVar _lidarConstantVar;
-  NcVar _lidarPulseEnergyJVar;
-  NcVar _lidarPeakPowerWVar;
-  NcVar _lidarApertureDiamCmVar;
-  NcVar _lidarApertureEfficiencyVar;
-  NcVar _lidarFieldOfViewMradVar;
-  NcVar _lidarBeamDivergenceMradVar;
+  NcxxVar _lidarConstantVar;
+  NcxxVar _lidarPulseEnergyJVar;
+  NcxxVar _lidarPeakPowerWVar;
+  NcxxVar _lidarApertureDiamCmVar;
+  NcxxVar _lidarApertureEfficiencyVar;
+  NcxxVar _lidarFieldOfViewMradVar;
+  NcxxVar _lidarBeamDivergenceMradVar;
 
   // calibration variables
 
-  NcVar _rCalTimeVar;
-  NcVar _rCalPulseWidthVar;
-  NcVar _rCalXmitPowerHVar;
-  NcVar _rCalXmitPowerVVar;
-  NcVar _rCalTwoWayWaveguideLossHVar;
-  NcVar _rCalTwoWayWaveguideLossVVar;
-  NcVar _rCalTwoWayRadomeLossHVar;
-  NcVar _rCalTwoWayRadomeLossVVar;
-  NcVar _rCalReceiverMismatchLossVar;
-  NcVar _rCalRadarConstHVar;
-  NcVar _rCalRadarConstVVar;
-  NcVar _rCalAntennaGainHVar;
-  NcVar _rCalAntennaGainVVar;
-  NcVar _rCalNoiseHcVar;
-  NcVar _rCalNoiseHxVar;
-  NcVar _rCalNoiseVcVar;
-  NcVar _rCalNoiseVxVar;
-  NcVar _rCalReceiverGainHcVar;
-  NcVar _rCalReceiverGainHxVar;
-  NcVar _rCalReceiverGainVcVar;
-  NcVar _rCalReceiverGainVxVar;
-  NcVar _rCalBaseDbz1kmHcVar;
-  NcVar _rCalBaseDbz1kmHxVar;
-  NcVar _rCalBaseDbz1kmVcVar;
-  NcVar _rCalBaseDbz1kmVxVar;
-  NcVar _rCalSunPowerHcVar;
-  NcVar _rCalSunPowerHxVar;
-  NcVar _rCalSunPowerVcVar;
-  NcVar _rCalSunPowerVxVar;
-  NcVar _rCalNoiseSourcePowerHVar;
-  NcVar _rCalNoiseSourcePowerVVar;
-  NcVar _rCalPowerMeasLossHVar;
-  NcVar _rCalPowerMeasLossVVar;
-  NcVar _rCalCouplerForwardLossHVar;
-  NcVar _rCalCouplerForwardLossVVar;
-  NcVar _rCalDbzCorrectionVar;
-  NcVar _rCalZdrCorrectionVar;
-  NcVar _rCalLdrCorrectionHVar;
-  NcVar _rCalLdrCorrectionVVar;
-  NcVar _rCalSystemPhidpVar;
-  NcVar _rCalTestPowerHVar;
-  NcVar _rCalTestPowerVVar;
-  NcVar _rCalReceiverSlopeHcVar;
-  NcVar _rCalReceiverSlopeHxVar;
-  NcVar _rCalReceiverSlopeVcVar;
-  NcVar _rCalReceiverSlopeVxVar;
+  NcxxVar _rCalTimeVar;
+  NcxxVar _rCalPulseWidthVar;
+  NcxxVar _rCalXmitPowerHVar;
+  NcxxVar _rCalXmitPowerVVar;
+  NcxxVar _rCalTwoWayWaveguideLossHVar;
+  NcxxVar _rCalTwoWayWaveguideLossVVar;
+  NcxxVar _rCalTwoWayRadomeLossHVar;
+  NcxxVar _rCalTwoWayRadomeLossVVar;
+  NcxxVar _rCalReceiverMismatchLossVar;
+  NcxxVar _rCalRadarConstHVar;
+  NcxxVar _rCalRadarConstVVar;
+  NcxxVar _rCalAntennaGainHVar;
+  NcxxVar _rCalAntennaGainVVar;
+  NcxxVar _rCalNoiseHcVar;
+  NcxxVar _rCalNoiseHxVar;
+  NcxxVar _rCalNoiseVcVar;
+  NcxxVar _rCalNoiseVxVar;
+  NcxxVar _rCalReceiverGainHcVar;
+  NcxxVar _rCalReceiverGainHxVar;
+  NcxxVar _rCalReceiverGainVcVar;
+  NcxxVar _rCalReceiverGainVxVar;
+  NcxxVar _rCalBaseDbz1kmHcVar;
+  NcxxVar _rCalBaseDbz1kmHxVar;
+  NcxxVar _rCalBaseDbz1kmVcVar;
+  NcxxVar _rCalBaseDbz1kmVxVar;
+  NcxxVar _rCalSunPowerHcVar;
+  NcxxVar _rCalSunPowerHxVar;
+  NcxxVar _rCalSunPowerVcVar;
+  NcxxVar _rCalSunPowerVxVar;
+  NcxxVar _rCalNoiseSourcePowerHVar;
+  NcxxVar _rCalNoiseSourcePowerVVar;
+  NcxxVar _rCalPowerMeasLossHVar;
+  NcxxVar _rCalPowerMeasLossVVar;
+  NcxxVar _rCalCouplerForwardLossHVar;
+  NcxxVar _rCalCouplerForwardLossVVar;
+  NcxxVar _rCalDbzCorrectionVar;
+  NcxxVar _rCalZdrCorrectionVar;
+  NcxxVar _rCalLdrCorrectionHVar;
+  NcxxVar _rCalLdrCorrectionVVar;
+  NcxxVar _rCalSystemPhidpVar;
+  NcxxVar _rCalTestPowerHVar;
+  NcxxVar _rCalTestPowerVVar;
+  NcxxVar _rCalReceiverSlopeHcVar;
+  NcxxVar _rCalReceiverSlopeHxVar;
+  NcxxVar _rCalReceiverSlopeVcVar;
+  NcxxVar _rCalReceiverSlopeVxVar;
 
   // ray variables
 
-  NcVar _azimuthVar;
-  NcVar _elevationVar;
-  NcVar _pulseWidthVar;
-  NcVar _prtVar;
-  NcVar _prtRatioVar;
-  NcVar _nyquistVar;
-  NcVar _unambigRangeVar;
-  NcVar _antennaTransitionVar;
-  NcVar _georefsAppliedVar;
-  NcVar _georefTimeVar;
-  NcVar _nSamplesVar;
-  NcVar _calIndexVar;
-  NcVar _xmitPowerHVar;
-  NcVar _xmitPowerVVar;
-  NcVar _scanRateVar;
-  NcVar _estNoiseDbmHcVar;
-  NcVar _estNoiseDbmVcVar;
-  NcVar _estNoiseDbmHxVar;
-  NcVar _estNoiseDbmVxVar;
+  NcxxVar _azimuthVar;
+  NcxxVar _elevationVar;
+  NcxxVar _pulseWidthVar;
+  NcxxVar _prtVar;
+  NcxxVar _prtRatioVar;
+  NcxxVar _nyquistVar;
+  NcxxVar _unambigRangeVar;
+  NcxxVar _antennaTransitionVar;
+  NcxxVar _georefsAppliedVar;
+  NcxxVar _georefTimeVar;
+  NcxxVar _nSamplesVar;
+  NcxxVar _calIndexVar;
+  NcxxVar _xmitPowerHVar;
+  NcxxVar _xmitPowerVVar;
+  NcxxVar _scanRateVar;
+  NcxxVar _estNoiseDbmHcVar;
+  NcxxVar _estNoiseDbmVcVar;
+  NcxxVar _estNoiseDbmHxVar;
+  NcxxVar _estNoiseDbmVxVar;
 
   // georeference variables
 
@@ -375,22 +376,22 @@ private:
   // correction factor variables
 
   bool _correctionsActive;
-  NcVar _azimuthCorrVar;
-  NcVar _elevationCorrVar;
-  NcVar _rangeCorrVar;
-  NcVar _longitudeCorrVar;
-  NcVar _latitudeCorrVar;
-  NcVar _pressureAltCorrVar;
-  NcVar _altitudeCorrVar;
-  NcVar _ewVelCorrVar;
-  NcVar _nsVelCorrVar;
-  NcVar _vertVelCorrVar;
-  NcVar _headingCorrVar;
-  NcVar _rollCorrVar;
-  NcVar _pitchCorrVar;
-  NcVar _driftCorrVar;
-  NcVar _rotationCorrVar;
-  NcVar _tiltCorrVar;
+  NcxxVar _azimuthCorrVar;
+  NcxxVar _elevationCorrVar;
+  NcxxVar _rangeCorrVar;
+  NcxxVar _longitudeCorrVar;
+  NcxxVar _latitudeCorrVar;
+  NcxxVar _pressureAltCorrVar;
+  NcxxVar _altitudeCorrVar;
+  NcxxVar _ewVelCorrVar;
+  NcxxVar _nsVelCorrVar;
+  NcxxVar _vertVelCorrVar;
+  NcxxVar _headingCorrVar;
+  NcxxVar _rollCorrVar;
+  NcxxVar _pitchCorrVar;
+  NcxxVar _driftCorrVar;
+  NcxxVar _rotationCorrVar;
+  NcxxVar _tiltCorrVar;
 
   // unique field names for writing
 
@@ -979,8 +980,8 @@ private:
   void _clearCals();
   void _clearFields();
   
-  NcType _getNcType(Radx::DataType_t dtype);
-  NcFile::FileFormat _getFileFormat(RadxFile::netcdf_format_t format);
+  NcxxType _getNcType(Radx::DataType_t dtype);
+  NcxxFile::FileFormat _getFileFormat(RadxFile::netcdf_format_t format);
   
   // private methods for NcfRadial_read.cc
   
@@ -1015,11 +1016,11 @@ private:
   int _readCal(RadxRcalib &cal, int index);
   int _readFieldVariables(bool metaOnly);
   
-  int _readRayVar(NcVar* &var, const string &name, 
+  int _readRayVar(NcxxVar* &var, const string &name, 
                   vector<double> &vals, bool required = true);
-  int _readRayVar(NcVar* &var, const string &name, 
+  int _readRayVar(NcxxVar* &var, const string &name, 
                   vector<int> &vals, bool required = true);
-  int _readRayVar(NcVar* &var, const string &name, 
+  int _readRayVar(NcxxVar* &var, const string &name, 
                   vector<bool> &vals, bool required = true);
   
   int _readRayVar(const string &name, 
@@ -1029,41 +1030,41 @@ private:
   int _readRayVar(const string &name, 
                   vector<bool> &vals, bool required = true);
   
-  NcVar* _getRayVar(const string &name, bool required);
-  int _readSweepVar(NcVar* &var, const string &name,
+  NcxxVar* _getRayVar(const string &name, bool required);
+  int _readSweepVar(NcxxVar* &var, const string &name,
                     vector<double> &vals, bool required = true);
-  int _readSweepVar(NcVar* &var, const string &name, 
+  int _readSweepVar(NcxxVar* &var, const string &name, 
                     vector<int> &vals, bool required = true);
-  int _readSweepVar(NcVar* &var, const string &name,
+  int _readSweepVar(NcxxVar* &var, const string &name,
                     vector<string> &vals, bool required = true);
-  NcVar* _getSweepVar(const string &name);
-  int _readCalTime(const string &name, NcVar* &var, int index, time_t &val);
-  int _readCalVar(const string &name, NcVar* &var, int index,
+  NcxxVar* _getSweepVar(const string &name);
+  int _readCalTime(const string &name, NcxxVar* &var, int index, time_t &val);
+  int _readCalVar(const string &name, NcxxVar* &var, int index,
                   double &val, bool required = false);
 
-  int _addFl64FieldToRays(NcVar* var,
+  int _addFl64FieldToRays(NcxxVar* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           bool isDiscrete, bool fieldFolds,
                           float foldLimitLower, float foldLimitUpper);
-  int _addFl32FieldToRays(NcVar* var,
+  int _addFl32FieldToRays(NcxxVar* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           bool isDiscrete, bool fieldFolds,
                           float foldLimitLower, float foldLimitUpper);
-  int _addSi32FieldToRays(NcVar* var,
-                          const string &name, const string &units,
-                          const string &standardName, const string &longName,
-                          double scale, double offset,
-                          bool isDiscrete, bool fieldFolds,
-                          float foldLimitLower, float foldLimitUpper);
-  int _addSi16FieldToRays(NcVar* var,
+  int _addSi32FieldToRays(NcxxVar* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           double scale, double offset,
                           bool isDiscrete, bool fieldFolds,
                           float foldLimitLower, float foldLimitUpper);
-  int _addSi08FieldToRays(NcVar* var,
+  int _addSi16FieldToRays(NcxxVar* var,
+                          const string &name, const string &units,
+                          const string &standardName, const string &longName,
+                          double scale, double offset,
+                          bool isDiscrete, bool fieldFolds,
+                          float foldLimitLower, float foldLimitUpper);
+  int _addSi08FieldToRays(NcxxVar* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           double scale, double offset,
@@ -1090,7 +1091,7 @@ private:
   int _addRayVariables();
   void _setEstNoiseAvailFlags();
   int _addGeorefVariables();
-  int _addCalVar(NcVar* &var, const string &name, const string &standardName,
+  int _addCalVar(NcxxVar* &var, const string &name, const string &standardName,
                  const string &units = "");
     
   int _writeCoordinateVariables();
@@ -1104,11 +1105,11 @@ private:
   int _writeFrequencyVariable();
 
   int _writeFieldVariables();
-  NcVar _createFieldVar(const RadxField &field);
-  int _writeFieldVar(NcVar var, RadxField *field);
+  NcxxVar _createFieldVar(const RadxField &field);
+  int _writeFieldVar(NcxxVar var, RadxField *field);
   int _closeOnError(const string &caller);
 
-  int _setCompression(NcVar var);
+  int _setCompression(NcxxVar var);
   void _computeFixedAngles();
 
   Radx::fl64 _checkMissingDouble(double val);

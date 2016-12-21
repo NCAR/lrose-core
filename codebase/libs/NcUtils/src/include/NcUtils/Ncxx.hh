@@ -48,6 +48,9 @@
 //
 //////////////////////////////////////////////////////////////////////
 
+#ifndef Ncxx_HH
+#define Ncxx_HH
+
 //
 // generic include file for the Ncxx C++ API
 //
@@ -89,16 +92,23 @@ extern "C" {
 class Ncxx {
 
 public:
+
+  // missing values
+
   static const double missingDouble;
   static const float missingFloat;
   static const int missingInt;
   static const unsigned char missingUchar;
   
-  ////////////////////////////////////////
   // convert type enum to string
   
   static string ncTypeToStr(nc_type nctype);
   
+  // strip redundant null from string
+  
+  static string stripNulls(const string &val);
+
 };
 
+#endif
   

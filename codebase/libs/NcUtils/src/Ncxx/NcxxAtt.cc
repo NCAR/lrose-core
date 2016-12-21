@@ -48,21 +48,27 @@
 //
 //////////////////////////////////////////////////////////////////////
 
+#include <NcUtils/Ncxx.hh>
 #include <NcUtils/NcxxAtt.hh>
 #include <NcUtils/NcxxGroup.hh>
+#include <NcUtils/NcxxException.hh>
+#include <ncException.h>
 #include <NcUtils/NcxxCheck.hh>
-#include <vector>
 
 using namespace std;
 using namespace netCDF;
+using namespace netCDF::exceptions;
   
-
 // destructor  (defined even though it is virtual)
 NcxxAtt::~NcxxAtt() {}
 
 // assignment operator
 NcxxAtt& NcxxAtt::operator=(const NcxxAtt& rhs)
 {
+  if (&rhs == this) {
+    return *this;
+  }
+  _errStr = rhs._errStr;
   nullObject = rhs.nullObject;
   myName = rhs.myName;
   groupId = rhs.groupId;
@@ -72,21 +78,27 @@ NcxxAtt& NcxxAtt::operator=(const NcxxAtt& rhs)
 
 // Constructor generates a null object.
 NcxxAtt::NcxxAtt() : 
-  nullObject(true) 
-{}
+        nullObject(true)
+{
+  _errStr.clear();
+}
 
 // Constructor for non-null instances.
 NcxxAtt::NcxxAtt(bool nullObject): 
-  nullObject(nullObject)
-{}
+        nullObject(nullObject)
+{
+  _errStr.clear();
+}
 
 // The copy constructor.
 NcxxAtt::NcxxAtt(const NcxxAtt& rhs) :
-  nullObject(rhs.nullObject),
-  myName(rhs.myName),
-  groupId(rhs.groupId),
-   varId(rhs.varId)
-{}
+        nullObject(rhs.nullObject),
+        myName(rhs.myName),
+        groupId(rhs.groupId),
+        varId(rhs.varId)
+{
+  _errStr = rhs._errStr;
+}
 
 
 // equivalence operator
@@ -120,62 +132,91 @@ NcxxType  NcxxAtt::getType() const{
     return NcxxType(xtypep);
   else
     // this is a user-defined type
-    {
-      // now get the set of NcxxType objects in this file.
-      multimap<string,NcxxType> typeMap(getParentGroup().getTypes(NcxxGroup::ParentsAndCurrent));
-      multimap<string,NcxxType>::iterator iter;
-      // identify the Nctype object with the same id as this attribute.
-      for (iter=typeMap.begin(); iter!= typeMap.end();iter++) {
-	if(iter->second.getId() == xtypep) return iter->second;
-      }
-      // return a null object, as no type was identified.
-      return NcxxType();
+  {
+    // now get the set of NcxxType objects in this file.
+    multimap<string,NcxxType> typeMap(getParentGroup().getTypes(NcxxGroup::ParentsAndCurrent));
+    multimap<string,NcxxType>::iterator iter;
+    // identify the Nctype object with the same id as this attribute.
+    for (iter=typeMap.begin(); iter!= typeMap.end();iter++) {
+      if(iter->second.getId() == xtypep) return iter->second;
     }
+    // return a null object, as no type was identified.
+    return NcxxType();
+  }
 }
 
-// Gets attribute length.
+// Gets attribute length - i.e. number of values in attribute.
+
 size_t  NcxxAtt::getAttLength() const{
   size_t lenp;
   ncxxCheck(nc_inq_attlen(groupId, varId, myName.c_str(), &lenp),__FILE__,__LINE__);
   return lenp;
 }
 
+///////////////////////////////////////////////////////
 // Gets a netCDF variable attribute.
+
 void NcxxAtt::getValues(string& dataValues) const {
+
   NcxxType::ncType typeClass(getType().getTypeClass());
 
   size_t att_len=getAttLength();
-  char* tmpValues;
-  tmpValues = (char *) malloc(att_len + 1);  /* + 1 for trailing null */
+  char* tmpValues = new char[att_len + 1];  /* + 1 for trailing null */
 
-  if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
-    ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),tmpValues),__FILE__,__LINE__);
-  else
-    ncxxCheck(nc_get_att_text(groupId,varId,myName.c_str(),tmpValues),__FILE__,__LINE__);
+  if(typeClass == NcxxType::nc_VLEN ||
+     typeClass == NcxxType::nc_OPAQUE ||
+     typeClass == NcxxType::nc_ENUM ||
+     typeClass == NcxxType::nc_COMPOUND) {
+    ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),tmpValues),
+              __FILE__, __LINE__);
+  } else {
+    ncxxCheck(nc_get_att_text(groupId,varId,myName.c_str(),tmpValues),
+              __FILE__, __LINE__);
+  }
+
+  // set return value
+
   dataValues=string(tmpValues,att_len);
-  free(tmpValues);
+
+  delete[] tmpValues;
+
 }
 
+///////////////////////////////////////////////////////
 // Gets a netCDF variable attribute.
+
 void NcxxAtt::getValues(char* dataValues) const {
+
   NcxxType::ncType typeClass(getType().getTypeClass());
-  if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
-    ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
-  else
-    ncxxCheck(nc_get_att_text(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
+  if(typeClass == NcxxType::nc_VLEN ||
+     typeClass == NcxxType::nc_OPAQUE ||
+     typeClass == NcxxType::nc_ENUM ||
+     typeClass == NcxxType::nc_COMPOUND) {
+    ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),dataValues),
+              __FILE__, __LINE__);
+  } else {
+    ncxxCheck(nc_get_att_text(groupId,varId,myName.c_str(),dataValues),
+              __FILE__, __LINE__);
+  }
+
 }
 
 
 // Gets a netCDF variable attribute.
+
 void NcxxAtt::getValues(unsigned char* dataValues) const {
+
   NcxxType::ncType typeClass(getType().getTypeClass());
+
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
     ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
   else
     ncxxCheck(nc_get_att_uchar(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
+
 }
 
 // Gets a netCDF variable attribute.
+
 void NcxxAtt::getValues(signed char* dataValues) const {
   NcxxType::ncType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
@@ -185,6 +226,7 @@ void NcxxAtt::getValues(signed char* dataValues) const {
 }
 
 // Gets a netCDF variable attribute.
+
 void NcxxAtt::getValues(short* dataValues) const {
   NcxxType::ncType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
@@ -194,6 +236,7 @@ void NcxxAtt::getValues(short* dataValues) const {
 }
 
 // Gets a netCDF variable attribute.
+
 void NcxxAtt::getValues(int* dataValues) const {
   NcxxType::ncType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
@@ -203,6 +246,7 @@ void NcxxAtt::getValues(int* dataValues) const {
 }
 
 // Gets a netCDF variable attribute.
+
 void NcxxAtt::getValues(long* dataValues) const {
   NcxxType::ncType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
@@ -212,6 +256,7 @@ void NcxxAtt::getValues(long* dataValues) const {
 }
 
 // Gets a netCDF variable attribute.
+
 void NcxxAtt::getValues(float* dataValues) const {
   NcxxType::ncType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
@@ -221,6 +266,7 @@ void NcxxAtt::getValues(float* dataValues) const {
 }
 
 // Gets a netCDF variable attribute.
+
 void NcxxAtt::getValues(double* dataValues) const {
   NcxxType::ncType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
@@ -230,6 +276,7 @@ void NcxxAtt::getValues(double* dataValues) const {
 }
 
 // Gets a netCDF variable attribute.
+
 void NcxxAtt::getValues(unsigned short* dataValues) const {
   NcxxType::ncType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
@@ -239,6 +286,7 @@ void NcxxAtt::getValues(unsigned short* dataValues) const {
 }
 
 // Gets a netCDF variable attribute.
+
 void NcxxAtt::getValues(unsigned int* dataValues) const {
   NcxxType::ncType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
@@ -248,6 +296,7 @@ void NcxxAtt::getValues(unsigned int* dataValues) const {
 }
 
 // Gets a netCDF variable attribute.
+
 void NcxxAtt::getValues(long long* dataValues) const {
   NcxxType::ncType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
@@ -257,6 +306,7 @@ void NcxxAtt::getValues(long long* dataValues) const {
 }
 
 // Gets a netCDF variable attribute.
+
 void NcxxAtt::getValues(unsigned long long* dataValues) const {
   NcxxType::ncType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
@@ -266,6 +316,7 @@ void NcxxAtt::getValues(unsigned long long* dataValues) const {
 }
 
 // Gets a netCDF variable attribute.
+
 void NcxxAtt::getValues(char** dataValues) const {
   NcxxType::ncType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
@@ -277,5 +328,251 @@ void NcxxAtt::getValues(char** dataValues) const {
 // Gets a netCDF variable attribute.
 void NcxxAtt::getValues(void* dataValues) const {
   ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
+}
+
+//////////////////////////////////////////////////////
+// get values of different types loaded into vector
+// vector is resized to hold attribute length
+// returns 0 on success, -1 on failure
+// On failure, getErrStr() holds error message.
+
+int NcxxAtt::getValues(vector<char *> &dataValues) const
+{
+  clearErrStr();
+  size_t attLen = getAttLength();
+  dataValues.resize(attLen);
+  if (attLen < 1) {
+    return 0;
+  }
+  try {
+    getValues(&dataValues[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxAtt::getValues");
+    _addErrStr("  Cannot get values, attr name: ", myName);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+int NcxxAtt::getValues(vector<char> &dataValues) const
+{
+  clearErrStr();
+  size_t attLen = getAttLength();
+  dataValues.resize(attLen);
+  if (attLen < 1) {
+    return 0;
+  }
+  try {
+    getValues(&dataValues[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxAtt::getValues");
+    _addErrStr("  Cannot get values, attr name: ", myName);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+int NcxxAtt::getValues(vector<unsigned char> &dataValues) const
+{
+  clearErrStr();
+  size_t attLen = getAttLength();
+  dataValues.resize(attLen);
+  if (attLen < 1) {
+    return 0;
+  }
+  try {
+    getValues(&dataValues[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxAtt::getValues");
+    _addErrStr("  Cannot get values, attr name: ", myName);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+int NcxxAtt::getValues(vector<short> &dataValues) const
+{
+  clearErrStr();
+  size_t attLen = getAttLength();
+  dataValues.resize(attLen);
+  if (attLen < 1) {
+    return 0;
+  }
+  try {
+    getValues(&dataValues[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxAtt::getValues");
+    _addErrStr("  Cannot get values, attr name: ", myName);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+int NcxxAtt::getValues(vector<unsigned short> &dataValues) const
+{
+  clearErrStr();
+  size_t attLen = getAttLength();
+  dataValues.resize(attLen);
+  if (attLen < 1) {
+    return 0;
+  }
+  try {
+    getValues(&dataValues[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxAtt::getValues");
+    _addErrStr("  Cannot get values, attr name: ", myName);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+int NcxxAtt::getValues(vector<int> &dataValues) const
+{
+  clearErrStr();
+  size_t attLen = getAttLength();
+  dataValues.resize(attLen);
+  if (attLen < 1) {
+    return 0;
+  }
+  try {
+    getValues(&dataValues[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxAtt::getValues");
+    _addErrStr("  Cannot get values, attr name: ", myName);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+int NcxxAtt::getValues(vector<unsigned int> &dataValues) const
+{
+  clearErrStr();
+  size_t attLen = getAttLength();
+  dataValues.resize(attLen);
+  if (attLen < 1) {
+    return 0;
+  }
+  try {
+    getValues(&dataValues[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxAtt::getValues");
+    _addErrStr("  Cannot get values, attr name: ", myName);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+int NcxxAtt::getValues(vector<long> &dataValues) const
+{
+  clearErrStr();
+  size_t attLen = getAttLength();
+  dataValues.resize(attLen);
+  if (attLen < 1) {
+    return 0;
+  }
+  try {
+    getValues(&dataValues[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxAtt::getValues");
+    _addErrStr("  Cannot get values, attr name: ", myName);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+int NcxxAtt::getValues(vector<long long> &dataValues) const
+{
+  clearErrStr();
+  size_t attLen = getAttLength();
+  dataValues.resize(attLen);
+  if (attLen < 1) {
+    return 0;
+  }
+  try {
+    getValues(&dataValues[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxAtt::getValues");
+    _addErrStr("  Cannot get values, attr name: ", myName);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+int NcxxAtt::getValues(vector<unsigned long long> &dataValues) const
+{
+  clearErrStr();
+  size_t attLen = getAttLength();
+  dataValues.resize(attLen);
+  if (attLen < 1) {
+    return 0;
+  }
+  try {
+    getValues(&dataValues[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxAtt::getValues");
+    _addErrStr("  Cannot get values, attr name: ", myName);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+int NcxxAtt::getValues(vector<float> &dataValues) const
+{
+  clearErrStr();
+  size_t attLen = getAttLength();
+  dataValues.resize(attLen);
+  if (attLen < 1) {
+    return 0;
+  }
+  try {
+    getValues(&dataValues[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxAtt::getValues");
+    _addErrStr("  Cannot get values, attr name: ", myName);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+int NcxxAtt::getValues(vector<double> &dataValues) const
+{
+  clearErrStr();
+  size_t attLen = getAttLength();
+  dataValues.resize(attLen);
+  if (attLen < 1) {
+    return 0;
+  }
+  try {
+    getValues(&dataValues[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxAtt::getValues");
+    _addErrStr("  Cannot get values, attr name: ", myName);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+
+///////////////////////////////////////////
+// get string representation of attribute
+
+std::string NcxxAtt::asString()
+  
+{
+  std::string val;
+  getValues(val);
+  return val;
 }
 

@@ -48,6 +48,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
+#include <NcUtils/Ncxx.hh>
 #include <NcUtils/NcxxGroup.hh>
 #include <NcUtils/NcxxVar.hh>
 #include <NcUtils/NcxxDim.hh>
@@ -126,8 +127,8 @@ NcxxGroup& NcxxGroup::operator=(const NcxxGroup & rhs)
 
 // The copy constructor.
 NcxxGroup::NcxxGroup(const NcxxGroup& rhs):
-  nullObject(rhs.nullObject),
-  myId(rhs.myId)
+        nullObject(rhs.nullObject),
+        myId(rhs.myId)
 {
   _errStr = rhs._errStr;
 }
@@ -458,7 +459,7 @@ NcxxVar NcxxGroup::getVar(const string& name,NcxxGroup::Location location) const
 
 // Adds a new netCDF scalar variable.
 NcxxVar NcxxGroup::addVar(const std::string& name, const NcxxType& ncType) const {
-  return NcxxGroup::addVar(name, ncType, std::vector<NcxxDim>());
+  return addVar(name, ncType, std::vector<NcxxDim>());
 }
 
 // Add a new netCDF variable.
@@ -947,7 +948,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, size_t len, const char** data
 }
 
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
- NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t len, const void* dataValues) const {
+NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t len, const void* dataValues) const {
   ncxxCheckDefineMode(myId);
   ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),len,dataValues),__FILE__,__LINE__);
   // finally instantiate this attribute and return
@@ -1308,7 +1309,7 @@ NcxxType NcxxGroup::getType(const string& name, NcxxGroup::Location location) co
   multimap<string,NcxxType> types(getTypes(location));
   // define STL set object to hold the result
   set<NcxxType> tmpType;
-    // get the set of NcxxType objects with a given name
+  // get the set of NcxxType objects with a given name
   ret=types.equal_range(name);
   if(ret.first == ret.second)
     return NcxxType();
@@ -1440,3 +1441,323 @@ void NcxxGroup::getCoordVar(string& coordVarName, NcxxDim& ncDim, NcxxVar& ncVar
   }
 
 }
+
+///////////////////////////////////////////
+// add string global attribute
+// Returns 0 on success, -1 on failure
+
+int NcxxGroup::addGlobAttr(const string &name, const string &val)
+{
+  try {
+    putAtt(name, val);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxGroup::addGlobalAttr");
+    _addErrStr("  Cannot add global attr name: ", name);
+    _addErrStr("  val: ", val);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// add int global attribute
+// Returns 0 on success, -1 on failure
+
+int NcxxGroup::addGlobAttr(const string &name, int val)
+{
+  NcxxInt xtype;
+  try {
+    putAtt(name, xtype, val);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxGroup::addGlobAttr");
+    _addErrStr("  Cannot add global attr name: ", name);
+    _addErrInt("  val: ", val);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// add float global attribute
+// Returns 0 on success, -1 on failure
+
+int NcxxGroup::addGlobAttr(const string &name, float val)
+{
+  NcxxFloat xtype;
+  try {
+    putAtt(name, xtype, val);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxGroup::addGlobAttr");
+    _addErrStr("  Cannot add global attr name: ", name);
+    _addErrDbl("  val: ", val, "%g");
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// read a global attribute
+// Returns 0 on success, -1 on failure
+
+int NcxxGroup::readGlobAttr(const string &name, string &val)
+{
+  NcxxGroupAtt att = getAtt(name);
+  if (att.isNull()) {
+    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    _addErrStr("  Cannot read global attr name: ", name);
+    return -1;
+  }
+  try {
+    att.getValues(val);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    _addErrStr("  Cannot read global attr name: ", name);
+    _addErrStr("  exception: ", e.what());
+    _addErrStr("  Cannot read value as string");
+    return -1;
+  }
+  return 0;
+}
+
+int NcxxGroup::readGlobAttr(const string &name, int &val)
+{
+  NcxxGroupAtt att = getAtt(name);
+  if (att.isNull()) {
+    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    _addErrStr("  Cannot read global attr name: ", name);
+    return -1;
+  }
+  size_t nvals = att.getAttLength();
+  if (nvals < 1) {
+    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    _addErrStr("  Cannot read global attr name: ", name);
+    _addErrStr("  no values supplied");
+    return -1;
+  }
+  int *vals = new int[nvals];
+  try {
+    att.getValues(vals);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    _addErrStr("  Cannot read global attr name: ", name);
+    _addErrStr("  exception: ", e.what());
+    _addErrStr("  Cannot read value as int");
+    delete[] vals;
+    return -1;
+  }
+  val = vals[0];
+  delete[] vals;
+  return 0;
+}
+
+int NcxxGroup::readGlobAttr(const string &name, float &val)
+{
+  NcxxGroupAtt att = getAtt(name);
+  if (att.isNull()) {
+    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    _addErrStr("  Cannot read global attr name: ", name);
+    return -1;
+  }
+  size_t nvals = att.getAttLength();
+  if (nvals < 1) {
+    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    _addErrStr("  Cannot read global attr name: ", name);
+    _addErrStr("  no values supplied");
+    return -1;
+  }
+  float *vals = new float[nvals];
+  try {
+    att.getValues(vals);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    _addErrStr("  Cannot read global attr name: ", name);
+    _addErrStr("  exception: ", e.what());
+    _addErrStr("  Cannot read value as float");
+    delete[] vals;
+    return -1;
+  }
+  val = vals[0];
+  delete[] vals;
+  return 0;
+}
+
+int NcxxGroup::readGlobAttr(const string &name, double &val)
+{
+  NcxxGroupAtt att = getAtt(name);
+  if (att.isNull()) {
+    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    _addErrStr("  Cannot read global attr name: ", name);
+    return -1;
+  }
+  size_t nvals = att.getAttLength();
+  if (nvals < 1) {
+    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    _addErrStr("  Cannot read global attr name: ", name);
+    _addErrStr("  no values supplied");
+    return -1;
+  }
+  double *vals = new double[nvals];
+  try {
+    att.getValues(vals);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    _addErrStr("  Cannot read global attr name: ", name);
+    _addErrStr("  exception: ", e.what());
+    _addErrStr("  Cannot read value as double");
+    delete[] vals;
+    return -1;
+  }
+  val = vals[0];
+  delete[] vals;
+  return 0;
+}
+
+///////////////////////////////////////////
+// add a dimension
+// Returns 0 on success, -1 on failure
+// Side effect: dim arg is updated
+
+int NcxxGroup::addDim(NcxxDim &dim, const string &name, int size)
+{
+  if (size < 1) {
+    dim = addDim(name);
+  } else {
+    dim = addDim(name, size);
+  }
+  if (dim.isNull()) {
+    _addErrStr("ERROR - NcxxGroup::addDim");
+    _addErrStr("  Cannot add dimension: ", name);
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// read a dimension
+// Returns 0 on success, -1 on failure
+// Side effect: dim arg is set
+
+int NcxxGroup::readDim(const string &name, NcxxDim &dim)
+  
+{
+  dim = getDim(name);
+  if (dim.isNull()) {
+    _addErrStr("ERROR - NcxxGroup::readDim");
+    _addErrStr("  Cannot read dimension, name: ", name);
+    return -1;
+  }
+  return 0;
+}
+
+//////////////////////////////////////////////
+// Add scalar var
+// Returns 0 on success, -1 on failure
+// Side effect: var is set
+
+int NcxxGroup::addVar(NcxxVar &var,
+                      const string &name, 
+                      const string &standardName,
+                      const string &longName,
+                      NcxxType ncType, 
+                      const string &units /* = "" */)
+  
+{
+  
+  vector<NcxxDim> dims; // 0 length - for scalar
+  
+  return addVar(var, name, standardName, longName,
+                ncType, dims, units);
+
+}
+
+///////////////////////////////////////
+// Add 1-D array var
+// Returns 0 on success, -1 on failure
+// Side effect: var is set
+
+int NcxxGroup::addVar(NcxxVar &var, 
+                      const string &name, 
+                      const string &standardName,
+                      const string &longName,
+                      NcxxType ncType, 
+                      NcxxDim &dim, 
+                      const string &units /* = "" */)
+  
+{
+  
+  vector<NcxxDim> dims;
+  dims.push_back(dim);
+
+  return addVar(var, name, standardName, longName,
+                ncType, dims, units);
+
+}
+
+///////////////////////////////////////
+// Add 2-D array var
+// Returns 0 on success, -1 on failure
+// Side effect: var is set
+
+int NcxxGroup::addVar(NcxxVar &var, 
+                      const string &name,
+                      const string &standardName,
+                      const string &longName,
+                      NcxxType ncType,
+                      NcxxDim &dim0,
+                      NcxxDim &dim1,
+                      const string &units /* = "" */)
+{
+
+  vector<NcxxDim> dims;
+  dims.push_back(dim0);
+  dims.push_back(dim1);
+
+  return addVar(var, name, standardName, longName,
+                ncType, dims, units);
+  
+}
+
+///////////////////////////////////////
+// Add var in multiple-dimensions
+// Returns 0 on success, -1 on failure
+// Side effect: var is set
+
+int NcxxGroup::addVar(NcxxVar &var, 
+                      const string &name,
+                      const string &standardName,
+                      const string &longName,
+                      NcxxType ncType,
+                      vector<NcxxDim> &dims,
+                      const string &units /* = "" */)
+{
+
+  var = addVar(name, ncType, dims);
+  nc_type vtype = ncType.getId();
+  if (var.isNull()) {
+    _addErrStr("ERROR - NcxxGroup::addVar");
+    _addErrStr("  Cannot add var, name: ", name);
+    _addErrStr("  Type: ", Ncxx::ncTypeToStr(vtype));
+    return -1;
+  }
+
+  if (standardName.length() > 0) {
+    var.addAttr("standard_name", standardName);
+  }
+  
+  if (longName.length() > 0) {
+    var.addAttr("long_name", longName);
+  }
+
+  if (units.length() > 0) {
+    var.addAttr("units", units);
+  }
+  
+  var.setDefaultFillvalue();
+
+  return 0;
+
+}
+

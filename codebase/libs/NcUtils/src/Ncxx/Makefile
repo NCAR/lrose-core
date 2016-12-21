@@ -18,7 +18,7 @@
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
-TARGET_FILE = ../libNcxxUtils.a
+TARGET_FILE = ../libNcUtils.a
 
 LOC_INCLUDES = -I../include $(NETCDF4_INCS)
 LOC_CFLAGS = 

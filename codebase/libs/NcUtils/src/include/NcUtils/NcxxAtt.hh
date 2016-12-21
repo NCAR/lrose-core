@@ -50,6 +50,8 @@
 
 #include <NcUtils/NcxxType.hh>
 #include <NcUtils/NcxxException.hh>
+#include <NcUtils/NcxxErrStr.hh>
+#include <vector>
 #include <string>
 #include <typeinfo>
 
@@ -60,7 +62,7 @@ namespace netCDF
 {
 
   /*! Abstract base class represents inherited by ncVarAtt and ncGroupAtt. */
-  class NcxxAtt
+  class NcxxAtt : public NcxxErrStr
   {
   public:
     
@@ -149,9 +151,33 @@ namespace netCDF
     */
     void getValues(void* dataValues) const;
 
+    //////////////////////////////////////////
+    // get values loaded into vector
+    // vector is resized to hold attribute length
+    // returns 0 on success, -1 on failure
+    // On failure, getErrStr() holds error message.
+    
+    int getValues(vector<char *> &dataValues) const;
+    int getValues(vector<char> &dataValues) const;
+    int getValues(vector<unsigned char> &dataValues) const;
+    int getValues(vector<short> &dataValues) const;
+    int getValues(vector<unsigned short> &dataValues) const;
+    int getValues(vector<int> &dataValues) const;
+    int getValues(vector<unsigned int> &dataValues) const;
+    int getValues(vector<long> &dataValues) const;
+    int getValues(vector<long long> &dataValues) const;
+    int getValues(vector<unsigned long long> &dataValues) const;
+    int getValues(vector<float> &dataValues) const;
+    int getValues(vector<double> &dataValues) const;
+
     /*! Returns true if this object is null (i.e. it has no contents); otherwise returns false. */
     bool isNull() const {return nullObject;}
 
+    ///////////////////////////////////////////
+    // get string representation of attribute
+    
+    std::string asString();
+  
   protected:
     /*! assignment operator */
     NcxxAtt& operator= (const NcxxAtt& rhs);

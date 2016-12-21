@@ -106,7 +106,8 @@ NcxxErrStr::~NcxxErrStr()
 // add labelled integer value to error string,
 // with optional following carriage return.
 
-void NcxxErrStr::_addErrInt(string label, int iarg, bool cr)
+void NcxxErrStr::_addErrInt(string label, int iarg, 
+                            bool cr) const
 {
   _errStr += label;
   char str[32];
@@ -123,7 +124,7 @@ void NcxxErrStr::_addErrInt(string label, int iarg, bool cr)
 // Default format is %g.
 
 void NcxxErrStr::_addErrDbl(string label, double darg,
-                            string format, bool cr)
+                            string format, bool cr) const
 
 {
   _errStr += label;
@@ -139,7 +140,8 @@ void NcxxErrStr::_addErrDbl(string label, double darg,
 // add labelled string to error string
 // with optional following carriage return.
 
-void NcxxErrStr::_addErrStr(string label, string strarg, bool cr)
+void NcxxErrStr::_addErrStr(string label, string strarg,
+                            bool cr) const
 
 {
   _errStr += label;

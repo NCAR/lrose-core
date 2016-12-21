@@ -43,6 +43,7 @@
 #include <Radx/RadxRcalib.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxArray.hh>
+#include <ncException.h>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
@@ -50,6 +51,8 @@
 #include <dirent.h>
 #include <algorithm>
 using namespace std;
+using namespace netCDF;
+using namespace netCDF::exceptions;
 
 ////////////////////////////////////////////////////////////
 // Read in data from specified path, load up volume object.
@@ -683,7 +686,7 @@ void NcxxRadxFile::_checkGeorefsActiveOnRead()
 
   // get latitude variable
 
-  _latitudeVar = _file.getNcFile()->getVar(LATITUDE);
+  _latitudeVar = _file.getVar(LATITUDE);
   if (_latitudeVar.isNull()) {
     return;
   }
@@ -691,7 +694,7 @@ void NcxxRadxFile::_checkGeorefsActiveOnRead()
   // if the latitude has dimension of time, then latitude is a 
   // vector and georefs are active
   
-  NcDim timeDim = _latitudeVar.getDim(0);
+  NcxxDim timeDim = _latitudeVar.getDim(0);
   if (timeDim == _timeDim) {
     _georefsActive = true;
   }
@@ -705,7 +708,7 @@ void NcxxRadxFile::_checkCorrectionsActiveOnRead()
 {
 
   _correctionsActive = false;
-  if (!_file.getNcFile()->getVar(AZIMUTH_CORRECTION).isNull()) {
+  if (!_file.getVar(AZIMUTH_CORRECTION).isNull()) {
     _correctionsActive = true;
   }
 
@@ -732,7 +735,7 @@ int NcxxRadxFile::_readDimensions()
     _nRangeInFile = _rangeDim.getSize();
   }
 
-  _nPointsDim = _file.getNcFile()->getDim(N_POINTS);
+  _nPointsDim = _file.getDim(N_POINTS);
   if (_nPointsDim.isNull()) {
     _nGatesVary = false;
     _nPoints = 0;
@@ -750,7 +753,7 @@ int NcxxRadxFile::_readDimensions()
 
   // calibration dimension is optional
 
-  _calDim = _file.getNcFile()->getDim(R_CALIB);
+  _calDim = _file.getDim(R_CALIB);
 
   return 0;
 
@@ -765,13 +768,13 @@ int NcxxRadxFile::_readGlobalAttributes()
 
   // check for conventions
 
-  NcGroupAtt att = _file.getNcFile()->getAtt(CONVENTIONS);
+  NcxxGroupAtt att = _file.getAtt(CONVENTIONS);
   if (att.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_readGlobalAttributes");
     _addErrStr("  Cannot find conventions attribute");
     return -1;
   }
-  _conventions = NetcdfCxxUtils::asString(att);
+  _conventions = att.asString();
   if (_conventions.find(BaseConvention) == string::npos) {
     if (_conventions.find("CF") == string::npos &&
         _conventions.find("Radial") == string::npos) {
@@ -783,13 +786,13 @@ int NcxxRadxFile::_readGlobalAttributes()
 
   // check for instrument name
 
-  att = _file.getNcFile()->getAtt(INSTRUMENT_NAME);
+  att = _file.getAtt(INSTRUMENT_NAME);
   if (att.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_readGlobalAttributes");
     _addErrStr("  Cannot find instrument_name attribute");
     return -1;
   }
-  _instrumentName = NetcdfCxxUtils::asString(att);
+  _instrumentName = att.asString();
   if (_instrumentName.size() < 1) {
     _instrumentName = "unknown";
   }
@@ -798,59 +801,62 @@ int NcxxRadxFile::_readGlobalAttributes()
 
   _origFormat = "CFRADIAL"; // default
 
-  multimap<string,NcGroupAtt> atts = _file.getNcFile()->getAtts();
+  multimap<string,NcxxGroupAtt> atts = _file.getAtts();
   for (auto ii = atts.begin(); ii != atts.end(); ii++) {
 
-    NcGroupAtt att = ii->second;
+    NcxxGroupAtt att = ii->second;
     
     if (att.isNull()) {
       continue;
     }
     if (att.getName().find(VERSION) != string::npos) {
-      _version = NetcdfCxxUtils::asString(att);
+      _version = att.asString();
     }
     if (att.getName().find(TITLE) != string::npos) {
-      _title = NetcdfCxxUtils::asString(att);
+      _title = att.asString();
     }
     if (att.getName().find(SOURCE) != string::npos) {
-      _source = NetcdfCxxUtils::asString(att);
+      _source = att.asString();
     }
     if (att.getName().find(HISTORY) != string::npos) {
-      _history = NetcdfCxxUtils::asString(att);
+      _history = att.asString();
     }
     if (att.getName().find(INSTITUTION) != string::npos) {
-      _institution = NetcdfCxxUtils::asString(att);
+      _institution = att.asString();
     }
     if (att.getName().find(REFERENCES) != string::npos) {
-      _references = NetcdfCxxUtils::asString(att);
+      _references = att.asString();
     }
     if (att.getName().find(COMMENT) != string::npos) {
-      _comment = NetcdfCxxUtils::asString(att);
+      _comment = att.asString();
     }
     if (att.getName().find(AUTHOR) != string::npos) {
-      _author = NetcdfCxxUtils::asString(att);
+      _author = att.asString();
     }
     if (att.getName().find(ORIGINAL_FORMAT) != string::npos) {
-      _origFormat = NetcdfCxxUtils::asString(att);
+      _origFormat = att.asString();
     }
     if (att.getName().find(DRIVER) != string::npos) {
-      _driver = NetcdfCxxUtils::asString(att);
+      _driver = att.asString();
     }
     if (att.getName().find(CREATED) != string::npos) {
-      _created = NetcdfCxxUtils::asString(att);
+      _created = att.asString();
     }
     if (att.getName().find(SITE_NAME) != string::npos) {
-      _siteName = NetcdfCxxUtils::asString(att);
+      _siteName = att.asString();
     }
     if (att.getName().find(SCAN_NAME) != string::npos) {
-      _scanName = NetcdfCxxUtils::asString(att);
+      _scanName = att.asString();
     }
     if (att.getName().find(SCAN_ID) != string::npos) {
-      _scanId = att.as_int(0);
+      vector<int> scanIds;
+      if (att.getValues(scanIds) == 0) {
+        _scanId = scanIds[0];
+      }
     }
     
     if (att.getName().find(RAY_TIMES_INCREASE) != string::npos) {
-      string rayTimesIncrease = NetcdfCxxUtils::asString(att);
+      string rayTimesIncrease = att.asString();
       if (rayTimesIncrease == "true") {
         _rayTimesIncrease = true;
       } else {
@@ -858,10 +864,6 @@ int NcxxRadxFile::_readGlobalAttributes()
       }
     }
 
-    // Caller must delete attribute
-
-    delete att;
-    
   } // ii
 
   return 0;
@@ -877,64 +879,34 @@ int NcxxRadxFile::_readTimes(int pathNum)
 
   // read the time variable
 
-  _timeVar = _file.getNcFile()->getVar(TIME);
+  _timeVar = _file.getVar(TIME);
   if (_timeVar.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_readTimes");
     _addErrStr("  Cannot find time variable, name: ", TIME);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
-  if (_timeVar.num_dims() < 1) {
+  if (_timeVar.getDimCount() < 1) {
     _addErrStr("ERROR - NcxxRadxFile::_readTimes");
     _addErrStr("  time variable has no dimensions");
     return -1;
   }
-  NcDim *timeDim = _timeVar.getDim(0);
+  NcxxDim timeDim = _timeVar.getDim(0);
   if (timeDim != _timeDim) {
     _addErrStr("ERROR - NcxxRadxFile::_readTimes");
-    _addErrStr("  Time has incorrect dimension, name: ", timeDim.name());
+    _addErrStr("  Time has incorrect dimension, name: ", timeDim.getName());
     return -1;
   }
 
   // get units attribute
   
-  NcGroupAtt* unitsAtt = _timeVar.getAtt(UNITS);
+  NcxxVarAtt unitsAtt = _timeVar.getAtt(UNITS);
   if (unitsAtt.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_readTimes");
     _addErrStr("  Time has no units");
     return -1;
   }
-  string units = NetcdfCxxUtils::asString(unitsAtt);
-  delete unitsAtt;
-
-#ifdef NOTNOW
-
-  // check if this is a time variable, using udunits
-  
-  ut_unit *udUnit = ut_parse(_udunits.getSystem(), units.c_str(), UT_ASCII);
-  if (udUnit.isNull()) {
-    _addErrStr("ERROR - NcxxRadxFile::_readTimes");
-    _addErrStr("  Cannot parse time units: ", units);
-    _addErrInt("  udunits status: ", ut_get_status());
-    return -1;
-  }
-    
-  if (ut_are_convertible(udUnit, _udunits.getEpoch()) == 0) {
-    // not a time variable
-    _addErrStr("ERROR - NcxxRadxFile::_readTimes");
-    _addErrStr("  Time does not have convertible units: ", units);
-    _addErrInt("  udunits status: ", ut_get_status());
-    ut_free(udUnit);
-    return -1;
-  }
-  
-  // get ref time as unix time
-  
-  cv_converter *conv = ut_get_converter(udUnit, _udunits.getEpoch());
-  double refTimeDouble = cv_convert_double(conv, 0);
-  _refTimeSecsFile = (time_t) refTimeDouble;
-
-#endif
+  string units = unitsAtt.asString();
 
   // parse the time units reference time
 
@@ -945,9 +917,12 @@ int NcxxRadxFile::_readTimes(int pathNum)
   
   RadxArray<double> dtimes_;
   double *dtimes = dtimes_.alloc(_nTimesInFile);
-  if (_timeVar.get(dtimes, _nTimesInFile) == 0) {
+  try {
+    _timeVar.getVar(dtimes);
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_readTimes");
     _addErrStr("  Cannot read times variable");
+    _addErrStr("  exception: ", e.what());
     return -1;
   }
   _dTimes.clear();
@@ -976,15 +951,15 @@ int NcxxRadxFile::_readRangeVariable()
 
 {
 
-  _rangeVar = _file.getNcFile()->getVar(RANGE);
-  if (_rangeVar.isNull() || _rangeVar.num_vals() < 1) {
+  _rangeVar = _file.getVar(RANGE);
+  if (_rangeVar.isNull() || _rangeVar.numVals() < 1) {
     _addErrStr("ERROR - NcxxRadxFile::_readRangeVariable");
     _addErrStr("  Cannot read range");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
 
-  if (_rangeVar.num_vals() <= (int) _rangeKm.size()) {
+  if (_rangeVar.numVals() <= (int) _rangeKm.size()) {
     // use data from previously-read sweep file
     return 0;
   }
@@ -992,24 +967,26 @@ int NcxxRadxFile::_readRangeVariable()
   _rangeKm.clear();
   _nRangeInFile = _rangeDim.getSize();
 
-  if (_rangeVar.num_dims() == 1) {
+  if (_rangeVar.getDimCount() == 1) {
 
     // 1-dimensional - range dim only
     // for gate geom that does not vary by ray
 
-    NcDim *rangeDim = _rangeVar.getDim(0);
+    NcxxDim rangeDim = _rangeVar.getDim(0);
     if (rangeDim != _rangeDim) {
       _addErrStr("ERROR - NcxxRadxFile::_readRangeVariable");
-      _addErrStr("  Range has incorrect dimension, name: ", rangeDim.name());
+      _addErrStr("  Range has incorrect dimension, name: ", rangeDim.getName());
       return -1;
     }
 
     double *rangeMeters = new double[_nRangeInFile];
-    if (_rangeVar.get(rangeMeters, _nRangeInFile)) {
+    try {
+      _rangeVar.getVar(rangeMeters);
       double *rr = rangeMeters;
       for (size_t ii = 0; ii < _nRangeInFile; ii++, rr++) {
         _rangeKm.push_back(*rr / 1000.0);
       }
+    } catch (NcxxException& e) {
     }
     delete[] rangeMeters;
 
@@ -1019,22 +996,27 @@ int NcxxRadxFile::_readRangeVariable()
     // for gate geom that does vary by ray
     
     // check that we have the correct dimensions
-    NcDim* timeDim = _rangeVar.getDim(0);
-    NcDim* rangeDim = _rangeVar.getDim(1);
+    NcxxDim timeDim = _rangeVar.getDim(0);
+    NcxxDim rangeDim = _rangeVar.getDim(1);
     if (timeDim != _timeDim || rangeDim != _rangeDim) {
       _addErrStr("ERROR - NcxxRadxFile::_readRangeVariable");
       _addErrStr("  Range has incorrect dimensions");
-      _addErrStr("  dim0, name: ", timeDim.name());
-      _addErrStr("  dim1, name: ", rangeDim.name());
+      _addErrStr("  dim0, name: ", timeDim.getName());
+      _addErrStr("  dim1, name: ", rangeDim.getName());
       return -1;
     }
 
+    vector<size_t> dimSizes;
+    dimSizes.push_back(_nTimesInFile);
+    dimSizes.push_back(_nRangeInFile);
     double *rangeMeters = new double[_nTimesInFile * _nRangeInFile];
-    if (_rangeVar.get(rangeMeters, _nTimesInFile, _nRangeInFile)) {
+    try {
+      _rangeVar.getVar(dimSizes, rangeMeters);
       double *rr = rangeMeters;
       for (size_t ii = 0; ii < _nRangeInFile; ii++, rr++) {
         _rangeKm.push_back(*rr / 1000.0);
       }
+    } catch (NcxxException& e) {
     }
     delete[] rangeMeters;
 
@@ -1051,16 +1033,17 @@ int NcxxRadxFile::_readRangeVariable()
   double startRangeKm = Radx::missingMetaDouble;
   double gateSpacingKm = Radx::missingMetaDouble;
 
-  for (int ii = 0; ii < _rangeVar.getAttCount(); ii++) {
+  map<string, NcxxVarAtt> atts = _rangeVar.getAtts();
+  for (auto ii = atts.begin(); ii != atts.end(); ii++) {
     
-    NcGroupAtt* att = _rangeVar.getAtt(ii);
+    NcxxVarAtt att = ii->second;
     
     if (att.isNull()) {
       continue;
     }
     
     if (att.getName().find(SPACING_IS_CONSTANT) != string::npos) {
-      string spacingIsConstant = NetcdfCxxUtils::asString(att);
+      string spacingIsConstant = att.asString();
       if (spacingIsConstant == "true") {
         _gateSpacingIsConstant = true;
       } else {
@@ -1069,20 +1052,22 @@ int NcxxRadxFile::_readRangeVariable()
     }
 
     if (att.getName().find(METERS_TO_CENTER_OF_FIRST_GATE) != string::npos) {
-      if (att.type() == ncFloat || att.type() == ncDouble) {
-        startRangeKm = att.as_double(0) / 1000.0;
+      if (att.getType() == ncFloat || att.getType() == ncDouble) {
+        vector<double> vals;
+        if (att.getValues(vals) == 0) {
+          startRangeKm = vals[0] / 1000.0;
+        }
       }
     }
 
     if (att.getName().find(METERS_BETWEEN_GATES) != string::npos) {
-      if (att.type() == ncFloat || att.type() == ncDouble) {
-        gateSpacingKm = att.as_double(0) / 1000.0;
+      if (att.getType() == ncFloat || att.getType() == ncDouble) {
+        vector<double> vals;
+        if (att.getValues(vals) == 0) {
+          gateSpacingKm = vals[0] / 1000.0;
+        }
       }
     }
-    
-    // Caller must delete attribute
-
-    delete att;
     
   } // ii
 
@@ -1121,7 +1106,7 @@ int NcxxRadxFile::_readScalarVariables()
     _primaryAxis = Radx::primaryAxisFromStr(pstring);
   }
 
-  if (_file.getNcFile()->getVar(STATUS_XML) != NULL) {
+  if (_file.getVar(STATUS_XML) != NULL) {
     if (_file.readStringVar(_statusXmlVar, STATUS_XML, pstring) == 0) {
       _statusXml = pstring;
     }
@@ -1270,18 +1255,18 @@ int NcxxRadxFile::_readPositionVariables()
 
   // time
 
-  _georefTimeVar = _file.getNcFile()->getVar(GEOREF_TIME);
+  _georefTimeVar = _file.getVar(GEOREF_TIME);
   if (_georefTimeVar != NULL) {
-    if (_georefTimeVar.num_vals() < 1) {
+    if (_georefTimeVar.numVals() < 1) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  Cannot read georef time");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
       return -1;
     }
-    if (_latitudeVar.type() != ncDouble) {
+    if (_latitudeVar.getType() != ncDouble) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  georef time is incorrect type: ", 
-                 NetcdfCxxUtils::ncTypeToStr(_georefTimeVar.type()));
+                 NetcdfCxxUtils::ncTypeToStr(_georefTimeVar.getType()));
       _addErrStr("  expecting type: double");
       return -1;
     }
@@ -1289,18 +1274,18 @@ int NcxxRadxFile::_readPositionVariables()
 
   // find latitude, longitude, altitude
 
-  _latitudeVar = _file.getNcFile()->getVar(LATITUDE);
+  _latitudeVar = _file.getVar(LATITUDE);
   if (_latitudeVar != NULL) {
-    if (_latitudeVar.num_vals() < 1) {
+    if (_latitudeVar.numVals() < 1) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  Cannot read latitude");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
       return -1;
     }
-    if (_latitudeVar.type() != ncDouble) {
+    if (_latitudeVar.getType() != ncDouble) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  latitude is incorrect type: ", 
-                 NetcdfCxxUtils::ncTypeToStr(_latitudeVar.type()));
+                 NetcdfCxxUtils::ncTypeToStr(_latitudeVar.getType()));
       _addErrStr("  expecting type: double");
       return -1;
     }
@@ -1310,18 +1295,18 @@ int NcxxRadxFile::_readPositionVariables()
     cerr << "  Setting latitude to 0" << endl;
   }
 
-  _longitudeVar = _file.getNcFile()->getVar(LONGITUDE);
+  _longitudeVar = _file.getVar(LONGITUDE);
   if (_longitudeVar != NULL) {
-    if (_longitudeVar.num_vals() < 1) {
+    if (_longitudeVar.numVals() < 1) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  Cannot read longitude");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
       return -1;
     }
-    if (_longitudeVar.type() != ncDouble) {
+    if (_longitudeVar.getType() != ncDouble) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  longitude is incorrect type: ",
-                 NetcdfCxxUtils::ncTypeToStr(_longitudeVar.type()));
+                 NetcdfCxxUtils::ncTypeToStr(_longitudeVar.getType()));
       _addErrStr("  expecting type: double");
       return -1;
     }
@@ -1331,18 +1316,18 @@ int NcxxRadxFile::_readPositionVariables()
     cerr << "  Setting longitude to 0" << endl;
   }
 
-  _altitudeVar = _file.getNcFile()->getVar(ALTITUDE);
+  _altitudeVar = _file.getVar(ALTITUDE);
   if (_altitudeVar != NULL) {
-    if (_altitudeVar.num_vals() < 1) {
+    if (_altitudeVar.numVals() < 1) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  Cannot read altitude");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
       return -1;
     }
-    if (_altitudeVar.type() != ncDouble) {
+    if (_altitudeVar.getType() != ncDouble) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  altitude is incorrect type: ",
-                 NetcdfCxxUtils::ncTypeToStr(_altitudeVar.type()));
+                 NetcdfCxxUtils::ncTypeToStr(_altitudeVar.getType()));
       _addErrStr("  expecting type: double");
       return -1;
     }
@@ -1352,17 +1337,17 @@ int NcxxRadxFile::_readPositionVariables()
     cerr << "  Setting altitude to 0" << endl;
   }
 
-  _altitudeAglVar = _file.getNcFile()->getVar(ALTITUDE_AGL);
+  _altitudeAglVar = _file.getVar(ALTITUDE_AGL);
   if (_altitudeAglVar != NULL) {
-    if (_altitudeAglVar.num_vals() < 1) {
+    if (_altitudeAglVar.numVals() < 1) {
       _addErrStr("WARNING - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  Bad variable - altitudeAgl");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
     }
-    if (_altitudeAglVar.type() != ncDouble) {
+    if (_altitudeAglVar.getType() != ncDouble) {
       _addErrStr("WARNING - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  altitudeAgl is incorrect type: ",
-                 NetcdfCxxUtils::ncTypeToStr(_altitudeAglVar.type()));
+                 NetcdfCxxUtils::ncTypeToStr(_altitudeAglVar.getType()));
       _addErrStr("  expecting type: double");
     }
   }
@@ -1370,10 +1355,10 @@ int NcxxRadxFile::_readPositionVariables()
   // set variables
 
   if (_latitudeVar != NULL) {
-    double *data = new double[_latitudeVar.num_vals()];
-    if (_latitudeVar.get(data, _latitudeVar.num_vals())) {
+    double *data = new double[_latitudeVar.numVals()];
+    if (_latitudeVar.get(data, _latitudeVar.numVals())) {
       double *dd = data;
-      for (int ii = 0; ii < _latitudeVar.num_vals(); ii++, dd++) {
+      for (int ii = 0; ii < _latitudeVar.numVals(); ii++, dd++) {
         _latitude.push_back(*dd);
       }
     }
@@ -1383,10 +1368,10 @@ int NcxxRadxFile::_readPositionVariables()
   }
 
   if (_longitudeVar != NULL) {
-    double *data = new double[_longitudeVar.num_vals()];
-    if (_longitudeVar.get(data, _longitudeVar.num_vals())) {
+    double *data = new double[_longitudeVar.numVals()];
+    if (_longitudeVar.get(data, _longitudeVar.numVals())) {
       double *dd = data;
-      for (int ii = 0; ii < _longitudeVar.num_vals(); ii++, dd++) {
+      for (int ii = 0; ii < _longitudeVar.numVals(); ii++, dd++) {
         _longitude.push_back(*dd);
       }
     }
@@ -1396,10 +1381,10 @@ int NcxxRadxFile::_readPositionVariables()
   }
 
   if (_altitudeVar != NULL) {
-    double *data = new double[_altitudeVar.num_vals()];
-    if (_altitudeVar.get(data, _altitudeVar.num_vals())) {
+    double *data = new double[_altitudeVar.numVals()];
+    if (_altitudeVar.get(data, _altitudeVar.numVals())) {
       double *dd = data;
-      for (int ii = 0; ii < _altitudeVar.num_vals(); ii++, dd++) {
+      for (int ii = 0; ii < _altitudeVar.numVals(); ii++, dd++) {
         _altitude.push_back(*dd);
       }
     }
@@ -1409,10 +1394,10 @@ int NcxxRadxFile::_readPositionVariables()
   }
 
   if (_altitudeAglVar != NULL) {
-    double *data = new double[_altitudeAglVar.num_vals()];
-    if (_altitudeAglVar.get(data, _altitudeAglVar.num_vals())) {
+    double *data = new double[_altitudeAglVar.numVals()];
+    if (_altitudeAglVar.get(data, _altitudeAglVar.numVals())) {
       double *dd = data;
-      for (int ii = 0; ii < _altitudeAglVar.num_vals(); ii++, dd++) {
+      for (int ii = 0; ii < _altitudeAglVar.numVals(); ii++, dd++) {
         _altitudeAgl.push_back(*dd);
       }
     }
@@ -1977,12 +1962,12 @@ int NcxxRadxFile::_readFrequencyVariable()
 {
 
   _frequency.clear();
-  _frequencyVar = _file.getNcFile()->getVar(FREQUENCY);
+  _frequencyVar = _file.getVar(FREQUENCY);
   if (_frequencyVar.isNull()) {
     return 0;
   }
 
-  int nFreq = _frequencyVar.num_vals();
+  int nFreq = _frequencyVar.numVals();
   double *freq = new double[nFreq];
   if (_frequencyVar.get(freq, nFreq)) {
     for (int ii = 0; ii < nFreq; ii++) {
@@ -2332,21 +2317,21 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
 
   // loop through the variables, adding data fields as appropriate
   
-  for (int ivar = 0; ivar < _file.getNcFile()->num_vars(); ivar++) {
+  for (int ivar = 0; ivar < _file.num_vars(); ivar++) {
     
-    NcVar* var = _file.getNcFile()->getVar(ivar);
+    NcVar* var = _file.getVar(ivar);
     if (var.isNull()) {
       continue;
     }
     
-    int numDims = var->num_dims();
+    int numDims = var->getDimCount();
     if (_nGatesVary) {
       // variable number of gates per ray
       // we need fields with 1 dimension
       if (numDims != 1) {
         continue;
       }
-      NcDim* nPointsDim = var->getDim(0);
+      NcxxDim* nPointsDim = var->getDim(0);
       if (nPointsDim != _nPointsDim) {
         continue;
       }
@@ -2357,8 +2342,8 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
         continue;
       }
       // check that we have the correct dimensions
-      NcDim* timeDim = var->getDim(0);
-      NcDim* rangeDim = var->getDim(1);
+      NcxxDim* timeDim = var->getDim(0);
+      NcxxDim* rangeDim = var->getDim(1);
       if (timeDim != _timeDim || rangeDim != _rangeDim) {
         continue;
       }
@@ -2587,7 +2572,7 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     if (iret) {
       _addErrStr("ERROR - NcxxRadxFile::_readFieldVariables");
       _addErrStr("  cannot read field name: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
       return -1;
     }
 
@@ -2642,7 +2627,7 @@ int NcxxRadxFile::_readRayVar(NcVar* &var, const string &name,
     } else {
       _addErrStr("ERROR - NcxxRadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
       iret = -1;
     }
   }
@@ -2707,7 +2692,7 @@ int NcxxRadxFile::_readRayVar(NcVar* &var, const string &name,
     } else {
       _addErrStr("ERROR - NcxxRadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
       iret = -1;
     }
   }
@@ -2799,19 +2784,19 @@ NcVar* NcxxRadxFile::_getRayVar(const string &name, bool required)
 
   // get var
   
-  NcVar *var = _file.getNcFile()->getVar(name.c_str());
+  NcVar *var = _file.getVar(name.c_str());
   if (var.isNull()) {
     if (required) {
       _addErrStr("ERROR - NcxxRadxFile::_getRayVar");
       _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
     }
     return NULL;
   }
 
   // check time dimension
   
-  if (var->num_dims() < 1) {
+  if (var->getDimCount() < 1) {
     if (required) {
       _addErrStr("ERROR - NcxxRadxFile::_getRayVar");
       _addErrStr("  variable name: ", name);
@@ -2819,13 +2804,13 @@ NcVar* NcxxRadxFile::_getRayVar(const string &name, bool required)
     }
     return NULL;
   }
-  NcDim *timeDim = var->getDim(0);
+  NcxxDim *timeDim = var->getDim(0);
   if (timeDim != _timeDim) {
     if (required) {
       _addErrStr("ERROR - NcxxRadxFile::_getRayVar");
       _addErrStr("  variable name: ", name);
       _addErrStr("  variable has incorrect dimension, dim name: ", 
-                 timeDim.name());
+                 timeDim.getName());
       _addErrStr("  should be: ", TIME);
     }
     return NULL;
@@ -2880,7 +2865,7 @@ int NcxxRadxFile::_readSweepVar(NcVar* &var, const string &name,
     } else {
       _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
       iret = -1;
     }
   }
@@ -2934,7 +2919,7 @@ int NcxxRadxFile::_readSweepVar(NcVar* &var, const string &name,
     } else {
       _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
       iret = -1;
     }
   }
@@ -2954,7 +2939,7 @@ int NcxxRadxFile::_readSweepVar(NcVar* &var, const string &name,
   // get var
   
   int nSweeps = _sweepDim.getSize();
-  var = _file.getNcFile()->getVar(name.c_str());
+  var = _file.getVar(name.c_str());
   if (var.isNull()) {
     if (!required) {
       for (int ii = 0; ii < nSweeps; ii++) {
@@ -2965,29 +2950,29 @@ int NcxxRadxFile::_readSweepVar(NcVar* &var, const string &name,
     } else {
       _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
       _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
       return -1;
     }
   }
 
   // check sweep dimension
 
-  if (var->num_dims() < 2) {
+  if (var->getDimCount() < 2) {
     _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has fewer than 2 dimensions");
     return -1;
   }
-  NcDim *sweepDim = var->getDim(0);
+  NcxxDim *sweepDim = var->getDim(0);
   if (sweepDim != _sweepDim) {
     _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has incorrect first dimension, dim name: ",
-               sweepDim.name());
+               sweepDim.getName());
     _addErrStr("  should be: ", SWEEP);
     return -1;
   }
-  NcDim *stringLenDim = var->getDim(1);
+  NcxxDim *stringLenDim = var->getDim(1);
   if (stringLenDim.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
     _addErrStr("  variable name: ", name);
@@ -3029,7 +3014,7 @@ int NcxxRadxFile::_readSweepVar(NcVar* &var, const string &name,
   } else {
     _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
     _addErrStr("  Cannot read variable: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
   delete[] cvalues;
@@ -3048,28 +3033,28 @@ NcVar* NcxxRadxFile::_getSweepVar(const string &name)
   
   // get var
   
-  NcVar *var = _file.getNcFile()->getVar(name.c_str());
+  NcVar *var = _file.getVar(name.c_str());
   if (var.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_getSweepVar");
     _addErrStr("  Cannot read variable, name: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return NULL;
   }
 
   // check sweep dimension
 
-  if (var->num_dims() < 1) {
+  if (var->getDimCount() < 1) {
     _addErrStr("ERROR - NcxxRadxFile::_getSweepVar");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has no dimensions");
     return NULL;
   }
-  NcDim *sweepDim = var->getDim(0);
+  NcxxDim *sweepDim = var->getDim(0);
   if (sweepDim != _sweepDim) {
     _addErrStr("ERROR - NcxxRadxFile::_getSweepVar");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has incorrect dimension, dim name: ",
-               sweepDim.name());
+               sweepDim.getName());
     _addErrStr("  should be: ", SWEEP);
     return NULL;
   }
@@ -3087,36 +3072,36 @@ int NcxxRadxFile::_readCalTime(const string &name, NcVar* &var,
 
 {
 
-  var = _file.getNcFile()->getVar(name.c_str());
+  var = _file.getVar(name.c_str());
 
   if (var.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
     _addErrStr("  cal variable name: ", name);
     _addErrStr("  Cannot read calibration time");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
 
   // check cal dimension
 
-  if (var->num_dims() < 2) {
+  if (var->getDimCount() < 2) {
     _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has fewer than 2 dimensions");
     return -1;
   }
 
-  NcDim *rCalDim = var->getDim(0);
+  NcxxDim *rCalDim = var->getDim(0);
   if (rCalDim != _calDim) {
     _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has incorrect first dimension, dim name: ", 
-               rCalDim.name());
+               rCalDim.getName());
     _addErrStr("  should be: ", R_CALIB);
     return -1;
   }
 
-  NcDim *stringLenDim = var->getDim(1);
+  NcxxDim *stringLenDim = var->getDim(1);
   if (stringLenDim.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
     _addErrStr("  variable name: ", name);
@@ -3164,7 +3149,7 @@ int NcxxRadxFile::_readCalTime(const string &name, NcVar* &var,
   } else {
     _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
     _addErrStr("  Cannot read variable: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     delete[] cvalues;
     return -1;
   }
@@ -3196,7 +3181,7 @@ int NcxxRadxFile::_readCalVar(const string &name, NcVar* &var,
 {
 
   val = Radx::missingMetaDouble;
-  var = _file.getNcFile()->getVar(name.c_str());
+  var = _file.getVar(name.c_str());
 
   if (var.isNull()) {
     if (!required) {
@@ -3205,17 +3190,17 @@ int NcxxRadxFile::_readCalVar(const string &name, NcVar* &var,
       _addErrStr("ERROR - NcxxRadxFile::_readCalVar");
       _addErrStr("  cal variable name: ", name);
       _addErrStr("  Cannot read calibration variable");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
       return -1;
     }
   }
 
-  if (var->num_vals() < index-1) {
+  if (var->numVals() < index-1) {
     _addErrStr("ERROR - NcxxRadxFile::_readCalVar");
     _addErrStr("  requested index too high");
     _addErrStr("  cal variable name: ", name);
     _addErrInt("  requested index: ", index);
-    _addErrInt("  n cals available: ", var->num_vals());
+    _addErrInt("  n cals available: ", var->numVals());
     return -1;
   }
 

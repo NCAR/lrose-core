@@ -78,4 +78,22 @@ string Ncxx::ncTypeToStr(nc_type nctype)
   
 }
 
+///////////////////////////////////////////
+// strip redundant null from string
+
+string Ncxx::stripNulls(const string &val)
+  
+{
+  // find first null in string
+  size_t len = val.size();
+  for (size_t ii = 0; ii < val.size(); ii++) {
+    if ((int) val[ii] == 0) {
+      len = ii;
+      break;
+    }
+  }
+  return val.substr(0, len);
+}
+
+
 
