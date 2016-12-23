@@ -51,6 +51,7 @@
 #include <cstring>
 #include <netcdf.h>
 #include <ncException.h>
+#include <NcUtils/NcxxException.hh>
 using namespace std;
 using namespace netCDF::exceptions;
 
@@ -126,7 +127,7 @@ namespace netCDF
     case NC_ELATEDEF        : throw NcElateDef(msg,file,line);
 
     default:
-      throw NcException(retCode, msg, file, line);
+      throw NcxxException(retCode, msg, file, line);
     }
   }
 
