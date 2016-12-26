@@ -1094,20 +1094,20 @@ int NcxxRadxFile::_readScalarVariables()
 
   string pstring;
   _instrumentType = Radx::INSTRUMENT_TYPE_RADAR;
-  if (_file.readStringVar(_instrumentTypeVar, INSTRUMENT_TYPE, pstring) == 0) {
+  if (_file.readCharStringVar(_instrumentTypeVar, INSTRUMENT_TYPE, pstring) == 0) {
     _instrumentType = Radx::instrumentTypeFromStr(pstring);
   }
 
-  if (_file.readStringVar(_platformTypeVar, PLATFORM_TYPE, pstring) == 0) {
+  if (_file.readCharStringVar(_platformTypeVar, PLATFORM_TYPE, pstring) == 0) {
     _platformType = Radx::platformTypeFromStr(pstring);
   }
 
-  if (_file.readStringVar(_primaryAxisVar, PRIMARY_AXIS, pstring) == 0) {
+  if (_file.readCharStringVar(_primaryAxisVar, PRIMARY_AXIS, pstring) == 0) {
     _primaryAxis = Radx::primaryAxisFromStr(pstring);
   }
 
-  if (_file.getVar(STATUS_XML) != NULL) {
-    if (_file.readStringVar(_statusXmlVar, STATUS_XML, pstring) == 0) {
+  if (!_file.getVar(STATUS_XML).isNull()) {
+    if (_file.readCharStringVar(_statusXmlVar, STATUS_XML, pstring) == 0) {
       _statusXml = pstring;
     }
   }
@@ -1256,17 +1256,17 @@ int NcxxRadxFile::_readPositionVariables()
   // time
 
   _georefTimeVar = _file.getVar(GEOREF_TIME);
-  if (_georefTimeVar != NULL) {
+  if (!_georefTimeVar.isNull()) {
     if (_georefTimeVar.numVals() < 1) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  Cannot read georef time");
       _addErrStr(_file.getErrStr());
       return -1;
     }
-    if (_latitudeVar.getType() != ncDouble) {
+    if (_georefTimeVar.getType() != ncDouble) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  georef time is incorrect type: ", 
-                 NetcdfCxxUtils::ncTypeToStr(_georefTimeVar.getType()));
+                 Ncxx::ncTypeToStr(_georefTimeVar.getType()));
       _addErrStr("  expecting type: double");
       return -1;
     }

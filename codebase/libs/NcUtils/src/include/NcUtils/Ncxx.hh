@@ -103,6 +103,7 @@ public:
   // convert type enum to string
   
   static string ncTypeToStr(nc_type nctype);
+  static string ncTypeToStr(netCDF::NcxxType &nctype);
   
   // strip redundant null from string
   

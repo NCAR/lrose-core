@@ -498,7 +498,7 @@ namespace netCDF
       \param location Enumeration type controlling the groups to search.
       \return         Number of types of the given enumeration type.
     */
-    int getTypeCount(NcxxType::ncType enumType, NcxxGroup::Location location=Current) const;
+    int getTypeCount(NcxxType::ncxxType enumType, NcxxGroup::Location location=Current) const;
 
 
     /*!
@@ -525,7 +525,7 @@ namespace netCDF
       \param location Enumeration type controlling the groups to search.
       \return         Set of Nctype objects.
     */
-    std::set<NcxxType> getTypes(NcxxType::ncType enumType, NcxxGroup::Location location=Current) const;
+    std::set<NcxxType> getTypes(NcxxType::ncxxType enumType, NcxxGroup::Location location=Current) const;
 
 
     /*!
@@ -536,7 +536,7 @@ namespace netCDF
       \param location Enumeration type controlling the groups to search.
       \return         Set of Nctype objects.
     */
-    std::set<NcxxType> getTypes(const std::string& name, NcxxType::ncType enumType, NcxxGroup::Location location=Current) const;
+    std::set<NcxxType> getTypes(const std::string& name, NcxxType::ncxxType enumType, NcxxGroup::Location location=Current) const;
 
 
     /*!
@@ -719,6 +719,12 @@ namespace netCDF
     int readDoubleVar(NcxxVar &var, const string &name,
                       double &val, double missingVal, bool required = true);
       
+    ///////////////////////////////////
+    // read a scalar char string variable
+    // Returns 0 on success, -1 on failure
+    
+    int readCharStringVar(NcxxVar &var, const string &name, string &val);
+
   protected:
 
     /*! assignment operator  */
