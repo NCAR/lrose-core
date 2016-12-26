@@ -279,6 +279,9 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::KDP_BRINGI:
           *datp = _kdpBringiArray[igate];
           break;
+        case Params::KDP_ZZDR:
+          *datp = _kdpZZdrArray[igate];
+          break;
         case Params::PSOB:
           *datp = psob[igate];
           break;
@@ -749,6 +752,7 @@ void ComputeEngine::_kdpCompute()
                missingDbl);
 
   const double *kdp = _kdp.getKdp();
+  const double *kdpZZdr = _kdp.getKdpZZdr();
   
   // put KDP into fields objects
   
@@ -758,6 +762,7 @@ void ComputeEngine::_kdpCompute()
     } else {
       _kdpArray[ii] = kdp[ii];
     }
+    _kdpZZdrArray[ii] = kdpZZdr[ii];
   }
 
   if (_params.compute_kdp_bringi) {
@@ -996,12 +1001,13 @@ void ComputeEngine::_allocMomentsArrays()
   _zdrmArray = _zdrmArray_.alloc(_nGates);
   _zdpArray = _zdpArray_.alloc(_nGates);
   _kdpArray = _kdpArray_.alloc(_nGates);
+  _kdpBringiArray = _kdpBringiArray_.alloc(_nGates);
+  _kdpZZdrArray = _kdpZZdrArray_.alloc(_nGates);
   _ldrArray = _ldrArray_.alloc(_nGates);
   _rhohvArray = _rhohvArray_.alloc(_nGates);
   _rhohvNncArray = _rhohvNncArray_.alloc(_nGates);
   _phidpArray = _phidpArray_.alloc(_nGates);
   _rhoVxHxArray = _rhoVxHxArray_.alloc(_nGates);
-
 }
 
 //////////////////////////////////////

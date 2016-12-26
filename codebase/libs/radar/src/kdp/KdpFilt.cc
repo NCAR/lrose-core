@@ -566,6 +566,7 @@ void KdpFilt::_initArrays(const double *snr,
   _validForKdp = _validForKdp_.alloc(_nGates);
   _validForUnfold = _validForUnfold_.alloc(_nGates);
   _kdp = _kdp_.alloc(_nGates);
+  _kdpZZdr = _kdpZZdr_.alloc(_nGates);
   _psob = _psob_.alloc(_nGates);
   _dbzAttenCorr = _dbzAttenCorr_.alloc(_nGates);
   _zdrAttenCorr = _zdrAttenCorr_.alloc(_nGates);
@@ -886,7 +887,7 @@ void KdpFilt::_computeKdp()
   
   // load up conditioned KDP
 
-  _loadKdp(_phidpCondFilt, _kdp);
+  _loadKdp();
 
   // load up accumulated filtered phidp along range
 
@@ -937,7 +938,7 @@ void KdpFilt::_padArray(double *array)
 /////////////////////////////////////////////
 // Load up KDP array
 
-void KdpFilt::_loadKdp(const double *phidp, double *kdp)
+void KdpFilt::_loadKdp()
 
 {
 
@@ -971,10 +972,17 @@ void KdpFilt::_loadKdp(const double *phidp, double *kdp)
     }
     int len = i1 - i0;
     if (len < 1) {
-      kdp[ii] = 0;
+      _kdp[ii] = 0;
     } else {
-      double dphi = phidp[i1] - phidp[i0];
-      kdp[ii] = (dphi / (_gateSpacingKm * len)) / 2.0;
+      double dphi = _phidpCondFilt[i1] - _phidpCondFilt[i0];
+      _kdp[ii] = (dphi / (_gateSpacingKm * len)) / 2.0;
+    }
+
+    if (_dbz[ii] != _missingValue &&
+        _zdr[ii] != _missingValue) {
+      _kdpZZdr[ii] = _computeKdpFromZZdr(_dbz[ii], _zdr[ii]);
+    } else {
+      _kdpZZdr[ii] = _missingValue;
     }
 
   } // ii
@@ -1712,3 +1720,31 @@ double KdpFilt::_getPlotVal(double val, double valIfMissing)
     return val;
   }
 }
+
+////////////////////////////////////////////////////////////
+// Compute estimated kdp from Z and ZDR using power law
+
+double KdpFilt::_computeKdpFromZZdr(double dbz,
+                                    double zdr)
+  
+{
+  
+  double zExpon = 1.0;
+  double zdrExpon = -2.05;
+  double kdpCoeff = 3.32e-5;
+
+  double zzLin = pow(10.0, dbz / 10.0);
+
+  if (zdr < 0.1) {
+    zdr = 0.1;
+  }
+  double zdrLin = pow(10.0, zdr / 10.0);
+  
+  double zTerm = pow(zzLin, zExpon);
+  double zdrTerm = pow(zdrLin, zdrExpon);
+  double kdpEst = zTerm * zdrTerm * kdpCoeff;
+
+  return kdpEst;
+  
+}
+

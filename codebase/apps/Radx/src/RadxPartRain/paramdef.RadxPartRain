@@ -1541,6 +1541,7 @@ typedef enum {
   RHOHV_NNC,
   PHIDP,
   KDP,
+  KDP_ZZDR,
   KDP_BRINGI,
   PSOB,
   ZDP,
