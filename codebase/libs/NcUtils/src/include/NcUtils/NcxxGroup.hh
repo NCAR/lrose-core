@@ -706,6 +706,19 @@ namespace netCDF
                vector<NcxxDim> &dims,
                const string &units = "");
      
+    ///////////////////////////////////////////////
+    // read variable based on type, set var and val
+    // Returns 0 on success, -1 on failure
+    
+    int readIntVar(NcxxVar &var, const string &name,
+                   int &val, int missingVal, bool required = true);
+    
+    int readFloatVar(NcxxVar &var, const string &name,
+                     float &val, float missingVal, bool required = true);
+    
+    int readDoubleVar(NcxxVar &var, const string &name,
+                      double &val, double missingVal, bool required = true);
+      
   protected:
 
     /*! assignment operator  */

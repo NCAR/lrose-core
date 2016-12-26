@@ -1761,3 +1761,153 @@ int NcxxGroup::addVar(NcxxVar &var,
 
 }
 
+/////////////////////////////////////
+// read int variable, set var and val
+// Returns 0 on success, -1 on failure
+
+int NcxxGroup::readIntVar(NcxxVar &var, const string &name,
+                          int &val, int missingVal, bool required)
+  
+{
+
+  val = missingVal;
+
+  var = getVar(name);
+  if (var.isNull()) {
+    if (!required) {
+      val = missingVal;
+      return 0;
+    } else {
+      _addErrStr("ERROR - NcxxGroup::readIntVar");
+      _addErrStr("  Cannot read variable, name: ", name);
+      _addErrStr("  group: ", getName());
+      return -1;
+    }
+  }
+
+  // check size
+  
+  if (var.numVals() < 1) {
+    _addErrStr("ERROR - NcxxGroup::readIntVar");
+    _addErrStr("  variable name: ", name);
+    _addErrStr("  variable has no data");
+    _addErrStr("  group: ", getName());
+    return -1;
+  }
+
+  vector<int> vals;
+  vals.resize(var.numVals());
+  try {
+    var.getVar(&vals[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxGroup::readIntVar");
+    _addErrStr("  cannot read variable, name: ", name);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  val = vals[0];
+
+  return 0;
+  
+}
+
+/////////////////////////////////////
+// read float variable, set var and val
+// Returns 0 on success, -1 on failure
+
+int NcxxGroup::readFloatVar(NcxxVar &var, const string &name,
+                            float &val, float missingVal, bool required)
+  
+{
+
+  val = missingVal;
+
+  var = getVar(name);
+  if (var.isNull()) {
+    if (!required) {
+      val = missingVal;
+      return 0;
+    } else {
+      _addErrStr("ERROR - NcxxGroup::readFloatVar");
+      _addErrStr("  Cannot read variable, name: ", name);
+      _addErrStr("  group: ", getName());
+      return -1;
+    }
+  }
+
+  // check size
+  
+  if (var.numVals() < 1) {
+    _addErrStr("ERROR - NcxxGroup::readFloatVar");
+    _addErrStr("  variable name: ", name);
+    _addErrStr("  variable has no data");
+    _addErrStr("  group: ", getName());
+    return -1;
+  }
+
+  vector<float> vals;
+  vals.resize(var.numVals());
+  try {
+    var.getVar(&vals[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxGroup::readFloatVar");
+    _addErrStr("  cannot read variable, name: ", name);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  val = vals[0];
+
+  return 0;
+  
+}
+
+/////////////////////////////////////
+// read double variable, set var and val
+// Returns 0 on success, -1 on failure
+
+int NcxxGroup::readDoubleVar(NcxxVar &var, const string &name,
+                             double &val, double missingVal, bool required)
+  
+{
+
+  val = missingVal;
+
+  var = getVar(name);
+  if (var.isNull()) {
+    if (!required) {
+      val = missingVal;
+      return 0;
+    } else {
+      _addErrStr("ERROR - NcxxGroup::readDoubleVar");
+      _addErrStr("  Cannot read variable, name: ", name);
+      _addErrStr("  group: ", getName());
+      return -1;
+    }
+  }
+
+  // check size
+  
+  if (var.numVals() < 1) {
+    _addErrStr("ERROR - NcxxGroup::readDoubleVar");
+    _addErrStr("  variable name: ", name);
+    _addErrStr("  variable has no data");
+    _addErrStr("  group: ", getName());
+    return -1;
+  }
+
+  vector<double> vals;
+  vals.resize(var.numVals());
+  try {
+    var.getVar(&vals[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxGroup::readDoubleVar");
+    _addErrStr("  cannot read variable, name: ", name);
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  val = vals[0];
+
+  return 0;
+  
+}
+
