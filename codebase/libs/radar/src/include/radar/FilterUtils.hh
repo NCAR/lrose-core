@@ -51,13 +51,27 @@ public:
 
   /**
    * Apply a median filter to an array of double values
-   * @param[in][out] field Pointer to the data
-   * @param[in] fieldLen The length of the field array
-   * @param[in] filterLen The length of the median filter. Must be an odd number!
+   * @param[in][out] field pointer to the data
+   * @param[in] fieldLen - length of the field array
+   * @param[in] filterLen - length of the median filter - should be odd
    */
   static void applyMedianFilter(double *field,
 				int fieldLen,
 				int filterLen);
+  
+  /**
+   * Apply a median filter to an array of double values
+   *   Handles missing data.
+   * @param[in][out] field pointer to the data
+   * @param[in] fieldLen - length of the field array
+   * @param[in] filterLen - length of the median filter - should be odd
+   * @param[in] missingVal - value to indicate missing data
+   */
+
+  static void applyMedianFilter(double *field,
+                                int fieldLen,
+                                int filterLen,
+                                double missingVal);
   
   /**
    * Apply a median filter to an array of integer values
@@ -68,6 +82,20 @@ public:
   static void applyMedianFilter(int *field,
 				int fieldLen,
 				int filterLen);
+  
+  /**
+   * Apply a median filter to an array of int values
+   *   Handles missing data.
+   * @param[in][out] field pointer to the data
+   * @param[in] fieldLen - length of the field array
+   * @param[in] filterLen - length of the median filter - should be odd
+   * @param[in] missingVal - value to indicate missing data
+   */
+
+  static void applyMedianFilter(int *field,
+                                int fieldLen,
+                                int filterLen,
+                                int missingVal);
   
   /**
    * Interpolate linearly between points

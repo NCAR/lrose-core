@@ -36,13 +36,14 @@
 #include <cstring>
 #include <cstdlib>
 #include <vector>
+#include <algorithm>
 #include <radar/FilterUtils.hh>
 #include <toolsa/TaArray.hh>
 
 using namespace std;
 
-///////////////////////////////////
-// apply a median filter to a field
+////////////////////////////////////////////////////
+// apply a median filter to a double field
 
 void FilterUtils::applyMedianFilter(double *field,
                                     int fieldLen,
@@ -57,6 +58,8 @@ void FilterUtils::applyMedianFilter(double *field,
   if (len < 3) {
     return;
   }
+
+  // make copy
 
   TaArray<double> buf_, copy_;
   double *buf = buf_.alloc(len);
@@ -73,7 +76,52 @@ void FilterUtils::applyMedianFilter(double *field,
 
 }
 
-/////////////////////////////////////////////
+////////////////////////////////////////////////////
+// apply a median filter to a double field
+// handle missing values
+
+void FilterUtils::applyMedianFilter(double *field,
+                                    int fieldLen,
+                                    int filterLen,
+                                    double missingVal)
+  
+{
+  
+  // make sure filter len is odd
+
+  int halfFilt = filterLen / 2;
+  int len = halfFilt * 2 + 1;
+  if (len < 3) {
+    return;
+  }
+
+  // make copy
+
+  TaArray<double> copy_;
+  double *copy = copy_.alloc(fieldLen);
+  memcpy(copy, field, fieldLen * sizeof(double));
+  
+  for (int ii = halfFilt; ii < fieldLen - halfFilt; ii++) {
+
+    vector<double> vals;
+    for (int jj = ii - halfFilt; jj <= ii + halfFilt; jj++) {
+      if (copy[jj] != missingVal) {
+        vals.push_back(copy[jj]);
+      }
+    } // jj
+
+    if (vals.size() > 0) {
+      sort(vals.begin(), vals.end());
+      field[ii] = vals[vals.size() / 2];
+    } else {
+      field[ii] = missingVal;
+    }
+    
+  } // ii
+
+}
+
+////////////////////////////////////////////////////
 // apply a median filter to an integer field
 
 void FilterUtils::applyMedianFilter(int *field,
@@ -90,11 +138,15 @@ void FilterUtils::applyMedianFilter(int *field,
     return;
   }
   
+  // make copy
+
   TaArray<int> buf_, copy_;
   int *buf = buf_.alloc(len);
   int *copy = copy_.alloc(fieldLen);
   memcpy(copy, field, fieldLen * sizeof(int));
-  
+
+  // apply filter
+
   for (int ii = halfFilt; ii < fieldLen - halfFilt; ii++) {
     
     memcpy(buf, copy + ii - halfFilt, len * sizeof(int));
@@ -102,6 +154,51 @@ void FilterUtils::applyMedianFilter(int *field,
     field[ii] = buf[halfFilt];
 
   }
+
+}
+
+////////////////////////////////////////////////////
+// apply a median filter to a int field
+// handle missing values
+
+void FilterUtils::applyMedianFilter(int *field,
+                                    int fieldLen,
+                                    int filterLen,
+                                    int missingVal)
+  
+{
+  
+  // make sure filter len is odd
+
+  int halfFilt = filterLen / 2;
+  int len = halfFilt * 2 + 1;
+  if (len < 3) {
+    return;
+  }
+
+  // make copy
+
+  TaArray<int> copy_;
+  int *copy = copy_.alloc(fieldLen);
+  memcpy(copy, field, fieldLen * sizeof(int));
+  
+  for (int ii = halfFilt; ii < fieldLen - halfFilt; ii++) {
+
+    vector<int> vals;
+    for (int jj = ii - halfFilt; jj <= ii + halfFilt; jj++) {
+      if (copy[jj] != missingVal) {
+        vals.push_back(copy[jj]);
+      }
+    } // jj
+
+    if (vals.size() > 0) {
+      sort(vals.begin(), vals.end());
+      field[ii] = vals[vals.size() / 2];
+    } else {
+      field[ii] = missingVal;
+    }
+    
+  } // ii
 
 }
 
