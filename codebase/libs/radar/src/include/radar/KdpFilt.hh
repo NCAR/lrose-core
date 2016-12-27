@@ -540,6 +540,9 @@ private:
   TaArray<double> _dbz_;
   double *_dbz;
 
+  TaArray<double> _dbzMedian_;
+  double *_dbzMedian;
+
   TaArray<double> _dbzMax_;
   double *_dbzMax;
   
@@ -553,6 +556,9 @@ private:
 
   TaArray<double> _zdrSdev_;
   double *_zdrSdev;
+
+  TaArray<double> _zdrMedian_;
+  double *_zdrMedian;
 
   TaArray<double> _phidp_;
   double *_phidp;

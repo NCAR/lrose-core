@@ -564,8 +564,10 @@ void KdpFilt::_initArrays(const double *snr,
   _snr = _snr_.alloc(_nGates);
   _dbz = _dbz_.alloc(_nGates);
   _dbzMax = _dbzMax_.alloc(_nGates);
+  _dbzMedian = _dbzMedian_.alloc(_nGates);
   _zdr = _zdr_.alloc(_nGates);
   _zdrSdev = _zdrSdev_.alloc(_nGates);
+  _zdrMedian = _zdrMedian_.alloc(_nGates);
   _rhohv = _rhohv_.alloc(_nGates);
   _phidp = _phidp_.alloc(_nGates);
   _phidpMean = _phidpMean_.alloc(_nGates);
@@ -607,6 +609,8 @@ void KdpFilt::_initArrays(const double *snr,
       _dbz[ii] = _missingValue;
     }
   }
+  memcpy(_dbzMedian, _dbz, _nGates * sizeof(double));
+  FilterUtils::applyMedianFilter(_dbzMedian, _nGates, 5, _missingValue);
 
   if (zdr != NULL) {
     memcpy(_zdr, zdr, _nGates * sizeof(double));
@@ -617,6 +621,8 @@ void KdpFilt::_initArrays(const double *snr,
     }
     _zdrAvailable = false;
   }
+  memcpy(_zdrMedian, _zdr, _nGates * sizeof(double));
+  FilterUtils::applyMedianFilter(_zdrMedian, _nGates, 5, _missingValue);
 
   if (rhohv != NULL) {
     memcpy(_rhohv, rhohv, _nGates * sizeof(double));
@@ -1013,7 +1019,7 @@ void KdpFilt::_loadKdp()
       _kdp[ii] = (dphi / (_gateSpacingKm * len)) / 2.0;
     }
 
-    _kdpZZdr[ii] = _computeKdpFromZZdr(_dbz[ii], _zdr[ii]);
+    _kdpZZdr[ii] = _computeKdpFromZZdr(_dbzMedian[ii], _zdrMedian[ii]);
 
   } // ii
 
