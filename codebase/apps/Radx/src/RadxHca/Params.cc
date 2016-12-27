@@ -533,7 +533,7 @@ using namespace std;
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
     tt->comment_hdr = tdrpStrDup("RadxHca reads moments from Radx-supported format files, runs the NEXRAD Hydrometeor Classification Algorithm (HCA) on the moments, and writes out the results to CfRadial files.");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("References:\n\nPark HyangSuk, A. V. Ryzhhov, D. S. Zrnic, Kyung0Eak Kim. June 2009. The Hydrometeor Classification Algorithm for the Polarimetric WSR-88D: Description and Application to an MCS. AMS Weather and Forecasting, Vol 24, 730-748, June 2009.");
     tt++;
     
     // Parameter 'Comment 1'

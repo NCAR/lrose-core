@@ -37,6 +37,15 @@
 // on the moments, and writes out the results to CfRadial files.
 //
 ///////////////////////////////////////////////////////////////
+//
+// References:
+// Park HyangSuk, A. V. Ryzhhov, D. S. Zrnic, Kyung0Eak Kim.
+// June 2009.
+// The Hydrometeor Classification Algorithm for the Polarimetric
+// WSR-88D: Description and Application to an MCS.
+// AMS Weather and Forecasting, Vol 24, 730-748, June 2009.
+//
+///////////////////////////////////////////////////////////////
 
 #ifndef RadxHca_H
 #define RadxHca_H
