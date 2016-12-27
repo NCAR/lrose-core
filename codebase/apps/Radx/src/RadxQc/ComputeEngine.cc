@@ -937,7 +937,7 @@ void ComputeEngine::_locateSeaClutter()
   
 {
 
-  // set up RLAN
+  // initialize sea cutter object
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _seaclut.setDebug(true);
@@ -979,7 +979,7 @@ void ComputeEngine::_locateSeaClutter()
     _seaclut.setDbzElevGradientField(_dbzElevGradientArray);
   }
 
-  // locate RLAN interference
+  // locate sea clutter
 
   _seaclut.locate();
 
