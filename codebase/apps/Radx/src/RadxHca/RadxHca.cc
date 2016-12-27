@@ -581,9 +581,6 @@ void RadxHca::_setupRead(RadxFile &file)
   if (_params.set_fixed_angle_limits) {
     file.setReadFixedAngleLimits(_params.lower_fixed_angle_limit,
                                  _params.upper_fixed_angle_limit);
-  } else if (_params.set_sweep_num_limits) {
-    file.setReadSweepNumLimits(_params.lower_sweep_num,
-                               _params.upper_sweep_num);
   }
   
   if (_params.aggregate_sweep_files_on_read) {
@@ -610,36 +607,10 @@ void RadxHca::_setupRead(RadxFile &file)
   }
 
 
-  if (_params.ZDR_available) {
-    file.addReadField(_params.ZDR_field_name);
-  }
-
-  if (_params.PHIDP_available) {
-    file.addReadField(_params.PHIDP_field_name);
-  }
-  if (_params.RHOHV_available) {
-    file.addReadField(_params.RHOHV_field_name);
-  }
-
-  if (_params.LDR_available) {
-    file.addReadField(_params.LDR_field_name);
-  }
-
-  bool applyInputCensoring = false;
-  if (_params.write_censored_fields_to_output) {
-    for (int ii = 0; ii < _params.censored_output_fields_n; ii++) {
-      file.addReadField(_params._censored_output_fields[ii].input_name);
-      if (_params._censored_output_fields[ii].apply_input_field_censoring) {
-        applyInputCensoring = true;
-      }
-    }
-  }
-  if (applyInputCensoring) {
-    for (int ii = 0; ii < _params.censoring_input_fields_n; ii++) {
-      file.addReadField(_params._censoring_input_fields[ii].input_name);
-    }
-  }
-
+  file.addReadField(_params.ZDR_field_name);
+  file.addReadField(_params.PHIDP_field_name);
+  file.addReadField(_params.RHOHV_field_name);
+    
   if (_params.remove_rays_with_antenna_transitions &&
       !_params.trim_surveillance_sweeps_to_360deg) {
     file.setReadIgnoreTransitions(true);

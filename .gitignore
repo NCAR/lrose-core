@@ -516,6 +516,7 @@ codebase/apps/Radx/src/RadxDiff/RadxDiff
 codebase/apps/Radx/src/RadxDwellCombine/RadxDwellCombine
 codebase/apps/Radx/src/RadxEvad/RadxEvad
 codebase/apps/Radx/src/RadxFilter/RadxFilter
+codebase/apps/Radx/src/RadxHca/RadxHca
 codebase/apps/Radx/src/RadxMergeFields/RadxMergeFields
 codebase/apps/Radx/src/RadxMergeVols/RadxMergeVols
 codebase/apps/Radx/src/RadxMon/RadxMon

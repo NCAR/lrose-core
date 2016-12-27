@@ -129,7 +129,7 @@ paramdef int {
 } transition_nrays_margin;
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Option to trip surveillance sweeps so that they only cover 360 degrees.";
   p_help = "Some sweeps will have rays which cover more than a 360-degree rotation. Often these include antenna transitions. If this is set to true, rays are trimmed off either end of the sweep to limit the coverage to 360 degrees. The median elevation angle is computed and the end ray which deviates from the median in elevation is trimmed first.";
 } trim_surveillance_sweeps_to_360deg;
@@ -166,22 +166,6 @@ paramdef double {
   p_default = 90;
   p_descr = "Upper fixed angle limit - degrees.";
 } upper_fixed_angle_limit;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set sweep number limits";
-  p_help = "Only read sweeps within the specified sweep number limits.";
-} set_sweep_num_limits;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Lower sweep number limit.";
-} lower_sweep_num;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Upper sweep number limit.";
-} upper_sweep_num;
 
 commentdef {
   p_header = "OPTION TO OVERRIDE RADAR LOCATION";
@@ -268,41 +252,15 @@ paramdef double {
   p_help = "Used to fill in missing reflectivity data for the vertical gradient of reflectivity in identifying sea clutter and AP. Also used if SNR_available is set to FALSE. It is used for computing the SNR from the DBZ field. The SNR will be computed by range-correcting this value and using it as the noise value.";
 } noise_dbz_at_100km;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Is ZDR data available?";
-} ZDR_available;
-
 paramdef string {
   p_default = "ZDR";
   p_descr = "Field name for ZDR.";
 } ZDR_field_name;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Is LDR data available for PID?";
-} LDR_available;
-
-paramdef string {
-  p_default = "LDR";
-  p_descr = "Field name for LDR.";
-  p_help = "Used in PID computations, if available.";
-} LDR_field_name;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Is PHIDP data available?";
-} PHIDP_available;
-
 paramdef string {
   p_default = "PHIDP";
   p_descr = "Field name for PHIDP.";
 } PHIDP_field_name;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Is RHOHV data available?";
-} RHOHV_available;
 
 paramdef string {
   p_default = "RHOHV";
@@ -804,12 +762,6 @@ paramdef int {
   p_help = "See 'appply_median_filter_to_PID'";
 } PID_median_filter_len;
 
-paramdef int {
-  p_default = { 15, 16, 17, 18, 19 };
-  p_descr = "PID values for which output should be censored.";
-  p_help = "List of PID values, for which the PID censoring flag will be set.";
-} PID_censoring_flag_vals[];
-
 commentdef {
   p_header = "SOUNDING INPUT FOR PID temperature profile - OPTIONAL";
 }
@@ -980,10 +932,7 @@ typedef enum {
   SEACLUT_FLAG,
 
   PARTICLE_ID,
-  TEMP_FOR_PID,
-  PID_CENSOR_FLAG,
-  INPUT_FIELDS_CENSOR_FLAG,
-  COMBINED_CENSOR_FLAG
+  TEMP_FOR_PID
 
 } output_field_id_t;
 
@@ -1100,95 +1049,6 @@ paramdef struct output_field_t {
   p_descr = "Indicate which fields should be written to the output file.";
   p_help = "Choose the ID from the list. The name and units can be set however the user prefers. The output_encoding and output_scaling apply to CfRadial output only. If the output_scaling is DYNAMIC then the scale and offset are computed using the dynamic range of the data. If the output_scaling is SPECIFIED, then the specified scale and offset are used.";
 } output_fields[];
-
-commentdef {
-  p_header = "CENSORING BASED ON INPUT FIELD VALUES";
-  p_text = "You have the option of censoring the value of data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise.";
-}
-
-typedef enum {
-  LOGICAL_AND, LOGICAL_OR
-} logical_t;
-
-typedef struct {
-  string input_name;
-  double min_valid_value;
-  double max_valid_value;
-  logical_t combination_method;
-} censoring_input_field_t;
-
-paramdef struct censoring_input_field_t {
-  p_default = {
-    { "SNR", 0.0, 1000.0, LOGICAL_OR },
-    { "NCP", 0.15, 1000.0, LOGICAL_OR }
-  };
-  p_descr = "Fields to be used for censoring.";
-  p_help = "Specify the fields to be used to determine whether a gate should be censored. The name refers to the input data field names. Valid field values lie in the range from min_valid_value to max_valid_value inclusive. If the value of a field at a gate lies within this range, it is considered valid. Each specified field is examined at each gate, and is flagged as valid if its value lies in the valid range. These field flags are then combined as follows: first, all of the LOGICAL_OR flags are combined, yielding a single combined_or flag which is true if any of the LOGICAL_OR fields is true. The combined_or flag is then combined with all of the LOGICAL_AND fields, yielding a true value only if the combined_or flag and the LOGICAL_AND fields are all true. If this final flag is true, then the data at the gate is regarded as valid and is retained. If the final flag is false, the data at the gate is censored, and all of the fields at the gate are set to missing.";
-} censoring_input_fields[];
-  
-paramdef int {
-  p_default = 1;
-  p_descr = "Minimum valid run of non-censored gates.";
-  p_help = "Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.";
-} input_field_censoring_min_valid_run;
-
-commentdef {
-  p_header = "SPECIFYING FIELDS FOR CENSORING";
-  p_text = "These fields are copied from the input file, censored according to the output rules, and written to the output file.";
-}
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to write censored fields to the output file.";
-} write_censored_fields_to_output;
-
-typedef struct {
-  string input_name; 
-  string output_name;
-  boolean apply_rlan_censoring;
-  boolean apply_seaclut_censoring;
-  boolean apply_pid_censoring;
-  boolean apply_input_field_censoring;
-} censored_output_field_t;
-
-paramdef struct censored_output_field_t {
-  p_default = {
-    {
-      input_name = "VEL",
-      output_name = "VEL",
-      apply_rlan_censoring = FALSE,
-      apply_seaclut_censoring = FALSE,
-      apply_pid_censoring = FALSE,
-      apply_input_field_censoring = FALSE
-    }
-  };
-  p_descr = "Fields to be copied from input and written to output.";
-  p_help = "These fields are copied from the input, optionally censored, and written to the output file. You can change the name of the field on output. And you can specify censoring as required, based on the results of the QC steps in this app.";
-} censored_output_fields[];
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to ignore isolated gates of censoring surrounded by good data.";
-  p_help = "If true, we will ignore isolated censoring gates if surrounded by non-censored gates. Single censor gates will be ignored. 2 consecutive censored gates are ignored if surrounded by 2 good gates on either side. And so on.";
-} censoring_ignore_isolated_gates;
-
-paramdef int {
-  p_default = 2;
-  p_descr = "Max length of censor flag run to be ignored (gates).";
-  p_help = "See 'censoring_ignore_isolated_gates'.";
-} censoring_max_isolated_ngates;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to fill in small gaps in the censoring flag.";
-  p_help = "If true, we will fill in small gaps in the censoring flag. A single gate is filled in. 2 consecutive censored gates are filled in if surrounded by 2 censored gates on either side. And so on up to censoring_max_fill_gap_length.";
-} censoring_fill_in_gaps;
-
-paramdef int {
-  p_default = 3;
-  p_descr = "Max length of gaps filled (gates).";
-  p_help = "See 'censoring_fill_in_gaps'.";
-} censoring_max_fill_ngates;
 
 commentdef {
   p_header = "OUTPUT FILE FORMAT";

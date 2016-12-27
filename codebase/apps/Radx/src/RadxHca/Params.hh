@@ -130,10 +130,7 @@ public:
     DBZ_ELEV_GRADIENT_INTEREST_SEACLUT = 54,
     SEACLUT_FLAG = 55,
     PARTICLE_ID = 56,
-    TEMP_FOR_PID = 57,
-    PID_CENSOR_FLAG = 58,
-    INPUT_FIELDS_CENSOR_FLAG = 59,
-    COMBINED_CENSOR_FLAG = 60
+    TEMP_FOR_PID = 57
   } output_field_id_t;
 
   typedef enum {
@@ -147,11 +144,6 @@ public:
     OUTPUT_SCALING_DYNAMIC = 0,
     OUTPUT_SCALING_SPECIFIED = 1
   } output_scaling_t;
-
-  typedef enum {
-    LOGICAL_AND = 0,
-    LOGICAL_OR = 1
-  } logical_t;
 
   typedef enum {
     OUTPUT_FORMAT_CFRADIAL = 0,
@@ -199,22 +191,6 @@ public:
     double scale;
     double offset;
   } output_field_t;
-
-  typedef struct {
-    char* input_name;
-    double min_valid_value;
-    double max_valid_value;
-    logical_t combination_method;
-  } censoring_input_field_t;
-
-  typedef struct {
-    char* input_name;
-    char* output_name;
-    tdrp_bool_t apply_rlan_censoring;
-    tdrp_bool_t apply_seaclut_censoring;
-    tdrp_bool_t apply_pid_censoring;
-    tdrp_bool_t apply_input_field_censoring;
-  } censored_output_field_t;
 
   ///////////////////////////
   // Member functions
@@ -543,12 +519,6 @@ public:
 
   double upper_fixed_angle_limit;
 
-  tdrp_bool_t set_sweep_num_limits;
-
-  int lower_sweep_num;
-
-  int upper_sweep_num;
-
   tdrp_bool_t override_radar_location;
 
   double radar_latitude_deg;
@@ -575,19 +545,9 @@ public:
 
   double noise_dbz_at_100km;
 
-  tdrp_bool_t ZDR_available;
-
   char* ZDR_field_name;
 
-  tdrp_bool_t LDR_available;
-
-  char* LDR_field_name;
-
-  tdrp_bool_t PHIDP_available;
-
   char* PHIDP_field_name;
-
-  tdrp_bool_t RHOHV_available;
 
   char* RHOHV_field_name;
 
@@ -750,9 +710,6 @@ public:
 
   int PID_median_filter_len;
 
-  int *_PID_censoring_flag_vals;
-  int PID_censoring_flag_vals_n;
-
   tdrp_bool_t use_soundings_from_spdb;
 
   char* sounding_spdb_url;
@@ -786,24 +743,6 @@ public:
   output_field_t *_output_fields;
   int output_fields_n;
 
-  censoring_input_field_t *_censoring_input_fields;
-  int censoring_input_fields_n;
-
-  int input_field_censoring_min_valid_run;
-
-  tdrp_bool_t write_censored_fields_to_output;
-
-  censored_output_field_t *_censored_output_fields;
-  int censored_output_fields_n;
-
-  tdrp_bool_t censoring_ignore_isolated_gates;
-
-  int censoring_max_isolated_ngates;
-
-  tdrp_bool_t censoring_fill_in_gaps;
-
-  int censoring_max_fill_ngates;
-
   output_format_t output_format;
 
   netcdf_style_t netcdf_style;
@@ -835,7 +774,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[180];
+  mutable TDRPtable _table[161];
 
   const char *_className;
 
