@@ -1,0 +1,1295 @@
+/*********************************************************
+ * parameter definitions for RadxHca
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Dec 2016
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "RadxHca reads moments from Radx-supported format files, runs the NEXRAD Hydrometeor Classification Algorithm (HCA) on the moments, and writes out the results to CfRadial files.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to register this process with the process mapper (procmap).";
+  p_help = "If TRUE, every minute this process will register a heartbeat with procmap. If the process hangs, it will be restared by the auto_restarter.";
+} register_with_procmap;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Interval for registering with procmap (secs).";
+  p_help = "The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.";
+} procmap_register_interval;
+
+commentdef {
+  p_header = "THREADING FOR SPEED.";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to use multiple compute threads to improve performance.";
+  p_help = "The read and write stages occur in the main thread, since netCDF is not thread safe. The compute stage can be multi-threaded to improve performance.";
+} use_multiple_threads;
+
+paramdef int {
+  p_default = 4;
+  p_min = 1;
+  p_descr = "The number of compute threads.";
+  p_help = "The moments computations are segmented in range, with each thread computing a fraction of the number of gates. For maximum performance, n_threads should be set to the number of processors multiplied by 4. For further tuning, use top to maximize CPU usage while varying the number of threads.";
+} n_compute_threads;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory for searching for files.";
+  p_help = "Files will be searched for in this directory.";
+} input_dir;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = FILELIST;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file.  "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in ARCHIVE mode, at least) MUST contain a "
+           "day-directory above the data file -- ./data_file.ext will not "
+           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+} mode;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} max_realtime_data_age_secs;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name extension.";
+  p_help = "If set, only files with this extension will be processed.";
+} input_file_search_ext;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name sub-string.";
+  p_help = "If set, only files with names containing this sub-string will be processed.";
+} input_file_search_substr;
+
+commentdef {
+  p_header = "READ OPTIONS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to aggregate sweep files into a volume on read.";
+  p_help = "If true, and the input data is in sweeps rather than volumes (e.g. DORADE), the sweep files from a volume will be aggregated into a volume.";
+} aggregate_sweep_files_on_read;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remove rays taken while the antenna was in transition.";
+  p_help = "If true, rays with the transition flag set will not be used. The transiton flag is set when the antenna is in transtion between one sweep and the next.";
+} remove_rays_with_antenna_transitions;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Number of transition rays to include as a margin";
+  p_help =  "Sometimes the transition flag is turned on too early in a transition, on not turned off quickly enough after a transition. If you set this to a number greater than 0, that number of rays will be included at each end of the transition, i.e. the transition will effectively be shorter at each end by this number of rays.";
+} transition_nrays_margin;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to trip surveillance sweeps so that they only cover 360 degrees.";
+  p_help = "Some sweeps will have rays which cover more than a 360-degree rotation. Often these include antenna transitions. If this is set to true, rays are trimmed off either end of the sweep to limit the coverage to 360 degrees. The median elevation angle is computed and the end ray which deviates from the median in elevation is trimmed first.";
+} trim_surveillance_sweeps_to_360deg;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the max range for any ray.";
+} set_max_range;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to force the number of gates to be constant.";
+  p_help = "If TRUE, the number of gates on all rays will be set to the maximum, and gates added to shorter rays will be filled with missing values.";
+} set_ngates_constant;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set fixed angle limits";
+  p_help = "Only use sweeps within the specified fixed angle limits.";
+} set_fixed_angle_limits;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Lower fixed angle limit - degrees.";
+} lower_fixed_angle_limit;
+
+paramdef double {
+  p_default = 90;
+  p_descr = "Upper fixed angle limit - degrees.";
+} upper_fixed_angle_limit;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set sweep number limits";
+  p_help = "Only read sweeps within the specified sweep number limits.";
+} set_sweep_num_limits;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Lower sweep number limit.";
+} lower_sweep_num;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Upper sweep number limit.";
+} upper_sweep_num;
+
+commentdef {
+  p_header = "OPTION TO OVERRIDE RADAR LOCATION";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar location.";
+  p_help = "If true, the location in this file will be used. If not, the location in the time series data will be used.";
+} override_radar_location;
+
+paramdef double {
+  p_default = -999;
+  p_descr = "Radar latitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_latitude_deg;
+
+paramdef double {
+  p_default = -999;
+  p_descr = "Radar longitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_longitude_deg;
+
+paramdef double {
+  p_default = -999;
+  p_descr = "Radar altitude (meters).";
+  p_help = "See override_radar_location.";
+} radar_altitude_meters;
+
+commentdef {
+  p_header = "INPUT FIELD INFORMATION";
+  p_text = "Names of fields in the input file. The following fields are required: SNR, DBZ, ZDR, PHIDP and RHOHV. KDP is also required internally, but if KDP is not available it will be computed from PHIDP. LDR is optional, and is used for PID only.";
+}
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Field name for DBZ.";
+  p_help = "Horizontally-polarized reflectivity factor.";
+} DBZ_field_name;
+
+paramdef string {
+  p_default = "VEL";
+  p_descr = "Field name for radial velocity.";
+  p_help = "This is used in quality checks.";
+} VEL_field_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Is WIDTH data available?";
+  p_help = "If NCP is not available, this field is used for locating RLAN interference.";
+} WIDTH_available;
+
+paramdef string {
+  p_default = "WIDTH";
+  p_descr = "Field name for WIDTH.";
+} WIDTH_field_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Is NCP data available?";
+  p_help = "This field is used for locating RLAN interference. If it is not available, use spectrum width instead.";
+} NCP_available;
+
+paramdef string {
+  p_default = "NCP";
+  p_descr = "Field name for NCP.";
+} NCP_field_name;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Is SNR data available?";
+  p_help = "If not, SNR will be computed from the DBZ field. See 'noise_dbz_at_100km'.";
+} SNR_available;
+
+paramdef string {
+  p_default = "SNR";
+  p_descr = "Field name for SNR.";
+  p_help = "Signal-to-noise ratio (dB).";
+} SNR_field_name;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "The noise value, represented as dBZ at a range of 100km.";
+  p_help = "Used to fill in missing reflectivity data for the vertical gradient of reflectivity in identifying sea clutter and AP. Also used if SNR_available is set to FALSE. It is used for computing the SNR from the DBZ field. The SNR will be computed by range-correcting this value and using it as the noise value.";
+} noise_dbz_at_100km;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Is ZDR data available?";
+} ZDR_available;
+
+paramdef string {
+  p_default = "ZDR";
+  p_descr = "Field name for ZDR.";
+} ZDR_field_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Is LDR data available for PID?";
+} LDR_available;
+
+paramdef string {
+  p_default = "LDR";
+  p_descr = "Field name for LDR.";
+  p_help = "Used in PID computations, if available.";
+} LDR_field_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Is PHIDP data available?";
+} PHIDP_available;
+
+paramdef string {
+  p_default = "PHIDP";
+  p_descr = "Field name for PHIDP.";
+} PHIDP_field_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Is RHOHV data available?";
+} RHOHV_available;
+
+paramdef string {
+  p_default = "RHOHV";
+  p_descr = "Field name for RHOHV.";
+} RHOHV_field_name;
+
+commentdef {
+  p_header = "COMPUTE KDP";
+  p_help = "KDP is computed from PHIDP. So this only applied if PHIDP_available is TRUE.";
+}
+
+typedef enum {
+  FIR_LEN_125, FIR_LEN_60, FIR_LEN_40, FIR_LEN_30, FIR_LEN_20, FIR_LEN_10
+} fir_filter_len_t;
+  
+paramdef enum fir_filter_len_t {
+  p_default = FIR_LEN_10;
+  p_descr = "Filter length for the FIR filter for PHIDP (gates)";
+  p_help = "When computing KDP, an FIR filter is first applied to PHIDP to smooth it. This is the length of that filter, in gates.";
+} KDP_fir_filter_len;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Sets the number of iterations for the initial FIR filter for unfolded PHIDP.";
+  p_help = "After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.";
+} KDP_n_filt_iterations_unfolded;
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Sets the number of iterations for the final FIR filter for conditioned PHIDP.";
+  p_help = "In order to identify phase shift on backscatter (PSOB), we condition the PHIDP to keep it generally increasing with range. The FIR filter is applied to the conditioned phidp a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.";
+} KDP_n_filt_iterations_conditioned;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Perform iterative filtering to locate backscatter phase shift.";
+  p_descr = "This is the Hubbert-Bringi method.";
+} KDP_use_iterative_filtering;
+
+paramdef double {
+  p_default = 4.0;
+  p_descr = "Difference threshold for the iterative filtering method.";
+  p_help = "The FIR filter is applied successively, KDP_n_filt_iterations_conditioned times. After each iteration the result is checked against the original. If the difference is less than this parameter, the original value at that gate is retained. If the difference exceeds this parameter, the new filtered value is retained.";
+} KDP_phidp_difference_threshold;
+
+paramdef int {
+  p_default = 9;
+  p_descr = "Number of gates over which the phidp mean, sdev and jitter are computed.";
+  p_help = "The mean, sdev and jitter of phidp are computed over a consecutive number of gates in range, centered on the current gate of interest. This parameter is the number of gates over which these statistics are computed.";
+} KDP_ngates_for_stats;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Sets the threshold for the standard deviation of phidp in range.";
+  p_help = "The sdev of phidp is a good test for valid phidp. The sdev is computed in the circle, so that it takes account of folding if present. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
+} KDP_phidp_sdev_max;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Sets the threshold for the jitter of phidp in range.";
+  p_help = "The jitter of phidp is defined as the mean absolute change in angle between successive phidp measurements in range. It is computed on the circle to take account of folding. If the jitter is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
+} KDP_phidp_jitter_max;
+
+paramdef double {
+  p_default = 0.01;
+  p_descr = "Sets the min valid KDP value.";
+  p_help = "Values less than this are set to 0.";
+} KDP_min_valid_abs_kdp;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Check the SNR.";
+  p_descr = "This test can help identify regions of good PHIDP.";
+} KDP_check_snr;
+
+paramdef double {
+  p_default = -6.0;
+  p_descr = "Sets the threshold for checking SNR (dB).";
+  p_help = "If the SNR drops below this value, KDP will not be computed at this gate.";
+} KDP_snr_threshold;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Check the RHOHV.";
+  p_descr = "This test can help identify regions of good PHIDP.";
+} KDP_check_rhohv;
+
+paramdef double {
+  p_default = 0.95;
+  p_descr = "Sets the threshold for checking RHOHV.";
+  p_help = "If the RHOHV drops below this value, KDP will not be computed at this gate.";
+} KDP_rhohv_threshold;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Check the standard deviation of ZDR in range?";
+  p_descr = "This test can help identify regions of clutter, and hence noisy PHIDP.";
+} KDP_check_zdr_sdev;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Sets the threshold for the standard deviation of zdr in range.";
+  p_help = "The sdev of zdr is a good test for clutter. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
+} KDP_zdr_sdev_max;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print debug messages in KDP computation.";
+} KDP_debug;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write ray files to debug KDP computation.";
+} KDP_write_ray_files;
+
+paramdef string {
+  p_default = "/tmp/kdp_ray_files";
+  p_descr = "Directory for KDP ray files.";
+} KDP_ray_files_dir;
+
+commentdef {
+  p_header = "PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to apply precip attenuation correction for DBZ and ZDR.";
+  p_help =
+    "The following extra fields will be computed:\n"
+    "\tDBZ_ATTEN_CORRECTION - correction in dB\n"
+    "\tZDR_ATTEN_CORRECTION - correction in dB\n"
+    "\tDBZ_ATTEN_CORRECTED - DBZHC corrected\n"
+    "\tZDR_ATTEN_CORRECTED - ZDR corrected\n";
+} apply_precip_attenuation_correction;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify the coefficients and exponents - see below.";
+  p_help = "If false, the default coefficients will be determined for the radar wavelength.";
+} specify_coefficients_for_attenuation_correction;
+
+paramdef double {
+  p_default = 0.017;
+  p_descr = "Coefficient for computing DBZ attenuation correction.";
+  p_help = "See Bringi and Chandrasekar, Table 7.1, page 494.";
+} dbz_attenuation_coefficient;
+
+paramdef double {
+  p_default = 0.84;
+  p_descr = "Exponent for computing DBZ attenuation correction.";
+  p_help = "See Bringi and Chandrasekar, Table 7.1, page 494.";
+} dbz_attenuation_exponent;
+
+paramdef double {
+  p_default = 0.017;
+  p_descr = "Coefficient for computing ZDR attenuation correction.";
+  p_help = "See Bringi and Chandrasekar, Table 7.1, page 494.";
+} zdr_attenuation_coefficient;
+
+paramdef double {
+  p_default = 0.84;
+  p_descr = "Exponent for computing ZDR attenuation correction.";
+  p_help = "See Bringi and Chandrasekar, Table 7.1, page 494.";
+} zdr_attenuation_exponent;
+
+commentdef {
+  p_header = "LOCATING RLAN INTERFERENCE";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to locate gates with RLAN interference.";
+  p_help = "This particularly applies to C-band.";
+} locate_rlan_interference;
+
+commentdef {
+  p_header = "INTEREST MAPS and WEIGHTS for RLAN DETECTION";
+  p_text = "Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.\n\nFor locating RLAN, we use the gate-to-gate phase_noise, ncp_mean (or width_mean if ncp is not available) and snr_dmode.\n\nFor locating NOISE, we use the gate-to-gate phase_noise, ncp_mean (or width_mean if ncp is not available) and snr_sdev.";
+};
+
+typedef struct {
+  double value;
+  double interest;
+} interest_map_point_t;
+
+paramdef struct interest_map_point_t {
+  p_default = {{35.0, 0.0001}, {45.0, 1.0}};
+  p_descr = "RLAN interest mapping for phase noise.";
+  p_help = "The phase noise is a measure of the variability of phase with range.";
+} rlan_phase_noise_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "RLAN weight for interest for phase noise.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} rlan_phase_noise_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.1, 1.0}, {0.2, 0.0001}};
+  p_descr = "RLAN interest mapping for mean of ncp.";
+  p_help = "NCP should be used instead of width, if available.";
+} rlan_ncp_mean_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for mean of ncp.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} rlan_ncp_mean_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{4.0, 0.0001}, {5.0, 1.0}};
+  p_descr = "RLAN interest mapping for mean of width.";
+  p_help = "WIDTH should be used if NCP is not available.";
+} rlan_width_mean_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for mean of width.";
+  p_help = "Set to 0 if NCP is available.";
+} rlan_width_mean_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{2.0, 1.0}, {2.5, 0.0001}};
+  p_descr = "RLAN interest mapping for delta mode of snr.";
+} rlan_snr_dmode_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for delta mode of snr.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} rlan_snr_dmode_weight;
+
+// paramdef struct interest_map_point_t {
+//   p_default = {{0.65, 1.0}, {0.75, 0.0001}};
+//   p_descr = "RLAN interest mapping for sdev of snr.";
+// } rlan_snr_sdev_interest_map[];
+
+// paramdef double {
+//   p_default = 1.0;
+//   p_descr = "Weight for interest for sdev of snr.";
+//   p_help = "The relative weighting applied when computing the fuzzy sum.";
+// } rlan_snr_sdev_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.5, 1.0}, {1.0, 0.0001}};
+  p_descr = "RLAN interest mapping for sdev of zdr.";
+} rlan_zdr_sdev_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for sdev of zdr.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} rlan_zdr_sdev_weight;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min SNR (dB) for identifying RLAN interference.";
+  p_help = "The ray SNR is computed as a mean for all gates, including gates with missing SNR. If the SNR at a gate is missing, it is set to -20 dB.";
+} rlan_min_ray_snr_db;
+
+paramdef double {
+  p_default = 5.0;
+  p_descr = "Min SNR (dB) for using ZDR SDEV in identifying RLAN interference.";
+  p_help = "If the mean ray SNR falls below this threshold, the ZDR SDEV will not be used. ZDR is noisy at low SNR, so it only makes sense to use ZDR SDEV at higher SNRs.";
+} rlan_min_ray_snr_for_zdr_sdev_db;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Min fraction of ray with RLAN interference.";
+  p_help = "After running the algorithm, we compute the fraction of the ray where RLAN was found. If that fraction falls below this minimum, the entire ray is cleared of RLAN flags.";
+} rlan_min_ray_fraction;
+
+paramdef double {
+  p_default = 2.5;
+  p_descr = "Max elevation angle for rlan interference (deg).";
+  p_help = "Above this angle the rlan flag will not be set.";
+} rlan_max_elev_deg;
+
+paramdef double {
+  p_default = 0.51;
+  p_descr = "Threshold interest value for identifying RLAN interference.";
+  p_help = "If the fuzzy interest value exceeds this threshold, RLAN is assumed to exist at that gate.";
+} rlan_interest_threshold;
+
+commentdef {
+  p_header = "LOCATING SEA CLUTTER";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to locate gates with sea clutter.";
+} locate_sea_clutter;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the standard 4/3 earth radius model for refraction.";
+  p_help = "If true, the standard 4/3 earth radius will be overridden. The US NWS NEXRAD system uses 1.21 instead of 1.333.";
+} override_standard_pseudo_earth_radius;
+
+paramdef double {
+  p_default = 1.33333333;
+  p_descr = "Ratio for computing the pseudo earth radius for beam height computations.";
+  p_help = "For standard refraction this is 4/3. For super refraction it will be less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 1.21.";
+} pseudo_earth_radius_ratio;
+
+commentdef {
+  p_header = "INTEREST MAPS and WEIGHTS for SEA CLUTTER DETECTION";
+  p_text = "Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.";
+};
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min SNR for sea clutter (dB).";
+  p_help = "Only locate sea clutter if SNR exceeds this value.";
+} seaclut_min_snr_db;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.35, 1.0}, {0.4, 0.0001}};
+  p_descr = "SEA CLUTTER interest mapping for rhohv mean.";
+} seaclut_rhohv_mean_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "SEA CLUTTER weight for interest for rhohv mean.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} seaclut_rhohv_mean_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{40.0, 0.0001}, {45.0, 1.0}};
+  p_descr = "SEA CLUTTER interest mapping for sdev of phidp.";
+} seaclut_phidp_sdev_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for sdev of phidp.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} seaclut_phidp_sdev_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{1.5, 0.0001}, {2.5, 1.0}};
+  p_descr = "SEA CLUTTER interest mapping for sdev of zdr.";
+} seaclut_zdr_sdev_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for sdev of zdr.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} seaclut_zdr_sdev_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{-15.0, 1.0}, {-5.0, 0.0}};
+  p_descr = "SEA CLUTTER interest mapping for gradient of dbz in polar elevation space.";
+  p_help = "The reflectivity gradient is computed with respect to elevation, i.e. the change in reflectivity with change in elevation angle. The units are db/deg.";
+} seaclut_dbz_elev_gradient_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for interest for elevation gradient of dbz.";
+  p_help = "The relative weighting applied when computing the fuzzy sum.";
+} seaclut_dbz_elev_gradient_weight;
+
+paramdef double {
+  p_default = 0.51;
+  p_descr = "Threshold interest value for identifying sea clutter.";
+  p_help = "If the fuzzy interest value exceeds this threshold, sea clutter is assumed to exist at that gate.";
+} seaclut_interest_threshold;
+
+paramdef string {
+  p_default = "DbzElevGradient";
+  p_descr = "Field name for computed vertical dbz gradient in polar elevation space (dB/deg).";
+  p_help = "For sea clutter identification, we need to compute the vertical gradient of reflectivity. This is the name of that gradient field, in dB/deg.";
+} dbz_elevation_gradient_field_name;
+
+paramdef string {
+  p_default = "RayHtMsl";
+  p_descr = "Field name for computed ray height (km).";
+  p_help = "In order to compute the vertical gradient of reflectivity for sea clutter, we need to compute the beam height at each gate. This is the name of the ray height field, in km MSL.";
+} ray_height_field_name;
+
+paramdef double {
+  p_default = 2.5;
+  p_descr = "Max elevation angle for sea clutter (deg).";
+  p_help = "Above this angle the clutter flag will not be set.";
+} seaclut_max_elev_deg;
+
+commentdef {
+  p_header = "COMPUTING PID - HYDROMETEOR PARTICLE ID";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to compute PID classification.";
+} compute_pid;
+
+paramdef string {
+  p_descr = "File path for fuzzy logic thresholds for PID.";
+  p_help = "This file contains the thresholds and weights for computing particle ID.";
+  p_default = "./s_band_pid_input_steraotables27.input";
+} pid_thresholds_file_path;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Minimum SNR for valid PID.";
+  p_help = "If the SNR at a gate is below this, the PID is censored.";
+} PID_snr_threshold;
+
+paramdef double {
+  p_default = 9999.0;
+  p_descr = "Maximum SNR for valid PID.";
+  p_help = "If the SNR at a gate is above this value, the PID will be set to SATURATED_SNR = 18.";
+} PID_snr_upper_threshold;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Minimum valid interest value for identifying a particle.";
+  p_help = "If the computed interest value is below this, the PID is set to missing.";
+} PID_min_valid_interest;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to filter DBZ with median filter.";
+  p_help = "The filter is computed in range.";
+} PID_apply_median_filter_to_DBZ;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for DBZ - gates.";
+  p_help = "See 'PID_apply_median_filter_to_DBZ'";
+} PID_DBZ_median_filter_len;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to filter ZDR with median filter.";
+  p_help = "The filter is computed in range.";
+} PID_apply_median_filter_to_ZDR;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for ZDR - gates.";
+  p_help = "See 'PID_apply_median_filter_to_ZDR'";
+} PID_ZDR_median_filter_len;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to filter RHOHV with median filter.";
+  p_help = "The filter is computed in range.";
+} PID_apply_median_filter_to_RHOHV;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for RHOHV - gates.";
+  p_help = "See 'PID_apply_median_filter_to_RHOHV'";
+} PID_RHOHV_median_filter_len;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to filter LDR with median filter.";
+  p_help = "The filter is computed in range.";
+} PID_apply_median_filter_to_LDR;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of median filter for LDR - gates.";
+  p_help = "See 'PID_apply_median_filter_to_LDR'";
+} PID_LDR_median_filter_len;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "For PID, option to replace missing LDR values with a specified value.";
+  p_help = "When the SNR gets low, LDR is unreliable since there is not sufficient dynamic range to provide an accurate cross-polar power measurement. In these cases, it makes sense to replace LDR with a neutral value, such as 0.0, so that we do not reject gates at which valuable data is available.";
+} PID_replace_missing_LDR;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Value to which LDR will be set if missing.";
+} PID_LDR_replacement_value;
+
+paramdef int {
+  p_default = 9;
+  p_descr = "Number of gates for computing standard deviations.";
+  p_help = "This applies to computing the standard deviation of zdr and phidp.";
+} PID_ngates_for_sdev;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to output the individual interest fields.";
+  p_help = "If TRUE, the interest field for each particle type will be written to the output FMQ, in addition to the list in 'output_fields'.";
+} PID_output_particle_interest_fields;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to filter PID with median filter.";
+  p_help = "The filter is computed in range, and affects both rain rate and PID.";
+} apply_median_filter_to_PID;
+
+paramdef int {
+  p_default = 7;
+  p_descr = "Length of median filter for PID - gates.";
+  p_help = "See 'appply_median_filter_to_PID'";
+} PID_median_filter_len;
+
+paramdef int {
+  p_default = { 15, 16, 17, 18, 19 };
+  p_descr = "PID values for which output should be censored.";
+  p_help = "List of PID values, for which the PID censoring flag will be set.";
+} PID_censoring_flag_vals[];
+
+commentdef {
+  p_header = "SOUNDING INPUT FOR PID temperature profile - OPTIONAL";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to read sounding data from SPDB.";
+  p_help = "If TRUE, the program will read the closest (in time) available sounding from an SPDB data base. The temperature profile from the sounding will be used to override the temperature profile in the PID thresholds config file";
+} use_soundings_from_spdb;
+
+paramdef string {
+  p_descr = "SPDB URL for sounding data.";
+  p_default = "spdb/soundings";
+} sounding_spdb_url;
+
+paramdef int {
+  p_default = 86400;
+  p_descr = "Time margin for retrieving sounding, in secs.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message).";
+} sounding_search_time_margin_secs;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of sounding location.";
+  p_help = "If set, we request a profile just for that sounding. If empty, all soundings in the data base are considered valid.";
+} sounding_location_name;
+
+typedef struct {
+  double min_val;
+  double max_val;
+} data_range_t;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check that pressure covers the required range.";
+  p_help = "If TRUE, we will check that pressure range in the sounding meets or exceeds the min and max specified."; 
+} sounding_check_pressure_range;
+
+paramdef struct data_range_t {
+  p_default = { min_val = 300, max_val = 950 };
+  p_descr = "Required pressure range for sounding to be valid (hPa)";
+  p_help = "This is used to provide a quality check on the sounding. If the pressure data does not fully cover this range, the sounding is rejected and we look back for the next available one.";
+} sounding_required_pressure_range_hpa;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check that height covers the required range.";
+  p_help = "If TRUE, we will check that height range in the sounding meets or exceeds the min and max specified."; 
+} sounding_check_height_range;
+
+paramdef struct data_range_t {
+  p_default = { min_val = 500, max_val = 15000 };
+  p_descr = "Required height range for sounding to be valid (m)";
+  p_help = "This is used to provide a quality check on the sounding. If the height data does not fully cover this range, the sounding is rejected and we look back for the next available one.";
+} sounding_required_height_range_m;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check that pressure decreases monotonically.";
+  p_help = "If TRUE, we will check that pressure decreases monotonically. If not, the sounding is rejected and we look back for the next available one."; 
+} sounding_check_pressure_monotonically_decreasing;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Correction to the heights read in with the sounding (km).";
+  p_help = "This correction is ADDED to the heights read in. So if the freezing level seems low, the correction should be positive. If the freezing level appears high, it should be negative.";
+} sounding_height_correction_km;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use wet bulb temperature profile.";
+  p_help = "If TRUE, we use the wet bulb temperature profile from the sounding instead of the dry bulb. Applies to PID estimation. This is thought to more closely track the temperature of melting ice.";
+} sounding_use_wet_bulb_temp;
+
+commentdef {
+  p_header = "RETRIEVING SITE TEMPERATURE FROM SPDB";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read site temperature from SPDB.";
+  p_help = "The temperature closest to the radar volume time will be read in.";
+} read_site_temp_from_spdb;
+
+paramdef string {
+  p_default = "spdbp:://hail:0:pecan/spdb/spol/temp";
+  p_descr = "URL for temperatures from SPDB.";
+} site_temp_spdb_url;
+
+paramdef string {
+  p_default = "SPOL";
+  p_descr = "Station name for site temperature.";
+} site_temp_station_name;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Search margin when finding site temp data (secs).";
+  p_help = "We search for the temperature closest in time to the radar volume. This is the search margin on either side of the volume time.";
+} site_temp_search_margin_secs;
+
+commentdef {
+  p_header = "SPECIFYING FIELD NAMES AND OUTPUT ENCODING";
+}
+
+typedef enum {
+  
+  SNR,
+  DBZ,
+  VEL,
+  WIDTH,
+  NCP,
+  ZDR,
+  LDR,
+  RHOHV,
+  PHIDP,
+  KDP,
+  PSOB,
+  ZDP,
+
+  DBZ_ATTEN_CORRECTION,
+  ZDR_ATTEN_CORRECTION,
+  DBZ_ATTEN_CORRECTED,
+  ZDR_ATTEN_CORRECTED,
+
+  DBZ_FOR_KDP,
+  ZDR_FOR_KDP,
+  RHOHV_FOR_KDP,
+  SNR_FOR_KDP,
+  ZDR_SDEV_FOR_KDP,
+  VALID_FLAG_FOR_KDP,
+
+  PHIDP_FOR_KDP,
+  PHIDP_MEAN_FOR_KDP,
+  PHIDP_MEAN_UNFOLD_FOR_KDP,
+  PHIDP_SDEV_FOR_KDP,
+  PHIDP_JITTER_FOR_KDP,
+  PHIDP_UNFOLD_FOR_KDP,
+  PHIDP_FILT_FOR_KDP,
+  PHIDP_COND_FOR_KDP,
+  PHIDP_COND_FILT_FOR_KDP,
+
+  SNR_RLAN,
+  SNR_MODE_RLAN,
+  SNR_DMODE_RLAN,
+  ZDR_SDEV_RLAN,
+  NCP_MEAN_RLAN,
+  WIDTH_MEAN_RLAN,
+  PHASE_RLAN,
+  PHASE_NOISE_RLAN,
+  PHASE_NOISE_INTEREST_RLAN,
+  NCP_MEAN_INTEREST_RLAN,
+  WIDTH_MEAN_INTEREST_RLAN,
+  SNR_DMODE_INTEREST_RLAN,
+  ZDR_SDEV_INTEREST_RLAN,
+  RLAN_FLAG,
+
+  RAY_HEIGHT,
+
+  SNR_MEAN_SEACLUT,
+  RHOHV_MEAN_SEACLUT,
+  PHIDP_SDEV_SEACLUT,
+  ZDR_SDEV_SEACLUT,
+  DBZ_ELEV_GRADIENT_SEACLUT,
+  RHOHV_MEAN_INTEREST_SEACLUT,
+  PHIDP_SDEV_INTEREST_SEACLUT,
+  ZDR_SDEV_INTEREST_SEACLUT,
+  DBZ_ELEV_GRADIENT_INTEREST_SEACLUT,
+  SEACLUT_FLAG,
+
+  PARTICLE_ID,
+  TEMP_FOR_PID,
+  PID_CENSOR_FLAG,
+  INPUT_FIELDS_CENSOR_FLAG,
+  COMBINED_CENSOR_FLAG
+
+} output_field_id_t;
+
+typedef enum {
+  OUTPUT_ENCODING_FL32,
+  OUTPUT_ENCODING_INT32,
+  OUTPUT_ENCODING_INT16,
+  OUTPUT_ENCODING_INT08
+} output_encoding_t;
+
+typedef enum {
+  OUTPUT_SCALING_DYNAMIC,
+  OUTPUT_SCALING_SPECIFIED
+} output_scaling_t;
+
+typedef struct {
+  output_field_id_t id;
+  string name; 
+  string long_name; 
+  string standard_name; 
+  string units;
+  output_encoding_t encoding;
+  output_scaling_t scaling;
+  double scale;
+  double offset;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    {
+      id = SNR,
+      name = "SNR",
+      long_name = "signal_to_noise_ratio_db",
+      standard_name = "signal_to_noise_ratio",
+      units = "dB",
+      encoding = OUTPUT_ENCODING_INT16,
+      scaling = OUTPUT_SCALING_DYNAMIC,
+      scale = 0.01,
+      offset = 0.0
+    }
+    ,
+    {
+      id = DBZ,
+      name = "DBZ",
+      long_name = "radar_reflectivity",
+      standard_name = "equivalent_reflectivity_factor",
+      units = "dBZ",
+      encoding = OUTPUT_ENCODING_INT16,
+      scaling = OUTPUT_SCALING_DYNAMIC,
+      scale = 0.01,
+      offset = 0.0
+    }
+    ,
+    {
+      id = ZDR,
+      name = "ZDR",
+      long_name = "calibrated_log_differential_reflectivity",
+      standard_name = "log_differential_reflectivity",
+      units = "dB",
+      encoding = OUTPUT_ENCODING_INT16,
+      scaling = OUTPUT_SCALING_DYNAMIC,
+      scale = 0.01,
+      offset = 0.0
+    }
+    ,
+    {
+      id = RHOHV,
+      name = "RHOHV",
+      long_name = "cross_correlation_ratio",
+      standard_name = "cross_correlation_ratio_hv",
+      units = "",
+      encoding = OUTPUT_ENCODING_INT16,
+      scaling = OUTPUT_SCALING_DYNAMIC,
+      scale = 0.001,
+      offset = 0.0
+    }
+    ,
+    {
+      id = PHIDP,
+      name = "PHIDP",
+      long_name = "differential_phase",
+      standard_name = "differential_phase_hv",
+      units = "deg",
+      encoding = OUTPUT_ENCODING_INT16,
+      scaling = OUTPUT_SCALING_DYNAMIC,
+      scale = 0.01,
+      offset = 0.0
+    }
+    ,
+    {
+      id = KDP,
+      name = "KDP",
+      long_name = "specific_differential_phase",
+      standard_name = "specific_differential_phase_hv",
+      units = "deg/km",
+      encoding = OUTPUT_ENCODING_INT16,
+      scaling = OUTPUT_SCALING_DYNAMIC,
+      scale = 0.001,
+      offset = 0.0
+    }
+    ,
+    {
+      id = PSOB,
+      name = "PSOB",
+      long_name = "phase_shift_on_backscatter",
+      standard_name = "phase_shift_on_backscatter",
+      units = "deg",
+      encoding = OUTPUT_ENCODING_INT16,
+      scaling = OUTPUT_SCALING_DYNAMIC,
+      scale = 0.001,
+      offset = 0.0
+    }
+  };
+  p_descr = "Indicate which fields should be written to the output file.";
+  p_help = "Choose the ID from the list. The name and units can be set however the user prefers. The output_encoding and output_scaling apply to CfRadial output only. If the output_scaling is DYNAMIC then the scale and offset are computed using the dynamic range of the data. If the output_scaling is SPECIFIED, then the specified scale and offset are used.";
+} output_fields[];
+
+commentdef {
+  p_header = "CENSORING BASED ON INPUT FIELD VALUES";
+  p_text = "You have the option of censoring the value of data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise.";
+}
+
+typedef enum {
+  LOGICAL_AND, LOGICAL_OR
+} logical_t;
+
+typedef struct {
+  string input_name;
+  double min_valid_value;
+  double max_valid_value;
+  logical_t combination_method;
+} censoring_input_field_t;
+
+paramdef struct censoring_input_field_t {
+  p_default = {
+    { "SNR", 0.0, 1000.0, LOGICAL_OR },
+    { "NCP", 0.15, 1000.0, LOGICAL_OR }
+  };
+  p_descr = "Fields to be used for censoring.";
+  p_help = "Specify the fields to be used to determine whether a gate should be censored. The name refers to the input data field names. Valid field values lie in the range from min_valid_value to max_valid_value inclusive. If the value of a field at a gate lies within this range, it is considered valid. Each specified field is examined at each gate, and is flagged as valid if its value lies in the valid range. These field flags are then combined as follows: first, all of the LOGICAL_OR flags are combined, yielding a single combined_or flag which is true if any of the LOGICAL_OR fields is true. The combined_or flag is then combined with all of the LOGICAL_AND fields, yielding a true value only if the combined_or flag and the LOGICAL_AND fields are all true. If this final flag is true, then the data at the gate is regarded as valid and is retained. If the final flag is false, the data at the gate is censored, and all of the fields at the gate are set to missing.";
+} censoring_input_fields[];
+  
+paramdef int {
+  p_default = 1;
+  p_descr = "Minimum valid run of non-censored gates.";
+  p_help = "Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.";
+} input_field_censoring_min_valid_run;
+
+commentdef {
+  p_header = "SPECIFYING FIELDS FOR CENSORING";
+  p_text = "These fields are copied from the input file, censored according to the output rules, and written to the output file.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to write censored fields to the output file.";
+} write_censored_fields_to_output;
+
+typedef struct {
+  string input_name; 
+  string output_name;
+  boolean apply_rlan_censoring;
+  boolean apply_seaclut_censoring;
+  boolean apply_pid_censoring;
+  boolean apply_input_field_censoring;
+} censored_output_field_t;
+
+paramdef struct censored_output_field_t {
+  p_default = {
+    {
+      input_name = "VEL",
+      output_name = "VEL",
+      apply_rlan_censoring = FALSE,
+      apply_seaclut_censoring = FALSE,
+      apply_pid_censoring = FALSE,
+      apply_input_field_censoring = FALSE
+    }
+  };
+  p_descr = "Fields to be copied from input and written to output.";
+  p_help = "These fields are copied from the input, optionally censored, and written to the output file. You can change the name of the field on output. And you can specify censoring as required, based on the results of the QC steps in this app.";
+} censored_output_fields[];
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to ignore isolated gates of censoring surrounded by good data.";
+  p_help = "If true, we will ignore isolated censoring gates if surrounded by non-censored gates. Single censor gates will be ignored. 2 consecutive censored gates are ignored if surrounded by 2 good gates on either side. And so on.";
+} censoring_ignore_isolated_gates;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Max length of censor flag run to be ignored (gates).";
+  p_help = "See 'censoring_ignore_isolated_gates'.";
+} censoring_max_isolated_ngates;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to fill in small gaps in the censoring flag.";
+  p_help = "If true, we will fill in small gaps in the censoring flag. A single gate is filled in. 2 consecutive censored gates are filled in if surrounded by 2 censored gates on either side. And so on up to censoring_max_fill_gap_length.";
+} censoring_fill_in_gaps;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Max length of gaps filled (gates).";
+  p_help = "See 'censoring_fill_in_gaps'.";
+} censoring_max_fill_ngates;
+
+commentdef {
+  p_header = "OUTPUT FILE FORMAT";
+}
+
+typedef enum {
+  OUTPUT_FORMAT_CFRADIAL,
+  OUTPUT_FORMAT_DORADE,
+  OUTPUT_FORMAT_FORAY,
+  OUTPUT_FORMAT_NEXRAD,
+  OUTPUT_FORMAT_UF,
+  OUTPUT_FORMAT_MDV_RADIAL
+} output_format_t;
+
+paramdef enum output_format_t {
+  p_default = OUTPUT_FORMAT_CFRADIAL;
+  p_descr = "Format for the output files.";
+} output_format;
+
+typedef enum {
+  CLASSIC, NC64BIT, NETCDF4, NETCDF4_CLASSIC
+} netcdf_style_t;
+
+paramdef enum netcdf_style_t {
+  p_default = NETCDF4;
+  p_descr = "NetCDF style - if output_format is CFRADIAL";
+  p_help = "netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls";
+} netcdf_style;
+
+commentdef {
+  p_header = "OUTPUT BYTE-SWAPPING and COMPRESSION";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to leave data in native byte order.";
+  p_help = "If false, data will be byte-swapped as appropriate on output.";
+} output_native_byte_order;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to compress data fields on output.";
+  p_help = "Applies to netCDF and Dorade. UF does not support compression.";
+} output_compressed;
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Compression level for output, if compressed.";
+  p_help = "Applies to netCDF only. Dorade compression is run-length encoding, and has not options..";
+} compression_level;
+
+commentdef {
+  p_header = "VOLUME OUTPUT";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write the results to a volume output file.";
+  p_help = "Normally this will be set to true. However, when running analyses such as self-consistency or zdr bias, it may be preferable to suppress writing the output file, in which case this should be set to false.";
+} write_output_volume;
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory path.";
+  p_help = "Files will be written to this directory.";
+} output_dir;
+
+typedef enum {
+  START_AND_END_TIMES,
+  START_TIME_ONLY,
+  END_TIME_ONLY,
+  SPECIFY_FILE_NAME
+} filename_mode_t;
+
+paramdef enum filename_mode_t {
+  p_default = START_AND_END_TIMES;
+  p_descr = "Mode for computing output file name.";
+  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name.";
+} output_filename_mode;
+
+paramdef string {
+  p_default = "cfradial.test.nc";
+  p_descr = "Name of output file.";
+  p_help = "Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of this name will be written to output_dir.";
+} output_filename;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Add the day directory to the output directory.";
+  p_help = "Path will be output_dir/yyyymmdd/filename.";
+} append_day_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add the year directory to the output directory.";
+  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
+} append_year_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out individual sweeps if appropriate.";
+  p_help = "If true, the volume is split into individual sweeps for writing. Applies to CfRadial format. This is always true for DORADE format files.";
+} write_individual_sweeps;
+
