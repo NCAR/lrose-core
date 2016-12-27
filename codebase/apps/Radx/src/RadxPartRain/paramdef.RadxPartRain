@@ -1542,6 +1542,7 @@ typedef enum {
   PHIDP,
   KDP,
   KDP_ZZDR,
+  KDP_COND,
   KDP_BRINGI,
   PSOB,
   ZDP,

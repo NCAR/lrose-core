@@ -353,6 +353,7 @@ public:
    */
   const double *getKdp() const { return _kdp; }
   const double *getKdpZZdr() const { return _kdpZZdr; }
+  const double *getKdpCond() const { return _kdpCond; }
 
   /**
    * Get attenuation correction after calling compute()
@@ -598,6 +599,9 @@ private:
   TaArray<double> _kdpZZdr_;
   double *_kdpZZdr;
 
+  TaArray<double> _kdpCond_;
+  double *_kdpCond;
+
   TaArray<double> _psob_;
   double *_psob;
 
@@ -690,6 +694,11 @@ private:
   /// Compute estimated kdp from Z and ZDR using power law
 
   double _computeKdpFromZZdr(double dbz, double zdr);
+
+  /// load up conditional kdp from computed kdp and kdpZZdr
+
+  void _loadKdpCond();
+  void _loadKdpCondRun(int startGate, int endGate);
 
 };
 
