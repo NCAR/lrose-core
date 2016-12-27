@@ -665,6 +665,9 @@ void ComputeEngine::_kdpInit()
     _kdp.checkZdrSdev(true);
   }
   _kdp.setZdrSdevMax(_params.KDP_zdr_sdev_max);
+  _kdp.setThresholdForKdpZZdr(_params.KDP_threshold_for_ZZDR);
+  _kdp.setMedianFilterLenForKdpZZdr(_params.KDP_median_filter_len_for_ZZDR);
+
   if (_params.KDP_debug) {
     _kdp.setDebug(true);
   }

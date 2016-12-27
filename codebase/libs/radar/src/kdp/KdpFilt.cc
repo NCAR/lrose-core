@@ -201,7 +201,15 @@ KdpFilt::KdpFilt()
   _zdrAttenExpon = 1.05;
   _doComputeAttenCorr = false;
   _attenCoeffsSpecified = false;
-  
+
+  // initialize computation of KDP from Z and ZDR
+
+  _kdpZExpon = 1.0;
+  _kdpZdrExpon = -2.05;
+  _kdpZZdrCoeff = 3.32e-5;
+  _kdpZZdrThreshold = 0.25;
+  _kdpZZdrMedianLen = 5;
+
   // debugging
 
   _debug = false;
@@ -377,6 +385,12 @@ int KdpFilt::compute(time_t timeSecs,
       cerr << "    zdrAttenExpon: " << _zdrAttenExpon << endl;
     }
   }
+
+  // set params for computing KDP from Z and ZDR
+
+  _kdpZExpon = 1.0;
+  _kdpZdrExpon = -2.05;
+  _kdpZZdrCoeff = 3.32e-5 * (10.0 / _wavelengthCm);
 
   // set range details
 
@@ -610,7 +624,8 @@ void KdpFilt::_initArrays(const double *snr,
     }
   }
   memcpy(_dbzMedian, _dbz, _nGates * sizeof(double));
-  FilterUtils::applyMedianFilter(_dbzMedian, _nGates, 5, _missingValue);
+  FilterUtils::applyMedianFilter(_dbzMedian, _nGates,
+                                 _kdpZZdrMedianLen, _missingValue);
 
   if (zdr != NULL) {
     memcpy(_zdr, zdr, _nGates * sizeof(double));
@@ -622,7 +637,8 @@ void KdpFilt::_initArrays(const double *snr,
     _zdrAvailable = false;
   }
   memcpy(_zdrMedian, _zdr, _nGates * sizeof(double));
-  FilterUtils::applyMedianFilter(_zdrMedian, _nGates, 5, _missingValue);
+  FilterUtils::applyMedianFilter(_zdrMedian, _nGates,
+                                 _kdpZZdrMedianLen, _missingValue);
 
   if (rhohv != NULL) {
     memcpy(_rhohv, rhohv, _nGates * sizeof(double));
@@ -1764,10 +1780,6 @@ double KdpFilt::_computeKdpFromZZdr(double dbz,
   
 {
   
-  double zExpon = 1.0;
-  double zdrExpon = -2.05;
-  double kdpCoeff = 3.32e-5;
-
   double zzLin = pow(10.0, dbz / 10.0);
 
   if (zdr < 0.1) {
@@ -1775,9 +1787,9 @@ double KdpFilt::_computeKdpFromZZdr(double dbz,
   }
   double zdrLin = pow(10.0, zdr / 10.0);
   
-  double zTerm = pow(zzLin, zExpon);
-  double zdrTerm = pow(zdrLin, zdrExpon);
-  double kdpEst = zTerm * zdrTerm * kdpCoeff;
+  double zTerm = pow(zzLin, _kdpZExpon);
+  double zdrTerm = pow(zdrLin, _kdpZdrExpon);
+  double kdpEst = zTerm * zdrTerm * _kdpZZdrCoeff;
 
   return kdpEst;
   
@@ -1796,7 +1808,8 @@ void KdpFilt::_loadKdpCond()
 
   for (int igate = 0; igate < _nGates; igate++) {
 
-    if (_kdp[igate] == _missingValue || _kdp[igate] <= 0.25 ||
+    if (_kdp[igate] == _missingValue ||
+        _kdp[igate] <= _kdpZZdrThreshold ||
         _kdpZZdr[igate] == _missingValue) {
       
       // non-positive KDP

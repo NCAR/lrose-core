@@ -1380,6 +1380,30 @@ using namespace std;
     tt->single_val.d = 2;
     tt++;
     
+    // Parameter 'KDP_threshold_for_ZZDR'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("KDP_threshold_for_ZZDR");
+    tt->descr = tdrpStrDup("Sets the threshold for computing conditional KDP from Z and ZDR.");
+    tt->help = tdrpStrDup("We can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can then compute the conditioned KDP - we call this KDP_COND. To compute KDP_COND, we first find the gates over which regular KDP exceeds this threshold. Over this run of gates we compute the PHIDP change from the regular KDP and from KDP_ZZDR. By taking the ratio of sum(KDP) / sum(KDP_ZZDR), and applying that ratio to KDP_ZZDR over these gates, we can compute KDP_COND such that the PHIDP change is the same for both KDP and KDP_COND.");
+    tt->val_offset = (char *) &KDP_threshold_for_ZZDR - &_start_;
+    tt->single_val.d = 0.25;
+    tt++;
+    
+    // Parameter 'KDP_median_filter_len_for_ZZDR'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("KDP_median_filter_len_for_ZZDR");
+    tt->descr = tdrpStrDup("Sets the length of the median filter when computing KDP_ZZDR.");
+    tt->help = tdrpStrDup("The Z and ZDR fields are smoothed with a median filter of this length prior to estimating KDP_ZZDR.");
+    tt->val_offset = (char *) &KDP_median_filter_len_for_ZZDR - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
     // Parameter 'KDP_debug'
     // ctype is 'tdrp_bool_t'
     

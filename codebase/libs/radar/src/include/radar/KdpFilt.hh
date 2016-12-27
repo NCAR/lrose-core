@@ -242,6 +242,21 @@ public:
 
   void setAttenCoeffs(double dbzCoeff, double dbzExpon,
                       double zdrCoeff, double zdrExpon);
+
+
+  /**
+   * Set KDP threshold for valid run when estimating
+   * KDP from Z and ZDR
+   */
+
+  void setThresholdForKdpZZdr(double val) { _kdpZZdrThreshold = val; }
+  
+  /**
+   * Set length for Z and ZDR median filter when estimating
+   * KDP from Z and ZDR
+   */
+
+  void setMedianFilterLenForKdpZZdr(int val) { _kdpZZdrMedianLen = val; }
   
   /**
    * Initialize the object arrays for later use.
@@ -631,6 +646,14 @@ private:
   bool _debug;
   bool _writeRayFile;
   string _rayFileDir;
+
+  // parameters for KDP conditioned by ZZDR
+
+  double _kdpZExpon;
+  double _kdpZdrExpon;
+  double _kdpZZdrCoeff;
+  double _kdpZZdrThreshold;
+  int _kdpZZdrMedianLen;
 
   // methods
  

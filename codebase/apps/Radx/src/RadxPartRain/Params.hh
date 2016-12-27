@@ -612,6 +612,10 @@ public:
 
   double KDP_zdr_sdev_max;
 
+  double KDP_threshold_for_ZZDR;
+
+  int KDP_median_filter_len_for_ZZDR;
+
   tdrp_bool_t KDP_debug;
 
   tdrp_bool_t KDP_write_ray_files;
@@ -978,7 +982,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[273];
+  mutable TDRPtable _table[275];
 
   const char *_className;
 
