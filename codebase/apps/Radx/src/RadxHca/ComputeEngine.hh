@@ -185,9 +185,6 @@ private:
   void _kdpInit();
   void _kdpCompute();
 
-  int _rlanInit();
-  void _locateRlan();
-
   int _seaclutInit();
   void _locateSeaClutter();
   

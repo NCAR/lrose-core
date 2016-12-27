@@ -1385,20 +1385,8 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("LOCATING RLAN INTERFERENCE");
+    tt->comment_hdr = tdrpStrDup("Interest maps");
     tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'locate_rlan_interference'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("locate_rlan_interference");
-    tt->descr = tdrpStrDup("Option to locate gates with RLAN interference.");
-    tt->help = tdrpStrDup("This particularly applies to C-band.");
-    tt->val_offset = (char *) &locate_rlan_interference - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 10'
@@ -1406,320 +1394,6 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("INTEREST MAPS and WEIGHTS for RLAN DETECTION");
-    tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.\n\nFor locating RLAN, we use the gate-to-gate phase_noise, ncp_mean (or width_mean if ncp is not available) and snr_dmode.\n\nFor locating NOISE, we use the gate-to-gate phase_noise, ncp_mean (or width_mean if ncp is not available) and snr_sdev.");
-    tt++;
-    
-    // Parameter 'rlan_phase_noise_interest_map'
-    // ctype is '_interest_map_point_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("rlan_phase_noise_interest_map");
-    tt->descr = tdrpStrDup("RLAN interest mapping for phase noise.");
-    tt->help = tdrpStrDup("The phase noise is a measure of the variability of phase with range.");
-    tt->array_offset = (char *) &_rlan_phase_noise_interest_map - &_start_;
-    tt->array_n_offset = (char *) &rlan_phase_noise_interest_map_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(interest_map_point_t);
-    tt->array_n = 2;
-    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
-    tt->struct_def.nfields = 2;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("value");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_rlan_phase_noise_interest_map->value - (char *) _rlan_phase_noise_interest_map;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_rlan_phase_noise_interest_map->interest - (char *) _rlan_phase_noise_interest_map;
-    tt->n_struct_vals = 4;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 35;
-      tt->struct_vals[1].d = 0.0001;
-      tt->struct_vals[2].d = 45;
-      tt->struct_vals[3].d = 1;
-    tt++;
-    
-    // Parameter 'rlan_phase_noise_weight'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rlan_phase_noise_weight");
-    tt->descr = tdrpStrDup("RLAN weight for interest for phase noise.");
-    tt->help = tdrpStrDup("The relative weighting applied when computing the fuzzy sum.");
-    tt->val_offset = (char *) &rlan_phase_noise_weight - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'rlan_ncp_mean_interest_map'
-    // ctype is '_interest_map_point_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("rlan_ncp_mean_interest_map");
-    tt->descr = tdrpStrDup("RLAN interest mapping for mean of ncp.");
-    tt->help = tdrpStrDup("NCP should be used instead of width, if available.");
-    tt->array_offset = (char *) &_rlan_ncp_mean_interest_map - &_start_;
-    tt->array_n_offset = (char *) &rlan_ncp_mean_interest_map_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(interest_map_point_t);
-    tt->array_n = 2;
-    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
-    tt->struct_def.nfields = 2;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("value");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_rlan_ncp_mean_interest_map->value - (char *) _rlan_ncp_mean_interest_map;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_rlan_ncp_mean_interest_map->interest - (char *) _rlan_ncp_mean_interest_map;
-    tt->n_struct_vals = 4;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 0.1;
-      tt->struct_vals[1].d = 1;
-      tt->struct_vals[2].d = 0.2;
-      tt->struct_vals[3].d = 0.0001;
-    tt++;
-    
-    // Parameter 'rlan_ncp_mean_weight'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rlan_ncp_mean_weight");
-    tt->descr = tdrpStrDup("Weight for interest for mean of ncp.");
-    tt->help = tdrpStrDup("The relative weighting applied when computing the fuzzy sum.");
-    tt->val_offset = (char *) &rlan_ncp_mean_weight - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'rlan_width_mean_interest_map'
-    // ctype is '_interest_map_point_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("rlan_width_mean_interest_map");
-    tt->descr = tdrpStrDup("RLAN interest mapping for mean of width.");
-    tt->help = tdrpStrDup("WIDTH should be used if NCP is not available.");
-    tt->array_offset = (char *) &_rlan_width_mean_interest_map - &_start_;
-    tt->array_n_offset = (char *) &rlan_width_mean_interest_map_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(interest_map_point_t);
-    tt->array_n = 2;
-    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
-    tt->struct_def.nfields = 2;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("value");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_rlan_width_mean_interest_map->value - (char *) _rlan_width_mean_interest_map;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_rlan_width_mean_interest_map->interest - (char *) _rlan_width_mean_interest_map;
-    tt->n_struct_vals = 4;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 4;
-      tt->struct_vals[1].d = 0.0001;
-      tt->struct_vals[2].d = 5;
-      tt->struct_vals[3].d = 1;
-    tt++;
-    
-    // Parameter 'rlan_width_mean_weight'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rlan_width_mean_weight");
-    tt->descr = tdrpStrDup("Weight for interest for mean of width.");
-    tt->help = tdrpStrDup("Set to 0 if NCP is available.");
-    tt->val_offset = (char *) &rlan_width_mean_weight - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'rlan_snr_dmode_interest_map'
-    // ctype is '_interest_map_point_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("rlan_snr_dmode_interest_map");
-    tt->descr = tdrpStrDup("RLAN interest mapping for delta mode of snr.");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_rlan_snr_dmode_interest_map - &_start_;
-    tt->array_n_offset = (char *) &rlan_snr_dmode_interest_map_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(interest_map_point_t);
-    tt->array_n = 2;
-    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
-    tt->struct_def.nfields = 2;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("value");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_rlan_snr_dmode_interest_map->value - (char *) _rlan_snr_dmode_interest_map;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_rlan_snr_dmode_interest_map->interest - (char *) _rlan_snr_dmode_interest_map;
-    tt->n_struct_vals = 4;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 2;
-      tt->struct_vals[1].d = 1;
-      tt->struct_vals[2].d = 2.5;
-      tt->struct_vals[3].d = 0.0001;
-    tt++;
-    
-    // Parameter 'rlan_snr_dmode_weight'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rlan_snr_dmode_weight");
-    tt->descr = tdrpStrDup("Weight for interest for delta mode of snr.");
-    tt->help = tdrpStrDup("The relative weighting applied when computing the fuzzy sum.");
-    tt->val_offset = (char *) &rlan_snr_dmode_weight - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'rlan_zdr_sdev_interest_map'
-    // ctype is '_interest_map_point_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("rlan_zdr_sdev_interest_map");
-    tt->descr = tdrpStrDup("RLAN interest mapping for sdev of zdr.");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_rlan_zdr_sdev_interest_map - &_start_;
-    tt->array_n_offset = (char *) &rlan_zdr_sdev_interest_map_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(interest_map_point_t);
-    tt->array_n = 2;
-    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
-    tt->struct_def.nfields = 2;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("value");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_rlan_zdr_sdev_interest_map->value - (char *) _rlan_zdr_sdev_interest_map;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_rlan_zdr_sdev_interest_map->interest - (char *) _rlan_zdr_sdev_interest_map;
-    tt->n_struct_vals = 4;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 0.5;
-      tt->struct_vals[1].d = 1;
-      tt->struct_vals[2].d = 1;
-      tt->struct_vals[3].d = 0.0001;
-    tt++;
-    
-    // Parameter 'rlan_zdr_sdev_weight'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rlan_zdr_sdev_weight");
-    tt->descr = tdrpStrDup("Weight for interest for sdev of zdr.");
-    tt->help = tdrpStrDup("The relative weighting applied when computing the fuzzy sum.");
-    tt->val_offset = (char *) &rlan_zdr_sdev_weight - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'rlan_min_ray_snr_db'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rlan_min_ray_snr_db");
-    tt->descr = tdrpStrDup("Min SNR (dB) for identifying RLAN interference.");
-    tt->help = tdrpStrDup("The ray SNR is computed as a mean for all gates, including gates with missing SNR. If the SNR at a gate is missing, it is set to -20 dB.");
-    tt->val_offset = (char *) &rlan_min_ray_snr_db - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'rlan_min_ray_snr_for_zdr_sdev_db'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rlan_min_ray_snr_for_zdr_sdev_db");
-    tt->descr = tdrpStrDup("Min SNR (dB) for using ZDR SDEV in identifying RLAN interference.");
-    tt->help = tdrpStrDup("If the mean ray SNR falls below this threshold, the ZDR SDEV will not be used. ZDR is noisy at low SNR, so it only makes sense to use ZDR SDEV at higher SNRs.");
-    tt->val_offset = (char *) &rlan_min_ray_snr_for_zdr_sdev_db - &_start_;
-    tt->single_val.d = 5;
-    tt++;
-    
-    // Parameter 'rlan_min_ray_fraction'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rlan_min_ray_fraction");
-    tt->descr = tdrpStrDup("Min fraction of ray with RLAN interference.");
-    tt->help = tdrpStrDup("After running the algorithm, we compute the fraction of the ray where RLAN was found. If that fraction falls below this minimum, the entire ray is cleared of RLAN flags.");
-    tt->val_offset = (char *) &rlan_min_ray_fraction - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'rlan_max_elev_deg'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rlan_max_elev_deg");
-    tt->descr = tdrpStrDup("Max elevation angle for rlan interference (deg).");
-    tt->help = tdrpStrDup("Above this angle the rlan flag will not be set.");
-    tt->val_offset = (char *) &rlan_max_elev_deg - &_start_;
-    tt->single_val.d = 2.5;
-    tt++;
-    
-    // Parameter 'rlan_interest_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rlan_interest_threshold");
-    tt->descr = tdrpStrDup("Threshold interest value for identifying RLAN interference.");
-    tt->help = tdrpStrDup("If the fuzzy interest value exceeds this threshold, RLAN is assumed to exist at that gate.");
-    tt->val_offset = (char *) &rlan_interest_threshold - &_start_;
-    tt->single_val.d = 0.51;
-    tt++;
-    
-    // Parameter 'Comment 11'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("LOCATING SEA CLUTTER");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1760,11 +1434,11 @@ using namespace std;
     tt->single_val.d = 1.33333;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("INTEREST MAPS and WEIGHTS for SEA CLUTTER DETECTION");
     tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.");
     tt++;
@@ -2025,11 +1699,11 @@ using namespace std;
     tt->single_val.d = 2.5;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("COMPUTING PID - HYDROMETEOR PARTICLE ID");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2262,11 +1936,11 @@ using namespace std;
     tt->single_val.i = 7;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("SOUNDING INPUT FOR PID temperature profile - OPTIONAL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2439,11 +2113,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("RETRIEVING SITE TEMPERATURE FROM SPDB");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2496,11 +2170,11 @@ using namespace std;
     tt->single_val.i = 3600;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("SPECIFYING FIELD NAMES AND OUTPUT ENCODING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2529,7 +2203,7 @@ using namespace std;
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 58;
+        tt->struct_def.fields[0].enum_def.nfields = 44;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SNR");
@@ -2594,60 +2268,32 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[29].val = PHIDP_COND_FOR_KDP;
         tt->struct_def.fields[0].enum_def.fields[30].name = tdrpStrDup("PHIDP_COND_FILT_FOR_KDP");
         tt->struct_def.fields[0].enum_def.fields[30].val = PHIDP_COND_FILT_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[31].name = tdrpStrDup("SNR_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[31].val = SNR_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[32].name = tdrpStrDup("SNR_MODE_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[32].val = SNR_MODE_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[33].name = tdrpStrDup("SNR_DMODE_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[33].val = SNR_DMODE_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[34].name = tdrpStrDup("ZDR_SDEV_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[34].val = ZDR_SDEV_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[35].name = tdrpStrDup("NCP_MEAN_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[35].val = NCP_MEAN_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[36].name = tdrpStrDup("WIDTH_MEAN_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[36].val = WIDTH_MEAN_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[37].name = tdrpStrDup("PHASE_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[37].val = PHASE_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[38].name = tdrpStrDup("PHASE_NOISE_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[38].val = PHASE_NOISE_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[39].name = tdrpStrDup("PHASE_NOISE_INTEREST_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[39].val = PHASE_NOISE_INTEREST_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[40].name = tdrpStrDup("NCP_MEAN_INTEREST_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[40].val = NCP_MEAN_INTEREST_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[41].name = tdrpStrDup("WIDTH_MEAN_INTEREST_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[41].val = WIDTH_MEAN_INTEREST_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[42].name = tdrpStrDup("SNR_DMODE_INTEREST_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[42].val = SNR_DMODE_INTEREST_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[43].name = tdrpStrDup("ZDR_SDEV_INTEREST_RLAN");
-        tt->struct_def.fields[0].enum_def.fields[43].val = ZDR_SDEV_INTEREST_RLAN;
-        tt->struct_def.fields[0].enum_def.fields[44].name = tdrpStrDup("RLAN_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[44].val = RLAN_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[45].name = tdrpStrDup("RAY_HEIGHT");
-        tt->struct_def.fields[0].enum_def.fields[45].val = RAY_HEIGHT;
-        tt->struct_def.fields[0].enum_def.fields[46].name = tdrpStrDup("SNR_MEAN_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[46].val = SNR_MEAN_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[47].name = tdrpStrDup("RHOHV_MEAN_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[47].val = RHOHV_MEAN_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[48].name = tdrpStrDup("PHIDP_SDEV_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[48].val = PHIDP_SDEV_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[49].name = tdrpStrDup("ZDR_SDEV_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[49].val = ZDR_SDEV_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[50].name = tdrpStrDup("DBZ_ELEV_GRADIENT_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[50].val = DBZ_ELEV_GRADIENT_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[51].name = tdrpStrDup("RHOHV_MEAN_INTEREST_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[51].val = RHOHV_MEAN_INTEREST_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[52].name = tdrpStrDup("PHIDP_SDEV_INTEREST_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[52].val = PHIDP_SDEV_INTEREST_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[53].name = tdrpStrDup("ZDR_SDEV_INTEREST_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[53].val = ZDR_SDEV_INTEREST_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[54].name = tdrpStrDup("DBZ_ELEV_GRADIENT_INTEREST_SEACLUT");
-        tt->struct_def.fields[0].enum_def.fields[54].val = DBZ_ELEV_GRADIENT_INTEREST_SEACLUT;
-        tt->struct_def.fields[0].enum_def.fields[55].name = tdrpStrDup("SEACLUT_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[55].val = SEACLUT_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[56].name = tdrpStrDup("PARTICLE_ID");
-        tt->struct_def.fields[0].enum_def.fields[56].val = PARTICLE_ID;
-        tt->struct_def.fields[0].enum_def.fields[57].name = tdrpStrDup("TEMP_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[57].val = TEMP_FOR_PID;
+        tt->struct_def.fields[0].enum_def.fields[31].name = tdrpStrDup("RAY_HEIGHT");
+        tt->struct_def.fields[0].enum_def.fields[31].val = RAY_HEIGHT;
+        tt->struct_def.fields[0].enum_def.fields[32].name = tdrpStrDup("SNR_MEAN_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[32].val = SNR_MEAN_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[33].name = tdrpStrDup("RHOHV_MEAN_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[33].val = RHOHV_MEAN_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[34].name = tdrpStrDup("PHIDP_SDEV_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[34].val = PHIDP_SDEV_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[35].name = tdrpStrDup("ZDR_SDEV_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[35].val = ZDR_SDEV_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[36].name = tdrpStrDup("DBZ_ELEV_GRADIENT_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[36].val = DBZ_ELEV_GRADIENT_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[37].name = tdrpStrDup("RHOHV_MEAN_INTEREST_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[37].val = RHOHV_MEAN_INTEREST_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[38].name = tdrpStrDup("PHIDP_SDEV_INTEREST_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[38].val = PHIDP_SDEV_INTEREST_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[39].name = tdrpStrDup("ZDR_SDEV_INTEREST_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[39].val = ZDR_SDEV_INTEREST_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[40].name = tdrpStrDup("DBZ_ELEV_GRADIENT_INTEREST_SEACLUT");
+        tt->struct_def.fields[0].enum_def.fields[40].val = DBZ_ELEV_GRADIENT_INTEREST_SEACLUT;
+        tt->struct_def.fields[0].enum_def.fields[41].name = tdrpStrDup("SEACLUT_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[41].val = SEACLUT_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[42].name = tdrpStrDup("PARTICLE_ID");
+        tt->struct_def.fields[0].enum_def.fields[42].val = PARTICLE_ID;
+        tt->struct_def.fields[0].enum_def.fields[43].name = tdrpStrDup("TEMP_FOR_PID");
+        tt->struct_def.fields[0].enum_def.fields[43].val = TEMP_FOR_PID;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
@@ -2776,11 +2422,11 @@ using namespace std;
       tt->struct_vals[62].d = 0;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("OUTPUT FILE FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2837,11 +2483,11 @@ using namespace std;
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2882,11 +2528,11 @@ using namespace std;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("VOLUME OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;

@@ -104,33 +104,19 @@ public:
     PHIDP_FILT_FOR_KDP = 28,
     PHIDP_COND_FOR_KDP = 29,
     PHIDP_COND_FILT_FOR_KDP = 30,
-    SNR_RLAN = 31,
-    SNR_MODE_RLAN = 32,
-    SNR_DMODE_RLAN = 33,
-    ZDR_SDEV_RLAN = 34,
-    NCP_MEAN_RLAN = 35,
-    WIDTH_MEAN_RLAN = 36,
-    PHASE_RLAN = 37,
-    PHASE_NOISE_RLAN = 38,
-    PHASE_NOISE_INTEREST_RLAN = 39,
-    NCP_MEAN_INTEREST_RLAN = 40,
-    WIDTH_MEAN_INTEREST_RLAN = 41,
-    SNR_DMODE_INTEREST_RLAN = 42,
-    ZDR_SDEV_INTEREST_RLAN = 43,
-    RLAN_FLAG = 44,
-    RAY_HEIGHT = 45,
-    SNR_MEAN_SEACLUT = 46,
-    RHOHV_MEAN_SEACLUT = 47,
-    PHIDP_SDEV_SEACLUT = 48,
-    ZDR_SDEV_SEACLUT = 49,
-    DBZ_ELEV_GRADIENT_SEACLUT = 50,
-    RHOHV_MEAN_INTEREST_SEACLUT = 51,
-    PHIDP_SDEV_INTEREST_SEACLUT = 52,
-    ZDR_SDEV_INTEREST_SEACLUT = 53,
-    DBZ_ELEV_GRADIENT_INTEREST_SEACLUT = 54,
-    SEACLUT_FLAG = 55,
-    PARTICLE_ID = 56,
-    TEMP_FOR_PID = 57
+    RAY_HEIGHT = 31,
+    SNR_MEAN_SEACLUT = 32,
+    RHOHV_MEAN_SEACLUT = 33,
+    PHIDP_SDEV_SEACLUT = 34,
+    ZDR_SDEV_SEACLUT = 35,
+    DBZ_ELEV_GRADIENT_SEACLUT = 36,
+    RHOHV_MEAN_INTEREST_SEACLUT = 37,
+    PHIDP_SDEV_INTEREST_SEACLUT = 38,
+    ZDR_SDEV_INTEREST_SEACLUT = 39,
+    DBZ_ELEV_GRADIENT_INTEREST_SEACLUT = 40,
+    SEACLUT_FLAG = 41,
+    PARTICLE_ID = 42,
+    TEMP_FOR_PID = 43
   } output_field_id_t;
 
   typedef enum {
@@ -599,43 +585,6 @@ public:
 
   double zdr_attenuation_exponent;
 
-  tdrp_bool_t locate_rlan_interference;
-
-  interest_map_point_t *_rlan_phase_noise_interest_map;
-  int rlan_phase_noise_interest_map_n;
-
-  double rlan_phase_noise_weight;
-
-  interest_map_point_t *_rlan_ncp_mean_interest_map;
-  int rlan_ncp_mean_interest_map_n;
-
-  double rlan_ncp_mean_weight;
-
-  interest_map_point_t *_rlan_width_mean_interest_map;
-  int rlan_width_mean_interest_map_n;
-
-  double rlan_width_mean_weight;
-
-  interest_map_point_t *_rlan_snr_dmode_interest_map;
-  int rlan_snr_dmode_interest_map_n;
-
-  double rlan_snr_dmode_weight;
-
-  interest_map_point_t *_rlan_zdr_sdev_interest_map;
-  int rlan_zdr_sdev_interest_map_n;
-
-  double rlan_zdr_sdev_weight;
-
-  double rlan_min_ray_snr_db;
-
-  double rlan_min_ray_snr_for_zdr_sdev_db;
-
-  double rlan_min_ray_fraction;
-
-  double rlan_max_elev_deg;
-
-  double rlan_interest_threshold;
-
   tdrp_bool_t locate_sea_clutter;
 
   tdrp_bool_t override_standard_pseudo_earth_radius;
@@ -774,7 +723,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[161];
+  mutable TDRPtable _table[144];
 
   const char *_className;
 

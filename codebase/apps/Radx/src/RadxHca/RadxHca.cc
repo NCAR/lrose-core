@@ -114,17 +114,6 @@ RadxHca::RadxHca(int argc, char **argv)
     }
   }
 
-  if (_params.locate_rlan_interference) {
-    if (!_params.NCP_available && !_params.WIDTH_available) {
-      cerr << "ERROR: " << _progName << endl;
-      cerr << "  Problem with TDRP parameters." << endl;
-      cerr << "  You have locate_rlan_interference set to TRUE" << endl;
-      cerr << "  but neither WIDTH or NCP is avaiable." << endl;
-      cerr << "  You need either NCP or WIDTH for RLAN location." << endl;
-      OK = FALSE;
-    }
-  }
-
   // initialize compute object
 
   pthread_mutex_init(&_debugPrintMutex, NULL);
@@ -430,9 +419,7 @@ int RadxHca::_processFile(const string &filePath)
                          _params.radar_longitude_deg,
                          _params.radar_altitude_meters / 1000.0);
   }
-  if (_params.locate_rlan_interference) {
-    vol.estimateSweepNyquistFromVel(_params.VEL_field_name);
-  }
+  vol.estimateSweepNyquistFromVel(_params.VEL_field_name);
 
   // set radar properties
 

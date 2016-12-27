@@ -67,10 +67,6 @@ ComputeEngine::ComputeEngine(const Params &params,
     OK = false;
   }
 
-  if (_rlanInit()) {
-    OK = false;
-  }
-
   if (_seaclutInit()) {
     OK = false;
   }
@@ -136,12 +132,6 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
   // compute kdp if needed
   
   _kdpCompute();
-
-  // locate RLAN interference
-
-  if (_params.locate_rlan_interference) {
-    _locateRlan();
-  }
 
   // locate sea clutter
 
@@ -356,55 +346,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
               _zdrArray[igate] != missingDbl) {
             *datp = zdrAtten[igate] + _zdrArray[igate];
           }
-          break;
-
-        case Params::SNR_RLAN:
-          *datp = snrRlan[igate];
-          break;
-        case Params::SNR_MODE_RLAN:
-          *datp = snrModeRlan[igate];
-          break;
-        case Params::SNR_DMODE_RLAN:
-          *datp = snrDModeRlan[igate];
-          break;
-        case Params::ZDR_SDEV_RLAN:
-          *datp = zdrSdevRlan[igate];
-          break;
-        case Params::NCP_MEAN_RLAN:
-          *datp = ncpMeanRlan[igate];
-          break;
-        case Params::WIDTH_MEAN_RLAN:
-          *datp = widthMeanRlan[igate];
-          break;
-        case Params::PHASE_RLAN:
-          *datp = phaseRlan[igate];
-          break;
-        case Params::PHASE_NOISE_RLAN:
-          *datp = phaseNoiseRlan[igate];
-          break;
-
-        case Params::RLAN_FLAG:
-          if (rlanFlag[igate]) {
-            *datp = 1.0;
-          } else {
-            *datp = 0.0;
-          }
-          break;
-
-        case Params::PHASE_NOISE_INTEREST_RLAN:
-          *datp = phaseNoiseInterestRlan[igate];
-          break;
-        case Params::NCP_MEAN_INTEREST_RLAN:
-          *datp = ncpMeanInterestRlan[igate];
-          break;
-        case Params::WIDTH_MEAN_INTEREST_RLAN:
-          *datp = widthMeanInterestRlan[igate];
-          break;
-        case Params::SNR_DMODE_INTEREST_RLAN:
-          *datp = snrDModeInterestRlan[igate];
-          break;
-        case Params::ZDR_SDEV_INTEREST_RLAN:
-          *datp = zdrSdevInterestRlan[igate];
           break;
 
         case Params::RAY_HEIGHT:
@@ -633,132 +574,6 @@ void ComputeEngine::_kdpCompute()
 }
 
 //////////////////////////////////////
-// Initialize RLAN interference
-
-int ComputeEngine::_rlanInit()
-  
-{
-
-  int iret = 0;
-
-  _intf.setMinRaySnr(_params.rlan_min_ray_snr_db);
-  _intf.setMinRayFraction(_params.rlan_min_ray_fraction);
-  _intf.setMinRaySnrForZdr(_params.rlan_min_ray_snr_for_zdr_sdev_db);
-  _intf.setMaxElevDeg(_params.rlan_max_elev_deg);
-
-  // set up interest maps for RLAN interference
-
-  if (_convertInterestParamsToVector
-      ("rlan_phase_noise",
-       _params._rlan_phase_noise_interest_map,
-       _params.rlan_phase_noise_interest_map_n,
-       _rlanImapPhaseNoise)) {
-    iret = -1;
-  } else {
-    _intf.setInterestMapPhaseNoise(_rlanImapPhaseNoise,
-                                   _params.rlan_phase_noise_weight);
-  }
-  
-  if (_convertInterestParamsToVector
-      ("rlan_ncp_mean",
-       _params._rlan_ncp_mean_interest_map,
-       _params.rlan_ncp_mean_interest_map_n,
-       _rlanImapNcpMean)) {
-    iret = -1;
-  } else {
-    _intf.setInterestMapNcpMean(_rlanImapNcpMean,
-                                _params.rlan_ncp_mean_weight);
-  }
-  
-  if (_convertInterestParamsToVector
-      ("rlan_width_mean",
-       _params._rlan_width_mean_interest_map,
-       _params.rlan_width_mean_interest_map_n,
-       _rlanImapWidthMean)) {
-    iret = -1;
-  } else {
-    _intf.setInterestMapWidthMean(_rlanImapWidthMean,
-                                  _params.rlan_width_mean_weight);
-  }
-  
-  if (_convertInterestParamsToVector
-      ("rlan_snr_dmode",
-       _params._rlan_snr_dmode_interest_map,
-       _params.rlan_snr_dmode_interest_map_n,
-       _rlanImapSnrDMode)) {
-    iret = -1;
-  } else {
-    _intf.setInterestMapSnrDMode(_rlanImapSnrDMode,
-                                 _params.rlan_snr_dmode_weight);
-  }
-  _intf.setRlanInterestThreshold(_params.rlan_interest_threshold);
-
-  if (_convertInterestParamsToVector
-      ("rlan_zdr_sdev",
-       _params._rlan_zdr_sdev_interest_map,
-       _params.rlan_zdr_sdev_interest_map_n,
-       _rlanImapZdrSdev)) {
-    iret = -1;
-  } else {
-    _intf.setInterestMapZdrSdev(_rlanImapZdrSdev,
-                                _params.rlan_zdr_sdev_weight);
-  }
-
-  return iret;
-
-}
-
-//////////////////////////////////////
-// Locate RLAN interference
-
-void ComputeEngine::_locateRlan()
-  
-{
-
-  // set up RLAN
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _intf.setDebug(true);
-  }
-
-  _intf.setNGatesKernel(9);
-  _intf.setWavelengthM(_wavelengthM);
-  _intf.setRadarHtM(_radarHtKm * 1000.0);
-
-  _intf.setRayProps(_timeSecs,
-                    _nanoSecs,
-                    _elevation,
-                    _azimuth,
-                    _nGates,
-                    _startRangeKm,
-                    _gateSpacingKm);
-
-  _intf.setFieldMissingVal(missingDbl);
-  
-  _intf.setVelField(_velArray, _nyquist);
-
-  if (_params.NCP_available) {
-    _intf.setNcpField(_ncpArray);
-  }
-  if (_params.WIDTH_available) {
-    _intf.setWidthField(_widthArray);
-  }
-
-  if (_params.SNR_available) {
-    _intf.setSnrField(_snrArray);
-  } else {
-    _intf.setDbzField(_dbzArray, _params.noise_dbz_at_100km);
-  }
-
-  _intf.setZdrField(_zdrArray);
-
-  // locate RLAN interference
-
-  _intf.rlanLocate();
-
-}
-
-//////////////////////////////////////
 // Initialize Sea Clutter
 
 int ComputeEngine::_seaclutInit()
@@ -829,7 +644,7 @@ void ComputeEngine::_locateSeaClutter()
   
 {
 
-  // set up RLAN
+  // set up sea clut
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _seaclut.setDebug(true);
@@ -865,7 +680,7 @@ void ComputeEngine::_locateSeaClutter()
     _seaclut.setDbzElevGradientField(_dbzElevGradientArray);
   }
 
-  // locate RLAN interference
+  // locate seaclutter
 
   _seaclut.locate();
 
