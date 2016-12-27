@@ -947,7 +947,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Is WIDTH data available?");
     tt->help = tdrpStrDup("If NCP is not available, this field is used for locating RLAN interference.");
     tt->val_offset = (char *) &WIDTH_available - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'WIDTH_field_name'
@@ -1317,7 +1317,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Option to apply precip attenuation correction for DBZ and ZDR.");
     tt->help = tdrpStrDup("The following extra fields will be computed:\n\tDBZ_ATTEN_CORRECTION - correction in dB\n\tZDR_ATTEN_CORRECTION - correction in dB\n\tDBZ_ATTEN_CORRECTED - DBZHC corrected\n\tZDR_ATTEN_CORRECTED - ZDR corrected\n");
     tt->val_offset = (char *) &apply_precip_attenuation_correction - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'specify_coefficients_for_attenuation_correction'

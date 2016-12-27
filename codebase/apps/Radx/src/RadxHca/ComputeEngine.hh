@@ -43,7 +43,6 @@
 #include <radar/NcarParticleId.hh>
 #include <radar/TempProfile.hh>
 #include <radar/AtmosAtten.hh>
-#include <radar/IntfLocator.hh>
 #include <radar/SeaClutter.hh>
 #include <radar/PhidpProc.hh>
 #include <Radx/RadxArray.hh>
@@ -155,15 +154,6 @@ private:
   // temperature profile
 
   const TempProfile *_tempProfile;
-
-  // RLAN interference
-
-  IntfLocator _intf;
-  vector<InterestMap::ImPoint> _rlanImapPhaseNoise;
-  vector<InterestMap::ImPoint> _rlanImapNcpMean;
-  vector<InterestMap::ImPoint> _rlanImapWidthMean;
-  vector<InterestMap::ImPoint> _rlanImapSnrDMode;
-  vector<InterestMap::ImPoint> _rlanImapZdrSdev;
 
   // sea clutter
 

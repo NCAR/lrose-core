@@ -200,23 +200,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *dbzAtten = _kdp.getDbzAttenCorr();
   const double *zdrAtten = _kdp.getZdrAttenCorr();
   
-  const double *snrRlan = _intf.getSnr();
-  const double *snrModeRlan = _intf.getSnrMode();
-  const double *snrDModeRlan = _intf.getSnrDMode();
-  const double *zdrSdevRlan = _intf.getZdrSdev();
-  const double *ncpMeanRlan = _intf.getNcpMean();
-  const double *widthMeanRlan = _intf.getWidthMean();
-  const double *phaseRlan = _intf.getPhase();
-  const double *phaseNoiseRlan = _intf.getPhaseNoise();
-
-  const double *phaseNoiseInterestRlan = _intf.getPhaseNoiseInterest();
-  const double *ncpMeanInterestRlan = _intf.getNcpMeanInterest();
-  const double *widthMeanInterestRlan = _intf.getWidthMeanInterest();
-  const double *snrDModeInterestRlan = _intf.getSnrDModeInterest();
-  const double *zdrSdevInterestRlan = _intf.getZdrSdevInterest();
-
-  const bool *rlanFlag = _intf.getRlanFlag();
-  
   const double *snrMeanSeaclut = _seaclut.getSnrMean();
   const double *rhohvMeanSeaclut = _seaclut.getRhohvMean();
   const double *phidpSdevSeaclut = _seaclut.getPhidpSdev();
