@@ -73,7 +73,7 @@ public:
   } fir_filter_len_t;
 
   typedef enum {
-    ID_GC_AP = 0,
+    ID_GC = 0,
     ID_BS = 1,
     ID_DS = 2,
     ID_WS = 3,
