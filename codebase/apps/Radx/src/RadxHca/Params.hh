@@ -73,25 +73,25 @@ public:
   } fir_filter_len_t;
 
   typedef enum {
-    ID_GC = 1,
-    ID_BS = 2,
-    ID_DS = 3,
-    ID_WS = 4,
-    ID_CR = 5,
-    ID_GR = 6,
-    ID_BD = 7,
-    ID_RA = 8,
-    ID_HR = 9,
-    ID_RH = 10
-  } hca_id_t;
+    CLASS_GC = 0,
+    CLASS_BS = 1,
+    CLASS_DS = 2,
+    CLASS_WS = 3,
+    CLASS_CR = 4,
+    CLASS_GR = 5,
+    CLASS_BD = 6,
+    CLASS_RA = 7,
+    CLASS_HR = 8,
+    CLASS_RH = 9
+  } hca_class_t;
 
   typedef enum {
-    FEATURE_DBZ = 1,
-    FEATURE_ZDR = 2,
-    FEATURE_RHOHV = 3,
-    FEATURE_LOG_KDP = 4,
-    FEATURE_SD_DBZ = 5,
-    FEATURE_SD_PHIDP = 6
+    FEATURE_DBZ = 0,
+    FEATURE_ZDR = 1,
+    FEATURE_RHOHV = 2,
+    FEATURE_LOG_KDP = 3,
+    FEATURE_SD_DBZ = 4,
+    FEATURE_SD_PHIDP = 5
   } feature_field_t;
 
   typedef enum {
@@ -184,8 +184,8 @@ public:
   } interest_map_point_t;
 
   typedef struct {
-    hca_id_t id;
-    feature_field_t field;
+    hca_class_t hca_class;
+    feature_field_t feature;
     double x1;
     double x2;
     double x3;

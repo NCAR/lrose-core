@@ -114,9 +114,16 @@ RadxHca::RadxHca(int argc, char **argv)
     }
   }
 
-  // create the interst maps
+  // create the interest maps
 
-  _createInterestMaps();
+  _initInterestMaps();
+  if (_createInterestMaps()) {
+    OK = FALSE;
+  } else {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      _printInterestMaps(cerr);
+    }
+  }
 
   // initialize compute object
 
@@ -209,8 +216,10 @@ RadxHca::~RadxHca()
 
   // clean up other elements
 
-  for (size_t ii = 0; ii < _imaps.size(); ii++) {
-    delete _imaps[ii];
+  for (size_t ii = 0; ii < nClasses; ii++) {
+    for (size_t jj = 0; jj < nFeatures; jj++) {
+      delete _imaps[ii][jj];
+    }
   }
 
   // unregister process
@@ -1564,41 +1573,125 @@ void RadxHca::_printRunTime(const string& str)
   _timeA.tv_usec = tvb.tv_usec;
 }
 
+/////////////////////////////////////
+// initialize interest maps to NULL
+
+void RadxHca::_initInterestMaps()
+  
+{
+  
+  for (size_t iclass = 0; iclass < nClasses; iclass++) {
+    for (size_t ifeature = 0; ifeature < nFeatures; ifeature++) {
+      _imaps[iclass][ifeature] = NULL;
+    }
+  }
+
+}
+
 ///////////////////////////////////////////////////////////////////
 // Create the interest maps
 
-void RadxHca::_createInterestMaps()
+int RadxHca::_createInterestMaps()
 {
 
-  // clean up any existing maps
+  int iret = 0;
 
-  for (size_t ii = 0; ii < _imaps.size(); ii++) {
-    delete _imaps[ii];
+  // clean up any existing maps
+  
+  _deleteInterestMaps();
+
+  for (int imap = 0; imap < _params.hca_interest_maps_n; imap++) {
+    
+    const Params::hca_interest_map_t &pmap = _params._hca_interest_maps[imap];
+
+    if (_imaps[pmap.hca_class][pmap.feature] != NULL) {
+      cerr << "ERROR - duplicate interest map" << endl;
+      cerr << "                  class   : "
+           << HcaInterestMap::hcaClassToStr(pmap.hca_class) << endl;
+      cerr << "                  feature : " 
+           << HcaInterestMap::hcaFeatureToStr(pmap.feature) << endl;
+      iret = -1;
+    } else {
+      string label = HcaInterestMap::hcaClassToStr(pmap.hca_class);
+      label += "-";
+      label += HcaInterestMap::hcaFeatureToStr(pmap.feature);
+      vector<HcaInterestMap::ImPoint> map;
+      map.push_back(HcaInterestMap::ImPoint(pmap.x1, 0.0));
+      map.push_back(HcaInterestMap::ImPoint(pmap.x2, 1.0));
+      map.push_back(HcaInterestMap::ImPoint(pmap.x3, 1.0));
+      map.push_back(HcaInterestMap::ImPoint(pmap.x4, 0.0));
+      _imaps[pmap.hca_class][pmap.feature] =
+        new HcaInterestMap(label, pmap.hca_class, pmap.feature, map, pmap.weight);
+    }
+  
+  } // imap
+
+  return iret;
+
+}
+
+////////////////////////////////////////////
+// check that all interest maps are non-NULL
+
+int RadxHca::_checkInterestMaps()
+  
+{
+  
+  int iret = 0;
+
+  for (size_t iclass = 0; iclass < nClasses; iclass++) {
+    for (size_t ifeature = 0; ifeature < nFeatures; ifeature++) {
+      if (_imaps[iclass][ifeature] == NULL) {
+        cerr << "ERROR - RadxHca::_checkInterestMaps()" << endl;
+        cerr << "  Missing interest map" << endl;
+        cerr << "                  class   : "
+             << HcaInterestMap::hcaClassToStr(iclass) << endl;
+        cerr << "                  feature : " 
+             << HcaInterestMap::hcaFeatureToStr(ifeature) << endl;
+        iret = -1;
+      }
+    }
   }
 
-  for (int ii = 0; ii < _params.hca_interest_maps_n; ii++) {
+  return iret;
 
-    const Params::hca_interest_map_t &pmap = _params._hca_interest_maps[ii];
+}
+
+/////////////////////////////////////
+// print all interest maps
+
+void RadxHca::_printInterestMaps(ostream &out)
   
-    // switch (pmap.id) {
-    //   case Params::ID_GC:
-    //     break;
-    //     ID_BS = 1,
-    //     ID_DS = 2,
-    //     ID_WS = 3,
-    //     ID_CR = 4,
-    //     ID_GR = 5,
-    //     ID_BD = 6,
-    //     ID_RA = 7,
-    //     ID_HR = 8,
-    //     ID_RH = 9
-      
-    // }
+{
+  
+  out << "=============================================" << endl;
+  for (size_t iclass = 0; iclass < nClasses; iclass++) {
+    for (size_t ifeature = 0; ifeature < nFeatures; ifeature++) {
+      if (_imaps[iclass][ifeature] != NULL) {
+        if (_imaps[iclass][ifeature] != NULL) {
+          _imaps[iclass][ifeature]->printParams(out);
+        }
+      }
+    }
+  }
+  out << "=============================================" << endl;
 
-    // if (pmap.id == Params::ID_GC && pmap.field == Params::FEATURE_DBZ) {
-    //   imapGcDbz = new HcaInterestMap(pmap.ID_GC, 
+}
 
-  } // ii
+/////////////////////////////////////
+// delete all interest maps
+
+void RadxHca::_deleteInterestMaps()
+  
+{
+  
+  for (size_t iclass = 0; iclass < nClasses; iclass++) {
+    for (size_t ifeature = 0; ifeature < nFeatures; ifeature++) {
+      if (_imaps[iclass][ifeature] != NULL) {
+        delete _imaps[iclass][ifeature];
+      }
+    }
+  }
 
 }
 

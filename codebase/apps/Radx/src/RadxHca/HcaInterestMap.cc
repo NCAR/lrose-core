@@ -47,15 +47,15 @@ using namespace std;
 // Constructor
 
 HcaInterestMap::HcaInterestMap(const string &label,
-                               Params::hca_id_t id,
-                               Params::feature_field_t field,
+                               Params::hca_class_t hcaClass,
+                               Params::feature_field_t feature,
                                const vector<ImPoint> &map,
                                double weight) :
         _label(label),
         _map(map),
         _weight(weight),
-        _id(id),
-        _field(field)
+        _hcaClass(hcaClass),
+        _feature(feature)
 
 {
   
@@ -238,61 +238,10 @@ void HcaInterestMap::printParams(ostream &out)
   
 {
 
-  out << "=============================================" << endl;
+  out << "---------------------------------------------" << endl;
   out << "Interest map: " << _label << endl;
-
-  switch (_id) {
-    case Params::ID_GC:
-      out << "      id: GC" << endl;
-      break;
-    case Params::ID_BS:
-      out << "      id: BS" << endl;
-      break;
-    case Params::ID_DS:
-      out << "      id: DS" << endl;
-      break;
-    case Params::ID_WS:
-      out << "      id: WS" << endl;
-      break;
-    case Params::ID_CR:
-      out << "      id: CR" << endl;
-      break;
-    case Params::ID_GR:
-      out << "      id: GR" << endl;
-      break;
-    case Params::ID_BD:
-      out << "      id: BD" << endl;
-      break;
-    case Params::ID_RA:
-      out << "      id: RA" << endl;
-      break;
-    case Params::ID_HR:
-      out << "      id: HR" << endl;
-      break;
-    case Params::ID_RH:
-      out << "      id: RH" << endl;
-  }
-
-  switch (_field) {
-    case Params::FEATURE_DBZ:
-      out << "      feature field: DBZ" << endl;
-      break;
-    case Params::FEATURE_ZDR:
-      out << "      feature field: ZDR" << endl;
-      break;
-    case Params::FEATURE_RHOHV:
-      out << "      feature field: RHOHV" << endl;
-      break;
-    case Params::FEATURE_LOG_KDP:
-      out << "      feature field: LOG_KDP" << endl;
-      break;
-    case Params::FEATURE_SD_DBZ:
-      out << "      feature field: SD_DBZ" << endl;
-      break;
-    case Params::FEATURE_SD_PHIDP:
-      out << "      feature field: SD_PHIDP" << endl;
-  }
-
+  out << "       class: " << hcaClassToStr(_hcaClass) << endl;
+  out << "     feature: " << hcaFeatureToStr(_feature) << endl;
   out << "      weight: " << _weight << endl;
   out << "      points: " << endl;
 
@@ -308,3 +257,71 @@ void HcaInterestMap::printParams(ostream &out)
   }
 
 }
+
+/////////////////////////////////
+// get string for classification
+
+string HcaInterestMap::hcaClassToStr(int hcaClass)
+{
+  switch ((Params::hca_class_t) hcaClass) {
+    case Params::CLASS_GC:
+      return "GC";
+      break;
+    case Params::CLASS_BS:
+      return "BS";
+      break;
+    case Params::CLASS_DS:
+      return "DS";
+      break;
+    case Params::CLASS_WS:
+      return "WS";
+      break;
+    case Params::CLASS_CR:
+      return "CR";
+      break;
+    case Params::CLASS_GR:
+      return "GR";
+      break;
+    case Params::CLASS_BD:
+      return "BD";
+      break;
+    case Params::CLASS_RA:
+      return "RA";
+      break;
+    case Params::CLASS_HR:
+      return "HR";
+      break;
+    case Params::CLASS_RH:
+      return "RH";
+  }
+  return "UNKNOWN";
+}
+
+/////////////////////////////////
+// get string for featureification
+
+string HcaInterestMap::hcaFeatureToStr(int hcaFeature)
+{
+  switch ((Params::feature_field_t) hcaFeature) {
+    case Params::FEATURE_DBZ:
+      return "DBZ";
+      break;
+    case Params::FEATURE_ZDR:
+      return "ZDR";
+      break;
+    case Params::FEATURE_RHOHV:
+      return "RHOHV";
+      break;
+    case Params::FEATURE_LOG_KDP:
+      return "LOG_KDP";
+      break;
+    case Params::FEATURE_SD_DBZ:
+      return "SD_DBZ";
+      break;
+    case Params::FEATURE_SD_PHIDP:
+      return "SD_PHIPD";
+      break;
+  }
+  return "UNKNOWN";
+}
+

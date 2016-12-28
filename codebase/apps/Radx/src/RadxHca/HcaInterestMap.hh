@@ -62,8 +62,8 @@ public:
   };
 
   HcaInterestMap(const string &label,
-                 Params::hca_id_t id,
-                 Params::feature_field_t field,
+                 Params::hca_class_t hcaClass,
+                 Params::feature_field_t feature,
                  const vector<ImPoint> &map,
                  double weight);
   
@@ -86,6 +86,14 @@ public:
   
   void printParams(ostream &out);
   
+  // get string for classification
+  
+  static string hcaClassToStr(int hcaClass);
+
+  // get string for feature field
+  
+  static string hcaFeatureToStr(int hcaFeature);
+
 protected:
 private:
   
@@ -96,8 +104,8 @@ private:
   vector<ImPoint> _map;
   double _weight;
 
-  Params::hca_id_t _id;
-  Params::feature_field_t _field;
+  Params::hca_class_t _hcaClass;
+  Params::feature_field_t _feature;
 
   bool _mapLoaded;
   double _minVal;

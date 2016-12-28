@@ -139,9 +139,11 @@ private:
   struct timeval _timeA;
 
   // interest maps
+
+  static const size_t nClasses = 10;
+  static const size_t nFeatures = 6;
   
-  HcaInterestMap *_imapGcDbz;
-  vector<HcaInterestMap *> _imaps;
+  HcaInterestMap* _imaps[nClasses][nFeatures];
 
   // private methods
   
@@ -173,7 +175,11 @@ private:
   void _copyDbzGradient(const RadxRay &lowerRay, RadxRay &upperRay);
   void _printRunTime(const string& str);
 
-  void _createInterestMaps();
+  void _initInterestMaps();
+  int _createInterestMaps();
+  int _checkInterestMaps();
+  void _printInterestMaps(ostream &out);
+  void _deleteInterestMaps();
   
 };
 
