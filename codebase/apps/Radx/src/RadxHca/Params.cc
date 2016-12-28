@@ -1704,7 +1704,205 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 12");
-    tt->comment_hdr = tdrpStrDup("COMPUTING PID - HYDROMETEOR PARTICLE ID");
+    tt->comment_hdr = tdrpStrDup("COMPUTING WSR88D HCA - HYDROMETEOR PARTICLE ID");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'compute_hca'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("compute_hca");
+    tt->descr = tdrpStrDup("Option to compute HCA classification.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &compute_hca - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'Comment 13'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 13");
+    tt->comment_hdr = tdrpStrDup("Classification types");
+    tt->comment_text = tdrpStrDup("There are 10 classification types:\n\tGC_AP: ground clutter or AP\n\tBS: biological scatterers\n\tDS: dry aggregated snow\n\tWS: wet snow\n\tCR: crystals of various orientations\n\tGR: graupel\n\tBD: big drops\n\tRA: light to moderate rain\n\tHR: heavy rain\n\tRH: mixture of rain and hail.");
+    tt++;
+    
+    // Parameter 'hca_interest_maps'
+    // ctype is '_hca_interest_map_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("hca_interest_maps");
+    tt->descr = tdrpStrDup("Interest maps to convert feature fields into interest");
+    tt->help = tdrpStrDup("There should be 1 entry for each id/feature pair - i.e. 60 entries.");
+    tt->array_offset = (char *) &_hca_interest_maps - &_start_;
+    tt->array_n_offset = (char *) &hca_interest_maps_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(hca_interest_map_t);
+    tt->array_n = 10;
+    tt->struct_def.name = tdrpStrDup("hca_interest_map_t");
+    tt->struct_def.nfields = 7;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("hca_id_t");
+      tt->struct_def.fields[0].fname = tdrpStrDup("id");
+      tt->struct_def.fields[0].ptype = ENUM_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_hca_interest_maps->id - (char *) _hca_interest_maps;
+        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("hca_id_t");
+        tt->struct_def.fields[0].enum_def.nfields = 10;
+        tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("ID_GC_AP");
+        tt->struct_def.fields[0].enum_def.fields[0].val = ID_GC_AP;
+        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("ID_BS");
+        tt->struct_def.fields[0].enum_def.fields[1].val = ID_BS;
+        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("ID_DS");
+        tt->struct_def.fields[0].enum_def.fields[2].val = ID_DS;
+        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("ID_WS");
+        tt->struct_def.fields[0].enum_def.fields[3].val = ID_WS;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("ID_CR");
+        tt->struct_def.fields[0].enum_def.fields[4].val = ID_CR;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("ID_GR");
+        tt->struct_def.fields[0].enum_def.fields[5].val = ID_GR;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("ID_BD");
+        tt->struct_def.fields[0].enum_def.fields[6].val = ID_BD;
+        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("ID_RA");
+        tt->struct_def.fields[0].enum_def.fields[7].val = ID_RA;
+        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("ID_HR");
+        tt->struct_def.fields[0].enum_def.fields[8].val = ID_HR;
+        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("ID_RH");
+        tt->struct_def.fields[0].enum_def.fields[9].val = ID_RH;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("feature_field_t");
+      tt->struct_def.fields[1].fname = tdrpStrDup("field");
+      tt->struct_def.fields[1].ptype = ENUM_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_hca_interest_maps->field - (char *) _hca_interest_maps;
+        tt->struct_def.fields[1].enum_def.name = tdrpStrDup("feature_field_t");
+        tt->struct_def.fields[1].enum_def.nfields = 6;
+        tt->struct_def.fields[1].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[1].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[1].enum_def.fields[0].name = tdrpStrDup("FEATURE_DBZ");
+        tt->struct_def.fields[1].enum_def.fields[0].val = FEATURE_DBZ;
+        tt->struct_def.fields[1].enum_def.fields[1].name = tdrpStrDup("FEATURE_ZDR");
+        tt->struct_def.fields[1].enum_def.fields[1].val = FEATURE_ZDR;
+        tt->struct_def.fields[1].enum_def.fields[2].name = tdrpStrDup("FEATURE_RHOHV");
+        tt->struct_def.fields[1].enum_def.fields[2].val = FEATURE_RHOHV;
+        tt->struct_def.fields[1].enum_def.fields[3].name = tdrpStrDup("FEATURE_LOG_KDP");
+        tt->struct_def.fields[1].enum_def.fields[3].val = FEATURE_LOG_KDP;
+        tt->struct_def.fields[1].enum_def.fields[4].name = tdrpStrDup("FEATURE_SD_DBZ");
+        tt->struct_def.fields[1].enum_def.fields[4].val = FEATURE_SD_DBZ;
+        tt->struct_def.fields[1].enum_def.fields[5].name = tdrpStrDup("FEATURE_SD_PHIDP");
+        tt->struct_def.fields[1].enum_def.fields[5].val = FEATURE_SD_PHIDP;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("x1");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_hca_interest_maps->x1 - (char *) _hca_interest_maps;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("x2");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_hca_interest_maps->x2 - (char *) _hca_interest_maps;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("x3");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_hca_interest_maps->x3 - (char *) _hca_interest_maps;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[5].fname = tdrpStrDup("x4");
+      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &_hca_interest_maps->x4 - (char *) _hca_interest_maps;
+      tt->struct_def.fields[6].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[6].fname = tdrpStrDup("weight");
+      tt->struct_def.fields[6].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[6].rel_offset = 
+        (char *) &_hca_interest_maps->weight - (char *) _hca_interest_maps;
+    tt->n_struct_vals = 70;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].e = ID_GC_AP;
+      tt->struct_vals[1].e = FEATURE_DBZ;
+      tt->struct_vals[2].d = 15;
+      tt->struct_vals[3].d = 20;
+      tt->struct_vals[4].d = 70;
+      tt->struct_vals[5].d = 80;
+      tt->struct_vals[6].d = 0.2;
+      tt->struct_vals[7].e = ID_BS;
+      tt->struct_vals[8].e = FEATURE_DBZ;
+      tt->struct_vals[9].d = 5;
+      tt->struct_vals[10].d = 10;
+      tt->struct_vals[11].d = 20;
+      tt->struct_vals[12].d = 30;
+      tt->struct_vals[13].d = 0.4;
+      tt->struct_vals[14].e = ID_DS;
+      tt->struct_vals[15].e = FEATURE_DBZ;
+      tt->struct_vals[16].d = 5;
+      tt->struct_vals[17].d = 10;
+      tt->struct_vals[18].d = 35;
+      tt->struct_vals[19].d = 40;
+      tt->struct_vals[20].d = 1;
+      tt->struct_vals[21].e = ID_WS;
+      tt->struct_vals[22].e = FEATURE_DBZ;
+      tt->struct_vals[23].d = 25;
+      tt->struct_vals[24].d = 30;
+      tt->struct_vals[25].d = 40;
+      tt->struct_vals[26].d = 50;
+      tt->struct_vals[27].d = 0.6;
+      tt->struct_vals[28].e = ID_CR;
+      tt->struct_vals[29].e = FEATURE_DBZ;
+      tt->struct_vals[30].d = 0;
+      tt->struct_vals[31].d = 5;
+      tt->struct_vals[32].d = 20;
+      tt->struct_vals[33].d = 25;
+      tt->struct_vals[34].d = 1;
+      tt->struct_vals[35].e = ID_GR;
+      tt->struct_vals[36].e = FEATURE_DBZ;
+      tt->struct_vals[37].d = 25;
+      tt->struct_vals[38].d = 35;
+      tt->struct_vals[39].d = 50;
+      tt->struct_vals[40].d = 55;
+      tt->struct_vals[41].d = 0.8;
+      tt->struct_vals[42].e = ID_BD;
+      tt->struct_vals[43].e = FEATURE_DBZ;
+      tt->struct_vals[44].d = 20;
+      tt->struct_vals[45].d = 25;
+      tt->struct_vals[46].d = 45;
+      tt->struct_vals[47].d = 50;
+      tt->struct_vals[48].d = 0.8;
+      tt->struct_vals[49].e = ID_RA;
+      tt->struct_vals[50].e = FEATURE_DBZ;
+      tt->struct_vals[51].d = 5;
+      tt->struct_vals[52].d = 10;
+      tt->struct_vals[53].d = 45;
+      tt->struct_vals[54].d = 50;
+      tt->struct_vals[55].d = 1;
+      tt->struct_vals[56].e = ID_HR;
+      tt->struct_vals[57].e = FEATURE_DBZ;
+      tt->struct_vals[58].d = 40;
+      tt->struct_vals[59].d = 45;
+      tt->struct_vals[60].d = 55;
+      tt->struct_vals[61].d = 60;
+      tt->struct_vals[62].d = 1;
+      tt->struct_vals[63].e = ID_RH;
+      tt->struct_vals[64].e = FEATURE_DBZ;
+      tt->struct_vals[65].d = 45;
+      tt->struct_vals[66].d = 50;
+      tt->struct_vals[67].d = 75;
+      tt->struct_vals[68].d = 80;
+      tt->struct_vals[69].d = 1;
+    tt++;
+    
+    // Parameter 'Comment 14'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 14");
+    tt->comment_hdr = tdrpStrDup("COMPUTING NCAR PID - HYDROMETEOR PARTICLE ID");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1936,11 +2134,11 @@ using namespace std;
     tt->single_val.i = 7;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("SOUNDING INPUT FOR PID temperature profile - OPTIONAL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2113,11 +2311,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("RETRIEVING SITE TEMPERATURE FROM SPDB");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2170,11 +2368,11 @@ using namespace std;
     tt->single_val.i = 3600;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("SPECIFYING FIELD NAMES AND OUTPUT ENCODING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2422,11 +2620,11 @@ using namespace std;
       tt->struct_vals[62].d = 0;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("OUTPUT FILE FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2483,11 +2681,11 @@ using namespace std;
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2528,11 +2726,11 @@ using namespace std;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("VOLUME OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;

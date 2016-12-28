@@ -73,6 +73,28 @@ public:
   } fir_filter_len_t;
 
   typedef enum {
+    ID_GC_AP = 0,
+    ID_BS = 1,
+    ID_DS = 2,
+    ID_WS = 3,
+    ID_CR = 4,
+    ID_GR = 5,
+    ID_BD = 6,
+    ID_RA = 7,
+    ID_HR = 8,
+    ID_RH = 9
+  } hca_id_t;
+
+  typedef enum {
+    FEATURE_DBZ = 0,
+    FEATURE_ZDR = 1,
+    FEATURE_RHOHV = 2,
+    FEATURE_LOG_KDP = 3,
+    FEATURE_SD_DBZ = 4,
+    FEATURE_SD_PHIDP = 5
+  } feature_field_t;
+
+  typedef enum {
     SNR = 0,
     DBZ = 1,
     VEL = 2,
@@ -160,6 +182,16 @@ public:
     double value;
     double interest;
   } interest_map_point_t;
+
+  typedef struct {
+    hca_id_t id;
+    feature_field_t field;
+    double x1;
+    double x2;
+    double x3;
+    double x4;
+    double weight;
+  } hca_interest_map_t;
 
   typedef struct {
     double min_val;
@@ -621,6 +653,11 @@ public:
 
   double seaclut_max_elev_deg;
 
+  tdrp_bool_t compute_hca;
+
+  hca_interest_map_t *_hca_interest_maps;
+  int hca_interest_maps_n;
+
   tdrp_bool_t compute_pid;
 
   char* pid_thresholds_file_path;
@@ -723,7 +760,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[144];
+  mutable TDRPtable _table[148];
 
   const char *_className;
 

@@ -538,7 +538,70 @@ paramdef double {
 } seaclut_max_elev_deg;
 
 commentdef {
-  p_header = "COMPUTING PID - HYDROMETEOR PARTICLE ID";
+  p_header = "COMPUTING WSR88D HCA - HYDROMETEOR PARTICLE ID";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to compute HCA classification.";
+} compute_hca;
+
+commentdef {
+  p_header = "Classification types";
+  p_text = "There are 10 classification types:\n\tGC_AP: ground clutter or AP\n\tBS: biological scatterers\n\tDS: dry aggregated snow\n\tWS: wet snow\n\tCR: crystals of various orientations\n\tGR: graupel\n\tBD: big drops\n\tRA: light to moderate rain\n\tHR: heavy rain\n\tRH: mixture of rain and hail.";
+}
+
+typedef enum {
+  ID_GC_AP,
+  ID_BS,
+  ID_DS,
+  ID_WS,
+  ID_CR,
+  ID_GR,
+  ID_BD,
+  ID_RA,
+  ID_HR,
+  ID_RH
+} hca_id_t;
+
+typedef enum {
+  FEATURE_DBZ,
+  FEATURE_ZDR,
+  FEATURE_RHOHV,
+  FEATURE_LOG_KDP,
+  FEATURE_SD_DBZ,
+  FEATURE_SD_PHIDP
+} feature_field_t;
+
+typedef struct {
+  hca_id_t id;
+  feature_field_t field;
+  double x1;
+  double x2;
+  double x3;
+  double x4;
+  double weight;
+} hca_interest_map_t;
+
+paramdef struct hca_interest_map_t {
+  p_default = {
+    { ID_GC_AP, FEATURE_DBZ,   15, 20, 70, 80, 0.2 },
+    { ID_BS,    FEATURE_DBZ,    5, 10, 20, 30, 0.4 },
+    { ID_DS,    FEATURE_DBZ,    5, 10, 35, 40, 1.0 },
+    { ID_WS,    FEATURE_DBZ,   25, 30, 40, 50, 0.6 },
+    { ID_CR,    FEATURE_DBZ,    0,  5, 20, 25, 1.0 },
+    { ID_GR,    FEATURE_DBZ,   25, 35, 50, 55, 0.8 },
+    { ID_BD,    FEATURE_DBZ,   20, 25, 45, 50, 0.8 },
+    { ID_RA,    FEATURE_DBZ,    5, 10, 45, 50, 1.0 },
+    { ID_HR,    FEATURE_DBZ,   40, 45, 55, 60, 1.0 },
+    { ID_RH,    FEATURE_DBZ,   45, 50, 75, 80, 1.0 }
+  };
+  p_descr = "Interest maps to convert feature fields into interest";
+  p_help = "There should be 1 entry for each id/feature pair - i.e. 60 entries.";
+} hca_interest_maps[];
+
+commentdef {
+  p_header = "COMPUTING NCAR PID - HYDROMETEOR PARTICLE ID";
 }
 
 paramdef boolean {
