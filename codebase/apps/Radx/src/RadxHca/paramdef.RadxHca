@@ -585,20 +585,76 @@ typedef struct {
 
 paramdef struct hca_interest_map_t {
   p_default = {
-    { ID_GC_AP, FEATURE_DBZ,   15, 20, 70, 80, 0.2 },
-    { ID_BS,    FEATURE_DBZ,    5, 10, 20, 30, 0.4 },
-    { ID_DS,    FEATURE_DBZ,    5, 10, 35, 40, 1.0 },
-    { ID_WS,    FEATURE_DBZ,   25, 30, 40, 50, 0.6 },
-    { ID_CR,    FEATURE_DBZ,    0,  5, 20, 25, 1.0 },
-    { ID_GR,    FEATURE_DBZ,   25, 35, 50, 55, 0.8 },
-    { ID_BD,    FEATURE_DBZ,   20, 25, 45, 50, 0.8 },
-    { ID_RA,    FEATURE_DBZ,    5, 10, 45, 50, 1.0 },
-    { ID_HR,    FEATURE_DBZ,   40, 45, 55, 60, 1.0 },
-    { ID_RH,    FEATURE_DBZ,   45, 50, 75, 80, 1.0 }
+    { ID_GC_AP, FEATURE_DBZ,     15,   20,   70,   80,   0.2 },
+    { ID_BS,    FEATURE_DBZ,      5,   10,   20,   30,   0.4 },
+    { ID_DS,    FEATURE_DBZ,      5,   10,   35,   40,   1.0 },
+    { ID_WS,    FEATURE_DBZ,     25,   30,   40,   50,   0.6 },
+    { ID_CR,    FEATURE_DBZ,      0,    5,   20,   25,   1.0 },
+    { ID_GR,    FEATURE_DBZ,     25,   35,   50,   55,   0.8 },
+    { ID_BD,    FEATURE_DBZ,     20,   25,   45,   50,   0.8 },
+    { ID_RA,    FEATURE_DBZ,      5,   10,   45,   50,   1.0 },
+    { ID_HR,    FEATURE_DBZ,     40,   45,   55,   60,   1.0 },
+    { ID_RH,    FEATURE_DBZ,     45,   50,   75,   80,   1.0 },
+
+    { ID_GC_AP, FEATURE_ZDR,     15,   20,   70,   80,   0.2 },
+    { ID_BS,    FEATURE_ZDR,      5,   10,   20,   30,   0.4 },
+    { ID_DS,    FEATURE_ZDR,      5,   10,   35,   40,   1.0 },
+    { ID_WS,    FEATURE_ZDR,     25,   30,   40,   50,   0.6 },
+    { ID_CR,    FEATURE_ZDR,      0,    5,   20,   25,   1.0 },
+    { ID_GR,    FEATURE_ZDR,     25,   35,   50,   55,   0.8 },
+    { ID_BD,    FEATURE_ZDR,     20,   25,   45,   50,   0.8 },
+    { ID_RA,    FEATURE_ZDR,      5,   10,   45,   50,   1.0 },
+    { ID_HR,    FEATURE_ZDR,     40,   45,   55,   60,   1.0 },
+    { ID_RH,    FEATURE_ZDR,     45,   50,   75,   80,   1.0 },
+
+    { ID_GC_AP, FEATURE_RHOHV,    15,   20,   70,   80,   0.2 },
+    { ID_BS,    FEATURE_RHOHV,     5,   10,   20,   30,   0.4 },
+    { ID_DS,    FEATURE_RHOHV,     5,   10,   35,   40,   1.0 },
+    { ID_WS,    FEATURE_RHOHV,    25,   30,   40,   50,   0.6 },
+    { ID_CR,    FEATURE_RHOHV,     0,    5,   20,   25,   1.0 },
+    { ID_GR,    FEATURE_RHOHV,    25,   35,   50,   55,   0.8 },
+    { ID_BD,    FEATURE_RHOHV,    20,   25,   45,   50,   0.8 },
+    { ID_RA,    FEATURE_RHOHV,     5,   10,   45,   50,   1.0 },
+    { ID_HR,    FEATURE_RHOHV,    40,   45,   55,   60,   1.0 },
+    { ID_RH,    FEATURE_RHOHV,    45,   50,   75,   80,   1.0 },
+
+    { ID_GC_AP, FEATURE_LOG_KDP,  15,   20,   70,   80,   0.2 },
+    { ID_BS,    FEATURE_LOG_KDP,   5,   10,   20,   30,   0.4 },
+    { ID_DS,    FEATURE_LOG_KDP,   5,   10,   35,   40,   1.0 },
+    { ID_WS,    FEATURE_LOG_KDP,  25,   30,   40,   50,   0.6 },
+    { ID_CR,    FEATURE_LOG_KDP,   0,    5,   20,   25,   1.0 },
+    { ID_GR,    FEATURE_LOG_KDP,  25,   35,   50,   55,   0.8 },
+    { ID_BD,    FEATURE_LOG_KDP,  20,   25,   45,   50,   0.8 },
+    { ID_RA,    FEATURE_LOG_KDP,   5,   10,   45,   50,   1.0 },
+    { ID_HR,    FEATURE_LOG_KDP,  40,   45,   55,   60,   1.0 },
+    { ID_RH,    FEATURE_LOG_KDP,  45,   50,   75,   80,   1.0 },
+
+    { ID_GC_AP, FEATURE_SD_DBZ,   15,   20,   70,   80,   0.2 },
+    { ID_BS,    FEATURE_SD_DBZ,    5,   10,   20,   30,   0.4 },
+    { ID_DS,    FEATURE_SD_DBZ,    5,   10,   35,   40,   1.0 },
+    { ID_WS,    FEATURE_SD_DBZ,   25,   30,   40,   50,   0.6 },
+    { ID_CR,    FEATURE_SD_DBZ,    0,    5,   20,   25,   1.0 },
+    { ID_GR,    FEATURE_SD_DBZ,   25,   35,   50,   55,   0.8 },
+    { ID_BD,    FEATURE_SD_DBZ,   20,   25,   45,   50,   0.8 },
+    { ID_RA,    FEATURE_SD_DBZ,    5,   10,   45,   50,   1.0 },
+    { ID_HR,    FEATURE_SD_DBZ,   40,   45,   55,   60,   1.0 },
+    { ID_RH,    FEATURE_SD_DBZ,   45,   50,   75,   80,   1.0 },
+
+    { ID_GC_AP, FEATURE_SD_PHIDP, 15,   20,   70,   80,   0.2 },
+    { ID_BS,    FEATURE_SD_PHIDP,  5,   10,   20,   30,   0.4 },
+    { ID_DS,    FEATURE_SD_PHIDP,  5,   10,   35,   40,   1.0 },
+    { ID_WS,    FEATURE_SD_PHIDP, 25,   30,   40,   50,   0.6 },
+    { ID_CR,    FEATURE_SD_PHIDP,  0,    5,   20,   25,   1.0 },
+    { ID_GR,    FEATURE_SD_PHIDP, 25,   35,   50,   55,   0.8 },
+    { ID_BD,    FEATURE_SD_PHIDP, 20,   25,   45,   50,   0.8 },
+    { ID_RA,    FEATURE_SD_PHIDP,  5,   10,   45,   50,   1.0 },
+    { ID_HR,    FEATURE_SD_PHIDP, 40,   45,   55,   60,   1.0 },
+    { ID_RH,    FEATURE_SD_PHIDP, 45,   50,   75,   80,   1.0 }
+
   };
   p_descr = "Interest maps to convert feature fields into interest";
   p_help = "There should be 1 entry for each id/feature pair - i.e. 60 entries.";
-} hca_interest_maps[];
+} hca_interest_maps[60];
 
 commentdef {
   p_header = "COMPUTING NCAR PID - HYDROMETEOR PARTICLE ID";
