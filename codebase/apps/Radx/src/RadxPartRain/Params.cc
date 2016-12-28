@@ -1618,7 +1618,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Coefficient for computing ZDR attenuation correction.");
     tt->help = tdrpStrDup("See Bringi and Chandrasekar, Table 7.1, page 494.");
     tt->val_offset = (char *) &zdr_attenuation_coefficient - &_start_;
-    tt->single_val.d = 0.017;
+    tt->single_val.d = 0.003;
     tt++;
     
     // Parameter 'zdr_attenuation_exponent'
@@ -1630,7 +1630,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Exponent for computing ZDR attenuation correction.");
     tt->help = tdrpStrDup("See Bringi and Chandrasekar, Table 7.1, page 494.");
     tt->val_offset = (char *) &zdr_attenuation_exponent - &_start_;
-    tt->single_val.d = 0.84;
+    tt->single_val.d = 1.05;
     tt++;
     
     // Parameter 'Comment 10'

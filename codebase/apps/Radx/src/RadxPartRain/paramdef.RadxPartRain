@@ -528,13 +528,13 @@ paramdef double {
 } dbz_attenuation_exponent;
 
 paramdef double {
-  p_default = 0.017;
+  p_default = 0.003;
   p_descr = "Coefficient for computing ZDR attenuation correction.";
   p_help = "See Bringi and Chandrasekar, Table 7.1, page 494.";
 } zdr_attenuation_coefficient;
 
 paramdef double {
-  p_default = 0.84;
+  p_default = 1.05;
   p_descr = "Exponent for computing ZDR attenuation correction.";
   p_help = "See Bringi and Chandrasekar, Table 7.1, page 494.";
 } zdr_attenuation_exponent;
