@@ -130,7 +130,7 @@ paramdef int {
 } transition_nrays_margin;
 
 paramdef boolean {
-  p_default = true;
+  p_default = false;
   p_descr = "Option to trip surveillance sweeps so that they only cover 360 degrees.";
   p_help = "Some sweeps will have rays which cover more than a 360-degree rotation. Often these include antenna transitions. If this is set to true, rays are trimmed off either end of the sweep to limit the coverage to 360 degrees. The median elevation angle is computed and the end ray which deviates from the median in elevation is trimmed first.";
 } trim_surveillance_sweeps_to_360deg;
@@ -366,6 +366,18 @@ paramdef double {
   p_descr = "Sets the threshold for the standard deviation of zdr in range.";
   p_help = "The sdev of zdr is a good test for clutter. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
 } KDP_zdr_sdev_max;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Sets the threshold for computing conditional KDP from Z and ZDR.";
+  p_help = "We can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can then compute the conditioned KDP - we call this KDP_COND. To compute KDP_COND, we first find the gates over which regular KDP exceeds this threshold. Over this run of gates we compute the PHIDP change from the regular KDP and from KDP_ZZDR. By taking the ratio of sum(KDP) / sum(KDP_ZZDR), and applying that ratio to KDP_ZZDR over these gates, we can compute KDP_COND such that the PHIDP change is the same for both KDP and KDP_COND.";
+} KDP_threshold_for_ZZDR;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Sets the length of the median filter when computing KDP_ZZDR.";
+  p_help = "The Z and ZDR fields are smoothed with a median filter of this length prior to estimating KDP_ZZDR.";
+} KDP_median_filter_len_for_ZZDR;
 
 paramdef boolean {
   p_default = false;
@@ -889,8 +901,9 @@ typedef enum {
   RHOHV,
   PHIDP,
   KDP,
+  KDP_ZZDR,
+  KDP_COND,
   PSOB,
-  ZDP,
 
   DBZ_ATTEN_CORRECTION,
   ZDR_ATTEN_CORRECTION,

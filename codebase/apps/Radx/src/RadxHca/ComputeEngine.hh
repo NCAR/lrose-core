@@ -114,7 +114,6 @@ private:
   RadxArray<double> _widthArray_;
   RadxArray<double> _ncpArray_;
   RadxArray<double> _zdrArray_;
-  RadxArray<double> _zdpArray_;
   RadxArray<double> _ldrArray_;
   RadxArray<double> _rhohvArray_;
   RadxArray<double> _phidpArray_;
@@ -127,7 +126,6 @@ private:
   double *_widthArray;
   double *_ncpArray;
   double *_zdrArray;
-  double *_zdpArray;
   double *_ldrArray;
   double *_rhohvArray;
   double *_phidpArray;
@@ -196,8 +194,6 @@ private:
                       const string &fieldName,
                       bool required,
                       double *array);
-
-  void _computeZdpArray();
 
   void _computeSnrFromDbz();
 

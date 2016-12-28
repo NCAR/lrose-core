@@ -125,11 +125,7 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
   _allocArrays();
   _loadMomentsArrays(inputRay);
   
-  // compute ZDP
-
-  _computeZdpArray();
-  
-  // compute kdp if needed
+  // compute kdp
   
   _kdpCompute();
 
@@ -185,6 +181,9 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *phidpFiltForKdp = _kdp.getPhidpFilt();
   const double *phidpCondForKdp = _kdp.getPhidpCond();
   const double *phidpCondFiltForKdp = _kdp.getPhidpCondFilt();
+
+  const double *kdpZZdr = _kdp.getKdpZZdr();
+  const double *kdpCond = _kdp.getKdpCond();
   const double *psob = _kdp.getPsob();
 
   const double *dbzAtten = _kdp.getDbzAttenCorr();
@@ -264,15 +263,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::PHIDP:
           *datp = _phidpArray[igate];
           break;
-        case Params::KDP:
-          *datp = _kdpArray[igate];
-          break;
-        case Params::PSOB:
-          *datp = psob[igate];
-          break;
-        case Params::ZDP:
-          *datp = _zdpArray[igate];
-          break;
           
           // kdp
           
@@ -297,6 +287,18 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           } else {
             *datp = 0.0;
           }
+          break;
+        case Params::KDP:
+          *datp = _kdpArray[igate];
+          break;
+        case Params::KDP_ZZDR:
+          *datp = kdpZZdr[igate];
+          break;
+        case Params::KDP_COND:
+          *datp = kdpCond[igate];
+          break;
+        case Params::PSOB:
+          *datp = psob[igate];
           break;
 
         case Params::PHIDP_FOR_KDP:
@@ -506,6 +508,8 @@ void ComputeEngine::_kdpInit()
     _kdp.checkZdrSdev(true);
   }
   _kdp.setZdrSdevMax(_params.KDP_zdr_sdev_max);
+  _kdp.setThresholdForKdpZZdr(_params.KDP_threshold_for_ZZDR);
+  _kdp.setMedianFilterLenForKdpZZdr(_params.KDP_median_filter_len_for_ZZDR);
   if (_params.KDP_debug) {
     _kdp.setDebug(true);
   }
@@ -796,7 +800,6 @@ void ComputeEngine::_allocArrays()
   _ncpArray = _ncpArray_.alloc(_nGates);
   _zdrArray = _zdrArray_.alloc(_nGates);
   _ldrArray = _ldrArray_.alloc(_nGates);
-  _zdpArray = _zdpArray_.alloc(_nGates);
   _kdpArray = _kdpArray_.alloc(_nGates);
   _rhohvArray = _rhohvArray_.alloc(_nGates);
   _phidpArray = _phidpArray_.alloc(_nGates);
@@ -889,32 +892,6 @@ int ComputeEngine::_loadMomentsArrays(RadxRay *inputRay)
 
   return 0;
   
-}
-
-/////////////////////////////////////////////////////
-// compute zdp from dbz and zdr
-//
-// See Bringi and Chandrasekar, p438.
-  
-void ComputeEngine::_computeZdpArray()
-  
-{
-  
-  for (int igate = 0; igate < _nGates; igate++) {
-
-    double dbz = _dbzArray[igate];
-    double zh = pow(10.0, dbz / 10.0);
-    double zdr = _zdrArray[igate];
-    double zdrLinear = pow(10.0, zdr / 10.0);
-    double zv = zh / zdrLinear;
-    double zdp = missingDbl;
-    if (zh > zv) {
-      zdp = 10.0 * log10(zh - zv);
-    }
-    _zdpArray[igate] = zdp;
-
-  } // igate
-
 }
 
 ////////////////////////////////////////

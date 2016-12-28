@@ -273,24 +273,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::PHIDP:
           *datp = _phidpArray[igate];
           break;
-        case Params::KDP:
-          *datp = _kdpArray[igate];
-          break;
-        case Params::KDP_BRINGI:
-          *datp = _kdpBringiArray[igate];
-          break;
-        case Params::KDP_ZZDR:
-          *datp = _kdpZZdrArray[igate];
-          break;
-        case Params::KDP_COND:
-          *datp = _kdpCondArray[igate];
-          break;
-        case Params::PSOB:
-          *datp = psob[igate];
-          break;
-        case Params::ZDP:
-          *datp = _zdpArray[igate];
-          break;
           
           // kdp
           
@@ -315,6 +297,24 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           } else {
             *datp = 0.0;
           }
+          break;
+        case Params::KDP:
+          *datp = _kdpArray[igate];
+          break;
+        case Params::KDP_BRINGI:
+          *datp = _kdpBringiArray[igate];
+          break;
+        case Params::KDP_ZZDR:
+          *datp = _kdpZZdrArray[igate];
+          break;
+        case Params::KDP_COND:
+          *datp = _kdpCondArray[igate];
+          break;
+        case Params::PSOB:
+          *datp = psob[igate];
+          break;
+        case Params::ZDP:
+          *datp = _zdpArray[igate];
           break;
 
         case Params::PHIDP_FOR_KDP:

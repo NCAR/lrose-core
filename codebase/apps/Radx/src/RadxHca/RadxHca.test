@@ -116,7 +116,7 @@ use_multiple_threads = TRUE;
 // Type: int
 //
 
-n_compute_threads = 4;
+n_compute_threads = 8;
 
 //======================================================================
 //
@@ -134,7 +134,7 @@ n_compute_threads = 4;
 // Type: string
 //
 
-input_dir = ".";
+input_dir = "/scr/hail2/rsfdata/pecan/cfradial/spol/moments/sband/sur";
 
 ///////////// mode ////////////////////////////////////
 //
@@ -261,7 +261,7 @@ transition_nrays_margin = 0;
 // Type: boolean
 //
 
-trim_surveillance_sweeps_to_360deg = TRUE;
+trim_surveillance_sweeps_to_360deg = FALSE;
 
 ///////////// set_max_range ///////////////////////////
 //
@@ -406,7 +406,7 @@ radar_altitude_meters = -999;
 // Type: string
 //
 
-DBZ_field_name = "DBZ";
+DBZ_field_name = "DBZ_F";
 
 ///////////// VEL_field_name //////////////////////////
 //
@@ -418,7 +418,7 @@ DBZ_field_name = "DBZ";
 // Type: string
 //
 
-VEL_field_name = "VEL";
+VEL_field_name = "VEL_F";
 
 ///////////// WIDTH_available /////////////////////////
 //
@@ -441,7 +441,7 @@ WIDTH_available = TRUE;
 // Type: string
 //
 
-WIDTH_field_name = "WIDTH";
+WIDTH_field_name = "WIDTH_F";
 
 ///////////// NCP_available ///////////////////////////
 //
@@ -454,7 +454,7 @@ WIDTH_field_name = "WIDTH";
 // Type: boolean
 //
 
-NCP_available = FALSE;
+NCP_available = TRUE;
 
 ///////////// NCP_field_name //////////////////////////
 //
@@ -464,7 +464,7 @@ NCP_available = FALSE;
 // Type: string
 //
 
-NCP_field_name = "NCP";
+NCP_field_name = "NCP_F";
 
 ///////////// SNR_available ///////////////////////////
 //
@@ -489,7 +489,7 @@ SNR_available = TRUE;
 // Type: string
 //
 
-SNR_field_name = "SNR";
+SNR_field_name = "SNRHC_F";
 
 ///////////// noise_dbz_at_100km //////////////////////
 //
@@ -515,7 +515,7 @@ noise_dbz_at_100km = 0;
 // Type: string
 //
 
-ZDR_field_name = "ZDR";
+ZDR_field_name = "ZDR_F";
 
 ///////////// PHIDP_field_name ////////////////////////
 //
@@ -525,7 +525,7 @@ ZDR_field_name = "ZDR";
 // Type: string
 //
 
-PHIDP_field_name = "PHIDP";
+PHIDP_field_name = "PHIDP_F";
 
 ///////////// RHOHV_field_name ////////////////////////
 //
@@ -535,7 +535,7 @@ PHIDP_field_name = "PHIDP";
 // Type: string
 //
 
-RHOHV_field_name = "RHOHV";
+RHOHV_field_name = "RHOHV_F";
 
 //======================================================================
 //
@@ -750,6 +750,38 @@ KDP_check_zdr_sdev = FALSE;
 //
 
 KDP_zdr_sdev_max = 2;
+
+///////////// KDP_threshold_for_ZZDR //////////////////
+//
+// Sets the threshold for computing conditional KDP from Z and ZDR.
+//
+// We can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can 
+//   then compute the conditioned KDP - we call this KDP_COND. To compute 
+//   KDP_COND, we first find the gates over which regular KDP exceeds this 
+//   threshold. Over this run of gates we compute the PHIDP change from 
+//   the regular KDP and from KDP_ZZDR. By taking the ratio of sum(KDP) / 
+//   sum(KDP_ZZDR), and applying that ratio to KDP_ZZDR over these gates, 
+//   we can compute KDP_COND such that the PHIDP change is the same for 
+//   both KDP and KDP_COND.
+//
+//
+// Type: double
+//
+
+KDP_threshold_for_ZZDR = 0.25;
+
+///////////// KDP_median_filter_len_for_ZZDR //////////
+//
+// Sets the length of the median filter when computing KDP_ZZDR.
+//
+// The Z and ZDR fields are smoothed with a median filter of this length 
+//   prior to estimating KDP_ZZDR.
+//
+//
+// Type: int
+//
+
+KDP_median_filter_len_for_ZZDR = 5;
 
 ///////////// KDP_debug ///////////////////////////////
 //
@@ -1852,7 +1884,7 @@ compute_pid = TRUE;
 // Type: string
 //
 
-pid_thresholds_file_path = "./s_band_pid_input_steraotables27.input";
+pid_thresholds_file_path = "$(HOME)/git/lrose-projects-eolbase/projDir/alg/params/pid_thresholds.spol";
 
 ///////////// PID_snr_threshold ///////////////////////
 //
@@ -2082,7 +2114,7 @@ PID_median_filter_len = 7;
 // Type: boolean
 //
 
-use_soundings_from_spdb = FALSE;
+use_soundings_from_spdb = TRUE;
 
 ///////////// sounding_spdb_url ///////////////////////
 //
@@ -2092,7 +2124,7 @@ use_soundings_from_spdb = FALSE;
 // Type: string
 //
 
-sounding_spdb_url = "spdb/soundings";
+sounding_spdb_url = "/scr/hail2/rsfdata/pecan/spdb/sounding/ruc";
 
 ///////////// sounding_search_time_margin_secs ////////
 //
@@ -2118,7 +2150,7 @@ sounding_search_time_margin_secs = 86400;
 // Type: string
 //
 
-sounding_location_name = "";
+sounding_location_name = "SPOL";
 
 ///////////// sounding_check_pressure_range ///////////
 //
@@ -2229,7 +2261,7 @@ sounding_height_correction_km = 0;
 // Type: boolean
 //
 
-sounding_use_wet_bulb_temp = FALSE;
+sounding_use_wet_bulb_temp = TRUE;
 
 //======================================================================
 //
@@ -2314,8 +2346,9 @@ site_temp_search_margin_secs = 3600;
 //          RHOHV
 //          PHIDP
 //          KDP
+//          KDP_ZZDR
+//          KDP_COND
 //          PSOB
-//          ZDP
 //          DBZ_ATTEN_CORRECTION
 //          ZDR_ATTEN_CORRECTION
 //          DBZ_ATTEN_CORRECTED
@@ -2570,7 +2603,7 @@ write_output_volume = TRUE;
 // Type: string
 //
 
-output_dir = "./output";
+output_dir = "$(HOME)/data/hca/test/cfradial/spol/sur";
 
 ///////////// output_filename_mode ////////////////////
 //
