@@ -1329,7 +1329,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Option to specify the coefficients and exponents - see below.");
     tt->help = tdrpStrDup("If false, the default coefficients will be determined for the radar wavelength.");
     tt->val_offset = (char *) &specify_coefficients_for_attenuation_correction - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'dbz_attenuation_coefficient'
@@ -1365,7 +1365,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Coefficient for computing ZDR attenuation correction.");
     tt->help = tdrpStrDup("See Bringi and Chandrasekar, Table 7.1, page 494.");
     tt->val_offset = (char *) &zdr_attenuation_coefficient - &_start_;
-    tt->single_val.d = 0.017;
+    tt->single_val.d = 0.003;
     tt++;
     
     // Parameter 'zdr_attenuation_exponent'
@@ -1377,7 +1377,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Exponent for computing ZDR attenuation correction.");
     tt->help = tdrpStrDup("See Bringi and Chandrasekar, Table 7.1, page 494.");
     tt->val_offset = (char *) &zdr_attenuation_exponent - &_start_;
-    tt->single_val.d = 0.84;
+    tt->single_val.d = 1.05;
     tt++;
     
     // Parameter 'Comment 9'
@@ -1991,7 +1991,7 @@ using namespace std;
       tt->struct_vals[163].d = 0.88;
       tt->struct_vals[164].d = 0.92;
       tt->struct_vals[165].d = 0.95;
-      tt->struct_vals[166].d = 0.895;
+      tt->struct_vals[166].d = 0.985;
       tt->struct_vals[167].d = 1;
       tt->struct_vals[168].e = ID_CR;
       tt->struct_vals[169].e = FEATURE_RHOHV;

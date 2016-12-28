@@ -114,6 +114,10 @@ RadxHca::RadxHca(int argc, char **argv)
     }
   }
 
+  // create the interst maps
+
+  _createInterestMaps();
+
   // initialize compute object
 
   pthread_mutex_init(&_debugPrintMutex, NULL);
@@ -202,6 +206,12 @@ RadxHca::~RadxHca()
   }
 
   pthread_mutex_destroy(&_debugPrintMutex);
+
+  // clean up other elements
+
+  for (size_t ii = 0; ii < _imaps.size(); ii++) {
+    delete _imaps[ii];
+  }
 
   // unregister process
 
@@ -1552,5 +1562,43 @@ void RadxHca::_printRunTime(const string& str)
   cerr << "TIMING, task: " << str << ", secs used: " << deltaSec << endl;
   _timeA.tv_sec = tvb.tv_sec;
   _timeA.tv_usec = tvb.tv_usec;
+}
+
+///////////////////////////////////////////////////////////////////
+// Create the interest maps
+
+void RadxHca::_createInterestMaps()
+{
+
+  // clean up any existing maps
+
+  for (size_t ii = 0; ii < _imaps.size(); ii++) {
+    delete _imaps[ii];
+  }
+
+  for (int ii = 0; ii < _params.hca_interest_maps_n; ii++) {
+
+    const Params::hca_interest_map_t &pmap = _params._hca_interest_maps[ii];
+  
+    // switch (pmap.id) {
+    //   case Params::ID_GC:
+    //     break;
+    //     ID_BS = 1,
+    //     ID_DS = 2,
+    //     ID_WS = 3,
+    //     ID_CR = 4,
+    //     ID_GR = 5,
+    //     ID_BD = 6,
+    //     ID_RA = 7,
+    //     ID_HR = 8,
+    //     ID_RH = 9
+      
+    // }
+
+    // if (pmap.id == Params::ID_GC && pmap.field == Params::FEATURE_DBZ) {
+    //   imapGcDbz = new HcaInterestMap(pmap.ID_GC, 
+
+  } // ii
+
 }
 

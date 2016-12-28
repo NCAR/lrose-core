@@ -73,25 +73,25 @@ public:
   } fir_filter_len_t;
 
   typedef enum {
-    ID_GC = 0,
-    ID_BS = 1,
-    ID_DS = 2,
-    ID_WS = 3,
-    ID_CR = 4,
-    ID_GR = 5,
-    ID_BD = 6,
-    ID_RA = 7,
-    ID_HR = 8,
-    ID_RH = 9
+    ID_GC = 1,
+    ID_BS = 2,
+    ID_DS = 3,
+    ID_WS = 4,
+    ID_CR = 5,
+    ID_GR = 6,
+    ID_BD = 7,
+    ID_RA = 8,
+    ID_HR = 9,
+    ID_RH = 10
   } hca_id_t;
 
   typedef enum {
-    FEATURE_DBZ = 0,
-    FEATURE_ZDR = 1,
-    FEATURE_RHOHV = 2,
-    FEATURE_LOG_KDP = 3,
-    FEATURE_SD_DBZ = 4,
-    FEATURE_SD_PHIDP = 5
+    FEATURE_DBZ = 1,
+    FEATURE_ZDR = 2,
+    FEATURE_RHOHV = 3,
+    FEATURE_LOG_KDP = 4,
+    FEATURE_SD_DBZ = 5,
+    FEATURE_SD_PHIDP = 6
   } feature_field_t;
 
   typedef enum {

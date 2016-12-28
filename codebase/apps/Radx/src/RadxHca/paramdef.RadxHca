@@ -398,7 +398,7 @@ paramdef boolean {
 } apply_precip_attenuation_correction;
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Option to specify the coefficients and exponents - see below.";
   p_help = "If false, the default coefficients will be determined for the radar wavelength.";
 } specify_coefficients_for_attenuation_correction;
@@ -416,13 +416,13 @@ paramdef double {
 } dbz_attenuation_exponent;
 
 paramdef double {
-  p_default = 0.017;
+  p_default = 0.003;
   p_descr = "Coefficient for computing ZDR attenuation correction.";
   p_help = "See Bringi and Chandrasekar, Table 7.1, page 494.";
 } zdr_attenuation_coefficient;
 
 paramdef double {
-  p_default = 0.84;
+  p_default = 1.05;
   p_descr = "Exponent for computing ZDR attenuation correction.";
   p_help = "See Bringi and Chandrasekar, Table 7.1, page 494.";
 } zdr_attenuation_exponent;
@@ -552,25 +552,25 @@ commentdef {
 }
 
 typedef enum {
-  ID_GC,
-  ID_BS,
-  ID_DS,
-  ID_WS,
-  ID_CR,
-  ID_GR,
-  ID_BD,
-  ID_RA,
-  ID_HR,
-  ID_RH
+  ID_GC = 1,
+  ID_BS = 2,
+  ID_DS = 3,
+  ID_WS = 4,
+  ID_CR = 5,
+  ID_GR = 6,
+  ID_BD = 7,
+  ID_RA = 8,
+  ID_HR = 9,
+  ID_RH = 10
 } hca_id_t;
 
 typedef enum {
-  FEATURE_DBZ,
-  FEATURE_ZDR,
-  FEATURE_RHOHV,
-  FEATURE_LOG_KDP,
-  FEATURE_SD_DBZ,
-  FEATURE_SD_PHIDP
+  FEATURE_DBZ = 1,
+  FEATURE_ZDR = 2,
+  FEATURE_RHOHV = 3,
+  FEATURE_LOG_KDP = 4,
+  FEATURE_SD_DBZ = 5,
+  FEATURE_SD_PHIDP = 6
 } feature_field_t;
 
 typedef struct {
@@ -585,71 +585,72 @@ typedef struct {
 
 paramdef struct hca_interest_map_t {
   p_default = {
-    { ID_GC,    FEATURE_DBZ,     15,   20,   70,   80,   0.2 },
-    { ID_BS,    FEATURE_DBZ,      5,   10,   20,   30,   0.4 },
-    { ID_DS,    FEATURE_DBZ,      5,   10,   35,   40,   1.0 },
-    { ID_WS,    FEATURE_DBZ,     25,   30,   40,   50,   0.6 },
-    { ID_CR,    FEATURE_DBZ,      0,    5,   20,   25,   1.0 },
-    { ID_GR,    FEATURE_DBZ,     25,   35,   50,   55,   0.8 },
-    { ID_BD,    FEATURE_DBZ,     20,   25,   45,   50,   0.8 },
-    { ID_RA,    FEATURE_DBZ,      5,   10,   45,   50,   1.0 },
-    { ID_HR,    FEATURE_DBZ,     40,   45,   55,   60,   1.0 },
-    { ID_RH,    FEATURE_DBZ,     45,   50,   75,   80,   1.0 },
 
-    { ID_GC,    FEATURE_ZDR,     -4,   -2,    1,    2,   0.4 },
-    { ID_BS,    FEATURE_ZDR,      0,    2,   10,   12,   0.8 },
-    { ID_DS,    FEATURE_ZDR,   -0.3,  0.0,  0.3,  0.6,   0.8 },
-    { ID_WS,    FEATURE_ZDR,    0.5,  1.0,  2.0,  3.0,   0.8 },
-    { ID_CR,    FEATURE_ZDR,    0.1,  0.4,  3.0,  3.3,   0.6 },
-    { ID_GR,    FEATURE_ZDR,   -0.3,  0.0,  0.0,  0.3,   1.0 },
-    { ID_BD,    FEATURE_ZDR,   -0.3,  0.0,  0.0,  1.0,   0.8 },
-    { ID_RA,    FEATURE_ZDR,   -0.3,  0.0,  0.0,  0.5,   1.0 },
-    { ID_HR,    FEATURE_ZDR,   -0.3,  0.0,  0.0,  0.5,   1.0 },
-    { ID_RH,    FEATURE_ZDR,   -0.3,  0.0,  0.0,  0.5,   1.0 },
+    { ID_GC,  FEATURE_DBZ,     15,   20,   70,   80,   0.2 },
+    { ID_BS,  FEATURE_DBZ,      5,   10,   20,   30,   0.4 },
+    { ID_DS,  FEATURE_DBZ,      5,   10,   35,   40,   1.0 },
+    { ID_WS,  FEATURE_DBZ,     25,   30,   40,   50,   0.6 },
+    { ID_CR,  FEATURE_DBZ,      0,    5,   20,   25,   1.0 },
+    { ID_GR,  FEATURE_DBZ,     25,   35,   50,   55,   0.8 },
+    { ID_BD,  FEATURE_DBZ,     20,   25,   45,   50,   0.8 },
+    { ID_RA,  FEATURE_DBZ,      5,   10,   45,   50,   1.0 },
+    { ID_HR,  FEATURE_DBZ,     40,   45,   55,   60,   1.0 },
+    { ID_RH,  FEATURE_DBZ,     45,   50,   75,   80,   1.0 },
 
-    { ID_GC,    FEATURE_RHOHV,  0.50, 0.60, 0.90, 0.95,   1.0 },
-    { ID_BS,    FEATURE_RHOHV,  0.30, 0.50, 0.80, 0.83,   1.0 },
-    { ID_DS,    FEATURE_RHOHV,  0.95, 0.98, 1.00, 1.01,   0.6 },
-    { ID_WS,    FEATURE_RHOHV,  0.88, 0.92, 0.95,0.985,   1.0 },
-    { ID_CR,    FEATURE_RHOHV,  0.95, 0.98, 1.00, 1.01,   0.4 },
-    { ID_GR,    FEATURE_RHOHV,  0.90, 0.97, 1.00, 1.01,   0.4 },
-    { ID_BD,    FEATURE_RHOHV,  0.92, 0.95, 1.00, 1.01,   0.6 },
-    { ID_RA,    FEATURE_RHOHV,  0.95, 0.97, 1.00, 1.01,   0.6 },
-    { ID_HR,    FEATURE_RHOHV,  0.92, 0.95, 1.00, 1.01,   0.6 },
-    { ID_RH,    FEATURE_RHOHV,  0.85, 0.90, 1.00, 1.01,   0.6 },
+    { ID_GC,  FEATURE_ZDR,     -4,   -2,    1,    2,   0.4 },
+    { ID_BS,  FEATURE_ZDR,      0,    2,   10,   12,   0.8 },
+    { ID_DS,  FEATURE_ZDR,   -0.3,  0.0,  0.3,  0.6,   0.8 },
+    { ID_WS,  FEATURE_ZDR,    0.5,  1.0,  2.0,  3.0,   0.8 },
+    { ID_CR,  FEATURE_ZDR,    0.1,  0.4,  3.0,  3.3,   0.6 },
+    { ID_GR,  FEATURE_ZDR,   -0.3,  0.0,  0.0,  0.3,   1.0 },
+    { ID_BD,  FEATURE_ZDR,   -0.3,  0.0,  0.0,  1.0,   0.8 },
+    { ID_RA,  FEATURE_ZDR,   -0.3,  0.0,  0.0,  0.5,   1.0 },
+    { ID_HR,  FEATURE_ZDR,   -0.3,  0.0,  0.0,  0.5,   1.0 },
+    { ID_RH,  FEATURE_ZDR,   -0.3,  0.0,  0.0,  0.5,   1.0 },
 
-    { ID_GC,    FEATURE_LOG_KDP, -30,  -25,   10,   20,   0.0 },
-    { ID_BS,    FEATURE_LOG_KDP, -30,  -25,   10,   10,   0.0 },
-    { ID_DS,    FEATURE_LOG_KDP, -30,  -25,   10,   20,   0.0 },
-    { ID_WS,    FEATURE_LOG_KDP, -30,  -25,   10,   20,   0.0 },
-    { ID_CR,    FEATURE_LOG_KDP,  -5,    0,   10,   15,   0.5 },
-    { ID_GR,    FEATURE_LOG_KDP, -30,  -25,   10,   20,   0.0 },
-    { ID_BD,    FEATURE_LOG_KDP,  -1,    0,    0,    1,   0.0 },
-    { ID_RA,    FEATURE_LOG_KDP,  -1,    0,    0,    1,   0.0 },
-    { ID_HR,    FEATURE_LOG_KDP,  -1,    0,    0,    1,   1.0 },
-    { ID_RH,    FEATURE_LOG_KDP, -10,   -4,    0,    1,   1.0 },
+    { ID_GC,  FEATURE_RHOHV,  0.50, 0.60, 0.90, 0.95,   1.0 },
+    { ID_BS,  FEATURE_RHOHV,  0.30, 0.50, 0.80, 0.83,   1.0 },
+    { ID_DS,  FEATURE_RHOHV,  0.95, 0.98, 1.00, 1.01,   0.6 },
+    { ID_WS,  FEATURE_RHOHV,  0.88, 0.92, 0.95,0.985,   1.0 },
+    { ID_CR,  FEATURE_RHOHV,  0.95, 0.98, 1.00, 1.01,   0.4 },
+    { ID_GR,  FEATURE_RHOHV,  0.90, 0.97, 1.00, 1.01,   0.4 },
+    { ID_BD,  FEATURE_RHOHV,  0.92, 0.95, 1.00, 1.01,   0.6 },
+    { ID_RA,  FEATURE_RHOHV,  0.95, 0.97, 1.00, 1.01,   0.6 },
+    { ID_HR,  FEATURE_RHOHV,  0.92, 0.95, 1.00, 1.01,   0.6 },
+    { ID_RH,  FEATURE_RHOHV,  0.85, 0.90, 1.00, 1.01,   0.6 },
 
-    { ID_GC,    FEATURE_SD_DBZ,    2,  4.0,   10,   15,   0.6 },
-    { ID_BS,    FEATURE_SD_DBZ,    1,  2.0,    4,    7,   0.8 },
-    { ID_DS,    FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { ID_WS,    FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { ID_CR,    FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { ID_GR,    FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { ID_BD,    FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { ID_RA,    FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { ID_HR,    FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { ID_RH,    FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { ID_GC,  FEATURE_LOG_KDP, -30,  -25,   10,   20,   0.0 },
+    { ID_BS,  FEATURE_LOG_KDP, -30,  -25,   10,   10,   0.0 },
+    { ID_DS,  FEATURE_LOG_KDP, -30,  -25,   10,   20,   0.0 },
+    { ID_WS,  FEATURE_LOG_KDP, -30,  -25,   10,   20,   0.0 },
+    { ID_CR,  FEATURE_LOG_KDP,  -5,    0,   10,   15,   0.5 },
+    { ID_GR,  FEATURE_LOG_KDP, -30,  -25,   10,   20,   0.0 },
+    { ID_BD,  FEATURE_LOG_KDP,  -1,    0,    0,    1,   0.0 },
+    { ID_RA,  FEATURE_LOG_KDP,  -1,    0,    0,    1,   0.0 },
+    { ID_HR,  FEATURE_LOG_KDP,  -1,    0,    0,    1,   1.0 },
+    { ID_RH,  FEATURE_LOG_KDP, -10,   -4,    0,    1,   1.0 },
 
-    { ID_GC,    FEATURE_SD_PHIDP, 30,   40,   50,   60,   0.8 },
-    { ID_BS,    FEATURE_SD_PHIDP,  8,   10,   40,   60,   0.8 },
-    { ID_DS,    FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { ID_WS,    FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { ID_CR,    FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { ID_GR,    FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { ID_BD,    FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { ID_RA,    FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { ID_HR,    FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { ID_RH,    FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 }
+    { ID_GC,  FEATURE_SD_DBZ,    2,  4.0,   10,   15,   0.6 },
+    { ID_BS,  FEATURE_SD_DBZ,    1,  2.0,    4,    7,   0.8 },
+    { ID_DS,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { ID_WS,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { ID_CR,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { ID_GR,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { ID_BD,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { ID_RA,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { ID_HR,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { ID_RH,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+
+    { ID_GC,  FEATURE_SD_PHIDP, 30,   40,   50,   60,   0.8 },
+    { ID_BS,  FEATURE_SD_PHIDP,  8,   10,   40,   60,   0.8 },
+    { ID_DS,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { ID_WS,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { ID_CR,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { ID_GR,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { ID_BD,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { ID_RA,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { ID_HR,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { ID_RH,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 }
 
   };
   p_descr = "Interest maps to convert feature fields into interest";

@@ -51,6 +51,7 @@ HDRS = \
 	Params.hh \
 	Args.hh \
 	ComputeEngine.hh \
+	HcaInterestMap.hh \
 	RadxHca.hh \
 	Thread.hh
 
@@ -58,6 +59,7 @@ CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
 	ComputeEngine.cc \
+	HcaInterestMap.cc \
 	Main.cc \
 	RadxHca.cc \
 	Thread.cc
