@@ -106,14 +106,14 @@ field_list = {
 #---------------------------------------------------------------------------------------------------------
 
 DBZ DBZ  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&DBZ    dbz.colors   dBZ -5 80 5 radial 1 0
-SNR SNR  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&SNR    snr.colors   dBZ -5 80 5 radial 1 0
-ZDR ZDR  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&ZDR    zdr.colors   dBZ -5 80 5 radial 1 0
-RHOHV RHOHV  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&RHOHV    rhohv.colors   dBZ -5 80 5 radial 1 0
+SNR SNR  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&SNR    snr.colors   dB  -5 80 5 radial 1 0
+ZDR ZDR  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&ZDR    zdr.colors   dB  -5 80 5 radial 1 0
+RHOHV RHOHV  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&RHOHV    rhohv.colors   - -5 80 5 radial 1 0
 
-PHIDP PHIDP  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&PHIDP    phidp.colors   dBZ -5 80 5 radial 1 0
-KDP KDP  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp.colors   kdp -5 80 5 radial 1 0
-PSOB PSOB  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&PSOB    psob.colors   deg -5 80 5 radial 1 0
-=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+PHIDP PHIDP  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&PHIDP    phidp.colors  deg -5 80 5 radial 1 0
+KDP KDP  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp.colors   deg/km -5 80 5 radial 1 0
+KDP_COND KDP_COND  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&KDP_COND    kdp.colors   deg/km -5 80 5 radial 1 0
+PID   PID mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&PID   pid.colors   - -5 80 5 radial 1 0
 
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
@@ -1047,7 +1047,7 @@ cidd.wsddm_mode:            0
 # click and drag. When set to 1, disallows multi way point cross sections
 # - RHI are defined by clicking right mouse near the radar origin and
 # dragging away from the radar along the desired  azimuth and releasing.
-cidd.one_click_rhi: 0
+cidd.one_click_rhi: 1
 
 # CIDD uses the number pad keys 7,9,4,6,1,3 to rotate the RHI 
 # by +/- these amounts

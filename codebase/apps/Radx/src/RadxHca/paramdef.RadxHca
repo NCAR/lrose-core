@@ -290,7 +290,7 @@ paramdef int {
 } KDP_n_filt_iterations_unfolded;
 
 paramdef int {
-  p_default = 4;
+  p_default = 3;
   p_descr = "Sets the number of iterations for the final FIR filter for conditioned PHIDP.";
   p_help = "In order to identify phase shift on backscatter (PSOB), we condition the PHIDP to keep it generally increasing with range. The FIR filter is applied to the conditioned phidp a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.";
 } KDP_n_filt_iterations_conditioned;
@@ -314,7 +314,7 @@ paramdef int {
 } KDP_ngates_for_stats;
 
 paramdef double {
-  p_default = 20.0;
+  p_default = 25.0;
   p_descr = "Sets the threshold for the standard deviation of phidp in range.";
   p_help = "The sdev of phidp is a good test for valid phidp. The sdev is computed in the circle, so that it takes account of folding if present. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
 } KDP_phidp_sdev_max;
@@ -332,13 +332,13 @@ paramdef double {
 } KDP_min_valid_abs_kdp;
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Check the SNR.";
   p_descr = "This test can help identify regions of good PHIDP.";
 } KDP_check_snr;
 
 paramdef double {
-  p_default = -6.0;
+  p_default = 0.0;
   p_descr = "Sets the threshold for checking SNR (dB).";
   p_help = "If the SNR drops below this value, KDP will not be computed at this gate.";
 } KDP_snr_threshold;
@@ -350,19 +350,19 @@ paramdef boolean {
 } KDP_check_rhohv;
 
 paramdef double {
-  p_default = 0.95;
+  p_default = 0.85;
   p_descr = "Sets the threshold for checking RHOHV.";
   p_help = "If the RHOHV drops below this value, KDP will not be computed at this gate.";
 } KDP_rhohv_threshold;
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Check the standard deviation of ZDR in range?";
   p_descr = "This test can help identify regions of clutter, and hence noisy PHIDP.";
 } KDP_check_zdr_sdev;
 
 paramdef double {
-  p_default = 2.0;
+  p_default = 2.5;
   p_descr = "Sets the threshold for the standard deviation of zdr in range.";
   p_help = "The sdev of zdr is a good test for clutter. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
 } KDP_zdr_sdev_max;

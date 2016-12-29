@@ -593,7 +593,7 @@ KDP_n_filt_iterations_unfolded = 2;
 // Type: int
 //
 
-KDP_n_filt_iterations_conditioned = 4;
+KDP_n_filt_iterations_conditioned = 3;
 
 ///////////// KDP_use_iterative_filtering /////////////
 //
@@ -651,7 +651,7 @@ KDP_ngates_for_stats = 9;
 // Type: double
 //
 
-KDP_phidp_sdev_max = 20;
+KDP_phidp_sdev_max = 25;
 
 ///////////// KDP_phidp_jitter_max ////////////////////
 //
@@ -689,7 +689,7 @@ KDP_min_valid_abs_kdp = 0.01;
 // Type: boolean
 //
 
-KDP_check_snr = FALSE;
+KDP_check_snr = TRUE;
 
 ///////////// KDP_snr_threshold ///////////////////////
 //
@@ -702,7 +702,7 @@ KDP_check_snr = FALSE;
 // Type: double
 //
 
-KDP_snr_threshold = -6;
+KDP_snr_threshold = 0;
 
 ///////////// KDP_check_rhohv /////////////////////////
 //
@@ -725,7 +725,7 @@ KDP_check_rhohv = TRUE;
 // Type: double
 //
 
-KDP_rhohv_threshold = 0.95;
+KDP_rhohv_threshold = 0.85;
 
 ///////////// KDP_check_zdr_sdev //////////////////////
 //
@@ -735,7 +735,7 @@ KDP_rhohv_threshold = 0.95;
 // Type: boolean
 //
 
-KDP_check_zdr_sdev = FALSE;
+KDP_check_zdr_sdev = TRUE;
 
 ///////////// KDP_zdr_sdev_max ////////////////////////
 //
@@ -749,7 +749,7 @@ KDP_check_zdr_sdev = FALSE;
 // Type: double
 //
 
-KDP_zdr_sdev_max = 2;
+KDP_zdr_sdev_max = 2.5;
 
 ///////////// KDP_threshold_for_ZZDR //////////////////
 //
@@ -768,7 +768,7 @@ KDP_zdr_sdev_max = 2;
 // Type: double
 //
 
-KDP_threshold_for_ZZDR = 0.25;
+KDP_threshold_for_ZZDR = 0.33;
 
 ///////////// KDP_median_filter_len_for_ZZDR //////////
 //
@@ -2124,7 +2124,7 @@ use_soundings_from_spdb = TRUE;
 // Type: string
 //
 
-sounding_spdb_url = "/scr/hail2/rsfdata/pecan/spdb/sounding/ruc";
+sounding_spdb_url = "spdbp:://hail::/scr/hail2/rsfdata/pecan/spdb/sounding/ruc";
 
 ///////////// sounding_search_time_margin_secs ////////
 //
@@ -2184,7 +2184,7 @@ sounding_check_pressure_range = TRUE;
 
 sounding_required_pressure_range_hpa = {
     min_val = 300,
-    max_val = 950
+    max_val = 800
 };
 
 ///////////// sounding_check_height_range /////////////
@@ -2198,7 +2198,7 @@ sounding_required_pressure_range_hpa = {
 // Type: boolean
 //
 
-sounding_check_height_range = TRUE;
+sounding_check_height_range = FALSE;
 
 ///////////// sounding_required_height_range_m ////////
 //
@@ -2218,7 +2218,7 @@ sounding_check_height_range = TRUE;
 //
 
 sounding_required_height_range_m = {
-    min_val = 500,
+    min_val = 1000,
     max_val = 15000
 };
 
@@ -2233,7 +2233,7 @@ sounding_required_height_range_m = {
 // Type: boolean
 //
 
-sounding_check_pressure_monotonically_decreasing = TRUE;
+sounding_check_pressure_monotonically_decreasing = FALSE;
 
 ///////////// sounding_height_correction_km ///////////
 //
@@ -2476,11 +2476,23 @@ output_fields = {
   }
   ,
   {
-    id = PSOB,
-    name = "PSOB",
-    long_name = "phase_shift_on_backscatter",
-    standard_name = "phase_shift_on_backscatter",
-    units = "deg",
+    id = KDP_COND,
+    name = "KDP_COND",
+    long_name = "conditional_specific_differential_phase",
+    standard_name = "specific_differential_phase_hv",
+    units = "deg/km",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = PARTICLE_ID,
+    name = "PID",
+    long_name = "ncar_particle_id",
+    standard_name = "hydrometeor_type",
+    units = "-",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
     scale = 0.001,

@@ -1105,6 +1105,10 @@ int RadxHca::_retrieveTempProfile(const RadxVol &vol)
     return 0;
   }
 
+  if (_params.debug) {
+    _tempProfile.setDebug();
+  }
+
   _tempProfile.setSoundingLocationName
     (_params.sounding_location_name);
   _tempProfile.setSoundingSearchTimeMarginSecs
