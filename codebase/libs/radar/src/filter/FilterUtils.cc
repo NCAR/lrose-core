@@ -236,8 +236,8 @@ int FilterUtils::_intCompare(const void *i, const void *j)
 // return yVal for given xVal
 
 double FilterUtils::linearInterp(double xx1, double yy1,
-				double xx2, double yy2,
-				double xVal)
+                                 double xx2, double yy2,
+                                 double xVal)
 
 {
 
@@ -256,10 +256,10 @@ double FilterUtils::linearInterp(double xx1, double yy1,
 // available for computing the standard deviation.
 
 void FilterUtils::computeSdevInRange(double *field,
-				    double *sdev,
-				    int nGates,
-				    int nGatesKernel,
-				    double missingVal)
+                                     double *sdev,
+                                     int nGates,
+                                     int nGatesKernel,
+                                     double missingVal)
   
 {
   
