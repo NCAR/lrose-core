@@ -72,7 +72,7 @@ def main():
     ax1.set_xlabel("Zdr")
     ax1.set_ylabel("KDP 50dBZ")
     ax1.grid(True)
-    ax1.set_title("hello")
+    ax1.set_title("KDP for DBZ = " + options.dbz)
 
     plt.show()
 
