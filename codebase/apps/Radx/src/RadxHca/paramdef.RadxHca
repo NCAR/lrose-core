@@ -268,9 +268,19 @@ paramdef string {
   p_descr = "Field name for RHOHV.";
 } RHOHV_field_name;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Is LDR data available?";
+} LDR_available;
+
+paramdef string {
+  p_default = "LDR";
+  p_descr = "Field name for LDR.";
+} LDR_field_name;
+
 commentdef {
   p_header = "COMPUTE KDP";
-  p_help = "KDP is computed from PHIDP. So this only applied if PHIDP_available is TRUE.";
+  p_help = "KDP is computed from PHIDP.";
 }
 
 typedef enum {
@@ -901,8 +911,8 @@ typedef enum {
   RHOHV,
   PHIDP,
   KDP,
-  KDP_ZZDR,
   KDP_COND,
+  KDP_LOG,
   PSOB,
 
   DBZ_ATTEN_CORRECTION,

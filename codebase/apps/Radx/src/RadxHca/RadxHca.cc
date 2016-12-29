@@ -621,10 +621,13 @@ void RadxHca::_setupRead(RadxFile &file)
     file.addReadField(_params.SNR_field_name);
   }
 
-
   file.addReadField(_params.ZDR_field_name);
   file.addReadField(_params.PHIDP_field_name);
   file.addReadField(_params.RHOHV_field_name);
+
+  if (_params.LDR_available) {
+    file.addReadField(_params.LDR_field_name);
+  }
     
   if (_params.remove_rays_with_antenna_transitions &&
       !_params.trim_surveillance_sweeps_to_360deg) {

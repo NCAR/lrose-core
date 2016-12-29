@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for RadxHca
+ * TDRP params for ./RadxHca
  **********************************************************************/
 
 //======================================================================
@@ -536,6 +536,26 @@ PHIDP_field_name = "PHIDP_F";
 //
 
 RHOHV_field_name = "RHOHV_F";
+
+///////////// LDR_available ///////////////////////////
+//
+// Is LDR data available?.
+//
+//
+// Type: boolean
+//
+
+LDR_available = FALSE;
+
+///////////// LDR_field_name //////////////////////////
+//
+// Field name for LDR.
+//
+//
+// Type: string
+//
+
+LDR_field_name = "LDRH_F";
 
 //======================================================================
 //
@@ -2481,6 +2501,18 @@ output_fields = {
     long_name = "conditional_specific_differential_phase",
     standard_name = "specific_differential_phase_hv",
     units = "deg/km",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = KDP_LOG,
+    name = "KDP_LOG",
+    long_name = "log_conditional_specific_differential_phase",
+    standard_name = "log_specific_differential_phase_hv",
+    units = "log(deg/km)",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
     scale = 0.001,

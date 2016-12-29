@@ -1058,6 +1058,30 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("RHOHV");
     tt++;
     
+    // Parameter 'LDR_available'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("LDR_available");
+    tt->descr = tdrpStrDup("Is LDR data available?");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &LDR_available - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'LDR_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("LDR_field_name");
+    tt->descr = tdrpStrDup("Field name for LDR.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &LDR_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("LDR");
+    tt++;
+    
     // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1116,7 +1140,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Sets the number of iterations for the final FIR filter for conditioned PHIDP.");
     tt->help = tdrpStrDup("In order to identify phase shift on backscatter (PSOB), we condition the PHIDP to keep it generally increasing with range. The FIR filter is applied to the conditioned phidp a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
     tt->val_offset = (char *) &KDP_n_filt_iterations_conditioned - &_start_;
-    tt->single_val.i = 4;
+    tt->single_val.i = 3;
     tt++;
     
     // Parameter 'KDP_use_iterative_filtering'
@@ -1164,7 +1188,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of phidp in range.");
     tt->help = tdrpStrDup("The sdev of phidp is a good test for valid phidp. The sdev is computed in the circle, so that it takes account of folding if present. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
     tt->val_offset = (char *) &KDP_phidp_sdev_max - &_start_;
-    tt->single_val.d = 20;
+    tt->single_val.d = 25;
     tt++;
     
     // Parameter 'KDP_phidp_jitter_max'
@@ -1200,7 +1224,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Check the SNR.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &KDP_check_snr - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'KDP_snr_threshold'
@@ -1212,7 +1236,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Sets the threshold for checking SNR (dB).");
     tt->help = tdrpStrDup("If the SNR drops below this value, KDP will not be computed at this gate.");
     tt->val_offset = (char *) &KDP_snr_threshold - &_start_;
-    tt->single_val.d = -6;
+    tt->single_val.d = 0;
     tt++;
     
     // Parameter 'KDP_check_rhohv'
@@ -1236,7 +1260,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Sets the threshold for checking RHOHV.");
     tt->help = tdrpStrDup("If the RHOHV drops below this value, KDP will not be computed at this gate.");
     tt->val_offset = (char *) &KDP_rhohv_threshold - &_start_;
-    tt->single_val.d = 0.95;
+    tt->single_val.d = 0.85;
     tt++;
     
     // Parameter 'KDP_check_zdr_sdev'
@@ -1248,7 +1272,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Check the standard deviation of ZDR in range?");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &KDP_check_zdr_sdev - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'KDP_zdr_sdev_max'
@@ -1260,7 +1284,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of zdr in range.");
     tt->help = tdrpStrDup("The sdev of zdr is a good test for clutter. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
     tt->val_offset = (char *) &KDP_zdr_sdev_max - &_start_;
-    tt->single_val.d = 2;
+    tt->single_val.d = 2.5;
     tt++;
     
     // Parameter 'KDP_threshold_for_ZZDR'
@@ -2798,10 +2822,10 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[8].val = PHIDP;
         tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("KDP");
         tt->struct_def.fields[0].enum_def.fields[9].val = KDP;
-        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("KDP_ZZDR");
-        tt->struct_def.fields[0].enum_def.fields[10].val = KDP_ZZDR;
-        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("KDP_COND");
-        tt->struct_def.fields[0].enum_def.fields[11].val = KDP_COND;
+        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("KDP_COND");
+        tt->struct_def.fields[0].enum_def.fields[10].val = KDP_COND;
+        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("KDP_LOG");
+        tt->struct_def.fields[0].enum_def.fields[11].val = KDP_LOG;
         tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("PSOB");
         tt->struct_def.fields[0].enum_def.fields[12].val = PSOB;
         tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");

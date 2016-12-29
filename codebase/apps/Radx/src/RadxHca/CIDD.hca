@@ -113,7 +113,12 @@ RHOHV RHOHV  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&RHOHV   
 PHIDP PHIDP  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&PHIDP    phidp.colors  deg -5 80 5 radial 1 0
 KDP KDP  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp.colors   deg/km -5 80 5 radial 1 0
 KDP_COND KDP_COND  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&KDP_COND    kdp.colors   deg/km -5 80 5 radial 1 0
+KDP_LOG KDP_LOG  mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&KDP_LOG    kdp_log.colors   log(deg/km) -5 80 5 radial 1 0
+
 PID   PID mdvp:://localhost::$(HOME)/data/hca/test/cfradial/spol/sur&PID   pid.colors   - -5 80 5 radial 1 0
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
@@ -215,7 +220,7 @@ cidd.debug2_flag:           0
 #  System will startup using field 0, requesting data closest to the
 # demo time. The movie frame will be centered on the time after applying
 # temporal rounding. 
-cidd.demo_time:  00:05 06/26/2015
+cidd.demo_time:  23:55 06/25/2015
 
 
 # Set times to the nearest value divisible by the number of seconds

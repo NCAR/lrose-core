@@ -182,8 +182,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *phidpCondForKdp = _kdp.getPhidpCond();
   const double *phidpCondFiltForKdp = _kdp.getPhidpCondFilt();
 
-  const double *kdpZZdr = _kdp.getKdpZZdr();
-  const double *kdpCond = _kdp.getKdpCond();
   const double *psob = _kdp.getPsob();
 
   const double *dbzAtten = _kdp.getDbzAttenCorr();
@@ -291,11 +289,11 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::KDP:
           *datp = _kdpArray[igate];
           break;
-        case Params::KDP_ZZDR:
-          *datp = kdpZZdr[igate];
-          break;
         case Params::KDP_COND:
-          *datp = kdpCond[igate];
+          *datp = _kdpCondArray[igate];
+          break;
+        case Params::KDP_LOG:
+          *datp = _kdpLogArray[igate];
           break;
         case Params::PSOB:
           *datp = psob[igate];
@@ -564,14 +562,23 @@ void ComputeEngine::_kdpCompute()
                missingDbl);
 
   const double *kdp = _kdp.getKdp();
+  const double *kdpCond = _kdp.getKdpCond();
   
   // put KDP into fields objects
   
   for (int ii = 0; ii < _nGates; ii++) {
     if (kdp[ii] == NAN) {
       _kdpArray[ii] = missingDbl;
+      _kdpCondArray[ii] = missingDbl;
+      _kdpLogArray[ii] = missingDbl;
     } else {
       _kdpArray[ii] = kdp[ii];
+      _kdpCondArray[ii] = kdpCond[ii];
+      if (kdpCond[ii] > 1.0e-3) {
+        _kdpLogArray[ii] = log10(kdpCond[ii]);
+      } else {
+        _kdpLogArray[ii] = -30.0;
+      }
     }
   }
 
@@ -801,6 +808,8 @@ void ComputeEngine::_allocArrays()
   _zdrArray = _zdrArray_.alloc(_nGates);
   _ldrArray = _ldrArray_.alloc(_nGates);
   _kdpArray = _kdpArray_.alloc(_nGates);
+  _kdpCondArray = _kdpCondArray_.alloc(_nGates);
+  _kdpLogArray = _kdpLogArray_.alloc(_nGates);
   _rhohvArray = _rhohvArray_.alloc(_nGates);
   _phidpArray = _phidpArray_.alloc(_nGates);
   _dbzElevGradientArray = _dbzElevGradientArray_.alloc(_nGates);
@@ -865,8 +874,15 @@ int ComputeEngine::_loadMomentsArrays(RadxRay *inputRay)
     return -1;
   }
 
-  for (int igate = 0; igate < _nGates; igate++) {
-    _ldrArray[igate] = missingDbl;
+  if (_params.LDR_available) {
+    if (_loadFieldArray(inputRay, _params.LDR_field_name,
+                        true, _ldrArray)) {
+      return -1;
+    }
+  } else {
+    for (int igate = 0; igate < _nGates; igate++) {
+      _ldrArray[igate] = missingDbl;
+    }
   }
 
   if (_loadFieldArray(inputRay, _params.PHIDP_field_name,
@@ -881,6 +897,8 @@ int ComputeEngine::_loadMomentsArrays(RadxRay *inputRay)
 
   for (int igate = 0; igate < _nGates; igate++) {
     _kdpArray[igate] = missingDbl;
+    _kdpCondArray[igate] = missingDbl;
+    _kdpLogArray[igate] = missingDbl;
   }
   
   if (_loadFieldArray(inputRay, _params.dbz_elevation_gradient_field_name,

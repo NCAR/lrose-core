@@ -118,6 +118,8 @@ private:
   RadxArray<double> _rhohvArray_;
   RadxArray<double> _phidpArray_;
   RadxArray<double> _kdpArray_;
+  RadxArray<double> _kdpCondArray_;
+  RadxArray<double> _kdpLogArray_;
   RadxArray<double> _dbzElevGradientArray_;
 
   double *_snrArray;
@@ -130,6 +132,8 @@ private:
   double *_rhohvArray;
   double *_phidpArray;
   double *_kdpArray;
+  double *_kdpCondArray;
+  double *_kdpLogArray;
   double *_dbzElevGradientArray;
 
   RadxArray<int> _pidArray_;

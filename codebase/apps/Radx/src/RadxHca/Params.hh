@@ -105,8 +105,8 @@ public:
     RHOHV = 7,
     PHIDP = 8,
     KDP = 9,
-    KDP_ZZDR = 10,
-    KDP_COND = 11,
+    KDP_COND = 10,
+    KDP_LOG = 11,
     PSOB = 12,
     DBZ_ATTEN_CORRECTION = 13,
     ZDR_ATTEN_CORRECTION = 14,
@@ -570,6 +570,10 @@ public:
 
   char* RHOHV_field_name;
 
+  tdrp_bool_t LDR_available;
+
+  char* LDR_field_name;
+
   fir_filter_len_t KDP_fir_filter_len;
 
   int KDP_n_filt_iterations_unfolded;
@@ -765,7 +769,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[150];
+  mutable TDRPtable _table[152];
 
   const char *_className;
 
