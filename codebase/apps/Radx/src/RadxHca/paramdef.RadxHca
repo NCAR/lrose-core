@@ -679,6 +679,11 @@ paramdef struct hca_interest_map_t {
   p_help = "There should be 1 entry for each id/feature pair - i.e. 60 entries.";
 } hca_interest_maps[60];
 
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of kernel for computing SD_DBS - gates.";
+} HCA_SD_DBZ_kernel_len;
+
 commentdef {
   p_header = "COMPUTING NCAR PID - HYDROMETEOR PARTICLE ID";
 }
@@ -951,7 +956,9 @@ typedef enum {
   SEACLUT_FLAG,
 
   PARTICLE_ID,
-  TEMP_FOR_PID
+  TEMP_FOR_PID,
+
+  SD_DBZ
 
 } output_field_id_t;
 

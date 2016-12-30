@@ -40,6 +40,7 @@
 #include <toolsa/file_io.h>
 #include <rapmath/trig.h>
 #include <rapmath/umath.h>
+#include <radar/FilterUtils.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
 #include <cerrno>
@@ -139,6 +140,12 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
 
   if (_params.compute_pid) {
     _pidCompute();
+  }
+
+  // compute hca
+
+  if (_params.compute_hca) {
+    _hcaCompute();
   }
   
   // load output fields into the moments ray
@@ -261,7 +268,13 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::PHIDP:
           *datp = _phidpArray[igate];
           break;
-          
+
+        // hca
+
+        case Params::SD_DBZ:
+          *datp = _sdDbzArray[igate];
+          break;
+
           // kdp
           
         case Params::DBZ_FOR_KDP:
@@ -814,6 +827,8 @@ void ComputeEngine::_allocArrays()
   _phidpArray = _phidpArray_.alloc(_nGates);
   _dbzElevGradientArray = _dbzElevGradientArray_.alloc(_nGates);
 
+  _sdDbzArray = _sdDbzArray_.alloc(_nGates);
+
   _pidArray = _pidArray_.alloc(_nGates);
   _pidInterest = _pidInterest_.alloc(_nGates);
   _tempForPid = _tempForPid_.alloc(_nGates);
@@ -1025,6 +1040,24 @@ int ComputeEngine::_convertInterestParamsToVector(const string &label,
   } // ii
   
   return 0;
+
+}
+
+//////////////////////////////////////
+// compute HCA
+
+void ComputeEngine::_hcaCompute()
+  
+{
+
+  // compute trend deviation of dbz
+
+  FilterUtils::computeTrendDevInRange(_dbzArray,
+                                      _sdDbzArray,
+                                      _nGates,
+                                      _params.HCA_SD_DBZ_kernel_len,
+                                      missingDbl);
+  
 
 }
 

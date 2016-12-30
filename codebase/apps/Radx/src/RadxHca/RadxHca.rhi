@@ -51,7 +51,7 @@ debug = DEBUG_OFF;
 // Type: string
 //
 
-instance = "test";
+instance = "rhi";
 
 ///////////// register_with_procmap ///////////////////
 //
@@ -99,7 +99,7 @@ procmap_register_interval = 60;
 // Type: boolean
 //
 
-use_multiple_threads = TRUE;
+use_multiple_threads = FALSE;
 
 ///////////// n_compute_threads ///////////////////////
 //
@@ -1877,6 +1877,16 @@ hca_interest_maps = {
   }
 };
 
+///////////// HCA_SD_DBZ_kernel_len ///////////////////
+//
+// Length of kernel for computing SD_DBS - gates.
+//
+//
+// Type: int
+//
+
+HCA_SD_DBZ_kernel_len = 7;
+
 //======================================================================
 //
 // COMPUTING NCAR PID - HYDROMETEOR PARTICLE ID.
@@ -2366,8 +2376,8 @@ site_temp_search_margin_secs = 3600;
 //          RHOHV
 //          PHIDP
 //          KDP
-//          KDP_ZZDR
 //          KDP_COND
+//          KDP_LOG
 //          PSOB
 //          DBZ_ATTEN_CORRECTION
 //          ZDR_ATTEN_CORRECTION
@@ -2401,6 +2411,7 @@ site_temp_search_margin_secs = 3600;
 //          SEACLUT_FLAG
 //          PARTICLE_ID
 //          TEMP_FOR_PID
+//          SD_DBZ
 //      string name;
 //      string long_name;
 //      string standard_name;
@@ -2528,6 +2539,18 @@ output_fields = {
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
     scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = SD_DBZ,
+    name = "SD_DBZ",
+    long_name = "trend_deviation_for_dbz",
+    standard_name = "trend_deviation_for_dbz",
+    units = "dBZ",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
     offset = 0
   }
 };

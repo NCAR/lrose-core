@@ -122,6 +122,8 @@ private:
   RadxArray<double> _kdpLogArray_;
   RadxArray<double> _dbzElevGradientArray_;
 
+  RadxArray<double> _sdDbzArray_;
+
   double *_snrArray;
   double *_dbzArray;
   double *_velArray;
@@ -135,6 +137,8 @@ private:
   double *_kdpCondArray;
   double *_kdpLogArray;
   double *_dbzElevGradientArray;
+
+  double *_sdDbzArray;
 
   RadxArray<int> _pidArray_;
   RadxArray<double> _pidInterest_;
@@ -205,6 +209,8 @@ private:
                                      const Params::interest_map_point_t *map,
                                      int nPoints,
                                      vector<InterestMap::ImPoint> &pts);
+
+  void _hcaCompute();
 
 };
 

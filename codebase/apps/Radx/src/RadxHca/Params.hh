@@ -139,7 +139,8 @@ public:
     DBZ_ELEV_GRADIENT_INTEREST_SEACLUT = 41,
     SEACLUT_FLAG = 42,
     PARTICLE_ID = 43,
-    TEMP_FOR_PID = 44
+    TEMP_FOR_PID = 44,
+    SD_DBZ = 45
   } output_field_id_t;
 
   typedef enum {
@@ -667,6 +668,8 @@ public:
   hca_interest_map_t *_hca_interest_maps;
   int hca_interest_maps_n;
 
+  int HCA_SD_DBZ_kernel_len;
+
   tdrp_bool_t compute_pid;
 
   char* pid_thresholds_file_path;
@@ -769,7 +772,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[152];
+  mutable TDRPtable _table[153];
 
   const char *_className;
 

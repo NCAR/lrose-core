@@ -2295,6 +2295,18 @@ using namespace std;
       tt->struct_vals[419].d = 0.2;
     tt++;
     
+    // Parameter 'HCA_SD_DBZ_kernel_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("HCA_SD_DBZ_kernel_len");
+    tt->descr = tdrpStrDup("Length of kernel for computing SD_DBS - gates.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &HCA_SD_DBZ_kernel_len - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
     // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -2799,7 +2811,7 @@ using namespace std;
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 45;
+        tt->struct_def.fields[0].enum_def.nfields = 46;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SNR");
@@ -2892,6 +2904,8 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[43].val = PARTICLE_ID;
         tt->struct_def.fields[0].enum_def.fields[44].name = tdrpStrDup("TEMP_FOR_PID");
         tt->struct_def.fields[0].enum_def.fields[44].val = TEMP_FOR_PID;
+        tt->struct_def.fields[0].enum_def.fields[45].name = tdrpStrDup("SD_DBZ");
+        tt->struct_def.fields[0].enum_def.fields[45].val = SD_DBZ;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;

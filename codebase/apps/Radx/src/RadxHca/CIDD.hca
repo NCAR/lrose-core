@@ -105,10 +105,10 @@ field_list = {
 #Label    Label       URL           Colorscale Units Cont-lo-hi-interv Format Display_in_menu Bkgnd_Render
 #---------------------------------------------------------------------------------------------------------
 
-DBZ DBZ  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&DBZ    dbz2.colors   dBZ -5 80 5 radial 1 0
-
-KDP2 KDP2  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp2.colors   deg/km -5 80 5 radial 1 0
-KDP3 KDP3  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp3.colors   deg/km -5 80 5 radial 1 0
+#DBZ DBZ  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&DBZ    dbz2.colors   dBZ -5 80 5 radial 1 0
+#DBZ3 DBZ3  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&DBZ    dbz3.colors   dBZ -5 80 5 radial 1 0
+#KDP2 KDP2  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp2.colors   deg/km -5 80 5 radial 1 0
+#KDP3 KDP3  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp3.colors   deg/km -5 80 5 radial 1 0
 
 DBZ DBZ  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&DBZ    dbz.colors   dBZ -5 80 5 radial 1 0
 SNR SNR  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&SNR    snr.colors   dB  -5 80 5 radial 1 0
@@ -116,20 +116,21 @@ ZDR ZDR  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&ZDR    zdr.
 RHOHV RHOHV  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&RHOHV    rhohv.colors   - -5 80 5 radial 1 0
 
 PHIDP PHIDP  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&PHIDP    phidp.colors  deg -5 80 5 radial 1 0
-KDP KDP  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp.colors   deg/km -5 80 5 radial 1 0
-KDP_COND KDP_COND  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP_COND    kdp.colors   deg/km -5 80 5 radial 1 0
+KDP KDP  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp3.colors   deg/km -5 80 5 radial 1 0
+KDP_COND KDP_COND  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP_COND    kdp3.colors   deg/km -5 80 5 radial 1 0
 KDP_LOG KDP_LOG  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP_LOG    kdp_log.colors   log(deg/km) -5 80 5 radial 1 0
 
 KDP1 KDP1  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp1.colors   deg/km -5 80 5 radial 1 0
 KDPS KDPS  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp_sband.colors   deg/km -5 80 5 radial 1 0
 KDP2 KDP2  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp2.colors   deg/km -5 80 5 radial 1 0
 KDP4 KDP4  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp.colors   deg/km -5 80 5 radial 1 0
+
 PID   PID mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&PID   pid.colors   - -5 80 5 radial 1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 
-=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+SD_DBZ SD_DBZ  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&SD_DBZ    sdev_snr.colors   dBZ -5 80 5 radial 1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
