@@ -282,7 +282,7 @@ void FilterUtils::computeSdevInRange(double *field,
     endGate.push_back(end);
   } // igate
   
-  // sdve computed in range
+  // sdev computed in range
   
   for (int igate = 0; igate < nGates; igate++) {
 
@@ -316,6 +316,109 @@ void FilterUtils::computeSdevInRange(double *field,
           sdev[igate] = sqrt(term1 - term2);
         }
       }
+    }
+    
+  } // igate
+
+}
+
+/////////////////////////////////////////////////////////////////
+// compute trend deviation of a field, over a kernel in range
+//
+// Set field values to missingVal if they are missing.
+// The trend dev will be set to missingVal if not enough data is
+// available for computing the result.
+//
+// The trend deviation differs from standard deviation.
+// It is computed as follows:
+//  (a) compute kernel mean at each point
+//  (b) compute residual of data from trend mean
+//  (c) compute root mean square of residual over kernel.
+
+void FilterUtils::computeTrendDevInRange(double *field,
+                                         double *tdev,
+                                         int nGates,
+                                         int nGatesKernel,
+                                         double missingVal)
+  
+{
+
+  // ensure we have odd nmber of gates
+
+  int nGatesHalf = nGatesKernel / 2;
+  if (nGatesHalf < 1) {
+    nGatesHalf = 1;
+  }
+  nGates = nGatesHalf * 2 + 1;
+  
+  // set up gate limits
+  
+  vector<int> startGate;
+  vector<int> endGate;
+  for (int igate = 0; igate < nGates; igate++) {
+    int start = igate - nGatesHalf;
+    if (start < 0) {
+      start = 0;
+    }
+    startGate.push_back(start);
+    int end = igate + nGatesHalf;
+    if (end > nGates - 1) {
+      end = nGates - 1;
+    }
+    endGate.push_back(end);
+  } // igate
+
+  // kernel means and residuals
+  
+  TaArray<double> residual_;
+  double *residual = residual_.alloc(nGates);
+
+  for (int igate = 0; igate < nGates; igate++) {
+    
+    residual[igate] = missingVal;
+    
+    // compute sums over the kernel space
+    
+    double nVal = 0.0;
+    double sumVal = 0.0;
+    
+    for (int jgate = startGate[igate]; jgate <= endGate[igate]; jgate++) {
+      double val = field[jgate];
+      if (val != missingVal) {
+        sumVal += val;
+        nVal++;
+      }
+    } // jgate
+    
+    if (nVal > 0) {
+      double mean = sumVal / nVal;
+      residual[igate] = mean - field[igate];
+    }
+    
+  } // igate
+  
+  // trend deviation is root mean square of residuals
+  
+  for (int igate = 0; igate < nGates; igate++) {
+    
+    tdev[igate] = missingVal;
+
+    // compute sums sq for stats over the kernel
+    
+    double nVal = 0.0;
+    double sumValSq = 0.0;
+    
+    for (int jgate = startGate[igate]; jgate <= endGate[igate]; jgate++) {
+      double val = residual[jgate];
+      if (val != missingVal) {
+        sumValSq += val * val;
+        nVal++;
+      }
+    } // jgate
+    
+    if (nVal > 0) {
+      double rms = sqrt(sumValSq / nVal);
+      tdev[igate] = rms;
     }
     
   } // igate

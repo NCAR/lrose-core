@@ -127,6 +127,24 @@ public:
 				 int nGatesKernel,
 				 double missingVal);
   
+  // compute trend deviation of a field, over a kernel in range
+  //
+  // Set field values to missingVal if they are missing.
+  // The trend dev will be set to missingVal if not enough data is
+  // available for computing the result.
+  //
+  // The trend deviation differs from standard deviation.
+  // It is computed as follows:
+  //  (a) compute kernel mean at each point
+  //  (b) compute residual of data from trend mean
+  //  (c) compute root mean square of residual over kernel.
+  
+  void computeTrendDevInRange(double *field,
+                              double *tdev,
+                              int nGates,
+                              int nGatesKernel,
+                              double missingVal);
+  
 protected:
 private:
 
