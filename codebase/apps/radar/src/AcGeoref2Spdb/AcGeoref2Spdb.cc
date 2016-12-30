@@ -1164,7 +1164,7 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
 
   // var type
 
-  NcxxType::ncType varType = var.getType().getTypeClass();
+  NcxxType::ncxxType varType = var.getType().getTypeClass();
 
   // get fill value
   
