@@ -947,7 +947,7 @@ using namespace std;
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("specified_min_elev");
     tt->descr = tdrpStrDup("Minimum valid elevation for rays (deg).");
-    tt->help = tdrpStrDup("If the elevation is below this value, the ray is ignored.");
+    tt->help = tdrpStrDup("If the elevation is below this value, the ray is ignored. Applies only if filter_using_elev is true.");
     tt->val_offset = (char *) &specified_min_elev - &_start_;
     tt->single_val.d = -10;
     tt++;
@@ -959,7 +959,7 @@ using namespace std;
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("specified_max_elev");
     tt->descr = tdrpStrDup("Maximum valid elevation for rays (deg).");
-    tt->help = tdrpStrDup("If the elevation is above this value, the ray is ignored.");
+    tt->help = tdrpStrDup("If the elevation is above this value, the ray is ignored. Applies only if filter_using_elev is true.");
     tt->val_offset = (char *) &specified_max_elev - &_start_;
     tt->single_val.d = 90;
     tt++;
@@ -983,7 +983,7 @@ using namespace std;
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("specified_min_sweep_number");
     tt->descr = tdrpStrDup("Minimum valid sweep number for rays.");
-    tt->help = tdrpStrDup("If the sweep number is below this value, the ray is ignored.");
+    tt->help = tdrpStrDup("If the sweep number is below this value, the ray is ignored. Applies only if filter_using_sweep_number is true.");
     tt->val_offset = (char *) &specified_min_sweep_number - &_start_;
     tt->single_val.i = 0;
     tt++;
@@ -995,9 +995,42 @@ using namespace std;
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("specified_max_sweep_number");
     tt->descr = tdrpStrDup("Maximum valid sweep number for rays.");
-    tt->help = tdrpStrDup("If the sweep number is above this value, the ray is ignored.");
+    tt->help = tdrpStrDup("If the sweep number is above this value, the ray is ignored. Applies only if filter_using_sweep_number is true.");
     tt->val_offset = (char *) &specified_max_sweep_number - &_start_;
     tt->single_val.i = 999;
+    tt++;
+    
+    // Parameter 'filter_using_sweep_number_list'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("filter_using_sweep_number_list");
+    tt->descr = tdrpStrDup("Option to filter data based on sweep numbers in the list.");
+    tt->help = tdrpStrDup("If TRUE, the program will use only ray data with a sweep number that is in the specified list.");
+    tt->val_offset = (char *) &filter_using_sweep_number_list - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'specified_sweep_number_list'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("specified_sweep_number_list");
+    tt->descr = tdrpStrDup("List of valid sweep numbers.");
+    tt->help = tdrpStrDup("If the sweep number is not in this list, the ray is ignored. Applies only if filter_using_sweep_number_list is true.");
+    tt->array_offset = (char *) &_specified_sweep_number_list - &_start_;
+    tt->array_n_offset = (char *) &specified_sweep_number_list_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(int);
+    tt->array_n = 3;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].i = 0;
+      tt->array_vals[1].i = 1;
+      tt->array_vals[2].i = 2;
     tt++;
     
     // Parameter 'Comment 6'
@@ -1086,8 +1119,8 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("CONVERTING ALL RAYS TO SAME GATE GEOMETRY");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_hdr = tdrpStrDup("OUTPUT GATE GEOMETRY");
+    tt->comment_text = tdrpStrDup("You can only choose one range geometry remapping option. If none are picked, all rays which do not match the predominant geometry will be discarded.");
     tt++;
     
     // Parameter 'convert_to_predominant_gate_geometry'
@@ -1097,9 +1130,69 @@ using namespace std;
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("convert_to_predominant_gate_geometry");
     tt->descr = tdrpStrDup("Option to convert all rays to predominant geometry.");
-    tt->help = tdrpStrDup("If true, all rays will be converted to the predominant gate geometry - i.e. start_range and gate_spacing. If false, all rays which do not match the predominant geometry will be discarded.");
+    tt->help = tdrpStrDup("If true, all rays will be converted to the predominant gate geometry - i.e. start_range and gate_spacing.");
     tt->val_offset = (char *) &convert_to_predominant_gate_geometry - &_start_;
     tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'convert_to_finest_gate_geometry'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("convert_to_finest_gate_geometry");
+    tt->descr = tdrpStrDup("Option to convert all rays to finest range gate spacing.");
+    tt->help = tdrpStrDup("If true, all rays will be converted to the finest gate spacing.");
+    tt->val_offset = (char *) &convert_to_finest_gate_geometry - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'convert_to_specified_output_gate_geometry'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("convert_to_specified_output_gate_geometry");
+    tt->descr = tdrpStrDup("Option to convert all rays to a specified gate geometry.");
+    tt->help = tdrpStrDup("See 'specified_start_range_k', 'specified_gate_spacing_km' and 'interpolate_to_specified_gate_geometry'.");
+    tt->val_offset = (char *) &convert_to_specified_output_gate_geometry - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'output_start_range_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("output_start_range_km");
+    tt->descr = tdrpStrDup("Start range for specified remapping (km).");
+    tt->help = tdrpStrDup("See 'convert_to_specified_gate_geometry'.");
+    tt->val_offset = (char *) &output_start_range_km - &_start_;
+    tt->single_val.d = 0.1;
+    tt++;
+    
+    // Parameter 'output_gate_spacing_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("output_gate_spacing_km");
+    tt->descr = tdrpStrDup("Gate spacing for specified remapping (km).");
+    tt->help = tdrpStrDup("See 'convert_to_specified_gate_geometry'.");
+    tt->val_offset = (char *) &output_gate_spacing_km - &_start_;
+    tt->single_val.d = 0.2;
+    tt++;
+    
+    // Parameter 'interpolate_to_output_gate_geometry'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("interpolate_to_output_gate_geometry");
+    tt->descr = tdrpStrDup("Option to use interpolation when converting to the specified gate geometry.");
+    tt->help = tdrpStrDup("If false, nearest neighbor mapping is used. See 'convert_to_specified_gate_geometry'.");
+    tt->val_offset = (char *) &interpolate_to_output_gate_geometry - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 8'
@@ -1909,6 +2002,18 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'write_surveillance_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_surveillance_files");
+    tt->descr = tdrpStrDup("Option to write out files for surveillance mode.");
+    tt->help = tdrpStrDup("Only applies if 'separate_output_dirs_by_scan_type' is true.");
+    tt->val_offset = (char *) &write_surveillance_files - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'surveillance_subdir'
     // ctype is 'char*'
     
@@ -1916,9 +2021,21 @@ using namespace std;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("surveillance_subdir");
     tt->descr = tdrpStrDup("The directory path for surveillance scan files.");
-    tt->help = tdrpStrDup("See 'separate_by_scan_type'. If the scan mode is surveillance, this subdirectory will be created under the ouput dir.");
+    tt->help = tdrpStrDup("See 'separate_output_dirs_by_scan_type'. If the scan mode is surveillance, this subdirectory will be created under the ouput dir.");
     tt->val_offset = (char *) &surveillance_subdir - &_start_;
     tt->single_val.s = tdrpStrDup("sur");
+    tt++;
+    
+    // Parameter 'write_sector_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_sector_files");
+    tt->descr = tdrpStrDup("Option to write out files for sector mode.");
+    tt->help = tdrpStrDup("Only applies if 'separate_output_dirs_by_scan_type' is true.");
+    tt->val_offset = (char *) &write_sector_files - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'sector_subdir'
@@ -1928,9 +2045,21 @@ using namespace std;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("sector_subdir");
     tt->descr = tdrpStrDup("The directory path for sector scan files.");
-    tt->help = tdrpStrDup("See 'separate_by_scan_type'. If the scan mode is sector, this subdirectory will be created under the ouput dir.");
+    tt->help = tdrpStrDup("See 'separate_output_dirs_by_scan_type'. If the scan mode is sector, this subdirectory will be created under the ouput dir.");
     tt->val_offset = (char *) &sector_subdir - &_start_;
     tt->single_val.s = tdrpStrDup("sec");
+    tt++;
+    
+    // Parameter 'write_rhi_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_rhi_files");
+    tt->descr = tdrpStrDup("Option to write out files for rhi mode.");
+    tt->help = tdrpStrDup("Only applies if 'separate_output_dirs_by_scan_type' is true.");
+    tt->val_offset = (char *) &write_rhi_files - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'rhi_subdir'
@@ -1940,9 +2069,21 @@ using namespace std;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("rhi_subdir");
     tt->descr = tdrpStrDup("The directory path for rhi files.");
-    tt->help = tdrpStrDup("See 'separate_by_scan_type'. If the scan mode is rhi, this subdirectory will be created under the ouput dir.");
+    tt->help = tdrpStrDup("See 'separate_output_dirs_by_scan_type'. If the scan mode is rhi, this subdirectory will be created under the ouput dir.");
     tt->val_offset = (char *) &rhi_subdir - &_start_;
     tt->single_val.s = tdrpStrDup("rhi");
+    tt++;
+    
+    // Parameter 'write_vert_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_vert_files");
+    tt->descr = tdrpStrDup("Option to write out files for vertical pointing mode.");
+    tt->help = tdrpStrDup("Only applies if 'separate_output_dirs_by_scan_type' is true.");
+    tt->val_offset = (char *) &write_vert_files - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'vert_subdir'
@@ -1952,33 +2093,9 @@ using namespace std;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("vert_subdir");
     tt->descr = tdrpStrDup("The directory path for vert scan files.");
-    tt->help = tdrpStrDup("See 'separate_by_scan_type'. If the scan mode is vert, this subdirectory will be created under the ouput dir.");
+    tt->help = tdrpStrDup("See 'separate_output_dirs_by_scan_type'. If the scan mode is vert, this subdirectory will be created under the ouput dir.");
     tt->val_offset = (char *) &vert_subdir - &_start_;
     tt->single_val.s = tdrpStrDup("vert");
-    tt++;
-    
-    // Parameter 'sun_subdir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("sun_subdir");
-    tt->descr = tdrpStrDup("The directory path for sun scan files.");
-    tt->help = tdrpStrDup("See 'separate_by_scan_type'. If the scan mode is sun, this subdirectory will be created under the ouput dir.");
-    tt->val_offset = (char *) &sun_subdir - &_start_;
-    tt->single_val.s = tdrpStrDup("sun");
-    tt++;
-    
-    // Parameter 'solar_scan_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("solar_scan_name");
-    tt->descr = tdrpStrDup("Optionally specify the scan name for the solar scan.");
-    tt->help = tdrpStrDup("If the scan name from the antenna controller matches this string, it will be assumed that this is a solar scan.");
-    tt->val_offset = (char *) &solar_scan_name - &_start_;
-    tt->single_val.s = tdrpStrDup("Solar");
     tt++;
     
     // Parameter 'min_elevation_for_vert_files'
@@ -2003,6 +2120,42 @@ using namespace std;
     tt->help = tdrpStrDup("If the fraction of the data with elevation angles above the specified min_elevation exceeds this fraction,  the volume will be considered to be from vertically-pointing operations.");
     tt->val_offset = (char *) &min_vert_fraction_for_vert_files - &_start_;
     tt->single_val.d = 0.9;
+    tt++;
+    
+    // Parameter 'write_sun_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_sun_files");
+    tt->descr = tdrpStrDup("Option to write out files for sun scan mode.");
+    tt->help = tdrpStrDup("Only applies if 'separate_output_dirs_by_scan_type' is true.");
+    tt->val_offset = (char *) &write_sun_files - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'sun_subdir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("sun_subdir");
+    tt->descr = tdrpStrDup("The directory path for sun scan files.");
+    tt->help = tdrpStrDup("See 'separate_output_dirs_by_scan_type'. If the scan mode is sun, this subdirectory will be created under the ouput dir.");
+    tt->val_offset = (char *) &sun_subdir - &_start_;
+    tt->single_val.s = tdrpStrDup("sun");
+    tt++;
+    
+    // Parameter 'solar_scan_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("solar_scan_name");
+    tt->descr = tdrpStrDup("Optionally specify the scan name for the solar scan.");
+    tt->help = tdrpStrDup("If the scan name from the antenna controller matches this string, it will be assumed that this is a solar scan.");
+    tt->val_offset = (char *) &solar_scan_name - &_start_;
+    tt->single_val.s = tdrpStrDup("Solar");
     tt++;
     
     // Parameter 'Comment 23'
@@ -2126,7 +2279,7 @@ using namespace std;
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("write_individual_ldata_info");
     tt->descr = tdrpStrDup("Option to write latest_data_info for each data set.");
-    tt->help = tdrpStrDup("Writes a latest_data_info file for each data set written, including the separate directories for surveillance, sector and RHI as appropriate. If write_master_ldata_info is true, you may consider turning this off.");
+    tt->help = tdrpStrDup("Writes a latest_data_info file for each data set written, including the separate directories for surveillance, sector, rhi etc. as appropriate. If write_master_ldata_info is true, you may consider turning this off.");
     tt->val_offset = (char *) &write_individual_ldata_info - &_start_;
     tt->single_val.b = pTRUE;
     tt++;

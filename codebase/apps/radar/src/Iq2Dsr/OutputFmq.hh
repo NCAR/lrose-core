@@ -74,7 +74,7 @@ public:
   
   // write the beam data
   
-  int writeBeam(const Beam &beam, int volNum, int sweepNum);
+  int writeBeam(const Beam &beam);
   
   // put flags
   

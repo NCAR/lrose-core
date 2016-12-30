@@ -48,7 +48,7 @@ public:
   
   // constructor - initializes for given size
   
-  InputUdp();
+  InputUdp(const Params &params);
   
   // destructor
   
@@ -56,7 +56,7 @@ public:
 
   // open and close
 
-  int openUdp(int port, bool debug);
+  int openUdp();
   void closeUdp();
 
   // read data from socket, puts into buffer
@@ -74,6 +74,7 @@ protected:
   
 private:
 
+  const Params &_params;
   int _udpFd;
   static const int maxUdpBytes = 1524;
   int _len;

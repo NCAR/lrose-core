@@ -62,6 +62,7 @@ public:
     double lat;
     double lon;
     double alt;
+    char* name;
   } id_t;
 
   typedef struct {

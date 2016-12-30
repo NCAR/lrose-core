@@ -26,8 +26,10 @@
  */
 
 #include <euclid/GridAlgs.hh>
+#include <euclid/Grid2dLoopAlg.hh>
 #include <euclid/Grid2dOffset.hh>
 #include <euclid/Grid2dLoop.hh>
+#include <euclid/Grid2dLoopA.hh>
 #include <euclid/Grid2dMedian.hh>
 #include <rapmath/AngleCombiner.hh>
 #include <rapmath/FuzzyF.hh>
@@ -57,8 +59,8 @@ static double _round(double v, double r0, double r1, double res)
 }
 
 //----------------------------------------------------------------
-static double _median2(Grid2d &out, const int xw, const int yw,
-		       Grid2dMedian &F, Grid2dLoop &G)
+static double _median2(Grid2d &out, int xw, int yw, Grid2dMedian &F,
+		       Grid2dLoop &G)
 {
   vector<pair<int,int> >  newv, oldv;
   vector<pair<int,int> >::iterator i;
@@ -69,92 +71,89 @@ static double _median2(Grid2d &out, const int xw, const int yw,
   
   // update Grid2dMedian object
   F.update(newv, oldv);
-
   return F.getMedian();
-
 }
 
-//----------------------------------------------------------------
-static double _speckle(Grid2d &out, const int xw, const int yw,
-		       Grid2dMedian &F, Grid2dLoop &G) 
-{
-  vector<pair<int,int> >  newv, oldv;
-  vector<pair<int,int> >::iterator i;
+// //----------------------------------------------------------------
+// static double _speckle(Grid2d &out, int xw, int yw, Grid2dMedian &F,
+// 		       Grid2dLoop &G) 
+// {
+//   vector<pair<int,int> >  newv, oldv;
+//   vector<pair<int,int> >::iterator i;
 
-  // get old and new points based on state
-  newv = G.newXy(xw, yw);
-  oldv = G.oldXy(xw, yw);
+//   // get old and new points based on state
+//   newv = G.newXy(xw, yw);
+//   oldv = G.oldXy(xw, yw);
   
-  // update Grid2dMedian object
-  F.update(newv, oldv);
+//   // update Grid2dMedian object
+//   F.update(newv, oldv);
 
-  double p25, p75;
-  p25 = F.getPercentile(0.25);
-  p75 = F.getPercentile(0.75);
-  if (p25 == F.getMissing() || p75 == F.getMissing())
-  {
-    return out.getMissing();
-  }
-  else
-  {
-    return p75 - p25;
-  }
-}
+//   double p25, p75;
+//   p25 = F.getPercentile(0.25);
+//   p75 = F.getPercentile(0.75);
+//   if (p25 == F.getMissing() || p75 == F.getMissing())
+//   {
+//     return out.getMissing();
+//   }
+//   else
+//   {
+//     return p75 - p25;
+//   }
+// }
 
-//----------------------------------------------------------------
-static double _speckleInterest(Grid2d &out, const int xw, const int yw,
-			       const FuzzyF &fuzzyDataDiff,
-			       const FuzzyF &fuzzyCountPctDiff,
-			       Grid2dMedian &F, Grid2dLoop &G) 
-{
-  vector<pair<int,int> >  newv, oldv;
-  vector<pair<int,int> >::iterator i;
+// //----------------------------------------------------------------
+// static double _speckleInterest(Grid2d &out, int xw, int yw,
+// 			       const FuzzyF &fuzzyDataDiff,
+// 			       const FuzzyF &fuzzyCountPctDiff,
+// 			       Grid2dMedian &F, Grid2dLoop &G) 
+// {
+//   vector<pair<int,int> >  newv, oldv;
+//   vector<pair<int,int> >::iterator i;
 
-  // get old and new points based on state
-  newv = G.newXy(xw, yw);
-  oldv = G.oldXy(xw, yw);
+//   // get old and new points based on state
+//   newv = G.newXy(xw, yw);
+//   oldv = G.oldXy(xw, yw);
   
-  // update Grid2dMedian object
-  F.update(newv, oldv);
+//   // update Grid2dMedian object
+//   F.update(newv, oldv);
 
-  double p25, p50, p75;
-  p25 = F.getPercentile(0.25);
-  p50 = F.getPercentile(0.50);
-  p75 = F.getPercentile(0.75);
+//   double p25, p50, p75;
+//   p25 = F.getPercentile(0.25);
+//   p50 = F.getPercentile(0.50);
+//   p75 = F.getPercentile(0.75);
 
-  double c25, c50, c75;
-  c25 = F.getCount(0.25);
-  c50 = F.getCount(0.50);
-  c75 = F.getCount(0.75);
-  double missing = F.getMissing();
+//   double c25, c50, c75;
+//   c25 = F.getCount(0.25);
+//   c50 = F.getCount(0.50);
+//   c75 = F.getCount(0.75);
+//   double missing = F.getMissing();
 
-  if (p25 == missing || p50 == missing || p75 == missing ||
-      c25 == missing || c50 == missing || c75 == missing)
-  {
-    return out.getMissing();
-  }
-  else
-  {
-    double interest = 1.0;
-    interest *= fuzzyDataDiff.apply(p50-p25);
-    interest *= fuzzyDataDiff.apply(p75-p50);
+//   if (p25 == missing || p50 == missing || p75 == missing ||
+//       c25 == missing || c50 == missing || c75 == missing)
+//   {
+//     return out.getMissing();
+//   }
+//   else
+//   {
+//     double interest = 1.0;
+//     interest *= fuzzyDataDiff.apply(p50-p25);
+//     interest *= fuzzyDataDiff.apply(p75-p50);
     
-    double num = F.getNum();
-    c25 /= num;
-    c50 /= num;
-    c75 /= num;
+//     double num = F.getNum();
+//     c25 /= num;
+//     c50 /= num;
+//     c75 /= num;
 
-    interest *= fuzzyCountPctDiff.apply(fabs(c50-c25));
-    interest *= fuzzyCountPctDiff.apply(fabs(c75-c50));
+//     interest *= fuzzyCountPctDiff.apply(fabs(c50-c25));
+//     interest *= fuzzyCountPctDiff.apply(fabs(c75-c50));
     
-    return interest;
-  }
-}
+//     return interest;
+//   }
+// }
 
 //----------------------------------------------------------------
-static double _medianInBox(Grid2d &data, const int x0, const int y0,
-			   const int nx, const int ny, 
-			   const bool allow_any_data, Grid2dMedian &F)
+static double _medianInBox(Grid2d &data, int x0, int y0, int nx, int ny, 
+			   bool allow_any_data, Grid2dMedian &F)
 {
   F.clear();
   
@@ -184,7 +183,7 @@ static double _medianInBox(Grid2d &data, const int x0, const int y0,
 
 
 //------------------------------------------------------------------
-TaThread *GridAlgs::GridAlgThreads::clone(const int index)
+TaThread *GridAlgs::GridAlgThreads::clone(int index)
 {
   // it is a simple thread that uses the Algorithm::compute() as method
   TaThreadSimple *t = new TaThreadSimple(index);
@@ -426,7 +425,7 @@ bool GridAlgs::isEdge(int x0, int y0) const
 }
 
 //---------------------------------------------------------------------------
-bool GridAlgs::isValidWithAtMostOneNeighbor(const int ix, const int iy) const
+bool GridAlgs::isValidWithAtMostOneNeighbor(int ix, int iy) const
 {
   if (isMissing(ix, iy))
   {
@@ -471,7 +470,7 @@ bool GridAlgs::isValidWithAtMostOneNeighbor(const int ix, const int iy) const
 }
 
 //---------------------------------------------------------------------------
-bool GridAlgs::isHoleSingle(const int ix, const int iy, double &v) const
+bool GridAlgs::isHoleSingle(int ix, int iy, double &v) const
 {
   if (ix < 1 || ix >= _nx -2)
   {
@@ -599,48 +598,7 @@ bool GridAlgs::boundingBox(int &x0, int &x1, int &y0, int &y1) const
 }
 
 //---------------------------------------------------------------------------
-bool GridAlgs::weightedCentroid(double maskvalue, const Grid2d &weights,
-				int &x, int &y) const
-{
-  if (_nx != weights._nx || _ny != weights._ny)
-  {
-    return false;
-  }
-  double n=0.0, w=0.0, v;
-  double fx=0.0, fy=0.0;
-  for (int iy=0; iy<_ny; ++iy)
-  {
-    for (int ix=0; ix<_nx; ++ix)
-    {
-      if (_data[_ipt(ix, iy)] == maskvalue)
-      {
-	v = weights._data[_ipt(ix, iy)];
-	if (v == weights._missing)
-	{
-	  continue;
-	}
-	++n;
-	w += v;
-	fx += static_cast<double>(ix)*v;
-	fy += static_cast<double>(iy)*v;
-      }
-    }
-  }
-  if (n == 0.0)
-  {
-    return false;
-  }
-  if (w == 0.0)
-  {
-    return false;
-  }
-  x = static_cast<int>(fx/w);
-  y = static_cast<int>(fy/w);
-  return true;
-}
-
-//---------------------------------------------------------------------------
-std::string GridAlgs::getInfoForAlg(const bool debug, double &missing,
+std::string GridAlgs::getInfoForAlg(bool debug, double &missing,
 				    double &newMissing) const
 {
   missing = _missing;
@@ -691,7 +649,7 @@ bool GridAlgs::intersects(const Grid2d &g, double &quality) const
 }
 
 //---------------------------------------------------------------------------
-bool GridAlgs::intersects(const int i, const Grid2d &g, int &ngood0, int &n0,
+bool GridAlgs::intersects(int i, const Grid2d &g, int &ngood0, int &n0,
 			  int &ngood1, int &n1) const
 {
   bool g0, g1;
@@ -718,8 +676,36 @@ bool GridAlgs::intersects(const int i, const Grid2d &g, int &ngood0, int &n0,
 }
 
 //---------------------------------------------------------------------------
-double GridAlgs::localMax(const int ix, const int iy, const int sx, 
-			  const int sy) const
+void GridAlgs::max(const Grid2d &g)
+{
+  if (_nx != g._nx || _ny != g._ny)
+  {
+    printf("ERROR in grid max, dims unequal\n");
+    return;
+  }
+  for (int i=0; i<_nx*_ny; ++i)
+  {
+    double v2;
+    if (g.getValue(i, v2))
+    {
+      double v;
+      if (getValue(i, v))
+      {
+	if (v2 > v)
+	{
+	  setValue(i, v2);
+	}
+      }
+      else
+      {
+	setValue(i, v2);
+      }
+    }
+  }
+}
+
+//---------------------------------------------------------------------------
+double GridAlgs::localMax(int ix, int iy, int sx,  int sy) const
 {
   double vt = 0.0;
   double v = 0.0;
@@ -764,94 +750,7 @@ double GridAlgs::localMax(const int ix, const int iy, const int sx,
 }
 
 //---------------------------------------------------------------------------
-double GridAlgs::localAverage(const int ix, const int iy, const int sx, 
-			      const int sy, bool needHalf) const
-{
-  double vt=0;
-  double v;
-  double n=0;
-  for (int y=iy-sy; y<=iy+sy; ++y)
-  {
-    if (y < 0 || y >= _ny)
-    {
-      continue;
-    }
-    for (int x=ix-sx; x<=ix+sx; ++x)
-    {
-      if (x < 0 || x >= _nx)
-      {
-	continue;
-      }
-      if (getValue(x, y, v))
-      {
-	vt += v;
-	n++;
-      }
-    }
-  }
-  double maxbad;
-  if (needHalf)
-  {
-    maxbad = static_cast<double>(sx*sy)/2.0;
-  }
-  else
-  {
-    maxbad = 0;
-  }
-
-  if (n > maxbad)
-  {
-    return vt/n;
-  }
-  else
-  {
-    return _missing;
-  }
-}
-
-
-//---------------------------------------------------------------------------
-double GridAlgs::localAverageNoMissing(const int ix, const int iy,
-				       const int sx,  const int sy) const
-{
-  double vt=0;
-  double v;
-  double n=0;
-  for (int y=iy-sy; y<=iy+sy; ++y)
-  {
-    if (y < 0 || y >= _ny)
-    {
-      continue;
-    }
-    for (int x=ix-sx; x<=ix+sx; ++x)
-    {
-      if (x < 0 || x >= _nx)
-      {
-	continue;
-      }
-      if (getValue(x, y, v))
-      {
-	vt += v;
-	n++;
-      }
-      else
-      {
-	return _missing;
-      }
-    }
-  }
-  if (n==0)
-  {
-    return _missing;
-  }
-  else
-  {
-    return vt/n;
-  }
-}
-
-//---------------------------------------------------------------------------
-double GridAlgs::averageAtX(const int ix) const
+double GridAlgs::averageAtX(int ix) const
 {
   if (ix < 0 || ix >= _nx)
   {
@@ -879,7 +778,7 @@ double GridAlgs::averageAtX(const int ix) const
 }
 
 //---------------------------------------------------------------------------
-double GridAlgs::maxAtX(const int ix) const
+double GridAlgs::maxAtX(int ix) const
 {
   if (ix < 0 || ix >= _nx)
   {
@@ -914,6 +813,300 @@ double GridAlgs::maxAtX(const int ix) const
   {
     return max;
   }
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::adjust(int x0, int x1)
+{
+  if (x0 <= 0 && (x1 >= _nx-1 || x1 < 0))
+  {
+    return;
+  }
+
+  for (int y=0; y<_ny; ++y)
+  {
+    for (int x=0; x<x0; ++x)
+    {
+      _data[_ipt(x,y)] = _missing;
+    }
+    if (x1 > 0)
+    {
+      for (int x=x1+1; x<_nx; ++x)
+      {
+	_data[_ipt(x,y)] = _missing;
+      }
+    }
+  }
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::increment(int x, int y, double value)
+{
+  double v;
+  if (getValue(x, y, v))
+  {
+    _data[_ipt(x,y)] = v +  value;
+  }
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::add(double value)
+{
+  for (int i=0; i<_nx*_ny; ++i)
+  {
+    double v;
+    if (getValue(i, v))
+    {
+      setValue(i, v+value);
+    }
+  }
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::add(const Grid2d &g, Grid2d &count)
+{
+  if (_nx != g._nx || _ny != g._ny ||
+      _nx != count._nx || _ny != count._ny)
+  {
+    printf("ERROR in grid add, dims unequal\n");
+    return;
+  }
+  for (int i=0; i<_nx*_ny; ++i)
+  {
+    double v2;
+    if (g.getValue(i, v2))
+    {
+      double v;
+      if (getValue(i, v))
+      {
+	setValue(i, v+v2);
+      }
+      else
+      {
+	setValue(i, v2);
+      }
+      double c;
+      if (count.getValue(i, c))
+      {
+	count.setValue(i, c+1);
+      }
+      else
+      {
+	count.setValue(i, 1);
+      }
+    }
+  }
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::add(const Grid2d &g)
+{
+  if (_nx != g._nx || _ny != g._ny)
+  {
+    printf("ERROR in grid add, dims unequal\n");
+    return;
+  }
+  for (int i=0; i<_nx*_ny; ++i)
+  {
+    double v2;
+    if (g.getValue(i, v2))
+    {
+      double v;
+      if (getValue(i, v))
+      {
+	setValue(i, v+v2);
+      }
+      else
+      {
+	setValue(i, v2);
+      }
+    }
+  }
+}
+
+
+//---------------------------------------------------------------------------
+void GridAlgs::multiply(int x, int y, double value)
+{
+  double v;
+  if (getValue(x, y, v))
+  {
+    _data[_ipt(x,y)] = v*value;
+  }
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::multiply(const Grid2d &g)
+{
+  if (_nx != g._nx || _ny != g._ny)
+  {
+    printf("ERROR in grid product, dims unequal\n");
+    return;
+  }
+  for (int i=0; i<_nx*_ny; ++i)
+  {
+    double v;
+    if (getValue(i, v))
+    {
+      double v2;
+      if (g.getValue(i, v2))
+      {
+	setValue(i, v*v2);
+      }
+      else
+      {
+	setValue(i, _missing);
+      }
+    }
+  }
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::multiply(double value)
+{
+  for (int i=0; i<_nx*_ny; ++i)
+  {
+    double v;
+    if (getValue(i, v))
+    {
+      setValue(i, v*value);
+    }
+  }
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::divide(const Grid2d &div)
+{
+  if (_nx != div._nx || _ny != div._ny )
+  {
+    printf("ERROR in grid div, dims unequal\n");
+    return;
+  }
+  for (int i=0; i<_nx*_ny; ++i)
+  {
+    double v2;
+    if (div.getValue(i, v2))
+    {
+      if (v2 == 0)
+      {
+	continue;
+      }
+      double v;
+      if (getValue(i, v))
+      {
+	setValue(i, v/v2);
+      }
+    }
+  }
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::change(double oldvalue, double newvalue)
+{
+  for (int i=0; i<_nx*_ny; ++i)
+  {
+    if (_data[i] == oldvalue)
+    {
+      _data[i] = newvalue;
+    }
+  }
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::changeLessOrEqual(double oldvalue, double newvalue)
+{
+  for (int i=0; i<_nx*_ny; ++i)
+  {
+    if (_data[i] == _missing)
+    {
+      _data[i] = newvalue;
+    }
+    else
+    {
+      if (_data[i] <= oldvalue)
+      {
+	_data[i] = newvalue;
+      }
+    }
+  }
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::change(std::vector<double> oldvalue, double skipvalue,
+		      double newvalue)
+{
+  for (int i=0; i<_nx*_ny; ++i)
+  {
+    if (_data[i] == skipvalue)
+    {
+      continue;
+    }
+    vector<double>::const_iterator ii;
+    if (find(oldvalue.begin(), oldvalue.end(), _data[i]) != oldvalue.end())
+    {
+      _data[i] = newvalue;
+    }
+  }
+}
+
+//---------------------------------------------------------------------------
+bool GridAlgs::merge(const Grid2d &g)
+{
+  if (g._nx != _nx || g._ny != _ny)
+  {
+    printf("ERROR merging grids, dimensions unequal\n");
+    return false;
+  }
+  double v;
+  for (int i=0; i<_nx*_ny; ++i)
+  {
+    if (g.getValue(i, v))
+    {
+      _data[i] = v;
+    }
+  }
+  return true;
+}
+
+//---------------------------------------------------------------------------
+bool GridAlgs::weightedCentroid(double maskvalue, const Grid2d &weights,
+				int &x, int &y) const
+{
+  if (_nx != weights._nx || _ny != weights._ny)
+  {
+    return false;
+  }
+  double n=0.0, w=0.0, v;
+  double fx=0.0, fy=0.0;
+  for (int iy=0; iy<_ny; ++iy)
+  {
+    for (int ix=0; ix<_nx; ++ix)
+    {
+      if (_data[_ipt(ix, iy)] == maskvalue)
+      {
+	v = weights._data[_ipt(ix, iy)];
+	if (v == weights._missing)
+	{
+	  continue;
+	}
+	++n;
+	w += v;
+	fx += static_cast<double>(ix)*v;
+	fy += static_cast<double>(iy)*v;
+      }
+    }
+  }
+  if (n == 0.0)
+  {
+    return false;
+  }
+  if (w == 0.0)
+  {
+    return false;
+  }
+  x = static_cast<int>(fx/w);
+  y = static_cast<int>(fy/w);
+  return true;
 }
 
 /*------------------------------------------------------------------------*/
@@ -1220,1463 +1413,8 @@ bool GridAlgs::motionDifferenceInMask(const Grid2d &mask,
   }
 }
 
-//---------------------------------------------------------------------------
-void GridAlgs::adjust(int x0, int x1)
-{
-  if (x0 <= 0 && (x1 >= _nx-1 || x1 < 0))
-  {
-    return;
-  }
-
-  for (int y=0; y<_ny; ++y)
-  {
-    for (int x=0; x<x0; ++x)
-    {
-      _data[_ipt(x,y)] = _missing;
-    }
-    if (x1 > 0)
-    {
-      for (int x=x1+1; x<_nx; ++x)
-      {
-	_data[_ipt(x,y)] = _missing;
-      }
-    }
-  }
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::increment(int x, int y, double value)
-{
-  double v;
-  if (getValue(x, y, v))
-  {
-    _data[_ipt(x,y)] = v +  value;
-  }
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::multiply(int x, int y, double value)
-{
-  double v;
-  if (getValue(x, y, v))
-  {
-    _data[_ipt(x,y)] = v*value;
-  }
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::multiply(const Grid2d &g)
-{
-  if (_nx != g._nx || _ny != g._ny)
-  {
-    printf("ERROR in grid product, dims unequal\n");
-    return;
-  }
-  for (int i=0; i<_nx*_ny; ++i)
-  {
-    double v;
-    if (getValue(i, v))
-    {
-      double v2;
-      if (g.getValue(i, v2))
-      {
-	setValue(i, v*v2);
-      }
-      else
-      {
-	setValue(i, _missing);
-      }
-    }
-  }
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::multiply(const double value)
-{
-  for (int i=0; i<_nx*_ny; ++i)
-  {
-    double v;
-    if (getValue(i, v))
-    {
-      setValue(i, v*value);
-    }
-  }
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::add(const double value)
-{
-  for (int i=0; i<_nx*_ny; ++i)
-  {
-    double v;
-    if (getValue(i, v))
-    {
-      setValue(i, v+value);
-    }
-  }
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::max(const Grid2d &g)
-{
-  if (_nx != g._nx || _ny != g._ny)
-  {
-    printf("ERROR in grid max, dims unequal\n");
-    return;
-  }
-  for (int i=0; i<_nx*_ny; ++i)
-  {
-    double v2;
-    if (g.getValue(i, v2))
-    {
-      double v;
-      if (getValue(i, v))
-      {
-	if (v2 > v)
-	{
-	  setValue(i, v2);
-	}
-      }
-      else
-      {
-	setValue(i, v2);
-      }
-    }
-  }
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::add(const Grid2d &g, Grid2d &count)
-{
-  if (_nx != g._nx || _ny != g._ny ||
-      _nx != count._nx || _ny != count._ny)
-  {
-    printf("ERROR in grid add, dims unequal\n");
-    return;
-  }
-  for (int i=0; i<_nx*_ny; ++i)
-  {
-    double v2;
-    if (g.getValue(i, v2))
-    {
-      double v;
-      if (getValue(i, v))
-      {
-	setValue(i, v+v2);
-      }
-      else
-      {
-	setValue(i, v2);
-      }
-      double c;
-      if (count.getValue(i, c))
-      {
-	count.setValue(i, c+1);
-      }
-      else
-      {
-	count.setValue(i, 1);
-      }
-    }
-  }
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::add(const Grid2d &g)
-{
-  if (_nx != g._nx || _ny != g._ny)
-  {
-    printf("ERROR in grid add, dims unequal\n");
-    return;
-  }
-  for (int i=0; i<_nx*_ny; ++i)
-  {
-    double v2;
-    if (g.getValue(i, v2))
-    {
-      double v;
-      if (getValue(i, v))
-      {
-	setValue(i, v+v2);
-      }
-      else
-      {
-	setValue(i, v2);
-      }
-    }
-  }
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::divide(const Grid2d &div)
-{
-  if (_nx != div._nx || _ny != div._ny )
-  {
-    printf("ERROR in grid div, dims unequal\n");
-    return;
-  }
-  for (int i=0; i<_nx*_ny; ++i)
-  {
-    double v2;
-    if (div.getValue(i, v2))
-    {
-      if (v2 == 0)
-      {
-	continue;
-      }
-      double v;
-      if (getValue(i, v))
-      {
-	setValue(i, v/v2);
-      }
-    }
-  }
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::change(double oldvalue, double newvalue)
-{
-  for (int i=0; i<_nx*_ny; ++i)
-  {
-    if (_data[i] == oldvalue)
-    {
-      _data[i] = newvalue;
-    }
-  }
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::changeLessOrEqual(double oldvalue, double newvalue)
-{
-  for (int i=0; i<_nx*_ny; ++i)
-  {
-    if (_data[i] == _missing)
-    {
-      _data[i] = newvalue;
-    }
-    else
-    {
-      if (_data[i] <= oldvalue)
-      {
-	_data[i] = newvalue;
-      }
-    }
-  }
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::change(std::vector<double> oldvalue, double skipvalue,
-		      double newvalue)
-{
-  for (int i=0; i<_nx*_ny; ++i)
-  {
-    if (_data[i] == skipvalue)
-    {
-      continue;
-    }
-    vector<double>::const_iterator ii;
-    if (find(oldvalue.begin(), oldvalue.end(), _data[i]) != oldvalue.end())
-    {
-      _data[i] = newvalue;
-    }
-  }
-}
-
-//---------------------------------------------------------------------------
-bool GridAlgs::merge(const Grid2d &g)
-{
-  if (g._nx != _nx || g._ny != _ny)
-  {
-    printf("ERROR merging grids, dimensions unequal\n");
-    return false;
-  }
-  double v;
-  for (int i=0; i<_nx*_ny; ++i)
-  {
-    if (g.getValue(i, v))
-    {
-      _data[i] = v;
-    }
-  }
-  return true;
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::smooth(const int sx, const int sy)
-{
-  GridAlgs tmp(*this);
-  for (int iy=0; iy<_ny; ++iy)
-  {
-    for (int ix=0; ix<_nx; ++ix)
-    {
-      double v = localAverage(ix, iy, sx, sy);
-      tmp.setValue(ix, iy, v);
-    }
-  }
-  *this = tmp;
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::smoothThreaded(const int sx, const int sy, int numThread)
-{
-  GridAlgThreads *thread = new GridAlgs::GridAlgThreads();
-  thread->init(numThread, false);
-
-  GridAlgs tmp(*this);
-  for (int iy=0; iy<_ny; ++iy)
-  {
-    GridAlgsInfo *info = new GridAlgsInfo(GridAlgsInfo::SMOOTH,
-					  sx, sy, iy, this, tmp);
-    thread->thread(iy, (void *)info);
-  }
-  thread->waitForThreads();
-  delete thread;
-  *this = tmp;
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::compute(void *ti)
-{
-  GridAlgsInfo *info = static_cast<GridAlgsInfo *>(ti);
-  switch (info->_type)
-  {
-  case GridAlgsInfo::SMOOTH:
-    for (int ix=0; ix<info->_gridAlgs->_nx; ++ix)
-    {
-      double v = info->_gridAlgs->localAverage(ix, info->_y, info->_sx, 
-					       info->_sy, true);
-      info->_out.setValue(ix, info->_y, v);
-    }
-    break;
-  case GridAlgsInfo::SDEV:
-    for (int ix=0; ix<info->_gridAlgs->_nx; ++ix)
-    {
-      double v = info->_gridAlgs->_sdev(ix, info->_y, info->_sx, info->_sy,
-					true);
-      info->_out.setValue(ix, info->_y, v);
-    }
-    break;
-  case GridAlgsInfo::TEXTURE_X:
-    for (int ix=0; ix<info->_gridAlgs->_nx; ++ix)
-    {
-      double v = info->_gridAlgs->_textureX(ix, info->_y, info->_sx, info->_sy,
-					    true);
-      info->_out.setValue(ix, info->_y, v);
-    }
-    break;
-  case GridAlgsInfo::TEXTURE_Y:
-    for (int ix=0; ix<info->_gridAlgs->_nx; ++ix)
-    {
-      double v = info->_gridAlgs->_textureY(ix, info->_y, info->_sx, info->_sy,
-					    true);
-      info->_out.setValue(ix, info->_y, v);
-    }
-    break;
-  default:
-    break;
-  }
-  delete info;
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::smoothNoMissing(const int sx, const int sy)
-{
-  GridAlgs tmp(*this);
-  for (int iy=0; iy<_ny; ++iy)
-  {
-    for (int ix=0; ix<_nx; ++ix)
-    {
-      double v = localAverageNoMissing(ix, iy, sx, sy);
-      tmp.setValue(ix, iy, v);
-    }
-  }
-  *this = tmp;
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::fillGaps(const int sx, const int sy)
-{
-  GridAlgs tmp(*this);
-  double v;
-  for (int iy=0; iy<_ny; ++iy)
-  {
-    for (int ix=0; ix<_nx; ++ix)
-    {
-      if (getValue(ix, iy, v))
-      {
-	continue;
-      }
-      double v = localAverage(ix, iy, sx, sy);
-      tmp.setValue(ix, iy, v);
-    }
-  }
-  *this = tmp;
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::reduce(const int f)
-{
-  if (f < 2)
-  {
-    return;
-  }
-  int nx = _nx/f;
-  int ny = _ny/f;
-  GridAlgs g(_name.c_str(), nx, ny, _missing);
-
-  for (int y=0; y<ny; ++y)
-  {
-    int full_y = y*f;
-    if (full_y >= _ny)
-    {
-      printf("ERROR\n");
-      continue;
-    }
-    for (int x=0; x<nx; ++x)
-    {
-      int full_x = x*f;
-      if (full_x >= _nx)
-      {
-	printf("ERROR\n");
-	continue;
-      }
-      g.setValue(x, y, getValue(full_x, full_y));
-    }
-  }
-  *this = g;
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::reduceMax(const int f)
-{
-  if (f < 2)
-  {
-    return;
-  }
-  int nx = _nx/f;
-  int ny = _ny/f;
-  GridAlgs g(_name.c_str(), nx, ny, _missing);
-  for (int y=0; y<ny; ++y)
-  {
-    int full_y = y*f;
-    if (full_y >= _ny)
-    {
-      printf("ERROR\n");
-      continue;
-    }
-    for (int x=0; x<nx; ++x)
-    {
-      int full_x = x*f;
-      if (full_x >= _nx)
-      {
-	printf("ERROR\n");
-	continue;
-      }
-      g.setValue(x, y, localMax(full_x, full_y, f, f));
-    }
-  }
-  *this = g;
-  }
-
-//---------------------------------------------------------------------------
-void GridAlgs::reduceMax(const int fx, const int fy)
-{
-  if (fx < 2 && fy < 2)
-  {
-    return;
-  }
-  int nx = _nx/fx;
-  int ny = _ny/fy;
-  GridAlgs g(_name.c_str(), nx, ny, _missing);
-
-  for (int y=0; y<ny; ++y)
-  {
-    int full_y = y*fy;
-    if (full_y >= _ny)
-    {
-      printf("ERROR\n");
-      continue;
-    }
-    for (int x=0; x<nx; ++x)
-    {
-      int full_x = x*fx;
-      if (full_x >= _nx)
-      {
-	printf("ERROR\n");
-	continue;
-      }
-      g.setValue(x, y, localMax(full_x, full_y, fx, fy));
-    }
-  }
-  *this = g;
-}
-
-#ifdef NOTDEF
-//---------------------------------------------------------------------------
-void GridAlgs::maxRTheta(const int circle_r, const double dx, const double dy,
-		   const double x0, const int maxy)
-{
-  GridAlgs g(*this);
-  //
-  // for each radius, get lookup offsets and use them
-  //
-  // at a given radius the max number of azimuths is therefore computed
-  // using this:
-  // 
-  //   distance azimuthally for M gridpoints = r*M*dy*3.14/180
-  //   M*r*dy*3.14/180 <= circle_r*dx  gives maximum M to check out at r
-  //
-  //   total distance = (approx) sqrt((r2-r1)^2 + (r*(theta change)
-  //
-  for (int x=0; x<_nx; ++x)
-  {
-    Grid2dLookup G;
-    G.init(x, circle_r, dx, dy, x0, maxy);
-    for (int y=0; y<_ny; ++y)
-    {
-      g.setValue(x, y, G.max(*this, x, y));
-    }
-  }
-  *this = g;
-}
-#endif
-
-
-//---------------------------------------------------------------------------
-bool GridAlgs::interpolate(const Grid2d &lowres, const int res)
-{
-  if (lowres._nx != _nx/res)
-  {
-    printf("ERROR interpolating, bad dimensions\n");
-    return false;
-  }
-  if (lowres._ny != _ny/res)
-  {
-    printf("ERROR interpolating, bad dimensions\n");
-    return false;
-  }
-  for (int y=0; y<_ny; ++y)
-  {
-    int ry0 = y/res;
-    for (int x=0; x<_nx; ++x)
-    {
-      int rx0 = x/res;
-      double v = _bilinear(ry0, rx0, res, y, x, lowres);
-      setValue(x, y, v);
-    }
-  }
-  return true;
-}
-
 //----------------------------------------------------------------
-void GridAlgs::dilate2(const int xw, const int yw)
-{
-  // make a copy of the input grid..
-  GridAlgs tmp(*this);
-
-  // for each point, set value to max in a xw by yw window around
-  // the point
-  for (int y=0; y<_ny; y++)
-  {
-    for (int x=0; x<_nx; x++)
-    {
-      _data[y*_nx + x] = tmp._dilate(x, y, xw, yw);
-    }
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::dilateOneValue(const double v, const int xw, const int yw)
-{
-  // make a copy of the input grid..
-  GridAlgs tmp(*this);
-
-  for (int y=0; y<_ny; y++)
-  {
-    for (int x=0; x<_nx; x++)
-    {
-      _data[y*_nx + x] = tmp._dilateOneValue(v, x, y, xw, yw);
-    }
-  }
-}
-
-//----------------------------------------------------------------
-double GridAlgs::medianXy(const int xLwr, const int xUpr, const int yLwr,
-			  const int yUpr)
-{
-
-  double v;
-  vector <double> aList;
-
-  for (int iy=0; iy<_ny; iy++)
-  {
-    if (iy < yLwr || iy >= yUpr)
-    {
-      continue;
-    }
-    for (int ix=0; ix<_nx; ix++)
-    {
-      if (ix < xLwr || ix >= xUpr)
-      {
-        continue;
-      }
-      if (getValue(ix, iy, v))
-      {
-        aList.push_back(v);
-      }
-    }
-  }
-
-  if (aList.empty())
-  {
-    return _missing;
-  }
-
-  int ind = aList.size() / 2;
-  nth_element(aList.begin(), aList.begin()+ind, aList.end());
-  return aList[ind];
-}
-
-//----------------------------------------------------------------
-double GridAlgs::meanXy(const int xLwr, const int xUpr, const int yLwr,
-			const int yUpr)
-{
-
-  double v,A=0,N=0;
-
-  for (int iy=0; iy<_ny; iy++)
-  {
-    if (iy < yLwr || iy >= yUpr)
-    {
-      continue;
-    }
-    for (int ix=0; ix<_nx; ix++)
-    {
-      if (ix < xLwr || ix >= xUpr)
-      {
-	continue;
-      }
-      if (getValue(ix, iy, v))
-      {
-        A += v;
-        N += 1;
-      }
-    }
-  }
-
-  if (N > 0) 
-  {
-    return A/N;
-  }
-  else
-  {
-    LOG(ERROR) << "no data found in mean_xy"; 
-    return _missing;
-  }
-}
-
-//----------------------------------------------------------------
-double GridAlgs::sdevXy(const int xLwr, const int xUpr, const int yLwr,
-			const int yUpr)
-{
-
-  double v, A=0,Q=0,N=0;
-
-  for (int iy=0; iy<_ny; iy++)
-  {
-    if (iy < yLwr || iy >= yUpr)
-    {
-      continue;
-    }
-    for (int ix=0; ix<_nx; ix++)
-    {
-      if (ix < xLwr || ix >= xUpr)
-      {
-	continue;
-      }
-      if (getValue(ix, iy, v))
-      {
-        N+=1;
-        Q = Q+((N-1)/N)*(v-A)*(v-A);
-        A = A+(v-A)/N;
-      }
-    }
-  }
-
-  if (N > 0)
-  {
-    return sqrt(Q/N);
-  }
-  else
-  {
-    LOG(ERROR) << "no data found in sdev_xy";
-    return _missing;
-  }
-
-}
-
-//----------------------------------------------------------------
-void GridAlgs::median2(const int xw, const int yw, double bin_min,
-		      double bin_max, double bin_delta)
-{
-  // make a fast median object
-  Grid2dMedian F(*this, xw, yw, bin_delta, bin_min, bin_max);
-
-  // make an object to loop through the grid
-  Grid2dLoop G(_nx, _ny);
-
-  // do this computation writing to local object
-  // get the value
-  int x, y;
-  double m;
-
-  // set value into 
-  m = _median2(*this, xw, yw, F, G);
-  G.getXy(x, y);
-  setValue(x, y, m);
-
-  while (G.increment())
-  {
-    m = _median2(*this, xw, yw, F, G);
-    G.getXy(x, y);
-    setValue(x, y, m);
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::speckle(const int xw, int yw, double bin_min, double bin_max,
-		       double bin_delta)
-{
-  // make a fast median object
-  Grid2dMedian F(*this, xw, yw, bin_delta, bin_min, bin_max);
-
-  // make an object to loop through the grid
-  Grid2dLoop G(_nx, _ny);
-
-  // do this computation writing to local object
-  // get the value
-  int x, y;
-  double m;
-
-  // set value into 
-  
-  m = _speckle(*this, xw, yw, F, G);
-  G.getXy(x, y);
-  setValue(x, y, m);
-
-  while (G.increment())
-  {
-    m = _speckle(*this, xw, yw, F, G);
-    G.getXy(x, y);
-    setValue(x, y, m);
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::speckleInterest(const int xw, const int yw,
-			       double bin_min, double bin_max,
-			       double bin_delta, const FuzzyF &fuzzyDataDiff,
-			       const FuzzyF &fuzzyCountPctDiff)
-{
-  // make a fast median object
-  Grid2dMedian F(*this, xw, yw, bin_delta, bin_min, bin_max);
-
-  // make an object to loop through the grid
-  Grid2dLoop G(_nx, _ny);
-
-  // do this computation writing to local object
-  // get the value
-  int x, y;
-  double m;
-
-  // set value into 
-  
-  m = _speckleInterest(*this, xw, yw, fuzzyDataDiff, fuzzyCountPctDiff, F, G);
-  G.getXy(x, y);
-  setValue(x, y, m);
-
-  while (G.increment())
-  {
-    m = _speckleInterest(*this, xw, yw, fuzzyDataDiff, fuzzyCountPctDiff, F, G);
-    G.getXy(x, y);
-    setValue(x, y, m);
-  }
-}
-
-#ifdef NOTYET
-void GridAlgs::threadedSpeckleInterest(const int xw, const int yw,
-				       double bin_min, double bin_max,
-				       double bin_delta,
-				       const FuzzyF &fuzzyDataDiff,
-				       const FuzzyF &fuzzyCountPctDiff,
-				       int nthread)
-{
-
-
-  // make a fast median object
-  Grid2dMedian F(*this, xw, yw, bin_delta, bin_min, bin_max);
-
-  // make an object to loop through the grid
-  Grid2dLoop G(_nx, _ny);
-
-  // do this computation writing to local object
-  // get the value
-  int x, y;
-  double m;
-
-  // set value into 
-  
-  m = _speckleInterest(*this, xw, yw, fuzzyDataDiff, fuzzyCountPctDiff, F, G);
-  G.getXy(x, y);
-  setValue(x, y, m);
-
-  while (G.increment())
-  {
-    m = _speckleInterest(*this, xw, yw, fuzzyDataDiff, fuzzyCountPctDiff, F, G);
-    G.getXy(x, y);
-    setValue(x, y, m);
-  }
-}
-#endif
-
-//----------------------------------------------------------------
-void GridAlgs::medianNoOverlap(const int xw, const int yw, 
-			       const double bin_min,
-			       const double bin_max, const double bin_delta,
-			       const bool allow_any_data)
-{
-  // make a fast median object
-  Grid2dMedian F(*this, xw, yw, bin_delta, bin_min, bin_max);
-
-  // make a copy of the local object
-  GridAlgs tmp(*this);
-
-  for (int y=0; y<_ny; y += yw)
-  {
-    for (int x=0; x<_nx; x += xw)
-    {
-      double v = _medianInBox(tmp, x, y, xw, yw, allow_any_data, F);
-      _fillBox(x, y, xw, yw, v);
-    }
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::sdev2Old(const int xw, const int yw)
-{
-  // make a copy of the input grid..
-  GridAlgs tmp(*this);
-
-  // for each point, set value to standard deviation in a xw by yw window around
-  // the point
-  for (int y=0; y<_ny; y++)
-  {
-    for (int x=0; x<_nx; x++)
-    {
-      _data[y*_nx + x] = tmp._sdev(x, y, xw, yw);
-    }
-  }
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::sdevThreaded(const int sx, const int sy, int numThread)
-{
-  GridAlgThreads *thread = new GridAlgs::GridAlgThreads();
-  thread->init(numThread, false);
-
-  GridAlgs tmp(*this);
-  for (int iy=0; iy<_ny; ++iy)
-  {
-    GridAlgsInfo *info = new GridAlgsInfo(GridAlgsInfo::SDEV,
-					  sx, sy, iy, this, tmp);
-    thread->thread(iy, (void *)info);
-  }
-  thread->waitForThreads();
-  delete thread;
-  *this = tmp;
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::textureXThreaded(const int sx, const int sy, int numThread)
-{
-  GridAlgThreads *thread = new GridAlgs::GridAlgThreads();
-  thread->init(numThread, false);
-
-  GridAlgs tmp(*this);
-  for (int iy=0; iy<_ny; ++iy)
-  {
-    GridAlgsInfo *info = new GridAlgsInfo(GridAlgsInfo::TEXTURE_X,
-					  sx, sy, iy, this, tmp);
-    thread->thread(iy, (void *)info);
-  }
-  thread->waitForThreads();
-  delete thread;
-  *this = tmp;
-}
-
-//---------------------------------------------------------------------------
-void GridAlgs::textureYThreaded(const int sx, const int sy, int numThread)
-{
-  GridAlgThreads *thread = new GridAlgs::GridAlgThreads();
-  thread->init(numThread, false);
-
-  GridAlgs tmp(*this);
-  for (int iy=0; iy<_ny; ++iy)
-  {
-    GridAlgsInfo *info = new GridAlgsInfo(GridAlgsInfo::TEXTURE_Y,
-					  sx, sy, iy, this, tmp);
-    thread->thread(iy, (void *)info);
-  }
-  thread->waitForThreads();
-  delete thread;
-  *this = tmp;
-}
-
-//----------------------------------------------------------------
-void GridAlgs::sdev2(const int xw, const int yw)
-{
-  // make an object to loop through the grid
-  Grid2dLoop G(_nx, _ny);
-
-  // make a copy of the local object
-  GridAlgs tmp(*this);
-
-  // consider this: sdev = sqrt(sum (xi-xbar)**2/N)
-  //                     = sum(xi**2 ) -2*xbar*sum(xi) + sum(xbar**2)
-  //                xbar = sum(xi)/N
-  //                sdev = sqrt(Z/N)
-  //  where
-  //           Z = sum(xi**2) -2*sum(xi)*xbar + N*xbar*xbar
-  //             = sum(xi**2) -2*sum(xi)*sum(xi)/N + N*sum(xi)*sum(xi)/(N*N)
-  //             = sum(xi**2) -sum(xi)*sum(xi)/N
-  //             = (N*sum(xi**2) - (sum(xi))**2)/N
-  //    
-  // we can therefore do this the fast way as follows. Let
-  //   A = sum(xi**2)
-  //   B = sum(xi)
-  // 
-  //   Z = (N*A - B*B)/N
-  //   sdev = sqrt(Z/N) = sqrt(N*A-B*B)/N
-  //
-  // When we increment the G and get old/new points, we can say
-  //   A(k+1) = A(k) - sum(xi**2)old + sum(xi**2)new
-  //   B(k+1) = B(k) - sum(xi)old + sum(xi)new
-  //   N(k+1) = N(k) - number removed + number added
-  //
-  // which shows that this can be done using the 'fast' method.
-  
-  double A=0, B=0, N=0;
-
-  // do this computation writing to local object
-  _sdev2Final(xw, yw, tmp, G, A, B, N);
-  while (G.increment())
-  {
-    _sdev2Final(xw, yw, tmp, G, A, B, N);
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::sdevNoOverlap(const int xw, const int yw)
-{
-  // make a copy of the local object
-  GridAlgs tmp(*this);
-
-  // Note: sdev = sqrt(sum (xi-xbar)**2/N)
-  //            = sum(xi**2 ) -2*xbar*sum(xi) + sum(xbar**2)
-  //       xbar = sum(xi)/N
-  //    
-
-  for (int y=0; y<_ny; y += yw)
-  {
-    for (int x=0; x<_nx; x += xw)
-    {
-      double xbar = tmp._meanInBox(x, y, xw, yw);
-      double sdev = tmp._sdevInBox(x, y, xw, yw, xbar);
-      _fillBox(x, y, xw, yw, sdev);
-    }
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::texture2X(const int xw, const int yw)
-{
-  // make an object to loop through the grid
-  Grid2dLoop G(_nx, _ny);
-
-  // make a copy of the local object
-  GridAlgs tmp(*this);
-
-  double A=0.0;
-  double N=0.0;
-
-  // do this computation writing to local object
-  _textureXNew(xw, yw, tmp, G, A, N);
-  while (G.increment())
-  {
-    _textureXNew(xw, yw, tmp, G, A, N);
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::texture2Y(const int xw, const int yw)
-{
-  // make an object to loop through the grid
-  Grid2dLoop G(_nx, _ny);
-
-  // make a copy of the local object
-  GridAlgs tmp(*this);
-
-  double A=0.0;
-  double N=0.0;
-
-  // do this computation writing to local object
-  _textureYNew(xw, yw, tmp, G, A, N);
-  while (G.increment())
-  {
-    _textureYNew(xw, yw, tmp, G, A, N);
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::smooth2(const int xw, const int yw)
-{
-  // make an object to loop through the grid
-  Grid2dLoop G(_nx, _ny);
-
-  // make a copy of the local object
-  GridAlgs tmp(*this);
-
-  double A=0.0, N=0.0;
-
-  // do this computation writing to local object
-  _smooth2(xw, yw, tmp, G, A, N);
-  while (G.increment())
-  {
-    _smooth2(xw, yw, tmp, G, A, N);
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::smooth2NoMissing(const int xw, const int yw)
-{
-  // make an object to loop through the grid
-  Grid2dLoop G(_nx, _ny);
-
-  // make a copy of the local object
-  GridAlgs tmp(*this);
-
-  double A=0.0, N=0.0;
-  int nmissing = 0;
-
-  // do this computation writing to local object
-  _smooth2NoMissing(xw, yw, tmp, G, A, N, nmissing);
-  while (G.increment())
-  {
-    _smooth2NoMissing(xw, yw, tmp, G, A, N, nmissing);
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::db2linear(void)
-{
-  double v1,v2;
-
-  // for each point, convert from db to linear
-  for (int y=0; y<_ny; y++)
-  {
-    for (int x=0; x<_nx; x++)
-    {
-      if (!isMissing(x,y))
-      {
-        getValue(x, y, v1);
-        v2 = v1/10;
-        _data[y*_nx + x] = pow(10,v2); 
-      }
-      else
-      {
-	_data[y*_nx + x] = _missing; 
-      }
-    }
-  }
-
-}
-
-//----------------------------------------------------------------
-void GridAlgs::linear2db(void)
-{
-
-  double v1;
-
-  // for each point, convert from linear to db
-  for (int y=0; y<_ny; y++)
-  {
-    for (int x=0; x<_nx; x++)
-    {
-      if (!isMissing(x,y))
-      {
-	getValue(x, y, v1);
-	if (v1 != 0)
-	{
-	  _data[y*_nx + x] = 10*log10(v1);
-	}
-	else
-	{
-	  _data[y*_nx + x] = _missing; 
-	}
-      }
-      else
-      {
-	_data[y*_nx + x] = _missing; 
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::xMaxForAllY(const int nx)
-{
-  GridAlgs tmp(*this);
-  for (int x=0; x<_nx; ++x)
-  {
-    double max=_missing, v;
-    bool first = true;
-    for (int ix=x-nx; ix<=x+nx; ++ix)
-    {
-      if (ix < 0 || ix >= _nx-1)
-      {
-	continue;
-      }
-      for (int iy=0; iy<_ny; ++iy)
-      {
-	if (getValue(ix, iy, v))
-	{
-	  if (first)
-	  {
-	    max = v;
-	    first = false;
-	  }
-	  else
-	  {
-	    if (v > max)
-	    {
-	      max = v;
-	    }
-	  }
-	}
-      }
-    }
-    for (int iy=0; iy<_ny; ++iy)
-    {
-      tmp.setValue(x, iy, max);
-    }
-  }
-  *this = tmp;
-}
-
-//----------------------------------------------------------------
-void GridAlgs::xAverageForAllY(const int nx)
-{
-  GridAlgs tmp(*this);
-  for (int x=0; x<_nx; ++x)
-  {
-    double ave=0.0, count=0.0, v;
-    for (int ix=x-nx; ix<=x+nx; ++ix)
-    {
-      if (ix < 0 || ix >= _nx-1)
-      {
-	continue;
-      }
-      for (int iy=0; iy<_ny; ++iy)
-      {
-	if (getValue(ix, iy, v))
-	{
-	  ave += v;
-	  count ++;
-	}
-      }
-    }
-    if (count > 0)
-    {
-      ave = ave/count;
-    }
-    else
-    {
-      ave = _missing;
-    }
-    for (int iy=0; iy<_ny; ++iy)
-    {
-      tmp.setValue(x, iy, ave);
-    }
-  }
-  *this = tmp;
-}
-
-//----------------------------------------------------------------
-void GridAlgs::xMaxForAllY(const int nx, const double min_v)
-{
-  GridAlgs tmp(*this);
-  for (int x=0; x<_nx; ++x)
-  {
-    double max=_missing, v;
-    bool first = true;
-
-    for (int iy=0; iy<_ny; ++iy)
-    {
-      if (getValue(x, iy, v))
-      {
-	if (v >= min_v)
-	{
-	  if (first)
-	  {
-	    max = v;
-	    first = false;
-	  }
-	  else
-	  {
-	    if (v > max)
-	    {
-	      max = v;
-	    }
-	  }
-	}
-      }
-    }
-    if (!first)
-    {      
-      for (int ix=x-nx; ix<=x+nx; ++ix)
-      {
-	if (ix < 0 || ix >= _nx-1 || ix == x)
-	{
-	  continue;
-	}
-	for (int iy=0; iy<_ny; ++iy)
-	{
-	  if (getValue(ix, iy, v))
-	  {
-	    if (v >= min_v)
-	    {
-	      if (first)
-	      {
-		max = v;
-		first = false;
-	      }
-	      else
-	      {
-		if (v > max)
-		{
-		  max = v;
-		}
-	      }
-	    }
-	  }
-	}
-      }
-    }
-    for (int iy=0; iy<_ny; ++iy)
-    {
-      tmp.setValue(x, iy, max);
-    }
-  }
-  *this = tmp;
-}
-
-//----------------------------------------------------------------
-void GridAlgs::xAverageForAllY(const int nx, const double min_v)
-{
-  GridAlgs tmp(*this);
-  for (int x=0; x<_nx; ++x)
-  {
-    double ave=0.0, count=0.0, v;
-    for (int iy=0; iy<_ny; ++iy)
-    {
-      if (getValue(x, iy, v))
-      {
-	if (v >= min_v)
-	{
-	  ave += v;
-	  count ++;
-	}
-      }
-    }
-    if (count > 0)
-    {      
-      for (int ix=x-nx; ix<=x+nx; ++ix)
-      {
-	if (ix < 0 || ix >= _nx-1 || ix == x)
-	{
-	  continue;
-	}
-	for (int iy=0; iy<_ny; ++iy)
-	{
-	  if (getValue(ix, iy, v))
-	  {
-	    if (v >= min_v)
-	    {
-	      ave += v;
-	      count ++;
-	    }
-	  }
-	}
-      }
-    }
-    if (count > 0)
-    {
-      ave = ave/count;
-    }
-    else
-    {
-      ave = _missing;
-    }
-    for (int iy=0; iy<_ny; ++iy)
-    {
-      tmp.setValue(x, iy, ave);
-    }
-  }
-  *this = tmp;
-}
-
-//----------------------------------------------------------------
-void GridAlgs::xPcntGeForAllY(const int nx, const double min_v,
-			      const double min_pct, int &x0, int &x1)
-{
-  GridAlgs tmp(*this);
-  x0 = x1 = -1;
-  for (int x=0; x<_nx; ++x)
-  {
-    double npt=0.0, count=0.0, v;
-    for (int ix=x-nx; ix<=x+nx; ++ix)
-    {
-      if (ix < 0 || ix >= _nx-1)
-      {
-	continue;
-      }
-      for (int iy=0; iy<_ny; ++iy)
-      {
-	count ++;
-	if (getValue(ix, iy, v))
-	{
-	  if (v >= min_v)
-	  {
-	    npt ++;
-	  }
-	}
-      }
-    }
-    npt = npt/count;
-    for (int iy=0; iy<_ny; ++iy)
-    {
-      tmp.setValue(x, iy, npt);
-    }
-    if (npt >= min_pct)
-    {
-      if (x0 == -1)
-      {
-	x0 = x1 = x;
-      }
-      else
-      {
-	x1 = x;
-      }
-    }
-  }
-  *this = tmp;
-}
-
-//----------------------------------------------------------------
-void GridAlgs::clumpFilter(void)
-{
-  // find points that have only 1 neighbor and remove
-  bool did_change = true;
-  while (did_change)
-  {
-    did_change = false;
-    for (int iy=0; iy<_ny; ++iy)
-    {
-      for (int ix=0; ix<_nx; ++ix)
-      {
-	if (isValidWithAtMostOneNeighbor(ix, iy))
-	{
-	  setMissing(ix, iy);
-	  did_change = true;
-	}
-	for (int nh=1; nh<=3; ++nh)
-	{
-	  if (_fillHole(nh, ix, iy))
-	  {
-	    did_change = true;
-	  }
-	}
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::clearNear(const int x, const int y, const int n)
-{
-  for (int iy=y-n; iy<=y+n; ++iy)
-  {
-    if (iy < 0 || iy >= _ny)
-    {
-      continue;
-    }
-    for (int ix=x-n; ix<=x+n; ++ix)
-    {
-      if (ix < 0 || ix >= _nx)
-      {
-	continue;
-      }
-      setValue(ix, iy, _missing);
-    }
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::shiftX(const int npt)
-{
-  double v;
-  if (npt > 0)
-  {
-    for (int x=_nx -1 - npt; x>=0; --x)
-    {
-      for (int y=0; y<_ny; ++y)
-      {
-	v = getValue(x, y);
-	setValue(x+npt, y, v);
-      }
-    }
-    for (int x=0; x<npt; ++x)
-    {
-      for (int y=0; y<_ny; ++y)
-      {
-	setValue(x, y, _missing);
-      }
-    }
-  }
-  else if (npt < 0)
-  {
-    int m = -npt;
-    for (int x=m; x<_nx; ++x)
-    {
-      for (int y=0; y<_ny; ++y)
-      {
-	v = getValue(x, y);
-	setValue(x-m, y, v);
-      }
-    }
-    for (int x=_nx-1-m; x<_nx; ++x)
-    {
-      for (int y=0; y<_ny; ++y)
-      {
-	setValue(x, y, _missing);
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::maskRange(const Grid2d &mask, const double low,
-			 const double high)
+void GridAlgs::maskRange(const Grid2d &mask, double low, double high)
 {
   if (mask._nx != _nx || mask._ny != _ny)
   {
@@ -2701,42 +1439,6 @@ void GridAlgs::maskRange(const Grid2d &mask, const double low,
     }
   }
 }
-
-//----------------------------------------------------------------
-void GridAlgs::boxExpand(void)
-{
-  GridAlgs tmp(*this);
-
-  double v;
-
-  for (int y=0; y<_ny; ++y)
-  {
-    for (int x=0; x<_nx; ++x)
-    {
-      if (getValue(x, y, v))
-      {
-	tmp.setValue(x, y, v);
-	for (int yi=y-1; yi<=y+1; ++yi)
-	{
-	  if (yi < 0 || yi >= _ny)
-	  {
-	    continue;
-	  }
-	  for (int xi=x-1; xi<=x+1; ++xi)
-	  {
-	    if (xi < 0 || xi >= _nx)
-	    {
-	      continue;
-	    }
-	    tmp.setValue(xi,yi,v);
-	  }
-	}
-      }
-    }
-  }
-  *this = tmp;
-}	
-
 
 /*----------------------------------------------------------------*/
 void GridAlgs::rescaleInMask(const Grid2d &mask, double scale)
@@ -2863,7 +1565,7 @@ void GridAlgs::nearestSameWithMaskSame(const Grid2d &data,
 				      const Grid2d &conf,
 				      int x, int y,
 				      const Grid2d &mask,
-				      const double  mask_value,
+				      double mask_value,
 				      Grid2d &out_conf)
 {
   int r;
@@ -2900,6 +1602,1390 @@ void GridAlgs::nearestSameWithMaskSame(const Grid2d &data,
   setMissing(x, y);
   out_conf.setMissing(x, y);
 }
+
+//----------------------------------------------------------------
+void GridAlgs::setMaskToMissing(const Grid2d &mask)
+{
+  for (int i=0;i<_npt; ++i)
+  {
+    if (!mask.isMissing(i))
+    {
+      setMissing(i);
+    }
+  }
+}
+
+//----------------------------------------------------------------
+bool GridAlgs::orientationAngleAverageInMask(const Grid2d &mask,
+					    double &ave) const
+{
+  AngleCombiner A(mask.numGood());
+  A.clearValues();
+  int count=0;
+  for (int i=0; i<_npt; ++i)
+  {
+    if (mask.isMissing(i))
+    {
+      continue;
+    }
+    double a;
+    if (getValue(i, a))
+    {
+      A.setGood(count++, a, 1.0);
+    }
+  }
+  return A.getCombineAngle(ave);
+}
+
+//---------------------------------------------------------------------------
+double GridAlgs::localCenteredAverage(int ix, int iy, int sx, int sy,
+				      bool needHalf) const
+{
+  double vt=0;
+  double v;
+  double n=0;
+  for (int y=iy-sy; y<=iy+sy; ++y)
+  {
+    if (y < 0 || y >= _ny)
+    {
+      continue;
+    }
+    for (int x=ix-sx; x<=ix+sx; ++x)
+    {
+      if (x < 0 || x >= _nx)
+      {
+	continue;
+      }
+      if (getValue(x, y, v))
+      {
+	vt += v;
+	n++;
+      }
+    }
+  }
+  double maxbad;
+  if (needHalf)
+  {
+    maxbad = static_cast<double>(sx*sy)/2.0;
+  }
+  else
+  {
+    maxbad = 0;
+  }
+
+  if (n > maxbad)
+  {
+    return vt/n;
+  }
+  else
+  {
+    return _missing;
+  }
+}
+
+//---------------------------------------------------------------------------
+double GridAlgs::localBoxAverage(int x0, int y0, int nx, int ny) const
+{
+  double vt=0;
+  double n=0;
+  for (int y=y0; y<y0+ny; ++y)
+  {
+    if (y < 0 || y >= _ny)
+    {
+      continue;
+    }
+    for (int x=x0; x<x0+nx; ++x)
+    {
+      if (x < 0 || x >= _nx)
+      {
+	continue;
+      }
+      double v;
+      if (getValue(x, y, v))
+      {
+	vt += v;
+	n++;
+      }
+    }
+  }
+  if (n > 0)
+  {
+    return vt/n;
+  }
+  else
+  {
+    return _missing;
+  }
+}
+
+//---------------------------------------------------------------------------
+double GridAlgs::localMeanXy(int xLwr, int xUpr, int yLwr, int yUpr) const
+{
+  double vt=0;
+  double n=0;
+  for (int y=yLwr; y<=yUpr; ++y)
+  {
+    if (y < 0 || y >= _ny)
+    {
+      continue;
+    }
+    for (int x=xLwr; x<=xUpr; ++x)
+    {
+      if (x < 0 || x >= _nx)
+      {
+	continue;
+      }
+      double v;
+      if (getValue(x, y, v))
+      {
+	vt += v;
+	n++;
+      }
+    }
+  }
+  if (n > 0)
+  {
+    return vt/n;
+  }
+  else
+  {
+    return _missing;
+  }
+}
+
+//---------------------------------------------------------------------------
+double GridAlgs::localCenteredAverageNoMissing(int ix, int iy, int sx,
+					       int sy) const
+{
+  double vt=0;
+  double v;
+  double n=0;
+  for (int y=iy-sy; y<=iy+sy; ++y)
+  {
+    if (y < 0 || y >= _ny)
+    {
+      continue;
+    }
+    for (int x=ix-sx; x<=ix+sx; ++x)
+    {
+      if (x < 0 || x >= _nx)
+      {
+	continue;
+      }
+      if (getValue(x, y, v))
+      {
+	vt += v;
+	n++;
+      }
+      else
+      {
+	return _missing;
+      }
+    }
+  }
+  if (n==0)
+  {
+    return _missing;
+  }
+  else
+  {
+    return vt/n;
+  }
+}
+
+//----------------------------------------------------------------
+void GridAlgs::smooth(int xw, int yw)
+{
+  // make an object to loop through the grid
+  Grid2dLoopA G(_nx, _ny, xw, yw);
+
+  // make a copy of the local object
+  GridAlgs tmp(*this);
+
+  Grid2dLoopAlgMean A;
+
+  while (G.increment(tmp, A))
+  {
+    int x, y;
+    double result;
+    if (G.getXyAndResult(A, xw*yw/2, x, y, result))
+    {
+      _data[y*_nx + x] = result;
+    }
+    else
+    {
+      _data[y*_nx + x] = _missing;
+    }
+  }
+}
+
+
+//---------------------------------------------------------------------------
+void GridAlgs::smoothSimple(int sx, int sy)
+{
+  GridAlgs tmp(*this);
+  for (int iy=0; iy<_ny; ++iy)
+  {
+    for (int ix=0; ix<_nx; ++ix)
+    {
+      double v = localCenteredAverage(ix, iy, sx, sy);
+      tmp.setValue(ix, iy, v);
+    }
+  }
+  *this = tmp;
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::smoothThreaded(int sx, int sy, int numThread)
+{
+  GridAlgThreads *thread = new GridAlgs::GridAlgThreads();
+  thread->init(numThread, false);
+
+  GridAlgs tmp(*this);
+  for (int iy=0; iy<_ny; ++iy)
+  {
+    GridAlgsInfo *info = new GridAlgsInfo(GridAlgsInfo::SMOOTH,
+					  sx, sy, iy, this, tmp);
+    thread->thread(iy, (void *)info);
+  }
+  thread->waitForThreads();
+  delete thread;
+  *this = tmp;
+}
+
+
+//----------------------------------------------------------------
+void GridAlgs::smoothNoMissing(int xw, int yw)
+{
+  // make an object to loop through the grid
+  Grid2dLoopA G(_nx, _ny, xw, yw);
+
+  // make a copy of the local object
+  GridAlgs tmp(*this);
+
+  Grid2dLoopAlgMeanNoMissing A;
+
+  while (G.increment(tmp, A))
+  {
+    int x, y;
+    double result;
+    if (G.getXyAndResult(A, xw*yw/2, x, y, result))
+    {
+      _data[y*_nx + x] = result;
+    }
+    else
+    {
+      _data[y*_nx + x] = _missing;
+    }
+  }
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::smoothNoMissingSimple(int sx, int sy)
+{
+  GridAlgs tmp(*this);
+  for (int iy=0; iy<_ny; ++iy)
+  {
+    for (int ix=0; ix<_nx; ++ix)
+    {
+      double v = localCenteredAverageNoMissing(ix, iy, sx, sy);
+      tmp.setValue(ix, iy, v);
+    }
+  }
+  *this = tmp;
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::fillGaps(int sx, int sy)
+{
+  GridAlgs tmp(*this);
+  double v;
+  for (int iy=0; iy<_ny; ++iy)
+  {
+    for (int ix=0; ix<_nx; ++ix)
+    {
+      if (getValue(ix, iy, v))
+      {
+	continue;
+      }
+      double v = localCenteredAverage(ix, iy, sx, sy);
+      tmp.setValue(ix, iy, v);
+    }
+  }
+  *this = tmp;
+}
+
+//----------------------------------------------------------------
+double GridAlgs::localSdevXy(int xLwr, int xUpr, int yLwr, int yUpr) const
+{
+  double N=0.0, Q = 0.0, A = 0.0;
+
+  for (int y=yLwr; y<=yUpr; ++y)
+  {
+    if (y < 0 || y >= _ny)
+    {
+      continue;
+    }
+    for (int x=xLwr; x<=xUpr; ++x)
+    {
+      if (x < 0 || x >= _nx)
+      {
+	continue;
+      }
+      double v;
+      if (getValue(x, y, v))
+      {
+        N+=1;
+        Q = Q+((N-1)/N)*(v-A)*(v-A);
+        A = A+(v-A)/N;
+      }
+    }
+  }
+  if (N > 0)
+  {
+    return sqrt(Q/N);
+  }
+  else
+  {
+    return _missing;
+  }
+}
+
+//----------------------------------------------------------------
+double GridAlgs::localBoxSdev(int x0, int y0, int nx, int ny,
+			      bool needHalf) const
+{
+  double N=0.0, Q = 0.0, A = 0.0;
+
+  for (int y=y0; y<y0+ny; ++y)
+  {
+    if (y < 0 || y >= _ny)
+    {
+      continue;
+    }
+    for (int x=x0; x<x0+nx; ++x)
+    {
+      if (x < 0 || x >= _nx)
+      {
+	continue;
+      }
+      double v;
+      if (getValue(x, y, v))
+      {
+        N+=1;
+        Q = Q+((N-1)/N)*(v-A)*(v-A);
+        A = A+(v-A)/N;
+      }
+    }
+  }
+
+  double maxbad;
+  if (needHalf)
+  {
+    maxbad = static_cast<double>(nx*ny)/2.0;
+  }
+  else
+  {
+    maxbad = 0;
+  }
+
+  if (N > maxbad)
+  {
+    return sqrt(Q/N);
+  }
+  else
+  {
+    LOG(DEBUG_VERBOSE) << "no data found in sdevXy";
+    return _missing;
+  }
+
+}
+
+//----------------------------------------------------------------
+double GridAlgs::localCenteredSdev(int x, int y,
+				   int sx, int sy, bool needHalf) const
+{
+  return localBoxSdev(x-sx, y-sy,  sx*2+1, sy*2 + 1, needHalf);
+}
+
+//----------------------------------------------------------------
+void GridAlgs::sdev(int xw, int yw)
+{
+
+  // make an object to loop through the grid
+  Grid2dLoopA G(_nx, _ny, xw, yw);
+
+  // make a copy of the local object
+  GridAlgs tmp(*this);
+
+  Grid2dLoopAlgSdev A;
+
+  // // do this computation writing to local object
+  while (G.increment(tmp, A))
+  {
+    int x, y;
+    double result;
+    if (G.getXyAndResult(A, xw*yw/2, x, y, result))
+    {
+      _data[y*_nx + x] = result;
+    }
+    else
+    {
+      _data[y*_nx + x] = _missing;
+    }
+  }
+}
+
+//----------------------------------------------------------------
+void GridAlgs::sdevSimple(int xw, int yw)
+{
+  // make a copy of the input grid..
+  GridAlgs tmp(*this);
+
+  // for each point, set value to standard deviation in a xw by yw window around
+  // the point
+  for (int y=0; y<_ny; y++)
+  {
+    for (int x=0; x<_nx; x++)
+    {
+      _data[y*_nx + x] = tmp.localCenteredSdev(x, y, xw, yw);
+    }
+  }
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::sdevThreaded(int sx, int sy, int numThread)
+{
+  GridAlgThreads *thread = new GridAlgs::GridAlgThreads();
+  thread->init(numThread, false);
+
+  GridAlgs tmp(*this);
+  for (int iy=0; iy<_ny; ++iy)
+  {
+    GridAlgsInfo *info = new GridAlgsInfo(GridAlgsInfo::SDEV,
+					  sx, sy, iy, this, tmp);
+    thread->thread(iy, (void *)info);
+  }
+  thread->waitForThreads();
+  delete thread;
+  *this = tmp;
+}
+
+//----------------------------------------------------------------
+void GridAlgs::sdevNoOverlap(int xw, int yw)
+{
+  // make a copy of the local object
+  GridAlgs tmp(*this);
+
+  for (int y=0; y<_ny; y += yw)
+  {
+    for (int x=0; x<_nx; x += xw)
+    {
+      double sdev = tmp.localBoxSdev(x, y, xw, yw);
+      _fillBox(x, y, xw, yw, sdev);
+    }
+  }
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::reduce(int f)
+{
+  if (f < 2)
+  {
+    return;
+  }
+  int nx = _nx/f;
+  int ny = _ny/f;
+  GridAlgs g(_name.c_str(), nx, ny, _missing);
+
+  for (int y=0; y<ny; ++y)
+  {
+    int full_y = y*f;
+    if (full_y >= _ny)
+    {
+      printf("ERROR\n");
+      continue;
+    }
+    for (int x=0; x<nx; ++x)
+    {
+      int full_x = x*f;
+      if (full_x >= _nx)
+      {
+	printf("ERROR\n");
+	continue;
+      }
+      g.setValue(x, y, getValue(full_x, full_y));
+    }
+  }
+  *this = g;
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::reduceMax(int f)
+{
+  if (f < 2)
+  {
+    return;
+  }
+  int nx = _nx/f;
+  int ny = _ny/f;
+  GridAlgs g(_name.c_str(), nx, ny, _missing);
+  for (int y=0; y<ny; ++y)
+  {
+    int full_y = y*f;
+    if (full_y >= _ny)
+    {
+      printf("ERROR\n");
+      continue;
+    }
+    for (int x=0; x<nx; ++x)
+    {
+      int full_x = x*f;
+      if (full_x >= _nx)
+      {
+	printf("ERROR\n");
+	continue;
+      }
+      g.setValue(x, y, localMax(full_x, full_y, f, f));
+    }
+  }
+  *this = g;
+  }
+
+//---------------------------------------------------------------------------
+void GridAlgs::reduceMax(int fx, int fy)
+{
+  if (fx < 2 && fy < 2)
+  {
+    return;
+  }
+  int nx = _nx/fx;
+  int ny = _ny/fy;
+  GridAlgs g(_name.c_str(), nx, ny, _missing);
+
+  for (int y=0; y<ny; ++y)
+  {
+    int full_y = y*fy;
+    if (full_y >= _ny)
+    {
+      printf("ERROR\n");
+      continue;
+    }
+    for (int x=0; x<nx; ++x)
+    {
+      int full_x = x*fx;
+      if (full_x >= _nx)
+      {
+	printf("ERROR\n");
+	continue;
+      }
+      g.setValue(x, y, localMax(full_x, full_y, fx, fy));
+    }
+  }
+  *this = g;
+}
+
+//---------------------------------------------------------------------------
+bool GridAlgs::interpolate(const Grid2d &lowres, int res)
+{
+  if (lowres._nx != _nx/res)
+  {
+    printf("ERROR interpolating, bad dimensions\n");
+    return false;
+  }
+  if (lowres._ny != _ny/res)
+  {
+    printf("ERROR interpolating, bad dimensions\n");
+    return false;
+  }
+  for (int y=0; y<_ny; ++y)
+  {
+    int ry0 = y/res;
+    for (int x=0; x<_nx; ++x)
+    {
+      int rx0 = x/res;
+      double v = _bilinear(ry0, rx0, res, y, x, lowres);
+      setValue(x, y, v);
+    }
+  }
+  return true;
+}
+
+//----------------------------------------------------------------
+void GridAlgs::dilate(int xw, int yw)
+{
+  // make a copy of the input grid..
+  GridAlgs tmp(*this);
+
+  // for each point, set value to max in a xw by yw window around
+  // the point
+  for (int y=0; y<_ny; y++)
+  {
+    for (int x=0; x<_nx; x++)
+    {
+      _data[y*_nx + x] = tmp._max(x, y, xw, yw);
+    }
+  }
+}
+
+//----------------------------------------------------------------
+void GridAlgs::dilateOneValue(double v, int xw, int yw)
+{
+  // make a copy of the input grid..
+  GridAlgs tmp(*this);
+
+  for (int y=0; y<_ny; y++)
+  {
+    for (int x=0; x<_nx; x++)
+    {
+      _data[y*_nx + x] = tmp._maxOneValue(v, x, y, xw, yw);
+    }
+  }
+}
+
+
+//----------------------------------------------------------------
+double GridAlgs::localMedian(int xLwr, int xUpr, int yLwr, int yUpr)
+{
+
+  double v;
+  vector <double> aList;
+
+  for (int iy=yLwr; iy<=yUpr; iy++)
+  {
+    if (iy < 0 || iy >= _ny)
+    {
+      continue;
+    }
+    for (int ix=xLwr; ix<=xUpr; ix++)
+    {
+      if (ix < 0 || ix >= _nx)
+      {
+        continue;
+      }
+      if (getValue(ix, iy, v))
+      {
+        aList.push_back(v);
+      }
+    }
+  }
+
+  if (aList.empty())
+  {
+    return _missing;
+  }
+
+  int ind = aList.size() / 2;
+  nth_element(aList.begin(), aList.begin()+ind, aList.end());
+  return aList[ind];
+}
+
+//----------------------------------------------------------------
+void GridAlgs::medianSimple(int xw, int yw, double bin_min, double bin_max,
+			    double bin_delta)
+{
+  // make a fast median object
+  Grid2dMedian F(*this, xw, yw, bin_delta, bin_min, bin_max);
+
+  // make an object to loop through the grid
+  Grid2dLoop G(_nx, _ny);
+
+  // do this computation writing to local object
+  // get the value
+  int x, y;
+  double m;
+
+  // set value into 
+  m = _median2(*this, xw, yw, F, G);
+  G.getXy(x, y);
+  setValue(x, y, m);
+
+  while (G.increment())
+  {
+    m = _median2(*this, xw, yw, F, G);
+    G.getXy(x, y);
+    setValue(x, y, m);
+  }
+}
+
+//----------------------------------------------------------------
+void GridAlgs::median(int xw, int yw, double bin_min, double bin_max,
+		      double bin_delta)
+{
+  // make a fast median object
+  // Grid2dMedian F(*this, xw, yw, bin_delta, bin_min, bin_max);
+
+  // make an object to loop through the grid
+  Grid2dLoopA G(_nx, _ny, xw, yw);
+  GridAlgs tmp(*this);
+  Grid2dLoopAlgMedian A(bin_min, bin_max, bin_delta);
+
+  while (G.increment(tmp, A))
+  {
+    int x, y;
+    double m;
+    if (G.getXyAndResult(A, xw*yw/2, x,  y, m))
+    {
+      _data[y*_nx + x] = m;
+    }
+    else
+    {
+      _data[y*_nx + x] = _missing;
+    }
+  }
+}
+
+//----------------------------------------------------------------
+void GridAlgs::medianNoOverlap(int xw, int yw, double bin_min, double bin_max,
+			       double bin_delta, bool allow_any_data)
+{
+  // make a fast median object
+  Grid2dMedian F(*this, xw, yw, bin_delta, bin_min, bin_max);
+
+  // make a copy of the local object
+  GridAlgs tmp(*this);
+
+  for (int y=0; y<_ny; y += yw)
+  {
+    for (int x=0; x<_nx; x += xw)
+    {
+      double v = _medianInBox(tmp, x, y, xw, yw, allow_any_data, F);
+      _fillBox(x, y, xw, yw, v);
+    }
+  }
+}
+
+//----------------------------------------------------------------
+void GridAlgs::speckle(int xw, int yw, double bin_min, double bin_max,
+		       double bin_delta)
+{
+  // make a fast median object
+  // Grid2dMedian F(*this, xw, yw, bin_delta, bin_min, bin_max);
+
+  // make an object to loop through the grid
+  Grid2dLoopA G(_nx, _ny, xw, yw);
+  GridAlgs tmp(*this);
+  Grid2dLoopAlgSpeckle A(bin_min, bin_max, bin_delta);
+
+  while (G.increment(tmp, A))
+  {
+    int x, y;
+    double m;
+    if (G.getXyAndResult(A, xw*yw/2, x,  y, m))
+    {
+      _data[y*_nx + x] = m;
+    }
+    else
+    {
+      _data[y*_nx + x] = _missing;
+    }
+  }
+}
+
+//----------------------------------------------------------------
+void GridAlgs::speckleInterest(int xw, int yw, double bin_min, double bin_max,
+			       double bin_delta, const FuzzyF &fuzzyDataDiff,
+			       const FuzzyF &fuzzyCountPctDiff)
+{
+  // make a fast median object
+  // Grid2dMedian F(*this, xw, yw, bin_delta, bin_min, bin_max);
+
+  // make an object to loop through the grid
+  Grid2dLoopA G(_nx, _ny, xw, yw);
+  GridAlgs tmp(*this);
+  Grid2dLoopAlgSpeckleInterest A(bin_min, bin_max, bin_delta,
+				 fuzzyDataDiff, fuzzyCountPctDiff);
+
+  while (G.increment(tmp, A))
+  {
+    int x, y;
+    double m;
+    if (G.getXyAndResult(A, xw*yw/2, x,  y, m))
+    {
+      _data[y*_nx + x] = m;
+    }
+    else
+    {
+      _data[y*_nx + x] = _missing;
+    }
+  }
+}
+
+//----------------------------------------------------------------
+double GridAlgs::localCenteredTexture(int x, int y, int xw, int yw, bool isX,
+				      bool needHalf) const
+{
+  double A=0.0;
+  int n = 0;
+
+  int maxbad;
+  if (needHalf)
+  {
+    maxbad = xw*yw/2;
+  }
+  else
+  {
+    maxbad = 0;
+  }
+
+  for (int iy=y-yw; iy<=y+yw; ++iy)
+  {
+    if (iy < 0 || iy >= _ny)
+    {
+      continue;
+    }
+    if (isX && (iy-1 < 0 || iy-1 >= _ny))
+    {
+      continue;
+    }
+    for (int ix=x-xw; ix<=x+xw; ++ix)
+    {
+      if (ix < 0 || ix >= _nx)
+      {
+	continue;
+      }
+      if ((!isX) && (ix-1 < 0 || ix-1 >= _nx))
+      {
+	continue;
+      }
+
+      double v1,v2;
+      bool ok;
+      if (isX)
+      {
+	ok = getValue(ix, iy, v1) && getValue(ix,iy-1,v2);
+      }
+      else
+      {
+	ok = getValue(ix, iy, v1) && getValue(ix-1,iy,v2);
+      }
+      if (ok)
+      {
+	A = A+(v1-v2)*(v1-v2);
+	n++;
+      }
+    }
+  }
+  if (n > maxbad)
+  {
+    return A/static_cast<double>(n);//yw*xw-1);
+  }
+  else
+  {
+    return _missing;
+  }
+}
+
+//---------------------------------------------------------------------------
+void GridAlgs::textureThreaded(int sx, int sy, int numThread, bool isX)
+{
+  GridAlgThreads *thread = new GridAlgs::GridAlgThreads();
+  thread->init(numThread, false);
+
+  GridAlgs tmp(*this);
+  for (int iy=0; iy<_ny; ++iy)
+  {
+    if (isX)
+    {
+      GridAlgsInfo *info = new GridAlgsInfo(GridAlgsInfo::TEXTURE_X,
+					    sx, sy, iy, this, tmp);
+      thread->thread(iy, (void *)info);
+    }
+    else
+    {
+      GridAlgsInfo *info = new GridAlgsInfo(GridAlgsInfo::TEXTURE_Y,
+					    sx, sy, iy, this, tmp);
+      thread->thread(iy, (void *)info);
+    }
+  }
+  thread->waitForThreads();
+  delete thread;
+  *this = tmp;
+}
+
+//----------------------------------------------------------------
+void GridAlgs::texture(int xw, int yw, bool isX)
+{
+  // make an object to loop through the grid
+  Grid2dLoopA G(_nx, _ny, xw, yw);
+
+  // make a copy of the local object
+  GridAlgs tmp(*this);
+
+  Grid2dLoopAlgTexture A(isX);
+
+
+  // // do this computation writing to local object
+  while (G.increment(tmp, A))
+  {
+    int x, y;
+    double result;
+    if (G.getXyAndResult(A, xw*yw/2, x, y, result))
+    {
+      _data[y*_nx + x] = result;
+    }
+    else
+    {
+      _data[y*_nx + x] = _missing;
+    }
+  }
+}
+
+//----------------------------------------------------------------
+void GridAlgs::db2linear(void)
+{
+  double v1,v2;
+
+  // for each point, convert from db to linear
+  for (int y=0; y<_ny; y++)
+  {
+    for (int x=0; x<_nx; x++)
+    {
+      if (!isMissing(x,y))
+      {
+        getValue(x, y, v1);
+        v2 = v1/10;
+        _data[y*_nx + x] = pow(10,v2); 
+      }
+      else
+      {
+	_data[y*_nx + x] = _missing; 
+      }
+    }
+  }
+
+}
+
+//----------------------------------------------------------------
+void GridAlgs::linear2db(void)
+{
+
+  double v1;
+
+  // for each point, convert from linear to db
+  for (int y=0; y<_ny; y++)
+  {
+    for (int x=0; x<_nx; x++)
+    {
+      if (!isMissing(x,y))
+      {
+	getValue(x, y, v1);
+	if (v1 != 0)
+	{
+	  _data[y*_nx + x] = 10*log10(v1);
+	}
+	else
+	{
+	  _data[y*_nx + x] = _missing; 
+	}
+      }
+      else
+      {
+	_data[y*_nx + x] = _missing; 
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------
+void GridAlgs::xMaxForAllY(int nx)
+{
+  GridAlgs tmp(*this);
+  for (int x=0; x<_nx; ++x)
+  {
+    double max=_missing, v;
+    bool first = true;
+    for (int ix=x-nx; ix<=x+nx; ++ix)
+    {
+      if (ix < 0 || ix >= _nx-1)
+      {
+	continue;
+      }
+      for (int iy=0; iy<_ny; ++iy)
+      {
+	if (getValue(ix, iy, v))
+	{
+	  if (first)
+	  {
+	    max = v;
+	    first = false;
+	  }
+	  else
+	  {
+	    if (v > max)
+	    {
+	      max = v;
+	    }
+	  }
+	}
+      }
+    }
+    for (int iy=0; iy<_ny; ++iy)
+    {
+      tmp.setValue(x, iy, max);
+    }
+  }
+  *this = tmp;
+}
+
+//----------------------------------------------------------------
+void GridAlgs::xAverageForAllY(int nx)
+{
+  GridAlgs tmp(*this);
+  for (int x=0; x<_nx; ++x)
+  {
+    double ave=0.0, count=0.0, v;
+    for (int ix=x-nx; ix<=x+nx; ++ix)
+    {
+      if (ix < 0 || ix >= _nx-1)
+      {
+	continue;
+      }
+      for (int iy=0; iy<_ny; ++iy)
+      {
+	if (getValue(ix, iy, v))
+	{
+	  ave += v;
+	  count ++;
+	}
+      }
+    }
+    if (count > 0)
+    {
+      ave = ave/count;
+    }
+    else
+    {
+      ave = _missing;
+    }
+    for (int iy=0; iy<_ny; ++iy)
+    {
+      tmp.setValue(x, iy, ave);
+    }
+  }
+  *this = tmp;
+}
+
+//----------------------------------------------------------------
+void GridAlgs::xMaxForAllY(int nx, double min_v)
+{
+  GridAlgs tmp(*this);
+  for (int x=0; x<_nx; ++x)
+  {
+    double max=_missing, v;
+    bool first = true;
+
+    for (int iy=0; iy<_ny; ++iy)
+    {
+      if (getValue(x, iy, v))
+      {
+	if (v >= min_v)
+	{
+	  if (first)
+	  {
+	    max = v;
+	    first = false;
+	  }
+	  else
+	  {
+	    if (v > max)
+	    {
+	      max = v;
+	    }
+	  }
+	}
+      }
+    }
+    if (!first)
+    {      
+      for (int ix=x-nx; ix<=x+nx; ++ix)
+      {
+	if (ix < 0 || ix >= _nx-1 || ix == x)
+	{
+	  continue;
+	}
+	for (int iy=0; iy<_ny; ++iy)
+	{
+	  if (getValue(ix, iy, v))
+	  {
+	    if (v >= min_v)
+	    {
+	      if (first)
+	      {
+		max = v;
+		first = false;
+	      }
+	      else
+	      {
+		if (v > max)
+		{
+		  max = v;
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    }
+    for (int iy=0; iy<_ny; ++iy)
+    {
+      tmp.setValue(x, iy, max);
+    }
+  }
+  *this = tmp;
+}
+
+//----------------------------------------------------------------
+void GridAlgs::xAverageForAllY(int nx, double min_v)
+{
+  GridAlgs tmp(*this);
+  for (int x=0; x<_nx; ++x)
+  {
+    double ave=0.0, count=0.0, v;
+    for (int iy=0; iy<_ny; ++iy)
+    {
+      if (getValue(x, iy, v))
+      {
+	if (v >= min_v)
+	{
+	  ave += v;
+	  count ++;
+	}
+      }
+    }
+    if (count > 0)
+    {      
+      for (int ix=x-nx; ix<=x+nx; ++ix)
+      {
+	if (ix < 0 || ix >= _nx-1 || ix == x)
+	{
+	  continue;
+	}
+	for (int iy=0; iy<_ny; ++iy)
+	{
+	  if (getValue(ix, iy, v))
+	  {
+	    if (v >= min_v)
+	    {
+	      ave += v;
+	      count ++;
+	    }
+	  }
+	}
+      }
+    }
+    if (count > 0)
+    {
+      ave = ave/count;
+    }
+    else
+    {
+      ave = _missing;
+    }
+    for (int iy=0; iy<_ny; ++iy)
+    {
+      tmp.setValue(x, iy, ave);
+    }
+  }
+  *this = tmp;
+}
+
+//----------------------------------------------------------------
+void GridAlgs::xPcntGeForAllY(int nx, double min_v, double min_pct, int &x0,
+			      int &x1)
+{
+  GridAlgs tmp(*this);
+  x0 = x1 = -1;
+  for (int x=0; x<_nx; ++x)
+  {
+    double npt=0.0, count=0.0, v;
+    for (int ix=x-nx; ix<=x+nx; ++ix)
+    {
+      if (ix < 0 || ix >= _nx-1)
+      {
+	continue;
+      }
+      for (int iy=0; iy<_ny; ++iy)
+      {
+	count ++;
+	if (getValue(ix, iy, v))
+	{
+	  if (v >= min_v)
+	  {
+	    npt ++;
+	  }
+	}
+      }
+    }
+    npt = npt/count;
+    for (int iy=0; iy<_ny; ++iy)
+    {
+      tmp.setValue(x, iy, npt);
+    }
+    if (npt >= min_pct)
+    {
+      if (x0 == -1)
+      {
+	x0 = x1 = x;
+      }
+      else
+      {
+	x1 = x;
+      }
+    }
+  }
+  *this = tmp;
+}
+
+//----------------------------------------------------------------
+void GridAlgs::clumpFilter(void)
+{
+  // find points that have only 1 neighbor and remove
+  bool did_change = true;
+  while (did_change)
+  {
+    did_change = false;
+    for (int iy=0; iy<_ny; ++iy)
+    {
+      for (int ix=0; ix<_nx; ++ix)
+      {
+	if (isValidWithAtMostOneNeighbor(ix, iy))
+	{
+	  setMissing(ix, iy);
+	  did_change = true;
+	}
+	for (int nh=1; nh<=3; ++nh)
+	{
+	  if (_fillHole(nh, ix, iy))
+	  {
+	    did_change = true;
+	  }
+	}
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------
+void GridAlgs::clearNear(int x, int y, int n)
+{
+  for (int iy=y-n; iy<=y+n; ++iy)
+  {
+    if (iy < 0 || iy >= _ny)
+    {
+      continue;
+    }
+    for (int ix=x-n; ix<=x+n; ++ix)
+    {
+      if (ix < 0 || ix >= _nx)
+      {
+	continue;
+      }
+      setValue(ix, iy, _missing);
+    }
+  }
+}
+
+//----------------------------------------------------------------
+void GridAlgs::shiftX(int npt)
+{
+  double v;
+  if (npt > 0)
+  {
+    for (int x=_nx -1 - npt; x>=0; --x)
+    {
+      for (int y=0; y<_ny; ++y)
+      {
+	v = getValue(x, y);
+	setValue(x+npt, y, v);
+      }
+    }
+    for (int x=0; x<npt; ++x)
+    {
+      for (int y=0; y<_ny; ++y)
+      {
+	setValue(x, y, _missing);
+      }
+    }
+  }
+  else if (npt < 0)
+  {
+    int m = -npt;
+    for (int x=m; x<_nx; ++x)
+    {
+      for (int y=0; y<_ny; ++y)
+      {
+	v = getValue(x, y);
+	setValue(x-m, y, v);
+      }
+    }
+    for (int x=_nx-1-m; x<_nx; ++x)
+    {
+      for (int y=0; y<_ny; ++y)
+      {
+	setValue(x, y, _missing);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------
+void GridAlgs::shiftY(int n)
+{
+  vector<double> newData = _data;
+  for (int y=0; y<_ny; ++y)
+  {
+    int iy = y - n;
+    while (iy < 0)
+    {
+      iy += _ny;
+    }
+    while (iy >= _ny)
+    {
+      iy -= _ny;
+    }
+    for (int ix=0; ix<_nx; ++ix)
+    {
+      newData[_ipt(ix, iy)] = _data[_ipt(ix, y)];
+    }
+  }
+}
+
+//----------------------------------------------------------------
+void GridAlgs::boxExpand(void)
+{
+  GridAlgs tmp(*this);
+
+  double v;
+
+  for (int y=0; y<_ny; ++y)
+  {
+    for (int x=0; x<_nx; ++x)
+    {
+      if (getValue(x, y, v))
+      {
+	tmp.setValue(x, y, v);
+	for (int yi=y-1; yi<=y+1; ++yi)
+	{
+	  if (yi < 0 || yi >= _ny)
+	  {
+	    continue;
+	  }
+	  for (int xi=x-1; xi<=x+1; ++xi)
+	  {
+	    if (xi < 0 || xi >= _nx)
+	    {
+	      continue;
+	    }
+	    tmp.setValue(xi,yi,v);
+	  }
+	}
+      }
+    }
+  }
+  *this = tmp;
+}	
+
 
 /*----------------------------------------------------------------*/
 void GridAlgs::roundToNearest(double res, double r0, double r1)
@@ -2953,41 +3039,7 @@ void GridAlgs::copyMissingToInput(Grid2d &data) const
 }
 
 //----------------------------------------------------------------
-void GridAlgs::setMaskToMissing(const Grid2d &mask)
-{
-  for (int i=0;i<_npt; ++i)
-  {
-    if (!mask.isMissing(i))
-    {
-      setMissing(i);
-    }
-  }
-}
-
-//----------------------------------------------------------------
-bool GridAlgs::orientationAngleAverageInMask(const Grid2d &mask,
-					    double &ave) const
-{
-  AngleCombiner A(mask.numGood());
-  A.clearValues();
-  int count=0;
-  for (int i=0; i<_npt; ++i)
-  {
-    if (mask.isMissing(i))
-    {
-      continue;
-    }
-    double a;
-    if (getValue(i, a))
-    {
-      A.setGood(count++, a, 1.0);
-    }
-  }
-  return A.getCombineAngle(ave);
-}
-
-//----------------------------------------------------------------
-void GridAlgs::belowThresholdToMissing(const double thresh)
+void GridAlgs::belowThresholdToMissing(double thresh)
 {
   for (int i=0; i<_npt; ++i)
   {
@@ -3063,26 +3115,52 @@ void GridAlgs::maskExcept(double v)
   }
 }
 
-//----------------------------------------------------------------
-void GridAlgs::shiftY(int n)
+//---------------------------------------------------------------------------
+void GridAlgs::compute(void *ti)
 {
-  vector<double> newData = _data;
-  for (int y=0; y<_ny; ++y)
+  GridAlgsInfo *info = static_cast<GridAlgsInfo *>(ti);
+  switch (info->_type)
   {
-    int iy = y - n;
-    while (iy < 0)
+  case GridAlgsInfo::SMOOTH:
+    for (int ix=0; ix<info->_gridAlgs->_nx; ++ix)
     {
-      iy += _ny;
+      double v = info->_gridAlgs->localCenteredAverage(ix, info->_y,
+						       info->_sx, info->_sy,
+						       true);
+      info->_out.setValue(ix, info->_y, v);
     }
-    while (iy >= _ny)
+    break;
+  case GridAlgsInfo::SDEV:
+    for (int ix=0; ix<info->_gridAlgs->_nx; ++ix)
     {
-      iy -= _ny;
+      double v = info->_gridAlgs->localCenteredSdev(ix, info->_y,
+						    info->_sx, info->_sy,
+						    true);
+      info->_out.setValue(ix, info->_y, v);
     }
-    for (int ix=0; ix<_nx; ++ix)
+    break;
+  case GridAlgsInfo::TEXTURE_X:
+    for (int ix=0; ix<info->_gridAlgs->_nx; ++ix)
     {
-      newData[_ipt(ix, iy)] = _data[_ipt(ix, y)];
+      double v = info->_gridAlgs->localCenteredTexture(ix, info->_y,
+						       info->_sx, info->_sy,
+						       true, true);
+      info->_out.setValue(ix, info->_y, v);
     }
+    break;
+  case GridAlgsInfo::TEXTURE_Y:
+    for (int ix=0; ix<info->_gridAlgs->_nx; ++ix)
+    {
+      double v = info->_gridAlgs->localCenteredTexture(ix, info->_y, info->_sx,
+						       info->_sy,
+						       false, true);
+      info->_out.setValue(ix, info->_y, v);
+    }
+    break;
+  default:
+    break;
   }
+  delete info;
 }
 
 //----------------------------------------------------------------
@@ -3124,76 +3202,6 @@ std::vector<int> GridAlgs::_orderedIndices(int x, int y, int r) const
     _appendIfOk(x1, y+i, o);
   }
   return o;
-}
-
-//----------------------------------------------------------------
-double GridAlgs::_meanInBox(const int x0, const int y0, const int nx,
-			    const int ny) const
-{
-  double v=0.0, n=0.0;
-
-  for (int y=y0; y<y0+ny; ++y)
-  {
-    if (y >= 0 && y < _ny)
-    {
-      for (int x=x0; x<x0+nx; ++x)
-      {
-	if (x >= 0 && x < _nx)
-	{
-	  double vxy;
-	  if (getValue(x, y, vxy))
-	  {
-	    ++n;
-	    v += vxy;
-	  }
-	}
-      }
-    }
-  }
-  if (n > 0.0)
-  {
-     return v/n;
-  }
-  else
-  {
-    return _missing;
-  }
-}
-
-//----------------------------------------------------------------
-double GridAlgs::_sdevInBox(const int x0, const int y0, const int nx,
-			    const int ny, const double xbar) const
-{
-  // Note: sdev = sqrt(sum (xi-xbar)**2/N)
-  double v=0.0, n=0.0;
-
-  for (int y=y0; y<y0+ny; ++y)
-  {
-    if (y >= 0 && y < _ny)
-    {
-      for (int x=x0; x<x0+nx; ++x)
-      {
-	if (x >= 0 && x < _nx)
-	{
-	  double vxy;
-	  if (getValue(x, y, vxy))
-	  {
-	    ++n;
-	    v += (vxy-xbar)*(vxy-xbar);
-	  }
-	}
-      }
-    }
-  }
-  if (n > 0.0)
-  {
-    return sqrt(v/n);
-  }
-  else
-  {
-    return _missing;
-  }
-
 }
 
 /*----------------------------------------------------------------*/
@@ -3256,8 +3264,7 @@ double GridAlgs::_bilinear(int ry0, int rx0, int res, int y, int x,
 }
 
 //----------------------------------------------------------------
-double GridAlgs::_dilate(const int x, const int y, const int xw,
-			const int yw) const
+double GridAlgs::_max(int x, int y, int xw, int yw) const
 {
   double max = 0.0;
   bool first = true;
@@ -3302,8 +3309,7 @@ double GridAlgs::_dilate(const int x, const int y, const int xw,
 }
 
 //----------------------------------------------------------------
-double GridAlgs::_dilateOneValue(const double value, const int x,
-				const int y, const int xw, const int yw) const
+double GridAlgs::_maxOneValue(double value, int x, int y, int xw, int yw) const
 {
   double  v, v0;
   if (getValue(x, y, v0))
@@ -3347,254 +3353,7 @@ double GridAlgs::_dilateOneValue(const double value, const int x,
 }
 
 //----------------------------------------------------------------
-double GridAlgs::_median(const int x, const int y, const int xw,
-			const int yw) const
-{
-  vector <double> aList;
-  for (int iy=y-yw; iy<=y+yw; ++iy)
-  {
-    if (iy < 0 || iy >= _ny)
-    {
-      continue;
-    }
-    for (int ix=x-xw; ix<=x+xw; ++ix)
-    {
-      if (ix < 0 || ix >= _nx)
-      {
-	continue;
-      }
-      double v;
-      if (getValue(ix, iy, v))
-      {
-        aList.push_back(v);
-      }
-    }
-  }
-
-  if (!aList.empty())
-  {
-    int ind = aList.size() / 2;
-    nth_element(aList.begin(), aList.begin()+ind, aList.end());
-    return aList[ind];
-  }
-  else
-  {
-    return _missing;
-  }
-}
-
-//----------------------------------------------------------------
-double GridAlgs::_sdev(const int x, const int y, const int xw,
-		       const int yw, bool needHalf) const
-{
-  double A=0,Q=0,N=0;
-  for (int iy=y-yw; iy<=y+yw; ++iy)
-  {
-    if (iy < 0 || iy >= _ny)
-    {
-      continue;
-    }
-    for (int ix=x-xw; ix<=x+xw; ++ix)
-    {
-      if (ix < 0 || ix >= _nx)
-      {
-	continue;
-      }
-      double v;
-      if (getValue(ix, iy, v))
-      {
-	// from wikipedia
-        N+=1;
-        Q = Q+((N-1)/N)*(v-A)*(v-A);
-        A = A+(v-A)/N;
-      }
-    }
-  }
-
-  double maxbad;
-  if (needHalf)
-  {
-    maxbad = static_cast<double>(xw*yw)/2.0;
-  }
-  else
-  {
-    maxbad = 0;
-  }
-
-
-  if (N > maxbad)
-  {
-    return sqrt(Q/N);
-  }
-  else
-  {
-    return _missing;
-  }
-}
-
-//----------------------------------------------------------------
-double GridAlgs::_sdev2(const int x, const int y, const int xw,
-		       const int yw) const
-{
-  double mean=0.0;
-  double n = 0.0;
-  for (int iy=y-yw; iy<=y+yw; ++iy)
-  {
-    if (iy < 0 || iy >= _ny)
-    {
-      continue;
-    }
-    for (int ix=x-xw; ix<=x+xw; ++ix)
-    {
-      if (ix < 0 || ix >= _nx)
-      {
-	continue;
-      }
-      double v;
-      if (getValue(ix, iy, v))
-      {
-        n+=1;
-	mean += v;
-      }
-    }
-  }
-  if (n > 0)
-  {
-    mean /= n;
-  }
-  else
-  {
-    return _missing;
-  }
-
-  double sdev=0.0;
-  for (int iy=y-yw; iy<=y+yw; ++iy)
-  {
-    if (iy < 0 || iy >= _ny)
-    {
-      continue;
-    }
-    for (int ix=x-xw; ix<=x+xw; ++ix)
-    {
-      if (ix < 0 || ix >= _nx)
-      {
-	continue;
-      }
-      double v;
-      if (getValue(ix, iy, v))
-      {
-	double d = (v-mean);
-	sdev += d*d;
-      }
-    }
-  }
-  return sqrt(sdev/n);
-}
-
-//----------------------------------------------------------------
-double GridAlgs::_textureX(const int x, const int y, const int xw,
-			   const int yw, bool needHalf) const
-{
-  double A=0.0;
-  int n = 0;
-
-  int maxbad;
-  if (needHalf)
-  {
-    maxbad = xw*yw/2;
-  }
-  else
-  {
-    maxbad = 0;
-  }
-
-  for (int iy=y-yw; iy<=y+yw; ++iy)
-  {
-    if (iy-1 < 0 || iy-1 >= _ny)
-    {
-      continue;
-    }
-    if (iy < 0 || iy >= _ny)
-    {
-      continue;
-    }
-    for (int ix=x-xw; ix<=x+xw; ++ix)
-    {
-      if (ix < 0 || ix >= _nx)
-      {
-	continue;
-      }
-      double v1,v2;
-      if (getValue(ix, iy, v1) && getValue(ix,iy-1,v2))
-      {
-	A = A+(v1-v2)*(v1-v2);
-	n++;
-      }
-    }
-  }
-  if (n > maxbad)
-  {
-    return A/static_cast<double>(n);//yw*xw-1);
-  }
-  else
-  {
-    return _missing;
-  }
-}
-
-//----------------------------------------------------------------
-double GridAlgs::_textureY(const int x, const int y, const int xw,
-			   const int yw, bool needHalf) const
-{
-  double A=0.0;
-  int n = 0;
-
-  int maxbad;
-  if (needHalf)
-  {
-    maxbad = xw*yw/2;
-  }
-  else
-  {
-    maxbad = 0;
-  }
-
-  for (int iy=y-yw; iy<=y+yw; ++iy)
-  {
-    if (iy < 0 || iy >= _ny)
-    {
-      continue;
-    }
-    for (int ix=x-xw; ix<=x+xw; ++ix)
-    {
-      if (ix-1 < 0 || ix-1 >= _nx)
-      {
-	continue;
-      }
-      if (ix < 0 || ix >= _nx)
-      {
-	continue;
-      }
-      double v1,v2;
-      if (getValue(ix, iy, v1) && getValue(ix-1,iy,v2))
-      {
-	A = A+(v1-v2)*(v1-v2);
-	n++;
-      }
-    }
-  }
-  if (n > maxbad)
-  {
-    return A/static_cast<double>(n);//yw*xw-1);
-  }
-  else
-  {
-    return _missing;
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::_fillEdge(const int xw, const int yw, const double value)
+void GridAlgs::_fillEdge(int xw, int yw, double value)
 {
   int xedge, yedge, x, y;
 
@@ -3625,7 +3384,7 @@ void GridAlgs::_fillEdge(const int xw, const int yw, const double value)
 
 //----------------------------------------------------------------
 // fill hole horizontal or vertial with min point at ix,iy
-bool GridAlgs::_fillHole(const int n, const int ix, const int iy)
+bool GridAlgs::_fillHole(int n, int ix, int iy)
 {
   if (ix < 1 || ix >= _nx - 1 - n)
   {
@@ -3674,7 +3433,7 @@ bool GridAlgs::_fillHole(const int n, const int ix, const int iy)
 //----------------------------------------------------------------
 // fill hole horizontal with min point at ix,iy
 // x values are missing on entry
-bool GridAlgs::_fillHhole(const int n, const int ix, const int iy)
+bool GridAlgs::_fillHhole(int n, int ix, int iy)
 {
   if (isMissing(ix-1, iy))
   {
@@ -3712,7 +3471,7 @@ bool GridAlgs::_fillHhole(const int n, const int ix, const int iy)
 //----------------------------------------------------------------
 // fill hole vertical with min point at ix,iy
 // y values are missing on entry
-bool GridAlgs::_fillVhole(const int n, const int ix, const int iy)
+bool GridAlgs::_fillVhole(int n, int ix, int iy)
 {
   if (isMissing(ix, iy-1))
   {
@@ -3746,277 +3505,6 @@ bool GridAlgs::_fillVhole(const int n, const int ix, const int iy)
   }
   return true;
 }
-
-
-//----------------------------------------------------------------
-// compute and store standard deviation using 'fast' method into local object
-// use grid of means Xbar and counts N
-// A = previous state sum of values squared, updated on exit.
-// B = previous state sum of values, updated on exit.
-//
-void GridAlgs::_sdev2Final(const int xw, const int yw, const Grid2d &tmp,
-			  Grid2dLoop &G, double &A, double &B, double &N)
-{
-  int x, y;
-  vector<pair<int,int> >  newv, oldv;
-  vector<pair<int,int> >::iterator i;
-
-  // get the value
-  G.getXy(x, y);
-
-  // get old and new points based on state
-  newv = G.newXy(xw, yw);
-  oldv = G.oldXy(xw, yw);
-  
-  // remove all old squared values and non-squared from A and B, and dec. N
-  double vi;
-  for (i=oldv.begin(); i!=oldv.end(); ++i)
-  {
-    if (tmp.getValue(i->first, i->second, vi))
-    {
-      A -= (vi*vi);
-      B -= vi;
-      N --;
-    }
-  }
-  // add in squares and non-squares to A and B, inc. N
-  for (i=newv.begin(); i!=newv.end(); ++i)
-  {
-    if (tmp.getValue(i->first, i->second, vi))
-    {
-      A += (vi*vi);
-      B += vi;
-      N ++;
-    }
-  }
-
-  // compute numerator from that, and use to build result
-  if (N > xw*yw/2)
-  {
-    double numerator = N*A-B*B;
-    _data[y*_nx + x] = sqrt(numerator)/N;
-  }
-  else
-  {
-    _data[y*_nx + x] = _missing;
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::_textureXNew(const int xw, const int yw, const Grid2d &tmp,
-			   Grid2dLoop &G, double &A, double &N)
-{
-  int x, y;
-  vector<pair<int,int> >  newv, oldv;
-  vector<pair<int,int> >::iterator i;
-
-  // get the value
-  G.getXy(x, y);
-
-  // get old and new points based on state
-  newv = G.newXy(xw, yw);
-  oldv = G.oldXy(xw, yw);
-  
-  // remove all old contrubutions to A
-  double v1, v2;
-  int ix, iy;
-  for (i=oldv.begin(); i!=oldv.end(); ++i)
-  {
-    ix = i->first;
-    iy = i->second;
-    if (iy-1 >= 0)
-    {
-      if (tmp.getValue(ix, iy, v1) && tmp.getValue(ix,iy-1,v2))
-      {
-	A -= (v1-v2)*(v1-v2);
-	N --;
-      }
-    }
-  }
-
-  // add in new contributions to A
-  for (i=newv.begin(); i!=newv.end(); ++i)
-  {
-    ix = i->first;
-    iy = i->second;
-    if (iy-1 >= 0)
-    {
-      if (tmp.getValue(ix, iy, v1) && tmp.getValue(ix,iy-1,v2))
-      {
-	A += (v1-v2)*(v1-v2);
-	N ++;
-      }
-    }
-  }
-  if (N > xw*yw/2)
-  {
-    _data[y*_nx + x] = A/N;
-  }
-  else
-  {
-    _data[y*_nx + x] = _missing;
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::_textureYNew(const int xw, const int yw, const Grid2d &tmp,
-			   Grid2dLoop &G, double &A, double &N)
-{
-  int x, y;
-  vector<pair<int,int> >  newv, oldv;
-  vector<pair<int,int> >::iterator i;
-
-  // get the value
-  G.getXy(x, y);
-
-  // get old and new points based on state
-  newv = G.newXy(xw, yw);
-  oldv = G.oldXy(xw, yw);
-  
-  // remove all old contrubutions to A
-  double v1, v2;
-  int ix, iy;
-  for (i=oldv.begin(); i!=oldv.end(); ++i)
-  {
-    ix = i->first;
-    iy = i->second;
-    if (ix-1 >= 0)
-    {
-      if (tmp.getValue(ix, iy, v1) && tmp.getValue(ix-1,iy,v2))
-      {
-	A -= (v1-v2)*(v1-v2);
-	N --;
-      }
-    }
-  }
-
-  // add in new contributions to A
-  for (i=newv.begin(); i!=newv.end(); ++i)
-  {
-    ix = i->first;
-    iy = i->second;
-    if (ix-1 >= 0)
-    {
-      if (tmp.getValue(ix, iy, v1) && tmp.getValue(ix-1,iy,v2))
-      {
-	A += (v1-v2)*(v1-v2);
-	N ++;
-      }
-    }
-  }
-
-  if (N >  xw*yw/2)
-  {
-    _data[y*_nx + x] = A/N;
-  }
-  else
-  {
-    _data[y*_nx + x] = _missing;
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::_smooth2(const int xw, const int yw, const Grid2d &tmp,
-		       Grid2dLoop &G, double &A, double &N)
-{
-  int x, y;
-  vector<pair<int,int> >  newv, oldv;
-  vector<pair<int,int> >::iterator i;
-
-  // get the value
-  G.getXy(x, y);
-
-  // get old and new points based on state
-  newv = G.newXy(xw, yw);
-  oldv = G.oldXy(xw, yw);
-  
-  // remove all old contrubutions to A
-  double v;
-  for (i=oldv.begin(); i!=oldv.end(); ++i)
-  {
-    if (tmp.getValue(i->first, i->second, v))
-    {
-      A -= v;
-      N --;
-    }
-  }
-
-  // add in new contributions to A
-  for (i=newv.begin(); i!=newv.end(); ++i)
-  {
-    if (tmp.getValue(i->first, i->second, v))
-    {
-      A += v;
-      N ++;
-    }
-  }
-
-  if (N > xw*yw/2)
-  {
-    _data[y*_nx + x] = A/N;
-  }
-  else
-  {
-    _data[y*_nx + x] = _missing;
-  }
-}
-
-//----------------------------------------------------------------
-void GridAlgs::_smooth2NoMissing(const int xw, const int yw,
-				const Grid2d &tmp,
-				Grid2dLoop &G, double &A, double &N,
-				int &nmissing)
-{
-  int x, y;
-  vector<pair<int,int> >  newv, oldv;
-  vector<pair<int,int> >::iterator i;
-
-  // get the value
-  G.getXy(x, y);
-
-  // get old and new points based on state
-  newv = G.newXy(xw, yw);
-  oldv = G.oldXy(xw, yw);
-  
-  // remove all old contrubutions to A
-  double v;
-  for (i=oldv.begin(); i!=oldv.end(); ++i)
-  {
-    if (tmp.getValue(i->first, i->second, v))
-    {
-      A -= v;
-      N --;
-    }
-    else
-    {
-      nmissing --;
-    }
-  }
-
-  // add in new contributions to A
-  for (i=newv.begin(); i!=newv.end(); ++i)
-  {
-    if (tmp.getValue(i->first, i->second, v))
-    {
-      A += v;
-      N ++;
-    }
-    else
-    {
-      nmissing++;
-    }
-  }
-
-  if (nmissing <= 0)
-  {
-    _data[y*_nx + x] = A/N;
-  }
-  else
-  {
-    _data[y*_nx + x] = _missing;
-  }
-}
-
 
 //----------------------------------------------------------------
 void GridAlgs::_fillBox(const int x0, const int y0, const int nx,

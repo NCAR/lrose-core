@@ -39,7 +39,6 @@
 #include <cerrno>
 #include <iostream>
 #include <Radx/RadxXml.hh>
-#include <Radx/RadxTime.hh>
 using namespace std;
 
 // set the default indent spaces per level
@@ -897,22 +896,27 @@ int RadxXml::readDouble(const string &xmlBuf,
 }
 
 /////////////////////////////////////////////
-// read time
-// will decode either yyyy-mm-ddThh:mm:ss or unix time
-// in secs since 1970
-// methods return 0 on success, -1 on failure
+// read time from a string
+// fill out time_t &val
+// will decode either yyyy-mm-ddThh:mm:ss or
+// unix time in secs since 1970
+// returns 0 on success, -1 on failure
 
 // time from a string
 
 int RadxXml::readTime(const string &valStr, time_t &val)
   
 {
-  int year, month, day, hour, min, sec;
-  if (sscanf(valStr.c_str(), "%4d-%2d-%2dT%2d:%2d:%2d",
-             &year, &month, &day, &hour, &min, &sec) == 6) {
-    RadxTime dt(year, month, day, hour, min, sec);
-    val = dt.utime();
-    return 0;
+  {
+    // integer secs, e.g. "2015-12-01T00:55:06"
+    char cc;
+    int year, month, day, hour, min, sec;
+    if (sscanf(valStr.c_str(), "%4d-%2d-%2d%c%2d:%2d:%2d",
+               &year, &month, &day, &cc, &hour, &min, &sec) == 7) {
+      RadxTime dt(year, month, day, hour, min, sec);
+      val = dt.utime();
+      return 0;
+    }
   }
   time_t tval;
   if (sscanf(valStr.c_str(), "%ld", &tval) == 1) {
@@ -946,6 +950,86 @@ int RadxXml::readTime(const string &xmlBuf,
 int RadxXml::readTime(const string &xmlBuf,
                       const string &tag,
                       time_t &val,
+                      vector<attribute> &attributes)
+  
+{
+  string valStr;
+  if (readString(xmlBuf, tag, valStr, attributes)) {
+    return -1;
+  }
+  if (readTime(valStr, val)) {
+    return -1;
+  }
+  return 0;
+}
+
+/////////////////////////////////////////////
+// read time
+// fill out RadxTime &val
+// will decode either yyyy-mm-ddThh:mm:ss or
+// unix time in secs since 1970
+// returns 0 on success, -1 on failure
+
+// time from a string
+
+int RadxXml::readTime(const string &valStr, RadxTime &val)
+  
+{
+  if (valStr.find(".") != string::npos) {
+    // double secs, e.g. "2015-12-01T00:55:06.453"
+    int year, month, day, hour, min;
+    double fsec;
+    char cc;
+    if (sscanf(valStr.c_str(), "%4d-%2d-%2d%c%2d:%2d:%lg",
+               &year, &month, &day, &cc, &hour, &min, &fsec) == 7) {
+      int sec = (int) fsec;
+      double subsec = fsec - sec;
+      val.set(year, month, day, hour, min, sec, subsec);
+      return 0;
+    }
+  }
+  {
+    // integer secs, e.g. "2015-12-01T00:55:06"
+    char cc;
+    int year, month, day, hour, min, sec;
+    if (sscanf(valStr.c_str(), "%4d-%2d-%2d%c%2d:%2d:%2d",
+               &year, &month, &day, &cc, &hour, &min, &sec) == 7) {
+      val.set(year, month, day, hour, min, sec);
+      return 0;
+    }
+  }
+  time_t tval;
+  if (sscanf(valStr.c_str(), "%ld", &tval) == 1) {
+    val.set(tval);
+    return 0;
+  }
+  cerr << "ERROR - RadxXml::readTime" << endl;
+  cerr << "  Cannot decode string into time_t: " << valStr << endl;
+  return -1;
+}
+
+// time from xml buffer, given a tag
+
+int RadxXml::readTime(const string &xmlBuf,
+                      const string &tag,
+                      RadxTime &val)
+  
+{
+  string valStr;
+  if (readString(xmlBuf, tag, valStr)) {
+    return -1;
+  }
+  if (readTime(valStr, val)) {
+    return -1;
+  }
+  return 0;
+}
+
+// time with attributes from xml buffer, given a tag
+
+int RadxXml::readTime(const string &xmlBuf,
+                      const string &tag,
+                      RadxTime &val,
                       vector<attribute> &attributes)
   
 {

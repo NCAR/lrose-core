@@ -209,6 +209,9 @@ static int _readFile(char *FileName, Params *P)
   for (size_t ii = 0; ii < lines.size(); ii++) {
     
     message += lines[ii];
+    if (!isspace(message[message.size()-1])) {
+      message += " ";
+    }
     
     // is this message done?
     

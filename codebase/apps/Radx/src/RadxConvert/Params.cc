@@ -827,6 +827,15 @@ using namespace std;
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("READ OPTIONS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'read_set_radar_num'
     // ctype is 'tdrp_bool_t'
     
@@ -849,15 +858,6 @@ using namespace std;
     tt->help = tdrpStrDup("Most files have data from a single radar, so this does not apply. The NOAA HRD files, however, have data from both the lower fuselage (LF, radar_num = 1) and tail (TA, radar_num = 2) radars. For HRD files, by default the TA radar will be used, unless the radar num is set to 1 for the LF radar. If this is set to 1, it will force the convert to assume a lower fuselage radar. If set to 2, it will assume a tail radar.");
     tt->val_offset = (char *) &read_radar_num - &_start_;
     tt->single_val.i = -1;
-    tt++;
-    
-    // Parameter 'Comment 4'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("READ OPTIONS");
-    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'aggregate_sweep_files_on_read'

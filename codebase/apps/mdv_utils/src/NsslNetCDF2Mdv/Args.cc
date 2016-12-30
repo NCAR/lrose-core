@@ -29,6 +29,7 @@
 #include <toolsa/LogStream.hh>
 #include <iostream>
 #include <fstream>
+#include <stdlib.h>
 using std::ifstream;
 using std::string;
 

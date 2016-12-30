@@ -52,6 +52,7 @@ HDRS = \
 
 CPPC_SRCS = \
 	ByteOrder.cc \
+	PseudoRhi.cc \
 	Radx.cc \
 	RadxAngleHist.cc \
 	RadxAzElev.cc \

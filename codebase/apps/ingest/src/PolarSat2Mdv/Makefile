@@ -35,13 +35,12 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = PolarSat2Mdv
 
-LOC_INCLUDES = $(NETCDF4_INCS) -I/opt/netcdf/include
-LOC_CPPC_CFLAGS =
-LOC_LDFLAGS = $(NETCDF4_LDFLAGS)  -L/opt/netcdf/lib/
+LOC_INCLUDES = $(NETCDF4_INCS) 
+LOC_CPPC_CFLAGS = -g
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS) 
 
 LOC_LIBS = -lMdv -lrapformats -ldsserver -ldidss -ltoolsa \
-           -ltdrp -ldataport -leuclid  -lRadx \
-           $(NETCDF4_LIBS) -lnetcdf_c++4
+           -ltdrp -ldataport -leuclid  -lRadx $(NETCDF4_LIBS) 
 
 HDRS = \
 	$(PARAMS_HH) \

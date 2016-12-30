@@ -39,8 +39,10 @@
 #include <dsdata/DsTimeListTrigger.hh>
 #include <dsdata/DsFcstTimeListTrigger.hh>
 #include <didss/DsInputPath.hh>
+#include <rapformats/Cedric.hh>
 #include <toolsa/umisc.h>
 #include <toolsa/pmu.h>
+#include <toolsa/pjg.h>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxField.hh>
 #include <Mdv/MdvxRemapLut.hh>
@@ -142,13 +144,21 @@ int MdvConvert::Run ()
   // SPEC_FCAST_REALTIME (DsTrigger class is used)
 
   if ( _params.mode != Params::LOCAL_FILEPATH_REALTIME) {
-    
+
     while (!_dataTrigger->endOfData()) {
+
       TriggerInfo triggerInfo;
       time_t inputTime = _dataTrigger->next(triggerInfo);
+      int leadTime = 0;
+      if (triggerInfo.getForecastTime() > triggerInfo.getIssueTime()) {
+        leadTime = triggerInfo.getForecastTime() - triggerInfo.getIssueTime();
+        if (leadTime > 86400 * 100) {
+          leadTime = -9999;
+        }
+      }
+
       if (_processData(triggerInfo.getIssueTime(),
-	               (triggerInfo.getForecastTime() -
-                        triggerInfo.getIssueTime()), 
+	               leadTime,
 	               triggerInfo.getFilePath())) {
         cerr << "MdvConvert::Run" <<"  Errors in processing time: "
              <<  triggerInfo.getIssueTime() << endl
@@ -201,8 +211,12 @@ int MdvConvert:: _processData(time_t inputTime, int leadTime,
   if (_params.debug) {
     cerr << "Processing data file" << endl;
     cerr << "  inputTime: " << DateTime::strm(inputTime) << endl;
-    cerr << "  leadTime: " << leadTime << endl;
-    cerr << "  filePath: " << filepath << endl;
+    if (leadTime > 0) {
+      cerr << "  leadTime: " << leadTime << endl;
+    }
+    if (filepath.size() > 0) {
+      cerr << "  filePath: " << filepath << endl;
+    }
   }
 
   // create DsMdvx object
@@ -1270,3 +1284,191 @@ bool MdvConvert::_wantedLeadTime(int leadTime) const
     return true;
   }
 }
+
+/////////////////////////////////////////////////////
+// write out data in CEDRIC format
+
+int MdvConvert::_writeCedricFile(DsMdvx &mdvx)
+{
+
+  if (mdvx.getNFields() < 1) {
+    cerr << "ERROR - MdvConvert::_writeCedricFile" << endl;
+    cerr << "  No fields in data." << endl;
+    return -1;
+  }
+  
+  Cedric ced;
+  if (_params.debug) {
+    ced.setDebug(true);
+  }
+
+  // set meta data
+  
+  ced.setDateTimeRun(time(NULL));
+  ced.setVolStartTime(mdvx.getMasterHeader().time_begin);
+  ced.setVolEndTime(mdvx.getMasterHeader().time_end);
+  ced.setTapeStartTime(mdvx.getMasterHeader().time_begin);
+  ced.setTapeEndTime(mdvx.getMasterHeader().time_end);
+  ced.setTimeZone("UTC");
+  
+  ced.setVolumeNumber(_params.cedric_volume_number);
+  ced.setVolName(_params.cedric_volume_name);
+  ced.setRadar(_params.cedric_radar_name);
+  ced.setProject(_params.cedric_project_name);
+  ced.setProgram(_params.cedric_program_name);
+
+  // field and vlevel headers
+
+  const MdvxField *field0 = mdvx.getFieldByNum(0);
+  if (field0 == NULL) {
+    cerr << "ERROR - MdvConvert::_writeCedricFile" << endl;
+    cerr << "  No fields in data." << endl;
+    return -1;
+  }
+  Mdvx::field_header_t fhdr0 = field0->getFieldHeader();
+  Mdvx::vlevel_header_t vhdr0 = field0->getVlevelHeader();
+  MdvxProj proj0(fhdr0);
+  if (fhdr0.nx < 1) {
+    cerr << "ERROR - MdvConvert::_writeCedricFile" << endl;
+    cerr << "  No vert levels in data." << endl;
+    return -1;
+  }
+
+  // projection
+
+  if (fhdr0.proj_type == Mdvx::PROJ_LATLON) {
+    ced.setCoordType("LLE ");
+  } else {
+    ced.setCoordType("ELEV");
+  }
+  ced.setXaxisAngleFromNDeg(90.0);
+  ced.setOriginX(0.0);
+  ced.setOriginY(0.0);
+
+  // origin
+
+  ced.setLongitudeDeg(fhdr0.proj_origin_lon);
+  ced.setLatitudeDeg(fhdr0.proj_origin_lat);
+  ced.setOriginHtKm(fhdr0.grid_minz);
+  ced.setNyquistVel(_params.cedric_nyquist_velocity);
+
+  // ced.addLandmark(_params.cedric_radar_name,
+  //                 _radarX, _radarY, _readVol.getAltitudeKm());
+
+  // range limits
+
+  double minLat, minLon, maxLat, maxLon;
+  proj0.getEdgeExtrema(minLat, minLon, maxLat, maxLon);
+  
+  double minX, minY, maxX, maxY;
+  PJGLatLon2DxDy(fhdr0.proj_origin_lat, fhdr0.proj_origin_lon,
+                 minLat, minLon, &minX, &minY);
+  PJGLatLon2DxDy(fhdr0.proj_origin_lat, fhdr0.proj_origin_lon,
+                 maxLat, maxLon, &maxX, &maxY);
+  double distToLowerLeft = sqrt(minX * minX + minY * minY);
+  double distToUpperRight = sqrt(maxX * maxX + maxY * maxY);
+  double maxRange = distToLowerLeft;
+  if (distToUpperRight > distToLowerLeft) {
+    maxRange = distToUpperRight;
+  }
+  ced.setMinRangeKm(0);
+  ced.setMaxRangeKm(maxRange);
+
+  
+  ced.setNumGatesBeam(_params.cedric_ngates_beam);
+  ced.setGateSpacingKm(_params.cedric_gate_spacing_km);
+  ced.setMinAzimuthDeg(0);
+  ced.setMaxAzimuthDeg(360);
+
+  ced.setMinX(fhdr0.grid_minx);
+  ced.setMaxX(fhdr0.grid_minx + (fhdr0.nx - 1) * fhdr0.grid_dx);
+  ced.setNx(fhdr0.nx);
+  ced.setDx(fhdr0.grid_dx);
+  ced.setFastAxis(1);
+  
+  ced.setMinY(fhdr0.grid_miny);
+  ced.setMaxY(fhdr0.grid_miny + (fhdr0.ny - 1) * fhdr0.grid_dy);
+  ced.setNy(fhdr0.ny);
+  ced.setDy(fhdr0.grid_dy);
+  ced.setMidAxis(2);
+
+  ced.setMinZ(vhdr0.level[0]);
+  ced.setMaxZ(vhdr0.level[fhdr0.nz-1]);
+  ced.setNz(fhdr0.nz);
+  ced.setDz(vhdr0.level[1] - vhdr0.level[0]);
+  ced.setSlowAxis(3);
+  ced.setPlaneType("PP");
+
+  ced.setNumElevs(_params.cedric_elevation_angles_n);
+  double minElev = 9999;
+  double maxElev = -9999;
+  double sumElev = 0.0;
+  double sumDeltaElev = 0.0;
+  double prevElev = -9999;
+  for (int ii = 0; ii < _params.cedric_elevation_angles_n; ii++) {
+    double elev = _params._cedric_elevation_angles[ii];
+    sumElev += elev;
+    if (elev > maxElev) maxElev = elev;
+    if (elev < minElev) minElev = elev;
+    if (prevElev > -9990) {
+      double deltaElev = fabs(elev - prevElev);
+      sumDeltaElev += deltaElev;
+    }
+    prevElev = elev;
+  }
+  ced.setMinElevDeg(minElev);
+  ced.setMaxElevDeg(maxElev);
+  ced.setAveElevDeg(sumElev / _params.cedric_elevation_angles_n);
+  ced.setAveDeltaElevDeg(sumDeltaElev / _params.cedric_elevation_angles_n);
+  
+  for (int ii = 0; ii < fhdr0.nz; ii++) {
+    ced.addVlevel(ii, vhdr0.level[ii],
+                  mdvx.getNFields(),
+                  fhdr0.nx, fhdr0.ny,
+                  _params.cedric_nyquist_velocity);
+  }
+
+  ced.setNumRadars(1);
+  // if (_readVol.getNRcalibs() > 0) {
+  //   ced.setRadarConst(_readVol.getRcalibs()[0]->getRadarConstantH());
+  // }
+
+  // add fields
+
+  for (int ifield = 0; ifield < mdvx.getNFields(); ifield++) {
+
+    MdvxField *field = mdvx.getFieldByNum(ifield);
+    if (field == NULL) {
+      cerr << "ERROR - MdvConvert::_writeCedricFile" << endl;
+      cerr << "  Cannot find field number: " << ifield << endl;
+      return -1;
+    }
+    field->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
+    Mdvx::field_header_t fhdr = field->getFieldHeader();
+    fl32 missingFl32 = fhdr.missing_data_value;
+    ced.addField(fhdr.field_name, (fl32 *) field->getVol(), missingFl32);
+
+  } // ifield
+
+  if (_params.debug) {
+    cerr << "  Writing CEDRIC file ... " << endl;
+  }
+  
+  if (_params.write_to_path) {
+    string outputPath = _params.output_path;
+    if (ced.writeToDir(outputPath, _progName)) {
+      cerr << "ERROR - MdvConvert::_writeCedricFile()" << endl;
+      return -1;
+    }
+  } else {
+    DsURL outUrl(_params.output_url);
+    if (ced.writeToDir(outUrl.getFile(), _progName)) {
+      cerr << "ERROR - CartInterp::_writeCedricFile()" << endl;
+      return -1;
+    }
+  }
+
+  return 0;
+
+}
+

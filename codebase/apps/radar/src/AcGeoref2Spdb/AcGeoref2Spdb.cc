@@ -56,6 +56,7 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/str.h>
 #include <toolsa/pmu.h>
+#include <radar/IwrfMomReader.hh>
 #include <Radx/RadxFile.hh>
 #include <Radx/RadxVol.hh>
 #include <physics/thermo.h>
@@ -77,6 +78,9 @@ AcGeoref2Spdb::AcGeoref2Spdb(int argc, char **argv)
   _pulseReader = NULL;
   _prevPulseSeqNum = 0;
   _iwg1FlightTimeStart = -1;
+  _timeLastVelPrint.set(-1);
+  _velStatsCount = 0;
+  MEM_zero(_velStatsSum);
 
   // set programe name
   
@@ -119,6 +123,31 @@ AcGeoref2Spdb::AcGeoref2Spdb(int argc, char **argv)
     _pulseReader = new IwrfTsReaderFile(_args.inputFileList, iwrfDebug);
   }
 
+  // set up the surface velocity filtering
+  
+  _surfVel.initFilters(_params.surface_vel_stage1_filter_n,
+                       _params._surface_vel_stage1_filter,
+                       _params.surface_vel_spike_filter_n,
+                       _params._surface_vel_spike_filter,
+                       _params.surface_vel_final_filter_n,
+                       _params._surface_vel_final_filter);
+
+  if (_params.debug) {
+    _surfVel.setDebug(true);
+  }
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _surfVel.setVerbose(true);
+  }
+
+  _surfVel.setDbzFieldName(_params.cfradial_dbz_field_name);
+  _surfVel.setVelFieldName(_params.cfradial_vel_field_name);
+
+  _surfVel.setMinRangeToSurfaceKm(_params.min_range_to_surface_km);
+  _surfVel.setMinDbzForSurfaceEcho(_params.min_dbz_for_surface_echo);
+  _surfVel.setNGatesForSurfaceEcho(_params.ngates_for_surface_echo);
+  _surfVel.setSpikeFilterDifferenceThreshold
+    (_params.surface_vel_spike_filter_difference_threshold);
+  
   // init process mapper registration
   
   if (_params.reg_with_procmap) {
@@ -152,6 +181,10 @@ int AcGeoref2Spdb::Run ()
   if (_params.input_mode == Params::CFRADIAL) {
     
     return _runCfradialMode();
+    
+  } else if (_params.input_mode == Params::RADX_FMQ) {
+    
+    return _runRadxFmqMode();
     
   } else if (_params.input_mode == Params::IWRF_FILE ||
              _params.input_mode == Params::IWRF_FMQ) {
@@ -321,9 +354,8 @@ int AcGeoref2Spdb::_runRafIwg1UdpMode()
 
   // open socket
 
-  InputUdp udp;
-  if (udp.openUdp(_params.iwg1_udp_port, 
-                  _params.debug >= Params::DEBUG_NORM)) {
+  InputUdp udp(_params);
+  if (udp.openUdp()) {
     cerr << "ERROR - AcGeoref2Spdb::_runRafIwg1UdpMode()" << endl;
     cerr << "  Cannot open UDP, port: " << _params.iwg1_udp_port << endl;
     return -1;
@@ -335,8 +367,7 @@ int AcGeoref2Spdb::_runRafIwg1UdpMode()
       // close socket
       udp.closeUdp();
       // reopen socket
-      if (udp.openUdp(_params.iwg1_udp_port, 
-                      _params.debug >= Params::DEBUG_NORM)) {
+      if (udp.openUdp()) {
         cerr << "ERROR - AcGeoref2Spdb::_runRafIwg1UdpMode()" << endl;
         cerr << "  Cannot open UDP, port: " << _params.iwg1_udp_port << endl;
         return -1;
@@ -359,6 +390,78 @@ int AcGeoref2Spdb::_runRafIwg1UdpMode()
   } // while
 
   return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Run reading RADX rays from an FMQ
+
+int AcGeoref2Spdb::_runRadxFmqMode()
+  
+{
+
+  PMU_auto_register("_runRadxFmqMode");
+
+  int iret = 0;
+  
+  // set up reader
+  
+  IwrfMomReaderFmq fmq(_params.input_fmq_name);
+  if (!_params.seek_to_end_of_input) {
+    fmq.seekToStart();
+  }
+  double cmigitsTemp = _missingDbl;
+  double tailconeTemp = _missingDbl;
+  
+  // clear spdb
+  
+  _spdb.clearPutChunks();
+
+  while (true) { 
+    
+    // register with procmap
+
+    PMU_auto_register("Reading moments");
+    
+    // get the next ray
+    
+    RadxRay *ray = fmq.readNextRay();
+    ray->convertToFl32();
+
+    if (_params.get_hcr_temps_from_cfradial) {
+      if (fmq.getStatusXmlUpdated()) {
+        _getHcrTempsFromStatusXml(fmq.getStatusXml(), 
+                                  cmigitsTemp, tailconeTemp);
+      }
+    }
+    
+    // print ray in debug mode
+    
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      ray->print(cerr);
+    }
+
+    // handle ray, adding to spdb
+
+    _handleRay(*ray, cmigitsTemp, tailconeTemp);
+
+    // write out periodically
+
+    if (_spdb.nPutChunks() == _params.spdb_nchunks_per_write) {
+      _doWrite();
+    }
+    
+    // clean up
+
+    delete ray;
+    
+  } // while
+
+  // write any remaining data
+  
+  _doWrite();
+
+  return iret;
 
 }
 
@@ -543,62 +646,13 @@ int AcGeoref2Spdb::_processCfRadialFile(const string &path)
   for (size_t iray = 0; iray < rays.size(); iray++) {
 
     // get ray
+
     RadxRay &ray = *rays[iray];
 
-    // get georef for ray
-    const RadxGeoref *radxGeoref = ray.getGeoreference();
-    if (radxGeoref == NULL) {
-      continue;
-    }
+    // handle ray, adding to spdb
 
-    // convert to ac_georef
-    ac_georef_t acGeoref;
-    _convertFromRadxGeoref(*radxGeoref, acGeoref);
+    _handleRay(ray, cmigitsTemp, tailconeTemp);
 
-    // optionally add in HCR temps
-    if (_params.get_hcr_temps_from_cfradial) {
-      acGeoref.temp_c = cmigitsTemp;
-      acGeoref.custom[0] = tailconeTemp;
-    }
-
-    // optionally add in surface vel
-    if (_params.compute_surface_vel_in_cfradial) {
-      double surfaceVel = _computeSurfaceVel(ray);
-      acGeoref.custom[1] = surfaceVel;
-    }
-
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "=======================================" << endl;
-      ac_georef_print(stderr, " ", &acGeoref);
-    }
-
-    acGeoref.custom[2] = ray.getAzimuthDeg();
-    acGeoref.custom[3] = ray.getElevationDeg();
-    acGeoref.custom[4] = radxGeoref->getRotation();
-    acGeoref.custom[5] = radxGeoref->getTilt();
-
-    // add to spdb
-    string callsign(_params.aircraft_callsign);
-    string callsignLast4(callsign.substr(callsign.size() - 4));
-    si32 dataType = Spdb::hash4CharsToInt32(callsignLast4.c_str());
-    si32 dataType2 = acGeoref.time_nano_secs;
-    time_t validTime = acGeoref.time_secs_utc;
-    ac_georef_t copy = acGeoref;
-    BE_from_ac_georef(&copy);
-    _spdb.addPutChunk(dataType,
-                      validTime,
-                      validTime,
-                      sizeof(ac_georef_t),
-                      &copy,
-                      dataType2);
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      if (_spdb.nPutChunks() == 1) {
-        fprintf(stderr, "Writing georef for time: %s\n",
-                DateTime::strm(validTime).c_str());
-        fprintf(stderr, "url: %s\n", _params.output_spdb_url);
-        ac_georef_print(stderr, " ", &acGeoref);
-      }
-    }
 
   } // iray
 
@@ -610,6 +664,76 @@ int AcGeoref2Spdb::_processCfRadialFile(const string &path)
 
 }
 
+//////////////////////////////////////////////////
+// Handle a Radx ray, adding spdb chunk
+
+void AcGeoref2Spdb::_handleRay(const RadxRay &ray,
+                               double cmigitsTemp,
+                               double tailconeTemp)
+  
+{
+
+  // get georef for ray
+  const RadxGeoref *radxGeoref = ray.getGeoreference();
+  if (radxGeoref == NULL) {
+    return;
+  }
+
+  // convert to ac_georef
+  ac_georef_t acGeoref;
+  _convertFromRadxGeoref(*radxGeoref, acGeoref);
+  
+  // optionally add in HCR temps
+  if (_params.get_hcr_temps_from_cfradial) {
+    acGeoref.temp_c = cmigitsTemp;
+    acGeoref.custom[0] = tailconeTemp;
+  }
+  
+  // optionally add in surface vel
+  if (_params.compute_surface_vel_in_cfradial) {
+    double surfaceVel = _computeSurfaceVel(ray);
+    acGeoref.custom[1] = surfaceVel;
+  }
+
+  acGeoref.custom[2] = ray.getAzimuthDeg();
+  acGeoref.custom[3] = ray.getElevationDeg();
+  acGeoref.custom[4] = radxGeoref->getRotation();
+  acGeoref.custom[5] = radxGeoref->getTilt();
+
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "=======================================" << endl;
+    ac_georef_print(stderr, " ", &acGeoref);
+  }
+
+  // add to spdb
+  string callsign(_params.aircraft_callsign);
+  string callsignLast4(callsign.substr(callsign.size() - 4));
+  si32 dataType = Spdb::hash4CharsToInt32(callsignLast4.c_str());
+  si32 dataType2 = acGeoref.time_nano_secs;
+  time_t validTime = acGeoref.time_secs_utc;
+  ac_georef_t copy = acGeoref;
+  BE_from_ac_georef(&copy);
+  _spdb.addPutChunk(dataType,
+                    validTime,
+                    validTime,
+                    sizeof(ac_georef_t),
+                    &copy,
+                    dataType2);
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (_spdb.nPutChunks() == 1) {
+      fprintf(stderr, "Writing georef for time: %s\n",
+              DateTime::strm(validTime).c_str());
+      fprintf(stderr, "url: %s\n", _params.output_spdb_url);
+      ac_georef_print(stderr, " ", &acGeoref);
+    }
+  }
+
+  if (_params.print_surface_velocity_data) {
+    _printSurfVelStats(ray, acGeoref);
+  }
+
+}
+  
 //////////////////////////////////////////////////
 // Process RAF NETCDF file
 
@@ -812,8 +936,8 @@ int AcGeoref2Spdb::_readTimes()
   
 {
 
-  multimap<string, NcVar> allVars = _file.getNcFile()->getVars();
-  multimap<string, NcVar>::iterator it;
+  multimap<string, NcxxVar> allVars = _file.getVars();
+  multimap<string, NcxxVar>::iterator it;
   int count = 0;
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "======>> Variable list" << endl;
@@ -825,7 +949,7 @@ int AcGeoref2Spdb::_readTimes()
 
   // read the time coordinate variable
 
-  _timeVar = _file.getNcFile()->getVar(_timeCoordName);
+  _timeVar = _file.getVar(_timeCoordName);
   if (_timeVar.isNull()) {
     cerr << "ERROR - AcGeoref2Spdb::_readTimes" << endl;
     cerr << "  Cannot get time variable: " << _timeCoordName << endl;
@@ -839,7 +963,7 @@ int AcGeoref2Spdb::_readTimes()
     return -1;
   }
 
-  NcDim timeDim = _timeVar.getDim(0);
+  NcxxDim timeDim = _timeVar.getDim(0);
   if (timeDim.isNull()) {
     cerr << "ERROR - AcGeoref2Spdb::_readTimes" << endl;
     cerr << "  cannot read time dimension" << endl;
@@ -849,7 +973,7 @@ int AcGeoref2Spdb::_readTimes()
 
   // get units attribute
   
-  NcVarAtt unitsAtt = _timeVar.getAtt("units");
+  NcxxVarAtt unitsAtt = _timeVar.getAtt("units");
   if (unitsAtt.isNull()) {
     cerr << "ERROR - AcGeoref2Spdb::_readTimes" << endl;
     cerr << "  cannot read time 'units' attribute" << endl;
@@ -857,7 +981,7 @@ int AcGeoref2Spdb::_readTimes()
   }
   string units;
   unitsAtt.getValues(units);
-  units = _file.stripNulls(units);
+  units = Ncxx::stripNulls(units);
 
   // set the time base from the units
 
@@ -993,7 +1117,7 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
 
   // get the variable
   
-  NcVar var = _file.getNcFile()->getVar(varName);
+  NcxxVar var = _file.getVar(varName);
   if (var.isNull()) {
     cerr << "ERROR - AcGeoref2Spdb::_readTimeSeriesVar" << endl;
     cerr << "  Cannot find var: " << varName << endl;
@@ -1011,7 +1135,7 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
 
   // get dim
 
-  NcDim dim = var.getDim(0);
+  NcxxDim dim = var.getDim(0);
   if (dim.isNull()) {
     cerr << "ERROR - AcGeoref2Spdb::_readTimeSeriesVar" << endl;
     cerr << "  cannot get dimension for var: " << varName << endl;
@@ -1031,16 +1155,16 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
 
   // get units
   
-  NcVarAtt unitsAtt = var.getAtt("units");
+  NcxxVarAtt unitsAtt = var.getAtt("units");
   string units;
   if (!unitsAtt.isNull()) {
     unitsAtt.getValues(units);
-    units = _file.stripNulls(units);
+    units = Ncxx::stripNulls(units);
   }
 
   // var type
 
-  NcType::ncType varType = var.getType().getTypeClass();
+  NcxxType::ncType varType = var.getType().getTypeClass();
 
   // get fill value
   
@@ -1048,7 +1172,7 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
   float ffill = -9999.0f;
   double dfill = -9999.0;
 
-  NcVarAtt fillValAtt = var.getAtt("_FillValue");
+  NcxxVarAtt fillValAtt = var.getAtt("_FillValue");
   if (fillValAtt.isNull()) {
     fillValAtt = var.getAtt("missing_value");
   }
@@ -1166,9 +1290,24 @@ void AcGeoref2Spdb::_getHcrTempsFromStatusXml(const string &statusXml,
 //
 // Sets vel to (0.0) if cannot determine valocity from surface.
 
-double AcGeoref2Spdb::_computeSurfaceVel(RadxRay &ray)
+double AcGeoref2Spdb::_computeSurfaceVel(const RadxRay &ray)
   
 {
+  
+  RadxRay *tmpRay = new RadxRay(ray);
+  tmpRay->addClient();
+  double surfVel = -9999.0;
+  
+  if (_surfVel.processRay(tmpRay) == 0) {
+    if (_surfVel.velocityIsValid()) {
+      surfVel = _surfVel.getSurfaceVelocity();
+    }
+  }
+
+  RadxRay::deleteIfUnused(tmpRay);
+  return surfVel;
+
+#ifdef INITIAL_VERSION
 
   // init
   
@@ -1178,18 +1317,22 @@ double AcGeoref2Spdb::_computeSurfaceVel(RadxRay &ray)
   // cannot compute gnd vel if not pointing down
   
   double elev = ray.getElevationDeg();
-  if (elev > -85 || elev < -95) {
+
+  if ((elev > -90 + _params.max_nadir_error_for_surface_vel) ||
+      (elev < -90 - _params.max_nadir_error_for_surface_vel)) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Bad elevation for finding surface, time, elev(deg): "
            << ray.getRadxTime().asString() << ", "
            << elev << endl;
+      cerr << "Max allowable error from nadir: " 
+           << _params.max_nadir_error_for_surface_vel << endl;
     }
     return surfaceVel;
-  }
+   }
 
   // get dbz field
 
-  RadxField *dbzField = ray.getField(_params.cfradial_dbz_field_name);
+  const RadxField *dbzField = ray.getField(_params.cfradial_dbz_field_name);
   if (dbzField == NULL) {
     cerr << "ERROR - HcrVelCorrect::_computeSurfaceVel" << endl;
     cerr << "  No dbz field found, field name: " << _params.cfradial_dbz_field_name << endl;
@@ -1200,7 +1343,7 @@ double AcGeoref2Spdb::_computeSurfaceVel(RadxRay &ray)
 
   // get vel field
 
-  RadxField *velField = ray.getField(_params.cfradial_vel_field_name);
+  const RadxField *velField = ray.getField(_params.cfradial_vel_field_name);
   if (velField == NULL) {
     cerr << "ERROR - HcrVelCorrect::_computeSurfaceVel" << endl;
     cerr << "  No vel field found, field name: " << _params.cfradial_vel_field_name << endl;
@@ -1276,6 +1419,8 @@ double AcGeoref2Spdb::_computeSurfaceVel(RadxRay &ray)
   }
 
   return surfaceVel;
+
+#endif
 
 }
 
@@ -1402,6 +1547,8 @@ int AcGeoref2Spdb::_handleIwg1(const char *buf, int bufLen)
   string callSign(_params.aircraft_callsign);
   STRncopy(acGeoref.callsign, callSign.c_str(), AC_GEOREF_NBYTES_CALLSIGN);
   
+  ac_georef_print(stderr, " ", &acGeoref);
+
   // add to spdb
   
   string callSignLast4(callSign.substr(callSign.size() - 4));
@@ -1446,3 +1593,101 @@ double AcGeoref2Spdb::_decodeIwg1Field(const vector<string> &toks,
 
 }
 
+//////////////////////////////////////////////////
+// Print surface velocity estimates to stdout
+// at regular intervals
+
+void AcGeoref2Spdb::_printSurfVelStats(const RadxRay &ray, const ac_georef_t &georef)
+  
+{
+
+  // accumulate for stats
+  
+  RadxTime printTime(georef.time_secs_utc, georef.time_nano_secs / 1.0e9);
+  
+  _velStatsSum.time_secs_utc += georef.time_secs_utc;
+  _velStatsSum.time_nano_secs += georef.time_nano_secs;
+  _velStatsSum.longitude += georef.longitude;
+  _velStatsSum.latitude += georef.latitude;
+  _velStatsSum.altitude_msl_km += georef.altitude_msl_km;
+  _velStatsSum.ew_velocity_mps += georef.ew_velocity_mps;
+  _velStatsSum.ns_velocity_mps += georef.ns_velocity_mps;
+  _velStatsSum.vert_velocity_mps += georef.vert_velocity_mps;
+  _velStatsSum.heading_deg += georef.heading_deg;
+  _velStatsSum.drift_angle_deg += georef.drift_angle_deg;
+  _velStatsSum.track_deg += georef.track_deg;
+  _velStatsSum.roll_deg += georef.roll_deg;
+  _velStatsSum.pitch_deg += georef.pitch_deg;
+  _velStatsSum.temp_c += georef.temp_c;
+  for (size_t ii = 0; ii < AC_GEOREF_N_CUSTOM; ii++) {
+    _velStatsSum.custom[ii] += georef.custom[ii];
+  }
+  _velStatsCount++;
+
+  double timeSincePrint = printTime - _timeLastVelPrint;
+
+  if (timeSincePrint > _params.surface_velocity_print_period_secs &&
+      _velStatsCount > 0) {
+
+    double meanLongitude = _velStatsSum.longitude / _velStatsCount;
+    double meanLatitude = _velStatsSum.latitude / _velStatsCount;
+    double meanAltM = (_velStatsSum.altitude_msl_km / _velStatsCount) * 1000.0;
+    double meanAltFt = meanAltM / 0.3048;
+    double meanEwVel = _velStatsSum.ew_velocity_mps / _velStatsCount;
+    double meanNsVel = _velStatsSum.ns_velocity_mps / _velStatsCount;
+    double meanGndSpeed = sqrt(meanEwVel * meanEwVel + meanNsVel * meanNsVel);
+    double meanVertVel = _velStatsSum.vert_velocity_mps / _velStatsCount;
+    double meanHeading = _velStatsSum.heading_deg / _velStatsCount;
+    if (meanHeading < 0) meanHeading += 360.0;
+    double meanDrift = _velStatsSum.drift_angle_deg / _velStatsCount;
+    // double meanTrack = _velStatsSum.track_deg / _velStatsCount;
+    double meanRoll = _velStatsSum.roll_deg / _velStatsCount;
+    double meanPitch = _velStatsSum.pitch_deg / _velStatsCount;
+    // double meanTemp = _velStatsSum.temp_c / _velStatsCount;
+    // double meanTailconeTemp = _velStatsSum.custom[0] / _velStatsCount;
+    double meanSurfVel = _velStatsSum.custom[1] / _velStatsCount;
+    double meanAz = _velStatsSum.custom[2] / _velStatsCount;
+    double meanEl = _velStatsSum.custom[3] / _velStatsCount;
+    double meanRotation = _velStatsSum.custom[4] / _velStatsCount;
+    double meanTilt = _velStatsSum.custom[5] / _velStatsCount;
+
+    double tiltErrorDeg = -asin(meanSurfVel / meanGndSpeed) * RAD_TO_DEG;
+    double meanCrossSpeed = meanGndSpeed * sin(meanDrift * DEG_TO_RAD);
+    double rotErrorDeg = asin(meanSurfVel / meanCrossSpeed) * RAD_TO_DEG;
+
+    // double estTilt = meanPitch + meanTilt + tiltErrorDeg;
+    // double estRot = meanRotation + rotErrorDeg;
+
+    cout << "====== HCR GEOREF STATS ========" << endl;
+    cout << "Time:    " << printTime.asString(3) << endl;
+
+    fprintf(stdout, "Longitude      (deg): %10.4f\n", meanLongitude);
+    fprintf(stdout, "Latitude       (deg): %10.4f\n", meanLatitude);
+    fprintf(stdout, "Altitude        (ft): %10.0f\n", meanAltFt);
+
+    fprintf(stdout, "Ground speed   (m/s): %10.3f\n", meanGndSpeed);
+    fprintf(stdout, "Cross speed    (m/s): %10.3f\n", meanCrossSpeed);
+    fprintf(stdout, "Vert vel       (m/s): %10.3f\n", meanVertVel);
+    fprintf(stdout, "Heading        (deg): %10.3f\n", meanHeading);
+    fprintf(stdout, "Drift          (deg): %10.3f\n", meanDrift);
+    fprintf(stdout, "Pitch          (deg): %10.3f\n", meanPitch);
+    fprintf(stdout, "Roll           (deg): %10.3f\n", meanRoll);
+    fprintf(stdout, "Tilt           (deg): %10.3f\n", meanTilt);
+    fprintf(stdout, "Rotation       (deg): %10.3f\n", meanRotation);
+    fprintf(stdout, "Azimuth        (deg): %10.3f\n", meanAz);
+    fprintf(stdout, "Elevation      (deg): %10.3f\n", meanEl);
+    fprintf(stdout, "Surf vel       (m/s): %10.3f\n", meanSurfVel);
+    fprintf(stdout, "velErrorAsTilt (deg): %10.3f\n", tiltErrorDeg);
+    fprintf(stdout, "velErrorAsRot  (deg): %10.3f\n", rotErrorDeg);
+    cout << "================================" << endl;
+    
+    _timeLastVelPrint = printTime;
+
+    // clear
+    MEM_zero(_velStatsSum);
+    _velStatsCount = 0;
+
+  }
+
+}
+  

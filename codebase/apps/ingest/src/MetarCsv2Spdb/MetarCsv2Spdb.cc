@@ -51,7 +51,6 @@
 #include <toolsa/file_io.h>
 #include <toolsa/Path.hh>
 #include <didss/DsInputPath.hh>
-//#include <Spdb/Product_defines.hh>
 #include <toolsa/TaXml.hh>
 
 // Local include files
@@ -134,8 +133,6 @@ MetarCsv2Spdb::MetarCsv2Spdb(int argc, char **argv)
 		                  _params.max_realtime_valid_age,
 		                  PMU_auto_register);
   }
-
-  //  _decoder = new PirepDecoder();
 
   // initialize process registration
   PMU_auto_init(_progName.c_str(), _params.instance,
@@ -227,7 +224,7 @@ bool MetarCsv2Spdb::_parseHeader(string line)
   istringstream ss(line);
 
   //putting all the tokens in the vector
-  vector<string> arrayTokens;//(begin, end); 
+  vector<string> arrayTokens; 
 
   while(ss) {
     string s;
@@ -628,8 +625,6 @@ int MetarCsv2Spdb::run()
 
     spdbXml.setAppName(_progName);
     spdbRaw.setAppName(_progName);
-    //    cerr << " File is: " << input_filename << endl;
-
 
     // Process the input file
     // Register with the process mapper
@@ -672,7 +667,6 @@ int MetarCsv2Spdb::run()
       continue;
     }
 
-    //    vector<WxObs> metars;
     string line;
     getline(in_file, line); // get header
     if(!_parseHeader(line))
@@ -689,7 +683,7 @@ int MetarCsv2Spdb::run()
       istringstream ss(line);
 
       //putting all the tokens in the vector
-      vector<string> arrayTokens;//(begin, end); 
+      vector<string> arrayTokens; 
 
       while(ss) {
         string s;
@@ -697,11 +691,8 @@ int MetarCsv2Spdb::run()
         arrayTokens.push_back(s);
       }
 
-      //	    if(arrayTokens[0].compare("PIREP") == 0) {
-	      WxObs m;
+      WxObs m;
         if(!fillMetarObject(arrayTokens, m)) {
-	        //	        cerr << "adding chunk: " << endl;
-	        //          cerr << p.getXml() << endl;
           if(strlen(_params.decoded_spdb_url) != 0) {
             addXmlSpdb(&spdbXml, &m, _params.expire_secs);
     	    }
@@ -709,7 +700,6 @@ int MetarCsv2Spdb::run()
         else {
 	        cerr << "WARNING: Decoder failed on line: " << line  << endl;
         }
-        //     }        
     }  
     // Write
     if(strlen(_params.decoded_spdb_url) != 0) {
@@ -736,9 +726,6 @@ void MetarCsv2Spdb::addXmlSpdb(DsSpdb* spdb, WxObs* m, int& expire_secs)
   time_t obsTime = m->getObservationTime();
   const time_t expireTime = obsTime + expire_secs;
   int stationId = Spdb::hash4CharsToInt32(m->getStationId().c_str());
-
-  //  MemBuf buf;
-  //  buf.add(m->getBufPtr(), m->getBufLen());
 
   spdb->addPutChunk(stationId,
     obsTime,
@@ -875,17 +862,13 @@ int MetarCsv2Spdb::fillMetarObject(const vector<string>& in, WxObs& out)
   }
 
   if(_iQcField >= 0) {
-	  //cerr << "QC Field: " << in[_iQcField];
 	  if((atoi(in[_iQcField].c_str()) & 32)) {
-		  //cerr << " set TSDOWN";
 	    out.setMetarRemTsDown(true);
     }
 	  if((atoi(in[_iQcField].c_str()) & 64)) {
-		  //cerr << " set FZRADOWN";
 	    out.setMetarRemFzraDown(true);
     }
   if( (atoi(in[_iQcField].c_str()) & 128)) {
-	  //cerr << " set PWIDOWN";
       out.setMetarRemPwiDown(true);
     }
   }
@@ -1104,7 +1087,6 @@ int MetarCsv2Spdb::fillMetarObject(const vector<string>& in, WxObs& out)
     } 
   }
 
-//  out.toXml();
   if (_params.output_report_type == Params::REPORT_PLUS_METAR_XML) {
 	  out.assembleAsReport(REPORT_PLUS_METAR_XML);
   } else if (_params.output_report_type == Params::REPORT_PLUS_FULL_XML) {

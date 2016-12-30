@@ -1122,7 +1122,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("FIR FILTERING");
+    tt->comment_hdr = tdrpStrDup("FIR FILTERING FOR VELOCITY ESTIMATES");
     tt->comment_text = tdrpStrDup("");
     tt++;
     

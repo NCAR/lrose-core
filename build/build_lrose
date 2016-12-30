@@ -26,8 +26,8 @@
 #   /tmp/lrose/lib
 #   /tmp/lrose/bin
 
-# Delend on HDF5, NETCDF and UDUNITS
-# ----------------------------------
+# Depends on HDF5, NETCDF and UDUNITS
+# -----------------------------------
 # Before running this,
 # checkout https://github.com/NCAR/lrose-netcdf
 # build and install hdf5, netcdf, udunits

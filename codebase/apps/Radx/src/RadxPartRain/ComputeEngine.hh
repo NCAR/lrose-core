@@ -142,6 +142,8 @@ private:
   RadxArray<double> _zdrmArray_;
   RadxArray<double> _zdpArray_;
   RadxArray<double> _kdpArray_;
+  RadxArray<double> _kdpZZdrArray_;
+  RadxArray<double> _kdpCondArray_;
   RadxArray<double> _kdpBringiArray_;
   RadxArray<double> _kdpConstrainedArray_;
   RadxArray<double> _kdpWithPsobArray_;
@@ -158,6 +160,8 @@ private:
   double *_zdrmArray;
   double *_zdpArray;
   double *_kdpArray;
+  double *_kdpZZdrArray;
+  double *_kdpCondArray;
   double *_kdpBringiArray;
   double *_ldrArray;
   double *_rhohvArray;
@@ -165,7 +169,7 @@ private:
   double *_phidpArray;
   double *_rhoVxHxArray;
 
-  // input arrays for computing KDP, PID and PRECIP
+  // arrays for computing KDP, PID and PRECIP
 
   RadxArray<double> _rateZ_;
   RadxArray<double> _rateZSnow_;

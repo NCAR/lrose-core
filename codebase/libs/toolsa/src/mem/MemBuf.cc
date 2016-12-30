@@ -102,7 +102,7 @@ void MemBuf::reset()
 void MemBuf::setAllowShrink(bool allowshrink /* = true */)
 {
   _allowShrink = allowshrink;
-};
+}
 
 ///////////////////////////////////////////////////////////////
 // 

@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: dixon $
 //   $Locker:  $
-//   $Date: 2016/03/06 23:53:40 $
-//   $Id: Products.cc,v 1.2 2016/03/06 23:53:40 dixon Exp $
-//   $Revision: 1.2 $
+//   $Date: 2016/10/18 00:36:43 $
+//   $Id: Products.cc,v 1.3 2016/10/18 00:36:43 dixon Exp $
+//   $Revision: 1.3 $
 //   $State: Exp $
 //
  
@@ -69,7 +69,7 @@ const double ProductConstants::SMALL = 0.0183156389;
 Products::Products(const bool debug) :
   _debug(debug)
 {
-};
+}
 
 
 /*********************************************************************

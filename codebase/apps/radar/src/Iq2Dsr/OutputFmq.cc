@@ -348,23 +348,29 @@ int OutputFmq::writeStatusXml(const Beam &beam)
 //
 // Returns 0 on success, -1 on failure
 
-int OutputFmq::writeBeam(const Beam &beam, int volNum, int sweepNum)
+int OutputFmq::writeBeam(const Beam &beam)
 
 {
 
   // get a lock on the busy mutex
 
   pthread_mutex_lock(&_busy);
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "-->> OutputFmq::writeBeam, az: " << beam.getAz() 
-	 << " el: " << beam.getEl() 
-	 << " nSamples: " << beam.getNSamplesEffective() << endl;
-  } else if (_params.debug) {
-    if ((_nBeamsWritten % 30) == 0)
-      cerr << "-->> OutputFmq::writeBeam, az: " << beam.getAz() 
-	   << " el: " << beam.getEl()
-	   << " nSamples: " << beam.getNSamplesEffective() << endl;
+  
+  bool printBeamDebug = (_params.debug >= Params::DEBUG_VERBOSE);
+  if (_params.debug &&
+      ((_nBeamsWritten % _params.beam_count_for_debug_print) == 0)) {
+    printBeamDebug = true;
+  }
+  if (printBeamDebug) {
+    DateTime beamTime(beam.getTimeSecs(), true, beam.getNanoSecs() / 1.0e9);
+    fprintf(stderr,
+            "-->> OutputFmq::writeBeam %s - %s, vol: %.3d, sweep: %.3d, "
+            "az: %6.3f, el %5.3f, nSamples: %3d\n",
+            beamTime.asString(3).c_str(), 
+            iwrf_scan_mode_to_short_str(beam.getScanMode()).c_str(), 
+            beam.getVolNum(), beam.getSweepNum(),
+            beam.getAz(), beam.getEl(),
+            beam.getNSamplesEffective());
   }
 
   // put georeference if applicable
@@ -394,8 +400,8 @@ int OutputFmq::writeBeam(const Beam &beam, int volNum, int sweepNum)
   double dtime = beam.getDoubleTime();
   double partialSecs = fmod(dtime, 1.0);
   dsBeam.nanoSecs = (int) (partialSecs * 1.0e9 + 0.5);
-  dsBeam.volumeNum = volNum;
-  dsBeam.tiltNum = sweepNum;
+  dsBeam.volumeNum = beam.getVolNum();
+  dsBeam.tiltNum = beam.getSweepNum();
   dsBeam.elevation = beam.getEl();
   dsBeam.azimuth = beam.getAz();
   dsBeam.targetElev = beam.getTargetEl();
@@ -872,10 +878,6 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
       return (&_flds.lag0_hcvx_db - start);
     case Params::LAG0_HCVX_PHASE:
       return (&_flds.lag0_hcvx_phase - start);
-    case Params::LAG0_VXHX_DB:
-      return (&_flds.lag0_vxhx_db - start);
-    case Params::LAG0_VXHX_PHASE:
-      return (&_flds.lag0_vxhx_phase - start);
 
     case Params::LAG1_HC_DB:
       return (&_flds.lag1_hc_db - start);

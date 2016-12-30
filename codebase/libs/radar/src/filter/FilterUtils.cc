@@ -36,13 +36,15 @@
 #include <cstring>
 #include <cstdlib>
 #include <vector>
+#include <algorithm>
+#include <iostream>
 #include <radar/FilterUtils.hh>
 #include <toolsa/TaArray.hh>
 
 using namespace std;
 
-///////////////////////////////////
-// apply a median filter to a field
+////////////////////////////////////////////////////
+// apply a median filter to a double field
 
 void FilterUtils::applyMedianFilter(double *field,
                                     int fieldLen,
@@ -57,6 +59,8 @@ void FilterUtils::applyMedianFilter(double *field,
   if (len < 3) {
     return;
   }
+
+  // make copy
 
   TaArray<double> buf_, copy_;
   double *buf = buf_.alloc(len);
@@ -73,7 +77,52 @@ void FilterUtils::applyMedianFilter(double *field,
 
 }
 
-/////////////////////////////////////////////
+////////////////////////////////////////////////////
+// apply a median filter to a double field
+// handle missing values
+
+void FilterUtils::applyMedianFilter(double *field,
+                                    int fieldLen,
+                                    int filterLen,
+                                    double missingVal)
+  
+{
+  
+  // make sure filter len is odd
+
+  int halfFilt = filterLen / 2;
+  int len = halfFilt * 2 + 1;
+  if (len < 3) {
+    return;
+  }
+
+  // make copy
+
+  TaArray<double> copy_;
+  double *copy = copy_.alloc(fieldLen);
+  memcpy(copy, field, fieldLen * sizeof(double));
+  
+  for (int ii = halfFilt; ii < fieldLen - halfFilt; ii++) {
+
+    vector<double> vals;
+    for (int jj = ii - halfFilt; jj <= ii + halfFilt; jj++) {
+      if (copy[jj] != missingVal) {
+        vals.push_back(copy[jj]);
+      }
+    } // jj
+
+    if (vals.size() > 0) {
+      sort(vals.begin(), vals.end());
+      field[ii] = vals[vals.size() / 2];
+    } else {
+      field[ii] = missingVal;
+    }
+    
+  } // ii
+
+}
+
+////////////////////////////////////////////////////
 // apply a median filter to an integer field
 
 void FilterUtils::applyMedianFilter(int *field,
@@ -90,11 +139,15 @@ void FilterUtils::applyMedianFilter(int *field,
     return;
   }
   
+  // make copy
+
   TaArray<int> buf_, copy_;
   int *buf = buf_.alloc(len);
   int *copy = copy_.alloc(fieldLen);
   memcpy(copy, field, fieldLen * sizeof(int));
-  
+
+  // apply filter
+
   for (int ii = halfFilt; ii < fieldLen - halfFilt; ii++) {
     
     memcpy(buf, copy + ii - halfFilt, len * sizeof(int));
@@ -102,6 +155,51 @@ void FilterUtils::applyMedianFilter(int *field,
     field[ii] = buf[halfFilt];
 
   }
+
+}
+
+////////////////////////////////////////////////////
+// apply a median filter to a int field
+// handle missing values
+
+void FilterUtils::applyMedianFilter(int *field,
+                                    int fieldLen,
+                                    int filterLen,
+                                    int missingVal)
+  
+{
+  
+  // make sure filter len is odd
+
+  int halfFilt = filterLen / 2;
+  int len = halfFilt * 2 + 1;
+  if (len < 3) {
+    return;
+  }
+
+  // make copy
+
+  TaArray<int> copy_;
+  int *copy = copy_.alloc(fieldLen);
+  memcpy(copy, field, fieldLen * sizeof(int));
+  
+  for (int ii = halfFilt; ii < fieldLen - halfFilt; ii++) {
+
+    vector<int> vals;
+    for (int jj = ii - halfFilt; jj <= ii + halfFilt; jj++) {
+      if (copy[jj] != missingVal) {
+        vals.push_back(copy[jj]);
+      }
+    } // jj
+
+    if (vals.size() > 0) {
+      sort(vals.begin(), vals.end());
+      field[ii] = vals[vals.size() / 2];
+    } else {
+      field[ii] = missingVal;
+    }
+    
+  } // ii
 
 }
 
@@ -139,8 +237,8 @@ int FilterUtils::_intCompare(const void *i, const void *j)
 // return yVal for given xVal
 
 double FilterUtils::linearInterp(double xx1, double yy1,
-				double xx2, double yy2,
-				double xVal)
+                                 double xx2, double yy2,
+                                 double xVal)
 
 {
 
@@ -159,10 +257,10 @@ double FilterUtils::linearInterp(double xx1, double yy1,
 // available for computing the standard deviation.
 
 void FilterUtils::computeSdevInRange(double *field,
-				    double *sdev,
-				    int nGates,
-				    int nGatesKernel,
-				    double missingVal)
+                                     double *sdev,
+                                     int nGates,
+                                     int nGatesKernel,
+                                     double missingVal)
   
 {
   
@@ -185,7 +283,7 @@ void FilterUtils::computeSdevInRange(double *field,
     endGate.push_back(end);
   } // igate
   
-  // sdve computed in range
+  // sdev computed in range
   
   for (int igate = 0; igate < nGates; igate++) {
 
@@ -219,6 +317,109 @@ void FilterUtils::computeSdevInRange(double *field,
           sdev[igate] = sqrt(term1 - term2);
         }
       }
+    }
+    
+  } // igate
+
+}
+
+/////////////////////////////////////////////////////////////////
+// compute trend deviation of a field, over a kernel in range
+//
+// Set field values to missingVal if they are missing.
+// The trend dev will be set to missingVal if not enough data is
+// available for computing the result.
+//
+// The trend deviation differs from standard deviation.
+// It is computed as follows:
+//  (a) compute kernel mean at each point
+//  (b) compute residual of data from trend mean
+//  (c) compute root mean square of residual over kernel.
+
+void FilterUtils::computeTrendDevInRange(double *field,
+                                         double *tdev,
+                                         int nGates,
+                                         int nGatesKernel,
+                                         double missingVal)
+  
+{
+
+  // ensure we have odd nmber of gates in the kernel
+
+  int nGatesHalf = nGatesKernel / 2;
+  if (nGatesHalf < 1) {
+    nGatesHalf = 1;
+  }
+  nGatesKernel = nGatesHalf * 2 + 1;
+  
+  // set up gate limits
+  
+  vector<int> startGate;
+  vector<int> endGate;
+  for (int igate = 0; igate < nGates; igate++) {
+    int start = igate - nGatesHalf;
+    if (start < 0) {
+      start = 0;
+    }
+    startGate.push_back(start);
+    int end = igate + nGatesHalf;
+    if (end > nGates - 1) {
+      end = nGates - 1;
+    }
+    endGate.push_back(end);
+  } // igate
+
+  // kernel means and residuals
+  
+  TaArray<double> residual_;
+  double *residual = residual_.alloc(nGates);
+
+  for (int igate = 0; igate < nGates; igate++) {
+    
+    // compute sums over the kernel space
+    
+    int nVal = 0;
+    double sumVal = 0.0;
+    
+    for (int jgate = startGate[igate]; jgate <= endGate[igate]; jgate++) {
+      double val = field[jgate];
+      if (val != missingVal) {
+        sumVal += val;
+        nVal++;
+      }
+    } // jgate
+    
+    if (nVal > 0 && field[igate] != missingVal) {
+      double mean = sumVal / (double) nVal;
+      residual[igate] = mean - field[igate];
+    } else {
+      residual[igate] = missingVal;
+    }
+    
+  } // igate
+  
+  // trend deviation is root mean square of residuals
+  
+  for (int igate = 0; igate < nGates; igate++) {
+    
+    // compute sums sq for stats over the kernel
+    
+    int nVal = 0;
+    double sumValSq = 0.0;
+    
+    for (int jgate = startGate[igate]; jgate <= endGate[igate]; jgate++) {
+      double val = residual[jgate];
+      if (val != missingVal) {
+        sumValSq += val * val;
+        nVal++;
+      }
+    } // jgate
+    
+    if (nVal > 0) {
+      double rms = sqrt(sumValSq / (double) nVal);
+      tdev[igate] = rms;
+    } else {
+      tdev[igate] = missingVal;
     }
     
   } // igate

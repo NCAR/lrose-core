@@ -44,6 +44,7 @@
 #include <vector>
 #include <toolsa/TaArray.hh>
 #include <radar/PidImapManager.hh>
+#include <radar/PhidpProc.hh>
 using namespace std;
 
 ////////////////////////
@@ -73,8 +74,8 @@ public:
   const static int SECOND_TRIP = 16;
   const static int GROUND_CLUTTER = 17;
   const static int SATURATED_SNR = 18;
-  const static int MISC_1 = 19;
-  const static int MISC_2 = 20;
+  const static int CHAFF = 19;
+  const static int MISC = 20;
 
   // category of the particle
 
@@ -630,8 +631,8 @@ public:
   const Particle *getParticleBugs() const { return _bgs; }
   const Particle *getParticleSecondTrip() const { return _trip2; }
   const Particle *getParticleClutter() const { return _gcl; }
-  const Particle *getParticleMisc1() const { return _misc1; }
-  const Particle *getParticleMisc2() const { return _misc2; }
+  const Particle *getParticleChaff() const { return _chaff; }
+  const Particle *getParticleMisc() const { return _misc; }
   
   /**
    * Print status 
@@ -671,6 +672,10 @@ private:
   bool _verbose;            /**< Flag to indicate whether verbose messages should be printed */
   double _wavelengthCm;     /**< The wavelength (cm) of the radar beam */
 
+  // range geometry
+  double _startRangeKm;
+  double _gateSpacingKm;
+
   // particle types
   Particle* _cl;    /**< Cloud particle type */
   Particle* _drz;   /**< Drizzle particle type */
@@ -689,8 +694,8 @@ private:
   Particle* _bgs;   /**< Flying_Insects particle type */
   Particle* _trip2; /**< Second trip particle type */
   Particle* _gcl;   /**< Ground_Clutter particle type */
-  Particle* _misc1; /**< miscellaneous 1 particle type */
-  Particle* _misc2; /**< miscellaneous 2 particle type */
+  Particle* _chaff; /**< chaff for radar countermeasures */
+  Particle* _misc;  /**< miscellaneous particle type */
 
   vector<Particle*> _particleList;  /**< A vector of pointers to Particle objects, one for each possible particle type */
 
@@ -806,6 +811,10 @@ private:
                                        the pid value is set to missing i.e. 0 */
 
   string _thresholdsFilePath;     /**< File path for thresholds file */
+
+  // compute phidp standard deviation
+
+  PhidpProc _phidpProc;
 
   // allocate the required arrays
 

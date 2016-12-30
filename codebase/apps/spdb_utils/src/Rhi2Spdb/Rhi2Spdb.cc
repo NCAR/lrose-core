@@ -116,6 +116,8 @@ Rhi2Spdb::Rhi2Spdb(int argc, char **argv)
     }
   }
 
+  _input.setSearchMarginSecs(_params.mdv_search_margin_secs);
+
   return;
 
 }

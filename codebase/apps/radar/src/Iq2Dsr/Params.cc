@@ -570,6 +570,18 @@ using namespace std;
     tt->single_val.e = DEBUG_OFF;
     tt++;
     
+    // Parameter 'beam_count_for_debug_print'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("beam_count_for_debug_print");
+    tt->descr = tdrpStrDup("Interval at which beam data is printed in debug mode.");
+    tt->help = tdrpStrDup("We print out beam details in debug mode - this is the number of beams between each print.");
+    tt->val_offset = (char *) &beam_count_for_debug_print - &_start_;
+    tt->single_val.i = 30;
+    tt++;
+    
     // Parameter 'instance'
     // ctype is 'char*'
     
@@ -781,6 +793,18 @@ using namespace std;
     tt->descr = tdrpStrDup("Option to change the sign of the velocity in staggered mode.");
     tt->help = tdrpStrDup("If true, the sign of the velocity will be changed only in staggered mode. Both this and the 'change_velocity_sign' parameter in moments_params will be applied, so if both are true they will cancel out.");
     tt->val_offset = (char *) &change_velocity_sign_staggered - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'use_pulse_width_from_ts_proc'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_pulse_width_from_ts_proc");
+    tt->descr = tdrpStrDup("Option to use the pulse width in the ts_processing headers.");
+    tt->help = tdrpStrDup("The default mode is to use the pulse width from the pulse headers. However, for some radar systems the pulse width is correct in the ts_processing headers, but not correct in the pulse headers. So this option allows you to override the pulse width in the pulse headers by copying it over from the ts_processing header.");
+    tt->val_offset = (char *) &use_pulse_width_from_ts_proc - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
@@ -3887,80 +3911,6 @@ using namespace std;
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'set_end_of_vol_from_elev_angle'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_end_of_vol_from_elev_angle");
-    tt->descr = tdrpStrDup("Option to set the end of vol flag based on elevation angle.");
-    tt->help = tdrpStrDup("If true, the program will look for changes in antenna angle to compute the end of volume.");
-    tt->val_offset = (char *) &set_end_of_vol_from_elev_angle - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'vol_starts_at_bottom'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("vol_starts_at_bottom");
-    tt->descr = tdrpStrDup("Flag to indicate that elevation angles increase in the volume.");
-    tt->help = tdrpStrDup("If the volume starts at the top, i.e. elevations decrease during the volume, set this to FALSE.");
-    tt->val_offset = (char *) &vol_starts_at_bottom - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'elev_change_for_end_of_vol'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("elev_change_for_end_of_vol");
-    tt->descr = tdrpStrDup("Change in elevation which triggers and end of volume.");
-    tt->help = tdrpStrDup("If the elevation angle changes by this amount, and end of volume flag will be set.");
-    tt->val_offset = (char *) &elev_change_for_end_of_vol - &_start_;
-    tt->has_min = TRUE;
-    tt->min_val.d = 0.1;
-    tt->single_val.d = 1.5;
-    tt++;
-    
-    // Parameter 'min_beams_per_vol'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("min_beams_per_vol");
-    tt->descr = tdrpStrDup("Min number of beams per volume.");
-    tt->help = tdrpStrDup("Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume. Only used for set_end_of_vol_from_elev_angle.");
-    tt->val_offset = (char *) &min_beams_per_vol - &_start_;
-    tt->single_val.i = 360;
-    tt++;
-    
-    // Parameter 'set_end_of_vol_on_prf_change'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_end_of_vol_on_prf_change");
-    tt->descr = tdrpStrDup("Option to set the end-of-vol flag when the PRF changes.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &set_end_of_vol_on_prf_change - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'set_end_of_vol_on_pulse_width_change'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_end_of_vol_on_pulse_width_change");
-    tt->descr = tdrpStrDup("Option to set the end-of-vol flag when the pulse width changes.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &set_end_of_vol_on_pulse_width_change - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'output_fields'
     // ctype is '_output_field_t'
     
@@ -3985,7 +3935,7 @@ using namespace std;
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 177;
+        tt->struct_def.fields[0].enum_def.nfields = 175;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("DBZ");
@@ -4242,106 +4192,102 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[125].val = LAG0_HCVX_DB;
         tt->struct_def.fields[0].enum_def.fields[126].name = tdrpStrDup("LAG0_HCVX_PHASE");
         tt->struct_def.fields[0].enum_def.fields[126].val = LAG0_HCVX_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[127].name = tdrpStrDup("LAG0_VXHX_DB");
-        tt->struct_def.fields[0].enum_def.fields[127].val = LAG0_VXHX_DB;
-        tt->struct_def.fields[0].enum_def.fields[128].name = tdrpStrDup("LAG0_VXHX_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[128].val = LAG0_VXHX_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[129].name = tdrpStrDup("LAG1_HC_DB");
-        tt->struct_def.fields[0].enum_def.fields[129].val = LAG1_HC_DB;
-        tt->struct_def.fields[0].enum_def.fields[130].name = tdrpStrDup("LAG1_HC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[130].val = LAG1_HC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[131].name = tdrpStrDup("LAG1_VC_DB");
-        tt->struct_def.fields[0].enum_def.fields[131].val = LAG1_VC_DB;
-        tt->struct_def.fields[0].enum_def.fields[132].name = tdrpStrDup("LAG1_VC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[132].val = LAG1_VC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[133].name = tdrpStrDup("LAG1_HCVC_DB");
-        tt->struct_def.fields[0].enum_def.fields[133].val = LAG1_HCVC_DB;
-        tt->struct_def.fields[0].enum_def.fields[134].name = tdrpStrDup("LAG1_HCVC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[134].val = LAG1_HCVC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[135].name = tdrpStrDup("LAG1_VCHC_DB");
-        tt->struct_def.fields[0].enum_def.fields[135].val = LAG1_VCHC_DB;
-        tt->struct_def.fields[0].enum_def.fields[136].name = tdrpStrDup("LAG1_VCHC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[136].val = LAG1_VCHC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[137].name = tdrpStrDup("LAG1_VXHX_DB");
-        tt->struct_def.fields[0].enum_def.fields[137].val = LAG1_VXHX_DB;
-        tt->struct_def.fields[0].enum_def.fields[138].name = tdrpStrDup("LAG1_VXHX_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[138].val = LAG1_VXHX_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[139].name = tdrpStrDup("LAG1_HC_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[139].val = LAG1_HC_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[140].name = tdrpStrDup("LAG1_HC_LONG_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[140].val = LAG1_HC_LONG_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[141].name = tdrpStrDup("LAG1_VC_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[141].val = LAG1_VC_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[142].name = tdrpStrDup("LAG1_VC_LONG_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[142].val = LAG1_VC_LONG_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[143].name = tdrpStrDup("LAG1_HC_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[143].val = LAG1_HC_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[144].name = tdrpStrDup("LAG1_HC_SHORT_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[144].val = LAG1_HC_SHORT_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[145].name = tdrpStrDup("LAG1_VC_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[145].val = LAG1_VC_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[146].name = tdrpStrDup("LAG1_VC_SHORT_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[146].val = LAG1_VC_SHORT_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[147].name = tdrpStrDup("LAG1_HC_LONG_TO_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[147].val = LAG1_HC_LONG_TO_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[148].name = tdrpStrDup("LAG1_HC_LONG_TO_SHORT_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[148].val = LAG1_HC_LONG_TO_SHORT_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[149].name = tdrpStrDup("LAG1_VC_LONG_TO_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[149].val = LAG1_VC_LONG_TO_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[150].name = tdrpStrDup("LAG1_VC_LONG_TO_SHORT_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[150].val = LAG1_VC_LONG_TO_SHORT_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[151].name = tdrpStrDup("LAG1_HC_SHORT_TO_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[151].val = LAG1_HC_SHORT_TO_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[152].name = tdrpStrDup("LAG1_HC_SHORT_TO_LONG_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[152].val = LAG1_HC_SHORT_TO_LONG_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[153].name = tdrpStrDup("LAG1_VC_SHORT_TO_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[153].val = LAG1_VC_SHORT_TO_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[154].name = tdrpStrDup("LAG1_VC_SHORT_TO_LONG_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[154].val = LAG1_VC_SHORT_TO_LONG_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[155].name = tdrpStrDup("LAG2_HC_DB");
-        tt->struct_def.fields[0].enum_def.fields[155].val = LAG2_HC_DB;
-        tt->struct_def.fields[0].enum_def.fields[156].name = tdrpStrDup("LAG2_HC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[156].val = LAG2_HC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[157].name = tdrpStrDup("LAG2_VC_DB");
-        tt->struct_def.fields[0].enum_def.fields[157].val = LAG2_VC_DB;
-        tt->struct_def.fields[0].enum_def.fields[158].name = tdrpStrDup("LAG2_VC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[158].val = LAG2_VC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[159].name = tdrpStrDup("LAG3_HC_DB");
-        tt->struct_def.fields[0].enum_def.fields[159].val = LAG3_HC_DB;
-        tt->struct_def.fields[0].enum_def.fields[160].name = tdrpStrDup("LAG3_HC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[160].val = LAG3_HC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[161].name = tdrpStrDup("LAG3_VC_DB");
-        tt->struct_def.fields[0].enum_def.fields[161].val = LAG3_VC_DB;
-        tt->struct_def.fields[0].enum_def.fields[162].name = tdrpStrDup("LAG3_VC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[162].val = LAG3_VC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[163].name = tdrpStrDup("RVVHH0_DB");
-        tt->struct_def.fields[0].enum_def.fields[163].val = RVVHH0_DB;
-        tt->struct_def.fields[0].enum_def.fields[164].name = tdrpStrDup("RVVHH0_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[164].val = RVVHH0_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[165].name = tdrpStrDup("RVVHH0_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[165].val = RVVHH0_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[166].name = tdrpStrDup("RVVHH0_LONG_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[166].val = RVVHH0_LONG_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[167].name = tdrpStrDup("RVVHH0_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[167].val = RVVHH0_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[168].name = tdrpStrDup("RVVHH0_SHORT_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[168].val = RVVHH0_SHORT_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[169].name = tdrpStrDup("SDEV_VV");
-        tt->struct_def.fields[0].enum_def.fields[169].val = SDEV_VV;
-        tt->struct_def.fields[0].enum_def.fields[170].name = tdrpStrDup("PRT");
-        tt->struct_def.fields[0].enum_def.fields[170].val = PRT;
-        tt->struct_def.fields[0].enum_def.fields[171].name = tdrpStrDup("NUM_PULSES");
-        tt->struct_def.fields[0].enum_def.fields[171].val = NUM_PULSES;
-        tt->struct_def.fields[0].enum_def.fields[172].name = tdrpStrDup("TEST");
-        tt->struct_def.fields[0].enum_def.fields[172].val = TEST;
-        tt->struct_def.fields[0].enum_def.fields[173].name = tdrpStrDup("TEST2");
-        tt->struct_def.fields[0].enum_def.fields[173].val = TEST2;
-        tt->struct_def.fields[0].enum_def.fields[174].name = tdrpStrDup("TEST3");
-        tt->struct_def.fields[0].enum_def.fields[174].val = TEST3;
-        tt->struct_def.fields[0].enum_def.fields[175].name = tdrpStrDup("TEST4");
-        tt->struct_def.fields[0].enum_def.fields[175].val = TEST4;
-        tt->struct_def.fields[0].enum_def.fields[176].name = tdrpStrDup("TEST5");
-        tt->struct_def.fields[0].enum_def.fields[176].val = TEST5;
+        tt->struct_def.fields[0].enum_def.fields[127].name = tdrpStrDup("LAG1_HC_DB");
+        tt->struct_def.fields[0].enum_def.fields[127].val = LAG1_HC_DB;
+        tt->struct_def.fields[0].enum_def.fields[128].name = tdrpStrDup("LAG1_HC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[128].val = LAG1_HC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[129].name = tdrpStrDup("LAG1_VC_DB");
+        tt->struct_def.fields[0].enum_def.fields[129].val = LAG1_VC_DB;
+        tt->struct_def.fields[0].enum_def.fields[130].name = tdrpStrDup("LAG1_VC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[130].val = LAG1_VC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[131].name = tdrpStrDup("LAG1_HCVC_DB");
+        tt->struct_def.fields[0].enum_def.fields[131].val = LAG1_HCVC_DB;
+        tt->struct_def.fields[0].enum_def.fields[132].name = tdrpStrDup("LAG1_HCVC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[132].val = LAG1_HCVC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[133].name = tdrpStrDup("LAG1_VCHC_DB");
+        tt->struct_def.fields[0].enum_def.fields[133].val = LAG1_VCHC_DB;
+        tt->struct_def.fields[0].enum_def.fields[134].name = tdrpStrDup("LAG1_VCHC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[134].val = LAG1_VCHC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[135].name = tdrpStrDup("LAG1_VXHX_DB");
+        tt->struct_def.fields[0].enum_def.fields[135].val = LAG1_VXHX_DB;
+        tt->struct_def.fields[0].enum_def.fields[136].name = tdrpStrDup("LAG1_VXHX_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[136].val = LAG1_VXHX_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[137].name = tdrpStrDup("LAG1_HC_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[137].val = LAG1_HC_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[138].name = tdrpStrDup("LAG1_HC_LONG_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[138].val = LAG1_HC_LONG_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[139].name = tdrpStrDup("LAG1_VC_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[139].val = LAG1_VC_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[140].name = tdrpStrDup("LAG1_VC_LONG_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[140].val = LAG1_VC_LONG_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[141].name = tdrpStrDup("LAG1_HC_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[141].val = LAG1_HC_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[142].name = tdrpStrDup("LAG1_HC_SHORT_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[142].val = LAG1_HC_SHORT_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[143].name = tdrpStrDup("LAG1_VC_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[143].val = LAG1_VC_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[144].name = tdrpStrDup("LAG1_VC_SHORT_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[144].val = LAG1_VC_SHORT_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[145].name = tdrpStrDup("LAG1_HC_LONG_TO_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[145].val = LAG1_HC_LONG_TO_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[146].name = tdrpStrDup("LAG1_HC_LONG_TO_SHORT_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[146].val = LAG1_HC_LONG_TO_SHORT_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[147].name = tdrpStrDup("LAG1_VC_LONG_TO_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[147].val = LAG1_VC_LONG_TO_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[148].name = tdrpStrDup("LAG1_VC_LONG_TO_SHORT_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[148].val = LAG1_VC_LONG_TO_SHORT_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[149].name = tdrpStrDup("LAG1_HC_SHORT_TO_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[149].val = LAG1_HC_SHORT_TO_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[150].name = tdrpStrDup("LAG1_HC_SHORT_TO_LONG_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[150].val = LAG1_HC_SHORT_TO_LONG_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[151].name = tdrpStrDup("LAG1_VC_SHORT_TO_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[151].val = LAG1_VC_SHORT_TO_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[152].name = tdrpStrDup("LAG1_VC_SHORT_TO_LONG_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[152].val = LAG1_VC_SHORT_TO_LONG_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[153].name = tdrpStrDup("LAG2_HC_DB");
+        tt->struct_def.fields[0].enum_def.fields[153].val = LAG2_HC_DB;
+        tt->struct_def.fields[0].enum_def.fields[154].name = tdrpStrDup("LAG2_HC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[154].val = LAG2_HC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[155].name = tdrpStrDup("LAG2_VC_DB");
+        tt->struct_def.fields[0].enum_def.fields[155].val = LAG2_VC_DB;
+        tt->struct_def.fields[0].enum_def.fields[156].name = tdrpStrDup("LAG2_VC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[156].val = LAG2_VC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[157].name = tdrpStrDup("LAG3_HC_DB");
+        tt->struct_def.fields[0].enum_def.fields[157].val = LAG3_HC_DB;
+        tt->struct_def.fields[0].enum_def.fields[158].name = tdrpStrDup("LAG3_HC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[158].val = LAG3_HC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[159].name = tdrpStrDup("LAG3_VC_DB");
+        tt->struct_def.fields[0].enum_def.fields[159].val = LAG3_VC_DB;
+        tt->struct_def.fields[0].enum_def.fields[160].name = tdrpStrDup("LAG3_VC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[160].val = LAG3_VC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[161].name = tdrpStrDup("RVVHH0_DB");
+        tt->struct_def.fields[0].enum_def.fields[161].val = RVVHH0_DB;
+        tt->struct_def.fields[0].enum_def.fields[162].name = tdrpStrDup("RVVHH0_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[162].val = RVVHH0_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[163].name = tdrpStrDup("RVVHH0_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[163].val = RVVHH0_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[164].name = tdrpStrDup("RVVHH0_LONG_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[164].val = RVVHH0_LONG_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[165].name = tdrpStrDup("RVVHH0_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[165].val = RVVHH0_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[166].name = tdrpStrDup("RVVHH0_SHORT_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[166].val = RVVHH0_SHORT_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[167].name = tdrpStrDup("SDEV_VV");
+        tt->struct_def.fields[0].enum_def.fields[167].val = SDEV_VV;
+        tt->struct_def.fields[0].enum_def.fields[168].name = tdrpStrDup("PRT");
+        tt->struct_def.fields[0].enum_def.fields[168].val = PRT;
+        tt->struct_def.fields[0].enum_def.fields[169].name = tdrpStrDup("NUM_PULSES");
+        tt->struct_def.fields[0].enum_def.fields[169].val = NUM_PULSES;
+        tt->struct_def.fields[0].enum_def.fields[170].name = tdrpStrDup("TEST");
+        tt->struct_def.fields[0].enum_def.fields[170].val = TEST;
+        tt->struct_def.fields[0].enum_def.fields[171].name = tdrpStrDup("TEST2");
+        tt->struct_def.fields[0].enum_def.fields[171].val = TEST2;
+        tt->struct_def.fields[0].enum_def.fields[172].name = tdrpStrDup("TEST3");
+        tt->struct_def.fields[0].enum_def.fields[172].val = TEST3;
+        tt->struct_def.fields[0].enum_def.fields[173].name = tdrpStrDup("TEST4");
+        tt->struct_def.fields[0].enum_def.fields[173].val = TEST4;
+        tt->struct_def.fields[0].enum_def.fields[174].name = tdrpStrDup("TEST5");
+        tt->struct_def.fields[0].enum_def.fields[174].val = TEST5;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
@@ -4949,8 +4895,8 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 23");
-    tt->comment_hdr = tdrpStrDup("SWEEP INFORMATION");
-    tt->comment_text = tdrpStrDup("Option to read volume and tilt numbers from sweep information in the incoming pulse data.");
+    tt->comment_hdr = tdrpStrDup("SWEEP TRANSITIONS");
+    tt->comment_text = tdrpStrDup("We can modify the end-of-sweep and start-of-sweep conditions found in the time series.");
     tt++;
     
     // Parameter 'use_sweep_info_from_time_series'
@@ -4962,16 +4908,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Option to read sweep info from time series data.");
     tt->help = tdrpStrDup("If not, we need to guess at the sweep information.");
     tt->val_offset = (char *) &use_sweep_info_from_time_series - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 24'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
-    tt->comment_hdr = tdrpStrDup("SWEEP TRANSITIONS");
-    tt->comment_text = tdrpStrDup("We can modify the end-of-sweep and start-of-sweep conditions found in the time series.");
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'delay_tilt_start_msg_during_ant_trans'
@@ -4998,6 +4935,30 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'required_delta_angle_for_antenna_direction_change'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("required_delta_angle_for_antenna_direction_change");
+    tt->descr = tdrpStrDup("The required angle difference for detecting direction change (deg).");
+    tt->help = tdrpStrDup("We examine the antenna angles for reversal in motion direction. The antenna must move by at least this amount for deducing the direction.");
+    tt->val_offset = (char *) &required_delta_angle_for_antenna_direction_change - &_start_;
+    tt->single_val.d = 0.25;
+    tt++;
+    
+    // Parameter 'min_rays_in_sweep_for_antenna_direction_change'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("min_rays_in_sweep_for_antenna_direction_change");
+    tt->descr = tdrpStrDup("Min number of rays in a sweep when finding end of sweep from dirn change.");
+    tt->help = tdrpStrDup("If the number of rays is less than this at the time of a direction change, a change in sweep number is not triggered.");
+    tt->val_offset = (char *) &min_rays_in_sweep_for_antenna_direction_change - &_start_;
+    tt->single_val.i = 45;
+    tt++;
+    
     // Parameter 'max_sweeps_in_vol_for_antenna_direction_change'
     // ctype is 'int'
     
@@ -5008,6 +4969,101 @@ using namespace std;
     tt->help = tdrpStrDup("Used to trigger end of volume if sweep number gets too high. Only applies if set_end_of_sweep_when_antenna_changes_direction is true.");
     tt->val_offset = (char *) &max_sweeps_in_vol_for_antenna_direction_change - &_start_;
     tt->single_val.i = 32;
+    tt++;
+    
+    // Parameter 'Comment 24'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 24");
+    tt->comment_hdr = tdrpStrDup("VOLUME TRANSITIONS");
+    tt->comment_text = tdrpStrDup("We can modify the end-of-volume conditions found in the time series. This section only applies if 'use_volume_info_from_time_series' is set to FALSE.");
+    tt++;
+    
+    // Parameter 'use_volume_info_from_time_series'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_volume_info_from_time_series");
+    tt->descr = tdrpStrDup("Option to read volume info from time series data.");
+    tt->help = tdrpStrDup("If not, we need to deduce the end of volume conditions. The options that follow only apply if this parameter is set to false.");
+    tt->val_offset = (char *) &use_volume_info_from_time_series - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'set_end_of_vol_from_elev_angle'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_end_of_vol_from_elev_angle");
+    tt->descr = tdrpStrDup("Option to set the end of vol flag based on elevation angle.");
+    tt->help = tdrpStrDup("If true, the program will look for changes in antenna angle to compute the end of volume. Only applies if 'use_volume_info_from_time_series' is false.");
+    tt->val_offset = (char *) &set_end_of_vol_from_elev_angle - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'vol_starts_at_bottom'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("vol_starts_at_bottom");
+    tt->descr = tdrpStrDup("Flag to indicate that elevation angles increase in the volume.");
+    tt->help = tdrpStrDup("If the volume starts at the top, i.e. elevations decrease during the volume, set this to FALSE. Only applies if 'use_volume_info_from_time_series' is false.");
+    tt->val_offset = (char *) &vol_starts_at_bottom - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'elev_change_for_end_of_vol'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("elev_change_for_end_of_vol");
+    tt->descr = tdrpStrDup("Change in elevation which triggers and end of volume.");
+    tt->help = tdrpStrDup("If the elevation angle changes by this amount, and end of volume flag will be set. Only applies if 'use_volume_info_from_time_series' is false.");
+    tt->val_offset = (char *) &elev_change_for_end_of_vol - &_start_;
+    tt->has_min = TRUE;
+    tt->min_val.d = 0.1;
+    tt->single_val.d = 1.5;
+    tt++;
+    
+    // Parameter 'min_beams_per_vol'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("min_beams_per_vol");
+    tt->descr = tdrpStrDup("Min number of beams per volume.");
+    tt->help = tdrpStrDup("Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume. Only used for set_end_of_vol_from_elev_angle.");
+    tt->val_offset = (char *) &min_beams_per_vol - &_start_;
+    tt->single_val.i = 360;
+    tt++;
+    
+    // Parameter 'set_end_of_vol_on_prf_change'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_end_of_vol_on_prf_change");
+    tt->descr = tdrpStrDup("Option to set the end-of-vol flag when the PRF changes.");
+    tt->help = tdrpStrDup("Only applies if 'use_volume_info_from_time_series' is false.");
+    tt->val_offset = (char *) &set_end_of_vol_on_prf_change - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'set_end_of_vol_on_pulse_width_change'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_end_of_vol_on_pulse_width_change");
+    tt->descr = tdrpStrDup("Option to set the end-of-vol flag when the pulse width changes.");
+    tt->help = tdrpStrDup("Only applies if 'use_volume_info_from_time_series' is false.");
+    tt->val_offset = (char *) &set_end_of_vol_on_pulse_width_change - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 25'

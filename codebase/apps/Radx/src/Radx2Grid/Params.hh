@@ -491,6 +491,8 @@ public:
 
   tdrp_bool_t override_fixed_angle_with_mean_measured_angle;
 
+  tdrp_bool_t reorder_sweeps_by_ascending_angle;
+
   tdrp_bool_t apply_time_offset;
 
   double time_offset_secs;
@@ -621,6 +623,8 @@ public:
   double grid_origin_lat;
 
   double grid_origin_lon;
+
+  tdrp_bool_t auto_remap_flat_to_latlon;
 
   double grid_lat1;
 
@@ -782,7 +786,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[192];
+  mutable TDRPtable _table[194];
 
   const char *_className;
 

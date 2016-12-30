@@ -42,7 +42,7 @@
 #include <NcUtils/DataPort.hh>
 
 // fix for HDF5 before version 1.8.12
-#include "H5public.h"
+#include <H5public.h>
 // #if H5_VERSION_LE(1,8,11)
 // H5_VERSION_LE macro does not work, use folling instead
 #if (((H5_VERS_MAJOR==1) && (H5_VERS_MINOR==8) && (H5_VERS_RELEASE<=11)) || \

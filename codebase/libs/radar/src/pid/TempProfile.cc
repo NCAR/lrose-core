@@ -101,6 +101,7 @@ int TempProfile::getTempProfile(const string &url,
   if (_debug) {
     cerr << "Searching for sounding, dataTime: "
 	 << DateTime::strm(dataTime) << endl;
+    cerr << "  marginSecs: " << _soundingSearchTimeMarginSecs << endl;
   }
 
   while (searchTime >= earliestTime) {
@@ -379,7 +380,7 @@ int TempProfile::_checkTempProfile()
       if (_debug) {
 	cerr << "WARNING - checkTempProfile()" << endl;
 	cerr << "  Max pressure not high enough" << endl;
-	cerr << "  Max pressure: " << minPress << endl;
+	cerr << "  Max pressure: " << maxPress << endl;
 	cerr << "  Should be above: "
 	     << _soundingRequiredMaxPressureHpa << endl;
       }
@@ -402,7 +403,7 @@ int TempProfile::_checkTempProfile()
       if (_debug) {
 	cerr << "WARNING - checkTempProfile()" << endl;
 	cerr << "  Max height not high enough" << endl;
-	cerr << "  Max height: " << minHt << endl;
+	cerr << "  Max height: " << maxHt << endl;
 	cerr << "  Should be above: "
 	     << _soundingRequiredMaxHeightM << endl;
       }
@@ -425,7 +426,7 @@ int TempProfile::_checkTempProfile()
       if (_debug) {
 	cerr << "WARNING - checkTempProfile()" << endl;
 	cerr << "  Max temp not high enough" << endl;
-	cerr << "  Max temp: " << minHt << endl;
+	cerr << "  Max temp: " << maxHt << endl;
 	cerr << "  Should be above: "
 	     << _soundingRequiredMaxTempC << endl;
       }

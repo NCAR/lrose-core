@@ -70,11 +70,14 @@ SoundingMerge::~SoundingMerge(){
 // already something there. If there is, it is sorted into ascending
 // order with respect to altitude and stored internally.
 //
-int SoundingMerge::Init(time_t dataTime, int id){
+int SoundingMerge::Init(time_t dataTime, int id, const string &name){
   //
   // Make copies of input args.
   //
-  _id = id; _dataTime = dataTime;
+  _id = id;
+  _dataTime = dataTime;
+  _stationName = name;
+
   //
   // See if we have data in the database for this time.
   //
@@ -174,6 +177,11 @@ int SoundingMerge::Merge(SoundingDataHolder toBeAdded){
 	     merged.siteName,
 	     merged.lat, merged.lon, 
 	     merged.alt, merged.badVal );
+
+  if (_stationName.size() > 0) {
+    _Sput.setSiteName(_stationName);
+    _Sput.setSiteId(Spdb::hash4CharsToInt32(_stationName.c_str()));
+  }
 
   //
   // If we are limiting wind speed, do that now.

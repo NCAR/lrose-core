@@ -39,6 +39,7 @@
 #include <toolsa/sockutil.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <unistd.h>
 #include <cerrno>
 #if defined(__linux)
@@ -52,7 +53,8 @@ using namespace std;
 
 // Constructor
 
-InputUdp::InputUdp()
+InputUdp::InputUdp(const Params &params) :
+        _params(params)
   
 {
   _udpFd = -1;
@@ -70,12 +72,13 @@ InputUdp::~InputUdp()
 ///////////////////
 // open port
 
-int InputUdp::openUdp(int port, bool debug)
+int InputUdp::openUdp()
   
 {
 
   closeUdp();
-  
+  int port = _params.iwg1_udp_port;
+
   // get socket
 
   if  ((_udpFd = socket (AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
@@ -84,6 +87,24 @@ int InputUdp::openUdp(int port, bool debug)
     cerr << "  Could not create socket." << endl;
     cerr << "  " << strerror(errNum) << endl;
     return -1;
+  }
+
+  // set for multicast
+
+  if (_params.udp_is_multicast) {
+    ip_mreq mreq;
+    memset(&mreq, 0, sizeof(ip_mreq));
+    mreq.imr_multiaddr.s_addr = inet_addr(_params.udp_multicast_group);
+    mreq.imr_interface.s_addr = htons(INADDR_ANY);
+    if (setsockopt(_udpFd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&mreq,
+                   sizeof(mreq)) < 0) {
+      int errNum = errno;
+      cerr << "ERROR - InputUdp::open" << endl;
+      cerr << "  Cannot set socket for multicast" << endl;
+      cerr << "  " << strerror(errNum) << endl;
+      closeUdp();
+      return -1;
+    }
   }
 
   // set the socket for reuse
@@ -109,7 +130,7 @@ int InputUdp::openUdp(int port, bool debug)
     return -1;
   }
 
-  if (debug) {
+  if (_params.debug) {
     cerr << "Opened UDP port: " << port << endl;
   }
   

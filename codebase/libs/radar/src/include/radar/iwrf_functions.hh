@@ -285,6 +285,7 @@ extern string iwrf_prf_mode_to_str(int prf_mode);
 extern string iwrf_pulse_type_to_str(int pulse_type);
 extern string iwrf_pol_mode_to_str(int pol_mode);
 extern string iwrf_scan_mode_to_str(int scan_mode);
+extern string iwrf_scan_mode_to_short_str(int scan_mode);
 extern string iwrf_follow_mode_to_str(int follow_mode);
 extern string iwrf_radar_platform_to_str(int radar_platform);
 extern string iwrf_cal_type_to_str(int cal_type);

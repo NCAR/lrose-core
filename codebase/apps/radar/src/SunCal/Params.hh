@@ -405,6 +405,8 @@ public:
 
   tdrp_bool_t invert_hv_flag;
 
+  tdrp_bool_t print_missing_pulses;
+
   moments_field_names_t moments_field_names;
 
   tdrp_bool_t scan_mode_rhi;
@@ -473,6 +475,10 @@ public:
 
   double max_solid_angle_for_mean_correlation;
 
+  tdrp_bool_t compute_ellipse_hv_power_diffs;
+
+  double solid_angle_for_ellipse_power_diffs;
+
   double sun_edge_below_peak_db;
 
   int n_s1s2_ratios_computed;
@@ -531,6 +537,8 @@ public:
 
   tdrp_bool_t compute_mean_transmit_powers;
 
+  tdrp_bool_t only_write_for_valid_centroid;
+
   tdrp_bool_t write_text_files;
 
   char* text_output_dir;
@@ -554,7 +562,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[105];
+  mutable TDRPtable _table[110];
 
   const char *_className;
 

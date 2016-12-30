@@ -71,8 +71,9 @@ Iq2Dsr::Iq2Dsr(int argc, char **argv)
   _endOfVolFlag = false;
   _endOfSweepFlag = false;
 
-  _startOfVolPending = false;
   _startOfSweepPending = false;
+  _startOfVolPending = false;
+  _endOfVolPending = false;
 
   _antennaTransition = false;
 
@@ -80,6 +81,7 @@ Iq2Dsr::Iq2Dsr(int argc, char **argv)
   _inTransition = false;
   _prevAngle = 0.0;
   _motionDirn = 0.0;
+  _nRaysInSweep = 0;
 
   _volMinEl = 180.0;
   _volMaxEl = -180.0;
@@ -509,7 +511,9 @@ int Iq2Dsr::_processBeamSingleThreaded(Beam *beam)
 
   // write out beam
 
-  if (_fmq->writeBeam(*beam, _currentVolNum, _currentSweepNum)) {
+  beam->setVolNum(_currentVolNum);
+  beam->setSweepNum(_currentSweepNum);
+  if (_fmq->writeBeam(*beam)) {
     cerr << "ERROR - Iq2Dsr::_processFile" << endl;
     cerr << "  Cannot write the beam data to output FMQ" << endl;
     return -1;
@@ -764,7 +768,7 @@ int Iq2Dsr::writeBeams()
     
     // get the beam from the thread
 
-    const Beam *beam = thread->getBeam();
+    Beam *beam = thread->getBeam();
     
     // write the sweep and volume flags
     
@@ -776,7 +780,9 @@ int Iq2Dsr::writeBeams()
     
     // write beam to FMQ
 
-    if (_fmq->writeBeam(*beam, _currentVolNum, _currentSweepNum)) {
+    beam->setVolNum(_currentVolNum);
+    beam->setSweepNum(_currentSweepNum);
+    if (_fmq->writeBeam(*beam)) {
       cerr << "ERROR - Iq2Dsr::_writeBeams" << endl;
       cerr << "  Cannot write the beam data to output FMQ" << endl;
       _writeThread->setReturnCode(-1);
@@ -810,37 +816,50 @@ void Iq2Dsr::_handleSweepAndVolChange(const Beam *beam)
   
 {
 
-  _endOfVolFlag = false;
-  _endOfSweepFlag = false;
+  // initialize end of sweep and volume flags
 
-  if (!_params.use_sweep_info_from_time_series) {
+  if (_params.use_volume_info_from_time_series) {
     _endOfVolFlag = beam->getEndOfVolFlag();
-    _endOfSweepFlag = beam->getEndOfSweepFlag();
+    if (_endOfVolFlag) {
+      _endOfVolPending = true;
+    }
+  } else {
+    _endOfVolFlag = false;
   }
 
-  // send scan mode change
+  if (_params.use_sweep_info_from_time_series) {
+    _endOfSweepFlag = beam->getEndOfSweepFlag();
+  } else {
+    _endOfSweepFlag = false;
+  }
+
+  // scan mode change
   
   _beamScanMode = beam->getScanMode();
   if (_currentScanMode != _beamScanMode) {
     _fmq->putNewScanType(_beamScanMode, beam->getTimeSecs());
     _currentScanMode = _beamScanMode;
+    if (_params.set_end_of_sweep_when_antenna_changes_direction) {
+      _endOfVolPending = true;
+    }
     if (_params.debug) {
-      cerr << "Scan mode change to: " << _currentScanMode << endl;
+      cerr << "Scan mode change to: " << iwrf_scan_mode_to_str(_currentScanMode) << endl;
     }
   }
 
-  if (!_params.use_sweep_info_from_time_series) {
-    // have to guess
-    _guessEndOfVol(beam);
+  if (!_params.use_volume_info_from_time_series) {
+    // have to deduce the end of volume condition
+    _deduceEndOfVol(beam);
     return;
   }
   
-  // set from beam
+  // set vol and sweep num from beam
 
   _prevVolNum = _beamVolNum;
   _beamVolNum = beam->getVolNum();
   if (_prevVolNum != _beamVolNum) {
     _endOfVolFlag = true;
+    _endOfVolPending = true;
   }
 
   _prevSweepNum = _beamSweepNum;
@@ -946,14 +965,15 @@ void Iq2Dsr::_putEndOfVol(time_t latestTime)
 }
 
 ////////////////////////////////////////////////////////////////////////
-// Guess at end of vol condition
+// Deduce end of vol condition
 
-void Iq2Dsr::_guessEndOfVol(const Beam *beam)
+void Iq2Dsr::_deduceEndOfVol(const Beam *beam)
   
 {
   
   // set tilt number to missing
 
+  _endOfVolFlag = false;
   _currentSweepNum = -1;
   
   // set elev stats
@@ -1023,6 +1043,7 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
   // no transitions in this mode, we change sweep number instanteously
 
   _antennaTransition = false;
+  _nRaysInSweep++;
   
   // compute angle change
 
@@ -1038,6 +1059,9 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
   } else if (deltaAngle < -180) {
     deltaAngle += 360.0;
   }
+  if (fabs(deltaAngle) < _params.required_delta_angle_for_antenna_direction_change) {
+    return;
+  }
   _prevAngle = angle;
 
   // check for dirn change
@@ -1052,7 +1076,13 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
   } else {
     _motionDirn = -1.0;
   }
-
+  
+  // do nothing if number of rays is too small
+  
+  if (_nRaysInSweep < _params.min_rays_in_sweep_for_antenna_direction_change) {
+    return;
+  }
+  
   // do nothing if the direction of motion has not changed
   
   if (!dirnChange && !_endOfVolFlag) {
@@ -1066,9 +1096,25 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
 
   if (dirnChange && _params.debug) {
     cerr << "Dirn change, end of sweep num: " << _currentSweepNum << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "    nrays, el, az, angle, prevAngle, deltaAngle, _motionDirn, dirnChange: "
+           << _nRaysInSweep << ", "
+           << beam->getEl() << ", " << beam->getAz() << ", "
+           << angle << ", "
+           << _prevAngle << ", "
+           << deltaAngle << ", "
+           << _motionDirn << ", "
+           << dirnChange << endl;
+    }
   }
+  _nRaysInSweep = 0;
 
   // increment sweep number
+
+  if (_endOfVolPending) {
+    _endOfVolFlag = true;
+    _endOfVolPending = false;
+  }
 
   if (!_endOfVolFlag) {
     _currentSweepNum++;
@@ -1099,6 +1145,7 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
     }
     _nBeamsThisVol = 0;
     _currentSweepNum = 0;
+    _endOfVolFlag = false;
   }
   
   // start of sweep

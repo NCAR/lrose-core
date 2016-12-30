@@ -47,6 +47,7 @@
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxTime.hh>
+#include <radar/FindSurfaceVel.hh>
 #include <rapformats/DsRadarMsg.hh>
 #include <Fmq/DsRadarQueue.hh>
 class RadxFile;
@@ -99,32 +100,7 @@ private:
   // write out filtered results
 
   RadxTime _timeFirstRay;
-  deque<RadxRay *> _filtRays;
-
-  // filtering
-
-  vector<double> _filtCoeffStage1;
-  vector<double> _filtCoeffSpike;
-  vector<double> _filtCoeffFinal;
-  
-  size_t _lenStage1, _lenStage1Half;
-  size_t _lenSpike, _lenSpikeHalf;
-  size_t _lenFinal, _lenFinalHalf;
-
-  size_t _condIndex;
-  size_t _finalIndex;
-  size_t _filtBufLen;
-
-  size_t _nValid;
-
-  double *_dbzMax;
-  double *_rangeToSurface;
-  double *_surfaceVel;
-
-  double *_filteredStage1;
-  double *_filteredSpike;
-  double *_filteredCond;
-  double *_filteredFinal;
+  FindSurfaceVel _surfVel;
 
   // input volume
   
@@ -146,13 +122,6 @@ private:
 
   int _processFile(const string &filePath);
   void _setupRead(RadxFile &file);
-  int _processRay(RadxRay *ray);
-  void _computeSurfaceVel(RadxRay *ray);
-
-  void _applySpikeFilter();
-  void _applyStage1Filter();
-  void _computeConditionedValue();
-  void _applyFinalFilter();
 
   void _convertFieldsForOutput(RadxVol &vol);
   void _setupWrite(RadxFile &file);
@@ -172,10 +141,7 @@ private:
 
   int _getDsScanMode(Radx::SweepMode_t mode);
 
-  void _initFilters();
-  void _shiftArrays();
-
-  void _correctVelForRay(RadxRay *ray);
+  void _correctVelForRay(RadxRay *ray, double surfVel);
   void _copyVelForRay(RadxRay *ray);
 
 };

@@ -464,13 +464,13 @@ ThresholdBiasMapping::getLeadtimeInterpolatedThreshold(int lt,
 
   if (lt < locLt[0])
   {
-    LOG(WARNING) << "Lead time " << lt << 
+    LOG(DEBUG_VERBOSE) << "Lead time " << lt << 
       " smaller than all leads in SPDB, use smallest lead times threshold";
     return getThreshold(locLt[0], thresh);
   }
   if (lt > *(locLt.rbegin()))
   {
-    LOG(WARNING) << "Lead time " << lt << 
+    LOG(DEBUG_VERBOSE) << "Lead time " << lt << 
       " larger than all leads in SPDB, use largest lead times threshold";
     return getThreshold(*(locLt.rbegin()), thresh);
   }
@@ -484,10 +484,10 @@ ThresholdBiasMapping::getLeadtimeInterpolatedThreshold(int lt,
       double w = locLt[i] - locLt[i-1];
       w0 /= w;
       w1 /= w;
-      LOG(DEBUG) << "Interpolating lead times " << locLt[i-1] 
-		 << " " << locLt[i];
+      LOG(DEBUG_VERBOSE) << "Interpolating lead times " << locLt[i-1] 
+			 << " " << locLt[i];
 
-      LOG(DEBUG) << "Interpolating weights are " << w0 << " " << w1;
+      LOG(DEBUG_VERBOSE) << "Interpolating weights are " << w0 << " " << w1;
 
       double t0, t1;
       if (!getThreshold(locLt[i-1], t0))
@@ -500,7 +500,7 @@ ThresholdBiasMapping::getLeadtimeInterpolatedThreshold(int lt,
 	LOG(ERROR) << "Unexpected inability to get threshold at " << locLt[i];
 	return false;
       }
-      LOG(DEBUG) << "Interpolating thresholds are " << t0 << " " << t1;
+      LOG(DEBUG_VERBOSE) << "Interpolating thresholds are " << t0 << " " << t1;
       thresh = (w0*t0 + w1*t1);
       return true;
     }

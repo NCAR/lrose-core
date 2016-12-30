@@ -438,7 +438,7 @@ void RadarMoments::computeCovarDpAltHvCoCross(RadarComplex_t *iqhc,
   
   // compute lag0 cross-polar correlation Vx to Hx
   
-  fields.lag0_vxhx =
+  fields.lag1_vxhx =
     RadarComplex::meanConjugateProduct(iqvx, iqhx, _nSamplesHalf - 1);
   
   // lag-2 correlations for HH and VV
@@ -1222,7 +1222,7 @@ void RadarMoments::dpAltHvCoCross(RadarComplex_t *iqhc,
   
   // compute lag0 cross-polar correlation Hx to Vx
   
-  RadarComplex_t lag0_vxhx =
+  RadarComplex_t lag1_vxhx =
     RadarComplex::meanConjugateProduct(iqvx, iqhx, _nSamplesHalf - 1);
 
   // lag-2 correlations for HH and VV
@@ -1237,7 +1237,7 @@ void RadarMoments::dpAltHvCoCross(RadarComplex_t *iqhc,
   
   computeMomDpAltHvCoCross(lag0_hc, lag0_hx,
                            lag0_vc, lag0_vx,
-                           lag0_vchx, lag0_hcvx, lag0_vxhx,
+                           lag0_vchx, lag0_hcvx, lag1_vxhx,
                            lag1_vchc, lag1_hcvc,
                            lag2_hc, lag2_vc,
                            gateNum, fields);
@@ -1284,7 +1284,7 @@ void RadarMoments::computeMomDpAltHvCoCross(double lag0_hc,
                                             double lag0_vx,
                                             RadarComplex_t lag0_vchx,
                                             RadarComplex_t lag0_hcvx,
-                                            RadarComplex_t lag0_vxhx,
+                                            RadarComplex_t lag1_vxhx,
                                             RadarComplex_t lag1_vchc,
                                             RadarComplex_t lag1_hcvc,
                                             RadarComplex_t lag2_hc,
@@ -1517,11 +1517,11 @@ void RadarMoments::computeMomDpAltHvCoCross(double lag0_hc,
   
   double mag_lag0_vchx = RadarComplex::mag(lag0_vchx);
   double mag_lag0_hcvx = RadarComplex::mag(lag0_hcvx);
-  double mag_lag0_vxhx = RadarComplex::mag(lag0_vxhx);
+  double mag_lag1_vxhx = RadarComplex::mag(lag1_vxhx);
 
   double arg_lag0_vchx = RadarComplex::argRad(lag0_vchx);
   double arg_lag0_hcvx = RadarComplex::argRad(lag0_hcvx);
-  double arg_lag0_vxhx = RadarComplex::argRad(lag0_vxhx);
+  double arg_lag1_vxhx = RadarComplex::argRad(lag1_vxhx);
 
   fields.lag0_vchx_db = 20.0 * log10(mag_lag0_vchx);
   fields.lag0_vchx_phase = arg_lag0_vchx * RAD_TO_DEG;
@@ -1529,8 +1529,8 @@ void RadarMoments::computeMomDpAltHvCoCross(double lag0_hc,
   fields.lag0_hcvx_db = 20.0 * log10(mag_lag0_hcvx);
   fields.lag0_hcvx_phase = arg_lag0_hcvx * RAD_TO_DEG;
   
-  fields.lag0_vxhx_db = 20.0 * log10(mag_lag0_vxhx);
-  fields.lag0_vxhx_phase = arg_lag0_vxhx * RAD_TO_DEG;
+  fields.lag1_vxhx_db = 20.0 * log10(mag_lag1_vxhx);
+  fields.lag1_vxhx_phase = arg_lag1_vxhx * RAD_TO_DEG;
   
   // Correct for system PhiDp offset, so that phidp will not wrap prematurely
   
@@ -1636,7 +1636,7 @@ void RadarMoments::computeMomDpAltHvCoCross(double lag0_hc,
   double rho_hcvx =
     RadarComplex::mag(lag0_hcvx) / sqrt(lag0_hc * lag0_vx);
   double rho_vxhx =
-    RadarComplex::mag(lag0_vxhx) / sqrt(lag0_vx * lag0_hx);
+    RadarComplex::mag(lag1_vxhx) / sqrt(lag0_vx * lag0_hx);
 
   RadarComplex_t diff = RadarComplex::conjugateProduct(lag0_vchx, lag0_hcvx);
   RadarComplex_t corrected =

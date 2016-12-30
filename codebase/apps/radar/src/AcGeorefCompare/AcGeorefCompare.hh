@@ -88,6 +88,9 @@ private:
   static double _missingDbl;
   int _lineCount;
 
+  time_t _requestedStartTime, _requestedEndTime;
+  time_t _periodStartTime, _periodEndTime;
+
   double _takeoffWtKg;
   double _aircraftWtKg;
   double _fuelRateClimbKgPerSec;
@@ -96,18 +99,53 @@ private:
   double _initialClimbSecs;
   double _topOfClimbAltitudeM;
   
+  vector<ac_georef_t> _georefsPrimary;
+  vector<ac_georef_t> _georefsSecondary;
+
   // methods
 
-  int _processTimeBlock(time_t startTime, time_t endTime);
+  int _runTimeSeriesTable();
+  int _runSinglePeriodArchive();
+  int _runSinglePeriodRealtime();
 
-  void _analyzeGeorefPair(const ac_georef_t &georefPrim,
-                          const ac_georef_t &georefSec,
-                          const DateTime &timePrim,
-                          double timeDiff);
+  int _retrieveTimeBlock(time_t startTime, time_t endTime);
+  int _produceTimeSeriesTable();
+  int _produceSinglePeriodProduct();
 
+  void _computeGeorefsMean(const vector<ac_georef_t> &vals,
+                           ac_georef_t &mean);
+
+  void _computeGeorefsDiffs(const ac_georef_t &primaryMean,
+                            const ac_georef_t &secondaryMean,
+                            ac_georef_t &diffs);
+
+  void _printTimeSeriesEntry(const ac_georef_t &georefPrim,
+                             const ac_georef_t &georefSec,
+                             const DateTime &timePrim,
+                             double timeDiff);
+                                            
   string _formatVal(double val, const char * format);
 
-  void _writeCommentedHeader(FILE *out);
+  void _printCommentedHeader(FILE *out);
+  
+  void _printPeriodStats(const ac_georef_t &primaryMean,
+                        const ac_georef_t &secondaryMean,
+                        const ac_georef_t &diffs,
+                        FILE *out);
+
+  void _printStats(const string &label,
+                   double primaryVal,
+                   double secondaryVal,
+                   double diff,
+                   FILE *out);
+
+  void _printLatLonStats(const string &label,
+                         double primaryVal,
+                         double secondaryVal,
+                         double diff,
+                         FILE *out);
+
+  bool _valIsMissing(double val);
 
 };
 

@@ -281,56 +281,54 @@ public:
     LAG0_VCHX_PHASE = 124,
     LAG0_HCVX_DB = 125,
     LAG0_HCVX_PHASE = 126,
-    LAG0_VXHX_DB = 127,
-    LAG0_VXHX_PHASE = 128,
-    LAG1_HC_DB = 129,
-    LAG1_HC_PHASE = 130,
-    LAG1_VC_DB = 131,
-    LAG1_VC_PHASE = 132,
-    LAG1_HCVC_DB = 133,
-    LAG1_HCVC_PHASE = 134,
-    LAG1_VCHC_DB = 135,
-    LAG1_VCHC_PHASE = 136,
-    LAG1_VXHX_DB = 137,
-    LAG1_VXHX_PHASE = 138,
-    LAG1_HC_LONG_DB = 139,
-    LAG1_HC_LONG_PHASE = 140,
-    LAG1_VC_LONG_DB = 141,
-    LAG1_VC_LONG_PHASE = 142,
-    LAG1_HC_SHORT_DB = 143,
-    LAG1_HC_SHORT_PHASE = 144,
-    LAG1_VC_SHORT_DB = 145,
-    LAG1_VC_SHORT_PHASE = 146,
-    LAG1_HC_LONG_TO_SHORT_DB = 147,
-    LAG1_HC_LONG_TO_SHORT_PHASE = 148,
-    LAG1_VC_LONG_TO_SHORT_DB = 149,
-    LAG1_VC_LONG_TO_SHORT_PHASE = 150,
-    LAG1_HC_SHORT_TO_LONG_DB = 151,
-    LAG1_HC_SHORT_TO_LONG_PHASE = 152,
-    LAG1_VC_SHORT_TO_LONG_DB = 153,
-    LAG1_VC_SHORT_TO_LONG_PHASE = 154,
-    LAG2_HC_DB = 155,
-    LAG2_HC_PHASE = 156,
-    LAG2_VC_DB = 157,
-    LAG2_VC_PHASE = 158,
-    LAG3_HC_DB = 159,
-    LAG3_HC_PHASE = 160,
-    LAG3_VC_DB = 161,
-    LAG3_VC_PHASE = 162,
-    RVVHH0_DB = 163,
-    RVVHH0_PHASE = 164,
-    RVVHH0_LONG_DB = 165,
-    RVVHH0_LONG_PHASE = 166,
-    RVVHH0_SHORT_DB = 167,
-    RVVHH0_SHORT_PHASE = 168,
-    SDEV_VV = 169,
-    PRT = 170,
-    NUM_PULSES = 171,
-    TEST = 172,
-    TEST2 = 173,
-    TEST3 = 174,
-    TEST4 = 175,
-    TEST5 = 176
+    LAG1_HC_DB = 127,
+    LAG1_HC_PHASE = 128,
+    LAG1_VC_DB = 129,
+    LAG1_VC_PHASE = 130,
+    LAG1_HCVC_DB = 131,
+    LAG1_HCVC_PHASE = 132,
+    LAG1_VCHC_DB = 133,
+    LAG1_VCHC_PHASE = 134,
+    LAG1_VXHX_DB = 135,
+    LAG1_VXHX_PHASE = 136,
+    LAG1_HC_LONG_DB = 137,
+    LAG1_HC_LONG_PHASE = 138,
+    LAG1_VC_LONG_DB = 139,
+    LAG1_VC_LONG_PHASE = 140,
+    LAG1_HC_SHORT_DB = 141,
+    LAG1_HC_SHORT_PHASE = 142,
+    LAG1_VC_SHORT_DB = 143,
+    LAG1_VC_SHORT_PHASE = 144,
+    LAG1_HC_LONG_TO_SHORT_DB = 145,
+    LAG1_HC_LONG_TO_SHORT_PHASE = 146,
+    LAG1_VC_LONG_TO_SHORT_DB = 147,
+    LAG1_VC_LONG_TO_SHORT_PHASE = 148,
+    LAG1_HC_SHORT_TO_LONG_DB = 149,
+    LAG1_HC_SHORT_TO_LONG_PHASE = 150,
+    LAG1_VC_SHORT_TO_LONG_DB = 151,
+    LAG1_VC_SHORT_TO_LONG_PHASE = 152,
+    LAG2_HC_DB = 153,
+    LAG2_HC_PHASE = 154,
+    LAG2_VC_DB = 155,
+    LAG2_VC_PHASE = 156,
+    LAG3_HC_DB = 157,
+    LAG3_HC_PHASE = 158,
+    LAG3_VC_DB = 159,
+    LAG3_VC_PHASE = 160,
+    RVVHH0_DB = 161,
+    RVVHH0_PHASE = 162,
+    RVVHH0_LONG_DB = 163,
+    RVVHH0_LONG_PHASE = 164,
+    RVVHH0_SHORT_DB = 165,
+    RVVHH0_SHORT_PHASE = 166,
+    SDEV_VV = 167,
+    PRT = 168,
+    NUM_PULSES = 169,
+    TEST = 170,
+    TEST2 = 171,
+    TEST3 = 172,
+    TEST4 = 173,
+    TEST5 = 174
   } field_id_t;
 
   typedef enum {
@@ -699,6 +697,8 @@ public:
 
   debug_t debug;
 
+  int beam_count_for_debug_print;
+
   char* instance;
 
   tdrp_bool_t use_multiple_threads;
@@ -728,6 +728,8 @@ public:
   tdrp_bool_t compute_prt_from_interpulse_periods;
 
   tdrp_bool_t change_velocity_sign_staggered;
+
+  tdrp_bool_t use_pulse_width_from_ts_proc;
 
   tdrp_bool_t override_primary_prt;
 
@@ -1101,6 +1103,23 @@ public:
 
   int beam_wait_msecs;
 
+  output_field_t *_output_fields;
+  int output_fields_n;
+
+  tdrp_bool_t use_sweep_info_from_time_series;
+
+  tdrp_bool_t delay_tilt_start_msg_during_ant_trans;
+
+  tdrp_bool_t set_end_of_sweep_when_antenna_changes_direction;
+
+  double required_delta_angle_for_antenna_direction_change;
+
+  int min_rays_in_sweep_for_antenna_direction_change;
+
+  int max_sweeps_in_vol_for_antenna_direction_change;
+
+  tdrp_bool_t use_volume_info_from_time_series;
+
   tdrp_bool_t set_end_of_vol_from_elev_angle;
 
   tdrp_bool_t vol_starts_at_bottom;
@@ -1112,17 +1131,6 @@ public:
   tdrp_bool_t set_end_of_vol_on_prf_change;
 
   tdrp_bool_t set_end_of_vol_on_pulse_width_change;
-
-  output_field_t *_output_fields;
-  int output_fields_n;
-
-  tdrp_bool_t use_sweep_info_from_time_series;
-
-  tdrp_bool_t delay_tilt_start_msg_during_ant_trans;
-
-  tdrp_bool_t set_end_of_sweep_when_antenna_changes_direction;
-
-  int max_sweeps_in_vol_for_antenna_direction_change;
 
   transition_method_t transition_method;
 
@@ -1153,7 +1161,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[244];
+  mutable TDRPtable _table[249];
 
   const char *_className;
 

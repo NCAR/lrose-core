@@ -688,6 +688,20 @@ void Wrf2Mdv::_loadCrossOutputFields(WRFData &inData,
 			 fhdr->missing_data_value, mGrid);
 	  break;
 	    
+	case Params::QNRAIN_FIELD:
+	  _interp3dField(inData, _params._output_fields[ifield].name,
+			 inData.getNRain(), mdvx,
+			 planeOffset, nPointsPlane,
+			 fhdr->missing_data_value, mGrid);
+	  break;
+	    
+	case Params::QNCLOUD_FIELD:
+	  _interp3dField(inData, _params._output_fields[ifield].name,
+			 inData.getNCloud(), mdvx,
+			 planeOffset, nPointsPlane,
+			 fhdr->missing_data_value, mGrid);
+	  break;
+	    
 	case Params::SNOW_FIELD:
 	  _interp3dField(inData, _params._output_fields[ifield].name,
 			 inData.getSnow(), mdvx,

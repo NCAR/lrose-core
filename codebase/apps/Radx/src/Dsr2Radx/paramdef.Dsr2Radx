@@ -197,13 +197,13 @@ paramdef boolean {
 paramdef double {
   p_default = -10.0;
   p_descr = "Minimum valid elevation for rays (deg).";
-  p_help = "If the elevation is below this value, the ray is ignored.";
+  p_help = "If the elevation is below this value, the ray is ignored. Applies only if filter_using_elev is true.";
 } specified_min_elev;
 
 paramdef double {
   p_default = 90.0;
   p_descr = "Maximum valid elevation for rays (deg).";
-  p_help = "If the elevation is above this value, the ray is ignored.";
+  p_help = "If the elevation is above this value, the ray is ignored. Applies only if filter_using_elev is true.";
 } specified_max_elev;
 
 paramdef boolean {
@@ -215,14 +215,26 @@ paramdef boolean {
 paramdef int {
   p_default = 0;
   p_descr = "Minimum valid sweep number for rays.";
-  p_help = "If the sweep number is below this value, the ray is ignored.";
+  p_help = "If the sweep number is below this value, the ray is ignored. Applies only if filter_using_sweep_number is true.";
 } specified_min_sweep_number;
 
 paramdef int {
   p_default = 999;
   p_descr = "Maximum valid sweep number for rays.";
-  p_help = "If the sweep number is above this value, the ray is ignored.";
+  p_help = "If the sweep number is above this value, the ray is ignored. Applies only if filter_using_sweep_number is true.";
 } specified_max_sweep_number;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to filter data based on sweep numbers in the list.";
+  p_help = "If TRUE, the program will use only ray data with a sweep number that is in the specified list.";
+} filter_using_sweep_number_list;
+
+paramdef int {
+  p_default = { 0, 1, 2 };
+  p_descr = "List of valid sweep numbers.";
+  p_help = "If the sweep number is not in this list, the ray is ignored. Applies only if filter_using_sweep_number_list is true.";
+} specified_sweep_number_list[];
 
 commentdef {
   p_header = "FILTER DATA BASED ON ANTENNA or SCAN STATE";
@@ -265,14 +277,45 @@ paramdef boolean {
 } filter_when_scan_pointing;
 
 commentdef {
-  p_header = "CONVERTING ALL RAYS TO SAME GATE GEOMETRY";
+  p_header = "OUTPUT GATE GEOMETRY";
+  p_text = "You can only choose one range geometry remapping option. If none are picked, all rays which do not match the predominant geometry will be discarded.";
 }
 
 paramdef boolean {
   p_default = true;
   p_descr = "Option to convert all rays to predominant geometry.";
-  p_help = "If true, all rays will be converted to the predominant gate geometry - i.e. start_range and gate_spacing. If false, all rays which do not match the predominant geometry will be discarded.";
+  p_help = "If true, all rays will be converted to the predominant gate geometry - i.e. start_range and gate_spacing.";
 } convert_to_predominant_gate_geometry;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to convert all rays to finest range gate spacing.";
+  p_help = "If true, all rays will be converted to the finest gate spacing.";
+} convert_to_finest_gate_geometry;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to convert all rays to a specified gate geometry.";
+  p_help = "See 'specified_start_range_k', 'specified_gate_spacing_km' and 'interpolate_to_specified_gate_geometry'.";
+} convert_to_specified_output_gate_geometry;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Start range for specified remapping (km).";
+  p_help = "See 'convert_to_specified_gate_geometry'.";
+} output_start_range_km;
+
+paramdef double {
+  p_default = 0.2;
+  p_descr = "Gate spacing for specified remapping (km).";
+  p_help = "See 'convert_to_specified_gate_geometry'.";
+} output_gate_spacing_km;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use interpolation when converting to the specified gate geometry.";
+  p_help = "If false, nearest neighbor mapping is used. See 'convert_to_specified_gate_geometry'.";
+} interpolate_to_output_gate_geometry;
 
 commentdef {
   p_header = "COMPUTING THE SWEEP ANGLE HISTOGRAM";
@@ -669,41 +712,53 @@ paramdef boolean {
   p_help = "Sometimes a scan strategy will switch between surveillance scans, sector scans, rhi scans, vertically-pointing scans and sun scans. If true, the files will be separated into subdirectories based on scan type.";
 } separate_output_dirs_by_scan_type;
 
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out files for surveillance mode.";
+  p_help = "Only applies if 'separate_output_dirs_by_scan_type' is true.";
+} write_surveillance_files;
+
 paramdef string {
   p_default = "sur";
   p_descr = "The directory path for surveillance scan files.";
-  p_help = "See 'separate_by_scan_type'. If the scan mode is surveillance, this subdirectory will be created under the ouput dir.";
+  p_help = "See 'separate_output_dirs_by_scan_type'. If the scan mode is surveillance, this subdirectory will be created under the ouput dir.";
 } surveillance_subdir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out files for sector mode.";
+  p_help = "Only applies if 'separate_output_dirs_by_scan_type' is true.";
+} write_sector_files;
 
 paramdef string {
   p_default = "sec";
   p_descr = "The directory path for sector scan files.";
-  p_help = "See 'separate_by_scan_type'. If the scan mode is sector, this subdirectory will be created under the ouput dir.";
+  p_help = "See 'separate_output_dirs_by_scan_type'. If the scan mode is sector, this subdirectory will be created under the ouput dir.";
 } sector_subdir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out files for rhi mode.";
+  p_help = "Only applies if 'separate_output_dirs_by_scan_type' is true.";
+} write_rhi_files;
 
 paramdef string {
   p_default = "rhi";
   p_descr = "The directory path for rhi files.";
-  p_help = "See 'separate_by_scan_type'. If the scan mode is rhi, this subdirectory will be created under the ouput dir.";
+  p_help = "See 'separate_output_dirs_by_scan_type'. If the scan mode is rhi, this subdirectory will be created under the ouput dir.";
 } rhi_subdir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out files for vertical pointing mode.";
+  p_help = "Only applies if 'separate_output_dirs_by_scan_type' is true.";
+} write_vert_files;
 
 paramdef string {
   p_default = "vert";
   p_descr = "The directory path for vert scan files.";
-  p_help = "See 'separate_by_scan_type'. If the scan mode is vert, this subdirectory will be created under the ouput dir.";
+  p_help = "See 'separate_output_dirs_by_scan_type'. If the scan mode is vert, this subdirectory will be created under the ouput dir.";
 } vert_subdir;
-
-paramdef string {
-  p_default = "sun";
-  p_descr = "The directory path for sun scan files.";
-  p_help = "See 'separate_by_scan_type'. If the scan mode is sun, this subdirectory will be created under the ouput dir.";
-} sun_subdir;
-
-paramdef string {
-  p_default = "Solar";
-  p_descr = "Optionally specify the scan name for the solar scan.";
-  p_help = "If the scan name from the antenna controller matches this string, it will be assumed that this is a solar scan.";
-} solar_scan_name;
 
 paramdef double {
   p_default = 85;
@@ -716,6 +771,24 @@ paramdef double {
   p_descr = "The min fraction of data with elevations in excess of the min elevation.";
   p_help = "If the fraction of the data with elevation angles above the specified min_elevation exceeds this fraction,  the volume will be considered to be from vertically-pointing operations.";
 } min_vert_fraction_for_vert_files;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write out files for sun scan mode.";
+  p_help = "Only applies if 'separate_output_dirs_by_scan_type' is true.";
+} write_sun_files;
+
+paramdef string {
+  p_default = "sun";
+  p_descr = "The directory path for sun scan files.";
+  p_help = "See 'separate_output_dirs_by_scan_type'. If the scan mode is sun, this subdirectory will be created under the ouput dir.";
+} sun_subdir;
+
+paramdef string {
+  p_default = "Solar";
+  p_descr = "Optionally specify the scan name for the solar scan.";
+  p_help = "If the scan name from the antenna controller matches this string, it will be assumed that this is a solar scan.";
+} solar_scan_name;
 
 commentdef {
   p_header = "OUTPUT FILE NAME OPTIONS";
@@ -776,7 +849,7 @@ paramdef boolean {
 paramdef boolean {
   p_default = true;
   p_descr = "Option to write latest_data_info for each data set.";
-  p_help = "Writes a latest_data_info file for each data set written, including the separate directories for surveillance, sector and RHI as appropriate. If write_master_ldata_info is true, you may consider turning this off.";
+  p_help = "Writes a latest_data_info file for each data set written, including the separate directories for surveillance, sector, rhi etc. as appropriate. If write_master_ldata_info is true, you may consider turning this off.";
 } write_individual_ldata_info;
 
 commentdef {

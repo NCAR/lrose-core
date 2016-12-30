@@ -1,26 +1,9 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-// ** Copyright UCAR (c) 1990 - 2016                                         
-// ** University Corporation for Atmospheric Research (UCAR)                 
-// ** National Center for Atmospheric Research (NCAR)                        
-// ** Boulder, Colorado, USA                                                 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from UCAR.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of UCAR nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+// ** Copyright UCAR (c) 1992 - 2016
+// ** University Corporation for Atmospheric Research(UCAR)
+// ** National Center for Atmospheric Research(NCAR)
+// ** Boulder, Colorado, USA
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -471,8 +454,8 @@ using namespace std;
   {
     out << "TDRP args: [options as below]\n"
         << "   [ -params/--params path ] specify params file path\n"
-        << "   [ -check_params] check which params are not set\n"
-        << "   [ -print_params [mode]] print parameters\n"
+        << "   [ -check_params/--check_params] check which params are not set\n"
+        << "   [ -print_params/--print_params [mode]] print parameters\n"
         << "     using following modes, default mode is 'norm'\n"
         << "       short:   main comments only, no help or descr\n"
         << "                structs and arrays on a single line\n"
@@ -1525,16 +1508,26 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'low_dbz_threshold_spdb_is_partitioned'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'low_dbz_threshold_spdb_lookup_mode'
+    // ctype is '_lookup_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("low_dbz_threshold_spdb_is_partitioned");
-    tt->descr = tdrpStrDup("Assume partitioned lead times in dynamic low dbz threshold data");
-    tt->help = tdrpStrDup("If TRUE, the data in the low_dbz_threshold_spdb_url can be assumed to be partitioned into lead times at a lower resolution than the local lead time resolution, where partitions are evenly spaced lead time ranges, that is to say dt = lt1-lt0 = lt2-lt1 = lt3-lt2,..., and the partitions are then [lt0, lt1), [lt1,lt2), [ltn,ltn+dt).  lt0,lt1,...ltn are the lead times found the low_dbz_threshold_spdb_url.  If FALSE, the lead times must match the data lead times exactly");
-    tt->val_offset = (char *) &low_dbz_threshold_spdb_is_partitioned - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("low_dbz_threshold_spdb_lookup_mode");
+    tt->descr = tdrpStrDup("low_dbz_threshold_url lookup mode");
+    tt->help = tdrpStrDup("EXACT = thresholds URL must have exactly matching lead times as the data\nPARTITION = the data in the low_dbz_threshold_spdb_url can be assumed to be partitioned into lead times at a lower resolution than the local lead time resolution, where partitions are evenly spaced lead time ranges, that is to say dt = lt1-lt0 = lt2-lt1 = lt3-lt2,..., and the partitions are then [lt0, lt1), [lt1,lt2), [ltn,ltn+dt).  lt0,lt1,...ltn are the lead times found the low_dbz_threshold_spdb_url.\nINTERPOLATE = the data in the low_deb_threshold_spdb_url can be at a lower resolution than the lookup lead times, and then threshold values are then computed using linear interpolation");
+    tt->val_offset = (char *) &low_dbz_threshold_spdb_lookup_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("lookup_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("EXACT");
+      tt->enum_def.fields[0].val = EXACT;
+      tt->enum_def.fields[1].name = tdrpStrDup("PARTITION");
+      tt->enum_def.fields[1].val = PARTITION;
+      tt->enum_def.fields[2].name = tdrpStrDup("INTERPOLATE");
+      tt->enum_def.fields[2].val = INTERPOLATE;
+    tt->single_val.e = EXACT;
     tt++;
     
     // Parameter 'Comment 15'

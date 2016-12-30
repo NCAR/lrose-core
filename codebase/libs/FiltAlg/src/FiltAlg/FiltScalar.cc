@@ -109,13 +109,13 @@ bool FiltScalar::filter(const FiltInfoInput &inp, FiltInfoOutput &o) const
   switch (_f.filter)
   {
   case FiltAlgParams::FULL_MEAN:
-    result = g.meanXy(xLwr, xUpr, yLwr, yUpr);
+    result = g.localMeanXy(xLwr, xUpr, yLwr, yUpr);
     break;
   case FiltAlgParams::FULL_MEDIAN:
-    result = g.medianXy(xLwr, xUpr, yLwr, yUpr);
+    result = g.localMedian(xLwr, xUpr, yLwr, yUpr);
     break;
   case FiltAlgParams::FULL_SDEV:
-    result = g.sdevXy(xLwr, xUpr, yLwr, yUpr);
+    result = g.localSdevXy(xLwr, xUpr, yLwr, yUpr);
     break;
   default:
     LOG(ERROR)<< "wrong filter";

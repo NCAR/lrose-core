@@ -33,16 +33,14 @@
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
-MODULE_TYPE = progcpp
-
 TARGET_FILE = Dsr2Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lFmq -ldsserver -lMdv -lRadx \
-	-leuclid -lrapformats -lrapmath -ldidss \
-	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
-	-lbz2 -lz -lm
+LOC_LIBS = -lFmq -lMdv -lRadx -leuclid \
+	-ldsserver -lrapformats -ldidss -ltoolsa \
+	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
+	-lz -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
@@ -64,24 +62,26 @@ CPPC_SRCS = \
 	transformBeam.cc
 
 #
-# tdrp support
+# tdrp macros
 #
 
 include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
 
 #
-# standard targets
+# standard C++ targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_targets
+include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
+
+#
+# tdrp targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
 
 #
 # local targets
 #
-
-depend: $(TDRP_C) depend_generic
-
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_targets
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

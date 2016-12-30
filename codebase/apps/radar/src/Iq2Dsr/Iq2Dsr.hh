@@ -155,8 +155,9 @@ private:
   bool _endOfVolFlag;
   bool _endOfSweepFlag;
 
-  bool _startOfVolPending;
   bool _startOfSweepPending;
+  bool _startOfVolPending;
+  bool _endOfVolPending;
 
   bool _antennaTransition;
 
@@ -171,6 +172,7 @@ private:
   bool _inTransition;
   double _prevAngle;
   double _motionDirn;
+  int _nRaysInSweep;
   
   // end of vol decision
 
@@ -211,7 +213,7 @@ private:
 
   void _handleSweepAndVolChange(const Beam *beam);
   void _putEndOfVol(time_t latestTime);
-  void _guessEndOfVol(const Beam *beam);
+  void _deduceEndOfVol(const Beam *beam);
   void _changeSweepOnDirectionChange(const Beam *beam);
 
 };

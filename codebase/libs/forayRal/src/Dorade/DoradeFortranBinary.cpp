@@ -27,7 +27,6 @@
 //
 
 #include <errno.h>
-extern int errno;
 #include <string.h>
 
 #include <iostream>

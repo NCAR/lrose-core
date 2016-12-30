@@ -127,14 +127,16 @@
 // #endif
 
 //------------------------------------------------------------------
-MultiThreshBiasMapping::MultiThreshBiasMapping(void)
+MultiThreshBiasMapping::MultiThreshBiasMapping(void) :
+  _chunkValidTime(0)
 {
 }
 
 //------------------------------------------------------------------
 MultiThreshBiasMapping::MultiThreshBiasMapping(const std::string &spdb) :
   MultiThresholdsBiasMapping(),
- _url(spdb)
+  _url(spdb),
+  _chunkValidTime(0)
 {
 
 }
@@ -962,6 +964,7 @@ bool MultiThreshBiasMapping::_load(DsSpdb &s, bool fieldsAndLeadsSet)
     if (s.getProdId() == SPDB_XML_ID)
     {
       string xml((char *)chunk_data);
+      _chunkValidTime = chunk.valid_time;
       return MultiThresholdsBiasMapping::fromXml(xml, fieldsAndLeadsSet);
     }
     else

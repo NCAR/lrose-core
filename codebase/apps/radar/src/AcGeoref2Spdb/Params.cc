@@ -612,19 +612,21 @@ using namespace std;
     tt->help = tdrpStrDup("CFRADIAL: read CfRadial files.\n\nIWRF_FILE: read the georeference packets from files containing IWRF time series.\n\nIWRF_FMQ: read the georeference packets from an FMQ containing IWRF time series.\n\nRAF_NETCDF: read files produced by the NCAR EOL/RAF aircraft group.\n\nRAF_IWG1_UDP: read NCAR RAF IWG1 packets from UDP.");
     tt->val_offset = (char *) &input_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("input_mode_t");
-    tt->enum_def.nfields = 5;
+    tt->enum_def.nfields = 6;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("CFRADIAL");
       tt->enum_def.fields[0].val = CFRADIAL;
-      tt->enum_def.fields[1].name = tdrpStrDup("IWRF_FILE");
-      tt->enum_def.fields[1].val = IWRF_FILE;
-      tt->enum_def.fields[2].name = tdrpStrDup("IWRF_FMQ");
-      tt->enum_def.fields[2].val = IWRF_FMQ;
-      tt->enum_def.fields[3].name = tdrpStrDup("RAF_NETCDF");
-      tt->enum_def.fields[3].val = RAF_NETCDF;
-      tt->enum_def.fields[4].name = tdrpStrDup("RAF_IWG1_UDP");
-      tt->enum_def.fields[4].val = RAF_IWG1_UDP;
+      tt->enum_def.fields[1].name = tdrpStrDup("RADX_FMQ");
+      tt->enum_def.fields[1].val = RADX_FMQ;
+      tt->enum_def.fields[2].name = tdrpStrDup("IWRF_FILE");
+      tt->enum_def.fields[2].val = IWRF_FILE;
+      tt->enum_def.fields[3].name = tdrpStrDup("IWRF_FMQ");
+      tt->enum_def.fields[3].val = IWRF_FMQ;
+      tt->enum_def.fields[4].name = tdrpStrDup("RAF_NETCDF");
+      tt->enum_def.fields[4].val = RAF_NETCDF;
+      tt->enum_def.fields[5].name = tdrpStrDup("RAF_IWG1_UDP");
+      tt->enum_def.fields[5].val = RAF_IWG1_UDP;
     tt->single_val.e = IWRF_FILE;
     tt++;
     
@@ -634,7 +636,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("input_fmq_name");
-    tt->descr = tdrpStrDup("FMQ name. For IWRF_FMQ only.");
+    tt->descr = tdrpStrDup("FMQ name. For IWRF_FMQ or RADX_FMQ only.");
     tt->help = tdrpStrDup("Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.");
     tt->val_offset = (char *) &input_fmq_name - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/fmq/ts");
@@ -652,6 +654,15 @@ using namespace std;
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("IWG1 UDP mode");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'iwg1_udp_port'
     // ctype is 'int'
     
@@ -664,11 +675,35 @@ using namespace std;
     tt->single_val.i = 7071;
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'udp_is_multicast'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("udp_is_multicast");
+    tt->descr = tdrpStrDup("Option to read multi-cast udp packets.");
+    tt->help = tdrpStrDup("If true, you must set the multicast group as well.");
+    tt->val_offset = (char *) &udp_is_multicast - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'udp_multicast_group'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("udp_multicast_group");
+    tt->descr = tdrpStrDup("Group for multicast packets");
+    tt->help = tdrpStrDup("Multicast packets are sometimes required to get through a firewall.");
+    tt->val_offset = (char *) &udp_multicast_group - &_start_;
+    tt->single_val.s = tdrpStrDup("239.0.0.10");
+    tt++;
+    
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("AIRCRAFT CALL SIGN");
     tt->comment_text = tdrpStrDup("For IWRF, CFRADIAL and UDP data.");
     tt++;
@@ -685,11 +720,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("CFRADIAL DATA FIELDS");
     tt->comment_text = tdrpStrDup("Used for computing the surface velocity.");
     tt++;
@@ -730,11 +765,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("DETERMINE THE SURFACE VELOCITY FROM CFRADIAL DATA");
     tt->comment_text = tdrpStrDup("This applies to HCR data.");
     tt++;
@@ -775,6 +810,18 @@ using namespace std;
     tt->single_val.d = 20;
     tt++;
     
+    // Parameter 'max_nadir_error_for_surface_vel'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_nadir_error_for_surface_vel");
+    tt->descr = tdrpStrDup("Maximum error from nadir pointing for computing surface velocity (deg).");
+    tt->help = tdrpStrDup("We only try to compute the surface velocity if the beam is pointing within this margin of nadir (vertically down).");
+    tt->val_offset = (char *) &max_nadir_error_for_surface_vel - &_start_;
+    tt->single_val.d = 5;
+    tt++;
+    
     // Parameter 'ngates_for_surface_echo'
     // ctype is 'int'
     
@@ -787,11 +834,35 @@ using namespace std;
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'print_surface_velocity_data'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_surface_velocity_data");
+    tt->descr = tdrpStrDup("Option to print surface velocity information to stdout.");
+    tt->help = tdrpStrDup("If true, the surface velocity estimates, as well as estimated antenna pointing angles, will be printed to stdout at regular intervals.");
+    tt->val_offset = (char *) &print_surface_velocity_data - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'surface_velocity_print_period_secs'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("surface_velocity_print_period_secs");
+    tt->descr = tdrpStrDup("Number of seconds between printing information on surface velocity.");
+    tt->help = tdrpStrDup("The data will be averaged over this time period and then printed to stdout.");
+    tt->val_offset = (char *) &surface_velocity_print_period_secs - &_start_;
+    tt->single_val.d = 2;
+    tt++;
+    
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("NETCDF DATA");
     tt->comment_text = tdrpStrDup("Set the NetCDF variable names for the fields to be read in. If a field is not available. set the name to an empty string.");
     tt++;
@@ -1092,11 +1163,11 @@ using namespace std;
       tt->array_vals[1].s = tdrpStrDup("PITCH_IRS3");
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1110,7 +1181,260 @@ using namespace std;
     tt->descr = tdrpStrDup("Output SPDB URL for georef data.");
     tt->help = tdrpStrDup("The format is spdbp::params//host:port:dir. Normally params is an empty string, and port is an empty string, so that the default behavior will occur.");
     tt->val_offset = (char *) &output_spdb_url - &_start_;
-    tt->single_val.s = tdrpStrDup("spdbp:://localhost::spdb/ac_georef");
+    tt->single_val.s = tdrpStrDup("spdbp:://localhost::/tmp/spdb/ac_georef");
+    tt++;
+    
+    // Parameter 'spdb_nchunks_per_write'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spdb_nchunks_per_write");
+    tt->descr = tdrpStrDup("Number of SPDB chunks per write.");
+    tt->help = tdrpStrDup("We package up the SPDB data chunks, and write them together once the number of chunks reaches this threshold.");
+    tt->val_offset = (char *) &spdb_nchunks_per_write - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
+    tt->comment_hdr = tdrpStrDup("FIR FILTERING FOR SURFACE VELOCITY ESTIMATES");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'surface_vel_spike_filter_difference_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("surface_vel_spike_filter_difference_threshold");
+    tt->descr = tdrpStrDup("Threshold for removing spikes in the original data and resetting the value to that form the short filter.");
+    tt->help = tdrpStrDup("We apply both the stage-1 and spike filters to the time series of surface velocity. If the absolute difference between the two exceeds this threshold, then the conditioned data is set to the output from the stage-1 filter. If the absolute difference is below this threshold then the original data point is retained. After this step the final filter it applied to the conditioned data to compute the final filtered value.");
+    tt->val_offset = (char *) &surface_vel_spike_filter_difference_threshold - &_start_;
+    tt->single_val.d = 0.11;
+    tt++;
+    
+    // Parameter 'surface_vel_stage1_filter'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("surface_vel_stage1_filter");
+    tt->descr = tdrpStrDup("Coefficients for stage-1 FIR filter.");
+    tt->help = tdrpStrDup("Initial filtering step. This is normally a 21-point FIR filter.");
+    tt->array_offset = (char *) &_surface_vel_stage1_filter - &_start_;
+    tt->array_n_offset = (char *) &surface_vel_stage1_filter_n - &_start_;
+    tt->is_private = TRUE;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(double);
+    tt->array_n = 21;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].d = 0.016977;
+      tt->array_vals[1].d = 0.023295;
+      tt->array_vals[2].d = 0.0302445;
+      tt->array_vals[3].d = 0.0375501;
+      tt->array_vals[4].d = 0.0448883;
+      tt->array_vals[5].d = 0.0519082;
+      tt->array_vals[6].d = 0.0582545;
+      tt->array_vals[7].d = 0.0635929;
+      tt->array_vals[8].d = 0.0676334;
+      tt->array_vals[9].d = 0.0701522;
+      tt->array_vals[10].d = 0.0710079;
+      tt->array_vals[11].d = 0.0701522;
+      tt->array_vals[12].d = 0.0676334;
+      tt->array_vals[13].d = 0.0635929;
+      tt->array_vals[14].d = 0.0582545;
+      tt->array_vals[15].d = 0.0519082;
+      tt->array_vals[16].d = 0.0448883;
+      tt->array_vals[17].d = 0.0375501;
+      tt->array_vals[18].d = 0.0302445;
+      tt->array_vals[19].d = 0.023295;
+      tt->array_vals[20].d = 0.016977;
+    tt++;
+    
+    // Parameter 'surface_vel_spike_filter'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("surface_vel_spike_filter");
+    tt->descr = tdrpStrDup("Coefficients for spike FIR filter.");
+    tt->help = tdrpStrDup("Applying this filter onces is equivalent to applying the stage-1 filter five times in succession on a time series. Normally this will have 101 entries.");
+    tt->array_offset = (char *) &_surface_vel_spike_filter - &_start_;
+    tt->array_n_offset = (char *) &surface_vel_spike_filter_n - &_start_;
+    tt->is_private = TRUE;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(double);
+    tt->array_n = 101;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].d = 1.41027e-09;
+      tt->array_vals[1].d = 9.67555e-09;
+      tt->array_vals[2].d = 3.91146e-08;
+      tt->array_vals[3].d = 1.20978e-07;
+      tt->array_vals[4].d = 3.15912e-07;
+      tt->array_vals[5].d = 7.3214e-07;
+      tt->array_vals[6].d = 1.55076e-06;
+      tt->array_vals[7].d = 3.05944e-06;
+      tt->array_vals[8].d = 5.69573e-06;
+      tt->array_vals[9].d = 1.01006e-05;
+      tt->array_vals[10].d = 1.71828e-05;
+      tt->array_vals[11].d = 2.81927e-05;
+      tt->array_vals[12].d = 4.48059e-05;
+      tt->array_vals[13].d = 6.92118e-05;
+      tt->array_vals[14].d = 0.000104206;
+      tt->array_vals[15].d = 0.000153279;
+      tt->array_vals[16].d = 0.000220702;
+      tt->array_vals[17].d = 0.000311587;
+      tt->array_vals[18].d = 0.000431939;
+      tt->array_vals[19].d = 0.000588667;
+      tt->array_vals[20].d = 0.000789562;
+      tt->array_vals[21].d = 0.00104322;
+      tt->array_vals[22].d = 0.00135892;
+      tt->array_vals[23].d = 0.00174645;
+      tt->array_vals[24].d = 0.00221584;
+      tt->array_vals[25].d = 0.00277708;
+      tt->array_vals[26].d = 0.00343973;
+      tt->array_vals[27].d = 0.00421257;
+      tt->array_vals[28].d = 0.0051031;
+      tt->array_vals[29].d = 0.0061171;
+      tt->array_vals[30].d = 0.00725815;
+      tt->array_vals[31].d = 0.00852721;
+      tt->array_vals[32].d = 0.00992217;
+      tt->array_vals[33].d = 0.0114375;
+      tt->array_vals[34].d = 0.0130642;
+      tt->array_vals[35].d = 0.0147892;
+      tt->array_vals[36].d = 0.0165958;
+      tt->array_vals[37].d = 0.0184636;
+      tt->array_vals[38].d = 0.0203688;
+      tt->array_vals[39].d = 0.0222844;
+      tt->array_vals[40].d = 0.0241812;
+      tt->array_vals[41].d = 0.0260281;
+      tt->array_vals[42].d = 0.0277931;
+      tt->array_vals[43].d = 0.0294439;
+      tt->array_vals[44].d = 0.0309493;
+      tt->array_vals[45].d = 0.0322797;
+      tt->array_vals[46].d = 0.0334084;
+      tt->array_vals[47].d = 0.0343119;
+      tt->array_vals[48].d = 0.0349715;
+      tt->array_vals[49].d = 0.0353729;
+      tt->array_vals[50].d = 0.0355077;
+      tt->array_vals[51].d = 0.0353729;
+      tt->array_vals[52].d = 0.0349715;
+      tt->array_vals[53].d = 0.0343119;
+      tt->array_vals[54].d = 0.0334084;
+      tt->array_vals[55].d = 0.0322797;
+      tt->array_vals[56].d = 0.0309493;
+      tt->array_vals[57].d = 0.0294439;
+      tt->array_vals[58].d = 0.0277931;
+      tt->array_vals[59].d = 0.0260281;
+      tt->array_vals[60].d = 0.0241812;
+      tt->array_vals[61].d = 0.0222844;
+      tt->array_vals[62].d = 0.0203688;
+      tt->array_vals[63].d = 0.0184636;
+      tt->array_vals[64].d = 0.0165958;
+      tt->array_vals[65].d = 0.0147892;
+      tt->array_vals[66].d = 0.0130642;
+      tt->array_vals[67].d = 0.0114375;
+      tt->array_vals[68].d = 0.00992217;
+      tt->array_vals[69].d = 0.00852721;
+      tt->array_vals[70].d = 0.00725815;
+      tt->array_vals[71].d = 0.0061171;
+      tt->array_vals[72].d = 0.0051031;
+      tt->array_vals[73].d = 0.00421257;
+      tt->array_vals[74].d = 0.00343973;
+      tt->array_vals[75].d = 0.00277708;
+      tt->array_vals[76].d = 0.00221584;
+      tt->array_vals[77].d = 0.00174645;
+      tt->array_vals[78].d = 0.00135892;
+      tt->array_vals[79].d = 0.00104322;
+      tt->array_vals[80].d = 0.000789562;
+      tt->array_vals[81].d = 0.000588667;
+      tt->array_vals[82].d = 0.000431939;
+      tt->array_vals[83].d = 0.000311587;
+      tt->array_vals[84].d = 0.000220702;
+      tt->array_vals[85].d = 0.000153279;
+      tt->array_vals[86].d = 0.000104206;
+      tt->array_vals[87].d = 6.92118e-05;
+      tt->array_vals[88].d = 4.48059e-05;
+      tt->array_vals[89].d = 2.81927e-05;
+      tt->array_vals[90].d = 1.71828e-05;
+      tt->array_vals[91].d = 1.01006e-05;
+      tt->array_vals[92].d = 5.69573e-06;
+      tt->array_vals[93].d = 3.05944e-06;
+      tt->array_vals[94].d = 1.55076e-06;
+      tt->array_vals[95].d = 7.3214e-07;
+      tt->array_vals[96].d = 3.15912e-07;
+      tt->array_vals[97].d = 1.20978e-07;
+      tt->array_vals[98].d = 3.91146e-08;
+      tt->array_vals[99].d = 9.67555e-09;
+      tt->array_vals[100].d = 1.41027e-09;
+    tt++;
+    
+    // Parameter 'surface_vel_final_filter'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("surface_vel_final_filter");
+    tt->descr = tdrpStrDup("Coefficients for final FIR filter.");
+    tt->help = tdrpStrDup("Before applying this filter, we first compute the conditioned time series. We compute the difference between the results of the stage-1 and spike filters - if this difference exceeds spike_filter_difference_threshold we use the spike filter result. Otherwise we use the stage-1 result.");
+    tt->array_offset = (char *) &_surface_vel_final_filter - &_start_;
+    tt->array_n_offset = (char *) &surface_vel_final_filter_n - &_start_;
+    tt->is_private = TRUE;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(double);
+    tt->array_n = 41;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].d = 0.000288218;
+      tt->array_vals[1].d = 0.000790958;
+      tt->array_vals[2].d = 0.00156958;
+      tt->array_vals[3].d = 0.00268406;
+      tt->array_vals[4].d = 0.00418832;
+      tt->array_vals[5].d = 0.0061252;
+      tt->array_vals[6].d = 0.00852163;
+      tt->array_vals[7].d = 0.0113843;
+      tt->array_vals[8].d = 0.0146962;
+      tt->array_vals[9].d = 0.0184147;
+      tt->array_vals[10].d = 0.0224707;
+      tt->array_vals[11].d = 0.0267698;
+      tt->array_vals[12].d = 0.0311959;
+      tt->array_vals[13].d = 0.035615;
+      tt->array_vals[14].d = 0.039882;
+      tt->array_vals[15].d = 0.0438477;
+      tt->array_vals[16].d = 0.0473667;
+      tt->array_vals[17].d = 0.0503056;
+      tt->array_vals[18].d = 0.0525504;
+      tt->array_vals[19].d = 0.0540136;
+      tt->array_vals[20].d = 0.0546387;
+      tt->array_vals[21].d = 0.0540136;
+      tt->array_vals[22].d = 0.0525504;
+      tt->array_vals[23].d = 0.0503056;
+      tt->array_vals[24].d = 0.0473667;
+      tt->array_vals[25].d = 0.0438477;
+      tt->array_vals[26].d = 0.039882;
+      tt->array_vals[27].d = 0.035615;
+      tt->array_vals[28].d = 0.0311959;
+      tt->array_vals[29].d = 0.0267698;
+      tt->array_vals[30].d = 0.0224707;
+      tt->array_vals[31].d = 0.0184147;
+      tt->array_vals[32].d = 0.0146962;
+      tt->array_vals[33].d = 0.0113843;
+      tt->array_vals[34].d = 0.00852163;
+      tt->array_vals[35].d = 0.0061252;
+      tt->array_vals[36].d = 0.00418832;
+      tt->array_vals[37].d = 0.00268406;
+      tt->array_vals[38].d = 0.00156958;
+      tt->array_vals[39].d = 0.000790958;
+      tt->array_vals[40].d = 0.000288218;
     tt++;
     
     // trailing entry has param_name set to NULL

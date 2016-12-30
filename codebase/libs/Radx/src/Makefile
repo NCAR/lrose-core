@@ -23,6 +23,7 @@ SUB_DIRS = \
 	DOE \
 	D3R \
 	Dorade \
+	EEC \
 	ForayNc \
 	Gamic \
 	Gematronik \

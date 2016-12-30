@@ -482,6 +482,12 @@ int Radx2Grid::_readFile(const string &filePath)
     _readVol.computeFixedAngleFromRays();
   }
 
+  // reorder sweeps into ascending order if requested
+
+  if (_params.reorder_sweeps_by_ascending_angle) {
+    _readVol.reorderSweepsAscendingAngle();
+  }
+
   // trim surveillance sweeps to 360 degrees if requested
 
   if (_params.trim_surveillance_sweeps_to_360deg) {

@@ -108,6 +108,8 @@ WRFData::WRFData() :
   _clw(0),
   _rnw(0),
   _ice(0),
+  _nRain(0),
+  _nCloud(0),
   _snow(0),
   _graupel(0),
   _ww(0),
@@ -370,6 +372,16 @@ void WRFData::_freeGrids()
   if (_ice != 0)
     ufree3((void ***)_ice);
   _ice = 0;
+  
+  if (_nCloud != 0)
+    ufree3((void ***)_nCloud);
+  _nCloud = 0;
+  
+  if (_nRain != 0)
+    ufree3((void ***)_nRain);
+  _nRain = 0;
+  
+
   
   if (_snow != 0)
     ufree3((void ***)_snow);
@@ -1831,6 +1843,22 @@ void WRFData::_loadSnowMixingRatio()
   
   _load3dField("QSNOW", _snow);
 }
+
+void WRFData::_loadNRain()
+{
+  _heartbeatFunc("Entering WRFData::_loadNRain()");
+  
+  _load3dField("QNRAIN", _nRain);
+}
+
+void WRFData::_loadNCloud()
+{
+  _heartbeatFunc("Entering WRFData::_loadNCloud()");
+  
+  _load3dField("QNCLOUD", _nCloud);
+}
+
+
 
 
 //////////////

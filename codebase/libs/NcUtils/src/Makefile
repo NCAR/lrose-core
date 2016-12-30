@@ -38,6 +38,7 @@ SUB_DIRS = \
 	Hdf5 \
 	Netcdf \
 	NcUtils \
+	Ncxx \
 	Udunits
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

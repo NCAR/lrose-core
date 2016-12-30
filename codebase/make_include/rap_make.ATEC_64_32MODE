@@ -221,8 +221,17 @@ NETCDF3_LIBS=$(MY_NETCDF3_LIBS) -L/opt/netcdf/lib -L/opt/lib -L/opt/netcdf/lib -
 NETCDF4_INCS=$(MY_NETCDF4_INCS) -I/opt/netcdf/include -I/opt/include -I/opt/netcdf/include $(UDUNITS_INCS) $(HDF5_INCLUDES) $(ZLIB_INCLUDES)
 NETCDF4_LDFLAGS=$(MY_NETCDF4_LDFLAGS) -L/opt/netcdf/lib -L/opt/lib -L/opt/netcdf/lib $(HDF5_LDFLAGS) $(ZLIB_LDFLAGS) $(UDUNITS_LDFLAGS)
 
-NETCDF_INCS=$(MY_NETCDF_INCS) $(NETCDF3_INCS) $(UDUNITS_INCS) -I/opt/netcdf/include
-NETCDF_LDFLAGS=$(MY_NETCDF_LDFLAGS) $(NETCDF3_LIBS) -L/opt/netcdf/lib -L/opt/hdf5/lib
+NETCDF_C_LIB=-lnetcdf
+NETCDF_C++_LIB=-lnetcdf_c++
+NETCDF_FF_LIB=-lnetcdff
+NETCDF_C_AND_C++_LIBS=-lnetcdf -lnetcdf_c++
+NETCDF_C_AND_F_LIBS=-lnetcdff -lnetcdf
+NETCDF4_LIBS=-lnetcdf_c++ -lnetcdf -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -ludunits2 -lbz2 -lexpat
+NETCDF_LIB_LIST=$(NETCDF4_LIBS)
+NETCDF_LIB=$(NETCDF4_LIBS)
+NETCDF_INCLUDES=$(NETCDF4_INCS)
+NETCDF_INCS=$(NETCDF4_INCS)
+NETCDF_LDFLAGS=$(NETCDF4_LDFLAGS)
 
 PGI_NETCDF3_INCS=$(MY_PGI_NETCDF3_INCS) -I/opt/netcdf-pgi/include
 PGI_NETCDF3_LIBS=$(MY_PGI_NETCDF3_LIBS) -L/opt/netcdf-pgi/lib
@@ -237,14 +246,6 @@ INTEL_NETCDF4_INCS=$(MY_INTEL_NETCDF4_INCS) -I/opt/netcdf4-ifort/include
 INTEL_NETCDF4_LDFLAGS=$(MY_INTEL_NETCDF4_LDFLAGS) -L/opt/netcdf4-ifort/lib
 INTEL_NETCDF_INCS=$(MY_INTEL_NETCDF_INCS) $(INTEL_NETCDF3_INCS)
 INTEL_NETCDF_LDFLAGS=$(MY_INTEL_NETCDF_LDFLAGS) $(INTEL_NETCDF3_LIBS)
-
-NETCDF_C_LIB=-lnetcdf
-NETCDF_C++_LIB=-lnetcdf_c++
-NETCDF_FF_LIB=-lnetcdff
-NETCDF_C_AND_C++_LIBS=-lnetcdf -lnetcdf_c++
-NETCDF_C_AND_F_LIBS=-lnetcdff -lnetcdf
-NETCDF4_LIBS=-lnetcdf_c++ -lnetcdf -lhdf5_hl -lhdf5 -lz -ludunits2
-NETCDF_LIB_LIST=$(NETCDF4_LIBS)
 
 #
 # Java

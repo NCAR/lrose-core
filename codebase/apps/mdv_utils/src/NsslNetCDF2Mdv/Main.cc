@@ -25,8 +25,9 @@
  * @file Main.cc
  */
 
-#include <toolsa/port.h>
 #include "NsslNetCDF2Mdv.hh"
+#include <toolsa/port.h>
+#include <stdlib.h>
 
 static void tidy_and_exit(int sig);
 

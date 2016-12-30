@@ -917,6 +917,17 @@ void IwrfTsPulse::cohereIqToBurstPhase()
 
 }
 
+////////////////////////////////////////////////////////////
+// copy the pulse width from the ts_proc in the info
+
+void IwrfTsPulse::copyPulseWidthFromTsProc() {
+  
+  if (_info.isTsProcessingActive()) {
+    _hdr.pulse_width_us = _info.get_proc_pulse_width_us();
+  }
+
+}
+
 ///////////////////////////////////////////////////////////
 // assemble into a single buffer
 

@@ -38,6 +38,8 @@ HDRS = \
 	../include/euclid/Grid2dEdgeBuilder.hh \
 	../include/euclid/Grid2dInside.hh \
 	../include/euclid/Grid2dLoop.hh \
+	../include/euclid/Grid2dLoopA.hh \
+	../include/euclid/Grid2dLoopAlg.hh \
 	../include/euclid/Grid2dMedian.hh \
 	../include/euclid/Grid2dOffset.hh \
 	../include/euclid/Grid2dPolyFinder.hh
@@ -52,6 +54,8 @@ CPPC_SRCS = \
 	Grid2dEdgeBuilder.cc \
 	Grid2dInside.cc \
 	Grid2dLoop.cc \
+	Grid2dLoopA.cc \
+	Grid2dLoopAlg.cc \
 	Grid2dMedian.cc \
 	Grid2dOffset.cc \
 	Grid2dPolyFinder.cc

@@ -105,6 +105,9 @@ private:
   int _processData(time_t inputTime, int leadTime, const string filepath);
   
   bool _wantedLeadTime(int leadTime) const;
+
+  int _writeCedricFile(DsMdvx &mdvx);
+
 };
 
 #endif

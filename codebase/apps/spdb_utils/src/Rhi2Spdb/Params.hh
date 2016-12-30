@@ -357,6 +357,8 @@ public:
 
   int time_between_checks_secs;
 
+  int mdv_search_margin_secs;
+
   char* input_url;
 
   char* output_url;
@@ -368,7 +370,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[9];
+  mutable TDRPtable _table[10];
 
   const char *_className;
 

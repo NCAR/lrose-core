@@ -468,6 +468,11 @@ public:
 
   int specified_max_sweep_number;
 
+  tdrp_bool_t filter_using_sweep_number_list;
+
+  int *_specified_sweep_number_list;
+  int specified_sweep_number_list_n;
+
   tdrp_bool_t filter_antenna_stationary;
 
   double min_angle_change_for_moving_antenna;
@@ -481,6 +486,16 @@ public:
   tdrp_bool_t filter_when_scan_pointing;
 
   tdrp_bool_t convert_to_predominant_gate_geometry;
+
+  tdrp_bool_t convert_to_finest_gate_geometry;
+
+  tdrp_bool_t convert_to_specified_output_gate_geometry;
+
+  double output_start_range_km;
+
+  double output_gate_spacing_km;
+
+  tdrp_bool_t interpolate_to_output_gate_geometry;
 
   tdrp_bool_t find_sweep_numbers_using_histogram;
 
@@ -574,21 +589,31 @@ public:
 
   tdrp_bool_t separate_output_dirs_by_scan_type;
 
+  tdrp_bool_t write_surveillance_files;
+
   char* surveillance_subdir;
+
+  tdrp_bool_t write_sector_files;
 
   char* sector_subdir;
 
+  tdrp_bool_t write_rhi_files;
+
   char* rhi_subdir;
 
+  tdrp_bool_t write_vert_files;
+
   char* vert_subdir;
-
-  char* sun_subdir;
-
-  char* solar_scan_name;
 
   double min_elevation_for_vert_files;
 
   double min_vert_fraction_for_vert_files;
+
+  tdrp_bool_t write_sun_files;
+
+  char* sun_subdir;
+
+  char* solar_scan_name;
 
   char* output_filename_prefix;
 
@@ -657,7 +682,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[148];
+  mutable TDRPtable _table[160];
 
   const char *_className;
 

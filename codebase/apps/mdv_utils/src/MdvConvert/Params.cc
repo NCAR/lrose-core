@@ -966,10 +966,10 @@ using namespace std;
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("output_format");
     tt->descr = tdrpStrDup("Specify format of file on output.");
-    tt->help = tdrpStrDup("FORMAT_MDV: normal MDV formal. FORMAT_XML: XML format. XML format writes out 2 files: *.mdv.xml and *.mdv.buf. The xml file contains the meta-data. The buf file contains the binary fields.\nNOTE: only COMPRESSION_NONE and COMPRESSION_GZIP_VOL are supported in XML. FORMAT_NCF: write file in netCDF CF format. Extension will be .nc.");
+    tt->help = tdrpStrDup("FORMAT_MDV: normal MDV formal.\n\nFORMAT_XML: XML format. XML format writes out 2 files: *.mdv.xml and *.mdv.buf. The xml file contains the meta-data. The buf file contains the binary fields.\n\nNOTE: only COMPRESSION_NONE and COMPRESSION_GZIP_VOL are supported in XML.\n\nFORMAT_NCF: write file in netCDF CF format. Extension will be .nc.\n\nFORMAT_CEDRIC: Write out in Cedric format.");
     tt->val_offset = (char *) &output_format - &_start_;
     tt->enum_def.name = tdrpStrDup("output_format_t");
-    tt->enum_def.nfields = 3;
+    tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("OUTPUT_FORMAT_MDV");
@@ -978,6 +978,8 @@ using namespace std;
       tt->enum_def.fields[1].val = OUTPUT_FORMAT_XML;
       tt->enum_def.fields[2].name = tdrpStrDup("OUTPUT_FORMAT_NCF");
       tt->enum_def.fields[2].val = OUTPUT_FORMAT_NCF;
+      tt->enum_def.fields[3].name = tdrpStrDup("OUTPUT_FORMAT_CEDRIC");
+      tt->enum_def.fields[3].val = OUTPUT_FORMAT_CEDRIC;
     tt->single_val.e = OUTPUT_FORMAT_MDV;
     tt++;
     
@@ -2159,6 +2161,141 @@ using namespace std;
     tt->help = tdrpStrDup("If true, MDV chunks will be included as byte binary variables.");
     tt->val_offset = (char *) &ncf_output_mdv_chunks - &_start_;
     tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'Comment 13'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 13");
+    tt->comment_hdr = tdrpStrDup("DETAILS FOR CEDRIC OUTPUT CONVERSION.");
+    tt->comment_text = tdrpStrDup("Parameters for writing out CEDRIC files. CEDRIC is an NCAR package for performing radar-type analyses such as dual-Doppler wind field estimation.");
+    tt++;
+    
+    // Parameter 'cedric_volume_number'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("cedric_volume_number");
+    tt->descr = tdrpStrDup("Volume number for CEDRIC conversion.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &cedric_volume_number - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'cedric_volume_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("cedric_volume_name");
+    tt->descr = tdrpStrDup("Volume name for CEDRIC conversion.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &cedric_volume_name - &_start_;
+    tt->single_val.s = tdrpStrDup("CED-VOL");
+    tt++;
+    
+    // Parameter 'cedric_radar_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("cedric_radar_name");
+    tt->descr = tdrpStrDup("Radar name for CEDRIC conversion.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &cedric_radar_name - &_start_;
+    tt->single_val.s = tdrpStrDup("RADAR");
+    tt++;
+    
+    // Parameter 'cedric_project_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("cedric_project_name");
+    tt->descr = tdrpStrDup("Project name for CEDRIC conversion.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &cedric_project_name - &_start_;
+    tt->single_val.s = tdrpStrDup("PROJECT");
+    tt++;
+    
+    // Parameter 'cedric_program_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("cedric_program_name");
+    tt->descr = tdrpStrDup("Program name for CEDRIC conversion.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &cedric_program_name - &_start_;
+    tt->single_val.s = tdrpStrDup("PROGRAM");
+    tt++;
+    
+    // Parameter 'cedric_nyquist_velocity'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("cedric_nyquist_velocity");
+    tt->descr = tdrpStrDup("Nyquist velocity for CEDRIC conversion.");
+    tt->help = tdrpStrDup("Included as metadata in CEDRIC files. CEDRIC was written for radar data, so we need to supply radar meta-data, even if this is simulated.");
+    tt->val_offset = (char *) &cedric_nyquist_velocity - &_start_;
+    tt->single_val.d = 25;
+    tt++;
+    
+    // Parameter 'cedric_ngates_beam'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("cedric_ngates_beam");
+    tt->descr = tdrpStrDup("Number of gates CEDRIC conversion.");
+    tt->help = tdrpStrDup("Included as metadata in CEDRIC files. CEDRIC was written for radar data, so we need to supply radar meta-data, even if this is simulated.");
+    tt->val_offset = (char *) &cedric_ngates_beam - &_start_;
+    tt->single_val.i = 1000;
+    tt++;
+    
+    // Parameter 'cedric_gate_spacing_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("cedric_gate_spacing_km");
+    tt->descr = tdrpStrDup("Gate spacing CEDRIC conversion (km).");
+    tt->help = tdrpStrDup("Included as metadata in CEDRIC files. CEDRIC was written for radar data, so we need to supply radar meta-data, even if this is simulated.");
+    tt->val_offset = (char *) &cedric_gate_spacing_km - &_start_;
+    tt->single_val.d = 0.25;
+    tt++;
+    
+    // Parameter 'cedric_elevation_angles'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("cedric_elevation_angles");
+    tt->descr = tdrpStrDup("Elevation angles for CEDRIC conversion (deg).");
+    tt->help = tdrpStrDup("Included as metadata in CEDRIC files. CEDRIC was written for radar data, so we need to supply radar meta-data, even if this is simulated.");
+    tt->array_offset = (char *) &_cedric_elevation_angles - &_start_;
+    tt->array_n_offset = (char *) &cedric_elevation_angles_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(double);
+    tt->array_n = 12;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].d = 0.5;
+      tt->array_vals[1].d = 1;
+      tt->array_vals[2].d = 1.5;
+      tt->array_vals[3].d = 2;
+      tt->array_vals[4].d = 3;
+      tt->array_vals[5].d = 4;
+      tt->array_vals[6].d = 5;
+      tt->array_vals[7].d = 7.5;
+      tt->array_vals[8].d = 10;
+      tt->array_vals[9].d = 12.5;
+      tt->array_vals[10].d = 15;
+      tt->array_vals[11].d = 20;
     tt++;
     
     // trailing entry has param_name set to NULL

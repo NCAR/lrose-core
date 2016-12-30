@@ -102,7 +102,7 @@ void RadxBuf::reset()
 void RadxBuf::setAllowShrink(bool allowshrink /* = true */)
 {
   _allowShrink = allowshrink;
-};
+}
 
 ///////////////////////////////////////////////////////////////
 // 

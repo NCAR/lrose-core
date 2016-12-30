@@ -786,17 +786,17 @@ int GemRadxFile::_loadSweep(int sweepNum,
   }
 
   const GemSweep &sweepField0 = *(_fields[0]->getSweeps()[sweepNum]);
-  const vector<double> &azAngles = sweepField0.getAzAngles();
-  double prevAz = azAngles[0];
+  const vector<double> &angles = sweepField0.getAngles();
+  double prevAngle = angles[0];
 
-  double deltaTime = ((double) endTime - (double) startTime) / (_nAz + 1.0);
+  double deltaTime = ((double) endTime - (double) startTime) / (_nAngles + 1.0);
 
   // loop through the beams
 
   time_t lastTime = 0;
   double dSecs = 0.0;
 
-  for (int iaz = 0; iaz < _nAz; iaz++) {
+  for (int iangle = 0; iangle < _nAngles; iangle++) {
     
     // create new ray
     
@@ -808,18 +808,31 @@ int GemRadxFile::_loadSweep(int sweepNum,
 
     // compute change in azimuth
 
-    double az = azAngles[iaz];
-    double absDeltaAz = fabs(az - prevAz);
-    if (absDeltaAz > 180) {
-      absDeltaAz = fabs(absDeltaAz - 360);
+    double angle = angles[iangle];
+    double absDeltaAngle = fabs(angle - prevAngle);
+    if (absDeltaAngle > 180) {
+      absDeltaAngle = fabs(absDeltaAngle - 360);
     }
-    prevAz = az;
+    prevAngle = angle;
 
     // set angles
 
-    ray->setAzimuthDeg(az);
-    ray->setElevationDeg(sweepField0.getElev());
-    ray->setFixedAngleDeg(sweepField0.getElev());
+    if (_fields[0]->getIsRhi()) {
+      if (angle > 180.0) {
+        ray->setElevationDeg(angle - 360.0);
+      } else {
+        ray->setElevationDeg(angle);
+      }
+      ray->setAzimuthDeg(sweepField0.getFixedAngle());
+    } else {
+      if (angle < 0) {
+        ray->setAzimuthDeg(angle + 360.0);
+      } else {
+        ray->setAzimuthDeg(angle);
+      }
+      ray->setElevationDeg(sweepField0.getFixedAngle());
+    }
+    ray->setFixedAngleDeg(sweepField0.getFixedAngle());
     
     ray->setTrueScanRateDegPerSec(antennaSpeed);
     ray->setTargetScanRateDegPerSec(antennaSpeed);
@@ -834,9 +847,9 @@ int GemRadxFile::_loadSweep(int sweepNum,
     // otherwiste use fixed delta time
     
     if (antennaSpeed > 0) {
-      dSecs += (absDeltaAz / antennaSpeed);
+      dSecs += (absDeltaAngle / antennaSpeed);
     } else {
-      dSecs = iaz * deltaTime;
+      dSecs = iangle * deltaTime;
     }
 
     int iSecs = (int) dSecs;
@@ -851,9 +864,14 @@ int GemRadxFile::_loadSweep(int sweepNum,
     
     ray->setRangeGeom(sweepField0.getStartRange(), sweepField0.getGateSpacing());
     ray->setNGates(_nGates);
-    
-    ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
-    // ray->setSweepMode(Radx::SWEEP_MODE_RHI);
+
+    if (_fields[0]->getIsRhi()) {
+      ray->setSweepMode(Radx::SWEEP_MODE_RHI);
+    } else if (_fields[0]->getIsSector()) {
+      ray->setSweepMode(Radx::SWEEP_MODE_SECTOR);
+    } else {
+      ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
+    }
 
     // polarization mode
     if (sweepField0.getIsDualPol()) {
@@ -920,7 +938,7 @@ int GemRadxFile::_loadSweep(int sweepNum,
         // get input data - unsigned
         
         const Radx::ui08 *uData = sweep.getFieldData();
-        const Radx::ui08 *ud = uData + (iaz * _nGates);
+        const Radx::ui08 *ud = uData + (iangle * _nGates);
 
         // convert to signed
 
@@ -938,7 +956,7 @@ int GemRadxFile::_loadSweep(int sweepNum,
         // get input data - unsigned
         
         const Radx::ui16 *uData = (Radx::ui16 *) sweep.getFieldData();
-        const Radx::ui16 *ud = uData + (iaz * _nGates);
+        const Radx::ui16 *ud = uData + (iangle * _nGates);
 
         // convert to signed
 
@@ -975,7 +993,7 @@ int GemRadxFile::_loadSweep(int sweepNum,
     
     _rays.push_back(ray);
     
-  } // iaz
+  } // iangle
 
   if (_debug) {
     cerr << "          end   time: " << RadxTime::strm(lastTime) << endl;
@@ -1264,7 +1282,7 @@ int GemRadxFile::_computeNSweeps()
 }
 
 //////////////////////////////////////////////////
-// set number of azimuths in sweep
+// set number of angles in sweep
 // returns 0 on success, -1 on failure
 
 int GemRadxFile::_setSweepGeom(int sweepNum)
@@ -1272,19 +1290,19 @@ int GemRadxFile::_setSweepGeom(int sweepNum)
 {
 
   const GemSweep &field0 = *(_fields[0]->getSweeps()[sweepNum]);
-  _nAz = field0.getNAz();
+  _nAngles = field0.getNAngles();
   _nGates = field0.getNGates();
   
   for (int ii = 1; ii < (int) _fields.size(); ii++) {
     const GemSweep &field = *(_fields[ii]->getSweeps()[sweepNum]);
-    if (_nAz < 1) {
+    if (_nAngles < 1) {
       _addErrStr("ERROR - GemRadxFile::_setSweepGeom");
-      _addErrInt("  nAz not positive: ", _nAz);
+      _addErrInt("  nAngles not positive: ", _nAngles);
       return -1;
     }
-    if (_nAz != field.getNAz()) {
+    if (_nAngles != field.getNAngles()) {
       _addErrStr("ERROR - GemRadxFile::_setSweepGeom");
-      _addErrStr("  nAz not constant across fields");
+      _addErrStr("  nAngles not constant across fields");
       return -1;
     }
     if (_nGates != field.getNGates()) {

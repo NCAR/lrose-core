@@ -26,6 +26,12 @@ paramdef enum debug_t {
   p_help = "If set, debug messages will be printed appropriately";
 } debug;
 
+paramdef int {
+  p_default = 30;
+  p_descr = "Interval at which beam data is printed in debug mode.";
+  p_help = "We print out beam details in debug mode - this is the number of beams between each print.";
+} beam_count_for_debug_print;
+
 paramdef string {
   p_default = "test";
   p_descr = "Process instance";
@@ -129,6 +135,12 @@ paramdef boolean {
   p_descr = "Option to change the sign of the velocity in staggered mode.";
   p_help = "If true, the sign of the velocity will be changed only in staggered mode. Both this and the 'change_velocity_sign' parameter in moments_params will be applied, so if both are true they will cancel out.";
 } change_velocity_sign_staggered;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use the pulse width in the ts_processing headers.";
+  p_help = "The default mode is to use the pulse width from the pulse headers. However, for some radar systems the pulse width is correct in the ts_processing headers, but not correct in the pulse headers. So this option allows you to override the pulse width in the pulse headers by copying it over from the ts_processing header.";
+} use_pulse_width_from_ts_proc;
 
 paramdef boolean {
   p_default = false;
@@ -1574,41 +1586,6 @@ paramdef int {
   p_help = "ARCHIVE and SIMULATE modes only.";
 } beam_wait_msecs;
 
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to set the end of vol flag based on elevation angle.";
-  p_help = "If true, the program will look for changes in antenna angle to compute the end of volume.";
-} set_end_of_vol_from_elev_angle;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Flag to indicate that elevation angles increase in the volume.";
-  p_help = "If the volume starts at the top, i.e. elevations decrease during the volume, set this to FALSE.";
-} vol_starts_at_bottom;
-
-paramdef double {
-  p_default = 1.5;
-  p_min = 0.1;
-  p_descr = "Change in elevation which triggers and end of volume.";
-  p_help = "If the elevation angle changes by this amount, and end of volume flag will be set.";
-} elev_change_for_end_of_vol;
-
-paramdef int {
-  p_default = 360;
-  p_descr = "Min number of beams per volume.";
-  p_help = "Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume. Only used for set_end_of_vol_from_elev_angle.";
-} min_beams_per_vol;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to set the end-of-vol flag when the PRF changes.";
-} set_end_of_vol_on_prf_change;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to set the end-of-vol flag when the pulse width changes.";
-} set_end_of_vol_on_pulse_width_change;
-
 typedef enum {
 
   // reflectivity
@@ -1805,9 +1782,6 @@ typedef enum {
   LAG0_HCVX_DB,
   LAG0_HCVX_PHASE,
 
-  LAG0_VXHX_DB,
-  LAG0_VXHX_PHASE,
-
   LAG1_HC_DB,
   LAG1_HC_PHASE,
 
@@ -1983,20 +1957,15 @@ paramdef struct output_field_t {
 } output_fields[];
 
 commentdef {
-  p_header = "SWEEP INFORMATION";
-  p_text = "Option to read volume and tilt numbers from sweep information in the incoming pulse data.";
-};
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to read sweep info from time series data.";
-  p_help = "If not, we need to guess at the sweep information.";
-} use_sweep_info_from_time_series;
-
-commentdef {
   p_header = "SWEEP TRANSITIONS";
   p_text = "We can modify the end-of-sweep and start-of-sweep conditions found in the time series.";
 };
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to read sweep info from time series data.";
+  p_help = "If not, we need to guess at the sweep information.";
+} use_sweep_info_from_time_series;
 
 paramdef boolean {
   p_default = false;
@@ -2010,11 +1979,71 @@ paramdef boolean {
   p_help = "We monitor the antenna movement direction. When this changes, we set the end of sweep flag.";
 } set_end_of_sweep_when_antenna_changes_direction;
 
+paramdef double {
+  p_default = 0.25;
+  p_descr = "The required angle difference for detecting direction change (deg).";
+  p_help = "We examine the antenna angles for reversal in motion direction. The antenna must move by at least this amount for deducing the direction.";
+} required_delta_angle_for_antenna_direction_change;
+
+paramdef int {
+  p_default = 45;
+  p_descr = "Min number of rays in a sweep when finding end of sweep from dirn change.";
+  p_help = "If the number of rays is less than this at the time of a direction change, a change in sweep number is not triggered.";
+} min_rays_in_sweep_for_antenna_direction_change;
+
 paramdef int {
   p_default = 32;
   p_descr = "Max number of sweeps in volume when finding end of sweep from dirn change.";
   p_help = "Used to trigger end of volume if sweep number gets too high. Only applies if set_end_of_sweep_when_antenna_changes_direction is true.";
 } max_sweeps_in_vol_for_antenna_direction_change;
+
+commentdef {
+  p_header = "VOLUME TRANSITIONS";
+  p_text = "We can modify the end-of-volume conditions found in the time series. This section only applies if 'use_volume_info_from_time_series' is set to FALSE.";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to read volume info from time series data.";
+  p_help = "If not, we need to deduce the end of volume conditions. The options that follow only apply if this parameter is set to false.";
+} use_volume_info_from_time_series;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to set the end of vol flag based on elevation angle.";
+  p_help = "If true, the program will look for changes in antenna angle to compute the end of volume. Only applies if 'use_volume_info_from_time_series' is false.";
+} set_end_of_vol_from_elev_angle;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Flag to indicate that elevation angles increase in the volume.";
+  p_help = "If the volume starts at the top, i.e. elevations decrease during the volume, set this to FALSE. Only applies if 'use_volume_info_from_time_series' is false.";
+} vol_starts_at_bottom;
+
+paramdef double {
+  p_default = 1.5;
+  p_min = 0.1;
+  p_descr = "Change in elevation which triggers and end of volume.";
+  p_help = "If the elevation angle changes by this amount, and end of volume flag will be set. Only applies if 'use_volume_info_from_time_series' is false.";
+} elev_change_for_end_of_vol;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Min number of beams per volume.";
+  p_help = "Used to prevent end-of-volume conditions being determined during antenna transition to the start of the next volume. Only used for set_end_of_vol_from_elev_angle.";
+} min_beams_per_vol;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to set the end-of-vol flag when the PRF changes.";
+  p_help = "Only applies if 'use_volume_info_from_time_series' is false.";
+} set_end_of_vol_on_prf_change;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set the end-of-vol flag when the pulse width changes.";
+  p_help = "Only applies if 'use_volume_info_from_time_series' is false.";
+} set_end_of_vol_on_pulse_width_change;
 
 commentdef {
   p_header = "TRANSITION FLAG";

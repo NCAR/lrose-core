@@ -267,7 +267,7 @@ int ScanParams::set(const char *line, int nScans)
 	     << "but video_res not set yet" << endl;
 	return -1;
     }
-    char lcopy[strlen(line) + 1];
+    char *lcopy = new char[strlen(line) + 1];
     strcpy(lcopy, line);
     char *tok = strtok(lcopy, " \n\t\r");
     dbz_levels.clear();
@@ -293,9 +293,11 @@ int ScanParams::set(const char *line, int nScans)
 	cerr << "  Expected nlevels: " << video_res << endl;
 	cerr << "  Only found: " << i - 1 << endl;
 	cerr << "  " << line;
+        delete[] lcopy;
 	return -1;
       }
     }
+    delete[] lcopy;
     return 0;
   }
 

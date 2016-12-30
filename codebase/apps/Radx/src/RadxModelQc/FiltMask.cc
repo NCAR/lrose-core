@@ -40,7 +40,7 @@ FiltMask::FiltMask(const Params::data_filter_t f,
   _type = P._parm_mask[f.filter_index].type;
   _maskThreshold = P._parm_mask[f.filter_index].mask_threshold;
   _dataReplacementValue = P._parm_mask[f.filter_index].data_replacement_value;
-  _replaceWithMissing = P._parm_thresh[f.filter_index].replace_with_missing;
+  _replaceWithMissing = P._parm_mask[f.filter_index].replace_with_missing;
 }
 
 //------------------------------------------------------------------

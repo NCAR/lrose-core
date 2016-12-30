@@ -22,6 +22,7 @@ SUB_DIRS = \
 	moments \
 	pid \
 	precip \
+	qc \
 	radx \
 	spol \
 	ts

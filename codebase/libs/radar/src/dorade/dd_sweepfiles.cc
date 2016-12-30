@@ -21,15 +21,14 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/* 	$Id: dd_sweepfiles.cc,v 1.7 2016/03/03 18:45:06 dixon Exp $	 */
+/* 	$Id: dd_sweepfiles.cc,v 1.8 2016/10/17 23:50:58 dixon Exp $	 */
 
 
-# include <errno.h>
-extern int errno;
-# include <stdio.h>
-# include <stdlib.h>
+# include <cerrno>
+# include <cstdio>
+# include <cstdlib>
 # include <unistd.h>
-# include <string.h>
+# include <cstring>
 # include <sys/types.h>
 # include <time.h>
 # include <sys/time.h>

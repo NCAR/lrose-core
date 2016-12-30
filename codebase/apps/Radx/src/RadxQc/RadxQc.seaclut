@@ -1,0 +1,2477 @@
+/**********************************************************************
+ * TDRP params for ./RadxQc
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxQc reads moments from Radx-supported format files, and performs 
+//   Quality Control operations on the data. It optionally adds QC fields 
+//   to the output, and optionally censors the input data based on the QC 
+//   results.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "rlan-seaclut";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register this process with the process mapper (procmap).
+//
+// If TRUE, every minute this process will register a heartbeat with 
+//   procmap. If the process hangs, it will be restared by the 
+//   auto_restarter.
+//
+//
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+///////////// procmap_register_interval ///////////////
+//
+// Interval for registering with procmap (secs).
+//
+// The app will register with procmap at this interval, to update its 
+//   status. If it does not register within twice this interval, the 
+//   auto_restart script will restart the app.
+//
+//
+// Type: int
+//
+
+procmap_register_interval = 60;
+
+//======================================================================
+//
+// THREADING FOR SPEED.
+//
+//======================================================================
+ 
+///////////// use_multiple_threads ////////////////////
+//
+// Option to use multiple compute threads to improve performance.
+//
+// The read and write stages occur in the main thread, since netCDF is 
+//   not thread safe. The compute stage can be multi-threaded to improve 
+//   performance.
+//
+//
+// Type: boolean
+//
+
+use_multiple_threads = FALSE;
+
+///////////// n_compute_threads ///////////////////////
+//
+// The number of compute threads.
+//
+// The moments computations are segmented in range, with each thread 
+//   computing a fraction of the number of gates. For maximum performance, 
+//   n_threads should be set to the number of processors multiplied by 4. 
+//   For further tuning, use top to maximize CPU usage while varying the 
+//   number of threads.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+n_compute_threads = 8;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+//
+// Files will be searched for in this directory.
+//
+//
+// Type: string
+//
+
+input_dir = "$(HOME)/data/rlan/cfradial/DB";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = REALTIME;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+///////////// input_file_search_ext ///////////////////
+//
+// File name extension.
+//
+// If set, only files with this extension will be processed.
+//
+//
+// Type: string
+//
+
+input_file_search_ext = "";
+
+///////////// input_file_search_substr ////////////////
+//
+// File name sub-string.
+//
+// If set, only files with names containing this sub-string will be 
+//   processed.
+//
+//
+// Type: string
+//
+
+input_file_search_substr = "";
+
+//======================================================================
+//
+// READ OPTIONS.
+//
+//======================================================================
+ 
+///////////// aggregate_sweep_files_on_read ///////////
+//
+// Option to aggregate sweep files into a volume on read.
+//
+// If true, and the input data is in sweeps rather than volumes (e.g. 
+//   DORADE), the sweep files from a volume will be aggregated into a 
+//   volume.
+//
+//
+// Type: boolean
+//
+
+aggregate_sweep_files_on_read = FALSE;
+
+///////////// remove_rays_with_antenna_transitions ////
+//
+// Option to remove rays taken while the antenna was in transition.
+//
+// If true, rays with the transition flag set will not be used. The 
+//   transiton flag is set when the antenna is in transtion between one 
+//   sweep and the next.
+//
+//
+// Type: boolean
+//
+
+remove_rays_with_antenna_transitions = FALSE;
+
+///////////// transition_nrays_margin /////////////////
+//
+// Number of transition rays to include as a margin.
+//
+// Sometimes the transition flag is turned on too early in a transition, 
+//   on not turned off quickly enough after a transition. If you set this 
+//   to a number greater than 0, that number of rays will be included at 
+//   each end of the transition, i.e. the transition will effectively be 
+//   shorter at each end by this number of rays.
+//
+//
+// Type: int
+//
+
+transition_nrays_margin = 0;
+
+///////////// trim_surveillance_sweeps_to_360deg //////
+//
+// Option to trip surveillance sweeps so that they only cover 360 
+//   degrees.
+//
+// Some sweeps will have rays which cover more than a 360-degree 
+//   rotation. Often these include antenna transitions. If this is set to 
+//   true, rays are trimmed off either end of the sweep to limit the 
+//   coverage to 360 degrees. The median elevation angle is computed and 
+//   the end ray which deviates from the median in elevation is trimmed 
+//   first.
+//
+//
+// Type: boolean
+//
+
+trim_surveillance_sweeps_to_360deg = FALSE;
+
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range for any ray.
+//
+//
+// Type: boolean
+//
+
+set_max_range = FALSE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+//
+// Gates beyond this range are removed.
+//
+//
+// Type: double
+//
+
+max_range_km = 9999;
+
+///////////// set_ngates_constant /////////////////////
+//
+// Option to force the number of gates to be constant.
+//
+// If TRUE, the number of gates on all rays will be set to the maximum, 
+//   and gates added to shorter rays will be filled with missing values.
+//
+//
+// Type: boolean
+//
+
+set_ngates_constant = FALSE;
+
+///////////// set_fixed_angle_limits //////////////////
+//
+// Option to set fixed angle limits.
+//
+// Only use sweeps within the specified fixed angle limits.
+//
+//
+// Type: boolean
+//
+
+set_fixed_angle_limits = FALSE;
+
+///////////// lower_fixed_angle_limit /////////////////
+//
+// Lower fixed angle limit - degrees.
+//
+//
+// Type: double
+//
+
+lower_fixed_angle_limit = 0;
+
+///////////// upper_fixed_angle_limit /////////////////
+//
+// Upper fixed angle limit - degrees.
+//
+//
+// Type: double
+//
+
+upper_fixed_angle_limit = 7;
+
+///////////// set_sweep_num_limits ////////////////////
+//
+// Option to set sweep number limits.
+//
+// Only read sweeps within the specified sweep number limits.
+//
+//
+// Type: boolean
+//
+
+set_sweep_num_limits = FALSE;
+
+///////////// lower_sweep_num /////////////////////////
+//
+// Lower sweep number limit.
+//
+//
+// Type: int
+//
+
+lower_sweep_num = 0;
+
+///////////// upper_sweep_num /////////////////////////
+//
+// Upper sweep number limit.
+//
+//
+// Type: int
+//
+
+upper_sweep_num = 0;
+
+//======================================================================
+//
+// OPTION TO OVERRIDE RADAR LOCATION.
+//
+//======================================================================
+ 
+///////////// override_radar_location /////////////////
+//
+// Option to override the radar location.
+//
+// If true, the location in this file will be used. If not, the location 
+//   in the time series data will be used.
+//
+//
+// Type: boolean
+//
+
+override_radar_location = FALSE;
+
+///////////// radar_latitude_deg //////////////////////
+//
+// Radar latitude (deg).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_latitude_deg = -999;
+
+///////////// radar_longitude_deg /////////////////////
+//
+// Radar longitude (deg).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_longitude_deg = -999;
+
+///////////// radar_altitude_meters ///////////////////
+//
+// Radar altitude (meters).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_altitude_meters = -999;
+
+//======================================================================
+//
+// INPUT FIELD INFORMATION.
+//
+// Names of fields in the input file. The following fields are required: 
+//   SNR, DBZ, ZDR, PHIDP and RHOHV. KDP is also required internally, but 
+//   if KDP is not available it will be computed from PHIDP. LDR is 
+//   optional, and is used for PID only.
+//
+//======================================================================
+ 
+///////////// DBZ_field_name //////////////////////////
+//
+// Field name for DBZ.
+//
+// Horizontally-polarized reflectivity factor.
+//
+//
+// Type: string
+//
+
+DBZ_field_name = "DBZ_F";
+
+///////////// VEL_field_name //////////////////////////
+//
+// Field name for radial velocity.
+//
+// This is used in quality checks.
+//
+//
+// Type: string
+//
+
+VEL_field_name = "VEL_F";
+
+///////////// WIDTH_available /////////////////////////
+//
+// Is WIDTH data available?.
+//
+// If NCP is not available, this field is used for locating RLAN 
+//   interference.
+//
+//
+// Type: boolean
+//
+
+WIDTH_available = TRUE;
+
+///////////// WIDTH_field_name ////////////////////////
+//
+// Field name for WIDTH.
+//
+//
+// Type: string
+//
+
+WIDTH_field_name = "WIDTH_F";
+
+///////////// NCP_available ///////////////////////////
+//
+// Is NCP data available?.
+//
+// This field is used for locating RLAN interference. If it is not 
+//   available, use spectrum width instead.
+//
+//
+// Type: boolean
+//
+
+NCP_available = TRUE;
+
+///////////// NCP_field_name //////////////////////////
+//
+// Field name for NCP.
+//
+//
+// Type: string
+//
+
+NCP_field_name = "NCP_F";
+
+///////////// SNR_available ///////////////////////////
+//
+// Is SNR data available?.
+//
+// If not, SNR will be computed from the DBZ field. See 
+//   'noise_dbz_at_100km'.
+//
+//
+// Type: boolean
+//
+
+SNR_available = TRUE;
+
+///////////// SNR_field_name //////////////////////////
+//
+// Field name for SNR.
+//
+// Signal-to-noise ratio (dB).
+//
+//
+// Type: string
+//
+
+SNR_field_name = "SNRHC_F";
+
+///////////// noise_dbz_at_100km //////////////////////
+//
+// The noise value, represented as dBZ at a range of 100km.
+//
+// Used to fill in missing reflectivity data for the vertical gradient 
+//   of reflectivity in identifying sea clutter and AP. Also used if 
+//   SNR_available is set to FALSE. It is used for computing the SNR from 
+//   the DBZ field. The SNR will be computed by range-correcting this 
+//   value and using it as the noise value.
+//
+//
+// Type: double
+//
+
+noise_dbz_at_100km = 0;
+
+///////////// ZDR_available ///////////////////////////
+//
+// Is ZDR data available?.
+//
+//
+// Type: boolean
+//
+
+ZDR_available = TRUE;
+
+///////////// ZDR_field_name //////////////////////////
+//
+// Field name for ZDR.
+//
+//
+// Type: string
+//
+
+ZDR_field_name = "ZDR_F";
+
+///////////// PHIDP_available /////////////////////////
+//
+// Is PHIDP data available?.
+//
+//
+// Type: boolean
+//
+
+PHIDP_available = TRUE;
+
+///////////// PHIDP_field_name ////////////////////////
+//
+// Field name for PHIDP.
+//
+//
+// Type: string
+//
+
+PHIDP_field_name = "PHIDP_F";
+
+///////////// RHOHV_available /////////////////////////
+//
+// Is RHOHV data available?.
+//
+//
+// Type: boolean
+//
+
+RHOHV_available = TRUE;
+
+///////////// RHOHV_field_name ////////////////////////
+//
+// Field name for RHOHV.
+//
+//
+// Type: string
+//
+
+RHOHV_field_name = "RHOHV_F";
+
+///////////// compute_KDP /////////////////////////////
+//
+// Compute KDP from PHIDP.
+//
+// If KDP is not available, it can be computed from PHIDP.
+//
+//
+// Type: boolean
+//
+
+compute_KDP = TRUE;
+
+///////////// KDP_fir_filter_len //////////////////////
+//
+// Filter length for the FIR filter for PHIDP (gates).
+//
+// When computing KDP, an FIR filter is first applied to PHIDP to smooth 
+//   it. This is the length of that filter, in gates.
+//
+//
+// Type: enum
+// Options:
+//     FIR_LEN_125
+//     FIR_LEN_60
+//     FIR_LEN_40
+//     FIR_LEN_30
+//     FIR_LEN_20
+//     FIR_LEN_10
+//
+
+KDP_fir_filter_len = FIR_LEN_10;
+
+///////////// KDP_n_filt_iterations_unfolded //////////
+//
+// Sets the number of iterations for the initial FIR filter for unfolded 
+//   PHIDP.
+//
+// After unfolding PHIDP, the FIR filter is applied to the unfolded 
+//   phidp, a number of times, to smooth it. The effect of the filter is a 
+//   combination of the filter length and the number of iterations.
+//
+//
+// Type: int
+//
+
+KDP_n_filt_iterations_unfolded = 2;
+
+///////////// KDP_n_filt_iterations_conditioned ///////
+//
+// Sets the number of iterations for the final FIR filter for 
+//   conditioned PHIDP.
+//
+// In order to identify phase shift on backscatter (PSOB), we condition 
+//   the PHIDP to keep it generally increasing with range. The FIR filter 
+//   is applied to the conditioned phidp a number of times, to smooth it. 
+//   The effect of the filter is a combination of the filter length and 
+//   the number of iterations.
+//
+//
+// Type: int
+//
+
+KDP_n_filt_iterations_conditioned = 4;
+
+///////////// KDP_use_iterative_filtering /////////////
+//
+// Perform iterative filtering to locate backscatter phase shift.
+//
+//
+// Type: boolean
+//
+
+KDP_use_iterative_filtering = FALSE;
+
+///////////// KDP_phidp_difference_threshold //////////
+//
+// Difference threshold for the iterative filtering method.
+//
+// The FIR filter is applied successively, 
+//   KDP_n_filt_iterations_conditioned times. After each iteration the 
+//   result is checked against the original. If the difference is less 
+//   than this parameter, the original value at that gate is retained. If 
+//   the difference exceeds this parameter, the new filtered value is 
+//   retained.
+//
+//
+// Type: double
+//
+
+KDP_phidp_difference_threshold = 4;
+
+///////////// KDP_ngates_for_stats ////////////////////
+//
+// Number of gates over which the phidp mean, sdev and jitter are 
+//   computed.
+//
+// The mean, sdev and jitter of phidp are computed over a consecutive 
+//   number of gates in range, centered on the current gate of interest. 
+//   This parameter is the number of gates over which these statistics are 
+//   computed.
+//
+//
+// Type: int
+//
+
+KDP_ngates_for_stats = 9;
+
+///////////// KDP_phidp_sdev_max //////////////////////
+//
+// Sets the threshold for the standard deviation of phidp in range.
+//
+// The sdev of phidp is a good test for valid phidp. The sdev is 
+//   computed in the circle, so that it takes account of folding if 
+//   present. If the sdev is less than this value, it is assumed we are in 
+//   weather. Applies to computation of KDP only.
+//
+//
+// Type: double
+//
+
+KDP_phidp_sdev_max = 20;
+
+///////////// KDP_phidp_jitter_max ////////////////////
+//
+// Sets the threshold for the jitter of phidp in range.
+//
+// The jitter of phidp is defined as the mean absolute change in angle 
+//   between successive phidp measurements in range. It is computed on the 
+//   circle to take account of folding. If the jitter is less than this 
+//   value, it is assumed we are in weather. Applies to computation of KDP 
+//   only.
+//
+//
+// Type: double
+//
+
+KDP_phidp_jitter_max = 25;
+
+///////////// KDP_min_valid_abs_kdp ///////////////////
+//
+// Sets the min valid KDP value.
+//
+// Values less than this are set to 0.
+//
+//
+// Type: double
+//
+
+KDP_min_valid_abs_kdp = 0.01;
+
+///////////// KDP_check_snr ///////////////////////////
+//
+// Check the SNR.
+//
+//
+// Type: boolean
+//
+
+KDP_check_snr = FALSE;
+
+///////////// KDP_snr_threshold ///////////////////////
+//
+// Sets the threshold for checking SNR (dB).
+//
+// If the SNR drops below this value, KDP will not be computed at this 
+//   gate.
+//
+//
+// Type: double
+//
+
+KDP_snr_threshold = -6;
+
+///////////// KDP_check_rhohv /////////////////////////
+//
+// Check the RHOHV.
+//
+//
+// Type: boolean
+//
+
+KDP_check_rhohv = TRUE;
+
+///////////// KDP_rhohv_threshold /////////////////////
+//
+// Sets the threshold for checking RHOHV.
+//
+// If the RHOHV drops below this value, KDP will not be computed at this 
+//   gate.
+//
+//
+// Type: double
+//
+
+KDP_rhohv_threshold = 0.95;
+
+///////////// KDP_check_zdr_sdev //////////////////////
+//
+// Check the standard deviation of ZDR in range?.
+//
+//
+// Type: boolean
+//
+
+KDP_check_zdr_sdev = FALSE;
+
+///////////// KDP_zdr_sdev_max ////////////////////////
+//
+// Sets the threshold for the standard deviation of zdr in range.
+//
+// The sdev of zdr is a good test for clutter. If the sdev is less than 
+//   this value, it is assumed we are in weather. Applies to computation 
+//   of KDP only.
+//
+//
+// Type: double
+//
+
+KDP_zdr_sdev_max = 2;
+
+///////////// KDP_debug ///////////////////////////////
+//
+// Option to print debug messages in KDP computation.
+//
+//
+// Type: boolean
+//
+
+KDP_debug = FALSE;
+
+///////////// KDP_write_ray_files /////////////////////
+//
+// Option to write ray files to debug KDP computation.
+//
+//
+// Type: boolean
+//
+
+KDP_write_ray_files = FALSE;
+
+///////////// KDP_ray_files_dir ///////////////////////
+//
+// Directory for KDP ray files.
+//
+//
+// Type: string
+//
+
+KDP_ray_files_dir = "/tmp/kdp_ray_files";
+
+//======================================================================
+//
+// PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR.
+//
+//======================================================================
+ 
+///////////// apply_precip_attenuation_correction /////
+//
+// Option to apply precip attenuation correction for DBZ and ZDR.
+//
+// The following extra fields will be computed:
+// 	DBZ_ATTEN_CORRECTION - correction in dB
+// 	ZDR_ATTEN_CORRECTION - correction in dB
+// 	DBZ_ATTEN_CORRECTED - DBZHC corrected
+// 	ZDR_ATTEN_CORRECTED - ZDR corrected.
+//
+//
+// Type: boolean
+//
+
+apply_precip_attenuation_correction = FALSE;
+
+///////////// specify_coefficients_for_attenuation_correction 
+//
+// Option to specify the coefficients and exponents - see below.
+//
+// If false, the default coefficients will be determined for the radar 
+//   wavelength.
+//
+//
+// Type: boolean
+//
+
+specify_coefficients_for_attenuation_correction = FALSE;
+
+///////////// dbz_attenuation_coefficient /////////////
+//
+// Coefficient for computing DBZ attenuation correction.
+//
+// See Bringi and Chandrasekar, Table 7.1, page 494.
+//
+//
+// Type: double
+//
+
+dbz_attenuation_coefficient = 0.017;
+
+///////////// dbz_attenuation_exponent ////////////////
+//
+// Exponent for computing DBZ attenuation correction.
+//
+// See Bringi and Chandrasekar, Table 7.1, page 494.
+//
+//
+// Type: double
+//
+
+dbz_attenuation_exponent = 0.84;
+
+///////////// zdr_attenuation_coefficient /////////////
+//
+// Coefficient for computing ZDR attenuation correction.
+//
+// See Bringi and Chandrasekar, Table 7.1, page 494.
+//
+//
+// Type: double
+//
+
+zdr_attenuation_coefficient = 0.017;
+
+///////////// zdr_attenuation_exponent ////////////////
+//
+// Exponent for computing ZDR attenuation correction.
+//
+// See Bringi and Chandrasekar, Table 7.1, page 494.
+//
+//
+// Type: double
+//
+
+zdr_attenuation_exponent = 0.84;
+
+//======================================================================
+//
+// LOCATING RLAN INTERFERENCE.
+//
+//======================================================================
+ 
+///////////// locate_rlan_interference ////////////////
+//
+// Option to locate gates with RLAN interference.
+//
+// This particularly applies to C-band. You need to activate this step 
+//   if you want RLAN to show up in the PID classification.
+//
+//
+// Type: boolean
+//
+
+locate_rlan_interference = TRUE;
+
+//======================================================================
+//
+// INTEREST MAPS and WEIGHTS for RLAN DETECTION.
+//
+// Each map should hold at least 2 points. The points should be 
+//   increasing in value, i.e. the value should increase for each 
+//   subsequent point. The various interest values are combined using the 
+//   specified weights in a weighted mean to produce the final interest 
+//   value.
+//
+// For locating RLAN, we use the gate-to-gate phase_noise, ncp_mean (or 
+//   width_mean if ncp is not available) and snr_dmode.
+//
+// For locating NOISE, we use the gate-to-gate phase_noise, ncp_mean (or 
+//   width_mean if ncp is not available) and snr_sdev.
+//
+//======================================================================
+ 
+///////////// rlan_phase_noise_interest_map ///////////
+//
+// RLAN interest mapping for phase noise.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+rlan_phase_noise_interest_map = {
+  {
+    value = 35,
+    interest = 0.001
+  }
+  ,
+  {
+    value = 45,
+    interest = 1
+  }
+};
+
+///////////// rlan_phase_noise_weight /////////////////
+//
+// RLAN weight for interest for phase noise.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+rlan_phase_noise_weight = 1;
+
+///////////// rlan_ncp_mean_interest_map //////////////
+//
+// RLAN interest mapping for mean of ncp.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+rlan_ncp_mean_interest_map = {
+  {
+    value = 0.1,
+    interest = 1
+  }
+  ,
+  {
+    value = 0.2,
+    interest = 0.001
+  }
+};
+
+///////////// rlan_ncp_mean_weight ////////////////////
+//
+// Weight for interest for mean of ncp.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+rlan_ncp_mean_weight = 1;
+
+///////////// rlan_width_mean_interest_map ////////////
+//
+// RLAN interest mapping for mean of width.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+rlan_width_mean_interest_map = {
+  {
+    value = 4.5,
+    interest = 0.001
+  }
+  ,
+  {
+    value = 5.5,
+    interest = 1
+  }
+};
+
+///////////// rlan_width_mean_weight //////////////////
+//
+// Weight for interest for mean of width.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+rlan_width_mean_weight = 1;
+
+///////////// rlan_snr_dmode_interest_map /////////////
+//
+// RLAN interest mapping for delta mode of snr.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+rlan_snr_dmode_interest_map = {
+  {
+    value = 2,
+    interest = 1
+  }
+  ,
+  {
+    value = 2.5,
+    interest = 0.001
+  }
+};
+
+///////////// rlan_snr_dmode_weight ///////////////////
+//
+// Weight for interest for delta mode of snr.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+rlan_snr_dmode_weight = 1;
+
+///////////// rlan_snr_sdev_interest_map //////////////
+//
+// RLAN interest mapping for sdev of snr.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+rlan_snr_sdev_interest_map = {
+  {
+    value = 0.65,
+    interest = 1
+  }
+  ,
+  {
+    value = 0.75,
+    interest = 0.001
+  }
+};
+
+///////////// rlan_snr_sdev_weight ////////////////////
+//
+// Weight for interest for sdev of snr.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+rlan_snr_sdev_weight = 1;
+
+///////////// rlan_interest_threshold /////////////////
+//
+// Threshold interest value for identifying RLAN interference.
+//
+// If the fuzzy interest value exceeds this threshold, RLAN is assumed 
+//   to exist at that gate.
+//
+//
+// Type: double
+//
+
+rlan_interest_threshold = 0.51;
+
+//======================================================================
+//
+// LOCATING SEA CLUTTER.
+//
+//======================================================================
+ 
+///////////// locate_sea_clutter //////////////////////
+//
+// Option to locate gates with sea clutter.
+//
+// You need to activate this step if you want sea clutter to show up in 
+//   the PID classification.
+//
+//
+// Type: boolean
+//
+
+locate_sea_clutter = TRUE;
+
+///////////// override_standard_pseudo_earth_radius ///
+//
+// Option to override the standard 4/3 earth radius model for 
+//   refraction.
+//
+// If true, the standard 4/3 earth radius will be overridden. The US NWS 
+//   NEXRAD system uses 1.21 instead of 1.333.
+//
+//
+// Type: boolean
+//
+
+override_standard_pseudo_earth_radius = FALSE;
+
+///////////// pseudo_earth_radius_ratio ///////////////
+//
+// Ratio for computing the pseudo earth radius for beam height 
+//   computations.
+//
+// For standard refraction this is 4/3. For super refraction it will be 
+//   less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 
+//   1.21.
+//
+//
+// Type: double
+//
+
+pseudo_earth_radius_ratio = 1.33333;
+
+//======================================================================
+//
+// INTEREST MAPS and WEIGHTS for SEA CLUTTER DETECTION.
+//
+// Each map should hold at least 2 points. The points should be 
+//   increasing in value, i.e. the value should increase for each 
+//   subsequent point. The various interest values are combined using the 
+//   specified weights in a weighted mean to produce the final interest 
+//   value.
+//
+//======================================================================
+ 
+///////////// seaclut_min_snr_db //////////////////////
+//
+// Min SNR for sea clutter (dB).
+//
+// Only locate sea clutter if SNR exceeds this value.
+//
+//
+// Type: double
+//
+
+seaclut_min_snr_db = 0;
+
+///////////// seaclut_rhohv_mean_interest_map /////////
+//
+// SEA CLUTTER interest mapping for rhohv mean.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+seaclut_rhohv_mean_interest_map = {
+  {
+    value = 0.35,
+    interest = 1
+  }
+  ,
+  {
+    value = 0.4,
+    interest = 0.001
+  }
+};
+
+///////////// seaclut_rhohv_mean_weight ///////////////
+//
+// SEA CLUTTER weight for interest for rhohv mean.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+seaclut_rhohv_mean_weight = 0.5;
+
+///////////// seaclut_phidp_sdev_interest_map /////////
+//
+// SEA CLUTTER interest mapping for sdev of phidp.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+seaclut_phidp_sdev_interest_map = {
+  {
+    value = 40,
+    interest = 0.001
+  }
+  ,
+  {
+    value = 45,
+    interest = 1
+  }
+};
+
+///////////// seaclut_phidp_sdev_weight ///////////////
+//
+// Weight for interest for sdev of phidp.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+seaclut_phidp_sdev_weight = 1;
+
+///////////// seaclut_zdr_sdev_interest_map ///////////
+//
+// SEA CLUTTER interest mapping for sdev of zdr.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+seaclut_zdr_sdev_interest_map = {
+  {
+    value = 0.7,
+    interest = 0.001
+  }
+  ,
+  {
+    value = 1.2,
+    interest = 1
+  }
+};
+
+///////////// seaclut_zdr_sdev_weight /////////////////
+//
+// Weight for interest for sdev of zdr.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+seaclut_zdr_sdev_weight = 0.2;
+
+///////////// seaclut_dbz_elev_gradient_interest_map //
+//
+// SEA CLUTTER interest mapping for gradient of dbz in polar elevation 
+//   space.
+//
+// The reflectivity gradient is computed with respect to elevation, i.e. 
+//   the change in reflectivity with change in elevation angle. The units 
+//   are db/deg.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+seaclut_dbz_elev_gradient_interest_map = {
+  {
+    value = -15,
+    interest = 1
+  }
+  ,
+  {
+    value = -5,
+    interest = 0
+  }
+};
+
+///////////// seaclut_dbz_elev_gradient_weight ////////
+//
+// Weight for interest for elevation gradient of dbz.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+seaclut_dbz_elev_gradient_weight = 1;
+
+///////////// seaclut_interest_threshold //////////////
+//
+// Threshold interest value for identifying sea clutter.
+//
+// If the fuzzy interest value exceeds this threshold, sea clutter is 
+//   assumed to exist at that gate.
+//
+//
+// Type: double
+//
+
+seaclut_interest_threshold = 0.51;
+
+///////////// dbz_elevation_gradient_field_name ///////
+//
+// Field name for computed vertical dbz gradient in polar elevation 
+//   space (dB/deg).
+//
+// For sea clutter identification, we need to compute the vertical 
+//   gradient of reflectivity. This is the name of that gradient field, in 
+//   dB/deg.
+//
+//
+// Type: string
+//
+
+dbz_elevation_gradient_field_name = "DbzElevGradient";
+
+///////////// ray_height_field_name ///////////////////
+//
+// Field name for computed ray height (km).
+//
+// In order to compute the vertical gradient of reflectivity for sea 
+//   clutter, we need to compute the beam height at each gate. This is the 
+//   name of the ray height field, in km MSL.
+//
+//
+// Type: string
+//
+
+ray_height_field_name = "RayHtMsl";
+
+//======================================================================
+//
+// SOUNDING INPUT FOR temperatures - OPTIONAL.
+//
+//======================================================================
+ 
+///////////// use_soundings_from_spdb /////////////////
+//
+// Option to read sounding data from SPDB.
+//
+// If TRUE, the program will read the closest (in time) available 
+//   sounding from an SPDB data base. The temperature profile from the 
+//   sounding will be used to override the temperature profile in the PID 
+//   thresholds config file.
+//
+//
+// Type: boolean
+//
+
+use_soundings_from_spdb = FALSE;
+
+///////////// sounding_spdb_url ///////////////////////
+//
+// SPDB URL for sounding data.
+//
+//
+// Type: string
+//
+
+sounding_spdb_url = "spdb/soundings";
+
+///////////// sounding_search_time_margin_secs ////////
+//
+// Time margin for retrieving sounding, in secs.
+//
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message).
+//
+//
+// Type: int
+//
+
+sounding_search_time_margin_secs = 86400;
+
+///////////// sounding_location_name //////////////////
+//
+// Name of sounding location.
+//
+// If set, we request a profile just for that sounding. If empty, all 
+//   soundings in the data base are considered valid.
+//
+//
+// Type: string
+//
+
+sounding_location_name = "";
+
+///////////// sounding_check_pressure_range ///////////
+//
+// Option to check that pressure covers the required range.
+//
+// If TRUE, we will check that pressure range in the sounding meets or 
+//   exceeds the min and max specified.
+//
+//
+// Type: boolean
+//
+
+sounding_check_pressure_range = TRUE;
+
+///////////// sounding_required_pressure_range_hpa ////
+//
+// Required pressure range for sounding to be valid (hPa).
+//
+// This is used to provide a quality check on the sounding. If the 
+//   pressure data does not fully cover this range, the sounding is 
+//   rejected and we look back for the next available one.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double min_val;
+//      double max_val;
+//   }
+//
+//
+
+sounding_required_pressure_range_hpa = {
+    min_val = 300,
+    max_val = 950
+};
+
+///////////// sounding_check_height_range /////////////
+//
+// Option to check that height covers the required range.
+//
+// If TRUE, we will check that height range in the sounding meets or 
+//   exceeds the min and max specified.
+//
+//
+// Type: boolean
+//
+
+sounding_check_height_range = TRUE;
+
+///////////// sounding_required_height_range_m ////////
+//
+// Required height range for sounding to be valid (m).
+//
+// This is used to provide a quality check on the sounding. If the 
+//   height data does not fully cover this range, the sounding is rejected 
+//   and we look back for the next available one.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double min_val;
+//      double max_val;
+//   }
+//
+//
+
+sounding_required_height_range_m = {
+    min_val = 500,
+    max_val = 15000
+};
+
+///////////// sounding_check_pressure_monotonically_decreasing 
+//
+// Option to check that pressure decreases monotonically.
+//
+// If TRUE, we will check that pressure decreases monotonically. If not, 
+//   the sounding is rejected and we look back for the next available one.
+//
+//
+// Type: boolean
+//
+
+sounding_check_pressure_monotonically_decreasing = TRUE;
+
+///////////// sounding_height_correction_km ///////////
+//
+// Correction to the heights read in with the sounding (km).
+//
+// This correction is ADDED to the heights read in. So if the freezing 
+//   level seems low, the correction should be positive. If the freezing 
+//   level appears high, it should be negative.
+//
+//
+// Type: double
+//
+
+sounding_height_correction_km = 0;
+
+///////////// sounding_use_wet_bulb_temp //////////////
+//
+// Option to use wet bulb temperature profile.
+//
+// If TRUE, we use the wet bulb temperature profile from the sounding 
+//   instead of the dry bulb. This is thought to more closely track the 
+//   temperature of melting ice.
+//
+//
+// Type: boolean
+//
+
+sounding_use_wet_bulb_temp = FALSE;
+
+//======================================================================
+//
+// RETRIEVING SITE TEMPERATURE FROM SPDB.
+//
+//======================================================================
+ 
+///////////// read_site_temp_from_spdb ////////////////
+//
+// Option to read site temperature from SPDB.
+//
+// The temperature closest to the radar volume time will be read in.
+//
+//
+// Type: boolean
+//
+
+read_site_temp_from_spdb = FALSE;
+
+///////////// site_temp_spdb_url //////////////////////
+//
+// URL for temperatures from SPDB.
+//
+//
+// Type: string
+//
+
+site_temp_spdb_url = "spdbp:://hail:0:pecan/spdb/spol/temp";
+
+///////////// site_temp_station_name //////////////////
+//
+// Station name for site temperature.
+//
+//
+// Type: string
+//
+
+site_temp_station_name = "SPOL";
+
+///////////// site_temp_search_margin_secs ////////////
+//
+// Search margin when finding site temp data (secs).
+//
+// We search for the temperature closest in time to the radar volume. 
+//   This is the search margin on either side of the volume time.
+//
+//
+// Type: int
+//
+
+site_temp_search_margin_secs = 3600;
+
+//======================================================================
+//
+// SPECIFYING FIELD NAMES AND OUTPUT ENCODING.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Indicate which fields should be written to the output file.
+//
+// Choose the ID from the list. The name and units can be set however 
+//   the user prefers. The output_encoding and output_scaling apply to 
+//   CfRadial output only. If the output_scaling is DYNAMIC then the scale 
+//   and offset are computed using the dynamic range of the data. If the 
+//   output_scaling is SPECIFIED, then the specified scale and offset are 
+//   used.
+//
+//
+// Type: struct
+//   typedef struct {
+//      output_field_id_t id;
+//        Options:
+//          SNR
+//          DBZ
+//          VEL
+//          WIDTH
+//          NCP
+//          ZDR
+//          RHOHV
+//          PHIDP
+//          KDP
+//          PSOB
+//          ZDP
+//          DBZ_ATTEN_CORRECTION
+//          ZDR_ATTEN_CORRECTION
+//          DBZ_ATTEN_CORRECTED
+//          ZDR_ATTEN_CORRECTED
+//          DBZ_FOR_KDP
+//          ZDR_FOR_KDP
+//          RHOHV_FOR_KDP
+//          SNR_FOR_KDP
+//          ZDR_SDEV_FOR_KDP
+//          VALID_FLAG_FOR_KDP
+//          PHIDP_FOR_KDP
+//          PHIDP_MEAN_FOR_KDP
+//          PHIDP_MEAN_UNFOLD_FOR_KDP
+//          PHIDP_SDEV_FOR_KDP
+//          PHIDP_JITTER_FOR_KDP
+//          PHIDP_UNFOLD_FOR_KDP
+//          PHIDP_FILT_FOR_KDP
+//          PHIDP_COND_FOR_KDP
+//          PHIDP_COND_FILT_FOR_KDP
+//          SNR_RLAN
+//          SNR_MODE_RLAN
+//          SNR_DMODE_RLAN
+//          SNR_SDEV_RLAN
+//          NCP_MEAN_RLAN
+//          WIDTH_MEAN_RLAN
+//          PHASE_RLAN
+//          PHASE_NOISE_RLAN
+//          PHASE_NOISE_INTEREST_RLAN
+//          NCP_MEAN_INTEREST_RLAN
+//          WIDTH_MEAN_INTEREST_RLAN
+//          SNR_DMODE_INTEREST_RLAN
+//          SNR_SDEV_INTEREST_RLAN
+//          RLAN_FLAG
+//          RAY_HEIGHT
+//          SNR_MEAN_SEACLUT
+//          RHOHV_MEAN_SEACLUT
+//          PHIDP_SDEV_SEACLUT
+//          ZDR_SDEV_SEACLUT
+//          DBZ_ELEV_GRADIENT_SEACLUT
+//          RHOHV_MEAN_INTEREST_SEACLUT
+//          PHIDP_SDEV_INTEREST_SEACLUT
+//          ZDR_SDEV_INTEREST_SEACLUT
+//          DBZ_ELEV_GRADIENT_INTEREST_SEACLUT
+//          SEACLUT_FLAG
+//      string name;
+//      string long_name;
+//      string standard_name;
+//      string units;
+//      output_encoding_t encoding;
+//        Options:
+//          OUTPUT_ENCODING_FL32
+//          OUTPUT_ENCODING_INT32
+//          OUTPUT_ENCODING_INT16
+//          OUTPUT_ENCODING_INT08
+//      output_scaling_t scaling;
+//        Options:
+//          OUTPUT_SCALING_DYNAMIC
+//          OUTPUT_SCALING_SPECIFIED
+//      double scale;
+//      double offset;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    id = SNR,
+    name = "SNR",
+    long_name = "signal_to_noise_ratio_db",
+    standard_name = "signal_to_noise_ratio",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = DBZ,
+    name = "DBZ",
+    long_name = "radar_reflectivity",
+    standard_name = "equivalent_reflectivity_factor",
+    units = "dBZ",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = VEL,
+    name = "VEL",
+    long_name = "radial_velocity",
+    standard_name = "radial_velocity",
+    units = "m/s",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = WIDTH,
+    name = "WIDTH",
+    long_name = "spectrum_width",
+    standard_name = "spectrum_width",
+    units = "m/s",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = NCP,
+    name = "NCP",
+    long_name = "normalized_coherent_power",
+    standard_name = "normalized_coherent_power",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = ZDR,
+    name = "ZDR",
+    long_name = "calibrated_log_differential_reflectivity",
+    standard_name = "log_differential_reflectivity",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = RHOHV,
+    name = "RHOHV",
+    long_name = "cross_correlation_ratio",
+    standard_name = "cross_correlation_ratio_hv",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = PHIDP,
+    name = "PHIDP",
+    long_name = "differential_phase",
+    standard_name = "differential_phase_hv",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = KDP,
+    name = "KDP",
+    long_name = "specific_differential_phase",
+    standard_name = "specific_differential_phase_hv",
+    units = "deg/km",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = SNR_RLAN,
+    name = "SNR_RLAN",
+    long_name = "snr_for_rlan",
+    standard_name = "snr_for_rlan",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = SNR_MODE_RLAN,
+    name = "SNR_MODE_RLAN",
+    long_name = "mode_of_snr_for_rlan",
+    standard_name = "mode_of_snr_for_rlan",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = SNR_DMODE_RLAN,
+    name = "SNR_DMODE_RLAN",
+    long_name = "delta_from_mode_of_snr_for_rlan",
+    standard_name = "delta_from_mode_of_snr_for_rlan",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = SNR_SDEV_RLAN,
+    name = "SNR_SDEV_RLAN",
+    long_name = "sdev_of_snr_for_rlan",
+    standard_name = "sdev_of_snr_for_rlan",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = NCP_MEAN_RLAN,
+    name = "NCP_MEAN_RLAN",
+    long_name = "mean_of_ncp_for_rlan",
+    standard_name = "mean_of_ncp_for_rlan",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = WIDTH_MEAN_RLAN,
+    name = "WIDTH_MEAN_RLAN",
+    long_name = "mean_of_width_for_rlan",
+    standard_name = "mean_of_width_for_rlan",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = PHASE_RLAN,
+    name = "PHASE_RLAN",
+    long_name = "phase_from_vel_for_rlan",
+    standard_name = "phase_from_vel_for_rlan",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = PHASE_NOISE_RLAN,
+    name = "PHASE_NOISE_RLAN",
+    long_name = "phase_noise_in_range_for_rlan",
+    standard_name = "phase_noise_in_range_for_rlan",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = RLAN_FLAG,
+    name = "RLAN_FLAG",
+    long_name = "flag_for_radio_lan_interference",
+    standard_name = "flag_for_radio_lan_interference",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = SNR_MEAN_SEACLUT,
+    name = "SNR_MEAN_SEACLUT",
+    long_name = "mean_of_snr_for_seaclut",
+    standard_name = "mean_of_snr_for_seaclut",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = RHOHV_MEAN_SEACLUT,
+    name = "RHOHV_MEAN_SEACLUT",
+    long_name = "mean_of_rhohv_for_seaclut",
+    standard_name = "mean_of_rhohv_for_seaclut",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = PHIDP_SDEV_SEACLUT,
+    name = "PHIDP_SDEV_SEACLUT",
+    long_name = "sdev_of_phidp_for_seaclut",
+    standard_name = "sdev_of_phidp_for_seaclut",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = ZDR_SDEV_SEACLUT,
+    name = "ZDR_SDEV_SEACLUT",
+    long_name = "sdev_of_zdr_for_seaclut",
+    standard_name = "sdev_of_zdr_for_seaclut",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = RAY_HEIGHT,
+    name = "ray_ht",
+    long_name = "height_of_ray_msl",
+    standard_name = "height_above_reference_ellipsoid",
+    units = "km",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = DBZ_ELEV_GRADIENT_SEACLUT,
+    name = "dbz_elev_gradient",
+    long_name = "gradient_of_dbz_with_elevation_angle",
+    standard_name = "gradient_of_dbz_with_elevation_angle",
+    units = "dB/deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = SEACLUT_FLAG,
+    name = "SEACLUT_FLAG",
+    long_name = "flag_for_sea_clutter",
+    standard_name = "flag_for_sea_clutter",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = PHASE_NOISE_INTEREST_RLAN,
+    name = "PHASE_NOISE_INTEREST_RLAN",
+    long_name = "phase_noise_interest_for_rlan",
+    standard_name = "phase_noise_interest_for_rlan",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = NCP_MEAN_INTEREST_RLAN,
+    name = "NCP_MEAN_INTEREST_RLAN",
+    long_name = "ncp_mean_interest_for_rlan",
+    standard_name = "ncp_mean_interest_for_rlan",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = WIDTH_MEAN_INTEREST_RLAN,
+    name = "WIDTH_MEAN_INTEREST_RLAN",
+    long_name = "width_mean_interest_for_rlan",
+    standard_name = "width_mean_interest_for_rlan",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = SNR_DMODE_INTEREST_RLAN,
+    name = "SNR_DMODE_INTEREST_RLAN",
+    long_name = "snr_dmode_interest_for_rlan",
+    standard_name = "snr_dmode_interest_for_rlan",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = SNR_SDEV_INTEREST_RLAN,
+    name = "SNR_SDEV_INTEREST_RLAN",
+    long_name = "snr_sdev_interest_for_rlan",
+    standard_name = "snr_sdev_interest_for_rlan",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = RHOHV_MEAN_INTEREST_SEACLUT,
+    name = "RHOHV_MEAN_INTEREST_SEACLUT",
+    long_name = "rhohv_mean_interest_for_seaclut",
+    standard_name = "rhohv_mean_interest_for_seaclut",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = PHIDP_SDEV_INTEREST_SEACLUT,
+    name = "PHIDP_SDEV_INTEREST_SEACLUT",
+    long_name = "phidp_sdev_interest_for_seaclut",
+    standard_name = "phidp_sdev_interest_for_seaclut",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = ZDR_SDEV_INTEREST_SEACLUT,
+    name = "ZDR_SDEV_INTEREST_SEACLUT",
+    long_name = "zdr_sdev_interest_for_seaclut",
+    standard_name = "zdr_sdev_interest_for_seaclut",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = DBZ_ELEV_GRADIENT_INTEREST_SEACLUT,
+    name = "DBZ_ELEV_GRADIENT_INTEREST_SEACLUT",
+    long_name = "dbz_elev_gradient_interest_for_seaclut",
+    standard_name = "dbz_elev_gradient_interest_for_seaclut",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+};
+
+//======================================================================
+//
+// SPECIFYING COPY-THROUGH FIELDS.
+//
+// These fields are copied unchanged from the input file to the output 
+//   file. This is a way of consolidating the output data set.
+//
+//======================================================================
+ 
+///////////// copy_input_fields_to_output /////////////
+//
+// Option to copy input fields unchanged to the output file.
+//
+//
+// Type: boolean
+//
+
+copy_input_fields_to_output = TRUE;
+
+///////////// copy_fields /////////////////////////////
+//
+// These fields are copied through unchanged to the output file.
+//
+// You can change the name of the field on output. And you can specify 
+//   censoring as required, based on the results of the QC steps in this 
+//   app. See censoring control parameters below.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string input_name;
+//      string output_name;
+//      boolean apply_censoring;
+//   }
+//
+// 1D array - variable length.
+//
+
+copy_fields = {
+  {
+    input_name = "DBZ_F",
+    output_name = "DBZ_F",
+    apply_censoring = FALSE
+  }
+  ,
+  {
+    input_name = "VEL_F",
+    output_name = "VEL_F",
+    apply_censoring = FALSE
+  }
+  ,
+  {
+    input_name = "WIDTH_F",
+    output_name = "WIDTH_F",
+    apply_censoring = FALSE
+  }
+  ,
+  {
+    input_name = "NCP_F",
+    output_name = "NCP_F",
+    apply_censoring = FALSE
+  }
+  ,
+  {
+    input_name = "PHIDP_F",
+    output_name = "PHIDP_F",
+    apply_censoring = FALSE
+  }
+  ,
+  {
+    input_name = "RHOHV_F",
+    output_name = "RHOHV_F",
+    apply_censoring = FALSE
+  }
+  ,
+  {
+    input_name = "ZDR_F",
+    output_name = "ZDR_F",
+    apply_censoring = FALSE
+  }
+  ,
+  {
+    input_name = "DBZ_F",
+    output_name = "DBZ_C",
+    apply_censoring = TRUE
+  }
+  ,
+  {
+    input_name = "VEL_F",
+    output_name = "VEL_C",
+    apply_censoring = TRUE
+  }
+  ,
+  {
+    input_name = "ZDR_F",
+    output_name = "ZDR_C",
+    apply_censoring = TRUE
+  }
+};
+
+///////////// apply_rlan_censoring ////////////////////
+//
+// Option to censor rlan interference in fields that are copied through.
+//
+// Only applies for fields for which 'apply_censoring' is set to TRUE.
+//
+//
+// Type: boolean
+//
+
+apply_rlan_censoring = TRUE;
+
+///////////// apply_seaclutter_censoring //////////////
+//
+// Option to censor sea clutter in fields that are copied through.
+//
+// Only applies for fields for which 'apply_censoring' is set to TRUE.
+//
+//
+// Type: boolean
+//
+
+apply_seaclutter_censoring = TRUE;
+
+//======================================================================
+//
+// OUTPUT FILE FORMAT.
+//
+//======================================================================
+ 
+///////////// output_format ///////////////////////////
+//
+// Format for the output files.
+//
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_CFRADIAL
+//     OUTPUT_FORMAT_DORADE
+//     OUTPUT_FORMAT_FORAY
+//     OUTPUT_FORMAT_NEXRAD
+//     OUTPUT_FORMAT_UF
+//     OUTPUT_FORMAT_MDV_RADIAL
+//
+
+output_format = OUTPUT_FORMAT_CFRADIAL;
+
+///////////// netcdf_style ////////////////////////////
+//
+// NetCDF style - if output_format is CFRADIAL.
+//
+// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
+//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
+//
+// Type: enum
+// Options:
+//     CLASSIC
+//     NC64BIT
+//     NETCDF4
+//     NETCDF4_CLASSIC
+//
+
+netcdf_style = NETCDF4;
+
+//======================================================================
+//
+// OUTPUT BYTE-SWAPPING and COMPRESSION.
+//
+//======================================================================
+ 
+///////////// output_native_byte_order ////////////////
+//
+// Option to leave data in native byte order.
+//
+// If false, data will be byte-swapped as appropriate on output.
+//
+//
+// Type: boolean
+//
+
+output_native_byte_order = FALSE;
+
+///////////// output_compressed ///////////////////////
+//
+// Option to compress data fields on output.
+//
+// Applies to netCDF and Dorade. UF does not support compression.
+//
+//
+// Type: boolean
+//
+
+output_compressed = TRUE;
+
+///////////// compression_level ///////////////////////
+//
+// Compression level for output, if compressed.
+//
+// Applies to netCDF only. Dorade compression is run-length encoding, 
+//   and has not options..
+//
+//
+// Type: int
+//
+
+compression_level = 4;
+
+//======================================================================
+//
+// VOLUME OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_output_volume /////////////////////
+//
+// Option to write the results to a volume output file.
+//
+// Normally this will be set to true. However, when running analyses 
+//   such as self-consistency or zdr bias, it may be preferable to 
+//   suppress writing the output file, in which case this should be set to 
+//   false.
+//
+//
+// Type: boolean
+//
+
+write_output_volume = TRUE;
+
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+//
+// Files will be written to this directory.
+//
+//
+// Type: string
+//
+
+output_dir = "$(HOME)/data/rlan/cfradial/DB-QC";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+//
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name.
+//
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//     SPECIFY_FILE_NAME
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// output_filename /////////////////////////
+//
+// Name of output file.
+//
+// Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of 
+//   this name will be written to output_dir.
+//
+//
+// Type: string
+//
+
+output_filename = "cfradial.test.nc";
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+//
+// Path will be output_dir/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+//
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// write_individual_sweeps /////////////////
+//
+// Option to write out individual sweeps if appropriate.
+//
+// If true, the volume is split into individual sweeps for writing. 
+//   Applies to CfRadial format. This is always true for DORADE format 
+//   files.
+//
+//
+// Type: boolean
+//
+
+write_individual_sweeps = FALSE;
+

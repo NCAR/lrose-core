@@ -234,7 +234,6 @@ void MomentsFields::init()
 
   memset(&lag0_vchx, 0, sizeof(RadarComplex_t));
   memset(&lag0_hcvx, 0, sizeof(RadarComplex_t));
-  memset(&lag0_vxhx, 0, sizeof(RadarComplex_t));
   memset(&lag1_hc, 0, sizeof(RadarComplex_t));
   memset(&lag1_vc, 0, sizeof(RadarComplex_t));
   memset(&lag1_hcvc, 0, sizeof(RadarComplex_t));
@@ -278,9 +277,6 @@ void MomentsFields::init()
 
   lag0_hcvx_db = missingDouble;
   lag0_hcvx_phase = missingDouble;
-
-  lag0_vxhx_db = missingDouble;
-  lag0_vxhx_phase = missingDouble;
 
   lag1_hc_db = missingDouble;
   lag1_hc_phase = missingDouble;
@@ -358,9 +354,9 @@ void MomentsFields::init()
   dbm_sdev = missingDouble;
   ncp_mean = missingDouble;
   memset(&phase_for_noise, 0, sizeof(RadarComplex_t));
-  accum_phase_change = missingDouble;
-  phase_change_error = missingDouble;
-
+  accum_phase_change = 0.0;
+  phase_change_error = 0.0;
+  
   // flag to indicate noise/signal is present at a gate
 
   noise_flag = missingDouble;
@@ -381,87 +377,7 @@ void MomentsFields::init()
   dbz_atten_corrected = missingDouble;
   zdr_atten_corrected = missingDouble;
 
-  // for testing
-
-  test = missingDouble;
-  test2 = missingDouble;
-  test3 = missingDouble;
-  test4 = missingDouble;
-  test5 = missingDouble;
-  
-  lag0_hc_db = missingDouble;
-  lag0_hx_db = missingDouble;
-  lag0_vc_db = missingDouble;
-  lag0_vx_db = missingDouble;
-  
-  lag0_hcvx_db = missingDouble;
-  lag0_hcvx_phase = missingDouble;
-
-  lag0_vchx_db = missingDouble;
-  lag0_vchx_phase = missingDouble;
-
-  lag1_hc_db = missingDouble;
-  lag1_hc_phase = missingDouble;
-
-  lag1_vc_db = missingDouble;
-  lag1_vc_phase = missingDouble;
-
-  lag1_hcvc_db = missingDouble;
-  lag1_hcvc_phase = missingDouble;
-
-  lag1_vchc_db = missingDouble;
-  lag1_vchc_phase = missingDouble;
-
-  lag1_vxhx_db = missingDouble;
-  lag1_vxhx_phase = missingDouble;
-
-  lag2_hc_db = missingDouble;
-  lag2_hc_phase = missingDouble;
-
-  lag2_vc_db = missingDouble;
-  lag2_vc_phase = missingDouble;
-
-  lag3_hc_db = missingDouble;
-  lag3_hc_phase = missingDouble;
-
-  lag3_vc_db = missingDouble;
-  lag3_vc_phase = missingDouble;
-
-  rvvhh0_db = missingDouble;
-  rvvhh0_phase = missingDouble;
-
-  sdev_vv = missingDouble;
-
-  prt = missingDouble;
-  num_pulses = missingDouble;
-
-  prt_short = missingDouble;
-  prt_long = missingDouble;
-
-  // identifying noise
-
-  dbm_for_noise = missingDouble;
-  dbm_sdev = missingDouble;
-  ncp_mean = missingDouble;
-
-  phase_for_noise.re = 0.0;
-  phase_for_noise.im = 0.0;
-  accum_phase_change = 0.0;
-  phase_change_error = 0.0;
-  
-  // flag to indicate noise/signal is present at a gate
-
-  noise_flag = missingDouble;
-  signal_flag = missingDouble;
-
-  // mean noise dbm - no gain applied
-  
-  noise_bias_db_hc = missingDouble;
-  noise_bias_db_hx = missingDouble;
-  noise_bias_db_vc = missingDouble;
-  noise_bias_db_vx = missingDouble;
-
-  // field for testing
+  // fields for testing
 
   test = missingDouble;
   test2 = missingDouble;

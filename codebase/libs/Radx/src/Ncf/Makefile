@@ -24,12 +24,17 @@ LOC_INCLUDES = -I../include $(NETCDF4_INCS)
 LOC_CFLAGS = 
 
 HDRS = \
-	../include/Radx/NcfRadxFile.hh
+	../include/Radx/NcfRadxFile.hh \
+	../include/Radx/NcxxRadxFile.hh
 
 CPPC_SRCS = \
 	NcfRadxFile.cc \
 	NcfRadxFile_read.cc \
 	NcfRadxFile_write.cc
+
+#	NcxxRadxFile.cc \
+#	NcxxRadxFile_read.cc \
+#	NcxxRadxFile_write.cc
 
 #
 # general targets

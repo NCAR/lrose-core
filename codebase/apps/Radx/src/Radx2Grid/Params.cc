@@ -821,6 +821,18 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'reorder_sweeps_by_ascending_angle'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("reorder_sweeps_by_ascending_angle");
+    tt->descr = tdrpStrDup("Option to reorder sweeps by ascending angles.");
+    tt->help = tdrpStrDup("If true, sweeps will be checked to see if they are in ascending angle order. If not they are reordered. If the sweeps are reordered, this means that the rays times will no longer be monotonically increasing");
+    tt->val_offset = (char *) &reorder_sweeps_by_ascending_angle - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1851,6 +1863,18 @@ using namespace std;
     tt->help = tdrpStrDup("This applies to all projections except LATLON. Not used if 'center_grid_on_radar' is true.");
     tt->val_offset = (char *) &grid_origin_lon - &_start_;
     tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'auto_remap_flat_to_latlon'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("auto_remap_flat_to_latlon");
+    tt->descr = tdrpStrDup("Option to grid to a PROJ_FLAT projection, and then automatically remap to a latlon projection on output.");
+    tt->help = tdrpStrDup("If TRUE, before writing the file, the app will choose a latlon grid that matches the FLAT grid extent and rsolution, and automatically remap to a PROJ_LATLON projection.");
+    tt->val_offset = (char *) &auto_remap_flat_to_latlon - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'grid_lat1'

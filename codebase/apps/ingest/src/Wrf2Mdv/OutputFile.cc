@@ -423,6 +423,18 @@ void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
 		    "none", codeEntry.code);
       break;
 
+    case Params::QNRAIN_FIELD:
+      MdvxFieldCode::getEntryByAbbrev("UNDEFINED", codeEntry);
+      _setFieldName(fhdr, _params._output_fields[out_field].name, "",
+		    "none", codeEntry.code);
+      break;
+
+    case Params::QNCLOUD_FIELD:
+      MdvxFieldCode::getEntryByAbbrev("UNDEFINED", codeEntry);
+      _setFieldName(fhdr, _params._output_fields[out_field].name, "",
+		    "none", codeEntry.code);
+      break;
+
     case Params::SNOW_FIELD:
       MdvxFieldCode::getEntryByAbbrev("SNMR", codeEntry);
       _setFieldName(fhdr, _params._output_fields[out_field].name, "kg/kg",

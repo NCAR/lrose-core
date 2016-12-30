@@ -141,7 +141,7 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
   } else {
     _kdp.initializeArrays(_nGates);
   }
-  
+
   // compute pid
 
   _allocPidArrays();
@@ -273,18 +273,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::PHIDP:
           *datp = _phidpArray[igate];
           break;
-        case Params::KDP:
-          *datp = _kdpArray[igate];
-          break;
-        case Params::KDP_BRINGI:
-          *datp = _kdpBringiArray[igate];
-          break;
-        case Params::PSOB:
-          *datp = psob[igate];
-          break;
-        case Params::ZDP:
-          *datp = _zdpArray[igate];
-          break;
           
           // kdp
           
@@ -304,7 +292,29 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           *datp = zdrSdevForKdp[igate];
           break;
         case Params::VALID_FLAG_FOR_KDP:
-          *datp = validFlagForKdp[igate];
+          if (validFlagForKdp[igate]) {
+            *datp = 1.0;
+          } else {
+            *datp = 0.0;
+          }
+          break;
+        case Params::KDP:
+          *datp = _kdpArray[igate];
+          break;
+        case Params::KDP_BRINGI:
+          *datp = _kdpBringiArray[igate];
+          break;
+        case Params::KDP_ZZDR:
+          *datp = _kdpZZdrArray[igate];
+          break;
+        case Params::KDP_COND:
+          *datp = _kdpCondArray[igate];
+          break;
+        case Params::PSOB:
+          *datp = psob[igate];
+          break;
+        case Params::ZDP:
+          *datp = _zdpArray[igate];
           break;
 
         case Params::PHIDP_FOR_KDP:
@@ -587,7 +597,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
       
     } // ii
     
-  } // if (_needPid ...
+  } // if (_params.PID_output_particle_interest_fields) ...
 
   // copy fields through as required
 
@@ -655,6 +665,9 @@ void ComputeEngine::_kdpInit()
     _kdp.checkZdrSdev(true);
   }
   _kdp.setZdrSdevMax(_params.KDP_zdr_sdev_max);
+  _kdp.setThresholdForKdpZZdr(_params.KDP_threshold_for_ZZDR);
+  _kdp.setMedianFilterLenForKdpZZdr(_params.KDP_median_filter_len_for_ZZDR);
+
   if (_params.KDP_debug) {
     _kdp.setDebug(true);
   }
@@ -745,6 +758,8 @@ void ComputeEngine::_kdpCompute()
                missingDbl);
 
   const double *kdp = _kdp.getKdp();
+  const double *kdpZZdr = _kdp.getKdpZZdr();
+  const double *kdpCond = _kdp.getKdpCond();
   
   // put KDP into fields objects
   
@@ -754,6 +769,8 @@ void ComputeEngine::_kdpCompute()
     } else {
       _kdpArray[ii] = kdp[ii];
     }
+    _kdpZZdrArray[ii] = kdpZZdr[ii];
+    _kdpCondArray[ii] = kdpCond[ii];
   }
 
   if (_params.compute_kdp_bringi) {
@@ -992,12 +1009,14 @@ void ComputeEngine::_allocMomentsArrays()
   _zdrmArray = _zdrmArray_.alloc(_nGates);
   _zdpArray = _zdpArray_.alloc(_nGates);
   _kdpArray = _kdpArray_.alloc(_nGates);
+  _kdpBringiArray = _kdpBringiArray_.alloc(_nGates);
+  _kdpZZdrArray = _kdpZZdrArray_.alloc(_nGates);
+  _kdpCondArray = _kdpCondArray_.alloc(_nGates);
   _ldrArray = _ldrArray_.alloc(_nGates);
   _rhohvArray = _rhohvArray_.alloc(_nGates);
   _rhohvNncArray = _rhohvNncArray_.alloc(_nGates);
   _phidpArray = _phidpArray_.alloc(_nGates);
   _rhoVxHxArray = _rhoVxHxArray_.alloc(_nGates);
-
 }
 
 //////////////////////////////////////
@@ -1155,7 +1174,7 @@ int ComputeEngine::_loadMomentsArrays(RadxRay *inputRay)
       _kdpArray[igate] = missingDbl;
     }
   }
-  
+
   return 0;
   
 }
@@ -1247,6 +1266,9 @@ void ComputeEngine::_computeSnrFromDbz()
   TaArray<double> noiseDbz_;
   double *noiseDbz = noiseDbz_.alloc(_nGates);
   double range = _startRangeKm;
+  if (range == 0) {
+    range = _gateSpacingKm / 10.0;
+  }
   for (int igate = 0; igate < _nGates; igate++, range += _gateSpacingKm) {
     noiseDbz[igate] = _params.noise_dbz_at_100km +
       20.0 * (log10(range) - log10(100.0));
@@ -2107,7 +2129,8 @@ void ComputeEngine::_doCheckSelfConsistency(int runStart, int runEnd)
   double phidpAccumEst = 0.0;
   double kdpEst = 0.0;
   for (int ii = 0; ii < runLen; ii++) {
-    if (_params.self_consisteny_method == Params::SELF_CON_ZDR_POWER_LAW_METHOD) {
+    if (_params.self_consistency_method ==
+        Params::SELF_CON_ZDR_POWER_LAW_METHOD) {
       kdpEst = _computeKdpPowerLaw(zzLin[ii], zdrLin[ii], aa, bb, cc);
     } else {
       kdpEst = _computeKdpPolynomial(zzLin[ii], zdr[ii], a0, a1, a2, a3);

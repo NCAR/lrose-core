@@ -56,14 +56,6 @@ HcrVelCorrect::HcrVelCorrect(int argc, char **argv)
 {
 
   OK = TRUE;
-  _dbzMax = NULL;
-  _rangeToSurface = NULL;
-  _surfaceVel = NULL;
-  _filteredStage1 = NULL;
-  _filteredSpike = NULL;
-  _filteredCond = NULL;
-  _filteredFinal = NULL;
-  _nValid = 0;
   _firstInputFile = true;
 
   // set programe name
@@ -90,10 +82,30 @@ HcrVelCorrect::HcrVelCorrect(int argc, char **argv)
     return;
   }
   
-  // set up the filters
-  
-  _initFilters();
+  // set up the surface velocity filtering
 
+  _surfVel.initFilters(_params.stage1_filter_n,
+                       _params._stage1_filter,
+                       _params.spike_filter_n,
+                       _params._spike_filter,
+                       _params.final_filter_n,
+                       _params._final_filter);
+
+  if (_params.debug) {
+    _surfVel.setDebug(true);
+  }
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _surfVel.setVerbose(true);
+  }
+
+  _surfVel.setDbzFieldName(_params.dbz_field_name);
+  _surfVel.setVelFieldName(_params.vel_field_name);
+
+  _surfVel.setMinRangeToSurfaceKm(_params.min_range_to_surface_km);
+  _surfVel.setMinDbzForSurfaceEcho(_params.min_dbz_for_surface_echo);
+  _surfVel.setNGatesForSurfaceEcho(_params.ngates_for_surface_echo);
+  _surfVel.setSpikeFilterDifferenceThreshold(_params.spike_filter_difference_threshold);
+  
   // init process mapper registration
 
   if (_params.register_with_procmap) {
@@ -114,34 +126,6 @@ HcrVelCorrect::~HcrVelCorrect()
 
   _inputFmq.closeMsgQueue();
   _outputFmq.closeMsgQueue();
-
-  // free memory
-
-  for (size_t iray = 0; iray < _filtRays.size(); iray++) {
-    RadxRay::deleteIfUnused(_filtRays[iray]);
-  }
-
-  if (_dbzMax) {
-    delete[] _dbzMax;
-  }
-  if (_rangeToSurface) {
-    delete[] _rangeToSurface;
-  }
-  if (_surfaceVel) {
-    delete[] _surfaceVel;
-  }
-  if (_filteredStage1) {
-    delete[] _filteredStage1;
-  }
-  if (_filteredSpike) {
-    delete[] _filteredSpike;
-  }
-  if (_filteredCond) {
-    delete[] _filteredCond;
-  }
-  if (_filteredFinal) {
-    delete[] _filteredFinal;
-  }
 
   // unregister process
 
@@ -372,15 +356,20 @@ int HcrVelCorrect::_processFile(const string &readPath)
 
     RadxRay *ray = new RadxRay(*rays[iray]);
     
-  // process each ray in the volume
+    // process each ray in the volume
     
-    _processRay(ray);
-    
-    if (_filtRays.size() > _finalIndex) {
-
-      RadxRay *outRay = _filtRays[_finalIndex];
+    if (_surfVel.processRay(ray) == 0) {
+      
+      RadxRay *outRay = _surfVel.getFiltRay();
       RadxTime filtRayTime = outRay->getRadxTime();
 
+      if (_surfVel.velocityIsValid()) {
+        double surfVel = _surfVel.getSurfaceVelocity();
+        _correctVelForRay(ray, surfVel);
+      } else {
+        _copyVelForRay(ray);
+      }
+      
       // write vol when done
       
       if (filtRayTime > _inEndTime) {
@@ -416,339 +405,6 @@ void HcrVelCorrect::_setupRead(RadxFile &file)
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.printReadRequest(cerr);
   }
-
-}
-
-/////////////////////////////////////////////////////////////////////////
-// Process an incoming ray
-
-int HcrVelCorrect::_processRay(RadxRay *ray)
-
-{
-
-  if (_filtRays.size() == 0) {
-    _timeFirstRay = ray->getRadxTime();
-  }
-
-  // convert to floats
-
-  ray->convertToFl32();
-
-  // trim ray deque as needed
-
-  if (_filtRays.size() > _finalIndex) {
-    RadxRay *toBeDeleted = _filtRays.back();
-    RadxRay::deleteIfUnused(toBeDeleted);
-    _filtRays.pop_back();
-  }
-
-  // shift the data arrays by 1
-
-  _shiftArrays();
-
-  // add to ray deque
-  
-  ray->addClient();
-  _filtRays.push_front(ray);
-  
-  // compute surface vel, store at end of array
-  
-  _computeSurfaceVel(ray);
-  
-  // apply the spike and stage1 filters
-
-  _applyStage1Filter();
-  _applySpikeFilter();
-
-  // compute the conditioned velocity, based on the
-  // difference between the results of the spike and stage1 filter
-  
-  _computeConditionedValue();
-  
-  // apply the final filter
-  
-  _applyFinalFilter();
-
-  // was this a valid observation? - i.e. can we see the surface
-
-  if (_rangeToSurface[0] > 0) {
-    _nValid++;
-  } else {
-    _nValid = 0;
-  }
-  
-  // print out?
-  
-  if (_params.write_results_to_stdout &&
-      (_filtRays.size() > _finalIndex)) {
-    RadxRay *ray = _filtRays[_finalIndex];
-    if (_rangeToSurface[_finalIndex] > 0) {
-      double deltaTime = ray->getRadxTime() - _timeFirstRay;
-      cout << ray->getRadxTime().asString(3) << " "
-           << deltaTime << " "
-           << _rangeToSurface[_finalIndex] << " "
-           << _dbzMax[_finalIndex] << " "
-           << _surfaceVel[_finalIndex] << " "
-           << _filteredStage1[_finalIndex] << " "
-           << _filteredSpike[_finalIndex] << " "
-           << _filteredCond[_finalIndex] << " "
-           << _filteredFinal[_finalIndex] << endl;
-    }
-  }
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    if (_filtRays.size() > _finalIndex) {
-      RadxRay *ray = _filtRays[_finalIndex];
-      if (_rangeToSurface[_finalIndex] > 0) {
-        cerr << "Time gndRange dbzMax surfVel filtStage1 filtSpike filtCond filtFinal "
-             << ray->getRadxTime().asString() << " "
-             << _rangeToSurface[_finalIndex] << " "
-             << _dbzMax[_finalIndex] << " "
-             << _surfaceVel[_finalIndex] << " "
-             << _filteredStage1[_finalIndex] <<  ""
-             << _filteredSpike[_finalIndex] << " "
-             << _filteredCond[_finalIndex] << " "
-             << _filteredFinal[_finalIndex] << endl;
-      } else {
-        cerr << "Surface NOT found, time: "
-             << ray->getRadxTime().asString() << endl;
-      }
-    }
-  }
-
-  // add corrected velocity to ray
-  
-  if (_filtRays.size() > _finalIndex) {
-    RadxRay *ray = _filtRays[_finalIndex];
-    if (_nValid > _finalIndex) {
-      _correctVelForRay(ray);
-    } else {
-      _copyVelForRay(ray);
-    }
-  }
-
-  return 0;
-
-}
-
-/////////////////////////////////////////////////////////////////////////
-// compute surface velocity
-//
-// Sets vel to (0.0) if cannot determine valocity
-
-void HcrVelCorrect::_computeSurfaceVel(RadxRay *ray)
-  
-{
-
-  // init
-  
-  _dbzMax[0] = -9999.0;
-  _rangeToSurface[0] = -9999.0;
-  _surfaceVel[0] = 0.0;
-
-  // check elevation
-  // cannot compute gnd vel if not pointing down
-  
-  double elev = ray->getElevationDeg();
-  if (elev > -85 || elev < -95) {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Bad elevation for finding surface, time, elev(deg): "
-           << ray->getRadxTime().asString() << ", "
-           << elev << endl;
-    }
-    return;
-  }
-
-  // get dbz field
-
-  RadxField *dbzField = ray->getField(_params.dbz_field_name);
-  if (dbzField == NULL) {
-    cerr << "ERROR - HcrVelCorrect::_computeSurfaceVel" << endl;
-    cerr << "  No dbz field found, field name: " << _params.dbz_field_name << endl;
-    return;
-  }
-  const Radx::fl32 *dbzArray = dbzField->getDataFl32();
-  Radx::fl32 dbzMiss = dbzField->getMissingFl32();
-
-  // get vel field
-
-  RadxField *velField = ray->getField(_params.vel_field_name);
-  if (velField == NULL) {
-    cerr << "ERROR - HcrVelCorrect::_computeSurfaceVel" << endl;
-    cerr << "  No vel field found, field name: " << _params.vel_field_name << endl;
-    return;
-  }
-  const Radx::fl32 *velArray = velField->getDataFl32();
-  Radx::fl32 velMiss = velField->getMissingFl32();
-  
-  // get gate at which max dbz occurs
-
-  double range = dbzField->getStartRangeKm();
-  double drange = dbzField->getGateSpacingKm();
-  double dbzMax = -9999.0;
-  int gateForMax = -1;
-  double rangeToSurface = 0;
-  double foundSurface = false;
-  for (size_t igate = 0; igate < dbzField->getNPoints(); igate++, range += drange) {
-    if (range < _params.min_range_to_surface_km) {
-      continue;
-    }
-    Radx::fl32 dbz = dbzArray[igate];
-    if (dbz != dbzMiss) {
-      if (dbz > dbzMax) {
-        dbzMax = dbz;
-        gateForMax = igate;
-        rangeToSurface = range;
-        foundSurface = true;
-      }
-    }
-  }
-  
-  // check for sufficient power
-
-  if (foundSurface) {
-    if (dbzMax < _params.min_dbz_for_surface_echo) {
-      foundSurface = false;
-      if (_params.debug) {
-        cerr << "WARNING - HcrVelCorrect::_computeSurfaceVel" << endl;
-        cerr << "  Ray at time: " << ray->getRadxTime().asString() << endl;
-        cerr << "  Dbz max not high enough for surface detection: " << dbzMax << endl;
-        cerr << "  Range to max dbz: " << rangeToSurface << endl;
-      }
-    }
-  }
-
-  size_t nEachSide = _params.ngates_for_surface_echo / 2;
-  if (foundSurface) {
-    for (size_t igate = gateForMax - nEachSide; igate <= gateForMax + nEachSide; igate++) {
-      Radx::fl32 dbz = dbzArray[igate];
-      if (dbz == dbzMiss) {
-        foundSurface = false;
-      }
-      if (dbz < _params.min_dbz_for_surface_echo) {
-        foundSurface = false;
-      }
-    }
-  }
-  
-  // compute surface vel
-  
-  if (foundSurface) {
-    double sum = 0.0;
-    double count = 0.0;
-    for (size_t igate = gateForMax - nEachSide; igate <= gateForMax + nEachSide; igate++) {
-      Radx::fl32 vel = velArray[igate];
-      if (vel == velMiss) {
-        foundSurface = false;
-      }
-      sum += vel;
-      count++;
-    }
-    _surfaceVel[0] = sum / count;
-    _dbzMax[0] = dbzMax;
-    _rangeToSurface[0] = rangeToSurface;
-  }
-
-}
-
-/////////////////////////////////////////////////////////////////////////
-// apply the stage1 filter
-// this is applied to the tail end of the incoming data
-
-void HcrVelCorrect::_applyStage1Filter()
-
-{
-  
-  double sum = 0.0;
-  double sumWts = 0.0;
-  for (size_t ii = 0; ii < _lenStage1; ii++) {
-    double vel = _surfaceVel[ii];
-    double wt = _filtCoeffStage1[ii];
-    sum += wt * vel;
-    sumWts += wt;
-  }
-
-  double filtVal = _surfaceVel[_lenStage1Half];
-  if (sumWts > 0) {
-    filtVal = sum / sumWts;
-  }
-  
-  _filteredStage1[_lenStage1Half] = filtVal;
-
-}
-
-/////////////////////////////////////////////////////////////////////////
-// apply the spike filter
-
-void HcrVelCorrect::_applySpikeFilter()
-
-{
-
-  double sum = 0.0;
-  double sumWts = 0.0;
-  for (size_t ii = 0; ii < _lenSpike; ii++) {
-    double vel = _surfaceVel[ii];
-    double wt = _filtCoeffSpike[ii];
-    sum += wt * vel;
-    sumWts += wt;
-  }
-
-  double filtVal = _surfaceVel[_lenSpikeHalf];
-  if (sumWts > 0) {
-    filtVal = sum / sumWts;
-  }
-
-  _filteredSpike[_lenSpikeHalf] = filtVal;
-
-}
-
-/////////////////////////////////////////////////////////////////////////
-// compute the conditioned value
-
-void HcrVelCorrect::_computeConditionedValue()
-
-{
-  
-  // we compute the conditioned value
-
-  double filtStage1 = _filteredStage1[_condIndex];
-  double filtSpike = _filteredSpike[_condIndex];
-  double surfaceVel = _surfaceVel[_condIndex];
-  double conditionedVel = surfaceVel;
-
-  double absDiff = fabs(surfaceVel - filtStage1);
-  if (absDiff > _params.spike_filter_difference_threshold) {
-    conditionedVel = filtSpike;
-  }
-
-  _filteredCond[_condIndex] = conditionedVel;
-  
-}
-
-/////////////////////////////////////////////////////////////////////////
-// apply the final filter to compute the final filtered velocity
-
-void HcrVelCorrect::_applyFinalFilter()
-
-{
-  
-  size_t istart = _finalIndex - _lenFinalHalf;
-  
-  double sum = 0.0;
-  double sumWts = 0.0;
-  for (size_t ii = 0; ii < _lenFinal; ii++) {
-    double vel = _filteredCond[ii + istart];
-    double wt = _filtCoeffFinal[ii];
-    sum += wt * vel;
-    sumWts += wt;
-  }
-  
-  double finalVal = _filteredCond[_finalIndex];
-  if (sumWts > 0) {
-    finalVal = sum / sumWts;
-  }
-  
-  _filteredFinal[_finalIndex] = finalVal;
 
 }
 
@@ -1016,71 +672,22 @@ int HcrVelCorrect::_runFmq()
 
     // process this ray
 
-    _processRay(ray);
+    if (_surfVel.processRay(ray) == 0) {
     
-    // write params if needed
-    
-    if (_needWriteParams) {
-      if (_writeParams(ray)) {
-        return -1; 
-      }
-      _needWriteParams = false;
-    }
-    
-    // write out ray
-    
-    _writeRay(ray);
-
-#ifdef JUNK
-
-    // combine rays if combined time exceeds specified dwell
-
-    const vector<RadxRay *> &raysDwell = _filtVol.getRays();
-    size_t nRaysDwell = raysDwell.size();
-    if (nRaysDwell > 1) {
+      // write params if needed
       
-      _dwellStartTime = raysDwell[0]->getRadxTime();
-      _dwellEndTime = raysDwell[nRaysDwell-1]->getRadxTime();
-      double dwellSecs = (_dwellEndTime - _dwellStartTime);
-      dwellSecs *= ((double) nRaysDwell / (nRaysDwell - 1.0));
-      
-      if (dwellSecs >= _filtBufLen) {
-
-        // dwell time exceeded, so compute dwell ray and add to volume
-
-        if (_params.debug >= Params::DEBUG_VERBOSE) {
-          cerr << "INFO: _runFmq, using nrays: " << nRaysDwell << endl;
+      if (_needWriteParams) {
+        if (_writeParams(ray)) {
+          return -1; 
         }
-        RadxRay *dwellRay = _filtVol.computeFieldStats(_dwellStatsMethod);
-
-        RadxTime dwellRayTime(dwellRay->getRadxTime());
-        //double deltaSecs = dwellRayTime - prevDwellRayTime;
-
-        prevDwellRayTime = dwellRayTime;
-        
-        // write params if needed
-
-        if (_needWriteParams) {
-          if (_writeParams(dwellRay)) {
-            return -1; 
-          }
-          _needWriteParams = false;
-        }
-
-        // write out ray
-
-        _writeRay(dwellRay);
-
-        // clean up
-
-        delete ray; // SHOULD CHANGE
-        _georefs.clear();
-
+        _needWriteParams = false;
       }
+      
+      // write out ray
+      
+      _writeRay(ray);
 
-    } // if (nRaysDwell > 1)
-
-#endif
+    } // if (_surfVel.processRay(ray) == 0)
 
   } // while (true)
   
@@ -1712,120 +1319,12 @@ int HcrVelCorrect::_getDsScanMode(Radx::SweepMode_t mode)
 }
 
 //////////////////////////////////////////////////
-// initialize the filters
-
-void HcrVelCorrect::_initFilters()
-{
-
-  // set up vectors of filter coefficients
-
-  _filtCoeffStage1.clear();
-  _filtCoeffSpike.clear();
-  _filtCoeffFinal.clear();
-
-  for (int ii = 0; ii < _params.stage1_filter_n; ii++) {
-    _filtCoeffStage1.push_back(_params._stage1_filter[ii]);
-  }
-  
-  for (int ii = 0; ii < _params.spike_filter_n; ii++) {
-    _filtCoeffSpike.push_back(_params._spike_filter[ii]);
-  }
-
-  for (int ii = 0; ii < _params.final_filter_n; ii++) {
-    _filtCoeffFinal.push_back(_params._final_filter[ii]);
-  }
-  
-  // compute filter lengths and half-lengths
-
-  _lenStage1 = _filtCoeffStage1.size();
-  _lenStage1Half = _lenStage1 / 2;
-  
-  _lenSpike = _filtCoeffSpike.size();
-  _lenSpikeHalf = _lenSpike / 2;
-
-  _lenFinal = _filtCoeffFinal.size();
-  _lenFinalHalf = _lenFinal / 2;
-
-  // compute indices for filter results and
-  // length of buffers required for filtering
-  
-  if (_lenSpike > _lenStage1) {
-    _condIndex = _lenSpikeHalf;
-    _finalIndex = _lenSpikeHalf + _lenFinalHalf;
-    _filtBufLen = _lenSpike;
-    if (_finalIndex + _lenFinalHalf > _filtBufLen) {
-      _filtBufLen = _finalIndex + _lenFinalHalf;
-    }
-  } else {
-    _condIndex = _lenStage1Half;
-    _finalIndex = _lenStage1Half + _lenFinalHalf;
-    _filtBufLen = _lenStage1;
-    if (_finalIndex + _lenFinalHalf > _filtBufLen) {
-      _filtBufLen = _finalIndex + _lenFinalHalf;
-    }
-  }
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Filter summary:" << endl;
-    cerr << "  Filter _lenStage1, _lenStage1Half: "
-         << _lenStage1 << ", " << _lenStage1Half << endl;
-    cerr << "  Filter _lenSpike, _lenSpikeHalf: "
-         << _lenSpike << ", " << _lenSpikeHalf << endl;
-    cerr << "  Filter _lenFinal, _lenFinalHalf: "
-         << _lenFinal << ", " << _lenFinalHalf << endl;
-    cerr << "  Conditioned index: " << _condIndex << endl;
-    cerr << "  Final index: " << _finalIndex << endl;
-    cerr << "  Filter buffer len: " << _filtBufLen << endl;
-  }
-
-  // set up arrays
-
-  int nbytes = _filtBufLen * sizeof(double);
-  
-  _dbzMax = new double[_filtBufLen];
-  _rangeToSurface = new double[_filtBufLen];
-  _surfaceVel = new double[_filtBufLen];
-  _filteredSpike = new double[_filtBufLen];
-  _filteredStage1 = new double[_filtBufLen];
-  _filteredCond = new double[_filtBufLen];
-  _filteredFinal = new double[_filtBufLen];
-
-  memset(_dbzMax, 0, nbytes);
-  memset(_rangeToSurface, 0, nbytes);
-  memset(_surfaceVel, 0, nbytes);
-  memset(_filteredSpike, 0, nbytes);
-  memset(_filteredStage1, 0, nbytes);
-  memset(_filteredCond, 0, nbytes);
-  memset(_filteredFinal, 0, nbytes);
-
-}
-
-//////////////////////////////////////////////////
-// shift the arrays by 1
-
-void HcrVelCorrect::_shiftArrays()
-{
-  
-  int nbytesMove = (_filtBufLen - 1) * sizeof(double);
-  
-  memmove(_dbzMax + 1, _dbzMax, nbytesMove);
-  memmove(_rangeToSurface + 1, _rangeToSurface, nbytesMove);
-  memmove(_surfaceVel + 1, _surfaceVel, nbytesMove);
-  memmove(_filteredSpike + 1, _filteredSpike, nbytesMove);
-  memmove(_filteredStage1 + 1, _filteredStage1, nbytesMove);
-  memmove(_filteredCond + 1, _filteredCond, nbytesMove);
-  memmove(_filteredFinal + 1, _filteredFinal, nbytesMove);
-
-}
-
-//////////////////////////////////////////////////
 // correct velocity on ray
 
-void HcrVelCorrect::_correctVelForRay(RadxRay *ray)
+void HcrVelCorrect::_correctVelForRay(RadxRay *ray, double surfVel)
 
 {
 
-  double surfVel = _filteredFinal[_finalIndex];
   RadxField *velField = ray->getField(_params.vel_field_name);
   if (velField == NULL) {
     // no vel field, nothing to do

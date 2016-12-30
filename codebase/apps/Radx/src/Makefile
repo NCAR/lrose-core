@@ -7,6 +7,7 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
+	Ascii2Radx \
 	Dsr2Radx \
 	FixCfradialPaths \
 	FixRadxPointing \
@@ -20,6 +21,7 @@ SUB_DIRS = \
 	RadxEvad \
 	RadxFilter \
 	RadxMergeFields \
+	RadxMergeVols \
 	RadxMon \
 	RadxPartRain \
 	RadxPrint \

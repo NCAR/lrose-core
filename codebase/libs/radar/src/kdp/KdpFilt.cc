@@ -201,7 +201,15 @@ KdpFilt::KdpFilt()
   _zdrAttenExpon = 1.05;
   _doComputeAttenCorr = false;
   _attenCoeffsSpecified = false;
-  
+
+  // initialize computation of KDP from Z and ZDR
+
+  _kdpZExpon = 1.0;
+  _kdpZdrExpon = -2.05;
+  _kdpZZdrCoeff = 3.32e-5;
+  _kdpZZdrThreshold = 0.25;
+  _kdpZZdrMedianLen = 5;
+
   // debugging
 
   _debug = false;
@@ -378,6 +386,12 @@ int KdpFilt::compute(time_t timeSecs,
     }
   }
 
+  // set params for computing KDP from Z and ZDR
+
+  _kdpZExpon = 1.0;
+  _kdpZdrExpon = -2.05;
+  _kdpZZdrCoeff = 3.32e-5 * (10.0 / _wavelengthCm);
+
   // set range details
 
   _startRangeKm = startRangeKm;
@@ -408,7 +422,17 @@ int KdpFilt::compute(time_t timeSecs,
   if (_unfoldPhidp()) {
     // no good data in whole ray, fill with missing, return early
     for (int igate = 0; igate < _nGates; igate++) {
-      _kdp[igate] = _missingValue;
+      if (_snr[igate] < _snrThreshold) {
+        _kdp[igate] = _missingValue;
+        _kdpZZdr[igate] = _missingValue;
+        _kdpCond[igate] = _missingValue;
+        _psob[igate] = _missingValue;
+      } else {
+        _kdp[igate] = 0;
+        _kdpZZdr[igate] = 0;
+        _kdpCond[igate] = 0;
+        _psob[igate] = 0;
+      }
     }
     return 0;
   }
@@ -438,16 +462,21 @@ int KdpFilt::compute(time_t timeSecs,
     
   // set KDP and PSOB to 0
   // for small values of KDP, and non-good gates
-  
-  for (int ii = 0; ii < _nGates; ii++) {
-    if (!_validForKdp[ii] || fabs(_kdp[ii]) < _minValidAbsKdp) {
-      _kdp[ii] = 0.0;
-      // _psob[ii] = 0.0;
-      // _kdp[ii] = _missingValue;
-      // _psob[ii] = _missingValue;
-    }
-  }
-    
+
+  // for (int ii = 0; ii < _nGates; ii++) {
+  //   if (!_validForKdp[ii] || fabs(_kdp[ii]) < _minValidAbsKdp) {
+  //     if (_snr[ii] < _snrThreshold) {
+  //       _kdp[ii] = _missingValue;
+  //     } else { 
+  //       _kdp[ii] = 0.0;
+  //     }
+  //   }
+  // }
+
+  // load up conditional KDP from estimated kdp and kdpZZdr
+
+  _loadKdpCond();
+
   // compute attenuation corrections
 
   if (_doComputeAttenCorr) {
@@ -549,8 +578,10 @@ void KdpFilt::_initArrays(const double *snr,
   _snr = _snr_.alloc(_nGates);
   _dbz = _dbz_.alloc(_nGates);
   _dbzMax = _dbzMax_.alloc(_nGates);
+  _dbzMedian = _dbzMedian_.alloc(_nGates);
   _zdr = _zdr_.alloc(_nGates);
   _zdrSdev = _zdrSdev_.alloc(_nGates);
+  _zdrMedian = _zdrMedian_.alloc(_nGates);
   _rhohv = _rhohv_.alloc(_nGates);
   _phidp = _phidp_.alloc(_nGates);
   _phidpMean = _phidpMean_.alloc(_nGates);
@@ -566,6 +597,8 @@ void KdpFilt::_initArrays(const double *snr,
   _validForKdp = _validForKdp_.alloc(_nGates);
   _validForUnfold = _validForUnfold_.alloc(_nGates);
   _kdp = _kdp_.alloc(_nGates);
+  _kdpZZdr = _kdpZZdr_.alloc(_nGates);
+  _kdpCond = _kdpCond_.alloc(_nGates);
   _psob = _psob_.alloc(_nGates);
   _dbzAttenCorr = _dbzAttenCorr_.alloc(_nGates);
   _zdrAttenCorr = _zdrAttenCorr_.alloc(_nGates);
@@ -590,6 +623,9 @@ void KdpFilt::_initArrays(const double *snr,
       _dbz[ii] = _missingValue;
     }
   }
+  memcpy(_dbzMedian, _dbz, _nGates * sizeof(double));
+  FilterUtils::applyMedianFilter(_dbzMedian, _nGates,
+                                 _kdpZZdrMedianLen, _missingValue);
 
   if (zdr != NULL) {
     memcpy(_zdr, zdr, _nGates * sizeof(double));
@@ -600,6 +636,9 @@ void KdpFilt::_initArrays(const double *snr,
     }
     _zdrAvailable = false;
   }
+  memcpy(_zdrMedian, _zdr, _nGates * sizeof(double));
+  FilterUtils::applyMedianFilter(_zdrMedian, _nGates,
+                                 _kdpZZdrMedianLen, _missingValue);
 
   if (rhohv != NULL) {
     memcpy(_rhohv, rhohv, _nGates * sizeof(double));
@@ -649,8 +688,17 @@ void KdpFilt::_initArrays(const double *snr,
     _phidpAccumFilt[ii] = _missingValue;
     _validForKdp[ii] = false;
     _validForUnfold[ii] = false;
-    _kdp[ii] = _missingValue;
-    _psob[ii] = _missingValue;
+    if (_snr[ii] < _snrThreshold) {
+      _kdp[ii] = _missingValue;
+      _kdpZZdr[ii] = _missingValue;
+      _kdpCond[ii] = _missingValue;
+      _psob[ii] = _missingValue;
+    } else {
+      _kdp[ii] = 0;
+      _kdpZZdr[ii] = 0;
+      _kdpCond[ii] = 0;
+      _psob[ii] = 0;
+    }
   }
   
 }
@@ -886,7 +934,7 @@ void KdpFilt::_computeKdp()
   
   // load up conditioned KDP
 
-  _loadKdp(_phidpCondFilt, _kdp);
+  _loadKdp();
 
   // load up accumulated filtered phidp along range
 
@@ -937,13 +985,23 @@ void KdpFilt::_padArray(double *array)
 /////////////////////////////////////////////
 // Load up KDP array
 
-void KdpFilt::_loadKdp(const double *phidp, double *kdp)
+void KdpFilt::_loadKdp()
 
 {
 
   // compute kdp
   
   for (int ii = 0; ii < _nGates; ii++) {
+
+    // check SNR
+    
+    if (_snr[ii] < _snrThreshold) {
+      _kdp[ii] = _missingValue;
+      _kdpZZdr[ii] = _missingValue;
+      _kdpCond[ii] = _missingValue;
+      _psob[ii] = _missingValue;
+      continue;
+    }
 
     // get max DBZ for surrounding gates
     
@@ -971,11 +1029,13 @@ void KdpFilt::_loadKdp(const double *phidp, double *kdp)
     }
     int len = i1 - i0;
     if (len < 1) {
-      kdp[ii] = 0;
+      _kdp[ii] = 0;
     } else {
-      double dphi = phidp[i1] - phidp[i0];
-      kdp[ii] = (dphi / (_gateSpacingKm * len)) / 2.0;
+      double dphi = _phidpCondFilt[i1] - _phidpCondFilt[i0];
+      _kdp[ii] = (dphi / (_gateSpacingKm * len)) / 2.0;
     }
+
+    _kdpZZdr[ii] = _computeKdpFromZZdr(_dbzMedian[ii], _zdrMedian[ii]);
 
   } // ii
 
@@ -1094,10 +1154,6 @@ void KdpFilt::_computePhidpConditioned()
 {
 
   bool debug = false;
-
-  // if (fabs(_elevDeg - 0.6) < 0.1 && fabs(_azDeg - 131.9) < 0.1) {
-  //   debug = true;
-  // }
 
   // loop through the valid runs
 
@@ -1504,7 +1560,8 @@ void KdpFilt::_computePhidpStats(int igate)
   double sumDist = 0.0;
   double sumDistSq = 0.0;
   
-  for (int jj = igate - _nGatesStatsHalf; jj <= igate + _nGatesStatsHalf; jj++) {
+  for (int jj = igate - _nGatesStatsHalf;
+       jj <= igate + _nGatesStatsHalf; jj++) {
     if (jj < 0 || jj >= _nGates) {
       continue;
     }
@@ -1573,7 +1630,8 @@ void KdpFilt::_computeZdrSdev(int igate)
   double sum = 0.0;
   double sumSq = 0.0;
   
-  for (int jj = igate - _nGatesStatsHalf; jj <= igate + _nGatesStatsHalf; jj++) {
+  for (int jj = igate - _nGatesStatsHalf;
+       jj <= igate + _nGatesStatsHalf; jj++) {
     if (jj < 0 || jj >= _nGates) {
       continue;
     }
@@ -1624,7 +1682,8 @@ void KdpFilt::_writeRayDataToFile()
   char filePath[MAX_PATH_LEN];
   DateTime rtime(_timeSecs);
   int msecs = (int) (_timeFractionSecs * 1000.0 + 0.5);
-  sprintf(filePath, "%s%skdpray_%.4d%.2d%.2d-%.2d%.2d%.2d.%.3d_el-%05.1f_az-%05.1f_.txt",
+  sprintf(filePath,
+          "%s%skdpray_%.4d%.2d%.2d-%.2d%.2d%.2d.%.3d_el-%05.1f_az-%05.1f_.txt",
           _rayFileDir.c_str(), PATH_DELIM,
           rtime.getYear(), rtime.getMonth(), rtime.getDay(),
           rtime.getHour(), rtime.getMin(), rtime.getSec(), msecs,
@@ -1712,3 +1771,124 @@ double KdpFilt::_getPlotVal(double val, double valIfMissing)
     return val;
   }
 }
+
+////////////////////////////////////////////////////////////
+// Compute estimated kdp from Z and ZDR using power law
+
+double KdpFilt::_computeKdpFromZZdr(double dbz,
+                                    double zdr)
+  
+{
+  
+  double zzLin = pow(10.0, dbz / 10.0);
+
+  if (zdr < 0.1) {
+    zdr = 0.1;
+  }
+  double zdrLin = pow(10.0, zdr / 10.0);
+  
+  double zTerm = pow(zzLin, _kdpZExpon);
+  double zdrTerm = pow(zdrLin, _kdpZdrExpon);
+  double kdpEst = zTerm * zdrTerm * _kdpZZdrCoeff;
+
+  return kdpEst;
+  
+}
+
+////////////////////////////////////////////////////////////
+/// load up conditional kdp from computed kdp and kdpZZdr
+
+void KdpFilt::_loadKdpCond()
+
+{
+
+  int startGate = 0;
+  int endGate = 0;
+  bool inRun = false;
+
+  for (int igate = 0; igate < _nGates; igate++) {
+
+    if (_kdp[igate] == _missingValue ||
+        _kdp[igate] <= _kdpZZdrThreshold ||
+        _kdpZZdr[igate] == _missingValue) {
+      
+      // non-positive KDP
+    
+      if (inRun) {
+
+        // end of run so process it
+      
+        _loadKdpCondRun(startGate, endGate);
+
+      }
+        
+      // start again
+      
+      startGate = igate + 1;
+      endGate = igate + 1;
+      inRun = false;
+      
+    } else {
+      
+      // have positive KDP, update run info
+      
+      if (!inRun) {
+        startGate = igate;
+      }
+      endGate = igate;
+      inRun = true;
+      
+    } // if (_kdp[igate] == _missingValue ...
+
+  } // igate
+
+  // check for active run
+  
+  if (inRun) {
+    _loadKdpCondRun(startGate, endGate);
+  }
+
+}
+
+////////////////////////////////////////////////////////////
+/// load up conditional kdp for a specific run
+
+void KdpFilt::_loadKdpCondRun(int startGate, int endGate)
+
+{
+
+  if (endGate - startGate < 3) {
+    // not enough gates for this to make sense
+    return;
+  }
+
+  // integrate the KDP in the run
+
+  double sumKdp = 0.0;
+  double sumKdpZZdr = 0.0;
+  
+  for (int igate = startGate; igate <= endGate; igate++) {
+    sumKdp += _kdp[igate];
+    sumKdpZZdr += _kdpZZdr[igate];
+  } // igate
+
+  if (sumKdpZZdr < 0.5) {
+    return;
+  }
+
+  // compute factor to normalize the ZZdr estimate
+  // from the measured estimate
+
+  double condFactor = sumKdp / sumKdpZZdr;
+
+  // load the conditional KDP
+
+  for (int igate = startGate; igate <= endGate; igate++) {
+    _kdpCond[igate] = _kdpZZdr[igate] * condFactor;
+  } // igate
+
+}
+
+
+
+

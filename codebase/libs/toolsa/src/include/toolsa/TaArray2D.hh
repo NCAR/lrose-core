@@ -212,7 +212,7 @@ template <class T>
     return *this;
   }
 
-  _alloc(rhs._sizeMajor, rhs.sizeMinor);
+  _alloc(rhs._sizeMajor, rhs._sizeMinor);
   memcpy(_dat2D, rhs._dat2D, _sizeMajor * sizeof(T*));
   memcpy(_dat1D, rhs._dat1D, _size1D * sizeof(T));
 

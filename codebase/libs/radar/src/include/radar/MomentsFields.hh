@@ -237,7 +237,6 @@ public:
 
   RadarComplex_t lag0_vchx; // lag 0 v-co to h-x covariance
   RadarComplex_t lag0_hcvx; // lag 0 h-co to v-x  covariance
-  RadarComplex_t lag0_vxhx; // lag 0 h-x to v-x covariance
   RadarComplex_t lag1_hc;
   RadarComplex_t lag1_vc;
   RadarComplex_t lag1_hcvc; // lag 1 h-co to v-co covariance
@@ -280,9 +279,6 @@ public:
 
   double lag0_hcvx_db; // lag 0 h-co to v-x  covariance
   double lag0_hcvx_phase;
-
-  double lag0_vxhx_db; // lag 0 h-x to v-x covariance
-  double lag0_vxhx_phase;
 
   double lag1_hc_db;
   double lag1_hc_phase;

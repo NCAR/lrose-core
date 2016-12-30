@@ -121,6 +121,7 @@ public:
   double _windPressure;
   int _numPoints;
   int _stationID;
+  string _stationName;
   double _lat, _lon, _alt;
   double _surfPres;
   double _presScale;

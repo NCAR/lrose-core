@@ -44,6 +44,7 @@
 #include <Radx/RadxRcalib.hh>
 #include <Radx/RadxAngleHist.hh>
 #include <Radx/RadxGeoref.hh>
+#include <Radx/PseudoRhi.hh>
 #include <cstring>
 #include <cmath>
 #include <algorithm>
@@ -418,6 +419,7 @@ void RadxVol::clear()
   clearCfactors();
   clearFrequency();
   clearPacking();
+  clearPseudoRhis();
 
 }
 
@@ -3733,6 +3735,107 @@ double RadxVol::_computeSweepFractionInTransition(int sweepIndex)
 
 }
 
+///////////////////////////////////////////
+// compute the geometry limits from rays
+
+void RadxVol::computeGeomLimitsFromRays(double &minElev,
+                                        double &maxElev,
+                                        double &minRange,
+                                        double &maxRange)
+  
+{
+
+  if (_rays.size() < 1) {
+    return;
+  }
+
+  const RadxRay &ray0 = *_rays[0];
+
+  minElev = ray0.getElevationDeg();
+  maxElev = ray0.getElevationDeg();
+  minRange = ray0.getStartRangeKm();
+  maxRange = minRange + ray0.getNGates() * ray0.getGateSpacingKm();
+
+  // loop through rays, accumulating geometry information
+  
+  for (size_t iray = 1; iray < _rays.size(); iray++) {
+
+    const RadxRay &ray = *_rays[iray];
+
+    double elev = ray.getElevationDeg();
+    double startRange = ray.getStartRangeKm();
+    double gateSpacing = ray.getGateSpacingKm();
+    double endRange = startRange + ray.getNGates() * gateSpacing;
+    
+    if (elev < minElev) {
+      minElev = elev;
+    }
+    if (elev > maxElev) {
+      maxElev = elev;
+    }
+    if (startRange < minRange) {
+      minRange = startRange;
+    }
+    if (endRange > maxRange) {
+      maxRange = endRange;
+    }
+    
+  } // iray
+
+}
+
+///////////////////////////////////////////////////////////////
+/// Estimate nyquist per sweep from velocity field
+///
+/// If nyquist values are missing, we can estimate the nyquist
+/// finding the max absolute velocity in each sweep.
+
+void RadxVol::estimateSweepNyquistFromVel(const string &velFieldName)
+  
+{
+
+  // estimate nyquist for each sweep
+
+  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+    
+    RadxSweep *sweep = _sweeps[isweep];
+    size_t startIndex = sweep->getStartRayIndex();
+    size_t endIndex = sweep->getEndRayIndex();
+    double maxAbsVel = 0;
+
+    for (size_t iray = startIndex; iray <= endIndex; iray++) {
+      const RadxRay &ray = *_rays[iray];
+      const RadxField *velField = ray.getField(velFieldName);
+      if (velField != NULL) {
+        RadxField velf(*velField);
+        velf.convertToFl32();
+        const Radx::fl32 *vel = velf.getDataFl32();
+        Radx::fl32 miss = velf.getMissingFl32();
+        for (size_t igate = 0; igate < velf.getNPoints(); igate++) {
+          if (vel[igate] != miss) {
+            double absVel = fabs(vel[igate]);
+            if (absVel > maxAbsVel) {
+              maxAbsVel = absVel;
+            }
+          } // if (vel[igate] != miss)
+        } // igate
+      } // if (velField != NULL)
+    } // iray
+
+    if (maxAbsVel > 0) {
+      double estimatedNyquist = maxAbsVel;
+      for (size_t iray = startIndex; iray <= endIndex; iray++) {
+        RadxRay &ray = *_rays[iray];
+        if (ray.getNyquistMps() <= 0) {
+          ray.setNyquistMps(estimatedNyquist);
+        }
+      } // iray
+    } // if (maxAbsVel > 0) 
+    
+  } // isweep
+  
+}
+
 ////////////////////////////////////////////////////////////
 // Constrain the data by specifying fixedAngle limits
 //
@@ -3976,9 +4079,9 @@ void RadxVol::sortSweepRaysByAzimuth()
       sortedRayPtrs.insert(rptr);
     }
     
-    // add sortedRays array in time-sorted order
+    // add sortedRays array in az-sorted order
     
-    for (set<RayPtr, SortByRayTime>::iterator ii = sortedRayPtrs.begin();
+    for (set<RayPtr, SortByRayAzimuth>::iterator ii = sortedRayPtrs.begin();
          ii != sortedRayPtrs.end(); ii++) {
       sortedRays.push_back(ii->ptr);
     }
@@ -5383,6 +5486,153 @@ void RadxVol::countGeorefsNotMissing(RadxGeoref &count) const
   }
 
 }
+
+///////////////////////////////////////////////////////////////
+/// Load up pseudo RHIs, by analyzing the rays in the volume.
+/// Only relevant for surveillance and sector ppi-type volumes.
+/// Returns 0 on success
+/// Returns -1 on error - i.e. if not ppi-type scan.
+/// After success, you can call getPseudoRhis().
+
+int RadxVol::loadPseudoRhis()
+
+{
+
+  // initialize
+
+  clearPseudoRhis();
+
+  // check scan type
+
+  Radx::SweepMode_t sweepMode = getPredomSweepModeFromAngles();
+  if (sweepMode != Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE &&
+      sweepMode != Radx::SWEEP_MODE_SECTOR) {
+    if (_debug) {
+      cerr << "WARNING - RadxVol::loadPseudoRhis()" << endl;
+      cerr << "  Sweep mode invalid: " << Radx::sweepModeToStr(sweepMode) << endl;
+    }
+    return -1;
+  }
+
+  if (_sweeps.size() < 1) {
+    if (_debug) {
+      cerr << "WARNING - RadxVol::loadPseudoRhis()" << endl;
+      cerr << "  No sweeps found" << endl;
+    }
+    return -1;
+  }
+
+  // trim surveillance to 360 deg sweeps
+
+  if (sweepMode != Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE) {
+    trimSurveillanceSweepsTo360Deg();
+  }
+
+  // get the sweep with lowest elevation angle
+  
+  size_t lowSweepIndex = 0;
+  const RadxSweep *lowSweep = _sweeps[0];
+  double minElev = lowSweep->getFixedAngleDeg();
+  for (size_t isweep = 1; isweep < _sweeps.size(); isweep++) {
+    const RadxSweep *sweep = _sweeps[isweep];
+    double elev = sweep->getFixedAngleDeg();
+    if (elev < minElev) {
+      lowSweep = sweep;
+      lowSweepIndex = isweep;
+      minElev = elev;
+    }
+  }
+  if (lowSweep->getNRays() < 10) {
+    if (_debug) {
+      cerr << "WARNING - RadxVol::loadPseudoRhis()" << endl;
+      cerr << "  Low sweep has too few rays, nRays: lowSweep->getNRays()" << endl;
+      cerr << "  Cannot determine pseudo RHIs" << endl;
+    }
+    return -1;
+  }
+
+  // compute mean delta azimuth for low sweep
+
+  size_t lowSweepStartRayIndex = lowSweep->getStartRayIndex();
+  size_t lowSweepEndRayIndex = lowSweep->getEndRayIndex();
+  double prevAz = _rays[lowSweepStartRayIndex]->getAzimuthDeg();
+  double sumDeltaAz = 0.0;
+  double count = 0.0;
+
+  for (size_t iray = lowSweepStartRayIndex + 1; iray <= lowSweepEndRayIndex; iray++) {
+    double az = _rays[iray]->getAzimuthDeg();
+    double deltaAz = fabs(az - prevAz);
+    if (deltaAz > 180.0) {
+      deltaAz = fabs(deltaAz - 360.0);
+    }
+    sumDeltaAz += deltaAz;
+    count++;
+    prevAz = az;
+  } // iray
+  double meanDeltaAz = sumDeltaAz / count;
+
+  // compute azimuth margin for finding RHI rays
+
+  double azMargin = meanDeltaAz * 2.5;
+  
+  // go through the low sweep, adding rays to pseudo RHIs
+  
+  for (size_t iray = lowSweepStartRayIndex; iray <= lowSweepEndRayIndex; iray++) {
+    RadxRay *lowRay = _rays[iray];
+    PseudoRhi *rhi = new PseudoRhi;
+    rhi->addRay(lowRay);
+    _pseudoRhis.push_back(rhi);
+    for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+      if (isweep == lowSweepIndex) {
+        // low sweep, ignore this one, already added
+        continue;
+      }
+      RadxSweep *sweep = _sweeps[isweep];
+      RadxRay *bestRay = NULL;
+      double minDeltaAz = 9999.0;
+      for (size_t jray = sweep->getStartRayIndex(); 
+           jray <= sweep->getEndRayIndex(); jray++) {
+        RadxRay *ray = _rays[jray];
+        double deltaAz = fabs(lowRay->getAzimuthDeg() - ray->getAzimuthDeg());
+        if (deltaAz > 180.0) {
+          deltaAz = fabs(deltaAz - 360.0);
+        }
+        if (deltaAz < azMargin && deltaAz < minDeltaAz) {
+          bestRay = ray;
+          minDeltaAz = deltaAz;
+        }
+      } // jray
+      if (bestRay != NULL) {
+        rhi->addRay(bestRay);
+      }
+    } // isweep;
+    
+  } // iray
+
+  // sort the RHIs in elevation
+
+  for (size_t ii = 0; ii < _pseudoRhis.size(); ii++) {
+    _pseudoRhis[ii]->sortRaysByElevation();
+  }
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////
+/// clear vector of pseudo RHIs
+
+void RadxVol::clearPseudoRhis()
+
+{
+
+  for (size_t ii = 0; ii < _pseudoRhis.size(); ii++) {
+    delete _pseudoRhis[ii];
+  }
+  _pseudoRhis.clear();
+
+}
+
 ////////////////////////////////////////////  
 /// Set up angle search, for a given sweep
 /// Return 0 on success, -1 on failure

@@ -1,0 +1,434 @@
+/**********************************************************************
+ * TDRP params for AcGeorefCompare
+ **********************************************************************/
+
+//======================================================================
+//
+// AcGeorefCompare reads multiple ac georef data sets from SPDB and 
+//   compares them. It is designed to compare the NCAR GV INS with the HCR 
+//   Gmigits unit.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// reg_with_procmap ////////////////////////
+//
+// Register with procmap.
+//
+//
+// Type: boolean
+//
+
+reg_with_procmap = TRUE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "diffs";
+
+//======================================================================
+//
+// OPERATIONS MODE.
+//
+//======================================================================
+ 
+///////////// product_type ////////////////////////////
+//
+// Type of product that is produced.
+//
+// TIME_SERIES_TABLE: produced a text table, one line per primary 
+//   observation. Results are written to stdout. Each line contains data 
+//   from both data sets, along with differences between them. The start 
+//   and end times are specified on the command line.
+//
+// SINGLE_PERIOD_ARCHIVE: analyze a single specified time period, in 
+//   archive mode. Print the results in for that single period to stdout. 
+//   The start time is specified on the command line.
+//
+// SINGLE_PERIOD_REALTIME: in realtime mode, analyze single time 
+//   periods. Print the results in for that single period to stdout. Sleep 
+//   and repeat.
+//
+//
+// Type: enum
+// Options:
+//     TIME_SERIES_TABLE
+//     SINGLE_PERIOD_ARCHIVE
+//     SINGLE_PERIOD_REALTIME
+//
+
+product_type = SINGLE_PERIOD_ARCHIVE;
+
+///////////// start_time //////////////////////////////
+//
+// Start time in yyyy mm dd hh mm ss.
+//
+// Applies to TIME_SERIES_TABLE and SINGLE_PERIOD_ARCHIVE product types.
+//
+//
+// Type: string
+//
+
+start_time = "2016 09 16 16 00 00";
+
+///////////// end_time ////////////////////////////////
+//
+// End time in yyyy mm dd hh mm ss.
+//
+// Applies to TIME_SERIES_TABLE product type.
+//
+//
+// Type: string
+//
+
+end_time = "2016 09 16 16 00 00";
+
+///////////// single_period_secs //////////////////////
+//
+// Period for analysis (secs).
+//
+// Mean values are computed over this period. Applies to 
+//   SINGLE_PERIOD_REALTIME and SINGLE_PERIOD_ARCHIVE product types.
+//
+//
+// Type: double
+//
+
+single_period_secs = 10;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+// We specify a primary and secondary data set. The primary set is read 
+//   in first, and then data from the secondary data set is matched in 
+//   time to the entries in the primary.
+//
+//======================================================================
+ 
+///////////// primary_spdb_url ////////////////////////
+//
+// SPDB url for primary data set.
+//
+// Can take the form of a local directory path, or a full url of the 
+//   form:
+//
+// 	'spdbp:://hostname::dir_path'
+//
+// If the dir_path starts with '.' or '/', it specifies a relative or 
+//   absolute path respectively. If not, it specifies a path relative to 
+//   '$DATA_DIR'.
+//
+//
+// Type: string
+//
+
+primary_spdb_url = "$(DATA_DIR)/spdb/ac_georef/iwg1";
+
+///////////// secondary_spdb_url //////////////////////
+//
+// SPDB url for secondary data set.
+//
+// Can take the form of a local directory path, or a full url of the 
+//   form:
+//
+// 	'spdbp:://hostname::dir_path'
+//
+// If the dir_path starts with '.' or '/', it specifies a relative or 
+//   absolute path respecively. If not, it specifies a path relative to 
+//   '$DATA_DIR'.
+//
+//
+// Type: string
+//
+
+secondary_spdb_url = "$(DATA_DIR)/spdb/ac_georef/moments_10hz";
+
+//======================================================================
+//
+// DATA ANALYSIS.
+//
+// Data is written to stdout in ASCII column format.
+//
+//======================================================================
+ 
+///////////// primary_frequency_hz ////////////////////
+//
+// Frequency of primary data to be used in the analysis.
+//
+// If the data in the primary data set is more frequent than this, we 
+//   trim it down to this frequency.
+//
+//
+// Type: double
+//
+
+primary_frequency_hz = 1;
+
+///////////// time_block_secs /////////////////////////
+//
+// Length of data time blocks to be read in (secs).
+//
+// The data is read in blocks of this length, to control memory usage 
+//   for large data sets.
+//
+//
+// Type: int
+//
+
+time_block_secs = 60;
+
+///////////// max_time_diff_secs //////////////////////
+//
+// Maximum time difference for valid pair (secs).
+//
+// This is the max valid time difference between a primary observation 
+//   and secondary observation.
+//
+//
+// Type: double
+//
+
+max_time_diff_secs = 0.5;
+
+//======================================================================
+//
+// AIRCRAFT WEIGHT CALCULATIONS.
+//
+//======================================================================
+ 
+///////////// fuel_burn_rate_initial_climb ////////////
+//
+// Fuel burn rate in initial climb (lb/hr).
+//
+//
+// Type: double
+//
+
+fuel_burn_rate_initial_climb = 11500;
+
+///////////// mean_fuel_burn_rate_cruise //////////////
+//
+// Mean Fuel burn rate in cruise after the initial climb (lb/hr).
+//
+//
+// Type: double
+//
+
+mean_fuel_burn_rate_cruise = 3500;
+
+///////////// takeoff_weight_lbs //////////////////////
+//
+// Aircraft takeoff weight (lb).
+//
+//
+// Type: double
+//
+
+takeoff_weight_lbs = 88000;
+
+///////////// top_of_climb_altitude_ft ////////////////
+//
+// Target top of climb altitude (ft).
+//
+//
+// Type: double
+//
+
+top_of_climb_altitude_ft = 20000;
+
+//======================================================================
+//
+// TIME SERIES TABLE DETAILS.
+//
+//======================================================================
+ 
+///////////// print_commented_header //////////////////
+//
+// If true, write a commented header at the start of the output.
+//
+//
+// Type: boolean
+//
+
+print_commented_header = TRUE;
+
+///////////// comment_character ///////////////////////
+//
+// Character at start of comment lines.
+//
+// Each comment line will be start with this character.
+//
+//
+// Type: string
+//
+
+comment_character = "#";
+
+///////////// column_delimiter ////////////////////////
+//
+// Delimiter between columns.
+//
+//
+// Type: string
+//
+
+column_delimiter = " ";
+
+//======================================================================
+//
+// SINGLE PERIOD OUTPUT DETAILS.
+//
+//======================================================================
+ 
+///////////// print_single_period_stats ///////////////
+//
+// If true, write the single period statistics to stdout.
+//
+//
+// Type: boolean
+//
+
+print_single_period_stats = TRUE;
+
+///////////// primary_label ///////////////////////////
+//
+// Label for primary column in printout.
+//
+//
+// Type: string
+//
+
+primary_label = "IWG1";
+
+///////////// secondary_label /////////////////////////
+//
+// Label for secondary column in printout.
+//
+//
+// Type: string
+//
+
+secondary_label = "Moments-10HZ";
+
+///////////// print_primary_custom_variables //////////
+//
+// If true, write the custom variables for primary data set.
+//
+//
+// Type: boolean
+//
+
+print_primary_custom_variables = TRUE;
+
+///////////// primary_custom_labels ///////////////////
+//
+// Labels for primary custom variables.
+//
+// If the label is left empty, the variable is not printed.
+//
+//
+// Type: string
+// 1D array - fixed length - 10 elements.
+//
+
+primary_custom_labels = {
+ "pitch2 (deg)",
+ "pitch3 (deg)",
+ "roll2 (deg)",
+ "roll3 (deg)",
+ "",
+ "",
+ "tempNose (C)",
+ "",
+ "",
+ ""
+};
+
+///////////// print_secondary_custom_variables ////////
+//
+// If true, write the custom variables for secondary data set.
+//
+//
+// Type: boolean
+//
+
+print_secondary_custom_variables = TRUE;
+
+///////////// secondary_custom_labels /////////////////
+//
+// Labels for secondary custom variables.
+//
+// If the label is left empty, the variable is not printed.
+//
+//
+// Type: string
+// 1D array - fixed length - 10 elements.
+//
+
+secondary_custom_labels = {
+ "tailConeTemp (C)",
+ "",
+ "azimuth (deg)",
+ "elevation (deg)",
+ "",
+ "",
+ "",
+ "",
+ "",
+ ""
+};
+
+///////////// print_surface_velocity_stats ////////////
+//
+// If true, print the surface velocity stats for HCR.
+//
+// The estimated pitch and roll angle errors will also be printed.
+//
+//
+// Type: boolean
+//
+
+print_surface_velocity_stats = TRUE;
+
+///////////// surface_velocity_custom_index ///////////
+//
+// Index of surface velocity in the custom variables.
+//
+// The surface velocity will be in the secondary data set.
+//
+//
+// Type: int
+//
+
+surface_velocity_custom_index = 1;
+

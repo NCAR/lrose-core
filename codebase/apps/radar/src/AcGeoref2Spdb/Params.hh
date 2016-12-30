@@ -59,10 +59,11 @@ public:
 
   typedef enum {
     CFRADIAL = 0,
-    IWRF_FILE = 1,
-    IWRF_FMQ = 2,
-    RAF_NETCDF = 3,
-    RAF_IWG1_UDP = 4
+    RADX_FMQ = 1,
+    IWRF_FILE = 2,
+    IWRF_FMQ = 3,
+    RAF_NETCDF = 4,
+    RAF_IWG1_UDP = 5
   } input_mode_t;
 
   ///////////////////////////
@@ -364,6 +365,10 @@ public:
 
   int iwg1_udp_port;
 
+  tdrp_bool_t udp_is_multicast;
+
+  char* udp_multicast_group;
+
   char* aircraft_callsign;
 
   char* cfradial_dbz_field_name;
@@ -378,7 +383,13 @@ public:
 
   double min_dbz_for_surface_echo;
 
+  double max_nadir_error_for_surface_vel;
+
   int ngates_for_surface_echo;
+
+  tdrp_bool_t print_surface_velocity_data;
+
+  double surface_velocity_print_period_secs;
 
   char* nc_varname_altitude_msl;
 
@@ -431,6 +442,19 @@ public:
 
   char* output_spdb_url;
 
+  int spdb_nchunks_per_write;
+
+  double surface_vel_spike_filter_difference_threshold;
+
+  double *_surface_vel_stage1_filter;
+  int surface_vel_stage1_filter_n;
+
+  double *_surface_vel_spike_filter;
+  int surface_vel_spike_filter_n;
+
+  double *_surface_vel_final_filter;
+  int surface_vel_final_filter_n;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -438,7 +462,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[49];
+  mutable TDRPtable _table[61];
 
   const char *_className;
 

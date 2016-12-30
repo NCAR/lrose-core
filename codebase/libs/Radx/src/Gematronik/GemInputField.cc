@@ -34,6 +34,7 @@
 #include "GemSweep.hh"
 #include <cerrno>
 #include <cstdio>
+#include <cmath>
 #include <sys/stat.h>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxStr.hh>
@@ -174,7 +175,7 @@ int GemInputField::read()
     for (int jj = 0; jj < (int) _blobs.size(); jj++) {
       const GemBlob &blob = *_blobs[jj];
       if (sweep.getAnglesBlobId() == blob.getId()) {
-        sweep.setAzAngles(blob);
+        sweep.setAngles(blob);
       } else if (sweep.getDataBlobId() == blob.getId()) {
         sweep.setFieldData(blob);
       }
@@ -296,11 +297,23 @@ int GemInputField::_decodeXml(const string &xmlBuf)
     RadxStr::addStr(_errStr, "  Cannot find <volume> tag");
     return -1;
   }
+  
+  // get time
 
   if (_decodeRadxTime(attributes, _volTime)) {
     RadxStr::addStr(_errStr, "ERROR - GemInputField::_decodeXml");
     RadxStr::addStr(_errStr, "  Cannot decode volume date and time");
     return -1;
+  }
+
+  // get type
+
+  _volType = "vol";
+  for (size_t ii = 0; ii < attributes.size(); ii++) {
+    const RadxXml::attribute &att = attributes[ii];
+    if (att.getName() == "type") {
+      _volType = att.getVal();
+    }
   }
 
   // get radar info or sensor info
@@ -403,11 +416,39 @@ int GemInputField::_decodeXml(const string &xmlBuf)
     RadxStr::addStr(_errStr, "  Cannot find num ele");
     return -1;
   }
+
+  RadxXml::readDouble(pargroupBuf, "startAzi", _startAzi);
+  RadxXml::readDouble(pargroupBuf, "stopAzi", _stopAzi);
+
   RadxXml::readDouble(pargroupBuf, "firstele", _scanFirstEle);
   RadxXml::readDouble(pargroupBuf, "lastele", _scanLastEle);
   RadxXml::readString(pargroupBuf, "pol", _polarization);
   RadxXml::readDouble(pargroupBuf, "pw_index", _pulseWidthUs);
   RadxXml::readDouble(pargroupBuf, "antspeed", _antennaSpeed);
+
+  // deduce scan mode
+
+  if (_volType == "ele") {
+    _isRhi = true;
+    _isSector = false;
+  } else if (_volType == "azi") {
+    _isRhi = false;
+    double deltaStartStop = fabs(_stopAzi - _startAzi);
+    if (deltaStartStop > 180) {
+      deltaStartStop = fabs(deltaStartStop - 360.0);
+    }
+    if (deltaStartStop < 5) {
+      // surveillance
+      _isSector = false;
+    } else {
+      // sector
+      _isSector = true;
+    }
+  } else {
+    // surveillance
+    _isRhi = false;
+    _isSector = false;
+  }
 
   // read in array of tag buffers for slices
 
@@ -472,6 +513,11 @@ int GemInputField::_decodeRadxTime(const vector<RadxXml::attribute> &attributes,
 {
 
   string dateTimeStr;
+  if (RadxXml::readStringAttr(attributes, "datetimehighaccuracy", dateTimeStr) == 0) {
+    if (RadxXml::readTime(dateTimeStr, time) == 0) {
+      return 0;
+    }
+  }
   if (RadxXml::readStringAttr(attributes, "datetime", dateTimeStr) == 0) {
     if (RadxXml::readTime(dateTimeStr, time) == 0) {
       return 0;

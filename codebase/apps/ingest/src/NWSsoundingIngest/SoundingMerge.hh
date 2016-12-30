@@ -81,7 +81,7 @@ public:
   // order with respect to altitude and stored internally.
   // Returns 0 on failure.
   //
-  int Init(time_t dataTime, int id);
+  int Init(time_t dataTime, int id, const string &name);
   //
   //
   // Merge. The real woo-woo of the class.  You pass in the specs for
@@ -122,6 +122,7 @@ public:
   SoundingPut _Sput;
   time_t _dataTime;
   int _id;
+  string _stationName;
   double _lat, _lon, _alt;
   //
   // Method that actually does the merging if we have to.

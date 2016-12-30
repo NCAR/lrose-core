@@ -750,6 +750,18 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'print_missing_pulses'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_missing_pulses");
+    tt->descr = tdrpStrDup("Option to print message about missing pulses.");
+    tt->help = tdrpStrDup("Only applies to time series data input. If true, a message will be printed to stderr if a missing pulse is noted in the time series.");
+    tt->val_offset = (char *) &print_missing_pulses - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1337,6 +1349,39 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 11");
+    tt->comment_hdr = tdrpStrDup("COMPUTING DIFFERENCE IN ELLIPSE POWER PATTERN BETWEEN H and V");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'compute_ellipse_hv_power_diffs'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("compute_ellipse_hv_power_diffs");
+    tt->descr = tdrpStrDup("Option to compute the power differences for the H and V ellipses.");
+    tt->help = tdrpStrDup("The differences are computed along the centroid axes, covering the specified solid angle.");
+    tt->val_offset = (char *) &compute_ellipse_hv_power_diffs - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'solid_angle_for_ellipse_power_diffs'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("solid_angle_for_ellipse_power_diffs");
+    tt->descr = tdrpStrDup("Solid angle for computing ellipse power pattern diffs (deg).");
+    tt->help = tdrpStrDup("We compute the mean power ratio between H and V, along the centroid-centered axes in elevation and azimuth. The difference between these gives a measure of the distortion in the ellipse shapes between H and V.");
+    tt->val_offset = (char *) &solid_angle_for_ellipse_power_diffs - &_start_;
+    tt->single_val.d = 2;
+    tt++;
+    
+    // Parameter 'Comment 12'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("CROSS-POLAR POWER ANALYSIS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1521,11 +1566,11 @@ using namespace std;
     tt->single_val.d = 2;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("OPTION TO RETRIEVE XPOL RATIO from SPDB");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1590,11 +1635,11 @@ using namespace std;
     tt->single_val.i = 3600;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("OPTION TO RETRIEVE SITE TEMP from SPDB");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1659,11 +1704,11 @@ using namespace std;
     tt->single_val.i = 3600;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("TEST PULSE ANALYSIS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1704,11 +1749,11 @@ using namespace std;
     tt->single_val.d = 147.8;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("TRANSMITTER POWERS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1725,13 +1770,25 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
-    tt->comment_hdr = tdrpStrDup("OUTPUT TEXT RESULTS");
+    tt->param_name = tdrpStrDup("Comment 17");
+    tt->comment_hdr = tdrpStrDup("WRITE RESULTS");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'only_write_for_valid_centroid'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("only_write_for_valid_centroid");
+    tt->descr = tdrpStrDup("Only write out data if the computed centroid position is valid.");
+    tt->help = tdrpStrDup("If the parabolic fit in el and az is not valid, do not write out the data.");
+    tt->val_offset = (char *) &only_write_for_valid_centroid - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'write_text_files'
@@ -1782,11 +1839,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("SunCal.global_results.txt");
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("OUTPUT RESULTS TO MDV FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1815,11 +1872,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("./mdv");
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("OUTPUT SUMMARY RESULTS TO SPDB XML");
     tt->comment_text = tdrpStrDup("");
     tt++;

@@ -41,7 +41,7 @@
 #define LABEL_MAX 64
 #define LINE_MAX 4096
 
-extern double gamma(double);
+extern double gamma_(double);
 
 static int compare_y_coords(const void *, const void *);
 
@@ -697,7 +697,7 @@ static int compute_stats(double minx,
   beta2 = sqrt((xsdev * xsdev) / shape);
   beta = (beta1 + beta2) / 2.0;
   one_over_beta = 1.0 / beta;
-  gamma_k = 1.0 / (pow(beta, shape) * gamma(shape));
+  gamma_k = 1.0 / (pow(beta, shape) * gamma_(shape));
   eta = xmin;
 
   if (Glob->hist_fit == HIST_EXPONENTIAL) {

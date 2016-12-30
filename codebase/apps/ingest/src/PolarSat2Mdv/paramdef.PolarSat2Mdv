@@ -183,3 +183,9 @@ paramdef int {
   p_default = 10;
   p_descr = "Seconds to sleep between data checks";
 } sleep_secs;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to check the bounds of the satellite path g-ring data with the bounds of the user defined grip and test for overlap before processing";
+}check_domain_before_process;
+

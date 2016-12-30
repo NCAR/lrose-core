@@ -10,6 +10,11 @@
 ~*
 *~
 
+# cvs
+
+Entries.Log
+Entries.static
+
 # configure
 
 makefile
@@ -18,6 +23,7 @@ makefile
 makefile.in
 makefile.am
 __makefile.template
+.libs
 
 codebase/Makefile.top
 codebase/VERSION
@@ -170,6 +176,7 @@ codebase/apps/hydro/src/RainGage/RainGage
 codebase/apps/hydro/src/RateAccum/RateAccum
 codebase/apps/hydro/src/Shape2Map/Shape2Map
 
+codebase/apps/ingest/src/AcData2Spdb/AcData2Spdb
 codebase/apps/ingest/src/AcTrack2Polygon/AcTrack2Polygon
 codebase/apps/ingest/src/AcarsNc2GenPt/AcarsNc2GenPt
 codebase/apps/ingest/src/Awos2Spdb/Awos2Spdb
@@ -333,6 +340,7 @@ codebase/apps/procmap/src/procmap_register/procmap_register
 codebase/apps/procmap/src/procmap_unregister/procmap_unregister
 codebase/apps/procmap/src/test_procmap/test_procmap
 
+codebase/apps/radar/src/AcGeorefCompare/AcGeorefCompare
 codebase/apps/radar/src/AcGeoref2Spdb/AcGeoref2Spdb
 codebase/apps/radar/src/AltCpCompute/AltCpCompute
 codebase/apps/radar/src/CP2Udp2Fmq/CP2Udp2Fmq
@@ -423,6 +431,7 @@ codebase/apps/spol/src/SpolCal2Xml/SpolCal2Xml
 codebase/apps/spol/src/SpolSysconRelay/SpolSysconRelay
 codebase/apps/spol/src/SpolTs2Fmq/SpolTs2Fmq
 codebase/apps/spol/src/SpolTsMonitor/SpolTsMonitor
+codebase/apps/spol/src/SpolDishTemp2Spdb/SpolDishTemp2Spdb
 
 codebase/apps/titan/src/AcPosnAscii2Spdb/AcPosnAscii2Spdb
 codebase/apps/titan/src/Alenia2Mom/Alenia2Mom
@@ -493,6 +502,7 @@ codebase/apps/trec/src/GridForecast/GridForecast
 codebase/apps/trec/src/TrecGauge2Spdb/TrecGauge2Spdb
 codebase/apps/trec/src/ctrec/ctrec
 
+codebase/apps/Radx/src/Ascii2Radx/Ascii2Radx
 codebase/apps/Radx/src/Dsr2Radx/Dsr2Radx
 codebase/apps/Radx/src/FixCfradialPaths/FixCfradialPaths
 codebase/apps/Radx/src/FixRadxPointing/FixRadxPointing
@@ -506,19 +516,65 @@ codebase/apps/Radx/src/RadxDiff/RadxDiff
 codebase/apps/Radx/src/RadxDwellCombine/RadxDwellCombine
 codebase/apps/Radx/src/RadxEvad/RadxEvad
 codebase/apps/Radx/src/RadxFilter/RadxFilter
+codebase/apps/Radx/src/RadxHca/RadxHca
 codebase/apps/Radx/src/RadxMergeFields/RadxMergeFields
+codebase/apps/Radx/src/RadxMergeVols/RadxMergeVols
 codebase/apps/Radx/src/RadxMon/RadxMon
 codebase/apps/Radx/src/RadxPartRain/RadxPartRain
 codebase/apps/Radx/src/RadxPrint/RadxPrint
 codebase/apps/Radx/src/RadxQpe/RadxQpe
+codebase/apps/Radx/src/RadxQc/RadxQc
 codebase/apps/Radx/src/RadxSunMon/RadxSunMon
+codebase/apps/Radx/src/RadxBeamBlock/RadxBeamBlock
 
 codebase/apps/tdrp/src/TdrpTest/TdrpTest
 codebase/apps/tdrp/src/tdrp_gen/tdrp_gen
 codebase/apps/tdrp/src/tdrp_test/tdrp_test
+
+codebase/apps/cidd/src/AsciiSelect/AsciiSelect
+codebase/apps/cidd/src/CIDD/CIDD
+codebase/apps/cidd/src/CheckXDisplay/CheckXDisplay
+codebase/apps/cidd/src/CiddClick2GenPt/CiddClick2GenPt
+codebase/apps/cidd/src/CiddParams2JazzXml/CiddParams2JazzXml
+codebase/apps/cidd/src/CronusPointSelect/CronusPointSelect
+codebase/apps/cidd/src/DrawFmq2Bdry/DrawFmq2Bdry
+codebase/apps/cidd/src/DrawFmq2MaskMdv/DrawFmq2MaskMdv
+codebase/apps/cidd/src/DrawFmq2Polygon/DrawFmq2Polygon
+codebase/apps/cidd/src/DrawFmqPolygonStats/DrawFmqPolygonStats
+codebase/apps/cidd/src/EdrSelect/EdrSelect
+codebase/apps/cidd/src/EventMan/EventMan
+codebase/apps/cidd/src/GridPointSelect/GridPointSelect
+codebase/apps/cidd/src/MapCircles/MapCircles
+codebase/apps/cidd/src/MapGrid/MapGrid
+codebase/apps/cidd/src/MetarSelect/MetarSelect
+codebase/apps/cidd/src/OverlayCreate/OverlayCreate
+codebase/apps/cidd/src/RemoteUI2Fmq/RemoteUI2Fmq
+codebase/apps/cidd/src/Shape2Map/Shape2Map
+codebase/apps/cidd/src/ShapeAscii2Map/ShapeAscii2Map
+codebase/apps/cidd/src/ShapeGridPt2Mdv/ShapeGridPt2Mdv
+codebase/apps/cidd/src/SoundingChart/SoundingChart
+codebase/apps/cidd/src/SoundingText/SoundingText
+codebase/apps/cidd/src/StationStripChart/StationStripChart
+codebase/apps/cidd/src/cidd_client/cidd_client
+codebase/apps/cidd/src/create_colorscale/create_colormap
+codebase/apps/cidd/src/cscale_edit/cscale_edit
+codebase/apps/cidd/src/fix_map/fix_map
+codebase/apps/cidd/src/get_url/get_url
+codebase/apps/cidd/src/initDrawQueue/initDrawQueue
+codebase/apps/cidd/src/inspectRawFmq/inspectRawFmq
+codebase/apps/cidd/src/jvizMaps2ciddMaps/jvizMaps2ciddMaps
+codebase/apps/cidd/src/metar_strip/metar_strip
+codebase/apps/cidd/src/notify_cidd/notify_cidd
+codebase/apps/cidd/src/pos_report/pos_report
+codebase/apps/cidd/src/shapefile2Mapfile/shapefile2Mapfile
+codebase/apps/cidd/src/toneDownColorscale/toneDownColorscale
+codebase/apps/cidd/src/view_colormap/view_colormap
+codebase/apps/radar/src/SpectraPlot/SpectraPlot
+codebase/apps/radar/src/SpectraScope/SpectraScope
 
 codebase/Makefile
 codebase/libs/Fmq/src/.libs/
 codebase/libtool
 codebase/ltmain.sh
 codebase/m4/
+

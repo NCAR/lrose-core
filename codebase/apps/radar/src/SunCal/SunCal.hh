@@ -284,10 +284,22 @@ private:
   
   // sun centroid
 
+  bool _validCentroid;
   double _meanSunEl, _meanSunAz;
   double _sunCentroidAzOffset, _sunCentroidElOffset;
   double _sunCentroidAzOffsetHc, _sunCentroidElOffsetHc;
   double _sunCentroidAzOffsetVc, _sunCentroidElOffsetVc;
+
+  // beam pattern and pattern ratio H-V
+  // fitting parabolas to solar pattern
+
+  double _ccAz, _bbAz, _aaAz, _errEstAz, _rSqAz;
+  double _ccEl, _bbEl, _aaEl, _errEstEl, _rSqEl;
+
+  double _widthRatioElAzHc;
+  double _widthRatioElAzVc;
+  double _widthRatioElAzDiffHV;
+  double _zdrDiffElAz;
 
   // mean correlations
   
@@ -417,6 +429,9 @@ private:
   void _computeSS(const vector<MomentsSun> &selected,
                   double solidAngle,
                   Stats &stats);
+
+  void _computeEllipsePowerDiffsUsingSolidAngle();
+
   void _computeXpolRatio(const vector<Xpol> &xpolMoments);
   void _computeTestPulse();
 
@@ -439,7 +454,7 @@ private:
   void _writeSummaryText(FILE *out);
   int _appendToGlobalResults();
   void _writeGlobalHeader(FILE *out);
-  void _appendFloatToFile(FILE *out, double val);
+  void _appendFloatToFile(FILE *out, double val, int width = 10);
   int _writeGriddedTextFiles();
   int _writeGriddedField(const string &dirPath,
                          const string &field, int offset);

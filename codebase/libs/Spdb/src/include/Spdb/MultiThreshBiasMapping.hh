@@ -127,6 +127,12 @@ public:
    */
   bool read(const time_t &time);
 
+  /**
+   * @return the chunk valid time, which will be set with any successful
+   * read
+   */
+  inline time_t getChunkValidTime(void) const {return _chunkValidTime;}
+
 protected:
 private:  
 
@@ -134,6 +140,12 @@ private:
    * SPDB location
    */
   std::string _url;
+
+  /**
+   * Valid time of the chunk that was loaded, when  you read
+   */
+  time_t _chunkValidTime;
+
 
   bool _load(DsSpdb &s, bool fieldsAndLeadsSet=true);
 

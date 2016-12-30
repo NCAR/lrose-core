@@ -75,7 +75,7 @@ bool FiltMedian::filter(const FiltInfoInput &inp, FiltInfoOutput &o) const
     return false;
   }
 
-  o.median2(_nr, _ntheta, _bin_min, _bin_max, _bin_delta);
+  o.median(_nr, _ntheta, _bin_min, _bin_max, _bin_delta);
   return true;
 }
 

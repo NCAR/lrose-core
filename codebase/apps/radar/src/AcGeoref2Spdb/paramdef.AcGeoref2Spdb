@@ -43,6 +43,7 @@ commentdef {
 
 typedef enum {
   CFRADIAL,
+  RADX_FMQ,
   IWRF_FILE,
   IWRF_FMQ,
   RAF_NETCDF,
@@ -57,7 +58,7 @@ paramdef enum input_mode_t {
 
 paramdef string {
   p_default = "/tmp/fmq/ts";
-  p_descr = "FMQ name. For IWRF_FMQ only.";
+  p_descr = "FMQ name. For IWRF_FMQ or RADX_FMQ only.";
   p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
 } input_fmq_name;
 
@@ -67,11 +68,27 @@ paramdef boolean {
   p_help = "Applies to input_mode = IWRF_FMQ. If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
 } seek_to_end_of_input;
 
+commentdef {
+  p_header = "IWG1 UDP mode";
+}
+
 paramdef int {
   p_default = 7071;
   p_descr = "Port for reading IWG1 packets via UDP.";
   p_help = "Applies to input_mode = RAF_IWG1_UDP. On the aircraft, the IWG1 georeference information is broadcast using UDP. This is the UDP port used.";
 } iwg1_udp_port;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to read multi-cast udp packets.";
+  p_help = "If true, you must set the multicast group as well.";
+} udp_is_multicast;
+
+paramdef string {
+  p_default = "239.0.0.10";
+  p_descr = "Group for multicast packets";
+  p_help = "Multicast packets are sometimes required to get through a firewall.";
+} udp_multicast_group;
 
 commentdef {
   p_header = "AIRCRAFT CALL SIGN";
@@ -130,11 +147,29 @@ paramdef double {
   p_help = "Gates with values below this will not be used.";
 } min_dbz_for_surface_echo;
 
+paramdef double {
+  p_default = 5;
+  p_descr = "Maximum error from nadir pointing for computing surface velocity (deg).";
+  p_help = "We only try to compute the surface velocity if the beam is pointing within this margin of nadir (vertically down).";
+} max_nadir_error_for_surface_vel;
+
 paramdef int {
   p_default = 1;
   p_descr = "Number of gates needed for identifying surface echo.";
   p_help = "We require this number of gates to exceed min_dbz_for_surface_echo.";
 } ngates_for_surface_echo;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print surface velocity information to stdout.";
+  p_help = "If true, the surface velocity estimates, as well as estimated antenna pointing angles, will be printed to stdout at regular intervals.";
+} print_surface_velocity_data;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Number of seconds between printing information on surface velocity.";
+  p_help = "The data will be averaged over this time period and then printed to stdout.";
+} surface_velocity_print_period_secs;
 
 commentdef {
   p_header = "NETCDF DATA";
@@ -268,8 +303,211 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "spdbp:://localhost::spdb/ac_georef";
+  p_default = "spdbp:://localhost::/tmp/spdb/ac_georef";
   p_descr = "Output SPDB URL for georef data.";
   p_help = "The format is spdbp::params//host:port:dir. Normally params is an empty string, and port is an empty string, so that the default behavior will occur.";
 } output_spdb_url;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Number of SPDB chunks per write.";
+  p_help = "We package up the SPDB data chunks, and write them together once the number of chunks reaches this threshold.";
+} spdb_nchunks_per_write;
+
+commentdef {
+  p_header = "FIR FILTERING FOR SURFACE VELOCITY ESTIMATES";
+}
+
+paramdef double {
+  p_default = 0.11;
+  p_descr = "Threshold for removing spikes in the original data and resetting the value to that form the short filter.";
+  p_help = "We apply both the stage-1 and spike filters to the time series of surface velocity. If the absolute difference between the two exceeds this threshold, then the conditioned data is set to the output from the stage-1 filter. If the absolute difference is below this threshold then the original data point is retained. After this step the final filter it applied to the conditioned data to compute the final filtered value.";
+} surface_vel_spike_filter_difference_threshold;
+
+paramdef double {
+  p_default = {
+    1.6976992e-02,
+    2.3294990e-02,
+    3.0244475e-02,
+    3.7550056e-02,
+    4.4888313e-02,
+    5.1908191e-02,
+    5.8254533e-02,
+    6.3592862e-02,
+    6.7633391e-02,
+    7.0152222e-02,
+    7.1007947e-02,
+    7.0152222e-02,
+    6.7633391e-02,
+    6.3592862e-02,
+    5.8254533e-02,
+    5.1908191e-02,
+    4.4888313e-02,
+    3.7550056e-02,
+    3.0244475e-02,
+    2.3294990e-02,
+    1.6976992e-02
+  };
+  p_descr = "Coefficients for stage-1 FIR filter.";
+  p_help =  "Initial filtering step. This is normally a 21-point FIR filter.";
+  p_private = TRUE;
+} surface_vel_stage1_filter[];
+
+paramdef double {
+  p_default = {
+    1.4102747e-09,
+    9.6755464e-09,
+    3.9114620e-08,
+    1.2097842e-07,
+    3.1591184e-07,
+    7.3214001e-07,
+    1.5507567e-06,
+    3.0594395e-06,
+    5.6957251e-06,
+    1.0100617e-05,
+    1.7182765e-05,
+    2.8192724e-05,
+    4.4805905e-05,
+    6.9211797e-05,
+    1.0420588e-04,
+    1.5327948e-04,
+    2.2070176e-04,
+    3.1158693e-04,
+    4.3193918e-04,
+    5.8866742e-04,
+    7.8956192e-04,
+    1.0432208e-03,
+    1.3589249e-03,
+    1.7464536e-03,
+    2.2158418e-03,
+    2.7770754e-03,
+    3.4397322e-03,
+    4.2125742e-03,
+    5.1031044e-03,
+    6.1171018e-03,
+    7.2581539e-03,
+    8.5272083e-03,
+    9.9221654e-03,
+    1.1437535e-02,
+    1.3064185e-02,
+    1.4789188e-02,
+    1.6595812e-02,
+    1.8463629e-02,
+    2.0368790e-02,
+    2.2284434e-02,
+    2.4181247e-02,
+    2.6028147e-02,
+    2.7793078e-02,
+    2.9443896e-02,
+    3.0949289e-02,
+    3.2279725e-02,
+    3.3408367e-02,
+    3.4311933e-02,
+    3.4971458e-02,
+    3.5372918e-02,
+    3.5507705e-02,
+    3.5372918e-02,
+    3.4971458e-02,
+    3.4311933e-02,
+    3.3408367e-02,
+    3.2279725e-02,
+    3.0949289e-02,
+    2.9443896e-02,
+    2.7793078e-02,
+    2.6028147e-02,
+    2.4181247e-02,
+    2.2284434e-02,
+    2.0368790e-02,
+    1.8463629e-02,
+    1.6595812e-02,
+    1.4789188e-02,
+    1.3064185e-02,
+    1.1437535e-02,
+    9.9221654e-03,
+    8.5272083e-03,
+    7.2581539e-03,
+    6.1171018e-03,
+    5.1031044e-03,
+    4.2125742e-03,
+    3.4397322e-03,
+    2.7770754e-03,
+    2.2158418e-03,
+    1.7464536e-03,
+    1.3589249e-03,
+    1.0432208e-03,
+    7.8956192e-04,
+    5.8866742e-04,
+    4.3193918e-04,
+    3.1158693e-04,
+    2.2070176e-04,
+    1.5327948e-04,
+    1.0420588e-04,
+    6.9211797e-05,
+    4.4805905e-05,
+    2.8192724e-05,
+    1.7182765e-05,
+    1.0100617e-05,
+    5.6957251e-06,
+    3.0594395e-06,
+    1.5507567e-06,
+    7.3214001e-07,
+    3.1591184e-07,
+    1.2097842e-07,
+    3.9114620e-08,
+    9.6755464e-09,
+    1.4102747e-09
+  };
+  p_descr = "Coefficients for spike FIR filter.";
+  p_help =  "Applying this filter onces is equivalent to applying the stage-1 filter five times in succession on a time series. Normally this will have 101 entries.";
+  p_private = TRUE;
+} surface_vel_spike_filter[];
+
+paramdef double {
+  p_default = {
+    2.8821826e-04,
+    7.9095771e-04,
+    1.5695770e-03,
+    2.6840635e-03,
+    4.1883217e-03,
+    6.1251990e-03,
+    8.5216287e-03,
+    1.1384298e-02,
+    1.4696240e-02,
+    1.8414716e-02,
+    2.2470653e-02,
+    2.6769843e-02,
+    3.1195919e-02,
+    3.5615037e-02,
+    3.9882036e-02,
+    4.3847698e-02,
+    4.7366679e-02,
+    5.0305553e-02,
+    5.2550426e-02,
+    5.4013588e-02,
+    5.4638695e-02,
+    5.4013588e-02,
+    5.2550426e-02,
+    5.0305553e-02,
+    4.7366679e-02,
+    4.3847698e-02,
+    3.9882036e-02,
+    3.5615037e-02,
+    3.1195919e-02,
+    2.6769843e-02,
+    2.2470653e-02,
+    1.8414716e-02,
+    1.4696240e-02,
+    1.1384298e-02,
+    8.5216287e-03,
+    6.1251990e-03,
+    4.1883217e-03,
+    2.6840635e-03,
+    1.5695770e-03,
+    7.9095771e-04,
+    2.8821826e-04
+  };
+  p_descr = "Coefficients for final FIR filter.";
+  p_help =  "Before applying this filter, we first compute the conditioned time series. We compute the difference between the results of the stage-1 and spike filters - if this difference exceeds spike_filter_difference_threshold we use the spike filter result. Otherwise we use the stage-1 result.";
+  p_private = TRUE;
+} surface_vel_final_filter[];
 

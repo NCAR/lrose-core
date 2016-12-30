@@ -154,6 +154,44 @@ Dsr2Radx::Dsr2Radx(int argc, char **argv)
     Radx::setMissingSi08(_params.missing_field_si08);
   }
 
+  // check params
+
+  int nGeomOptions = 0;
+  if (_params.convert_to_specified_output_gate_geometry) {
+    nGeomOptions++;
+  }
+  if (_params.convert_to_predominant_gate_geometry) {
+    nGeomOptions++;
+  }
+  if (_params.convert_to_finest_gate_geometry) {
+    nGeomOptions++;
+  }
+  if (nGeomOptions > 1) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "  Problem with TDRP parameters" << endl;
+    cerr << "  You can only set one of the following to true:" << endl;
+    cerr << "    convert_to_specified_output_gate_geometry" << endl;
+    cerr << "    convert_to_predominant_gate_geometry" << endl;
+    cerr << "    convert_to_finest_gate_geometry" << endl;
+    isOK = false;
+  }
+
+  int nSweepFilterOptions = 0;
+  if (_params.filter_using_sweep_number) {
+    nSweepFilterOptions++;
+  }
+  if (_params.filter_using_sweep_number_list) {
+    nSweepFilterOptions++;
+  }
+  if (nSweepFilterOptions > 1) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "  Problem with TDRP parameters" << endl;
+    cerr << "  You can only set one of the following to true:" << endl;
+    cerr << "    filter_using_sweep_number" << endl;
+    cerr << "    filter_using_sweep_number_list" << endl;
+    isOK = false;
+  }
+  
   // set up output file object
 
   _outFile = new RadxFile();
@@ -593,7 +631,7 @@ int Dsr2Radx::_processVol()
   }
 
   // load the current scan mode - PPI or RHI
-
+  
   _loadCurrentScanMode();
 
   // set the sweep numbers in the input rays, if needed
@@ -623,9 +661,9 @@ int Dsr2Radx::_processVol()
   }
 
   // set the volume info from the rays
-  
-  _vol.loadVolumeInfoFromRays();
 
+  _vol.loadVolumeInfoFromRays();
+  
   // set the sweep numbers from the rays
 
   if (_params.increment_sweep_num_when_pol_mode_changes) {
@@ -691,8 +729,14 @@ int Dsr2Radx::_processVol()
 
   // convert to common geometry
 
-  if (_params.convert_to_predominant_gate_geometry) {
+  if (_params.convert_to_specified_output_gate_geometry) {
+    _vol.remapRangeGeom(_params.output_start_range_km,
+                        _params.output_gate_spacing_km,
+                        _params.interpolate_to_output_gate_geometry);
+  } else if (_params.convert_to_predominant_gate_geometry) {
     _vol.remapToPredomGeom();
+  } else if (_params.convert_to_finest_gate_geometry) {
+    _vol.remapToFinestGeom();
   } else {
     _vol.filterOnPredomGeom();
   }
@@ -704,7 +748,15 @@ int Dsr2Radx::_processVol()
   // trim sweeps with too few rays
 
   if (_params.check_min_rays_in_sweep) {
+    size_t nraysVolBefore = _vol.getNRays();
     _vol.removeSweepsWithTooFewRays(_params.min_rays_in_sweep);
+    if (nraysVolBefore != _vol.getNRays()) {
+      if (_params.debug) {
+        cerr << "NOTE: removed sweeps with nrays < " << _params.min_rays_in_sweep << endl;
+        cerr << "  nrays in vol before removal: " << nraysVolBefore << endl;
+        cerr << "  nrays in vol after  removal: " << _vol.getNRays() << endl;
+      }
+    }
   }
 
   // apply angle offsets
@@ -774,7 +826,8 @@ int Dsr2Radx::_doWrite()
     }
 
     string outputDir = dset.output_dir;
-    
+
+    bool doWrite = true;
     if (_params.separate_output_dirs_by_scan_type) {
       outputDir += PATH_DELIM;
       if (_isSolarScan) {
@@ -784,22 +837,62 @@ int Dsr2Radx::_doWrite()
         switch (_scanMode) {
           case SCAN_MODE_RHI:
             outputDir += _params.rhi_subdir;
+            if (!_params.write_rhi_files) {
+              doWrite = false;
+            }
             break;
           case SCAN_MODE_SECTOR:
             outputDir += _params.sector_subdir;
+            if (!_params.write_sector_files) {
+              doWrite = false;
+            }
             break;
           case SCAN_MODE_VERT:
             outputDir += _params.vert_subdir;
+            if (!_params.write_vert_files) {
+              doWrite = false;
+            }
             break;
           case SCAN_MODE_SUNSCAN:
           case SCAN_MODE_SUNSCAN_RHI:
             outputDir += _params.sun_subdir;
+            if (!_params.write_sun_files) {
+              doWrite = false;
+            }
             break;
           case SCAN_MODE_PPI:
           default:
             outputDir += _params.surveillance_subdir;
+            if (!_params.write_surveillance_files) {
+              doWrite = false;
+            }
         }
       }
+    }
+    if (!doWrite) {
+      if (_params.debug) {
+        cerr << "NOTE - Dsr2Radx::_doWrite(), nrays: " << _vol.getNRays() << endl;
+        cerr << "  Skipping writing file for outputDir: " << outputDir << endl;
+        switch (_scanMode) {
+          case SCAN_MODE_RHI:
+            cerr << "  parameter write_rhi_files is false" << endl;
+            break;
+          case SCAN_MODE_SECTOR:
+            cerr << "  parameter write_sector_files is false" << endl;
+            break;
+          case SCAN_MODE_VERT:
+            cerr << "  parameter write_vert_files is false" << endl;
+            break;
+          case SCAN_MODE_SUNSCAN:
+          case SCAN_MODE_SUNSCAN_RHI:
+            cerr << "  parameter write_sun_files is false" << endl;
+            break;
+          case SCAN_MODE_PPI:
+          default:
+            cerr << "  parameter write_surveillance_files is false" << endl;
+        }
+      }
+      continue;
     }
     
     // check nrays in vol for volume-type formats
@@ -808,17 +901,17 @@ int Dsr2Radx::_doWrite()
         dset.format == Params::OUTPUT_FORMAT_CFRADIAL) {
       if ((int) _vol.getNRays() < _params.min_rays_in_vol) {
         if (_params.debug) {
-          cerr << "NOTE - Dsr2Radx::_doWrite()" << _vol.getNRays() << endl;
+          cerr << "NOTE - Dsr2Radx::_doWrite(), nrays: " << _vol.getNRays() << endl;
           cerr << "  dataType: " << dataType << endl;
           cerr << "  outputDir: " << outputDir << endl;
-          cerr << "  too few rays, will not be saved: " << _vol.getNRays() << endl;
+          cerr << "  too few rays, will not be saved" << endl;
         }
         continue;
       }
     }
 
     // write out
-    
+
     if (_outFile->writeToDir(_vol,
                              outputDir,
                              _params.append_day_dir_to_output_dir,
@@ -1611,6 +1704,8 @@ bool Dsr2Radx::_acceptRay(const RadxRay *ray)
 
 {
 
+  // check gate geometry
+
   if (_params.filter_using_gate_spacing) {
     double diff = fabs(_params.specified_gate_spacing - ray->getGateSpacingKm());
     if (diff > _smallVal) {
@@ -1625,6 +1720,8 @@ bool Dsr2Radx::_acceptRay(const RadxRay *ray)
     }
   }
 
+  // check elevation
+
   if (_params.filter_using_elev) {
     double elev = ray->getElevationDeg();
     if (elev < _params.specified_min_elev ||
@@ -1633,10 +1730,25 @@ bool Dsr2Radx::_acceptRay(const RadxRay *ray)
     }
   }
   
+  // check sweep number
+
   if (_params.filter_using_sweep_number) {
     int sweepNum = ray->getSweepNumber();
     if (sweepNum < _params.specified_min_sweep_number ||
         sweepNum > _params.specified_max_sweep_number) {
+      return false;
+    }
+  }
+  
+  if (_params.filter_using_sweep_number_list) {
+    int sweepNum = ray->getSweepNumber();
+    bool inList = false;
+    for (int ii = 0; ii < _params.specified_sweep_number_list_n; ii++) {
+      if (sweepNum == _params._specified_sweep_number_list[ii]) {
+        inList = true;
+      }
+    }
+    if (!inList) {
       return false;
     }
   }

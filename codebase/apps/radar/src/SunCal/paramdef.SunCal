@@ -114,6 +114,12 @@ paramdef boolean {
   p_help = "Only applies to alternating dual polarization mode. Normally, the HV flag is set to 1 for H, 0 for V. If the flag in the data has the opposite sense, set this to true.";
 } invert_hv_flag;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print message about missing pulses.";
+  p_help = "Only applies to time series data input. If true, a message will be printed to stderr if a missing pulse is noted in the time series.";
+} print_missing_pulses;
+
 commentdef {
   p_header = "FIELD NAMES FOR MOMENTS FILES";
   p_text = "Names of specified fields in the moments files.";
@@ -380,6 +386,22 @@ paramdef double {
 } max_solid_angle_for_mean_correlation;
 
 commentdef {
+  p_header = "COMPUTING DIFFERENCE IN ELLIPSE POWER PATTERN BETWEEN H and V";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute the power differences for the H and V ellipses.";
+  p_help = "The differences are computed along the centroid axes, covering the specified solid angle.";
+} compute_ellipse_hv_power_diffs;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Solid angle for computing ellipse power pattern diffs (deg).";
+  p_help = "We compute the mean power ratio between H and V, along the centroid-centered axes in elevation and azimuth. The difference between these gives a measure of the distortion in the ellipse shapes between H and V.";
+} solid_angle_for_ellipse_power_diffs;
+
+commentdef {
   p_header = "CROSS-POLAR POWER ANALYSIS";
 };
 
@@ -569,8 +591,14 @@ paramdef boolean {
 } compute_mean_transmit_powers;
 
 commentdef {
-  p_header = "OUTPUT TEXT RESULTS";
+  p_header = "WRITE RESULTS";
 };
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Only write out data if the computed centroid position is valid.";
+  p_help = "If the parabolic fit in el and az is not valid, do not write out the data.";
+} only_write_for_valid_centroid;
 
 paramdef boolean {
   p_default = true;

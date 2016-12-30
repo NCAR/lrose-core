@@ -52,13 +52,16 @@
 #include <radar/IwrfTsPulse.hh>
 #include <radar/IwrfTsReader.hh>
 #include <radar/IwrfCalib.hh>
+#include <radar/FindSurfaceVel.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxRay.hh>
+#include <Radx/RadxTime.hh>
 #include <rapformats/ac_georef.hh>
 #include <Spdb/DsSpdb.hh>
-#include <NcUtils/NetcdfCxxFile.hh>
+#include <NcUtils/Ncxx.hh>
 
 using namespace std;
+using namespace netCDF;
 
 ////////////////////////
 // This class
@@ -101,13 +104,13 @@ private:
 
   // reading netcdf file
   
-  NetcdfCxxFile _file;
+  NcxxFile _file;
   string _errStr;
 
   string _callSign, _projectName, _flightNum;
   string _timeCoordName, _latCoordName, _lonCoordName;
 
-  NcVar _timeVar;
+  NcxxVar _timeVar;
   DateTime _timeBase;
   TaArray<time_t> _times_;
   size_t _nTimes;
@@ -146,6 +149,13 @@ private:
   // writing out
 
   DsSpdb _spdb;
+
+  // printing surface velocity data
+
+  FindSurfaceVel _surfVel;
+  RadxTime _timeLastVelPrint;
+  double _velStatsCount;
+  ac_georef_t _velStatsSum;
   
   // methods
 
@@ -153,6 +163,7 @@ private:
   int _runCfradialMode();
   int _runRafNetcdfMode();
   int _runRafIwg1UdpMode();
+  int _runRadxFmqMode();
 
   IwrfTsPulse *_getNextPulse();
 
@@ -162,6 +173,7 @@ private:
   void _convertFromRadxGeoref(const RadxGeoref &radxGeoref,
                               ac_georef_t &acGeoref);
   int _processCfRadialFile(const string &path);
+  void _handleRay(const RadxRay &ray, double cmigitsTemp, double tailconeTemp);
   int _processRafNetcdfFile(const string &path);
   int _readGlobalAttr();
   int _readTimes();
@@ -176,12 +188,14 @@ private:
                                  double &cmigitsTemp, 
                                  double &tailconeTemp);
 
-  double _computeSurfaceVel(RadxRay &ray);
+  double _computeSurfaceVel(const RadxRay &ray);
 
   int _handleIwg1(const char *buf, int bufLen);
 
   double _decodeIwg1Field(const vector<string> &toks,
                           int tokNum);
+
+  void _printSurfVelStats(const RadxRay &ray, const ac_georef_t &georef);
 
 };
 
