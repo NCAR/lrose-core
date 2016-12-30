@@ -162,7 +162,7 @@ private:
 
     RadarComplex_t lag0VcHx;
     RadarComplex_t lag0HcVx;
-    RadarComplex_t lag0VxHx;
+    RadarComplex_t lag1VxHx;
     
     RadarComplex_t lag1VcHc;
     RadarComplex_t lag1HcVc;
@@ -195,8 +195,8 @@ private:
       lag0VcHx.im = 0.0;
       lag0HcVx.re = 0.0;
       lag0HcVx.im = 0.0;
-      lag0VxHx.re = 0.0;
-      lag0VxHx.im = 0.0;
+      lag1VxHx.re = 0.0;
+      lag1VxHx.im = 0.0;
 
       lag1VcHc.re = 0.0;
       lag1VcHc.im = 0.0;
