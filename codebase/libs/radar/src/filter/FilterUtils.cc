@@ -37,6 +37,7 @@
 #include <cstdlib>
 #include <vector>
 #include <algorithm>
+#include <iostream>
 #include <radar/FilterUtils.hh>
 #include <toolsa/TaArray.hh>
 
@@ -343,13 +344,13 @@ void FilterUtils::computeTrendDevInRange(double *field,
   
 {
 
-  // ensure we have odd nmber of gates
+  // ensure we have odd nmber of gates in the kernel
 
   int nGatesHalf = nGatesKernel / 2;
   if (nGatesHalf < 1) {
     nGatesHalf = 1;
   }
-  nGates = nGatesHalf * 2 + 1;
+  nGatesKernel = nGatesHalf * 2 + 1;
   
   // set up gate limits
   
@@ -375,11 +376,9 @@ void FilterUtils::computeTrendDevInRange(double *field,
 
   for (int igate = 0; igate < nGates; igate++) {
     
-    residual[igate] = missingVal;
-    
     // compute sums over the kernel space
     
-    double nVal = 0.0;
+    int nVal = 0;
     double sumVal = 0.0;
     
     for (int jgate = startGate[igate]; jgate <= endGate[igate]; jgate++) {
@@ -390,9 +389,11 @@ void FilterUtils::computeTrendDevInRange(double *field,
       }
     } // jgate
     
-    if (nVal > 0) {
-      double mean = sumVal / nVal;
+    if (nVal > 0 && field[igate] != missingVal) {
+      double mean = sumVal / (double) nVal;
       residual[igate] = mean - field[igate];
+    } else {
+      residual[igate] = missingVal;
     }
     
   } // igate
@@ -401,11 +402,9 @@ void FilterUtils::computeTrendDevInRange(double *field,
   
   for (int igate = 0; igate < nGates; igate++) {
     
-    tdev[igate] = missingVal;
-
     // compute sums sq for stats over the kernel
     
-    double nVal = 0.0;
+    int nVal = 0;
     double sumValSq = 0.0;
     
     for (int jgate = startGate[igate]; jgate <= endGate[igate]; jgate++) {
@@ -417,8 +416,10 @@ void FilterUtils::computeTrendDevInRange(double *field,
     } // jgate
     
     if (nVal > 0) {
-      double rms = sqrt(sumValSq / nVal);
+      double rms = sqrt(sumValSq / (double) nVal);
       tdev[igate] = rms;
+    } else {
+      tdev[igate] = missingVal;
     }
     
   } // igate

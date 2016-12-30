@@ -139,11 +139,11 @@ public:
   //  (b) compute residual of data from trend mean
   //  (c) compute root mean square of residual over kernel.
   
-  void computeTrendDevInRange(double *field,
-                              double *tdev,
-                              int nGates,
-                              int nGatesKernel,
-                              double missingVal);
+  static void computeTrendDevInRange(double *field,
+                                     double *tdev,
+                                     int nGates,
+                                     int nGatesKernel,
+                                     double missingVal);
   
 protected:
 private:
