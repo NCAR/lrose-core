@@ -121,7 +121,7 @@ public:
    * @param[in] nGatesKernel Number of gates over which to compute sdev
    * @param[in] missingVal The value to use for missing data
    */
-  static void computeSdevInRange(double *field,
+  static void computeSdevInRange(const double *field,
 				 double *sdev,
 				 int nGates,
 				 int nGatesKernel,
@@ -139,7 +139,7 @@ public:
   //  (b) compute residual of data from trend mean
   //  (c) compute root mean square of residual over kernel.
   
-  static void computeTrendDevInRange(double *field,
+  static void computeTrendDevInRange(const double *field,
                                      double *tdev,
                                      int nGates,
                                      int nGatesKernel,

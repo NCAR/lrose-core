@@ -256,7 +256,7 @@ double FilterUtils::linearInterp(double xx1, double yy1,
 // The sdev will be set to missingVal if not enough data is
 // available for computing the standard deviation.
 
-void FilterUtils::computeSdevInRange(double *field,
+void FilterUtils::computeSdevInRange(const double *field,
                                      double *sdev,
                                      int nGates,
                                      int nGatesKernel,
@@ -336,7 +336,7 @@ void FilterUtils::computeSdevInRange(double *field,
 //  (b) compute residual of data from trend mean
 //  (c) compute root mean square of residual over kernel.
 
-void FilterUtils::computeTrendDevInRange(double *field,
+void FilterUtils::computeTrendDevInRange(const double *field,
                                          double *tdev,
                                          int nGates,
                                          int nGatesKernel,
