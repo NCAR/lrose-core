@@ -1263,8 +1263,8 @@ compute_hca = TRUE;
 //          FEATURE_ZDR
 //          FEATURE_RHOHV
 //          FEATURE_LOG_KDP
-//          FEATURE_SD_DBZ
-//          FEATURE_SD_PHIDP
+//          FEATURE_TD_DBZ
+//          FEATURE_TD_PHIDP
 //      double x1;
 //      double x2;
 //      double x3;
@@ -1678,7 +1678,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_GC,
-    feature = FEATURE_SD_DBZ,
+    feature = FEATURE_TD_DBZ,
     x1 = 2,
     x2 = 4,
     x3 = 10,
@@ -1688,7 +1688,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_BS,
-    feature = FEATURE_SD_DBZ,
+    feature = FEATURE_TD_DBZ,
     x1 = 1,
     x2 = 2,
     x3 = 4,
@@ -1698,7 +1698,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_DS,
-    feature = FEATURE_SD_DBZ,
+    feature = FEATURE_TD_DBZ,
     x1 = 0,
     x2 = 0.5,
     x3 = 3,
@@ -1708,7 +1708,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_WS,
-    feature = FEATURE_SD_DBZ,
+    feature = FEATURE_TD_DBZ,
     x1 = 0,
     x2 = 0.5,
     x3 = 3,
@@ -1718,7 +1718,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_CR,
-    feature = FEATURE_SD_DBZ,
+    feature = FEATURE_TD_DBZ,
     x1 = 0,
     x2 = 0.5,
     x3 = 3,
@@ -1728,7 +1728,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_GR,
-    feature = FEATURE_SD_DBZ,
+    feature = FEATURE_TD_DBZ,
     x1 = 0,
     x2 = 0.5,
     x3 = 3,
@@ -1738,7 +1738,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_BD,
-    feature = FEATURE_SD_DBZ,
+    feature = FEATURE_TD_DBZ,
     x1 = 0,
     x2 = 0.5,
     x3 = 3,
@@ -1748,7 +1748,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_RA,
-    feature = FEATURE_SD_DBZ,
+    feature = FEATURE_TD_DBZ,
     x1 = 0,
     x2 = 0.5,
     x3 = 3,
@@ -1758,7 +1758,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_HR,
-    feature = FEATURE_SD_DBZ,
+    feature = FEATURE_TD_DBZ,
     x1 = 0,
     x2 = 0.5,
     x3 = 3,
@@ -1768,7 +1768,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_RH,
-    feature = FEATURE_SD_DBZ,
+    feature = FEATURE_TD_DBZ,
     x1 = 0,
     x2 = 0.5,
     x3 = 3,
@@ -1778,7 +1778,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_GC,
-    feature = FEATURE_SD_PHIDP,
+    feature = FEATURE_TD_PHIDP,
     x1 = 30,
     x2 = 40,
     x3 = 50,
@@ -1788,7 +1788,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_BS,
-    feature = FEATURE_SD_PHIDP,
+    feature = FEATURE_TD_PHIDP,
     x1 = 8,
     x2 = 10,
     x3 = 40,
@@ -1798,7 +1798,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_DS,
-    feature = FEATURE_SD_PHIDP,
+    feature = FEATURE_TD_PHIDP,
     x1 = 0,
     x2 = 1,
     x3 = 15,
@@ -1808,7 +1808,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_WS,
-    feature = FEATURE_SD_PHIDP,
+    feature = FEATURE_TD_PHIDP,
     x1 = 0,
     x2 = 1,
     x3 = 15,
@@ -1818,7 +1818,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_CR,
-    feature = FEATURE_SD_PHIDP,
+    feature = FEATURE_TD_PHIDP,
     x1 = 0,
     x2 = 1,
     x3 = 15,
@@ -1828,7 +1828,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_GR,
-    feature = FEATURE_SD_PHIDP,
+    feature = FEATURE_TD_PHIDP,
     x1 = 0,
     x2 = 1,
     x3 = 15,
@@ -1838,7 +1838,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_BD,
-    feature = FEATURE_SD_PHIDP,
+    feature = FEATURE_TD_PHIDP,
     x1 = 0,
     x2 = 1,
     x3 = 15,
@@ -1848,7 +1848,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_RA,
-    feature = FEATURE_SD_PHIDP,
+    feature = FEATURE_TD_PHIDP,
     x1 = 0,
     x2 = 1,
     x3 = 15,
@@ -1858,7 +1858,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_HR,
-    feature = FEATURE_SD_PHIDP,
+    feature = FEATURE_TD_PHIDP,
     x1 = 0,
     x2 = 1,
     x3 = 15,
@@ -1868,7 +1868,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_RH,
-    feature = FEATURE_SD_PHIDP,
+    feature = FEATURE_TD_PHIDP,
     x1 = 0,
     x2 = 1,
     x3 = 15,
@@ -1877,15 +1877,15 @@ hca_interest_maps = {
   }
 };
 
-///////////// HCA_SD_DBZ_kernel_len ///////////////////
+///////////// HCA_TD_DBZ_kernel_len ///////////////////
 //
-// Length of kernel for computing SD_DBS - gates.
+// Length of kernel for computing TD_DBS - gates.
 //
 //
 // Type: int
 //
 
-HCA_SD_DBZ_kernel_len = 7;
+HCA_TD_DBZ_kernel_len = 7;
 
 //======================================================================
 //
@@ -2411,7 +2411,7 @@ site_temp_search_margin_secs = 3600;
 //          SEACLUT_FLAG
 //          PARTICLE_ID
 //          TEMP_FOR_PID
-//          SD_DBZ
+//          TD_DBZ
 //      string name;
 //      string long_name;
 //      string standard_name;
@@ -2557,9 +2557,21 @@ output_fields = {
   {
     id = TD_DBZ,
     name = "TD_DBZ",
-    long_name = "trend_deviation_for_dbz",
-    standard_name = "trend_deviation_for_dbz",
+    long_name = "trend_rms_error_for_dbz",
+    standard_name = "trend_rms_error_for_dbz",
     units = "dBZ",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = TD_PHIDP,
+    name = "TD_PHIDP",
+    long_name = "trend_rms_error_for_phidp",
+    standard_name = "trend_rms_error_for_phidp",
+    units = "deg",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
     scale = 0.01,

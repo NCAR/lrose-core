@@ -90,8 +90,8 @@ public:
     FEATURE_ZDR = 1,
     FEATURE_RHOHV = 2,
     FEATURE_LOG_KDP = 3,
-    FEATURE_SD_DBZ = 4,
-    FEATURE_SD_PHIDP = 5
+    FEATURE_TD_DBZ = 4,
+    FEATURE_TD_PHIDP = 5
   } feature_field_t;
 
   typedef enum {
@@ -141,7 +141,8 @@ public:
     PARTICLE_ID = 43,
     TEMP_FOR_PID = 44,
     SD_DBZ = 45,
-    TD_DBZ = 46
+    TD_DBZ = 46,
+    TD_PHIDP = 47
   } output_field_id_t;
 
   typedef enum {
@@ -669,7 +670,9 @@ public:
   hca_interest_map_t *_hca_interest_maps;
   int hca_interest_maps_n;
 
-  int HCA_SD_DBZ_kernel_len;
+  int HCA_TD_DBZ_kernel_len;
+
+  int HCA_TD_PHIDP_kernel_len;
 
   tdrp_bool_t compute_pid;
 
@@ -773,7 +776,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[153];
+  mutable TDRPtable _table[154];
 
   const char *_className;
 

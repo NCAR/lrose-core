@@ -315,11 +315,11 @@ string HcaInterestMap::hcaFeatureToStr(int hcaFeature)
     case Params::FEATURE_LOG_KDP:
       return "LOG_KDP";
       break;
-    case Params::FEATURE_SD_DBZ:
-      return "SD_DBZ";
+    case Params::FEATURE_TD_DBZ:
+      return "TD_DBZ";
       break;
-    case Params::FEATURE_SD_PHIDP:
-      return "SD_PHIPD";
+    case Params::FEATURE_TD_PHIDP:
+      return "TD_PHIPD";
       break;
   }
   return "UNKNOWN";

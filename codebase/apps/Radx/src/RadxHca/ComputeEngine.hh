@@ -124,6 +124,7 @@ private:
 
   RadxArray<double> _sdDbzArray_;
   RadxArray<double> _tdDbzArray_;
+  RadxArray<double> _tdPhidpArray_;
 
   double *_snrArray;
   double *_dbzArray;
@@ -141,6 +142,7 @@ private:
 
   double *_sdDbzArray;
   double *_tdDbzArray;
+  double *_tdPhidpArray;
 
   RadxArray<int> _pidArray_;
   RadxArray<double> _pidInterest_;

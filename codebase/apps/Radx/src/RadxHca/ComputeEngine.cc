@@ -277,6 +277,9 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::TD_DBZ:
           *datp = _tdDbzArray[igate];
           break;
+        case Params::TD_PHIDP:
+          *datp = _tdPhidpArray[igate];
+          break;
 
           // kdp
           
@@ -832,6 +835,7 @@ void ComputeEngine::_allocArrays()
 
   _sdDbzArray = _sdDbzArray_.alloc(_nGates);
   _tdDbzArray = _tdDbzArray_.alloc(_nGates);
+  _tdPhidpArray = _tdPhidpArray_.alloc(_nGates);
 
   _pidArray = _pidArray_.alloc(_nGates);
   _pidInterest = _pidInterest_.alloc(_nGates);
@@ -1059,15 +1063,24 @@ void ComputeEngine::_hcaCompute()
   FilterUtils::computeTrendDevInRange(_dbzArray,
                                       _tdDbzArray,
                                       _nGates,
-                                      _params.HCA_SD_DBZ_kernel_len,
+                                      _params.HCA_TD_DBZ_kernel_len,
                                       missingDbl);
   
 
   FilterUtils::computeSdevInRange(_dbzArray,
                                   _sdDbzArray,
                                   _nGates,
-                                  _params.HCA_SD_DBZ_kernel_len,
+                                  _params.HCA_TD_DBZ_kernel_len,
                                   missingDbl);
+  
+
+  // compute trend deviation of phidp
+
+  FilterUtils::computeTrendDevInRange(_kdp.getPhidpUnfold(),
+                                      _tdPhidpArray,
+                                      _nGates,
+                                      _params.HCA_TD_PHIDP_kernel_len,
+                                      missingDbl);
   
 
 }

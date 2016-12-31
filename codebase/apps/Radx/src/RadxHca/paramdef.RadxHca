@@ -591,8 +591,8 @@ typedef enum {
   FEATURE_ZDR = 1,
   FEATURE_RHOHV = 2,
   FEATURE_LOG_KDP = 3,
-  FEATURE_SD_DBZ = 4,
-  FEATURE_SD_PHIDP = 5
+  FEATURE_TD_DBZ = 4,
+  FEATURE_TD_PHIDP = 5
 } feature_field_t;
 
 typedef struct {
@@ -652,27 +652,27 @@ paramdef struct hca_interest_map_t {
     { CLASS_HR,  FEATURE_LOG_KDP,  -1,    0,    0,    1,   1.0 },
     { CLASS_RH,  FEATURE_LOG_KDP, -10,   -4,    0,    1,   1.0 },
 
-    { CLASS_GC,  FEATURE_SD_DBZ,    2,  4.0,   10,   15,   0.6 },
-    { CLASS_BS,  FEATURE_SD_DBZ,    1,  2.0,    4,    7,   0.8 },
-    { CLASS_DS,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { CLASS_WS,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { CLASS_CR,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { CLASS_GR,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { CLASS_BD,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { CLASS_RA,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { CLASS_HR,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { CLASS_RH,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { CLASS_GC,  FEATURE_TD_DBZ,    2,  4.0,   10,   15,   0.6 },
+    { CLASS_BS,  FEATURE_TD_DBZ,    1,  2.0,    4,    7,   0.8 },
+    { CLASS_DS,  FEATURE_TD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { CLASS_WS,  FEATURE_TD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { CLASS_CR,  FEATURE_TD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { CLASS_GR,  FEATURE_TD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { CLASS_BD,  FEATURE_TD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { CLASS_RA,  FEATURE_TD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { CLASS_HR,  FEATURE_TD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { CLASS_RH,  FEATURE_TD_DBZ,    0,  0.5,    3,    6,   0.2 },
 
-    { CLASS_GC,  FEATURE_SD_PHIDP, 30,   40,   50,   60,   0.8 },
-    { CLASS_BS,  FEATURE_SD_PHIDP,  8,   10,   40,   60,   0.8 },
-    { CLASS_DS,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { CLASS_WS,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { CLASS_CR,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { CLASS_GR,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { CLASS_BD,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { CLASS_RA,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { CLASS_HR,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { CLASS_RH,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 }
+    { CLASS_GC,  FEATURE_TD_PHIDP, 30,   40,   50,   60,   0.8 },
+    { CLASS_BS,  FEATURE_TD_PHIDP,  8,   10,   40,   60,   0.8 },
+    { CLASS_DS,  FEATURE_TD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { CLASS_WS,  FEATURE_TD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { CLASS_CR,  FEATURE_TD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { CLASS_GR,  FEATURE_TD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { CLASS_BD,  FEATURE_TD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { CLASS_RA,  FEATURE_TD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { CLASS_HR,  FEATURE_TD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { CLASS_RH,  FEATURE_TD_PHIDP,  0,    1,   15,   30,   0.2 }
 
   };
   p_descr = "Interest maps to convert feature fields into interest";
@@ -681,8 +681,15 @@ paramdef struct hca_interest_map_t {
 
 paramdef int {
   p_default = 5;
-  p_descr = "Length of kernel for computing SD_DBS - gates.";
-} HCA_SD_DBZ_kernel_len;
+  p_descr = "Length of kernel for computing TD_DBZ - gates.";
+  p_help = "TD_DBZ is the rms deviation of the DBZ field from a linear trend, over this number of gates.";
+} HCA_TD_DBZ_kernel_len;
+
+paramdef int {
+  p_default = 11;
+  p_descr = "Length of kernel for computing TD_PHIDP - gates.";
+  p_help = "TD_PHIDP is the rms deviation of the PHIDP field from a linear trend, over this number of gates.";
+} HCA_TD_PHIDP_kernel_len;
 
 commentdef {
   p_header = "COMPUTING NCAR PID - HYDROMETEOR PARTICLE ID";
@@ -959,7 +966,8 @@ typedef enum {
   TEMP_FOR_PID,
 
   SD_DBZ,
-  TD_DBZ
+  TD_DBZ,
+  TD_PHIDP
 
 } output_field_id_t;
 

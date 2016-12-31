@@ -132,6 +132,7 @@ PID   PID mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&PID   pid.
 
 SD_DBZ SD_DBZ  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&SD_DBZ    sdev_snr.colors   dBZ -5 80 5 radial 1 0
 TD_DBZ TD_DBZ  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&TD_DBZ    sdev_snr.colors   dBZ -5 80 5 radial 1 0
+TD_PHIDP TD_PHIDP  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&TD_PHIDP  sdphidp.colors   dBZ -5 80 5 radial 1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 
