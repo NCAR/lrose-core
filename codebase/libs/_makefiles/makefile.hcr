@@ -23,7 +23,8 @@ SUB_DIRS = \
         titan \
 	Mdv \
 	Fmq \
-	Spdb
+	Spdb \
+        NcUtils
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
 
