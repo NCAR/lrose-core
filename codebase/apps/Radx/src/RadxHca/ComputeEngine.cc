@@ -1082,6 +1082,19 @@ void ComputeEngine::_hcaCompute()
                                       _params.HCA_TD_PHIDP_kernel_len,
                                       missingDbl);
   
+  for (int igate = 0; igate < _nGates; igate++) {
+    double tdPhidp = _tdPhidpArray[igate];
+    double snr = _snrArray[igate];
+    if (tdPhidp == missingDbl) {
+      if (snr != missingDbl && snr > _params.KDP_snr_threshold) {
+        _tdPhidpArray[igate] = 0.0;
+      }
+    } else if (tdPhidp < 0.01) {
+      if (snr == missingDbl || snr < _params.KDP_snr_threshold) {
+        _tdPhidpArray[igate] = missingDbl;
+      }
+    }
+  }
 
 }
 
