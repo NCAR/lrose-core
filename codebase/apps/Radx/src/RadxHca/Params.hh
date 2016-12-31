@@ -140,7 +140,8 @@ public:
     SEACLUT_FLAG = 42,
     PARTICLE_ID = 43,
     TEMP_FOR_PID = 44,
-    SD_DBZ = 45
+    SD_DBZ = 45,
+    TD_DBZ = 46
   } output_field_id_t;
 
   typedef enum {

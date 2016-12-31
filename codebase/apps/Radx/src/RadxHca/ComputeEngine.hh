@@ -123,6 +123,7 @@ private:
   RadxArray<double> _dbzElevGradientArray_;
 
   RadxArray<double> _sdDbzArray_;
+  RadxArray<double> _tdDbzArray_;
 
   double *_snrArray;
   double *_dbzArray;
@@ -139,6 +140,7 @@ private:
   double *_dbzElevGradientArray;
 
   double *_sdDbzArray;
+  double *_tdDbzArray;
 
   RadxArray<int> _pidArray_;
   RadxArray<double> _pidInterest_;

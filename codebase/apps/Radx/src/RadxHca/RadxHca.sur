@@ -51,7 +51,7 @@ debug = DEBUG_OFF;
 // Type: string
 //
 
-instance = "rhi";
+instance = "sur";
 
 ///////////// register_with_procmap ///////////////////
 //
@@ -134,7 +134,7 @@ n_compute_threads = 8;
 // Type: string
 //
 
-input_dir = "/scr/hail2/rsfdata/pecan/cfradial/spol/moments/sband/rhi";
+input_dir = "/scr/hail2/rsfdata/pecan/cfradial/spol/moments/sband/sur";
 
 ///////////// mode ////////////////////////////////////
 //
@@ -2682,7 +2682,7 @@ write_output_volume = TRUE;
 // Type: string
 //
 
-output_dir = "$(HOME)/data/hca/test/cfradial/spol/rhi";
+output_dir = "$(HOME)/data/hca/test/cfradial/spol/sur";
 
 ///////////// output_filename_mode ////////////////////
 //

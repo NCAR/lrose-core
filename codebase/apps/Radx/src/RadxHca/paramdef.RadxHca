@@ -958,7 +958,8 @@ typedef enum {
   PARTICLE_ID,
   TEMP_FOR_PID,
 
-  SD_DBZ
+  SD_DBZ,
+  TD_DBZ
 
 } output_field_id_t;
 

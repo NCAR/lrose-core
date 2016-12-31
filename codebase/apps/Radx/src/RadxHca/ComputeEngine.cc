@@ -274,6 +274,9 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::SD_DBZ:
           *datp = _sdDbzArray[igate];
           break;
+        case Params::TD_DBZ:
+          *datp = _tdDbzArray[igate];
+          break;
 
           // kdp
           
@@ -828,6 +831,7 @@ void ComputeEngine::_allocArrays()
   _dbzElevGradientArray = _dbzElevGradientArray_.alloc(_nGates);
 
   _sdDbzArray = _sdDbzArray_.alloc(_nGates);
+  _tdDbzArray = _tdDbzArray_.alloc(_nGates);
 
   _pidArray = _pidArray_.alloc(_nGates);
   _pidInterest = _pidInterest_.alloc(_nGates);
@@ -1053,10 +1057,17 @@ void ComputeEngine::_hcaCompute()
   // compute trend deviation of dbz
 
   FilterUtils::computeTrendDevInRange(_dbzArray,
-                                      _sdDbzArray,
+                                      _tdDbzArray,
                                       _nGates,
                                       _params.HCA_SD_DBZ_kernel_len,
                                       missingDbl);
+  
+
+  FilterUtils::computeSdevInRange(_dbzArray,
+                                  _sdDbzArray,
+                                  _nGates,
+                                  _params.HCA_SD_DBZ_kernel_len,
+                                  missingDbl);
   
 
 }

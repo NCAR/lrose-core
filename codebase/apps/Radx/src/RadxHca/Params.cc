@@ -2811,7 +2811,7 @@ using namespace std;
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 46;
+        tt->struct_def.fields[0].enum_def.nfields = 47;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SNR");
@@ -2906,6 +2906,8 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[44].val = TEMP_FOR_PID;
         tt->struct_def.fields[0].enum_def.fields[45].name = tdrpStrDup("SD_DBZ");
         tt->struct_def.fields[0].enum_def.fields[45].val = SD_DBZ;
+        tt->struct_def.fields[0].enum_def.fields[46].name = tdrpStrDup("TD_DBZ");
+        tt->struct_def.fields[0].enum_def.fields[46].val = TD_DBZ;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
