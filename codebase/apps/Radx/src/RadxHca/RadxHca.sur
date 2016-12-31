@@ -1914,7 +1914,8 @@ compute_pid = TRUE;
 // Type: string
 //
 
-pid_thresholds_file_path = "$(HOME)/git/lrose-projects-eolbase/projDir/alg/params/pid_thresholds.spol";
+#pid_thresholds_file_path = "$(HOME)/git/lrose-projects-eolbase/projDir/alg/params/pid_thresholds.spol";
+pid_thresholds_file_path = "./pid_thresholds.spol";
 
 ///////////// PID_snr_threshold ///////////////////////
 //
