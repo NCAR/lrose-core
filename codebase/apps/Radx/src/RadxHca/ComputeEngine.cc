@@ -593,8 +593,8 @@ void ComputeEngine::_kdpCompute()
     } else {
       _kdpArray[ii] = kdp[ii];
       _kdpCondArray[ii] = kdpCond[ii];
-      if (kdpCond[ii] > 1.0e-3) {
-        _kdpLogArray[ii] = log10(kdpCond[ii]);
+      if (kdp[ii] > 1.0e-3) {
+        _kdpLogArray[ii] = log10(kdp[ii]);
       } else {
         _kdpLogArray[ii] = -30.0;
       }
