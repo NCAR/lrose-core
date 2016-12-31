@@ -52,28 +52,6 @@ However, LROSE can be compiled and run under Mac OSX.
 
 Windows is not supported.
 
-### Recommended LINUX distributions for LROSE build
-
-Most good, up-to date LINUX distributions should work.
-
-Recommended distributions are:
-
-  * Debian
-  * Ubuntu
-  * RedHat
-  * Centos
-  * Fedora
-  * Suse
-
-### gcc/g++ versions for LROSE build
-
-LROSE builds requires support for the c++11 standard.
-
-The gcc/g++ version should be 4.8.4 or later.
-
-Distributions dated after June 2015 should work.
-
-
 ### Required LINUX and gcc/g++ versions for LROSE build
 
 Most good, up-to date LINUX distributions should work.
@@ -86,7 +64,9 @@ Recommended distributions are:
   * Centos
   * Fedora
 
-LROSE expects good support for the c++11 standard.
+### gcc/g++ versions for LROSE build
+
+LROSE expects support for the c++11 standard.
 
 The gcc/g++ version should be 4.8.5 or later.
 
