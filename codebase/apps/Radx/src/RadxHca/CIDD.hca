@@ -126,13 +126,13 @@ KDP2 KDP2  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kd
 KDP4 KDP4  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp.colors   deg/km -5 80 5 radial 1 0
 
 PID   PID mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&PID   pid.colors   - -5 80 5 radial 1 0
-=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+TEMP4PID   TEMP4PID mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&TEMP_FOR_PID   temp.colors   - -5 80 5 radial 1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 
 SD_DBZ SD_DBZ  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&SD_DBZ    sdev_snr.colors   dBZ -5 80 5 radial 1 0
 TD_DBZ TD_DBZ  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&TD_DBZ    sdev_snr.colors   dBZ -5 80 5 radial 1 0
-TD_PHIDP TD_PHIDP  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&TD_PHIDP  sdphidp.colors   dBZ -5 80 5 radial 1 0
+TD_PHIDP TD_PHIDP  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&TD_PHIDP  td_phidp.colors   dBZ -5 80 5 radial 1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 

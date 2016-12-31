@@ -545,7 +545,7 @@ RHOHV_field_name = "RHOHV_F";
 // Type: boolean
 //
 
-LDR_available = FALSE;
+LDR_available = TRUE;
 
 ///////////// LDR_field_name //////////////////////////
 //
@@ -1914,7 +1914,8 @@ compute_pid = TRUE;
 // Type: string
 //
 
-pid_thresholds_file_path = "$(HOME)/git/lrose-projects-eolbase/projDir/alg/params/pid_thresholds.spol";
+#pid_thresholds_file_path = "$(HOME)/git/lrose-projects-eolbase/projDir/alg/params/pid_thresholds.spol";
+pid_thresholds_file_path = "./pid_thresholds.spol";
 
 ///////////// PID_snr_threshold ///////////////////////
 //
@@ -2539,6 +2540,18 @@ output_fields = {
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
     scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = TEMP_FOR_PID,
+    name = "TEMP_FOR_PID",
+    long_name = "temperature_for_computing_pid",
+    standard_name = "temperature",
+    units = "C",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
     offset = 0
   }
   ,

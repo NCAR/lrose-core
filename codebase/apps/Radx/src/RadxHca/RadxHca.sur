@@ -2543,6 +2543,18 @@ output_fields = {
   }
   ,
   {
+    id = TEMP_FOR_PID,
+    name = "TEMP_FOR_PID",
+    long_name = "temperature_for_computing_pid",
+    standard_name = "temperature",
+    units = "C",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
     id = SD_DBZ,
     name = "SD_DBZ",
     long_name = "std_deviation_for_dbz",
