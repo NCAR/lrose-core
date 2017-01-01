@@ -53,7 +53,6 @@
 #include "Args.hh"
 #include "Params.hh"
 #include "ComputeEngine.hh"
-#include "HcaInterestMap.hh"
 #include <string>
 #include <deque>
 #include <radar/NoiseLocator.hh>
@@ -138,10 +137,6 @@ private:
 
   struct timeval _timeA;
 
-  // interest maps
-
-  HcaInterestMap* _imaps[HcaInterestMap::nClasses][HcaInterestMap::nFeatures];
-
   // private methods
   
   int _runFilelist();
@@ -171,18 +166,6 @@ private:
   int _computeDbzGradient(RadxRay &lowerRay, RadxRay &upperRay);
   void _copyDbzGradient(const RadxRay &lowerRay, RadxRay &upperRay);
   void _printRunTime(const string& str);
-
-  void _initInterestMaps();
-  int _createInterestMaps();
-  int _checkInterestMaps();
-  void _printInterestMaps(ostream &out);
-  void _deleteInterestMaps();
-  
-  HcaInterestMap::imap_class_t _getImapClass(Params::hca_class_t hcaClass);
-  HcaInterestMap::imap_feature_t _getImapFeature(Params::feature_field_t feature);
-
-  string _hcaClassToStr(Params::hca_class_t hcaClass);
-  string _hcaFeatureToStr(Params::feature_field_t hcaFeature);
 
 };
 

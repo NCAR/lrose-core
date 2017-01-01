@@ -39,6 +39,7 @@
 #define ComputeEngine_HH
 
 #include "Params.hh"
+#include "HcaInterestMap.hh"
 #include <radar/KdpFilt.hh>
 #include <radar/NcarParticleId.hh>
 #include <radar/TempProfile.hh>
@@ -178,6 +179,10 @@ private:
 
   NcarParticleId _pid;
 
+  // HCA interest maps
+
+  HcaInterestMap* _imaps[HcaInterestMap::nClasses][HcaInterestMap::nFeatures];
+
   // debug printing
   
   static pthread_mutex_t _debugPrintMutex;
@@ -215,6 +220,18 @@ private:
                                      vector<InterestMap::ImPoint> &pts);
 
   void _hcaCompute();
+
+  void _initInterestMaps();
+  int _createInterestMaps();
+  int _checkInterestMaps();
+  void _printInterestMaps(ostream &out);
+  void _deleteInterestMaps();
+  
+  HcaInterestMap::imap_class_t _getImapClass(Params::hca_class_t hcaClass);
+  HcaInterestMap::imap_feature_t _getImapFeature(Params::feature_field_t feature);
+
+  string _hcaClassToStr(Params::hca_class_t hcaClass);
+  string _hcaFeatureToStr(Params::feature_field_t hcaFeature);
 
 };
 
