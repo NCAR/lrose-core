@@ -24,16 +24,15 @@
 ///////////////////////////////////////////////////////////////
 // HcaInterestMap.cc
 //
-//
 // Mike Dixon, RAP, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// April 2005
+// Dec 2016
 //
 ///////////////////////////////////////////////////////////////
 //
 // Handles interest mapping. Converts a data value into an
-// interest value based on a linear function.
+// interest value based on a piece-wise linear function.
 //
 ///////////////////////////////////////////////////////////////
 
@@ -46,94 +45,102 @@ using namespace std;
 
 // Constructor
 
-HcaInterestMap::HcaInterestMap(const string &label,
-                               Params::hca_class_t hcaClass,
-                               Params::feature_field_t feature,
-                               const vector<ImPoint> &map,
+HcaInterestMap::HcaInterestMap(imap_class_t hcaClass,
+                               imap_feature_t feature,
+                               double x1,
+                               double x2,
+                               double x3,
+                               double x4,
                                double weight) :
-        _label(label),
-        _map(map),
-        _weight(weight),
         _hcaClass(hcaClass),
-        _feature(feature)
-
+        _feature(feature),
+        _weight(weight)
+        
 {
+
+  // compute label
+
+  string label = hcaClassToStr(hcaClass);
+  label += "-";
+  label += hcaFeatureToStr(feature);
   
-  _lut = NULL;
-  _weightedLut = NULL;
-  _mapLoaded = false;
-  _minVal = 0.0;
-  _maxVal = 0.0;
+  // set shape parameters
 
-  // check we have at least 2 points
-
-  if (_map.size() < 2) {
-    cerr << "ERROR - HcaInterestMap, label: " << _label << endl;
-    cerr << "  Map must have at least 2 points.";
-    assert(false);
-  }
+  _shape.xx1 = x1;
+  _shape.xx2 = x2;
+  _shape.xx3 = x3;
+  _shape.xx4 = x4;
+  _computeShapeSlopes(_shape);
 
   // check vals increase monotonically
   
-  double prevVal = map[0].getVal();
-  bool success = true;
-  for (size_t ii = 1; ii < map.size(); ii++) {
-    double val = map[ii].getVal();
-    if (val <= prevVal) {
-      cerr << "ERROR - HcaInterestMap, label: " << _label << endl;
-      cerr << "  Map values must increase monotonically.";
-      cerr << "  index: " << ii << endl;
-      cerr << "  prevVal: " << prevVal << endl;
-      cerr << "  thisVal: " << val << endl;
-      success = false;
+  if (x2 <= x1 || x3 <= x2 || x4 <= x3) {
+    cerr << "ERROR - HcaInterestMap, label: " << _label << endl;
+    cerr << "  Map values must increase monotonically.";
+    print(cerr);
+    assert(false);
+  }
+
+  // compute lookup table as appropriate
+  // for particular features and classes
+  // for dbz from -40 to +100
+  
+  _useLut = false;
+  _lutMinDbz = -40.0;
+  _lutDeltaDbz = 1.0;
+  _lutSize = 140;
+  
+  if (_feature == FeatureZDR) {
+    if (_hcaClass == ClassGR) {
+      _loadLut(DbzFunctionConst, -0.3,
+               DbzFunctionConst, 0.0,
+               DbzFunctionF1, 0.0,
+               DbzFunctionF1, 0.3);
+    } else if (_hcaClass == ClassBD) {
+      _loadLut(DbzFunctionF2, -0.3,
+               DbzFunctionF2, 0.0,
+               DbzFunctionF3, 0.0,
+               DbzFunctionF3, 1.0);
+    } else if (_hcaClass == ClassRA) {
+      _loadLut(DbzFunctionF1, -0.3,
+               DbzFunctionF1, 0.0,
+               DbzFunctionF2, 0.0,
+               DbzFunctionF2, 0.5);
+    } else if (_hcaClass == ClassHR) {
+      _loadLut(DbzFunctionF1, -0.3,
+               DbzFunctionF1, 0.0,
+               DbzFunctionF2, 0.0,
+               DbzFunctionF2, 0.5);
+    } else if (_hcaClass == ClassRH) {
+      _loadLut(DbzFunctionConst, -0.3,
+               DbzFunctionConst, 0.0,
+               DbzFunctionF1, 0.0,
+               DbzFunctionF1, 0.5);
+    }
+  } else if (feature == FeatureLOG_KDP) {
+    if (_hcaClass == ClassBD) {
+      _loadLut(DbzFunctionG1, -1.0,
+               DbzFunctionG1, 0.0,
+               DbzFunctionG2, 0.0,
+               DbzFunctionG2, 1.0);
+    } else if (_hcaClass == ClassRA) {
+      _loadLut(DbzFunctionG1, -1.0,
+               DbzFunctionG1, 0.0,
+               DbzFunctionG2, 0.0,
+               DbzFunctionG2, 1.0);
+    } else if (_hcaClass == ClassHR) {
+      _loadLut(DbzFunctionG1, -1.0,
+               DbzFunctionG1, 0.0,
+               DbzFunctionG2, 0.0,
+               DbzFunctionG2, 1.0);
+    } else if (_hcaClass == ClassRH) {
+      _loadLut(DbzFunctionConst, -10.0,
+               DbzFunctionConst, -4.0,
+               DbzFunctionG1, 0.0,
+               DbzFunctionG1, 1.0);
     }
   }
-  assert(success);
 
-  _minVal = _map[0].getVal();
-  _maxVal = _map[_map.size() - 1].getVal();
-  _dVal = (_maxVal - _minVal) / (_nLut - 1.0);
-  _lut = new double[_nLut];
-  _weightedLut = new double[_nLut];
-
-  int mapIndex = 1;
-  double slope =
-    ((_map[mapIndex].getInterest() - _map[mapIndex-1].getInterest()) /
-     (_map[mapIndex].getVal() - _map[mapIndex-1].getVal()));
-
-  for (int ii = 0; ii < _nLut; ii++) {
-
-    double val = _minVal + ii * _dVal;
-    if ((val > _map[mapIndex].getVal()) &&
-	(mapIndex < (int) _map.size() - 1)) {
-      mapIndex++;
-      slope =
-	((_map[mapIndex].getInterest() - _map[mapIndex-1].getInterest()) /
-	 (_map[mapIndex].getVal() - _map[mapIndex-1].getVal()));
-    }
-
-    double interest = _map[mapIndex-1].getInterest() +
-      (val - _map[mapIndex-1].getVal()) * slope;
-
-    _lut[ii] = interest;
-    _weightedLut[ii] = interest * _weight;
-
-  }
-
-  _mapLoaded = true;
-  
-#ifdef DEBUG_PRINT
-  cerr << "Interest map, label: " << _label << endl;
-  for (double val = -10.0; val < 10.0; val+= 0.1) {
-    double interest, wt;
-    getInterest(val, interest, wt);
-    cerr << "val, interest: " << val << ", " << interest << endl;
-  }
-  for (int ii = 0; ii < _nLut; ii++) {
-    cerr << "val, interest: " << _minVal + ii * _dVal << ", " << _lut[ii] << endl;
-  }
-#endif
-  
 }
 
 // destructor
@@ -141,59 +148,34 @@ HcaInterestMap::HcaInterestMap(const string &label,
 HcaInterestMap::~HcaInterestMap()
   
 {
-  if (_lut) {
-    delete[] _lut;
-  }
-  if (_weightedLut) {
-    delete[] _weightedLut;
-  }
+  _shapeLut.clear();
 }
 
 ///////////////////////////////////////////////////////////
 // compute interest from value
 
-double HcaInterestMap::getInterest(double val)
-
+double HcaInterestMap::getInterest(double dbz, double val)
+  
 {
 
-  if (!_mapLoaded || val == _missingDbl) {
-    return 0.0;
-  }
-
-  int index = (int) floor((val - _minVal) / _dVal + 0.5);
-  if (index < 0) {
-    index = 0;
-  } else if (index > _nLut - 1) {
-    index = _nLut - 1;
-  }
-  
-  return _lut[index];
+  imap_shape_t *shape = _getCurrentShape(dbz);
+  double interest = _getInterest(shape, val);
+  return interest;
 
 }
 
 ///////////////////////////////////////////////////////////
 // compute weighted interest from value
 
-void HcaInterestMap::getWeightedInterest(double val,
+void HcaInterestMap::getWeightedInterest(double dbz,
+                                         double val,
                                          double &interest,
                                          double &wt)
 
 {
 
-  if (!_mapLoaded || val == _missingDbl) {
-    interest = 0.0;
-    wt = 0.0;
-    return;
-  }
-
-  int index = (int) floor((val - _minVal) / _dVal + 0.5);
-  if (index < 0) {
-    index = 0;
-  } else if (index > _nLut - 1) {
-    index = _nLut - 1;
-  }
-  
-  interest = _weightedLut[index];
+  imap_shape_t *shape = _getCurrentShape(dbz);
+  interest = _getInterest(shape, val) * _weight;
   wt = _weight;
 
 }
@@ -201,40 +183,31 @@ void HcaInterestMap::getWeightedInterest(double val,
 ///////////////////////////////////////////////////////////
 // accumulate weighted interest based on value
 
-void HcaInterestMap::accumWeightedInterest(double val,
+void HcaInterestMap::accumWeightedInterest(double dbz,
+                                           double val,
                                            double &sumInterest,
                                            double &sumWt)
   
 {
   
-  if (!_mapLoaded || val == _missingDbl || fabs(_weight) < 0.001) {
-    return;
+  imap_shape_t *shape = _getCurrentShape(dbz);
+  double interest = _getInterest(shape, val);
+  if (fabs(interest) > 0.00001) {
+    sumInterest += interest;
+    sumWt += _weight;
   }
-
-  int index = (int) floor((val - _minVal) / _dVal + 0.5);
-  if (index < 0) {
-    index = 0;
-  } else if (index > _nLut - 1) {
-    index = _nLut - 1;
-  }
-
-  double interest = _weightedLut[index];
 
 #ifdef DEBUG_PRINT  
   cerr << "val, interest: " << val << ", " << interest << endl;
 #endif
 
-  if (fabs(interest) > 0.00001) {
-    sumInterest += interest;
-    sumWt += _weight;
-  }
 
 }
 
 ///////////////////////////////////////////////////////////
 // Print interest map parameters
 
-void HcaInterestMap::printParams(ostream &out)
+void HcaInterestMap::print(ostream &out)
   
 {
 
@@ -242,56 +215,164 @@ void HcaInterestMap::printParams(ostream &out)
   out << "Interest map: " << _label << endl;
   out << "       class: " << hcaClassToStr(_hcaClass) << endl;
   out << "     feature: " << hcaFeatureToStr(_feature) << endl;
+  out << "         xx1: " << _shape.xx1 << endl;
+  out << "         xx2: " << _shape.xx2 << endl;
+  out << "         xx3: " << _shape.xx3 << endl;
+  out << "         xx4: " << _shape.xx4 << endl;
+  out << "     delta12: " << _shape.delta12 << endl;
+  out << "     delta34: " << _shape.delta34 << endl;
+  out << "     slope12: " << _shape.slope12 << endl;
+  out << "     slope34: " << _shape.slope34 << endl;
   out << "      weight: " << _weight << endl;
-  out << "      points: " << endl;
-
-  for (size_t ii = 0; ii < _map.size(); ii++) {
-    out << "      val, interest: "
-        << _map[ii].getVal() << ", " << _map[ii].getInterest() << endl;
-  }
-
-  if (!_mapLoaded) {
-    out << "NOTE - HcaInterestMap::printParams" << endl;
-    out << "  Map not yet loaded" << endl;
-    return;
-  }
+  out << "      useLut: " << (_useLut?"Y":"N") << endl;
 
 }
 
+///////////////////////////////////////////////////////////
+// Compute shape slopes based on x values
+
+void HcaInterestMap::_computeShapeSlopes(imap_shape_t &shape)
+{
+  shape.delta12 = shape.xx2 - shape.xx1;
+  shape.delta34 = shape.xx4 - shape.xx3;
+  shape.slope12 = +1.0 / shape.delta12;
+  shape.slope34 = -1.0 / shape.delta34;
+}
+
+///////////////////////////////////////////////////////////
+// Load up LUT by dbz value
+
+void HcaInterestMap::_loadLut(imap_dbz_function_t fx1, double cx1,
+                              imap_dbz_function_t fx2, double cx2,
+                              imap_dbz_function_t fx3, double cx3,
+                              imap_dbz_function_t fx4, double cx4)
+  
+{
+
+  for (int ii = 0; ii < _lutSize; ii++) {
+    
+    double dbz = _lutMinDbz + ii * _lutDeltaDbz;
+
+    imap_shape_t shape;
+    shape.xx1 = _computeShapeValueForDbz(fx1, cx1, dbz);
+    shape.xx2 = _computeShapeValueForDbz(fx2, cx2, dbz);
+    shape.xx3 = _computeShapeValueForDbz(fx3, cx3, dbz);
+    shape.xx4 = _computeShapeValueForDbz(fx4, cx4, dbz);
+    _computeShapeSlopes(shape);
+
+    _shapeLut.push_back(shape);
+
+  }
+
+  _useLut = true;
+
+}
+
+double HcaInterestMap::_computeShapeValueForDbz(imap_dbz_function_t fx, 
+                                                double cx,
+                                                double dbz)
+  
+{
+  
+  switch (fx) {
+    case DbzFunctionConst:
+      return cx;
+    case DbzFunctionF1:
+      return (cx - 0.50 + 2.50e-3 * dbz + 7.50e-4 * dbz * dbz);
+    case DbzFunctionF2:
+      return (cx + 0.68 + -4.81e-2 * dbz + 2.920e-3 * dbz * dbz);
+    case DbzFunctionF3:
+      return (cx + 1.42 + 6.67e-2 * dbz + 4.85e-4 * dbz * dbz);
+    case DbzFunctionG1:
+      return (cx - 44.0 + 0.8 * dbz);
+    case DbzFunctionG2:
+      return (cx = cx - 22.0 + 0.5 * dbz);
+  }
+  
+  return 0.0;
+
+}
+  
+///////////////////////////////////////////////////////////
+// get shape for a given DBZ value
+
+HcaInterestMap::imap_shape_t *HcaInterestMap::_getCurrentShape(double dbz)
+{
+  if (!_useLut) {
+    // use as is
+    return &_shape;
+  }
+  // set _shape from LUT
+  int index = (int) ((dbz - _lutMinDbz) / _lutDeltaDbz + 0.5);
+  if (index < 0) {
+    index = 0;
+  } else if (index > _lutSize - 1) {
+    index = _lutSize - 1;
+  }
+  return &_shapeLut[index];
+}
+
+///////////////////////////////////////////////////////////
+// get interest for val and shape
+
+double HcaInterestMap::_getInterest(const imap_shape_t *shape,
+                                    double val)
+{
+
+  if (val <= shape->xx1 || val >= shape->xx4) {
+    return 0.0;
+  }
+
+  if (val >= shape->xx2 && val <= shape->xx3) {
+    return 1.0;
+  }
+
+  if (val >= shape->xx1 && val <= shape->xx2) {
+    return (val - shape->xx1) * shape->slope12;
+  }
+
+  if (val >= shape->xx3 && val <= shape->xx4) {
+    return (val - shape->xx3) * shape->slope34;
+  }
+
+  return 0.0;
+
+}
+  
 /////////////////////////////////
 // get string for classification
 
-string HcaInterestMap::hcaClassToStr(int hcaClass)
+string HcaInterestMap::hcaClassToStr(imap_class_t hcaClass)
 {
-  switch ((Params::hca_class_t) hcaClass) {
-    case Params::CLASS_GC:
+  switch (hcaClass) {
+    case ClassGC:
       return "GC";
       break;
-    case Params::CLASS_BS:
+    case ClassBS:
       return "BS";
       break;
-    case Params::CLASS_DS:
+    case ClassDS:
       return "DS";
       break;
-    case Params::CLASS_WS:
+    case ClassWS:
       return "WS";
       break;
-    case Params::CLASS_CR:
+    case ClassCR:
       return "CR";
       break;
-    case Params::CLASS_GR:
+    case ClassGR:
       return "GR";
       break;
-    case Params::CLASS_BD:
+    case ClassBD:
       return "BD";
       break;
-    case Params::CLASS_RA:
+    case ClassRA:
       return "RA";
       break;
-    case Params::CLASS_HR:
+    case ClassHR:
       return "HR";
       break;
-    case Params::CLASS_RH:
+    case ClassRH:
       return "RH";
   }
   return "UNKNOWN";
@@ -300,25 +381,25 @@ string HcaInterestMap::hcaClassToStr(int hcaClass)
 /////////////////////////////////
 // get string for featureification
 
-string HcaInterestMap::hcaFeatureToStr(int hcaFeature)
+string HcaInterestMap::hcaFeatureToStr(imap_feature_t hcaFeature)
 {
-  switch ((Params::feature_field_t) hcaFeature) {
-    case Params::FEATURE_DBZ:
+  switch (hcaFeature) {
+    case FeatureDBZ:
       return "DBZ";
       break;
-    case Params::FEATURE_ZDR:
+    case FeatureZDR:
       return "ZDR";
       break;
-    case Params::FEATURE_RHOHV:
+    case FeatureRHOHV:
       return "RHOHV";
       break;
-    case Params::FEATURE_LOG_KDP:
+    case FeatureLOG_KDP:
       return "LOG_KDP";
       break;
-    case Params::FEATURE_TD_DBZ:
+    case FeatureTD_DBZ:
       return "TD_DBZ";
       break;
-    case Params::FEATURE_TD_PHIDP:
+    case FeatureTD_PHIDP:
       return "TD_PHIPD";
       break;
   }

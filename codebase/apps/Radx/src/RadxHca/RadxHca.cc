@@ -1612,23 +1612,19 @@ int RadxHca::_createInterestMaps()
     const Params::hca_interest_map_t &pmap = _params._hca_interest_maps[imap];
 
     if (_imaps[pmap.hca_class][pmap.feature] != NULL) {
-      cerr << "ERROR - duplicate interest map" << endl;
+      cerr << "ERROR - RadxHca::_createInterestMaps()" << endl;
+      cerr << "  Duplicate interest map" << endl;
       cerr << "                  class   : "
-           << HcaInterestMap::hcaClassToStr(pmap.hca_class) << endl;
+           << _hcaClassToStr(pmap.hca_class) << endl;
       cerr << "                  feature : " 
-           << HcaInterestMap::hcaFeatureToStr(pmap.feature) << endl;
+           << _hcaFeatureToStr(pmap.feature) << endl;
       iret = -1;
     } else {
-      string label = HcaInterestMap::hcaClassToStr(pmap.hca_class);
-      label += "-";
-      label += HcaInterestMap::hcaFeatureToStr(pmap.feature);
-      vector<HcaInterestMap::ImPoint> map;
-      map.push_back(HcaInterestMap::ImPoint(pmap.x1, 0.0));
-      map.push_back(HcaInterestMap::ImPoint(pmap.x2, 1.0));
-      map.push_back(HcaInterestMap::ImPoint(pmap.x3, 1.0));
-      map.push_back(HcaInterestMap::ImPoint(pmap.x4, 0.0));
       _imaps[pmap.hca_class][pmap.feature] =
-        new HcaInterestMap(label, pmap.hca_class, pmap.feature, map, pmap.weight);
+        new HcaInterestMap(_getImapClass(pmap.hca_class),
+                           _getImapFeature(pmap.feature),
+                           pmap.x1, pmap.x2, pmap.x3, pmap.x4,
+                           pmap.weight);
     }
   
   } // imap
@@ -1652,9 +1648,9 @@ int RadxHca::_checkInterestMaps()
         cerr << "ERROR - RadxHca::_checkInterestMaps()" << endl;
         cerr << "  Missing interest map" << endl;
         cerr << "                  class   : "
-             << HcaInterestMap::hcaClassToStr(iclass) << endl;
+             << _hcaClassToStr((Params::hca_class_t) iclass) << endl;
         cerr << "                  feature : " 
-             << HcaInterestMap::hcaFeatureToStr(ifeature) << endl;
+             << _hcaFeatureToStr((Params::feature_field_t) ifeature) << endl;
         iret = -1;
       }
     }
@@ -1676,7 +1672,7 @@ void RadxHca::_printInterestMaps(ostream &out)
     for (size_t ifeature = 0; ifeature < nFeatures; ifeature++) {
       if (_imaps[iclass][ifeature] != NULL) {
         if (_imaps[iclass][ifeature] != NULL) {
-          _imaps[iclass][ifeature]->printParams(out);
+          _imaps[iclass][ifeature]->print(out);
         }
       }
     }
@@ -1700,5 +1696,124 @@ void RadxHca::_deleteInterestMaps()
     }
   }
 
+}
+
+//////////////////////////////////////////////////////////////
+// convert Params::hca_class_t to HcaInterestMap::imap_class_t
+
+HcaInterestMap::imap_class_t RadxHca::_getImapClass(Params::hca_class_t hcaClass)
+{
+  switch(hcaClass) {
+    case Params::CLASS_GC:
+      return HcaInterestMap::ClassGC;
+    case Params::CLASS_BS:
+      return HcaInterestMap::ClassBS;
+    case Params::CLASS_DS:
+      return HcaInterestMap::ClassDS;
+    case Params::CLASS_WS:
+      return HcaInterestMap::ClassWS;
+    case Params::CLASS_CR:
+      return HcaInterestMap::ClassCR;
+    case Params::CLASS_GR:
+      return HcaInterestMap::ClassGR;
+    case Params::CLASS_BD:
+      return HcaInterestMap::ClassBD;
+    case Params::CLASS_RA:
+      return HcaInterestMap::ClassRA;
+    case Params::CLASS_HR:
+      return HcaInterestMap::ClassHR;
+    case Params::CLASS_RH:
+      return HcaInterestMap::ClassRH;
+  }
+  return HcaInterestMap::ClassGC;
+}
+
+//////////////////////////////////////////////////////////////
+// convert Params::feature_field_t to HcaInterestMap::imap_feature_t
+
+HcaInterestMap::imap_feature_t RadxHca::_getImapFeature(Params::feature_field_t feature)
+{
+  switch(feature) {
+    case Params::FEATURE_DBZ:
+      return HcaInterestMap::FeatureDBZ;
+    case Params::FEATURE_ZDR:
+      return HcaInterestMap::FeatureZDR;
+    case Params::FEATURE_RHOHV:
+      return HcaInterestMap::FeatureRHOHV;
+    case Params::FEATURE_LOG_KDP:
+      return HcaInterestMap::FeatureLOG_KDP;
+    case Params::FEATURE_TD_DBZ:
+      return HcaInterestMap::FeatureTD_DBZ;
+    case Params::FEATURE_TD_PHIDP:
+      return HcaInterestMap::FeatureTD_PHIDP;
+  }
+  return HcaInterestMap::FeatureDBZ;
+}
+
+/////////////////////////////////
+// get string for classification
+
+string RadxHca::_hcaClassToStr(Params::hca_class_t hcaClass)
+{
+  switch (hcaClass) {
+    case Params::CLASS_GC:
+      return "GC";
+      break;
+    case Params::CLASS_BS:
+      return "BS";
+      break;
+    case Params::CLASS_DS:
+      return "DS";
+      break;
+    case Params::CLASS_WS:
+      return "WS";
+      break;
+    case Params::CLASS_CR:
+      return "CR";
+      break;
+    case Params::CLASS_GR:
+      return "GR";
+      break;
+    case Params::CLASS_BD:
+      return "BD";
+      break;
+    case Params::CLASS_RA:
+      return "RA";
+      break;
+    case Params::CLASS_HR:
+      return "HR";
+      break;
+    case Params::CLASS_RH:
+      return "RH";
+  }
+  return "UNKNOWN";
+}
+
+/////////////////////////////////
+// get string for featureification
+
+string RadxHca::_hcaFeatureToStr(Params::feature_field_t hcaFeature)
+{
+  switch (hcaFeature) {
+    case Params::FEATURE_DBZ:
+      return "DBZ";
+      break;
+    case Params::FEATURE_ZDR:
+      return "ZDR";
+      break;
+    case Params::FEATURE_RHOHV:
+      return "RHOHV";
+      break;
+    case Params::FEATURE_LOG_KDP:
+      return "LOG_KDP";
+      break;
+    case Params::FEATURE_TD_DBZ:
+      return "TD_DBZ";
+      break;
+    case Params::FEATURE_TD_PHIDP:
+      return "TD_PHIPD";
+      break;
+  }
+  return "UNKNOWN";
 }
 

@@ -181,6 +181,12 @@ private:
   void _printInterestMaps(ostream &out);
   void _deleteInterestMaps();
   
+  HcaInterestMap::imap_class_t _getImapClass(Params::hca_class_t hcaClass);
+  HcaInterestMap::imap_feature_t _getImapFeature(Params::feature_field_t feature);
+
+  string _hcaClassToStr(Params::hca_class_t hcaClass);
+  string _hcaFeatureToStr(Params::feature_field_t hcaFeature);
+
 };
 
 #endif
