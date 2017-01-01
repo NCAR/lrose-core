@@ -38,7 +38,6 @@
 
 #include <iostream>
 #include <cmath>
-#include <cassert>
 #define _in_interest_map_cc
 #include "HcaInterestMap.hh"
 using namespace std;
@@ -71,15 +70,6 @@ HcaInterestMap::HcaInterestMap(imap_class_t hcaClass,
   _shape.xx3 = x3;
   _shape.xx4 = x4;
   _computeShapeSlopes(_shape);
-
-  // check vals increase monotonically
-  
-  if (x2 <= x1 || x3 <= x2 || x4 <= x3) {
-    cerr << "ERROR - HcaInterestMap, label: " << _label << endl;
-    cerr << "  Map values must increase monotonically.";
-    print(cerr);
-    assert(false);
-  }
 
   // compute lookup table as appropriate
   // for particular features and classes
@@ -136,9 +126,25 @@ HcaInterestMap::HcaInterestMap(imap_class_t hcaClass,
     } else if (_hcaClass == ClassRH) {
       _loadLut(DbzFunctionConst, -10.0,
                DbzFunctionConst, -4.0,
-               DbzFunctionG1, 0.0,
-               DbzFunctionG1, 1.0);
+               DbzFunctionG2, 0.0,
+               DbzFunctionG2, 1.0);
     }
+  }
+
+  // if using LUT, load up default shape at 35 dBZ
+
+  if (_useLut) {
+    _shape = *_getCurrentShape(35.0);
+  }
+  
+  // check vals increase monotonically
+
+  if (_shape.xx2 <= _shape.xx1 || 
+      _shape.xx3 <= _shape.xx2 ||
+      _shape.xx4 <= _shape.xx3) {
+    cerr << "WARNING - HcaInterestMap, label: " << _label << endl;
+    cerr << "  Map values must increase monotonically.";
+    print(cerr);
   }
 
 }

@@ -1592,7 +1592,7 @@ hca_interest_maps = {
     x1 = -30,
     x2 = -25,
     x3 = 10,
-    x4 = 10,
+    x4 = 20,
     weight = 0
   }
   ,

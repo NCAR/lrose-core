@@ -642,7 +642,7 @@ paramdef struct hca_interest_map_t {
     { CLASS_RH,  FEATURE_RHOHV,  0.85, 0.90, 1.00, 1.01,   0.6 },
 
     { CLASS_GC,  FEATURE_LOG_KDP, -30,  -25,   10,   20,   0.0 },
-    { CLASS_BS,  FEATURE_LOG_KDP, -30,  -25,   10,   10,   0.0 },
+    { CLASS_BS,  FEATURE_LOG_KDP, -30,  -25,   10,   20,   0.0 },
     { CLASS_DS,  FEATURE_LOG_KDP, -30,  -25,   10,   20,   0.0 },
     { CLASS_WS,  FEATURE_LOG_KDP, -30,  -25,   10,   20,   0.0 },
     { CLASS_CR,  FEATURE_LOG_KDP,  -5,    0,   10,   15,   0.5 },

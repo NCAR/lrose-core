@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2016
+// ** Copyright UCAR (c) 1992 - 2017
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -2095,7 +2095,7 @@ using namespace std;
       tt->struct_vals[219].d = -30;
       tt->struct_vals[220].d = -25;
       tt->struct_vals[221].d = 10;
-      tt->struct_vals[222].d = 10;
+      tt->struct_vals[222].d = 20;
       tt->struct_vals[223].d = 0;
       tt->struct_vals[224].e = CLASS_DS;
       tt->struct_vals[225].e = FEATURE_LOG_KDP;
