@@ -58,6 +58,11 @@ public:
     double slope34; // slope from xx3 to xx4
   } imap_shape_t;
 
+  // number of classes and features
+
+  static const size_t nClasses = 10;
+  static const size_t nFeatures = 6;
+  
   typedef enum {
     ClassGC = 0,
     ClassBS = 1,

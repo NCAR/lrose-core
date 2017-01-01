@@ -216,8 +216,8 @@ RadxHca::~RadxHca()
 
   // clean up other elements
 
-  for (size_t ii = 0; ii < nClasses; ii++) {
-    for (size_t jj = 0; jj < nFeatures; jj++) {
+  for (size_t ii = 0; ii < HcaInterestMap::nClasses; ii++) {
+    for (size_t jj = 0; jj < HcaInterestMap::nFeatures; jj++) {
       delete _imaps[ii][jj];
     }
   }
@@ -1587,8 +1587,8 @@ void RadxHca::_initInterestMaps()
   
 {
   
-  for (size_t iclass = 0; iclass < nClasses; iclass++) {
-    for (size_t ifeature = 0; ifeature < nFeatures; ifeature++) {
+  for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
+    for (size_t ifeature = 0; ifeature < HcaInterestMap::nFeatures; ifeature++) {
       _imaps[iclass][ifeature] = NULL;
     }
   }
@@ -1642,8 +1642,8 @@ int RadxHca::_checkInterestMaps()
   
   int iret = 0;
 
-  for (size_t iclass = 0; iclass < nClasses; iclass++) {
-    for (size_t ifeature = 0; ifeature < nFeatures; ifeature++) {
+  for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
+    for (size_t ifeature = 0; ifeature < HcaInterestMap::nFeatures; ifeature++) {
       if (_imaps[iclass][ifeature] == NULL) {
         cerr << "ERROR - RadxHca::_checkInterestMaps()" << endl;
         cerr << "  Missing interest map" << endl;
@@ -1668,8 +1668,8 @@ void RadxHca::_printInterestMaps(ostream &out)
 {
   
   out << "=============================================" << endl;
-  for (size_t iclass = 0; iclass < nClasses; iclass++) {
-    for (size_t ifeature = 0; ifeature < nFeatures; ifeature++) {
+  for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
+    for (size_t ifeature = 0; ifeature < HcaInterestMap::nFeatures; ifeature++) {
       if (_imaps[iclass][ifeature] != NULL) {
         if (_imaps[iclass][ifeature] != NULL) {
           _imaps[iclass][ifeature]->print(out);
@@ -1688,8 +1688,8 @@ void RadxHca::_deleteInterestMaps()
   
 {
   
-  for (size_t iclass = 0; iclass < nClasses; iclass++) {
-    for (size_t ifeature = 0; ifeature < nFeatures; ifeature++) {
+  for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
+    for (size_t ifeature = 0; ifeature < HcaInterestMap::nFeatures; ifeature++) {
       if (_imaps[iclass][ifeature] != NULL) {
         delete _imaps[iclass][ifeature];
       }

@@ -140,10 +140,7 @@ private:
 
   // interest maps
 
-  static const size_t nClasses = 10;
-  static const size_t nFeatures = 6;
-  
-  HcaInterestMap* _imaps[nClasses][nFeatures];
+  HcaInterestMap* _imaps[HcaInterestMap::nClasses][HcaInterestMap::nFeatures];
 
   // private methods
   
