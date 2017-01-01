@@ -300,6 +300,37 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           *datp = _tdPhidpArray[igate];
           break;
 
+        case Params::GC_INTEREST:
+          *datp = _gcInterest[igate];
+          break;
+        case Params::BS_INTEREST:
+          *datp = _bsInterest[igate];
+          break;
+        case Params::DS_INTEREST:
+          *datp = _dsInterest[igate];
+          break;
+        case Params::WS_INTEREST:
+          *datp = _wsInterest[igate];
+          break;
+        case Params::CR_INTEREST:
+          *datp = _crInterest[igate];
+          break;
+        case Params::GR_INTEREST:
+          *datp = _grInterest[igate];
+          break;
+        case Params::BD_INTEREST:
+          *datp = _bdInterest[igate];
+          break;
+        case Params::RA_INTEREST:
+          *datp = _raInterest[igate];
+          break;
+        case Params::HR_INTEREST:
+          *datp = _hrInterest[igate];
+          break;
+        case Params::RH_INTEREST:
+          *datp = _rhInterest[igate];
+          break;
+
           // kdp
           
         case Params::DBZ_FOR_KDP:
@@ -856,6 +887,17 @@ void ComputeEngine::_allocArrays()
   _tdDbzArray = _tdDbzArray_.alloc(_nGates);
   _tdPhidpArray = _tdPhidpArray_.alloc(_nGates);
 
+  _gcInterest = _gcInterest_.alloc(_nGates);
+  _bsInterest = _bsInterest_.alloc(_nGates);
+  _dsInterest = _dsInterest_.alloc(_nGates);
+  _wsInterest = _wsInterest_.alloc(_nGates);
+  _crInterest = _crInterest_.alloc(_nGates);
+  _grInterest = _grInterest_.alloc(_nGates);
+  _bdInterest = _bdInterest_.alloc(_nGates);
+  _raInterest = _raInterest_.alloc(_nGates);
+  _hrInterest = _hrInterest_.alloc(_nGates);
+  _rhInterest = _rhInterest_.alloc(_nGates);
+
   _pidArray = _pidArray_.alloc(_nGates);
   _pidInterest = _pidInterest_.alloc(_nGates);
   _tempForPid = _tempForPid_.alloc(_nGates);
@@ -1114,6 +1156,76 @@ void ComputeEngine::_hcaCompute()
       }
     }
   }
+
+  // set up features
+  
+  double *featureVals[HcaInterestMap::nFeatures];
+  featureVals[HcaInterestMap::FeatureDBZ] = _dbzArray;
+  featureVals[HcaInterestMap::FeatureZDR] = _zdrArray;
+  featureVals[HcaInterestMap::FeatureRHOHV] = _rhohvArray;
+  featureVals[HcaInterestMap::FeatureLOG_KDP] = _kdpLogArray;
+  featureVals[HcaInterestMap::FeatureTD_DBZ] = _tdDbzArray;
+  featureVals[HcaInterestMap::FeatureTD_PHIDP] = _tdPhidpArray;
+
+  // set up classes interest
+  
+  double *interestVals[HcaInterestMap::nClasses];
+  interestVals[HcaInterestMap::ClassGC] = _gcInterest;
+  interestVals[HcaInterestMap::ClassBS] = _bsInterest;
+  interestVals[HcaInterestMap::ClassDS] = _dsInterest;
+  interestVals[HcaInterestMap::ClassWS] = _wsInterest;
+  interestVals[HcaInterestMap::ClassCR] = _crInterest;
+  interestVals[HcaInterestMap::ClassGR] = _grInterest;
+  interestVals[HcaInterestMap::ClassBD] = _bdInterest;
+  interestVals[HcaInterestMap::ClassRA] = _raInterest;
+  interestVals[HcaInterestMap::ClassHR] = _hrInterest;
+  interestVals[HcaInterestMap::ClassRH] = _rhInterest;
+
+  // initialize interest to missing
+
+  for (int igate = 0; igate < _nGates; igate++) {
+    for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
+      interestVals[iclass][igate] = missingDbl;
+    }
+  }
+
+  // compute the interest for each class at each gate
+
+  for (int igate = 0; igate < _nGates; igate++) {
+
+    // ensure we have all feature fields
+
+    bool missing = false;
+    for (size_t ifeature = 0; ifeature < HcaInterestMap::nFeatures; ifeature++) {
+      if (featureVals[ifeature][igate] == missingDbl) {
+        missing = true;
+        break;
+      }
+    }
+    if (missing) {
+      continue;
+    }
+
+    // sum up interest and weights for each class
+    
+    for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
+
+      double sumWtInterest = 0.0;
+      double sumWt = 0.0;
+      for (size_t ifeature = 0; ifeature < HcaInterestMap::nFeatures; ifeature++) {
+        _imaps[iclass][ifeature]->accumWeightedInterest(_dbzArray[igate],
+                                                        featureVals[ifeature][igate],
+                                                        sumWtInterest,
+                                                        sumWt);
+      } // ifeature
+
+      double meanInterest = sumWtInterest / sumWt;
+      interestVals[iclass][igate] = meanInterest;
+      
+    } // iclass
+
+
+  } // igate
 
 }
 

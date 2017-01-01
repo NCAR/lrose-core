@@ -2590,6 +2590,126 @@ output_fields = {
     scale = 0.01,
     offset = 0
   }
+  ,
+  {
+    id = GC_INTEREST,
+    name = "GC_INTEREST",
+    long_name = "gc_interest_value",
+    standard_name = "gc_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = BS_INTEREST,
+    name = "BS_INTEREST",
+    long_name = "bs_interest_value",
+    standard_name = "bs_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = DS_INTEREST,
+    name = "DS_INTEREST",
+    long_name = "ds_interest_value",
+    standard_name = "ds_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = WS_INTEREST,
+    name = "WS_INTEREST",
+    long_name = "ws_interest_value",
+    standard_name = "ws_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = CR_INTEREST,
+    name = "CR_INTEREST",
+    long_name = "cr_interest_value",
+    standard_name = "cr_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = GR_INTEREST,
+    name = "GR_INTEREST",
+    long_name = "gr_interest_value",
+    standard_name = "gr_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = BD_INTEREST,
+    name = "BD_INTEREST",
+    long_name = "bd_interest_value",
+    standard_name = "bd_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = RA_INTEREST,
+    name = "RA_INTEREST",
+    long_name = "ra_interest_value",
+    standard_name = "ra_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HR_INTEREST,
+    name = "HR_INTEREST",
+    long_name = "hr_interest_value",
+    standard_name = "hr_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = RH_INTEREST,
+    name = "RH_INTEREST",
+    long_name = "rh_interest_value",
+    standard_name = "rh_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
 };
 
 //======================================================================

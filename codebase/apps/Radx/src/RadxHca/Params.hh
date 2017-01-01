@@ -142,7 +142,17 @@ public:
     TEMP_FOR_PID = 44,
     SD_DBZ = 45,
     TD_DBZ = 46,
-    TD_PHIDP = 47
+    TD_PHIDP = 47,
+    GC_INTEREST = 48,
+    BS_INTEREST = 49,
+    DS_INTEREST = 50,
+    WS_INTEREST = 51,
+    CR_INTEREST = 52,
+    GR_INTEREST = 53,
+    BD_INTEREST = 54,
+    RA_INTEREST = 55,
+    HR_INTEREST = 56,
+    RH_INTEREST = 57
   } output_field_id_t;
 
   typedef enum {

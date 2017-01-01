@@ -59,9 +59,9 @@ HcaInterestMap::HcaInterestMap(imap_class_t hcaClass,
 
   // compute label
 
-  string label = hcaClassToStr(hcaClass);
-  label += "-";
-  label += hcaFeatureToStr(feature);
+  _label = hcaClassToStr(hcaClass);
+  _label += "-";
+  _label += hcaFeatureToStr(feature);
   
   // set shape parameters
 
@@ -199,12 +199,14 @@ void HcaInterestMap::accumWeightedInterest(double dbz,
   imap_shape_t *shape = _getCurrentShape(dbz);
   double interest = _getInterest(shape, val);
   if (fabs(interest) > 0.00001) {
-    sumInterest += interest;
+    sumInterest += interest * _weight;
     sumWt += _weight;
   }
 
 #ifdef DEBUG_PRINT  
-  cerr << "val, interest: " << val << ", " << interest << endl;
+  cerr << "label, dbz, val, interest: "
+       << _label << ", " << dbz << ", "
+       << val << ", " << interest << endl;
 #endif
 
 
@@ -338,7 +340,7 @@ double HcaInterestMap::_getInterest(const imap_shape_t *shape,
   }
 
   if (val >= shape->xx3 && val <= shape->xx4) {
-    return (val - shape->xx3) * shape->slope34;
+    return 1.0 + (val - shape->xx3) * shape->slope34;
   }
 
   return 0.0;

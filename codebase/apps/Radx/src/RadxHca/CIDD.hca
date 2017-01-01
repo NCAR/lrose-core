@@ -134,6 +134,20 @@ SD_DBZ SD_DBZ  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&SD_DB
 TD_DBZ TD_DBZ  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&TD_DBZ    sdev_snr.colors   dBZ -5 80 5 radial 1 0
 TD_PHIDP TD_PHIDP  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&TD_PHIDP  td_phidp.colors   dBZ -5 80 5 radial 1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+
+GC_INT GC_INT mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&GC_INTEREST   interest.colors   dBZ -5 80 5 radial 1 0
+BS_INT BS_INT mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&BS_INTEREST   interest.colors   dBZ -5 80 5 radial 1 0
+DS_INT DS_INT mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&DS_INTEREST   interest.colors   dBZ -5 80 5 radial 1 0
+WS_INT WS_INT mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&WS_INTEREST   interest.colors   dBZ -5 80 5 radial 1 0
+
+CR_INT CR_INT mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&CR_INTEREST   interest.colors   dBZ -5 80 5 radial 1 0
+GR_INT GR_INT mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&GR_INTEREST   interest.colors   dBZ -5 80 5 radial 1 0
+BD_INT BD_INT mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&BD_INTEREST   interest.colors   dBZ -5 80 5 radial 1 0
+RA_INT RA_INT mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&RA_INTEREST   interest.colors   dBZ -5 80 5 radial 1 0
+
+HR_INT HR_INT mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HR_INTEREST   interest.colors   dBZ -5 80 5 radial 1 0
+RH_INT RH_INT mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&RH_INTEREST   interest.colors   dBZ -5 80 5 radial 1 0
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 
 </GRIDS>

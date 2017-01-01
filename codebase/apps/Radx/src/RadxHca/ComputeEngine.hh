@@ -144,6 +144,28 @@ private:
   double *_sdDbzArray;
   double *_tdDbzArray;
   double *_tdPhidpArray;
+  
+  RadxArray<double> _gcInterest_;
+  RadxArray<double> _bsInterest_;
+  RadxArray<double> _dsInterest_;
+  RadxArray<double> _wsInterest_;
+  RadxArray<double> _crInterest_;
+  RadxArray<double> _grInterest_;
+  RadxArray<double> _bdInterest_;
+  RadxArray<double> _raInterest_;
+  RadxArray<double> _hrInterest_;
+  RadxArray<double> _rhInterest_;
+
+  double *_gcInterest;
+  double *_bsInterest;
+  double *_dsInterest;
+  double *_wsInterest;
+  double *_crInterest;
+  double *_grInterest;
+  double *_bdInterest;
+  double *_raInterest;
+  double *_hrInterest;
+  double *_rhInterest;
 
   RadxArray<int> _pidArray_;
   RadxArray<double> _pidInterest_;

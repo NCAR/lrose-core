@@ -967,7 +967,18 @@ typedef enum {
 
   SD_DBZ,
   TD_DBZ,
-  TD_PHIDP
+  TD_PHIDP,
+
+  GC_INTEREST,
+  BS_INTEREST,
+  DS_INTEREST,
+  WS_INTEREST,
+  CR_INTEREST,
+  GR_INTEREST,
+  BD_INTEREST,
+  RA_INTEREST,
+  HR_INTEREST,
+  RH_INTEREST
 
 } output_field_id_t;
 
