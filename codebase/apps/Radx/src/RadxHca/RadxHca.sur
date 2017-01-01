@@ -2710,6 +2710,18 @@ output_fields = {
     scale = 0.01,
     offset = 0
   }
+  ,
+  {
+    id = HCA,
+    name = "HCA",
+    long_name = "wsr88d_hydrometeor_class",
+    standard_name = "hydrometeor_class",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
 };
 
 //======================================================================

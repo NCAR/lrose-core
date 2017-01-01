@@ -152,7 +152,8 @@ public:
     BD_INTEREST = 54,
     RA_INTEREST = 55,
     HR_INTEREST = 56,
-    RH_INTEREST = 57
+    RH_INTEREST = 57,
+    HCA = 58
   } output_field_id_t;
 
   typedef enum {

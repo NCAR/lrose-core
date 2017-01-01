@@ -330,6 +330,16 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::RH_INTEREST:
           *datp = _rhInterest[igate];
           break;
+        case Params::HCA:
+          {
+            int hca = _hcaArray[igate];
+            if (hca > 0) {
+              *datp = hca;
+            } else {
+              *datp = missingDbl;
+            }
+          }
+          break;
 
           // kdp
           
@@ -878,11 +888,11 @@ void ComputeEngine::_allocArrays()
   _ldrArray = _ldrArray_.alloc(_nGates);
   _kdpArray = _kdpArray_.alloc(_nGates);
   _kdpCondArray = _kdpCondArray_.alloc(_nGates);
-  _kdpLogArray = _kdpLogArray_.alloc(_nGates);
   _rhohvArray = _rhohvArray_.alloc(_nGates);
   _phidpArray = _phidpArray_.alloc(_nGates);
   _dbzElevGradientArray = _dbzElevGradientArray_.alloc(_nGates);
 
+  _kdpLogArray = _kdpLogArray_.alloc(_nGates);
   _sdDbzArray = _sdDbzArray_.alloc(_nGates);
   _tdDbzArray = _tdDbzArray_.alloc(_nGates);
   _tdPhidpArray = _tdPhidpArray_.alloc(_nGates);
@@ -897,6 +907,7 @@ void ComputeEngine::_allocArrays()
   _raInterest = _raInterest_.alloc(_nGates);
   _hrInterest = _hrInterest_.alloc(_nGates);
   _rhInterest = _rhInterest_.alloc(_nGates);
+  _hcaArray = _hcaArray_.alloc(_nGates);
 
   _pidArray = _pidArray_.alloc(_nGates);
   _pidInterest = _pidInterest_.alloc(_nGates);
@@ -1187,6 +1198,7 @@ void ComputeEngine::_hcaCompute()
     for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
       interestVals[iclass][igate] = missingDbl;
     }
+    _hcaArray[igate] = -1;
   }
 
   // compute the interest for each class at each gate
@@ -1224,7 +1236,18 @@ void ComputeEngine::_hcaCompute()
       
     } // iclass
 
+    // determine the class with the highest weighted interest
 
+    int mostLikelyClass = -1;
+    double maxInterest = -9999.0;
+    for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
+      if(interestVals[iclass][igate] > maxInterest) {
+        mostLikelyClass = iclass;
+        maxInterest = interestVals[iclass][igate];
+      }
+    }
+    _hcaArray[igate] = mostLikelyClass + 1;
+    
   } // igate
 
 }

@@ -978,7 +978,8 @@ typedef enum {
   BD_INTEREST,
   RA_INTEREST,
   HR_INTEREST,
-  RH_INTEREST
+  RH_INTEREST,
+  HCA
 
 } output_field_id_t;
 

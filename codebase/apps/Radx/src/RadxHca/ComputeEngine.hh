@@ -107,7 +107,7 @@ private:
   double _startRangeKm, _gateSpacingKm;
   double _nyquist;
   
-  // input arrays for moments and derived products
+  // input arrays for moments
 
   RadxArray<double> _snrArray_;
   RadxArray<double> _dbzArray_;
@@ -120,12 +120,7 @@ private:
   RadxArray<double> _phidpArray_;
   RadxArray<double> _kdpArray_;
   RadxArray<double> _kdpCondArray_;
-  RadxArray<double> _kdpLogArray_;
   RadxArray<double> _dbzElevGradientArray_;
-
-  RadxArray<double> _sdDbzArray_;
-  RadxArray<double> _tdDbzArray_;
-  RadxArray<double> _tdPhidpArray_;
 
   double *_snrArray;
   double *_dbzArray;
@@ -138,9 +133,16 @@ private:
   double *_phidpArray;
   double *_kdpArray;
   double *_kdpCondArray;
-  double *_kdpLogArray;
   double *_dbzElevGradientArray;
 
+  // HCA
+
+  RadxArray<double> _kdpLogArray_;
+  RadxArray<double> _sdDbzArray_;
+  RadxArray<double> _tdDbzArray_;
+  RadxArray<double> _tdPhidpArray_;
+
+  double *_kdpLogArray;
   double *_sdDbzArray;
   double *_tdDbzArray;
   double *_tdPhidpArray;
@@ -166,6 +168,11 @@ private:
   double *_raInterest;
   double *_hrInterest;
   double *_rhInterest;
+
+  RadxArray<int> _hcaArray_;
+  int *_hcaArray;
+
+  // NCAR PID
 
   RadxArray<int> _pidArray_;
   RadxArray<double> _pidInterest_;

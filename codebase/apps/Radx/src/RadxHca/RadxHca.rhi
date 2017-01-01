@@ -2556,7 +2556,7 @@ output_fields = {
   }
   ,
   {
-    id = TD_DBZ,
+    id = SD_DBZ,
     name = "SD_DBZ",
     long_name = "std_deviation_for_dbz",
     standard_name = "std_deviation_for_dbz",
@@ -2704,6 +2704,18 @@ output_fields = {
     name = "RH_INTEREST",
     long_name = "rh_interest_value",
     standard_name = "rh_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA,
+    name = "HCA",
+    long_name = "wsr88d_hydrometeor_class",
+    standard_name = "hydrometeor_class",
     units = "",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
