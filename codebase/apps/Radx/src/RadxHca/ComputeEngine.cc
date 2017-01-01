@@ -1209,7 +1209,7 @@ void ComputeEngine::_hcaCompute()
     // sum up interest and weights for each class
     
     for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
-
+    
       double sumWtInterest = 0.0;
       double sumWt = 0.0;
       for (size_t ifeature = 0; ifeature < HcaInterestMap::nFeatures; ifeature++) {

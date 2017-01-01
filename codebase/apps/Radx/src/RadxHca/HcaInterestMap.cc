@@ -200,15 +200,12 @@ void HcaInterestMap::accumWeightedInterest(double dbz,
   double interest = _getInterest(shape, val);
   if (fabs(interest) > 0.00001) {
     sumInterest += interest * _weight;
-    sumWt += _weight;
   }
+  sumWt += _weight;
 
-#ifdef DEBUG_PRINT  
-  cerr << "label, dbz, val, interest: "
-       << _label << ", " << dbz << ", "
-       << val << ", " << interest << endl;
-#endif
-
+  // cerr << "label, dbz, val, wt, interest: "
+  //      << _label << ", " << dbz << ", "
+  //      << val << ", " << _weight << ", " << interest << endl;
 
 }
 
