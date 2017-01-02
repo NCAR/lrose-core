@@ -89,7 +89,7 @@ TempProfile::~TempProfile()
 int TempProfile::getTempProfile(const string &url,
                                 time_t dataTime,
                                 time_t &soundingTime,
-                                vector<NcarParticleId::TmpPoint> &tmpProfile)
+                                vector<PointVal> &tmpProfile)
 
 {
 
@@ -237,10 +237,10 @@ int TempProfile::_getTempProfile(time_t searchTime)
         if (_useWetBulbTemp && rh >= 0) {
           double dewptC = PHYrhdp(tempC, rh);
           double tWet = PHYtwet(pressHpa, tempC, dewptC);
-          NcarParticleId::TmpPoint tmpPt(pressHpa, htKm, tWet);
+          PointVal tmpPt(pressHpa, htKm, tWet);
           _tmpProfile.push_back(tmpPt);
         } else {
-          NcarParticleId::TmpPoint tmpPt(pressHpa, htKm, tempC);
+          PointVal tmpPt(pressHpa, htKm, tempC);
           _tmpProfile.push_back(tmpPt);
         }
       }
@@ -280,10 +280,10 @@ int TempProfile::_getTempProfile(time_t searchTime)
         double dewptC = pt.dewpt;
         if (_useWetBulbTemp && dewptC > -999) {
           double tWet = PHYtwet(pressHpa, tempC, dewptC);
-          NcarParticleId::TmpPoint tmpPt(pressHpa, htKm, tWet);
+          PointVal tmpPt(pressHpa, htKm, tWet);
           _tmpProfile.push_back(tmpPt);
         } else {
-          NcarParticleId::TmpPoint tmpPt(pressHpa, htKm, tempC);
+          PointVal tmpPt(pressHpa, htKm, tempC);
           _tmpProfile.push_back(tmpPt);
         }
       }
@@ -469,4 +469,54 @@ void TempProfile::_computeFreezingLevel()
   } // ii
 
 }
+
+//////////////////////////////////////////////////////////////
+// PointVal interior class
+
+// Constructor
+
+TempProfile::PointVal::PointVal(double ht, double tmp)
+
+{
+
+  pressHpa = -9999;
+  htKm = ht;
+  tmpC = tmp;
+
+}
+
+TempProfile::PointVal::PointVal(double press, double ht, double tmp)
+
+{
+
+  pressHpa = press;
+  htKm = ht;
+  tmpC = tmp;
+
+}
+
+/////////////////////////////////////////////////////////
+// destructor
+
+TempProfile::PointVal::~PointVal()
+
+{
+
+}
+
+/////////////////////////////////////////////////////////
+// print
+
+void TempProfile::PointVal::print(ostream &out)
+
+{
+
+  out << "---- Temp point ----" << endl;
+  out << "  Pressure Hpa: " << pressHpa << endl;
+  out << "  Height Km: " << htKm << endl;
+  out << "  Temp    C: " << tmpC << endl;
+  out << "------------------" << endl;
+
+}
+
 
