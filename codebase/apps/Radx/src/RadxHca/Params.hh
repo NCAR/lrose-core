@@ -689,6 +689,8 @@ public:
 
   char* pid_thresholds_file_path;
 
+  tdrp_bool_t pid_override_temp_profile;
+
   double PID_snr_threshold;
 
   double PID_snr_upper_threshold;
@@ -722,8 +724,6 @@ public:
   tdrp_bool_t apply_median_filter_to_PID;
 
   int PID_median_filter_len;
-
-  tdrp_bool_t use_soundings_from_spdb;
 
   char* sounding_spdb_url;
 

@@ -2352,6 +2352,18 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("./s_band_pid_input_steraotables27.input");
     tt++;
     
+    // Parameter 'pid_override_temp_profile'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("pid_override_temp_profile");
+    tt->descr = tdrpStrDup("Option to override temp profile in pid_thresholds file.");
+    tt->help = tdrpStrDup("If TRUE, the profile in the thresholds file will be overridden by the sounding from SPDB.");
+    tt->val_offset = (char *) &pid_override_temp_profile - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'PID_snr_threshold'
     // ctype is 'double'
     
@@ -2561,20 +2573,8 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 15");
-    tt->comment_hdr = tdrpStrDup("SOUNDING INPUT FOR PID temperature profile - OPTIONAL");
+    tt->comment_hdr = tdrpStrDup("SOUNDING INPUT FOR temperature profile");
     tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'use_soundings_from_spdb'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_soundings_from_spdb");
-    tt->descr = tdrpStrDup("Option to read sounding data from SPDB.");
-    tt->help = tdrpStrDup("If TRUE, the program will read the closest (in time) available sounding from an SPDB data base. The temperature profile from the sounding will be used to override the temperature profile in the PID thresholds config file");
-    tt->val_offset = (char *) &use_soundings_from_spdb - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'sounding_spdb_url'
