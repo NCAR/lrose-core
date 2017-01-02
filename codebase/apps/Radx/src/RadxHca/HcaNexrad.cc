@@ -42,7 +42,6 @@
 ///////////////////////////////////////////////////////////////
 
 #include "HcaNexrad.hh"
-#include <radar/FilterUtils.hh>
 #include <radar/BeamHeight.hh>
 #include <cstring>
 
@@ -230,33 +229,39 @@ void HcaNexrad::computeHca(const double *snr,
 
   // compute trend deviation of dbz
   
-  FilterUtils::computeTrendDevInRange(_dbz,
-                                      _sdDbz,
-                                      _nGates,
-                                      _sdDbzFilterLen,
-                                      _missingDouble);
+  _filt.computeTrendDevInRange(_dbz,
+                               _sdDbz,
+                               _nGates,
+                               _sdDbzFilterLen,
+                               _missingDouble);
   
   
-  FilterUtils::computeSdevInRange(_dbz,
-                                  _sdDbz2,
-                                  _nGates,
-                                  _sdDbzFilterLen,
-                                  _missingDouble);
+  _filt.computeSdevInRange(_dbz,
+                           _sdDbz2,
+                           _nGates,
+                           _sdDbzFilterLen,
+                           _missingDouble);
   
   
   // compute trend deviation of phidp
   
-  FilterUtils::computeTrendDevInRange(_phidp,
-                                      _sdPhidp,
-                                      _nGates,
-                                      _sdPhidpFilterLen,
-                                      _missingDouble);
+  // _filt.computeTrendDevInRange(_phidp,
+  //                              _sdPhidp,
+  //                              _nGates,
+  //                              _sdPhidpFilterLen,
+  //                              _missingDouble);
   
-  FilterUtils::computeSdevInRange(_phidp,
-                                  _sdPhidp2,
-                                  _nGates,
-                                  _sdPhidpFilterLen,
-                                  _missingDouble);
+  _phidpFilt.computePhidpTexture(_nGates,
+                                 _sdPhidpFilterLen,
+                                 _phidp,
+                                 _missingDouble,
+                                 _sdPhidp);
+  
+  _phidpFilt.computePhidpSdev(_nGates,
+                              _sdPhidpFilterLen,
+                              _phidp,
+                              _missingDouble,
+                              _sdPhidp2);
   
   // for (int igate = 0; igate < _nGates; igate++) {
   //   double sdPhidp = _sdPhidp[igate];

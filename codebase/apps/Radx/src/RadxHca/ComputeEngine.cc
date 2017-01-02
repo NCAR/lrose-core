@@ -1203,7 +1203,7 @@ void ComputeEngine::_hcaCompute()
                         _dbzArray,
                         _zdrArray,
                         _rhohvArray,
-                        _kdp.getPhidpUnfold(),
+                        _phidpArray,
                         _kdpArray);
   
 }

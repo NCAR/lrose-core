@@ -49,6 +49,8 @@
 #include <radar/TempProfile.hh>
 #include <radar/AtmosAtten.hh>
 #include <Radx/RadxArray.hh>
+#include <radar/FilterUtils.hh>
+#include <radar/PhidpFilt.hh>
 #include "HcaInterestMap.hh"
 
 using namespace std;
@@ -282,6 +284,11 @@ private:
   
   bool _setPseudoRadiusRatio;
   double _pseudoRadiusRatio;
+
+  // filtering
+
+  FilterUtils _filt;
+  PhidpFilt _phidpFilt;
 
   // temperature profile
 
