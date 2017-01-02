@@ -50,8 +50,8 @@
 #include <Spdb/SoundingGet.hh>
 #include <rapformats/Sndg.hh>
 #include <radar/FilterUtils.hh>
+#include <radar/TempProfile.hh>
 #include "MdvPartRain.hh"
-#include "TempProfile.hh"
 using namespace std;
 
 const double MdvPartRain::missingDouble = -9999.0;
@@ -74,7 +74,6 @@ MdvPartRain::MdvPartRain(int argc, char **argv)
   _phidp = NULL;
   _rhohv = NULL;
   _kdp = NULL;
-  _tempProfile = NULL;
 
   // geometry
 
@@ -196,10 +195,6 @@ MdvPartRain::MdvPartRain(int argc, char **argv)
   _partId.setSnrUpperThresholdDb(_params.PID_snr_upper_threshold);
   _partId.setWavelengthCm(_wavelengthCm);
 
-  // create temp profile object
-
-  _tempProfile = new TempProfile(_progName, _params);
-
   // init process mapper registration
 
   PMU_auto_init((char *) _progName.c_str(),
@@ -234,10 +229,6 @@ MdvPartRain::MdvPartRain(int argc, char **argv)
 MdvPartRain::~MdvPartRain()
 
 {
-
-  if (_tempProfile != NULL) {
-    delete _tempProfile;
-  }
 
   // unregister process
 
@@ -1743,43 +1734,100 @@ int MdvPartRain::_overrideTempProfile(time_t dataTime)
 
 {
 
-  time_t soundingTime;
-  vector<NcarParticleId::TmpPoint> profile;
+  // get temperature profile
 
-  if (_tempProfile->getTempProfile(dataTime,
-                                   soundingTime,
-                                   profile)) {
-    cerr << "ERROR - PartRain::_overrideTempProfile" << endl;
+  TempProfile tempProfile;
+
+  tempProfile.setSoundingLocationName
+    (_params.sounding_location_name);
+  tempProfile.setSoundingSearchTimeMarginSecs
+    (_params.sounding_search_time_margin_secs);
+  
+  tempProfile.setCheckPressureRange
+    (_params.sounding_check_pressure_range);
+  tempProfile.setSoundingRequiredMinPressureHpa
+    (_params.sounding_required_pressure_range_hpa.min_val);
+  tempProfile.setSoundingRequiredMaxPressureHpa
+    (_params.sounding_required_pressure_range_hpa.max_val);
+  
+  tempProfile.setCheckHeightRange
+    (_params.sounding_check_height_range);
+  tempProfile.setSoundingRequiredMinHeightM
+    (_params.sounding_required_height_range_m.min_val);
+  tempProfile.setSoundingRequiredMaxHeightM
+    (_params.sounding_required_height_range_m.max_val);
+  
+  tempProfile.setCheckPressureMonotonicallyDecreasing
+    (_params.sounding_check_pressure_monotonically_decreasing);
+
+  tempProfile.setHeightCorrectionKm
+    (_params.sounding_height_correction_km);
+
+  if (_params.sounding_use_wet_bulb_temp) {
+    tempProfile.setUseWetBulbTemp(true);
+  }
+  
+  time_t retrievedTime;
+  vector<TempProfile::PointVal> retrievedProfile;
+  if (tempProfile.getTempProfile(_params.sounding_spdb_url,
+                                 dataTime,
+                                 retrievedTime,
+                                 retrievedProfile)) {
+    cerr << "ERROR - MdvPartRain::tempProfileInit" << endl;
     cerr << "  Cannot retrive profile for time: "
          << DateTime::strm(dataTime) << endl;
+    cerr << "  url: " << _params.sounding_spdb_url << endl;
+    cerr << "  station name: " << _params.sounding_location_name << endl;
+    cerr << "  time margin secs: " << _params.sounding_search_time_margin_secs << endl;
     return -1;
   }
-
-  // accept the profile
-
-  _partId.setTempProfile(profile);
+  
+  if (_params.debug) {
+    cerr << "=====================================" << endl;
+    cerr << "Got temp profile, URL: " << _params.sounding_spdb_url << endl;
+    cerr << "Overriding temperature profile" << endl;
+    cerr << "  vol time: " << DateTime::strm(dataTime) << endl;
+    cerr << "  retrievedTime: " << DateTime::strm(retrievedTime) << endl;
+    cerr << "  freezingLevel: " << tempProfile.getFreezingLevel() << endl;
+  }
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "=====================================" << endl;
-    cerr << "Overriding temperature profile" << endl;
-    cerr << "  rayTime: " << DateTime::strm(dataTime) << endl;
-    cerr << "  soundingTime: " << DateTime::strm(soundingTime) << endl;
-    for (size_t ii = 0; ii < profile.size(); ii++) {
+    cerr << "Temp  profile" << endl;
+    int nLevels = (int) retrievedProfile.size();
+    int nPrint = 50;
+    int printInterval = nLevels / nPrint;
+    if (nLevels < nPrint) {
+      printInterval = 1;
+    }
+    for (size_t ii = 0; ii < retrievedProfile.size(); ii++) {
       bool doPrint = false;
-      if (_params.debug >= Params::DEBUG_EXTRA) {
+      if (ii % printInterval == 0) {
         doPrint = true;
-      } else {
-        if (ii % 20 == 0) doPrint = true;
+      }
+      if (ii < retrievedProfile.size() - 1) {
+        if (retrievedProfile[ii].tmpC * retrievedProfile[ii+1].tmpC <= 0) {
+          doPrint = true;
+        }
+      }
+      if (ii > 0) {
+        if (retrievedProfile[ii-1].tmpC * retrievedProfile[ii].tmpC <= 0) {
+          doPrint = true;
+        }
       }
       if (doPrint) {
-        cerr << "  index, press(Hpa), alt(km), temp(C): " << ii << ", "
-             << profile[ii].pressHpa << ", "
-             << profile[ii].htKm << ", "
-             << profile[ii].tmpC << endl;
+        cerr << "  ilevel, press(Hpa), alt(km), temp(C): " << ii << ", "
+             << retrievedProfile[ii].pressHpa << ", "
+             << retrievedProfile[ii].htKm << ", "
+             << retrievedProfile[ii].tmpC << endl;
       }
     }
     cerr << "=====================================" << endl;
   }
+  
+  // accept the profile
+
+  _partId.setTempProfile(tempProfile.getProfile());
   
   return 0;
   

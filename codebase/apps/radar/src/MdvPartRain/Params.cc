@@ -1,9 +1,8 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2016
+// ** Copyright UCAR (c) 1992 - 2017
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
-// ** Research Applications Laboratory(RAL)
-// ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA
+// ** Boulder, Colorado, USA
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 ////////////////////////////////////////////
 // Params.cc
@@ -455,8 +454,8 @@ using namespace std;
   {
     out << "TDRP args: [options as below]\n"
         << "   [ -params/--params path ] specify params file path\n"
-        << "   [ -check_params] check which params are not set\n"
-        << "   [ -print_params [mode]] print parameters\n"
+        << "   [ -check_params/--check_params] check which params are not set\n"
+        << "   [ -print_params/--print_params [mode]] print parameters\n"
         << "     using following modes, default mode is 'norm'\n"
         << "       short:   main comments only, no help or descr\n"
         << "                structs and arrays on a single line\n"
@@ -1510,6 +1509,30 @@ using namespace std;
     tt->single_val.i = 86400;
     tt++;
     
+    // Parameter 'sounding_location_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("sounding_location_name");
+    tt->descr = tdrpStrDup("Name of sounding location.");
+    tt->help = tdrpStrDup("If set, we request a profile just for that sounding. If empty, all soundings in the data base are considered valid.");
+    tt->val_offset = (char *) &sounding_location_name - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'sounding_check_pressure_range'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("sounding_check_pressure_range");
+    tt->descr = tdrpStrDup("Option to check that pressure covers the required range.");
+    tt->help = tdrpStrDup("If TRUE, we will check that pressure range in the sounding meets or exceeds the min and max specified.");
+    tt->val_offset = (char *) &sounding_check_pressure_range - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'sounding_required_pressure_range_hpa'
     // ctype is '_data_range_t'
     
@@ -1538,6 +1561,18 @@ using namespace std;
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].d = 300;
       tt->struct_vals[1].d = 950;
+    tt++;
+    
+    // Parameter 'sounding_check_height_range'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("sounding_check_height_range");
+    tt->descr = tdrpStrDup("Option to check that height covers the required range.");
+    tt->help = tdrpStrDup("If TRUE, we will check that height range in the sounding meets or exceeds the min and max specified.");
+    tt->val_offset = (char *) &sounding_check_height_range - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'sounding_required_height_range_m'
@@ -1580,6 +1615,30 @@ using namespace std;
     tt->help = tdrpStrDup("If TRUE, we will check that pressure decreases monotonically. If not, the sounding is rejected and we look back for the next available one.");
     tt->val_offset = (char *) &sounding_check_pressure_monotonically_decreasing - &_start_;
     tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'sounding_height_correction_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("sounding_height_correction_km");
+    tt->descr = tdrpStrDup("Correction to the heights read in with the sounding (km).");
+    tt->help = tdrpStrDup("This correction is ADDED to the heights read in. So if the freezing level seems low, the correction should be positive. If the freezing level appears high, it should be negative.");
+    tt->val_offset = (char *) &sounding_height_correction_km - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'sounding_use_wet_bulb_temp'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("sounding_use_wet_bulb_temp");
+    tt->descr = tdrpStrDup("Option to use wet bulb temperature profile.");
+    tt->help = tdrpStrDup("If TRUE, we use the wet bulb temperature profile from the sounding instead of the dry bulb. This is thought to more closely track the temperature of melting ice.");
+    tt->val_offset = (char *) &sounding_use_wet_bulb_temp - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 20'
