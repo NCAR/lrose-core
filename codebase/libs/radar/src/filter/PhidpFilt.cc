@@ -36,6 +36,7 @@
 #include <toolsa/sincos.h>
 #include <toolsa/toolsa_macros.h>
 #include <radar/PhidpFilt.hh>
+#include <iostream>
 using namespace std;
 
 ////////////////////////////////////////////////////
@@ -100,7 +101,7 @@ void PhidpFilt::computePhidpSdev(int nGatesData,
   // compute folding range
 
   _computeFoldingRange(nGatesData);
-  
+
   // init (x,y) representation of phidp
   
   for (int igate = 0; igate < nGatesData; igate++) {
@@ -143,7 +144,7 @@ void PhidpFilt::computePhidpSdev(int nGatesData,
     }
   
     if (count <= nKernelHalf) {
-      return;
+      continue;
     }
     
     istate.meanxx = sumxx / count;
@@ -198,7 +199,7 @@ void PhidpFilt::computePhidpSdev(int nGatesData,
       sum += diff;
       sumSq += diff * diff;
       
-    }
+    } // jj
 
     if (count <= nKernelHalf || count < 3) {
       istate.phidpSdev = missingValue;
