@@ -572,16 +572,34 @@ paramdef int {
   p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message).";
 } sounding_search_time_margin_secs;
 
+paramdef string {
+  p_default = "";
+  p_descr = "Name of sounding location.";
+  p_help = "If set, we request a profile just for that sounding. If empty, all soundings in the data base are considered valid.";
+} sounding_location_name;
+
 typedef struct {
   double min_val;
   double max_val;
 } data_range_t;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check that pressure covers the required range.";
+  p_help = "If TRUE, we will check that pressure range in the sounding meets or exceeds the min and max specified."; 
+} sounding_check_pressure_range;
 
 paramdef struct data_range_t {
   p_default = { min_val = 300, max_val = 950 };
   p_descr = "Required pressure range for sounding to be valid (hPa)";
   p_help = "This is used to provide a quality check on the sounding. If the pressure data does not fully cover this range, the sounding is rejected and we look back for the next available one.";
 } sounding_required_pressure_range_hpa;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check that height covers the required range.";
+  p_help = "If TRUE, we will check that height range in the sounding meets or exceeds the min and max specified."; 
+} sounding_check_height_range;
 
 paramdef struct data_range_t {
   p_default = { min_val = 500, max_val = 15000 };
@@ -594,6 +612,18 @@ paramdef boolean {
   p_descr = "Option to check that pressure decreases monotonically.";
   p_help = "If TRUE, we will check that pressure decreases monotonically. If not, the sounding is rejected and we look back for the next available one."; 
 } sounding_check_pressure_monotonically_decreasing;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Correction to the heights read in with the sounding (km).";
+  p_help = "This correction is ADDED to the heights read in. So if the freezing level seems low, the correction should be positive. If the freezing level appears high, it should be negative.";
+} sounding_height_correction_km;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use wet bulb temperature profile.";
+  p_help = "If TRUE, we use the wet bulb temperature profile from the sounding instead of the dry bulb. This is thought to more closely track the temperature of melting ice.";
+} sounding_use_wet_bulb_temp;
 
 commentdef {
   p_header = "DATA OUTPUT";
