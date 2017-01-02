@@ -53,7 +53,8 @@ pthread_mutex_t HcaNexrad::_debugPrintMutex = PTHREAD_MUTEX_INITIALIZER;
 
 // Constructor
 
-HcaNexrad::HcaNexrad()
+HcaNexrad::HcaNexrad(const TempProfile &tempProfile) :
+        _tempProfile(tempProfile)
   
 {
 
@@ -459,24 +460,6 @@ void HcaNexrad::deleteInterestMaps()
 
 }
 
-/////////////////////////////////////////////////////////////
-// Set the temperature profile.
-//
-
-void HcaNexrad::setTempProfile(const TempProfile &tempProfile)
-
-{
-
-  // store the profile
-
-  _tmpProfile = tempProfile.getProfile();
-
-  // compute the temperature height lookup table
-
-  _computeTempHtLookup();
-
-}
- 
 //////////////////////////////////////////////
 // fill temperature array, based on height
 
@@ -492,73 +475,8 @@ void HcaNexrad::_fillTempArray()
   double rangeKm = _startRangeKm;
   for (int ii = 0; ii < _nGates; ii++, rangeKm += _gateSpacingKm) {
     double htKm = beamHt.computeHtKm(_elevation, rangeKm);
-    _tempC[ii] = _computeTempC(htKm);
+    _tempC[ii] = _tempProfile.getTempForHtKm(htKm);
   }
 
 }
     
-/////////////////////////////////////////////////////
-// compute temperature/ht lookup 
-
-void HcaNexrad::_computeTempHtLookup()
-  
-{
-
-  _tmpMinHtMeters =
-    (int) (_tmpProfile[0].htKm * 1000.0 + 0.5);
-  _tmpMaxHtMeters =
-    (int) (_tmpProfile[_tmpProfile.size()-1].htKm * 1000.0 + 0.5);
-
-  _tmpBottomC = _tmpProfile[0].tmpC;
-  _tmpTopC = _tmpProfile[_tmpProfile.size()-1].tmpC;
-
-  // fill out temp array, every meter
-
-  int nHt = (_tmpMaxHtMeters - _tmpMinHtMeters) + 1;
-  _tmpHtArray_.free();
-  _tmpHtArray = _tmpHtArray_.alloc(nHt);
-  
-  for (int ii = 1; ii < (int) _tmpProfile.size(); ii++) {
-
-    int minHtMeters = (int) (_tmpProfile[ii-1].htKm * 1000.0 + 0.5);
-    double minTmp = _tmpProfile[ii-1].tmpC;
-
-    int maxHtMeters = (int) (_tmpProfile[ii].htKm * 1000.0 + 0.5);
-    double maxTmp = _tmpProfile[ii].tmpC;
-
-    double deltaMeters = maxHtMeters - minHtMeters;
-    double deltaTmp = maxTmp - minTmp;
-    double gradient = deltaTmp / deltaMeters;
-    double tmp = minTmp;
-    int kk = minHtMeters - _tmpMinHtMeters;
-    
-    for (int jj = minHtMeters; jj <= maxHtMeters; jj++, kk++, tmp += gradient) {
-      if (kk >= 0 && kk < nHt) {
-	_tmpHtArray[kk] = tmp;
-      }
-    }
-
-  }
-
-}
-
-////////////////////////////////////////
-// get temperature at a given height
-
-double HcaNexrad::_computeTempC(double htKm)
-
-{
-
-  int htMeters = (int) (htKm * 1000.0 + 0.5);
-
-  if (htMeters <= _tmpMinHtMeters) {
-    return _tmpBottomC;
-  } else if (htMeters >= _tmpMaxHtMeters) {
-    return _tmpTopC;
-  }
-
-  int kk = htMeters - _tmpMinHtMeters;
-  return _tmpHtArray[kk];
-
-}
-

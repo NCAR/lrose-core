@@ -90,6 +90,10 @@ private:
   const Params &_params;
   int _id;
 
+  // temperature profile
+
+  const TempProfile &_tempProfile;
+
   // current ray properties
   
   time_t _timeSecs;
@@ -158,10 +162,6 @@ private:
 
   KdpFilt _kdp;
   PhidpProc _phidp;
-
-  // temperature profile
-
-  const TempProfile _tempProfile;
 
   // sea clutter
 

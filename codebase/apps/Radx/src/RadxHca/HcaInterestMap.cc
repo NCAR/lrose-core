@@ -126,8 +126,8 @@ HcaInterestMap::HcaInterestMap(imap_class_t hcaClass,
     } else if (_hcaClass == ClassRH) {
       _loadLut(DbzFunctionConst, -10.0,
                DbzFunctionConst, -4.0,
-               DbzFunctionG2, 0.0,
-               DbzFunctionG2, 1.0);
+               DbzFunctionG1, 0.0,
+               DbzFunctionG1, 1.0);
     }
   }
 
@@ -263,6 +263,21 @@ void HcaInterestMap::_loadLut(imap_dbz_function_t fx1, double cx1,
     shape.xx2 = _computeShapeValueForDbz(fx2, cx2, dbz);
     shape.xx3 = _computeShapeValueForDbz(fx3, cx3, dbz);
     shape.xx4 = _computeShapeValueForDbz(fx4, cx4, dbz);
+
+    // ensure monotonicity
+
+    if (shape.xx2 <= shape.xx1) {
+      shape.xx2 = shape.xx1 + fabs(shape.xx1 * 1.01) + 0.001;
+    }
+    if (shape.xx3 <= shape.xx2) {
+      shape.xx3 = shape.xx2 + fabs(shape.xx2 * 1.01) + 0.001;
+    }
+    if (shape.xx4 <= shape.xx3) {
+      shape.xx4 = shape.xx3 + fabs(shape.xx3 * 1.01) + 0.001;
+    }
+
+    // compute deltas and slopes
+
     _computeShapeSlopes(shape);
 
     _shapeLut.push_back(shape);

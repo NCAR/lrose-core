@@ -52,10 +52,11 @@ const double ComputeEngine::missingDbl = -9999.0;
 
 ComputeEngine::ComputeEngine(const Params &params,
                              int id,
-                             const TempProfile &tempProfile)  :
+                             const TempProfile &tempProfile) :
         _params(params),
         _id(id),
-        _tempProfile(tempProfile)
+        _tempProfile(tempProfile),
+        _hcaNexrad(tempProfile)
   
 {
 
@@ -1192,6 +1193,13 @@ int ComputeEngine::_hcaInit()
 void ComputeEngine::_hcaCompute()
   
 {
+
+  _hcaNexrad.setWavelengthM(_wavelengthM);
+  _hcaNexrad.setRadarHtKm(_radarHtKm);
+  _hcaNexrad.setElevation(_elevation);
+  _hcaNexrad.setAzimuth(_azimuth);
+  _hcaNexrad.setStartRangeKm(_startRangeKm);
+  _hcaNexrad.setGateSpacingKm(_gateSpacingKm);
 
   // prepare for HCA
 

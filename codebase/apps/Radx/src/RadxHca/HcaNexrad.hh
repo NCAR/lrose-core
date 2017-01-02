@@ -62,7 +62,7 @@ public:
   ///////////////////////////////////////////
   // constructor
   
-  HcaNexrad();
+  HcaNexrad(const TempProfile &tempProfile);
 
   // destructor
   
@@ -271,7 +271,13 @@ private:
   bool _verbose; /**< Flag to indicate whether verbose messages should be printed */
   static pthread_mutex_t _debugPrintMutex; // debug printing
   
-  double _wavelengthM; /**< The wavelength of the radar beam (meters) */
+  // temperature profile
+
+  const TempProfile &_tempProfile;
+
+  // wavelength
+
+  double _wavelengthM;
 
   // geometry
 
@@ -379,9 +385,7 @@ private:
   // private methods
   
   void _allocArrays();
-  void _computeTempHtLookup();
   void _fillTempArray();
-  double _computeTempC(double htKm);
 
 };
 

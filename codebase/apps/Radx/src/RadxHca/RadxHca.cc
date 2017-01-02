@@ -1144,37 +1144,7 @@ int RadxHca::_retrieveTempProfile(const RadxVol &vol)
     cerr << "  freezingLevel: " << _tempProfile.getFreezingLevel() << endl;
   }
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=====================================" << endl;
-    cerr << "Temp  profile" << endl;
-    int nLevels = (int) retrievedProfile.size();
-    int nPrint = 50;
-    int printInterval = nLevels / nPrint;
-    if (nLevels < nPrint) {
-      printInterval = 1;
-    }
-    for (size_t ii = 0; ii < retrievedProfile.size(); ii++) {
-      bool doPrint = false;
-      if (ii % printInterval == 0) {
-        doPrint = true;
-      }
-      if (ii < retrievedProfile.size() - 1) {
-        if (retrievedProfile[ii].tmpC * retrievedProfile[ii+1].tmpC <= 0) {
-          doPrint = true;
-        }
-      }
-      if (ii > 0) {
-        if (retrievedProfile[ii-1].tmpC * retrievedProfile[ii].tmpC <= 0) {
-          doPrint = true;
-        }
-      }
-      if (doPrint) {
-        cerr << "  ilevel, press(Hpa), alt(km), temp(C): " << ii << ", "
-             << retrievedProfile[ii].pressHpa << ", "
-             << retrievedProfile[ii].htKm << ", "
-             << retrievedProfile[ii].tmpC << endl;
-      }
-    }
-    cerr << "=====================================" << endl;
+    _tempProfile.print(cerr);
   }
   
   return 0;
