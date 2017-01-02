@@ -43,6 +43,7 @@
 
 #include "HcaNexrad.hh"
 #include <radar/FilterUtils.hh>
+#include <radar/BeamHeight.hh>
 #include <cstring>
 
 using namespace std;
@@ -64,12 +65,18 @@ HcaNexrad::HcaNexrad()
 
   _missingDouble = -9999.0;
   
-  _wavelengthCm = 10.0;
+  _wavelengthM = 0.010;
 
   _nGates = 0;
   _startRangeKm = 0.125;
   _gateSpacingKm = 0.250;
   _radarHtKm = 0.0;
+
+  _elevation = 0.0;
+  _azimuth = 0.0;
+
+  _setPseudoRadiusRatio = false;
+  _pseudoRadiusRatio = 4.0 / 3.0;
 
   _tmpMinHtMeters = 0;
   _tmpMaxHtMeters = 0;
@@ -83,21 +90,13 @@ HcaNexrad::HcaNexrad()
   _sdPhidpFilterLen = 9;
 
   // initialize interest map array with NULLS
+  // interest maps must be added by calling class using addInterestMap()
 
   for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
     for (size_t ifeature = 0; ifeature < HcaInterestMap::nFeatures; ifeature++) {
       _imaps[iclass][ifeature] = NULL;
     }
   }
-
-  // _initInterestMaps();
-  // if (_createInterestMaps()) {
-  //   OK = FALSE;
-  // } else {
-  //   if (_verbose) {
-  //     _printInterestMaps(cerr);
-  //   }
-  // }
 
 }
   
@@ -122,13 +121,15 @@ void HcaNexrad::initializeArrays(int nGates)
 
 {
 
+  _nGates = nGates;
+
   // allocate local arrays
 
-  _allocArrays(nGates);
+  _allocArrays();
 
   // set to missing
   
-  for (int ii = 0; ii < nGates; ii++) {
+  for (int ii = 0; ii < _nGates; ii++) {
 
     _snr[ii] = _missingDouble;
     _dbz[ii] = _missingDouble;
@@ -139,7 +140,9 @@ void HcaNexrad::initializeArrays(int nGates)
     _tempC[ii] = _missingDouble;
 
     _sdDbz[ii] = _missingDouble;
+    _sdDbz2[ii] = _missingDouble;
     _sdPhidp[ii] = _missingDouble;
+    _sdPhidp2[ii] = _missingDouble;
 
     _gcInterest[ii] = _missingDouble;
     _bsInterest[ii] = _missingDouble;
@@ -161,20 +164,22 @@ void HcaNexrad::initializeArrays(int nGates)
 /////////////////////////
 // allocate local arrays
 
-void HcaNexrad::_allocArrays(int nGates)
+void HcaNexrad::_allocArrays()
   
 {
   
-  _snr = _snr_.alloc(nGates);
-  _dbz = _dbz_.alloc(nGates);
-  _zdr = _zdr_.alloc(nGates);
-  _rhohv = _rhohv_.alloc(nGates);
-  _phidp = _phidp_.alloc(nGates);
-  _logKdp = _logKdp_.alloc(nGates);
-  _tempC = _tempC_.alloc(nGates);
+  _snr = _snr_.alloc(_nGates);
+  _dbz = _dbz_.alloc(_nGates);
+  _zdr = _zdr_.alloc(_nGates);
+  _rhohv = _rhohv_.alloc(_nGates);
+  _phidp = _phidp_.alloc(_nGates);
+  _logKdp = _logKdp_.alloc(_nGates);
+  _tempC = _tempC_.alloc(_nGates);
 
-  _sdDbz = _sdDbz_.alloc(nGates);
-  _sdPhidp = _sdPhidp_.alloc(nGates);
+  _sdDbz = _sdDbz_.alloc(_nGates);
+  _sdDbz2 = _sdDbz2_.alloc(_nGates);
+  _sdPhidp = _sdPhidp_.alloc(_nGates);
+  _sdPhidp2 = _sdPhidp2_.alloc(_nGates);
 
   _gcInterest = _gcInterest_.alloc(_nGates);
   _bsInterest = _bsInterest_.alloc(_nGates);
@@ -187,21 +192,19 @@ void HcaNexrad::_allocArrays(int nGates)
   _hrInterest = _hrInterest_.alloc(_nGates);
   _rhInterest = _rhInterest_.alloc(_nGates);
 
-  _hca = _hca_.alloc(nGates);
+  _hca = _hca_.alloc(_nGates);
 
 }
 
 //////////////////////////////////////
 // compute HCA
 
-void HcaNexrad::computeHca(int nGates,
-                           const double *snr,
+void HcaNexrad::computeHca(const double *snr,
                            const double *dbz,
                            const double *zdr,
                            const double *rhohv,
                            const double *phidpUnfolded,
-                           const double *kdp,
-                           const double *tempC)
+                           const double *kdp)
 
 {
 
@@ -212,7 +215,6 @@ void HcaNexrad::computeHca(int nGates,
   memcpy(_zdr, zdr, _nGates * sizeof(double));
   memcpy(_rhohv, rhohv, _nGates * sizeof(double));
   memcpy(_phidp, phidpUnfolded, _nGates * sizeof(double));
-  memcpy(_tempC, tempC, _nGates * sizeof(double));
 
   for (int igate = 0; igate < _nGates; igate++) {
     if (kdp[igate] > 1.0e-3) {
@@ -221,6 +223,10 @@ void HcaNexrad::computeHca(int nGates,
       _logKdp[igate] = -30.0;
     }
   }
+
+  // compute the temperature at each gate
+
+  _fillTempArray();
 
   // compute trend deviation of dbz
   
@@ -466,6 +472,26 @@ void HcaNexrad::setTempProfile(const TempProfile &tempProfile)
 
 }
  
+//////////////////////////////////////////////
+// fill temperature array, based on height
+
+void HcaNexrad::_fillTempArray()
+  
+{
+  
+  BeamHeight beamHt;
+  beamHt.setInstrumentHtKm(_radarHtKm);
+  if (_setPseudoRadiusRatio) {
+    beamHt.setPseudoRadiusRatio(_pseudoRadiusRatio);
+  }
+  double rangeKm = _startRangeKm;
+  for (int ii = 0; ii < _nGates; ii++, rangeKm += _gateSpacingKm) {
+    double htKm = beamHt.computeHtKm(_elevation, rangeKm);
+    _tempC[ii] = _computeTempC(htKm);
+  }
+
+}
+    
 /////////////////////////////////////////////////////
 // compute temperature/ht lookup 
 
@@ -514,7 +540,7 @@ void HcaNexrad::_computeTempHtLookup()
 ////////////////////////////////////////
 // get temperature at a given height
 
-double HcaNexrad::getTmpC(double htKm)
+double HcaNexrad::_computeTempC(double htKm)
 
 {
 

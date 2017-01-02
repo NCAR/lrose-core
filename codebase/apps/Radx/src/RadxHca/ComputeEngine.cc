@@ -74,15 +74,8 @@ ComputeEngine::ComputeEngine(const Params &params,
     OK = false;
   }
 
-  // create the hca interest maps
-
-  _initInterestMaps();
-  if (_createInterestMaps()) {
-    OK = FALSE;
-  } else {
-    if (id == 0 && _params.debug >= Params::DEBUG_VERBOSE) {
-      _printInterestMaps(cerr);
-    }
+  if (_hcaInit()) {
+    OK = false;
   }
 
 }
@@ -92,15 +85,7 @@ ComputeEngine::ComputeEngine(const Params &params,
 ComputeEngine::~ComputeEngine()
 
 {
-
-  // clean up interest maps
-  
-  for (size_t ii = 0; ii < HcaInterestMap::nClasses; ii++) {
-    for (size_t jj = 0; jj < HcaInterestMap::nFeatures; jj++) {
-      delete _imaps[ii][jj];
-    }
-  }
-
+  _hcaNexrad.deleteInterestMaps();
 }
 
 //////////////////////////////////////////////////
@@ -239,8 +224,33 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
     dbzGradient = dbzGradientField->getDataFl32();
   }
 
-  // load up output data
+  // hca
 
+  const double *hcaDbz = _hcaNexrad.getDbz();
+  const double *hcaZdr = _hcaNexrad.getZdr();
+  const double *hcaRhohv = _hcaNexrad.getRhohv();
+  const double *hcaPhidp = _hcaNexrad.getPhidp();
+  const double *hcaTempC = _hcaNexrad.getTempC();
+  const double *hcaLogKdp = _hcaNexrad.getLogKdp();
+
+  const double *hcaSdDbz = _hcaNexrad.getSdDbz();
+  const double *hcaSdDbz2 = _hcaNexrad.getSdDbz2();
+  const double *hcaSdPhidp = _hcaNexrad.getSdPhidp();
+  const double *hcaSdPhidp2 = _hcaNexrad.getSdPhidp2();
+
+  const double *hcaGcInterest = _hcaNexrad.getGcInterest();
+  const double *hcaBsInterest = _hcaNexrad.getBsInterest();
+  const double *hcaDsInterest = _hcaNexrad.getDsInterest();
+  const double *hcaWsInterest = _hcaNexrad.getWsInterest();
+  const double *hcaCrInterest = _hcaNexrad.getCrInterest();
+  const double *hcaGrInterest = _hcaNexrad.getGrInterest();
+  const double *hcaBdInterest = _hcaNexrad.getBdInterest();
+  const double *hcaRaInterest = _hcaNexrad.getRaInterest();
+  const double *hcaHrInterest = _hcaNexrad.getHrInterest();
+  const double *hcaRhInterest = _hcaNexrad.getRhInterest();
+
+  const int *hca = _hcaNexrad.getHca();
+  
   for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
 
     const Params::output_field_t &ofld = _params._output_fields[ifield];
@@ -290,58 +300,78 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
         // hca
 
-        case Params::SD_DBZ2:
-          *datp = _sdDbzArray[igate];
+        case Params::HCA_DBZ:
+          *datp = hcaDbz[igate];
           break;
-        case Params::SD_DBZ:
-          *datp = _tdDbzArray[igate];
+        case Params::HCA_ZDR:
+          *datp = hcaZdr[igate];
           break;
-        case Params::SD_PHIDP:
-        case Params::SD_PHIDP2:
-          *datp = _tdPhidpArray[igate];
+        case Params::HCA_RHOHV:
+          *datp = hcaRhohv[igate];
+          break;
+        case Params::HCA_PHIDP:
+          *datp = hcaPhidp[igate];
+          break;
+        case Params::HCA_LOGKDP:
+          *datp = hcaLogKdp[igate];
+          break;
+        case Params::HCA_TEMPC:
+          *datp = hcaTempC[igate];
           break;
 
-        case Params::GC_INTEREST:
-          *datp = _gcInterest[igate];
+        case Params::HCA_SD_DBZ:
+          *datp = hcaSdDbz[igate];
           break;
-        case Params::BS_INTEREST:
-          *datp = _bsInterest[igate];
+        case Params::HCA_SD_DBZ2:
+          *datp = hcaSdDbz2[igate];
           break;
-        case Params::DS_INTEREST:
-          *datp = _dsInterest[igate];
+        case Params::HCA_SD_PHIDP:
+          *datp = hcaSdPhidp[igate];
           break;
-        case Params::WS_INTEREST:
-          *datp = _wsInterest[igate];
+        case Params::HCA_SD_PHIDP2:
+          *datp = hcaSdPhidp2[igate];
           break;
-        case Params::CR_INTEREST:
-          *datp = _crInterest[igate];
+
+        case Params::HCA_GC_INTEREST:
+          *datp = hcaGcInterest[igate];
           break;
-        case Params::GR_INTEREST:
-          *datp = _grInterest[igate];
+        case Params::HCA_BS_INTEREST:
+          *datp = hcaBsInterest[igate];
           break;
-        case Params::BD_INTEREST:
-          *datp = _bdInterest[igate];
+        case Params::HCA_DS_INTEREST:
+          *datp = hcaDsInterest[igate];
           break;
-        case Params::RA_INTEREST:
-          *datp = _raInterest[igate];
+        case Params::HCA_WS_INTEREST:
+          *datp = hcaWsInterest[igate];
           break;
-        case Params::HR_INTEREST:
-          *datp = _hrInterest[igate];
+        case Params::HCA_CR_INTEREST:
+          *datp = hcaCrInterest[igate];
           break;
-        case Params::RH_INTEREST:
-          *datp = _rhInterest[igate];
+        case Params::HCA_GR_INTEREST:
+          *datp = hcaGrInterest[igate];
           break;
-        case Params::HCA:
-          {
-            int hca = _hcaArray[igate];
-            if (hca > 0) {
-              *datp = hca;
-            } else {
-              *datp = missingDbl;
-            }
+        case Params::HCA_BD_INTEREST:
+          *datp = hcaBdInterest[igate];
+          break;
+        case Params::HCA_RA_INTEREST:
+          *datp = hcaRaInterest[igate];
+          break;
+        case Params::HCA_HR_INTEREST:
+          *datp = hcaHrInterest[igate];
+          break;
+        case Params::HCA_RH_INTEREST:
+          *datp = hcaRhInterest[igate];
+          break;
+        case Params::HCA: {
+          int hcaVal = hca[igate];
+          if (hcaVal > 0) {
+            *datp = hcaVal;
+          } else {
+            *datp = missingDbl;
           }
           break;
-
+        }
+       
           // kdp
           
         case Params::DBZ_FOR_KDP:
@@ -371,9 +401,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           break;
         case Params::KDP_COND:
           *datp = _kdpCondArray[igate];
-          break;
-        case Params::KDP_LOG:
-          *datp = _kdpLogArray[igate];
           break;
         case Params::PSOB:
           *datp = psob[igate];
@@ -650,15 +677,9 @@ void ComputeEngine::_kdpCompute()
     if (kdp[ii] == NAN) {
       _kdpArray[ii] = missingDbl;
       _kdpCondArray[ii] = missingDbl;
-      _kdpLogArray[ii] = missingDbl;
     } else {
       _kdpArray[ii] = kdp[ii];
       _kdpCondArray[ii] = kdpCond[ii];
-      if (kdp[ii] > 1.0e-3) {
-        _kdpLogArray[ii] = log10(kdp[ii]);
-      } else {
-        _kdpLogArray[ii] = -30.0;
-      }
     }
   }
 
@@ -891,23 +912,6 @@ void ComputeEngine::_allocArrays()
   _phidpArray = _phidpArray_.alloc(_nGates);
   _dbzElevGradientArray = _dbzElevGradientArray_.alloc(_nGates);
 
-  _kdpLogArray = _kdpLogArray_.alloc(_nGates);
-  _sdDbzArray = _sdDbzArray_.alloc(_nGates);
-  _tdDbzArray = _tdDbzArray_.alloc(_nGates);
-  _tdPhidpArray = _tdPhidpArray_.alloc(_nGates);
-
-  _gcInterest = _gcInterest_.alloc(_nGates);
-  _bsInterest = _bsInterest_.alloc(_nGates);
-  _dsInterest = _dsInterest_.alloc(_nGates);
-  _wsInterest = _wsInterest_.alloc(_nGates);
-  _crInterest = _crInterest_.alloc(_nGates);
-  _grInterest = _grInterest_.alloc(_nGates);
-  _bdInterest = _bdInterest_.alloc(_nGates);
-  _raInterest = _raInterest_.alloc(_nGates);
-  _hrInterest = _hrInterest_.alloc(_nGates);
-  _rhInterest = _rhInterest_.alloc(_nGates);
-  _hcaArray = _hcaArray_.alloc(_nGates);
-
   _pidArray = _pidArray_.alloc(_nGates);
   _pidInterest = _pidInterest_.alloc(_nGates);
   _tempForPid = _tempForPid_.alloc(_nGates);
@@ -992,7 +996,6 @@ int ComputeEngine::_loadMomentsArrays(RadxRay *inputRay)
   for (int igate = 0; igate < _nGates; igate++) {
     _kdpArray[igate] = missingDbl;
     _kdpCondArray[igate] = missingDbl;
-    _kdpLogArray[igate] = missingDbl;
   }
   
   if (_loadFieldArray(inputRay, _params.dbz_elevation_gradient_field_name,
@@ -1123,250 +1126,86 @@ int ComputeEngine::_convertInterestParamsToVector(const string &label,
 }
 
 //////////////////////////////////////
+// initialize hca computations
+  
+int ComputeEngine::_hcaInit()
+  
+{
+
+  // initialize
+
+  _hcaNexrad.setWavelengthM(_wavelengthM);
+  _hcaNexrad.setRadarHtKm(_radarHtKm);
+  _hcaNexrad.setElevation(_elevation);
+  _hcaNexrad.setAzimuth(_azimuth);
+  _hcaNexrad.setStartRangeKm(_startRangeKm);
+  _hcaNexrad.setGateSpacingKm(_gateSpacingKm);
+
+  if (_params.override_standard_pseudo_earth_radius) {
+    _hcaNexrad.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
+  }
+
+  // clean up any existing maps
+  
+  _hcaNexrad.deleteInterestMaps();
+  
+  // add interest maps to HCA object
+
+  int iret = 0;
+  for (int imap = 0; imap < _params.hca_interest_maps_n; imap++) {
+    const Params::hca_interest_map_t &pmap = _params._hca_interest_maps[imap];
+    if (_hcaNexrad.addInterestMap(_getImapClass(pmap.hca_class),
+                                  _getImapFeature(pmap.feature),
+                                  pmap.x1, pmap.x2, pmap.x3, pmap.x4,
+                                  pmap.weight)) {
+      cerr << "ERROR - ComputeEngine::_createInterestMaps()" << endl;
+      cerr << "  Cannot add interest map" << endl;
+      iret = -1;
+    }
+  } // imap
+  if (iret) {
+    return -1;
+  }
+
+  // check all interest maps are present
+
+  if (_hcaNexrad.checkInterestMaps()) {
+    cerr << "ERROR - ComputeEngine:_hcaInit" << endl;
+    cerr << "  Problem with interest maps" << endl;
+    cerr << "  Check params file." << endl;
+    return -1;
+  }
+
+  // print interest maps
+
+  if (_id == 0 && _params.debug >= Params::DEBUG_VERBOSE) {
+    _hcaNexrad.printInterestMaps(cerr);
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////
 // compute HCA
 
 void ComputeEngine::_hcaCompute()
   
 {
 
-  // compute trend deviation of dbz
+  // prepare for HCA
 
-  FilterUtils::computeTrendDevInRange(_dbzArray,
-                                      _tdDbzArray,
-                                      _nGates,
-                                      _params.HCA_SD_DBZ_kernel_len,
-                                      missingDbl);
+  _hcaNexrad.initializeArrays(_nGates);
+
+  // run hca algorithm
   
-
-  FilterUtils::computeSdevInRange(_dbzArray,
-                                  _sdDbzArray,
-                                  _nGates,
-                                  _params.HCA_SD_DBZ_kernel_len,
-                                  missingDbl);
+  _hcaNexrad.computeHca(_snrArray,
+                        _dbzArray,
+                        _zdrArray,
+                        _rhohvArray,
+                        _kdp.getPhidpUnfold(),
+                        _kdpArray);
   
-
-  // compute trend deviation of phidp
-
-  FilterUtils::computeTrendDevInRange(_kdp.getPhidpUnfold(),
-                                      _tdPhidpArray,
-                                      _nGates,
-                                      _params.HCA_SD_PHIDP_kernel_len,
-                                      missingDbl);
-  
-  for (int igate = 0; igate < _nGates; igate++) {
-    double tdPhidp = _tdPhidpArray[igate];
-    double snr = _snrArray[igate];
-    if (tdPhidp == missingDbl) {
-      if (snr != missingDbl && snr > _params.KDP_snr_threshold) {
-        _tdPhidpArray[igate] = 0.0;
-      }
-    } else if (tdPhidp < 0.01) {
-      if (snr == missingDbl || snr < _params.KDP_snr_threshold) {
-        _tdPhidpArray[igate] = missingDbl;
-      }
-    }
-  }
-
-  // set up features
-  
-  double *featureVals[HcaInterestMap::nFeatures];
-  featureVals[HcaInterestMap::FeatureDBZ] = _dbzArray;
-  featureVals[HcaInterestMap::FeatureZDR] = _zdrArray;
-  featureVals[HcaInterestMap::FeatureRHOHV] = _rhohvArray;
-  featureVals[HcaInterestMap::FeatureLOG_KDP] = _kdpLogArray;
-  featureVals[HcaInterestMap::FeatureSD_DBZ] = _tdDbzArray;
-  featureVals[HcaInterestMap::FeatureSD_PHIDP] = _tdPhidpArray;
-
-  // set up classes interest
-  
-  double *interestVals[HcaInterestMap::nClasses];
-  interestVals[HcaInterestMap::ClassGC] = _gcInterest;
-  interestVals[HcaInterestMap::ClassBS] = _bsInterest;
-  interestVals[HcaInterestMap::ClassDS] = _dsInterest;
-  interestVals[HcaInterestMap::ClassWS] = _wsInterest;
-  interestVals[HcaInterestMap::ClassCR] = _crInterest;
-  interestVals[HcaInterestMap::ClassGR] = _grInterest;
-  interestVals[HcaInterestMap::ClassBD] = _bdInterest;
-  interestVals[HcaInterestMap::ClassRA] = _raInterest;
-  interestVals[HcaInterestMap::ClassHR] = _hrInterest;
-  interestVals[HcaInterestMap::ClassRH] = _rhInterest;
-
-  // initialize interest to missing
-
-  for (int igate = 0; igate < _nGates; igate++) {
-    for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
-      interestVals[iclass][igate] = missingDbl;
-    }
-    _hcaArray[igate] = -1;
-  }
-
-  // compute the interest for each class at each gate
-
-  for (int igate = 0; igate < _nGates; igate++) {
-
-    // ensure we have all feature fields
-
-    bool missing = false;
-    for (size_t ifeature = 0; ifeature < HcaInterestMap::nFeatures; ifeature++) {
-      if (featureVals[ifeature][igate] == missingDbl) {
-        missing = true;
-        break;
-      }
-    }
-    if (missing) {
-      continue;
-    }
-
-    // sum up interest and weights for each class
-    
-    for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
-    
-      double sumWtInterest = 0.0;
-      double sumWt = 0.0;
-      for (size_t ifeature = 0; ifeature < HcaInterestMap::nFeatures; ifeature++) {
-        _imaps[iclass][ifeature]->accumWeightedInterest(_dbzArray[igate],
-                                                        featureVals[ifeature][igate],
-                                                        sumWtInterest,
-                                                        sumWt);
-      } // ifeature
-
-      double meanInterest = sumWtInterest / sumWt;
-      interestVals[iclass][igate] = meanInterest;
-      
-    } // iclass
-
-    // determine the class with the highest weighted interest
-
-    int mostLikelyClass = -1;
-    double maxInterest = -9999.0;
-    for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
-      if(interestVals[iclass][igate] > maxInterest) {
-        mostLikelyClass = iclass;
-        maxInterest = interestVals[iclass][igate];
-      }
-    }
-    _hcaArray[igate] = mostLikelyClass + 1;
-    
-  } // igate
-
-}
-
-/////////////////////////////////////
-// initialize interest maps to NULL
-
-void ComputeEngine::_initInterestMaps()
-  
-{
-  
-  for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
-    for (size_t ifeature = 0; ifeature < HcaInterestMap::nFeatures; ifeature++) {
-      _imaps[iclass][ifeature] = NULL;
-    }
-  }
-
-}
-
-///////////////////////////////////////////////////////////////////
-// Create the interest maps
-
-int ComputeEngine::_createInterestMaps()
-{
-
-  int iret = 0;
-
-  // clean up any existing maps
-  
-  _deleteInterestMaps();
-
-  for (int imap = 0; imap < _params.hca_interest_maps_n; imap++) {
-    
-    const Params::hca_interest_map_t &pmap = _params._hca_interest_maps[imap];
-
-    if (_imaps[pmap.hca_class][pmap.feature] != NULL) {
-      cerr << "ERROR - ComputeEngine::_createInterestMaps()" << endl;
-      cerr << "  Duplicate interest map" << endl;
-      cerr << "                  class   : "
-           << _hcaClassToStr(pmap.hca_class) << endl;
-      cerr << "                  feature : " 
-           << _hcaFeatureToStr(pmap.feature) << endl;
-      iret = -1;
-    } else {
-      _imaps[pmap.hca_class][pmap.feature] =
-        new HcaInterestMap(_getImapClass(pmap.hca_class),
-                           _getImapFeature(pmap.feature),
-                           pmap.x1, pmap.x2, pmap.x3, pmap.x4,
-                           pmap.weight);
-    }
-  
-  } // imap
-
-  return iret;
-
-}
-
-////////////////////////////////////////////
-// check that all interest maps are non-NULL
-
-int ComputeEngine::_checkInterestMaps()
-  
-{
-  
-  int iret = 0;
-
-  for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
-    for (size_t ifeature = 0; ifeature < HcaInterestMap::nFeatures; ifeature++) {
-      if (_imaps[iclass][ifeature] == NULL) {
-        cerr << "ERROR - ComputeEngine::_checkInterestMaps()" << endl;
-        cerr << "  Missing interest map" << endl;
-        cerr << "                  class   : "
-             << _hcaClassToStr((Params::hca_class_t) iclass) << endl;
-        cerr << "                  feature : " 
-             << _hcaFeatureToStr((Params::feature_field_t) ifeature) << endl;
-        iret = -1;
-      }
-    }
-  }
-
-  return iret;
-
-}
-
-/////////////////////////////////////
-// print all interest maps
-
-void ComputeEngine::_printInterestMaps(ostream &out)
-  
-{
-  
-  out << "=============================================" << endl;
-  for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
-    for (size_t ifeature = 0; ifeature < HcaInterestMap::nFeatures; ifeature++) {
-      if (_imaps[iclass][ifeature] != NULL) {
-        if (_imaps[iclass][ifeature] != NULL) {
-          _imaps[iclass][ifeature]->print(out);
-        }
-      }
-    }
-  }
-  out << "=============================================" << endl;
-
-}
-
-/////////////////////////////////////
-// delete all interest maps
-
-void ComputeEngine::_deleteInterestMaps()
-  
-{
-  
-  for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
-    for (size_t ifeature = 0; ifeature < HcaInterestMap::nFeatures; ifeature++) {
-      if (_imaps[iclass][ifeature] != NULL) {
-        delete _imaps[iclass][ifeature];
-      }
-    }
-  }
-
 }
 
 //////////////////////////////////////////////////////////////

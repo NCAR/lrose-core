@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./RadxHca
+ * TDRP params for RadxHca
  **********************************************************************/
 
 //======================================================================
@@ -545,7 +545,7 @@ RHOHV_field_name = "RHOHV_F";
 // Type: boolean
 //
 
-LDR_available = TRUE;
+LDR_available = FALSE;
 
 ///////////// LDR_field_name //////////////////////////
 //
@@ -1263,8 +1263,8 @@ compute_hca = TRUE;
 //          FEATURE_ZDR
 //          FEATURE_RHOHV
 //          FEATURE_LOG_KDP
-//          FEATURE_TD_DBZ
-//          FEATURE_TD_PHIDP
+//          FEATURE_SD_DBZ
+//          FEATURE_SD_PHIDP
 //      double x1;
 //      double x2;
 //      double x3;
@@ -1678,7 +1678,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_GC,
-    feature = FEATURE_TD_DBZ,
+    feature = FEATURE_SD_DBZ,
     x1 = 2,
     x2 = 4,
     x3 = 10,
@@ -1688,7 +1688,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_BS,
-    feature = FEATURE_TD_DBZ,
+    feature = FEATURE_SD_DBZ,
     x1 = 1,
     x2 = 2,
     x3 = 4,
@@ -1698,7 +1698,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_DS,
-    feature = FEATURE_TD_DBZ,
+    feature = FEATURE_SD_DBZ,
     x1 = 0,
     x2 = 0.5,
     x3 = 3,
@@ -1708,7 +1708,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_WS,
-    feature = FEATURE_TD_DBZ,
+    feature = FEATURE_SD_DBZ,
     x1 = 0,
     x2 = 0.5,
     x3 = 3,
@@ -1718,7 +1718,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_CR,
-    feature = FEATURE_TD_DBZ,
+    feature = FEATURE_SD_DBZ,
     x1 = 0,
     x2 = 0.5,
     x3 = 3,
@@ -1728,7 +1728,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_GR,
-    feature = FEATURE_TD_DBZ,
+    feature = FEATURE_SD_DBZ,
     x1 = 0,
     x2 = 0.5,
     x3 = 3,
@@ -1738,7 +1738,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_BD,
-    feature = FEATURE_TD_DBZ,
+    feature = FEATURE_SD_DBZ,
     x1 = 0,
     x2 = 0.5,
     x3 = 3,
@@ -1748,7 +1748,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_RA,
-    feature = FEATURE_TD_DBZ,
+    feature = FEATURE_SD_DBZ,
     x1 = 0,
     x2 = 0.5,
     x3 = 3,
@@ -1758,7 +1758,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_HR,
-    feature = FEATURE_TD_DBZ,
+    feature = FEATURE_SD_DBZ,
     x1 = 0,
     x2 = 0.5,
     x3 = 3,
@@ -1768,7 +1768,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_RH,
-    feature = FEATURE_TD_DBZ,
+    feature = FEATURE_SD_DBZ,
     x1 = 0,
     x2 = 0.5,
     x3 = 3,
@@ -1778,7 +1778,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_GC,
-    feature = FEATURE_TD_PHIDP,
+    feature = FEATURE_SD_PHIDP,
     x1 = 30,
     x2 = 40,
     x3 = 50,
@@ -1788,7 +1788,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_BS,
-    feature = FEATURE_TD_PHIDP,
+    feature = FEATURE_SD_PHIDP,
     x1 = 8,
     x2 = 10,
     x3 = 40,
@@ -1798,7 +1798,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_DS,
-    feature = FEATURE_TD_PHIDP,
+    feature = FEATURE_SD_PHIDP,
     x1 = 0,
     x2 = 1,
     x3 = 15,
@@ -1808,7 +1808,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_WS,
-    feature = FEATURE_TD_PHIDP,
+    feature = FEATURE_SD_PHIDP,
     x1 = 0,
     x2 = 1,
     x3 = 15,
@@ -1818,7 +1818,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_CR,
-    feature = FEATURE_TD_PHIDP,
+    feature = FEATURE_SD_PHIDP,
     x1 = 0,
     x2 = 1,
     x3 = 15,
@@ -1828,7 +1828,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_GR,
-    feature = FEATURE_TD_PHIDP,
+    feature = FEATURE_SD_PHIDP,
     x1 = 0,
     x2 = 1,
     x3 = 15,
@@ -1838,7 +1838,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_BD,
-    feature = FEATURE_TD_PHIDP,
+    feature = FEATURE_SD_PHIDP,
     x1 = 0,
     x2 = 1,
     x3 = 15,
@@ -1848,7 +1848,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_RA,
-    feature = FEATURE_TD_PHIDP,
+    feature = FEATURE_SD_PHIDP,
     x1 = 0,
     x2 = 1,
     x3 = 15,
@@ -1858,7 +1858,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_HR,
-    feature = FEATURE_TD_PHIDP,
+    feature = FEATURE_SD_PHIDP,
     x1 = 0,
     x2 = 1,
     x3 = 15,
@@ -1868,7 +1868,7 @@ hca_interest_maps = {
   ,
   {
     hca_class = CLASS_RH,
-    feature = FEATURE_TD_PHIDP,
+    feature = FEATURE_SD_PHIDP,
     x1 = 0,
     x2 = 1,
     x3 = 15,
@@ -1877,15 +1877,31 @@ hca_interest_maps = {
   }
 };
 
-///////////// HCA_TD_DBZ_kernel_len ///////////////////
+///////////// HCA_SD_DBZ_kernel_len ///////////////////
 //
-// Length of kernel for computing TD_DBS - gates.
+// Length of kernel for computing SD_DBZ - gates.
+//
+// SD_DBZ is the rms deviation of the DBZ field from a linear trend, 
+//   over this number of gates.
 //
 //
 // Type: int
 //
 
-HCA_TD_DBZ_kernel_len = 7;
+HCA_SD_DBZ_kernel_len = 7;
+
+///////////// HCA_SD_PHIDP_kernel_len /////////////////
+//
+// Length of kernel for computing SD_PHIDP - gates.
+//
+// SD_PHIDP is the rms deviation of the PHIDP field from a linear trend, 
+//   over this number of gates.
+//
+//
+// Type: int
+//
+
+HCA_SD_PHIDP_kernel_len = 11;
 
 //======================================================================
 //
@@ -1914,8 +1930,20 @@ compute_pid = TRUE;
 // Type: string
 //
 
-#pid_thresholds_file_path = "$(HOME)/git/lrose-projects-eolbase/projDir/alg/params/pid_thresholds.spol";
 pid_thresholds_file_path = "./pid_thresholds.spol";
+
+///////////// pid_override_temp_profile ///////////////
+//
+// Option to override temp profile in pid_thresholds file.
+//
+// If TRUE, the profile in the thresholds file will be overridden by the 
+//   sounding from SPDB.
+//
+//
+// Type: boolean
+//
+
+pid_override_temp_profile = TRUE;
 
 ///////////// PID_snr_threshold ///////////////////////
 //
@@ -2128,25 +2156,10 @@ PID_median_filter_len = 7;
 
 //======================================================================
 //
-// SOUNDING INPUT FOR PID temperature profile - OPTIONAL.
+// SOUNDING INPUT FOR temperature profile.
 //
 //======================================================================
  
-///////////// use_soundings_from_spdb /////////////////
-//
-// Option to read sounding data from SPDB.
-//
-// If TRUE, the program will read the closest (in time) available 
-//   sounding from an SPDB data base. The temperature profile from the 
-//   sounding will be used to override the temperature profile in the PID 
-//   thresholds config file.
-//
-//
-// Type: boolean
-//
-
-use_soundings_from_spdb = TRUE;
-
 ///////////// sounding_spdb_url ///////////////////////
 //
 // SPDB URL for sounding data.
@@ -2378,7 +2391,6 @@ site_temp_search_margin_secs = 3600;
 //          PHIDP
 //          KDP
 //          KDP_COND
-//          KDP_LOG
 //          PSOB
 //          DBZ_ATTEN_CORRECTION
 //          ZDR_ATTEN_CORRECTION
@@ -2412,7 +2424,27 @@ site_temp_search_margin_secs = 3600;
 //          SEACLUT_FLAG
 //          PARTICLE_ID
 //          TEMP_FOR_PID
-//          TD_DBZ
+//          HCA_DBZ
+//          HCA_ZDR
+//          HCA_RHOHV
+//          HCA_PHIDP
+//          HCA_LOGKDP
+//          HCA_TEMPC
+//          HCA_SD_DBZ
+//          HCA_SD_DBZ2
+//          HCA_SD_PHIDP
+//          HCA_SD_PHIDP2
+//          HCA_GC_INTEREST
+//          HCA_BS_INTEREST
+//          HCA_DS_INTEREST
+//          HCA_WS_INTEREST
+//          HCA_CR_INTEREST
+//          HCA_GR_INTEREST
+//          HCA_BD_INTEREST
+//          HCA_RA_INTEREST
+//          HCA_HR_INTEREST
+//          HCA_RH_INTEREST
+//          HCA
 //      string name;
 //      string long_name;
 //      string standard_name;
@@ -2520,18 +2552,6 @@ output_fields = {
   }
   ,
   {
-    id = KDP_LOG,
-    name = "KDP_LOG",
-    long_name = "log_conditional_specific_differential_phase",
-    standard_name = "log_specific_differential_phase_hv",
-    units = "log(deg/km)",
-    encoding = OUTPUT_ENCODING_INT16,
-    scaling = OUTPUT_SCALING_DYNAMIC,
-    scale = 0.001,
-    offset = 0
-  }
-  ,
-  {
     id = PARTICLE_ID,
     name = "PID",
     long_name = "ncar_particle_id",
@@ -2556,10 +2576,10 @@ output_fields = {
   }
   ,
   {
-    id = SD_DBZ,
-    name = "SD_DBZ",
-    long_name = "std_deviation_for_dbz",
-    standard_name = "std_deviation_for_dbz",
+    id = HCA_DBZ,
+    name = "HCA_DBZ",
+    long_name = "hca_radar_reflectivity",
+    standard_name = "equivalent_reflectivity_factor",
     units = "dBZ",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
@@ -2568,11 +2588,11 @@ output_fields = {
   }
   ,
   {
-    id = TD_DBZ,
-    name = "TD_DBZ",
-    long_name = "trend_rms_error_for_dbz",
-    standard_name = "trend_rms_error_for_dbz",
-    units = "dBZ",
+    id = HCA_ZDR,
+    name = "HCA_ZDR",
+    long_name = "hca_log_differential_reflectivity",
+    standard_name = "log_differential_reflectivity",
+    units = "dB",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
     scale = 0.01,
@@ -2580,10 +2600,22 @@ output_fields = {
   }
   ,
   {
-    id = TD_PHIDP,
-    name = "TD_PHIDP",
-    long_name = "trend_rms_error_for_phidp",
-    standard_name = "trend_rms_error_for_phidp",
+    id = HCA_RHOHV,
+    name = "HCA_RHOHV",
+    long_name = "hca_cross_correlation_ratio",
+    standard_name = "cross_correlation_ratio_hv",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_PHIDP,
+    name = "HCA_PHIDP",
+    long_name = "hca_unfolded_differential_phase",
+    standard_name = "differential_phase_hv",
     units = "deg",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
@@ -2592,10 +2624,82 @@ output_fields = {
   }
   ,
   {
-    id = GC_INTEREST,
-    name = "GC_INTEREST",
-    long_name = "gc_interest_value",
-    standard_name = "gc_interest_value",
+    id = HCA_LOGKDP,
+    name = "HCA_LOGKDP",
+    long_name = "hca_log_conditional_specific_differential_phase",
+    standard_name = "log_specific_differential_phase_hv",
+    units = "log(deg/km)",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_TEMPC,
+    name = "HCA_TEMPC",
+    long_name = "temperature",
+    standard_name = "wet-bulb-temperature",
+    units = "C",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_SD_DBZ,
+    name = "HCA_SD_DBZ",
+    long_name = "hca_texture_of_dbz",
+    standard_name = "dbz_texture",
+    units = "dBZ",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_SD_DBZ2,
+    name = "HCA_SDEV_DBZ",
+    long_name = "sdev_dbz",
+    standard_name = "dbz_sdev",
+    units = "dBZ",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_SD_PHIDP,
+    name = "HCA_SD_PHIDP",
+    long_name = "hca_texture_of_phidp",
+    standard_name = "phidp_texture",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_SD_PHIDP2,
+    name = "HCA_SDEV_PHIDP",
+    long_name = "sdev_phidp",
+    standard_name = "phidp_sdev",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_GC_INTEREST,
+    name = "HCA_GC_INTEREST",
+    long_name = "HCA_gc_interest_value",
+    standard_name = "HCA_gc_interest_value",
     units = "",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
@@ -2604,10 +2708,10 @@ output_fields = {
   }
   ,
   {
-    id = BS_INTEREST,
-    name = "BS_INTEREST",
-    long_name = "bs_interest_value",
-    standard_name = "bs_interest_value",
+    id = HCA_BS_INTEREST,
+    name = "HCA_BS_INTEREST",
+    long_name = "HCA_bs_interest_value",
+    standard_name = "HCA_bs_interest_value",
     units = "",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
@@ -2616,10 +2720,10 @@ output_fields = {
   }
   ,
   {
-    id = DS_INTEREST,
-    name = "DS_INTEREST",
-    long_name = "ds_interest_value",
-    standard_name = "ds_interest_value",
+    id = HCA_DS_INTEREST,
+    name = "HCA_DS_INTEREST",
+    long_name = "HCA_ds_interest_value",
+    standard_name = "HCA_ds_interest_value",
     units = "",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
@@ -2628,10 +2732,10 @@ output_fields = {
   }
   ,
   {
-    id = WS_INTEREST,
-    name = "WS_INTEREST",
-    long_name = "ws_interest_value",
-    standard_name = "ws_interest_value",
+    id = HCA_WS_INTEREST,
+    name = "HCA_WS_INTEREST",
+    long_name = "HCA_ws_interest_value",
+    standard_name = "HCA_ws_interest_value",
     units = "",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
@@ -2640,10 +2744,10 @@ output_fields = {
   }
   ,
   {
-    id = CR_INTEREST,
-    name = "CR_INTEREST",
-    long_name = "cr_interest_value",
-    standard_name = "cr_interest_value",
+    id = HCA_CR_INTEREST,
+    name = "HCA_CR_INTEREST",
+    long_name = "HCA_cr_interest_value",
+    standard_name = "HCA_cr_interest_value",
     units = "",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
@@ -2652,10 +2756,10 @@ output_fields = {
   }
   ,
   {
-    id = GR_INTEREST,
-    name = "GR_INTEREST",
-    long_name = "gr_interest_value",
-    standard_name = "gr_interest_value",
+    id = HCA_GR_INTEREST,
+    name = "HCA_GR_INTEREST",
+    long_name = "HCA_gr_interest_value",
+    standard_name = "HCA_gr_interest_value",
     units = "",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
@@ -2664,10 +2768,10 @@ output_fields = {
   }
   ,
   {
-    id = BD_INTEREST,
-    name = "BD_INTEREST",
-    long_name = "bd_interest_value",
-    standard_name = "bd_interest_value",
+    id = HCA_BD_INTEREST,
+    name = "HCA_BD_INTEREST",
+    long_name = "HCA_bd_interest_value",
+    standard_name = "HCA_bd_interest_value",
     units = "",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
@@ -2676,10 +2780,10 @@ output_fields = {
   }
   ,
   {
-    id = RA_INTEREST,
-    name = "RA_INTEREST",
-    long_name = "ra_interest_value",
-    standard_name = "ra_interest_value",
+    id = HCA_RA_INTEREST,
+    name = "HCA_RA_INTEREST",
+    long_name = "HCA_ra_interest_value",
+    standard_name = "HCA_ra_interest_value",
     units = "",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
@@ -2688,10 +2792,10 @@ output_fields = {
   }
   ,
   {
-    id = HR_INTEREST,
-    name = "HR_INTEREST",
-    long_name = "hr_interest_value",
-    standard_name = "hr_interest_value",
+    id = HCA_HR_INTEREST,
+    name = "HCA_HR_INTEREST",
+    long_name = "HCA_hr_interest_value",
+    standard_name = "HCA_hr_interest_value",
     units = "",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
@@ -2700,10 +2804,10 @@ output_fields = {
   }
   ,
   {
-    id = RH_INTEREST,
-    name = "RH_INTEREST",
-    long_name = "rh_interest_value",
-    standard_name = "rh_interest_value",
+    id = HCA_RH_INTEREST,
+    name = "HCA_RH_INTEREST",
+    long_name = "HCA_rh_interest_value",
+    standard_name = "HCA_rh_interest_value",
     units = "",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,
@@ -2714,8 +2818,8 @@ output_fields = {
   {
     id = HCA,
     name = "HCA",
-    long_name = "wsr88d_hydrometeor_class",
-    standard_name = "hydrometeor_class",
+    long_name = "wsr88d_hydrometeor_classification",
+    standard_name = "hydrometeor_classification",
     units = "",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,

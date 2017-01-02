@@ -39,6 +39,7 @@
 #define ComputeEngine_HH
 
 #include "Params.hh"
+#include "HcaNexrad.hh"
 #include "HcaInterestMap.hh"
 #include <radar/KdpFilt.hh>
 #include <radar/NcarParticleId.hh>
@@ -137,40 +138,7 @@ private:
 
   // HCA
 
-  RadxArray<double> _kdpLogArray_;
-  RadxArray<double> _sdDbzArray_;
-  RadxArray<double> _tdDbzArray_;
-  RadxArray<double> _tdPhidpArray_;
-
-  double *_kdpLogArray;
-  double *_sdDbzArray;
-  double *_tdDbzArray;
-  double *_tdPhidpArray;
-  
-  RadxArray<double> _gcInterest_;
-  RadxArray<double> _bsInterest_;
-  RadxArray<double> _dsInterest_;
-  RadxArray<double> _wsInterest_;
-  RadxArray<double> _crInterest_;
-  RadxArray<double> _grInterest_;
-  RadxArray<double> _bdInterest_;
-  RadxArray<double> _raInterest_;
-  RadxArray<double> _hrInterest_;
-  RadxArray<double> _rhInterest_;
-
-  double *_gcInterest;
-  double *_bsInterest;
-  double *_dsInterest;
-  double *_wsInterest;
-  double *_crInterest;
-  double *_grInterest;
-  double *_bdInterest;
-  double *_raInterest;
-  double *_hrInterest;
-  double *_rhInterest;
-
-  RadxArray<int> _hcaArray_;
-  int *_hcaArray;
+  HcaNexrad _hcaNexrad;
 
   // NCAR PID
 
@@ -210,7 +178,7 @@ private:
 
   // HCA interest maps
 
-  HcaInterestMap* _imaps[HcaInterestMap::nClasses][HcaInterestMap::nFeatures];
+  // HcaInterestMap* _imaps[HcaInterestMap::nClasses][HcaInterestMap::nFeatures];
 
   // debug printing
   
@@ -248,14 +216,9 @@ private:
                                      int nPoints,
                                      vector<InterestMap::ImPoint> &pts);
 
+  int _hcaInit();
   void _hcaCompute();
 
-  void _initInterestMaps();
-  int _createInterestMaps();
-  int _checkInterestMaps();
-  void _printInterestMaps(ostream &out);
-  void _deleteInterestMaps();
-  
   HcaInterestMap::imap_class_t _getImapClass(Params::hca_class_t hcaClass);
   HcaInterestMap::imap_feature_t _getImapFeature(Params::feature_field_t feature);
 

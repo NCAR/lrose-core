@@ -82,13 +82,21 @@ public:
     }
   }
   
-  // set the radar wavelength in cm
+  // set the radar and ray properties
 
-  void setWavelengthCm(double val) { _wavelengthCm = val; }
-
-  // set the radar ht in km
-
+  void setWavelengthM(double val) { _wavelengthM = val; }
   void setRadarHtKm(double val) { _radarHtKm = val; }
+  void setElevation(double val) { _elevation = val; }
+  void setAzimuth(double val) { _azimuth = val; }
+  void setStartRangeKm(double val) { _startRangeKm = val; }
+  void setGateSpacingKm(double val) { _gateSpacingKm = val; }
+
+  // details for computing beam height
+
+  void setPseudoRadiusRatio(double pseudoRadiusRatio) {
+    _setPseudoRadiusRatio = true;
+    _pseudoRadiusRatio = pseudoRadiusRatio;
+  }
 
   // set the SNR threshold
 
@@ -121,6 +129,7 @@ public:
   
   /**
    * Initialize the object arrays for later use.
+   * Sets the number of gates.
    * Do this if you need access to the arrays, but have not yet called
    * computePidBeam(), and do not plan to do so.
    * For example, you may want to output missing fields that you have
@@ -135,7 +144,6 @@ public:
    * if they are not valid for that gate.
    * Results are stored in local arrays on this class.
    * Use get() methods to retieve them.
-   * @param[in] nGates Number of gates
    * @param[in] dbz Reflectivity array
    * @param[in] zdr Differential reflectivity array
    * @param[in] rhohv Correlation coeff array
@@ -144,14 +152,12 @@ public:
    * @param[in] tempC Temperature at each gate, in deg C
    */ 
 
-  void computeHca(int nGates,
-                  const double *snr,
+  void computeHca(const double *snr,
                   const double *dbz,
                   const double *zdr,
                   const double *rhohv,
                   const double *phidpUnfolded,
-                  const double *kdp,
-                  const double *tempC);
+                  const double *kdp);
   
   /**
    * Get snr field after calling computeHca()
@@ -192,11 +198,13 @@ public:
    * Get texture of dbz after calling computeHca()
    */
   const double *getSdDbz() const { return _sdDbz; }
+  const double *getSdDbz2() const { return _sdDbz2; }
 
   /**
    * Get texture of phidp after calling computeHca()
    */
   const double *getSdPhidp() const { return _sdPhidp; }
+  const double *getSdPhidp2() const { return _sdPhidp2; }
 
   /**
    * Get primary particle id field after calling computeHca()
@@ -229,22 +237,6 @@ public:
    */ 
   void setMissingDouble(double missing) { _missingDouble = missing; }
 
-  /**
-   * Fill a temperature array, for a radar beam elevation
-   * @param[in] radarHtKm The radar height in Km MSL
-   * @param[in] elevDeg The elevation angle of the radar beam
-   * @param[in] nGates The number of gates in the radar beam
-   * @param[in] startRangeKm The starting gate for the temperature array
-   * @param[in] gateSpacingKm The spacing between gates (km)
-   * @param[out] temp The filled temperature array
-   */
-  void fillTempArray(double radarHtKm,
-                     bool setPseudoRadiusRatio,
-                     double pseudoRadiusRatio,
-                     double elevDeg, int nGates,
-                     double startRangeKm, double gateSpacingKm,
-                     double *tempC);
-
   const static double pseudoEarthDiamKm; /**< pseudo earth diameter
                                           * for computing radar beam heights */
 
@@ -271,13 +263,13 @@ public:
 protected:
 private:
 
-  static double _missingDouble; /**< The value to use for missing data */
+  double _missingDouble; /**< The value to use for missing data */
 
   bool _debug;   /**< Flag to indicate whether debug messages should be printed */
   bool _verbose; /**< Flag to indicate whether verbose messages should be printed */
   static pthread_mutex_t _debugPrintMutex; // debug printing
   
-  double _wavelengthCm; /**< The wavelength (cm) of the radar beam */
+  double _wavelengthM; /**< The wavelength of the radar beam (meters) */
 
   // geometry
 
@@ -285,6 +277,11 @@ private:
   double _startRangeKm;
   double _gateSpacingKm;
   double _radarHtKm;
+  double _elevation;
+  double _azimuth;
+  
+  bool _setPseudoRadiusRatio;
+  double _pseudoRadiusRatio;
 
   // temperature profile
 
@@ -330,13 +327,13 @@ private:
   double *_tempC;
   
   RadxArray<double> _sdDbz_;
-  RadxArray<double> _sdPhidp_;
   RadxArray<double> _sdDbz2_;
+  RadxArray<double> _sdPhidp_;
   RadxArray<double> _sdPhidp2_;
 
   double *_sdDbz;
-  double *_sdPhidp;
   double *_sdDbz2;
+  double *_sdPhidp;
   double *_sdPhidp2;
   
   RadxArray<double> _gcInterest_;
@@ -374,8 +371,10 @@ private:
 
   // private methods
   
-  void _allocArrays(int nGates);
+  void _allocArrays();
   void _computeTempHtLookup();
+  void _fillTempArray();
+  double _computeTempC(double htKm);
 
 };
 
