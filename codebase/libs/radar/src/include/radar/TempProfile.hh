@@ -86,7 +86,7 @@ public:
      * Print the contents of this TmpPoint
      * @param[out] out The stream to print to
      */
-    void print(ostream &out);
+    void print(ostream &out) const;
     
     // data
 
@@ -117,6 +117,12 @@ public:
   // If getTempProfile() returned failure, tmpProfile will be empty
 
   const vector<PointVal> &getProfile() const { return _tmpProfile; }
+  
+  // get temperature at a given height
+  // returns -9999 if no temp profile available
+  // on first call will create lut
+  
+  double getTempForHtKm(double htKm) const;
 
   // clear the profile
 
@@ -225,6 +231,10 @@ public:
 
   void setHeightCorrectionKm(double val) { _heightCorrectionKm = val; }
 
+  /// print
+
+  void print(ostream &out) const;
+
   // debugging
 
   void setDebug() { _debug = true; }
@@ -261,11 +271,22 @@ private:
 
   double _heightCorrectionKm; /* correction made to sounding heights
                                * as they are read in */
+
+  mutable vector<double> _lutByMeterHt; /* array of temperature with height
+                                         * one entry per meter */
+  
+  mutable int _tmpMinHtMeters;  /**< Mimimum height of the temperature profile (m) */
+  mutable int _tmpMaxHtMeters;  /**< Maximum height of the temperature profile (m) */
+
+  mutable double _tmpBottomC;    /**< Temperature at the base of the profile */
+  mutable double _tmpTopC;       /**< Temperature at the top of the profile */
+
   // methods
 
   int _getTempProfile(time_t searchTime);
   int _checkTempProfile();
   void _computeFreezingLevel();
+  void _createLutByMeterHt() const;
 
 };
 

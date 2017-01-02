@@ -93,6 +93,7 @@ int TempProfile::getTempProfile(const string &url,
 
 {
 
+  _lutByMeterHt.clear();
   _tmpProfile.clear();
   _soundingSpdbUrl = url;
   time_t earliestTime = dataTime - _soundingSearchTimeMarginSecs;
@@ -106,7 +107,8 @@ int TempProfile::getTempProfile(const string &url,
 
   while (searchTime >= earliestTime) {
 
-    // get a temperature profile
+    // get a temperature profile from spdb
+
     if (_getTempProfile(searchTime)) {
       // failed - move back in time and try again
       searchTime -= 3600;
@@ -143,15 +145,20 @@ int TempProfile::getTempProfile(const string &url,
       cerr << "  Got profile at time: "
            << DateTime::strm(_soundingTime) << endl;
     }
-    
+
+    // compute the freezing level
+
     _computeFreezingLevel();
 
     return 0;
   
   } // while
-  
+
+  // error
+
   _tmpProfile.clear();
   tmpProfile = _tmpProfile;
+
   return -1;
   
 }
@@ -470,6 +477,91 @@ void TempProfile::_computeFreezingLevel()
 
 }
 
+///////////////////////////////////////////////
+// get temperature at a given height
+// returns -9999 if no temp profile available
+
+double TempProfile::getTempForHtKm(double htKm) const
+
+{
+
+  // create LUT by height if it does not already exist
+  
+  if (_lutByMeterHt.size() < 1) {
+    _createLutByMeterHt();
+  }
+
+  // check LUT - if zero size then return missing
+
+  if (_lutByMeterHt.size() < 1) {
+    return -9999.0;
+  }
+
+  // get temp for requested height
+
+  int htMeters = (int) (htKm * 1000.0 + 0.5);
+  
+  if (htMeters <= _tmpMinHtMeters) {
+    return _tmpBottomC;
+  } else if (htMeters >= _tmpMaxHtMeters) {
+    return _tmpTopC;
+  }
+
+  int kk = htMeters - _tmpMinHtMeters;
+  return _lutByMeterHt[kk];
+
+}
+
+//////////////////////////////////////////////////////////////////
+// create a lookup table by height
+// one entry per meter
+
+void TempProfile::_createLutByMeterHt() const
+
+{
+
+  _lutByMeterHt.clear();
+  if (_tmpProfile.size() < 1) {
+    return;
+  }
+  
+  _tmpMinHtMeters =
+    (int) (_tmpProfile[0].htKm * 1000.0 + 0.5);
+  _tmpMaxHtMeters =
+    (int) (_tmpProfile[_tmpProfile.size()-1].htKm * 1000.0 + 0.5);
+
+  _tmpBottomC = _tmpProfile[0].tmpC;
+  _tmpTopC = _tmpProfile[_tmpProfile.size()-1].tmpC;
+
+  // fill out temp array, every meter
+
+  int nHt = (_tmpMaxHtMeters - _tmpMinHtMeters) + 1;
+  _lutByMeterHt.resize(nHt);
+  
+  for (int ii = 1; ii < (int) _tmpProfile.size(); ii++) {
+
+    int minHtMeters = (int) (_tmpProfile[ii-1].htKm * 1000.0 + 0.5);
+    double minTmp = _tmpProfile[ii-1].tmpC;
+
+    int maxHtMeters = (int) (_tmpProfile[ii].htKm * 1000.0 + 0.5);
+    double maxTmp = _tmpProfile[ii].tmpC;
+
+    double deltaMeters = maxHtMeters - minHtMeters;
+    double deltaTmp = maxTmp - minTmp;
+    double gradient = deltaTmp / deltaMeters;
+    double tmp = minTmp;
+    int kk = minHtMeters - _tmpMinHtMeters;
+    
+    for (int jj = minHtMeters; jj <= maxHtMeters; jj++, kk++, tmp += gradient) {
+      if (kk >= 0 && kk < nHt) {
+	_lutByMeterHt[kk] = tmp;
+      }
+    }
+    
+  } // ii
+
+}
+
 //////////////////////////////////////////////////////////////
 // PointVal interior class
 
@@ -507,7 +599,7 @@ TempProfile::PointVal::~PointVal()
 /////////////////////////////////////////////////////////
 // print
 
-void TempProfile::PointVal::print(ostream &out)
+void TempProfile::PointVal::print(ostream &out) const
 
 {
 
@@ -519,4 +611,51 @@ void TempProfile::PointVal::print(ostream &out)
 
 }
 
+/////////////////////////////////////////////////////////
+// print
+
+void TempProfile::print(ostream &out) const
+
+{
+
+  out << "======= Temperature Profile =========" << endl;
+
+  out << "  soundingTime: " << DateTime::strm(_soundingTime) << endl;
+  out << "  soundingUrl: " << _soundingSpdbUrl << endl;
+  out << "  soundingLocationName: " << _soundingLocationName << endl;
+  out << "  freezingLevel? " << _freezingLevel << endl;
+  out << "  useWetBulbTemp? " << (_useWetBulbTemp?"Y":"N") << endl;
+  out << "  heightCorrectionKm: " << _heightCorrectionKm << endl;
+
+  int nLevels = (int) _tmpProfile.size();
+  int nPrint = 50;
+  int printInterval = nLevels / nPrint;
+  if (nLevels < nPrint) {
+    printInterval = 1;
+  }
+  for (size_t ii = 0; ii < _tmpProfile.size(); ii++) {
+    bool doPrint = false;
+    if (ii % printInterval == 0) {
+      doPrint = true;
+    }
+    if (ii < _tmpProfile.size() - 1) {
+      if (_tmpProfile[ii].tmpC * _tmpProfile[ii].tmpC <= 0) {
+        // always print freezing level
+        doPrint = true;
+      }
+    }
+    if (ii > 0) {
+      if (_tmpProfile[ii-1].tmpC * _tmpProfile[ii].tmpC <= 0) {
+        doPrint = true;
+      }
+    }
+    if (doPrint) {
+      out << "  ilevel, press(Hpa), alt(km), temp(C): " << ii << ", "
+          << _tmpProfile[ii].pressHpa << ", "
+          << _tmpProfile[ii].htKm << ", "
+          << _tmpProfile[ii].tmpC << endl;
+    }
+  }
+  out << "=====================================" << endl;
+}
 
