@@ -90,8 +90,8 @@ public:
     FEATURE_ZDR = 1,
     FEATURE_RHOHV = 2,
     FEATURE_LOG_KDP = 3,
-    FEATURE_TD_DBZ = 4,
-    FEATURE_TD_PHIDP = 5
+    FEATURE_SD_DBZ = 4,
+    FEATURE_SD_PHIDP = 5
   } feature_field_t;
 
   typedef enum {
@@ -141,19 +141,20 @@ public:
     PARTICLE_ID = 43,
     TEMP_FOR_PID = 44,
     SD_DBZ = 45,
-    TD_DBZ = 46,
-    TD_PHIDP = 47,
-    GC_INTEREST = 48,
-    BS_INTEREST = 49,
-    DS_INTEREST = 50,
-    WS_INTEREST = 51,
-    CR_INTEREST = 52,
-    GR_INTEREST = 53,
-    BD_INTEREST = 54,
-    RA_INTEREST = 55,
-    HR_INTEREST = 56,
-    RH_INTEREST = 57,
-    HCA = 58
+    SD_DBZ2 = 46,
+    SD_PHIDP = 47,
+    SD_PHIDP2 = 48,
+    GC_INTEREST = 49,
+    BS_INTEREST = 50,
+    DS_INTEREST = 51,
+    WS_INTEREST = 52,
+    CR_INTEREST = 53,
+    GR_INTEREST = 54,
+    BD_INTEREST = 55,
+    RA_INTEREST = 56,
+    HR_INTEREST = 57,
+    RH_INTEREST = 58,
+    HCA = 59
   } output_field_id_t;
 
   typedef enum {
@@ -681,9 +682,9 @@ public:
   hca_interest_map_t *_hca_interest_maps;
   int hca_interest_maps_n;
 
-  int HCA_TD_DBZ_kernel_len;
+  int HCA_SD_DBZ_kernel_len;
 
-  int HCA_TD_PHIDP_kernel_len;
+  int HCA_SD_PHIDP_kernel_len;
 
   tdrp_bool_t compute_pid;
 

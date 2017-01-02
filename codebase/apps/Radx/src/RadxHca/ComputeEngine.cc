@@ -51,9 +51,11 @@ const double ComputeEngine::missingDbl = -9999.0;
 // Constructor
 
 ComputeEngine::ComputeEngine(const Params &params,
-                             int id)  :
+                             int id,
+                             const TempProfile &tempProfile)  :
         _params(params),
-        _id(id)
+        _id(id),
+        _tempProfile(tempProfile)
   
 {
 
@@ -112,8 +114,7 @@ ComputeEngine::~ComputeEngine()
 
 RadxRay *ComputeEngine::compute(RadxRay *inputRay,
                                 double radarHtKm,
-                                double wavelengthM,
-                                const TempProfile *tempProfile)
+                                double wavelengthM)
 {
 
   // set ray-specific metadata
@@ -131,7 +132,6 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
 
   _radarHtKm = radarHtKm;
   _wavelengthM = wavelengthM;
-  _tempProfile = tempProfile;
   _atmos.setAttenCrpl(_wavelengthM * 100.0);
 
   // create moments ray
@@ -290,13 +290,14 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
         // hca
 
-        case Params::SD_DBZ:
+        case Params::SD_DBZ2:
           *datp = _sdDbzArray[igate];
           break;
-        case Params::TD_DBZ:
+        case Params::SD_DBZ:
           *datp = _tdDbzArray[igate];
           break;
-        case Params::TD_PHIDP:
+        case Params::SD_PHIDP:
+        case Params::SD_PHIDP2:
           *datp = _tdPhidpArray[igate];
           break;
 
@@ -838,14 +839,12 @@ void ComputeEngine::_pidCompute()
   
 {
   
-  // override temp profile if appropriate
+  // override temp profile in PID
   
-  if (_params.use_soundings_from_spdb) {
-    if (_tempProfile) {
-      const vector<NcarParticleId::TmpPoint> &profile = _tempProfile->getProfile();
-      if (profile.size() > 0) {
-        _pid.setTempProfile(profile);
-      }
+  if (_params.pid_override_temp_profile) {
+    const vector<TempProfile::PointVal> &profile = _tempProfile.getProfile();
+    if (profile.size() > 0) {
+      _pid.setTempProfile(profile);
     }
   }
 
@@ -1135,14 +1134,14 @@ void ComputeEngine::_hcaCompute()
   FilterUtils::computeTrendDevInRange(_dbzArray,
                                       _tdDbzArray,
                                       _nGates,
-                                      _params.HCA_TD_DBZ_kernel_len,
+                                      _params.HCA_SD_DBZ_kernel_len,
                                       missingDbl);
   
 
   FilterUtils::computeSdevInRange(_dbzArray,
                                   _sdDbzArray,
                                   _nGates,
-                                  _params.HCA_TD_DBZ_kernel_len,
+                                  _params.HCA_SD_DBZ_kernel_len,
                                   missingDbl);
   
 
@@ -1151,7 +1150,7 @@ void ComputeEngine::_hcaCompute()
   FilterUtils::computeTrendDevInRange(_kdp.getPhidpUnfold(),
                                       _tdPhidpArray,
                                       _nGates,
-                                      _params.HCA_TD_PHIDP_kernel_len,
+                                      _params.HCA_SD_PHIDP_kernel_len,
                                       missingDbl);
   
   for (int igate = 0; igate < _nGates; igate++) {
@@ -1175,8 +1174,8 @@ void ComputeEngine::_hcaCompute()
   featureVals[HcaInterestMap::FeatureZDR] = _zdrArray;
   featureVals[HcaInterestMap::FeatureRHOHV] = _rhohvArray;
   featureVals[HcaInterestMap::FeatureLOG_KDP] = _kdpLogArray;
-  featureVals[HcaInterestMap::FeatureTD_DBZ] = _tdDbzArray;
-  featureVals[HcaInterestMap::FeatureTD_PHIDP] = _tdPhidpArray;
+  featureVals[HcaInterestMap::FeatureSD_DBZ] = _tdDbzArray;
+  featureVals[HcaInterestMap::FeatureSD_PHIDP] = _tdPhidpArray;
 
   // set up classes interest
   
@@ -1414,10 +1413,10 @@ HcaInterestMap::imap_feature_t ComputeEngine::_getImapFeature(Params::feature_fi
       return HcaInterestMap::FeatureRHOHV;
     case Params::FEATURE_LOG_KDP:
       return HcaInterestMap::FeatureLOG_KDP;
-    case Params::FEATURE_TD_DBZ:
-      return HcaInterestMap::FeatureTD_DBZ;
-    case Params::FEATURE_TD_PHIDP:
-      return HcaInterestMap::FeatureTD_PHIDP;
+    case Params::FEATURE_SD_DBZ:
+      return HcaInterestMap::FeatureSD_DBZ;
+    case Params::FEATURE_SD_PHIDP:
+      return HcaInterestMap::FeatureSD_PHIDP;
   }
   return HcaInterestMap::FeatureDBZ;
 }
@@ -1479,11 +1478,11 @@ string ComputeEngine::_hcaFeatureToStr(Params::feature_field_t hcaFeature)
     case Params::FEATURE_LOG_KDP:
       return "LOG_KDP";
       break;
-    case Params::FEATURE_TD_DBZ:
-      return "TD_DBZ";
+    case Params::FEATURE_SD_DBZ:
+      return "SD_DBZ";
       break;
-    case Params::FEATURE_TD_PHIDP:
-      return "TD_PHIPD";
+    case Params::FEATURE_SD_PHIDP:
+      return "SD_PHIPD";
       break;
   }
   return "UNKNOWN";

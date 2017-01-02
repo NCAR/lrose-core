@@ -61,7 +61,8 @@ public:
   
   // constructor
   
-  ComputeEngine(const Params &params, int id);
+  ComputeEngine(const Params &params, int id,
+                const TempProfile &tempProfile);
 
   // destructor
   
@@ -77,8 +78,7 @@ public:
   
   RadxRay *compute(RadxRay *inputRay,
                    double radarHtKm,
-                   double wavelengthM,
-                   const TempProfile *tempProfile);
+                   double wavelengthM);
 
   bool OK;
   
@@ -193,7 +193,7 @@ private:
 
   // temperature profile
 
-  const TempProfile *_tempProfile;
+  const TempProfile _tempProfile;
 
   // sea clutter
 

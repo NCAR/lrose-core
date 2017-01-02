@@ -81,8 +81,8 @@ public:
     FeatureZDR = 1,
     FeatureRHOHV = 2,
     FeatureLOG_KDP = 3,
-    FeatureTD_DBZ = 4,
-    FeatureTD_PHIDP = 5
+    FeatureSD_DBZ = 4,
+    FeatureSD_PHIDP = 5
   } imap_feature_t;
   
   typedef enum {

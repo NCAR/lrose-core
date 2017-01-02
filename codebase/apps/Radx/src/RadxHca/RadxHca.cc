@@ -127,7 +127,7 @@ RadxHca::RadxHca(int argc, char **argv)
       ComputeThread *thread = new ComputeThread();
       thread->setApp(this);
 
-      ComputeEngine *engine = new ComputeEngine(_params, ii);
+      ComputeEngine *engine = new ComputeEngine(_params, ii, _tempProfile);
       if (!engine->OK) {
         OK = FALSE;
       }
@@ -144,7 +144,7 @@ RadxHca::RadxHca(int argc, char **argv)
 
     // single threaded
 
-    _engine = new ComputeEngine(_params, 0);
+    _engine = new ComputeEngine(_params, 0, _tempProfile);
     if (!_engine->OK) {
       OK = FALSE;
     }
@@ -440,7 +440,11 @@ int RadxHca::_processFile(const string &filePath)
 
   // retrieve temp profile from SPDB as appropriate
 
-  _retrieveTempProfile(vol);
+  if (_retrieveTempProfile(vol)) {
+    cerr << "ERROR - RadxHca::Run" << endl;
+    cerr << " Cannot get temperature profile" << endl;
+    return -1;
+  }
 
   // option to get site temperature
   
@@ -845,7 +849,7 @@ int RadxHca::_computeSingleThreaded(RadxVol &vol)
     
     // compute moments
     
-    RadxRay *derivedRay = _engine->compute(inputRay, _radarHtKm, _wavelengthM, &_tempProfile);
+    RadxRay *derivedRay = _engine->compute(inputRay, _radarHtKm, _wavelengthM);
     if (derivedRay == NULL) {
       cerr << "ERROR - _compute" << endl;
       return -1;
@@ -1010,8 +1014,7 @@ void *RadxHca::_computeInThread(void *thread_data)
     RadxRay *inputRay = compThread->getCovRay();
     RadxRay *derivedRay = engine->compute(inputRay,
                                           app->_radarHtKm,
-                                          app->_wavelengthM,
-                                          &app->_tempProfile);
+                                          app->_wavelengthM);
     compThread->setMomRay(derivedRay);
     
     if (app->getParams().debug >= Params::DEBUG_EXTRA) {
@@ -1084,11 +1087,6 @@ int RadxHca::_retrieveTempProfile(const RadxVol &vol)
   
 {
 
-  if (!_params.use_soundings_from_spdb) {
-    _tempProfile.clear();
-    return 0;
-  }
-
   if (_params.debug) {
     _tempProfile.setDebug();
   }
@@ -1123,7 +1121,7 @@ int RadxHca::_retrieveTempProfile(const RadxVol &vol)
   }
   
   time_t retrievedTime;
-  vector<NcarParticleId::TmpPoint> retrievedProfile;
+  vector<TempProfile::PointVal> retrievedProfile;
   if (_tempProfile.getTempProfile(_params.sounding_spdb_url,
                                   vol.getStartTimeSecs(),
                                   retrievedTime,

@@ -401,11 +401,11 @@ string HcaInterestMap::hcaFeatureToStr(imap_feature_t hcaFeature)
     case FeatureLOG_KDP:
       return "LOG_KDP";
       break;
-    case FeatureTD_DBZ:
-      return "TD_DBZ";
+    case FeatureSD_DBZ:
+      return "SD_DBZ";
       break;
-    case FeatureTD_PHIDP:
-      return "TD_PHIPD";
+    case FeatureSD_PHIDP:
+      return "SD_PHIPD";
       break;
   }
   return "UNKNOWN";
