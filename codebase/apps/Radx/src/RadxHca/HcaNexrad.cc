@@ -258,19 +258,19 @@ void HcaNexrad::computeHca(const double *snr,
                                   _sdPhidpFilterLen,
                                   _missingDouble);
   
-  for (int igate = 0; igate < _nGates; igate++) {
-    double sdPhidp = _sdPhidp[igate];
-    double snr = _snr[igate];
-    if (sdPhidp == _missingDouble) {
-      if (snr != _missingDouble && snr > _snrThresholdDb) {
-        _sdPhidp[igate] = 0.0;
-      }
-    } else if (sdPhidp < 0.01) {
-      if (snr == _missingDouble || snr < _snrThresholdDb) {
-        _sdPhidp[igate] = _missingDouble;
-      }
-    }
-  }
+  // for (int igate = 0; igate < _nGates; igate++) {
+  //   double sdPhidp = _sdPhidp[igate];
+  //   double snr = _snr[igate];
+  //   if (sdPhidp == _missingDouble) {
+  //     if (snr != _missingDouble && snr > _snrThresholdDb) {
+  //       _sdPhidp[igate] = 0.0;
+  //     }
+  //   } else if (sdPhidp < 0.01) {
+  //     if (snr == _missingDouble || snr < _snrThresholdDb) {
+  //       _sdPhidp[igate] = _missingDouble;
+  //     }
+  //   }
+  // }
 
   // set up feature 2D-array
   
