@@ -73,6 +73,18 @@ public:
                         double missingValue,
                         double *sdevPhidp);
   
+  // compute TEXTURE for PHIDP SDEV
+  // takes account of folding
+  // nGates and phidp passed in
+  // computes sdev and load into sdevPhidp array
+  // sdevPhidp array must be allocated by caller
+  
+  void computePhidpTexture(int nGatesData,
+                           int nGatesKernel,
+                           const double *phidp,
+                           double missingValue,
+                           double *sdevPhidp);
+  
 protected:
   
 private:
