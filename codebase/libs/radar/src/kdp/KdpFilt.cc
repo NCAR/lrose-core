@@ -737,6 +737,7 @@ int KdpFilt::_unfoldPhidp()
   // load up runs of valid phidp
 
   if (_findValidRuns()) {
+    memcpy(_phidpUnfold, _phidp, _nGates * sizeof(double));
     return -1;
   }
 
