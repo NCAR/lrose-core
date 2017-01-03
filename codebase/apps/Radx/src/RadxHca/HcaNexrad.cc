@@ -83,11 +83,11 @@ HcaNexrad::HcaNexrad(const TempProfile &tempProfile) :
   _tmpBottomC = 0;
   _tmpTopC = 0;
 
-  _dbzFilterLen = 5;
-  _zdrFilterLen = 9;
-  _rhohvFilterLen = 9;
-  _sdDbzFilterLen = 5;
-  _sdPhidpFilterLen = 9;
+  _dbzFilterLen = 7;
+  _zdrFilterLen = 11;
+  _rhohvFilterLen = 11;
+  _phidpFilterLen = 11;
+  _phidpHvyFilterLen = 25;
 
   // initialize interest map array with NULLS
   // interest maps must be added by calling class using addInterestMap()
@@ -139,10 +139,18 @@ void HcaNexrad::initializeArrays(int nGates)
     _logKdp[ii] = _missingDouble;
     _tempC[ii] = _missingDouble;
 
+    _smoothDbz[ii] = _missingDouble;
+    _smoothZdr[ii] = _missingDouble;
+    _smoothRhohv[ii] = _missingDouble;
+    _smoothPhidp[ii] = _missingDouble;
+    _hvySmoothPhidp[ii] = _missingDouble;
+
+    _textureDbz[ii] = _missingDouble;
     _sdDbz[ii] = _missingDouble;
-    _sdDbz2[ii] = _missingDouble;
+    _textureZdr[ii] = _missingDouble;
+    _textureRhohv[ii] = _missingDouble;
+    _texturePhidp[ii] = _missingDouble;
     _sdPhidp[ii] = _missingDouble;
-    _sdPhidp2[ii] = _missingDouble;
 
     _gcInterest[ii] = _missingDouble;
     _bsInterest[ii] = _missingDouble;
@@ -176,10 +184,18 @@ void HcaNexrad::_allocArrays()
   _logKdp = _logKdp_.alloc(_nGates);
   _tempC = _tempC_.alloc(_nGates);
 
+  _smoothDbz = _smoothDbz_.alloc(_nGates);
+  _smoothZdr = _smoothZdr_.alloc(_nGates);
+  _smoothRhohv = _smoothRhohv_.alloc(_nGates);
+  _smoothPhidp = _smoothPhidp_.alloc(_nGates);
+  _hvySmoothPhidp = _hvySmoothPhidp_.alloc(_nGates);
+
+  _textureDbz = _textureDbz_.alloc(_nGates);
   _sdDbz = _sdDbz_.alloc(_nGates);
-  _sdDbz2 = _sdDbz2_.alloc(_nGates);
+  _textureZdr = _textureZdr_.alloc(_nGates);
+  _textureRhohv = _textureRhohv_.alloc(_nGates);
+  _texturePhidp = _texturePhidp_.alloc(_nGates);
   _sdPhidp = _sdPhidp_.alloc(_nGates);
-  _sdPhidp2 = _sdPhidp2_.alloc(_nGates);
 
   _gcInterest = _gcInterest_.alloc(_nGates);
   _bsInterest = _bsInterest_.alloc(_nGates);
@@ -228,41 +244,64 @@ void HcaNexrad::computeHca(const double *snr,
 
   _fillTempArray();
 
-  // compute trend deviation of dbz
+  // compute RMSE of trend residuals for dbz, zdr and rhohv
   
   _filt.computeTrendDevInRange(_dbz,
-                               _sdDbz,
                                _nGates,
-                               _sdDbzFilterLen,
-                               _missingDouble);
+                               _dbzFilterLen,
+                               _missingDouble,
+                               _smoothDbz,
+                               _textureDbz);
   
+  _filt.computeTrendDevInRange(_zdr,
+                               _nGates,
+                               _zdrFilterLen,
+                               _missingDouble,
+                               _smoothZdr,
+                               _textureZdr);
+  
+  _filt.computeTrendDevInRange(_rhohv,
+                               _nGates,
+                               _rhohvFilterLen,
+                               _missingDouble,
+                               _smoothRhohv,
+                               _textureRhohv);
+  
+  // compute standard deviation of dbz - for testing purposes
   
   _filt.computeSdevInRange(_dbz,
-                           _sdDbz2,
+                           _sdDbz,
                            _nGates,
-                           _sdDbzFilterLen,
+                           _dbzFilterLen,
                            _missingDouble);
   
-  
-  // compute trend deviation of phidp
-  
-  // _filt.computeTrendDevInRange(_phidp,
-  //                              _sdPhidp,
-  //                              _nGates,
-  //                              _sdPhidpFilterLen,
-  //                              _missingDouble);
-  
-  _phidpFilt.computePhidpTexture(_nGates,
-                                 _sdPhidpFilterLen,
-                                 _phidp,
-                                 _missingDouble,
-                                 _sdPhidp);
+  // compute RMSE of trend residuals for phidp
   
   _phidpFilt.computePhidpSdev(_nGates,
-                              _sdPhidpFilterLen,
+                              _phidpFilterLen,
                               _phidp,
                               _missingDouble,
-                              _sdPhidp2);
+                              true,
+                              _smoothPhidp,
+                              _texturePhidp);
+  
+  _phidpFilt.computePhidpSdev(_nGates,
+                              _phidpHvyFilterLen,
+                              _phidp,
+                              _missingDouble,
+                              true,
+                              _hvySmoothPhidp,
+                              NULL);
+  
+  // compute standard deviation of phidp for testing purposes
+  
+  _phidpFilt.computePhidpSdev(_nGates,
+                              _phidpFilterLen,
+                              _phidp,
+                              _missingDouble,
+                              false,
+                              NULL,
+                              _sdPhidp);
   
   // for (int igate = 0; igate < _nGates; igate++) {
   //   double sdPhidp = _sdPhidp[igate];
@@ -281,12 +320,12 @@ void HcaNexrad::computeHca(const double *snr,
   // set up feature 2D-array
   
   double *featureVals[HcaInterestMap::nFeatures];
-  featureVals[HcaInterestMap::FeatureDBZ] = _dbz;
-  featureVals[HcaInterestMap::FeatureZDR] = _zdr;
-  featureVals[HcaInterestMap::FeatureRHOHV] = _rhohv;
+  featureVals[HcaInterestMap::FeatureDBZ] = _smoothDbz;
+  featureVals[HcaInterestMap::FeatureZDR] = _smoothZdr;
+  featureVals[HcaInterestMap::FeatureRHOHV] = _smoothRhohv;
   featureVals[HcaInterestMap::FeatureLOG_KDP] = _logKdp;
-  featureVals[HcaInterestMap::FeatureSD_DBZ] = _sdDbz;
-  featureVals[HcaInterestMap::FeatureSD_PHIDP] = _sdPhidp;
+  featureVals[HcaInterestMap::FeatureSD_DBZ] = _textureDbz;
+  featureVals[HcaInterestMap::FeatureSD_PHIDP] = _texturePhidp;
 
   // set up classes 2D-array
   

@@ -145,21 +145,28 @@ public:
     HCA_PHIDP = 47,
     HCA_LOGKDP = 48,
     HCA_TEMPC = 49,
-    HCA_SD_DBZ = 50,
-    HCA_SD_DBZ2 = 51,
-    HCA_SD_PHIDP = 52,
-    HCA_SD_PHIDP2 = 53,
-    HCA_GC_INTEREST = 54,
-    HCA_BS_INTEREST = 55,
-    HCA_DS_INTEREST = 56,
-    HCA_WS_INTEREST = 57,
-    HCA_CR_INTEREST = 58,
-    HCA_GR_INTEREST = 59,
-    HCA_BD_INTEREST = 60,
-    HCA_RA_INTEREST = 61,
-    HCA_HR_INTEREST = 62,
-    HCA_RH_INTEREST = 63,
-    HCA = 64
+    HCA_SMOOTH_DBZ = 50,
+    HCA_SMOOTH_ZDR = 51,
+    HCA_SMOOTH_RHOHV = 52,
+    HCA_SMOOTH_PHIDP = 53,
+    HCA_HVY_SMOOTH_PHIDP = 54,
+    HCA_TEXTURE_DBZ = 55,
+    HCA_TEXTURE_ZDR = 56,
+    HCA_TEXTURE_RHOHV = 57,
+    HCA_TEXTURE_PHIDP = 58,
+    HCA_SD_DBZ = 59,
+    HCA_SD_PHIDP = 60,
+    HCA_GC_INTEREST = 61,
+    HCA_BS_INTEREST = 62,
+    HCA_DS_INTEREST = 63,
+    HCA_WS_INTEREST = 64,
+    HCA_CR_INTEREST = 65,
+    HCA_GR_INTEREST = 66,
+    HCA_BD_INTEREST = 67,
+    HCA_RA_INTEREST = 68,
+    HCA_HR_INTEREST = 69,
+    HCA_RH_INTEREST = 70,
+    HCA = 71
   } output_field_id_t;
 
   typedef enum {
@@ -687,9 +694,15 @@ public:
   hca_interest_map_t *_hca_interest_maps;
   int hca_interest_maps_n;
 
-  int HCA_SD_DBZ_kernel_len;
+  int HCA_DBZ_filter_len;
 
-  int HCA_SD_PHIDP_kernel_len;
+  int HCA_ZDR_filter_len;
+
+  int HCA_RHOHV_filter_len;
+
+  int HCA_PHIDP_filter_len;
+
+  int HCA_PHIDP_heavy_filter_len;
 
   tdrp_bool_t compute_pid;
 
@@ -793,7 +806,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[154];
+  mutable TDRPtable _table[157];
 
   const char *_className;
 

@@ -234,10 +234,19 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *hcaTempC = _hcaNexrad.getTempC();
   const double *hcaLogKdp = _hcaNexrad.getLogKdp();
 
+  const double *hcaSmoothDbz = _hcaNexrad.getSmoothDbz();
+  const double *hcaSmoothZdr = _hcaNexrad.getSmoothZdr();
+  const double *hcaSmoothRhohv = _hcaNexrad.getSmoothRhohv();
+  const double *hcaSmoothPhidp = _hcaNexrad.getSmoothPhidp();
+  const double *hcaHvySmoothPhidp = _hcaNexrad.getHvySmoothPhidp();
+
+  const double *hcaTextureDbz = _hcaNexrad.getTextureDbz();
+  const double *hcaTextureZdr = _hcaNexrad.getTextureZdr();
+  const double *hcaTextureRhohv = _hcaNexrad.getTextureRhohv();
+  const double *hcaTexturePhidp = _hcaNexrad.getTexturePhidp();
+
   const double *hcaSdDbz = _hcaNexrad.getSdDbz();
-  const double *hcaSdDbz2 = _hcaNexrad.getSdDbz2();
   const double *hcaSdPhidp = _hcaNexrad.getSdPhidp();
-  const double *hcaSdPhidp2 = _hcaNexrad.getSdPhidp2();
 
   const double *hcaGcInterest = _hcaNexrad.getGcInterest();
   const double *hcaBsInterest = _hcaNexrad.getBsInterest();
@@ -320,17 +329,40 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           *datp = hcaTempC[igate];
           break;
 
+        case Params::HCA_SMOOTH_DBZ:
+          *datp = hcaSmoothDbz[igate];
+          break;
+        case Params::HCA_SMOOTH_ZDR:
+          *datp = hcaSmoothZdr[igate];
+          break;
+        case Params::HCA_SMOOTH_RHOHV:
+          *datp = hcaSmoothRhohv[igate];
+          break;
+        case Params::HCA_SMOOTH_PHIDP:
+          *datp = hcaSmoothPhidp[igate];
+          break;
+        case Params::HCA_HVY_SMOOTH_PHIDP:
+          *datp = hcaHvySmoothPhidp[igate];
+          break;
+
+        case Params::HCA_TEXTURE_DBZ:
+          *datp = hcaTextureDbz[igate];
+          break;
+        case Params::HCA_TEXTURE_ZDR:
+          *datp = hcaTextureZdr[igate];
+          break;
+        case Params::HCA_TEXTURE_RHOHV:
+          *datp = hcaTextureRhohv[igate];
+          break;
+        case Params::HCA_TEXTURE_PHIDP:
+          *datp = hcaTexturePhidp[igate];
+          break;
+
         case Params::HCA_SD_DBZ:
           *datp = hcaSdDbz[igate];
           break;
-        case Params::HCA_SD_DBZ2:
-          *datp = hcaSdDbz2[igate];
-          break;
         case Params::HCA_SD_PHIDP:
           *datp = hcaSdPhidp[igate];
-          break;
-        case Params::HCA_SD_PHIDP2:
-          *datp = hcaSdPhidp2[igate];
           break;
 
         case Params::HCA_GC_INTEREST:
@@ -1200,6 +1232,12 @@ void ComputeEngine::_hcaCompute()
   _hcaNexrad.setAzimuth(_azimuth);
   _hcaNexrad.setStartRangeKm(_startRangeKm);
   _hcaNexrad.setGateSpacingKm(_gateSpacingKm);
+
+  _hcaNexrad.setDbzFilterLen(_params.HCA_DBZ_filter_len);
+  _hcaNexrad.setZdrFilterLen(_params.HCA_ZDR_filter_len);
+  _hcaNexrad.setRhohvFilterLen(_params.HCA_RHOHV_filter_len);
+  _hcaNexrad.setPhidpFilterLen(_params.HCA_PHIDP_filter_len);
+  _hcaNexrad.setPhidpHvyFilterLen(_params.HCA_PHIDP_heavy_filter_len);
 
   // prepare for HCA
 

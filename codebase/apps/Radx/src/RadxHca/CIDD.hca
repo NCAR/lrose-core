@@ -141,10 +141,25 @@ HCA_TEMPC  HCA_TEMPC mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 
 
-HCA_SD_DBZ  HCA_SD_DBZ mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_SD_DBZ  sdev_snr.colors   dBZ -5 80 5 radial 1 0
+HCA_SMOOTH_DBZ  HCA_SMOOTH_DBZ mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_SMOOTH_DBZ  dbz.colors   dBZ -5 80 5 radial 1 0
+HCA_SMOOTH_ZDR  HCA_SMOOTH_ZDR mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_SMOOTH_ZDR  zdr.colors   dB -5 80 5 radial 1 0
+HCA_SMOOTH_RHOHV  HCA_SMOOTH_RHOHV mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_SMOOTH_RHOHV  rhohv.colors - -5 80 5 radial 1 0
+HCA_SMOOTH_PHIDP  HCA_SMOOTH_PHIDP mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_SMOOTH_PHIDP  phidp.colors  deg -5 80 5 radial 1 0
+
+HCA_HVY_SMOOTH_PHIDP  HCA_HVY_SMOOTH_PHIDP mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_HVY_SMOOTH_PHIDP  phidp.colors  deg -5 80 5 radial 1 0
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+
+HCA_TEXTURE_DBZ  HCA_TEXTURE_DBZ mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_TEXTURE_DBZ  sdev_snr.colors   dBZ -5 80 5 radial 1 0
+HCA_TEXTURE_ZDR  HCA_TEXTURE_ZDR mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_TEXTURE_ZDR  sdev_snr.colors   dB -5 80 5 radial 1 0
+HCA_TEXTURE_RHOHV  HCA_TEXTURE_RHOHV mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_TEXTURE_RHOHV  sdev_rhohv.colors - -5 80 5 radial 1 0
+HCA_TEXTURE_PHIDP  HCA_TEXTURE_PHIDP mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_TEXTURE_PHIDP  sdev_snr.colors  deg -5 80 5 radial 1 0
+
 HCA_SDEV_DBZ  HCA_SDEV_DBZ mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_SDEV_DBZ  sdev_snr.colors   dBZ -5 80 5 radial 1 0
-HCA_SD_PHIDP  HCA_SD_PHIDP mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_SD_PHIDP  sdev_snr.colors  deg -5 80 5 radial 1 0
 HCA_SDEV_PHIDP  HCA_SDEV_PHIDP mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_SDEV_PHIDP  sdev_snr.colors deg -5 80 5 radial 1 0
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 
 HCA_GC_INT HCA_GC_INT mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_GC_INTEREST   interest.colors   dBZ -5 80 5 radial 1 0
 HCA_BS_INT HCA_BS_INT mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_BS_INTEREST   interest.colors   dBZ -5 80 5 radial 1 0

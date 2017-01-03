@@ -126,9 +126,9 @@ public:
   void setDbzFilterLen(int nGates) { _dbzFilterLen = nGates; }
   void setZdrFilterLen(int nGates) { _zdrFilterLen = nGates; }
   void setRhohvFilterLen(int nGates) { _rhohvFilterLen = nGates; }
-  void setSdDbzFilterLen(int nGates) { _sdDbzFilterLen = nGates; }
-  void setSdPhidpFilterLen(int nGates) { _sdPhidpFilterLen = nGates; }
-  
+  void setPhidpFilterLen(int nGates) { _phidpFilterLen = nGates; }
+  void setPhidpHvyFilterLen(int nGates) { _phidpHvyFilterLen = nGates; }
+
   /**
    * Initialize the object arrays for later use.
    * Sets the number of gates.
@@ -162,51 +162,35 @@ public:
                   const double *kdp);
   
   /**
-   * Get snr field after calling computeHca()
+   * Get fields used as input
    */
   const double *getSnr() const { return _snr; }
-
-  /**
-   * Get smoothed dbz field after calling computeHca()
-   */
   const double *getDbz() const { return _dbz; }
-
-  /**
-   * Get smoothed zdr field after calling computeHca()
-   */
   const double *getZdr() const { return _zdr; }
-
-  /**
-   * Get smoothed rhohv field after calling computeHca()
-   */
   const double *getRhohv() const { return _rhohv; }
-
-  /**
-   * Get log10(kdp) field after calling computeHca()
-   */
-  const double *getLogKdp() const { return _logKdp; }
-
-  /**
-   * Get phidp field after calling computeHca()
-   */
   const double *getPhidp() const { return _phidp; }
-
-  /**
-   * Get temperature field after calling computeHca()
-   */
+  const double *getLogKdp() const { return _logKdp; }
   const double *getTempC() const { return _tempC; }
   
   /**
-   * Get texture of dbz after calling computeHca()
+   * Get smoothed fields
    */
-  const double *getSdDbz() const { return _sdDbz; }
-  const double *getSdDbz2() const { return _sdDbz2; }
+  const double *getSmoothDbz() const { return _smoothDbz; }
+  const double *getSmoothZdr() const { return _smoothZdr; }
+  const double *getSmoothRhohv() const { return _smoothRhohv; }
+  const double *getSmoothPhidp() const { return _smoothPhidp; }
+  const double *getHvySmoothPhidp() const { return _hvySmoothPhidp; }
 
   /**
-   * Get texture of phidp after calling computeHca()
+   * Get textures
    */
-  const double *getSdPhidp() const { return _sdPhidp; }
-  const double *getSdPhidp2() const { return _sdPhidp2; }
+  const double *getTextureDbz() const { return _textureDbz; }
+  const double *getTextureZdr() const { return _textureZdr; }
+  const double *getTextureRhohv() const { return _textureRhohv; } // sdev
+  const double *getTexturePhidp() const { return _texturePhidp; }
+
+  const double *getSdDbz() const { return _sdDbz; } // sdev
+  const double *getSdPhidp() const { return _sdPhidp; } // sdev
 
   /**
    * Get primary particle id field after calling computeHca()
@@ -318,8 +302,8 @@ private:
   int _dbzFilterLen;
   int _zdrFilterLen;
   int _rhohvFilterLen;
-  int _sdDbzFilterLen;
-  int _sdPhidpFilterLen;
+  int _phidpFilterLen;
+  int _phidpHvyFilterLen;
   
   // data arrays
   
@@ -339,15 +323,31 @@ private:
   double *_logKdp;
   double *_tempC;
   
-  RadxArray<double> _sdDbz_;
-  RadxArray<double> _sdDbz2_;
-  RadxArray<double> _sdPhidp_;
-  RadxArray<double> _sdPhidp2_;
+  RadxArray<double> _smoothDbz_;
+  RadxArray<double> _smoothZdr_;
+  RadxArray<double> _smoothRhohv_;
+  RadxArray<double> _smoothPhidp_;
+  RadxArray<double> _hvySmoothPhidp_;
 
+  double *_smoothDbz;
+  double *_smoothZdr;
+  double *_smoothRhohv;
+  double *_smoothPhidp;
+  double *_hvySmoothPhidp;
+  
+  RadxArray<double> _textureDbz_;
+  RadxArray<double> _textureZdr_;
+  RadxArray<double> _textureRhohv_;
+  RadxArray<double> _texturePhidp_;
+  RadxArray<double> _sdDbz_;
+  RadxArray<double> _sdPhidp_;
+
+  double *_textureDbz;
+  double *_textureZdr;
+  double *_textureRhohv;
+  double *_texturePhidp;
   double *_sdDbz;
-  double *_sdDbz2;
   double *_sdPhidp;
-  double *_sdPhidp2;
   
   RadxArray<double> _gcInterest_;
   RadxArray<double> _bsInterest_;

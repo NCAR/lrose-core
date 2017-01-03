@@ -2295,28 +2295,64 @@ using namespace std;
       tt->struct_vals[419].d = 0.2;
     tt++;
     
-    // Parameter 'HCA_SD_DBZ_kernel_len'
+    // Parameter 'HCA_DBZ_filter_len'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("HCA_SD_DBZ_kernel_len");
-    tt->descr = tdrpStrDup("Length of kernel for computing SD_DBZ - gates.");
-    tt->help = tdrpStrDup("SD_DBZ is the rms deviation of the DBZ field from a linear trend, over this number of gates.");
-    tt->val_offset = (char *) &HCA_SD_DBZ_kernel_len - &_start_;
+    tt->param_name = tdrpStrDup("HCA_DBZ_filter_len");
+    tt->descr = tdrpStrDup("Length of kernel for computing DBZ fields - gates.");
+    tt->help = tdrpStrDup("We use this filter length to compute DBZ smoothed and texture fields.");
+    tt->val_offset = (char *) &HCA_DBZ_filter_len - &_start_;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'HCA_SD_PHIDP_kernel_len'
+    // Parameter 'HCA_ZDR_filter_len'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("HCA_SD_PHIDP_kernel_len");
-    tt->descr = tdrpStrDup("Length of kernel for computing SD_PHIDP - gates.");
-    tt->help = tdrpStrDup("SD_PHIDP is the rms deviation of the PHIDP field from a linear trend, over this number of gates.");
-    tt->val_offset = (char *) &HCA_SD_PHIDP_kernel_len - &_start_;
+    tt->param_name = tdrpStrDup("HCA_ZDR_filter_len");
+    tt->descr = tdrpStrDup("Length of kernel for computing ZDR fields - gates.");
+    tt->help = tdrpStrDup("We use this filter length to compute ZDR smoothed and texture fields.");
+    tt->val_offset = (char *) &HCA_ZDR_filter_len - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'HCA_RHOHV_filter_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("HCA_RHOHV_filter_len");
+    tt->descr = tdrpStrDup("Length of kernel for computing RHOHV fields - gates.");
+    tt->help = tdrpStrDup("We use this filter length to compute RHOHV smoothed and texture fields.");
+    tt->val_offset = (char *) &HCA_RHOHV_filter_len - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'HCA_PHIDP_filter_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("HCA_PHIDP_filter_len");
+    tt->descr = tdrpStrDup("Length of kernel for computing heavily filtered PHIDP fields - gates.");
+    tt->help = tdrpStrDup("We use this filter length to compute the heavily filtered PHIDP fields.");
+    tt->val_offset = (char *) &HCA_PHIDP_filter_len - &_start_;
     tt->single_val.i = 11;
+    tt++;
+    
+    // Parameter 'HCA_PHIDP_heavy_filter_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("HCA_PHIDP_heavy_filter_len");
+    tt->descr = tdrpStrDup("Length of kernel for computing PHIDP fields - gates.");
+    tt->help = tdrpStrDup("We use this filter length to compute the lightly filtered PHIDP fields.");
+    tt->val_offset = (char *) &HCA_PHIDP_heavy_filter_len - &_start_;
+    tt->single_val.i = 25;
     tt++;
     
     // Parameter 'Comment 14'
@@ -2823,7 +2859,7 @@ using namespace std;
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 65;
+        tt->struct_def.fields[0].enum_def.nfields = 72;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SNR");
@@ -2926,36 +2962,50 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[48].val = HCA_LOGKDP;
         tt->struct_def.fields[0].enum_def.fields[49].name = tdrpStrDup("HCA_TEMPC");
         tt->struct_def.fields[0].enum_def.fields[49].val = HCA_TEMPC;
-        tt->struct_def.fields[0].enum_def.fields[50].name = tdrpStrDup("HCA_SD_DBZ");
-        tt->struct_def.fields[0].enum_def.fields[50].val = HCA_SD_DBZ;
-        tt->struct_def.fields[0].enum_def.fields[51].name = tdrpStrDup("HCA_SD_DBZ2");
-        tt->struct_def.fields[0].enum_def.fields[51].val = HCA_SD_DBZ2;
-        tt->struct_def.fields[0].enum_def.fields[52].name = tdrpStrDup("HCA_SD_PHIDP");
-        tt->struct_def.fields[0].enum_def.fields[52].val = HCA_SD_PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[53].name = tdrpStrDup("HCA_SD_PHIDP2");
-        tt->struct_def.fields[0].enum_def.fields[53].val = HCA_SD_PHIDP2;
-        tt->struct_def.fields[0].enum_def.fields[54].name = tdrpStrDup("HCA_GC_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[54].val = HCA_GC_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[55].name = tdrpStrDup("HCA_BS_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[55].val = HCA_BS_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[56].name = tdrpStrDup("HCA_DS_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[56].val = HCA_DS_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[57].name = tdrpStrDup("HCA_WS_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[57].val = HCA_WS_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[58].name = tdrpStrDup("HCA_CR_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[58].val = HCA_CR_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[59].name = tdrpStrDup("HCA_GR_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[59].val = HCA_GR_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[60].name = tdrpStrDup("HCA_BD_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[60].val = HCA_BD_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[61].name = tdrpStrDup("HCA_RA_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[61].val = HCA_RA_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[62].name = tdrpStrDup("HCA_HR_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[62].val = HCA_HR_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[63].name = tdrpStrDup("HCA_RH_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[63].val = HCA_RH_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[64].name = tdrpStrDup("HCA");
-        tt->struct_def.fields[0].enum_def.fields[64].val = HCA;
+        tt->struct_def.fields[0].enum_def.fields[50].name = tdrpStrDup("HCA_SMOOTH_DBZ");
+        tt->struct_def.fields[0].enum_def.fields[50].val = HCA_SMOOTH_DBZ;
+        tt->struct_def.fields[0].enum_def.fields[51].name = tdrpStrDup("HCA_SMOOTH_ZDR");
+        tt->struct_def.fields[0].enum_def.fields[51].val = HCA_SMOOTH_ZDR;
+        tt->struct_def.fields[0].enum_def.fields[52].name = tdrpStrDup("HCA_SMOOTH_RHOHV");
+        tt->struct_def.fields[0].enum_def.fields[52].val = HCA_SMOOTH_RHOHV;
+        tt->struct_def.fields[0].enum_def.fields[53].name = tdrpStrDup("HCA_SMOOTH_PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[53].val = HCA_SMOOTH_PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[54].name = tdrpStrDup("HCA_HVY_SMOOTH_PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[54].val = HCA_HVY_SMOOTH_PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[55].name = tdrpStrDup("HCA_TEXTURE_DBZ");
+        tt->struct_def.fields[0].enum_def.fields[55].val = HCA_TEXTURE_DBZ;
+        tt->struct_def.fields[0].enum_def.fields[56].name = tdrpStrDup("HCA_TEXTURE_ZDR");
+        tt->struct_def.fields[0].enum_def.fields[56].val = HCA_TEXTURE_ZDR;
+        tt->struct_def.fields[0].enum_def.fields[57].name = tdrpStrDup("HCA_TEXTURE_RHOHV");
+        tt->struct_def.fields[0].enum_def.fields[57].val = HCA_TEXTURE_RHOHV;
+        tt->struct_def.fields[0].enum_def.fields[58].name = tdrpStrDup("HCA_TEXTURE_PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[58].val = HCA_TEXTURE_PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[59].name = tdrpStrDup("HCA_SD_DBZ");
+        tt->struct_def.fields[0].enum_def.fields[59].val = HCA_SD_DBZ;
+        tt->struct_def.fields[0].enum_def.fields[60].name = tdrpStrDup("HCA_SD_PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[60].val = HCA_SD_PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[61].name = tdrpStrDup("HCA_GC_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[61].val = HCA_GC_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[62].name = tdrpStrDup("HCA_BS_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[62].val = HCA_BS_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[63].name = tdrpStrDup("HCA_DS_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[63].val = HCA_DS_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[64].name = tdrpStrDup("HCA_WS_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[64].val = HCA_WS_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[65].name = tdrpStrDup("HCA_CR_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[65].val = HCA_CR_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[66].name = tdrpStrDup("HCA_GR_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[66].val = HCA_GR_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[67].name = tdrpStrDup("HCA_BD_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[67].val = HCA_BD_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[68].name = tdrpStrDup("HCA_RA_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[68].val = HCA_RA_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[69].name = tdrpStrDup("HCA_HR_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[69].val = HCA_HR_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[70].name = tdrpStrDup("HCA_RH_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[70].val = HCA_RH_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[71].name = tdrpStrDup("HCA");
+        tt->struct_def.fields[0].enum_def.fields[71].val = HCA;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;

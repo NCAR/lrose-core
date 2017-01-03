@@ -681,15 +681,33 @@ paramdef struct hca_interest_map_t {
 
 paramdef int {
   p_default = 5;
-  p_descr = "Length of kernel for computing SD_DBZ - gates.";
-  p_help = "SD_DBZ is the rms deviation of the DBZ field from a linear trend, over this number of gates.";
-} HCA_SD_DBZ_kernel_len;
+  p_descr = "Length of kernel for computing DBZ fields - gates.";
+  p_help = "We use this filter length to compute DBZ smoothed and texture fields.";
+} HCA_DBZ_filter_len;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of kernel for computing ZDR fields - gates.";
+  p_help = "We use this filter length to compute ZDR smoothed and texture fields.";
+} HCA_ZDR_filter_len;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of kernel for computing RHOHV fields - gates.";
+  p_help = "We use this filter length to compute RHOHV smoothed and texture fields.";
+} HCA_RHOHV_filter_len;
 
 paramdef int {
   p_default = 11;
-  p_descr = "Length of kernel for computing SD_PHIDP - gates.";
-  p_help = "SD_PHIDP is the rms deviation of the PHIDP field from a linear trend, over this number of gates.";
-} HCA_SD_PHIDP_kernel_len;
+  p_descr = "Length of kernel for computing heavily filtered PHIDP fields - gates.";
+  p_help = "We use this filter length to compute the heavily filtered PHIDP fields.";
+} HCA_PHIDP_filter_len;
+
+paramdef int {
+  p_default = 25;
+  p_descr = "Length of kernel for computing PHIDP fields - gates.";
+  p_help = "We use this filter length to compute the lightly filtered PHIDP fields.";
+} HCA_PHIDP_heavy_filter_len;
 
 commentdef {
   p_header = "COMPUTING NCAR PID - HYDROMETEOR PARTICLE ID";
@@ -971,10 +989,18 @@ typedef enum {
   HCA_LOGKDP,
   HCA_TEMPC,
 
+  HCA_SMOOTH_DBZ,
+  HCA_SMOOTH_ZDR,
+  HCA_SMOOTH_RHOHV,
+  HCA_SMOOTH_PHIDP,
+  HCA_HVY_SMOOTH_PHIDP,
+
+  HCA_TEXTURE_DBZ,
+  HCA_TEXTURE_ZDR,
+  HCA_TEXTURE_RHOHV,
+  HCA_TEXTURE_PHIDP,
   HCA_SD_DBZ,
-  HCA_SD_DBZ2,
   HCA_SD_PHIDP,
-  HCA_SD_PHIDP2,
 
   HCA_GC_INTEREST,
   HCA_BS_INTEREST,

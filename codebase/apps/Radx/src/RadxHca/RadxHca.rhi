@@ -1877,31 +1877,68 @@ hca_interest_maps = {
   }
 };
 
-///////////// HCA_SD_DBZ_kernel_len ///////////////////
+///////////// HCA_DBZ_filter_len //////////////////////
 //
-// Length of kernel for computing SD_DBZ - gates.
+// Length of kernel for computing DBZ fields - gates.
 //
-// SD_DBZ is the rms deviation of the DBZ field from a linear trend, 
-//   over this number of gates.
-//
-//
-// Type: int
-//
-
-HCA_SD_DBZ_kernel_len = 7;
-
-///////////// HCA_SD_PHIDP_kernel_len /////////////////
-//
-// Length of kernel for computing SD_PHIDP - gates.
-//
-// SD_PHIDP is the rms deviation of the PHIDP field from a linear trend, 
-//   over this number of gates.
+// We use this filter length to compute DBZ smoothed and texture fields.
 //
 //
 // Type: int
 //
 
-HCA_SD_PHIDP_kernel_len = 11;
+HCA_DBZ_filter_len = 5;
+
+///////////// HCA_ZDR_filter_len //////////////////////
+//
+// Length of kernel for computing ZDR fields - gates.
+//
+// We use this filter length to compute ZDR smoothed and texture fields.
+//
+//
+// Type: int
+//
+
+HCA_ZDR_filter_len = 5;
+
+///////////// HCA_RHOHV_filter_len ////////////////////
+//
+// Length of kernel for computing RHOHV fields - gates.
+//
+// We use this filter length to compute RHOHV smoothed and texture 
+//   fields.
+//
+//
+// Type: int
+//
+
+HCA_RHOHV_filter_len = 5;
+
+///////////// HCA_PHIDP_filter_len ////////////////////
+//
+// Length of kernel for computing heavily filtered PHIDP fields - gates.
+//
+// We use this filter length to compute the heavily filtered PHIDP 
+//   fields.
+//
+//
+// Type: int
+//
+
+HCA_PHIDP_filter_len = 11;
+
+///////////// HCA_PHIDP_heavy_filter_len //////////////
+//
+// Length of kernel for computing PHIDP fields - gates.
+//
+// We use this filter length to compute the lightly filtered PHIDP 
+//   fields.
+//
+//
+// Type: int
+//
+
+HCA_PHIDP_heavy_filter_len = 25;
 
 //======================================================================
 //
@@ -2430,10 +2467,17 @@ site_temp_search_margin_secs = 3600;
 //          HCA_PHIDP
 //          HCA_LOGKDP
 //          HCA_TEMPC
+//          HCA_SMOOTH_DBZ
+//          HCA_SMOOTH_ZDR
+//          HCA_SMOOTH_RHOHV
+//          HCA_SMOOTH_PHIDP
+//          HCA_HVY_SMOOTH_PHIDP
+//          HCA_TEXTURE_DBZ
+//          HCA_TEXTURE_ZDR
+//          HCA_TEXTURE_RHOHV
+//          HCA_TEXTURE_PHIDP
 //          HCA_SD_DBZ
-//          HCA_SD_DBZ2
 //          HCA_SD_PHIDP
-//          HCA_SD_PHIDP2
 //          HCA_GC_INTEREST
 //          HCA_BS_INTEREST
 //          HCA_DS_INTEREST
@@ -2648,8 +2692,68 @@ output_fields = {
   }
   ,
   {
-    id = HCA_SD_DBZ,
-    name = "HCA_SD_DBZ",
+    id = HCA_SMOOTH_DBZ,
+    name = "HCA_SMOOTH_DBZ",
+    long_name = "hca_smoothed_dbz",
+    standard_name = "dbz_smooth",
+    units = "dBZ",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_SMOOTH_ZDR,
+    name = "HCA_SMOOTH_ZDR",
+    long_name = "hca_smoothed_zdr",
+    standard_name = "zdr_smooth",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_SMOOTH_RHOHV,
+    name = "HCA_SMOOTH_RHOHV",
+    long_name = "hca_smoothed_rhohv",
+    standard_name = "rhohv_smooth",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_SMOOTH_PHIDP,
+    name = "HCA_SMOOTH_PHIDP",
+    long_name = "hca_smoothed_phidp",
+    standard_name = "phidp_smooth",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_HVY_SMOOTH_PHIDP,
+    name = "HCA_HVY_SMOOTH_PHIDP",
+    long_name = "hca_hvy_smoothed_phidp",
+    standard_name = "phidp_hvy_smooth",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_TEXTURE_DBZ,
+    name = "HCA_TEXTURE_DBZ",
     long_name = "hca_texture_of_dbz",
     standard_name = "dbz_texture",
     units = "dBZ",
@@ -2660,7 +2764,43 @@ output_fields = {
   }
   ,
   {
-    id = HCA_SD_DBZ2,
+    id = HCA_TEXTURE_ZDR,
+    name = "HCA_TEXTURE_ZDR",
+    long_name = "hca_texture_of_zdr",
+    standard_name = "zdr_texture",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_TEXTURE_RHOHV,
+    name = "HCA_TEXTURE_RHOHV",
+    long_name = "hca_texture_of_rhohv",
+    standard_name = "rhohv_texture",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_TEXTURE_PHIDP,
+    name = "HCA_TEXTURE_PHIDP",
+    long_name = "hca_texture_of_phidp",
+    standard_name = "phidp_texture",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_SD_DBZ,
     name = "HCA_SDEV_DBZ",
     long_name = "sdev_dbz",
     standard_name = "dbz_sdev",
@@ -2673,18 +2813,6 @@ output_fields = {
   ,
   {
     id = HCA_SD_PHIDP,
-    name = "HCA_SD_PHIDP",
-    long_name = "hca_texture_of_phidp",
-    standard_name = "phidp_texture",
-    units = "deg",
-    encoding = OUTPUT_ENCODING_INT16,
-    scaling = OUTPUT_SCALING_DYNAMIC,
-    scale = 0.01,
-    offset = 0
-  }
-  ,
-  {
-    id = HCA_SD_PHIDP2,
     name = "HCA_SDEV_PHIDP",
     long_name = "sdev_phidp",
     standard_name = "phidp_sdev",
