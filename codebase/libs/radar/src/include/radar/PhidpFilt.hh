@@ -36,6 +36,7 @@
 #ifndef PhidpFilt_hh
 #define PhidpFilt_hh
 
+#include <cstdio>
 #include <vector>
 using namespace std;
 
@@ -61,29 +62,28 @@ public:
     _gateSpacingKm = gateSpacingKm;
   }
 
-  // compute SDEV for PHIDP SDEV
+  // compute texture for PHIDP
   // takes account of folding
   // nGates and phidp passed in
   // computes sdev and load into sdevPhidp array
   // sdevPhidp array must be allocated by caller
+  //
+  // If computeTrendRmse is true, we compute the rmse of
+  // the deviation from the trend mean
+  //
+  // If computeTrendRmse is false, we compute the
+  // standard deviation of the phidp
+  //
+  // if meanPhidp is not nullptr, the mean value is stored there.
+  // if texturePhidp is not nullptr, the texture value is stored there.
   
   void computePhidpSdev(int nGatesData,
                         int nGatesKernel,
                         const double *phidp,
                         double missingValue,
-                        double *sdevPhidp);
-  
-  // compute TEXTURE for PHIDP SDEV
-  // takes account of folding
-  // nGates and phidp passed in
-  // computes sdev and load into sdevPhidp array
-  // sdevPhidp array must be allocated by caller
-  
-  void computePhidpTexture(int nGatesData,
-                           int nGatesKernel,
-                           const double *phidp,
-                           double missingValue,
-                           double *sdevPhidp);
+                        bool computeTrendRmse = false,
+                        double *meanPhidp = NULL,
+                        double *texturePhidp = NULL);
   
 protected:
   
@@ -106,7 +106,7 @@ private:
       meanxx = 0.0;
       meanyy = 0.0;
       phidpMean = missingValue;
-      phidpSdev = missingValue;
+      phidpTexture = missingValue;
     }
     bool missing;
     double phidp;
@@ -115,7 +115,7 @@ private:
     double meanxx;
     double meanyy;
     double phidpMean;
-    double phidpSdev;
+    double phidpTexture;
   };
   
   vector<PhidpState> _phidpStates;

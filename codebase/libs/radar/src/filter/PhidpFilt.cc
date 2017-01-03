@@ -66,17 +66,25 @@ PhidpFilt::~PhidpFilt()
 }
 
 /////////////////////////////////////////////////
-// compute SDEV for PHIDP, over kernel length
+// compute texture for PHIDP, over kernel length
 // takes account of folding
 // nGatesData and phidp passed in
 // computes sdev and load into sdevPhidp array
 // sdevPhidp array must be allocated by caller
+//
+// If computeTrendRmse is true, we compute the rmse of
+// the residuals from the trend mean instead of sdev
+//
+// if meanPhidp is not NULL, the mean value is stored there
+// if texturePhidp is not NULL, the texture value is stored there
 
 void PhidpFilt::computePhidpSdev(int nGatesData,
                                  int nGatesKernel,
                                  const double *phidp,
                                  double missingValue,
-                                 double *sdevPhidp)
+                                 bool computeTrendRmse /* = false */,
+                                 double *meanPhidp /* = NULL*/,
+                                 double *texturePhidp /* = NULL*/)
   
 {
 
@@ -180,9 +188,18 @@ void PhidpFilt::computePhidpSdev(int nGatesData,
         continue;
       }
 
-      // compute difference between this value and the mean
+      double diff;
+      
+      if (computeTrendRmse) {
+        // compute residual between this value and the mean at that point
+        // this yields the RMSE of the residuals from the trend
+        diff = jstate.phidp - jstate.phidpMean;
+      } else {
+        // compute difference between this value and the mean at EACH point
+        // this yields the standard deviation
+        diff = jstate.phidp - istate.phidpMean;
+      }
 
-      double diff = jstate.phidp - istate.phidpMean;
 
       // constrain diff
       
@@ -202,170 +219,22 @@ void PhidpFilt::computePhidpSdev(int nGatesData,
     } // jj
 
     if (count <= nKernelHalf || count < 3) {
-      istate.phidpSdev = missingValue;
+      istate.phidpTexture = missingValue;
     } else {
       double meanDiff = sum / count;
       double term1 = sumSq / count;
       double term2 = meanDiff * meanDiff;
       if (term1 >= term2) {
-        istate.phidpSdev = sqrt(term1 - term2);
+        istate.phidpTexture = sqrt(term1 - term2);
       }
     }
 
-    sdevPhidp[igate] = istate.phidpSdev;
-    
-  } // igate
-  
-}
-
-/////////////////////////////////////////////////
-// compute TEXTURE for PHIDP, over kernel length
-// takes account of folding
-// nGatesData and phidp passed in
-// computes sdev and load into sdevPhidp array
-// sdevPhidp array must be allocated by caller
-
-void PhidpFilt::computePhidpTexture(int nGatesData,
-                                    int nGatesKernel,
-                                    const double *phidp,
-                                    double missingValue,
-                                    double *sdevPhidp)
-  
-{
-
-  // compute number of gates in kernel, making sure there is an odd number
-  
-  int nKernelHalf = nGatesKernel / 2;
-  nGatesKernel = nKernelHalf * 2 + 1;
-
-  // save phidp to states array
-
-  _phidpStates.resize(nGatesData);
-  
-  for (int igate = 0; igate < nGatesData; igate++) {
-    PhidpState &state = _phidpStates[igate];
-    state.init(missingValue);
-    state.phidp = phidp[igate];
-    if (state.phidp != missingValue) {
-      state.missing = false;
+    if (texturePhidp != NULL) {
+      texturePhidp[igate] = istate.phidpTexture;
     }
-  }
-
-  // compute folding range
-
-  _computeFoldingRange(nGatesData);
-
-  // init (x,y) representation of phidp
-  
-  for (int igate = 0; igate < nGatesData; igate++) {
-    PhidpState &state = _phidpStates[igate];
-    if (!state.missing) {
-      double phase = state.phidp;
-      if (_phidpFoldsAt90) {
-        phase *= 2.0;
-      }
-      double sinVal, cosVal;
-      ta_sincos(phase * DEG_TO_RAD, &sinVal, &cosVal);
-      state.xx = cosVal;
-      state.yy = sinVal;
+    if (meanPhidp != NULL) {
+      meanPhidp[igate] = istate.phidpMean;
     }
-  }
-
-  // compute mean phidp at each gate
-
-  for (int igate = 0; igate < nGatesData; igate++) {
-  
-    PhidpState &istate = _phidpStates[igate];
-    
-    double count = 0.0;
-    double sumxx = 0.0;
-    double sumyy = 0.0;
-    
-    for (int jj = igate - nKernelHalf; jj <= igate + nKernelHalf; jj++) {
-      if (jj < 0 || jj >= nGatesData) {
-        continue;
-      }
-      PhidpState &jstate = _phidpStates[jj];
-      if (jstate.missing) {
-        continue;
-      }
-      double xx = jstate.xx;
-      double yy = jstate.yy;
-      sumxx += xx;
-      sumyy += yy;
-      count++;
-    }
-  
-    if (count <= nKernelHalf) {
-      continue;
-    }
-    
-    istate.meanxx = sumxx / count;
-    istate.meanyy = sumyy / count;
-    
-    double phase = atan2(istate.meanyy, istate.meanxx) * RAD_TO_DEG;
-    if (_phidpFoldsAt90) {
-      phase *= 0.5;
-    }
-    istate.phidpMean = phase;
-
-  } // igate
-  
-  // compute standard deviation at each gate
-  // we center on the mean value
-  
-  for (int igate = 0; igate < nGatesData; igate++) {
-    
-    PhidpState &istate = _phidpStates[igate];
-    
-    double count = 0.0;
-    double sum = 0.0;
-    double sumSq = 0.0;
-    
-    for (int jj = igate - nKernelHalf; jj <= igate + nKernelHalf; jj++) {
-      
-      if (jj < 0 || jj >= nGatesData) {
-        continue;
-      }
-
-      PhidpState &jstate = _phidpStates[jj];
-      if (jstate.missing) {
-        continue;
-      }
-
-      // compute residual between this value and the mean at that point
-
-      double diff = jstate.phidp - jstate.phidpMean;
-
-      // constrain diff
-      
-      while (diff < -_phidpFoldVal) {
-        diff += 2 * _phidpFoldVal;
-      }
-      while (diff > _phidpFoldVal) {
-        diff -= 2 * _phidpFoldVal;
-      }
-
-      // sum up
-
-      count++;
-      sum += diff;
-      sumSq += diff * diff;
-      
-    } // jj
-
-    if (count <= nKernelHalf || count < 3) {
-      istate.phidpSdev = missingValue;
-    } else {
-      double meanDiff = sum / count;
-      double term1 = sumSq / count;
-      double term2 = meanDiff * meanDiff;
-      if (term1 >= term2) {
-        istate.phidpSdev = sqrt(term1 - term2);
-      }
-    }
-
-    sdevPhidp[igate] = istate.phidpSdev;
     
   } // igate
   
