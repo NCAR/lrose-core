@@ -450,22 +450,8 @@ paramdef double {
 } zdr_attenuation_exponent;
 
 commentdef {
-  p_header = "Interest maps";
+  p_header = "COMPUTING BEAM HEIGHT";
 }
-
-typedef struct {
-  double value;
-  double interest;
-} interest_map_point_t;
-
-commentdef {
-  p_header = "LOCATING SEA CLUTTER";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to locate gates with sea clutter.";
-} locate_sea_clutter;
 
 paramdef boolean {
   p_default = false;
@@ -479,10 +465,36 @@ paramdef double {
   p_help = "For standard refraction this is 4/3. For super refraction it will be less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 1.21.";
 } pseudo_earth_radius_ratio;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the beamwidth in the input file.";
+  p_height = "The beamwidth is used to compute the height at the top and bottom edges of the beam.";
+} override_vertical_beamwidth;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Specified radar antenna vertical beamwidth (deg).";
+  p_help = "See 'override_vertical_beamwidth'.";
+} vertical_beamwidth_deg;
+
+commentdef {
+  p_header = "LOCATING SEA CLUTTER";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to locate gates with sea clutter.";
+} locate_sea_clutter;
+
 commentdef {
   p_header = "INTEREST MAPS and WEIGHTS for SEA CLUTTER DETECTION";
   p_text = "Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.";
 };
+
+typedef struct {
+  double value;
+  double interest;
+} interest_map_point_t;
 
 paramdef double {
   p_default = 0.0;
@@ -987,7 +999,10 @@ typedef enum {
   HCA_RHOHV,
   HCA_PHIDP,
   HCA_LOGKDP,
-  HCA_TEMPC,
+
+  HCA_TEMP_LOW,
+  HCA_TEMP_MID,
+  HCA_TEMP_HIGH,
 
   HCA_SMOOTH_DBZ,
   HCA_SMOOTH_ZDR,

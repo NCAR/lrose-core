@@ -87,6 +87,7 @@ public:
   // set the radar and ray properties
 
   void setWavelengthM(double val) { _wavelengthM = val; }
+  void setVertBeamWidthDeg(double val) { _vertBeamWidthDeg = val; }
   void setRadarHtKm(double val) { _radarHtKm = val; }
   void setElevation(double val) { _elevation = val; }
   void setAzimuth(double val) { _azimuth = val; }
@@ -146,12 +147,12 @@ public:
    * if they are not valid for that gate.
    * Results are stored in local arrays on this class.
    * Use get() methods to retieve them.
+   * @param[in] snr Signal-to-noise ratio
    * @param[in] dbz Reflectivity array
    * @param[in] zdr Differential reflectivity array
    * @param[in] rhohv Correlation coeff array
    * @param[in] phidpUnfolded - unfolded phase difference array
    * @param[in] kdp - pre-computed
-   * @param[in] tempC Temperature at each gate, in deg C
    */ 
 
   void computeHca(const double *snr,
@@ -170,7 +171,9 @@ public:
   const double *getRhohv() const { return _rhohv; }
   const double *getPhidp() const { return _phidp; }
   const double *getLogKdp() const { return _logKdp; }
-  const double *getTempC() const { return _tempC; }
+  const double *getTempLow() const { return _tempLow; }
+  const double *getTempMid() const { return _tempMid; }
+  const double *getTempHigh() const { return _tempHigh; }
   
   /**
    * Get smoothed fields
@@ -259,11 +262,10 @@ private:
 
   const TempProfile &_tempProfile;
 
-  // wavelength
+  // radar parameters
 
   double _wavelengthM;
-
-  // geometry
+  double _vertBeamWidthDeg;
 
   int _nGates;
   double _startRangeKm;
@@ -313,7 +315,9 @@ private:
   RadxArray<double> _rhohv_;
   RadxArray<double> _phidp_;
   RadxArray<double> _logKdp_;
-  RadxArray<double> _tempC_;
+  RadxArray<double> _tempLow_;
+  RadxArray<double> _tempMid_;
+  RadxArray<double> _tempHigh_;
 
   double *_snr;
   double *_dbz;
@@ -321,7 +325,9 @@ private:
   double *_rhohv;
   double *_phidp;
   double *_logKdp;
-  double *_tempC;
+  double *_tempLow;
+  double *_tempMid;
+  double *_tempHigh;
   
   RadxArray<double> _smoothDbz_;
   RadxArray<double> _smoothZdr_;

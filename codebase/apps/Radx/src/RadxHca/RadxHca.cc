@@ -425,6 +425,11 @@ int RadxHca::_processFile(const string &filePath)
 
   _wavelengthM = vol.getWavelengthM();
   _radarHtKm = vol.getAltitudeKm();
+  if (_params.override_vertical_beamwidth) {
+    _vertBeamWidthDeg = _params.vertical_beamwidth_deg;
+  } else {
+    _vertBeamWidthDeg = vol.getRadarBeamWidthDegV();
+  }
 
   // set number of gates constant if requested
 
@@ -846,10 +851,16 @@ int RadxHca::_computeSingleThreaded(RadxVol &vol)
     // get covariance ray
     
     RadxRay *inputRay = inputRays[iray];
+
+    // set engine params
     
-    // compute moments
-    
-    RadxRay *derivedRay = _engine->compute(inputRay, _radarHtKm, _wavelengthM);
+    _engine->setWavelengthM(_wavelengthM);
+    _engine->setRadarHtKm(_radarHtKm);
+    _engine->setVertBeamWidthDeg(_vertBeamWidthDeg);
+
+    // run the compute method
+
+    RadxRay *derivedRay = _engine->compute(inputRay);
     if (derivedRay == NULL) {
       cerr << "ERROR - _compute" << endl;
       return -1;
@@ -1012,9 +1023,16 @@ void *RadxHca::_computeInThread(void *thread_data)
 
     ComputeEngine *engine = compThread->getComputeEngine();
     RadxRay *inputRay = compThread->getCovRay();
-    RadxRay *derivedRay = engine->compute(inputRay,
-                                          app->_radarHtKm,
-                                          app->_wavelengthM);
+
+    // set engine params
+    
+    engine->setWavelengthM(app->_wavelengthM);
+    engine->setRadarHtKm(app->_radarHtKm);
+    engine->setVertBeamWidthDeg(app->_vertBeamWidthDeg);
+
+    // run the compute method
+    
+    RadxRay *derivedRay = engine->compute(inputRay);
     compThread->setMomRay(derivedRay);
     
     if (app->getParams().debug >= Params::DEBUG_EXTRA) {

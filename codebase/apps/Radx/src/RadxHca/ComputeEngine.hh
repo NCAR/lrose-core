@@ -65,9 +65,19 @@ public:
   ComputeEngine(const Params &params, int id,
                 const TempProfile &tempProfile);
 
+  // is constructor OK?
+
+  bool OK;
+
   // destructor
   
   ~ComputeEngine();
+
+  // set methods
+
+  void setRadarHtKm(double val) { _radarHtKm = val; }
+  void setWavelengthM(double val) { _wavelengthM = val; }
+  void setVertBeamWidthDeg(double val) { _vertBeamWidthDeg = val; }
 
   // compute for given input ray
   // storing results in derived ray
@@ -77,12 +87,8 @@ public:
   //
   // Returns NULL on error.
   
-  RadxRay *compute(RadxRay *inputRay,
-                   double radarHtKm,
-                   double wavelengthM);
+  RadxRay *compute(RadxRay *inputRay);
 
-  bool OK;
-  
 protected:
 private:
 
@@ -105,6 +111,7 @@ private:
 
   double _radarHtKm;
   double _wavelengthM;
+  double _vertBeamWidthDeg;
 
   // moments field data
   

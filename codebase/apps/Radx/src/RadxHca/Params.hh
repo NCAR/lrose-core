@@ -144,29 +144,31 @@ public:
     HCA_RHOHV = 46,
     HCA_PHIDP = 47,
     HCA_LOGKDP = 48,
-    HCA_TEMPC = 49,
-    HCA_SMOOTH_DBZ = 50,
-    HCA_SMOOTH_ZDR = 51,
-    HCA_SMOOTH_RHOHV = 52,
-    HCA_SMOOTH_PHIDP = 53,
-    HCA_HVY_SMOOTH_PHIDP = 54,
-    HCA_TEXTURE_DBZ = 55,
-    HCA_TEXTURE_ZDR = 56,
-    HCA_TEXTURE_RHOHV = 57,
-    HCA_TEXTURE_PHIDP = 58,
-    HCA_SD_DBZ = 59,
-    HCA_SD_PHIDP = 60,
-    HCA_GC_INTEREST = 61,
-    HCA_BS_INTEREST = 62,
-    HCA_DS_INTEREST = 63,
-    HCA_WS_INTEREST = 64,
-    HCA_CR_INTEREST = 65,
-    HCA_GR_INTEREST = 66,
-    HCA_BD_INTEREST = 67,
-    HCA_RA_INTEREST = 68,
-    HCA_HR_INTEREST = 69,
-    HCA_RH_INTEREST = 70,
-    HCA = 71
+    HCA_TEMP_LOW = 49,
+    HCA_TEMP_MID = 50,
+    HCA_TEMP_HIGH = 51,
+    HCA_SMOOTH_DBZ = 52,
+    HCA_SMOOTH_ZDR = 53,
+    HCA_SMOOTH_RHOHV = 54,
+    HCA_SMOOTH_PHIDP = 55,
+    HCA_HVY_SMOOTH_PHIDP = 56,
+    HCA_TEXTURE_DBZ = 57,
+    HCA_TEXTURE_ZDR = 58,
+    HCA_TEXTURE_RHOHV = 59,
+    HCA_TEXTURE_PHIDP = 60,
+    HCA_SD_DBZ = 61,
+    HCA_SD_PHIDP = 62,
+    HCA_GC_INTEREST = 63,
+    HCA_BS_INTEREST = 64,
+    HCA_DS_INTEREST = 65,
+    HCA_WS_INTEREST = 66,
+    HCA_CR_INTEREST = 67,
+    HCA_GR_INTEREST = 68,
+    HCA_BD_INTEREST = 69,
+    HCA_RA_INTEREST = 70,
+    HCA_HR_INTEREST = 71,
+    HCA_RH_INTEREST = 72,
+    HCA = 73
   } output_field_id_t;
 
   typedef enum {
@@ -653,11 +655,15 @@ public:
 
   double zdr_attenuation_exponent;
 
-  tdrp_bool_t locate_sea_clutter;
-
   tdrp_bool_t override_standard_pseudo_earth_radius;
 
   double pseudo_earth_radius_ratio;
+
+  tdrp_bool_t override_vertical_beamwidth;
+
+  double vertical_beamwidth_deg;
+
+  tdrp_bool_t locate_sea_clutter;
 
   double seaclut_min_snr_db;
 
@@ -806,7 +812,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[157];
+  mutable TDRPtable _table[159];
 
   const char *_className;
 

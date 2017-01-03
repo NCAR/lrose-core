@@ -2680,9 +2680,33 @@ output_fields = {
   }
   ,
   {
-    id = HCA_TEMPC,
-    name = "HCA_TEMPC",
-    long_name = "temperature",
+    id = HCA_TEMP_LOW,
+    name = "HCA_TEMP_LOW",
+    long_name = "temperature_beam_lower_edge",
+    standard_name = "wet-bulb-temperature",
+    units = "C",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_TEMP_MID,
+    name = "HCA_TEMP_MID",
+    long_name = "temperature_beam_center",
+    standard_name = "wet-bulb-temperature",
+    units = "C",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_TEMP_HIGH,
+    name = "HCA_TEMP_HIGH",
+    long_name = "temperature_beam_upper_edge",
     standard_name = "wet-bulb-temperature",
     units = "C",
     encoding = OUTPUT_ENCODING_INT16,

@@ -136,9 +136,9 @@ HCA_RHOHV HCA_RHOHV  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur
 HCA_PHIDP HCA_PHIDP  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_PHIDP    phidp.colors  deg -5 80 5 radial 1 0
 
 HCA_LOGKDP HCA_LOGKDP  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_LOGKDP  kdp_log.colors   log(deg/km) -5 80 5 radial 1 0
-HCA_TEMPC  HCA_TEMPC mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_TEMPC  temp.colors   - -5 80 5 radial 1 0
-=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
-=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+HCA_TEMP_LOW  HCA_TEMP_LOW mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_TEMP_LOW  temp.colors   - -5 80 5 radial 1 0
+HCA_TEMP_MID  HCA_TEMP_MID mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_TEMP_MID  temp.colors   - -5 80 5 radial 1 0
+HCA_TEMP_HIGH  HCA_TEMP_HIGH mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_TEMP_HIGH  temp.colors   - -5 80 5 radial 1 0
 
 
 HCA_SMOOTH_DBZ  HCA_SMOOTH_DBZ mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_SMOOTH_DBZ  dbz.colors   dBZ -5 80 5 radial 1 0

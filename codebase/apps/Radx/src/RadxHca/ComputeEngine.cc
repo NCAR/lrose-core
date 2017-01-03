@@ -79,6 +79,10 @@ ComputeEngine::ComputeEngine(const Params &params,
     OK = false;
   }
 
+  _radarHtKm = 0.0;
+  _wavelengthM = 0.010;
+  _vertBeamWidthDeg = 1.0;
+
 }
   
 // destructor
@@ -98,9 +102,7 @@ ComputeEngine::~ComputeEngine()
 //
 // Returns NULL on error.
 
-RadxRay *ComputeEngine::compute(RadxRay *inputRay,
-                                double radarHtKm,
-                                double wavelengthM)
+RadxRay *ComputeEngine::compute(RadxRay *inputRay)
 {
 
   // set ray-specific metadata
@@ -116,8 +118,6 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay,
 
   // initialize
 
-  _radarHtKm = radarHtKm;
-  _wavelengthM = wavelengthM;
   _atmos.setAttenCrpl(_wavelengthM * 100.0);
 
   // create moments ray
@@ -231,8 +231,11 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *hcaZdr = _hcaNexrad.getZdr();
   const double *hcaRhohv = _hcaNexrad.getRhohv();
   const double *hcaPhidp = _hcaNexrad.getPhidp();
-  const double *hcaTempC = _hcaNexrad.getTempC();
   const double *hcaLogKdp = _hcaNexrad.getLogKdp();
+
+  const double *hcaTempLow = _hcaNexrad.getTempLow();
+  const double *hcaTempMid = _hcaNexrad.getTempMid();
+  const double *hcaTempHigh = _hcaNexrad.getTempHigh();
 
   const double *hcaSmoothDbz = _hcaNexrad.getSmoothDbz();
   const double *hcaSmoothZdr = _hcaNexrad.getSmoothZdr();
@@ -325,8 +328,15 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::HCA_LOGKDP:
           *datp = hcaLogKdp[igate];
           break;
-        case Params::HCA_TEMPC:
-          *datp = hcaTempC[igate];
+
+        case Params::HCA_TEMP_LOW:
+          *datp = hcaTempLow[igate];
+          break;
+        case Params::HCA_TEMP_MID:
+          *datp = hcaTempMid[igate];
+          break;
+        case Params::HCA_TEMP_HIGH:
+          *datp = hcaTempHigh[igate];
           break;
 
         case Params::HCA_SMOOTH_DBZ:
@@ -1227,6 +1237,7 @@ void ComputeEngine::_hcaCompute()
 {
 
   _hcaNexrad.setWavelengthM(_wavelengthM);
+  _hcaNexrad.setVertBeamWidthDeg(_vertBeamWidthDeg);
   _hcaNexrad.setRadarHtKm(_radarHtKm);
   _hcaNexrad.setElevation(_elevation);
   _hcaNexrad.setAzimuth(_azimuth);

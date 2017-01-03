@@ -137,7 +137,10 @@ void HcaNexrad::initializeArrays(int nGates)
     _rhohv[ii] = _missingDouble;
     _phidp[ii] = _missingDouble;
     _logKdp[ii] = _missingDouble;
-    _tempC[ii] = _missingDouble;
+
+    _tempLow[ii] = _missingDouble;
+    _tempMid[ii] = _missingDouble;
+    _tempHigh[ii] = _missingDouble;
 
     _smoothDbz[ii] = _missingDouble;
     _smoothZdr[ii] = _missingDouble;
@@ -182,7 +185,10 @@ void HcaNexrad::_allocArrays()
   _rhohv = _rhohv_.alloc(_nGates);
   _phidp = _phidp_.alloc(_nGates);
   _logKdp = _logKdp_.alloc(_nGates);
-  _tempC = _tempC_.alloc(_nGates);
+
+  _tempLow = _tempLow_.alloc(_nGates);
+  _tempMid = _tempMid_.alloc(_nGates);
+  _tempHigh = _tempHigh_.alloc(_nGates);
 
   _smoothDbz = _smoothDbz_.alloc(_nGates);
   _smoothZdr = _smoothZdr_.alloc(_nGates);
@@ -512,9 +518,17 @@ void HcaNexrad::_fillTempArray()
     beamHt.setPseudoRadiusRatio(_pseudoRadiusRatio);
   }
   double rangeKm = _startRangeKm;
+  double halfBeamWidth = _vertBeamWidthDeg / 2.0;
+  if (halfBeamWidth > 1.5) {
+    halfBeamWidth = 1.5;
+  }
   for (int ii = 0; ii < _nGates; ii++, rangeKm += _gateSpacingKm) {
-    double htKm = beamHt.computeHtKm(_elevation, rangeKm);
-    _tempC[ii] = _tempProfile.getTempForHtKm(htKm);
+    double htLow = beamHt.computeHtKm(_elevation - halfBeamWidth, rangeKm);
+    _tempLow[ii] = _tempProfile.getTempForHtKm(htLow);
+    double htMid = beamHt.computeHtKm(_elevation, rangeKm);
+    _tempMid[ii] = _tempProfile.getTempForHtKm(htMid);
+    double htHigh = beamHt.computeHtKm(_elevation + halfBeamWidth, rangeKm);
+    _tempHigh[ii] = _tempProfile.getTempForHtKm(htHigh);
   }
 
 }

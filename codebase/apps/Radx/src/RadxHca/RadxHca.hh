@@ -116,6 +116,7 @@ private:
 
   double _radarHtKm;
   double _wavelengthM;
+  double _vertBeamWidthDeg;
   BeamHeight _beamHt;
 
   // temperature profile from sounding, if appropriate
