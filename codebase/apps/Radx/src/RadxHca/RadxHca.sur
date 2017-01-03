@@ -99,7 +99,7 @@ procmap_register_interval = 60;
 // Type: boolean
 //
 
-use_multiple_threads = TRUE;
+use_multiple_threads = FALSE;
 
 ///////////// n_compute_threads ///////////////////////
 //
@@ -2389,7 +2389,7 @@ sounding_use_wet_bulb_temp = TRUE;
 // Type: double
 //
 
-temp_at_bottom_of_melting_layer = 1;
+temp_at_bottom_of_melting_layer = 0.9;
 
 ///////////// temp_at_top_of_melting_layer ////////////
 //
@@ -2402,7 +2402,7 @@ temp_at_bottom_of_melting_layer = 1;
 // Type: double
 //
 
-temp_at_top_of_melting_layer = -1;
+temp_at_top_of_melting_layer = -0.9;
 
 //======================================================================
 //
@@ -3022,6 +3022,18 @@ output_fields = {
     name = "HCA_RH_INTEREST",
     long_name = "HCA_rh_interest_value",
     standard_name = "HCA_rh_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_TEMP_CAT,
+    name = "HCA_TEMP_CAT",
+    long_name = "temperature_category",
+    standard_name = "temperature_category",
     units = "",
     encoding = OUTPUT_ENCODING_INT16,
     scaling = OUTPUT_SCALING_DYNAMIC,

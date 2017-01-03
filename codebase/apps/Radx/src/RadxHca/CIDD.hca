@@ -173,7 +173,12 @@ HCA_RA_INT HCA_RA_INT mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/su
 
 HCA_HR_INT HCA_HR_INT mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_HR_INTEREST   interest.colors   dBZ -5 80 5 radial 1 0
 HCA_RH_INT HCA_RH_INT mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_RH_INTEREST   interest.colors   dBZ -5 80 5 radial 1 0
+HCA_TEMP_CAT   HCA_TEMP_CAT mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA_TEMP_CAT   hca_temp_cat.colors   - -5 80 5 radial 1 0
 HCA   HCA mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&HCA   hca.colors   - -5 80 5 radial 1 0
+
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 
 </GRIDS>

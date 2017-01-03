@@ -1046,6 +1046,7 @@ typedef enum {
   HCA_HR_INTEREST,
   HCA_RH_INTEREST,
 
+  HCA_TEMP_CAT,
   HCA
 
 } output_field_id_t;

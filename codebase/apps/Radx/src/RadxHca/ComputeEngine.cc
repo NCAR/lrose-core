@@ -262,6 +262,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *hcaHrInterest = _hcaNexrad.getHrInterest();
   const double *hcaRhInterest = _hcaNexrad.getRhInterest();
 
+  const int *hcaTempCat = _hcaNexrad.getTempCat();
   const int *hca = _hcaNexrad.getHca();
   
   for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
@@ -405,6 +406,15 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::HCA_RH_INTEREST:
           *datp = hcaRhInterest[igate];
           break;
+        case Params::HCA_TEMP_CAT: {
+          int tempCat = hcaTempCat[igate];
+          if (tempCat > 0) {
+            *datp = tempCat;
+          } else {
+            *datp = missingDbl;
+          }
+          break;
+        }
         case Params::HCA: {
           int hcaVal = hca[igate];
           if (hcaVal > 0) {

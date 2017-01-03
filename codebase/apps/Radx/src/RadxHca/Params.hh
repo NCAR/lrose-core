@@ -168,7 +168,8 @@ public:
     HCA_RA_INTEREST = 70,
     HCA_HR_INTEREST = 71,
     HCA_RH_INTEREST = 72,
-    HCA = 73
+    HCA_TEMP_CAT = 73,
+    HCA = 74
   } output_field_id_t;
 
   typedef enum {

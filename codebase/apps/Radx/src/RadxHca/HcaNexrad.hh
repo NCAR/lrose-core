@@ -114,7 +114,7 @@ public:
   void setTempProfile(const TempProfile &tempProfile);
 
   void setTempAtTopOfMeltingLayerC(double val) { _tempAtTopOfMeltingLayerC = val; }
-  void setTempAtBottomOfMeltingLayerC(double val) { _tempAtTopOfMeltingLayerC = val; }
+  void setTempAtBottomOfMeltingLayerC(double val) { _tempAtBottomOfMeltingLayerC = val; }
  
   /** 
    * Get temperature at a given height
@@ -202,6 +202,7 @@ public:
    * Get primary particle id field after calling computeHca()
    */
   const int *getHca() const { return _hca; }
+  const int *getTempCat() const { return _tempCat; }
   
   /**
    * Get interest for classes after calling computeHca()
@@ -385,6 +386,9 @@ private:
 
   RadxArray<int> _hca_;
   int *_hca;
+
+  RadxArray<int> _tempCat_;
+  int *_tempCat;
 
   // atmospheric attenuation
 
