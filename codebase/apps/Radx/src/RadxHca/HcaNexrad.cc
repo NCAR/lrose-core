@@ -248,7 +248,7 @@ void HcaNexrad::computeHca(const double *snr,
 
   // compute the temperature at each gate
 
-  _fillTempArray();
+  _fillTempArrays();
 
   // compute RMSE of trend residuals for dbz, zdr and rhohv
   
@@ -391,17 +391,67 @@ void HcaNexrad::computeHca(const double *snr,
       
     } // iclass
 
+    // load list of classes applicable at this temperature
+
+    vector<HcaInterestMap::imap_class_t> validClasses;
+    
+    if (_tempHigh[igate] >= _tempAtBottomOfMeltingLayerC) {
+      validClasses.push_back(HcaInterestMap::ClassGC);
+      validClasses.push_back(HcaInterestMap::ClassBS);
+      validClasses.push_back(HcaInterestMap::ClassBD);
+      validClasses.push_back(HcaInterestMap::ClassRA);
+      validClasses.push_back(HcaInterestMap::ClassHR);
+      validClasses.push_back(HcaInterestMap::ClassRH);
+    } else if (_tempMid[igate] >= _tempAtBottomOfMeltingLayerC) {
+      validClasses.push_back(HcaInterestMap::ClassGC);
+      validClasses.push_back(HcaInterestMap::ClassBS);
+      validClasses.push_back(HcaInterestMap::ClassWS);
+      validClasses.push_back(HcaInterestMap::ClassGR);
+      validClasses.push_back(HcaInterestMap::ClassBD);
+      validClasses.push_back(HcaInterestMap::ClassRA);
+      validClasses.push_back(HcaInterestMap::ClassHR);
+      validClasses.push_back(HcaInterestMap::ClassRH);
+    } else if (_tempMid[igate] >= _tempAtTopOfMeltingLayerC) {
+      validClasses.push_back(HcaInterestMap::ClassGC);
+      validClasses.push_back(HcaInterestMap::ClassBS);
+      validClasses.push_back(HcaInterestMap::ClassDS);
+      validClasses.push_back(HcaInterestMap::ClassWS);
+      validClasses.push_back(HcaInterestMap::ClassGR);
+      validClasses.push_back(HcaInterestMap::ClassBD);
+      validClasses.push_back(HcaInterestMap::ClassRH);
+    } else if (_tempLow[igate] >= _tempAtTopOfMeltingLayerC) {
+      validClasses.push_back(HcaInterestMap::ClassGC);
+      validClasses.push_back(HcaInterestMap::ClassBS);
+      validClasses.push_back(HcaInterestMap::ClassDS);
+      validClasses.push_back(HcaInterestMap::ClassWS);
+      validClasses.push_back(HcaInterestMap::ClassCR);
+      validClasses.push_back(HcaInterestMap::ClassGR);
+      validClasses.push_back(HcaInterestMap::ClassBD);
+      validClasses.push_back(HcaInterestMap::ClassRH);
+    } else {
+      validClasses.push_back(HcaInterestMap::ClassDS);
+      validClasses.push_back(HcaInterestMap::ClassCR);
+      validClasses.push_back(HcaInterestMap::ClassGR);
+      validClasses.push_back(HcaInterestMap::ClassRH);
+    }
+
     // determine the class with the highest weighted interest
 
     int mostLikelyClass = -1;
     double maxInterest = -9999.0;
-    for (size_t iclass = 0; iclass < HcaInterestMap::nClasses; iclass++) {
-      if(interestVals[iclass][igate] > maxInterest) {
-        mostLikelyClass = iclass;
-        maxInterest = interestVals[iclass][igate];
+    for (size_t ii = 0; ii < validClasses.size(); ii++) {
+      HcaInterestMap::imap_class_t validClass = validClasses[ii];
+      if(interestVals[validClass][igate] > maxInterest) {
+        mostLikelyClass = validClass;
+        maxInterest = interestVals[validClass][igate];
       }
     }
     _hca[igate] = mostLikelyClass + 1;
+
+    if (_snr[igate] < _snrThresholdDb) {
+      _hca[igate] = -1;
+    }
+
     
   } // igate
 
@@ -508,7 +558,7 @@ void HcaNexrad::deleteInterestMaps()
 //////////////////////////////////////////////
 // fill temperature array, based on height
 
-void HcaNexrad::_fillTempArray()
+void HcaNexrad::_fillTempArrays()
   
 {
   

@@ -1792,6 +1792,18 @@ using namespace std;
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'HCA_snr_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("HCA_snr_threshold");
+    tt->descr = tdrpStrDup("Minimum SNR for valid HCA classification.");
+    tt->help = tdrpStrDup("If the SNR at a gate is below this, the HCA is censored.");
+    tt->val_offset = (char *) &HCA_snr_threshold - &_start_;
+    tt->single_val.d = 3;
+    tt++;
+    
     // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -2791,6 +2803,30 @@ using namespace std;
     tt->help = tdrpStrDup("If TRUE, we use the wet bulb temperature profile from the sounding instead of the dry bulb. Applies to PID estimation. This is thought to more closely track the temperature of melting ice.");
     tt->val_offset = (char *) &sounding_use_wet_bulb_temp - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'temp_at_bottom_of_melting_layer'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("temp_at_bottom_of_melting_layer");
+    tt->descr = tdrpStrDup("Temperature at the bottom of the melting layer (C).");
+    tt->help = tdrpStrDup("We use this temperature to locate the bottom edge of the melting layer in the temperature profile.");
+    tt->val_offset = (char *) &temp_at_bottom_of_melting_layer - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'temp_at_top_of_melting_layer'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("temp_at_top_of_melting_layer");
+    tt->descr = tdrpStrDup("Temperature at the top of the melting layer (C).");
+    tt->help = tdrpStrDup("We use this temperature to locate the top edge of the melting layer in the temperature profile.");
+    tt->val_offset = (char *) &temp_at_top_of_melting_layer - &_start_;
+    tt->single_val.d = -1;
     tt++;
     
     // Parameter 'Comment 16'

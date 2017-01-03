@@ -103,7 +103,7 @@ public:
 
   // set the SNR threshold
 
-  void setSnrThreshold(double val) { _snrThresholdDb = val; }
+  void setSnrThresholdDb(double val) { _snrThresholdDb = val; }
 
   /**
    * Set the temperature profile.
@@ -112,6 +112,9 @@ public:
    * @param
    */
   void setTempProfile(const TempProfile &tempProfile);
+
+  void setTempAtTopOfMeltingLayerC(double val) { _tempAtTopOfMeltingLayerC = val; }
+  void setTempAtBottomOfMeltingLayerC(double val) { _tempAtTopOfMeltingLayerC = val; }
  
   /** 
    * Get temperature at a given height
@@ -295,6 +298,9 @@ private:
   double _tmpBottomC;           /**< Temperature at the base of the profile */
   double _tmpTopC;              /**< Temperature at the top of the profile */
 
+  double _tempAtTopOfMeltingLayerC;
+  double _tempAtBottomOfMeltingLayerC;
+
   // snr threshold to use
 
   double _snrThresholdDb;
@@ -391,7 +397,7 @@ private:
   // private methods
   
   void _allocArrays();
-  void _fillTempArray();
+  void _fillTempArrays();
 
 };
 

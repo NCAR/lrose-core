@@ -918,26 +918,10 @@ zdr_attenuation_exponent = 1.05;
 
 //======================================================================
 //
-// Interest maps.
+// COMPUTING BEAM HEIGHT.
 //
 //======================================================================
  
-//======================================================================
-//
-// LOCATING SEA CLUTTER.
-//
-//======================================================================
- 
-///////////// locate_sea_clutter //////////////////////
-//
-// Option to locate gates with sea clutter.
-//
-//
-// Type: boolean
-//
-
-locate_sea_clutter = FALSE;
-
 ///////////// override_standard_pseudo_earth_radius ///
 //
 // Option to override the standard 4/3 earth radius model for 
@@ -966,6 +950,44 @@ override_standard_pseudo_earth_radius = FALSE;
 //
 
 pseudo_earth_radius_ratio = 1.33333;
+
+///////////// override_vertical_beamwidth /////////////
+//
+// Option to override the beamwidth in the input file.
+//
+//
+// Type: boolean
+//
+
+override_vertical_beamwidth = FALSE;
+
+///////////// vertical_beamwidth_deg //////////////////
+//
+// Specified radar antenna vertical beamwidth (deg).
+//
+// See 'override_vertical_beamwidth'.
+//
+//
+// Type: double
+//
+
+vertical_beamwidth_deg = 1;
+
+//======================================================================
+//
+// LOCATING SEA CLUTTER.
+//
+//======================================================================
+ 
+///////////// locate_sea_clutter //////////////////////
+//
+// Option to locate gates with sea clutter.
+//
+//
+// Type: boolean
+//
+
+locate_sea_clutter = FALSE;
 
 //======================================================================
 //
@@ -1217,6 +1239,18 @@ seaclut_max_elev_deg = 2.5;
 //
 
 compute_hca = TRUE;
+
+///////////// HCA_snr_threshold ///////////////////////
+//
+// Minimum SNR for valid HCA classification.
+//
+// If the SNR at a gate is below this, the HCA is censored.
+//
+//
+// Type: double
+//
+
+HCA_snr_threshold = 3;
 
 //======================================================================
 //
@@ -2344,6 +2378,32 @@ sounding_height_correction_km = 0;
 
 sounding_use_wet_bulb_temp = TRUE;
 
+///////////// temp_at_bottom_of_melting_layer /////////
+//
+// Temperature at the bottom of the melting layer (C).
+//
+// We use this temperature to locate the bottom edge of the melting 
+//   layer in the temperature profile.
+//
+//
+// Type: double
+//
+
+temp_at_bottom_of_melting_layer = 1;
+
+///////////// temp_at_top_of_melting_layer ////////////
+//
+// Temperature at the top of the melting layer (C).
+//
+// We use this temperature to locate the top edge of the melting layer 
+//   in the temperature profile.
+//
+//
+// Type: double
+//
+
+temp_at_top_of_melting_layer = -1;
+
 //======================================================================
 //
 // RETRIEVING SITE TEMPERATURE FROM SPDB.
@@ -2466,7 +2526,9 @@ site_temp_search_margin_secs = 3600;
 //          HCA_RHOHV
 //          HCA_PHIDP
 //          HCA_LOGKDP
-//          HCA_TEMPC
+//          HCA_TEMP_LOW
+//          HCA_TEMP_MID
+//          HCA_TEMP_HIGH
 //          HCA_SMOOTH_DBZ
 //          HCA_SMOOTH_ZDR
 //          HCA_SMOOTH_RHOHV

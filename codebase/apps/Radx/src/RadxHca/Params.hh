@@ -697,6 +697,8 @@ public:
 
   tdrp_bool_t compute_hca;
 
+  double HCA_snr_threshold;
+
   hca_interest_map_t *_hca_interest_maps;
   int hca_interest_maps_n;
 
@@ -770,6 +772,10 @@ public:
 
   tdrp_bool_t sounding_use_wet_bulb_temp;
 
+  double temp_at_bottom_of_melting_layer;
+
+  double temp_at_top_of_melting_layer;
+
   tdrp_bool_t read_site_temp_from_spdb;
 
   char* site_temp_spdb_url;
@@ -812,7 +818,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[159];
+  mutable TDRPtable _table[162];
 
   const char *_className;
 

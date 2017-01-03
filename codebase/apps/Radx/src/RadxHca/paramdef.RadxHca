@@ -580,6 +580,12 @@ paramdef boolean {
   p_descr = "Option to compute HCA classification.";
 } compute_hca;
 
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Minimum SNR for valid HCA classification.";
+  p_help = "If the SNR at a gate is below this, the HCA is censored.";
+} HCA_snr_threshold;
+
 commentdef {
   p_header = "Classification types";
   p_text = "There are 10 classification types:\n\tGC: ground clutter or AP\n\tBS: biological scatterers\n\tDS: dry aggregated snow\n\tWS: wet snow\n\tCR: crystals of various orientations\n\tGR: graupel\n\tBD: big drops\n\tRA: light to moderate rain\n\tHR: heavy rain\n\tRH: mixture of rain and hail.";
@@ -910,6 +916,18 @@ paramdef boolean {
   p_descr = "Option to use wet bulb temperature profile.";
   p_help = "If TRUE, we use the wet bulb temperature profile from the sounding instead of the dry bulb. Applies to PID estimation. This is thought to more closely track the temperature of melting ice.";
 } sounding_use_wet_bulb_temp;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Temperature at the bottom of the melting layer (C).";
+  p_help = "We use this temperature to locate the bottom edge of the melting layer in the temperature profile.";
+} temp_at_bottom_of_melting_layer;
+
+paramdef double {
+  p_default = -1.0;
+  p_descr = "Temperature at the top of the melting layer (C).";
+  p_help = "We use this temperature to locate the top edge of the melting layer in the temperature profile.";
+} temp_at_top_of_melting_layer;
 
 commentdef {
   p_header = "RETRIEVING SITE TEMPERATURE FROM SPDB";

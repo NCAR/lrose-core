@@ -1177,6 +1177,8 @@ int ComputeEngine::_hcaInit()
 
   // initialize
 
+  _hcaNexrad.setSnrThresholdDb(_params.HCA_snr_threshold);
+
   _hcaNexrad.setWavelengthM(_wavelengthM);
   _hcaNexrad.setRadarHtKm(_radarHtKm);
   _hcaNexrad.setElevation(_elevation);
@@ -1187,6 +1189,9 @@ int ComputeEngine::_hcaInit()
   if (_params.override_standard_pseudo_earth_radius) {
     _hcaNexrad.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
   }
+
+  _hcaNexrad.setTempAtBottomOfMeltingLayerC(_params.temp_at_bottom_of_melting_layer);
+  _hcaNexrad.setTempAtTopOfMeltingLayerC(_params.temp_at_top_of_melting_layer);
 
   // clean up any existing maps
   
