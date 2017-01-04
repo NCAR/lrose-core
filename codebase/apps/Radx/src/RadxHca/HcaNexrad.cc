@@ -92,6 +92,19 @@ HcaNexrad::HcaNexrad(const TempProfile &tempProfile) :
   _phidpFilterLen = 11;
   _phidpHvyFilterLen = 25;
 
+  _hcaMaxAbsVelForGC = 1.0;
+  _hcaMaxRhohvForBS = 0.97;
+  _hcaMaxZdrForDS = 2.0;
+  _hcaMinZdrForBD = -0.3;
+  _hcaMinZdrForWS = 0.0;
+  _hcaMinDbzForWS = 20.0;
+  _hcaMaxDbzForCR = 40.0;
+  _hcaMinDbzForGR = 10.0;
+  _hcaMaxDbzForGR = 60.0;
+  _hcaMaxDbzForRA = 50.0;
+  _hcaMinDbzForHR = 30.0;
+  _hcaMinDbzForRH = 40.0;
+
   // initialize interest map array with NULLS
   // interest maps must be added by calling class using addInterestMap()
 
@@ -136,6 +149,7 @@ void HcaNexrad::initializeArrays(int nGates)
 
     _snr[ii] = _missingDouble;
     _dbz[ii] = _missingDouble;
+    _vel[ii] = _missingDouble;
     _zdr[ii] = _missingDouble;
     _rhohv[ii] = _missingDouble;
     _phidp[ii] = _missingDouble;
@@ -185,6 +199,7 @@ void HcaNexrad::_allocArrays()
   
   _snr = _snr_.alloc(_nGates);
   _dbz = _dbz_.alloc(_nGates);
+  _vel = _vel_.alloc(_nGates);
   _zdr = _zdr_.alloc(_nGates);
   _rhohv = _rhohv_.alloc(_nGates);
   _phidp = _phidp_.alloc(_nGates);
@@ -228,6 +243,7 @@ void HcaNexrad::_allocArrays()
 
 void HcaNexrad::computeHca(const double *snr,
                            const double *dbz,
+                           const double *vel,
                            const double *zdr,
                            const double *rhohv,
                            const double *phidpUnfolded,
@@ -239,6 +255,7 @@ void HcaNexrad::computeHca(const double *snr,
 
   memcpy(_snr, snr, _nGates * sizeof(double));
   memcpy(_dbz, dbz, _nGates * sizeof(double));
+  memcpy(_vel, vel, _nGates * sizeof(double));
   memcpy(_zdr, zdr, _nGates * sizeof(double));
   memcpy(_rhohv, rhohv, _nGates * sizeof(double));
   memcpy(_phidp, phidpUnfolded, _nGates * sizeof(double));
@@ -404,6 +421,7 @@ void HcaNexrad::computeHca(const double *snr,
     if (_tempHigh[igate] >= _tempAtBottomOfMeltingLayerC) {
       validClasses.push_back(HcaInterestMap::ClassGC);
       validClasses.push_back(HcaInterestMap::ClassBS);
+      validClasses.push_back(HcaInterestMap::ClassGR);
       validClasses.push_back(HcaInterestMap::ClassBD);
       validClasses.push_back(HcaInterestMap::ClassRA);
       validClasses.push_back(HcaInterestMap::ClassHR);
@@ -446,6 +464,52 @@ void HcaNexrad::computeHca(const double *snr,
       _tempCat[igate] = 5;
     }
 
+    // apply thresholds
+
+    double dbz = _dbz[igate];
+    double vel = _vel[igate];
+    double zdr = _zdr[igate];
+    double rhohv = _rhohv[igate];
+    double minZdrForBD =
+      _hcaMinZdrForBD + 0.68 + -4.81e-2 * dbz + 2.920e-3 * dbz * dbz; // f2(dbz) - 0.3
+
+    if (fabs(vel) > _hcaMaxAbsVelForGC) {
+      _suppressClass(validClasses, HcaInterestMap::ClassGC);
+    }
+    if (rhohv > _hcaMaxRhohvForBS) {
+      _suppressClass(validClasses, HcaInterestMap::ClassBS);
+    }
+    if (zdr > _hcaMaxZdrForDS) {
+      _suppressClass(validClasses, HcaInterestMap::ClassDS);
+    }
+    if (zdr < _hcaMinZdrForWS) {
+      _suppressClass(validClasses, HcaInterestMap::ClassWS);
+    }
+    if (zdr < minZdrForBD) {
+      _suppressClass(validClasses, HcaInterestMap::ClassBD);
+    }
+    if (dbz < _hcaMinDbzForWS) {
+      _suppressClass(validClasses, HcaInterestMap::ClassWS);
+    }
+    if (dbz > _hcaMaxDbzForCR) {
+      _suppressClass(validClasses, HcaInterestMap::ClassCR);
+    }
+    if (dbz < _hcaMinDbzForGR) {
+      _suppressClass(validClasses, HcaInterestMap::ClassGR);
+    }
+    if (dbz > _hcaMaxDbzForGR) {
+      _suppressClass(validClasses, HcaInterestMap::ClassGR);
+    }
+    if (dbz > _hcaMaxDbzForRA) {
+      _suppressClass(validClasses, HcaInterestMap::ClassRA);
+    }
+    if (dbz < _hcaMinDbzForHR) {
+      _suppressClass(validClasses, HcaInterestMap::ClassHR);
+    }
+    if (dbz < _hcaMinDbzForRH) {
+      _suppressClass(validClasses, HcaInterestMap::ClassRH);
+    }
+
     // determine the class with the highest weighted interest
 
     int mostLikelyClass = -1;
@@ -465,6 +529,23 @@ void HcaNexrad::computeHca(const double *snr,
 
     
   } // igate
+
+}
+
+///////////////////////////////////////////////////////////////////
+// Suppress a class from the valid classes list
+
+void HcaNexrad::_suppressClass(vector<HcaInterestMap::imap_class_t> &validClasses,
+                               HcaInterestMap::imap_class_t suppressedClass)
+
+{
+
+  for (size_t ii = 0; ii < validClasses.size(); ii++) {
+    if (validClasses[ii] == suppressedClass) {
+      validClasses.erase(validClasses.begin() + ii);
+      return;
+    }
+  }
 
 }
 

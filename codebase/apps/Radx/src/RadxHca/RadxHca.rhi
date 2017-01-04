@@ -1976,6 +1976,156 @@ HCA_PHIDP_heavy_filter_len = 25;
 
 //======================================================================
 //
+// INDIVIDUAL THRESHOLDS FOR CLASSES.
+//
+//======================================================================
+ 
+///////////// HCA_max_abs_vel_for_GC //////////////////
+//
+// Maximum radial velocity for GC (m/s).
+//
+// If abs(velocity) exceeds this, GC will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_max_abs_vel_for_GC = 1;
+
+///////////// HCA_max_rhohv_for_BS ////////////////////
+//
+// Maximum rhohv for BS.
+//
+// If rhohv exceeds this, BS will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_max_rhohv_for_BS = 0.97;
+
+///////////// HCA_max_zdr_for_DS //////////////////////
+//
+// Maximum zdr for DS.
+//
+// If zdr exceeds this, DS will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_max_zdr_for_DS = 2;
+
+///////////// HCA_min_zdr_for_BD //////////////////////
+//
+// Minimum zdr for BD.
+//
+// If zdr exceeds (f2(Z) - this), BD will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_min_zdr_for_BD = -0.3;
+
+///////////// HCA_min_zdr_for_WS //////////////////////
+//
+// Minimum zdr for WS.
+//
+// If zdr is less than this, WS will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_min_zdr_for_WS = 0;
+
+///////////// HCA_min_dbz_for_WS //////////////////////
+//
+// Minimum dbz for WS.
+//
+// If dbz is less than this, WS will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_min_dbz_for_WS = 20;
+
+///////////// HCA_max_dbz_for_CR //////////////////////
+//
+// Maximum dbz for CR.
+//
+// If dbz exceeds this, CR will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_max_dbz_for_CR = 40;
+
+///////////// HCA_min_dbz_for_GR //////////////////////
+//
+// Minimum dbz for GR.
+//
+// If dbz is less than this, GR will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_min_dbz_for_GR = 10;
+
+///////////// HCA_max_dbz_for_GR //////////////////////
+//
+// Maximum dbz for GR.
+//
+// If dbz exceeds this, GR will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_max_dbz_for_GR = 60;
+
+///////////// HCA_max_dbz_for_RA //////////////////////
+//
+// Maximum dbz for RA.
+//
+// If dbz exceeds this, RA will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_max_dbz_for_RA = 50;
+
+///////////// HCA_min_dbz_for_HR //////////////////////
+//
+// Minimum dbz for HR.
+//
+// If dbz is less than this, HR will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_min_dbz_for_HR = 30;
+
+///////////// HCA_min_dbz_for_RH //////////////////////
+//
+// Minimum dbz for RH.
+//
+// If dbz is less than this, RH will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_min_dbz_for_RH = 40;
+
+//======================================================================
+//
 // COMPUTING NCAR PID - HYDROMETEOR PARTICLE ID.
 //
 //======================================================================
@@ -2550,6 +2700,7 @@ site_temp_search_margin_secs = 3600;
 //          HCA_RA_INTEREST
 //          HCA_HR_INTEREST
 //          HCA_RH_INTEREST
+//          HCA_TEMP_CAT
 //          HCA
 //      string name;
 //      string long_name;

@@ -713,6 +713,30 @@ public:
 
   int HCA_PHIDP_heavy_filter_len;
 
+  double HCA_max_abs_vel_for_GC;
+
+  double HCA_max_rhohv_for_BS;
+
+  double HCA_max_zdr_for_DS;
+
+  double HCA_min_zdr_for_BD;
+
+  double HCA_min_zdr_for_WS;
+
+  double HCA_min_dbz_for_WS;
+
+  double HCA_max_dbz_for_CR;
+
+  double HCA_min_dbz_for_GR;
+
+  double HCA_max_dbz_for_GR;
+
+  double HCA_max_dbz_for_RA;
+
+  double HCA_min_dbz_for_HR;
+
+  double HCA_min_dbz_for_RH;
+
   tdrp_bool_t compute_pid;
 
   char* pid_thresholds_file_path;
@@ -819,7 +843,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[162];
+  mutable TDRPtable _table[175];
 
   const char *_className;
 

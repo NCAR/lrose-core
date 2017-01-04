@@ -134,6 +134,23 @@ public:
   void setPhidpHvyFilterLen(int nGates) { _phidpHvyFilterLen = nGates; }
 
   /**
+   * Set individual class thresholds
+   */
+
+  void setHcaMaxAbsVelForGC(double val) { _hcaMaxAbsVelForGC = val; }
+  void setHcaMaxRhohvForBS(double val) { _hcaMaxRhohvForBS = val; }
+  void setHcaMaxZdrForDS(double val) { _hcaMaxZdrForDS = val; }
+  void setHcaMinZdrForBD(double val) { _hcaMinZdrForBD = val; }
+  void setHcaMinZdrForWS(double val) { _hcaMinZdrForWS = val; }
+  void setHcaMinDbzForWS(double val) { _hcaMinDbzForWS = val; }
+  void setHcaMaxDbzForCR(double val) { _hcaMaxDbzForCR = val; }
+  void setHcaMinDbzForGR(double val) { _hcaMinDbzForGR = val; }
+  void setHcaMaxDbzForGR(double val) { _hcaMaxDbzForGR = val; }
+  void setHcaMaxDbzForRA(double val) { _hcaMaxDbzForRA = val; }
+  void setHcaMinDbzForHR(double val) { _hcaMinDbzForHR = val; }
+  void setHcaMinDbzForRH(double val) { _hcaMinDbzForRH = val; }
+
+  /**
    * Initialize the object arrays for later use.
    * Sets the number of gates.
    * Do this if you need access to the arrays, but have not yet called
@@ -160,6 +177,7 @@ public:
 
   void computeHca(const double *snr,
                   const double *dbz,
+                  const double *vel,
                   const double *zdr,
                   const double *rhohv,
                   const double *phidpUnfolded,
@@ -306,6 +324,21 @@ private:
 
   double _snrThresholdDb;
 
+  // class thresholds
+
+  double _hcaMaxAbsVelForGC;
+  double _hcaMaxRhohvForBS;
+  double _hcaMaxZdrForDS;
+  double _hcaMinZdrForBD;
+  double _hcaMinZdrForWS;
+  double _hcaMinDbzForWS;
+  double _hcaMaxDbzForCR;
+  double _hcaMinDbzForGR;
+  double _hcaMaxDbzForGR;
+  double _hcaMaxDbzForRA;
+  double _hcaMinDbzForHR;
+  double _hcaMinDbzForRH;
+
   // filter lengths in gates
 
   int _dbzFilterLen;
@@ -318,6 +351,7 @@ private:
   
   RadxArray<double> _snr_;
   RadxArray<double> _dbz_;
+  RadxArray<double> _vel_;
   RadxArray<double> _zdr_;
   RadxArray<double> _rhohv_;
   RadxArray<double> _phidp_;
@@ -328,6 +362,7 @@ private:
 
   double *_snr;
   double *_dbz;
+  double *_vel;
   double *_zdr;
   double *_rhohv;
   double *_phidp;
@@ -402,6 +437,8 @@ private:
   
   void _allocArrays();
   void _fillTempArrays();
+  void _suppressClass(vector<HcaInterestMap::imap_class_t> &validClasses,
+                      HcaInterestMap::imap_class_t suppressedClass);
 
 };
 

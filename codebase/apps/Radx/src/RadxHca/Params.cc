@@ -2396,6 +2396,159 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 14");
+    tt->comment_hdr = tdrpStrDup("INDIVIDUAL THRESHOLDS FOR CLASSES");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'HCA_max_abs_vel_for_GC'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("HCA_max_abs_vel_for_GC");
+    tt->descr = tdrpStrDup("Maximum radial velocity for GC (m/s).");
+    tt->help = tdrpStrDup("If abs(velocity) exceeds this, GC will be suppressed.");
+    tt->val_offset = (char *) &HCA_max_abs_vel_for_GC - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'HCA_max_rhohv_for_BS'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("HCA_max_rhohv_for_BS");
+    tt->descr = tdrpStrDup("Maximum rhohv for BS.");
+    tt->help = tdrpStrDup("If rhohv exceeds this, BS will be suppressed.");
+    tt->val_offset = (char *) &HCA_max_rhohv_for_BS - &_start_;
+    tt->single_val.d = 0.97;
+    tt++;
+    
+    // Parameter 'HCA_max_zdr_for_DS'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("HCA_max_zdr_for_DS");
+    tt->descr = tdrpStrDup("Maximum zdr for DS.");
+    tt->help = tdrpStrDup("If zdr exceeds this, DS will be suppressed.");
+    tt->val_offset = (char *) &HCA_max_zdr_for_DS - &_start_;
+    tt->single_val.d = 2;
+    tt++;
+    
+    // Parameter 'HCA_min_zdr_for_BD'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("HCA_min_zdr_for_BD");
+    tt->descr = tdrpStrDup("Minimum zdr for BD.");
+    tt->help = tdrpStrDup("If zdr exceeds (f2(Z) - this), BD will be suppressed.");
+    tt->val_offset = (char *) &HCA_min_zdr_for_BD - &_start_;
+    tt->single_val.d = -0.3;
+    tt++;
+    
+    // Parameter 'HCA_min_zdr_for_WS'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("HCA_min_zdr_for_WS");
+    tt->descr = tdrpStrDup("Minimum zdr for WS.");
+    tt->help = tdrpStrDup("If zdr is less than this, WS will be suppressed.");
+    tt->val_offset = (char *) &HCA_min_zdr_for_WS - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'HCA_min_dbz_for_WS'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("HCA_min_dbz_for_WS");
+    tt->descr = tdrpStrDup("Minimum dbz for WS.");
+    tt->help = tdrpStrDup("If dbz is less than this, WS will be suppressed.");
+    tt->val_offset = (char *) &HCA_min_dbz_for_WS - &_start_;
+    tt->single_val.d = 20;
+    tt++;
+    
+    // Parameter 'HCA_max_dbz_for_CR'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("HCA_max_dbz_for_CR");
+    tt->descr = tdrpStrDup("Maximum dbz for CR.");
+    tt->help = tdrpStrDup("If dbz exceeds this, CR will be suppressed.");
+    tt->val_offset = (char *) &HCA_max_dbz_for_CR - &_start_;
+    tt->single_val.d = 40;
+    tt++;
+    
+    // Parameter 'HCA_min_dbz_for_GR'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("HCA_min_dbz_for_GR");
+    tt->descr = tdrpStrDup("Minimum dbz for GR.");
+    tt->help = tdrpStrDup("If dbz is less than this, GR will be suppressed.");
+    tt->val_offset = (char *) &HCA_min_dbz_for_GR - &_start_;
+    tt->single_val.d = 10;
+    tt++;
+    
+    // Parameter 'HCA_max_dbz_for_GR'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("HCA_max_dbz_for_GR");
+    tt->descr = tdrpStrDup("Maximum dbz for GR.");
+    tt->help = tdrpStrDup("If dbz exceeds this, GR will be suppressed.");
+    tt->val_offset = (char *) &HCA_max_dbz_for_GR - &_start_;
+    tt->single_val.d = 60;
+    tt++;
+    
+    // Parameter 'HCA_max_dbz_for_RA'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("HCA_max_dbz_for_RA");
+    tt->descr = tdrpStrDup("Maximum dbz for RA.");
+    tt->help = tdrpStrDup("If dbz exceeds this, RA will be suppressed.");
+    tt->val_offset = (char *) &HCA_max_dbz_for_RA - &_start_;
+    tt->single_val.d = 50;
+    tt++;
+    
+    // Parameter 'HCA_min_dbz_for_HR'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("HCA_min_dbz_for_HR");
+    tt->descr = tdrpStrDup("Minimum dbz for HR.");
+    tt->help = tdrpStrDup("If dbz is less than this, HR will be suppressed.");
+    tt->val_offset = (char *) &HCA_min_dbz_for_HR - &_start_;
+    tt->single_val.d = 30;
+    tt++;
+    
+    // Parameter 'HCA_min_dbz_for_RH'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("HCA_min_dbz_for_RH");
+    tt->descr = tdrpStrDup("Minimum dbz for RH.");
+    tt->help = tdrpStrDup("If dbz is less than this, RH will be suppressed.");
+    tt->val_offset = (char *) &HCA_min_dbz_for_RH - &_start_;
+    tt->single_val.d = 40;
+    tt++;
+    
+    // Parameter 'Comment 15'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("COMPUTING NCAR PID - HYDROMETEOR PARTICLE ID");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2640,11 +2793,11 @@ using namespace std;
     tt->single_val.i = 7;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("SOUNDING INPUT FOR temperature profile");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2829,11 +2982,11 @@ using namespace std;
     tt->single_val.d = -1;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("RETRIEVING SITE TEMPERATURE FROM SPDB");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2886,11 +3039,11 @@ using namespace std;
     tt->single_val.i = 3600;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("SPECIFYING FIELD NAMES AND OUTPUT ENCODING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3200,11 +3353,11 @@ using namespace std;
       tt->struct_vals[62].d = 0;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("OUTPUT FILE FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3261,11 +3414,11 @@ using namespace std;
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3306,11 +3459,11 @@ using namespace std;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("VOLUME OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;

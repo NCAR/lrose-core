@@ -1265,6 +1265,19 @@ void ComputeEngine::_hcaCompute()
   _hcaNexrad.setPhidpFilterLen(_params.HCA_PHIDP_filter_len);
   _hcaNexrad.setPhidpHvyFilterLen(_params.HCA_PHIDP_heavy_filter_len);
 
+  _hcaNexrad.setHcaMaxAbsVelForGC(_params.HCA_max_abs_vel_for_GC);
+  _hcaNexrad.setHcaMaxRhohvForBS(_params.HCA_max_rhohv_for_BS);
+  _hcaNexrad.setHcaMaxZdrForDS(_params.HCA_max_zdr_for_DS);
+  _hcaNexrad.setHcaMinZdrForBD(_params.HCA_min_zdr_for_BD);
+  _hcaNexrad.setHcaMinZdrForWS(_params.HCA_min_zdr_for_WS);
+  _hcaNexrad.setHcaMinDbzForWS(_params.HCA_min_dbz_for_WS);
+  _hcaNexrad.setHcaMaxDbzForCR(_params.HCA_max_dbz_for_CR);
+  _hcaNexrad.setHcaMinDbzForGR(_params.HCA_min_dbz_for_GR);
+  _hcaNexrad.setHcaMaxDbzForGR(_params.HCA_max_dbz_for_GR);
+  _hcaNexrad.setHcaMaxDbzForRA(_params.HCA_max_dbz_for_RA);
+  _hcaNexrad.setHcaMinDbzForHR(_params.HCA_min_dbz_for_HR);
+  _hcaNexrad.setHcaMinDbzForRH(_params.HCA_min_dbz_for_RH);
+
   // prepare for HCA
 
   _hcaNexrad.initializeArrays(_nGates);
@@ -1273,6 +1286,7 @@ void ComputeEngine::_hcaCompute()
   
   _hcaNexrad.computeHca(_snrArray,
                         _dbzArray,
+                        _velArray,
                         _zdrArray,
                         _rhohvArray,
                         _phidpArray,
