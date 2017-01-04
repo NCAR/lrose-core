@@ -111,14 +111,14 @@ field_list = {
 #KDP3 KDP3  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp3.colors   deg/km -5 80 5 radial 1 0
 
 DBZ DBZ  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&DBZ    dbz.colors   dBZ -5 80 5 radial 1 0
+VEL VEL  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&VEL    vel.colors   m/s -5 80 5 radial 1 0
 SNR SNR  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&SNR    snr.colors   dB  -5 80 5 radial 1 0
 ZDR ZDR  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&ZDR    zdr.colors   dB  -5 80 5 radial 1 0
-RHOHV RHOHV  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&RHOHV    rhohv.colors   - -5 80 5 radial 1 0
 
+RHOHV RHOHV  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&RHOHV    rhohv.colors   - -5 80 5 radial 1 0
 PHIDP PHIDP  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&PHIDP    phidp.colors  deg -5 80 5 radial 1 0
 KDP KDP  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp3.colors   deg/km -5 80 5 radial 1 0
 KDP_COND KDP_COND  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP_COND    kdp3.colors   deg/km -5 80 5 radial 1 0
-=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 
 KDP1 KDP1  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp1.colors   deg/km -5 80 5 radial 1 0
 KDPS KDPS  mdvp:://localhost:0:$(HOME)/data/hca/test/cfradial/spol/sur&KDP    kdp_sband.colors   deg/km -5 80 5 radial 1 0

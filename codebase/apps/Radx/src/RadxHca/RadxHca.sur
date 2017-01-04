@@ -2749,6 +2749,18 @@ output_fields = {
   }
   ,
   {
+    id = VEL,
+    name = "VEL",
+    long_name = "radial_velocity",
+    standard_name = "radial_velocity",
+    units = "m/s",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
     id = ZDR,
     name = "ZDR",
     long_name = "calibrated_log_differential_reflectivity",
