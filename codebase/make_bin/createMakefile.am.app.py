@@ -71,7 +71,7 @@ def main():
     # set up list of other libs which may be used for include
 
     if (len(options.libList) < 1):
-        availLibList = [ 'FiltAlg', 'Fmq', 'Mdv', 'Radx',
+        availLibList = [ 'FiltAlg', 'Fmq', 'Mdv', 'Radx', 'NcUtils',
                          'Refract', 'Spdb', 'SpdbServer', 'advect', 
                          'cidd', 'contour',
                          'dataport', 'devguide', 'didss', 'dsdata', 'dsserver',
@@ -450,6 +450,7 @@ def appendToLibList(line):
             loadLibList.append(thisTok)
         elif ((thisTok.find("NETCDF4_LIBS") >= 0) or
               (thisTok.find("NETCDF_LIBS") >= 0)):
+            loadLibList.append("-lNcUtils")
             loadLibList.append("-lnetcdf_c++")
             loadLibList.append("-lnetcdf")
             loadLibList.append("-lhdf5_cpp")

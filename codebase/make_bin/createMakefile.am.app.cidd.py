@@ -423,6 +423,7 @@ def getLibLinkOrder():
                   'physics',
                   'rapplot',
                   'Radx',
+                  'NcUtils',
                   'rapformats',
                   'dsserver',
                   'didss',
@@ -469,6 +470,7 @@ def decodeLibLine(line):
             libs.append(thisTok[2:]) # strip off '-l'
         elif ((thisTok.find("NETCDF4_LIBS") >= 0) or
               (thisTok.find("NETCDF_LIBS") >= 0)):
+            libs.append("NcUtils")
             libs.append("netcdf_c++")
             libs.append("netcdf")
             libs.append("hdf5_cpp")
@@ -508,7 +510,8 @@ def getLoadLibList():
 
     # extend the lib list with required standard libs
     
-    extendLibs = [ 'netcdf_c++',
+    extendLibs = [ 'NcUtils',
+                   'netcdf_c++',
                    'netcdf',
                    'hdf5_cpp',
                    'hdf5_hl',
