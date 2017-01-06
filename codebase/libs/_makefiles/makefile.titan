@@ -40,7 +40,8 @@ SUB_DIRS = \
 	dsdata \
 	advect \
         contour \
-        Radx
+        Radx \
+        NcxxUtils
 
 #	apiTitan
 
