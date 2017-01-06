@@ -48,7 +48,7 @@
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxGeoref.hh>
-#include <NcUtils/Ncxx.hh>
+#include <NcxxUtils/Ncxx.hh>
 
 class RadxField;
 class RadxVol;
