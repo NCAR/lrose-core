@@ -55,22 +55,18 @@
 using namespace std;
 
 
-namespace netCDF {
-  //  Global comparator operator ==============
-  // comparator operator
-  bool operator<(const NcxxDim& lhs,const NcxxDim& rhs)
-  {
-    return false;
-  }
-
-  // comparator operator
-  bool operator>(const NcxxDim& lhs,const NcxxDim& rhs)
-  {
-    return true;
-  }
+//  Global comparator operator ==============
+// comparator operator
+bool operator<(const NcxxDim& lhs,const NcxxDim& rhs)
+{
+  return false;
 }
 
-using namespace netCDF;
+// comparator operator
+bool operator>(const NcxxDim& lhs,const NcxxDim& rhs)
+{
+  return true;
+}
 
 // assignment operator
 NcxxDim& NcxxDim::operator=(const NcxxDim & rhs)

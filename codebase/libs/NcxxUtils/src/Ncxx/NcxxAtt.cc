@@ -56,8 +56,6 @@
 #include <NcxxUtils/NcxxCheck.hh>
 
 using namespace std;
-using namespace netCDF;
-using namespace netCDF::exceptions;
   
 // destructor  (defined even though it is virtual)
 NcxxAtt::~NcxxAtt() {}
@@ -117,8 +115,8 @@ bool NcxxAtt::operator!=(const NcxxAtt & rhs) const
 }  
 
 // Gets parent group.
-netCDF::NcxxGroup  NcxxAtt::getParentGroup() const {
-  return netCDF::NcxxGroup(groupId);
+NcxxGroup  NcxxAtt::getParentGroup() const {
+  return NcxxGroup(groupId);
 }
       
 

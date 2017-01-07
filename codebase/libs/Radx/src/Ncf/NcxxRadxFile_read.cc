@@ -51,8 +51,6 @@
 #include <dirent.h>
 #include <algorithm>
 using namespace std;
-using namespace netCDF;
-using namespace netCDF::exceptions;
 
 ////////////////////////////////////////////////////////////
 // Read in data from specified path, load up volume object.
@@ -1052,7 +1050,7 @@ int NcxxRadxFile::_readRangeVariable()
     }
 
     if (att.getName().find(METERS_TO_CENTER_OF_FIRST_GATE) != string::npos) {
-      if (att.getType() == ncFloat || att.getType() == ncDouble) {
+      if (att.getType() == ncxxFloat || att.getType() == ncxxDouble) {
         vector<double> vals;
         if (att.getValues(vals) == 0) {
           startRangeKm = vals[0] / 1000.0;
@@ -1061,7 +1059,7 @@ int NcxxRadxFile::_readRangeVariable()
     }
 
     if (att.getName().find(METERS_BETWEEN_GATES) != string::npos) {
-      if (att.getType() == ncFloat || att.getType() == ncDouble) {
+      if (att.getType() == ncxxFloat || att.getType() == ncxxDouble) {
         vector<double> vals;
         if (att.getValues(vals) == 0) {
           gateSpacingKm = vals[0] / 1000.0;
@@ -1263,7 +1261,7 @@ int NcxxRadxFile::_readPositionVariables()
       _addErrStr(_file.getErrStr());
       return -1;
     }
-    if (_georefTimeVar.getType() != ncDouble) {
+    if (_georefTimeVar.getType() != ncxxDouble) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  georef time is incorrect type: ", 
                  Ncxx::ncxxTypeToStr(_georefTimeVar.getType()));

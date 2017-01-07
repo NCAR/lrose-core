@@ -50,12 +50,9 @@
 
 #include <NcxxUtils/NcxxChar.hh>
 #include <netcdf.h>
-using namespace netCDF;
 
-// create an instance of NcxxChar  called netCDF::ncChar
-namespace netCDF {
-  NcxxChar ncChar;
-}
+// create an instance of NcxxChar called ncxxChar
+NcxxChar ncxxChar;
 
 // constructor
 NcxxChar::NcxxChar() : NcxxType(NC_CHAR){

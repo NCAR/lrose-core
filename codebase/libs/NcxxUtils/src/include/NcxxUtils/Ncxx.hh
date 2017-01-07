@@ -186,16 +186,16 @@ public:
 
   // get byte width of data type
   
-  int getByteWidth(nc_type nctype);
+  static int getByteWidth(nc_type nctype);
 
   // get byte width of data type
 
-  int getByteWidth(PortType_t ptype);
+  static int getByteWidth(PortType_t ptype);
 
   // convert type enum to string
   
   static string ncTypeToStr(nc_type nctype);
-  static string ncTypeToStr(netCDF::NcxxType &nctype);
+  static string ncxxTypeToStr(NcxxType &nctype);
   string portTypeToStr(PortType_t ptype);
   
   // strip redundant null from string

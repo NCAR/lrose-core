@@ -54,11 +54,8 @@
 #include <NcxxUtils/NcxxException.hh>
 #include <netcdf.h>
 using namespace std;
-using namespace netCDF;
-using namespace netCDF::exceptions;
 
 // Class represents a netCDF variable.
-using namespace netCDF;
   
 // assignment operator
 NcxxOpaqueType& NcxxOpaqueType::operator=(const NcxxOpaqueType& rhs)

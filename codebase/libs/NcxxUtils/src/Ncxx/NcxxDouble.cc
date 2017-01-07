@@ -50,12 +50,9 @@
 
 #include <NcxxUtils/NcxxDouble.hh>
 #include <netcdf.h>
-using namespace netCDF;
 
-// create an instance of NcxxDouble  called netCDF::ncDouble
-namespace netCDF {
-  NcxxDouble ncDouble;
-}
+// create an instance of NcxxDouble  called ncxxDouble
+NcxxDouble ncxxDouble;
 
 // constructor
 NcxxDouble::NcxxDouble() : NcxxType(NC_DOUBLE){

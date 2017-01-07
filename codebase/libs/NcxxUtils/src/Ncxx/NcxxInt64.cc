@@ -50,12 +50,9 @@
 
 #include <NcxxUtils/NcxxInt64.hh>
 #include <netcdf.h>
-using namespace netCDF;
 
-// create an instance of NcxxInt64  called netCDF::ncInt64
-namespace netCDF {
-  NcxxInt64 ncInt64;
-}
+// create an instance of NcxxInt64  called ncxxInt64
+NcxxInt64 ncxxInt64;
 
 // constructor
 NcxxInt64::NcxxInt64() : NcxxType(NC_INT64){

@@ -52,9 +52,6 @@
 #include <sstream>
 #include <netcdf.h>
 using namespace std;
-using namespace netCDF;
-using namespace netCDF::exceptions;
-
 
 // Default object thrown if a netCDF exception is encountered.
 /*NcxxException::NcxxException(const string& complaint,const char* fileName,int lineNumber)
@@ -237,7 +234,7 @@ NcxxNoRecVars::NcxxNoRecVars(const char* complaint,const char* file,int line) :
   NcxxException(NC_ENORECVARS,complaint,file,line) { }
 
 // Thrown if attempt to convert between text and numbers.
-NcxxChar::NcxxChar(const char* complaint,const char* file,int line) :
+NcxxCharConvert::NcxxCharConvert(const char* complaint,const char* file,int line) :
   NcxxException(NC_ECHAR,complaint,file,line) { }
 
 // Thrown if edge+start exceeds dimension bound.

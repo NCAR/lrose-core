@@ -66,8 +66,6 @@
 #include <NcxxUtils/NcxxException.hh>
 
 using namespace std;
-using namespace netCDF;
-using namespace netCDF::exceptions;
 
 // Class represents a netCDF variable.
 
@@ -160,18 +158,18 @@ NcxxType NcxxCompoundType::getMember(int memberIndex) const
   nc_type fieldtypeidp;
   ncxxCheck(nc_inq_compound_fieldtype(groupId,myId,memberIndex,&fieldtypeidp),__FILE__,__LINE__);
   switch (fieldtypeidp) {
-  case NC_BYTE    : return ncByte;
-  case NC_UBYTE   : return ncUbyte;
-  case NC_CHAR    : return ncChar;
-  case NC_SHORT   : return ncShort;
-  case NC_USHORT  : return ncUshort;
-  case NC_INT     : return ncInt;
-  case NC_UINT    : return ncUint;  
-  case NC_INT64   : return ncInt64; 
-  case NC_UINT64  : return ncUint64;
-  case NC_FLOAT   : return ncFloat;
-  case NC_DOUBLE  : return ncDouble;
-  case NC_STRING  : return ncString;
+  case NC_BYTE    : return ncxxByte;
+  case NC_UBYTE   : return ncxxUbyte;
+  case NC_CHAR    : return ncxxChar;
+  case NC_SHORT   : return ncxxShort;
+  case NC_USHORT  : return ncxxUshort;
+  case NC_INT     : return ncxxInt;
+  case NC_UINT    : return ncxxUint;  
+  case NC_INT64   : return ncxxInt64; 
+  case NC_UINT64  : return ncxxUint64;
+  case NC_FLOAT   : return ncxxFloat;
+  case NC_DOUBLE  : return ncxxDouble;
+  case NC_STRING  : return ncxxString;
   default:  
     // this is a user defined type
     return NcxxType(getParentGroup(),fieldtypeidp);

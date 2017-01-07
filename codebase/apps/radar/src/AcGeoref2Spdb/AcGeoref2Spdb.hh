@@ -61,7 +61,6 @@
 #include <NcxxUtils/Ncxx.hh>
 
 using namespace std;
-using namespace netCDF;
 
 ////////////////////////
 // This class

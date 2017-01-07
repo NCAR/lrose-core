@@ -50,12 +50,9 @@
 
 #include <NcxxUtils/NcxxShort.hh>
 #include <netcdf.h>
-using namespace netCDF;
 
-// create an instance of NcxxShort  called netCDF::ncShort
-namespace netCDF {
-  NcxxShort ncShort;
-}
+// create an instance of NcxxShort  called ncxxShort
+NcxxShort ncxxShort;
 
 // constructor
 NcxxShort::NcxxShort() : NcxxType(NC_SHORT){

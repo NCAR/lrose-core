@@ -57,24 +57,19 @@
 #include <NcxxUtils/NcxxException.hh>
 #include<netcdf.h>
 using namespace std;
-using namespace netCDF::exceptions;
 
-namespace netCDF {
-  //  Global comparator operator ==============
-  // comparator operator
-  bool operator<(const NcxxVar& lhs,const NcxxVar& rhs)
-  {
-    return false;
-  }
-
-  // comparator operator
-  bool operator>(const NcxxVar& lhs,const NcxxVar& rhs)
-  {
-    return true;
-  }
+//  Global comparator operator ==============
+// comparator operator
+bool operator<(const NcxxVar& lhs,const NcxxVar& rhs)
+{
+  return false;
 }
 
-using namespace netCDF;
+// comparator operator
+bool operator>(const NcxxVar& lhs,const NcxxVar& rhs)
+{
+  return true;
+}
 
 // assignment operator
 NcxxVar& NcxxVar::operator=(const NcxxVar & rhs)
@@ -166,18 +161,18 @@ NcxxType NcxxVar::getType() const {
   nc_type xtypep;
   ncxxCheck(nc_inq_vartype(groupId,myId,&xtypep),__FILE__,__LINE__);
 
-  if(xtypep ==  ncByte.getId()    ) return ncByte;
-  if(xtypep ==  ncUbyte.getId()   ) return ncUbyte;
-  if(xtypep ==  ncChar.getId()    ) return ncChar;
-  if(xtypep ==  ncShort.getId()   ) return ncShort;
-  if(xtypep ==  ncUshort.getId()  ) return ncUshort;
-  if(xtypep ==  ncInt.getId()     ) return ncInt;
-  if(xtypep ==  ncUint.getId()    ) return ncUint;
-  if(xtypep ==  ncInt64.getId()   ) return ncInt64;
-  if(xtypep ==  ncUint64.getId()  ) return ncUint64;
-  if(xtypep ==  ncFloat.getId()   ) return ncFloat;
-  if(xtypep ==  ncDouble.getId()  ) return ncDouble;
-  if(xtypep ==  ncString.getId()  ) return ncString;
+  if(xtypep ==  ncxxByte.getId()    ) return ncxxByte;
+  if(xtypep ==  ncxxUbyte.getId()   ) return ncxxUbyte;
+  if(xtypep ==  ncxxChar.getId()    ) return ncxxChar;
+  if(xtypep ==  ncxxShort.getId()   ) return ncxxShort;
+  if(xtypep ==  ncxxUshort.getId()  ) return ncxxUshort;
+  if(xtypep ==  ncxxInt.getId()     ) return ncxxInt;
+  if(xtypep ==  ncxxUint.getId()    ) return ncxxUint;
+  if(xtypep ==  ncxxInt64.getId()   ) return ncxxInt64;
+  if(xtypep ==  ncxxUint64.getId()  ) return ncxxUint64;
+  if(xtypep ==  ncxxFloat.getId()   ) return ncxxFloat;
+  if(xtypep ==  ncxxDouble.getId()  ) return ncxxDouble;
+  if(xtypep ==  ncxxString.getId()  ) return ncxxString;
 
   multimap<string,NcxxType>::const_iterator it;
   multimap<string,NcxxType> types(NcxxGroup(groupId).getTypes(NcxxGroup::ParentsAndCurrent));

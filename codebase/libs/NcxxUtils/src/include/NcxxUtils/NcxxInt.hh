@@ -53,26 +53,22 @@
 #ifndef NcxxIntClass
 #define NcxxIntClass
 
-namespace netCDF
+/*! Class represents a netCDF atomic Int type. */
+class NcxxInt : public NcxxType
 {
+public: 
   
-  /*! Class represents a netCDF atomic Int type. */
-  class NcxxInt : public NcxxType
-  {
-  public: 
-    
-    /*! equivalence operator */
-    bool operator==(const NcxxInt & rhs);
-    
-    /*!  destructor */
-    ~NcxxInt();
-    
-    /*! Constructor */
-    NcxxInt();
-  };
+  /*! equivalence operator */
+  bool operator==(const NcxxInt & rhs);
+  
+  /*!  destructor */
+  ~NcxxInt();
+  
+  /*! Constructor */
+  NcxxInt();
+};
 
-  /*! A global instance  of the NcxxInt class within the netCDF namespace. */
-  extern NcxxInt ncInt;
+/*! A global instance  of the NcxxInt class. */
+extern NcxxInt ncxxInt;
 
-}
 #endif

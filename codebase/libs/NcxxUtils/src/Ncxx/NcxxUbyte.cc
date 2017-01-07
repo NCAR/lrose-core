@@ -50,12 +50,9 @@
 
 #include <NcxxUtils/NcxxUbyte.hh>
 #include <netcdf.h>
-using namespace netCDF;
 
-// create an instance of NcxxUbyte  called netCDF::ncUbyte
-namespace netCDF {
-  NcxxUbyte ncUbyte;
-}
+// create an instance of NcxxUbyte  called ncxxUbyte
+NcxxUbyte ncxxUbyte;
 
 // constructor
 NcxxUbyte::NcxxUbyte() : NcxxType(NC_UBYTE){

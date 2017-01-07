@@ -50,12 +50,9 @@
 
 #include <NcxxUtils/NcxxFloat.hh>
 #include <netcdf.h>
-using namespace netCDF;
 
-// create an instance of NcxxFloat  called netCDF::ncFloat
-namespace netCDF {
-  NcxxFloat ncFloat;
-}
+// create an instance of NcxxFloat  called ncxxFloat
+NcxxFloat ncxxFloat;
 
 // constructor
 NcxxFloat::NcxxFloat() : NcxxType(NC_FLOAT){

@@ -50,12 +50,9 @@
 
 #include <NcxxUtils/NcxxString.hh>
 #include <netcdf.h>
-using namespace netCDF;
 
-// create an instance of NcxxString  called netCDF::ncString
-namespace netCDF {
-  NcxxString ncString;
-}
+// create an instance of NcxxString  called ncxxString
+NcxxString ncxxString;
 
 // constructor
 NcxxString::NcxxString() : NcxxType(NC_STRING){

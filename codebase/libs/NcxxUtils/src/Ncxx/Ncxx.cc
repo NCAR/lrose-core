@@ -50,8 +50,6 @@
 
 #include <NcxxUtils/Ncxx.hh>
 
-using namespace netCDF;
-
 // missing values in meta-data
 
 double Ncxx::missingMetaDouble = -9999.0;
@@ -150,7 +148,7 @@ string Ncxx::ncTypeToStr(nc_type nctype)
   
 }
 
-string Ncxx::ncTypeToStr(NcxxType &nctype)
+string Ncxx::ncxxTypeToStr(NcxxType &nctype)
   
 {
   return ncTypeToStr(nctype.getId());

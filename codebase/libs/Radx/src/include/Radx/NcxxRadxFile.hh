@@ -56,7 +56,6 @@ class RadxRay;
 class RadxSweep;
 class RadxRcalib;
 using namespace std;
-using namespace netCDF;
 
 ///////////////////////////////////////////////////////////////
 /// CXX FILE IO CLASS FOR NETCDF CF/RADIAL FILE FORMAT

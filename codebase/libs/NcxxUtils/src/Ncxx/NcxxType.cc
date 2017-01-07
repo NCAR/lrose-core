@@ -56,22 +56,18 @@ using namespace std;
 
 extern int g_ncid;
 
-namespace netCDF {
-  //  Global comparator operator ==============
-  // comparator operator
-  bool operator<(const NcxxType& lhs,const NcxxType& rhs)
-  {
-    return false;
-  }
-
-  // comparator operator
-  bool operator>(const NcxxType& lhs,const NcxxType& rhs)
-  {
-    return true;
-  }
+//  Global comparator operator ==============
+// comparator operator
+bool operator<(const NcxxType& lhs,const NcxxType& rhs)
+{
+  return false;
 }
 
-using namespace netCDF;
+// comparator operator
+bool operator>(const NcxxType& lhs,const NcxxType& rhs)
+{
+  return true;
+}
 
 // assignment operator
 NcxxType& NcxxType::operator=(const NcxxType & rhs)
@@ -113,7 +109,7 @@ NcxxType::NcxxType(nc_type id) :
 }
 
 // Constructor for a non-global type
-NcxxType::NcxxType(const netCDF::NcxxGroup& grp, nc_type id):
+NcxxType::NcxxType(const NcxxGroup& grp, nc_type id):
   nullObject(false),
   myId(id),
   groupId(grp.getId())

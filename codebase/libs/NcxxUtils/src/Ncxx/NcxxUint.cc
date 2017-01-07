@@ -50,12 +50,8 @@
 
 #include <NcxxUtils/NcxxUint.hh>
 #include <netcdf.h>
-using namespace netCDF;
-
-// create an instance of NcxxUint  called netCDF::ncUint
-namespace netCDF {
-  NcxxUint ncUint;
-}
+// create an instance of NcxxUint  called ncxxUint
+NcxxUint ncxxUint;
 
 // constructor
 NcxxUint::NcxxUint() : NcxxType(NC_UINT){

@@ -53,28 +53,24 @@
 #ifndef NcxxByteClass
 #define NcxxByteClass
 
-namespace netCDF
+/*! Class represents a netCDF atomic Byte type. */
+class NcxxByte : public NcxxType
 {
-  
-  /*! Class represents a netCDF atomic Byte type. */
-  class NcxxByte : public NcxxType
-  {
-  public: 
+public: 
     
-    /*! equivalence operator */
-    bool operator==(const NcxxByte & rhs);
+  /*! equivalence operator */
+  bool operator==(const NcxxByte & rhs);
 
-    /*! storage size */
-    int sizeoff();
+  /*! storage size */
+  int sizeoff();
 
-    ~NcxxByte();
+  ~NcxxByte();
     
-    /*! Constructor */
-    NcxxByte();
-  };
+  /*! Constructor */
+  NcxxByte();
+};
 
-  /*! A global instance  of the NcxxByte class within the netCDF namespace. */
-  extern NcxxByte ncByte;
+/*! A global instance  of the NcxxByte class. */
+extern NcxxByte ncxxByte;
 
-}
 #endif

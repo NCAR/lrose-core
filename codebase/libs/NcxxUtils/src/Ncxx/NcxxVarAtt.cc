@@ -56,23 +56,18 @@
 using namespace std;
 
 
-namespace netCDF {
-  //  Global comparator operator ==============
-  // comparator operator 
-  bool operator<(const NcxxVarAtt& lhs,const NcxxVarAtt& rhs)
-  {
-    return false;
-  }
-  
-  // comparator operator 
-  bool operator>(const NcxxVarAtt& lhs,const NcxxVarAtt& rhs)
-  {
-    return true;
-  }
+//  Global comparator operator ==============
+// comparator operator 
+bool operator<(const NcxxVarAtt& lhs,const NcxxVarAtt& rhs)
+{
+  return false;
 }
 
-
-using namespace netCDF;
+// comparator operator 
+bool operator>(const NcxxVarAtt& lhs,const NcxxVarAtt& rhs)
+{
+  return true;
+}
 
 
 // assignment operator
