@@ -45,6 +45,7 @@
 #include <toolsa/TaArray.hh>
 #include <radar/PidImapManager.hh>
 #include <radar/PhidpProc.hh>
+#include <radar/TempProfile.hh>
 using namespace std;
 
 ////////////////////////
@@ -233,56 +234,6 @@ public:
 
   };
 
-  //////////////////////////
-  // Interior class: TmpPoint
-
-  /**
-   * @class TmpPoint
-   *   An object to hold the temperature, pressure, and height values 
-   *   at each gate 
-   */
-  class TmpPoint {
-  
-  public:
-    
-    // constructor
-    
-    /**
-     * Constructor
-     * @param[in] press The pressure at this gate (Hpa)
-     * @param[in] ht The height of this gate (km)
-     * @param[in] temp The temperature at this gate (C)
-     */
-    TmpPoint(double press, double ht, double tmp);
-
-    /**
-     * Constructor
-     * @param[in] ht The height of this gate (km)
-     * @param[in] temp The temperature at this gate (C)
-     */
-    TmpPoint(double ht, double tmp);
-    
-    /**
-     * Destructor
-     */
-    ~TmpPoint();
-
-    // print tmpPoint
-
-    /**
-     * Print the contents of this TmpPoint
-     * @param[out] out The stream to print to
-     */
-    void print(ostream &out);
-    
-    // data
-
-    double pressHpa;   /**< The pressure at this gate (Hpa), or -9999 if unavailable */
-    double htKm;       /**< The height of this gate (km) */
-    double tmpC;       /**< The temperature at this gate (C) */
-    
-  };
-
   /**
    * Constructor
    */
@@ -420,7 +371,7 @@ public:
    * thresholds file, for example from a sounding.
    * @param
    */
-  void setTempProfile(const vector<TmpPoint> &profile);
+  void setTempProfile(const vector<TempProfile::PointVal> &profile);
  
   /** 
    * Get temperature at a given height
@@ -700,7 +651,7 @@ private:
   vector<Particle*> _particleList;  /**< A vector of pointers to Particle objects, one for each possible particle type */
 
   // temperature profile
-  vector<TmpPoint> _tmpProfile; /**< Temperature profile */
+  vector<TempProfile::PointVal> _tmpProfile; /**< Temperature profile */
   TaArray<double> _tmpHtArray_; /**< Array of temperature profile heights */
   double *_tmpHtArray;          /**< Pointer to the array of temperature profile heights */
 

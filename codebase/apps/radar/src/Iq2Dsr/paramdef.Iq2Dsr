@@ -1782,9 +1782,6 @@ typedef enum {
   LAG0_HCVX_DB,
   LAG0_HCVX_PHASE,
 
-  LAG0_VXHX_DB,
-  LAG0_VXHX_PHASE,
-
   LAG1_HC_DB,
   LAG1_HC_PHASE,
 

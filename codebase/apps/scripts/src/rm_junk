@@ -1,4 +1,4 @@
-nice find . '(' -name core -o -name 'core.*' -o -name '*~' -o -name 'junk*' \
+nice find . '(' -name core -o -name '*~' -o -name 'junk*' \
          -o -name '*.i' -o -name a.out -o -name '*errlog' \
          -o -name 'TAGS' ')' \
          -user $USER -type f -print -exec \rm '{}' \;

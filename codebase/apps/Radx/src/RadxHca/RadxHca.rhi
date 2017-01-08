@@ -1,0 +1,3406 @@
+/**********************************************************************
+ * TDRP params for RadxHca
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxHca reads moments from Radx-supported format files, runs the 
+//   NEXRAD Hydrometeor Classification Algorithm (HCA) on the moments, and 
+//   writes out the results to CfRadial files.
+//
+// References:
+//
+// Park HyangSuk, A. V. Ryzhhov, D. S. Zrnic, Kyung0Eak Kim. June 2009. 
+//   The Hydrometeor Classification Algorithm for the Polarimetric 
+//   WSR-88D: Description and Application to an MCS. AMS Weather and 
+//   Forecasting, Vol 24, 730-748, June 2009.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "rhi";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register this process with the process mapper (procmap).
+//
+// If TRUE, every minute this process will register a heartbeat with 
+//   procmap. If the process hangs, it will be restared by the 
+//   auto_restarter.
+//
+//
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+///////////// procmap_register_interval ///////////////
+//
+// Interval for registering with procmap (secs).
+//
+// The app will register with procmap at this interval, to update its 
+//   status. If it does not register within twice this interval, the 
+//   auto_restart script will restart the app.
+//
+//
+// Type: int
+//
+
+procmap_register_interval = 60;
+
+//======================================================================
+//
+// THREADING FOR SPEED.
+//
+//======================================================================
+ 
+///////////// use_multiple_threads ////////////////////
+//
+// Option to use multiple compute threads to improve performance.
+//
+// The read and write stages occur in the main thread, since netCDF is 
+//   not thread safe. The compute stage can be multi-threaded to improve 
+//   performance.
+//
+//
+// Type: boolean
+//
+
+use_multiple_threads = FALSE;
+
+///////////// n_compute_threads ///////////////////////
+//
+// The number of compute threads.
+//
+// The moments computations are segmented in range, with each thread 
+//   computing a fraction of the number of gates. For maximum performance, 
+//   n_threads should be set to the number of processors multiplied by 4. 
+//   For further tuning, use top to maximize CPU usage while varying the 
+//   number of threads.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+n_compute_threads = 8;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+//
+// Files will be searched for in this directory.
+//
+//
+// Type: string
+//
+
+input_dir = "/scr/hail2/rsfdata/pecan/cfradial/spol/moments/sband/rhi";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = FILELIST;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+///////////// input_file_search_ext ///////////////////
+//
+// File name extension.
+//
+// If set, only files with this extension will be processed.
+//
+//
+// Type: string
+//
+
+input_file_search_ext = "";
+
+///////////// input_file_search_substr ////////////////
+//
+// File name sub-string.
+//
+// If set, only files with names containing this sub-string will be 
+//   processed.
+//
+//
+// Type: string
+//
+
+input_file_search_substr = "";
+
+//======================================================================
+//
+// READ OPTIONS.
+//
+//======================================================================
+ 
+///////////// aggregate_sweep_files_on_read ///////////
+//
+// Option to aggregate sweep files into a volume on read.
+//
+// If true, and the input data is in sweeps rather than volumes (e.g. 
+//   DORADE), the sweep files from a volume will be aggregated into a 
+//   volume.
+//
+//
+// Type: boolean
+//
+
+aggregate_sweep_files_on_read = FALSE;
+
+///////////// remove_rays_with_antenna_transitions ////
+//
+// Option to remove rays taken while the antenna was in transition.
+//
+// If true, rays with the transition flag set will not be used. The 
+//   transiton flag is set when the antenna is in transtion between one 
+//   sweep and the next.
+//
+//
+// Type: boolean
+//
+
+remove_rays_with_antenna_transitions = FALSE;
+
+///////////// transition_nrays_margin /////////////////
+//
+// Number of transition rays to include as a margin.
+//
+// Sometimes the transition flag is turned on too early in a transition, 
+//   on not turned off quickly enough after a transition. If you set this 
+//   to a number greater than 0, that number of rays will be included at 
+//   each end of the transition, i.e. the transition will effectively be 
+//   shorter at each end by this number of rays.
+//
+//
+// Type: int
+//
+
+transition_nrays_margin = 0;
+
+///////////// trim_surveillance_sweeps_to_360deg //////
+//
+// Option to trip surveillance sweeps so that they only cover 360 
+//   degrees.
+//
+// Some sweeps will have rays which cover more than a 360-degree 
+//   rotation. Often these include antenna transitions. If this is set to 
+//   true, rays are trimmed off either end of the sweep to limit the 
+//   coverage to 360 degrees. The median elevation angle is computed and 
+//   the end ray which deviates from the median in elevation is trimmed 
+//   first.
+//
+//
+// Type: boolean
+//
+
+trim_surveillance_sweeps_to_360deg = FALSE;
+
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range for any ray.
+//
+//
+// Type: boolean
+//
+
+set_max_range = FALSE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+//
+// Gates beyond this range are removed.
+//
+//
+// Type: double
+//
+
+max_range_km = 9999;
+
+///////////// set_ngates_constant /////////////////////
+//
+// Option to force the number of gates to be constant.
+//
+// If TRUE, the number of gates on all rays will be set to the maximum, 
+//   and gates added to shorter rays will be filled with missing values.
+//
+//
+// Type: boolean
+//
+
+set_ngates_constant = FALSE;
+
+///////////// set_fixed_angle_limits //////////////////
+//
+// Option to set fixed angle limits.
+//
+// Only use sweeps within the specified fixed angle limits.
+//
+//
+// Type: boolean
+//
+
+set_fixed_angle_limits = FALSE;
+
+///////////// lower_fixed_angle_limit /////////////////
+//
+// Lower fixed angle limit - degrees.
+//
+//
+// Type: double
+//
+
+lower_fixed_angle_limit = 0;
+
+///////////// upper_fixed_angle_limit /////////////////
+//
+// Upper fixed angle limit - degrees.
+//
+//
+// Type: double
+//
+
+upper_fixed_angle_limit = 90;
+
+//======================================================================
+//
+// OPTION TO OVERRIDE RADAR LOCATION.
+//
+//======================================================================
+ 
+///////////// override_radar_location /////////////////
+//
+// Option to override the radar location.
+//
+// If true, the location in this file will be used. If not, the location 
+//   in the time series data will be used.
+//
+//
+// Type: boolean
+//
+
+override_radar_location = FALSE;
+
+///////////// radar_latitude_deg //////////////////////
+//
+// Radar latitude (deg).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_latitude_deg = -999;
+
+///////////// radar_longitude_deg /////////////////////
+//
+// Radar longitude (deg).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_longitude_deg = -999;
+
+///////////// radar_altitude_meters ///////////////////
+//
+// Radar altitude (meters).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_altitude_meters = -999;
+
+//======================================================================
+//
+// INPUT FIELD INFORMATION.
+//
+// Names of fields in the input file. The following fields are required: 
+//   SNR, DBZ, ZDR, PHIDP and RHOHV. KDP is also required internally, but 
+//   if KDP is not available it will be computed from PHIDP. LDR is 
+//   optional, and is used for PID only.
+//
+//======================================================================
+ 
+///////////// DBZ_field_name //////////////////////////
+//
+// Field name for DBZ.
+//
+// Horizontally-polarized reflectivity factor.
+//
+//
+// Type: string
+//
+
+DBZ_field_name = "DBZ_F";
+
+///////////// VEL_field_name //////////////////////////
+//
+// Field name for radial velocity.
+//
+// This is used in quality checks.
+//
+//
+// Type: string
+//
+
+VEL_field_name = "VEL_F";
+
+///////////// WIDTH_available /////////////////////////
+//
+// Is WIDTH data available?.
+//
+// If NCP is not available, this field is used for locating RLAN 
+//   interference.
+//
+//
+// Type: boolean
+//
+
+WIDTH_available = TRUE;
+
+///////////// WIDTH_field_name ////////////////////////
+//
+// Field name for WIDTH.
+//
+//
+// Type: string
+//
+
+WIDTH_field_name = "WIDTH_F";
+
+///////////// NCP_available ///////////////////////////
+//
+// Is NCP data available?.
+//
+// This field is used for locating RLAN interference. If it is not 
+//   available, use spectrum width instead.
+//
+//
+// Type: boolean
+//
+
+NCP_available = TRUE;
+
+///////////// NCP_field_name //////////////////////////
+//
+// Field name for NCP.
+//
+//
+// Type: string
+//
+
+NCP_field_name = "NCP_F";
+
+///////////// SNR_available ///////////////////////////
+//
+// Is SNR data available?.
+//
+// If not, SNR will be computed from the DBZ field. See 
+//   'noise_dbz_at_100km'.
+//
+//
+// Type: boolean
+//
+
+SNR_available = TRUE;
+
+///////////// SNR_field_name //////////////////////////
+//
+// Field name for SNR.
+//
+// Signal-to-noise ratio (dB).
+//
+//
+// Type: string
+//
+
+SNR_field_name = "SNRHC_F";
+
+///////////// noise_dbz_at_100km //////////////////////
+//
+// The noise value, represented as dBZ at a range of 100km.
+//
+// Used to fill in missing reflectivity data for the vertical gradient 
+//   of reflectivity in identifying sea clutter and AP. Also used if 
+//   SNR_available is set to FALSE. It is used for computing the SNR from 
+//   the DBZ field. The SNR will be computed by range-correcting this 
+//   value and using it as the noise value.
+//
+//
+// Type: double
+//
+
+noise_dbz_at_100km = 0;
+
+///////////// ZDR_field_name //////////////////////////
+//
+// Field name for ZDR.
+//
+//
+// Type: string
+//
+
+ZDR_field_name = "ZDR_F";
+
+///////////// PHIDP_field_name ////////////////////////
+//
+// Field name for PHIDP.
+//
+//
+// Type: string
+//
+
+PHIDP_field_name = "PHIDP_F";
+
+///////////// RHOHV_field_name ////////////////////////
+//
+// Field name for RHOHV.
+//
+//
+// Type: string
+//
+
+RHOHV_field_name = "RHOHV_F";
+
+///////////// LDR_available ///////////////////////////
+//
+// Is LDR data available?.
+//
+//
+// Type: boolean
+//
+
+LDR_available = FALSE;
+
+///////////// LDR_field_name //////////////////////////
+//
+// Field name for LDR.
+//
+//
+// Type: string
+//
+
+LDR_field_name = "LDRH_F";
+
+//======================================================================
+//
+// COMPUTE KDP.
+//
+//======================================================================
+ 
+///////////// KDP_fir_filter_len //////////////////////
+//
+// Filter length for the FIR filter for PHIDP (gates).
+//
+// When computing KDP, an FIR filter is first applied to PHIDP to smooth 
+//   it. This is the length of that filter, in gates.
+//
+//
+// Type: enum
+// Options:
+//     FIR_LEN_125
+//     FIR_LEN_60
+//     FIR_LEN_40
+//     FIR_LEN_30
+//     FIR_LEN_20
+//     FIR_LEN_10
+//
+
+KDP_fir_filter_len = FIR_LEN_10;
+
+///////////// KDP_n_filt_iterations_unfolded //////////
+//
+// Sets the number of iterations for the initial FIR filter for unfolded 
+//   PHIDP.
+//
+// After unfolding PHIDP, the FIR filter is applied to the unfolded 
+//   phidp, a number of times, to smooth it. The effect of the filter is a 
+//   combination of the filter length and the number of iterations.
+//
+//
+// Type: int
+//
+
+KDP_n_filt_iterations_unfolded = 2;
+
+///////////// KDP_n_filt_iterations_conditioned ///////
+//
+// Sets the number of iterations for the final FIR filter for 
+//   conditioned PHIDP.
+//
+// In order to identify phase shift on backscatter (PSOB), we condition 
+//   the PHIDP to keep it generally increasing with range. The FIR filter 
+//   is applied to the conditioned phidp a number of times, to smooth it. 
+//   The effect of the filter is a combination of the filter length and 
+//   the number of iterations.
+//
+//
+// Type: int
+//
+
+KDP_n_filt_iterations_conditioned = 3;
+
+///////////// KDP_use_iterative_filtering /////////////
+//
+// Perform iterative filtering to locate backscatter phase shift.
+//
+//
+// Type: boolean
+//
+
+KDP_use_iterative_filtering = FALSE;
+
+///////////// KDP_phidp_difference_threshold //////////
+//
+// Difference threshold for the iterative filtering method.
+//
+// The FIR filter is applied successively, 
+//   KDP_n_filt_iterations_conditioned times. After each iteration the 
+//   result is checked against the original. If the difference is less 
+//   than this parameter, the original value at that gate is retained. If 
+//   the difference exceeds this parameter, the new filtered value is 
+//   retained.
+//
+//
+// Type: double
+//
+
+KDP_phidp_difference_threshold = 4;
+
+///////////// KDP_ngates_for_stats ////////////////////
+//
+// Number of gates over which the phidp mean, sdev and jitter are 
+//   computed.
+//
+// The mean, sdev and jitter of phidp are computed over a consecutive 
+//   number of gates in range, centered on the current gate of interest. 
+//   This parameter is the number of gates over which these statistics are 
+//   computed.
+//
+//
+// Type: int
+//
+
+KDP_ngates_for_stats = 9;
+
+///////////// KDP_phidp_sdev_max //////////////////////
+//
+// Sets the threshold for the standard deviation of phidp in range.
+//
+// The sdev of phidp is a good test for valid phidp. The sdev is 
+//   computed in the circle, so that it takes account of folding if 
+//   present. If the sdev is less than this value, it is assumed we are in 
+//   weather. Applies to computation of KDP only.
+//
+//
+// Type: double
+//
+
+KDP_phidp_sdev_max = 25;
+
+///////////// KDP_phidp_jitter_max ////////////////////
+//
+// Sets the threshold for the jitter of phidp in range.
+//
+// The jitter of phidp is defined as the mean absolute change in angle 
+//   between successive phidp measurements in range. It is computed on the 
+//   circle to take account of folding. If the jitter is less than this 
+//   value, it is assumed we are in weather. Applies to computation of KDP 
+//   only.
+//
+//
+// Type: double
+//
+
+KDP_phidp_jitter_max = 25;
+
+///////////// KDP_min_valid_abs_kdp ///////////////////
+//
+// Sets the min valid KDP value.
+//
+// Values less than this are set to 0.
+//
+//
+// Type: double
+//
+
+KDP_min_valid_abs_kdp = 0.01;
+
+///////////// KDP_check_snr ///////////////////////////
+//
+// Check the SNR.
+//
+//
+// Type: boolean
+//
+
+KDP_check_snr = TRUE;
+
+///////////// KDP_snr_threshold ///////////////////////
+//
+// Sets the threshold for checking SNR (dB).
+//
+// If the SNR drops below this value, KDP will not be computed at this 
+//   gate.
+//
+//
+// Type: double
+//
+
+KDP_snr_threshold = 0;
+
+///////////// KDP_check_rhohv /////////////////////////
+//
+// Check the RHOHV.
+//
+//
+// Type: boolean
+//
+
+KDP_check_rhohv = TRUE;
+
+///////////// KDP_rhohv_threshold /////////////////////
+//
+// Sets the threshold for checking RHOHV.
+//
+// If the RHOHV drops below this value, KDP will not be computed at this 
+//   gate.
+//
+//
+// Type: double
+//
+
+KDP_rhohv_threshold = 0.85;
+
+///////////// KDP_check_zdr_sdev //////////////////////
+//
+// Check the standard deviation of ZDR in range?.
+//
+//
+// Type: boolean
+//
+
+KDP_check_zdr_sdev = TRUE;
+
+///////////// KDP_zdr_sdev_max ////////////////////////
+//
+// Sets the threshold for the standard deviation of zdr in range.
+//
+// The sdev of zdr is a good test for clutter. If the sdev is less than 
+//   this value, it is assumed we are in weather. Applies to computation 
+//   of KDP only.
+//
+//
+// Type: double
+//
+
+KDP_zdr_sdev_max = 2.5;
+
+///////////// KDP_threshold_for_ZZDR //////////////////
+//
+// Sets the threshold for computing conditional KDP from Z and ZDR.
+//
+// We can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can 
+//   then compute the conditioned KDP - we call this KDP_COND. To compute 
+//   KDP_COND, we first find the gates over which regular KDP exceeds this 
+//   threshold. Over this run of gates we compute the PHIDP change from 
+//   the regular KDP and from KDP_ZZDR. By taking the ratio of sum(KDP) / 
+//   sum(KDP_ZZDR), and applying that ratio to KDP_ZZDR over these gates, 
+//   we can compute KDP_COND such that the PHIDP change is the same for 
+//   both KDP and KDP_COND.
+//
+//
+// Type: double
+//
+
+KDP_threshold_for_ZZDR = 0.33;
+
+///////////// KDP_median_filter_len_for_ZZDR //////////
+//
+// Sets the length of the median filter when computing KDP_ZZDR.
+//
+// The Z and ZDR fields are smoothed with a median filter of this length 
+//   prior to estimating KDP_ZZDR.
+//
+//
+// Type: int
+//
+
+KDP_median_filter_len_for_ZZDR = 5;
+
+///////////// KDP_debug ///////////////////////////////
+//
+// Option to print debug messages in KDP computation.
+//
+//
+// Type: boolean
+//
+
+KDP_debug = FALSE;
+
+///////////// KDP_write_ray_files /////////////////////
+//
+// Option to write ray files to debug KDP computation.
+//
+//
+// Type: boolean
+//
+
+KDP_write_ray_files = FALSE;
+
+///////////// KDP_ray_files_dir ///////////////////////
+//
+// Directory for KDP ray files.
+//
+//
+// Type: string
+//
+
+KDP_ray_files_dir = "/tmp/kdp_ray_files";
+
+//======================================================================
+//
+// PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR.
+//
+//======================================================================
+ 
+///////////// apply_precip_attenuation_correction /////
+//
+// Option to apply precip attenuation correction for DBZ and ZDR.
+//
+// The following extra fields will be computed:
+// 	DBZ_ATTEN_CORRECTION - correction in dB
+// 	ZDR_ATTEN_CORRECTION - correction in dB
+// 	DBZ_ATTEN_CORRECTED - DBZHC corrected
+// 	ZDR_ATTEN_CORRECTED - ZDR corrected.
+//
+//
+// Type: boolean
+//
+
+apply_precip_attenuation_correction = TRUE;
+
+///////////// specify_coefficients_for_attenuation_correction 
+//
+// Option to specify the coefficients and exponents - see below.
+//
+// If false, the default coefficients will be determined for the radar 
+//   wavelength.
+//
+//
+// Type: boolean
+//
+
+specify_coefficients_for_attenuation_correction = TRUE;
+
+///////////// dbz_attenuation_coefficient /////////////
+//
+// Coefficient for computing DBZ attenuation correction.
+//
+// See Bringi and Chandrasekar, Table 7.1, page 494.
+//
+//
+// Type: double
+//
+
+dbz_attenuation_coefficient = 0.017;
+
+///////////// dbz_attenuation_exponent ////////////////
+//
+// Exponent for computing DBZ attenuation correction.
+//
+// See Bringi and Chandrasekar, Table 7.1, page 494.
+//
+//
+// Type: double
+//
+
+dbz_attenuation_exponent = 0.84;
+
+///////////// zdr_attenuation_coefficient /////////////
+//
+// Coefficient for computing ZDR attenuation correction.
+//
+// See Bringi and Chandrasekar, Table 7.1, page 494.
+//
+//
+// Type: double
+//
+
+zdr_attenuation_coefficient = 0.003;
+
+///////////// zdr_attenuation_exponent ////////////////
+//
+// Exponent for computing ZDR attenuation correction.
+//
+// See Bringi and Chandrasekar, Table 7.1, page 494.
+//
+//
+// Type: double
+//
+
+zdr_attenuation_exponent = 1.05;
+
+//======================================================================
+//
+// COMPUTING BEAM HEIGHT.
+//
+//======================================================================
+ 
+///////////// override_standard_pseudo_earth_radius ///
+//
+// Option to override the standard 4/3 earth radius model for 
+//   refraction.
+//
+// If true, the standard 4/3 earth radius will be overridden. The US NWS 
+//   NEXRAD system uses 1.21 instead of 1.333.
+//
+//
+// Type: boolean
+//
+
+override_standard_pseudo_earth_radius = FALSE;
+
+///////////// pseudo_earth_radius_ratio ///////////////
+//
+// Ratio for computing the pseudo earth radius for beam height 
+//   computations.
+//
+// For standard refraction this is 4/3. For super refraction it will be 
+//   less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 
+//   1.21.
+//
+//
+// Type: double
+//
+
+pseudo_earth_radius_ratio = 1.33333;
+
+///////////// override_vertical_beamwidth /////////////
+//
+// Option to override the beamwidth in the input file.
+//
+//
+// Type: boolean
+//
+
+override_vertical_beamwidth = FALSE;
+
+///////////// vertical_beamwidth_deg //////////////////
+//
+// Specified radar antenna vertical beamwidth (deg).
+//
+// See 'override_vertical_beamwidth'.
+//
+//
+// Type: double
+//
+
+vertical_beamwidth_deg = 1;
+
+//======================================================================
+//
+// LOCATING SEA CLUTTER.
+//
+//======================================================================
+ 
+///////////// locate_sea_clutter //////////////////////
+//
+// Option to locate gates with sea clutter.
+//
+//
+// Type: boolean
+//
+
+locate_sea_clutter = FALSE;
+
+//======================================================================
+//
+// INTEREST MAPS and WEIGHTS for SEA CLUTTER DETECTION.
+//
+// Each map should hold at least 2 points. The points should be 
+//   increasing in value, i.e. the value should increase for each 
+//   subsequent point. The various interest values are combined using the 
+//   specified weights in a weighted mean to produce the final interest 
+//   value.
+//
+//======================================================================
+ 
+///////////// seaclut_min_snr_db //////////////////////
+//
+// Min SNR for sea clutter (dB).
+//
+// Only locate sea clutter if SNR exceeds this value.
+//
+//
+// Type: double
+//
+
+seaclut_min_snr_db = 0;
+
+///////////// seaclut_rhohv_mean_interest_map /////////
+//
+// SEA CLUTTER interest mapping for rhohv mean.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+seaclut_rhohv_mean_interest_map = {
+  {
+    value = 0.35,
+    interest = 1
+  }
+  ,
+  {
+    value = 0.4,
+    interest = 0.0001
+  }
+};
+
+///////////// seaclut_rhohv_mean_weight ///////////////
+//
+// SEA CLUTTER weight for interest for rhohv mean.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+seaclut_rhohv_mean_weight = 1;
+
+///////////// seaclut_phidp_sdev_interest_map /////////
+//
+// SEA CLUTTER interest mapping for sdev of phidp.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+seaclut_phidp_sdev_interest_map = {
+  {
+    value = 40,
+    interest = 0.0001
+  }
+  ,
+  {
+    value = 45,
+    interest = 1
+  }
+};
+
+///////////// seaclut_phidp_sdev_weight ///////////////
+//
+// Weight for interest for sdev of phidp.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+seaclut_phidp_sdev_weight = 1;
+
+///////////// seaclut_zdr_sdev_interest_map ///////////
+//
+// SEA CLUTTER interest mapping for sdev of zdr.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+seaclut_zdr_sdev_interest_map = {
+  {
+    value = 1.5,
+    interest = 0.0001
+  }
+  ,
+  {
+    value = 2.5,
+    interest = 1
+  }
+};
+
+///////////// seaclut_zdr_sdev_weight /////////////////
+//
+// Weight for interest for sdev of zdr.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+seaclut_zdr_sdev_weight = 1;
+
+///////////// seaclut_dbz_elev_gradient_interest_map //
+//
+// SEA CLUTTER interest mapping for gradient of dbz in polar elevation 
+//   space.
+//
+// The reflectivity gradient is computed with respect to elevation, i.e. 
+//   the change in reflectivity with change in elevation angle. The units 
+//   are db/deg.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+seaclut_dbz_elev_gradient_interest_map = {
+  {
+    value = -15,
+    interest = 1
+  }
+  ,
+  {
+    value = -5,
+    interest = 0
+  }
+};
+
+///////////// seaclut_dbz_elev_gradient_weight ////////
+//
+// Weight for interest for elevation gradient of dbz.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+seaclut_dbz_elev_gradient_weight = 1;
+
+///////////// seaclut_interest_threshold //////////////
+//
+// Threshold interest value for identifying sea clutter.
+//
+// If the fuzzy interest value exceeds this threshold, sea clutter is 
+//   assumed to exist at that gate.
+//
+//
+// Type: double
+//
+
+seaclut_interest_threshold = 0.51;
+
+///////////// dbz_elevation_gradient_field_name ///////
+//
+// Field name for computed vertical dbz gradient in polar elevation 
+//   space (dB/deg).
+//
+// For sea clutter identification, we need to compute the vertical 
+//   gradient of reflectivity. This is the name of that gradient field, in 
+//   dB/deg.
+//
+//
+// Type: string
+//
+
+dbz_elevation_gradient_field_name = "DbzElevGradient";
+
+///////////// ray_height_field_name ///////////////////
+//
+// Field name for computed ray height (km).
+//
+// In order to compute the vertical gradient of reflectivity for sea 
+//   clutter, we need to compute the beam height at each gate. This is the 
+//   name of the ray height field, in km MSL.
+//
+//
+// Type: string
+//
+
+ray_height_field_name = "RayHtMsl";
+
+///////////// seaclut_max_elev_deg ////////////////////
+//
+// Max elevation angle for sea clutter (deg).
+//
+// Above this angle the clutter flag will not be set.
+//
+//
+// Type: double
+//
+
+seaclut_max_elev_deg = 2.5;
+
+//======================================================================
+//
+// COMPUTING WSR88D HCA - HYDROMETEOR PARTICLE ID.
+//
+//======================================================================
+ 
+///////////// compute_hca /////////////////////////////
+//
+// Option to compute HCA classification.
+//
+//
+// Type: boolean
+//
+
+compute_hca = TRUE;
+
+///////////// HCA_snr_threshold ///////////////////////
+//
+// Minimum SNR for valid HCA classification.
+//
+// If the SNR at a gate is below this, the HCA is censored.
+//
+//
+// Type: double
+//
+
+HCA_snr_threshold = 3;
+
+//======================================================================
+//
+// Classification types.
+//
+// There are 10 classification types:
+// 	GC: ground clutter or AP
+// 	BS: biological scatterers
+// 	DS: dry aggregated snow
+// 	WS: wet snow
+// 	CR: crystals of various orientations
+// 	GR: graupel
+// 	BD: big drops
+// 	RA: light to moderate rain
+// 	HR: heavy rain
+// 	RH: mixture of rain and hail.
+//
+//======================================================================
+ 
+///////////// hca_interest_maps ///////////////////////
+//
+// Interest maps to convert feature fields into interest.
+//
+// There should be 1 entry for each id/feature pair - i.e. 60 entries.
+//
+//
+// Type: struct
+//   typedef struct {
+//      hca_class_t hca_class;
+//        Options:
+//          CLASS_GC
+//          CLASS_BS
+//          CLASS_DS
+//          CLASS_WS
+//          CLASS_CR
+//          CLASS_GR
+//          CLASS_BD
+//          CLASS_RA
+//          CLASS_HR
+//          CLASS_RH
+//      feature_field_t feature;
+//        Options:
+//          FEATURE_DBZ
+//          FEATURE_ZDR
+//          FEATURE_RHOHV
+//          FEATURE_LOG_KDP
+//          FEATURE_SD_DBZ
+//          FEATURE_SD_PHIDP
+//      double x1;
+//      double x2;
+//      double x3;
+//      double x4;
+//      double weight;
+//   }
+//
+// 1D array - fixed length - 60 elements.
+//
+
+hca_interest_maps = {
+  {
+    hca_class = CLASS_GC,
+    feature = FEATURE_DBZ,
+    x1 = 15,
+    x2 = 20,
+    x3 = 70,
+    x4 = 80,
+    weight = 0.2
+  }
+  ,
+  {
+    hca_class = CLASS_BS,
+    feature = FEATURE_DBZ,
+    x1 = 5,
+    x2 = 10,
+    x3 = 20,
+    x4 = 30,
+    weight = 0.4
+  }
+  ,
+  {
+    hca_class = CLASS_DS,
+    feature = FEATURE_DBZ,
+    x1 = 5,
+    x2 = 10,
+    x3 = 35,
+    x4 = 40,
+    weight = 1
+  }
+  ,
+  {
+    hca_class = CLASS_WS,
+    feature = FEATURE_DBZ,
+    x1 = 25,
+    x2 = 30,
+    x3 = 40,
+    x4 = 50,
+    weight = 0.6
+  }
+  ,
+  {
+    hca_class = CLASS_CR,
+    feature = FEATURE_DBZ,
+    x1 = 0,
+    x2 = 5,
+    x3 = 20,
+    x4 = 25,
+    weight = 1
+  }
+  ,
+  {
+    hca_class = CLASS_GR,
+    feature = FEATURE_DBZ,
+    x1 = 25,
+    x2 = 35,
+    x3 = 50,
+    x4 = 55,
+    weight = 0.8
+  }
+  ,
+  {
+    hca_class = CLASS_BD,
+    feature = FEATURE_DBZ,
+    x1 = 20,
+    x2 = 25,
+    x3 = 45,
+    x4 = 50,
+    weight = 0.8
+  }
+  ,
+  {
+    hca_class = CLASS_RA,
+    feature = FEATURE_DBZ,
+    x1 = 5,
+    x2 = 10,
+    x3 = 45,
+    x4 = 50,
+    weight = 1
+  }
+  ,
+  {
+    hca_class = CLASS_HR,
+    feature = FEATURE_DBZ,
+    x1 = 40,
+    x2 = 45,
+    x3 = 55,
+    x4 = 60,
+    weight = 1
+  }
+  ,
+  {
+    hca_class = CLASS_RH,
+    feature = FEATURE_DBZ,
+    x1 = 45,
+    x2 = 50,
+    x3 = 75,
+    x4 = 80,
+    weight = 1
+  }
+  ,
+  {
+    hca_class = CLASS_GC,
+    feature = FEATURE_ZDR,
+    x1 = -4,
+    x2 = -2,
+    x3 = 1,
+    x4 = 2,
+    weight = 0.4
+  }
+  ,
+  {
+    hca_class = CLASS_BS,
+    feature = FEATURE_ZDR,
+    x1 = 0,
+    x2 = 2,
+    x3 = 10,
+    x4 = 12,
+    weight = 0.8
+  }
+  ,
+  {
+    hca_class = CLASS_DS,
+    feature = FEATURE_ZDR,
+    x1 = -0.3,
+    x2 = 0,
+    x3 = 0.3,
+    x4 = 0.6,
+    weight = 0.8
+  }
+  ,
+  {
+    hca_class = CLASS_WS,
+    feature = FEATURE_ZDR,
+    x1 = 0.5,
+    x2 = 1,
+    x3 = 2,
+    x4 = 3,
+    weight = 0.8
+  }
+  ,
+  {
+    hca_class = CLASS_CR,
+    feature = FEATURE_ZDR,
+    x1 = 0.1,
+    x2 = 0.4,
+    x3 = 3,
+    x4 = 3.3,
+    weight = 0.6
+  }
+  ,
+  {
+    hca_class = CLASS_GR,
+    feature = FEATURE_ZDR,
+    x1 = -0.3,
+    x2 = 0,
+    x3 = 0,
+    x4 = 0.3,
+    weight = 1
+  }
+  ,
+  {
+    hca_class = CLASS_BD,
+    feature = FEATURE_ZDR,
+    x1 = -0.3,
+    x2 = 0,
+    x3 = 0,
+    x4 = 1,
+    weight = 0.8
+  }
+  ,
+  {
+    hca_class = CLASS_RA,
+    feature = FEATURE_ZDR,
+    x1 = -0.3,
+    x2 = 0,
+    x3 = 0,
+    x4 = 0.5,
+    weight = 1
+  }
+  ,
+  {
+    hca_class = CLASS_HR,
+    feature = FEATURE_ZDR,
+    x1 = -0.3,
+    x2 = 0,
+    x3 = 0,
+    x4 = 0.5,
+    weight = 1
+  }
+  ,
+  {
+    hca_class = CLASS_RH,
+    feature = FEATURE_ZDR,
+    x1 = -0.3,
+    x2 = 0,
+    x3 = 0,
+    x4 = 0.5,
+    weight = 1
+  }
+  ,
+  {
+    hca_class = CLASS_GC,
+    feature = FEATURE_RHOHV,
+    x1 = 0.5,
+    x2 = 0.6,
+    x3 = 0.9,
+    x4 = 0.95,
+    weight = 1
+  }
+  ,
+  {
+    hca_class = CLASS_BS,
+    feature = FEATURE_RHOHV,
+    x1 = 0.3,
+    x2 = 0.5,
+    x3 = 0.8,
+    x4 = 0.83,
+    weight = 1
+  }
+  ,
+  {
+    hca_class = CLASS_DS,
+    feature = FEATURE_RHOHV,
+    x1 = 0.95,
+    x2 = 0.98,
+    x3 = 1,
+    x4 = 1.01,
+    weight = 0.6
+  }
+  ,
+  {
+    hca_class = CLASS_WS,
+    feature = FEATURE_RHOHV,
+    x1 = 0.88,
+    x2 = 0.92,
+    x3 = 0.95,
+    x4 = 0.985,
+    weight = 1
+  }
+  ,
+  {
+    hca_class = CLASS_CR,
+    feature = FEATURE_RHOHV,
+    x1 = 0.95,
+    x2 = 0.98,
+    x3 = 1,
+    x4 = 1.01,
+    weight = 0.4
+  }
+  ,
+  {
+    hca_class = CLASS_GR,
+    feature = FEATURE_RHOHV,
+    x1 = 0.9,
+    x2 = 0.97,
+    x3 = 1,
+    x4 = 1.01,
+    weight = 0.4
+  }
+  ,
+  {
+    hca_class = CLASS_BD,
+    feature = FEATURE_RHOHV,
+    x1 = 0.92,
+    x2 = 0.95,
+    x3 = 1,
+    x4 = 1.01,
+    weight = 0.6
+  }
+  ,
+  {
+    hca_class = CLASS_RA,
+    feature = FEATURE_RHOHV,
+    x1 = 0.95,
+    x2 = 0.97,
+    x3 = 1,
+    x4 = 1.01,
+    weight = 0.6
+  }
+  ,
+  {
+    hca_class = CLASS_HR,
+    feature = FEATURE_RHOHV,
+    x1 = 0.92,
+    x2 = 0.95,
+    x3 = 1,
+    x4 = 1.01,
+    weight = 0.6
+  }
+  ,
+  {
+    hca_class = CLASS_RH,
+    feature = FEATURE_RHOHV,
+    x1 = 0.85,
+    x2 = 0.9,
+    x3 = 1,
+    x4 = 1.01,
+    weight = 0.6
+  }
+  ,
+  {
+    hca_class = CLASS_GC,
+    feature = FEATURE_LOG_KDP,
+    x1 = -30,
+    x2 = -25,
+    x3 = 10,
+    x4 = 20,
+    weight = 0
+  }
+  ,
+  {
+    hca_class = CLASS_BS,
+    feature = FEATURE_LOG_KDP,
+    x1 = -30,
+    x2 = -25,
+    x3 = 10,
+    x4 = 20,
+    weight = 0
+  }
+  ,
+  {
+    hca_class = CLASS_DS,
+    feature = FEATURE_LOG_KDP,
+    x1 = -30,
+    x2 = -25,
+    x3 = 10,
+    x4 = 20,
+    weight = 0
+  }
+  ,
+  {
+    hca_class = CLASS_WS,
+    feature = FEATURE_LOG_KDP,
+    x1 = -30,
+    x2 = -25,
+    x3 = 10,
+    x4 = 20,
+    weight = 0
+  }
+  ,
+  {
+    hca_class = CLASS_CR,
+    feature = FEATURE_LOG_KDP,
+    x1 = -5,
+    x2 = 0,
+    x3 = 10,
+    x4 = 15,
+    weight = 0.5
+  }
+  ,
+  {
+    hca_class = CLASS_GR,
+    feature = FEATURE_LOG_KDP,
+    x1 = -30,
+    x2 = -25,
+    x3 = 10,
+    x4 = 20,
+    weight = 0
+  }
+  ,
+  {
+    hca_class = CLASS_BD,
+    feature = FEATURE_LOG_KDP,
+    x1 = -1,
+    x2 = 0,
+    x3 = 0,
+    x4 = 1,
+    weight = 0
+  }
+  ,
+  {
+    hca_class = CLASS_RA,
+    feature = FEATURE_LOG_KDP,
+    x1 = -1,
+    x2 = 0,
+    x3 = 0,
+    x4 = 1,
+    weight = 0
+  }
+  ,
+  {
+    hca_class = CLASS_HR,
+    feature = FEATURE_LOG_KDP,
+    x1 = -1,
+    x2 = 0,
+    x3 = 0,
+    x4 = 1,
+    weight = 1
+  }
+  ,
+  {
+    hca_class = CLASS_RH,
+    feature = FEATURE_LOG_KDP,
+    x1 = -10,
+    x2 = -4,
+    x3 = 0,
+    x4 = 1,
+    weight = 1
+  }
+  ,
+  {
+    hca_class = CLASS_GC,
+    feature = FEATURE_SD_DBZ,
+    x1 = 2,
+    x2 = 4,
+    x3 = 10,
+    x4 = 15,
+    weight = 0.6
+  }
+  ,
+  {
+    hca_class = CLASS_BS,
+    feature = FEATURE_SD_DBZ,
+    x1 = 1,
+    x2 = 2,
+    x3 = 4,
+    x4 = 7,
+    weight = 0.8
+  }
+  ,
+  {
+    hca_class = CLASS_DS,
+    feature = FEATURE_SD_DBZ,
+    x1 = 0,
+    x2 = 0.5,
+    x3 = 3,
+    x4 = 6,
+    weight = 0.2
+  }
+  ,
+  {
+    hca_class = CLASS_WS,
+    feature = FEATURE_SD_DBZ,
+    x1 = 0,
+    x2 = 0.5,
+    x3 = 3,
+    x4 = 6,
+    weight = 0.2
+  }
+  ,
+  {
+    hca_class = CLASS_CR,
+    feature = FEATURE_SD_DBZ,
+    x1 = 0,
+    x2 = 0.5,
+    x3 = 3,
+    x4 = 6,
+    weight = 0.2
+  }
+  ,
+  {
+    hca_class = CLASS_GR,
+    feature = FEATURE_SD_DBZ,
+    x1 = 0,
+    x2 = 0.5,
+    x3 = 3,
+    x4 = 6,
+    weight = 0.2
+  }
+  ,
+  {
+    hca_class = CLASS_BD,
+    feature = FEATURE_SD_DBZ,
+    x1 = 0,
+    x2 = 0.5,
+    x3 = 3,
+    x4 = 6,
+    weight = 0.2
+  }
+  ,
+  {
+    hca_class = CLASS_RA,
+    feature = FEATURE_SD_DBZ,
+    x1 = 0,
+    x2 = 0.5,
+    x3 = 3,
+    x4 = 6,
+    weight = 0.2
+  }
+  ,
+  {
+    hca_class = CLASS_HR,
+    feature = FEATURE_SD_DBZ,
+    x1 = 0,
+    x2 = 0.5,
+    x3 = 3,
+    x4 = 6,
+    weight = 0.2
+  }
+  ,
+  {
+    hca_class = CLASS_RH,
+    feature = FEATURE_SD_DBZ,
+    x1 = 0,
+    x2 = 0.5,
+    x3 = 3,
+    x4 = 6,
+    weight = 0.2
+  }
+  ,
+  {
+    hca_class = CLASS_GC,
+    feature = FEATURE_SD_PHIDP,
+    x1 = 30,
+    x2 = 40,
+    x3 = 50,
+    x4 = 60,
+    weight = 0.8
+  }
+  ,
+  {
+    hca_class = CLASS_BS,
+    feature = FEATURE_SD_PHIDP,
+    x1 = 8,
+    x2 = 10,
+    x3 = 40,
+    x4 = 60,
+    weight = 0.8
+  }
+  ,
+  {
+    hca_class = CLASS_DS,
+    feature = FEATURE_SD_PHIDP,
+    x1 = 0,
+    x2 = 1,
+    x3 = 15,
+    x4 = 30,
+    weight = 0.2
+  }
+  ,
+  {
+    hca_class = CLASS_WS,
+    feature = FEATURE_SD_PHIDP,
+    x1 = 0,
+    x2 = 1,
+    x3 = 15,
+    x4 = 30,
+    weight = 0.2
+  }
+  ,
+  {
+    hca_class = CLASS_CR,
+    feature = FEATURE_SD_PHIDP,
+    x1 = 0,
+    x2 = 1,
+    x3 = 15,
+    x4 = 30,
+    weight = 0.2
+  }
+  ,
+  {
+    hca_class = CLASS_GR,
+    feature = FEATURE_SD_PHIDP,
+    x1 = 0,
+    x2 = 1,
+    x3 = 15,
+    x4 = 30,
+    weight = 0.2
+  }
+  ,
+  {
+    hca_class = CLASS_BD,
+    feature = FEATURE_SD_PHIDP,
+    x1 = 0,
+    x2 = 1,
+    x3 = 15,
+    x4 = 30,
+    weight = 0.2
+  }
+  ,
+  {
+    hca_class = CLASS_RA,
+    feature = FEATURE_SD_PHIDP,
+    x1 = 0,
+    x2 = 1,
+    x3 = 15,
+    x4 = 30,
+    weight = 0.2
+  }
+  ,
+  {
+    hca_class = CLASS_HR,
+    feature = FEATURE_SD_PHIDP,
+    x1 = 0,
+    x2 = 1,
+    x3 = 15,
+    x4 = 30,
+    weight = 0.2
+  }
+  ,
+  {
+    hca_class = CLASS_RH,
+    feature = FEATURE_SD_PHIDP,
+    x1 = 0,
+    x2 = 1,
+    x3 = 15,
+    x4 = 30,
+    weight = 0.2
+  }
+};
+
+///////////// HCA_DBZ_filter_len //////////////////////
+//
+// Length of kernel for computing DBZ fields - gates.
+//
+// We use this filter length to compute DBZ smoothed and texture fields.
+//
+//
+// Type: int
+//
+
+HCA_DBZ_filter_len = 5;
+
+///////////// HCA_ZDR_filter_len //////////////////////
+//
+// Length of kernel for computing ZDR fields - gates.
+//
+// We use this filter length to compute ZDR smoothed and texture fields.
+//
+//
+// Type: int
+//
+
+HCA_ZDR_filter_len = 5;
+
+///////////// HCA_RHOHV_filter_len ////////////////////
+//
+// Length of kernel for computing RHOHV fields - gates.
+//
+// We use this filter length to compute RHOHV smoothed and texture 
+//   fields.
+//
+//
+// Type: int
+//
+
+HCA_RHOHV_filter_len = 5;
+
+///////////// HCA_PHIDP_filter_len ////////////////////
+//
+// Length of kernel for computing heavily filtered PHIDP fields - gates.
+//
+// We use this filter length to compute the heavily filtered PHIDP 
+//   fields.
+//
+//
+// Type: int
+//
+
+HCA_PHIDP_filter_len = 11;
+
+///////////// HCA_PHIDP_heavy_filter_len //////////////
+//
+// Length of kernel for computing PHIDP fields - gates.
+//
+// We use this filter length to compute the lightly filtered PHIDP 
+//   fields.
+//
+//
+// Type: int
+//
+
+HCA_PHIDP_heavy_filter_len = 25;
+
+//======================================================================
+//
+// INDIVIDUAL THRESHOLDS FOR CLASSES.
+//
+//======================================================================
+ 
+///////////// HCA_max_abs_vel_for_GC //////////////////
+//
+// Maximum radial velocity for GC (m/s).
+//
+// If abs(velocity) exceeds this, GC will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_max_abs_vel_for_GC = 1;
+
+///////////// HCA_max_rhohv_for_BS ////////////////////
+//
+// Maximum rhohv for BS.
+//
+// If rhohv exceeds this, BS will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_max_rhohv_for_BS = 0.97;
+
+///////////// HCA_max_zdr_for_DS //////////////////////
+//
+// Maximum zdr for DS.
+//
+// If zdr exceeds this, DS will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_max_zdr_for_DS = 2;
+
+///////////// HCA_min_zdr_for_BD //////////////////////
+//
+// Minimum zdr for BD.
+//
+// If zdr exceeds (f2(Z) - this), BD will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_min_zdr_for_BD = -0.3;
+
+///////////// HCA_min_zdr_for_WS //////////////////////
+//
+// Minimum zdr for WS.
+//
+// If zdr is less than this, WS will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_min_zdr_for_WS = 0;
+
+///////////// HCA_min_dbz_for_WS //////////////////////
+//
+// Minimum dbz for WS.
+//
+// If dbz is less than this, WS will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_min_dbz_for_WS = 20;
+
+///////////// HCA_max_dbz_for_CR //////////////////////
+//
+// Maximum dbz for CR.
+//
+// If dbz exceeds this, CR will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_max_dbz_for_CR = 40;
+
+///////////// HCA_min_dbz_for_GR //////////////////////
+//
+// Minimum dbz for GR.
+//
+// If dbz is less than this, GR will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_min_dbz_for_GR = 10;
+
+///////////// HCA_max_dbz_for_GR //////////////////////
+//
+// Maximum dbz for GR.
+//
+// If dbz exceeds this, GR will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_max_dbz_for_GR = 60;
+
+///////////// HCA_max_dbz_for_RA //////////////////////
+//
+// Maximum dbz for RA.
+//
+// If dbz exceeds this, RA will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_max_dbz_for_RA = 50;
+
+///////////// HCA_min_dbz_for_HR //////////////////////
+//
+// Minimum dbz for HR.
+//
+// If dbz is less than this, HR will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_min_dbz_for_HR = 30;
+
+///////////// HCA_min_dbz_for_RH //////////////////////
+//
+// Minimum dbz for RH.
+//
+// If dbz is less than this, RH will be suppressed.
+//
+//
+// Type: double
+//
+
+HCA_min_dbz_for_RH = 40;
+
+//======================================================================
+//
+// COMPUTING NCAR PID - HYDROMETEOR PARTICLE ID.
+//
+//======================================================================
+ 
+///////////// compute_pid /////////////////////////////
+//
+// Option to compute PID classification.
+//
+//
+// Type: boolean
+//
+
+compute_pid = TRUE;
+
+///////////// pid_thresholds_file_path ////////////////
+//
+// File path for fuzzy logic thresholds for PID.
+//
+// This file contains the thresholds and weights for computing particle 
+//   ID.
+//
+//
+// Type: string
+//
+
+pid_thresholds_file_path = "./pid_thresholds.spol";
+
+///////////// pid_override_temp_profile ///////////////
+//
+// Option to override temp profile in pid_thresholds file.
+//
+// If TRUE, the profile in the thresholds file will be overridden by the 
+//   sounding from SPDB.
+//
+//
+// Type: boolean
+//
+
+pid_override_temp_profile = TRUE;
+
+///////////// PID_snr_threshold ///////////////////////
+//
+// Minimum SNR for valid PID.
+//
+// If the SNR at a gate is below this, the PID is censored.
+//
+//
+// Type: double
+//
+
+PID_snr_threshold = 3;
+
+///////////// PID_snr_upper_threshold /////////////////
+//
+// Maximum SNR for valid PID.
+//
+// If the SNR at a gate is above this value, the PID will be set to 
+//   SATURATED_SNR = 18.
+//
+//
+// Type: double
+//
+
+PID_snr_upper_threshold = 9999;
+
+///////////// PID_min_valid_interest //////////////////
+//
+// Minimum valid interest value for identifying a particle.
+//
+// If the computed interest value is below this, the PID is set to 
+//   missing.
+//
+//
+// Type: double
+//
+
+PID_min_valid_interest = 0.5;
+
+///////////// PID_apply_median_filter_to_DBZ //////////
+//
+// Option to filter DBZ with median filter.
+//
+// The filter is computed in range.
+//
+//
+// Type: boolean
+//
+
+PID_apply_median_filter_to_DBZ = TRUE;
+
+///////////// PID_DBZ_median_filter_len ///////////////
+//
+// Length of median filter for DBZ - gates.
+//
+// See 'PID_apply_median_filter_to_DBZ'.
+//
+//
+// Type: int
+//
+
+PID_DBZ_median_filter_len = 5;
+
+///////////// PID_apply_median_filter_to_ZDR //////////
+//
+// Option to filter ZDR with median filter.
+//
+// The filter is computed in range.
+//
+//
+// Type: boolean
+//
+
+PID_apply_median_filter_to_ZDR = TRUE;
+
+///////////// PID_ZDR_median_filter_len ///////////////
+//
+// Length of median filter for ZDR - gates.
+//
+// See 'PID_apply_median_filter_to_ZDR'.
+//
+//
+// Type: int
+//
+
+PID_ZDR_median_filter_len = 5;
+
+///////////// PID_apply_median_filter_to_RHOHV ////////
+//
+// Option to filter RHOHV with median filter.
+//
+// The filter is computed in range.
+//
+//
+// Type: boolean
+//
+
+PID_apply_median_filter_to_RHOHV = TRUE;
+
+///////////// PID_RHOHV_median_filter_len /////////////
+//
+// Length of median filter for RHOHV - gates.
+//
+// See 'PID_apply_median_filter_to_RHOHV'.
+//
+//
+// Type: int
+//
+
+PID_RHOHV_median_filter_len = 5;
+
+///////////// PID_apply_median_filter_to_LDR //////////
+//
+// Option to filter LDR with median filter.
+//
+// The filter is computed in range.
+//
+//
+// Type: boolean
+//
+
+PID_apply_median_filter_to_LDR = TRUE;
+
+///////////// PID_LDR_median_filter_len ///////////////
+//
+// Length of median filter for LDR - gates.
+//
+// See 'PID_apply_median_filter_to_LDR'.
+//
+//
+// Type: int
+//
+
+PID_LDR_median_filter_len = 5;
+
+///////////// PID_replace_missing_LDR /////////////////
+//
+// For PID, option to replace missing LDR values with a specified value.
+//
+// When the SNR gets low, LDR is unreliable since there is not 
+//   sufficient dynamic range to provide an accurate cross-polar power 
+//   measurement. In these cases, it makes sense to replace LDR with a 
+//   neutral value, such as 0.0, so that we do not reject gates at which 
+//   valuable data is available.
+//
+//
+// Type: boolean
+//
+
+PID_replace_missing_LDR = TRUE;
+
+///////////// PID_LDR_replacement_value ///////////////
+//
+// Value to which LDR will be set if missing.
+//
+//
+// Type: double
+//
+
+PID_LDR_replacement_value = 0;
+
+///////////// PID_ngates_for_sdev /////////////////////
+//
+// Number of gates for computing standard deviations.
+//
+// This applies to computing the standard deviation of zdr and phidp.
+//
+//
+// Type: int
+//
+
+PID_ngates_for_sdev = 9;
+
+///////////// PID_output_particle_interest_fields /////
+//
+// Option to output the individual interest fields.
+//
+// If TRUE, the interest field for each particle type will be written to 
+//   the output FMQ, in addition to the list in 'output_fields'.
+//
+//
+// Type: boolean
+//
+
+PID_output_particle_interest_fields = FALSE;
+
+///////////// apply_median_filter_to_PID //////////////
+//
+// Option to filter PID with median filter.
+//
+// The filter is computed in range, and affects both rain rate and PID.
+//
+//
+// Type: boolean
+//
+
+apply_median_filter_to_PID = FALSE;
+
+///////////// PID_median_filter_len ///////////////////
+//
+// Length of median filter for PID - gates.
+//
+// See 'appply_median_filter_to_PID'.
+//
+//
+// Type: int
+//
+
+PID_median_filter_len = 7;
+
+//======================================================================
+//
+// SOUNDING INPUT FOR temperature profile.
+//
+//======================================================================
+ 
+///////////// sounding_spdb_url ///////////////////////
+//
+// SPDB URL for sounding data.
+//
+//
+// Type: string
+//
+
+sounding_spdb_url = "spdbp:://hail::/scr/hail2/rsfdata/pecan/spdb/sounding/ruc";
+
+///////////// sounding_search_time_margin_secs ////////
+//
+// Time margin for retrieving sounding, in secs.
+//
+// This is the total size of the output FMQ buffer. Some of this buffer 
+//   will be used for control bytes (12 bytes per message).
+//
+//
+// Type: int
+//
+
+sounding_search_time_margin_secs = 86400;
+
+///////////// sounding_location_name //////////////////
+//
+// Name of sounding location.
+//
+// If set, we request a profile just for that sounding. If empty, all 
+//   soundings in the data base are considered valid.
+//
+//
+// Type: string
+//
+
+sounding_location_name = "SPOL";
+
+///////////// sounding_check_pressure_range ///////////
+//
+// Option to check that pressure covers the required range.
+//
+// If TRUE, we will check that pressure range in the sounding meets or 
+//   exceeds the min and max specified.
+//
+//
+// Type: boolean
+//
+
+sounding_check_pressure_range = TRUE;
+
+///////////// sounding_required_pressure_range_hpa ////
+//
+// Required pressure range for sounding to be valid (hPa).
+//
+// This is used to provide a quality check on the sounding. If the 
+//   pressure data does not fully cover this range, the sounding is 
+//   rejected and we look back for the next available one.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double min_val;
+//      double max_val;
+//   }
+//
+//
+
+sounding_required_pressure_range_hpa = {
+    min_val = 300,
+    max_val = 800
+};
+
+///////////// sounding_check_height_range /////////////
+//
+// Option to check that height covers the required range.
+//
+// If TRUE, we will check that height range in the sounding meets or 
+//   exceeds the min and max specified.
+//
+//
+// Type: boolean
+//
+
+sounding_check_height_range = FALSE;
+
+///////////// sounding_required_height_range_m ////////
+//
+// Required height range for sounding to be valid (m).
+//
+// This is used to provide a quality check on the sounding. If the 
+//   height data does not fully cover this range, the sounding is rejected 
+//   and we look back for the next available one.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double min_val;
+//      double max_val;
+//   }
+//
+//
+
+sounding_required_height_range_m = {
+    min_val = 1000,
+    max_val = 15000
+};
+
+///////////// sounding_check_pressure_monotonically_decreasing 
+//
+// Option to check that pressure decreases monotonically.
+//
+// If TRUE, we will check that pressure decreases monotonically. If not, 
+//   the sounding is rejected and we look back for the next available one.
+//
+//
+// Type: boolean
+//
+
+sounding_check_pressure_monotonically_decreasing = FALSE;
+
+///////////// sounding_height_correction_km ///////////
+//
+// Correction to the heights read in with the sounding (km).
+//
+// This correction is ADDED to the heights read in. So if the freezing 
+//   level seems low, the correction should be positive. If the freezing 
+//   level appears high, it should be negative.
+//
+//
+// Type: double
+//
+
+sounding_height_correction_km = 0;
+
+///////////// sounding_use_wet_bulb_temp //////////////
+//
+// Option to use wet bulb temperature profile.
+//
+// If TRUE, we use the wet bulb temperature profile from the sounding 
+//   instead of the dry bulb. Applies to PID estimation. This is thought 
+//   to more closely track the temperature of melting ice.
+//
+//
+// Type: boolean
+//
+
+sounding_use_wet_bulb_temp = TRUE;
+
+///////////// temp_at_bottom_of_melting_layer /////////
+//
+// Temperature at the bottom of the melting layer (C).
+//
+// We use this temperature to locate the bottom edge of the melting 
+//   layer in the temperature profile.
+//
+//
+// Type: double
+//
+
+temp_at_bottom_of_melting_layer = 1;
+
+///////////// temp_at_top_of_melting_layer ////////////
+//
+// Temperature at the top of the melting layer (C).
+//
+// We use this temperature to locate the top edge of the melting layer 
+//   in the temperature profile.
+//
+//
+// Type: double
+//
+
+temp_at_top_of_melting_layer = -1;
+
+//======================================================================
+//
+// RETRIEVING SITE TEMPERATURE FROM SPDB.
+//
+//======================================================================
+ 
+///////////// read_site_temp_from_spdb ////////////////
+//
+// Option to read site temperature from SPDB.
+//
+// The temperature closest to the radar volume time will be read in.
+//
+//
+// Type: boolean
+//
+
+read_site_temp_from_spdb = FALSE;
+
+///////////// site_temp_spdb_url //////////////////////
+//
+// URL for temperatures from SPDB.
+//
+//
+// Type: string
+//
+
+site_temp_spdb_url = "spdbp:://hail:0:pecan/spdb/spol/temp";
+
+///////////// site_temp_station_name //////////////////
+//
+// Station name for site temperature.
+//
+//
+// Type: string
+//
+
+site_temp_station_name = "SPOL";
+
+///////////// site_temp_search_margin_secs ////////////
+//
+// Search margin when finding site temp data (secs).
+//
+// We search for the temperature closest in time to the radar volume. 
+//   This is the search margin on either side of the volume time.
+//
+//
+// Type: int
+//
+
+site_temp_search_margin_secs = 3600;
+
+//======================================================================
+//
+// SPECIFYING FIELD NAMES AND OUTPUT ENCODING.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Indicate which fields should be written to the output file.
+//
+// Choose the ID from the list. The name and units can be set however 
+//   the user prefers. The output_encoding and output_scaling apply to 
+//   CfRadial output only. If the output_scaling is DYNAMIC then the scale 
+//   and offset are computed using the dynamic range of the data. If the 
+//   output_scaling is SPECIFIED, then the specified scale and offset are 
+//   used.
+//
+//
+// Type: struct
+//   typedef struct {
+//      output_field_id_t id;
+//        Options:
+//          SNR
+//          DBZ
+//          VEL
+//          WIDTH
+//          NCP
+//          ZDR
+//          LDR
+//          RHOHV
+//          PHIDP
+//          KDP
+//          KDP_COND
+//          PSOB
+//          DBZ_ATTEN_CORRECTION
+//          ZDR_ATTEN_CORRECTION
+//          DBZ_ATTEN_CORRECTED
+//          ZDR_ATTEN_CORRECTED
+//          DBZ_FOR_KDP
+//          ZDR_FOR_KDP
+//          RHOHV_FOR_KDP
+//          SNR_FOR_KDP
+//          ZDR_SDEV_FOR_KDP
+//          VALID_FLAG_FOR_KDP
+//          PHIDP_FOR_KDP
+//          PHIDP_MEAN_FOR_KDP
+//          PHIDP_MEAN_UNFOLD_FOR_KDP
+//          PHIDP_SDEV_FOR_KDP
+//          PHIDP_JITTER_FOR_KDP
+//          PHIDP_UNFOLD_FOR_KDP
+//          PHIDP_FILT_FOR_KDP
+//          PHIDP_COND_FOR_KDP
+//          PHIDP_COND_FILT_FOR_KDP
+//          RAY_HEIGHT
+//          SNR_MEAN_SEACLUT
+//          RHOHV_MEAN_SEACLUT
+//          PHIDP_SDEV_SEACLUT
+//          ZDR_SDEV_SEACLUT
+//          DBZ_ELEV_GRADIENT_SEACLUT
+//          RHOHV_MEAN_INTEREST_SEACLUT
+//          PHIDP_SDEV_INTEREST_SEACLUT
+//          ZDR_SDEV_INTEREST_SEACLUT
+//          DBZ_ELEV_GRADIENT_INTEREST_SEACLUT
+//          SEACLUT_FLAG
+//          PARTICLE_ID
+//          TEMP_FOR_PID
+//          HCA_DBZ
+//          HCA_ZDR
+//          HCA_RHOHV
+//          HCA_PHIDP
+//          HCA_LOGKDP
+//          HCA_TEMP_LOW
+//          HCA_TEMP_MID
+//          HCA_TEMP_HIGH
+//          HCA_SMOOTH_DBZ
+//          HCA_SMOOTH_ZDR
+//          HCA_SMOOTH_RHOHV
+//          HCA_SMOOTH_PHIDP
+//          HCA_HVY_SMOOTH_PHIDP
+//          HCA_TEXTURE_DBZ
+//          HCA_TEXTURE_ZDR
+//          HCA_TEXTURE_RHOHV
+//          HCA_TEXTURE_PHIDP
+//          HCA_SD_DBZ
+//          HCA_SD_PHIDP
+//          HCA_GC_INTEREST
+//          HCA_BS_INTEREST
+//          HCA_DS_INTEREST
+//          HCA_WS_INTEREST
+//          HCA_CR_INTEREST
+//          HCA_GR_INTEREST
+//          HCA_BD_INTEREST
+//          HCA_RA_INTEREST
+//          HCA_HR_INTEREST
+//          HCA_RH_INTEREST
+//          HCA_TEMP_CAT
+//          HCA
+//      string name;
+//      string long_name;
+//      string standard_name;
+//      string units;
+//      output_encoding_t encoding;
+//        Options:
+//          OUTPUT_ENCODING_FL32
+//          OUTPUT_ENCODING_INT32
+//          OUTPUT_ENCODING_INT16
+//          OUTPUT_ENCODING_INT08
+//      output_scaling_t scaling;
+//        Options:
+//          OUTPUT_SCALING_DYNAMIC
+//          OUTPUT_SCALING_SPECIFIED
+//      double scale;
+//      double offset;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    id = SNR,
+    name = "SNR",
+    long_name = "signal_to_noise_ratio_db",
+    standard_name = "signal_to_noise_ratio",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = DBZ,
+    name = "DBZ",
+    long_name = "radar_reflectivity",
+    standard_name = "equivalent_reflectivity_factor",
+    units = "dBZ",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = VEL,
+    name = "VEL",
+    long_name = "radial_velocity",
+    standard_name = "radial_velocity",
+    units = "m/s",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = ZDR,
+    name = "ZDR",
+    long_name = "calibrated_log_differential_reflectivity",
+    standard_name = "log_differential_reflectivity",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = RHOHV,
+    name = "RHOHV",
+    long_name = "cross_correlation_ratio",
+    standard_name = "cross_correlation_ratio_hv",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = PHIDP,
+    name = "PHIDP",
+    long_name = "differential_phase",
+    standard_name = "differential_phase_hv",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = KDP,
+    name = "KDP",
+    long_name = "specific_differential_phase",
+    standard_name = "specific_differential_phase_hv",
+    units = "deg/km",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = KDP_COND,
+    name = "KDP_COND",
+    long_name = "conditional_specific_differential_phase",
+    standard_name = "specific_differential_phase_hv",
+    units = "deg/km",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = PARTICLE_ID,
+    name = "PID",
+    long_name = "ncar_particle_id",
+    standard_name = "hydrometeor_type",
+    units = "-",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = TEMP_FOR_PID,
+    name = "TEMP_FOR_PID",
+    long_name = "temperature_for_computing_pid",
+    standard_name = "temperature",
+    units = "C",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_DBZ,
+    name = "HCA_DBZ",
+    long_name = "hca_radar_reflectivity",
+    standard_name = "equivalent_reflectivity_factor",
+    units = "dBZ",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_ZDR,
+    name = "HCA_ZDR",
+    long_name = "hca_log_differential_reflectivity",
+    standard_name = "log_differential_reflectivity",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_RHOHV,
+    name = "HCA_RHOHV",
+    long_name = "hca_cross_correlation_ratio",
+    standard_name = "cross_correlation_ratio_hv",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_PHIDP,
+    name = "HCA_PHIDP",
+    long_name = "hca_unfolded_differential_phase",
+    standard_name = "differential_phase_hv",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_LOGKDP,
+    name = "HCA_LOGKDP",
+    long_name = "hca_log_conditional_specific_differential_phase",
+    standard_name = "log_specific_differential_phase_hv",
+    units = "log(deg/km)",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_TEMP_LOW,
+    name = "HCA_TEMP_LOW",
+    long_name = "temperature_beam_lower_edge",
+    standard_name = "wet-bulb-temperature",
+    units = "C",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_TEMP_MID,
+    name = "HCA_TEMP_MID",
+    long_name = "temperature_beam_center",
+    standard_name = "wet-bulb-temperature",
+    units = "C",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_TEMP_HIGH,
+    name = "HCA_TEMP_HIGH",
+    long_name = "temperature_beam_upper_edge",
+    standard_name = "wet-bulb-temperature",
+    units = "C",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_SMOOTH_DBZ,
+    name = "HCA_SMOOTH_DBZ",
+    long_name = "hca_smoothed_dbz",
+    standard_name = "dbz_smooth",
+    units = "dBZ",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_SMOOTH_ZDR,
+    name = "HCA_SMOOTH_ZDR",
+    long_name = "hca_smoothed_zdr",
+    standard_name = "zdr_smooth",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_SMOOTH_RHOHV,
+    name = "HCA_SMOOTH_RHOHV",
+    long_name = "hca_smoothed_rhohv",
+    standard_name = "rhohv_smooth",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_SMOOTH_PHIDP,
+    name = "HCA_SMOOTH_PHIDP",
+    long_name = "hca_smoothed_phidp",
+    standard_name = "phidp_smooth",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_HVY_SMOOTH_PHIDP,
+    name = "HCA_HVY_SMOOTH_PHIDP",
+    long_name = "hca_hvy_smoothed_phidp",
+    standard_name = "phidp_hvy_smooth",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_TEXTURE_DBZ,
+    name = "HCA_TEXTURE_DBZ",
+    long_name = "hca_texture_of_dbz",
+    standard_name = "dbz_texture",
+    units = "dBZ",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_TEXTURE_ZDR,
+    name = "HCA_TEXTURE_ZDR",
+    long_name = "hca_texture_of_zdr",
+    standard_name = "zdr_texture",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_TEXTURE_RHOHV,
+    name = "HCA_TEXTURE_RHOHV",
+    long_name = "hca_texture_of_rhohv",
+    standard_name = "rhohv_texture",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_TEXTURE_PHIDP,
+    name = "HCA_TEXTURE_PHIDP",
+    long_name = "hca_texture_of_phidp",
+    standard_name = "phidp_texture",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_SD_DBZ,
+    name = "HCA_SDEV_DBZ",
+    long_name = "sdev_dbz",
+    standard_name = "dbz_sdev",
+    units = "dBZ",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_SD_PHIDP,
+    name = "HCA_SDEV_PHIDP",
+    long_name = "sdev_phidp",
+    standard_name = "phidp_sdev",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_GC_INTEREST,
+    name = "HCA_GC_INTEREST",
+    long_name = "HCA_gc_interest_value",
+    standard_name = "HCA_gc_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_BS_INTEREST,
+    name = "HCA_BS_INTEREST",
+    long_name = "HCA_bs_interest_value",
+    standard_name = "HCA_bs_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_DS_INTEREST,
+    name = "HCA_DS_INTEREST",
+    long_name = "HCA_ds_interest_value",
+    standard_name = "HCA_ds_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_WS_INTEREST,
+    name = "HCA_WS_INTEREST",
+    long_name = "HCA_ws_interest_value",
+    standard_name = "HCA_ws_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_CR_INTEREST,
+    name = "HCA_CR_INTEREST",
+    long_name = "HCA_cr_interest_value",
+    standard_name = "HCA_cr_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_GR_INTEREST,
+    name = "HCA_GR_INTEREST",
+    long_name = "HCA_gr_interest_value",
+    standard_name = "HCA_gr_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_BD_INTEREST,
+    name = "HCA_BD_INTEREST",
+    long_name = "HCA_bd_interest_value",
+    standard_name = "HCA_bd_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_RA_INTEREST,
+    name = "HCA_RA_INTEREST",
+    long_name = "HCA_ra_interest_value",
+    standard_name = "HCA_ra_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_HR_INTEREST,
+    name = "HCA_HR_INTEREST",
+    long_name = "HCA_hr_interest_value",
+    standard_name = "HCA_hr_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_RH_INTEREST,
+    name = "HCA_RH_INTEREST",
+    long_name = "HCA_rh_interest_value",
+    standard_name = "HCA_rh_interest_value",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA_TEMP_CAT,
+    name = "HCA_TEMP_CAT",
+    long_name = "temperature_category",
+    standard_name = "temperature_category",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = HCA,
+    name = "HCA",
+    long_name = "wsr88d_hydrometeor_classification",
+    standard_name = "hydrometeor_classification",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_DYNAMIC,
+    scale = 0.01,
+    offset = 0
+  }
+};
+
+//======================================================================
+//
+// OUTPUT FILE FORMAT.
+//
+//======================================================================
+ 
+///////////// output_format ///////////////////////////
+//
+// Format for the output files.
+//
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_CFRADIAL
+//     OUTPUT_FORMAT_DORADE
+//     OUTPUT_FORMAT_FORAY
+//     OUTPUT_FORMAT_NEXRAD
+//     OUTPUT_FORMAT_UF
+//     OUTPUT_FORMAT_MDV_RADIAL
+//
+
+output_format = OUTPUT_FORMAT_CFRADIAL;
+
+///////////// netcdf_style ////////////////////////////
+//
+// NetCDF style - if output_format is CFRADIAL.
+//
+// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
+//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
+//
+// Type: enum
+// Options:
+//     CLASSIC
+//     NC64BIT
+//     NETCDF4
+//     NETCDF4_CLASSIC
+//
+
+netcdf_style = NETCDF4;
+
+//======================================================================
+//
+// OUTPUT BYTE-SWAPPING and COMPRESSION.
+//
+//======================================================================
+ 
+///////////// output_native_byte_order ////////////////
+//
+// Option to leave data in native byte order.
+//
+// If false, data will be byte-swapped as appropriate on output.
+//
+//
+// Type: boolean
+//
+
+output_native_byte_order = FALSE;
+
+///////////// output_compressed ///////////////////////
+//
+// Option to compress data fields on output.
+//
+// Applies to netCDF and Dorade. UF does not support compression.
+//
+//
+// Type: boolean
+//
+
+output_compressed = TRUE;
+
+///////////// compression_level ///////////////////////
+//
+// Compression level for output, if compressed.
+//
+// Applies to netCDF only. Dorade compression is run-length encoding, 
+//   and has not options..
+//
+//
+// Type: int
+//
+
+compression_level = 4;
+
+//======================================================================
+//
+// VOLUME OUTPUT.
+//
+//======================================================================
+ 
+///////////// write_output_volume /////////////////////
+//
+// Option to write the results to a volume output file.
+//
+// Normally this will be set to true. However, when running analyses 
+//   such as self-consistency or zdr bias, it may be preferable to 
+//   suppress writing the output file, in which case this should be set to 
+//   false.
+//
+//
+// Type: boolean
+//
+
+write_output_volume = TRUE;
+
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+//
+// Files will be written to this directory.
+//
+//
+// Type: string
+//
+
+output_dir = "$(HOME)/data/hca/test/cfradial/spol/rhi";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+//
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name.
+//
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//     SPECIFY_FILE_NAME
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// output_filename /////////////////////////
+//
+// Name of output file.
+//
+// Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of 
+//   this name will be written to output_dir.
+//
+//
+// Type: string
+//
+
+output_filename = "cfradial.test.nc";
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+//
+// Path will be output_dir/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+//
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// write_individual_sweeps /////////////////
+//
+// Option to write out individual sweeps if appropriate.
+//
+// If true, the volume is split into individual sweeps for writing. 
+//   Applies to CfRadial format. This is always true for DORADE format 
+//   files.
+//
+//
+// Type: boolean
+//
+
+write_individual_sweeps = FALSE;
+

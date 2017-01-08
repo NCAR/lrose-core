@@ -273,18 +273,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::PHIDP:
           *datp = _phidpArray[igate];
           break;
-        case Params::KDP:
-          *datp = _kdpArray[igate];
-          break;
-        case Params::KDP_BRINGI:
-          *datp = _kdpBringiArray[igate];
-          break;
-        case Params::PSOB:
-          *datp = psob[igate];
-          break;
-        case Params::ZDP:
-          *datp = _zdpArray[igate];
-          break;
           
           // kdp
           
@@ -309,6 +297,24 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           } else {
             *datp = 0.0;
           }
+          break;
+        case Params::KDP:
+          *datp = _kdpArray[igate];
+          break;
+        case Params::KDP_BRINGI:
+          *datp = _kdpBringiArray[igate];
+          break;
+        case Params::KDP_ZZDR:
+          *datp = _kdpZZdrArray[igate];
+          break;
+        case Params::KDP_COND:
+          *datp = _kdpCondArray[igate];
+          break;
+        case Params::PSOB:
+          *datp = psob[igate];
+          break;
+        case Params::ZDP:
+          *datp = _zdpArray[igate];
           break;
 
         case Params::PHIDP_FOR_KDP:
@@ -659,6 +665,9 @@ void ComputeEngine::_kdpInit()
     _kdp.checkZdrSdev(true);
   }
   _kdp.setZdrSdevMax(_params.KDP_zdr_sdev_max);
+  _kdp.setThresholdForKdpZZdr(_params.KDP_threshold_for_ZZDR);
+  _kdp.setMedianFilterLenForKdpZZdr(_params.KDP_median_filter_len_for_ZZDR);
+
   if (_params.KDP_debug) {
     _kdp.setDebug(true);
   }
@@ -749,6 +758,8 @@ void ComputeEngine::_kdpCompute()
                missingDbl);
 
   const double *kdp = _kdp.getKdp();
+  const double *kdpZZdr = _kdp.getKdpZZdr();
+  const double *kdpCond = _kdp.getKdpCond();
   
   // put KDP into fields objects
   
@@ -758,6 +769,8 @@ void ComputeEngine::_kdpCompute()
     } else {
       _kdpArray[ii] = kdp[ii];
     }
+    _kdpZZdrArray[ii] = kdpZZdr[ii];
+    _kdpCondArray[ii] = kdpCond[ii];
   }
 
   if (_params.compute_kdp_bringi) {
@@ -867,7 +880,7 @@ void ComputeEngine::_pidCompute()
   
   if (_params.use_soundings_from_spdb) {
     if (_tempProfile) {
-      const vector<NcarParticleId::TmpPoint> &profile = _tempProfile->getProfile();
+      const vector<TempProfile::PointVal> &profile = _tempProfile->getProfile();
       if (profile.size() > 0) {
         _pid.setTempProfile(profile);
       }
@@ -996,12 +1009,14 @@ void ComputeEngine::_allocMomentsArrays()
   _zdrmArray = _zdrmArray_.alloc(_nGates);
   _zdpArray = _zdpArray_.alloc(_nGates);
   _kdpArray = _kdpArray_.alloc(_nGates);
+  _kdpBringiArray = _kdpBringiArray_.alloc(_nGates);
+  _kdpZZdrArray = _kdpZZdrArray_.alloc(_nGates);
+  _kdpCondArray = _kdpCondArray_.alloc(_nGates);
   _ldrArray = _ldrArray_.alloc(_nGates);
   _rhohvArray = _rhohvArray_.alloc(_nGates);
   _rhohvNncArray = _rhohvNncArray_.alloc(_nGates);
   _phidpArray = _phidpArray_.alloc(_nGates);
   _rhoVxHxArray = _rhoVxHxArray_.alloc(_nGates);
-
 }
 
 //////////////////////////////////////

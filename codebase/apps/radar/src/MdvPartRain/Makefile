@@ -38,9 +38,9 @@ TARGET_FILE = MdvPartRain
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -lMdv -lRadx -lradar \
-	-leuclid -ldsserver -ldidss -lrapmath \
-	-lrapformats -ltoolsa -ldataport -ltdrp \
+LOC_LIBS = -lMdv -lRadx -lradar \
+	-lSpdb -leuclid -ldsserver -ldidss -lrapmath \
+	-lrapformats -lphysics -ltoolsa -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
@@ -50,15 +50,13 @@ LOC_CFLAGS =
 HDRS = \
 	$(PARAMS_HH) \
 	MdvPartRain.hh \
-	Args.hh \
-	TempProfile.hh
+	Args.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	MdvPartRain.cc \
 	Args.cc \
-	Main.cc \
-	TempProfile.cc
+	Main.cc
 
 #
 # tdrp macros

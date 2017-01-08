@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2016
+// ** Copyright UCAR (c) 1992 - 2017
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -505,11 +505,21 @@ public:
 
   int sounding_search_time_margin_secs;
 
+  char* sounding_location_name;
+
+  tdrp_bool_t sounding_check_pressure_range;
+
   data_range_t sounding_required_pressure_range_hpa;
+
+  tdrp_bool_t sounding_check_height_range;
 
   data_range_t sounding_required_height_range_m;
 
   tdrp_bool_t sounding_check_pressure_monotonically_decreasing;
+
+  double sounding_height_correction_km;
+
+  tdrp_bool_t sounding_use_wet_bulb_temp;
 
   tdrp_bool_t apply_median_filter_to_PID;
 
@@ -591,7 +601,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[130];
+  mutable TDRPtable _table[135];
 
   const char *_className;
 

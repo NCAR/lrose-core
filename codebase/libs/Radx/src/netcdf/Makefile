@@ -25,12 +25,10 @@ LOC_CFLAGS =
 
 HDRS = \
 	../include/Radx/NetcdfClassic.hh \
-	../include/Radx/NetcdfCxxUtils.hh \
 	../include/Radx/Udunits2.hh
 
 CPPC_SRCS = \
 	NetcdfClassic.cc \
-	NetcdfCxxUtils.cc \
 	Udunits2.cc
 
 #

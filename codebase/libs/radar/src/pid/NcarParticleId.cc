@@ -705,7 +705,7 @@ int NcarParticleId::_setTempProfile(const char *line)
   for (int ii = 0; ii < (int) toks.size(); ii++) {
     double ht, tmp;
     if (sscanf(toks[ii].c_str(), "%lg,%lg", &ht, &tmp) == 2) {
-      TmpPoint tmpPt(ht, tmp);
+      TempProfile::PointVal tmpPt(ht, tmp);
       _tmpProfile.push_back(tmpPt); 
     }
   }
@@ -768,7 +768,7 @@ void NcarParticleId::_computeTempHtLookup()
 // This is used to override the temperature profile in the
 // thresholds file, for example from a sounding.
 
-void NcarParticleId::setTempProfile(const vector<TmpPoint> &profile)
+void NcarParticleId::setTempProfile(const vector<TempProfile::PointVal> &profile)
   
 {
 
@@ -1359,55 +1359,6 @@ void NcarParticleId::Particle::print(ostream &out)
   out << "-----------------------------------------" << endl;
 
   out << "=============================================================" << endl;
-
-}
-
-//////////////////////////////////////////////////////////////
-// TmpPoint interior class
-
-// Constructor
-
-NcarParticleId::TmpPoint::TmpPoint(double ht, double tmp)
-
-{
-
-  pressHpa = -9999;
-  htKm = ht;
-  tmpC = tmp;
-
-}
-
-NcarParticleId::TmpPoint::TmpPoint(double press, double ht, double tmp)
-
-{
-
-  pressHpa = press;
-  htKm = ht;
-  tmpC = tmp;
-
-}
-
-/////////////////////////////////////////////////////////
-// destructor
-
-NcarParticleId::TmpPoint::~TmpPoint()
-
-{
-
-}
-
-/////////////////////////////////////////////////////////
-// print
-
-void NcarParticleId::TmpPoint::print(ostream &out)
-
-{
-
-  out << "---- Temp point ----" << endl;
-  out << "  Pressure Hpa: " << pressHpa << endl;
-  out << "  Height Km: " << htKm << endl;
-  out << "  Temp    C: " << tmpC << endl;
-  out << "------------------" << endl;
 
 }
 

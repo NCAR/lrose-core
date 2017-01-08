@@ -50,6 +50,8 @@
 
 #include <NcUtils/Ncxx.hh>
 
+using namespace netCDF;
+
 const double Ncxx::missingDouble = -9999.0;
 const float Ncxx::missingFloat = -9999.0f;
 const int Ncxx::missingInt = -9999;
@@ -76,6 +78,12 @@ string Ncxx::ncTypeToStr(nc_type nctype)
       return "NC_UBYTE";
   }
   
+}
+
+string Ncxx::ncTypeToStr(NcxxType &nctype)
+  
+{
+  return ncTypeToStr(nctype.getId());
 }
 
 ///////////////////////////////////////////

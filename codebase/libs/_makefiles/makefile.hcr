@@ -12,6 +12,7 @@ SUB_DIRS = \
         euclid \
 	physics \
         Radx \
+        NcxxUtils \
         radar \
         toolsa \
         didss \

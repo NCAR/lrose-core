@@ -163,7 +163,7 @@ size_t NcxxType::getSize() const{
 };
 
 // The type class returned as an enumeration type.
-NcxxType::ncType NcxxType::getTypeClass() const{
+NcxxType::ncxxType NcxxType::getTypeClass() const{
   switch (myId) {
   case NC_BYTE    : return nc_BYTE;
   case NC_UBYTE   : return nc_UBYTE;
@@ -186,13 +186,13 @@ NcxxType::ncType NcxxType::getTypeClass() const{
     size_t* nfieldsp=NULL;
     int classp;
     ncxxCheck(nc_inq_user_type(groupId,myId,name,sizep,base_nc_typep,nfieldsp,&classp),__FILE__,__LINE__);
-    return static_cast<ncType>(classp);
+    return static_cast<ncxxType>(classp);
   }
 }
 
 // The type class returned as a string.
 string NcxxType::getTypeClassName() const{
-  ncType typeClass=getTypeClass();
+  ncxxType typeClass=getTypeClass();
   switch (typeClass) {
   case nc_BYTE    : return string("nc_BYTE");
   case nc_UBYTE   : return string("nc_UBYTE");

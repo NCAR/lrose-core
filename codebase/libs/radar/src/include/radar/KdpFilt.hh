@@ -242,6 +242,21 @@ public:
 
   void setAttenCoeffs(double dbzCoeff, double dbzExpon,
                       double zdrCoeff, double zdrExpon);
+
+
+  /**
+   * Set KDP threshold for valid run when estimating
+   * KDP from Z and ZDR
+   */
+
+  void setThresholdForKdpZZdr(double val) { _kdpZZdrThreshold = val; }
+  
+  /**
+   * Set length for Z and ZDR median filter when estimating
+   * KDP from Z and ZDR
+   */
+
+  void setMedianFilterLenForKdpZZdr(int val) { _kdpZZdrMedianLen = val; }
   
   /**
    * Initialize the object arrays for later use.
@@ -352,6 +367,8 @@ public:
    * @return an array of kdp values
    */
   const double *getKdp() const { return _kdp; }
+  const double *getKdpZZdr() const { return _kdpZZdr; }
+  const double *getKdpCond() const { return _kdpCond; }
 
   /**
    * Get attenuation correction after calling compute()
@@ -538,6 +555,9 @@ private:
   TaArray<double> _dbz_;
   double *_dbz;
 
+  TaArray<double> _dbzMedian_;
+  double *_dbzMedian;
+
   TaArray<double> _dbzMax_;
   double *_dbzMax;
   
@@ -551,6 +571,9 @@ private:
 
   TaArray<double> _zdrSdev_;
   double *_zdrSdev;
+
+  TaArray<double> _zdrMedian_;
+  double *_zdrMedian;
 
   TaArray<double> _phidp_;
   double *_phidp;
@@ -594,6 +617,12 @@ private:
   TaArray<double> _kdp_;
   double *_kdp;
 
+  TaArray<double> _kdpZZdr_;
+  double *_kdpZZdr;
+
+  TaArray<double> _kdpCond_;
+  double *_kdpCond;
+
   TaArray<double> _psob_;
   double *_psob;
 
@@ -617,6 +646,14 @@ private:
   bool _debug;
   bool _writeRayFile;
   string _rayFileDir;
+
+  // parameters for KDP conditioned by ZZDR
+
+  double _kdpZExpon;
+  double _kdpZdrExpon;
+  double _kdpZZdrCoeff;
+  double _kdpZZdrThreshold;
+  int _kdpZZdrMedianLen;
 
   // methods
  
@@ -645,7 +682,7 @@ private:
   void _copyArrayCond(double *array, const double *vals,
                       const double *original);
   void _padArray(double *array);
-  void _loadKdp(const double *phidp, double *kdp);
+  void _loadKdp();
   void _loadPhidpAccumFilt(const double *phidp, double *accum);
   void _computeAttenCorrection();
   void _applyFirFilter(const double *in, double *out);
@@ -682,6 +719,15 @@ private:
   
   void _writeRayDataToFile();
   double _getPlotVal(double val, double valIfMissing);
+
+  /// Compute estimated kdp from Z and ZDR using power law
+
+  double _computeKdpFromZZdr(double dbz, double zdr);
+
+  /// load up conditional kdp from computed kdp and kdpZZdr
+
+  void _loadKdpCond();
+  void _loadKdpCondRun(int startGate, int endGate);
 
 };
 

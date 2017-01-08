@@ -690,7 +690,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const string& dataValues) con
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t len, const unsigned char* dataValues) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),len,dataValues),__FILE__,__LINE__);
   else
@@ -703,7 +703,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t 
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t len, const signed char* dataValues) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),len,dataValues),__FILE__,__LINE__);
   else
@@ -716,7 +716,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t 
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, short datumValue) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),1,&datumValue),__FILE__,__LINE__);
   else
@@ -729,7 +729,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, short d
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, int datumValue) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),1,&datumValue),__FILE__,__LINE__);
   else
@@ -741,7 +741,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, int dat
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, long datumValue) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),1,&datumValue),__FILE__,__LINE__);
   else
@@ -753,7 +753,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, long da
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, float datumValue) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),1,&datumValue),__FILE__,__LINE__);
   else
@@ -766,7 +766,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, float d
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, double datumValue) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),1,&datumValue),__FILE__,__LINE__);
   else
@@ -779,7 +779,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, double 
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, unsigned short datumValue) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),1,&datumValue),__FILE__,__LINE__);
   else
@@ -791,7 +791,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, unsigne
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, unsigned int datumValue) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),1,&datumValue),__FILE__,__LINE__);
   else
@@ -803,7 +803,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, unsigne
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, long long datumValue) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),1,&datumValue),__FILE__,__LINE__);
   else
@@ -816,7 +816,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, long lo
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, unsigned long long datumValue) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),1,&datumValue),__FILE__,__LINE__);
   else
@@ -829,7 +829,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, unsigne
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t len, const short* dataValues) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),len,dataValues),__FILE__,__LINE__);
   else
@@ -842,7 +842,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t 
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t len, const int* dataValues) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),len,dataValues),__FILE__,__LINE__);
   else
@@ -854,7 +854,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t 
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t len, const long* dataValues) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),len,dataValues),__FILE__,__LINE__);
   else
@@ -866,7 +866,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t 
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t len, const float* dataValues) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),len,dataValues),__FILE__,__LINE__);
   else
@@ -879,7 +879,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t 
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t len, const double* dataValues) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),len,dataValues),__FILE__,__LINE__);
   else
@@ -892,7 +892,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t 
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t len, const unsigned short* dataValues) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),len,dataValues),__FILE__,__LINE__);
   else
@@ -904,7 +904,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t 
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t len, const unsigned int* dataValues) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),len,dataValues),__FILE__,__LINE__);
   else
@@ -916,7 +916,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t 
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t len, const long long* dataValues) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),len,dataValues),__FILE__,__LINE__);
   else
@@ -929,7 +929,7 @@ NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t 
 //  Creates a new NetCDF group attribute or if already exisiting replaces it.
 NcxxGroupAtt NcxxGroup::putAtt(const string& name, const NcxxType& type, size_t len, const unsigned long long* dataValues) const {
   ncxxCheckDefineMode(myId);
-  NcxxType::ncType typeClass(type.getTypeClass());
+  NcxxType::ncxxType typeClass(type.getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
     ncxxCheck(nc_put_att(myId,NC_GLOBAL,name.c_str(),type.getId(),len,dataValues),__FILE__,__LINE__);
   else
@@ -1136,7 +1136,7 @@ int NcxxGroup::getTypeCount(NcxxGroup::Location location) const {
 
 
 // Gets the number of type objects with a given enumeration type.
-int NcxxGroup::getTypeCount(NcxxType::ncType enumType, NcxxGroup::Location location) const {
+int NcxxGroup::getTypeCount(NcxxType::ncxxType enumType, NcxxGroup::Location location) const {
 
   if(isNull()) throw NcNullGrp("Attempt to invoke NcxxGroup::getTypeCount on a Null group",__FILE__,__LINE__);
 
@@ -1244,7 +1244,7 @@ set<NcxxType> NcxxGroup::getTypes(const string& name, NcxxGroup::Location locati
 
 
 // Gets the collection of NcxxType objects with a given data type.
-set<NcxxType> NcxxGroup::getTypes(NcxxType::ncType enumType, NcxxGroup::Location location) const {
+set<NcxxType> NcxxGroup::getTypes(NcxxType::ncxxType enumType, NcxxGroup::Location location) const {
   if(isNull()) throw NcNullGrp("Attempt to invoke NcxxGroup::getTypes on a Null group",__FILE__,__LINE__);
   // iterator for the multimap container.
   multimap<string,NcxxType>::iterator it;
@@ -1263,7 +1263,7 @@ set<NcxxType> NcxxGroup::getTypes(NcxxType::ncType enumType, NcxxGroup::Location
 
 
 // Gets the collection of NcxxType objects with a given name and data type.
-set<NcxxType> NcxxGroup::getTypes(const string& name, NcxxType::ncType enumType, NcxxGroup::Location location) const {
+set<NcxxType> NcxxGroup::getTypes(const string& name, NcxxType::ncxxType enumType, NcxxGroup::Location location) const {
   if(isNull()) throw NcNullGrp("Attempt to invoke NcxxGroup::getTypes on a Null group",__FILE__,__LINE__);
   // iterator for the multimap container.
   multimap<string,NcxxType>::iterator it;
@@ -1454,6 +1454,7 @@ int NcxxGroup::addGlobAttr(const string &name, const string &val)
     _addErrStr("ERROR - NcxxGroup::addGlobalAttr");
     _addErrStr("  Cannot add global attr name: ", name);
     _addErrStr("  val: ", val);
+    _addErrStr("  group: ", getName());
     _addErrStr("  exception: ", e.what());
     return -1;
   }
@@ -1473,6 +1474,7 @@ int NcxxGroup::addGlobAttr(const string &name, int val)
     _addErrStr("ERROR - NcxxGroup::addGlobAttr");
     _addErrStr("  Cannot add global attr name: ", name);
     _addErrInt("  val: ", val);
+    _addErrStr("  group: ", getName());
     _addErrStr("  exception: ", e.what());
     return -1;
   }
@@ -1492,6 +1494,7 @@ int NcxxGroup::addGlobAttr(const string &name, float val)
     _addErrStr("ERROR - NcxxGroup::addGlobAttr");
     _addErrStr("  Cannot add global attr name: ", name);
     _addErrDbl("  val: ", val, "%g");
+    _addErrStr("  group: ", getName());
     _addErrStr("  exception: ", e.what());
     return -1;
   }
@@ -1515,6 +1518,7 @@ int NcxxGroup::readGlobAttr(const string &name, string &val)
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxGroup::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
+    _addErrStr("  group: ", getName());
     _addErrStr("  exception: ", e.what());
     _addErrStr("  Cannot read value as string");
     return -1;
@@ -1528,6 +1532,7 @@ int NcxxGroup::readGlobAttr(const string &name, int &val)
   if (att.isNull()) {
     _addErrStr("ERROR - NcxxGroup::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
+    _addErrStr("  group: ", getName());
     return -1;
   }
   size_t nvals = att.getAttLength();
@@ -1535,6 +1540,7 @@ int NcxxGroup::readGlobAttr(const string &name, int &val)
     _addErrStr("ERROR - NcxxGroup::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
     _addErrStr("  no values supplied");
+    _addErrStr("  group: ", getName());
     return -1;
   }
   int *vals = new int[nvals];
@@ -1545,6 +1551,7 @@ int NcxxGroup::readGlobAttr(const string &name, int &val)
     _addErrStr("  Cannot read global attr name: ", name);
     _addErrStr("  exception: ", e.what());
     _addErrStr("  Cannot read value as int");
+    _addErrStr("  group: ", getName());
     delete[] vals;
     return -1;
   }
@@ -1559,6 +1566,7 @@ int NcxxGroup::readGlobAttr(const string &name, float &val)
   if (att.isNull()) {
     _addErrStr("ERROR - NcxxGroup::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
+    _addErrStr("  group: ", getName());
     return -1;
   }
   size_t nvals = att.getAttLength();
@@ -1576,6 +1584,7 @@ int NcxxGroup::readGlobAttr(const string &name, float &val)
     _addErrStr("  Cannot read global attr name: ", name);
     _addErrStr("  exception: ", e.what());
     _addErrStr("  Cannot read value as float");
+    _addErrStr("  group: ", getName());
     delete[] vals;
     return -1;
   }
@@ -1590,6 +1599,7 @@ int NcxxGroup::readGlobAttr(const string &name, double &val)
   if (att.isNull()) {
     _addErrStr("ERROR - NcxxGroup::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
+    _addErrStr("  group: ", getName());
     return -1;
   }
   size_t nvals = att.getAttLength();
@@ -1597,6 +1607,7 @@ int NcxxGroup::readGlobAttr(const string &name, double &val)
     _addErrStr("ERROR - NcxxGroup::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
     _addErrStr("  no values supplied");
+    _addErrStr("  group: ", getName());
     return -1;
   }
   double *vals = new double[nvals];
@@ -1607,6 +1618,7 @@ int NcxxGroup::readGlobAttr(const string &name, double &val)
     _addErrStr("  Cannot read global attr name: ", name);
     _addErrStr("  exception: ", e.what());
     _addErrStr("  Cannot read value as double");
+    _addErrStr("  group: ", getName());
     delete[] vals;
     return -1;
   }
@@ -1630,6 +1642,7 @@ int NcxxGroup::addDim(NcxxDim &dim, const string &name, int size)
   if (dim.isNull()) {
     _addErrStr("ERROR - NcxxGroup::addDim");
     _addErrStr("  Cannot add dimension: ", name);
+    _addErrStr("  group: ", getName());
     return -1;
   }
   return 0;
@@ -1647,6 +1660,7 @@ int NcxxGroup::readDim(const string &name, NcxxDim &dim)
   if (dim.isNull()) {
     _addErrStr("ERROR - NcxxGroup::readDim");
     _addErrStr("  Cannot read dimension, name: ", name);
+    _addErrStr("  group: ", getName());
     return -1;
   }
   return 0;
@@ -1760,4 +1774,229 @@ int NcxxGroup::addVar(NcxxVar &var,
   return 0;
 
 }
+
+/////////////////////////////////////
+// read int variable, set var and val
+// Returns 0 on success, -1 on failure
+
+int NcxxGroup::readIntVar(NcxxVar &var, const string &name,
+                          int &val, int missingVal, bool required)
+  
+{
+
+  val = missingVal;
+
+  var = getVar(name);
+  if (var.isNull()) {
+    if (!required) {
+      val = missingVal;
+      return 0;
+    } else {
+      _addErrStr("ERROR - NcxxGroup::readIntVar");
+      _addErrStr("  Cannot read variable, name: ", name);
+      _addErrStr("  group: ", getName());
+      return -1;
+    }
+  }
+
+  // check size
+  
+  if (var.numVals() < 1) {
+    _addErrStr("ERROR - NcxxGroup::readIntVar");
+    _addErrStr("  variable name: ", name);
+    _addErrStr("  variable has no data");
+    _addErrStr("  group: ", getName());
+    return -1;
+  }
+
+  vector<int> vals;
+  vals.resize(var.numVals());
+  try {
+    var.getVar(&vals[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxGroup::readIntVar");
+    _addErrStr("  cannot read variable, name: ", name);
+    _addErrStr("  exception: ", e.what());
+    _addErrStr("  group: ", getName());
+    return -1;
+  }
+  val = vals[0];
+
+  return 0;
+  
+}
+
+/////////////////////////////////////
+// read float variable, set var and val
+// Returns 0 on success, -1 on failure
+
+int NcxxGroup::readFloatVar(NcxxVar &var, const string &name,
+                            float &val, float missingVal, bool required)
+  
+{
+
+  val = missingVal;
+
+  var = getVar(name);
+  if (var.isNull()) {
+    if (!required) {
+      val = missingVal;
+      return 0;
+    } else {
+      _addErrStr("ERROR - NcxxGroup::readFloatVar");
+      _addErrStr("  Cannot read variable, name: ", name);
+      _addErrStr("  group: ", getName());
+      return -1;
+    }
+  }
+
+  // check size
+  
+  if (var.numVals() < 1) {
+    _addErrStr("ERROR - NcxxGroup::readFloatVar");
+    _addErrStr("  variable name: ", name);
+    _addErrStr("  variable has no data");
+    _addErrStr("  group: ", getName());
+    return -1;
+  }
+
+  vector<float> vals;
+  vals.resize(var.numVals());
+  try {
+    var.getVar(&vals[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxGroup::readFloatVar");
+    _addErrStr("  cannot read variable, name: ", name);
+    _addErrStr("  exception: ", e.what());
+    _addErrStr("  group: ", getName());
+    return -1;
+  }
+  val = vals[0];
+
+  return 0;
+  
+}
+
+/////////////////////////////////////
+// read double variable, set var and val
+// Returns 0 on success, -1 on failure
+
+int NcxxGroup::readDoubleVar(NcxxVar &var, const string &name,
+                             double &val, double missingVal, bool required)
+  
+{
+
+  val = missingVal;
+
+  var = getVar(name);
+  if (var.isNull()) {
+    if (!required) {
+      val = missingVal;
+      return 0;
+    } else {
+      _addErrStr("ERROR - NcxxGroup::readDoubleVar");
+      _addErrStr("  Cannot read variable, name: ", name);
+      _addErrStr("  group: ", getName());
+      return -1;
+    }
+  }
+
+  // check size
+  
+  if (var.numVals() < 1) {
+    _addErrStr("ERROR - NcxxGroup::readDoubleVar");
+    _addErrStr("  variable name: ", name);
+    _addErrStr("  variable has no data");
+    _addErrStr("  group: ", getName());
+    return -1;
+  }
+
+  vector<double> vals;
+  vals.resize(var.numVals());
+  try {
+    var.getVar(&vals[0]);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxGroup::readDoubleVar");
+    _addErrStr("  cannot read variable, name: ", name);
+    _addErrStr("  exception: ", e.what());
+    _addErrStr("  group: ", getName());
+    return -1;
+  }
+  val = vals[0];
+
+  return 0;
+  
+}
+
+///////////////////////////////////
+// read a scalar char string variable
+// Returns 0 on success, -1 on failure
+
+int NcxxGroup::readCharStringVar(NcxxVar &var, const string &name, string &val)
+
+{
+
+  val.clear();
+
+  // get var
+  
+  var = getVar(name);
+  if (var.isNull()) {
+    _addErrStr("ERROR - NcxxGroup::readCharStringVar");
+    _addErrStr("  Cannot read variable, name: ", name);
+    _addErrStr("  group: ", getName());
+    return -1;
+  }
+
+  // check dimension
+  
+  if (var.getDimCount() != 1) {
+    _addErrStr("ERROR - NcxxGroup::readCharStringVar");
+    _addErrStr("  variable name: ", name);
+    _addErrStr("  variable does not have 1 dimension");
+    _addErrStr("  group: ", getName());
+    return -1;
+  }
+  NcxxDim stringLenDim = var.getDim(0);
+  if (stringLenDim.isNull()) {
+    _addErrStr("ERROR - NcxxGroup::readCharStringVar");
+    _addErrStr("  variable name: ", name);
+    _addErrStr("  variable has NULL 0th dimension");
+    _addErrStr("  should be a string length dimension");
+    _addErrStr("  group: ", getName());
+    return -1;
+  }
+  
+  NcxxType ntype = var.getType();
+  if (ntype != NcxxType::nc_CHAR) {
+    _addErrStr("ERROR - NcxxGroup::readCharStringVar");
+    _addErrStr("  Incorrect variable type");
+    _addErrStr("  expecting char");
+    _addErrStr("  found: ", Ncxx::ncTypeToStr(ntype));
+    _addErrStr("  group: ", getName());
+    return -1;
+  }
+
+  // load up data
+
+  int stringLen = stringLenDim.getSize();
+  char *cvalues = new char[stringLen+1];
+
+  try {
+    var.getVar(cvalues);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxGroup::readCharStringVar");
+    _addErrStr("  cannot read variable, name: ", name);
+    _addErrStr("  exception: ", e.what());
+    _addErrStr("  group: ", getName());
+    delete[] cvalues;
+    return -1;
+  }
+
+  delete[] cvalues;
+
+  return 0;
+
+}
+
 

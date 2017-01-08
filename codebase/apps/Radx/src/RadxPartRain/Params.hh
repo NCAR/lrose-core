@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2016
+// ** Copyright UCAR (c) 1992 - 2017
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -88,59 +88,61 @@ public:
     RHOHV_NNC = 7,
     PHIDP = 8,
     KDP = 9,
-    KDP_BRINGI = 10,
-    PSOB = 11,
-    ZDP = 12,
-    PRECIP_RATE_ZH = 13,
-    PRECIP_RATE_ZH_SNOW = 14,
-    PRECIP_RATE_Z_ZDR = 15,
-    PRECIP_RATE_KDP = 16,
-    PRECIP_RATE_KDP_ZDR = 17,
-    PRECIP_RATE_HYBRID = 18,
-    PRECIP_RATE_PID = 19,
-    PRECIP_RATE_HIDRO = 20,
-    PRECIP_RATE_BRINGI = 21,
-    DBZ_ATTEN_CORRECTION = 22,
-    ZDR_ATTEN_CORRECTION = 23,
-    DBZ_ATTEN_CORRECTED = 24,
-    ZDR_ATTEN_CORRECTED = 25,
-    DBZ_FOR_KDP = 26,
-    ZDR_FOR_KDP = 27,
-    RHOHV_FOR_KDP = 28,
-    SNR_FOR_KDP = 29,
-    ZDR_SDEV_FOR_KDP = 30,
-    VALID_FLAG_FOR_KDP = 31,
-    PHIDP_FOR_KDP = 32,
-    PHIDP_MEAN_FOR_KDP = 33,
-    PHIDP_MEAN_UNFOLD_FOR_KDP = 34,
-    PHIDP_SDEV_FOR_KDP = 35,
-    PHIDP_JITTER_FOR_KDP = 36,
-    PHIDP_UNFOLD_FOR_KDP = 37,
-    PHIDP_FILT_FOR_KDP = 38,
-    PHIDP_COND_FOR_KDP = 39,
-    PHIDP_COND_FILT_FOR_KDP = 40,
-    DBZ_FOR_RATE = 41,
-    ZDR_FOR_RATE = 42,
-    KDP_FOR_RATE = 43,
-    PARTICLE_ID = 44,
-    PID_INTEREST = 45,
-    PARTICLE_ID2 = 46,
-    PID_INTEREST2 = 47,
-    DBZ_FOR_PID = 48,
-    ZDR_FOR_PID = 49,
-    LDR_FOR_PID = 50,
-    PHIDP_FOR_PID = 51,
-    RHOHV_FOR_PID = 52,
-    KDP_FOR_PID = 53,
-    SDZDR_FOR_PID = 54,
-    SDPHIDP_FOR_PID = 55,
-    TEMP_FOR_PID = 56,
-    ZDRM_IN_ICE = 57,
-    ZDRM_IN_BRAGG = 58,
-    ZDR_IN_ICE = 59,
-    ZDR_IN_BRAGG = 60,
-    ZDR_FLAG_IN_ICE = 61,
-    ZDR_FLAG_IN_BRAGG = 62
+    KDP_ZZDR = 10,
+    KDP_COND = 11,
+    KDP_BRINGI = 12,
+    PSOB = 13,
+    ZDP = 14,
+    PRECIP_RATE_ZH = 15,
+    PRECIP_RATE_ZH_SNOW = 16,
+    PRECIP_RATE_Z_ZDR = 17,
+    PRECIP_RATE_KDP = 18,
+    PRECIP_RATE_KDP_ZDR = 19,
+    PRECIP_RATE_HYBRID = 20,
+    PRECIP_RATE_PID = 21,
+    PRECIP_RATE_HIDRO = 22,
+    PRECIP_RATE_BRINGI = 23,
+    DBZ_ATTEN_CORRECTION = 24,
+    ZDR_ATTEN_CORRECTION = 25,
+    DBZ_ATTEN_CORRECTED = 26,
+    ZDR_ATTEN_CORRECTED = 27,
+    DBZ_FOR_KDP = 28,
+    ZDR_FOR_KDP = 29,
+    RHOHV_FOR_KDP = 30,
+    SNR_FOR_KDP = 31,
+    ZDR_SDEV_FOR_KDP = 32,
+    VALID_FLAG_FOR_KDP = 33,
+    PHIDP_FOR_KDP = 34,
+    PHIDP_MEAN_FOR_KDP = 35,
+    PHIDP_MEAN_UNFOLD_FOR_KDP = 36,
+    PHIDP_SDEV_FOR_KDP = 37,
+    PHIDP_JITTER_FOR_KDP = 38,
+    PHIDP_UNFOLD_FOR_KDP = 39,
+    PHIDP_FILT_FOR_KDP = 40,
+    PHIDP_COND_FOR_KDP = 41,
+    PHIDP_COND_FILT_FOR_KDP = 42,
+    DBZ_FOR_RATE = 43,
+    ZDR_FOR_RATE = 44,
+    KDP_FOR_RATE = 45,
+    PARTICLE_ID = 46,
+    PID_INTEREST = 47,
+    PARTICLE_ID2 = 48,
+    PID_INTEREST2 = 49,
+    DBZ_FOR_PID = 50,
+    ZDR_FOR_PID = 51,
+    LDR_FOR_PID = 52,
+    PHIDP_FOR_PID = 53,
+    RHOHV_FOR_PID = 54,
+    KDP_FOR_PID = 55,
+    SDZDR_FOR_PID = 56,
+    SDPHIDP_FOR_PID = 57,
+    TEMP_FOR_PID = 58,
+    ZDRM_IN_ICE = 59,
+    ZDRM_IN_BRAGG = 60,
+    ZDR_IN_ICE = 61,
+    ZDR_IN_BRAGG = 62,
+    ZDR_FLAG_IN_ICE = 63,
+    ZDR_FLAG_IN_BRAGG = 64
   } output_field_id_t;
 
   typedef enum {
@@ -610,6 +612,10 @@ public:
 
   double KDP_zdr_sdev_max;
 
+  double KDP_threshold_for_ZZDR;
+
+  int KDP_median_filter_len_for_ZZDR;
+
   tdrp_bool_t KDP_debug;
 
   tdrp_bool_t KDP_write_ray_files;
@@ -976,7 +982,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[273];
+  mutable TDRPtable _table[275];
 
   const char *_className;
 

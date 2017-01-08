@@ -54,7 +54,6 @@
 #include <radar/PrecipRate.hh>
 #include <radar/KdpBringi.hh>
 #include <radar/NcarParticleId.hh>
-class TempProfile;
 
 #include "Args.hh"
 #include "Params.hh"
@@ -140,7 +139,6 @@ private:
   double *_snr, *_dbz, *_vel, *_width;
   double *_zdr, *_ldr, *_kdp, *_phidp, *_rhohv;
   double *_tempForPid;
-  TempProfile *_tempProfile;
 
   // field indexes
 

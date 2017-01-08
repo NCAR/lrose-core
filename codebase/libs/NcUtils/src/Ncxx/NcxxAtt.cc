@@ -158,7 +158,7 @@ size_t  NcxxAtt::getAttLength() const{
 
 void NcxxAtt::getValues(string& dataValues) const {
 
-  NcxxType::ncType typeClass(getType().getTypeClass());
+  NcxxType::ncxxType typeClass(getType().getTypeClass());
 
   size_t att_len=getAttLength();
   char* tmpValues = new char[att_len + 1];  /* + 1 for trailing null */
@@ -187,7 +187,7 @@ void NcxxAtt::getValues(string& dataValues) const {
 
 void NcxxAtt::getValues(char* dataValues) const {
 
-  NcxxType::ncType typeClass(getType().getTypeClass());
+  NcxxType::ncxxType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN ||
      typeClass == NcxxType::nc_OPAQUE ||
      typeClass == NcxxType::nc_ENUM ||
@@ -206,7 +206,7 @@ void NcxxAtt::getValues(char* dataValues) const {
 
 void NcxxAtt::getValues(unsigned char* dataValues) const {
 
-  NcxxType::ncType typeClass(getType().getTypeClass());
+  NcxxType::ncxxType typeClass(getType().getTypeClass());
 
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
     ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
@@ -218,7 +218,7 @@ void NcxxAtt::getValues(unsigned char* dataValues) const {
 // Gets a netCDF variable attribute.
 
 void NcxxAtt::getValues(signed char* dataValues) const {
-  NcxxType::ncType typeClass(getType().getTypeClass());
+  NcxxType::ncxxType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
     ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
   else
@@ -228,7 +228,7 @@ void NcxxAtt::getValues(signed char* dataValues) const {
 // Gets a netCDF variable attribute.
 
 void NcxxAtt::getValues(short* dataValues) const {
-  NcxxType::ncType typeClass(getType().getTypeClass());
+  NcxxType::ncxxType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
     ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
   else
@@ -238,7 +238,7 @@ void NcxxAtt::getValues(short* dataValues) const {
 // Gets a netCDF variable attribute.
 
 void NcxxAtt::getValues(int* dataValues) const {
-  NcxxType::ncType typeClass(getType().getTypeClass());
+  NcxxType::ncxxType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
     ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
   else
@@ -248,7 +248,7 @@ void NcxxAtt::getValues(int* dataValues) const {
 // Gets a netCDF variable attribute.
 
 void NcxxAtt::getValues(long* dataValues) const {
-  NcxxType::ncType typeClass(getType().getTypeClass());
+  NcxxType::ncxxType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
     ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
   else
@@ -258,7 +258,7 @@ void NcxxAtt::getValues(long* dataValues) const {
 // Gets a netCDF variable attribute.
 
 void NcxxAtt::getValues(float* dataValues) const {
-  NcxxType::ncType typeClass(getType().getTypeClass());
+  NcxxType::ncxxType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
     ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
   else
@@ -268,7 +268,7 @@ void NcxxAtt::getValues(float* dataValues) const {
 // Gets a netCDF variable attribute.
 
 void NcxxAtt::getValues(double* dataValues) const {
-  NcxxType::ncType typeClass(getType().getTypeClass());
+  NcxxType::ncxxType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
     ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
   else
@@ -278,7 +278,7 @@ void NcxxAtt::getValues(double* dataValues) const {
 // Gets a netCDF variable attribute.
 
 void NcxxAtt::getValues(unsigned short* dataValues) const {
-  NcxxType::ncType typeClass(getType().getTypeClass());
+  NcxxType::ncxxType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
     ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
   else
@@ -288,7 +288,7 @@ void NcxxAtt::getValues(unsigned short* dataValues) const {
 // Gets a netCDF variable attribute.
 
 void NcxxAtt::getValues(unsigned int* dataValues) const {
-  NcxxType::ncType typeClass(getType().getTypeClass());
+  NcxxType::ncxxType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
     ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
   else
@@ -298,7 +298,7 @@ void NcxxAtt::getValues(unsigned int* dataValues) const {
 // Gets a netCDF variable attribute.
 
 void NcxxAtt::getValues(long long* dataValues) const {
-  NcxxType::ncType typeClass(getType().getTypeClass());
+  NcxxType::ncxxType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
     ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
   else
@@ -308,7 +308,7 @@ void NcxxAtt::getValues(long long* dataValues) const {
 // Gets a netCDF variable attribute.
 
 void NcxxAtt::getValues(unsigned long long* dataValues) const {
-  NcxxType::ncType typeClass(getType().getTypeClass());
+  NcxxType::ncxxType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
     ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
   else
@@ -318,7 +318,7 @@ void NcxxAtt::getValues(unsigned long long* dataValues) const {
 // Gets a netCDF variable attribute.
 
 void NcxxAtt::getValues(char** dataValues) const {
-  NcxxType::ncType typeClass(getType().getTypeClass());
+  NcxxType::ncxxType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND) 
     ncxxCheck(nc_get_att(groupId,varId,myName.c_str(),dataValues),__FILE__,__LINE__);
   else

@@ -878,10 +878,6 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
       return (&_flds.lag0_hcvx_db - start);
     case Params::LAG0_HCVX_PHASE:
       return (&_flds.lag0_hcvx_phase - start);
-    case Params::LAG0_VXHX_DB:
-      return (&_flds.lag0_vxhx_db - start);
-    case Params::LAG0_VXHX_PHASE:
-      return (&_flds.lag0_vxhx_phase - start);
 
     case Params::LAG1_HC_DB:
       return (&_flds.lag1_hc_db - start);

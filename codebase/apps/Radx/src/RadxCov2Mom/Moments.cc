@@ -515,8 +515,8 @@ int Moments::_getCovariancesDpAltHvCoCross(const RadxRay *covRay)
   const RadxField *fldLag0HcVxPhase = _getField(covRay, Params::LAG0_HCVX_PHASE);
   if (fldLag0HcVxPhase == NULL) iret = -1;
 
-  const RadxField *fldLag0VxHxDb = _getField(covRay, Params::LAG0_VXHX_DB, false);
-  const RadxField *fldLag0VxHxPhase = _getField(covRay, Params::LAG0_VXHX_PHASE, false);
+  const RadxField *fldLag1VxHxDb = _getField(covRay, Params::LAG0_VXHX_DB, false);
+  const RadxField *fldLag1VxHxPhase = _getField(covRay, Params::LAG0_VXHX_PHASE, false);
 
   const RadxField *fldLag1VcHcDb = _getField(covRay, Params::LAG1_VCHC_DB);
   if (fldLag1VcHcDb == NULL) iret = -1;
@@ -558,14 +558,14 @@ int Moments::_getCovariancesDpAltHvCoCross(const RadxRay *covRay)
   Radx::fl32 *lag0HcVxDb = (Radx::fl32 *) fldLag0HcVxDb->getData();
   Radx::fl32 *lag0HcVxPhaseDeg = (Radx::fl32 *) fldLag0HcVxPhase->getData();
 
-  Radx::fl32 *lag0VxHxDb = NULL;
-  if (fldLag0VxHxDb != NULL) {
-    lag0VxHxDb = (Radx::fl32 *) fldLag0VxHxDb->getData();
+  Radx::fl32 *lag1VxHxDb = NULL;
+  if (fldLag1VxHxDb != NULL) {
+    lag1VxHxDb = (Radx::fl32 *) fldLag1VxHxDb->getData();
   }
 
-  Radx::fl32 *lag0VxHxPhaseDeg = NULL;
-  if (fldLag0VxHxPhase != NULL) {
-    lag0VxHxPhaseDeg = (Radx::fl32 *) fldLag0VxHxPhase->getData();
+  Radx::fl32 *lag1VxHxPhaseDeg = NULL;
+  if (fldLag1VxHxPhase != NULL) {
+    lag1VxHxPhaseDeg = (Radx::fl32 *) fldLag1VxHxPhase->getData();
   }
 
   Radx::fl32 *lag1VcHcDb = (Radx::fl32 *) fldLag1VcHcDb->getData();
@@ -597,13 +597,13 @@ int Moments::_getCovariancesDpAltHvCoCross(const RadxRay *covRay)
     double lag0HcVxMag = pow(10.0, lag0HcVxDb[igate] / 20.0);
     double lag0HcVxPhase = lag0HcVxPhaseDeg[igate] * DEG_TO_RAD;
 
-    double lag0VxHxMag = 0.0;
-    if (lag0VxHxDb != NULL) {
-      lag0VxHxMag = pow(10.0, lag0VxHxDb[igate] / 20.0);
+    double lag1VxHxMag = 0.0;
+    if (lag1VxHxDb != NULL) {
+      lag1VxHxMag = pow(10.0, lag1VxHxDb[igate] / 20.0);
     }
-    double lag0VxHxPhase = 0.0;
-    if (lag0VxHxPhaseDeg != NULL) {
-      lag0VxHxPhase = lag0VxHxPhaseDeg[igate] * DEG_TO_RAD;
+    double lag1VxHxPhase = 0.0;
+    if (lag1VxHxPhaseDeg != NULL) {
+      lag1VxHxPhase = lag1VxHxPhaseDeg[igate] * DEG_TO_RAD;
     }
 
     double lag1VcHcMag = pow(10.0, lag1VcHcDb[igate] / 20.0);
@@ -626,8 +626,8 @@ int Moments::_getCovariancesDpAltHvCoCross(const RadxRay *covRay)
     rap_sincos(lag0HcVxPhase, &sinval, &cosval);
     covar.lag0HcVx.set(lag0HcVxMag * cosval, lag0HcVxMag * sinval);
     
-    rap_sincos(lag0VxHxPhase, &sinval, &cosval);
-    covar.lag0VxHx.set(lag0VxHxMag * cosval, lag0VxHxMag * sinval);
+    rap_sincos(lag1VxHxPhase, &sinval, &cosval);
+    covar.lag1VxHx.set(lag1VxHxMag * cosval, lag1VxHxMag * sinval);
     
     rap_sincos(lag1VcHcPhase, &sinval, &cosval);
     covar.lag1VcHc.set(lag1VcHcMag * cosval, lag1VcHcMag * sinval);
@@ -1031,7 +1031,7 @@ void Moments::_computeMomDpAltHvCoCross()
                                    covar.lag0Vx,
                                    covar.lag0VcHx, 
                                    covar.lag0HcVx,
-                                   covar.lag0VxHx,
+                                   covar.lag1VxHx,
                                    covar.lag1VcHc, 
                                    covar.lag1HcVc,
                                    covar.lag2Hc, 

@@ -75,7 +75,7 @@ def main():
     # set up list of other libs which may be used for include
 
     if (len(options.libList) < 1):
-        libList = [ 'FiltAlg', 'Fmq', 'Mdv', 'Radx',
+        libList = [ 'FiltAlg', 'Fmq', 'Mdv', 'Radx', 'NcxxUtils',
                     'Refract', 'Spdb', 'SpdbServer', 'advect', 
                     'cidd', 'contour',
                     'dataport', 'devguide', 'didss', 'dsdata', 'dsserver',

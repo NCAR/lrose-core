@@ -21,61 +21,54 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// TempProfile.hh
+//////////////////////////////////////////////////////////////////////
+//  Ncxx C++ classes for NetCDF4
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//  Copied from code by:
 //
-// Nov 2011
+//    Lynton Appel, of the Culham Centre for Fusion Energy (CCFE)
+//    in Oxfordshire, UK.
+//    The netCDF-4 C++ API was developed for use in managing
+//    fusion research data from CCFE's innovative MAST
+//    (Mega Amp Spherical Tokamak) experiment.
+// 
+//  Offical NetCDF codebase is at:
 //
-///////////////////////////////////////////////////////////////
+//    https://github.com/Unidata/netcdf-cxx4
 //
-// Get temperature profile from sounding
+//  Modification for LROSE made by:
 //
-////////////////////////////////////////////////////////////////
+//    Mike Dixon, EOL, NCAR
+//    P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+//  The base code makes extensive use of exceptions.
+//  Additional methods have been added to return error conditions. 
+//
+//  December 2016
+//
+//////////////////////////////////////////////////////////////////////
 
-#ifndef TempProfile_H
-#define TempProfile_H
+#include <NcxxUtils/NcxxType.hh>
 
-#include "Params.hh"
-#include <string>
-#include <radar/NcarParticleId.hh>
+#ifndef NcxxFloatClass
+#define NcxxFloatClass
 
-using namespace std;
-
-class TempProfile {
+/*! Class represents a netCDF atomic Float type. */
+class NcxxFloat : public NcxxType
+{
+public: 
   
-public:
-
-  // constructor
+  /*! equivalence operator */
+  bool operator==(const NcxxFloat & rhs);
   
-  TempProfile (const string progName,
-               const Params &params);
+  /*!  destructor */
+  ~NcxxFloat();
   
-  // destructor
-  
-  ~TempProfile();
-
-  // get a valid temperature profile
-  // returns 0 on success, -1 on failure
-
-  int getTempProfile(time_t dataTime,
-                     time_t &soundingTime,
-                     vector<NcarParticleId::TmpPoint> &tmpProfile);
-
-protected:
-private:
-
-  string _progName;
-  Params _params;
-
-  vector<NcarParticleId::TmpPoint> _tmpProfile;
-  time_t _soundingTime;
-  
-  int _getTempProfile(time_t searchTime, int marginSecs);
-  int _checkTempProfile();
-
+  /*! Constructor */
+  NcxxFloat();
 };
 
+/*! A global instance  of the NcxxFloat class */
+extern NcxxFloat ncxxFloat;
 
 #endif

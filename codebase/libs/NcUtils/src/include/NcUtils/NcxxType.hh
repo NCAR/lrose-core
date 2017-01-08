@@ -72,7 +72,7 @@ namespace netCDF
       is included. This enables the user to instantiate a netCDF type object without explcitly needing to know
       it precise type.
     */
-    enum ncType
+    enum ncxxType
     {
       nc_BYTE     = NC_BYTE, 	//!< signed 1 byte integer
       nc_CHAR     = NC_CHAR,	//!< ISO/ASCII character
@@ -170,7 +170,7 @@ namespace netCDF
       Valid for all types, whether atomic or user-defined. User-defined types are returned as one of the following
       enumeration types: nc_VLEN, nc_OPAQUE, nc_ENUM, or nc_COMPOUND.
      */
-    ncType getTypeClass() const;
+    ncxxType getTypeClass() const;
 
     /*!
       Return a string containing the name of the enumerated type.  (ie one of the following strings:
