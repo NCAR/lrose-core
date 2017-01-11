@@ -24,7 +24,6 @@
 ///////////////////////////////////////////////////////////////
 // InterestMap.cc
 //
-//
 // Mike Dixon, RAP, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -196,10 +195,13 @@ void InterestMap::getWeightedInterest(double val,
 
 ///////////////////////////////////////////////////////////
 // accumulate weighted interest based on value
+// If interest is less than minValidInterest, the sum
+// is not performed.
 
 void InterestMap::accumWeightedInterest(double val,
                                         double &sumInterest,
-                                        double &sumWt)
+                                        double &sumWt,
+                                        double minValidInterest /* = 0.00001 */)
   
 {
   
@@ -216,14 +218,16 @@ void InterestMap::accumWeightedInterest(double val,
 
   double interest = _weightedLut[index];
 
-#ifdef DEBUG_PRINT  
-  cerr << "val, interest: " << val << ", " << interest << endl;
-#endif
-
-  if (fabs(interest) > 0.00001) {
+  if (fabs(interest) > minValidInterest) {
     sumInterest += interest;
     sumWt += _weight;
   }
+
+#ifdef DEBUG_PRINT  
+  cerr << "label, val, interest, sumInt, sumWt: "
+       << _label << ", " << val << ", " << interest
+       << ", " << sumInterest << ", " << sumWt << endl;
+#endif
 
 }
 
