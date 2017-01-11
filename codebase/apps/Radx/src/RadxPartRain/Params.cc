@@ -1834,6 +1834,18 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'PID_compute_melting_layer'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("PID_compute_melting_layer");
+    tt->descr = tdrpStrDup("Option to compute interest for melting layer.");
+    tt->help = tdrpStrDup("If true, the ML_INTEREST field will be computed. Otherwise it will be missing. Follows Giangrande et al. - Automatic Designation of the Melting Layer with Polarimitric Prototype of WSR-88D Radar - AMS JAMC, Vol47, 2008.");
+    tt->val_offset = (char *) &PID_compute_melting_layer - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -3816,8 +3828,8 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[63].val = ZDR_FLAG_IN_ICE;
         tt->struct_def.fields[0].enum_def.fields[64].name = tdrpStrDup("ZDR_FLAG_IN_BRAGG");
         tt->struct_def.fields[0].enum_def.fields[64].val = ZDR_FLAG_IN_BRAGG;
-        tt->struct_def.fields[0].enum_def.fields[65].name = tdrpStrDup("ML_RAW");
-        tt->struct_def.fields[0].enum_def.fields[65].val = ML_RAW;
+        tt->struct_def.fields[0].enum_def.fields[65].name = tdrpStrDup("ML_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[65].val = ML_INTEREST;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;

@@ -225,7 +225,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *sdzdrForPid = _pid.getSdzdr();
   const double *sdphidpForPid = _pid.getSdphidp();
 
-  const double *mlRaw = _pid.getMlRaw();
+  const double *mlInterest = _pid.getMlInterest();
 
   // load up output data
 
@@ -547,8 +547,8 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           *datp = _zdrFlagInBragg[igate];
           break;
 
-        case Params::ML_RAW:
-          *datp = mlRaw[igate];
+        case Params::ML_INTEREST:
+          *datp = mlInterest[igate];
           break;
 
       } // switch
@@ -869,6 +869,9 @@ int ComputeEngine::_pidInit()
          << _params.pid_thresholds_file_path << endl;
     cerr << "  PID will not be computed" << endl;
     return -1;
+  }
+  if (_params.PID_compute_melting_layer) {
+    _pid.setComputeMeltingLayer(true);
   }
   
   return 0;

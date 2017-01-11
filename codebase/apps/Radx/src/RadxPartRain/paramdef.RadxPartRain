@@ -638,6 +638,12 @@ paramdef boolean {
   p_help = "If TRUE, the interest field for each particle type will be written to the output FMQ, in addition to the list in 'output_fields'.";
 } PID_output_particle_interest_fields;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compute interest for melting layer.";
+  p_help = "If true, the ML_INTEREST field will be computed. Otherwise it will be missing. Follows Giangrande et al. - Automatic Designation of the Melting Layer with Polarimitric Prototype of WSR-88D Radar - AMS JAMC, Vol47, 2008.";
+} PID_compute_melting_layer;
+
 commentdef {
   p_header = "SOUNDING INPUT FOR PID temperatures - OPTIONAL";
 }
@@ -1619,7 +1625,7 @@ typedef enum {
   ZDR_FLAG_IN_ICE,
   ZDR_FLAG_IN_BRAGG,
 
-  ML_RAW
+  ML_INTEREST
 
 } output_field_id_t;
 
