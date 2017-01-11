@@ -46,6 +46,7 @@
 #include <radar/PidImapManager.hh>
 #include <radar/PhidpProc.hh>
 #include <radar/TempProfile.hh>
+#include <radar/InterestMap.hh>
 using namespace std;
 
 ////////////////////////
@@ -372,6 +373,13 @@ public:
    * @param
    */
   void setTempProfile(const vector<TempProfile::PointVal> &profile);
+
+  // set flag to compute the melting layer
+  // Follows Giangrande et al. - Automatic Designation of the
+  // Melting Layer with Polarimitric Prototype of WSR-88D Radar.
+  // AMS JAMC, Vol47, 2008.
+
+  void setComputeMeltingLayer(bool val) { _computeMl = val; }
  
   /** 
    * Get temperature at a given height
@@ -557,7 +565,7 @@ public:
    * Get melting layer fields
    */
 
-  const double *getMlRaw() const { return _mlRaw; }
+  const double *getMlInterest() const { return _mlInterest; }
   
   /**
    * Get list of possible particle types used by the algorithm, along
@@ -776,18 +784,16 @@ private:
 
   // melting layer
 
-  TaArray<double> _mlRaw_;       /**< Raw gates for melting layer */
-  double *_mlRaw;                /**< Pointer to the array of raw gates for melting layer */
-  
-  double _mlMinDbz;
-  double _mlMaxDbz;
-  
-  double _mlMinZdr;
-  double _mlMaxZdr;
+  bool _computeMl;
 
-  double _mlMinRhohv;
-  double _mlMaxRhohv;
+  TaArray<double> _mlInterest_;  /**< Combined interest value for melting layer */
+  double *_mlInterest;
 
+  InterestMap *_mlDbzInterest;
+  InterestMap *_mlZdrInterest;
+  InterestMap *_mlRhohvInterest;
+  InterestMap *_mlTempInterest;
+  
   // allocate the required arrays
 
   void _allocArrays(int nGates);
@@ -838,8 +844,8 @@ private:
 
   // compute melting layer
   
-  void _computeMeltingLayer();
-  void _computeMlRaw();
+  void _mlInit();
+  void _mlCompute();
   
 };
 

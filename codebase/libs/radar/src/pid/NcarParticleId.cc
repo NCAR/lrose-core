@@ -160,14 +160,7 @@ NcarParticleId::NcarParticleId()
 
   // melting layer
 
-  _mlMinDbz = 30.0;
-  _mlMaxDbz = 47.0;
-
-  _mlMinRhohv = 0.90;
-  _mlMaxRhohv = 0.97;
-
-  _mlMinZdr = 0.80;
-  _mlMaxZdr = 2.50;
+  _mlInit();
 
 }
 
@@ -182,6 +175,19 @@ NcarParticleId::~NcarParticleId()
     delete _particleList[ii];
   }
   _particleList.clear();
+
+  if (_mlDbzInterest) {
+    delete _mlDbzInterest;
+  }
+  if (_mlZdrInterest) {
+    delete _mlZdrInterest;
+  }
+  if (_mlRhohvInterest) {
+    delete _mlRhohvInterest;
+  }
+  if (_mlTempInterest) {
+    delete _mlTempInterest;
+  }
 
   clear();
 
@@ -370,6 +376,7 @@ void NcarParticleId::initializeArrays(int nGates)
     _sdzdr[ii] = _missingDouble;
     _sdphidp[ii] = _missingDouble;
     _cflags[ii] = false;
+    _mlInterest[ii] = _missingDouble;
   }
   
 }
@@ -552,7 +559,9 @@ void NcarParticleId::computePidBeam(int nGates,
 
   // compute melting layer
   
-  _computeMeltingLayer();
+  if (_computeMl) {
+    _mlCompute();
+  }
   
 }
 
@@ -658,7 +667,7 @@ void NcarParticleId::_allocArrays(int nGates)
   _sdphidp = _sdphidp_.alloc(nGates);
   _cflags = _cflags_.alloc(nGates);
 
-  _mlRaw = _mlRaw_.alloc(nGates);
+  _mlInterest = _mlInterest_.alloc(nGates);
 
 }
 
@@ -1080,45 +1089,133 @@ void NcarParticleId::print(ostream &out)
 }
 
 //////////////////////////////////////////////
-// compute Melting Layer
+// Initialze melting layer computations
 
-void NcarParticleId::_computeMeltingLayer()
+void NcarParticleId::_mlInit()
   
 {
 
-  // compute ML raw array
-  
-  _computeMlRaw();
+  _computeMl = false;
+  _mlDbzInterest = NULL;
+  _mlZdrInterest = NULL;
+  _mlRhohvInterest = NULL;
+  _mlTempInterest = NULL;
+
+  vector<InterestMap::ImPoint> pts;
+
+  // dbz interest map
+
+  pts.clear();
+  pts.push_back(InterestMap::ImPoint(25.0, 0.0));
+  pts.push_back(InterestMap::ImPoint(30.0, 1.0));
+  pts.push_back(InterestMap::ImPoint(47.0, 1.0));
+  pts.push_back(InterestMap::ImPoint(52.0, 0.0));
+  _mlDbzInterest = new InterestMap("dbz4ml", pts, 1.0);
+  _mlDbzInterest->setMissingValue(_missingDouble);
+
+  // zdr interest map
+
+  pts.clear();
+  pts.push_back(InterestMap::ImPoint(0.60, 0.0));
+  pts.push_back(InterestMap::ImPoint(0.80, 1.0));
+  pts.push_back(InterestMap::ImPoint(2.50, 1.0));
+  pts.push_back(InterestMap::ImPoint(2.70, 0.0));
+  _mlZdrInterest = new InterestMap("zdr4ml", pts, 1.0);
+  _mlZdrInterest->setMissingValue(_missingDouble);
+
+  // rhohv interest map
+
+  pts.clear();
+  pts.push_back(InterestMap::ImPoint(0.85, 0.0));
+  pts.push_back(InterestMap::ImPoint(0.90, 1.0));
+  pts.push_back(InterestMap::ImPoint(0.97, 1.0));
+  pts.push_back(InterestMap::ImPoint(0.972, 0.0));
+  _mlRhohvInterest = new InterestMap("rhohv4ml", pts, 1.0);
+  _mlRhohvInterest->setMissingValue(_missingDouble);
+
+  // temp interest map
+
+  pts.clear();
+  pts.push_back(InterestMap::ImPoint(-5.0, 0.0));
+  pts.push_back(InterestMap::ImPoint(-1.0, 1.0));
+  pts.push_back(InterestMap::ImPoint(1.0, 1.0));
+  pts.push_back(InterestMap::ImPoint(5.0, 0.0));
+  _mlTempInterest = new InterestMap("temp4ml", pts, 1.0);
+  _mlTempInterest->setMissingValue(_missingDouble);
 
 }
 
-//////////////////////////////////////////////
-// compute ML raw array
+////////////////////////////////////////////////////////////
+// compute Melting Layer
+//
+// Follows Giangrande et al. - Automatic Designation of the
+// Melting Layer with Polarimitric Prototype of WSR-88D Radar.
+// AMS JAMC, Vol47, 2008.
 
-void NcarParticleId::_computeMlRaw()
+void NcarParticleId::_mlCompute()
   
 {
 
   for (int igate = 0; igate < _nGates; igate++) {
 
-    _mlRaw[igate] = _missingDouble;
+    // check for missing values
 
+    _mlInterest[igate] = _missingDouble;
     double dbz = _dbz[igate];
-    if (dbz < _mlMinDbz || dbz > _mlMaxDbz) {
-      continue;
-    }
-    
     double zdr = _zdr[igate];
-    if (zdr < _mlMinZdr || zdr > _mlMaxZdr) {
-      continue;
-    }
-    
     double rhohv = _rhohv[igate];
-    if (rhohv < _mlMinRhohv || rhohv > _mlMaxRhohv) {
+
+    if (dbz == _missingDouble ||
+        zdr == _missingDouble ||
+        rhohv == _missingDouble) {
       continue;
     }
-    
-    _mlRaw[igate] = 1.0;
+
+    // check for PID type
+
+    int pidVal = _pid[igate];
+    if (pidVal > 14) {
+      // not a cloud particle, so set to 0
+      _mlInterest[igate] = 0.0;
+      continue;
+    }
+
+    // check temperature
+
+    // double temp = _tempC[igate];
+    // if (temp < -2 || temp > 2) {
+    //   continue;
+    // }
+
+    // compute interest
+
+    double sumInterest = 0.0;
+    double sumWt = 0.0;
+
+    _mlDbzInterest->accumWeightedInterest(dbz, sumInterest, sumWt, -1);
+    _mlZdrInterest->accumWeightedInterest(zdr, sumInterest, sumWt, -1);
+    _mlRhohvInterest->accumWeightedInterest(rhohv, sumInterest, sumWt, -1);
+    _mlTempInterest->accumWeightedInterest(_tempC[igate], sumInterest, sumWt, -1);
+
+    _mlInterest[igate] = sumInterest / sumWt;
+
+    // double dbzInt = _mlDbzInterest->getInterest(dbz);
+    // double dbzWt = _mlDbzInterest->getWeight();
+
+    // double zdrInt = _mlZdrInterest->getInterest(zdr);
+    // double zdrWt = _mlZdrInterest->getWeight();
+
+    // double rhohvInt = _mlRhohvInterest->getInterest(rhohv);
+    // double rhohvWt = _mlRhohvInterest->getWeight();
+
+    // if (dbz > 30) {
+    //   cerr << "11111111: "
+    //        << dbz << ", " << dbzInt << ", " << dbzWt << " # "
+    //        << zdr << ", " << zdrInt << ", " << zdrWt << " #  "
+    //        << rhohv << ", " << rhohvInt << ", " << rhohvWt << " # "
+    //        << sumInterest << ", " << sumWt << ", " 
+    //        << _mlInterest[igate] << ", " << _missingDouble << endl;
+    // }
 
   } // igate
 
