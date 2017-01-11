@@ -225,6 +225,8 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *sdzdrForPid = _pid.getSdzdr();
   const double *sdphidpForPid = _pid.getSdphidp();
 
+  const double *mlRaw = _pid.getMlRaw();
+
   // load up output data
 
   double minValidPrecipRate = _params.PRECIP_min_valid_rate;
@@ -543,6 +545,10 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           break;
         case Params::ZDR_FLAG_IN_BRAGG:
           *datp = _zdrFlagInBragg[igate];
+          break;
+
+        case Params::ML_RAW:
+          *datp = mlRaw[igate];
           break;
 
       } // switch

@@ -1617,7 +1617,9 @@ typedef enum {
   ZDR_IN_BRAGG,
 
   ZDR_FLAG_IN_ICE,
-  ZDR_FLAG_IN_BRAGG
+  ZDR_FLAG_IN_BRAGG,
+
+  ML_RAW
 
 } output_field_id_t;
 

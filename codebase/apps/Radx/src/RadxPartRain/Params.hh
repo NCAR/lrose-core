@@ -142,7 +142,8 @@ public:
     ZDR_IN_ICE = 61,
     ZDR_IN_BRAGG = 62,
     ZDR_FLAG_IN_ICE = 63,
-    ZDR_FLAG_IN_BRAGG = 64
+    ZDR_FLAG_IN_BRAGG = 64,
+    ML_RAW = 65
   } output_field_id_t;
 
   typedef enum {

@@ -554,6 +554,12 @@ public:
   const bool *getCensorFlags() const { return _cflags; }
   
   /**
+   * Get melting layer fields
+   */
+
+  const double *getMlRaw() const { return _mlRaw; }
+  
+  /**
    * Get list of possible particle types used by the algorithm, along
    * with interest functions.
    * @return A vector of pointers to Particle objects, one for each possible particle type
@@ -561,7 +567,7 @@ public:
   const vector<Particle*> getParticleList() const { return _particleList; }
 
   /**
-   * Get indicidual particle arrays
+   * Get individual particle arrays
    * @return pointers to Particle objects, one for each possible particle type
    */
 
@@ -624,6 +630,7 @@ private:
   double _wavelengthCm;     /**< The wavelength (cm) of the radar beam */
 
   // range geometry
+  int _nGates;
   double _startRangeKm;
   double _gateSpacingKm;
 
@@ -767,6 +774,20 @@ private:
 
   PhidpProc _phidpProc;
 
+  // melting layer
+
+  TaArray<double> _mlRaw_;       /**< Raw gates for melting layer */
+  double *_mlRaw;                /**< Pointer to the array of raw gates for melting layer */
+  
+  double _mlMinDbz;
+  double _mlMaxDbz;
+  
+  double _mlMinZdr;
+  double _mlMaxZdr;
+
+  double _mlMinRhohv;
+  double _mlMaxRhohv;
+
   // allocate the required arrays
 
   void _allocArrays(int nGates);
@@ -815,6 +836,11 @@ private:
    */
   int _setInterestMaps(Particle *part, const char *line);
 
+  // compute melting layer
+  
+  void _computeMeltingLayer();
+  void _computeMlRaw();
+  
 };
 
 #endif

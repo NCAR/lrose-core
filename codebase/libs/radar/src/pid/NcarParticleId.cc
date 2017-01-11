@@ -158,6 +158,17 @@ NcarParticleId::NcarParticleId()
 
   _ngatesSdev = 9;
 
+  // melting layer
+
+  _mlMinDbz = 30.0;
+  _mlMaxDbz = 47.0;
+
+  _mlMinRhohv = 0.90;
+  _mlMaxRhohv = 0.97;
+
+  _mlMinZdr = 0.80;
+  _mlMaxZdr = 2.50;
+
 }
 
 /////////////////////////////////////////////////////////
@@ -539,6 +550,10 @@ void NcarParticleId::computePidBeam(int nGates,
     FilterUtils::applyMedianFilter(_pid2, nGates, _pidMedianFilterLen);
   }
 
+  // compute melting layer
+  
+  _computeMeltingLayer();
+  
 }
 
 /////////////////////////////////////////////////////////
@@ -623,7 +638,8 @@ void NcarParticleId::computePid(double snr,
 void NcarParticleId::_allocArrays(int nGates)
   
 {
-  
+
+  _nGates = nGates;
   _snr = _snr_.alloc(nGates);
   _dbz = _dbz_.alloc(nGates);
   _zdr = _zdr_.alloc(nGates);
@@ -641,6 +657,8 @@ void NcarParticleId::_allocArrays(int nGates)
   _sdzdr = _sdzdr_.alloc(nGates);
   _sdphidp = _sdphidp_.alloc(nGates);
   _cflags = _cflags_.alloc(nGates);
+
+  _mlRaw = _mlRaw_.alloc(nGates);
 
 }
 
@@ -1061,6 +1079,51 @@ void NcarParticleId::print(ostream &out)
 
 }
 
+//////////////////////////////////////////////
+// compute Melting Layer
+
+void NcarParticleId::_computeMeltingLayer()
+  
+{
+
+  // compute ML raw array
+  
+  _computeMlRaw();
+
+}
+
+//////////////////////////////////////////////
+// compute ML raw array
+
+void NcarParticleId::_computeMlRaw()
+  
+{
+
+  for (int igate = 0; igate < _nGates; igate++) {
+
+    _mlRaw[igate] = _missingDouble;
+
+    double dbz = _dbz[igate];
+    if (dbz < _mlMinDbz || dbz > _mlMaxDbz) {
+      continue;
+    }
+    
+    double zdr = _zdr[igate];
+    if (zdr < _mlMinZdr || zdr > _mlMaxZdr) {
+      continue;
+    }
+    
+    double rhohv = _rhohv[igate];
+    if (rhohv < _mlMinRhohv || rhohv > _mlMaxRhohv) {
+      continue;
+    }
+    
+    _mlRaw[igate] = 1.0;
+
+  } // igate
+
+}
+    
 //////////////////////////////////////////////////////////////
 // Particle interior class
 
