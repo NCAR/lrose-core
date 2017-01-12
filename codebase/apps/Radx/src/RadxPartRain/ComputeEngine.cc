@@ -1245,14 +1245,14 @@ int ComputeEngine::_loadFieldArray(RadxRay *inputRay,
     return -1;
   }
   
-  // convert field data to floats
+  // Set array values
+  // fields are already fl32
 
-  field->convertToFl64();
-  const double *vals = field->getDataFl64();
-  double missingVal = field->getMissingFl64();
+  const Radx::fl32 *vals = field->getDataFl32();
+  double missingFl32 = field->getMissingFl32();
   for (int igate = 0; igate < _nGates; igate++, vals++) {
-    double val = *vals;
-    if (val == missingVal) {
+    Radx::fl32 val = *vals;
+    if (val == missingFl32) {
       array[igate] = missingDbl;
     } else {
       array[igate] = val;

@@ -412,6 +412,10 @@ int RadxPartRain::_processFile(const string &filePath)
   }
   _readPaths = inFile.getReadPaths();
 
+  // comvert to fl32
+  
+  vol.convertToFl32();
+
   // override radar location if requested
 
   if (_params.override_radar_location) {
@@ -1620,44 +1624,54 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
 
   // loop through rays
 
+  vector<size_t> raysWithMl;
   for (size_t iray = 0; iray < vol.getRays().size(); iray++) {
 
     // get ray
     
     RadxRay *ray = vol.getRays()[iray];
     double elevation = ray->getElevationDeg();
+    // double azimuth = ray->getAzimuthDeg();
+
+    // cerr << "11111111111 el, az: " << elevation << ", " << azimuth << endl;
+
     if (elevation < 3.9 || elevation > 10.0) {
       // only process elevations between 4 and 10 deg elevation
       continue;
     }
 
-    // find PID field
+    // find PID field, copy and convert to ints
     
     RadxField *pidField = ray->getField(pidFieldName);
     if (pidField == NULL) {
       continue;
     }
-    
-    // copy field, convert to int
-
     RadxField pidCopy(*pidField);
     pidCopy.convertToSi16(1.0, 0.0);
     const Radx::si16 *pidVals = pidCopy.getDataSi16();
 
-    // loop through the gates
+    // loop through the gates loading up the ht array
+    // for points in the melting layer
+    // also find fist and last gates with wet snow
     
     double startRangeKm = pidCopy.getStartRangeKm();
     double gateSpacingKm = pidCopy.getGateSpacingKm();
     size_t nGates = pidCopy.getNPoints();
-    double range = startRangeKm;
-    for (size_t igate = 0; igate < nGates; igate++, range += gateSpacingKm) {
-      // cerr << "igate, pid: " << igate << ", " << pidVals[igate] << endl;
+
+    bool hasMl = false;
+    for (size_t igate = 0; igate < nGates; igate++) {
+      double range = startRangeKm + igate * gateSpacingKm;
       if (pidVals[igate] == NcarParticleId::WET_SNOW) {
         double gateHt = beamHt.computeHtKm(elevation, range);
         mlHts.push_back(gateHt);
+        hasMl = true;
       }
     } // igate
-    
+
+    if (hasMl) {
+      raysWithMl.push_back(iray);
+    }
+
   } // iray
 
   if (mlHts.size() < 1) {
@@ -1671,7 +1685,7 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
   
   sort(mlHts.begin(), mlHts.end());
 
-  // print out the percentiles
+  // compute height properties
   
   int ipercBot = (int)
     ((_params.melting_layer_percentile_for_bottom_limit / 100.0) * 
@@ -1685,6 +1699,129 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
   double htTop = mlHts[ipercTop];
   double htMax = mlHts[mlHts.size() - 1];
 
+  double tempBot = _tempProfile.getTempForHtKm(htBot);
+  double tempTop = _tempProfile.getTempForHtKm(htTop);
+
+  // compute mean dbz immediately below and above layer
+
+  vector<double> dbzBelow, dbzAbove;
+
+  for (size_t ii = 0; ii < raysWithMl.size(); ii++) {
+
+    size_t iray = raysWithMl[ii];
+    RadxRay *ray = vol.getRays()[iray];
+    double elevation = ray->getElevationDeg();
+    // double azimuth = ray->getAzimuthDeg();
+
+    // find PID field, copy and convert to ints
+    
+    RadxField *pidField = ray->getField(pidFieldName);
+    RadxField pidCopy(*pidField);
+    pidCopy.convertToSi16(1.0, 0.0);
+    const Radx::si16 *pidVals = pidCopy.getDataSi16();
+    
+    // find DBZ field
+    
+    RadxField *dbzField = ray->getField(_params.DBZ_field_name);
+    if (dbzField == NULL) {
+      continue;
+    }
+    const Radx::fl32 *dbzVals = dbzField->getDataFl32();
+
+    // find the gates for the bottom and top of the melting layer
+    // as determined above
+
+    double startRangeKm = pidCopy.getStartRangeKm();
+    double gateSpacingKm = pidCopy.getGateSpacingKm();
+    size_t nGates = pidCopy.getNPoints();
+
+    int igateBot = 0;
+    int igateTop = nGates - 1;
+    
+    for (size_t igate = 0; igate < nGates; igate++) {
+      double range = startRangeKm + igate * gateSpacingKm;
+      double gateHt = beamHt.computeHtKm(elevation, range);
+      if (igateBot == 0 && gateHt >= htBot) {
+        igateBot = igate;
+      }
+      if (gateHt >= htTop) {
+        igateTop = igate;
+        break;
+      }
+    }
+
+    int nGatesMeltingLayer = igateTop - igateBot + 1;
+
+    // cerr << "44444444444444 igateBot, igateTop, nGatesMeltingLayer: "
+    //      << igateBot << ", "
+    //      << igateTop << ", "
+    //      << nGatesMeltingLayer << endl;
+
+    // accumulate dbz values above and below the ML
+    // so that we can compute the mean values for use
+    // in precip estimation
+    
+    int countBelow = 0;
+    for (int igate = igateBot; igate >= 0; igate--) {
+      if (pidVals[igate] == NcarParticleId::LIGHT_RAIN ||
+          pidVals[igate] == NcarParticleId::MODERATE_RAIN) {
+        dbzBelow.push_back(dbzVals[igate]);
+        // double range = startRangeKm + igate * gateSpacingKm;
+        // double gateHt = beamHt.computeHtKm(elevation, range);
+        // cerr << "111111 elev, az, range, ht, dbzBelow: "
+        //      << elevation << ", " << azimuth << ", "
+        //      << range << ", "
+        //      << gateHt << ", "
+        //      << dbzVals[igate] << endl;
+        countBelow++;
+        if ((igateBot - igate) > nGatesMeltingLayer) {
+          break;
+        }
+      }
+    } // igate
+    
+    int countAbove = 0;
+    for (int igate = igateTop; igate < (int) nGates; igate++) {
+      if (pidVals[igate] == NcarParticleId::DRY_SNOW) {
+        dbzAbove.push_back(dbzVals[igate]);
+        // double range = startRangeKm + igate * gateSpacingKm;
+        // double gateHt = beamHt.computeHtKm(elevation, range);
+        // cerr << "222222 elev, az, range, ht, dbzAbove: "
+        //      << elevation << ", " << azimuth << ", "
+        //      << range << ", "
+        //      << gateHt << ", "
+        //      << dbzVals[igate] << endl;
+        countAbove++;
+        if ((igate - igateTop) > nGatesMeltingLayer) {
+          break;
+        }
+      }
+    } // igate
+    
+    cerr << "------------------" << endl;
+
+  } // iray
+
+  double meanDbzBelow = -9999.0;
+  if (dbzBelow.size() > 0) {
+    double sumDbzBelow = 0.0;
+    for (size_t ii = 0; ii < dbzBelow.size(); ii++) {
+      sumDbzBelow += dbzBelow[ii];
+    }
+    meanDbzBelow = sumDbzBelow / (double) dbzBelow.size();
+  }
+
+  double meanDbzAbove = -9999.0;
+  if (dbzAbove.size() > 0) {
+    double sumDbzAbove = 0.0;
+    for (size_t ii = 0; ii < dbzAbove.size(); ii++) {
+      sumDbzAbove += dbzAbove[ii];
+    }
+    meanDbzAbove = sumDbzAbove / (double) dbzAbove.size();
+  }
+
+  // debug print
+
   if (_params.debug) {
     cerr << "========== melting layer stats ============" << endl;
     cerr << "  ML perc for bot: "
@@ -1695,6 +1832,10 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
     cerr << "  ML ht top: " << htTop << endl;
     cerr << "  ML ht max: " << htMax << endl;
     cerr << "  ML ht min: " << htMin << endl;
+    cerr << "  ML temp bot: " << tempBot << endl;
+    cerr << "  ML temp top: " << tempTop << endl;
+    cerr << "  dBZ below: " << meanDbzBelow << endl;
+    cerr << "  dBZ above: " << meanDbzAbove << endl;
     for (double perc = 5.0; perc < 96.0; perc += 5.0) {
       int iperc = (int) ((perc / 100.0) * (double) mlHts.size());
       cerr << "  ML ht at perc " << perc << ": " << mlHts[iperc] << endl;
@@ -1716,15 +1857,17 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
   xml += RadxXml::writeString("file", 1, path.getFile());
   xml += RadxXml::writeBoolean("is_rhi", 1, vol.checkIsRhi());
   
-  xml += RadxXml::writeDouble("PercForBottom", 1, 
+  xml += RadxXml::writeDouble("percForBottom", 1, 
                               _params.melting_layer_percentile_for_bottom_limit);
-  xml += RadxXml::writeDouble("PercForTop", 1, 
+  xml += RadxXml::writeDouble("percForTop", 1, 
                               _params.melting_layer_percentile_for_top_limit);
 
-  xml += RadxXml::writeDouble("HtBottom", 1, htBot);
-  xml += RadxXml::writeDouble("HtTop", 1, htTop);
-  xml += RadxXml::writeDouble("HtMin", 1, htMin);
-  xml += RadxXml::writeDouble("HtMax", 1, htMax);
+  xml += RadxXml::writeDouble("htBottom", 1, htBot);
+  xml += RadxXml::writeDouble("htTop", 1, htTop);
+  xml += RadxXml::writeDouble("htMin", 1, htMin);
+  xml += RadxXml::writeDouble("htMax", 1, htMax);
+  xml += RadxXml::writeDouble("dBZBelow", 1, meanDbzBelow);
+  xml += RadxXml::writeDouble("dBZAbove", 1, meanDbzAbove);
 
   xml += RadxXml::writeEndTag("MeltingLayer", 0);
   
