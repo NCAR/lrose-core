@@ -188,6 +188,8 @@ private:
 
   void _computeSelfConZBias(const RadxVol &vol);
 
+  void _locateMeltingLayer(RadxVol &vol);
+
 };
 
 #endif

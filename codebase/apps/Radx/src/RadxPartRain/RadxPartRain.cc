@@ -46,10 +46,11 @@
 #include <rapformats/WxObs.hh>
 #include <Spdb/DsSpdb.hh>
 #include <rapmath/trig.h>
+#include <Mdv/GenericRadxFile.hh>
+#include <radar/BeamHeight.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
-#include <Mdv/GenericRadxFile.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
@@ -480,6 +481,12 @@ int RadxPartRain::_processFile(const string &filePath)
 
   if (_params.estimate_z_bias_using_self_consistency) {
     _computeSelfConZBias(vol);
+  }
+
+  // compute melting layer statistics
+
+  if (_params.PID_locate_melting_layer) {
+    _locateMeltingLayer(vol);
   }
 
   // write results to output file
@@ -1578,4 +1585,173 @@ void RadxPartRain::_computeSelfConZBias(const RadxVol &vol)
   }
 
 }
+
+/////////////////////////////////////////////////////////////
+// Compute stats for melting layer
+
+void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
+
+{
   
+  bool pidFound = false;
+  string pidFieldName;
+  for (int ii = 0; ii < _params.output_fields_n; ii++) {
+    const Params::output_field_t &fld = _params._output_fields[ii];
+    if (fld.id == Params::PARTICLE_ID) {
+      pidFound = true;
+      pidFieldName = fld.name;
+      break;
+    }
+  } // ii
+
+  if (!pidFound) {
+    cerr << "WARNING - RadxPartRain::_locateMeltingLayer" << endl;
+    cerr << "  Cannot find PARTICLE_ID field in output_fields array" << endl;
+    cerr << "    In order to compute melting layer, you must add" << endl;
+    cerr << "    PARTICLE_ID to output_fields array in your param file" << endl;
+    return;
+  }
+
+  // set up beam height object
+
+  BeamHeight beamHt;
+  beamHt.setInstrumentHtKm(vol.getAltitudeKm());
+  vector<double> mlHts;
+
+  // loop through rays
+
+  for (size_t iray = 0; iray < vol.getRays().size(); iray++) {
+
+    // get ray
+    
+    RadxRay *ray = vol.getRays()[iray];
+    double elevation = ray->getElevationDeg();
+    if (elevation < 3.9 || elevation > 10.0) {
+      // only process elevations between 4 and 10 deg elevation
+      continue;
+    }
+
+    // find PID field
+    
+    RadxField *pidField = ray->getField(pidFieldName);
+    if (pidField == NULL) {
+      continue;
+    }
+    
+    // copy field, convert to int
+
+    RadxField pidCopy(*pidField);
+    pidCopy.convertToSi16(1.0, 0.0);
+    const Radx::si16 *pidVals = pidCopy.getDataSi16();
+
+    // loop through the gates
+    
+    double startRangeKm = pidCopy.getStartRangeKm();
+    double gateSpacingKm = pidCopy.getGateSpacingKm();
+    size_t nGates = pidCopy.getNPoints();
+    double range = startRangeKm;
+    for (size_t igate = 0; igate < nGates; igate++, range += gateSpacingKm) {
+      // cerr << "igate, pid: " << igate << ", " << pidVals[igate] << endl;
+      if (pidVals[igate] == NcarParticleId::WET_SNOW) {
+        double gateHt = beamHt.computeHtKm(elevation, range);
+        mlHts.push_back(gateHt);
+      }
+    } // igate
+    
+  } // iray
+
+  if (mlHts.size() < 1) {
+    cerr << "WARNING - RadxPartRain::_locateMeltingLayer" << endl;
+    cerr << "  No melting layer found" << endl;
+    cerr << "  i.e. no wet snow in PID" << endl;
+    return;
+  }
+
+  // sort the heights
+  
+  sort(mlHts.begin(), mlHts.end());
+
+  // print out the percentiles
+  
+  int ipercBot = (int)
+    ((_params.melting_layer_percentile_for_bottom_limit / 100.0) * 
+     (double) mlHts.size());
+  double htBot = mlHts[ipercBot];
+  double htMin = mlHts[0];
+
+  int ipercTop = (int)
+    ((_params.melting_layer_percentile_for_top_limit / 100.0) * 
+     (double) mlHts.size());
+  double htTop = mlHts[ipercTop];
+  double htMax = mlHts[mlHts.size() - 1];
+
+  if (_params.debug) {
+    cerr << "========== melting layer stats ============" << endl;
+    cerr << "  ML perc for bot: "
+         << _params.melting_layer_percentile_for_bottom_limit << endl;
+    cerr << "  ML perc for top: "
+         << _params.melting_layer_percentile_for_top_limit << endl;
+    cerr << "  ML ht bot: " << htBot << endl;
+    cerr << "  ML ht top: " << htTop << endl;
+    cerr << "  ML ht max: " << htMax << endl;
+    cerr << "  ML ht min: " << htMin << endl;
+    for (double perc = 5.0; perc < 96.0; perc += 5.0) {
+      int iperc = (int) ((perc / 100.0) * (double) mlHts.size());
+      cerr << "  ML ht at perc " << perc << ": " << mlHts[iperc] << endl;
+    }
+    cerr << "===========================================" << endl;
+  }
+
+  // write results to SPDB
+  
+  if (!_params. melting_layer_write_results_to_spdb) {
+    return;
+  }
+  
+  RadxPath path(vol.getPathInUse());
+  string xml;
+
+  xml += RadxXml::writeStartTag("MeltingLayer", 0);
+
+  xml += RadxXml::writeString("file", 1, path.getFile());
+  xml += RadxXml::writeBoolean("is_rhi", 1, vol.checkIsRhi());
+  
+  xml += RadxXml::writeDouble("PercForBottom", 1, 
+                              _params.melting_layer_percentile_for_bottom_limit);
+  xml += RadxXml::writeDouble("PercForTop", 1, 
+                              _params.melting_layer_percentile_for_top_limit);
+
+  xml += RadxXml::writeDouble("HtBottom", 1, htBot);
+  xml += RadxXml::writeDouble("HtTop", 1, htTop);
+  xml += RadxXml::writeDouble("HtMin", 1, htMin);
+  xml += RadxXml::writeDouble("HtMax", 1, htMax);
+
+  xml += RadxXml::writeEndTag("MeltingLayer", 0);
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Writing melting layer results to SPDB, url: "
+         << _params.melting_layer_spdb_output_url << endl;
+  }
+
+  DsSpdb spdb;
+  time_t validTime = vol.getStartTimeSecs();
+  spdb.addPutChunk(0, validTime, validTime, xml.size() + 1, xml.c_str());
+  if (spdb.put(_params.melting_layer_spdb_output_url,
+               SPDB_XML_ID, SPDB_XML_LABEL)) {
+    cerr << "ERROR - RadxPartRain::_locateMeltingLayer" << endl;
+    cerr << spdb.getErrStr() << endl;
+    return;
+  }
+  
+  if (_params.debug) {
+    cerr << "Wrote melting layer results to spdb, url: " 
+         << _params.melting_layer_spdb_output_url << endl;
+  }
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "=====================================" << endl;
+    cerr << xml;
+    cerr << "=====================================" << endl;
+  }
+
+}
+

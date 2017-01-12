@@ -870,7 +870,7 @@ int ComputeEngine::_pidInit()
     cerr << "  PID will not be computed" << endl;
     return -1;
   }
-  if (_params.PID_compute_melting_layer) {
+  if (_params.PID_locate_melting_layer) {
     _pid.setComputeMeltingLayer(true);
   }
   

@@ -639,10 +639,34 @@ paramdef boolean {
 } PID_output_particle_interest_fields;
 
 paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to locate the melting layer.";
+  p_help = "If true, the melting layer will be located using the WET_SNOW category. In addition, the ML_INTEREST field will be computed. Otherwise it will be missing. Follows Giangrande et al. - Automatic Designation of the Melting Layer with Polarimitric Prototype of WSR-88D Radar - AMS JAMC, Vol47, 2008.";
+} PID_locate_melting_layer;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Percentile value for estimating the bottom of the melting layer.";
+  p_help = "To locate the melting layer limits, we rank the heights of all gates containing WET_SNOW, from bottom to top. This is the percentile value for the bottom of the layer.";
+} melting_layer_percentile_for_bottom_limit;
+
+paramdef double {
+  p_default = 75.0;
+  p_descr = "Percentile value for estimating the top of the melting layer.";
+  p_help = "To locate the melting layer limits, we rank the heights of all gates containing WET_SNOW, from bottom to top. This is the percentile value for the top of the layer.";
+} melting_layer_percentile_for_top_limit;
+
+paramdef boolean {
   p_default = FALSE;
-  p_descr = "Option to compute interest for melting layer.";
-  p_help = "If true, the ML_INTEREST field will be computed. Otherwise it will be missing. Follows Giangrande et al. - Automatic Designation of the Melting Layer with Polarimitric Prototype of WSR-88D Radar - AMS JAMC, Vol47, 2008.";
-} PID_compute_melting_layer;
+  p_descr = "Option to save melting layer properties to spdb.";
+  p_help = "If true, the melting layer properties will be saved to SPDB using XML encoding. See 'melting_layer_spdb_output_url'";
+} melting_layer_write_results_to_spdb;
+
+paramdef string {
+  p_default = "/tmp/spdb/melting_layer";
+  p_descr = "URL for writing melting layer results to SPDB XML.";
+  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
+} melting_layer_spdb_output_url;
 
 commentdef {
   p_header = "SOUNDING INPUT FOR PID temperatures - OPTIONAL";

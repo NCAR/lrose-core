@@ -683,7 +683,15 @@ public:
 
   tdrp_bool_t PID_output_particle_interest_fields;
 
-  tdrp_bool_t PID_compute_melting_layer;
+  tdrp_bool_t PID_locate_melting_layer;
+
+  double melting_layer_percentile_for_bottom_limit;
+
+  double melting_layer_percentile_for_top_limit;
+
+  tdrp_bool_t melting_layer_write_results_to_spdb;
+
+  char* melting_layer_spdb_output_url;
 
   tdrp_bool_t use_soundings_from_spdb;
 
@@ -985,7 +993,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[276];
+  mutable TDRPtable _table[280];
 
   const char *_className;
 

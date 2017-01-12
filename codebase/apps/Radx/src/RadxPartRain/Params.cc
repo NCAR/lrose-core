@@ -1834,16 +1834,64 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'PID_compute_melting_layer'
+    // Parameter 'PID_locate_melting_layer'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("PID_compute_melting_layer");
-    tt->descr = tdrpStrDup("Option to compute interest for melting layer.");
-    tt->help = tdrpStrDup("If true, the ML_INTEREST field will be computed. Otherwise it will be missing. Follows Giangrande et al. - Automatic Designation of the Melting Layer with Polarimitric Prototype of WSR-88D Radar - AMS JAMC, Vol47, 2008.");
-    tt->val_offset = (char *) &PID_compute_melting_layer - &_start_;
+    tt->param_name = tdrpStrDup("PID_locate_melting_layer");
+    tt->descr = tdrpStrDup("Option to locate the melting layer.");
+    tt->help = tdrpStrDup("If true, the melting layer will be located using the WET_SNOW category. In addition, the ML_INTEREST field will be computed. Otherwise it will be missing. Follows Giangrande et al. - Automatic Designation of the Melting Layer with Polarimitric Prototype of WSR-88D Radar - AMS JAMC, Vol47, 2008.");
+    tt->val_offset = (char *) &PID_locate_melting_layer - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'melting_layer_percentile_for_bottom_limit'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("melting_layer_percentile_for_bottom_limit");
+    tt->descr = tdrpStrDup("Percentile value for estimating the bottom of the melting layer.");
+    tt->help = tdrpStrDup("To locate the melting layer limits, we rank the heights of all gates containing WET_SNOW, from bottom to top. This is the percentile value for the bottom of the layer.");
+    tt->val_offset = (char *) &melting_layer_percentile_for_bottom_limit - &_start_;
+    tt->single_val.d = 25;
+    tt++;
+    
+    // Parameter 'melting_layer_percentile_for_top_limit'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("melting_layer_percentile_for_top_limit");
+    tt->descr = tdrpStrDup("Percentile value for estimating the top of the melting layer.");
+    tt->help = tdrpStrDup("To locate the melting layer limits, we rank the heights of all gates containing WET_SNOW, from bottom to top. This is the percentile value for the top of the layer.");
+    tt->val_offset = (char *) &melting_layer_percentile_for_top_limit - &_start_;
+    tt->single_val.d = 75;
+    tt++;
+    
+    // Parameter 'melting_layer_write_results_to_spdb'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("melting_layer_write_results_to_spdb");
+    tt->descr = tdrpStrDup("Option to save melting layer properties to spdb.");
+    tt->help = tdrpStrDup("If true, the melting layer properties will be saved to SPDB using XML encoding. See 'melting_layer_spdb_output_url'");
+    tt->val_offset = (char *) &melting_layer_write_results_to_spdb - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'melting_layer_spdb_output_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("melting_layer_spdb_output_url");
+    tt->descr = tdrpStrDup("URL for writing melting layer results to SPDB XML.");
+    tt->help = tdrpStrDup("For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir");
+    tt->val_offset = (char *) &melting_layer_spdb_output_url - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/spdb/melting_layer");
     tt++;
     
     // Parameter 'Comment 11'
