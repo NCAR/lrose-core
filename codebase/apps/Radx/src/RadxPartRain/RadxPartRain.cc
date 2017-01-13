@@ -1616,6 +1616,17 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
     return;
   }
 
+  // convert PID field to ints with no bias and unit scale
+  
+  for (size_t iray = 0; iray < vol.getRays().size(); iray++) {
+    RadxRay *ray = vol.getRays()[iray];
+    RadxField *pidField = ray->getField(pidFieldName);
+    if (pidField == NULL) {
+      continue;
+    }
+    pidField->convertToSi16(1.0, 0.0);
+  }
+  
   // set up beam height object
 
   BeamHeight beamHt;
@@ -1624,39 +1635,38 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
 
   // loop through rays
 
-  vector<size_t> raysWithMl;
+  vector<bool> rayHasMl;
+  rayHasMl.resize(vol.getRays().size());
+
   for (size_t iray = 0; iray < vol.getRays().size(); iray++) {
+
+    rayHasMl[iray] = false;
 
     // get ray
     
     RadxRay *ray = vol.getRays()[iray];
     double elevation = ray->getElevationDeg();
-    // double azimuth = ray->getAzimuthDeg();
 
-    // cerr << "11111111111 el, az: " << elevation << ", " << azimuth << endl;
-
-    if (elevation < 3.9 || elevation > 10.0) {
+    if (elevation < 2.9 || elevation > 10.0) {
       // only process elevations between 4 and 10 deg elevation
       continue;
     }
 
-    // find PID field, copy and convert to ints
+    // find PID field
     
     RadxField *pidField = ray->getField(pidFieldName);
     if (pidField == NULL) {
       continue;
     }
-    RadxField pidCopy(*pidField);
-    pidCopy.convertToSi16(1.0, 0.0);
-    const Radx::si16 *pidVals = pidCopy.getDataSi16();
+    const Radx::si16 *pidVals = pidField->getDataSi16();
 
     // loop through the gates loading up the ht array
     // for points in the melting layer
     // also find fist and last gates with wet snow
     
-    double startRangeKm = pidCopy.getStartRangeKm();
-    double gateSpacingKm = pidCopy.getGateSpacingKm();
-    size_t nGates = pidCopy.getNPoints();
+    double startRangeKm = pidField->getStartRangeKm();
+    double gateSpacingKm = pidField->getGateSpacingKm();
+    size_t nGates = pidField->getNPoints();
 
     bool hasMl = false;
     for (size_t igate = 0; igate < nGates; igate++) {
@@ -1667,9 +1677,9 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
         hasMl = true;
       }
     } // igate
-
+    
     if (hasMl) {
-      raysWithMl.push_back(iray);
+      rayHasMl[iray] = true;
     }
 
   } // iray
@@ -1706,19 +1716,19 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
 
   vector<double> dbzBelow, dbzAbove;
 
-  for (size_t ii = 0; ii < raysWithMl.size(); ii++) {
+  for (size_t iray = 0; iray < vol.getRays().size(); iray++) {
 
-    size_t iray = raysWithMl[ii];
+    if (!rayHasMl[iray]) {
+      continue;
+    }
+
     RadxRay *ray = vol.getRays()[iray];
     double elevation = ray->getElevationDeg();
-    // double azimuth = ray->getAzimuthDeg();
 
-    // find PID field, copy and convert to ints
+    // find PID field
     
     RadxField *pidField = ray->getField(pidFieldName);
-    RadxField pidCopy(*pidField);
-    pidCopy.convertToSi16(1.0, 0.0);
-    const Radx::si16 *pidVals = pidCopy.getDataSi16();
+    const Radx::si16 *pidVals = pidField->getDataSi16();
     
     // find DBZ field
     
@@ -1731,9 +1741,9 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
     // find the gates for the bottom and top of the melting layer
     // as determined above
 
-    double startRangeKm = pidCopy.getStartRangeKm();
-    double gateSpacingKm = pidCopy.getGateSpacingKm();
-    size_t nGates = pidCopy.getNPoints();
+    double startRangeKm = pidField->getStartRangeKm();
+    double gateSpacingKm = pidField->getGateSpacingKm();
+    size_t nGates = pidField->getNPoints();
 
     int igateBot = 0;
     int igateTop = nGates - 1;
@@ -1751,11 +1761,6 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
     }
 
     int nGatesMeltingLayer = igateTop - igateBot + 1;
-
-    // cerr << "44444444444444 igateBot, igateTop, nGatesMeltingLayer: "
-    //      << igateBot << ", "
-    //      << igateTop << ", "
-    //      << nGatesMeltingLayer << endl;
 
     // accumulate dbz values above and below the ML
     // so that we can compute the mean values for use
@@ -1798,8 +1803,6 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
       }
     } // igate
     
-    cerr << "------------------" << endl;
-
   } // iray
 
   double meanDbzBelow = -9999.0;
@@ -1819,6 +1822,77 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
     }
     meanDbzAbove = sumDbzAbove / (double) dbzAbove.size();
   }
+
+  // create dbz field corrected in the brightband
+
+  double depthMl = htTop - htBot;
+  double deltaDbz = meanDbzAbove - meanDbzBelow;
+  
+  for (size_t iray = 0; iray < vol.getRays().size(); iray++) {
+    
+    RadxRay *ray = vol.getRays()[iray];
+    double elevation = ray->getElevationDeg();
+    
+    // find DBZ field
+    
+    RadxField *dbzField = ray->getField(_params.DBZ_field_name);
+    if (dbzField == NULL) {
+      continue;
+    }
+
+    // find PID field
+    
+    RadxField *pidField = ray->getField(pidFieldName);
+    if (pidField == NULL) {
+      continue;
+    }
+    const Radx::si16 *pidVals = pidField->getDataSi16();
+    
+    // make a copy of the DBZ field that we can amend in 
+    // the brightband
+    
+    double startRangeKm = pidField->getStartRangeKm();
+    double gateSpacingKm = pidField->getGateSpacingKm();
+    size_t nGates = pidField->getNPoints();
+
+    RadxField *dbzCorrField = new RadxField(*dbzField);
+    dbzCorrField->setName("DBZ_CORR");
+
+    TaArray<Radx::fl32> _dbzCorrVals_;
+    Radx::fl32 *dbzCorrVals = _dbzCorrVals_.alloc(nGates);
+    memcpy(dbzCorrVals, dbzCorrField->getDataFl32(), 
+           nGates * sizeof(Radx::fl32));
+    
+    // if (elevation < 2.9) {
+
+      // look for melting layer, adjust reflectivity
+      
+      for (size_t igate = 0; igate < nGates; igate++) {
+        double range = startRangeKm + igate * gateSpacingKm;
+        if (pidVals[igate] == NcarParticleId::WET_SNOW) {
+          double gateHt = beamHt.computeHtKm(elevation, range);
+          double dbzCorr = meanDbzBelow;
+          if (gateHt >= htTop) {
+            dbzCorr = meanDbzAbove;
+          } else if (gateHt >= htBot) {
+            double frac = (gateHt - htBot) / depthMl;
+            dbzCorr = meanDbzBelow + frac * deltaDbz;
+          }
+          dbzCorrVals[igate] = dbzCorr;
+        }
+      } // igate
+
+      // } // if (elevation < 2.9
+      
+    // set the corrected values in the field
+
+    dbzCorrField->setDataFl32(nGates, dbzCorrVals, true);
+
+    // add field to ray
+    
+    ray->addField(dbzCorrField);
+
+  } // iray
 
   // debug print
 
@@ -1866,6 +1940,8 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
   xml += RadxXml::writeDouble("htTop", 1, htTop);
   xml += RadxXml::writeDouble("htMin", 1, htMin);
   xml += RadxXml::writeDouble("htMax", 1, htMax);
+  xml += RadxXml::writeDouble("tempBottom", 1, tempBot);
+  xml += RadxXml::writeDouble("tempTop", 1, tempTop);
   xml += RadxXml::writeDouble("dBZBelow", 1, meanDbzBelow);
   xml += RadxXml::writeDouble("dBZAbove", 1, meanDbzAbove);
 
