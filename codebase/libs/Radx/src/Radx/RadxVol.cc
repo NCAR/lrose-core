@@ -2382,6 +2382,12 @@ void RadxVol::trimSurveillanceSweepsTo360Deg()
 
 {
 
+  // does not apply to RHIs
+
+  if (!checkIsRhi()) {
+    return;
+  }
+  
   // clear utility flags
 
   for (size_t ii = 0; ii < _rays.size(); ii++) {
