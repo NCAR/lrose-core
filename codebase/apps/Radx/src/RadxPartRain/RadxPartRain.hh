@@ -99,10 +99,6 @@ private:
 
   vector <RadxRay *> _derivedRays;
 
-  // transitions - same size as derivedRays
-
-  vector<bool> _transitionFlags;
-
   // radar properties
 
   double _radarHtKm;
@@ -163,15 +159,13 @@ private:
   int _processFile(const string &filePath);
   void _encodeFieldsForOutput(RadxVol &vol);
   
-  void _addGeometryFields(RadxVol &vol);
+  void _addExtraFields(RadxVol &vol);
 
   int _compute(RadxVol &vol);
   int _computeSingleThreaded(RadxVol &vol);
   int _computeMultiThreaded(RadxVol &vol);
   int _storeDerivedRay(ComputeThread *thread);
   static void *_computeInThread(void *thread_data);
-
-  void _findTransitions(vector<RadxRay *> &rays);
 
   int _retrieveTempProfile(const RadxVol &vol);
   int _retrieveSiteTempFromSpdb(const RadxVol &vol,

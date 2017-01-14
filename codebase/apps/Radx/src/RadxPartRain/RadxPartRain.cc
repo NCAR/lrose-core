@@ -436,11 +436,9 @@ int RadxPartRain::_processFile(const string &filePath)
     vol.setNGatesConstant();
   }
 
-  // trim surveillance sweeps to 360 degrees if requested
+  // trim surveillance sweeps to 360 degrees
 
-  if (_params.trim_surveillance_sweeps_to_360deg) {
-    vol.trimSurveillanceSweepsTo360Deg();
-  }
+  vol.trimSurveillanceSweepsTo360Deg();
 
   // retrieve temp profile from SPDB as appropriate
 
@@ -467,9 +465,9 @@ int RadxPartRain::_processFile(const string &filePath)
   _zdrmInBraggResults.clear();
   _selfConResults.clear();
 
-  // add geometry fields to the volume
-
-  _addGeometryFields(vol);
+  // add geometry and pid fields to the volume
+  
+  _addExtraFields(vol);
 
   // compute the derived fields
   
@@ -622,12 +620,6 @@ void RadxPartRain::_setupRead(RadxFile &file)
     file.addReadField(_params.RHOHV_NNC_field_name);
   }
 
-  if (_params.remove_rays_with_antenna_transitions &&
-      !_params.trim_surveillance_sweeps_to_360deg) {
-    file.setReadIgnoreTransitions(true);
-    file.setReadTransitionNraysMargin(_params.transition_nrays_margin);
-  }
-  
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.printReadRequest(cerr);
   }
@@ -720,8 +712,22 @@ void RadxPartRain::_setupWrite(RadxFile &file)
 
 int RadxPartRain::_writeVol(RadxVol &vol)
 {
+  
+  // clear the input rays
 
-  // output file
+  vol.clearRays();
+  
+  // add the derived rays to the volume
+  
+  for (size_t iray = 0; iray < _derivedRays.size(); iray++) {
+    vol.addRay(_derivedRays[iray]);
+  }
+  
+  vol.loadVolumeInfoFromRays();
+  vol.loadSweepInfoFromRays();
+  vol.setPackingFromRays();
+
+  // create output file object
 
   GenericRadxFile outFile;
   _setupWrite(outFile);
@@ -779,9 +785,9 @@ int RadxPartRain::_writeVol(RadxVol &vol)
 }
 
 //////////////////////////////////////////////////
-// add geometry fields to the volume
+// add geometry and pid fields to the volume
 
-void RadxPartRain::_addGeometryFields(RadxVol &vol)
+void RadxPartRain::_addExtraFields(RadxVol &vol)
 
 {
 
@@ -794,14 +800,18 @@ void RadxPartRain::_addGeometryFields(RadxVol &vol)
     RadxField *rangeFld = new RadxField("range", "km");
     RadxField *beamHtFld = new RadxField("beam_height", "km");
     RadxField *tempFld = new RadxField("temperature", "C");
+    RadxField *pidFld = new RadxField("pid", "");
 
     size_t nGates = ray->getNGates();
 
-    TaArray<fl32> elev_, rng_, ht_, temp_;
-    fl32 *elev = elev_.alloc(nGates);
-    fl32 *rng = rng_.alloc(nGates);
-    fl32 *ht = ht_.alloc(nGates);
-    fl32 *temp = temp_.alloc(nGates);
+    TaArray<Radx::fl32> elev_, rng_, ht_, temp_;
+    Radx::fl32 *elev = elev_.alloc(nGates);
+    Radx::fl32 *rng = rng_.alloc(nGates);
+    Radx::fl32 *ht = ht_.alloc(nGates);
+    Radx::fl32 *temp = temp_.alloc(nGates);
+
+    TaArray<Radx::si32> pid_;
+    Radx::si32 *pid = pid_.alloc(nGates);
 
     double startRangeKm = ray->getStartRangeKm();
     double gateSpacingKm = ray->getGateSpacingKm();
@@ -823,22 +833,26 @@ void RadxPartRain::_addGeometryFields(RadxVol &vol)
       rng[igate] = rangeKm;
       ht[igate] = htKm;
       temp[igate] = tempC;
+      pid[igate] = -9999;
     } // igate
 
     elevFld->setTypeFl32(-9999.0);
     rangeFld->setTypeFl32(-9999.0);
     beamHtFld->setTypeFl32(-9999.0);
     tempFld->setTypeFl32(-9999.0);
+    pidFld->setTypeSi32(-9999, 1.0, 0.0);
 
     elevFld->addDataFl32(nGates, elev);
     rangeFld->addDataFl32(nGates, rng);
     beamHtFld->addDataFl32(nGates, ht);
     tempFld->addDataFl32(nGates, temp);
+    pidFld->addDataSi32(nGates, pid);
 
     ray->addField(elevFld);
     ray->addField(rangeFld);
     ray->addField(beamHtFld);
     ray->addField(tempFld);
+    ray->addField(pidFld);
 
   } // iray
 
@@ -861,44 +875,6 @@ int RadxPartRain::_compute(RadxVol &vol)
       return -1;
     }
   }
-
-  // clear the covariance rays
-
-  vol.clearRays();
-
-  // add the moments rays to the volume
-  
-  if (_params.remove_rays_with_antenna_transitions) {
-
-    // find the transitions
-
-    _findTransitions(_derivedRays);
-    
-    // load up the rays on the vol,
-    // deleting those which are transitions
-    
-    for (size_t iray = 0; iray < _derivedRays.size(); iray++) {
-      if (_transitionFlags[iray]) {
-        delete _derivedRays[iray];
-      } else {
-        _derivedRays[iray]->setAntennaTransition(false);
-        vol.addRay(_derivedRays[iray]);
-      }
-    }
-    
-  } else {
-
-    // add all of the moments rays
-    
-    for (size_t iray = 0; iray < _derivedRays.size(); iray++) {
-      vol.addRay(_derivedRays[iray]);
-    }
-
-  }
-  
-  vol.loadVolumeInfoFromRays();
-  vol.loadSweepInfoFromRays();
-  vol.setPackingFromRays();
 
   return 0;
 
@@ -1140,52 +1116,6 @@ void *RadxPartRain::_computeInThread(void *thread_data)
   } // while
 
   return NULL;
-
-}
-
-////////////////////////////////////////////////////////////
-// Find the transitions in the rays
-
-void RadxPartRain::_findTransitions(vector<RadxRay *> &rays)
-
-{
-
-  _transitionFlags.clear();
-
-  for (size_t iray = 0; iray < rays.size(); iray++) {
-    _transitionFlags.push_back(rays[iray]->getAntennaTransition());
-  } // iray
-
-  // widen good data by the specified margin
-
-  int margin = _params.transition_nrays_margin;
-  if (margin > 0) {
-    
-    // widen at start of transitions
-    
-    for (int ii = _transitionFlags.size() - 1; ii > 0; ii--) {
-      if (_transitionFlags[ii] && !_transitionFlags[ii-1]) {
-        for (int jj = ii; jj < ii + margin; jj++) {
-          if (jj < (int) _transitionFlags.size()) {
-            _transitionFlags[jj] = false;
-          }
-        }
-      }
-    } // ii
-    
-    // widen at end of transitions
-    
-    for (int ii = 1; ii < (int) _transitionFlags.size(); ii++) {
-      if (_transitionFlags[ii-1] && !_transitionFlags[ii]) {
-        for (int jj = ii - margin; jj < ii; jj++) {
-          if (jj >= 0) {
-            _transitionFlags[jj] = false;
-          }
-        }
-      }
-    } // ii
-    
-  }
 
 }
 
@@ -1679,85 +1609,46 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
     }
   }
 
-  // find PID field name
+  // prepare vector for melting layer heights
 
-  bool pidFound = false;
-  string pidFieldName;
-  for (int ii = 0; ii < _params.output_fields_n; ii++) {
-    const Params::output_field_t &fld = _params._output_fields[ii];
-    if (fld.id == Params::PARTICLE_ID) {
-      pidFound = true;
-      pidFieldName = fld.name;
-      break;
-    }
-  } // ii
-
-  if (!pidFound) {
-    cerr << "WARNING - RadxPartRain::_locateMeltingLayer" << endl;
-    cerr << "  Cannot find PARTICLE_ID field in output_fields array" << endl;
-    cerr << "    In order to compute melting layer, you must add" << endl;
-    cerr << "    PARTICLE_ID to output_fields array in your param file" << endl;
-    return;
-  }
-
-  // convert PID field to ints with no bias and unit scale
-  
-  for (size_t iray = 0; iray < vol.getRays().size(); iray++) {
-    RadxRay *ray = vol.getRays()[iray];
-    RadxField *pidField = ray->getField(pidFieldName);
-    if (pidField == NULL) {
-      continue;
-    }
-    pidField->convertToSi16(1.0, 0.0);
-  }
-  
-  // set up beam height object
-
-  BeamHeight beamHt;
-  beamHt.setInstrumentHtKm(vol.getAltitudeKm());
   vector<double> mlHts;
 
   // loop through rays
-
+  
   vector<bool> rayHasMl;
   rayHasMl.resize(vol.getRays().size());
 
   for (size_t iray = 0; iray < vol.getRays().size(); iray++) {
-
+    
     rayHasMl[iray] = false;
-
+    
     // get ray
     
     RadxRay *ray = vol.getRays()[iray];
     double elevation = ray->getElevationDeg();
-
+    size_t nGates = ray->getNGates();
+    
     if (elevation < 2.9 || elevation > 10.0) {
       // only process elevations between 4 and 10 deg elevation
       continue;
     }
-
-    // get PID field for this ray
     
-    RadxField *pidField = ray->getField(pidFieldName);
-    if (pidField == NULL) {
-      continue;
-    }
-    const Radx::si16 *pidVals = pidField->getDataSi16();
+    // get PID and height fields for this ray
+    
+    RadxField *pidField = ray->getField("pid");
+    const Radx::si32 *pidVals = pidField->getDataSi32();
 
+    RadxField *htField = ray->getField("beam_height");
+    const Radx::fl32 *htVals = htField->getDataFl32();
+    
     // loop through the gates loading up the ht array
     // for points in the melting layer
     // also find fist and last gates with wet snow
     
-    double startRangeKm = pidField->getStartRangeKm();
-    double gateSpacingKm = pidField->getGateSpacingKm();
-    size_t nGates = pidField->getNPoints();
-
     bool hasMl = false;
     for (size_t igate = 0; igate < nGates; igate++) {
-      double range = startRangeKm + igate * gateSpacingKm;
       if (pidVals[igate] == NcarParticleId::WET_SNOW) {
-        double gateHt = beamHt.computeHtKm(elevation, range);
-        mlHts.push_back(gateHt);
+        mlHts.push_back(htVals[igate]);
         hasMl = true;
       }
     } // igate
@@ -1779,7 +1670,7 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
   
   sort(mlHts.begin(), mlHts.end());
 
-  // compute height properties
+  // compute height-based properties
   
   int ipercBot = (int)
     ((_params.melting_layer_percentile_for_bottom_limit / 100.0) * 
@@ -1801,40 +1692,38 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
   vector<double> dbzBelow, dbzAbove;
 
   for (size_t iray = 0; iray < vol.getRays().size(); iray++) {
-
+    
     if (!rayHasMl[iray]) {
       continue;
     }
 
     RadxRay *ray = vol.getRays()[iray];
-    double elevation = ray->getElevationDeg();
+    size_t nGates = ray->getNGates();
 
-    // find PID field
-    
-    RadxField *pidField = ray->getField(pidFieldName);
-    const Radx::si16 *pidVals = pidField->getDataSi16();
-    
-    // find DBZ field
-    
+    // get DBZ field
+
     RadxField *dbzField = ray->getField(_params.DBZ_field_name);
     if (dbzField == NULL) {
       continue;
     }
     const Radx::fl32 *dbzVals = dbzField->getDataFl32();
 
+    // get PID field and ht fields
+    
+    RadxField *pidField = ray->getField("pid");
+    const Radx::si32 *pidVals = pidField->getDataSi32();
+    
+    RadxField *htField = ray->getField("beam_height");
+    const Radx::fl32 *htVals = htField->getDataFl32();
+
     // find the gates for the bottom and top of the melting layer
     // as determined above
-
-    double startRangeKm = pidField->getStartRangeKm();
-    double gateSpacingKm = pidField->getGateSpacingKm();
-    size_t nGates = pidField->getNPoints();
 
     int igateBot = 0;
     int igateTop = nGates - 1;
     
     for (size_t igate = 0; igate < nGates; igate++) {
-      double range = startRangeKm + igate * gateSpacingKm;
-      double gateHt = beamHt.computeHtKm(elevation, range);
+      double gateHt = htVals[igate];
       if (igateBot == 0 && gateHt >= htBot) {
         igateBot = igate;
       }
@@ -1855,13 +1744,6 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
       if (pidVals[igate] == NcarParticleId::LIGHT_RAIN ||
           pidVals[igate] == NcarParticleId::MODERATE_RAIN) {
         dbzBelow.push_back(dbzVals[igate]);
-        // double range = startRangeKm + igate * gateSpacingKm;
-        // double gateHt = beamHt.computeHtKm(elevation, range);
-        // cerr << "111111 elev, az, range, ht, dbzBelow: "
-        //      << elevation << ", " << azimuth << ", "
-        //      << range << ", "
-        //      << gateHt << ", "
-        //      << dbzVals[igate] << endl;
         countBelow++;
         if ((igateBot - igate) > nGatesMeltingLayer) {
           break;
@@ -1873,13 +1755,6 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
     for (int igate = igateTop; igate < (int) nGates; igate++) {
       if (pidVals[igate] == NcarParticleId::DRY_SNOW) {
         dbzAbove.push_back(dbzVals[igate]);
-        // double range = startRangeKm + igate * gateSpacingKm;
-        // double gateHt = beamHt.computeHtKm(elevation, range);
-        // cerr << "222222 elev, az, range, ht, dbzAbove: "
-        //      << elevation << ", " << azimuth << ", "
-        //      << range << ", "
-        //      << gateHt << ", "
-        //      << dbzVals[igate] << endl;
         countAbove++;
         if ((igate - igateTop) > nGatesMeltingLayer) {
           break;
@@ -1888,7 +1763,7 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
     } // igate
     
   } // iray
-
+  
   double meanDbzBelow = -9999.0;
   if (dbzBelow.size() > 0) {
     double sumDbzBelow = 0.0;
@@ -1915,7 +1790,8 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
   for (size_t iray = 0; iray < vol.getRays().size(); iray++) {
     
     RadxRay *ray = vol.getRays()[iray];
-    double elevation = ray->getElevationDeg();
+    RadxRay *derivedRay = _derivedRays[iray];
+    size_t nGates = ray->getNGates();
     
     // find DBZ field
     
@@ -1923,59 +1799,51 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
     if (dbzField == NULL) {
       continue;
     }
+    
+    // get PID and ht fields
+    
+    RadxField *pidField = ray->getField("pid");
+    const Radx::si32 *pidVals = pidField->getDataSi32();
+    
+    RadxField *htField = ray->getField("beam_height");
+    const Radx::fl32 *htVals = htField->getDataFl32();
 
-    // find PID field
-    
-    RadxField *pidField = ray->getField(pidFieldName);
-    if (pidField == NULL) {
-      continue;
-    }
-    const Radx::si16 *pidVals = pidField->getDataSi16();
-    
     // make a copy of the DBZ field that we can amend in 
     // the brightband
     
-    double startRangeKm = pidField->getStartRangeKm();
-    double gateSpacingKm = pidField->getGateSpacingKm();
-    size_t nGates = pidField->getNPoints();
-
     RadxField *dbzCorrField = new RadxField(*dbzField);
     dbzCorrField->setName("DBZ_CORR");
-
+    
     TaArray<Radx::fl32> _dbzCorrVals_;
     Radx::fl32 *dbzCorrVals = _dbzCorrVals_.alloc(nGates);
     memcpy(dbzCorrVals, dbzCorrField->getDataFl32(), 
            nGates * sizeof(Radx::fl32));
     
-    // if (elevation < 2.9) {
-
-      // look for melting layer, adjust reflectivity
-      
-      for (size_t igate = 0; igate < nGates; igate++) {
-        double range = startRangeKm + igate * gateSpacingKm;
-        if (pidVals[igate] == NcarParticleId::WET_SNOW) {
-          double gateHt = beamHt.computeHtKm(elevation, range);
-          double dbzCorr = meanDbzBelow;
-          if (gateHt >= htTop) {
-            dbzCorr = meanDbzAbove;
-          } else if (gateHt >= htBot) {
-            double frac = (gateHt - htBot) / depthMl;
-            dbzCorr = meanDbzBelow + frac * deltaDbz;
-          }
-          dbzCorrVals[igate] = dbzCorr;
+    // look for melting layer, adjust reflectivity
+    
+    for (size_t igate = 0; igate < nGates; igate++) {
+      if (pidVals[igate] == NcarParticleId::WET_SNOW) {
+        double gateHt = htVals[igate];
+        double dbzCorr = meanDbzBelow;
+        if (gateHt >= htTop) {
+          dbzCorr = meanDbzAbove;
+        } else if (gateHt >= htBot) {
+          double frac = (gateHt - htBot) / depthMl;
+          dbzCorr = meanDbzBelow + frac * deltaDbz;
         }
-      } // igate
-
-      // } // if (elevation < 2.9
-      
+        // dbzCorrVals[igate] = dbzCorr;
+        dbzCorrVals[igate] = 70.0;
+      }
+    } // igate
+    
     // set the corrected values in the field
-
+    
     dbzCorrField->setDataFl32(nGates, dbzCorrVals, true);
 
     // add field to ray
     
-    ray->addField(dbzCorrField);
-
+    derivedRay->addField(dbzCorrField);
+    
   } // iray
 
   // debug print
