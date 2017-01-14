@@ -55,6 +55,7 @@
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxXml.hh>
+#include <Radx/PseudoRhi.hh>
 using namespace std;
 
 // Constructor
@@ -412,7 +413,7 @@ int RadxPartRain::_processFile(const string &filePath)
   }
   _readPaths = inFile.getReadPaths();
 
-  // comvert to fl32
+  // convert to fl32
   
   vol.convertToFl32();
 
@@ -423,7 +424,7 @@ int RadxPartRain::_processFile(const string &filePath)
                          _params.radar_longitude_deg,
                          _params.radar_altitude_meters / 1000.0);
   }
-
+  
   // set radar properties
 
   _wavelengthM = vol.getWavelengthM();
@@ -1596,7 +1597,18 @@ void RadxPartRain::_computeSelfConZBias(const RadxVol &vol)
 void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
 
 {
-  
+
+  // load pseudo RHIs
+
+  vol.loadPseudoRhis();
+  const vector<PseudoRhi *> pseudoRhis = vol.getPseudoRhis();
+  for (size_t ii = 0; ii < pseudoRhis.size(); ii++) {
+    PseudoRhi *rhi = pseudoRhis[ii];
+    rhi->printRaySummary(cerr);
+  }
+
+  // find PID field name
+
   bool pidFound = false;
   string pidFieldName;
   for (int ii = 0; ii < _params.output_fields_n; ii++) {
@@ -1652,7 +1664,7 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
       continue;
     }
 
-    // find PID field
+    // get PID field for this ray
     
     RadxField *pidField = ray->getField(pidFieldName);
     if (pidField == NULL) {

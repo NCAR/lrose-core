@@ -773,7 +773,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Option to trip surveillance sweeps so that they only cover 360 degrees.");
     tt->help = tdrpStrDup("Some sweeps will have rays which cover more than a 360-degree rotation. Often these include antenna transitions. If this is set to true, rays are trimmed off either end of the sweep to limit the coverage to 360 degrees. The median elevation angle is computed and the end ray which deviates from the median in elevation is trimmed first.");
     tt->val_offset = (char *) &trim_surveillance_sweeps_to_360deg - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'set_max_range'
