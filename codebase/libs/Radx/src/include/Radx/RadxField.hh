@@ -797,38 +797,43 @@ public:
   /// Get pointer to data for specified ray
   /// Also sets the number of gates
 
-  const void *getData(size_t rayNum,
-                      size_t &nGates) const;
+  const void *getData(size_t rayNum, size_t &nGates) const;
+  void *getData(size_t rayNum, size_t &nGates);
 
   /// Get pointer to 64-bit floating point data.
   /// Note - this assumes data is stored in this type.
   /// An assert will check this assumption, and exit if false.
   
   const Radx::fl64 *getDataFl64() const;
+  Radx::fl64 *getDataFl64();
 
   /// Get pointer to 32-bit floating point data.
   /// Note - this assumes data is stored in this type.
   /// An assert will check this assumption, and exit if false.
   
   const Radx::fl32 *getDataFl32() const;
+  Radx::fl32 *getDataFl32();
 
   /// Get pointer to 32-bit scaled integer data.
   /// Note - this assumes data is stored in this type.
   /// An assert will check this assumption, and exit if false.
   
   const Radx::si32 *getDataSi32() const;
+  Radx::si32 *getDataSi32();
 
   /// Get pointer to 16-bit scaled integer data.
   /// Note - this assumes data is stored in this type.
   /// An assert will check this assumption, and exit if false.
   
   const Radx::si16 *getDataSi16() const;
+  Radx::si16 *getDataSi16();
 
   /// Get pointer to 8-bit scaled integer data.
   /// Note - this assumes data is stored in this type.
   /// An assert will check this assumption, and exit if false.
   
   const Radx::si08 *getDataSi08() const;
+  Radx::si08 *getDataSi08();
 
   //////////////////////////////////////////////////////
   /// Get the value at a gate, as a double.
