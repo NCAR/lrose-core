@@ -1751,6 +1751,7 @@ private:
   void _setPredomSweepModeFromAngles() const;
   void _augmentSweepFields(size_t target, size_t source);
 
+  int _loadPseudoFromRealRhis();
   int _setupAngleSearch(size_t sweepNum);
   int _getSearchAngleIndex(double angle);
   double _getSearchAngle(int index);

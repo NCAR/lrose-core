@@ -5508,6 +5508,10 @@ int RadxVol::loadPseudoRhis()
 
   clearPseudoRhis();
 
+  if (checkIsRhi()) {
+    return _loadPseudoFromRealRhis();
+  }
+
   // check scan type
 
   Radx::SweepMode_t sweepMode = getPredomSweepModeFromAngles();
@@ -5516,14 +5520,6 @@ int RadxVol::loadPseudoRhis()
     if (_debug) {
       cerr << "WARNING - RadxVol::loadPseudoRhis()" << endl;
       cerr << "  Sweep mode invalid: " << Radx::sweepModeToStr(sweepMode) << endl;
-    }
-    return -1;
-  }
-
-  if (_sweeps.size() < 1) {
-    if (_debug) {
-      cerr << "WARNING - RadxVol::loadPseudoRhis()" << endl;
-      cerr << "  No sweeps found" << endl;
     }
     return -1;
   }
@@ -5620,6 +5616,47 @@ int RadxVol::loadPseudoRhis()
   for (size_t ii = 0; ii < _pseudoRhis.size(); ii++) {
     _pseudoRhis[ii]->sortRaysByElevation();
   }
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////
+/// Load up pseudo RHIs from a real RHI volume
+/// The RHI sweeps are ordered in increasing elevation angle
+/// Returns 0 on success, -1 on error.
+/// After success, you can call getPseudoRhis().
+
+int RadxVol::_loadPseudoFromRealRhis()
+
+{
+
+  // loop through the sweeps
+  
+  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+    const RadxSweep *sweep = _sweeps[isweep];
+
+    // create pseudo RHI from sweep rays
+    // that are not in transition
+
+    PseudoRhi *rhi = new PseudoRhi;
+    for (size_t iray = sweep->getStartRayIndex();
+         iray <= sweep->getEndRayIndex(); iray++) {
+      RadxRay *ray = _rays[iray];
+      if (!ray->getAntennaTransition()) {
+        rhi->addRay(_rays[iray]);
+      }
+    }
+
+    // set the rays by elevation
+
+    rhi->sortRaysByElevation();
+
+    // add to vector
+
+    _pseudoRhis.push_back(rhi);
+    
+  } // isweep
 
   return 0;
 
