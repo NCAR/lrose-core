@@ -467,6 +467,10 @@ int RadxPartRain::_processFile(const string &filePath)
   _zdrmInBraggResults.clear();
   _selfConResults.clear();
 
+  // add geometry fields to the volume
+
+  _addGeometryFields(vol);
+
   // compute the derived fields
   
   if (_compute(vol)) {
@@ -771,6 +775,72 @@ int RadxPartRain::_writeVol(RadxVol &vol)
   }
 
   return 0;
+
+}
+
+//////////////////////////////////////////////////
+// add geometry fields to the volume
+
+void RadxPartRain::_addGeometryFields(RadxVol &vol)
+
+{
+
+  vector<RadxRay *> &rays = vol.getRays();
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+
+    RadxRay *ray = rays[iray];
+
+    RadxField *elevFld = new RadxField("elevation", "deg");
+    RadxField *rangeFld = new RadxField("range", "km");
+    RadxField *beamHtFld = new RadxField("beam_height", "km");
+    RadxField *tempFld = new RadxField("temperature", "C");
+
+    size_t nGates = ray->getNGates();
+
+    TaArray<fl32> elev_, rng_, ht_, temp_;
+    fl32 *elev = elev_.alloc(nGates);
+    fl32 *rng = rng_.alloc(nGates);
+    fl32 *ht = ht_.alloc(nGates);
+    fl32 *temp = temp_.alloc(nGates);
+
+    double startRangeKm = ray->getStartRangeKm();
+    double gateSpacingKm = ray->getGateSpacingKm();
+
+    BeamHeight beamHt;
+    beamHt.setInstrumentHtKm(vol.getAltitudeKm());
+    if (_params.override_standard_pseudo_earth_radius) {
+      beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
+    }
+
+    // loop through the gates
+    
+    double rangeKm = startRangeKm;
+    double elevationDeg = ray->getElevationDeg();
+    for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
+      double htKm = beamHt.computeHtKm(elevationDeg, rangeKm);
+      double tempC = _tempProfile.getTempForHtKm(htKm);
+      elev[igate] = elevationDeg;
+      rng[igate] = rangeKm;
+      ht[igate] = htKm;
+      temp[igate] = tempC;
+    } // igate
+
+    elevFld->setTypeFl32(-9999.0);
+    rangeFld->setTypeFl32(-9999.0);
+    beamHtFld->setTypeFl32(-9999.0);
+    tempFld->setTypeFl32(-9999.0);
+
+    elevFld->addDataFl32(nGates, elev);
+    rangeFld->addDataFl32(nGates, rng);
+    beamHtFld->addDataFl32(nGates, ht);
+    tempFld->addDataFl32(nGates, temp);
+
+    ray->addField(elevFld);
+    ray->addField(rangeFld);
+    ray->addField(beamHtFld);
+    ray->addField(tempFld);
+
+  } // iray
 
 }
 
@@ -1604,7 +1674,9 @@ void RadxPartRain::_locateMeltingLayer(RadxVol &vol)
   const vector<PseudoRhi *> pseudoRhis = vol.getPseudoRhis();
   for (size_t ii = 0; ii < pseudoRhis.size(); ii++) {
     PseudoRhi *rhi = pseudoRhis[ii];
-    rhi->printRaySummary(cerr);
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      rhi->printRaySummary(cerr);
+    }
   }
 
   // find PID field name

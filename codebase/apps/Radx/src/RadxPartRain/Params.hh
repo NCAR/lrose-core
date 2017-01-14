@@ -143,7 +143,10 @@ public:
     ZDR_IN_BRAGG = 62,
     ZDR_FLAG_IN_ICE = 63,
     ZDR_FLAG_IN_BRAGG = 64,
-    ML_INTEREST = 65
+    ML_INTEREST = 65,
+    ELEVATION_ANGLE = 66,
+    RANGE = 67,
+    BEAM_HEIGHT = 68
   } output_field_id_t;
 
   typedef enum {

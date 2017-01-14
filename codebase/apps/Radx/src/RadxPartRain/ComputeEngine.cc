@@ -227,6 +227,10 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
   const double *mlInterest = _pid.getMlInterest();
 
+  const Radx::fl32 *beamHt = inputRay->getField("beam_height")->getDataFl32();
+  const Radx::fl32 *range = inputRay->getField("range")->getDataFl32();
+  const Radx::fl32 *elevation = inputRay->getField("elevation")->getDataFl32();
+
   // load up output data
 
   double minValidPrecipRate = _params.PRECIP_min_valid_rate;
@@ -549,6 +553,18 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
         case Params::ML_INTEREST:
           *datp = mlInterest[igate];
+          break;
+
+        case Params::ELEVATION_ANGLE:
+          *datp = elevation[igate];
+          break;
+
+        case Params::RANGE:
+          *datp = range[igate];
+          break;
+
+        case Params::BEAM_HEIGHT:
+          *datp = beamHt[igate];
           break;
 
       } // switch
@@ -896,16 +912,6 @@ void ComputeEngine::_pidCompute()
     }
   }
 
-  // fill temperature array
-  
-  _pid.fillTempArray(_radarHtKm,
-                     _params.override_standard_pseudo_earth_radius,
-                     _params.pseudo_earth_radius_ratio,
-                     _elevation, _nGates,
-                     _startRangeKm,
-                     _gateSpacingKm,
-                     _tempForPid);
-
   // compute particle ID
   
   _pid.computePidBeam(_nGates, _snrArray, _dbzArray, 
@@ -1026,6 +1032,7 @@ void ComputeEngine::_allocMomentsArrays()
   _rhohvNncArray = _rhohvNncArray_.alloc(_nGates);
   _phidpArray = _phidpArray_.alloc(_nGates);
   _rhoVxHxArray = _rhoVxHxArray_.alloc(_nGates);
+  _tempForPid = _tempForPid_.alloc(_nGates);
 }
 
 //////////////////////////////////////
@@ -1039,7 +1046,6 @@ void ComputeEngine::_allocPidArrays()
   _pidArray2 = _pidArray2_.alloc(_nGates);
   _pidInterest = _pidInterest_.alloc(_nGates);
   _pidInterest2 = _pidInterest2_.alloc(_nGates);
-  _tempForPid = _tempForPid_.alloc(_nGates);
 
 }
 
@@ -1184,6 +1190,8 @@ int ComputeEngine::_loadMomentsArrays(RadxRay *inputRay)
     }
   }
 
+  _loadFieldArray(inputRay, "temperature", true, _tempForPid);
+
   return 0;
   
 }
@@ -1244,7 +1252,7 @@ int ComputeEngine::_loadFieldArray(RadxRay *inputRay,
     pthread_mutex_unlock(&_debugPrintMutex);
     return -1;
   }
-  
+
   // Set array values
   // fields are already fl32
 

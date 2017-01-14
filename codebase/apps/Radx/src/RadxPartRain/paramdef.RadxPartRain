@@ -1649,7 +1649,11 @@ typedef enum {
   ZDR_FLAG_IN_ICE,
   ZDR_FLAG_IN_BRAGG,
 
-  ML_INTEREST
+  ML_INTEREST,
+
+  ELEVATION_ANGLE,
+  RANGE,
+  BEAM_HEIGHT
 
 } output_field_id_t;
 

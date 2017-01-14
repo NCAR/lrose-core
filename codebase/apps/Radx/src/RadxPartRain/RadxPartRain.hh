@@ -163,6 +163,8 @@ private:
   int _processFile(const string &filePath);
   void _encodeFieldsForOutput(RadxVol &vol);
   
+  void _addGeometryFields(RadxVol &vol);
+
   int _compute(RadxVol &vol);
   int _computeSingleThreaded(RadxVol &vol);
   int _computeMultiThreaded(RadxVol &vol);

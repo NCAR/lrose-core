@@ -3743,7 +3743,7 @@ using namespace std;
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 66;
+        tt->struct_def.fields[0].enum_def.nfields = 69;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SNR");
@@ -3878,6 +3878,12 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[64].val = ZDR_FLAG_IN_BRAGG;
         tt->struct_def.fields[0].enum_def.fields[65].name = tdrpStrDup("ML_INTEREST");
         tt->struct_def.fields[0].enum_def.fields[65].val = ML_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[66].name = tdrpStrDup("ELEVATION_ANGLE");
+        tt->struct_def.fields[0].enum_def.fields[66].val = ELEVATION_ANGLE;
+        tt->struct_def.fields[0].enum_def.fields[67].name = tdrpStrDup("RANGE");
+        tt->struct_def.fields[0].enum_def.fields[67].val = RANGE;
+        tt->struct_def.fields[0].enum_def.fields[68].name = tdrpStrDup("BEAM_HEIGHT");
+        tt->struct_def.fields[0].enum_def.fields[68].val = BEAM_HEIGHT;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
