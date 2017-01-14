@@ -518,12 +518,6 @@ public:
 
   tdrp_bool_t aggregate_sweep_files_on_read;
 
-  tdrp_bool_t remove_rays_with_antenna_transitions;
-
-  int transition_nrays_margin;
-
-  tdrp_bool_t trim_surveillance_sweeps_to_360deg;
-
   tdrp_bool_t set_max_range;
 
   double max_range_km;
@@ -996,7 +990,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[280];
+  mutable TDRPtable _table[277];
 
   const char *_className;
 
