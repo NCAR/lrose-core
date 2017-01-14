@@ -49,6 +49,7 @@
 #include <radar/NoiseLocator.hh>
 #include <radar/KdpBringi.hh>
 #include <radar/TempProfile.hh>
+#include <Radx/RadxVol.hh>
 #include <Radx/RadxArray.hh>
 class RadxVol;
 class RadxFile;
@@ -90,6 +91,10 @@ private:
   Args _args;
   Params _params;
   vector<string> _readPaths;
+
+  // radar volume container
+
+  RadxVol _vol;
 
   // computations object
 
@@ -147,6 +152,15 @@ private:
   deque<ComputeThread *> _activeThreads;
   deque<ComputeThread *> _availThreads;
   pthread_mutex_t _debugPrintMutex;
+
+  // names for extra fields
+
+  string _elevationFieldName;
+  string _rangeFieldName;
+  string _beamHtFieldName;
+  string _tempFieldName;
+  string _pidFieldName;
+  string _mlFieldName;
   
   // private methods
   
@@ -155,24 +169,24 @@ private:
   int _runRealtime();
   void _setupRead(RadxFile &file);
   void _setupWrite(RadxFile &file);
-  int _writeVol(RadxVol &vol);
+  int _writeVol();
   int _processFile(const string &filePath);
-  void _encodeFieldsForOutput(RadxVol &vol);
+  void _encodeFieldsForOutput();
   
-  void _addExtraFields(RadxVol &vol);
+  void _addExtraFieldsToInput();
+  void _addExtraFieldsToOutput();
 
-  int _compute(RadxVol &vol);
-  int _computeSingleThreaded(RadxVol &vol);
-  int _computeMultiThreaded(RadxVol &vol);
+  int _compute();
+  int _computeSingleThreaded();
+  int _computeMultiThreaded();
   int _storeDerivedRay(ComputeThread *thread);
   static void *_computeInThread(void *thread_data);
 
-  int _retrieveTempProfile(const RadxVol &vol);
-  int _retrieveSiteTempFromSpdb(const RadxVol &vol,
-                                double &tempC,
+  int _retrieveTempProfile();
+  int _retrieveSiteTempFromSpdb(double &tempC,
                                 time_t &timeForTemp);
 
-  void _computeZdrBias(const RadxVol &vol);
+  void _computeZdrBias();
 
   void _loadZdrResults(vector<double> &results,
                        ZdrStats &stats,
@@ -182,9 +196,9 @@ private:
   double _computeZdrPerc(const vector<double> &zdrmResults,
                          double percent);
 
-  void _computeSelfConZBias(const RadxVol &vol);
+  void _computeSelfConZBias();
 
-  void _locateMeltingLayer(RadxVol &vol);
+  void _locateMeltingLayer();
 
 };
 
