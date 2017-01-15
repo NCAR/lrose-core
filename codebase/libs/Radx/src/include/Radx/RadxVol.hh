@@ -43,6 +43,7 @@
 #include <Radx/Radx.hh>
 #include <Radx/RadxPlatform.hh>
 #include <Radx/RadxField.hh>
+#include <Radx/RadxArray.hh>
 class RadxSweep;
 class RadxRay;
 class RadxRcalib;
@@ -972,6 +973,15 @@ public:
   /// clear vector of pseudo RHIs
 
   void clearPseudoRhis();
+
+  // Load up a 2D field array from a vector of rays
+  // This is a static method, does not use any vol members.
+  // Returns 0 on success, -1 on failure
+  
+  static int load2DFieldFromRays(const vector<const RadxRay *> &rays,
+                                 const string fieldName,
+                                 RadxArray2D<Radx::fl32> &array,
+                                 Radx::fl32 missingValue = -9999.0);
 
   //@}
 

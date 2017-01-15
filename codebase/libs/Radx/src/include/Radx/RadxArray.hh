@@ -28,7 +28,7 @@
 //
 // Mike Dixon, RAL, NCAR, POBox 3000, Boulder, CO, 80307, USA
 //
-// Dec 2006
+// Jan 2017
 //
 ////////////////////////////////////////////////////////////////////
 //
@@ -38,6 +38,8 @@
 //
 // If you make the object an automatic variable, the destructor
 // will be called when the object goes out of scope.
+//
+// RadxArray2D is similar, but for 2-D arrays.
 //
 ////////////////////////////////////////////////////////////////////
 
@@ -188,6 +190,179 @@ RadxArray<T> &RadxArray<T>::_copy(const RadxArray<T> &rhs)
 
   alloc(rhs._nelem);
   memcpy(_buf, rhs._buf, _nelem * sizeof(T));
+
+  return *this;
+
+}
+
+template <class T>
+  class RadxArray2D
+{
+public:
+
+  // default constructor - empty array
+
+  RadxArray2D();
+
+  // constructor specifying dimensions of array
+
+  RadxArray2D(int sizeMajor, int sizeMinor);
+
+  // destructor
+
+  ~RadxArray2D();
+
+  // copy constructor
+  
+  RadxArray2D(const RadxArray2D &rhs);
+
+  // assignment (operator =)
+
+  RadxArray2D & operator=(const RadxArray2D &rhs);
+
+  // Alloc array
+
+  T **alloc(int sizeMajor, int sizeMinor);
+
+  // free array
+
+  void free();
+
+  // get size
+
+  int sizeMajor() const { return _sizeMajor; }
+  int sizeMinor() const { return _sizeMinor; }
+  int size1D() const { return _size1D; }
+
+  // get pointer to data
+
+  inline T **dat2D() const { return _dat2D; }
+  inline T *dat1D() const { return _dat1D; }
+
+private:
+
+  T **_dat2D;
+  T *_dat1D;
+  int _sizeMajor;
+  int _sizeMinor;
+  int _size1D;
+  
+  RadxArray2D &_copy(const RadxArray2D &rhs);
+  void _alloc(int sizeMajor, int sizeMinor);
+
+};
+
+// The Implementation.
+
+// default constructor - empty array
+
+template <class T>
+  RadxArray2D<T>::RadxArray2D()
+{
+  _dat2D = NULL;
+  _dat1D = NULL;
+  _size1D = 0;
+  _sizeMajor = 0;
+  _sizeMinor = 0;
+}
+
+// constructor specifying array dimension
+
+template <class T>
+  RadxArray2D<T>::RadxArray2D(int sizeMajor, int sizeMinor)
+{
+  _alloc(sizeMajor, sizeMinor);
+}
+
+// destructor
+
+template <class T>
+  RadxArray2D<T>::~RadxArray2D()
+{
+  free();
+}
+
+// copy constructor
+
+template <class T>
+  RadxArray2D<T>::RadxArray2D(const RadxArray2D<T> &rhs) {
+  if (this != &rhs) {
+    free();
+    _copy(rhs);
+  }
+}
+
+// assignment
+
+template <class T>
+  RadxArray2D<T>& RadxArray2D<T>::operator=(const RadxArray2D<T> &rhs) {
+  return _copy(rhs);
+}
+
+// allocation
+
+template <class T>
+  T **RadxArray2D<T>::alloc(int sizeMajor, int sizeMinor)
+{
+  _alloc(sizeMajor, sizeMinor);
+  return _dat2D;
+}
+
+template <class T>
+  void RadxArray2D<T>::_alloc(int sizeMajor, int sizeMinor)
+{
+  if (sizeMajor == _sizeMajor &&
+      sizeMinor == _sizeMinor) {
+    return;
+  }
+  free();
+  _sizeMajor = sizeMajor;
+  _sizeMinor = sizeMinor;
+  _size1D = _sizeMajor * _sizeMinor;
+  _dat1D = new T[_size1D];
+  _dat2D = new T*[_sizeMajor];
+  for (size_t ii = 0; ii < _sizeMajor; ii++) {
+    _dat2D[ii] = _dat1D + ii * _sizeMinor;
+  }
+}
+
+// free up
+
+template <class T>
+  void RadxArray2D<T>::free()
+{
+  if (_dat1D != NULL) {
+    delete[] _dat1D;
+  }
+  if (_dat2D != NULL) {
+    delete[] _dat2D;
+  }
+  _dat1D = NULL;
+  _dat2D = NULL;
+  _size1D = 0;
+  _sizeMajor = 0;
+  _sizeMinor = 0;
+}
+
+// copy
+
+template <class T>
+  RadxArray2D<T> &RadxArray2D<T>::_copy(const RadxArray2D<T> &rhs)
+
+{
+
+  if (&rhs == this) {
+    return *this;
+  }
+
+  if (rhs._size1D == 0 || rhs._dat2D == NULL) {
+    free();
+    return *this;
+  }
+
+  _alloc(rhs._sizeMajor, rhs._sizeMinor);
+  memcpy(_dat2D, rhs._dat2D, _sizeMajor * sizeof(T*));
+  memcpy(_dat1D, rhs._dat1D, _size1D * sizeof(T));
 
   return *this;
 

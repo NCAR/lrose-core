@@ -5676,6 +5676,77 @@ void RadxVol::clearPseudoRhis()
 
 }
 
+//////////////////////////////////////////////////////////////
+// Load up a 2D field array from a vector of rays.
+// This is a static method, does not use any vol members.
+//
+// Returns 0 on success, -1 on failure
+
+int RadxVol::load2DFieldFromRays(const vector<const RadxRay *> &rays,
+                                 const string fieldName,
+                                 RadxArray2D<Radx::fl32> &array,
+                                 Radx::fl32 missingValue /* = -9999.0 */)
+  
+{
+
+  // check field exists
+
+  bool fieldFound = false;
+  size_t maxNGates = 0;
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+    const RadxRay *ray = rays[iray];
+    if (ray->getField(fieldName) != NULL) {
+      fieldFound = true;
+      if (ray->getNGates() > maxNGates) {
+        maxNGates = ray->getNGates();
+      }
+    }
+  }
+
+  if (!fieldFound) {
+    cerr << "ERROR - RadxVol::load2DFieldFromRays()" << endl;
+    cerr << "  Field not found: " << fieldName << endl;
+    return -1;
+  }
+
+  // allocate array
+
+  array.alloc(rays.size(), maxNGates);
+  Radx::fl32 **data = array.dat2D();
+
+  // initialize to missing
+
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+    for (size_t igate = 0; igate < maxNGates; igate++) {
+      data[iray][igate] = missingValue;
+    }
+  }
+
+  // fill array in ray order
+  
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+    const RadxRay *ray = rays[iray];
+    size_t nGates = ray->getNGates();
+    const RadxField *fld = ray->getField(fieldName);
+    if (fld == NULL) {
+      continue;
+    }
+    RadxField copy(*fld);
+    copy.convertToFl32();
+    Radx::fl32 miss = copy.getMissingFl32();
+    const Radx::fl32 *vals = copy.getDataFl32();
+    for (size_t igate = 0; igate < nGates; igate++) {
+      Radx::fl32 val = vals[igate];
+      if (val != miss) {
+        data[iray][igate] = val;
+      }
+    } // igate
+  } // iray
+
+  return 0;
+
+}
+                             
 ////////////////////////////////////////////  
 /// Set up angle search, for a given sweep
 /// Return 0 on success, -1 on failure
