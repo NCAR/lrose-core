@@ -979,10 +979,32 @@ public:
   // Returns 0 on success, -1 on failure
   
   static int load2DFieldFromRays(const vector<const RadxRay *> &rays,
-                                 const string fieldName,
+                                 const string &fieldName,
                                  RadxArray2D<Radx::fl32> &array,
                                  Radx::fl32 missingValue = -9999.0);
 
+  static int load2DFieldFromRays(const vector<const RadxRay *> &rays,
+                                 const string &fieldName,
+                                 RadxArray2D<Radx::si32> &array,
+                                 Radx::si32 missingValue = -9999.0);
+
+  // Load up ray fields from 2D field array.
+  // This is a static method, does not use any vol members.
+  // Returns 0 on success, -1 on failure
+  
+  static int loadRaysFrom2DField(const RadxArray2D<Radx::fl32> &array,
+                                 const vector<RadxRay *> &rays,
+                                 const string &fieldName,
+                                 const string &units,
+                                 Radx::fl32 missingValue);
+
+  static int loadRaysFrom2DField(const RadxArray2D<Radx::si32> &array,
+                                 const vector<RadxRay *> &rays,
+                                 const string &fieldName,
+                                 const string &units,
+                                 Radx::si32 missingValue);
+
+  
   //@}
 
   //////////////////////////////////////////////////////////////////
