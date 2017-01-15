@@ -1803,7 +1803,7 @@ void RadxPartRain::_locateMeltingLayer()
 
     // get PID field and ht fields
     
-    RadxField *pidField = ray->getField(mlFieldName);
+    RadxField *pidField = ray->getField(pidFieldName);
     const Radx::si32 *pidVals = pidField->getDataSi32();
     
     RadxField *htField = ray->getField(beamHtFieldName);
@@ -1856,23 +1856,29 @@ void RadxPartRain::_locateMeltingLayer()
     } // igate
     
   } // iray
-  
+
   double meanDbzBelow = -9999.0;
+  double medianDbzBelow = -9999.0;
   if (dbzBelow.size() > 0) {
     double sumDbzBelow = 0.0;
     for (size_t ii = 0; ii < dbzBelow.size(); ii++) {
       sumDbzBelow += dbzBelow[ii];
     }
     meanDbzBelow = sumDbzBelow / (double) dbzBelow.size();
+    sort(dbzBelow.begin(), dbzBelow.end());
+    medianDbzBelow = dbzBelow[dbzBelow.size() / 2];
   }
 
   double meanDbzAbove = -9999.0;
+  double medianDbzAbove = -9999.0;
   if (dbzAbove.size() > 0) {
     double sumDbzAbove = 0.0;
     for (size_t ii = 0; ii < dbzAbove.size(); ii++) {
       sumDbzAbove += dbzAbove[ii];
     }
     meanDbzAbove = sumDbzAbove / (double) dbzAbove.size();
+    sort(dbzAbove.begin(), dbzAbove.end());
+    medianDbzAbove = dbzAbove[dbzAbove.size() / 2];
   }
 
   // create dbz field corrected in the brightband
@@ -1953,8 +1959,10 @@ void RadxPartRain::_locateMeltingLayer()
     cerr << "  ML ht min: " << htMin << endl;
     cerr << "  ML temp bot: " << tempBot << endl;
     cerr << "  ML temp top: " << tempTop << endl;
-    cerr << "  dBZ below: " << meanDbzBelow << endl;
-    cerr << "  dBZ above: " << meanDbzAbove << endl;
+    cerr << "  mean dBZ below: " << meanDbzBelow << endl;
+    cerr << "  mean dBZ above: " << meanDbzAbove << endl;
+    cerr << "  median dBZ below: " << medianDbzBelow << endl;
+    cerr << "  median dBZ above: " << medianDbzAbove << endl;
     for (double perc = 5.0; perc < 96.0; perc += 5.0) {
       int iperc = (int) ((perc / 100.0) * (double) mlHts.size());
       cerr << "  ML ht at perc " << perc << ": " << mlHts[iperc] << endl;
