@@ -36,6 +36,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "ComputeEngine.hh"
+#include "RadxPartRain.hh"
 #include <toolsa/os_config.h>
 #include <toolsa/file_io.h>
 #include <rapmath/trig.h>
@@ -592,7 +593,16 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   for (size_t igate = 0; igate < inputRay->getNGates(); igate++) {
     pid[igate] = _pidArray[igate];
   }
-  inputRay->getField("pid")->setDataSi32(_nGates, pid, true);
+  RadxField *pidFld = inputRay->getField(RadxPartRain::pidFieldName);
+  pidFld->setDataSi32(_nGates, pid, true);
+
+  TaArray<Radx::fl32> pidIntr_;
+  Radx::fl32 *pidIntr = pidIntr_.alloc(_nGates);
+  for (size_t igate = 0; igate < inputRay->getNGates(); igate++) {
+    pidIntr[igate] = _pidInterest[igate];
+  }
+  RadxField *pidIntrFld = inputRay->getField(RadxPartRain::pidInterestFieldName);
+  pidIntrFld->setDataFl32(_nGates, pidIntr, true);
 
   // if required, output individual PID particle interest fields
 

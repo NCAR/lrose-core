@@ -58,6 +58,16 @@
 #include <Radx/PseudoRhi.hh>
 using namespace std;
 
+// initialize extra field names
+
+string RadxPartRain::elevationFieldName = "elevation";
+string RadxPartRain::rangeFieldName = "range";
+string RadxPartRain::beamHtFieldName = "beam_height";
+string RadxPartRain::tempFieldName = "temperature";
+string RadxPartRain::pidFieldName = "pid";
+string RadxPartRain::pidInterestFieldName = "pid_interest";
+string RadxPartRain::mlFieldName = "melting_layer";
+
 // Constructor
 
 RadxPartRain::RadxPartRain(int argc, char **argv)
@@ -119,15 +129,6 @@ RadxPartRain::RadxPartRain(int argc, char **argv)
       OK = FALSE;
     }
   }
-
-  // initialize extra field names
-
-  _elevationFieldName = "elevation";
-  _rangeFieldName = "range";
-  _beamHtFieldName = "beam_height";
-  _tempFieldName = "temperature";
-  _pidFieldName = "pid";
-  _mlFieldName = "melting_layer";
 
   // initialize compute object
 
@@ -808,20 +809,22 @@ void RadxPartRain::_addExtraFieldsToInput()
 
     RadxRay *ray = rays[iray];
 
-    RadxField *elevFld = new RadxField(_elevationFieldName, "deg");
-    RadxField *rangeFld = new RadxField(_rangeFieldName, "km");
-    RadxField *beamHtFld = new RadxField(_beamHtFieldName, "km");
-    RadxField *tempFld = new RadxField(_tempFieldName, "C");
-    RadxField *pidFld = new RadxField(_pidFieldName, "");
-    RadxField *mlFld = new RadxField(_mlFieldName, "");
+    RadxField *elevFld = new RadxField(elevationFieldName, "deg");
+    RadxField *rangeFld = new RadxField(rangeFieldName, "km");
+    RadxField *beamHtFld = new RadxField(beamHtFieldName, "km");
+    RadxField *tempFld = new RadxField(tempFieldName, "C");
+    RadxField *pidFld = new RadxField(pidFieldName, "");
+    RadxField *pidIntrFld = new RadxField(pidInterestFieldName, "");
+    RadxField *mlFld = new RadxField(mlFieldName, "");
 
     size_t nGates = ray->getNGates();
 
-    TaArray<Radx::fl32> elev_, rng_, ht_, temp_;
+    TaArray<Radx::fl32> elev_, rng_, ht_, temp_, pidIntr_;
     Radx::fl32 *elev = elev_.alloc(nGates);
     Radx::fl32 *rng = rng_.alloc(nGates);
     Radx::fl32 *ht = ht_.alloc(nGates);
     Radx::fl32 *temp = temp_.alloc(nGates);
+    Radx::fl32 *pidIntr = pidIntr_.alloc(nGates);
 
     TaArray<Radx::si32> pid_, ml_;
     Radx::si32 *pid = pid_.alloc(nGates);
@@ -848,6 +851,7 @@ void RadxPartRain::_addExtraFieldsToInput()
       ht[igate] = htKm;
       temp[igate] = tempC;
       pid[igate] = -9999;
+      pidIntr[igate] = -9999.0;
       ml[igate] = -9999;
     } // igate
 
@@ -856,6 +860,7 @@ void RadxPartRain::_addExtraFieldsToInput()
     beamHtFld->setTypeFl32(-9999.0);
     tempFld->setTypeFl32(-9999.0);
     pidFld->setTypeSi32(-9999, 1.0, 0.0);
+    pidIntrFld->setTypeFl32(-9999.0);
     mlFld->setTypeSi32(-9999, 1.0, 0.0);
 
     elevFld->addDataFl32(nGates, elev);
@@ -863,6 +868,7 @@ void RadxPartRain::_addExtraFieldsToInput()
     beamHtFld->addDataFl32(nGates, ht);
     tempFld->addDataFl32(nGates, temp);
     pidFld->addDataSi32(nGates, pid);
+    pidIntrFld->addDataFl32(nGates, pidIntr);
     mlFld->addDataSi32(nGates, ml);
 
     ray->addField(elevFld);
@@ -870,6 +876,7 @@ void RadxPartRain::_addExtraFieldsToInput()
     ray->addField(beamHtFld);
     ray->addField(tempFld);
     ray->addField(pidFld);
+    ray->addField(pidIntrFld);
     ray->addField(mlFld);
 
   } // iray
@@ -893,7 +900,7 @@ void RadxPartRain::_addExtraFieldsToOutput()
 
     // make a copy of the input fields
 
-    RadxField *mlFld = new RadxField(*inputRay->getField(_mlFieldName));
+    RadxField *mlFld = new RadxField(*inputRay->getField(mlFieldName));
 
     // add to output
 
@@ -944,7 +951,8 @@ int RadxPartRain::_computeSingleThreaded()
     
     // compute moments
     
-    RadxRay *derivedRay = _engine->compute(inputRay, _radarHtKm, _wavelengthM, &_tempProfile);
+    RadxRay *derivedRay =
+      _engine->compute(inputRay, _radarHtKm, _wavelengthM, &_tempProfile);
     if (derivedRay == NULL) {
       cerr << "ERROR - _compute" << endl;
       return -1;
@@ -1653,6 +1661,47 @@ void RadxPartRain::_locateMeltingLayer()
     }
   }
 
+  // copy the wet snow field to melting layer field
+
+  for (size_t ii = 0; ii < pseudoRhis.size(); ii++) {
+
+    PseudoRhi *rhi = pseudoRhis[ii];
+    vector<RadxRay *> rhiRays = rhi->getRays();
+
+    for (size_t iray = 0; iray < rhiRays.size(); iray++) {
+
+      RadxRay *ray = rhiRays[iray];
+      size_t nGates = ray->getNGates();
+
+      RadxField *pidField = ray->getField(pidFieldName);
+      const Radx::si32 *pidVals = pidField->getDataSi32();
+      // Radx::si32 pidMiss = pidField->getMissingSi32();
+
+      RadxField *mlField = ray->getField(mlFieldName);
+      Radx::si32 *mlVals = mlField->getDataSi32();
+
+      for (size_t igate = 0; igate < nGates; igate++) {
+        Radx::si32 pid = pidVals[igate];
+        if (pid == NcarParticleId::WET_SNOW) {
+          mlVals[igate] = 1;
+        } else if (pid > 0) {
+          mlVals[igate] = 0;
+        }
+      } // igate
+
+      // fill in gaps in melting layer field
+
+      // RadxField *interestField = ray->getField(pidInterestFieldName);
+      // Radx::fl32 *interestVals = interestField->getDataFl32();
+      // _applyGapFilterToMl(nGates, mlVals, interestVals);
+      _applyInfillFilter(nGates, mlVals, false);
+      _applyInfillFilter(nGates, mlVals, false);
+      _applyInfillFilter(nGates, mlVals, true);
+    
+    } // iray
+
+  } // ii
+
   // prepare vector for melting layer heights
 
   vector<double> mlHts;
@@ -1679,10 +1728,10 @@ void RadxPartRain::_locateMeltingLayer()
     
     // get PID and height fields for this ray
     
-    RadxField *pidField = ray->getField(_pidFieldName);
-    const Radx::si32 *pidVals = pidField->getDataSi32();
+    RadxField *mlField = ray->getField(mlFieldName);
+    const Radx::si32 *mlVals = mlField->getDataSi32();
 
-    RadxField *htField = ray->getField(_beamHtFieldName);
+    RadxField *htField = ray->getField(beamHtFieldName);
     const Radx::fl32 *htVals = htField->getDataFl32();
     
     // loop through the gates loading up the ht array
@@ -1691,7 +1740,7 @@ void RadxPartRain::_locateMeltingLayer()
     
     bool hasMl = false;
     for (size_t igate = 0; igate < nGates; igate++) {
-      if (pidVals[igate] == NcarParticleId::WET_SNOW) {
+      if (mlVals[igate] > 0) {
         mlHts.push_back(htVals[igate]);
         hasMl = true;
       }
@@ -1754,10 +1803,10 @@ void RadxPartRain::_locateMeltingLayer()
 
     // get PID field and ht fields
     
-    RadxField *pidField = ray->getField(_mlFieldName);
+    RadxField *pidField = ray->getField(mlFieldName);
     const Radx::si32 *pidVals = pidField->getDataSi32();
     
-    RadxField *htField = ray->getField(_beamHtFieldName);
+    RadxField *htField = ray->getField(beamHtFieldName);
     const Radx::fl32 *htVals = htField->getDataFl32();
 
     // find the gates for the bottom and top of the melting layer
@@ -1844,12 +1893,12 @@ void RadxPartRain::_locateMeltingLayer()
       continue;
     }
     
-    // get PID and ht fields
+    // get ML and ht fields
     
-    RadxField *pidField = ray->getField(_mlFieldName);
-    const Radx::si32 *pidVals = pidField->getDataSi32();
+    RadxField *mlField = ray->getField(mlFieldName);
+    const Radx::si32 *mlVals = mlField->getDataSi32();
     
-    RadxField *htField = ray->getField(_beamHtFieldName);
+    RadxField *htField = ray->getField(beamHtFieldName);
     const Radx::fl32 *htVals = htField->getDataFl32();
 
     // make a copy of the DBZ field that we can amend in 
@@ -1866,7 +1915,7 @@ void RadxPartRain::_locateMeltingLayer()
     // look for melting layer, adjust reflectivity
     
     for (size_t igate = 0; igate < nGates; igate++) {
-      if (pidVals[igate] == NcarParticleId::WET_SNOW) {
+      if (mlVals[igate] > 0) {
         double gateHt = htVals[igate];
         double dbzCorr = meanDbzBelow;
         if (gateHt >= htTop) {
@@ -1966,6 +2015,84 @@ void RadxPartRain::_locateMeltingLayer()
     cerr << "=====================================" << endl;
     cerr << xml;
     cerr << "=====================================" << endl;
+  }
+
+}
+
+/////////////////////////////////////////////////////////////
+// apply in-fill filter to flag field
+
+void RadxPartRain::_applyInfillFilter(int nGates,
+                                      Radx::si32 *flag,
+                                      bool removeShort)
+  
+{
+
+  // compute the count of gates, within a range interval, that
+  // have the flag set
+
+  int halfLen = 10;
+  int filtLen = halfLen * 2 + 1;
+  if (filtLen >= nGates) {
+    return;
+  }
+
+  // initialize
+  
+  vector<int> countSet;
+  countSet.resize(nGates);
+  for (int igate = 0; igate < nGates; igate++) {
+    countSet[igate] = 0;
+  }
+
+  // load counts at beginning
+
+  int count = 0;
+  for (int igate = 0; igate < filtLen; igate++) {
+    if (flag[igate] > 0) {
+      count++;
+      countSet[igate] = count;
+    }
+  }
+ 
+  // load counts in main part of ray
+
+  for (int igate = filtLen; igate < nGates; igate++) {
+    if (flag[igate] > 0) {
+      count++;
+    }
+    if (flag[igate - filtLen] > 0) {
+      count--;
+    }
+    countSet[igate - halfLen] = count;
+  }
+
+  // load counts at end
+
+  count = 0;
+  for (int igate = nGates - 1; igate > nGates - halfLen - 1; igate--) {
+    if (flag[igate] > 0) {
+      count++;
+      countSet[igate] = count;
+    }
+  }
+
+  // set flag true if count exceeds half len at any point
+
+  for (int igate = 0; igate < nGates; igate++) {
+    if (countSet[igate] > halfLen) {
+      flag[igate] = 1;
+    }
+  }
+
+  // set flag false if count is below 5
+
+  if (removeShort) {
+    for (int igate = 0; igate < nGates; igate++) {
+      if (countSet[igate] < 5) {
+        flag[igate] = 0;
+      }
+    }
   }
 
 }

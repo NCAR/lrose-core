@@ -83,6 +83,16 @@ public:
   const Params &getParams() const { return _params; }
   pthread_mutex_t *getDebugPrintMutex() { return &_debugPrintMutex; }
 
+  // names for extra fields
+
+  static string elevationFieldName;
+  static string rangeFieldName;
+  static string beamHtFieldName;
+  static string tempFieldName;
+  static string pidFieldName;
+  static string pidInterestFieldName;
+  static string mlFieldName;
+  
 protected:
 private:
 
@@ -153,15 +163,6 @@ private:
   deque<ComputeThread *> _availThreads;
   pthread_mutex_t _debugPrintMutex;
 
-  // names for extra fields
-
-  string _elevationFieldName;
-  string _rangeFieldName;
-  string _beamHtFieldName;
-  string _tempFieldName;
-  string _pidFieldName;
-  string _mlFieldName;
-  
   // private methods
   
   int _runFilelist();
@@ -200,6 +201,10 @@ private:
 
   void _locateMeltingLayer();
 
+  void _applyInfillFilter(int nGates,
+                          Radx::si32 *flag,
+                          bool removeShort);
+  
 };
 
 #endif
