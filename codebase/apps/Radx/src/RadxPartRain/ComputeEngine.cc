@@ -586,16 +586,27 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
   } // ifield
   
-  // copy the dbz, pid and interest field back to the input ray
+  // copy the dbz, rhohv, pid and interest field back to the input ray
 
-  RadxField *dbzFld = inputRay->getField(RadxPartRain::smoothedDbzFieldName);
-  TaArray<Radx::fl32> dbz_;
-  Radx::fl32 *dbz = dbz_.alloc(_nGates);
+  RadxField *smoothDbzFld =
+    inputRay->getField(RadxPartRain::smoothedDbzFieldName);
+  TaArray<Radx::fl32> smoothDbz_;
+  Radx::fl32 *smoothDbz = smoothDbz_.alloc(_nGates);
   for (size_t igate = 0; igate < inputRay->getNGates(); igate++) {
-    dbz[igate] = dbzForPid[igate];
+    smoothDbz[igate] = dbzForPid[igate];
   }
-  dbzFld->setDataFl32(_nGates, dbz, true);
-  dbzFld->setMissingFl32(missingDbl);
+  smoothDbzFld->setDataFl32(_nGates, smoothDbz, true);
+  smoothDbzFld->setMissingFl32(missingDbl);
+  
+  RadxField *smoothRhohvFld =
+    inputRay->getField(RadxPartRain::smoothedRhohvFieldName);
+  TaArray<Radx::fl32> smoothRhohv_;
+  Radx::fl32 *smoothRhohv = smoothRhohv_.alloc(_nGates);
+  for (size_t igate = 0; igate < inputRay->getNGates(); igate++) {
+    smoothRhohv[igate] = rhohvForPid[igate];
+  }
+  smoothRhohvFld->setDataFl32(_nGates, smoothRhohv, true);
+  smoothRhohvFld->setMissingFl32(missingDbl);
   
   TaArray<Radx::si32> pid_;
   Radx::si32 *pid = pid_.alloc(_nGates);

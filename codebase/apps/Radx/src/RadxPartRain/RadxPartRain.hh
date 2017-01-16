@@ -87,6 +87,7 @@ public:
   // names for extra fields
 
   static string smoothedDbzFieldName;
+  static string smoothedRhohvFieldName;
   static string elevationFieldName;
   static string rangeFieldName;
   static string beamHtFieldName;
