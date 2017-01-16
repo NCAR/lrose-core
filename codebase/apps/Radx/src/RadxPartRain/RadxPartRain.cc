@@ -68,6 +68,7 @@ string RadxPartRain::pidFieldName = "pid";
 string RadxPartRain::pidInterestFieldName = "pid_interest";
 string RadxPartRain::mlFieldName = "melting_layer";
 string RadxPartRain::mlExtendedFieldName = "ml_extended";
+string RadxPartRain::convFlagFieldName = "conv_flag";
 
 // Constructor
 
@@ -1692,12 +1693,9 @@ void RadxPartRain::_locateMeltingLayer()
       }
     } // igate
     
-      // fill in gaps in melting layer field
-      // by running filter 3 times in succession
+    // fill in gaps in melting layer field
     
-    _applyInfillFilter(nGates, mlVals, false);
-    _applyInfillFilter(nGates, mlVals, false);
-    _applyInfillFilter(nGates, mlVals, true);
+    _applyInfillFilter(nGates, mlVals);
     
   } // iray
 
@@ -1916,9 +1914,12 @@ void RadxPartRain::_locateMeltingLayer()
 
   /////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////
+  // identify convective regions from higher reflectivity above
+  // the melting layer
   // expand the melting layer from the top of the layer to the
   // height at which the dbz has dropped to the 75th percentile
 
+  // do this in RHI mode
   // loop through through the RHIs
 
   for (size_t irhi = 0; irhi < pseudoRhis.size(); irhi++) {
@@ -1940,17 +1941,30 @@ void RadxPartRain::_locateMeltingLayer()
                              ht2D, Radx::missingFl32);
     _vol.load2DFieldFromRays(rhi->getRays(), mlFieldName,
                              ml2D, Radx::missingSi32);
-
+    
     Radx::fl32 **dbz = dbz2D.dat2D();
     Radx::fl32 **ht = ht2D.dat2D();
     Radx::si32 **ml = ml2D.dat2D();
 
+    // array dimensions
+    
     size_t nRays = dbz2D.sizeMajor();
     size_t maxNGates = dbz2D.sizeMinor();
+    
+    // set up the convective flag, and extended melting layer
 
+    RadxArray2D<Radx::si32> mle2D, conv2D;
+    Radx::si32 **mle = mle2D.alloc(nRays, maxNGates);
+    Radx::si32 **conv = conv2D.alloc(nRays, maxNGates);
+
+    // copy extended flag from ml flag and clear convective flag
+
+    memcpy(mle2D.dat1D(), ml2D.dat1D(), ml2D.size1D() * sizeof(Radx::si32));
+    memset(conv2D.dat1D(), 0, conv2D.size1D() * sizeof(Radx::si32));
+    
     // loop through range gates
     // for ml gates, find height at which the reflectivity drops below
-    // the 75th percentile
+    // the 75th percentile of dbz above the melting layer
 
     for (size_t igate = 0; igate < maxNGates; igate++) {
       
@@ -1966,78 +1980,112 @@ void RadxPartRain::_locateMeltingLayer()
       double dbzTopMl = dbz[mlMaxIndex][igate];
       double htTopMl = ht[mlMaxIndex][igate];
       if (dbzTopMl < perc75DbzAbove) {
+        // non-convective and weak
         continue;
       }
-      
-      int iray75 = -1;
+
+      bool perc75Found = false;
+      int index75 = -1;
       double htPerc75 = -9999.0;
       double elev = -9999.0;
       double az = -9999.0;
       double dbz75 = -9999.0;
-
+      double htDiff = -9999.0;
+      double htAboveTop = -9999.0;
+      double dbzDiff = -9999.0;
+      
       for (size_t iray = mlMaxIndex + 1; iray < nRays; iray++) {
         if (dbz[iray][igate] < perc75DbzAbove) {
           htPerc75 = ht[iray][igate];
           az = rays[iray]->getAzimuthDeg();
           elev = rays[iray]->getElevationDeg();
-          iray75 = iray;
+          index75 = iray;
           dbz75 = dbz[iray][igate];
+          perc75Found = true;
           break;
         }
       } // iray
 
-      if (iray75 < 0) {
+      if (perc75Found) {
+        htDiff = htPerc75 - htTopMl;
+        htAboveTop = htPerc75 - htTop;
+        dbzDiff = dbz75 - dbzTopMl;
+        if (_params.debug >= Params::DEBUG_EXTRA && htPerc75 > 0) {
+          cerr << "111111 az, el, gate, ray, dbzTop, dbz75, dbzDiff, htTop, ht75, htDiff, htAbove: "
+               << az << ", "
+               << elev << ", "
+               << igate << ", "
+               << index75 << " ** "
+               << dbzTopMl << ", "
+               << dbz75 << ", "
+               << dbzDiff << " ** "
+               << htTopMl << ", "
+               << htPerc75 << ", "
+               << htDiff << ", "
+               << htAboveTop << endl;
+        }
+      }
+
+      if (!perc75Found || htAboveTop > 1.5) {
+        // convective, set the convection flag
+        for (size_t iray = 0; iray < nRays; iray++) {
+          conv[iray][igate] = 1;
+        }
+        // do not extend the ml upwards
         continue;
       }
       
-      double htDiff = htPerc75 - htTopMl;
-      double htAboveTop = htPerc75 - htTop;
-      double dbzDiff = dbz75 - dbzTopMl;
-      
-      if (htPerc75 > 0) {
-        cerr << "111111 az, el, gate, ray, dbzTop, dbz75, dbzDiff, htTop, ht75, htDiff, htAbove: "
-             << az << ", "
-             << elev << ", "
-             << igate << ", "
-             << iray75 << " ** "
-             << dbzTopMl << ", "
-             << dbz75 << ", "
-             << dbzDiff << " ** "
-             << htTopMl << ", "
-             << htPerc75 << ", "
-             << htDiff << ", "
-             << htAboveTop << endl;
-      }
-
-      if (htAboveTop > 1.5) {
-        continue;
-      }
-
       // extend the ml index up to where the dbz drops below perc75
       
-      for (int iray = mlMaxIndex + 1; iray <= iray75; iray++) {
-        ml[iray][igate] = 1;
+      for (int iray = mlMaxIndex + 1; iray <= index75; iray++) {
+        mle[iray][igate] = 1;
       }
-
-      // load the extended ml data field
-
-      _vol.loadRaysFrom2DField(ml2D, rhi->getRays(),
-                               mlExtendedFieldName, "",
-                               Radx::missingSi32);
-
+      
     } // igate
     
+    // load the extended ml data field and convective flag field
+    
+    _vol.loadRaysFrom2DField(mle2D, rhi->getRays(),
+                             mlExtendedFieldName, "",
+                             Radx::missingSi32);
+    
+    _vol.loadRaysFrom2DField(conv2D, rhi->getRays(),
+                             convFlagFieldName, "",
+                             Radx::missingSi32);
+
   } // irhi
 
-  // load extended field into derived ray
+  // fill in the gaps in the extended field and convective field
+
+  for (size_t iray = 0; iray < _vol.getRays().size(); iray++) {
+    RadxRay *ray = _vol.getRays()[iray];
+    size_t nGates = ray->getNGates();
+    RadxField *mleField = ray->getField(mlExtendedFieldName);
+    if (mleField != NULL) {
+      Radx::si32 *mleVals = mleField->getDataSi32();
+      _applyInfillFilter(nGates, mleVals);
+    }
+    RadxField *convField = ray->getField(convFlagFieldName);
+    if (convField != NULL) {
+      Radx::si32 *convVals = convField->getDataSi32();
+      _applyInfillFilter(nGates, convVals);
+    }
+  } // iray
+  
+  // load extra fields into derived ray
   
   for (size_t iray = 0; iray < _vol.getRays().size(); iray++) {
     RadxRay *ray = _vol.getRays()[iray];
     RadxRay *derivedRay = _derivedRays[iray];
-    RadxField *mlExtFld = ray->getField(mlExtendedFieldName);
-    if (mlExtFld != NULL) {
-      RadxField *copy = new RadxField(*mlExtFld);
-      derivedRay->addField(copy);
+    RadxField *mleFld = ray->getField(mlExtendedFieldName);
+    if (mleFld != NULL) {
+      RadxField *mleCopy = new RadxField(*mleFld);
+      derivedRay->addField(mleCopy);
+    }
+    RadxField *convFld = ray->getField(convFlagFieldName);
+    if (convFld != NULL) {
+      RadxField *convCopy = new RadxField(*convFld);
+      derivedRay->addField(convCopy);
     }
   }
 
@@ -2180,8 +2228,25 @@ void RadxPartRain::_locateMeltingLayer()
 // apply in-fill filter to flag field
 
 void RadxPartRain::_applyInfillFilter(int nGates,
+                                      Radx::si32 *flag)
+
+{
+
+  // we apply the basic filter 3 times, and on the third time
+  // we remove any short runs
+  
+  _applyInfillFilter(nGates, flag, false);
+  _applyInfillFilter(nGates, flag, false);
+  _applyInfillFilter(nGates, flag, true);
+
+}
+
+/////////////////////////////////////////////////////////////
+// apply in-fill filter to flag field
+
+void RadxPartRain::_applyInfillFilter(int nGates,
                                       Radx::si32 *flag,
-                                      bool removeShort)
+                                      bool removeShortRuns)
   
 {
 
@@ -2244,7 +2309,7 @@ void RadxPartRain::_applyInfillFilter(int nGates,
 
   // set flag false if count is below 5
 
-  if (removeShort) {
+  if (removeShortRuns) {
     for (int igate = 0; igate < nGates; igate++) {
       if (countSet[igate] < 5) {
         flag[igate] = 0;

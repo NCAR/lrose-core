@@ -93,6 +93,7 @@ public:
   static string pidInterestFieldName;
   static string mlFieldName;
   static string mlExtendedFieldName;
+  static string convFlagFieldName;
   
 protected:
 private:
@@ -203,8 +204,11 @@ private:
   void _locateMeltingLayer();
 
   void _applyInfillFilter(int nGates,
+                          Radx::si32 *flag);
+  
+  void _applyInfillFilter(int nGates,
                           Radx::si32 *flag,
-                          bool removeShort);
+                          bool removeShortRuns);
   
 };
 
