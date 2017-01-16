@@ -2198,15 +2198,15 @@ void RadxPartRain::_expandMlRhi(double htMlTop,
     // load up 2D arrays for ml, dbz and height fields
 
     RadxArray2D<Radx::fl32> dbz2D, rhohv2D;
-    // RadxArray2D<Radx::fl32> ht2D;
+    RadxArray2D<Radx::fl32> range2D;
     RadxArray2D<Radx::si32> ml2D, mle2D, conv2D;
     
     _vol.load2DFieldFromRays(rhi->getRays(), smoothedDbzFieldName,
                              dbz2D, Radx::missingFl32);
     _vol.load2DFieldFromRays(rhi->getRays(), smoothedRhohvFieldName,
                              rhohv2D, Radx::missingFl32);
-    // _vol.load2DFieldFromRays(rhi->getRays(), beamHtFieldName,
-    //                          ht2D, Radx::missingFl32);
+    _vol.load2DFieldFromRays(rhi->getRays(), rangeFieldName,
+                             range2D, Radx::missingFl32);
     _vol.load2DFieldFromRays(rhi->getRays(), mlFieldName,
                              ml2D, Radx::missingSi32);
     _vol.load2DFieldFromRays(rhi->getRays(), mlExtendedFieldName,
@@ -2216,7 +2216,7 @@ void RadxPartRain::_expandMlRhi(double htMlTop,
     
     Radx::fl32 **dbzVals = dbz2D.dat2D();
     Radx::fl32 **rhohvVals = rhohv2D.dat2D();
-    // Radx::fl32 **htVals = ht2D.dat2D();
+    Radx::fl32 **rangeVals = range2D.dat2D();
     Radx::si32 **mlVals = ml2D.dat2D();
     Radx::si32 **mleVals = mle2D.dat2D();
     Radx::si32 **convVals = conv2D.dat2D();
@@ -2267,7 +2267,10 @@ void RadxPartRain::_expandMlRhi(double htMlTop,
         //   indexEnd = iray;
         //   break;
         // }
-        if (rhohvVals[iray][igate] < 0 || rhohvVals[iray][igate] > 0.995) {
+        double rhohvThreshold =
+          0.995 - rangeVals[iray][igate] *  0.000065;
+        if (rhohvVals[iray][igate] < 0 || 
+            rhohvVals[iray][igate] > rhohvThreshold) {
           endFound = true;
           indexEnd = iray;
           break;
@@ -2328,8 +2331,8 @@ void RadxPartRain::_expandMlPpi(double htMlTop,
     RadxField *convField = ray->getField(convFlagFieldName);
     Radx::si32 *convVals = convField->getDataSi32();
     
-    // RadxField *htField = ray->getField(beamHtFieldName);
-    // const Radx::fl32 *htVals = htField->getDataFl32();
+    RadxField *rangeField = ray->getField(rangeFieldName);
+    const Radx::fl32 *rangeVals = rangeField->getDataFl32();
 
     // find the mean gate for the melting layer
 
@@ -2359,7 +2362,9 @@ void RadxPartRain::_expandMlPpi(double htMlTop,
       //   endFound = true;
       //   break;
       // }
-      if (rhohvVals[igate] < 0 || rhohvVals[igate] > 0.995) {
+      double rhohvThreshold = 0.995 - rangeVals[igate] *  0.00005;
+      if (rhohvVals[igate] < 0 ||
+          rhohvVals[igate] > rhohvThreshold) {
         indexEnd = igate;
         endFound = true;
         break;
