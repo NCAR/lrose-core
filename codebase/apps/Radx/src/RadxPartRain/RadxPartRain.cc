@@ -1678,7 +1678,8 @@ void RadxPartRain::_locateMeltingLayer()
     
     for (size_t igate = 0; igate < nGates; igate++) {
       Radx::si32 pid = pidVals[igate];
-      if (pid == NcarParticleId::WET_SNOW) {
+      if (pid == NcarParticleId::WET_SNOW ||
+          pid == NcarParticleId::GRAUPEL_RAIN) {
         mlVals[igate] = 1;
       } else if (pid > 0) {
         mlVals[igate] = 0;
@@ -2197,12 +2198,13 @@ void RadxPartRain::_expandMlRhi(double htMlTop,
     
     // load up 2D arrays for ml, dbz and height fields
 
-    RadxArray2D<Radx::fl32> dbz2D, rhohv2D;
+    // RadxArray2D<Radx::fl32> dbz2D;
+    RadxArray2D<Radx::fl32> rhohv2D;
     RadxArray2D<Radx::fl32> range2D;
     RadxArray2D<Radx::si32> ml2D, mle2D, conv2D;
     
-    _vol.load2DFieldFromRays(rhi->getRays(), smoothedDbzFieldName,
-                             dbz2D, Radx::missingFl32);
+    // _vol.load2DFieldFromRays(rhi->getRays(), smoothedDbzFieldName,
+    //                          dbz2D, Radx::missingFl32);
     _vol.load2DFieldFromRays(rhi->getRays(), smoothedRhohvFieldName,
                              rhohv2D, Radx::missingFl32);
     _vol.load2DFieldFromRays(rhi->getRays(), rangeFieldName,
@@ -2214,7 +2216,7 @@ void RadxPartRain::_expandMlRhi(double htMlTop,
     _vol.load2DFieldFromRays(rhi->getRays(), convFlagFieldName,
                              conv2D, Radx::missingSi32);
     
-    Radx::fl32 **dbzVals = dbz2D.dat2D();
+    // Radx::fl32 **dbzVals = dbz2D.dat2D();
     Radx::fl32 **rhohvVals = rhohv2D.dat2D();
     Radx::fl32 **rangeVals = range2D.dat2D();
     Radx::si32 **mlVals = ml2D.dat2D();
@@ -2223,8 +2225,8 @@ void RadxPartRain::_expandMlRhi(double htMlTop,
 
     // array dimensions
     
-    size_t nRays = dbz2D.sizeMajor();
-    size_t maxNGates = dbz2D.sizeMinor();
+    size_t nRays = ml2D.sizeMajor();
+    size_t maxNGates = ml2D.sizeMinor();
     
     // copy extended flag from ml flag
     
@@ -2316,8 +2318,8 @@ void RadxPartRain::_expandMlPpi(double htMlTop,
     
     // Get fields
     
-    RadxField *dbzField = ray->getField(smoothedDbzFieldName);
-    const Radx::fl32 *dbzVals = dbzField->getDataFl32();
+    // RadxField *dbzField = ray->getField(smoothedDbzFieldName);
+    // const Radx::fl32 *dbzVals = dbzField->getDataFl32();
     
     RadxField *rhohvField = ray->getField(smoothedRhohvFieldName);
     const Radx::fl32 *rhohvVals = rhohvField->getDataFl32();
