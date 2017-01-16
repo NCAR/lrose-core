@@ -55,11 +55,11 @@
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxXml.hh>
-#include <Radx/PseudoRhi.hh>
 using namespace std;
 
 // initialize extra field names
 
+string RadxPartRain::smoothedDbzFieldName = "smoothedDbz";
 string RadxPartRain::elevationFieldName = "elevation";
 string RadxPartRain::rangeFieldName = "range";
 string RadxPartRain::beamHtFieldName = "beam_height";
@@ -811,6 +811,7 @@ void RadxPartRain::_addExtraFieldsToInput()
 
     RadxRay *ray = rays[iray];
 
+    RadxField *dbzFld = new RadxField(smoothedDbzFieldName, "dBZ");
     RadxField *elevFld = new RadxField(elevationFieldName, "deg");
     RadxField *rangeFld = new RadxField(rangeFieldName, "km");
     RadxField *beamHtFld = new RadxField(beamHtFieldName, "km");
@@ -821,17 +822,12 @@ void RadxPartRain::_addExtraFieldsToInput()
 
     size_t nGates = ray->getNGates();
 
-    TaArray<Radx::fl32> elev_, rng_, ht_, temp_, pidIntr_;
+    TaArray<Radx::fl32> elev_, rng_, ht_, temp_;
     Radx::fl32 *elev = elev_.alloc(nGates);
     Radx::fl32 *rng = rng_.alloc(nGates);
     Radx::fl32 *ht = ht_.alloc(nGates);
     Radx::fl32 *temp = temp_.alloc(nGates);
-    Radx::fl32 *pidIntr = pidIntr_.alloc(nGates);
-
-    TaArray<Radx::si32> pid_, ml_;
-    Radx::si32 *pid = pid_.alloc(nGates);
-    Radx::si32 *ml = ml_.alloc(nGates);
-
+    
     double startRangeKm = ray->getStartRangeKm();
     double gateSpacingKm = ray->getGateSpacingKm();
 
@@ -852,11 +848,9 @@ void RadxPartRain::_addExtraFieldsToInput()
       rng[igate] = rangeKm;
       ht[igate] = htKm;
       temp[igate] = tempC;
-      pid[igate] = -9999;
-      pidIntr[igate] = -9999.0;
-      ml[igate] = -9999;
     } // igate
 
+    dbzFld->setTypeFl32(-9999.0);
     elevFld->setTypeFl32(-9999.0);
     rangeFld->setTypeFl32(-9999.0);
     beamHtFld->setTypeFl32(-9999.0);
@@ -864,15 +858,17 @@ void RadxPartRain::_addExtraFieldsToInput()
     pidFld->setTypeSi32(-9999, 1.0, 0.0);
     pidIntrFld->setTypeFl32(-9999.0);
     mlFld->setTypeSi32(-9999, 1.0, 0.0);
-
+    
+    dbzFld->addDataMissing(nGates);
     elevFld->addDataFl32(nGates, elev);
     rangeFld->addDataFl32(nGates, rng);
     beamHtFld->addDataFl32(nGates, ht);
     tempFld->addDataFl32(nGates, temp);
-    pidFld->addDataSi32(nGates, pid);
-    pidIntrFld->addDataFl32(nGates, pidIntr);
-    mlFld->addDataSi32(nGates, ml);
+    pidFld->addDataMissing(nGates);
+    pidIntrFld->addDataMissing(nGates);
+    mlFld->addDataMissing(nGates);
 
+    ray->addField(dbzFld);
     ray->addField(elevFld);
     ray->addField(rangeFld);
     ray->addField(beamHtFld);
@@ -1654,23 +1650,14 @@ void RadxPartRain::_locateMeltingLayer()
 {
 
   /////////////////////////////////////////////////////////////
-  /////////////////////////////////////////////////////////////
   // load pseudo RHIs
 
   _vol.loadPseudoRhis();
-  const vector<PseudoRhi *> pseudoRhis = _vol.getPseudoRhis();
-  for (size_t ii = 0; ii < pseudoRhis.size(); ii++) {
-    PseudoRhi *rhi = pseudoRhis[ii];
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      rhi->printRaySummary(cerr);
-    }
-  }
+  _pseudoRhis = _vol.getPseudoRhis();
 
   /////////////////////////////////////////////////////////////
-  /////////////////////////////////////////////////////////////
   // set the melting layer field at all gates at
-  // which PID is WET_SNOW
-  // and fill in the gaps
+  // which PID is WET_SNOW and fill in the gaps
 
   for (size_t iray = 0; iray < _vol.getRays().size(); iray++) {
     
@@ -1700,17 +1687,13 @@ void RadxPartRain::_locateMeltingLayer()
   } // iray
 
   /////////////////////////////////////////////////////////////
-  /////////////////////////////////////////////////////////////
   // get vector of heights for all melting layer gates
   // so that we can compute stats on the melting layer
   
   vector<double> mlHts;
-
-  // loop through rays
-  
   vector<bool> rayHasMl;
   rayHasMl.resize(_vol.getRays().size());
-
+  
   for (size_t iray = 0; iray < _vol.getRays().size(); iray++) {
     
     rayHasMl[iray] = false;
@@ -1760,9 +1743,7 @@ void RadxPartRain::_locateMeltingLayer()
   }
 
   /////////////////////////////////////////////////////////////
-  /////////////////////////////////////////////////////////////
   // compute stats on the melting layer
-
   // sort the heights
   
   sort(mlHts.begin(), mlHts.end());
@@ -1772,15 +1753,15 @@ void RadxPartRain::_locateMeltingLayer()
   int ipercBot = (int)
     ((_params.melting_layer_percentile_for_bottom_limit / 100.0) * 
      (double) mlHts.size());
-  double htBot = mlHts[ipercBot];
+  double htMlBot = mlHts[ipercBot];
 
   int ipercTop = (int)
     ((_params.melting_layer_percentile_for_top_limit / 100.0) * 
      (double) mlHts.size());
-  double htTop = mlHts[ipercTop];
+  double htMlTop = mlHts[ipercTop];
 
-  double tempBot = _tempProfile.getTempForHtKm(htBot);
-  double tempTop = _tempProfile.getTempForHtKm(htTop);
+  double tempBot = _tempProfile.getTempForHtKm(htMlBot);
+  double tempTop = _tempProfile.getTempForHtKm(htMlTop);
 
   // compute mean/median dbz immediately below and above layer
 
@@ -1797,10 +1778,7 @@ void RadxPartRain::_locateMeltingLayer()
 
     // get DBZ field
 
-    RadxField *dbzField = ray->getField(_params.DBZ_field_name);
-    if (dbzField == NULL) {
-      continue;
-    }
+    RadxField *dbzField = ray->getField(smoothedDbzFieldName);
     const Radx::fl32 *dbzVals = dbzField->getDataFl32();
 
     // get PID field and ht fields
@@ -1819,10 +1797,10 @@ void RadxPartRain::_locateMeltingLayer()
     
     for (size_t igate = 0; igate < nGates; igate++) {
       double gateHt = htVals[igate];
-      if (igateBot == 0 && gateHt >= htBot) {
+      if (igateBot == 0 && gateHt >= htMlBot) {
         igateBot = igate;
       }
-      if (gateHt >= htTop) {
+      if (gateHt >= htMlTop) {
         igateTop = igate;
         break;
       }
@@ -1896,8 +1874,8 @@ void RadxPartRain::_locateMeltingLayer()
          << _params.melting_layer_percentile_for_bottom_limit << endl;
     cerr << "  ML perc for top: "
          << _params.melting_layer_percentile_for_top_limit << endl;
-    cerr << "  ML ht bot: " << htBot << endl;
-    cerr << "  ML ht top: " << htTop << endl;
+    cerr << "  ML ht bot: " << htMlBot << endl;
+    cerr << "  ML ht top: " << htMlTop << endl;
     cerr << "  ML temp bot: " << tempBot << endl;
     cerr << "  ML temp top: " << tempTop << endl;
     cerr << "  mean dBZ below: " << meanDbzBelow << endl;
@@ -1905,157 +1883,47 @@ void RadxPartRain::_locateMeltingLayer()
     cerr << "  median dBZ below: " << medianDbzBelow << endl;
     cerr << "  median dBZ above: " << medianDbzAbove << endl;
     cerr << "  perc75 dBZ above: " << perc75DbzAbove << endl;
-    // for (double perc = 5.0; perc < 96.0; perc += 5.0) {
-    //   int iperc = (int) ((perc / 100.0) * (double) mlHts.size());
-    //   cerr << "  ML ht at perc " << perc << ": " << mlHts[iperc] << endl;
-    // }
     cerr << "===========================================" << endl;
   }
 
-  /////////////////////////////////////////////////////////////
-  /////////////////////////////////////////////////////////////
-  // identify convective regions from higher reflectivity above
-  // the melting layer
+  // create the convective flag field for each ray
+  
+  for (size_t iray = 0; iray < _vol.getRays().size(); iray++) {
+    RadxRay *ray = _vol.getRays()[iray];
+    size_t nGates = ray->getNGates();
+    RadxField *convFld = new RadxField(convFlagFieldName, "");
+    convFld->setTypeSi32(Radx::missingSi32, 1.0, 0.0);
+    convFld->addDataMissing(nGates);
+    ray->addField(convFld);
+  }
+
+  // identify convective regions from the vertical profile
+  // and PID
+  
+  _checkForConvection(htMlTop);
+
+  // create the extended ml flag field for each ray
+  
+  for (size_t iray = 0; iray < _vol.getRays().size(); iray++) {
+    RadxRay *ray = _vol.getRays()[iray];
+    size_t nGates = ray->getNGates();
+    RadxField *mleFld = new RadxField(mlExtendedFieldName, "");
+    mleFld->setTypeSi32(Radx::missingSi32, 1.0, 0.0);
+    mleFld->addDataMissing(nGates);
+    ray->addField(mleFld);
+  }
+
   // expand the melting layer from the top of the layer to the
   // height at which the dbz has dropped to the 75th percentile
+  // RHI mode
+  
+  if (_vol.checkIsRhi()) {
+    _expandMlRhi(htMlTop, perc75DbzAbove);
+  } else {
+    _expandMlPpi(htMlTop, medianDbzAbove);
+  }
 
-  // do this in RHI mode
-  // loop through through the RHIs
-
-  for (size_t irhi = 0; irhi < pseudoRhis.size(); irhi++) {
-
-    PseudoRhi *rhi = pseudoRhis[irhi];
-    const vector<RadxRay *> &rays = rhi->getRays();
-    if (rays.size() < 2) {
-      continue;
-    }
-    
-    // load up 2D arrays for ml, dbz and height fields
-
-    RadxArray2D<Radx::fl32> dbz2D, ht2D;
-    RadxArray2D<Radx::si32> ml2D;
-    
-    _vol.load2DFieldFromRays(rhi->getRays(), _params.DBZ_field_name,
-                             dbz2D, Radx::missingFl32);
-    _vol.load2DFieldFromRays(rhi->getRays(), beamHtFieldName,
-                             ht2D, Radx::missingFl32);
-    _vol.load2DFieldFromRays(rhi->getRays(), mlFieldName,
-                             ml2D, Radx::missingSi32);
-    
-    Radx::fl32 **dbz = dbz2D.dat2D();
-    Radx::fl32 **ht = ht2D.dat2D();
-    Radx::si32 **ml = ml2D.dat2D();
-
-    // array dimensions
-    
-    size_t nRays = dbz2D.sizeMajor();
-    size_t maxNGates = dbz2D.sizeMinor();
-    
-    // set up the convective flag, and extended melting layer
-
-    RadxArray2D<Radx::si32> mle2D, conv2D;
-    Radx::si32 **mle = mle2D.alloc(nRays, maxNGates);
-    Radx::si32 **conv = conv2D.alloc(nRays, maxNGates);
-
-    // copy extended flag from ml flag and clear convective flag
-
-    memcpy(mle2D.dat1D(), ml2D.dat1D(), ml2D.size1D() * sizeof(Radx::si32));
-    memset(conv2D.dat1D(), 0, conv2D.size1D() * sizeof(Radx::si32));
-    
-    // loop through range gates
-    // for ml gates, find height at which the reflectivity drops below
-    // the 75th percentile of dbz above the melting layer
-
-    for (size_t igate = 0; igate < maxNGates; igate++) {
-      
-      int mlMaxIndex = -1;
-      for (size_t iray = 0; iray < nRays; iray++) {
-        if (ml[iray][igate] > 0) {
-          mlMaxIndex = iray;
-        }
-      } // iray
-      if (mlMaxIndex < 0 || mlMaxIndex == (int) (nRays - 1)) {
-        continue;
-      }
-      double dbzTopMl = dbz[mlMaxIndex][igate];
-      double htTopMl = ht[mlMaxIndex][igate];
-      if (dbzTopMl < perc75DbzAbove) {
-        // non-convective and weak
-        continue;
-      }
-
-      bool perc75Found = false;
-      int index75 = -1;
-      double htPerc75 = -9999.0;
-      double elev = -9999.0;
-      double az = -9999.0;
-      double dbz75 = -9999.0;
-      double htDiff = -9999.0;
-      double htAboveTop = -9999.0;
-      double dbzDiff = -9999.0;
-      
-      for (size_t iray = mlMaxIndex + 1; iray < nRays; iray++) {
-        if (dbz[iray][igate] < perc75DbzAbove) {
-          htPerc75 = ht[iray][igate];
-          az = rays[iray]->getAzimuthDeg();
-          elev = rays[iray]->getElevationDeg();
-          index75 = iray;
-          dbz75 = dbz[iray][igate];
-          perc75Found = true;
-          break;
-        }
-      } // iray
-
-      if (perc75Found) {
-        htDiff = htPerc75 - htTopMl;
-        htAboveTop = htPerc75 - htTop;
-        dbzDiff = dbz75 - dbzTopMl;
-        if (_params.debug >= Params::DEBUG_EXTRA && htPerc75 > 0) {
-          cerr << "111111 az, el, gate, ray, dbzTop, dbz75, dbzDiff, htTop, ht75, htDiff, htAbove: "
-               << az << ", "
-               << elev << ", "
-               << igate << ", "
-               << index75 << " ** "
-               << dbzTopMl << ", "
-               << dbz75 << ", "
-               << dbzDiff << " ** "
-               << htTopMl << ", "
-               << htPerc75 << ", "
-               << htDiff << ", "
-               << htAboveTop << endl;
-        }
-      }
-
-      if (!perc75Found || htAboveTop > 1.5) {
-        // convective, set the convection flag
-        for (size_t iray = 0; iray < nRays; iray++) {
-          conv[iray][igate] = 1;
-        }
-        // do not extend the ml upwards
-        continue;
-      }
-      
-      // extend the ml index up to where the dbz drops below perc75
-      
-      for (int iray = mlMaxIndex + 1; iray <= index75; iray++) {
-        mle[iray][igate] = 1;
-      }
-      
-    } // igate
-    
-    // load the extended ml data field and convective flag field
-    
-    _vol.loadRaysFrom2DField(mle2D, rhi->getRays(),
-                             mlExtendedFieldName, "",
-                             Radx::missingSi32);
-    
-    _vol.loadRaysFrom2DField(conv2D, rhi->getRays(),
-                             convFlagFieldName, "",
-                             Radx::missingSi32);
-
-  } // irhi
-
-  // fill in the gaps in the extended field and convective field
+  // fill in the gaps in the extended field
 
   for (size_t iray = 0; iray < _vol.getRays().size(); iray++) {
     RadxRay *ray = _vol.getRays()[iray];
@@ -2065,11 +1933,6 @@ void RadxPartRain::_locateMeltingLayer()
       Radx::si32 *mleVals = mleField->getDataSi32();
       _applyInfillFilter(nGates, mleVals);
     }
-    RadxField *convField = ray->getField(convFlagFieldName);
-    if (convField != NULL) {
-      Radx::si32 *convVals = convField->getDataSi32();
-      _applyInfillFilter(nGates, convVals);
-    }
   } // iray
   
   // load extra fields into derived ray
@@ -2078,24 +1941,14 @@ void RadxPartRain::_locateMeltingLayer()
     RadxRay *ray = _vol.getRays()[iray];
     RadxRay *derivedRay = _derivedRays[iray];
     RadxField *mleFld = ray->getField(mlExtendedFieldName);
-    if (mleFld != NULL) {
-      RadxField *mleCopy = new RadxField(*mleFld);
-      derivedRay->addField(mleCopy);
-    }
-    RadxField *convFld = ray->getField(convFlagFieldName);
-    if (convFld != NULL) {
-      RadxField *convCopy = new RadxField(*convFld);
-      derivedRay->addField(convCopy);
-    }
+    RadxField *mleCopy = new RadxField(*mleFld);
+    derivedRay->addField(mleCopy);
   }
 
   /////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////
-  // create dbz field corrected in the brightband
+  // create dbz field flagged in the brightband
 
-  // double depthMl = htTop - htBot;
-  // double deltaDbz = meanDbzAbove - meanDbzBelow;
-  
   for (size_t iray = 0; iray < _vol.getRays().size(); iray++) {
     
     RadxRay *ray = _vol.getRays()[iray];
@@ -2104,10 +1957,7 @@ void RadxPartRain::_locateMeltingLayer()
     
     // find DBZ field
     
-    RadxField *dbzField = ray->getField(_params.DBZ_field_name);
-    if (dbzField == NULL) {
-      continue;
-    }
+    RadxField *dbzField = ray->getField(smoothedDbzFieldName);
     
     // get ML and ht fields
     
@@ -2120,47 +1970,44 @@ void RadxPartRain::_locateMeltingLayer()
       mleVals = mleField->getDataSi32();
     }
     
-    // RadxField *htField = ray->getField(beamHtFieldName);
-    // const Radx::fl32 *htVals = htField->getDataFl32();
-
     // make a copy of the DBZ field that we can amend in 
     // the brightband
     
     RadxField *dbzCorrField = new RadxField(*dbzField);
     dbzCorrField->setName("DBZ_CORR");
-    
     TaArray<Radx::fl32> _dbzCorrVals_;
     Radx::fl32 *dbzCorrVals = _dbzCorrVals_.alloc(nGates);
     memcpy(dbzCorrVals, dbzCorrField->getDataFl32(), 
+           nGates * sizeof(Radx::fl32));
+    
+    RadxField *dbzCorrField2 = new RadxField(*dbzField);
+    dbzCorrField2->setName("DBZ_CORR2");
+    TaArray<Radx::fl32> _dbzCorrVals2_;
+    Radx::fl32 *dbzCorrVals2 = _dbzCorrVals2_.alloc(nGates);
+    memcpy(dbzCorrVals2, dbzCorrField2->getDataFl32(), 
            nGates * sizeof(Radx::fl32));
     
     // look for melting layer, adjust reflectivity
     
     for (size_t igate = 0; igate < nGates; igate++) {
       if (mleVals && mleVals[igate] > 0) {
-        dbzCorrVals[igate] = 75.0;
+        dbzCorrVals2[igate] = 67.5;
       }
       if (mlVals[igate] > 0) {
-        // double gateHt = htVals[igate];
-        // double dbzCorr = meanDbzBelow;
-        // if (gateHt >= htTop) {
-        //   dbzCorr = meanDbzAbove;
-        // } else if (gateHt >= htBot) {
-        //   double frac = (gateHt - htBot) / depthMl;
-        //   dbzCorr = meanDbzBelow + frac * deltaDbz;
-        // }
-        // dbzCorrVals[igate] = dbzCorr;
-        dbzCorrVals[igate] = 67.0;
+        dbzCorrVals[igate] = 75.0;
+        dbzCorrVals2[igate] = 75.0;
       }
     } // igate
     
     // set the corrected values in the field
     
     dbzCorrField->setDataFl32(nGates, dbzCorrVals, true);
+    dbzCorrField2->setDataFl32(nGates, dbzCorrVals2, true);
 
     // add field to ray
     
     derivedRay->addField(dbzCorrField);
+    derivedRay->addField(dbzCorrField2);
     
   } // iray
 
@@ -2185,8 +2032,8 @@ void RadxPartRain::_locateMeltingLayer()
   xml += RadxXml::writeDouble("percForTop", 1, 
                               _params.melting_layer_percentile_for_top_limit);
 
-  xml += RadxXml::writeDouble("htBottom", 1, htBot);
-  xml += RadxXml::writeDouble("htTop", 1, htTop);
+  xml += RadxXml::writeDouble("htMlBottom", 1, htMlBot);
+  xml += RadxXml::writeDouble("htMlTop", 1, htMlTop);
   xml += RadxXml::writeDouble("tempBottom", 1, tempBot);
   xml += RadxXml::writeDouble("tempTop", 1, tempTop);
   xml += RadxXml::writeDouble("dBZMedianBelow", 1, medianDbzBelow);
@@ -2222,6 +2069,321 @@ void RadxPartRain::_locateMeltingLayer()
     cerr << "=====================================" << endl;
   }
 
+}
+
+/////////////////////////////////////////////////////////////
+// identify convective regions from the vertical profile
+// and PID
+
+void RadxPartRain::_checkForConvection(double htMlTop)
+
+{
+  
+  for (size_t irhi = 0; irhi < _pseudoRhis.size(); irhi++) {
+    
+    PseudoRhi *rhi = _pseudoRhis[irhi];
+    const vector<RadxRay *> &rays = rhi->getRays();
+    if (rays.size() < 2) {
+      continue;
+    }
+    
+    // load up 2D arrays for dbz, height and pid fields
+    
+    RadxArray2D<Radx::fl32> dbz2D, ht2D;
+    RadxArray2D<Radx::si32> pid2D, conv2D;
+    
+    _vol.load2DFieldFromRays(rhi->getRays(), smoothedDbzFieldName,
+                             dbz2D, Radx::missingFl32);
+    _vol.load2DFieldFromRays(rhi->getRays(), beamHtFieldName,
+                             ht2D, Radx::missingFl32);
+    _vol.load2DFieldFromRays(rhi->getRays(), pidFieldName,
+                             pid2D, Radx::missingSi32);
+    _vol.load2DFieldFromRays(rhi->getRays(), convFlagFieldName,
+                             conv2D, Radx::missingSi32);
+    
+    Radx::fl32 **dbzVals = dbz2D.dat2D();
+    Radx::fl32 **htVals = ht2D.dat2D();
+    Radx::si32 **pidVals = pid2D.dat2D();
+    Radx::si32 **convVals = conv2D.dat2D();
+    
+    // array dimensions
+    
+    size_t nRays = dbz2D.sizeMajor();
+    size_t maxNGates = dbz2D.sizeMinor();
+    
+    // check for convection
+    
+    for (size_t igate = 0; igate < maxNGates; igate++) {
+      
+      double isConv = false;
+      for (size_t iray = 0; iray < nRays; iray++) {
+        double dbz = dbzVals[iray][igate];
+        double ht = htVals[iray][igate];
+        int pid = pidVals[iray][igate];
+        if (dbz > 50) {
+          isConv = true;
+        }
+        if (ht > htMlTop * 1.25 && dbz > 45) {
+          isConv = true;
+        }
+        if (ht > htMlTop * 1.5 && dbz > 35) {
+          isConv = true;
+        }
+        if (pid == NcarParticleId::HEAVY_RAIN ||
+            pid == NcarParticleId::HAIL ||
+            pid == NcarParticleId::RAIN_HAIL_MIXTURE) {
+          isConv = true;
+        }
+      } // iray
+
+      if (isConv) {
+        for (size_t iray = 0; iray < nRays; iray++) {
+          double dbz = dbzVals[iray][igate];
+          if (dbz > 0) {
+            convVals[iray][igate] = 1;
+          }
+        }
+      }
+    }
+      
+    // load the convective flag field
+    
+    _vol.loadRaysFrom2DField(conv2D, rhi->getRays(),
+                             convFlagFieldName, "",
+                             Radx::missingSi32);
+
+  } // irhi
+
+  // fill in the gaps in the convective field
+  // load convective field into derived ray
+  
+  for (size_t iray = 0; iray < _vol.getRays().size(); iray++) {
+    RadxRay *ray = _vol.getRays()[iray];
+    size_t nGates = ray->getNGates();
+    RadxField *convFld = ray->getField(convFlagFieldName);
+    Radx::si32 *convVals = convFld->getDataSi32();
+    _applyInfillFilter(nGates, convVals);
+    RadxRay *derivedRay = _derivedRays[iray];
+    RadxField *convCopy = new RadxField(*convFld);
+    derivedRay->addField(convCopy);
+  }
+  
+}
+
+/////////////////////////////////////////////////////////////
+// expand the melting layer from the top of the layer to the
+// height at which the dbz has dropped to the 75th percentile
+// RHI mode
+
+void RadxPartRain::_expandMlRhi(double htMlTop,
+                                double dbzThreshold)
+
+{
+
+  // loop through through the RHIs
+
+  for (size_t irhi = 0; irhi < _pseudoRhis.size(); irhi++) {
+
+    PseudoRhi *rhi = _pseudoRhis[irhi];
+    const vector<RadxRay *> &rays = rhi->getRays();
+    if (rays.size() < 2) {
+      continue;
+    }
+    
+    // load up 2D arrays for ml, dbz and height fields
+
+    RadxArray2D<Radx::fl32> dbz2D, ht2D;
+    RadxArray2D<Radx::si32> ml2D, mle2D;
+    
+    _vol.load2DFieldFromRays(rhi->getRays(), smoothedDbzFieldName,
+                             dbz2D, Radx::missingFl32);
+    _vol.load2DFieldFromRays(rhi->getRays(), beamHtFieldName,
+                             ht2D, Radx::missingFl32);
+    _vol.load2DFieldFromRays(rhi->getRays(), mlFieldName,
+                             ml2D, Radx::missingSi32);
+    _vol.load2DFieldFromRays(rhi->getRays(), mlExtendedFieldName,
+                             mle2D, Radx::missingSi32);
+    
+    Radx::fl32 **dbz = dbz2D.dat2D();
+    Radx::fl32 **ht = ht2D.dat2D();
+    Radx::si32 **ml = ml2D.dat2D();
+    Radx::si32 **mle = mle2D.dat2D();
+
+    // array dimensions
+    
+    size_t nRays = dbz2D.sizeMajor();
+    size_t maxNGates = dbz2D.sizeMinor();
+    
+    // copy extended flag from ml flag
+    
+    memcpy(mle2D.dat1D(), ml2D.dat1D(), ml2D.size1D() * sizeof(Radx::si32));
+    
+    // loop through range gates
+    // for ml gates, find height at which the reflectivity drops below
+    // the 75th percentile of dbz above the melting layer
+
+    for (size_t igate = 0; igate < maxNGates; igate++) {
+      
+      int mlMaxIndex = -1;
+      for (size_t iray = 0; iray < nRays; iray++) {
+        if (ml[iray][igate] > 0) {
+          mlMaxIndex = iray;
+        }
+      } // iray
+      if (mlMaxIndex < 0 || mlMaxIndex == (int) (nRays - 1)) {
+        continue;
+      }
+      double dbzTopMl = dbz[mlMaxIndex][igate];
+      double htTopMl = ht[mlMaxIndex][igate];
+      if (dbzTopMl < dbzThreshold) {
+        // non-convective and weak
+        continue;
+      }
+
+      bool perc75Found = false;
+      int index75 = -1;
+      double htPerc75 = -9999.0;
+      double elev = -9999.0;
+      double az = -9999.0;
+      double dbz75 = -9999.0;
+      double htDiff = -9999.0;
+      double htAboveTop = -9999.0;
+      double dbzDiff = -9999.0;
+      
+      for (size_t iray = mlMaxIndex + 1; iray < nRays; iray++) {
+        if (dbz[iray][igate] < dbzThreshold) {
+          htPerc75 = ht[iray][igate];
+          az = rays[iray]->getAzimuthDeg();
+          elev = rays[iray]->getElevationDeg();
+          index75 = iray;
+          dbz75 = dbz[iray][igate];
+          perc75Found = true;
+          break;
+        }
+      } // iray
+
+      if (perc75Found) {
+        htDiff = htPerc75 - htTopMl;
+        htAboveTop = htPerc75 - htMlTop;
+        dbzDiff = dbz75 - dbzTopMl;
+        if (_params.debug >= Params::DEBUG_EXTRA && htPerc75 > 0) {
+          cerr << "==>> az, el, gate, ray, dbzTop, dbz75, dbzDiff, "
+               << "htMlTop, ht75, htDiff, htAbove: "
+               << az << ", "
+               << elev << ", "
+               << igate << ", "
+               << index75 << " ** "
+               << dbzTopMl << ", "
+               << dbz75 << ", "
+               << dbzDiff << " ** "
+               << htTopMl << ", "
+               << htPerc75 << ", "
+               << htDiff << ", "
+               << htAboveTop << endl;
+        }
+      }
+      
+      if (!perc75Found || htAboveTop > 1.5) {
+        // do not extend the ml upwards
+        continue;
+      }
+      
+      // extend the ml index up to where the dbz drops below perc75
+      
+      for (int iray = mlMaxIndex + 1; iray <= index75; iray++) {
+        mle[iray][igate] = 1;
+      }
+      
+    } // igate
+    
+    // load the extended ml data field and convective flag field
+    
+    _vol.loadRaysFrom2DField(mle2D, rhi->getRays(),
+                             mlExtendedFieldName, "",
+                             Radx::missingSi32);
+    
+  } // irhi
+
+}
+
+/////////////////////////////////////////////////////////////
+// expand the melting layer from the top of the layer to the
+// height at which the dbz has dropped to the 75th percentile
+// PPI mode
+
+void RadxPartRain::_expandMlPpi(double htMlTop,
+                                double dbzThreshold)
+
+{
+
+  for (size_t iray = 0; iray < _vol.getRays().size(); iray++) {
+    
+    RadxRay *ray = _vol.getRays()[iray];
+    size_t nGates = ray->getNGates();
+    
+    // Get fields
+    
+    RadxField *dbzField = ray->getField(smoothedDbzFieldName);
+    if (dbzField == NULL) {
+      continue;
+    }
+    const Radx::fl32 *dbzVals = dbzField->getDataFl32();
+    
+    // get ML and ht fields
+    
+    RadxField *mlField = ray->getField(mlFieldName);
+    const Radx::si32 *mlVals = mlField->getDataSi32();
+    
+    RadxField *mleField = ray->getField(mlExtendedFieldName);
+    Radx::si32 *mleVals = mleField->getDataSi32();
+    
+    RadxField *convField = ray->getField(convFlagFieldName);
+    Radx::si32 *convVals = convField->getDataSi32();
+    
+    // RadxField *htField = ray->getField(beamHtFieldName);
+    // const Radx::fl32 *htVals = htField->getDataFl32();
+
+    // fnd the mean gate for the melting layer
+
+    double sumGateIndex = 0.0;
+    double gateCount = 0.0;
+    for (size_t igate = 0; igate < nGates; igate++) {
+      if (mlVals[igate] > 0) {
+        sumGateIndex += igate;
+        gateCount++;
+      }
+    } // igate
+    if (gateCount < 10) {
+      // melting layer not well defined
+      continue;
+    }
+    int meanGateIndex = (int) (sumGateIndex / gateCount + 0.5);
+    
+    bool endFound = false;
+    int indexEnd = -1;
+    
+    for (size_t igate = meanGateIndex; igate < nGates; igate++) {
+      if (convVals[igate] != 0) {
+        break;
+      }
+      if (dbzVals[igate] < dbzThreshold) {
+        indexEnd = igate;
+        endFound = true;
+        break;
+      }
+    } // iray
+    
+    if (endFound) {
+      // extend the ml index up to where the dbz drops below threshold
+      for (int igate = meanGateIndex + 1; igate <= indexEnd; igate++) {
+        if (mlVals[igate] == 0) {
+          mleVals[igate] = 1;
+        }
+      }
+    }
+    
+  } // iray
+    
 }
 
 /////////////////////////////////////////////////////////////

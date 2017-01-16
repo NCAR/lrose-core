@@ -586,7 +586,16 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
   } // ifield
   
-  // copy the pid field back to the input ray
+  // copy the dbz, pid and interest field back to the input ray
+
+  RadxField *dbzFld = inputRay->getField(RadxPartRain::smoothedDbzFieldName);
+  TaArray<Radx::fl32> dbz_;
+  Radx::fl32 *dbz = dbz_.alloc(_nGates);
+  for (size_t igate = 0; igate < inputRay->getNGates(); igate++) {
+    dbz[igate] = dbzForPid[igate];
+  }
+  dbzFld->setDataFl32(_nGates, dbz, true);
+  dbzFld->setMissingFl32(missingDbl);
   
   TaArray<Radx::si32> pid_;
   Radx::si32 *pid = pid_.alloc(_nGates);

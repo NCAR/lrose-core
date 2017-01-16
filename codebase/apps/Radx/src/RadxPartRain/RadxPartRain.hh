@@ -51,6 +51,7 @@
 #include <radar/TempProfile.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxArray.hh>
+#include <Radx/PseudoRhi.hh>
 class RadxVol;
 class RadxFile;
 class RadxRay;
@@ -85,6 +86,7 @@ public:
 
   // names for extra fields
 
+  static string smoothedDbzFieldName;
   static string elevationFieldName;
   static string rangeFieldName;
   static string beamHtFieldName;
@@ -165,6 +167,10 @@ private:
   deque<ComputeThread *> _availThreads;
   pthread_mutex_t _debugPrintMutex;
 
+  // pseudo RHIs
+
+  vector<PseudoRhi *> _pseudoRhis;
+
   // private methods
   
   int _runFilelist();
@@ -202,7 +208,10 @@ private:
   void _computeSelfConZBias();
 
   void _locateMeltingLayer();
-
+  void _checkForConvection(double htMlTop);
+  void _expandMlRhi(double htMlTop, double dbzThreshold);
+  void _expandMlPpi(double htMlTop, double dbzThreshold);
+  
   void _applyInfillFilter(int nGates,
                           Radx::si32 *flag);
   
