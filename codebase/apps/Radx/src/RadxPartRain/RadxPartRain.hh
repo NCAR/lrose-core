@@ -92,6 +92,7 @@ public:
   static string pidFieldName;
   static string pidInterestFieldName;
   static string mlFieldName;
+  static string mlExtendedFieldName;
   
 protected:
 private:

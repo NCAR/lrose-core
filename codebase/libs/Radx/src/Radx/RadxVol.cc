@@ -5676,13 +5676,14 @@ void RadxVol::clearPseudoRhis()
 
 }
 
-//////////////////////////////////////////////////////////////
-// Load up a 2D field array from a vector of rays.
+////////////////////////////////////////////////////////////////////
+// Load up a 2D field fl32 array from a vector of rays.
+// The ray data for the specified field will be converted to fl32.
 // This is a static method, does not use any vol members.
 //
 // Returns 0 on success, -1 on failure
 
-int RadxVol::load2DFieldFromRays(const vector<const RadxRay *> &rays,
+int RadxVol::load2DFieldFromRays(const vector<RadxRay *> &rays,
                                  const string &fieldName,
                                  RadxArray2D<Radx::fl32> &array,
                                  Radx::fl32 missingValue /* = -9999.0 */)
@@ -5725,16 +5726,15 @@ int RadxVol::load2DFieldFromRays(const vector<const RadxRay *> &rays,
   // fill array in ray order
   
   for (size_t iray = 0; iray < rays.size(); iray++) {
-    const RadxRay *ray = rays[iray];
+    RadxRay *ray = rays[iray];
     size_t nGates = ray->getNGates();
-    const RadxField *fld = ray->getField(fieldName);
+    RadxField *fld = ray->getField(fieldName);
     if (fld == NULL) {
       continue;
     }
-    RadxField copy(*fld);
-    copy.convertToFl32();
-    Radx::fl32 miss = copy.getMissingFl32();
-    const Radx::fl32 *vals = copy.getDataFl32();
+    fld->convertToFl32();
+    Radx::fl32 miss = fld->getMissingFl32();
+    const Radx::fl32 *vals = fld->getDataFl32();
     for (size_t igate = 0; igate < nGates; igate++) {
       Radx::fl32 val = vals[igate];
       if (val != miss) {
@@ -5746,8 +5746,14 @@ int RadxVol::load2DFieldFromRays(const vector<const RadxRay *> &rays,
   return 0;
 
 }
-                             
-int RadxVol::load2DFieldFromRays(const vector<const RadxRay *> &rays,
+
+////////////////////////////////////////////////////////////////////
+// Load up a 2D field si32 array from a vector of rays
+// The ray data for the specified field will be converted to si32.
+// This is a static method, does not use any vol members.
+// Returns 0 on success, -1 on failure
+
+int RadxVol::load2DFieldFromRays(const vector<RadxRay *> &rays,
                                  const string &fieldName,
                                  RadxArray2D<Radx::si32> &array,
                                  Radx::si32 missingValue /* = -9999.0 */)
@@ -5790,16 +5796,15 @@ int RadxVol::load2DFieldFromRays(const vector<const RadxRay *> &rays,
   // fill array in ray order
   
   for (size_t iray = 0; iray < rays.size(); iray++) {
-    const RadxRay *ray = rays[iray];
+    RadxRay *ray = rays[iray];
     size_t nGates = ray->getNGates();
-    const RadxField *fld = ray->getField(fieldName);
+    RadxField *fld = ray->getField(fieldName);
     if (fld == NULL) {
       continue;
     }
-    RadxField copy(*fld);
-    copy.convertToSi32();
-    Radx::si32 miss = copy.getMissingSi32();
-    const Radx::si32 *vals = copy.getDataSi32();
+    fld->convertToSi32();
+    Radx::si32 miss = fld->getMissingSi32();
+    const Radx::si32 *vals = fld->getDataSi32();
     for (size_t igate = 0; igate < nGates; igate++) {
       Radx::si32 val = vals[igate];
       if (val != miss) {
@@ -5813,7 +5818,7 @@ int RadxVol::load2DFieldFromRays(const vector<const RadxRay *> &rays,
 }
                              
 //////////////////////////////////////////////////////////////
-// Load up ray fields from 2D field array.
+// Load up ray fields from 2D fl32 field array.
 // This is a static method, does not use any vol members.
 // Returns 0 on success, -1 on failure
 
@@ -5852,6 +5857,7 @@ int RadxVol::loadRaysFrom2DField(const RadxArray2D<Radx::fl32> &array,
     if (fld == NULL) {
       // field does not exist, create it
       fld = new RadxField(fieldName, units);
+      fld->setTypeFl32(missingValue);
       fld->setMissingFl32(missingValue);
       fld->addDataFl32(nGates, data[iray]);
       ray->addField(fld);
@@ -5867,6 +5873,11 @@ int RadxVol::loadRaysFrom2DField(const RadxArray2D<Radx::fl32> &array,
   return 0;
 
 }
+
+//////////////////////////////////////////////////////////////
+// Load up ray fields from 2D si32 field array.
+// This is a static method, does not use any vol members.
+// Returns 0 on success, -1 on failure
 
 int RadxVol::loadRaysFrom2DField(const RadxArray2D<Radx::si32> &array,
                                  const vector<RadxRay *> &rays,
@@ -5903,6 +5914,7 @@ int RadxVol::loadRaysFrom2DField(const RadxArray2D<Radx::si32> &array,
     if (fld == NULL) {
       // field does not exist, create it
       fld = new RadxField(fieldName, units);
+      fld->setTypeSi32(missingValue, 1.0, 0.0);
       fld->setMissingSi32(missingValue);
       fld->addDataSi32(nGates, data[iray]);
       ray->addField(fld);

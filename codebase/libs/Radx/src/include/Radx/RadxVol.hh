@@ -974,21 +974,27 @@ public:
 
   void clearPseudoRhis();
 
-  // Load up a 2D field array from a vector of rays
+  // Load up a 2D field fl32 array from a vector of rays
+  // The ray data for the specified field will be converted to fl32.
   // This is a static method, does not use any vol members.
   // Returns 0 on success, -1 on failure
   
-  static int load2DFieldFromRays(const vector<const RadxRay *> &rays,
+  static int load2DFieldFromRays(const vector<RadxRay *> &rays,
                                  const string &fieldName,
                                  RadxArray2D<Radx::fl32> &array,
                                  Radx::fl32 missingValue = -9999.0);
 
-  static int load2DFieldFromRays(const vector<const RadxRay *> &rays,
+  // Load up a 2D field si32 array from a vector of rays
+  // The ray data for the specified field will be converted to si32.
+  // This is a static method, does not use any vol members.
+  // Returns 0 on success, -1 on failure
+  
+  static int load2DFieldFromRays(const vector<RadxRay *> &rays,
                                  const string &fieldName,
                                  RadxArray2D<Radx::si32> &array,
                                  Radx::si32 missingValue = -9999.0);
 
-  // Load up ray fields from 2D field array.
+  // Load up ray fields from 2D fl32 field array.
   // This is a static method, does not use any vol members.
   // Returns 0 on success, -1 on failure
   
@@ -998,6 +1004,10 @@ public:
                                  const string &units,
                                  Radx::fl32 missingValue);
 
+  // Load up ray fields from 2D si32 field array.
+  // This is a static method, does not use any vol members.
+  // Returns 0 on success, -1 on failure
+  
   static int loadRaysFrom2DField(const RadxArray2D<Radx::si32> &array,
                                  const vector<RadxRay *> &rays,
                                  const string &fieldName,
