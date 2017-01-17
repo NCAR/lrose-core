@@ -2364,7 +2364,7 @@ void RadxPartRain::_expandMlPpi(double htMlTop,
       //   endFound = true;
       //   break;
       // }
-      double rhohvThreshold = 0.995 - rangeVals[igate] *  0.00005;
+      double rhohvThreshold = 0.997 - rangeVals[igate] *  0.00005;
       if (rhohvVals[igate] < 0 ||
           rhohvVals[igate] > rhohvThreshold) {
         indexEnd = igate;
