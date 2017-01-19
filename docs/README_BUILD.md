@@ -206,7 +206,8 @@ and use apt-get to install the following:
                    libstdc++6:i386 \
                    libxml2:i386 \
                    libgtk2.0-0:i386 \
-                   libgdk-pixbuf2.0-0:i386
+                   libgdk-pixbuf2.0-0:i386 \
+                   libbz2-dev:i386
 ```
 
 ### Running LROSE server-based applications
