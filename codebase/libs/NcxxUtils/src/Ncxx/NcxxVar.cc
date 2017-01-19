@@ -2445,7 +2445,7 @@ void NcxxVar::setDefaultFillvalue()
     return;
   }
   if (vtype == NC_LONG) {
-    addAttr("_fillValue", (long) Ncxx::missingInt);
+    addAttr("_fillValue", /* (long) */ Ncxx::missingInt);
     return;
   }
   if (vtype == NC_SHORT) {

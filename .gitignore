@@ -24,6 +24,7 @@ makefile.in
 makefile.am
 __makefile.template
 .libs
+compile
 
 codebase/Makefile.top
 codebase/VERSION
