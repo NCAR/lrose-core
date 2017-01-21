@@ -640,7 +640,11 @@ int D3rNcRadxFile::readFromPath(const string &path,
   // compute fixed angles as mean angle from sweeps
   
   _computeFixedAngles();
+
+  // set the sweep mode from rays
   
+  _readVol->setSweepScanModeFromRayAngles();
+    
   // set format as read
 
   _fileFormat = FILE_FORMAT_D3R_NC;
