@@ -48,7 +48,13 @@
 #include <cstring>
 #include <cstdio>
 #include <cmath>
+#include <algorithm>
+#include <sys/stat.h>
+#include <dirent.h>
 using namespace std;
+
+int D3rNcRadxFile::_prevSweepNumber = -1;
+int D3rNcRadxFile::_volumeNumber = -1;
 
 //////////////
 // Constructor
@@ -91,7 +97,10 @@ void D3rNcRadxFile::clear()
   _dTimes.clear();
   _rayTimesIncrease = true;
   _nTimesInFile = 0;
-  
+
+  _raysVol.clear();
+  _raysFile.clear();
+
   _rangeKm.clear();
   _nRangeInFile = 0;
   _gateSpacingIsConstant = true;
@@ -201,7 +210,6 @@ void D3rNcRadxFile::clear()
   // int _scanId;
   _instrumentName.clear();
   
-  _volumeNumber = 0;
   _instrumentType = Radx::INSTRUMENT_TYPE_RADAR;
   _platformType = Radx::PLATFORM_TYPE_FIXED;
   _primaryAxis = Radx::PRIMARY_AXIS_Z;
@@ -499,22 +507,105 @@ int D3rNcRadxFile::readFromPath(const string &path,
   
 {
 
+  // initialize
+
   _initForRead(path, vol);
+  clear();
+  
+  // Check if this is a D3rNc file
+
+  if (!isD3rNc(path)) {
+    _addErrStr("ERROR - D3rNcRadxFile::readFromPath");
+    _addErrStr("  Not a D3R file: ", path);
+    return -1;
+  }
   
   if (_debug) {
     cerr << "Reading path: " << path << endl;
   }
+  
+  // if the flag is set to aggregate sweeps into a volume on read,
+  // call the method to handle that
+  
+  if (_readAggregateSweeps) {
+    if (_readAggregatePaths(path)) {
+      _addErrStr("ERROR - D3rNcRadxFile::readFromPath");
+      return -1;
+    }
+  } else {
+    if (_readFile(path)) {
+      _addErrStr("ERROR - D3rNcRadxFile::readFromPath");
+      return -1;
+    }
+  }
+  
+  // load the data into the read volume
+
+  _volumeNumber++;
+  if (_loadReadVolume()) {
+    return -1;
+  }
+  
+  // set format as read
+
+  _fileFormat = FILE_FORMAT_D3R_NC;
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////////////////
+// Read in sweep data using the specified path as a starting
+// point. Aggregate the data from the sweeps into a single
+// volume.
+//
+// Returns 0 on success, -1 on failure
+//
+// Use getErrStr() if error occurs
+
+int D3rNcRadxFile::_readAggregatePaths(const string &path)
+  
+{
+
+  // cerr << "11111111111 path: " << path << endl;
+  
+  // get the list of paths which make up this volume
+
+  vector<string> paths;
+  _getVolumePaths(path, paths);
+  
+  for (size_t ii = 0; ii < paths.size(); ii++) {
+    if (_readFile(paths[ii])) {
+      return -1;
+    }
+  }
+
+  return 0;
+
+}
+
+
+////////////////////////////////////////////////////////////
+// Read in data from specified path,
+// load up volume object.
+//
+// Returns 0 on success, -1 on failure
+//
+// Use getErrStr() if error occurs
+
+int D3rNcRadxFile::_readFile(const string &path)
+  
+{
 
   string errStr("ERROR - D3rNcRadxFile::readFromPath");
   
-  // clear tmp rays
-
+  // clear tmp vars
+  
   _nTimesInFile = 0;
-  _rays.clear();
   _nRangeInFile = 0;
 
   // open file
-
+  
   if (_file.openRead(path)) {
     _addErrStr(_file.getErrStr());
     return -1;
@@ -598,12 +689,11 @@ int D3rNcRadxFile::readFromPath(const string &path,
 
   _file.close();
   
-  // add file rays to main rays
+  // add file rays to vol rays
 
-  vector<RadxRay *> raysValid;
-  for (size_t ii = 0; ii < _rays.size(); ii++) {
+  for (size_t ii = 0; ii < _raysFile.size(); ii++) {
     
-    RadxRay *ray = _rays[ii];
+    RadxRay *ray = _raysFile[ii];
     
     // check if we should keep this ray or discard it
     
@@ -617,45 +707,196 @@ int D3rNcRadxFile::readFromPath(const string &path,
     // add to valid vector if we are keeping it
 
     if (keep) {
-      raysValid.push_back(ray);
+      _raysVol.push_back(ray);
     } else {
       delete ray;
     }
     
   }
-  
-  _rays.clear();
-  _rays = raysValid;
+
+  _raysFile.clear();
   
   // append to read paths
   
   _readPaths.push_back(path);
 
-  // load the data into the read volume
-
-  if (_loadReadVolume()) {
-    return -1;
-  }
-  
-  // compute fixed angles as mean angle from sweeps
-  
-  _computeFixedAngles();
-
-  // set the sweep mode from rays
-  
-  _readVol->setSweepScanModeFromRayAngles();
-    
-  // set format as read
-
-  _fileFormat = FILE_FORMAT_D3R_NC;
-
   // clean up
 
   _clearRayVariables();
-  _iTimes.clear();
-  _dTimes.clear();
 
   return 0;
+
+}
+
+//////////////////////////////////////////////////////////////
+// get list of paths for the same volume as the specified path
+//
+// We search for files contiguous in time and with the sweep
+// numbers sequentially
+
+void D3rNcRadxFile::_getVolumePaths(const string &path,
+				    vector<string> &paths)
+  
+{
+  
+  paths.clear();
+
+  // get file time
+  
+  RadxTime refTime;
+  getTimeFromPath(path, refTime);
+  int refHour = refTime.getHour();
+
+  // find all files in the same day
+  // directory as the specified path, within 1 hour of the time
+  
+  vector<string> pathList;
+  RadxPath rpath(path);
+  string dir = rpath.getDirectory();
+  _addToPathList(dir, refTime, pathList);
+
+  RadxPath dpath(dir);
+  string parentDir = dpath.getDirectory();
+
+  // if time is close to start of day, search previous directory
+
+  if (refHour == 0) {
+    RadxTime prevDate(refTime.utime() - RadxTime::RADX_SECS_IN_DAY);
+    char prevDir[RadxPath::RADX_MAX_PATH_LEN];
+    sprintf(prevDir, "%s%s%.4d%.2d%.2d",
+            parentDir.c_str(), RadxPath::RADX_PATH_DELIM,
+            prevDate.getYear(), prevDate.getMonth(), prevDate.getDay());
+    _addToPathList(prevDir, refTime, pathList);
+  }
+
+  // if time is close to end of day, search previous directory
+
+  if (refHour == 23) {
+    RadxTime nextDate(refTime.utime() + RadxTime::RADX_SECS_IN_DAY);
+    char nextDir[RadxPath::RADX_MAX_PATH_LEN];
+    sprintf(nextDir, "%s%s%.4d%.2d%.2d",
+            parentDir.c_str(), RadxPath::RADX_PATH_DELIM,
+            nextDate.getYear(), nextDate.getMonth(), nextDate.getDay());
+    _addToPathList(nextDir, refTime, pathList);
+  }
+  
+  // sort the path list
+  
+  sort(pathList.begin(), pathList.end());
+
+  // for (int ii = 0; ii < (int) pathList.size(); ii++) {
+  //   cerr << "4444444444 ii, path: " << ii << ", " << pathList[ii] << endl;
+  // }
+
+  // find the index of the requested file in the path list
+
+  string fileName = rpath.getFile();
+  int refIndex = -1;
+  for (int ii = 0; ii < (int) pathList.size(); ii++) {
+    if (pathList[ii].find(fileName) != string::npos) {
+      refIndex = ii;
+    }
+  }
+
+  // cerr << "4444444444 refIndex: " << refIndex << endl;
+  
+  if (refIndex < 0) {
+    paths.push_back(path);
+    return;
+  }
+  
+  // get the sweep number for this file
+  
+  int referenceSweepNum = _readSweepNumber(path);
+  
+  // find the start and end refIndex of the paths
+  // for the same volume by checking for
+  // a discontinuity in the sweep numbers
+
+  int startIndex = 0;
+  int prevSweepNum = referenceSweepNum;
+  for (int ii = refIndex - 1; ii >= 0; ii--) {
+    int sweepNum = _readSweepNumber(pathList[ii]);
+    if (ii == 0) {
+      startIndex = ii;
+    } else {
+      if (sweepNum < prevSweepNum) {
+	prevSweepNum = sweepNum;
+      } else {
+	startIndex = ii + 1;
+	break;
+      }
+    }
+  }
+  // cerr << "4444444444 startIndex: " << startIndex << endl;
+  
+  int endIndex = (int) pathList.size() - 1;
+  for (int ii = refIndex + 1; ii < (int) pathList.size(); ii++) {
+    int sweepNum = _readSweepNumber(pathList[ii]);
+    if (ii == (int) (pathList.size() - 1)) {
+      endIndex = ii;
+    } else {
+      if (sweepNum > prevSweepNum) {
+	prevSweepNum = sweepNum;
+      } else {
+	endIndex = ii - 1;
+	break;
+      }
+    }
+  } // ii
+  // cerr << "4444444444 endIndex: " << endIndex << endl;
+  
+  // load up all paths from start to end index
+
+  for (int ii = startIndex; ii <= endIndex; ii++) {
+    paths.push_back(pathList[ii]);
+  }
+
+}
+
+///////////////////////////////////////////////////////////
+// add to the path list, files with 1 hour of ref time
+
+void D3rNcRadxFile::_addToPathList(const string &dir,
+				   const RadxTime &refTime,
+				   vector<string> &paths)
+  
+{
+
+  // find all paths within the given time
+  
+  DIR *dirp;
+  if((dirp = opendir(dir.c_str())) == NULL) {
+    return;
+  }
+  
+  struct dirent *dp;
+  for(dp = readdir(dirp); dp != NULL; dp = readdir(dirp)) {
+    
+    string fileName(dp->d_name);
+
+    // exclude dir entries which cannot be valid
+    if (fileName.find(".nc") == string::npos) {
+      continue;
+    }
+    if (fileName.size() < 10) {
+      continue;
+    }
+
+    RadxTime ftime;
+    getTimeFromPath(fileName, ftime);
+    double tdiff = fabs(ftime - refTime);
+    if (tdiff < 3600) {
+      // cerr << "33333333333333 fileName: " << fileName << endl;
+      string filePath = dir;
+      filePath += RadxPath::RADX_PATH_DELIM;
+      filePath += fileName;
+      paths.push_back(filePath);
+    }
+
+  } // dp
+
+  closedir(dirp);
 
 }
 
@@ -690,6 +931,22 @@ int D3rNcRadxFile::_readDimensions()
 }
 
 ///////////////////////////////////
+// read the sweep number for a file
+
+int D3rNcRadxFile::_readSweepNumber(const string &path)
+
+{
+  int sweepNumber = -1;
+  NetcdfClassic file;
+  if (file.openRead(path)) {
+    return -1;
+  }
+  file.readGlobAttr("SweepNumber", sweepNumber);
+  file.close();
+  return sweepNumber;
+}
+
+///////////////////////////////////
 // read the global attributes
 
 int D3rNcRadxFile::_readGlobalAttributes()
@@ -711,6 +968,8 @@ int D3rNcRadxFile::_readGlobalAttributes()
   _file.readGlobAttr("ScanType", _scanName);
   _file.readGlobAttr("SweepNumber", _sweepNumber);
   _file.readGlobAttr("Time", _refTimeSecsFile);
+
+  _prevSweepNumber = _sweepNumber;
 
   _title = _netcdfRevision;
   _institution = "CSU/NASA";
@@ -1022,7 +1281,7 @@ int D3rNcRadxFile::_createRays(const string &path)
 
   // set up rays to read
 
-  _rays.clear();
+  _raysFile.clear();
   
   for (size_t rayIndex = 0; rayIndex < _dTimes.size(); rayIndex++) {
     
@@ -1060,8 +1319,8 @@ int D3rNcRadxFile::_createRays(const string &path)
     
     // add to ray vector
 
-    _rays.push_back(ray);
-
+    _raysFile.push_back(ray);
+    
   } // rayIndex
 
   return 0;
@@ -1448,7 +1707,7 @@ int D3rNcRadxFile::_addFl64FieldToRays(NcVar* var,
 
   // load field on rays
 
-  for (size_t ii = 0; ii < _rays.size(); ii++) {
+  for (size_t ii = 0; ii < _raysFile.size(); ii++) {
     
     size_t rayIndex = ii;
 
@@ -1465,10 +1724,10 @@ int D3rNcRadxFile::_addFl64FieldToRays(NcVar* var,
     int startIndex = rayIndex * _nRangeInFile;
     
     RadxField *field =
-      _rays[ii]->addField(name, units, nGates,
-			  missingVal,
-			  data + startIndex,
-			  true);
+      _raysFile[ii]->addField(name, units, nGates,
+			      missingVal,
+			      data + startIndex,
+			      true);
 
     field->setStandardName(standardName);
     field->setLongName(longName);
@@ -1534,7 +1793,7 @@ int D3rNcRadxFile::_addFl32FieldToRays(NcVar* var,
   
   // load field on rays
 
-  for (size_t ii = 0; ii < _rays.size(); ii++) {
+  for (size_t ii = 0; ii < _raysFile.size(); ii++) {
     
     size_t rayIndex = ii;
 
@@ -1551,10 +1810,10 @@ int D3rNcRadxFile::_addFl32FieldToRays(NcVar* var,
     int startIndex = rayIndex * _nRangeInFile;
 
     RadxField *field =
-      _rays[ii]->addField(name, units, nGates,
-			  missingVal,
-			  data + startIndex,
-			  true);
+      _raysFile[ii]->addField(name, units, nGates,
+			      missingVal,
+			      data + startIndex,
+			      true);
     
     field->setStandardName(standardName);
     field->setLongName(longName);
@@ -1585,7 +1844,7 @@ int D3rNcRadxFile::_loadReadVolume()
 
   // set metadata
 
-  _readVol->setOrigFormat("DOE");
+  _readVol->setOrigFormat("D3R");
   _readVol->setVolumeNumber(_volumeNumber);
   _readVol->setInstrumentType(_instrumentType);
   _readVol->setPlatformType(_platformType);
@@ -1616,13 +1875,13 @@ int D3rNcRadxFile::_loadReadVolume()
 
   _readVol->copyRangeGeom(_geom);
 
-  for (int ii = 0; ii < (int) _rays.size(); ii++) {
-    _rays[ii]->setVolumeNumber(_volumeNumber);
+  for (int ii = 0; ii < (int) _raysVol.size(); ii++) {
+    _raysVol[ii]->setVolumeNumber(_volumeNumber);
   }
 
   // add rays to vol - they will be freed by vol
 
-  for (size_t ii = 0; ii < _rays.size(); ii++) {
+  for (size_t ii = 0; ii < _raysVol.size(); ii++) {
 
     // fake angles for testing
     // double el = 0.5;
@@ -1635,7 +1894,7 @@ int D3rNcRadxFile::_loadReadVolume()
     // _raysValid[ii]->setFixedAngleDeg(el);
     // _raysValid[ii]->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
 
-    _readVol->addRay(_rays[ii]);
+    _readVol->addRay(_raysVol[ii]);
   }
 
   if (_readSetMaxRange) {
@@ -1645,7 +1904,7 @@ int D3rNcRadxFile::_loadReadVolume()
   // memory responsibility has passed to the volume object, so clear
   // the vectors without deleting the objects to which they point
 
-  _rays.clear();
+  _raysVol.clear();
   
   // load the sweep information from the rays
 
@@ -1681,6 +1940,14 @@ int D3rNcRadxFile::_loadReadVolume()
 
   _readVol->checkForIndexedRays();
 
+  // compute fixed angles as mean angle from sweeps
+  
+  _computeFixedAngles();
+
+  // set the sweep mode from rays
+  
+  _readVol->setSweepScanModeFromRayAngles();
+    
   return 0;
 
 }
