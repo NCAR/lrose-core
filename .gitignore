@@ -413,6 +413,8 @@ codebase/apps/radar/src/TsTimeFix/TsTimeFix
 codebase/apps/radar/src/UfRadarPrint/UfRadarPrint
 codebase/apps/radar/src/VertCompute/VertCompute
 codebase/apps/radar/src/ZdrCalSimHv/ZdrCalSimHv
+codebase/apps/radar/src/TerrainHtServer/TerrainHtServer
+codebase/apps/radar/src/TerrainHtServer/TestClientTerrainHt
 
 codebase/apps/satApps/src/IR2Height/IR2Height
 
