@@ -7,8 +7,12 @@
 *.a
 *.la
 *.lo
+
+# emacs
+
 ~*
 *~
+TAGS
 
 # cvs
 
