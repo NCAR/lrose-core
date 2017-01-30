@@ -417,11 +417,20 @@ int GemInputField::_decodeXml(const string &xmlBuf)
     return -1;
   }
 
-  RadxXml::readDouble(pargroupBuf, "startAzi", _startAzi);
-  RadxXml::readDouble(pargroupBuf, "stopAzi", _stopAzi);
+  if (RadxXml::readDouble(pargroupBuf, "startAzi", _startAzi)) {
+    RadxXml::readDouble(pargroupBuf, "startazi", _startAzi);
+  }
+  if (RadxXml::readDouble(pargroupBuf, "stopAzi", _stopAzi)) {
+    RadxXml::readDouble(pargroupBuf, "stopazi", _stopAzi);
+  }
 
-  RadxXml::readDouble(pargroupBuf, "firstele", _scanFirstEle);
-  RadxXml::readDouble(pargroupBuf, "lastele", _scanLastEle);
+  if (RadxXml::readDouble(pargroupBuf, "firstele", _scanFirstEle)) {
+    RadxXml::readDouble(pargroupBuf, "startele", _scanFirstEle);
+  }
+  if (RadxXml::readDouble(pargroupBuf, "lastele", _scanLastEle)) {
+    RadxXml::readDouble(pargroupBuf, "stopele", _scanLastEle);
+  }
+
   RadxXml::readString(pargroupBuf, "pol", _polarization);
   RadxXml::readDouble(pargroupBuf, "pw_index", _pulseWidthUs);
   RadxXml::readDouble(pargroupBuf, "antspeed", _antennaSpeed);
