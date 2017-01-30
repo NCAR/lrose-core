@@ -133,6 +133,9 @@ public:
   // The trend dev will be set to missingVal if not enough data is
   // available for computing the result.
   //
+  // If mean is not NULL, the mean values are stored in that array.
+  // If texture is not NULL, the texture values are stored there.
+  //
   // The trend deviation differs from standard deviation.
   // It is computed as follows:
   //  (a) compute kernel mean at each point
@@ -140,10 +143,11 @@ public:
   //  (c) compute root mean square of residual over kernel.
   
   static void computeTrendDevInRange(const double *field,
-                                     double *tdev,
                                      int nGates,
                                      int nGatesKernel,
-                                     double missingVal);
+                                     double missingVal,
+                                     double *mean = NULL,
+                                     double *texture = NULL);
   
 protected:
 private:

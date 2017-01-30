@@ -450,22 +450,8 @@ paramdef double {
 } zdr_attenuation_exponent;
 
 commentdef {
-  p_header = "Interest maps";
+  p_header = "COMPUTING BEAM HEIGHT";
 }
-
-typedef struct {
-  double value;
-  double interest;
-} interest_map_point_t;
-
-commentdef {
-  p_header = "LOCATING SEA CLUTTER";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to locate gates with sea clutter.";
-} locate_sea_clutter;
 
 paramdef boolean {
   p_default = false;
@@ -479,10 +465,36 @@ paramdef double {
   p_help = "For standard refraction this is 4/3. For super refraction it will be less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 1.21.";
 } pseudo_earth_radius_ratio;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the beamwidth in the input file.";
+  p_height = "The beamwidth is used to compute the height at the top and bottom edges of the beam.";
+} override_vertical_beamwidth;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Specified radar antenna vertical beamwidth (deg).";
+  p_help = "See 'override_vertical_beamwidth'.";
+} vertical_beamwidth_deg;
+
+commentdef {
+  p_header = "LOCATING SEA CLUTTER";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to locate gates with sea clutter.";
+} locate_sea_clutter;
+
 commentdef {
   p_header = "INTEREST MAPS and WEIGHTS for SEA CLUTTER DETECTION";
   p_text = "Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.";
 };
+
+typedef struct {
+  double value;
+  double interest;
+} interest_map_point_t;
 
 paramdef double {
   p_default = 0.0;
@@ -568,6 +580,12 @@ paramdef boolean {
   p_descr = "Option to compute HCA classification.";
 } compute_hca;
 
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Minimum SNR for valid HCA classification.";
+  p_help = "If the SNR at a gate is below this, the HCA is censored.";
+} HCA_snr_threshold;
+
 commentdef {
   p_header = "Classification types";
   p_text = "There are 10 classification types:\n\tGC: ground clutter or AP\n\tBS: biological scatterers\n\tDS: dry aggregated snow\n\tWS: wet snow\n\tCR: crystals of various orientations\n\tGR: graupel\n\tBD: big drops\n\tRA: light to moderate rain\n\tHR: heavy rain\n\tRH: mixture of rain and hail.";
@@ -591,8 +609,8 @@ typedef enum {
   FEATURE_ZDR = 1,
   FEATURE_RHOHV = 2,
   FEATURE_LOG_KDP = 3,
-  FEATURE_TD_DBZ = 4,
-  FEATURE_TD_PHIDP = 5
+  FEATURE_SD_DBZ = 4,
+  FEATURE_SD_PHIDP = 5
 } feature_field_t;
 
 typedef struct {
@@ -642,7 +660,7 @@ paramdef struct hca_interest_map_t {
     { CLASS_RH,  FEATURE_RHOHV,  0.85, 0.90, 1.00, 1.01,   0.6 },
 
     { CLASS_GC,  FEATURE_LOG_KDP, -30,  -25,   10,   20,   0.0 },
-    { CLASS_BS,  FEATURE_LOG_KDP, -30,  -25,   10,   10,   0.0 },
+    { CLASS_BS,  FEATURE_LOG_KDP, -30,  -25,   10,   20,   0.0 },
     { CLASS_DS,  FEATURE_LOG_KDP, -30,  -25,   10,   20,   0.0 },
     { CLASS_WS,  FEATURE_LOG_KDP, -30,  -25,   10,   20,   0.0 },
     { CLASS_CR,  FEATURE_LOG_KDP,  -5,    0,   10,   15,   0.5 },
@@ -652,27 +670,27 @@ paramdef struct hca_interest_map_t {
     { CLASS_HR,  FEATURE_LOG_KDP,  -1,    0,    0,    1,   1.0 },
     { CLASS_RH,  FEATURE_LOG_KDP, -10,   -4,    0,    1,   1.0 },
 
-    { CLASS_GC,  FEATURE_TD_DBZ,    2,  4.0,   10,   15,   0.6 },
-    { CLASS_BS,  FEATURE_TD_DBZ,    1,  2.0,    4,    7,   0.8 },
-    { CLASS_DS,  FEATURE_TD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { CLASS_WS,  FEATURE_TD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { CLASS_CR,  FEATURE_TD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { CLASS_GR,  FEATURE_TD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { CLASS_BD,  FEATURE_TD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { CLASS_RA,  FEATURE_TD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { CLASS_HR,  FEATURE_TD_DBZ,    0,  0.5,    3,    6,   0.2 },
-    { CLASS_RH,  FEATURE_TD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { CLASS_GC,  FEATURE_SD_DBZ,    2,  4.0,   10,   15,   0.6 },
+    { CLASS_BS,  FEATURE_SD_DBZ,    1,  2.0,    4,    7,   0.8 },
+    { CLASS_DS,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { CLASS_WS,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { CLASS_CR,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { CLASS_GR,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { CLASS_BD,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { CLASS_RA,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { CLASS_HR,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
+    { CLASS_RH,  FEATURE_SD_DBZ,    0,  0.5,    3,    6,   0.2 },
 
-    { CLASS_GC,  FEATURE_TD_PHIDP, 30,   40,   50,   60,   0.8 },
-    { CLASS_BS,  FEATURE_TD_PHIDP,  8,   10,   40,   60,   0.8 },
-    { CLASS_DS,  FEATURE_TD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { CLASS_WS,  FEATURE_TD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { CLASS_CR,  FEATURE_TD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { CLASS_GR,  FEATURE_TD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { CLASS_BD,  FEATURE_TD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { CLASS_RA,  FEATURE_TD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { CLASS_HR,  FEATURE_TD_PHIDP,  0,    1,   15,   30,   0.2 },
-    { CLASS_RH,  FEATURE_TD_PHIDP,  0,    1,   15,   30,   0.2 }
+    { CLASS_GC,  FEATURE_SD_PHIDP, 30,   40,   50,   60,   0.8 },
+    { CLASS_BS,  FEATURE_SD_PHIDP,  8,   10,   40,   60,   0.8 },
+    { CLASS_DS,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { CLASS_WS,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { CLASS_CR,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { CLASS_GR,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { CLASS_BD,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { CLASS_RA,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { CLASS_HR,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 },
+    { CLASS_RH,  FEATURE_SD_PHIDP,  0,    1,   15,   30,   0.2 }
 
   };
   p_descr = "Interest maps to convert feature fields into interest";
@@ -681,15 +699,109 @@ paramdef struct hca_interest_map_t {
 
 paramdef int {
   p_default = 5;
-  p_descr = "Length of kernel for computing TD_DBZ - gates.";
-  p_help = "TD_DBZ is the rms deviation of the DBZ field from a linear trend, over this number of gates.";
-} HCA_TD_DBZ_kernel_len;
+  p_descr = "Length of kernel for computing DBZ fields - gates.";
+  p_help = "We use this filter length to compute DBZ smoothed and texture fields.";
+} HCA_DBZ_filter_len;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of kernel for computing ZDR fields - gates.";
+  p_help = "We use this filter length to compute ZDR smoothed and texture fields.";
+} HCA_ZDR_filter_len;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Length of kernel for computing RHOHV fields - gates.";
+  p_help = "We use this filter length to compute RHOHV smoothed and texture fields.";
+} HCA_RHOHV_filter_len;
 
 paramdef int {
   p_default = 11;
-  p_descr = "Length of kernel for computing TD_PHIDP - gates.";
-  p_help = "TD_PHIDP is the rms deviation of the PHIDP field from a linear trend, over this number of gates.";
-} HCA_TD_PHIDP_kernel_len;
+  p_descr = "Length of kernel for computing heavily filtered PHIDP fields - gates.";
+  p_help = "We use this filter length to compute the heavily filtered PHIDP fields.";
+} HCA_PHIDP_filter_len;
+
+paramdef int {
+  p_default = 25;
+  p_descr = "Length of kernel for computing PHIDP fields - gates.";
+  p_help = "We use this filter length to compute the lightly filtered PHIDP fields.";
+} HCA_PHIDP_heavy_filter_len;
+
+commentdef {
+  p_header = "INDIVIDUAL THRESHOLDS FOR CLASSES";
+}
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Maximum radial velocity for GC (m/s).";
+  p_help = "If abs(velocity) exceeds this, GC will be suppressed.";
+} HCA_max_abs_vel_for_GC;
+
+paramdef double {
+  p_default = 0.97;
+  p_descr = "Maximum rhohv for BS.";
+  p_help = "If rhohv exceeds this, BS will be suppressed.";
+} HCA_max_rhohv_for_BS;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Maximum zdr for DS.";
+  p_help = "If zdr exceeds this, DS will be suppressed.";
+} HCA_max_zdr_for_DS;
+
+paramdef double {
+  p_default = -0.3;
+  p_descr = "Minimum zdr for BD.";
+  p_help = "If zdr exceeds (f2(Z) - this), BD will be suppressed.";
+} HCA_min_zdr_for_BD;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Minimum zdr for WS.";
+  p_help = "If zdr is less than this, WS will be suppressed.";
+} HCA_min_zdr_for_WS;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Minimum dbz for WS.";
+  p_help = "If dbz is less than this, WS will be suppressed.";
+} HCA_min_dbz_for_WS;
+
+paramdef double {
+  p_default = 40.0;
+  p_descr = "Maximum dbz for CR.";
+  p_help = "If dbz exceeds this, CR will be suppressed.";
+} HCA_max_dbz_for_CR;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Minimum dbz for GR.";
+  p_help = "If dbz is less than this, GR will be suppressed.";
+} HCA_min_dbz_for_GR;
+
+paramdef double {
+  p_default = 60.0;
+  p_descr = "Maximum dbz for GR.";
+  p_help = "If dbz exceeds this, GR will be suppressed.";
+} HCA_max_dbz_for_GR;
+
+paramdef double {
+  p_default = 50.0;
+  p_descr = "Maximum dbz for RA.";
+  p_help = "If dbz exceeds this, RA will be suppressed.";
+} HCA_max_dbz_for_RA;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Minimum dbz for HR.";
+  p_help = "If dbz is less than this, HR will be suppressed.";
+} HCA_min_dbz_for_HR;
+
+paramdef double {
+  p_default = 40.0;
+  p_descr = "Minimum dbz for RH.";
+  p_help = "If dbz is less than this, RH will be suppressed.";
+} HCA_min_dbz_for_RH;
 
 commentdef {
   p_header = "COMPUTING NCAR PID - HYDROMETEOR PARTICLE ID";
@@ -705,6 +817,12 @@ paramdef string {
   p_help = "This file contains the thresholds and weights for computing particle ID.";
   p_default = "./s_band_pid_input_steraotables27.input";
 } pid_thresholds_file_path;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to override temp profile in pid_thresholds file.";
+  p_help = "If TRUE, the profile in the thresholds file will be overridden by the sounding from SPDB.";
+} pid_override_temp_profile;
 
 paramdef double {
   p_default = 3.0;
@@ -808,14 +926,8 @@ paramdef int {
 } PID_median_filter_len;
 
 commentdef {
-  p_header = "SOUNDING INPUT FOR PID temperature profile - OPTIONAL";
+  p_header = "SOUNDING INPUT FOR temperature profile";
 }
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to read sounding data from SPDB.";
-  p_help = "If TRUE, the program will read the closest (in time) available sounding from an SPDB data base. The temperature profile from the sounding will be used to override the temperature profile in the PID thresholds config file";
-} use_soundings_from_spdb;
 
 paramdef string {
   p_descr = "SPDB URL for sounding data.";
@@ -881,6 +993,18 @@ paramdef boolean {
   p_help = "If TRUE, we use the wet bulb temperature profile from the sounding instead of the dry bulb. Applies to PID estimation. This is thought to more closely track the temperature of melting ice.";
 } sounding_use_wet_bulb_temp;
 
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Temperature at the bottom of the melting layer (C).";
+  p_help = "We use this temperature to locate the bottom edge of the melting layer in the temperature profile.";
+} temp_at_bottom_of_melting_layer;
+
+paramdef double {
+  p_default = -1.0;
+  p_descr = "Temperature at the top of the melting layer (C).";
+  p_help = "We use this temperature to locate the top edge of the melting layer in the temperature profile.";
+} temp_at_top_of_melting_layer;
+
 commentdef {
   p_header = "RETRIEVING SITE TEMPERATURE FROM SPDB";
 };
@@ -924,7 +1048,6 @@ typedef enum {
   PHIDP,
   KDP,
   KDP_COND,
-  KDP_LOG,
   PSOB,
 
   DBZ_ATTEN_CORRECTION,
@@ -965,9 +1088,42 @@ typedef enum {
   PARTICLE_ID,
   TEMP_FOR_PID,
 
-  SD_DBZ,
-  TD_DBZ,
-  TD_PHIDP
+  HCA_DBZ,
+  HCA_ZDR,
+  HCA_RHOHV,
+  HCA_PHIDP,
+  HCA_LOGKDP,
+
+  HCA_TEMP_LOW,
+  HCA_TEMP_MID,
+  HCA_TEMP_HIGH,
+
+  HCA_SMOOTH_DBZ,
+  HCA_SMOOTH_ZDR,
+  HCA_SMOOTH_RHOHV,
+  HCA_SMOOTH_PHIDP,
+  HCA_HVY_SMOOTH_PHIDP,
+
+  HCA_TEXTURE_DBZ,
+  HCA_TEXTURE_ZDR,
+  HCA_TEXTURE_RHOHV,
+  HCA_TEXTURE_PHIDP,
+  HCA_SD_DBZ,
+  HCA_SD_PHIDP,
+
+  HCA_GC_INTEREST,
+  HCA_BS_INTEREST,
+  HCA_DS_INTEREST,
+  HCA_WS_INTEREST,
+  HCA_CR_INTEREST,
+  HCA_GR_INTEREST,
+  HCA_BD_INTEREST,
+  HCA_RA_INTEREST,
+  HCA_HR_INTEREST,
+  HCA_RH_INTEREST,
+
+  HCA_TEMP_CAT,
+  HCA
 
 } output_field_id_t;
 

@@ -39,6 +39,8 @@
 #define ComputeEngine_HH
 
 #include "Params.hh"
+#include "HcaNexrad.hh"
+#include "HcaInterestMap.hh"
 #include <radar/KdpFilt.hh>
 #include <radar/NcarParticleId.hh>
 #include <radar/TempProfile.hh>
@@ -60,11 +62,22 @@ public:
   
   // constructor
   
-  ComputeEngine(const Params &params, int id);
+  ComputeEngine(const Params &params, int id,
+                const TempProfile &tempProfile);
+
+  // is constructor OK?
+
+  bool OK;
 
   // destructor
   
   ~ComputeEngine();
+
+  // set methods
+
+  void setRadarHtKm(double val) { _radarHtKm = val; }
+  void setWavelengthM(double val) { _wavelengthM = val; }
+  void setVertBeamWidthDeg(double val) { _vertBeamWidthDeg = val; }
 
   // compute for given input ray
   // storing results in derived ray
@@ -74,19 +87,18 @@ public:
   //
   // Returns NULL on error.
   
-  RadxRay *compute(RadxRay *inputRay,
-                   double radarHtKm,
-                   double wavelengthM,
-                   const TempProfile *tempProfile);
+  RadxRay *compute(RadxRay *inputRay);
 
-  bool OK;
-  
 protected:
 private:
 
   static const double missingDbl;
   const Params &_params;
   int _id;
+
+  // temperature profile
+
+  const TempProfile &_tempProfile;
 
   // current ray properties
   
@@ -99,6 +111,7 @@ private:
 
   double _radarHtKm;
   double _wavelengthM;
+  double _vertBeamWidthDeg;
 
   // moments field data
   
@@ -106,7 +119,7 @@ private:
   double _startRangeKm, _gateSpacingKm;
   double _nyquist;
   
-  // input arrays for moments and derived products
+  // input arrays for moments
 
   RadxArray<double> _snrArray_;
   RadxArray<double> _dbzArray_;
@@ -119,12 +132,7 @@ private:
   RadxArray<double> _phidpArray_;
   RadxArray<double> _kdpArray_;
   RadxArray<double> _kdpCondArray_;
-  RadxArray<double> _kdpLogArray_;
   RadxArray<double> _dbzElevGradientArray_;
-
-  RadxArray<double> _sdDbzArray_;
-  RadxArray<double> _tdDbzArray_;
-  RadxArray<double> _tdPhidpArray_;
 
   double *_snrArray;
   double *_dbzArray;
@@ -137,12 +145,13 @@ private:
   double *_phidpArray;
   double *_kdpArray;
   double *_kdpCondArray;
-  double *_kdpLogArray;
   double *_dbzElevGradientArray;
 
-  double *_sdDbzArray;
-  double *_tdDbzArray;
-  double *_tdPhidpArray;
+  // HCA
+
+  HcaNexrad _hcaNexrad;
+
+  // NCAR PID
 
   RadxArray<int> _pidArray_;
   RadxArray<double> _pidInterest_;
@@ -161,10 +170,6 @@ private:
   KdpFilt _kdp;
   PhidpProc _phidp;
 
-  // temperature profile
-
-  const TempProfile *_tempProfile;
-
   // sea clutter
 
   SeaClutter _seaclut;
@@ -177,6 +182,10 @@ private:
   // pid
 
   NcarParticleId _pid;
+
+  // HCA interest maps
+
+  // HcaInterestMap* _imaps[HcaInterestMap::nClasses][HcaInterestMap::nFeatures];
 
   // debug printing
   
@@ -214,7 +223,14 @@ private:
                                      int nPoints,
                                      vector<InterestMap::ImPoint> &pts);
 
+  int _hcaInit();
   void _hcaCompute();
+
+  HcaInterestMap::imap_class_t _getImapClass(Params::hca_class_t hcaClass);
+  HcaInterestMap::imap_feature_t _getImapFeature(Params::feature_field_t feature);
+
+  string _hcaClassToStr(Params::hca_class_t hcaClass);
+  string _hcaFeatureToStr(Params::feature_field_t hcaFeature);
 
 };
 

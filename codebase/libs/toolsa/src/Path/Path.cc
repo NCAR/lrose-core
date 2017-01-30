@@ -26,7 +26,7 @@
 // Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
 // January 1998
 //
-// $Id: Path.cc,v 1.28 2016/03/03 18:00:25 dixon Exp $
+// $Id: Path.cc,v 1.29 2017/01/28 23:02:59 dixon Exp $
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -35,6 +35,7 @@
 #include <cstdio>
 #include <stdexcept>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <toolsa/Path.hh>
 #include <toolsa/file_io.h>
 #include <unistd.h> // Added by Niles for getpid() proto
@@ -451,13 +452,47 @@ string Path::computeTmpPath(const char *tmp_name /* = NULL*/ )
   string tmp_path = getDirectory();
   tmp_path += delimiter;
 
-  if (tmp_name == NULL) {
-    char pid_name[128];
-    sprintf(pid_name, "tmp_%d.tmp", getpid());
-    tmp_path += pid_name;
-  } else {
+  // if tmp_name is specified, use that
+
+  if (tmp_name != NULL) {
     tmp_path += tmp_name;
+    return tmp_path;
   }
+
+  // create a temp name
+
+  // first get current time in high precision and make a string from it
+  
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  char timeStr[128];
+  sprintf(timeStr, "%ld.%ld_", tv.tv_sec, tv.tv_usec);
+
+  // get PID and make a string from it
+  
+  char pidStr[128];
+  sprintf(pidStr, "%d_", (int) getpid());
+  
+  // concatenate strings into tmp name
+
+  string computed_name("tmp_");
+  computed_name += timeStr;
+  computed_name += pidStr;
+  computed_name += getBase();
+  computed_name += ".tmp";
+
+  // change all numerals to lower case letters a to j
+
+  int delta = 'a' - '0';
+  for (size_t ii = 0; ii < computed_name.size(); ii++) {
+    if (isdigit(computed_name[ii])) {
+      computed_name[ii] += delta;
+    }
+  }
+
+  // add to path
+
+  tmp_path += computed_name;
 
   return tmp_path;
 

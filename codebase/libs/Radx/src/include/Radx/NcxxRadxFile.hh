@@ -48,7 +48,7 @@
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxGeoref.hh>
-#include <NcUtils/Ncxx.hh>
+#include <NcxxUtils/Ncxx.hh>
 
 class RadxField;
 class RadxVol;
@@ -56,7 +56,6 @@ class RadxRay;
 class RadxSweep;
 class RadxRcalib;
 using namespace std;
-using namespace netCDF;
 
 ///////////////////////////////////////////////////////////////
 /// CXX FILE IO CLASS FOR NETCDF CF/RADIAL FILE FORMAT

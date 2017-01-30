@@ -52,28 +52,6 @@ However, LROSE can be compiled and run under Mac OSX.
 
 Windows is not supported.
 
-### Recommended LINUX distributions for LROSE build
-
-Most good, up-to date LINUX distributions should work.
-
-Recommended distributions are:
-
-  * Debian
-  * Ubuntu
-  * RedHat
-  * Centos
-  * Fedora
-  * Suse
-
-### gcc/g++ versions for LROSE build
-
-LROSE builds requires support for the c++11 standard.
-
-The gcc/g++ version should be 4.8.4 or later.
-
-Distributions dated after June 2015 should work.
-
-
 ### Required LINUX and gcc/g++ versions for LROSE build
 
 Most good, up-to date LINUX distributions should work.
@@ -86,7 +64,9 @@ Recommended distributions are:
   * Centos
   * Fedora
 
-LROSE expects good support for the c++11 standard.
+### gcc/g++ versions for LROSE build
+
+LROSE expects support for the c++11 standard.
 
 The gcc/g++ version should be 4.8.5 or later.
 
@@ -209,16 +189,25 @@ On Debian, you need to run the following:
 
 ```
   /usr/bin/dpkg --add-architecture i386
+  aptitude update
 ```
 
 and use apt-get to install the following:
 
 ```
-  libstdc++5:i386
-  libstdc++6:i386
-  libxml2:i386
-  libgtk2.0-0:i386
-  libgdk-pixbuf2.0-0:i386
+  aptitude install libx11-6:i386 \
+                   libstdc++-4.9-dev:i386 \
+                   libpng12-dev:i386 \
+                   libx11-dev:i386 \
+                   libxext-dev:i386 \
+                   lib32stdc++-4.9-dev \
+                   xviewg:i386 xviewg-dev:i386 \
+                   libstdc++5:i386 \
+                   libstdc++6:i386 \
+                   libxml2:i386 \
+                   libgtk2.0-0:i386 \
+                   libgdk-pixbuf2.0-0:i386 \
+                   libbz2-dev:i386
 ```
 
 ### Running LROSE server-based applications

@@ -197,6 +197,10 @@ int RadxMon::_runPrint()
     // get the next ray
     
     RadxRay *ray = _reader->readNextRay();
+    if (ray == NULL) {
+      // read error
+      continue;
+    }
     ray->convertToFl32();
 
     // print events if they apply

@@ -36,6 +36,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "ComputeEngine.hh"
+#include "RadxPartRain.hh"
 #include <toolsa/os_config.h>
 #include <toolsa/file_io.h>
 #include <rapmath/trig.h>
@@ -225,23 +226,28 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *sdzdrForPid = _pid.getSdzdr();
   const double *sdphidpForPid = _pid.getSdphidp();
 
+  const double *mlInterest = _pid.getMlInterest();
+
+  const Radx::fl32 *beamHt = inputRay->getField("beam_height")->getDataFl32();
+  const Radx::fl32 *range = inputRay->getField("range")->getDataFl32();
+  const Radx::fl32 *elevation = inputRay->getField("elevation")->getDataFl32();
+
   // load up output data
-
+  
   double minValidPrecipRate = _params.PRECIP_min_valid_rate;
-
+  
   for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
-
+    
     const Params::output_field_t &ofld = _params._output_fields[ifield];
-
+    
     // fill data array
     
     TaArray<Radx::fl32> data_;
-    Radx::fl32 *data = data_.alloc(derivedRay->getNGates());
+    Radx::fl32 *data = data_.alloc(_nGates);
     Radx::fl32 *datp = data;
     
-    for (int igate = 0; igate < (int) derivedRay->getNGates(); 
-         igate++, datp++) {
-      
+    for (size_t igate = 0; igate < _nGates; igate++, datp++) {
+    
       switch (ofld.id) {
 
         // computed fields
@@ -545,6 +551,22 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           *datp = _zdrFlagInBragg[igate];
           break;
 
+        case Params::ML_INTEREST:
+          *datp = mlInterest[igate];
+          break;
+
+        case Params::ELEVATION_ANGLE:
+          *datp = elevation[igate];
+          break;
+
+        case Params::RANGE:
+          *datp = range[igate];
+          break;
+
+        case Params::BEAM_HEIGHT:
+          *datp = beamHt[igate];
+          break;
+
       } // switch
 
     } // igate
@@ -555,7 +577,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
     field->setLongName(ofld.long_name);
     field->setStandardName(ofld.standard_name);
     field->setTypeFl32(missingDbl);
-    field->addDataFl32(derivedRay->getNGates(), data);
+    field->addDataFl32(_nGates, data);
     field->copyRangeGeom(*inputRay);
 
     // add to ray
@@ -563,6 +585,44 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
     derivedRay->addField(field);
 
   } // ifield
+  
+  // copy the dbz, rhohv, pid and interest field back to the input ray
+
+  RadxField *smoothDbzFld =
+    inputRay->getField(RadxPartRain::smoothedDbzFieldName);
+  TaArray<Radx::fl32> smoothDbz_;
+  Radx::fl32 *smoothDbz = smoothDbz_.alloc(_nGates);
+  for (size_t igate = 0; igate < inputRay->getNGates(); igate++) {
+    smoothDbz[igate] = dbzForPid[igate];
+  }
+  smoothDbzFld->setDataFl32(_nGates, smoothDbz, true);
+  smoothDbzFld->setMissingFl32(missingDbl);
+  
+  RadxField *smoothRhohvFld =
+    inputRay->getField(RadxPartRain::smoothedRhohvFieldName);
+  TaArray<Radx::fl32> smoothRhohv_;
+  Radx::fl32 *smoothRhohv = smoothRhohv_.alloc(_nGates);
+  for (size_t igate = 0; igate < inputRay->getNGates(); igate++) {
+    smoothRhohv[igate] = rhohvForPid[igate];
+  }
+  smoothRhohvFld->setDataFl32(_nGates, smoothRhohv, true);
+  smoothRhohvFld->setMissingFl32(missingDbl);
+  
+  TaArray<Radx::si32> pid_;
+  Radx::si32 *pid = pid_.alloc(_nGates);
+  for (size_t igate = 0; igate < inputRay->getNGates(); igate++) {
+    pid[igate] = _pidArray[igate];
+  }
+  RadxField *pidFld = inputRay->getField(RadxPartRain::pidFieldName);
+  pidFld->setDataSi32(_nGates, pid, true);
+
+  TaArray<Radx::fl32> pidIntr_;
+  Radx::fl32 *pidIntr = pidIntr_.alloc(_nGates);
+  for (size_t igate = 0; igate < inputRay->getNGates(); igate++) {
+    pidIntr[igate] = _pidInterest[igate];
+  }
+  RadxField *pidIntrFld = inputRay->getField(RadxPartRain::pidInterestFieldName);
+  pidIntrFld->setDataFl32(_nGates, pidIntr, true);
 
   // if required, output individual PID particle interest fields
 
@@ -578,10 +638,10 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
       // fill data array
       
       TaArray<Radx::fl32> data_;
-      Radx::fl32 *data = data_.alloc(derivedRay->getNGates());
+      Radx::fl32 *data = data_.alloc(_nGates);
 
       const double *interest = particle->gateInterest;
-      for (int igate = 0; igate < (int) derivedRay->getNGates(); igate++) {
+      for (size_t igate = 0; igate < _nGates; igate++) {
         data[igate] = interest[igate];
       } // igate
       
@@ -589,7 +649,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
       
       RadxField *field = new RadxField(fieldName, "");
       field->setTypeFl32(missingDbl);
-      field->addDataFl32(derivedRay->getNGates(), data);
+      field->addDataFl32(_nGates, data);
       
       // add to ray
       
@@ -736,7 +796,7 @@ void ComputeEngine::_kdpCompute()
   TaArray<double> rangeKm_;
   double *rangeKm = rangeKm_.alloc(_nGates);
   double range = _startRangeKm;
-  for (int ii = 0; ii < _nGates; ii++, range += _gateSpacingKm) {
+  for (size_t ii = 0; ii < _nGates; ii++, range += _gateSpacingKm) {
     rangeKm[ii] = range;
   }
 
@@ -763,7 +823,7 @@ void ComputeEngine::_kdpCompute()
   
   // put KDP into fields objects
   
-  for (int ii = 0; ii < _nGates; ii++) {
+  for (size_t ii = 0; ii < _nGates; ii++) {
     if (kdp[ii] == NAN) {
       _kdpArray[ii] = missingDbl;
     } else {
@@ -779,7 +839,7 @@ void ComputeEngine::_kdpCompute()
     
     double *ranges = new double[_nGates];
     double range = _startRangeKm;
-    for (int igate = 0; igate < _nGates; igate++) {
+    for (size_t igate = 0; igate < _nGates; igate++) {
       ranges[igate] = range;
       range += _gateSpacingKm;
     }
@@ -804,7 +864,7 @@ void ComputeEngine::_kdpCompute()
     delete[] ranges;
     
     const double *kdpb = _kdpBringi.getKdp();
-    for (int ii = 0; ii < _nGates; ii++) {
+    for (size_t ii = 0; ii < _nGates; ii++) {
       if (kdpb[ii] == NAN) {
         _kdpBringiArray[ii] = missingDbl;
       } else {
@@ -864,6 +924,9 @@ int ComputeEngine::_pidInit()
     cerr << "  PID will not be computed" << endl;
     return -1;
   }
+  if (_params.PID_locate_melting_layer) {
+    _pid.setComputeMeltingLayer(true);
+  }
   
   return 0;
   
@@ -880,22 +943,12 @@ void ComputeEngine::_pidCompute()
   
   if (_params.use_soundings_from_spdb) {
     if (_tempProfile) {
-      const vector<NcarParticleId::TmpPoint> &profile = _tempProfile->getProfile();
+      const vector<TempProfile::PointVal> &profile = _tempProfile->getProfile();
       if (profile.size() > 0) {
         _pid.setTempProfile(profile);
       }
     }
   }
-
-  // fill temperature array
-  
-  _pid.fillTempArray(_radarHtKm,
-                     _params.override_standard_pseudo_earth_radius,
-                     _params.pseudo_earth_radius_ratio,
-                     _elevation, _nGates,
-                     _startRangeKm,
-                     _gateSpacingKm,
-                     _tempForPid);
 
   // compute particle ID
   
@@ -1017,6 +1070,7 @@ void ComputeEngine::_allocMomentsArrays()
   _rhohvNncArray = _rhohvNncArray_.alloc(_nGates);
   _phidpArray = _phidpArray_.alloc(_nGates);
   _rhoVxHxArray = _rhoVxHxArray_.alloc(_nGates);
+  _tempForPid = _tempForPid_.alloc(_nGates);
 }
 
 //////////////////////////////////////
@@ -1030,7 +1084,6 @@ void ComputeEngine::_allocPidArrays()
   _pidArray2 = _pidArray2_.alloc(_nGates);
   _pidInterest = _pidInterest_.alloc(_nGates);
   _pidInterest2 = _pidInterest2_.alloc(_nGates);
-  _tempForPid = _tempForPid_.alloc(_nGates);
 
 }
 
@@ -1148,7 +1201,7 @@ int ComputeEngine::_loadMomentsArrays(RadxRay *inputRay)
       return -1;
     }
   } else {
-    for (int igate = 0; igate < _nGates; igate++) {
+    for (size_t igate = 0; igate < _nGates; igate++) {
       _ldrArray[igate] = missingDbl;
     }
   }
@@ -1159,7 +1212,7 @@ int ComputeEngine::_loadMomentsArrays(RadxRay *inputRay)
       return -1;
     }
   } else {
-    for (int igate = 0; igate < _nGates; igate++) {
+    for (size_t igate = 0; igate < _nGates; igate++) {
       _rhoVxHxArray[igate] = missingDbl;
     }
   }
@@ -1170,10 +1223,12 @@ int ComputeEngine::_loadMomentsArrays(RadxRay *inputRay)
       return -1;
     }
   } else {
-    for (int igate = 0; igate < _nGates; igate++) {
+    for (size_t igate = 0; igate < _nGates; igate++) {
       _kdpArray[igate] = missingDbl;
     }
   }
+
+  _loadFieldArray(inputRay, "temperature", true, _tempForPid);
 
   return 0;
   
@@ -1188,7 +1243,7 @@ void ComputeEngine::_computeZdpArray()
   
 {
   
-  for (int igate = 0; igate < _nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
 
     double dbz = _dbzArray[igate];
     double zh = pow(10.0, dbz / 10.0);
@@ -1219,7 +1274,7 @@ int ComputeEngine::_loadFieldArray(RadxRay *inputRay,
   if (field == NULL) {
 
     if (!required) {
-      for (int igate = 0; igate < _nGates; igate++) {
+      for (size_t igate = 0; igate < _nGates; igate++) {
         array[igate] = missingDbl;
       }
       return -1;
@@ -1235,15 +1290,15 @@ int ComputeEngine::_loadFieldArray(RadxRay *inputRay,
     pthread_mutex_unlock(&_debugPrintMutex);
     return -1;
   }
-  
-  // convert field data to floats
 
-  field->convertToFl64();
-  const double *vals = field->getDataFl64();
-  double missingVal = field->getMissingFl64();
-  for (int igate = 0; igate < _nGates; igate++, vals++) {
-    double val = *vals;
-    if (val == missingVal) {
+  // Set array values
+  // fields are already fl32
+
+  const Radx::fl32 *vals = field->getDataFl32();
+  double missingFl32 = field->getMissingFl32();
+  for (size_t igate = 0; igate < _nGates; igate++, vals++) {
+    Radx::fl32 val = *vals;
+    if (val == missingFl32) {
       array[igate] = missingDbl;
     } else {
       array[igate] = val;
@@ -1269,7 +1324,7 @@ void ComputeEngine::_computeSnrFromDbz()
   if (range == 0) {
     range = _gateSpacingKm / 10.0;
   }
-  for (int igate = 0; igate < _nGates; igate++, range += _gateSpacingKm) {
+  for (size_t igate = 0; igate < _nGates; igate++, range += _gateSpacingKm) {
     noiseDbz[igate] = _params.noise_dbz_at_100km +
       20.0 * (log10(range) - log10(100.0));
   }
@@ -1278,7 +1333,7 @@ void ComputeEngine::_computeSnrFromDbz()
   
   double *snr = _snrArray;
   const double *dbz = _dbzArray;
-  for (int igate = 0; igate < _nGates; igate++, snr++, dbz++) {
+  for (size_t igate = 0; igate < _nGates; igate++, snr++, dbz++) {
     if (*dbz != missingDbl) {
       *snr = *dbz - noiseDbz[igate];
     } else {
@@ -1296,7 +1351,7 @@ void ComputeEngine::_censorNonPrecip(RadxField &field)
 {
 
   const int *pid = _pid.getPid();
-  for (int ii = 0; ii < _nGates; ii++) {
+  for (size_t ii = 0; ii < _nGates; ii++) {
     int ptype = pid[ii];
     if (ptype == NcarParticleId::FLYING_INSECTS ||
         ptype == NcarParticleId::SECOND_TRIP ||
@@ -1318,7 +1373,7 @@ void ComputeEngine::_accumForZdrBiasInIce()
 
   // initialize
 
-  for (int igate = 0; igate < _nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
     _zdrFlagInIce[igate] = 0;
     _zdrInIce[igate] = missingDbl;
     _zdrmInIce[igate] = missingDbl;
@@ -1336,7 +1391,7 @@ void ComputeEngine::_accumForZdrBiasInIce()
   const double *phidpAccumArray = _kdp.getPhidpAccumFilt();
 
   double rangeKm = _startRangeKm;
-  for (int igate = 0; igate < _nGates; igate++, rangeKm += _gateSpacingKm) {
+  for (size_t igate = 0; igate < _nGates; igate++, rangeKm += _gateSpacingKm) {
 
     // initially clear flag
     
@@ -1436,7 +1491,7 @@ void ComputeEngine::_accumForZdrBiasInIce()
 
   int count = 0;
   int start = 0;
-  for (int igate = 0; igate < _nGates; igate++) {
+  for (int igate = 0; igate < (int) _nGates; igate++) {
     if (_zdrFlagInIce[igate] == 1) {
       // accumulate run
       count++;
@@ -1454,7 +1509,7 @@ void ComputeEngine::_accumForZdrBiasInIce()
 
   // sum up for ZDR bias
 
-  for (int igate = 0; igate < _nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
     if (_zdrFlagInIce[igate] == 1) {
       double zdr = _zdrArray[igate];
       double zdrm = _zdrmArray[igate];
@@ -1484,7 +1539,7 @@ void ComputeEngine::_accumForZdrBiasInBragg()
 
   // initialize
 
-  for (int igate = 0; igate < _nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
     _zdrFlagInBragg[igate] = 0;
     _zdrInBragg[igate] = missingDbl;
     _zdrmInBragg[igate] = missingDbl;
@@ -1503,7 +1558,7 @@ void ComputeEngine::_accumForZdrBiasInBragg()
 
   double rangeKm = _startRangeKm;
 
-  for (int igate = 0; igate < _nGates; igate++, rangeKm += _gateSpacingKm) {
+  for (size_t igate = 0; igate < _nGates; igate++, rangeKm += _gateSpacingKm) {
     
     _zdrFlagInBragg[igate] = 0;
 
@@ -1601,7 +1656,7 @@ void ComputeEngine::_accumForZdrBiasInBragg()
   
   int count = 0;
   int start = 0;
-  for (int igate = 0; igate < _nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
     if (_zdrFlagInBragg[igate] == 1) {
       // accumulate run
       count++;
@@ -1619,7 +1674,7 @@ void ComputeEngine::_accumForZdrBiasInBragg()
 
   // sum up for ZDR bias
 
-  for (int igate = 0; igate < _nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
     if (_zdrFlagInBragg[igate] == 1) {
       double zdr = _zdrArray[igate];
       double zdrm = _zdrmArray[igate];
@@ -1667,7 +1722,7 @@ void ComputeEngine::_runSelfConsistencyCheck()
 
   // compute slope of filtered phidp
 
-  for (int igate = 1; igate < _nGates - 1; igate++) {
+  for (size_t igate = 1; igate < _nGates - 1; igate++) {
     if (phidpFilt[igate-1] == missingDbl || phidpFilt[igate+1] == missingDbl) {
       _kdpFromFilt[igate] = missingDbl;
     } else {
@@ -1681,7 +1736,7 @@ void ComputeEngine::_runSelfConsistencyCheck()
   // loop through gates, checking for valid runs
 
   double rangeKm = _startRangeKm;
-  for (int igate = 0; igate < _nGates; igate++, rangeKm += _gateSpacingKm) {
+  for (size_t igate = 0; igate < _nGates; igate++, rangeKm += _gateSpacingKm) {
     
     gateIsValid[igate] = true;
 

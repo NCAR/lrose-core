@@ -114,17 +114,6 @@ RadxHca::RadxHca(int argc, char **argv)
     }
   }
 
-  // create the interest maps
-
-  _initInterestMaps();
-  if (_createInterestMaps()) {
-    OK = FALSE;
-  } else {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      _printInterestMaps(cerr);
-    }
-  }
-
   // initialize compute object
 
   pthread_mutex_init(&_debugPrintMutex, NULL);
@@ -138,7 +127,7 @@ RadxHca::RadxHca(int argc, char **argv)
       ComputeThread *thread = new ComputeThread();
       thread->setApp(this);
 
-      ComputeEngine *engine = new ComputeEngine(_params, ii);
+      ComputeEngine *engine = new ComputeEngine(_params, ii, _tempProfile);
       if (!engine->OK) {
         OK = FALSE;
       }
@@ -155,7 +144,7 @@ RadxHca::RadxHca(int argc, char **argv)
 
     // single threaded
 
-    _engine = new ComputeEngine(_params, 0);
+    _engine = new ComputeEngine(_params, 0, _tempProfile);
     if (!_engine->OK) {
       OK = FALSE;
     }
@@ -213,14 +202,6 @@ RadxHca::~RadxHca()
   }
 
   pthread_mutex_destroy(&_debugPrintMutex);
-
-  // clean up other elements
-
-  for (size_t ii = 0; ii < nClasses; ii++) {
-    for (size_t jj = 0; jj < nFeatures; jj++) {
-      delete _imaps[ii][jj];
-    }
-  }
 
   // unregister process
 
@@ -444,6 +425,11 @@ int RadxHca::_processFile(const string &filePath)
 
   _wavelengthM = vol.getWavelengthM();
   _radarHtKm = vol.getAltitudeKm();
+  if (_params.override_vertical_beamwidth) {
+    _vertBeamWidthDeg = _params.vertical_beamwidth_deg;
+  } else {
+    _vertBeamWidthDeg = vol.getRadarBeamWidthDegV();
+  }
 
   // set number of gates constant if requested
 
@@ -459,7 +445,11 @@ int RadxHca::_processFile(const string &filePath)
 
   // retrieve temp profile from SPDB as appropriate
 
-  _retrieveTempProfile(vol);
+  if (_retrieveTempProfile(vol)) {
+    cerr << "ERROR - RadxHca::Run" << endl;
+    cerr << " Cannot get temperature profile" << endl;
+    return -1;
+  }
 
   // option to get site temperature
   
@@ -861,10 +851,16 @@ int RadxHca::_computeSingleThreaded(RadxVol &vol)
     // get covariance ray
     
     RadxRay *inputRay = inputRays[iray];
+
+    // set engine params
     
-    // compute moments
-    
-    RadxRay *derivedRay = _engine->compute(inputRay, _radarHtKm, _wavelengthM, &_tempProfile);
+    _engine->setWavelengthM(_wavelengthM);
+    _engine->setRadarHtKm(_radarHtKm);
+    _engine->setVertBeamWidthDeg(_vertBeamWidthDeg);
+
+    // run the compute method
+
+    RadxRay *derivedRay = _engine->compute(inputRay);
     if (derivedRay == NULL) {
       cerr << "ERROR - _compute" << endl;
       return -1;
@@ -1027,10 +1023,16 @@ void *RadxHca::_computeInThread(void *thread_data)
 
     ComputeEngine *engine = compThread->getComputeEngine();
     RadxRay *inputRay = compThread->getCovRay();
-    RadxRay *derivedRay = engine->compute(inputRay,
-                                          app->_radarHtKm,
-                                          app->_wavelengthM,
-                                          &app->_tempProfile);
+
+    // set engine params
+    
+    engine->setWavelengthM(app->_wavelengthM);
+    engine->setRadarHtKm(app->_radarHtKm);
+    engine->setVertBeamWidthDeg(app->_vertBeamWidthDeg);
+
+    // run the compute method
+    
+    RadxRay *derivedRay = engine->compute(inputRay);
     compThread->setMomRay(derivedRay);
     
     if (app->getParams().debug >= Params::DEBUG_EXTRA) {
@@ -1103,11 +1105,6 @@ int RadxHca::_retrieveTempProfile(const RadxVol &vol)
   
 {
 
-  if (!_params.use_soundings_from_spdb) {
-    _tempProfile.clear();
-    return 0;
-  }
-
   if (_params.debug) {
     _tempProfile.setDebug();
   }
@@ -1142,7 +1139,7 @@ int RadxHca::_retrieveTempProfile(const RadxVol &vol)
   }
   
   time_t retrievedTime;
-  vector<NcarParticleId::TmpPoint> retrievedProfile;
+  vector<TempProfile::PointVal> retrievedProfile;
   if (_tempProfile.getTempProfile(_params.sounding_spdb_url,
                                   vol.getStartTimeSecs(),
                                   retrievedTime,
@@ -1165,37 +1162,7 @@ int RadxHca::_retrieveTempProfile(const RadxVol &vol)
     cerr << "  freezingLevel: " << _tempProfile.getFreezingLevel() << endl;
   }
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=====================================" << endl;
-    cerr << "Temp  profile" << endl;
-    int nLevels = (int) retrievedProfile.size();
-    int nPrint = 50;
-    int printInterval = nLevels / nPrint;
-    if (nLevels < nPrint) {
-      printInterval = 1;
-    }
-    for (size_t ii = 0; ii < retrievedProfile.size(); ii++) {
-      bool doPrint = false;
-      if (ii % printInterval == 0) {
-        doPrint = true;
-      }
-      if (ii < retrievedProfile.size() - 1) {
-        if (retrievedProfile[ii].tmpC * retrievedProfile[ii+1].tmpC <= 0) {
-          doPrint = true;
-        }
-      }
-      if (ii > 0) {
-        if (retrievedProfile[ii-1].tmpC * retrievedProfile[ii].tmpC <= 0) {
-          doPrint = true;
-        }
-      }
-      if (doPrint) {
-        cerr << "  ilevel, press(Hpa), alt(km), temp(C): " << ii << ", "
-             << retrievedProfile[ii].pressHpa << ", "
-             << retrievedProfile[ii].htKm << ", "
-             << retrievedProfile[ii].tmpC << endl;
-      }
-    }
-    cerr << "=====================================" << endl;
+    _tempProfile.print(cerr);
   }
   
   return 0;
@@ -1578,127 +1545,5 @@ void RadxHca::_printRunTime(const string& str)
   cerr << "TIMING, task: " << str << ", secs used: " << deltaSec << endl;
   _timeA.tv_sec = tvb.tv_sec;
   _timeA.tv_usec = tvb.tv_usec;
-}
-
-/////////////////////////////////////
-// initialize interest maps to NULL
-
-void RadxHca::_initInterestMaps()
-  
-{
-  
-  for (size_t iclass = 0; iclass < nClasses; iclass++) {
-    for (size_t ifeature = 0; ifeature < nFeatures; ifeature++) {
-      _imaps[iclass][ifeature] = NULL;
-    }
-  }
-
-}
-
-///////////////////////////////////////////////////////////////////
-// Create the interest maps
-
-int RadxHca::_createInterestMaps()
-{
-
-  int iret = 0;
-
-  // clean up any existing maps
-  
-  _deleteInterestMaps();
-
-  for (int imap = 0; imap < _params.hca_interest_maps_n; imap++) {
-    
-    const Params::hca_interest_map_t &pmap = _params._hca_interest_maps[imap];
-
-    if (_imaps[pmap.hca_class][pmap.feature] != NULL) {
-      cerr << "ERROR - duplicate interest map" << endl;
-      cerr << "                  class   : "
-           << HcaInterestMap::hcaClassToStr(pmap.hca_class) << endl;
-      cerr << "                  feature : " 
-           << HcaInterestMap::hcaFeatureToStr(pmap.feature) << endl;
-      iret = -1;
-    } else {
-      string label = HcaInterestMap::hcaClassToStr(pmap.hca_class);
-      label += "-";
-      label += HcaInterestMap::hcaFeatureToStr(pmap.feature);
-      vector<HcaInterestMap::ImPoint> map;
-      map.push_back(HcaInterestMap::ImPoint(pmap.x1, 0.0));
-      map.push_back(HcaInterestMap::ImPoint(pmap.x2, 1.0));
-      map.push_back(HcaInterestMap::ImPoint(pmap.x3, 1.0));
-      map.push_back(HcaInterestMap::ImPoint(pmap.x4, 0.0));
-      _imaps[pmap.hca_class][pmap.feature] =
-        new HcaInterestMap(label, pmap.hca_class, pmap.feature, map, pmap.weight);
-    }
-  
-  } // imap
-
-  return iret;
-
-}
-
-////////////////////////////////////////////
-// check that all interest maps are non-NULL
-
-int RadxHca::_checkInterestMaps()
-  
-{
-  
-  int iret = 0;
-
-  for (size_t iclass = 0; iclass < nClasses; iclass++) {
-    for (size_t ifeature = 0; ifeature < nFeatures; ifeature++) {
-      if (_imaps[iclass][ifeature] == NULL) {
-        cerr << "ERROR - RadxHca::_checkInterestMaps()" << endl;
-        cerr << "  Missing interest map" << endl;
-        cerr << "                  class   : "
-             << HcaInterestMap::hcaClassToStr(iclass) << endl;
-        cerr << "                  feature : " 
-             << HcaInterestMap::hcaFeatureToStr(ifeature) << endl;
-        iret = -1;
-      }
-    }
-  }
-
-  return iret;
-
-}
-
-/////////////////////////////////////
-// print all interest maps
-
-void RadxHca::_printInterestMaps(ostream &out)
-  
-{
-  
-  out << "=============================================" << endl;
-  for (size_t iclass = 0; iclass < nClasses; iclass++) {
-    for (size_t ifeature = 0; ifeature < nFeatures; ifeature++) {
-      if (_imaps[iclass][ifeature] != NULL) {
-        if (_imaps[iclass][ifeature] != NULL) {
-          _imaps[iclass][ifeature]->printParams(out);
-        }
-      }
-    }
-  }
-  out << "=============================================" << endl;
-
-}
-
-/////////////////////////////////////
-// delete all interest maps
-
-void RadxHca::_deleteInterestMaps()
-  
-{
-  
-  for (size_t iclass = 0; iclass < nClasses; iclass++) {
-    for (size_t ifeature = 0; ifeature < nFeatures; ifeature++) {
-      if (_imaps[iclass][ifeature] != NULL) {
-        delete _imaps[iclass][ifeature];
-      }
-    }
-  }
-
 }
 

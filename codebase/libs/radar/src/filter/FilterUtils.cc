@@ -330,17 +330,21 @@ void FilterUtils::computeSdevInRange(const double *field,
 // The trend dev will be set to missingVal if not enough data is
 // available for computing the result.
 //
-// The trend deviation differs from standard deviation.
+// If mean is not NULL, the mean values are stored there.
+// If texture is not NULL, the texture values are stored there.
+//
+// The trend rms deviation differs from standard deviation.
 // It is computed as follows:
 //  (a) compute kernel mean at each point
 //  (b) compute residual of data from trend mean
 //  (c) compute root mean square of residual over kernel.
 
 void FilterUtils::computeTrendDevInRange(const double *field,
-                                         double *tdev,
                                          int nGates,
                                          int nGatesKernel,
-                                         double missingVal)
+                                         double missingVal,
+                                         double *mean /* = NULL */,
+                                         double *texture /* = NULL */)
   
 {
 
@@ -390,8 +394,11 @@ void FilterUtils::computeTrendDevInRange(const double *field,
     } // jgate
     
     if (nVal > 0 && field[igate] != missingVal) {
-      double mean = sumVal / (double) nVal;
-      residual[igate] = mean - field[igate];
+      double meanVal = sumVal / (double) nVal;
+      residual[igate] = meanVal - field[igate];
+      if (mean != NULL) {
+        mean[igate] = meanVal;
+      }
     } else {
       residual[igate] = missingVal;
     }
@@ -415,11 +422,13 @@ void FilterUtils::computeTrendDevInRange(const double *field,
       }
     } // jgate
     
-    if (nVal > 0) {
-      double rms = sqrt(sumValSq / (double) nVal);
-      tdev[igate] = rms;
-    } else {
-      tdev[igate] = missingVal;
+    if (texture != NULL) {
+      if (nVal > 0) {
+        double rms = sqrt(sumValSq / (double) nVal);
+        texture[igate] = rms;
+      } else {
+        texture[igate] = missingVal;
+      }
     }
     
   } // igate

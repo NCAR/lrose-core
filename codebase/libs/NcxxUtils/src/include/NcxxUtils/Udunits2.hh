@@ -22,88 +22,106 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// TempProfile.hh
+// Udunits2.hh
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Udunits wrapper
 //
-// Nov 2011
+// Mike Dixon, RAP, NCAR
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Feb 2013
 //
 ///////////////////////////////////////////////////////////////
 
-/**
- * @file TempProfile.hh
- * @brief Get temperature profile from sounding
- * @class TempProfile
- *
- * Get temperature profile from sounding
- *
- */
+#ifndef Udunits2_HH
+#define Udunits2_HH
 
-#ifndef TempProfile_H
-#define TempProfile_H
-
-#include "Params.hh"
 #include <string>
-#include <radar/NcarParticleId.hh>
+#include <iostream>
+#include <cassert>
+#include <udunits2.h>
 
 using namespace std;
 
-class TempProfile {
+///////////////////////////////////////////////////////////////
+/// CLASS FOR NETCDF IO OPERATIONS
+
+class Udunits2
+
+{
   
 public:
-
-  /**
-   * Constructor
-   * @param[in] progName The name of the aplication
-   * @param[in] Params The application parameters
-   */
-  TempProfile (const string progName,
-               const Params &params);
   
-  /**
-   * Destructor
-   */
-  ~TempProfile();
+  // constructor 
+  // will call assert if cannot be initialized
+  
+  Udunits2();
+  
+  /// Destructor
+  
+  virtual ~Udunits2();
 
-  /**
-   * Get a valid temperature profile
-   * @param[in] dataTime The time of the radar data
-   * @param[out] soundingTime The time of the sounding data used
-   *             to construct the temperature profile
-   * @param[out] tmpProfile The vector of profile temperatures
-   * @return 0 on success, -1 on failure
-   */
-  int getTempProfile(time_t dataTime,
-                     time_t &soundingTime,
-                     vector<NcarParticleId::TmpPoint> &tmpProfile);
+  /// Clear all status
+  
+  void clear();
+
+  //////////////////////////////////////////////////////////////
+  /// \name get system and epoch
+  //@{
+
+  ut_system *getSystem() { return _uds; } 
+  ut_unit *getEpoch() { return _udsEpoch; }
+  
+  //@}
+  
+  ////////////////////////
+  /// \name Error string:
+  //@{
+  
+  /// Get the Error String.
+  /// The contents are only meaningful if an error has returned.
+  
+  string getErrStr() const { return _errStr; }
+  
+  //@}
 
 protected:
+
 private:
 
-  string _progName;  /**< Name of the application (for debugging messages) */
-  Params _params;    /**< Application parameters */
+  // error string
 
-  vector<NcarParticleId::TmpPoint> _tmpProfile; /**< The vector of profile temperatures */
-  time_t _soundingTime;                         /**< The time of the sounding data used to
-                                                     construct the temperature profile*/
+  string _errStr; ///< Error string is set on read or write error
   
-  /**
-   * Get temp profile from first sounding before given time
-   * @param[in] searchTime The desired time of the sounding data
-   * @param[in] marginSecs Number of seconds to look back from searcgTime
-   *            for a usable sounding, before giving up
-   *
-   * @return 0 on success, -1 on failure
-   */
-  int _getTempProfile(time_t searchTime, int marginSecs);
+  // handles
+  
+  ut_system *_uds;
+  ut_unit *_udsEpoch;
 
-  /**
-   * Check the temperature profile for quality
-   * @return 0 on success, -1 on failure
-   */
-  int _checkTempProfile();
+  // initialize udunits
 
+  int _init();
+  void _free();
+  
+  /// Clear error string.
+  
+  void _clearErrStr() { _errStr.clear(); }
+
+  /// add integer value to error string, with label
+  
+  void _addErrInt(string label, int iarg,
+                  bool cr = true);
+  
+  /// add double value to error string, with label
+  
+  void _addErrDbl(string label, double darg,
+                  string format, bool cr = true);
+  
+  /// add string value to error string, with label
+  
+  void _addErrStr(string label, string strarg = "",
+                  bool cr = true);
+  
 };
-
 
 #endif

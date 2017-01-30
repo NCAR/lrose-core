@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2016
+// ** Copyright UCAR (c) 1992 - 2017
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -90,8 +90,8 @@ public:
     FEATURE_ZDR = 1,
     FEATURE_RHOHV = 2,
     FEATURE_LOG_KDP = 3,
-    FEATURE_TD_DBZ = 4,
-    FEATURE_TD_PHIDP = 5
+    FEATURE_SD_DBZ = 4,
+    FEATURE_SD_PHIDP = 5
   } feature_field_t;
 
   typedef enum {
@@ -106,43 +106,70 @@ public:
     PHIDP = 8,
     KDP = 9,
     KDP_COND = 10,
-    KDP_LOG = 11,
-    PSOB = 12,
-    DBZ_ATTEN_CORRECTION = 13,
-    ZDR_ATTEN_CORRECTION = 14,
-    DBZ_ATTEN_CORRECTED = 15,
-    ZDR_ATTEN_CORRECTED = 16,
-    DBZ_FOR_KDP = 17,
-    ZDR_FOR_KDP = 18,
-    RHOHV_FOR_KDP = 19,
-    SNR_FOR_KDP = 20,
-    ZDR_SDEV_FOR_KDP = 21,
-    VALID_FLAG_FOR_KDP = 22,
-    PHIDP_FOR_KDP = 23,
-    PHIDP_MEAN_FOR_KDP = 24,
-    PHIDP_MEAN_UNFOLD_FOR_KDP = 25,
-    PHIDP_SDEV_FOR_KDP = 26,
-    PHIDP_JITTER_FOR_KDP = 27,
-    PHIDP_UNFOLD_FOR_KDP = 28,
-    PHIDP_FILT_FOR_KDP = 29,
-    PHIDP_COND_FOR_KDP = 30,
-    PHIDP_COND_FILT_FOR_KDP = 31,
-    RAY_HEIGHT = 32,
-    SNR_MEAN_SEACLUT = 33,
-    RHOHV_MEAN_SEACLUT = 34,
-    PHIDP_SDEV_SEACLUT = 35,
-    ZDR_SDEV_SEACLUT = 36,
-    DBZ_ELEV_GRADIENT_SEACLUT = 37,
-    RHOHV_MEAN_INTEREST_SEACLUT = 38,
-    PHIDP_SDEV_INTEREST_SEACLUT = 39,
-    ZDR_SDEV_INTEREST_SEACLUT = 40,
-    DBZ_ELEV_GRADIENT_INTEREST_SEACLUT = 41,
-    SEACLUT_FLAG = 42,
-    PARTICLE_ID = 43,
-    TEMP_FOR_PID = 44,
-    SD_DBZ = 45,
-    TD_DBZ = 46,
-    TD_PHIDP = 47
+    PSOB = 11,
+    DBZ_ATTEN_CORRECTION = 12,
+    ZDR_ATTEN_CORRECTION = 13,
+    DBZ_ATTEN_CORRECTED = 14,
+    ZDR_ATTEN_CORRECTED = 15,
+    DBZ_FOR_KDP = 16,
+    ZDR_FOR_KDP = 17,
+    RHOHV_FOR_KDP = 18,
+    SNR_FOR_KDP = 19,
+    ZDR_SDEV_FOR_KDP = 20,
+    VALID_FLAG_FOR_KDP = 21,
+    PHIDP_FOR_KDP = 22,
+    PHIDP_MEAN_FOR_KDP = 23,
+    PHIDP_MEAN_UNFOLD_FOR_KDP = 24,
+    PHIDP_SDEV_FOR_KDP = 25,
+    PHIDP_JITTER_FOR_KDP = 26,
+    PHIDP_UNFOLD_FOR_KDP = 27,
+    PHIDP_FILT_FOR_KDP = 28,
+    PHIDP_COND_FOR_KDP = 29,
+    PHIDP_COND_FILT_FOR_KDP = 30,
+    RAY_HEIGHT = 31,
+    SNR_MEAN_SEACLUT = 32,
+    RHOHV_MEAN_SEACLUT = 33,
+    PHIDP_SDEV_SEACLUT = 34,
+    ZDR_SDEV_SEACLUT = 35,
+    DBZ_ELEV_GRADIENT_SEACLUT = 36,
+    RHOHV_MEAN_INTEREST_SEACLUT = 37,
+    PHIDP_SDEV_INTEREST_SEACLUT = 38,
+    ZDR_SDEV_INTEREST_SEACLUT = 39,
+    DBZ_ELEV_GRADIENT_INTEREST_SEACLUT = 40,
+    SEACLUT_FLAG = 41,
+    PARTICLE_ID = 42,
+    TEMP_FOR_PID = 43,
+    HCA_DBZ = 44,
+    HCA_ZDR = 45,
+    HCA_RHOHV = 46,
+    HCA_PHIDP = 47,
+    HCA_LOGKDP = 48,
+    HCA_TEMP_LOW = 49,
+    HCA_TEMP_MID = 50,
+    HCA_TEMP_HIGH = 51,
+    HCA_SMOOTH_DBZ = 52,
+    HCA_SMOOTH_ZDR = 53,
+    HCA_SMOOTH_RHOHV = 54,
+    HCA_SMOOTH_PHIDP = 55,
+    HCA_HVY_SMOOTH_PHIDP = 56,
+    HCA_TEXTURE_DBZ = 57,
+    HCA_TEXTURE_ZDR = 58,
+    HCA_TEXTURE_RHOHV = 59,
+    HCA_TEXTURE_PHIDP = 60,
+    HCA_SD_DBZ = 61,
+    HCA_SD_PHIDP = 62,
+    HCA_GC_INTEREST = 63,
+    HCA_BS_INTEREST = 64,
+    HCA_DS_INTEREST = 65,
+    HCA_WS_INTEREST = 66,
+    HCA_CR_INTEREST = 67,
+    HCA_GR_INTEREST = 68,
+    HCA_BD_INTEREST = 69,
+    HCA_RA_INTEREST = 70,
+    HCA_HR_INTEREST = 71,
+    HCA_RH_INTEREST = 72,
+    HCA_TEMP_CAT = 73,
+    HCA = 74
   } output_field_id_t;
 
   typedef enum {
@@ -629,11 +656,15 @@ public:
 
   double zdr_attenuation_exponent;
 
-  tdrp_bool_t locate_sea_clutter;
-
   tdrp_bool_t override_standard_pseudo_earth_radius;
 
   double pseudo_earth_radius_ratio;
+
+  tdrp_bool_t override_vertical_beamwidth;
+
+  double vertical_beamwidth_deg;
+
+  tdrp_bool_t locate_sea_clutter;
 
   double seaclut_min_snr_db;
 
@@ -667,16 +698,50 @@ public:
 
   tdrp_bool_t compute_hca;
 
+  double HCA_snr_threshold;
+
   hca_interest_map_t *_hca_interest_maps;
   int hca_interest_maps_n;
 
-  int HCA_TD_DBZ_kernel_len;
+  int HCA_DBZ_filter_len;
 
-  int HCA_TD_PHIDP_kernel_len;
+  int HCA_ZDR_filter_len;
+
+  int HCA_RHOHV_filter_len;
+
+  int HCA_PHIDP_filter_len;
+
+  int HCA_PHIDP_heavy_filter_len;
+
+  double HCA_max_abs_vel_for_GC;
+
+  double HCA_max_rhohv_for_BS;
+
+  double HCA_max_zdr_for_DS;
+
+  double HCA_min_zdr_for_BD;
+
+  double HCA_min_zdr_for_WS;
+
+  double HCA_min_dbz_for_WS;
+
+  double HCA_max_dbz_for_CR;
+
+  double HCA_min_dbz_for_GR;
+
+  double HCA_max_dbz_for_GR;
+
+  double HCA_max_dbz_for_RA;
+
+  double HCA_min_dbz_for_HR;
+
+  double HCA_min_dbz_for_RH;
 
   tdrp_bool_t compute_pid;
 
   char* pid_thresholds_file_path;
+
+  tdrp_bool_t pid_override_temp_profile;
 
   double PID_snr_threshold;
 
@@ -712,8 +777,6 @@ public:
 
   int PID_median_filter_len;
 
-  tdrp_bool_t use_soundings_from_spdb;
-
   char* sounding_spdb_url;
 
   int sounding_search_time_margin_secs;
@@ -733,6 +796,10 @@ public:
   double sounding_height_correction_km;
 
   tdrp_bool_t sounding_use_wet_bulb_temp;
+
+  double temp_at_bottom_of_melting_layer;
+
+  double temp_at_top_of_melting_layer;
 
   tdrp_bool_t read_site_temp_from_spdb;
 
@@ -776,7 +843,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[154];
+  mutable TDRPtable _table[175];
 
   const char *_className;
 

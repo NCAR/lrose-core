@@ -40,7 +40,7 @@ LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lradar -lRadx -lFmq -lSpdb \
 	-ldsserver -lrapformats -lrapmath -ldidss \
-	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
+	-ltoolsa -lphysics -ldataport -ltdrp $(NETCDF4_LIBS) \
 	-lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
@@ -50,15 +50,13 @@ LOC_CFLAGS =
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
-	PartRain.hh \
-	TempProfile.hh
+	PartRain.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
 	Main.cc \
-	PartRain.cc \
-	TempProfile.cc
+	PartRain.cc
 
 #
 # tdrp macros

@@ -118,24 +118,6 @@ paramdef boolean {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to remove rays taken while the antenna was in transition.";
-  p_help = "If true, rays with the transition flag set will not be used. The transiton flag is set when the antenna is in transtion between one sweep and the next.";
-} remove_rays_with_antenna_transitions;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Number of transition rays to include as a margin";
-  p_help =  "Sometimes the transition flag is turned on too early in a transition, on not turned off quickly enough after a transition. If you set this to a number greater than 0, that number of rays will be included at each end of the transition, i.e. the transition will effectively be shorter at each end by this number of rays.";
-} transition_nrays_margin;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to trip surveillance sweeps so that they only cover 360 degrees.";
-  p_help = "Some sweeps will have rays which cover more than a 360-degree rotation. Often these include antenna transitions. If this is set to true, rays are trimmed off either end of the sweep to limit the coverage to 360 degrees. The median elevation angle is computed and the end ray which deviates from the median in elevation is trimmed first.";
-} trim_surveillance_sweeps_to_360deg;
-
-paramdef boolean {
-  p_default = false;
   p_descr = "Option to set the max range for any ray.";
 } set_max_range;
 
@@ -637,6 +619,36 @@ paramdef boolean {
   p_descr = "Option to output the individual interest fields.";
   p_help = "If TRUE, the interest field for each particle type will be written to the output FMQ, in addition to the list in 'output_fields'.";
 } PID_output_particle_interest_fields;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to locate the melting layer.";
+  p_help = "If true, the melting layer will be located using the WET_SNOW category. In addition, the ML_INTEREST field will be computed. Otherwise it will be missing. Follows Giangrande et al. - Automatic Designation of the Melting Layer with Polarimitric Prototype of WSR-88D Radar - AMS JAMC, Vol47, 2008.";
+} PID_locate_melting_layer;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Percentile value for estimating the bottom of the melting layer.";
+  p_help = "To locate the melting layer limits, we rank the heights of all gates containing WET_SNOW, from bottom to top. This is the percentile value for the bottom of the layer.";
+} melting_layer_percentile_for_bottom_limit;
+
+paramdef double {
+  p_default = 75.0;
+  p_descr = "Percentile value for estimating the top of the melting layer.";
+  p_help = "To locate the melting layer limits, we rank the heights of all gates containing WET_SNOW, from bottom to top. This is the percentile value for the top of the layer.";
+} melting_layer_percentile_for_top_limit;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to save melting layer properties to spdb.";
+  p_help = "If true, the melting layer properties will be saved to SPDB using XML encoding. See 'melting_layer_spdb_output_url'";
+} melting_layer_write_results_to_spdb;
+
+paramdef string {
+  p_default = "/tmp/spdb/melting_layer";
+  p_descr = "URL for writing melting layer results to SPDB XML.";
+  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
+} melting_layer_spdb_output_url;
 
 commentdef {
   p_header = "SOUNDING INPUT FOR PID temperatures - OPTIONAL";
@@ -1617,7 +1629,13 @@ typedef enum {
   ZDR_IN_BRAGG,
 
   ZDR_FLAG_IN_ICE,
-  ZDR_FLAG_IN_BRAGG
+  ZDR_FLAG_IN_BRAGG,
+
+  ML_INTEREST,
+
+  ELEVATION_ANGLE,
+  RANGE,
+  BEAM_HEIGHT
 
 } output_field_id_t;
 

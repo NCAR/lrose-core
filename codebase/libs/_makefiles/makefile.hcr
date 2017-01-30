@@ -12,6 +12,7 @@ SUB_DIRS = \
         euclid \
 	physics \
         Radx \
+        NcxxUtils \
         radar \
         toolsa \
         didss \
@@ -23,8 +24,7 @@ SUB_DIRS = \
         titan \
 	Mdv \
 	Fmq \
-	Spdb \
-        NcUtils
+	Spdb
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
 

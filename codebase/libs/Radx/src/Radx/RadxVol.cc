@@ -2382,6 +2382,12 @@ void RadxVol::trimSurveillanceSweepsTo360Deg()
 
 {
 
+  // does not apply to RHIs
+
+  if (!checkIsRhi()) {
+    return;
+  }
+  
   // clear utility flags
 
   for (size_t ii = 0; ii < _rays.size(); ii++) {
@@ -5502,6 +5508,10 @@ int RadxVol::loadPseudoRhis()
 
   clearPseudoRhis();
 
+  if (checkIsRhi()) {
+    return _loadPseudoFromRealRhis();
+  }
+
   // check scan type
 
   Radx::SweepMode_t sweepMode = getPredomSweepModeFromAngles();
@@ -5510,14 +5520,6 @@ int RadxVol::loadPseudoRhis()
     if (_debug) {
       cerr << "WARNING - RadxVol::loadPseudoRhis()" << endl;
       cerr << "  Sweep mode invalid: " << Radx::sweepModeToStr(sweepMode) << endl;
-    }
-    return -1;
-  }
-
-  if (_sweeps.size() < 1) {
-    if (_debug) {
-      cerr << "WARNING - RadxVol::loadPseudoRhis()" << endl;
-      cerr << "  No sweeps found" << endl;
     }
     return -1;
   }
@@ -5620,6 +5622,47 @@ int RadxVol::loadPseudoRhis()
 }
 
 ///////////////////////////////////////////////////////////////
+/// Load up pseudo RHIs from a real RHI volume
+/// The RHI sweeps are ordered in increasing elevation angle
+/// Returns 0 on success, -1 on error.
+/// After success, you can call getPseudoRhis().
+
+int RadxVol::_loadPseudoFromRealRhis()
+
+{
+
+  // loop through the sweeps
+  
+  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+    const RadxSweep *sweep = _sweeps[isweep];
+
+    // create pseudo RHI from sweep rays
+    // that are not in transition
+
+    PseudoRhi *rhi = new PseudoRhi;
+    for (size_t iray = sweep->getStartRayIndex();
+         iray <= sweep->getEndRayIndex(); iray++) {
+      RadxRay *ray = _rays[iray];
+      if (!ray->getAntennaTransition()) {
+        rhi->addRay(_rays[iray]);
+      }
+    }
+
+    // set the rays by elevation
+
+    rhi->sortRaysByElevation();
+
+    // add to vector
+
+    _pseudoRhis.push_back(rhi);
+    
+  } // isweep
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////
 /// clear vector of pseudo RHIs
 
 void RadxVol::clearPseudoRhis()
@@ -5633,6 +5676,261 @@ void RadxVol::clearPseudoRhis()
 
 }
 
+////////////////////////////////////////////////////////////////////
+// Load up a 2D field fl32 array from a vector of rays.
+// The ray data for the specified field will be converted to fl32.
+// This is a static method, does not use any vol members.
+//
+// Returns 0 on success, -1 on failure
+
+int RadxVol::load2DFieldFromRays(const vector<RadxRay *> &rays,
+                                 const string &fieldName,
+                                 RadxArray2D<Radx::fl32> &array,
+                                 Radx::fl32 missingValue /* = -9999.0 */)
+  
+{
+
+  // check field exists
+
+  bool fieldFound = false;
+  size_t maxNGates = 0;
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+    const RadxRay *ray = rays[iray];
+    if (ray->getField(fieldName) != NULL) {
+      fieldFound = true;
+      if (ray->getNGates() > maxNGates) {
+        maxNGates = ray->getNGates();
+      }
+    }
+  }
+
+  if (!fieldFound) {
+    cerr << "ERROR - RadxVol::load2DFieldFromRays()" << endl;
+    cerr << "  Field not found: " << fieldName << endl;
+    return -1;
+  }
+
+  // allocate array
+
+  array.alloc(rays.size(), maxNGates);
+  Radx::fl32 **data = array.dat2D();
+
+  // initialize to missing
+
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+    for (size_t igate = 0; igate < maxNGates; igate++) {
+      data[iray][igate] = missingValue;
+    }
+  }
+
+  // fill array in ray order
+  
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+    RadxRay *ray = rays[iray];
+    size_t nGates = ray->getNGates();
+    RadxField *fld = ray->getField(fieldName);
+    if (fld == NULL) {
+      continue;
+    }
+    fld->convertToFl32();
+    Radx::fl32 miss = fld->getMissingFl32();
+    const Radx::fl32 *vals = fld->getDataFl32();
+    for (size_t igate = 0; igate < nGates; igate++) {
+      Radx::fl32 val = vals[igate];
+      if (val != miss) {
+        data[iray][igate] = val;
+      }
+    } // igate
+  } // iray
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////////////////////////
+// Load up a 2D field si32 array from a vector of rays
+// The ray data for the specified field will be converted to si32.
+// This is a static method, does not use any vol members.
+// Returns 0 on success, -1 on failure
+
+int RadxVol::load2DFieldFromRays(const vector<RadxRay *> &rays,
+                                 const string &fieldName,
+                                 RadxArray2D<Radx::si32> &array,
+                                 Radx::si32 missingValue /* = -9999.0 */)
+  
+{
+
+  // check field exists
+
+  bool fieldFound = false;
+  size_t maxNGates = 0;
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+    const RadxRay *ray = rays[iray];
+    if (ray->getField(fieldName) != NULL) {
+      fieldFound = true;
+      if (ray->getNGates() > maxNGates) {
+        maxNGates = ray->getNGates();
+      }
+    }
+  }
+
+  if (!fieldFound) {
+    cerr << "ERROR - RadxVol::load2DFieldFromRays()" << endl;
+    cerr << "  Field not found: " << fieldName << endl;
+    return -1;
+  }
+
+  // allocate array
+
+  array.alloc(rays.size(), maxNGates);
+  Radx::si32 **data = array.dat2D();
+
+  // initialize to missing
+
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+    for (size_t igate = 0; igate < maxNGates; igate++) {
+      data[iray][igate] = missingValue;
+    }
+  }
+
+  // fill array in ray order
+  
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+    RadxRay *ray = rays[iray];
+    size_t nGates = ray->getNGates();
+    RadxField *fld = ray->getField(fieldName);
+    if (fld == NULL) {
+      continue;
+    }
+    fld->convertToSi32();
+    Radx::si32 miss = fld->getMissingSi32();
+    const Radx::si32 *vals = fld->getDataSi32();
+    for (size_t igate = 0; igate < nGates; igate++) {
+      Radx::si32 val = vals[igate];
+      if (val != miss) {
+        data[iray][igate] = val;
+      }
+    } // igate
+  } // iray
+
+  return 0;
+
+}
+                             
+//////////////////////////////////////////////////////////////
+// Load up ray fields from 2D fl32 field array.
+// This is a static method, does not use any vol members.
+// Returns 0 on success, -1 on failure
+
+int RadxVol::loadRaysFrom2DField(const RadxArray2D<Radx::fl32> &array,
+                                 const vector<RadxRay *> &rays,
+                                 const string &fieldName,
+                                 const string &units,
+                                 Radx::fl32 missingValue)
+
+  
+{
+
+  if (array.sizeMajor() != (int) rays.size()) {
+    cerr << "ERROR - RadxVol::loadRaysFrom2DField()" << endl;
+    cerr << "  Array major dimension does not match nRays" << endl;
+    cerr << "  Array major size: " << array.sizeMajor() << endl;
+    cerr << "  nRays: " << rays.size() << endl;
+    cerr << "  Field: " << fieldName << endl;
+    return -1;
+  }
+
+  // fill rays in order
+
+  Radx::fl32 **data = array.dat2D();
+  
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+
+    RadxRay *ray = rays[iray];
+    int nGates = ray->getNGates();
+    if (nGates > array.sizeMinor()) {
+      nGates = array.sizeMinor();
+    }
+
+    RadxField *fld = ray->getField(fieldName);
+
+    if (fld == NULL) {
+      // field does not exist, create it
+      fld = new RadxField(fieldName, units);
+      fld->setTypeFl32(missingValue);
+      fld->setMissingFl32(missingValue);
+      fld->addDataFl32(nGates, data[iray]);
+      ray->addField(fld);
+    } else {
+      // copy the data in
+      fld->clearData();
+      fld->setMissingFl32(missingValue);
+      fld->addDataFl32(nGates, data[iray]);
+    }
+
+  } // iray
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////////////////
+// Load up ray fields from 2D si32 field array.
+// This is a static method, does not use any vol members.
+// Returns 0 on success, -1 on failure
+
+int RadxVol::loadRaysFrom2DField(const RadxArray2D<Radx::si32> &array,
+                                 const vector<RadxRay *> &rays,
+                                 const string &fieldName,
+                                 const string &units,
+                                 Radx::si32 missingValue)
+
+  
+{
+
+  if (array.sizeMajor() != (int) rays.size()) {
+    cerr << "ERROR - RadxVol::loadRaysFrom2DField()" << endl;
+    cerr << "  Array major dimension does not match nRays" << endl;
+    cerr << "  Array major size: " << array.sizeMajor() << endl;
+    cerr << "  nRays: " << rays.size() << endl;
+    cerr << "  Field: " << fieldName << endl;
+    return -1;
+  }
+
+  // fill rays in order
+
+  Radx::si32 **data = array.dat2D();
+  
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+
+    RadxRay *ray = rays[iray];
+    int nGates = ray->getNGates();
+    if (nGates > array.sizeMinor()) {
+      nGates = array.sizeMinor();
+    }
+
+    RadxField *fld = ray->getField(fieldName);
+
+    if (fld == NULL) {
+      // field does not exist, create it
+      fld = new RadxField(fieldName, units);
+      fld->setTypeSi32(missingValue, 1.0, 0.0);
+      fld->setMissingSi32(missingValue);
+      fld->addDataSi32(nGates, data[iray]);
+      ray->addField(fld);
+    } else {
+      // copy the data in
+      fld->clearData();
+      fld->setMissingSi32(missingValue);
+      fld->addDataSi32(nGates, data[iray]);
+    }
+
+  } // iray
+
+  return 0;
+
+}
+                  
 ////////////////////////////////////////////  
 /// Set up angle search, for a given sweep
 /// Return 0 on success, -1 on failure

@@ -66,6 +66,10 @@ public:
 
   ~InterestMap();
 
+  // set the missing value
+
+  void setMissingValue(double miss) { _missingDbl = miss; }
+  
   // get interest for a given val
 
   double getInterest(double val);
@@ -75,9 +79,17 @@ public:
   void getWeightedInterest(double val, double &interest, double &wt);
   
   // accumulate weighted interest based on value
+  // If interest is less than minValidInterest, the sum
+  // is not performed.
 
   void accumWeightedInterest(double val,
-                             double &sumInterest, double &sumWt);
+                             double &sumInterest,
+                             double &sumWt,
+                             double minValidInterest = 0.00001);
+  
+  // get weight
+
+  double getWeight() const { return _weight; }
   
   // Print interest map parameters
   
@@ -86,7 +98,7 @@ public:
 protected:
 private:
   
-  static const double _missingDbl;
+  static double _missingDbl;
   static const int _nLut = 10001;
 
   string _label;
@@ -104,7 +116,7 @@ private:
 };
 
 #ifdef _in_interest_map_cc
-const double InterestMap::_missingDbl = -9999.0;
+double InterestMap::_missingDbl = -9999.0;
 #endif
 
 #endif

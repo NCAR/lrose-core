@@ -9,7 +9,6 @@ TARGETS =  $(GENERAL_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
 SUB_DIRS = \
 	tdrp \
 	procmap \
-	servmap \
 	spdb_utils \
 	mdv_utils
 

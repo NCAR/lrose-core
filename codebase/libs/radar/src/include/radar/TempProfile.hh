@@ -38,13 +38,63 @@
 #define TempProfile_H
 
 #include <string>
-#include <radar/NcarParticleId.hh>
+#include <vector>
 
 using namespace std;
 
 class TempProfile {
   
 public:
+
+  ////////////////////////////
+  // Interior class: PointVal
+  
+  /**
+   * @class TmpPoint
+   *   An object to hold temperature, pressure, and height values
+   *   at a point
+   */
+  class PointVal {
+  
+  public:
+    
+    // constructor
+    
+    /**
+     * Constructor
+     * @param[in] press The pressure at this gate (Hpa)
+     * @param[in] ht The height of this gate (km)
+     * @param[in] temp The temperature at this gate (C)
+     */
+    PointVal(double press, double ht, double tmp);
+
+    /**
+     * Constructor
+     * @param[in] ht The height of this gate (km)
+     * @param[in] temp The temperature at this gate (C)
+     */
+    PointVal(double ht, double tmp);
+    
+    /**
+     * Destructor
+     */
+    ~PointVal();
+
+    // print tmpPoint
+
+    /**
+     * Print the contents of this TmpPoint
+     * @param[out] out The stream to print to
+     */
+    void print(ostream &out) const;
+    
+    // data
+
+    double pressHpa;   /**< The pressure at this gate (Hpa), or -9999 if unavailable */
+    double htKm;       /**< The height of this gate (km) */
+    double tmpC;       /**< The temperature at this gate (C) */
+    
+  };
 
   // constructor
   
@@ -61,12 +111,18 @@ public:
   int getTempProfile(const string &url,
                      time_t dataTime,
                      time_t &soundingTime,
-                     vector<NcarParticleId::TmpPoint> &tmpProfile);
+                     vector<PointVal> &tmpProfile);
 
   // optionally get access to the profile
   // If getTempProfile() returned failure, tmpProfile will be empty
 
-  const vector<NcarParticleId::TmpPoint> &getProfile() const { return _tmpProfile; }
+  const vector<PointVal> &getProfile() const { return _tmpProfile; }
+  
+  // get temperature at a given height
+  // returns -9999 if no temp profile available
+  // on first call will create lut
+  
+  double getTempForHtKm(double htKm) const;
 
   // clear the profile
 
@@ -175,6 +231,10 @@ public:
 
   void setHeightCorrectionKm(double val) { _heightCorrectionKm = val; }
 
+  /// print
+
+  void print(ostream &out) const;
+
   // debugging
 
   void setDebug() { _debug = true; }
@@ -187,7 +247,7 @@ private:
   bool _verbose;
 
   time_t _soundingTime;
-  vector<NcarParticleId::TmpPoint> _tmpProfile;
+  vector<PointVal> _tmpProfile;
   double _freezingLevel;
   
   string _soundingSpdbUrl;
@@ -211,11 +271,22 @@ private:
 
   double _heightCorrectionKm; /* correction made to sounding heights
                                * as they are read in */
+
+  mutable vector<double> _lutByMeterHt; /* array of temperature with height
+                                         * one entry per meter */
+  
+  mutable int _tmpMinHtMeters;  /**< Mimimum height of the temperature profile (m) */
+  mutable int _tmpMaxHtMeters;  /**< Maximum height of the temperature profile (m) */
+
+  mutable double _tmpBottomC;    /**< Temperature at the base of the profile */
+  mutable double _tmpTopC;       /**< Temperature at the top of the profile */
+
   // methods
 
   int _getTempProfile(time_t searchTime);
   int _checkTempProfile();
   void _computeFreezingLevel();
+  void _createLutByMeterHt() const;
 
 };
 

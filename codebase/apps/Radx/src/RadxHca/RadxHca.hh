@@ -53,7 +53,6 @@
 #include "Args.hh"
 #include "Params.hh"
 #include "ComputeEngine.hh"
-#include "HcaInterestMap.hh"
 #include <string>
 #include <deque>
 #include <radar/NoiseLocator.hh>
@@ -117,6 +116,7 @@ private:
 
   double _radarHtKm;
   double _wavelengthM;
+  double _vertBeamWidthDeg;
   BeamHeight _beamHt;
 
   // temperature profile from sounding, if appropriate
@@ -137,13 +137,6 @@ private:
   // checking timing performance
 
   struct timeval _timeA;
-
-  // interest maps
-
-  static const size_t nClasses = 10;
-  static const size_t nFeatures = 6;
-  
-  HcaInterestMap* _imaps[nClasses][nFeatures];
 
   // private methods
   
@@ -175,12 +168,6 @@ private:
   void _copyDbzGradient(const RadxRay &lowerRay, RadxRay &upperRay);
   void _printRunTime(const string& str);
 
-  void _initInterestMaps();
-  int _createInterestMaps();
-  int _checkInterestMaps();
-  void _printInterestMaps(ostream &out);
-  void _deleteInterestMaps();
-  
 };
 
 #endif

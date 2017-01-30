@@ -7,8 +7,12 @@
 *.a
 *.la
 *.lo
+
+# emacs
+
 ~*
 *~
+TAGS
 
 # cvs
 
@@ -24,6 +28,7 @@ makefile.in
 makefile.am
 __makefile.template
 .libs
+compile
 
 codebase/Makefile.top
 codebase/VERSION
@@ -196,6 +201,7 @@ codebase/apps/ingest/src/GtsSockIngest/GtsSockIngest
 codebase/apps/ingest/src/LdmDynamic2Static/LdmDynamic2Static
 codebase/apps/ingest/src/LdmMetars2File/LdmMetars2File
 codebase/apps/ingest/src/Ltg2Spdb/Ltg2Spdb
+codebase/apps/ingest/src/madis2Spdb/madis2Spdb
 codebase/apps/ingest/src/Metar2Spdb/Metar2Spdb
 codebase/apps/ingest/src/Mrms2Mdv/Mrms2Mdv
 codebase/apps/ingest/src/MrmsGribIngest/MrmsGribIngest

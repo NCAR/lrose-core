@@ -442,16 +442,16 @@ NcxxType NcxxRadxFile::_getNcType(Radx::DataType_t dtype)
 {
   switch (dtype) {
     case Radx::FL64:
-      return ncDouble;
+      return ncxxDouble;
     case Radx::FL32:
-      return ncFloat;
+      return ncxxFloat;
     case Radx::SI32:
-      return ncInt;
+      return ncxxInt;
     case Radx::SI16:
-      return ncShort;
+      return ncxxShort;
     case Radx::SI08:
     default:
-      return ncByte;
+      return ncxxByte;
   }
 }
 

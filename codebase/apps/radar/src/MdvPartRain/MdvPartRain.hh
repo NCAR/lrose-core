@@ -55,7 +55,6 @@
 #include <radar/KdpBringi.hh>
 #include <radar/NcarParticleId.hh>
 #include <toolsa/TaArray.hh>
-class TempProfile;
 using namespace std;
 
 class MdvPartRain {
@@ -105,8 +104,6 @@ private:
   PrecipRate _rate;        /**< Object to calculate precip rates for a radar beam */
   NcarParticleId _partId;  /**< Object to calculate particle id for a radar beam*/
   KdpBringi _kdpBringi;    /**< Object to calculate Kdp for SBand, based on Bringi code */
-
-  TempProfile *_tempProfile;  /**< The current temperature profile, from a sounding or the parameter file */
 
   /////////////////////////////////////////
   // input data

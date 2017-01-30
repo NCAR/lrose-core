@@ -158,6 +158,10 @@ NcarParticleId::NcarParticleId()
 
   _ngatesSdev = 9;
 
+  // melting layer
+
+  _mlInit();
+
 }
 
 /////////////////////////////////////////////////////////
@@ -171,6 +175,19 @@ NcarParticleId::~NcarParticleId()
     delete _particleList[ii];
   }
   _particleList.clear();
+
+  if (_mlDbzInterest) {
+    delete _mlDbzInterest;
+  }
+  if (_mlZdrInterest) {
+    delete _mlZdrInterest;
+  }
+  if (_mlRhohvInterest) {
+    delete _mlRhohvInterest;
+  }
+  if (_mlTempInterest) {
+    delete _mlTempInterest;
+  }
 
   clear();
 
@@ -359,6 +376,7 @@ void NcarParticleId::initializeArrays(int nGates)
     _sdzdr[ii] = _missingDouble;
     _sdphidp[ii] = _missingDouble;
     _cflags[ii] = false;
+    _mlInterest[ii] = _missingDouble;
   }
   
 }
@@ -539,6 +557,12 @@ void NcarParticleId::computePidBeam(int nGates,
     FilterUtils::applyMedianFilter(_pid2, nGates, _pidMedianFilterLen);
   }
 
+  // compute melting layer
+  
+  if (_computeMl) {
+    _mlCompute();
+  }
+  
 }
 
 /////////////////////////////////////////////////////////
@@ -623,7 +647,8 @@ void NcarParticleId::computePid(double snr,
 void NcarParticleId::_allocArrays(int nGates)
   
 {
-  
+
+  _nGates = nGates;
   _snr = _snr_.alloc(nGates);
   _dbz = _dbz_.alloc(nGates);
   _zdr = _zdr_.alloc(nGates);
@@ -641,6 +666,8 @@ void NcarParticleId::_allocArrays(int nGates)
   _sdzdr = _sdzdr_.alloc(nGates);
   _sdphidp = _sdphidp_.alloc(nGates);
   _cflags = _cflags_.alloc(nGates);
+
+  _mlInterest = _mlInterest_.alloc(nGates);
 
 }
 
@@ -705,7 +732,7 @@ int NcarParticleId::_setTempProfile(const char *line)
   for (int ii = 0; ii < (int) toks.size(); ii++) {
     double ht, tmp;
     if (sscanf(toks[ii].c_str(), "%lg,%lg", &ht, &tmp) == 2) {
-      TmpPoint tmpPt(ht, tmp);
+      TempProfile::PointVal tmpPt(ht, tmp);
       _tmpProfile.push_back(tmpPt); 
     }
   }
@@ -768,7 +795,7 @@ void NcarParticleId::_computeTempHtLookup()
 // This is used to override the temperature profile in the
 // thresholds file, for example from a sounding.
 
-void NcarParticleId::setTempProfile(const vector<TmpPoint> &profile)
+void NcarParticleId::setTempProfile(const vector<TempProfile::PointVal> &profile)
   
 {
 
@@ -1061,6 +1088,139 @@ void NcarParticleId::print(ostream &out)
 
 }
 
+//////////////////////////////////////////////
+// Initialze melting layer computations
+
+void NcarParticleId::_mlInit()
+  
+{
+
+  _computeMl = false;
+  _mlDbzInterest = NULL;
+  _mlZdrInterest = NULL;
+  _mlRhohvInterest = NULL;
+  _mlTempInterest = NULL;
+
+  vector<InterestMap::ImPoint> pts;
+
+  // dbz interest map
+
+  pts.clear();
+  pts.push_back(InterestMap::ImPoint(25.0, 0.0));
+  pts.push_back(InterestMap::ImPoint(30.0, 1.0));
+  pts.push_back(InterestMap::ImPoint(47.0, 1.0));
+  pts.push_back(InterestMap::ImPoint(52.0, 0.0));
+  _mlDbzInterest = new InterestMap("dbz4ml", pts, 1.0);
+  _mlDbzInterest->setMissingValue(_missingDouble);
+
+  // zdr interest map
+
+  pts.clear();
+  pts.push_back(InterestMap::ImPoint(0.60, 0.0));
+  pts.push_back(InterestMap::ImPoint(0.80, 1.0));
+  pts.push_back(InterestMap::ImPoint(2.50, 1.0));
+  pts.push_back(InterestMap::ImPoint(2.70, 0.0));
+  _mlZdrInterest = new InterestMap("zdr4ml", pts, 1.0);
+  _mlZdrInterest->setMissingValue(_missingDouble);
+
+  // rhohv interest map
+
+  pts.clear();
+  pts.push_back(InterestMap::ImPoint(0.85, 0.0));
+  pts.push_back(InterestMap::ImPoint(0.90, 1.0));
+  pts.push_back(InterestMap::ImPoint(0.97, 1.0));
+  pts.push_back(InterestMap::ImPoint(0.972, 0.0));
+  _mlRhohvInterest = new InterestMap("rhohv4ml", pts, 1.0);
+  _mlRhohvInterest->setMissingValue(_missingDouble);
+
+  // temp interest map
+
+  pts.clear();
+  pts.push_back(InterestMap::ImPoint(-5.0, 0.0));
+  pts.push_back(InterestMap::ImPoint(-1.0, 1.0));
+  pts.push_back(InterestMap::ImPoint(1.0, 1.0));
+  pts.push_back(InterestMap::ImPoint(5.0, 0.0));
+  _mlTempInterest = new InterestMap("temp4ml", pts, 1.0);
+  _mlTempInterest->setMissingValue(_missingDouble);
+
+}
+
+////////////////////////////////////////////////////////////
+// compute Melting Layer
+//
+// Follows Giangrande et al. - Automatic Designation of the
+// Melting Layer with Polarimitric Prototype of WSR-88D Radar.
+// AMS JAMC, Vol47, 2008.
+
+void NcarParticleId::_mlCompute()
+  
+{
+
+  for (int igate = 0; igate < _nGates; igate++) {
+
+    // check for missing values
+
+    _mlInterest[igate] = _missingDouble;
+    double dbz = _dbz[igate];
+    double zdr = _zdr[igate];
+    double rhohv = _rhohv[igate];
+
+    if (dbz == _missingDouble ||
+        zdr == _missingDouble ||
+        rhohv == _missingDouble) {
+      continue;
+    }
+
+    // check for PID type
+
+    int pidVal = _pid[igate];
+    if (pidVal > 14) {
+      // not a cloud particle, so set to 0
+      _mlInterest[igate] = 0.0;
+      continue;
+    }
+
+    // check temperature
+
+    // double temp = _tempC[igate];
+    // if (temp < -2 || temp > 2) {
+    //   continue;
+    // }
+
+    // compute interest
+
+    double sumInterest = 0.0;
+    double sumWt = 0.0;
+
+    _mlDbzInterest->accumWeightedInterest(dbz, sumInterest, sumWt, -1);
+    _mlZdrInterest->accumWeightedInterest(zdr, sumInterest, sumWt, -1);
+    _mlRhohvInterest->accumWeightedInterest(rhohv, sumInterest, sumWt, -1);
+    _mlTempInterest->accumWeightedInterest(_tempC[igate], sumInterest, sumWt, -1);
+
+    _mlInterest[igate] = sumInterest / sumWt;
+
+    // double dbzInt = _mlDbzInterest->getInterest(dbz);
+    // double dbzWt = _mlDbzInterest->getWeight();
+
+    // double zdrInt = _mlZdrInterest->getInterest(zdr);
+    // double zdrWt = _mlZdrInterest->getWeight();
+
+    // double rhohvInt = _mlRhohvInterest->getInterest(rhohv);
+    // double rhohvWt = _mlRhohvInterest->getWeight();
+
+    // if (dbz > 30) {
+    //   cerr << "11111111: "
+    //        << dbz << ", " << dbzInt << ", " << dbzWt << " # "
+    //        << zdr << ", " << zdrInt << ", " << zdrWt << " #  "
+    //        << rhohv << ", " << rhohvInt << ", " << rhohvWt << " # "
+    //        << sumInterest << ", " << sumWt << ", " 
+    //        << _mlInterest[igate] << ", " << _missingDouble << endl;
+    // }
+
+  } // igate
+
+}
+    
 //////////////////////////////////////////////////////////////
 // Particle interior class
 
@@ -1359,55 +1519,6 @@ void NcarParticleId::Particle::print(ostream &out)
   out << "-----------------------------------------" << endl;
 
   out << "=============================================================" << endl;
-
-}
-
-//////////////////////////////////////////////////////////////
-// TmpPoint interior class
-
-// Constructor
-
-NcarParticleId::TmpPoint::TmpPoint(double ht, double tmp)
-
-{
-
-  pressHpa = -9999;
-  htKm = ht;
-  tmpC = tmp;
-
-}
-
-NcarParticleId::TmpPoint::TmpPoint(double press, double ht, double tmp)
-
-{
-
-  pressHpa = press;
-  htKm = ht;
-  tmpC = tmp;
-
-}
-
-/////////////////////////////////////////////////////////
-// destructor
-
-NcarParticleId::TmpPoint::~TmpPoint()
-
-{
-
-}
-
-/////////////////////////////////////////////////////////
-// print
-
-void NcarParticleId::TmpPoint::print(ostream &out)
-
-{
-
-  out << "---- Temp point ----" << endl;
-  out << "  Pressure Hpa: " << pressHpa << endl;
-  out << "  Height Km: " << htKm << endl;
-  out << "  Temp    C: " << tmpC << endl;
-  out << "------------------" << endl;
 
 }
 
