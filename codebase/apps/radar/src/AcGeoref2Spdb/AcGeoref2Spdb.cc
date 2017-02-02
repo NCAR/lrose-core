@@ -997,7 +997,7 @@ int AcGeoref2Spdb::_readTimes()
   _times = _times_.alloc(_nTimes);
   TaArray<int> dTimes_;
   int *dTimes = dTimes_.alloc(_nTimes);
-  _timeVar.getVar(dTimes);
+  _timeVar.getVal(dTimes);
 
   for (size_t ii = 0; ii < _nTimes; ii++) {
     _times[ii] = _timeBase.utime() + dTimes[ii];
@@ -1190,7 +1190,7 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
 
   double *dArray = array.dat();
   if (varType == NC_DOUBLE) {
-    var.getVar(dArray);
+    var.getVal(dArray);
     for (size_t ii = 0; ii < _nTimes; ii++) {
       if (dArray[ii] == dfill) {
         dArray[ii] = _missingDbl;
@@ -1199,7 +1199,7 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
   } else if (varType == NC_FLOAT) {
     TaArray<float> fArray_;
     float *fArray = fArray_.alloc(_nTimes);
-    var.getVar(fArray);
+    var.getVal(fArray);
     for (size_t ii = 0; ii < _nTimes; ii++) {
       if (fArray[ii] == ffill) {
         dArray[ii] = _missingDbl;
@@ -1210,7 +1210,7 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
   } else if (varType == NC_INT) {
     TaArray<int> iArray_;
     int *iArray = iArray_.alloc(_nTimes);
-    var.getVar(iArray);
+    var.getVal(iArray);
     for (size_t ii = 0; ii < _nTimes; ii++) {
       if (iArray[ii] == ifill) {
         dArray[ii] = _missingDbl;
