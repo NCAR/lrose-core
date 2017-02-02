@@ -1807,7 +1807,7 @@ int NcxxGroup::readIntVar(NcxxVar &var, const string &name,
   vector<int> vals;
   vals.resize(var.numVals());
   try {
-    var.getVar(&vals[0]);
+    var.getVal(&vals[0]);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxGroup::readIntVar");
     _addErrStr("  cannot read variable, name: ", name);
@@ -1858,7 +1858,7 @@ int NcxxGroup::readFloatVar(NcxxVar &var, const string &name,
   vector<float> vals;
   vals.resize(var.numVals());
   try {
-    var.getVar(&vals[0]);
+    var.getVal(&vals[0]);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxGroup::readFloatVar");
     _addErrStr("  cannot read variable, name: ", name);
@@ -1909,7 +1909,7 @@ int NcxxGroup::readDoubleVar(NcxxVar &var, const string &name,
   vector<double> vals;
   vals.resize(var.numVals());
   try {
-    var.getVar(&vals[0]);
+    var.getVal(&vals[0]);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxGroup::readDoubleVar");
     _addErrStr("  cannot read variable, name: ", name);
@@ -1978,7 +1978,7 @@ int NcxxGroup::readCharStringVar(NcxxVar &var, const string &name, string &val)
   char *cvalues = new char[stringLen+1];
 
   try {
-    var.getVar(cvalues);
+    var.getVal(cvalues);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxGroup::readCharStringVar");
     _addErrStr("  cannot read variable, name: ", name);
