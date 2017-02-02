@@ -916,7 +916,7 @@ int NcxxRadxFile::_readTimes(int pathNum)
   RadxArray<double> dtimes_;
   double *dtimes = dtimes_.alloc(_nTimesInFile);
   try {
-    _timeVar.getVar(dtimes);
+    _timeVar.getVal(dtimes);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_readTimes");
     _addErrStr("  Cannot read times variable");
@@ -979,7 +979,7 @@ int NcxxRadxFile::_readRangeVariable()
 
     double *rangeMeters = new double[_nRangeInFile];
     try {
-      _rangeVar.getVar(rangeMeters);
+      _rangeVar.getVal(rangeMeters);
       double *rr = rangeMeters;
       for (size_t ii = 0; ii < _nRangeInFile; ii++, rr++) {
         _rangeKm.push_back(*rr / 1000.0);
@@ -1009,7 +1009,7 @@ int NcxxRadxFile::_readRangeVariable()
     dimSizes.push_back(_nRangeInFile);
     double *rangeMeters = new double[_nTimesInFile * _nRangeInFile];
     try {
-      _rangeVar.getVar(dimSizes, rangeMeters);
+      _rangeVar.getVal(dimSizes, rangeMeters);
       double *rr = rangeMeters;
       for (size_t ii = 0; ii < _nRangeInFile; ii++, rr++) {
         _rangeKm.push_back(*rr / 1000.0);
@@ -1280,7 +1280,7 @@ int NcxxRadxFile::_readPositionVariables()
       _addErrStr(_file.getErrStr());
       return -1;
     }
-    if (_latitudeVar.getType() != ncDouble) {
+    if (_latitudeVar.getType() != ncxxDouble) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  latitude is incorrect type: ", 
                  Ncxx::ncTypeToStr(_latitudeVar.getType().getId()));
@@ -1301,7 +1301,7 @@ int NcxxRadxFile::_readPositionVariables()
       _addErrStr(_file.getErrStr());
       return -1;
     }
-    if (_longitudeVar.getType() != ncDouble) {
+    if (_longitudeVar.getType() != ncxxDouble) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  longitude is incorrect type: ",
                  Ncxx::ncTypeToStr(_longitudeVar.getType().getId()));
@@ -1322,7 +1322,7 @@ int NcxxRadxFile::_readPositionVariables()
       _addErrStr(_file.getErrStr());
       return -1;
     }
-    if (_altitudeVar.getType() != ncDouble) {
+    if (_altitudeVar.getType() != ncxxDouble) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  altitude is incorrect type: ",
                  Ncxx::ncTypeToStr(_altitudeVar.getType().getId()));
@@ -1342,7 +1342,7 @@ int NcxxRadxFile::_readPositionVariables()
       _addErrStr("  Bad variable - altitudeAgl");
       _addErrStr(_file.getErrStr());
     }
-    if (_altitudeAglVar.getType() != ncDouble) {
+    if (_altitudeAglVar.getType() != ncxxDouble) {
       _addErrStr("WARNING - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  altitudeAgl is incorrect type: ",
                  Ncxx::ncTypeToStr(_altitudeAglVar.getType().getId()));
@@ -1354,7 +1354,7 @@ int NcxxRadxFile::_readPositionVariables()
 
   if (!_latitudeVar.isNull()) {
     double *data = new double[_latitudeVar.numVals()];
-    if (_latitudeVar.get(data, _latitudeVar.numVals())) {
+    if (_latitudeVar.getVal(data, _latitudeVar.numVals())) {
       double *dd = data;
       for (int ii = 0; ii < _latitudeVar.numVals(); ii++, dd++) {
         _latitude.push_back(*dd);
@@ -2349,7 +2349,7 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     
     // check the type
     NcType ftype = var->type();
-    if (ftype != ncDouble && ftype != ncFloat && ftype != ncInt &&
+    if (ftype != ncxxDouble && ftype != ncFloat && ftype != ncInt &&
         ftype != ncShort && ftype != ncByte) {
       // not a valid type
       continue;
@@ -2517,7 +2517,7 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     int iret = 0;
     
     switch (var->type()) {
-      case ncDouble: {
+      case ncxxDouble: {
         if (_addFl64FieldToRays(var, name, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
