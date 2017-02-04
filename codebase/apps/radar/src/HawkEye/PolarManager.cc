@@ -65,11 +65,18 @@
 #include <QRadioButton>
 #include <QStatusBar>
 #include <QVBoxLayout>
+#include <QDateTime>
+#include <QDateTimeEdit>
+#include <QLineEdit>
+#include <QErrorMessage>
 
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pmu.h>
 #include <toolsa/DateTime.hh>
+#include <toolsa/Path.hh>
+#include <dsserver/DsLdataInfo.hh>
 #include <radar/RadarComplex.hh>
+#include <Radx/RadxFile.hh>
 
 using namespace std;
 
@@ -91,11 +98,26 @@ PolarManager::PolarManager(const Params &params,
   _endAz = -9999.0;
   _ppiRays = NULL;
   _rhiRays = NULL;
+  _rhiMode = false;
 
   // initialize geometry
   
   _nGates = 1000;
   _maxRange = _params.max_range_km;
+
+  _realtimeModeButton = NULL;
+  _archiveModeButton = NULL;
+
+  _archiveMode = _params.begin_in_archive_mode;
+  _archiveRetrievalPending = false;
+  _archiveTimeBox = NULL;
+  _archiveStartTimeEdit = NULL;
+  _archiveEndTimeEcho = NULL;
+
+  _archiveStartTime.set(_params.archive_start_time);
+
+  _archivePeriodStartTime.set(_params.archive_start_time);
+  _archivePeriodEndTime.set(_params.archive_end_time);
 
   // set up ray locators
 
@@ -169,6 +191,15 @@ void PolarManager::enableZoomButton() const
   _unzoomAct->setEnabled(true);
 }
 
+//////////////////////////////////////////////////
+// time axis changes
+
+void PolarManager::_cancelTimeControllerChanges()
+{
+  _refreshTimeControllerDialog();
+  _timeControllerDialog->setVisible(false);
+}
+
 //////////////////////////////////////////////////////////////
 // respond to timer events
   
@@ -201,43 +232,47 @@ void PolarManager::timerEvent(QTimerEvent *event)
     _statusLayout->setColumnMinimumWidth(1, maxWidth);
   
     _firstTimerEvent = false;
+
+  } // if (_firstTimerEvent)
+
+  // check for image creation
+  
+  if (_params.images_auto_create) {
+    
+    // if we are just creating files in archive mode and then exiting, do that now
+    
+    if (_params.images_creation_mode == Params::CREATE_IMAGES_THEN_EXIT ||
+        _params.images_creation_mode == Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
+      _createArchiveImageFiles();
+      close();
+      return;
+    }
+    
+    // if we are creating files in realtime mode, do that now
+    
+    if (_params.images_creation_mode == Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
+      _handleRealtimeData(event);
+      _createRealtimeImageFiles();
+      return;
+    }
+    
+  }
+  
+  // handle event
+  
+  if (event->timerId() == _beamTimerId) {
+    
+    if (_archiveMode) {
+      if (_archiveRetrievalPending) {
+        _handleArchiveData(event);
+        _archiveRetrievalPending = false;
+      }
+    } else {
+      _handleRealtimeData(event);
+    }
+
   }
 
-  if (event->timerId() == _beamTimerId && !_frozen) {
-
-    // get all available beams
-
-    while (true) {
-
-      // get the next ray from the reader queue
-      // responsibility for this ray memory passes to
-      // this (the master) thread
-
-      RadxRay *ray = _reader->getNextRay(_platform);
-      if (ray == NULL) {
-        break; // no pending rays
-      }
-
-      if (_params.debug >= Params::DEBUG_EXTRA) {
-        cerr << "  Got a ray, time, el, az: "
-             << DateTime::strm(ray->getTimeSecs()) << ", "
-             << ray->getElevationDeg() << ", "
-             << ray->getAzimuthDeg() << endl;
-        // ray->printWithFieldMeta(cerr);
-      }
-
-      // update the status panel
-      
-      _updateStatusPanel(ray);
-      
-      // draw the beam
-      
-      _handleRay(_platform, ray);
-    
-    } // while
-
-  }
-    
 }
 
 ///////////////////////////////////////////////
@@ -420,6 +455,10 @@ void PolarManager::_setupWindows()
 
   _createClickReportDialog();
 
+  // create the time controller settings dialog
+  
+  _createTimeControllerDialog();
+
 }
 
 //////////////////////////////////////////////
@@ -450,28 +489,52 @@ void PolarManager::_createRhiWindow()
 void PolarManager::_createActions()
 {
 
+  // freeze display
+
   _freezeAct = new QAction(tr("Freeze"), this);
   _freezeAct->setShortcut(tr("Esc"));
   _freezeAct->setStatusTip(tr("Freeze display"));
   connect(_freezeAct, SIGNAL(triggered()), this, SLOT(_freeze()));
   
+  // show user click in dialog
+
   _showClickAct = new QAction(tr("Show Click"), this);
   _showClickAct->setStatusTip(tr("Show click value dialog"));
   connect(_showClickAct, SIGNAL(triggered()), this, SLOT(_showClick()));
 
+  // set time controller settings
+
+  _timeControllerAct = new QAction(tr("Time-Config"), this);
+  _timeControllerAct->setStatusTip(tr("Set configuration for time controller"));
+  connect(_timeControllerAct, SIGNAL(triggered()), this, SLOT(_showTimeControllerDialog()));
+
+  // unzoom display
+
   _unzoomAct = new QAction(tr("Unzoom"), this);
   _unzoomAct->setStatusTip(tr("Unzoom to original view"));
   connect(_unzoomAct, SIGNAL(triggered()), this, SLOT(_unzoom()));
+
+  // refresh display
+
+  _refreshAct = new QAction(tr("Refresh"), this);
+  _refreshAct->setStatusTip(tr("Refresh plot"));
+  connect(_refreshAct, SIGNAL(triggered()), this, SLOT(_refresh()));
+
+  // clear display
 
   _clearAct = new QAction(tr("Clear"), this);
   _clearAct->setStatusTip(tr("Clear data"));
   connect(_clearAct, SIGNAL(triggered()), _ppi, SLOT(clear()));
   connect(_clearAct, SIGNAL(triggered()), _rhi, SLOT(clear()));
 
+  // exit app
+
   _exitAct = new QAction(tr("E&xit"), this);
   _exitAct->setShortcut(tr("Ctrl+Q"));
   _exitAct->setStatusTip(tr("Exit the application"));
   connect(_exitAct, SIGNAL(triggered()), this, SLOT(close()));
+
+  // show range rings
 
   _ringsAct = new QAction(tr("Range Rings"), this);
   _ringsAct->setStatusTip(tr("Turn range rings on/off"));
@@ -480,12 +543,16 @@ void PolarManager::_createActions()
   connect(_ringsAct, SIGNAL(triggered(bool)),
 	  _ppi, SLOT(setRings(bool)));
 
+  // show grids
+
   _gridsAct = new QAction(tr("Grids"), this);
   _gridsAct->setStatusTip(tr("Turn range grids on/off"));
   _gridsAct->setCheckable(true);
   _gridsAct->setChecked(false);
   connect(_gridsAct, SIGNAL(triggered(bool)),
 	  _ppi, SLOT(setGrids(bool)));
+
+  // show azimuth lines
 
   _azLinesAct = new QAction(tr("Az Lines"), this);
   _azLinesAct->setStatusTip(tr("Turn range azLines on/off"));
@@ -494,9 +561,13 @@ void PolarManager::_createActions()
   connect(_azLinesAct, SIGNAL(triggered(bool)),
 	  _ppi, SLOT(setAzLines(bool)));
 
+  // show RHI window
+
   _showRhiAct = new QAction(tr("Show RHI Window"), this);
   _showRhiAct->setStatusTip(tr("Show the RHI Window"));
   connect(_showRhiAct, SIGNAL(triggered()), _rhiWindow, SLOT(show()));
+
+  // howto and about
   
   _howtoAct = new QAction(tr("&Howto"), this);
   _howtoAct->setStatusTip(tr("Show the application's Howto box"));
@@ -530,6 +601,7 @@ void PolarManager::_createMenus()
   _viewMenu->addSeparator();
   _viewMenu->addAction(_showRhiAct);
 
+  menuBar()->addAction(_timeControllerAct);
   menuBar()->addAction(_freezeAct);
   menuBar()->addAction(_showClickAct);
   menuBar()->addAction(_unzoomAct);
@@ -539,6 +611,212 @@ void PolarManager::_createMenus()
   _helpMenu->addAction(_howtoAct);
   _helpMenu->addAction(_aboutAct);
   _helpMenu->addAction(_aboutQtAct);
+
+}
+
+/////////////////////////////
+// get data in realtime mode
+
+void PolarManager::_handleRealtimeData(QTimerEvent * event)
+
+{
+
+  // do nothing if freeze is on
+
+  if (_frozen) {
+    return;
+  }
+
+  if (event->timerId() == _beamTimerId && !_frozen) {
+
+    // get all available beams
+
+    while (true) {
+
+      // get the next ray from the reader queue
+      // responsibility for this ray memory passes to
+      // this (the master) thread
+
+      RadxRay *ray = _reader->getNextRay(_platform);
+      if (ray == NULL) {
+        break; // no pending rays
+      }
+
+      if (_params.debug >= Params::DEBUG_EXTRA) {
+        cerr << "  Got a ray, time, el, az: "
+             << DateTime::strm(ray->getTimeSecs()) << ", "
+             << ray->getElevationDeg() << ", "
+             << ray->getAzimuthDeg() << endl;
+      }
+
+      // update the status panel
+      
+      _updateStatusPanel(ray);
+      
+      // draw the beam
+      
+      if (_params.images_creation_mode != Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
+        _handleRay(_platform, ray);
+      }
+    
+    } // while
+
+  }
+    
+}
+
+///////////////////////////////////////
+// handle data in archive mode
+
+void PolarManager::_handleArchiveData(QTimerEvent * event)
+
+{
+
+#ifdef JUNK
+
+  // set up plot times
+
+  _plotStartTime = _archiveStartTime;
+  _plotEndTime = _archiveEndTime;
+
+  // erase plot and set time controller
+
+  _bscan->setPlotStartTime(_plotStartTime, true);
+  _bscan->activateArchiveRendering();
+
+  // set cursor to wait cursor
+
+  this->setCursor(Qt::WaitCursor);
+  _timeAxisDialog->setCursor(Qt::WaitCursor);
+
+  // get data
+
+  if (_getArchiveData()) {
+    this->setCursor(Qt::ArrowCursor);
+    _timeAxisDialog->setCursor(Qt::ArrowCursor);
+    return;
+  }
+
+  // plot the data
+
+  _plotArchiveData();
+  this->setCursor(Qt::ArrowCursor);
+  _timeAxisDialog->setCursor(Qt::ArrowCursor);
+
+#endif
+
+}
+
+/////////////////////////////
+// get data in archive mode
+// returns 0 on success, -1 on failure
+
+int PolarManager::_getArchiveData()
+
+{
+
+  // set up file object for reading
+  
+  RadxFile file;
+  _vol.clear();
+  _setupVolRead(file);
+
+  if (_params.debug) {
+    cerr << "----------------------------------------------------" << endl;
+    cerr << "perform archive retrieval" << endl;
+    cerr << "  archive start time: " << _archiveStartTime.asString() << endl;
+    cerr << "  archive end time: " << _archiveEndTime.asString() << endl;
+    // cerr << "  dwell secs: " << _dwellSecs << endl;
+    // cerr << "  dwell stats method: "
+    //      << RadxField::statsMethodToStr(_dwellStatsMethod) << endl;
+    cerr << "----------------------------------------------------" << endl;
+  }
+  
+  if (file.readFromDir(_params.archive_data_url, _vol)) {
+    string errMsg = "ERROR - Cannot retrieve archive data\n";
+    errMsg += "PolarManager::_getArchiveData\n";
+    errMsg += file.getErrStr() + "\n";
+    errMsg += "  start time: " + _archiveStartTime.asString() + "\n";
+    errMsg += "  end time: " + _archiveEndTime.asString() + "\n";
+    // char text[1024];
+    // sprintf(text, "  dwell secs: %g\n", _dwellSecs);
+    // errMsg += text;
+    cerr << errMsg;
+    if (!_params.images_auto_create)  {
+      QErrorMessage errorDialog;
+      errorDialog.setMinimumSize(400, 250);
+      errorDialog.showMessage(errMsg.c_str());
+      errorDialog.exec();
+    }
+    return -1;
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////
+// plot data in archive mode
+
+void PolarManager::_plotArchiveData()
+
+{
+
+  if(_params.debug) {
+    cerr << "======== Plotting archive data =======================" << endl;
+    cerr << "======>>   plotStartTime: " << _plotStartTime.asString() << endl;
+    cerr << "======>>   plotEndTime: " << _plotEndTime.asString() << endl;
+  }
+
+  // initialize plotting
+
+  _initialRay = true;
+
+  // handle the rays
+  
+  const vector<RadxRay *> &rays = _vol.getRays();
+  if (rays.size() < 1) {
+    cerr << "ERROR - _plotArchiveData" << endl;
+    cerr << "  No rays found" << endl;
+  }
+  
+  for (size_t ii = 0; ii < rays.size(); ii++) {
+    RadxRay *ray = rays[ii];
+    _handleRay(_platform, ray);
+  }
+
+  // update the status panel
+  
+  _updateStatusPanel(rays[0]);
+    
+}
+
+//////////////////////////////////////////////////
+// set up read
+
+void PolarManager::_setupVolRead(RadxFile &file)
+{
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    file.setDebug(true);
+  }
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    file.setDebug(true);
+    file.setVerbose(true);
+  }
+
+  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
+    const DisplayField *field = _fields[ifield];
+    file.addReadField(field->getName());
+  }
+
+  // _dwellSecs = _dwellSpecifiedSecs;
+  // if (_dwellAuto) {
+  //   _dwellSecs = _dwellAutoSecs;
+  // }
+  
+  // file.setReadRaysInInterval(_archiveStartTime, _archiveEndTime,
+  //                            _dwellSecs, _dwellStatsMethod);
 
 }
 
@@ -601,6 +879,8 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
       ray->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI ||
       ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
 
+    _rhiMode = true;
+
     // Store the ray location using the elevation angle and the RHI location
     // table
 
@@ -631,6 +911,8 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
     _rhiWindow->setElevation(ray->getElevationDeg());
     
   } else {
+
+    _rhiMode = false;
 
     // Store the ray location using the azimuth angle and the PPI location
     // table
@@ -1060,5 +1342,783 @@ void PolarManager::_locationClicked(double xkm, double ykm,
   
   _updateStatusPanel(ray);
     
+}
+
+///////////////////////////////////////////////////////
+// create the time controller settings dialog
+//
+// This allows the user to control the time controller
+
+void PolarManager::_createTimeControllerDialog()
+{
+  
+  _timeControllerDialog = new QDialog(this);
+  _timeControllerDialog->setWindowTitle("Time controller settings");
+  
+  QBoxLayout *timeControllerDialogLayout =
+    new QBoxLayout(QBoxLayout::TopToBottom, _timeControllerDialog);
+  
+  {  // archive / realtime mode
+  
+    QGroupBox *modeBox = new QGroupBox(_timeControllerDialog);
+    QHBoxLayout *modeBoxLayout = new QHBoxLayout;
+    modeBox->setLayout(modeBoxLayout);
+    modeBox->setTitle("Set data retrieval mode");
+    
+    _realtimeModeButton = new QRadioButton(tr("Realtime mode"), this);
+    _realtimeModeButton->setStatusTip(tr("Run in realtime mode"));
+    _realtimeModeButton->setCheckable(true);
+    connect(_realtimeModeButton, SIGNAL(clicked()), this, SLOT(_setDataRetrievalMode()));
+    modeBoxLayout->addWidget(_realtimeModeButton);
+    
+    _archiveModeButton = new QRadioButton(tr("Archive mode"), this);
+    _archiveModeButton->setStatusTip(tr("Run in archive mode"));
+    _archiveModeButton->setCheckable(true);
+    connect(_archiveModeButton, SIGNAL(clicked()), this, SLOT(_setDataRetrievalMode()));
+    modeBoxLayout->addWidget(_archiveModeButton);
+    
+    QButtonGroup *modeGroup = new QButtonGroup(this);
+    modeGroup->setExclusive(true);
+    modeGroup->addButton(_realtimeModeButton);
+    modeGroup->addButton(_archiveModeButton);
+    
+    if (_archiveMode) {
+      _archiveModeButton->setChecked(true);
+    } else {
+      _realtimeModeButton->setChecked(true);
+    }
+    _setDataRetrievalMode();
+    
+    timeControllerDialogLayout->addWidget(modeBox, Qt::AlignCenter);
+    
+  } // archive / realtime mode
+  
+  {  // set nscans and scan interval
+
+    QGroupBox *archiveScanIntervalBox = new QGroupBox(_timeControllerDialog);
+    QVBoxLayout *archiveScanIntervalLayout = new QVBoxLayout;
+    archiveScanIntervalBox->setLayout(archiveScanIntervalLayout);
+    archiveScanIntervalBox->setTitle("Set archive nscans and times");
+    
+    QFrame *nArchiveScansEditLabel;
+    _nArchiveScansEdit = 
+      _addInputRow(archiveScanIntervalBox, archiveScanIntervalLayout,
+                   "N scans in archive mode", "",
+                   0, &nArchiveScansEditLabel);
+
+    QFrame *archiveScanIntervalEditLabel;
+    _archiveScanIntervalEdit = 
+      _addInputRow(archiveScanIntervalBox, archiveScanIntervalLayout,
+                   "Scan interval in archive (secs)", "",
+                   0, &archiveScanIntervalEditLabel);
+    
+    _resetArchiveScanConfigToDefault();
+    
+    QFrame *acceptCancelReset = new QFrame;
+    QHBoxLayout *horiz = new QHBoxLayout;
+    acceptCancelReset->setLayout(horiz);
+    
+    QPushButton *acceptButton = new QPushButton(archiveScanIntervalBox);
+    acceptButton->setText("Accept");
+    horiz->addWidget(acceptButton);
+    connect(acceptButton, SIGNAL(clicked()), this, SLOT(_setArchiveScanConfig()));
+    
+    QPushButton *cancelButton = new QPushButton(archiveScanIntervalBox);
+    cancelButton->setText("Cancel");
+    horiz->addWidget(cancelButton);
+    connect(cancelButton, SIGNAL(clicked()), this, SLOT(_cancelTimeControllerChanges()));
+    
+    QPushButton *resetButton = new QPushButton(archiveScanIntervalBox);
+    resetButton->setText("Reset to default");
+    horiz->addWidget(resetButton);
+    connect(resetButton, SIGNAL(clicked()), this, SLOT(_resetArchiveScanConfigToDefault()));
+
+    archiveScanIntervalLayout->addWidget(acceptCancelReset);
+
+    // add to main dialog
+
+    timeControllerDialogLayout->addWidget(archiveScanIntervalBox, Qt::AlignCenter);
+
+  } // scan interval for plot
+  
+  {  // set archival time retrieval
+
+    // box for setting start timew
+
+    _archiveTimeBox = new QGroupBox(_timeControllerDialog);
+    QVBoxLayout *archiveTimeLayout = new QVBoxLayout;
+    _archiveTimeBox->setLayout(archiveTimeLayout);
+    _archiveTimeBox->setTitle("Set times for archive mode");
+
+    // start time edit
+
+    QFrame *timeStartFrame = new QFrame;
+    QHBoxLayout *timeStartLayout = new QHBoxLayout;
+    timeStartFrame->setLayout(timeStartLayout);
+    
+    QLabel *timeStartLabel = new QLabel(timeStartFrame);
+    timeStartLabel->setText("Start time (UTC)");
+    timeStartLayout->addWidget(timeStartLabel);
+    
+    _archiveStartTimeEdit = new QDateTimeEdit(_archiveTimeBox);
+    _archiveStartTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
+    _setArchiveStartTimeToDefault();
+    timeStartLayout->addWidget(_archiveStartTimeEdit);
+    connect(_archiveStartTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
+            this, SLOT(_setStartTimeFromGui(const QDateTime &)));
+    
+    archiveTimeLayout->addWidget(timeStartFrame);
+
+    // end time echo
+
+    QFrame *timeEndFrame = new QFrame;
+    QHBoxLayout *timeEndLayout = new QHBoxLayout;
+    timeEndFrame->setLayout(timeEndLayout);
+    
+    QLabel *timeEndLabel = new QLabel(timeEndFrame);
+    timeEndLabel->setText("End time (UTC)");
+    timeEndLayout->addWidget(timeEndLabel);
+    
+    _archiveEndTimeEcho = new QLabel(_archiveTimeBox);
+    _computeArchiveEndTime();
+    timeEndLayout->addWidget(_archiveEndTimeEcho);
+    
+    archiveTimeLayout->addWidget(timeEndFrame);
+
+    // back / forward
+    
+    QFrame *backFwd = new QFrame;
+    QHBoxLayout *layout1 = new QHBoxLayout;
+    backFwd->setLayout(layout1);
+    
+    QPushButton *back5 = new QPushButton(backFwd);
+    back5->setText("Back <<");
+    layout1->addWidget(back5);
+    connect(back5, SIGNAL(clicked()), this, SLOT(_goBack5()));
+    
+    QPushButton *back1 = new QPushButton(backFwd);
+    back1->setText("Back <");
+    layout1->addWidget(back1);
+    connect(back1, SIGNAL(clicked()), this, SLOT(_goBack1()));
+    
+    QPushButton *fwd1 = new QPushButton(backFwd);
+    fwd1->setText("Fwd >");
+    layout1->addWidget(fwd1);
+    connect(fwd1, SIGNAL(clicked()), this, SLOT(_goFwd1()));
+    
+    QPushButton *fwd5 = new QPushButton(backFwd);
+    fwd5->setText("Fwd >>");
+    layout1->addWidget(fwd5);
+    connect(fwd5, SIGNAL(clicked()), this, SLOT(_goFwd5()));
+    
+    archiveTimeLayout->addWidget(backFwd);
+
+    // accept / cancel / reset
+    
+    QFrame *goCancelReset = new QFrame;
+    QHBoxLayout *layout2 = new QHBoxLayout;
+    goCancelReset->setLayout(layout2);
+    
+    QPushButton *goButton = new QPushButton(goCancelReset);
+    goButton->setText("Go");
+    QPalette goPalette = goButton->palette();
+    QColor goColor(0, 210, 0); // green
+    goPalette.setColor(QPalette::Active, QPalette::Button, goColor);
+    // pal.setColor( QPalette::Inactive, QPalette::Button, color );
+    goButton->setPalette(goPalette);
+    layout2->addWidget(goButton);
+    connect(goButton, SIGNAL(clicked()), this, SLOT(_performArchiveRetrieval()));
+    
+    QPushButton *cancelButton = new QPushButton(goCancelReset);
+    cancelButton->setText("Cancel");
+    layout2->addWidget(cancelButton);
+    connect(cancelButton, SIGNAL(clicked()), this, SLOT(_cancelTimeControllerChanges()));
+    
+    QPushButton *resetButton = new QPushButton(goCancelReset);
+    resetButton->setText("Reset to default");
+    layout2->addWidget(resetButton);
+    connect(resetButton, SIGNAL(clicked()), this, SLOT(_setArchiveStartTimeToDefault()));
+
+    archiveTimeLayout->addWidget(goCancelReset);
+
+    // add to main dialog
+
+    timeControllerDialogLayout->addWidget(_archiveTimeBox, Qt::AlignCenter);
+
+  }  // set archival time retrieval
+  
+  // done?
+  
+  {
+    
+    QGroupBox *doneBox = new QGroupBox(_timeControllerDialog);
+    QGridLayout *doneLayout = new QGridLayout;
+    doneBox->setLayout(doneLayout);
+    doneBox->setTitle("Done with all changes");
+
+    int row = 0;
+    QPushButton *done = new QPushButton(doneBox);
+    done->setText("Done");
+    doneLayout->addWidget(done, row++, 0, Qt::AlignCenter);
+    connect(done, SIGNAL(clicked()), this, SLOT(_cancelTimeControllerChanges()));
+    
+    timeControllerDialogLayout->addWidget(doneBox, Qt::AlignCenter);
+
+  } // done
+  
+  _refreshTimeControllerDialog();
+  
+}
+
+///////////////////////////////////////////////////////
+// set the state on the time controller dialog
+
+void PolarManager::_refreshTimeControllerDialog()
+{
+  
+  char text[1024];
+
+  // set altitude limits text
+
+  sprintf(text, "%g", _archiveScanIntervalSecs);
+  _archiveScanIntervalEdit->setText(text);
+
+}
+
+/////////////////////////////////////
+// show the time controller dialog
+
+void PolarManager::_showTimeControllerDialog()
+{
+
+  if (_timeControllerDialog) {
+    if (_timeControllerDialog->isVisible()) {
+      _timeControllerDialog->setVisible(false);
+    } else {
+      if (!_archiveMode) {
+        _setArchiveStartTime(_plotStartTime);
+      }
+      _refreshTimeControllerDialog();
+      _timeControllerDialog->setVisible(true);
+      _timeControllerDialog->raise();
+      if (_timeControllerDialog->x() == 0 &&
+          _timeControllerDialog->y() == 0) {
+        QPoint pos;
+        pos.setX(x() + width() + 5);
+        pos.setY(y() + (height() - _timeControllerDialog->height()));
+        _timeControllerDialog->move(pos);
+      }
+    }
+  }
+}
+
+////////////////////////////////////////////////////////
+// change modes for retrieving the data
+
+void PolarManager::_setDataRetrievalMode()
+{
+  if (!_archiveTimeBox) {
+    return;
+  }
+  if (_realtimeModeButton && _realtimeModeButton->isChecked()) {
+    if (_archiveMode) {
+      _archiveMode = false;
+      _archiveTimeBox->setEnabled(false);
+      // _bscan->activateRealtimeRendering();
+    }
+  } else {
+    if (!_archiveMode) {
+      _archiveMode = true;
+      _archiveTimeBox->setEnabled(true);
+      if (_plotStartTime.utime() != 0) {
+        _setArchiveStartTime(_plotStartTime - _archiveScanIntervalSecs * _nArchiveScans);
+        _setGuiFromStartTime();
+      }
+      // _bscan->activateArchiveRendering();
+    }
+  }
+}
+
+
+////////////////////////////////////////////////////////
+// set archive scan configuration from GUI
+
+void PolarManager::_setArchiveScanConfig()
+{
+
+  double archiveScanInterval = 0;
+  if (sscanf(_archiveScanIntervalEdit->text().toLocal8Bit().data(),
+             "%lg", &archiveScanInterval) != 1) {
+    QErrorMessage errMsg(_archiveScanIntervalEdit);
+    string text("Bad entry for scan interval: ");
+    text += _archiveScanIntervalEdit->text().toLocal8Bit().data();
+    errMsg.setModal(true);
+    errMsg.showMessage(text.c_str());
+    errMsg.exec();
+    _resetArchiveScanConfigToDefault();
+    return;
+  }
+  _archiveScanIntervalSecs = archiveScanInterval;
+  
+  int nArchiveScans = 0;
+  if (sscanf(_nArchiveScansEdit->text().toLocal8Bit().data(),
+             "%d", &nArchiveScans) != 1) {
+    QErrorMessage errMsg(_nArchiveScansEdit);
+    string text("Bad entry for n scans: ");
+    text += _nArchiveScansEdit->text().toLocal8Bit().data();
+    errMsg.setModal(true);
+    errMsg.showMessage(text.c_str());
+    errMsg.exec();
+    _resetArchiveScanConfigToDefault();
+    return;
+  }
+  _nArchiveScans = nArchiveScans;
+
+  _computeArchiveEndTime();
+  
+  // if (_archiveMode) {
+  //   _performArchiveRetrieval();
+  // }
+
+}
+
+////////////////////////////////////////////////////////
+// reset to default archive scan config
+
+void PolarManager::_resetArchiveScanConfigToDefault()
+{
+
+  char text[1024];
+
+  _archiveScanIntervalSecs = _params.archive_scan_interval_secs;
+  sprintf(text, "%g", _archiveScanIntervalSecs);
+  if (_archiveScanIntervalEdit) {
+    _archiveScanIntervalEdit->setText(text);
+  }
+
+  _nArchiveScans = _params.archive_n_scans;
+  sprintf(text, "%d", _nArchiveScans);
+  if (_nArchiveScansEdit) {
+    _nArchiveScansEdit->setText(text);
+  }
+
+  _computeArchiveEndTime();
+
+}
+
+////////////////////////////////////////////////////////
+// set start time from gui widget
+
+void PolarManager::_setStartTimeFromGui(const QDateTime &datetime1)
+{
+  QDateTime datetime = _archiveStartTimeEdit->dateTime();
+  QDate date = datetime.date();
+  QTime time = datetime.time();
+  _archiveStartTime.set(date.year(), date.month(), date.day(),
+                        time.hour(), time.minute(), time.second());
+  _computeArchiveEndTime();
+}
+
+////////////////////////////////////////////////////////
+// set gui widget from start time
+
+void PolarManager::_setGuiFromStartTime()
+{
+  QDate date(_archiveStartTime.getYear(), 
+             _archiveStartTime.getMonth(),
+             _archiveStartTime.getDay());
+  QTime time(_archiveStartTime.getHour(),
+             _archiveStartTime.getMin(),
+             _archiveStartTime.getSec());
+  QDateTime datetime(date, time);
+  _archiveStartTimeEdit->setDateTime(datetime);
+}
+
+////////////////////////////////////////////////////////
+// set start time to defaults
+
+void PolarManager::_setArchiveStartTimeToDefault()
+
+{
+
+  _archiveStartTime.set(_params.archive_start_time);
+  if (!_archiveStartTime.isValid()) {
+    _archiveStartTime.set(RadxTime::NOW);
+  }
+  _setGuiFromStartTime();
+  _computeArchiveEndTime();
+
+}
+
+////////////////////////////////////////////////////////
+// set start time
+
+void PolarManager::_setArchiveStartTime(const RadxTime &rtime)
+
+{
+
+  if (rtime.utime() == 0) {
+    return;
+  }
+
+  _archiveStartTime = rtime;
+  if (!_archiveStartTime.isValid()) {
+    _archiveStartTime.set(RadxTime::NOW);
+  }
+  _setGuiFromStartTime();
+  _computeArchiveEndTime();
+
+}
+
+////////////////////////////////////////////////////////
+// set end time from start time, nscans and interval
+
+void PolarManager::_computeArchiveEndTime()
+
+{
+
+  _archiveEndTime =
+    _archiveStartTime + _archiveScanIntervalSecs * _nArchiveScans;
+  if (_archiveEndTimeEcho) {
+    _archiveEndTimeEcho->setText(_archiveEndTime.asString().c_str());
+  }
+
+}
+
+/////////////////////////////////////////////////////
+// creating image files in realtime mode
+
+void PolarManager::_createRealtimeImageFiles()
+{
+
+  int interval = _params.images_schedule_interval_secs;
+  int delay = _params.images_schedule_delay_secs;
+  time_t latestRayTime = _readerRayTime.utime();
+  
+  // initialize the schedule if required
+
+  if (_imagesScheduledTime.utime() == 0) {
+    if (latestRayTime == 0) {
+      // no data yet
+      return;
+    }
+    time_t nextUtime = ((latestRayTime / interval) + 1) * interval;
+    _imagesScheduledTime.set(nextUtime + delay);
+    if (_params.debug) {
+      cerr << "Next scheduled time for images: " 
+           << _imagesScheduledTime.asString() << endl;
+    }
+  }
+  
+  if (_readerRayTime > _imagesScheduledTime) {
+
+    // create images
+
+    _archiveEndTime = _imagesScheduledTime - delay;
+    _archiveStartTime = _archiveEndTime - _archiveScanIntervalSecs;
+    _createImageFiles();
+
+    // set next scheduled time
+    
+    time_t nextUtime = ((latestRayTime / interval) + 1) * interval;
+    _imagesScheduledTime.set(nextUtime + delay);
+    if (_params.debug) {
+      cerr << "Next scheduled time for images: "
+           << _imagesScheduledTime.asString() << endl;
+    }
+
+  }
+
+}
+
+/////////////////////////////////////////////////////
+// creating image files in archive mode
+
+void PolarManager::_createArchiveImageFiles()
+{
+
+  if (_params.images_creation_mode ==
+      Params::CREATE_IMAGES_THEN_EXIT) {
+
+    _createImageFiles();
+
+  } else if (_params.images_creation_mode ==
+             Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
+
+    for (time_t stime = _archivePeriodStartTime.utime();
+         stime <= _archivePeriodEndTime.utime();
+         stime += _params.images_schedule_interval_secs) {
+      
+      _archiveStartTime.set(stime);
+      _archiveEndTime = _archiveStartTime + _archiveScanIntervalSecs;
+
+      _createImageFiles();
+      
+    } // stime
+
+  } // if (_params.images_creation_mode ...
+
+}
+
+/////////////////////////////////////////////////////
+// creating one image per field
+
+void PolarManager::_createImageFiles()
+{
+
+  if (_params.debug) {
+    cerr << "PolarManager::_createImageFiles()" << endl;
+  }
+
+  PMU_auto_register("createImageFiles");
+
+  // retrieve data
+
+  // _setDwellAutoVal();
+  _handleArchiveData(NULL);
+
+  // save current field
+
+  int fieldNum = _fieldNum;
+  
+  // loop through fields
+
+  for (size_t ii = 0; ii < _fields.size(); ii++) {
+    
+    // select field
+    
+    _changeField(ii, false);
+    // _bscan->update();
+    
+    // create plot
+    
+    if (_params.debug) {
+      cerr << "Creating image for field: " << getSelectedFieldLabel() << endl;
+    }
+    
+    // save image for plot
+
+    _saveImageToFile(false);
+
+  }
+  
+  // change field back
+
+  _changeField(fieldNum, false);
+
+  if (_params.debug) {
+    cerr << "Done creating image files" << endl;
+  }
+
+}
+
+/////////////////////////////////////////////////////
+// howto help
+
+void PolarManager::_howto()
+{
+  string text;
+  text += "HOWTO HINTS FOR HAWK-EYE in POLAR mode\n";
+  text += "======================================\n";
+  text += "\n";
+  text += "To go forward  in time, click in data window, hit Right Arrow\n";
+  text += "To go backward in time, click in data window, hit Left  Arrow\n";
+  text += "\n";
+  text += "To change fields, click on field buttons\n";
+  text += "  Once active, you can use the arrow keys to change the field selection\n";
+  text += "  Hit '.' to toggle between the two latest fields\n";
+  text += "\n";
+  text += "Hot-keys for fields:\n";
+  text += "  Use NUMBER or LETTER keys to display RAW fields\n";
+  text += "  Use ALT-NUMBER and ALT-LETTER keys to display FILTERED fields\n";
+  text += "\n";
+  text += "To see field data at a point:\n";
+  text += "  Click in main window\n";
+  QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
+}
+
+/////////////////////////////////////////////////////
+// save image to file
+// If interactive is true, use dialog boxes to indicate errors or report
+// where the image was saved.
+
+void PolarManager::_saveImageToFile(bool interactive)
+{
+
+#ifdef JUNK
+
+  // create image
+  
+  QPixmap pixmap = QPixmap::grabWidget(_bscan);
+  QImage image = pixmap.toImage();
+
+  // compute output dir
+  
+  string outputDir(_params.images_output_dir);
+  char dayStr[1024];
+  if (_params.images_write_to_day_dir) {
+    sprintf(dayStr, "%.4d%.2d%.2d",
+            _plotStartTime.getYear(),
+            _plotStartTime.getMonth(),
+            _plotStartTime.getDay());
+    outputDir += PATH_DELIM;
+    outputDir += dayStr;
+  }
+  
+  // make sure output dir exists
+
+  if (ta_makedir_recurse(outputDir.c_str())) {
+    string errmsg("Cannot create output dir: " + outputDir);
+    cerr << "ERROR - BscanManager::_saveImageToFile()" << endl;
+    cerr << "  " << errmsg << endl;
+    if (interactive) {
+        QMessageBox::critical(this, "Error", errmsg.c_str());
+    }
+    return;
+  }
+
+  // compute file name
+
+  string fileName;
+
+  // category
+
+  if (strlen(_params.images_file_name_category) > 0) {
+    fileName += _params.images_file_name_category;
+  }
+
+  // platform
+
+  if (strlen(_params.images_file_name_platform) > 0) {
+    fileName += _params.images_file_name_delimiter;
+    fileName += _params.images_file_name_platform;
+  }
+
+  // time
+
+  if (_params.images_include_time_part_in_file_name) {
+    fileName += _params.images_file_name_delimiter;
+    char timeStr[1024];
+    if (_params.images_include_seconds_in_time_part) {
+      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d%.2d",
+              _plotStartTime.getYear(),
+              _plotStartTime.getMonth(),
+              _plotStartTime.getDay(),
+              _plotStartTime.getHour(),
+              _plotStartTime.getMin(),
+              _plotStartTime.getSec());
+    } else {
+      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d",
+              _plotStartTime.getYear(),
+              _plotStartTime.getMonth(),
+              _plotStartTime.getDay(),
+              _plotStartTime.getHour(),
+              _plotStartTime.getMin());
+    }
+    fileName += timeStr;
+  }
+
+  // field label
+
+  if (_params.images_include_field_label_in_file_name) {
+    fileName += _params.images_file_name_delimiter;
+    fileName += getSelectedFieldLabel();
+  }
+
+  // extension
+
+  fileName += ".";
+  fileName += _params.images_file_name_extension;
+
+  // compute output path
+
+  string outputPath(outputDir);
+  outputPath += PATH_DELIM;
+  outputPath += fileName;
+
+  // write the file
+  
+  if (!image.save(outputPath.c_str())) {
+    string errmsg("Cannot save image to file: " + outputPath);
+    cerr << "ERROR - BscanManager::_saveImageToFile()" << endl;
+    cerr << "  " << errmsg << endl;
+    if (interactive) {
+        QMessageBox::critical(this, "Error", errmsg.c_str());
+    }
+    return;
+  }
+
+  if (interactive) {
+      string infoMsg("Saved image to file " + outputPath);
+      QMessageBox::information(this, "Image Saved", infoMsg.c_str());
+  }
+
+  if (_params.debug) {
+    cerr << "==>> saved image to file: " << outputPath << endl;
+  }
+
+  // write latest data info
+
+  if (_params.images_write_latest_data_info) {
+    
+    DsLdataInfo ldataInfo(_params.images_output_dir);
+    
+    string relPath;
+    Path::stripDir(_params.images_output_dir, outputPath, relPath);
+    
+    if(_params.debug) {
+      ldataInfo.setDebug();
+    }
+    ldataInfo.setLatestTime(_plotStartTime.utime());
+    ldataInfo.setWriter("HawkEye");
+    ldataInfo.setDataFileExt(_params.images_file_name_extension);
+    ldataInfo.setDataType(_params.images_file_name_extension);
+    ldataInfo.setRelDataPath(relPath);
+    
+    if(ldataInfo.write(_plotStartTime.utime())) {
+      cerr << "ERROR - BscanManager::_saveImageToFile()" << endl;
+      cerr << "  Cannot write _latest_data_info to dir: " << outputDir << endl;
+      return;
+    }
+    
+  } // if (_params.images_write_latest_data_info)
+
+#endif
+
+}
+
+////////////////////////////////////////////////////////
+// change start time
+
+void PolarManager::_goBack1()
+{
+  _archiveStartTime -= 1 * _archiveScanIntervalSecs;
+  _setGuiFromStartTime();
+}
+
+void PolarManager::_goBack5()
+{
+  _archiveStartTime -= 5 * _archiveScanIntervalSecs;
+  _setGuiFromStartTime();
+}
+
+void PolarManager::_goFwd1()
+{
+  _archiveStartTime += 1 * _archiveScanIntervalSecs;
+  _setGuiFromStartTime();
+}
+
+void PolarManager::_goFwd5()
+{
+  _archiveStartTime += 5 * _archiveScanIntervalSecs;
+  _setGuiFromStartTime();
+}
+
+////////////////////////////////////////////////////////
+// perform archive retrieval
+
+void PolarManager::_performArchiveRetrieval()
+{
+  _archiveRetrievalPending = true;
 }
 

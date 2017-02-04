@@ -58,6 +58,8 @@ class QDialog;
 class QLabel;
 class QGroupBox;
 class QGridLayout;
+class QDateTime;
+class QDateTimeEdit;
 class ColorBar;
 class DisplayField;
 class PpiWidget;
@@ -140,6 +142,11 @@ private:
   RayLoc* _rhiRayLoc; // for use, allows negative indices at north line
   RayLoc* _rhiRays; // for new and delete
 
+  // input data
+  
+  RadxTime _readerRayTime;
+  RadxVol _vol;
+
   // windows
 
   QFrame *_ppiFrame;
@@ -149,6 +156,7 @@ private:
   RhiWindow *_rhiWindow;
   RhiWidget *_rhi;
   bool _rhiWindowDisplayed;
+  bool _rhiMode;
   
   // azimuths for current ray
 
@@ -157,6 +165,12 @@ private:
   double _startAz;
   double _endAz;
 
+  // times for rays
+
+  RadxTime _plotStartTime;
+  RadxTime _plotEndTime;
+  RadxTime _prevRayTime;
+  
   // menus
 
   QMenu *_fileMenu;
@@ -169,6 +183,39 @@ private:
   QAction *_gridsAct;
   QAction *_azLinesAct;
   QAction *_showRhiAct;
+
+  QAction *_timeControllerAct;
+  QAction *_saveImageAct;
+
+  // time controller settings dialog
+  
+  QDialog *_timeControllerDialog;
+  QLabel *_timeControllerInfo;
+
+  QLineEdit *_archiveScanIntervalEdit;
+  double _archiveScanIntervalSecs;
+
+  QLineEdit *_nArchiveScansEdit;
+  int _nArchiveScans;
+
+  bool _archiveMode;
+  bool _archiveRetrievalPending;
+  QRadioButton *_realtimeModeButton;
+  QRadioButton *_archiveModeButton;
+
+  QGroupBox *_archiveTimeBox;
+  QDateTimeEdit *_archiveStartTimeEdit;
+  RadxTime _archiveStartTime;
+
+  QLabel *_archiveEndTimeEcho;
+  RadxTime _archiveEndTime;
+  
+  RadxTime _archivePeriodStartTime;
+  RadxTime _archivePeriodEndTime;
+
+  // saving images in real time mode
+
+  RadxTime _imagesScheduledTime;
 
   // override event handling
 
@@ -187,6 +234,14 @@ private:
   void _createActions();
   void _createMenus();
 
+  // data retrieval
+
+  void _handleRealtimeData(QTimerEvent * event);
+  void _handleArchiveData(QTimerEvent * event);
+  int _getArchiveData();
+  void _plotArchiveData();
+  void _setupVolRead(RadxFile &file);
+
   // draw beam
 
   void _handleRay(RadxPlatform &platform, RadxRay *ray);
@@ -197,6 +252,17 @@ private:
 		    const double beam_width, RayLoc *ray_loc);
   void _clearRayOverlap(const int start_index, const int end_index,
 			RayLoc *ray_loc);
+
+  // images
+
+  void _createRealtimeImageFiles();
+  void _createArchiveImageFiles();
+  void _createImageFiles();
+  void _saveImageToFile(bool interactive);
+
+  // override howto
+
+  void _howto();
 
 private slots:
 
@@ -219,7 +285,32 @@ private slots:
                            const RadxRay *closestRay);
   void _locationClicked(double xkm, double ykm,
                         RayLoc *ray_loc, const RadxRay *closestRay);
+
+  void _cancelTimeControllerChanges();
+
+  // archive mode
   
+  void _setDataRetrievalMode();
+  void _setArchiveScanConfig();
+  void _resetArchiveScanConfigToDefault();
+  void _setStartTimeFromGui(const QDateTime &datetime1);
+  void _setGuiFromStartTime();
+  void _setArchiveStartTimeToDefault();
+  void _setArchiveStartTime(const RadxTime &rtime);
+  void _computeArchiveEndTime();
+  void _goBack1();
+  void _goFwd1();
+  void _goBack5();
+  void _goFwd5();
+
+  void _performArchiveRetrieval();
+
+  // time controller
+
+  void _createTimeControllerDialog();
+  void _refreshTimeControllerDialog();
+  void _showTimeControllerDialog();
+
 };
 
 #endif

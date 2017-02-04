@@ -453,6 +453,10 @@ public:
 
   char* archive_end_time;
 
+  int archive_scan_interval_secs;
+
+  int archive_n_scans;
+
   char* archive_data_url;
 
   show_status_t show_status_in_gui;
@@ -649,7 +653,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[131];
+  mutable TDRPtable _table[133];
 
   const char *_className;
 

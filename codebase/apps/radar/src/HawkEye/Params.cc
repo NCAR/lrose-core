@@ -728,9 +728,33 @@ using namespace std;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("archive_end_time");
     tt->descr = tdrpStrDup("End time for archive mode.");
-    tt->help = tdrpStrDup("Generally this is applicable for image generation.");
+    tt->help = tdrpStrDup("Only applicable for image generation.");
     tt->val_offset = (char *) &archive_end_time - &_start_;
     tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
+    tt++;
+    
+    // Parameter 'archive_scan_interval_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("archive_scan_interval_secs");
+    tt->descr = tdrpStrDup("Time between scans in archive mode (secs).");
+    tt->help = tdrpStrDup("Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.");
+    tt->val_offset = (char *) &archive_scan_interval_secs - &_start_;
+    tt->single_val.i = 300;
+    tt++;
+    
+    // Parameter 'archive_n_scans'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("archive_n_scans");
+    tt->descr = tdrpStrDup("Number of scans in archive mode.");
+    tt->help = tdrpStrDup("Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.");
+    tt->val_offset = (char *) &archive_n_scans - &_start_;
+    tt->single_val.i = 12;
     tt++;
     
     // Parameter 'archive_data_url'

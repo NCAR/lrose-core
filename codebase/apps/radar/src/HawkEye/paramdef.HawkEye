@@ -104,8 +104,20 @@ paramdef string {
 paramdef string {
   p_default = "1970 01 01 00 00 00";
   p_descr = "End time for archive mode.";
-  p_help = "Generally this is applicable for image generation.";
+  p_help = "Only applicable for image generation.";
 } archive_end_time;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Time between scans in archive mode (secs).";
+  p_help = "Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.";
+} archive_scan_interval_secs;
+
+paramdef int {
+  p_default = 12;
+  p_descr = "Number of scans in archive mode.";
+  p_help = "Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.";
+} archive_n_scans;
 
 paramdef string {
   p_default = "/scr/eldora1/hcr-test/cfradial/moments/wband";

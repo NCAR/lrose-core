@@ -851,7 +851,8 @@ void BscanManager::_createTimeAxisDialog()
     timeSpanBox->setTitle("Set time span for plot");
     
     QFrame *timeSpanEditLabel;
-    _timeSpanEdit = _addInputRow(timeSpanBox, timeSpanLayout, "Time span for plot (secs)", "",
+    _timeSpanEdit = _addInputRow(timeSpanBox, timeSpanLayout, 
+                                 "Time span for plot (secs)", "",
                                  0, &timeSpanEditLabel);
     _resetTimeSpanToDefault();
     
@@ -867,12 +868,14 @@ void BscanManager::_createTimeAxisDialog()
     QPushButton *cancelButton = new QPushButton(timeSpanBox);
     cancelButton->setText("Cancel");
     horiz->addWidget(cancelButton);
-    connect(cancelButton, SIGNAL(clicked()), this, SLOT(_cancelTimeAxisChanges()));
+    connect(cancelButton, SIGNAL(clicked()), this,
+            SLOT(_cancelTimeAxisChanges()));
     
     QPushButton *resetButton = new QPushButton(timeSpanBox);
     resetButton->setText("Reset to default");
     horiz->addWidget(resetButton);
-    connect(resetButton, SIGNAL(clicked()), this, SLOT(_resetTimeSpanToDefault()));
+    connect(resetButton, SIGNAL(clicked()), this,
+            SLOT(_resetTimeSpanToDefault()));
 
     timeSpanLayout->addWidget(acceptCancelReset);
 
@@ -892,13 +895,15 @@ void BscanManager::_createTimeAxisDialog()
     _realtimeModeButton = new QRadioButton(tr("Realtime mode"), this);
     _realtimeModeButton->setStatusTip(tr("Run in realtime mode"));
     _realtimeModeButton->setCheckable(true);
-    connect(_realtimeModeButton, SIGNAL(clicked()), this, SLOT(_setDataRetrievalMode()));
+    connect(_realtimeModeButton, SIGNAL(clicked()), this,
+            SLOT(_setDataRetrievalMode()));
     modeBoxLayout->addWidget(_realtimeModeButton);
     
     _archiveModeButton = new QRadioButton(tr("Archive mode"), this);
     _archiveModeButton->setStatusTip(tr("Run in archive mode"));
     _archiveModeButton->setCheckable(true);
-    connect(_archiveModeButton, SIGNAL(clicked()), this, SLOT(_setDataRetrievalMode()));
+    connect(_archiveModeButton, SIGNAL(clicked()), this,
+            SLOT(_setDataRetrievalMode()));
     modeBoxLayout->addWidget(_archiveModeButton);
     
     QButtonGroup *modeGroup = new QButtonGroup(this);
@@ -1003,17 +1008,20 @@ void BscanManager::_createTimeAxisDialog()
     // pal.setColor( QPalette::Inactive, QPalette::Button, color );
     goButton->setPalette(goPalette);
     layout2->addWidget(goButton);
-    connect(goButton, SIGNAL(clicked()), this, SLOT(_performArchiveRetrieval()));
+    connect(goButton, SIGNAL(clicked()), this, 
+            SLOT(_performArchiveRetrieval()));
     
     QPushButton *cancelButton = new QPushButton(goCancelReset);
     cancelButton->setText("Cancel");
     layout2->addWidget(cancelButton);
-    connect(cancelButton, SIGNAL(clicked()), this, SLOT(_cancelTimeAxisChanges()));
+    connect(cancelButton, SIGNAL(clicked()), this,
+            SLOT(_cancelTimeAxisChanges()));
     
     QPushButton *resetButton = new QPushButton(goCancelReset);
     resetButton->setText("Reset to default");
     layout2->addWidget(resetButton);
-    connect(resetButton, SIGNAL(clicked()), this, SLOT(_setArchiveStartTimeToDefault()));
+    connect(resetButton, SIGNAL(clicked()), this,
+            SLOT(_setArchiveStartTimeToDefault()));
 
     archiveTimeLayout->addWidget(goCancelReset);
 
@@ -1042,7 +1050,8 @@ void BscanManager::_createTimeAxisDialog()
     _dwellAutoBox->setText("Dwell auto (secs)?");
     _dwellAutoBox->setChecked(_dwellAuto);
     dwellAutoLayout->addWidget(_dwellAutoBox);
-    connect(_dwellAutoBox, SIGNAL(clicked()), this, SLOT(_setDwellAuto()));
+    connect(_dwellAutoBox, SIGNAL(clicked()), this,
+            SLOT(_setDwellAuto()));
     
     _dwellAutoVal = new QLabel();
     dwellAutoLayout->addWidget(_dwellAutoVal);
@@ -1056,7 +1065,8 @@ void BscanManager::_createTimeAxisDialog()
                                        "Set the dwell (secs)", "", 0,
                                        &_dwellSpecifiedFrame);
     _resetDwellSpecifiedToDefault();
-    connect(_dwellSpecifiedEdit, SIGNAL(returnPressed()), this, SLOT(_setDwellSpecified()));
+    connect(_dwellSpecifiedEdit, SIGNAL(returnPressed()), this,
+            SLOT(_setDwellSpecified()));
 
     // set the auto selection
 
@@ -2074,6 +2084,9 @@ void BscanManager::_doneWithRangeAxis()
 {
   _rangeAxisDialog->setVisible(false);
 }
+
+//////////////////////////////////////////////////
+// time axis changes
 
 void BscanManager::_cancelTimeAxisChanges()
 {
