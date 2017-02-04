@@ -1398,7 +1398,7 @@ void PolarManager::_createTimeControllerDialog()
     QGroupBox *archiveScanIntervalBox = new QGroupBox(_timeControllerDialog);
     QVBoxLayout *archiveScanIntervalLayout = new QVBoxLayout;
     archiveScanIntervalBox->setLayout(archiveScanIntervalLayout);
-    archiveScanIntervalBox->setTitle("Set archive nscans and times");
+    archiveScanIntervalBox->setTitle("Set nscans and interval for archive mode");
     
     QFrame *nArchiveScansEditLabel;
     _nArchiveScansEdit = 
@@ -1491,25 +1491,25 @@ void PolarManager::_createTimeControllerDialog()
     QHBoxLayout *layout1 = new QHBoxLayout;
     backFwd->setLayout(layout1);
     
-    QPushButton *back5 = new QPushButton(backFwd);
-    back5->setText("Back <<");
-    layout1->addWidget(back5);
-    connect(back5, SIGNAL(clicked()), this, SLOT(_goBack5()));
+    QPushButton *backNScans = new QPushButton(backFwd);
+    backNScans->setText("<< NScans");
+    layout1->addWidget(backNScans);
+    connect(backNScans, SIGNAL(clicked()), this, SLOT(_goBackNScans()));
     
     QPushButton *back1 = new QPushButton(backFwd);
-    back1->setText("Back <");
+    back1->setText("< 1");
     layout1->addWidget(back1);
     connect(back1, SIGNAL(clicked()), this, SLOT(_goBack1()));
     
     QPushButton *fwd1 = new QPushButton(backFwd);
-    fwd1->setText("Fwd >");
+    fwd1->setText("> 1");
     layout1->addWidget(fwd1);
     connect(fwd1, SIGNAL(clicked()), this, SLOT(_goFwd1()));
     
-    QPushButton *fwd5 = new QPushButton(backFwd);
-    fwd5->setText("Fwd >>");
-    layout1->addWidget(fwd5);
-    connect(fwd5, SIGNAL(clicked()), this, SLOT(_goFwd5()));
+    QPushButton *fwdNScans = new QPushButton(backFwd);
+    fwdNScans->setText(">> NScans");
+    layout1->addWidget(fwdNScans);
+    connect(fwdNScans, SIGNAL(clicked()), this, SLOT(_goFwdNScans()));
     
     archiveTimeLayout->addWidget(backFwd);
 
@@ -1780,7 +1780,7 @@ void PolarManager::_computeArchiveEndTime()
   _archiveEndTime =
     _archiveStartTime + _archiveScanIntervalSecs * _nArchiveScans;
   if (_archiveEndTimeEcho) {
-    _archiveEndTimeEcho->setText(_archiveEndTime.asString().c_str());
+    _archiveEndTimeEcho->setText(_archiveEndTime.asString(0).c_str());
   }
 
 }
@@ -2096,9 +2096,9 @@ void PolarManager::_goBack1()
   _setGuiFromStartTime();
 }
 
-void PolarManager::_goBack5()
+void PolarManager::_goBackNScans()
 {
-  _archiveStartTime -= 5 * _archiveScanIntervalSecs;
+  _archiveStartTime -= _nArchiveScans * _archiveScanIntervalSecs;
   _setGuiFromStartTime();
 }
 
@@ -2108,9 +2108,9 @@ void PolarManager::_goFwd1()
   _setGuiFromStartTime();
 }
 
-void PolarManager::_goFwd5()
+void PolarManager::_goFwdNScans()
 {
-  _archiveStartTime += 5 * _archiveScanIntervalSecs;
+  _archiveStartTime += _nArchiveScans * _archiveScanIntervalSecs;
   _setGuiFromStartTime();
 }
 

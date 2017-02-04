@@ -300,8 +300,8 @@ private slots:
   void _computeArchiveEndTime();
   void _goBack1();
   void _goFwd1();
-  void _goBack5();
-  void _goFwd5();
+  void _goBackNScans();
+  void _goFwdNScans();
 
   void _performArchiveRetrieval();
 
