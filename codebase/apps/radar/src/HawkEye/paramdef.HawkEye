@@ -125,6 +125,12 @@ paramdef string {
   p_help = "This should point to a CfRadial moments data set.";
 } archive_data_url;
 
+paramdef int {
+  p_default = 600;
+  p_descr = "Time interval to search in archive mode (secs).";
+  p_help = "We search for data within this margin, on either side of the required time.";
+} archive_retrieval_interval_secs;
+
 commentdef {
   p_header = "STATUS TO BE SHOWN IN GUI";
 }

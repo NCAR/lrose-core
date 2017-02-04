@@ -281,6 +281,34 @@ void PolarWidget::clearVar(const size_t index)
 
 
 /*************************************************************************
+ * turn on archive-style rendering - all fields
+ */
+
+void PolarWidget::activateArchiveRendering()
+{
+  for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
+    _fieldRenderers[ii]->setBackgroundRenderingOn();
+  }
+}
+
+
+/*************************************************************************
+ * turn on reatlime-style rendering - non-selected fields in background
+ */
+
+void PolarWidget::activateRealtimeRendering()
+{
+  
+  for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
+    if (ii != _selectedField) {
+      _fieldRenderers[ii]->activateBackgroundRendering();
+    }
+  }
+
+}
+
+
+/*************************************************************************
  * addBeam()
  */
 

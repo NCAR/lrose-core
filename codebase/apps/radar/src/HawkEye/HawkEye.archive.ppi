@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for HawkEye
+ * TDRP params for ./HawkEye
  **********************************************************************/
 
 //======================================================================
@@ -180,19 +180,43 @@ begin_in_archive_mode = TRUE;
 // Type: string
 //
 
-archive_start_time = "2015 07 27 18 00 00";
+archive_start_time = "2015 06 26 00 00 00";
 
 ///////////// archive_end_time ////////////////////////
 //
 // End time for archive mode.
 //
-// Generally this is applicable for image generation.
+// Only applicable for image generation.
 //
 //
 // Type: string
 //
 
-archive_end_time = "2015 07 27 19 00 00";
+archive_end_time = "2015 06 27 00 00 00";
+
+///////////// archive_scan_interval_secs //////////////
+//
+// Time between scans in archive mode (secs).
+//
+// Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.
+//
+//
+// Type: int
+//
+
+archive_scan_interval_secs = 300;
+
+///////////// archive_n_scans /////////////////////////
+//
+// Number of scans in archive mode.
+//
+// Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.
+//
+//
+// Type: int
+//
+
+archive_n_scans = 12;
 
 ///////////// archive_data_url ////////////////////////
 //
@@ -204,7 +228,20 @@ archive_end_time = "2015 07 27 19 00 00";
 // Type: string
 //
 
-archive_data_url = "/scr/eldora1/rsfdata/cset/hcr/qc/cfradial/moments/10hz";
+archive_data_url = "/scr/hail2/rsfdata/pecan/cfradial/spol/moments/sband/rhi";
+
+///////////// archive_retrieval_interval_secs /////////
+//
+// Time interval to search in archive mode (secs).
+//
+// We search for data within this margin, on either side of the required 
+//   time.
+//
+//
+// Type: int
+//
+
+archive_retrieval_interval_secs = 600;
 
 //======================================================================
 //
@@ -651,7 +688,7 @@ site_name = "GV";
 // Type: int
 //
 
-main_window_width = 1400;
+main_window_width = 1200;
 
 ///////////// main_window_height //////////////////////
 //
@@ -661,7 +698,7 @@ main_window_width = 1400;
 // Type: int
 //
 
-main_window_height = 700;
+main_window_height = 800;
 
 ///////////// main_window_start_x /////////////////////
 //

@@ -206,6 +206,7 @@ private:
   QGroupBox *_archiveTimeBox;
   QDateTimeEdit *_archiveStartTimeEdit;
   RadxTime _archiveStartTime;
+  int _archiveMarginSecs;
 
   QLabel *_archiveEndTimeEcho;
   RadxTime _archiveEndTime;

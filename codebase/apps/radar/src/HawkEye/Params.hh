@@ -459,6 +459,8 @@ public:
 
   char* archive_data_url;
 
+  int archive_retrieval_interval_secs;
+
   show_status_t show_status_in_gui;
 
   char* color_scale_dir;
@@ -653,7 +655,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[133];
+  mutable TDRPtable _table[134];
 
   const char *_className;
 

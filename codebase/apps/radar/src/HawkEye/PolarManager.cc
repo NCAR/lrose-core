@@ -77,6 +77,7 @@
 #include <dsserver/DsLdataInfo.hh>
 #include <radar/RadarComplex.hh>
 #include <Radx/RadxFile.hh>
+#include <Radx/RadxSweep.hh>
 
 using namespace std;
 
@@ -115,6 +116,7 @@ PolarManager::PolarManager(const Params &params,
   _archiveEndTimeEcho = NULL;
 
   _archiveStartTime.set(_params.archive_start_time);
+  _archiveMarginSecs = _params.archive_retrieval_interval_secs;
 
   _archivePeriodStartTime.set(_params.archive_start_time);
   _archivePeriodEndTime.set(_params.archive_end_time);
@@ -231,6 +233,10 @@ void PolarManager::timerEvent(QTimerEvent *event)
     }
     _statusLayout->setColumnMinimumWidth(1, maxWidth);
   
+    if (_archiveMode) {
+      _archiveRetrievalPending = true;
+    }
+
     _firstTimerEvent = false;
 
   } // if (_firstTimerEvent)
@@ -257,7 +263,7 @@ void PolarManager::timerEvent(QTimerEvent *event)
     }
     
   }
-  
+
   // handle event
   
   if (event->timerId() == _beamTimerId) {
@@ -294,11 +300,13 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
   Qt::KeyboardModifiers mods = e->modifiers();
   char keychar = e->text().toAscii().data()[0];
+  int key = e->key();
 
   if (_params.debug) {
-    cerr << "Clicked key: " << keychar << ":" << (int) keychar << endl;
+    cerr << "Clicked char: " << keychar << ":" << (int) keychar << endl;
+    cerr << "         key: " << hex << key << dec << endl;
   }
-
+  
   // for '.', swap with previous field
 
   if (keychar == '.') {
@@ -349,6 +357,22 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       break;
     }
 
+  }
+
+  // check for back or forward in time
+
+  if (key == Qt::Key_Left) {
+    if (_params.debug) {
+      cerr << "Clicked left arrow, go back in time" << endl;
+    }
+    _goBack1();
+    _performArchiveRetrieval();
+  } else if (key == Qt::Key_Right) {
+    if (_params.debug) {
+      cerr << "Clicked right arrow, go forward in time" << endl;
+    }
+    _goFwd1();
+    _performArchiveRetrieval();
   }
 
 }
@@ -672,38 +696,38 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
 
 {
 
-#ifdef JUNK
-
   // set up plot times
 
   _plotStartTime = _archiveStartTime;
   _plotEndTime = _archiveEndTime;
 
-  // erase plot and set time controller
-
-  _bscan->setPlotStartTime(_plotStartTime, true);
-  _bscan->activateArchiveRendering();
-
   // set cursor to wait cursor
 
   this->setCursor(Qt::WaitCursor);
-  _timeAxisDialog->setCursor(Qt::WaitCursor);
+  _timeControllerDialog->setCursor(Qt::WaitCursor);
 
   // get data
-
+  
   if (_getArchiveData()) {
     this->setCursor(Qt::ArrowCursor);
-    _timeAxisDialog->setCursor(Qt::ArrowCursor);
+    _timeControllerDialog->setCursor(Qt::ArrowCursor);
     return;
   }
 
-  // plot the data
+  // _ppi->activateArchiveRendering();
+  // _rhi->activateArchiveRendering();
 
+  if (_vol.checkIsRhi()) {
+    _rhiMode = true;
+  } else {
+    _rhiMode = false;
+  }
+
+  // plot the data
+  
   _plotArchiveData();
   this->setCursor(Qt::ArrowCursor);
-  _timeAxisDialog->setCursor(Qt::ArrowCursor);
-
-#endif
+  _timeControllerDialog->setCursor(Qt::ArrowCursor);
 
 }
 
@@ -725,10 +749,7 @@ int PolarManager::_getArchiveData()
     cerr << "----------------------------------------------------" << endl;
     cerr << "perform archive retrieval" << endl;
     cerr << "  archive start time: " << _archiveStartTime.asString() << endl;
-    cerr << "  archive end time: " << _archiveEndTime.asString() << endl;
-    // cerr << "  dwell secs: " << _dwellSecs << endl;
-    // cerr << "  dwell stats method: "
-    //      << RadxField::statsMethodToStr(_dwellStatsMethod) << endl;
+    cerr << "  archive margin secs: " << _archiveMarginSecs << endl;
     cerr << "----------------------------------------------------" << endl;
   }
   
@@ -737,10 +758,9 @@ int PolarManager::_getArchiveData()
     errMsg += "PolarManager::_getArchiveData\n";
     errMsg += file.getErrStr() + "\n";
     errMsg += "  start time: " + _archiveStartTime.asString() + "\n";
-    errMsg += "  end time: " + _archiveEndTime.asString() + "\n";
-    // char text[1024];
-    // sprintf(text, "  dwell secs: %g\n", _dwellSecs);
-    // errMsg += text;
+    char text[1024];
+    sprintf(text, "  margin secs: %d\n", _archiveMarginSecs);
+    errMsg += text;
     cerr << errMsg;
     if (!_params.images_auto_create)  {
       QErrorMessage errorDialog;
@@ -780,7 +800,14 @@ void PolarManager::_plotArchiveData()
     cerr << "  No rays found" << endl;
   }
   
-  for (size_t ii = 0; ii < rays.size(); ii++) {
+  const vector<RadxSweep *> &sweeps = _vol.getSweeps();
+  if (sweeps.size() < 1) {
+    cerr << "ERROR - _plotArchiveData" << endl;
+    cerr << "  No sweeps found" << endl;
+  }
+
+  for (size_t ii = sweeps[0]->getStartRayIndex();
+       ii <= sweeps[0]->getEndRayIndex(); ii++) {
     RadxRay *ray = rays[ii];
     _handleRay(_platform, ray);
   }
@@ -810,13 +837,7 @@ void PolarManager::_setupVolRead(RadxFile &file)
     file.addReadField(field->getName());
   }
 
-  // _dwellSecs = _dwellSpecifiedSecs;
-  // if (_dwellAuto) {
-  //   _dwellSecs = _dwellAutoSecs;
-  // }
-  
-  // file.setReadRaysInInterval(_archiveStartTime, _archiveEndTime,
-  //                            _dwellSecs, _dwellStatsMethod);
+  file.setReadModeClosest(_archiveStartTime, _archiveMarginSecs);
 
 }
 
@@ -1676,9 +1697,9 @@ void PolarManager::_setArchiveScanConfig()
 
   _computeArchiveEndTime();
   
-  // if (_archiveMode) {
-  //   _performArchiveRetrieval();
-  // }
+  if (_archiveMode) {
+    _performArchiveRetrieval();
+  }
 
 }
 
@@ -1874,7 +1895,6 @@ void PolarManager::_createImageFiles()
 
   // retrieve data
 
-  // _setDwellAutoVal();
   _handleArchiveData(NULL);
 
   // save current field

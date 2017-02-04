@@ -769,6 +769,18 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("/scr/eldora1/hcr-test/cfradial/moments/wband");
     tt++;
     
+    // Parameter 'archive_retrieval_interval_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("archive_retrieval_interval_secs");
+    tt->descr = tdrpStrDup("Time interval to search in archive mode (secs).");
+    tt->help = tdrpStrDup("We search for data within this margin, on either side of the required time.");
+    tt->val_offset = (char *) &archive_retrieval_interval_secs - &_start_;
+    tt->single_val.i = 600;
+    tt++;
+    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));

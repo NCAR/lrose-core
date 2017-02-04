@@ -139,6 +139,19 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   void clearVar(const size_t index);
 
+  /**********************************************
+   * turn on archive-style rendering - all fields
+   */
+
+  void activateArchiveRendering();
+
+
+  /**********************************************************************
+   * turn on reatlime-style rendering - non-selected fields in background
+   */
+
+  void activateRealtimeRendering();
+
   /**
    * @brief Add a new beam to the display. Data for all fields and all
    *        gates are provided, as well as color maps for all fields.
