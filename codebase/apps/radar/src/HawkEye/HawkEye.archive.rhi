@@ -394,87 +394,87 @@ fields = {
     color_map = "snr.colors",
     shortcut = "8"
   }
-  ,
-  {
-    label = "SNRHX",
-    raw_name = "SNRHX",
-    filtered_name = "",
-    units = "dB",
-    color_map = "snr.colors",
-    shortcut = "9"
-  }
-  ,
-  {
-    label = "SNRVX",
-    raw_name = "SNRVX",
-    filtered_name = "",
-    units = "dB",
-    color_map = "snr.colors",
-    shortcut = "a"
-  }
-  ,
-  {
-    label = "DBMHC",
-    raw_name = "DBMHC",
-    filtered_name = "",
-    units = "dBm",
-    color_map = "dbm.colors",
-    shortcut = "b"
-  }
-  ,
-  {
-    label = "DBMVC",
-    raw_name = "DBMVC",
-    filtered_name = "",
-    units = "dBm",
-    color_map = "dbm.colors",
-    shortcut = "c"
-  }
-  ,
-  {
-    label = "DBMHX",
-    raw_name = "DBMHX",
-    filtered_name = "",
-    units = "dBm",
-    color_map = "dbm.colors",
-    shortcut = "d"
-  }
-  ,
-  {
-    label = "DBMVX",
-    raw_name = "DBMVX",
-    filtered_name = "",
-    units = "dBm",
-    color_map = "dbm.colors",
-    shortcut = "e"
-  }
-  ,
-  {
-    label = "NCP",
-    raw_name = "NCP",
-    filtered_name = "",
-    units = "",
-    color_map = "ncp.colors",
-    shortcut = "f"
-  }
-  ,
-  {
-    label = "LDRH",
-    raw_name = "LDRH",
-    filtered_name = "",
-    units = "dB",
-    color_map = "ldr.colors",
-    shortcut = "h"
-  }
-  ,
-  {
-    label = "LDRV",
-    raw_name = "LDRV",
-    filtered_name = "",
-    units = "dB",
-    color_map = "ldr.colors",
-    shortcut = "i"
-  }
+  // ,
+  // {
+  //   label = "SNRHX",
+  //   raw_name = "SNRHX",
+  //   filtered_name = "",
+  //   units = "dB",
+  //   color_map = "snr.colors",
+  //   shortcut = "9"
+  // }
+  // ,
+  // {
+  //   label = "SNRVX",
+  //   raw_name = "SNRVX",
+  //   filtered_name = "",
+  //   units = "dB",
+  //   color_map = "snr.colors",
+  //   shortcut = "a"
+  // }
+  // ,
+  // {
+  //   label = "DBMHC",
+  //   raw_name = "DBMHC",
+  //   filtered_name = "",
+  //   units = "dBm",
+  //   color_map = "dbm.colors",
+  //   shortcut = "b"
+  // }
+  // ,
+  // {
+  //   label = "DBMVC",
+  //   raw_name = "DBMVC",
+  //   filtered_name = "",
+  //   units = "dBm",
+  //   color_map = "dbm.colors",
+  //   shortcut = "c"
+  // }
+  // ,
+  // {
+  //   label = "DBMHX",
+  //   raw_name = "DBMHX",
+  //   filtered_name = "",
+  //   units = "dBm",
+  //   color_map = "dbm.colors",
+  //   shortcut = "d"
+  // }
+  // ,
+  // {
+  //   label = "DBMVX",
+  //   raw_name = "DBMVX",
+  //   filtered_name = "",
+  //   units = "dBm",
+  //   color_map = "dbm.colors",
+  //   shortcut = "e"
+  // }
+  // ,
+  // {
+  //   label = "NCP",
+  //   raw_name = "NCP",
+  //   filtered_name = "",
+  //   units = "",
+  //   color_map = "ncp.colors",
+  //   shortcut = "f"
+  // }
+  // ,
+  // {
+  //   label = "LDRH",
+  //   raw_name = "LDRH",
+  //   filtered_name = "",
+  //   units = "dB",
+  //   color_map = "ldr.colors",
+  //   shortcut = "h"
+  // }
+  // ,
+  // {
+  //   label = "LDRV",
+  //   raw_name = "LDRV",
+  //   filtered_name = "",
+  //   units = "dB",
+  //   color_map = "ldr.colors",
+  //   shortcut = "i"
+  // }
 };
 
 ///////////// background_render_mins //////////////////
@@ -612,7 +612,7 @@ site_name = "GV";
 // Type: int
 //
 
-main_window_width = 1200;
+main_window_width = 1130;
 
 ///////////// main_window_height //////////////////////
 //
@@ -777,7 +777,7 @@ rhi_window_height = 700;
 // Type: int
 //
 
-rhi_window_start_x = 1000;
+rhi_window_start_x = 1150;
 
 ///////////// rhi_window_start_y //////////////////////
 //
