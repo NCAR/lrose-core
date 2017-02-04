@@ -713,10 +713,14 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
     _timeControllerDialog->setCursor(Qt::ArrowCursor);
     return;
   }
-
-  // _ppi->activateArchiveRendering();
-  // _rhi->activateArchiveRendering();
-
+  
+  if (_ppi) {
+    _ppi->activateArchiveRendering();
+  }
+  if (_rhi) {
+    _rhi->activateArchiveRendering();
+  }
+  
   if (_vol.checkIsRhi()) {
     _rhiMode = true;
   } else {
@@ -1654,7 +1658,14 @@ void PolarManager::_setDataRetrievalMode()
     if (_archiveMode) {
       _archiveMode = false;
       _archiveTimeBox->setEnabled(false);
-      // _bscan->activateRealtimeRendering();
+      if (_ppi) {
+        _ppi->setArchiveMode(false);
+        _ppi->activateRealtimeRendering();
+      }
+      if (_rhi) {
+        _rhi->setArchiveMode(false);
+        _rhi->activateRealtimeRendering();
+      }
     }
   } else {
     if (!_archiveMode) {
@@ -1664,7 +1675,14 @@ void PolarManager::_setDataRetrievalMode()
         _setArchiveStartTime(_plotStartTime - _archiveScanIntervalSecs * _nArchiveScans);
         _setGuiFromStartTime();
       }
-      // _bscan->activateArchiveRendering();
+      if (_ppi) {
+        _ppi->setArchiveMode(false);
+        _ppi->activateArchiveRendering();
+      }
+      if (_rhi) {
+        _rhi->setArchiveMode(false);
+        _rhi->activateArchiveRendering();
+      }
     }
   }
 }

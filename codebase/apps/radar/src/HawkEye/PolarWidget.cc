@@ -57,8 +57,8 @@ PolarWidget::PolarWidget(QWidget* parent,
         _params(params),
         _nFields(n_fields),
         _selectedField(0),
-        _gridRingsColor(_params.grid_and_range_ring_color),
         _backgroundBrush(QColor(_params.background_color)),
+        _gridRingsColor(_params.grid_and_range_ring_color),
         _ringsEnabled(true),
         _gridsEnabled(false),
         _azLinesEnabled(true),
@@ -67,6 +67,10 @@ PolarWidget::PolarWidget(QWidget* parent,
         _ringSpacing(10.0)
 
 {
+
+  // mode
+
+  _archiveMode = _params.begin_in_archive_mode;
 
   // Set up the background color
 
@@ -136,6 +140,19 @@ PolarWidget::~PolarWidget()
 
 }
 
+
+/*************************************************************************
+ * configure the axes
+ */
+
+/*************************************************************************
+ * set archive mode
+ */
+
+void PolarWidget::setArchiveMode(bool archive_mode)
+{
+  _archiveMode = archive_mode;
+}
 
 /*************************************************************************
  * unzoom the view
@@ -227,6 +244,10 @@ void PolarWidget::selectVar(const size_t index)
     return;
   }
   
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "=========>> selectVar for field: " << _params._fields[index].label << endl;
+  }
+
   // If this field isn't being rendered in the background, render all of
   // the beams for it
 

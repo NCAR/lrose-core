@@ -148,6 +148,10 @@ void FieldRenderer::setBackgroundRenderingOn()
 void FieldRenderer::run()
 {
 
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Start of rendering for field: " << _params._fields[_fieldNum].label << endl;
+  }
+
   if (_beams.size() == 0) {
     return;
   }
@@ -164,7 +168,7 @@ void FieldRenderer::run()
       continue;
     }
     if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "Rendering beam:" << endl;
+      cerr << "Rendering beam field:" << _params._fields[_fieldNum].label << endl;
       (*beam)->print(cerr);
     }
     (*beam)->paint(_image, _transform, _fieldNum, _useHeight, _drawInstHt);

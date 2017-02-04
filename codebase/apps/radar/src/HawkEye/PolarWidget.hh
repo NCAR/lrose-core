@@ -145,7 +145,6 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   void activateArchiveRendering();
 
-
   /**********************************************************************
    * turn on reatlime-style rendering - non-selected fields in background
    */
@@ -257,6 +256,12 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   void displayImage(const size_t field_num);
+
+  /**
+   * set archive mode
+   */
+  
+  void setArchiveMode(bool archive_mode);
 
   /**
    * @brief Unzoom the view.
@@ -373,16 +378,16 @@ class DLL_EXPORT PolarWidget : public QWidget
   size_t _selectedField;
 
   /**
-   * @brief The color for the grid and rings.
-   */
-
-  QColor _gridRingsColor;
-
-  /**
    * @brief The brush for the background.
    */
 
   QBrush _backgroundBrush;
+
+  /**
+   * @brief The color for the grid and rings.
+   */
+
+  QColor _gridRingsColor;
 
   /**
    * @brief True if the ring display is enabled.
@@ -415,6 +420,10 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   double _maxRange;
+
+  // archive mode
+
+  bool _archiveMode;
 
   /**
    * @brief Last X,Y location of the mouse during mouse move events; used for

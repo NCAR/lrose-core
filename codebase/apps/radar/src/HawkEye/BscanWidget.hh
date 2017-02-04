@@ -355,13 +355,6 @@ class DLL_EXPORT BscanWidget : public QWidget
 
   ScaledLabel _scaledLabel;
 
-  // start time of plot
-
-  RadxTime _plotStartTime;
-  RadxTime _plotEndTime;
-  double _timeSpanSecs;
-  bool _archiveMode;
-
   /**
    * @brief The maximum range of the beams, in km.  It affects the
    *        labelling of the range rings
@@ -373,6 +366,13 @@ class DLL_EXPORT BscanWidget : public QWidget
   double _maxAltitude;
   bool _altitudeInFeet;
   bool _rangeInFeet;
+
+  // start time of plot
+
+  RadxTime _plotStartTime;
+  RadxTime _plotEndTime;
+  double _timeSpanSecs;
+  bool _archiveMode;
 
   /**
    * @brief Last X,Y location of the mouse during mouse move events; used for
