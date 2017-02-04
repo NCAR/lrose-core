@@ -40,6 +40,7 @@ RhiWidget::RhiWidget(QWidget* parent,
   } else {
     _aspectRatio = _params.rhi_aspect_ratio;
   }
+  _colorScaleWidth = _params.rhi_color_scale_width;
 
   // initialoze world view
   
@@ -106,7 +107,7 @@ void RhiWidget::configureRange(double max_range)
   int rightMargin = 0;
   int topMargin = 0;
   int bottomMargin = 0;
-  int colorScaleWidth = 0;
+  int colorScaleWidth = _params.rhi_color_scale_width;
   int axisTickLen = 7;
   int nTicksIdeal = 7;
   int textMargin = 5;

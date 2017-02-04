@@ -61,6 +61,8 @@ BscanWidget::BscanWidget(QWidget* parent,
 
   _pointClicked = false;
   
+  _colorScaleWidth = _params.color_scale_width;
+
   _rangeGridEnabled = _params.bscan_draw_range_grid_lines;
   _timeGridEnabled = _params.bscan_draw_time_grid_lines;
   _instHtLineEnabled = _params.bscan_draw_instrument_height_line;
@@ -175,7 +177,7 @@ void BscanWidget::configureAxes(Params::range_axis_mode_t range_axis_mode,
                    _params.bscan_right_margin,
                    _params.bscan_top_margin,
                    bottomMargin,
-                   _params.color_scale_width,
+                   _colorScaleWidth,
                    0.0,
                    _minRange,
                    _timeSpanSecs,
@@ -189,7 +191,7 @@ void BscanWidget::configureAxes(Params::range_axis_mode_t range_axis_mode,
                    _params.bscan_right_margin,
                    _params.bscan_top_margin,
                    bottomMargin,
-                   _params.color_scale_width,
+                   _colorScaleWidth,
                    0.0,
                    _maxRange,
                    _timeSpanSecs,
@@ -203,7 +205,7 @@ void BscanWidget::configureAxes(Params::range_axis_mode_t range_axis_mode,
                    _params.bscan_right_margin,
                    _params.bscan_top_margin,
                    bottomMargin,
-                   _params.color_scale_width,
+                   _colorScaleWidth,
                    0.0,
                    _minAltitude,
                    _timeSpanSecs,

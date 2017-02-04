@@ -639,13 +639,15 @@ void PolarWidget::resize(const int width, const int height)
   // Set the geometry based on the aspect ratio that we need for this display.
   // The setGeometry() method will fire off the resizeEvent() so we leave the
   // updating of the display to that event.
-
-  int sizeNeeded = (int) (width / getAspectRatio() + 0.5);
+  
+  int sizeNeeded = (int) ((width - _colorScaleWidth) / _aspectRatio + 0.5);
   if (height < sizeNeeded) {
     sizeNeeded = height;
   }
 
-  setGeometry(0, 0, (int) (sizeNeeded * getAspectRatio() + 0.5), sizeNeeded);
+  setGeometry(0, 0, 
+              (int) (sizeNeeded * _aspectRatio + 0.5) + _colorScaleWidth,
+              sizeNeeded);
 
 }
 
@@ -1018,6 +1020,11 @@ void PolarWidget::_drawOverlays(QPainter &painter)
   
   painter.restore();
 
+  // draw the color scale
+
+  const DisplayField &field = _manager.getSelectedField();
+  _zoomWorld.drawColorScale(field.getColorMap(), painter);
+  
 }
 
 

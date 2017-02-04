@@ -417,6 +417,12 @@ class DLL_EXPORT BscanWidget : public QWidget
   QTransform _zoomTransform;
   WorldPlot _zoomWorld;
   
+  /**
+   * @brief The width of the color scale
+   */
+
+  int _colorScaleWidth;
+  
   // vertical scale state
   
   Params::range_axis_mode_t _rangeAxisMode;

@@ -434,6 +434,11 @@ paramdef double {
   p_descr = "Set to -1 to allow aspect ratio to vary as the RHI window is resized.";
 } rhi_aspect_ratio;
 
+paramdef int {
+  p_default = 40;
+  p_descr = "Width of color scale for RHI window (pixels).";
+} rhi_color_scale_width;
+
 commentdef {
   p_header = "BSCAN TIME LIMITS";
 }

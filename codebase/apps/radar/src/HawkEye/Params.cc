@@ -1464,6 +1464,18 @@ using namespace std;
     tt->single_val.d = 1;
     tt++;
     
+    // Parameter 'rhi_color_scale_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_color_scale_width");
+    tt->descr = tdrpStrDup("Width of color scale for RHI window (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_color_scale_width - &_start_;
+    tt->single_val.i = 40;
+    tt++;
+    
     // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));

@@ -1527,7 +1527,8 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   int pltHt = _plotHeight;
   int width = _colorScaleWidth;
   int xStart = _widthPixels - width;
-  double patchHt = (double)(pltHt) / cmap.size();
+  size_t nHts = cmap.size() + 2; // leave space at top and bottom
+  double patchHt = (double)(pltHt) / nHts;
   int iPatchHt = (int) patchHt;
 
   // fill the swatches with the color
@@ -1538,7 +1539,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
     const ColorMap::CmapEntry &entry = cmap[ii];
     QColor color(entry.red, entry.green, entry.blue);
     painter.setBrush(color);
-    double topY = pltHt - (ii + 1) * patchHt + _topMargin;
+    double topY = pltHt - (int) (ii + 2) * patchHt + (patchHt / 2) + _topMargin;
     QRectF r(xStart, topY, width, patchHt);
     painter.fillRect(r, color);
   }
@@ -1586,7 +1587,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 
   painter.setBrush(Qt::black);
   painter.setBackgroundMode(Qt::OpaqueMode);
-  double yy = pltHt - patchHt / 2.0 + _topMargin;
+  double yy = pltHt - (patchHt * 1.0) + _topMargin;
   for (size_t ii = 0; ii < cmap.size(); ii++) {
     const ColorMap::CmapEntry &entry = cmap[ii];
     QString label = QString("%1").arg(entry.minVal,0,format,ndecimals);
@@ -1603,11 +1604,12 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   painter.drawText(xStart, (int)yy, width, iPatchHt, 
                    Qt::AlignVCenter | Qt::AlignHCenter, 
                    label);
+  yy -= patchHt * 0.5;
 
   // add Units header
   
   QString units(colorMap.getUnits().c_str());
-  painter.drawText(xStart, 0, width, iPatchHt, 
+  painter.drawText(xStart, yy, width, iPatchHt, 
                    Qt::AlignVCenter | Qt::AlignHCenter, units);
 
   // restore state

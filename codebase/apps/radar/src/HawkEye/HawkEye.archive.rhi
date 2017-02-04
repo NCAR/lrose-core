@@ -228,7 +228,7 @@ archive_n_scans = 12;
 // Type: string
 //
 
-archive_data_url = "$(HOME)/data/spol_data/sur";
+archive_data_url = "$(HOME)/data/spol_data/rhi";
 
 //======================================================================
 //
@@ -757,7 +757,7 @@ ppi_aspect_ratio = 1;
 // Type: int
 //
 
-rhi_window_width = 500;
+rhi_window_width = 350;
 
 ///////////// rhi_window_height ///////////////////////
 //
@@ -767,7 +767,7 @@ rhi_window_width = 500;
 // Type: int
 //
 
-rhi_window_height = 500;
+rhi_window_height = 700;
 
 ///////////// rhi_window_start_x //////////////////////
 //
@@ -808,7 +808,7 @@ rhi_display_180_degrees = FALSE;
 // Type: double
 //
 
-rhi_aspect_ratio = 1;
+rhi_aspect_ratio = 1.0;
 
 //======================================================================
 //

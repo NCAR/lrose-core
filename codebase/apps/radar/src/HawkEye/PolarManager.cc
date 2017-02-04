@@ -41,7 +41,7 @@
 #include "PpiWidget.hh"
 #include "RhiWidget.hh"
 #include "RhiWindow.hh"
-#include "ColorBar.hh"
+// #include "ColorBar.hh"
 #include "Params.hh"
 #include "Reader.hh"
 
@@ -448,8 +448,8 @@ void PolarManager::_setupWindows()
 
   // color bar to right
   
-  _colorBar = new ColorBar(_params.color_scale_width,
-                           &_fields[0]->getColorMap(), _main);
+  // _colorBar = new ColorBar(_params.color_scale_width,
+  //                          &_fields[0]->getColorMap(), _main);
   
   // main window layout
   
@@ -458,7 +458,7 @@ void PolarManager::_setupWindows()
   mainLayout->addWidget(_statusPanel);
   mainLayout->addWidget(_fieldPanel);
   mainLayout->addWidget(_ppiFrame);
-  mainLayout->addWidget(_colorBar);
+  // mainLayout->addWidget(_colorBar);
 
   _createActions();
   _createMenus();
@@ -770,6 +770,8 @@ int PolarManager::_getArchiveData()
     }
     return -1;
   }
+  
+  _platform = _vol.getPlatform();
 
   return 0;
 
@@ -811,6 +813,13 @@ void PolarManager::_plotArchiveData()
     RadxRay *ray = rays[ii];
     _handleRay(_platform, ray);
   }
+
+  // if (_ppi) {
+  //   _ppi->update();
+  // }
+  // if (_rhiWindow) {
+  //   _rhiWindow->update();
+  // }
 
   // update the status panel
   
@@ -1182,7 +1191,7 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
   _ppi->selectVar(_fieldNum);
   _rhi->selectVar(_fieldNum);
 
-  _colorBar->setColorMap(&_fields[_fieldNum]->getColorMap());
+  // _colorBar->setColorMap(&_fields[_fieldNum]->getColorMap());
 
   _selectedName = _selectedField->getName();
   _selectedLabel = _selectedField->getLabel();

@@ -459,6 +459,12 @@ class DLL_EXPORT PolarWidget : public QWidget
   double _aspectRatio;
   
   /**
+   * @brief The width of the color scale
+   */
+
+  int _colorScaleWidth;
+  
+  /**
    * @brief The full window rendering dimensions.  These are different for
    *        PPI windows and RHI windows.
    */

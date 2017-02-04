@@ -522,6 +522,8 @@ public:
 
   double rhi_aspect_ratio;
 
+  int rhi_color_scale_width;
+
   double bscan_time_span_secs;
 
   tdrp_bool_t bscan_truncate_start_time;
@@ -655,7 +657,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[134];
+  mutable TDRPtable _table[135];
 
   const char *_className;
 
