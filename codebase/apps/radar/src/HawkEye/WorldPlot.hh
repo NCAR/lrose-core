@@ -350,7 +350,14 @@ public:
                                     bool specifyTicks = false,
                                     double specifiedTickMin = 0.0,
                                     double specifiedTickDelta = 1.0);
-  
+
+  // get tick locations used for each axis, after drawing
+
+  const vector<double> &getTopTicks() const { return _topTicks; }
+  const vector<double> &getBottomTicks() const { return _bottomTicks; }
+  const vector<double> &getLeftTicks() const { return _leftTicks; }
+  const vector<double> &getRightTicks() const { return _rightTicks; }
+
   // draw source image into graphics, scaling and translating to
   // map the world coordinates
     
@@ -433,6 +440,11 @@ private:
   int _textMargin;
   bool _specifyTicks;
   double _tickMin, _tickDelta;
+
+  vector<double> _topTicks;
+  vector<double> _bottomTicks;
+  vector<double> _leftTicks;
+  vector<double> _rightTicks;
 
   // affine transform
 

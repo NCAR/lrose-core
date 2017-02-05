@@ -419,7 +419,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    *        labelling of the range rings
    */
 
-  double _maxRange;
+  double _maxRangeKm;
 
   // archive mode
 
@@ -543,7 +543,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @return Returns the ring spacing in kilometers.
    */
 
-  virtual void _setRingSpacing() = 0;
+  virtual void _setGridSpacing() = 0;
 
   /**
    * @brief Initialize the full window transform to use for the widget.

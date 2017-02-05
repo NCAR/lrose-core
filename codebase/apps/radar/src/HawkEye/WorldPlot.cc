@@ -701,18 +701,18 @@ void WorldPlot::drawAxisLeft(QPainter &painter, const string &units,
 
   // tick marks
 
-  vector<double> ticks = linearTicks(_yMinWorld, _yMaxWorld,
-                                     _nTicksIdeal, _specifyTicks,
-                                     _tickMin, _tickDelta);
+  _leftTicks = linearTicks(_yMinWorld, _yMaxWorld,
+                           _nTicksIdeal, _specifyTicks,
+                           _tickMin, _tickDelta);
 
-  if (ticks.size() < 2) {
+  if (_leftTicks.size() < 2) {
     return;
   }
 	
-  double delta = ticks[1] - ticks[0];
-  for (size_t i = 0; i < ticks.size(); i++) {
+  double delta = _leftTicks[1] - _leftTicks[0];
+  for (size_t i = 0; i < _leftTicks.size(); i++) {
 	    
-    double val = ticks[i];
+    double val = _leftTicks[i];
     double pix = getYPixel(val);
     if (doTicks) {
       QLineF qline(_xMinPixel, pix,
@@ -765,17 +765,17 @@ void WorldPlot::drawAxisRight(QPainter &painter, const string &units,
 
   // tick marks
 
-  vector<double> ticks = linearTicks(_yMinWorld, _yMaxWorld,
-                                     _nTicksIdeal, _specifyTicks,
-                                     _tickMin, _tickDelta);
-  if (ticks.size() < 2) {
+  _rightTicks = linearTicks(_yMinWorld, _yMaxWorld,
+                            _nTicksIdeal, _specifyTicks,
+                            _tickMin, _tickDelta);
+  if (_rightTicks.size() < 2) {
     return;
   }
 	
-  double delta = ticks[1] - ticks[0];
-  for (size_t i = 0; i < ticks.size(); i++) {
+  double delta = _rightTicks[1] - _rightTicks[0];
+  for (size_t i = 0; i < _rightTicks.size(); i++) {
 	    
-    double val = ticks[i];
+    double val = _rightTicks[i];
     double pix = getYPixel(val);
     if (doTicks) {
       QLineF qline(_xMaxPixel, pix,
@@ -830,17 +830,17 @@ void WorldPlot::drawAxisBottom(QPainter &painter,
 
   // tick marks
 
-  vector<double> ticks = linearTicks(_xMinWorld, _xMaxWorld,
-                                     _nTicksIdeal, _specifyTicks,
-                                     _tickMin, _tickDelta);
-  if (ticks.size() < 2) {
+  _bottomTicks = linearTicks(_xMinWorld, _xMaxWorld,
+                             _nTicksIdeal, _specifyTicks,
+                             _tickMin, _tickDelta);
+  if (_bottomTicks.size() < 2) {
     return;
   }
 	
-  double delta = ticks[1] - ticks[0];
-  for (size_t i = 0; i < ticks.size(); i++) {
+  double delta = _bottomTicks[1] - _bottomTicks[0];
+  for (size_t i = 0; i < _bottomTicks.size(); i++) {
 	    
-    double val = ticks[i];
+    double val = _bottomTicks[i];
     double pix = getXPixel(val);
     if (doTicks) {
       QLineF qline(pix, _yMinPixel,
@@ -893,17 +893,17 @@ void WorldPlot::drawAxisTop(QPainter &painter,
 
   // tick marks
 
-  vector<double> ticks = linearTicks(_xMinWorld, _xMaxWorld,
-                                     _nTicksIdeal, _specifyTicks,
-                                     _tickMin, _tickDelta);
-  if (ticks.size() < 2) {
+  _topTicks = linearTicks(_xMinWorld, _xMaxWorld,
+                          _nTicksIdeal, _specifyTicks,
+                          _tickMin, _tickDelta);
+  if (_topTicks.size() < 2) {
     return;
   }
   
-  double delta = ticks[1] - ticks[0];
-  for (size_t i = 0; i < ticks.size(); i++) {
+  double delta = _topTicks[1] - _topTicks[0];
+  for (size_t i = 0; i < _topTicks.size(); i++) {
 	    
-    double val = ticks[i];
+    double val = _topTicks[i];
     double pix = getXPixel(val);
     if (doTicks) {
       QLineF qline(pix, _yMaxPixel,

@@ -518,9 +518,27 @@ public:
 
   int rhi_window_start_y;
 
+  int rhi_top_margin;
+
+  int rhi_bottom_margin;
+
+  int rhi_left_margin;
+
+  int rhi_right_margin;
+
+  int rhi_label_font_size;
+
+  int rhi_axis_tick_len;
+
+  int rhi_n_ticks_ideal;
+
+  int rhi_text_margin;
+
   tdrp_bool_t rhi_display_180_degrees;
 
   double rhi_aspect_ratio;
+
+  double rhi_max_height_km;
 
   int rhi_color_scale_width;
 
@@ -657,7 +675,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[135];
+  mutable TDRPtable _table[144];
 
   const char *_className;
 

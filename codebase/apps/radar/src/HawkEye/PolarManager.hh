@@ -126,7 +126,7 @@ private:
   // beam geometry
   
   int _nGates;
-  double _maxRange;
+  double _maxRangeKm;
 
   // ray locator
   // we use a locator with data every 1/100th degree

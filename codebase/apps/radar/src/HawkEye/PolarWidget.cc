@@ -163,7 +163,7 @@ void PolarWidget::unzoomView()
   _zoomWorld = _fullWorld;
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
-  _setRingSpacing();
+  _setGridSpacing();
   _refreshImages();
 }
 
@@ -604,7 +604,7 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
 
     _setTransform(_zoomWorld.getTransform());
 
-    _setRingSpacing();
+    _setGridSpacing();
 
     // enable unzoom button
     
@@ -682,7 +682,7 @@ void PolarWidget::_resetWorld(int width, int height)
   _fullWorld.resize(width, height);
   _zoomWorld = _fullWorld;
   _setTransform(_fullWorld.getTransform());
-  _setRingSpacing();
+  _setGridSpacing();
 
 }
 

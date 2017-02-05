@@ -157,7 +157,7 @@ void BscanWidget::configureAxes(Params::range_axis_mode_t range_axis_mode,
 
   _rangeAxisMode = range_axis_mode;
   _minRange = min_range;
-  _maxRange = max_range;
+  _maxRangeKm = max_range;
   _minAltitude = min_altitude;
   _maxAltitude = max_altitude;
   _timeSpanSecs = time_span_secs;
@@ -181,7 +181,7 @@ void BscanWidget::configureAxes(Params::range_axis_mode_t range_axis_mode,
                    0.0,
                    _minRange,
                    _timeSpanSecs,
-                   _maxRange,
+                   _maxRangeKm,
                    _params.bscan_axis_tick_len,
                    _params.bscan_n_ticks_ideal,
                    _params.bscan_text_margin);
@@ -193,7 +193,7 @@ void BscanWidget::configureAxes(Params::range_axis_mode_t range_axis_mode,
                    bottomMargin,
                    _colorScaleWidth,
                    0.0,
-                   _maxRange,
+                   _maxRangeKm,
                    _timeSpanSecs,
                    _minRange,
                    _params.bscan_axis_tick_len,

@@ -1440,6 +1440,102 @@ using namespace std;
     tt->single_val.i = 0;
     tt++;
     
+    // Parameter 'rhi_top_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_top_margin");
+    tt->descr = tdrpStrDup("Height of top margin in RHI mode (pixels).");
+    tt->help = tdrpStrDup("Titles go in the top margin.");
+    tt->val_offset = (char *) &rhi_top_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'rhi_bottom_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_bottom_margin");
+    tt->descr = tdrpStrDup("Height of bottom margin in RHI mode (pixels).");
+    tt->help = tdrpStrDup("Time scale goes in the bottom margin.");
+    tt->val_offset = (char *) &rhi_bottom_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'rhi_left_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_left_margin");
+    tt->descr = tdrpStrDup("Width of left margin in RHI mode (pixels).");
+    tt->help = tdrpStrDup("Height scale goes in the left margin.");
+    tt->val_offset = (char *) &rhi_left_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'rhi_right_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_right_margin");
+    tt->descr = tdrpStrDup("Width of right margin in RHI mode (pixels).");
+    tt->help = tdrpStrDup("Height scale goes in the right margin.");
+    tt->val_offset = (char *) &rhi_right_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'rhi_label_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_label_font_size");
+    tt->descr = tdrpStrDup("Font size for labels on range rings (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_label_font_size - &_start_;
+    tt->single_val.i = 8;
+    tt++;
+    
+    // Parameter 'rhi_axis_tick_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_axis_tick_len");
+    tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_axis_tick_len - &_start_;
+    tt->single_val.i = 7;
+    tt++;
+    
+    // Parameter 'rhi_n_ticks_ideal'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_n_ticks_ideal");
+    tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_n_ticks_ideal - &_start_;
+    tt->single_val.i = 7;
+    tt++;
+    
+    // Parameter 'rhi_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_text_margin");
+    tt->descr = tdrpStrDup("Margin around some text (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_text_margin - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
     // Parameter 'rhi_display_180_degrees'
     // ctype is 'tdrp_bool_t'
     
@@ -1458,10 +1554,22 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("rhi_aspect_ratio");
-    tt->descr = tdrpStrDup("Aspect ratio (width/height) of PPI window.");
+    tt->descr = tdrpStrDup("Aspect ratio (width/height) of RHI window.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &rhi_aspect_ratio - &_start_;
     tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'rhi_max_height_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("rhi_max_height_km");
+    tt->descr = tdrpStrDup("Max height of data in RHI window (km).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_max_height_km - &_start_;
+    tt->single_val.d = 25;
     tt++;
     
     // Parameter 'rhi_color_scale_width'

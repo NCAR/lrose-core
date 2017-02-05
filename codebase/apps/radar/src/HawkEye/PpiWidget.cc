@@ -64,11 +64,11 @@ void PpiWidget::configureRange(double max_range)
 
   // Save the specified values
 
-  _maxRange = max_range;
+  _maxRangeKm = max_range;
 
   // Set the ring spacing.  This is dependent on the value of _maxRange.
 
-  _setRingSpacing();
+  _setGridSpacing();
   
   // set world view
 
@@ -85,8 +85,8 @@ void PpiWidget::configureRange(double max_range)
 
     _fullWorld.set(width(), height(),
                    leftMargin, rightMargin, topMargin, bottomMargin, colorScaleWidth,
-                   -_maxRange, 0.0,
-                   _maxRange, _maxRange,
+                   -_maxRangeKm, 0.0,
+                   _maxRangeKm, _maxRangeKm,
                    axisTickLen, nTicksIdeal, textMargin);
     // _setWindow(QRect(-Beam::RENDER_PIXELS, -Beam::RENDER_PIXELS,
     //                  Beam::RENDER_PIXELS * 2, Beam::RENDER_PIXELS * 2));
@@ -95,8 +95,8 @@ void PpiWidget::configureRange(double max_range)
     
     _fullWorld.set(width(), height(),
                    leftMargin, rightMargin, topMargin, bottomMargin, colorScaleWidth,
-                   -_maxRange, -_maxRange,
-                   _maxRange, _maxRange,
+                   -_maxRangeKm, -_maxRangeKm,
+                   _maxRangeKm, _maxRangeKm,
                    axisTickLen, nTicksIdeal, textMargin);
     // _setWindow(QRect(-Beam::RENDER_PIXELS, -Beam::RENDER_PIXELS,
     //                  Beam::RENDER_PIXELS * 2, Beam::RENDER_PIXELS));
@@ -106,7 +106,7 @@ void PpiWidget::configureRange(double max_range)
   _zoomWorld = _fullWorld;
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
-  _setRingSpacing();
+  _setGridSpacing();
 
   // Initialize the images used for double-buffering.  For some reason,
   // the window size is incorrect at this point, but that will be corrected
@@ -145,10 +145,10 @@ const RadxRay *PpiWidget::_getClosestRay(double x_km, double y_km)
 }
 
 /*************************************************************************
- * _setRingSpacing()
+ * _setGridSpacing()
  */
 
-void PpiWidget::_setRingSpacing()
+void PpiWidget::_setGridSpacing()
 {
 
   double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
@@ -215,7 +215,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
     painter.save();
     painter.setTransform(_zoomTransform);
     double ringRange = _ringSpacing;
-    while (ringRange <= _maxRange) {
+    while (ringRange <= _maxRangeKm) {
       QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
       painter.drawEllipse(rect);
       ringRange += _ringSpacing;
@@ -230,7 +230,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
     // painter.setWindow(0, 0, width(), height());
     
     ringRange = _ringSpacing;
-    while (ringRange <= _maxRange) {
+    while (ringRange <= _maxRangeKm) {
       double labelPos = ringRange * SIN_45;
       const string &labelStr = _scaledLabel.scale(ringRange);
       _zoomWorld.drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
@@ -248,12 +248,12 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
     double ringRange = _ringSpacing;
     double maxRingRange = ringRange;
-    while (ringRange <= _maxRange) {
+    while (ringRange <= _maxRangeKm) {
 
-      _zoomWorld.drawLine(painter, ringRange, -_maxRange, ringRange, _maxRange);
-      _zoomWorld.drawLine(painter, -ringRange, -_maxRange, -ringRange, _maxRange);
-      _zoomWorld.drawLine(painter, -_maxRange, ringRange, _maxRange, ringRange);
-      _zoomWorld.drawLine(painter, -_maxRange, -ringRange, _maxRange, -ringRange);
+      _zoomWorld.drawLine(painter, ringRange, -_maxRangeKm, ringRange, _maxRangeKm);
+      _zoomWorld.drawLine(painter, -ringRange, -_maxRangeKm, -ringRange, _maxRangeKm);
+      _zoomWorld.drawLine(painter, -_maxRangeKm, ringRange, _maxRangeKm, ringRange);
+      _zoomWorld.drawLine(painter, -_maxRangeKm, -ringRange, _maxRangeKm, -ringRange);
       
       maxRingRange = ringRange;
       ringRange += _ringSpacing;
@@ -276,13 +276,13 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
     // Draw the lines along the X and Y axes
 
-    _zoomWorld.drawLine(painter, 0, -_maxRange, 0, _maxRange);
-    _zoomWorld.drawLine(painter, -_maxRange, 0, _maxRange, 0);
+    _zoomWorld.drawLine(painter, 0, -_maxRangeKm, 0, _maxRangeKm);
+    _zoomWorld.drawLine(painter, -_maxRangeKm, 0, _maxRangeKm, 0);
 
     // Draw the lines along the 30 degree lines
 
-    double end_pos1 = SIN_30 * _maxRange;
-    double end_pos2 = COS_30 * _maxRange;
+    double end_pos1 = SIN_30 * _maxRangeKm;
+    double end_pos2 = COS_30 * _maxRangeKm;
     
     _zoomWorld.drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
     _zoomWorld.drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);

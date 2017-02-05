@@ -87,7 +87,7 @@ class DLL_EXPORT PpiWidget : public PolarWidget
    * @return Returns the ring spacing in kilometers.
    */
 
-  virtual void _setRingSpacing();
+  virtual void _setGridSpacing();
 
 };
 

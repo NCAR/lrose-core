@@ -107,7 +107,7 @@ PolarManager::PolarManager(const Params &params,
   // initialize geometry
   
   _nGates = 1000;
-  _maxRange = _params.max_range_km;
+  _maxRangeKm = _params.max_range_km;
 
   _realtimeModeButton = NULL;
   _archiveModeButton = NULL;
@@ -529,9 +529,9 @@ void PolarManager::_createRhiWindow()
   _rhiFrame = new QFrame(_main);
   // _rhiFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   _rhi = new RhiWidget(_rhiFrame, *this, _params, _fields.size());
-  _rhi->setRings(true);
-  _rhi->setGrids(false);
-  _rhi->setAzLines(true);
+  _rhi->setRings(false);
+  _rhi->setGrids(true);
+  _rhi->setAzLines(false);
 
   // Create the RHI window
 
@@ -907,11 +907,11 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   int nGates = ray->getNGates();
   double maxRange = ray->getStartRangeKm() + nGates * ray->getGateSpacingKm();
   
-  if ((maxRange - _maxRange) > 0.001) {
+  if ((maxRange - _maxRangeKm) > 0.001) {
     _nGates = nGates;
-    _maxRange = maxRange;
-    _ppi->configureRange(_maxRange);
-    _rhi->configureRange(_maxRange);
+    _maxRangeKm = maxRange;
+    _ppi->configureRange(_maxRangeKm);
+    _rhi->configureRange(_maxRangeKm);
   }
 
   // create 2D field data vector

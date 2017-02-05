@@ -107,6 +107,15 @@ protected:
   ///////////////////////
 
   /**
+   * @brief The maximum range of the beams, in km.  It affects the
+   *        labelling of the range rings
+   */
+
+  double _maxHeightKm;
+  double _xGridSpacing;
+  double _yGridSpacing;
+
+  /**
    * @brief The number of RHI beams processed so far.  I have to keep track of
    *        this so that I can automatically resize the window after processing
    *        a few beams to get rid of a problem with widget size on startup.
@@ -134,7 +143,8 @@ protected:
    * @return Returns the ring spacing in kilometers.
    */
 
-  virtual void _setRingSpacing();
+  virtual void _setGridSpacing();
+  double _getSpacing(double range);
 
 };
 
