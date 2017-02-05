@@ -233,6 +233,7 @@ private:
   
   // local methods
 
+  void _clear();
   void _setupWindows();
   void _createRhiWindow();
   void _createActions();
@@ -263,6 +264,12 @@ private:
   void _createArchiveImageFiles();
   void _createImageFiles();
   void _saveImageToFile(bool interactive);
+
+  // modes
+
+  void _setArchiveMode(bool state);
+  void _activateRealtimeRendering();
+  void _activateArchiveRendering();
 
   // override howto
 

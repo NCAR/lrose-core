@@ -112,12 +112,12 @@ PolarManager::PolarManager(const Params &params,
   _realtimeModeButton = NULL;
   _archiveModeButton = NULL;
 
-  _archiveMode = _params.begin_in_archive_mode;
   _archiveRetrievalPending = false;
   _archiveTimeBox = NULL;
   _archiveStartTimeEdit = NULL;
   _archiveEndTimeEcho = NULL;
 
+  _setArchiveMode(_params.begin_in_archive_mode);
   _archiveStartTime.set(_params.archive_start_time);
   _archiveMarginSecs = _params.archive_retrieval_interval_secs;
 
@@ -729,6 +729,8 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
 
 {
 
+  _clear();
+
   // set up plot times
 
   _plotStartTime = _archiveStartTime;
@@ -747,12 +749,7 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
     return;
   }
   
-  if (_ppi) {
-    _ppi->activateArchiveRendering();
-  }
-  if (_rhi) {
-    _rhi->activateArchiveRendering();
-  }
+  _activateArchiveRendering();
   
   if (_vol.checkIsRhi()) {
     _rhiMode = true;
@@ -1700,32 +1697,16 @@ void PolarManager::_setDataRetrievalMode()
   }
   if (_realtimeModeButton && _realtimeModeButton->isChecked()) {
     if (_archiveMode) {
-      _archiveMode = false;
-      _archiveTimeBox->setEnabled(false);
-      if (_ppi) {
-        _ppi->setArchiveMode(false);
-        _ppi->activateRealtimeRendering();
-      }
-      if (_rhi) {
-        _rhi->setArchiveMode(false);
-        _rhi->activateRealtimeRendering();
-      }
+      _setArchiveMode(false);
+      _activateRealtimeRendering();
     }
   } else {
     if (!_archiveMode) {
-      _archiveMode = true;
-      _archiveTimeBox->setEnabled(true);
+      _setArchiveMode(true);
+      _activateArchiveRendering();
       if (_plotStartTime.utime() != 0) {
         _setArchiveStartTime(_plotStartTime - _archiveScanIntervalSecs * _nArchiveScans);
         _setGuiFromStartTime();
-      }
-      if (_ppi) {
-        _ppi->setArchiveMode(false);
-        _ppi->activateArchiveRendering();
-      }
-      if (_rhi) {
-        _rhi->setArchiveMode(false);
-        _rhi->activateArchiveRendering();
       }
     }
   }
@@ -2210,5 +2191,61 @@ void PolarManager::_goFwdNScans()
 void PolarManager::_performArchiveRetrieval()
 {
   _archiveRetrievalPending = true;
+}
+
+/////////////////////////////////////
+// clear display widgets
+
+void PolarManager::_clear()
+{
+  if (_ppi) {
+    _ppi->clear();
+  }
+  if (_rhi) {
+    _rhi->clear();
+  }
+}
+
+/////////////////////////////////////
+// set archive mode
+
+void PolarManager::_setArchiveMode(bool state)
+{
+  _archiveMode = state;
+  if (_archiveTimeBox) {
+    _archiveTimeBox->setEnabled(state);
+  }
+  if (_ppi) {
+    _ppi->setArchiveMode(state);
+  }
+  if (_rhi) {
+    _rhi->setArchiveMode(state);
+  }
+}
+
+/////////////////////////////////////
+// activate realtime rendering
+
+void PolarManager::_activateRealtimeRendering()
+{
+  if (_ppi) {
+    _ppi->activateRealtimeRendering();
+  }
+  if (_rhi) {
+    _rhi->activateRealtimeRendering();
+  }
+}
+
+/////////////////////////////////////
+// activate archive rendering
+
+void PolarManager::_activateArchiveRendering()
+{
+  if (_ppi) {
+    _ppi->activateArchiveRendering();
+  }
+  if (_rhi) {
+    _rhi->activateArchiveRendering();
+  }
 }
 
