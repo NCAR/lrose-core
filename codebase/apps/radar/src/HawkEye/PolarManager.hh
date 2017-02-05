@@ -146,6 +146,9 @@ private:
   
   RadxTime _readerRayTime;
   RadxVol _vol;
+  int _sweepNum;
+  bool _movingToTopSweep;
+  bool _keepSweepNumber;
 
   // windows
 

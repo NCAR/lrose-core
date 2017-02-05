@@ -534,7 +534,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @param[in] painter    Painter to use for rendering.
    */
 
-  void _drawOverlays(QPainter &painter);
+  virtual void _drawOverlays(QPainter &painter) = 0;
 
   /**
    * @brief Determine a ring spacing which will give even distances, and
@@ -543,7 +543,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @return Returns the ring spacing in kilometers.
    */
 
-  void _setRingSpacing();
+  virtual void _setRingSpacing() = 0;
 
   /**
    * @brief Initialize the full window transform to use for the widget.

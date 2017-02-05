@@ -118,6 +118,24 @@ protected:
 
   virtual const RadxRay *_getClosestRay(double x_km, double y_km);
 
+  /**
+   * @brief Render the rings and grid. The current value of _ringsGridColor
+   *        will be used for the color.
+   *
+   * @param[in] painter    Painter to use for rendering.
+   */
+
+  virtual void _drawOverlays(QPainter &painter);
+
+  /**
+   * @brief Determine a ring spacing which will give even distances, and
+   *        fit a reasonable number of rings in the display.
+   *
+   * @return Returns the ring spacing in kilometers.
+   */
+
+  virtual void _setRingSpacing();
+
 };
 
 #endif

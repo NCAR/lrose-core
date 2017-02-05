@@ -100,6 +100,9 @@ PolarManager::PolarManager(const Params &params,
   _ppiRays = NULL;
   _rhiRays = NULL;
   _rhiMode = false;
+  _sweepNum = 0;
+  _movingToTopSweep = false;
+  _keepSweepNumber = true;
 
   // initialize geometry
   
@@ -350,7 +353,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       if (_params.debug) {
 	cerr << "Short-cut key pressed: " << shortcut << endl;
 	cerr << "  field label: " << field->getLabel() << endl;
-	cerr << "  field name: " << field->getName() << endl;
+	cerr << "   field name: " << field->getName() << endl;
       }
       QRadioButton *button = (QRadioButton *) _fieldGroup->button(ifield);
       button->click();
@@ -360,35 +363,65 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
   }
 
   // check for back or forward in time
+  // or up/down in sweep number
 
+  bool sweepChanged = false;
+  
   if (key == Qt::Key_Left) {
     if (_params.debug) {
       cerr << "Clicked left arrow, go back in time" << endl;
     }
     _goBack1();
+    _keepSweepNumber = true;
     _performArchiveRetrieval();
   } else if (key == Qt::Key_Right) {
     if (_params.debug) {
       cerr << "Clicked right arrow, go forward in time" << endl;
     }
     _goFwd1();
+    _keepSweepNumber = true;
     _performArchiveRetrieval();
+  } else if (key == Qt::Key_Up) {
+    const vector<RadxSweep *> &sweeps = _vol.getSweeps();
+    if (_sweepNum < (int) sweeps.size() - 1) {
+      _sweepNum++;
+      sweepChanged = true;
+    } else {
+      if (_params.debug) {
+        cerr << "Clicked up arrow, moving forward in time" << endl;
+      }
+      _goFwd1();
+      _keepSweepNumber = false;
+      _movingToTopSweep = false;
+      _performArchiveRetrieval();
+    }
+  } else if (key == Qt::Key_Down) {
+    if (_sweepNum > 0) {
+      _sweepNum--;
+      sweepChanged = true;
+    } else {
+      if (_params.debug) {
+        cerr << "Clicked down arrow, go back in time" << endl;
+      }
+      _goBack1();
+      _keepSweepNumber = false;
+      _movingToTopSweep = true;
+      _performArchiveRetrieval();
+    }
   }
 
+  if (sweepChanged) {
+    if (_params.debug) {
+      cerr << "Clicked up/down arrow, change to sweep num: " << _sweepNum << endl;
+    }
+    this->setCursor(Qt::WaitCursor);
+    _timeControllerDialog->setCursor(Qt::WaitCursor);
+    _plotArchiveData();
+    this->setCursor(Qt::ArrowCursor);
+    _timeControllerDialog->setCursor(Qt::ArrowCursor);
+  }
+  
 }
-
-// void PolarManager::_contextMenuEvent(QContextMenuEvent *event)
-// {
-//   QMenu menu(this);
-//   // menu.addAction(_printAct);
-//   menu.addAction(_ringsOnAct);
-//   menu.addAction(_ringsOffAct);
-//   menu.addAction(_gridsOnAct);
-//   menu.addAction(_gridsOffAct);
-//   menu.addAction(_azLinesOnAct);
-//   menu.addAction(_azLinesOffAct);
-//   menu.exec(event->globalPos());
-// }
 
 //////////////////////////////////////////////////
 // Set radar name in title bar
@@ -775,6 +808,20 @@ int PolarManager::_getArchiveData()
     return -1;
   }
   
+  if (_keepSweepNumber) {
+    if (_sweepNum > (int) _vol.getNSweeps() - 1) {
+      _sweepNum = _vol.getNSweeps();
+    }
+    if (_sweepNum < 0) {
+      _sweepNum = 0;
+    }
+  } else {
+    if (_movingToTopSweep) {
+      _sweepNum = _vol.getNSweeps() - 1;
+    } else {
+      _sweepNum = 0;
+    }
+  }
   _platform = _vol.getPlatform();
 
   return 0;
@@ -812,22 +859,19 @@ void PolarManager::_plotArchiveData()
     cerr << "  No sweeps found" << endl;
   }
 
-  for (size_t ii = sweeps[0]->getStartRayIndex();
-       ii <= sweeps[0]->getEndRayIndex(); ii++) {
+  if (_sweepNum > (int) sweeps.size()) {
+    _sweepNum = (int) sweeps.size() - 1;
+  }
+
+  for (size_t ii = sweeps[_sweepNum]->getStartRayIndex();
+       ii <= sweeps[_sweepNum]->getEndRayIndex(); ii++) {
     RadxRay *ray = rays[ii];
     _handleRay(_platform, ray);
   }
 
-  // if (_ppi) {
-  //   _ppi->update();
-  // }
-  // if (_rhiWindow) {
-  //   _rhiWindow->update();
-  // }
-
   // update the status panel
   
-  _updateStatusPanel(rays[0]);
+  _updateStatusPanel(rays[sweeps[_sweepNum]->getStartRayIndex()]);
     
 }
 
@@ -866,7 +910,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   int nGates = ray->getNGates();
   double maxRange = ray->getStartRangeKm() + nGates * ray->getGateSpacingKm();
   
-  if (fabs(_maxRange - maxRange) > 0.001) {
+  if ((maxRange - _maxRange) > 0.001) {
     _nGates = nGates;
     _maxRange = maxRange;
     _ppi->configureRange(_maxRange);
@@ -1935,7 +1979,6 @@ void PolarManager::_createImageFiles()
     // select field
     
     _changeField(ii, false);
-    // _bscan->update();
     
     // create plot
     
@@ -1996,7 +2039,7 @@ void PolarManager::_saveImageToFile(bool interactive)
 
   // create image
   
-  QPixmap pixmap = QPixmap::grabWidget(_bscan);
+  QPixmap pixmap = QPixmap::grabWidget(_polar);
   QImage image = pixmap.toImage();
 
   // compute output dir
@@ -2016,7 +2059,7 @@ void PolarManager::_saveImageToFile(bool interactive)
 
   if (ta_makedir_recurse(outputDir.c_str())) {
     string errmsg("Cannot create output dir: " + outputDir);
-    cerr << "ERROR - BscanManager::_saveImageToFile()" << endl;
+    cerr << "ERROR - PolarManager::_saveImageToFile()" << endl;
     cerr << "  " << errmsg << endl;
     if (interactive) {
         QMessageBox::critical(this, "Error", errmsg.c_str());
@@ -2087,7 +2130,7 @@ void PolarManager::_saveImageToFile(bool interactive)
   
   if (!image.save(outputPath.c_str())) {
     string errmsg("Cannot save image to file: " + outputPath);
-    cerr << "ERROR - BscanManager::_saveImageToFile()" << endl;
+    cerr << "ERROR - PolarManager::_saveImageToFile()" << endl;
     cerr << "  " << errmsg << endl;
     if (interactive) {
         QMessageBox::critical(this, "Error", errmsg.c_str());
@@ -2123,7 +2166,7 @@ void PolarManager::_saveImageToFile(bool interactive)
     ldataInfo.setRelDataPath(relPath);
     
     if(ldataInfo.write(_plotStartTime.utime())) {
-      cerr << "ERROR - BscanManager::_saveImageToFile()" << endl;
+      cerr << "ERROR - PolarManager::_saveImageToFile()" << endl;
       cerr << "  Cannot write _latest_data_info to dir: " << outputDir << endl;
       return;
     }
