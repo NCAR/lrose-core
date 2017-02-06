@@ -32,7 +32,10 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// PolarManager manages polar rendering - PPIs and RHIs
+// PolarManager manages polar data gathering and dissemination
+// for PPIs and RHIs
+//
+// Rendering is delegated to PpiWidget and RhiWidget
 //
 ///////////////////////////////////////////////////////////////
 

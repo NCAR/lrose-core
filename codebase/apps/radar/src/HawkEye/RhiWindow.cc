@@ -26,6 +26,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 
+#include "PolarManager.hh"
 #include "RhiWindow.hh"
 
 using namespace std;
@@ -35,8 +36,16 @@ using namespace std;
  * Constructor
  */
 
-RhiWindow::RhiWindow(QWidget *parent, RhiWidget *rhi, const Params &params) :
-  QMainWindow(parent)
+RhiWindow::RhiWindow(QFrame *rhiFrame,
+                     PolarManager *manager,
+                     const Params &params,
+                     const vector<DisplayField *> &fields):
+        QMainWindow(rhiFrame),
+        _rhiFrame(rhiFrame),
+        _manager(manager),
+        _params(params),
+        _fields(fields)
+        
 {
   // Create the main frame which contains everything in this window
 
@@ -47,22 +56,29 @@ RhiWindow::RhiWindow(QWidget *parent, RhiWidget *rhi, const Params &params) :
 
   _rhiParent = new QFrame(_main);
   _rhiParent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  rhi->setParent(_rhiParent);
+
+  // create RHI widget
+
+  _rhiWidget = new RhiWidget(_rhiFrame, *manager, _params, _fields.size());
+  _rhiWidget->setGrids(true);
+  _rhiWidget->setRings(false);
+  _rhiWidget->setAzLines(false);
+  _rhiWidget->setParent(_rhiParent);
   
   // Connect the window resize signal to the RHI widget resize() method.
 
   connect(this, SIGNAL(windowResized(const int, const int)),
-	  rhi, SLOT(resize(const int, const int)));
+	  _rhiWidget, SLOT(resize(const int, const int)));
   
   // Connect the first beam recieved widget from the RhiWidget object to the
   // resize() method so that we resize the window after processing several
   // RHI beams.  This is done to get around a window resizing problem at
   // startup.
 
-  connect(rhi, SIGNAL(severalBeamsProcessed()), this, SLOT(resize()));
+  connect(_rhiWidget, SIGNAL(severalBeamsProcessed()), this, SLOT(resize()));
   
   // Create the status panel
-
+  
   _createStatusPanel(params.label_font_size);
   
   // Create the main window layout.  We need a layout so the main window can
@@ -75,7 +91,7 @@ RhiWindow::RhiWindow(QWidget *parent, RhiWidget *rhi, const Params &params) :
   
   // Create the actions and the menus
 
-  _createActions(rhi);
+  _createActions(_rhiWidget);
   _createMenus();
 
   // Set the window attributes.

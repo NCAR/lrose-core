@@ -523,20 +523,25 @@ void PolarManager::_setupWindows()
 
 void PolarManager::_createRhiWindow()
 {
+
   // Create the RHI widget with a null frame.  The frame will be reset
   // when the RHI window is created.
   
   _rhiFrame = new QFrame(_main);
   // _rhiFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  _rhi = new RhiWidget(_rhiFrame, *this, _params, _fields.size());
-  _rhi->setRings(false);
-  _rhi->setGrids(true);
-  _rhi->setAzLines(false);
 
   // Create the RHI window
 
-  _rhiWindow = new RhiWindow(this, _rhi, _params);
+  _rhiWindow = new RhiWindow(_rhiFrame, this, _params, _fields);
   _rhiWindow->setRadarName(_params.radar_name);
+
+  // set pointer to the rhiWidget
+
+  _rhi = _rhiWindow->getWidget();
+  // _rhi = new RhiWidget(_rhiFrame, *this, _params, _fields.size());
+  _rhi->setRings(false);
+  _rhi->setGrids(true);
+  _rhi->setAzLines(false);
 
 }
 

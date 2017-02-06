@@ -125,8 +125,6 @@ signals:
   
 protected:
   
-  // void _contextMenuEvent(QContextMenuEvent *event);
-  
   const Params &_params;
   
   // reading data in

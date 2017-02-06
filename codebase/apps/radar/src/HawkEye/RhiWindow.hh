@@ -42,9 +42,13 @@
 #include <QLabel>
 #include <QMainWindow>
 #include <QMenuBar>
+#include <vector>
 
 #include "Params.hh"
 #include "RhiWidget.hh"
+
+class PolarManager;
+class DisplayField;
 
 class DLL_EXPORT RhiWindow : public QMainWindow
 {
@@ -64,7 +68,11 @@ public:
    * @param[in] parent   The parent widget.
    */
 
-  RhiWindow(QWidget *parent, RhiWidget *rhi, const Params &params);
+  RhiWindow(QFrame *_rhiParent,
+            PolarManager *manager,
+            const Params &params,
+            const vector<DisplayField *> &fields);
+            
 
   /**
    * @brief Destructor
@@ -72,6 +80,9 @@ public:
 
   virtual ~RhiWindow();
 
+  // get the RHI widget
+
+  RhiWidget *getWidget() { return _rhiWidget; }
 
   /**
    * @brief Set the azimuth value displayed in the window.
@@ -156,7 +167,21 @@ protected:
    * @brief The parent frame of the RHI widget.
    */
 
+  QFrame *_rhiFrame;
   QFrame *_rhiParent;
+  RhiWidget *_rhiWidget;
+
+  // the polar manager that created this window
+
+  PolarManager *_manager;
+
+  // params
+
+  const Params &_params;
+
+  // data fields
+            
+  const vector<DisplayField *> &_fields;
 
   /**
    * @brief The View menu.
@@ -246,7 +271,6 @@ protected:
 
   void _createStatusPanel(const int label_font_size);
   
-
 };
 
 #endif
