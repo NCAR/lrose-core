@@ -158,7 +158,7 @@ private:
   QFrame *_ppiFrame;
   PpiWidget *_ppi;
 
-  QFrame *_rhiFrame;
+  QFrame *_rhiParentFrame;
   RhiWindow *_rhiWindow;
   RhiWidget *_rhi;
   bool _rhiWindowDisplayed;

@@ -36,12 +36,12 @@ using namespace std;
  * Constructor
  */
 
-RhiWindow::RhiWindow(QFrame *rhiFrame,
+RhiWindow::RhiWindow(QFrame *rhiParentFrame,
                      PolarManager *manager,
                      const Params &params,
                      const vector<DisplayField *> &fields):
-        QMainWindow(rhiFrame),
-        _rhiFrame(rhiFrame),
+        QMainWindow(rhiParentFrame),
+        _rhiParentFrame(rhiParentFrame),
         _manager(manager),
         _params(params),
         _fields(fields)
@@ -54,16 +54,16 @@ RhiWindow::RhiWindow(QFrame *rhiFrame,
   
   // Create the parent frame for the RHI rendering
 
-  _rhiParent = new QFrame(_main);
-  _rhiParent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  _rhiTopFrame = new QFrame(_main);
+  _rhiTopFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   // create RHI widget
 
-  _rhiWidget = new RhiWidget(_rhiFrame, *manager, _params, _fields.size());
+  _rhiWidget = new RhiWidget(_rhiParentFrame, *manager, _params, _fields.size());
   _rhiWidget->setGrids(true);
   _rhiWidget->setRings(false);
   _rhiWidget->setAzLines(false);
-  _rhiWidget->setParent(_rhiParent);
+  _rhiWidget->setParent(_rhiTopFrame);
   
   // Connect the window resize signal to the RHI widget resize() method.
 
@@ -86,7 +86,7 @@ RhiWindow::RhiWindow(QFrame *rhiFrame,
 
   QVBoxLayout *main_layout = new QVBoxLayout(_main);
   main_layout->setMargin(0);
-  main_layout->addWidget(_rhiParent, 100);
+  main_layout->addWidget(_rhiTopFrame, 100);
   main_layout->addWidget(_statusPanel, 0);
   
   // Create the actions and the menus
@@ -118,7 +118,7 @@ RhiWindow::~RhiWindow()
 
 void RhiWindow::resize()
 {
-  emit windowResized(_rhiParent->width(), _rhiParent->height());
+  emit windowResized(_rhiTopFrame->width(), _rhiTopFrame->height());
 }
 
 
