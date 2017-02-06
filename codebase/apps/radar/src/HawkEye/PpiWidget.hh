@@ -65,6 +65,25 @@ class DLL_EXPORT PpiWidget : public PolarWidget
 
   virtual void configureRange(double max_range);
 
+  /**
+   * @brief Add a new beam to the display. Data for all fields and all
+   *        gates are provided, as well as color maps for all fields.
+   *        addBeam() will map the field values to  the correct color, and
+   *        render the beam for each field in the appropriate pixamp. The
+   *        existing wedge for this beam will be discarded.
+   *
+   * @param[in] start_angle    The starting angle for the beam.
+   * @param[in] stop_angle     The ending angle for the beam.
+   * @param[in] gates          The number of gates (must match beam_data vector
+   *                             sizes).
+   * @param[in] beam_data      Vectors of data, one for each field.
+   */
+
+  virtual void addBeam(const RadxRay *ray,
+                       const float start_angle, const float stop_angle,
+		       const std::vector< std::vector< double > > &beam_data,
+		       const std::vector< DisplayField* > &fields);
+
  protected:
 
   // get ray closest to click point

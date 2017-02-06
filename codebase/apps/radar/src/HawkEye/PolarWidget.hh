@@ -50,6 +50,7 @@
 
 #include "Params.hh"
 #include "PolarBeam.hh"
+#include "RhiBeam.hh"
 #include "FieldRenderer.hh"
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
@@ -168,7 +169,7 @@ class DLL_EXPORT PolarWidget : public QWidget
   virtual void addBeam(const RadxRay *ray,
                        const float start_angle, const float stop_angle,
 		       const std::vector< std::vector< double > > &beam_data,
-		       const std::vector< DisplayField* > &fields);
+		       const std::vector< DisplayField* > &fields) = 0;
 
   /**
    * @brief Specify the background color.
@@ -364,6 +365,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   std::vector<PolarBeam*> _beams;
+  std::vector<RhiBeam*> _rhiBeams;
 
   /**
    * @brief The renderer for each field.

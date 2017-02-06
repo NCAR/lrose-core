@@ -69,25 +69,94 @@ RhiWidget::~RhiWidget()
 
 void RhiWidget::addBeam(const RadxRay *ray,
                         const float start_angle,
-			const float stop_angle,
-			const std::vector< std::vector< double > > &beam_data,
-			const std::vector< DisplayField* > &fields)
+                        const float stop_angle,
+                        const std::vector< std::vector< double > > &beam_data,
+                        const std::vector< DisplayField* > &fields)
 {
-  // After processing 10 beams, send a signal to resize the widget.  This
-  // gets rid of the problem with the widget frame being cut off at the
-  // bottom until the user explicitly resizes the window.  I know this is
-  // screwy, but I couldn't find any other way that worked.  Note that I
-  // tried setting this to 3 instead of 10, and it seemed to be too soon to
-  // work.  If you can find the right way to get the widgets to size correctly,
-  // please change this!
+  // add a new beam to the display. 
+  // The steps are:
+  // 1. preallocate mode: find the beam to be drawn, or dynamic mode:
+  //    create the beam(s) to be drawn.
+  // 2. fill the colors for all variables in the beams to be drawn
+  // 3. make the display list for the selected variables in the beams
+  //    to be drawn.
+  // 4. call the new display list(s)
 
-  if (_beamsProcessed == 10) {
-    emit severalBeamsProcessed();
-  }
+  std::vector< PolarBeam* > newBeams;
+
+  // The start and stop angle MUST specify a clockwise fill for the sector.
+  // Thus if start_angle > stop_angle, we know that we have crossed the 0
+  // boundary, and must break it up into 2 beams.
+
+  // Create the new beam(s), to keep track of the display information.
+  // Beam start and stop angles are adjusted here so that they always 
+  // increase clockwise. Likewise, if a beam crosses the 0 degree boundary,
+  // it is split into two beams, each of them again obeying the clockwise
+  // rule. Prescribing these rules makes the beam culling logic a lot simpler.
+
+  // Normalize the start and stop angles.  I'm not convinced that this works
+  // for negative angles, but leave it for now.
+
+  float n_start_angle = start_angle - ((int)(start_angle/360.0))*360.0;
+  float n_stop_angle = stop_angle - ((int)(stop_angle/360.0))*360.0;
   
-  PolarWidget::addBeam(ray, start_angle, stop_angle, beam_data, fields);
+  if (n_start_angle <= n_stop_angle) {
 
-  _beamsProcessed++;
+    // This beam does not cross the 0 degree angle.  Just add the beam to
+    // the beam list.
+
+    PolarBeam* b = new PolarBeam(_params, ray, _nFields, n_start_angle, n_stop_angle);
+    _cullBeams(b);
+    _beams.push_back(b);
+    newBeams.push_back(b);
+
+  } else {
+
+    // The beam crosses the 0 degree angle.  First add the portion of the
+    // beam to the left of the 0 degree point.
+
+    PolarBeam* b1 = new PolarBeam(_params, ray, _nFields, n_start_angle, 360.0);
+    _cullBeams(b1);
+    _beams.push_back(b1);
+    newBeams.push_back(b1);
+
+    // Now add the portion of the beam to the right of the 0 degree point.
+
+    PolarBeam* b2 = new PolarBeam(_params, ray, _nFields, 0.0, n_stop_angle);
+    _cullBeams(b2);
+    _beams.push_back(b2);
+    newBeams.push_back(b2);
+
+  }
+
+  // newBeams has pointers to all of the newly added beams.  Render the
+  // beam data.
+
+  for (size_t ii = 0; ii < newBeams.size(); ii++) {
+
+    PolarBeam *beam = newBeams[ii];
+    
+    // Set up the brushes for all of the fields in this beam.  This can be
+    // done independently of a Painter object.
+    
+    beam->fillColors(beam_data, fields, &_backgroundBrush);
+
+    // Add the new beams to the render lists for each of the fields
+    
+    for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
+      if (field == _selectedField ||
+          _fieldRenderers[field]->isBackgroundRendered()) {
+        _fieldRenderers[field]->addBeam(beam);
+      } else {
+        beam->setBeingRendered(field, false);
+      }
+    }
+    
+  } /* endfor - beam */
+  
+  // Start the threads to render the new beams
+
+  _performRendering();
 
 }
 
