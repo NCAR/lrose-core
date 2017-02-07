@@ -397,6 +397,21 @@ paramdef double {
   p_descr = "Set to -1 to allow aspect ratio to vary as the main window is resized.";
 } ppi_aspect_ratio;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set PPI grids overlay on at startup.";
+} ppi_grids_on_at_startup;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set PPI range rings overlay on at startup.";
+} ppi_range_rings_on_at_startup;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set PPI azimuth lines overlay on at startup.";
+} ppi_azimuth_lines_on_at_startup;
+
 commentdef {
   p_header = "RHI MODE DISPLAY";
 }
@@ -488,6 +503,21 @@ paramdef int {
   p_default = 40;
   p_descr = "Width of color scale for RHI window (pixels).";
 } rhi_color_scale_width;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set RHI grids overlay on at startup.";
+} rhi_grids_on_at_startup;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set RHI range rings overlay on at startup.";
+} rhi_range_rings_on_at_startup;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set RHI elevation lines overlay on at startup.";
+} rhi_elevation_lines_on_at_startup;
 
 commentdef {
   p_header = "BSCAN TIME LIMITS";

@@ -48,6 +48,8 @@
 #include <QPoint>
 #include <QTransform>
 
+#include <Radx/RadxPlatform.hh>
+
 #include "Params.hh"
 #include "PolarBeam.hh"
 #include "RhiBeam.hh"
@@ -108,6 +110,7 @@ class DLL_EXPORT PolarWidget : public QWidget
   PolarWidget(QWidget* parent, 
               const PolarManager &manager,
               const Params &params,
+              const RadxPlatform &platform,
               size_t n_fields);
 
   /**
@@ -166,10 +169,10 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @param[in] beam_data      Vectors of data, one for each field.
    */
 
-  virtual void addBeam(const RadxRay *ray,
-                       const float start_angle, const float stop_angle,
-		       const std::vector< std::vector< double > > &beam_data,
-		       const std::vector< DisplayField* > &fields) = 0;
+  // virtual void addBeam(const RadxRay *ray,
+  //                      const float start_angle, const float stop_angle,
+  //       	       const std::vector< std::vector< double > > &beam_data,
+  //       	       const std::vector< DisplayField* > &fields) = 0;
 
   /**
    * @brief Specify the background color.
@@ -305,7 +308,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @param[in] enabled    True to show them, false otherwise.
    */
 
-  void setAzLines(const bool enabled);
+  void setAngleLines(const bool enabled);
 
 
  protected:
@@ -353,6 +356,10 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   const Params &_params;
 
+  // instrument platform details 
+
+  const RadxPlatform &_platform;
+  
   /**
    * @brief The number of fields we are representing. A QImage will be
    *        created for each field.
@@ -404,10 +411,10 @@ class DLL_EXPORT PolarWidget : public QWidget
   bool _gridsEnabled;
 
   /**
-   * @brief True if the az lines enabled.
+   * @brief True if the angle lines enabled.
    */
 
-  bool _azLinesEnabled;
+  bool _angleLinesEnabled;
 
   /**
    * @brief This will create labels wiith nicely scaled values and

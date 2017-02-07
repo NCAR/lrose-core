@@ -39,11 +39,13 @@ using namespace std;
 RhiWindow::RhiWindow(QFrame *rhiParentFrame,
                      PolarManager *manager,
                      const Params &params,
+                     const RadxPlatform &platform,
                      const vector<DisplayField *> &fields):
         QMainWindow(rhiParentFrame),
         _rhiParentFrame(rhiParentFrame),
         _manager(manager),
         _params(params),
+        _platform(platform),
         _fields(fields)
         
 {
@@ -58,11 +60,12 @@ RhiWindow::RhiWindow(QFrame *rhiParentFrame,
   _rhiTopFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   // create RHI widget
-
-  _rhiWidget = new RhiWidget(_rhiParentFrame, *manager, _params, _fields.size());
-  _rhiWidget->setGrids(true);
-  _rhiWidget->setRings(false);
-  _rhiWidget->setAzLines(false);
+  
+  _rhiWidget = new RhiWidget(_rhiParentFrame, *manager,
+                             _params, _platform, _fields.size());
+  _rhiWidget->setGrids(_params.rhi_grids_on_at_startup);
+  _rhiWidget->setRings(_params.rhi_range_rings_on_at_startup);
+  _rhiWidget->setAngleLines(_params.rhi_elevation_lines_on_at_startup);
   _rhiWidget->setParent(_rhiTopFrame);
   
   // Connect the window resize signal to the RHI widget resize() method.
@@ -161,7 +164,7 @@ void RhiWindow::_createActions(RhiWidget *rhi)
   _azLinesAct->setCheckable(true);
   _azLinesAct->setChecked(true);
   connect(_azLinesAct, SIGNAL(triggered(bool)),
-	  rhi, SLOT(setAzLines(bool)));
+	  rhi, SLOT(setAngleLines(bool)));
 
   _unzoomAct = new QAction(tr("Unzoom"), this);
   _unzoomAct->setStatusTip(tr("Unzoom to original view"));

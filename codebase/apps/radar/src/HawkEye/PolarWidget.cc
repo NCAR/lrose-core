@@ -50,18 +50,20 @@ const double PolarWidget::COS_30 = cos(30.0 * DEG_TO_RAD);
 PolarWidget::PolarWidget(QWidget* parent,
                          const PolarManager &manager,
                          const Params &params,
+                         const RadxPlatform &platform,
                          size_t n_fields) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
         _params(params),
+        _platform(platform),
         _nFields(n_fields),
         _selectedField(0),
         _backgroundBrush(QColor(_params.background_color)),
         _gridRingsColor(_params.grid_and_range_ring_color),
-        _ringsEnabled(true),
+        _ringsEnabled(false),
         _gridsEnabled(false),
-        _azLinesEnabled(true),
+        _angleLinesEnabled(false),
         _scaledLabel(ScaledLabel::DistanceEng),
         _rubberBand(0),
         _ringSpacing(10.0)
@@ -211,12 +213,12 @@ void PolarWidget::setGrids(const bool enabled)
 
 
 /*************************************************************************
- * setAzLines()
+ * setAngleLines()
  */
 
-void PolarWidget::setAzLines(const bool enabled)
+void PolarWidget::setAngleLines(const bool enabled)
 {
-  _azLinesEnabled = enabled;
+  _angleLinesEnabled = enabled;
   update();
 }
 

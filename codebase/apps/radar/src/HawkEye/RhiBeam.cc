@@ -43,6 +43,7 @@ using namespace std;
 
 RhiBeam::RhiBeam(const Params &params,
                  const RadxRay *ray,
+                 double instHtKm,     // height of instrument in km
                  int n_fields,
                  double start_angle,
                  double stop_angle) :
@@ -55,6 +56,11 @@ RhiBeam::RhiBeam(const Params &params,
 
 {
 
+  // set heights
+
+  _beamHt.setInstrumentHtKm(instHtKm);
+  _instHtKm = instHtKm; 
+
   // Calculate the cosine and sine of the angles.  Divide each value by the
   // number of gates since we will be rendering the beams in a circle with a
   // radius of 1.0.  These values will represent the increments along the X
@@ -63,8 +69,8 @@ RhiBeam::RhiBeam(const Params &params,
   double sin1, cos1;
   double sin2, cos2;
   
-  sincos(start_angle * DEG_TO_RAD, &sin1, &cos1);
-  sincos(stop_angle * DEG_TO_RAD, &sin2, &cos2);
+  sincos(startAngle * DEG_TO_RAD, &sin1, &cos1);
+  sincos(stopAngle * DEG_TO_RAD, &sin2, &cos2);
   
   // Now calculate the vertex values to be used for all fields.  We negate
   // the y values because the display coordinate system has y increasing down.
@@ -83,14 +89,14 @@ RhiBeam::RhiBeam(const Params &params,
       _polygons[jj].doPaint = false;
     } else {
       _polygons[jj].doPaint = true;
-      _polygons[jj].pts[0].x = innerRange * sin1;
-      _polygons[jj].pts[0].y = innerRange * cos1 + 1;
-      _polygons[jj].pts[1].x = innerRange * sin2;
-      _polygons[jj].pts[1].y = innerRange * cos2 + 1;
-      _polygons[jj].pts[2].x = outerRange * sin2;
-      _polygons[jj].pts[2].y = outerRange * cos2 + 1;
-      _polygons[jj].pts[3].x = outerRange * sin1;
-      _polygons[jj].pts[3].y = outerRange * cos1 + 1;
+      _polygons[jj].pts[0].x = innerRange * cos1;
+      _polygons[jj].pts[0].y = _beamHt.computeHtKm(startAngle, innerRange);
+      _polygons[jj].pts[1].x = innerRange * cos2;
+      _polygons[jj].pts[1].y = _beamHt.computeHtKm(stopAngle, innerRange);
+      _polygons[jj].pts[2].x = outerRange * cos2;
+      _polygons[jj].pts[2].y = _beamHt.computeHtKm(stopAngle, outerRange);
+      _polygons[jj].pts[3].x = outerRange * cos1;
+      _polygons[jj].pts[3].y = _beamHt.computeHtKm(startAngle, outerRange);
     }
   }
 

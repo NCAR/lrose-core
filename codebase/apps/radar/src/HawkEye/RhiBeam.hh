@@ -25,6 +25,7 @@
 #define RhiBeam_HH
 
 #include "Beam.hh"
+#include <radar/BeamHeight.hh>
 
 /////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
@@ -84,7 +85,6 @@ public:
 
   bool hidden;
 
-
   ////////////////////
   // Public methods //
   ////////////////////
@@ -101,6 +101,7 @@ public:
   
   RhiBeam(const Params &params,
           const RadxRay *ray,
+          double instHtKm,     // height of instrument in km
           int n_fields,
           double start_angle, double stop_angle);
   
@@ -149,6 +150,12 @@ protected:
    */
   
   std::vector< polygon_t > _polygons;
+
+  // instrument height MSL
+
+  double _instHtKm;
+  BeamHeight _beamHt;
+
 
 };
 

@@ -128,11 +128,11 @@ PolarManager::PolarManager(const Params &params,
 
   // set up ray locators
 
-  _ppiRays = new RayLoc[RAY_LOC_N];
-  _ppiRayLoc = _ppiRays + RAY_LOC_OFFSET;
+  _ppiRays = new RayLoc[RayLoc::RAY_LOC_N];
+  _ppiRayLoc = _ppiRays + RayLoc::RAY_LOC_OFFSET;
 
-  _rhiRays = new RayLoc[RAY_LOC_N];
-  _rhiRayLoc = _rhiRays + RAY_LOC_OFFSET;
+  _rhiRays = new RayLoc[RayLoc::RAY_LOC_N];
+  _rhiRayLoc = _rhiRays + RayLoc::RAY_LOC_OFFSET;
 
   // set up windows
 
@@ -447,10 +447,8 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
     _timeControllerDialog->setCursor(Qt::ArrowCursor);
   }
 
-  cerr << "333333333333 _sweepNum, _fixedAngleDeg: " 
-       << _sweepNum << ", " << _fixedAngleDeg << endl;
-  
 }
+
 
 //////////////////////////////////////////////////
 // Set radar name in title bar
@@ -479,10 +477,7 @@ void PolarManager::_setupWindows()
 
   // configure the PPI
 
-  _ppi = new PpiWidget(_ppiFrame, *this, _params, _fields.size());
-  _ppi->setRings(true);
-  _ppi->setGrids(false);
-  _ppi->setAzLines(true);
+  _ppi = new PpiWidget(_ppiFrame, *this, _params, _platform, _fields.size());
 
   connect(this, SIGNAL(frameResized(const int, const int)),
 	  _ppi, SLOT(resize(const int, const int)));
@@ -561,17 +556,13 @@ void PolarManager::_createRhiWindow()
 
   // Create the RHI window
 
-  _rhiWindow = new RhiWindow(_rhiParentFrame, this, _params, _fields);
+  _rhiWindow = new RhiWindow(_rhiParentFrame, this, _params, _platform, _fields);
   _rhiWindow->setRadarName(_params.radar_name);
 
   // set pointer to the rhiWidget
 
   _rhi = _rhiWindow->getWidget();
-  // _rhi = new RhiWidget(_rhiParentFrame, *this, _params, _fields.size());
-  _rhi->setRings(false);
-  _rhi->setGrids(true);
-  _rhi->setAzLines(false);
-
+  
 }
 
 //////////////////////////////
@@ -651,7 +642,7 @@ void PolarManager::_createActions()
   _azLinesAct->setCheckable(true);
   _azLinesAct->setChecked(true);
   connect(_azLinesAct, SIGNAL(triggered(bool)),
-	  _ppi, SLOT(setAzLines(bool)));
+	  _ppi, SLOT(setAngleLines(bool)));
 
   // show RHI window
 
@@ -865,7 +856,7 @@ int PolarManager::_getArchiveData()
     cerr << "----------------------------------------------------" << endl;
   }
   
-  _platform = _vol.getPlatform();
+   _platform = _vol.getPlatform();
 
   return 0;
 
@@ -1035,15 +1026,15 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
     // Store the ray location using the elevation angle and the RHI location
     // table
 
-    double el = 90.0 - ray->getElevationDeg();
-    if (el < 0.0)
-      el += 360.0;
-    _storeRayLoc(ray, el, platform.getRadarBeamWidthDegV(), _rhiRayLoc);
+    // double el = 90.0 - ray->getElevationDeg();
+    // if (el < 0.0)
+    //   el += 360.0;
+    // _storeRayLoc(ray, el, platform.getRadarBeamWidthDegV(), _rhiRayLoc);
 
     // Save the angle information for the next iteration
 
-    _prevEl = el;
-    _prevAz = -9999.0;
+    // _prevEl = el;
+    // _prevAz = -9999.0;
     
     // If this is the first RHI beam we've encountered, automatically open
     // the RHI window.  After this, opening and closing the window will be
@@ -1057,7 +1048,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 
     // Add the beam to the display
 
-    _rhi->addBeam(ray, _startAz, _endAz, fieldData, _fields);
+    _rhi->addBeam(ray, fieldData, _fields);
     _rhiWindow->setAzimuth(ray->getAzimuthDeg());
     _rhiWindow->setElevation(ray->getElevationDeg());
     
@@ -1119,8 +1110,8 @@ void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
     
   // store
     
-  int startIndex = (int) (_startAz * RAY_LOC_RES);
-  int endIndex = (int) (_endAz * RAY_LOC_RES + 1);
+  int startIndex = (int) (_startAz * RayLoc::RAY_LOC_RES);
+  int endIndex = (int) (_endAz * RayLoc::RAY_LOC_RES + 1);
 
   // Clear out any rays in the locations list that are overlapped by the
   // new ray
@@ -1140,7 +1131,7 @@ void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
   // indicate which ray is the master
   // i.e. it is responsible for ray memory
     
-  int midIndex = (int) (az * RAY_LOC_RES);
+  int midIndex = (int) (az * RayLoc::RAY_LOC_RES);
   ray_loc[midIndex].master = true;
   ray->addClient();
 
@@ -1374,7 +1365,7 @@ void PolarManager::_locationClicked(double xkm, double ykm,
     cerr << "    azDeg = " << azDeg << endl;
   }
   
-  int rayIndex = (int) (azDeg * RAY_LOC_RES);
+  int rayIndex = (int) (azDeg * RayLoc::RAY_LOC_RES);
   if (_params.debug) {
     cerr << "    rayIndex = " << rayIndex << endl;
   }

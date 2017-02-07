@@ -48,6 +48,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include "DisplayManager.hh"
+#include "RayLoc.hh"
 #include <QMainWindow>
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxRay.hh>
@@ -96,32 +97,6 @@ public:
 
   void enableZoomButton() const;
 
-  // inner class for ray locator
-
-  class RayLoc {
-  public:
-    int startIndex;
-    int endIndex;
-    bool master;
-    bool active;
-    const RadxRay *ray;
-    RayLoc() {
-      master = false;
-      active = false;
-      ray = NULL;
-    }
-    void clear() {
-      if (master && ray) {
-        if (ray->removeClient() == 0) {
-          delete ray;
-        }
-      }
-      ray = NULL;
-      master = false;
-      active = false;
-    }
-  };
-
 signals:
 
 private:
@@ -131,14 +106,6 @@ private:
   int _nGates;
   double _maxRangeKm;
 
-  // ray locator
-  // we use a locator with data every 1/100th degree
-  // around the 360 degree circle
-
-  static const int RAY_LOC_RES = 10;
-  static const int RAY_LOC_N = 4000;
-  static const int RAY_LOC_OFFSET = 300;
- 
   RayLoc* _ppiRayLoc; // for use, allows negative indices at north line
   RayLoc* _ppiRays; // for new and delete
 

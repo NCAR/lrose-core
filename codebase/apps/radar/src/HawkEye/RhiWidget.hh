@@ -25,6 +25,7 @@
 #define RhiWidget_HH
 
 #include "PolarWidget.hh"
+#include "RayLoc.hh"
 
 // Widget representing an RHI scan.  Beams are added to the scan as they
 // are received.  The widget can be set up to display the RHI in a 90 degree
@@ -52,6 +53,7 @@ class DLL_EXPORT RhiWidget : public PolarWidget
   RhiWidget(QWidget* parent, 
             const PolarManager &manager,
             const Params &params,
+            const RadxPlatform &platform,
             size_t n_fields);
 
   /**
@@ -73,18 +75,19 @@ class DLL_EXPORT RhiWidget : public PolarWidget
    *        render the beam for each field in the appropriate pixamp. The
    *        existing wedge for this beam will be discarded.
    *
-   * @param[in] start_angle    The starting angle for the beam.
-   * @param[in] stop_angle     The ending angle for the beam.
    * @param[in] gates          The number of gates (must match beam_data vector
    *                             sizes).
    * @param[in] beam_data      Vectors of data, one for each field.
    * @param[in] maps           Colormaps, one for each field.
    */
 
-  virtual void addBeam(const RadxRay *ray,
-                       const float start_angle, const float stop_angle,
-		       const std::vector< std::vector< double > > &beam_data,
-		       const std::vector< DisplayField* > &fields);
+  void addBeam(const RadxRay *ray,
+               const std::vector< std::vector< double > > &beam_data,
+               const std::vector< DisplayField* > &fields);
+
+  // store ray locations
+
+  // void storeRayLoc(const RadxRay *ray);
 
 signals:
 
@@ -121,6 +124,18 @@ protected:
 
   std::vector<RhiBeam*> _rhiBeams;
 
+  // ray locations
+
+  RayLoc* _rhiRayLoc;
+  RayLoc* _rhiRays; // for new and delete
+
+  // angles for current ray
+
+  double _prevAz;
+  double _prevElev;
+  double _startElev;
+  double _endElev;
+
   /**
    * @brief The number of RHI beams processed so far.  I have to keep track of
    *        this so that I can automatically resize the window after processing
@@ -152,6 +167,10 @@ protected:
   virtual void _setGridSpacing();
   double _getSpacing(double range);
 
+  // Compute the limits of the ray angles
+  
+  void _computeAngleLimits(const RadxRay *ray);
+  
 };
 
 #endif

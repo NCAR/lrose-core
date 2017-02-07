@@ -1383,6 +1383,42 @@ using namespace std;
     tt->single_val.d = 1;
     tt++;
     
+    // Parameter 'ppi_grids_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ppi_grids_on_at_startup");
+    tt->descr = tdrpStrDup("Set PPI grids overlay on at startup.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ppi_grids_on_at_startup - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'ppi_range_rings_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ppi_range_rings_on_at_startup");
+    tt->descr = tdrpStrDup("Set PPI range rings overlay on at startup.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ppi_range_rings_on_at_startup - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'ppi_azimuth_lines_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ppi_azimuth_lines_on_at_startup");
+    tt->descr = tdrpStrDup("Set PPI azimuth lines overlay on at startup.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ppi_azimuth_lines_on_at_startup - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1582,6 +1618,42 @@ using namespace std;
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &rhi_color_scale_width - &_start_;
     tt->single_val.i = 40;
+    tt++;
+    
+    // Parameter 'rhi_grids_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("rhi_grids_on_at_startup");
+    tt->descr = tdrpStrDup("Set RHI grids overlay on at startup.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_grids_on_at_startup - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'rhi_range_rings_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("rhi_range_rings_on_at_startup");
+    tt->descr = tdrpStrDup("Set RHI range rings overlay on at startup.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_range_rings_on_at_startup - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'rhi_elevation_lines_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("rhi_elevation_lines_on_at_startup");
+    tt->descr = tdrpStrDup("Set RHI elevation lines overlay on at startup.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_elevation_lines_on_at_startup - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 12'

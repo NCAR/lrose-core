@@ -51,6 +51,7 @@ class DLL_EXPORT PpiWidget : public PolarWidget
   PpiWidget(QWidget* parent,
             const PolarManager &manager,
             const Params &params,
+            const RadxPlatform &platform,
             size_t n_fields);
 
   /**
@@ -79,10 +80,10 @@ class DLL_EXPORT PpiWidget : public PolarWidget
    * @param[in] beam_data      Vectors of data, one for each field.
    */
 
-  virtual void addBeam(const RadxRay *ray,
-                       const float start_angle, const float stop_angle,
-		       const std::vector< std::vector< double > > &beam_data,
-		       const std::vector< DisplayField* > &fields);
+  void addBeam(const RadxRay *ray,
+               const float start_angle, const float stop_angle,
+               const std::vector< std::vector< double > > &beam_data,
+               const std::vector< DisplayField* > &fields);
 
  protected:
 

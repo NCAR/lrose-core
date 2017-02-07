@@ -510,6 +510,12 @@ public:
 
   double ppi_aspect_ratio;
 
+  tdrp_bool_t ppi_grids_on_at_startup;
+
+  tdrp_bool_t ppi_range_rings_on_at_startup;
+
+  tdrp_bool_t ppi_azimuth_lines_on_at_startup;
+
   int rhi_window_width;
 
   int rhi_window_height;
@@ -541,6 +547,12 @@ public:
   double rhi_max_height_km;
 
   int rhi_color_scale_width;
+
+  tdrp_bool_t rhi_grids_on_at_startup;
+
+  tdrp_bool_t rhi_range_rings_on_at_startup;
+
+  tdrp_bool_t rhi_elevation_lines_on_at_startup;
 
   double bscan_time_span_secs;
 
@@ -675,7 +687,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[144];
+  mutable TDRPtable _table[150];
 
   const char *_className;
 

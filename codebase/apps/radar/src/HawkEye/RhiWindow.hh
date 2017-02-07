@@ -71,6 +71,7 @@ public:
   RhiWindow(QFrame *rhiParentFrame,
             PolarManager *manager,
             const Params &params,
+            const RadxPlatform &platform,
             const vector<DisplayField *> &fields);
             
 
@@ -178,7 +179,11 @@ protected:
   // params
 
   const Params &_params;
-
+  
+  // instrument platform details  - platform exists in DisplayManager
+  
+  const RadxPlatform &_platform;
+  
   // data fields
             
   const vector<DisplayField *> &_fields;

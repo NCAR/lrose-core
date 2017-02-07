@@ -32,8 +32,9 @@ using namespace std;
 PpiWidget::PpiWidget(QWidget* parent,
                      const PolarManager &manager,
                      const Params &params,
+                     const RadxPlatform &platform,
                      size_t n_fields) :
-        PolarWidget(parent, manager, params, n_fields)
+        PolarWidget(parent, manager, params, platform, n_fields)
         
 {
 
@@ -43,6 +44,10 @@ PpiWidget::PpiWidget(QWidget* parent,
   // initialoze world view
 
   configureRange(_params.max_range_km);
+
+  setGrids(_params.ppi_grids_on_at_startup);
+  setRings(_params.ppi_range_rings_on_at_startup);
+  setAngleLines(_params.ppi_azimuth_lines_on_at_startup);
 
 }
 
@@ -287,7 +292,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
   // Don't try to draw rings if we haven't been configured yet or if the
   // rings or grids aren't enabled.
   
-  if (!_ringsEnabled && !_gridsEnabled && !_azLinesEnabled) {
+  if (!_ringsEnabled && !_gridsEnabled && !_angleLinesEnabled) {
     return;
   }
 
@@ -371,7 +376,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
   
   // Draw the azimuth lines
 
-  if (_azLinesEnabled) {
+  if (_angleLinesEnabled) {
 
     // Draw the lines along the X and Y axes
 

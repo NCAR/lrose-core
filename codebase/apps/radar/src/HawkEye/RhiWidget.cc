@@ -32,10 +32,14 @@ using namespace std;
 RhiWidget::RhiWidget(QWidget* parent,
                      const PolarManager &manager,
                      const Params &params,
+                     const RadxPlatform &platform,
                      size_t n_fields) :
-        PolarWidget(parent, manager, params, n_fields),
+        PolarWidget(parent, manager, params, platform, n_fields),
         _beamsProcessed(0)
 {
+  
+  _rhiRays = NULL;
+  _prevElev = -9999.0;
 
   if (_params.rhi_display_180_degrees) {
     _aspectRatio = _params.rhi_aspect_ratio * 2.0;
@@ -44,12 +48,21 @@ RhiWidget::RhiWidget(QWidget* parent,
   }
   _colorScaleWidth = _params.rhi_color_scale_width;
 
+  setGrids(_params.rhi_grids_on_at_startup);
+  setRings(_params.rhi_range_rings_on_at_startup);
+  setAngleLines(_params.rhi_elevation_lines_on_at_startup);
+
   // initialize world view
 
   _maxHeightKm = _params.rhi_max_height_km;
   _xGridSpacing = 0.0;
   _yGridSpacing = 0.0;
   configureRange(_params.max_range_km);
+
+  // set up ray locators
+
+  _rhiRays = new RayLoc[RayLoc::RAY_LOC_N];
+  _rhiRayLoc = _rhiRays + RayLoc::RAY_LOC_OFFSET;
 
 }
 
@@ -68,6 +81,10 @@ RhiWidget::~RhiWidget()
   }
   _rhiBeams.clear();
 
+  if (_rhiRays) {
+    delete[] _rhiRays;
+  }
+
 }
 
 
@@ -76,48 +93,82 @@ RhiWidget::~RhiWidget()
  */
 
 void RhiWidget::addBeam(const RadxRay *ray,
-                        const float start_angle,
-                        const float stop_angle,
                         const std::vector< std::vector< double > > &beam_data,
                         const std::vector< DisplayField* > &fields)
 {
 
+  // compute the angle limits
+
+  _computeAngleLimits(ray);
+
   // Just add the beam to the beam list.
 
-  RhiBeam* b = new RhiBeam(_params, ray, _nFields, start_angle, stop_angle);
-  _rhiBeams.push_back(b);
-  std::vector<RhiBeam* > newBeams;
-  newBeams.push_back(b);
+  RhiBeam* beam = new RhiBeam(_params, ray,
+                              _manager.getPlatform().getAltitudeKm(),
+                              _nFields, _startElev, _endElev);
+  _rhiBeams.push_back(beam);
 
-  // newBeams has pointers to all of the newly added beams.  Render the
-  // beam data.
+  // Render the beam data.
+  
+  // Set up the brushes for all of the fields in this beam.  This can be
+  // done independently of a Painter object.
+    
+  beam->fillColors(beam_data, fields, &_backgroundBrush);
 
-  for (size_t ii = 0; ii < newBeams.size(); ii++) {
-    
-    RhiBeam *beam = newBeams[ii];
-    
-    // Set up the brushes for all of the fields in this beam.  This can be
-    // done independently of a Painter object.
-    
-    beam->fillColors(beam_data, fields, &_backgroundBrush);
-
-    // Add the new beams to the render lists for each of the fields
-    
-    for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
-      if (field == _selectedField ||
-          _fieldRenderers[field]->isBackgroundRendered()) {
-        _fieldRenderers[field]->addBeam(beam);
-      } else {
-        beam->setBeingRendered(field, false);
-      }
+  // Add the new beams to the render lists for each of the fields
+  
+  for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
+    if (field == _selectedField ||
+        _fieldRenderers[field]->isBackgroundRendered()) {
+      _fieldRenderers[field]->addBeam(beam);
+    } else {
+      beam->setBeingRendered(field, false);
     }
-    
-  } /* endfor - beam */
+  }
   
   // Start the threads to render the new beams
-
+  
   _performRendering();
 
+}
+
+///////////////////////////////////////////////////////////
+// Compute the limits of the ray angles
+
+void RhiWidget::_computeAngleLimits(const RadxRay *ray)
+  
+{
+  
+  double beamWidth = _platform.getRadarBeamWidthDegV();
+  double elev = ray->getElevationDeg();
+
+  // Determine the extent of this ray
+  
+  double elevDiff = Radx::computeAngleDiff(elev, _prevElev);
+  if (ray->getIsIndexed() || fabs(elevDiff) > beamWidth * 2.0) {
+
+    double halfAngle = ray->getAngleResDeg() / 2.0;
+    _startElev = elev - halfAngle;
+    _endElev = elev + halfAngle;
+
+  } else {
+
+    double maxHalfAngle = beamWidth / 2.0;
+    double prevOffset = maxHalfAngle;
+      
+    double halfElevDiff = elevDiff / 2.0;
+	
+    if (prevOffset > halfElevDiff) {
+	prevOffset = halfElevDiff;
+    }
+      
+    _startElev = elev - prevOffset;
+    _endElev = elev + maxHalfAngle;
+
+  }
+
+  _prevElev = elev;
+    
 }
 
 /*************************************************************************
@@ -347,7 +398,7 @@ void RhiWidget::_drawOverlays(QPainter &painter)
   
   // Draw the azimuth lines
 
-  if (_azLinesEnabled) {
+  if (_angleLinesEnabled) {
 
     // Draw the lines along the X and Y axes
 
