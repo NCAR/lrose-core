@@ -84,13 +84,13 @@ RhiBeam::RhiBeam(const Params &params,
     } else {
       _polygons[jj].doPaint = true;
       _polygons[jj].pts[0].x = innerRange * sin1;
-      _polygons[jj].pts[0].y = innerRange * cos1;
+      _polygons[jj].pts[0].y = innerRange * cos1 + 1;
       _polygons[jj].pts[1].x = innerRange * sin2;
-      _polygons[jj].pts[1].y = innerRange * cos2;
+      _polygons[jj].pts[1].y = innerRange * cos2 + 1;
       _polygons[jj].pts[2].x = outerRange * sin2;
-      _polygons[jj].pts[2].y = outerRange * cos2;
+      _polygons[jj].pts[2].y = outerRange * cos2 + 1;
       _polygons[jj].pts[3].x = outerRange * sin1;
-      _polygons[jj].pts[3].y = outerRange * cos1;
+      _polygons[jj].pts[3].y = outerRange * cos1 + 1;
     }
   }
 

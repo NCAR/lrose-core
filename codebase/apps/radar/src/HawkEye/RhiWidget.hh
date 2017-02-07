@@ -116,6 +116,12 @@ protected:
   double _yGridSpacing;
 
   /**
+   * @brief Pointers to all of the active beams are saved here.
+   */
+
+  std::vector<RhiBeam*> _rhiBeams;
+
+  /**
    * @brief The number of RHI beams processed so far.  I have to keep track of
    *        this so that I can automatically resize the window after processing
    *        a few beams to get rid of a problem with widget size on startup.

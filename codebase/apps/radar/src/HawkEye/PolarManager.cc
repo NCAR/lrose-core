@@ -101,8 +101,10 @@ PolarManager::PolarManager(const Params &params,
   _rhiRays = NULL;
   _rhiMode = false;
   _sweepNum = 0;
-  _movingToTopSweep = false;
-  _keepSweepNumber = true;
+
+  _newArchiveVolNeeded = true;
+  _moveToHighSweep = false;
+  _keepFixedAngle = false;
 
   // initialize geometry
   
@@ -244,6 +246,21 @@ void PolarManager::timerEvent(QTimerEvent *event)
 
   } // if (_firstTimerEvent)
 
+  // handle event
+  
+  if (event->timerId() == _beamTimerId) {
+    
+    if (_archiveMode) {
+      if (_archiveRetrievalPending) {
+        _handleArchiveData(event);
+        _archiveRetrievalPending = false;
+      }
+    } else {
+      _handleRealtimeData(event);
+    }
+
+  }
+
   // check for image creation
   
   if (_params.images_auto_create) {
@@ -265,21 +282,6 @@ void PolarManager::timerEvent(QTimerEvent *event)
       return;
     }
     
-  }
-
-  // handle event
-  
-  if (event->timerId() == _beamTimerId) {
-    
-    if (_archiveMode) {
-      if (_archiveRetrievalPending) {
-        _handleArchiveData(event);
-        _archiveRetrievalPending = false;
-      }
-    } else {
-      _handleRealtimeData(event);
-    }
-
   }
 
 }
@@ -365,52 +367,76 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
   // check for back or forward in time
   // or up/down in sweep number
 
-  bool sweepChanged = false;
+  bool moveUpDown = false;
+  _keepFixedAngle = false;
   
   if (key == Qt::Key_Left) {
+
     if (_params.debug) {
       cerr << "Clicked left arrow, go back in time" << endl;
     }
+    _keepFixedAngle = true;
+    _setFixedAngle(_sweepNum);
     _goBack1();
-    _keepSweepNumber = true;
-    _performArchiveRetrieval();
+    _setArchiveRetrievalPending();
+
   } else if (key == Qt::Key_Right) {
+
     if (_params.debug) {
       cerr << "Clicked right arrow, go forward in time" << endl;
     }
+    _keepFixedAngle = true;
+    _setFixedAngle(_sweepNum);
     _goFwd1();
-    _keepSweepNumber = true;
-    _performArchiveRetrieval();
+    _setArchiveRetrievalPending();
+    
   } else if (key == Qt::Key_Up) {
-    const vector<RadxSweep *> &sweeps = _vol.getSweeps();
-    if (_sweepNum < (int) sweeps.size() - 1) {
+
+    if (_sweepNum < (int) _vol.getNSweeps() - 1) {
+
       _sweepNum++;
-      sweepChanged = true;
+      moveUpDown = true;
+      _keepFixedAngle = false;
+      _setFixedAngle(_sweepNum);
+
     } else {
+
       if (_params.debug) {
         cerr << "Clicked up arrow, moving forward in time" << endl;
       }
+      _moveToHighSweep = false; // start with low sweep of next volume
+      _keepFixedAngle = false;
+      _setFixedAngle(_sweepNum);
       _goFwd1();
-      _keepSweepNumber = false;
-      _movingToTopSweep = false;
-      _performArchiveRetrieval();
+      _setArchiveRetrievalPending();
+
     }
+
   } else if (key == Qt::Key_Down) {
+
     if (_sweepNum > 0) {
+
       _sweepNum--;
-      sweepChanged = true;
+      _keepFixedAngle = false;
+      _setFixedAngle(_sweepNum);
+      moveUpDown = true;
+
     } else {
+
       if (_params.debug) {
         cerr << "Clicked down arrow, go back in time" << endl;
       }
+      _keepFixedAngle = false;
+      _moveToHighSweep = true;
+      _setFixedAngle(_sweepNum);
       _goBack1();
-      _keepSweepNumber = false;
-      _movingToTopSweep = true;
-      _performArchiveRetrieval();
+      _setArchiveRetrievalPending();
+
     }
+
   }
 
-  if (sweepChanged) {
+  if (moveUpDown) {
     if (_params.debug) {
       cerr << "Clicked up/down arrow, change to sweep num: " << _sweepNum << endl;
     }
@@ -420,6 +446,9 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
     this->setCursor(Qt::ArrowCursor);
     _timeControllerDialog->setCursor(Qt::ArrowCursor);
   }
+
+  cerr << "333333333333 _sweepNum, _fixedAngleDeg: " 
+       << _sweepNum << ", " << _fixedAngleDeg << endl;
   
 }
 
@@ -568,7 +597,8 @@ void PolarManager::_createActions()
 
   _timeControllerAct = new QAction(tr("Time-Config"), this);
   _timeControllerAct->setStatusTip(tr("Set configuration for time controller"));
-  connect(_timeControllerAct, SIGNAL(triggered()), this, SLOT(_showTimeControllerDialog()));
+  connect(_timeControllerAct, SIGNAL(triggered()), this,
+          SLOT(_showTimeControllerDialog()));
 
   // unzoom display
 
@@ -809,25 +839,66 @@ int PolarManager::_getArchiveData()
     }
     return -1;
   }
-  
-  if (_keepSweepNumber) {
-    if (_sweepNum > (int) _vol.getNSweeps() - 1) {
-      _sweepNum = _vol.getNSweeps();
-    }
-    if (_sweepNum < 0) {
-      _sweepNum = 0;
-    }
+
+  cerr << "5555555555555555  _sweepNum, _fixedAngleDeg: " 
+       << _sweepNum << ", " << _fixedAngleDeg << endl;
+
+  // condition sweep number
+
+  if (_keepFixedAngle) {
+    _setSweepNum(_fixedAngleDeg);
+  } else if (_moveToHighSweep) {
+    _sweepNum = _vol.getNSweeps() - 1;
+    _setFixedAngle(_sweepNum);
   } else {
-    if (_movingToTopSweep) {
-      _sweepNum = _vol.getNSweeps() - 1;
-    } else {
-      _sweepNum = 0;
-    }
+    _sweepNum = 0;
+    _setFixedAngle(_sweepNum);
   }
+  
+  if (_params.debug) {
+    cerr << "----------------------------------------------------" << endl;
+    cerr << "perform archive retrieval" << endl;
+    cerr << "  read file: " << _vol.getPathInUse() << endl;
+    cerr << "  nSweeps: " << _vol.getNSweeps() << endl;
+    cerr << "  _sweepNum, _fixedAngleDeg: " 
+         << _sweepNum << ", " << _fixedAngleDeg << endl;
+    cerr << "----------------------------------------------------" << endl;
+  }
+  
   _platform = _vol.getPlatform();
 
   return 0;
 
+}
+
+/////////////////////////////////////////
+// set the sweep number from fixed angle
+
+void PolarManager::_setSweepNum(double fixedAngle)
+{
+  RadxSweep *sweep = _vol.getSweepByFixedAngle(fixedAngle);
+  if (sweep != NULL) {
+    _sweepNum = sweep->getSweepNumber();
+  } else {
+    _sweepNum = 0;
+  }
+  cerr << "1111111111 _sweepNum, _fixedAngleDeg: " 
+       << _sweepNum << ", " << _fixedAngleDeg << endl;
+}
+
+////////////////////////////////////////////
+// set the fixed angle from the sweep number
+
+void PolarManager::_setFixedAngle(int sweepNum)
+{
+  RadxSweep *sweep = _vol.getSweepByNumber(sweepNum);
+  if (sweep != NULL) {
+    _fixedAngleDeg = sweep->getFixedAngleDeg();
+  } else {
+    _fixedAngleDeg = 0.0;
+  }
+  cerr << "2222222222 _sweepNum, _fixedAngleDeg: " 
+       << _sweepNum << ", " << _fixedAngleDeg << endl;
 }
 
 /////////////////////////////
@@ -1607,7 +1678,7 @@ void PolarManager::_createTimeControllerDialog()
     // pal.setColor( QPalette::Inactive, QPalette::Button, color );
     goButton->setPalette(goPalette);
     layout2->addWidget(goButton);
-    connect(goButton, SIGNAL(clicked()), this, SLOT(_performArchiveRetrieval()));
+    connect(goButton, SIGNAL(clicked()), this, SLOT(_setArchiveRetrievalPending()));
     
     QPushButton *cancelButton = new QPushButton(goCancelReset);
     cancelButton->setText("Cancel");
@@ -1755,7 +1826,7 @@ void PolarManager::_setArchiveScanConfig()
   _computeArchiveEndTime();
   
   if (_archiveMode) {
-    _performArchiveRetrieval();
+    _setArchiveRetrievalPending();
   }
 
 }
@@ -2191,9 +2262,9 @@ void PolarManager::_goFwdNScans()
 }
 
 ////////////////////////////////////////////////////////
-// perform archive retrieval
+// set for pending archive retrieval
 
-void PolarManager::_performArchiveRetrieval()
+void PolarManager::_setArchiveRetrievalPending()
 {
   _archiveRetrievalPending = true;
 }

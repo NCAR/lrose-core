@@ -60,6 +60,14 @@ RhiWidget::RhiWidget(QWidget* parent,
 
 RhiWidget::~RhiWidget()
 {
+
+  // delete all of the dynamically created beams
+
+  for (size_t i = 0; i < _rhiBeams.size(); ++i) {
+    delete _rhiBeams[i];
+  }
+  _rhiBeams.clear();
+
 }
 
 
@@ -73,68 +81,20 @@ void RhiWidget::addBeam(const RadxRay *ray,
                         const std::vector< std::vector< double > > &beam_data,
                         const std::vector< DisplayField* > &fields)
 {
-  // add a new beam to the display. 
-  // The steps are:
-  // 1. preallocate mode: find the beam to be drawn, or dynamic mode:
-  //    create the beam(s) to be drawn.
-  // 2. fill the colors for all variables in the beams to be drawn
-  // 3. make the display list for the selected variables in the beams
-  //    to be drawn.
-  // 4. call the new display list(s)
 
-  std::vector< PolarBeam* > newBeams;
+  // Just add the beam to the beam list.
 
-  // The start and stop angle MUST specify a clockwise fill for the sector.
-  // Thus if start_angle > stop_angle, we know that we have crossed the 0
-  // boundary, and must break it up into 2 beams.
-
-  // Create the new beam(s), to keep track of the display information.
-  // Beam start and stop angles are adjusted here so that they always 
-  // increase clockwise. Likewise, if a beam crosses the 0 degree boundary,
-  // it is split into two beams, each of them again obeying the clockwise
-  // rule. Prescribing these rules makes the beam culling logic a lot simpler.
-
-  // Normalize the start and stop angles.  I'm not convinced that this works
-  // for negative angles, but leave it for now.
-
-  float n_start_angle = start_angle - ((int)(start_angle/360.0))*360.0;
-  float n_stop_angle = stop_angle - ((int)(stop_angle/360.0))*360.0;
-  
-  if (n_start_angle <= n_stop_angle) {
-
-    // This beam does not cross the 0 degree angle.  Just add the beam to
-    // the beam list.
-
-    PolarBeam* b = new PolarBeam(_params, ray, _nFields, n_start_angle, n_stop_angle);
-    _cullBeams(b);
-    _beams.push_back(b);
-    newBeams.push_back(b);
-
-  } else {
-
-    // The beam crosses the 0 degree angle.  First add the portion of the
-    // beam to the left of the 0 degree point.
-
-    PolarBeam* b1 = new PolarBeam(_params, ray, _nFields, n_start_angle, 360.0);
-    _cullBeams(b1);
-    _beams.push_back(b1);
-    newBeams.push_back(b1);
-
-    // Now add the portion of the beam to the right of the 0 degree point.
-
-    PolarBeam* b2 = new PolarBeam(_params, ray, _nFields, 0.0, n_stop_angle);
-    _cullBeams(b2);
-    _beams.push_back(b2);
-    newBeams.push_back(b2);
-
-  }
+  RhiBeam* b = new RhiBeam(_params, ray, _nFields, start_angle, stop_angle);
+  _rhiBeams.push_back(b);
+  std::vector<RhiBeam* > newBeams;
+  newBeams.push_back(b);
 
   // newBeams has pointers to all of the newly added beams.  Render the
   // beam data.
 
   for (size_t ii = 0; ii < newBeams.size(); ii++) {
-
-    PolarBeam *beam = newBeams[ii];
+    
+    RhiBeam *beam = newBeams[ii];
     
     // Set up the brushes for all of the fields in this beam.  This can be
     // done independently of a Painter object.
@@ -229,8 +189,8 @@ const RadxRay *RhiWidget::_getClosestRay(double x_km, double y_km)
   
   double minDiff = 1.0e99;
   const RadxRay *closestRay = NULL;
-  for (size_t ii = 0; ii < _beams.size(); ii++) {
-    const RadxRay *ray = _beams[ii]->getRay();
+  for (size_t ii = 0; ii < _rhiBeams.size(); ii++) {
+    const RadxRay *ray = _rhiBeams[ii]->getRay();
     double rayEl = ray->getElevationDeg();
     double diff = fabs(clickEl - rayEl);
     if (diff > 180.0) {

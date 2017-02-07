@@ -149,9 +149,13 @@ private:
   
   RadxTime _readerRayTime;
   RadxVol _vol;
+  bool _newArchiveVolNeeded;
+
+  bool _moveToHighSweep;
   int _sweepNum;
-  bool _movingToTopSweep;
-  bool _keepSweepNumber;
+  
+  bool _keepFixedAngle;
+  double _fixedAngleDeg;
 
   // windows
 
@@ -250,6 +254,9 @@ private:
   void _plotArchiveData();
   void _setupVolRead(RadxFile &file);
 
+  void _setSweepNum(double fixedAngle);
+  void _setFixedAngle(int sweepNum);
+
   // draw beam
 
   void _handleRay(RadxPlatform &platform, RadxRay *ray);
@@ -317,7 +324,7 @@ private slots:
   void _goBackNScans();
   void _goFwdNScans();
 
-  void _performArchiveRetrieval();
+  void _setArchiveRetrievalPending();
 
   // time controller
 
