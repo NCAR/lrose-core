@@ -4173,6 +4173,51 @@ RadxSweep *RadxVol::getSweepByNumber(int sweepNum)
   return NULL;
 }
 
+////////////////////////////////////////////////////////////
+// get sweep by fixed angle
+// returns sweep closest to fixed angle
+// returns NULL on failure
+
+const RadxSweep *RadxVol::getSweepByFixedAngle(double requestedAngle) const
+  
+{
+  double minDiff = 9999.0;
+  int sweepNum = -1;
+  for (size_t ii = 0; ii < _sweeps.size(); ii++) {
+    const RadxSweep *sweep = _sweeps[ii];
+    double diff = 
+      Radx::computeAngleDiff(requestedAngle, sweep->getFixedAngleDeg());
+    if (diff < minDiff) {
+      minDiff = diff;
+      sweepNum = ii;
+    }
+  } // ii
+  if (sweepNum >= 0) {
+    return getSweepByNumber(sweepNum);
+  }
+  return NULL;
+}
+
+RadxSweep *RadxVol::getSweepByFixedAngle(double requestedAngle) 
+  
+{
+  double minDiff = 9999.0;
+  int sweepNum = -1;
+  for (size_t ii = 0; ii < _sweeps.size(); ii++) {
+    RadxSweep *sweep = _sweeps[ii];
+    double diff = 
+      Radx::computeAngleDiff(requestedAngle, sweep->getFixedAngleDeg());
+    if (diff < minDiff) {
+      minDiff = diff;
+      sweepNum = ii;
+    }
+  } // ii
+  if (sweepNum >= 0) {
+    return getSweepByNumber(sweepNum);
+  }
+  return NULL;
+}
+
 //////////////////////////////////////////////////////////////////////////
 /// check if all rays in a sweep are in an antenna transition
 

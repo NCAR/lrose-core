@@ -1314,12 +1314,18 @@ public:
   inline vector<RadxField *> &getFields() { return _fields; }
 
   /// Get sweep by sweep number (not the index).
-  /// 
   /// Returns NULL on failure.
 
   const RadxSweep *getSweepByNumber(int sweepNum) const;
   RadxSweep *getSweepByNumber(int sweepNum);
   
+  /// Get sweep by fixed angle
+  /// returns the closest sweep if available
+  /// Returns NULL on failure.
+  
+  const RadxSweep *getSweepByFixedAngle(double requestedAngle) const;
+  RadxSweep *getSweepByFixedAngle(double requestedAngle);
+
   /// Get vector of sweeps.
 
   const vector<RadxSweep *> &getSweeps() const { return _sweeps; }
