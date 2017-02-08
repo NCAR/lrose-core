@@ -85,6 +85,11 @@ class DLL_EXPORT PpiWidget : public PolarWidget
                const std::vector< std::vector< double > > &beam_data,
                const std::vector< DisplayField* > &fields);
 
+  // are we in archive mode? and if so are we at the start of a sweep?
+
+  void setArchiveMode(bool state) { _isArchiveMode = state; }
+  void setStartOfSweep(bool state) { _isStartOfSweep = state; }
+
  protected:
 
   // get ray closest to click point
@@ -108,6 +113,19 @@ class DLL_EXPORT PpiWidget : public PolarWidget
    */
 
   virtual void _setGridSpacing();
+
+  // are we in archive mode? and if so are we at the start of a sweep?
+
+  bool _isArchiveMode;
+  bool _isStartOfSweep;
+
+  // angles and times in archive mode
+
+  RadxTime _archiveStartTime;
+  RadxTime _archiveEndTime;
+  double _meanElev;
+  double _sumElev;
+  double _nRays;
 
 };
 

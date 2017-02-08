@@ -246,12 +246,9 @@ protected:
   // Protected methods //
   ///////////////////////
 
-  /**
-   * @brief Method called when a resize event is issued.
-   *
-   * @param[in] event    The resize event information.
-   */
+  // override event handling
 
+  virtual void keyPressEvent(QKeyEvent* event);
   virtual void resizeEvent(QResizeEvent *event);
 
   /**

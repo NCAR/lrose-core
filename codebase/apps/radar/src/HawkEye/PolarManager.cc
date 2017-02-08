@@ -100,11 +100,12 @@ PolarManager::PolarManager(const Params &params,
   _ppiRays = NULL;
   _rhiRays = NULL;
   _rhiMode = false;
-  _sweepNum = 0;
+  _sweepIndex = 0;
 
-  _newArchiveVolNeeded = true;
+  _firstVol = true;
   _moveToHighSweep = false;
   _keepFixedAngle = false;
+  _fixedAngleDeg = -9999.0;
 
   // initialize geometry
   
@@ -376,7 +377,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       cerr << "Clicked left arrow, go back in time" << endl;
     }
     _keepFixedAngle = true;
-    _setFixedAngle(_sweepNum);
+    _ppi->setStartOfSweep(true);
     _goBack1();
     _setArchiveRetrievalPending();
 
@@ -386,18 +387,19 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       cerr << "Clicked right arrow, go forward in time" << endl;
     }
     _keepFixedAngle = true;
-    _setFixedAngle(_sweepNum);
+    _ppi->setStartOfSweep(true);
     _goFwd1();
     _setArchiveRetrievalPending();
     
   } else if (key == Qt::Key_Up) {
 
-    if (_sweepNum < (int) _vol.getNSweeps() - 1) {
+    if (_sweepIndex < (int) _vol.getNSweeps() - 1) {
 
-      _sweepNum++;
+      _sweepIndex++;
       moveUpDown = true;
       _keepFixedAngle = false;
-      _setFixedAngle(_sweepNum);
+      _setFixedAngle(_sweepIndex);
+      _ppi->setStartOfSweep(true);
 
     } else {
 
@@ -406,20 +408,22 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       }
       _moveToHighSweep = false; // start with low sweep of next volume
       _keepFixedAngle = false;
-      _setFixedAngle(_sweepNum);
+      _setFixedAngle(_sweepIndex);
       _goFwd1();
+      _ppi->setStartOfSweep(true);
       _setArchiveRetrievalPending();
 
     }
 
   } else if (key == Qt::Key_Down) {
 
-    if (_sweepNum > 0) {
+    if (_sweepIndex > 0) {
 
-      _sweepNum--;
+      _sweepIndex--;
       _keepFixedAngle = false;
-      _setFixedAngle(_sweepNum);
+      _setFixedAngle(_sweepIndex);
       moveUpDown = true;
+      _ppi->setStartOfSweep(true);
 
     } else {
 
@@ -428,8 +432,9 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       }
       _keepFixedAngle = false;
       _moveToHighSweep = true;
-      _setFixedAngle(_sweepNum);
+      _setFixedAngle(_sweepIndex);
       _goBack1();
+      _ppi->setStartOfSweep(true);
       _setArchiveRetrievalPending();
 
     }
@@ -438,7 +443,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
   if (moveUpDown) {
     if (_params.debug) {
-      cerr << "Clicked up/down arrow, change to sweep num: " << _sweepNum << endl;
+      cerr << "Clicked up/down arrow, change to sweep num: " << _sweepIndex << endl;
     }
     this->setCursor(Qt::WaitCursor);
     _timeControllerDialog->setCursor(Qt::WaitCursor);
@@ -704,6 +709,8 @@ void PolarManager::_handleRealtimeData(QTimerEvent * event)
 
 {
 
+  _ppi->setArchiveMode(false);
+
   // do nothing if freeze is on
 
   if (_frozen) {
@@ -755,7 +762,8 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
 
 {
 
-  _clear();
+  _ppi->setArchiveMode(true);
+  _ppi->setStartOfSweep(true);
 
   // set up plot times
 
@@ -831,19 +839,29 @@ int PolarManager::_getArchiveData()
     return -1;
   }
 
-  cerr << "5555555555555555  _sweepNum, _fixedAngleDeg: " 
-       << _sweepNum << ", " << _fixedAngleDeg << endl;
+  // compute the fixed angles from the rays
+  // so that we reflect reality
+  
+  _vol.computeFixedAngleFromRays();
 
+  // for first retrieval, start with sweepIndex of 0
+
+  if (_firstVol) {
+    _sweepIndex = 0;
+    _setFixedAngle(_sweepIndex);
+  }
+  _firstVol = false;
+  
   // condition sweep number
-
+  
   if (_keepFixedAngle) {
-    _setSweepNum(_fixedAngleDeg);
+    _setSweepIndex(_fixedAngleDeg);
   } else if (_moveToHighSweep) {
-    _sweepNum = _vol.getNSweeps() - 1;
-    _setFixedAngle(_sweepNum);
+    _sweepIndex = _vol.getNSweeps() - 1;
+    _setFixedAngle(_sweepIndex);
   } else {
-    _sweepNum = 0;
-    _setFixedAngle(_sweepNum);
+    _sweepIndex = 0;
+    _setFixedAngle(_sweepIndex);
   }
   
   if (_params.debug) {
@@ -851,8 +869,8 @@ int PolarManager::_getArchiveData()
     cerr << "perform archive retrieval" << endl;
     cerr << "  read file: " << _vol.getPathInUse() << endl;
     cerr << "  nSweeps: " << _vol.getNSweeps() << endl;
-    cerr << "  _sweepNum, _fixedAngleDeg: " 
-         << _sweepNum << ", " << _fixedAngleDeg << endl;
+    cerr << "  _sweepIndex, _fixedAngleDeg: " 
+         << _sweepIndex << ", " << _fixedAngleDeg << endl;
     cerr << "----------------------------------------------------" << endl;
   }
   
@@ -863,33 +881,47 @@ int PolarManager::_getArchiveData()
 }
 
 /////////////////////////////////////////
-// set the sweep number from fixed angle
+// set the sweep index from fixed angle
 
-void PolarManager::_setSweepNum(double fixedAngle)
+void PolarManager::_setSweepIndex(double fixedAngle)
 {
-  RadxSweep *sweep = _vol.getSweepByFixedAngle(fixedAngle);
-  if (sweep != NULL) {
-    _sweepNum = sweep->getSweepNumber();
-  } else {
-    _sweepNum = 0;
+  const vector<RadxSweep *> &sweeps = _vol.getSweeps();
+  if (sweeps.size() < 1) {
+    _sweepIndex = 0;
+    return;
   }
-  cerr << "1111111111 _sweepNum, _fixedAngleDeg: " 
-       << _sweepNum << ", " << _fixedAngleDeg << endl;
+  double minDiff = 9999.0;
+  int bestIndex = 0;
+  for (size_t ii = 0; ii < sweeps.size(); ii++) {
+    const RadxSweep *sweep = sweeps[ii];
+    double diff = 
+      fabs(Radx::computeAngleDiff(fixedAngle, sweep->getFixedAngleDeg()));
+    if (diff < minDiff) {
+      minDiff = diff;
+      bestIndex = ii;
+    }
+  } // ii
+  _sweepIndex = bestIndex;
 }
 
 ////////////////////////////////////////////
-// set the fixed angle from the sweep number
+// set the fixed angle from the sweep index
 
 void PolarManager::_setFixedAngle(int sweepNum)
 {
-  RadxSweep *sweep = _vol.getSweepByNumber(sweepNum);
-  if (sweep != NULL) {
-    _fixedAngleDeg = sweep->getFixedAngleDeg();
-  } else {
-    _fixedAngleDeg = 0.0;
+  const vector<RadxSweep *> &sweeps = _vol.getSweeps();
+  if (sweeps.size() < 1) {
+    _fixedAngleDeg = -8888.0;
+    return;
   }
-  cerr << "2222222222 _sweepNum, _fixedAngleDeg: " 
-       << _sweepNum << ", " << _fixedAngleDeg << endl;
+  if (sweepNum < 0) {
+    sweepNum = 0;
+  }
+  if (sweepNum > (int) sweeps.size() - 1) {
+    sweepNum = sweeps.size() - 1;
+  }
+  const RadxSweep *sweep = sweeps[sweepNum];
+  _fixedAngleDeg = sweep->getFixedAngleDeg();
 }
 
 /////////////////////////////
@@ -915,27 +947,35 @@ void PolarManager::_plotArchiveData()
   if (rays.size() < 1) {
     cerr << "ERROR - _plotArchiveData" << endl;
     cerr << "  No rays found" << endl;
+    return;
   }
   
   const vector<RadxSweep *> &sweeps = _vol.getSweeps();
   if (sweeps.size() < 1) {
     cerr << "ERROR - _plotArchiveData" << endl;
     cerr << "  No sweeps found" << endl;
+    return;
   }
 
-  if (_sweepNum > (int) sweeps.size()) {
-    _sweepNum = (int) sweeps.size() - 1;
+  if (_sweepIndex > (int) sweeps.size()) {
+    _sweepIndex = (int) sweeps.size() - 1;
   }
 
-  for (size_t ii = sweeps[_sweepNum]->getStartRayIndex();
-       ii <= sweeps[_sweepNum]->getEndRayIndex(); ii++) {
+  // clear the canvas
+
+  _clear();
+
+  // handle the rays
+
+  for (size_t ii = sweeps[_sweepIndex]->getStartRayIndex();
+       ii <= sweeps[_sweepIndex]->getEndRayIndex(); ii++) {
     RadxRay *ray = rays[ii];
     _handleRay(_platform, ray);
   }
 
   // update the status panel
   
-  _updateStatusPanel(rays[sweeps[_sweepNum]->getStartRayIndex()]);
+  _updateStatusPanel(rays[sweeps[_sweepIndex]->getStartRayIndex()]);
     
 }
 
@@ -1253,6 +1293,7 @@ void PolarManager::_freeze()
     _frozen = true;
     _freezeAct->setText("Unfreeze");
     _freezeAct->setStatusTip(tr("Click to unfreeze display, or hit ESC"));
+    _initialRay = true;
   }
 }
 

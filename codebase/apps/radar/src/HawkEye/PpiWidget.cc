@@ -49,6 +49,15 @@ PpiWidget::PpiWidget(QWidget* parent,
   setRings(_params.ppi_range_rings_on_at_startup);
   setAngleLines(_params.ppi_azimuth_lines_on_at_startup);
 
+  _isArchiveMode = false;
+  _isStartOfSweep = true;
+
+  _archiveStartTime.set(0);
+  _archiveEndTime.set(0);
+  _meanElev = -9999.0;
+  _sumElev = 0.0;
+  _nRays = 0.0;
+
 }
 
 /*************************************************************************
@@ -127,6 +136,29 @@ void PpiWidget::addBeam(const RadxRay *ray,
 
   }
 
+  // compute angles and times in archive mode
+  
+  if (newBeams.size() > 0) {
+    
+    if (_isArchiveMode) {
+
+      if (_isStartOfSweep) {
+        _archiveStartTime = ray->getRadxTime();
+        _meanElev = -9999.0;
+        _sumElev = 0.0;
+        _nRays = 0.0;
+        _isStartOfSweep = false;
+      }
+      _archiveEndTime = ray->getRadxTime();
+      _sumElev += ray->getElevationDeg();
+      _nRays++;
+      _meanElev = _sumElev / _nRays;
+    
+    } // if (_isArchiveMode) 
+    
+  } // if (newBeams.size() > 0) 
+
+
   // newBeams has pointers to all of the newly added beams.  Render the
   // beam data.
 
@@ -151,7 +183,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
     }
     
   } /* endfor - beam */
-  
+
   // Start the threads to render the new beams
 
   _performRendering();
@@ -417,5 +449,11 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
   const DisplayField &field = _manager.getSelectedField();
   _zoomWorld.drawColorScale(field.getColorMap(), painter);
+
+  // add text for time and angles
+
+  cerr << "111111111111111 startTime: " << _archiveStartTime.asString(3) << endl;
+  cerr << "111111111111111 endTime: " << _archiveEndTime.asString(3) << endl;
+  cerr << "111111111111111 meanEl: " << _meanElev << endl;
   
 }

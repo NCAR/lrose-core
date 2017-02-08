@@ -831,7 +831,7 @@ void PolarWidget::_refreshImages()
     }
 
     // clear image
-    
+
     field->getImage()->fill(_backgroundBrush.color().rgb());
     
     // set up rendering details

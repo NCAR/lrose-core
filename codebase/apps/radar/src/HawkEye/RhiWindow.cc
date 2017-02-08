@@ -31,7 +31,6 @@
 
 using namespace std;
 
-
 /*************************************************************************
  * Constructor
  */
@@ -112,6 +111,7 @@ RhiWindow::RhiWindow(QFrame *rhiParentFrame,
 
 RhiWindow::~RhiWindow()
 {
+
 }
 
 
@@ -135,9 +135,14 @@ void RhiWindow::resizeEvent(QResizeEvent *event)
 }
 
 
-/*************************************************************************
- * Protected methods
- *************************************************************************/
+////////////////////////////////////////////////////////////////
+void RhiWindow::keyPressEvent(QKeyEvent * e)
+{
+  // pass event up to PolarManager
+  _manager->keyPressEvent(e);
+}
+
+// Protected methods
 
 /*************************************************************************
  * _createActions()

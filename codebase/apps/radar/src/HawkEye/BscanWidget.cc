@@ -1233,13 +1233,6 @@ void BscanWidget::_plotDistanceOnTimeAxis(QPainter &painter)
     tickTimes.push_back(tickTime);
   }
 
-  // cerr << "111111111111111111111111111111111111111111111111" << endl;
-  // for (size_t ii = 0; ii < tickDists.size(); ii++) {
-  //   cerr << "1111111111 dist, time: " << tickDists[ii] << ", " 
-  //        << tickTimes[ii].asString() << endl;
-  // }
-  // cerr << "111111111111111111111111111111111111111111111111" << endl;
-
   // plot them
 
   QColor lineColor(_params.bscan_axes_color);

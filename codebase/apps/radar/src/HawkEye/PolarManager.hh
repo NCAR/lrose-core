@@ -97,6 +97,12 @@ public:
 
   void enableZoomButton() const;
 
+  // override event handling
+
+  virtual void timerEvent (QTimerEvent * event);
+  virtual void resizeEvent (QResizeEvent * event);
+  virtual void keyPressEvent(QKeyEvent* event);
+
 signals:
 
 private:
@@ -116,10 +122,10 @@ private:
   
   RadxTime _readerRayTime;
   RadxVol _vol;
-  bool _newArchiveVolNeeded;
+  bool _firstVol;
 
   bool _moveToHighSweep;
-  int _sweepNum;
+  int _sweepIndex;
   
   bool _keepFixedAngle;
   double _fixedAngleDeg;
@@ -195,12 +201,6 @@ private:
 
   RadxTime _imagesScheduledTime;
 
-  // override event handling
-
-  virtual void timerEvent (QTimerEvent * event);
-  virtual void resizeEvent (QResizeEvent * event);
-  virtual void keyPressEvent(QKeyEvent* event);
-
   // set top bar
 
   virtual void _setTitleBar(const string &radarName);
@@ -221,8 +221,8 @@ private:
   void _plotArchiveData();
   void _setupVolRead(RadxFile &file);
 
-  void _setSweepNum(double fixedAngle);
-  void _setFixedAngle(int sweepNum);
+  void _setSweepIndex(double fixedAngle);
+  void _setFixedAngle(int sweepIndex);
 
   // draw beam
 
