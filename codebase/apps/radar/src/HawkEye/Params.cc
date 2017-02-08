@@ -1419,6 +1419,30 @@ using namespace std;
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'ppi_main_legend_pos'
+    // ctype is '_legend_pos_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("ppi_main_legend_pos");
+    tt->descr = tdrpStrDup("Position of main legend in the PPI plot window");
+    tt->help = tdrpStrDup("This include time, field name and elevation angle.");
+    tt->val_offset = (char *) &ppi_main_legend_pos - &_start_;
+    tt->enum_def.name = tdrpStrDup("legend_pos_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("LEGEND_TOP_LEFT");
+      tt->enum_def.fields[0].val = LEGEND_TOP_LEFT;
+      tt->enum_def.fields[1].name = tdrpStrDup("LEGEND_TOP_RIGHT");
+      tt->enum_def.fields[1].val = LEGEND_TOP_RIGHT;
+      tt->enum_def.fields[2].name = tdrpStrDup("LEGEND_BOTTOM_LEFT");
+      tt->enum_def.fields[2].val = LEGEND_BOTTOM_LEFT;
+      tt->enum_def.fields[3].name = tdrpStrDup("LEGEND_BOTTOM_RIGHT");
+      tt->enum_def.fields[3].val = LEGEND_BOTTOM_RIGHT;
+    tt->single_val.e = LEGEND_TOP_LEFT;
+    tt++;
+    
     // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1654,6 +1678,30 @@ using namespace std;
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &rhi_elevation_lines_on_at_startup - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'rhi_main_legend_pos'
+    // ctype is '_legend_pos_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("rhi_main_legend_pos");
+    tt->descr = tdrpStrDup("Position of main legend in the RHI plot window");
+    tt->help = tdrpStrDup("This include time, field name and elevation angle.");
+    tt->val_offset = (char *) &rhi_main_legend_pos - &_start_;
+    tt->enum_def.name = tdrpStrDup("legend_pos_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("LEGEND_TOP_LEFT");
+      tt->enum_def.fields[0].val = LEGEND_TOP_LEFT;
+      tt->enum_def.fields[1].name = tdrpStrDup("LEGEND_TOP_RIGHT");
+      tt->enum_def.fields[1].val = LEGEND_TOP_RIGHT;
+      tt->enum_def.fields[2].name = tdrpStrDup("LEGEND_BOTTOM_LEFT");
+      tt->enum_def.fields[2].val = LEGEND_BOTTOM_LEFT;
+      tt->enum_def.fields[3].name = tdrpStrDup("LEGEND_BOTTOM_RIGHT");
+      tt->enum_def.fields[3].val = LEGEND_BOTTOM_RIGHT;
+    tt->single_val.e = LEGEND_TOP_LEFT;
     tt++;
     
     // Parameter 'Comment 12'

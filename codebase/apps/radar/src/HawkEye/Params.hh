@@ -76,17 +76,17 @@ public:
   } ppi_display_type_t;
 
   typedef enum {
-    RANGE_AXIS_UP = 0,
-    RANGE_AXIS_DOWN = 1,
-    RANGE_AXIS_ALTITUDE = 2
-  } range_axis_mode_t;
-
-  typedef enum {
     LEGEND_TOP_LEFT = 0,
     LEGEND_TOP_RIGHT = 1,
     LEGEND_BOTTOM_LEFT = 2,
     LEGEND_BOTTOM_RIGHT = 3
   } legend_pos_t;
+
+  typedef enum {
+    RANGE_AXIS_UP = 0,
+    RANGE_AXIS_DOWN = 1,
+    RANGE_AXIS_ALTITUDE = 2
+  } range_axis_mode_t;
 
   typedef enum {
     DWELL_STATS_MEAN = 0,
@@ -516,6 +516,8 @@ public:
 
   tdrp_bool_t ppi_azimuth_lines_on_at_startup;
 
+  legend_pos_t ppi_main_legend_pos;
+
   int rhi_window_width;
 
   int rhi_window_height;
@@ -553,6 +555,8 @@ public:
   tdrp_bool_t rhi_range_rings_on_at_startup;
 
   tdrp_bool_t rhi_elevation_lines_on_at_startup;
+
+  legend_pos_t rhi_main_legend_pos;
 
   double bscan_time_span_secs;
 
@@ -687,7 +691,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[150];
+  mutable TDRPtable _table[152];
 
   const char *_className;
 

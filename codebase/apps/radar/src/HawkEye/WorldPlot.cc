@@ -485,7 +485,7 @@ void WorldPlot::drawText(QPainter &painter, const string &text,
                          int flags)
 
 {
-	
+
   int ixx = getIxPixel(text_x);
   int iyy = getIyPixel(text_y);
 	
@@ -1505,12 +1505,6 @@ void WorldPlot::_computeTransform()
   _yMinWindow = getYWorld(0);
   _xMaxWindow = getXWorld(_widthPixels);
   _yMaxWindow = getYWorld(_heightPixels);
-
-  // cerr << "11111111111 _xMinWorld: " << _xMinWorld << endl;
-  // cerr << "11111111111 _xMaxWorld: " << _xMaxWorld << endl;
-  // cerr << "11111111111 _xMinPixel: " << _xMinPixel << endl;
-  // cerr << "11111111111 _xMaxPixel: " << _xMaxPixel << endl;
-  // cerr << "11111111111 _xPixelsPerWorld: " << _xPixelsPerWorld << endl;
 
 }
 

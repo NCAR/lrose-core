@@ -412,6 +412,16 @@ paramdef boolean {
   p_descr = "Set PPI azimuth lines overlay on at startup.";
 } ppi_azimuth_lines_on_at_startup;
 
+typedef enum {
+  LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
+} legend_pos_t;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of main legend in the PPI plot window";
+  p_help = "This include time, field name and elevation angle.";
+} ppi_main_legend_pos;
+
 commentdef {
   p_header = "RHI MODE DISPLAY";
 }
@@ -518,6 +528,12 @@ paramdef boolean {
   p_default = false;
   p_descr = "Set RHI elevation lines overlay on at startup.";
 } rhi_elevation_lines_on_at_startup;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of main legend in the RHI plot window";
+  p_help = "This include time, field name and elevation angle.";
+} rhi_main_legend_pos;
 
 commentdef {
   p_header = "BSCAN TIME LIMITS";
@@ -770,10 +786,6 @@ paramdef int {
 commentdef {
   p_header = "BSCAN LEGENDS";
 }
-
-typedef enum {
-  LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
-} legend_pos_t;
 
 paramdef boolean {
   p_default = false;

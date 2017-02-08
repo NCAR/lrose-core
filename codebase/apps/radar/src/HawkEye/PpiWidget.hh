@@ -114,6 +114,12 @@ class DLL_EXPORT PpiWidget : public PolarWidget
 
   virtual void _setGridSpacing();
 
+  // draw text in screen coords
+
+  void _drawScreenText(QPainter &painter, const string &text,
+                       int text_x, int text_y,
+                       int flags);
+    
   // are we in archive mode? and if so are we at the start of a sweep?
 
   bool _isArchiveMode;

@@ -450,10 +450,98 @@ void PpiWidget::_drawOverlays(QPainter &painter)
   const DisplayField &field = _manager.getSelectedField();
   _zoomWorld.drawColorScale(field.getColorMap(), painter);
 
-  // add text for time and angles
+  if (_archiveMode) {
 
-  cerr << "111111111111111 startTime: " << _archiveStartTime.asString(3) << endl;
-  cerr << "111111111111111 endTime: " << _archiveEndTime.asString(3) << endl;
-  cerr << "111111111111111 meanEl: " << _meanElev << endl;
+    // add legends with time, field name and elevation angle
+
+    vector<string> legends;
+    char text[1024];
+    
+    sprintf(text, "Start time: %s", _archiveStartTime.asString(3).c_str());
+    legends.push_back(text);
+    
+    string fieldName =
+      _fieldRenderers[_selectedField]->getParams().label;
+    sprintf(text, "Field: %s", fieldName.c_str());
+    legends.push_back(text);
+    
+    sprintf(text, "Elevation(deg): %.3f", _meanElev);
+    legends.push_back(text);
+
+    sprintf(text, "NRays: %g", _nRays);
+    legends.push_back(text);
+    
+    painter.save();
+    painter.setBrush(Qt::black);
+    painter.setBackgroundMode(Qt::OpaqueMode);
+
+    switch (_params.ppi_main_legend_pos) {
+      case Params::LEGEND_TOP_LEFT:
+        _zoomWorld.drawLegendsTopLeft(painter, legends);
+        break;
+      case Params::LEGEND_TOP_RIGHT:
+        _zoomWorld.drawLegendsTopRight(painter, legends);
+        break;
+      case Params::LEGEND_BOTTOM_LEFT:
+        _zoomWorld.drawLegendsBottomLeft(painter, legends);
+        break;
+      case Params::LEGEND_BOTTOM_RIGHT:
+        _zoomWorld.drawLegendsBottomRight(painter, legends);
+        break;
+      default: {}
+    }
+
+    // painter.setBrush(Qt::white);
+    // painter.setBackgroundMode(Qt::TransparentMode);
+    painter.restore();
+
+  } // if (_archiveMode) {
+
+  // // add text for time and angles
+  
+  // cerr << "111111111111111 startTime: " << _archiveStartTime.asString(3) << endl;
+  // cerr << "111111111111111 endTime: " << _archiveEndTime.asString(3) << endl;
+  // cerr << "111111111111111 meanEl: " << _meanElev << endl;
+  
+  // _drawScreenText(painter, "TESTING", 20, 20, Qt::AlignLeft | Qt::AlignTop);
   
 }
+
+///////////////////////////////////////////////////////////////////////////
+// Draw text, with (X, Y) in screen space
+//
+// Flags give the justification in Qt, and are or'd from the following:
+//    Qt::AlignLeft aligns to the left border.
+//    Qt::AlignRight aligns to the right border.
+//    Qt::AlignJustify produces justified text.
+//    Qt::AlignHCenter aligns horizontally centered.
+//    Qt::AlignTop aligns to the top border.
+//    Qt::AlignBottom aligns to the bottom border.
+//    Qt::AlignVCenter aligns vertically centered
+//    Qt::AlignCenter (== Qt::AlignHCenter | Qt::AlignVCenter)
+//    Qt::TextSingleLine ignores newline characters in the text.
+//    Qt::TextExpandTabs expands tabs (see below)
+//    Qt::TextShowMnemonic interprets "&x" as x; i.e., underlined.
+//    Qt::TextWordWrap breaks the text to fit the rectangle.
+
+// draw text in world coords
+
+void PpiWidget::_drawScreenText(QPainter &painter, const string &text,
+                                int text_x, int text_y,
+                                int flags)
+  
+{
+
+  int ixx = text_x;
+  int iyy = text_y;
+	
+  QRect tRect(painter.fontMetrics().tightBoundingRect(text.c_str()));
+  QRect bRect(painter.fontMetrics().
+              boundingRect(ixx, iyy,
+                           tRect.width() + 2, tRect.height() + 2,
+                           flags, text.c_str()));
+    
+  painter.drawText(bRect, flags, text.c_str());
+    
+}
+
