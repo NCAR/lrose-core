@@ -197,16 +197,12 @@ void RhiWidget::configureRange(double max_range)
                    -_maxRangeKm, 0.0,
                    _maxRangeKm, _maxHeightKm,
                    axisTickLen, nTicksIdeal, textMargin);
-    // _setWindow(QRect(-Beam::RENDER_PIXELS, -Beam::RENDER_PIXELS,
-    //     	     Beam::RENDER_PIXELS * 2, Beam::RENDER_PIXELS));
   } else {
     _fullWorld.set(width(), height(),
                    leftMargin, rightMargin, topMargin, bottomMargin, colorScaleWidth,
                    0.0, 0.0,
                    _maxRangeKm, _maxHeightKm,
                    axisTickLen, nTicksIdeal, textMargin);
-    // _setWindow(QRect(0, -Beam::RENDER_PIXELS,
-    //     	     Beam::RENDER_PIXELS, Beam::RENDER_PIXELS));
   }
 
   _zoomWorld = _fullWorld;

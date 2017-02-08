@@ -224,8 +224,6 @@ void PpiWidget::configureRange(double max_range)
                    -_maxRangeKm, 0.0,
                    _maxRangeKm, _maxRangeKm,
                    axisTickLen, nTicksIdeal, textMargin);
-    // _setWindow(QRect(-Beam::RENDER_PIXELS, -Beam::RENDER_PIXELS,
-    //                  Beam::RENDER_PIXELS * 2, Beam::RENDER_PIXELS * 2));
     
   } else {
     
@@ -234,8 +232,6 @@ void PpiWidget::configureRange(double max_range)
                    -_maxRangeKm, -_maxRangeKm,
                    _maxRangeKm, _maxRangeKm,
                    axisTickLen, nTicksIdeal, textMargin);
-    // _setWindow(QRect(-Beam::RENDER_PIXELS, -Beam::RENDER_PIXELS,
-    //                  Beam::RENDER_PIXELS * 2, Beam::RENDER_PIXELS));
 
   }
   

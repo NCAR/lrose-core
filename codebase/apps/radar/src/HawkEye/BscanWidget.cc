@@ -1185,7 +1185,9 @@ void BscanWidget::_computeSummaryDistanceSpeedTrack()
   const DistLoc &locStart = _distLocs[0];
   const DistLoc &locEnd = _distLocs[_distLocs.size()-1];
   double totDistKm, meanTrackDeg;
-  PJGLatLon2RTheta(locStart.lat, locStart.lon, locEnd.lat, locEnd.lon, &totDistKm, &meanTrackDeg);
+  PJGLatLon2RTheta(locStart.lat, locStart.lon, 
+                   locEnd.lat, locEnd.lon,
+                   &totDistKm, &meanTrackDeg);
 
   double totSecs = locEnd.time - locStart.time;
   _meanSpeedMps = (_sumDistKm * 1000.0) / totSecs;
@@ -1194,22 +1196,22 @@ void BscanWidget::_computeSummaryDistanceSpeedTrack()
     _meanDirnDeg += 360.0;
   }
 
-  // cerr << "2222222222222222222222222222222222222222" << endl;
-  // for (size_t ii = 0; ii < _distLocs.size(); ii++) {
-  //   DistLoc &loc = _distLocs[ii];
-  //   cerr << "==========>> loc ii: " << ii << endl;
-  //   cerr << "  beamNum: " << loc.beamNum << endl;
-  //   cerr << "  time: " << loc.time.asString() << endl;
-  //   cerr << "  lat: " << loc.lat << endl;
-  //   cerr << "  lon: " << loc.lon << endl;
-  //   cerr << "  speedMps: " << loc.speedMps << endl;
-  //   cerr << "  dirnDeg: " << loc.dirnDeg << endl;
-  //   cerr << "  distKm: " << loc.distKm << endl;
-  //   cerr << "  sumDistKm: " << loc.sumDistKm << endl;
-  //   cerr << "==============================" << endl;
-  // }
-  // cerr << "2222222222222222222222222222222222222222" << endl;
-  
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    for (size_t ii = 0; ii < _distLocs.size(); ii++) {
+      DistLoc &loc = _distLocs[ii];
+      cerr << "==========>> loc ii: " << ii << endl;
+      cerr << "  beamNum: " << loc.beamNum << endl;
+      cerr << "  time: " << loc.time.asString() << endl;
+      cerr << "  lat: " << loc.lat << endl;
+      cerr << "  lon: " << loc.lon << endl;
+      cerr << "  speedMps: " << loc.speedMps << endl;
+      cerr << "  dirnDeg: " << loc.dirnDeg << endl;
+      cerr << "  distKm: " << loc.distKm << endl;
+      cerr << "  sumDistKm: " << loc.sumDistKm << endl;
+      cerr << "==============================" << endl;
+    }
+  }
+    
 }
 
 /*************************************************************************
@@ -1280,7 +1282,7 @@ RadxTime BscanWidget::_getTimeForDistanceVal(double distKm)
       double timeSpan = (locNext.time - locThis.time);
       double timeFrac = timeSpan * fraction;
       RadxTime timeForDist = locThis.time + timeFrac;
-      // cerr << "66666666666666666 ii, fraction timeSpan timeFrac time: "
+      // cerr << "====>>  ii, fraction timeSpan timeFrac time: "
       //      << ii << ", "
       //      << fraction << ", "
       //      << timeSpan << ", "

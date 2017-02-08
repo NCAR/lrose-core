@@ -42,7 +42,8 @@ class ScaledLabel
 {
 public:
     enum ScalingType {
-        /// Scale for distance, in engineering units, with the appropriate units designation appended.
+      /// Scale for distance, in engineering units, 
+      /// with the appropriate units designation appended.
         DistanceEng
     };
     

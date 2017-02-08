@@ -503,21 +503,26 @@ void BscanManager::_createRangeAxisDialog()
     _rangeAxisModeBox->setTitle("Set mode for range axis");
     
     _rangeAxisModeUpButton = new QRadioButton(tr("Plot range up"), this);
-    _rangeAxisModeUpButton->setStatusTip(tr("Plot range from instrument, positive upwards"));
+    _rangeAxisModeUpButton->setStatusTip
+      (tr("Plot range from instrument, positive upwards"));
     _rangeAxisModeUpButton->setCheckable(true);
-    connect(_rangeAxisModeUpButton, SIGNAL(clicked()), this, SLOT(_setRangeAxisRangeUp()));
+    connect(_rangeAxisModeUpButton, SIGNAL(clicked()),
+            this, SLOT(_setRangeAxisRangeUp()));
     modeBoxLayout->addWidget(_rangeAxisModeUpButton);
     
     _rangeAxisModeDownButton = new QRadioButton(tr("Plot range down"), this);
-    _rangeAxisModeDownButton->setStatusTip(tr("Plot range from instrument, positive downwards"));
+    _rangeAxisModeDownButton->setStatusTip
+      (tr("Plot range from instrument, positive downwards"));
     _rangeAxisModeDownButton->setCheckable(true);
-    connect(_rangeAxisModeDownButton, SIGNAL(clicked()), this, SLOT(_setRangeAxisRangeDown()));
+    connect(_rangeAxisModeDownButton, SIGNAL(clicked()), 
+            this, SLOT(_setRangeAxisRangeDown()));
     modeBoxLayout->addWidget(_rangeAxisModeDownButton);
     
     _rangeAxisModeAltitudeButton = new QRadioButton(tr("Plot altitude"), this);
     _rangeAxisModeAltitudeButton->setStatusTip(tr("Plot altitude on vertical axis"));
     _rangeAxisModeAltitudeButton->setCheckable(true);
-    connect(_rangeAxisModeAltitudeButton, SIGNAL(clicked()), this, SLOT(_setRangeAxisAltitude()));
+    connect(_rangeAxisModeAltitudeButton, SIGNAL(clicked()), 
+            this, SLOT(_setRangeAxisAltitude()));
     modeBoxLayout->addWidget(_rangeAxisModeAltitudeButton);
     
     QButtonGroup *modeGroup = new QButtonGroup(this);
@@ -1771,7 +1776,6 @@ void BscanManager::_changeField(int fieldId, bool guiMode)
   _bscan->selectVar(_fieldNum);
 
   // _colorBar->setColorMap(&_fields[_fieldNum]->getColorMap());
-  // QRadioButton *button = _fieldButtons[_fieldNum];
   _selectedName = _selectedField->getName();
   _selectedLabel = _selectedField->getLabel();
   _selectedUnits = _selectedField->getUnits();
@@ -2274,7 +2278,8 @@ void BscanManager::_setCensorDataBelowSurface()
   _surfaceField = _surfaceFieldEdit->text().toLocal8Bit().data();
 
   double minRange;
-  if (sscanf(_minRangeToSurfaceEdit->text().toLocal8Bit().data(), "%lg", &minRange) != 1) {
+  if (sscanf(_minRangeToSurfaceEdit->text().toLocal8Bit().data(), 
+             "%lg", &minRange) != 1) {
     QErrorMessage errMsg(_minRangeToSurfaceEdit);
     string text("Bad entry for min range: ");
     text += _minRangeToSurfaceEdit->text().toLocal8Bit().data();
@@ -2287,7 +2292,8 @@ void BscanManager::_setCensorDataBelowSurface()
   _minRangeToSurfaceKm = minRange;
 
   double rangeMargin;
-  if (sscanf(_surfaceRangeMarginEdit->text().toLocal8Bit().data(), "%lg", &rangeMargin) != 1) {
+  if (sscanf(_surfaceRangeMarginEdit->text().toLocal8Bit().data(),
+             "%lg", &rangeMargin) != 1) {
     QErrorMessage errMsg(_surfaceRangeMarginEdit);
     string text("Bad entry for range margin: ");
     text += _surfaceRangeMarginEdit->text().toLocal8Bit().data();
@@ -2311,7 +2317,8 @@ void BscanManager::_setCensorDataBelowSurface()
 void BscanManager::_setRangeLimits()
 {
   double minRange;
-  if (sscanf(_minRangeEdit->text().toLocal8Bit().data(), "%lg", &minRange) != 1) {
+  if (sscanf(_minRangeEdit->text().toLocal8Bit().data(),
+             "%lg", &minRange) != 1) {
     QErrorMessage errMsg(_minRangeEdit);
     string text("Bad entry for min range: ");
     text += _minRangeEdit->text().toLocal8Bit().data();
@@ -2322,7 +2329,8 @@ void BscanManager::_setRangeLimits()
     return;
   }
   double maxRange;
-  if (sscanf(_maxRangeEdit->text().toLocal8Bit().data(), "%lg", &maxRange) != 1) {
+  if (sscanf(_maxRangeEdit->text().toLocal8Bit().data(),
+             "%lg", &maxRange) != 1) {
     QErrorMessage errMsg(_maxRangeEdit);
     string text("Bad entry for max range: ");
     text += _maxRangeEdit->text().toLocal8Bit().data();
@@ -2384,7 +2392,8 @@ void BscanManager::_setTimeSpan()
 {
 
   double timeSpan;
-  if (sscanf(_timeSpanEdit->text().toLocal8Bit().data(), "%lg", &timeSpan) != 1) {
+  if (sscanf(_timeSpanEdit->text().toLocal8Bit().data(), 
+             "%lg", &timeSpan) != 1) {
     QErrorMessage errMsg(_timeSpanEdit);
     string text("Bad entry for time span: ");
     text += _timeSpanEdit->text().toLocal8Bit().data();
@@ -2439,8 +2448,10 @@ void BscanManager::_setStartTimeFromGui(const QDateTime &datetime1)
 
 void BscanManager::_setGuiFromStartTime()
 {
-  QDate date(_archiveStartTime.getYear(), _archiveStartTime.getMonth(), _archiveStartTime.getDay());
-  QTime time(_archiveStartTime.getHour(), _archiveStartTime.getMin(), _archiveStartTime.getSec());
+  QDate date(_archiveStartTime.getYear(),
+             _archiveStartTime.getMonth(), _archiveStartTime.getDay());
+  QTime time(_archiveStartTime.getHour(),
+             _archiveStartTime.getMin(), _archiveStartTime.getSec());
   QDateTime datetime(date, time);
   _archiveStartTimeEdit->setDateTime(datetime);
 }
@@ -2624,7 +2635,8 @@ void BscanManager::_setDwellSpecified()
 
   double dwellSecs;
   bool error = false;
-  if (sscanf(_dwellSpecifiedEdit->text().toLocal8Bit().data(), "%lg", &dwellSecs) != 1) {
+  if (sscanf(_dwellSpecifiedEdit->text().toLocal8Bit().data(),
+             "%lg", &dwellSecs) != 1) {
     error = true;
   }
   if (dwellSecs <= 0) {
@@ -2762,7 +2774,8 @@ double BscanManager::_getCensorRange(const RadxRay *ray)
 
   // now check field values below the surface
 
-  int igate = (int) ((censorRange - cfld->getStartRangeKm()) / cfld->getGateSpacingKm() + 0.5);
+  int igate = (int) ((censorRange - cfld->getStartRangeKm()) / 
+                     cfld->getGateSpacingKm() + 0.5);
   for (size_t ii = igate; ii < cfld->getNPoints(); ii++) {
     Radx::fl32 val = vals[ii];
     if (val != missing) {

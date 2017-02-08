@@ -639,15 +639,16 @@ void PolarWidget::_cullBeams(const PolarBeam *beamAB)
   //         a---------b
   //    x---------y
   // 
-  // If an overlap on beam XY is detected, the occluded region is recorded as the interval (CD):        
+  // If an overlap on beam XY is detected, the occluded region is recorded
+  //   as the interval (CD):        
   //         a---------b
   //    x---------y
   //         c----d
   // 
   // The culling algorithm starts with the last beam in the list, and compares it with all
-  // preceeding beams, setting their overlap regions appropriately. Then the next to the last
-  // beam is compared with all preceeding beams. Previously found occluded regions will be 
-  // expanded as they are detected.
+  // preceeding beams, setting their overlap regions appropriately.
+  // Then the next to the last beam is compared with all preceeding beams.
+  // Previously found occluded regions will be expanded as they are detected.
   // 
   // Once the occluded region spans the entire beam, then the beam is known 
   // to be hidden, and it doesn't need to be tested any more, nor is it it used as a 

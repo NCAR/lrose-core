@@ -82,8 +82,6 @@ class PolarManager;
 /// and the distance span of each beam. The latter is used to 
 /// to create range rings in real world units.
 ///
-/// Internally, we use a coordinate system which places the display in
-/// the region x,y between -Beam::RENDER_PIXELS and Beam::RENDER_PIXELS.
 /// The radar is located at 0, 0.
 ///
 /// Zooming is accomplished by changing the limits of the Qt window.

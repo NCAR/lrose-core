@@ -739,7 +739,8 @@ void PolarManager::_handleRealtimeData(QTimerEvent * event)
       
       // draw the beam
       
-      if (_params.images_creation_mode != Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
+      if (_params.images_creation_mode != 
+          Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
         _handleRay(_platform, ray);
       }
     
@@ -1388,12 +1389,14 @@ void PolarManager::_ppiLocationClicked(double xkm, double ykm, const RadxRay *cl
   
   const RadxRay *ray = _ppiRayLoc[rayIndex].ray;
   if (ray == NULL) {
-    cerr << "    No ray data yet..." << endl;
-    cerr << "      active = " << _ppiRayLoc[rayIndex].active << endl;
-    cerr << "      master = " << _ppiRayLoc[rayIndex].master << endl;
-    cerr << "      startIndex = " << _ppiRayLoc[rayIndex].startIndex << endl;
-    cerr << "      endIndex = " << _ppiRayLoc[rayIndex].endIndex << endl;
     // no ray data yet
+    if (_params.debug) {
+      cerr << "    No ray data yet..." << endl;
+      cerr << "      active = " << _ppiRayLoc[rayIndex].active << endl;
+      cerr << "      master = " << _ppiRayLoc[rayIndex].master << endl;
+      cerr << "      startIndex = " << _ppiRayLoc[rayIndex].startIndex << endl;
+      cerr << "      endIndex = " << _ppiRayLoc[rayIndex].endIndex << endl;
+    }
     return;
   }
 
@@ -1424,35 +1427,6 @@ void PolarManager::_locationClicked(double xkm, double ykm,
     cerr << "*** Entering PolarManager::_locationClicked()" << endl;
   }
   
-  // find the relevant ray
-
-  // double azDeg = 0.0;
-  // if (xkm != 0 || ykm != 0) {
-  //   azDeg = atan2(xkm, ykm) * RAD_TO_DEG;
-  //   if (azDeg < 0) {
-  //     azDeg += 360.0;
-  //   }
-  // }
-  // if (_params.debug) {
-  //   cerr << "    azDeg = " << azDeg << endl;
-  // }
-  
-  // int rayIndex = (int) (azDeg * RayLoc::RAY_LOC_RES);
-  // if (_params.debug) {
-  //   cerr << "    rayIndex = " << rayIndex << endl;
-  // }
-  
-  // const RadxRay *ray = ray_loc[rayIndex].ray;
-  // if (ray == NULL) {
-  //   cerr << "    No ray data yet..." << endl;
-  //   cerr << "      active = " << ray_loc[rayIndex].active << endl;
-  //   cerr << "      master = " << ray_loc[rayIndex].master << endl;
-  //   cerr << "      startIndex = " << ray_loc[rayIndex].startIndex << endl;
-  //   cerr << "      endIndex = " << ray_loc[rayIndex].endIndex << endl;
-  //   // no ray data yet
-  //   return;
-  // }
-
   double range = sqrt(xkm * xkm + ykm * ykm);
   int gate = (int) 
     ((range - ray->getStartRangeKm()) / ray->getGateSpacingKm() + 0.5);
@@ -1465,14 +1439,10 @@ void PolarManager::_locationClicked(double xkm, double ykm,
 
   if (_params.debug) {
     cerr << "Clicked on location: xkm, ykm: " << xkm << ", " << ykm << endl;
-    // cerr << "  az, index: " << azDeg << ", " << rayIndex << endl;
     cerr << "  range, gate: " << range << ", " << gate << endl;
     cerr << "  az, el from ray: "
          << ray->getAzimuthDeg() << ", "
          << ray->getElevationDeg() << endl;
-    // cerr << "  az, el from closestRay: "
-    //      << closestRay->getAzimuthDeg() << ", "
-    //      << closestRay->getElevationDeg() << endl;
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       ray->print(cerr);
     }
@@ -2147,6 +2117,97 @@ void PolarManager::_howto()
   QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
 }
 
+////////////////////////////////////////////////////////
+// change start time
+
+void PolarManager::_goBack1()
+{
+  _archiveStartTime -= 1 * _archiveScanIntervalSecs;
+  _setGuiFromStartTime();
+}
+
+void PolarManager::_goBackNScans()
+{
+  _archiveStartTime -= _nArchiveScans * _archiveScanIntervalSecs;
+  _setGuiFromStartTime();
+}
+
+void PolarManager::_goFwd1()
+{
+  _archiveStartTime += 1 * _archiveScanIntervalSecs;
+  _setGuiFromStartTime();
+}
+
+void PolarManager::_goFwdNScans()
+{
+  _archiveStartTime += _nArchiveScans * _archiveScanIntervalSecs;
+  _setGuiFromStartTime();
+}
+
+////////////////////////////////////////////////////////
+// set for pending archive retrieval
+
+void PolarManager::_setArchiveRetrievalPending()
+{
+  _archiveRetrievalPending = true;
+}
+
+/////////////////////////////////////
+// clear display widgets
+
+void PolarManager::_clear()
+{
+  if (_ppi) {
+    _ppi->clear();
+  }
+  if (_rhi) {
+    _rhi->clear();
+  }
+}
+
+/////////////////////////////////////
+// set archive mode
+
+void PolarManager::_setArchiveMode(bool state)
+{
+  _archiveMode = state;
+  if (_archiveTimeBox) {
+    _archiveTimeBox->setEnabled(state);
+  }
+  if (_ppi) {
+    _ppi->setArchiveMode(state);
+  }
+  if (_rhi) {
+    _rhi->setArchiveMode(state);
+  }
+}
+
+/////////////////////////////////////
+// activate realtime rendering
+
+void PolarManager::_activateRealtimeRendering()
+{
+  if (_ppi) {
+    _ppi->activateRealtimeRendering();
+  }
+  if (_rhi) {
+    _rhi->activateRealtimeRendering();
+  }
+}
+
+/////////////////////////////////////
+// activate archive rendering
+
+void PolarManager::_activateArchiveRendering()
+{
+  if (_ppi) {
+    _ppi->activateArchiveRendering();
+  }
+  if (_rhi) {
+    _rhi->activateArchiveRendering();
+  }
+}
+
 /////////////////////////////////////////////////////
 // save image to file
 // If interactive is true, use dialog boxes to indicate errors or report
@@ -2295,96 +2356,5 @@ void PolarManager::_saveImageToFile(bool interactive)
 
 #endif
 
-}
-
-////////////////////////////////////////////////////////
-// change start time
-
-void PolarManager::_goBack1()
-{
-  _archiveStartTime -= 1 * _archiveScanIntervalSecs;
-  _setGuiFromStartTime();
-}
-
-void PolarManager::_goBackNScans()
-{
-  _archiveStartTime -= _nArchiveScans * _archiveScanIntervalSecs;
-  _setGuiFromStartTime();
-}
-
-void PolarManager::_goFwd1()
-{
-  _archiveStartTime += 1 * _archiveScanIntervalSecs;
-  _setGuiFromStartTime();
-}
-
-void PolarManager::_goFwdNScans()
-{
-  _archiveStartTime += _nArchiveScans * _archiveScanIntervalSecs;
-  _setGuiFromStartTime();
-}
-
-////////////////////////////////////////////////////////
-// set for pending archive retrieval
-
-void PolarManager::_setArchiveRetrievalPending()
-{
-  _archiveRetrievalPending = true;
-}
-
-/////////////////////////////////////
-// clear display widgets
-
-void PolarManager::_clear()
-{
-  if (_ppi) {
-    _ppi->clear();
-  }
-  if (_rhi) {
-    _rhi->clear();
-  }
-}
-
-/////////////////////////////////////
-// set archive mode
-
-void PolarManager::_setArchiveMode(bool state)
-{
-  _archiveMode = state;
-  if (_archiveTimeBox) {
-    _archiveTimeBox->setEnabled(state);
-  }
-  if (_ppi) {
-    _ppi->setArchiveMode(state);
-  }
-  if (_rhi) {
-    _rhi->setArchiveMode(state);
-  }
-}
-
-/////////////////////////////////////
-// activate realtime rendering
-
-void PolarManager::_activateRealtimeRendering()
-{
-  if (_ppi) {
-    _ppi->activateRealtimeRendering();
-  }
-  if (_rhi) {
-    _rhi->activateRealtimeRendering();
-  }
-}
-
-/////////////////////////////////////
-// activate archive rendering
-
-void PolarManager::_activateArchiveRendering()
-{
-  if (_ppi) {
-    _ppi->activateArchiveRendering();
-  }
-  if (_rhi) {
-    _rhi->activateArchiveRendering();
-  }
 }
 
