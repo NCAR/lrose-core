@@ -530,6 +530,7 @@ void RhiWidget::_drawOverlays(QPainter &painter)
     legends.push_back(text);
     
     painter.save();
+    painter.setPen(Qt::yellow);
     painter.setBrush(Qt::black);
     painter.setBackgroundMode(Qt::OpaqueMode);
 
