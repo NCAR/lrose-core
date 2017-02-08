@@ -138,7 +138,7 @@ void RhiWidget::addBeam(const RadxRay *ray,
     _sumAz += ray->getAzimuthDeg();
     _nRays++;
     _meanAz = _sumAz / _nRays;
-    
+
   } // if (_isArchiveMode) 
     
   // Render the beam data.
@@ -342,7 +342,7 @@ void RhiWidget::_setGridSpacing()
 }
 
 /*************************************************************************
- * _setGridSpacing()
+ * Get spacing for a given distance range
  */
 
 double RhiWidget::_getSpacing(double range)
@@ -731,4 +731,128 @@ void RhiWidget::_clearRayOverlap(const int startIndex,
   } /* endwhile - i */
   
 }
+
+/*************************************************************************
+ * _refreshImages()
+ */
+
+void RhiWidget::_refreshImages()
+{
+
+  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
+    
+    FieldRenderer *field = _fieldRenderers[ifield];
+    
+    // If needed, create new image for this field
+    
+    if (size() != field->getImage()->size()) {
+      field->createImage(width(), height());
+    }
+
+    // clear image
+
+    field->getImage()->fill(_backgroundBrush.color().rgb());
+    
+    // set up rendering details
+
+    field->setTransform(_zoomTransform);
+    
+    // Add pointers to the beams to be rendered
+    
+    if (ifield == _selectedField || field->isBackgroundRendered()) {
+
+      std::vector< RhiBeam* >::iterator beam;
+      for (beam = _rhiBeams.begin(); beam != _rhiBeams.end(); ++beam) {
+	(*beam)->setBeingRendered(ifield, true);
+	field->addBeam(*beam);
+      }
+      
+    }
+    
+  } // ifield
+  
+  // do the rendering
+
+  _performRendering();
+
+  update();
+}
+
+
+/*************************************************************************
+ * clear()
+ */
+
+void RhiWidget::clear()
+{
+
+  // Clear out the beam array
+  
+  for (size_t i = 0; i < _rhiBeams.size(); i++) {
+    delete _rhiBeams[i];
+  }
+  _rhiBeams.clear();
+  _pointClicked = false;
+  
+  // Now rerender the images
+  
+  _refreshImages();
+  
+}
+
+
+/*************************************************************************
+ * refresh()
+ */
+
+void RhiWidget::refresh()
+{
+  _refreshImages();
+}
+
+/*************************************************************************
+ * unzoom the view
+ */
+
+void RhiWidget::unzoomView()
+{
+  
+  _zoomWorld = _fullWorld;
+  _isZoomed = false;
+  _setTransform(_zoomWorld.getTransform());
+  _setGridSpacing();
+  _refreshImages();
+  // _updateRenderers();
+
+}
+
+/*************************************************************************
+ * resize()
+ */
+
+void RhiWidget::resize(int width, int height)
+{
+  
+  setGeometry(0, 0, width, height);
+  _resetWorld(width, height);
+
+}
+
+/*************************************************************************
+ * paintEvent()
+ */
+
+void RhiWidget::paintEvent(QPaintEvent *event)
+{
+
+  QPainter painter(this);
+  painter.save();
+  painter.eraseRect(0, 0, width(), height());
+  _zoomWorld.setClippingOn(painter);
+  painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
+  painter.restore();
+  _drawOverlays(painter);
+
+}
+
 

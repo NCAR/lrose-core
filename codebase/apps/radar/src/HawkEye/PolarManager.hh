@@ -154,7 +154,7 @@ private:
   // menus
 
   QMenu *_fileMenu;
-  QMenu *_viewMenu;
+  QMenu *_overlaysMenu;
   QMenu *_helpMenu;
 
   // actions

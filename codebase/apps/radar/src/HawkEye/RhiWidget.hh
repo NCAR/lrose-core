@@ -112,6 +112,41 @@ signals:
 
   void severalBeamsProcessed();
   
+  //////////////
+  // Qt slots //
+  //////////////
+
+ public slots:
+
+  /**
+   * @brief Reset the view to unzoomed.
+   */
+
+  void unzoomView();
+
+  /**
+   * @brief Clear the data in the view.
+   */
+
+  void clear();
+
+  /*************************************************************************
+   * refresh()
+   */
+  
+  void refresh();
+
+  /**
+   * @brief Resize the window.
+   *
+   */
+
+  void resize(int width, int height);
+
+  // paint event
+
+  void paintEvent(QPaintEvent *event);
+
 protected:
 
   ///////////////////////
@@ -208,6 +243,11 @@ protected:
 
   void _clearRayOverlap(const int startIndex,
                         const int endIndex);
+
+  // overide refresh images
+
+  void _refreshImages();
+
 };
 
 #endif

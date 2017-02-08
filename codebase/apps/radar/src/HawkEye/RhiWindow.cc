@@ -153,21 +153,21 @@ void RhiWindow::_createActions(RhiWidget *rhi)
   _ringsAct = new QAction(tr("Range Rings"), this);
   _ringsAct->setStatusTip(tr("Turn range rings on/off"));
   _ringsAct->setCheckable(true);
-  _ringsAct->setChecked(true);
+  _ringsAct->setChecked(_params.rhi_range_rings_on_at_startup);
   connect(_ringsAct, SIGNAL(triggered(bool)),
 	  rhi, SLOT(setRings(bool)));
 
   _gridsAct = new QAction(tr("Grids"), this);
   _gridsAct->setStatusTip(tr("Turn range grids on/off"));
   _gridsAct->setCheckable(true);
-  _gridsAct->setChecked(false);
+  _gridsAct->setChecked(_params.rhi_grids_on_at_startup);
   connect(_gridsAct, SIGNAL(triggered(bool)),
 	  rhi, SLOT(setGrids(bool)));
 
   _azLinesAct = new QAction(tr("Az Lines"), this);
   _azLinesAct->setStatusTip(tr("Turn range azLines on/off"));
   _azLinesAct->setCheckable(true);
-  _azLinesAct->setChecked(true);
+  _azLinesAct->setChecked(_params.rhi_elevation_lines_on_at_startup);
   connect(_azLinesAct, SIGNAL(triggered(bool)),
 	  rhi, SLOT(setAngleLines(bool)));
 
@@ -201,11 +201,11 @@ void RhiWindow::_unzoom()
 
 void RhiWindow::_createMenus()
 {
-  _viewMenu = menuBar()->addMenu(tr("&View"));
-  _viewMenu->addAction(_ringsAct);
-  _viewMenu->addAction(_gridsAct);
-  _viewMenu->addAction(_azLinesAct);
-  _viewMenu->addSeparator();
+  _overlaysMenu = menuBar()->addMenu(tr("&Overlays"));
+  _overlaysMenu->addAction(_ringsAct);
+  _overlaysMenu->addAction(_gridsAct);
+  _overlaysMenu->addAction(_azLinesAct);
+  _overlaysMenu->addSeparator();
 
   menuBar()->addAction(_unzoomAct);
 }

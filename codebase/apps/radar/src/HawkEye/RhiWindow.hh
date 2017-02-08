@@ -200,7 +200,7 @@ protected:
    * @brief The View menu.
    */
 
-  QMenu *_viewMenu;
+  QMenu *_overlaysMenu;
 
   /**
    * @brief The status panel frame.
