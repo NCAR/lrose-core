@@ -836,6 +836,7 @@ void RhiWidget::resize(int width, int height)
   
   setGeometry(0, 0, width, height);
   _resetWorld(width, height);
+  _refreshImages();
 
 }
 
