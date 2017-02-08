@@ -115,9 +115,6 @@ private:
   RayLoc* _ppiRayLoc; // for use, allows negative indices at north line
   RayLoc* _ppiRays; // for new and delete
 
-  RayLoc* _rhiRayLoc; // for use, allows negative indices at north line
-  RayLoc* _rhiRays; // for new and delete
-
   // input data
   
   RadxTime _readerRayTime;
@@ -272,7 +269,7 @@ private slots:
   void _rhiLocationClicked(double xkm, double ykm,
                            const RadxRay *closestRay);
   void _locationClicked(double xkm, double ykm,
-                        RayLoc *ray_loc, const RadxRay *closestRay);
+                        RayLoc *ray_loc, const RadxRay *ray);
 
   void _cancelTimeControllerChanges();
 

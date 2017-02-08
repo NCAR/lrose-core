@@ -60,7 +60,7 @@ RhiWindow::RhiWindow(QFrame *rhiParentFrame,
 
   // create RHI widget
   
-  _rhiWidget = new RhiWidget(_rhiParentFrame, *manager,
+  _rhiWidget = new RhiWidget(_rhiParentFrame, *manager, *this,
                              _params, _platform, _fields.size());
   _rhiWidget->setGrids(_params.rhi_grids_on_at_startup);
   _rhiWidget->setRings(_params.rhi_range_rings_on_at_startup);
@@ -173,9 +173,27 @@ void RhiWindow::_createActions(RhiWidget *rhi)
 
   _unzoomAct = new QAction(tr("Unzoom"), this);
   _unzoomAct->setStatusTip(tr("Unzoom to original view"));
-  connect(_unzoomAct, SIGNAL(triggered()), rhi, SLOT(unzoomView()));
+  _unzoomAct->setEnabled(false);
+  connect(_unzoomAct, SIGNAL(triggered()), this, SLOT(_unzoom()));
+
 }
 
+//////////////////////////////////////////////////
+// enable the zoom button - called by RhiWidget
+
+void RhiWindow::enableZoomButton() const
+{
+  _unzoomAct->setEnabled(true);
+}
+
+////////////////////////////////
+// unzoom display
+
+void RhiWindow::_unzoom()
+{
+  _rhiWidget->unzoomView();
+  _unzoomAct->setEnabled(false);
+}
 
 /*************************************************************************
  * _createMenus()

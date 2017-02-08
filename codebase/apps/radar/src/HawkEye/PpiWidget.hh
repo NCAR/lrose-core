@@ -92,6 +92,23 @@ class DLL_EXPORT PpiWidget : public PolarWidget
 
  protected:
 
+  // are we in archive mode? and if so are we at the start of a sweep?
+
+  bool _isArchiveMode;
+  bool _isStartOfSweep;
+
+  // angles and times in archive mode
+
+  RadxTime _archiveStartTime;
+  RadxTime _archiveEndTime;
+  double _meanElev;
+  double _sumElev;
+  double _nRays;
+
+   // override mouse release event
+
+  virtual void mouseReleaseEvent(QMouseEvent* event);
+
   // get ray closest to click point
 
   virtual const RadxRay *_getClosestRay(double x_km, double y_km);
@@ -120,19 +137,6 @@ class DLL_EXPORT PpiWidget : public PolarWidget
                        int text_x, int text_y,
                        int flags);
     
-  // are we in archive mode? and if so are we at the start of a sweep?
-
-  bool _isArchiveMode;
-  bool _isStartOfSweep;
-
-  // angles and times in archive mode
-
-  RadxTime _archiveStartTime;
-  RadxTime _archiveEndTime;
-  double _meanElev;
-  double _sumElev;
-  double _nRays;
-
 };
 
 #endif

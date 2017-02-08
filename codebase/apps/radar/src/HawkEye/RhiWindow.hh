@@ -122,6 +122,9 @@ public:
     setWindowTitle(tr(window_title.c_str()));
   }
   
+  // enable the zoom button - called by RhiWidget
+  
+  void enableZoomButton() const;
 
 public slots:
 
@@ -136,7 +139,12 @@ public slots:
 
   void resize();
 
-
+private slots:
+  
+  // override
+  
+  virtual void _unzoom();
+  
 signals:
 
   ////////////////

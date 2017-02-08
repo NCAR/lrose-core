@@ -48,6 +48,8 @@ public:
   const RadxRay *ray;
 
   RayLoc() {
+    startIndex = -1;
+    endIndex = -1;
     master = false;
     active = false;
     ray = NULL;
@@ -60,17 +62,19 @@ public:
       }
     }
     ray = NULL;
+    startIndex = -1;
+    endIndex = -1;
     master = false;
     active = false;
   }
 
   // ray locator
-  // we use a locator with data every 1/100th degree
+  // we use a locator with data every 1/10th degree
   // around the 360 degree circle
   
   static const int RAY_LOC_RES = 10;
-  static const int RAY_LOC_N = 4000;
-  static const int RAY_LOC_OFFSET = 300;
+  static const int RAY_LOC_N = 4800;
+  static const int RAY_LOC_OFFSET = 600;
   
 };
 

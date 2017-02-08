@@ -22,23 +22,26 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
-#include "RhiWidget.hh"
 #include "PolarManager.hh"
+#include "RhiWidget.hh"
+#include "RhiWindow.hh"
 #include <toolsa/toolsa_macros.h>
 
 using namespace std;
 
-
 RhiWidget::RhiWidget(QWidget* parent,
                      const PolarManager &manager,
+                     const RhiWindow &rhiWindow,
                      const Params &params,
                      const RadxPlatform &platform,
                      size_t n_fields) :
         PolarWidget(parent, manager, params, platform, n_fields),
+        _rhiWindow(rhiWindow),
         _beamsProcessed(0)
+
 {
   
-  _rhiRays = NULL;
+  _locArray = NULL;
   _prevElev = -9999.0;
 
   if (_params.rhi_display_180_degrees) {
@@ -61,8 +64,19 @@ RhiWidget::RhiWidget(QWidget* parent,
 
   // set up ray locators
 
-  _rhiRays = new RayLoc[RayLoc::RAY_LOC_N];
-  _rhiRayLoc = _rhiRays + RayLoc::RAY_LOC_OFFSET;
+  _locArray = new RayLoc[RayLoc::RAY_LOC_N];
+  _rayLoc = _locArray + RayLoc::RAY_LOC_OFFSET;
+
+  // archive mode
+
+  _isArchiveMode = false;
+  _isStartOfSweep = true;
+
+  _archiveStartTime.set(0);
+  _archiveEndTime.set(0);
+  _meanAz = -9999.0;
+  _sumAz = 0.0;
+  _nRays = 0.0;
 
 }
 
@@ -81,8 +95,8 @@ RhiWidget::~RhiWidget()
   }
   _rhiBeams.clear();
 
-  if (_rhiRays) {
-    delete[] _rhiRays;
+  if (_locArray) {
+    delete[] _locArray;
   }
 
 }
@@ -97,9 +111,10 @@ void RhiWidget::addBeam(const RadxRay *ray,
                         const std::vector< DisplayField* > &fields)
 {
 
-  // compute the angle limits
+  // compute the angle limits, and store the location of this ray
 
   _computeAngleLimits(ray);
+  _storeRayLoc(ray);
 
   // Just add the beam to the beam list.
 
@@ -108,6 +123,24 @@ void RhiWidget::addBeam(const RadxRay *ray,
                               _nFields, _startElev, _endElev);
   _rhiBeams.push_back(beam);
 
+  // compute angles and times in archive mode
+  
+  if (_isArchiveMode) {
+
+    if (_isStartOfSweep) {
+      _archiveStartTime = ray->getRadxTime();
+      _meanAz = -9999.0;
+      _sumAz = 0.0;
+      _nRays = 0.0;
+      _isStartOfSweep = false;
+    }
+    _archiveEndTime = ray->getRadxTime();
+    _sumAz += ray->getAzimuthDeg();
+    _nRays++;
+    _meanAz = _sumAz / _nRays;
+    
+  } // if (_isArchiveMode) 
+    
   // Render the beam data.
   
   // Set up the brushes for all of the fields in this beam.  This can be
@@ -130,45 +163,6 @@ void RhiWidget::addBeam(const RadxRay *ray,
   
   _performRendering();
 
-}
-
-///////////////////////////////////////////////////////////
-// Compute the limits of the ray angles
-
-void RhiWidget::_computeAngleLimits(const RadxRay *ray)
-  
-{
-  
-  double beamWidth = _platform.getRadarBeamWidthDegV();
-  double elev = ray->getElevationDeg();
-
-  // Determine the extent of this ray
-  
-  double elevDiff = Radx::computeAngleDiff(elev, _prevElev);
-  if (ray->getIsIndexed() || fabs(elevDiff) > beamWidth * 2.0) {
-
-    double halfAngle = ray->getAngleResDeg() / 2.0;
-    _startElev = elev - halfAngle;
-    _endElev = elev + halfAngle;
-
-  } else {
-
-    double maxHalfAngle = beamWidth / 2.0;
-    double prevOffset = maxHalfAngle;
-      
-    double halfElevDiff = elevDiff / 2.0;
-	
-    if (prevOffset > halfElevDiff) {
-	prevOffset = halfElevDiff;
-    }
-      
-    _startElev = elev - prevOffset;
-    _endElev = elev + maxHalfAngle;
-
-  }
-
-  _prevElev = elev;
-    
 }
 
 /*************************************************************************
@@ -229,14 +223,88 @@ void RhiWidget::configureRange(double max_range)
   
 }
 
+/*************************************************************************
+ * mouseReleaseEvent()
+ */
+
+void RhiWidget::mouseReleaseEvent(QMouseEvent *e)
+{
+
+  _pointClicked = false;
+
+  QRect rgeom = _rubberBand->geometry();
+
+  // If the mouse hasn't moved much, assume we are clicking rather than
+  // zooming
+
+  QPointF clickPos(e->pos());
+  
+  _mouseReleaseX = clickPos.x();
+  _mouseReleaseY = clickPos.y();
+
+  // get click location in world coords
+
+  if (rgeom.width() <= 20) {
+    
+    // Emit a signal to indicate that the click location has changed
+    
+    _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
+    _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
+
+    double x_km = _worldReleaseX;
+    double y_km = _worldReleaseY;
+    _pointClicked = true;
+
+    // get ray closest to click point
+
+    const RadxRay *closestRay = _getClosestRay(x_km, y_km);
+
+    // emit signal
+
+    emit locationClicked(x_km, y_km, closestRay);
+  
+  } else {
+
+    // mouse moved more than 20 pixels, so a zoom occurred
+    
+    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+
+    _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
+    _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
+
+    _zoomWorld.set(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
+
+    _setTransform(_zoomWorld.getTransform());
+
+    _setGridSpacing();
+
+    // enable unzoom button
+
+    _rhiWindow.enableZoomButton();
+    
+    // Update the window in the renderers
+    
+    _refreshImages();
+
+  }
+    
+  // hide the rubber band
+
+  _rubberBand->hide();
+  update();
+
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // get ray closest to click point
 
-const RadxRay *RhiWidget::_getClosestRay(double x_km, double y_km)
+const RadxRay *RhiWidget::_getClosestRay(double xx, double yy)
 
 {
 
-  double clickEl = atan2(y_km, x_km) * DEG_TO_RAD;
+  _beamHt.setInstrumentHtKm(_platform.getAltitudeKm());
+  double clickEl = _beamHt.computeElevationDeg(yy, xx);
   
   double minDiff = 1.0e99;
   const RadxRay *closestRay = NULL;
@@ -440,4 +508,227 @@ void RhiWidget::_drawOverlays(QPainter &painter)
   const DisplayField &field = _manager.getSelectedField();
   _zoomWorld.drawColorScale(field.getColorMap(), painter);
   
+  // add legends with time, field name and elevation angle
+
+  if (_archiveMode) {
+    
+    vector<string> legends;
+    char text[1024];
+    
+    sprintf(text, "Start time: %s", _archiveStartTime.asString(3).c_str());
+    legends.push_back(text);
+    
+    string fieldName =
+      _fieldRenderers[_selectedField]->getParams().label;
+    sprintf(text, "Field: %s", fieldName.c_str());
+    legends.push_back(text);
+    
+    sprintf(text, "Azimuth(deg): %.3f", _meanAz);
+    legends.push_back(text);
+
+    sprintf(text, "NRays: %g", _nRays);
+    legends.push_back(text);
+    
+    painter.save();
+    painter.setBrush(Qt::black);
+    painter.setBackgroundMode(Qt::OpaqueMode);
+
+    switch (_params.ppi_main_legend_pos) {
+      case Params::LEGEND_TOP_LEFT:
+        _zoomWorld.drawLegendsTopLeft(painter, legends);
+        break;
+      case Params::LEGEND_TOP_RIGHT:
+        _zoomWorld.drawLegendsTopRight(painter, legends);
+        break;
+      case Params::LEGEND_BOTTOM_LEFT:
+        _zoomWorld.drawLegendsBottomLeft(painter, legends);
+        break;
+      case Params::LEGEND_BOTTOM_RIGHT:
+        _zoomWorld.drawLegendsBottomRight(painter, legends);
+        break;
+      default: {}
+    }
+
+    // painter.setBrush(Qt::white);
+    // painter.setBackgroundMode(Qt::TransparentMode);
+    painter.restore();
+
+  } // if (_archiveMode) {
+
 }
+
+///////////////////////////////////////////////////////////
+// Compute the limits of the ray angles
+
+void RhiWidget::_computeAngleLimits(const RadxRay *ray)
+  
+{
+  
+  double beamWidth = _platform.getRadarBeamWidthDegV();
+  double elev = ray->getElevationDeg();
+
+  // Determine the extent of this ray
+  
+  double elevDiff = Radx::computeAngleDiff(elev, _prevElev);
+  if (ray->getIsIndexed() || fabs(elevDiff) > beamWidth * 2.0) {
+
+    double halfAngle = ray->getAngleResDeg() / 2.0;
+    _startElev = elev - halfAngle;
+    _endElev = elev + halfAngle;
+
+  } else {
+
+    double maxHalfAngle = beamWidth / 2.0;
+    double prevOffset = maxHalfAngle;
+      
+    double halfElevDiff = elevDiff / 2.0;
+	
+    if (prevOffset > halfElevDiff) {
+	prevOffset = halfElevDiff;
+    }
+      
+    _startElev = elev - prevOffset;
+    _endElev = elev + maxHalfAngle;
+
+  }
+
+  _prevElev = elev;
+    
+}
+
+///////////////////////////////////////////////////////////
+// store ray location
+
+void RhiWidget::_storeRayLoc(const RadxRay *ray)
+{
+
+  int startIndex = (int) (_startElev * RayLoc::RAY_LOC_RES);
+  int endIndex = (int) (_endElev * RayLoc::RAY_LOC_RES + 1);
+
+  // Clear out any rays in the locations list that are overlapped by the
+  // new ray
+    
+  _clearRayOverlap(startIndex, endIndex);
+  
+  // Set the locations associated with this ray
+
+  for (int ii = startIndex; ii <= endIndex; ii++) {
+    _rayLoc[ii].ray = ray;
+    _rayLoc[ii].active = true;
+    _rayLoc[ii].master = false;
+    _rayLoc[ii].startIndex = startIndex;
+    _rayLoc[ii].endIndex = endIndex;
+  }
+
+  // indicate which ray is the master
+  // i.e. it is responsible for ray memory
+    
+  int midIndex = (int) (ray->getElevationDeg() * RayLoc::RAY_LOC_RES);
+  _rayLoc[midIndex].master = true;
+  ray->addClient();
+
+}
+
+///////////////////////////////////////////////////////////
+// clear any locations that are overlapped by the given ray
+
+void RhiWidget::_clearRayOverlap(const int startIndex,
+                                 const int endIndex)
+{
+  // Loop through the ray locations, clearing out old information
+
+  int i = startIndex;
+  
+  while (i <= endIndex)
+  {
+    RayLoc &loc = _rayLoc[i];
+    
+    // If this location isn't active, we can skip it
+
+    if (!loc.active)
+    {
+      ++i;
+      continue;
+    }
+    
+    int locStartIndex = loc.startIndex;
+    int locEndIndex = loc.endIndex;
+      
+    // If we get here, this location is active.  We now have 4 possible
+    // situations:
+
+    if (loc.startIndex < startIndex && loc.endIndex <= endIndex)
+    {
+      // The overlap area covers the end of the current beam.  Reduce the
+      // current beam down to just cover the area before the overlap area.
+
+      for (int j = startIndex; j <= locEndIndex; ++j)
+      {
+	// If the master is in the overlap area, then it needs to be moved
+	// outside of this area
+
+	if (_rayLoc[j].master)
+	  _rayLoc[startIndex-1].master = true;
+	
+	_rayLoc[j].ray = NULL;
+	_rayLoc[j].active = false;
+	_rayLoc[j].master = false;
+      }
+
+      // Update the end indices for the remaining locations in the current
+      // beam
+
+      for (int j = locStartIndex; j < startIndex; ++j)
+	_rayLoc[j].endIndex = startIndex - 1;
+    }
+    else if (loc.startIndex < startIndex && loc.endIndex > endIndex)
+    {
+      // The current beam is bigger than the overlap area.  This should never
+      // happen, so go ahead and just clear out the locations for the current
+      // beam.
+
+      for (int j = locStartIndex; j <= locEndIndex; ++j)
+      {
+        _rayLoc[j].clear();
+      }
+    }
+    else if (loc.endIndex > endIndex)
+    {
+      // The overlap area covers the beginning of the current beam.  Reduce the
+      // current beam down to just cover the area after the overlap area.
+
+      for (int j = locStartIndex; j <= endIndex; ++j)
+      {
+	// If the master is in the overlap area, then it needs to be moved
+	// outside of this area
+
+	if (_rayLoc[j].master)
+	  _rayLoc[endIndex+1].master = true;
+	
+	_rayLoc[j].ray = NULL;
+	_rayLoc[j].active = false;
+	_rayLoc[j].master = false;
+      }
+
+      // Update the start indices for the remaining locations in the current
+      // beam
+
+      for (int j = endIndex + 1; j <= locEndIndex; ++j)
+	_rayLoc[j].startIndex = endIndex + 1;
+    }
+    else
+    {
+      // The current beam is completely covered by the overlap area.  Clear
+      // out all of the locations for the current beam.
+
+      for (int j = locStartIndex; j <= locEndIndex; ++j)
+      {
+        _rayLoc[j].clear();
+      }
+    }
+    
+    i = locEndIndex + 1;
+  } /* endwhile - i */
+  
+}
+

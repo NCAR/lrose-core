@@ -26,6 +26,9 @@
 
 #include "PolarWidget.hh"
 #include "RayLoc.hh"
+#include <radar/BeamHeight.hh>
+class PolarManager;
+class RhiWindow;
 
 // Widget representing an RHI scan.  Beams are added to the scan as they
 // are received.  The widget can be set up to display the RHI in a 90 degree
@@ -52,6 +55,7 @@ class DLL_EXPORT RhiWidget : public PolarWidget
 
   RhiWidget(QWidget* parent, 
             const PolarManager &manager,
+            const RhiWindow &rhiWindow,
             const Params &params,
             const RadxPlatform &platform,
             size_t n_fields);
@@ -85,9 +89,14 @@ class DLL_EXPORT RhiWidget : public PolarWidget
                const std::vector< std::vector< double > > &beam_data,
                const std::vector< DisplayField* > &fields);
 
-  // store ray locations
+  // get ray locations in RHI
 
-  // void storeRayLoc(const RadxRay *ray);
+  RayLoc *getRayLoc() { return _rayLoc; }
+  
+  // are we in archive mode? and if so are we at the start of a sweep?
+
+  void setArchiveMode(bool state) { _isArchiveMode = state; }
+  void setStartOfSweep(bool state) { _isStartOfSweep = state; }
 
 signals:
 
@@ -109,6 +118,21 @@ protected:
   // Protected members //
   ///////////////////////
 
+  const RhiWindow &_rhiWindow;
+
+  // are we in archive mode? and if so are we at the start of a sweep?
+
+  bool _isArchiveMode;
+  bool _isStartOfSweep;
+
+  // angles and times in archive mode
+
+  RadxTime _archiveStartTime;
+  RadxTime _archiveEndTime;
+  double _meanAz;
+  double _sumAz;
+  double _nRays;
+
   /**
    * @brief The maximum range of the beams, in km.  It affects the
    *        labelling of the range rings
@@ -126,15 +150,20 @@ protected:
 
   // ray locations
 
-  RayLoc* _rhiRayLoc;
-  RayLoc* _rhiRays; // for new and delete
+  RayLoc* _rayLoc;
+  RayLoc* _locArray; // for new and delete
+  BeamHeight _beamHt;
 
-  // angles for current ray
+  // computing angle limits of rays
 
   double _prevAz;
   double _prevElev;
   double _startElev;
   double _endElev;
+
+  // override mouse release event
+
+  virtual void mouseReleaseEvent(QMouseEvent* event);
 
   /**
    * @brief The number of RHI beams processed so far.  I have to keep track of
@@ -171,6 +200,14 @@ protected:
   
   void _computeAngleLimits(const RadxRay *ray);
   
+  // store ray location
+  
+  void _storeRayLoc(const RadxRay *ray);
+
+  // clear overlap with existing rays
+
+  void _clearRayOverlap(const int startIndex,
+                        const int endIndex);
 };
 
 #endif

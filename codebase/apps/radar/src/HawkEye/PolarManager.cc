@@ -98,7 +98,6 @@ PolarManager::PolarManager(const Params &params,
   _startAz = -9999.0;
   _endAz = -9999.0;
   _ppiRays = NULL;
-  _rhiRays = NULL;
   _rhiMode = false;
   _sweepIndex = 0;
 
@@ -132,9 +131,6 @@ PolarManager::PolarManager(const Params &params,
   _ppiRays = new RayLoc[RayLoc::RAY_LOC_N];
   _ppiRayLoc = _ppiRays + RayLoc::RAY_LOC_OFFSET;
 
-  _rhiRays = new RayLoc[RayLoc::RAY_LOC_N];
-  _rhiRayLoc = _rhiRays + RayLoc::RAY_LOC_OFFSET;
-
   // set up windows
 
   _setupWindows();
@@ -161,10 +157,6 @@ PolarManager::~PolarManager()
 
   if (_ppiRays) {
     delete[] _ppiRays;
-  }
-  
-  if (_rhiRays) {
-    delete[] _rhiRays;
   }
   
 }
@@ -600,6 +592,7 @@ void PolarManager::_createActions()
 
   _unzoomAct = new QAction(tr("Unzoom"), this);
   _unzoomAct->setStatusTip(tr("Unzoom to original view"));
+  _unzoomAct->setEnabled(false);
   connect(_unzoomAct, SIGNAL(triggered()), this, SLOT(_unzoom()));
 
   // refresh display
@@ -1369,32 +1362,10 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
 void PolarManager::_ppiLocationClicked(double xkm, double ykm, const RadxRay *closestRay)
 
 {
-  _locationClicked(xkm, ykm, _ppiRayLoc, closestRay);
-}
 
-///////////////////////////////////////////////////
-// respond to a change in click location on the RHI
-
-void PolarManager::_rhiLocationClicked(double xkm, double ykm, const RadxRay *closestRay)
-  
-{
-  _locationClicked(xkm, ykm, _rhiRayLoc, closestRay);
-}
-
-///////////////////////////////////////////////////
-// respond to a change in click location on one of the windows
-
-void PolarManager::_locationClicked(double xkm, double ykm,
-                                    RayLoc *ray_loc, const RadxRay *closestRay)
-
-{
-
-  if (_params.debug) {
-    cerr << "*** Entering PolarManager::_locationClicked()" << endl;
-  }
-  
   // find the relevant ray
-
+  // ignore closest ray sent in
+  
   double azDeg = 0.0;
   if (xkm != 0 || ykm != 0) {
     azDeg = atan2(xkm, ykm) * RAD_TO_DEG;
@@ -1411,16 +1382,72 @@ void PolarManager::_locationClicked(double xkm, double ykm,
     cerr << "    rayIndex = " << rayIndex << endl;
   }
   
-  const RadxRay *ray = ray_loc[rayIndex].ray;
+  const RadxRay *ray = _ppiRayLoc[rayIndex].ray;
   if (ray == NULL) {
     cerr << "    No ray data yet..." << endl;
-    cerr << "      active = " << ray_loc[rayIndex].active << endl;
-    cerr << "      master = " << ray_loc[rayIndex].master << endl;
-    cerr << "      startIndex = " << ray_loc[rayIndex].startIndex << endl;
-    cerr << "      endIndex = " << ray_loc[rayIndex].endIndex << endl;
+    cerr << "      active = " << _ppiRayLoc[rayIndex].active << endl;
+    cerr << "      master = " << _ppiRayLoc[rayIndex].master << endl;
+    cerr << "      startIndex = " << _ppiRayLoc[rayIndex].startIndex << endl;
+    cerr << "      endIndex = " << _ppiRayLoc[rayIndex].endIndex << endl;
     // no ray data yet
     return;
   }
+
+  _locationClicked(xkm, ykm, _ppiRayLoc, ray);
+
+}
+
+///////////////////////////////////////////////////
+// respond to a change in click location on the RHI
+
+void PolarManager::_rhiLocationClicked(double xkm, double ykm, const RadxRay *closestRay)
+  
+{
+
+  _locationClicked(xkm, ykm, _rhi->getRayLoc(), closestRay);
+
+}
+
+////////////////////////////////////////////////////////////////////////
+// respond to a change in click location on one of the windows
+
+void PolarManager::_locationClicked(double xkm, double ykm,
+                                    RayLoc *ray_loc, const RadxRay *ray)
+  
+{
+
+  if (_params.debug) {
+    cerr << "*** Entering PolarManager::_locationClicked()" << endl;
+  }
+  
+  // find the relevant ray
+
+  // double azDeg = 0.0;
+  // if (xkm != 0 || ykm != 0) {
+  //   azDeg = atan2(xkm, ykm) * RAD_TO_DEG;
+  //   if (azDeg < 0) {
+  //     azDeg += 360.0;
+  //   }
+  // }
+  // if (_params.debug) {
+  //   cerr << "    azDeg = " << azDeg << endl;
+  // }
+  
+  // int rayIndex = (int) (azDeg * RayLoc::RAY_LOC_RES);
+  // if (_params.debug) {
+  //   cerr << "    rayIndex = " << rayIndex << endl;
+  // }
+  
+  // const RadxRay *ray = ray_loc[rayIndex].ray;
+  // if (ray == NULL) {
+  //   cerr << "    No ray data yet..." << endl;
+  //   cerr << "      active = " << ray_loc[rayIndex].active << endl;
+  //   cerr << "      master = " << ray_loc[rayIndex].master << endl;
+  //   cerr << "      startIndex = " << ray_loc[rayIndex].startIndex << endl;
+  //   cerr << "      endIndex = " << ray_loc[rayIndex].endIndex << endl;
+  //   // no ray data yet
+  //   return;
+  // }
 
   double range = sqrt(xkm * xkm + ykm * ykm);
   int gate = (int) 
@@ -1434,14 +1461,14 @@ void PolarManager::_locationClicked(double xkm, double ykm,
 
   if (_params.debug) {
     cerr << "Clicked on location: xkm, ykm: " << xkm << ", " << ykm << endl;
-    cerr << "  az, index: " << azDeg << ", " << rayIndex << endl;
+    // cerr << "  az, index: " << azDeg << ", " << rayIndex << endl;
     cerr << "  range, gate: " << range << ", " << gate << endl;
-    cerr << "  az, el from rayLoc: "
+    cerr << "  az, el from ray: "
          << ray->getAzimuthDeg() << ", "
          << ray->getElevationDeg() << endl;
-    cerr << "  az, el from closestRay: "
-         << closestRay->getAzimuthDeg() << ", "
-         << closestRay->getElevationDeg() << endl;
+    // cerr << "  az, el from closestRay: "
+    //      << closestRay->getAzimuthDeg() << ", "
+    //      << closestRay->getElevationDeg() << endl;
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       ray->print(cerr);
     }

@@ -252,6 +252,81 @@ void PpiWidget::configureRange(double max_range)
   
 }
 
+
+/*************************************************************************
+ * mouseReleaseEvent()
+ */
+
+void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
+{
+
+  _pointClicked = false;
+
+  QRect rgeom = _rubberBand->geometry();
+
+  // If the mouse hasn't moved much, assume we are clicking rather than
+  // zooming
+
+  QPointF clickPos(e->pos());
+  
+  _mouseReleaseX = clickPos.x();
+  _mouseReleaseY = clickPos.y();
+
+  // get click location in world coords
+
+  if (rgeom.width() <= 20) {
+    
+    // Emit a signal to indicate that the click location has changed
+    
+    _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
+    _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
+
+    double x_km = _worldReleaseX;
+    double y_km = _worldReleaseY;
+    _pointClicked = true;
+
+    // get ray closest to click point
+
+    const RadxRay *closestRay = _getClosestRay(x_km, y_km);
+
+    // emit signal
+
+    emit locationClicked(x_km, y_km, closestRay);
+  
+  } else {
+
+    // mouse moved more than 20 pixels, so a zoom occurred
+    
+    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+
+    _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
+    _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
+
+    _zoomWorld.set(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
+
+    _setTransform(_zoomWorld.getTransform());
+
+    _setGridSpacing();
+
+    // enable unzoom button
+    
+    _manager.enableZoomButton();
+    
+    // Update the window in the renderers
+    
+    _refreshImages();
+
+  }
+    
+  // hide the rubber band
+
+  _rubberBand->hide();
+  update();
+
+}
+
+
 ////////////////////////////////////////////////////////////////////////////
 // get ray closest to click point
 
@@ -497,14 +572,6 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
   } // if (_archiveMode) {
 
-  // // add text for time and angles
-  
-  // cerr << "111111111111111 startTime: " << _archiveStartTime.asString(3) << endl;
-  // cerr << "111111111111111 endTime: " << _archiveEndTime.asString(3) << endl;
-  // cerr << "111111111111111 meanEl: " << _meanElev << endl;
-  
-  // _drawScreenText(painter, "TESTING", 20, 20, Qt::AlignLeft | Qt::AlignTop);
-  
 }
 
 ///////////////////////////////////////////////////////////////////////////
