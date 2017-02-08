@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for HawkEye
+ * TDRP params for ./HawkEye
  **********************************************************************/
 
 //======================================================================
@@ -675,6 +675,53 @@ ppi_display_type = PPI_FULL;
 
 ppi_aspect_ratio = 1;
 
+///////////// ppi_grids_on_at_startup /////////////////
+//
+// Set PPI grids overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+ppi_grids_on_at_startup = FALSE;
+
+///////////// ppi_range_rings_on_at_startup ///////////
+//
+// Set PPI range rings overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+ppi_range_rings_on_at_startup = TRUE;
+
+///////////// ppi_azimuth_lines_on_at_startup /////////
+//
+// Set PPI azimuth lines overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+ppi_azimuth_lines_on_at_startup = TRUE;
+
+///////////// ppi_main_legend_pos /////////////////////
+//
+// Position of main legend in the PPI plot window.
+//
+// This include time, field name and elevation angle.
+//
+//
+// Type: enum
+// Options:
+//     LEGEND_TOP_LEFT
+//     LEGEND_TOP_RIGHT
+//     LEGEND_BOTTOM_LEFT
+//     LEGEND_BOTTOM_RIGHT
+//
+
+ppi_main_legend_pos = LEGEND_TOP_LEFT;
+
 //======================================================================
 //
 // RHI MODE DISPLAY.
@@ -769,6 +816,16 @@ rhi_left_margin = 20;
 
 rhi_right_margin = 20;
 
+///////////// rhi_label_font_size /////////////////////
+//
+// Font size for labels on range rings (pixels).
+//
+//
+// Type: int
+//
+
+rhi_label_font_size = 8;
+
 ///////////// rhi_axis_tick_len ///////////////////////
 //
 // Length of ticks on axes (pixels).
@@ -839,6 +896,53 @@ rhi_max_height_km = 25;
 //
 
 rhi_color_scale_width = 40;
+
+///////////// rhi_grids_on_at_startup /////////////////
+//
+// Set RHI grids overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+rhi_grids_on_at_startup = TRUE;
+
+///////////// rhi_range_rings_on_at_startup ///////////
+//
+// Set RHI range rings overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+rhi_range_rings_on_at_startup = FALSE;
+
+///////////// rhi_elevation_lines_on_at_startup ///////
+//
+// Set RHI elevation lines overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+rhi_elevation_lines_on_at_startup = FALSE;
+
+///////////// rhi_main_legend_pos /////////////////////
+//
+// Position of main legend in the RHI plot window.
+//
+// This include time, field name and elevation angle.
+//
+//
+// Type: enum
+// Options:
+//     LEGEND_TOP_LEFT
+//     LEGEND_TOP_RIGHT
+//     LEGEND_BOTTOM_LEFT
+//     LEGEND_BOTTOM_RIGHT
+//
+
+rhi_main_legend_pos = LEGEND_TOP_LEFT;
 
 //======================================================================
 //

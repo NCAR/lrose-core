@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for HawkEye
+ * TDRP params for ./HawkEye
  **********************************************************************/
 
 //======================================================================
@@ -230,6 +230,19 @@ archive_n_scans = 12;
 
 archive_data_url = "$(HOME)/data/spol_data/sur";
 
+///////////// archive_retrieval_interval_secs /////////
+//
+// Time interval to search in archive mode (secs).
+//
+// We search for data within this margin, on either side of the required 
+//   time.
+//
+//
+// Type: int
+//
+
+archive_retrieval_interval_secs = 600;
+
 //======================================================================
 //
 // STATUS TO BE SHOWN IN GUI.
@@ -394,87 +407,6 @@ fields = {
     color_map = "snr.colors",
     shortcut = "8"
   }
-  // ,
-  // {
-  //   label = "SNRHX",
-  //   raw_name = "SNRHX",
-  //   filtered_name = "",
-  //   units = "dB",
-  //   color_map = "snr.colors",
-  //   shortcut = "9"
-  // }
-  // ,
-  // {
-  //   label = "SNRVX",
-  //   raw_name = "SNRVX",
-  //   filtered_name = "",
-  //   units = "dB",
-  //   color_map = "snr.colors",
-  //   shortcut = "a"
-  // }
-  // ,
-  // {
-  //   label = "DBMHC",
-  //   raw_name = "DBMHC",
-  //   filtered_name = "",
-  //   units = "dBm",
-  //   color_map = "dbm.colors",
-  //   shortcut = "b"
-  // }
-  // ,
-  // {
-  //   label = "DBMVC",
-  //   raw_name = "DBMVC",
-  //   filtered_name = "",
-  //   units = "dBm",
-  //   color_map = "dbm.colors",
-  //   shortcut = "c"
-  // }
-  // ,
-  // {
-  //   label = "DBMHX",
-  //   raw_name = "DBMHX",
-  //   filtered_name = "",
-  //   units = "dBm",
-  //   color_map = "dbm.colors",
-  //   shortcut = "d"
-  // }
-  // ,
-  // {
-  //   label = "DBMVX",
-  //   raw_name = "DBMVX",
-  //   filtered_name = "",
-  //   units = "dBm",
-  //   color_map = "dbm.colors",
-  //   shortcut = "e"
-  // }
-  // ,
-  // {
-  //   label = "NCP",
-  //   raw_name = "NCP",
-  //   filtered_name = "",
-  //   units = "",
-  //   color_map = "ncp.colors",
-  //   shortcut = "f"
-  // }
-  // ,
-  // {
-  //   label = "LDRH",
-  //   raw_name = "LDRH",
-  //   filtered_name = "",
-  //   units = "dB",
-  //   color_map = "ldr.colors",
-  //   shortcut = "h"
-  // }
-  // ,
-  // {
-  //   label = "LDRV",
-  //   raw_name = "LDRV",
-  //   filtered_name = "",
-  //   units = "dB",
-  //   color_map = "ldr.colors",
-  //   shortcut = "i"
-  // }
 };
 
 ///////////// background_render_mins //////////////////
@@ -743,6 +675,53 @@ ppi_display_type = PPI_FULL;
 
 ppi_aspect_ratio = 1;
 
+///////////// ppi_grids_on_at_startup /////////////////
+//
+// Set PPI grids overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+ppi_grids_on_at_startup = FALSE;
+
+///////////// ppi_range_rings_on_at_startup ///////////
+//
+// Set PPI range rings overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+ppi_range_rings_on_at_startup = TRUE;
+
+///////////// ppi_azimuth_lines_on_at_startup /////////
+//
+// Set PPI azimuth lines overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+ppi_azimuth_lines_on_at_startup = TRUE;
+
+///////////// ppi_main_legend_pos /////////////////////
+//
+// Position of main legend in the PPI plot window.
+//
+// This include time, field name and elevation angle.
+//
+//
+// Type: enum
+// Options:
+//     LEGEND_TOP_LEFT
+//     LEGEND_TOP_RIGHT
+//     LEGEND_BOTTOM_LEFT
+//     LEGEND_BOTTOM_RIGHT
+//
+
+ppi_main_legend_pos = LEGEND_TOP_LEFT;
+
 //======================================================================
 //
 // RHI MODE DISPLAY.
@@ -789,6 +768,94 @@ rhi_window_start_x = 1000;
 
 rhi_window_start_y = 0;
 
+///////////// rhi_top_margin //////////////////////////
+//
+// Height of top margin in RHI mode (pixels).
+//
+// Titles go in the top margin.
+//
+//
+// Type: int
+//
+
+rhi_top_margin = 20;
+
+///////////// rhi_bottom_margin ///////////////////////
+//
+// Height of bottom margin in RHI mode (pixels).
+//
+// Time scale goes in the bottom margin.
+//
+//
+// Type: int
+//
+
+rhi_bottom_margin = 20;
+
+///////////// rhi_left_margin /////////////////////////
+//
+// Width of left margin in RHI mode (pixels).
+//
+// Height scale goes in the left margin.
+//
+//
+// Type: int
+//
+
+rhi_left_margin = 20;
+
+///////////// rhi_right_margin ////////////////////////
+//
+// Width of right margin in RHI mode (pixels).
+//
+// Height scale goes in the right margin.
+//
+//
+// Type: int
+//
+
+rhi_right_margin = 20;
+
+///////////// rhi_label_font_size /////////////////////
+//
+// Font size for labels on range rings (pixels).
+//
+//
+// Type: int
+//
+
+rhi_label_font_size = 8;
+
+///////////// rhi_axis_tick_len ///////////////////////
+//
+// Length of ticks on axes (pixels).
+//
+//
+// Type: int
+//
+
+rhi_axis_tick_len = 7;
+
+///////////// rhi_n_ticks_ideal ///////////////////////
+//
+// Ideal number of ticks on axes.
+//
+//
+// Type: int
+//
+
+rhi_n_ticks_ideal = 7;
+
+///////////// rhi_text_margin /////////////////////////
+//
+// Margin around some text (pixels).
+//
+//
+// Type: int
+//
+
+rhi_text_margin = 5;
+
 ///////////// rhi_display_180_degrees /////////////////
 //
 // Flag indicating to display full 180 degrees in RHI window. If set to 
@@ -802,13 +869,80 @@ rhi_display_180_degrees = FALSE;
 
 ///////////// rhi_aspect_ratio ////////////////////////
 //
-// Aspect ratio (width/height) of PPI window.
+// Aspect ratio (width/height) of RHI window.
 //
 //
 // Type: double
 //
 
 rhi_aspect_ratio = 1;
+
+///////////// rhi_max_height_km ///////////////////////
+//
+// Max height of data in RHI window (km).
+//
+//
+// Type: double
+//
+
+rhi_max_height_km = 25;
+
+///////////// rhi_color_scale_width ///////////////////
+//
+// Width of color scale for RHI window (pixels).
+//
+//
+// Type: int
+//
+
+rhi_color_scale_width = 40;
+
+///////////// rhi_grids_on_at_startup /////////////////
+//
+// Set RHI grids overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+rhi_grids_on_at_startup = TRUE;
+
+///////////// rhi_range_rings_on_at_startup ///////////
+//
+// Set RHI range rings overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+rhi_range_rings_on_at_startup = FALSE;
+
+///////////// rhi_elevation_lines_on_at_startup ///////
+//
+// Set RHI elevation lines overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+rhi_elevation_lines_on_at_startup = FALSE;
+
+///////////// rhi_main_legend_pos /////////////////////
+//
+// Position of main legend in the RHI plot window.
+//
+// This include time, field name and elevation angle.
+//
+//
+// Type: enum
+// Options:
+//     LEGEND_TOP_LEFT
+//     LEGEND_TOP_RIGHT
+//     LEGEND_BOTTOM_LEFT
+//     LEGEND_BOTTOM_RIGHT
+//
+
+rhi_main_legend_pos = LEGEND_TOP_LEFT;
 
 //======================================================================
 //

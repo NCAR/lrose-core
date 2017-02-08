@@ -594,15 +594,15 @@ void WorldPlot::drawLegendsTopLeft(QPainter &painter,
 
 {
 
+  qreal xx = (qreal) (_xMinPixel + _axisTickLen + _textMargin);
+  qreal yy = _yMaxPixel + _axisTickLen;
+
   for (size_t i = 0; i < legends.size(); i++) {
     string legend(legends[i]);
     QRect tRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
-    qreal xx = (qreal) (_xMinPixel + _axisTickLen + _textMargin);
-    qreal yy = (qreal) (_yMaxPixel + _axisTickLen +
-                        i * _textMargin +
-                        i * tRect.height());
     QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 2);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
+    yy += (_textMargin + tRect.height());
   }
 
 }
@@ -615,16 +615,16 @@ void WorldPlot::drawLegendsTopRight(QPainter &painter,
 
 {
 
+  qreal yy = _yMaxPixel + _axisTickLen;
+
   for (size_t i = 0; i < legends.size(); i++) {
     string legend(legends[i]);
     QRect tRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
     qreal xx = (qreal) (_xMaxPixel - _axisTickLen -
                         _textMargin - tRect.width());
-    qreal yy = (qreal) (_yMaxPixel + _axisTickLen +
-                        i * _textMargin +
-                        i * tRect.height());
     QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 2);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
+    yy += (_textMargin + tRect.height());
   }
 
 }
@@ -637,15 +637,16 @@ void WorldPlot::drawLegendsBottomLeft(QPainter &painter,
 
 {
 	
+  qreal xx = (qreal) (_xMinPixel + _axisTickLen + _textMargin);
+  qreal yy = (qreal) (_yMinPixel - _axisTickLen);
+
   for (size_t i = 0; i < legends.size(); i++) {
     string legend(legends[i]);
     QRect tRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
-    qreal xx = (qreal) (_xMinPixel + _axisTickLen + _textMargin);
-    qreal yy = (qreal) (_yMinPixel - _axisTickLen -
-                        i * _textMargin -
-                        (i + 1) * tRect.height());
+    yy -= tRect.height();
     QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 2);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
+    yy -= _textMargin;
   }
 
 }
@@ -658,16 +659,17 @@ void WorldPlot::drawLegendsBottomRight(QPainter &painter,
 
 {
 	
+  qreal yy = (qreal) (_yMinPixel - _axisTickLen);
+
   for (size_t i = 0; i < legends.size(); i++) {
     string legend(legends[i]);
     QRect tRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
     qreal xx = (qreal) (_xMaxPixel - _axisTickLen -
                         _textMargin - tRect.width());
-    qreal yy = (qreal) (_yMinPixel - _axisTickLen -
-                        i * _textMargin -
-                        (i + 1) * tRect.height());
+    yy -= tRect.height();
     QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 2);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
+    yy -= _textMargin;
   }
 
 }
