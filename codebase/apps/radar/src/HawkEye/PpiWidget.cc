@@ -609,3 +609,13 @@ void PpiWidget::_drawScreenText(QPainter &painter, const string &text,
     
 }
 
+/*************************************************************************
+ * numBeams()
+ */
+
+size_t PpiWidget::getNumBeams() const
+{
+  return _beams.size();
+}
+
+

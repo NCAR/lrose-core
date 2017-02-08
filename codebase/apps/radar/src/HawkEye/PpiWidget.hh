@@ -90,6 +90,10 @@ class DLL_EXPORT PpiWidget : public PolarWidget
   void setArchiveMode(bool state) { _isArchiveMode = state; }
   void setStartOfSweep(bool state) { _isStartOfSweep = state; }
 
+  // get the number of beams stored in widget
+
+  size_t getNumBeams() const;
+
  protected:
 
   // are we in archive mode? and if so are we at the start of a sweep?

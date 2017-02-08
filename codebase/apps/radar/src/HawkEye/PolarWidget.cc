@@ -224,16 +224,6 @@ void PolarWidget::setAngleLines(const bool enabled)
 
 
 /*************************************************************************
- * numBeams()
- */
-
-int PolarWidget::numBeams() const
-{
-  return _beams.size();
-}
-
-
-/*************************************************************************
  * selectVar()
  */
 

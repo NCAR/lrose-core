@@ -193,17 +193,6 @@ class DLL_EXPORT PolarWidget : public QWidget
   void gridRingsColor(const QColor &color);
 
   /**
-   * @brief Get the current number of beams. This is interesting to monitor
-   *        when PolarWidget is operating in the dynamically allocated beam mode.
-   *
-   * @return Returns the current number of beams.
-   *
-   * @notes This method is not currently called anywhere.
-   */
-
-  int numBeams() const;
-
-  /**
    * @brief Capture an image of the display.
    *
    * @return Returns the image. The caller must delete it when finished
