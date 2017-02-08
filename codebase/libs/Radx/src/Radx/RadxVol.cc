@@ -51,6 +51,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <iostream>
 #include <sys/stat.h>
 using namespace std;
 
@@ -4181,41 +4182,47 @@ RadxSweep *RadxVol::getSweepByNumber(int sweepNum)
 const RadxSweep *RadxVol::getSweepByFixedAngle(double requestedAngle) const
   
 {
+  if (_sweeps.size() < 1) {
+    return NULL;
+  }
   double minDiff = 9999.0;
   int sweepNum = -1;
   for (size_t ii = 0; ii < _sweeps.size(); ii++) {
     const RadxSweep *sweep = _sweeps[ii];
     double diff = 
-      Radx::computeAngleDiff(requestedAngle, sweep->getFixedAngleDeg());
+      fabs(Radx::computeAngleDiff(requestedAngle, sweep->getFixedAngleDeg()));
     if (diff < minDiff) {
       minDiff = diff;
       sweepNum = ii;
     }
   } // ii
-  if (sweepNum >= 0) {
-    return getSweepByNumber(sweepNum);
+  if (sweepNum < 0) {
+    sweepNum = 0;
   }
-  return NULL;
+  return getSweepByNumber(sweepNum);
 }
 
 RadxSweep *RadxVol::getSweepByFixedAngle(double requestedAngle) 
   
 {
+  if (_sweeps.size() < 1) {
+    return NULL;
+  }
   double minDiff = 9999.0;
   int sweepNum = -1;
   for (size_t ii = 0; ii < _sweeps.size(); ii++) {
     RadxSweep *sweep = _sweeps[ii];
     double diff = 
-      Radx::computeAngleDiff(requestedAngle, sweep->getFixedAngleDeg());
+      fabs(Radx::computeAngleDiff(requestedAngle, sweep->getFixedAngleDeg()));
     if (diff < minDiff) {
       minDiff = diff;
       sweepNum = ii;
     }
   } // ii
-  if (sweepNum >= 0) {
-    return getSweepByNumber(sweepNum);
+  if (sweepNum < 0) {
+    sweepNum = 0;
   }
-  return NULL;
+  return getSweepByNumber(sweepNum);
 }
 
 //////////////////////////////////////////////////////////////////////////
