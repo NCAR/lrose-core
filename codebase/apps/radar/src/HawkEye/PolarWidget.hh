@@ -359,7 +359,6 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   std::vector<PolarBeam*> _beams;
-  std::vector<RhiBeam*> _rhiBeams;
 
   /**
    * @brief The renderer for each field.
@@ -394,7 +393,7 @@ class DLL_EXPORT PolarWidget : public QWidget
   /**
    * @brief True if the grids display is enabled.
    */
-
+  
   bool _gridsEnabled;
 
   /**

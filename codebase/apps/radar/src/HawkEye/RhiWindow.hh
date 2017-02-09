@@ -68,8 +68,7 @@ public:
    * @param[in] parent   The parent widget.
    */
 
-  RhiWindow(QFrame *rhiParentFrame,
-            PolarManager *manager,
+  RhiWindow(PolarManager *manager,
             const Params &params,
             const RadxPlatform &platform,
             const vector<DisplayField *> &fields);
@@ -176,7 +175,6 @@ protected:
    * @brief The parent frame of the RHI widget.
    */
 
-  QFrame *_rhiParentFrame;
   QFrame *_rhiTopFrame;
   RhiWidget *_rhiWidget;
 

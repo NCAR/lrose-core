@@ -370,6 +370,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
     }
     _keepFixedAngle = true;
     _ppi->setStartOfSweep(true);
+    _rhi->setStartOfSweep(true);
     _goBack1();
     _setArchiveRetrievalPending();
 
@@ -380,6 +381,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
     }
     _keepFixedAngle = true;
     _ppi->setStartOfSweep(true);
+    _rhi->setStartOfSweep(true);
     _goFwd1();
     _setArchiveRetrievalPending();
     
@@ -392,6 +394,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       _keepFixedAngle = false;
       _setFixedAngle(_sweepIndex);
       _ppi->setStartOfSweep(true);
+      _rhi->setStartOfSweep(true);
 
     } else {
 
@@ -403,6 +406,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       _setFixedAngle(_sweepIndex);
       _goFwd1();
       _ppi->setStartOfSweep(true);
+      _rhi->setStartOfSweep(true);
       _setArchiveRetrievalPending();
 
     }
@@ -416,6 +420,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       _setFixedAngle(_sweepIndex);
       moveUpDown = true;
       _ppi->setStartOfSweep(true);
+      _rhi->setStartOfSweep(true);
 
     } else {
 
@@ -427,6 +432,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       _setFixedAngle(_sweepIndex);
       _goBack1();
       _ppi->setStartOfSweep(true);
+      _rhi->setStartOfSweep(true);
       _setArchiveRetrievalPending();
 
     }
@@ -479,11 +485,14 @@ void PolarManager::_setupWindows()
   connect(this, SIGNAL(frameResized(const int, const int)),
 	  _ppi, SLOT(resize(const int, const int)));
   
-  // connect slot for click
-
   // Create the RHI window
 
-  _createRhiWindow();
+  _rhiWindow = new RhiWindow(this, _params, _platform, _fields);
+  _rhiWindow->setRadarName(_params.radar_name);
+
+  // set pointer to the rhiWidget
+
+  _rhi = _rhiWindow->getWidget();
   
   // connect slots for location
 
@@ -537,29 +546,6 @@ void PolarManager::_setupWindows()
   
   _createTimeControllerDialog();
 
-}
-
-//////////////////////////////////////////////
-// create the RHI window
-
-void PolarManager::_createRhiWindow()
-{
-
-  // Create the RHI widget with a null frame.  The frame will be reset
-  // when the RHI window is created.
-  
-  _rhiParentFrame = new QFrame(_main);
-  // _rhiParentFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-  // Create the RHI window
-
-  _rhiWindow = new RhiWindow(_rhiParentFrame, this, _params, _platform, _fields);
-  _rhiWindow->setRadarName(_params.radar_name);
-
-  // set pointer to the rhiWidget
-
-  _rhi = _rhiWindow->getWidget();
-  
 }
 
 //////////////////////////////

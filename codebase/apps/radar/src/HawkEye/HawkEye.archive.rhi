@@ -204,7 +204,7 @@ archive_end_time = "2015 06 26 01 00 00";
 // Type: int
 //
 
-archive_scan_interval_secs = 300;
+archive_scan_interval_secs = 600;
 
 ///////////// archive_n_scans /////////////////////////
 //

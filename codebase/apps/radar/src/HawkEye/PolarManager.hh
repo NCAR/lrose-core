@@ -132,7 +132,6 @@ private:
   QFrame *_ppiFrame;
   PpiWidget *_ppi;
 
-  QFrame *_rhiParentFrame;
   RhiWindow *_rhiWindow;
   RhiWidget *_rhi;
   bool _rhiWindowDisplayed;
@@ -206,7 +205,6 @@ private:
 
   void _clear();
   void _setupWindows();
-  void _createRhiWindow();
   void _createActions();
   void _createMenus();
 

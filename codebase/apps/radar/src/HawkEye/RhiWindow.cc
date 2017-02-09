@@ -35,13 +35,11 @@ using namespace std;
  * Constructor
  */
 
-RhiWindow::RhiWindow(QFrame *rhiParentFrame,
-                     PolarManager *manager,
+RhiWindow::RhiWindow(PolarManager *manager,
                      const Params &params,
                      const RadxPlatform &platform,
                      const vector<DisplayField *> &fields):
-        QMainWindow(rhiParentFrame),
-        _rhiParentFrame(rhiParentFrame),
+        QMainWindow(manager),
         _manager(manager),
         _params(params),
         _platform(platform),
@@ -60,7 +58,7 @@ RhiWindow::RhiWindow(QFrame *rhiParentFrame,
 
   // create RHI widget
   
-  _rhiWidget = new RhiWidget(_rhiParentFrame, *manager, *this,
+  _rhiWidget = new RhiWidget(_main, *manager, *this,
                              _params, _platform, _fields.size());
   _rhiWidget->setGrids(_params.rhi_grids_on_at_startup);
   _rhiWidget->setRings(_params.rhi_range_rings_on_at_startup);
@@ -221,7 +219,7 @@ void RhiWindow::_createStatusPanel(const int label_font_size)
   
   _statusPanel = new QFrame(_main);
   _statusPanel->setFrameShape(QFrame::Box);
-//  QHBoxLayout *layout = new QHBoxLayout(_statusPanel);
+  // QHBoxLayout *layout = new QHBoxLayout(_statusPanel);
   QGridLayout *layout = new QGridLayout(_statusPanel);
   layout->setSpacing(0);
 
@@ -237,14 +235,14 @@ void RhiWindow::_createStatusPanel(const int label_font_size)
   QLabel *elev_label = new QLabel(_statusPanel);
   elev_label->setText("Elevation ");
   elev_label->setFont(font);
-//  layout->addWidget(elev_label, 0, Qt::AlignLeft);
+  // layout->addWidget(elev_label, 0, Qt::AlignLeft);
   layout->addWidget(elev_label, 0, 0, Qt::AlignLeft);
   
   _elevValue = new QLabel(_statusPanel);
   _elevValue->setText("9999.99");
   _elevValue->setFont(font);
   _elevValue->setMinimumWidth(_elevValue->width());
-//  layout->addWidget(_elevValue, 0, Qt::AlignRight);
+  // layout->addWidget(_elevValue, 0, Qt::AlignRight);
   layout->addWidget(_elevValue, 0, 1, Qt::AlignRight);
   
   // Azimuth
@@ -252,17 +250,17 @@ void RhiWindow::_createStatusPanel(const int label_font_size)
   QLabel *az_label = new QLabel(_statusPanel);
   az_label->setText("Azimuth ");
   az_label->setFont(font);
-//  layout->addWidget(az_label, 0, Qt::AlignLeft);
+  // layout->addWidget(az_label, 0, Qt::AlignLeft);
   layout->addWidget(az_label, 0, 2, Qt::AlignLeft);
   
   _azValue = new QLabel(_statusPanel);
   _azValue->setText("9999.99");
   _azValue->setFont(font);
   _azValue->setMinimumWidth(_azValue->width());
-//  layout->addWidget(_azValue, 0, Qt::AlignRight);
+  // layout->addWidget(_azValue, 0, Qt::AlignRight);
   layout->addWidget(_azValue, 0, 3, Qt::AlignRight);
   
-//  layout->addStretch(100);
+  //layout->addStretch(100);
   layout->setColumnStretch(4, 100);
   
   _statusPanel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
