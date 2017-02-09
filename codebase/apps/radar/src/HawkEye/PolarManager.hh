@@ -166,7 +166,7 @@ private:
   QAction *_gridsAct;
   QAction *_azLinesAct;
   QAction *_showRhiAct;
-
+  
   QAction *_timeControllerAct;
   QAction *_saveImageAct;
 
@@ -234,13 +234,6 @@ private:
   void _clearRayOverlap(const int start_index, const int end_index,
 			RayLoc *ray_loc);
 
-  // images
-
-  void _createRealtimeImageFiles();
-  void _createArchiveImageFiles();
-  void _createImageFiles();
-  void _saveImageToFile(bool interactive);
-
   // modes
 
   void _setArchiveMode(bool state);
@@ -297,6 +290,13 @@ private slots:
   void _createTimeControllerDialog();
   void _refreshTimeControllerDialog();
   void _showTimeControllerDialog();
+
+  // images
+
+  void _saveImageToFile(bool interactive = true);
+  void _createRealtimeImageFiles();
+  void _createArchiveImageFiles();
+  void _createImageFiles();
 
 };
 

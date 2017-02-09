@@ -498,7 +498,7 @@ override_radar_name = TRUE;
 // Type: string
 //
 
-radar_name = "HCR-10hz";
+radar_name = "SPOL";
 
 ///////////// display_site_name ///////////////////////
 //
@@ -518,7 +518,7 @@ display_site_name = FALSE;
 // Type: boolean
 //
 
-override_site_name = FALSE;
+override_site_name = TRUE;
 
 ///////////// site_name ///////////////////////////////
 //
@@ -528,7 +528,7 @@ override_site_name = FALSE;
 // Type: string
 //
 
-site_name = "GV";
+site_name = "PECAN";
 
 //======================================================================
 //
@@ -1601,7 +1601,7 @@ images_file_name_category = "radar";
 // Type: string
 //
 
-images_file_name_platform = "NSF_NCAR_GV_HCR";
+images_file_name_platform = "SPOL_RHI";
 
 ///////////// images_file_name_extension //////////////
 //

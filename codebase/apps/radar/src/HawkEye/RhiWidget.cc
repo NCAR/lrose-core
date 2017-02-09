@@ -511,16 +511,41 @@ void RhiWidget::_drawOverlays(QPainter &painter)
     vector<string> legends;
     char text[1024];
     
+    // time legend
+
     sprintf(text, "Start time: %s", _archiveStartTime.asString(3).c_str());
     legends.push_back(text);
     
+    // radar and site name legend
+
+    string radarName(_platform.getInstrumentName());
+    if (_params.override_radar_name) {
+      radarName = _params.radar_name;
+    }
+    string siteName(_platform.getInstrumentName());
+    if (_params.override_site_name) {
+      siteName = _params.site_name;
+    }
+    string radarSiteLabel = radarName;
+    if (siteName.size() > 0) {
+      radarSiteLabel += "/";
+      radarSiteLabel += siteName;
+    }
+    legends.push_back(radarSiteLabel);
+
+    // field name legend
+
     string fieldName =
       _fieldRenderers[_selectedField]->getParams().label;
     sprintf(text, "Field: %s", fieldName.c_str());
     legends.push_back(text);
     
+    // azimuth legend
+
     sprintf(text, "Azimuth(deg): %.3f", _meanAz);
     legends.push_back(text);
+
+    // nrays legend
 
     sprintf(text, "NRays: %g", _nRays);
     legends.push_back(text);

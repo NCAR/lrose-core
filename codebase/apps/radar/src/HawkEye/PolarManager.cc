@@ -72,6 +72,7 @@
 
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pmu.h>
+#include <toolsa/file_io.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/Path.hh>
 #include <dsserver/DsLdataInfo.hh>
@@ -648,6 +649,12 @@ void PolarManager::_createActions()
   _aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
   connect(_aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
+  // save image
+  
+  _saveImageAct = new QAction(tr("Save-Image"), this);
+  _saveImageAct->setStatusTip(tr("Save image to png file"));
+  connect(_saveImageAct, SIGNAL(triggered()), this, SLOT(_saveImageToFile()));
+
 }
 
 ////////////////
@@ -657,8 +664,8 @@ void PolarManager::_createMenus()
 {
 
   _fileMenu = menuBar()->addMenu(tr("&File"));
-  // _fileMenu->addAction(_printAct);
   _fileMenu->addSeparator();
+  _fileMenu->addAction(_saveImageAct);
   _fileMenu->addAction(_exitAct);
 
   _overlaysMenu = menuBar()->addMenu(tr("&Overlays"));
@@ -2202,11 +2209,17 @@ void PolarManager::_activateArchiveRendering()
 void PolarManager::_saveImageToFile(bool interactive)
 {
 
-#ifdef JUNK
+  cerr << "11111111111111111111111" << endl;
+  cerr << "11111111 interactive: " << (interactive?"Y":"N") << endl;
 
   // create image
   
-  QPixmap pixmap = QPixmap::grabWidget(_polar);
+  QPixmap pixmap;
+  if (_rhiMode) {
+    pixmap = QPixmap::grabWidget(_rhi);
+  } else {
+    pixmap = QPixmap::grabWidget(_ppi);
+  }
   QImage image = pixmap.toImage();
 
   // compute output dir
@@ -2339,8 +2352,6 @@ void PolarManager::_saveImageToFile(bool interactive)
     }
     
   } // if (_params.images_write_latest_data_info)
-
-#endif
 
 }
 

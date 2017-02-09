@@ -94,7 +94,7 @@ BscanWidget::BscanWidget(QWidget* parent,
   
   qRegisterMetaType<size_t>("size_t");
 
-  // creaate the field renderers
+  // create the field renderers
   
   for (size_t i = 0; i < _nFields; ++i) {
     FieldRenderer *field = new FieldRenderer(_params, i);
