@@ -21,8 +21,8 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#ifndef PolarBeam_HH
-#define PolarBeam_HH
+#ifndef PpiBeam_HH
+#define PpiBeam_HH
 
 #include "Beam.hh"
 
@@ -45,7 +45,7 @@
 /// rapidly switched between variables just by executing
 /// the correct display list.
 
-class PolarBeam : public Beam
+class PpiBeam : public Beam
 {
 
 public:
@@ -99,16 +99,16 @@ public:
    * @param[in] stop_angle  Stop angle of the beam.
    */
   
-  PolarBeam(const Params &params,
-            const RadxRay *ray,
-            int n_fields,
-            double start_angle, double stop_angle);
+  PpiBeam(const Params &params,
+          const RadxRay *ray,
+          int n_fields,
+          double start_angle, double stop_angle);
   
   /**
    * @brief Destructor
    */
 
-  virtual ~PolarBeam();
+  virtual ~PpiBeam();
 
   /**
    * @brief Paint the given field in the given painter.

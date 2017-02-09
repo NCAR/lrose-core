@@ -117,7 +117,7 @@ void PpiWidget::selectVar(const size_t index)
   // the beams for it
 
   if (!_fieldRenderers[index]->isBackgroundRendered()) {
-    std::vector< PolarBeam* >::iterator beam;
+    std::vector< PpiBeam* >::iterator beam;
     for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
       (*beam)->setBeingRendered(index, true);
       _fieldRenderers[index]->addBeam(*beam);
@@ -154,7 +154,7 @@ void PpiWidget::clearVar(const size_t index)
   // Set the brush for every beam/gate for this field to use the background
   // color
 
-  std::vector< PolarBeam* >::iterator beam;
+  std::vector< PpiBeam* >::iterator beam;
   for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
     (*beam)->resetFieldBrush(index, &_backgroundBrush);
   }
@@ -185,7 +185,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
   //    to be drawn.
   // 4. call the new display list(s)
 
-  std::vector< PolarBeam* > newBeams;
+  std::vector< PpiBeam* > newBeams;
 
   // The start and stop angle MUST specify a clockwise fill for the sector.
   // Thus if start_angle > stop_angle, we know that we have crossed the 0
@@ -208,7 +208,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
     // This beam does not cross the 0 degree angle.  Just add the beam to
     // the beam list.
 
-    PolarBeam* b = new PolarBeam(_params, ray, _nFields, n_start_angle, n_stop_angle);
+    PpiBeam* b = new PpiBeam(_params, ray, _nFields, n_start_angle, n_stop_angle);
     _cullBeams(b);
     _ppiBeams.push_back(b);
     newBeams.push_back(b);
@@ -218,14 +218,14 @@ void PpiWidget::addBeam(const RadxRay *ray,
     // The beam crosses the 0 degree angle.  First add the portion of the
     // beam to the left of the 0 degree point.
 
-    PolarBeam* b1 = new PolarBeam(_params, ray, _nFields, n_start_angle, 360.0);
+    PpiBeam* b1 = new PpiBeam(_params, ray, _nFields, n_start_angle, 360.0);
     _cullBeams(b1);
     _ppiBeams.push_back(b1);
     newBeams.push_back(b1);
 
     // Now add the portion of the beam to the right of the 0 degree point.
 
-    PolarBeam* b2 = new PolarBeam(_params, ray, _nFields, 0.0, n_stop_angle);
+    PpiBeam* b2 = new PpiBeam(_params, ray, _nFields, 0.0, n_stop_angle);
     _cullBeams(b2);
     _ppiBeams.push_back(b2);
     newBeams.push_back(b2);
@@ -260,7 +260,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
 
   for (size_t ii = 0; ii < newBeams.size(); ii++) {
 
-    PolarBeam *beam = newBeams[ii];
+    PpiBeam *beam = newBeams[ii];
     
     // Set up the brushes for all of the fields in this beam.  This can be
     // done independently of a Painter object.
@@ -743,7 +743,7 @@ int PpiWidget::_beamIndex(const double start_angle,
  * _cullBeams()
  */
 
-void PpiWidget::_cullBeams(const PolarBeam *beamAB)
+void PpiWidget::_cullBeams(const PpiBeam *beamAB)
 {
   // This routine examines the collection of beams, and removes those that are 
   // completely occluded by other beams. The algorithm gives precedence to the 
@@ -812,7 +812,7 @@ void PpiWidget::_cullBeams(const PolarBeam *beamAB)
   {
     // Pull the beam from the list for ease of coding
 
-    PolarBeam *beamXY = _ppiBeams[j];
+    PpiBeam *beamXY = _ppiBeams[j];
 
     // If this beam has alread been marked hidden, we don't need to 
     // look at it.
@@ -965,7 +965,7 @@ void PpiWidget::_refreshImages()
     
     if (ifield == _selectedField || field->isBackgroundRendered()) {
 
-      std::vector< PolarBeam* >::iterator beam;
+      std::vector< PpiBeam* >::iterator beam;
       for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
 	(*beam)->setBeingRendered(ifield, true);
 	field->addBeam(*beam);

@@ -63,7 +63,7 @@ HDRS = \
 	FieldRenderer.hh \
 	HawkEye.hh \
 	Params.hh \
-	PolarBeam.hh \
+	PpiBeam.hh \
 	PolarManager.hh \
 	PolarWidget.hh \
 	PpiWidget.hh \
@@ -83,7 +83,7 @@ NORM_SRCS = \
 	DisplayField.cc \
 	HawkEye.cc \
 	Main.cc \
-	PolarBeam.cc \
+	PpiBeam.cc \
 	Reader.cc \
 	RhiBeam.cc \
 	ScaledLabel.cc \

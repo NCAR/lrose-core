@@ -51,7 +51,7 @@
 #include <Radx/RadxPlatform.hh>
 
 #include "Params.hh"
-#include "PolarBeam.hh"
+#include "PpiBeam.hh"
 #include "RhiBeam.hh"
 #include "FieldRenderer.hh"
 #include "ScaledLabel.hh"

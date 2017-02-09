@@ -128,7 +128,7 @@ class DLL_EXPORT PpiWidget : public PolarWidget
 
   // pointers to active beams
 
-  std::vector<PolarBeam*> _ppiBeams;
+  std::vector<PpiBeam*> _ppiBeams;
 
   // are we in archive mode? and if so are we at the start of a sweep?
 
@@ -192,7 +192,7 @@ class DLL_EXPORT PpiWidget : public PolarWidget
    *                        removed again.
    */
 
-  void _cullBeams(const PolarBeam *beamAB);
+  void _cullBeams(const PpiBeam *beamAB);
   
   /**
    * @brief Find the index in the _ppiBeams array of the beam that corresponds
