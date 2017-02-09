@@ -88,39 +88,21 @@ public:
    * @brief Set the azimuth value displayed in the window.
    */
 
-  void setAzimuth(const double azimuth)
-  {
-    char text[1024];
-    
-    sprintf(text, "%6.2f", azimuth);
-    _azValue->setText(text);
-  }
-  
+  void setAzimuth(const double azimuth);
 
   /**
    * @brief Set the elevation value displayed in the window.
    */
 
-  void setElevation(const double elevation)
-  {
-    char text[1024];
-    
-    sprintf(text, "%6.2f", elevation);
-    _elevValue->setText(text);
-  }
-  
+  void setElevation(const double elevation);
 
   /**
    * @brief Set the radar name.  The name is included as part of the window
    *        title.
    */
 
-  void setRadarName(const string &radar_name)
-  {
-    string window_title = "RHI -- " + radar_name;
-    setWindowTitle(tr(window_title.c_str()));
-  }
-  
+  void setRadarName(const string &radar_name);
+
   // enable the zoom button - called by RhiWidget
   
   void enableZoomButton() const;

@@ -103,6 +103,10 @@ public:
   virtual void resizeEvent (QResizeEvent * event);
   virtual void keyPressEvent(QKeyEvent* event);
 
+  // check on archive mode
+  
+  bool checkArchiveMode() const { return _archiveMode; }
+
 signals:
 
 private:

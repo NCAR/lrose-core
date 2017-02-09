@@ -267,3 +267,49 @@ void RhiWindow::_createStatusPanel(const int label_font_size)
 
 }
 
+/**
+ * @brief Set the azimuth value displayed in the window.
+ */
+
+void RhiWindow::setAzimuth(const double azimuth)
+{
+  if (_manager->checkArchiveMode()) {
+    _azValue->setText("-----");
+    _azValue->setEnabled(false);
+  } else {
+    char text[1024];
+    sprintf(text, "%6.2f", azimuth);
+    _azValue->setText(text);
+    _azValue->setEnabled(true);
+  }
+}
+
+/**
+ * @brief Set the elevation value displayed in the window.
+ */
+
+void RhiWindow::setElevation(const double elevation)
+{
+  if (_manager->checkArchiveMode()) {
+    _elevValue->setText("-----");
+    _elevValue->setEnabled(false);
+  } else {
+    char text[1024];
+    sprintf(text, "%6.2f", elevation);
+    _elevValue->setText(text);
+    _elevValue->setEnabled(true);
+  }
+}
+
+
+/**
+ * @brief Set the radar name.  The name is included as part of the window
+ *        title.
+ */
+
+void RhiWindow::setRadarName(const string &radar_name)
+{
+  string window_title = "RHI -- " + radar_name;
+  setWindowTitle(tr(window_title.c_str()));
+}
+
