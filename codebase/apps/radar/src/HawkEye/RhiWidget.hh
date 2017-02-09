@@ -106,6 +106,11 @@ class DLL_EXPORT RhiWidget : public PolarWidget
 
   void selectVar(const size_t index);
 
+  // get plot times
+
+  const RadxTime &getPlotStartTime() { return _plotStartTime; }
+  const RadxTime &getPlotEndTime() { return _plotEndTime; }
+
 signals:
 
   ////////////////
@@ -170,8 +175,8 @@ protected:
 
   // angles and times in archive mode
 
-  RadxTime _archiveStartTime;
-  RadxTime _archiveEndTime;
+  RadxTime _plotStartTime;
+  RadxTime _plotEndTime;
   double _meanAz;
   double _sumAz;
   double _nRays;

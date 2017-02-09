@@ -72,8 +72,8 @@ RhiWidget::RhiWidget(QWidget* parent,
   _isArchiveMode = false;
   _isStartOfSweep = true;
 
-  _archiveStartTime.set(0);
-  _archiveEndTime.set(0);
+  _plotStartTime.set(0);
+  _plotEndTime.set(0);
   _meanAz = -9999.0;
   _sumAz = 0.0;
   _nRays = 0.0;
@@ -128,13 +128,13 @@ void RhiWidget::addBeam(const RadxRay *ray,
   if (_isArchiveMode) {
 
     if (_isStartOfSweep) {
-      _archiveStartTime = ray->getRadxTime();
+      _plotStartTime = ray->getRadxTime();
       _meanAz = -9999.0;
       _sumAz = 0.0;
       _nRays = 0.0;
       _isStartOfSweep = false;
     }
-    _archiveEndTime = ray->getRadxTime();
+    _plotEndTime = ray->getRadxTime();
     _sumAz += ray->getAzimuthDeg();
     _nRays++;
     _meanAz = _sumAz / _nRays;
@@ -513,7 +513,7 @@ void RhiWidget::_drawOverlays(QPainter &painter)
     
     // time legend
 
-    sprintf(text, "Start time: %s", _archiveStartTime.asString(3).c_str());
+    sprintf(text, "Start time: %s", _plotStartTime.asString(3).c_str());
     legends.push_back(text);
     
     // radar and site name legend

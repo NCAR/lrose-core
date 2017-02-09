@@ -164,11 +164,16 @@ int HawkEye::Run(QApplication &app)
   // start the reader thread
 
   _reader->signalRunToStart();
-
+  
   if (_params.display_mode == Params::POLAR_DISPLAY) {
-
+    
     _polarManager = new PolarManager(_params, _reader,
                                      _displayFields, _haveFilteredFields);
+
+    if (_args.inputFileList.size() > 0) {
+      _polarManager->setInputFileList(_args.inputFileList);
+    }
+
     return _polarManager->run(app);
 
   } else if (_params.display_mode == Params::BSCAN_DISPLAY) {

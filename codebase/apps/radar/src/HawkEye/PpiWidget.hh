@@ -112,6 +112,11 @@ class DLL_EXPORT PpiWidget : public PolarWidget
 
   void clearVar(const size_t index);
 
+  // get plot times
+
+  const RadxTime &getPlotStartTime() { return _plotStartTime; }
+  const RadxTime &getPlotEndTime() { return _plotEndTime; }
+
   //////////////
   // Qt slots //
   //////////////
@@ -137,8 +142,8 @@ class DLL_EXPORT PpiWidget : public PolarWidget
 
   // angles and times in archive mode
 
-  RadxTime _archiveStartTime;
-  RadxTime _archiveEndTime;
+  RadxTime _plotStartTime;
+  RadxTime _plotEndTime;
   double _meanElev;
   double _sumElev;
   double _nRays;

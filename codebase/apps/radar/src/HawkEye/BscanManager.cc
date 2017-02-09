@@ -218,7 +218,6 @@ void BscanManager::_setupWindows()
   _createFieldPanel();
 
   // color bar to right
-  
   // _colorBar = new ColorBar(_params.color_scale_width,
   //                          &_fields[0]->getColorMap(), _main);
   

@@ -52,8 +52,8 @@ PpiWidget::PpiWidget(QWidget* parent,
   _isArchiveMode = false;
   _isStartOfSweep = true;
 
-  _archiveStartTime.set(0);
-  _archiveEndTime.set(0);
+  _plotStartTime.set(0);
+  _plotEndTime.set(0);
   _meanElev = -9999.0;
   _sumElev = 0.0;
   _nRays = 0.0;
@@ -239,13 +239,13 @@ void PpiWidget::addBeam(const RadxRay *ray,
     if (_isArchiveMode) {
 
       if (_isStartOfSweep) {
-        _archiveStartTime = ray->getRadxTime();
+        _plotStartTime = ray->getRadxTime();
         _meanElev = -9999.0;
         _sumElev = 0.0;
         _nRays = 0.0;
         _isStartOfSweep = false;
       }
-      _archiveEndTime = ray->getRadxTime();
+      _plotEndTime = ray->getRadxTime();
       _sumElev += ray->getElevationDeg();
       _nRays++;
       _meanElev = _sumElev / _nRays;
@@ -626,7 +626,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
     // time legend
 
-    sprintf(text, "Start time: %s", _archiveStartTime.asString(3).c_str());
+    sprintf(text, "Start time: %s", _plotStartTime.asString(3).c_str());
     legends.push_back(text);
     
     // radar and site name legend

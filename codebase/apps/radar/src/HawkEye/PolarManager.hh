@@ -107,6 +107,10 @@ public:
   
   bool checkArchiveMode() const { return _archiveMode; }
 
+  // input file list for archive mode
+
+  void setInputFileList(const vector<string> &list) { _inputFileList = list; }
+  
 signals:
 
 private:
@@ -181,6 +185,8 @@ private:
   QLineEdit *_nArchiveScansEdit;
   int _nArchiveScans;
 
+  // archive mode
+
   bool _archiveMode;
   bool _archiveRetrievalPending;
   QRadioButton *_realtimeModeButton;
@@ -189,14 +195,17 @@ private:
   QGroupBox *_archiveTimeBox;
   QDateTimeEdit *_archiveStartTimeEdit;
   RadxTime _archiveStartTime;
+  RadxTime _archiveEndTime;
   int _archiveMarginSecs;
 
-  QLabel *_archiveEndTimeEcho;
-  RadxTime _archiveEndTime;
+  QLabel *_archiveStopTimeEcho;
+  RadxTime _archiveStopTime;
   
   RadxTime _archivePeriodStartTime;
   RadxTime _archivePeriodEndTime;
 
+  vector<string> _inputFileList;
+  
   // saving images in real time mode
 
   RadxTime _imagesScheduledTime;
@@ -277,7 +286,7 @@ private slots:
   void _setGuiFromStartTime();
   void _setArchiveStartTimeToDefault();
   void _setArchiveStartTime(const RadxTime &rtime);
-  void _computeArchiveEndTime();
+  void _computeArchiveStopTime();
   void _goBack1();
   void _goFwd1();
   void _goBackNScans();

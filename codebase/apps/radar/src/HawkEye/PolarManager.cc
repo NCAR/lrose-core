@@ -118,10 +118,11 @@ PolarManager::PolarManager(const Params &params,
   _archiveRetrievalPending = false;
   _archiveTimeBox = NULL;
   _archiveStartTimeEdit = NULL;
-  _archiveEndTimeEcho = NULL;
+  _archiveStopTimeEcho = NULL;
 
   _setArchiveMode(_params.begin_in_archive_mode);
   _archiveStartTime.set(_params.archive_start_time);
+  _archiveEndTime.set(_params.archive_end_time);
   _archiveMarginSecs = _params.archive_retrieval_interval_secs;
 
   _archivePeriodStartTime.set(_params.archive_start_time);
@@ -259,10 +260,13 @@ void PolarManager::timerEvent(QTimerEvent *event)
   
   if (_params.images_auto_create) {
     
-    // if we are just creating files in archive mode and then exiting, do that now
+    // if we are just creating files in archive mode
+    // and then exiting, do that now
     
-    if (_params.images_creation_mode == Params::CREATE_IMAGES_THEN_EXIT ||
-        _params.images_creation_mode == Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
+    if ((_params.images_creation_mode ==
+         Params::CREATE_IMAGES_THEN_EXIT) ||
+        (_params.images_creation_mode ==
+         Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE)) {
       _createArchiveImageFiles();
       close();
       return;
@@ -270,7 +274,8 @@ void PolarManager::timerEvent(QTimerEvent *event)
     
     // if we are creating files in realtime mode, do that now
     
-    if (_params.images_creation_mode == Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
+    if (_params.images_creation_mode ==
+        Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
       _handleRealtimeData(event);
       _createRealtimeImageFiles();
       return;
@@ -442,7 +447,8 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
   if (moveUpDown) {
     if (_params.debug) {
-      cerr << "Clicked up/down arrow, change to sweep num: " << _sweepIndex << endl;
+      cerr << "Clicked up/down arrow, change to sweep num: " 
+           << _sweepIndex << endl;
     }
     this->setCursor(Qt::WaitCursor);
     _timeControllerDialog->setCursor(Qt::WaitCursor);
@@ -804,30 +810,59 @@ int PolarManager::_getArchiveData()
   _vol.clear();
   _setupVolRead(file);
 
-  if (_params.debug) {
-    cerr << "----------------------------------------------------" << endl;
-    cerr << "perform archive retrieval" << endl;
-    cerr << "  archive start time: " << _archiveStartTime.asString() << endl;
-    cerr << "  archive margin secs: " << _archiveMarginSecs << endl;
-    cerr << "----------------------------------------------------" << endl;
-  }
-  
-  if (file.readFromDir(_params.archive_data_url, _vol)) {
-    string errMsg = "ERROR - Cannot retrieve archive data\n";
-    errMsg += "PolarManager::_getArchiveData\n";
-    errMsg += file.getErrStr() + "\n";
-    errMsg += "  start time: " + _archiveStartTime.asString() + "\n";
-    char text[1024];
-    sprintf(text, "  margin secs: %d\n", _archiveMarginSecs);
-    errMsg += text;
-    cerr << errMsg;
-    if (!_params.images_auto_create)  {
-      QErrorMessage errorDialog;
-      errorDialog.setMinimumSize(400, 250);
-      errorDialog.showMessage(errMsg.c_str());
-      errorDialog.exec();
+  if (_inputFileList.size() > 0) {
+
+    string inputPath = _inputFileList[0];
+    if (_params.debug) {
+      cerr << "----------------------------------------------------" << endl;
+      cerr << "perform archive retrieval" << endl;
+      cerr << "  file path: " << inputPath << endl;
+      cerr << "----------------------------------------------------" << endl;
     }
-    return -1;
+    
+    if (file.readFromPath(inputPath, _vol)) {
+      string errMsg = "ERROR - Cannot retrieve archive data\n";
+      errMsg += "PolarManager::_getArchiveData\n";
+      errMsg += file.getErrStr() + "\n";
+      errMsg += "  path: " + inputPath + "\n";
+      cerr << errMsg;
+      if (!_params.images_auto_create)  {
+        QErrorMessage errorDialog;
+        errorDialog.setMinimumSize(400, 250);
+        errorDialog.showMessage(errMsg.c_str());
+        errorDialog.exec();
+      }
+      return -1;
+    }
+
+  } else {
+
+    if (_params.debug) {
+      cerr << "----------------------------------------------------" << endl;
+      cerr << "perform archive retrieval" << endl;
+      cerr << "  archive start time: " << _archiveStartTime.asString() << endl;
+      cerr << "  archive margin secs: " << _archiveMarginSecs << endl;
+      cerr << "----------------------------------------------------" << endl;
+    }
+    
+    if (file.readFromDir(_params.archive_data_url, _vol)) {
+      string errMsg = "ERROR - Cannot retrieve archive data\n";
+      errMsg += "PolarManager::_getArchiveData\n";
+      errMsg += file.getErrStr() + "\n";
+      errMsg += "  start time: " + _archiveStartTime.asString() + "\n";
+      char text[1024];
+      sprintf(text, "  margin secs: %d\n", _archiveMarginSecs);
+      errMsg += text;
+      cerr << errMsg;
+      if (!_params.images_auto_create)  {
+        QErrorMessage errorDialog;
+        errorDialog.setMinimumSize(400, 250);
+        errorDialog.showMessage(errMsg.c_str());
+        errorDialog.exec();
+      }
+      return -1;
+    }
+
   }
 
   // compute the fixed angles from the rays
@@ -1178,14 +1213,13 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
 
   int i = start_index;
   
-  while (i <= end_index)
-  {
+  while (i <= end_index) {
+
     RayLoc &loc = ray_loc[i];
     
     // If this location isn't active, we can skip it
 
-    if (!loc.active)
-    {
+    if (!loc.active) {
       ++i;
       continue;
     }
@@ -1196,13 +1230,12 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
     // If we get here, this location is active.  We now have 4 possible
     // situations:
 
-    if (loc.startIndex < start_index && loc.endIndex <= end_index)
-    {
+    if (loc.startIndex < start_index && loc.endIndex <= end_index) {
+
       // The overlap area covers the end of the current beam.  Reduce the
       // current beam down to just cover the area before the overlap area.
 
-      for (int j = start_index; j <= loc_end_index; ++j)
-      {
+      for (int j = start_index; j <= loc_end_index; ++j) {
 	// If the master is in the overlap area, then it needs to be moved
 	// outside of this area
 
@@ -1219,31 +1252,27 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
 
       for (int j = loc_start_index; j < start_index; ++j)
 	ray_loc[j].endIndex = start_index - 1;
-    }
-    else if (loc.startIndex < start_index && loc.endIndex > end_index)
-    {
+
+    } else if (loc.startIndex < start_index && loc.endIndex > end_index) {
+      
       // The current beam is bigger than the overlap area.  This should never
       // happen, so go ahead and just clear out the locations for the current
       // beam.
 
-      for (int j = loc_start_index; j <= loc_end_index; ++j)
-      {
+      for (int j = loc_start_index; j <= loc_end_index; ++j) {
         ray_loc[j].clear();
       }
-    }
-    else if (loc.endIndex > end_index)
-    {
+
+    } else if (loc.endIndex > end_index) {
+      
       // The overlap area covers the beginning of the current beam.  Reduce the
       // current beam down to just cover the area after the overlap area.
 
-      for (int j = loc_start_index; j <= end_index; ++j)
-      {
+      for (int j = loc_start_index; j <= end_index; ++j) {
 	// If the master is in the overlap area, then it needs to be moved
 	// outside of this area
-
 	if (ray_loc[j].master)
 	  ray_loc[end_index+1].master = true;
-	
 	ray_loc[j].ray = NULL;
 	ray_loc[j].active = false;
 	ray_loc[j].master = false;
@@ -1252,21 +1281,23 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
       // Update the start indices for the remaining locations in the current
       // beam
 
-      for (int j = end_index + 1; j <= loc_end_index; ++j)
+      for (int j = end_index + 1; j <= loc_end_index; ++j) {
 	ray_loc[j].startIndex = end_index + 1;
-    }
-    else
-    {
+      }
+
+    } else {
+      
       // The current beam is completely covered by the overlap area.  Clear
       // out all of the locations for the current beam.
 
-      for (int j = loc_start_index; j <= loc_end_index; ++j)
-      {
+      for (int j = loc_start_index; j <= loc_end_index; ++j) {
         ray_loc[j].clear();
       }
+
     }
     
     i = loc_end_index + 1;
+
   } /* endwhile - i */
   
 }
@@ -1656,9 +1687,9 @@ void PolarManager::_createTimeControllerDialog()
     timeEndLabel->setText("End time (UTC)");
     timeEndLayout->addWidget(timeEndLabel);
     
-    _archiveEndTimeEcho = new QLabel(_archiveTimeBox);
-    _computeArchiveEndTime();
-    timeEndLayout->addWidget(_archiveEndTimeEcho);
+    _archiveStopTimeEcho = new QLabel(_archiveTimeBox);
+    _computeArchiveStopTime();
+    timeEndLayout->addWidget(_archiveStopTimeEcho);
     
     archiveTimeLayout->addWidget(timeEndFrame);
 
@@ -1849,7 +1880,7 @@ void PolarManager::_setArchiveScanConfig()
   }
   _nArchiveScans = nArchiveScans;
 
-  _computeArchiveEndTime();
+  _computeArchiveStopTime();
   
   if (_archiveMode) {
     _setArchiveRetrievalPending();
@@ -1877,7 +1908,7 @@ void PolarManager::_resetArchiveScanConfigToDefault()
     _nArchiveScansEdit->setText(text);
   }
 
-  _computeArchiveEndTime();
+  _computeArchiveStopTime();
 
 }
 
@@ -1891,7 +1922,7 @@ void PolarManager::_setStartTimeFromGui(const QDateTime &datetime1)
   QTime time = datetime.time();
   _archiveStartTime.set(date.year(), date.month(), date.day(),
                         time.hour(), time.minute(), time.second());
-  _computeArchiveEndTime();
+  _computeArchiveStopTime();
 }
 
 ////////////////////////////////////////////////////////
@@ -1921,7 +1952,7 @@ void PolarManager::_setArchiveStartTimeToDefault()
     _archiveStartTime.set(RadxTime::NOW);
   }
   _setGuiFromStartTime();
-  _computeArchiveEndTime();
+  _computeArchiveStopTime();
 
 }
 
@@ -1941,21 +1972,21 @@ void PolarManager::_setArchiveStartTime(const RadxTime &rtime)
     _archiveStartTime.set(RadxTime::NOW);
   }
   _setGuiFromStartTime();
-  _computeArchiveEndTime();
+  _computeArchiveStopTime();
 
 }
 
 ////////////////////////////////////////////////////////
 // set end time from start time, nscans and interval
 
-void PolarManager::_computeArchiveEndTime()
+void PolarManager::_computeArchiveStopTime()
 
 {
 
-  _archiveEndTime =
+  _archiveStopTime =
     _archiveStartTime + _archiveScanIntervalSecs * _nArchiveScans;
-  if (_archiveEndTimeEcho) {
-    _archiveEndTimeEcho->setText(_archiveEndTime.asString(0).c_str());
+  if (_archiveStopTimeEcho) {
+    _archiveStopTimeEcho->setText(_archiveStopTime.asString(0).c_str());
   }
 
 }
@@ -1989,8 +2020,8 @@ void PolarManager::_createRealtimeImageFiles()
 
     // create images
 
-    _archiveEndTime = _imagesScheduledTime - delay;
-    _archiveStartTime = _archiveEndTime - _archiveScanIntervalSecs;
+    _archiveStopTime = _imagesScheduledTime - delay;
+    _archiveStartTime = _archiveStopTime - _archiveScanIntervalSecs;
     _createImageFiles();
 
     // set next scheduled time
@@ -2014,8 +2045,27 @@ void PolarManager::_createArchiveImageFiles()
 
   if (_params.images_creation_mode ==
       Params::CREATE_IMAGES_THEN_EXIT) {
+    
+    if (_inputFileList.size() > 0) {
 
-    _createImageFiles();
+      // using input file list to drive image generation
+
+      while (_inputFileList.size() > 0) {
+        _createImageFiles();
+        _inputFileList.erase(_inputFileList.begin(), 
+                             _inputFileList.begin() + 1);
+      }
+
+    } else {
+      
+      // using archive time to drive image generation
+
+      while (_archiveStartTime <= _archiveEndTime) {
+        _createImageFiles();
+        _archiveStartTime += _params.archive_scan_interval_secs;
+      }
+
+    }
 
   } else if (_params.images_creation_mode ==
              Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
@@ -2025,7 +2075,7 @@ void PolarManager::_createArchiveImageFiles()
          stime += _params.images_schedule_interval_secs) {
       
       _archiveStartTime.set(stime);
-      _archiveEndTime = _archiveStartTime + _archiveScanIntervalSecs;
+      _archiveStopTime = _archiveStartTime + _archiveScanIntervalSecs;
 
       _createImageFiles();
       
@@ -2209,8 +2259,15 @@ void PolarManager::_activateArchiveRendering()
 void PolarManager::_saveImageToFile(bool interactive)
 {
 
-  cerr << "11111111111111111111111" << endl;
-  cerr << "11111111 interactive: " << (interactive?"Y":"N") << endl;
+  // set times from plots
+
+  if (_rhiMode) {
+    _plotStartTime = _rhi->getPlotStartTime();
+    _plotEndTime = _rhi->getPlotEndTime();
+  } else {
+    _plotStartTime = _ppi->getPlotStartTime();
+    _plotEndTime = _ppi->getPlotEndTime();
+  }
 
   // create image
   
@@ -2221,7 +2278,7 @@ void PolarManager::_saveImageToFile(bool interactive)
     pixmap = QPixmap::grabWidget(_ppi);
   }
   QImage image = pixmap.toImage();
-
+  
   // compute output dir
   
   string outputDir(_params.images_output_dir);
