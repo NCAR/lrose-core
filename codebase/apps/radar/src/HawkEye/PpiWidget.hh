@@ -94,7 +94,41 @@ class DLL_EXPORT PpiWidget : public PolarWidget
 
   size_t getNumBeams() const;
 
+  /**
+   * @brief Select the field to display.
+   *
+   * @param[in] index   Index of the field to display, zero based.
+   */
+
+  void selectVar(const size_t index);
+
+  /**
+   * @brief Clear the specified field.
+   *
+   * @param[in] index    Index of the field to be cleared, zero based.
+   *
+   * @notes This method is not currently called anywhere.
+   */
+
+  void clearVar(const size_t index);
+
+  //////////////
+  // Qt slots //
+  //////////////
+
+ public slots:
+
+  /**
+   * @brief Clear the data in the view.
+   */
+
+  void clear();
+
  protected:
+
+  // pointers to active beams
+
+  std::vector<PolarBeam*> _ppiBeams;
 
   // are we in archive mode? and if so are we at the start of a sweep?
 
@@ -141,6 +175,38 @@ class DLL_EXPORT PpiWidget : public PolarWidget
                        int text_x, int text_y,
                        int flags);
     
+  /**
+   * @brief Refresh the images.  Note that this is an expensive method and
+   *        should only be called where needed.
+   */
+
+  virtual void _refreshImages();
+
+  /**
+   * @brief For dynamically allocated beams, cull the beam list, removing
+   *        beams that are hidden by the given new beam.
+   *
+   * @params[in] beamAB     The new beam being added to the list.  Note that
+   *                        this beam must not already be added to the list
+   *                        when this method is called or it will be immediately
+   *                        removed again.
+   */
+
+  void _cullBeams(const PolarBeam *beamAB);
+  
+  /**
+   * @brief Find the index in the _ppiBeams array of the beam that corresponds
+   *        to this angle. The beam angles must sweep in a counter clockwise,
+   *         i.e. cartessian, direction.
+   *
+   * @param[in] start_angle    Beginning angle of the beam.
+   * @param[in] stop_angle     Ending angle of the beam.
+   *
+   * @return Returns the index for the given beam.
+   */
+
+  inline int _beamIndex(const double start_angle, const double stop_angle);
+
 };
 
 #endif

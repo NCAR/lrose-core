@@ -67,6 +67,102 @@ PpiWidget::PpiWidget(QWidget* parent,
 PpiWidget::~PpiWidget()
 {
 
+  // delete all of the dynamically created beams
+  
+  for (size_t i = 0; i < _ppiBeams.size(); ++i) {
+    delete _ppiBeams[i];
+  }
+  _ppiBeams.clear();
+
+}
+
+/*************************************************************************
+ * clear()
+ */
+
+void PpiWidget::clear()
+{
+  // Clear out the beam array
+  
+  for (size_t i = 0; i < _ppiBeams.size(); i++) {
+    delete _ppiBeams[i];
+  }
+  _ppiBeams.clear();
+  
+  // Now rerender the images
+  
+  _refreshImages();
+
+}
+
+/*************************************************************************
+ * selectVar()
+ */
+
+void PpiWidget::selectVar(const size_t index)
+{
+
+  // If the field index isn't actually changing, we don't need to do anything
+  
+  if (_selectedField == index) {
+    return;
+  }
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "=========>> selectVar for field: "
+         << _params._fields[index].label << endl;
+  }
+
+  // If this field isn't being rendered in the background, render all of
+  // the beams for it
+
+  if (!_fieldRenderers[index]->isBackgroundRendered()) {
+    std::vector< PolarBeam* >::iterator beam;
+    for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
+      (*beam)->setBeingRendered(index, true);
+      _fieldRenderers[index]->addBeam(*beam);
+    }
+  }
+  _performRendering();
+
+  // Do any needed housekeeping when the field selection is changed
+
+  _fieldRenderers[_selectedField]->unselectField();
+  _fieldRenderers[index]->selectField();
+  
+  // Change the selected field index
+
+  _selectedField = index;
+
+  // Update the display
+
+  update();
+}
+
+
+/*************************************************************************
+ * clearVar()
+ */
+
+void PpiWidget::clearVar(const size_t index)
+{
+
+  if (index >= _nFields) {
+    return;
+  }
+
+  // Set the brush for every beam/gate for this field to use the background
+  // color
+
+  std::vector< PolarBeam* >::iterator beam;
+  for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
+    (*beam)->resetFieldBrush(index, &_backgroundBrush);
+  }
+  
+  if (index == _selectedField) {
+    update();
+  }
+
 }
 
 
@@ -114,7 +210,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
 
     PolarBeam* b = new PolarBeam(_params, ray, _nFields, n_start_angle, n_stop_angle);
     _cullBeams(b);
-    _beams.push_back(b);
+    _ppiBeams.push_back(b);
     newBeams.push_back(b);
 
   } else {
@@ -124,14 +220,14 @@ void PpiWidget::addBeam(const RadxRay *ray,
 
     PolarBeam* b1 = new PolarBeam(_params, ray, _nFields, n_start_angle, 360.0);
     _cullBeams(b1);
-    _beams.push_back(b1);
+    _ppiBeams.push_back(b1);
     newBeams.push_back(b1);
 
     // Now add the portion of the beam to the right of the 0 degree point.
 
     PolarBeam* b2 = new PolarBeam(_params, ray, _nFields, 0.0, n_stop_angle);
     _cullBeams(b2);
-    _beams.push_back(b2);
+    _ppiBeams.push_back(b2);
     newBeams.push_back(b2);
 
   }
@@ -334,8 +430,8 @@ const RadxRay *PpiWidget::_getClosestRay(double x_km, double y_km)
 
   double minDiff = 1.0e99;
   const RadxRay *closestRay = NULL;
-  for (size_t ii = 0; ii < _beams.size(); ii++) {
-    const RadxRay *ray = _beams[ii]->getRay();
+  for (size_t ii = 0; ii < _ppiBeams.size(); ii++) {
+    const RadxRay *ray = _ppiBeams[ii]->getRay();
     double rayAz = ray->getAzimuthDeg();
     double diff = fabs(clickAz - rayAz);
     if (diff > 180.0) {
@@ -615,7 +711,277 @@ void PpiWidget::_drawScreenText(QPainter &painter, const string &text,
 
 size_t PpiWidget::getNumBeams() const
 {
-  return _beams.size();
+  return _ppiBeams.size();
 }
+
+/*************************************************************************
+ * _beamIndex()
+ */
+
+int PpiWidget::_beamIndex(const double start_angle,
+                          const double stop_angle)
+{
+
+  // Find where the center angle of the beam will fall within the beam array
+  
+  int ii = (int)
+    (_ppiBeams.size()*(start_angle + (stop_angle-start_angle)/2)/360.0);
+
+  // Take care of the cases at the ends of the beam list
+  
+  if (ii < 0)
+    ii = 0;
+  if (ii > (int)_ppiBeams.size() - 1)
+    ii = _ppiBeams.size() - 1;
+
+  return ii;
+
+}
+
+
+/*************************************************************************
+ * _cullBeams()
+ */
+
+void PpiWidget::_cullBeams(const PolarBeam *beamAB)
+{
+  // This routine examines the collection of beams, and removes those that are 
+  // completely occluded by other beams. The algorithm gives precedence to the 
+  // most recent beams; i.e. beams at the end of the _ppiBeams vector.
+  //
+  // Remember that there won't be any beams that cross angles through zero; 
+  // otherwise the beam culling logic would be a real pain, and PpiWidget has
+  // already split incoming beams into two, if it received a beam of this type.
+  //
+  // The logic is as follows. First of all, just consider the start and stop angle 
+  // of a beam to be a linear region. We can diagram the angle interval of beam(AB) as:
+  //         a---------b
+  // 
+  // The culling logic will compare all other beams (XY) to AB, looking for an overlap.
+  // An example overlap might be:
+  //         a---------b
+  //    x---------y
+  // 
+  // If an overlap on beam XY is detected, the occluded region is recorded
+  //   as the interval (CD):        
+  //         a---------b
+  //    x---------y
+  //         c----d
+  // 
+  // The culling algorithm starts with the last beam in the list, and compares it with all
+  // preceeding beams, setting their overlap regions appropriately.
+  // Then the next to the last beam is compared with all preceeding beams.
+  // Previously found occluded regions will be expanded as they are detected.
+  // 
+  // Once the occluded region spans the entire beam, then the beam is known 
+  // to be hidden, and it doesn't need to be tested any more, nor is it it used as a 
+  // test on other beams.
+  //
+  // After the list has been completly processed in this manner, the completely occluded 
+  // beams are removed.
+  // .
+  // Note now that if the list is rendered from beginning to end, the more recent beams will
+  // overwrite the portions of previous beams that they share.
+  //
+
+  // NOTE - This algorithm doesn't handle beams that are occluded in different
+  // subsections.  For example, the following would be handled as a hidden
+  // beam even though the middle of the beam is still visible:
+  //         a---------b    c--------d
+  //              x-------------y
+
+  // Do nothing if we don't have any beams in the list
+
+  if (_ppiBeams.size() < 1)
+    return;
+
+  // Look through all of the beams in the list and record any place where
+  // this beam occludes any other beam.
+
+  bool need_to_cull = false;
+  
+  // Save the angle information for easier processing.
+  
+  double a = beamAB->startAngle;
+  double b = beamAB->stopAngle;
+
+  // Look at all of the beams in the list to see if any are occluded by this
+  // new beam
+
+  for (size_t j = 0; j < _ppiBeams.size(); ++j)
+  {
+    // Pull the beam from the list for ease of coding
+
+    PolarBeam *beamXY = _ppiBeams[j];
+
+    // If this beam has alread been marked hidden, we don't need to 
+    // look at it.
+
+    if (beamXY->hidden)
+      continue;
+      
+    // Again, save the angles for easier coding
+
+    double x = beamXY->startAngle;
+    double y = beamXY->stopAngle;
+
+    if (b <= x || a >= y)
+    {
+      //  handles these cases:
+      //  a-----b                a-----b
+      //           x-----------y
+      //  
+      // they don't overlap at all so do nothing
+    }
+    else if (a <= x && b >= y)
+    {
+      //     a------------------b
+      //        x-----------y
+      // completely covered
+
+      beamXY->hidden = true;
+      need_to_cull = true;
+    }
+    else if (a <= x && b <= y)
+    {
+      //   a-----------b
+      //        x-----------y
+      //
+      // We know that b > x because otherwise this would have been handled
+      // in the first case above.
+
+      // If the right part of this beam is already occluded, we can just
+      // mark the beam as hidden at this point.  Otherwise, we update the
+      // c and d values.
+
+      if (beamXY->rightEnd == y)
+      {
+	beamXY->hidden = true;
+	need_to_cull = true;
+      }
+      else
+      {
+	beamXY->leftEnd = x;
+	if (beamXY->rightEnd < b)
+	  beamXY->rightEnd = b;
+      }
+    }
+    else if (a >= x && b >= y)
+    {
+      //       a-----------b
+      //   x-----------y
+      //
+      // We know that a < y because otherwise this would have been handled
+      // in the first case above.
+      
+      // If the left part of this beam is already occluded, we can just
+      // mark the beam as hidden at this point.  Otherwise, we update the
+      // c and d values.
+
+      if (beamXY->leftEnd == x)
+      {
+	beamXY->hidden = true;
+	need_to_cull = true;
+      }
+      else
+      {
+	beamXY->rightEnd = y;
+	if (a < beamXY->leftEnd)
+	  beamXY->leftEnd = a;
+      }
+    }
+    else
+    {
+      // all that is left is this pathological case:
+      //     a-------b
+      //   x-----------y
+      //
+      // We need to extend c and d, if the are inside of a and b.  We know
+      // that a != x and b != y because otherwise this would have been
+      // handled in the third case above.
+
+      if (beamXY->leftEnd > a)
+	beamXY->leftEnd = a;
+      if (beamXY->rightEnd < b)
+	beamXY->rightEnd = b;
+	      
+    } /* endif */
+  } /* endfor - j */
+
+  // Now actually cull the list
+
+  if (need_to_cull)
+  {
+    // Note that i has to be an int rather than a size_t since we are going
+    // backwards through the list and will end when i < 0.
+
+    for (int i = _ppiBeams.size()-1; i >= 0; i--)
+    {
+      // Delete beams who are hidden but aren't currently being rendered.
+      // We can get the case where we have hidden beams that are being
+      // rendered when we do something (like resizing) that causes us to 
+      // have to rerender all of the current beams.  During the rerendering,
+      // new beams continue to come in and will obscure some of the beams
+      // that are still in the rendering queue.  These beams will be deleted
+      // during a later pass through this loop.
+
+      if (_ppiBeams[i]->hidden && !_ppiBeams[i]->isBeingRendered())
+      {
+	delete _ppiBeams[i];
+	_ppiBeams.erase(_ppiBeams.begin()+i);
+      }
+    }
+
+  } /* endif - need_to_cull */
+  
+}
+
+/*************************************************************************
+ * _refreshImages()
+ */
+
+void PpiWidget::_refreshImages()
+{
+
+  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
+    
+    FieldRenderer *field = _fieldRenderers[ifield];
+    
+    // If needed, create new image for this field
+    
+    if (size() != field->getImage()->size()) {
+      field->createImage(width(), height());
+    }
+
+    // clear image
+
+    field->getImage()->fill(_backgroundBrush.color().rgb());
+    
+    // set up rendering details
+
+    field->setTransform(_zoomTransform);
+    
+    // Add pointers to the beams to be rendered
+    
+    if (ifield == _selectedField || field->isBackgroundRendered()) {
+
+      std::vector< PolarBeam* >::iterator beam;
+      for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
+	(*beam)->setBeingRendered(ifield, true);
+	field->addBeam(*beam);
+      }
+      
+    }
+    
+  } // ifield
+  
+  // do the rendering
+
+  _performRendering();
+
+  update();
+}
+
+
 
 

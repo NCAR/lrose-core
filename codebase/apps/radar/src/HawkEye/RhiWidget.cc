@@ -853,4 +853,49 @@ void RhiWidget::paintEvent(QPaintEvent *event)
 
 }
 
+/*************************************************************************
+ * selectVar()
+ */
+
+void RhiWidget::selectVar(const size_t index)
+{
+
+  // If the field index isn't actually changing, we don't need to do anything
+  
+  if (_selectedField == index) {
+    return;
+  }
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "=========>> selectVar for field: "
+         << _params._fields[index].label << endl;
+  }
+
+  // If this field isn't being rendered in the background, render all of
+  // the beams for it
+
+  if (!_fieldRenderers[index]->isBackgroundRendered()) {
+    std::vector<RhiBeam*>::iterator beam;
+    for (beam = _rhiBeams.begin(); beam != _rhiBeams.end(); ++beam) {
+      (*beam)->setBeingRendered(index, true);
+      _fieldRenderers[index]->addBeam(*beam);
+    }
+  }
+  _performRendering();
+
+  // Do any needed housekeeping when the field selection is changed
+
+  _fieldRenderers[_selectedField]->unselectField();
+  _fieldRenderers[index]->selectField();
+  
+  // Change the selected field index
+
+  _selectedField = index;
+
+  // Update the display
+
+  update();
+}
+
+
 

@@ -98,6 +98,14 @@ class DLL_EXPORT RhiWidget : public PolarWidget
   void setArchiveMode(bool state) { _isArchiveMode = state; }
   void setStartOfSweep(bool state) { _isStartOfSweep = state; }
 
+  /**
+   * @brief Select the field to display.
+   *
+   * @param[in] index   Index of the field to display, zero based.
+   */
+
+  void selectVar(const size_t index);
+
 signals:
 
   ////////////////
@@ -246,7 +254,7 @@ protected:
 
   // overide refresh images
 
-  void _refreshImages();
+  virtual void _refreshImages();
 
 };
 
