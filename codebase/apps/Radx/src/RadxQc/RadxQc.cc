@@ -1150,7 +1150,7 @@ int RadxQc::_retrieveTempProfile(const RadxVol &vol)
   }
   
   time_t retrievedTime;
-  vector<NcarParticleId::TmpPoint> retrievedProfile;
+  vector<TempProfile::PointVal> retrievedProfile;
   if (_tempProfile.getTempProfile(_params.sounding_spdb_url,
                                   vol.getStartTimeSecs(),
                                   retrievedTime,
