@@ -542,7 +542,7 @@ void RhiWidget::_drawOverlays(QPainter &painter)
     
     // azimuth legend
 
-    sprintf(text, "Azimuth(deg): %.3f", _meanAz);
+    sprintf(text, "Azimuth(deg): %.2f", _meanAz);
     legends.push_back(text);
 
     // nrays legend

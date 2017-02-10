@@ -98,14 +98,8 @@ paramdef boolean {
 paramdef string {
   p_default = "1970 01 01 00 00 00";
   p_descr = "Start time for archive mode.";
-  p_help = "If this is set to 1 Jan 1970, the app will initialize at 'now'.";
+  p_help = "In archive mode, data retrieval starts at this time.";
 } archive_start_time;
-
-paramdef string {
-  p_default = "1970 01 01 00 00 00";
-  p_descr = "End time for archive mode.";
-  p_help = "Only applicable for image generation.";
-} archive_end_time;
 
 paramdef int {
   p_default = 300;
@@ -127,9 +121,9 @@ paramdef string {
 
 paramdef int {
   p_default = 600;
-  p_descr = "Time interval to search in archive mode (secs).";
+  p_descr = "Time margin for search in archive mode (secs).";
   p_help = "We search for data within this margin, on either side of the required time.";
-} archive_retrieval_interval_secs;
+} archive_search_margin_secs;
 
 commentdef {
   p_header = "STATUS TO BE SHOWN IN GUI";
@@ -940,6 +934,19 @@ paramdef int {
   p_descr = "Delay between scheduled time and image creation (secs).";
   p_help = "In order to ensure that the data has been written, a delay may be provided. This allows for the writing application to complete writing the data before this application tries to access it.";
 } images_schedule_delay_secs;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "Start time for image generation in archive mode.";
+  p_help = "Image generation starts with a seach at this time, and the proceeds at increments of images_schedule_interval_secs.";
+} images_archive_start_time;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "End time for image generation in archive mode.";
+  p_help = "Image generation is terminated when the search time exceeds this end time.";
+  p_help = "Only applicable for image generation.";
+} images_archive_end_time;
 
 commentdef {
   p_header = "SIMULATION MODE";

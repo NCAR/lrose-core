@@ -655,7 +655,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
     // elevation legend
 
-    sprintf(text, "Elevation(deg): %.3f", _meanElev);
+    sprintf(text, "Elevation(deg): %.2f", _meanElev);
     legends.push_back(text);
 
     // nrays legend

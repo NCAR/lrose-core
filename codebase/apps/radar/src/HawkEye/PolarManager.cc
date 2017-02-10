@@ -122,11 +122,10 @@ PolarManager::PolarManager(const Params &params,
 
   _setArchiveMode(_params.begin_in_archive_mode);
   _archiveStartTime.set(_params.archive_start_time);
-  _archiveEndTime.set(_params.archive_end_time);
-  _archiveMarginSecs = _params.archive_retrieval_interval_secs;
+  _archiveMarginSecs = _params.archive_search_margin_secs;
 
-  _archivePeriodStartTime.set(_params.archive_start_time);
-  _archivePeriodEndTime.set(_params.archive_end_time);
+  _imagesArchiveStartTime.set(_params.images_archive_start_time);
+  _imagesArchiveEndTime.set(_params.images_archive_end_time);
 
   // set up ray locators
 
@@ -765,7 +764,8 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
   // set up plot times
 
   _plotStartTime = _archiveStartTime;
-  _plotEndTime = _archiveEndTime;
+  _plotEndTime = _plotStartTime +
+    _params.archive_scan_interval_secs * _params.archive_n_scans;
 
   // set cursor to wait cursor
 
@@ -813,12 +813,12 @@ int PolarManager::_getArchiveData()
   if (_inputFileList.size() > 0) {
 
     string inputPath = _inputFileList[0];
-    if (_params.debug) {
-      cerr << "----------------------------------------------------" << endl;
-      cerr << "perform archive retrieval" << endl;
-      cerr << "  file path: " << inputPath << endl;
-      cerr << "----------------------------------------------------" << endl;
-    }
+    // if (_params.debug) {
+    //   cerr << "----------------------------------------------------" << endl;
+    //   cerr << "perform archive retrieval" << endl;
+    //   cerr << "  file path: " << inputPath << endl;
+    //   cerr << "----------------------------------------------------" << endl;
+    // }
     
     if (file.readFromPath(inputPath, _vol)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
@@ -837,13 +837,13 @@ int PolarManager::_getArchiveData()
 
   } else {
 
-    if (_params.debug) {
-      cerr << "----------------------------------------------------" << endl;
-      cerr << "perform archive retrieval" << endl;
-      cerr << "  archive start time: " << _archiveStartTime.asString() << endl;
-      cerr << "  archive margin secs: " << _archiveMarginSecs << endl;
-      cerr << "----------------------------------------------------" << endl;
-    }
+    // if (_params.debug) {
+    //   cerr << "----------------------------------------------------" << endl;
+    //   cerr << "perform archive retrieval" << endl;
+    //   cerr << "  archive start time: " << _archiveStartTime.asString() << endl;
+    //   cerr << "  archive margin secs: " << _archiveMarginSecs << endl;
+    //   cerr << "----------------------------------------------------" << endl;
+    // }
     
     if (file.readFromDir(_params.archive_data_url, _vol)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
@@ -2022,7 +2022,7 @@ void PolarManager::_createRealtimeImageFiles()
 
     _archiveStopTime = _imagesScheduledTime - delay;
     _archiveStartTime = _archiveStopTime - _archiveScanIntervalSecs;
-    _createImageFiles();
+    _createImageFilesAllSweeps();
 
     // set next scheduled time
     
@@ -2051,7 +2051,7 @@ void PolarManager::_createArchiveImageFiles()
       // using input file list to drive image generation
 
       while (_inputFileList.size() > 0) {
-        _createImageFiles();
+        _createImageFilesAllSweeps();
         _inputFileList.erase(_inputFileList.begin(), 
                              _inputFileList.begin() + 1);
       }
@@ -2060,8 +2060,8 @@ void PolarManager::_createArchiveImageFiles()
       
       // using archive time to drive image generation
 
-      while (_archiveStartTime <= _archiveEndTime) {
-        _createImageFiles();
+      while (_archiveStartTime <= _imagesArchiveEndTime) {
+        _createImageFilesAllSweeps();
         _archiveStartTime += _params.archive_scan_interval_secs;
       }
 
@@ -2070,18 +2070,31 @@ void PolarManager::_createArchiveImageFiles()
   } else if (_params.images_creation_mode ==
              Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
 
-    for (time_t stime = _archivePeriodStartTime.utime();
-         stime <= _archivePeriodEndTime.utime();
+    for (RadxTime stime = _imagesArchiveStartTime;
+         stime <= _imagesArchiveEndTime;
          stime += _params.images_schedule_interval_secs) {
       
-      _archiveStartTime.set(stime);
+      _archiveStartTime = stime;
       _archiveStopTime = _archiveStartTime + _archiveScanIntervalSecs;
 
-      _createImageFiles();
+      _createImageFilesAllSweeps();
       
     } // stime
 
   } // if (_params.images_creation_mode ...
+
+}
+
+/////////////////////////////////////////////////////
+// creating one image per field, for each sweep
+
+void PolarManager::_createImageFilesAllSweeps()
+{
+
+  for (size_t ii = 0; ii < _vol.getNSweeps(); ii++) {
+    _sweepIndex = ii;
+    _createImageFiles();
+  }
 
 }
 
@@ -2097,9 +2110,21 @@ void PolarManager::_createImageFiles()
 
   PMU_auto_register("createImageFiles");
 
-  // retrieve data
+  // plot the data
 
-  _handleArchiveData(NULL);
+  _ppi->setStartOfSweep(true);
+  _rhi->setStartOfSweep(true);
+  _plotArchiveData();
+
+  // set times from plots
+
+  if (_rhiMode) {
+    _plotStartTime = _rhi->getPlotStartTime();
+    _plotEndTime = _rhi->getPlotEndTime();
+  } else {
+    _plotStartTime = _ppi->getPlotStartTime();
+    _plotEndTime = _ppi->getPlotEndTime();
+  }
 
   // save current field
 

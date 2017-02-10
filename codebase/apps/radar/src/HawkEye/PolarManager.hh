@@ -195,14 +195,13 @@ private:
   QGroupBox *_archiveTimeBox;
   QDateTimeEdit *_archiveStartTimeEdit;
   RadxTime _archiveStartTime;
-  RadxTime _archiveEndTime;
   int _archiveMarginSecs;
 
   QLabel *_archiveStopTimeEcho;
   RadxTime _archiveStopTime;
   
-  RadxTime _archivePeriodStartTime;
-  RadxTime _archivePeriodEndTime;
+  RadxTime _imagesArchiveStartTime;
+  RadxTime _imagesArchiveEndTime;
 
   vector<string> _inputFileList;
   
@@ -305,6 +304,7 @@ private slots:
   void _saveImageToFile(bool interactive = true);
   void _createRealtimeImageFiles();
   void _createArchiveImageFiles();
+  void _createImageFilesAllSweeps();
   void _createImageFiles();
 
 };

@@ -451,15 +451,13 @@ public:
 
   char* archive_start_time;
 
-  char* archive_end_time;
-
   int archive_scan_interval_secs;
 
   int archive_n_scans;
 
   char* archive_data_url;
 
-  int archive_retrieval_interval_secs;
+  int archive_search_margin_secs;
 
   show_status_t show_status_in_gui;
 
@@ -676,6 +674,10 @@ public:
 
   int images_schedule_delay_secs;
 
+  char* images_archive_start_time;
+
+  char* images_archive_end_time;
+
   int sim_sleep_msecs;
 
   int sim_n_gates;
@@ -691,7 +693,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[152];
+  mutable TDRPtable _table[153];
 
   const char *_className;
 

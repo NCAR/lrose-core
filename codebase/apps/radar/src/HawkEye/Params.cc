@@ -716,20 +716,8 @@ using namespace std;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("archive_start_time");
     tt->descr = tdrpStrDup("Start time for archive mode.");
-    tt->help = tdrpStrDup("If this is set to 1 Jan 1970, the app will initialize at 'now'.");
+    tt->help = tdrpStrDup("In archive mode, data retrieval starts at this time.");
     tt->val_offset = (char *) &archive_start_time - &_start_;
-    tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
-    tt++;
-    
-    // Parameter 'archive_end_time'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("archive_end_time");
-    tt->descr = tdrpStrDup("End time for archive mode.");
-    tt->help = tdrpStrDup("Only applicable for image generation.");
-    tt->val_offset = (char *) &archive_end_time - &_start_;
     tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
     tt++;
     
@@ -769,15 +757,15 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("/scr/eldora1/hcr-test/cfradial/moments/wband");
     tt++;
     
-    // Parameter 'archive_retrieval_interval_secs'
+    // Parameter 'archive_search_margin_secs'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("archive_retrieval_interval_secs");
-    tt->descr = tdrpStrDup("Time interval to search in archive mode (secs).");
+    tt->param_name = tdrpStrDup("archive_search_margin_secs");
+    tt->descr = tdrpStrDup("Time margin for search in archive mode (secs).");
     tt->help = tdrpStrDup("We search for data within this margin, on either side of the required time.");
-    tt->val_offset = (char *) &archive_retrieval_interval_secs - &_start_;
+    tt->val_offset = (char *) &archive_search_margin_secs - &_start_;
     tt->single_val.i = 600;
     tt++;
     
@@ -2571,6 +2559,30 @@ using namespace std;
     tt->help = tdrpStrDup("In order to ensure that the data has been written, a delay may be provided. This allows for the writing application to complete writing the data before this application tries to access it.");
     tt->val_offset = (char *) &images_schedule_delay_secs - &_start_;
     tt->single_val.i = 60;
+    tt++;
+    
+    // Parameter 'images_archive_start_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("images_archive_start_time");
+    tt->descr = tdrpStrDup("Start time for image generation in archive mode.");
+    tt->help = tdrpStrDup("Image generation starts with a seach at this time, and the proceeds at increments of images_schedule_interval_secs.");
+    tt->val_offset = (char *) &images_archive_start_time - &_start_;
+    tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
+    tt++;
+    
+    // Parameter 'images_archive_end_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("images_archive_end_time");
+    tt->descr = tdrpStrDup("End time for image generation in archive mode.");
+    tt->help = tdrpStrDup("Image generation is terminated when the search time exceeds this end time.");
+    tt->val_offset = (char *) &images_archive_end_time - &_start_;
+    tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
     tt++;
     
     // Parameter 'Comment 23'

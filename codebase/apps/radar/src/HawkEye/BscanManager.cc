@@ -119,8 +119,8 @@ BscanManager::BscanManager(const Params &params,
 
   _archiveStartTime.set(_params.archive_start_time);
 
-  _archivePeriodStartTime.set(_params.archive_start_time);
-  _archivePeriodEndTime.set(_params.archive_end_time);
+  _archiveImagesStartTime.set(_params.images_archive_start_time);
+  _archiveImagesEndTime.set(_params.images_archive_end_time);
 
   _dwellSpecsBox = NULL;
   _dwellAutoBox = NULL;
@@ -2997,8 +2997,8 @@ void BscanManager::_createArchiveImageFiles()
   } else if (_params.images_creation_mode ==
              Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
 
-    for (time_t stime = _archivePeriodStartTime.utime();
-         stime <= _archivePeriodEndTime.utime();
+    for (time_t stime = _archiveImagesStartTime.utime();
+         stime <= _archiveImagesEndTime.utime();
          stime += _params.images_schedule_interval_secs) {
       
       _archiveStartTime.set(stime);

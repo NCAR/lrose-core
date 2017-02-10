@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./HawkEye
+ * TDRP params for HawkEye
  **********************************************************************/
 
 //======================================================================
@@ -174,25 +174,13 @@ begin_in_archive_mode = TRUE;
 //
 // Start time for archive mode.
 //
-// If this is set to 1 Jan 1970, the app will initialize at 'now'.
+// In archive mode, data retrieval starts at this time.
 //
 //
 // Type: string
 //
 
 archive_start_time = "2015 06 26 00 30 00";
-
-///////////// archive_end_time ////////////////////////
-//
-// End time for archive mode.
-//
-// Only applicable for image generation.
-//
-//
-// Type: string
-//
-
-archive_end_time = "2015 06 26 01 00 00";
 
 ///////////// archive_scan_interval_secs //////////////
 //
@@ -230,9 +218,9 @@ archive_n_scans = 12;
 
 archive_data_url = "$(HOME)/data/spol_data/sur";
 
-///////////// archive_retrieval_interval_secs /////////
+///////////// archive_search_margin_secs //////////////
 //
-// Time interval to search in archive mode (secs).
+// Time margin for search in archive mode (secs).
 //
 // We search for data within this margin, on either side of the required 
 //   time.
@@ -241,7 +229,7 @@ archive_data_url = "$(HOME)/data/spol_data/sur";
 // Type: int
 //
 
-archive_retrieval_interval_secs = 600;
+archive_search_margin_secs = 600;
 
 //======================================================================
 //
@@ -1744,6 +1732,32 @@ images_schedule_interval_secs = 60;
 //
 
 images_schedule_delay_secs = 10;
+
+///////////// images_archive_start_time ///////////////
+//
+// Start time for image generation in archive mode.
+//
+// Image generation starts with a seach at this time, and the proceeds 
+//   at increments of images_schedule_interval_secs.
+//
+//
+// Type: string
+//
+
+images_archive_start_time = "1970 01 01 00 00 00";
+
+///////////// images_archive_end_time /////////////////
+//
+// End time for image generation in archive mode.
+//
+// Image generation is terminated when the search time exceeds this end 
+//   time.
+//
+//
+// Type: string
+//
+
+images_archive_end_time = "1970 01 01 00 00 00";
 
 //======================================================================
 //
