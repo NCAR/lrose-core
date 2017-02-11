@@ -812,14 +812,9 @@ int PolarManager::_getArchiveData()
 
   if (_inputFileList.size() > 0) {
 
+    // files were specified on the command line
+
     string inputPath = _inputFileList[0];
-    // if (_params.debug) {
-    //   cerr << "----------------------------------------------------" << endl;
-    //   cerr << "perform archive retrieval" << endl;
-    //   cerr << "  file path: " << inputPath << endl;
-    //   cerr << "----------------------------------------------------" << endl;
-    // }
-    
     if (file.readFromPath(inputPath, _vol)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
       errMsg += "PolarManager::_getArchiveData\n";
@@ -835,16 +830,13 @@ int PolarManager::_getArchiveData()
       return -1;
     }
 
+    _archiveStartTime.set(_vol.getStartTimeSecs());
+    _setGuiFromStartTime();
+    
   } else {
 
-    // if (_params.debug) {
-    //   cerr << "----------------------------------------------------" << endl;
-    //   cerr << "perform archive retrieval" << endl;
-    //   cerr << "  archive start time: " << _archiveStartTime.asString() << endl;
-    //   cerr << "  archive margin secs: " << _archiveMarginSecs << endl;
-    //   cerr << "----------------------------------------------------" << endl;
-    // }
-    
+    // times were specified on the command line
+
     if (file.readFromDir(_params.archive_data_url, _vol)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
       errMsg += "PolarManager::_getArchiveData\n";
@@ -1025,6 +1017,10 @@ void PolarManager::_setupVolRead(RadxFile &file)
   }
 
   file.setReadModeClosest(_archiveStartTime, _archiveMarginSecs);
+
+  // if (_params.max_range_km > 0) {
+  //   file.setReadMaxRangeKm(_params.max_range_km);
+  // }
 
 }
 
@@ -2218,6 +2214,8 @@ void PolarManager::_goFwdNScans()
 void PolarManager::_setArchiveRetrievalPending()
 {
   _archiveRetrievalPending = true;
+  // if files were specified on command line, clear them
+  _inputFileList.clear();
 }
 
 /////////////////////////////////////
