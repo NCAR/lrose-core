@@ -306,11 +306,163 @@ int Hsrl2Radx::_runRealtimeNoLdata()
 int Hsrl2Radx::_processFile(const string &readPath)
 {
 
+
   PMU_auto_register("Processing file");
+  
+  if (_params.debug) {
+    cerr << "INFO - Hsrl2Radx::_processFile" << endl;
+    cerr << "  Input path: " << readPath << endl;
+  }
+
+  // check if this is a CfRadial file
+
+  NcfRadxFile file;
+  if (file.isCfRadial(readPath)) {
+    return _processUwCfRadialFile(readPath);
+  } else {
+    return _processUwRawFile(readPath);
+  }
+
+}
+
+//////////////////////////////////////////////////
+// Process a UofWisc pseudo CfRadial file
+// Returns 0 on success, -1 on failure
+
+int Hsrl2Radx::_processUwCfRadialFile(const string &readPath)
+{
+
+  PMU_auto_register("Processing UW CfRadial file");
 
   if (_params.debug) {
-    cerr << "INFO - Hsrl2Radx::Run" << endl;
-    cerr << "  Input path: " << readPath << endl;
+    cerr << "INFO - Hsrl2Radx::_processUwCfRadialFile" << endl;
+    cerr << "  UW CfRadial file: " << readPath << endl;
+  }
+
+  MslFile inFile(_params);
+  _setupRead(inFile);
+  
+  // read in file
+
+  RadxVol vol;
+  if (inFile.readFromPath(readPath, vol)) {
+    cerr << "ERROR - Hsrl2Radx::Run" << endl;
+    cerr << inFile.getErrStr() << endl;
+    return -1;
+  }
+  _readPaths = inFile.getReadPaths();
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    for (size_t ii = 0; ii < _readPaths.size(); ii++) {
+      cerr << "  ==>> read in file: " << _readPaths[ii] << endl;
+    }
+  }
+
+  // remove unwanted fields
+
+  if (_params.exclude_specified_fields) {
+    for (int ii = 0; ii < _params.excluded_fields_n; ii++) {
+      if (_params.debug) {
+        cerr << "Removing field name: " << _params._excluded_fields[ii] << endl;
+      }
+      vol.removeField(_params._excluded_fields[ii]);
+    }
+  }
+
+  // convert to floats
+
+  vol.convertToFl32();
+
+  // override radar location if requested
+  
+  if (_params.override_instrument_location) {
+    vol.overrideLocation(_params.instrument_latitude_deg,
+                         _params.instrument_longitude_deg,
+                         _params.instrument_altitude_meters / 1000.0);
+  }
+    
+  // override radar name and site name if requested
+  
+  if (_params.override_instrument_name) {
+    vol.setInstrumentName(_params.instrument_name);
+  }
+  if (_params.override_site_name) {
+    vol.setSiteName(_params.site_name);
+  }
+    
+  // apply angle offsets
+
+  if (_params.apply_azimuth_offset) {
+    if (_params.debug) {
+      cerr << "NOTE: applying azimuth offset (deg): " 
+           << _params.azimuth_offset << endl;
+    }
+    vol.applyAzimuthOffset(_params.azimuth_offset);
+  }
+  if (_params.apply_elevation_offset) {
+    if (_params.debug) {
+      cerr << "NOTE: applying elevation offset (deg): " 
+           << _params.elevation_offset << endl;
+    }
+    vol.applyElevationOffset(_params.elevation_offset);
+  }
+
+  // override start range and/or gate spacing
+
+  if (_params.override_start_range || _params.override_gate_spacing) {
+    _overrideGateGeometry(vol);
+  }
+
+  // set the range relative to the instrument location
+
+  if (_params.set_range_relative_to_instrument) {
+    _setRangeRelToInstrument(inFile, vol);
+  }
+  
+  // set number of gates constant if requested
+  
+  if (_params.set_ngates_constant) {
+    // vol.setNGatesConstant();
+  }
+
+  // set vol values
+
+  vol.loadSweepInfoFromRays();
+  vol.loadVolumeInfoFromRays();
+
+  // vol.printWithRayMetaData(cerr);
+
+  // set field type, names, units etc
+  
+  _convertFields(vol);
+
+  // set global attributes
+
+  _setGlobalAttr(vol);
+
+  // write the file
+
+  if (_writeVol(vol)) {
+    cerr << "ERROR - Hsrl2Radx::_processFile" << endl;
+    cerr << "  Cannot write volume to file" << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Process a UofWisc raw netcdf file
+// Returns 0 on success, -1 on failure
+
+int Hsrl2Radx::_processUwRawFile(const string &readPath)
+{
+
+  PMU_auto_register("Processing UW Raw file");
+
+  if (_params.debug) {
+    cerr << "INFO - Hsrl2Radx::_processUwRawFile" << endl;
+    cerr << "  UW raw file: " << readPath << endl;
   }
 
   MslFile inFile(_params);
