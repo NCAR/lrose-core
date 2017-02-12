@@ -131,7 +131,7 @@ private:
 
   // output volume
 
-  RadxVol _readVol;
+  RadxVol *_readVol;
   
   // dimensions
 

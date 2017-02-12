@@ -44,7 +44,7 @@ debug = DEBUG_OFF;
 // Type: string
 //
 
-instance = "devel";
+instance = "raw";
 
 //======================================================================
 //
@@ -183,101 +183,6 @@ search_ext = "nc";
 
 //======================================================================
 //
-// READ OPTIONS.
-//
-//======================================================================
- 
-///////////// set_max_range ///////////////////////////
-//
-// Option to set the max range for any ray.
-//
-//
-// Type: boolean
-//
-
-set_max_range = FALSE;
-
-///////////// max_range_km ////////////////////////////
-//
-// Specified maximim range - km.
-//
-// Gates beyond this range are removed.
-//
-//
-// Type: double
-//
-
-max_range_km = 9999;
-
-///////////// set_ngates_constant /////////////////////
-//
-// Option to force the number of gates to be constant.
-//
-// If TRUE, the number of gates on all rays will be set to the maximum, 
-//   and gates added to shorter rays will be filled with missing values.
-//
-//
-// Type: boolean
-//
-
-set_ngates_constant = FALSE;
-
-//======================================================================
-//
-// OPTION TO OVERRIDE INSTRUMENT AND/OR NAME.
-//
-//======================================================================
- 
-///////////// override_instrument_name ////////////////
-//
-// Option to override the instrument name.
-//
-// If true, the name provided will be used.
-//
-//
-// Type: boolean
-//
-
-override_instrument_name = FALSE;
-
-///////////// instrument_name /////////////////////////
-//
-// Instrument name.
-//
-// See override_instrument_name.
-//
-//
-// Type: string
-//
-
-instrument_name = "unknown";
-
-///////////// override_site_name //////////////////////
-//
-// Option to override the site name.
-//
-// If true, the name provided will be used.
-//
-//
-// Type: boolean
-//
-
-override_site_name = FALSE;
-
-///////////// site_name ///////////////////////////////
-//
-// Site name.
-//
-// See override_site_name.
-//
-//
-// Type: string
-//
-
-site_name = "unknown";
-
-//======================================================================
-//
 // OPTION TO OVERRIDE GATE GEOMETRY.
 //
 //======================================================================
@@ -387,38 +292,11 @@ instrument_longitude_deg = -999;
 
 instrument_altitude_meters = -999;
 
-///////////// change_instrument_latitude_sign /////////
-//
-// Option to negate the latitude.
-//
-// Mainly useful for RAPIC files. In RAPIC, latitude is always positive, 
-//   so mostly you need to set the latitiude to the negative value of 
-//   itself.
-//
-//
-// Type: boolean
-//
-
-change_instrument_latitude_sign = FALSE;
-
-///////////// apply_georeference_corrections //////////
-//
-// Option to apply the georeference info for moving platforms.
-//
-// For moving platforms, measured georeference information is sometimes 
-//   available. If this is set to true, the georeference data is applied 
-//   and appropriate corrections made. If possible, Earth-centric azimuth 
-//   and elevation angles will be computed.
-//
-//
-// Type: boolean
-//
-
-apply_georeference_corrections = FALSE;
-
 //======================================================================
 //
-// OPTION TO SET RANGE RELATIVE TO INSTRUNENT.
+// OPTION TO SET RANGE RELATIVE TO INSTRUNENT - CfRadial files only.
+//
+// This applies to python-generated CfRadial files only.
 //
 //======================================================================
  
@@ -449,116 +327,6 @@ set_range_relative_to_instrument = TRUE;
 //
 
 telescope_direction_is_up = 1;
-
-//======================================================================
-//
-// OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES.
-//
-//======================================================================
- 
-///////////// version_override ////////////////////////
-//
-// Option to override the version global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the version attribute.
-//
-//
-// Type: string
-//
-
-version_override = "";
-
-///////////// title_override //////////////////////////
-//
-// Option to override the title global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the title attribute.
-//
-//
-// Type: string
-//
-
-title_override = "";
-
-///////////// institution_override ////////////////////
-//
-// Option to override the institution global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the institution attribute.
-//
-//
-// Type: string
-//
-
-institution_override = "";
-
-///////////// references_override /////////////////////
-//
-// Option to override the references global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the references attribute.
-//
-//
-// Type: string
-//
-
-references_override = "";
-
-///////////// source_override /////////////////////////
-//
-// Option to override the source global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the source attribute.
-//
-//
-// Type: string
-//
-
-source_override = "";
-
-///////////// history_override ////////////////////////
-//
-// Option to override the history global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the history attribute.
-//
-//
-// Type: string
-//
-
-history_override = "";
-
-///////////// comment_override ////////////////////////
-//
-// Option to override the comment global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the comment attribute.
-//
-//
-// Type: string
-//
-
-comment_override = "";
-
-///////////// author_override /////////////////////////
-//
-// Option to override the author global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the author attribute.
-//
-//
-// Type: string
-//
-
-author_override = "";
 
 //======================================================================
 //
@@ -623,6 +391,40 @@ apply_elevation_offset = FALSE;
 //
 
 elevation_offset = 0;
+
+//======================================================================
+//
+// OPTION TO COMBINED RAW RANGE BIN ON READ TO FORM GATES.
+//
+// Only applies to reading in RAW NetCDF files.
+//
+//======================================================================
+ 
+///////////// combine_bins_on_read ////////////////////
+//
+// Option to combine range gates on read.
+//
+// If true, the specified number of range gates will be combined on read 
+//   to create mean values with lower noisiness.
+//
+//
+// Type: boolean
+//
+
+combine_bins_on_read = TRUE;
+
+///////////// n_bins_per_gate /////////////////////////
+//
+// Number of bins to combine into a single gate.
+//
+// In range, we will combine this number of gates to produce a data set 
+//   with lower spatial resolution but less noiry data.
+//
+//
+// Type: int
+//
+
+n_bins_per_gate = 4;
 
 //======================================================================
 //
@@ -759,6 +561,116 @@ excluded_fields = {
 
 //======================================================================
 //
+// OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES.
+//
+//======================================================================
+ 
+///////////// version_override ////////////////////////
+//
+// Option to override the version global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the version attribute.
+//
+//
+// Type: string
+//
+
+version_override = "";
+
+///////////// title_override //////////////////////////
+//
+// Option to override the title global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the title attribute.
+//
+//
+// Type: string
+//
+
+title_override = "";
+
+///////////// institution_override ////////////////////
+//
+// Option to override the institution global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the institution attribute.
+//
+//
+// Type: string
+//
+
+institution_override = "";
+
+///////////// references_override /////////////////////
+//
+// Option to override the references global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the references attribute.
+//
+//
+// Type: string
+//
+
+references_override = "";
+
+///////////// source_override /////////////////////////
+//
+// Option to override the source global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the source attribute.
+//
+//
+// Type: string
+//
+
+source_override = "";
+
+///////////// history_override ////////////////////////
+//
+// Option to override the history global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the history attribute.
+//
+//
+// Type: string
+//
+
+history_override = "";
+
+///////////// comment_override ////////////////////////
+//
+// Option to override the comment global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the comment attribute.
+//
+//
+// Type: string
+//
+
+comment_override = "";
+
+///////////// author_override /////////////////////////
+//
+// Option to override the author global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the author attribute.
+//
+//
+// Type: string
+//
+
+author_override = "";
+
+//======================================================================
+//
 // OUTPUT FORMAT.
 //
 // Files are written in CfRadial.
@@ -789,19 +701,6 @@ netcdf_style = NETCDF4;
 //
 //======================================================================
  
-///////////// output_force_ngates_vary ////////////////
-//
-// Option to force the use of ragged arrays for CfRadial files.
-//
-// Only applies to CfRadial. If true, forces the use of ragged arrays 
-//   even if the number of gates for all rays is constant.
-//
-//
-// Type: boolean
-//
-
-output_force_ngates_vary = FALSE;
-
 ///////////// compression_level ///////////////////////
 //
 // Compression level for output, if compressed.
@@ -814,6 +713,54 @@ output_force_ngates_vary = FALSE;
 //
 
 compression_level = 4;
+
+///////////// override_instrument_name ////////////////
+//
+// Option to override the instrument name.
+//
+// If true, the name provided will be used.
+//
+//
+// Type: boolean
+//
+
+override_instrument_name = FALSE;
+
+///////////// instrument_name /////////////////////////
+//
+// Instrument name.
+//
+// See override_instrument_name.
+//
+//
+// Type: string
+//
+
+instrument_name = "unknown";
+
+///////////// override_site_name //////////////////////
+//
+// Option to override the site name.
+//
+// If true, the name provided will be used.
+//
+//
+// Type: boolean
+//
+
+override_site_name = FALSE;
+
+///////////// site_name ///////////////////////////////
+//
+// Site name.
+//
+// See override_site_name.
+//
+//
+// Type: string
+//
+
+site_name = "unknown";
 
 //======================================================================
 //
@@ -943,20 +890,6 @@ append_day_dir_to_output_dir = TRUE;
 
 append_year_dir_to_output_dir = FALSE;
 
-///////////// write_individual_sweeps /////////////////
-//
-// Option to write out individual sweeps if appropriate.
-//
-// If true, the volume is split into individual sweeps for writing. 
-//   Applies to CfRadial format. This is always true for DORADE format 
-//   files.
-//
-//
-// Type: boolean
-//
-
-write_individual_sweeps = FALSE;
-
 ///////////// write_latest_data_info //////////////////
 //
 // Option to write out _latest_data_info files.
@@ -969,160 +902,4 @@ write_individual_sweeps = FALSE;
 //
 
 write_latest_data_info = TRUE;
-
-//======================================================================
-//
-// OPTION TO OVERRIDE MISSING VALUES.
-//
-// Missing values are applicable to both metadata and field data. The 
-//   default values should be satisfactory for most purposes. However, you 
-//   can choose to override these if you are careful with the selected 
-//   values.
-//
-// The default values for metadata are:
-// 	missingMetaDouble = -9999.0
-// 	missingMetaFloat = -9999.0
-// 	missingMetaInt = -9999
-// 	missingMetaChar = -128
-//
-// The default values for field data are:
-// 	missingFl64 = -9.0e33
-// 	missingFl32 = -9.0e33
-// 	missingSi32 = -2147483647
-// 	missingSi16 = -32768
-// 	missingSi08 = -128.
-//
-//======================================================================
- 
-///////////// override_missing_metadata_values ////////
-//
-// Option to override the missing values for meta-data.
-//
-// See following parameter options.
-//
-//
-// Type: boolean
-//
-
-override_missing_metadata_values = FALSE;
-
-///////////// missing_metadata_double /////////////////
-//
-// Missing value for metadata of type double.
-//
-// Only applies if override_missing_metadata_values is TRUE.
-//
-//
-// Type: double
-//
-
-missing_metadata_double = -9999;
-
-///////////// missing_metadata_float //////////////////
-//
-// Missing value for metadata of type float.
-//
-// Only applies if override_missing_metadata_values is TRUE.
-//
-//
-// Type: float
-//
-
-missing_metadata_float = -9999;
-
-///////////// missing_metadata_int ////////////////////
-//
-// Missing value for metadata of type int.
-//
-// Only applies if override_missing_metadata_values is TRUE.
-//
-//
-// Type: int
-//
-
-missing_metadata_int = -9999;
-
-///////////// missing_metadata_char ///////////////////
-//
-// Missing value for metadata of type char.
-//
-// Only applies if override_missing_metadata_values is TRUE.
-//
-//
-// Type: int
-//
-
-missing_metadata_char = -128;
-
-///////////// override_missing_field_values ///////////
-//
-// Option to override the missing values for field data.
-//
-// See following parameter options.
-//
-//
-// Type: boolean
-//
-
-override_missing_field_values = FALSE;
-
-///////////// missing_field_fl64 //////////////////////
-//
-// Missing value for field data of type 64-bit float.
-//
-// Only applies if override_missing_field_values is TRUE.
-//
-//
-// Type: double
-//
-
-missing_field_fl64 = -9e+33;
-
-///////////// missing_field_fl32 //////////////////////
-//
-// Missing value for field data of type 32-bit float.
-//
-// Only applies if override_missing_field_values is TRUE.
-//
-//
-// Type: double
-//
-
-missing_field_fl32 = -9e+33;
-
-///////////// missing_field_si32 //////////////////////
-//
-// Missing value for field data of type 32-bit integer.
-//
-// Only applies if override_missing_field_values is TRUE.
-//
-//
-// Type: int
-//
-
-missing_field_si32 = -2147483647;
-
-///////////// missing_field_si16 //////////////////////
-//
-// Missing value for field data of type 16-bit integer.
-//
-// Only applies if override_missing_field_values is TRUE.
-//
-//
-// Type: int
-//
-
-missing_field_si16 = -232768;
-
-///////////// missing_field_si08 //////////////////////
-//
-// Missing value for field data of type 8-bit integer.
-//
-// Only applies if override_missing_field_values is TRUE.
-//
-//
-// Type: int
-//
-
-missing_field_si08 = -128;
 

@@ -96,22 +96,6 @@ Hsrl2Radx::Hsrl2Radx(int argc, char **argv)
     }
   }
 
-  // override missing values
-
-  if (_params.override_missing_metadata_values) {
-    Radx::setMissingMetaDouble(_params.missing_metadata_double);
-    Radx::setMissingMetaFloat(_params.missing_metadata_float);
-    Radx::setMissingMetaInt(_params.missing_metadata_int);
-    Radx::setMissingMetaChar(_params.missing_metadata_char);
-  }
-  if (_params.override_missing_field_values) {
-    Radx::setMissingFl64(_params.missing_field_fl64);
-    Radx::setMissingFl32(_params.missing_field_fl32);
-    Radx::setMissingSi32(_params.missing_field_si32);
-    Radx::setMissingSi16(_params.missing_field_si16);
-    Radx::setMissingSi08(_params.missing_field_si08);
-  }
-
 }
 
 // destructor
@@ -786,10 +770,8 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
     return -1;
   }
   
-  // convert to floats
-  
-  vol.convertToFl32();
-  
+  cerr << "333333333333333333 nRays in vol: " << vol.getNRays() << endl;
+
   // override radar name and site name if requested
   
   if (_params.override_instrument_name) {

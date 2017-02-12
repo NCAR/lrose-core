@@ -245,6 +245,8 @@ int RawFile::readFromPath(const string &path,
 
   string errStr("ERROR - RawFile::readFromPath");
 
+  _readVol = &vol;
+
   // clear tmp rays
   
   _nTimesInFile = 0;
@@ -845,6 +847,7 @@ int RawFile::_createRays(const string &path)
     
     // sweep info
 
+    ray->setVolumeNumber(-9999);
     ray->setSweepNumber(0);
     ray->setSweepMode(Radx::SWEEP_MODE_POINTING);
     ray->setPrtMode(Radx::PRT_MODE_FIXED);
@@ -905,47 +908,46 @@ void RawFile::_loadReadVolume()
   
 {
 
-  _readVol.clear();
+  cerr << "1111111111111111111111 _rays.size: " << _rays.size() << endl;
 
-  _readVol.setOrigFormat("HSRL-RAW");
-  _readVol.setVolumeNumber(-9999);
-  _readVol.setInstrumentType(_instrumentType);
-  _readVol.setInstrumentName("HSRL");
-  _readVol.setSiteName("GV");
-  _readVol.setPlatformType(_platformType);
-  _readVol.setPrimaryAxis(_primaryAxis);
-  for (int ii = 0; ii < (int) _rays.size(); ii++) {
-    _rays[ii]->setVolumeNumber(-9999);
-  }
-  
-  _readVol.addFrequencyHz(Radx::LIGHT_SPEED / 538.0e-6);
-  _readVol.addFrequencyHz(Radx::LIGHT_SPEED / 1064.0e-6);
-  
-  _readVol.setLidarConstant(-9999.0);
-  _readVol.setLidarPulseEnergyJ(-9999.0);
-  _readVol.setLidarPeakPowerW(-9999.0);
-  _readVol.setLidarApertureDiamCm(-9999.0);
-  _readVol.setLidarApertureEfficiency(-9999.0);
-  _readVol.setLidarFieldOfViewMrad(-9999.0);
-  _readVol.setLidarBeamDivergenceMrad(-9999.0);
+  _readVol->clear();
 
-  _readVol.setTitle("NCAR HSRL");
-  _readVol.setSource("HSRL realtime software");
-  _readVol.setHistory("Converted from RAW NetCDF files");
-  _readVol.setInstitution("NCAR");
-  _readVol.setReferences("University of Wisconsin");
-  _readVol.setComment("");
-  _readVol.setDriver("Hsrl2Radx");
-  _readVol.setCreated(_dataAdded);
-  _readVol.setStatusXml("");
+  _readVol->setOrigFormat("HSRL-RAW");
+  _readVol->setVolumeNumber(-9999);
+  _readVol->setInstrumentType(_instrumentType);
+  _readVol->setInstrumentName("HSRL");
+  _readVol->setSiteName("GV");
+  _readVol->setPlatformType(_platformType);
+  _readVol->setPrimaryAxis(_primaryAxis);
   
-  _readVol.setScanName("Vert");
-  _readVol.setScanId(0);
+  _readVol->addFrequencyHz(Radx::LIGHT_SPEED / 538.0e-6);
+  _readVol->addFrequencyHz(Radx::LIGHT_SPEED / 1064.0e-6);
+  
+  _readVol->setLidarConstant(-9999.0);
+  _readVol->setLidarPulseEnergyJ(-9999.0);
+  _readVol->setLidarPeakPowerW(-9999.0);
+  _readVol->setLidarApertureDiamCm(-9999.0);
+  _readVol->setLidarApertureEfficiency(-9999.0);
+  _readVol->setLidarFieldOfViewMrad(-9999.0);
+  _readVol->setLidarBeamDivergenceMrad(-9999.0);
+
+  _readVol->setTitle("NCAR HSRL");
+  _readVol->setSource("HSRL realtime software");
+  _readVol->setHistory("Converted from RAW NetCDF files");
+  _readVol->setInstitution("NCAR");
+  _readVol->setReferences("University of Wisconsin");
+  _readVol->setComment("");
+  _readVol->setDriver("Hsrl2Radx");
+  _readVol->setCreated(_dataAdded);
+  _readVol->setStatusXml("");
+  
+  _readVol->setScanName("Vert");
+  _readVol->setScanId(0);
 
   if (_latitude.size() > 0) {
     for (size_t ii = 0; ii < _latitude.size(); ii++) {
       if (_latitude[ii] > -9990) {
-        _readVol.setLatitudeDeg(_latitude[ii]);
+        _readVol->setLatitudeDeg(_latitude[ii]);
         break;
       }
     }
@@ -953,7 +955,7 @@ void RawFile::_loadReadVolume()
   if (_longitude.size() > 0) {
     for (size_t ii = 0; ii < _longitude.size(); ii++) {
       if (_longitude[ii] > -9990) {
-        _readVol.setLongitudeDeg(_longitude[ii]);
+        _readVol->setLongitudeDeg(_longitude[ii]);
         break;
       }
     }
@@ -961,36 +963,37 @@ void RawFile::_loadReadVolume()
   if (_altitude.size() > 0) {
     for (size_t ii = 0; ii < _altitude.size(); ii++) {
       if (_altitude[ii] > -9990) {
-        _readVol.setAltitudeKm(_altitude[ii] / 1000.0);
+        _readVol->setAltitudeKm(_altitude[ii] / 1000.0);
         break;
       }
     }
   }
 
-  _readVol.setRangeGeom(_startRangeKm, _gateSpacingKm);
+  _readVol->setRangeGeom(_startRangeKm, _gateSpacingKm);
 
   for (size_t ii = 0; ii < _rays.size(); ii++) {
-    _readVol.addRay(_rays[ii]);
+    _readVol->addRay(_rays[ii]);
   }
 
   // memory responsibility has passed to the volume object, so clear
   // the vectors without deleting the objects to which they point
 
   _rays.clear();
-  // _fields.clear();
 
   // apply goeref info
 
-  _readVol.applyGeorefs();
+  _readVol->applyGeorefs();
 
   // load the sweep information from the rays
 
-  _readVol.loadSweepInfoFromRays();
+  _readVol->loadSweepInfoFromRays();
   
   // load the volume information from the rays
 
-  _readVol.loadVolumeInfoFromRays();
+  _readVol->loadVolumeInfoFromRays();
   
+  cerr << "222222222222222 nRays in vol: " << _readVol->getNRays() << endl;
+
 }
 
 ////////////////////////////////////////////

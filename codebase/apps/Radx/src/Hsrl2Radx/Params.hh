@@ -486,28 +486,6 @@ public:
 
   tdrp_bool_t write_latest_data_info;
 
-  tdrp_bool_t override_missing_metadata_values;
-
-  double missing_metadata_double;
-
-  float missing_metadata_float;
-
-  int missing_metadata_int;
-
-  int missing_metadata_char;
-
-  tdrp_bool_t override_missing_field_values;
-
-  double missing_field_fl64;
-
-  double missing_field_fl32;
-
-  int missing_field_si32;
-
-  int missing_field_si16;
-
-  int missing_field_si08;
-
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -515,7 +493,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[82];
+  mutable TDRPtable _table[70];
 
   const char *_className;
 
