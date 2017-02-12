@@ -89,7 +89,6 @@ void RawFile::clear()
   _timeVar = NULL;
   _telescopeLockedVar = NULL;
   _telescopeDirectionVar = NULL;
-  _telescopeRollAngleOffsetVar = NULL;
   _latitudeVar = NULL;
   _longitudeVar = NULL;
   _altitudeVar = NULL;
@@ -129,7 +128,6 @@ void RawFile::clear()
 
   _telescopeLocked.clear();
   _telescopeDirection.clear();
-  _telescopeRollAngleOffset.clear();
   _rotation.clear();
   _tilt.clear();
 
@@ -270,12 +268,41 @@ int RawFile::readFromPath(const string &path,
     return -1;
   }
 
+  // read global attributes
+  
+  if (_readGlobalAttributes()) {
+    _addErrStr(errStr);
+    return -1;
+  }
+
   // read time variable
   
   if (_readTimes()) {
     _addErrStr(errStr);
     return -1;
   }
+  
+  // read in ray metadata variables
+  
+  if (_readRayVariables()) {
+    _addErrStr(errStr);
+    return -1;
+  }
+  
+  // create the rays, filling out the metadata
+  
+  if (_createRays(path)) {
+    _addErrStr(errStr);
+    return -1;
+  }
+  
+  // load the data into the read volume
+
+  // _loadReadVolume();
+
+  // close file
+
+  _file.close();
 
 #ifdef JUNK
   
@@ -287,13 +314,6 @@ int RawFile::readFromPath(const string &path,
   // for first path in aggregated list, read in non-varying values
 
   if (pathNum == 0) {
-
-    // read global attributes
-    
-    if (_readGlobalAttributes()) {
-      _addErrStr(errStr);
-      return -1;
-    }
 
     // read in scalar variables
     
@@ -344,13 +364,6 @@ int RawFile::readFromPath(const string &path,
     return -1;
   }
 
-  // read in ray variables
-
-  if (_readRayVariables()) {
-    _addErrStr(errStr);
-    return -1;
-  }
-
   // read in georef variables
 
   if (_georefsActive) {
@@ -383,13 +396,6 @@ int RawFile::readFromPath(const string &path,
 
   } else {
 
-    // create the rays to be read in, filling out the metadata
-    
-    if (_createRays(path)) {
-      _addErrStr(errStr);
-      return -1;
-    }
-    
     // read the ray ngates and offset vectors for each ray
     
     if (_readRayNgatesAndOffsets()) {
@@ -414,14 +420,6 @@ int RawFile::readFromPath(const string &path,
   }
 
 #endif
-
-  // close file
-
-  _file.close();
-
-  // load the data into the read volume
-
-  // _loadReadVolume();
 
   // clean up
 
@@ -505,15 +503,15 @@ int RawFile::_readGlobalAttributes()
       _userName = NetcdfClassic::asString(att);
     }
 
-    if (!strcmp(att->name(), "NCUTIL_GSRL_GIT_COMMIT")) {
+    if (!strcmp(att->name(), "NCUTIL_HSRL_GIT_COMMIT")) {
       _gitCommit = NetcdfClassic::asString(att);
     }
 
-    if (!strcmp(att->name(), "NCUTIL_HsrlVersion")) {
+    if (!strcmp(att->name(), "DATA_HSRLVersion")) {
       _hsrlVersion = att->as_int(0);
     }
 
-    if (!strcmp(att->name(), "NCUTIL_SourceSoftware")) {
+    if (!strcmp(att->name(), "DATA_SourceSoftware")) {
       _sourceSoftware = NetcdfClassic::asString(att);
     }
 
@@ -522,6 +520,17 @@ int RawFile::_readGlobalAttributes()
     delete att;
     
   } // ii
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+
+    cerr << "Gobal attr machType: " << _machType << endl;
+    cerr << "Gobal attr hostName: " << _hostName << endl;
+    cerr << "Gobal attr userName: " << _userName << endl;
+    cerr << "Gobal attr gitCommit: " << _gitCommit << endl;
+    cerr << "Gobal attr hsrlVersion: " << _hsrlVersion << endl;
+    cerr << "Gobal attr sourceSoftware: " << _sourceSoftware << endl;
+    
+  }
 
   return 0;
 
@@ -533,6 +542,9 @@ int RawFile::_readGlobalAttributes()
 int RawFile::_readTimes()
 
 {
+
+  _dataTimes.clear();
+  _dTimes.clear();
 
   // read the time variable
 
@@ -579,10 +591,522 @@ int RawFile::_readTimes()
     int microSec = tdat[7];
     double fracSec = milliSec / 1.0e3 + microSec / 1.0e6;
     RadxTime thisTime(year, month, day, hour, min, sec, fracSec);
-    cerr << "11111111111111111 time: " << thisTime.asString(6) << endl;
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "  Ray time: " << thisTime.asString(6) << endl;
+    }
+    _dataTimes.push_back(thisTime);
+    _dTimes.push_back(thisTime.asDouble());
   }
 
   return 0;
+
+}
+
+///////////////////////////////////
+// clear the ray variables
+
+void RawFile::_clearRayVariables()
+
+{
+
+  _telescopeLocked.clear();
+  _telescopeDirection.clear();
+  _rotation.clear();
+  _tilt.clear();
+  _latitude.clear();
+  _longitude.clear();
+  _altitude.clear();
+  _gndSpeed.clear();
+  _vertVel.clear();
+  _pitch.clear();
+  _roll.clear();
+
+}
+
+///////////////////////////////////
+// read in ray variables
+
+int RawFile::_readRayVariables()
+
+{
+
+  _clearRayVariables();
+  int iret = 0;
+
+  _readRayVar(_telescopeLockedVar, "TelescopeLocked", _telescopeLocked);
+  if (_telescopeLocked.size() < _nTimesInFile) {
+    _addErrStr("ERROR - TelescopeLocked variable required");
+    iret = -1;
+  }
+
+  _readRayVar(_telescopeDirectionVar, "TelescopeDirection", _telescopeDirection);
+  if (_telescopeDirection.size() < _nTimesInFile) {
+    _addErrStr("ERROR - TelescopeDirection variable required");
+    iret = -1;
+  }
+
+  _readRayVar(_latitudeVar, "iwg1_Lat", _latitude);
+  if (_latitude.size() < _nTimesInFile) {
+    _addErrStr("ERROR - iwg1_Lat variable required");
+    iret = -1;
+  }
+
+  _readRayVar(_longitudeVar, "iwg1_Lon", _longitude);
+  if (_longitude.size() < _nTimesInFile) {
+    _addErrStr("ERROR - iwg1_Lon variable required");
+    iret = -1;
+  }
+
+  _readRayVar(_altitudeVar, "iwg1_GPS_MSL_Alt", _altitude);
+  if (_altitude.size() < _nTimesInFile) {
+    _addErrStr("ERROR - iwg1_GPS_MSL_Alt variable required");
+    iret = -1;
+  }
+
+  _readRayVar(_gndSpeedVar, "iwg1_Grnd_Spd", _gndSpeed, false);
+  _readRayVar(_vertVelVar, "iwg1_Vert_Velocity", _vertVel, false);
+
+  _readRayVar(_pitchVar, "iwg1_Pitch", _pitch);
+  if (_pitch.size() < _nTimesInFile) {
+    _addErrStr("ERROR - iwg1_Pitch variable required");
+    iret = -1;
+  }
+
+  _readRayVar(_rollVar, "iwg1_Roll", _roll);
+  if (_roll.size() < _nTimesInFile) {
+    _addErrStr("ERROR - iwg1_Roll variable required");
+    iret = -1;
+  }
+
+  if (iret) {
+    _addErrStr("ERROR - RawFile::_readRayVariables");
+    return -1;
+  }
+
+  return 0;
+
+}
+
+///////////////////////////////////
+// read a ray variable - double
+// side effects: set var, vals
+
+int RawFile::_readRayVar(NcVar* &var, const string &name,
+                         vector<double> &vals, bool required)
+  
+{
+
+  vals.clear();
+
+  // get var
+
+  var = _getRayVar(name, required);
+  if (var == NULL) {
+    if (!required) {
+      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+        vals.push_back(Radx::missingMetaDouble);
+      }
+      clearErrStr();
+      return 0;
+    } else {
+      _addErrStr("ERROR - RawFile::_readRayVar");
+      return -1;
+    }
+  }
+
+  // load up data
+
+  double *data = new double[_nTimesInFile];
+  double *dd = data;
+  int iret = 0;
+  if (var->get(data, _nTimesInFile)) {
+    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
+      vals.push_back(*dd);
+    }
+  } else {
+    if (!required) {
+      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+        vals.push_back(Radx::missingMetaDouble);
+      }
+      clearErrStr();
+    } else {
+      _addErrStr("ERROR - RawFile::_readRayVar");
+      _addErrStr("  Cannot read variable: ", name);
+      _addErrStr(_file.getNcError()->get_errmsg());
+      iret = -1;
+    }
+  }
+  delete[] data;
+  return iret;
+
+}
+
+///////////////////////////////////
+// read a ray variable - double
+// side effects: set vals only
+
+int RawFile::_readRayVar(const string &name,
+                         vector<double> &vals, bool required)
+{
+  NcVar *var;
+  return _readRayVar(var, name, vals, required);
+}
+
+///////////////////////////////////
+// read a ray variable - integer
+// side effects: set var, vals
+
+int RawFile::_readRayVar(NcVar* &var, const string &name,
+                         vector<int> &vals, bool required)
+  
+{
+
+  vals.clear();
+
+  // get var
+  
+  var = _getRayVar(name, required);
+  if (var == NULL) {
+    if (!required) {
+      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+        vals.push_back(Radx::missingMetaInt);
+      }
+      clearErrStr();
+      return 0;
+    } else {
+      _addErrStr("ERROR - RawFile::_readRayVar");
+      return -1;
+    }
+  }
+
+  // load up data
+
+  int *data = new int[_nTimesInFile];
+  int *dd = data;
+  int iret = 0;
+  if (var->get(data, _nTimesInFile)) {
+    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
+      vals.push_back(*dd);
+    }
+  } else {
+    if (!required) {
+      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+        vals.push_back(Radx::missingMetaInt);
+      }
+      clearErrStr();
+    } else {
+      _addErrStr("ERROR - RawFile::_readRayVar");
+      _addErrStr("  Cannot read variable: ", name);
+      _addErrStr(_file.getNcError()->get_errmsg());
+      iret = -1;
+    }
+  }
+  delete[] data;
+  return iret;
+
+}
+
+///////////////////////////////////
+// read a ray variable - integer
+// side effects: set vals only
+
+int RawFile::_readRayVar(const string &name,
+                         vector<int> &vals, bool required)
+{
+  NcVar *var;
+  return _readRayVar(var, name, vals, required);
+}
+
+///////////////////////////////////////////
+// read a ray variable - boolean
+// side effects: set var, vals
+
+int RawFile::_readRayVar(NcVar* &var, const string &name,
+                         vector<bool> &vals, bool required)
+  
+{
+  
+  vals.clear();
+  
+  // get var
+  
+  var = _getRayVar(name, false);
+  if (var == NULL) {
+    if (!required) {
+      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+        vals.push_back(false);
+      }
+      clearErrStr();
+      return 0;
+    } else {
+      _addErrStr("ERROR - RawFile::_readRayVar");
+      return -1;
+    }
+  }
+
+  // load up data
+  
+  int *data = new int[_nTimesInFile];
+  int *dd = data;
+  int iret = 0;
+  if (var->get(data, _nTimesInFile)) {
+    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
+      if (*dd == 0) {
+        vals.push_back(false);
+      } else {
+        vals.push_back(true);
+      }
+    }
+  } else {
+    for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+      vals.push_back(false);
+    }
+    clearErrStr();
+  }
+  delete[] data;
+  return iret;
+
+}
+
+///////////////////////////////////
+// read a ray variable - boolean
+// side effects: set vals only
+
+int RawFile::_readRayVar(const string &name,
+                         vector<bool> &vals, bool required)
+{
+  NcVar *var;
+  return _readRayVar(var, name, vals, required);
+}
+
+///////////////////////////////////
+// get a ray variable by name
+// returns NULL on failure
+
+NcVar* RawFile::_getRayVar(const string &name, bool required)
+
+{
+
+  // get var
+  
+  NcVar *var = _file.getNcFile()->get_var(name.c_str());
+  if (var == NULL) {
+    if (required) {
+      _addErrStr("ERROR - RawFile::_getRayVar");
+      _addErrStr("  Cannot read variable, name: ", name);
+      _addErrStr(_file.getNcError()->get_errmsg());
+    }
+    return NULL;
+  }
+
+  // check time dimension
+  
+  if (var->num_dims() < 1) {
+    if (required) {
+      _addErrStr("ERROR - RawFile::_getRayVar");
+      _addErrStr("  variable name: ", name);
+      _addErrStr("  variable has no dimensions");
+    }
+    return NULL;
+  }
+  NcDim *timeDim = var->get_dim(0);
+  if (timeDim != _timeDim) {
+    if (required) {
+      _addErrStr("ERROR - RawFile::_getRayVar");
+      _addErrStr("  variable name: ", name);
+      _addErrStr("  variable has incorrect dimension, dim name: ", 
+                 timeDim->name());
+      _addErrStr("  should be: ", "time");
+    }
+    return NULL;
+  }
+
+  return var;
+
+}
+
+///////////////////////////////////
+// create the rays to be read in
+// and set meta data
+
+int RawFile::_createRays(const string &path)
+
+{
+
+  // compile a list of the rays to be read in
+  
+  _rays.clear();
+
+  for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+
+    // new ray
+
+    RadxRay *ray = new RadxRay;
+    double gateSpacingKm = 3.75 / 1000.0;
+    ray->setRangeGeom(gateSpacingKm / 2.0, gateSpacingKm);
+    ray->setTime(_dataTimes[ii]);
+    
+    // sweep info
+
+    ray->setSweepNumber(0);
+    ray->setSweepMode(Radx::SWEEP_MODE_POINTING);
+    ray->setPrtMode(Radx::PRT_MODE_FIXED);
+    ray->setTargetScanRateDegPerSec(0.0);
+    ray->setIsIndexed(false);
+
+    // georeference
+    
+    RadxGeoref geo;
+
+    if (_telescopeDirection[ii] == 1) {
+
+      // pointing up
+
+      geo.setRotation(-4.0);
+      geo.setTilt(0.0);
+      ray->setAzimuthDeg(0.0);
+      ray->setElevationDeg(90.0);
+      ray->setFixedAngleDeg(90.0);
+      
+    } else {
+
+      // pointing down
+
+      geo.setRotation(184.0);
+      geo.setTilt(0.0);
+      ray->setAzimuthDeg(0.0);
+      ray->setElevationDeg(-90.0);
+      ray->setFixedAngleDeg(-90.0);
+      
+    }
+
+    geo.setRoll(_roll[ii]);
+    geo.setPitch(_pitch[ii]);
+
+    geo.setLatitude(_latitude[ii]);
+    geo.setLongitude(_longitude[ii]);
+    geo.setAltitudeKmMsl(_altitude[ii]);
+
+    geo.setVertVelocity(_vertVel[ii]);
+    
+    ray->setGeoref(geo);
+    
+    // add to ray vector
+    
+    _rays.push_back(ray);
+
+  } // ii
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// load up the read volume with the data from this object
+
+void RawFile::_loadReadVolume()
+  
+{
+
+  _readVol.clear();
+
+  _readVol.setOrigFormat("HSRL-RAW");
+  _readVol.setVolumeNumber(-9999);
+  _readVol.setInstrumentType(_instrumentType);
+  _readVol.setPlatformType(_platformType);
+  _readVol.setPrimaryAxis(_primaryAxis);
+  for (int ii = 0; ii < (int) _rays.size(); ii++) {
+    _rays[ii]->setVolumeNumber(-9999);
+  }
+  
+  // for (size_t ii = 0; ii < _frequency.size(); ii++) {
+  //   _readVol.addFrequencyHz(_frequency[ii]);
+  // }
+
+  // _readVol.setRadarAntennaGainDbH(_radarAntennaGainDbH);
+  // _readVol.setRadarAntennaGainDbV(_radarAntennaGainDbV);
+  // _readVol.setRadarBeamWidthDegH(_radarBeamWidthDegH);
+  // _readVol.setRadarBeamWidthDegV(_radarBeamWidthDegV);
+  // _readVol.setRadarReceiverBandwidthMhz(_radarRxBandwidthHz / 1.0e6);
+  
+  // _readVol.setVersion(_version);
+  // _readVol.setTitle(_title);
+  // _readVol.setSource(_source);
+  // _readVol.setHistory(_history);
+  _readVol.setInstitution("NCAR");
+  // _readVol.setReferences(_references);
+  // _readVol.setComment(_comment);
+  // _readVol.setOrigFormat(_origFormat);
+  _readVol.setDriver("Hsrl2Radx");
+  _readVol.setCreated(_created);
+  // _readVol.setStatusXml(_statusXml);
+  // _readVol.setSiteName(_siteName);
+  // _readVol.setScanName(_scanName);
+  // _readVol.setScanId(_scanId);
+  _readVol.setInstrumentName("HSRL");
+
+  if (_latitude.size() > 0) {
+    for (size_t ii = 0; ii < _latitude.size(); ii++) {
+      if (_latitude[ii] > -9990) {
+        _readVol.setLatitudeDeg(_latitude[ii]);
+        break;
+      }
+    }
+  }
+  if (_longitude.size() > 0) {
+    for (size_t ii = 0; ii < _longitude.size(); ii++) {
+      if (_longitude[ii] > -9990) {
+        _readVol.setLongitudeDeg(_longitude[ii]);
+        break;
+      }
+    }
+  }
+  if (_altitude.size() > 0) {
+    for (size_t ii = 0; ii < _altitude.size(); ii++) {
+      if (_altitude[ii] > -9990) {
+        _readVol.setAltitudeKm(_altitude[ii] / 1000.0);
+        break;
+      }
+    }
+  }
+  // if (_altitudeAgl.size() > 0) {
+  //   for (size_t ii = 0; ii < _altitudeAgl.size(); ii++) {
+  //     if (_altitudeAgl[ii] > -9990) {
+  //       _readVol.setSensorHtAglM(_altitudeAgl[ii]);
+  //       break;
+  //     }
+  //   }
+  // }
+
+  // _readVol.copyRangeGeom(_geom);
+
+  for (size_t ii = 0; ii < _rays.size(); ii++) {
+    _readVol.addRay(_rays[ii]);
+  }
+
+  // memory responsibility has passed to the volume object, so clear
+  // the vectors without deleting the objects to which they point
+
+  _rays.clear();
+  // _fields.clear();
+
+  // apply goeref info if applicable
+
+  // if (_readApplyGeorefs) {
+  //   _readVol.applyGeorefs();
+  // }
+
+  // load the sweep information from the rays
+
+  _readVol.loadSweepInfoFromRays();
+  
+  // load the volume information from the rays
+
+  _readVol.loadVolumeInfoFromRays();
+  
+  // check for indexed rays, set info on rays
+
+  _readVol.checkForIndexedRays();
 
 }
 
@@ -906,179 +1430,6 @@ void RawFile::_clearGeorefVariables()
 
 }
 
-///////////////////////////////////
-// read the georeference meta-data
-
-int RawFile::_readGeorefVariables()
-
-{
-
-  _clearGeorefVariables();
-  int iret = 0;
-
-  _readRayVar(_georefTimeVar, GEOREF_TIME, _geoTime);
-  if (_geoTime.size() < _raysFromFile.size()) {
-    // iret = -1;
-  }
-
-  _readRayVar(_latitudeVar, LATITUDE, _geoLatitude);
-  if (_geoLatitude.size() < _raysFromFile.size()) {
-    iret = -1;
-  }
-
-  _readRayVar(_longitudeVar, LONGITUDE, _geoLongitude);
-  if (_geoLongitude.size() < _raysFromFile.size()) {
-    iret = -1;
-  }
-
-  _readRayVar(_altitudeVar, ALTITUDE, _geoAltitudeMsl); // meters
-  if (_geoAltitudeMsl.size() < _raysFromFile.size()) {
-    iret = -1;
-  }
-
-  _readRayVar(_altitudeAglVar, ALTITUDE_AGL, _geoAltitudeAgl, false); // meters
-
-  _readRayVar(EASTWARD_VELOCITY, _geoEwVelocity, false);
-  _readRayVar(NORTHWARD_VELOCITY, _geoNsVelocity, false);
-  _readRayVar(VERTICAL_VELOCITY, _geoVertVelocity, false);
-
-  _readRayVar(HEADING, _geoHeading, false);
-  _readRayVar(ROLL, _geoRoll, false);
-  _readRayVar(PITCH, _geoPitch, false);
-
-  _readRayVar(DRIFT, _geoDrift, false);
-  _readRayVar(ROTATION, _geoRotation, false);
-  _readRayVar(TILT, _geoTilt, false);
-
-  _readRayVar(EASTWARD_WIND, _geoEwWind, false);
-  _readRayVar(NORTHWARD_WIND, _geoNsWind, false);
-  _readRayVar(VERTICAL_WIND, _geoVertWind, false);
-
-  _readRayVar(HEADING_CHANGE_RATE, _geoHeadingRate, false);
-  _readRayVar(PITCH_CHANGE_RATE, _geoPitchRate, false);
-  _readRayVar(DRIVE_ANGLE_1, _geoDriveAngle1, false);
-  _readRayVar(DRIVE_ANGLE_2, _geoDriveAngle2, false);
-
-  if (iret) {
-    _addErrStr("ERROR - RawFile::_readGeorefVariables");
-    return -1;
-  }
-
-  return 0;
-
-}
-
-///////////////////////////////////
-// clear the ray variables
-
-void RawFile::_clearRayVariables()
-
-{
-
-  _rayAzimuths.clear();
-  _rayElevations.clear();
-  _rayPulseWidths.clear();
-  _rayPrts.clear();
-  _rayPrtRatios.clear();
-  _rayNyquists.clear();
-  _rayUnambigRanges.clear();
-  _rayAntennaTransitions.clear();
-  _rayGeorefsApplied.clear();
-  _rayNSamples.clear();
-  _rayCalNum.clear();
-  _rayXmitPowerH.clear();
-  _rayXmitPowerV.clear();
-  _rayScanRate.clear();
-  _rayEstNoiseDbmHc.clear();
-  _rayEstNoiseDbmVc.clear();
-  _rayEstNoiseDbmHx.clear();
-  _rayEstNoiseDbmVx.clear();
-
-  _telescopeLocked.clear();
-  _telescopeDirection.clear();
-  _telescopeRollAngleOffset.clear();
-
-}
-
-///////////////////////////////////
-// read in ray variables
-
-int RawFile::_readRayVariables()
-
-{
-
-  _clearRayVariables();
-  int iret = 0;
-
-  _readRayVar(_azimuthVar, AZIMUTH, _rayAzimuths);
-  if (_rayAzimuths.size() < _raysFromFile.size()) {
-    _addErrStr("ERROR - azimuth variable required");
-    iret = -1;
-  }
-
-  _readRayVar(_pulseWidthVar, PULSE_WIDTH, _rayPulseWidths, false);
-  _readRayVar(_prtVar, PRT, _rayPrts, false);
-  _readRayVar(_prtRatioVar, PRT_RATIO, _rayPrtRatios, false);
-  _readRayVar(_nyquistVar, NYQUIST_VELOCITY, _rayNyquists, false);
-  _readRayVar(_unambigRangeVar, UNAMBIGUOUS_RANGE, _rayUnambigRanges, false);
-  _readRayVar(_antennaTransitionVar, ANTENNA_TRANSITION, 
-              _rayAntennaTransitions, false);
-  _readRayVar(_georefsAppliedVar, GEOREFS_APPLIED,
-              _rayGeorefsApplied, false);
-  _readRayVar(_nSamplesVar, N_SAMPLES, _rayNSamples, false);
-  _readRayVar(_calIndexVar, R_CALIB_INDEX, _rayCalNum, false);
-  _readRayVar(_xmitPowerHVar, RADAR_MEASURED_TRANSMIT_POWER_H, 
-              _rayXmitPowerH, false);
-  _readRayVar(_xmitPowerVVar, RADAR_MEASURED_TRANSMIT_POWER_V, 
-              _rayXmitPowerV, false);
-  _readRayVar(_scanRateVar, SCAN_RATE, _rayScanRate, false);
-  _readRayVar(_estNoiseDbmHcVar, RADAR_ESTIMATED_NOISE_DBM_HC,
-              _rayEstNoiseDbmHc, false);
-  _readRayVar(_estNoiseDbmVcVar, RADAR_ESTIMATED_NOISE_DBM_VC,
-              _rayEstNoiseDbmVc, false);
-  _readRayVar(_estNoiseDbmHxVar, RADAR_ESTIMATED_NOISE_DBM_HX,
-              _rayEstNoiseDbmHx, false);
-  _readRayVar(_estNoiseDbmVxVar, RADAR_ESTIMATED_NOISE_DBM_VX,
-              _rayEstNoiseDbmVx, false);
-  
-  // HSRL telescope
-
-  // offset from vertical in degrees
-
-  if (_readRayVar(_telescopeRollAngleOffsetVar,
-                  "telescope_roll_angle_offset",
-                  _telescopeRollAngleOffset, true)) {
-    _addErrStr("ERROR - cannot find var telescope_roll_angle_offset");
-    iret = -1;
-  }
-
-  // locked - 0 is locked, 1 is free
-
-  if (_readRayVar(_telescopeLockedVar,
-                  "TelescopeLocked",
-                  _telescopeLocked, true)) {
-    _addErrStr("ERROR - cannot find var TelescopeLocked");
-    iret = -1;
-  }
-
-  // direction - 0 is down, 1 is up
-
-  if (_readRayVar(_telescopeDirectionVar,
-                  "TelescopeDirection",
-                  _telescopeDirection, true)) {
-    _addErrStr("ERROR - cannot find var TelescopeDirection");
-    iret = -1;
-  }
-
-  if (iret) {
-    _addErrStr("ERROR - RawFile::_readRayVariables");
-    return -1;
-  }
-
-  return 0;
-
-}
-
 /////////////////////////////////////////////
 // set pointing angles from other variables
 
@@ -1128,226 +1479,6 @@ void RawFile::_setPointingAngles()
     //        << _geoRotation[ii] << endl;
     // }
   }
-
-}
-
-///////////////////////////////////
-// create the rays to be read in
-// and set meta data
-
-int RawFile::_createRays(const string &path)
-
-{
-
-  // compile a list of the rays to be read in, using the list of
-  // sweeps to read
-
-  _raysToRead.clear();
-
-  for (size_t isweep = 0; isweep < _sweepsToRead.size(); isweep++) {
-
-    if (path != _sweepsToRead[isweep].path) {
-      // the references sweep is not in this file
-      continue;
-    }
-
-    RadxSweep *sweep = _sweepsInFile[_sweepsToRead[isweep].indexInFile];
-
-    for (size_t ii = sweep->getStartRayIndex();
-         ii <= sweep->getEndRayIndex(); ii++) {
-
-      // add ray to list to be read
-
-      RayInfo info;
-      info.indexInFile = ii;
-      info.sweep = sweep;
-      _raysToRead.push_back(info);
-
-    } // ii
-
-  } // isweep
-
-  // create the rays to be read
-  
-  for (size_t ii = 0; ii < _raysToRead.size(); ii++) {
-
-    size_t rayIndex = _raysToRead[ii].indexInFile;
-    const RadxSweep *sweep = _raysToRead[ii].sweep;
-
-    // new ray
-
-    RadxRay *ray = new RadxRay;
-    ray->copyRangeGeom(_geom);
-    
-    // set time
-    
-    double rayTimeDouble = _dTimes[rayIndex];
-    time_t rayUtimeSecs = _refTimeSecsFile + (time_t) rayTimeDouble;
-    double rayIntSecs;
-    double rayFracSecs = modf(rayTimeDouble, &rayIntSecs);
-    int rayNanoSecs = (int) (rayFracSecs * 1.0e9);
-
-    if (rayIntSecs < 0 || rayNanoSecs < 0) {
-      rayUtimeSecs -= 1;
-      rayNanoSecs = 1000000000 + rayNanoSecs;
-    }
-      
-    ray->setTime(rayUtimeSecs, rayNanoSecs);
-
-    // sweep info
-
-    ray->setSweepNumber(sweep->getSweepNumber());
-    ray->setSweepMode(sweep->getSweepMode());
-    ray->setPolarizationMode(sweep->getPolarizationMode());
-    ray->setPrtMode(sweep->getPrtMode());
-    ray->setFollowMode(sweep->getFollowMode());
-    ray->setFixedAngleDeg(sweep->getFixedAngleDeg());
-    ray->setTargetScanRateDegPerSec(sweep->getTargetScanRateDegPerSec());
-    ray->setIsIndexed(sweep->getRaysAreIndexed());
-    ray->setAngleResDeg(sweep->getAngleResDeg());
-
-    if (_rayAzimuths.size() > rayIndex) {
-      ray->setAzimuthDeg(_rayAzimuths[rayIndex]);
-    }
-    if (_rayElevations.size() > rayIndex) {
-      ray->setElevationDeg(_rayElevations[rayIndex]);
-    }
-    if (_rayPulseWidths.size() > rayIndex) {
-      ray->setPulseWidthUsec(_rayPulseWidths[rayIndex] * 1.0e6);
-    }
-    if (_rayPrts.size() > rayIndex) {
-      ray->setPrtSec(_rayPrts[rayIndex]);
-    }
-    if (_rayPrtRatios.size() > rayIndex) {
-      ray->setPrtRatio(_rayPrtRatios[rayIndex]);
-    }
-    if (_rayNyquists.size() > rayIndex) {
-      ray->setNyquistMps(_rayNyquists[rayIndex]);
-    }
-    if (_rayUnambigRanges.size() > rayIndex) {
-      if (_rayUnambigRanges[rayIndex] > 0) {
-        ray->setUnambigRangeKm(_rayUnambigRanges[rayIndex] / 1000.0);
-      }
-    }
-    if (_rayAntennaTransitions.size() > rayIndex) {
-      ray->setAntennaTransition(_rayAntennaTransitions[rayIndex]);
-    }
-    if (_rayGeorefsApplied.size() > rayIndex) {
-      ray->setGeorefApplied(_rayGeorefsApplied[rayIndex]);
-    }
-    if (_rayNSamples.size() > rayIndex) {
-      ray->setNSamples(_rayNSamples[rayIndex]);
-    }
-    if (_rayCalNum.size() > rayIndex) {
-      ray->setCalibIndex(_rayCalNum[rayIndex]);
-    }
-    if (_rayXmitPowerH.size() > rayIndex) {
-      ray->setMeasXmitPowerDbmH(_rayXmitPowerH[rayIndex]);
-    }
-    if (_rayXmitPowerV.size() > rayIndex) {
-      ray->setMeasXmitPowerDbmV(_rayXmitPowerV[rayIndex]);
-    }
-    if (_rayScanRate.size() > rayIndex) {
-      ray->setTrueScanRateDegPerSec(_rayScanRate[rayIndex]);
-    }
-    if (_rayEstNoiseDbmHc.size() > rayIndex) {
-      ray->setEstimatedNoiseDbmHc(_rayEstNoiseDbmHc[rayIndex]);
-    }
-    if (_rayEstNoiseDbmVc.size() > rayIndex) {
-      ray->setEstimatedNoiseDbmVc(_rayEstNoiseDbmVc[rayIndex]);
-    }
-    if (_rayEstNoiseDbmHx.size() > rayIndex) {
-      ray->setEstimatedNoiseDbmHx(_rayEstNoiseDbmHx[rayIndex]);
-    }
-    if (_rayEstNoiseDbmVx.size() > rayIndex) {
-      ray->setEstimatedNoiseDbmVx(_rayEstNoiseDbmVx[rayIndex]);
-    }
-    ray->copyRangeGeom(_geom);
-
-    if (_georefsActive) {
-
-      RadxGeoref geo;
-      
-      if (_geoTime.size() > rayIndex) {
-        double geoTime = _geoTime[rayIndex];
-        int secs = (int) geoTime;
-        int nanoSecs = (int) ((geoTime - secs) * 1.0e9 + 0.5);
-        time_t tSecs = _readVol->getStartTimeSecs() + secs;
-        geo.setTimeSecs(tSecs);
-        geo.setNanoSecs(nanoSecs);
-      }
-      if (_geoLatitude.size() > rayIndex) {
-        geo.setLatitude(_geoLatitude[rayIndex]);
-      }
-      if (_geoLongitude.size() > rayIndex) {
-        geo.setLongitude(_geoLongitude[rayIndex]);
-      }
-      if (_geoAltitudeMsl.size() > rayIndex) {
-        geo.setAltitudeKmMsl(_geoAltitudeMsl[rayIndex] / 1000.0);
-      }
-      if (_geoAltitudeAgl.size() > rayIndex) {
-        geo.setAltitudeKmAgl(_geoAltitudeAgl[rayIndex] / 1000.0);
-      }
-      if (_geoEwVelocity.size() > rayIndex) {
-        geo.setEwVelocity(_geoEwVelocity[rayIndex]);
-      }
-      if (_geoNsVelocity.size() > rayIndex) {
-        geo.setNsVelocity(_geoNsVelocity[rayIndex]);
-      }
-      if (_geoVertVelocity.size() > rayIndex) {
-        geo.setVertVelocity(_geoVertVelocity[rayIndex]);
-      }
-      if (_geoHeading.size() > rayIndex) {
-        geo.setHeading(_geoHeading[rayIndex]);
-      }
-      if (_geoRoll.size() > rayIndex) {
-        geo.setRoll(_geoRoll[rayIndex]);
-      }
-      if (_geoPitch.size() > rayIndex) {
-        geo.setPitch(_geoPitch[rayIndex]);
-      }
-      if (_geoDrift.size() > rayIndex) {
-        geo.setDrift(_geoDrift[rayIndex]);
-      }
-      if (_geoRotation.size() > rayIndex) {
-        geo.setRotation(_geoRotation[rayIndex]);
-      }
-      if (_geoTilt.size() > rayIndex) {
-        geo.setTilt(_geoTilt[rayIndex]);
-      }
-      if (_geoEwWind.size() > rayIndex) {
-        geo.setEwWind(_geoEwWind[rayIndex]);
-      }
-      if (_geoNsWind.size() > rayIndex) {
-        geo.setNsWind(_geoNsWind[rayIndex]);
-      }
-      if (_geoVertWind.size() > rayIndex) {
-        geo.setVertWind(_geoVertWind[rayIndex]);
-      }
-      if (_geoHeadingRate.size() > rayIndex) {
-        geo.setHeadingRate(_geoHeadingRate[rayIndex]);
-      }
-      if (_geoPitchRate.size() > rayIndex) {
-        geo.setPitchRate(_geoPitchRate[rayIndex]);
-      }
-      if (_geoDriveAngle1.size() > rayIndex) {
-        geo.setDriveAngle1(_geoDriveAngle1[rayIndex]);
-      }
-      if (_geoDriveAngle2.size() > rayIndex) {
-        geo.setDriveAngle2(_geoDriveAngle2[rayIndex]);
-      }
-      
-      ray->setGeoref(geo);
-
-    } // if (_georefsActive) 
-  
-    // add to ray vector
-
-    _raysFromFile.push_back(ray);
-
-  } // ii
-
-  return 0;
 
 }
 
@@ -1845,244 +1976,6 @@ int RawFile::_readFieldVariables(bool metaOnly)
   } // ivar
 
   return 0;
-
-}
-
-///////////////////////////////////
-// read a ray variable - double
-// side effects: set var, vals
-
-int RawFile::_readRayVar(NcVar* &var, const string &name,
-                             vector<double> &vals, bool required)
-
-{
-
-  vals.clear();
-
-  // get var
-
-  var = _getRayVar(name, required);
-  if (var == NULL) {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaDouble);
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      return -1;
-    }
-  }
-
-  // load up data
-
-  double *data = new double[_nTimesInFile];
-  double *dd = data;
-  int iret = 0;
-  if (var->get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
-      vals.push_back(*dd);
-    }
-  } else {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaDouble);
-      }
-      clearErrStr();
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
-      iret = -1;
-    }
-  }
-  delete[] data;
-  return iret;
-
-}
-
-///////////////////////////////////
-// read a ray variable - double
-// side effects: set vals only
-
-int RawFile::_readRayVar(const string &name,
-                             vector<double> &vals, bool required)
-{
-  NcVar *var;
-  return _readRayVar(var, name, vals, required);
-}
-
-///////////////////////////////////
-// read a ray variable - integer
-// side effects: set var, vals
-
-int RawFile::_readRayVar(NcVar* &var, const string &name,
-                             vector<int> &vals, bool required)
-
-{
-
-  vals.clear();
-
-  // get var
-  
-  var = _getRayVar(name, required);
-  if (var == NULL) {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaInt);
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      return -1;
-    }
-  }
-
-  // load up data
-
-  int *data = new int[_nTimesInFile];
-  int *dd = data;
-  int iret = 0;
-  if (var->get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
-      vals.push_back(*dd);
-    }
-  } else {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaInt);
-      }
-      clearErrStr();
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
-      iret = -1;
-    }
-  }
-  delete[] data;
-  return iret;
-
-}
-
-///////////////////////////////////
-// read a ray variable - integer
-// side effects: set vals only
-
-int RawFile::_readRayVar(const string &name,
-                             vector<int> &vals, bool required)
-{
-  NcVar *var;
-  return _readRayVar(var, name, vals, required);
-}
-
-///////////////////////////////////////////
-// read a ray variable - boolean
-// side effects: set var, vals
-
-int RawFile::_readRayVar(NcVar* &var, const string &name,
-                             vector<bool> &vals, bool required)
-  
-{
-  
-  vals.clear();
-  
-  // get var
-  
-  var = _getRayVar(name, false);
-  if (var == NULL) {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(false);
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      return -1;
-    }
-  }
-
-  // load up data
-  
-  int *data = new int[_nTimesInFile];
-  int *dd = data;
-  int iret = 0;
-  if (var->get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
-      if (*dd == 0) {
-        vals.push_back(false);
-      } else {
-        vals.push_back(true);
-      }
-    }
-  } else {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-      vals.push_back(false);
-    }
-    clearErrStr();
-  }
-  delete[] data;
-  return iret;
-
-}
-
-///////////////////////////////////
-// read a ray variable - boolean
-// side effects: set vals only
-
-int RawFile::_readRayVar(const string &name,
-                             vector<bool> &vals, bool required)
-{
-  NcVar *var;
-  return _readRayVar(var, name, vals, required);
-}
-
-///////////////////////////////////
-// get a ray variable by name
-// returns NULL on failure
-
-NcVar* RawFile::_getRayVar(const string &name, bool required)
-
-{
-
-  // get var
-  
-  NcVar *var = _file.getNcFile()->get_var(name.c_str());
-  if (var == NULL) {
-    if (required) {
-      _addErrStr("ERROR - RawFile::_getRayVar");
-      _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
-    }
-    return NULL;
-  }
-
-  // check time dimension
-  
-  if (var->num_dims() < 1) {
-    if (required) {
-      _addErrStr("ERROR - RawFile::_getRayVar");
-      _addErrStr("  variable name: ", name);
-      _addErrStr("  variable has no dimensions");
-    }
-    return NULL;
-  }
-  NcDim *timeDim = var->get_dim(0);
-  if (timeDim != _timeDim) {
-    if (required) {
-      _addErrStr("ERROR - RawFile::_getRayVar");
-      _addErrStr("  variable name: ", name);
-      _addErrStr("  variable has incorrect dimension, dim name: ", 
-                 timeDim->name());
-      _addErrStr("  should be: ", TIME);
-    }
-    return NULL;
-  }
-
-  return var;
 
 }
 
@@ -2615,126 +2508,6 @@ int RawFile::_addSi08FieldToRays(NcVar* var,
   delete[] data;
   return 0;
   
-}
-
-/////////////////////////////////////////////////////////
-// load up the read volume with the data from this object
-
-void RawFile::_loadReadVolume()
-  
-{
-
-  _readVol->setOrigFormat("CFRADIAL");
-  _readVol->setVolumeNumber(_volumeNumber);
-  _readVol->setInstrumentType(_instrumentType);
-  _readVol->setPlatformType(_platformType);
-  _readVol->setPrimaryAxis(_primaryAxis);
-  for (int ii = 0; ii < (int) _raysVol.size(); ii++) {
-    _raysVol[ii]->setVolumeNumber(_volumeNumber);
-  }
-
-  for (size_t ii = 0; ii < _frequency.size(); ii++) {
-    _readVol->addFrequencyHz(_frequency[ii]);
-  }
-
-  _readVol->setRadarAntennaGainDbH(_radarAntennaGainDbH);
-  _readVol->setRadarAntennaGainDbV(_radarAntennaGainDbV);
-  _readVol->setRadarBeamWidthDegH(_radarBeamWidthDegH);
-  _readVol->setRadarBeamWidthDegV(_radarBeamWidthDegV);
-  _readVol->setRadarReceiverBandwidthMhz(_radarRxBandwidthHz / 1.0e6);
-
-  _readVol->setVersion(_version);
-  _readVol->setTitle(_title);
-  _readVol->setSource(_source);
-  _readVol->setHistory(_history);
-  _readVol->setInstitution(_institution);
-  _readVol->setReferences(_references);
-  _readVol->setComment(_comment);
-  _readVol->setOrigFormat(_origFormat);
-  _readVol->setDriver(_driver);
-  _readVol->setCreated(_created);
-  _readVol->setStatusXml(_statusXml);
-  _readVol->setSiteName(_siteName);
-  _readVol->setScanName(_scanName);
-  _readVol->setScanId(_scanId);
-  _readVol->setInstrumentName(_instrumentName);
-
-  if (_latitude.size() > 0) {
-    for (size_t ii = 0; ii < _latitude.size(); ii++) {
-      if (_latitude[ii] > -9990) {
-        _readVol->setLatitudeDeg(_latitude[ii]);
-        break;
-      }
-    }
-  }
-  if (_longitude.size() > 0) {
-    for (size_t ii = 0; ii < _longitude.size(); ii++) {
-      if (_longitude[ii] > -9990) {
-        _readVol->setLongitudeDeg(_longitude[ii]);
-        break;
-      }
-    }
-  }
-  if (_altitude.size() > 0) {
-    for (size_t ii = 0; ii < _altitude.size(); ii++) {
-      if (_altitude[ii] > -9990) {
-        _readVol->setAltitudeKm(_altitude[ii] / 1000.0);
-        break;
-      }
-    }
-  }
-  if (_altitudeAgl.size() > 0) {
-    for (size_t ii = 0; ii < _altitudeAgl.size(); ii++) {
-      if (_altitudeAgl[ii] > -9990) {
-        _readVol->setSensorHtAglM(_altitudeAgl[ii]);
-        break;
-      }
-    }
-  }
-
-  _readVol->copyRangeGeom(_geom);
-
-  if (_correctionsActive) {
-    _readVol->setCfactors(_cfactors);
-  }
-
-  for (size_t ii = 0; ii < _raysVol.size(); ii++) {
-    _readVol->addRay(_raysVol[ii]);
-  }
-
-  for (size_t ii = 0; ii < _rCals.size(); ii++) {
-    _readVol->addCalib(_rCals[ii]);
-  }
-
-  if (_readSetMaxRange) {
-    _readVol->setMaxRangeKm(_readMaxRangeKm);
-  }
-  
-  // memory responsibility has passed to the volume object, so clear
-  // the vectors without deleting the objects to which they point
-
-  _raysVol.clear();
-  _rCals.clear();
-  _fields.clear();
-
-  // apply goeref info if applicable
-
-  if (_readApplyGeorefs) {
-    _readVol->applyGeorefs();
-  }
-
-  // load the sweep information from the rays
-
-  _readVol->loadSweepInfoFromRays();
-  
-  // load the volume information from the rays
-
-  _readVol->loadVolumeInfoFromRays();
-  
-  // check for indexed rays, set info on rays
-
-  _readVol->checkForIndexedRays();
-
 }
 
 /////////////////////////////////////////////////////////////

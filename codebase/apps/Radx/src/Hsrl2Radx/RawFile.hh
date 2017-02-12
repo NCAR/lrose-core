@@ -128,6 +128,9 @@ private:
   // netcdf file
   
   NetcdfClassic _file;
+
+  // output volume
+
   RadxVol _readVol;
   
   // dimensions
@@ -135,6 +138,10 @@ private:
   NcDim *_timeDim;
   NcDim *_timeVecDim;
   NcDim *_binCountDim;
+
+  size_t _nTimesInFile;
+  size_t _timeVecSize;
+  size_t _nBinsInFile;
 
   // global attributes
 
@@ -145,15 +152,16 @@ private:
   int _hsrlVersion;
   string _sourceSoftware;
   
-  // coordinate variables
+  // times
   
   NcVar *_timeVar;
+  vector<RadxTime> _dataTimes;
+  vector<double> _dTimes;
 
   // georeference variables
 
   NcVar *_telescopeLockedVar;
   NcVar *_telescopeDirectionVar;
-  NcVar *_telescopeRollAngleOffsetVar;
 
   NcVar *_latitudeVar;
   NcVar *_longitudeVar;
@@ -162,6 +170,19 @@ private:
   NcVar *_vertVelVar;
   NcVar *_pitchVar;
   NcVar *_rollVar;
+
+  vector<int> _telescopeLocked;
+  vector<int> _telescopeDirection;
+  vector<double> _rotation;
+  vector<double> _tilt;
+  
+  vector<double> _latitude;
+  vector<double> _longitude;
+  vector<double> _altitude;
+  vector<double> _gndSpeed;
+  vector<double> _vertVel;
+  vector<double> _pitch;
+  vector<double> _roll;
 
   // objects to be set on read
   
@@ -183,26 +204,11 @@ private:
 
   time_t _timeCoverageStart;
   time_t _timeCoverageEnd;
-  vector<RadxTime> _dataTimes;
-  vector<double> _dTimes;
 
   Radx::InstrumentType_t _instrumentType;
   Radx::PlatformType_t _platformType;
   Radx::PrimaryAxis_t _primaryAxis;
 
-  vector<double> _latitude;
-  vector<double> _longitude;
-  vector<double> _altitude;
-
-  vector<int> _telescopeLocked;
-  vector<int> _telescopeDirection;
-  vector<double> _telescopeRollAngleOffset;
-  vector<double> _rotation;
-  vector<double> _tilt;
-  
-  size_t _nTimesInFile;
-  size_t _timeVecSize;
-  size_t _nBinsInFile;
   vector<double> _rangeKm;
   
   vector<RadxRay *> _rays;
@@ -217,6 +223,28 @@ private:
   int _readDimensions();
   int _readGlobalAttributes();
   int _readTimes();
+  void _clearRayVariables();
+  int _readRayVariables();
+
+  int _readRayVar(NcVar* &var, const string &name, 
+                  vector<double> &vals, bool required = true);
+  int _readRayVar(NcVar* &var, const string &name, 
+                  vector<int> &vals, bool required = true);
+  int _readRayVar(NcVar* &var, const string &name, 
+                  vector<bool> &vals, bool required = true);
+  
+  int _readRayVar(const string &name, 
+                  vector<double> &vals, bool required = true);
+  int _readRayVar(const string &name, 
+                  vector<int> &vals, bool required = true);
+  int _readRayVar(const string &name, 
+                  vector<bool> &vals, bool required = true);
+  
+  NcVar* _getRayVar(const string &name, bool required);
+
+  int _createRays(const string &path);
+
+  void _loadReadVolume();
 
   /// add integer value to error string, with label
 
@@ -246,31 +274,13 @@ private:
   int _readSweepVariables();
   void _clearGeorefVariables();
   int _readGeorefVariables();
-  void _clearRayVariables();
-  int _readRayVariables();
   void _setPointingAngles();
-  int _createRays(const string &path);
   int _readFrequencyVariable();
   int _readRayNgatesAndOffsets();
   int _readCalibrationVariables();
   int _readCal(RadxRcalib &cal, int index);
   int _readFieldVariables(bool metaOnly);
   
-  int _readRayVar(NcVar* &var, const string &name, 
-                  vector<double> &vals, bool required = true);
-  int _readRayVar(NcVar* &var, const string &name, 
-                  vector<int> &vals, bool required = true);
-  int _readRayVar(NcVar* &var, const string &name, 
-                  vector<bool> &vals, bool required = true);
-  
-  int _readRayVar(const string &name, 
-                  vector<double> &vals, bool required = true);
-  int _readRayVar(const string &name, 
-                  vector<int> &vals, bool required = true);
-  int _readRayVar(const string &name, 
-                  vector<bool> &vals, bool required = true);
-  
-  NcVar* _getRayVar(const string &name, bool required);
   int _readSweepVar(NcVar* &var, const string &name,
                     vector<double> &vals, bool required = true);
   int _readSweepVar(NcVar* &var, const string &name, 
@@ -310,8 +320,6 @@ private:
                           double scale, double offset,
                           bool isDiscrete, bool fieldFolds,
                           float foldLimitLower, float foldLimitUpper);
-
-  void _loadReadVolume();
 
   // private methods for NcfRadial_write.cc
   
