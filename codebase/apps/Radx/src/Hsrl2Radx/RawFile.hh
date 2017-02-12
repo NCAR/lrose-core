@@ -150,6 +150,7 @@ private:
   string _userName;
   string _gitCommit;
   int _hsrlVersion;
+  string _dataAdded;
   string _sourceSoftware;
   
   // times
@@ -184,33 +185,16 @@ private:
   vector<double> _pitch;
   vector<double> _roll;
 
-  // objects to be set on read
-  
-  string _title;
-  string _institution;
-  string _references;
-  string _source;
-  string _history;
-  string _comment;
-  string _author;
-  string _driver;
-  string _created;
-  string _statusXml;
-
-  string _siteName;
-  string _scanName;
-  int _scanId;
-  string _instrumentName;
-
-  time_t _timeCoverageStart;
-  time_t _timeCoverageEnd;
-
   Radx::InstrumentType_t _instrumentType;
   Radx::PlatformType_t _platformType;
   Radx::PrimaryAxis_t _primaryAxis;
 
-  vector<double> _rangeKm;
-  
+  // range geometry
+
+  double _rawGateSpacingM;
+  double _startRangeKm;
+  double _gateSpacingKm;
+
   vector<RadxRay *> _rays;
   
   // private methods for NcfRadial.cc

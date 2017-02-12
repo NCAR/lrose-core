@@ -103,55 +103,6 @@ paramdef string {
 } search_ext;
 
 commentdef {
-  p_header = "READ OPTIONS";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set the max range for any ray.";
-} set_max_range;
-
-paramdef double {
-  p_default = 9999;
-  p_descr = "Specified maximim range - km.";
-  p_help = "Gates beyond this range are removed.";
-} max_range_km;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to force the number of gates to be constant.";
-  p_help = "If TRUE, the number of gates on all rays will be set to the maximum, and gates added to shorter rays will be filled with missing values.";
-} set_ngates_constant;
-
-commentdef {
-  p_header = "OPTION TO OVERRIDE INSTRUMENT AND/OR NAME";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the instrument name.";
-  p_help = "If true, the name provided will be used.";
-} override_instrument_name;
-
-paramdef string {
-  p_default = "unknown";
-  p_descr = "Instrument name.";
-  p_help = "See override_instrument_name.";
-} instrument_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the site name.";
-  p_help = "If true, the name provided will be used.";
-} override_site_name;
-
-paramdef string {
-  p_default = "unknown";
-  p_descr = "Site name.";
-  p_help = "See override_site_name.";
-} site_name;
-
-commentdef {
   p_header = "OPTION TO OVERRIDE GATE GEOMETRY";
 }
 
@@ -207,20 +158,9 @@ paramdef double {
   p_help = "See override_instrument_location.";
 } instrument_altitude_meters;
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to negate the latitude.";
-  p_help = "Mainly useful for RAPIC files. In RAPIC, latitude is always positive, so mostly you need to set the latitiude to the negative value of itself.";
-} change_instrument_latitude_sign;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to apply the georeference info for moving platforms.";
-  p_help = "For moving platforms, measured georeference information is sometimes available. If this is set to true, the georeference data is applied and appropriate corrections made. If possible, Earth-centric azimuth and elevation angles will be computed.";
-} apply_georeference_corrections;
-
 commentdef {
-  p_header = "OPTION TO SET RANGE RELATIVE TO INSTRUNENT";
+  p_header = "OPTION TO SET RANGE RELATIVE TO INSTRUNENT - CfRadial files only";
+  p_text = "This applies to python-generated CfRadial files only";
 }
 
 paramdef boolean {
@@ -234,58 +174,6 @@ paramdef int {
   p_descr = "Integer value for telescope direction is up.";
   p_help = "This value indicates the telescope is pointing up. If the telescope_direction value is not equal to this value it is pointing down.";
 } telescope_direction_is_up;
-
-commentdef {
-  p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";
-}
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the version global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the version attribute.";
-} version_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the title global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the title attribute.";
-} title_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the institution global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the institution attribute.";
-} institution_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the references global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the references attribute.";
-} references_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the source global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the source attribute.";
-} source_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the history global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the history attribute.";
-} history_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the comment global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the comment attribute.";
-} comment_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the author global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the author attribute.";
-} author_override;
 
 commentdef {
   p_header = "OPTION TO CORRECT ANTENNA ANGLES";
@@ -314,6 +202,22 @@ paramdef double {
   p_descr = "Elevation offset (degrees).";
   p_help = "See 'apply_elevation_offset'. This value will be ADDED to the measured elevations.";
 } elevation_offset;
+
+commentdef {
+  p_header = "OPTION TO COMBINED RANGE GATES ON READ";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to combine range gates on read.";
+  p_help = "If true, the specified number of range gates will be combined on read to create mean values with lower noisiness.";
+} combine_gates_on_read;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of gates to combine on read.";
+  p_help = "In range, we will combine this number of gates to produce a data set with lower spatial resolution but less noiry data.";
+} n_gates_to_combine;
 
 commentdef {
   p_header = "OPTION TO SPECIFY FIELD NAMES FOR OUTPUT FILES";
@@ -406,6 +310,58 @@ paramdef string {
 } excluded_fields[];
 
 commentdef {
+  p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";
+}
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the version global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the version attribute.";
+} version_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the title global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the title attribute.";
+} title_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the institution global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the institution attribute.";
+} institution_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the references global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the references attribute.";
+} references_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the source global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the source attribute.";
+} source_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the history global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the history attribute.";
+} history_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the comment global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the comment attribute.";
+} comment_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the author global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the author attribute.";
+} author_override;
+
+commentdef {
   p_header = "OUTPUT FORMAT";
   p_text = "Files are written in CfRadial";
 }
@@ -424,17 +380,35 @@ commentdef {
   p_header = "OUTPUT OPTIONS FOR CfRadial FILES";
 }
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to force the use of ragged arrays for CfRadial files.";
-  p_help = "Only applies to CfRadial. If true, forces the use of ragged arrays even if the number of gates for all rays is constant.";
-} output_force_ngates_vary;
-
 paramdef int {
   p_default = 4;
   p_descr = "Compression level for output, if compressed.";
   p_help = "Applies to netCDF only. Dorade compression is run-length encoding, and has not options..";
 } compression_level;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the instrument name.";
+  p_help = "If true, the name provided will be used.";
+} override_instrument_name;
+
+paramdef string {
+  p_default = "unknown";
+  p_descr = "Instrument name.";
+  p_help = "See override_instrument_name.";
+} instrument_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the site name.";
+  p_help = "If true, the name provided will be used.";
+} override_site_name;
+
+paramdef string {
+  p_default = "unknown";
+  p_descr = "Site name.";
+  p_help = "See override_site_name.";
+} site_name;
 
 commentdef {
   p_header = "OUTPUT DIRECTORY AND FILE NAME";
@@ -500,12 +474,6 @@ paramdef boolean {
   p_descr = "Add the year directory to the output directory.";
   p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
 } append_year_dir_to_output_dir;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write out individual sweeps if appropriate.";
-  p_help = "If true, the volume is split into individual sweeps for writing. Applies to CfRadial format. This is always true for DORADE format files.";
-} write_individual_sweeps;
 
 paramdef boolean {
   p_default = false;

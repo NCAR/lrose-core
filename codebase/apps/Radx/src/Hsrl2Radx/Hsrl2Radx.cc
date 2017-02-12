@@ -419,12 +419,6 @@ int Hsrl2Radx::_processUwCfRadialFile(const string &readPath)
     _setRangeRelToInstrument(inFile, vol);
   }
   
-  // set number of gates constant if requested
-  
-  if (_params.set_ngates_constant) {
-    // vol.setNGatesConstant();
-  }
-
   // set vol values
 
   vol.loadSweepInfoFromRays();
@@ -473,18 +467,6 @@ void Hsrl2Radx::_setupRead(MslFile &file)
       }
     }
 
-  }
-
-  if (_params.set_max_range) {
-    file.setReadMaxRangeKm(_params.max_range_km);
-  }
-
-  if (_params.change_instrument_latitude_sign) {
-    file.setChangeLatitudeSignOnRead(true);
-  }
-
-  if (_params.apply_georeference_corrections) {
-    file.setApplyGeorefsOnRead(true);
   }
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
@@ -657,14 +639,6 @@ void Hsrl2Radx::_setupWrite(RadxFile &file)
       break;
     default:
       file.setNcFormat(RadxFile::NETCDF_CLASSIC);
-  }
-
-  if (_params.write_individual_sweeps) {
-    file.setWriteIndividualSweeps(true);
-  }
-
-  if (_params.output_force_ngates_vary) {
-    file.setWriteForceNgatesVary(true);
   }
 
   if (strlen(_params.output_filename_prefix) > 0) {
@@ -848,31 +822,13 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
     _overrideGateGeometry(vol);
   }
 
-  // set the range relative to the instrument location
-
-  // if (_params.set_range_relative_to_instrument) {
-  //   _setRangeRelToInstrument(inFile, vol);
-  // }
-  
-  // set number of gates constant if requested
-  
-  if (_params.set_ngates_constant) {
-    // vol.setNGatesConstant();
-  }
-
   // set vol values
-
+  
   vol.loadSweepInfoFromRays();
   vol.loadVolumeInfoFromRays();
 
-  // vol.printWithRayMetaData(cerr);
-
-  // set field type, names, units etc
-  
-  _convertFields(vol);
-
   // set global attributes
-
+  
   _setGlobalAttr(vol);
 
   // write the file

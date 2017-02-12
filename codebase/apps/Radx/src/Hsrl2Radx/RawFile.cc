@@ -80,15 +80,32 @@ void RawFile::clear()
 {
 
   clearErrStr();
-
+  
   _file.close();
 
   _timeDim = NULL;
   _timeVecDim = NULL;
   _binCountDim = NULL;
+
+  _nTimesInFile = 0;
+  _timeVecSize = 0;
+  _nBinsInFile = 0;
+
+  _machType.clear();
+  _hostName.clear();
+  _userName.clear();
+  _gitCommit.clear();
+  _hsrlVersion = -9999;
+  _dataAdded.clear();
+  _sourceSoftware.clear();
+
   _timeVar = NULL;
+  _dataTimes.clear();
+  _dTimes.clear();
+  
   _telescopeLockedVar = NULL;
   _telescopeDirectionVar = NULL;
+
   _latitudeVar = NULL;
   _longitudeVar = NULL;
   _altitudeVar = NULL;
@@ -97,52 +114,33 @@ void RawFile::clear()
   _pitchVar = NULL;
   _rollVar = NULL;
 
-  _title.clear();
-  _institution.clear();
-  _references.clear();
-  _source.clear();
-  _history.clear();
-  _comment.clear();
-  _author.clear();
-  _driver.clear();
-  _created.clear();
-  _statusXml.clear();
-
-  _siteName.clear();
-  _scanName.clear();
-  _scanId = 0;
-  _instrumentName.clear();
-
-  _timeCoverageStart = 0;
-  _timeCoverageEnd = 0;
-  _dataTimes.clear();
-  _dTimes.clear();
-
-  _instrumentType = Radx::INSTRUMENT_TYPE_LIDAR;
-  _platformType = Radx::PLATFORM_TYPE_AIRCRAFT;
-  _primaryAxis = Radx::PRIMARY_AXIS_Y_PRIME;
-  
-  _latitude.clear();
-  _longitude.clear();
-  _altitude.clear();
-
   _telescopeLocked.clear();
   _telescopeDirection.clear();
   _rotation.clear();
   _tilt.clear();
 
-  _nTimesInFile = 0;
-  _nBinsInFile = 0;
-  _rangeKm.clear();
+  _latitude.clear();
+  _longitude.clear();
+  _altitude.clear();
+  _gndSpeed.clear();
+  _vertVel.clear();
+  _pitch.clear();
+  _roll.clear();
+
+  _instrumentType = Radx::INSTRUMENT_TYPE_LIDAR;
+  _platformType = Radx::PLATFORM_TYPE_AIRCRAFT;
+  _primaryAxis = Radx::PRIMARY_AXIS_Y_PRIME;
+
+  _rawGateSpacingM = 3.75;
+  _gateSpacingKm = _rawGateSpacingM * cos(4.0 * Radx::DegToRad);
+  _startRangeKm = _gateSpacingKm / 2.0;
+  if (_params.combine_gates_on_read) {
+    _gateSpacingKm *= _params.n_gates_to_combine;
+    _startRangeKm = _gateSpacingKm / 2.0;
+  }
+
   _rays.clear();
   
-  _machType.clear();
-  _hostName.clear();
-  _userName.clear();
-  _gitCommit.clear();
-  _hsrlVersion = -9999;
-  _sourceSoftware.clear();
-
 }
 
 ////////////////////////////////////////////////////////////
@@ -252,7 +250,6 @@ int RawFile::readFromPath(const string &path,
   _nTimesInFile = 0;
   _nBinsInFile = 0;
   _rays.clear();
-  _rangeKm.clear();
 
   // open file
 
@@ -509,6 +506,10 @@ int RawFile::_readGlobalAttributes()
 
     if (!strcmp(att->name(), "DATA_HSRLVersion")) {
       _hsrlVersion = att->as_int(0);
+    }
+
+    if (!strcmp(att->name(), "DATA_Added")) {
+      _dataAdded = NetcdfClassic::asString(att);
     }
 
     if (!strcmp(att->name(), "DATA_SourceSoftware")) {
@@ -942,8 +943,7 @@ int RawFile::_createRays(const string &path)
     // new ray
 
     RadxRay *ray = new RadxRay;
-    double gateSpacingKm = 3.75 / 1000.0;
-    ray->setRangeGeom(gateSpacingKm / 2.0, gateSpacingKm);
+    ray->setRangeGeom(_startRangeKm, _gateSpacingKm);
     ray->setTime(_dataTimes[ii]);
     
     // sweep info
@@ -1013,37 +1013,37 @@ void RawFile::_loadReadVolume()
   _readVol.setOrigFormat("HSRL-RAW");
   _readVol.setVolumeNumber(-9999);
   _readVol.setInstrumentType(_instrumentType);
+  _readVol.setInstrumentName("HSRL");
+  _readVol.setSiteName("GV");
   _readVol.setPlatformType(_platformType);
   _readVol.setPrimaryAxis(_primaryAxis);
   for (int ii = 0; ii < (int) _rays.size(); ii++) {
     _rays[ii]->setVolumeNumber(-9999);
   }
   
-  // for (size_t ii = 0; ii < _frequency.size(); ii++) {
-  //   _readVol.addFrequencyHz(_frequency[ii]);
-  // }
-
-  // _readVol.setRadarAntennaGainDbH(_radarAntennaGainDbH);
-  // _readVol.setRadarAntennaGainDbV(_radarAntennaGainDbV);
-  // _readVol.setRadarBeamWidthDegH(_radarBeamWidthDegH);
-  // _readVol.setRadarBeamWidthDegV(_radarBeamWidthDegV);
-  // _readVol.setRadarReceiverBandwidthMhz(_radarRxBandwidthHz / 1.0e6);
+  _readVol.addFrequencyHz(Radx::LIGHT_SPEED / 538.0e-6);
+  _readVol.addFrequencyHz(Radx::LIGHT_SPEED / 1064.0e-6);
   
-  // _readVol.setVersion(_version);
-  // _readVol.setTitle(_title);
-  // _readVol.setSource(_source);
-  // _readVol.setHistory(_history);
+  _readVol.setLidarConstant(-9999.0);
+  _readVol.setLidarPulseEnergyJ(-9999.0);
+  _readVol.setLidarPeakPowerW(-9999.0);
+  _readVol.setLidarApertureDiamCm(-9999.0);
+  _readVol.setLidarApertureEfficiency(-9999.0);
+  _readVol.setLidarFieldOfViewMrad(-9999.0);
+  _readVol.setLidarBeamDivergenceMrad(-9999.0);
+
+  _readVol.setTitle("NCAR HSRL");
+  _readVol.setSource("HSRL realtime software");
+  _readVol.setHistory("Converted from RAW NetCDF files");
   _readVol.setInstitution("NCAR");
-  // _readVol.setReferences(_references);
-  // _readVol.setComment(_comment);
-  // _readVol.setOrigFormat(_origFormat);
+  _readVol.setReferences("University of Wisconsin");
+  _readVol.setComment("");
   _readVol.setDriver("Hsrl2Radx");
-  _readVol.setCreated(_created);
-  // _readVol.setStatusXml(_statusXml);
-  // _readVol.setSiteName(_siteName);
-  // _readVol.setScanName(_scanName);
-  // _readVol.setScanId(_scanId);
-  _readVol.setInstrumentName("HSRL");
+  _readVol.setCreated(_dataAdded);
+  _readVol.setStatusXml("");
+  
+  _readVol.setScanName("Vert");
+  _readVol.setScanId(0);
 
   if (_latitude.size() > 0) {
     for (size_t ii = 0; ii < _latitude.size(); ii++) {
@@ -1069,16 +1069,8 @@ void RawFile::_loadReadVolume()
       }
     }
   }
-  // if (_altitudeAgl.size() > 0) {
-  //   for (size_t ii = 0; ii < _altitudeAgl.size(); ii++) {
-  //     if (_altitudeAgl[ii] > -9990) {
-  //       _readVol.setSensorHtAglM(_altitudeAgl[ii]);
-  //       break;
-  //     }
-  //   }
-  // }
 
-  // _readVol.copyRangeGeom(_geom);
+  _readVol.setRangeGeom(_startRangeKm, _gateSpacingKm);
 
   for (size_t ii = 0; ii < _rays.size(); ii++) {
     _readVol.addRay(_rays[ii]);
@@ -1090,11 +1082,9 @@ void RawFile::_loadReadVolume()
   _rays.clear();
   // _fields.clear();
 
-  // apply goeref info if applicable
+  // apply goeref info
 
-  // if (_readApplyGeorefs) {
-  //   _readVol.applyGeorefs();
-  // }
+  _readVol.applyGeorefs();
 
   // load the sweep information from the rays
 
@@ -1104,10 +1094,6 @@ void RawFile::_loadReadVolume()
 
   _readVol.loadVolumeInfoFromRays();
   
-  // check for indexed rays, set info on rays
-
-  _readVol.checkForIndexedRays();
-
 }
 
 ///////////////////////////////////////////////
