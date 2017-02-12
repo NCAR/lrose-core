@@ -1097,7 +1097,7 @@ int RawFile::_addCountFieldToRays(NcVar* var,
     int startIndex = iray * _nBinsInFile;
     Radx::si32 *icounts = idata + startIndex;
 
-    // accumulate into gates
+    // compute mean counts per gate
 
     size_t ibin = 0;
     for (size_t igate = 0; igate < _nGates; igate++) {
@@ -1106,11 +1106,7 @@ int RawFile::_addCountFieldToRays(NcVar* var,
         fcounts[igate] += icounts[ibin];
       }
       fcounts[igate] /= (double) _nBinsPerGate;
-      if (fcounts[igate] == 0) {
-        fcounts[igate] = Radx::missingFl32;
-      } else {
-        fcounts[igate] = 10.0 * log10(fcounts[igate]);
-      }
+
     }
     
     RadxField *field =
@@ -1121,6 +1117,31 @@ int RawFile::_addCountFieldToRays(NcVar* var,
     
     field->setLongName(longName);
     field->setRangeGeom(_startRangeKm, _gateSpacingKm);
+    
+    // add db of same field
+    
+    for (size_t igate = 0; igate < _nGates; igate++) {
+      if (fcounts[igate] > 0) {
+        fcounts[igate] = 10.0 * log10(fcounts[igate]);
+      } else {
+        fcounts[igate] = Radx::missingFl32;
+      }
+    }
+
+    string dbName = "db_";
+    dbName += name;
+    string dbUnits = "db_counts";
+    string dbLongName = "db_";
+    dbLongName += longName;
+    
+    RadxField *dbField =
+      _rays[iray]->addField(dbName, dbUnits, _nGates,
+                            Radx::missingFl32,
+                            fcounts,
+                            true);
+    
+    dbField->setLongName(dbLongName);
+    dbField->setRangeGeom(_startRangeKm, _gateSpacingKm);
 
   }
   
