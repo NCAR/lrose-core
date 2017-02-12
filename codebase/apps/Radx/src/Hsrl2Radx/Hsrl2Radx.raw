@@ -424,7 +424,7 @@ combine_bins_on_read = TRUE;
 // Type: int
 //
 
-n_bins_per_gate = 4;
+n_bins_per_gate = 2;
 
 //======================================================================
 //

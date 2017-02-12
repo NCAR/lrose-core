@@ -178,8 +178,6 @@ private:
 
   vector<int> _telescopeLocked;
   vector<int> _telescopeDirection;
-  vector<double> _rotation;
-  vector<double> _tilt;
   
   vector<double> _latitude;
   vector<double> _longitude;
@@ -195,7 +193,7 @@ private:
 
   // range geometry
 
-  double _rawGateSpacingM;
+  double _rawGateSpacingKm;
   double _startRangeKm;
   double _gateSpacingKm;
   

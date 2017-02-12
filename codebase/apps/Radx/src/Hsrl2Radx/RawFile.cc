@@ -116,8 +116,6 @@ void RawFile::clear()
 
   _telescopeLocked.clear();
   _telescopeDirection.clear();
-  _rotation.clear();
-  _tilt.clear();
 
   _latitude.clear();
   _longitude.clear();
@@ -129,15 +127,18 @@ void RawFile::clear()
 
   _instrumentType = Radx::INSTRUMENT_TYPE_LIDAR;
   _platformType = Radx::PLATFORM_TYPE_AIRCRAFT;
-  _primaryAxis = Radx::PRIMARY_AXIS_Y_PRIME;
+  _primaryAxis = Radx::PRIMARY_AXIS_Z;
 
-  _rawGateSpacingM = 3.75;
-  _gateSpacingKm = _rawGateSpacingM * cos(4.0 * Radx::DegToRad);
+  // _rawGateSpacingKm = 3.75 / 1000.0;
+  _rawGateSpacingKm = 7.5 / 1000.0;
+  _gateSpacingKm = _rawGateSpacingKm * cos(4.0 * Radx::DegToRad);
   _startRangeKm = _gateSpacingKm / 2.0;
   if (_params.combine_bins_on_read) {
     _gateSpacingKm *= _params.n_bins_per_gate;
     _startRangeKm = _gateSpacingKm / 2.0;
   }
+
+  _startRangeKm -= 0.300;
 
   _rays.clear();
   
@@ -511,8 +512,6 @@ void RawFile::_clearRayVariables()
 
   _telescopeLocked.clear();
   _telescopeDirection.clear();
-  _rotation.clear();
-  _tilt.clear();
   _latitude.clear();
   _longitude.clear();
   _altitude.clear();
@@ -862,7 +861,7 @@ int RawFile::_createRays(const string &path)
 
       // pointing up
 
-      geo.setRotation(-4.0);
+      geo.setRotation(90.0);
       geo.setTilt(0.0);
       ray->setAzimuthDeg(0.0);
       ray->setElevationDeg(90.0);
@@ -872,7 +871,7 @@ int RawFile::_createRays(const string &path)
 
       // pointing down
 
-      geo.setRotation(184.0);
+      geo.setRotation(-90.0);
       geo.setTilt(0.0);
       ray->setAzimuthDeg(0.0);
       ray->setElevationDeg(-90.0);
@@ -885,7 +884,7 @@ int RawFile::_createRays(const string &path)
 
     geo.setLatitude(_latitude[ii]);
     geo.setLongitude(_longitude[ii]);
-    geo.setAltitudeKmMsl(_altitude[ii]);
+    geo.setAltitudeKmMsl(_altitude[ii] / 1000.0);
 
     geo.setVertVelocity(_vertVel[ii]);
     
@@ -907,8 +906,6 @@ int RawFile::_createRays(const string &path)
 void RawFile::_loadReadVolume()
   
 {
-
-  cerr << "1111111111111111111111 _rays.size: " << _rays.size() << endl;
 
   _readVol->clear();
 
@@ -982,7 +979,7 @@ void RawFile::_loadReadVolume()
 
   // apply goeref info
 
-  _readVol->applyGeorefs();
+  // _readVol->applyGeorefs();
 
   // load the sweep information from the rays
 
@@ -992,8 +989,6 @@ void RawFile::_loadReadVolume()
 
   _readVol->loadVolumeInfoFromRays();
   
-  cerr << "222222222222222 nRays in vol: " << _readVol->getNRays() << endl;
-
 }
 
 ////////////////////////////////////////////
@@ -1084,6 +1079,9 @@ int RawFile::_addCountFieldToRays(NcVar* var,
   if (iret) {
     return -1;
   }
+  // for (size_t ii = 0; ii < _nPoints; ii++) {
+  //   idata[ii] = ii % 50;
+  // }
 
   // set up float array
 
@@ -1095,7 +1093,7 @@ int RawFile::_addCountFieldToRays(NcVar* var,
   for (size_t iray = 0; iray < _rays.size(); iray++) {
 
     // get int counts for ray
-
+    
     int startIndex = iray * _nBinsInFile;
     Radx::si32 *icounts = idata + startIndex;
 
@@ -1106,6 +1104,12 @@ int RawFile::_addCountFieldToRays(NcVar* var,
       fcounts[igate] = 0.0;
       for (size_t ii = 0; ii < _nBinsPerGate; ii++, ibin++) {
         fcounts[igate] += icounts[ibin];
+      }
+      fcounts[igate] /= (double) _nBinsPerGate;
+      if (fcounts[igate] == 0) {
+        fcounts[igate] = Radx::missingFl32;
+      } else {
+        fcounts[igate] = 10.0 * log10(fcounts[igate]);
       }
     }
     

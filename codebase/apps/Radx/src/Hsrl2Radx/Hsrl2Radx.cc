@@ -770,8 +770,6 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
     return -1;
   }
   
-  cerr << "333333333333333333 nRays in vol: " << vol.getNRays() << endl;
-
   // override radar name and site name if requested
   
   if (_params.override_instrument_name) {
