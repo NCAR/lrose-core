@@ -24,16 +24,14 @@
 /////////////////////////////////////////////////////////////
 // MslFile.cc
 //
-// MslFile object
+// For reading
+// NetCDF file data for HSRL radial data from UW
+// in MSL vert coords
 //
-// NetCDF file data for radar radial data in CF-compliant file
-//
-// See also MslFile_read.cc and MslFile_write.cc
-//
-// Mike Dixon, RAP, NCAR
+// Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Dec 2009
+// June 2015
 //
 ///////////////////////////////////////////////////////////////
 

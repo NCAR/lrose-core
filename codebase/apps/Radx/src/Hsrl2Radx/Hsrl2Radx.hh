@@ -78,7 +78,6 @@ private:
   int _runRealtimeNoLdata();
   int _processFile(const string &filePath);
   int _processUwCfRadialFile(const string &filePath);
-  int _processUwRawFile(const string &filePath);
   void _setupRead(MslFile &file);
   void _overrideGateGeometry(RadxVol &vol);
   void _setRangeRelToInstrument(MslFile &file,
@@ -87,6 +86,8 @@ private:
   void _setupWrite(RadxFile &file);
   void _setGlobalAttr(RadxVol &vol);
   int _writeVol(RadxVol &vol);
+
+  int _processUwRawFile(const string &filePath);
 
 };
 
