@@ -422,9 +422,9 @@ public:
 
   double elevation_offset;
 
-  tdrp_bool_t combine_gates_on_read;
+  tdrp_bool_t combine_bins_on_read;
 
-  int n_gates_to_combine;
+  int n_bins_per_gate;
 
   tdrp_bool_t set_output_fields;
 

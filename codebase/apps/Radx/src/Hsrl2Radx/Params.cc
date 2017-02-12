@@ -919,31 +919,31 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("OPTION TO COMBINED RANGE GATES ON READ");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_hdr = tdrpStrDup("OPTION TO COMBINED RAW RANGE BIN ON READ TO FORM GATES");
+    tt->comment_text = tdrpStrDup("Only applies to reading in RAW NetCDF files.");
     tt++;
     
-    // Parameter 'combine_gates_on_read'
+    // Parameter 'combine_bins_on_read'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("combine_gates_on_read");
+    tt->param_name = tdrpStrDup("combine_bins_on_read");
     tt->descr = tdrpStrDup("Option to combine range gates on read.");
     tt->help = tdrpStrDup("If true, the specified number of range gates will be combined on read to create mean values with lower noisiness.");
-    tt->val_offset = (char *) &combine_gates_on_read - &_start_;
+    tt->val_offset = (char *) &combine_bins_on_read - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'n_gates_to_combine'
+    // Parameter 'n_bins_per_gate'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("n_gates_to_combine");
-    tt->descr = tdrpStrDup("Number of gates to combine on read.");
+    tt->param_name = tdrpStrDup("n_bins_per_gate");
+    tt->descr = tdrpStrDup("Number of bins to combine into a single gate.");
     tt->help = tdrpStrDup("In range, we will combine this number of gates to produce a data set with lower spatial resolution but less noiry data.");
-    tt->val_offset = (char *) &n_gates_to_combine - &_start_;
+    tt->val_offset = (char *) &n_bins_per_gate - &_start_;
     tt->single_val.i = 1;
     tt++;
     

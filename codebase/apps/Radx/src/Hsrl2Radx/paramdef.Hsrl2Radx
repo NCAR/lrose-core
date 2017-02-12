@@ -204,20 +204,21 @@ paramdef double {
 } elevation_offset;
 
 commentdef {
-  p_header = "OPTION TO COMBINED RANGE GATES ON READ";
+  p_header = "OPTION TO COMBINED RAW RANGE BIN ON READ TO FORM GATES";
+  p_text = "Only applies to reading in RAW NetCDF files.";
 }
 
 paramdef boolean {
   p_default = false;
   p_descr = "Option to combine range gates on read.";
   p_help = "If true, the specified number of range gates will be combined on read to create mean values with lower noisiness.";
-} combine_gates_on_read;
+} combine_bins_on_read;
 
 paramdef int {
   p_default = 1;
-  p_descr = "Number of gates to combine on read.";
+  p_descr = "Number of bins to combine into a single gate.";
   p_help = "In range, we will combine this number of gates to produce a data set with lower spatial resolution but less noiry data.";
-} n_gates_to_combine;
+} n_bins_per_gate;
 
 commentdef {
   p_header = "OPTION TO SPECIFY FIELD NAMES FOR OUTPUT FILES";
