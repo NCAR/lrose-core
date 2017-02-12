@@ -812,20 +812,10 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
     return -1;
   }
   
-#ifdef JUNK
-
   // convert to floats
   
   vol.convertToFl32();
-
-  // override radar location if requested
   
-  if (_params.override_instrument_location) {
-    vol.overrideLocation(_params.instrument_latitude_deg,
-                         _params.instrument_longitude_deg,
-                         _params.instrument_altitude_meters / 1000.0);
-  }
-    
   // override radar name and site name if requested
   
   if (_params.override_instrument_name) {
@@ -860,9 +850,9 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
 
   // set the range relative to the instrument location
 
-  if (_params.set_range_relative_to_instrument) {
-    _setRangeRelToInstrument(inFile, vol);
-  }
+  // if (_params.set_range_relative_to_instrument) {
+  //   _setRangeRelToInstrument(inFile, vol);
+  // }
   
   // set number of gates constant if requested
   
@@ -892,8 +882,6 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
     cerr << "  Cannot write volume to file" << endl;
     return -1;
   }
-
-#endif
 
   return 0;
 
