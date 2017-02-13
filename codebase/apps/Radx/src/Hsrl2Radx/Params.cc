@@ -919,8 +919,8 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("OPTION TO COMBINED RAW RANGE BIN ON READ TO FORM GATES");
-    tt->comment_text = tdrpStrDup("Only applies to reading in RAW NetCDF files.");
+    tt->comment_hdr = tdrpStrDup("READING RAW NetCDF DATA FILES");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'combine_bins_on_read'
@@ -945,6 +945,30 @@ using namespace std;
     tt->help = tdrpStrDup("In range, we will combine this number of gates to produce a data set with lower spatial resolution but less noiry data.");
     tt->val_offset = (char *) &n_bins_per_gate - &_start_;
     tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'raw_bin_start_range_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("raw_bin_start_range_km");
+    tt->descr = tdrpStrDup("Start range to first bin (km).");
+    tt->help = tdrpStrDup("Takes into account dead zone caused by digitizer starting before the pulse.");
+    tt->val_offset = (char *) &raw_bin_start_range_km - &_start_;
+    tt->single_val.d = -0.3;
+    tt++;
+    
+    // Parameter 'raw_bin_spacing_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("raw_bin_spacing_km");
+    tt->descr = tdrpStrDup("Spacing of raw bins (km).");
+    tt->help = tdrpStrDup("The distance between the ray bins in km.");
+    tt->val_offset = (char *) &raw_bin_spacing_km - &_start_;
+    tt->single_val.d = 0.0075;
     tt++;
     
     // Parameter 'Comment 8'

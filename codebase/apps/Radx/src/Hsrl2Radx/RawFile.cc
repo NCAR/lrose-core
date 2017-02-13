@@ -129,16 +129,12 @@ void RawFile::clear()
   _platformType = Radx::PLATFORM_TYPE_AIRCRAFT;
   _primaryAxis = Radx::PRIMARY_AXIS_Z;
 
-  // _rawGateSpacingKm = 3.75 / 1000.0;
-  _rawGateSpacingKm = 7.5 / 1000.0;
+  _rawGateSpacingKm = _params.raw_bin_spacing_km;
   _gateSpacingKm = _rawGateSpacingKm * cos(4.0 * Radx::DegToRad);
-  _startRangeKm = _gateSpacingKm / 2.0;
   if (_params.combine_bins_on_read) {
     _gateSpacingKm *= _params.n_bins_per_gate;
-    _startRangeKm = _gateSpacingKm / 2.0;
   }
-
-  _startRangeKm -= 0.300;
+  _startRangeKm = _params.raw_bin_start_range_km;
 
   _rays.clear();
   

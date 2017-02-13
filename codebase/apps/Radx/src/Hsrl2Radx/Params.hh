@@ -426,6 +426,10 @@ public:
 
   int n_bins_per_gate;
 
+  double raw_bin_start_range_km;
+
+  double raw_bin_spacing_km;
+
   tdrp_bool_t set_output_fields;
 
   output_field_t *_output_fields;
@@ -493,7 +497,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[70];
+  mutable TDRPtable _table[72];
 
   const char *_className;
 

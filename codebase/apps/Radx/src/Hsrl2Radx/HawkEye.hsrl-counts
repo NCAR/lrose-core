@@ -327,12 +327,48 @@ color_scale_dir = "$(PROJ_DIR)/display/color_scales";
 
 fields = {
   {
+    label = "db_combined_hi",
+    raw_name = "db_combined_hi",
+    filtered_name = "",
+    units = "db_counts",
+    color_map = "hsrl_log_counts.colors",
+    shortcut = "1"
+  }
+  ,
+  {
+    label = "db_combined_lo",
+    raw_name = "db_combined_lo",
+    filtered_name = "",
+    units = "db_counts",
+    color_map = "hsrl_log_counts.colors",
+    shortcut = "2"
+  }
+  ,
+  {
+    label = "db_cross",
+    raw_name = "db_cross",
+    filtered_name = "",
+    units = "db_counts",
+    color_map = "hsrl_log_counts.colors",
+    shortcut = "3"
+  }
+  ,
+  {
+    label = "db_molecular",
+    raw_name = "db_molecular",
+    filtered_name = "",
+    units = "db_counts",
+    color_map = "hsrl_log_counts.colors",
+    shortcut = "4"
+  }
+  , 
+  {
     label = "combined_hi",
     raw_name = "combined_hi",
     filtered_name = "",
     units = "counts",
-    color_map = "hsrl_log_counts.colors",
-    shortcut = "1"
+    color_map = "number_1000.colors",
+    shortcut = "5"
   }
   ,
   {
@@ -340,8 +376,8 @@ fields = {
     raw_name = "combined_lo",
     filtered_name = "",
     units = "counts",
-    color_map = "hsrl_log_counts.colors",
-    shortcut = "1"
+    color_map = "number_1000.colors",
+    shortcut = "6"
   }
   ,
   {
@@ -349,8 +385,8 @@ fields = {
     raw_name = "cross",
     filtered_name = "",
     units = "counts",
-    color_map = "hsrl_log_counts.colors",
-    shortcut = "1"
+    color_map = "number_1000.colors",
+    shortcut = "7"
   }
   ,
   {
@@ -358,8 +394,8 @@ fields = {
     raw_name = "molecular",
     filtered_name = "",
     units = "counts",
-    color_map = "hsrl_log_counts.colors",
-    shortcut = "1"
+    color_map = "number_1000.colors",
+    shortcut = "8"
   }
 };
 

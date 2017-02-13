@@ -394,9 +394,7 @@ elevation_offset = 0;
 
 //======================================================================
 //
-// OPTION TO COMBINED RAW RANGE BIN ON READ TO FORM GATES.
-//
-// Only applies to reading in RAW NetCDF files.
+// READING RAW NetCDF DATA FILES.
 //
 //======================================================================
  
@@ -424,7 +422,32 @@ combine_bins_on_read = TRUE;
 // Type: int
 //
 
-n_bins_per_gate = 2;
+n_bins_per_gate = 4;
+
+///////////// raw_bin_start_range_km //////////////////
+//
+// Start range to first bin (km).
+//
+// Takes into account dead zone caused by digitizer starting before the 
+//   pulse.
+//
+//
+// Type: double
+//
+
+raw_bin_start_range_km = -0.3;
+
+///////////// raw_bin_spacing_km //////////////////////
+//
+// Spacing of raw bins (km).
+//
+// The distance between the ray bins in km.
+//
+//
+// Type: double
+//
+
+raw_bin_spacing_km = 0.0075;
 
 //======================================================================
 //
