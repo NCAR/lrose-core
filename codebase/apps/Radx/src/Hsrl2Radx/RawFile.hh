@@ -171,6 +171,7 @@ private:
   NcVar *_latitudeVar;
   NcVar *_longitudeVar;
   NcVar *_altitudeVar;
+  NcVar *_headingVar;
   NcVar *_gndSpeedVar;
   NcVar *_vertVelVar;
   NcVar *_pitchVar;
@@ -182,6 +183,7 @@ private:
   vector<double> _latitude;
   vector<double> _longitude;
   vector<double> _altitude;
+  vector<double> _heading;
   vector<double> _gndSpeed;
   vector<double> _vertVel;
   vector<double> _pitch;
@@ -258,6 +260,13 @@ private:
   void _addErrStr(string label, string strarg = "",
                   bool cr = true);
 
+  // compute angles from georef
+
+  void _computeRadarAngles(RadxGeoref &georef,
+                           RadxCfactors &corr,
+                           double &azimuthDeg,
+                           double &elevationDeg);
+  
 };
 
 #endif

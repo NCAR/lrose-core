@@ -43,6 +43,8 @@
 #include <Radx/RadxRcalib.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxArray.hh>
+#include <Radx/RadxGeoref.hh>
+#include <Radx/RadxCfactors.hh>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
@@ -109,6 +111,7 @@ void RawFile::clear()
   _latitudeVar = NULL;
   _longitudeVar = NULL;
   _altitudeVar = NULL;
+  _headingVar = NULL;
   _gndSpeedVar = NULL;
   _vertVelVar = NULL;
   _pitchVar = NULL;
@@ -120,6 +123,7 @@ void RawFile::clear()
   _latitude.clear();
   _longitude.clear();
   _altitude.clear();
+  _heading.clear();
   _gndSpeed.clear();
   _vertVel.clear();
   _pitch.clear();
@@ -127,10 +131,11 @@ void RawFile::clear()
 
   _instrumentType = Radx::INSTRUMENT_TYPE_LIDAR;
   _platformType = Radx::PLATFORM_TYPE_AIRCRAFT;
-  _primaryAxis = Radx::PRIMARY_AXIS_Z;
+  _primaryAxis = Radx::PRIMARY_AXIS_Y_PRIME;
 
   _rawGateSpacingKm = _params.raw_bin_spacing_km;
-  _gateSpacingKm = _rawGateSpacingKm * cos(4.0 * Radx::DegToRad);
+  // _gateSpacingKm = _rawGateSpacingKm * cos(4.0 * Radx::DegToRad);
+  _gateSpacingKm = _rawGateSpacingKm;
   if (_params.combine_bins_on_read) {
     _gateSpacingKm *= _params.n_bins_per_gate;
   }
@@ -511,6 +516,7 @@ void RawFile::_clearRayVariables()
   _latitude.clear();
   _longitude.clear();
   _altitude.clear();
+  _heading.clear();
   _gndSpeed.clear();
   _vertVel.clear();
   _pitch.clear();
@@ -555,6 +561,12 @@ int RawFile::_readRayVariables()
   _readRayVar(_altitudeVar, "iwg1_GPS_MSL_Alt", _altitude);
   if (_altitude.size() < _nTimesInFile) {
     _addErrStr("ERROR - iwg1_GPS_MSL_Alt variable required");
+    iret = -1;
+  }
+
+  _readRayVar(_altitudeVar, "iwg1_True_Hdg", _heading);
+  if (_heading.size() < _nTimesInFile) {
+    _addErrStr("ERROR - iwg1_True_Hdg variable required");
     iret = -1;
   }
 
@@ -831,6 +843,7 @@ int RawFile::_createRays(const string &path)
   // compile a list of the rays to be read in
   
   _rays.clear();
+  RadxCfactors corr;
 
   for (size_t ii = 0; ii < _nTimesInFile; ii++) {
 
@@ -857,34 +870,48 @@ int RawFile::_createRays(const string &path)
 
       // pointing up
 
-      geo.setRotation(90.0);
+      geo.setRotation(-4.0);
       geo.setTilt(0.0);
       ray->setAzimuthDeg(0.0);
       ray->setElevationDeg(90.0);
       ray->setFixedAngleDeg(90.0);
       
     } else {
-
+      
       // pointing down
-
-      geo.setRotation(-90.0);
+      
+      geo.setRotation(184.0);
       geo.setTilt(0.0);
       ray->setAzimuthDeg(0.0);
       ray->setElevationDeg(-90.0);
       ray->setFixedAngleDeg(-90.0);
       
     }
-
+    
     geo.setRoll(_roll[ii]);
     geo.setPitch(_pitch[ii]);
-
+    geo.setHeading(_heading[ii]);
+    geo.setDrift(0.0); // do not have drift in the file
+    
     geo.setLatitude(_latitude[ii]);
     geo.setLongitude(_longitude[ii]);
     geo.setAltitudeKmMsl(_altitude[ii] / 1000.0);
 
     geo.setVertVelocity(_vertVel[ii]);
+
+    double sinVal, cosVal;
+    sincos(_heading[ii] * Radx::DegToRad, &sinVal, &cosVal);
+    geo.setEwVelocity(_gndSpeed[ii] * sinVal);
+    geo.setNsVelocity(_gndSpeed[ii] * cosVal);
     
     ray->setGeoref(geo);
+
+    // compute az/el from geo
+    
+    double azimuth, elevation;
+    _computeRadarAngles(geo, corr, azimuth, elevation);
+    ray->setAzimuthDeg(azimuth);
+    ray->setElevationDeg(elevation);
     
     // add to ray vector
     
@@ -1183,5 +1210,63 @@ void RawFile::_clearRays()
     delete _rays[ii];
   }
   _rays.clear();
+}
+
+///////////////////////////////////////////////////////////////////
+// compute the true azimuth, elevation, etc. from platform
+// parameters using Testud's equations with their different
+// definitions of rotation angle, etc.
+//
+// see Wen-Chau Lee's paper
+// "Mapping of the Airborne Doppler Radar Data"
+
+void RawFile::_computeRadarAngles(RadxGeoref &georef,
+                                  RadxCfactors &corr,
+                                  double &azimuthDeg,
+                                  double &elevationDeg)
+  
+{
+  
+  double R = (georef.getRoll() + corr.getRollCorr()) * Radx::DegToRad;
+  double P = (georef.getPitch() + corr.getPitchCorr()) * Radx::DegToRad;
+  double H = (georef.getHeading() + corr.getHeadingCorr()) * Radx::DegToRad;
+  double D = (georef.getDrift() + corr.getDriftCorr()) * Radx::DegToRad;
+  double T = H + D;
+  
+  double sinP = sin(P);
+  double cosP = cos(P);
+  double sinD = sin(D);
+  double cosD = cos(D);
+  
+  double theta_a = 
+    (georef.getRotation() + corr.getRotationCorr()) * Radx::DegToRad;
+  double tau_a =
+    (georef.getTilt() + corr.getTiltCorr()) * Radx::DegToRad;
+  double sin_tau_a = sin(tau_a);
+  double cos_tau_a = cos(tau_a);
+  double sin_theta_rc = sin(theta_a + R); /* roll corrected rotation angle */
+  double cos_theta_rc = cos(theta_a + R); /* roll corrected rotation angle */
+  
+  double xsubt = (cos_theta_rc * sinD * cos_tau_a * sinP
+                  + cosD * sin_theta_rc * cos_tau_a
+                  -sinD * cosP * sin_tau_a);
+  
+  double ysubt = (-cos_theta_rc * cosD * cos_tau_a * sinP
+                  + sinD * sin_theta_rc * cos_tau_a
+                  + cosP * cosD * sin_tau_a);
+  
+  double zsubt = (cosP * cos_tau_a * cos_theta_rc
+                  + sinP * sin_tau_a);
+  
+  double lambda_t = atan2(xsubt, ysubt);
+  double azimuthRad = fmod(lambda_t + T, M_PI * 2.0);
+  double elevationRad = asin(zsubt);
+  
+  elevationDeg = elevationRad * Radx::RadToDeg;
+  azimuthDeg = azimuthRad * Radx::RadToDeg;
+  if (azimuthDeg < 0) {
+    azimuthDeg += 360.0;
+  }
+  
 }
 

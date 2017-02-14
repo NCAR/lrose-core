@@ -435,7 +435,7 @@ n_bins_per_gate = 4;
 // Type: double
 //
 
-raw_bin_start_range_km = -0.3;
+raw_bin_start_range_km = -0.300;
 
 ///////////// raw_bin_spacing_km //////////////////////
 //
