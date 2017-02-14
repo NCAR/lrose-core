@@ -397,6 +397,33 @@ fields = {
     color_map = "number_1000.colors",
     shortcut = "8"
   }
+  ,
+  {
+    label = "height",
+    raw_name = "height",
+    filtered_name = "",
+    units = "km",
+    color_map = "number50.colors",
+    shortcut = "9"
+  }
+  ,
+  {
+    label = "temperature",
+    raw_name = "temperature",
+    filtered_name = "",
+    units = "K",
+    color_map = "tempK.colors",
+    shortcut = "a"
+  }
+  ,
+  {
+    label = "pressure",
+    raw_name = "pressure",
+    filtered_name = "",
+    units = "mb",
+    color_map = "number_1000.colors",
+    shortcut = "b"
+  }
 };
 
 ///////////// background_render_mins //////////////////

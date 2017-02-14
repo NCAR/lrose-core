@@ -189,6 +189,12 @@ private:
   vector<double> _pitch;
   vector<double> _roll;
 
+  NcVar *_pollAngleVar;
+  NcVar *_totalEnergyVar;
+
+  vector<float> _polAngle;
+  vector<int> _totalEnergy;
+
   Radx::InstrumentType_t _instrumentType;
   Radx::PlatformType_t _platformType;
   Radx::PrimaryAxis_t _primaryAxis;
@@ -220,6 +226,8 @@ private:
 
   int _readRayVar(NcVar* &var, const string &name, 
                   vector<double> &vals, bool required = true);
+  int _readRayVar(NcVar* &var, const string &name, 
+                  vector<float> &vals, bool required = true);
   int _readRayVar(NcVar* &var, const string &name, 
                   vector<int> &vals, bool required = true);
   int _readRayVar(NcVar* &var, const string &name, 

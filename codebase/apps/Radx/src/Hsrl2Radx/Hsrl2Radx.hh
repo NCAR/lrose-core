@@ -88,6 +88,7 @@ private:
   int _writeVol(RadxVol &vol);
 
   int _processUwRawFile(const string &filePath);
+  void _addEnvFields(RadxVol &vol);
 
 };
 

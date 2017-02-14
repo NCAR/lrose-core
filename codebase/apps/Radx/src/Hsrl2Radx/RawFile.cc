@@ -303,7 +303,7 @@ int RawFile::readFromPath(const string &path,
     _addErrStr(errStr);
     return -1;
   }
-  
+
   // load the data into the read volume
 
   _loadReadVolume();
@@ -585,6 +585,9 @@ int RawFile::_readRayVariables()
     iret = -1;
   }
 
+  _readRayVar(_pollAngleVar, "polarization", _polAngle);
+  _readRayVar(_totalEnergyVar, "total_energy", _totalEnergy);
+
   if (iret) {
     _addErrStr("ERROR - RawFile::_readRayVariables");
     return -1;
@@ -634,6 +637,60 @@ int RawFile::_readRayVar(NcVar* &var, const string &name,
     if (!required) {
       for (size_t ii = 0; ii < _nTimesInFile; ii++) {
         vals.push_back(Radx::missingMetaDouble);
+      }
+      clearErrStr();
+    } else {
+      _addErrStr("ERROR - RawFile::_readRayVar");
+      _addErrStr("  Cannot read variable: ", name);
+      _addErrStr(_file.getNcError()->get_errmsg());
+      iret = -1;
+    }
+  }
+  delete[] data;
+  return iret;
+
+}
+
+///////////////////////////////////
+// read a ray variable - float
+// side effects: set var, vals
+
+int RawFile::_readRayVar(NcVar* &var, const string &name,
+                         vector<float> &vals, bool required)
+  
+{
+
+  vals.clear();
+
+  // get var
+
+  var = _getRayVar(name, required);
+  if (var == NULL) {
+    if (!required) {
+      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+        vals.push_back(Radx::missingMetaFloat);
+      }
+      clearErrStr();
+      return 0;
+    } else {
+      _addErrStr("ERROR - RawFile::_readRayVar");
+      return -1;
+    }
+  }
+
+  // load up data
+
+  float *data = new float[_nTimesInFile];
+  float *dd = data;
+  int iret = 0;
+  if (var->get(data, _nTimesInFile)) {
+    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
+      vals.push_back(*dd);
+    }
+  } else {
+    if (!required) {
+      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+        vals.push_back(Radx::missingMetaFloat);
       }
       clearErrStr();
     } else {
@@ -912,6 +969,11 @@ int RawFile::_createRays(const string &path)
     _computeRadarAngles(geo, corr, azimuth, elevation);
     ray->setAzimuthDeg(azimuth);
     ray->setElevationDeg(elevation);
+
+    // other metadata - overloading
+    
+    ray->setMeasXmitPowerDbmH(_totalEnergy[ii]);
+    ray->setEstimatedNoiseDbmHc(_polAngle[ii]);
     
     // add to ray vector
     
@@ -999,10 +1061,6 @@ void RawFile::_loadReadVolume()
   // the vectors without deleting the objects to which they point
 
   _rays.clear();
-
-  // apply goeref info
-
-  // _readVol->applyGeorefs();
 
   // load the sweep information from the rays
 

@@ -45,6 +45,7 @@
 #include <didss/DsInputPath.hh>
 #include <toolsa/TaXml.hh>
 #include <toolsa/pmu.h>
+#include <physics/IcaoStdAtmos.hh>
 #include "MslFile.hh"
 #include "RawFile.hh"
 using namespace std;
@@ -414,7 +415,7 @@ int Hsrl2Radx::_processUwCfRadialFile(const string &readPath)
   
   _convertFields(vol);
 
-  // set global attributes
+  // set global attributes as needed
 
   _setGlobalAttr(vol);
 
@@ -779,37 +780,13 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
     vol.setSiteName(_params.site_name);
   }
     
-  // apply angle offsets
-
-  if (_params.apply_azimuth_offset) {
-    if (_params.debug) {
-      cerr << "NOTE: applying azimuth offset (deg): " 
-           << _params.azimuth_offset << endl;
-    }
-    vol.applyAzimuthOffset(_params.azimuth_offset);
-  }
-  if (_params.apply_elevation_offset) {
-    if (_params.debug) {
-      cerr << "NOTE: applying elevation offset (deg): " 
-           << _params.elevation_offset << endl;
-    }
-    vol.applyElevationOffset(_params.elevation_offset);
-  }
-
-  // override start range and/or gate spacing
-
-  if (_params.override_start_range || _params.override_gate_spacing) {
-    _overrideGateGeometry(vol);
-  }
-
-  // set vol values
-  
-  vol.loadSweepInfoFromRays();
-  vol.loadVolumeInfoFromRays();
-
-  // set global attributes
+  // set global attributes as needed
   
   _setGlobalAttr(vol);
+
+  // add in height, temperature and pressure fields
+
+  _addEnvFields(vol);
 
   // write the file
 
@@ -822,4 +799,70 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
   return 0;
 
 }
+
+
+//////////////////////////////////////////////////
+// Add in the height, pressure and temperature
+// environmental fields
+
+void Hsrl2Radx::_addEnvFields(RadxVol &vol)
+{
+
+  IcaoStdAtmos stdAtmos;
+
+  // loop through the rays
+
+  vector<RadxRay *> rays = vol.getRays();
+  for(size_t iray = 0; iray < rays.size(); iray++) {
+
+    RadxRay *ray = rays[iray];
+    const RadxGeoref *geo = ray->getGeoreference();
+    if (!geo) {
+      continue;
+    }
+
+    double altitudeKm = geo->getAltitudeKmMsl();
+    double elevDeg = ray->getElevationDeg();
+
+    size_t nGates = ray->getNGates();
+
+    RadxArray<Radx::fl32> htKm_, tempK_, presHpa_;
+    Radx::fl32 *htKm = htKm_.alloc(nGates);
+    Radx::fl32 *tempK = tempK_.alloc(nGates);
+    Radx::fl32 *presHpa = presHpa_.alloc(nGates);
+
+    double sinEl = sin(elevDeg * Radx::DegToRad);
+    cerr << "11111111111111 sinEl: " << sinEl << endl;
+    double startRangeKm = ray->getStartRangeKm();
+    double gateSpacingKm = ray->getGateSpacingKm();
+
+    double rangeKm = startRangeKm;
+    for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
+      htKm[igate] = altitudeKm + rangeKm * sinEl;
+      double rangeM = rangeKm * 1000.0;
+      tempK[igate] = stdAtmos.ht2temp(rangeM);
+      presHpa[igate] = stdAtmos.ht2pres(rangeM);
+    }
+
+    RadxField *htField =
+      ray->addField("height", "km", nGates, Radx::missingFl32, htKm, true);
+    htField->setLongName("height_MSL");
+    htField->setRangeGeom(startRangeKm, gateSpacingKm);
+
+    RadxField *tempField =
+      ray->addField("temperature", "K", nGates, Radx::missingFl32, tempK, true);
+    tempField->setLongName("temperaure_from_std_atmos");
+    tempField->setRangeGeom(startRangeKm, gateSpacingKm);
+
+    RadxField *presField =
+      ray->addField("pressure", "HPa", nGates, Radx::missingFl32, presHpa, true);
+    presField->setLongName("pressure_from_std_atmos");
+    presField->setRangeGeom(startRangeKm, gateSpacingKm);
+
+  } // iray
+  
+
+}
+
+
 
