@@ -100,7 +100,7 @@ input_mode = IWRF_FMQ_INPUT;
 // Type: string
 //
 
-input_fmq_url = "$(DATA_DIR)/fmq/ncar";
+input_fmq_url = "$(HOME)/fmq/ncar";
 
 ///////////// seek_to_start_of_fmq ////////////////////
 //
@@ -300,7 +300,6 @@ show_status_in_gui = {
 //
 
 color_scale_dir = "$(HOME)/git/hsrl_configuration/projDir/display/color_scales";
-// color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
 
 ///////////// fields //////////////////////////////////
 //

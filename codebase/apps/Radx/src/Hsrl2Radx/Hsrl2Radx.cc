@@ -838,9 +838,9 @@ void Hsrl2Radx::_addEnvFields(RadxVol &vol)
     double rangeKm = startRangeKm;
     for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
       htKm[igate] = altitudeKm + rangeKm * sinEl;
-      double rangeM = rangeKm * 1000.0;
-      tempK[igate] = stdAtmos.ht2temp(rangeM);
-      presHpa[igate] = stdAtmos.ht2pres(rangeM);
+      double htM = htKm[igate] * 1000.0;
+      tempK[igate] = stdAtmos.ht2temp(htM);
+      presHpa[igate] = stdAtmos.ht2pres(htM);
     }
 
     RadxField *htField =
