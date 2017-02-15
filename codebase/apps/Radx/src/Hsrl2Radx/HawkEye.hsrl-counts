@@ -100,7 +100,7 @@ input_mode = IWRF_FMQ_INPUT;
 // Type: string
 //
 
-input_fmq_url = "$(DATA_DIR)/fmq/ncar";
+input_fmq_url = "$(HOME)/fmq/ncar";
 
 ///////////// seek_to_start_of_fmq ////////////////////
 //
@@ -299,7 +299,7 @@ show_status_in_gui = {
 // Type: string
 //
 
-color_scale_dir = "$(PROJ_DIR)/display/color_scales";
+color_scale_dir = "$(HOME)/git/hsrl_configuration/projDir/display/color_scales";
 
 ///////////// fields //////////////////////////////////
 //
@@ -367,7 +367,7 @@ fields = {
     raw_name = "combined_hi",
     filtered_name = "",
     units = "counts",
-    color_map = "number_1000.colors",
+    color_map = "number_log.colors",
     shortcut = "5"
   }
   ,
@@ -376,7 +376,7 @@ fields = {
     raw_name = "combined_lo",
     filtered_name = "",
     units = "counts",
-    color_map = "number_1000.colors",
+    color_map = "number_log.colors",
     shortcut = "6"
   }
   ,
@@ -385,7 +385,7 @@ fields = {
     raw_name = "cross",
     filtered_name = "",
     units = "counts",
-    color_map = "number_1000.colors",
+    color_map = "number_log.colors",
     shortcut = "7"
   }
   ,
@@ -394,7 +394,7 @@ fields = {
     raw_name = "molecular",
     filtered_name = "",
     units = "counts",
-    color_map = "number_1000.colors",
+    color_map = "number_log.colors",
     shortcut = "8"
   }
   ,
@@ -421,7 +421,7 @@ fields = {
     raw_name = "pressure",
     filtered_name = "",
     units = "mb",
-    color_map = "number_1000.colors",
+    color_map = "number_log.colors",
     shortcut = "b"
   }
 };
