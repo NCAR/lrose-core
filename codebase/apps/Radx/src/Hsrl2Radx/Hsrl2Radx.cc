@@ -832,7 +832,6 @@ void Hsrl2Radx::_addEnvFields(RadxVol &vol)
     Radx::fl32 *presHpa = presHpa_.alloc(nGates);
 
     double sinEl = sin(elevDeg * Radx::DegToRad);
-    cerr << "11111111111111 sinEl: " << sinEl << endl;
     double startRangeKm = ray->getStartRangeKm();
     double gateSpacingKm = ray->getGateSpacingKm();
 
