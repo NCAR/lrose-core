@@ -889,10 +889,8 @@ void RadxRay::remapRangeGeom(double newStartRangeKm,
       _fields[ii]->remapRayGeom(remap, interp);
     }
 
-    _nGates = remap.getNGatesInterp();
-    _startRangeKm = newStartRangeKm;
-    _gateSpacingKm = newGateSpacingKm;
-    _rangeGeomSet = true;
+    setNGates(remap.getNGatesInterp());
+    RadxRangeGeom::setRangeGeom(newStartRangeKm, newGateSpacingKm);
     
   }
 
