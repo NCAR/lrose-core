@@ -938,7 +938,7 @@ void RadxVol::loadFieldsFromRays(bool nFieldsConstantPerRay /* = false */)
 {
 
   // check we have data
-  
+
   if (_rays.size() < 1) {
     return;
   }
@@ -1766,8 +1766,11 @@ void RadxVol::remapRangeGeom(double startRangeKm,
   
   // save geometry members
   
-  _startRangeKm = startRangeKm;
-  _gateSpacingKm = gateSpacingKm;
+  setRangeGeom(startRangeKm, gateSpacingKm);
+
+  // set the packing from the rays, to update packing table
+
+  setPackingFromRays();
 
 }
 
@@ -2955,7 +2958,8 @@ void RadxVol::loadVolumeInfoFromRays()
   // set geom from predominant
 
   RayGeom predom = _getPredomGeom();
-  setRangeGeom(predom.startRange, predom.gateSpacing);                                     
+  setRangeGeom(predom.startRange, predom.gateSpacing);
+  setPackingFromRays();
 
 }
 
