@@ -2585,6 +2585,39 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
     tt++;
     
+    // Parameter 'images_set_sweep_index_list'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("images_set_sweep_index_list");
+    tt->descr = tdrpStrDup("Option to specify the sweep indexes for the image generation.");
+    tt->help = tdrpStrDup("If TRUE, only the specified sweeps will be processed.");
+    tt->val_offset = (char *) &images_set_sweep_index_list - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'images_sweep_index_list'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("images_sweep_index_list");
+    tt->descr = tdrpStrDup("List of valid sweep indexes for image generation.");
+    tt->help = tdrpStrDup("See 'images_set_sweep_index_list'. Images will only be generated for the specified sweep indexes.");
+    tt->array_offset = (char *) &_images_sweep_index_list - &_start_;
+    tt->array_n_offset = (char *) &images_sweep_index_list_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(int);
+    tt->array_n = 3;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].i = 0;
+      tt->array_vals[1].i = 1;
+      tt->array_vals[2].i = 2;
+    tt++;
+    
     // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));

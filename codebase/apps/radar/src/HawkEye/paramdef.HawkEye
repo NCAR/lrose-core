@@ -948,6 +948,18 @@ paramdef string {
   p_help = "Only applicable for image generation.";
 } images_archive_end_time;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify the sweep indexes for the image generation.";
+  p_help = "If TRUE, only the specified sweeps will be processed.";
+} images_set_sweep_index_list;
+
+paramdef int {
+  p_default = { 0, 1, 2 };
+  p_descr = "List of valid sweep indexes for image generation.";
+  p_help = "See 'images_set_sweep_index_list'. Images will only be generated for the specified sweep indexes.";
+} images_sweep_index_list[];
+
 commentdef {
   p_header = "SIMULATION MODE";
 }

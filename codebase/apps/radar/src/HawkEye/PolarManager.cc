@@ -2087,9 +2087,23 @@ void PolarManager::_createArchiveImageFiles()
 void PolarManager::_createImageFilesAllSweeps()
 {
 
-  for (size_t ii = 0; ii < _vol.getNSweeps(); ii++) {
-    _sweepIndex = ii;
-    _createImageFiles();
+  if (_params.images_set_sweep_index_list) {
+
+    for (int ii = 0; ii < _params.images_sweep_index_list_n; ii++) {
+      int index = _params._images_sweep_index_list[ii];
+      if (index >= 0 && index < (int) _vol.getNSweeps()) {
+        _sweepIndex = index;
+        _createImageFiles();
+      }
+    }
+
+  } else {
+
+    for (size_t index = 0; index < _vol.getNSweeps(); index++) {
+      _sweepIndex = index;
+      _createImageFiles();
+    }
+
   }
 
 }

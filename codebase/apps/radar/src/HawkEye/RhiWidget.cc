@@ -592,27 +592,27 @@ void RhiWidget::_computeAngleLimits(const RadxRay *ray)
   // Determine the extent of this ray
   
   double elevDiff = Radx::computeAngleDiff(elev, _prevElev);
-  if (ray->getIsIndexed() || fabs(elevDiff) > beamWidth * 2.0) {
-
+  // if (ray->getIsIndexed() || fabs(elevDiff) > beamWidth * 4.0) {
+    
     double halfAngle = ray->getAngleResDeg() / 2.0;
     _startElev = elev - halfAngle;
     _endElev = elev + halfAngle;
-
-  } else {
-
-    double maxHalfAngle = beamWidth / 2.0;
-    double prevOffset = maxHalfAngle;
-      
-    double halfElevDiff = elevDiff / 2.0;
-	
-    if (prevOffset > halfElevDiff) {
-	prevOffset = halfElevDiff;
-    }
-      
-    _startElev = elev - prevOffset;
-    _endElev = elev + maxHalfAngle;
-
-  }
+    
+  // } else {
+    
+  //   double maxHalfAngle = beamWidth / 2.0;
+  //   double prevOffset = maxHalfAngle;
+    
+  //   double halfElevDiff = elevDiff / 2.0;
+    
+  //   if (prevOffset > halfElevDiff) {
+  //     prevOffset = halfElevDiff;
+  //   }
+    
+  //   _startElev = elev - prevOffset;
+  //   _endElev = elev + maxHalfAngle;
+    
+  // }
 
   _prevElev = elev;
     
