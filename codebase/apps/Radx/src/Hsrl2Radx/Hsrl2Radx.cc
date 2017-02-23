@@ -1162,12 +1162,73 @@ void Hsrl2Radx::_readCalvals(const char* file, bool debug)
       std::stringstream ss;
       ss << line;
       
-      string test = "#";
-      //fix the following conditional to look for # anywhere..... 
-      if( !(line.substr(0, test.length())==test) && ( (line.length()<=3) || (line.length()>3) && !(line.substr(3, test.length())==test) ) && ( (line.length()<=4) || (line.length()>4) && !(line.substr(4, test.length())==test) ) ) //comments at begining of file begin with #, ignore those lines and process the rest. In the calvals file some comments are tabbed in three or four spaces and need to check for that. 
+      line=_removeWhitespace(line);//removes leading whitespace from line
+
+      if(_checkForChar("#",line)>-1)// now we remove comments which are delimited by the #
+	line=line.substr(0, _checkForChar("#",line));
+	
+      
+      if(line.length()>0)//now that we've cleaned up the line, only want to bother with it if it has non-zero length. 
 	{
-	  if(debug)
-	    cout<<line<<'\n';
-	}
-    }
-} 
+	  cout<<line<<'\n';
+	  
+	  //if the first char is a letter then it is a variable name
+
+	  if( (line.at(0)>='a' && line.at(0)<='z') || (line.at(0)>='A' && line.at(0)<='Z') )
+	    {
+	      cout<<"starts with letter"<<'\n';
+	  
+	      int hasUnits=-1;
+	      
+	      hasUnits=_checkForChar("(",line); // units are captured in ()
+
+	    }
+	      
+	  //if the first char is a number then it is a date/data pair
+
+	  if( line.at(0)>='0' && line.at(0)<='9' )
+	    {
+	      cout<<"starts with number"<<'\n';
+	      
+	      int strData=-1;
+	      int numData=-1;
+	      
+	      strData=_checkForChar("'",line);//strings are captured in ' quotes 
+	      numData=_checkForChar("[",line);//numbers are captured in [	    
+	      		    
+
+	      cout<<"strData"<<strData<<'\n';
+	      cout<<"numData"<<numData<<'\n';
+		  
+	      string date;
+	      string strValue;
+	      vector<double> numValue;
+	   
+	    }
+	  
+	}//end line length check
+    
+    }//end reading calvals file line by line
+
+}// end of _readCalvals function 
+
+
+
+
+
+string Hsrl2Radx::_removeWhitespace(string s)//this function removes spaces from the begining of strings
+{
+  while(s.length()>0 && (s.substr(0, 1)==" ") )
+    s=s.substr(1,s.length());
+  return s;
+}
+
+
+int Hsrl2Radx::_checkForChar(string subSt, string str)//checks string for a particular substring and returns the location of the start of that substring, returns -1 if not found. 
+{
+  for(int i=0;i<str.length();i++)
+    if( (str.substr(i, subSt.length())==subSt) )
+      return i;
+  
+  return -1;
+}

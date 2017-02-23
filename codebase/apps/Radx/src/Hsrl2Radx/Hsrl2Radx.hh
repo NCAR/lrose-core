@@ -94,7 +94,8 @@ private:
   void _readGeofileDefault(const char* file, bool debug);
   void _readAfterPulse(const char* file, bool debug);
   void _readCalvals(const char* file, bool debug);
-
+  string _removeWhitespace(string s);
+  int _checkForChar(string subSt, string s);
 };
 
 #endif
