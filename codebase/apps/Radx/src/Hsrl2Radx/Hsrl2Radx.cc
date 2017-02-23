@@ -48,6 +48,11 @@
 #include <physics/IcaoStdAtmos.hh>
 #include "MslFile.hh"
 #include "RawFile.hh"
+
+#include <fstream>
+#include <sstream>
+#include <string>
+
 using namespace std;
 
 // Constructor
@@ -256,7 +261,7 @@ int Hsrl2Radx::_runRealtimeNoLdata()
 
   int iret = 0;
 
-  while(true) {
+  while(true) { // how does this loop end? --Brad
 
     // check for new data
     
@@ -784,10 +789,27 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
   
   _setGlobalAttr(vol);
 
+  // read in calibration files
+
+  // this block should not be here, it means every file being processed has to read the entirety of the calibration files independantly, need to find where to better put it so calibration files are only read once. 
+
+  bool debug = true;// use while developing to give specific output information relating to reading in cal files
+  bool doneDebug = false;// use while developing when done looking at debug info for a particular cal file
+  const char* baseline = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/baseline_correction_20150601T0000.blc";
+  const char* diffDefGeo = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/diff_default_geofile_20120201T0000.geo";
+  const char* geoDef = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/geofile_default_20150601T0000.geo";
+  const char* afterpulse = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/afterpulse_default_20061001T0000.ap";
+  const char* calvals = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/calvals_gvhsrl.txt";
+  _readBaselineCorrection(baseline, doneDebug);
+  _readDiffDefaultGeo(diffDefGeo, doneDebug);
+  _readGeofileDefault(geoDef, doneDebug);
+  _readAfterPulse(afterpulse, doneDebug);
+  _readCalvals(calvals, debug);
+
   // add in height, temperature and pressure fields
 
   _addEnvFields(vol);
-
+  
   // write the file
 
   if (_writeVol(vol)) {
@@ -865,3 +887,287 @@ void Hsrl2Radx::_addEnvFields(RadxVol &vol)
 
 
 
+//////////////////////////////////////////////////
+// read in variables from calibration files
+// stores them in a multidimentional array
+
+
+
+//void Hsrl2Radx::_ReadCalvals(string pathToCalValsFile, time_t time)
+void Hsrl2Radx::_readBaselineCorrection(const char* file, bool debug)
+{
+  if(debug)
+    cout<< "in _readBaselineCorrection"<<'\n';
+  
+  std::ifstream infile(file);
+  std::string line;
+  vector<double> vec_binnum;
+  vector<double> vec_combined_hi;
+  vector<double> vec_combined_lo;
+  vector<double> vec_molecular;
+  vector<double> vec_crosspol;
+  vector<double> vec_mol_I2A;
+  vector<double> vec_comb_1064;
+
+  while (std::getline(infile, line))
+    {
+      std::stringstream ss;
+      ss << line;
+      if(debug)
+	cout<<line<<'\n';
+      
+      string test = "#";
+            
+      if(!(line.substr(0, test.length())==test))//comments at begining of file begin with #, ignore those lines and process the rest. 
+	{
+	  double binnum; 
+	  ss>>binnum;
+	  vec_binnum.push_back(binnum);
+	  if(debug)
+	    cout<<"binnum="<<binnum<<'\n';
+
+	  double combined_hi; 
+	  ss>>combined_hi;
+	  vec_combined_hi.push_back(combined_hi);
+	  if(debug)
+	    cout<<"combined_hi="<<combined_hi<<'\n';
+
+	  double combined_lo; 
+	  ss>>combined_lo;
+	  vec_combined_lo.push_back(combined_lo);
+	  if(debug)
+	    cout<<"combined_lo="<<combined_lo<<'\n';
+
+	  double molecular; 
+	  ss>>molecular;
+	  vec_molecular.push_back(molecular);
+	  if(debug)
+	    cout<<"molecular="<<molecular<<'\n';
+
+	  double crosspol; 
+	  ss>>crosspol;
+	  vec_crosspol.push_back(crosspol);
+	  if(debug)
+	    cout<<"crosspol="<<crosspol<<'\n';
+
+	  double mol_I2A; 
+	  ss>>mol_I2A;
+	  vec_mol_I2A.push_back(mol_I2A);
+	  if(debug)
+	    cout<<"mol_I2A="<<mol_I2A<<'\n';
+
+	  double comb_1064; 
+	  ss>>comb_1064;
+	  vec_comb_1064.push_back(comb_1064);
+	  if(debug)
+	    cout<<"comb_1064="<<comb_1064<<'\n';
+	}
+    }
+}
+
+void Hsrl2Radx::_readDiffDefaultGeo(const char* file, bool debug)
+{
+  if(debug)
+    cout<< "in _readDiffDefaultGeo"<<'\n';
+  std::ifstream infile(file);
+  std::string line;
+  vector<double> vec_altitudes;
+  vector<double> vec_comb_himol;
+  vector<double> vec_comb_lomol;
+  vector<double> vec_scomb_himol;
+  vector<double> vec_scomb_lomol;
+
+  while (std::getline(infile, line))
+    {
+      std::stringstream ss;
+      ss << line;
+      if(debug)
+	cout<<line<<'\n';
+
+      string test = "#";
+            
+      if(!(line.substr(0, test.length())==test))//comments at begining of file begin with #, ignore those lines and process the rest. 
+	{
+	  double altitudes; 
+	  ss>>altitudes;
+	  vec_altitudes.push_back(altitudes);
+	  if(debug)
+	    cout<<"altitudes="<<altitudes<<'\n';
+	  
+	  double comb_himol; 
+	  ss>>comb_himol;
+	  vec_comb_himol.push_back(comb_himol);
+	  if(debug)
+	    cout<<"comb_himol="<<comb_himol<<'\n';
+	  
+	  double comb_lomol; 
+	  ss>>comb_lomol;
+	  vec_comb_lomol.push_back(comb_lomol);
+	  if(debug)
+	    cout<<"comb_lomol="<<comb_lomol<<'\n';
+	  	  	  
+	  double scomb_himol; 
+	  ss>>scomb_himol;
+	  vec_scomb_himol.push_back(scomb_himol);
+	  if(debug)
+	    cout<<"scomb_himol="<<scomb_himol<<'\n';
+	  
+	  double scomb_lomol; 
+	  ss>>scomb_lomol;
+	  vec_scomb_lomol.push_back(scomb_lomol);
+	  if(debug)
+	    cout<<"scomb_lomol="<<scomb_lomol<<'\n';
+	  
+	}
+    }
+} 
+
+void Hsrl2Radx::_readGeofileDefault(const char* file, bool debug)
+{
+  if(debug)
+    cout<< "in _readGeofileDefault"<<'\n';
+  std::ifstream infile(file);
+  std::string line;
+  vector<double> vec_range;
+  vector<double> vec_geo_corr;
+
+  while (std::getline(infile, line))
+    {
+      std::stringstream ss;
+      ss << line;
+      if(debug)
+	cout<<line<<'\n';
+       
+      string test = "#";
+            
+      if(!(line.substr(0, test.length())==test))//comments at begining of file begin with #, ignore those lines and process the rest. 
+	{
+	  double range; 
+	  ss>>range;
+	  vec_range.push_back(range);
+	  if(debug)
+	    cout<<"range="<<range<<'\n';
+
+	  double geo_corr; 
+	  ss>>geo_corr;
+	  vec_geo_corr.push_back(geo_corr);
+	  if(debug)
+	    cout<<"geo_corr="<<geo_corr<<'\n';
+	  
+	}
+    }
+} 
+
+void Hsrl2Radx::_readAfterPulse(const char* file, bool debug)
+{
+  if(debug)
+    cout<< "in _readAfterPulse"<<'\n';
+  std::ifstream infile(file);
+  std::string line;
+  vector<double> vec_bin;
+  vector<double> vec_mol;
+  vector<double> vec_comb;
+  vector<double> vec_crossPol;
+  vector<double> vec_refftMol;
+  vector<double> vec_imfftMol;
+  vector<double> vec_refftComb;
+  vector<double> vec_imfftComb;
+  vector<double> vec_refftCPol;
+  vector<double> vec_imfftCPol;
+
+
+  while (std::getline(infile, line))
+    {
+      std::stringstream ss;
+      ss << line;
+      if(debug)
+	cout<<line<<'\n';
+       
+      string test = "#";
+            
+      if(!(line.substr(0, test.length())==test))//comments at begining of file begin with #, ignore those lines and process the rest. 
+	{
+	  double bin; 
+	  ss>>bin;
+	  vec_bin.push_back(bin);
+	  if(debug)
+	    cout<<"bin="<<bin<<'\n';
+
+	  double mol; 
+	  ss>>mol;
+	  vec_mol.push_back(mol);
+	  if(debug)
+	    cout<<"mol="<<mol<<'\n';
+
+	  double comb; 
+	  ss>>comb;
+	  vec_comb.push_back(comb);
+	  if(debug)
+	    cout<<"comb="<<comb<<'\n';
+
+	  double crossPol; 
+	  ss>>crossPol;
+	  vec_crossPol.push_back(crossPol);
+	  if(debug)
+	    cout<<"crossPol="<<crossPol<<'\n';
+
+	  double refftMol; 
+	  ss>>refftMol;
+	  vec_refftMol.push_back(refftMol);
+	  if(debug)
+	    cout<<"refftMol="<<refftMol<<'\n';
+
+	  double imfftMol; 
+	  ss>>imfftMol;
+	  vec_imfftMol.push_back(imfftMol);
+	  if(debug)
+	    cout<<"imfftMol="<<imfftMol<<'\n';
+
+	  double refftComb; 
+	  ss>>refftComb;
+	  vec_refftComb.push_back(refftComb);
+	  if(debug)
+	    cout<<"refftComb="<<refftComb<<'\n';
+
+	  double imfftComb; 
+	  ss>>imfftComb;
+	  vec_imfftComb.push_back(imfftComb);
+	  if(debug)
+	    cout<<"imfftComb="<<imfftComb<<'\n';
+
+	  double refftCPol; 
+	  ss>>refftCPol;
+	  vec_refftCPol.push_back(refftCPol);
+	  if(debug)
+	    cout<<"refftCPol="<<refftCPol<<'\n';
+
+	  double imfftCPol; 
+	  ss>>imfftCPol;
+	  vec_imfftCPol.push_back(imfftCPol);
+	  if(debug)
+	    cout<<"imfftCPol="<<imfftCPol<<'\n';
+
+	}
+    }
+} 
+
+void Hsrl2Radx::_readCalvals(const char* file, bool debug)
+{
+  if(debug)
+    cout<< "in _readCalvals"<<'\n';
+  std::ifstream infile(file);
+  std::string line;
+  while (std::getline(infile, line))
+    {
+      std::stringstream ss;
+      ss << line;
+      
+      string test = "#";
+      //fix the following conditional to look for # anywhere..... 
+      if( !(line.substr(0, test.length())==test) && ( (line.length()<=3) || (line.length()>3) && !(line.substr(3, test.length())==test) ) && ( (line.length()<=4) || (line.length()>4) && !(line.substr(4, test.length())==test) ) ) //comments at begining of file begin with #, ignore those lines and process the rest. In the calvals file some comments are tabbed in three or four spaces and need to check for that. 
+	{
+	  if(debug)
+	    cout<<line<<'\n';
+	}
+    }
+} 

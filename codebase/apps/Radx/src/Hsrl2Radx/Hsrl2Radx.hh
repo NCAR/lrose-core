@@ -89,6 +89,11 @@ private:
 
   int _processUwRawFile(const string &filePath);
   void _addEnvFields(RadxVol &vol);
+  void _readBaselineCorrection(const char* file, bool debug);
+  void _readDiffDefaultGeo(const char* file, bool debug);
+  void _readGeofileDefault(const char* file, bool debug);
+  void _readAfterPulse(const char* file, bool debug);
+  void _readCalvals(const char* file, bool debug);
 
 };
 

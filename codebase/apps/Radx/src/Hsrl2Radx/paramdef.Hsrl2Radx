@@ -231,6 +231,16 @@ paramdef double {
   p_help = "The distance between the ray bins in km.";
 } raw_bin_spacing_km;
 
+//***************************************
+
+commentdef {
+  p_header = "Brad's test comment"; 
+
+}
+
+
+//***************************************
+
 commentdef {
   p_header = "OPTION TO SPECIFY FIELD NAMES FOR OUTPUT FILES";
 }
