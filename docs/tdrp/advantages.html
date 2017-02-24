@@ -1,0 +1,100 @@
+<html>
+
+<head>
+<title>Advantages of using TDRP</title>
+</head>
+
+<body>
+
+<h3>Advantages of using TDRP</h3>
+
+<ul>
+
+<li>
+
+Self-documenting. All parameter documentation is done in the paramdef
+file, therefore the documentation and code are co-located, making it
+easy to keep the documentation up-to-date.
+
+</li><p>
+
+<li>
+
+Automatic generation of a default parameter file. Use of the
+<code>-print_params</code> feature allows the new user to generate a
+default parameter file. The documentation included in the file helps
+the new user to understand the use of the program and customize the
+parameters.  Users find this one of the most useful aspects of the
+system.
+
+</li><p>
+
+<li>
+
+Checking of parameters which have not been set by the user. Use of the
+<code>-check_params</code> feature allows the user to check which
+parameters have not been explicitly set.
+
+</li><p>
+
+<li>
+
+Simple default behavior. If no parameter file is used, the default
+parameter values are used.
+
+</li><p>
+
+<li>
+
+Support for environment variables in the parameter files. Use of
+environment variables along with parameters provides a powerful
+combination for maintaining simplicity while porting applications from
+one environment to another.
+
+</li><p>
+
+<li>
+
+Automatic range checking of numeric variables. If the
+<code>p_min</code> and <code>p_max</code> features are set, the
+range of the user's parameters are checked to ensure they lie
+within the specified range.
+
+</li><p>
+
+<li>
+
+Allows a simple transition from development to deployment. The use of
+the <code>p_private</code> feature allows the programmer to lock
+parameters at their default values without changing any code. The
+programmer has the advantages of parameter settings during development
+while being assured that they will not be set to invalid values after
+deployment.
+
+</li><p>
+
+<li>
+
+Simple and robust. Completely implemented in C therfore no fancy
+compilers or libraries are required.
+
+</li><p>
+
+<li>
+
+Explicit support for both C and C++. Support for most native C
+variable types.
+
+</li><p>
+
+<li>
+
+Minimal coding required. Most work is done in the the paramdef file.
+
+</li><p>
+
+</ul>
+
+</body>
+</html>
+

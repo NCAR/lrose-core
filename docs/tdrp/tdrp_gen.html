@@ -1,0 +1,116 @@
+<html>
+
+<head>
+<title>tdrp_gen</title>
+</head>
+
+<body>
+
+<h4>tdrp_gen</h4>
+
+tdrp_gen parses a TDRP paramdef file and then generates either C or
+C++ headers and code for reading in the parameter file at run-time
+and making the parameters visible to the client program. Source code for this
+program exists under apps/tdrp<p>
+
+The usage for tdrp_gen is given below:<p>
+
+<pre>
+Usage:
+  tdrp_gen [moduleName] -f paramdef_path
+           [-h] [-c++] [-class className] [-prog progName] [-debug]
+
+where:
+  [moduleName] in C mode all externals are prepended with this name.
+    moduleName must be first arg if it is specified.
+    If first arg begins with -, moduleName is set
+    to empty string.
+  [-f paramdef_path] parameter definition file path.
+                     This arg is REQUIRED.
+  [-h] gives usage.
+  [-c++] C++ mode - generates .hh and .cc class files.
+  [-class className] In C++ mode, set the name of the params class.
+                     Default is 'Params'.
+  [-prog progName] Program name for documenting code files.
+  [-debug] print debug messages.
+
+NOTES: TDRP - Table Driven Runtime Parameters.
+  tdrp_gen performs code generation.
+  tdrp_gen will generate two files, one header and one for code.
+  In C mode, the default, it will generate the files:
+    moduleName_tdrp.h and moduleName_tdrp.c.
+  If moduleName is left out of the command line, the files will be:
+    _tdrp.h and _tdrp.c.
+  In C++ mode, it will generate the files:
+    className.hh and className.cc.
+  If the -class arg is not given, the files will be:
+    Params.hh and Params.cc.
+</pre>
+
+<b>tdrp_gen supports the following:</b>
+
+<ul>
+<li>generation of C code for a single TDRP module per program.</li>
+<li>generation of C code for multiple TDRP modules per program.</li>
+<li>generation of C++ code for a single TDRP class per program.</li>
+<li>generation of C++ code for multiple TDRP classes per program.</li>
+</ul>
+
+<b>Generation of C code for a single TDRP module per program.</b><p>
+
+If you run:
+
+<pre>
+  tdrp_gen -f paramdef_path -prog name
+</pre>
+
+tdrp_gen will generate two files, <tt>_tdrp.h</tt> and
+<tt>_tdrp.c</tt>. This is the normal case, in which a single TDRP
+module is used with a program. The module name is omitted, and the
+generated files (and the routines within them) start with
+<i><b>_tdrp</i></b>.<p>
+
+<b>Generation of C code for multiple TDRP modules per program.</b><p>
+
+If you run:
+
+<pre>
+  tdrp_gen moduleName -f paramdef_path -prog name
+</pre>
+
+tdrp_gen will generate two files, <tt>moduleName_tdrp.h</tt> and
+<tt>moduleName_tdrp.c</tt>. The the
+generated files (and the routines within them) start with
+<i><b>moduleName_tdrp</i></b>. This allows the programmer to set
+up multiple TDRP modules. The moduleName provides the unique
+name-space for each module.<p>
+
+<b>Generation of C++ code for a single TDRP class per program.</b><p>
+
+If you run:
+
+<pre>
+  tdrp_gen -f paramdef_path -C++ -prog name
+</pre>
+
+tdrp_gen will generate two files, <tt>Params.hh</tt> and
+<tt>Params.cc</tt>. This is the normal case, in which a single TDRP
+class is used with a program. The class name is omitted, so the
+default value of <i><b>Params</i></b> is used.<p>
+
+
+<b>Generation of C++ code for multiple TDRP classes per program.</b><p>
+
+If you run:
+
+<pre>
+  tdrp_gen -f paramdef_path -C++ -class className -prog name
+</pre>
+
+tdrp_gen will generate two files, <tt>className.hh</tt> and
+<tt>className.cc</tt>. Running tdrp_gen multiple times with different paramdef file and classNames will produce multiple classes.<p>
+
+
+</body>
+</html>
+

@@ -1,0 +1,156 @@
+<html>
+
+<head>
+<title>TDRP Makefiles</title>
+</head>
+
+<body>
+
+<h3>TDRP Makefiles</h3>
+
+<h4>Makefile for single TDRP C module</h4>
+
+Assume that you are building the program tdrp_test, which has 
+a couple of subroutines, do_printout() and parse_args(), each of which
+is in a separate C file. The main is in tdrp_test.c. You need to 
+generate the files _tdrp.h and _tdrp.c, which will contain the
+TDRP code. <p>
+
+The following fragment from the Makefile shows how to do this:
+
+<pre>
+###########################################################################
+#
+# Makefile fragment for tdrp_test program
+#
+###########################################################################
+
+LDFLAGS = -ltdrp
+
+OBJS = \
+	_tdrp.o \
+	do_printout.o \
+	parse_args.o \
+	tdrp_test.o
+
+_tdrp.c: paramdef.tdrp_test
+	tdrp_gen -f paramdef.tdrp_test -prog tdrp_test
+
+clean_tdrp:
+	$(RM) _tdrp.h _tdrp.c
+</pre>
+
+Note that _tdrp.o is at the top of the OBJS list. This forces the
+generation of _tdrp.h <i>before</i> compiling the other files,
+since the program code will need the header file.
+
+<h4>Makefile for multiple TDRP C modules per program</h4>
+
+Assume that you are building the program tdrp_mult, which has two TDRP
+modules. You need to generate the files mod1_tdrp.h and mod1_tdrp.c
+for the module mod1, and mod2_tdrp.h and mod2_tdrp.c for the module
+mod2.<p>
+
+The following fragment from the Makefile shows how to do this:
+
+<pre>
+###########################################################################
+#
+# Makefile fragment for tdrp_mult program
+#
+###########################################################################
+
+LDFLAGS = -ltdrp
+
+OBJS = \
+	mod1_tdrp.o \
+	mod2_tdrp.o \
+	do_printout.o \
+	parse_args.o \
+	tdrp_mult.o
+
+mod1_tdrp.c: paramdef.mod1
+	tdrp_gen mod1 -f paramdef.mod1 -prog tdrp_test
+
+mod2_tdrp.c: paramdef.mod2
+	tdrp_gen mod2 -f paramdef.mod2 -prog tdrp_test
+
+clean_tdrp:
+	$(RM) mod1_tdrp.h mod1_tdrp.c mod2_tdrp.h mod2_tdrp.c
+</pre>
+
+<h4>Makefile for single TDRP C++ class</h4>
+
+Assume that you are building the program TdrpTest, which has a couple
+of classes Args and TdrpTest, and a Main routine. You need to generate
+the files Params.hh and Params.cc, which will contain the TDRP class. <p>
+
+The following fragment from the Makefile shows how to do this:
+
+<pre>
+###########################################################################
+#
+# Makefile fragment for TdrpTest program
+#
+###########################################################################
+
+LDFLAGS = -ltdrp
+
+OBJS = \
+	Params.o \
+	Args.o \
+	Main.o \
+	TdrpTest.o
+
+Params.cc: paramdef.TdrpTest
+	tdrp_gen -f paramdef.TdrpTest -c++ -prog TdrpTest
+
+clean_tdrp:
+	$(RM) Params.hh Params.cc
+
+</pre>
+
+Note that Params.o is at the top of the OBJS list. This forces the
+generation of Params.hh <i>before</i> compiling the other files,
+since the program code will need the header file.
+
+<h4>Makefile for multiple TDRP C++ classes</h4>
+
+Assume that you are building the program TdrpMult, which needs 2
+TDRP classes, Class1 and Class2. You need to generate the files
+Class1.hh, Class1.cc, Class2.hh and Class2.cc.
+
+The following fragment from the Makefile shows how to do this:
+
+<pre>
+###########################################################################
+#
+# Makefile fragment for TdrpMult program
+#
+###########################################################################
+
+LDFLAGS = -ltdrp
+
+OBJS = \
+	Class1.o \
+	Class2.o \
+	Args.o \
+	Main.o \
+	TdrpTest.o
+
+Class1.cc: paramdef.Class1
+	tdrp_gen -f paramdef.Class1 -c++ -class Class1 -prog TdrpTest
+
+Class2.cc: paramdef.Class2
+	tdrp_gen -f paramdef.Class2 -c++ -class Class2 -prog TdrpTest
+
+clean_tdrp:
+	$(RM) Class1.hh Class1.cc Class2.hh Class2.cc
+
+</pre>
+
+
+
+</body>
+</html>
+
