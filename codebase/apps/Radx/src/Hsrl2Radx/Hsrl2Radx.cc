@@ -804,7 +804,7 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
   _readDiffDefaultGeo(diffDefGeo, doneDebug);
   _readGeofileDefault(geoDef, doneDebug);
   _readAfterPulse(afterpulse, doneDebug);
-  _readCalvals(calvals, debug);
+  _readCalvals(calvals, doneDebug);
 
   // add in height, temperature and pressure fields
 
@@ -894,7 +894,7 @@ void Hsrl2Radx::_addEnvFields(RadxVol &vol)
 
 
 //void Hsrl2Radx::_ReadCalvals(string pathToCalValsFile, time_t time)
-void Hsrl2Radx::_readBaselineCorrection(const char* file, bool debug)
+vector <vector<double> > Hsrl2Radx::_readBaselineCorrection(const char* file, bool debug)
 {
   if(debug)
     cout<< "in _readBaselineCorrection"<<'\n';
@@ -963,9 +963,21 @@ void Hsrl2Radx::_readBaselineCorrection(const char* file, bool debug)
 	    cout<<"comb_1064="<<comb_1064<<'\n';
 	}
     }
+ 
+  vector< vector<double> > ans;
+  ans.push_back(vec_binnum);
+  ans.push_back(vec_combined_hi);
+  ans.push_back(vec_combined_lo);
+  ans.push_back(vec_molecular);
+  ans.push_back(vec_crosspol);
+  ans.push_back(vec_mol_I2A);
+  ans.push_back(vec_comb_1064);
+
+  return ans;
+
 }
 
-void Hsrl2Radx::_readDiffDefaultGeo(const char* file, bool debug)
+vector <vector<double> > Hsrl2Radx::_readDiffDefaultGeo(const char* file, bool debug)
 {
   if(debug)
     cout<< "in _readDiffDefaultGeo"<<'\n';
@@ -1020,9 +1032,19 @@ void Hsrl2Radx::_readDiffDefaultGeo(const char* file, bool debug)
 	  
 	}
     }
+
+  vector< vector<double> > ans;
+  ans.push_back(vec_altitudes);
+  ans.push_back(vec_comb_himol);
+  ans.push_back(vec_comb_lomol);
+  ans.push_back(vec_scomb_himol);
+  ans.push_back(vec_scomb_lomol);
+
+  return ans;
+
 } 
 
-void Hsrl2Radx::_readGeofileDefault(const char* file, bool debug)
+vector <vector<double> > Hsrl2Radx::_readGeofileDefault(const char* file, bool debug)
 {
   if(debug)
     cout<< "in _readGeofileDefault"<<'\n';
@@ -1056,9 +1078,16 @@ void Hsrl2Radx::_readGeofileDefault(const char* file, bool debug)
 	  
 	}
     }
+
+  vector< vector<double> > ans;
+  ans.push_back(vec_range);
+  ans.push_back(vec_geo_corr);
+
+  return ans;
+
 } 
 
-void Hsrl2Radx::_readAfterPulse(const char* file, bool debug)
+vector <vector<double> > Hsrl2Radx::_readAfterPulse(const char* file, bool debug)
 {
   if(debug)
     cout<< "in _readAfterPulse"<<'\n';
@@ -1074,7 +1103,6 @@ void Hsrl2Radx::_readAfterPulse(const char* file, bool debug)
   vector<double> vec_imfftComb;
   vector<double> vec_refftCPol;
   vector<double> vec_imfftCPol;
-
 
   while (std::getline(infile, line))
     {
@@ -1149,6 +1177,21 @@ void Hsrl2Radx::_readAfterPulse(const char* file, bool debug)
 
 	}
     }
+
+  vector< vector<double> > ans;
+  ans.push_back(vec_bin);
+  ans.push_back(vec_mol);
+  ans.push_back(vec_comb);
+  ans.push_back(vec_crossPol);
+  ans.push_back(vec_refftMol);
+  ans.push_back(vec_imfftMol);
+  ans.push_back(vec_refftComb);
+  ans.push_back(vec_imfftComb);
+  ans.push_back(vec_refftCPol);
+  ans.push_back(vec_imfftCPol);
+
+  return ans;
+
 } 
 
 void Hsrl2Radx::_readCalvals(const char* file, bool debug)
@@ -1170,45 +1213,253 @@ void Hsrl2Radx::_readCalvals(const char* file, bool debug)
       
       if(line.length()>0)//now that we've cleaned up the line, only want to bother with it if it has non-zero length. 
 	{
-	  cout<<line<<'\n';
+	  if(debug)
+	    cout<<line<<'\n';
 	  
-	  //if the first char is a letter then it is a variable name
-
-	  if( (line.at(0)>='a' && line.at(0)<='z') || (line.at(0)>='A' && line.at(0)<='Z') )
+	  if( (line.at(0)>='a' && line.at(0)<='z') || (line.at(0)>='A' && line.at(0)<='Z') )//if the first char is a letter then it is a variable name
 	    {
-	      cout<<"starts with letter"<<'\n';
-	  
+	      if(debug)
+		cout<<"starts with letter"<<'\n';
+	      
 	      int hasUnits=-1;
 	      
 	      hasUnits=_checkForChar("(",line); // units are captured in ()
+	      
+	      string varName;
+	      string units;
 
+	      if(hasUnits==-1)
+		{
+		  varName=line;
+		  units="";
+		}
+	      else
+		{
+		  varName=line.substr(0, hasUnits);
+		  units=line.substr(hasUnits+1,line.length()-hasUnits-2);
+		}
+	      
+	      varName=_removeWhitespace(varName);
+	      units=_removeWhitespace(units);
+	      
+	      if(debug)
+		{
+		  cout<<"line="<<line<<'\n';
+		  cout<<"varName="<<varName<<'\n';
+		  cout<<"units="<<units<<'\n';
+		}
 	    }
 	      
-	  //if the first char is a number then it is a date/data pair
-
-	  if( line.at(0)>='0' && line.at(0)<='9' )
+	  if( line.at(0)>='0' && line.at(0)<='9' )//if the first char is a number then it is a date/data pair
 	    {
-	      cout<<"starts with number"<<'\n';
+	      if(debug)
+		cout<<"starts with number"<<'\n';
+	     
+	      string date; //extract date
+	      date=line.substr(0,_checkForChar(",",line));
+	      date=_removeWhitespace(date);
 	      
-	      int strData=-1;
-	      int numData=-1;
+	      if(debug)
+		cout<<"date="<<date<<'\n';
 	      
-	      strData=_checkForChar("'",line);//strings are captured in ' quotes 
-	      numData=_checkForChar("[",line);//numbers are captured in [	    
-	      		    
+	      int day=0;
+	      int mon=0;
+	      int year=0;
+	      int hour=0;
+	      int min=0;
+	      int sec=0;
 
-	      cout<<"strData"<<strData<<'\n';
-	      cout<<"numData"<<numData<<'\n';
+	      string temp;//holds each segment of the date string in turn. 
+	      
+	      temp=date.substr(0,_checkForChar("-",date)); // day
+	      istringstream ( temp ) >> day;
+	      date=date.substr(_checkForChar("-",date)+1,date.length());
+	      
+	      temp=date.substr(0,_checkForChar("-",date)); // month
+	      for (int i=0; temp[i]; i++) //make sure month letters are all lowercase
+		temp[i] = tolower(temp[i]);
+
+	      if(temp=="jan")
+		mon=1;
+	      if(temp=="feb")
+		mon=2;
+	      if(temp=="mar")
+		mon=3;
+	      if(temp=="apr")
+		mon=4;
+	      if(temp=="may")
+		mon=5;
+	      if(temp=="jun")
+		mon=6;
+	      if(temp=="jul")
+		mon=7;
+	      if(temp=="aug")
+		mon=8;
+	      if(temp=="sep")
+		mon=9;
+	      if(temp=="oct")
+		mon=10;
+	      if(temp=="nov")
+		mon=11;
+	      if(temp=="dec")
+		mon=12;
+	      date=date.substr(_checkForChar("-",date)+1,date.length());
+
+	      temp=date.substr(0,2); // year, two digit format 
+	      istringstream ( temp ) >> year;
+	      year=year+2000;
+	      date=date.substr(2,date.length());
+	      
+	      date=_removeWhitespace(date);
+	      
+	      if(date.length()>0)//if there is a time stamp
+		{
+		  temp=date.substr(0,_checkForChar(":",date)); // hour
+		  istringstream ( temp ) >> hour;
+		  date=date.substr(_checkForChar(":",date)+1,date.length());
+		}
+	      if(date.length()>0 && _checkForChar(":",date)>-1 )//if there is a timestamp and it has seconds listed
+		{  
+		  temp=date.substr(0,_checkForChar(":",date)); // min
+		  istringstream ( temp ) >> min;
+		  date=date.substr(_checkForChar(":",date)+1,date.length());
+		}
+	      else if(date.length()>0 && _checkForChar(":",date)==-1 )//if there is a timestamp without seconds listed read in the minutes and be done
+		{
+		  temp=date; // min
+		  istringstream ( temp ) >> min;
+		  date="";
+		}
+	      if(date.length()>0)
+		{
+		  temp=date; //sec
+		  istringstream ( temp ) >> sec;
+		  date="";
+		}
+	      	    
+       	      if(debug)
+		cout<<"day="<<day<<"  :  mon="<<mon<<"  :  year="<<year<<"  :  hour="<<hour<<"  :  min="<<min<<"  :  sec="<<sec<<'\n';
+	      
+	      RadxTime dateStamp(year, mon, day, hour, min, sec, 0.0);//passing 0.0 for subseconds
+	      
+	      if(debug)
+		cout<<"dateStamp="<<dateStamp<<'\n';
+	      
+	      int strData=-1; // will hold the position of the ' or " if the data is a string
+	      int numData=-1; // will hold the position of the [ if the data is a number
+	      
+	      strData=max(_checkForChar("'",line),_checkForChar("\"",line));//string data is captured in ' quotes or " quotes
+	      numData=_checkForChar("[",line);//numbers are captured in []	    
+	      	
+	      if(debug)
+		cout<<"strData"<<strData<<'\n';
+	      if(debug)
+		cout<<"numData"<<numData<<'\n';
 		  
-	      string date;
 	      string strValue;
-	      vector<double> numValue;
+	      vector<double> numValue;//check numValue.size() to see its length, if length is 0 there is no numerical data and is string data. 
 	   
-	    }
+	      if(strData==-1 && numData==-1)
+		{
+		  cerr<<"WARNING: calvals_gvhsrl has an improperly formmated line with a date but no data."<<'\n';
+		  strValue="";//don't want errors it just gives an empty result
+		}
+	      else if(strData > -1 && numData > -1)
+		{
+		  cerr<<"WARNING: calvals_gvhsrl has an improperly formmated line with a date and numerical data and string typed data."<<'\n';
+		  strValue="";//don't want errors it just gives an empty result
+		}
+	      else if(strData > -1)
+		{
+		  strValue=line.substr(strData+1,line.length()-strData-2);
+		}
+	      else if(numData > -1)
+		{
+		  strValue="";//don't want errors it just gives an empty result
+		  string numStrTemp;
+		  numStrTemp = line.substr(numData+1,line.length()-numData);
+		  //we need the start and end value for the numbers, and any multipliers that come after. numStrTemp does still have the ] but not the [.
+		  numStrTemp=_removeWhitespace(numStrTemp);
+		  
+		  double hasComma;
+		  hasComma = _checkForChar(",",numStrTemp);//this finds the first instance of , which delimits different numbers. 
+		  
+		  string temp;
+		  double data;
+		  
+		  while(hasComma>-1)
+		    {
+		      temp=numStrTemp.substr(0,hasComma);
+		      
+		      istringstream ( temp ) >> data;
+		      numValue.push_back(data);
+		      
+		      numStrTemp=numStrTemp.substr(hasComma+1,numStrTemp.length());
+		      numStrTemp=_removeWhitespace(numStrTemp);
+		      
+		      hasComma = _checkForChar(",",numStrTemp);//this finds the first instance of , which delimits different numbers. 
+		    }
+		  
+		  double endNumData;
+		  endNumData = _checkForChar("]",numStrTemp);// the ] is at endNumData which is not nessicarily the end of the string
+		  
+		  temp=numStrTemp.substr(0,endNumData);
+		  istringstream ( temp ) >> data;
+		  numValue.push_back(data);
+		  numStrTemp=numStrTemp.substr(endNumData+1,numStrTemp.length());
+		  
+		  numStrTemp=_removeWhitespace(numStrTemp);
+		 
+		  if(numStrTemp.length()>0)
+		    {
+		      double mod=1;
+		      if(_checkForChar("/",numStrTemp)>-1)
+			{
+			  numStrTemp=numStrTemp.substr(1,numStrTemp.length());
+			  istringstream ( numStrTemp ) >> mod;
+			  for(int i=0; i<numValue.size(); i++)
+			    numValue.at(i)=numValue.at(i)/mod;
+			}
+		      else if(_checkForChar("*",numStrTemp)>-1)
+			{
+			  numStrTemp=numStrTemp.substr(1,numStrTemp.length());
+			  istringstream ( numStrTemp ) >> mod;
+			  for(int i=0; i<numValue.size(); i++)
+			    numValue.at(i)=numValue.at(i)*mod;
+			}
+		      else
+			{
+			  cerr<<"WARNING: calvals_gvhsrl has an improperly formmated line with non-modifier text after numerical data."<<'\n';
+			}
+		    }
+		  
+		   		  
+		  if(debug)
+		    {
+		      cout<<"checking data reading"<<'\n';
+		      for(int i=0;i<numValue.size();i++)
+			cout<<numValue.at(i)<<'\n';;
+		    }
+		  
+		}
+	     	      
+	    }//if the first char is a number then it is a date/data pair, end that processing
 	  
 	}//end line length check
     
     }//end reading calvals file line by line
+
+
+
+  //want to return a custom class with the following 
+  // string var name ; varName
+  // string var units ; units
+  // vector RadxTime ; dateStamp
+  // vector data string ; strValue
+  // vector vector double data num ; numValue
+
+
+
 
 }// end of _readCalvals function 
 
@@ -1216,10 +1467,12 @@ void Hsrl2Radx::_readCalvals(const char* file, bool debug)
 
 
 
-string Hsrl2Radx::_removeWhitespace(string s)//this function removes spaces from the begining of strings
+string Hsrl2Radx::_removeWhitespace(string s)//this function removes spaces from the begining and end of strings
 {
   while(s.length()>0 && (s.substr(0, 1)==" ") )
     s=s.substr(1,s.length());
+  while(s.length()>0 && (s.substr(s.length()-1, 1)==" ") )
+    s=s.substr(0,s.length()-1);
   return s;
 }
 
