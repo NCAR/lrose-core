@@ -1,0 +1,42 @@
+<html>
+
+<head>
+<title>Multiple TDRP classs in C++</title>
+</head>
+
+<body>
+
+<h3>Multiple TDRP classs in C++</h3>
+
+Complicated applications may require more than one TDRP class,
+although this is rare in practice. TDRP supports multiple classes.<p>
+
+Suppose you need two classes, Class1 and Class2. You would then create two
+paramdef files, say paramdef.Class1 and paramdef.Class2. The <a
+href="Makefiles.html">Makefile</a> can easily be set up to generate
+two code classes.<p>
+
+The following files would be generated:<p>
+<pre>
+  Class1.hh
+  Class1.cc
+  Class2.hh
+  Class2.cc
+</pre>
+
+Each class has its own user interface. Instead of
+using <tt>_tdrp_load_from_args()</tt>, you would use the functions:
+
+<pre>
+  Class1::load()
+  Class2::load()
+</pre>
+
+to load up the parameters for each class.<p>
+
+Since the load() functions operate at a lower level than
+_load_from_args(), you will need to write code to parse the command
+line and respond to any TDRP arguments.<p>
+
+</body>
+</html>

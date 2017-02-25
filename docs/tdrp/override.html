@@ -1,0 +1,100 @@
+<html>
+
+<head>
+<title>Overriding TDRP parameters on the command line.</title>
+</head>
+
+<body>
+
+<h3>Overriding TDRP parameters on the command line.</h3>
+
+TDRP provides a mechanism to allow command line arguments to override
+parameter values set in the parameter file. This has the advantage
+of allowing the parameter-parsing logic to be applied to command line
+args rather than having to program separate logic to deal with
+the args.<p>
+
+The override mechanism uses a NULL-terminated array of strings, each of
+which is in the same format as an entry in the parameter file.
+The type <tt>tdrp_override_t</tt> is provided, along with a series of
+functions, to make it easy to create and use the override list.<p>
+
+<h4>Example</h4>
+
+As an example, suppose the paramdef file contains the following:<p>
+
+<pre>
+  paramdef boolean {
+    p_descr = "Option to print debugging messages";
+  } debug;
+</pre>
+
+The the paramfile could have the following entry:
+
+<pre>
+  debug = FALSE;
+</pre>
+
+Suppose a <tt>-debug</tt> appears on the command line. The following
+code fragment shows how you could set up and use the override:
+
+<pre>
+  /* initialize before parsing the command line */
+
+  tdrp_override_t override;
+  TDRP_init_override(&override);
+
+  /* in the arg parsing code */
+
+  char tmp_str[BUFSIZ];
+  int i;
+  for (i =  1; i < argc; i++) {
+    if (!strcmp(argv[i], "-debug")) {
+      sprintf(tmp_str, "debug = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+    }
+  }
+
+  /* loading the parameters */
+
+  char *params_file_path;
+  _tdrp_struct params;
+  if (_tdrp_load_from_args(argc, argv, &params,
+			   override.list, &params_file_path)) {
+    fprintf(stderr, "ERROR - Problems with params file '%s'\n",
+	    params_file_path);
+    exit(-1);
+  }
+
+  /* free up the override list */
+
+  TDRP_free_override(&override);
+</pre>
+
+Each string in the override list is appended as a line to to the
+lines in the param file. The entry:
+
+<pre>
+  debug = FALSE;
+</pre>
+
+will still exist in the param file. However, this will be superceded
+by the line:
+
+<pre>
+  debug = TRUE;
+</pre>
+
+appended from the override list. Hence the debug value will be set to
+TRUE.<p>
+
+<h4>Program carefully and test fully</h4>
+
+A word of caution here. As the programmer you need to make sure that
+your override code is generating strings which are valid as parameter
+entries. Test your code thoroughly, making sure you exercise every
+override option. <p>
+
+</body>
+</html>
+

@@ -1,0 +1,85 @@
+<html>
+
+<head>
+<title>Changing TDRP parameters from within a program</title>
+</head>
+
+<body>
+
+<h3>Changing TDRP parameters from within a program</h3>
+
+<h4>Changing non-string parameters</h4>
+
+You may set any of the following parameter types directly from within
+a program:
+<ul>
+  <li>boolean
+  <li>int
+  <li>long
+  <li>float
+  <li>double
+  <li>enum
+</ul>
+
+Also, any struct fields of these types may be set directly.
+
+<h4>Changing string parameters</h4>
+
+To change the vale of a string parameter, use TDRP_str_replace().<p>
+
+For example, if <tt>params</tt> points to the struct of parameters
+defined in <a href="paramdef.example.html">paramdef.example</a>, you
+could do:<p>
+
+<pre>
+  TDRP_str_replace(&params.input_file_ext, "dob");
+  TDRP_str_replace(&params._input_file_paths[1],
+		   "New_file_path");
+  TDRP_str_replace(&params._data_field[1].name, "Spectral width");
+  TDRP_str_replace(&params._data_field[2].name, "Signal-to-noise");
+  TDRP_str_replace(&params._data_field[2].units, "dB");
+</pre>
+  
+<h4>Changing array sizes</h4>
+
+You should not realloc TDRP array pointers directly. Rather, you
+should use the realloc functions provided in the API:
+
+<dl>
+<dt>Using <a href="api_c.html">C API</a>:</dt>
+<dd>
+_tdrp_array_realloc()<br>
+_tdrp_array2D_realloc()<p>
+</dd>
+
+<dt>Using <a href="api_c++.html">C++ API</a>:</dt>
+<dd>
+Params::arrayRealloc()<br>
+Params::array2DRealloc()<p>
+</dd>
+
+<dt>Using <a href="api_c.old.html">Old C API</a>:</dt>
+<dd>
+TDRP_array_realloc()<br>
+TDRP_array2D_realloc()<p>
+</dd>
+</dl>
+
+For example, if <tt>params</tt> points to the struct of parameters
+defined in <a href="paramdef.example.html">paramdef.example</a>, you
+could, using the C API, do:<p>
+
+<pre>
+  _tdrp_array_realloc("our_ages", 7);
+  _tdrp_array_realloc("data_field", 3);
+  _tdrp_array2D_realloc("rain_accumulation", 6, 8);
+  _tdrp_array2D_realloc("output_file_paths", 4, 3);
+</pre>
+
+After changing parameters inside a program, it is possible to <a
+href="saving_params.html">save that parameter state</a> out to a
+file.<p>
+
+</body>
+</html>
+

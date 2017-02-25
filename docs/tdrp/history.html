@@ -1,0 +1,45 @@
+<html>
+
+<head>
+<title>TDRP history</title>
+</head>
+
+<body>
+
+<h3>TDRP history</h3>
+
+<h4>1993</h4>
+
+John Yunker created the RTP (Run-Time Parameters) system, consisting
+of the rtp library and a program for generating code. rtp was based
+on lex and yacc and created a number of table files which were 
+needed by the running executable.
+
+<h4>1994</h4>
+
+John Caron reworked RTP into TDRP (Table-Driven Runtime Parameters).
+TDRP was still based on lex and yacc. tdrp_gen generated 3 header files
+and 1 C-code file. The run-time tables were no longer required.
+
+<h4>1995 - 1997</h4>
+
+Mike Dixon ported TDRP to Dec Alpha and Linux, fixing some memory bugs
+along the way. The number of generated files was reduced from 4 to 2,
+one header and one C code. The Slackware Linux port was
+straightfoward. However, later Linux versions used bison for yacc, and
+tdrp_gen exhibited a bug which we have never been able to solve.
+Therefore the Slackware yacc and lex programs had to be installed
+for TDRP to work.
+
+<h4>1998</h4>
+
+Mike Dixon rewrote TDRP in vanilla C to remove the dependency on
+yacc and lex which was causing problems on Linux. The system was
+enhanced in a number of ways, and C++ class code generation was
+added.
+
+
+
+</body>
+</html>
+
