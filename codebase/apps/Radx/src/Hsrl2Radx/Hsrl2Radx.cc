@@ -121,6 +121,29 @@ Hsrl2Radx::~Hsrl2Radx()
 
 int Hsrl2Radx::Run()
 {
+  // reading in calibration files here ----- 
+  bool debug = true;// use while developing to give specific output information relating to reading in cal files
+  bool doneDebug = false;// use while developing when done looking at debug info for a particular cal file
+  const char* baseline = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/baseline_correction_20150601T0000.blc";
+  const char* diffDefGeo = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/diff_default_geofile_20120201T0000.geo";
+  const char* geoDef = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/geofile_default_20150601T0000.geo";
+  const char* afterpulse = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/afterpulse_default_20061001T0000.ap";
+  const char* calvals = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/calvals_gvhsrl.txt";
+  const char* variable = "combined_hi_dead_time";//look for this calibration block
+  //const char* variable = "sounding_id";
+  //const char* variable = "non_filtered_energy_monitor";
+  //const char* variable = "baseline_adjust";
+  //const char* variable = "apd_pulse_timing";
+  //const char* variable = "quarter_wave_plate_rotation";
+  //const char* variable = "";
+  
+  _readBaselineCorrection(baseline, doneDebug);
+  _readDiffDefaultGeo(diffDefGeo, doneDebug);
+  _readGeofileDefault(geoDef, doneDebug);
+  _readAfterPulse(afterpulse, doneDebug);
+  _readCalvals(calvals, variable, doneDebug);
+
+  //done reading calibration files. 
 
   if (_params.mode == Params::ARCHIVE) {
     return _runArchive();
@@ -789,25 +812,6 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
   
   _setGlobalAttr(vol);
 
-  // read in calibration files
-
-  // this block should not be here, it means every file being processed has to read the entirety of the calibration files independantly, need to find where to better put it so calibration files are only read once. 
-
-  bool debug = true;// use while developing to give specific output information relating to reading in cal files
-  bool doneDebug = false;// use while developing when done looking at debug info for a particular cal file
-  const char* baseline = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/baseline_correction_20150601T0000.blc";
-  const char* diffDefGeo = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/diff_default_geofile_20120201T0000.geo";
-  const char* geoDef = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/geofile_default_20150601T0000.geo";
-  const char* afterpulse = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/afterpulse_default_20061001T0000.ap";
-  const char* calvals = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/calvals_gvhsrl.txt";
-  const char* variable = "combined_hi_dead_time";
-
-  _readBaselineCorrection(baseline, doneDebug);
-  _readDiffDefaultGeo(diffDefGeo, doneDebug);
-  _readGeofileDefault(geoDef, doneDebug);
-  _readAfterPulse(afterpulse, doneDebug);
-  _readCalvals(calvals, variable, doneDebug);
-
   // add in height, temperature and pressure fields
 
   _addEnvFields(vol);
@@ -1209,11 +1213,12 @@ CalVals Hsrl2Radx::_readCalvals(const char* file, const char* variable, bool deb
       std::stringstream ss;
       ss << line;
       
-      line=_removeWhitespace(line);//removes leading whitespace from line
+      line=_removeWhitespace(line);//removes whitespace from begining or end of line
 
       if(_checkForChar("#",line)>-1)// now we remove comments which are delimited by the #
 	line=line.substr(0, _checkForChar("#",line));
-	
+      
+      line=_removeWhitespace(line);//removes whitespace from begining or end of line
       
       if(line.length()>0)//now that we've cleaned up the line, only want to bother with it if it has non-zero length. 
 	{
@@ -1477,6 +1482,9 @@ CalVals Hsrl2Radx::_readCalvals(const char* file, const char* variable, bool deb
     
     }//end reading calvals file line by line
 
+  if(debug)
+    dataBlock.printBlock();
+
   return dataBlock;
 
 }// end of _readCalvals function 
@@ -1567,10 +1575,16 @@ void CalVals::addDataNum(vector<double> inDataNum)
 }
 
 void CalVals::setIsStr()
-{isStr=true;}
+{
+  isStr=true;
+  isNum=false;
+}
 
 void CalVals::setIsNum()
-{isNum=true;}
+{
+  isNum=true;
+  isStr=false;
+}
 
 string CalVals::getVarName()
 {return varName;}
@@ -1597,6 +1611,47 @@ bool CalVals::dataTypeisStr()
 {
   assert(isStr!=isNum);//data should be either string type or numbers, not both or neither. 
   return isStr;    
+}
+
+void CalVals::printBlock()
+{
+  cout<<"Printing out block of CalVals data."<<'\n';
+  cout<<varName<<'\n';
+  cout<<varUnits<<'\n';
+  
+  cout<<"time.size()="<<time.size()<<'\n';
+  cout<<"dataNum.size()="<<dataNum.size()<<'\n';
+  cout<<"dataStr.size()="<<dataStr.size()<<'\n';
+
+  
+  if(isNum)
+    {
+      cout<<"numerical type data"<<'\n'; 
+      assert(time.size()==dataNum.size());
+    }
+  if(isStr)
+    {
+      cout<<"string type data"<<'\n'; 
+      assert(time.size()==dataStr.size());
+    }
+
+  for(int i=0;i<time.size();i++)
+    {
+      cout<<time.at(i)<<'\n';
+      
+      if(isStr)
+	cout<<dataStr.at(i)<<'\n';
+      
+      if(isNum)
+	{
+	  for(int j=0;j<(dataNum.at(i)).size();j++)
+	    cout<<(dataNum.at(i)).at(j)<<" ";
+	  cout<<'\n';
+	}
+	
+    }
+  
+
 }
 
 CalVals::~CalVals()

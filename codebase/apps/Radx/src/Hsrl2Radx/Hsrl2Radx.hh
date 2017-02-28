@@ -75,7 +75,8 @@ public:
   vector<RadxTime> getTime();
   vector<string> getDataStr();
   vector< vector<double> > getDataNum();
- 
+  void printBlock();
+
   ~CalVals();
     
 };
