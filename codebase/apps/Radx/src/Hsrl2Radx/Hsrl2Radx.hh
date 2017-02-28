@@ -38,10 +38,47 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <string>
+#include <Radx/RadxTime.hh>
 class RadxVol;
 class RadxFile;
 class MslFile;
 using namespace std;
+
+
+class CalVals{
+private:
+  string varName;
+  string varUnits;
+  vector<RadxTime> time;
+  vector<string> dataStr;
+  vector< vector<double> > dataNum;
+  bool isNum, isStr;
+public:
+
+  CalVals();
+  CalVals(string inName, string inUnits, vector< RadxTime > inTime, vector<string> inDataStr);//constructor for string type data
+  CalVals(string inName, string inUnits, vector< RadxTime > inTime, vector< vector<double> > inDataNum);////constructor for num type data
+ 
+  void setVarName(string inName);
+  void setVarUnits(string inUnits);
+  void setTime(vector<RadxTime> inTime);
+  void addTime(RadxTime inTime);
+  void setDataStr(vector<string> inDataStr);
+  void addDataStr(string inDataStr);
+  void setDataNum(vector< vector<double> > inDataNum);
+  void addDataNum(vector<double> inDataNum);
+  void setIsStr();
+  void setIsNum();
+  bool dataTypeisNum();
+  bool dataTypeisStr(); string getVarName();
+  string getVarUnits();
+  vector<RadxTime> getTime();
+  vector<string> getDataStr();
+  vector< vector<double> > getDataNum();
+ 
+  ~CalVals();
+    
+};
 
 class Hsrl2Radx {
   
@@ -94,7 +131,7 @@ private:
   vector <vector<double> > _readDiffDefaultGeo(const char* file, bool debug);
   vector <vector<double> > _readGeofileDefault(const char* file, bool debug);
   vector <vector<double> > _readAfterPulse(const char* file, bool debug);
-  void _readCalvals(const char* file, bool debug);
+  CalVals _readCalvals(const char* file, const char* variable, bool debug);
   string _removeWhitespace(string s);
   int _checkForChar(string subSt, string s);
 };

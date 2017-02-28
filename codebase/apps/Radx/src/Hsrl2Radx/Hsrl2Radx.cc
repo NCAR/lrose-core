@@ -800,11 +800,13 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
   const char* geoDef = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/geofile_default_20150601T0000.geo";
   const char* afterpulse = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/afterpulse_default_20061001T0000.ap";
   const char* calvals = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/calvals_gvhsrl.txt";
+  const char* variable = "combined_hi_dead_time";
+
   _readBaselineCorrection(baseline, doneDebug);
   _readDiffDefaultGeo(diffDefGeo, doneDebug);
   _readGeofileDefault(geoDef, doneDebug);
   _readAfterPulse(afterpulse, doneDebug);
-  _readCalvals(calvals, doneDebug);
+  _readCalvals(calvals, variable, doneDebug);
 
   // add in height, temperature and pressure fields
 
@@ -1194,8 +1196,10 @@ vector <vector<double> > Hsrl2Radx::_readAfterPulse(const char* file, bool debug
 
 } 
 
-void Hsrl2Radx::_readCalvals(const char* file, bool debug)
+CalVals Hsrl2Radx::_readCalvals(const char* file, const char* variable, bool debug)
 {
+  CalVals dataBlock;
+  bool rightBlock=false;//each block of the calval file has the data in the calvals class, and we want to scan through the correct block and return just that data. Don't bother returning data from other blocks. 
   if(debug)
     cout<< "in _readCalvals"<<'\n';
   std::ifstream infile(file);
@@ -1231,7 +1235,7 @@ void Hsrl2Radx::_readCalvals(const char* file, bool debug)
 	      if(hasUnits==-1)
 		{
 		  varName=line;
-		  units="";
+		  units="none";
 		}
 	      else
 		{
@@ -1242,6 +1246,16 @@ void Hsrl2Radx::_readCalvals(const char* file, bool debug)
 	      varName=_removeWhitespace(varName);
 	      units=_removeWhitespace(units);
 	      
+	      if(varName==variable)
+		rightBlock=true;
+	      else
+		rightBlock=false;
+
+	      if(rightBlock)
+		{
+		  dataBlock.setVarName(varName);
+		  dataBlock.setVarUnits(units);
+		}
 	      if(debug)
 		{
 		  cout<<"line="<<line<<'\n';
@@ -1250,7 +1264,7 @@ void Hsrl2Radx::_readCalvals(const char* file, bool debug)
 		}
 	    }
 	      
-	  if( line.at(0)>='0' && line.at(0)<='9' )//if the first char is a number then it is a date/data pair
+	  if(rightBlock && line.at(0)>='0' && line.at(0)<='9' )//if the first char is a number then it is a date/data pair
 	    {
 	      if(debug)
 		cout<<"starts with number"<<'\n';
@@ -1433,33 +1447,37 @@ void Hsrl2Radx::_readCalvals(const char* file, bool debug)
 			}
 		    }
 		  
-		   		  
 		  if(debug)
 		    {
 		      cout<<"checking data reading"<<'\n';
 		      for(int i=0;i<numValue.size();i++)
 			cout<<numValue.at(i)<<'\n';;
 		    }
-		  
 		}
-	     	      
+	      
+	      if(rightBlock)
+		{
+		  dataBlock.addTime(dateStamp);
+		  
+		  if(strData > -1)
+		    {
+		      dataBlock.setIsStr();
+		      dataBlock.addDataStr(strValue);
+		    }
+		  if(numData > -1)
+		    {
+		      dataBlock.setIsNum();
+		      dataBlock.addDataNum(numValue);
+		    }
+		}
+	      
 	    }//if the first char is a number then it is a date/data pair, end that processing
 	  
 	}//end line length check
     
     }//end reading calvals file line by line
 
-
-
-  //want to return a custom class with the following 
-  // string var name ; varName
-  // string var units ; units
-  // vector RadxTime ; dateStamp
-  // vector data string ; strValue
-  // vector vector double data num ; numValue
-
-
-
+  return dataBlock;
 
 }// end of _readCalvals function 
 
@@ -1485,3 +1503,102 @@ int Hsrl2Radx::_checkForChar(string subSt, string str)//checks string for a part
   
   return -1;
 }
+
+  
+
+
+CalVals::CalVals()
+{}
+
+CalVals::CalVals(string inName, string inUnits, vector< RadxTime > inTime, vector<string> inDataStr)//constructor for string type data
+{
+  varName=inName;
+  varUnits=inUnits;
+  time=inTime;
+  dataStr=inDataStr;
+  isStr=true;
+  isNum=false;
+}
+
+CalVals::CalVals(string inName, string inUnits, vector< RadxTime > inTime, vector< vector<double> > inDataNum)////constructor for num type data
+{
+  varName=inName;
+  varUnits=inUnits;
+  time=inTime;
+  dataNum=inDataNum;
+  isStr=false;
+  isNum=true;
+}
+
+void CalVals::setVarName(string inName)
+{varName=inName;}
+
+void CalVals::setVarUnits(string inUnits)
+{varUnits=inUnits;}
+
+void CalVals::setTime(vector<RadxTime> inTime)
+{time=inTime;}
+
+void CalVals::addTime(RadxTime inTime)
+{time.push_back(inTime);}
+
+void CalVals::setDataStr(vector<string> inDataStr)
+{
+  if(isStr)
+    dataStr=inDataStr;
+}
+
+void CalVals::addDataStr(string inDataStr)
+{
+  if(isStr)
+    dataStr.push_back(inDataStr);
+}
+
+void CalVals::setDataNum(vector< vector<double> > inDataNum)
+{
+  if(isNum)
+    dataNum=inDataNum;
+}
+
+void CalVals::addDataNum(vector<double> inDataNum)
+{
+  if(isNum)
+    dataNum.push_back(inDataNum);
+}
+
+void CalVals::setIsStr()
+{isStr=true;}
+
+void CalVals::setIsNum()
+{isNum=true;}
+
+string CalVals::getVarName()
+{return varName;}
+
+string CalVals::getVarUnits()
+{return varUnits;}
+
+vector<RadxTime> CalVals::getTime()
+{return time;}
+
+vector<string> CalVals::getDataStr()
+{return dataStr;}
+
+vector< vector<double> > CalVals::getDataNum()
+{return dataNum;}
+
+bool CalVals::dataTypeisNum()
+{
+  assert(isStr!=isNum);//data should be either string type or numbers, not both or neither. 
+  return isNum;    
+}
+
+bool CalVals::dataTypeisStr()
+{
+  assert(isStr!=isNum);//data should be either string type or numbers, not both or neither. 
+  return isStr;    
+}
+
+CalVals::~CalVals()
+{}
+
