@@ -109,7 +109,7 @@ char *InputDir::getNextFilename(int check_dir_flag,
 				int max_input_data_age)
 {
   static const string method_name = "InputDir::getNextFilename()";
-  
+
   struct stat file_stat;
   struct dirent *dir_entry_ptr;
   char *next_file;
@@ -138,7 +138,7 @@ char *InputDir::getNextFilename(int check_dir_flag,
 
       // Make sure we don't process the old files again
 
-      _lastDirUpdateTime = _lastDirRewindTime;
+      _lastDirUpdateTime = _lastDataFileTime;
     
       // Tell the calling routine that there are no more new files.
 
@@ -198,7 +198,14 @@ char *InputDir::getNextFilename(int check_dir_flag,
       continue;
     }
     else
+    {
+      if (file_stat.st_mtime > _lastDataFileTime)
+        _lastDataFileTime = file_stat.st_mtime;
       break;
+    }
+    
+    // We can never get here
+
   } /* endwhile - Forever */
   
   return(next_file);
@@ -231,13 +238,19 @@ void InputDir::_init(const string &dir_name,
   _fileSubstring = file_substring;
   _excludeSubstring = exclude_substring;
   
-  // Initialize the directory update time
+  // Initialize the internal times
 
   if (process_old_files)
+  {
     _lastDirUpdateTime = -1;
+    _lastDataFileTime = 0;
+  }
   else
+  {
     _lastDirUpdateTime = time((time_t *)0);
-
+    _lastDataFileTime = _lastDirUpdateTime;
+  }
+  
   _lastDirRewindTime = 0;
   
   _rewindDirFlag = true;
