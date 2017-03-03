@@ -22,77 +22,68 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// Hsrl2Radx.hh
+// CalReader.hh
 //
-// Hsrl2Radx object
+// CalReader object
 //
-// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Brad Schoenrock, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// June 2015
+// Feb 2017
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef Hsrl2Radx_HH
-#define Hsrl2Radx_HH
+#ifndef CalReader_HH
+#define CalReader_HH
 
-#include "Args.hh"
-#include "Params.hh"
 #include <string>
 #include <Radx/RadxTime.hh>
-class RadxVol;
-class RadxFile;
-class MslFile;
-class CalReader;
+#include <vector>
+
 using namespace std;
 
-
-class Hsrl2Radx {
-  
+class CalReader{
+private: 
+  string varName;
+  string varUnits;
+  vector<RadxTime> time;
+  vector<string> dataStr;
+  vector< vector<double> > dataNum;
+  bool isNum, isStr;
 public:
 
-  // constructor
-  
-  Hsrl2Radx (int argc, char **argv);
+  CalReader();
+  CalReader(string inName, string inUnits, vector< RadxTime > inTime, vector<string> inDataStr);//constructor for string type data
+  CalReader(string inName, string inUnits, vector< RadxTime > inTime, vector< vector<double> > inDataNum);////constructor for num type data
+ 
+  void setVarName(string inName);
+  void setVarUnits(string inUnits);
+  void setTime(vector<RadxTime> inTime);
+  void addTime(RadxTime inTime);
+  void setDataStr(vector<string> inDataStr);
+  void addDataStr(string inDataStr);
+  void setDataNum(vector< vector<double> > inDataNum);
+  void addDataNum(vector<double> inDataNum);
+  void setIsStr();
+  void setIsNum();
+  bool dataTypeisNum();
+  bool dataTypeisStr(); string getVarName();
+  string getVarUnits();
+  vector<RadxTime> getTime();
+  vector<string> getDataStr();
+  vector< vector<double> > getDataNum();
+  void printBlock();
 
-  // destructor
-  
-  ~Hsrl2Radx();
 
-  // run 
+  vector <vector<double> > readBaselineCorrection(const char* file, bool debug);
+  vector <vector<double> > readDiffDefaultGeo(const char* file, bool debug);
+  vector <vector<double> > readGeofileDefault(const char* file, bool debug);
+  vector <vector<double> > readAfterPulse(const char* file, bool debug);
+  CalReader readCalVals(const char* file, const char* variable, bool debug);
+  string removeWhitespace(string s);
+  int checkForChar(string subSt, string s);
 
-  int Run();
 
-  // data members
-
-  int OK;
-
-protected:
-private:
-
-  string _progName;
-  char *_paramsPath;
-  Args _args;
-  Params _params;
-  vector<string> _readPaths;
-
-  int _runFilelist();
-  int _runArchive();
-  int _runRealtimeWithLdata();
-  int _runRealtimeNoLdata();
-  int _processFile(const string &filePath);
-  int _processUwCfRadialFile(const string &filePath);
-  void _setupRead(MslFile &file);
-  void _overrideGateGeometry(RadxVol &vol);
-  void _setRangeRelToInstrument(MslFile &file,
-                                RadxVol &vol);
-  void _convertFields(RadxVol &vol);
-  void _setupWrite(RadxFile &file);
-  void _setGlobalAttr(RadxVol &vol);
-  int _writeVol(RadxVol &vol);
-
-  int _processUwRawFile(const string &filePath);
-  void _addEnvFields(RadxVol &vol);
-
+  ~CalReader();
+    
 };
-
 #endif

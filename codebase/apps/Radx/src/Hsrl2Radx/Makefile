@@ -51,7 +51,8 @@ HDRS = \
 	Args.hh \
 	Hsrl2Radx.hh \
 	MslFile.hh \
-	RawFile.hh
+	RawFile.hh \
+	CalReader.hh
 
 CPPC_SRCS = \
 	Params.cc \
@@ -59,7 +60,8 @@ CPPC_SRCS = \
 	Main.cc \
 	Hsrl2Radx.cc \
 	MslFile.cc \
-	RawFile.cc
+	RawFile.cc \
+	CalReader.cc
 
 #
 # tdrp macros
