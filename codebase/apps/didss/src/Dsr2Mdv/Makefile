@@ -77,7 +77,13 @@ include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
 # tdrp targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
+#
+# local targets
+#
+
+depend: $(TDRP_C) depend_generic
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_targets
 
 #
 # local targets

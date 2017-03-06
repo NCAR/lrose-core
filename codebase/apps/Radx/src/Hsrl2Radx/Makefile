@@ -38,7 +38,7 @@ TARGET_FILE = Hsrl2Radx
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lRadx -lMdv -lRadx -ldsserver \
-	-ldidss -lrapformats -ltoolsa -leuclid \
+	-ldidss -lrapformats -ltoolsa -leuclid -lphysics \
 	-ltdrp -ldataport $(NETCDF4_LIBS) -lbz2 \
 	-lz
 
@@ -50,14 +50,18 @@ HDRS = \
 	Params.hh \
 	Args.hh \
 	Hsrl2Radx.hh \
-	MslFile.hh
+	MslFile.hh \
+	RawFile.hh \
+	CalReader.hh
 
 CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
 	Main.cc \
 	Hsrl2Radx.cc \
-	MslFile.cc
+	MslFile.cc \
+	RawFile.cc \
+	CalReader.cc
 
 #
 # tdrp macros

@@ -530,6 +530,9 @@ void IwrfReader::run()
     // get new ray
 
     RadxRay *ray = reader->readNextRay();
+    if (ray == NULL) {
+      continue;
+    }
 
     // add ray to queue
     

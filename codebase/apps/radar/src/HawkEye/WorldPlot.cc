@@ -485,7 +485,7 @@ void WorldPlot::drawText(QPainter &painter, const string &text,
                          int flags)
 
 {
-	
+
   int ixx = getIxPixel(text_x);
   int iyy = getIyPixel(text_y);
 	
@@ -594,15 +594,15 @@ void WorldPlot::drawLegendsTopLeft(QPainter &painter,
 
 {
 
+  qreal xx = (qreal) (_xMinPixel + _axisTickLen + _textMargin);
+  qreal yy = _yMaxPixel + _axisTickLen;
+
   for (size_t i = 0; i < legends.size(); i++) {
     string legend(legends[i]);
     QRect tRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
-    qreal xx = (qreal) (_xMinPixel + _axisTickLen + _textMargin);
-    qreal yy = (qreal) (_yMaxPixel + _axisTickLen +
-                        i * _textMargin +
-                        i * tRect.height());
     QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 2);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
+    yy += (_textMargin + tRect.height());
   }
 
 }
@@ -615,16 +615,16 @@ void WorldPlot::drawLegendsTopRight(QPainter &painter,
 
 {
 
+  qreal yy = _yMaxPixel + _axisTickLen;
+
   for (size_t i = 0; i < legends.size(); i++) {
     string legend(legends[i]);
     QRect tRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
     qreal xx = (qreal) (_xMaxPixel - _axisTickLen -
                         _textMargin - tRect.width());
-    qreal yy = (qreal) (_yMaxPixel + _axisTickLen +
-                        i * _textMargin +
-                        i * tRect.height());
     QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 2);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
+    yy += (_textMargin + tRect.height());
   }
 
 }
@@ -637,15 +637,16 @@ void WorldPlot::drawLegendsBottomLeft(QPainter &painter,
 
 {
 	
+  qreal xx = (qreal) (_xMinPixel + _axisTickLen + _textMargin);
+  qreal yy = (qreal) (_yMinPixel - _axisTickLen);
+
   for (size_t i = 0; i < legends.size(); i++) {
     string legend(legends[i]);
     QRect tRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
-    qreal xx = (qreal) (_xMinPixel + _axisTickLen + _textMargin);
-    qreal yy = (qreal) (_yMinPixel - _axisTickLen -
-                        i * _textMargin -
-                        (i + 1) * tRect.height());
+    yy -= tRect.height();
     QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 2);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
+    yy -= _textMargin;
   }
 
 }
@@ -658,16 +659,17 @@ void WorldPlot::drawLegendsBottomRight(QPainter &painter,
 
 {
 	
+  qreal yy = (qreal) (_yMinPixel - _axisTickLen);
+
   for (size_t i = 0; i < legends.size(); i++) {
     string legend(legends[i]);
     QRect tRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
     qreal xx = (qreal) (_xMaxPixel - _axisTickLen -
                         _textMargin - tRect.width());
-    qreal yy = (qreal) (_yMinPixel - _axisTickLen -
-                        i * _textMargin -
-                        (i + 1) * tRect.height());
+    yy -= tRect.height();
     QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 2);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
+    yy -= _textMargin;
   }
 
 }
@@ -701,18 +703,18 @@ void WorldPlot::drawAxisLeft(QPainter &painter, const string &units,
 
   // tick marks
 
-  vector<double> ticks = linearTicks(_yMinWorld, _yMaxWorld,
-                                     _nTicksIdeal, _specifyTicks,
-                                     _tickMin, _tickDelta);
+  _leftTicks = linearTicks(_yMinWorld, _yMaxWorld,
+                           _nTicksIdeal, _specifyTicks,
+                           _tickMin, _tickDelta);
 
-  if (ticks.size() < 2) {
+  if (_leftTicks.size() < 2) {
     return;
   }
 	
-  double delta = ticks[1] - ticks[0];
-  for (size_t i = 0; i < ticks.size(); i++) {
+  double delta = _leftTicks[1] - _leftTicks[0];
+  for (size_t i = 0; i < _leftTicks.size(); i++) {
 	    
-    double val = ticks[i];
+    double val = _leftTicks[i];
     double pix = getYPixel(val);
     if (doTicks) {
       QLineF qline(_xMinPixel, pix,
@@ -765,17 +767,17 @@ void WorldPlot::drawAxisRight(QPainter &painter, const string &units,
 
   // tick marks
 
-  vector<double> ticks = linearTicks(_yMinWorld, _yMaxWorld,
-                                     _nTicksIdeal, _specifyTicks,
-                                     _tickMin, _tickDelta);
-  if (ticks.size() < 2) {
+  _rightTicks = linearTicks(_yMinWorld, _yMaxWorld,
+                            _nTicksIdeal, _specifyTicks,
+                            _tickMin, _tickDelta);
+  if (_rightTicks.size() < 2) {
     return;
   }
 	
-  double delta = ticks[1] - ticks[0];
-  for (size_t i = 0; i < ticks.size(); i++) {
+  double delta = _rightTicks[1] - _rightTicks[0];
+  for (size_t i = 0; i < _rightTicks.size(); i++) {
 	    
-    double val = ticks[i];
+    double val = _rightTicks[i];
     double pix = getYPixel(val);
     if (doTicks) {
       QLineF qline(_xMaxPixel, pix,
@@ -830,17 +832,17 @@ void WorldPlot::drawAxisBottom(QPainter &painter,
 
   // tick marks
 
-  vector<double> ticks = linearTicks(_xMinWorld, _xMaxWorld,
-                                     _nTicksIdeal, _specifyTicks,
-                                     _tickMin, _tickDelta);
-  if (ticks.size() < 2) {
+  _bottomTicks = linearTicks(_xMinWorld, _xMaxWorld,
+                             _nTicksIdeal, _specifyTicks,
+                             _tickMin, _tickDelta);
+  if (_bottomTicks.size() < 2) {
     return;
   }
 	
-  double delta = ticks[1] - ticks[0];
-  for (size_t i = 0; i < ticks.size(); i++) {
+  double delta = _bottomTicks[1] - _bottomTicks[0];
+  for (size_t i = 0; i < _bottomTicks.size(); i++) {
 	    
-    double val = ticks[i];
+    double val = _bottomTicks[i];
     double pix = getXPixel(val);
     if (doTicks) {
       QLineF qline(pix, _yMinPixel,
@@ -893,17 +895,17 @@ void WorldPlot::drawAxisTop(QPainter &painter,
 
   // tick marks
 
-  vector<double> ticks = linearTicks(_xMinWorld, _xMaxWorld,
-                                     _nTicksIdeal, _specifyTicks,
-                                     _tickMin, _tickDelta);
-  if (ticks.size() < 2) {
+  _topTicks = linearTicks(_xMinWorld, _xMaxWorld,
+                          _nTicksIdeal, _specifyTicks,
+                          _tickMin, _tickDelta);
+  if (_topTicks.size() < 2) {
     return;
   }
   
-  double delta = ticks[1] - ticks[0];
-  for (size_t i = 0; i < ticks.size(); i++) {
+  double delta = _topTicks[1] - _topTicks[0];
+  for (size_t i = 0; i < _topTicks.size(); i++) {
 	    
-    double val = ticks[i];
+    double val = _topTicks[i];
     double pix = getXPixel(val);
     if (doTicks) {
       QLineF qline(pix, _yMaxPixel,
@@ -1506,12 +1508,6 @@ void WorldPlot::_computeTransform()
   _xMaxWindow = getXWorld(_widthPixels);
   _yMaxWindow = getYWorld(_heightPixels);
 
-  // cerr << "11111111111 _xMinWorld: " << _xMinWorld << endl;
-  // cerr << "11111111111 _xMaxWorld: " << _xMaxWorld << endl;
-  // cerr << "11111111111 _xMinPixel: " << _xMinPixel << endl;
-  // cerr << "11111111111 _xMaxPixel: " << _xMaxPixel << endl;
-  // cerr << "11111111111 _xPixelsPerWorld: " << _xPixelsPerWorld << endl;
-
 }
 
 /////////////////////////////////////////////////////
@@ -1527,7 +1523,8 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   int pltHt = _plotHeight;
   int width = _colorScaleWidth;
   int xStart = _widthPixels - width;
-  double patchHt = (double)(pltHt) / cmap.size();
+  size_t nHts = cmap.size() + 2; // leave space at top and bottom
+  double patchHt = (double)(pltHt) / nHts;
   int iPatchHt = (int) patchHt;
 
   // fill the swatches with the color
@@ -1538,7 +1535,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
     const ColorMap::CmapEntry &entry = cmap[ii];
     QColor color(entry.red, entry.green, entry.blue);
     painter.setBrush(color);
-    double topY = pltHt - (ii + 1) * patchHt + _topMargin;
+    double topY = pltHt - (int) (ii + 2) * patchHt + (patchHt / 2) + _topMargin;
     QRectF r(xStart, topY, width, patchHt);
     painter.fillRect(r, color);
   }
@@ -1586,7 +1583,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 
   painter.setBrush(Qt::black);
   painter.setBackgroundMode(Qt::OpaqueMode);
-  double yy = pltHt - patchHt / 2.0 + _topMargin;
+  double yy = pltHt - (patchHt * 1.0) + _topMargin;
   for (size_t ii = 0; ii < cmap.size(); ii++) {
     const ColorMap::CmapEntry &entry = cmap[ii];
     QString label = QString("%1").arg(entry.minVal,0,format,ndecimals);
@@ -1603,11 +1600,12 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   painter.drawText(xStart, (int)yy, width, iPatchHt, 
                    Qt::AlignVCenter | Qt::AlignHCenter, 
                    label);
+  yy -= patchHt * 0.5;
 
   // add Units header
   
   QString units(colorMap.getUnits().c_str());
-  painter.drawText(xStart, 0, width, iPatchHt, 
+  painter.drawText(xStart, yy, width, iPatchHt, 
                    Qt::AlignVCenter | Qt::AlignHCenter, units);
 
   // restore state

@@ -37,6 +37,7 @@
 #include <tdrp/tdrp.h>
 #include <iostream>
 #include <string>
+#include <vector>
 using namespace std;
 
 class Args {
@@ -59,6 +60,7 @@ public:
   // public data
 
   tdrp_override_t override;
+  vector<string> inputFileList;
 
 protected:
   

@@ -1219,7 +1219,7 @@ int DoradeRadxFile::_getVolumePaths(const string &path,
     }
   }
 
-  int endIndex = (int) pathList[index].size() - 1;
+  int endIndex = (int) pathList.size() - 1;
   for (int ii = startIndex; ii < (int) pathList.size(); ii++) {
     if (pathList[ii].find(volStr) == string::npos) {
       endIndex = ii - 1;

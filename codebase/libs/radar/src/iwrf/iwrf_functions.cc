@@ -3043,6 +3043,8 @@ void iwrf_platform_georef_print(FILE *out,
   iwrf_platform_georef_swap(copy);
   fprintf(out, "============== iwrf_platform_georef =====================\n");
   iwrf_packet_info_print(out, copy.packet);
+  fprintf(out, "  spare1: %g\n", copy.spare1);
+  fprintf(out, "  spare2: %g\n", copy.spare2);
   fprintf(out, "  longitude: %g\n", copy.longitude);
   fprintf(out, "  latitude: %g\n", copy.latitude);
   fprintf(out, "  altitude_msl_km: %g\n", copy.altitude_msl_km);

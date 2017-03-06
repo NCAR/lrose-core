@@ -32,7 +32,8 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// BscanManager manages BSCAN rendering - vert pointing etc
+// BscanManager manages BSCAN data - vert pointing etc
+// Rendering is delegated to BscanWidget
 //
 ///////////////////////////////////////////////////////////////
 
@@ -213,8 +214,8 @@ private:
   QLabel *_archiveEndTimeEcho;
   RadxTime _archiveEndTime;
   
-  RadxTime _archivePeriodStartTime;
-  RadxTime _archivePeriodEndTime;
+  RadxTime _archiveImagesStartTime;
+  RadxTime _archiveImagesEndTime;
 
   QGroupBox *_dwellSpecsBox;
   QCheckBox *_dwellAutoBox;

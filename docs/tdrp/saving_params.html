@@ -1,0 +1,69 @@
+<html>
+
+<head>
+<title>Saving parameters to a file</title>
+</head>
+
+<body>
+
+<h3>Saving parameters to a file</h3>
+
+Some programs, especially those driven by a GUI, will <a href =
+"changing_params.html"> change TDRP parameters </a> from within the
+program.<p>
+
+If you have changed parameters in the program, you may print the
+amended values out to a file for later use. To do this, use the
+<tt>sync()</tt> function to copy the the changes out to the parameter
+table and the <tt>print()</tt> function to print to a file.<p>
+
+Example using the <a href="api_c.html">C API</a>:<p>
+
+<pre>
+  /*
+   * copy params back to table
+   */
+
+  _tdrp_sync();
+
+  /*
+   * print out to params.out
+   */
+
+  if ((out = fopen("params.out", "w")) == NULL) {
+    fprintf(stderr, "ERROR\n");
+    fprintf(stderr,
+	    "Cannot open file params.out for writing table.\n");
+    return (-1);
+  }
+  _tdrp_print(out, PRINT_SHORT);
+  fclose(out);
+
+</pre>
+
+Example using the <a href="api_c++.html">C++ API</a>:<p>
+
+<pre>
+  Params *params;
+
+  // copy params back to table
+
+  _params->sync();
+
+  // print out to params.out
+
+  if ((out = fopen("params.out", "w")) == NULL) {
+    fprintf(stderr, "ERROR\n");
+    fprintf(stderr,
+	    "Cannot open file params.out for writing table.\n");
+    return (-1);
+  }
+  _params->print(out, PRINT_SHORT);
+  fclose(out);
+</pre>
+
+
+
+</body>
+</html>
+

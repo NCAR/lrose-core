@@ -1,0 +1,245 @@
+<html>
+
+<head>
+<title>TDRP API for C</title>
+</head>
+
+<body>
+
+<h3>TDRP API for C</h3>
+
+When tdrp_gen is run on a paramdef file in C mode, it produces
+two files:<p>
+
+<pre>
+  moduleName_tdrp.h
+  moduleName_tdrp.c
+</pre>
+
+In normal cases, in which only one parameter file is required for a
+program, the module is set to the empty string. Then the generated
+files are:<p>
+
+<pre>
+  _tdrp.h
+  _tdrp.c
+</pre>
+
+These two files contain most of the API for the simple case. Some
+additional routines are defined in <i>tdrp/tdrp.h</i>. The following
+are the relevant API routines from these sources. If a moduleName
+is used, all of the _tdrp identifiers will be prepended with 
+moduleName.<p>
+
+<pre>
+/*************************************************************
+ * _tdrp_load_from_args()
+ *
+ * Loads up TDRP using the command line args.
+ *
+ * Check TDRP_usage() for command line actions associated with
+ * this function.
+ *
+ *   argc, argv: command line args
+ *
+ *   _tdrp_struct *params: loads up this struct
+ * 
+ *   char **override_list: A null-terminated list of overrides
+ *     to the parameter file.
+ *     An override string has exactly the format of an entry
+ *     in the parameter file itself.
+ *
+ *   char **params_path_p: if non-NULL, this is set to point to
+ *                         the path of the params file used.
+ *
+ *  Returns 0 on success, -1 on failure.
+ */
+
+extern int _tdrp_load_from_args(int argc, char **argv,
+                                _tdrp_struct *params,
+                                char **override_list,
+                                char **params_path_p);
+
+/*************************************************************
+ * _tdrp_load()
+ *
+ * Loads up TDRP for a given module.
+ *
+ * This version of load gives the programmer the option to load
+ * up more than one module for a single application. It is a
+ * lower-level routine than _tdrp_load_from_args,
+ * and hence more flexible, but the programmer must do more work.
+ *
+ *   char *param_file_path: the parameter file to be read in.
+ *
+ *   _tdrp_struct *params: loads up this struct
+ *
+ *   char **override_list: A null-terminated list of overrides
+ *     to the parameter file.
+ *     An override string has exactly the format of an entry
+ *     in the parameter file itself.
+ *
+ *  expand_env: flag to control environment variable
+ *                expansion during tokenization.
+ *              If TRUE, environment expansion is set on.
+ *              If FALSE, environment expansion is set off.
+ *
+ *  Returns 0 on success, -1 on failure.
+ */
+
+extern int _tdrp_load(char *param_file_path,
+                      _tdrp_struct *params,
+                      char **override_list,
+                      int expand_env, int debug);
+
+/*************************************************************
+ * _tdrp_load_defaults()
+ *
+ * Loads up defaults for a given module.
+ *
+ * See _tdrp_load() for more details.
+ *
+ *  Returns 0 on success, -1 on failure.
+ */
+
+extern int _tdrp_load_defaults(_tdrp_struct *params,
+                               int expand_env);
+
+/*************************************************************
+ * _tdrp_sync()
+ *
+ * Syncs the user struct data back into the parameter table,
+ * in preparation for printing.
+ */
+
+extern void _tdrp_sync(void);
+
+/*************************************************************
+ * _tdrp_print()
+ * 
+ * Print params file
+ *
+ * The modes supported are:
+ *
+ *   PRINT_SHORT:   main comments only, no help or descriptions
+ *                  structs and arrays on a single line
+ *   PRINT_NORM:    short + descriptions and help
+ *   PRINT_LONG:    norm  + arrays and structs expanded
+ *   PRINT_VERBOSE: long  + private params included
+ */
+
+extern void _tdrp_print(FILE *out, tdrp_print_mode_t mode);
+
+/*************************************************************
+ * _tdrp_free_all()
+ *
+ * Frees up all TDRP dynamic memory.
+ */
+
+extern void _tdrp_free_all(void);
+
+/*************************************************************
+ * _tdrp_check_all_set()
+ *
+ * Return TRUE if all set, FALSE if not.
+ *
+ * If out is non-NULL, prints out warning messages for those
+ * parameters which are not set.
+ */
+
+extern int _tdrp_check_all_set(FILE *out);
+
+/*************************************************************
+ * _tdrp_array_realloc()
+ *
+ * Realloc 1D array.
+ *
+ * If size is increased, the values from the last array entry is
+ * copied into the new space.
+ *
+ * Returns 0 on success, -1 on error.
+ */
+
+extern int _tdrp_array_realloc(char *param_name,
+                               int new_array_n);
+
+/*************************************************************
+ * _tdrp_array2D_realloc()
+ *
+ * Realloc 2D array.
+ *
+ * If size is increased, the values from the last array entry is
+ * copied into the new space.
+ *
+ * Returns 0 on success, -1 on error.
+ */
+
+extern int _tdrp_array2D_realloc(char *param_name,
+                                 int new_array_n1,
+                                 int new_array_n2);
+
+/*************************************************************
+ * _tdrp_table()
+ *
+ * Returns pointer to static Table for this module.
+ */
+
+extern TDRPtable *_tdrp_table(void);
+
+/*************************************************************
+ * _tdrp_init()
+ *
+ * Module table initialization function.
+ *
+ *
+ * Returns pointer to static Table for this module.
+ */
+
+extern TDRPtable *_tdrp_init(_tdrp_struct *params);
+
+/**********************
+ * TDRP_init_override()
+ *
+ * Initialize the override list
+ */
+
+extern void TDRP_init_override(tdrp_override_t *override);
+
+/*********************
+ * TDRP_add_override()
+ *
+ * Add a string to the override list
+ */
+
+extern void TDRP_add_override(tdrp_override_t *override, char *override_str);
+
+/**********************
+ * TDRP_free_override()
+ *
+ * Free up the override list
+ */
+
+extern void TDRP_free_override(tdrp_override_t *override);
+
+/***********************************************************
+ * TDRP_str_replace()
+ *
+ * Replace a string.
+ */
+
+extern void TDRP_str_replace(char **s1, char *s2);
+
+/*********************************************************
+ * TDRP_usage()
+ *
+ * Prints out usage message for TDRP args as passed in to
+ * TDRP_load_from_args()
+ */
+
+extern void TDRP_usage(FILE *out);
+
+</pre>
+
+</body>
+</html>
+

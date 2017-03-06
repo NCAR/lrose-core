@@ -296,9 +296,11 @@ void DisplayManager::_createStatusPanel()
 
   if (_params.show_status_in_gui.altitude) {
     if (_altitudeInFeet) {
-      _altVal = _createStatusVal("Alt(kft)", "-999.999", row++, fsize, &_altLabel);
+      _altVal = _createStatusVal("Alt(kft)", "-999.999",
+                                 row++, fsize, &_altLabel);
     } else {
-      _altVal = _createStatusVal("Alt(km)", "-999.999", row++, fsize, &_altLabel);
+      _altVal = _createStatusVal("Alt(km)", "-999.999",
+                                 row++, fsize, &_altLabel);
     }
   } else {
     _altVal = NULL;
@@ -306,9 +308,11 @@ void DisplayManager::_createStatusPanel()
 
   if (_params.show_status_in_gui.altitude_rate) {
     if (_altitudeInFeet) {
-      _altRateVal = _createStatusVal("AltRate(ft/s)", "-999.999", row++, fsize, &_altRateLabel);
+      _altRateVal = _createStatusVal("AltRate(ft/s)", "-999.999",
+                                     row++, fsize, &_altRateLabel);
     } else {
-      _altRateVal = _createStatusVal("AltRate(m/s)", "-999.999", row++, fsize, &_altRateLabel);
+      _altRateVal = _createStatusVal("AltRate(m/s)", "-999.999",
+                                     row++, fsize, &_altRateLabel);
     }
   } else {
     _altRateVal = NULL;
@@ -789,9 +793,6 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
           ((int) ray->getNanoSecs() / 1000));
   _timeVal->setText(text);
   
-  //   _setText(text, "%.6d", (int) (ray->getNanoSecs() / 1000));
-  //   _microSecsLabel->setText(text);
-
   if (_volNumVal) {
     _setText(text, "%d", ray->getVolumeNumber());
     _volNumVal->setText(text);

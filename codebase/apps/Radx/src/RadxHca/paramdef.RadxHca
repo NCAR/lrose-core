@@ -728,6 +728,82 @@ paramdef int {
 } HCA_PHIDP_heavy_filter_len;
 
 commentdef {
+  p_header = "INDIVIDUAL THRESHOLDS FOR CLASSES";
+}
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Maximum radial velocity for GC (m/s).";
+  p_help = "If abs(velocity) exceeds this, GC will be suppressed.";
+} HCA_max_abs_vel_for_GC;
+
+paramdef double {
+  p_default = 0.97;
+  p_descr = "Maximum rhohv for BS.";
+  p_help = "If rhohv exceeds this, BS will be suppressed.";
+} HCA_max_rhohv_for_BS;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Maximum zdr for DS.";
+  p_help = "If zdr exceeds this, DS will be suppressed.";
+} HCA_max_zdr_for_DS;
+
+paramdef double {
+  p_default = -0.3;
+  p_descr = "Minimum zdr for BD.";
+  p_help = "If zdr exceeds (f2(Z) - this), BD will be suppressed.";
+} HCA_min_zdr_for_BD;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Minimum zdr for WS.";
+  p_help = "If zdr is less than this, WS will be suppressed.";
+} HCA_min_zdr_for_WS;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Minimum dbz for WS.";
+  p_help = "If dbz is less than this, WS will be suppressed.";
+} HCA_min_dbz_for_WS;
+
+paramdef double {
+  p_default = 40.0;
+  p_descr = "Maximum dbz for CR.";
+  p_help = "If dbz exceeds this, CR will be suppressed.";
+} HCA_max_dbz_for_CR;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Minimum dbz for GR.";
+  p_help = "If dbz is less than this, GR will be suppressed.";
+} HCA_min_dbz_for_GR;
+
+paramdef double {
+  p_default = 60.0;
+  p_descr = "Maximum dbz for GR.";
+  p_help = "If dbz exceeds this, GR will be suppressed.";
+} HCA_max_dbz_for_GR;
+
+paramdef double {
+  p_default = 50.0;
+  p_descr = "Maximum dbz for RA.";
+  p_help = "If dbz exceeds this, RA will be suppressed.";
+} HCA_max_dbz_for_RA;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Minimum dbz for HR.";
+  p_help = "If dbz is less than this, HR will be suppressed.";
+} HCA_min_dbz_for_HR;
+
+paramdef double {
+  p_default = 40.0;
+  p_descr = "Minimum dbz for RH.";
+  p_help = "If dbz is less than this, RH will be suppressed.";
+} HCA_min_dbz_for_RH;
+
+commentdef {
   p_header = "COMPUTING NCAR PID - HYDROMETEOR PARTICLE ID";
 }
 
@@ -1046,6 +1122,7 @@ typedef enum {
   HCA_HR_INTEREST,
   HCA_RH_INTEREST,
 
+  HCA_TEMP_CAT,
   HCA
 
 } output_field_id_t;

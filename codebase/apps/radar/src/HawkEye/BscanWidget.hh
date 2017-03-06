@@ -355,24 +355,24 @@ class DLL_EXPORT BscanWidget : public QWidget
 
   ScaledLabel _scaledLabel;
 
-  // start time of plot
-
-  RadxTime _plotStartTime;
-  RadxTime _plotEndTime;
-  double _timeSpanSecs;
-  bool _archiveMode;
-
   /**
    * @brief The maximum range of the beams, in km.  It affects the
    *        labelling of the range rings
    */
 
   double _minRange;
-  double _maxRange;
+  double _maxRangeKm;
   double _minAltitude;
   double _maxAltitude;
   bool _altitudeInFeet;
   bool _rangeInFeet;
+
+  // start time of plot
+
+  RadxTime _plotStartTime;
+  RadxTime _plotEndTime;
+  double _timeSpanSecs;
+  bool _archiveMode;
 
   /**
    * @brief Last X,Y location of the mouse during mouse move events; used for
@@ -416,6 +416,12 @@ class DLL_EXPORT BscanWidget : public QWidget
   bool _isZoomed;
   QTransform _zoomTransform;
   WorldPlot _zoomWorld;
+  
+  /**
+   * @brief The width of the color scale
+   */
+
+  int _colorScaleWidth;
   
   // vertical scale state
   

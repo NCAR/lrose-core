@@ -54,7 +54,6 @@ HDRS = \
 	Args.hh \
 	Beam.hh \
 	BscanBeam.hh \
-	PolarBeam.hh \
 	BscanManager.hh \
 	BscanWidget.hh \
 	ColorBar.hh \
@@ -64,10 +63,12 @@ HDRS = \
 	FieldRenderer.hh \
 	HawkEye.hh \
 	Params.hh \
+	PpiBeam.hh \
 	PolarManager.hh \
 	PolarWidget.hh \
 	PpiWidget.hh \
 	Reader.hh \
+	RhiBeam.hh \
 	RhiWidget.hh \
 	RhiWindow.hh \
 	ScaledLabel.hh \
@@ -78,12 +79,13 @@ NORM_SRCS = \
 	Args.cc \
 	Beam.cc \
 	BscanBeam.cc \
-	PolarBeam.cc \
 	ColorMap.cc \
 	DisplayField.cc \
 	HawkEye.cc \
 	Main.cc \
+	PpiBeam.cc \
 	Reader.cc \
+	RhiBeam.cc \
 	ScaledLabel.cc \
 	WorldPlot.cc
 

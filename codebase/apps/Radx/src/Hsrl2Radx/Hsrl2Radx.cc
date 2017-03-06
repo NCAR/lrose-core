@@ -45,7 +45,15 @@
 #include <didss/DsInputPath.hh>
 #include <toolsa/TaXml.hh>
 #include <toolsa/pmu.h>
+#include <physics/IcaoStdAtmos.hh>
 #include "MslFile.hh"
+#include "RawFile.hh"
+#include "CalReader.hh"
+
+#include <fstream>
+#include <sstream>
+#include <string>
+
 using namespace std;
 
 // Constructor
@@ -95,22 +103,6 @@ Hsrl2Radx::Hsrl2Radx(int argc, char **argv)
     }
   }
 
-  // override missing values
-
-  if (_params.override_missing_metadata_values) {
-    Radx::setMissingMetaDouble(_params.missing_metadata_double);
-    Radx::setMissingMetaFloat(_params.missing_metadata_float);
-    Radx::setMissingMetaInt(_params.missing_metadata_int);
-    Radx::setMissingMetaChar(_params.missing_metadata_char);
-  }
-  if (_params.override_missing_field_values) {
-    Radx::setMissingFl64(_params.missing_field_fl64);
-    Radx::setMissingFl32(_params.missing_field_fl32);
-    Radx::setMissingSi32(_params.missing_field_si32);
-    Radx::setMissingSi16(_params.missing_field_si16);
-    Radx::setMissingSi08(_params.missing_field_si08);
-  }
-
 }
 
 // destructor
@@ -130,6 +122,34 @@ Hsrl2Radx::~Hsrl2Radx()
 
 int Hsrl2Radx::Run()
 {
+  // reading in calibration files here ----- 
+  bool debug = true;// use while developing to give specific output information relating to reading in cal files
+  bool doneDebug = false;// use while developing when done looking at debug info for a particular cal file
+  const char* baseline = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/baseline_correction_20150601T0000.blc";
+  const char* diffDefGeo = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/diff_default_geofile_20120201T0000.geo";
+  const char* geoDef = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/geofile_default_20150601T0000.geo";
+  const char* afterpulse = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/afterpulse_default_20061001T0000.ap";
+  const char* calvals = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/calvals_gvhsrl.txt";
+  const char* variable = "combined_hi_dead_time";//look for this calibration block
+  //const char* variable = "sounding_id";
+  //const char* variable = "non_filtered_energy_monitor";
+  //const char* variable = "baseline_adjust";
+  //const char* variable = "apd_pulse_timing";
+  //const char* variable = "quarter_wave_plate_rotation";
+  //const char* variable = "";
+  
+  CalReader cr;
+  cr=cr.readCalVals(calvals, variable, doneDebug);
+  vector< vector<double> > blCor;
+  blCor=cr.readBaselineCorrection(baseline, doneDebug);
+  vector< vector<double> > diffDGeoCor;  
+  diffDGeoCor=cr.readDiffDefaultGeo(diffDefGeo, doneDebug);
+  vector< vector<double> > geoDefCor;  
+  geoDefCor=cr.readGeofileDefault(geoDef, doneDebug);
+  vector< vector<double> > afPulCor;  
+  afPulCor=cr.readAfterPulse(afterpulse, doneDebug);
+
+  //done reading calibration files. 
 
   if (_params.mode == Params::ARCHIVE) {
     return _runArchive();
@@ -270,7 +290,7 @@ int Hsrl2Radx::_runRealtimeNoLdata()
 
   int iret = 0;
 
-  while(true) {
+  while(true) { // how does this loop end? --Brad
 
     // check for new data
     
@@ -306,11 +326,37 @@ int Hsrl2Radx::_runRealtimeNoLdata()
 int Hsrl2Radx::_processFile(const string &readPath)
 {
 
+
   PMU_auto_register("Processing file");
+  
+  if (_params.debug) {
+    cerr << "INFO - Hsrl2Radx::_processFile" << endl;
+    cerr << "  Input path: " << readPath << endl;
+  }
+
+  // check if this is a CfRadial file
+
+  NcfRadxFile file;
+  if (file.isCfRadial(readPath)) {
+    return _processUwCfRadialFile(readPath);
+  } else {
+    return _processUwRawFile(readPath);
+  }
+
+}
+
+//////////////////////////////////////////////////
+// Process a UofWisc pseudo CfRadial file
+// Returns 0 on success, -1 on failure
+
+int Hsrl2Radx::_processUwCfRadialFile(const string &readPath)
+{
+
+  PMU_auto_register("Processing UW CfRadial file");
 
   if (_params.debug) {
-    cerr << "INFO - Hsrl2Radx::Run" << endl;
-    cerr << "  Input path: " << readPath << endl;
+    cerr << "INFO - Hsrl2Radx::_processUwCfRadialFile" << endl;
+    cerr << "  UW CfRadial file: " << readPath << endl;
   }
 
   MslFile inFile(_params);
@@ -392,12 +438,6 @@ int Hsrl2Radx::_processFile(const string &readPath)
     _setRangeRelToInstrument(inFile, vol);
   }
   
-  // set number of gates constant if requested
-  
-  if (_params.set_ngates_constant) {
-    // vol.setNGatesConstant();
-  }
-
   // set vol values
 
   vol.loadSweepInfoFromRays();
@@ -409,7 +449,7 @@ int Hsrl2Radx::_processFile(const string &readPath)
   
   _convertFields(vol);
 
-  // set global attributes
+  // set global attributes as needed
 
   _setGlobalAttr(vol);
 
@@ -446,18 +486,6 @@ void Hsrl2Radx::_setupRead(MslFile &file)
       }
     }
 
-  }
-
-  if (_params.set_max_range) {
-    file.setReadMaxRangeKm(_params.max_range_km);
-  }
-
-  if (_params.change_instrument_latitude_sign) {
-    file.setChangeLatitudeSignOnRead(true);
-  }
-
-  if (_params.apply_georeference_corrections) {
-    file.setApplyGeorefsOnRead(true);
   }
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
@@ -632,14 +660,6 @@ void Hsrl2Radx::_setupWrite(RadxFile &file)
       file.setNcFormat(RadxFile::NETCDF_CLASSIC);
   }
 
-  if (_params.write_individual_sweeps) {
-    file.setWriteIndividualSweeps(true);
-  }
-
-  if (_params.output_force_ngates_vary) {
-    file.setWriteForceNgatesVary(true);
-  }
-
   if (strlen(_params.output_filename_prefix) > 0) {
     file.setWriteFileNamePrefix(_params.output_filename_prefix);
   }
@@ -757,6 +777,123 @@ int Hsrl2Radx::_writeVol(RadxVol &vol)
   }
 
   return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Process a UofWisc raw netcdf file
+// Returns 0 on success, -1 on failure
+
+int Hsrl2Radx::_processUwRawFile(const string &readPath)
+{
+
+  PMU_auto_register("Processing UW Raw file");
+  
+  if (_params.debug) {
+    cerr << "INFO - Hsrl2Radx::_processUwRawFile" << endl;
+    cerr << "  UW raw file: " << readPath << endl;
+  }
+
+  RawFile inFile(_params);
+  
+  // read in file
+  
+  RadxVol vol;
+  if (inFile.readFromPath(readPath, vol)) {
+    cerr << "ERROR - Hsrl2Radx::Run" << endl;
+    cerr << inFile.getErrStr() << endl;
+    return -1;
+  }
+  
+  // override radar name and site name if requested
+  
+  if (_params.override_instrument_name) {
+    vol.setInstrumentName(_params.instrument_name);
+  }
+  if (_params.override_site_name) {
+    vol.setSiteName(_params.site_name);
+  }
+    
+  // set global attributes as needed
+  
+  _setGlobalAttr(vol);
+
+  // add in height, temperature and pressure fields
+
+  _addEnvFields(vol);
+  
+  // write the file
+
+  if (_writeVol(vol)) {
+    cerr << "ERROR - Hsrl2Radx::_processFile" << endl;
+    cerr << "  Cannot write volume to file" << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+
+//////////////////////////////////////////////////
+// Add in the height, pressure and temperature
+// environmental fields
+
+void Hsrl2Radx::_addEnvFields(RadxVol &vol)
+{
+
+  IcaoStdAtmos stdAtmos;
+
+  // loop through the rays
+
+  vector<RadxRay *> rays = vol.getRays();
+  for(size_t iray = 0; iray < rays.size(); iray++) {
+
+    RadxRay *ray = rays[iray];
+    const RadxGeoref *geo = ray->getGeoreference();
+    if (!geo) {
+      continue;
+    }
+
+    double altitudeKm = geo->getAltitudeKmMsl();
+    double elevDeg = ray->getElevationDeg();
+
+    size_t nGates = ray->getNGates();
+
+    RadxArray<Radx::fl32> htKm_, tempK_, presHpa_;
+    Radx::fl32 *htKm = htKm_.alloc(nGates);
+    Radx::fl32 *tempK = tempK_.alloc(nGates);
+    Radx::fl32 *presHpa = presHpa_.alloc(nGates);
+
+    double sinEl = sin(elevDeg * Radx::DegToRad);
+    double startRangeKm = ray->getStartRangeKm();
+    double gateSpacingKm = ray->getGateSpacingKm();
+
+    double rangeKm = startRangeKm;
+    for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
+      htKm[igate] = altitudeKm + rangeKm * sinEl;
+      double htM = htKm[igate] * 1000.0;
+      tempK[igate] = stdAtmos.ht2temp(htM);
+      presHpa[igate] = stdAtmos.ht2pres(htM);
+    }
+
+    RadxField *htField =
+      ray->addField("height", "km", nGates, Radx::missingFl32, htKm, true);
+    htField->setLongName("height_MSL");
+    htField->setRangeGeom(startRangeKm, gateSpacingKm);
+
+    RadxField *tempField =
+      ray->addField("temperature", "K", nGates, Radx::missingFl32, tempK, true);
+    tempField->setLongName("temperaure_from_std_atmos");
+    tempField->setRangeGeom(startRangeKm, gateSpacingKm);
+
+    RadxField *presField =
+      ray->addField("pressure", "HPa", nGates, Radx::missingFl32, presHpa, true);
+    presField->setLongName("pressure_from_std_atmos");
+    presField->setRangeGeom(startRangeKm, gateSpacingKm);
+
+  } // iray
+  
 
 }
 

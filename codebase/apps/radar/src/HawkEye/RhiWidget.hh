@@ -25,6 +25,10 @@
 #define RhiWidget_HH
 
 #include "PolarWidget.hh"
+#include "RayLoc.hh"
+#include <radar/BeamHeight.hh>
+class PolarManager;
+class RhiWindow;
 
 // Widget representing an RHI scan.  Beams are added to the scan as they
 // are received.  The widget can be set up to display the RHI in a 90 degree
@@ -51,7 +55,9 @@ class DLL_EXPORT RhiWidget : public PolarWidget
 
   RhiWidget(QWidget* parent, 
             const PolarManager &manager,
+            const RhiWindow &rhiWindow,
             const Params &params,
+            const RadxPlatform &platform,
             size_t n_fields);
 
   /**
@@ -73,18 +79,37 @@ class DLL_EXPORT RhiWidget : public PolarWidget
    *        render the beam for each field in the appropriate pixamp. The
    *        existing wedge for this beam will be discarded.
    *
-   * @param[in] start_angle    The starting angle for the beam.
-   * @param[in] stop_angle     The ending angle for the beam.
    * @param[in] gates          The number of gates (must match beam_data vector
    *                             sizes).
    * @param[in] beam_data      Vectors of data, one for each field.
    * @param[in] maps           Colormaps, one for each field.
    */
 
-  virtual void addBeam(const RadxRay *ray,
-                       const float start_angle, const float stop_angle,
-		       const std::vector< std::vector< double > > &beam_data,
-		       const std::vector< DisplayField* > &fields);
+  void addBeam(const RadxRay *ray,
+               const std::vector< std::vector< double > > &beam_data,
+               const std::vector< DisplayField* > &fields);
+
+  // get ray locations in RHI
+
+  RayLoc *getRayLoc() { return _rayLoc; }
+  
+  // are we in archive mode? and if so are we at the start of a sweep?
+
+  void setArchiveMode(bool state) { _isArchiveMode = state; }
+  void setStartOfSweep(bool state) { _isStartOfSweep = state; }
+
+  /**
+   * @brief Select the field to display.
+   *
+   * @param[in] index   Index of the field to display, zero based.
+   */
+
+  void selectVar(const size_t index);
+
+  // get plot times
+
+  const RadxTime &getPlotStartTime() { return _plotStartTime; }
+  const RadxTime &getPlotEndTime() { return _plotEndTime; }
 
 signals:
 
@@ -100,11 +125,93 @@ signals:
 
   void severalBeamsProcessed();
   
+  //////////////
+  // Qt slots //
+  //////////////
+
+ public slots:
+
+  /**
+   * @brief Reset the view to unzoomed.
+   */
+
+  void unzoomView();
+
+  /**
+   * @brief Clear the data in the view.
+   */
+
+  void clear();
+
+  /*************************************************************************
+   * refresh()
+   */
+  
+  void refresh();
+
+  /**
+   * @brief Resize the window.
+   *
+   */
+
+  void resize(int width, int height);
+
+  // paint event
+
+  void paintEvent(QPaintEvent *event);
+
 protected:
 
   ///////////////////////
   // Protected members //
   ///////////////////////
+
+  const RhiWindow &_rhiWindow;
+
+  // are we in archive mode? and if so are we at the start of a sweep?
+
+  bool _isArchiveMode;
+  bool _isStartOfSweep;
+
+  // angles and times in archive mode
+
+  RadxTime _plotStartTime;
+  RadxTime _plotEndTime;
+  double _meanAz;
+  double _sumAz;
+  double _nRays;
+
+  /**
+   * @brief The maximum range of the beams, in km.  It affects the
+   *        labelling of the range rings
+   */
+
+  double _maxHeightKm;
+  double _xGridSpacing;
+  double _yGridSpacing;
+
+  /**
+   * @brief Pointers to all of the active beams are saved here.
+   */
+
+  std::vector<RhiBeam*> _rhiBeams;
+
+  // ray locations
+
+  RayLoc* _rayLoc;
+  RayLoc* _locArray; // for new and delete
+  BeamHeight _beamHt;
+
+  // computing angle limits of rays
+
+  double _prevAz;
+  double _prevElev;
+  double _startElev;
+  double _endElev;
+
+  // override mouse release event
+
+  virtual void mouseReleaseEvent(QMouseEvent* event);
 
   /**
    * @brief The number of RHI beams processed so far.  I have to keep track of
@@ -117,6 +224,42 @@ protected:
   // get ray closest to click point
 
   virtual const RadxRay *_getClosestRay(double x_km, double y_km);
+
+  /**
+   * @brief Render the rings and grid. The current value of _ringsGridColor
+   *        will be used for the color.
+   *
+   * @param[in] painter    Painter to use for rendering.
+   */
+
+  virtual void _drawOverlays(QPainter &painter);
+
+  /**
+   * @brief Determine a ring spacing which will give even distances, and
+   *        fit a reasonable number of rings in the display.
+   *
+   * @return Returns the ring spacing in kilometers.
+   */
+
+  virtual void _setGridSpacing();
+  double _getSpacing(double range);
+
+  // Compute the limits of the ray angles
+  
+  void _computeAngleLimits(const RadxRay *ray);
+  
+  // store ray location
+  
+  void _storeRayLoc(const RadxRay *ray);
+
+  // clear overlap with existing rays
+
+  void _clearRayOverlap(const int startIndex,
+                        const int endIndex);
+
+  // overide refresh images
+
+  virtual void _refreshImages();
 
 };
 

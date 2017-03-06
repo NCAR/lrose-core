@@ -889,10 +889,8 @@ void RadxRay::remapRangeGeom(double newStartRangeKm,
       _fields[ii]->remapRayGeom(remap, interp);
     }
 
-    _nGates = remap.getNGatesInterp();
-    _startRangeKm = newStartRangeKm;
-    _gateSpacingKm = newGateSpacingKm;
-    _rangeGeomSet = true;
+    setNGates(remap.getNGatesInterp());
+    RadxRangeGeom::setRangeGeom(newStartRangeKm, newGateSpacingKm);
     
   }
 
@@ -1441,8 +1439,8 @@ void RadxRay::printSummary(ostream &out) const
           "%s.%.3d %6.2f %6.2f %s %4d %4d %2d %5d %s",
           RadxTime::strm(_timeSecs).c_str(),
           (int) (_nanoSecs / 1000000),
-          _az,
           _elev,
+          _az,
           Radx::sweepModeToShortStr(_sweepMode).c_str(),
           (int) (1.0 / _prtSec + 0.5),
           (int) _nGates,

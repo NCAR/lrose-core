@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2016
+// ** Copyright UCAR (c) 1992 - 2017
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -716,21 +716,33 @@ using namespace std;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("archive_start_time");
     tt->descr = tdrpStrDup("Start time for archive mode.");
-    tt->help = tdrpStrDup("If this is set to 1 Jan 1970, the app will initialize at 'now'.");
+    tt->help = tdrpStrDup("In archive mode, data retrieval starts at this time.");
     tt->val_offset = (char *) &archive_start_time - &_start_;
     tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
     tt++;
     
-    // Parameter 'archive_end_time'
-    // ctype is 'char*'
+    // Parameter 'archive_scan_interval_secs'
+    // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("archive_end_time");
-    tt->descr = tdrpStrDup("End time for archive mode.");
-    tt->help = tdrpStrDup("Generally this is applicable for image generation.");
-    tt->val_offset = (char *) &archive_end_time - &_start_;
-    tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("archive_scan_interval_secs");
+    tt->descr = tdrpStrDup("Time between scans in archive mode (secs).");
+    tt->help = tdrpStrDup("Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.");
+    tt->val_offset = (char *) &archive_scan_interval_secs - &_start_;
+    tt->single_val.i = 300;
+    tt++;
+    
+    // Parameter 'archive_n_scans'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("archive_n_scans");
+    tt->descr = tdrpStrDup("Number of scans in archive mode.");
+    tt->help = tdrpStrDup("Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.");
+    tt->val_offset = (char *) &archive_n_scans - &_start_;
+    tt->single_val.i = 12;
     tt++;
     
     // Parameter 'archive_data_url'
@@ -743,6 +755,18 @@ using namespace std;
     tt->help = tdrpStrDup("This should point to a CfRadial moments data set.");
     tt->val_offset = (char *) &archive_data_url - &_start_;
     tt->single_val.s = tdrpStrDup("/scr/eldora1/hcr-test/cfradial/moments/wband");
+    tt++;
+    
+    // Parameter 'archive_search_margin_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("archive_search_margin_secs");
+    tt->descr = tdrpStrDup("Time margin for search in archive mode (secs).");
+    tt->help = tdrpStrDup("We search for data within this margin, on either side of the required time.");
+    tt->val_offset = (char *) &archive_search_margin_secs - &_start_;
+    tt->single_val.i = 600;
     tt++;
     
     // Parameter 'Comment 4'
@@ -1347,6 +1371,66 @@ using namespace std;
     tt->single_val.d = 1;
     tt++;
     
+    // Parameter 'ppi_grids_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ppi_grids_on_at_startup");
+    tt->descr = tdrpStrDup("Set PPI grids overlay on at startup.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ppi_grids_on_at_startup - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'ppi_range_rings_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ppi_range_rings_on_at_startup");
+    tt->descr = tdrpStrDup("Set PPI range rings overlay on at startup.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ppi_range_rings_on_at_startup - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'ppi_azimuth_lines_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ppi_azimuth_lines_on_at_startup");
+    tt->descr = tdrpStrDup("Set PPI azimuth lines overlay on at startup.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ppi_azimuth_lines_on_at_startup - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'ppi_main_legend_pos'
+    // ctype is '_legend_pos_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("ppi_main_legend_pos");
+    tt->descr = tdrpStrDup("Position of main legend in the PPI plot window");
+    tt->help = tdrpStrDup("This include time, field name and elevation angle.");
+    tt->val_offset = (char *) &ppi_main_legend_pos - &_start_;
+    tt->enum_def.name = tdrpStrDup("legend_pos_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("LEGEND_TOP_LEFT");
+      tt->enum_def.fields[0].val = LEGEND_TOP_LEFT;
+      tt->enum_def.fields[1].name = tdrpStrDup("LEGEND_TOP_RIGHT");
+      tt->enum_def.fields[1].val = LEGEND_TOP_RIGHT;
+      tt->enum_def.fields[2].name = tdrpStrDup("LEGEND_BOTTOM_LEFT");
+      tt->enum_def.fields[2].val = LEGEND_BOTTOM_LEFT;
+      tt->enum_def.fields[3].name = tdrpStrDup("LEGEND_BOTTOM_RIGHT");
+      tt->enum_def.fields[3].val = LEGEND_BOTTOM_RIGHT;
+    tt->single_val.e = LEGEND_TOP_LEFT;
+    tt++;
+    
     // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1404,6 +1488,102 @@ using namespace std;
     tt->single_val.i = 0;
     tt++;
     
+    // Parameter 'rhi_top_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_top_margin");
+    tt->descr = tdrpStrDup("Height of top margin in RHI mode (pixels).");
+    tt->help = tdrpStrDup("Titles go in the top margin.");
+    tt->val_offset = (char *) &rhi_top_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'rhi_bottom_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_bottom_margin");
+    tt->descr = tdrpStrDup("Height of bottom margin in RHI mode (pixels).");
+    tt->help = tdrpStrDup("Time scale goes in the bottom margin.");
+    tt->val_offset = (char *) &rhi_bottom_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'rhi_left_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_left_margin");
+    tt->descr = tdrpStrDup("Width of left margin in RHI mode (pixels).");
+    tt->help = tdrpStrDup("Height scale goes in the left margin.");
+    tt->val_offset = (char *) &rhi_left_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'rhi_right_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_right_margin");
+    tt->descr = tdrpStrDup("Width of right margin in RHI mode (pixels).");
+    tt->help = tdrpStrDup("Height scale goes in the right margin.");
+    tt->val_offset = (char *) &rhi_right_margin - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'rhi_label_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_label_font_size");
+    tt->descr = tdrpStrDup("Font size for labels on range rings (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_label_font_size - &_start_;
+    tt->single_val.i = 8;
+    tt++;
+    
+    // Parameter 'rhi_axis_tick_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_axis_tick_len");
+    tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_axis_tick_len - &_start_;
+    tt->single_val.i = 7;
+    tt++;
+    
+    // Parameter 'rhi_n_ticks_ideal'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_n_ticks_ideal");
+    tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_n_ticks_ideal - &_start_;
+    tt->single_val.i = 7;
+    tt++;
+    
+    // Parameter 'rhi_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_text_margin");
+    tt->descr = tdrpStrDup("Margin around some text (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_text_margin - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
     // Parameter 'rhi_display_180_degrees'
     // ctype is 'tdrp_bool_t'
     
@@ -1422,10 +1602,94 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("rhi_aspect_ratio");
-    tt->descr = tdrpStrDup("Aspect ratio (width/height) of PPI window.");
+    tt->descr = tdrpStrDup("Aspect ratio (width/height) of RHI window.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &rhi_aspect_ratio - &_start_;
     tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'rhi_max_height_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("rhi_max_height_km");
+    tt->descr = tdrpStrDup("Max height of data in RHI window (km).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_max_height_km - &_start_;
+    tt->single_val.d = 25;
+    tt++;
+    
+    // Parameter 'rhi_color_scale_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_color_scale_width");
+    tt->descr = tdrpStrDup("Width of color scale for RHI window (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_color_scale_width - &_start_;
+    tt->single_val.i = 40;
+    tt++;
+    
+    // Parameter 'rhi_grids_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("rhi_grids_on_at_startup");
+    tt->descr = tdrpStrDup("Set RHI grids overlay on at startup.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_grids_on_at_startup - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'rhi_range_rings_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("rhi_range_rings_on_at_startup");
+    tt->descr = tdrpStrDup("Set RHI range rings overlay on at startup.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_range_rings_on_at_startup - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'rhi_elevation_lines_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("rhi_elevation_lines_on_at_startup");
+    tt->descr = tdrpStrDup("Set RHI elevation lines overlay on at startup.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rhi_elevation_lines_on_at_startup - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'rhi_main_legend_pos'
+    // ctype is '_legend_pos_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("rhi_main_legend_pos");
+    tt->descr = tdrpStrDup("Position of main legend in the RHI plot window");
+    tt->help = tdrpStrDup("This include time, field name and elevation angle.");
+    tt->val_offset = (char *) &rhi_main_legend_pos - &_start_;
+    tt->enum_def.name = tdrpStrDup("legend_pos_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("LEGEND_TOP_LEFT");
+      tt->enum_def.fields[0].val = LEGEND_TOP_LEFT;
+      tt->enum_def.fields[1].name = tdrpStrDup("LEGEND_TOP_RIGHT");
+      tt->enum_def.fields[1].val = LEGEND_TOP_RIGHT;
+      tt->enum_def.fields[2].name = tdrpStrDup("LEGEND_BOTTOM_LEFT");
+      tt->enum_def.fields[2].val = LEGEND_BOTTOM_LEFT;
+      tt->enum_def.fields[3].name = tdrpStrDup("LEGEND_BOTTOM_RIGHT");
+      tt->enum_def.fields[3].val = LEGEND_BOTTOM_RIGHT;
+    tt->single_val.e = LEGEND_TOP_LEFT;
     tt++;
     
     // Parameter 'Comment 12'
@@ -2295,6 +2559,63 @@ using namespace std;
     tt->help = tdrpStrDup("In order to ensure that the data has been written, a delay may be provided. This allows for the writing application to complete writing the data before this application tries to access it.");
     tt->val_offset = (char *) &images_schedule_delay_secs - &_start_;
     tt->single_val.i = 60;
+    tt++;
+    
+    // Parameter 'images_archive_start_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("images_archive_start_time");
+    tt->descr = tdrpStrDup("Start time for image generation in archive mode.");
+    tt->help = tdrpStrDup("Image generation starts with a seach at this time, and the proceeds at increments of images_schedule_interval_secs.");
+    tt->val_offset = (char *) &images_archive_start_time - &_start_;
+    tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
+    tt++;
+    
+    // Parameter 'images_archive_end_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("images_archive_end_time");
+    tt->descr = tdrpStrDup("End time for image generation in archive mode.");
+    tt->help = tdrpStrDup("Image generation is terminated when the search time exceeds this end time.");
+    tt->val_offset = (char *) &images_archive_end_time - &_start_;
+    tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
+    tt++;
+    
+    // Parameter 'images_set_sweep_index_list'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("images_set_sweep_index_list");
+    tt->descr = tdrpStrDup("Option to specify the sweep indexes for the image generation.");
+    tt->help = tdrpStrDup("If TRUE, only the specified sweeps will be processed.");
+    tt->val_offset = (char *) &images_set_sweep_index_list - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'images_sweep_index_list'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("images_sweep_index_list");
+    tt->descr = tdrpStrDup("List of valid sweep indexes for image generation.");
+    tt->help = tdrpStrDup("See 'images_set_sweep_index_list'. Images will only be generated for the specified sweep indexes.");
+    tt->array_offset = (char *) &_images_sweep_index_list - &_start_;
+    tt->array_n_offset = (char *) &images_sweep_index_list_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(int);
+    tt->array_n = 3;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].i = 0;
+      tt->array_vals[1].i = 1;
+      tt->array_vals[2].i = 2;
     tt++;
     
     // Parameter 'Comment 23'

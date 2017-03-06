@@ -84,3 +84,4 @@ ScaledLabel::scale(double value) {
     return m_stringStr.str();
     
 }
+

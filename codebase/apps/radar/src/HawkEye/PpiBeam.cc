@@ -34,18 +34,18 @@
 #include <QResizeEvent>
 #include <QStylePainter>
 
-#include "PolarBeam.hh"
+#include "PpiBeam.hh"
 
 using namespace std;
 
 /////////////////////
 // polar constructor
 
-PolarBeam::PolarBeam(const Params &params,
-                     const RadxRay *ray,
-                     int n_fields,
-                     double start_angle,
-                     double stop_angle) :
+PpiBeam::PpiBeam(const Params &params,
+                 const RadxRay *ray,
+                 int n_fields,
+                 double start_angle,
+                 double stop_angle) :
         Beam(params, ray, n_fields),
         startAngle(start_angle),
         stopAngle(stop_angle),
@@ -98,17 +98,17 @@ PolarBeam::PolarBeam(const Params &params,
 
 ////////////////////////////////////////////////////////////////
 
-PolarBeam::~PolarBeam()
+PpiBeam::~PpiBeam()
 {
   _polygons.clear();
 }
 
 ////////////////////////////////////////////////////////////////
-void PolarBeam::paint(QImage *image,
-                      const QTransform &transform,
-                      size_t field,
-                      bool useHeight,
-                      bool drawInstHt)
+void PpiBeam::paint(QImage *image,
+                    const QTransform &transform,
+                    size_t field,
+                    bool useHeight,
+                    bool drawInstHt)
 {
 
   QPainter painter(image);
@@ -165,10 +165,10 @@ void PolarBeam::paint(QImage *image,
 }
 
 ////////////////////////////////////////////////////////////////
-void PolarBeam::print(ostream &out)
+void PpiBeam::print(ostream &out)
 
 {
-  out << "================= PolarBeam =================" << endl;
+  out << "================= PpiBeam =================" << endl;
   RadxTime btime(_ray->getTimeSecs());
   out << "  time: " << btime.asString() << endl;
   out << "  elevation: " << _ray->getElevationDeg() << endl;

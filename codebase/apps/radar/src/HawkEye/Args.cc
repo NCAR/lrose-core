@@ -228,6 +228,29 @@ int Args::parse (const int argc, const char **argv)
 	iret = -1;
       }
       
+    } else if (!strcmp(argv[i], "-f")) {
+      
+      if (i < argc - 1) {
+	// load up file list vector. Break at next arg which
+	// start with -
+	for (int j = i + 1; j < argc; j++) {
+	  if (argv[j][0] == '-') {
+	    break;
+	  } else {
+	    inputFileList.push_back(argv[j]);
+	  }
+	}
+        sprintf(tmp_str, "begin_in_archive_mode = TRUE;");
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+
+      if (inputFileList.size() < 1) {
+        cerr << "ERROR - with -f you must specify files to be read" << endl;
+        iret = -1;
+      }
+
     } // if
     
   } // i
@@ -252,6 +275,7 @@ void Args::_usage(ostream &out)
       << "       [ -debug, -d ] print debug messages\n"
       << "       [ -end_time \"yyyy mm dd hh mm ss\"]\n"
       << "            set end time for archive image-generation mode\n"
+      << "       [ -f ? ?] list of files to process in archive mode\n"
       << "       [ -fmq_mode] set forces DSR_FMQ_INPUT mode\n"
       << "       [ -fmq_url ?] set input fmq URL\n"
       << "       [ -image_interval ?]\n"

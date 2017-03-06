@@ -58,10 +58,9 @@
 #include <Radx/RadxTime.hh>
 #include <rapformats/ac_georef.hh>
 #include <Spdb/DsSpdb.hh>
-#include <NcUtils/Ncxx.hh>
+#include <NcxxUtils/Ncxx.hh>
 
 using namespace std;
-using namespace netCDF;
 
 ////////////////////////
 // This class

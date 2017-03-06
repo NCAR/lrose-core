@@ -90,6 +90,17 @@ int Args::parse (const int argc, const char **argv)
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-f")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "path = \"%s\";", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+	sprintf(tmp_str, "mode = FILELIST;");
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
     } // if
     
   } // i
@@ -110,12 +121,8 @@ void Args::_usage(ostream &out)
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
       << "       [ -debug ] print debug messages\n"
-      << "       [ -path ?] path to test\n"
+      << "       [ -f ?] path to test\n"
       << "       [ -verbose ] print verbose debug messages\n"
-      << endl;
-
-  out << "NOTE: for ARCHIVE mode and retracking, you must specify the \n"
-      << "analysis times using -start and -end.\n"
       << endl;
 
   Params::usage(out);

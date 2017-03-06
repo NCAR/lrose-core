@@ -1,26 +1,9 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-// ** Copyright UCAR (c) 1990 - 2016                                         
-// ** University Corporation for Atmospheric Research (UCAR)                 
-// ** National Center for Atmospheric Research (NCAR)                        
-// ** Boulder, Colorado, USA                                                 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from UCAR.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of UCAR nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+// ** Copyright UCAR (c) 1992 - 2017
+// ** University Corporation for Atmospheric Research(UCAR)
+// ** National Center for Atmospheric Research(NCAR)
+// ** Boulder, Colorado, USA
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 ////////////////////////////////////////////
 // Params.hh
 //
@@ -411,20 +394,6 @@ public:
 
   char* search_ext;
 
-  tdrp_bool_t set_max_range;
-
-  double max_range_km;
-
-  tdrp_bool_t set_ngates_constant;
-
-  tdrp_bool_t override_instrument_name;
-
-  char* instrument_name;
-
-  tdrp_bool_t override_site_name;
-
-  char* site_name;
-
   tdrp_bool_t override_start_range;
 
   double start_range_km;
@@ -441,13 +410,37 @@ public:
 
   double instrument_altitude_meters;
 
-  tdrp_bool_t change_instrument_latitude_sign;
-
-  tdrp_bool_t apply_georeference_corrections;
-
   tdrp_bool_t set_range_relative_to_instrument;
 
   int telescope_direction_is_up;
+
+  tdrp_bool_t apply_azimuth_offset;
+
+  double azimuth_offset;
+
+  tdrp_bool_t apply_elevation_offset;
+
+  double elevation_offset;
+
+  tdrp_bool_t combine_bins_on_read;
+
+  int n_bins_per_gate;
+
+  double raw_bin_start_range_km;
+
+  double raw_bin_spacing_km;
+
+  tdrp_bool_t set_output_fields;
+
+  output_field_t *_output_fields;
+  int output_fields_n;
+
+  tdrp_bool_t write_other_fields_unchanged;
+
+  tdrp_bool_t exclude_specified_fields;
+
+  char* *_excluded_fields;
+  int excluded_fields_n;
 
   char* version_override;
 
@@ -465,31 +458,17 @@ public:
 
   char* author_override;
 
-  tdrp_bool_t apply_azimuth_offset;
-
-  double azimuth_offset;
-
-  tdrp_bool_t apply_elevation_offset;
-
-  double elevation_offset;
-
-  tdrp_bool_t set_output_fields;
-
-  output_field_t *_output_fields;
-  int output_fields_n;
-
-  tdrp_bool_t write_other_fields_unchanged;
-
-  tdrp_bool_t exclude_specified_fields;
-
-  char* *_excluded_fields;
-  int excluded_fields_n;
-
   netcdf_style_t netcdf_style;
 
-  tdrp_bool_t output_force_ngates_vary;
-
   int compression_level;
+
+  tdrp_bool_t override_instrument_name;
+
+  char* instrument_name;
+
+  tdrp_bool_t override_site_name;
+
+  char* site_name;
 
   char* output_dir;
 
@@ -509,31 +488,7 @@ public:
 
   tdrp_bool_t append_year_dir_to_output_dir;
 
-  tdrp_bool_t write_individual_sweeps;
-
   tdrp_bool_t write_latest_data_info;
-
-  tdrp_bool_t override_missing_metadata_values;
-
-  double missing_metadata_double;
-
-  float missing_metadata_float;
-
-  int missing_metadata_int;
-
-  int missing_metadata_char;
-
-  tdrp_bool_t override_missing_field_values;
-
-  double missing_field_fl64;
-
-  double missing_field_fl32;
-
-  int missing_field_si32;
-
-  int missing_field_si16;
-
-  int missing_field_si08;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -542,7 +497,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[88];
+  mutable TDRPtable _table[73];
 
   const char *_className;
 

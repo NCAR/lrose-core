@@ -51,8 +51,6 @@
 #include <dirent.h>
 #include <algorithm>
 using namespace std;
-using namespace netCDF;
-using namespace netCDF::exceptions;
 
 ////////////////////////////////////////////////////////////
 // Read in data from specified path, load up volume object.
@@ -918,7 +916,7 @@ int NcxxRadxFile::_readTimes(int pathNum)
   RadxArray<double> dtimes_;
   double *dtimes = dtimes_.alloc(_nTimesInFile);
   try {
-    _timeVar.getVar(dtimes);
+    _timeVar.getVal(dtimes);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_readTimes");
     _addErrStr("  Cannot read times variable");
@@ -981,7 +979,7 @@ int NcxxRadxFile::_readRangeVariable()
 
     double *rangeMeters = new double[_nRangeInFile];
     try {
-      _rangeVar.getVar(rangeMeters);
+      _rangeVar.getVal(rangeMeters);
       double *rr = rangeMeters;
       for (size_t ii = 0; ii < _nRangeInFile; ii++, rr++) {
         _rangeKm.push_back(*rr / 1000.0);
@@ -1011,7 +1009,7 @@ int NcxxRadxFile::_readRangeVariable()
     dimSizes.push_back(_nRangeInFile);
     double *rangeMeters = new double[_nTimesInFile * _nRangeInFile];
     try {
-      _rangeVar.getVar(dimSizes, rangeMeters);
+      _rangeVar.getVal(dimSizes, rangeMeters);
       double *rr = rangeMeters;
       for (size_t ii = 0; ii < _nRangeInFile; ii++, rr++) {
         _rangeKm.push_back(*rr / 1000.0);
@@ -1052,7 +1050,7 @@ int NcxxRadxFile::_readRangeVariable()
     }
 
     if (att.getName().find(METERS_TO_CENTER_OF_FIRST_GATE) != string::npos) {
-      if (att.getType() == ncFloat || att.getType() == ncDouble) {
+      if (att.getType() == ncxxFloat || att.getType() == ncxxDouble) {
         vector<double> vals;
         if (att.getValues(vals) == 0) {
           startRangeKm = vals[0] / 1000.0;
@@ -1061,7 +1059,7 @@ int NcxxRadxFile::_readRangeVariable()
     }
 
     if (att.getName().find(METERS_BETWEEN_GATES) != string::npos) {
-      if (att.getType() == ncFloat || att.getType() == ncDouble) {
+      if (att.getType() == ncxxFloat || att.getType() == ncxxDouble) {
         vector<double> vals;
         if (att.getValues(vals) == 0) {
           gateSpacingKm = vals[0] / 1000.0;
@@ -1263,10 +1261,10 @@ int NcxxRadxFile::_readPositionVariables()
       _addErrStr(_file.getErrStr());
       return -1;
     }
-    if (_georefTimeVar.getType() != ncDouble) {
+    if (_georefTimeVar.getType() != ncxxDouble) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  georef time is incorrect type: ", 
-                 Ncxx::ncTypeToStr(_georefTimeVar.getType()));
+                 Ncxx::ncxxTypeToStr(_georefTimeVar.getType()));
       _addErrStr("  expecting type: double");
       return -1;
     }
@@ -1275,17 +1273,17 @@ int NcxxRadxFile::_readPositionVariables()
   // find latitude, longitude, altitude
 
   _latitudeVar = _file.getVar(LATITUDE);
-  if (_latitudeVar != NULL) {
+  if (!_latitudeVar.isNull()) {
     if (_latitudeVar.numVals() < 1) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  Cannot read latitude");
       _addErrStr(_file.getErrStr());
       return -1;
     }
-    if (_latitudeVar.getType() != ncDouble) {
+    if (_latitudeVar.getType() != ncxxDouble) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  latitude is incorrect type: ", 
-                 NetcdfCxxUtils::ncTypeToStr(_latitudeVar.getType()));
+                 Ncxx::ncTypeToStr(_latitudeVar.getType().getId()));
       _addErrStr("  expecting type: double");
       return -1;
     }
@@ -1296,17 +1294,17 @@ int NcxxRadxFile::_readPositionVariables()
   }
 
   _longitudeVar = _file.getVar(LONGITUDE);
-  if (_longitudeVar != NULL) {
+  if (!_longitudeVar.isNull()) {
     if (_longitudeVar.numVals() < 1) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  Cannot read longitude");
       _addErrStr(_file.getErrStr());
       return -1;
     }
-    if (_longitudeVar.getType() != ncDouble) {
+    if (_longitudeVar.getType() != ncxxDouble) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  longitude is incorrect type: ",
-                 NetcdfCxxUtils::ncTypeToStr(_longitudeVar.getType()));
+                 Ncxx::ncTypeToStr(_longitudeVar.getType().getId()));
       _addErrStr("  expecting type: double");
       return -1;
     }
@@ -1317,17 +1315,17 @@ int NcxxRadxFile::_readPositionVariables()
   }
 
   _altitudeVar = _file.getVar(ALTITUDE);
-  if (_altitudeVar != NULL) {
+  if (!_altitudeVar.isNull()) {
     if (_altitudeVar.numVals() < 1) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  Cannot read altitude");
       _addErrStr(_file.getErrStr());
       return -1;
     }
-    if (_altitudeVar.getType() != ncDouble) {
+    if (_altitudeVar.getType() != ncxxDouble) {
       _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  altitude is incorrect type: ",
-                 NetcdfCxxUtils::ncTypeToStr(_altitudeVar.getType()));
+                 Ncxx::ncTypeToStr(_altitudeVar.getType().getId()));
       _addErrStr("  expecting type: double");
       return -1;
     }
@@ -1338,25 +1336,25 @@ int NcxxRadxFile::_readPositionVariables()
   }
 
   _altitudeAglVar = _file.getVar(ALTITUDE_AGL);
-  if (_altitudeAglVar != NULL) {
+  if (!_altitudeAglVar.isNull()) {
     if (_altitudeAglVar.numVals() < 1) {
       _addErrStr("WARNING - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  Bad variable - altitudeAgl");
       _addErrStr(_file.getErrStr());
     }
-    if (_altitudeAglVar.getType() != ncDouble) {
+    if (_altitudeAglVar.getType() != ncxxDouble) {
       _addErrStr("WARNING - NcxxRadxFile::_readPositionVariables");
       _addErrStr("  altitudeAgl is incorrect type: ",
-                 NetcdfCxxUtils::ncTypeToStr(_altitudeAglVar.getType()));
+                 Ncxx::ncTypeToStr(_altitudeAglVar.getType().getId()));
       _addErrStr("  expecting type: double");
     }
   }
 
   // set variables
 
-  if (_latitudeVar != NULL) {
+  if (!_latitudeVar.isNull()) {
     double *data = new double[_latitudeVar.numVals()];
-    if (_latitudeVar.get(data, _latitudeVar.numVals())) {
+    if (_latitudeVar.getVal(data, _latitudeVar.numVals())) {
       double *dd = data;
       for (int ii = 0; ii < _latitudeVar.numVals(); ii++, dd++) {
         _latitude.push_back(*dd);
@@ -2351,7 +2349,7 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     
     // check the type
     NcType ftype = var->type();
-    if (ftype != ncDouble && ftype != ncFloat && ftype != ncInt &&
+    if (ftype != ncxxDouble && ftype != ncFloat && ftype != ncInt &&
         ftype != ncShort && ftype != ncByte) {
       // not a valid type
       continue;
@@ -2387,35 +2385,35 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     string standardName;
     NcGroupAtt *standardNameAtt = var->getAtt(STANDARD_NAME);
     if (standardNameAtt != NULL) {
-      standardName = NetcdfCxxUtils::asString(standardNameAtt);
+      standardName = Ncxx::asString(standardNameAtt);
       delete standardNameAtt;
     }
     
     string longName;
     NcGroupAtt *longNameAtt = var->getAtt(LONG_NAME);
     if (longNameAtt != NULL) {
-      longName = NetcdfCxxUtils::asString(longNameAtt);
+      longName = Ncxx::asString(longNameAtt);
       delete longNameAtt;
     }
 
     string units;
     NcGroupAtt *unitsAtt = var->getAtt(UNITS);
     if (unitsAtt != NULL) {
-      units = NetcdfCxxUtils::asString(unitsAtt);
+      units = Ncxx::asString(unitsAtt);
       delete unitsAtt;
     }
 
     string legendXml;
     NcGroupAtt *legendXmlAtt = var->getAtt(LEGEND_XML);
     if (legendXmlAtt != NULL) {
-      legendXml = NetcdfCxxUtils::asString(legendXmlAtt);
+      legendXml = Ncxx::asString(legendXmlAtt);
       delete legendXmlAtt;
     }
 
     string thresholdingXml;
     NcGroupAtt *thresholdingXmlAtt = var->getAtt(THRESHOLDING_XML);
     if (thresholdingXmlAtt != NULL) {
-      thresholdingXml = NetcdfCxxUtils::asString(thresholdingXmlAtt);
+      thresholdingXml = Ncxx::asString(thresholdingXmlAtt);
       delete thresholdingXmlAtt;
     }
 
@@ -2433,7 +2431,7 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     float foldLimitUpper = Radx::missingMetaFloat;
     NcGroupAtt *fieldFoldsAtt = var->getAtt(FIELD_FOLDS);
     if (fieldFoldsAtt != NULL) {
-      string fieldFoldsStr = NetcdfCxxUtils::asString(fieldFoldsAtt);
+      string fieldFoldsStr = Ncxx::asString(fieldFoldsAtt);
       if (fieldFoldsStr == "true"
           || fieldFoldsStr == "TRUE"
           || fieldFoldsStr == "True") {
@@ -2457,7 +2455,7 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     bool isDiscrete = false;
     NcGroupAtt *isDiscreteAtt = var->getAtt(IS_DISCRETE);
     if (isDiscreteAtt != NULL) {
-      string isDiscreteStr = NetcdfCxxUtils::asString(isDiscreteAtt);
+      string isDiscreteStr = Ncxx::asString(isDiscreteAtt);
       if (isDiscreteStr == "true"
           || isDiscreteStr == "TRUE"
           || isDiscreteStr == "True") {
@@ -2519,7 +2517,7 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     int iret = 0;
     
     switch (var->type()) {
-      case ncDouble: {
+      case ncxxDouble: {
         if (_addFl64FieldToRays(var, name, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
@@ -2986,7 +2984,7 @@ int NcxxRadxFile::_readSweepVar(NcVar* &var, const string &name,
     _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
     _addErrStr("  Incorrect variable type");
     _addErrStr("  Expecting char");
-    _addErrStr("  Found: ", NetcdfCxxUtils::ncTypeToStr(ntype));
+    _addErrStr("  Found: ", Ncxx::ncTypeToStr(ntype));
     return -1;
   }
 
@@ -3115,7 +3113,7 @@ int NcxxRadxFile::_readCalTime(const string &name, NcVar* &var,
     _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
     _addErrStr("  Incorrect variable type");
     _addErrStr("  Expecting char");
-    _addErrStr("  Found: ", NetcdfCxxUtils::ncTypeToStr(ntype));
+    _addErrStr("  Found: ", Ncxx::ncTypeToStr(ntype));
     return -1;
   }
 

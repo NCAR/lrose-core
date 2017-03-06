@@ -46,6 +46,7 @@
 #include <radar/PidImapManager.hh>
 #include <radar/PhidpProc.hh>
 #include <radar/TempProfile.hh>
+#include <radar/InterestMap.hh>
 using namespace std;
 
 ////////////////////////
@@ -372,6 +373,13 @@ public:
    * @param
    */
   void setTempProfile(const vector<TempProfile::PointVal> &profile);
+
+  // set flag to compute the melting layer
+  // Follows Giangrande et al. - Automatic Designation of the
+  // Melting Layer with Polarimitric Prototype of WSR-88D Radar.
+  // AMS JAMC, Vol47, 2008.
+
+  void setComputeMeltingLayer(bool val) { _computeMl = val; }
  
   /** 
    * Get temperature at a given height
@@ -554,6 +562,12 @@ public:
   const bool *getCensorFlags() const { return _cflags; }
   
   /**
+   * Get melting layer fields
+   */
+
+  const double *getMlInterest() const { return _mlInterest; }
+  
+  /**
    * Get list of possible particle types used by the algorithm, along
    * with interest functions.
    * @return A vector of pointers to Particle objects, one for each possible particle type
@@ -561,7 +575,7 @@ public:
   const vector<Particle*> getParticleList() const { return _particleList; }
 
   /**
-   * Get indicidual particle arrays
+   * Get individual particle arrays
    * @return pointers to Particle objects, one for each possible particle type
    */
 
@@ -624,6 +638,7 @@ private:
   double _wavelengthCm;     /**< The wavelength (cm) of the radar beam */
 
   // range geometry
+  int _nGates;
   double _startRangeKm;
   double _gateSpacingKm;
 
@@ -767,6 +782,18 @@ private:
 
   PhidpProc _phidpProc;
 
+  // melting layer
+
+  bool _computeMl;
+
+  TaArray<double> _mlInterest_;  /**< Combined interest value for melting layer */
+  double *_mlInterest;
+
+  InterestMap *_mlDbzInterest;
+  InterestMap *_mlZdrInterest;
+  InterestMap *_mlRhohvInterest;
+  InterestMap *_mlTempInterest;
+  
   // allocate the required arrays
 
   void _allocArrays(int nGates);
@@ -815,6 +842,11 @@ private:
    */
   int _setInterestMaps(Particle *part, const char *line);
 
+  // compute melting layer
+  
+  void _mlInit();
+  void _mlCompute();
+  
 };
 
 #endif

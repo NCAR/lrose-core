@@ -308,6 +308,7 @@ private:
   int _scanId;
   int _scanType;
   int _sweepNumber;
+  static int _prevSweepNumber;
   double _refTimeSecsFile;
   
   string _title;
@@ -323,16 +324,28 @@ private:
   // int _scanId;
   string _instrumentName;
   
-  int _volumeNumber;
+  static int _volumeNumber;
   Radx::InstrumentType_t _instrumentType;
   Radx::PlatformType_t _platformType;
   Radx::PrimaryAxis_t _primaryAxis;
 
   // rays to be added to volume
 
-  vector<RadxRay *> _rays;
+  vector<RadxRay *> _raysVol;
+
+  // rays in file
+
+  vector<RadxRay *> _raysFile;
+
+  int _readAggregatePaths(const string &path);
+  int _readFile(const string &path);
+  void _getVolumePaths(const string &path, vector<string> &paths);
+  void _addToPathList(const string &dir,
+		      const RadxTime &refTime,
+		      vector<string> &paths);
 
   int _readDimensions();
+  int _readSweepNumber(const string &path);
   int _readGlobalAttributes();
   int _readTimes();
   int _readRangeVariables();

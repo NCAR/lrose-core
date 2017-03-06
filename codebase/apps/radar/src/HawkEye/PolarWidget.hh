@@ -48,8 +48,11 @@
 #include <QPoint>
 #include <QTransform>
 
+#include <Radx/RadxPlatform.hh>
+
 #include "Params.hh"
-#include "PolarBeam.hh"
+#include "PpiBeam.hh"
+#include "RhiBeam.hh"
 #include "FieldRenderer.hh"
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
@@ -79,8 +82,6 @@ class PolarManager;
 /// and the distance span of each beam. The latter is used to 
 /// to create range rings in real world units.
 ///
-/// Internally, we use a coordinate system which places the display in
-/// the region x,y between -Beam::RENDER_PIXELS and Beam::RENDER_PIXELS.
 /// The radar is located at 0, 0.
 ///
 /// Zooming is accomplished by changing the limits of the Qt window.
@@ -107,6 +108,7 @@ class DLL_EXPORT PolarWidget : public QWidget
   PolarWidget(QWidget* parent, 
               const PolarManager &manager,
               const Params &params,
+              const RadxPlatform &platform,
               size_t n_fields);
 
   /**
@@ -121,23 +123,17 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   virtual void configureRange(double max_range) = 0;
 
-  /**
-   * @brief Select the field to display.
-   *
-   * @param[in] index   Index of the field to display, zero based.
+  /**********************************************
+   * turn on archive-style rendering - all fields
    */
 
-  void selectVar(const size_t index);
+  void activateArchiveRendering();
 
-  /**
-   * @brief Clear the specified field.
-   *
-   * @param[in] index    Index of the field to be cleared, zero based.
-   *
-   * @notes This method is not currently called anywhere.
+  /**********************************************************************
+   * turn on reatlime-style rendering - non-selected fields in background
    */
 
-  void clearVar(const size_t index);
+  void activateRealtimeRendering();
 
   /**
    * @brief Add a new beam to the display. Data for all fields and all
@@ -153,10 +149,10 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @param[in] beam_data      Vectors of data, one for each field.
    */
 
-  virtual void addBeam(const RadxRay *ray,
-                       const float start_angle, const float stop_angle,
-		       const std::vector< std::vector< double > > &beam_data,
-		       const std::vector< DisplayField* > &fields);
+  // virtual void addBeam(const RadxRay *ray,
+  //                      const float start_angle, const float stop_angle,
+  //       	       const std::vector< std::vector< double > > &beam_data,
+  //       	       const std::vector< DisplayField* > &fields) = 0;
 
   /**
    * @brief Specify the background color.
@@ -177,17 +173,6 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   void gridRingsColor(const QColor &color);
-
-  /**
-   * @brief Get the current number of beams. This is interesting to monitor
-   *        when PolarWidget is operating in the dynamically allocated beam mode.
-   *
-   * @return Returns the current number of beams.
-   *
-   * @notes This method is not currently called anywhere.
-   */
-
-  int numBeams() const;
 
   /**
    * @brief Capture an image of the display.
@@ -246,16 +231,16 @@ class DLL_EXPORT PolarWidget : public QWidget
   void displayImage(const size_t field_num);
 
   /**
+   * set archive mode
+   */
+  
+  void setArchiveMode(bool archive_mode);
+
+  /**
    * @brief Unzoom the view.
    */
 
   void unzoomView();
-
-  /**
-   * @brief Clear the data in the view.
-   */
-
-  void clear();
 
   /**
    * @brief Resize the window.
@@ -286,7 +271,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @param[in] enabled    True to show them, false otherwise.
    */
 
-  void setAzLines(const bool enabled);
+  void setAngleLines(const bool enabled);
 
 
  protected:
@@ -334,6 +319,10 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   const Params &_params;
 
+  // instrument platform details 
+
+  const RadxPlatform &_platform;
+  
   /**
    * @brief The number of fields we are representing. A QImage will be
    *        created for each field.
@@ -342,17 +331,15 @@ class DLL_EXPORT PolarWidget : public QWidget
   size_t _nFields;
 
   /**
-   * @brief Pointers to all of the active beams are saved here.
-   */
-
-  std::vector<PolarBeam*> _beams;
-
-  /**
    * @brief The renderer for each field.
    */
 
   vector<FieldRenderer*> _fieldRenderers;
   
+  // overide refresh images
+
+  virtual void _refreshImages() = 0;
+
   /**
    * @brief The index of the field selected for display.
    */
@@ -360,16 +347,16 @@ class DLL_EXPORT PolarWidget : public QWidget
   size_t _selectedField;
 
   /**
-   * @brief The color for the grid and rings.
-   */
-
-  QColor _gridRingsColor;
-
-  /**
    * @brief The brush for the background.
    */
 
   QBrush _backgroundBrush;
+
+  /**
+   * @brief The color for the grid and rings.
+   */
+
+  QColor _gridRingsColor;
 
   /**
    * @brief True if the ring display is enabled.
@@ -380,14 +367,14 @@ class DLL_EXPORT PolarWidget : public QWidget
   /**
    * @brief True if the grids display is enabled.
    */
-
+  
   bool _gridsEnabled;
 
   /**
-   * @brief True if the az lines enabled.
+   * @brief True if the angle lines enabled.
    */
 
-  bool _azLinesEnabled;
+  bool _angleLinesEnabled;
 
   /**
    * @brief This will create labels wiith nicely scaled values and
@@ -401,7 +388,11 @@ class DLL_EXPORT PolarWidget : public QWidget
    *        labelling of the range rings
    */
 
-  double _maxRange;
+  double _maxRangeKm;
+
+  // archive mode
+
+  bool _archiveMode;
 
   /**
    * @brief Last X,Y location of the mouse during mouse move events; used for
@@ -446,6 +437,12 @@ class DLL_EXPORT PolarWidget : public QWidget
   double _aspectRatio;
   
   /**
+   * @brief The width of the color scale
+   */
+
+  int _colorScaleWidth;
+  
+  /**
    * @brief The full window rendering dimensions.  These are different for
    *        PPI windows and RHI windows.
    */
@@ -468,45 +465,13 @@ class DLL_EXPORT PolarWidget : public QWidget
   ///////////////////////
 
   /**
-   * @brief Refresh the images.  Note that this is an expensive method and
-   *        should only be called where needed.
-   */
-
-  void _refreshImages();
-
-  /**
-   * @brief For dynamically allocated beams, cull the beam list, removing
-   *        beams that are hidden by the given new beam.
-   *
-   * @params[in] beamAB     The new beam being added to the list.  Note that
-   *                        this beam must not already be added to the list
-   *                        when this method is called or it will be immediately
-   *                        removed again.
-   */
-
-  void _cullBeams(const PolarBeam *beamAB);
-  
-  /**
-   * @brief Find the index in the _beams array of the beam that corresponds
-   *        to this angle. The beam angles must sweep in a counter clockwise,
-   *         i.e. cartessian, direction.
-   *
-   * @param[in] start_angle    Beginning angle of the beam.
-   * @param[in] stop_angle     Ending angle of the beam.
-   *
-   * @return Returns the index for the given beam.
-   */
-
-  inline int _beamIndex(const double start_angle, const double stop_angle);
-
-  /**
    * @brief Render the rings and grid. The current value of _ringsGridColor
    *        will be used for the color.
    *
    * @param[in] painter    Painter to use for rendering.
    */
 
-  void _drawOverlays(QPainter &painter);
+  virtual void _drawOverlays(QPainter &painter) = 0;
 
   /**
    * @brief Determine a ring spacing which will give even distances, and
@@ -515,7 +480,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @return Returns the ring spacing in kilometers.
    */
 
-  void _setRingSpacing();
+  virtual void _setGridSpacing() = 0;
 
   /**
    * @brief Initialize the full window transform to use for the widget.
