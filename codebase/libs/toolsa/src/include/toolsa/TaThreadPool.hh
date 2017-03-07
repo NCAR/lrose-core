@@ -106,6 +106,9 @@ private:
   deque<TaThread *> _idlePool;
   deque<TaThread *> _donePool;
   
+  TaThread *_getIdleThread(bool block);
+  TaThread *_getDoneThread(bool block);
+
 };
 
 #endif

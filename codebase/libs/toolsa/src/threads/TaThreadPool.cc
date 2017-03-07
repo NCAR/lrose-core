@@ -87,6 +87,106 @@ void TaThreadPool::addThreadToMain(TaThread *thread)
   pthread_mutex_unlock(&_idleMutex);
 
 }
+
+/////////////////////////////////////////////////////////////
+// Get an idle thread, if available
+  
+TaThread *TaThreadPool::_getIdleThread(bool block)
+
+{
+
+  pthread_mutex_lock(&_idleMutex);
+
+  // handle non-blocking behavior
+
+  if (!block) {
+
+    if (_idlePool.empty()) {
+      pthread_mutex_unlock(&_idleMutex);
+      return NULL;
+    } else {
+      TaThread *thread = _idlePool.back();
+      _idlePool.pop_back();
+      pthread_mutex_unlock(&_idleMutex);
+      return thread;
+    }
+    
+  }
+  
+  // handle blocking behavior
+
+  if (!_idlePool.empty()) {
+    TaThread *thread = _idlePool.back();
+    _idlePool.pop_back();
+    pthread_mutex_unlock(&_idleMutex);
+    return thread;
+  }
+
+  while (_idlePool.empty()) {
+    pthread_cond_wait(&_idleCond, &_idleMutex);
+    if (!_idlePool.empty()) {
+      TaThread *thread = _idlePool.back();
+      _idlePool.pop_back();
+      pthread_mutex_unlock(&_idleMutex);
+      return thread;
+    }
+  }
+
+  pthread_mutex_unlock(&_idleMutex);
+  return NULL;
+
+}
+
+/////////////////////////////////////////////////////////////
+// Get an done thread, if available
+  
+TaThread *TaThreadPool::_getDoneThread(bool block)
+
+{
+
+  pthread_mutex_lock(&_doneMutex);
+
+  // handle non-blocking behavior
+
+  if (!block) {
+
+    if (_donePool.empty()) {
+      pthread_mutex_unlock(&_doneMutex);
+      return NULL;
+    } else {
+      TaThread *thread = _donePool.back();
+      _donePool.pop_back();
+      pthread_mutex_unlock(&_doneMutex);
+      return thread;
+    }
+    
+  }
+  
+  // handle blocking behavior
+
+  if (!_donePool.empty()) {
+    TaThread *thread = _donePool.back();
+    _donePool.pop_back();
+    pthread_mutex_unlock(&_doneMutex);
+    return thread;
+  }
+
+  while (_donePool.empty()) {
+    pthread_cond_wait(&_doneCond, &_doneMutex);
+    if (!_donePool.empty()) {
+      TaThread *thread = _donePool.back();
+      _donePool.pop_back();
+      pthread_mutex_unlock(&_doneMutex);
+      return thread;
+    }
+  }
+
+  pthread_mutex_unlock(&_doneMutex);
+  return NULL;
+
+}
+
+#ifdef JUNK
   
 /////////////////////////////////////////////////////////////
 // Mutex handling for communication between caller and thread
@@ -365,3 +465,4 @@ void TaThreadPool::msecSleep(unsigned int msecs)
   TaThreadPool::usecSleep(msecs * 1000);
 }
 
+#endif
