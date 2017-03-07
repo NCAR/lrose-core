@@ -125,6 +125,7 @@ class InputDir
   
     time_t _lastDirUpdateTime;
     time_t _lastDirRewindTime;
+    time_t _lastDataFileTime;
     bool _rewindDirFlag;
   
   void _init(const string &dir_name,

@@ -22,107 +22,172 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// TaThread.cc
+// TaThreadPool.cc
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// April 2013
+// March 2017
 //
 ///////////////////////////////////////////////////////////////
 //
-// Handling compute threads
+// Pool of TaThreads.
 //
 ///////////////////////////////////////////////////////////////
 
+#include <toolsa/TaThreadPool.hh>
 #include <toolsa/TaThread.hh>
-#include <cstring>
-#include <string>
-#include <cassert>
-#include <cerrno>
-#include <stdexcept>
-#include <iostream>
-#include <iomanip>
-#include <sys/select.h>
-#include <sys/time.h>
 using namespace std;
 
-TaThread::SafeMutex TaThread::_defaultMutex;
-
 /////////////////////////////////
-// Generic thread base class
-//
-// Subclassed for actual use
+// Constructor
 
-// constructor
-
-TaThread::TaThread()
-
+TaThreadPool::TaThreadPool() 
 {
 
-  _thread = 0;
-  _threadDebug = false;
-  _threadName = "TaThread";
-  _threadMethod = NULL;
-  _threadInfo = NULL;
+  _debug = false;
 
-  pthread_mutex_init(&_startMutex, NULL);
-  pthread_mutex_init(&_completeMutex, NULL);
-  pthread_mutex_init(&_busyMutex, NULL);
-  pthread_mutex_init(&_exitMutex, NULL);
-  
-  pthread_cond_init(&_startCond, NULL);
-  pthread_cond_init(&_completeCond, NULL);
-  pthread_cond_init(&_busyCond, NULL);
+  pthread_mutex_init(&_mainMutex, NULL);
+  pthread_mutex_init(&_idleMutex, NULL);
+  pthread_mutex_init(&_doneMutex, NULL);
 
-  _startFlag = false;
-  _completeFlag = false;
-  _busyFlag = false;
-  _exitFlag = false;
-  
+  pthread_cond_init(&_idleCond, NULL);
+  pthread_cond_init(&_doneCond, NULL);
+
 }
 
 ///////////////
 // destructor
 
-TaThread::~TaThread()
+TaThreadPool::~TaThreadPool()
 
 {
   
-  if (_threadDebug) {
-    LockForScope lock;
-    cerr << _threadName << ": thread destructor start" << endl;
-    cerr << "_thread: " << hex << _thread << dec << endl;
+  pthread_mutex_lock(&_mainMutex);
+  for (size_t ii = 0; ii < _mainPool.size(); ii++) {
+    delete _mainPool[ii];
   }
-
-  // set the exit flag in case run method is active
-
-  setExitFlag(true);
-
-  // cancel thread
-
-  cancel();
-
-  // free up mutexes
-
-  pthread_mutex_destroy(&_startMutex);
-  pthread_mutex_destroy(&_completeMutex);
-  pthread_mutex_destroy(&_busyMutex);
-
-  // free up condition variables
-
-  pthread_cond_destroy(&_startCond);
-  pthread_cond_destroy(&_completeCond);
-  pthread_cond_destroy(&_busyCond);
+  pthread_mutex_unlock(&_mainMutex);
   
-  if (_threadDebug) {
-    LockForScope lock;
-    cerr << _threadName << ": thread destructor end" << endl;
-    cerr << "_thread: " << hex << _thread << dec << endl;
-  }
+}
+
+/////////////////////////////////////////////////////////////
+// Add a thread to the pool
+  
+void TaThreadPool::addThreadToMain(TaThread *thread)
+
+{
+
+  pthread_mutex_lock(&_mainMutex);
+  _mainPool.push_front(thread);
+  pthread_mutex_unlock(&_mainMutex);
+
+  pthread_mutex_lock(&_idleMutex);
+  _idlePool.push_front(thread);
+  pthread_mutex_unlock(&_idleMutex);
 
 }
 
+/////////////////////////////////////////////////////////////
+// Get an idle thread, if available
+  
+TaThread *TaThreadPool::_getIdleThread(bool block)
+
+{
+
+  pthread_mutex_lock(&_idleMutex);
+
+  // handle non-blocking behavior
+
+  if (!block) {
+
+    if (_idlePool.empty()) {
+      pthread_mutex_unlock(&_idleMutex);
+      return NULL;
+    } else {
+      TaThread *thread = _idlePool.back();
+      _idlePool.pop_back();
+      pthread_mutex_unlock(&_idleMutex);
+      return thread;
+    }
+    
+  }
+  
+  // handle blocking behavior
+
+  if (!_idlePool.empty()) {
+    TaThread *thread = _idlePool.back();
+    _idlePool.pop_back();
+    pthread_mutex_unlock(&_idleMutex);
+    return thread;
+  }
+
+  while (_idlePool.empty()) {
+    pthread_cond_wait(&_idleCond, &_idleMutex);
+    if (!_idlePool.empty()) {
+      TaThread *thread = _idlePool.back();
+      _idlePool.pop_back();
+      pthread_mutex_unlock(&_idleMutex);
+      return thread;
+    }
+  }
+
+  pthread_mutex_unlock(&_idleMutex);
+  return NULL;
+
+}
+
+/////////////////////////////////////////////////////////////
+// Get an done thread, if available
+  
+TaThread *TaThreadPool::_getDoneThread(bool block)
+
+{
+
+  pthread_mutex_lock(&_doneMutex);
+
+  // handle non-blocking behavior
+
+  if (!block) {
+
+    if (_donePool.empty()) {
+      pthread_mutex_unlock(&_doneMutex);
+      return NULL;
+    } else {
+      TaThread *thread = _donePool.back();
+      _donePool.pop_back();
+      pthread_mutex_unlock(&_doneMutex);
+      return thread;
+    }
+    
+  }
+  
+  // handle blocking behavior
+
+  if (!_donePool.empty()) {
+    TaThread *thread = _donePool.back();
+    _donePool.pop_back();
+    pthread_mutex_unlock(&_doneMutex);
+    return thread;
+  }
+
+  while (_donePool.empty()) {
+    pthread_cond_wait(&_doneCond, &_doneMutex);
+    if (!_donePool.empty()) {
+      TaThread *thread = _donePool.back();
+      _donePool.pop_back();
+      pthread_mutex_unlock(&_doneMutex);
+      return thread;
+    }
+  }
+
+  pthread_mutex_unlock(&_doneMutex);
+  return NULL;
+
+}
+
+#ifdef JUNK
+  
 /////////////////////////////////////////////////////////////
 // Mutex handling for communication between caller and thread
 
@@ -130,7 +195,7 @@ TaThread::~TaThread()
 //
 // On failure, throws runtime_error exception.
 
-void TaThread::signalRunToStart() 
+void TaThreadPool::signalRunToStart() 
 {
 
   pthread_mutex_lock(&_startMutex);
@@ -145,7 +210,7 @@ void TaThread::signalRunToStart()
     int iret = pthread_create(&_thread, NULL, _run, this);
     if (iret) {
       int errNum = errno;
-      string errStr = "ERROR - TaThread::signalRunToStart()\n";
+      string errStr = "ERROR - TaThreadPool::signalRunToStart()\n";
       errStr += _threadName;
       errStr += "\n";
       errStr += "  Cannot create thread\n";
@@ -164,7 +229,7 @@ void TaThread::signalRunToStart()
 
 // Thread waits for parent to signal start
 
-void TaThread::_waitForStart() 
+void TaThreadPool::_waitForStart() 
 {
   pthread_mutex_lock(&_startMutex);
   while (!_startFlag) {
@@ -176,7 +241,7 @@ void TaThread::_waitForStart()
 
 // Thread signals parent it is complete
  
-void TaThread::_signalComplete() 
+void TaThreadPool::_signalComplete() 
 {
   pthread_mutex_lock(&_completeMutex);
   _completeFlag = true;
@@ -186,7 +251,7 @@ void TaThread::_signalComplete()
 
 // Parent waits for thread to be complete
 
-void TaThread::waitForRunToComplete() 
+void TaThreadPool::waitForRunToComplete() 
 {
   pthread_mutex_lock(&_completeMutex);
   while (!_completeFlag) {
@@ -198,7 +263,7 @@ void TaThread::waitForRunToComplete()
 
 // Mark thread as busy
  
-void TaThread::_setBusyFlag(bool state) 
+void TaThreadPool::_setBusyFlag(bool state) 
 {
   pthread_mutex_lock(&_busyMutex);
   _busyFlag = state;
@@ -207,7 +272,7 @@ void TaThread::_setBusyFlag(bool state)
 
 // Wait for thread to be available - i.e. not busy
 
-void TaThread::waitUntilNotBusy() 
+void TaThreadPool::waitUntilNotBusy() 
 {
   pthread_mutex_lock(&_busyMutex);
   while (_busyFlag) {
@@ -219,7 +284,7 @@ void TaThread::waitUntilNotBusy()
 
 // get flag indicating thread is busy
 
-bool TaThread::getIsBusy()
+bool TaThreadPool::getIsBusy()
 {
   pthread_mutex_lock(&_busyMutex);
   bool flag = _busyFlag;
@@ -229,7 +294,7 @@ bool TaThread::getIsBusy()
 
 // set flag to tell thread to exit
 
-void TaThread::setExitFlag(bool val)
+void TaThreadPool::setExitFlag(bool val)
 {
   pthread_mutex_lock(&_exitMutex);
   _exitFlag = val;
@@ -238,7 +303,7 @@ void TaThread::setExitFlag(bool val)
 
 // get flag indicating thread should exit
 
-bool TaThread::getExitFlag()
+bool TaThreadPool::getExitFlag()
 {
   pthread_mutex_lock(&_exitMutex);
   bool flag = _exitFlag;
@@ -249,12 +314,12 @@ bool TaThread::getExitFlag()
 
 // static run method - entry point for thread
 
-void *TaThread::_run(void *threadData)
+void *TaThreadPool::_run(void *threadData)
 {
 
   // get thread data from args
 
-  TaThread *thread = (TaThread *) threadData;
+  TaThreadPool *thread = (TaThreadPool *) threadData;
   assert(thread);
   return thread->_run();
 
@@ -262,7 +327,7 @@ void *TaThread::_run(void *threadData)
 
 // _run method on class
 
-void *TaThread::_run()
+void *TaThreadPool::_run()
 
 {
 
@@ -314,7 +379,7 @@ void *TaThread::_run()
 // (a) Set exit flag
 // (b) Cancels the thread and joins it
 
-void TaThread::terminate()
+void TaThreadPool::terminate()
 
 {
 
@@ -348,7 +413,7 @@ void TaThread::terminate()
 //////////////////////////////////
 // Cancels the thread and joins it
 
-void TaThread::cancel()
+void TaThreadPool::cancel()
 
 {
 
@@ -374,7 +439,7 @@ void TaThread::cancel()
 // sleep in micro-seconds
 //
 
-void TaThread::usecSleep(unsigned int usecs)
+void TaThreadPool::usecSleep(unsigned int usecs)
 
 {
   
@@ -394,9 +459,10 @@ void TaThread::usecSleep(unsigned int usecs)
 // sleep in milli-seconds
 //
 
-void TaThread::msecSleep(unsigned int msecs)
+void TaThreadPool::msecSleep(unsigned int msecs)
 
 {
-  TaThread::usecSleep(msecs * 1000);
+  TaThreadPool::usecSleep(msecs * 1000);
 }
 
+#endif
