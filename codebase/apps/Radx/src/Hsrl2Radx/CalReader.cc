@@ -814,9 +814,63 @@ void CalReader::printBlock()
 	}
 	
     }
-  
 
 }
+  
+CalReader CalReader::sortTime(CalReader toSort, bool debug)
+{
+    
+  for(int i=0; i<(toSort.time).size()-1;i++)
+    {  
+      for(int j=0; j<(toSort.time).size()-1;j++)
+	{
+	  if( ((toSort.time).at(j)).asDouble() < ((toSort.time).at(j+1)).asDouble() )
+	    {
+	      RadxTime tempT=(toSort.time).at(j);
+	      (toSort.time).at(j)=(toSort.time).at(j+1);
+	      (toSort.time).at(j+1)=tempT;
+	      
+	      if(toSort.isNum)
+		{
+		  assert( (toSort.dataNum).size() == (toSort.time).size() );
+		  vector<double> tempD=(toSort.dataNum).at(j);
+		  (toSort.dataNum).at(j)=(toSort.dataNum).at(j+1);
+		  (toSort.dataNum).at(j+1)=tempD;
+		}
+	      if(toSort.isStr)
+		{
+		  assert( (toSort.dataStr).size() == (toSort.time).size() );
+		  string tempS=(toSort.dataStr).at(j);
+		  (toSort.dataStr).at(j)=(toSort.dataStr).at(j+1);
+		  (toSort.dataStr).at(j+1)=tempS;
+		}
+ 
+	    }
+	}
+    }
+  
+  if(debug)
+    {
+      toSort.printBlock();
+    }
+  
+  return toSort; 
+  
+}
+
+
+int CalReader::dateMatch(CalReader calIn, RadxTime check)
+{
+  
+  for(int i=0;i<(calIn.time).size();i++)
+    {
+      if(check > (calIn.time).at(i))
+	return i;
+    }
+  return 0;
+  
+}
+
 
 CalReader::~CalReader()
 {}

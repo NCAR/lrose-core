@@ -72,6 +72,8 @@ public:
   vector<string> getDataStr();
   vector< vector<double> > getDataNum();
   void printBlock();
+  CalReader sortTime(CalReader toSort, bool debug);
+  int dateMatch(CalReader calIn, RadxTime check);
 
 
   vector <vector<double> > readBaselineCorrection(const char* file, bool debug);

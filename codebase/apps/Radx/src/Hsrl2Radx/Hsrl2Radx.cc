@@ -130,12 +130,12 @@ int Hsrl2Radx::Run()
   const char* geoDef = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/geofile_default_20150601T0000.geo";
   const char* afterpulse = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/afterpulse_default_20061001T0000.ap";
   const char* calvals = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/calvals_gvhsrl.txt";
-  const char* variable = "combined_hi_dead_time";//look for this calibration block
+  //const char* variable = "combined_hi_dead_time";//look for this calibration block
   //const char* variable = "sounding_id";
   //const char* variable = "non_filtered_energy_monitor";
   //const char* variable = "baseline_adjust";
   //const char* variable = "apd_pulse_timing";
-  //const char* variable = "quarter_wave_plate_rotation";
+  const char* variable = "quarter_wave_plate_rotation";
   //const char* variable = "";
   
   CalReader cr;
@@ -148,7 +148,19 @@ int Hsrl2Radx::Run()
   geoDefCor=cr.readGeofileDefault(geoDef, doneDebug);
   vector< vector<double> > afPulCor;  
   afPulCor=cr.readAfterPulse(afterpulse, doneDebug);
-
+  
+  RadxTime ti(2015, 07, 14, 23 , 0 , 0 , 0.0);
+  
+  //cr.printBlock();
+    
+  cr=cr.sortTime(cr,true);
+  
+  int temp;
+  temp=cr.dateMatch(cr,ti);
+  
+  
+  
+  
   //done reading calibration files. 
 
   if (_params.mode == Params::ARCHIVE) {
