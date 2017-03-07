@@ -123,8 +123,6 @@ Hsrl2Radx::~Hsrl2Radx()
 int Hsrl2Radx::Run()
 {
   // reading in calibration files here ----- 
-  bool debug = true;// use while developing to give specific output information relating to reading in cal files
-  bool doneDebug = false;// use while developing when done looking at debug info for a particular cal file
   const char* baseline = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/baseline_correction_20150601T0000.blc";
   const char* diffDefGeo = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/diff_default_geofile_20120201T0000.geo";
   const char* geoDef = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/geofile_default_20150601T0000.geo";
@@ -139,15 +137,15 @@ int Hsrl2Radx::Run()
   //const char* variable = "";
   
   CalReader cr;
-  cr=cr.readCalVals(calvals, variable, doneDebug);
+  cr=cr.readCalVals(calvals, variable, false); // Last argument is a debug flag
   vector< vector<double> > blCor;
-  blCor=cr.readBaselineCorrection(baseline, doneDebug);
+  blCor=cr.readBaselineCorrection(baseline, false); // Last argument is a debug flag
   vector< vector<double> > diffDGeoCor;  
-  diffDGeoCor=cr.readDiffDefaultGeo(diffDefGeo, doneDebug);
+  diffDGeoCor=cr.readDiffDefaultGeo(diffDefGeo, false); // Last argument is a debug flag
   vector< vector<double> > geoDefCor;  
-  geoDefCor=cr.readGeofileDefault(geoDef, doneDebug);
+  geoDefCor=cr.readGeofileDefault(geoDef, false); // Last argument is a debug flag
   vector< vector<double> > afPulCor;  
-  afPulCor=cr.readAfterPulse(afterpulse, doneDebug);
+  afPulCor=cr.readAfterPulse(afterpulse, false); // Last argument is a debug flag
   
   RadxTime ti(2015, 07, 14, 23 , 0 , 0 , 0.0);
   

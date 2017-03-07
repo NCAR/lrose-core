@@ -600,14 +600,14 @@ CalReader CalReader::readCalVals(const char* file, const char* variable, bool de
 			{
 			  numStrTemp=numStrTemp.substr(1,numStrTemp.length());
 			  istringstream ( numStrTemp ) >> mod;
-			  for(int i=0; i<numValue.size(); i++)
+			  for(unsigned int i=0; i<numValue.size(); i++)
 			    numValue.at(i)=numValue.at(i)/mod;
 			}
 		      else if(checkForChar("*",numStrTemp)>-1)
 			{
 			  numStrTemp=numStrTemp.substr(1,numStrTemp.length());
 			  istringstream ( numStrTemp ) >> mod;
-			  for(int i=0; i<numValue.size(); i++)
+			  for(unsigned int i=0; i<numValue.size(); i++)
 			    numValue.at(i)=numValue.at(i)*mod;
 			}
 		      else
@@ -619,7 +619,7 @@ CalReader CalReader::readCalVals(const char* file, const char* variable, bool de
 		  if(debug)
 		    {
 		      cout<<"checking data reading"<<'\n';
-		      for(int i=0;i<numValue.size();i++)
+		      for(unsigned int i=0;i<numValue.size();i++)
 			cout<<numValue.at(i)<<'\n';;
 		    }
 		}
@@ -669,7 +669,7 @@ string CalReader::removeWhitespace(string s)//this function removes spaces from 
 
 int CalReader::checkForChar(string subSt, string str)//checks string for a particular substring and returns the location of the start of that substring, returns -1 if not found. 
 {
-  for(int i=0;i<str.length();i++)
+  for(unsigned int i=0;i<str.length();i++)
     if( (str.substr(i, subSt.length())==subSt) )
       return i;
   
@@ -799,7 +799,7 @@ void CalReader::printBlock()
       assert(time.size()==dataStr.size());
     }
 
-  for(int i=0;i<time.size();i++)
+  for(unsigned int i=0;i<time.size();i++)
     {
       cout<<time.at(i)<<'\n';
       
@@ -808,7 +808,7 @@ void CalReader::printBlock()
       
       if(isNum)
 	{
-	  for(int j=0;j<(dataNum.at(i)).size();j++)
+	  for(unsigned int j=0;j<(dataNum.at(i)).size();j++)
 	    cout<<(dataNum.at(i)).at(j)<<" ";
 	  cout<<'\n';
 	}
@@ -820,9 +820,9 @@ void CalReader::printBlock()
 CalReader CalReader::sortTime(CalReader toSort, bool debug)
 {
     
-  for(int i=0; i<(toSort.time).size()-1;i++)
+  for(unsigned int i=0; i<(toSort.time).size()-1;i++)
     {  
-      for(int j=0; j<(toSort.time).size()-1;j++)
+      for(unsigned int j=0; j<(toSort.time).size()-1;j++)
 	{
 	  if( ((toSort.time).at(j)).asDouble() < ((toSort.time).at(j+1)).asDouble() )
 	    {
@@ -862,7 +862,7 @@ CalReader CalReader::sortTime(CalReader toSort, bool debug)
 int CalReader::dateMatch(CalReader calIn, RadxTime check)
 {
   
-  for(int i=0;i<(calIn.time).size();i++)
+  for(unsigned int i=0;i<(calIn.time).size();i++)
     {
       if(check > (calIn.time).at(i))
 	return i;
