@@ -46,9 +46,13 @@ TaThreadPool::TaThreadPool()
 {
 
   _debug = false;
-  pthread_mutex_init(&_poolMutex, NULL);
-  pthread_mutex_init(&_availMutex, NULL);
-  pthread_cond_init(&_availCond, NULL);
+
+  pthread_mutex_init(&_mainMutex, NULL);
+  pthread_mutex_init(&_idleMutex, NULL);
+  pthread_mutex_init(&_doneMutex, NULL);
+
+  pthread_cond_init(&_idleCond, NULL);
+  pthread_cond_init(&_doneCond, NULL);
 
 }
 
@@ -59,28 +63,28 @@ TaThreadPool::~TaThreadPool()
 
 {
   
-  pthread_mutex_lock(&_poolMutex);
-  for (size_t ii = 0; ii < _pool.size(); ii++) {
-    delete _pool[ii];
+  pthread_mutex_lock(&_mainMutex);
+  for (size_t ii = 0; ii < _mainPool.size(); ii++) {
+    delete _mainPool[ii];
   }
-  pthread_mutex_unlock(&_poolMutex);
+  pthread_mutex_unlock(&_mainMutex);
   
 }
 
 /////////////////////////////////////////////////////////////
 // Add a thread to the pool
   
-void TaThreadPool::addThread(TaThread *thread)
+void TaThreadPool::addThreadToMain(TaThread *thread)
 
 {
 
-  pthread_mutex_lock(&_poolMutex);
-  _pool.push_back(thread);
-  pthread_mutex_unlock(&_poolMutex);
+  pthread_mutex_lock(&_mainMutex);
+  _mainPool.push_front(thread);
+  pthread_mutex_unlock(&_mainMutex);
 
-  pthread_mutex_lock(&_availMutex);
-  _avail.push_back(thread);
-  pthread_mutex_unlock(&_availMutex);
+  pthread_mutex_lock(&_idleMutex);
+  _idlePool.push_front(thread);
+  pthread_mutex_unlock(&_idleMutex);
 
 }
   

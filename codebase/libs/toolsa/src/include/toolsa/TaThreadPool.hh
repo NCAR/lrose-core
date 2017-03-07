@@ -39,8 +39,11 @@
 #define TaThreadPool_h
 
 #include <string>
+#include <deque>
 #include <pthread.h>
 class TaThread;
+
+using namespace std;
 
 ////////////////////////////
 // Generic thread base class
@@ -52,21 +55,34 @@ public:
   TaThreadPool();
   virtual ~TaThreadPool();
   
-  // Add a thread to the pool
+  // Add a thread to the main pool
   
-  void addThread(TaThread *thread);
+  void addThreadToMain(TaThread *thread);
   
-  // Get a thread from the pool
-  // If block is true, blocks until thread is available.
+  // Add a thread to the idle pool
+  // This is called after a done thread is handled.
+
+  void addThreadToIdle(TaThread *thread);
+  
+  // Add a thread to the done pool
+  // This is normally called by the thread itself, once it is done.
+  
+  void addThreadToDone(TaThread *thread);
+  
+  // Get a thread from the done or idle pool.
+  // Preference is given to done threads.
+  // If block is true, blocks until a suitable thread is available.
   // If block is false an no thread is available, returns NULL.
-  // This removes a thread from the available deque and
-  // adds it to the busy deque.
+  //
+  // If isDone is returned true, the thread came from the done pool.
+  //   Handle any return information from the done thread, and then
+  //   add it into the idle pool.
+  //
+  // If isDone is returned false, the thread came from the idle pool.
+  //   In this case, set the thread running.
+  //   It will add itself to the done pool when done.
   
-  TaThread *getAvailThread(bool block);
-  
-  // Return a thread to the available deque
-  
-  void returnToAvail(TaThread *thread);
+  TaThread *getThread(bool block, bool &isDone);
   
   // debugging
   
@@ -79,12 +95,16 @@ private:
   
   bool _debug;
 
-  pthread_mutex_t _poolMutex;
-  pthread_mutex_t _availMutex;
-  pthread_cond_t _availCond;
+  pthread_mutex_t _mainMutex;
+  pthread_mutex_t _idleMutex;
+  pthread_mutex_t _doneMutex;
 
-  vector<TaThread *> _pool;
-  deque<TaThread *> _avail;
+  pthread_cond_t _idleCond;
+  pthread_cond_t _doneCond;
+
+  deque<TaThread *> _mainPool;
+  deque<TaThread *> _idlePool;
+  deque<TaThread *> _donePool;
   
 };
 
