@@ -774,7 +774,6 @@ int Hsrl2Radx::_writeVol(RadxVol &vol)
   string outputPath = outFile.getPathInUse();
 
   // write latest data info file if requested 
-  
   if (_params.write_latest_data_info) {
     DsLdataInfo ldata(_params.output_dir);
     if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -812,8 +811,7 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
   RawFile inFile(_params);
   
   // read in file
-  
-  RadxVol vol;
+    RadxVol vol;
   if (inFile.readFromPath(readPath, vol)) {
     cerr << "ERROR - Hsrl2Radx::Run" << endl;
     cerr << inFile.getErrStr() << endl;
@@ -821,8 +819,7 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
   }
   
   // override radar name and site name if requested
-  
-  if (_params.override_instrument_name) {
+    if (_params.override_instrument_name) {
     vol.setInstrumentName(_params.instrument_name);
   }
   if (_params.override_site_name) {
@@ -830,15 +827,15 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
   }
     
   // set global attributes as needed
-  
-  _setGlobalAttr(vol);
+    _setGlobalAttr(vol);
 
   // add in height, temperature and pressure fields
-
   _addEnvFields(vol);
-  
-  // write the file
 
+  //add corrections and derived data outputs  
+  _addDerivedFields(vol);
+
+  // write the file
   if (_writeVol(vol)) {
     cerr << "ERROR - Hsrl2Radx::_processFile" << endl;
     cerr << "  Cannot write volume to file" << endl;
@@ -915,14 +912,34 @@ void Hsrl2Radx::_addEnvFields(RadxVol &vol)
     presField->setRangeGeom(startRangeKm, gateSpacingKm);
     
     
+  } // iray
+  
+
+}
+
+void Hsrl2Radx::_addDerivedFields(RadxVol &vol)
+{
+  vector<RadxRay *> rays = vol.getRays();
+  
+  for(size_t iray = 0; iray < rays.size(); iray++) {
+    
+    RadxRay *ray = rays[iray];
+    
+    size_t nGates = ray->getNGates();
+    
+    RadxArray<Radx::fl32> htKm_, tempK_, presHpa_,testThing_;
+    Radx::fl32 *testThing = testThing_.alloc(nGates);
+      
+    double startRangeKm = ray->getStartRangeKm();
+    double gateSpacingKm = ray->getGateSpacingKm();
+
     
     RadxField *testThingField =
       ray->addField("testThing", "unit", nGates, Radx::missingFl32, testThing, true);
     testThingField->setLongName("Test_thing");
     testThingField->setRangeGeom(startRangeKm, gateSpacingKm);
     
-
-
+    //get raw data fields
     const RadxField *hiField = ray->getField(_params.combined_hi_field_name);
     if(hiField != NULL)
       {
@@ -951,11 +968,10 @@ void Hsrl2Radx::_addEnvFields(RadxVol &vol)
 	//cout<<"iray="<<iray<<" : crossData="<<*crossData<<'\n';
       }
     
+    //do calculations for derived fields
     
     
     
-  } // iray
+  }
   
-
 }
-
