@@ -1186,7 +1186,7 @@ int RawFile::_addCountFieldToRays(NcVar* var,
       for (size_t ii = 0; ii < _nBinsPerGate; ii++, ibin++) {
         fcounts[igate] += icounts[ibin];
       }
-      fcounts[igate] /= (double) _nBinsPerGate;
+      //fcounts[igate] /= (double) _nBinsPerGate;
 
     }
     

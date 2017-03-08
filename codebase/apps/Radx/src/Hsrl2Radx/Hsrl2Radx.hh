@@ -39,10 +39,10 @@
 #include "Params.hh"
 #include <string>
 #include <Radx/RadxTime.hh>
+#include "CalReader.hh"
 class RadxVol;
 class RadxFile;
 class MslFile;
-class CalReader;
 using namespace std;
 
 
@@ -74,6 +74,14 @@ private:
   Args _args;
   Params _params;
   vector<string> _readPaths;
+  vector< vector<double> > blCor;
+  vector< vector<double> > diffDGeoCor;
+  vector< vector<double> > geoDefCor;
+  vector< vector<double> > afPulCor;
+  CalReader hi_CR_DT, lo_CR_DT, cross_CR_DT, mol_CR_DT;
+  //holds the deadtime calibration blocks
+  int hi_pos,lo_pos,cross_pos,mol_pos;
+  //hold which spot in the vectors are the correct calibration point. 
 
   int _runFilelist();
   int _runArchive();
