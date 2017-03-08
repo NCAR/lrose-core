@@ -80,7 +80,7 @@ paramdef boolean
 
 commentdef
 {
-  p_header = "Server details for support from ServerMgr";
+  p_header = "SERVER DETAILS FOR SUPPORT FROM ServerMgr";
 };
 
 paramdef int
@@ -208,7 +208,7 @@ paramdef double
 
 commentdef
 {
-  p_header = "Track before current time.";
+  p_header = "TRACK BEFORE CURRENT TIME";
 };
 
 paramdef int
@@ -262,7 +262,7 @@ paramdef string
 
 commentdef
 {
-  p_header = "Track at current time.";
+  p_header = "TRACK AT CURRENT TIME";
 };
 
 paramdef boolean
@@ -344,7 +344,7 @@ paramdef struct label_offset_t
 
 commentdef
 {
-  p_header = "Track after current time.";
+  p_header = "TRACK AFTER CURRENT TIME";
 };
 
 paramdef int
@@ -398,7 +398,7 @@ paramdef string
 
 commentdef
 {
-  p_header = "Altitude display.";
+  p_header = "ALTITUDE DISPLAY";
 };
 
 paramdef boolean
@@ -435,7 +435,7 @@ paramdef string
 
 commentdef
 {
-  p_header = "Specify callsigns to be displayed.";
+  p_header = "SPECIFY CALLSIGNS TO BE DISPLAYED";
 };
 
 paramdef boolean
@@ -457,7 +457,7 @@ paramdef string
 
 commentdef
 {
-  p_header = "Set color by callsign.";
+  p_header = "SET COLOR BY CALLSIGN";
 };
 
 paramdef boolean
@@ -478,5 +478,69 @@ paramdef struct callsign_color_t
   p_help = "See 'color_by_callsign'.";
   p_default = { { "ZJRA", "orange" }, { "47RE", "cyan" } };
 } callsign_colors[];
+
+
+///////////////////////////////////////////////////////////////////////////
+// Add time labels along track
+
+commentdef
+{
+  p_header = "ADD TIME LABELS TO TRACK";
+  p_text = "Option to add time labels at a specified time interval along the track.";
+};
+
+paramdef boolean
+{
+  p_descr = "Option to add time labels to the track at specified intervals.";
+  p_help = "If TRUE, time labels are added at the specified time interval.";
+  p_default = FALSE;
+} add_time_labels;
+
+paramdef string
+{
+  p_descr = "Color for time labels";
+  p_help = "If empty, use the same color as the track.";
+  p_default = "";
+} time_label_color;
+
+paramdef int
+{
+  p_descr = "Time interval for labels (secs)";
+  p_help = "Number of seconds between time labels.";
+  p_default = 900;
+} time_label_interval_secs;
+
+typedef enum
+{
+  TIME_LABEL_YYYY_MM_DD_HH_MM_SS,
+  TIME_LABEL_YYYY_MM_DD_HH_MM,
+  TIME_LABEL_HH_MM_SS,
+  TIME_LABEL_HH_MM
+} time_label_format_t;
+
+paramdef enum time_label_format_t
+{
+  p_descr = "Formatting for time label";
+  p_help = "Specify which elements in the time should appear in the label";
+  p_default = TIME_LABEL_HH_MM;
+} time_label_format;
+
+paramdef struct label_offset_t
+{
+  p_descr = "(x,y) offset for time labels";
+  p_help = "Pixel offsets for time label rendering. The label is rendered at the given offsets from the track position at the label time. A positive x_offset moves the label to the right; a positive y_offset moves the label up.";
+} time_label_offset;
+
+paramdef int
+{
+  p_default = {{0, 0, 1, 0, 0},
+	       {0, 1, 1, 1, 0},
+	       {1, 1, 1, 1, 1},
+	       {0, 1, 1, 1, 0},
+	       {0, 0, 1, 0, 0}};
+  p_descr = "Icon for time label";
+  p_help = "Array defining the icon to be used for the time label positions. The icon is a bit-mapped square icon.  You put 1's in the positions of the icon where the bit should be displayed, and 0's in the positions that are not a part of the icon. You may want to look at an example parameter file to see how this is done.";
+} time_label_icon[][];
+
 
 

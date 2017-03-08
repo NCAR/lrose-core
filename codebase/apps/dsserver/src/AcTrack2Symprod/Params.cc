@@ -596,7 +596,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("Server details for support from ServerMgr");
+    tt->comment_hdr = tdrpStrDup("SERVER DETAILS FOR SUPPORT FROM ServerMgr");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -814,7 +814,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("Track before current time.");
+    tt->comment_hdr = tdrpStrDup("TRACK BEFORE CURRENT TIME");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -933,7 +933,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("Track at current time.");
+    tt->comment_hdr = tdrpStrDup("TRACK AT CURRENT TIME");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1126,7 +1126,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("Track after current time.");
+    tt->comment_hdr = tdrpStrDup("TRACK AFTER CURRENT TIME");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1245,7 +1245,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("Altitude display.");
+    tt->comment_hdr = tdrpStrDup("ALTITUDE DISPLAY");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1331,7 +1331,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("Specify callsigns to be displayed.");
+    tt->comment_hdr = tdrpStrDup("SPECIFY CALLSIGNS TO BE DISPLAYED");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1373,7 +1373,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("Set color by callsign.");
+    tt->comment_hdr = tdrpStrDup("SET COLOR BY CALLSIGN");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1424,6 +1424,155 @@ using namespace std;
       tt->struct_vals[1].s = tdrpStrDup("orange");
       tt->struct_vals[2].s = tdrpStrDup("47RE");
       tt->struct_vals[3].s = tdrpStrDup("cyan");
+    tt++;
+    
+    // Parameter 'Comment 12'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 12");
+    tt->comment_hdr = tdrpStrDup("ADD TIME LABELS TO TRACK");
+    tt->comment_text = tdrpStrDup("Option to add time labels at a specified time interval along the track.");
+    tt++;
+    
+    // Parameter 'add_time_labels'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("add_time_labels");
+    tt->descr = tdrpStrDup("Option to add time labels to the track at specified intervals.");
+    tt->help = tdrpStrDup("If TRUE, time labels are added at the specified time interval.");
+    tt->val_offset = (char *) &add_time_labels - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'time_label_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("time_label_color");
+    tt->descr = tdrpStrDup("Color for time labels");
+    tt->help = tdrpStrDup("If empty, use the same color as the track.");
+    tt->val_offset = (char *) &time_label_color - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'time_label_interval_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("time_label_interval_secs");
+    tt->descr = tdrpStrDup("Time interval for labels (secs)");
+    tt->help = tdrpStrDup("Number of seconds between time labels.");
+    tt->val_offset = (char *) &time_label_interval_secs - &_start_;
+    tt->single_val.i = 900;
+    tt++;
+    
+    // Parameter 'time_label_format'
+    // ctype is '_time_label_format_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("time_label_format");
+    tt->descr = tdrpStrDup("Formatting for time label");
+    tt->help = tdrpStrDup("Specify which elements in the time should appear in the label");
+    tt->val_offset = (char *) &time_label_format - &_start_;
+    tt->enum_def.name = tdrpStrDup("time_label_format_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("TIME_LABEL_YYYY_MM_DD_HH_MM_SS");
+      tt->enum_def.fields[0].val = TIME_LABEL_YYYY_MM_DD_HH_MM_SS;
+      tt->enum_def.fields[1].name = tdrpStrDup("TIME_LABEL_YYYY_MM_DD_HH_MM");
+      tt->enum_def.fields[1].val = TIME_LABEL_YYYY_MM_DD_HH_MM;
+      tt->enum_def.fields[2].name = tdrpStrDup("TIME_LABEL_HH_MM_SS");
+      tt->enum_def.fields[2].val = TIME_LABEL_HH_MM_SS;
+      tt->enum_def.fields[3].name = tdrpStrDup("TIME_LABEL_HH_MM");
+      tt->enum_def.fields[3].val = TIME_LABEL_HH_MM;
+    tt->single_val.e = TIME_LABEL_HH_MM;
+    tt++;
+    
+    // Parameter 'time_label_offset'
+    // ctype is '_label_offset_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("time_label_offset");
+    tt->descr = tdrpStrDup("(x,y) offset for time labels");
+    tt->help = tdrpStrDup("Pixel offsets for time label rendering. The label is rendered at the given offsets from the track position at the label time. A positive x_offset moves the label to the right; a positive y_offset moves the label up.");
+    tt->val_offset = (char *) &time_label_offset - &_start_;
+    tt->struct_def.name = tdrpStrDup("label_offset_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[0].fname = tdrpStrDup("x_offset");
+      tt->struct_def.fields[0].ptype = INT_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &time_label_offset.x_offset - (char *) &time_label_offset;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[1].fname = tdrpStrDup("y_offset");
+      tt->struct_def.fields[1].ptype = INT_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &time_label_offset.y_offset - (char *) &time_label_offset;
+    tt->n_struct_vals = 2;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].i = 0;
+      tt->struct_vals[1].i = 0;
+    tt++;
+    
+    // Parameter 'time_label_icon'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("time_label_icon");
+    tt->descr = tdrpStrDup("Icon for time label");
+    tt->help = tdrpStrDup("Array defining the icon to be used for the time label positions. The icon is a bit-mapped square icon.  You put 1's in the positions of the icon where the bit should be displayed, and 0's in the positions that are not a part of the icon. You may want to look at an example parameter file to see how this is done.");
+    tt->array_offset = (char *) &_time_label_icon - &_start_;
+    tt->array_n_offset = (char *) &time_label_icon_n - &_start_;
+    tt->array2D_offset = (char *) &__time_label_icon - &_start_;
+    tt->array_n1_offset = (char *) &time_label_icon_n1 - &_start_;
+    tt->array_n2_offset = (char *) &time_label_icon_n2 - &_start_;
+    tt->is_array = TRUE;
+    tt->is_array2D = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(int);
+    tt->array_n = 25;
+    tt->array_n1 = 5;
+    tt->array_n2 = 5;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n1 * tt->array_n2 *
+          sizeof(tdrpVal_t));
+      tt->array_vals[0].i = 0;
+      tt->array_vals[1].i = 0;
+      tt->array_vals[2].i = 1;
+      tt->array_vals[3].i = 0;
+      tt->array_vals[4].i = 0;
+      tt->array_vals[5].i = 0;
+      tt->array_vals[6].i = 1;
+      tt->array_vals[7].i = 1;
+      tt->array_vals[8].i = 1;
+      tt->array_vals[9].i = 0;
+      tt->array_vals[10].i = 1;
+      tt->array_vals[11].i = 1;
+      tt->array_vals[12].i = 1;
+      tt->array_vals[13].i = 1;
+      tt->array_vals[14].i = 1;
+      tt->array_vals[15].i = 0;
+      tt->array_vals[16].i = 1;
+      tt->array_vals[17].i = 1;
+      tt->array_vals[18].i = 1;
+      tt->array_vals[19].i = 0;
+      tt->array_vals[20].i = 0;
+      tt->array_vals[21].i = 0;
+      tt->array_vals[22].i = 1;
+      tt->array_vals[23].i = 0;
+      tt->array_vals[24].i = 0;
     tt++;
     
     // trailing entry has param_name set to NULL
