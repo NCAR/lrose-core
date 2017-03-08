@@ -123,42 +123,47 @@ Hsrl2Radx::~Hsrl2Radx()
 int Hsrl2Radx::Run()
 {
   // reading in calibration files here ----- 
-  const char* baseline = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/baseline_correction_20150601T0000.blc";
-  const char* diffDefGeo = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/diff_default_geofile_20120201T0000.geo";
-  const char* geoDef = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/geofile_default_20150601T0000.geo";
-  const char* afterpulse = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/afterpulse_default_20061001T0000.ap";
-  const char* calvals = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/calvals_gvhsrl.txt";
-  //const char* variable = "combined_hi_dead_time";//look for this calibration block
-  //const char* variable = "sounding_id";
-  //const char* variable = "non_filtered_energy_monitor";
-  //const char* variable = "baseline_adjust";
-  //const char* variable = "apd_pulse_timing";
-  const char* variable = "quarter_wave_plate_rotation";
-  //const char* variable = "";
-  
+  // Last arguments in these are a debug flag
+
+  hi_CR_DT=hi_CR_DT.readCalVals(_params.calvals_gvhsrl_path, 
+			  _params.combined_hi_dead_time_name, false); 
+  lo_CR_DT=lo_CR_DT.readCalVals(_params.calvals_gvhsrl_path, 
+			  _params.combined_lo_dead_time_name, false); 
+  cross_CR_DT=cross_CR_DT.readCalVals(_params.calvals_gvhsrl_path, 
+				_params.cross_pol_dead_time_name, false); 
+  mol_CR_DT=mol_CR_DT.readCalVals(_params.calvals_gvhsrl_path, 
+			    _params.molecular_dead_time_name, false); 
+
   CalReader cr;
-  cr=cr.readCalVals(calvals, variable, false); // Last argument is a debug flag
-  vector< vector<double> > blCor;
-  blCor=cr.readBaselineCorrection(baseline, false); // Last argument is a debug flag
-  vector< vector<double> > diffDGeoCor;  
-  diffDGeoCor=cr.readDiffDefaultGeo(diffDefGeo, false); // Last argument is a debug flag
-  vector< vector<double> > geoDefCor;  
-  geoDefCor=cr.readGeofileDefault(geoDef, false); // Last argument is a debug flag
-  vector< vector<double> > afPulCor;  
-  afPulCor=cr.readAfterPulse(afterpulse, false); // Last argument is a debug flag
+  blCor=cr.readBaselineCorrection(_params.baseline_calibration_path, false); 
+  diffDGeoCor=cr.readDiffDefaultGeo(_params.diff_default_geofile_path, false); 
+  geoDefCor=cr.readGeofileDefault(_params.geofile_default_path, false); 
+  afPulCor=cr.readAfterPulse(_params.afterpulse_default_path, false); 
+  
+  //testing date/time matching functions
+    
+  hi_CR_DT=hi_CR_DT.sortTime(hi_CR_DT,false); 
+  lo_CR_DT=lo_CR_DT.sortTime(lo_CR_DT,false); 
+  cross_CR_DT=cross_CR_DT.sortTime(cross_CR_DT,false); 
+  mol_CR_DT=mol_CR_DT.sortTime(mol_CR_DT,false); 
   
   RadxTime ti(2015, 07, 14, 23 , 0 , 0 , 0.0);
-  
-  //cr.printBlock();
-    
-  cr=cr.sortTime(cr,true);
-  
-  int temp;
-  temp=cr.dateMatch(cr,ti);
-  
-  
-  
-  
+
+  hi_pos=hi_CR_DT.dateMatch(hi_CR_DT,ti);
+  lo_pos=lo_CR_DT.dateMatch(lo_CR_DT,ti);
+  cross_pos=cross_CR_DT.dateMatch(cross_CR_DT,ti);
+  mol_pos=mol_CR_DT.dateMatch(mol_CR_DT,ti);
+ 
+  //cout<<"hi_pos calibration time position = "<<hi_pos<<'\n';
+  //cout<<"lo_pos calibration time position = "<<lo_pos<<'\n';
+  //cout<<"cross_pos calibration time position = "<<cross_pos<<'\n';
+  //cout<<"mol_pos calibration time position = "<<mol_pos<<'\n';
+
+
+
+
+
+
   //done reading calibration files. 
 
   if (_params.mode == Params::ARCHIVE) {
@@ -857,6 +862,9 @@ void Hsrl2Radx::_addEnvFields(RadxVol &vol)
   // loop through the rays
 
   vector<RadxRay *> rays = vol.getRays();
+  
+  //cout<<"rays.size()="<<rays.size()<<'\n';
+  
   for(size_t iray = 0; iray < rays.size(); iray++) {
 
     RadxRay *ray = rays[iray];
@@ -867,13 +875,16 @@ void Hsrl2Radx::_addEnvFields(RadxVol &vol)
 
     double altitudeKm = geo->getAltitudeKmMsl();
     double elevDeg = ray->getElevationDeg();
-
+    
     size_t nGates = ray->getNGates();
 
-    RadxArray<Radx::fl32> htKm_, tempK_, presHpa_;
+    //cout<<"nGates="<<nGates<<'\n';
+    
+    RadxArray<Radx::fl32> htKm_, tempK_, presHpa_,testThing_;
     Radx::fl32 *htKm = htKm_.alloc(nGates);
     Radx::fl32 *tempK = tempK_.alloc(nGates);
     Radx::fl32 *presHpa = presHpa_.alloc(nGates);
+    Radx::fl32 *testThing = testThing_.alloc(nGates);
 
     double sinEl = sin(elevDeg * Radx::DegToRad);
     double startRangeKm = ray->getStartRangeKm();
@@ -885,6 +896,7 @@ void Hsrl2Radx::_addEnvFields(RadxVol &vol)
       double htM = htKm[igate] * 1000.0;
       tempK[igate] = stdAtmos.ht2temp(htM);
       presHpa[igate] = stdAtmos.ht2pres(htM);
+      testThing[igate] = igate;
     }
 
     RadxField *htField =
@@ -901,7 +913,47 @@ void Hsrl2Radx::_addEnvFields(RadxVol &vol)
       ray->addField("pressure", "HPa", nGates, Radx::missingFl32, presHpa, true);
     presField->setLongName("pressure_from_std_atmos");
     presField->setRangeGeom(startRangeKm, gateSpacingKm);
+    
+    
+    
+    RadxField *testThingField =
+      ray->addField("testThing", "unit", nGates, Radx::missingFl32, testThing, true);
+    testThingField->setLongName("Test_thing");
+    testThingField->setRangeGeom(startRangeKm, gateSpacingKm);
+    
 
+
+    const RadxField *hiField = ray->getField(_params.combined_hi_field_name);
+    if(hiField != NULL)
+      {
+	const Radx::fl32 *hiData = hiField->getDataFl32();
+	//cout<<"iray="<<iray<<" : hiData="<<*hiData<<'\n';
+      }
+     
+    const RadxField *loField = ray->getField(_params.combined_lo_field_name);
+    if(loField != NULL)
+      {
+	const Radx::fl32 *loData = loField->getDataFl32();
+	//cout<<"iray="<<iray<<" : loData="<<*loData<<'\n';
+      }
+    
+    const RadxField *molField = ray->getField(_params.molecular_field_name);
+    if(molField != NULL)
+      {
+	const Radx::fl32 *molData = molField->getDataFl32();
+	//cout<<"iray="<<iray<<" : molData="<<*molData<<'\n';
+      }
+    
+    const RadxField *crossField = ray->getField(_params.cross_field_name);
+    if(crossField != NULL)
+      {
+	const Radx::fl32 *crossData = crossField->getDataFl32();
+	//cout<<"iray="<<iray<<" : crossData="<<*crossData<<'\n';
+      }
+    
+    
+    
+    
   } // iray
   
 

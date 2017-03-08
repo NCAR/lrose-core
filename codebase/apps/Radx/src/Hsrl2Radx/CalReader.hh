@@ -52,8 +52,10 @@ private:
 public:
 
   CalReader();
-  CalReader(string inName, string inUnits, vector< RadxTime > inTime, vector<string> inDataStr);//constructor for string type data
-  CalReader(string inName, string inUnits, vector< RadxTime > inTime, vector< vector<double> > inDataNum);////constructor for num type data
+  CalReader(string inName, string inUnits, vector< RadxTime > inTime, 
+	    vector<string> inDataStr);//constructor for string type data
+  CalReader(string inName, string inUnits, vector< RadxTime > inTime, 
+	    vector< vector<double> > inDataNum);//constructor for num type data
  
   void setVarName(string inName);
   void setVarUnits(string inUnits);

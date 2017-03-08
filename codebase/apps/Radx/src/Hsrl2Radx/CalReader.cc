@@ -64,7 +64,8 @@ using namespace std;
 
 
 //void CalReader::ReadCalvals(string pathToCalValsFile, timet time)
-vector <vector<double> > CalReader::readBaselineCorrection(const char* file, bool debug)
+vector <vector<double> > CalReader::readBaselineCorrection(const char* file, 
+							   bool debug)
 {
   if(debug)
     cout<< "in readBaselineCorrection"<<'\n';
@@ -88,7 +89,8 @@ vector <vector<double> > CalReader::readBaselineCorrection(const char* file, boo
       
       string test = "#";
             
-      if(!(line.substr(0, test.length())==test))//comments at begining of file begin with #, ignore those lines and process the rest. 
+      if(!(line.substr(0, test.length())==test))//comments at begining of file 
+	//begin with #, ignore those lines and process the rest. 
 	{
 	  double binnum; 
 	  ss>>binnum;
@@ -147,7 +149,8 @@ vector <vector<double> > CalReader::readBaselineCorrection(const char* file, boo
 
 }
 
-vector <vector<double> > CalReader::readDiffDefaultGeo(const char* file, bool debug)
+vector <vector<double> > CalReader::readDiffDefaultGeo(const char* file, 
+						       bool debug)
 {
   if(debug)
     cout<< "in _readDiffDefaultGeo"<<'\n';
@@ -168,7 +171,8 @@ vector <vector<double> > CalReader::readDiffDefaultGeo(const char* file, bool de
 
       string test = "#";
             
-      if(!(line.substr(0, test.length())==test))//comments at begining of file begin with #, ignore those lines and process the rest. 
+      if(!(line.substr(0, test.length())==test))//comments at begining of file 
+	//begin with #, ignore those lines and process the rest. 
 	{
 	  double altitudes; 
 	  ss>>altitudes;
@@ -214,7 +218,8 @@ vector <vector<double> > CalReader::readDiffDefaultGeo(const char* file, bool de
 
 } 
 
-vector <vector<double> > CalReader::readGeofileDefault(const char* file, bool debug)
+vector <vector<double> > CalReader::readGeofileDefault(const char* file, 
+						       bool debug)
 {
   if(debug)
     cout<< "in _readGeofileDefault"<<'\n';
@@ -232,7 +237,8 @@ vector <vector<double> > CalReader::readGeofileDefault(const char* file, bool de
        
       string test = "#";
             
-      if(!(line.substr(0, test.length())==test))//comments at begining of file begin with #, ignore those lines and process the rest. 
+      if(!(line.substr(0, test.length())==test))//comments at begining of file 
+	//begin with #, ignore those lines and process the rest. 
 	{
 	  double range; 
 	  ss>>range;
@@ -283,7 +289,8 @@ vector <vector<double> > CalReader::readAfterPulse(const char* file, bool debug)
        
       string test = "#";
             
-      if(!(line.substr(0, test.length())==test))//comments at begining of file begin with #, ignore those lines and process the rest. 
+      if(!(line.substr(0, test.length())==test))//comments at begining of file 
+	//begin with #, ignore those lines and process the rest. 
 	{
 	  double bin; 
 	  ss>>bin;
@@ -364,10 +371,13 @@ vector <vector<double> > CalReader::readAfterPulse(const char* file, bool debug)
 
 } 
 
-CalReader CalReader::readCalVals(const char* file, const char* variable, bool debug)
+CalReader CalReader::readCalVals(const char* file, const char* variable, 
+				 bool debug)
 {
   CalReader dataBlock;
-  bool rightBlock=false;//each block of the calval file has the data in the calvals class, and we want to scan through the correct block and return just that data. Don't bother returning data from other blocks. 
+  bool rightBlock=false;//each block of the calval file has the data in the 
+  //calvals class, and we want to scan through the correct block and return 
+  //just that data. Don't bother returning data from other blocks. 
   if(debug)
     cout<< "in readCalvals"<<'\n';
   std::ifstream infile(file);
@@ -377,19 +387,21 @@ CalReader CalReader::readCalVals(const char* file, const char* variable, bool de
       std::stringstream ss;
       ss << line;
       
-      line=removeWhitespace(line);//removes whitespace from begining or end of line
+      line=removeWhitespace(line);//remove space from begining or end of line
 
-      if(checkForChar("#",line)>-1)// now we remove comments which are delimited by the #
+      if(checkForChar("#",line)>-1)//remove comments which begin with the #
 	line=line.substr(0, checkForChar("#",line));
       
-      line=removeWhitespace(line);//removes whitespace from begining or end of line
+      line=removeWhitespace(line);//remove space from begining or end of line
       
-      if(line.length()>0)//now that we've cleaned up the line, only want to bother with it if it has non-zero length. 
+      if(line.length()>0)//only look at lines with non 0 length
 	{
 	  if(debug)
 	    cout<<line<<'\n';
 	  
-	  if( (line.at(0)>='a' && line.at(0)<='z') || (line.at(0)>='A' && line.at(0)<='Z') )//if the first char is a letter then it is a variable name
+	  if( (line.at(0)>='a' && line.at(0)<='z') || 
+	      (line.at(0)>='A' && line.at(0)<='Z') )
+	    //if the first char is a letter then it is a variable name
 	    {
 	      if(debug)
 		cout<<"starts with letter"<<'\n';
@@ -433,7 +445,8 @@ CalReader CalReader::readCalVals(const char* file, const char* variable, bool de
 		}
 	    }
 	      
-	  if(rightBlock && line.at(0)>='0' && line.at(0)<='9' )//if the first char is a number then it is a date/data pair
+	  if(rightBlock && line.at(0)>='0' && line.at(0)<='9' )
+	    //if the first char is a number then it is a date/data pair
 	    {
 	      if(debug)
 		cout<<"starts with number"<<'\n';
@@ -459,7 +472,8 @@ CalReader CalReader::readCalVals(const char* file, const char* variable, bool de
 	      date=date.substr(checkForChar("-",date)+1,date.length());
 	      
 	      temp=date.substr(0,checkForChar("-",date)); // month
-	      for (int i=0; temp[i]; i++) //make sure month letters are all lowercase
+	      for (int i=0; temp[i]; i++) 
+		//make sure month letters are all lowercase
 		temp[i] = tolower(temp[i]);
 
 	      if(temp=="jan")
@@ -501,13 +515,15 @@ CalReader CalReader::readCalVals(const char* file, const char* variable, bool de
 		  istringstream ( temp ) >> hour;
 		  date=date.substr(checkForChar(":",date)+1,date.length());
 		}
-	      if(date.length()>0 && checkForChar(":",date)>-1 )//if there is a timestamp and it has seconds listed
+	      if(date.length()>0 && checkForChar(":",date)>-1 )
+		//if there is a timestamp and it has seconds listed
 		{  
 		  temp=date.substr(0,checkForChar(":",date)); // min
 		  istringstream ( temp ) >> min;
 		  date=date.substr(checkForChar(":",date)+1,date.length());
 		}
-	      else if(date.length()>0 && checkForChar(":",date)==-1 )//if there is a timestamp without seconds listed read in the minutes and be done
+	      else if(date.length()>0 && checkForChar(":",date)==-1 )
+		//if timestamp has no seconds read in the minutes and be done
 		{
 		  temp=date; // min
 		  istringstream ( temp ) >> min;
@@ -521,18 +537,23 @@ CalReader CalReader::readCalVals(const char* file, const char* variable, bool de
 		}
 	      	    
        	      if(debug)
-		cout<<"day="<<day<<"  :  mon="<<mon<<"  :  year="<<year<<"  :  hour="<<hour<<"  :  min="<<min<<"  :  sec="<<sec<<'\n';
+		cout<<"day="<<day<<"  :  mon="<<mon<<"  :  year="<<year
+		    <<"  :  hour="<<hour<<"  :  min="<<min<<"  :  sec="
+		    <<sec<<'\n';
 	      
-	      RadxTime dateStamp(year, mon, day, hour, min, sec, 0.0);//passing 0.0 for subseconds
+	      RadxTime dateStamp(year, mon, day, hour, min, sec, 0.0);
+	      //passing 0.0 for subseconds
 	      
 	      if(debug)
 		cout<<"dateStamp="<<dateStamp<<'\n';
 	      
-	      int strData=-1; // will hold the position of the ' or " if the data is a string
-	      int numData=-1; // will hold the position of the [ if the data is a number
+	      int strData=-1; //hold the position of ' or " if data is a string
+	      int numData=-1; //hold the position of [ if the data is a number
 	      
-	      strData=max(checkForChar("'",line),checkForChar("\"",line));//string data is captured in ' quotes or " quotes
-	      numData=checkForChar("[",line);//numbers are captured in []	    
+	      strData=max(checkForChar("'",line),checkForChar("\"",line));
+	      //string data is captured in ' quotes or " quotes
+	      numData=checkForChar("[",line);
+	      //numbers are captured in []	    
 	      	
 	      if(debug)
 		cout<<"strData"<<strData<<'\n';
@@ -540,7 +561,8 @@ CalReader CalReader::readCalVals(const char* file, const char* variable, bool de
 		cout<<"numData"<<numData<<'\n';
 		  
 	      string strValue;
-	      vector<double> numValue;//check numValue.size() to see its length, if length is 0 there is no numerical data and is string data. 
+	      vector<double> numValue;//check numValue.size() to see its length 
+	      //if length is 0 there is no numerical data and is string data. 
 	   
 	      if(strData==-1 && numData==-1)
 		{
@@ -561,11 +583,14 @@ CalReader CalReader::readCalVals(const char* file, const char* variable, bool de
 		  strValue="";//don't want errors it just gives an empty result
 		  string numStrTemp;
 		  numStrTemp = line.substr(numData+1,line.length()-numData);
-		  //we need the start and end value for the numbers, and any multipliers that come after. numStrTemp does still have the ] but not the [.
+		  //we need the start and end value for the numbers, 
+		  //and any multipliers that come after. 
+		  //numStrTemp does still have the ] but not the [.
 		  numStrTemp=removeWhitespace(numStrTemp);
 		  
 		  double hasComma;
-		  hasComma = checkForChar(",",numStrTemp);//this finds the first instance of , which delimits different numbers. 
+		  hasComma = checkForChar(",",numStrTemp);
+		  //this finds the first , which delimits different numbers. 
 		  
 		  string temp;
 		  double data;
@@ -580,11 +605,13 @@ CalReader CalReader::readCalVals(const char* file, const char* variable, bool de
 		      numStrTemp=numStrTemp.substr(hasComma+1,numStrTemp.length());
 		      numStrTemp=removeWhitespace(numStrTemp);
 		      
-		      hasComma = checkForChar(",",numStrTemp);//this finds the first instance of , which delimits different numbers. 
+		      hasComma = checkForChar(",",numStrTemp);
+		      //find the next comma
 		    }
 		  
 		  double endNumData;
-		  endNumData = checkForChar("]",numStrTemp);// the ] is at endNumData which is not nessicarily the end of the string
+		  endNumData = checkForChar("]",numStrTemp);
+		  // ] is not always the end of the string, multipliers are used
 		  
 		  temp=numStrTemp.substr(0,endNumData);
 		  istringstream ( temp ) >> data;
@@ -640,7 +667,8 @@ CalReader CalReader::readCalVals(const char* file, const char* variable, bool de
 		    }
 		}
 	      
-	    }//if the first char is a number then it is a date/data pair, end that processing
+	    }//if the first char is a number then it is a date/data pair, 
+	  //end that processing
 	  
 	}//end line length check
     
@@ -657,7 +685,8 @@ CalReader CalReader::readCalVals(const char* file, const char* variable, bool de
 
 
 
-string CalReader::removeWhitespace(string s)//this function removes spaces from the begining and end of strings
+string CalReader::removeWhitespace(string s)
+//this function removes spaces from the begining and end of strings
 {
   while(s.length()>0 && (s.substr(0, 1)==" ") )
     s=s.substr(1,s.length());
@@ -667,7 +696,9 @@ string CalReader::removeWhitespace(string s)//this function removes spaces from 
 }
 
 
-int CalReader::checkForChar(string subSt, string str)//checks string for a particular substring and returns the location of the start of that substring, returns -1 if not found. 
+int CalReader::checkForChar(string subSt, string str)
+//checks string for a particular substring and returns the location of the 
+//start of that substring, returns -1 if not found. 
 {
   for(unsigned int i=0;i<str.length();i++)
     if( (str.substr(i, subSt.length())==subSt) )
@@ -682,7 +713,9 @@ int CalReader::checkForChar(string subSt, string str)//checks string for a parti
 CalReader::CalReader()
 {}
 
-CalReader::CalReader(string inName, string inUnits, vector< RadxTime > inTime, vector<string> inDataStr)//constructor for string type data
+CalReader::CalReader(string inName, string inUnits, vector< RadxTime > inTime, 
+		     vector<string> inDataStr)
+//constructor for string type data
 {
   varName=inName;
   varUnits=inUnits;
@@ -692,7 +725,9 @@ CalReader::CalReader(string inName, string inUnits, vector< RadxTime > inTime, v
   isNum=false;
 }
 
-CalReader::CalReader(string inName, string inUnits, vector< RadxTime > inTime, vector< vector<double> > inDataNum)////constructor for num type data
+CalReader::CalReader(string inName, string inUnits, vector< RadxTime > inTime, 
+		     vector< vector<double> > inDataNum)
+//constructor for num type data
 {
   varName=inName;
   varUnits=inUnits;
@@ -767,13 +802,15 @@ vector< vector<double> > CalReader::getDataNum()
 
 bool CalReader::dataTypeisNum()
 {
-  assert(isStr!=isNum);//data should be either string type or numbers, not both or neither. 
+  assert(isStr!=isNum);
+  //data should be either string type or numbers, not both or neither. 
   return isNum;    
 }
 
 bool CalReader::dataTypeisStr()
 {
-  assert(isStr!=isNum);//data should be either string type or numbers, not both or neither. 
+  assert(isStr!=isNum);
+  //data should be either string type or numbers, not both or neither. 
   return isStr;    
 }
 
@@ -824,7 +861,8 @@ CalReader CalReader::sortTime(CalReader toSort, bool debug)
     {  
       for(unsigned int j=0; j<(toSort.time).size()-1;j++)
 	{
-	  if( ((toSort.time).at(j)).asDouble() < ((toSort.time).at(j+1)).asDouble() )
+	  if( ((toSort.time).at(j)).asDouble() < 
+	      ((toSort.time).at(j+1)).asDouble() )
 	    {
 	      RadxTime tempT=(toSort.time).at(j);
 	      (toSort.time).at(j)=(toSort.time).at(j+1);
