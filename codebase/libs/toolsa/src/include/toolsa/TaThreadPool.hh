@@ -97,21 +97,15 @@ private:
   
   bool _debug;
 
-  pthread_mutex_t _mainMutex;
-  pthread_mutex_t _availMutex;
-  pthread_mutex_t _doneMutex;
+  pthread_mutex_t _mutex;    // general mutex
+  pthread_cond_t _availCond; // available threads condition variable
 
-  pthread_cond_t _availCond;
-  pthread_cond_t _doneCond;
-
-  deque<TaThread *> _mainPool;
-  deque<TaThread *> _availPool;
-  deque<TaThread *> _donePool;
+  deque<TaThread *> _mainPool;  // all of the threads
+  deque<TaThread *> _availPool; // threads available for use
+  deque<TaThread *> _donePool;  // threads done but not yet dealt with
   
-  TaThread *_getAvailThread(bool block);
-  TaThread *_getAvailThreadBlock();
-  TaThread *_getAvailThreadNoBlock();
-  TaThread *_getDoneThreadNoBlock();
+  TaThread *_getAvailThread();
+  TaThread *_getDoneThread();
 
 };
 
