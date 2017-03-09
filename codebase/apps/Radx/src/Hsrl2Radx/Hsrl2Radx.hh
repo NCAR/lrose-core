@@ -100,6 +100,7 @@ private:
 
   int _processUwRawFile(const string &filePath);
   void _addEnvFields(RadxVol &vol);
+  void _addDerivedFields(RadxVol &vol);
 
 };
 
