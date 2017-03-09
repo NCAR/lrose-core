@@ -140,6 +140,9 @@ void TaThread::signalRunToStart()
 
   pthread_mutex_lock(&_startMutex);
   _startFlag = true;
+  if (_pool != NULL) {
+    _pool->incrementStartCount();
+  }
   pthread_cond_signal(&_startCond);
   pthread_mutex_unlock(&_startMutex);
   

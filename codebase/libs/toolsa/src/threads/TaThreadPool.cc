@@ -49,7 +49,9 @@ TaThreadPool::TaThreadPool()
   _debug = false;
 
   pthread_mutex_init(&_mutex, NULL);
-  pthread_cond_init(&_availCond, NULL);
+  pthread_cond_init(&_emptyCond, NULL);
+
+  initForRun();
 
 }
 
@@ -111,7 +113,7 @@ void TaThreadPool::addThreadToAvail(TaThread *thread)
   _availPool.push_front(thread);
   if (empty) {
     // indicate we are adding a thread to an empty pool
-    pthread_cond_signal(&_availCond);
+    pthread_cond_signal(&_emptyCond);
   }
   pthread_mutex_unlock(&_mutex);
 
@@ -128,16 +130,66 @@ void TaThreadPool::addThreadToDone(TaThread *thread)
   pthread_mutex_lock(&_mutex);
   bool empty = _availPool.empty() && _donePool.empty();
   _donePool.push_front(thread);
+  _countDone++;
   if (empty) {
     // indicate we are adding a thread to an empty pool
-    pthread_cond_signal(&_availCond);
+    pthread_cond_signal(&_emptyCond);
   }
   pthread_mutex_unlock(&_mutex);
 
 }
 
 /////////////////////////////////////////////////////////////
-// Get a thread from the done or avail pool.
+// Initialize the pool for a run.
+// Set counts to zero.
+// The counts are used to determine when all of the
+// threads is use are done.
+
+void TaThreadPool::initForRun()
+{
+  pthread_mutex_lock(&_mutex);
+  _readyForDoneCheck = false;
+  _countStarted = 0;
+  _countDone = 0;
+  pthread_mutex_unlock(&_mutex);
+}
+
+/////////////////////////////////////////////////////////////
+// set the condition that we have completed starting new
+// threads and are ready to collect remaining done threads
+
+void TaThreadPool::setReadyForDoneCheck()
+{
+  _readyForDoneCheck = true;
+}
+
+/////////////////////////////////////////////////////////////
+// add to start count
+// this is called by TaThread when starting
+
+void TaThreadPool::incrementStartCount()
+{
+  pthread_mutex_lock(&_mutex);
+  _countStarted++;
+  pthread_mutex_unlock(&_mutex);
+}
+
+/////////////////////////////////////////////////////////////
+// Check if all the threads are done.
+
+bool TaThreadPool::checkAllDone()
+{
+  bool allDone = false;
+  pthread_mutex_lock(&_mutex);
+  if (_readyForDoneCheck) {
+    allDone = (_countDone == _countStarted);
+  }
+  pthread_mutex_unlock(&_mutex);
+  return allDone;
+}
+
+/////////////////////////////////////////////////////////////
+// Get next thread from the done or avail pool.
 // Preference is given to done threads.
 // If block is true, blocks until a suitable thread is available.
 // If block is false an no thread is available, returns NULL.
@@ -183,11 +235,10 @@ TaThread *TaThreadPool::getNextThread(bool block, bool &isDone)
   
   pthread_mutex_lock(&_mutex);
 
-  // while (_availPool.empty() && _donePool.empty()) {
   while (true) {
 
     if (_availPool.empty() && _donePool.empty()) {
-      pthread_cond_wait(&_availCond, &_mutex);
+      pthread_cond_wait(&_emptyCond, &_mutex);
     }
 
     // return done thread if available
@@ -216,7 +267,8 @@ TaThread *TaThreadPool::getNextThread(bool block, bool &isDone)
 }
 
 /////////////////////////////////////////////////////////////
-// Get a avail thread, if available, without blocking
+// Get a avail thread, without blocking
+// returns NULL if no avail thread is ready
   
 TaThread *TaThreadPool::_getAvailThread()
 
@@ -240,7 +292,8 @@ TaThread *TaThreadPool::_getAvailThread()
 }
 
 /////////////////////////////////////////////////////////////
-// Get a done thread, if available, without blocking
+// Get a done thread, without blocking
+// returns NULL if no done thread is ready
   
 TaThread *TaThreadPool::_getDoneThread()
 

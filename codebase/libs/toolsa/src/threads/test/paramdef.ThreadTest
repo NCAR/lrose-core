@@ -1,0 +1,60 @@
+/*********************************************************
+ * parameter definitions for ThreadTest
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * March 2017
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  THREAD_POOL, THREADS_RUN_ONCE
+} thread_mode_t;
+
+paramdef enum thread_mode_t {
+  p_default = THREADS_RUN_ONCE;
+  p_descr = "Controls how threads are set up and run.";
+  p_help = "THREAD_POOL: a pool is created containing n_threads. The threads in the pool are used and re-used until the processing is complete. THREADS_RUN_ONCE: n_threads are created and the values are distributed amongst these threads. They run once only, and are then deleted.";
+} thread_mode;
+
+commentdef {
+  p_header = "CONTROLLING THE THREADING";
+}
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of threads used.";
+} n_threads;
+
+paramdef double {
+  p_default = 1.0e8;
+  p_descr = "We run the computations from 0 up to the maximum value.";
+  p_help = "Increment is 1.0.";
+} max_val;
+
+paramdef int {
+  p_default = 100000;
+  p_descr = "Number of values assigned to each thread each time it runs.";
+  p_help = "If thread_mode is THREADS_RUN_ONCE, then the value range is set so that after each thread runs once all values have been processed.";
+} n_vals_per_thread;
+
+  
