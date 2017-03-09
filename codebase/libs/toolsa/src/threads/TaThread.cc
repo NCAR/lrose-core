@@ -104,8 +104,10 @@ TaThread::~TaThread()
 
   // cancel thread
 
-  cancel();
-
+  if (_thread != 0) {
+    pthread_cancel(_thread);
+  }
+  
   // free up mutexes
 
   pthread_mutex_destroy(&_startMutex);
