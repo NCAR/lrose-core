@@ -56,33 +56,35 @@ public:
   virtual ~TaThreadPool();
   
   // Add a thread to the main pool
+  // this is used to initialize the pool.
   
   void addThreadToMain(TaThread *thread);
   
-  // Add a thread to the idle pool
+  // Add a thread to the avail pool
   // This is called after a done thread is handled.
 
-  void addThreadToIdle(TaThread *thread);
+  void addThreadToAvail(TaThread *thread);
   
   // Add a thread to the done pool
   // This is normally called by the thread itself, once it is done.
   
   void addThreadToDone(TaThread *thread);
   
-  // Get a thread from the done or idle pool.
+  // Get a thread from the done or avail pool.
   // Preference is given to done threads.
   // If block is true, blocks until a suitable thread is available.
   // If block is false an no thread is available, returns NULL.
   //
   // If isDone is returned true, the thread came from the done pool.
   //   Handle any return information from the done thread, and then
-  //   add it into the idle pool.
+  //   add it into the avail pool, using addThreadToAvail();
   //
-  // If isDone is returned false, the thread came from the idle pool.
+  // If isDone is returned false, the thread came from the avail pool.
   //   In this case, set the thread running.
-  //   It will add itself to the done pool when done.
+  //   It will add itself to the done pool when done,
+  //      using addThreadToDone().
   
-  TaThread *getThread(bool block, bool &isDone);
+  TaThread *getNextThread(bool block, bool &isDone);
   
   // debugging
   
@@ -96,18 +98,20 @@ private:
   bool _debug;
 
   pthread_mutex_t _mainMutex;
-  pthread_mutex_t _idleMutex;
+  pthread_mutex_t _availMutex;
   pthread_mutex_t _doneMutex;
 
-  pthread_cond_t _idleCond;
+  pthread_cond_t _availCond;
   pthread_cond_t _doneCond;
 
   deque<TaThread *> _mainPool;
-  deque<TaThread *> _idlePool;
+  deque<TaThread *> _availPool;
   deque<TaThread *> _donePool;
   
-  TaThread *_getIdleThread(bool block);
-  TaThread *_getDoneThread(bool block);
+  TaThread *_getAvailThread(bool block);
+  TaThread *_getAvailThreadBlock();
+  TaThread *_getAvailThreadNoBlock();
+  TaThread *_getDoneThreadNoBlock();
 
 };
 

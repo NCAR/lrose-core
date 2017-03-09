@@ -36,6 +36,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <toolsa/TaThread.hh>
+#include <toolsa/TaThreadPool.hh>
 #include <cstring>
 #include <string>
 #include <cassert>
@@ -79,6 +80,8 @@ TaThread::TaThread()
   _completeFlag = false;
   _busyFlag = false;
   _exitFlag = false;
+
+  _pool = NULL;
   
 }
 
@@ -302,6 +305,12 @@ void *TaThread::_run()
     // unlock done mutex
     
     _signalComplete();
+
+    // add to the done list on the pool, if part of a pool
+
+    if (_pool != NULL) {
+      _pool->addThreadToDone(this);
+    }
     
   } // while
 

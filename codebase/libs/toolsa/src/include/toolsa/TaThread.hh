@@ -62,6 +62,7 @@
 
 #include <string>
 #include <pthread.h>
+class TaThreadPool;
 
 ////////////////////////////
 // Generic thread base class
@@ -213,6 +214,10 @@ public:
   void setThreadContext(void *context) { _context = context; }
   void *getThreadContext(void) { return _context; }
 
+  // set the pool if this thread is part of a pool
+
+  void setPool(TaThreadPool *pool) { _pool = pool; }
+
 protected:
 
 private:
@@ -241,6 +246,8 @@ private:
   bool _completeFlag;
   bool _busyFlag;
   bool _exitFlag;
+
+  TaThreadPool *_pool;
 
   // Thread waits for parent to signal start
 
