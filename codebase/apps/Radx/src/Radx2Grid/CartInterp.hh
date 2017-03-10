@@ -141,10 +141,10 @@ private:
   double _searchRadiusAz;
   int _searchMaxDistAz;
 
-  CartThread _threadComputeLowerLeft;
-  CartThread _threadComputeUpperLeft;
-  CartThread _threadComputeLowerRight;
-  CartThread _threadComputeUpperRight;
+  // CartThread _threadComputeLowerLeft;
+  // CartThread _threadComputeUpperLeft;
+  // CartThread _threadComputeLowerRight;
+  // CartThread _threadComputeUpperRight;
 
   // class for neighboring points
 
@@ -254,10 +254,10 @@ private:
   void _printSearchMatrix(FILE *out, int res);
   void _printSearchMatrixPoint(FILE *out, int iel, int iaz);
 
-  static void *_computeSearchLowerLeft(void *thread_data);
-  static void *_computeSearchUpperLeft(void *thread_data);
-  static void *_computeSearchLowerRight(void *thread_data);
-  static void *_computeSearchUpperRight(void *thread_data);
+  // static void *_computeSearchLowerLeft(void *thread_data);
+  // static void *_computeSearchUpperLeft(void *thread_data);
+  // static void *_computeSearchLowerRight(void *thread_data);
+  // static void *_computeSearchUpperRight(void *thread_data);
 
   int _fillSearchLowerLeft(int level,
                            vector<SearchIndex> &thisSearch,
@@ -357,7 +357,75 @@ private:
   void _convStratComputeKernels();
   void _convStratComputeVertLookups();
 
-  // inner class for starting timers in a separate thread
+  //////////////////////////////////////////////////////////////
+  // Classes for threads
+  //////////////////////////////////////////////////////////////
+
+  //////////////////////////////////////////////////////////////
+  // inner class for filling out the lower-left search
+  
+  class FillSearchLowerLeft : public TaThread
+  {  
+  public:
+    // constructor
+    FillSearchLowerLeft(CartInterp *cartInterp);
+    // override run method
+    virtual void run();
+  private:
+    CartInterp *_cartInterp; // context
+  };
+
+  //////////////////////////////////////////////////////////////
+  // inner class for filling out the lower-right search
+  
+  class FillSearchLowerRight : public TaThread
+  {  
+  public:
+    // constructor
+    FillSearchLowerRight(CartInterp *cartInterp);
+    // override run method
+    virtual void run();
+  private:
+    CartInterp *_cartInterp; // context
+  };
+
+  //////////////////////////////////////////////////////////////
+  // inner class for filling out the upper-left search
+  
+  class FillSearchUpperLeft : public TaThread
+  {  
+  public:
+    // constructor
+    FillSearchUpperLeft(CartInterp *cartInterp);
+    // override run method
+    virtual void run();
+  private:
+    CartInterp *_cartInterp; // context
+  };
+
+  //////////////////////////////////////////////////////////////
+  // inner class for filling out the upper-right search
+  
+  class FillSearchUpperRight : public TaThread
+  {  
+  public:
+    // constructor
+    FillSearchUpperRight(CartInterp *cartInterp);
+    // override run method
+    virtual void run();
+  private:
+    CartInterp *_cartInterp; // context
+  };
+
+  // threads for computing angle limits
+
+  FillSearchLowerLeft _threadFillSearchLowerLeft;
+  FillSearchLowerRight _threadFillSearchLowerRight;
+  FillSearchUpperLeft _threadFillSearchUpperLeft;
+  FillSearchUpperRight _threadFillSearchUpperRight;
+
+  //////////////////////////////////////////////////////////////
+  // inner class for computing 2D texture
 
   class ComputeTexture : public TaThread
   {  
@@ -440,6 +508,8 @@ private:
     fl32 *_filledSqTexture;
 
   };
+
+  //////////////////////////////////////////////////////////////
 
 };
 
