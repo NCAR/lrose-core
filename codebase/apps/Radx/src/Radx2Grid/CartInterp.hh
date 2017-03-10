@@ -141,11 +141,6 @@ private:
   double _searchRadiusAz;
   int _searchMaxDistAz;
 
-  // CartThread _threadComputeLowerLeft;
-  // CartThread _threadComputeUpperLeft;
-  // CartThread _threadComputeLowerRight;
-  // CartThread _threadComputeUpperRight;
-
   // class for neighboring points
 
   class Neighbors {
@@ -253,11 +248,6 @@ private:
   void _fillSearchMatrix();
   void _printSearchMatrix(FILE *out, int res);
   void _printSearchMatrixPoint(FILE *out, int iel, int iaz);
-
-  // static void *_computeSearchLowerLeft(void *thread_data);
-  // static void *_computeSearchUpperLeft(void *thread_data);
-  // static void *_computeSearchLowerRight(void *thread_data);
-  // static void *_computeSearchUpperRight(void *thread_data);
 
   int _fillSearchLowerLeft(int level,
                            vector<SearchIndex> &thisSearch,
