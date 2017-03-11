@@ -478,6 +478,7 @@ int RawFile::_readTimes()
     _addErrStr("ERROR - RawFile::_readTimes");
     _addErrStr("  Cannot read DATA_time 2D array");
     _addErrStr(_file.getNcError()->get_errmsg());
+    delete[] timeData;
     return -1;
   }
 
@@ -499,7 +500,8 @@ int RawFile::_readTimes()
     _dataTimes.push_back(thisTime);
     _dTimes.push_back(thisTime.asDouble());
   }
-
+  
+  delete[] timeData;
   return 0;
 
 }
@@ -975,6 +977,9 @@ int RawFile::_createRays(const string &path)
     ray->setMeasXmitPowerDbmH(_totalEnergy[ii]);
     ray->setEstimatedNoiseDbmHc(_polAngle[ii]);
     
+    ray->setNSamples(2000);
+    // hard coded 2000 as replacement for DATA_shot_count from raw file
+    
     // add to ray vector
     
     _rays.push_back(ray);
@@ -989,7 +994,6 @@ int RawFile::_createRays(const string &path)
 // load up the read volume with the data from this object
 
 void RawFile::_loadReadVolume()
-  
 {
 
   _readVol->clear();

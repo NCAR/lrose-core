@@ -40,6 +40,7 @@
 #include <string>
 #include <Radx/RadxTime.hh>
 #include "CalReader.hh"
+#include <Radx/Radx.hh>
 class RadxVol;
 class RadxFile;
 class MslFile;
@@ -78,9 +79,9 @@ private:
   vector< vector<double> > diffDGeoCor;
   vector< vector<double> > geoDefCor;
   vector< vector<double> > afPulCor;
-  CalReader hi_CR_DT, lo_CR_DT, cross_CR_DT, mol_CR_DT;
+  CalReader hi_CR_DT, lo_CR_DT, cross_CR_DT, mol_CR_DT, binWidth_CR;
   //holds the deadtime calibration blocks
-  int hi_pos,lo_pos,cross_pos,mol_pos;
+  int hi_pos,lo_pos,cross_pos,mol_pos,binWidth_pos;
   //hold which spot in the vectors are the correct calibration point. 
 
   int _runFilelist();
@@ -102,6 +103,24 @@ private:
   void _addEnvFields(RadxVol &vol);
   void _addDerivedFields(RadxVol &vol);
 
+  
+  double _nonLinCountCor(Radx::fl32 count, double deadtime, 
+			     double binWid, double shotCount);
+  double _baselineSubtract(double arrivalRate, double profile, 
+			       double polarization);
+  double _backgroundSub(double arrivalRate, double backgroundBins);
+  double _energyNorm(double arrivalRate, double totalEnergy);
+  vector<double> _diffOverlapCor(vector<double> arrivalRate, vector<double> diffOverlap);
+  vector<double> _processQWPRotation(vector<double>arrivalRate, vector<double> polCal);
+  double _hiAndloMerge(double hiRate, double loRate);
+  double _geoOverlapCor(double arrivalRate, double geoOverlap);
+  double _volDepol(double crossRate, double combineRate);
+  double _backscatRatio(double combineRate, double molRate);
+  double _partDepol(double volDepol, double backscatRatio);
+  double _backscatCo(double pressure, double temp, 
+			 double backscatRatio);
+  
 };
 
 #endif
+
