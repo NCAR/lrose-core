@@ -856,7 +856,6 @@ void CalReader::printBlock()
   
 CalReader CalReader::sortTime(CalReader toSort, bool debug)
 {
-    
   for(unsigned int i=0; i<(toSort.time).size()-1;i++)
     {  
       for(unsigned int j=0; j<(toSort.time).size()-1;j++)

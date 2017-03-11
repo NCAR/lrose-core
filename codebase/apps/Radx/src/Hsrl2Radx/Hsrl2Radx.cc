@@ -49,6 +49,7 @@
 #include "MslFile.hh"
 #include "RawFile.hh"
 #include "CalReader.hh"
+#include <math.h>  
 
 #include <fstream>
 #include <sstream>
@@ -133,6 +134,8 @@ int Hsrl2Radx::Run()
 				_params.cross_pol_dead_time_name, false); 
   mol_CR_DT=mol_CR_DT.readCalVals(_params.calvals_gvhsrl_path, 
 			    _params.molecular_dead_time_name, false); 
+  binWidth_CR=binWidth_CR.readCalVals(_params.calvals_gvhsrl_path, 
+			    _params.bin_width_name, false); 
 
   CalReader cr;
   blCor=cr.readBaselineCorrection(_params.baseline_calibration_path, false); 
@@ -146,14 +149,16 @@ int Hsrl2Radx::Run()
   lo_CR_DT=lo_CR_DT.sortTime(lo_CR_DT,false); 
   cross_CR_DT=cross_CR_DT.sortTime(cross_CR_DT,false); 
   mol_CR_DT=mol_CR_DT.sortTime(mol_CR_DT,false); 
-  
+  binWidth_CR=binWidth_CR.sortTime(binWidth_CR,false); 
+
   RadxTime ti(2015, 07, 14, 23 , 0 , 0 , 0.0);
 
   hi_pos=hi_CR_DT.dateMatch(hi_CR_DT,ti);
   lo_pos=lo_CR_DT.dateMatch(lo_CR_DT,ti);
   cross_pos=cross_CR_DT.dateMatch(cross_CR_DT,ti);
   mol_pos=mol_CR_DT.dateMatch(mol_CR_DT,ti);
- 
+  binWidth_pos=binWidth_CR.dateMatch(binWidth_CR,ti);
+
   //cout<<"hi_pos calibration time position = "<<hi_pos<<'\n';
   //cout<<"lo_pos calibration time position = "<<lo_pos<<'\n';
   //cout<<"cross_pos calibration time position = "<<cross_pos<<'\n';
@@ -881,7 +886,6 @@ void Hsrl2Radx::_addEnvFields(RadxVol &vol)
     Radx::fl32 *htKm = htKm_.alloc(nGates);
     Radx::fl32 *tempK = tempK_.alloc(nGates);
     Radx::fl32 *presHpa = presHpa_.alloc(nGates);
-    Radx::fl32 *testThing = testThing_.alloc(nGates);
 
     double sinEl = sin(elevDeg * Radx::DegToRad);
     double startRangeKm = ray->getStartRangeKm();
@@ -893,7 +897,6 @@ void Hsrl2Radx::_addEnvFields(RadxVol &vol)
       double htM = htKm[igate] * 1000.0;
       tempK[igate] = stdAtmos.ht2temp(htM);
       presHpa[igate] = stdAtmos.ht2pres(htM);
-      testThing[igate] = igate;
     }
 
     RadxField *htField =
@@ -919,59 +922,429 @@ void Hsrl2Radx::_addEnvFields(RadxVol &vol)
 
 void Hsrl2Radx::_addDerivedFields(RadxVol &vol)
 {
+
+  IcaoStdAtmos stdAtmos;
+
+  // loop through the rays
   vector<RadxRay *> rays = vol.getRays();
   
+  //cout<<"diffDGeoCor size = " << (diffDGeoCor.at(1)).size() <<'\n';
+  //cout<<"rays.size() = "<< rays.size() <<'\n';
+
   for(size_t iray = 0; iray < rays.size(); iray++) {
-    
+        
     RadxRay *ray = rays[iray];
+    const RadxGeoref *geo = ray->getGeoreference();
+    if (!geo) {
+      continue;
+    }
+
+    double altitudeKm = geo->getAltitudeKmMsl();
+    double elevDeg = ray->getElevationDeg();
     
     size_t nGates = ray->getNGates();
+        
+    //get more info from ray here
+    
+    double power = ray->getMeasXmitPowerDbmH();
+    
+    double shotCount=ray->getNSamples();
     
     RadxArray<Radx::fl32> htKm_, tempK_, presHpa_,testThing_;
+    Radx::fl32 *htKm = htKm_.alloc(nGates);
+    Radx::fl32 *tempK = tempK_.alloc(nGates);
+    Radx::fl32 *presHpa = presHpa_.alloc(nGates);
     Radx::fl32 *testThing = testThing_.alloc(nGates);
-      
+    
+    double sinEl = sin(elevDeg * Radx::DegToRad);
     double startRangeKm = ray->getStartRangeKm();
     double gateSpacingKm = ray->getGateSpacingKm();
 
-    
-    RadxField *testThingField =
-      ray->addField("testThing", "unit", nGates, Radx::missingFl32, testThing, true);
-    testThingField->setLongName("Test_thing");
-    testThingField->setRangeGeom(startRangeKm, gateSpacingKm);
-    
+    double rangeKm = startRangeKm;
+    for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
+      htKm[igate] = altitudeKm + rangeKm * sinEl;
+      double htM = htKm[igate] * 1000.0;
+      tempK[igate] = stdAtmos.ht2temp(htM);
+      presHpa[igate] = stdAtmos.ht2pres(htM);
+      testThing[igate] = igate;
+    }
+    /*
+    RadxField *htField =
+      ray->addField("height", "km", nGates, Radx::missingFl32, htKm, true);
+    htField->setLongName("height_MSL");
+    htField->setRangeGeom(startRangeKm, gateSpacingKm);
+
+    RadxField *tempField =
+      ray->addField("temperature", "K", nGates, Radx::missingFl32, tempK, true);
+    tempField->setLongName("temperaure_from_std_atmos");
+    tempField->setRangeGeom(startRangeKm, gateSpacingKm);
+
+    RadxField *presField =
+      ray->addField("pressure", "HPa", nGates, Radx::missingFl32, presHpa, true);
+    presField->setLongName("pressure_from_std_atmos");
+    presField->setRangeGeom(startRangeKm, gateSpacingKm);
+    */      
+   
     //get raw data fields
     const RadxField *hiField = ray->getField(_params.combined_hi_field_name);
-    if(hiField != NULL)
+    const RadxField *loField = ray->getField(_params.combined_lo_field_name);
+    const RadxField *crossField = ray->getField(_params.cross_field_name);
+    const RadxField *molField = ray->getField(_params.molecular_field_name);
+
+    //holds derived data fields
+    RadxArray<Radx::fl32> volDepol_, backscatRatio_, partDepol_, 
+      backscatCoeff_, extinction_;
+    Radx::fl32 *volDepol = volDepol_.alloc(nGates);
+    Radx::fl32 *backscatRatio = backscatRatio_.alloc(nGates);
+    Radx::fl32 *partDepol = partDepol_.alloc(nGates);
+    Radx::fl32 *backscatCoeff = backscatCoeff_.alloc(nGates);
+    Radx::fl32 *extinction = extinction_.alloc(nGates);
+    
+    if(hiField != NULL && loField != NULL && molField != NULL && crossField != NULL)
       {
 	const Radx::fl32 *hiData = hiField->getDataFl32();
-	//cout<<"iray="<<iray<<" : hiData="<<*hiData<<'\n';
-      }
-     
-    const RadxField *loField = ray->getField(_params.combined_lo_field_name);
-    if(loField != NULL)
-      {
 	const Radx::fl32 *loData = loField->getDataFl32();
-	//cout<<"iray="<<iray<<" : loData="<<*loData<<'\n';
-      }
-    
-    const RadxField *molField = ray->getField(_params.molecular_field_name);
-    if(molField != NULL)
-      {
-	const Radx::fl32 *molData = molField->getDataFl32();
-	//cout<<"iray="<<iray<<" : molData="<<*molData<<'\n';
-      }
-    
-    const RadxField *crossField = ray->getField(_params.cross_field_name);
-    if(crossField != NULL)
-      {
 	const Radx::fl32 *crossData = crossField->getDataFl32();
-	//cout<<"iray="<<iray<<" : crossData="<<*crossData<<'\n';
+	const Radx::fl32 *molData = molField->getDataFl32();
+	
+	//apply correction and calibration functions here 
+
+	vector<double> hiDataRate;
+	vector<double> loDataRate;
+	vector<double> crossDataRate;
+	vector<double> molDataRate;
+	for(unsigned int igate=0;igate<nGates;igate++)
+	  {
+	    if(hi_CR_DT.dataTypeisNum() && 
+	       ( ( hi_CR_DT.getDataNum() ).at(hi_pos) ).size()==1 && 
+	         lo_CR_DT.dataTypeisNum() && 
+	       ( ( lo_CR_DT.getDataNum() ).at(lo_pos) ).size()==1 && 
+	       cross_CR_DT.dataTypeisNum() && 
+	       ( ( cross_CR_DT.getDataNum() ).at(cross_pos) ).size()==1 && 
+	       mol_CR_DT.dataTypeisNum() && 
+	       ( ( mol_CR_DT.getDataNum() ).at(mol_pos) ).size()==1 && 
+	       binWidth_CR.dataTypeisNum() && 
+	       ( ( binWidth_CR.getDataNum() ).at(binWidth_pos) ).size()==1 )
+	      {
+		
+		
+		
+		double hiDeadTime=((hi_CR_DT.getDataNum()).at(hi_pos)).at(0);
+		double loDeadTime=((lo_CR_DT.getDataNum()).at(lo_pos)).at(0);
+		double crossDeadTime=((cross_CR_DT.getDataNum()).at(cross_pos)).at(0);
+		double molDeadTime=((mol_CR_DT.getDataNum()).at(mol_pos)).at(0);
+		double binW= ((binWidth_CR.getDataNum()).at(hi_pos)).at(0);
+		hiDataRate.push_back(_nonLinCountCor(hiData[igate], hiDeadTime, binW, shotCount)); 
+		loDataRate.push_back(_nonLinCountCor(loData[igate], loDeadTime, binW, shotCount)); 
+		crossDataRate.push_back(_nonLinCountCor(crossData[igate], 
+							crossDeadTime, binW, shotCount)); 
+		molDataRate.push_back(_nonLinCountCor(molData[igate], 
+						      molDeadTime, binW, shotCount)); 
+	      }
+	    
+	  }
+	
+	for(unsigned int igate=0;igate<nGates;igate++)
+	  {
+	    //need pol baseline from file to replace 1.0
+	    //_baselineSubtract is a passthrough function for now anyway
+
+	    int calGate= (blCor.at(0)).size()/nGates * igate + 
+	      0.5 * (blCor.at(0)).size()/nGates;
+	    
+	    hiDataRate.at(igate)=_baselineSubtract(hiDataRate.at(igate),
+						   (blCor.at(1)).at(calGate),1.0);
+	    loDataRate.at(igate)=_baselineSubtract(loDataRate.at(igate),
+						   (blCor.at(2)).at(calGate),1.0);
+	    crossDataRate.at(igate)=_baselineSubtract(crossDataRate.at(igate),
+						      (blCor.at(3)).at(calGate),1.0);
+	    molDataRate.at(igate)=_baselineSubtract(molDataRate.at(igate),
+						    (blCor.at(4)).at(calGate),1.0);
+	  }
+	
+	double hibackgroundRate=0;
+	double lobackgroundRate=0;
+	double crossbackgroundRate=0;
+	double molbackgroundRate=0;
+
+	//grabs last 100 out of 4000 bins for background, or fractionally adjusts for less bins
+	int bgBinCount=0;
+	for(unsigned int cgate=nGates-1;cgate>=nGates*0.975;cgate--)
+	  {
+	    hibackgroundRate=hibackgroundRate+hiDataRate.at(cgate);
+	    lobackgroundRate=lobackgroundRate+loDataRate.at(cgate);
+	    crossbackgroundRate=crossbackgroundRate+crossDataRate.at(cgate);
+	    molbackgroundRate=molbackgroundRate+molDataRate.at(cgate);
+	    bgBinCount++;	    
+	  }
+	hibackgroundRate/=bgBinCount;
+	lobackgroundRate/=bgBinCount;
+	crossbackgroundRate/=bgBinCount;
+	molbackgroundRate/=bgBinCount;
+
+	for(unsigned int igate=0;igate<nGates;igate++)
+	  {
+	    hiDataRate.at(igate)=_backgroundSub(hiDataRate.at(igate),hibackgroundRate);
+	    loDataRate.at(igate)=_backgroundSub(loDataRate.at(igate),lobackgroundRate);
+	    crossDataRate.at(igate)=_backgroundSub(crossDataRate.at(igate),crossbackgroundRate);
+	    molDataRate.at(igate)=_backgroundSub(molDataRate.at(igate),molbackgroundRate);
+	  }
+	
+	for(unsigned int igate=0;igate<nGates;igate++)
+	  {
+	    hiDataRate.at(igate)=_energyNorm(hiDataRate.at(igate), power);
+	    loDataRate.at(igate)=_energyNorm(loDataRate.at(igate), power);
+	    crossDataRate.at(igate)=_energyNorm(crossDataRate.at(igate), power);
+	    molDataRate.at(igate)=_energyNorm(molDataRate.at(igate), power);
+	  }
+
+	for(unsigned int igate=0;igate<nGates;igate++)
+	  {
+
+	    int calGate= (diffDGeoCor.at(1)).size()/nGates * igate + 
+	      0.5 * (diffDGeoCor.at(1)).size()/nGates;
+
+	    vector<double> rates;
+	    vector<double> diffOverlap;
+	    
+	    rates.push_back(hiDataRate.at(igate));
+	    diffOverlap.push_back( (diffDGeoCor.at(1)).at(calGate) );
+	    rates.push_back(loDataRate.at(igate));
+	    diffOverlap.push_back( (diffDGeoCor.at(2)).at(calGate) );
+	    rates.push_back(crossDataRate.at(igate));
+	    diffOverlap.push_back( 1.0 ); 
+	    // ***** need cross overlap correction from another file
+	    rates.push_back(molDataRate.at(igate));
+	    diffOverlap.push_back( 1.0 );
+	    
+	    rates=_diffOverlapCor(rates, diffOverlap);
+	    
+	    hiDataRate.at(igate)=rates.at(0);
+	    loDataRate.at(igate)=rates.at(1);
+	    crossDataRate.at(igate)=rates.at(2);
+	    molDataRate.at(igate)=rates.at(3);
+	  
+	  }
+	
+	for(unsigned int igate=0;igate<nGates;igate++)
+	  {
+	    vector<double> rates;
+	    vector<double> polCal;
+	    rates.push_back(hiDataRate.at(igate));
+	    polCal.push_back( 1.0 );
+	    rates.push_back(loDataRate.at(igate));
+	    polCal.push_back( 1.0 );
+	    rates.push_back(crossDataRate.at(igate));
+	    polCal.push_back( 1.0 );
+	    rates.push_back(molDataRate.at(igate));
+	    polCal.push_back( 1.0 );
+	    // need to replace 1.0 with polarization calibration info, 
+	    // _processQWPRotation is passthrough for now though 
+	    rates=_processQWPRotation(rates, polCal);
+	
+	  }
+	
+	vector<double> combineRate;
+	
+	for(unsigned int igate=0;igate<nGates;igate++)
+	  {
+	    combineRate.push_back(_hiAndloMerge(hiDataRate.at(igate), loDataRate.at(igate)));
+	  }
+	
+	
+	for(unsigned int igate=0;igate<nGates;igate++)
+	  {
+	    int calGate= (geoDefCor.at(1)).size()/nGates * igate + 
+	      0.5*(geoDefCor.at(1)).size()/nGates;
+
+	    combineRate.at(igate)=_geoOverlapCor(combineRate.at(igate), 
+						 (geoDefCor.at(1)).at(calGate));
+	    crossDataRate.at(igate)=_geoOverlapCor(crossDataRate.at(igate), 
+						   (geoDefCor.at(1)).at(calGate));
+	    molDataRate.at(igate)=_geoOverlapCor(molDataRate.at(igate), 
+						 (geoDefCor.at(1)).at(calGate));
+	  }
+	
+	//done with corrections, time for derived fields. 
+	
+	for(unsigned int igate=0;igate<nGates;igate++)
+	  {
+	    volDepol[igate] = _volDepol( crossDataRate.at(igate), combineRate.at(igate));
+	  }
+	
+	for(unsigned int igate=0;igate<nGates;igate++)
+	  {
+	    backscatRatio[igate] = _backscatRatio(combineRate.at(igate), 
+						  molDataRate.at(igate) );
+	  }
+	
+	for(unsigned int igate=0;igate<nGates;igate++)
+	  {
+	    partDepol[igate] = _partDepol(volDepol[igate], backscatRatio[igate] );
+	  }
+	
+	for(unsigned int igate=0;igate<nGates;igate++)
+	  {
+	    backscatCoeff[igate] = _backscatCo(presHpa[igate], tempK[igate], 
+					       backscatRatio[igate]);
+	  }
+	
+	for(unsigned int igate=0;igate<nGates;igate++)
+	  {
+	    extinction[igate] = 1.0;
+	    //there is no extinction calculation, so have placeholder here for now. 
+	  }
+	
+
+	//write out derived fields here
+	
       }
     
-    //do calculations for derived fields
+    RadxField *volDepolField =
+      ray->addField("volDepol", "unit", nGates, Radx::missingFl32, volDepol, true);
+    volDepolField->setLongName("volume_depolarization");
+    volDepolField->setRangeGeom(startRangeKm, gateSpacingKm);
+        
+    RadxField *backscatRatioField =
+      ray->addField("backscatRatio", "unit", nGates, Radx::missingFl32, backscatRatio, true);
+    backscatRatioField->setLongName("backscatter_ratio");
+    backscatRatioField->setRangeGeom(startRangeKm, gateSpacingKm);
     
+    RadxField *partDepolField =
+      ray->addField("partDepol", "unit", nGates, Radx::missingFl32, partDepol, true);
+    partDepolField->setLongName("particle_depolarization");
+    partDepolField->setRangeGeom(startRangeKm, gateSpacingKm);
     
+    RadxField *backscatCoeffField =
+      ray->addField("backscatCoeff", "unit", nGates, Radx::missingFl32, backscatCoeff, true);
+    backscatCoeffField->setLongName("backscatter_coefficient");
+    backscatCoeffField->setRangeGeom(startRangeKm, gateSpacingKm);
+   
+    RadxField *extinctionField =
+      ray->addField("extinction", "unit", nGates, Radx::missingFl32, extinction, true);
+    extinctionField->setLongName("extinction");
+    extinctionField->setRangeGeom(startRangeKm, gateSpacingKm);
+   
     
   }
   
 }
+
+//do calculations for derived fields
+
+//nonlinear count corrections
+double Hsrl2Radx::_nonLinCountCor(Radx::fl32 count, double deadtime, 
+				      double binWid, double shotCount)
+{
+  double photonRate=count/shotCount/binWid;
+  double corrFactor=photonRate*deadtime;
+  if(corrFactor > 0.99)
+    corrFactor=0.95;
+  return count/(1-corrFactor);
+}
+
+
+//baseline subtraction
+double Hsrl2Radx::_baselineSubtract(double arrivalRate, double profile, 
+					double polarization)
+{
+  //pass through for now, not expected to significantly impact displays
+  return arrivalRate;
+}
+
+
+//background subtraction
+double Hsrl2Radx::_backgroundSub(double arrivalRate, double backgroundBins)
+{
+  //background bins is average of 
+  if(arrivalRate-backgroundBins>0)
+    return arrivalRate-backgroundBins;
+  else
+    return 0;
+}
+
+
+//energy normalization
+double Hsrl2Radx::_energyNorm(double arrivalRate, double totalEnergy)
+{
+  return arrivalRate/totalEnergy;
+}
+
+
+//differential overlap correction the vector coresponds to hi, lo, cross, mol
+vector<double> Hsrl2Radx::_diffOverlapCor(vector<double> arrivalRate, vector<double> diffOverlap)
+{
+  assert(arrivalRate.size()==4);
+  assert(diffOverlap.size()==4);
+  arrivalRate.at(0) = arrivalRate.at(0)/diffOverlap.at(0);
+  arrivalRate.at(1) = arrivalRate.at(1)/diffOverlap.at(1);
+  arrivalRate.at(2) = arrivalRate.at(2)/(diffOverlap.at(3)*diffOverlap.at(0));
+  // arrivalRate.at(3) is unchanged
+
+  return arrivalRate;//note the passthrough functionality for now
+}
+
+//process QWP rotation
+vector<double> Hsrl2Radx::_processQWPRotation(vector<double> arrivalRate, vector<double> polCal)
+{
+  return arrivalRate;
+}
+
+
+//merge hi and lo profiles 
+double Hsrl2Radx::_hiAndloMerge(double hiRate, double loRate)
+{  
+  //pass through for now, not expected to significantly impact displays
+  return hiRate;
+}
+
+
+//geometric overlap correction
+double Hsrl2Radx::_geoOverlapCor(double arrivalRate, double geoOverlap)
+{
+  return arrivalRate*geoOverlap;
+}
+
+
+//volume depolarization
+double Hsrl2Radx::_volDepol(double crossRate, double combineRate)
+{
+  return crossRate/(crossRate+combineRate);
+}
+
+
+//backscatter ratio
+double Hsrl2Radx::_backscatRatio(double combineRate, double molRate)
+{
+  return combineRate/molRate;
+}
+
+
+//particle depolarization
+double Hsrl2Radx::_partDepol(double volDepol, double backscatRatio)
+{
+  double d_mol=2*0.000365/(1+0.000365);
+  double pDepol1=volDepol/(1-1/backscatRatio)-d_mol/(backscatRatio-1);
+  double pDepol2=(-d_mol+backscatRatio*volDepol)/(backscatRatio-1);
+  
+  //cout<<"pDepol1="<<pDepol1<<'\n';
+  //cout<<"pDepol2="<<pDepol2<<'\n';
+
+  //sometimes comes up nan for these calculations. Equation correct? 
+  
+  return pDepol1;
+}
+
+
+//backscatter coefficient
+double Hsrl2Radx::_backscatCo(double pressure, double temp, 
+				  double backscatRatio)
+{
+  //double beta_m_sonde = 5.45*550/532*4*1*10^-32 * pressure /(temp * boltzman);
+  double beta_m_sonde = 5.45*550/532*4 * pow(10,-32) * pressure /(temp);
+  double aer_beta_bs = (backscatRatio-1)*beta_m_sonde;
+
+  //need to include boltzman constant in some units for beta_m_sonde calculation. 
+  return aer_beta_bs;
+}
+
