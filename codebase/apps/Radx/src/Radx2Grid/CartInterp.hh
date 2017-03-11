@@ -38,6 +38,7 @@
 
 #include "Interp.hh"
 #include <toolsa/TaThread.hh>
+#include <toolsa/TaThreadPool.hh>
 class DsMdvx;
 
 class CartInterp : public Interp {
@@ -209,8 +210,9 @@ private:
   vector<kernel_t> _textureKernel;
   vector<kernel_t> _convKernel;
 
-  // compute the lower and upper bounds of the vert levels for the texture computation,
-  // for each 0.01 km from 0 to 30 km. These are lookup tables
+  // compute the lower and upper bounds of the vert levels for the
+  // texture computation, for each 0.01 km from 0 to 30 km.
+  // These are lookup tables.
 
   static const int NLOOKUP = 3000;
   int _textureIzLower[NLOOKUP];
@@ -352,7 +354,7 @@ private:
   //////////////////////////////////////////////////////////////
 
   //////////////////////////////////////////////////////////////
-  // inner class for filling out the lower-left search
+  // inner thread class for filling out the lower-left search
   
   class FillSearchLowerLeft : public TaThread
   {  
@@ -364,9 +366,11 @@ private:
   private:
     CartInterp *_cartInterp; // context
   };
+  // instantiate thread
+  FillSearchLowerLeft _threadFillSearchLowerLeft;
 
   //////////////////////////////////////////////////////////////
-  // inner class for filling out the lower-right search
+  // inner thread class for filling out the lower-right search
   
   class FillSearchLowerRight : public TaThread
   {  
@@ -378,9 +382,11 @@ private:
   private:
     CartInterp *_cartInterp; // context
   };
+  // instantiate thread
+  FillSearchLowerRight _threadFillSearchLowerRight;
 
   //////////////////////////////////////////////////////////////
-  // inner class for filling out the upper-left search
+  // inner thread class for filling out the upper-left search
   
   class FillSearchUpperLeft : public TaThread
   {  
@@ -392,9 +398,11 @@ private:
   private:
     CartInterp *_cartInterp; // context
   };
+  // instantiate thread
+  FillSearchUpperLeft _threadFillSearchUpperLeft;
 
   //////////////////////////////////////////////////////////////
-  // inner class for filling out the upper-right search
+  // inner thread class for filling out the upper-right search
   
   class FillSearchUpperRight : public TaThread
   {  
@@ -406,16 +414,35 @@ private:
   private:
     CartInterp *_cartInterp; // context
   };
-
-  // threads for computing angle limits
-
-  FillSearchLowerLeft _threadFillSearchLowerLeft;
-  FillSearchLowerRight _threadFillSearchLowerRight;
-  FillSearchUpperLeft _threadFillSearchUpperLeft;
+  // instantiate thread
   FillSearchUpperRight _threadFillSearchUpperRight;
 
   //////////////////////////////////////////////////////////////
-  // inner class for computing 2D texture
+  // inner thread class for computing the grid locations
+  // relative to the radar
+  
+  class ComputeGridRelative : public TaThread
+  {  
+  public:
+    // constructor
+    ComputeGridRelative(CartInterp *cartInterp);
+    // set the y and z index
+    inline void setYIndex(int yIndex) { _yIndex = yIndex; }
+    inline void setZIndex(int zIndex) { _zIndex = zIndex; }
+    // override run method
+    virtual void run();
+  private:
+    CartInterp *_cartInterp; // context
+    int _yIndex; // grid index of y column
+    int _zIndex; // grid index of z plane
+  };
+  // instantiate thread
+  ComputeGridRelative _threadComputeGridRelative;
+  // instantiate thread pool for grid relative computations
+  TaThreadPool _threadPoolGridRel;
+
+  //////////////////////////////////////////////////////////////
+  // inner thread class for computing 2D texture
 
   class ComputeTexture : public TaThread
   {  

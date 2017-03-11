@@ -49,8 +49,7 @@ using namespace std;
 const double CartInterp::_searchResAz = 0.1;
 const double CartInterp::_searchResEl = 0.1;
 const double CartInterp::_searchAzOverlapDeg = 20.0;
-const double CartInterp::_searchAzOverlapHalf =
-  CartInterp::_searchAzOverlapDeg / 2.0;
+const double CartInterp::_searchAzOverlapHalf = CartInterp::_searchAzOverlapDeg / 2.0;
 
 // Constructor
 
@@ -67,8 +66,9 @@ CartInterp::CartInterp(const string &progName,
         _threadFillSearchLowerLeft(this),
         _threadFillSearchLowerRight(this),
         _threadFillSearchUpperLeft(this),
-        _threadFillSearchUpperRight(this)
-        
+        _threadFillSearchUpperRight(this),
+        _threadComputeGridRelative(this)
+  
 {
   
   _searchMatrixLowerLeft = NULL;
@@ -112,7 +112,6 @@ CartInterp::CartInterp(const string &progName,
 
   // set up thread objects
 
-  pthread_mutex_init(&_debugPrintMutex, NULL);
   _createThreads();
 
 }
@@ -272,24 +271,29 @@ int CartInterp::interpVol()
 void CartInterp::_createThreads()
 {
 
-  // initialize compute object
+  // initialize debug mutex
+
+  pthread_mutex_init(&_debugPrintMutex, NULL);
+
+  // initialize compute objects
 
   if (_params.use_multiple_threads) {
-    
     // set up compute thread pool
-    
     for (int ii = 0; ii < _params.n_compute_threads; ii++) {
-      
       CartThread *thread = new CartThread();
       thread->setContext(this);
-
       pthread_t pth = 0;
       pthread_create(&pth, NULL, _computeInThread, thread);
       thread->setThreadId(pth);
       _availThreads.push_back(thread);
-      
     }
-    
+  }
+
+  // initialize thread pool for grid relative to radar
+
+  for (int ii = 0; ii < _params.n_compute_threads; ii++) {
+    ComputeGridRelative *thread = new ComputeGridRelative(this);
+    _threadPoolGridRel.addThreadToMain(thread);
   }
 
 }
@@ -839,53 +843,52 @@ void CartInterp::_computeGridRelative()
 void CartInterp::_computeGridRelMultiThreaded()
 {
 
+  _threadPoolGridRel.initForRun();
+
   // loop through the Z layers
-  
   for (int iz = 0; iz < _gridNz; iz++) {
 
     // loop through the Y columns
-  
     for (int iy = 0; iy < _gridNy; iy++) {
       
-      // is a thread available? if not wait for one
-    
-      CartThread *thread = NULL;
-      if (_availThreads.size() > 0) {
-        // get thread from available pool
-        // it is doing no work
-        thread = _availThreads.front();
-        _availThreads.pop_front();
-      } else {
-        // get thread from active pool
-        thread = _activeThreads.front();
-        _activeThreads.pop_front();
-        // wait for current work to complete
-        thread->waitForWorkToComplete();
+      // get a thread from the pool
+
+      bool isDone = true;
+      ComputeGridRelative *thread = 
+        (ComputeGridRelative *) _threadPoolGridRel.getNextThread(true, isDone);
+      if (thread == NULL) {
+        break;
       }
-    
-      // set thread going to compute moments
-      
-      thread->setTask(CartThread::GRID_LOC);
-      thread->setZIndex(iz);
-      thread->setYIndex(iy);
-      thread->signalWorkToStart();
-      
-      // push onto active pool
-      
-      _activeThreads.push_back(thread);
+      if (isDone) {
+        // if it is a done thread, return thread to the available pool
+        _threadPoolGridRel.addThreadToAvail(thread);
+        // reduce iy by 1 since we did not actually get a compute
+        // thread yet for this row
+        iy--;
+      } else {
+        // available thread, set it running
+        thread->setZIndex(iz);
+        thread->setYIndex(iy);
+        thread->signalRunToStart();
+      }
 
     } // iy
 
   } // iz
-    
-  // wait for all active threads to complete
   
-  while (_activeThreads.size() > 0) {
-    CartThread *thread = _activeThreads.front();
-    _activeThreads.pop_front();
-    _availThreads.push_back(thread);
-    thread->waitForWorkToComplete();
-  }
+  // collect remaining done threads
+
+  _threadPoolGridRel.setReadyForDoneCheck();
+  while (!_threadPoolGridRel.checkAllDone()) {
+    bool isDone;
+    ComputeGridRelative *thread = 
+      (ComputeGridRelative *) _threadPoolGridRel.getNextThread(true, isDone);
+    if (thread == NULL) {
+      break;
+    } else {
+      _threadPoolGridRel.addThreadToAvail(thread);
+    }
+  } // while
 
 }
 
@@ -3267,6 +3270,21 @@ void CartInterp::FillSearchUpperRight::run()
     }
     thisSearch = nextSearch;
   }
+}
+
+///////////////////////////////////////////////////////////////
+// ComputeGridRelative thread
+///////////////////////////////////////////////////////////////
+// Constructor
+CartInterp::ComputeGridRelative::ComputeGridRelative(CartInterp *cartInterp) :
+        _cartInterp(cartInterp)
+{
+}  
+// run method
+void CartInterp::ComputeGridRelative::run()
+{
+  // cerr << "computeGridRow, iz, iy: " << _zIndex << ", " << _yIndex << endl;
+  _cartInterp->_computeGridRow(_zIndex, _yIndex);
 }
 
 ///////////////////////////////////////////////////////////////
