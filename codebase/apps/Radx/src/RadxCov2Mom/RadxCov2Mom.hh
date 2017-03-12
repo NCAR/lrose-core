@@ -46,6 +46,8 @@
 #include <string>
 #include <deque>
 #include <set>
+#include <toolsa/TaThread.hh>
+#include <toolsa/TaThreadPool.hh>
 #include <radar/RadarMoments.hh>
 #include <radar/AlternatingVelocity.hh>
 #include <radar/InterestMap.hh>
@@ -178,7 +180,6 @@ private:
   int _computeMomentsMultiThreaded(RadxVol &vol,
                                    const vector<RadxRay *> &covRays,
                                    vector <RadxRay *> &momRays);
-  static void *_computeMomentsInThread(void *thread_data);
 
   int _addEchoFields(const vector<RadxRay *> &covRays,
                      vector <RadxRay *> &momRays);
@@ -198,6 +199,44 @@ private:
 
   int _writeStatusXmlToSpdb(const RadxVol &vol,
                             const string &xml);
+
+  //////////////////////////////////////////////////////////////
+  // inner thread class for calling Moments computations
+  
+  class ComputeThread2 : public TaThread
+  {  
+  public:
+    // constructor
+    ComputeThread2(RadxCov2Mom *obj);
+    // compute moments
+    inline void setMoments(Moments *val) { _moments = val; }
+    inline Moments *getMoments() const { return _moments; }
+    // access to the covariance ray
+    inline void setCovRay(const RadxRay *val) { _covRay = val; }
+    inline const RadxRay *getCovRay() { return _covRay; }
+    // calibration
+    inline void setCalib(const IwrfCalib *val) { _calib = val; }
+    inline const IwrfCalib *getCalib() const { return _calib; }
+    // access to the moments ray
+    inline void setMomRay(RadxRay *val) { _momRay = val; }
+    inline RadxRay *getMomRay() const { return _momRay; }
+    // override run method
+    virtual void run();
+  private:
+    // parent object
+    RadxCov2Mom *_this;
+    // computation context
+    Moments *_moments;
+    const RadxRay *_covRay;
+    const IwrfCalib *_calib;
+    // result of computation
+    RadxRay *_momRay;
+  };
+  // instantiate thread pool for computations
+  TaThreadPool _threadPool;
+
+  void _handleDoneThread(ComputeThread2 *thread,
+                         vector <RadxRay *> &momRays);
 
 };
 
