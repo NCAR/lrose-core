@@ -75,8 +75,20 @@ o###############################################################################
 # Front Range
 #
 
-DBZ  DBZ  $(HOME)/data/radx/cart_test&DBZ   dbz.colors   dBZ -5 80 5 radial 1 0
-VEL  VEL  $(HOME)/data/radx/cart_test&VEL   vel.colors   m/s -5 80 5 radial 1 0
+DBZ_CART  DBZ_CART  $(HOME)/data/radx/cart_test&DBZ   dbz.colors   dBZ -5 80 5 radial 1 0
+VEL_CART  VEL_CART  $(HOME)/data/radx/cart_test&VEL   vel.colors   m/s -5 80 5 radial 1 0
+
+DBZ_PPI  DBZ_PPI  $(HOME)/data/radx/ppi_test&DBZ   dbz.colors   dBZ -5 80 5 radial 1 0
+VEL_PPI  VEL_PPI  $(HOME)/data/radx/ppi_test&VEL   vel.colors   m/s -5 80 5 radial 1 0
+
+DBZ_POLAR  DBZ_POLAR  $(HOME)/data/radx/polar_test&DBZ   dbz.colors   dBZ -5 80 5 radial 1 0
+VEL_POLAR  VEL_POLAR  $(HOME)/data/radx/polar_test&VEL   vel.colors   m/s -5 80 5 radial 1 0
+
+DBZ_REORDER  DBZ_REORDER  $(HOME)/data/radx/reorder_test&DBZ   dbz.colors   dBZ -5 80 5 radial 1 0
+VEL_REORDER  VEL_REORDER  $(HOME)/data/radx/reorder_test&VEL   vel.colors   m/s -5 80 5 radial 1 0
+
+DBZ_ORIG  DBZ_ORIG  /scr/hail2/rsfdata/pecan/cfradial/spol/moments/sband/sur&DBZ_F dbz.colors   dBZ -5 80 5 radial 1 0
+VEL_ORIG  VEL_ORIG  /scr/hail2/rsfdata/pecan/cfradial/spol/moments/sband/sur&VEL_F vel.colors   m/s -5 80 5 radial 1 0
 
 </GRIDS>
 
@@ -174,7 +186,7 @@ cidd.debug2_flag:           0
 # demo time. The movie frame will be centered on the time after applying
 # temporal rounding. 
 
-cidd.demo_time:  00:00 06/26/2015
+cidd.demo_time:  00:07 06/26/2015
 
 # Set times to the nearest value divisible by the number of seconds
 cidd.temporal_rounding:    1
@@ -854,7 +866,7 @@ cidd.click_posn_rel_to_origin: 1
 # Set this parameter to force the field menu popup to this many columns
 # If set <= 0, then cidd sets this dynamically, allowing at most 30 in each
 # column.
-cidd.num_field_menu_cols: 4
+cidd.num_field_menu_cols: 2
 
 # This parameter sets WSDDM specific behavior On -
 # - Go to end of loop when movie stops.
