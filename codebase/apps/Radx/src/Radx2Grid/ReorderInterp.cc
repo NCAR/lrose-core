@@ -49,58 +49,8 @@
 #include <Radx/RadxSweep.hh>
 using namespace std;
 
-//
-// 
-static bool _getData(int ifield, const Interp::Ray *ray, int igate, double &v)
-{
-  if (ray->fldData) {
-    
-    int nGates = ray->nGates;
-    fl32 missing = ray->missingVal[ifield];
-    fl32 *field = ray->fldData[ifield];
-
-    if (field != NULL) {
-      
-      if (igate >= 0 && igate < nGates) {
-        fl32 val = field[igate];
-        if (val != missing) {
-          v = val;
-	  return true;
-        }
-      }
-      
-    } // if (field != NULL) 
-    
-  } // if (ray->fldData)
-  return false;
-}
-
-//
-// 
-// static bool _getDataAllowMissing(int ifield, const Interp::Ray *ray,
-// 				 int igate, double &v, double &missing,
-// 				 bool &isMissing)
-// {
-//   if (ray->fldData) {
-    
-//     int nGates = ray->nGates;
-//     missing = (double)ray->missingVal[ifield];
-//     fl32 *field = ray->fldData[ifield];
-
-//     if (field != NULL) {
-      
-//       if (igate >= 0 && igate < nGates) {
-//         fl32 val = field[igate];
-// 	v = val;
-//         isMissing = (val == missing);
-// 	return true;
-//       }
-      
-//     } // if (field != NULL) 
-    
-//   } // if (ray->fldData)
-//   return false;
-// }
+////////////////////////////////////////////////////////////////
+// constructor
 
 ReorderInterp::ReorderInterp(const string &progName,
                              const Params &params,
@@ -133,7 +83,7 @@ ReorderInterp::ReorderInterp(const string &progName,
 
   // set up thread objects
 
-  _initThreads();
+  _createThreads();
   
 }
 
@@ -144,50 +94,32 @@ ReorderInterp::~ReorderInterp()
 
 {
 
-  // wait for active thread pool to complete
+  // free up threads
 
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->waitForWorkToComplete();
-  }
+  _freeThreads();
 
-  // signal all threads to exit
-
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    _availThreads[ii]->setExitFlag(true);
-    _availThreads[ii]->signalWorkToStart();
-  }
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->setExitFlag(true);
-    _activeThreads[ii]->signalWorkToStart();
-  }
-
-  // wait for all threads to exit
-  
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    _availThreads[ii]->waitForWorkToComplete();
-  }
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->waitForWorkToComplete();
-  }
-
-  // delete all threads
-  
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    delete _availThreads[ii];
-  }
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    delete _activeThreads[ii];
-  }
-
-  pthread_mutex_destroy(&_debugPrintMutex);
-  pthread_mutex_destroy(&_kdTreeMutex);
+  // check grid loc
 
   if (_gridLoc != NULL)  {
     cerr << "ERROR - ReorderInterp destructor, _gridLoc not NULL" << endl;
   }
 
+  // free up memory
+
   _freeOutputArrays();
   _radarPoints.clear();
+
+}
+
+//////////////////////////////////////////////////
+// free the threading objects
+
+void ReorderInterp::_freeThreads()
+{
+
+  pthread_mutex_destroy(&_kdTreeMutex);
+  
+  // NOTE - thread pools free their threads in the destructor
 
 }
 
@@ -201,11 +133,11 @@ int ReorderInterp::interpVol()
 
 {
 
-  cerr << "!!!!!!!!!!!!!!!!!!! IMPORTANT NOTE !!!!!!!!!!!!!!!!!!!!" << endl;
-  cerr << "The REORDER mode should NOT be used for FIXED platforms" << endl;
-  cerr << "Only use this for mobile platforms" << endl;
-  cerr << "For fixed platforms use INTERP_MODE_CART instead" << endl;
-  cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+  cerr << "!!!!!!!!!!!!!!!!!! IMPORTANT NOTE !!!!!!!!!!!!!!!!!!!!!!" << endl;
+  cerr << "!!! REORDER should NOT be used for FIXED platforms !!!!!" << endl;
+  cerr << "!!! Only use this for mobile platforms !!!!!!!!!!!!!!!!!" << endl;
+  cerr << "!!! For fixed platforms use INTERP_MODE_CART instead !!!" << endl;
+  cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
 
   _printRunTime("initialization");
 
@@ -235,8 +167,8 @@ int ReorderInterp::interpVol()
   }
   _printRunTime("computing scan props");
 
-  // compute grid locations relative to radar
-  _computeGridRelative();
+  // initialize projection for the radar location
+  _initProjectionLocal();
 
   // compute the cartesian points for each gate
 
@@ -318,79 +250,24 @@ void ReorderInterp::_initGrid()
 }
   
 //////////////////////////////////////////////////
-// initialize the threading objects
+// create and initialize the threading objects
 
-void ReorderInterp::_initThreads()
+void ReorderInterp::_createThreads()
 {
 
-  // initialize compute object
+  // initialize mutex for kd tree since it is not thread safe
 
-  pthread_mutex_init(&_debugPrintMutex, NULL);
   pthread_mutex_init(&_kdTreeMutex, NULL);
   
-  if (_params.use_multiple_threads) {
-    
-    // set up compute thread pool
-    
-    for (int ii = 0; ii < _params.n_compute_threads; ii++) {
-      
-      ReorderThread *thread = new ReorderThread();
-      thread->setContext(this);
-      
-      pthread_t pth = 0;
-      pthread_create(&pth, NULL, _computeInThread, thread);
-      thread->setThreadId(pth);
-      _availThreads.push_back(thread);
-      
-    }
-    
+  // initialize thread pool for interpolation
+  // use same number of threads as vert levels
+  // since we compute a plane in each thread
+
+  for (int ii = 0; ii < _gridNz; ii++) {
+    // for (int ii = 0; ii < _params.n_compute_threads; ii++) {
+    PerformInterp *thread = new PerformInterp(this);
+    _threadPoolInterp.addThreadToMain(thread);
   }
-
-}
-
-///////////////////////////////////////////////////////////
-// Thread function to perform computations
-
-void *ReorderInterp::_computeInThread(void *thread_data)
-  
-{
-  
-  // get thread data from args
-
-  ReorderThread *reorderThread = (ReorderThread *) thread_data;
-  ReorderInterp *context = reorderThread->getContext();
-  assert(context);
-  
-  while (true) {
-
-    // wait for main to unlock start mutex on this thread
-    
-    reorderThread->waitForStartSignal();
-    
-    // if exit flag is set, context is done, exit now
-    
-    if (reorderThread->getExitFlag()) {
-      if (context->getParams().debug >= Params::DEBUG_VERBOSE) {
-        pthread_mutex_t *debugPrintMutex = context->getDebugPrintMutex();
-        pthread_mutex_lock(debugPrintMutex);
-        cerr << "====>> compute thread exiting" << endl;
-        pthread_mutex_unlock(debugPrintMutex);
-      }
-      reorderThread->signalParentWorkIsComplete();
-      return NULL;
-    }
-    
-    // perform computations
-    
-    context->_interpPlane(reorderThread->getZIndex());
-    
-    // unlock done mutex
-    
-    reorderThread->signalParentWorkIsComplete();
-    
-  } // while
-
-  return NULL;
 
 }
 
@@ -536,7 +413,7 @@ void ReorderInterp::_computeRadarPoints()
 // identifying the rays closest to a grid point
 
 void ReorderInterp::_computeTagGates(int nGates)
-
+  
 {
 
   // check if geom has changed
@@ -557,8 +434,6 @@ void ReorderInterp::_computeTagGates(int nGates)
   int nextTagPos = 1;
   
   for (int ii = 0; ii < nGates; ii++) {
-
-    // cerr << "222222222222222222 ii, nextTagPos: " << ii << ", " << nextTagPos << endl;
     
     if (ii == nextTagPos) {
 
@@ -578,11 +453,6 @@ void ReorderInterp::_computeTagGates(int nGates)
       }
       nextTagPos += nskip;
 
-      // cerr << "111111 tag gate, searchRadius, nskip: " 
-      //      << ii << ", "
-      //      << searchRadiusKm << ", "
-      //      << nskip << endl;
-
     } else {
 
       _tagGates.push_back(false);
@@ -593,15 +463,14 @@ void ReorderInterp::_computeTagGates(int nGates)
   
 }
 
-
 ////////////////////////////////////////////////////////////
-// Compute grid locations relative to radar
+// Initialize the projection for computations
 
-void ReorderInterp::_computeGridRelative()
+void ReorderInterp::_initProjectionLocal()
 
 {
   if (_params.debug) {
-    cerr << "  Computing grid relative to radar ... " << endl;
+    cerr << "  Initializing projection ... " << endl;
   }
 
   // check if radar has moved
@@ -625,6 +494,7 @@ void ReorderInterp::_computeGridRelative()
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "ReorderInterp::_initProjection()" << endl;
     cerr << "  _radarLat: " << _radarLat << endl;
     cerr << "  _radarLon: " << _radarLon << endl;
     cerr << "  _radarAltKm: " << _radarAltKm << endl;
@@ -632,11 +502,9 @@ void ReorderInterp::_computeGridRelative()
     cerr << "  _gridOriginLon: " << _gridOriginLon << endl;
   }
 
-  // initialize the projection
-
+  // call the method on the base class
+  
   _initProjection();
-
-  _printRunTime("computing grid");
 
 }
 
@@ -658,7 +526,7 @@ void ReorderInterp::_computeGridRelRow(int iz, int iy, GridLoc **locIn)
   double xx = _gridMinx;
 
   for (int ix = 0; ix < _gridNx; ix++, xx += _gridDx) {
-    
+
     // get the latlon of the (x,y) point in the output grid
     
     double gridLat, gridLon;
@@ -791,8 +659,8 @@ void ReorderInterp::_doInterp()
 
 void ReorderInterp::_interpSingleThreaded()
 {
-  for (int iz = 0; iz < _gridNz; iz++) {
 
+  for (int iz = 0; iz < _gridNz; iz++) {
     _interpPlane(iz);
   } // iz
 
@@ -804,181 +672,51 @@ void ReorderInterp::_interpSingleThreaded()
 void ReorderInterp::_interpMultiThreaded()
 {
 
+  _threadPoolInterp.initForRun();
+
   // loop through the Z layers
-  
   for (int iz = 0; iz < _gridNz; iz++) {
-    
-    // is a thread available? if not wait for one
-    
-    ReorderThread *thread = NULL;
-    if (_availThreads.size() > 0) {
-      // get thread from available pool
-      // it is doing no work
-      thread = _availThreads.front();
-      _availThreads.pop_front();
-    } else {
-      // get thread from active pool
-      thread = _activeThreads.front();
-      _activeThreads.pop_front();
-      // wait for current work to complete
-      thread->waitForWorkToComplete();
+    // get a thread from the pool
+    bool isDone = true;
+    PerformInterp *thread = 
+      (PerformInterp *) _threadPoolInterp.getNextThread(true, isDone);
+    if (thread == NULL) {
+      break;
     }
-    
-    // set thread going to compute moments
-    
-    thread->setTask(ReorderThread::INTERP);
-    thread->setZIndex(iz);
-    thread->signalWorkToStart();
-    
-    // push onto active pool
-    
-    _activeThreads.push_back(thread);
-    
+    if (isDone) {
+      // if it is a done thread, return thread to the available pool
+      _threadPoolInterp.addThreadToAvail(thread);
+      // reduce iz by 1 since we did not actually get a compute
+      // thread yet for this row
+      iz--;
+    } else {
+      // available thread, set it running
+      thread->setZIndex(iz);
+      thread->signalRunToStart();
+    }
   } // iz
     
-  // wait for all active threads to complete
+  // collect remaining done threads
   
-  while (_activeThreads.size() > 0) {
-    ReorderThread *thread = _activeThreads.front();
-    _activeThreads.pop_front();
-    _availThreads.push_back(thread);
-    thread->waitForWorkToComplete();
-  }
+  _threadPoolInterp.setReadyForDoneCheck();
+  while (!_threadPoolInterp.checkAllDone()) {
+    bool isDone;
+    PerformInterp *thread = 
+      (PerformInterp *) _threadPoolInterp.getNextThread(true, isDone);
+    if (thread == NULL) {
+      break;
+    } else {
+      _threadPoolInterp.addThreadToAvail(thread);
+    }
+  } // while
 
 }
-
-// #ifdef NOTDEF
-// ////////////////////////////////////////////////////////////
-// // Interpolate a row at a time
-
-// void ReorderInterp::_interpRow(int iz, int iy)
-
-// {
-
-//   // init
-
-//   int nNeighbors = _params.reorder_npoints_search;
-
-//   TaArray<int> tagIndexes_;
-//   int *tagIndexes = tagIndexes_.alloc(nNeighbors);
-  
-//   TaArray<KD_real> distSq_;
-//   KD_real *distSq = distSq_.alloc(nNeighbors);
-
-//   // lock KD tree
-
-//   pthread_mutex_lock(&_kdTreeMutex);
-
-//   // create a vector of neighbor details, one for each
-//   // point in the row
-
-//   vector<NeighborProps *> neighbors;
-  
-//   for (int ix = 0; ix < _gridNx; ix++) {
-    
-//     NeighborProps *neighborProps = new NeighborProps;
-
-//     // get the grid location
-    
-//     neighborProps->iz = iz;
-//     neighborProps->iy = iy;
-//     neighborProps->ix = ix;
-//     neighborProps->loc = _gridLoc[iz][iy][ix];
-//     if (neighborProps->loc->slantRange > _maxRangeKm) {
-//       delete neighborProps;
-//       continue;
-//     }
-    
-//     // set the query location
-    
-//     KD_real queryLoc[KD_DIM];
-//     queryLoc[0] = neighborProps->loc->zz / _zSearchRatio;
-//     queryLoc[1] = neighborProps->loc->yyInstr;
-//     queryLoc[2] = neighborProps->loc->xxInstr;
-    
-//     // initialize tagIndexes
-    
-//     for (int ii = 0; ii < nNeighbors; ii++) {
-//       tagIndexes[ii] = -1;
-//     }
-    
-//     // get closest point from KD tree, and check distance
-    
-//     _kdTree->nnquery(queryLoc, // query location
-//                      1, // get only 1 point
-//                      KD_EUCLIDEAN, // search metric
-//                      1, // Minkowski parameter
-//                      tagIndexes, // out: indices of nearest nbrs
-//                      distSq); // out: squares of distances of nbrs
-    
-//     const radar_point_t &closestPt = _tagPoints[tagIndexes[0]];
-//     double range = _startRangeKm + closestPt.igate * _gateSpacingKm;
-//     double dtest = _params.reorder_search_radius_km;
-//     if (_params.reorder_scale_search_radius_with_range) {
-//       dtest *= (range / _params.reorder_nominal_range_for_search_radius_km);
-//     }
-//     if (dtest < 1.0) {
-//       dtest = 1.0;
-//     }
-//     double dtestSq = dtest * dtest;
-//     if (distSq[0] > dtestSq) {
-//       // the closest point is greater than dtest away from cell
-//       // so don't process this cell
-//       delete neighborProps;
-//       continue;
-//     }
-    
-//     // Find nearest neighbors
-    
-//     _kdTree->nnquery(queryLoc, // query location
-//                      nNeighbors, // number of neighbors to search for
-//                      KD_EUCLIDEAN, // search metric
-//                      1, // Minkowski parameter
-//                      tagIndexes, // out: indices of nearest nbrs
-//                      distSq); // out: squares of distances of nbrs
-    
-//     for (int jj = 0; jj < nNeighbors; jj++) {
-//       int tagIndex = tagIndexes[jj];
-//       if (tagIndex < 0) {
-//         continue;
-//       }
-//       if (distSq[jj] <= dtestSq) {
-//         neighborProps->tagIndexes.push_back(tagIndex);
-//         neighborProps->distSq.push_back(distSq[jj]);
-//       } else {
-//         // no more
-//         break;
-//       }
-//     }
-
-//     neighbors.push_back(neighborProps);
-    
-//   } // ix
-
-//   // unlock KD tree
-  
-//   pthread_mutex_unlock(&_kdTreeMutex);
-  
-//   // interp the points
-  
-//   for (size_t ii = 0; ii < neighbors.size(); ii++) {
-//     _interpPoint(*neighbors[ii]);
-//   } // ix
-
-//   // free up
-
-//   for (size_t ii = 0; ii < neighbors.size(); ii++) {
-//     delete neighbors[ii];
-//   } // ix
-  
-
-// }
 
 ////////////////////////////////////////////////////////////
 // Interpolate a plane at a time
 
 void ReorderInterp::_interpPlane(int iz)
-
+  
 {
 
   // allocate the GridLoc array for this plane and set values
@@ -1011,7 +749,6 @@ void ReorderInterp::_interpPlane(int iz)
   // create a vector of neighbor details, one for each
   // point in the row
   
-
   for (int iy = 0; iy < _gridNy; iy++) {
     for (int ix = 0; ix < _gridNx; ix++) {
     
@@ -1287,9 +1024,12 @@ void ReorderInterp::_findClosestGates(const GridLoc &loc,
 
 {
   
-  // cerr << "00000000000000000000000 initIndex: " << pt.index << endl;
-  // cerr << "00000000000000000000000 rayStartIndex: " << pt.rayStartIndex << endl;
-  // cerr << "00000000000000000000000 rayEndIndex: " << pt.rayEndIndex << endl;
+  // cerr << "00000000000000000000000 initIndex: "
+  //      << pt.index << endl;
+  // cerr << "00000000000000000000000 rayStartIndex: "
+  //      << pt.rayStartIndex << endl;
+  // cerr << "00000000000000000000000 rayEndIndex: "
+  //      << pt.rayEndIndex << endl;
 
   int thisIndex = pt.index;
   if (thisIndex == pt.rayEndIndex) {
@@ -1299,9 +1039,11 @@ void ReorderInterp::_findClosestGates(const GridLoc &loc,
 
   double thisDistSq = _computeDistSq(loc, _radarPoints[thisIndex]);
   double nextDistSq = _computeDistSq(loc, _radarPoints[nextIndex]);
-
-  // cerr << "11111111 thisIndex, thisDist: " << thisIndex << ", " << thisDist << endl;
-  // cerr << "11111111 thisIndex, nextDist: " << nextIndex << ", " << nextDist << endl;
+  
+  // cerr << "11111111 thisIndex, thisDist: "
+  //      << thisIndex << ", " << thisDist << endl;
+  // cerr << "11111111 thisIndex, nextDist: "
+  //      << nextIndex << ", " << nextDist << endl;
 
   bool searchForward = true;
   if (nextDistSq > thisDistSq) {
@@ -1353,11 +1095,11 @@ void ReorderInterp::_findClosestGates(const GridLoc &loc,
   closest.second.wt = 1.0 / nextDistSq;
   
   // set distances
-
   
-
-  // cerr << "22222222 nextIndex, nextDist: " << nextIndex << ", " << nextDist << endl;
-  // cerr << "22222222 thisIndex, thisDist: " << thisIndex << ", " << thisDist << endl;
+  // cerr << "22222222 nextIndex, nextDist: "
+  //      << nextIndex << ", " << nextDist << endl;
+  // cerr << "22222222 thisIndex, thisDist: "
+  //      << thisIndex << ", " << thisDist << endl;
 
   // _printRadarPoint(cerr, _radarPoints[thisIndex]);
 
@@ -1375,11 +1117,11 @@ void ReorderInterp::_findClosestGates(const GridLoc &loc,
   
   // if (minDist != thisDist && minDist != nextDist) {
   //   cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
-  //   cerr << "333333333 minIndex, minDist: " << minIndex << ", " << minDist << endl;
+  //   cerr << "333333333 minIndex, minDist: " 
+  //        << minIndex << ", " << minDist << endl;
   //   _printRadarPoint(cerr, _radarPoints[minIndex]);
   //   cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
   // }
-  
 
 }
 
@@ -1404,7 +1146,8 @@ void ReorderInterp::_printRadarPoint(ostream &out,
                                      const radar_point_t &pt)
 
 {
-  out << "=========== ray el, az: " << pt.ray->el << ", " << pt.ray->az << endl;
+  out << "=========== ray el, az: " << pt.ray->el << ", " 
+      << pt.ray->az << endl;
   out << "  index: " << pt.index << endl;
   out << "  rayStartIndex: " << pt.rayStartIndex << endl;
   out << "  rayEndIndex: " << pt.rayEndIndex << endl;
@@ -1422,9 +1165,10 @@ void ReorderInterp::_printRadarPoint(ostream &out,
 ///////////////////////////////////////////////////////
 // load up data for a grid point using nearest neighbor
 
-void ReorderInterp::_computeNearestGridPt(int ifield,
-                                          int iz, int iy, int ix,
-                                          const vector<radar_point_t> &interpPts)
+void ReorderInterp::_computeNearestGridPt
+  (int ifield,
+   int iz, int iy, int ix,
+   const vector<radar_point_t> &interpPts)
   
 {
   
@@ -1439,7 +1183,8 @@ void ReorderInterp::_computeNearestGridPt(int ifield,
     const Ray *ray = _interpRays[pt.iray];
     if (ray) {
       // points are in order of closest first
-      _accumNearest(ray, ifield, pt.igate, pt.wt, closestVal, maxWt, nContrib);
+      _accumNearest(ray, ifield, pt.igate, pt.wt, 
+                    closestVal, maxWt, nContrib);
       break;
     }
   }
@@ -1457,10 +1202,11 @@ void ReorderInterp::_computeNearestGridPt(int ifield,
 /////////////////////////////////////////////////////
 // load up data for a grid point using interpolation
 
-void ReorderInterp::_computeInterpGridPt(int ifield,
-                                         int iz, int iy, int ix,
-					 const GridLoc &loc,
-                                         const vector<radar_point_t> &interpPts)
+void ReorderInterp::
+  _computeInterpGridPt(int ifield,
+                       int iz, int iy, int ix,
+                       const GridLoc &loc,
+                       const vector<radar_point_t> &interpPts)
   
 {
   double v;
@@ -1550,10 +1296,12 @@ void ReorderInterp::_computeMinMax(const vector<double> &bb,
 // load up data for a grid point using interpolation
 
 void
-ReorderInterp::_computeWeightedInterpGridPt(int ifield,
-					    int iz, int iy, int ix,
-					    const vector<radar_point_t> &interpPts)
+ReorderInterp::
+  _computeWeightedInterpGridPt(int ifield,
+                               int iz, int iy, int ix,
+                               const vector<radar_point_t> &interpPts)
 {
+
   // sum up weighted vals
   
   double sumVals = 0.0;
@@ -1601,10 +1349,11 @@ ReorderInterp::_computeWeightedInterpGridPt(int ifield,
 // load up data for a grid point using interpolation
 // for a folded field
 
-void ReorderInterp::_computeFoldedGridPt(int ifield,
-                                         int iz, int iy, int ix,
-					 const GridLoc &loc,
-                                         const vector<radar_point_t> &interpPts)
+void ReorderInterp::
+  _computeFoldedGridPt(int ifield,
+                       int iz, int iy, int ix,
+                       const GridLoc &loc,
+                       const vector<radar_point_t> &interpPts)
   
 {
   // copy interp points
@@ -1657,8 +1406,8 @@ void ReorderInterp::_computeFoldedGridPt(int ifield,
   if (good) {
     double angleInterp = atan2(yfit, xfit);
     const Field &intFld = _interpFields[ifield];
-    double valInterp = _getFoldValue(angleInterp,
-                                     intFld.foldLimitLower, intFld.foldRange);
+    double valInterp =
+      _getFoldValue(angleInterp, intFld.foldLimitLower, intFld.foldRange);
     _outputFields[ifield][gridPtIndex] = valInterp;
   } else {
     _outputFields[ifield][gridPtIndex] = missingFl32;
@@ -1670,9 +1419,10 @@ void ReorderInterp::_computeFoldedGridPt(int ifield,
 // for a folded field
 
 void
-ReorderInterp::_computeWeightedFoldedGridPt(int ifield,
-					    int iz, int iy, int ix,
-					    const vector<radar_point_t> &interpPts)
+ReorderInterp::
+  _computeWeightedFoldedGridPt(int ifield,
+                               int iz, int iy, int ix,
+                               const vector<radar_point_t> &interpPts)
   
 {
   
@@ -1712,13 +1462,66 @@ ReorderInterp::_computeWeightedFoldedGridPt(int ifield,
   } else if (nContrib >= _params.min_nvalid_for_interp) {
     const Field &intFld = _interpFields[ifield];
     double angleInterp = atan2(sumY, sumX);
-    double valInterp = _getFoldValue(angleInterp,
-                                     intFld.foldLimitLower, intFld.foldRange);
+    double valInterp =
+      _getFoldValue(angleInterp,
+                    intFld.foldLimitLower, intFld.foldRange);
     _outputFields[ifield][gridPtIndex] = valInterp;
   } else {
     _outputFields[ifield][gridPtIndex] = missingFl32;
   }
 
+}
+
+///////////////////////////////////////////////////////////////
+// get data for a gate
+
+bool ReorderInterp::_getData(int ifield, const Interp::Ray *ray, 
+                             int igate, double &v)
+{
+  if (ray->fldData) {
+    
+    int nGates = ray->nGates;
+    fl32 missing = ray->missingVal[ifield];
+    fl32 *field = ray->fldData[ifield];
+
+    if (field != NULL) {
+      
+      if (igate >= 0 && igate < nGates) {
+        fl32 val = field[igate];
+        if (val != missing) {
+          v = val;
+	  return true;
+        }
+      }
+      
+    } // if (field != NULL) 
+    
+  } // if (ray->fldData)
+  return false;
+}
+
+///////////////////////////////////////////////////////////////
+// get data for a gate, allow missing values
+
+bool ReorderInterp::
+  _getDataAllowMissing(int ifield, const Interp::Ray *ray,
+                       int igate, double &v, double &missing,
+                       bool &isMissing)
+{
+  if (ray->fldData) {
+    int nGates = ray->nGates;
+    missing = (double)ray->missingVal[ifield];
+    fl32 *field = ray->fldData[ifield];
+    if (field != NULL) {
+      if (igate >= 0 && igate < nGates) {
+        fl32 val = field[igate];
+ 	v = val;
+        isMissing = (val == missing);
+ 	return true;
+      }
+    } // if (field != NULL) 
+  } // if (ray->fldData)
+  return false;
 }
 
 /////////////////////////////////////////////////////
@@ -1727,7 +1530,7 @@ ReorderInterp::_computeWeightedFoldedGridPt(int ifield,
 bool ReorderInterp::_collectLocalData(int ifield, 
 				      vector<radar_point_t> &interpPts,
 				      const GridLoc &loc,
-				      vector<double> &b) const
+				      vector<double> &b)
 {
   bool good = true;
   int numGood = 0;
@@ -1784,7 +1587,7 @@ bool ReorderInterp::_collectLocalData(int ifield,
 bool ReorderInterp::_collectLocalFoldedData(int ifield, 
 					    vector<radar_point_t> &interpPts,
 					    vector<double> &x,
-					    vector<double> &y) const
+					    vector<double> &y)
 {
   bool good = true;
 
@@ -1872,3 +1675,18 @@ int ReorderInterp::_writeOutputFile()
   return 0;
 
 }
+
+///////////////////////////////////////////////////////////////
+// PerformInterp thread
+///////////////////////////////////////////////////////////////
+// Constructor
+ReorderInterp::PerformInterp::PerformInterp(ReorderInterp *obj) :
+        _this(obj)
+{
+}  
+// run method
+void ReorderInterp::PerformInterp::run()
+{
+  _this->_interpPlane(_zIndex);
+}
+
