@@ -62,12 +62,7 @@ CartInterp::CartInterp(const string &progName,
                params,
                readVol,
                interpFields,
-               interpRays),
-        _threadFillSearchLowerLeft(this),
-        _threadFillSearchLowerRight(this),
-        _threadFillSearchUpperLeft(this),
-        _threadFillSearchUpperRight(this),
-        _threadComputeGridRelative(this)
+               interpRays)
   
 {
   
@@ -75,6 +70,11 @@ CartInterp::CartInterp(const string &progName,
   _searchMatrixUpperLeft = NULL;
   _searchMatrixLowerRight = NULL;
   _searchMatrixUpperRight = NULL;
+
+  _threadFillSearchLowerLeft = NULL;
+  _threadFillSearchLowerRight = NULL;
+  _threadFillSearchUpperLeft = NULL;
+  _threadFillSearchUpperRight = NULL;
 
   _prevRadarLat = _prevRadarLon = _prevRadarAltKm = -9999.0;
   _gridLoc = NULL;
@@ -271,29 +271,25 @@ int CartInterp::interpVol()
 void CartInterp::_createThreads()
 {
 
-  // initialize debug mutex
+  // threads for search
 
-  pthread_mutex_init(&_debugPrintMutex, NULL);
-
-  // initialize compute objects
-
-  if (_params.use_multiple_threads) {
-    // set up compute thread pool
-    for (int ii = 0; ii < _params.n_compute_threads; ii++) {
-      CartThread *thread = new CartThread();
-      thread->setContext(this);
-      pthread_t pth = 0;
-      pthread_create(&pth, NULL, _computeInThread, thread);
-      thread->setThreadId(pth);
-      _availThreads.push_back(thread);
-    }
-  }
+  _threadFillSearchLowerLeft = new FillSearchLowerLeft(this);
+  _threadFillSearchLowerRight = new FillSearchLowerRight(this);
+  _threadFillSearchUpperLeft = new FillSearchUpperLeft(this);
+  _threadFillSearchUpperRight = new FillSearchUpperRight(this);
 
   // initialize thread pool for grid relative to radar
 
   for (int ii = 0; ii < _params.n_compute_threads; ii++) {
     ComputeGridRelative *thread = new ComputeGridRelative(this);
     _threadPoolGridRel.addThreadToMain(thread);
+  }
+
+  // initialize thread pool for interpolation
+
+  for (int ii = 0; ii < _params.n_compute_threads; ii++) {
+    PerformInterp *thread = new PerformInterp(this);
+    _threadPoolInterp.addThreadToMain(thread);
   }
 
 }
@@ -304,42 +300,18 @@ void CartInterp::_createThreads()
 void CartInterp::_freeThreads()
 {
 
-  // wait for active thread pool to complete
-
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->waitForWorkToComplete();
+  if (_threadFillSearchLowerLeft) {
+    delete _threadFillSearchLowerLeft;
   }
-
-  // signal all threads to exit
-
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    _availThreads[ii]->setExitFlag(true);
-    _availThreads[ii]->signalWorkToStart();
+  if (_threadFillSearchLowerRight) {
+    delete _threadFillSearchLowerRight;
   }
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->setExitFlag(true);
-    _activeThreads[ii]->signalWorkToStart();
+  if (_threadFillSearchUpperLeft) {
+    delete _threadFillSearchUpperLeft;
   }
-
-  // wait for all threads to exit
-  
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    _availThreads[ii]->waitForWorkToComplete();
+  if (_threadFillSearchUpperRight) {
+    delete _threadFillSearchUpperRight;
   }
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->waitForWorkToComplete();
-  }
-
-  // delete all threads
-  
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    delete _availThreads[ii];
-  }
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    delete _activeThreads[ii];
-  }
-
-  pthread_mutex_destroy(&_debugPrintMutex);
 
 }
 
@@ -729,57 +701,6 @@ void CartInterp::_computeSearchLimits()
 
 }
 
-///////////////////////////////////////////////////////////
-// Thread function to perform computations
-
-void *CartInterp::_computeInThread(void *thread_data)
-  
-{
-  
-  // get thread data from args
-
-  CartThread *cartThread = (CartThread *) thread_data;
-  CartInterp *context = cartThread->getContext();
-  assert(context);
-  
-  while (true) {
-
-    // wait for main to unlock start mutex on this thread
-    
-    cartThread->waitForStartSignal();
-    
-    // if exit flag is set, context is done, exit now
-    
-    if (cartThread->getExitFlag()) {
-      if (context->getParams().debug >= Params::DEBUG_VERBOSE) {
-        pthread_mutex_t *debugPrintMutex = context->getDebugPrintMutex();
-        pthread_mutex_lock(debugPrintMutex);
-        cerr << "====>> compute thread exiting" << endl;
-        pthread_mutex_unlock(debugPrintMutex);
-      }
-      cartThread->signalParentWorkIsComplete();
-      return NULL;
-    }
-    
-    // perform computations
-
-    if (cartThread->getTask() == CartThread::INTERP) {
-      context->_interpRow(cartThread->getZIndex(), cartThread->getYIndex());
-    } else if (cartThread->getTask() == CartThread::GRID_LOC) {
-      context->_computeGridRow(cartThread->getZIndex(), 
-                               cartThread->getYIndex());
-    }
-    
-    // unlock done mutex
-    
-    cartThread->signalParentWorkIsComplete();
-    
-  } // while
-
-  return NULL;
-
-}
-
 ////////////////////////////////////////////////////////////
 // Compute grid locations relative to radar
 
@@ -1137,34 +1058,34 @@ void CartInterp::_fillSearchMatrix()
 
     // start all threads
 
-    _threadFillSearchLowerLeft.signalRunToStart();
-    _threadFillSearchUpperLeft.signalRunToStart();
-    _threadFillSearchLowerRight.signalRunToStart();
-    _threadFillSearchUpperRight.signalRunToStart();
+    _threadFillSearchLowerLeft->signalRunToStart();
+    _threadFillSearchUpperLeft->signalRunToStart();
+    _threadFillSearchLowerRight->signalRunToStart();
+    _threadFillSearchUpperRight->signalRunToStart();
 
     // wait for each thread to complete
 
-    _threadFillSearchLowerLeft.waitForRunToComplete();
-    _threadFillSearchUpperLeft.waitForRunToComplete();
-    _threadFillSearchLowerRight.waitForRunToComplete();
-    _threadFillSearchUpperRight.waitForRunToComplete();
+    _threadFillSearchLowerLeft->waitForRunToComplete();
+    _threadFillSearchUpperLeft->waitForRunToComplete();
+    _threadFillSearchLowerRight->waitForRunToComplete();
+    _threadFillSearchUpperRight->waitForRunToComplete();
 
   } else {
 
     // start each thread and wait to complete
     // before starting next one
 
-    _threadFillSearchLowerLeft.signalRunToStart();
-    _threadFillSearchLowerLeft.waitForRunToComplete();
+    _threadFillSearchLowerLeft->signalRunToStart();
+    _threadFillSearchLowerLeft->waitForRunToComplete();
 
-    _threadFillSearchUpperLeft.signalRunToStart();
-    _threadFillSearchUpperLeft.waitForRunToComplete();
+    _threadFillSearchUpperLeft->signalRunToStart();
+    _threadFillSearchUpperLeft->waitForRunToComplete();
 
-    _threadFillSearchLowerRight.signalRunToStart();
-    _threadFillSearchLowerRight.waitForRunToComplete();
+    _threadFillSearchLowerRight->signalRunToStart();
+    _threadFillSearchLowerRight->waitForRunToComplete();
 
-    _threadFillSearchUpperRight.signalRunToStart();
-    _threadFillSearchUpperRight.waitForRunToComplete();
+    _threadFillSearchUpperRight->signalRunToStart();
+    _threadFillSearchUpperRight->waitForRunToComplete();
 
   }
      
@@ -1731,53 +1652,52 @@ void CartInterp::_interpSingleThreaded()
 void CartInterp::_interpMultiThreaded()
 {
 
+  _threadPoolInterp.initForRun();
+
   // loop through the Z layers
-  
   for (int iz = 0; iz < _gridNz; iz++) {
 
     // loop through the Y columns
-  
     for (int iy = 0; iy < _gridNy; iy++) {
       
-      // is a thread available? if not wait for one
-    
-      CartThread *thread = NULL;
-      if (_availThreads.size() > 0) {
-        // get thread from available pool
-        // it is doing no work
-        thread = _availThreads.front();
-        _availThreads.pop_front();
-      } else {
-        // get thread from active pool
-        thread = _activeThreads.front();
-        _activeThreads.pop_front();
-        // wait for current work to complete
-        thread->waitForWorkToComplete();
+      // get a thread from the pool
+      
+      bool isDone = true;
+      PerformInterp *thread = 
+        (PerformInterp *) _threadPoolInterp.getNextThread(true, isDone);
+      if (thread == NULL) {
+        break;
       }
-    
-      // set thread going to compute moments
+      if (isDone) {
+        // if it is a done thread, return thread to the available pool
+        _threadPoolInterp.addThreadToAvail(thread);
+        // reduce iy by 1 since we did not actually get a compute
+        // thread yet for this row
+        iy--;
+      } else {
+        // available thread, set it running
+        thread->setZIndex(iz);
+        thread->setYIndex(iy);
+        thread->signalRunToStart();
+      }
       
-      thread->setTask(CartThread::INTERP);
-      thread->setZIndex(iz);
-      thread->setYIndex(iy);
-      thread->signalWorkToStart();
-      
-      // push onto active pool
-      
-      _activeThreads.push_back(thread);
-
     } // iy
 
   } // iz
     
-  // wait for all active threads to complete
-  
-  while (_activeThreads.size() > 0) {
-    CartThread *thread = _activeThreads.front();
-    _activeThreads.pop_front();
-    _availThreads.push_back(thread);
-    thread->waitForWorkToComplete();
-  }
+  // collect remaining done threads
+
+  _threadPoolInterp.setReadyForDoneCheck();
+  while (!_threadPoolInterp.checkAllDone()) {
+    bool isDone;
+    PerformInterp *thread = 
+      (PerformInterp *) _threadPoolInterp.getNextThread(true, isDone);
+    if (thread == NULL) {
+      break;
+    } else {
+      _threadPoolInterp.addThreadToAvail(thread);
+    }
+  } // while
 
 }
 
@@ -3283,8 +3203,21 @@ CartInterp::ComputeGridRelative::ComputeGridRelative(CartInterp *cartInterp) :
 // run method
 void CartInterp::ComputeGridRelative::run()
 {
-  // cerr << "computeGridRow, iz, iy: " << _zIndex << ", " << _yIndex << endl;
   _cartInterp->_computeGridRow(_zIndex, _yIndex);
+}
+
+///////////////////////////////////////////////////////////////
+// PerformInterp thread
+///////////////////////////////////////////////////////////////
+// Constructor
+CartInterp::PerformInterp::PerformInterp(CartInterp *cartInterp) :
+        _cartInterp(cartInterp)
+{
+}  
+// run method
+void CartInterp::PerformInterp::run()
+{
+  _cartInterp->_interpRow(_zIndex, _yIndex);
 }
 
 ///////////////////////////////////////////////////////////////
