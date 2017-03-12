@@ -300,6 +300,8 @@ void CartInterp::_createThreads()
 void CartInterp::_freeThreads()
 {
 
+  // free threads we created for search
+
   if (_threadFillSearchLowerLeft) {
     delete _threadFillSearchLowerLeft;
   }
@@ -312,6 +314,8 @@ void CartInterp::_freeThreads()
   if (_threadFillSearchUpperRight) {
     delete _threadFillSearchUpperRight;
   }
+
+  // NOTE - thread pools free their threads in the destructor
 
 }
 
