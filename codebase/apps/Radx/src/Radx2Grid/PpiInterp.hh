@@ -37,6 +37,8 @@
 #define PpiInterp_HH
 
 #include "Interp.hh"
+#include <toolsa/TaThread.hh>
+#include <toolsa/TaThreadPool.hh>
 
 class PpiInterp : public Interp {
   
@@ -61,10 +63,9 @@ public:
 
   virtual int interpVol();
   
-  // get methods for threading
+  // get methods
 
   const Params &getParams() const { return _params; }
-  pthread_mutex_t *getDebugPrintMutex() { return &_debugPrintMutex; }
 
 protected:
 private:
@@ -73,12 +74,6 @@ private:
   
   vector<double> _prevZLevels;
 
-   // threading
-  
-  deque<PpiThread *> _activeThreads;
-  deque<PpiThread *> _availThreads;
-  pthread_mutex_t _debugPrintMutex;
-  
   // class for search matrix
 
   class SearchPoint {
@@ -138,7 +133,7 @@ private:
     return dist;
   }
 
-  void _initThreads();
+  void _createThreads();
   void _freeThreads();
 
   void _initZLevels();
@@ -150,8 +145,6 @@ private:
   bool _geomHasChanged();
   void _computeSearchLimits();
 
-  static void *_computeInThread(void *thread_data);
-  
   void _allocOutputArrays();
   void _freeOutputArrays();
   void _initOutputArrays();
@@ -215,6 +208,49 @@ private:
   double _conditionAz(double az);
 
   int _writeOutputFile();
+
+  //////////////////////////////////////////////////////////////
+  // inner thread class for computing the grid locations
+  // relative to the radar
+  
+  class ComputeGridRelative : public TaThread
+  {  
+  public:
+    // constructor
+    ComputeGridRelative(PpiInterp *obj);
+    // set the y and z index
+    inline void setYIndex(int yIndex) { _yIndex = yIndex; }
+    inline void setZIndex(int zIndex) { _zIndex = zIndex; }
+    // override run method
+    virtual void run();
+  private:
+    PpiInterp *_this; // context
+    int _yIndex; // grid index of y column
+    int _zIndex; // grid index of z plane
+  };
+  // instantiate thread pool for grid relative computations
+  TaThreadPool _threadPoolGridRel;
+
+  //////////////////////////////////////////////////////////////
+  // inner thread class for performing interpolation
+  
+  class PerformInterp : public TaThread
+  {  
+  public:
+    // constructor
+    PerformInterp(PpiInterp *obj);
+    // set the y and z index
+    inline void setYIndex(int yIndex) { _yIndex = yIndex; }
+    inline void setZIndex(int zIndex) { _zIndex = zIndex; }
+    // override run method
+    virtual void run();
+  private:
+    PpiInterp *_this; // context
+    int _yIndex; // grid index of y column
+    int _zIndex; // grid index of z plane
+  };
+  // instantiate thread pool for interpolation
+  TaThreadPool _threadPoolInterp;
 
 };
 

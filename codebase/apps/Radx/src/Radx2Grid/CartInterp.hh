@@ -64,7 +64,7 @@ public:
 
   virtual int interpVol();
   
-  // get methods for threading
+  // get methods
 
   const Params &getParams() const { return _params; }
 
@@ -352,11 +352,11 @@ private:
   {  
   public:
     // constructor
-    FillSearchLowerLeft(CartInterp *cartInterp);
+    FillSearchLowerLeft(CartInterp *obj);
     // override run method
     virtual void run();
   private:
-    CartInterp *_cartInterp; // context
+    CartInterp *_this; // context
   };
 
   //////////////////////////////////////////////////////////////
@@ -366,11 +366,11 @@ private:
   {  
   public:
     // constructor
-    FillSearchLowerRight(CartInterp *cartInterp);
+    FillSearchLowerRight(CartInterp *obj);
     // override run method
     virtual void run();
   private:
-    CartInterp *_cartInterp; // context
+    CartInterp *_this; // context
   };
 
   //////////////////////////////////////////////////////////////
@@ -380,11 +380,11 @@ private:
   {  
   public:
     // constructor
-    FillSearchUpperLeft(CartInterp *cartInterp);
+    FillSearchUpperLeft(CartInterp *obj);
     // override run method
     virtual void run();
   private:
-    CartInterp *_cartInterp; // context
+    CartInterp *_this; // context
   };
 
   //////////////////////////////////////////////////////////////
@@ -394,11 +394,11 @@ private:
   {  
   public:
     // constructor
-    FillSearchUpperRight(CartInterp *cartInterp);
+    FillSearchUpperRight(CartInterp *obj);
     // override run method
     virtual void run();
   private:
-    CartInterp *_cartInterp; // context
+    CartInterp *_this; // context
   };
 
   // instantiate threads for fill search
@@ -415,14 +415,14 @@ private:
   {  
   public:
     // constructor
-    ComputeGridRelative(CartInterp *cartInterp);
+    ComputeGridRelative(CartInterp *obj);
     // set the y and z index
     inline void setYIndex(int yIndex) { _yIndex = yIndex; }
     inline void setZIndex(int zIndex) { _zIndex = zIndex; }
     // override run method
     virtual void run();
   private:
-    CartInterp *_cartInterp; // context
+    CartInterp *_this; // context
     int _yIndex; // grid index of y column
     int _zIndex; // grid index of z plane
   };
@@ -436,14 +436,14 @@ private:
   {  
   public:
     // constructor
-    PerformInterp(CartInterp *cartInterp);
+    PerformInterp(CartInterp *obj);
     // set the y and z index
     inline void setYIndex(int yIndex) { _yIndex = yIndex; }
     inline void setZIndex(int zIndex) { _zIndex = zIndex; }
     // override run method
     virtual void run();
   private:
-    CartInterp *_cartInterp; // context
+    CartInterp *_this; // context
     int _yIndex; // grid index of y column
     int _zIndex; // grid index of z plane
   };

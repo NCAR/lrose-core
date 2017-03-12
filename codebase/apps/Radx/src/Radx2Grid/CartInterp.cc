@@ -768,12 +768,9 @@ void CartInterp::_computeGridRelMultiThreaded()
 
   // loop through the Z layers
   for (int iz = 0; iz < _gridNz; iz++) {
-
     // loop through the Y columns
     for (int iy = 0; iy < _gridNy; iy++) {
-      
       // get a thread from the pool
-
       bool isDone = true;
       ComputeGridRelative *thread = 
         (ComputeGridRelative *) _threadPoolGridRel.getNextThread(true, isDone);
@@ -792,9 +789,7 @@ void CartInterp::_computeGridRelMultiThreaded()
         thread->setYIndex(iy);
         thread->signalRunToStart();
       }
-
     } // iy
-
   } // iz
   
   // collect remaining done threads
@@ -1656,12 +1651,9 @@ void CartInterp::_interpMultiThreaded()
 
   // loop through the Z layers
   for (int iz = 0; iz < _gridNz; iz++) {
-
     // loop through the Y columns
     for (int iy = 0; iy < _gridNy; iy++) {
-      
       // get a thread from the pool
-      
       bool isDone = true;
       PerformInterp *thread = 
         (PerformInterp *) _threadPoolInterp.getNextThread(true, isDone);
@@ -1680,9 +1672,7 @@ void CartInterp::_interpMultiThreaded()
         thread->setYIndex(iy);
         thread->signalRunToStart();
       }
-      
     } // iy
-
   } // iz
     
   // collect remaining done threads
@@ -3116,16 +3106,16 @@ void CartInterp::_convStratComputeVertLookups()
 // FillSearchLowerLeft thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::FillSearchLowerLeft::FillSearchLowerLeft(CartInterp *cartInterp) :
-        _cartInterp(cartInterp)
+CartInterp::FillSearchLowerLeft::FillSearchLowerLeft(CartInterp *obj) :
+        _this(obj)
 {
 }  
 // run method
 void CartInterp::FillSearchLowerLeft::run()
 {
   vector<SearchIndex> thisSearch, nextSearch;
-  for (int level = 0; level < _cartInterp->_searchMaxCount; level++) {
-    if (_cartInterp->_fillSearchLowerLeft(level, thisSearch, nextSearch) == 0) {
+  for (int level = 0; level < _this->_searchMaxCount; level++) {
+    if (_this->_fillSearchLowerLeft(level, thisSearch, nextSearch) == 0) {
       break;
     }
     thisSearch = nextSearch;
@@ -3136,16 +3126,16 @@ void CartInterp::FillSearchLowerLeft::run()
 // FillSearchLowerRight thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::FillSearchLowerRight::FillSearchLowerRight(CartInterp *cartInterp) :
-        _cartInterp(cartInterp)
+CartInterp::FillSearchLowerRight::FillSearchLowerRight(CartInterp *obj) :
+        _this(obj)
 {
 }  
 // run method
 void CartInterp::FillSearchLowerRight::run()
 {
   vector<SearchIndex> thisSearch, nextSearch;
-  for (int level = 0; level < _cartInterp->_searchMaxCount; level++) {
-    if (_cartInterp->_fillSearchLowerRight(level, thisSearch, nextSearch) == 0) {
+  for (int level = 0; level < _this->_searchMaxCount; level++) {
+    if (_this->_fillSearchLowerRight(level, thisSearch, nextSearch) == 0) {
       break;
     }
     thisSearch = nextSearch;
@@ -3156,16 +3146,16 @@ void CartInterp::FillSearchLowerRight::run()
 // FillSearchUpperLeft thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::FillSearchUpperLeft::FillSearchUpperLeft(CartInterp *cartInterp) :
-        _cartInterp(cartInterp)
+CartInterp::FillSearchUpperLeft::FillSearchUpperLeft(CartInterp *obj) :
+        _this(obj)
 {
 }  
 // run method
 void CartInterp::FillSearchUpperLeft::run()
 {
   vector<SearchIndex> thisSearch, nextSearch;
-  for (int level = 0; level < _cartInterp->_searchMaxCount; level++) {
-    if (_cartInterp->_fillSearchUpperLeft(level, thisSearch, nextSearch) == 0) {
+  for (int level = 0; level < _this->_searchMaxCount; level++) {
+    if (_this->_fillSearchUpperLeft(level, thisSearch, nextSearch) == 0) {
       break;
     }
     thisSearch = nextSearch;
@@ -3176,16 +3166,16 @@ void CartInterp::FillSearchUpperLeft::run()
 // FillSearchUpperRight thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::FillSearchUpperRight::FillSearchUpperRight(CartInterp *cartInterp) :
-        _cartInterp(cartInterp)
+CartInterp::FillSearchUpperRight::FillSearchUpperRight(CartInterp *obj) :
+        _this(obj)
 {
 }  
 // run method
 void CartInterp::FillSearchUpperRight::run()
 {
   vector<SearchIndex> thisSearch, nextSearch;
-  for (int level = 0; level < _cartInterp->_searchMaxCount; level++) {
-    if (_cartInterp->_fillSearchUpperRight(level, thisSearch, nextSearch) == 0) {
+  for (int level = 0; level < _this->_searchMaxCount; level++) {
+    if (_this->_fillSearchUpperRight(level, thisSearch, nextSearch) == 0) {
       break;
     }
     thisSearch = nextSearch;
@@ -3196,28 +3186,28 @@ void CartInterp::FillSearchUpperRight::run()
 // ComputeGridRelative thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::ComputeGridRelative::ComputeGridRelative(CartInterp *cartInterp) :
-        _cartInterp(cartInterp)
+CartInterp::ComputeGridRelative::ComputeGridRelative(CartInterp *obj) :
+        _this(obj)
 {
 }  
 // run method
 void CartInterp::ComputeGridRelative::run()
 {
-  _cartInterp->_computeGridRow(_zIndex, _yIndex);
+  _this->_computeGridRow(_zIndex, _yIndex);
 }
 
 ///////////////////////////////////////////////////////////////
 // PerformInterp thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::PerformInterp::PerformInterp(CartInterp *cartInterp) :
-        _cartInterp(cartInterp)
+CartInterp::PerformInterp::PerformInterp(CartInterp *obj) :
+        _this(obj)
 {
 }  
 // run method
 void CartInterp::PerformInterp::run()
 {
-  _cartInterp->_interpRow(_zIndex, _yIndex);
+  _this->_interpRow(_zIndex, _yIndex);
 }
 
 ///////////////////////////////////////////////////////////////
