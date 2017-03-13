@@ -1,0 +1,9 @@
+#! /bin/csh
+#
+
+cd ~/apps/Radx/src/RadxCov2Mom/test
+
+RadxCov2Mom -params RadxCov2Mom.test -debug -f /scr/hail2/rsfdata/pecan/cfradial/spol/covar/sband/sur/20150626/cfrad.20150626_000729.101_to_20150626_001312.085_SPOL_v3836_PunSur_SUR.nc
+
+
+
