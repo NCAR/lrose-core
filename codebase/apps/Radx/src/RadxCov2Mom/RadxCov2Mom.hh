@@ -63,7 +63,6 @@ class RadxRcalib;
 class RadxField;
 class IwrfCalib;
 class Moments;
-class ComputeThread;
 using namespace std;
 
 class RadxCov2Mom {
@@ -89,7 +88,6 @@ public:
   // get methods for threading
 
   const Params &getParams() const { return _params; }
-  pthread_mutex_t *getDebugPrintMutex() { return &_debugPrintMutex; }
 
 protected:
 private:
@@ -136,12 +134,6 @@ private:
   double _meanNoiseDbmVc;
   double _meanNoiseDbmHx;
   double _meanNoiseDbmVx;
-
-  // threading
-
-  deque<ComputeThread *> _activeThreads;
-  deque<ComputeThread *> _availThreads;
-  pthread_mutex_t _debugPrintMutex;
 
   // calibrations
 
@@ -203,23 +195,23 @@ private:
   //////////////////////////////////////////////////////////////
   // inner thread class for calling Moments computations
   
-  class ComputeThread2 : public TaThread
+  class ComputeThread : public TaThread
   {  
   public:
     // constructor
-    ComputeThread2(RadxCov2Mom *obj);
+    ComputeThread(RadxCov2Mom *obj);
     // compute moments
     inline void setMoments(Moments *val) { _moments = val; }
     inline Moments *getMoments() const { return _moments; }
     // access to the covariance ray
     inline void setCovRay(const RadxRay *val) { _covRay = val; }
     inline const RadxRay *getCovRay() { return _covRay; }
-    // calibration
-    inline void setCalib(const IwrfCalib *val) { _calib = val; }
-    inline const IwrfCalib *getCalib() const { return _calib; }
     // access to the moments ray
     inline void setMomRay(RadxRay *val) { _momRay = val; }
     inline RadxRay *getMomRay() const { return _momRay; }
+    // calibration
+    inline void setCalib(const IwrfCalib val) { _calib = val; }
+    inline const IwrfCalib &getCalib() const { return _calib; }
     // override run method
     virtual void run();
   private:
@@ -228,14 +220,14 @@ private:
     // computation context
     Moments *_moments;
     const RadxRay *_covRay;
-    const IwrfCalib *_calib;
+    IwrfCalib _calib;
     // result of computation
     RadxRay *_momRay;
   };
   // instantiate thread pool for computations
   TaThreadPool _threadPool;
 
-  void _handleDoneThread(ComputeThread2 *thread,
+  void _handleDoneThread(ComputeThread *thread,
                          vector <RadxRay *> &momRays);
 
 };
