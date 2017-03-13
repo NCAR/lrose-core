@@ -83,7 +83,6 @@ public:
   // get methods for threading
 
   const Params &getParams() const { return _params; }
-  pthread_mutex_t *getDebugPrintMutex() { return &_debugPrintMutex; }
 
   // names for extra fields
 

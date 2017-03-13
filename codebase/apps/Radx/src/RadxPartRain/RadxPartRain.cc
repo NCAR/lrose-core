@@ -174,6 +174,10 @@ RadxPartRain::~RadxPartRain()
     delete _engineSingle;
   }
   
+  // mutex
+
+  pthread_mutex_destroy(&_debugPrintMutex);
+
   // unregister process
 
   PMU_auto_unregister();
@@ -2389,7 +2393,7 @@ void RadxPartRain::ComputeThread::run()
   assert(_engine != NULL);
   assert(_inputRay != NULL);
   
-  // Moments object will create the moments ray
+  // Compute engine object will create the derived ray
   // The ownership of the ray is passed to the parent object
   // which adds it to the output volume.
 
