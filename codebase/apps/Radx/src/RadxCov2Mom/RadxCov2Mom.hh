@@ -148,6 +148,43 @@ private:
 
   vector<Calib> _calibs;
   
+  //////////////////////////////////////////////////////////////
+  // inner thread class for calling Moments computations
+  
+  class ComputeThread : public TaThread
+  {  
+  public:
+    // constructor
+    ComputeThread(RadxCov2Mom *obj, const Params &params);
+    // destructor
+    virtual ~ComputeThread();
+    // moments object
+    inline Moments *getMoments() const { return _moments; }
+    // set covariance ray to be used
+    inline void setCovRay(const RadxRay *val) { _covRay = val; }
+    // set calibration to be used
+    inline void setCalib(const IwrfCalib val) { _calib = val; }
+    // access to the moments ray
+    inline RadxRay *getMomRay() const { return _momRay; }
+    // override run method
+    virtual void run();
+    // constructor OK?
+    bool OK;
+  private:
+    // parent object
+    RadxCov2Mom *_this;
+    // params
+    const Params &_params;
+    // computation context
+    Moments *_moments;
+    const RadxRay *_covRay;
+    IwrfCalib _calib;
+    // result of computation - ownership gets passed to parent
+    RadxRay *_momRay;
+  };
+  // instantiate thread pool for computations
+  TaThreadPool _threadPool;
+
   // private methods
   
   int _runFilelist();
@@ -191,43 +228,6 @@ private:
 
   int _writeStatusXmlToSpdb(const RadxVol &vol,
                             const string &xml);
-
-  //////////////////////////////////////////////////////////////
-  // inner thread class for calling Moments computations
-  
-  class ComputeThread : public TaThread
-  {  
-  public:
-    // constructor
-    ComputeThread(RadxCov2Mom *obj, const Params &params);
-    // destructor
-    virtual ~ComputeThread();
-    // moments object
-    inline Moments *getMoments() const { return _moments; }
-    // set covariance ray to be used
-    inline void setCovRay(const RadxRay *val) { _covRay = val; }
-    // set calibration to be used
-    inline void setCalib(const IwrfCalib val) { _calib = val; }
-    // access to the moments ray
-    inline RadxRay *getMomRay() const { return _momRay; }
-    // override run method
-    virtual void run();
-    // constructor OK?
-    bool OK;
-  private:
-    // parent object
-    RadxCov2Mom *_this;
-    // params
-    const Params &_params;
-    // computation context
-    Moments *_moments;
-    const RadxRay *_covRay;
-    IwrfCalib _calib;
-    // result of computation - ownership gets passed to parent
-    RadxRay *_momRay;
-  };
-  // instantiate thread pool for computations
-  TaThreadPool _threadPool;
 
   void _handleDoneThread(ComputeThread *thread,
                          vector <RadxRay *> &momRays);
