@@ -38,6 +38,7 @@
 
 #include "RadxCov2Mom.hh"
 #include "Moments.hh"
+#include <cassert>
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/TaArray.hh>
@@ -56,6 +57,7 @@
 #include <Radx/RadxXml.hh>
 using namespace std;
 
+///////////////////////////////////////////////////////////////
 // Constructor
 
 RadxCov2Mom::RadxCov2Mom(int argc, char **argv)
@@ -63,6 +65,7 @@ RadxCov2Mom::RadxCov2Mom(int argc, char **argv)
 {
 
   OK = TRUE;
+  _momentsSingle = NULL;
 
   // set programe name
 
@@ -134,99 +137,40 @@ RadxCov2Mom::RadxCov2Mom(int argc, char **argv)
     // set up compute thread pool
     
     for (int ii = 0; ii < _params.n_compute_threads; ii++) {
-      ComputeThread *thread = new ComputeThread(this);
-      Moments *moments = new Moments(_params);
-      if (!moments->OK) {
-        delete moments;
+      ComputeThread *thread = new ComputeThread(this, _params);
+      if (!thread->OK) {
+        delete thread;
         OK = FALSE;
         return;
       }
-      _moments.push_back(moments);
-      thread->setMoments(moments);
       _threadPool.addThreadToMain(thread);
     }
 
-    // for (int ii = 0; ii < _params.n_compute_threads; ii++) {
-      
-    //   ComputeThread *thread = new ComputeThread();
-    //   thread->setApp(this);
-
-    //   Moments *moments = new Moments(_params);
-    //   if (!moments->OK) {
-    //     delete moments;
-    //     OK = FALSE;
-    //     return;
-    //   }
-    //   _moments.push_back(moments);
-    //   thread->setMoments(moments);
-
-    //   pthread_t pth = 0;
-    //   pthread_create(&pth, NULL, _computeMomentsInThread, thread);
-    //   thread->setThreadId(pth);
-    //   _availThreads.push_back(thread);
-
-    // }
-    
   } else {
-
+    
     // single threaded
     
-    Moments *moments = new Moments(_params);
-    if (!moments->OK) {
-      delete moments;
+    _momentsSingle = new Moments(_params);
+    if (!_momentsSingle->OK) {
+      delete _momentsSingle;
       OK = FALSE;
       return;
     }
-    _moments.push_back(moments);
-
+    
   }
 
 }
 
+///////////////////////////////////////////////////////////////
 // destructor
 
 RadxCov2Mom::~RadxCov2Mom()
 
 {
 
-  for (size_t ii = 0; ii < _moments.size(); ii++) {
-    delete _moments[ii];
+  if (_momentsSingle != NULL) {
+    delete _momentsSingle;
   }
-  _moments.clear();
-
-  // set thread pool to exit
-
-  // for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-  //   _activeThreads[ii]->waitForWorkToComplete();
-  // }
-
-  // for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-  //   _availThreads[ii]->setExitFlag(true);
-  //   _availThreads[ii]->signalWorkToStart();
-  // }
-  
-  // for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-  //   _activeThreads[ii]->setExitFlag(true);
-  //   _activeThreads[ii]->signalWorkToStart();
-  // }
-  
-  // for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-  //   _availThreads[ii]->waitForWorkToComplete();
-  // }
-
-  // for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-  //   _activeThreads[ii]->waitForWorkToComplete();
-  // }
-
-  // for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-  //   delete _availThreads[ii];
-  // }
-
-  // for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-  //   delete _activeThreads[ii];
-  // }
-
-  // pthread_mutex_destroy(&_debugPrintMutex);
 
   // unregister process
 
@@ -264,10 +208,6 @@ int RadxCov2Mom::_runFilelist()
     string inputPath = _args.inputFileList[ifile];
     if (_processFile(inputPath)) {
       iret = -1;
-    }
-
-    if (ifile == 1) {
-      exit(0);
     }
 
   }
@@ -410,7 +350,8 @@ int RadxCov2Mom::_processFile(const string &filePath)
   // optimize transitions in surveillance mode
 
   if (_params.optimize_surveillance_transitions) {
-    vol.optimizeSurveillanceTransitions(_params.optimized_transitions_max_elev_error);
+    vol.optimizeSurveillanceTransitions
+      (_params.optimized_transitions_max_elev_error);
   }
 
   // trim surveillance sweeps to 360 degrees if requested
@@ -1176,9 +1117,9 @@ int RadxCov2Mom::_computeMomentsSingleThreaded(RadxVol &vol,
     // compute moments
     
     RadxRay *momRay = 
-      _moments[0]->compute(covRay, calib,
-                           _measXmitPowerDbmH, _measXmitPowerDbmV,
-                           _wavelengthM, _radarHtKm);
+      _momentsSingle->compute(covRay, calib,
+                              _measXmitPowerDbmH, _measXmitPowerDbmV,
+                              _wavelengthM, _radarHtKm);
     if (momRay == NULL) {
       cerr << "ERROR - _computeMoments" << endl;
       return -1;
@@ -1190,7 +1131,7 @@ int RadxCov2Mom::_computeMomentsSingleThreaded(RadxVol &vol,
 
     // sum up for noise
 
-    _addToNoiseStats(*_moments[0]);
+    _addToNoiseStats(*_momentsSingle);
 
   } // iray
 
@@ -1283,77 +1224,6 @@ void RadxCov2Mom::_handleDoneThread(ComputeThread *thread,
   }
 
 }
-
-#ifdef JUNK
-
-///////////////////////////////////////////////////////////
-// Thread function to compute moments
-
-void *RadxCov2Mom::_computeMomentsInThread(void *thread_data)
-  
-{
-  
-  // get thread data from args
-
-  ComputeThread *compThread = (ComputeThread *) thread_data;
-  RadxCov2Mom *app = compThread->getApp();
-  assert(app);
-
-  while (true) {
-
-    // wait for main to unlock start mutex on this thread
-    
-    compThread->waitForStartSignal();
-    
-    // if exit flag is set, app is done, exit now
-    
-    if (compThread->getExitFlag()) {
-      if (app->getParams().debug >= Params::DEBUG_EXTRA) {
-        pthread_mutex_t *debugPrintMutex = app->getDebugPrintMutex();
-        pthread_mutex_lock(debugPrintMutex);
-        cerr << "====>> compute thread exiting" << endl;
-        pthread_mutex_unlock(debugPrintMutex);
-      }
-      compThread->signalParentWorkIsComplete();
-      return NULL;
-    }
-    
-    // compute moments
-
-    if (app->getParams().debug >= Params::DEBUG_EXTRA) {
-      pthread_mutex_t *debugPrintMutex = app->getDebugPrintMutex();
-      pthread_mutex_lock(debugPrintMutex);
-      cerr << "======>> starting beam compute" << endl;
-      pthread_mutex_unlock(debugPrintMutex);
-    }
-
-    Moments *moments = compThread->getMoments();
-    const RadxRay *covRay = compThread->getCovRay();
-    const IwrfCalib *calib = compThread->getCalib();
-    RadxRay *momRay = 
-      moments->compute(covRay, *calib,
-                       app->_measXmitPowerDbmH, app->_measXmitPowerDbmV,
-                       app->_wavelengthM, app->_radarHtKm);
-    compThread->setMomRay(momRay);
-    
-    if (app->getParams().debug >= Params::DEBUG_EXTRA) {
-      pthread_mutex_t *debugPrintMutex = app->getDebugPrintMutex();
-      pthread_mutex_lock(debugPrintMutex);
-      cerr << "======>> done with moments compute" << endl;
-      pthread_mutex_unlock(debugPrintMutex);
-    }
-
-    // unlock done mutex
-    
-    compThread->signalParentWorkIsComplete();
-    
-  } // while
-
-  return NULL;
-
-}
-
-#endif
 
 ///////////////////////////////////////////////////////////////////
 // add echo fields from covariance data to the output moments data
@@ -2018,9 +1888,34 @@ int RadxCov2Mom::_writeStatusXmlToSpdb(const RadxVol &vol,
 
 // Constructor
 
-RadxCov2Mom::ComputeThread::ComputeThread(RadxCov2Mom *obj) :
-        _this(obj)
+RadxCov2Mom::ComputeThread::ComputeThread(RadxCov2Mom *obj,
+                                          const Params &params) :
+        _this(obj),
+        _params(params)
 {
+
+  OK = TRUE;
+  _covRay = NULL;
+  _momRay = NULL;
+
+  // create moments object
+  
+  _moments = new Moments(_params);
+  if (!_moments->OK) {
+    delete _moments;
+    OK = FALSE;
+  }
+
+}  
+
+// Destructor
+
+RadxCov2Mom::ComputeThread::~ComputeThread()
+{
+
+  if (_moments != NULL) {
+    delete _moments;
+  }
 
 }  
 
@@ -2028,11 +1923,19 @@ RadxCov2Mom::ComputeThread::ComputeThread(RadxCov2Mom *obj) :
 void RadxCov2Mom::ComputeThread::run()
 {
 
-  RadxRay *momRay = 
-    _moments->compute(_covRay, _calib,
-                      _this->_measXmitPowerDbmH, _this->_measXmitPowerDbmV,
-                      _this->_wavelengthM, _this->_radarHtKm);
-  setMomRay(momRay);
+  // check
+
+  assert(_moments != NULL);
+  assert(_covRay != NULL);
+
+  // Moments object will create the moments ray
+  // The ownership of the ray is passed to the parent object
+  // which adds it to the output volume.
+
+  _momRay = _moments->compute
+    (_covRay, _calib,
+     _this->_measXmitPowerDbmH, _this->_measXmitPowerDbmV,
+     _this->_wavelengthM, _this->_radarHtKm);
 }
 
 

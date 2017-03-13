@@ -103,9 +103,9 @@ private:
   double _wavelengthM;
   double _radarHtKm;
   
-  // moments computations object
+  // moments computations object for single threading
 
-  vector<Moments *> _moments;
+  Moments *_momentsSingle;
 
   // transmit power
 
@@ -199,29 +199,31 @@ private:
   {  
   public:
     // constructor
-    ComputeThread(RadxCov2Mom *obj);
-    // compute moments
-    inline void setMoments(Moments *val) { _moments = val; }
+    ComputeThread(RadxCov2Mom *obj, const Params &params);
+    // destructor
+    virtual ~ComputeThread();
+    // moments object
     inline Moments *getMoments() const { return _moments; }
-    // access to the covariance ray
+    // set covariance ray to be used
     inline void setCovRay(const RadxRay *val) { _covRay = val; }
-    inline const RadxRay *getCovRay() { return _covRay; }
-    // access to the moments ray
-    inline void setMomRay(RadxRay *val) { _momRay = val; }
-    inline RadxRay *getMomRay() const { return _momRay; }
-    // calibration
+    // set calibration to be used
     inline void setCalib(const IwrfCalib val) { _calib = val; }
-    inline const IwrfCalib &getCalib() const { return _calib; }
+    // access to the moments ray
+    inline RadxRay *getMomRay() const { return _momRay; }
     // override run method
     virtual void run();
+    // constructor OK?
+    bool OK;
   private:
     // parent object
     RadxCov2Mom *_this;
+    // params
+    const Params &_params;
     // computation context
     Moments *_moments;
     const RadxRay *_covRay;
     IwrfCalib _calib;
-    // result of computation
+    // result of computation - ownership gets passed to parent
     RadxRay *_momRay;
   };
   // instantiate thread pool for computations
