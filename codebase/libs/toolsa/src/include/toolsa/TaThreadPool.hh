@@ -212,6 +212,13 @@ public:
 
   void setReadyForDoneCheck();
 
+  // Get next thread from the done pool.
+  // Blocks until a done thread is available,
+  // or all threads are done.
+  // Should only be called after setReadyForDoneCheck().
+  
+  TaThread *getNextDoneThread();
+    
   // check if all threads are done
   // all threads are done if _countDone == _countStarted
 
@@ -223,6 +230,9 @@ public:
   
   void setDebug(bool val) { _debug = val; }
   bool getDebug() const { return _debug; }
+  size_t getMainPoolSize() const { return _mainPool.size(); }
+  size_t getAvailPoolSize() const { return _availPool.size(); }
+  size_t getDonePoolSize() const { return _donePool.size(); }
 
 protected:
 
