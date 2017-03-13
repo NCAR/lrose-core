@@ -699,6 +699,8 @@ void KdpFilt::_initArrays(const double *snr,
       _kdpCond[ii] = 0;
       _psob[ii] = 0;
     }
+    _dbzAttenCorr[ii] = _missingValue;
+    _zdrAttenCorr[ii] = _missingValue;
   }
   
 }
