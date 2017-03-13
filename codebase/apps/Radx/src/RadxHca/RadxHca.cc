@@ -46,7 +46,6 @@
 ///////////////////////////////////////////////////////////////
 
 #include "RadxHca.hh"
-#include "Thread.hh"
 #include <algorithm>
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
@@ -73,7 +72,7 @@ RadxHca::RadxHca(int argc, char **argv)
 {
 
   OK = TRUE;
-  _engine = NULL;
+  _engineSingle = NULL;
 
   // set programe name
 
@@ -123,29 +122,22 @@ RadxHca::RadxHca(int argc, char **argv)
     // set up compute thread pool
     
     for (int ii = 0; ii < _params.n_compute_threads; ii++) {
-      
-      ComputeThread *thread = new ComputeThread();
-      thread->setApp(this);
-
-      ComputeEngine *engine = new ComputeEngine(_params, ii, _tempProfile);
-      if (!engine->OK) {
+      ComputeThread *thread = new ComputeThread(this, _params,
+                                                _tempProfile, ii);
+      if (!thread->OK) {
+        delete thread;
         OK = FALSE;
+        return;
       }
-      thread->setComputeEngine(engine);
-
-      pthread_t pth = 0;
-      pthread_create(&pth, NULL, _computeInThread, thread);
-      thread->setThreadId(pth);
-      _availThreads.push_back(thread);
-
+      _threadPool.addThreadToMain(thread);
     }
-    
+
   } else {
-
+    
     // single threaded
-
-    _engine = new ComputeEngine(_params, 0, _tempProfile);
-    if (!_engine->OK) {
+    
+    _engineSingle = new ComputeEngine(_params, 0, _tempProfile);
+    if (!_engineSingle->OK) {
       OK = FALSE;
     }
 
@@ -162,44 +154,11 @@ RadxHca::~RadxHca()
 
 {
 
-  if (_engine) {
-    delete _engine;
+  if (_engineSingle) {
+    delete _engineSingle;
   }
 
-  // wait for active thread pool to complete
-
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->waitForWorkToComplete();
-  }
-
-  // signal all threads to exit
-
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    _availThreads[ii]->setExitFlag(true);
-    _availThreads[ii]->signalWorkToStart();
-  }
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->setExitFlag(true);
-    _activeThreads[ii]->signalWorkToStart();
-  }
-
-  // wait for all threads to exit
-  
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    _availThreads[ii]->waitForWorkToComplete();
-  }
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->waitForWorkToComplete();
-  }
-
-  // delete all threads
-  
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    delete _availThreads[ii];
-  }
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    delete _activeThreads[ii];
-  }
+  // mutex
 
   pthread_mutex_destroy(&_debugPrintMutex);
 
@@ -836,7 +795,7 @@ int RadxHca::_compute(RadxVol &vol)
 }
 
 //////////////////////////////////////////////////
-// compute the moments for all rays in volume
+// compute the hca for all rays in volume
 // single-threaded operation
 
 int RadxHca::_computeSingleThreaded(RadxVol &vol)
@@ -854,13 +813,13 @@ int RadxHca::_computeSingleThreaded(RadxVol &vol)
 
     // set engine params
     
-    _engine->setWavelengthM(_wavelengthM);
-    _engine->setRadarHtKm(_radarHtKm);
-    _engine->setVertBeamWidthDeg(_vertBeamWidthDeg);
+    _engineSingle->setWavelengthM(_wavelengthM);
+    _engineSingle->setRadarHtKm(_radarHtKm);
+    _engineSingle->setVertBeamWidthDeg(_vertBeamWidthDeg);
 
     // run the compute method
 
-    RadxRay *derivedRay = _engine->compute(inputRay);
+    RadxRay *derivedRay = _engineSingle->compute(inputRay);
     if (derivedRay == NULL) {
       cerr << "ERROR - _compute" << endl;
       return -1;
@@ -877,7 +836,7 @@ int RadxHca::_computeSingleThreaded(RadxVol &vol)
 }
 
 //////////////////////////////////////////////////
-// compute the moments for all rays in volume
+// compute the hca for all rays in volume
 // using multiple threads
 
 int RadxHca::_computeMultiThreaded(RadxVol &vol)
@@ -889,72 +848,44 @@ int RadxHca::_computeMultiThreaded(RadxVol &vol)
   const vector<RadxRay *> &inputRays = vol.getRays();
   for (size_t iray = 0; iray < inputRays.size(); iray++) {
 
-    // is a thread available, if not wait for one
-    
-    ComputeThread *thread = NULL;
-    if (_availThreads.size() > 0) {
-
-      // get thread from available pool
-      
-      thread = _availThreads.front();
-      _availThreads.pop_front();
-
+    // get a thread from the pool
+    bool isDone = true;
+    ComputeThread *thread = 
+      (ComputeThread *) _threadPool.getNextThread(true, isDone);
+    if (thread == NULL) {
+      break;
+    }
+    if (isDone) {
+      // store the results computed by the thread
+      _storeDerivedRay(thread);
+      // return thread to the available pool
+      _threadPool.addThreadToAvail(thread);
+      // reduce iray by 1 since we did not actually process this ray
+      // we only handled a previously started thread
+      iray--;
     } else {
-
-      // get thread from active pool
-
-      thread = _activeThreads.front();
-      _activeThreads.pop_front();
-
-      // wait for moments computations to complete
-
-      thread->waitForWorkToComplete();
-
-      // store ray
-      
-      if (_storeDerivedRay(thread)) {
-        cerr << "ERROR - _computeMultiThreaded" << endl;
-        return -1;
-      }
-
+      // got a thread to use, set the input ray
+      thread->setInputRay(inputRays[iray]);
+      // set it running
+      thread->signalRunToStart();
     }
-    
-    // get new covariance ray
-    
-    RadxRay *inputRay = inputRays[iray];
-    
-    // set thread going to compute moments
-    
-    thread->setCovRay(inputRay);
-    thread->setWavelengthM(vol.getWavelengthM());
-    thread->signalWorkToStart();
 
-    // push onto active pool
-    
-    _activeThreads.push_back(thread);
-    
   } // iray
-  
-  // wait for all active threads to complete
-  
-  while (_activeThreads.size() > 0) {
     
-    ComputeThread *thread = _activeThreads.front();
-    _activeThreads.pop_front();
-    _availThreads.push_back(thread);
+  // collect remaining done threads
 
-    // wait for moments computations to complete
-    
-    thread->waitForWorkToComplete();
-
-    // store ray
-
-    if (_storeDerivedRay(thread)) {
-      cerr << "ERROR - _computeMultiThreaded" << endl;
-      return -1;
+  _threadPool.setReadyForDoneCheck();
+  while (!_threadPool.checkAllDone()) {
+    ComputeThread *thread = (ComputeThread *) _threadPool.getNextDoneThread();
+    if (thread == NULL) {
+      break;
+    } else {
+      // store the results computed by the thread
+      _storeDerivedRay(thread);
+      // return thread to the available pool
+      _threadPool.addThreadToAvail(thread);
     }
-
-  }
+  } // while
 
   return 0;
 
@@ -967,11 +898,8 @@ int RadxHca::_storeDerivedRay(ComputeThread *thread)
 
 {
   
-  RadxRay *derivedRay = thread->getMomRay();
-  if (derivedRay == NULL) {
-    _availThreads.push_back(thread);
-    return -1;
-  } else {
+  RadxRay *derivedRay = thread->getDerivedRay();
+  if (derivedRay != NULL) {
     // good return, add to results
     _derivedRays.push_back(derivedRay);
   }
@@ -980,78 +908,6 @@ int RadxHca::_storeDerivedRay(ComputeThread *thread)
 
 }
       
-///////////////////////////////////////////////////////////
-// Thread function to compute moments
-
-void *RadxHca::_computeInThread(void *thread_data)
-  
-{
-  
-  // get thread data from args
-
-  ComputeThread *compThread = (ComputeThread *) thread_data;
-  RadxHca *app = compThread->getApp();
-  assert(app);
-
-  while (true) {
-
-    // wait for main to unlock start mutex on this thread
-    
-    compThread->waitForStartSignal();
-    
-    // if exit flag is set, app is done, exit now
-    
-    if (compThread->getExitFlag()) {
-      if (app->getParams().debug >= Params::DEBUG_EXTRA) {
-        pthread_mutex_t *debugPrintMutex = app->getDebugPrintMutex();
-        pthread_mutex_lock(debugPrintMutex);
-        cerr << "====>> compute thread exiting" << endl;
-        pthread_mutex_unlock(debugPrintMutex);
-      }
-      compThread->signalParentWorkIsComplete();
-      return NULL;
-    }
-    
-    // compute moments
-
-    if (app->getParams().debug >= Params::DEBUG_EXTRA) {
-      pthread_mutex_t *debugPrintMutex = app->getDebugPrintMutex();
-      pthread_mutex_lock(debugPrintMutex);
-      cerr << "======>> starting compute" << endl;
-      pthread_mutex_unlock(debugPrintMutex);
-    }
-
-    ComputeEngine *engine = compThread->getComputeEngine();
-    RadxRay *inputRay = compThread->getCovRay();
-
-    // set engine params
-    
-    engine->setWavelengthM(app->_wavelengthM);
-    engine->setRadarHtKm(app->_radarHtKm);
-    engine->setVertBeamWidthDeg(app->_vertBeamWidthDeg);
-
-    // run the compute method
-    
-    RadxRay *derivedRay = engine->compute(inputRay);
-    compThread->setMomRay(derivedRay);
-    
-    if (app->getParams().debug >= Params::DEBUG_EXTRA) {
-      pthread_mutex_t *debugPrintMutex = app->getDebugPrintMutex();
-      pthread_mutex_lock(debugPrintMutex);
-      cerr << "======>> done with compute" << endl;
-      pthread_mutex_unlock(debugPrintMutex);
-    }
-
-    // unlock done mutex
-    
-    compThread->signalParentWorkIsComplete();
-    
-  } // while
-
-  return NULL;
-
-}
-
 ////////////////////////////////////////////////////////////
 // Find the transitions in the rays
 
@@ -1547,3 +1403,63 @@ void RadxHca::_printRunTime(const string& str)
   _timeA.tv_usec = tvb.tv_usec;
 }
 
+///////////////////////////////////////////////////////////////
+// ComputeThread
+
+// Constructor
+
+RadxHca::ComputeThread::ComputeThread(RadxHca *obj,
+                                      const Params &params,
+                                      TempProfile &tempProfile,
+                                      int threadNum) :
+        _this(obj),
+        _params(params),
+        _tempProfile(tempProfile),
+        _threadNum(threadNum)
+{
+
+  OK = TRUE;
+  _inputRay = NULL;
+  _derivedRay = NULL;
+
+  // create compute engine object
+  
+  _engine = new ComputeEngine(params, threadNum, tempProfile);
+  if (!_engine->OK) {
+    delete _engine;
+    OK = FALSE;
+  }
+
+}  
+
+// Destructor
+
+RadxHca::ComputeThread::~ComputeThread()
+{
+
+  if (_engine != NULL) {
+    delete _engine;
+  }
+
+}  
+
+// run method
+
+void RadxHca::ComputeThread::run()
+{
+
+  // check
+
+  assert(_engine != NULL);
+  assert(_inputRay != NULL);
+  
+  // Compute engine object will create the derived ray
+  // The ownership of the ray is passed to the parent object
+  // which adds it to the output volume.
+
+  _engine->setWavelengthM(_this->_wavelengthM);
+  _engine->setRadarHtKm(_this->_radarHtKm);
+  _engine->setVertBeamWidthDeg(_this->_vertBeamWidthDeg);
+  _derivedRay = _engine->compute(_inputRay);
+
+}
