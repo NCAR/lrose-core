@@ -700,9 +700,8 @@ void ReorderInterp::_interpMultiThreaded()
   
   _threadPoolInterp.setReadyForDoneCheck();
   while (!_threadPoolInterp.checkAllDone()) {
-    bool isDone;
     PerformInterp *thread = 
-      (PerformInterp *) _threadPoolInterp.getNextThread(true, isDone);
+      (PerformInterp *) _threadPoolInterp.getNextDoneThread();
     if (thread == NULL) {
       break;
     } else {

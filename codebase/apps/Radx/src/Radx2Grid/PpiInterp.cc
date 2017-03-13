@@ -521,9 +521,8 @@ void PpiInterp::_computeGridRelMultiThreaded()
 
   _threadPoolGridRel.setReadyForDoneCheck();
   while (!_threadPoolGridRel.checkAllDone()) {
-    bool isDone;
     ComputeGridRelative *thread = 
-      (ComputeGridRelative *) _threadPoolGridRel.getNextThread(true, isDone);
+      (ComputeGridRelative *) _threadPoolGridRel.getNextDoneThread();
     if (thread == NULL) {
       break;
     } else {
@@ -938,9 +937,8 @@ void PpiInterp::_interpMultiThreaded()
 
   _threadPoolInterp.setReadyForDoneCheck();
   while (!_threadPoolInterp.checkAllDone()) {
-    bool isDone;
     PerformInterp *thread = 
-      (PerformInterp *) _threadPoolInterp.getNextThread(true, isDone);
+      (PerformInterp *) _threadPoolInterp.getNextDoneThread();
     if (thread == NULL) {
       break;
     } else {
