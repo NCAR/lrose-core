@@ -1439,7 +1439,11 @@ void SigmetRadxFile::_setGeoref(const ray_header_t &rayHdr,
 
   // set sweep mode
 
-  ray->setSweepMode(Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE);
+  if (_isHrdTailRadar) {
+    ray->setSweepMode(Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE);
+  } else {
+    ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
+  }
 
   // update metadata
 
