@@ -109,7 +109,7 @@ use_multiple_threads = TRUE;
 // Type: int
 //
 
-n_compute_threads = 16;
+n_compute_threads = 8;
 
 //======================================================================
 //
@@ -1230,7 +1230,7 @@ z_level_array = {
 //
 
 grid_z_geom = {
-    nz = 20,
+    nz = 30,
     minz = 0.5,
     dz = 0.5
 };
@@ -1293,12 +1293,12 @@ grid_projection = PROJ_FLAT;
 //
 
 grid_xy_geom = {
-    nx = 300,
-    ny = 300,
-    minx = -149.5,
-    miny = -149.5,
-    dx = 1,
-    dy = 1
+    nx = 600,
+    ny = 600,
+    minx = -149.75,
+    miny = -149.75,
+    dx = 0.5,
+    dy = 0.5
 };
 
 ///////////// grid_rotation ///////////////////////////
