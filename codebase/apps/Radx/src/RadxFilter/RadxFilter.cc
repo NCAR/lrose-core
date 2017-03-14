@@ -38,7 +38,6 @@
 
 #include "RadxFilter.hh"
 #include "ComputeEngine.hh"
-#include "Thread.hh"
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/TaArray.hh>
@@ -60,7 +59,7 @@ RadxFilter::RadxFilter(int argc, char **argv)
 {
 
   OK = TRUE;
-  _engine = NULL;
+  _engineSingle = NULL;
 
   // set programe name
 
@@ -126,29 +125,21 @@ RadxFilter::RadxFilter(int argc, char **argv)
     // set up compute thread pool
     
     for (int ii = 0; ii < _params.n_compute_threads; ii++) {
-      
-      ComputeThread *thread = new ComputeThread();
-      thread->setApp(this);
-
-      ComputeEngine *engine = new ComputeEngine(_params);
-      if (!engine->OK) {
+      ComputeThread *thread = new ComputeThread(this, _params, ii);
+      if (!thread->OK) {
+        delete thread;
         OK = FALSE;
+        return;
       }
-      thread->setComputeEngine(engine);
-
-      pthread_t pth = 0;
-      pthread_create(&pth, NULL, _computeInThread, thread);
-      thread->setThreadId(pth);
-      _availThreads.push_back(thread);
-
+      _threadPool.addThreadToMain(thread);
     }
     
   } else {
 
     // single threaded
 
-    _engine = new ComputeEngine(_params);
-    if (!_engine->OK) {
+    _engineSingle = new ComputeEngine(_params);
+    if (!_engineSingle->OK) {
       OK = FALSE;
     }
 
@@ -163,44 +154,13 @@ RadxFilter::~RadxFilter()
 
 {
 
-  if (_engine) {
-    delete _engine;
+  // free up
+
+  if (_engineSingle) {
+    delete _engineSingle;
   }
-
-  // wait for active thread pool to complete
-
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->waitForWorkToComplete();
-  }
-
-  // signal all threads to exit
-
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    _availThreads[ii]->setExitFlag(true);
-    _availThreads[ii]->signalWorkToStart();
-  }
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->setExitFlag(true);
-    _activeThreads[ii]->signalWorkToStart();
-  }
-
-  // wait for all threads to exit
   
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    _availThreads[ii]->waitForWorkToComplete();
-  }
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->waitForWorkToComplete();
-  }
-
-  // delete all threads
-  
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    delete _availThreads[ii];
-  }
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    delete _activeThreads[ii];
-  }
+  // threading
 
   pthread_mutex_destroy(&_debugPrintMutex);
 
@@ -642,19 +602,19 @@ int RadxFilter::_computeSingleThreaded(RadxVol &vol)
   const vector<RadxRay *> &inputRays = vol.getRays();
   for (size_t iray = 0; iray < inputRays.size(); iray++) {
     
-    // get covariance ray
+    // get input ray
     
     RadxRay *inputRay = inputRays[iray];
     
-    // compute moments
+    // compute filtered
     
-    RadxRay *outputRay = _engine->compute(inputRay);
+    RadxRay *outputRay = _engineSingle->compute(inputRay);
     if (outputRay == NULL) {
       cerr << "ERROR - _compute" << endl;
       return -1;
     }
     
-    // add to vector
+    // add output to vector
 
     _outputRays.push_back(outputRay);
     
@@ -672,152 +632,70 @@ int RadxFilter::_computeMultiThreaded(RadxVol &vol)
 
   // loop through the input rays,
   // computing the output fields
-
+  
   const vector<RadxRay *> &inputRays = vol.getRays();
   for (size_t iray = 0; iray < inputRays.size(); iray++) {
 
-    // is a thread available, if not wait for one
-    
-    ComputeThread *thread = NULL;
-    if (_availThreads.size() > 0) {
-
-      // get thread from available pool
-      
-      thread = _availThreads.front();
-      _availThreads.pop_front();
-
-    } else {
-
-      // get thread from active pool
-
-      thread = _activeThreads.front();
-      _activeThreads.pop_front();
-
-      // wait for moments computations to complete
-
-      thread->waitForWorkToComplete();
-
-      // store ray
-      
-      RadxRay *outputRay = thread->getOutputRay();
-      if (outputRay == NULL) {
-        cerr << "ERROR - _computeMultiThreaded" << endl;
-        _availThreads.push_back(thread);
-        return -1;
-      } else {
-        // good return, add to results
-        _outputRays.push_back(outputRay);
-      }
-      
+    // get a thread from the pool
+    bool isDone = true;
+    ComputeThread *thread = 
+      (ComputeThread *) _threadPool.getNextThread(true, isDone);
+    if (thread == NULL) {
+      break;
     }
-    
-    // get new covariance ray
-    
-    RadxRay *inputRay = inputRays[iray];
-    
-    // set thread going to compute moments
-    
-    thread->setInputRay(inputRay);
-    thread->signalWorkToStart();
+    if (isDone) {
+      // store the results computed by the thread
+      _storeOutputRay(thread);
+      // return thread to the available pool
+      _threadPool.addThreadToAvail(thread);
+      // reduce iray by 1 since we did not actually process this ray
+      // we only handled a previously started thread
+      iray--;
+    } else {
+      // got a thread to use, set the input ray
+      thread->setInputRay(inputRays[iray]);
+      // set it running
+      thread->signalRunToStart();
+    }
 
-    // push onto active pool
-    
-    _activeThreads.push_back(thread);
-    
   } // iray
-  
-  // wait for all active threads to complete
-  
-  while (_activeThreads.size() > 0) {
     
-    ComputeThread *thread = _activeThreads.front();
-    _activeThreads.pop_front();
-    _availThreads.push_back(thread);
+  // collect remaining done threads
 
-    // wait for moments computations to complete
-    
-    thread->waitForWorkToComplete();
-
-    // store ray
-    
-    RadxRay *outputRay = thread->getOutputRay();
-    if (outputRay == NULL) {
-      cerr << "ERROR - _computeMultiThreaded" << endl;
-      return -1;
+  _threadPool.setReadyForDoneCheck();
+  while (!_threadPool.checkAllDone()) {
+    ComputeThread *thread = (ComputeThread *) _threadPool.getNextDoneThread();
+    if (thread == NULL) {
+      break;
     } else {
-      // good return, add to results
-      _outputRays.push_back(outputRay);
+      // store the results computed by the thread
+      _storeOutputRay(thread);
+      // return thread to the available pool
+      _threadPool.addThreadToAvail(thread);
     }
-
-  }
+  } // while
 
   return 0;
 
 }
 
 ///////////////////////////////////////////////////////////
-// Thread function to compute moments
+// Store the output ray
 
-void *RadxFilter::_computeInThread(void *thread_data)
-  
+int RadxFilter::_storeOutputRay(ComputeThread *thread)
+
 {
   
-  // get thread data from args
-
-  ComputeThread *compThread = (ComputeThread *) thread_data;
-  RadxFilter *app = compThread->getApp();
-  assert(app);
-
-  while (true) {
-
-    // wait for main to unlock start mutex on this thread
-    
-    compThread->waitForStartSignal();
-    
-    // if exit flag is set, app is done, exit now
-    
-    if (compThread->getExitFlag()) {
-      if (app->getParams().debug >= Params::DEBUG_VERBOSE) {
-        pthread_mutex_t *debugPrintMutex = app->getDebugPrintMutex();
-        pthread_mutex_lock(debugPrintMutex);
-        cerr << "====>> compute thread exiting" << endl;
-        pthread_mutex_unlock(debugPrintMutex);
-      }
-      compThread->signalParentWorkIsComplete();
-      return NULL;
-    }
-    
-    // compute moments
-
-    if (app->getParams().debug >= Params::DEBUG_VERBOSE) {
-      pthread_mutex_t *debugPrintMutex = app->getDebugPrintMutex();
-      pthread_mutex_lock(debugPrintMutex);
-      cerr << "======>> starting compute" << endl;
-      pthread_mutex_unlock(debugPrintMutex);
-    }
-
-    ComputeEngine *engine = compThread->getComputeEngine();
-    RadxRay *inputRay = compThread->getInputRay();
-    RadxRay *outputRay = engine->compute(inputRay);
-    compThread->setOutputRay(outputRay);
-    
-    if (app->getParams().debug >= Params::DEBUG_VERBOSE) {
-      pthread_mutex_t *debugPrintMutex = app->getDebugPrintMutex();
-      pthread_mutex_lock(debugPrintMutex);
-      cerr << "======>> done with compute" << endl;
-      pthread_mutex_unlock(debugPrintMutex);
-    }
-
-    // unlock done mutex
-    
-    compThread->signalParentWorkIsComplete();
-    
-  } // while
-
-  return NULL;
+  RadxRay *outputRay = thread->getOutputRay();
+  if (outputRay != NULL) {
+    // good return, add to results
+    _outputRays.push_back(outputRay);
+  }
+  
+  return 0;
 
 }
-
+      
 ////////////////////////////////////////////////////////////
 // Find the transitions in the rays
 
@@ -863,3 +741,60 @@ void RadxFilter::_findTransitions(vector<RadxRay *> &rays)
   }
 
 }
+
+///////////////////////////////////////////////////////////////
+// ComputeThread
+
+// Constructor
+
+RadxFilter::ComputeThread::ComputeThread(RadxFilter *obj,
+                                         const Params &params,
+                                         int threadNum) :
+        _this(obj),
+        _params(params),
+        _threadNum(threadNum)
+{
+
+  OK = TRUE;
+  _inputRay = NULL;
+  _outputRay = NULL;
+
+  // create compute engine object
+  
+  _engine = new ComputeEngine(params);
+  if (!_engine->OK) {
+    delete _engine;
+    OK = FALSE;
+  }
+
+}  
+
+// Destructor
+
+RadxFilter::ComputeThread::~ComputeThread()
+{
+
+  if (_engine != NULL) {
+    delete _engine;
+  }
+
+}  
+
+// run method
+
+void RadxFilter::ComputeThread::run()
+{
+
+  // check
+
+  assert(_engine != NULL);
+  assert(_inputRay != NULL);
+  
+  // Compute engine object will create the output ray
+  // The ownership of the ray is passed to the parent object
+  // which adds it to the output volume.
+
+  _outputRay = _engine->compute(_inputRay);
+  
+}
+
