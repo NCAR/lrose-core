@@ -69,7 +69,7 @@ use_multiple_threads = TRUE;
 // Type: int
 //
 
-n_compute_threads = 8;
+n_compute_threads = 16;
 
 //======================================================================
 //
@@ -84,7 +84,7 @@ n_compute_threads = 8;
 // Type: string
 //
 
-input_dir = ".";
+input_dir = "/scr/hail2/rsfdata/pecan/cfradial/spol/moments/sband/sur";
 
 ///////////// mode ////////////////////////////////////
 //
@@ -262,7 +262,7 @@ upper_sweep_num = 0;
 // Type: boolean
 //
 
-override_radar_location = TRUE;
+override_radar_location = FALSE;
 
 ///////////// radar_latitude_deg //////////////////////
 //
@@ -306,7 +306,7 @@ radar_altitude_meters = 10;
 // Type: boolean
 //
 
-select_fields = FALSE;
+select_fields = TRUE;
 
 ///////////// selected_fields /////////////////////////
 //
@@ -351,7 +351,7 @@ selected_fields = {
 // Type: boolean
 //
 
-rename_fields = TRUE;
+rename_fields = FALSE;
 
 ///////////// renamed_fields //////////////////////////
 //
@@ -439,9 +439,25 @@ renamed_fields = {
 
 field_filters = {
   {
-    partial_field_name = "",
-    //    filter_type = FILTER_NONE,
-    // filter_type = FILTER_TRIANGULAR,
+    partial_field_name = "DBZ",
+    filter_type = FILTER_TRIANGULAR,
+    length = 7
+  }
+  ,
+  {
+    partial_field_name = "VEL",
+    filter_type = FILTER_MEDIAN,
+    length = 7
+  }
+  ,
+  {
+    partial_field_name = "WIDTH",
+    filter_type = FILTER_NONE,
+    length = 7
+  }
+  ,
+  {
+    partial_field_name = "PHIDP",
     filter_type = FILTER_LEAST_SQUARES,
     length = 7
   }
@@ -579,7 +595,7 @@ output_format = OUTPUT_FORMAT_CFRADIAL;
 //     NETCDF4_CLASSIC
 //
 
-netcdf_style = CLASSIC;
+netcdf_style = NETCDF4;
 
 //======================================================================
 //
@@ -603,7 +619,7 @@ output_native_byte_order = FALSE;
 // Type: boolean
 //
 
-output_compressed = FALSE;
+output_compressed = TRUE;
 
 ///////////// compression_level ///////////////////////
 //
@@ -628,9 +644,7 @@ compression_level = 4;
 // Type: string
 //
 
-// output_dir = "$(RADX_DATA_DIR)/cfradial/filtered/tri";
-output_dir = "$(RADX_DATA_DIR)/cfradial/filtered/lstsq";
-// output_dir = "$(RADX_DATA_DIR)/examples/cfradial4";
+output_dir = "$(HOME)/data/radx/RadxFilter_test";
 
 ///////////// output_filename_mode ////////////////////
 //
