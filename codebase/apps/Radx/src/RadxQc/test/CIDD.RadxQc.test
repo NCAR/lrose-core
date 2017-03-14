@@ -105,95 +105,75 @@ field_list = {
 #Label    Label       URL           Colorscale Units Cont-lo-hi-interv Format Display_in_menu Bkgnd_Render
 #---------------------------------------------------------------------------------------------------------
 
-DBZ_F DBZ_F  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&DBZ_F    dbz.colors   dBZ -5 80 5 radial 1 0
-VEL_F VEL_F  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&VEL_F    vel.colors   m/s -5 80 5 radial 1 0
-WIDTH_F WIDTH_F  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&WIDTH_F    width.colors   dB -5 80 5 radial 1 0
-SNRHC_F SNRHC_F  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&SNRHC_F    snr.colors   dB -5 80 5 radial 1 0
+DBZ_F DBZ_F  $(HOME)/data/radx/RadxQc_test&DBZ_F    dbz.colors   dBZ -5 80 5 radial 1 0
+VEL_F VEL_F  $(HOME)/data/radx/RadxQc_test&VEL_F    vel.colors   m/s -5 80 5 radial 1 0
+WIDTH_F WIDTH_F  $(HOME)/data/radx/RadxQc_test&WIDTH_F    width.colors   dB -5 80 5 radial 1 0
+SNRHC_F SNRHC_F  $(HOME)/data/radx/RadxQc_test&SNRHC_F    snr.colors   dB -5 80 5 radial 1 0
 
-NCP_F NCP_F  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&NCP_F    ncp.colors   dB -5 80 5 radial 1 0
-PHIDP_F PHIDP_F  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&PHIDP_F    phidp.colors   dB -5 80 5 radial 1 0
-RHOHV_F RHOHV_F  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&RHOHV_F    rhohv.colors   dB -5 80 5 radial 1 0
-ZDR_F ZDR_F  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&ZDR_F    zdr.colors   dB -5 80 5 radial 1 0
+NCP_F NCP_F  $(HOME)/data/radx/RadxQc_test&NCP_F    ncp.colors   dB -5 80 5 radial 1 0
+PHIDP_F PHIDP_F  $(HOME)/data/radx/RadxQc_test&PHIDP_F    phidp.colors   dB -5 80 5 radial 1 0
+RHOHV_F RHOHV_F  $(HOME)/data/radx/RadxQc_test&RHOHV_F    rhohv.colors   dB -5 80 5 radial 1 0
+ZDR_F ZDR_F  $(HOME)/data/radx/RadxQc_test&ZDR_F    zdr.colors   dB -5 80 5 radial 1 0
 
-DBZ_C DBZ_C  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&DBZ_C    dbz.colors   dBZ -5 80 5 radial 1 0
-VEL_C VEL_C  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&VEL_C    vel.colors   m/s -5 80 5 radial 1 0
-WIDTH_C WIDTH_C  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&WIDTH_C    width.colors   dB -5 80 5 radial 1 0
-SNRHC_C SNRHC_C  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&SNRHC_C    snr.colors   dB -5 80 5 radial 1 0
+DBZ_C DBZ_C  $(HOME)/data/radx/RadxQc_test&DBZ_C    dbz.colors   dBZ -5 80 5 radial 1 0
+VEL_C VEL_C  $(HOME)/data/radx/RadxQc_test&VEL_C    vel.colors   m/s -5 80 5 radial 1 0
+WIDTH_C WIDTH_C  $(HOME)/data/radx/RadxQc_test&WIDTH_C    width.colors   dB -5 80 5 radial 1 0
+SNRHC_C SNRHC_C  $(HOME)/data/radx/RadxQc_test&SNRHC_C    snr.colors   dB -5 80 5 radial 1 0
 
-NCP_C NCP_C  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&NCP_C    ncp.colors   dB -5 80 5 radial 1 0
-PHIDP_C PHIDP_C  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&PHIDP_C    phidp.colors   dB -5 80 5 radial 1 0
-RHOHV_C RHOHV_C  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&RHOHV_C    rhohv.colors   dB -5 80 5 radial 1 0
-ZDR_C ZDR_C  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&ZDR_C    zdr.colors   dB -5 80 5 radial 1 0
+NCP_C NCP_C  $(HOME)/data/radx/RadxQc_test&NCP_C    ncp.colors   dB -5 80 5 radial 1 0
+PHIDP_C PHIDP_C  $(HOME)/data/radx/RadxQc_test&PHIDP_C    phidp.colors   dB -5 80 5 radial 1 0
+RHOHV_C RHOHV_C  $(HOME)/data/radx/RadxQc_test&RHOHV_C    rhohv.colors   dB -5 80 5 radial 1 0
+ZDR_C ZDR_C  $(HOME)/data/radx/RadxQc_test&ZDR_C    zdr.colors   dB -5 80 5 radial 1 0
 
-VEL_RLAN VEL_RLAN  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&VEL    vel.colors   dBZ -5 80 5 radial 1 0
-WIDTH_RLAN WIDTH_RLAN  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&WIDTH    width.colors   dBZ -5 80 5 radial 1 0
-MEAN_WIDTH_RLAN MEAN_WIDTH_RLAN  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&WIDTH_MEAN_RLAN    width.colors   - -5 80 5 radial 1 0
+VEL_RLAN VEL_RLAN  $(HOME)/data/radx/RadxQc_test&VEL    vel.colors   dBZ -5 80 5 radial 1 0
+WIDTH_RLAN WIDTH_RLAN  $(HOME)/data/radx/RadxQc_test&WIDTH    width.colors   dBZ -5 80 5 radial 1 0
+MEAN_WIDTH_RLAN MEAN_WIDTH_RLAN  $(HOME)/data/radx/RadxQc_test&WIDTH_MEAN_RLAN    width.colors   - -5 80 5 radial 1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 
-NCP_RLAN NCP_RLAN  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&NCP    ncp.colors   dBZ -5 80 5 radial 1 0
-MEAN_NCP_RLAN MEAN_NCP_RLAN  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&NCP_MEAN_RLAN    ncp.colors   - -5 80 5 radial 1 0
-PHASE_RLAN PHASE_RLAN  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&PHASE_RLAN    deg.colors  deg -5 80 5 radial 1 0
-PHASE_NOISE_RLAN PHASE_NOISE_RLAN  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&PHASE_NOISE_RLAN    deg.colors  deg -5 80 5 radial 1 0
+NCP_RLAN NCP_RLAN  $(HOME)/data/radx/RadxQc_test&NCP    ncp.colors   dBZ -5 80 5 radial 1 0
+MEAN_NCP_RLAN MEAN_NCP_RLAN  $(HOME)/data/radx/RadxQc_test&NCP_MEAN_RLAN    ncp.colors   - -5 80 5 radial 1 0
+PHASE_RLAN PHASE_RLAN  $(HOME)/data/radx/RadxQc_test&PHASE_RLAN    deg.colors  deg -5 80 5 radial 1 0
+PHASE_NOISE_RLAN PHASE_NOISE_RLAN  $(HOME)/data/radx/RadxQc_test&PHASE_NOISE_RLAN    deg.colors  deg -5 80 5 radial 1 0
 
-SNR_RLAN SNR_RLAN  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&SNR_RLAN    snr.colors   dB -5 80 5 radial 1 0
-SNR_MODE_RLAN SNR_MODE_RLAN  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&SNR_MODE_RLAN    snr.colors   dB -5 80 5 radial 1 0
-SNR_DMODE_RLAN SNR_DMODE_RLAN  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&SNR_DMODE_RLAN    snr.colors   dB -5 80 5 radial 1 0
-ZDR_SDEV_RLAN ZDR_SDEV_RLAN  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&ZDR_SDEV_RLAN  sdev_snr.colors dB -5 80 5 radial 1 0
+SNR_RLAN SNR_RLAN  $(HOME)/data/radx/RadxQc_test&SNR_RLAN    snr.colors   dB -5 80 5 radial 1 0
+SNR_MODE_RLAN SNR_MODE_RLAN  $(HOME)/data/radx/RadxQc_test&SNR_MODE_RLAN    snr.colors   dB -5 80 5 radial 1 0
+SNR_DMODE_RLAN SNR_DMODE_RLAN  $(HOME)/data/radx/RadxQc_test&SNR_DMODE_RLAN    snr.colors   dB -5 80 5 radial 1 0
+ZDR_SDEV_RLAN ZDR_SDEV_RLAN  $(HOME)/data/radx/RadxQc_test&ZDR_SDEV_RLAN  sdev_snr.colors dB -5 80 5 radial 1 0
 
-PHASE_NOISE_INT PHASE_NOISE_INT mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&PHASE_NOISE_INTEREST_RLAN interest.colors deg -5 80 5 radial 1 0
-NCP_MEAN_INT NCP_MEAN_INT mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&NCP_MEAN_INTEREST_RLAN interest.colors deg -5 80 5 radial 1 0
-WIDTH_MEAN_INT WIDTH_MEAN_INT mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&WIDTH_MEAN_INTEREST_RLAN interest.colors deg -5 80 5 radial 1 0
-SNR_DMODE_INT SNR_DMODE_INT mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&SNR_DMODE_INTEREST_RLAN interest.colors deg -5 80 5 radial 1 0
+PHASE_NOISE_INT PHASE_NOISE_INT $(HOME)/data/radx/RadxQc_test&PHASE_NOISE_INTEREST_RLAN interest.colors deg -5 80 5 radial 1 0
+NCP_MEAN_INT NCP_MEAN_INT $(HOME)/data/radx/RadxQc_test&NCP_MEAN_INTEREST_RLAN interest.colors deg -5 80 5 radial 1 0
+WIDTH_MEAN_INT WIDTH_MEAN_INT $(HOME)/data/radx/RadxQc_test&WIDTH_MEAN_INTEREST_RLAN interest.colors deg -5 80 5 radial 1 0
+SNR_DMODE_INT SNR_DMODE_INT $(HOME)/data/radx/RadxQc_test&SNR_DMODE_INTEREST_RLAN interest.colors deg -5 80 5 radial 1 0
 
-ZDR_SDEV_INT ZDR_SDEV_INT mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&ZDR_SDEV_INTEREST_RLAN interest.colors deg -5 80 5 radial 1 0
-RLAN_FLAG RLAN_FLAG mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&RLAN_FLAG   rlan_flag.colors   -   0 0 0   cart  1 0
-=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
-=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
-
-SNR_MEAN_SEACLUT SNR_MEAN_SEACLUT  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&SNR_MEAN_SEACLUT    snr.colors   dB -5 80 5 radial 1 0
-RHOHV_MEAN_SEACLUT RHOHV_MEAN_SEACLUT  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&RHOHV_MEAN_SEACLUT    rhohv.colors   dB -5 80 5 radial 1 0
-PHIDP_SDEV_SEACLUT PHIDP_SDEV_SEACLUT  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&PHIDP_SDEV_SEACLUT    sdphidp.colors   deg -5 80 5 radial 1 0
-ZDR_SDEV_SEACLUT ZDR_SDEV_SEACLUT  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&ZDR_SDEV_SEACLUT    sdzdr.colors   dB -5 80 5 radial 1 0
-
-RHOHV_MEAN_INT_SEACLUT RHOHV_MEAN_INT_SEACLUT mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&RHOHV_MEAN_INTEREST_SEACLUT interest.colors deg -5 80 5 radial 1 0
-PHIDP_SDEV_INT_SEACLUT PHIDP_SDEV_INT_SEACLUT mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&PHIDP_SDEV_INTEREST_SEACLUT interest.colors deg -5 80 5 radial 1 0
-ZDR_SDEV_INT_SEACLUT ZDR_SDEV_INT_SEACLUT mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&ZDR_SDEV_INTEREST_SEACLUT interest.colors deg -5 80 5 radial 1 0
-=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
-
-DBZ_GRAD DBZ_GRAD  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&dbz_elev_gradient    dbz.colors   dB/deg -5 80 5 radial 1 0
-DBZ_GRAD_INT_SEACLUT DBZ_GRAD_INT_SEACLUT mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&DBZ_ELEV_GRADIENT_INTEREST_SEACLUT interest.colors deg -5 80 5 radial 1 0
-SEACLUT_FLAG SEACLUT_FLAG mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&SEACLUT_FLAG   seaclut_flag.colors   -   0 0 0   cart  1 0
-=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
-
-PID   PID  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&PID    pid.colors   -  -5 80 5 radial 1 0
-TEMP_FOR_PID   TEMP_FOR_PID  mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&temperature   temp.colors  C -5 80 5 radial 1 0
-PID_FLAG PID_FLAG mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&PID_CENSOR_FLAG   pid_flag.colors   -   0 0 0   cart  1 0
-CENSOR_FLAG CENSOR_FLAG mdvp:://localhost::$(HOME)/case_studies/cfradial/DB-QC&INPUT_FIELDS_CENSOR_FLAG   pid_flag.colors   -   0 0 0   cart  1 0
-
-=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
-=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+ZDR_SDEV_INT ZDR_SDEV_INT $(HOME)/data/radx/RadxQc_test&ZDR_SDEV_INTEREST_RLAN interest.colors deg -5 80 5 radial 1 0
+RLAN_FLAG RLAN_FLAG $(HOME)/data/radx/RadxQc_test&RLAN_FLAG   rlan_flag.colors   -   0 0 0   cart  1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 =========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 
-DBORIG_DBZ     DBORIG_DBZ     $(HOME)/case_studies/mdv/DB&DBZ  dbz.colors   dbz   0 0 0   cart  1 0
-DBORIG_DBZ_F   DBORIG_DBZ_F   $(HOME)/case_studies/mdv/DB&DBZ_F  dbz.colors   dbz   0 0 0   cart  1 0
-DBORIG_DBZVC_F   DBORIG_DBZVC_F   $(HOME)/case_studies/mdv/DB&DBZVC_F  dbz.colors   dbz   0 0 0   cart  1 0
-=========     =========     $(HOME)/case_studies/mdv/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+SNR_MEAN_SEACLUT SNR_MEAN_SEACLUT  $(HOME)/data/radx/RadxQc_test&SNR_MEAN_SEACLUT    snr.colors   dB -5 80 5 radial 1 0
+RHOHV_MEAN_SEACLUT RHOHV_MEAN_SEACLUT  $(HOME)/data/radx/RadxQc_test&RHOHV_MEAN_SEACLUT    rhohv.colors   dB -5 80 5 radial 1 0
+PHIDP_SDEV_SEACLUT PHIDP_SDEV_SEACLUT  $(HOME)/data/radx/RadxQc_test&PHIDP_SDEV_SEACLUT    sdphidp.colors   deg -5 80 5 radial 1 0
+ZDR_SDEV_SEACLUT ZDR_SDEV_SEACLUT  $(HOME)/data/radx/RadxQc_test&ZDR_SDEV_SEACLUT    sdzdr.colors   dB -5 80 5 radial 1 0
 
-DBORIG_VEL     DBORIG_VEL     $(HOME)/case_studies/mdv/DB&VEL  vel.colors   m/s   0 0 0   cart  1 0
-DBORIG_VEL_F   DBORIG_VEL_F   $(HOME)/case_studies/mdv/DB&VEL_F  vel.colors  m/s   0 0 0   cart  1 0
-DBORIG_WIDTH_F DBORIG_WIDTH_F  $(HOME)/case_studies/mdv/DB&WIDTH_F  width.colors  m/s   0 0 0   cart  1 0
-DBORIG_NCP_F   DBORIG_NCP_F    $(HOME)/case_studies/mdv/DB&NCP_F  ncp.colors  -   0 0 0   cart  1 0
+RHOHV_MEAN_INT_SEACLUT RHOHV_MEAN_INT_SEACLUT $(HOME)/data/radx/RadxQc_test&RHOHV_MEAN_INTEREST_SEACLUT interest.colors deg -5 80 5 radial 1 0
+PHIDP_SDEV_INT_SEACLUT PHIDP_SDEV_INT_SEACLUT $(HOME)/data/radx/RadxQc_test&PHIDP_SDEV_INTEREST_SEACLUT interest.colors deg -5 80 5 radial 1 0
+ZDR_SDEV_INT_SEACLUT ZDR_SDEV_INT_SEACLUT $(HOME)/data/radx/RadxQc_test&ZDR_SDEV_INTEREST_SEACLUT interest.colors deg -5 80 5 radial 1 0
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 
-DBORIG_SNRHC_F DBORIG_SNRHC_F  $(HOME)/case_studies/mdv/DB&SNRHC_F  snr.colors  dB   0 0 0   cart  1 0
-DBORIG_ZDR_F   DBORIG_ZDR_F    $(HOME)/case_studies/mdv/DB&ZDR_F  zdr.colors  dB   0 0 0   cart  1 0
-DBORIG_PHIDP_F DBORIG_PHIDP_F  $(HOME)/case_studies/mdv/DB&PHIDP_F  phidp.colors  deg   0 0 0   cart  1 0
-DBORIG_RHOHV_F DBORIG_RHOHV_F  $(HOME)/case_studies/mdv/DB&RHOHV_F  rhohv.colors  -   0 0 0   cart  1 0
+DBZ_GRAD DBZ_GRAD  $(HOME)/data/radx/RadxQc_test&dbz_elev_gradient    dbz.colors   dB/deg -5 80 5 radial 1 0
+DBZ_GRAD_INT_SEACLUT DBZ_GRAD_INT_SEACLUT $(HOME)/data/radx/RadxQc_test&DBZ_ELEV_GRADIENT_INTEREST_SEACLUT interest.colors deg -5 80 5 radial 1 0
+SEACLUT_FLAG SEACLUT_FLAG $(HOME)/data/radx/RadxQc_test&SEACLUT_FLAG   seaclut_flag.colors   -   0 0 0   cart  1 0
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 
-DBORIG_CPA     DBORIG_CPA     $(HOME)/case_studies/mdv/DB&CPA  cpa.colors   -   0 0 0   cart  1 0
-DBORIG_CMD     DBORIG_CMD     $(HOME)/case_studies/mdv/DB&CMD  cmd.colors   -   0 0 0   cart  1 0
-DBORIG_CMD_FLAG DBORIG_CMD_FLAG $(HOME)/case_studies/mdv/DB&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
-=========     =========     $(HOME)/case_studies/mdv/DB&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+PID   PID  $(HOME)/data/radx/RadxQc_test&PID    pid.colors   -  -5 80 5 radial 1 0
+TEMP_FOR_PID   TEMP_FOR_PID  $(HOME)/data/radx/RadxQc_test&temperature   temp.colors  C -5 80 5 radial 1 0
+PID_FLAG PID_FLAG $(HOME)/data/radx/RadxQc_test&PID_CENSOR_FLAG   pid_flag.colors   -   0 0 0   cart  1 0
+CENSOR_FLAG CENSOR_FLAG $(HOME)/data/radx/RadxQc_test&INPUT_FIELDS_CENSOR_FLAG   pid_flag.colors   -   0 0 0   cart  1 0
+
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
+=========     =========     $(HOME)/case_studies/cfradial/AD&CMD_FLAG  cmd_flag.colors   -   0 0 0   cart  1 0
 
 </GRIDS>
 
@@ -294,9 +274,10 @@ cidd.debug2_flag:           0
 #cidd.demo_time:  4:45 05/10/2016
 #cidd.demo_time:  4:00 07/01/2016
 #cidd.demo_time:  01:05 10/20/2016
-cidd.demo_time:  11:00 05/25/2016
 #cidd.demo_time:   16:00 11/07/2016
 #cidd.demo_time:   23:00 03/08/2016
+
+cidd.demo_time:  11:00 05/25/2016
 
 
 # Set times to the nearest value divisible by the number of seconds
@@ -709,8 +690,8 @@ cidd.max_adeg:               360.0
 
 # List of comma delimited local directories or HTTP URLs to search
 # Search . then each directory/URL in order 
-cidd.color_file_subdir:  $(HOME)/case_studies/display/color_scales
-cidd.map_file_subdir:    $(HOME)/case_studies/display/maps
+cidd.color_file_subdir:  $(PROJ_DIR)/display/color_scales
+cidd.map_file_subdir:    $(PROJ_DIR)/display/maps
 
 #
 # Station locator features

@@ -1,0 +1,7 @@
+#! /bin/csh
+#
+
+cd ~/apps/Radx/src/RadxQc/test
+
+CIDD -p CIDD.RadxQc.test
+
