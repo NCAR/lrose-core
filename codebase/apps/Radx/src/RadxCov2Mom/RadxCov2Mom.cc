@@ -1884,3 +1884,58 @@ int RadxCov2Mom::_writeStatusXmlToSpdb(const RadxVol &vol,
 }
 
 
+///////////////////////////////////////////////////////////////
+// ComputeThread
+
+// Constructor
+
+RadxCov2Mom::ComputeThread::ComputeThread(RadxCov2Mom *obj,
+                                          const Params &params) :
+        _this(obj),
+        _params(params)
+{
+
+  OK = TRUE;
+  _covRay = NULL;
+  _momRay = NULL;
+
+  // create moments object
+  
+  _moments = new Moments(_params);
+  if (!_moments->OK) {
+    delete _moments;
+    OK = FALSE;
+  }
+
+}  
+
+// Destructor
+
+RadxCov2Mom::ComputeThread::~ComputeThread()
+{
+
+  if (_moments != NULL) {
+    delete _moments;
+  }
+
+}  
+
+// run method
+void RadxCov2Mom::ComputeThread::run()
+{
+
+  // check
+
+  assert(_moments != NULL);
+  assert(_covRay != NULL);
+
+  // Moments object will create the moments ray
+  // The ownership of the ray is passed to the parent object
+  // which adds it to the output volume.
+
+  _momRay = _moments->compute
+    (_covRay, _calib,
+     _this->_measXmitPowerDbmH, _this->_measXmitPowerDbmV,
+     _this->_wavelengthM, _this->_radarHtKm);
+}
+
