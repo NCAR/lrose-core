@@ -650,18 +650,21 @@ int SigmetRadxFile::_readHeaders(bool doPrint, ostream &out)
 
   // NOAA HRD radar?
   
+  _isHrdTailRadar = false;
+  _isHrdLfRadar = false;
   string hardwareName = Radx::makeString(_prodHdr.end.hardware_name, 16);
-  if (hardwareName.find("-Tail") != string::npos) {
+  if (_readRadarNum == 1) {
+    _isHrdLfRadar = true;
+  } else if (_readRadarNum == 2) {
+    _isHrdTailRadar = true;
+  } else if (hardwareName.find("-Tail") != string::npos) {
+    _isHrdTailRadar = true;
+  } else if (hardwareName.find("-TM") != string::npos) {
     _isHrdTailRadar = true;
   } else if (hardwareName.find("noaa1-master") != string::npos) {
     _isHrdTailRadar = true;
   } else if (hardwareName.find("-LF") != string::npos) {
     _isHrdLfRadar = true;
-  }
-  if (_readRadarNum == 1) {
-    _isHrdLfRadar = true;
-  } else if (_readRadarNum == 2) {
-    _isHrdTailRadar = true;
   }
 
   if (doPrint || _debug) {
