@@ -57,329 +57,17 @@
 
 using namespace std;
 
-
 //////////////////////////////////////////////////
 // read in variables from calibration files
 // stores them in a multidimentional array
 
-
-//void CalReader::ReadCalvals(string pathToCalValsFile, timet time)
-vector <vector<double> > CalReader::readBaselineCorrection(const char* file, 
-							   bool debug)
-{
-  if(debug)
-    cout<< "in readBaselineCorrection"<<'\n';
-  
-  std::ifstream infile(file);
-  std::string line;
-  vector<double> vec_binnum;
-  vector<double> vec_combined_hi;
-  vector<double> vec_combined_lo;
-  vector<double> vec_molecular;
-  vector<double> vec_crosspol;
-  vector<double> vec_mol_I2A;
-  vector<double> vec_comb_1064;
-
-  while (std::getline(infile, line))
-    {
-      std::stringstream ss;
-      ss << line;
-      if(debug)
-	cout<<line<<'\n';
-      
-      string test = "#";
-            
-      if(!(line.substr(0, test.length())==test))//comments at begining of file 
-	//begin with #, ignore those lines and process the rest. 
-	{
-	  double binnum; 
-	  ss>>binnum;
-	  vec_binnum.push_back(binnum);
-	  if(debug)
-	    cout<<"binnum="<<binnum<<'\n';
-
-	  double combined_hi; 
-	  ss>>combined_hi;
-	  vec_combined_hi.push_back(combined_hi);
-	  if(debug)
-	    cout<<"combined_hi="<<combined_hi<<'\n';
-
-	  double combined_lo; 
-	  ss>>combined_lo;
-	  vec_combined_lo.push_back(combined_lo);
-	  if(debug)
-	    cout<<"combined_lo="<<combined_lo<<'\n';
-
-	  double molecular; 
-	  ss>>molecular;
-	  vec_molecular.push_back(molecular);
-	  if(debug)
-	    cout<<"molecular="<<molecular<<'\n';
-
-	  double crosspol; 
-	  ss>>crosspol;
-	  vec_crosspol.push_back(crosspol);
-	  if(debug)
-	    cout<<"crosspol="<<crosspol<<'\n';
-
-	  double mol_I2A; 
-	  ss>>mol_I2A;
-	  vec_mol_I2A.push_back(mol_I2A);
-	  if(debug)
-	    cout<<"mol_I2A="<<mol_I2A<<'\n';
-
-	  double comb_1064; 
-	  ss>>comb_1064;
-	  vec_comb_1064.push_back(comb_1064);
-	  if(debug)
-	    cout<<"comb_1064="<<comb_1064<<'\n';
-	}
-    }
- 
-  vector< vector<double> > ans;
-  ans.push_back(vec_binnum);
-  ans.push_back(vec_combined_hi);
-  ans.push_back(vec_combined_lo);
-  ans.push_back(vec_molecular);
-  ans.push_back(vec_crosspol);
-  ans.push_back(vec_mol_I2A);
-  ans.push_back(vec_comb_1064);
-
-  return ans;
-
-}
-
-vector <vector<double> > CalReader::readDiffDefaultGeo(const char* file, 
-						       bool debug)
-{
-  if(debug)
-    cout<< "in _readDiffDefaultGeo"<<'\n';
-  std::ifstream infile(file);
-  std::string line;
-  vector<double> vec_altitudes;
-  vector<double> vec_comb_himol;
-  vector<double> vec_comb_lomol;
-  vector<double> vec_scomb_himol;
-  vector<double> vec_scomb_lomol;
-
-  while (std::getline(infile, line))
-    {
-      std::stringstream ss;
-      ss << line;
-      if(debug)
-	cout<<line<<'\n';
-
-      string test = "#";
-            
-      if(!(line.substr(0, test.length())==test))//comments at begining of file 
-	//begin with #, ignore those lines and process the rest. 
-	{
-	  double altitudes; 
-	  ss>>altitudes;
-	  vec_altitudes.push_back(altitudes);
-	  if(debug)
-	    cout<<"altitudes="<<altitudes<<'\n';
-	  
-	  double comb_himol; 
-	  ss>>comb_himol;
-	  vec_comb_himol.push_back(comb_himol);
-	  if(debug)
-	    cout<<"comb_himol="<<comb_himol<<'\n';
-	  
-	  double comb_lomol; 
-	  ss>>comb_lomol;
-	  vec_comb_lomol.push_back(comb_lomol);
-	  if(debug)
-	    cout<<"comb_lomol="<<comb_lomol<<'\n';
-	  	  	  
-	  double scomb_himol; 
-	  ss>>scomb_himol;
-	  vec_scomb_himol.push_back(scomb_himol);
-	  if(debug)
-	    cout<<"scomb_himol="<<scomb_himol<<'\n';
-	  
-	  double scomb_lomol; 
-	  ss>>scomb_lomol;
-	  vec_scomb_lomol.push_back(scomb_lomol);
-	  if(debug)
-	    cout<<"scomb_lomol="<<scomb_lomol<<'\n';
-	  
-	}
-    }
-
-  vector< vector<double> > ans;
-  ans.push_back(vec_altitudes);
-  ans.push_back(vec_comb_himol);
-  ans.push_back(vec_comb_lomol);
-  ans.push_back(vec_scomb_himol);
-  ans.push_back(vec_scomb_lomol);
-
-  return ans;
-
-} 
-
-vector <vector<double> > CalReader::readGeofileDefault(const char* file, 
-						       bool debug)
-{
-  if(debug)
-    cout<< "in _readGeofileDefault"<<'\n';
-  std::ifstream infile(file);
-  std::string line;
-  vector<double> vec_range;
-  vector<double> vec_geo_corr;
-
-  while (std::getline(infile, line))
-    {
-      std::stringstream ss;
-      ss << line;
-      if(debug)
-	cout<<line<<'\n';
-       
-      string test = "#";
-            
-      if(!(line.substr(0, test.length())==test))//comments at begining of file 
-	//begin with #, ignore those lines and process the rest. 
-	{
-	  double range; 
-	  ss>>range;
-	  vec_range.push_back(range);
-	  if(debug)
-	    cout<<"range="<<range<<'\n';
-
-	  double geo_corr; 
-	  ss>>geo_corr;
-	  vec_geo_corr.push_back(geo_corr);
-	  if(debug)
-	    cout<<"geo_corr="<<geo_corr<<'\n';
-	  
-	}
-    }
-
-  vector< vector<double> > ans;
-  ans.push_back(vec_range);
-  ans.push_back(vec_geo_corr);
-
-  return ans;
-
-} 
-
-vector <vector<double> > CalReader::readAfterPulse(const char* file, bool debug)
-{
-  if(debug)
-    cout<< "in readAfterPulse"<<'\n';
-  std::ifstream infile(file);
-  std::string line;
-  vector<double> vec_bin;
-  vector<double> vec_mol;
-  vector<double> vec_comb;
-  vector<double> vec_crossPol;
-  vector<double> vec_refftMol;
-  vector<double> vec_imfftMol;
-  vector<double> vec_refftComb;
-  vector<double> vec_imfftComb;
-  vector<double> vec_refftCPol;
-  vector<double> vec_imfftCPol;
-
-  while (std::getline(infile, line))
-    {
-      std::stringstream ss;
-      ss << line;
-      if(debug)
-	cout<<line<<'\n';
-       
-      string test = "#";
-            
-      if(!(line.substr(0, test.length())==test))//comments at begining of file 
-	//begin with #, ignore those lines and process the rest. 
-	{
-	  double bin; 
-	  ss>>bin;
-	  vec_bin.push_back(bin);
-	  if(debug)
-	    cout<<"bin="<<bin<<'\n';
-
-	  double mol; 
-	  ss>>mol;
-	  vec_mol.push_back(mol);
-	  if(debug)
-	    cout<<"mol="<<mol<<'\n';
-
-	  double comb; 
-	  ss>>comb;
-	  vec_comb.push_back(comb);
-	  if(debug)
-	    cout<<"comb="<<comb<<'\n';
-
-	  double crossPol; 
-	  ss>>crossPol;
-	  vec_crossPol.push_back(crossPol);
-	  if(debug)
-	    cout<<"crossPol="<<crossPol<<'\n';
-
-	  double refftMol; 
-	  ss>>refftMol;
-	  vec_refftMol.push_back(refftMol);
-	  if(debug)
-	    cout<<"refftMol="<<refftMol<<'\n';
-
-	  double imfftMol; 
-	  ss>>imfftMol;
-	  vec_imfftMol.push_back(imfftMol);
-	  if(debug)
-	    cout<<"imfftMol="<<imfftMol<<'\n';
-
-	  double refftComb; 
-	  ss>>refftComb;
-	  vec_refftComb.push_back(refftComb);
-	  if(debug)
-	    cout<<"refftComb="<<refftComb<<'\n';
-
-	  double imfftComb; 
-	  ss>>imfftComb;
-	  vec_imfftComb.push_back(imfftComb);
-	  if(debug)
-	    cout<<"imfftComb="<<imfftComb<<'\n';
-
-	  double refftCPol; 
-	  ss>>refftCPol;
-	  vec_refftCPol.push_back(refftCPol);
-	  if(debug)
-	    cout<<"refftCPol="<<refftCPol<<'\n';
-
-	  double imfftCPol; 
-	  ss>>imfftCPol;
-	  vec_imfftCPol.push_back(imfftCPol);
-	  if(debug)
-	    cout<<"imfftCPol="<<imfftCPol<<'\n';
-
-	}
-    }
-
-  vector< vector<double> > ans;
-  ans.push_back(vec_bin);
-  ans.push_back(vec_mol);
-  ans.push_back(vec_comb);
-  ans.push_back(vec_crossPol);
-  ans.push_back(vec_refftMol);
-  ans.push_back(vec_imfftMol);
-  ans.push_back(vec_refftComb);
-  ans.push_back(vec_imfftComb);
-  ans.push_back(vec_refftCPol);
-  ans.push_back(vec_imfftCPol);
-
-  return ans;
-
-} 
-
-CalReader CalReader::readCalVals(const char* file, const char* variable, 
-				 bool debug)
+CalReader CalReader::readCalVals(const char* file, const char* variable)
 {
   CalReader dataBlock;
   bool rightBlock=false;//each block of the calval file has the data in the 
   //calvals class, and we want to scan through the correct block and return 
   //just that data. Don't bother returning data from other blocks. 
-  if(debug)
-    cout<< "in readCalvals"<<'\n';
+
   std::ifstream infile(file);
   std::string line;
   while (std::getline(infile, line))
@@ -396,16 +84,12 @@ CalReader CalReader::readCalVals(const char* file, const char* variable,
       
       if(line.length()>0)//only look at lines with non 0 length
 	{
-	  if(debug)
-	    cout<<line<<'\n';
-	  
+	 
 	  if( (line.at(0)>='a' && line.at(0)<='z') || 
 	      (line.at(0)>='A' && line.at(0)<='Z') )
 	    //if the first char is a letter then it is a variable name
 	    {
-	      if(debug)
-		cout<<"starts with letter"<<'\n';
-	      
+	     
 	      int hasUnits=-1;
 	      
 	      hasUnits=checkForChar("(",line); // units are captured in ()
@@ -437,26 +121,16 @@ CalReader CalReader::readCalVals(const char* file, const char* variable,
 		  dataBlock.setVarName(varName);
 		  dataBlock.setVarUnits(units);
 		}
-	      if(debug)
-		{
-		  cout<<"line="<<line<<'\n';
-		  cout<<"varName="<<varName<<'\n';
-		  cout<<"units="<<units<<'\n';
-		}
+	     
 	    }
 	      
 	  if(rightBlock && line.at(0)>='0' && line.at(0)<='9' )
 	    //if the first char is a number then it is a date/data pair
 	    {
-	      if(debug)
-		cout<<"starts with number"<<'\n';
-	     
+	      
 	      string date; //extract date
 	      date=line.substr(0,checkForChar(",",line));
 	      date=removeWhitespace(date);
-	      
-	      if(debug)
-		cout<<"date="<<date<<'\n';
 	      
 	      int day=0;
 	      int mon=0;
@@ -536,17 +210,11 @@ CalReader CalReader::readCalVals(const char* file, const char* variable,
 		  date="";
 		}
 	      	    
-       	      if(debug)
-		cout<<"day="<<day<<"  :  mon="<<mon<<"  :  year="<<year
-		    <<"  :  hour="<<hour<<"  :  min="<<min<<"  :  sec="
-		    <<sec<<'\n';
-	      
+       	     
 	      RadxTime dateStamp(year, mon, day, hour, min, sec, 0.0);
 	      //passing 0.0 for subseconds
 	      
-	      if(debug)
-		cout<<"dateStamp="<<dateStamp<<'\n';
-	      
+	     
 	      int strData=-1; //hold the position of ' or " if data is a string
 	      int numData=-1; //hold the position of [ if the data is a number
 	      
@@ -554,12 +222,7 @@ CalReader CalReader::readCalVals(const char* file, const char* variable,
 	      //string data is captured in ' quotes or " quotes
 	      numData=checkForChar("[",line);
 	      //numbers are captured in []	    
-	      	
-	      if(debug)
-		cout<<"strData"<<strData<<'\n';
-	      if(debug)
-		cout<<"numData"<<numData<<'\n';
-		  
+	      
 	      string strValue;
 	      vector<double> numValue;//check numValue.size() to see its length 
 	      //if length is 0 there is no numerical data and is string data. 
@@ -642,13 +305,7 @@ CalReader CalReader::readCalVals(const char* file, const char* variable,
 			  cerr<<"WARNING: calvals_gvhsrl has an improperly formmated line with non-modifier text after numerical data."<<'\n';
 			}
 		    }
-		  
-		  if(debug)
-		    {
-		      cout<<"checking data reading"<<'\n';
-		      for(unsigned int i=0;i<numValue.size();i++)
-			cout<<numValue.at(i)<<'\n';;
-		    }
+		  		 
 		}
 	      
 	      if(rightBlock)
@@ -674,8 +331,7 @@ CalReader CalReader::readCalVals(const char* file, const char* variable,
     
     }//end reading calvals file line by line
 
-  if(debug)
-    dataBlock.printBlock();
+  dataBlock=sortTime(dataBlock);
 
   return dataBlock;
 
@@ -854,7 +510,7 @@ void CalReader::printBlock()
 
 }
   
-CalReader CalReader::sortTime(CalReader toSort, bool debug)
+CalReader CalReader::sortTime(CalReader toSort)
 {
   for(unsigned int i=0; i<(toSort.time).size()-1;i++)
     {  
@@ -885,12 +541,7 @@ CalReader CalReader::sortTime(CalReader toSort, bool debug)
 	    }
 	}
     }
-  
-  if(debug)
-    {
-      toSort.printBlock();
-    }
-  
+    
   return toSort; 
   
 }
