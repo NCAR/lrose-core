@@ -68,21 +68,17 @@ public:
   void setIsStr();
   void setIsNum();
   bool dataTypeisNum();
-  bool dataTypeisStr(); string getVarName();
+  bool dataTypeisStr(); 
+  string getVarName();
   string getVarUnits();
   vector<RadxTime> getTime();
   vector<string> getDataStr();
   vector< vector<double> > getDataNum();
   void printBlock();
-  CalReader sortTime(CalReader toSort, bool debug);
+  CalReader sortTime(CalReader toSort);
   int dateMatch(CalReader calIn, RadxTime check);
 
-
-  vector <vector<double> > readBaselineCorrection(const char* file, bool debug);
-  vector <vector<double> > readDiffDefaultGeo(const char* file, bool debug);
-  vector <vector<double> > readGeofileDefault(const char* file, bool debug);
-  vector <vector<double> > readAfterPulse(const char* file, bool debug);
-  CalReader readCalVals(const char* file, const char* variable, bool debug);
+  CalReader readCalVals(const char* file, const char* variable);
   string removeWhitespace(string s);
   int checkForChar(string subSt, string s);
 
