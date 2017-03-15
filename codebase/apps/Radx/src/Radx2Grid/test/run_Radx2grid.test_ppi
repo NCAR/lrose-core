@@ -1,0 +1,7 @@
+#! /bin/csh
+#
+
+cd ~/apps/Radx/src/Radx2Grid/test
+
+Radx2Grid -params ./Radx2Grid.test_ppi -debug -f /scr/hail2/rsfdata/pecan/cfradial/spol/moments/sband/sur/20150626/cfrad.20150626_000730.199_to_20150626_001312.085_SPOL_v3836_PunSur_SUR.nc
+

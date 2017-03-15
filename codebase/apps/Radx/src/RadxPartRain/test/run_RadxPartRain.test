@@ -1,0 +1,10 @@
+#! /bin/csh
+#
+
+cd ~/apps/Radx/src/RadxPartRain/test
+
+source site_info.pecan
+
+../RadxPartRain -params RadxPartRain.test -debug -f /scr/hail2/rsfdata/pecan/cfradial/spol/moments/sband/sur/20150626/cfrad.20150626_000730.199_to_20150626_001312.085_SPOL_v3836_PunSur_SUR.nc
+
+

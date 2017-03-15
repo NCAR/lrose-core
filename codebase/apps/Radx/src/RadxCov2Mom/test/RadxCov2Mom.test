@@ -1,0 +1,2918 @@
+/**********************************************************************
+ * TDRP params for RadxCov2Mom
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxCov2Mom reads covariances in Radx-supported format files, 
+//   computes the moments and writes out the results to Radx-supported 
+//   format files.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "spol.qc.sur";
+
+//======================================================================
+//
+// THREADING FOR SPEED.
+//
+//======================================================================
+ 
+///////////// use_multiple_threads ////////////////////
+//
+// Option to use multiple compute threads to improve performance.
+//
+// The read and write stages occur in the main thread, since netCDF is 
+//   not thread safe. The compute stage can be multi-threaded to improve 
+//   performance.
+//
+//
+// Type: boolean
+//
+
+use_multiple_threads = TRUE;
+
+///////////// n_compute_threads ///////////////////////
+//
+// The number of compute threads.
+//
+// The moments computations are segmented in range, with each thread 
+//   computing a fraction of the number of gates. For maximum performance, 
+//   n_threads should be set to the number of processors multiplied by 4. 
+//   For further tuning, use top to maximize CPU usage while varying the 
+//   number of threads.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+n_compute_threads = 16;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+//
+// Files will be searched for in this directory.
+//
+//
+// Type: string
+//
+
+input_dir = "/scr/hail2/rsfdata/pecan/cfradial/spol/covar/sband/sur/";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+//======================================================================
+//
+// READ OPTIONS.
+//
+//======================================================================
+ 
+///////////// aggregate_sweep_files_on_read ///////////
+//
+// Option to aggregate sweep files into a volume on read.
+//
+// If true, and the input data is in sweeps rather than volumes (e.g. 
+//   DORADE), the sweep files from a volume will be aggregated into a 
+//   volume.
+//
+//
+// Type: boolean
+//
+
+aggregate_sweep_files_on_read = FALSE;
+
+///////////// ignore_idle_scan_mode_on_read ///////////
+//
+// Option to ignore data taken in IDLE mode.
+//
+// If true, on read will ignore files with an IDLE scan mode.
+//
+//
+// Type: boolean
+//
+
+ignore_idle_scan_mode_on_read = FALSE;
+
+///////////// optimize_surveillance_transitions ///////
+//
+// Optimize the transitions in surveillance mode.
+//
+// If true, we check the transitions between sweeps in surveillance 
+//   mode, and move problem rays into the correct sweep. We also set the 
+//   transition flag on/off based on the max elevation error speficied. 
+//   See below.
+//
+//
+// Type: boolean
+//
+
+optimize_surveillance_transitions = TRUE;
+
+///////////// optimized_transitions_max_elev_error ////
+//
+// Max elevation angle error when optimizing surveillance transitions 
+//   (degrees).
+//
+// If the difference between the fixed angle and measured angle exceeds 
+//   this value, the transition flag will be set. If not, it will be 
+//   cleared.
+//
+//
+// Type: double
+//
+
+optimized_transitions_max_elev_error = 0.2;
+
+///////////// trim_surveillance_sweeps_to_360deg //////
+//
+// Option to trip surveillance sweeps so that they only cover 360 
+//   degrees.
+//
+// Some sweeps will have rays which cover more than a 360-degree 
+//   rotation. Often these include antenna transitions. If this is set to 
+//   true, rays are trimmed off either end of the sweep to limit the 
+//   coverage to 360 degrees. The median elevation angle is computed and 
+//   the end ray which deviates from the median in elevation is trimmed 
+//   first.
+//
+//
+// Type: boolean
+//
+
+trim_surveillance_sweeps_to_360deg = TRUE;
+
+///////////// remove_rays_with_antenna_transitions ////
+//
+// Option to remove rays taken while the antenna was in transition.
+//
+// If true, rays with the transition flag set will not be used. The 
+//   transiton flag is set when the antenna is in transtion between one 
+//   sweep and the next.
+//
+//
+// Type: boolean
+//
+
+remove_rays_with_antenna_transitions = TRUE;
+
+///////////// transition_nrays_margin /////////////////
+//
+// Number of transition rays to include as a margin.
+//
+// Sometimes the transition flag is turned on too early in a transition, 
+//   on not turned off quickly enough after a transition. If you set this 
+//   to a number greater than 0, that number of rays will be included at 
+//   each end of the transition, i.e. the transition will effectively be 
+//   shorter at each end by this number of rays.
+//
+//
+// Type: int
+//
+
+transition_nrays_margin = 1;
+
+///////////// compute_sweep_fixed_angles_from_rays ////
+//
+// Option to compute sweep fixed angles using the angles in the data.
+//
+// Normally the sweep angles are set using the scan strategy angles - 
+//   i.e., the theoretically perfect angles. This option allows you to 
+//   recompute the sweep angles using the measured elevation angles (in 
+//   PPI mode) or azimuth angles (in RHI mode).
+//
+//
+// Type: boolean
+//
+
+compute_sweep_fixed_angles_from_rays = FALSE;
+
+///////////// compute_sweep_modes_from_ray_angles /////
+//
+// Option to set the sweep mode by inspecting the ray angles.
+//
+// If the sweep modes are not correct, we can inspect the ray angles to 
+//   deduce what the antenna scan motion was, and set the sweep mode 
+//   accordingly.
+//
+//
+// Type: boolean
+//
+
+compute_sweep_modes_from_ray_angles = FALSE;
+
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range for any ray.
+//
+//
+// Type: boolean
+//
+
+set_max_range = TRUE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+//
+// Gates beyond this range are removed.
+//
+//
+// Type: double
+//
+
+max_range_km = 147.5;
+
+///////////// set_ngates_constant /////////////////////
+//
+// Option to force the number of gates to be constant.
+//
+// If TRUE, the number of gates on all rays will be set to the maximum, 
+//   and gates added to shorter rays will be filled with missing values.
+//
+//
+// Type: boolean
+//
+
+set_ngates_constant = FALSE;
+
+///////////// set_fixed_angle_limits //////////////////
+//
+// Option to set fixed angle limits.
+//
+// Only use sweeps within the specified fixed angle limits.
+//
+//
+// Type: boolean
+//
+
+set_fixed_angle_limits = FALSE;
+
+///////////// lower_fixed_angle_limit /////////////////
+//
+// Lower fixed angle limit - degrees.
+//
+//
+// Type: double
+//
+
+lower_fixed_angle_limit = 0;
+
+///////////// upper_fixed_angle_limit /////////////////
+//
+// Upper fixed angle limit - degrees.
+//
+//
+// Type: double
+//
+
+upper_fixed_angle_limit = 90;
+
+///////////// set_sweep_num_limits ////////////////////
+//
+// Option to set sweep number limits.
+//
+// Only read sweeps within the specified sweep number limits.
+//
+//
+// Type: boolean
+//
+
+set_sweep_num_limits = FALSE;
+
+///////////// lower_sweep_num /////////////////////////
+//
+// Lower sweep number limit.
+//
+//
+// Type: int
+//
+
+lower_sweep_num = 0;
+
+///////////// upper_sweep_num /////////////////////////
+//
+// Upper sweep number limit.
+//
+//
+// Type: int
+//
+
+upper_sweep_num = 0;
+
+//======================================================================
+//
+// CHECKING SWEEP DATA.
+//
+// Checking whether sweeps should be included.
+//
+//======================================================================
+ 
+///////////// check_min_rays_in_sweep /////////////////
+//
+// Option to check the number of rays in a sweep.
+//
+// If TRUE, a sweep is only considered valid if the number of rays 
+//   exceeds 'min_rays_in_sweep'.
+//
+//
+// Type: boolean
+//
+
+check_min_rays_in_sweep = TRUE;
+
+///////////// min_rays_in_sweep ///////////////////////
+//
+// The min number of rays for a sweep to be valid.
+//
+// If the number of rays is less than this, the sweep is removed. See 
+//   'check_min_rays_in_sweep'.
+//
+//
+// Type: int
+//
+
+min_rays_in_sweep = 180;
+
+//======================================================================
+//
+// OPTION TO OVERRIDE RADAR LOCATION.
+//
+//======================================================================
+ 
+///////////// override_radar_location /////////////////
+//
+// Option to override the radar location.
+//
+// If true, the location in this file will be used. If not, the location 
+//   in the time series data will be used.
+//
+//
+// Type: boolean
+//
+
+override_radar_location = FALSE;
+
+///////////// radar_latitude_deg //////////////////////
+//
+// Radar latitude (deg).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_latitude_deg = -999;
+
+///////////// radar_longitude_deg /////////////////////
+//
+// Radar longitude (deg).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_longitude_deg = -999;
+
+///////////// radar_altitude_meters ///////////////////
+//
+// Radar altitude (meters).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_altitude_meters = -999;
+
+//======================================================================
+//
+// INPUT COVARIANCE FIELDS.
+//
+// Finding the names of covariance fields in the input files.
+//
+//======================================================================
+ 
+///////////// input_covars ////////////////////////////
+//
+// Indicate which field name is to be used for each covariance.
+//
+// Set the field name for each covariance type. If the covariance is not 
+//   available in the input field, it will be set to missing.
+//
+//
+// Type: struct
+//   typedef struct {
+//      covariance_id_t field_id;
+//        Options:
+//          LAG0_HC_DB
+//          LAG0_HX_DB
+//          LAG0_VC_DB
+//          LAG0_VX_DB
+//          LAG0_HCVX_DB
+//          LAG0_HCVX_PHASE
+//          LAG0_VCHX_DB
+//          LAG0_VCHX_PHASE
+//          LAG0_VXHX_DB
+//          LAG0_VXHX_PHASE
+//          LAG1_HC_DB
+//          LAG1_HC_PHASE
+//          LAG1_VC_DB
+//          LAG1_VC_PHASE
+//          LAG1_HCVC_DB
+//          LAG1_HCVC_PHASE
+//          LAG1_VCHC_DB
+//          LAG1_VCHC_PHASE
+//          LAG1_VXHX_DB
+//          LAG1_VXHX_PHASE
+//          LAG2_HC_DB
+//          LAG2_HC_PHASE
+//          LAG2_VC_DB
+//          LAG2_VC_PHASE
+//          LAG3_HC_DB
+//          LAG3_HC_PHASE
+//          LAG3_VC_DB
+//          LAG3_VC_PHASE
+//          RVVHH0_DB
+//          RVVHH0_PHASE
+//      string field_name;
+//   }
+//
+// 1D array - variable length.
+//
+
+input_covars = {
+  {
+    field_id = LAG0_HC_DB,
+    field_name = "LAG0_HC_DB_F"
+  }
+  ,
+  {
+    field_id = LAG0_HX_DB,
+    field_name = "LAG0_HX_DB_F"
+  }
+  ,
+  {
+    field_id = LAG0_VC_DB,
+    field_name = "LAG0_VC_DB_F"
+  }
+  ,
+  {
+    field_id = LAG0_VX_DB,
+    field_name = "LAG0_VX_DB_F"
+  }
+  ,
+  {
+    field_id = LAG0_HCVX_DB,
+    field_name = "LAG0_HCVX_DB_F"
+  }
+  ,
+  {
+    field_id = LAG0_HCVX_PHASE,
+    field_name = "LAG0_HCVX_PHASE_F"
+  }
+  ,
+  {
+    field_id = LAG0_VCHX_DB,
+    field_name = "LAG0_VCHX_DB_F"
+  }
+  ,
+  {
+    field_id = LAG0_VCHX_PHASE,
+    field_name = "LAG0_VCHX_PHASE_F"
+  }
+  ,
+  {
+    field_id = LAG1_HCVC_DB,
+    field_name = "LAG1_HCVC_DB_F"
+  }
+  ,
+  {
+    field_id = LAG1_HCVC_PHASE,
+    field_name = "LAG1_HCVC_PHASE_F"
+  }
+  ,
+  {
+    field_id = LAG1_VCHC_DB,
+    field_name = "LAG1_VCHC_DB_F"
+  }
+  ,
+  {
+    field_id = LAG1_VCHC_PHASE,
+    field_name = "LAG1_VCHC_PHASE_F"
+  }
+  ,
+  {
+    field_id = LAG2_HC_DB,
+    field_name = "LAG2_HC_DB_F"
+  }
+  ,
+  {
+    field_id = LAG2_HC_PHASE,
+    field_name = "LAG2_HC_PHASE_F"
+  }
+  ,
+  {
+    field_id = LAG2_VC_DB,
+    field_name = "LAG2_VC_DB_F"
+  }
+  ,
+  {
+    field_id = LAG2_VC_PHASE,
+    field_name = "LAG2_VC_PHASE_F"
+  }
+};
+
+//======================================================================
+//
+// NOISE DETECTION.
+//
+// Noise detection will be performed for one or both of 2 reasons: (a) 
+//   if you set compute_vol_noise_stats to TRUE; (b) if you set 
+//   censoring_mode is set to CENSORING_BY_NOISE_FLAG.
+//
+//======================================================================
+ 
+///////////// compute_vol_noise_stats /////////////////
+//
+// Option to compute the noise statistics per volume.
+//
+// If true, we will compute the noise stats for each volume.
+//
+//
+// Type: boolean
+//
+
+compute_vol_noise_stats = TRUE;
+
+///////////// vol_noise_stats_min_elev_deg ////////////
+//
+// Minimum elevation for computing noise stats on the volume (deg).
+//
+// Only rays with elevation above this will be included in the noise 
+//   stats.
+//
+//
+// Type: double
+//
+
+vol_noise_stats_min_elev_deg = 4;
+
+///////////// vol_noise_stats_max_elev_deg ////////////
+//
+// Maximum elevation for computing noise stats on the volume (deg).
+//
+// Only rays with elevation less than this will be included in the noise 
+//   stats.
+//
+//
+// Type: double
+//
+
+vol_noise_stats_max_elev_deg = 90;
+
+///////////// noise_ngates_kernel /////////////////////
+//
+// Number of gates over which the noise detection feature fields are 
+//   computed.
+//
+// To identify noise at a gate, we accumulate the phase change in range 
+//   for the entire ray. We then assume that the phase change will be 
+//   linear in a local sense, i.e. within some region around each gate. 
+//   This parameter specifies the length of the assumed linear region. The 
+//   phase change error is computed as the mean absolute error between the 
+//   actual accumulated phase change and the linear fit to the phase 
+//   change over the local region. NOTE - this number should be odd.
+//
+//
+// Type: int
+//
+
+noise_ngates_kernel = 9;
+
+///////////// noise_min_ngates_for_ray_median /////////
+//
+// Min number of gates for computing median noise on a ray.
+//
+// In order to compute median noise for a ray, we require noise to be 
+//   detected at at least this number of gates.
+//
+//
+// Type: int
+//
+
+noise_min_ngates_for_ray_median = 100;
+
+///////////// noise_method ////////////////////////////
+//
+// Method for computing mean noise.
+//
+// 	RAY_BY_RAY: compute noise for each ray individually. 
+//   	RUNNING_MEDIAN: store noise values in an array, and compute the mean 
+//   noise when we have enough data. The noise varies more smoothly than 
+//   in the RAY_BY_RAY method.
+//
+//
+// Type: enum
+// Options:
+//     NOISE_RAY_BY_RAY
+//     NOISE_RUNNING_MEDIAN
+//
+
+noise_method = NOISE_RUNNING_MEDIAN;
+
+///////////// noise_ngates_for_running_median /////////
+//
+// Number of gates used to compute noise running mean.
+//
+// When noise is located at a gate, the power values are stored in 
+//   arrays. When we have accumulated enough gates, the mean is computed.
+//
+//
+// Type: int
+//
+
+noise_ngates_for_running_median = 2000;
+
+//======================================================================
+//
+// INTEREST MAPS and WEIGHTS for NOISE LOCATION.
+//
+// Each map should hold at least 2 points. The points should be 
+//   increasing in value, i.e. the value should increase for each 
+//   subsequent point. The various interest values are combined using the 
+//   specified weights in a weighted mean to produce the final interest 
+//   value.
+//
+//======================================================================
+ 
+///////////// phase_change_error_for_noise_interest_map 
+//
+// Interest mapping for phase change for noise.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+phase_change_error_for_noise_interest_map = {
+  {
+    value = 40,
+    interest = 0.001
+  }
+  ,
+  {
+    value = 50,
+    interest = 1
+  }
+};
+
+///////////// phase_change_error_for_noise_interest_weight 
+//
+// Weight for interest for phase change error - for noise.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+phase_change_error_for_noise_interest_weight = 1;
+
+///////////// dbm_sdev_for_noise_interest_map /////////
+//
+// Interest mapping for sdev of dbm for noise.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+dbm_sdev_for_noise_interest_map = {
+  {
+    value = 0.65,
+    interest = 1
+  }
+  ,
+  {
+    value = 0.75,
+    interest = 0.001
+  }
+};
+
+///////////// dbm_sdev_for_noise_interest_weight //////
+//
+// Weight for interest for sdev of dbm - for noise.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+dbm_sdev_for_noise_interest_weight = 1;
+
+///////////// ncp_mean_for_noise_interest_map /////////
+//
+// Interest mapping for mean of ncp for noise.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+ncp_mean_for_noise_interest_map = {
+  {
+    value = 0.1,
+    interest = 1
+  }
+  ,
+  {
+    value = 0.15,
+    interest = 0.001
+  }
+};
+
+///////////// ncp_mean_for_noise_interest_weight //////
+//
+// Weight for interest for sdev of dbm - for noise.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+ncp_mean_for_noise_interest_weight = 1;
+
+///////////// interest_threshold_for_noise ////////////
+//
+// Threshold interest value for identifying noise.
+//
+// If the fuzzy interest value exceeds this threshold, noise is assumed 
+//   to exist at that gate.
+//
+//
+// Type: double
+//
+
+interest_threshold_for_noise = 0.65;
+
+///////////// phase_change_error_for_signal_interest_map 
+//
+// Interest mapping for phase change for signal.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+phase_change_error_for_signal_interest_map = {
+  {
+    value = 10,
+    interest = 0.001
+  }
+  ,
+  {
+    value = 20,
+    interest = 1
+  }
+};
+
+///////////// phase_change_error_for_signal_interest_weight 
+//
+// Weight for interest for phase change error - for signal.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+phase_change_error_for_signal_interest_weight = 1;
+
+///////////// dbm_sdev_for_signal_interest_map ////////
+//
+// Interest mapping for sdev of dbm for signal.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double value;
+//      double interest;
+//   }
+//
+// 1D array - variable length.
+//
+
+dbm_sdev_for_signal_interest_map = {
+  {
+    value = 0.75,
+    interest = 1
+  }
+  ,
+  {
+    value = 0.85,
+    interest = 0.001
+  }
+};
+
+///////////// dbm_sdev_for_signal_interest_weight /////
+//
+// Weight for interest for sdev of dbm - for signal.
+//
+// The relative weighting applied when computing the fuzzy sum.
+//
+//
+// Type: double
+//
+
+dbm_sdev_for_signal_interest_weight = 1;
+
+///////////// interest_threshold_for_signal ///////////
+//
+// Threshold interest value for identifying signal.
+//
+// If the fuzzy interest value exceeds this threshold, signal is assumed 
+//   to exist at that gate.
+//
+//
+// Type: double
+//
+
+interest_threshold_for_signal = 0.51;
+
+//======================================================================
+//
+// MOMENTS COMPUTATIONS.
+//
+//======================================================================
+ 
+///////////// xmit_rcv_mode ///////////////////////////
+//
+// Transmit/receive mode.
+//
+// This governs the type of moments computations to be applied.
+// 	SINGLE_POL:
+// 		Single polarization
+// 	DUAL_POL_ALT_HV_CO_ONLY:
+// 		Dual pol, alternating transmission
+// 		          copolar receiver only
+// 	DUAL_POL_ALT_HV_CO_CROSS:
+// 		Dual pol, alternating transmission
+// 		          co-polar and cross-polar receivers
+// 	DUAL_POL_SIM_HV:
+// 		Dual pol, simultaneous transmit/receive
+// 	DUAL_POL_H_ONLY:
+// 		Dual pol, H transmission
+// 		          simultaneous H and V receive
+// 	DUAL_POL_V_ONLY:
+// 		Dual pol, V transmission
+// 		          simultaneous H and V receive.
+//
+//
+// Type: enum
+// Options:
+//     SINGLE_POL
+//     DUAL_POL_ALT_HV_CO_ONLY
+//     DUAL_POL_ALT_HV_CO_CROSS
+//     DUAL_POL_SIM_HV
+//     DUAL_POL_H_ONLY
+//     DUAL_POL_V_ONLY
+//
+
+xmit_rcv_mode = DUAL_POL_ALT_HV_CO_CROSS;
+
+///////////// use_estimated_noise_for_noise_subtraction 
+//
+// Option to correct power for estimated noise.
+//
+// We estimate the noise by identifying regions with noise and computing 
+//   the mean power - see above. If this parameter is set to TRUE, we use 
+//   the estimated noise instead of teh calibrated noise to compute the 
+//   noise-subtracted powers.
+//
+//
+// Type: boolean
+//
+
+use_estimated_noise_for_noise_subtraction = FALSE;
+
+///////////// correct_for_system_phidp ////////////////
+//
+// Option to correct for system phidp.
+//
+// If true, the H and V correlation phases will be corrected by 
+//   adding/subtracting the system phidp value as appropriate. This avoids 
+//   premature wrapping of the phased from which phidp and velocity are 
+//   computed. If false, this correction will not be applied. To find the 
+//   system phidp, set this to false and compute phidp for 
+//   vertically-pointing data.
+//
+//
+// Type: boolean
+//
+
+correct_for_system_phidp = TRUE;
+
+///////////// change_velocity_sign ////////////////////
+//
+// Option to change sign on velocity field.
+//
+// Set to true to change the sign of the computed radial velocity field.
+//
+//
+// Type: boolean
+//
+
+change_velocity_sign = FALSE;
+
+///////////// use_hybrid_for_width ////////////////////
+//
+// Option to use the hybrid estimator for spectrum width, if applicable.
+//
+// In some modes, we can compute the spectrum width with the NCAR hybrid 
+//   spectrum width estimator. If this is set, the hybrid width will be 
+//   used for all modes except dual pol alternating mode.
+//
+//
+// Type: boolean
+//
+
+use_hybrid_for_width = TRUE;
+
+///////////// min_snr_db_for_zdr //////////////////////
+//
+// Min SNR for computing ZDR (dB).
+//
+// If the SNR is below this threshold, ZDR will be set to missing.
+//
+//
+// Type: double
+//
+
+min_snr_db_for_zdr = -30;
+
+///////////// min_snr_db_for_ldr //////////////////////
+//
+// Min SNR for computing LDR (dB).
+//
+// If the SNR is below this threshold, LDR will be set to missing.
+//
+//
+// Type: double
+//
+
+min_snr_db_for_ldr = -30;
+
+//======================================================================
+//
+// RADAR CALIBRATION XML FILES.
+//
+//======================================================================
+ 
+///////////// cal_files ///////////////////////////////
+//
+// Specify the calibration file for each pulse width.
+//
+// First, the program will determine which of the specified pulse widths 
+//   best matches the pulse width in the data. The closest match will be 
+//   used to determine the cal file.
+//
+// NOTE - the pulse width is specified in micro-seconds.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double pulse_width_us;
+//      string cal_file_path;
+//   }
+//
+// 1D array - variable length.
+//
+
+cal_files = {
+  {
+    pulse_width_us = 1,
+    cal_file_path = "/scr/hail2/rsfdata/pecan/cal/sband_1.0us.alt/TsCalAuto_20150715_175201.xml"
+  }
+  ,
+  {
+    pulse_width_us = 1.5,
+    cal_file_path = "/scr/hail2/rsfdata/pecan/cal/sband_1.5us.alt/TsCalAuto_20150530_153543.xml"
+  }
+};
+
+///////////// override_cal_system_phidp ///////////////
+//
+// Option to override the system PHIDP in the calibration data.
+//
+// If true, the parameter 'system_phidp_deg' will override the system 
+//   phidp in the calibration data.
+//
+//
+// Type: boolean
+//
+
+override_cal_system_phidp = TRUE;
+
+///////////// system_phidp_deg ////////////////////////
+//
+// System PHIDP to be applied to all calibrations (deg).
+//
+// See 'override_cal_system_phidp'.
+//
+//
+// Type: double
+//
+
+system_phidp_deg = 90;
+
+///////////// change_phidp_sign ///////////////////////
+//
+// Option to change the sign of PHIDP.
+//
+// This should not be necessary - using for testing.
+//
+//
+// Type: boolean
+//
+
+change_phidp_sign = FALSE;
+
+///////////// override_cal_dbz_correction /////////////
+//
+// Option to override the DBZ correction in the calibration data.
+//
+// If true, we will override the DBZ correction in the calibration 
+//   files. See 'dbz_correction'.
+//
+//
+// Type: boolean
+//
+
+override_cal_dbz_correction = TRUE;
+
+///////////// dbz_correction //////////////////////////
+//
+// DBZ correction to be applied to all calibrations (dB).
+//
+// See 'override_cal_dbz_correction'.
+//
+//
+// Type: double
+//
+
+dbz_correction = -0.31;
+
+///////////// override_cal_ldr_correction /////////////
+//
+// Option to override the LDR corrections in the calibration data.
+//
+// If true, the parameters 'ldrh_correction_db' and 'ldrv_correction_db' 
+//   will override the ldr corrections in the calibration data.
+//
+//
+// Type: boolean
+//
+
+override_cal_ldr_correction = FALSE;
+
+///////////// ldr_correction_db_h /////////////////////
+//
+// LDRH correction to be applied to all calibrations (dB).
+//
+// See 'override_cal_ldr_corrections'.
+//
+//
+// Type: double
+//
+
+ldr_correction_db_h = 0;
+
+///////////// ldr_correction_db_v /////////////////////
+//
+// LDRV correction to be applied to all calibrations (dB).
+//
+// See 'override_cal_ldr_corrections'.
+//
+//
+// Type: double
+//
+
+ldr_correction_db_v = 0;
+
+//======================================================================
+//
+// CORRECTION TO ZDR.
+//
+// This can be eith a constant correction, or a linear-regression 
+//   correction based on temperature.
+//
+//======================================================================
+ 
+///////////// override_cal_zdr_correction /////////////
+//
+// Option to override the ZDR correction in the calibration data.
+//
+// If true, we will override the ZDR correction in the parameter file. 
+//   If 'use_temperature_based_zdr_correction' is true, we will read 
+//   temperature from SPDB and compute the correction based on the 
+//   temperatire. If not, the parameter 'zdr_correction_db' will be used.
+//
+//
+// Type: boolean
+//
+
+override_cal_zdr_correction = TRUE;
+
+///////////// zdr_correction_db ///////////////////////
+//
+// ZDR correction to be applied to all calibrations (dB).
+//
+// See 'override_cal_zdr_correction'. Only applies if 
+//   'apply_temperature_based_zdr_correction' is false.
+//
+//
+// Type: double
+//
+
+zdr_correction_db = 0;
+
+///////////// use_temperature_based_zdr_correction ////
+//
+// Option to determine the ZDR correction using temperature.
+//
+// If true, we read the temperature from SPDB, and apply a zdr 
+//   correction computed from a linear fit between temperature and zdr 
+//   correction.
+//
+//
+// Type: boolean
+//
+
+use_temperature_based_zdr_correction = TRUE;
+
+///////////// site_temp_spdb_url //////////////////////
+//
+// URL for site temperatures from SPDB.
+//
+//
+// Type: string
+//
+
+site_temp_spdb_url = "spdbp:://hail:0:pecan/spdb/spol/temp";
+
+///////////// site_temp_station_name //////////////////
+//
+// Station name for site temperature.
+//
+//
+// Type: string
+//
+
+site_temp_station_name = "SPOL";
+
+///////////// site_temp_search_margin_secs ////////////
+//
+// Search margin when finding site temp data (secs).
+//
+// We search for the temperature closest in time to the radar volume. 
+//   This is the search margin on either side of the volume time.
+//
+//
+// Type: int
+//
+
+site_temp_search_margin_secs = 3600;
+
+///////////// temp_based_zdr_correction_slope /////////
+//
+// Slope of regression fit between ZDR and temperature (db/C).
+//
+// The temperature-based ZDR correction is based on a linear regression 
+//   analysis between ZDR and temperature. This is the slope of the 
+//   regression line fit. The estimated ZDR correction is computed as 
+//   (temp * slope + intercept).
+//
+//
+// Type: double
+//
+
+temp_based_zdr_correction_slope =  -0.00975;
+
+///////////// temp_based_zdr_correction_intercept /////
+//
+// Intercept of regression fit between ZDR and temperature (C).
+//
+// The temperature-based ZDR correction is based on a linear regression 
+//   analysis between ZDR and temperature. This is the intercept of the 
+//   regression line fit. The estimated ZDR correction is computed as 
+//   (temp * slope + intercept).
+//
+//
+// Type: double
+//
+
+temp_based_zdr_correction_intercept = 0.242;
+
+//======================================================================
+//
+// ADJUSTING CALIBRATION FOR MEASURED TRANSMIT POWER.
+//
+// If the measured transmitter power is available, we can adjust the 
+//   calibration to use that power instead of the nominal values available 
+//   at calibration time.
+//
+//======================================================================
+ 
+///////////// adjust_calibration_for_measured_xmit_power 
+//
+// Option to adjust the calibration based on measured transmitter power.
+//
+// If true, and the measured transmitter power is available, the 
+//   calibration object will be updated to reflect the measured transmit 
+//   power as opposed to the power used at calibration time.
+//
+//
+// Type: boolean
+//
+
+adjust_calibration_for_measured_xmit_power = FALSE;
+
+///////////// min_valid_measured_xmit_power_dbm ///////
+//
+// Min valid value for measured xmit power (dBm).
+//
+// Sometimes we get spurious values for measured xmit power. This limit 
+//   allows us to ignore bad values.
+//
+//
+// Type: double
+//
+
+min_valid_measured_xmit_power_dbm = 85;
+
+///////////// max_valid_measured_xmit_power_dbm ///////
+//
+// Max valid value for measured xmit power (dBm).
+//
+// Sometimes we get spurious values for measured xmit power. This limit 
+//   allows us to ignore bad values.
+//
+//
+// Type: double
+//
+
+max_valid_measured_xmit_power_dbm = 90;
+
+///////////// measured_xmit_power_correction_db ///////
+//
+// Correction to measured xmit power (dB).
+//
+// We correct the measured powers by this amount before using it.
+//
+//
+// Type: double
+//
+
+measured_xmit_power_correction_db = 0.0;
+
+///////////// swap_measured_xmit_power_channels ///////
+//
+// Option to swap the H and V measurements for transmit power.
+//
+// Set this to true if the power measuements were made on the incorrect 
+//   channels.
+//
+//
+// Type: boolean
+//
+
+swap_measured_xmit_power_channels = FALSE;
+
+//======================================================================
+//
+// ATMOSPHERIC ATTENUATION CORRECTION METHOD.
+//
+//======================================================================
+ 
+///////////// atmos_atten_method //////////////////////
+//
+// Method for computing atmospheric attenuation.
+//
+// This is applied to the DBZ fields only.
+// 	ATMOS_ATTEN_NONE:
+// 		No correction is applied
+// 	ATMOS_ATTEN_CONSTANT:
+// 		A constant correction in dB/km is applied
+// 		See atmos_atten_db_per_km
+// 	ATMOS_ATTEN_CRPL:
+// 		Uses the method based on the Central Radio Propagation Laboratory
+// 		measurements.
+// 		See Doviak and Zrnic, page 44.
+//
+//
+// Type: enum
+// Options:
+//     ATMOS_ATTEN_NONE
+//     ATMOS_ATTEN_CONSTANT
+//     ATMOS_ATTEN_CRPL
+//
+
+atmos_atten_method = ATMOS_ATTEN_CRPL;
+
+///////////// atmos_atten_db_per_km ///////////////////
+//
+// Constant atmospheric attenuation (dB/km).
+//
+// DBZ is corrected for this.
+//
+//
+// Type: double
+//
+
+atmos_atten_db_per_km = 0.012;
+
+//======================================================================
+//
+// PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR.
+//
+//======================================================================
+ 
+///////////// apply_precip_attenuation_correction /////
+//
+// Option to apply precip attenuation correction for DBZ and ZDR.
+//
+// The following extra fields will be computed:
+// 	DBZ_ATTEN_CORRECTION - correction in dB
+// 	ZDR_ATTEN_CORRECTION - correction in dB
+// 	DBZ_ATTEN_CORRECTED - DBZHC corrected
+// 	ZDR_ATTEN_CORRECTED - ZDR corrected.
+//
+//
+// Type: boolean
+//
+
+apply_precip_attenuation_correction = FALSE;
+
+///////////// specify_coefficients_for_attenuation_correction 
+//
+// Option to specify the coefficients and exponents - see below.
+//
+// If false, the default coefficients will be determined for the radar 
+//   wavelength.
+//
+//
+// Type: boolean
+//
+
+specify_coefficients_for_attenuation_correction = FALSE;
+
+///////////// dbz_attenuation_coefficient /////////////
+//
+// Coefficient for computing DBZ attenuation correction.
+//
+// See Bringi and Chandrasekar, Table 7.1, page 494.
+//
+//
+// Type: double
+//
+
+dbz_attenuation_coefficient = 0.017;
+
+///////////// dbz_attenuation_exponent ////////////////
+//
+// Exponent for computing DBZ attenuation correction.
+//
+// See Bringi and Chandrasekar, Table 7.1, page 494.
+//
+//
+// Type: double
+//
+
+dbz_attenuation_exponent = 0.84;
+
+///////////// zdr_attenuation_coefficient /////////////
+//
+// Coefficient for computing ZDR attenuation correction.
+//
+// See Bringi and Chandrasekar, Table 7.1, page 494.
+//
+//
+// Type: double
+//
+
+zdr_attenuation_coefficient = 0.017;
+
+///////////// zdr_attenuation_exponent ////////////////
+//
+// Exponent for computing ZDR attenuation correction.
+//
+// See Bringi and Chandrasekar, Table 7.1, page 494.
+//
+//
+// Type: double
+//
+
+zdr_attenuation_exponent = 0.84;
+
+//======================================================================
+//
+// COMPUTING KDP.
+//
+// Parameters for computing KDP. KDP will be computed if KDP_available 
+//   is FALSE.
+//
+//======================================================================
+ 
+///////////// KDP_fir_filter_len //////////////////////
+//
+// Filter length for the FIR filter for PHIDP (gates).
+//
+// When computing KDP, an FIR filter is first applied to PHIDP to smooth 
+//   it. This is the length of that filter, in gates.
+//
+//
+// Type: enum
+// Options:
+//     FIR_LEN_125
+//     FIR_LEN_60
+//     FIR_LEN_40
+//     FIR_LEN_30
+//     FIR_LEN_20
+//     FIR_LEN_10
+//
+
+KDP_fir_filter_len = FIR_LEN_10;
+
+///////////// KDP_n_filt_iterations_unfolded //////////
+//
+// Sets the number of iterations for the initial FIR filter for unfolded 
+//   PHIDP.
+//
+// After unfolding PHIDP, the FIR filter is applied to the unfolded 
+//   phidp, a number of times, to smooth it. The effect of the filter is a 
+//   combination of the filter length and the number of iterations.
+//
+//
+// Type: int
+//
+
+KDP_n_filt_iterations_unfolded = 2;
+
+///////////// KDP_n_filt_iterations_conditioned ///////
+//
+// Sets the number of iterations for the final FIR filter for 
+//   conditioned PHIDP.
+//
+// In order to identify phase shift on backscatter (PSOB), we condition 
+//   the PHIDP to keep it generally increasing with range. The FIR filter 
+//   is applied to the conditioned phidp a number of times, to smooth it. 
+//   The effect of the filter is a combination of the filter length and 
+//   the number of iterations.
+//
+//
+// Type: int
+//
+
+KDP_n_filt_iterations_conditioned = 3;
+
+///////////// KDP_use_iterative_filtering /////////////
+//
+// Perform iterative filtering to locate backscatter phase shift.
+//
+//
+// Type: boolean
+//
+
+KDP_use_iterative_filtering = FALSE;
+
+///////////// KDP_phidp_difference_threshold //////////
+//
+// Difference threshold for the iterative filtering method.
+//
+// The FIR filter is applied successively, 
+//   KDP_n_filt_iterations_conditioned times. After each iteration the 
+//   result is checked against the original. If the difference is less 
+//   than this parameter, the original value at that gate is retained. If 
+//   the difference exceeds this parameter, the new filtered value is 
+//   retained.
+//
+//
+// Type: double
+//
+
+KDP_phidp_difference_threshold = 4;
+
+///////////// KDP_ngates_for_stats ////////////////////
+//
+// Number of gates over which the phidp mean, sdev and jitter are 
+//   computed.
+//
+// The mean, sdev and jitter of phidp are computed over a consecutive 
+//   number of gates in range, centered on the current gate of interest. 
+//   This parameter is the number of gates over which these statistics are 
+//   computed.
+//
+//
+// Type: int
+//
+
+KDP_ngates_for_stats = 9;
+
+///////////// KDP_phidp_sdev_max //////////////////////
+//
+// Sets the threshold for the standard deviation of phidp in range.
+//
+// The sdev of phidp is a good test for valid phidp. The sdev is 
+//   computed in the circle, so that it takes account of folding if 
+//   present. If the sdev is less than this value, it is assumed we are in 
+//   weather. Applies to computation of KDP only.
+//
+//
+// Type: double
+//
+
+KDP_phidp_sdev_max = 25;
+
+///////////// KDP_phidp_jitter_max ////////////////////
+//
+// Sets the threshold for the jitter of phidp in range.
+//
+// The jitter of phidp is defined as the mean absolute change in angle 
+//   between successive phidp measurements in range. It is computed on the 
+//   circle to take account of folding. If the jitter is less than this 
+//   value, it is assumed we are in weather. Applies to computation of KDP 
+//   only.
+//
+//
+// Type: double
+//
+
+KDP_phidp_jitter_max = 25;
+
+///////////// KDP_min_valid_abs_kdp ///////////////////
+//
+// Sets the min valid KDP value.
+//
+// Values less than this are set to 0.
+//
+//
+// Type: double
+//
+
+KDP_min_valid_abs_kdp = 0.01;
+
+///////////// KDP_check_snr ///////////////////////////
+//
+// Check the SNR.
+//
+//
+// Type: boolean
+//
+
+KDP_check_snr = TRUE;
+
+///////////// KDP_snr_threshold ///////////////////////
+//
+// Sets the threshold for checking SNR (dB).
+//
+// If the SNR drops below this value, KDP will not be computed at this 
+//   gate.
+//
+//
+// Type: double
+//
+
+KDP_snr_threshold = 0;
+
+///////////// KDP_check_rhohv /////////////////////////
+//
+// Check the RHOHV.
+//
+//
+// Type: boolean
+//
+
+KDP_check_rhohv = TRUE;
+
+///////////// KDP_rhohv_threshold /////////////////////
+//
+// Sets the threshold for checking RHOHV.
+//
+// If the RHOHV drops below this value, KDP will not be computed at this 
+//   gate.
+//
+//
+// Type: double
+//
+
+KDP_rhohv_threshold = 0.85;
+
+///////////// KDP_check_zdr_sdev //////////////////////
+//
+// Check the standard deviation of ZDR in range?.
+//
+//
+// Type: boolean
+//
+
+KDP_check_zdr_sdev = TRUE;
+
+///////////// KDP_zdr_sdev_max ////////////////////////
+//
+// Sets the threshold for the standard deviation of zdr in range.
+//
+// The sdev of zdr is a good test for clutter. If the sdev is less than 
+//   this value, it is assumed we are in weather. Applies to computation 
+//   of KDP only.
+//
+//
+// Type: double
+//
+
+KDP_zdr_sdev_max = 2.5;
+
+///////////// KDP_debug ///////////////////////////////
+//
+// Option to print debug messages in KDP computation.
+//
+//
+// Type: boolean
+//
+
+KDP_debug = FALSE;
+
+///////////// KDP_write_ray_files /////////////////////
+//
+// Option to write ray files to debug KDP computation.
+//
+//
+// Type: boolean
+//
+
+KDP_write_ray_files = FALSE;
+
+///////////// KDP_ray_files_dir ///////////////////////
+//
+// Directory for KDP ray files.
+//
+//
+// Type: string
+//
+
+KDP_ray_files_dir = "/tmp/kdp_ray_files";
+
+//======================================================================
+//
+// LOADING UP TEST FIELDS - for debugging.
+//
+//======================================================================
+ 
+///////////// load_alt_vel_alt_test_fields ////////////
+//
+// Option to load up test fields when computing alternative vel_alt for 
+//   alternating mode.
+//
+// If true, the following will be loaded:
+// 	test2: meanConfidence for gap run.
+// 	test3: min velocity for a gap run.
+// 	test4: max velocity for a gap run.
+// 	test5: corrected velocity for run with incorrect unfold.
+//
+//
+// Type: boolean
+//
+
+load_alt_vel_alt_test_fields = FALSE;
+
+//======================================================================
+//
+// SPECIFYING FIELD NAMES AND OUTPUT ENCODING.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Indicate which fields should be written to the output file.
+//
+// Choose the ID from the list. The name and units can be set however 
+//   the user prefers.
+//
+// The output_encoding and output_scaling apply to CfRadial output only. 
+//   If the output_scaling is DYNAMIC then the scale and offset are 
+//   computed using the dynamic range of the data. If the output_scaling 
+//   is SPECIFIED, then the specified scale and offset are used.
+//
+//
+// Type: struct
+//   typedef struct {
+//      output_field_id_t id;
+//        Options:
+//          DBZ
+//          DBZHC
+//          DBZVC
+//          DBZHX
+//          DBZVX
+//          DBZ_NO_ATMOS_ATTEN
+//          VEL
+//          VEL_ALT
+//          VEL_HV
+//          VEL_ALT_FOLD_INTERVAL
+//          VEL_ALT_FOLD_CONFIDENCE
+//          VEL_DIFF
+//          VEL_UNFOLD_INTERVAL
+//          VEL_H_ONLY
+//          VEL_V_ONLY
+//          WIDTH
+//          WIDTH_H_ONLY
+//          WIDTH_V_ONLY
+//          NCP
+//          NCP_H_ONLY
+//          NCP_V_ONLY
+//          NCP_H_MINUS_V
+//          ZDRM
+//          ZDR
+//          ZDR_BIAS
+//          LDRHM
+//          LDRH
+//          LDRVM
+//          LDRV
+//          LDR_DIFF
+//          LDR_MEAN
+//          RHOHV
+//          RHOHV_NNC
+//          RHO_HCVX
+//          RHO_VCHX
+//          RHO_VXHX
+//          PHIDP0
+//          PHIDP
+//          PHIDP_FILT
+//          PHIDP_COND
+//          KDP
+//          PSOB
+//          SNR
+//          SNRHC
+//          SNRHX
+//          SNRVC
+//          SNRVX
+//          DBM
+//          DBMHC
+//          DBMHX
+//          DBMVC
+//          DBMVX
+//          PHASE_FOR_NOISE
+//          ACCUM_PHASE_CHANGE
+//          PHASE_CHANGE_ERROR
+//          DBM_SDEV
+//          NCP_MEAN
+//          NOISE_FLAG
+//          SIGNAL_FLAG
+//          NOISE_BIAS_DB_HC
+//          NOISE_BIAS_DB_HX
+//          NOISE_BIAS_DB_VC
+//          NOISE_BIAS_DB_VX
+//          DBZ_ATTEN_CORRECTION
+//          ZDR_ATTEN_CORRECTION
+//          DBZ_ATTEN_CORRECTED
+//          ZDR_ATTEN_CORRECTED
+//          DBZ_FOR_KDP
+//          ZDR_FOR_KDP
+//          RHOHV_FOR_KDP
+//          SNR_FOR_KDP
+//          PHIDP_SDEV_FOR_KDP
+//          PHIDP_JITTER_FOR_KDP
+//          ZDR_SDEV_FOR_KDP
+//          TEST
+//          TEST2
+//          TEST3
+//          TEST4
+//          TEST5
+//      string name;
+//      string long_name;
+//      string standard_name;
+//      string units;
+//      output_encoding_t encoding;
+//        Options:
+//          OUTPUT_ENCODING_FL32
+//          OUTPUT_ENCODING_INT32
+//          OUTPUT_ENCODING_INT16
+//          OUTPUT_ENCODING_INT08
+//      output_scaling_t scaling;
+//        Options:
+//          OUTPUT_SCALING_DYNAMIC
+//          OUTPUT_SCALING_SPECIFIED
+//      double scale;
+//      double offset;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    id = DBZ,
+    name = "DBZ_F",
+    long_name = "radar_reflectivity",
+    standard_name = "equivalent_reflectivity_factor",
+    units = "dBZ",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = DBZ_NO_ATMOS_ATTEN,
+    name = "DBZ_NAA_F",
+    long_name = "DBZ_with_no_atmospheric_attenuation_correction",
+    standard_name = "equivalent_reflectivity_factor",
+    units = "dBZ",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = VEL_ALT,
+    name = "VEL_F",
+    long_name = "radial_velocity_unfolded_using_vel_hv",
+    standard_name = "radial_velocity_away_from_instrument",
+    units = "m/s",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = VEL_HV,
+    name = "VEL_HV_F",
+    long_name = "radial_velocity_hv_separately",
+    standard_name = "radial_velocity_away_from_instrument",
+    units = "m/s",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = WIDTH,
+    name = "WIDTH_F",
+    long_name = "doppler_spectrum_width",
+    standard_name = "doppler_spectrum_width",
+    units = "m/s",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = NCP,
+    name = "NCP_F",
+    long_name = "normalized_coherent_power",
+    standard_name = "normalized_coherent_power",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = ZDRM,
+    name = "ZDRM_F",
+    long_name = "measured_log_differential_reflectivity",
+    standard_name = "log_differential_reflectivity",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = ZDR,
+    name = "ZDR_F",
+    long_name = "calibrated_log_differential_reflectivity",
+    standard_name = "log_differential_reflectivity",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = LDRH,
+    name = "LDRH_F",
+    long_name = "linear_depolarization_ratio_h_channel",
+    standard_name = "linear_depolarization_ratio_h",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = LDRV,
+    name = "LDRV_F",
+    long_name = "linear_depolarization_ratio_v_channel",
+    standard_name = "linear_depolarization_ratio_v",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = RHOHV,
+    name = "RHOHV_F",
+    long_name = "cross_correlation_ratio",
+    standard_name = "cross_correlation_ratio_hv",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = RHOHV_NNC,
+    name = "RHOHV_NNC_F",
+    long_name = "cross_correlation_ratio_not_noise_corrected",
+    standard_name = "cross_correlation_ratio_hv",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = RHO_HCVX,
+    name = "RHO_HC_VX_F",
+    long_name = "cross_correlation_ratio_hc_to_vx",
+    standard_name = "cross_correlation_ratio_hcvx",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = RHO_VCHX,
+    name = "RHO_VC_HX_F",
+    long_name = "cross_correlation_ratio_vc_to_hx",
+    standard_name = "cross_correlation_ratio_vchx",
+    units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = PHIDP,
+    name = "PHIDP_F",
+    long_name = "differential_phase",
+    standard_name = "differential_phase_hv",
+    units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = KDP,
+    name = "KDP_F",
+    long_name = "specific_differential_phase",
+    standard_name = "specific_differential_phase_hv",
+    units = "deg/km",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.001,
+    offset = 0
+  }
+  ,
+  {
+    id = SNRHC,
+    name = "SNRHC_F",
+    long_name = "signal_to_noise_ratio_db_h_copol_channel",
+    standard_name = "signal_to_noise_ratio_hc",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = SNRHX,
+    name = "SNRHX_F",
+    long_name = "signal_to_noise_ratio_db_h_crosspol_channel",
+    standard_name = "signal_to_noise_ratio_hx",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = SNRVC,
+    name = "SNRVC_F",
+    long_name = "signal_to_noise_ratio_db_v_copol_channel",
+    standard_name = "signal_to_noise_ratio_vc",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = SNRVX,
+    name = "SNRVX_F",
+    long_name = "signal_to_noise_ratio_db_v_crosspol_channel",
+    standard_name = "signal_to_noise_ratio_vx",
+    units = "dB",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = DBMHC,
+    name = "DBMHC_F",
+    long_name = "power_in_dbm_h_copol_channel",
+    standard_name = "log_power_hc",
+    units = "dBm",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = DBMHX,
+    name = "DBMHX_F",
+    long_name = "power_in_dbm_h_crosspol_channel",
+    standard_name = "log_power_hx",
+    units = "dBm",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = DBMVC,
+    name = "DBMVC_F",
+    long_name = "power_in_dbm_v_copol_channel",
+    standard_name = "log_power_vc",
+    units = "dBm",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+  ,
+  {
+    id = DBMVX,
+    name = "DBMVX_F",
+    long_name = "power_in_dbm_v_crosspol_channel",
+    standard_name = "log_power_vx",
+    units = "dBm",
+    encoding = OUTPUT_ENCODING_INT16,
+    scaling = OUTPUT_SCALING_SPECIFIED,
+    scale = 0.01,
+    offset = 0
+  }
+};
+
+//======================================================================
+//
+// ECHO FIELDS UNCHANGED TO OUTPUT.
+//
+//======================================================================
+ 
+///////////// add_echo_fields_to_output ///////////////
+//
+// Option to echo fields from input to output files.
+//
+// If true, the fields listed in echo_fields will be added to the 
+//   output_fields. This allows you to copy extra fields directly from the 
+//   input to the output.
+//
+//
+// Type: boolean
+//
+
+add_echo_fields_to_output = TRUE;
+
+///////////// echo_fields /////////////////////////////
+//
+// Echo fields.
+//
+// Set the details for the fields you wish to echo from the input to the 
+//   output. The output_field_name is the ndtCDF variable name. Set the 
+//   long name to a more descriptive name. Set the standard name to the CF 
+//   standard name for this field. If the long and standard names are 
+//   empty, the values in the input will be used unchanged. If 
+//   SCALING_SPECIFIED, then the scale and offset is used.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string input_field_name;
+//      string output_field_name;
+//      string long_name;
+//      string standard_name;
+//      string output_units;
+//      output_encoding_t encoding;
+//        Options:
+//          OUTPUT_ENCODING_FL32
+//          OUTPUT_ENCODING_INT32
+//          OUTPUT_ENCODING_INT16
+//          OUTPUT_ENCODING_INT08
+//      output_scaling_t output_scaling;
+//        Options:
+//          OUTPUT_SCALING_DYNAMIC
+//          OUTPUT_SCALING_SPECIFIED
+//      double output_scale;
+//      double output_offset;
+//   }
+//
+// 1D array - variable length.
+//
+
+echo_fields = {
+  {
+    input_field_name = "AIQ",
+    output_field_name = "AIQ",
+    long_name = "mean_phase_from_phasor_sum",
+    standard_name = "mean_phase_from_phasor_sum",
+    output_units = "deg",
+    encoding = OUTPUT_ENCODING_INT16,
+    output_scaling = OUTPUT_SCALING_SPECIFIED,
+    output_scale = 0.001,
+    output_offset = 0
+  }
+  ,
+  {
+    input_field_name = "NIQ",
+    output_field_name = "NIQ",
+    long_name = "log_mean_power_from_phasor_sum",
+    standard_name = "log_mean_power_from_phasor_sum",
+    output_units = "dBm",
+    encoding = OUTPUT_ENCODING_INT16,
+    output_scaling = OUTPUT_SCALING_SPECIFIED,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_field_name = "CPA",
+    output_field_name = "CPA",
+    long_name = "clutter_phase_alignment",
+    standard_name = "clutter_phase_alignment",
+    output_units = "",
+    encoding = OUTPUT_ENCODING_INT16,
+    output_scaling = OUTPUT_SCALING_SPECIFIED,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+};
+
+//======================================================================
+//
+// ADDING MERGED FIELDS FROM A DIFFERENT FILE.
+//
+// This can be useful if, for example, you want to copy across fields 
+//   from the original moments files that are not possible to recompute 
+//   using the covariances.
+//
+//======================================================================
+ 
+///////////// add_merged_fields_to_output /////////////
+//
+// Option to add merged fields from a different file to output.
+//
+// If true, we read the corresponding volume (in time) from a different 
+//   directory, and merge the required fields into the output object. 
+//   Ideally this file will have the same rays as the main input file.
+//
+//
+// Type: boolean
+//
+
+add_merged_fields_to_output = TRUE;
+
+///////////// merge_input_dir /////////////////////////
+//
+// Input directory for files for merged fields.
+//
+// These files should match the main input files in time and scan 
+//   strategy.
+//
+//
+// Type: string
+//
+
+merge_input_dir = "/scr/hail2/rsfdata/pecan/cfradial/spol/moments/sband/sur";
+
+///////////// merge_fields ////////////////////////////
+//
+// Fields to be merged from other file.
+//
+// Most likely the fields to be merged will come from the original 
+//   moments output file. Some of the moments may not be reproducible from 
+//   the covariances, and so it is good to be able to copy these from the 
+//   moments file instead and merge them with the output data. If the 
+//   output_field_name, long_name, standard_name or units are empty, the 
+//   names from the original file will be used.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string input_field_name;
+//      string output_field_name;
+//      string long_name;
+//      string standard_name;
+//      string output_units;
+//      output_encoding_t encoding;
+//        Options:
+//          OUTPUT_ENCODING_FL32
+//          OUTPUT_ENCODING_INT32
+//          OUTPUT_ENCODING_INT16
+//          OUTPUT_ENCODING_INT08
+//   }
+//
+// 1D array - variable length.
+//
+
+merge_fields = {
+  {
+    input_field_name = "DBZ_F",
+    output_field_name = "FIELD_DBZ_F",
+    long_name = "radar_reflectivity",
+    standard_name = "equivalent_reflectivity_factor",
+    output_units = "dBZ",
+    encoding = OUTPUT_ENCODING_INT16
+  }
+  ,
+  {
+    input_field_name = "RHO_VX_HX",
+    output_field_name = "RHO_VX_HX",
+    long_name = "cross_correlation_ratio_vx_to_hx",
+    standard_name = "cross_correlation_ratio_hchx",
+    output_units = "",
+    encoding = OUTPUT_ENCODING_INT16
+  }
+  ,
+  {
+    input_field_name = "CMD",
+    output_field_name = "CMD",
+    long_name = "clutter_mitigation_interest",
+    standard_name = "clutter_mitigation_decision",
+    output_units = "",
+    encoding = OUTPUT_ENCODING_INT16
+  }
+  ,
+  {
+    input_field_name = "CMD_FLAG",
+    output_field_name = "CMD_FLAG",
+    long_name = "clutter_mitigation_interest_flag",
+    standard_name = "clutter_mitigation_decision_flag",
+    output_units = "",
+    encoding = OUTPUT_ENCODING_INT16
+  }
+};
+
+///////////// merge_file_time_tolerance_sec ///////////
+//
+// Time tolerance for finding the merge file (secs).
+//
+// We search merge_input_dir for a file within this tolerance of the 
+//   primary data set.
+//
+//
+// Type: double
+//
+
+merge_file_time_tolerance_sec = 30;
+
+///////////// merge_ray_time_tolerance_sec ////////////
+//
+// Time tolerance for matching rays between the primary and merged data 
+//   sets (secs).
+//
+// We match up rays between the primary and merged volumes, and require 
+//   that the rays must match in time by this tolerance or less.
+//
+//
+// Type: double
+//
+
+merge_ray_time_tolerance_sec = 30;
+
+///////////// merge_ray_elevation_tolerance_deg ///////
+//
+// Elevation tolerance for matching rays between the primary and merged 
+//   data sets (deg).
+//
+// We match up rays between the primary and merged volumes, and require 
+//   that the rays must match in elevation by this tolerance or less.
+//
+//
+// Type: double
+//
+
+merge_ray_elevation_tolerance_deg = 0.25;
+
+///////////// merge_ray_azimuth_tolerance_deg /////////
+//
+// Azimuth tolerance for matching rays between the primary and merged 
+//   data sets (deg).
+//
+// We match up rays between the primary and merged volumes, and require 
+//   that the rays must match in azimuth by this tolerance or less.
+//
+//
+// Type: double
+//
+
+merge_ray_azimuth_tolerance_deg = 0.1;
+
+///////////// merge_ray_check_fixed_angle /////////////
+//
+// Option to use the fixed angle instead of the measured angle when 
+//   computing angular differences.
+//
+// If true, the fixed angle will be used for elevation in PPI mode, and 
+//   azimuth in RHI mode.
+//
+//
+// Type: boolean
+//
+
+merge_ray_check_fixed_angle = TRUE;
+
+//======================================================================
+//
+// CENSORING OUTPUT FIELDS.
+//
+// You have the option of censoring the output data fields - i.e. 
+//   setting the fields to missing values - at gates which meet certain 
+//   criteria. If this is done correctly, it allows you to preserve the 
+//   valid data and discard the noise, thereby improving compression. This 
+//   leads to smaller data files.
+//
+//======================================================================
+ 
+///////////// censoring_mode //////////////////////////
+//
+// Control of the censoring operation.
+//
+// 	CENSORING_NONE: no censoring performed.
+// 	CENSORING_BY_NOISE_FLAG: censor fields for gates with NOISE_FLAG set 
+//   to true.
+// 	CENSORING_BY_SNR_AND_NCP: censoring is performed using thresholds 
+//   applied to SNR and NCP.
+//
+//
+// Type: enum
+// Options:
+//     CENSORING_NONE
+//     CENSORING_BY_NOISE_FLAG
+//     CENSORING_BY_SNR_AND_NCP
+//
+
+censoring_mode = CENSORING_BY_SNR_AND_NCP;
+
+///////////// censoring_snr_threshold /////////////////
+//
+// SNR threshold for censoring (dB).
+//
+// Applies to CENSORING_BY_SNR_AND_NCP mode. Censoring is applied if 
+//   both SNR and NCP are below the specified thresholds.
+//
+//
+// Type: double
+//
+
+censoring_snr_threshold = -3;
+
+///////////// censoring_ncp_threshold /////////////////
+//
+// NCP threshold for censoring.
+//
+// Applies to CENSORING_BY_SNR_AND_NCP mode. Censoring is applied if 
+//   both SNR and NCP are below the specified thresholds.
+//
+//
+// Type: double
+//
+
+censoring_ncp_threshold = 0.1;
+
+///////////// write_censor_flag_to_output /////////////
+//
+// Option to write the censoring flag to the output file.
+//
+// If true, we will write a field called 'CENSOR_FLAG' to the output 
+//   file, to indicate where censoring was performed.
+//
+//
+// Type: boolean
+//
+
+write_censor_flag_to_output = TRUE;
+
+//======================================================================
+//
+// OUTPUT FILE FORMAT.
+//
+//======================================================================
+ 
+///////////// output_format ///////////////////////////
+//
+// Format for the output files.
+//
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_CFRADIAL
+//     OUTPUT_FORMAT_DORADE
+//     OUTPUT_FORMAT_FORAY
+//     OUTPUT_FORMAT_NEXRAD
+//     OUTPUT_FORMAT_UF
+//     OUTPUT_FORMAT_MDV_RADIAL
+//
+
+output_format = OUTPUT_FORMAT_CFRADIAL;
+
+///////////// netcdf_style ////////////////////////////
+//
+// NetCDF style - if output_format is CFRADIAL.
+//
+// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
+//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
+//
+// Type: enum
+// Options:
+//     CLASSIC
+//     NC64BIT
+//     NETCDF4
+//     NETCDF4_CLASSIC
+//
+
+netcdf_style = NETCDF4;
+
+//======================================================================
+//
+// OUTPUT BYTE-SWAPPING and COMPRESSION.
+//
+//======================================================================
+ 
+///////////// output_native_byte_order ////////////////
+//
+// Option to leave data in native byte order.
+//
+// If false, data will be byte-swapped as appropriate on output.
+//
+//
+// Type: boolean
+//
+
+output_native_byte_order = FALSE;
+
+///////////// output_compressed ///////////////////////
+//
+// Option to compress data fields on output.
+//
+// Applies to netCDF and Dorade. UF does not support compression.
+//
+//
+// Type: boolean
+//
+
+output_compressed = TRUE;
+
+//======================================================================
+//
+// OUTPUT OPTIONS FOR CfRadial FILES.
+//
+//======================================================================
+ 
+///////////// output_force_ngates_vary ////////////////
+//
+// Option to force the use of ragged arrays for CfRadial files.
+//
+// Only applies to CfRadial. If true, forces the use of ragged arrays 
+//   even if the number of gates for all rays is constant.
+//
+//
+// Type: boolean
+//
+
+output_force_ngates_vary = TRUE;
+
+///////////// compression_level ///////////////////////
+//
+// Compression level for output, if compressed.
+//
+// Applies to netCDF only. Dorade compression is run-length encoding, 
+//   and has not options..
+//
+//
+// Type: int
+//
+
+compression_level = 4;
+
+//======================================================================
+//
+// OUTPUT DIRECTORY AND FILE NAME.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+//
+// Files will be written to this directory.
+//
+//
+// Type: string
+//
+
+output_dir = "$(HOME)/data/radx/RadxCov2Mom_test";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+//
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name.
+//
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//     SPECIFY_FILE_NAME
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// output_filename /////////////////////////
+//
+// Name of output file.
+//
+// Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of 
+//   this name will be written to output_dir.
+//
+//
+// Type: string
+//
+
+output_filename = "cfradial.test.nc";
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+//
+// Path will be output_dir/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+//
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// write_individual_sweeps /////////////////
+//
+// Option to write out individual sweeps if appropriate.
+//
+// If true, the volume is split into individual sweeps for writing. 
+//   Applies to CfRadial format. This is always true for DORADE format 
+//   files.
+//
+//
+// Type: boolean
+//
+
+write_individual_sweeps = FALSE;
+
+//======================================================================
+//
+// OPTION TO OVERRIDE MISSING VALUES.
+//
+// Missing values are applicable to both metadata and field data. The 
+//   default values should be satisfactory for most purposes. However, you 
+//   can choose to override these if you are careful with the selected 
+//   values.
+//
+// The default values for metadata are:
+// 	missingMetaDouble = -9999.0
+// 	missingMetaFloat = -9999.0
+// 	missingMetaInt = -9999
+// 	missingMetaChar = -128
+//
+// The default values for field data are:
+// 	missingFl64 = -9.0e33
+// 	missingFl32 = -9.0e33
+// 	missingSi32 = -2147483647
+// 	missingSi16 = -32768
+// 	missingSi08 = -128.
+//
+//======================================================================
+ 
+///////////// override_missing_metadata_values ////////
+//
+// Option to override the missing values for meta-data.
+//
+// See following parameter options.
+//
+//
+// Type: boolean
+//
+
+override_missing_metadata_values = FALSE;
+
+///////////// missing_metadata_double /////////////////
+//
+// Missing value for metadata of type double.
+//
+// Only applies if override_missing_metadata_values is TRUE.
+//
+//
+// Type: double
+//
+
+missing_metadata_double = -9999;
+
+///////////// missing_metadata_float //////////////////
+//
+// Missing value for metadata of type float.
+//
+// Only applies if override_missing_metadata_values is TRUE.
+//
+//
+// Type: float
+//
+
+missing_metadata_float = -9999;
+
+///////////// missing_metadata_int ////////////////////
+//
+// Missing value for metadata of type int.
+//
+// Only applies if override_missing_metadata_values is TRUE.
+//
+//
+// Type: int
+//
+
+missing_metadata_int = -9999;
+
+///////////// missing_metadata_char ///////////////////
+//
+// Missing value for metadata of type char.
+//
+// Only applies if override_missing_metadata_values is TRUE.
+//
+//
+// Type: int
+//
+
+missing_metadata_char = -128;
+
+///////////// override_missing_field_values ///////////
+//
+// Option to override the missing values for field data.
+//
+// See following parameter options.
+//
+//
+// Type: boolean
+//
+
+override_missing_field_values = FALSE;
+
+///////////// missing_field_fl64 //////////////////////
+//
+// Missing value for field data of type 64-bit float.
+//
+// Only applies if override_missing_field_values is TRUE.
+//
+//
+// Type: double
+//
+
+missing_field_fl64 = -9e+33;
+
+///////////// missing_field_fl32 //////////////////////
+//
+// Missing value for field data of type 32-bit float.
+//
+// Only applies if override_missing_field_values is TRUE.
+//
+//
+// Type: double
+//
+
+missing_field_fl32 = -9e+33;
+
+///////////// missing_field_si32 //////////////////////
+//
+// Missing value for field data of type 32-bit integer.
+//
+// Only applies if override_missing_field_values is TRUE.
+//
+//
+// Type: int
+//
+
+missing_field_si32 = -2147483647;
+
+///////////// missing_field_si16 //////////////////////
+//
+// Missing value for field data of type 16-bit integer.
+//
+// Only applies if override_missing_field_values is TRUE.
+//
+//
+// Type: int
+//
+
+missing_field_si16 = -232768;
+
+///////////// missing_field_si08 //////////////////////
+//
+// Missing value for field data of type 8-bit integer.
+//
+// Only applies if override_missing_field_values is TRUE.
+//
+//
+// Type: int
+//
+
+missing_field_si08 = -128;
+
+//======================================================================
+//
+// WRITE STATUS TO SPDB IN XML FORMAT.
+//
+//======================================================================
+ 
+///////////// write_status_to_spdb ////////////////////
+//
+// Option to write out radar status and calibration to SPDB.
+//
+// The transmit power, noise levels, radar status and calibration in use 
+//   will be written to SPDB, as XML. The data can then be retrieved for 
+//   plotting or other purposes.
+//
+//
+// Type: boolean
+//
+
+write_status_to_spdb = FALSE;
+
+///////////// status_spdb_output_url //////////////////
+//
+// URL for writing status to SPDB in XML.
+//
+// For local writes, specify the directory. For remote writes, specify 
+//   the full url: spdbp:://host::dir.
+//
+//
+// Type: string
+//
+
+status_spdb_output_url = "spdbp:://hail:0:pecan/qc/spdb/spol/cov_to_mom.sur";
+

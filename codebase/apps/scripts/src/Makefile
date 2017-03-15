@@ -17,6 +17,7 @@ SCRIPTS = \
 	MySqlInsituEvent.py \
 	Profiler2Class.pl \
 	RUNtests.sh \
+	TimeCmd.py \
 	archive_data_list \
 	backupToMSS.pl \
 	check_Janitor_files.pl \

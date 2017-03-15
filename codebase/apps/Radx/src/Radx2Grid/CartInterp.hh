@@ -38,6 +38,7 @@
 
 #include "Interp.hh"
 #include <toolsa/TaThread.hh>
+#include <toolsa/TaThreadPool.hh>
 class DsMdvx;
 
 class CartInterp : public Interp {
@@ -63,10 +64,9 @@ public:
 
   virtual int interpVol();
   
-  // get methods for threading
+  // get methods
 
   const Params &getParams() const { return _params; }
-  pthread_mutex_t *getDebugPrintMutex() { return &_debugPrintMutex; }
 
   // set RHI mode
 
@@ -75,12 +75,6 @@ public:
 protected:
 private:
 
-  // threading
-  
-  deque<CartThread *> _activeThreads;
-  deque<CartThread *> _availThreads;
-  pthread_mutex_t _debugPrintMutex;
-  
   // class for search matrix
 
   class SearchPoint {
@@ -209,8 +203,9 @@ private:
   vector<kernel_t> _textureKernel;
   vector<kernel_t> _convKernel;
 
-  // compute the lower and upper bounds of the vert levels for the texture computation,
-  // for each 0.01 km from 0 to 30 km. These are lookup tables
+  // compute the lower and upper bounds of the vert levels for the
+  // texture computation, for each 0.01 km from 0 to 30 km.
+  // These are lookup tables.
 
   static const int NLOOKUP = 3000;
   int _textureIzLower[NLOOKUP];
@@ -236,7 +231,6 @@ private:
   void _initOutputArrays();
   
   void _computeSearchLimits();
-  static void *_computeInThread(void *thread_data);
   
   void _computeGridRelative();
   void _computeGridRelMultiThreaded();
@@ -352,108 +346,142 @@ private:
   //////////////////////////////////////////////////////////////
 
   //////////////////////////////////////////////////////////////
-  // inner class for filling out the lower-left search
+  // inner thread class for filling out the lower-left search
   
   class FillSearchLowerLeft : public TaThread
   {  
   public:
     // constructor
-    FillSearchLowerLeft(CartInterp *cartInterp);
+    FillSearchLowerLeft(CartInterp *obj);
     // override run method
     virtual void run();
   private:
-    CartInterp *_cartInterp; // context
+    CartInterp *_this; // context
   };
 
   //////////////////////////////////////////////////////////////
-  // inner class for filling out the lower-right search
+  // inner thread class for filling out the lower-right search
   
   class FillSearchLowerRight : public TaThread
   {  
   public:
     // constructor
-    FillSearchLowerRight(CartInterp *cartInterp);
+    FillSearchLowerRight(CartInterp *obj);
     // override run method
     virtual void run();
   private:
-    CartInterp *_cartInterp; // context
+    CartInterp *_this; // context
   };
 
   //////////////////////////////////////////////////////////////
-  // inner class for filling out the upper-left search
+  // inner thread class for filling out the upper-left search
   
   class FillSearchUpperLeft : public TaThread
   {  
   public:
     // constructor
-    FillSearchUpperLeft(CartInterp *cartInterp);
+    FillSearchUpperLeft(CartInterp *obj);
     // override run method
     virtual void run();
   private:
-    CartInterp *_cartInterp; // context
+    CartInterp *_this; // context
   };
 
   //////////////////////////////////////////////////////////////
-  // inner class for filling out the upper-right search
+  // inner thread class for filling out the upper-right search
   
   class FillSearchUpperRight : public TaThread
   {  
   public:
     // constructor
-    FillSearchUpperRight(CartInterp *cartInterp);
+    FillSearchUpperRight(CartInterp *obj);
     // override run method
     virtual void run();
   private:
-    CartInterp *_cartInterp; // context
+    CartInterp *_this; // context
   };
 
-  // threads for computing angle limits
-
-  FillSearchLowerLeft _threadFillSearchLowerLeft;
-  FillSearchLowerRight _threadFillSearchLowerRight;
-  FillSearchUpperLeft _threadFillSearchUpperLeft;
-  FillSearchUpperRight _threadFillSearchUpperRight;
+  // instantiate threads for fill search
+  FillSearchLowerLeft *_threadFillSearchLowerLeft;
+  FillSearchLowerRight *_threadFillSearchLowerRight;
+  FillSearchUpperLeft *_threadFillSearchUpperLeft;
+  FillSearchUpperRight *_threadFillSearchUpperRight;
 
   //////////////////////////////////////////////////////////////
-  // inner class for computing 2D texture
+  // inner thread class for computing the grid locations
+  // relative to the radar
+  
+  class ComputeGridRelative : public TaThread
+  {  
+  public:
+    // constructor
+    ComputeGridRelative(CartInterp *obj);
+    // set the y and z index
+    inline void setYIndex(int yIndex) { _yIndex = yIndex; }
+    inline void setZIndex(int zIndex) { _zIndex = zIndex; }
+    // override run method
+    virtual void run();
+  private:
+    CartInterp *_this; // context
+    int _yIndex; // grid index of y column
+    int _zIndex; // grid index of z plane
+  };
+  // instantiate thread pool for grid relative computations
+  TaThreadPool _threadPoolGridRel;
+
+  //////////////////////////////////////////////////////////////
+  // inner thread class for performing interpolation
+  
+  class PerformInterp : public TaThread
+  {  
+  public:
+    // constructor
+    PerformInterp(CartInterp *obj);
+    // set the y and z index
+    inline void setYIndex(int yIndex) { _yIndex = yIndex; }
+    inline void setZIndex(int zIndex) { _zIndex = zIndex; }
+    // override run method
+    virtual void run();
+  private:
+    CartInterp *_this; // context
+    int _yIndex; // grid index of y column
+    int _zIndex; // grid index of z plane
+  };
+  // instantiate thread pool for interpolation
+  TaThreadPool _threadPoolInterp;
+
+  //////////////////////////////////////////////////////////////
+  // inner thread class for computing 2D texture
 
   class ComputeTexture : public TaThread
   {  
-    
   public:   
-    
+
     // constructor saves _sd3c pointer
-    
     ComputeTexture(int iz);
-    
+
     // destructor
-    
     virtual ~ComputeTexture();
-    
+
     // set parameters
-    
     void setGridSize(int nx, int ny)
     {
       _nx = nx;
       _ny = ny;
     }
-    
     void setKernelSize(int nx, int ny)
     {
       _nxTexture = nx;
       _nyTexture = ny;
     }
-    
     void setKernel(const vector<kernel_t> &kernel)
     {
       _kernel = kernel;
     }
-    
     void setMinValidFraction(double val)
     {
       _minValidFraction = val;
     }
-    
     void setFields(const fl32 *dbzCount,
                    const fl32 *dbzSum,
                    const fl32 *dbzSqSum,
@@ -474,7 +502,6 @@ private:
     }
     
     // override run method
-    
     virtual void run();
     
   private:
@@ -483,17 +510,13 @@ private:
     int _nx, _ny;
     int _nxTexture, _nyTexture;
     double _minValidFraction;
-
     vector<kernel_t> _kernel;
-    
     const fl32 *_dbzCount;
     const fl32 *_dbzSum;
     const fl32 *_dbzSqSum;
     const fl32 *_dbzSqSqSum;
-
     fl32 *_dbzTexture;
     fl32 *_dbzSqTexture;
-    
     fl32 *_filledTexture;
     fl32 *_filledSqTexture;
 

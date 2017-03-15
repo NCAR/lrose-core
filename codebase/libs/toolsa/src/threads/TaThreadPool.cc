@@ -147,10 +147,25 @@ void TaThreadPool::addThreadToDone(TaThread *thread)
 
 void TaThreadPool::initForRun()
 {
+
   pthread_mutex_lock(&_mutex);
+
+  // set flags and counts
+
   _readyForDoneCheck = false;
   _countStarted = 0;
   _countDone = 0;
+
+  // reinitialize the condition variable
+
+  pthread_cond_destroy(&_emptyCond);
+  pthread_cond_init(&_emptyCond, NULL);
+
+  // ensure the queues are correct
+
+  _availPool = _mainPool;
+  _donePool.clear();
+
   pthread_mutex_unlock(&_mutex);
 }
 
@@ -182,7 +197,10 @@ bool TaThreadPool::checkAllDone()
   bool allDone = false;
   pthread_mutex_lock(&_mutex);
   if (_readyForDoneCheck) {
-    allDone = (_countDone == _countStarted);
+    if (_countDone == _countStarted &&
+        _donePool.size() == 0) {
+      allDone = true;
+    }
   }
   pthread_mutex_unlock(&_mutex);
   return allDone;
@@ -264,6 +282,40 @@ TaThread *TaThreadPool::getNextThread(bool block, bool &isDone)
 
   pthread_mutex_unlock(&_mutex);
   return NULL;
+}
+
+/////////////////////////////////////////////////////////////
+// Get next thread from the done pool.
+// Blocks until a done thread is available,
+// or all threads are done.
+// Should only be called after setReadyForDoneCheck().
+
+TaThread *TaThreadPool::getNextDoneThread()
+
+{
+
+  while (true) {
+    
+    // all done?
+    if (checkAllDone()) {
+      return NULL;
+    }
+
+    // check for done thread
+
+    TaThread *thread = _getDoneThread();
+    if (thread == NULL) {
+    } else {
+      return thread;
+    }
+
+    // sleep a bit
+    TaThread::usecSleep(100);
+
+  } // while
+
+  return NULL;
+
 }
 
 /////////////////////////////////////////////////////////////

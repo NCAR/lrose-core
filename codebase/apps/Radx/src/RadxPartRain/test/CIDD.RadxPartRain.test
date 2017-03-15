@@ -75,8 +75,59 @@ o###############################################################################
 # Front Range
 #
 
-DBZ  DBZ  $(HOME)/data/radx/cart_test&DBZ   dbz.colors   dBZ -5 80 5 radial 1 0
-VEL  VEL  $(HOME)/data/radx/cart_test&VEL   vel.colors   m/s -5 80 5 radial 1 0
+PID         PID          $(HOME)/data/radx/RadxPartRain_test&PID           pid.colors  none -5 80 5 radial 1 0
+PID_TEMP    PID_TEMP     $(HOME)/data/radx/RadxPartRain_test&TEMP_FOR_PID  temp.colors  C -5 80 5 radial 1 0
+RATE_ZH      RATE_ZH       $(HOME)/data/radx/RadxPartRain_test&RATE_ZH       precip_rate.colors mm/hr -5 80 5 radial 1 0
+RATE_ZH_SNOW RATE_ZH_SNOW  $(HOME)/data/radx/RadxPartRain_test&RATE_ZH_SNOW  precip_rate.colors mm/hr -5 80 5 radial 1 0
+RATE_KDP     RATE_KDP      $(HOME)/data/radx/RadxPartRain_test&RATE_KDP      precip_rate.colors mm/hr -5 80 5 radial 1 0
+RATE_KZDR    RATE_KZDR     $(HOME)/data/radx/RadxPartRain_test&RATE_KDP_ZDR  precip_rate.colors mm/hr -5 80 5 radial 1 0
+RATE_HYBRID  RATE_HYBRID   $(HOME)/data/radx/RadxPartRain_test&RATE_HYBRID   precip_rate.colors mm/hr -5 80 5 radial 1 0
+RATE_PID     RATE_PID      $(HOME)/data/radx/RadxPartRain_test&RATE_PID      precip_rate.colors mm/hr -5 80 5 radial 1 0
+RATE_HIDRO   RATE_HIDRO    $(HOME)/data/radx/RadxPartRain_test&RATE_HIDRO    precip_rate.colors mm/hr -5 80 5 radial 1 0
+RATE_BRINGI  RATE_BRINGI   $(HOME)/data/radx/RadxPartRain_test&RATE_BRINGI   precip_rate.colors mm/hr -5 80 5 radial 1 0
+
+DBZ_ORIG  DBZ_ORIG  /scr/hail2/rsfdata/pecan/cfradial/spol/moments/sband/sur&DBZ_F dbz.colors   dBZ -5 80 5 radial 1 0
+VEL_ORIG  VEL_ORIG  /scr/hail2/rsfdata/pecan/cfradial/spol/moments/sband/sur&VEL_F vel.colors   m/s -5 80 5 radial 1 0
+
+DBZ_F     DBZ_F      $(HOME)/data/radx/RadxCov2Mom_test&DBZ_F      dbz.colors   dBZ -5 80 5 radial 1 0
+VEL_F     VEL_F      $(HOME)/data/radx/RadxCov2Mom_test&VEL_F      vel.colors   m/s -5 80 5 radial 1 0
+VEL_HV_F  VEL_HV_F   $(HOME)/data/radx/RadxCov2Mom_test&VEL_HV_F   vel.colors   m/s -5 80 5 radial 1 0
+WIDTH_F     WIDTH_F   $(HOME)/data/radx/RadxCov2Mom_test&WIDTH_F   width.colors m/s -5 80 5 radial 1 0
+NCP_F       NCP_F     $(HOME)/data/radx/RadxCov2Mom_test&NCP_F       ncp.colors  dB   -5   80  5  radial   1 0
+
+ZDR_F       ZDR_F      $(HOME)/data/radx/RadxCov2Mom_test&ZDR_F     zdr.colors   dB  -5 80 5 radial 1 0
+ZDRM_F      ZDRM_F     $(HOME)/data/radx/RadxCov2Mom_test&ZDRM_F    zdr.colors   dB  -5 80 5 radial 1 0
+LDRH_F      LDRH_F    $(HOME)/data/radx/RadxCov2Mom_test&LDRH_F    ldr.colors   dB  -5 80 5 radial 1 0
+LDRV_F      LDRV_F    $(HOME)/data/radx/RadxCov2Mom_test&LDRV_F    ldr.colors   dB  -5 80 5 radial 1 0
+PHIDP_F     PHIDP_F   $(HOME)/data/radx/RadxCov2Mom_test&PHIDP_F   phidp_alt.colors deg -5 80 5 radial 1 0
+KDP_F       KDP_F      $(HOME)/data/radx/RadxCov2Mom_test&KDP_F     kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+======== ==========  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
+======== ==========  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
+
+RHOHV_F     RHOHV_F   $(HOME)/data/radx/RadxCov2Mom_test&RHOHV_F         rhohv.colors _   -5 80 5 radial 1 0
+RHOHV_NNC_F RHOHV_NNC_F  $(HOME)/data/radx/RadxCov2Mom_test&RHOHV_NNC_F  rhohv.colors _   -5 80 5 radial 1 0
+RHO_HC_VX_F RHO_HC_VX_F $(HOME)/data/radx/RadxCov2Mom_test&RHO_HC_VX_F   rho_cross.colors _   -5 80 5 radial 1 0
+RHO_VC_HX_F RHO_VC_HX_F $(HOME)/data/radx/RadxCov2Mom_test&RHO_VC_HX_F   rho_cross.colors _   -5 80 5 radial 1 0
+RHO_VX_HX   RHO_VX_HX $(HOME)/data/radx/RadxCov2Mom_test&RHO_VX_HX       rho_cross.colors _   -5 80 5 radial 1 0
+======== ==========  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
+======== ==========  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
+======== ==========  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
+
+SNRHC_F     SNRHC_F   $(HOME)/data/radx/RadxCov2Mom_test&SNRHC_F  snr.colors   dB     -5 80 5 radial 1 0
+SNRVC_F     SNRVC_F   $(HOME)/data/radx/RadxCov2Mom_test&SNRVC_F  snr.colors   dB     -5 80 5 radial 1 0
+SNRHX_F     SNRHX_F   $(HOME)/data/radx/RadxCov2Mom_test&SNRHX_F  snr.colors   dB     -5 80 5 radial 1 0
+SNRVX_F     SNRVX_F   $(HOME)/data/radx/RadxCov2Mom_test&SNRVX_F  snr.colors   dB     -5 80 5 radial 1 0
+DBMHC_F     DBMHC_F   $(HOME)/data/radx/RadxCov2Mom_test&DBMHC_F  dbmlow.colors dBm -5 80 5 radial 1 0
+DBMVC_F     DBMVC_F   $(HOME)/data/radx/RadxCov2Mom_test&DBMVC_F  dbmlow.colors dBm -5 80 5 radial 1 0
+DBMHX_F     DBMHX_F   $(HOME)/data/radx/RadxCov2Mom_test&DBMHX_F  dbmlow.colors dBm -5 80 5 radial 1 0
+DBMVX_F     DBMVX_F   $(HOME)/data/radx/RadxCov2Mom_test&DBMVX_F  dbmlow.colors dBm -5 80 5 radial 1 0
+
+CPA         CPA          $(HOME)/data/radx/RadxCov2Mom_test&CPA           cpa.colors  - -5 80 5 radial 1 0
+CMD         CMD          $(HOME)/data/radx/RadxCov2Mom_test&CMD           cmd.colors  - -5 80 5 radial 1 0
+CMD_FLAG    CMD_FLAG     $(HOME)/data/radx/RadxCov2Mom_test&CMD_FLAG      cmd_flag.colors  - -5 80 5 radial 1 0
+AIQ         AIQ          $(HOME)/data/radx/RadxCov2Mom_test&AIQ           deg.colors   deg -5 80 5 radial 1 0
+NIQ         NIQ          $(HOME)/data/radx/RadxCov2Mom_test&NIQ           dbmlow.colors  dBm -5 80 5 radial 1 0
+CENSOR_FLAG CENSOR_FLAG  $(HOME)/data/radx/RadxCov2Mom_test&CENSOR_FLAG   censor_flag.colors  - -5 80 5 radial 1 0
 
 </GRIDS>
 
@@ -174,7 +225,7 @@ cidd.debug2_flag:           0
 # demo time. The movie frame will be centered on the time after applying
 # temporal rounding. 
 
-cidd.demo_time:  00:00 06/26/2015
+cidd.demo_time:  00:07 06/26/2015
 
 # Set times to the nearest value divisible by the number of seconds
 cidd.temporal_rounding:    1
@@ -854,7 +905,7 @@ cidd.click_posn_rel_to_origin: 1
 # Set this parameter to force the field menu popup to this many columns
 # If set <= 0, then cidd sets this dynamically, allowing at most 30 in each
 # column.
-cidd.num_field_menu_cols: 4
+cidd.num_field_menu_cols: 2
 
 # This parameter sets WSDDM specific behavior On -
 # - Go to end of loop when movie stops.

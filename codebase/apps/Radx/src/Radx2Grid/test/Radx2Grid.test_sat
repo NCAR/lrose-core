@@ -1249,7 +1249,7 @@ search_matrix_dir = "./mdv/search_matrix";
 // Type: string
 //
 
-output_dir = "$(DATA_DIR)/test/mdv/calipso";
+output_dir = "$(HOME)/data/radx/cart_sat";
 
 //======================================================================
 //

@@ -615,18 +615,6 @@ RHOHV_available = TRUE;
 
 RHOHV_field_name = "RHOHV_F";
 
-///////////// compute_KDP /////////////////////////////
-//
-// Compute KDP from PHIDP.
-//
-// If KDP is not available, it can be computed from PHIDP.
-//
-//
-// Type: boolean
-//
-
-compute_KDP = TRUE;
-
 ///////////// KDP_fir_filter_len //////////////////////
 //
 // Filter length for the FIR filter for PHIDP (gates).
@@ -1553,7 +1541,7 @@ compute_pid = TRUE;
 // Type: string
 //
 
-pid_thresholds_file_path = "$(HOME)/case_studies/alg/params/pid_thresholds.test";
+pid_thresholds_file_path = "./pid_thresholds.test";
 
 ///////////// PID_snr_threshold ///////////////////////
 //
@@ -3028,7 +3016,7 @@ write_output_volume = TRUE;
 // Type: string
 //
 
-output_dir = "$(HOME)/case_studies/cfradial/DB-QC";
+output_dir = "$(HOME)/data/radx/RadxQc_test";
 
 ///////////// output_filename_mode ////////////////////
 //

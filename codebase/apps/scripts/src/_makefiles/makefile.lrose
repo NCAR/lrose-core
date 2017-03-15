@@ -13,6 +13,7 @@ INSTALL_DIR=$(RAP_BIN_DIR)
 SCRIPTS = \
 	IngestSatMdv \
         RUNtests.sh \
+	TimeCmd.py \
 	check_Janitor_files.pl \
 	check_backup.pl \
 	check_build_status.pl \
