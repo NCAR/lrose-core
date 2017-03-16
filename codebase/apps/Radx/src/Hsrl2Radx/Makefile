@@ -53,7 +53,8 @@ HDRS = \
 	MslFile.hh \
 	RawFile.hh \
 	CalReader.hh \
-	FullCals.hh
+	FullCals.hh \
+	DerFieldCalcs.hh
 
 CPPC_SRCS = \
 	Params.cc \
@@ -63,7 +64,8 @@ CPPC_SRCS = \
 	MslFile.cc \
 	RawFile.cc \
 	CalReader.cc \
-	FullCals.cc
+	FullCals.cc \
+	DerFieldCalcs.cc
 
 #
 # tdrp macros

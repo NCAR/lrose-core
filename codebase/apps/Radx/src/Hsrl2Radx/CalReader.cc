@@ -30,27 +30,9 @@
 //
 ///////////////////////////////////////////////////////////////
 
-
 #include "CalReader.hh"
-#include "Hsrl2Radx.hh"
-#include <Radx/Radx.hh>
-#include <Radx/RadxVol.hh>
-#include <Radx/RadxRay.hh>
-#include <Radx/RadxField.hh>
-#include <Radx/RadxGeoref.hh>
-#include <Radx/RadxTime.hh>
-#include <Radx/RadxTimeList.hh>
-#include <Radx/RadxPath.hh>
-#include <Radx/RadxArray.hh>
-#include <Radx/NcfRadxFile.hh>
-#include <dsserver/DsLdataInfo.hh>
-#include <didss/DsInputPath.hh>
-#include <toolsa/TaXml.hh>
-#include <toolsa/pmu.h>
-#include <physics/IcaoStdAtmos.hh>
-#include "MslFile.hh"
-#include "RawFile.hh"
-
+#include <assert.h>
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>

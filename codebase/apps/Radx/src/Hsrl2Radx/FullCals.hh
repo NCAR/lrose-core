@@ -35,7 +35,6 @@
 #ifndef FullCals_HH
 #define FullCals_HH
 
-#include <string>
 #include <Radx/RadxTime.hh>
 #include "CalReader.hh"
 #include <vector>
