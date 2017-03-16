@@ -12,7 +12,7 @@ class Lrose < Formula
 
   url '{0}'
   version '{1}'
-  sha1 '{2}'
+  sha256 '{2}'
 
   depends_on 'hdf5' => 'enable-cxx'
   depends_on 'udunits'
@@ -50,7 +50,7 @@ def build_lrose_formula(tar_url, tar_name, formula_name):
     dash = tar_name.find('-')
     period = tar_name.find('.', dash)
     version = tar_name[dash+1:period]
-    checksum = subprocess.check_output(("sha1sum", tar_name))
+    checksum = subprocess.check_output(("sha256sum", tar_name))
     checksum = checksum.split()[0]
     formula = template.format(tar_url, version, checksum)
     outf = open(formula_name, 'w')
