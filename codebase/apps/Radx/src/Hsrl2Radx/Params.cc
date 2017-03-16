@@ -971,20 +971,179 @@ using namespace std;
     tt->single_val.d = 0.0075;
     tt++;
     
+    // Parameter 'combined_hi_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("combined_hi_field_name");
+    tt->descr = tdrpStrDup("Name of combined_hi field in netCDF file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &combined_hi_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("combined_hi");
+    tt++;
+    
+    // Parameter 'combined_lo_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("combined_lo_field_name");
+    tt->descr = tdrpStrDup("Name of combined_lo field in netCDF file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &combined_lo_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("combined_lo");
+    tt++;
+    
+    // Parameter 'molecular_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("molecular_field_name");
+    tt->descr = tdrpStrDup("Name of molecular field in netCDF file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &molecular_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("molecular");
+    tt++;
+    
+    // Parameter 'cross_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("cross_field_name");
+    tt->descr = tdrpStrDup("Name of cross field in netCDF file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &cross_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("cross");
+    tt++;
+    
+    // Parameter 'baseline_calibration_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("baseline_calibration_path");
+    tt->descr = tdrpStrDup("location of baseline calibration file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &baseline_calibration_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/h/eol/brads/git/hsrl_configuration/projDir/calfiles/baseline_correction_20150601T0000.blc");
+    tt++;
+    
+    // Parameter 'diff_default_geofile_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("diff_default_geofile_path");
+    tt->descr = tdrpStrDup("location of diff_default_geofile calibration file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &diff_default_geofile_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/h/eol/brads/git/hsrl_configuration/projDir/calfiles/diff_default_geofile_20120201T0000.geo");
+    tt++;
+    
+    // Parameter 'geofile_default_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("geofile_default_path");
+    tt->descr = tdrpStrDup("location of geofile_default calibration file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &geofile_default_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/h/eol/brads/git/hsrl_configuration/projDir/calfiles/geofile_default_20150601T0000.geo");
+    tt++;
+    
+    // Parameter 'afterpulse_default_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("afterpulse_default_path");
+    tt->descr = tdrpStrDup("location of afterpulse_default calibration file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &afterpulse_default_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/h/eol/brads/git/hsrl_configuration/projDir/calfiles/afterpulse_default_20061001T0000.ap");
+    tt++;
+    
+    // Parameter 'calvals_gvhsrl_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("calvals_gvhsrl_path");
+    tt->descr = tdrpStrDup("location of calvals_gvhsrl calibration file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &calvals_gvhsrl_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/h/eol/brads/git/hsrl_configuration/projDir/calfiles/calvals_gvhsrl.txt");
+    tt++;
+    
+    // Parameter 'combined_hi_dead_time_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("combined_hi_dead_time_name");
+    tt->descr = tdrpStrDup("Name of combined_hi_dead_time field in CalVals file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &combined_hi_dead_time_name - &_start_;
+    tt->single_val.s = tdrpStrDup("combined_hi_dead_time");
+    tt++;
+    
+    // Parameter 'combined_lo_dead_time_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("combined_lo_dead_time_name");
+    tt->descr = tdrpStrDup("Name of combined_lo_dead_time field in CalVals file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &combined_lo_dead_time_name - &_start_;
+    tt->single_val.s = tdrpStrDup("combined_lo_dead_time");
+    tt++;
+    
+    // Parameter 'cross_pol_dead_time_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("cross_pol_dead_time_name");
+    tt->descr = tdrpStrDup("Name of cross_pol_dead_time field in CalVals file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &cross_pol_dead_time_name - &_start_;
+    tt->single_val.s = tdrpStrDup("cross_pol_dead_time");
+    tt++;
+    
+    // Parameter 'molecular_dead_time_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("molecular_dead_time_name");
+    tt->descr = tdrpStrDup("Name of molecular_dead_time field in CalVals file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &molecular_dead_time_name - &_start_;
+    tt->single_val.s = tdrpStrDup("molecular_dead_time");
+    tt++;
+    
+    // Parameter 'bin_width_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("bin_width_name");
+    tt->descr = tdrpStrDup("Name of binWidth field in CalVals file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &bin_width_name - &_start_;
+    tt->single_val.s = tdrpStrDup("binwidth");
+    tt++;
+    
     // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("Brad's test comment");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 9'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY FIELD NAMES FOR OUTPUT FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1123,11 +1282,11 @@ using namespace std;
       tt->array_vals[1].s = tdrpStrDup("VEL");
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1228,11 +1387,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("Files are written in CfRadial");
     tt++;
@@ -1261,11 +1420,11 @@ using namespace std;
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1330,11 +1489,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;

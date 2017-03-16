@@ -430,6 +430,34 @@ public:
 
   double raw_bin_spacing_km;
 
+  char* combined_hi_field_name;
+
+  char* combined_lo_field_name;
+
+  char* molecular_field_name;
+
+  char* cross_field_name;
+
+  char* baseline_calibration_path;
+
+  char* diff_default_geofile_path;
+
+  char* geofile_default_path;
+
+  char* afterpulse_default_path;
+
+  char* calvals_gvhsrl_path;
+
+  char* combined_hi_dead_time_name;
+
+  char* combined_lo_dead_time_name;
+
+  char* cross_pol_dead_time_name;
+
+  char* molecular_dead_time_name;
+
+  char* bin_width_name;
+
   tdrp_bool_t set_output_fields;
 
   output_field_t *_output_fields;
@@ -497,7 +525,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[73];
+  mutable TDRPtable _table[86];
 
   const char *_className;
 
