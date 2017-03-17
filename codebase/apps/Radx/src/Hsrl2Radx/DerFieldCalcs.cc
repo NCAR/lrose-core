@@ -58,47 +58,127 @@ DerFieldCalcs::DerFieldCalcs(FullCals fullCals_in,
   shotCount=shotCount_in;
   power=power_in;
   
-  vector< vector<Radx::fl32> > inRates;
-  inRates.push_back(hiData);
-  inRates.push_back(loData);
-  inRates.push_back(crossData);
-  inRates.push_back(molData);
-  
-  vector< vector<double> > corrRates=applyCorr(inRates);
-
-  for(unsigned int i=0;i<(corrRates.at(0)).size();i++)
+  if( hiData.size() == loData.size() &&
+      hiData.size() == crossData.size() &&
+      hiData.size() == molData.size() )
     {
-      hiData.at(i)=(Radx::fl32)(corrRates.at(0)).at(i);
-      loData.at(i)=(Radx::fl32)(corrRates.at(1)).at(i);
-      crossData.at(i)=(Radx::fl32)(corrRates.at(2)).at(i);
-      molData.at(i)=(Radx::fl32)(corrRates.at(3)).at(i);
-      combData.push_back((Radx::fl32)(corrRates.at(4)).at(i));
+      applyCorr();
+      if( hiData.size() == combData.size() )
+	derive_quantities();
     }
   
-  derive_quantities();
-  
 }
-  
+
 void DerFieldCalcs::set_fullCals(FullCals fullCals_in)
-{fullCals=fullCals_in;}
+{
+  fullCals=fullCals_in;
+  if( hiData.size() == loData.size() &&
+      hiData.size() == crossData.size() &&
+      hiData.size() == molData.size() )
+    {
+      applyCorr();
+      if( hiData.size() == combData.size() )
+	derive_quantities();
+    }
+}
 void DerFieldCalcs::set_hiData (vector<Radx::fl32> in)
-{hiData=in;}
+{
+  hiData=in;
+  if( hiData.size() == loData.size() &&
+      hiData.size() == crossData.size() &&
+      hiData.size() == molData.size() )
+    {
+      applyCorr();
+      if( hiData.size() == combData.size() )
+	derive_quantities();
+    }
+}
 void DerFieldCalcs::set_loData (vector<Radx::fl32> in)
-{loData=in;}
+{
+  loData=in;
+  if( hiData.size() == loData.size() &&
+      hiData.size() == crossData.size() &&
+      hiData.size() == molData.size() )
+    {
+      applyCorr();
+      if( hiData.size() == combData.size() )
+	derive_quantities();
+    }
+}
 void DerFieldCalcs::set_crossData (vector<Radx::fl32> in)
-{crossData=in;}
+{
+  crossData=in;
+  if( hiData.size() == loData.size() &&
+      hiData.size() == crossData.size() &&
+      hiData.size() == molData.size() )
+    {
+      applyCorr();
+      if( hiData.size() == combData.size() )
+	derive_quantities();
+    }
+}
 void DerFieldCalcs::set_molData (vector<Radx::fl32> in)
-{molData=in;}
+{
+  molData=in;
+  if( hiData.size() == loData.size() &&
+      hiData.size() == crossData.size() &&
+      hiData.size() == molData.size() )
+    {
+      applyCorr();
+      if( hiData.size() == combData.size() )
+	derive_quantities();
+    }
+}
 
 void DerFieldCalcs::set_tempK (vector<Radx::fl32> in)
-{tempK=in;}
+{
+  tempK=in;
+  if( hiData.size() == loData.size() &&
+      hiData.size() == crossData.size() &&
+      hiData.size() == molData.size() )
+    {
+      applyCorr();
+      if( hiData.size() == combData.size() )
+	derive_quantities();
+    }
+}
 void DerFieldCalcs::set_presHpa (vector<Radx::fl32> in)
-{presHpa=in;}
+{
+  presHpa=in;
+  if( hiData.size() == loData.size() &&
+      hiData.size() == crossData.size() &&
+      hiData.size() == molData.size() )
+    {
+      applyCorr();
+      if( hiData.size() == combData.size() )
+	derive_quantities();
+    }
+}
 
 void DerFieldCalcs::set_shotCount(double in)
-{shotCount=in;}
+{
+  shotCount=in;
+  if( hiData.size() == loData.size() &&
+      hiData.size() == crossData.size() &&
+      hiData.size() == molData.size() )
+    {
+      applyCorr();
+      if( hiData.size() == combData.size() )
+	derive_quantities();
+    }
+}
 void DerFieldCalcs::set_power(double in)
-{power=in;}
+{
+  power=in;
+  if( hiData.size() == loData.size() &&
+      hiData.size() == crossData.size() &&
+      hiData.size() == molData.size() )
+    {
+      applyCorr();
+      if( hiData.size() == combData.size() )
+	derive_quantities();
+    }
+}
 
 FullCals DerFieldCalcs::get_fullCals()
 {return fullCals;}
@@ -122,36 +202,36 @@ double DerFieldCalcs::get_shotCount()
 double DerFieldCalcs::get_power()
 {return power;}
 
-vector<double> DerFieldCalcs::get_volDepol()
+vector<Radx::fl32> DerFieldCalcs::get_volDepol()
 {return volDepol;}
-vector<double> DerFieldCalcs::get_backscatRatio()
+vector<Radx::fl32> DerFieldCalcs::get_backscatRatio()
 {return backscatRatio;}
-vector<double> DerFieldCalcs::get_partDepol()
+vector<Radx::fl32> DerFieldCalcs::get_partDepol()
 {return partDepol;}
-vector<double> DerFieldCalcs::get_backscatCoeff()
+vector<Radx::fl32> DerFieldCalcs::get_backscatCoeff()
 {return backscatCoeff;}
-vector<double> DerFieldCalcs::get_extinction()
+vector<Radx::fl32> DerFieldCalcs::get_extinction()
 {return extinction;}
 
 
 
-vector< vector<double> > DerFieldCalcs::applyCorr(vector< vector<Radx::fl32> > rates)
+void DerFieldCalcs::applyCorr()
 {
   bool debug=false;
   
-  int nGates=(rates.at(0)).size();
+  int nGates=hiData.size();
   
-  vector<double> hiDataRate;
-  vector<double> loDataRate;
-  vector<double> crossDataRate;
-  vector<double> molDataRate;
+  vector<Radx::fl32> hiDataRate;
+  vector<Radx::fl32> loDataRate;
+  vector<Radx::fl32> crossDataRate;
+  vector<Radx::fl32> molDataRate;
   
   CalReader dt_hi=(fullCals.getDeadTimeHi());
   CalReader dt_lo=(fullCals.getDeadTimeLo());
   CalReader dt_cross=(fullCals.getDeadTimeCross());
   CalReader dt_mol=(fullCals.getDeadTimeMol());
   CalReader binwid=(fullCals.getBinWidth());
-  
+   
   for(int igate=0;igate<nGates;igate++)
     {
       if(dt_hi.dataTypeisNum() && 
@@ -360,7 +440,7 @@ vector< vector<double> > DerFieldCalcs::applyCorr(vector< vector<Radx::fl32> > r
   if(debug)
     cout<<"hiAndloMerge^^^^^"<<'\n';
   
-  vector<double> combineRate;
+  vector<Radx::fl32> combineRate;
   
   for(int igate=0;igate<nGates;igate++)
     {
@@ -402,16 +482,12 @@ vector< vector<double> > DerFieldCalcs::applyCorr(vector< vector<Radx::fl32> > r
 	cout<<"molDataRate["<<igate<<"]="<<molDataRate[igate]<<'\n';
 	cout<<"combineRate["<<igate<<"]="<<combineRate[igate]<<'\n';
       }      
-
-  vector< vector<double> > ans;
   
-  ans.push_back(hiDataRate);
-  ans.push_back(loDataRate);
-  ans.push_back(crossDataRate);
-  ans.push_back(molDataRate);
-  ans.push_back(combineRate);
-    
-  return ans;
+  hiData=hiDataRate;
+  loData=loDataRate;
+  crossData=crossDataRate;
+  molData=molDataRate;
+  combData=combineRate;
   
 }
 
@@ -419,7 +495,7 @@ vector< vector<double> > DerFieldCalcs::applyCorr(vector< vector<Radx::fl32> > r
 
 void DerFieldCalcs::derive_quantities()
 {
-  
+   
   bool debug=false;
    
   vector<Radx::fl32> crossDataRate=crossData;
@@ -484,7 +560,7 @@ void DerFieldCalcs::derive_quantities()
     for(int igate=0;igate<1;igate++)
       cout<<"extinction["<<igate<<"]="<<extinction[igate]<<'\n';
   
-   
+  
 }
 
 

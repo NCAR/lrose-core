@@ -53,7 +53,7 @@ private:
   FullCals fullCals;
   
   //derived quantities are not set, they are calculated. 
-  vector<double> volDepol, backscatRatio, partDepol, backscatCoeff, extinction;
+  vector<Radx::fl32> volDepol, backscatRatio, partDepol, backscatCoeff, extinction;
   vector<Radx::fl32> combData;
 public:   
     
@@ -90,13 +90,13 @@ public:
   double get_shotCount();
   double get_power();
 
-  vector<double> get_volDepol();
-  vector<double> get_backscatRatio();
-  vector<double> get_partDepol();
-  vector<double> get_backscatCoeff();
-  vector<double> get_extinction();
+  vector<Radx::fl32> get_volDepol();
+  vector<Radx::fl32> get_backscatRatio();
+  vector<Radx::fl32> get_partDepol();
+  vector<Radx::fl32> get_backscatCoeff();
+  vector<Radx::fl32> get_extinction();
 
-  vector< vector<double> > applyCorr(vector< vector<Radx::fl32> > rates); 
+  void applyCorr(); 
   
   void derive_quantities();
   

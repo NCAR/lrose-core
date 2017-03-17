@@ -35,6 +35,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -50,7 +51,7 @@ FullCals::FullCals(CalReader dtHi, CalReader dtLo,
 		   vector< vector<double> > geoDefCorIn, 
 		   vector< vector<double> > afPulCorIn)
 {
-  RadxTime time(2015, 07, 14, 23 , 0 , 0 , 0.0);
+  RadxTime time(2015, 07, 14, 18 , 0 , 0 , 0.0);
   ti=time;
   
   deadTimeHi=dtHi;
@@ -184,6 +185,10 @@ vector <vector<double> > FullCals::readBaselineCorrection(const char* file)
 {
  
   std::ifstream infile(file);
+  if (!infile) {
+    cerr << "INFO - FullCals::readBaselineCorrection" << endl;
+    cerr << "  Baseline Correction file: " << file << endl;
+  }   
   std::string line;
   vector<double> vec_binnum;
   vector<double> vec_combined_hi;
@@ -251,6 +256,10 @@ vector <vector<double> > FullCals::readDiffDefaultGeo(const char* file)
 {
 
   std::ifstream infile(file);
+  if (!infile) {
+    cerr << "INFO - FullCals::readDiffDefaultGeo" << endl;
+    cerr << "  DiffDefaultGeo file: " << file << endl;
+  }  
   std::string line;
   vector<double> vec_altitudes;
   vector<double> vec_comb_himol;
@@ -306,6 +315,10 @@ vector <vector<double> > FullCals::readGeofileDefault(const char* file)
 {
 
   std::ifstream infile(file);
+  if (!infile) {
+    cerr << "INFO - FullCals::readGeofileDefault" << endl;
+    cerr << "  GeofileDefault file: " << file << endl;
+  }  
   std::string line;
   vector<double> vec_range;
   vector<double> vec_geo_corr;
@@ -343,6 +356,10 @@ vector <vector<double> > FullCals::readAfterPulse(const char* file)
 {
 
   std::ifstream infile(file);
+  if (!infile) {
+    cerr << "INFO - FullCals::readAfterPulse" << endl;
+    cerr << "  readAfterPulse file: " << file << endl;
+  }  
   std::string line;
   vector<double> vec_bin;
   vector<double> vec_mol;

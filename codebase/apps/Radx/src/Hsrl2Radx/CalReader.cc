@@ -51,6 +51,10 @@ CalReader CalReader::readCalVals(const char* file, const char* variable)
   //just that data. Don't bother returning data from other blocks. 
 
   std::ifstream infile(file);
+  if (!infile) {
+    cerr << "INFO - CalReader::readCalVals" << endl;
+    cerr << "  CalVals file: " << file << endl;
+  } 
   std::string line;
   while (std::getline(infile, line))
     {

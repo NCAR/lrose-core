@@ -983,11 +983,11 @@ void Hsrl2Radx::_addDerivedFields(RadxVol &vol)
 					     molDataVec, tempKVec, presHpaVec, shotCount, 
 					     power);
 	
-	vector<double> volDepolVec=data.get_volDepol();
-	vector<double> backscatRatioVec=data.get_backscatRatio();
-	vector<double> partDepolVec=data.get_partDepol();
-	vector<double> backscatCoeffVec=data.get_backscatCoeff(); 
-	vector<double> extinctionVec=data.get_extinction();
+	vector<Radx::fl32> volDepolVec=data.get_volDepol();
+	vector<Radx::fl32> backscatRatioVec=data.get_backscatRatio();
+	vector<Radx::fl32> partDepolVec=data.get_partDepol();
+	vector<Radx::fl32> backscatCoeffVec=data.get_backscatCoeff(); 
+	vector<Radx::fl32> extinctionVec=data.get_extinction();
 	
 	for(unsigned int i=0;i<volDepolVec.size();i++)
 	  {
