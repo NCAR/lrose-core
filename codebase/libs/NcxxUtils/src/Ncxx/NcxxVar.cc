@@ -1436,7 +1436,9 @@ void NcxxVar::getVal(float* dataValues) const {
   else
     ncxxCheck(nc_get_var_float(groupId, myId,dataValues),__FILE__,__LINE__);
 }
+
 // Reads the entire data of the netCDF variable.
+
 void NcxxVar::getVal(double* dataValues) const {
   NcxxType::ncxxType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
@@ -1444,6 +1446,7 @@ void NcxxVar::getVal(double* dataValues) const {
   else
     ncxxCheck(nc_get_var_double(groupId, myId,dataValues),__FILE__,__LINE__);
 }
+
 // Reads the entire data of the netCDF variable.
 void NcxxVar::getVal(unsigned short* dataValues) const {
   NcxxType::ncxxType typeClass(getType().getTypeClass());
