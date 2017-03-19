@@ -718,11 +718,11 @@ int NcxxRadxFile::_addGlobalAttributes()
         if (sscanf(attr.val.c_str(), "%d", &ival) == 1) {
           _file.addGlobAttr(attr.name, ival);
         } else {
-          cerr << "ERROR - NcxxRadxFile::_addGlobalAttributes()" << endl;
-          cerr << "  Cannot decode user-defined global attribute" << endl;
-          cerr << "    name: " << attr.name << endl;
-          cerr << "    type: int" << endl;
-          cerr << "    val: " << attr.val << endl;
+          _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+          _addErrStr("  Cannot decode user-defined global attribute");
+          _addErrStr("   name: ", attr.name);
+          _addErrStr("    type: int");
+          _addErrStr("    val: ", attr.val);
         }
         break;
       }
@@ -731,11 +731,11 @@ int NcxxRadxFile::_addGlobalAttributes()
         if (sscanf(attr.val.c_str(), "%lg", &dval) == 1) {
           _file.addGlobAttr(attr.name, dval);
         } else {
-          cerr << "ERROR - NcxxRadxFile::_addGlobalAttributes()" << endl;
-          cerr << "  Cannot decode user-defined global attribute" << endl;
-          cerr << "    name: " << attr.name << endl;
-          cerr << "    type: double" << endl;
-          cerr << "    val: " << attr.val << endl;
+          _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+          _addErrStr("  Cannot decode user-defined global attribute");
+          _addErrStr("   name: ", attr.name);
+          _addErrStr("    type: double");
+          _addErrStr("    val: ", attr.val);
         }
         break;
       }
@@ -758,13 +758,22 @@ int NcxxRadxFile::_addGlobalAttributes()
           }
         } // jj
         if (!haveError) {
-          _file.addGlobAttr(attr.name, toks.size(), ivals);
+          try {
+            _file.putAtt(attr.name, ncxxInt, toks.size(), ivals);
+          } catch (NcxxException& e) {
+            haveError = true;
+            _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+            _addErrStr("  Cannot put attribute");
+            _addErrStr("  Exception: ", e.what());
+          }
         } else {
-          cerr << "ERROR - NcxxRadxFile::_addGlobalAttributes()" << endl;
-          cerr << "  Cannot decode user-defined global attribute" << endl;
-          cerr << "    name: " << attr.name << endl;
-          cerr << "    type: int[]" << endl;
-          cerr << "    vals: " << attr.val << endl;
+          _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+          _addErrStr("  Cannot decode user-defined global attribute");
+        }
+        if (haveError) {
+          _addErrStr("   name: ", attr.name);
+          _addErrStr("    type: int[]");
+          _addErrStr("    val: ", attr.val);
         }
         break;
       }
@@ -787,13 +796,22 @@ int NcxxRadxFile::_addGlobalAttributes()
           }
         } // jj
         if (!haveError) {
-          _file.addGlobAttr(attr.name, toks.size(), dvals);
+          try {
+            _file.putAtt(attr.name, ncxxDouble, toks.size(), dvals);
+          } catch (NcxxException& e) {
+            haveError = true;
+            _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+            _addErrStr("  Cannot put attribute");
+            _addErrStr("  Exception: ", e.what());
+          }
         } else {
-          cerr << "ERROR - NcxxRadxFile::_addGlobalAttributes()" << endl;
-          cerr << "  Cannot decode user-defined global attribute" << endl;
-          cerr << "    name: " << attr.name << endl;
-          cerr << "    type: double[]" << endl;
-          cerr << "    vals: " << attr.val << endl;
+          _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+          _addErrStr("  Cannot decode user-defined global attribute");
+        }
+        if (haveError) {
+          _addErrStr("   name: ", attr.name);
+          _addErrStr("    type: double[]");
+          _addErrStr("    val: ", attr.val);
         }
         break;
       }
@@ -913,64 +931,72 @@ int NcxxRadxFile::_addCoordinateVariables()
 
   // time
 
-  if ((_timeVar = _file.getNcFile()->add_var(TIME,
-                                             ncDouble, _timeDim)) == NULL) {
+  try {
+    _timeVar = _file.addVar(TIME, ncxxInt, _timeDim);
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_addCoordinateVariables");
+    _addErrStr("  Exception: ", e.what());
     _addErrStr("  Cannot add time var");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
   int iret = 0;
-  iret |= _file.addAttr(_timeVar, STANDARD_NAME, TIME);
-  iret |= _file.addAttr(_timeVar, LONG_NAME,
-                        "time in seconds since volume start");
-  iret |= _file.addAttr(_timeVar, CALENDAR, GREGORIAN);
+  iret |= _timeVar.addAttr(STANDARD_NAME, TIME);
+  iret |= _timeVar.addAttr(LONG_NAME,
+                           "time in seconds since volume start");
+  iret |= _timeVar.addAttr(CALENDAR, GREGORIAN);
 
   char timeUnitsStr[256];
   RadxTime stime(_writeVol->getStartTimeSecs());
   sprintf(timeUnitsStr, "seconds since %.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
           stime.getYear(), stime.getMonth(), stime.getDay(),
           stime.getHour(), stime.getMin(), stime.getSec());
-  iret |= _file.addAttr(_timeVar, UNITS, timeUnitsStr);
+  iret |= _timeVar.addAttr(UNITS, timeUnitsStr);
 
-  iret |= _file.addAttr(_timeVar, COMMENT,
-                        "times are relative to the volume start_time");
+  iret |= _timeVar.addAttr( COMMENT,
+                            "times are relative to the volume start_time");
   
   // range
   
   if (_gateGeomVaries) {
   
-    if ((_rangeVar =
-         _file.getNcFile()->add_var(RANGE,
-                                    ncFloat, _timeDim, _rangeDim)) == NULL) {
+    try {
+      vector<NcxxDim> dims;
+      dims.push_back(_timeDim);
+      dims.push_back(_rangeDim);
+      _rangeVar = _file.addVar(RANGE, ncxxFloat, dims);
+    } catch (NcxxException& e) {
       _addErrStr("ERROR - NcxxRadxFile::_addCoordinateVariables");
+      _addErrStr("  Exception: ", e.what());
       _addErrStr("  Cannot add range var");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
       return -1;
     }
 
   } else {
 
-    if ((_rangeVar = _file.getNcFile()->add_var(RANGE,
-                                                ncFloat, _rangeDim)) == NULL) {
+    try {
+      _rangeVar = _file.addVar(RANGE, ncxxFloat, _rangeDim);
+    } catch (NcxxException& e) {
       _addErrStr("ERROR - NcxxRadxFile::_addCoordinateVariables");
+      _addErrStr("  Exception: ", e.what());
       _addErrStr("  Cannot add range var");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
       return -1;
     }
 
   }
 
-  iret |= _file.addAttr(_rangeVar, LONG_NAME, RANGE_LONG);
-  iret |= _file.addAttr(_rangeVar, LONG_NAME,
-                        "Range from instrument to center of gate");
-  iret |= _file.addAttr(_rangeVar, UNITS, METERS);
-  iret |= _file.addAttr(_rangeVar, SPACING_IS_CONSTANT, "true");
-  iret |= _file.addAttr(_rangeVar, METERS_TO_CENTER_OF_FIRST_GATE,
-                        (float) _writeVol->getStartRangeKm() * 1000.0);
-  iret |= _file.addAttr(_rangeVar, METERS_BETWEEN_GATES, 
-                        (float) _writeVol->getGateSpacingKm() * 1000.0);
-
+  iret |= _rangeVar.addAttr(LONG_NAME, RANGE_LONG);
+  iret |= _rangeVar.addAttr(LONG_NAME,
+                            "Range from instrument to center of gate");
+  iret |= _rangeVar.addAttr(UNITS, METERS);
+  iret |= _rangeVar.addAttr(SPACING_IS_CONSTANT, "true");
+  iret |= _rangeVar.addAttr(METERS_TO_CENTER_OF_FIRST_GATE,
+                            (float) _writeVol->getStartRangeKm() * 1000.0);
+  iret |= _rangeVar.addAttr(METERS_BETWEEN_GATES, 
+                            (float) _writeVol->getGateSpacingKm() * 1000.0);
+  
   if (iret) {
     _addErrStr("ERROR - NcxxRadxFile::_addCoordinateVariables");
     _addErrStr("  Cannot add attributes");
