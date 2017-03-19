@@ -1373,7 +1373,7 @@ int NcxxRadxFile::_readPositionVariables()
     _latitude.push_back(0.0);
   }
 
-  if (_longitudeVar.isNull()) {
+  if (!_longitudeVar.isNull()) {
     double *data = new double[_longitudeVar.numVals()];
     try {
       _longitudeVar.getVal(data);
@@ -1391,7 +1391,7 @@ int NcxxRadxFile::_readPositionVariables()
     _longitude.push_back(0.0);
   }
 
-  if (_altitudeVar.isNull()) {
+  if (!_altitudeVar.isNull()) {
     double *data = new double[_altitudeVar.numVals()];
     try {
       _altitudeVar.getVal(data);
@@ -1409,7 +1409,7 @@ int NcxxRadxFile::_readPositionVariables()
     _altitude.push_back(0.0);
   }
 
-  if (_altitudeAglVar.isNull()) {
+  if (!_altitudeAglVar.isNull()) {
     double *data = new double[_altitudeAglVar.numVals()];
     try {
       _altitudeAglVar.getVal(data);
@@ -2411,37 +2411,37 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     
     string standardName;
     NcxxVarAtt standardNameAtt = var.getAtt(STANDARD_NAME);
-    if (standardNameAtt.isNull()) {
+    if (!standardNameAtt.isNull()) {
       standardName = standardNameAtt.asString();
     }
     
     string longName;
     NcxxVarAtt longNameAtt = var.getAtt(LONG_NAME);
-    if (longNameAtt.isNull()) {
+    if (!longNameAtt.isNull()) {
       longName = longNameAtt.asString();
     }
 
     string units;
     NcxxVarAtt unitsAtt = var.getAtt(UNITS);
-    if (unitsAtt.isNull()) {
+    if (!unitsAtt.isNull()) {
       units = unitsAtt.asString();
     }
 
     string legendXml;
     NcxxVarAtt legendXmlAtt = var.getAtt(LEGEND_XML);
-    if (legendXmlAtt.isNull()) {
+    if (!legendXmlAtt.isNull()) {
       legendXml = legendXmlAtt.asString();
     }
 
     string thresholdingXml;
     NcxxVarAtt thresholdingXmlAtt = var.getAtt(THRESHOLDING_XML);
-    if (thresholdingXmlAtt.isNull()) {
+    if (!thresholdingXmlAtt.isNull()) {
       thresholdingXml = thresholdingXmlAtt.asString();
     }
     
     float samplingRatio = Radx::missingMetaFloat;
     NcxxVarAtt samplingRatioAtt = var.getAtt(SAMPLING_RATIO);
-    if (samplingRatioAtt.isNull()) {
+    if (!samplingRatioAtt.isNull()) {
       vector<float> vals;
       if (samplingRatioAtt.getValues(vals) == 0) {
         samplingRatio = vals[0];
@@ -2454,21 +2454,21 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     float foldLimitLower = Radx::missingMetaFloat;
     float foldLimitUpper = Radx::missingMetaFloat;
     NcxxVarAtt fieldFoldsAtt = var.getAtt(FIELD_FOLDS);
-    if (fieldFoldsAtt.isNull()) {
+    if (!fieldFoldsAtt.isNull()) {
       string fieldFoldsStr = fieldFoldsAtt.asString();
       if (fieldFoldsStr == "true"
           || fieldFoldsStr == "TRUE"
           || fieldFoldsStr == "True") {
         fieldFolds = true;
         NcxxVarAtt foldLimitLowerAtt = var.getAtt(FOLD_LIMIT_LOWER);
-        if (foldLimitLowerAtt.isNull()) {
+        if (!foldLimitLowerAtt.isNull()) {
           vector<float> vals;
           if (foldLimitLowerAtt.getValues(vals) == 0) {
             foldLimitLower = vals[0];
           }
         }
         NcxxVarAtt foldLimitUpperAtt = var.getAtt(FOLD_LIMIT_UPPER);
-        if (foldLimitUpperAtt.isNull()) {
+        if (!foldLimitUpperAtt.isNull()) {
           vector<float> vals;
           if (foldLimitUpperAtt.getValues(vals) == 0) {
             foldLimitUpper = vals[0];
@@ -2481,7 +2481,7 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
 
     bool isDiscrete = false;
     NcxxVarAtt isDiscreteAtt = var.getAtt(IS_DISCRETE);
-    if (isDiscreteAtt.isNull()) {
+    if (!isDiscreteAtt.isNull()) {
       string isDiscreteStr = isDiscreteAtt.asString();
       if (isDiscreteStr == "true"
           || isDiscreteStr == "TRUE"
@@ -2494,7 +2494,7 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
 
     double offset = 0.0;
     NcxxVarAtt offsetAtt = var.getAtt(ADD_OFFSET);
-    if (offsetAtt.isNull()) {
+    if (!offsetAtt.isNull()) {
       vector<double> vals;
       if (offsetAtt.getValues(vals) == 0) {
         offset = vals[0];
@@ -2503,7 +2503,7 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
 
     double scale = 1.0;
     NcxxVarAtt scaleAtt = var.getAtt(SCALE_FACTOR);
-    if (scaleAtt.isNull()) {
+    if (!scaleAtt.isNull()) {
       vector<double> vals;
       if (scaleAtt.getValues(vals) == 0) {
         scale = vals[0];
@@ -2614,7 +2614,7 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
 // read a ray variable - double
 // side effects: set var, vals
 
-int NcxxRadxFile::_readRayVar(NcxxVar& var, const string &name,
+int NcxxRadxFile::_readRayVar(NcxxVar &var, const string &name,
                               vector<double> &vals, bool required)
 
 {
@@ -2623,8 +2623,7 @@ int NcxxRadxFile::_readRayVar(NcxxVar& var, const string &name,
 
   // get var
 
-  var = _getRayVar(name, required);
-  if (var.isNull()) {
+  if (_getRayVar(var, name, required)) {
     if (!required) {
       for (size_t ii = 0; ii < _nTimesInFile; ii++) {
         vals.push_back(Radx::missingMetaDouble);
@@ -2679,7 +2678,7 @@ int NcxxRadxFile::_readRayVar(const string &name,
 // read a ray variable - integer
 // side effects: set var, vals
 
-int NcxxRadxFile::_readRayVar(NcxxVar& var, const string &name,
+int NcxxRadxFile::_readRayVar(NcxxVar &var, const string &name,
                               vector<int> &vals, bool required)
 
 {
@@ -2688,8 +2687,7 @@ int NcxxRadxFile::_readRayVar(NcxxVar& var, const string &name,
 
   // get var
   
-  var = _getRayVar(name, required);
-  if (var.isNull()) {
+  if (_getRayVar(var, name, required)) {
     if (!required) {
       for (size_t ii = 0; ii < _nTimesInFile; ii++) {
         vals.push_back(Radx::missingMetaInt);
@@ -2704,14 +2702,14 @@ int NcxxRadxFile::_readRayVar(NcxxVar& var, const string &name,
 
   // load up data
 
-  int *data = new int[_nTimesInFile];
-  int *dd = data;
   int iret = 0;
-  if (var.get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
-      vals.push_back(*dd);
+  int *data = new int[_nTimesInFile];
+  try {
+    var.getVal(data);
+    for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+      vals.push_back(data[ii]);
     }
-  } else {
+  } catch (NcxxException& e) {
     if (!required) {
       for (size_t ii = 0; ii < _nTimesInFile; ii++) {
         vals.push_back(Radx::missingMetaInt);
@@ -2736,7 +2734,7 @@ int NcxxRadxFile::_readRayVar(NcxxVar& var, const string &name,
 int NcxxRadxFile::_readRayVar(const string &name,
                               vector<int> &vals, bool required)
 {
-  NcVar *var;
+  NcxxVar var;
   return _readRayVar(var, name, vals, required);
 }
 
@@ -2744,7 +2742,7 @@ int NcxxRadxFile::_readRayVar(const string &name,
 // read a ray variable - boolean
 // side effects: set var, vals
 
-int NcxxRadxFile::_readRayVar(NcxxVar& var, const string &name,
+int NcxxRadxFile::_readRayVar(NcxxVar &var, const string &name,
                               vector<bool> &vals, bool required)
   
 {
@@ -2753,8 +2751,7 @@ int NcxxRadxFile::_readRayVar(NcxxVar& var, const string &name,
   
   // get var
   
-  var = _getRayVar(name, false);
-  if (var.isNull()) {
+  if (_getRayVar(var, name, required)) {
     if (!required) {
       for (size_t ii = 0; ii < _nTimesInFile; ii++) {
         vals.push_back(false);
@@ -2768,23 +2765,30 @@ int NcxxRadxFile::_readRayVar(NcxxVar& var, const string &name,
   }
 
   // load up data
-  
-  int *data = new int[_nTimesInFile];
-  int *dd = data;
+
   int iret = 0;
-  if (var.get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
-      if (*dd == 0) {
+  int *data = new int[_nTimesInFile];
+  try {
+    var.getVal(data);
+    for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+      if (data[ii] == 0) {
         vals.push_back(false);
       } else {
         vals.push_back(true);
       }
     }
-  } else {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-      vals.push_back(false);
+  } catch (NcxxException& e) {
+    if (!required) {
+      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+        vals.push_back(false);
+      }
+      clearErrStr();
+    } else {
+      _addErrStr("ERROR - NcxxRadxFile::_readRayVar");
+      _addErrStr("  Cannot read variable: ", name);
+      _addErrStr(_file.getErrStr());
+      iret = -1;
     }
-    clearErrStr();
   }
   delete[] data;
   return iret;
@@ -2798,28 +2802,28 @@ int NcxxRadxFile::_readRayVar(NcxxVar& var, const string &name,
 int NcxxRadxFile::_readRayVar(const string &name,
                               vector<bool> &vals, bool required)
 {
-  NcVar *var;
+  NcxxVar var;
   return _readRayVar(var, name, vals, required);
 }
 
 ///////////////////////////////////
 // get a ray variable by name
-// returns NULL on failure
+// returns 0 on success, -1 on failure
 
-NcxxVar& NcxxRadxFile::_getRayVar(const string &name, bool required)
+int NcxxRadxFile::_getRayVar(NcxxVar &var, const string &name, bool required)
 
 {
 
   // get var
   
-  NcVar *var = _file.getVar(name.c_str());
+  var = _file.getVar(name);
   if (var.isNull()) {
     if (required) {
       _addErrStr("ERROR - NcxxRadxFile::_getRayVar");
       _addErrStr("  Cannot read variable, name: ", name);
       _addErrStr(_file.getErrStr());
     }
-    return NULL;
+    return -1;
   }
 
   // check time dimension
@@ -2830,9 +2834,9 @@ NcxxVar& NcxxRadxFile::_getRayVar(const string &name, bool required)
       _addErrStr("  variable name: ", name);
       _addErrStr("  variable has no dimensions");
     }
-    return NULL;
+    return -1;
   }
-  NcxxDim *timeDim = var.getDim(0);
+  NcxxDim timeDim = var.getDim(0);
   if (timeDim != _timeDim) {
     if (required) {
       _addErrStr("ERROR - NcxxRadxFile::_getRayVar");
@@ -2841,17 +2845,17 @@ NcxxVar& NcxxRadxFile::_getRayVar(const string &name, bool required)
                  timeDim.getName());
       _addErrStr("  should be: ", TIME);
     }
-    return NULL;
+    return -1;
   }
 
-  return var;
+  return 0;
 
 }
 
 ///////////////////////////////////
 // read a sweep variable - double
 
-int NcxxRadxFile::_readSweepVar(NcxxVar& var, const string &name,
+int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
                                 vector<double> &vals, bool required)
 
 {
@@ -2860,11 +2864,10 @@ int NcxxRadxFile::_readSweepVar(NcxxVar& var, const string &name,
 
   // get var
 
-  int nSweeps = _sweepDim.getSize();
-  var = _getSweepVar(name);
-  if (var.isNull()) {
+  size_t nSweeps = _sweepDim.getSize();
+  if (_getSweepVar(var, name)) {
     if (!required) {
-      for (int ii = 0; ii < nSweeps; ii++) {
+      for (size_t ii = 0; ii < nSweeps; ii++) {
         vals.push_back(Radx::missingMetaDouble);
       }
       clearErrStr();
@@ -2877,16 +2880,16 @@ int NcxxRadxFile::_readSweepVar(NcxxVar& var, const string &name,
 
   // load up data
 
-  double *data = new double[nSweeps];
-  double *dd = data;
   int iret = 0;
-  if (var.get(data, nSweeps)) {
-    for (int ii = 0; ii < nSweeps; ii++, dd++) {
-      vals.push_back(*dd);
+  double *data = new double[nSweeps];
+  try {
+    var.getVal(data);
+    for (size_t ii = 0; ii < nSweeps; ii++) {
+      vals.push_back(data[ii]);
     }
-  } else {
+  } catch (NcxxException& e) {
     if (!required) {
-      for (int ii = 0; ii < nSweeps; ii++) {
+      for (size_t ii = 0; ii < nSweeps; ii++) {
         vals.push_back(Radx::missingMetaDouble);
       }
       clearErrStr();
@@ -2905,7 +2908,7 @@ int NcxxRadxFile::_readSweepVar(NcxxVar& var, const string &name,
 ///////////////////////////////////
 // read a sweep variable - integer
 
-int NcxxRadxFile::_readSweepVar(NcxxVar& var, const string &name,
+int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
                                 vector<int> &vals, bool required)
 
 {
@@ -2914,11 +2917,10 @@ int NcxxRadxFile::_readSweepVar(NcxxVar& var, const string &name,
 
   // get var
 
-  int nSweeps = _sweepDim.getSize();
-  var = _getSweepVar(name);
-  if (var.isNull()) {
+  size_t nSweeps = _sweepDim.getSize();
+  if (_getSweepVar(var, name)) {
     if (!required) {
-      for (int ii = 0; ii < nSweeps; ii++) {
+      for (size_t ii = 0; ii < nSweeps; ii++) {
         vals.push_back(Radx::missingMetaInt);
       }
       clearErrStr();
@@ -2931,16 +2933,16 @@ int NcxxRadxFile::_readSweepVar(NcxxVar& var, const string &name,
 
   // load up data
 
-  int *data = new int[nSweeps];
-  int *dd = data;
   int iret = 0;
-  if (var.get(data, nSweeps)) {
-    for (int ii = 0; ii < nSweeps; ii++, dd++) {
-      vals.push_back(*dd);
+  int *data = new int[nSweeps];
+  try {
+    var.getVal(data);
+    for (size_t ii = 0; ii < nSweeps; ii++) {
+      vals.push_back(data[ii]);
     }
-  } else {
+  } catch (NcxxException& e) {
     if (!required) {
-      for (int ii = 0; ii < nSweeps; ii++) {
+      for (size_t ii = 0; ii < nSweeps; ii++) {
         vals.push_back(Radx::missingMetaInt);
       }
       clearErrStr();
@@ -2959,18 +2961,18 @@ int NcxxRadxFile::_readSweepVar(NcxxVar& var, const string &name,
 ///////////////////////////////////
 // read a sweep variable - string
 
-int NcxxRadxFile::_readSweepVar(NcxxVar& var, const string &name,
+int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
                                 vector<string> &vals, bool required)
 
 {
 
   // get var
   
-  int nSweeps = _sweepDim.getSize();
-  var = _file.getVar(name.c_str());
+  size_t nSweeps = _sweepDim.getSize();
+  var = _file.getVar(name);
   if (var.isNull()) {
     if (!required) {
-      for (int ii = 0; ii < nSweeps; ii++) {
+      for (size_t ii = 0; ii < nSweeps; ii++) {
         vals.push_back("");
       }
       clearErrStr();
@@ -2984,14 +2986,14 @@ int NcxxRadxFile::_readSweepVar(NcxxVar& var, const string &name,
   }
 
   // check sweep dimension
-
+  
   if (var.getDimCount() < 2) {
     _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has fewer than 2 dimensions");
     return -1;
   }
-  NcxxDim *sweepDim = var.getDim(0);
+  NcxxDim sweepDim = var.getDim(0);
   if (sweepDim != _sweepDim) {
     _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
     _addErrStr("  variable name: ", name);
@@ -3000,7 +3002,7 @@ int NcxxRadxFile::_readSweepVar(NcxxVar& var, const string &name,
     _addErrStr("  should be: ", SWEEP);
     return -1;
   }
-  NcxxDim *stringLenDim = var.getDim(1);
+  NcxxDim stringLenDim = var.getDim(1);
   if (stringLenDim.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
     _addErrStr("  variable name: ", name);
@@ -3009,8 +3011,8 @@ int NcxxRadxFile::_readSweepVar(NcxxVar& var, const string &name,
     return -1;
   }
 
-  NcxxType ntype = var.getType();
-  if (ntype != ncChar) {
+  int ntype = var.getType().getId();
+  if (ntype != NC_CHAR) {
     _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
     _addErrStr("  Incorrect variable type");
     _addErrStr("  Expecting char");
@@ -3020,12 +3022,13 @@ int NcxxRadxFile::_readSweepVar(NcxxVar& var, const string &name,
 
   // load up data
 
-  int stringLen = stringLenDim.getSize();
-  int nChars = nSweeps * stringLen;
+  size_t stringLen = stringLenDim.getSize();
+  size_t nChars = nSweeps * stringLen;
   char *cvalues = new char[nChars];
-  if (var.get(cvalues, nSweeps, stringLen)) {
+  try {
+    var.getVal(cvalues);
     // replace white space with nulls
-    for (int ii = 0; ii < nChars; ii++) {
+    for (size_t ii = 0; ii < nChars; ii++) {
       if (isspace(cvalues[ii])) {
         cvalues[ii] = '\0';
       }
@@ -3033,17 +3036,21 @@ int NcxxRadxFile::_readSweepVar(NcxxVar& var, const string &name,
     // ensure null termination
     char *cv = cvalues;
     char *cval = new char[stringLen+1];
-    for (int ii = 0; ii < nSweeps; ii++, cv += stringLen) {
+    for (size_t ii = 0; ii < nSweeps; ii++, cv += stringLen) {
       memcpy(cval, cv, stringLen);
       cval[stringLen] = '\0';
       vals.push_back(string(cval));
     }
     delete[] cval;
-  } else {
-    _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
-    _addErrStr("  Cannot read variable: ", name);
-    _addErrStr(_file.getErrStr());
-    return -1;
+  } catch (NcxxException& e) {
+    if (!required) {
+      clearErrStr();
+    } else {
+      _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
+      _addErrStr("  Cannot read variable: ", name);
+      _addErrStr(_file.getErrStr());
+      return -1;
+    }
   }
   delete[] cvalues;
 
@@ -3053,41 +3060,41 @@ int NcxxRadxFile::_readSweepVar(NcxxVar& var, const string &name,
 
 ///////////////////////////////////
 // get a sweep variable
-// returns NULL on failure
+// returns 0 on success, -1 on failure
 
-NcxxVar& NcxxRadxFile::_getSweepVar(const string &name)
+int NcxxRadxFile::_getSweepVar(NcxxVar &var, const string &name)
 
 {
   
   // get var
   
-  NcVar *var = _file.getVar(name.c_str());
+  var = _file.getVar(name);
   if (var.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_getSweepVar");
     _addErrStr("  Cannot read variable, name: ", name);
     _addErrStr(_file.getErrStr());
-    return NULL;
+    return -1;
   }
 
   // check sweep dimension
-
+  
   if (var.getDimCount() < 1) {
     _addErrStr("ERROR - NcxxRadxFile::_getSweepVar");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has no dimensions");
-    return NULL;
+    return -1;
   }
-  NcxxDim *sweepDim = var.getDim(0);
+  NcxxDim sweepDim = var.getDim(0);
   if (sweepDim != _sweepDim) {
     _addErrStr("ERROR - NcxxRadxFile::_getSweepVar");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has incorrect dimension, dim name: ",
                sweepDim.getName());
     _addErrStr("  should be: ", SWEEP);
-    return NULL;
+    return -1;
   }
 
-  return var;
+  return 0;
 
 }
 
@@ -3095,12 +3102,12 @@ NcxxVar& NcxxRadxFile::_getSweepVar(const string &name)
 // get calibration time
 // returns -1 on failure
 
-int NcxxRadxFile::_readCalTime(const string &name, NcxxVar& var,
+int NcxxRadxFile::_readCalTime(const string &name, NcxxVar &var,
                                int index, time_t &val)
 
 {
 
-  var = _file.getVar(name.c_str());
+  var = _file.getVar(name);
 
   if (var.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
@@ -3119,7 +3126,7 @@ int NcxxRadxFile::_readCalTime(const string &name, NcxxVar& var,
     return -1;
   }
 
-  NcxxDim *rCalDim = var.getDim(0);
+  NcxxDim rCalDim = var.getDim(0);
   if (rCalDim != _calDim) {
     _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
     _addErrStr("  variable name: ", name);
@@ -3129,7 +3136,7 @@ int NcxxRadxFile::_readCalTime(const string &name, NcxxVar& var,
     return -1;
   }
 
-  NcxxDim *stringLenDim = var.getDim(1);
+  NcxxDim stringLenDim = var.getDim(1);
   if (stringLenDim.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
     _addErrStr("  variable name: ", name);
@@ -3138,8 +3145,8 @@ int NcxxRadxFile::_readCalTime(const string &name, NcxxVar& var,
     return -1;
   }
   
-  NcxxType ntype = var.getType();
-  if (ntype != ncChar) {
+  int ntype = var.getType().getId();
+  if (ntype != NC_CHAR) {
     _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
     _addErrStr("  Incorrect variable type");
     _addErrStr("  Expecting char");
@@ -3149,8 +3156,8 @@ int NcxxRadxFile::_readCalTime(const string &name, NcxxVar& var,
 
   // load up data
   
-  int nCals = _calDim.getSize();
-  if (index > nCals - 1) {
+  size_t nCals = _calDim.getSize();
+  if (index > (int) nCals - 1) {
     _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
     _addErrStr("  requested index too high");
     _addErrStr("  cal variable name: ", name);
@@ -3159,14 +3166,15 @@ int NcxxRadxFile::_readCalTime(const string &name, NcxxVar& var,
     return -1;
   }
 
-  int stringLen = stringLenDim.getSize();
-  int nChars = nCals * stringLen;
+  size_t stringLen = stringLenDim.getSize();
+  size_t nChars = nCals * stringLen;
   char *cvalues = new char[nChars];
   vector<string> times;
-  if (var.get(cvalues, nCals, stringLen)) {
+  try {
+    var.getVal(cvalues);
     char *cv = cvalues;
     char *cval = new char[stringLen+1];
-    for (int ii = 0; ii < nCals; ii++, cv += stringLen) {
+    for (size_t ii = 0; ii < nCals; ii++, cv += stringLen) {
       // ensure null termination
       memcpy(cval, cv, stringLen);
       cval[stringLen] = '\0';
@@ -3174,14 +3182,15 @@ int NcxxRadxFile::_readCalTime(const string &name, NcxxVar& var,
       cv[stringLen-1] = '\0';
     }
     delete[] cval;
-  } else {
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
     _addErrStr("  Cannot read variable: ", name);
     _addErrStr(_file.getErrStr());
     delete[] cvalues;
     return -1;
   }
-
+  delete[] cvalues;
+  
   const char *timeStr = times[index].c_str();
   int year, month, day, hour, min, sec;
   if (sscanf(timeStr, "%4d-%2d-%2dT%2d:%2d:%2dZ",
@@ -3203,13 +3212,13 @@ int NcxxRadxFile::_readCalTime(const string &name, NcxxVar& var,
 // get calibration variable
 // returns -1 on failure
 
-int NcxxRadxFile::_readCalVar(const string &name, NcxxVar& var,
+int NcxxRadxFile::_readCalVar(const string &name, NcxxVar &var,
                               int index, double &val, bool required)
   
 {
 
   val = Radx::missingMetaDouble;
-  var = _file.getVar(name.c_str());
+  var = _file.getVar(name);
 
   if (var.isNull()) {
     if (!required) {
@@ -3232,9 +3241,23 @@ int NcxxRadxFile::_readCalVar(const string &name, NcxxVar& var,
     return -1;
   }
 
-  val = var.as_double(index);
+  // read value
 
-  return 0;
+  vector<size_t> indices;
+  indices.push_back(index);
+  double data;
+  int iret = 0;
+  try {
+    var.getVal(indices, &data);
+    val = data;
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxRadxFile::_readCalVarVar");
+    _addErrStr("  Cannot read variable: ", name);
+    _addErrStr(_file.getErrStr());
+    iret = -1;
+  }
+
+  return iret;
 
 }
 
@@ -3243,7 +3266,7 @@ int NcxxRadxFile::_readCalVar(const string &name, NcxxVar& var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_addFl64FieldToRays(NcxxVar& var,
+int NcxxRadxFile::_addFl64FieldToRays(NcxxVar &var,
                                       const string &name,
                                       const string &units,
                                       const string &standardName,
@@ -3257,30 +3280,33 @@ int NcxxRadxFile::_addFl64FieldToRays(NcxxVar& var,
 
   // get data from array
 
-  Radx::fl64 *data = new Radx::fl64[_nPoints];
-  int iret = 0;
+  size_t nVals = _nTimesInFile * _nRangeInFile;
   if (_nGatesVary) {
-    iret = !var.get(data, _nPoints);
-  } else {
-    iret = !var.get(data, _nTimesInFile, _nRangeInFile);
+    nVals = _nPoints;
   }
-  if (iret) {
+  Radx::fl64 *data = new Radx::fl64[nVals];
+
+  try {
+    var.getVal(data);
+  } catch (NcxxException& e) {
     delete[] data;
     return -1;
   }
-
+  
   // set missing value
-
+  
   Radx::fl64 missingVal = Radx::missingFl64;
   NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
-  if (missingValueAtt.isNull()) {
-    missingVal = missingValueAtt->as_double(0);
-    delete missingValueAtt;
+  if (!missingValueAtt.isNull()) {
+    vector<double> vals;
+    if (missingValueAtt.getValues(vals) == 0) {
+      missingVal = vals[0];
+    }
   } else {
     missingValueAtt = var.getAtt(FILL_VALUE);
-    if (missingValueAtt.isNull()) {
-      missingVal = missingValueAtt->as_double(0);
-      delete missingValueAtt;
+    vector<double> vals;
+    if (missingValueAtt.getValues(vals) == 0) {
+      missingVal = vals[0];
     }
   }
 
@@ -3345,7 +3371,7 @@ int NcxxRadxFile::_addFl64FieldToRays(NcxxVar& var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_addFl32FieldToRays(NcxxVar& var,
+int NcxxRadxFile::_addFl32FieldToRays(NcxxVar &var,
                                       const string &name,
                                       const string &units,
                                       const string &standardName,
@@ -3359,33 +3385,36 @@ int NcxxRadxFile::_addFl32FieldToRays(NcxxVar& var,
 
   // get data from array
 
-  Radx::fl32 *data = new Radx::fl32[_nPoints];
-  int iret = 0;
+  size_t nVals = _nTimesInFile * _nRangeInFile;
   if (_nGatesVary) {
-    iret = !var.get(data, _nPoints);
-  } else {
-    iret = !var.get(data, _nTimesInFile, _nRangeInFile);
+    nVals = _nPoints;
   }
-  if (iret) {
+  Radx::fl32 *data = new Radx::fl32[nVals];
+
+  try {
+    var.getVal(data);
+  } catch (NcxxException& e) {
     delete[] data;
     return -1;
   }
-
+  
   // set missing value
-
+  
   Radx::fl32 missingVal = Radx::missingFl32;
   NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
-  if (missingValueAtt.isNull()) {
-    missingVal = missingValueAtt->as_double(0);
-    delete missingValueAtt;
+  if (!missingValueAtt.isNull()) {
+    vector<float> vals;
+    if (missingValueAtt.getValues(vals) == 0) {
+      missingVal = vals[0];
+    }
   } else {
     missingValueAtt = var.getAtt(FILL_VALUE);
-    if (missingValueAtt.isNull()) {
-      missingVal = missingValueAtt->as_double(0);
-      delete missingValueAtt;
+    vector<float> vals;
+    if (missingValueAtt.getValues(vals) == 0) {
+      missingVal = vals[0];
     }
   }
-  
+
   // reset nans to missing
   
   for (int ii = 0; ii < _nPoints; ii++) {
@@ -3447,7 +3476,7 @@ int NcxxRadxFile::_addFl32FieldToRays(NcxxVar& var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_addSi32FieldToRays(NcxxVar& var,
+int NcxxRadxFile::_addSi32FieldToRays(NcxxVar &var,
                                       const string &name,
                                       const string &units,
                                       const string &standardName,
@@ -3462,33 +3491,36 @@ int NcxxRadxFile::_addSi32FieldToRays(NcxxVar& var,
 
   // get data from array
 
-  Radx::si32 *data = new Radx::si32[_nPoints];
-  int iret = 0;
+  size_t nVals = _nTimesInFile * _nRangeInFile;
   if (_nGatesVary) {
-    iret = !var.get(data, _nPoints);
-  } else {
-    iret = !var.get(data, _nTimesInFile, _nRangeInFile);
+    nVals = _nPoints;
   }
-  if (iret) {
+  Radx::si32 *data = new Radx::si32[nVals];
+  
+  try {
+    var.getVal(data);
+  } catch (NcxxException& e) {
     delete[] data;
     return -1;
   }
-
+  
   // set missing value
-
+  
   Radx::si32 missingVal = Radx::missingSi32;
   NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
-  if (missingValueAtt.isNull()) {
-    missingVal = missingValueAtt->as_int(0);
-    delete missingValueAtt;
+  if (!missingValueAtt.isNull()) {
+    vector<int> vals;
+    if (missingValueAtt.getValues(vals) == 0) {
+      missingVal = vals[0];
+    }
   } else {
     missingValueAtt = var.getAtt(FILL_VALUE);
-    if (missingValueAtt.isNull()) {
-      missingVal = missingValueAtt->as_int(0);
-      delete missingValueAtt;
+    vector<int> vals;
+    if (missingValueAtt.getValues(vals) == 0) {
+      missingVal = vals[0];
     }
   }
-  
+
   // load field on rays
 
   for (size_t ii = 0; ii < _raysToRead.size(); ii++) {
@@ -3543,7 +3575,7 @@ int NcxxRadxFile::_addSi32FieldToRays(NcxxVar& var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_addSi16FieldToRays(NcxxVar& var,
+int NcxxRadxFile::_addSi16FieldToRays(NcxxVar &var,
                                       const string &name,
                                       const string &units,
                                       const string &standardName,
@@ -3558,33 +3590,36 @@ int NcxxRadxFile::_addSi16FieldToRays(NcxxVar& var,
 
   // get data from array
 
-  Radx::si16 *data = new Radx::si16[_nPoints];
-  int iret = 0;
+  size_t nVals = _nTimesInFile * _nRangeInFile;
   if (_nGatesVary) {
-    iret = !var.get(data, _nPoints);
-  } else {
-    iret = !var.get(data, _nTimesInFile, _nRangeInFile);
+    nVals = _nPoints;
   }
-  if (iret) {
+  Radx::si16 *data = new Radx::si16[nVals];
+  
+  try {
+    var.getVal(data);
+  } catch (NcxxException& e) {
     delete[] data;
     return -1;
   }
-
+  
   // set missing value
-
+  
   Radx::si16 missingVal = Radx::missingSi16;
   NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
-  if (missingValueAtt.isNull()) {
-    missingVal = missingValueAtt->as_short(0);
-    delete missingValueAtt;
+  if (!missingValueAtt.isNull()) {
+    vector<short> vals;
+    if (missingValueAtt.getValues(vals) == 0) {
+      missingVal = vals[0];
+    }
   } else {
     missingValueAtt = var.getAtt(FILL_VALUE);
-    if (missingValueAtt.isNull()) {
-      missingVal = missingValueAtt->as_short(0);
-      delete missingValueAtt;
+    vector<short> vals;
+    if (missingValueAtt.getValues(vals) == 0) {
+      missingVal = vals[0];
     }
   }
-  
+
   // load field on rays
 
   for (size_t ii = 0; ii < _raysToRead.size(); ii++) {
@@ -3639,7 +3674,7 @@ int NcxxRadxFile::_addSi16FieldToRays(NcxxVar& var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_addSi08FieldToRays(NcxxVar& var,
+int NcxxRadxFile::_addSi08FieldToRays(NcxxVar &var,
                                       const string &name,
                                       const string &units,
                                       const string &standardName,
@@ -3654,33 +3689,36 @@ int NcxxRadxFile::_addSi08FieldToRays(NcxxVar& var,
 
   // get data from array
 
-  Radx::si08 *data = new Radx::si08[_nPoints];
-  int iret = 0;
+  size_t nVals = _nTimesInFile * _nRangeInFile;
   if (_nGatesVary) {
-    iret = !var.get((ncbyte *) data, _nPoints);
-  } else {
-    iret = !var.get((ncbyte *) data, _nTimesInFile, _nRangeInFile);
+    nVals = _nPoints;
   }
-  if (iret) {
+  Radx::si08 *data = new Radx::si08[nVals];
+  
+  try {
+    var.getVal(data);
+  } catch (NcxxException& e) {
     delete[] data;
     return -1;
   }
-
+  
   // set missing value
-
+  
   Radx::si08 missingVal = Radx::missingSi08;
   NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
-  if (missingValueAtt.isNull()) {
-    missingVal = missingValueAtt->as_ncbyte(0);
-    delete missingValueAtt;
+  if (!missingValueAtt.isNull()) {
+    vector<unsigned char> vals;
+    if (missingValueAtt.getValues(vals) == 0) {
+      missingVal = vals[0];
+    }
   } else {
     missingValueAtt = var.getAtt(FILL_VALUE);
-    if (missingValueAtt.isNull()) {
-      missingVal = missingValueAtt->as_ncbyte(0);
-      delete missingValueAtt;
+    vector<unsigned char> vals;
+    if (missingValueAtt.getValues(vals) == 0) {
+      missingVal = vals[0];
     }
   }
-  
+
   // load field on rays
 
   for (size_t ii = 0; ii < _raysToRead.size(); ii++) {
