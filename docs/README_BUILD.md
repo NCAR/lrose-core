@@ -121,7 +121,8 @@ For a full LROSE build under LINUX, you need the following packages:
 On Redhat-based hosts you can achieve this by running:
 
 ```
-yum install -y epel-release \
+yum install -y epel-release
+yum install -y \
 tcsh perl perl-Env ftp git svn cvs tkcvs emacs tkcvs m4 \
 gcc gcc-c++ gcc-gfortran glibc-devel libX11-devel libXext-devel \
 libpng-devel libtiff-devel jasper-devel zlib-devel expat-devel \
