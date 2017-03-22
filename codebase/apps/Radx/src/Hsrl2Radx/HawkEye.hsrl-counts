@@ -466,7 +466,7 @@ fields = {
     raw_name = "extinction",
     filtered_name = "",
     units = "",
-    color_map = "number_log.colors",
+    color_map = "number_log_n3.colors",
     shortcut = "g"
   }
  
