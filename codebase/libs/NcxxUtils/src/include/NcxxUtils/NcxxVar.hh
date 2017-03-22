@@ -1674,8 +1674,13 @@ public:
   ////////////////////////////////////////
   // set default fill value, based on type
     
-  void setDefaultFillvalue();
+  void setDefaultFillValue();
       
+  ////////////////////////////////////////
+  // set meta fill value, based on type
+  
+  void setMetaFillValue();
+
   ////////////////////////////////////////
   // convert var type string
     

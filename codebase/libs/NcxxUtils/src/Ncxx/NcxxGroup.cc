@@ -1781,7 +1781,7 @@ int NcxxGroup::addVar(NcxxVar &var,
     var.addAttr("units", units);
   }
   
-  var.setDefaultFillvalue();
+  var.setDefaultFillValue();
 
   return 0;
 

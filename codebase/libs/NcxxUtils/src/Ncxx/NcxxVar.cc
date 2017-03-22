@@ -2420,7 +2420,7 @@ int NcxxVar::writeStrings(const void *str)
 ////////////////////////////////////////
 // set default fill value, based on type
 
-void NcxxVar::setDefaultFillvalue()
+void NcxxVar::setDefaultFillValue()
 
 {
 
@@ -2450,6 +2450,41 @@ void NcxxVar::setDefaultFillvalue()
     return;
   }
   addAttr("_fillValue", Ncxx::missingInt);
+}
+
+////////////////////////////////////////
+// set meta fill value, based on type
+
+void NcxxVar::setMetaFillValue()
+
+{
+
+  nc_type vtype = getType().getId();
+  if (vtype == NC_DOUBLE) {
+    addAttr("_fillValue", Ncxx::missingMetaDouble);
+    return;
+  }
+  if (vtype == NC_FLOAT) {
+    addAttr("_fillValue", Ncxx::missingMetaFloat);
+    return;
+  }
+  if (vtype == NC_INT) {
+    addAttr("_fillValue", Ncxx::missingMetaInt);
+    return;
+  }
+  if (vtype == NC_LONG) {
+    addAttr("_fillValue", /* (long) */ Ncxx::missingMetaInt);
+    return;
+  }
+  if (vtype == NC_SHORT) {
+    addAttr("_fillValue", (short) Ncxx::missingMetaInt);
+    return;
+  }
+  if (vtype == NC_UBYTE) {
+    addAttr("_fillValue", Ncxx::missingMetaUchar);
+    return;
+  }
+  addAttr("_fillValue", Ncxx::missingMetaInt);
 }
 
 ////////////////////////////////////////

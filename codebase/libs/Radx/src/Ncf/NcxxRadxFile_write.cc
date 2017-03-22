@@ -1018,24 +1018,29 @@ int NcxxRadxFile::_addScalarVariables()
     cerr << "NcxxRadxFile::_addScalarVariables()" << endl;
   }
 
-  iret |= _file.addMetaVar(_volumeNumberVar, VOLUME_NUMBER,
-                           "", VOLUME_NUMBER_LONG, ncInt, "");
-
-  iret |= _file.addMetaVar(_platformTypeVar, PLATFORM_TYPE,
-                           "", PLATFORM_TYPE_LONG, ncChar, _stringLen32Dim, "");
-  iret |= _file.addAttr(_platformTypeVar, OPTIONS, Radx::platformTypeOptions());
+  iret |= _file.addVar(_volumeNumberVar, VOLUME_NUMBER,
+                       "", VOLUME_NUMBER_LONG, ncxxInt, "");
+  _volumeNumberVar.setMetaFillValue();
   
-  iret |= _file.addMetaVar(_primaryAxisVar, PRIMARY_AXIS,
-                           "", PRIMARY_AXIS_LONG, ncChar, _stringLen32Dim, "");
-  iret |= _file.addAttr(_primaryAxisVar, OPTIONS, Radx::primaryAxisOptions());
-
-  iret |= _file.addMetaVar(_statusXmlVar, STATUS_XML,
-                           "", "status_of_instrument", ncChar, _statusXmlDim, "");
+  iret |= _file.addVar(_platformTypeVar, PLATFORM_TYPE,
+                       "", PLATFORM_TYPE_LONG, ncxxChar, _stringLen32Dim, "");
+  _platformTypeVar.setMetaFillValue();
+  iret |= _platformTypeVar.addAttr(OPTIONS, Radx::platformTypeOptions());
   
-  iret |= _file.addMetaVar(_instrumentTypeVar, INSTRUMENT_TYPE,
-                           "", INSTRUMENT_TYPE_LONG, ncChar, _stringLen32Dim, "");
-  iret |= _file.addAttr(_instrumentTypeVar, OPTIONS, Radx::instrumentTypeOptions());
-  iret |= _file.addAttr(_instrumentTypeVar, META_GROUP, INSTRUMENT_PARAMETERS);
+  iret |= _file.addVar(_primaryAxisVar, PRIMARY_AXIS,
+                       "", PRIMARY_AXIS_LONG, ncxxChar, _stringLen32Dim, "");
+  _primaryAxisVar.setMetaFillValue();
+  iret |= _primaryAxisVar.addAttr(OPTIONS, Radx::primaryAxisOptions());
+
+  iret |= _file.addVar(_statusXmlVar, STATUS_XML,
+                       "", "status_of_instrument", ncxxChar, _statusXmlDim, "");
+  _statusXmlVar.setMetaFillValue();
+  
+  iret |= _file.addVar(_instrumentTypeVar, INSTRUMENT_TYPE,
+                       "", INSTRUMENT_TYPE_LONG, ncxxChar, _stringLen32Dim, "");
+  _instrumentTypeVar.setMetaFillValue();
+  iret |= _instrumentTypeVar.addAttr(OPTIONS, Radx::instrumentTypeOptions());
+  iret |= _instrumentTypeVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
 
   if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
 
