@@ -86,6 +86,7 @@ For a full LROSE build under LINUX, you need the following packages:
   emacs
   tkcvs
 
+  m4
   gcc
   g++
   gfortran
@@ -120,8 +121,9 @@ For a full LROSE build under LINUX, you need the following packages:
 On Redhat-based hosts you can achieve this by running:
 
 ```
-yum install -y epel-release \
-tcsh perl perl-Env ftp git svn cvs tkcvs emacs tkcvs \
+yum install -y epel-release
+yum install -y \
+tcsh perl perl-Env ftp git svn cvs tkcvs emacs tkcvs m4 \
 gcc gcc-c++ gcc-gfortran glibc-devel libX11-devel libXext-devel \
 libpng-devel libtiff-devel jasper-devel zlib-devel expat-devel \
 flex-devel fftw3-devel bzip2-devel jasper-devel qt4-devel xrdb \

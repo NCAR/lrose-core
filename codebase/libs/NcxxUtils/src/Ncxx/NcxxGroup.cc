@@ -1462,9 +1462,8 @@ int NcxxGroup::addGlobAttr(const string &name, const string &val)
 
 int NcxxGroup::addGlobAttr(const string &name, int val)
 {
-  NcxxInt xtype;
   try {
-    putAtt(name, xtype, val);
+    putAtt(name, ncxxInt, val);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxGroup::addGlobAttr");
     _addErrStr("  Cannot add global attr name: ", name);
@@ -1482,13 +1481,31 @@ int NcxxGroup::addGlobAttr(const string &name, int val)
 
 int NcxxGroup::addGlobAttr(const string &name, float val)
 {
-  NcxxFloat xtype;
   try {
-    putAtt(name, xtype, val);
+    putAtt(name, ncxxFloat, val);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxGroup::addGlobAttr");
     _addErrStr("  Cannot add global attr name: ", name);
     _addErrDbl("  val: ", val, "%g");
+    _addErrStr("  group: ", getName());
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// add double global attribute
+// Returns 0 on success, -1 on failure
+
+int NcxxGroup::addGlobAttr(const string &name, double val)
+{
+  try {
+    putAtt(name, ncxxDouble, val);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxGroup::addGlobAttr");
+    _addErrStr("  Cannot add global attr name: ", name);
+    _addErrDbl("  val: ", val, "%lg");
     _addErrStr("  group: ", getName());
     _addErrStr("  exception: ", e.what());
     return -1;
@@ -1764,7 +1781,7 @@ int NcxxGroup::addVar(NcxxVar &var,
     var.addAttr("units", units);
   }
   
-  var.setDefaultFillvalue();
+  var.setDefaultFillValue();
 
   return 0;
 

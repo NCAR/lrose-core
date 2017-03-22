@@ -1436,7 +1436,9 @@ void NcxxVar::getVal(float* dataValues) const {
   else
     ncxxCheck(nc_get_var_float(groupId, myId,dataValues),__FILE__,__LINE__);
 }
+
 // Reads the entire data of the netCDF variable.
+
 void NcxxVar::getVal(double* dataValues) const {
   NcxxType::ncxxType typeClass(getType().getTypeClass());
   if(typeClass == NcxxType::nc_VLEN || typeClass == NcxxType::nc_OPAQUE || typeClass == NcxxType::nc_ENUM || typeClass == NcxxType::nc_COMPOUND)
@@ -1444,6 +1446,7 @@ void NcxxVar::getVal(double* dataValues) const {
   else
     ncxxCheck(nc_get_var_double(groupId, myId,dataValues),__FILE__,__LINE__);
 }
+
 // Reads the entire data of the netCDF variable.
 void NcxxVar::getVal(unsigned short* dataValues) const {
   NcxxType::ncxxType typeClass(getType().getTypeClass());
@@ -2417,7 +2420,7 @@ int NcxxVar::writeStrings(const void *str)
 ////////////////////////////////////////
 // set default fill value, based on type
 
-void NcxxVar::setDefaultFillvalue()
+void NcxxVar::setDefaultFillValue()
 
 {
 
@@ -2447,6 +2450,41 @@ void NcxxVar::setDefaultFillvalue()
     return;
   }
   addAttr("_fillValue", Ncxx::missingInt);
+}
+
+////////////////////////////////////////
+// set meta fill value, based on type
+
+void NcxxVar::setMetaFillValue()
+
+{
+
+  nc_type vtype = getType().getId();
+  if (vtype == NC_DOUBLE) {
+    addAttr("_fillValue", Ncxx::missingMetaDouble);
+    return;
+  }
+  if (vtype == NC_FLOAT) {
+    addAttr("_fillValue", Ncxx::missingMetaFloat);
+    return;
+  }
+  if (vtype == NC_INT) {
+    addAttr("_fillValue", Ncxx::missingMetaInt);
+    return;
+  }
+  if (vtype == NC_LONG) {
+    addAttr("_fillValue", /* (long) */ Ncxx::missingMetaInt);
+    return;
+  }
+  if (vtype == NC_SHORT) {
+    addAttr("_fillValue", (short) Ncxx::missingMetaInt);
+    return;
+  }
+  if (vtype == NC_UBYTE) {
+    addAttr("_fillValue", Ncxx::missingMetaUchar);
+    return;
+  }
+  addAttr("_fillValue", Ncxx::missingMetaInt);
 }
 
 ////////////////////////////////////////
