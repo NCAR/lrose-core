@@ -445,11 +445,12 @@ NcxxVar NcxxGroup::getVar(const string& name,NcxxGroup::Location location) const
   multimap<std::string,NcxxVar> ncVars(getVars(location));
   pair<multimap<string,NcxxVar>::iterator,multimap<string,NcxxVar>::iterator> ret;
   ret = ncVars.equal_range(name);
-  if(ret.first == ret.second)
+  if(ret.first == ret.second) {
     // no matching netCDF variable found so return null object.
     return NcxxVar();
-  else
+  } else {
     return ret.first->second;
+  }
 }
 
 // Adds a new netCDF scalar variable.
