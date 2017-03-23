@@ -40,10 +40,14 @@ using namespace std;
 
 
 DerFieldCalcs::DerFieldCalcs(FullCals fullCals_in,
-		 vector<Radx::fl32> hiData_in, vector<Radx::fl32> loData_in, 
-		 vector<Radx::fl32> crossData_in, vector<Radx::fl32> molData_in,
-			     vector<Radx::fl32> tempK_in, vector<Radx::fl32> presHpa_in,  
-		 double shotCount_in, double power_in)
+			     vector<Radx::fl32> hiData_in, 
+			     vector<Radx::fl32> loData_in, 
+			     vector<Radx::fl32> crossData_in, 
+			     vector<Radx::fl32> molData_in,
+			     vector<Radx::fl32> htKm_in,
+			     vector<Radx::fl32> tempK_in, 
+			     vector<Radx::fl32> presHpa_in,  
+			     double shotCount_in, double power_in)
 {
   fullCals=fullCals_in;
   
@@ -51,12 +55,14 @@ DerFieldCalcs::DerFieldCalcs(FullCals fullCals_in,
   loData=loData_in;
   crossData=crossData_in;
   molData=molData_in;
-  
+ 
+  htKm=htKm_in;
   tempK=tempK_in;
   presHpa=presHpa_in;
   
   shotCount=shotCount_in;
   power=power_in;
+  
   
   if( hiData.size() == loData.size() &&
       hiData.size() == crossData.size() &&
@@ -66,7 +72,6 @@ DerFieldCalcs::DerFieldCalcs(FullCals fullCals_in,
       if( hiData.size() == combData.size() )
 	derive_quantities();
     }
-  
 }
 
 void DerFieldCalcs::set_fullCals(FullCals fullCals_in)
@@ -120,6 +125,20 @@ void DerFieldCalcs::set_crossData (vector<Radx::fl32> in)
 void DerFieldCalcs::set_molData (vector<Radx::fl32> in)
 {
   molData=in;
+  if( hiData.size() == loData.size() &&
+      hiData.size() == crossData.size() &&
+      hiData.size() == molData.size() )
+    {
+      applyCorr();
+      if( hiData.size() == combData.size() )
+	derive_quantities();
+    }
+}
+
+
+void DerFieldCalcs::set_htKm (vector<Radx::fl32> in)
+{
+  htKm=in;
   if( hiData.size() == loData.size() &&
       hiData.size() == crossData.size() &&
       hiData.size() == molData.size() )
@@ -192,6 +211,8 @@ vector<Radx::fl32> DerFieldCalcs::get_crossData()
 vector<Radx::fl32> DerFieldCalcs::get_molData()
 {return molData;}
 
+vector<Radx::fl32> DerFieldCalcs::get_htKm()
+{return htKm;}
 vector<Radx::fl32> DerFieldCalcs::get_tempK()
 {return tempK;}
 vector<Radx::fl32> DerFieldCalcs::get_presHpa()
@@ -550,17 +571,24 @@ void DerFieldCalcs::derive_quantities()
       cout<<"backscatCoeff["<<igate<<"]="<<backscatCoeff[igate]<<'\n';
   if(debug)
     cout<<"extinction^^^^^"<<'\n';
-  
-  for(int igate=0;igate<nGates;igate++)
+
+  double opDepth1, opDepth2, alt1, alt2;
+  opDepth2=_op_depth(presHpa[0],tempK[0],molDataRate.at(0));
+  alt2=htKm[0];
+ 
+  for(int igate=0;igate<nGates-1;igate++)
     {
-      extinction.push_back(1.0);
-      //there is no extinction calculation, so have placeholder here for now. 
+
+      opDepth1=opDepth2;
+      opDepth2=_op_depth(presHpa[igate+1],tempK[igate+1],molDataRate.at(igate+1));
+      alt1=alt2;
+      alt2=htKm[igate+1];
+      extinction.push_back(_extinction(opDepth1, opDepth2, alt1, alt2));
     }
   if(debug)
     for(int igate=0;igate<1;igate++)
       cout<<"extinction["<<igate<<"]="<<extinction[igate]<<'\n';
-  
-  
+    
 }
 
 
@@ -671,6 +699,16 @@ double DerFieldCalcs::_partDepol(double volDepol, double backscatRatio)
 }
 
 
+double DerFieldCalcs::_BetaMSonde(double pressure, double temperature)
+{
+  //If temp is 0 this causes errors but also there is a case where temp is -1.99384e+34
+  if(temperature<=0)
+    return 0;
+  return 5.45*(550/532)*4 * pow(10,-32) * pressure /
+    (temperature*1.3805604 * pow(10,-23));
+}
+
+
 //backscatter coefficient
 double DerFieldCalcs::_backscatCo(double pressure, double temperature, 
 				  double backscatRatio)
@@ -679,9 +717,22 @@ double DerFieldCalcs::_backscatCo(double pressure, double temperature,
   if(temperature<=0)
     return 0;
   
-  double beta_m_sonde = 5.45*(550/532)*4 * pow(10,-32) * pressure /(temperature*1.3805604 * pow(10,-23));
+  double beta_m_sonde =_BetaMSonde(pressure,temperature);
   double aer_beta_bs = (backscatRatio-1)*beta_m_sonde;
   
   return aer_beta_bs;
 }
 
+double DerFieldCalcs::_op_depth(double pressure, double temperature, 
+			       double molRate)
+{
+  double beta_m_sonde =_BetaMSonde(pressure,temperature);
+  return log( molRate /beta_m_sonde );
+}
+
+
+double DerFieldCalcs::_extinction(double opDepth1, double opDepth2,
+				  double alt1, double alt2)
+{
+  return (opDepth1-opDepth2)/(alt1-alt2);
+}

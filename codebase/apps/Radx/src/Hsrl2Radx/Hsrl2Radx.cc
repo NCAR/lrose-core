@@ -965,6 +965,7 @@ void Hsrl2Radx::_addDerivedFields(RadxVol &vol)
 	vector< Radx::fl32> loDataVec;
 	vector< Radx::fl32> crossDataVec;
 	vector< Radx::fl32> molDataVec;
+	vector< Radx::fl32> htKmVec;
 	vector< Radx::fl32> tempKVec;
 	vector< Radx::fl32> presHpaVec;
 	
@@ -974,14 +975,15 @@ void Hsrl2Radx::_addDerivedFields(RadxVol &vol)
 	    loDataVec.push_back(loData[igate]);
 	    crossDataVec.push_back(crossData[igate]);
 	    molDataVec.push_back(molData[igate]);
+	    htKmVec.push_back(htKm[igate]* 1000.0);
 	    tempKVec.push_back(tempK[igate]);
 	    presHpaVec.push_back(presHpa[igate]);
 	  }
 
 	
 	DerFieldCalcs data=DerFieldCalcs(_cals, hiDataVec, loDataVec, crossDataVec, 
-					     molDataVec, tempKVec, presHpaVec, shotCount, 
-					     power);
+					 molDataVec, htKmVec, tempKVec, presHpaVec, 
+					 shotCount, power);
 	
 	vector<Radx::fl32> volDepolVec=data.get_volDepol();
 	vector<Radx::fl32> backscatRatioVec=data.get_backscatRatio();
@@ -995,7 +997,8 @@ void Hsrl2Radx::_addDerivedFields(RadxVol &vol)
 	    backscatRatio[i]=backscatRatioVec.at(i);
 	    partDepol[i]=partDepolVec.at(i);
 	    backscatCoeff[i]=backscatCoeffVec.at(i);
-	    extinction[i]=extinctionVec.at(i);
+	    if(i<volDepolVec.size()-1)
+	      extinction[i]=extinctionVec.at(i);
 
 	  }
       }

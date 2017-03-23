@@ -73,32 +73,37 @@
 #ifndef NcxxVarClass
 #define NcxxVarClass
 
-//  class NcxxGroup;  // forward declaration.
 class NcxxDim;    // forward declaration.
-//  class NcxxVarAtt; // forward declaration.
 class NcxxType;   // forward declaration.
 
 /*! Class represents a netCDF variable. */
+
 class NcxxVar : public NcxxErrStr
 {
+
 public:
 
-  /*! Used for chunking specifications (see NcxxVar::setChunking,  NcxxVar::getChunkingParameters). */
+  /*!
+    Used for chunking specifications (see NcxxVar::setChunking,
+    NcxxVar::getChunkingParameters).
+  */
+
   enum ChunkMode
     {
       /*!
         Chunked storage is used for this variable.
       */
       nc_CHUNKED    = NC_CHUNKED,
-      /*! Contiguous storage is used for this variable. Variables with one or more unlimited
-        dimensions cannot use contiguous storage. If contiguous storage is turned on, the
-        chunkSizes parameter is ignored.
+      /*! Contiguous storage is used for this variable. Variables with one or
+        more unlimited dimensions cannot use contiguous storage. If contiguous
+        storage is turned on, the chunkSizes parameter is ignored.
       */
       nc_CONTIGUOUS = NC_CONTIGUOUS
     };
 
   /*!
-    Used to specifying the endianess of the data, (see NcxxVar::setEndianness, NcxxVar::getEndianness). By default this is NC_ENDIAN_NATIVE.
+    Used to specifying the endianess of the data, (see NcxxVar::setEndianness,
+    NcxxVar::getEndianness). By default this is NC_ENDIAN_NATIVE.
   */
   enum EndianMode
     {
@@ -314,18 +319,25 @@ public:
                     const long long* dataValues) const;
 
   /*!
+
     Creates a new variable attribute or if already exisiting replaces it.
     If you are writing a _Fill_Value_ attribute, and will tell the HDF5 layer to use
     the specified fill value for that variable.
+
     \par
-    Although it's possible to create attributes of all types, text and double attributes are adequate for most purposes.
+    Although it's possible to create attributes of all types, text and double
+    attributes are adequate for most purposes.
+
     \param name        Name of attribute.
     \param type        The attribute type.
     \param len         The length of the attribute (number of Nctype repeats).
     \param dataValues  Data Values to put into the new attribute.
-    If the type of data values differs from the netCDF variable type, type conversion will occur.
-    (However, no type conversion is carried out for variables using the user-defined data types:
-    nc_Vlen, nc_Opaque, nc_Compound and nc_Enum.)
+
+    If the type of data values differs from the netCDF variable type, type
+    conversion will occur.  (However, no type conversion is carried out for
+    variables using the user-defined data types: nc_Vlen, nc_Opaque, nc_Compound
+    and nc_Enum.)
+    
     \return            The NcxxVarAtt object for this new netCDF attribute.
   */
 
@@ -368,8 +380,10 @@ public:
     This is an overloaded member function, provided for convenience.
     It differs from the above function in what argument(s) it accepts.
     The function can be used for any type, including user-defined types.
+
     \param fillMode   Setting to true, turns on fill mode.
     \param fillValue  Pointer to fill value.
+
     Must be the same type as the variable. Ignored if fillMode=.false.
   */
   void setFill(bool fillMode,const void* fillValue=NULL) const;
@@ -382,15 +396,18 @@ public:
   template<class T>
     void setFill(bool fillMode, T fillValue) const
   {
-    ncxxCheck(nc_def_var_fill(groupId,myId,static_cast<int> (!fillMode),&fillValue),__FILE__,__LINE__);
+    ncxxCheck(nc_def_var_fill(groupId,myId,static_cast<int>
+                              (!fillMode),&fillValue),__FILE__,__LINE__);
   }
 
   /*!
     This is an overloaded member function, provided for convenience.
     It differs from the above function in what argument(s) it accepts.
     The function can be used for any type, including user-defined types.
+    
     \param fillMode   On return set to true  if fill mode is enabled.
     \param fillValue  On return containts a pointer to fill value.
+
     Must be the same type as the variable. Ignored if fillMode=.false.
   */
   void getFillModeParameters(bool& fillMode, 
@@ -403,7 +420,8 @@ public:
   */
   template <class T> void getFillModeParameters(bool& fillMode,T& fillValue) const{
     int fillModeInt;
-    ncxxCheck(nc_inq_var_fill(groupId,myId,&fillModeInt,&fillValue),__FILE__,__LINE__);
+    ncxxCheck(nc_inq_var_fill(groupId,myId,&fillModeInt,&fillValue),
+              __FILE__,__LINE__);
     fillMode= static_cast<bool> (fillModeInt == 0);
   }
 
@@ -441,10 +459,12 @@ public:
   void setEndianness(EndianMode endianMode) const;
 
   /*! Gets the endianness of the variable.
-    \return Endianness enumeration type. Allowable parameters are:
-    "nc_ENDIAN_NATIVE" (the default),
-    "nc_ENDIAN_LITTLE",
-    "nc_ENDIAN_BIG"
+    \return Endianness
+    enumeration type.
+    Allowable parameters are:
+      "nc_ENDIAN_NATIVE" (the default),
+      "nc_ENDIAN_LITTLE",
+      "nc_ENDIAN_BIG"
   */
   EndianMode getEndianness() const;
 
@@ -453,7 +473,8 @@ public:
   ////////////////////
 
   /*! Sets the checksum parameters of a variable.
-    \param ChecksumMode Enumeration type.
+    \param ChecksumMode
+    Enumeration type.
     Allowable parameters are: "nc_NOCHECKSUM", "nc_FLETCHER32".
   */
   void setChecksum(ChecksumMode checksumMode) const;
@@ -468,15 +489,29 @@ public:
   //  data  reading
   ////////////////////
 
+  /////////////////////////////////////////////////////////////////////////////
   // Reads the entire data into the netCDF variable.
+
   /*!
-    This is an overloaded member function, provided for convenience.
-    It differs from the above function in what argument(s) it accepts.
-    In addition, no data conversion is carried out. This means that
-    the type of the data in memory must match the type of the variable.
+    Reads the entire data from an netCDF variable.  This is the simplest
+    interface to use for reading the value of a scalar variable or when all the
+    values of a multidimensional variable can be read at once. The values are
+    read into consecutive locations with the last dimension varying fastest.
+
+    Take care when using the simplest forms of this interface with record
+    variables when you don't specify how many records are to be read. If you try
+    to read all the values of a record variable into an array but there are more
+    records in the file than you assume, more data will be read than you expect,
+    which may cause a segmentation violation.
+
+    \param dataValues
+    Pointer to the location into which the data value is read.
+    If the type of data value differs from the netCDF variable type, type
+    conversion will occur.  (However, no type conversion is carried out for
+    variables using the user-defined data types: nc_Vlen, nc_Opaque, nc_Compound
+    and nc_Enum.)
   */
 
-  void getVal(void* dataValues) const;
   /*! \overload
    */
   void getVal(char** dataValues) const;
@@ -513,35 +548,36 @@ public:
   /*! \overload
    */
   void getVal(unsigned long long* dataValues) const;
-  /*!
-    Reads the entire data from an netCDF variable.
-    This is the simplest interface to use for reading the value of a scalar variable
-    or when all the values of a multidimensional variable can be read at once. The values
-    are read into consecutive locations with the last dimension varying fastest.
-
-    Take care when using the simplest forms of this interface with record variables when you
-    don't specify how many records are to be read. If you try to read all the values of a
-    record variable into an array but there are more records in the file than you assume,
-    more data will be read than you expect, which may cause a segmentation violation.
-
-    \param dataValues Pointer to the location into which the data value is read. If the type of
-    data value differs from the netCDF variable type, type conversion will occur.
-    (However, no type conversion is carried out for variables using the user-defined data types:
-    nc_Vlen, nc_Opaque, nc_Compound and nc_Enum.)
-  */
+  /*! \overload
+   */
   void getVal(long long* dataValues) const;
-
-  //////////////////////
-  
-  // Reads a single datum value from a variable of an open netCDF dataset.
   /*!
     This is an overloaded member function, provided for convenience.
     It differs from the above function in what argument(s) it accepts.
     In addition, no data conversion is carried out. This means that
     the type of the data in memory must match the type of the variable.
   */
-  void getVal(const std::vector<size_t>& index,
-              void* datumValue) const;
+  void getVal(void* dataValues) const;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Reads a single datum value from a variable of an open netCDF dataset.
+  /*! Reads a single datum value from a variable of an open netCDF dataset.
+    The value is converted from the external data type of the variable, if necessary.
+
+    \param index
+    Vector specifying the index of the data value to be read.  The indices are
+    relative to 0, so for example, the first data value of a two-dimensional
+    variable would have index (0,0). The elements of index must correspond to
+    the variable's dimensions.  Hence, if the variable is a record variable, the
+    first index is the record number.
+
+    \param datumValue
+    Pointer to the location into which the data value is read. If the type of data
+    value differs from the netCDF variable type, type conversion will occur.
+    (However, no type conversion is carried out for variables using the
+    user-defined data types: nc_Vlen, nc_Opaque, nc_Compound and nc_Enum.)
+  */
+
   /*! \overload
    */
   void getVal(const std::vector<size_t>& index,
@@ -590,35 +626,57 @@ public:
    */
   void getVal(const std::vector<size_t>& index,
               unsigned long long* datumValue) const;
-
-  /*! Reads a single datum value from a variable of an open netCDF dataset.
-    The value is converted from the external data type of the variable, if necessary.
-
-    \param index       Vector specifying the index of the data value to be read.
-    The indices are relative to 0, so for example, the first data value of a two-dimensional
-    variable would have index (0,0). The elements of index must correspond to the variable's dimensions.
-    Hence, if the variable is a record variable, the first index is the record number.
-
-    \param datumValue Pointer to the location into which the data value is read. If the type of
-    data value differs from the netCDF variable type, type conversion will occur.
-    (However, no type conversion is carried out for variables using the user-defined data types:
-    nc_Vlen, nc_Opaque, nc_Compound and nc_Enum.)
-  */
+  /*! \overload
+   */
   void getVal(const std::vector<size_t>& index,
               long long* datumValue) const;
-
-  //////////////////////
-
-  // Reads an array of values from a netCDF variable of an open netCDF dataset.
   /*!
     This is an overloaded member function, provided for convenience.
     It differs from the above function in what argument(s) it accepts.
     In addition, no data conversion is carried out. This means that
     the type of the data in memory must match the type of the variable.
   */
-  void getVal(const std::vector<size_t>& start, 
-              const std::vector<size_t>& count,
-              void* dataValues) const;
+  void getVal(const std::vector<size_t>& index,
+              void* datumValue) const;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Reads an array of values from a netCDF variable of an open netCDF dataset.
+
+  /*! 
+    Reads an array of values from a netCDF variable of an open netCDF dataset.
+    The array is specified by giving a corner and a vector of edge lengths.  The
+    values are read into consecutive locations with the last dimension varying
+    fastest.
+
+    \param start
+    Vector specifying the index in the variable where the first of
+    the data values will be read.  The indices are relative to 0, so for
+    example, the first data value of a variable would have index (0, 0, ... ,
+    0).  The length of start must be the same as the number of dimensions of the
+    specified variable.  The elements of start correspond, in order, to the
+    variable's dimensions. Hence, if the variable is a record variable, the
+    first index would correspond to the starting record number for reading the
+    data values.
+
+    \param count
+    Vector specifying the edge lengths along each dimension of the
+    block of data values to be read.  To read a single value, for example,
+    specify count as (1, 1, ... , 1). The length of count is the number of
+    dimensions of the specified variable. The elements of count correspond, in
+    order, to the variable's dimensions.  Hence, if the variable is a record
+    variable, the first element of count corresponds to a count of the number of
+    records to read.  Note: setting any element of the count array to zero
+    causes the function to exit without error, and without doing anything.
+
+    \param dataValues
+    Pointer to the location into which the data value is
+    read. If the type of data value differs from the netCDF variable type, type
+    conversion will occur.  (However, no type conversion is carried out for
+    variables using the user-defined data types: nc_Vlen, nc_Opaque, nc_Compound
+    and nc_Enum.)
+
+  */
+
   /*! \overload
    */
   void getVal(const std::vector<size_t>& start,
@@ -679,49 +737,68 @@ public:
   void getVal(const std::vector<size_t>& start,
               const std::vector<size_t>& count,
               unsigned long long* dataValues) const;
-  
-  /*!
-    Reads an array of values from a netCDF variable of an open netCDF dataset.
-    The array is specified by giving a corner and a vector of edge lengths.
-    The values are read into consecutive locations with the last dimension varying fastest.
-
-    \param start
-    Vector specifying the index in the variable where the first of the data values will be read.
-    The indices are relative to 0, so for example, the first data value of a variable would have index (0, 0, ... , 0).
-    The length of start must be the same as the number of dimensions of the specified variable.
-    The elements of start correspond, in order, to the variable's dimensions. Hence, if the variable is a record variable,
-    the first index would correspond to the starting record number for reading the data values.
-
-    \param count
-    Vector specifying the edge lengths along each dimension of the block of data values to be read.
-    To read a single value, for example, specify count as (1, 1, ... , 1). The length of count is the number of
-    dimensions of the specified variable. The elements of count correspond, in order, to the variable's dimensions.
-    Hence, if the variable is a record variable, the first element of count corresponds to a count of the number of records to read.
-    Note: setting any element of the count array to zero causes the function to exit without error, and without doing anything.
-
-    \param dataValues Pointer to the location into which the data value is read. If the type of
-    data value differs from the netCDF variable type, type conversion will occur.
-    (However, no type conversion is carried out for variables using the user-defined data types:
-    nc_Vlen, nc_Opaque, nc_Compound and nc_Enum.)
-  */
-
+  /*! \overload
+   */
   void getVal(const std::vector<size_t>& start, 
               const std::vector<size_t>& count,
               long long* dataValues) const;
 
-  //////////////////////
-
-  // Reads a subsampled (strided) array section of values from a netCDF variable.
   /*!
     This is an overloaded member function, provided for convenience.
     It differs from the above function in what argument(s) it accepts.
     In addition, no data conversion is carried out. This means that
     the type of the data in memory must match the type of the variable.
   */
-  void getVal(const std::vector<size_t>& start,
-              const std::vector<size_t>& count, 
-              const std::vector<ptrdiff_t>& stride,
+  void getVal(const std::vector<size_t>& start, 
+              const std::vector<size_t>& count,
               void* dataValues) const;
+  
+  /////////////////////////////////////////////////////////////////////////////
+  // Reads a subsampled (strided) array section of values from a netCDF variable.
+
+  /*!
+    Reads a subsampled (strided) array section of values from a netCDF variable.
+    The subsampled array section is specified by giving a corner, a vector of
+    edge lengths, and a stride vector.  The values are read with the last
+    dimension of the netCDF variable varying fastest.
+
+    \param start
+    Vector specifying the index in the variable where the first of
+    the data values will be read.  The indices are relative to 0, so for
+    example, the first data value of a variable would have index (0, 0, ... ,
+    0).  The length of start must be the same as the number of dimensions of the
+    specified variable.  The elements of start correspond, in order, to the
+    variable's dimensions. Hence, if the variable is a record variable, the
+    first index would correspond to the starting record number for reading the
+    data values.
+
+    \param
+    count Vector specifying the edge lengths along each dimension of the
+    block of data values to be read.  To read a single value, for example,
+    specify count as (1, 1, ... , 1). The length of count is the number of
+    dimensions of the specified variable. The elements of count correspond, in
+    order, to the variable's dimensions.  Hence, if the variable is a record
+    variable, the first element of count corresponds to a count of the number of
+    records to read.  Note: setting any element of the count array to zero
+    causes the function to exit without error, and without doing anything.
+
+    \param stride
+    Vector specifying the interval between selected indices. The
+    elements of the stride vector correspond, in order, to the variable's
+    dimensions. A value of 1 accesses adjacent values of the netCDF variable in
+    the corresponding dimension; a value of 2 accesses every other value of the
+    netCDF variable in the corresponding dimension; and so on. A NULL stride
+    argument is treated as (1, 1, ... , 1).
+
+    \param dataValues
+    Pointer to the location into which the data value is
+    read. If the type of data value differs from the netCDF variable type, type
+    conversion will occur.  (However, no type conversion is carried out for
+    variables using the user-defined data types: nc_Vlen, nc_Opaque, nc_Compound
+    and nc_Enum.)
+  */
+  
+  
   /*! \overload
    */
   void getVal(const std::vector<size_t>& start,
@@ -794,57 +871,85 @@ public:
               const std::vector<size_t>& count,
               const std::vector<ptrdiff_t>& stride,
               unsigned long long* dataValues) const;
-  
-  /*!
-    Reads a subsampled (strided) array section of values from a netCDF variable.
-    The subsampled array section is specified by giving a corner, a vector of edge lengths, and a stride vector.
-    The values are read with the last dimension of the netCDF variable varying fastest.
-
-    \param start
-    Vector specifying the index in the variable where the first of the data values will be read.
-    The indices are relative to 0, so for example, the first data value of a variable would have index (0, 0, ... , 0).
-    The length of start must be the same as the number of dimensions of the specified variable.
-    The elements of start correspond, in order, to the variable's dimensions. Hence, if the variable is a record variable,
-    the first index would correspond to the starting record number for reading the data values.
-
-    \param count
-    Vector specifying the edge lengths along each dimension of the block of data values to be read.
-    To read a single value, for example, specify count as (1, 1, ... , 1). The length of count is the number of
-    dimensions of the specified variable. The elements of count correspond, in order, to the variable's dimensions.
-    Hence, if the variable is a record variable, the first element of count corresponds to a count of the number of records to read.
-    Note: setting any element of the count array to zero causes the function to exit without error, and without doing anything.
-
-    \param stride
-    Vector specifying the interval between selected indices. The elements of the stride vector correspond, in order,
-    to the variable's dimensions. A value of 1 accesses adjacent values of the netCDF variable in the corresponding
-    dimension; a value of 2 accesses every other value of the netCDF variable in the corresponding dimension; and so
-    on. A NULL stride argument is treated as (1, 1, ... , 1).
-
-    \param dataValues Pointer to the location into which the data value is read. If the type of
-    data value differs from the netCDF variable type, type conversion will occur.
-    (However, no type conversion is carried out for variables using the user-defined data types:
-    nc_Vlen, nc_Opaque, nc_Compound and nc_Enum.)
-  */
+  /*! \overload
+   */
   void getVal(const std::vector<size_t>& start,
               const std::vector<size_t>& count,
               const std::vector<ptrdiff_t>& stride,
               long long* dataValues) const;
-  
+  /*!
+    This is an overloaded member function, provided for convenience.
+    It differs from the above function in what argument(s) it accepts.
+    In addition, no data conversion is carried out. This means that
+    the type of the data in memory must match the type of the variable.
+  */
+  void getVal(const std::vector<size_t>& start,
+              const std::vector<size_t>& count, 
+              const std::vector<ptrdiff_t>& stride,
+              void* dataValues) const;
   
   //////////////////////
 
   // Reads a mapped array section of values from a netCDF variable.
   /*!
-    This is an overloaded member function, provided for convenience.
-    It differs from the above function in what argument(s) it accepts.
-    In addition, no data conversion is carried out. This means that
-    the type of the data in memory must match the type of the variable.
+
+    Reads a mapped array section of values from a netCDF variable.  The mapped
+    array section is specified by giving a corner, a vector of edge lengths, a
+    stride vector, and an index mapping vector. The index mapping vector is a
+    vector of integers that specifies the mapping between the dimensions of a
+    netCDF variable and the in-memory structure of the internal data array. No
+    assumptions are made about the ordering or length of the dimensions of the
+    data array.
+
+    \param start
+    Vector specifying the index in the variable where the first of
+    the data values will be read.  The indices are relative to 0, so for
+    example, the first data value of a variable would have index (0, 0, ... ,
+    0).  The length of start must be the same as the number of dimensions of the
+    specified variable.  The elements of start correspond, in order, to the
+    variable's dimensions. Hence, if the variable is a record variable, the
+    first index would correspond to the starting record number for reading the
+    data values.
+
+    \param count
+    Vector specifying the edge lengths along each dimension of the
+    block of data values to be read.  To read a single value, for example,
+    specify count as (1, 1, ... , 1). The length of count is the number of
+    dimensions of the specified variable. The elements of count correspond, in
+    order, to the variable's dimensions.  Hence, if the variable is a record
+    variable, the first element of count corresponds to a count of the number of
+    records to read.  Note: setting any element of the count array to zero
+    causes the function to exit without error, and without doing anything.
+
+    \param stride
+    Vector specifying the interval between selected indices. The
+    elements of the stride vector correspond, in order, to the variable's
+    dimensions. A value of 1 accesses adjacent values of the netCDF variable in
+    the corresponding dimension; a value of 2 accesses every other value of the
+    netCDF variable in the corresponding dimension; and so on. A NULL stride
+    argument is treated as (1, 1, ... , 1).
+
+    \param imap
+    Vector of integers that specifies the mapping between the
+    dimensions of a netCDF variable and the in-memory structure of the internal
+    data array. imap[0] gives the distance between elements of the internal
+    array corresponding to the most slowly varying dimension of the netCDF
+    variable. imap[n-1] (where n is the rank of the netCDF variable) gives the
+    distance between elements of the internal array corresponding to the most
+    rapidly varying dimension of the netCDF variable. Intervening imap elements
+    correspond to other dimensions of the netCDF variable in the obvious way.
+    Distances between elements are specified in type-independent units of
+    elements (the distance between internal elements that occupy adjacent memory
+    locations is 1 and not the element's byte-length as in netCDF 2).
+
+    \param
+    dataValues Pointer to the location into which the data value is
+    read. If the type of data value differs from the netCDF variable type, type
+    conversion will occur.  (However, no type conversion is carried out for
+    variables using the user-defined data types: nc_Vlen, nc_Opaque, nc_Compound
+    and nc_Enum.)
+
   */
-  void getVal(const std::vector<size_t>& start,
-              const std::vector<size_t>& count,
-              const std::vector<ptrdiff_t>& stride,
-              const std::vector<ptrdiff_t>& imap,
-              void* dataValues) const;
   /*! \overload
    */
   void getVal(const std::vector<size_t>& start, 
@@ -929,65 +1034,60 @@ public:
               const std::vector<ptrdiff_t>& stride, 
               const std::vector<ptrdiff_t>& imap, 
               unsigned long long* dataValues) const;
-  /*!
-    Reads a mapped array section of values from a netCDF variable.
-    The mapped array section is specified by giving a corner, a vector of edge lengths, a stride vector, and an
-    index mapping vector. The index mapping vector is a vector of integers that specifies the mapping between the
-    dimensions of a netCDF variable and the in-memory structure of the internal data array. No assumptions are
-    made about the ordering or length of the dimensions of the data array.
-
-    \param start
-    Vector specifying the index in the variable where the first of the data values will be read.
-    The indices are relative to 0, so for example, the first data value of a variable would have index (0, 0, ... , 0).
-    The length of start must be the same as the number of dimensions of the specified variable.
-    The elements of start correspond, in order, to the variable's dimensions. Hence, if the variable is a record variable,
-    the first index would correspond to the starting record number for reading the data values.
-
-    \param count
-    Vector specifying the edge lengths along each dimension of the block of data values to be read.
-    To read a single value, for example, specify count as (1, 1, ... , 1). The length of count is the number of
-    dimensions of the specified variable. The elements of count correspond, in order, to the variable's dimensions.
-    Hence, if the variable is a record variable, the first element of count corresponds to a count of the number of records to read.
-    Note: setting any element of the count array to zero causes the function to exit without error, and without doing anything.
-
-    \param stride
-    Vector specifying the interval between selected indices. The elements of the stride vector correspond, in order,
-    to the variable's dimensions. A value of 1 accesses adjacent values of the netCDF variable in the corresponding
-    dimension; a value of 2 accesses every other value of the netCDF variable in the corresponding dimension; and so
-    on. A NULL stride argument is treated as (1, 1, ... , 1).
-
-    \param imap
-    Vector of integers that specifies the mapping between the dimensions of a netCDF variable and the in-memory
-    structure of the internal data array. imap[0] gives the distance between elements of the internal array corresponding
-    to the most slowly varying dimension of the netCDF variable. imap[n-1] (where n is the rank of the netCDF variable)
-    gives the distance between elements of the internal array corresponding to the most rapidly varying dimension of the
-    netCDF variable. Intervening imap elements correspond to other dimensions of the netCDF variable in the obvious way.
-    Distances between elements are specified in type-independent units of elements (the distance between internal elements
-    that occupy adjacent memory locations is 1 and not the element's byte-length as in netCDF 2).
-
-    \param dataValues Pointer to the location into which the data value is read. If the type of
-    data value differs from the netCDF variable type, type conversion will occur.
-    (However, no type conversion is carried out for variables using the user-defined data types:
-    nc_Vlen, nc_Opaque, nc_Compound and nc_Enum.)
-  */
+  /*! \overload
+   */
   void getVal(const std::vector<size_t>& start, 
               const std::vector<size_t>& count,  
               const std::vector<ptrdiff_t>& stride, 
               const std::vector<ptrdiff_t>& imap, 
               long long* dataValues) const;
 
-  ////////////////////
-  //  data writing
-  ////////////////////
-
-  // Writes the entire data into the netCDF variable.
   /*!
     This is an overloaded member function, provided for convenience.
     It differs from the above function in what argument(s) it accepts.
     In addition, no data conversion is carried out. This means that
     the type of the data in memory must match the type of the variable.
   */
-  void putVal(const void* dataValues) const;
+  void getVal(const std::vector<size_t>& start,
+              const std::vector<size_t>& count,
+              const std::vector<ptrdiff_t>& stride,
+              const std::vector<ptrdiff_t>& imap,
+              void* dataValues) const;
+
+  ////////////////////
+  //  data writing
+  ////////////////////
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Writes the entire data into the netCDF variable.
+
+  /*!
+
+    Writes the entire data into the netCDF variable.  This is the simplest
+    interface to use for writing a value in a scalar variable or whenever all
+    the values of a multidimensional variable can all be written at once. The
+    values to be written are associated with the netCDF variable by assuming
+    that the last dimension of the netCDF variable varies fastest in the C
+    interface.
+
+    Take care when using the simplest forms of this interface with record
+    variables when you don't specify how many records are to be written. If you
+    try to write all the values of a record variable into a netCDF file that has
+    no record data yet (hence has 0 records), nothing will be
+    written. Similarly, if you try to write all of a record variable but there
+    are more records in the file than you assume, more data may be written to
+    the file than you supply, which may result in a segmentation violation.
+
+    \param
+    dataValues The data values. The order in which the data will be
+    written to the netCDF variable is with the last dimension of the specified
+    variable varying fastest. If the type of data values differs from the netCDF
+    variable type, type conversion will occur.  (However, no type conversion is
+    carried out for variables using the user-defined data types: nc_Vlen,
+    nc_Opaque, nc_Compound and nc_Enum.)
+
+  */
+
   /*! \overload
    */
   void putVal(const char** dataValues) const;
@@ -1024,44 +1124,39 @@ public:
   /*!  \overload
    */
   void putVal(const unsigned long long* dataValues) const;
-  /*!
-    Writes the entire data into the netCDF variable.
-    This is the simplest interface to use for writing a value in a scalar variable
-    or whenever all the values of a multidimensional variable can all be
-    written at once. The values to be written are associated with the
-    netCDF variable by assuming that the last dimension of the netCDF
-    variable varies fastest in the C interface.
-
-    Take care when using the simplest forms of this interface with
-    record variables when you don't specify how many records are to be
-    written. If you try to write all the values of a record variable
-    into a netCDF file that has no record data yet (hence has 0 records),
-    nothing will be written. Similarly, if you try to write all of a record
-    variable but there are more records in the file than you assume, more data
-    may be written to the file than you supply, which may result in a
-    segmentation violation.
-
-    \param dataValues The data values. The order in which the data will be written to the netCDF variable is with the last
-    dimension of the specified variable varying fastest. If the type of data values differs from the netCDF variable type, type conversion will occur.
-    (However, no type conversion is carried out for variables using the user-defined data types:
-    nc_Vlen, nc_Opaque, nc_Compound and nc_Enum.)
-  */
+  /*!  \overload
+   */
   void putVal(const long long* dataValues) const;
-
-
-
-  /////////////////////////
-
-
-  // Writes a single datum into the netCDF variable.
   /*!
     This is an overloaded member function, provided for convenience.
     It differs from the above function in what argument(s) it accepts.
     In addition, no data conversion is carried out. This means that
     the type of the data in memory must match the type of the variable.
   */
-  void putVal(const std::vector<size_t>& index, 
-              const void* datumValue) const;
+  void putVal(const void* dataValues) const;
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Writes a single datum into the netCDF variable.
+  /*!
+
+    Writes a single datum into the netCDF variable.
+
+    \param index
+    Vector specifying the index where the data values will be written. The
+    indices are relative to 0, so for example, the first data value of a
+    two-dimensional variable would have index (0,0). The elements of index must
+    correspond to the variable's dimensions.  Hence, if the variable uses the
+    unlimited dimension, the first index would correspond to the unlimited
+    dimension.
+
+    \param datumValue
+    The data value. If the type of data values differs from the netCDF variable
+    type, type conversion will occur.  (However, no type conversion is carried
+    out for variables using the user-defined data types: nc_Vlen, nc_Opaque,
+    nc_Compound and nc_Enum.)
+
+  */
+
   /*! \overload
    */
   void putVal(const std::vector<size_t>& index, 
@@ -1110,35 +1205,56 @@ public:
    */
   void putVal(const std::vector<size_t>& index, 
               const unsigned long long datumValue) const;
-  /*!
-    Writes a single datum into the netCDF variable.
-
-    \param index      Vector specifying the index where the data values will be written. The indices are relative to 0, so for example,
-    the first data value of a two-dimensional variable would have index (0,0). The elements of index must correspond to the variable's dimensions.
-    Hence, if the variable uses the unlimited dimension, the first index would correspond to the unlimited dimension.
-
-    \param datumValue The data value. If the type of data values differs from the netCDF variable type, type conversion will occur.
-    (However, no type conversion is carried out for variables using the user-defined data types:
-    nc_Vlen, nc_Opaque, nc_Compound and nc_Enum.)
-  */
+  /*!  \overload
+   */
   void putVal(const std::vector<size_t>& index, 
               const long long datumValue) const;
-
-
-  /////////////////////////
-
-
-
-  // Writes an array of values into the netCDF variable.
   /*!
     This is an overloaded member function, provided for convenience.
     It differs from the above function in what argument(s) it accepts.
     In addition, no data conversion is carried out. This means that
     the type of the data in memory must match the type of the variable.
   */
-  void putVal(const std::vector<size_t>& startp, 
-              const std::vector<size_t>& countp, 
-              const void* dataValues) const;
+  void putVal(const std::vector<size_t>& index, 
+              const void* datumValue) const;
+
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Writes an array of values into the netCDF variable.
+  /*!
+
+    Writes an array of values into the netCDF variable.  The portion of the
+    netCDF variable to write is specified by giving a corner and a vector of
+    edge lengths that refer to an array section of the netCDF variable. The
+    values to be written are associated with the netCDF variable by assuming
+    that the last dimension of the netCDF variable varies fastest.
+
+    \param startp
+    Vector specifying the index where the first data values will
+    be written.  The indices are relative to 0, so for example, the first data
+    value of a variable would have index (0, 0, ... , 0). The elements of start
+    correspond, in order, to the variable's dimensions. Hence, if the variable
+    is a record variable, the first index corresponds to the starting record
+    number for writing the data values.
+
+    \param countp
+    Vector specifying the number of indices selected along each
+    dimension.  To write a single value, for example, specify count as (1, 1,
+    ... , 1). The elements of count correspond, in order, to the variable's
+    dimensions. Hence, if the variable is a record variable, the first element
+    of count corresponds to a count of the number of records to write. Note:
+    setting any element of the count array to zero causes the function to exit
+    without error, and without doing anything.
+
+    \param dataValues
+    The data values. The order in which the data will be
+    written to the netCDF variable is with the last dimension of the specified
+    variable varying fastest. If the type of data values differs from the netCDF
+    variable type, type conversion will occur. (However, no type conversion is
+    carried out for variables using the user-defined data types: nc_Vlen,
+    nc_Opaque, nc_Compound and nc_Enum.)
+
+  */
   /*! \overload
    */
   void putVal(const std::vector<size_t>& startp, 
@@ -1199,35 +1315,11 @@ public:
   void putVal(const std::vector<size_t>& startp, 
               const std::vector<size_t>& countp, 
               const unsigned long long* dataValues) const;
-  /*!
-    Writes an array of values into the netCDF variable.
-    The portion of the netCDF variable to write is specified by giving a corner and a vector of edge lengths
-    that refer to an array section of the netCDF variable. The values to be written are associated with
-    the netCDF variable by assuming that the last dimension of the netCDF variable varies fastest.
-
-    \param startp  Vector specifying the index where the first data values will be written.  The indices are relative to 0, so for
-    example, the first data value of a variable would have index (0, 0, ... , 0). The elements of start correspond, in order, to the
-    variable's dimensions. Hence, if the variable is a record variable, the first index corresponds to the starting record number for writing the data values.
-
-    \param countp  Vector specifying the number of indices selected along each dimension.
-    To write a single value, for example, specify count as (1, 1, ... , 1). The elements of
-    count correspond, in order, to the variable's dimensions. Hence, if the variable is a record
-    variable, the first element of count corresponds to a count of the number of records to write. Note: setting any element
-    of the count array to zero causes the function to exit without error, and without doing anything.
-
-    \param dataValues The data values. The order in which the data will be written to the netCDF variable is with the last
-    dimension of the specified variable varying fastest. If the type of data values differs from the netCDF variable
-    type, type conversion will occur. (However, no type conversion is
-    carried out for variables using the user-defined data types:
-    nc_Vlen, nc_Opaque, nc_Compound and nc_Enum.)
-  */
+  /*!  \overload
+   */
   void putVal(const std::vector<size_t>& startp, 
               const std::vector<size_t>& countp, 
               const long long* dataValues) const;
-  
-  
-  ////////////////
-  // Writes a set of subsampled array values into the netCDF variable.
   /*!
     This is an overloaded member function, provided for convenience.
     It differs from the above function in what argument(s) it accepts.
@@ -1236,8 +1328,53 @@ public:
   */
   void putVal(const std::vector<size_t>& startp, 
               const std::vector<size_t>& countp, 
-              const std::vector<ptrdiff_t>& stridep, 
               const void* dataValues) const;
+  
+  
+  //////////////////////////////////////////////////////////////////////////////
+  // Writes a set of subsampled array values into the netCDF variable.
+  /*!
+    Writes an array of values into the netCDF variable.  The subsampled array
+    section is specified by giving a corner, a vector of counts, and a stride
+    vector.
+
+    \param startp
+    Vector specifying the index where the first data values will
+    be written.  The indices are relative to 0, so for example, the first data
+    value of a variable would have index (0, 0, ... , 0). The elements of start
+    correspond, in order, to the variable's dimensions. Hence, if the variable
+    is a record variable, the first index corresponds to the starting record
+    number for writing the data values.
+
+    \param countp
+    Vector specifying the number of indices selected along each
+    dimension.  To write a single value, for example, specify count as (1, 1,
+    ... , 1). The elements of count correspond, in order, to the variable's
+    dimensions. Hence, if the variable is a record variable, the first element
+    of count corresponds to a count of the number of records to write. Note:
+    setting any element of the count array to zero causes the function to exit
+    without error, and without doing anything.
+
+    \param stridep
+    A vector of ptrdiff_t integers that specifies the sampling
+    interval along each dimension of the netCDF variable.  The elements of the
+    stride vector correspond, in order, to the netCDF variable's dimensions
+    (stride[0] gives the sampling interval along the most slowly varying
+    dimension of the netCDF variable). Sampling intervals are specified in
+    type-independent units of elements (a value of 1 selects consecutive
+    elements of the netCDF variable along the corresponding dimension, a value
+    of 2 selects every other element, etc.). A NULL stride argument is treated
+    as (1, 1, ... , 1).
+
+    \param dataValues
+    The data values. The order in which the data will be
+    written to the netCDF variable is with the last dimension of the specified
+    variable varying fastest. If the type of data values differs from the netCDF
+    variable type, type conversion will occur.  (However, no type conversion is
+    carried out for variables using the user-defined data types: nc_Vlen,
+    nc_Opaque, nc_Compound and nc_Enum.
+  */
+
   /*! \overload
    */
   void putVal(const std::vector<size_t>& startp, 
@@ -1310,39 +1447,12 @@ public:
               const std::vector<size_t>& countp, 
               const std::vector<ptrdiff_t>& stridep, 
               const unsigned long long* dataValues) const;
-  
-  /*!
-    Writes an array of values into the netCDF variable.
-    The subsampled array section is specified by giving a corner, a vector of counts, and a stride vector.
-
-    \param startp  Vector specifying the index where the first data values will be written.  The indices are relative to 0, so for
-    example, the first data value of a variable would have index (0, 0, ... , 0). The elements of start correspond, in order, to the
-    variable's dimensions. Hence, if the variable is a record variable, the first index corresponds to the starting record number for writing the data values.
-
-    \param countp  Vector specifying the number of indices selected along each dimension.
-    To write a single value, for example, specify count as (1, 1, ... , 1). The elements of
-    count correspond, in order, to the variable's dimensions. Hence, if the variable is a record
-    variable, the first element of count corresponds to a count of the number of records to write. Note: setting any element
-    of the count array to zero causes the function to exit without error, and without doing anything.
-
-    \param stridep  A vector of ptrdiff_t integers that specifies the sampling interval along each dimension of the netCDF variable.
-    The elements of the stride vector correspond, in order, to the netCDF variable's dimensions (stride[0] gives the sampling interval
-    along the most slowly varying dimension of the netCDF variable). Sampling intervals are specified in type-independent units of
-    elements (a value of 1 selects consecutive elements of the netCDF variable along the corresponding dimension, a value of 2 selects
-    every other element, etc.). A NULL stride argument is treated as (1, 1, ... , 1).
-
-    \param dataValues The data values. The order in which the data will be written to the netCDF variable is with the last
-    dimension of the specified variable varying fastest. If the type of data values differs from the netCDF variable type, type conversion will occur.
-    (However, no type conversion is  carried out for variables using the user-defined data types: nc_Vlen, nc_Opaque, nc_Compound and nc_Enum.
-  */
+  /*!  \overload
+   */
   void putVal(const std::vector<size_t>& startp, 
                       const std::vector<size_t>& countp, 
                       const std::vector<ptrdiff_t>& stridep, 
                       const long long* dataValues) const;
-
-  ////////////////
-
-  // Writes a mapped array section of values into the netCDF variable.
   /*!
     This is an overloaded member function, provided for convenience.
     It differs from the above function in what argument(s) it accepts.
@@ -1350,10 +1460,63 @@ public:
     the type of the data in memory must match the type of the variable.
   */
   void putVal(const std::vector<size_t>& startp, 
-                      const std::vector<size_t>& countp, 
-                      const std::vector<ptrdiff_t>& stridep, 
-                      const std::vector<ptrdiff_t>& imapp, 
-                      const void* dataValues) const;
+              const std::vector<size_t>& countp, 
+              const std::vector<ptrdiff_t>& stridep, 
+              const void* dataValues) const;
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Writes a mapped array section of values into the netCDF variable.
+  /*!
+
+    Writes a mapped array section of values into the netCDF variable.  The
+    mapped array section is specified by giving a corner, a vector of counts, a
+    stride vector, and an index mapping vector.  The index mapping vector is a
+    vector of integers that specifies the mapping between the dimensions of a
+    netCDF variable and the in-memory structure of the internal data array.  No
+    assumptions are made about the ordering or length of the dimensions of the
+    data array.
+
+    \param countp
+    Vector specifying the number of indices selected along each
+    dimension.  To write a single value, for example, specify count as (1, 1,
+    ... , 1). The elements of count correspond, in order, to the variable's
+    dimensions. Hence, if the variable is a record variable, the first element
+    of count corresponds to a count of the number of records to write. Note:
+    setting any element of the count array to zero causes the function to exit
+    without error, and without doing anything.
+
+    \param stridep
+    A vector of ptrdiff_t integers that specifies the sampling
+    interval along each dimension of the netCDF variable.  The elements of the
+    stride vector correspond, in order, to the netCDF variable's dimensions
+    (stride[0] gives the sampling interval along the most slowly varying
+    dimension of the netCDF variable). Sampling intervals are specified in
+    type-independent units of elements (a value of 1 selects consecutive
+    elements of the netCDF variable along the corresponding dimension, a value
+    of 2 selects every other element, etc.). A NULL stride argument is treated
+    as (1, 1, ... , 1).
+
+    \param imap
+    Vector specifies the mapping between the dimensions of a netCDF
+    variable and the in-memory structure of the internal data array.  The
+    elements of the index mapping vector correspond, in order, to the netCDF
+    variable's dimensions (imap[0] gives the distance between elements of the
+    internal array corresponding to the most slowly varying dimension of the
+    netCDF variable). Distances between elements are specified in
+    type-independent units of elements (the distance between internal elements
+    that occupy adjacent memory locations is 1 and not the element's byte-length
+    as in netCDF 2). A NULL argument means the memory-resident values have the
+    same structure as the associated netCDF variable.
+
+    \param dataValues
+    The data values. The order in which the data will be
+    written to the netCDF variable is with the last dimension of the specified
+    variable varying fastest. If the type of data values differs from the netCDF
+    variable type, type conversion will occur.  (However, no type conversion is
+    carried out for variables using the user-defined data types: nc_Vlen,
+    nc_Opaque, nc_Compound and nc_Enum.)
+  */
+
   /*! \overload
    */
   void putVal(const std::vector<size_t>& startp, 
@@ -1438,44 +1601,26 @@ public:
                       const std::vector<ptrdiff_t>& stridep, 
                       const std::vector<ptrdiff_t>& imapp, 
                       const unsigned long long* dataValues) const;
-
-  /*!
-    Writes a mapped array section of values into the netCDF variable.
-    The mapped array section is specified by giving a corner, a vector of counts, a stride vector, and an index mapping vector.
-    The index mapping vector is a vector of integers that specifies the mapping between the dimensions of a netCDF variable and the in-memory structure of the internal data array.
-    No assumptions are made about the ordering or length of the dimensions of the data array.
-
-    \param countp  Vector specifying the number of indices selected along each dimension.
-    To write a single value, for example, specify count as (1, 1, ... , 1). The elements of
-    count correspond, in order, to the variable's dimensions. Hence, if the variable is a record
-    variable, the first element of count corresponds to a count of the number of records to write. Note: setting any element
-    of the count array to zero causes the function to exit without error, and without doing anything.
-
-    \param stridep  A vector of ptrdiff_t integers that specifies the sampling interval along each dimension of the netCDF variable.
-    The elements of the stride vector correspond, in order, to the netCDF variable's dimensions (stride[0] gives the sampling interval
-    along the most slowly varying dimension of the netCDF variable). Sampling intervals are specified in type-independent units of
-    elements (a value of 1 selects consecutive elements of the netCDF variable along the corresponding dimension, a value of 2 selects
-    every other element, etc.). A NULL stride argument is treated as (1, 1, ... , 1).
-
-    \param imap Vector  specifies the mapping between the dimensions of a netCDF variable and the in-memory structure of the internal data array.
-    The elements of the index mapping vector correspond, in order, to the netCDF variable's dimensions (imap[0] gives the distance between elements
-    of the internal array corresponding to the most slowly varying dimension of the netCDF variable). Distances between elements are
-    specified in type-independent units of elements (the distance between internal elements that occupy adjacent memory locations is
-    1 and not the element's byte-length as in netCDF 2). A NULL argument means the memory-resident values have the same structure as
-    the associated netCDF variable.
-
-    \param dataValues The data values. The order in which the data will be written to the netCDF variable is with the last
-    dimension of the specified variable varying fastest. If the type of data values differs from the netCDF variable type, type conversion will occur.
-    (However, no type conversion is carried out for variables using the user-defined data types:  nc_Vlen, nc_Opaque, nc_Compound and nc_Enum.)
-  */
+  /*!  \overload
+   */
   void putVal(const std::vector<size_t>& startp, 
               const std::vector<size_t>& countp, 
               const std::vector<ptrdiff_t>& stridep, 
               const std::vector<ptrdiff_t>& imapp, 
               const long long* dataValues) const;
+  /*!
+    This is an overloaded member function, provided for convenience.
+    It differs from the above function in what argument(s) it accepts.
+    In addition, no data conversion is carried out. This means that
+    the type of the data in memory must match the type of the variable.
+  */
+  void putVal(const std::vector<size_t>& startp, 
+                      const std::vector<size_t>& countp, 
+                      const std::vector<ptrdiff_t>& stridep, 
+                      const std::vector<ptrdiff_t>& imapp, 
+                      const void* dataValues) const;
 
-
-  //////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////
   /// add attribute of various types
   /// Returns 0 on success, -1 on failure
   /// Sets ErrStr on failure
@@ -1529,8 +1674,13 @@ public:
   ////////////////////////////////////////
   // set default fill value, based on type
     
-  void setDefaultFillvalue();
+  void setDefaultFillValue();
       
+  ////////////////////////////////////////
+  // set meta fill value, based on type
+  
+  void setMetaFillValue();
+
   ////////////////////////////////////////
   // convert var type string
     
