@@ -131,6 +131,9 @@ int SpdbXml2Table::Run ()
   // get chunks
   
   const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
+  if (_params.debug) {
+    cerr << "==>> got n entries: " << chunks.size() << endl;
+  }
   for (size_t ii = 0; ii < chunks.size(); ii++) {
     _printLine(stdout, chunks[ii]);
   }
@@ -231,7 +234,7 @@ void SpdbXml2Table::_printLine(FILE *out,
           (long) vtime.utime(), _params.column_delimiter,
           (double) vtime.utime() / 86400.0);
   ostr += oline;
-  
+
   // set the xml string from the chunk data
 
   string xml((const char *) chunk.data);
@@ -255,6 +258,9 @@ void SpdbXml2Table::_printLine(FILE *out,
     TaStr::tokenize(entry.xml_tag_list, "<>", tags);
     if (tags.size() == 0) {
       if (entry.required) {
+        cerr << "NOTE: required entry not found, ignoring" << endl;
+        cerr << "  ==>> label       : " << entry.label << endl;
+        cerr << "  ==>> xml_tag_list: " << entry.xml_tag_list << endl;
         return;
       }
       sprintf(oline, "nan");
@@ -267,6 +273,9 @@ void SpdbXml2Table::_printLine(FILE *out,
       string val;
       if (TaXml::readString(buf, tags[jj], val)) {
         if (entry.required) {
+          cerr << "NOTE - required entry not found, ignoring" << endl;
+          cerr << "  ==>> label       : " << entry.label << endl;
+          cerr << "  ==>> xml_tag_list: " << entry.xml_tag_list << endl;
           return;
         }
         sprintf(oline, "nan");

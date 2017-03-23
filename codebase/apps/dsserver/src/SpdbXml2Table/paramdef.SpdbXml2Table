@@ -109,14 +109,14 @@ paramdef struct xml_entry_t {
       xml_tag_list = "<tag1><tag2><tag3>",
       specify_label = true,
       label = "myLabel",
-      required = TRUE
+      required = FALSE
     }
     ,
     {
       xml_tag_list = "<tag4><tag5>",
       specify_label = false,
       label = "",
-      required = TRUE
+      required = FALSE
     }
   };
   p_descr = "Specify which XML entries to include in table.";
