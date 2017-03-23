@@ -172,9 +172,21 @@ void NcxxAtt::getValues(string& dataValues) const {
               __FILE__, __LINE__);
   }
 
+  // find length to null
+
+  size_t finalLen = 0;
+  for (size_t ii = 0; ii < att_len; ii++) {
+    if ((int) tmpValues[ii] == 0) {
+      break;
+    }
+    finalLen = ii + 1;
+  }
+
   // set return value
 
-  dataValues=string(tmpValues,att_len);
+  dataValues=string(tmpValues,finalLen);
+
+  // clean up
 
   delete[] tmpValues;
 
