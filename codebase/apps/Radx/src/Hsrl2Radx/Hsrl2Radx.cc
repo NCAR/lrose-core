@@ -132,13 +132,16 @@ int Hsrl2Radx::Run()
   _cals.setDeadTimeHi(_params.calvals_gvhsrl_path, 
 			  _params.combined_hi_dead_time_name);
   _cals.setDeadTimeLo(_params.calvals_gvhsrl_path, 
-			  _params.combined_hi_dead_time_name);
+			  _params.combined_lo_dead_time_name);
   _cals.setDeadTimeCross(_params.calvals_gvhsrl_path, 
-			  _params.combined_hi_dead_time_name);
+			  _params.cross_pol_dead_time_name);
   _cals.setDeadTimeMol(_params.calvals_gvhsrl_path, 
-			  _params.combined_hi_dead_time_name);
+			  _params.molecular_dead_time_name);
   _cals.setBinWidth(_params.calvals_gvhsrl_path, 
-			  _params.combined_hi_dead_time_name); 
+			  _params.bin_width_name); 
+  _cals.setScanAdj(_params.calvals_gvhsrl_path, 
+			  _params.scan_adjustment_name); 
+
 
   _cals.setBLCor(_params.baseline_calibration_path);
   _cals.setDiffDGeoCor(_params.diff_default_geofile_path);

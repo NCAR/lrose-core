@@ -522,6 +522,13 @@ void DerFieldCalcs::derive_quantities()
   vector<Radx::fl32> crossDataRate=crossData;
   vector<Radx::fl32> molDataRate=molData;
   vector<Radx::fl32> combineRate=combData;
+     
+  CalReader scanAdjust=(fullCals.getScanAdj());
+  double scan=1;
+  
+  if( scanAdjust.dataTypeisNum() && 
+      ( ( scanAdjust.getDataNum() ).at(fullCals.getBinPos()) ).size()==1 )
+    scan= ((scanAdjust.getDataNum()).at(fullCals.getBinPos())).at(0);
   
   int nGates=crossDataRate.size();
    
@@ -573,14 +580,13 @@ void DerFieldCalcs::derive_quantities()
     cout<<"extinction^^^^^"<<'\n';
 
   double opDepth1, opDepth2, alt1, alt2;
-  opDepth2=_op_depth(presHpa[0],tempK[0],molDataRate.at(0));
+  opDepth2=_op_depth(presHpa[0],tempK[0],molDataRate.at(0),scan);
   alt2=htKm[0];
  
   for(int igate=0;igate<nGates-1;igate++)
     {
-
       opDepth1=opDepth2;
-      opDepth2=_op_depth(presHpa[igate+1],tempK[igate+1],molDataRate.at(igate+1));
+      opDepth2=_op_depth(presHpa[igate+1],tempK[igate+1],molDataRate.at(igate+1),scan);
       alt1=alt2;
       alt2=htKm[igate+1];
       extinction.push_back(_extinction(opDepth1, opDepth2, alt1, alt2));
@@ -724,10 +730,10 @@ double DerFieldCalcs::_backscatCo(double pressure, double temperature,
 }
 
 double DerFieldCalcs::_op_depth(double pressure, double temperature, 
-			       double molRate)
+				double molRate, double scan)
 {
   double beta_m_sonde =_BetaMSonde(pressure,temperature);
-  return log( molRate /beta_m_sonde );
+  return log( scan * molRate / beta_m_sonde );
 }
 
 

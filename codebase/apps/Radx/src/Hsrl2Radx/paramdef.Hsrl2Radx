@@ -328,6 +328,12 @@ paramdef string {
   p_help = "";
 } bin_width_name;
 
+paramdef string {
+  p_default = "i2_scan_adjustment";
+  p_descr = "Name of coefficient field in CalVals file.";
+  p_help = "";
+} scan_adjustment_name;
+
 
 
 

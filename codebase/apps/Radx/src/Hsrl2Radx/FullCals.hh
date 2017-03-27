@@ -43,15 +43,16 @@ using namespace std;
 
 class FullCals{
   
-private:
-  CalReader deadTimeHi, deadTimeLo, deadTimeCross, deadTimeMol, binWidth;
+private:  
+  CalReader deadTimeHi, deadTimeLo, deadTimeCross, 
+    deadTimeMol, binWidth, scanAdj;
   //holds the deadtime calibration blocks from calvals file   
   
   //holds other calibration file data
   vector< vector<double> > blCor, diffDGeoCor, geoDefCor, afPulCor;
     
   //hold which spot in the vectors are the correct calibration point. 
-  int hi_pos, lo_pos, cross_pos, mol_pos, bin_pos;
+  int hi_pos, lo_pos, cross_pos, mol_pos, bin_pos, scan_pos;
   
   RadxTime ti;
 
@@ -60,7 +61,7 @@ public:
   
   FullCals(CalReader dtHi, CalReader dtLo, 
 	   CalReader dtCross, CalReader dtMol, 
-	   CalReader binW, 
+	   CalReader binW, CalReader scanAdjust, 
 	   vector< vector<double> > blCorIn, 
 	   vector< vector<double> > diffDGeoCorIn,
 	   vector< vector<double> > geoDefCorIn, 
@@ -71,12 +72,14 @@ public:
   void setDeadTimeCross(CalReader dtCross);
   void setDeadTimeMol(CalReader dtMol);
   void setBinWidth(CalReader binWidth); 
+  void setScanAdj(CalReader scanAdjust); 
 
   void setDeadTimeHi(const char* file, const char* variable);
   void setDeadTimeLo(const char* file, const char* variable);
   void setDeadTimeCross(const char* file, const char* variable);
   void setDeadTimeMol(const char* file, const char* variable);
   void setBinWidth(const char* file, const char* variable); 
+  void setScanAdj(const char* file, const char* variable); 
 
   void setBLCor(vector< vector<double> > blCor);
   void setDiffDGeoCor(vector< vector<double> > diffDGeoCor);
@@ -93,6 +96,7 @@ public:
   CalReader getDeadTimeCross();
   CalReader getDeadTimeMol();
   CalReader getBinWidth(); 
+  CalReader getScanAdj(); 
 
   int getHiPos(); 
   int getLoPos(); 

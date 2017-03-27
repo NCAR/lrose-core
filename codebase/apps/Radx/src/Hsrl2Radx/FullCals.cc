@@ -45,7 +45,7 @@ FullCals::FullCals()
 
 FullCals::FullCals(CalReader dtHi, CalReader dtLo, 
 		   CalReader dtCross, CalReader dtMol, 
-		   CalReader binW, 
+		   CalReader binW, CalReader scanAdjust, 
 		   vector< vector<double> > blCorIn, 
 		   vector< vector<double> > diffDGeoCorIn,
 		   vector< vector<double> > geoDefCorIn, 
@@ -59,6 +59,7 @@ FullCals::FullCals(CalReader dtHi, CalReader dtLo,
   deadTimeCross=dtCross;
   deadTimeMol=dtMol;
   binWidth=binW;
+  scanAdj=scanAdjust;
   
   blCor=blCorIn;
   diffDGeoCor=diffDGeoCorIn;
@@ -104,6 +105,11 @@ void FullCals::setBinWidth(CalReader binW)
   binWidth=binW;  
   bin_pos=binW.dateMatch(binW, ti);
 }
+void FullCals::setScanAdj(CalReader scanAdjust)
+{
+  scanAdj=scanAdjust;
+  scan_pos=scanAdjust.dateMatch(scanAdjust,ti);
+}
 
 void FullCals::setDeadTimeHi(const char* file, const char* variable)
 {
@@ -129,6 +135,11 @@ void FullCals::setBinWidth(const char* file, const char* variable)
 {
   binWidth=binWidth.readCalVals(file,variable);
   bin_pos=binWidth.dateMatch(binWidth, ti);
+}
+void FullCals::setScanAdj(const char* file, const char* variable) 
+{
+  scanAdj=scanAdj.readCalVals(file,variable);
+  scan_pos=scanAdj.dateMatch(scanAdj, ti);
 }
 
 void FullCals::setBLCor(vector< vector<double> > blCorIn)
@@ -159,6 +170,8 @@ CalReader FullCals::getDeadTimeMol()
 {return deadTimeMol;}
 CalReader FullCals::getBinWidth() 
 {return binWidth;}
+CalReader FullCals::getScanAdj() 
+{return scanAdj;}
 
 int FullCals::getHiPos() 
 {return hi_pos;}

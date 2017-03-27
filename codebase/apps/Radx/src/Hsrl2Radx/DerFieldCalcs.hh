@@ -146,7 +146,7 @@ public:
 		     double backscatRatio);
   
   //optical depth calculation for extinction;
-  double _op_depth(double pressure, double temperature, double molRate);
+  double _op_depth(double pressure, double temperature, double molRate,double scan);
 
   //extinction
   double _extinction(double opDepth1, double opDepth2,

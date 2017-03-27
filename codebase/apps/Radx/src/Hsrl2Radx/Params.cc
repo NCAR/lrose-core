@@ -1139,6 +1139,18 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("binwidth");
     tt++;
     
+    // Parameter 'scan_adjustment_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("scan_adjustment_name");
+    tt->descr = tdrpStrDup("Name of coefficient field in CalVals file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &scan_adjustment_name - &_start_;
+    tt->single_val.s = tdrpStrDup("i2_scan_adjustment");
+    tt++;
+    
     // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));

@@ -458,6 +458,8 @@ public:
 
   char* bin_width_name;
 
+  char* scan_adjustment_name;
+
   tdrp_bool_t set_output_fields;
 
   output_field_t *_output_fields;
@@ -525,7 +527,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[86];
+  mutable TDRPtable _table[87];
 
   const char *_className;
 
