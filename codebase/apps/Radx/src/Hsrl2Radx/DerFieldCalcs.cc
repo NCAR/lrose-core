@@ -35,6 +35,7 @@
 #include <math.h>  
 #include "FullCals.hh"
 #include <iostream>
+#include <cmath>
 
 using namespace std;
 
@@ -272,10 +273,12 @@ void DerFieldCalcs::applyCorr()
 	  double crossDeadTime=((dt_cross.getDataNum()).at(fullCals.getCrossPos())).at(0);
 	  double molDeadTime=((dt_mol.getDataNum()).at(fullCals.getMolPos())).at(0);
 	  double binW= ((binwid.getDataNum()).at(fullCals.getBinPos())).at(0);
-	  hiDataRate.push_back(_nonLinCountCor(hiData[igate], hiDeadTime, binW, shotCount)); 
-	  loDataRate.push_back(_nonLinCountCor(loData[igate], loDeadTime, binW, shotCount)); 
+	  hiDataRate.push_back(_nonLinCountCor(hiData[igate], 
+					       hiDeadTime, binW, shotCount)); 
+	  loDataRate.push_back(_nonLinCountCor(loData[igate], 
+					       loDeadTime, binW, shotCount)); 
 	  crossDataRate.push_back(_nonLinCountCor(crossData[igate], 
-						  crossDeadTime, binW, shotCount)); 
+					       crossDeadTime, binW, shotCount)); 
 	  molDataRate.push_back(_nonLinCountCor(molData[igate], 
 						molDeadTime, binW, shotCount)); 
 	}
@@ -328,7 +331,8 @@ void DerFieldCalcs::applyCorr()
   if(debug)
     cout<<"backgroundSub^^^^^"<<'\n';
   
-  //grabs last 100 out of 4000 bins for background, or fractionally adjusts for less bins
+  //grabs last 100 out of 4000 bins for background,
+  //or fractionally adjusts for less bins
   int bgBinCount=0;
   for(int cgate=nGates-1;cgate>=nGates*0.975;cgate--)
     {
@@ -465,7 +469,8 @@ void DerFieldCalcs::applyCorr()
   
   for(int igate=0;igate<nGates;igate++)
     {
-      combineRate.push_back(_hiAndloMerge(hiDataRate.at(igate), loDataRate.at(igate)));
+      combineRate.push_back(_hiAndloMerge(hiDataRate.at(igate), 
+					  loDataRate.at(igate)));
     }
   
   if(debug)
@@ -534,7 +539,8 @@ void DerFieldCalcs::derive_quantities()
    
   for(int igate=0;igate<nGates;igate++)
     {
-      volDepol.push_back(_volDepol( crossDataRate.at(igate), combineRate.at(igate)));
+      volDepol.push_back(_volDepol( crossDataRate.at(igate), 
+				    combineRate.at(igate)));
     }
 
   if(debug)
@@ -586,7 +592,8 @@ void DerFieldCalcs::derive_quantities()
   for(int igate=0;igate<nGates-1;igate++)
     {
       opDepth1=opDepth2;
-      opDepth2=_op_depth(presHpa[igate+1],tempK[igate+1],molDataRate.at(igate+1),scan);
+      opDepth2=_op_depth(presHpa[igate+1],tempK[igate+1],
+			 molDataRate.at(igate+1),scan);
       alt1=alt2;
       alt2=htKm[igate+1];
       extinction.push_back(_extinction(opDepth1, opDepth2, alt1, alt2));
@@ -639,7 +646,8 @@ double DerFieldCalcs::_energyNorm(double arrivalRate, double totalEnergy)
 
 
 //differential overlap correction the vector coresponds to hi, lo, cross, mol
-vector<double> DerFieldCalcs::_diffOverlapCor(vector<double> arrivalRate, vector<double> diffOverlap)
+vector<double> DerFieldCalcs::_diffOverlapCor(vector<double> arrivalRate, 
+					      vector<double> diffOverlap)
 {
   assert(arrivalRate.size()==4);
   assert(diffOverlap.size()==4);
@@ -652,7 +660,8 @@ vector<double> DerFieldCalcs::_diffOverlapCor(vector<double> arrivalRate, vector
 }
 
 //process QWP rotation
-vector<double> DerFieldCalcs::_processQWPRotation(vector<double> arrivalRate, vector<double> polCal)
+vector<double> DerFieldCalcs::_processQWPRotation(vector<double> arrivalRate, 
+						  vector<double> polCal)
 {
   return arrivalRate;
 }
@@ -707,7 +716,8 @@ double DerFieldCalcs::_partDepol(double volDepol, double backscatRatio)
 
 double DerFieldCalcs::_BetaMSonde(double pressure, double temperature)
 {
-  //If temp is 0 this causes errors but also there is a case where temp is -1.99384e+34
+  //If temp is 0 this causes errors but also there is a case where temp 
+  //is -1.99384e+34
   if(temperature<=0)
     return 0;
   return 5.45*(550/532)*4 * pow(10,-32) * pressure /
@@ -719,7 +729,8 @@ double DerFieldCalcs::_BetaMSonde(double pressure, double temperature)
 double DerFieldCalcs::_backscatCo(double pressure, double temperature, 
 				  double backscatRatio)
 {
-  //If temp is 0 this causes errors but also there is a case where temp is -1.99384e+34
+  //If temp is 0 this causes errors but also there is a case where temp 
+  //is -1.99384e+34
   if(temperature<=0)
     return 0;
   
@@ -733,6 +744,10 @@ double DerFieldCalcs::_op_depth(double pressure, double temperature,
 				double molRate, double scan)
 {
   double beta_m_sonde =_BetaMSonde(pressure,temperature);
+  //cout << "scan=" << scan << '\n';
+  //cout << "molRate=" << molRate << '\n';
+  //cout << "beta_m_sonde=" << beta_m_sonde << '\n';
+   
   return log( scan * molRate / beta_m_sonde );
 }
 
@@ -740,5 +755,16 @@ double DerFieldCalcs::_op_depth(double pressure, double temperature,
 double DerFieldCalcs::_extinction(double opDepth1, double opDepth2,
 				  double alt1, double alt2)
 {
-  return (opDepth1-opDepth2)/(alt1-alt2);
+  //cout << "opDepth1=" << opDepth1 << '\n';
+  //cout << "opDepth2=" << opDepth2 << '\n';
+  //cout << "alt1=" << alt1 << '\n';
+  //cout << "alt2=" << alt2 << '\n';
+  //cout << "extinction=" << (opDepth1-opDepth2)/(alt1-alt2) << '\n';
+    
+  if(!isnan(opDepth1) && !isnan(opDepth2) && alt1!=alt2)
+    {
+      //cout << "extinction=" << (opDepth1-opDepth2)/(alt1-alt2)<<'\n';
+      return (opDepth1-opDepth2)/(alt1-alt2);
+    }
+  return 0;
 }
