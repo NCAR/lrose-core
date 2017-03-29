@@ -1166,8 +1166,24 @@ int SunCal::_performAnalysis(bool force)
     }
   }
 
+  int startGateSun = _params.start_gate;
+  int endGateSun = startGateSun + _params.n_gates - 1;
+  const IwrfTsPulse &pulse0 = *_pulseQueue[0];
+  int nGates = pulse0.getNGates();
+  double startRangeKm = pulse0.get_start_range_km();
+  double gateSpacingKm = pulse0.get_gate_spacing_km();
+  double startRangeSun = startRangeKm + gateSpacingKm * startGateSun;
+  double endRangeSun = startRangeKm + gateSpacingKm * endGateSun;
+
   if (_params.debug) {
+    cerr << "----------------------------------------------------" << endl;
     cerr << "Performing analysis, n volumes: " << _volCount << endl;
+    cerr << "  nGates        : " << nGates << endl;
+    cerr << "  startGateSun  : " << startGateSun << endl;
+    cerr << "  endGateSun    : " << endGateSun << endl;
+    cerr << "  startRangeSun : " << startRangeSun << endl;
+    cerr << "  endRangeSun   : " << endRangeSun << endl;
+    cerr << "----------------------------------------------------" << endl;
   }
 
   // set the sun location
