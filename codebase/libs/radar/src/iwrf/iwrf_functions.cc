@@ -1944,10 +1944,10 @@ string iwrf_ui_opcode_to_str(int ui_opcode)
       return "IWRF_UI_GO_IDLE";
     case IWRF_UI_TASKLIST_UPD_LIST:
       return "IWRF_UI_TASKLIST_UPD_LIST";
-    case IWRF_UI_TASKLIST_UPD_UNUSED_LIST:
-      return "IWRF_UI_TASKLIST_UPD_UNUSED_LIST";
-    case IWRF_UI_TASKLIST_UPD_CURRENT_INDEX:
-      return "IWRF_UI_TASKLIST_UPD_CURRENT_INDEX";
+    case IWRF_UI_TASKLIST_GET_UNUSED_LIST:
+      return "IWRF_UI_TASKLIST_GET_UNUSED_LIST";
+    case IWRF_UI_TASKLIST_GET_CURRENT_INDEX:
+      return "IWRF_UI_TASKLIST_GET_CURRENT_INDEX";
     case IWRF_UI_TASKLIST_UPD_NEXT_INDEX:
       return "IWRF_UI_TASKLIST_UPD_NEXT_INDEX";
     case IWRF_UI_TASKLIST_SET_INDEX_IMMEDIATE:
@@ -1970,6 +1970,12 @@ string iwrf_ui_opcode_to_str(int ui_opcode)
       return "IWRF_UI_UPD_RSM_PACKET";
     case IWRF_UI_RCS_STATUS:
       return "IWRF_UI_RCS_STATUS";
+    case IWRF_UI_SHUTDOWN_CONNECTION:
+      return "IWRF_UI_SHUTDOWN_CONNECTION";
+    case IWRF_UI_SET_POL_MODE:
+      return "IWRF_UI_SET_POL_MODE";
+    case IWRF_UI_CONFIRM_POL_MODE:
+      return "IWRF_UI_CONFIRM_POL_MODE";
     default:
       return "UNKNOWN";
   }
