@@ -248,6 +248,7 @@ void iwrf_ts_processing_init(iwrf_ts_processing_t &val)
   val.block_mode_prt2_pulses = 0;
   val.block_mode_prt3_pulses = 0;
   val.block_mode_prt4_pulses = 0;
+  val.pol_sync_mode = 0;
   
 }
 
@@ -2345,6 +2346,7 @@ void iwrf_ts_processing_print(FILE *out,
   fprintf(out, "  block_mode_prt2_pulses: %d\n", copy.block_mode_prt2_pulses);
   fprintf(out, "  block_mode_prt3_pulses: %d\n", copy.block_mode_prt3_pulses);
   fprintf(out, "  block_mode_prt4_pulses: %d\n", copy.block_mode_prt4_pulses);
+  fprintf(out, "  pol_sync_mode: %d\n", copy.pol_sync_mode);
 
 }
 
@@ -3583,8 +3585,9 @@ void iwrf_ts_processing_print_format(FILE *out, const iwrf_ts_processing_t &val)
   fprintf(out, _dform, "si32", "block_mode_prt2_pulses", sizeof(val.block_mode_prt2_pulses), (char *) &val.block_mode_prt2_pulses - id);
   fprintf(out, _dform, "si32", "block_mode_prt3_pulses", sizeof(val.block_mode_prt3_pulses), (char *) &val.block_mode_prt3_pulses - id);
   fprintf(out, _dform, "si32", "block_mode_prt4_pulses", sizeof(val.block_mode_prt4_pulses), (char *) &val.block_mode_prt4_pulses - id);
+  fprintf(out, _dform, "ui32", "pol_sync_mode", sizeof(val.pol_sync_mode), (char *) &val.pol_sync_mode - id);
 
-  fprintf(out, _dform, "fl32", "unused[19]", sizeof(val.unused), (char *) val.unused - id);
+  fprintf(out, _dform, "fl32", "unused[18]", sizeof(val.unused), (char *) val.unused - id);
 
   _print_format_divider('-', out);
 

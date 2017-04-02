@@ -770,7 +770,8 @@ typedef struct iwrf_ts_processing {
   si32 block_mode_prt3_pulses;
   si32 block_mode_prt4_pulses;
   
-  fl32 unused[19]; /**< for future expansion */
+  ui32 pol_sync_mode; /**< synch required with UI to set polarization mode */
+  fl32 unused[18]; /**< for future expansion */
   
 } iwrf_ts_processing_t;
 
