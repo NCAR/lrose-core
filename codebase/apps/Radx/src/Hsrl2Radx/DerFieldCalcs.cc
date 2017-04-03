@@ -761,7 +761,7 @@ double DerFieldCalcs::_extinction(double opDepth1, double opDepth2,
   //cout << "alt2=" << alt2 << '\n';
   //cout << "extinction=" << (opDepth1-opDepth2)/(alt1-alt2) << '\n';
     
-  if(!isnan(opDepth1) && !isnan(opDepth2) && alt1!=alt2)
+  if(!std::isnan(opDepth1) && !std::isnan(opDepth2) && alt1!=alt2)
     {
       //cout << "extinction=" << (opDepth1-opDepth2)/(alt1-alt2)<<'\n';
       return (opDepth1-opDepth2)/(alt1-alt2);
