@@ -1689,14 +1689,15 @@ int NcxxGroup::addVar(NcxxVar &var,
                       const string &standardName,
                       const string &longName,
                       NcxxType ncType, 
-                      const string &units /* = "" */)
+                      const string &units /* = "" */,
+                      bool isMetadata /* = false */)
   
 {
   
   vector<NcxxDim> dims; // 0 length - for scalar
   
   return addVar(var, name, standardName, longName,
-                ncType, dims, units);
+                ncType, dims, units, isMetadata);
 
 }
 
@@ -1711,7 +1712,8 @@ int NcxxGroup::addVar(NcxxVar &var,
                       const string &longName,
                       NcxxType ncType, 
                       NcxxDim &dim, 
-                      const string &units /* = "" */)
+                      const string &units /* = "" */,
+                      bool isMetadata /* = false */)
   
 {
   
@@ -1719,7 +1721,7 @@ int NcxxGroup::addVar(NcxxVar &var,
   dims.push_back(dim);
 
   return addVar(var, name, standardName, longName,
-                ncType, dims, units);
+                ncType, dims, units, isMetadata);
 
 }
 
@@ -1735,7 +1737,8 @@ int NcxxGroup::addVar(NcxxVar &var,
                       NcxxType ncType,
                       NcxxDim &dim0,
                       NcxxDim &dim1,
-                      const string &units /* = "" */)
+                      const string &units /* = "" */,
+                      bool isMetadata /* = false */)
 {
 
   vector<NcxxDim> dims;
@@ -1743,7 +1746,7 @@ int NcxxGroup::addVar(NcxxVar &var,
   dims.push_back(dim1);
 
   return addVar(var, name, standardName, longName,
-                ncType, dims, units);
+                ncType, dims, units, isMetadata);
   
 }
 
@@ -1758,7 +1761,8 @@ int NcxxGroup::addVar(NcxxVar &var,
                       const string &longName,
                       NcxxType ncType,
                       vector<NcxxDim> &dims,
-                      const string &units /* = "" */)
+                      const string &units /* = "" */,
+                      bool isMetadata /* = false */)
 {
 
   var = addVar(name, ncType, dims);
@@ -1782,7 +1786,11 @@ int NcxxGroup::addVar(NcxxVar &var,
     var.addAttr("units", units);
   }
   
-  var.setDefaultFillValue();
+  if (isMetadata) {
+    var.setMetaFillValue();
+  } else {
+    var.setDefaultFillValue();
+  }
 
   return 0;
 
