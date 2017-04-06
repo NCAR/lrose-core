@@ -708,7 +708,8 @@ public:
              const string &standardName,
              const string &longName,
              NcxxType ncType, 
-             const string &units = "");
+             const string &units = "",
+             bool isMetadata = false);
 
   ///////////////////////////////////////
   // Add 1-D array var
@@ -721,7 +722,8 @@ public:
              const string &longName,
              NcxxType ncType, 
              NcxxDim &dim, 
-             const string &units = "");
+             const string &units = "",
+             bool isMetadata = false);
      
   ///////////////////////////////////////
   // Add 2-D array var
@@ -735,7 +737,8 @@ public:
              NcxxType ncType,
              NcxxDim &dim0,
              NcxxDim &dim1,
-             const string &units = "");
+             const string &units = "",
+             bool isMetadata = false);
 
   ///////////////////////////////////////
   // Add var in multiple-dimensions
@@ -748,7 +751,8 @@ public:
              const string &longName,
              NcxxType ncType,
              vector<NcxxDim> &dims,
-             const string &units = "");
+             const string &units = "",
+             bool isMetadata = false);
      
   ///////////////////////////////////////////////
   // read variable based on type, set var and val

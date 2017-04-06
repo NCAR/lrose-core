@@ -371,6 +371,24 @@ private:
 
   bool _georefsActive;
   bool _georefsApplied;
+  NcxxVar _headingVar;
+  NcxxVar _trackVar;
+  NcxxVar _rollVar;
+  NcxxVar _pitchVar;
+  NcxxVar _driftVar;
+  NcxxVar _rotationVar;
+  NcxxVar _tiltVar;
+  NcxxVar _ewVelocityVar;
+  NcxxVar _nsVelocityVar;
+  NcxxVar _vertVelocityVar;
+  NcxxVar _ewWindVar;
+  NcxxVar _nsWindVar;
+  NcxxVar _vertWindVar;
+  NcxxVar _headingRateVar;
+  NcxxVar _pitchRateVar;
+  NcxxVar _rollRateVar;
+  NcxxVar _driveAngle1Var;
+  NcxxVar _driveAngle2Var;
 
   // correction factor variables
 
