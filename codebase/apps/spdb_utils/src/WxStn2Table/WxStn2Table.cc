@@ -183,6 +183,7 @@ void WxStn2Table::_printComments(FILE *out)
   for (int ii = 0; ii < _params.fields_n; ii++) {
     fprintf(out, "%s", _params.column_delimiter);
     switch (_params._fields[ii]) {
+      case Params::STATION_NAME: fprintf(out, "station_name"); break;
       case Params::YEAR: fprintf(out, "year"); break;
       case Params::MONTH: fprintf(out, "month"); break;
       case Params::DAY: fprintf(out, "day"); break;
@@ -315,6 +316,7 @@ void WxStn2Table::_printLine(FILE *out,
 
   for (int ii = 0; ii < _params.fields_n; ii++) {
     switch (_params._fields[ii]) {
+      case Params::STATION_NAME: fprintf(out, "%s", stationName.c_str()); break;
       case Params::YEAR: fprintf(out, "%d", vtime.getYear()); break;
       case Params::MONTH: fprintf(out, "%d", vtime.getMonth()); break;
       case Params::DAY: fprintf(out, "%d", vtime.getDay()); break;

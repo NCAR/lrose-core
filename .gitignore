@@ -433,6 +433,7 @@ codebase/apps/spdb_utils/src/Rhi2Spdb/Rhi2Spdb
 codebase/apps/spdb_utils/src/Taf2Spdb/Taf2Spdb
 codebase/apps/spdb_utils/src/extractStationLocationList/extractStationLocationList
 codebase/apps/spdb_utils/src/spdb_merge/spdb_merge
+codebase/apps/spdb_utils/src/WxStn2Table/WxStn2Table
 
 codebase/apps/spol/src/SpolAngles2Fmq/SpolAngles2Fmq
 codebase/apps/spol/src/SpolCal2Xml/SpolCal2Xml
