@@ -89,8 +89,8 @@ station_names = "all";
 
 start_time = {
     year = 2015,
-    month = 06,
-    day = 01,
+    month = 05,
+    day = 15,
     hour = 0,
     min = 0,
     sec = 0

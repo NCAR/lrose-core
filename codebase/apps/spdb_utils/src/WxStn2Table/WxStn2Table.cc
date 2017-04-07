@@ -137,33 +137,58 @@ int WxStn2Table::Run ()
 {
 
   _lineCount = 0;
+  int oneDay = 86400;
 
-  DsSpdb spdb;
-
-  if (spdb.getInterval(_params.input_url,
-                       _startTime.utime(),
-                       _endTime.utime(),
-                       0, 0)) {
-    cerr << "ERROR - WxStn2Table::Run" << endl;
-    cerr << spdb.getErrStr() << endl;
-    return -1;
-  }
-
-  // add comment lines is appropriate
-
+  // prepend comment lines is appropriate
+  
   if (_params.add_commented_header) {
     _printComments(stdout);
   }
+    
+  // loop through data a day at a time
 
-  // get chunks
+  time_t retrieveStartTime = _startTime.utime();
+  time_t retrieveEndTime = retrieveStartTime + oneDay - 1;
+  if (retrieveEndTime > _endTime.utime()) {
+    retrieveEndTime = _endTime.utime();
+  }
   
-  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
-  if (_params.debug) {
-    cerr << "==>> got n entries: " << chunks.size() << endl;
-  }
-  for (size_t ii = 0; ii < chunks.size(); ii++) {
-    _printLine(stdout, chunks[ii]);
-  }
+  while (retrieveStartTime <= _endTime.utime()) {
+
+    DsSpdb spdb;
+
+    if (_params.debug) {
+      cerr << "Retrieving data for period " 
+           << DateTime::strm(retrieveStartTime) << " to " 
+           << DateTime::strm(retrieveEndTime) << endl;
+    }
+
+    if (spdb.getInterval(_params.input_url,
+                         retrieveStartTime,
+                         retrieveEndTime,
+                         0, 0)) {
+      cerr << "ERROR - WxStn2Table::Run" << endl;
+      cerr << spdb.getErrStr() << endl;
+      return -1;
+    }
+    
+    // get chunks
+    
+    const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
+    if (_params.debug) {
+      cerr << "==>> got n entries: " << chunks.size() << endl;
+    }
+    for (size_t ii = 0; ii < chunks.size(); ii++) {
+      _printLine(stdout, chunks[ii]);
+    }
+
+    retrieveStartTime += oneDay;
+    retrieveEndTime = retrieveStartTime + oneDay - 1;
+    if (retrieveEndTime > _endTime.utime()) {
+      retrieveEndTime = _endTime.utime();
+    }
+
+  } // while
 
   return 0;
   
