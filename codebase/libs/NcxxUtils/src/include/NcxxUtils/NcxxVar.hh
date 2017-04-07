@@ -462,9 +462,9 @@ public:
     \return Endianness
     enumeration type.
     Allowable parameters are:
-      "nc_ENDIAN_NATIVE" (the default),
-      "nc_ENDIAN_LITTLE",
-      "nc_ENDIAN_BIG"
+    "nc_ENDIAN_NATIVE" (the default),
+    "nc_ENDIAN_LITTLE",
+    "nc_ENDIAN_BIG"
   */
   EndianMode getEndianness() const;
 
@@ -1450,9 +1450,9 @@ public:
   /*!  \overload
    */
   void putVal(const std::vector<size_t>& startp, 
-                      const std::vector<size_t>& countp, 
-                      const std::vector<ptrdiff_t>& stridep, 
-                      const long long* dataValues) const;
+              const std::vector<size_t>& countp, 
+              const std::vector<ptrdiff_t>& stridep, 
+              const long long* dataValues) const;
   /*!
     This is an overloaded member function, provided for convenience.
     It differs from the above function in what argument(s) it accepts.
@@ -1520,87 +1520,87 @@ public:
   /*! \overload
    */
   void putVal(const std::vector<size_t>& startp, 
-                      const std::vector<size_t>& countp, 
-                      const std::vector<ptrdiff_t>& stridep, 
-                      const std::vector<ptrdiff_t>& imapp, 
-                      const char** dataValues) const;
+              const std::vector<size_t>& countp, 
+              const std::vector<ptrdiff_t>& stridep, 
+              const std::vector<ptrdiff_t>& imapp, 
+              const char** dataValues) const;
   /*!  \overload
    */
   void putVal(const std::vector<size_t>& startp, 
-                      const std::vector<size_t>& countp, 
-                      const std::vector<ptrdiff_t>& stridep, 
-                      const std::vector<ptrdiff_t>& imapp, 
-                      const char* dataValues) const;
+              const std::vector<size_t>& countp, 
+              const std::vector<ptrdiff_t>& stridep, 
+              const std::vector<ptrdiff_t>& imapp, 
+              const char* dataValues) const;
   /*!  \overload
    */
   void putVal(const std::vector<size_t>& startp, 
-                      const std::vector<size_t>& countp, 
-                      const std::vector<ptrdiff_t>& stridep, 
-                      const std::vector<ptrdiff_t>& imapp, 
-                      const unsigned char* dataValues) const;
+              const std::vector<size_t>& countp, 
+              const std::vector<ptrdiff_t>& stridep, 
+              const std::vector<ptrdiff_t>& imapp, 
+              const unsigned char* dataValues) const;
   /*!  \overload
    */
   void putVal(const std::vector<size_t>& startp, 
-                      const std::vector<size_t>& countp, 
-                      const std::vector<ptrdiff_t>& stridep, 
-                      const std::vector<ptrdiff_t>& imapp, 
-                      const signed char* dataValues) const;
+              const std::vector<size_t>& countp, 
+              const std::vector<ptrdiff_t>& stridep, 
+              const std::vector<ptrdiff_t>& imapp, 
+              const signed char* dataValues) const;
   /*!  \overload
    */
   void putVal(const std::vector<size_t>& startp, 
-                      const std::vector<size_t>& countp, 
-                      const std::vector<ptrdiff_t>& stridep, 
-                      const std::vector<ptrdiff_t>& imapp, 
-                      const short* dataValues) const;
+              const std::vector<size_t>& countp, 
+              const std::vector<ptrdiff_t>& stridep, 
+              const std::vector<ptrdiff_t>& imapp, 
+              const short* dataValues) const;
   /*!  \overload
    */
   void putVal(const std::vector<size_t>& startp, 
-                      const std::vector<size_t>& countp, 
-                      const std::vector<ptrdiff_t>& stridep, 
-                      const std::vector<ptrdiff_t>& imapp, 
-                      const int* dataValues) const;
+              const std::vector<size_t>& countp, 
+              const std::vector<ptrdiff_t>& stridep, 
+              const std::vector<ptrdiff_t>& imapp, 
+              const int* dataValues) const;
   /*!  \overload
    */
   void putVal(const std::vector<size_t>& startp, 
-                      const std::vector<size_t>& countp, 
-                      const std::vector<ptrdiff_t>& stridep, 
-                      const std::vector<ptrdiff_t>& imapp, 
-                      const long* dataValues) const;
+              const std::vector<size_t>& countp, 
+              const std::vector<ptrdiff_t>& stridep, 
+              const std::vector<ptrdiff_t>& imapp, 
+              const long* dataValues) const;
   /*!  \overload
    */
   void putVal(const std::vector<size_t>& startp, 
-                      const std::vector<size_t>& countp, 
-                      const std::vector<ptrdiff_t>& stridep, 
-                      const std::vector<ptrdiff_t>& imapp, 
-                      const float* dataValues) const;
+              const std::vector<size_t>& countp, 
+              const std::vector<ptrdiff_t>& stridep, 
+              const std::vector<ptrdiff_t>& imapp, 
+              const float* dataValues) const;
   /*!  \overload
    */
   void putVal(const std::vector<size_t>& startp, 
-                      const std::vector<size_t>& countp, 
-                      const std::vector<ptrdiff_t>& stridep, 
-                      const std::vector<ptrdiff_t>& imapp, 
-                      const double* dataValues) const;
+              const std::vector<size_t>& countp, 
+              const std::vector<ptrdiff_t>& stridep, 
+              const std::vector<ptrdiff_t>& imapp, 
+              const double* dataValues) const;
   /*!  \overload
    */
   void putVal(const std::vector<size_t>& startp, 
-                      const std::vector<size_t>& countp, 
-                      const std::vector<ptrdiff_t>& stridep, 
-                      const std::vector<ptrdiff_t>& imapp, 
-                      const unsigned short* dataValues) const;
+              const std::vector<size_t>& countp, 
+              const std::vector<ptrdiff_t>& stridep, 
+              const std::vector<ptrdiff_t>& imapp, 
+              const unsigned short* dataValues) const;
   /*!  \overload
    */
   void putVal(const std::vector<size_t>& startp, 
-                      const std::vector<size_t>& countp, 
-                      const std::vector<ptrdiff_t>& stridep, 
-                      const std::vector<ptrdiff_t>& imapp, 
-                      const unsigned int* dataValues) const;
+              const std::vector<size_t>& countp, 
+              const std::vector<ptrdiff_t>& stridep, 
+              const std::vector<ptrdiff_t>& imapp, 
+              const unsigned int* dataValues) const;
   /*!  \overload
    */
   void putVal(const std::vector<size_t>& startp, 
-                      const std::vector<size_t>& countp, 
-                      const std::vector<ptrdiff_t>& stridep, 
-                      const std::vector<ptrdiff_t>& imapp, 
-                      const unsigned long long* dataValues) const;
+              const std::vector<size_t>& countp, 
+              const std::vector<ptrdiff_t>& stridep, 
+              const std::vector<ptrdiff_t>& imapp, 
+              const unsigned long long* dataValues) const;
   /*!  \overload
    */
   void putVal(const std::vector<size_t>& startp, 
@@ -1615,10 +1615,10 @@ public:
     the type of the data in memory must match the type of the variable.
   */
   void putVal(const std::vector<size_t>& startp, 
-                      const std::vector<size_t>& countp, 
-                      const std::vector<ptrdiff_t>& stridep, 
-                      const std::vector<ptrdiff_t>& imapp, 
-                      const void* dataValues) const;
+              const std::vector<size_t>& countp, 
+              const std::vector<ptrdiff_t>& stridep, 
+              const std::vector<ptrdiff_t>& imapp, 
+              const void* dataValues) const;
 
   //////////////////////////////////////////////////////////////////////////
   /// add attribute of various types

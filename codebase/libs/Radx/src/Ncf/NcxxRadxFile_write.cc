@@ -932,7 +932,7 @@ int NcxxRadxFile::_addCoordinateVariables()
   // time
 
   try {
-    _timeVar = _file.addVar(TIME, ncxxInt, _timeDim);
+    _timeVar = _file.addVar(TIME, ncxxDouble, _timeDim);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_addCoordinateVariables");
     _addErrStr("  Exception: ", e.what());
@@ -1855,16 +1855,16 @@ int NcxxRadxFile::_addGeorefVariables()
 
 }
 
-int NcxxRadxFile::_addCalVar(NcxxVar* &var, const string &name,
+int NcxxRadxFile::_addCalVar(NcxxVar &var, const string &name,
                              const string &standardName,
                              const string &units /* = "" */)
 {
   
-  var = _file.getNcFile()->add_var(name.c_str(), ncxxFloat, _calDim);
+  var = _file.addVar(name, ncxxFloat, _calDim);
   if (var.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_addCalVar");
     _addErrStr("  Cannot add calib var, name: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
 
@@ -1914,10 +1914,13 @@ int NcxxRadxFile::_writeCoordinateVariables()
     dsecs += ray.getNanoSecs() / 1.0e9;
     dtime[ii] = dsecs;
   }
-  if (!_timeVar->put(dtime, nRays)) {
+  try {
+    _timeVar.putVal(dtime);
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_writeCoordinateVariables");
     _addErrStr("  Cannot write time var");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
     return -1;
   }
 
@@ -1940,9 +1943,15 @@ int NcxxRadxFile::_writeCoordinateVariables()
         rangeMeters[index] = rangeKm * 1000.0;
       }
     }
-
-    if (!_rangeVar->put(rangeMeters, _writeVol->getNRays(), _writeVol->getMaxNGates())) {
+    
+    // if (!_rangeVar->putVal(rangeMeters, _writeVol->getNRays(), _writeVol->getMaxNGates())) {
+    try {
+      _rangeVar.putVal(rangeMeters);
+    } catch (NcxxException& e) {
       _addErrStr("ERROR - NcxxRadxFile::_writeCoordinateVariables");
+      _addErrStr("  Cannot write range var");
+      _addErrStr(_file.getErrStr());
+      _addErrStr("  Exception: ", e.what());
       return -1;
     }
   
@@ -1958,8 +1967,13 @@ int NcxxRadxFile::_writeCoordinateVariables()
       rangeMeters[ii] = rangeKm * 1000.0;
     }
 
-    if (_file.writeVar(_rangeVar, _rangeDim, rangeMeters)) {
+    try {
+      _rangeVar.putVal(rangeMeters);
+    } catch (NcxxException& e) {
       _addErrStr("ERROR - NcxxRadxFile::_writeCoordinateVariables");
+      _addErrStr("  Cannot write range var");
+      _addErrStr(_file.getErrStr());
+      _addErrStr("  Exception: ", e.what());
       return -1;
     }
   
@@ -1982,10 +1996,13 @@ int NcxxRadxFile::_writeScalarVariables()
   // volume number
   
   int volNum = _writeVol->getVolumeNumber();
-  if (!_volumeNumberVar->put(&volNum, 1)) {
+  try {
+    _volumeNumberVar.putVal(&volNum);
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write volumeNumber");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
     return -1;
   }
 
@@ -2140,7 +2157,7 @@ int NcxxRadxFile::_writeProjectionVariables()
   if (!_latitudeVar->put(&latitude, 1)) {
     _addErrStr("ERROR - NcxxRadxFile::_writeProjectionVariables");
     _addErrStr("  Cannot write latitude");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
 
@@ -2148,7 +2165,7 @@ int NcxxRadxFile::_writeProjectionVariables()
   if (!_longitudeVar->put(&longitude, 1)) {
     _addErrStr("ERROR - NcxxRadxFile::_writeProjectionVariables");
     _addErrStr("  Cannot write longitude");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
 
@@ -2159,7 +2176,7 @@ int NcxxRadxFile::_writeProjectionVariables()
   if (!_altitudeVar->put(&altitudeM, 1)) {
     _addErrStr("ERROR - NcxxRadxFile::_writeProjectionVariables");
     _addErrStr("  Cannot write altitude");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
 
@@ -2171,7 +2188,7 @@ int NcxxRadxFile::_writeProjectionVariables()
       !_altitudeAglVar->put(&htAglM, 1)) {
     _addErrStr("ERROR - NcxxRadxFile::_writeProjectionVariables");
     _addErrStr("  Cannot write altitude AGL");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
 
@@ -3325,7 +3342,7 @@ NcxxVar *NcxxRadxFile::_createFieldVar(const RadxField &field)
     _addErrInt("  Time dim size: ", _timeDim->size());
     _addErrStr("  Range dim name: ", _rangeDim->name());
     _addErrInt("  Range dim size: ", _rangeDim->size());
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return NULL;
   }
 
@@ -3482,7 +3499,7 @@ int NcxxRadxFile::_writeFieldVar(NcxxVar *var, RadxField *field)
   if (iret) {
     _addErrStr("ERROR - NcxxRadxFile::_writeFieldVar");
     _addErrStr("  Canont write var, name: ", var->name());
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   } else {
     return 0;
