@@ -661,6 +661,8 @@ int SigmetRadxFile::_readHeaders(bool doPrint, ostream &out)
     _isHrdTailRadar = true;
   } else if (hardwareName.find("-TM") != string::npos) {
     _isHrdTailRadar = true;
+  } else if (hardwareName.find("-TS") != string::npos) {
+    _isHrdTailRadar = true;
   } else if (hardwareName.find("noaa1-master") != string::npos) {
     _isHrdTailRadar = true;
   } else if (hardwareName.find("-LF") != string::npos) {
