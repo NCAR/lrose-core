@@ -1823,7 +1823,18 @@ void RadxRay::convert2Xml(string &xml, int level /* = 0 */)  const
   xml += RadxXml::writeBoolean("utilityFlag", level + 1, _utilityFlag);
   xml += RadxXml::writeBoolean("isLongRange", level + 1, _isLongRange);
 
+  if (_georef != NULL) {
+    string georefXml;
+    _georef->convert2Xml(georefXml, level + 1);
+    xml += georefXml;
+  }
   xml += RadxXml::writeBoolean("georefApplied", level + 1, _georefApplied);
+
+  if (_cfactors != NULL) {
+    string cfactorsXml;
+    _cfactors->convert2Xml(cfactorsXml, level + 1);
+    xml += cfactorsXml;
+  }
 
   xml += RadxXml::writeInt("nGates", level + 1, _nGates);
 
