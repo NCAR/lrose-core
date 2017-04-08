@@ -35,6 +35,7 @@
 
 #include <Radx/RadxField.hh>
 #include <Radx/RadxArray.hh>
+#include <Radx/RadxXml.hh>
 #include <iostream>
 #include <cstdio>
 #include <cstring>
@@ -3250,3 +3251,51 @@ string RadxField::statsMethodToStr(StatsMethod_t method)
   }
   
 }
+
+/////////////////////////////////////////////////////////
+// convert to XML
+
+void RadxField::convert2Xml(string &xml, int level /* = 0 */)  const
+  
+{
+
+  xml.clear();
+  xml += RadxXml::writeStartTag("RadxField", level);
+
+  xml += RadxXml::writeString("name", level + 1, _name);
+  xml += RadxXml::writeString("longName", level + 1, _longName);
+  xml += RadxXml::writeString("standardName", level + 1, _standardName);
+  xml += RadxXml::writeString("units", level + 1, _units);
+  xml += RadxXml::writeString("legendXml", level + 1, _legendXml);
+  xml += RadxXml::writeString("thresholdingXml", level + 1, _thresholdingXml);
+
+  xml += RadxXml::writeString("dataType", level + 1,
+                              Radx::dataTypeToStr(_dataType));
+  xml += RadxXml::writeInt("byteWidth", level + 1, _byteWidth);
+
+  xml += RadxXml::writeDouble("samplingRatio", level + 1, _samplingRatio);
+
+  xml += RadxXml::writeBoolean("fieldFolds", level + 1, _fieldFolds);
+  xml += RadxXml::writeDouble("foldLimitLower", level + 1, _foldLimitLower);
+  xml += RadxXml::writeDouble("foldLimitUpper", level + 1, _foldLimitUpper);
+  xml += RadxXml::writeDouble("foldRange", level + 1, _foldRange);
+
+  xml += RadxXml::writeBoolean("isDiscrete", level + 1, _isDiscrete);
+
+  xml += RadxXml::writeDouble("minVal", level + 1, _minVal);
+  xml += RadxXml::writeDouble("maxVal", level + 1, _maxVal);
+
+  xml += RadxXml::writeDouble("missingFl64", level + 1, _missingFl64);
+  xml += RadxXml::writeDouble("missingFl32", level + 1, _missingFl32);
+  xml += RadxXml::writeInt("missingSi32", level + 1, _missingSi32);
+  xml += RadxXml::writeInt("missingSi16", level + 1, _missingSi16);
+  xml += RadxXml::writeInt("missingSi08", level + 1, _missingSi08);
+
+  xml += RadxXml::writeString("thresholdFieldName", level + 1, _thresholdFieldName);
+  xml += RadxXml::writeDouble("thresholdValue", level + 1, _thresholdValue);
+
+  xml += RadxXml::writeEndTag("RadxField", level);
+
+
+}
+
