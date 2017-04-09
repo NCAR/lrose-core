@@ -379,6 +379,7 @@ codebase/apps/radar/src/HawkEye/moc_RhiWindow.cpp
 codebase/apps/radar/src/HcrVelCorrect/HcrVelCorrect
 codebase/apps/radar/src/IntfRemove/IntfRemove
 codebase/apps/radar/src/Iq2Dsr/Iq2Dsr
+codebase/apps/radar/src/JamesDealias/JamesDealias
 codebase/apps/radar/src/Mdv2Vad/Mdv2Vad
 codebase/apps/radar/src/MdvFold/MdvFold
 codebase/apps/radar/src/MdvPartRain/MdvPartRain

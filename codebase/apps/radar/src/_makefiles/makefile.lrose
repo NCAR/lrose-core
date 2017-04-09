@@ -30,6 +30,7 @@ SUB_DIRS = \
 	HcrVelCorrect \
 	IntfRemove \
 	Iq2Dsr \
+        JamesDealias \
 	KinGin2Ncf \
 	Mdv2Vad \
 	MdvFold \
