@@ -36,6 +36,7 @@
 #include <Radx/Radx.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxTime.hh>
+#include <Radx/RadxXml.hh>
 using namespace std;
 
 /////////////////////////////////////////////////////////
@@ -208,4 +209,43 @@ void RadxGeoref::print(ostream &out) const
 
 }
 
+/////////////////////////////////////////////////////////
+// convert to XML
+
+void RadxGeoref::convert2Xml(string &xml, int level /* = 0 */)  const
+  
+{
+
+  xml.clear();
+  xml += RadxXml::writeStartTag("RadxGeoref", level);
+
+  xml += RadxXml::writeTime("timeSecs", level + 1, _timeSecs);
+  xml += RadxXml::writeDouble("nanoSecs", level + 1, _nanoSecs);
+
+  xml += RadxXml::writeDouble("longitude", level + 1, _longitude);
+  xml += RadxXml::writeDouble("latitude", level + 1, _latitude);
+  xml += RadxXml::writeDouble("altitudeKmMsl", level + 1, _altitudeKmMsl);
+  xml += RadxXml::writeDouble("altitudeKmAgl", level + 1, _altitudeKmAgl);
+  xml += RadxXml::writeDouble("ewVelocity", level + 1, _ewVelocity);
+  xml += RadxXml::writeDouble("nsVelocity", level + 1, _nsVelocity);
+  xml += RadxXml::writeDouble("vertVelocity", level + 1, _vertVelocity);
+  xml += RadxXml::writeDouble("heading", level + 1, _heading);
+  xml += RadxXml::writeDouble("track", level + 1, _track);
+  xml += RadxXml::writeDouble("roll", level + 1, _roll);
+  xml += RadxXml::writeDouble("pitch", level + 1, _pitch);
+  xml += RadxXml::writeDouble("drift", level + 1, _drift);
+  xml += RadxXml::writeDouble("rotation", level + 1, _rotation);
+  xml += RadxXml::writeDouble("tilt", level + 1, _tilt);
+  xml += RadxXml::writeDouble("ewWind", level + 1, _ewWind);
+  xml += RadxXml::writeDouble("nsWind", level + 1, _nsWind);
+  xml += RadxXml::writeDouble("vertWind", level + 1, _vertWind);
+  xml += RadxXml::writeDouble("headingRate", level + 1, _headingRate);
+  xml += RadxXml::writeDouble("pitchRate", level + 1, _pitchRate);
+  xml += RadxXml::writeDouble("rollRate", level + 1, _rollRate);
+  xml += RadxXml::writeDouble("driveAngle1", level + 1, _driveAngle1);
+  xml += RadxXml::writeDouble("driveAngle2", level + 1, _driveAngle2);
+
+  xml += RadxXml::writeEndTag("RadxGeoref", level);
+
+}
 
