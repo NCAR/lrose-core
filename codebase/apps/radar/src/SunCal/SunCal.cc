@@ -338,12 +338,6 @@ int SunCal::_runForMoments()
     }
   }
 
-  // process any remaining data
-
-  if (_performAnalysis(true)) {
-    return -1;
-  }
-
   return iret;
 
 }
@@ -814,6 +808,11 @@ int SunCal::_processMomentsFile(const char *filePath)
     cerr << inFile.getErrStr() << endl;
     return -1;
   }
+  if (vol.getNRays() < 100) {
+    cerr << "ERROR - SunCal::_processMomentsFile" << endl;
+    cerr << "  less than 100 rays in file: " << filePath << endl;
+    return -1;
+  }
 
   _volNum = vol.getVolumeNumber();
   _isRhi = _volIsRhi(vol);
@@ -832,7 +831,7 @@ int SunCal::_processMomentsFile(const char *filePath)
   for (size_t iray = 0; iray < rays.size(); iray++) {
     RadxRay *ray = rays[iray];
     ray->convertToFl32();
-    if (_processRay(ray)) {
+    if (_processMomentsRay(ray)) {
       cerr << "ERROR - SunCal::_processMomentsFile" << endl;
       cerr << "  Cannot process ray, el, az:"
            << ray->getElevationDeg() << ", "
@@ -841,8 +840,14 @@ int SunCal::_processMomentsFile(const char *filePath)
     }
   }
   
+  RadxRay *ray0 = rays[0];
+  _volCount = 1;
+  _nGates = ray0->getNGates();
+  _startRangeKm = ray0->getStartRangeKm();
+  _gateSpacingKm = ray0->getGateSpacingKm();
+
   // perform analysis
-  
+
   if (_performAnalysis(false)) {
     return -1;
   }
@@ -856,7 +861,7 @@ int SunCal::_processMomentsFile(const char *filePath)
 //////////////////////////////////////////////////
 // Process a moments ray
 
-int SunCal::_processRay(RadxRay *ray)
+int SunCal::_processMomentsRay(RadxRay *ray)
 {
 
   MomentsSun mom;
@@ -899,15 +904,15 @@ int SunCal::_processRay(RadxRay *ray)
   double meanDbmHx = _computeFieldMean(dbmhx);
   double meanDbmVx = _computeFieldMean(dbmvx);
 
-  mom.dbmHc = meanDbmHc;
-  mom.dbmVc = meanDbmVc;
-  mom.dbmHx = meanDbmHx;
-  mom.dbmVx = meanDbmVx;
+  mom.dbmHc = meanDbmHc + _calib.getReceiverGainDbHc();
+  mom.dbmVc = meanDbmVc + _calib.getReceiverGainDbVc();
+  mom.dbmHx = meanDbmHx + _calib.getReceiverGainDbHx();
+  mom.dbmVx = meanDbmVx + _calib.getReceiverGainDbVx();
 
   double corrMag = 0;
   RadarComplex_t meanRvvhh0 =
     _computeRvvhh0Mean(rvvhh0_db, rvvhh0_phase, corrMag);
-
+  
   mom.Rvvhh0 = meanRvvhh0;
   mom.corrMag = corrMag;
   if (meanDbmHc > -9990 && meanDbmVc > -9990) {
@@ -1156,7 +1161,7 @@ int SunCal::_performAnalysis(bool force)
   if (_volCount < 1) {
     return 0;
   }
-  
+
   if (!_params.analyze_individual_volumes) {
     if (_volCount < _params.min_n_volumes_for_analysis) {
       return 0;
@@ -1168,17 +1173,14 @@ int SunCal::_performAnalysis(bool force)
 
   int startGateSun = _params.start_gate;
   int endGateSun = startGateSun + _params.n_gates - 1;
-  const IwrfTsPulse &pulse0 = *_pulseQueue[0];
-  int nGates = pulse0.getNGates();
-  double startRangeKm = pulse0.get_start_range_km();
-  double gateSpacingKm = pulse0.get_gate_spacing_km();
-  double startRangeSun = startRangeKm + gateSpacingKm * startGateSun;
-  double endRangeSun = startRangeKm + gateSpacingKm * endGateSun;
+
+  double startRangeSun = _startRangeKm + _gateSpacingKm * startGateSun;
+  double endRangeSun = _startRangeKm + _gateSpacingKm * endGateSun;
 
   if (_params.debug) {
     cerr << "----------------------------------------------------" << endl;
     cerr << "Performing analysis, n volumes: " << _volCount << endl;
-    cerr << "  nGates        : " << nGates << endl;
+    cerr << "  nGates        : " << _nGates << endl;
     cerr << "  startGateSun  : " << startGateSun << endl;
     cerr << "  endGateSun    : " << endGateSun << endl;
     cerr << "  startRangeSun : " << startRangeSun << endl;
@@ -4918,6 +4920,10 @@ void SunCal::_allocGateData()
   for (size_t ii = 0; ii < _gateData.size(); ii++) {
     _gateData[ii]->allocArrays(_nSamples, false, false, false);
   }
+
+  _startRangeKm = _pulseQueue[0]->get_start_range_km();
+  _gateSpacingKm = _pulseQueue[0]->get_gate_spacing_km();
+
 }
 
 /////////////////////////////////////////////////////////////////

@@ -243,4 +243,6 @@ void Args::usage(string &prog_name, ostream &out)
       << "       [ -vv, -extra ] print extra verbose debug messages\n"
       << endl;
   
+  Params::usage(out);
+  
 }

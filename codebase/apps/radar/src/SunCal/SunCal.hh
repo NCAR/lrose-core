@@ -227,6 +227,7 @@ private:
   // gate data
 
   int _nGates;
+  double _startRangeKm, _gateSpacingKm;
   int _nSamples, _nSamplesHalf;
   vector<GateData *> _gateData;
   vector<MomentsFields> _fields;
@@ -375,7 +376,7 @@ private:
   void _clearPulseQueue();
 
   int _processMomentsFile(const char *filePath);
-  int _processRay(RadxRay *ray);
+  int _processMomentsRay(RadxRay *ray);
   double _computeFieldMean(const RadxField *field);
   RadarComplex_t _computeRvvhh0Mean(const RadxField *rvvhh0_db,
                                     const RadxField *rvvhh0_phase,
