@@ -61,9 +61,9 @@ public:
     TS_FILELIST_INPUT = 0,
     TS_FMQ_INPUT = 1,
     TS_REALTIME_DIR_INPUT = 2,
-    MOMENTS_REALTIME_INPUT = 3,
-    MOMENTS_ARCHIVE_INPUT = 4,
-    MOMENTS_FILELIST_INPUT = 5
+    COVAR_REALTIME_INPUT = 3,
+    COVAR_ARCHIVE_INPUT = 4,
+    COVAR_FILELIST_INPUT = 5
   } input_mode_t;
 
   typedef enum {
@@ -76,21 +76,17 @@ public:
   // struct typedefs
 
   typedef struct {
-    char* DBMHC;
-    char* DBMVC;
-    char* DBMHX;
-    char* DBMVX;
-    char* ZDR;
-    char* PHIDP;
-    char* RHOHV;
-    char* NCP;
-    char* LAG1_HC_DB;
-    char* LAG1_HC_PHASE;
-    char* LAG1_VC_DB;
-    char* LAG1_VC_PHASE;
+    char* LAG0_HC_DB;
+    char* LAG0_HX_DB;
+    char* LAG0_VC_DB;
+    char* LAG0_VX_DB;
+    char* LAG0_HCVX_DB;
+    char* LAG0_HCVX_PHASE;
+    char* LAG0_VCHX_DB;
+    char* LAG0_VCHX_PHASE;
     char* RVVHH0_DB;
     char* RVVHH0_PHASE;
-  } moments_field_names_t;
+  } covar_field_names_t;
 
   ///////////////////////////
   // Member functions
@@ -407,7 +403,7 @@ public:
 
   tdrp_bool_t print_missing_pulses;
 
-  moments_field_names_t moments_field_names;
+  covar_field_names_t covar_field_names;
 
   tdrp_bool_t scan_mode_rhi;
 

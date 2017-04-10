@@ -128,7 +128,7 @@ int Args::parse(int argc, char **argv, string &prog_name)
       }
 
     } else if (!strcmp(argv[i], "-tsf") ||
-               !strcmp(argv[i], "-momf")) {
+               !strcmp(argv[i], "-covf")) {
       
       if (i < argc - 1) {
 	// load up file list vector. Break at next arg which
@@ -151,7 +151,7 @@ int Args::parse(int argc, char **argv, string &prog_name)
         if (!strcmp(argv[i], "-tsf")) {
           sprintf(tmp_str, "input_mode = TS_FILELIST_INPUT;");
         } else {
-          sprintf(tmp_str, "input_mode = MOMENTS_FILELIST_INPUT;");
+          sprintf(tmp_str, "input_mode = COVAR_FILELIST_INPUT;");
         }
         TDRP_add_override(&override, tmp_str);
       }
@@ -161,7 +161,7 @@ int Args::parse(int argc, char **argv, string &prog_name)
       if (i < argc - 1) {
         sprintf(tmp_str, "archive_start_time = \"%s\";", argv[i+1]);
 	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "input_mode = MOMENTS_ARCHIVE_INPUT;");
+        sprintf(tmp_str, "input_mode = COVAR_ARCHIVE_INPUT;");
         TDRP_add_override(&override, tmp_str);
 	date_time_t start;
 	if (sscanf(argv[i+1], "%d %d %d %d %d %d",
@@ -181,7 +181,7 @@ int Args::parse(int argc, char **argv, string &prog_name)
       if (i < argc - 1) {
         sprintf(tmp_str, "archive_end_time = \"%s\";", argv[i+1]);
 	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "input_mode = MOMENTS_ARCHIVE_INPUT;");
+        sprintf(tmp_str, "input_mode = COVAR_ARCHIVE_INPUT;");
         TDRP_add_override(&override, tmp_str);
 
 	date_time_t end;
@@ -216,9 +216,12 @@ void Args::usage(string &prog_name, ostream &out)
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
       << "       [ -archive_end \"yyyy mm dd hh mm ss\"] end time\n"
-      << "         Sets mode to MOMENTS_ARCHIVE_INPUT\n"
+      << "         Sets mode to COVAR_ARCHIVE_INPUT\n"
       << "       [ -archive_start \"yyyy mm dd hh mm ss\"] start time\n"
-      << "         Sets mode to MOMENTS_ARCHIVE_INPUT\n"
+      << "         Sets mode to COVAR_ARCHIVE_INPUT\n"
+      << "       [ -covf files ] specify input covariances file list.\n"
+      << "         Read files specified on command line.\n"
+      << "         Sets mode to COVAR_FILELIST_INPUT.\n"
       << "       [ -d, -debug ] print debug messages\n"
       << "       [ -gate ?] specify gate number to be monitored\n"
       << "       [ -instance ?] instance for procmap\n"
@@ -227,12 +230,9 @@ void Args::usage(string &prog_name, ostream &out)
       << "          TS_FILELIST_INPUT\n"
       << "          TS_FMQ_INPUT,\n"
       << "          TS_REALTIME_DIR_INPUT\n"
-      << "          MOMENTS_REALTIME_FILE_INPUT\n"
-      << "          MOMENTS_ARCHIVE_INPUT\n"
-      << "          MOMENTS_FILELIST_INPUT\n"
-      << "       [ -momf files ] specify input moments file list.\n"
-      << "         Read files specified on command line.\n"
-      << "         Sets mode to MOMENTS_FILELIST_INPUT.\n"
+      << "          COVAR_REALTIME_FILE_INPUT\n"
+      << "          COVAR_ARCHIVE_INPUT\n"
+      << "          COVAR_FILELIST_INPUT\n"
       << "       [ -ngates ?] specify number of gates for averaging\n"
       << "         defaults to 1\n"
       << "       [ -nsamples ?] specify number of samples\n"

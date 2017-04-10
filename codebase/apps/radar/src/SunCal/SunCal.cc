@@ -73,7 +73,7 @@ SunCal::SunCal(int argc, char **argv)
 
   isOK = true;
   _tsReader = NULL;
-  _momReader = NULL;
+  _covarReader = NULL;
 
   _pulseSeqNum = 0;
   _prevAngleOffset = -999;
@@ -192,8 +192,8 @@ SunCal::~SunCal()
     delete _tsReader;
   }
 
-  if (_momReader) {
-    delete _momReader;
+  if (_covarReader) {
+    delete _covarReader;
   }
 
   // clean up memory
@@ -234,8 +234,8 @@ int SunCal::Run ()
 
   if (_tsReader != NULL) {
     return _runForTimeSeries();
-  } else if (_momReader != NULL) {
-    return _runForMoments();
+  } else if (_covarReader != NULL) {
+    return _runForCovar();
   } else {
     cerr << "ERROR - SunCal::Run()" << endl;
     cerr << "  No reader object created" << endl;
@@ -314,9 +314,9 @@ int SunCal::_runForTimeSeries()
 }
 
 //////////////////////////////////////////////////
-// Run for moments analysis
+// Run for covariances analysis
 
-int SunCal::_runForMoments()
+int SunCal::_runForCovar()
 {
 
   PMU_auto_register("_runForMoments");
@@ -332,8 +332,8 @@ int SunCal::_runForMoments()
 
   int iret = 0;
   const char *filePath;
-  while ((filePath = _momReader->next()) != NULL) {
-    if (_processMomentsFile(filePath)) {
+  while ((filePath = _covarReader->next()) != NULL) {
+    if (_processCovarFile(filePath)) {
       iret = -1;
     }
   }
@@ -371,14 +371,14 @@ int SunCal::_createReaders()
 
     _tsReader = new IwrfTsReaderFmq(_params.input_fmq_name, iwrfDebug);
 
-  } else if (_params.input_mode == Params::MOMENTS_REALTIME_INPUT) {
+  } else if (_params.input_mode == Params::COVAR_REALTIME_INPUT) {
 
-    _momReader = new DsInputPath(_progName,
-                                 _params.debug >= Params::DEBUG_VERBOSE,
-                                 _params.input_dir,
-                                 600, PMU_auto_register, true);
+    _covarReader = new DsInputPath(_progName,
+                                   _params.debug >= Params::DEBUG_VERBOSE,
+                                   _params.input_dir,
+                                   600, PMU_auto_register, true);
 
-  } else if (_params.input_mode == Params::MOMENTS_ARCHIVE_INPUT) {
+  } else if (_params.input_mode == Params::COVAR_ARCHIVE_INPUT) {
 
     date_time_t start;
     if (sscanf(_params.archive_start_time, "%d %d %d %d %d %d",
@@ -400,17 +400,17 @@ int SunCal::_createReaders()
       cerr << "  Format is \"yyyy mm dd hh mm ss\"" << endl;
       iret = -1;
     }
-    _momReader = new DsInputPath(_progName,
-                                 _params.debug >= Params::DEBUG_VERBOSE,
-                                 _params.input_dir,
-                                 start.unix_time, end.unix_time);
-
-  } else if (_params.input_mode == Params::MOMENTS_FILELIST_INPUT) {
+    _covarReader = new DsInputPath(_progName,
+                                   _params.debug >= Params::DEBUG_VERBOSE,
+                                   _params.input_dir,
+                                   start.unix_time, end.unix_time);
+    
+  } else if (_params.input_mode == Params::COVAR_FILELIST_INPUT) {
 
     if (_args.inputFileList.size() > 0) {
-      _momReader = new DsInputPath(_progName,
-                                   _params.debug >= Params::DEBUG_VERBOSE,
-                                   _args.inputFileList);
+      _covarReader = new DsInputPath(_progName,
+                                     _params.debug >= Params::DEBUG_VERBOSE,
+                                     _args.inputFileList);
     } else {
       cerr << "ERROR: " << _progName << endl;
       cerr << "  In FILELIST mode you must specify the files using -f arg." << endl;
@@ -784,9 +784,9 @@ void SunCal::_clearPulseQueue()
 }
 
 //////////////////////////////////////////////////
-// Process a moments file
+// Process a covariances file
 
-int SunCal::_processMomentsFile(const char *filePath)
+int SunCal::_processCovarFile(const char *filePath)
 {
 
   if (_params.debug) {
@@ -831,7 +831,7 @@ int SunCal::_processMomentsFile(const char *filePath)
   for (size_t iray = 0; iray < rays.size(); iray++) {
     RadxRay *ray = rays[iray];
     ray->convertToFl32();
-    if (_processMomentsRay(ray)) {
+    if (_processCovarRay(ray)) {
       cerr << "ERROR - SunCal::_processMomentsFile" << endl;
       cerr << "  Cannot process ray, el, az:"
            << ray->getElevationDeg() << ", "
@@ -859,9 +859,9 @@ int SunCal::_processMomentsFile(const char *filePath)
 }
 
 //////////////////////////////////////////////////
-// Process a moments ray
+// Process a covariance ray
 
-int SunCal::_processMomentsRay(RadxRay *ray)
+int SunCal::_processCovarRay(RadxRay *ray)
 {
 
   MomentsSun mom;
@@ -884,30 +884,26 @@ int SunCal::_processMomentsRay(RadxRay *ray)
   mom.offsetEl = _offsetEl;
   mom.offsetAz = _offsetAz;
   
-  RadxField *dbmhc = ray->getField(_params.moments_field_names.DBMHC);
-  RadxField *dbmvc = ray->getField(_params.moments_field_names.DBMVC);
-  RadxField *dbmhx = ray->getField(_params.moments_field_names.DBMHX);
-  RadxField *dbmvx = ray->getField(_params.moments_field_names.DBMVX);
-  RadxField *zdr = ray->getField(_params.moments_field_names.ZDR);
-  RadxField *phidp = ray->getField(_params.moments_field_names.PHIDP);
-  RadxField *rhohv = ray->getField(_params.moments_field_names.RHOHV);
-  RadxField *ncp = ray->getField(_params.moments_field_names.NCP);
-
+  RadxField *lag0_hc_db = ray->getField(_params.covar_field_names.LAG0_HC_DB);
+  RadxField *lag0_vc_db = ray->getField(_params.covar_field_names.LAG0_VC_DB);
+  RadxField *lag0_hx_db = ray->getField(_params.covar_field_names.LAG0_HX_DB);
+  RadxField *lag0_vx_db = ray->getField(_params.covar_field_names.LAG0_VX_DB);
+  
   RadxField *rvvhh0_db =
-    ray->getField(_params.moments_field_names.RVVHH0_DB);
+    ray->getField(_params.covar_field_names.RVVHH0_DB);
   RadxField *rvvhh0_phase =
-    ray->getField(_params.moments_field_names.RVVHH0_PHASE);
+    ray->getField(_params.covar_field_names.RVVHH0_PHASE);
   
-  double meanDbmHc = _computeFieldMean(dbmhc);
-  double meanDbmVc = _computeFieldMean(dbmvc);
+  double meanLag0_Hc_Db = _computeFieldMean(lag0_hc_db);
+  double meanLag0_Vc_Db = _computeFieldMean(lag0_vc_db);
   
-  double meanDbmHx = _computeFieldMean(dbmhx);
-  double meanDbmVx = _computeFieldMean(dbmvx);
+  double meanLag0_Hx_Db = _computeFieldMean(lag0_hx_db);
+  double meanLag0_Vx_Db = _computeFieldMean(lag0_vx_db);
 
-  mom.dbmHc = meanDbmHc + _calib.getReceiverGainDbHc();
-  mom.dbmVc = meanDbmVc + _calib.getReceiverGainDbVc();
-  mom.dbmHx = meanDbmHx + _calib.getReceiverGainDbHx();
-  mom.dbmVx = meanDbmVx + _calib.getReceiverGainDbVx();
+  mom.dbmHc = meanLag0_Hc_Db;
+  mom.dbmVc = meanLag0_Vc_Db;
+  mom.dbmHx = meanLag0_Hx_Db;
+  mom.dbmVx = meanLag0_Vx_Db;
 
   double corrMag = 0;
   RadarComplex_t meanRvvhh0 =
@@ -915,18 +911,27 @@ int SunCal::_processMomentsRay(RadxRay *ray)
   
   mom.Rvvhh0 = meanRvvhh0;
   mom.corrMag = corrMag;
-  if (meanDbmHc > -9990 && meanDbmVc > -9990) {
-    double powerHc = pow(10.0, meanDbmHc / 10.0);
-    double powerVc = pow(10.0, meanDbmVc / 10.0);
+  if (meanLag0_Hc_Db > -9990 && meanLag0_Vc_Db > -9990) {
+    double powerHc = pow(10.0, meanLag0_Hc_Db / 10.0);
+    double powerVc = pow(10.0, meanLag0_Vc_Db / 10.0);
     // MUST FIX THIS - 
     mom.corr00 = (corrMag / sqrt(powerHc * powerVc)) / 1000.0;
   }
   mom.arg00 = RadarComplex::argDeg(meanRvvhh0);
 
-  mom.zdr = _computeFieldMean(zdr);
-  mom.phidp = _computeFieldMean(phidp);
-  mom.rhohv = _computeFieldMean(rhohv);
-  mom.ncp = _computeFieldMean(ncp);
+  mom.ratioDbmHcHx = mom.dbmHc - mom.dbmHx;
+  mom.ratioDbmVcHx = mom.dbmVc - mom.dbmHx;
+
+  mom.ratioDbmVxHc = mom.dbmVx - mom.dbmHc;
+  mom.ratioDbmVcHx = mom.dbmVc - mom.dbmHx;
+  
+  mom.ratioDbmVcHc = mom.dbmVc - mom.dbmHc;
+  mom.ratioDbmVxHx = mom.dbmVx - mom.dbmHx;
+
+  // mom.zdr = _computeFieldMean(zdr);
+  // mom.phidp = _computeFieldMean(phidp);
+  // mom.rhohv = _computeFieldMean(rhohv);
+  // mom.ncp = _computeFieldMean(ncp);
   
   int angleIndex = 0;
 

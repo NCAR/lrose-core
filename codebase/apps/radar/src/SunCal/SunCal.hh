@@ -197,7 +197,7 @@ private:
   Args _args;
   Params _params;
   IwrfTsReader *_tsReader;
-  DsInputPath *_momReader;
+  DsInputPath *_covarReader;
   SunPosn _sunPosn;
 
   // radar location
@@ -368,15 +368,15 @@ private:
   // methods
 
   int _runForTimeSeries();
-  int _runForMoments();
+  int _runForCovar();
   int _createReaders();
 
   int _processPulse(const IwrfTsPulse *pulse);
   void _addPulseToQueue(const IwrfTsPulse *pulse);
   void _clearPulseQueue();
 
-  int _processMomentsFile(const char *filePath);
-  int _processMomentsRay(RadxRay *ray);
+  int _processCovarFile(const char *filePath);
+  int _processCovarRay(RadxRay *ray);
   double _computeFieldMean(const RadxField *field);
   RadarComplex_t _computeRvvhh0Mean(const RadxField *rvvhh0_db,
                                     const RadxField *rvvhh0_phase,
