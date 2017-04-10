@@ -1,26 +1,9 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-// ** Copyright UCAR (c) 1990 - 2016                                         
-// ** University Corporation for Atmospheric Research (UCAR)                 
-// ** National Center for Atmospheric Research (NCAR)                        
-// ** Boulder, Colorado, USA                                                 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from UCAR.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of UCAR nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+// ** Copyright UCAR (c) 1992 - 2017
+// ** University Corporation for Atmospheric Research(UCAR)
+// ** National Center for Atmospheric Research(NCAR)
+// ** Boulder, Colorado, USA
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -471,8 +454,8 @@ using namespace std;
   {
     out << "TDRP args: [options as below]\n"
         << "   [ -params/--params path ] specify params file path\n"
-        << "   [ -check_params] check which params are not set\n"
-        << "   [ -print_params [mode]] print parameters\n"
+        << "   [ -check_params/--check_params] check which params are not set\n"
+        << "   [ -print_params/--print_params [mode]] print parameters\n"
         << "     using following modes, default mode is 'norm'\n"
         << "       short:   main comments only, no help or descr\n"
         << "                structs and arrays on a single line\n"
@@ -732,108 +715,6 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("READ OPTIONS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'set_max_range'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_max_range");
-    tt->descr = tdrpStrDup("Option to set the max range for any ray.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &set_max_range - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'max_range_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_range_km");
-    tt->descr = tdrpStrDup("Specified maximim range - km.");
-    tt->help = tdrpStrDup("Gates beyond this range are removed.");
-    tt->val_offset = (char *) &max_range_km - &_start_;
-    tt->single_val.d = 9999;
-    tt++;
-    
-    // Parameter 'set_ngates_constant'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_ngates_constant");
-    tt->descr = tdrpStrDup("Option to force the number of gates to be constant.");
-    tt->help = tdrpStrDup("If TRUE, the number of gates on all rays will be set to the maximum, and gates added to shorter rays will be filled with missing values.");
-    tt->val_offset = (char *) &set_ngates_constant - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 4'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE INSTRUMENT AND/OR NAME");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'override_instrument_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_instrument_name");
-    tt->descr = tdrpStrDup("Option to override the instrument name.");
-    tt->help = tdrpStrDup("If true, the name provided will be used.");
-    tt->val_offset = (char *) &override_instrument_name - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'instrument_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("instrument_name");
-    tt->descr = tdrpStrDup("Instrument name.");
-    tt->help = tdrpStrDup("See override_instrument_name.");
-    tt->val_offset = (char *) &instrument_name - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
-    tt++;
-    
-    // Parameter 'override_site_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_site_name");
-    tt->descr = tdrpStrDup("Option to override the site name.");
-    tt->help = tdrpStrDup("If true, the name provided will be used.");
-    tt->val_offset = (char *) &override_site_name - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'site_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("site_name");
-    tt->descr = tdrpStrDup("Site name.");
-    tt->help = tdrpStrDup("See override_site_name.");
-    tt->val_offset = (char *) &site_name - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE GATE GEOMETRY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -886,11 +767,11 @@ using namespace std;
     tt->single_val.d = 0.0075;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE INSTRUMENT LOCATION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -943,37 +824,13 @@ using namespace std;
     tt->single_val.d = -999;
     tt++;
     
-    // Parameter 'change_instrument_latitude_sign'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("change_instrument_latitude_sign");
-    tt->descr = tdrpStrDup("Option to negate the latitude.");
-    tt->help = tdrpStrDup("Mainly useful for RAPIC files. In RAPIC, latitude is always positive, so mostly you need to set the latitiude to the negative value of itself.");
-    tt->val_offset = (char *) &change_instrument_latitude_sign - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'apply_georeference_corrections'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_georeference_corrections");
-    tt->descr = tdrpStrDup("Option to apply the georeference info for moving platforms.");
-    tt->help = tdrpStrDup("For moving platforms, measured georeference information is sometimes available. If this is set to true, the georeference data is applied and appropriate corrections made. If possible, Earth-centric azimuth and elevation angles will be computed.");
-    tt->val_offset = (char *) &apply_georeference_corrections - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("OPTION TO SET RANGE RELATIVE TO INSTRUNENT");
-    tt->comment_text = tdrpStrDup("");
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("OPTION TO SET RANGE RELATIVE TO INSTRUNENT - CfRadial files only");
+    tt->comment_text = tdrpStrDup("This applies to python-generated CfRadial files only");
     tt++;
     
     // Parameter 'set_range_relative_to_instrument'
@@ -1000,116 +857,11 @@ using namespace std;
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'version_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("version_override");
-    tt->descr = tdrpStrDup("Option to override the version global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the version attribute.");
-    tt->val_offset = (char *) &version_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'title_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("title_override");
-    tt->descr = tdrpStrDup("Option to override the title global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the title attribute.");
-    tt->val_offset = (char *) &title_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'institution_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("institution_override");
-    tt->descr = tdrpStrDup("Option to override the institution global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the institution attribute.");
-    tt->val_offset = (char *) &institution_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'references_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("references_override");
-    tt->descr = tdrpStrDup("Option to override the references global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the references attribute.");
-    tt->val_offset = (char *) &references_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'source_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("source_override");
-    tt->descr = tdrpStrDup("Option to override the source global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the source attribute.");
-    tt->val_offset = (char *) &source_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'history_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("history_override");
-    tt->descr = tdrpStrDup("Option to override the history global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the history attribute.");
-    tt->val_offset = (char *) &history_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'comment_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("comment_override");
-    tt->descr = tdrpStrDup("Option to override the comment global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the comment attribute.");
-    tt->val_offset = (char *) &comment_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'author_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("author_override");
-    tt->descr = tdrpStrDup("Option to override the author global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the author attribute.");
-    tt->val_offset = (char *) &author_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 9'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OPTION TO CORRECT ANTENNA ANGLES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1162,11 +914,248 @@ using namespace std;
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("READING RAW NetCDF DATA FILES");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'combine_bins_on_read'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("combine_bins_on_read");
+    tt->descr = tdrpStrDup("Option to combine range gates on read.");
+    tt->help = tdrpStrDup("If true, the specified number of range gates will be combined on read to create mean values with lower noisiness.");
+    tt->val_offset = (char *) &combine_bins_on_read - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'n_bins_per_gate'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("n_bins_per_gate");
+    tt->descr = tdrpStrDup("Number of bins to combine into a single gate.");
+    tt->help = tdrpStrDup("In range, we will combine this number of gates to produce a data set with lower spatial resolution but less noiry data.");
+    tt->val_offset = (char *) &n_bins_per_gate - &_start_;
+    tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'raw_bin_start_range_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("raw_bin_start_range_km");
+    tt->descr = tdrpStrDup("Start range to first bin (km).");
+    tt->help = tdrpStrDup("Takes into account dead zone caused by digitizer starting before the pulse.");
+    tt->val_offset = (char *) &raw_bin_start_range_km - &_start_;
+    tt->single_val.d = -0.3;
+    tt++;
+    
+    // Parameter 'raw_bin_spacing_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("raw_bin_spacing_km");
+    tt->descr = tdrpStrDup("Spacing of raw bins (km).");
+    tt->help = tdrpStrDup("The distance between the ray bins in km.");
+    tt->val_offset = (char *) &raw_bin_spacing_km - &_start_;
+    tt->single_val.d = 0.0075;
+    tt++;
+    
+    // Parameter 'combined_hi_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("combined_hi_field_name");
+    tt->descr = tdrpStrDup("Name of combined_hi field in netCDF file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &combined_hi_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("combined_hi");
+    tt++;
+    
+    // Parameter 'combined_lo_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("combined_lo_field_name");
+    tt->descr = tdrpStrDup("Name of combined_lo field in netCDF file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &combined_lo_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("combined_lo");
+    tt++;
+    
+    // Parameter 'molecular_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("molecular_field_name");
+    tt->descr = tdrpStrDup("Name of molecular field in netCDF file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &molecular_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("molecular");
+    tt++;
+    
+    // Parameter 'cross_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("cross_field_name");
+    tt->descr = tdrpStrDup("Name of cross field in netCDF file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &cross_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("cross");
+    tt++;
+    
+    // Parameter 'baseline_calibration_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("baseline_calibration_path");
+    tt->descr = tdrpStrDup("location of baseline calibration file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &baseline_calibration_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/h/eol/brads/git/hsrl_configuration/projDir/calfiles/baseline_correction_20150601T0000.blc");
+    tt++;
+    
+    // Parameter 'diff_default_geofile_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("diff_default_geofile_path");
+    tt->descr = tdrpStrDup("location of diff_default_geofile calibration file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &diff_default_geofile_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/h/eol/brads/git/hsrl_configuration/projDir/calfiles/diff_default_geofile_20120201T0000.geo");
+    tt++;
+    
+    // Parameter 'geofile_default_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("geofile_default_path");
+    tt->descr = tdrpStrDup("location of geofile_default calibration file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &geofile_default_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/h/eol/brads/git/hsrl_configuration/projDir/calfiles/geofile_default_20150601T0000.geo");
+    tt++;
+    
+    // Parameter 'afterpulse_default_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("afterpulse_default_path");
+    tt->descr = tdrpStrDup("location of afterpulse_default calibration file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &afterpulse_default_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/h/eol/brads/git/hsrl_configuration/projDir/calfiles/afterpulse_default_20061001T0000.ap");
+    tt++;
+    
+    // Parameter 'calvals_gvhsrl_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("calvals_gvhsrl_path");
+    tt->descr = tdrpStrDup("location of calvals_gvhsrl calibration file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &calvals_gvhsrl_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/h/eol/brads/git/hsrl_configuration/projDir/calfiles/calvals_gvhsrl.txt");
+    tt++;
+    
+    // Parameter 'combined_hi_dead_time_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("combined_hi_dead_time_name");
+    tt->descr = tdrpStrDup("Name of combined_hi_dead_time field in CalVals file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &combined_hi_dead_time_name - &_start_;
+    tt->single_val.s = tdrpStrDup("combined_hi_dead_time");
+    tt++;
+    
+    // Parameter 'combined_lo_dead_time_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("combined_lo_dead_time_name");
+    tt->descr = tdrpStrDup("Name of combined_lo_dead_time field in CalVals file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &combined_lo_dead_time_name - &_start_;
+    tt->single_val.s = tdrpStrDup("combined_lo_dead_time");
+    tt++;
+    
+    // Parameter 'cross_pol_dead_time_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("cross_pol_dead_time_name");
+    tt->descr = tdrpStrDup("Name of cross_pol_dead_time field in CalVals file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &cross_pol_dead_time_name - &_start_;
+    tt->single_val.s = tdrpStrDup("cross_pol_dead_time");
+    tt++;
+    
+    // Parameter 'molecular_dead_time_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("molecular_dead_time_name");
+    tt->descr = tdrpStrDup("Name of molecular_dead_time field in CalVals file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &molecular_dead_time_name - &_start_;
+    tt->single_val.s = tdrpStrDup("molecular_dead_time");
+    tt++;
+    
+    // Parameter 'bin_width_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("bin_width_name");
+    tt->descr = tdrpStrDup("Name of binWidth field in CalVals file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &bin_width_name - &_start_;
+    tt->single_val.s = tdrpStrDup("binwidth");
+    tt++;
+    
+    // Parameter 'scan_adjustment_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("scan_adjustment_name");
+    tt->descr = tdrpStrDup("Name of coefficient field in CalVals file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &scan_adjustment_name - &_start_;
+    tt->single_val.s = tdrpStrDup("i2_scan_adjustment");
+    tt++;
+    
+    // Parameter 'Comment 8'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY FIELD NAMES FOR OUTPUT FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1305,11 +1294,116 @@ using namespace std;
       tt->array_vals[1].s = tdrpStrDup("VEL");
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 9");
+    tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'version_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("version_override");
+    tt->descr = tdrpStrDup("Option to override the version global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the version attribute.");
+    tt->val_offset = (char *) &version_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'title_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("title_override");
+    tt->descr = tdrpStrDup("Option to override the title global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the title attribute.");
+    tt->val_offset = (char *) &title_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'institution_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("institution_override");
+    tt->descr = tdrpStrDup("Option to override the institution global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the institution attribute.");
+    tt->val_offset = (char *) &institution_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'references_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("references_override");
+    tt->descr = tdrpStrDup("Option to override the references global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the references attribute.");
+    tt->val_offset = (char *) &references_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'source_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("source_override");
+    tt->descr = tdrpStrDup("Option to override the source global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the source attribute.");
+    tt->val_offset = (char *) &source_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'history_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("history_override");
+    tt->descr = tdrpStrDup("Option to override the history global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the history attribute.");
+    tt->val_offset = (char *) &history_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'comment_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("comment_override");
+    tt->descr = tdrpStrDup("Option to override the comment global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the comment attribute.");
+    tt->val_offset = (char *) &comment_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'author_override'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("author_override");
+    tt->descr = tdrpStrDup("Option to override the author global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the author attribute.");
+    tt->val_offset = (char *) &author_override - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 10'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("Files are written in CfRadial");
     tt++;
@@ -1338,25 +1432,13 @@ using namespace std;
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_force_ngates_vary'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_force_ngates_vary");
-    tt->descr = tdrpStrDup("Option to force the use of ragged arrays for CfRadial files.");
-    tt->help = tdrpStrDup("Only applies to CfRadial. If true, forces the use of ragged arrays even if the number of gates for all rays is constant.");
-    tt->val_offset = (char *) &output_force_ngates_vary - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'compression_level'
@@ -1371,11 +1453,59 @@ using namespace std;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'override_instrument_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_instrument_name");
+    tt->descr = tdrpStrDup("Option to override the instrument name.");
+    tt->help = tdrpStrDup("If true, the name provided will be used.");
+    tt->val_offset = (char *) &override_instrument_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'instrument_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("instrument_name");
+    tt->descr = tdrpStrDup("Instrument name.");
+    tt->help = tdrpStrDup("See override_instrument_name.");
+    tt->val_offset = (char *) &instrument_name - &_start_;
+    tt->single_val.s = tdrpStrDup("unknown");
+    tt++;
+    
+    // Parameter 'override_site_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_site_name");
+    tt->descr = tdrpStrDup("Option to override the site name.");
+    tt->help = tdrpStrDup("If true, the name provided will be used.");
+    tt->val_offset = (char *) &override_site_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'site_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("site_name");
+    tt->descr = tdrpStrDup("Site name.");
+    tt->help = tdrpStrDup("See override_site_name.");
+    tt->val_offset = (char *) &site_name - &_start_;
+    tt->single_val.s = tdrpStrDup("unknown");
+    tt++;
+    
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1500,18 +1630,6 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'write_individual_sweeps'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_individual_sweeps");
-    tt->descr = tdrpStrDup("Option to write out individual sweeps if appropriate.");
-    tt->help = tdrpStrDup("If true, the volume is split into individual sweeps for writing. Applies to CfRadial format. This is always true for DORADE format files.");
-    tt->val_offset = (char *) &write_individual_sweeps - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'write_latest_data_info'
     // ctype is 'tdrp_bool_t'
     
@@ -1522,147 +1640,6 @@ using namespace std;
     tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
     tt->val_offset = (char *) &write_latest_data_info - &_start_;
     tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 14'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
-    tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE MISSING VALUES");
-    tt->comment_text = tdrpStrDup("Missing values are applicable to both metadata and field data. The default values should be satisfactory for most purposes. However, you can choose to override these if you are careful with the selected values.\n\nThe default values for metadata are:\n\tmissingMetaDouble = -9999.0\n\tmissingMetaFloat = -9999.0\n\tmissingMetaInt = -9999\n\tmissingMetaChar = -128\n\nThe default values for field data are:\n\tmissingFl64 = -9.0e33\n\tmissingFl32 = -9.0e33\n\tmissingSi32 = -2147483647\n\tmissingSi16 = -32768\n\tmissingSi08 = -128\n\n");
-    tt++;
-    
-    // Parameter 'override_missing_metadata_values'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_missing_metadata_values");
-    tt->descr = tdrpStrDup("Option to override the missing values for meta-data");
-    tt->help = tdrpStrDup("See following parameter options.");
-    tt->val_offset = (char *) &override_missing_metadata_values - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'missing_metadata_double'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("missing_metadata_double");
-    tt->descr = tdrpStrDup("Missing value for metadata of type double.");
-    tt->help = tdrpStrDup("Only applies if override_missing_metadata_values is TRUE");
-    tt->val_offset = (char *) &missing_metadata_double - &_start_;
-    tt->single_val.d = -9999;
-    tt++;
-    
-    // Parameter 'missing_metadata_float'
-    // ctype is 'float'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = FLOAT_TYPE;
-    tt->param_name = tdrpStrDup("missing_metadata_float");
-    tt->descr = tdrpStrDup("Missing value for metadata of type float.");
-    tt->help = tdrpStrDup("Only applies if override_missing_metadata_values is TRUE");
-    tt->val_offset = (char *) &missing_metadata_float - &_start_;
-    tt->single_val.f = -9999;
-    tt++;
-    
-    // Parameter 'missing_metadata_int'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("missing_metadata_int");
-    tt->descr = tdrpStrDup("Missing value for metadata of type int.");
-    tt->help = tdrpStrDup("Only applies if override_missing_metadata_values is TRUE");
-    tt->val_offset = (char *) &missing_metadata_int - &_start_;
-    tt->single_val.i = -9999;
-    tt++;
-    
-    // Parameter 'missing_metadata_char'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("missing_metadata_char");
-    tt->descr = tdrpStrDup("Missing value for metadata of type char.");
-    tt->help = tdrpStrDup("Only applies if override_missing_metadata_values is TRUE");
-    tt->val_offset = (char *) &missing_metadata_char - &_start_;
-    tt->single_val.i = -128;
-    tt++;
-    
-    // Parameter 'override_missing_field_values'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_missing_field_values");
-    tt->descr = tdrpStrDup("Option to override the missing values for field data");
-    tt->help = tdrpStrDup("See following parameter options.");
-    tt->val_offset = (char *) &override_missing_field_values - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'missing_field_fl64'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("missing_field_fl64");
-    tt->descr = tdrpStrDup("Missing value for field data of type 64-bit float.");
-    tt->help = tdrpStrDup("Only applies if override_missing_field_values is TRUE");
-    tt->val_offset = (char *) &missing_field_fl64 - &_start_;
-    tt->single_val.d = -9e+33;
-    tt++;
-    
-    // Parameter 'missing_field_fl32'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("missing_field_fl32");
-    tt->descr = tdrpStrDup("Missing value for field data of type 32-bit float.");
-    tt->help = tdrpStrDup("Only applies if override_missing_field_values is TRUE");
-    tt->val_offset = (char *) &missing_field_fl32 - &_start_;
-    tt->single_val.d = -9e+33;
-    tt++;
-    
-    // Parameter 'missing_field_si32'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("missing_field_si32");
-    tt->descr = tdrpStrDup("Missing value for field data of type 32-bit integer.");
-    tt->help = tdrpStrDup("Only applies if override_missing_field_values is TRUE");
-    tt->val_offset = (char *) &missing_field_si32 - &_start_;
-    tt->single_val.i = -2147483647;
-    tt++;
-    
-    // Parameter 'missing_field_si16'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("missing_field_si16");
-    tt->descr = tdrpStrDup("Missing value for field data of type 16-bit integer.");
-    tt->help = tdrpStrDup("Only applies if override_missing_field_values is TRUE");
-    tt->val_offset = (char *) &missing_field_si16 - &_start_;
-    tt->single_val.i = -232768;
-    tt++;
-    
-    // Parameter 'missing_field_si08'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("missing_field_si08");
-    tt->descr = tdrpStrDup("Missing value for field data of type 8-bit integer.");
-    tt->help = tdrpStrDup("Only applies if override_missing_field_values is TRUE");
-    tt->val_offset = (char *) &missing_field_si08 - &_start_;
-    tt->single_val.i = -128;
     tt++;
     
     // trailing entry has param_name set to NULL

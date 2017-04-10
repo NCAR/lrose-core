@@ -119,8 +119,8 @@ BscanManager::BscanManager(const Params &params,
 
   _archiveStartTime.set(_params.archive_start_time);
 
-  _archivePeriodStartTime.set(_params.archive_start_time);
-  _archivePeriodEndTime.set(_params.archive_end_time);
+  _archiveImagesStartTime.set(_params.images_archive_start_time);
+  _archiveImagesEndTime.set(_params.images_archive_end_time);
 
   _dwellSpecsBox = NULL;
   _dwellAutoBox = NULL;
@@ -218,7 +218,6 @@ void BscanManager::_setupWindows()
   _createFieldPanel();
 
   // color bar to right
-  
   // _colorBar = new ColorBar(_params.color_scale_width,
   //                          &_fields[0]->getColorMap(), _main);
   
@@ -503,21 +502,26 @@ void BscanManager::_createRangeAxisDialog()
     _rangeAxisModeBox->setTitle("Set mode for range axis");
     
     _rangeAxisModeUpButton = new QRadioButton(tr("Plot range up"), this);
-    _rangeAxisModeUpButton->setStatusTip(tr("Plot range from instrument, positive upwards"));
+    _rangeAxisModeUpButton->setStatusTip
+      (tr("Plot range from instrument, positive upwards"));
     _rangeAxisModeUpButton->setCheckable(true);
-    connect(_rangeAxisModeUpButton, SIGNAL(clicked()), this, SLOT(_setRangeAxisRangeUp()));
+    connect(_rangeAxisModeUpButton, SIGNAL(clicked()),
+            this, SLOT(_setRangeAxisRangeUp()));
     modeBoxLayout->addWidget(_rangeAxisModeUpButton);
     
     _rangeAxisModeDownButton = new QRadioButton(tr("Plot range down"), this);
-    _rangeAxisModeDownButton->setStatusTip(tr("Plot range from instrument, positive downwards"));
+    _rangeAxisModeDownButton->setStatusTip
+      (tr("Plot range from instrument, positive downwards"));
     _rangeAxisModeDownButton->setCheckable(true);
-    connect(_rangeAxisModeDownButton, SIGNAL(clicked()), this, SLOT(_setRangeAxisRangeDown()));
+    connect(_rangeAxisModeDownButton, SIGNAL(clicked()), 
+            this, SLOT(_setRangeAxisRangeDown()));
     modeBoxLayout->addWidget(_rangeAxisModeDownButton);
     
     _rangeAxisModeAltitudeButton = new QRadioButton(tr("Plot altitude"), this);
     _rangeAxisModeAltitudeButton->setStatusTip(tr("Plot altitude on vertical axis"));
     _rangeAxisModeAltitudeButton->setCheckable(true);
-    connect(_rangeAxisModeAltitudeButton, SIGNAL(clicked()), this, SLOT(_setRangeAxisAltitude()));
+    connect(_rangeAxisModeAltitudeButton, SIGNAL(clicked()), 
+            this, SLOT(_setRangeAxisAltitude()));
     modeBoxLayout->addWidget(_rangeAxisModeAltitudeButton);
     
     QButtonGroup *modeGroup = new QButtonGroup(this);
@@ -851,7 +855,8 @@ void BscanManager::_createTimeAxisDialog()
     timeSpanBox->setTitle("Set time span for plot");
     
     QFrame *timeSpanEditLabel;
-    _timeSpanEdit = _addInputRow(timeSpanBox, timeSpanLayout, "Time span for plot (secs)", "",
+    _timeSpanEdit = _addInputRow(timeSpanBox, timeSpanLayout, 
+                                 "Time span for plot (secs)", "",
                                  0, &timeSpanEditLabel);
     _resetTimeSpanToDefault();
     
@@ -867,12 +872,14 @@ void BscanManager::_createTimeAxisDialog()
     QPushButton *cancelButton = new QPushButton(timeSpanBox);
     cancelButton->setText("Cancel");
     horiz->addWidget(cancelButton);
-    connect(cancelButton, SIGNAL(clicked()), this, SLOT(_cancelTimeAxisChanges()));
+    connect(cancelButton, SIGNAL(clicked()), this,
+            SLOT(_cancelTimeAxisChanges()));
     
     QPushButton *resetButton = new QPushButton(timeSpanBox);
     resetButton->setText("Reset to default");
     horiz->addWidget(resetButton);
-    connect(resetButton, SIGNAL(clicked()), this, SLOT(_resetTimeSpanToDefault()));
+    connect(resetButton, SIGNAL(clicked()), this,
+            SLOT(_resetTimeSpanToDefault()));
 
     timeSpanLayout->addWidget(acceptCancelReset);
 
@@ -892,13 +899,15 @@ void BscanManager::_createTimeAxisDialog()
     _realtimeModeButton = new QRadioButton(tr("Realtime mode"), this);
     _realtimeModeButton->setStatusTip(tr("Run in realtime mode"));
     _realtimeModeButton->setCheckable(true);
-    connect(_realtimeModeButton, SIGNAL(clicked()), this, SLOT(_setDataRetrievalMode()));
+    connect(_realtimeModeButton, SIGNAL(clicked()), this,
+            SLOT(_setDataRetrievalMode()));
     modeBoxLayout->addWidget(_realtimeModeButton);
     
     _archiveModeButton = new QRadioButton(tr("Archive mode"), this);
     _archiveModeButton->setStatusTip(tr("Run in archive mode"));
     _archiveModeButton->setCheckable(true);
-    connect(_archiveModeButton, SIGNAL(clicked()), this, SLOT(_setDataRetrievalMode()));
+    connect(_archiveModeButton, SIGNAL(clicked()), this,
+            SLOT(_setDataRetrievalMode()));
     modeBoxLayout->addWidget(_archiveModeButton);
     
     QButtonGroup *modeGroup = new QButtonGroup(this);
@@ -1003,17 +1012,20 @@ void BscanManager::_createTimeAxisDialog()
     // pal.setColor( QPalette::Inactive, QPalette::Button, color );
     goButton->setPalette(goPalette);
     layout2->addWidget(goButton);
-    connect(goButton, SIGNAL(clicked()), this, SLOT(_performArchiveRetrieval()));
+    connect(goButton, SIGNAL(clicked()), this, 
+            SLOT(_performArchiveRetrieval()));
     
     QPushButton *cancelButton = new QPushButton(goCancelReset);
     cancelButton->setText("Cancel");
     layout2->addWidget(cancelButton);
-    connect(cancelButton, SIGNAL(clicked()), this, SLOT(_cancelTimeAxisChanges()));
+    connect(cancelButton, SIGNAL(clicked()), this,
+            SLOT(_cancelTimeAxisChanges()));
     
     QPushButton *resetButton = new QPushButton(goCancelReset);
     resetButton->setText("Reset to default");
     layout2->addWidget(resetButton);
-    connect(resetButton, SIGNAL(clicked()), this, SLOT(_setArchiveStartTimeToDefault()));
+    connect(resetButton, SIGNAL(clicked()), this,
+            SLOT(_setArchiveStartTimeToDefault()));
 
     archiveTimeLayout->addWidget(goCancelReset);
 
@@ -1042,7 +1054,8 @@ void BscanManager::_createTimeAxisDialog()
     _dwellAutoBox->setText("Dwell auto (secs)?");
     _dwellAutoBox->setChecked(_dwellAuto);
     dwellAutoLayout->addWidget(_dwellAutoBox);
-    connect(_dwellAutoBox, SIGNAL(clicked()), this, SLOT(_setDwellAuto()));
+    connect(_dwellAutoBox, SIGNAL(clicked()), this,
+            SLOT(_setDwellAuto()));
     
     _dwellAutoVal = new QLabel();
     dwellAutoLayout->addWidget(_dwellAutoVal);
@@ -1056,7 +1069,8 @@ void BscanManager::_createTimeAxisDialog()
                                        "Set the dwell (secs)", "", 0,
                                        &_dwellSpecifiedFrame);
     _resetDwellSpecifiedToDefault();
-    connect(_dwellSpecifiedEdit, SIGNAL(returnPressed()), this, SLOT(_setDwellSpecified()));
+    connect(_dwellSpecifiedEdit, SIGNAL(returnPressed()), this,
+            SLOT(_setDwellSpecified()));
 
     // set the auto selection
 
@@ -1761,7 +1775,6 @@ void BscanManager::_changeField(int fieldId, bool guiMode)
   _bscan->selectVar(_fieldNum);
 
   // _colorBar->setColorMap(&_fields[_fieldNum]->getColorMap());
-  // QRadioButton *button = _fieldButtons[_fieldNum];
   _selectedName = _selectedField->getName();
   _selectedLabel = _selectedField->getLabel();
   _selectedUnits = _selectedField->getUnits();
@@ -2075,6 +2088,9 @@ void BscanManager::_doneWithRangeAxis()
   _rangeAxisDialog->setVisible(false);
 }
 
+//////////////////////////////////////////////////
+// time axis changes
+
 void BscanManager::_cancelTimeAxisChanges()
 {
   _refreshTimeAxisDialog();
@@ -2261,7 +2277,8 @@ void BscanManager::_setCensorDataBelowSurface()
   _surfaceField = _surfaceFieldEdit->text().toLocal8Bit().data();
 
   double minRange;
-  if (sscanf(_minRangeToSurfaceEdit->text().toLocal8Bit().data(), "%lg", &minRange) != 1) {
+  if (sscanf(_minRangeToSurfaceEdit->text().toLocal8Bit().data(), 
+             "%lg", &minRange) != 1) {
     QErrorMessage errMsg(_minRangeToSurfaceEdit);
     string text("Bad entry for min range: ");
     text += _minRangeToSurfaceEdit->text().toLocal8Bit().data();
@@ -2274,7 +2291,8 @@ void BscanManager::_setCensorDataBelowSurface()
   _minRangeToSurfaceKm = minRange;
 
   double rangeMargin;
-  if (sscanf(_surfaceRangeMarginEdit->text().toLocal8Bit().data(), "%lg", &rangeMargin) != 1) {
+  if (sscanf(_surfaceRangeMarginEdit->text().toLocal8Bit().data(),
+             "%lg", &rangeMargin) != 1) {
     QErrorMessage errMsg(_surfaceRangeMarginEdit);
     string text("Bad entry for range margin: ");
     text += _surfaceRangeMarginEdit->text().toLocal8Bit().data();
@@ -2298,7 +2316,8 @@ void BscanManager::_setCensorDataBelowSurface()
 void BscanManager::_setRangeLimits()
 {
   double minRange;
-  if (sscanf(_minRangeEdit->text().toLocal8Bit().data(), "%lg", &minRange) != 1) {
+  if (sscanf(_minRangeEdit->text().toLocal8Bit().data(),
+             "%lg", &minRange) != 1) {
     QErrorMessage errMsg(_minRangeEdit);
     string text("Bad entry for min range: ");
     text += _minRangeEdit->text().toLocal8Bit().data();
@@ -2309,7 +2328,8 @@ void BscanManager::_setRangeLimits()
     return;
   }
   double maxRange;
-  if (sscanf(_maxRangeEdit->text().toLocal8Bit().data(), "%lg", &maxRange) != 1) {
+  if (sscanf(_maxRangeEdit->text().toLocal8Bit().data(),
+             "%lg", &maxRange) != 1) {
     QErrorMessage errMsg(_maxRangeEdit);
     string text("Bad entry for max range: ");
     text += _maxRangeEdit->text().toLocal8Bit().data();
@@ -2371,7 +2391,8 @@ void BscanManager::_setTimeSpan()
 {
 
   double timeSpan;
-  if (sscanf(_timeSpanEdit->text().toLocal8Bit().data(), "%lg", &timeSpan) != 1) {
+  if (sscanf(_timeSpanEdit->text().toLocal8Bit().data(), 
+             "%lg", &timeSpan) != 1) {
     QErrorMessage errMsg(_timeSpanEdit);
     string text("Bad entry for time span: ");
     text += _timeSpanEdit->text().toLocal8Bit().data();
@@ -2426,8 +2447,10 @@ void BscanManager::_setStartTimeFromGui(const QDateTime &datetime1)
 
 void BscanManager::_setGuiFromStartTime()
 {
-  QDate date(_archiveStartTime.getYear(), _archiveStartTime.getMonth(), _archiveStartTime.getDay());
-  QTime time(_archiveStartTime.getHour(), _archiveStartTime.getMin(), _archiveStartTime.getSec());
+  QDate date(_archiveStartTime.getYear(),
+             _archiveStartTime.getMonth(), _archiveStartTime.getDay());
+  QTime time(_archiveStartTime.getHour(),
+             _archiveStartTime.getMin(), _archiveStartTime.getSec());
   QDateTime datetime(date, time);
   _archiveStartTimeEdit->setDateTime(datetime);
 }
@@ -2611,7 +2634,8 @@ void BscanManager::_setDwellSpecified()
 
   double dwellSecs;
   bool error = false;
-  if (sscanf(_dwellSpecifiedEdit->text().toLocal8Bit().data(), "%lg", &dwellSecs) != 1) {
+  if (sscanf(_dwellSpecifiedEdit->text().toLocal8Bit().data(),
+             "%lg", &dwellSecs) != 1) {
     error = true;
   }
   if (dwellSecs <= 0) {
@@ -2749,7 +2773,8 @@ double BscanManager::_getCensorRange(const RadxRay *ray)
 
   // now check field values below the surface
 
-  int igate = (int) ((censorRange - cfld->getStartRangeKm()) / cfld->getGateSpacingKm() + 0.5);
+  int igate = (int) ((censorRange - cfld->getStartRangeKm()) / 
+                     cfld->getGateSpacingKm() + 0.5);
   for (size_t ii = igate; ii < cfld->getNPoints(); ii++) {
     Radx::fl32 val = vals[ii];
     if (val != missing) {
@@ -2972,8 +2997,8 @@ void BscanManager::_createArchiveImageFiles()
   } else if (_params.images_creation_mode ==
              Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
 
-    for (time_t stime = _archivePeriodStartTime.utime();
-         stime <= _archivePeriodEndTime.utime();
+    for (time_t stime = _archiveImagesStartTime.utime();
+         stime <= _archiveImagesEndTime.utime();
          stime += _params.images_schedule_interval_secs) {
       
       _archiveStartTime.set(stime);

@@ -41,15 +41,26 @@ FieldRenderer::FieldRenderer(const Params &params,
         _drawInstHt(false)
 {
 
+  // check field num and set params
+
+  if (_fieldNum < 0) {
+    _fieldNum = 0;
+  }
+  if ((int) _fieldNum > (_params.fields_n - 1)) {
+    _fieldNum = _params.fields_n - 1;
+  }
+  _fieldParams = _params._fields[_fieldNum];
+  
   // set up background rendering timer
 
   _backgroundRenderTimer = new QTimer(this);
   _backgroundRenderTimer->setSingleShot(true);
-  _backgroundRenderTimer->setInterval((int)(_params.background_render_mins * 60000.0));
+  _backgroundRenderTimer->setInterval
+    ((int)(_params.background_render_mins * 60000.0));
   
   connect(_backgroundRenderTimer, SIGNAL(timeout()),
 	  this, SLOT(setBackgroundRenderOff()));
-  
+
 }
 
 /*************************************************************************
@@ -148,6 +159,11 @@ void FieldRenderer::setBackgroundRenderingOn()
 void FieldRenderer::run()
 {
 
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Start of rendering for field: " 
+         << _params._fields[_fieldNum].label << endl;
+  }
+
   if (_beams.size() == 0) {
     return;
   }
@@ -164,7 +180,8 @@ void FieldRenderer::run()
       continue;
     }
     if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "Rendering beam:" << endl;
+      cerr << "Rendering beam field:" 
+           << _params._fields[_fieldNum].label << endl;
       (*beam)->print(cerr);
     }
     (*beam)->paint(_image, _transform, _fieldNum, _useHeight, _drawInstHt);

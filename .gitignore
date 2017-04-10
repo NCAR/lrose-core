@@ -7,8 +7,12 @@
 *.a
 *.la
 *.lo
+
+# emacs
+
 ~*
 *~
+TAGS
 
 # cvs
 
@@ -24,6 +28,7 @@ makefile.in
 makefile.am
 __makefile.template
 .libs
+compile
 
 codebase/Makefile.top
 codebase/VERSION
@@ -196,6 +201,7 @@ codebase/apps/ingest/src/GtsSockIngest/GtsSockIngest
 codebase/apps/ingest/src/LdmDynamic2Static/LdmDynamic2Static
 codebase/apps/ingest/src/LdmMetars2File/LdmMetars2File
 codebase/apps/ingest/src/Ltg2Spdb/Ltg2Spdb
+codebase/apps/ingest/src/madis2Spdb/madis2Spdb
 codebase/apps/ingest/src/Metar2Spdb/Metar2Spdb
 codebase/apps/ingest/src/Mrms2Mdv/Mrms2Mdv
 codebase/apps/ingest/src/MrmsGribIngest/MrmsGribIngest
@@ -373,6 +379,7 @@ codebase/apps/radar/src/HawkEye/moc_RhiWindow.cpp
 codebase/apps/radar/src/HcrVelCorrect/HcrVelCorrect
 codebase/apps/radar/src/IntfRemove/IntfRemove
 codebase/apps/radar/src/Iq2Dsr/Iq2Dsr
+codebase/apps/radar/src/JamesDealias/JamesDealias
 codebase/apps/radar/src/Mdv2Vad/Mdv2Vad
 codebase/apps/radar/src/MdvFold/MdvFold
 codebase/apps/radar/src/MdvPartRain/MdvPartRain
@@ -413,6 +420,8 @@ codebase/apps/radar/src/TsTimeFix/TsTimeFix
 codebase/apps/radar/src/UfRadarPrint/UfRadarPrint
 codebase/apps/radar/src/VertCompute/VertCompute
 codebase/apps/radar/src/ZdrCalSimHv/ZdrCalSimHv
+codebase/apps/radar/src/TerrainHtServer/TerrainHtServer
+codebase/apps/radar/src/TerrainHtServer/TestClientTerrainHt
 
 codebase/apps/satApps/src/IR2Height/IR2Height
 
@@ -425,6 +434,7 @@ codebase/apps/spdb_utils/src/Rhi2Spdb/Rhi2Spdb
 codebase/apps/spdb_utils/src/Taf2Spdb/Taf2Spdb
 codebase/apps/spdb_utils/src/extractStationLocationList/extractStationLocationList
 codebase/apps/spdb_utils/src/spdb_merge/spdb_merge
+codebase/apps/spdb_utils/src/WxStn2Table/WxStn2Table
 
 codebase/apps/spol/src/SpolAngles2Fmq/SpolAngles2Fmq
 codebase/apps/spol/src/SpolCal2Xml/SpolCal2Xml
@@ -506,6 +516,7 @@ codebase/apps/Radx/src/Ascii2Radx/Ascii2Radx
 codebase/apps/Radx/src/Dsr2Radx/Dsr2Radx
 codebase/apps/Radx/src/FixCfradialPaths/FixCfradialPaths
 codebase/apps/Radx/src/FixRadxPointing/FixRadxPointing
+codebase/apps/Radx/src/Hsrl2Radx/Hsrl2Radx
 codebase/apps/Radx/src/Radx2Dsr/Radx2Dsr
 codebase/apps/Radx/src/Radx2Grid/Radx2Grid
 codebase/apps/Radx/src/RadxCheck/RadxCheck

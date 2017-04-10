@@ -76,17 +76,17 @@ public:
   } ppi_display_type_t;
 
   typedef enum {
-    RANGE_AXIS_UP = 0,
-    RANGE_AXIS_DOWN = 1,
-    RANGE_AXIS_ALTITUDE = 2
-  } range_axis_mode_t;
-
-  typedef enum {
     LEGEND_TOP_LEFT = 0,
     LEGEND_TOP_RIGHT = 1,
     LEGEND_BOTTOM_LEFT = 2,
     LEGEND_BOTTOM_RIGHT = 3
   } legend_pos_t;
+
+  typedef enum {
+    RANGE_AXIS_UP = 0,
+    RANGE_AXIS_DOWN = 1,
+    RANGE_AXIS_ALTITUDE = 2
+  } range_axis_mode_t;
 
   typedef enum {
     DWELL_STATS_MEAN = 0,
@@ -451,9 +451,13 @@ public:
 
   char* archive_start_time;
 
-  char* archive_end_time;
+  int archive_scan_interval_secs;
+
+  int archive_n_scans;
 
   char* archive_data_url;
+
+  int archive_search_margin_secs;
 
   show_status_t show_status_in_gui;
 
@@ -504,6 +508,14 @@ public:
 
   double ppi_aspect_ratio;
 
+  tdrp_bool_t ppi_grids_on_at_startup;
+
+  tdrp_bool_t ppi_range_rings_on_at_startup;
+
+  tdrp_bool_t ppi_azimuth_lines_on_at_startup;
+
+  legend_pos_t ppi_main_legend_pos;
+
   int rhi_window_width;
 
   int rhi_window_height;
@@ -512,9 +524,37 @@ public:
 
   int rhi_window_start_y;
 
+  int rhi_top_margin;
+
+  int rhi_bottom_margin;
+
+  int rhi_left_margin;
+
+  int rhi_right_margin;
+
+  int rhi_label_font_size;
+
+  int rhi_axis_tick_len;
+
+  int rhi_n_ticks_ideal;
+
+  int rhi_text_margin;
+
   tdrp_bool_t rhi_display_180_degrees;
 
   double rhi_aspect_ratio;
+
+  double rhi_max_height_km;
+
+  int rhi_color_scale_width;
+
+  tdrp_bool_t rhi_grids_on_at_startup;
+
+  tdrp_bool_t rhi_range_rings_on_at_startup;
+
+  tdrp_bool_t rhi_elevation_lines_on_at_startup;
+
+  legend_pos_t rhi_main_legend_pos;
 
   double bscan_time_span_secs;
 
@@ -634,6 +674,15 @@ public:
 
   int images_schedule_delay_secs;
 
+  char* images_archive_start_time;
+
+  char* images_archive_end_time;
+
+  tdrp_bool_t images_set_sweep_index_list;
+
+  int *_images_sweep_index_list;
+  int images_sweep_index_list_n;
+
   int sim_sleep_msecs;
 
   int sim_n_gates;
@@ -649,7 +698,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[131];
+  mutable TDRPtable _table[155];
 
   const char *_className;
 

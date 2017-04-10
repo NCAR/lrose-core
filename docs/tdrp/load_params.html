@@ -1,0 +1,92 @@
+<html>
+
+<head>
+<title>Loading HTML parameters into a program</title>
+</head>
+
+<body>
+
+<h3>Loading HTML parameters into a program</h3>
+
+The simplest way to load the parameters is to use one of the
+load_from_args() functions. These functions parse the command line for
+any <a href="command_line.html">command line arguments </a> specific
+to TDRP and act on them. These functions are suitable only in the
+standard case of a single TDRP module or class per program.
+For multiple modules or classes, refer to the API pages.<p>
+
+<b>Using <a href="api_c.html">C API</a>:<p>
+_tdrp_load_from_args()</b><p>
+
+The following code fragment shows how to load the parameters into the
+<tt>params</tt> struct. It is assumed that the <a
+href="override.html">override</a> list has already been initialized
+and loaded.<p>
+
+<pre>
+  char *params_file_path = NULL;
+  tdrp_override_t override;
+  _tdrp_struct params;   /* parameter struct */
+  if (_tdrp_load_from_args(argc, argv, &params,
+			   override.list, &params_file_path)) {
+    fprintf(stderr, "ERROR - Problems with params file '%s'\n",
+	    params_file_path);
+    return(-1);
+  }
+</pre>  
+
+After loading, the parameters are available through the struct
+<tt>params</tt>.<p>
+
+<b>Using <a href="api_c++.html">C++ API</a>:<p>
+loadFromArgs()</b><p>
+
+The following code fragment shows how to load the parameters into the
+<tt>Params</tt> class. It is assumed that the <a
+href="override.html">override</a> list has already been initialized
+and loaded.<p>
+
+<pre>
+  Params *params = new Params();
+  char *paramsPath = "unknown";
+  if (params->loadFromArgs(argc, argv,
+                           _args->override.list,
+                           &_paramsPath)) {
+    fprintf(stderr, "ERROR: problems with TDRP parameters\n");
+    return;
+  }
+</pre>  
+
+After loading, the parameters are available through the object
+<tt>params</tt>.<p>
+
+<b>Using <a href="api_c.old.html">Old C API</a>:<p>
+TDRP_load_from_args()</b><p>
+
+The following code fragment shows how to load the parameters into the
+<tt>params</tt> struct. It is assumed that the <a
+href="override.html">override</a> list has already been initialized
+and loaded.<p>
+
+<pre>
+  char *params_file_path = NULL;
+  tdrp_override_t override;
+  TDRPtable *table;                  /* TDRP parsing table */
+  tdrp_example_tdrp_struct params;   /* parameter struct */
+
+  table = tdrp_example_tdrp_init(&params);
+  if (TDRP_load_from_args(argc, argv,
+			  table, &params,
+			  override.list, &params_file_path)) {
+    fprintf(stderr, "ERROR - Problems with params file '%s'\n",
+	    params_file_path);
+    return(-1);
+  }
+</pre>  
+
+After loading, the parameters are available through the struct
+<tt>params</tt>.<p>
+
+</body>
+</html>
+

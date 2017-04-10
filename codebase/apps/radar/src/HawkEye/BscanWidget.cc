@@ -61,6 +61,8 @@ BscanWidget::BscanWidget(QWidget* parent,
 
   _pointClicked = false;
   
+  _colorScaleWidth = _params.color_scale_width;
+
   _rangeGridEnabled = _params.bscan_draw_range_grid_lines;
   _timeGridEnabled = _params.bscan_draw_time_grid_lines;
   _instHtLineEnabled = _params.bscan_draw_instrument_height_line;
@@ -92,7 +94,7 @@ BscanWidget::BscanWidget(QWidget* parent,
   
   qRegisterMetaType<size_t>("size_t");
 
-  // creaate the field renderers
+  // create the field renderers
   
   for (size_t i = 0; i < _nFields; ++i) {
     FieldRenderer *field = new FieldRenderer(_params, i);
@@ -155,7 +157,7 @@ void BscanWidget::configureAxes(Params::range_axis_mode_t range_axis_mode,
 
   _rangeAxisMode = range_axis_mode;
   _minRange = min_range;
-  _maxRange = max_range;
+  _maxRangeKm = max_range;
   _minAltitude = min_altitude;
   _maxAltitude = max_altitude;
   _timeSpanSecs = time_span_secs;
@@ -175,11 +177,11 @@ void BscanWidget::configureAxes(Params::range_axis_mode_t range_axis_mode,
                    _params.bscan_right_margin,
                    _params.bscan_top_margin,
                    bottomMargin,
-                   _params.color_scale_width,
+                   _colorScaleWidth,
                    0.0,
                    _minRange,
                    _timeSpanSecs,
-                   _maxRange,
+                   _maxRangeKm,
                    _params.bscan_axis_tick_len,
                    _params.bscan_n_ticks_ideal,
                    _params.bscan_text_margin);
@@ -189,9 +191,9 @@ void BscanWidget::configureAxes(Params::range_axis_mode_t range_axis_mode,
                    _params.bscan_right_margin,
                    _params.bscan_top_margin,
                    bottomMargin,
-                   _params.color_scale_width,
+                   _colorScaleWidth,
                    0.0,
-                   _maxRange,
+                   _maxRangeKm,
                    _timeSpanSecs,
                    _minRange,
                    _params.bscan_axis_tick_len,
@@ -203,7 +205,7 @@ void BscanWidget::configureAxes(Params::range_axis_mode_t range_axis_mode,
                    _params.bscan_right_margin,
                    _params.bscan_top_margin,
                    bottomMargin,
-                   _params.color_scale_width,
+                   _colorScaleWidth,
                    0.0,
                    _minAltitude,
                    _timeSpanSecs,
@@ -1183,7 +1185,9 @@ void BscanWidget::_computeSummaryDistanceSpeedTrack()
   const DistLoc &locStart = _distLocs[0];
   const DistLoc &locEnd = _distLocs[_distLocs.size()-1];
   double totDistKm, meanTrackDeg;
-  PJGLatLon2RTheta(locStart.lat, locStart.lon, locEnd.lat, locEnd.lon, &totDistKm, &meanTrackDeg);
+  PJGLatLon2RTheta(locStart.lat, locStart.lon, 
+                   locEnd.lat, locEnd.lon,
+                   &totDistKm, &meanTrackDeg);
 
   double totSecs = locEnd.time - locStart.time;
   _meanSpeedMps = (_sumDistKm * 1000.0) / totSecs;
@@ -1192,22 +1196,22 @@ void BscanWidget::_computeSummaryDistanceSpeedTrack()
     _meanDirnDeg += 360.0;
   }
 
-  // cerr << "2222222222222222222222222222222222222222" << endl;
-  // for (size_t ii = 0; ii < _distLocs.size(); ii++) {
-  //   DistLoc &loc = _distLocs[ii];
-  //   cerr << "==========>> loc ii: " << ii << endl;
-  //   cerr << "  beamNum: " << loc.beamNum << endl;
-  //   cerr << "  time: " << loc.time.asString() << endl;
-  //   cerr << "  lat: " << loc.lat << endl;
-  //   cerr << "  lon: " << loc.lon << endl;
-  //   cerr << "  speedMps: " << loc.speedMps << endl;
-  //   cerr << "  dirnDeg: " << loc.dirnDeg << endl;
-  //   cerr << "  distKm: " << loc.distKm << endl;
-  //   cerr << "  sumDistKm: " << loc.sumDistKm << endl;
-  //   cerr << "==============================" << endl;
-  // }
-  // cerr << "2222222222222222222222222222222222222222" << endl;
-  
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    for (size_t ii = 0; ii < _distLocs.size(); ii++) {
+      DistLoc &loc = _distLocs[ii];
+      cerr << "==========>> loc ii: " << ii << endl;
+      cerr << "  beamNum: " << loc.beamNum << endl;
+      cerr << "  time: " << loc.time.asString() << endl;
+      cerr << "  lat: " << loc.lat << endl;
+      cerr << "  lon: " << loc.lon << endl;
+      cerr << "  speedMps: " << loc.speedMps << endl;
+      cerr << "  dirnDeg: " << loc.dirnDeg << endl;
+      cerr << "  distKm: " << loc.distKm << endl;
+      cerr << "  sumDistKm: " << loc.sumDistKm << endl;
+      cerr << "==============================" << endl;
+    }
+  }
+    
 }
 
 /*************************************************************************
@@ -1230,13 +1234,6 @@ void BscanWidget::_plotDistanceOnTimeAxis(QPainter &painter)
     RadxTime tickTime = _getTimeForDistanceVal(tickDists[ii]);
     tickTimes.push_back(tickTime);
   }
-
-  // cerr << "111111111111111111111111111111111111111111111111" << endl;
-  // for (size_t ii = 0; ii < tickDists.size(); ii++) {
-  //   cerr << "1111111111 dist, time: " << tickDists[ii] << ", " 
-  //        << tickTimes[ii].asString() << endl;
-  // }
-  // cerr << "111111111111111111111111111111111111111111111111" << endl;
 
   // plot them
 
@@ -1285,7 +1282,7 @@ RadxTime BscanWidget::_getTimeForDistanceVal(double distKm)
       double timeSpan = (locNext.time - locThis.time);
       double timeFrac = timeSpan * fraction;
       RadxTime timeForDist = locThis.time + timeFrac;
-      // cerr << "66666666666666666 ii, fraction timeSpan timeFrac time: "
+      // cerr << "====>>  ii, fraction timeSpan timeFrac time: "
       //      << ii << ", "
       //      << fraction << ", "
       //      << timeSpan << ", "

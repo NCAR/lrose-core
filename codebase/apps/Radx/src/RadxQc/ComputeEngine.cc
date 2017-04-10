@@ -1051,7 +1051,7 @@ void ComputeEngine::_pidCompute()
   
   if (_params.use_soundings_from_spdb) {
     if (_tempProfile) {
-      const vector<NcarParticleId::TmpPoint> &profile = _tempProfile->getProfile();
+      const vector<TempProfile::PointVal> &profile = _tempProfile->getProfile();
       if (profile.size() > 0) {
         _pid.setTempProfile(profile);
       }

@@ -42,9 +42,13 @@
 #include <QLabel>
 #include <QMainWindow>
 #include <QMenuBar>
+#include <vector>
 
 #include "Params.hh"
 #include "RhiWidget.hh"
+
+class PolarManager;
+class DisplayField;
 
 class DLL_EXPORT RhiWindow : public QMainWindow
 {
@@ -64,7 +68,11 @@ public:
    * @param[in] parent   The parent widget.
    */
 
-  RhiWindow(QWidget *parent, RhiWidget *rhi, const Params &params);
+  RhiWindow(PolarManager *manager,
+            const Params &params,
+            const RadxPlatform &platform,
+            const vector<DisplayField *> &fields);
+            
 
   /**
    * @brief Destructor
@@ -72,44 +80,32 @@ public:
 
   virtual ~RhiWindow();
 
+  // get the RHI widget
+
+  RhiWidget *getWidget() { return _rhiWidget; }
 
   /**
    * @brief Set the azimuth value displayed in the window.
    */
 
-  void setAzimuth(const double azimuth)
-  {
-    char text[1024];
-    
-    sprintf(text, "%6.2f", azimuth);
-    _azValue->setText(text);
-  }
-  
+  void setAzimuth(const double azimuth);
 
   /**
    * @brief Set the elevation value displayed in the window.
    */
 
-  void setElevation(const double elevation)
-  {
-    char text[1024];
-    
-    sprintf(text, "%6.2f", elevation);
-    _elevValue->setText(text);
-  }
-  
+  void setElevation(const double elevation);
 
   /**
    * @brief Set the radar name.  The name is included as part of the window
    *        title.
    */
 
-  void setRadarName(const string &radar_name)
-  {
-    string window_title = "RHI -- " + radar_name;
-    setWindowTitle(tr(window_title.c_str()));
-  }
+  void setRadarName(const string &radar_name);
+
+  // enable the zoom button - called by RhiWidget
   
+  void enableZoomButton() const;
 
 public slots:
 
@@ -124,7 +120,12 @@ public slots:
 
   void resize();
 
-
+private slots:
+  
+  // override
+  
+  virtual void _unzoom();
+  
 signals:
 
   ////////////////
@@ -156,13 +157,30 @@ protected:
    * @brief The parent frame of the RHI widget.
    */
 
-  QFrame *_rhiParent;
+  QFrame *_rhiTopFrame;
+  RhiWidget *_rhiWidget;
+
+  // the polar manager that created this window
+
+  PolarManager *_manager;
+
+  // params
+
+  const Params &_params;
+  
+  // instrument platform details  - platform exists in DisplayManager
+  
+  const RadxPlatform &_platform;
+  
+  // data fields
+            
+  const vector<DisplayField *> &_fields;
 
   /**
    * @brief The View menu.
    */
 
-  QMenu *_viewMenu;
+  QMenu *_overlaysMenu;
 
   /**
    * @brief The status panel frame.
@@ -216,12 +234,9 @@ protected:
   // Protected methods //
   ///////////////////////
 
-  /**
-   * @brief Method called when a resize event is issued.
-   *
-   * @param[in] event    The resize event information.
-   */
+  // override event handling
 
+  virtual void keyPressEvent(QKeyEvent* event);
   virtual void resizeEvent(QResizeEvent *event);
 
   /**
@@ -246,7 +261,6 @@ protected:
 
   void _createStatusPanel(const int label_font_size);
   
-
 };
 
 #endif

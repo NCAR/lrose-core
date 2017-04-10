@@ -39,7 +39,7 @@ TARGET_FILE = TerrainHtServer
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -ltoolsa -ltdrp -ldataport $(XMLRPC_LIBS) \
-	$(NETCDF4_LIBS) -lbz2 -lz
+	$(NETCDF4_LIBS) -lbz2 -lz -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 

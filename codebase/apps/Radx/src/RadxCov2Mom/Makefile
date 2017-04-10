@@ -51,16 +51,14 @@ HDRS = \
 	Params.hh \
 	Args.hh \
 	Moments.hh \
-	RadxCov2Mom.hh \
-	Thread.hh
+	RadxCov2Mom.hh
 
 CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
 	Moments.cc \
 	Main.cc \
-	RadxCov2Mom.cc \
-	Thread.cc
+	RadxCov2Mom.cc
 
 #
 # tdrp macros

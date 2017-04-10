@@ -47,6 +47,8 @@
 #include "ComputeEngine.hh"
 #include <string>
 #include <deque>
+#include <toolsa/TaThread.hh>
+#include <toolsa/TaThreadPool.hh>
 #include <radar/NoiseLocator.hh>
 #include <radar/TempProfile.hh>
 #include <radar/BeamHeight.hh>
@@ -55,7 +57,6 @@ class RadxVol;
 class RadxFile;
 class RadxRay;
 class RadxField;
-class ComputeThread;
 using namespace std;
 
 class RadxQc {
@@ -78,10 +79,9 @@ public:
 
   int OK;
 
-  // get methods for threading
+  // get methods
 
   const Params &getParams() const { return _params; }
-  pthread_mutex_t *getDebugPrintMutex() { return &_debugPrintMutex; }
 
 protected:
 private:
@@ -94,7 +94,7 @@ private:
 
   // computations object
 
-  ComputeEngine *_engine;
+  ComputeEngine *_engineSingle;
 
   // derived rays - after compute
 
@@ -119,15 +119,50 @@ private:
   double _siteTempC;
   time_t _timeForSiteTemp;
 
-  // threading
-  
-  deque<ComputeThread *> _activeThreads;
-  deque<ComputeThread *> _availThreads;
-  pthread_mutex_t _debugPrintMutex;
-  
   // checking timing performance
 
   struct timeval _timeA;
+
+  //////////////////////////////////////////////////////////////
+  // inner thread class for calling Moments computations
+  
+  pthread_mutex_t _debugPrintMutex;
+  
+  class ComputeThread : public TaThread
+  {  
+  public:
+    // constructor
+    ComputeThread(RadxQc *obj, 
+                  const Params &params,
+                  int threadNum);
+    // destructor
+    virtual ~ComputeThread();
+    // compute engine object
+    inline ComputeEngine *getComputeEngine() const { return _engine; }
+    // set input ray
+    inline void setInputRay(RadxRay *val) { _inputRay = val; }
+    // derived ray - result of computations
+    inline RadxRay *getDerivedRay() const { return _derivedRay; }
+    // override run method
+    virtual void run();
+    // constructor OK?
+    bool OK;
+  private:
+    // parent object
+    RadxQc *_this;
+    // params
+    const Params &_params;
+    // thread number
+    int _threadNum;
+    // computation engine
+    ComputeEngine *_engine;
+    // input ray
+    RadxRay *_inputRay;
+    // result of computation - ownership gets passed to parent
+    RadxRay *_derivedRay;
+  };
+  // instantiate thread pool for computations
+  TaThreadPool _threadPool;
 
   // private methods
   
@@ -144,7 +179,6 @@ private:
   int _computeSingleThreaded(RadxVol &vol);
   int _computeMultiThreaded(RadxVol &vol);
   int _storeDerivedRay(ComputeThread *thread);
-  static void *_computeInThread(void *thread_data);
 
   void _findTransitions(vector<RadxRay *> &rays);
 

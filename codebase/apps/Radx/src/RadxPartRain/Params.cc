@@ -740,42 +740,6 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'remove_rays_with_antenna_transitions'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("remove_rays_with_antenna_transitions");
-    tt->descr = tdrpStrDup("Option to remove rays taken while the antenna was in transition.");
-    tt->help = tdrpStrDup("If true, rays with the transition flag set will not be used. The transiton flag is set when the antenna is in transtion between one sweep and the next.");
-    tt->val_offset = (char *) &remove_rays_with_antenna_transitions - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'transition_nrays_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("transition_nrays_margin");
-    tt->descr = tdrpStrDup("Number of transition rays to include as a margin");
-    tt->help = tdrpStrDup("Sometimes the transition flag is turned on too early in a transition, on not turned off quickly enough after a transition. If you set this to a number greater than 0, that number of rays will be included at each end of the transition, i.e. the transition will effectively be shorter at each end by this number of rays.");
-    tt->val_offset = (char *) &transition_nrays_margin - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'trim_surveillance_sweeps_to_360deg'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("trim_surveillance_sweeps_to_360deg");
-    tt->descr = tdrpStrDup("Option to trip surveillance sweeps so that they only cover 360 degrees.");
-    tt->help = tdrpStrDup("Some sweeps will have rays which cover more than a 360-degree rotation. Often these include antenna transitions. If this is set to true, rays are trimmed off either end of the sweep to limit the coverage to 360 degrees. The median elevation angle is computed and the end ray which deviates from the median in elevation is trimmed first.");
-    tt->val_offset = (char *) &trim_surveillance_sweeps_to_360deg - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'set_max_range'
     // ctype is 'tdrp_bool_t'
     
@@ -1832,6 +1796,66 @@ using namespace std;
     tt->help = tdrpStrDup("If TRUE, the interest field for each particle type will be written to the output FMQ, in addition to the list in 'output_fields'.");
     tt->val_offset = (char *) &PID_output_particle_interest_fields - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'PID_locate_melting_layer'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("PID_locate_melting_layer");
+    tt->descr = tdrpStrDup("Option to locate the melting layer.");
+    tt->help = tdrpStrDup("If true, the melting layer will be located using the WET_SNOW category. In addition, the ML_INTEREST field will be computed. Otherwise it will be missing. Follows Giangrande et al. - Automatic Designation of the Melting Layer with Polarimitric Prototype of WSR-88D Radar - AMS JAMC, Vol47, 2008.");
+    tt->val_offset = (char *) &PID_locate_melting_layer - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'melting_layer_percentile_for_bottom_limit'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("melting_layer_percentile_for_bottom_limit");
+    tt->descr = tdrpStrDup("Percentile value for estimating the bottom of the melting layer.");
+    tt->help = tdrpStrDup("To locate the melting layer limits, we rank the heights of all gates containing WET_SNOW, from bottom to top. This is the percentile value for the bottom of the layer.");
+    tt->val_offset = (char *) &melting_layer_percentile_for_bottom_limit - &_start_;
+    tt->single_val.d = 25;
+    tt++;
+    
+    // Parameter 'melting_layer_percentile_for_top_limit'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("melting_layer_percentile_for_top_limit");
+    tt->descr = tdrpStrDup("Percentile value for estimating the top of the melting layer.");
+    tt->help = tdrpStrDup("To locate the melting layer limits, we rank the heights of all gates containing WET_SNOW, from bottom to top. This is the percentile value for the top of the layer.");
+    tt->val_offset = (char *) &melting_layer_percentile_for_top_limit - &_start_;
+    tt->single_val.d = 75;
+    tt++;
+    
+    // Parameter 'melting_layer_write_results_to_spdb'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("melting_layer_write_results_to_spdb");
+    tt->descr = tdrpStrDup("Option to save melting layer properties to spdb.");
+    tt->help = tdrpStrDup("If true, the melting layer properties will be saved to SPDB using XML encoding. See 'melting_layer_spdb_output_url'");
+    tt->val_offset = (char *) &melting_layer_write_results_to_spdb - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'melting_layer_spdb_output_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("melting_layer_spdb_output_url");
+    tt->descr = tdrpStrDup("URL for writing melting layer results to SPDB XML.");
+    tt->help = tdrpStrDup("For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir");
+    tt->val_offset = (char *) &melting_layer_spdb_output_url - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/spdb/melting_layer");
     tt++;
     
     // Parameter 'Comment 11'
@@ -3683,7 +3707,7 @@ using namespace std;
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 65;
+        tt->struct_def.fields[0].enum_def.nfields = 69;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SNR");
@@ -3816,6 +3840,14 @@ using namespace std;
         tt->struct_def.fields[0].enum_def.fields[63].val = ZDR_FLAG_IN_ICE;
         tt->struct_def.fields[0].enum_def.fields[64].name = tdrpStrDup("ZDR_FLAG_IN_BRAGG");
         tt->struct_def.fields[0].enum_def.fields[64].val = ZDR_FLAG_IN_BRAGG;
+        tt->struct_def.fields[0].enum_def.fields[65].name = tdrpStrDup("ML_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[65].val = ML_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[66].name = tdrpStrDup("ELEVATION_ANGLE");
+        tt->struct_def.fields[0].enum_def.fields[66].val = ELEVATION_ANGLE;
+        tt->struct_def.fields[0].enum_def.fields[67].name = tdrpStrDup("RANGE");
+        tt->struct_def.fields[0].enum_def.fields[67].val = RANGE;
+        tt->struct_def.fields[0].enum_def.fields[68].name = tdrpStrDup("BEAM_HEIGHT");
+        tt->struct_def.fields[0].enum_def.fields[68].val = BEAM_HEIGHT;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;

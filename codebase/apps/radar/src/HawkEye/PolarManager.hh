@@ -32,7 +32,10 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// PolarManager manages polar rendering - PPIs and RHIs
+// PolarManager manages polar data gathering and dissemination
+// for PPIs and RHIs
+//
+// Rendering is delegated to PpiWidget and RhiWidget
 //
 ///////////////////////////////////////////////////////////////
 
@@ -45,6 +48,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include "DisplayManager.hh"
+#include "RayLoc.hh"
 #include <QMainWindow>
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxRay.hh>
@@ -58,6 +62,8 @@ class QDialog;
 class QLabel;
 class QGroupBox;
 class QGridLayout;
+class QDateTime;
+class QDateTimeEdit;
 class ColorBar;
 class DisplayField;
 class PpiWidget;
@@ -91,32 +97,20 @@ public:
 
   void enableZoomButton() const;
 
-  // inner class for ray locator
+  // override event handling
 
-  class RayLoc {
-  public:
-    int startIndex;
-    int endIndex;
-    bool master;
-    bool active;
-    const RadxRay *ray;
-    RayLoc() {
-      master = false;
-      active = false;
-      ray = NULL;
-    }
-    void clear() {
-      if (master && ray) {
-        if (ray->removeClient() == 0) {
-          delete ray;
-        }
-      }
-      ray = NULL;
-      master = false;
-      active = false;
-    }
-  };
+  virtual void timerEvent (QTimerEvent * event);
+  virtual void resizeEvent (QResizeEvent * event);
+  virtual void keyPressEvent(QKeyEvent* event);
 
+  // check on archive mode
+  
+  bool checkArchiveMode() const { return _archiveMode; }
+
+  // input file list for archive mode
+
+  void setInputFileList(const vector<string> &list) { _inputFileList = list; }
+  
 signals:
 
 private:
@@ -124,31 +118,32 @@ private:
   // beam geometry
   
   int _nGates;
-  double _maxRange;
+  double _maxRangeKm;
 
-  // ray locator
-  // we use a locator with data every 1/100th degree
-  // around the 360 degree circle
-
-  static const int RAY_LOC_RES = 10;
-  static const int RAY_LOC_N = 4000;
-  static const int RAY_LOC_OFFSET = 300;
- 
   RayLoc* _ppiRayLoc; // for use, allows negative indices at north line
   RayLoc* _ppiRays; // for new and delete
 
-  RayLoc* _rhiRayLoc; // for use, allows negative indices at north line
-  RayLoc* _rhiRays; // for new and delete
+  // input data
+  
+  RadxTime _readerRayTime;
+  RadxVol _vol;
+  bool _firstVol;
+
+  bool _moveToHighSweep;
+  int _sweepIndex;
+  
+  bool _keepFixedAngle;
+  double _fixedAngleDeg;
 
   // windows
 
   QFrame *_ppiFrame;
   PpiWidget *_ppi;
 
-  QFrame *_rhiFrame;
   RhiWindow *_rhiWindow;
   RhiWidget *_rhi;
   bool _rhiWindowDisplayed;
+  bool _rhiMode;
   
   // azimuths for current ray
 
@@ -157,10 +152,16 @@ private:
   double _startAz;
   double _endAz;
 
+  // times for rays
+
+  RadxTime _plotStartTime;
+  RadxTime _plotEndTime;
+  RadxTime _prevRayTime;
+  
   // menus
 
   QMenu *_fileMenu;
-  QMenu *_viewMenu;
+  QMenu *_overlaysMenu;
   QMenu *_helpMenu;
 
   // actions
@@ -169,12 +170,44 @@ private:
   QAction *_gridsAct;
   QAction *_azLinesAct;
   QAction *_showRhiAct;
+  
+  QAction *_timeControllerAct;
+  QAction *_saveImageAct;
 
-  // override event handling
+  // time controller settings dialog
+  
+  QDialog *_timeControllerDialog;
+  QLabel *_timeControllerInfo;
 
-  virtual void timerEvent (QTimerEvent * event);
-  virtual void resizeEvent (QResizeEvent * event);
-  virtual void keyPressEvent(QKeyEvent* event);
+  QLineEdit *_archiveScanIntervalEdit;
+  double _archiveScanIntervalSecs;
+
+  QLineEdit *_nArchiveScansEdit;
+  int _nArchiveScans;
+
+  // archive mode
+
+  bool _archiveMode;
+  bool _archiveRetrievalPending;
+  QRadioButton *_realtimeModeButton;
+  QRadioButton *_archiveModeButton;
+
+  QGroupBox *_archiveTimeBox;
+  QDateTimeEdit *_archiveStartTimeEdit;
+  RadxTime _archiveStartTime;
+  int _archiveMarginSecs;
+
+  QLabel *_archiveStopTimeEcho;
+  RadxTime _archiveStopTime;
+  
+  RadxTime _imagesArchiveStartTime;
+  RadxTime _imagesArchiveEndTime;
+
+  vector<string> _inputFileList;
+  
+  // saving images in real time mode
+
+  RadxTime _imagesScheduledTime;
 
   // set top bar
 
@@ -182,10 +215,21 @@ private:
   
   // local methods
 
+  void _clear();
   void _setupWindows();
-  void _createRhiWindow();
   void _createActions();
   void _createMenus();
+
+  // data retrieval
+
+  void _handleRealtimeData(QTimerEvent * event);
+  void _handleArchiveData(QTimerEvent * event);
+  int _getArchiveData();
+  void _plotArchiveData();
+  void _setupVolRead(RadxFile &file);
+
+  void _setSweepIndex(double fixedAngle);
+  void _setFixedAngle(int sweepIndex);
 
   // draw beam
 
@@ -197,6 +241,16 @@ private:
 		    const double beam_width, RayLoc *ray_loc);
   void _clearRayOverlap(const int start_index, const int end_index,
 			RayLoc *ray_loc);
+
+  // modes
+
+  void _setArchiveMode(bool state);
+  void _activateRealtimeRendering();
+  void _activateArchiveRendering();
+
+  // override howto
+
+  void _howto();
 
 private slots:
 
@@ -218,8 +272,41 @@ private slots:
   void _rhiLocationClicked(double xkm, double ykm,
                            const RadxRay *closestRay);
   void _locationClicked(double xkm, double ykm,
-                        RayLoc *ray_loc, const RadxRay *closestRay);
+                        RayLoc *ray_loc, const RadxRay *ray);
+
+  void _cancelTimeControllerChanges();
+
+  // archive mode
   
+  void _setDataRetrievalMode();
+  void _setArchiveScanConfig();
+  void _resetArchiveScanConfigToDefault();
+  void _setStartTimeFromGui(const QDateTime &datetime1);
+  void _setGuiFromStartTime();
+  void _setArchiveStartTimeToDefault();
+  void _setArchiveStartTime(const RadxTime &rtime);
+  void _computeArchiveStopTime();
+  void _goBack1();
+  void _goFwd1();
+  void _goBackNScans();
+  void _goFwdNScans();
+
+  void _setArchiveRetrievalPending();
+
+  // time controller
+
+  void _createTimeControllerDialog();
+  void _refreshTimeControllerDialog();
+  void _showTimeControllerDialog();
+
+  // images
+
+  void _saveImageToFile(bool interactive = true);
+  void _createRealtimeImageFiles();
+  void _createArchiveImageFiles();
+  void _createImageFilesAllSweeps();
+  void _createImageFiles();
+
 };
 
 #endif

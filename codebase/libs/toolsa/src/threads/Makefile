@@ -46,15 +46,17 @@ TARGET_FILE = ../libtoolsa.a
 
 HDRS = \
 	../include/toolsa/TaThread.hh \
+	../include/toolsa/TaThreadPool.hh \
 	../include/toolsa/TaThreadSimple.hh
 
 CPPC_SRCS = \
 	TaThread.cc \
-	TaThreadSimple.cc \
-	TaThreadSimplePolling.cc \
-	TaThreadQue.cc \
 	TaThreadDoubleQue.cc \
-	TaThreadPollingQue.cc
+	TaThreadPollingQue.cc \
+	TaThreadPool.cc \
+	TaThreadQue.cc \
+	TaThreadSimple.cc \
+	TaThreadSimplePolling.cc
 
 #
 # general targets

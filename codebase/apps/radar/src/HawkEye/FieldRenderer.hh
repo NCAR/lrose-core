@@ -72,6 +72,10 @@ public:
    */
 
   virtual ~FieldRenderer();
+
+  // parameters for this field
+
+  const Params::field_t &getParams() { return _fieldParams; }
   
   // setting state
   
@@ -169,6 +173,10 @@ protected:
    */
 
   size_t _fieldNum;
+  
+  // parameters for this field
+  
+  Params::field_t _fieldParams;
   
   /**
    * @brief Image used for background rendering of this field.

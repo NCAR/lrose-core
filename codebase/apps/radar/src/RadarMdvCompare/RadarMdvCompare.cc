@@ -783,6 +783,9 @@ int RadarMdvCompare::_openOutputFiles()
       cerr << "Opening summary file: " << path << endl;
     }
 
+    fprintf(_summaryFile,
+            "# year month day hour min sec utime uday count mean sdev median\n");
+
   }
   
   return 0;

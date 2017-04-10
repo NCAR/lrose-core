@@ -445,11 +445,12 @@ NcxxVar NcxxGroup::getVar(const string& name,NcxxGroup::Location location) const
   multimap<std::string,NcxxVar> ncVars(getVars(location));
   pair<multimap<string,NcxxVar>::iterator,multimap<string,NcxxVar>::iterator> ret;
   ret = ncVars.equal_range(name);
-  if(ret.first == ret.second)
+  if(ret.first == ret.second) {
     // no matching netCDF variable found so return null object.
     return NcxxVar();
-  else
+  } else {
     return ret.first->second;
+  }
 }
 
 // Adds a new netCDF scalar variable.
@@ -1462,9 +1463,8 @@ int NcxxGroup::addGlobAttr(const string &name, const string &val)
 
 int NcxxGroup::addGlobAttr(const string &name, int val)
 {
-  NcxxInt xtype;
   try {
-    putAtt(name, xtype, val);
+    putAtt(name, ncxxInt, val);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxGroup::addGlobAttr");
     _addErrStr("  Cannot add global attr name: ", name);
@@ -1482,13 +1482,31 @@ int NcxxGroup::addGlobAttr(const string &name, int val)
 
 int NcxxGroup::addGlobAttr(const string &name, float val)
 {
-  NcxxFloat xtype;
   try {
-    putAtt(name, xtype, val);
+    putAtt(name, ncxxFloat, val);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxGroup::addGlobAttr");
     _addErrStr("  Cannot add global attr name: ", name);
     _addErrDbl("  val: ", val, "%g");
+    _addErrStr("  group: ", getName());
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// add double global attribute
+// Returns 0 on success, -1 on failure
+
+int NcxxGroup::addGlobAttr(const string &name, double val)
+{
+  try {
+    putAtt(name, ncxxDouble, val);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxGroup::addGlobAttr");
+    _addErrStr("  Cannot add global attr name: ", name);
+    _addErrDbl("  val: ", val, "%lg");
     _addErrStr("  group: ", getName());
     _addErrStr("  exception: ", e.what());
     return -1;
@@ -1671,14 +1689,15 @@ int NcxxGroup::addVar(NcxxVar &var,
                       const string &standardName,
                       const string &longName,
                       NcxxType ncType, 
-                      const string &units /* = "" */)
+                      const string &units /* = "" */,
+                      bool isMetadata /* = false */)
   
 {
   
   vector<NcxxDim> dims; // 0 length - for scalar
   
   return addVar(var, name, standardName, longName,
-                ncType, dims, units);
+                ncType, dims, units, isMetadata);
 
 }
 
@@ -1693,7 +1712,8 @@ int NcxxGroup::addVar(NcxxVar &var,
                       const string &longName,
                       NcxxType ncType, 
                       NcxxDim &dim, 
-                      const string &units /* = "" */)
+                      const string &units /* = "" */,
+                      bool isMetadata /* = false */)
   
 {
   
@@ -1701,7 +1721,7 @@ int NcxxGroup::addVar(NcxxVar &var,
   dims.push_back(dim);
 
   return addVar(var, name, standardName, longName,
-                ncType, dims, units);
+                ncType, dims, units, isMetadata);
 
 }
 
@@ -1717,7 +1737,8 @@ int NcxxGroup::addVar(NcxxVar &var,
                       NcxxType ncType,
                       NcxxDim &dim0,
                       NcxxDim &dim1,
-                      const string &units /* = "" */)
+                      const string &units /* = "" */,
+                      bool isMetadata /* = false */)
 {
 
   vector<NcxxDim> dims;
@@ -1725,7 +1746,7 @@ int NcxxGroup::addVar(NcxxVar &var,
   dims.push_back(dim1);
 
   return addVar(var, name, standardName, longName,
-                ncType, dims, units);
+                ncType, dims, units, isMetadata);
   
 }
 
@@ -1740,7 +1761,8 @@ int NcxxGroup::addVar(NcxxVar &var,
                       const string &longName,
                       NcxxType ncType,
                       vector<NcxxDim> &dims,
-                      const string &units /* = "" */)
+                      const string &units /* = "" */,
+                      bool isMetadata /* = false */)
 {
 
   var = addVar(name, ncType, dims);
@@ -1764,7 +1786,11 @@ int NcxxGroup::addVar(NcxxVar &var,
     var.addAttr("units", units);
   }
   
-  var.setDefaultFillvalue();
+  if (isMetadata) {
+    var.setMetaFillValue();
+  } else {
+    var.setDefaultFillValue();
+  }
 
   return 0;
 
@@ -1807,7 +1833,7 @@ int NcxxGroup::readIntVar(NcxxVar &var, const string &name,
   vector<int> vals;
   vals.resize(var.numVals());
   try {
-    var.getVar(&vals[0]);
+    var.getVal(&vals[0]);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxGroup::readIntVar");
     _addErrStr("  cannot read variable, name: ", name);
@@ -1858,7 +1884,7 @@ int NcxxGroup::readFloatVar(NcxxVar &var, const string &name,
   vector<float> vals;
   vals.resize(var.numVals());
   try {
-    var.getVar(&vals[0]);
+    var.getVal(&vals[0]);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxGroup::readFloatVar");
     _addErrStr("  cannot read variable, name: ", name);
@@ -1909,7 +1935,7 @@ int NcxxGroup::readDoubleVar(NcxxVar &var, const string &name,
   vector<double> vals;
   vals.resize(var.numVals());
   try {
-    var.getVar(&vals[0]);
+    var.getVal(&vals[0]);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxGroup::readDoubleVar");
     _addErrStr("  cannot read variable, name: ", name);
@@ -1978,7 +2004,7 @@ int NcxxGroup::readCharStringVar(NcxxVar &var, const string &name, string &val)
   char *cvalues = new char[stringLen+1];
 
   try {
-    var.getVar(cvalues);
+    var.getVal(cvalues);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxGroup::readCharStringVar");
     _addErrStr("  cannot read variable, name: ", name);

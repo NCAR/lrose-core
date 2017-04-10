@@ -38,7 +38,7 @@
 
 #include "RadxCov2Mom.hh"
 #include "Moments.hh"
-#include "Thread.hh"
+#include <cassert>
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/TaArray.hh>
@@ -57,6 +57,7 @@
 #include <Radx/RadxXml.hh>
 using namespace std;
 
+///////////////////////////////////////////////////////////////
 // Constructor
 
 RadxCov2Mom::RadxCov2Mom(int argc, char **argv)
@@ -64,6 +65,7 @@ RadxCov2Mom::RadxCov2Mom(int argc, char **argv)
 {
 
   OK = TRUE;
+  _momentsSingle = NULL;
 
   // set programe name
 
@@ -130,93 +132,45 @@ RadxCov2Mom::RadxCov2Mom(int argc, char **argv)
 
   // initialize moments object
 
-  pthread_mutex_init(&_debugPrintMutex, NULL);
-  
   if (_params.use_multiple_threads) {
 
     // set up compute thread pool
     
     for (int ii = 0; ii < _params.n_compute_threads; ii++) {
-      
-      ComputeThread *thread = new ComputeThread();
-      thread->setApp(this);
-
-      Moments *moments = new Moments(_params);
-      if (!moments->OK) {
-        delete moments;
+      ComputeThread *thread = new ComputeThread(this, _params);
+      if (!thread->OK) {
+        delete thread;
         OK = FALSE;
         return;
       }
-      _moments.push_back(moments);
-      thread->setMoments(moments);
-
-      pthread_t pth = 0;
-      pthread_create(&pth, NULL, _computeMomentsInThread, thread);
-      thread->setThreadId(pth);
-      _availThreads.push_back(thread);
-
+      _threadPool.addThreadToMain(thread);
     }
-    
+
   } else {
-
+    
     // single threaded
-
-    Moments *moments = new Moments(_params);
-    if (!moments->OK) {
-      delete moments;
+    
+    _momentsSingle = new Moments(_params);
+    if (!_momentsSingle->OK) {
+      delete _momentsSingle;
       OK = FALSE;
       return;
     }
-    _moments.push_back(moments);
-
+    
   }
 
 }
 
+///////////////////////////////////////////////////////////////
 // destructor
 
 RadxCov2Mom::~RadxCov2Mom()
 
 {
 
-  for (size_t ii = 0; ii < _moments.size(); ii++) {
-    delete _moments[ii];
+  if (_momentsSingle != NULL) {
+    delete _momentsSingle;
   }
-  _moments.clear();
-
-  // set thread pool to exit
-
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->waitForWorkToComplete();
-  }
-
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    _availThreads[ii]->setExitFlag(true);
-    _availThreads[ii]->signalWorkToStart();
-  }
-  
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->setExitFlag(true);
-    _activeThreads[ii]->signalWorkToStart();
-  }
-  
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    _availThreads[ii]->waitForWorkToComplete();
-  }
-
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->waitForWorkToComplete();
-  }
-
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    delete _availThreads[ii];
-  }
-
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    delete _activeThreads[ii];
-  }
-
-  pthread_mutex_destroy(&_debugPrintMutex);
 
   // unregister process
 
@@ -396,7 +350,8 @@ int RadxCov2Mom::_processFile(const string &filePath)
   // optimize transitions in surveillance mode
 
   if (_params.optimize_surveillance_transitions) {
-    vol.optimizeSurveillanceTransitions(_params.optimized_transitions_max_elev_error);
+    vol.optimizeSurveillanceTransitions
+      (_params.optimized_transitions_max_elev_error);
   }
 
   // trim surveillance sweeps to 360 degrees if requested
@@ -1162,9 +1117,9 @@ int RadxCov2Mom::_computeMomentsSingleThreaded(RadxVol &vol,
     // compute moments
     
     RadxRay *momRay = 
-      _moments[0]->compute(covRay, calib,
-                           _measXmitPowerDbmH, _measXmitPowerDbmV,
-                           _wavelengthM, _radarHtKm);
+      _momentsSingle->compute(covRay, calib,
+                              _measXmitPowerDbmH, _measXmitPowerDbmV,
+                              _wavelengthM, _radarHtKm);
     if (momRay == NULL) {
       cerr << "ERROR - _computeMoments" << endl;
       return -1;
@@ -1176,7 +1131,7 @@ int RadxCov2Mom::_computeMomentsSingleThreaded(RadxVol &vol,
 
     // sum up for noise
 
-    _addToNoiseStats(*_moments[0]);
+    _addToNoiseStats(*_momentsSingle);
 
   } // iray
 
@@ -1192,166 +1147,81 @@ int RadxCov2Mom::_computeMomentsMultiThreaded(RadxVol &vol,
                                               vector <RadxRay *> &momRays)
 {
 
+  // initialize the thread pool
+
+  _threadPool.initForRun();
+
   // loop through the rays, computing the moments
 
   for (size_t iray = 0; iray < covRays.size(); iray++) {
 
-    // is a thread available, if not wait for one
-    
-    ComputeThread *thread = NULL;
-    if (_availThreads.size() > 0) {
-
-      // get thread from available pool
-      
-      thread = _availThreads.front();
-      _availThreads.pop_front();
-
-    } else {
-
-      // get thread from active pool
-
-      thread = _activeThreads.front();
-      _activeThreads.pop_front();
-
-      // wait for moments computations to complete
-
-      thread->waitForWorkToComplete();
-
-      // sum up for noise
-      
-      _addToNoiseStats(*thread->getMoments());
-
-      // store ray
-      
-      RadxRay *momRay = thread->getMomRay();
-      if (momRay == NULL) {
-        cerr << "ERROR - _computeMomentsMultiThreaded" << endl;
-        _availThreads.push_back(thread);
-        return -1;
-      } else {
-        // good return, add to results
-        momRays.push_back(momRay);
-      }
-      
+    // get a thread from the pool
+    bool isDone = true;
+    ComputeThread *thread = 
+      (ComputeThread *) _threadPool.getNextThread(true, isDone);
+    if (thread == NULL) {
+      break;
     }
-    
-    // get new covariance ray
-    
-    const RadxRay *covRay = covRays[iray];
+    if (isDone) {
+      // get data from completed thread
+      _handleDoneThread(thread, momRays);
+      // return thread to the available pool
+      _threadPool.addThreadToAvail(thread);
+      // reduce iray by 1 since we did not actually process this ray
+      // we only handled a previously started thread
+      iray--;
+    } else {
+      // got a thread to use, set its properties
+      const RadxRay *covRay = covRays[iray];
+      const IwrfCalib &calib = _getBestCal(covRay->getPulseWidthUsec());
+      thread->setCovRay(covRay);
+      thread->setCalib(calib);
+      // set it running
+      thread->signalRunToStart();
+    }
 
-    // get best calibration for this ray
-
-    const IwrfCalib &calib = _getBestCal(covRay->getPulseWidthUsec());
-    
-    // set thread going to compute moments
-    
-    thread->setCovRay(covRay);
-    thread->setCalib(&calib);
-    thread->signalWorkToStart();
-
-    // push onto active pool
-    
-    _activeThreads.push_back(thread);
-    
   } // iray
-
-  // wait for all active threads to complete
-  
-  while (_activeThreads.size() > 0) {
     
-    ComputeThread *thread = _activeThreads.front();
-    _activeThreads.pop_front();
-    _availThreads.push_back(thread);
+  // collect remaining done threads
 
-    // wait for moments computations to complete
-    
-    thread->waitForWorkToComplete();
-
-    // store ray
-    
-    RadxRay *momRay = thread->getMomRay();
-    if (momRay == NULL) {
-      cerr << "ERROR - _computeMomentsMultiThreaded" << endl;
-      return -1;
+  _threadPool.setReadyForDoneCheck();
+  while (!_threadPool.checkAllDone()) {
+    ComputeThread *thread = (ComputeThread *) _threadPool.getNextDoneThread();
+    if (thread == NULL) {
+      break;
     } else {
-      // good return, add to results
-      momRays.push_back(momRay);
+      // get data from completed thread
+      _handleDoneThread(thread, momRays);
+      // return thread to the available pool
+      _threadPool.addThreadToAvail(thread);
     }
+  } // while
 
-    // sum up for noise
-
-    _addToNoiseStats(*thread->getMoments());
-
-  }
-  
   return 0;
 
 }
 
-///////////////////////////////////////////////////////////
-// Thread function to compute moments
+//////////////////////////////////////////////////
+// handle a done thread
 
-void *RadxCov2Mom::_computeMomentsInThread(void *thread_data)
-  
+void RadxCov2Mom::_handleDoneThread(ComputeThread *thread,
+                                    vector <RadxRay *> &momRays)
 {
-  
-  // get thread data from args
 
-  ComputeThread *compThread = (ComputeThread *) thread_data;
-  RadxCov2Mom *app = compThread->getApp();
-  assert(app);
+  // sum up for noise
 
-  while (true) {
+  _addToNoiseStats(*thread->getMoments());
 
-    // wait for main to unlock start mutex on this thread
-    
-    compThread->waitForStartSignal();
-    
-    // if exit flag is set, app is done, exit now
-    
-    if (compThread->getExitFlag()) {
-      if (app->getParams().debug >= Params::DEBUG_EXTRA) {
-        pthread_mutex_t *debugPrintMutex = app->getDebugPrintMutex();
-        pthread_mutex_lock(debugPrintMutex);
-        cerr << "====>> compute thread exiting" << endl;
-        pthread_mutex_unlock(debugPrintMutex);
-      }
-      compThread->signalParentWorkIsComplete();
-      return NULL;
-    }
-    
-    // compute moments
+  // store moments ray
 
-    if (app->getParams().debug >= Params::DEBUG_EXTRA) {
-      pthread_mutex_t *debugPrintMutex = app->getDebugPrintMutex();
-      pthread_mutex_lock(debugPrintMutex);
-      cerr << "======>> starting beam compute" << endl;
-      pthread_mutex_unlock(debugPrintMutex);
-    }
-
-    Moments *moments = compThread->getMoments();
-    const RadxRay *covRay = compThread->getCovRay();
-    const IwrfCalib *calib = compThread->getCalib();
-    RadxRay *momRay = 
-      moments->compute(covRay, *calib,
-                       app->_measXmitPowerDbmH, app->_measXmitPowerDbmV,
-                       app->_wavelengthM, app->_radarHtKm);
-    compThread->setMomRay(momRay);
-    
-    if (app->getParams().debug >= Params::DEBUG_EXTRA) {
-      pthread_mutex_t *debugPrintMutex = app->getDebugPrintMutex();
-      pthread_mutex_lock(debugPrintMutex);
-      cerr << "======>> done with moments compute" << endl;
-      pthread_mutex_unlock(debugPrintMutex);
-    }
-
-    // unlock done mutex
-    
-    compThread->signalParentWorkIsComplete();
-    
-  } // while
-
-  return NULL;
+  RadxRay *momRay = thread->getMomRay();
+  if (momRay == NULL) {
+    cerr << "ERROR - _handleDoneThread" << endl;
+    cerr << "  NULL moments ray returned" << endl;
+  } else {
+    // good return, add to results
+    momRays.push_back(momRay);
+  }
 
 }
 
@@ -2013,4 +1883,59 @@ int RadxCov2Mom::_writeStatusXmlToSpdb(const RadxVol &vol,
 
 }
 
+
+///////////////////////////////////////////////////////////////
+// ComputeThread
+
+// Constructor
+
+RadxCov2Mom::ComputeThread::ComputeThread(RadxCov2Mom *obj,
+                                          const Params &params) :
+        _this(obj),
+        _params(params)
+{
+
+  OK = TRUE;
+  _covRay = NULL;
+  _momRay = NULL;
+
+  // create moments object
+  
+  _moments = new Moments(_params);
+  if (!_moments->OK) {
+    delete _moments;
+    OK = FALSE;
+  }
+
+}  
+
+// Destructor
+
+RadxCov2Mom::ComputeThread::~ComputeThread()
+{
+
+  if (_moments != NULL) {
+    delete _moments;
+  }
+
+}  
+
+// run method
+void RadxCov2Mom::ComputeThread::run()
+{
+
+  // check
+
+  assert(_moments != NULL);
+  assert(_covRay != NULL);
+
+  // Moments object will create the moments ray
+  // The ownership of the ray is passed to the parent object
+  // which adds it to the output volume.
+
+  _momRay = _moments->compute
+    (_covRay, _calib,
+     _this->_measXmitPowerDbmH, _this->_measXmitPowerDbmV,
+     _this->_wavelengthM, _this->_radarHtKm);
+}
 

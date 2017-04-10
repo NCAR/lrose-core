@@ -142,7 +142,11 @@ public:
     ZDR_IN_ICE = 61,
     ZDR_IN_BRAGG = 62,
     ZDR_FLAG_IN_ICE = 63,
-    ZDR_FLAG_IN_BRAGG = 64
+    ZDR_FLAG_IN_BRAGG = 64,
+    ML_INTEREST = 65,
+    ELEVATION_ANGLE = 66,
+    RANGE = 67,
+    BEAM_HEIGHT = 68
   } output_field_id_t;
 
   typedef enum {
@@ -514,12 +518,6 @@ public:
 
   tdrp_bool_t aggregate_sweep_files_on_read;
 
-  tdrp_bool_t remove_rays_with_antenna_transitions;
-
-  int transition_nrays_margin;
-
-  tdrp_bool_t trim_surveillance_sweeps_to_360deg;
-
   tdrp_bool_t set_max_range;
 
   double max_range_km;
@@ -681,6 +679,16 @@ public:
   int PID_ngates_for_sdev;
 
   tdrp_bool_t PID_output_particle_interest_fields;
+
+  tdrp_bool_t PID_locate_melting_layer;
+
+  double melting_layer_percentile_for_bottom_limit;
+
+  double melting_layer_percentile_for_top_limit;
+
+  tdrp_bool_t melting_layer_write_results_to_spdb;
+
+  char* melting_layer_spdb_output_url;
 
   tdrp_bool_t use_soundings_from_spdb;
 
@@ -982,7 +990,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[275];
+  mutable TDRPtable _table[277];
 
   const char *_className;
 

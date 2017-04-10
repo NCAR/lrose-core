@@ -129,7 +129,7 @@ private:
 
   // moments field data
   
-  int _nGates;
+  size_t _nGates;
   double _startRangeKm, _gateSpacingKm;
   double _nyquist;
   

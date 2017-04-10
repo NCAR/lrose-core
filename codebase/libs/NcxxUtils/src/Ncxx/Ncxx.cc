@@ -148,7 +148,7 @@ string Ncxx::ncTypeToStr(nc_type nctype)
   
 }
 
-string Ncxx::ncxxTypeToStr(NcxxType &nctype)
+string Ncxx::ncxxTypeToStr(NcxxType nctype)
   
 {
   return ncTypeToStr(nctype.getId());

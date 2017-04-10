@@ -863,6 +863,12 @@ int Server::_convertToSymprod(const Params &params,
     }
 
   }
+
+  // add time labels if required
+
+  if (params.add_time_labels) {
+    _addTimeLabels(prod, params, track);
+  }
   
   // copy internal representation of product to output buffer
 
@@ -1246,3 +1252,138 @@ bool Server::_acceptPoint(double lat, double lon)
   return false;
 
 }
+
+/////////////////////////////////////////////
+// Add the time labels
+
+void Server::_addTimeLabels(Symprod &prod,
+                            const Params &params,
+                            const vector<location_t> &track)
+
+{
+
+  // get start and end time of track
+  
+  time_t trackStartTime = track[0].time;
+  time_t trackEndTime = track[track.size()-1].time;
+  int intervalSecs = params.time_label_interval_secs;
+  if (intervalSecs <= 0) {
+    intervalSecs = 300;
+  }
+  time_t labelStartTime = (((trackStartTime / intervalSecs) + 1) * intervalSecs);
+
+  // load up list of times to be plotted
+  
+  vector<location_t> labelLoc;
+  time_t labelTime = labelStartTime;
+  while (labelTime <= trackEndTime) {
+    location_t loc;
+    loc.time = labelTime;
+    loc.lat = -9999.0;
+    loc.lon = -9999.0;
+    labelLoc.push_back(loc);
+    labelTime += intervalSecs;
+  }
+
+  // compute location of times to be plotted
+
+  for (size_t ii = 0; ii < labelLoc.size(); ii++) {
+
+    for (size_t jj = 0; jj < track.size() - 1; jj++) {
+      if (labelLoc[ii].time >= track[jj].time &&
+          labelLoc[ii].time <= track[jj+1].time) {
+        double frac = ((double) (labelLoc[ii].time - track[jj].time) /
+                       (double) (track[jj+1].time - track[jj].time));
+        labelLoc[ii].lat = track[jj].lat + frac * (track[jj+1].lat - track[jj].lat);
+        labelLoc[ii].lon = track[jj].lon + frac * (track[jj+1].lon - track[jj].lon);
+        break;
+      }
+    } // jj
+
+  } // ii
+
+  if (params.debug >= Params::DEBUG_NORM) {
+    cerr << "================>> Adding time labels <<================" << endl;
+    cerr << endl;
+    cerr << "  trackStartTime: " << DateTime::strm(trackStartTime) << endl;
+    cerr << "  trackEndTime: " << DateTime::strm(trackEndTime) << endl;
+    cerr << "  intervalSecs: " <<  intervalSecs << endl;
+    cerr << "  labelStartTime: " << DateTime::strm(labelStartTime) << endl;
+    cerr << endl;
+    cerr << "  list of label time and locations:"  << endl;
+    for (size_t ii = 0; ii < labelLoc.size(); ii++) {
+      cerr << "  time, lat, lon: "
+           << DateTime::strm(labelLoc[ii].time) << ", "
+           << labelLoc[ii].lat << ", "
+           << labelLoc[ii].lon << endl;
+    }
+    cerr << "========================================================" << endl;
+  }
+
+  // Initialize icon
+
+  MemBuf iconBuf;
+  int iconNx = params.time_label_icon_n2;
+  int iconNy = params.time_label_icon_n1;
+  ui08 *icon = _loadIconBuf(params.__time_label_icon,
+                            iconNy, iconNx, iconBuf);
+  
+  for (size_t ii = 0; ii < labelLoc.size(); ii++) {
+
+    // add icon
+
+    Symprod::wpt_t pos;
+    pos.lat = labelLoc[ii].lat;
+    pos.lon = labelLoc[ii].lon;
+    prod.addBitmapIcons(params.time_label_color, 1, &pos,
+			iconNx, iconNy, icon);
+
+    // load up time label
+
+    char label[1024];
+    DateTime ltime(labelLoc[ii].time);
+    switch (params.time_label_format) {
+      case Params::TIME_LABEL_YYYY_MM_DD_HH_MM_SS:
+        sprintf(label, "%.4d/%.2d/%.2d_%.2d:%.2d:%.2d",
+                ltime.getYear(),
+                ltime.getMonth(),
+                ltime.getDay(),
+                ltime.getHour(),
+                ltime.getMin(),
+                ltime.getSec());
+        break;
+      case Params::TIME_LABEL_YYYY_MM_DD_HH_MM:
+        sprintf(label, "%.4d/%.2d/%.2d_%.2d:%.2d",
+                ltime.getYear(),
+                ltime.getMonth(),
+                ltime.getDay(),
+                ltime.getHour(),
+                ltime.getMin());
+        break;
+      case Params::TIME_LABEL_HH_MM_SS:
+        sprintf(label, "%.2d:%.2d:%.2d",
+                ltime.getHour(),
+                ltime.getMin(),
+                ltime.getSec());
+        break;
+      case Params::TIME_LABEL_HH_MM:
+        sprintf(label, "%.2d %.2d",
+                ltime.getHour(),
+                ltime.getMin());
+        break;
+    }
+
+    // add text
+
+    prod.addText(label, labelLoc[ii].lat, labelLoc[ii].lon,
+                 params.time_label_color, "",
+                 params.time_label_offset.x_offset,
+                 params.time_label_offset.y_offset,
+                 _vertAlign(params.label_vert_align),
+                 _horizAlign(params.label_horiz_align),
+                 0, Symprod::TEXT_NORM, params.label_font);
+
+  }
+
+}
+

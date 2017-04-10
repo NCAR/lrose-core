@@ -239,8 +239,11 @@ string rsm_ant_state_to_str(int ant_state)
     case RSM_ANT_PPI_EL_POSITIONING: return "RSM_ANT_PPI_EL_POSITIONING";
     case RSM_ANT_PPI_ACCEL: return "RSM_ANT_PPI_ACCEL";
     case RSM_ANT_PPI_IN_SWEEP: return "RSM_ANT_PPI_IN_SWEEP";
-    case RSM_PROG4_DO_SECTOR: return "RSM_PROG4_DO_SECTOR";
+    case RSM_ANT_PROG4_DO_SECTOR: return "RSM_ANT_PROG4_DO_SECTOR";
+    case RSM_ANT_PROG4_DO_SURV: return "RSM_ANT_PROG4_DO_SURV";
+    case RSM_ANT_PROG4_DO_RHI: return "RSM_ANT_PROG4_DO_RHI";
     case RSM_ANT_DISCONNECTED: return "RSM_ANT_DISCONNECTED";
+    case RSM_ANT_PROG4_FAIL: return "RSM_ANT_PROG4_FAIL";
     default: return "UNKNOWN";
   }
 

@@ -27,7 +27,7 @@ paramdef string {
 } path;
 
 typedef enum {
-  ARCHIVE, REALTIME
+  ARCHIVE, REALTIME, FILELIST
 } mode_t;
 
 paramdef enum mode_t {

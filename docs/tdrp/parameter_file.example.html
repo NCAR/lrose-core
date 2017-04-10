@@ -1,0 +1,428 @@
+<html>
+
+<head>
+<title>Example TDRP parameter file</title>
+</head>
+
+<body>
+
+<h3>Example TDRP parameter file</h3>
+
+<pre>
+/**********************************************************************
+ * TDRP params for tdrp_example
+ **********************************************************************/
+
+//======================================================================
+//
+// INTEGER PARAMETERS.
+//
+// Testing integer parameter behavior.
+//
+//======================================================================
+ 
+///////////// your_age ////////////////////////////////
+//
+// Single int value.
+// Testing single int actions.
+// Minimum val: 0
+// Maximum val: 120
+// Type: int
+//
+
+your_age = 35;
+
+///////////// our_ages ////////////////////////////////
+//
+// Int array - variable length.
+// Testing variable length int array.
+// Minimum val: 0
+// Maximum val: 120
+// Type: int
+// 1D array - variable length - 5 elements.
+//
+
+our_ages = { 30, 31, 42, 43, 54 };
+
+///////////// icon ////////////////////////////////////
+//
+// Variable length 2-D array.
+// Testing variable length 2-D array.
+// Minimum val: 0
+// Maximum val: 1
+// Type: int
+// 2D array - variable size (4 x 5).
+//
+
+icon = {
+  { 0, 0, 1, 1, 1 },
+  { 0, 0, 0, 0, 1 },
+  { 0, 1, 0, 1, 0 },
+  { 0, 0, 0, 1, 1 }
+};
+
+//======================================================================
+//
+// LONG INTEGER PARAMETERS.
+//
+// Testing long integer parameter behavior.
+//
+//======================================================================
+ 
+///////////// number_of_radars ////////////////////////
+//
+// Single long value.
+// Testing single long actions.
+// Minimum val: 0
+// Type: long
+//
+
+number_of_radars = 1;
+
+///////////// days_in_month ///////////////////////////
+//
+// Long array - fixed length.
+// Testing fixed length long array.
+// Type: long
+// 1D array - fixed length - 12 elements.
+//
+
+days_in_month = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
+///////////// item_count //////////////////////////////
+//
+// Variable fixed 2-D array.
+// Testing fixed length 2-D array.
+// Minimum val: 0
+// Type: long
+// 2D array - fixed size (4 x 6).
+//
+
+item_count = {
+  { 0, 5, 6, 11, 2, 3 },
+  { 9, 8, 15, 12, 4, 4 },
+  { 17, 18, 3, 7, 0, 12 },
+  { 15, 10, 10, 1, 9, 1 }
+};
+
+//======================================================================
+//
+// FLOAT PARAMETERS.
+//
+// Testing float parameter behavior.
+//
+//======================================================================
+ 
+///////////// speed ///////////////////////////////////
+//
+// Single float value.
+// Testing single float actions.
+// Minimum val: 0
+// Type: float
+//
+
+speed = 15;
+
+///////////// storm_volume ////////////////////////////
+//
+// Float array - fixed length.
+// Testing fixed length float array.
+// Type: float
+// 1D array - fixed length - 10 elements.
+//
+
+storm_volume = { 101.1, 102.1, 103.1, 104.1, 105.1, 106.1, 107.1, 108.1, 109.1, 110.1 };
+
+///////////// rain_accumulation ///////////////////////
+//
+// Variable length 2-D array.
+// Testing variable length 2-D array.
+// Type: float
+// 2D array - variable size (4 x 5).
+//
+
+rain_accumulation = {
+  { 0.1, 0.6, 1.9, 12.4, 1.1 },
+  { 2.3, 5.7, 12.8, 19.4, 0 },
+  { 14.3, 19.3, 12.1, 3.3, 7.5 },
+  { 8, 6.1, 0, 15.1, 10 }
+};
+
+//======================================================================
+//
+// DOUBLE PARAMETERS.
+//
+// Testing double parameter behavior.
+//
+//======================================================================
+ 
+///////////// mass_coefficient ////////////////////////
+//
+// Single double value.
+// Testing single double actions.
+// Type: double
+//
+
+mass_coefficient = 9.1e-09;
+
+///////////// storm_mass //////////////////////////////
+//
+// Double array - variable length.
+// Testing variable length double array.
+// Minimum val: 1
+// Type: double
+// 1D array - variable length - 5 elements.
+//
+
+storm_mass = { 1.9e+08, 2.1e+08, 9.7e+07, 5.3e+07, 1.1e+09 };
+
+///////////// length_factor ///////////////////////////
+//
+// Fixed length 2-D array.
+// Testing fixed length 2-D array.
+// Type: double
+// 2D array - fixed size (3 x 6).
+//
+
+length_factor = {
+  { 0.9, 0.9, 1.9, 1.9, 1.9, 100.3 },
+  { 0.9, 1.9, 0.9, 1.9, 0.9, -100.1 },
+  { 0.9, 0.9, 0.9, 1.9, 1.9, -99.9 }
+};
+
+//======================================================================
+//
+// BOOLEAN PARAMETERS.
+//
+// Testing boolean parameter behavior.
+//
+//======================================================================
+ 
+///////////// use_data ////////////////////////////////
+//
+// Single bool value.
+// Testing single bool actions.
+// Type: boolean
+//
+
+use_data = TRUE;
+
+///////////// allow_outliers //////////////////////////
+//
+// Bool array - variable length.
+// Testing variable length bool array.
+// Type: boolean
+// 1D array - variable length - 4 elements.
+//
+
+allow_outliers = { TRUE, FALSE, TRUE, TRUE };
+
+///////////// compute_length //////////////////////////
+//
+// Variable length 2-D array.
+// Testing variable length 2-D array.
+// Type: boolean
+// 2D array - variable size (4 x 5).
+//
+
+compute_length = {
+  { FALSE, FALSE, TRUE, TRUE, TRUE },
+  { FALSE, FALSE, FALSE, FALSE, TRUE },
+  { FALSE, TRUE, FALSE, TRUE, FALSE },
+  { FALSE, FALSE, FALSE, TRUE, TRUE }
+};
+
+///////////// debug ///////////////////////////////////
+//
+// Option to print debugging messages.
+// Type: boolean
+//
+
+debug = FALSE;
+
+///////////// flags ///////////////////////////////////
+//
+// Test boolean flags.
+// Type: boolean
+// 1D array - fixed length - 6 elements.
+//
+
+flags = { TRUE, FALSE, TRUE, FALSE, TRUE, TRUE };
+
+//======================================================================
+//
+// STRING PARAMETERS.
+//
+// Testing string parameter behavior.
+//
+//======================================================================
+ 
+///////////// input_file_ext //////////////////////////
+//
+// Input file extension.
+// Testing single-valued string parameter.
+// Type: string
+//
+
+input_file_ext = "mcg";
+
+///////////// input_file_paths ////////////////////////
+//
+// Input file paths.
+// Testing variable length array of strings. Note imbedded environment 
+//   variables.
+// Type: string
+// 1D array - variable length - 3 elements.
+//
+
+input_file_paths = { "$(HOME)/path1", "$(HOME)/paths", "$(HOME)/path3" };
+
+///////////// output_file_paths ///////////////////////
+//
+// Output file paths.
+// Testing variable length 2D array of strings. Note imbedded environment 
+//   variables.
+// Type: string
+// 2D array - variable size (6 x 3).
+//
+
+output_file_paths = {
+  { "$(USER)/path11", "$(USER)/path21", "$(USER)/path31" },
+  { "$(USER)/path12", "$(USER)/path22", "$(USER)/path32" },
+  { "$(USER)/path13", "$(USER)/path23", "$(USER)/path33" },
+  { "$(USER)/path14", "$(USER)/path24", "$(USER)/path34" },
+  { "$(USER)/path15", "$(USER)/path25", "$(USER)/path35" },
+  { "$(USER)/path16", "$(USER)/path26", "$(USER)/path36" }
+};
+
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+// Path of input directory - realtime mode onlyNote imbedded environment 
+//   variables.
+// Type: string
+//
+
+input_dir = "$(HOME)/input_dir";
+
+//======================================================================
+//
+// ENUM PARAMETERS.
+//
+// Testing enum parameter behavior.
+//
+//======================================================================
+ 
+///////////// data_origin /////////////////////////////
+//
+// Data origin position.
+// Testing variable length enum array.
+//
+// Type: enum
+// Options:
+//   BOTLEFT, TOPLEFT, BOTRIGHT, TOPRIGHT
+//
+// 1D array - variable length - 2 elements.
+//
+
+data_origin = { BOTLEFT, TOPLEFT };
+
+///////////// mode ////////////////////////////////////
+//
+// Testing 2-D enum array.
+// The options for this enum are defined in the paramdef instead of in a 
+//   typedef.
+//
+// Type: enum
+// Options:
+//   REALTIME, ARCHIVE, OTHER
+//
+// 2D array - fixed size (2 x 4).
+//
+
+mode = {
+  { REALTIME, REALTIME, ARCHIVE, OTHER },
+  { OTHER, ARCHIVE, ARCHIVE, REALTIME }
+};
+
+//======================================================================
+//
+// STRUCT PARAMETERS.
+//
+// Testing struct parameter behavior.
+//
+//======================================================================
+ 
+///////////// grid ////////////////////////////////////
+//
+// Grid parameters.
+// Testing single-valued struct.Struct Definition occurs within the 
+//   paramdef.
+//
+// Type: struct
+//   typedef struct {
+//      long nx;
+//      long ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+//
+
+grid = { 100, 100, -50, -50, 2, 2.5 };
+
+///////////// surface_stations ////////////////////////
+//
+// Surface station information.
+// Test of variable length struct array. Note that the struct is defined 
+//   in a typedef before the paramdef. Also, the struct includes an enum 
+//   which is pre-defined. Enums include din this manned MUST be defined in 
+//   a typedef.
+//
+// Type: struct
+//   typedef struct {
+//      double lat;
+//      double lon;
+//      double wind_sensor_ht;
+//      gauge_t gauge_make;
+//      boolean has_humidity;
+//   }
+//
+// 1D array - fixed length - 3 elements.
+//
+
+surface_stations = {
+  { 40.1012, -104.231, 10, ETI, TRUE},
+  { 40.2109, -104.576, 10, GEONOR, FALSE},
+  { 39.1379, -104.908, 3, CAMPBELL, FALSE}
+};
+
+///////////// data_field //////////////////////////////
+//
+// Data field parameters.
+// Test of fixed-length struct array.
+//
+// Type: struct
+//   typedef struct {
+//      double scale;
+//      double bias;
+//      long nplanes;
+//      string name;
+//      string units;
+//      origin_t origin;
+//   }
+//
+// 1D array - variable length - 2 elements.
+//
+
+data_field = {
+  { 0.5, 1, 16, "Reflectivity", "dBZ", BOTLEFT},
+  { 0.6, 1.1, 17, "Velocity", "m/s", TOPLEFT}
+};
+<pre>
+
+</body>
+</html>
+

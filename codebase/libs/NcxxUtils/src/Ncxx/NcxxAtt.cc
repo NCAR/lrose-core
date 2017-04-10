@@ -172,9 +172,21 @@ void NcxxAtt::getValues(string& dataValues) const {
               __FILE__, __LINE__);
   }
 
+  // find length to null
+
+  size_t finalLen = 0;
+  for (size_t ii = 0; ii < att_len; ii++) {
+    if ((int) tmpValues[ii] == 0) {
+      break;
+    }
+    finalLen = ii + 1;
+  }
+
   // set return value
 
-  dataValues=string(tmpValues,att_len);
+  dataValues=string(tmpValues,finalLen);
+
+  // clean up
 
   delete[] tmpValues;
 
@@ -340,7 +352,7 @@ int NcxxAtt::getValues(vector<char *> &dataValues) const
   size_t attLen = getAttLength();
   dataValues.resize(attLen);
   if (attLen < 1) {
-    return 0;
+    return-1;
   }
   try {
     getValues(&dataValues[0]);
@@ -359,7 +371,7 @@ int NcxxAtt::getValues(vector<char> &dataValues) const
   size_t attLen = getAttLength();
   dataValues.resize(attLen);
   if (attLen < 1) {
-    return 0;
+    return-1;
   }
   try {
     getValues(&dataValues[0]);
@@ -378,7 +390,7 @@ int NcxxAtt::getValues(vector<unsigned char> &dataValues) const
   size_t attLen = getAttLength();
   dataValues.resize(attLen);
   if (attLen < 1) {
-    return 0;
+    return-1;
   }
   try {
     getValues(&dataValues[0]);
@@ -397,7 +409,7 @@ int NcxxAtt::getValues(vector<short> &dataValues) const
   size_t attLen = getAttLength();
   dataValues.resize(attLen);
   if (attLen < 1) {
-    return 0;
+    return-1;
   }
   try {
     getValues(&dataValues[0]);
@@ -416,7 +428,7 @@ int NcxxAtt::getValues(vector<unsigned short> &dataValues) const
   size_t attLen = getAttLength();
   dataValues.resize(attLen);
   if (attLen < 1) {
-    return 0;
+    return-1;
   }
   try {
     getValues(&dataValues[0]);
@@ -435,7 +447,7 @@ int NcxxAtt::getValues(vector<int> &dataValues) const
   size_t attLen = getAttLength();
   dataValues.resize(attLen);
   if (attLen < 1) {
-    return 0;
+    return-1;
   }
   try {
     getValues(&dataValues[0]);
@@ -454,7 +466,7 @@ int NcxxAtt::getValues(vector<unsigned int> &dataValues) const
   size_t attLen = getAttLength();
   dataValues.resize(attLen);
   if (attLen < 1) {
-    return 0;
+    return-1;
   }
   try {
     getValues(&dataValues[0]);
@@ -473,7 +485,7 @@ int NcxxAtt::getValues(vector<long> &dataValues) const
   size_t attLen = getAttLength();
   dataValues.resize(attLen);
   if (attLen < 1) {
-    return 0;
+    return-1;
   }
   try {
     getValues(&dataValues[0]);
@@ -492,7 +504,7 @@ int NcxxAtt::getValues(vector<long long> &dataValues) const
   size_t attLen = getAttLength();
   dataValues.resize(attLen);
   if (attLen < 1) {
-    return 0;
+    return-1;
   }
   try {
     getValues(&dataValues[0]);
@@ -511,7 +523,7 @@ int NcxxAtt::getValues(vector<unsigned long long> &dataValues) const
   size_t attLen = getAttLength();
   dataValues.resize(attLen);
   if (attLen < 1) {
-    return 0;
+    return-1;
   }
   try {
     getValues(&dataValues[0]);
@@ -530,7 +542,7 @@ int NcxxAtt::getValues(vector<float> &dataValues) const
   size_t attLen = getAttLength();
   dataValues.resize(attLen);
   if (attLen < 1) {
-    return 0;
+    return-1;
   }
   try {
     getValues(&dataValues[0]);
@@ -549,7 +561,7 @@ int NcxxAtt::getValues(vector<double> &dataValues) const
   size_t attLen = getAttLength();
   dataValues.resize(attLen);
   if (attLen < 1) {
-    return 0;
+    return-1;
   }
   try {
     getValues(&dataValues[0]);

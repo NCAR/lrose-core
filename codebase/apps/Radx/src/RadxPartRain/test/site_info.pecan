@@ -1,0 +1,71 @@
+#############################################
+# site-specific parameter file for SPOL
+#
+# Mike Dixon Jan 2008
+#############################################
+
+# site details
+
+# PECAN
+
+setenv PROJECT_NAME               "PECAN"
+setenv project                    "pecan"
+setenv SITE_NAME                  "HAYS"
+setenv RADAR_LAT                  38.553164
+setenv RADAR_LON                  -99.535739
+setenv RADAR_ALT_KM               0.667
+setenv RADAR_ALT_M                667.0
+
+# FRONT - FIRESTONE
+
+#setenv PROJECT_NAME               "FRONT"
+#setenv project                    "front"
+#setenv SITE_NAME                  "FIRESTONE"
+#setenv RADAR_LAT                  40.123333
+#setenv RADAR_LON                  -104.89133
+#setenv RADAR_ALT_KM               1.55296
+#setenv RADAR_ALT_M                1552.96
+
+# Marshall
+
+#setenv PROJECT_NAME               "marshall"
+#setenv SITE_NAME                  "MARSHALL"
+#setenv RADAR_LAT                  39.9502
+#setenv RADAR_LON                  -105.1951
+#setenv RADAR_ALT_KM               1.748
+#setenv RADAR_ALT_M                1748
+
+#############################################
+
+# PRECIP RATE
+
+setenv ZH_AA 0.027366
+setenv ZH_BB 0.69444
+
+setenv ZH_AA_SNOW 0.0365
+setenv ZH_BB_SNOW 0.625
+
+setenv ZZDR_AA 0.0067
+setenv ZZDR_BB 0.927
+setenv ZZDR_CC -3.43
+
+setenv KDP_AA 44.0
+setenv KDP_BB 0.822
+
+setenv KDPZDR_AA 90.8
+setenv KDPZDR_BB 0.93
+setenv KDPZDR_CC -2.86
+
+setenv HYBRID_DBZ_THRESHOLD 40
+setenv HYBRID_KDP_THRESHOLD 0.3
+setenv HYBRID_ZDR_THRESHOLD 0.5
+
+setenv HIDRO_DBZ_THRESHOLD 38
+setenv HIDRO_KDP_THRESHOLD 0.3
+setenv HIDRO_ZDR_THRESHOLD 0.5
+
+setenv BRINGI_DBZ_THRESHOLD 40
+setenv BRINGI_KDP_THRESHOLD 0.15
+setenv BRINGI_ZDR_THRESHOLD 0.1
+
+setenv PID_RATE_KDP_THRESHOLD 0.3

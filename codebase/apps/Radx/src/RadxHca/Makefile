@@ -53,8 +53,7 @@ HDRS = \
 	ComputeEngine.hh \
 	HcaInterestMap.hh \
 	HcaNexrad.hh \
-	RadxHca.hh \
-	Thread.hh
+	RadxHca.hh
 
 CPPC_SRCS = \
 	Params.cc \
@@ -63,8 +62,7 @@ CPPC_SRCS = \
 	HcaInterestMap.cc \
 	HcaNexrad.cc \
 	Main.cc \
-	RadxHca.cc \
-	Thread.cc
+	RadxHca.cc
 
 #
 # tdrp macros

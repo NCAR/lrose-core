@@ -39,6 +39,8 @@
 #include "Interp.hh"
 #include <kd/kd.hh>
 #include <iostream>
+#include <toolsa/TaThread.hh>
+#include <toolsa/TaThreadPool.hh>
 
 class SatInterp : public Interp {
   
@@ -63,21 +65,13 @@ public:
 
   virtual int interpVol();
   
-  // get methods for threading
+  // get params
 
   const Params &getParams() const { return _params; }
-  pthread_mutex_t *getDebugPrintMutex() { return &_debugPrintMutex; }
 
 protected:
 private:
 
-   // threading
-  
-  deque<SatThread *> _activeThreads;
-  deque<SatThread *> _availThreads;
-  pthread_mutex_t _debugPrintMutex;
-  pthread_mutex_t _kdTreeMutex;
-  
   // keeping track of points in instr space
 
   typedef struct {
@@ -134,8 +128,8 @@ private:
   void _initZLevels();
   void _initGrid();
   
-  void _initThreads();
-  static void *_computeInThread(void *thread_data);
+  void _createThreads();
+  void _freeThreads();
   
   void _allocOutputArrays();
   void _freeOutputArrays();
@@ -178,6 +172,51 @@ private:
 
   int _writeOutputFile();
 
+  //////////////////////////////////////////////////////////////
+  // inner thread class for computing the grid locations
+  // relative to the radar
+  
+  class ComputeGridRelative : public TaThread
+  {  
+  public:
+    // constructor
+    ComputeGridRelative(SatInterp *obj);
+    // set the y and z index
+    inline void setYIndex(int yIndex) { _yIndex = yIndex; }
+    inline void setZIndex(int zIndex) { _zIndex = zIndex; }
+    // override run method
+    virtual void run();
+  private:
+    SatInterp *_this; // context
+    int _yIndex; // grid index of y column
+    int _zIndex; // grid index of z plane
+  };
+  // instantiate thread pool for grid relative computations
+  TaThreadPool _threadPoolGridRel;
+
+  //////////////////////////////////////////////////////////////
+  // inner thread class for performing interpolation
+  
+  class PerformInterp : public TaThread
+  {  
+  public:
+    // constructor
+    PerformInterp(SatInterp *obj);
+    // set the z index
+    inline void setZIndex(int zIndex) { _zIndex = zIndex; }
+    // override run method
+    virtual void run();
+  private:
+    SatInterp *_this; // context
+    int _zIndex; // grid index of z plane
+  };
+  // instantiate thread pool for interpolation
+  TaThreadPool _threadPoolInterp;
+
+  // threading - mutex for KdTree, since it is not thread safe
+  
+  pthread_mutex_t _kdTreeMutex;
+  
 };
 
 #endif

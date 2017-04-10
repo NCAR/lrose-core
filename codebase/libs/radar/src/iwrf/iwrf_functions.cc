@@ -248,6 +248,7 @@ void iwrf_ts_processing_init(iwrf_ts_processing_t &val)
   val.block_mode_prt2_pulses = 0;
   val.block_mode_prt3_pulses = 0;
   val.block_mode_prt4_pulses = 0;
+  val.pol_sync_mode = 0;
   
 }
 
@@ -1944,10 +1945,10 @@ string iwrf_ui_opcode_to_str(int ui_opcode)
       return "IWRF_UI_GO_IDLE";
     case IWRF_UI_TASKLIST_UPD_LIST:
       return "IWRF_UI_TASKLIST_UPD_LIST";
-    case IWRF_UI_TASKLIST_UPD_UNUSED_LIST:
-      return "IWRF_UI_TASKLIST_UPD_UNUSED_LIST";
-    case IWRF_UI_TASKLIST_UPD_CURRENT_INDEX:
-      return "IWRF_UI_TASKLIST_UPD_CURRENT_INDEX";
+    case IWRF_UI_TASKLIST_GET_UNUSED_LIST:
+      return "IWRF_UI_TASKLIST_GET_UNUSED_LIST";
+    case IWRF_UI_TASKLIST_GET_CURRENT_INDEX:
+      return "IWRF_UI_TASKLIST_GET_CURRENT_INDEX";
     case IWRF_UI_TASKLIST_UPD_NEXT_INDEX:
       return "IWRF_UI_TASKLIST_UPD_NEXT_INDEX";
     case IWRF_UI_TASKLIST_SET_INDEX_IMMEDIATE:
@@ -1970,6 +1971,12 @@ string iwrf_ui_opcode_to_str(int ui_opcode)
       return "IWRF_UI_UPD_RSM_PACKET";
     case IWRF_UI_RCS_STATUS:
       return "IWRF_UI_RCS_STATUS";
+    case IWRF_UI_SHUTDOWN_CONNECTION:
+      return "IWRF_UI_SHUTDOWN_CONNECTION";
+    case IWRF_UI_SET_POL_MODE:
+      return "IWRF_UI_SET_POL_MODE";
+    case IWRF_UI_CONFIRM_POL_MODE:
+      return "IWRF_UI_CONFIRM_POL_MODE";
     default:
       return "UNKNOWN";
   }
@@ -2339,6 +2346,7 @@ void iwrf_ts_processing_print(FILE *out,
   fprintf(out, "  block_mode_prt2_pulses: %d\n", copy.block_mode_prt2_pulses);
   fprintf(out, "  block_mode_prt3_pulses: %d\n", copy.block_mode_prt3_pulses);
   fprintf(out, "  block_mode_prt4_pulses: %d\n", copy.block_mode_prt4_pulses);
+  fprintf(out, "  pol_sync_mode: %d\n", copy.pol_sync_mode);
 
 }
 
@@ -3043,6 +3051,8 @@ void iwrf_platform_georef_print(FILE *out,
   iwrf_platform_georef_swap(copy);
   fprintf(out, "============== iwrf_platform_georef =====================\n");
   iwrf_packet_info_print(out, copy.packet);
+  fprintf(out, "  spare1: %g\n", copy.spare1);
+  fprintf(out, "  spare2: %g\n", copy.spare2);
   fprintf(out, "  longitude: %g\n", copy.longitude);
   fprintf(out, "  latitude: %g\n", copy.latitude);
   fprintf(out, "  altitude_msl_km: %g\n", copy.altitude_msl_km);
@@ -3575,8 +3585,9 @@ void iwrf_ts_processing_print_format(FILE *out, const iwrf_ts_processing_t &val)
   fprintf(out, _dform, "si32", "block_mode_prt2_pulses", sizeof(val.block_mode_prt2_pulses), (char *) &val.block_mode_prt2_pulses - id);
   fprintf(out, _dform, "si32", "block_mode_prt3_pulses", sizeof(val.block_mode_prt3_pulses), (char *) &val.block_mode_prt3_pulses - id);
   fprintf(out, _dform, "si32", "block_mode_prt4_pulses", sizeof(val.block_mode_prt4_pulses), (char *) &val.block_mode_prt4_pulses - id);
+  fprintf(out, _dform, "ui32", "pol_sync_mode", sizeof(val.pol_sync_mode), (char *) &val.pol_sync_mode - id);
 
-  fprintf(out, _dform, "fl32", "unused[19]", sizeof(val.unused), (char *) val.unused - id);
+  fprintf(out, _dform, "fl32", "unused[18]", sizeof(val.unused), (char *) val.unused - id);
 
   _print_format_divider('-', out);
 

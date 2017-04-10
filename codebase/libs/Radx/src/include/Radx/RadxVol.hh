@@ -43,6 +43,7 @@
 #include <Radx/Radx.hh>
 #include <Radx/RadxPlatform.hh>
 #include <Radx/RadxField.hh>
+#include <Radx/RadxArray.hh>
 class RadxSweep;
 class RadxRay;
 class RadxRcalib;
@@ -973,6 +974,47 @@ public:
 
   void clearPseudoRhis();
 
+  // Load up a 2D field fl32 array from a vector of rays
+  // The ray data for the specified field will be converted to fl32.
+  // This is a static method, does not use any vol members.
+  // Returns 0 on success, -1 on failure
+  
+  static int load2DFieldFromRays(const vector<RadxRay *> &rays,
+                                 const string &fieldName,
+                                 RadxArray2D<Radx::fl32> &array,
+                                 Radx::fl32 missingValue = -9999.0);
+
+  // Load up a 2D field si32 array from a vector of rays
+  // The ray data for the specified field will be converted to si32.
+  // This is a static method, does not use any vol members.
+  // Returns 0 on success, -1 on failure
+  
+  static int load2DFieldFromRays(const vector<RadxRay *> &rays,
+                                 const string &fieldName,
+                                 RadxArray2D<Radx::si32> &array,
+                                 Radx::si32 missingValue = -9999.0);
+
+  // Load up ray fields from 2D fl32 field array.
+  // This is a static method, does not use any vol members.
+  // Returns 0 on success, -1 on failure
+  
+  static int loadRaysFrom2DField(const RadxArray2D<Radx::fl32> &array,
+                                 const vector<RadxRay *> &rays,
+                                 const string &fieldName,
+                                 const string &units,
+                                 Radx::fl32 missingValue);
+
+  // Load up ray fields from 2D si32 field array.
+  // This is a static method, does not use any vol members.
+  // Returns 0 on success, -1 on failure
+  
+  static int loadRaysFrom2DField(const RadxArray2D<Radx::si32> &array,
+                                 const vector<RadxRay *> &rays,
+                                 const string &fieldName,
+                                 const string &units,
+                                 Radx::si32 missingValue);
+
+  
   //@}
 
   //////////////////////////////////////////////////////////////////
@@ -1272,12 +1314,18 @@ public:
   inline vector<RadxField *> &getFields() { return _fields; }
 
   /// Get sweep by sweep number (not the index).
-  /// 
   /// Returns NULL on failure.
 
   const RadxSweep *getSweepByNumber(int sweepNum) const;
   RadxSweep *getSweepByNumber(int sweepNum);
   
+  /// Get sweep by fixed angle
+  /// returns the closest sweep if available
+  /// Returns NULL on failure.
+  
+  const RadxSweep *getSweepByFixedAngle(double requestedAngle) const;
+  RadxSweep *getSweepByFixedAngle(double requestedAngle);
+
   /// Get vector of sweeps.
 
   const vector<RadxSweep *> &getSweeps() const { return _sweeps; }
@@ -1751,6 +1799,7 @@ private:
   void _setPredomSweepModeFromAngles() const;
   void _augmentSweepFields(size_t target, size_t source);
 
+  int _loadPseudoFromRealRhis();
   int _setupAngleSearch(size_t sweepNum);
   int _getSearchAngleIndex(double angle);
   double _getSearchAngle(int index);

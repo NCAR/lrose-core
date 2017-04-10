@@ -46,15 +46,18 @@
 #include "ComputeEngine.hh"
 #include <string>
 #include <deque>
+#include <toolsa/TaThread.hh>
+#include <toolsa/TaThreadPool.hh>
 #include <radar/NoiseLocator.hh>
 #include <radar/KdpBringi.hh>
 #include <radar/TempProfile.hh>
+#include <Radx/RadxVol.hh>
 #include <Radx/RadxArray.hh>
+#include <Radx/PseudoRhi.hh>
 class RadxVol;
 class RadxFile;
 class RadxRay;
 class RadxField;
-class ComputeThread;
 using namespace std;
 
 class RadxPartRain {
@@ -80,8 +83,21 @@ public:
   // get methods for threading
 
   const Params &getParams() const { return _params; }
-  pthread_mutex_t *getDebugPrintMutex() { return &_debugPrintMutex; }
 
+  // names for extra fields
+
+  static string smoothedDbzFieldName;
+  static string smoothedRhohvFieldName;
+  static string elevationFieldName;
+  static string rangeFieldName;
+  static string beamHtFieldName;
+  static string tempFieldName;
+  static string pidFieldName;
+  static string pidInterestFieldName;
+  static string mlFieldName;
+  static string mlExtendedFieldName;
+  static string convFlagFieldName;
+  
 protected:
 private:
 
@@ -91,17 +107,17 @@ private:
   Params _params;
   vector<string> _readPaths;
 
-  // computations object
+  // radar volume container
 
-  ComputeEngine *_engine;
+  RadxVol _vol;
+
+  // computations object for single threading
+
+  ComputeEngine *_engineSingle;
 
   // derived rays - after compute
 
   vector <RadxRay *> _derivedRays;
-
-  // transitions - same size as derivedRays
-
-  vector<bool> _transitionFlags;
 
   // radar properties
 
@@ -146,12 +162,49 @@ private:
 
   vector<ComputeEngine::self_con_t> _selfConResults;
 
-  // threading
+  // pseudo RHIs
+
+  vector<PseudoRhi *> _pseudoRhis;
+
+  //////////////////////////////////////////////////////////////
+  // inner thread class for calling Moments computations
   
-  deque<ComputeThread *> _activeThreads;
-  deque<ComputeThread *> _availThreads;
   pthread_mutex_t _debugPrintMutex;
   
+  class ComputeThread : public TaThread
+  {  
+  public:
+    // constructor
+    ComputeThread(RadxPartRain *obj, const Params &params, int threadNum);
+    // destructor
+    virtual ~ComputeThread();
+    // compute engine object
+    inline ComputeEngine *getComputeEngine() const { return _engine; }
+    // set input ray
+    inline void setInputRay(RadxRay *val) { _inputRay = val; }
+    // derived ray - result of computations
+    inline RadxRay *getDerivedRay() const { return _derivedRay; }
+    // override run method
+    virtual void run();
+    // constructor OK?
+    bool OK;
+  private:
+    // parent object
+    RadxPartRain *_this;
+    // params
+    const Params &_params;
+    // thread number
+    int _threadNum;
+    // computation engine
+    ComputeEngine *_engine;
+    // input ray
+    RadxRay *_inputRay;
+    // result of computation - ownership gets passed to parent
+    RadxRay *_derivedRay;
+  };
+  // instantiate thread pool for computations
+  TaThreadPool _threadPool;
+
   // private methods
   
   int _runFilelist();
@@ -159,24 +212,23 @@ private:
   int _runRealtime();
   void _setupRead(RadxFile &file);
   void _setupWrite(RadxFile &file);
-  int _writeVol(RadxVol &vol);
+  int _writeVol();
   int _processFile(const string &filePath);
-  void _encodeFieldsForOutput(RadxVol &vol);
+  void _encodeFieldsForOutput();
   
-  int _compute(RadxVol &vol);
-  int _computeSingleThreaded(RadxVol &vol);
-  int _computeMultiThreaded(RadxVol &vol);
+  void _addExtraFieldsToInput();
+  void _addExtraFieldsToOutput();
+
+  int _compute();
+  int _computeSingleThreaded();
+  int _computeMultiThreaded();
   int _storeDerivedRay(ComputeThread *thread);
-  static void *_computeInThread(void *thread_data);
 
-  void _findTransitions(vector<RadxRay *> &rays);
-
-  int _retrieveTempProfile(const RadxVol &vol);
-  int _retrieveSiteTempFromSpdb(const RadxVol &vol,
-                                double &tempC,
+  int _retrieveTempProfile();
+  int _retrieveSiteTempFromSpdb(double &tempC,
                                 time_t &timeForTemp);
 
-  void _computeZdrBias(const RadxVol &vol);
+  void _computeZdrBias();
 
   void _loadZdrResults(vector<double> &results,
                        ZdrStats &stats,
@@ -186,8 +238,20 @@ private:
   double _computeZdrPerc(const vector<double> &zdrmResults,
                          double percent);
 
-  void _computeSelfConZBias(const RadxVol &vol);
+  void _computeSelfConZBias();
 
+  void _locateMeltingLayer();
+  void _checkForConvection(double htMlTop);
+  void _expandMlRhi(double htMlTop, double dbzThreshold);
+  void _expandMlPpi(double htMlTop, double dbzThreshold);
+  
+  void _applyInfillFilter(int nGates,
+                          Radx::si32 *flag);
+  
+  void _applyInfillFilter(int nGates,
+                          Radx::si32 *flag,
+                          bool removeShortRuns);
+  
 };
 
 #endif

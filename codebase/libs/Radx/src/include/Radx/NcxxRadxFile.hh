@@ -371,6 +371,24 @@ private:
 
   bool _georefsActive;
   bool _georefsApplied;
+  NcxxVar _headingVar;
+  NcxxVar _trackVar;
+  NcxxVar _rollVar;
+  NcxxVar _pitchVar;
+  NcxxVar _driftVar;
+  NcxxVar _rotationVar;
+  NcxxVar _tiltVar;
+  NcxxVar _ewVelocityVar;
+  NcxxVar _nsVelocityVar;
+  NcxxVar _vertVelocityVar;
+  NcxxVar _ewWindVar;
+  NcxxVar _nsWindVar;
+  NcxxVar _vertWindVar;
+  NcxxVar _headingRateVar;
+  NcxxVar _pitchRateVar;
+  NcxxVar _rollRateVar;
+  NcxxVar _driveAngle1Var;
+  NcxxVar _driveAngle2Var;
 
   // correction factor variables
 
@@ -1015,11 +1033,11 @@ private:
   int _readCal(RadxRcalib &cal, int index);
   int _readFieldVariables(bool metaOnly);
   
-  int _readRayVar(NcxxVar* &var, const string &name, 
+  int _readRayVar(NcxxVar &var, const string &name, 
                   vector<double> &vals, bool required = true);
-  int _readRayVar(NcxxVar* &var, const string &name, 
+  int _readRayVar(NcxxVar &var, const string &name, 
                   vector<int> &vals, bool required = true);
-  int _readRayVar(NcxxVar* &var, const string &name, 
+  int _readRayVar(NcxxVar &var, const string &name, 
                   vector<bool> &vals, bool required = true);
   
   int _readRayVar(const string &name, 
@@ -1029,41 +1047,41 @@ private:
   int _readRayVar(const string &name, 
                   vector<bool> &vals, bool required = true);
   
-  NcxxVar* _getRayVar(const string &name, bool required);
-  int _readSweepVar(NcxxVar* &var, const string &name,
+  int _getRayVar(NcxxVar &var, const string &name, bool required);
+  int _readSweepVar(NcxxVar &var, const string &name,
                     vector<double> &vals, bool required = true);
-  int _readSweepVar(NcxxVar* &var, const string &name, 
+  int _readSweepVar(NcxxVar &var, const string &name, 
                     vector<int> &vals, bool required = true);
-  int _readSweepVar(NcxxVar* &var, const string &name,
+  int _readSweepVar(NcxxVar &var, const string &name,
                     vector<string> &vals, bool required = true);
-  NcxxVar* _getSweepVar(const string &name);
-  int _readCalTime(const string &name, NcxxVar* &var, int index, time_t &val);
-  int _readCalVar(const string &name, NcxxVar* &var, int index,
+  int _getSweepVar(NcxxVar &var, const string &name);
+  int _readCalTime(const string &name, NcxxVar &var, int index, time_t &val);
+  int _readCalVar(const string &name, NcxxVar &var, int index,
                   double &val, bool required = false);
 
-  int _addFl64FieldToRays(NcxxVar* var,
+  int _addFl64FieldToRays(NcxxVar &var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           bool isDiscrete, bool fieldFolds,
                           float foldLimitLower, float foldLimitUpper);
-  int _addFl32FieldToRays(NcxxVar* var,
+  int _addFl32FieldToRays(NcxxVar &var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           bool isDiscrete, bool fieldFolds,
                           float foldLimitLower, float foldLimitUpper);
-  int _addSi32FieldToRays(NcxxVar* var,
-                          const string &name, const string &units,
-                          const string &standardName, const string &longName,
-                          double scale, double offset,
-                          bool isDiscrete, bool fieldFolds,
-                          float foldLimitLower, float foldLimitUpper);
-  int _addSi16FieldToRays(NcxxVar* var,
+  int _addSi32FieldToRays(NcxxVar &var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           double scale, double offset,
                           bool isDiscrete, bool fieldFolds,
                           float foldLimitLower, float foldLimitUpper);
-  int _addSi08FieldToRays(NcxxVar* var,
+  int _addSi16FieldToRays(NcxxVar &var,
+                          const string &name, const string &units,
+                          const string &standardName, const string &longName,
+                          double scale, double offset,
+                          bool isDiscrete, bool fieldFolds,
+                          float foldLimitLower, float foldLimitUpper);
+  int _addSi08FieldToRays(NcxxVar &var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           double scale, double offset,
@@ -1090,7 +1108,9 @@ private:
   int _addRayVariables();
   void _setEstNoiseAvailFlags();
   int _addGeorefVariables();
-  int _addCalVar(NcxxVar* &var, const string &name, const string &standardName,
+
+  int _addCalVar(NcxxVar &var, const string &name, 
+                 const string &standardName,
                  const string &units = "");
     
   int _writeCoordinateVariables();
@@ -1105,10 +1125,10 @@ private:
 
   int _writeFieldVariables();
   NcxxVar _createFieldVar(const RadxField &field);
-  int _writeFieldVar(NcxxVar var, RadxField *field);
+  int _writeFieldVar(NcxxVar &var, RadxField *field);
   int _closeOnError(const string &caller);
 
-  int _setCompression(NcxxVar var);
+  int _setCompression(NcxxVar &var);
   void _computeFixedAngles();
 
   Radx::fl64 _checkMissingDouble(double val);

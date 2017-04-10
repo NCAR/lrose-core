@@ -35,6 +35,7 @@
 
 #include <Radx/RadxField.hh>
 #include <Radx/RadxArray.hh>
+#include <Radx/RadxXml.hh>
 #include <iostream>
 #include <cstdio>
 #include <cstring>
@@ -1883,8 +1884,36 @@ void RadxField::convertToType(Radx::DataType_t targetType,
 ////////////////////////////////////////////////////////////
 // Get pointer to data for specified ray
 
-const void *RadxField::getData(size_t rayNum,
-                               size_t &nGates) const
+const void *RadxField::getData(size_t rayNum, size_t &nGates) const
+
+{
+
+  if (rayNum >= _rayStartIndex.size()) {
+    cerr << "ERROR - RadxField::getData(rayNum)" << endl;
+    cerr << "  specified rayNum: " << rayNum << endl;
+    cerr << "  exceeds max: " << _rayStartIndex.size()-1 << endl;
+  }
+  assert(rayNum < _rayStartIndex.size());
+  size_t index = _rayStartIndex[rayNum];
+  nGates = _rayNGates[rayNum];
+  
+  switch (_dataType) {
+    case Radx::FL64:
+      return ((Radx::fl64 *) _data) + index;
+    case Radx::FL32:
+      return ((Radx::fl32 *) _data) + index;
+    case Radx::SI32:
+      return ((Radx::si32 *) _data) + index;
+    case Radx::SI16:
+      return ((Radx::si16 *) _data) + index;
+    case Radx::SI08:
+    default:
+      return ((Radx::si08 *) _data) + index;
+  }
+
+}
+
+void *RadxField::getData(size_t rayNum, size_t &nGates)
 
 {
 
@@ -1919,16 +1948,19 @@ const void *RadxField::getData(size_t rayNum,
 // An assert will check this assumption, and exit if false.
 
 const Radx::fl64 *RadxField::getDataFl64() const
-
 {
-  
   // first check that the data type is correct
-
   _printTypeMismatch("getDataFl64", Radx::FL64);
   assert(_dataType == Radx::FL64);
-
   return (const Radx::fl64 *) _data;
+}
 
+Radx::fl64 *RadxField::getDataFl64()
+{
+  // first check that the data type is correct
+  _printTypeMismatch("getDataFl64", Radx::FL64);
+  assert(_dataType == Radx::FL64);
+  return (Radx::fl64 *) _data;
 }
 
 ////////////////////////////////////////////////////////////
@@ -1937,16 +1969,19 @@ const Radx::fl64 *RadxField::getDataFl64() const
 // An assert will check this assumption, and exit if false.
 
 const Radx::fl32 *RadxField::getDataFl32() const 
-
 { 
-
   // first check that the data type is correct
-
   _printTypeMismatch("getDataFl32", Radx::FL32);
   assert(_dataType == Radx::FL32);
-
   return (const Radx::fl32 *) _data; 
+}
 
+Radx::fl32 *RadxField::getDataFl32()
+{ 
+  // first check that the data type is correct
+  _printTypeMismatch("getDataFl32", Radx::FL32);
+  assert(_dataType == Radx::FL32);
+  return (Radx::fl32 *) _data; 
 }
 
 ////////////////////////////////////////////////////////////
@@ -1954,15 +1989,19 @@ const Radx::fl32 *RadxField::getDataFl32() const
 // Note - this assumes data is stored in this type.
 // An assert will check this assumption, and exit if false.
 
-const Radx::si32 *RadxField::getDataSi32() const { 
-
+const Radx::si32 *RadxField::getDataSi32() const 
+{ 
   // first check that the data type is correct
-
   _printTypeMismatch("getDataSi32", Radx::SI32);
   assert(_dataType == Radx::SI32);
-
   return (const Radx::si32 *) _data; 
+}
 
+Radx::si32 *RadxField::getDataSi32() { 
+  // first check that the data type is correct
+  _printTypeMismatch("getDataSi32", Radx::SI32);
+  assert(_dataType == Radx::SI32);
+  return (Radx::si32 *) _data; 
 }
 
 ////////////////////////////////////////////////////////////
@@ -1971,14 +2010,17 @@ const Radx::si32 *RadxField::getDataSi32() const {
 // An assert will check this assumption, and exit if false.
 
 const Radx::si16 *RadxField::getDataSi16() const { 
-  
   // first check that the data type is correct
-
   _printTypeMismatch("getDataSi16", Radx::SI16);
   assert(_dataType == Radx::SI16);
-
   return (const Radx::si16 *) _data; 
+}
 
+Radx::si16 *RadxField::getDataSi16() { 
+  // first check that the data type is correct
+  _printTypeMismatch("getDataSi16", Radx::SI16);
+  assert(_dataType == Radx::SI16);
+  return (Radx::si16 *) _data; 
 }
 
 ////////////////////////////////////////////////////////////
@@ -1987,14 +2029,17 @@ const Radx::si16 *RadxField::getDataSi16() const {
 // An assert will check this assumption, and exit if false.
 
 const Radx::si08 *RadxField::getDataSi08() const { 
-
   // first check that the data type is correct
-
   _printTypeMismatch("getDataSi08", Radx::SI08);
   assert(_dataType == Radx::SI08);
-
   return (const Radx::si08 *) _data; 
+}
 
+Radx::si08 *RadxField::getDataSi08() { 
+  // first check that the data type is correct
+  _printTypeMismatch("getDataSi08", Radx::SI08);
+  assert(_dataType == Radx::SI08);
+  return (Radx::si08 *) _data; 
 }
 
 /////////////////////////////////////////////////////////
@@ -3206,3 +3251,51 @@ string RadxField::statsMethodToStr(StatsMethod_t method)
   }
   
 }
+
+/////////////////////////////////////////////////////////
+// convert to XML
+
+void RadxField::convert2Xml(string &xml, int level /* = 0 */)  const
+  
+{
+
+  xml.clear();
+  xml += RadxXml::writeStartTag("RadxField", level);
+
+  xml += RadxXml::writeString("name", level + 1, _name);
+  xml += RadxXml::writeString("longName", level + 1, _longName);
+  xml += RadxXml::writeString("standardName", level + 1, _standardName);
+  xml += RadxXml::writeString("units", level + 1, _units);
+  xml += RadxXml::writeString("legendXml", level + 1, _legendXml);
+  xml += RadxXml::writeString("thresholdingXml", level + 1, _thresholdingXml);
+
+  xml += RadxXml::writeString("dataType", level + 1,
+                              Radx::dataTypeToStr(_dataType));
+  xml += RadxXml::writeInt("byteWidth", level + 1, _byteWidth);
+
+  xml += RadxXml::writeDouble("samplingRatio", level + 1, _samplingRatio);
+
+  xml += RadxXml::writeBoolean("fieldFolds", level + 1, _fieldFolds);
+  xml += RadxXml::writeDouble("foldLimitLower", level + 1, _foldLimitLower);
+  xml += RadxXml::writeDouble("foldLimitUpper", level + 1, _foldLimitUpper);
+  xml += RadxXml::writeDouble("foldRange", level + 1, _foldRange);
+
+  xml += RadxXml::writeBoolean("isDiscrete", level + 1, _isDiscrete);
+
+  xml += RadxXml::writeDouble("minVal", level + 1, _minVal);
+  xml += RadxXml::writeDouble("maxVal", level + 1, _maxVal);
+
+  xml += RadxXml::writeDouble("missingFl64", level + 1, _missingFl64);
+  xml += RadxXml::writeDouble("missingFl32", level + 1, _missingFl32);
+  xml += RadxXml::writeInt("missingSi32", level + 1, _missingSi32);
+  xml += RadxXml::writeInt("missingSi16", level + 1, _missingSi16);
+  xml += RadxXml::writeInt("missingSi08", level + 1, _missingSi08);
+
+  xml += RadxXml::writeString("thresholdFieldName", level + 1, _thresholdFieldName);
+  xml += RadxXml::writeDouble("thresholdValue", level + 1, _thresholdValue);
+
+  xml += RadxXml::writeEndTag("RadxField", level);
+
+
+}
+

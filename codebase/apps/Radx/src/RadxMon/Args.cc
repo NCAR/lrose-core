@@ -229,7 +229,7 @@ int Args::parse(int argc, char **argv, string &prog_name)
 
     } else if (!strcmp(argv[i], "-gate")) {
       
-      sprintf(tmp_str, "print_mode = SINGLE_GATE;");
+      sprintf(tmp_str, "print_mode = PRINT_SINGLE_GATE;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-range")) {

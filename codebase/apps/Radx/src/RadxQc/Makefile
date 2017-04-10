@@ -51,16 +51,14 @@ HDRS = \
 	Params.hh \
 	Args.hh \
 	ComputeEngine.hh \
-	RadxQc.hh \
-	Thread.hh
+	RadxQc.hh
 
 CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
 	ComputeEngine.cc \
 	Main.cc \
-	RadxQc.cc \
-	Thread.cc
+	RadxQc.cc
 
 #
 # tdrp macros

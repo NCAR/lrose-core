@@ -718,11 +718,11 @@ int NcxxRadxFile::_addGlobalAttributes()
         if (sscanf(attr.val.c_str(), "%d", &ival) == 1) {
           _file.addGlobAttr(attr.name, ival);
         } else {
-          cerr << "ERROR - NcxxRadxFile::_addGlobalAttributes()" << endl;
-          cerr << "  Cannot decode user-defined global attribute" << endl;
-          cerr << "    name: " << attr.name << endl;
-          cerr << "    type: int" << endl;
-          cerr << "    val: " << attr.val << endl;
+          _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+          _addErrStr("  Cannot decode user-defined global attribute");
+          _addErrStr("   name: ", attr.name);
+          _addErrStr("    type: int");
+          _addErrStr("    val: ", attr.val);
         }
         break;
       }
@@ -731,11 +731,11 @@ int NcxxRadxFile::_addGlobalAttributes()
         if (sscanf(attr.val.c_str(), "%lg", &dval) == 1) {
           _file.addGlobAttr(attr.name, dval);
         } else {
-          cerr << "ERROR - NcxxRadxFile::_addGlobalAttributes()" << endl;
-          cerr << "  Cannot decode user-defined global attribute" << endl;
-          cerr << "    name: " << attr.name << endl;
-          cerr << "    type: double" << endl;
-          cerr << "    val: " << attr.val << endl;
+          _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+          _addErrStr("  Cannot decode user-defined global attribute");
+          _addErrStr("   name: ", attr.name);
+          _addErrStr("    type: double");
+          _addErrStr("    val: ", attr.val);
         }
         break;
       }
@@ -758,13 +758,22 @@ int NcxxRadxFile::_addGlobalAttributes()
           }
         } // jj
         if (!haveError) {
-          _file.addGlobAttr(attr.name, toks.size(), ivals);
+          try {
+            _file.putAtt(attr.name, ncxxInt, toks.size(), ivals);
+          } catch (NcxxException& e) {
+            haveError = true;
+            _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+            _addErrStr("  Cannot put attribute");
+            _addErrStr("  Exception: ", e.what());
+          }
         } else {
-          cerr << "ERROR - NcxxRadxFile::_addGlobalAttributes()" << endl;
-          cerr << "  Cannot decode user-defined global attribute" << endl;
-          cerr << "    name: " << attr.name << endl;
-          cerr << "    type: int[]" << endl;
-          cerr << "    vals: " << attr.val << endl;
+          _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+          _addErrStr("  Cannot decode user-defined global attribute");
+        }
+        if (haveError) {
+          _addErrStr("   name: ", attr.name);
+          _addErrStr("    type: int[]");
+          _addErrStr("    val: ", attr.val);
         }
         break;
       }
@@ -787,13 +796,22 @@ int NcxxRadxFile::_addGlobalAttributes()
           }
         } // jj
         if (!haveError) {
-          _file.addGlobAttr(attr.name, toks.size(), dvals);
+          try {
+            _file.putAtt(attr.name, ncxxDouble, toks.size(), dvals);
+          } catch (NcxxException& e) {
+            haveError = true;
+            _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+            _addErrStr("  Cannot put attribute");
+            _addErrStr("  Exception: ", e.what());
+          }
         } else {
-          cerr << "ERROR - NcxxRadxFile::_addGlobalAttributes()" << endl;
-          cerr << "  Cannot decode user-defined global attribute" << endl;
-          cerr << "    name: " << attr.name << endl;
-          cerr << "    type: double[]" << endl;
-          cerr << "    vals: " << attr.val << endl;
+          _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+          _addErrStr("  Cannot decode user-defined global attribute");
+        }
+        if (haveError) {
+          _addErrStr("   name: ", attr.name);
+          _addErrStr("    type: double[]");
+          _addErrStr("    val: ", attr.val);
         }
         break;
       }
@@ -913,64 +931,72 @@ int NcxxRadxFile::_addCoordinateVariables()
 
   // time
 
-  if ((_timeVar = _file.getNcFile()->add_var(TIME,
-                                             ncDouble, _timeDim)) == NULL) {
+  try {
+    _timeVar = _file.addVar(TIME, ncxxDouble, _timeDim);
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_addCoordinateVariables");
+    _addErrStr("  Exception: ", e.what());
     _addErrStr("  Cannot add time var");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
   int iret = 0;
-  iret |= _file.addAttr(_timeVar, STANDARD_NAME, TIME);
-  iret |= _file.addAttr(_timeVar, LONG_NAME,
-                        "time in seconds since volume start");
-  iret |= _file.addAttr(_timeVar, CALENDAR, GREGORIAN);
+  iret |= _timeVar.addAttr(STANDARD_NAME, TIME);
+  iret |= _timeVar.addAttr(LONG_NAME,
+                           "time in seconds since volume start");
+  iret |= _timeVar.addAttr(CALENDAR, GREGORIAN);
 
   char timeUnitsStr[256];
   RadxTime stime(_writeVol->getStartTimeSecs());
   sprintf(timeUnitsStr, "seconds since %.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
           stime.getYear(), stime.getMonth(), stime.getDay(),
           stime.getHour(), stime.getMin(), stime.getSec());
-  iret |= _file.addAttr(_timeVar, UNITS, timeUnitsStr);
+  iret |= _timeVar.addAttr(UNITS, timeUnitsStr);
 
-  iret |= _file.addAttr(_timeVar, COMMENT,
-                        "times are relative to the volume start_time");
+  iret |= _timeVar.addAttr( COMMENT,
+                            "times are relative to the volume start_time");
   
   // range
   
   if (_gateGeomVaries) {
   
-    if ((_rangeVar =
-         _file.getNcFile()->add_var(RANGE,
-                                    ncFloat, _timeDim, _rangeDim)) == NULL) {
+    try {
+      vector<NcxxDim> dims;
+      dims.push_back(_timeDim);
+      dims.push_back(_rangeDim);
+      _rangeVar = _file.addVar(RANGE, ncxxFloat, dims);
+    } catch (NcxxException& e) {
       _addErrStr("ERROR - NcxxRadxFile::_addCoordinateVariables");
+      _addErrStr("  Exception: ", e.what());
       _addErrStr("  Cannot add range var");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
       return -1;
     }
 
   } else {
 
-    if ((_rangeVar = _file.getNcFile()->add_var(RANGE,
-                                                ncFloat, _rangeDim)) == NULL) {
+    try {
+      _rangeVar = _file.addVar(RANGE, ncxxFloat, _rangeDim);
+    } catch (NcxxException& e) {
       _addErrStr("ERROR - NcxxRadxFile::_addCoordinateVariables");
+      _addErrStr("  Exception: ", e.what());
       _addErrStr("  Cannot add range var");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getErrStr());
       return -1;
     }
 
   }
 
-  iret |= _file.addAttr(_rangeVar, LONG_NAME, RANGE_LONG);
-  iret |= _file.addAttr(_rangeVar, LONG_NAME,
-                        "Range from instrument to center of gate");
-  iret |= _file.addAttr(_rangeVar, UNITS, METERS);
-  iret |= _file.addAttr(_rangeVar, SPACING_IS_CONSTANT, "true");
-  iret |= _file.addAttr(_rangeVar, METERS_TO_CENTER_OF_FIRST_GATE,
-                        (float) _writeVol->getStartRangeKm() * 1000.0);
-  iret |= _file.addAttr(_rangeVar, METERS_BETWEEN_GATES, 
-                        (float) _writeVol->getGateSpacingKm() * 1000.0);
-
+  iret |= _rangeVar.addAttr(LONG_NAME, RANGE_LONG);
+  iret |= _rangeVar.addAttr(LONG_NAME,
+                            "Range from instrument to center of gate");
+  iret |= _rangeVar.addAttr(UNITS, METERS);
+  iret |= _rangeVar.addAttr(SPACING_IS_CONSTANT, "true");
+  iret |= _rangeVar.addAttr(METERS_TO_CENTER_OF_FIRST_GATE,
+                            (float) _writeVol->getStartRangeKm() * 1000.0);
+  iret |= _rangeVar.addAttr(METERS_BETWEEN_GATES, 
+                            (float) _writeVol->getGateSpacingKm() * 1000.0);
+  
   if (iret) {
     _addErrStr("ERROR - NcxxRadxFile::_addCoordinateVariables");
     _addErrStr("  Cannot add attributes");
@@ -992,86 +1018,86 @@ int NcxxRadxFile::_addScalarVariables()
     cerr << "NcxxRadxFile::_addScalarVariables()" << endl;
   }
 
-  iret |= _file.addMetaVar(_volumeNumberVar, VOLUME_NUMBER,
-                           "", VOLUME_NUMBER_LONG, ncInt, "");
-
-  iret |= _file.addMetaVar(_platformTypeVar, PLATFORM_TYPE,
-                           "", PLATFORM_TYPE_LONG, ncChar, _stringLen32Dim, "");
-  iret |= _file.addAttr(_platformTypeVar, OPTIONS, Radx::platformTypeOptions());
+  iret |= _file.addVar(_volumeNumberVar, VOLUME_NUMBER,
+                       "", VOLUME_NUMBER_LONG, ncxxInt, "", true);
   
-  iret |= _file.addMetaVar(_primaryAxisVar, PRIMARY_AXIS,
-                           "", PRIMARY_AXIS_LONG, ncChar, _stringLen32Dim, "");
-  iret |= _file.addAttr(_primaryAxisVar, OPTIONS, Radx::primaryAxisOptions());
-
-  iret |= _file.addMetaVar(_statusXmlVar, STATUS_XML,
-                           "", "status_of_instrument", ncChar, _statusXmlDim, "");
+  iret |= _file.addVar(_platformTypeVar, PLATFORM_TYPE,
+                       "", PLATFORM_TYPE_LONG, ncxxChar, _stringLen32Dim, "", true);
+  iret |= _platformTypeVar.addAttr(OPTIONS, Radx::platformTypeOptions());
   
-  iret |= _file.addMetaVar(_instrumentTypeVar, INSTRUMENT_TYPE,
-                           "", INSTRUMENT_TYPE_LONG, ncChar, _stringLen32Dim, "");
-  iret |= _file.addAttr(_instrumentTypeVar, OPTIONS, Radx::instrumentTypeOptions());
-  iret |= _file.addAttr(_instrumentTypeVar, META_GROUP, INSTRUMENT_PARAMETERS);
+  iret |= _file.addVar(_primaryAxisVar, PRIMARY_AXIS,
+                       "", PRIMARY_AXIS_LONG, ncxxChar, _stringLen32Dim, "", true);
+  iret |= _primaryAxisVar.addAttr(OPTIONS, Radx::primaryAxisOptions());
+
+  iret |= _file.addVar(_statusXmlVar, STATUS_XML,
+                       "", "status_of_instrument", ncxxChar, _statusXmlDim, "", true);
+  
+  iret |= _file.addVar(_instrumentTypeVar, INSTRUMENT_TYPE,
+                       "", INSTRUMENT_TYPE_LONG, ncxxChar, _stringLen32Dim, "", true);
+  iret |= _instrumentTypeVar.addAttr(OPTIONS, Radx::instrumentTypeOptions());
+  iret |= _instrumentTypeVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
 
   if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
 
     // radar
 
-    iret |= _file.addMetaVar(_radarAntennaGainHVar, RADAR_ANTENNA_GAIN_H,
-                             "", RADAR_ANTENNA_GAIN_H_LONG, ncFloat, DB);
-    iret |= _file.addMetaVar(_radarAntennaGainVVar, RADAR_ANTENNA_GAIN_V,
-                             "", RADAR_ANTENNA_GAIN_V_LONG, ncFloat, DB);
-    iret |= _file.addMetaVar(_radarBeamWidthHVar, RADAR_BEAM_WIDTH_H,
-                             "", RADAR_BEAM_WIDTH_H_LONG, ncFloat, DEGREES);
-    iret |= _file.addMetaVar(_radarBeamWidthVVar, RADAR_BEAM_WIDTH_V,
-                             "", RADAR_BEAM_WIDTH_V_LONG, ncFloat, DEGREES);
-    iret |= _file.addMetaVar(_radarRxBandwidthVar, RADAR_RX_BANDWIDTH,
-                             "", RADAR_RX_BANDWIDTH_LONG, ncFloat, HZ);
+    iret |= _file.addVar(_radarAntennaGainHVar, RADAR_ANTENNA_GAIN_H,
+                         "", RADAR_ANTENNA_GAIN_H_LONG, ncxxFloat, DB, true);
+    iret |= _file.addVar(_radarAntennaGainVVar, RADAR_ANTENNA_GAIN_V,
+                         "", RADAR_ANTENNA_GAIN_V_LONG, ncxxFloat, DB, true);
+    iret |= _file.addVar(_radarBeamWidthHVar, RADAR_BEAM_WIDTH_H,
+                         "", RADAR_BEAM_WIDTH_H_LONG, ncxxFloat, DEGREES, true);
+    iret |= _file.addVar(_radarBeamWidthVVar, RADAR_BEAM_WIDTH_V,
+                         "", RADAR_BEAM_WIDTH_V_LONG, ncxxFloat, DEGREES, true);
+    iret |= _file.addVar(_radarRxBandwidthVar, RADAR_RX_BANDWIDTH,
+                         "", RADAR_RX_BANDWIDTH_LONG, ncxxFloat, HZ, true);
     
-    iret |= _file.addAttr(_radarAntennaGainHVar, META_GROUP, RADAR_PARAMETERS);
-    iret |= _file.addAttr(_radarAntennaGainVVar, META_GROUP, RADAR_PARAMETERS);
-    iret |= _file.addAttr(_radarBeamWidthHVar, META_GROUP, RADAR_PARAMETERS);
-    iret |= _file.addAttr(_radarBeamWidthVVar, META_GROUP, RADAR_PARAMETERS);
-    iret |= _file.addAttr(_radarRxBandwidthVar, META_GROUP, RADAR_PARAMETERS);
+    iret |= _radarAntennaGainHVar.addAttr(META_GROUP, RADAR_PARAMETERS);
+    iret |= _radarAntennaGainVVar.addAttr(META_GROUP, RADAR_PARAMETERS);
+    iret |= _radarBeamWidthHVar.addAttr(META_GROUP, RADAR_PARAMETERS);
+    iret |= _radarBeamWidthVVar.addAttr(META_GROUP, RADAR_PARAMETERS);
+    iret |= _radarRxBandwidthVar.addAttr(META_GROUP, RADAR_PARAMETERS);
 
   } else {
 
     // lidar
 
-    iret |= _file.addMetaVar(_lidarConstantVar, LIDAR_CONSTANT,
-                             "", LIDAR_CONSTANT_LONG, ncFloat, DB);
-    iret |= _file.addMetaVar(_lidarPulseEnergyJVar, LIDAR_PULSE_ENERGY,
-                             "", LIDAR_PULSE_ENERGY_LONG, ncFloat, JOULES);
-    iret |= _file.addMetaVar(_lidarPeakPowerWVar, LIDAR_PEAK_POWER,
-                             "", LIDAR_PEAK_POWER_LONG, ncFloat, WATTS);
-    iret |= _file.addMetaVar(_lidarApertureDiamCmVar, LIDAR_APERTURE_DIAMETER,
-                             "", LIDAR_APERTURE_DIAMETER_LONG, ncFloat, CM);
-    iret |= _file.addMetaVar(_lidarApertureEfficiencyVar, LIDAR_APERTURE_EFFICIENCY,
-                             "", LIDAR_APERTURE_EFFICIENCY_LONG, ncFloat, PERCENT);
-    iret |= _file.addMetaVar(_lidarFieldOfViewMradVar, LIDAR_FIELD_OF_VIEW,
-                             "", LIDAR_FIELD_OF_VIEW_LONG, ncFloat, MRAD);
-    iret |= _file.addMetaVar(_lidarBeamDivergenceMradVar, LIDAR_BEAM_DIVERGENCE,
-                             "", LIDAR_BEAM_DIVERGENCE_LONG, ncFloat, MRAD);
+    iret |= _file.addVar(_lidarConstantVar, LIDAR_CONSTANT,
+                         "", LIDAR_CONSTANT_LONG, ncxxFloat, DB, true);
+    iret |= _file.addVar(_lidarPulseEnergyJVar, LIDAR_PULSE_ENERGY,
+                         "", LIDAR_PULSE_ENERGY_LONG, ncxxFloat, JOULES, true);
+    iret |= _file.addVar(_lidarPeakPowerWVar, LIDAR_PEAK_POWER,
+                         "", LIDAR_PEAK_POWER_LONG, ncxxFloat, WATTS, true);
+    iret |= _file.addVar(_lidarApertureDiamCmVar, LIDAR_APERTURE_DIAMETER,
+                         "", LIDAR_APERTURE_DIAMETER_LONG, ncxxFloat, CM, true);
+    iret |= _file.addVar(_lidarApertureEfficiencyVar, LIDAR_APERTURE_EFFICIENCY,
+                         "", LIDAR_APERTURE_EFFICIENCY_LONG, ncxxFloat, PERCENT, true);
+    iret |= _file.addVar(_lidarFieldOfViewMradVar, LIDAR_FIELD_OF_VIEW,
+                         "", LIDAR_FIELD_OF_VIEW_LONG, ncxxFloat, MRAD, true);
+    iret |= _file.addVar(_lidarBeamDivergenceMradVar, LIDAR_BEAM_DIVERGENCE,
+                         "", LIDAR_BEAM_DIVERGENCE_LONG, ncxxFloat, MRAD, true);
     
-    iret |= _file.addAttr(_lidarConstantVar, META_GROUP, LIDAR_PARAMETERS);
-    iret |= _file.addAttr(_lidarPulseEnergyJVar, META_GROUP, LIDAR_PARAMETERS);
-    iret |= _file.addAttr(_lidarPeakPowerWVar, META_GROUP, LIDAR_PARAMETERS);
-    iret |= _file.addAttr(_lidarApertureDiamCmVar, META_GROUP, LIDAR_PARAMETERS);
-    iret |= _file.addAttr(_lidarApertureEfficiencyVar, META_GROUP, LIDAR_PARAMETERS);
-    iret |= _file.addAttr(_lidarFieldOfViewMradVar, META_GROUP, LIDAR_PARAMETERS);
-    iret |= _file.addAttr(_lidarBeamDivergenceMradVar, META_GROUP, LIDAR_PARAMETERS);
+    iret |= _lidarConstantVar.addAttr(META_GROUP, LIDAR_PARAMETERS);
+    iret |= _lidarPulseEnergyJVar.addAttr(META_GROUP, LIDAR_PARAMETERS);
+    iret |= _lidarPeakPowerWVar.addAttr(META_GROUP, LIDAR_PARAMETERS);
+    iret |= _lidarApertureDiamCmVar.addAttr(META_GROUP, LIDAR_PARAMETERS);
+    iret |= _lidarApertureEfficiencyVar.addAttr(META_GROUP, LIDAR_PARAMETERS);
+    iret |= _lidarFieldOfViewMradVar.addAttr(META_GROUP, LIDAR_PARAMETERS);
+    iret |= _lidarBeamDivergenceMradVar.addAttr(META_GROUP, LIDAR_PARAMETERS);
 
   }
 
   // start time
 
-  iret |= _file.addMetaVar(_startTimeVar, TIME_COVERAGE_START,
-                           "", TIME_COVERAGE_START_LONG, ncChar, _stringLen32Dim, "");
-  iret |= _file.addAttr(_startTimeVar, COMMENT,
-                        "ray times are relative to start time in secs");
+  iret |= _file.addVar(_startTimeVar, TIME_COVERAGE_START,
+                       "", TIME_COVERAGE_START_LONG, ncxxChar, _stringLen32Dim, "", true);
+  iret |= _startTimeVar.addAttr(COMMENT,
+                                "ray times are relative to start time in secs");
 
   // end time
 
-  iret |= _file.addMetaVar(_endTimeVar, TIME_COVERAGE_END,
-                           "", TIME_COVERAGE_END_LONG, ncChar, _stringLen32Dim, "");
+  iret |= _file.addVar(_endTimeVar, TIME_COVERAGE_END,
+                       "", TIME_COVERAGE_END_LONG, ncxxChar, _stringLen32Dim, "", true);
 
   if (iret) {
     _addErrStr("ERROR - NcxxRadxFile::_addScalarVariables");
@@ -1092,12 +1118,12 @@ int NcxxRadxFile::_addFrequencyVariable()
     return 0;
   }
   
-  if(_file.addMetaVar(_frequencyVar, FREQUENCY,
-                      "", FREQUENCY_LONG, ncFloat, _frequencyDim, HZ)) {
+  if(_file.addVar(_frequencyVar, FREQUENCY,
+                  "", FREQUENCY_LONG, ncxxFloat, _frequencyDim, HZ, true)) {
     _addErrStr("ERROR - NcxxRadxFile::_addFrequencyVariable");
     return -1;
   }
-  _file.addAttr(_frequencyVar, META_GROUP, INSTRUMENT_PARAMETERS);
+  _frequencyVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
 
   return 0;
 
@@ -1114,73 +1140,73 @@ int NcxxRadxFile::_addCorrectionVariables()
     cerr << "NcxxRadxFile::_addCorrectionVariables()" << endl;
   }
 
-  iret |= _file.addMetaVar(_azimuthCorrVar, AZIMUTH_CORRECTION,
-                           "", AZIMUTH_CORRECTION_LONG, ncFloat, DEGREES);
-  iret |= _file.addAttr(_azimuthCorrVar, META_GROUP, GEOMETRY_CORRECTION);
+  iret |= _file.addVar(_azimuthCorrVar, AZIMUTH_CORRECTION,
+                       "", AZIMUTH_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+  iret |= _azimuthCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
-  iret |= _file.addMetaVar(_elevationCorrVar, ELEVATION_CORRECTION,
-                           "", ELEVATION_CORRECTION_LONG, ncFloat, DEGREES);
-  iret |= _file.addAttr(_elevationCorrVar, META_GROUP, GEOMETRY_CORRECTION);
+  iret |= _file.addVar(_elevationCorrVar, ELEVATION_CORRECTION,
+                       "", ELEVATION_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+  iret |= _elevationCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
-  iret |= _file.addMetaVar(_rangeCorrVar, RANGE_CORRECTION,
-                           "", RANGE_CORRECTION_LONG, ncFloat, METERS);
-  iret |= _file.addAttr(_rangeCorrVar, META_GROUP, GEOMETRY_CORRECTION);
+  iret |= _file.addVar(_rangeCorrVar, RANGE_CORRECTION,
+                       "", RANGE_CORRECTION_LONG, ncxxFloat, METERS, true);
+  iret |= _rangeCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
-  iret |= _file.addMetaVar(_longitudeCorrVar, LONGITUDE_CORRECTION,
-                           "", LONGITUDE_CORRECTION_LONG, ncFloat, DEGREES);
-  iret |= _file.addAttr(_longitudeCorrVar, META_GROUP, GEOMETRY_CORRECTION);
+  iret |= _file.addVar(_longitudeCorrVar, LONGITUDE_CORRECTION,
+                       "", LONGITUDE_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+  iret |= _longitudeCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
-  iret |= _file.addMetaVar(_latitudeCorrVar, LATITUDE_CORRECTION,
-                           "", LATITUDE_CORRECTION_LONG, ncFloat, DEGREES);
-  iret |= _file.addAttr(_latitudeCorrVar, META_GROUP, GEOMETRY_CORRECTION);
+  iret |= _file.addVar(_latitudeCorrVar, LATITUDE_CORRECTION,
+                       "", LATITUDE_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+  iret |= _latitudeCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
-  iret |= _file.addMetaVar(_pressureAltCorrVar, PRESSURE_ALTITUDE_CORRECTION,
+  iret |= _file.addVar(_pressureAltCorrVar, PRESSURE_ALTITUDE_CORRECTION,
                            "", PRESSURE_ALTITUDE_CORRECTION_LONG,
-                           ncFloat, METERS);
-  iret |= _file.addAttr(_pressureAltCorrVar, META_GROUP, GEOMETRY_CORRECTION);
+                       ncxxFloat, METERS, true);
+  iret |= _pressureAltCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
   
-  iret |= _file.addMetaVar(_altitudeCorrVar, ALTITUDE_CORRECTION,
-                           "", ALTITUDE_CORRECTION_LONG, ncFloat, METERS);
-  iret |= _file.addAttr(_altitudeCorrVar, META_GROUP, GEOMETRY_CORRECTION);
+  iret |= _file.addVar(_altitudeCorrVar, ALTITUDE_CORRECTION,
+                       "", ALTITUDE_CORRECTION_LONG, ncxxFloat, METERS, true);
+  iret |= _altitudeCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
-  iret |= _file.addMetaVar(_ewVelCorrVar, EASTWARD_VELOCITY_CORRECTION,
+  iret |= _file.addVar(_ewVelCorrVar, EASTWARD_VELOCITY_CORRECTION,
                            "", EASTWARD_VELOCITY_CORRECTION_LONG, 
-                           ncFloat, METERS_PER_SECOND);
-  iret |= _file.addAttr(_ewVelCorrVar, META_GROUP, GEOMETRY_CORRECTION);
+                       ncxxFloat, METERS_PER_SECOND, true);
+  iret |= _ewVelCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
-  iret |= _file.addMetaVar(_nsVelCorrVar, NORTHWARD_VELOCITY_CORRECTION,
+  iret |= _file.addVar(_nsVelCorrVar, NORTHWARD_VELOCITY_CORRECTION,
                            "", NORTHWARD_VELOCITY_CORRECTION_LONG,
-                           ncFloat, METERS_PER_SECOND);
-  iret |= _file.addAttr(_nsVelCorrVar, META_GROUP, GEOMETRY_CORRECTION);
+                       ncxxFloat, METERS_PER_SECOND, true);
+  iret |= _nsVelCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
-  iret |= _file.addMetaVar(_vertVelCorrVar, VERTICAL_VELOCITY_CORRECTION,
+  iret |= _file.addVar(_vertVelCorrVar, VERTICAL_VELOCITY_CORRECTION,
                            "", VERTICAL_VELOCITY_CORRECTION_LONG,
-                           ncFloat, METERS_PER_SECOND);
-  iret |= _file.addAttr(_vertVelCorrVar, META_GROUP, GEOMETRY_CORRECTION);
+                       ncxxFloat, METERS_PER_SECOND, true);
+  iret |= _vertVelCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
-  iret |= _file.addMetaVar(_headingCorrVar, HEADING_CORRECTION,
-                           "", HEADING_CORRECTION_LONG, ncFloat, DEGREES);
-  iret |= _file.addAttr(_headingCorrVar, META_GROUP, GEOMETRY_CORRECTION);
+  iret |= _file.addVar(_headingCorrVar, HEADING_CORRECTION,
+                       "", HEADING_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+  iret |= _headingCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
-  iret |= _file.addMetaVar(_rollCorrVar, ROLL_CORRECTION,
-                           "", ROLL_CORRECTION_LONG, ncFloat, DEGREES);
-  iret |= _file.addAttr(_rollCorrVar, META_GROUP, GEOMETRY_CORRECTION);
+  iret |= _file.addVar(_rollCorrVar, ROLL_CORRECTION,
+                       "", ROLL_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+  iret |= _rollCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
-  iret |= _file.addMetaVar(_pitchCorrVar, PITCH_CORRECTION,
-                           "", PITCH_CORRECTION_LONG, ncFloat, DEGREES);
-  iret |= _file.addAttr(_pitchCorrVar, META_GROUP, GEOMETRY_CORRECTION);
+  iret |= _file.addVar(_pitchCorrVar, PITCH_CORRECTION,
+                       "", PITCH_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+  iret |= _pitchCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
-  iret |= _file.addMetaVar(_driftCorrVar, DRIFT_CORRECTION,
-                           "", DRIFT_CORRECTION_LONG, ncFloat, DEGREES);
-  iret |= _file.addAttr(_driftCorrVar, META_GROUP, GEOMETRY_CORRECTION);
+  iret |= _file.addVar(_driftCorrVar, DRIFT_CORRECTION,
+                       "", DRIFT_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+  iret |= _driftCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
-  iret |= _file.addMetaVar(_rotationCorrVar, ROTATION_CORRECTION,
-                           "", ROTATION_CORRECTION_LONG, ncFloat, DEGREES);
-  iret |= _file.addAttr(_rotationCorrVar, META_GROUP, GEOMETRY_CORRECTION);
+  iret |= _file.addVar(_rotationCorrVar, ROTATION_CORRECTION,
+                       "", ROTATION_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+  iret |= _rotationCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
-  iret |= _file.addMetaVar(_tiltCorrVar, TILT_CORRECTION,
-                           "", TILT_CORRECTION_LONG, ncFloat, DEGREES);
-  iret |= _file.addAttr(_tiltCorrVar, META_GROUP, GEOMETRY_CORRECTION);
+  iret |= _file.addVar(_tiltCorrVar, TILT_CORRECTION,
+                       "", TILT_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+  iret |= _tiltCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
   if (iret) {
     _addErrStr("ERROR - NcxxRadxFile::_addCorrectionVariables");
@@ -1205,25 +1231,25 @@ int NcxxRadxFile::_addProjectionVariables()
 
   // projection variable
   
-  _projVar = _file.getNcFile()->add_var(GRID_MAPPING, ncInt);
-  if (_projVar == NULL) {
+  _projVar = _file.addVar(GRID_MAPPING, ncxxInt);
+  if (_projVar.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_addProjectionVariables");
     _addErrStr("  Cannot add projection variable:", GRID_MAPPING);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
   
-  iret |= _file.addAttr(_projVar, GRID_MAPPING_NAME, "radar_lidar_radial_scan");
+  iret |= _projVar.addAttr(GRID_MAPPING_NAME, "radar_lidar_radial_scan");
 
   if (_writeVol->getPlatformType() == Radx::PLATFORM_TYPE_FIXED) {
-    iret |= _file.addAttr(_projVar, LONGITUDE_OF_PROJECTION_ORIGIN,
-                          _writeVol->getLongitudeDeg());
-    iret |= _file.addAttr(_projVar, LATITUDE_OF_PROJECTION_ORIGIN,
-                          _writeVol->getLatitudeDeg());
-    iret |= _file.addAttr(_projVar, ALTITUDE_OF_PROJECTION_ORIGIN,
-                          _writeVol->getAltitudeKm() * 1000.0);
-    iret |= _file.addAttr(_projVar, FALSE_NORTHING, 0.0);
-    iret |= _file.addAttr(_projVar, FALSE_EASTING, 0.0);
+    iret |= _projVar.addAttr(LONGITUDE_OF_PROJECTION_ORIGIN,
+                             _writeVol->getLongitudeDeg());
+    iret |= _projVar.addAttr(LATITUDE_OF_PROJECTION_ORIGIN,
+                             _writeVol->getLatitudeDeg());
+    iret |= _projVar.addAttr(ALTITUDE_OF_PROJECTION_ORIGIN,
+                             _writeVol->getAltitudeKm() * 1000.0);
+    iret |= _projVar.addAttr(FALSE_NORTHING, 0.0);
+    iret |= _projVar.addAttr(FALSE_EASTING, 0.0);
   }
 
   // lat/lon/alt
@@ -1232,16 +1258,16 @@ int NcxxRadxFile::_addProjectionVariables()
 
     // georeferencs on rays are not active, so write as scalars
 
-    iret |= _file.addMetaVar(_latitudeVar, LATITUDE,
-                             "", LATITUDE_LONG, ncDouble, DEGREES_NORTH);
-    iret |= _file.addMetaVar(_longitudeVar, LONGITUDE,
-                             "", LONGITUDE_LONG, ncDouble, DEGREES_EAST);
-    iret |= _file.addMetaVar(_altitudeVar, ALTITUDE,
-                             "", ALTITUDE_LONG, ncDouble, METERS);
-    iret |= _file.addAttr(_altitudeVar, POSITIVE, UP);
-    iret |= _file.addMetaVar(_altitudeAglVar, ALTITUDE_AGL,
-                             "", ALTITUDE_AGL_LONG, ncDouble, METERS);
-    iret |= _file.addAttr(_altitudeAglVar, POSITIVE, UP);
+    iret |= _file.addVar(_latitudeVar, LATITUDE,
+                         "", LATITUDE_LONG, ncxxDouble, DEGREES_NORTH, true);
+    iret |= _file.addVar(_longitudeVar, LONGITUDE,
+                         "", LONGITUDE_LONG, ncxxDouble, DEGREES_EAST, true);
+    iret |= _file.addVar(_altitudeVar, ALTITUDE,
+                         "", ALTITUDE_LONG, ncxxDouble, METERS, true);
+    iret |= _altitudeVar.addAttr(POSITIVE, UP);
+    iret |= _file.addVar(_altitudeAglVar, ALTITUDE_AGL,
+                         "", ALTITUDE_AGL_LONG, ncxxDouble, METERS, true);
+    iret |= _altitudeAglVar.addAttr(POSITIVE, UP);
 
   }
     
@@ -1267,54 +1293,54 @@ int NcxxRadxFile::_addSweepVariables()
   
   int iret = 0;
 
-  iret |= _file.addMetaVar(_sweepNumberVar, SWEEP_NUMBER,
+  iret |= _file.addVar(_sweepNumberVar, SWEEP_NUMBER,
                            "", SWEEP_NUMBER_LONG,
-                           ncInt, _sweepDim, "");
+                       ncxxInt, _sweepDim, "", true);
 
-  iret |= _file.addMetaVar(_sweepModeVar, SWEEP_MODE,
+  iret |= _file.addVar(_sweepModeVar, SWEEP_MODE,
                            "", SWEEP_MODE_LONG,
-                           ncChar, _sweepDim, _stringLen32Dim, "");
-  iret |= _file.addAttr(_sweepModeVar, OPTIONS, Radx::sweepModeOptions());
+                       ncxxChar, _sweepDim, _stringLen32Dim, "", true);
+  iret |= _sweepModeVar.addAttr(OPTIONS, Radx::sweepModeOptions());
 
-  iret |= _file.addMetaVar(_polModeVar, POLARIZATION_MODE,
+  iret |= _file.addVar(_polModeVar, POLARIZATION_MODE,
                            "", POLARIZATION_MODE_LONG, 
-                           ncChar, _sweepDim, _stringLen32Dim, "");
-  iret |= _file.addAttr(_polModeVar, OPTIONS, Radx::polarizationModeOptions());
-  iret |= _file.addAttr(_polModeVar, META_GROUP, RADAR_PARAMETERS);
+                       ncxxChar, _sweepDim, _stringLen32Dim, "", true);
+  iret |= _polModeVar.addAttr(OPTIONS, Radx::polarizationModeOptions());
+  iret |= _polModeVar.addAttr(META_GROUP, RADAR_PARAMETERS);
   
-  iret |= _file.addMetaVar(_prtModeVar, PRT_MODE,
+  iret |= _file.addVar(_prtModeVar, PRT_MODE,
                            "", PRT_MODE_LONG, 
-                           ncChar, _sweepDim, _stringLen32Dim, "");
-  iret |= _file.addAttr(_prtModeVar, OPTIONS, Radx::prtModeOptions());
-  iret |= _file.addAttr(_prtModeVar, META_GROUP, RADAR_PARAMETERS);
+                       ncxxChar, _sweepDim, _stringLen32Dim, "", true);
+  iret |= _prtModeVar.addAttr(OPTIONS, Radx::prtModeOptions());
+  iret |= _prtModeVar.addAttr(META_GROUP, RADAR_PARAMETERS);
   
-  iret |= _file.addMetaVar(_sweepFollowModeVar, FOLLOW_MODE,
+  iret |= _file.addVar(_sweepFollowModeVar, FOLLOW_MODE,
                            "", FOLLOW_MODE_LONG, 
-                           ncChar, _sweepDim, _stringLen32Dim, "");
-  iret |= _file.addAttr(_sweepFollowModeVar, OPTIONS, Radx::followModeOptions());
-  iret |= _file.addAttr(_sweepFollowModeVar, META_GROUP, INSTRUMENT_PARAMETERS);
+                       ncxxChar, _sweepDim, _stringLen32Dim, "", true);
+  iret |= _sweepFollowModeVar.addAttr(OPTIONS, Radx::followModeOptions());
+  iret |= _sweepFollowModeVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
   
-  iret |= _file.addMetaVar(_sweepFixedAngleVar, FIXED_ANGLE,
+  iret |= _file.addVar(_sweepFixedAngleVar, FIXED_ANGLE,
                            "", FIXED_ANGLE_LONG, 
-                           ncFloat, _sweepDim, DEGREES);
-  iret |= _file.addMetaVar(_targetScanRateVar, TARGET_SCAN_RATE,
+                       ncxxFloat, _sweepDim, DEGREES, true);
+  iret |= _file.addVar(_targetScanRateVar, TARGET_SCAN_RATE,
                            "", TARGET_SCAN_RATE_LONG, 
-                           ncFloat, _sweepDim, DEGREES_PER_SECOND);
+                       ncxxFloat, _sweepDim, DEGREES_PER_SECOND, true);
 
-  iret |= _file.addMetaVar(_sweepStartRayIndexVar, SWEEP_START_RAY_INDEX,
+  iret |= _file.addVar(_sweepStartRayIndexVar, SWEEP_START_RAY_INDEX,
                            "", SWEEP_START_RAY_INDEX_LONG, 
-                           ncInt, _sweepDim, "");
-  iret |= _file.addMetaVar(_sweepEndRayIndexVar, SWEEP_END_RAY_INDEX,
+                       ncxxInt, _sweepDim, "", true);
+  iret |= _file.addVar(_sweepEndRayIndexVar, SWEEP_END_RAY_INDEX,
                            "", SWEEP_END_RAY_INDEX_LONG, 
-                           ncInt, _sweepDim, "");
+                       ncxxInt, _sweepDim, "", true);
   
-  iret |= _file.addMetaVar(_raysAreIndexedVar, RAYS_ARE_INDEXED,
+  iret |= _file.addVar(_raysAreIndexedVar, RAYS_ARE_INDEXED,
                            "", RAYS_ARE_INDEXED_LONG, 
-                           ncChar, _sweepDim, _stringLen8Dim, "");
+                       ncxxChar, _sweepDim, _stringLen8Dim, "", true);
 
-  iret |= _file.addMetaVar(_rayAngleResVar, RAY_ANGLE_RES,
+  iret |= _file.addVar(_rayAngleResVar, RAY_ANGLE_RES,
                            "", RAY_ANGLE_RES_LONG, 
-                           ncFloat, _sweepDim, DEGREES);
+                       ncxxFloat, _sweepDim, DEGREES, true);
   
   bool haveIF = false;
   const vector<RadxSweep *> &sweeps = _writeVol->getSweeps();
@@ -1325,9 +1351,9 @@ int NcxxRadxFile::_addSweepVariables()
     }
   }
   if (haveIF) {
-    iret |= _file.addMetaVar(_intermedFreqHzVar, INTERMED_FREQ_HZ,
+    iret |= _file.addVar(_intermedFreqHzVar, INTERMED_FREQ_HZ,
                              "", INTERMED_FREQ_HZ_LONG, 
-                             ncFloat, _sweepDim, HZ);
+                         ncxxFloat, _sweepDim, HZ, true);
   }
   
   if (iret) {
@@ -1355,10 +1381,10 @@ int NcxxRadxFile::_addCalibVariables()
     
   int iret = 0;
 
-  iret |= _file.addMetaVar(_rCalTimeVar, R_CALIB_TIME,
+  iret |= _file.addVar(_rCalTimeVar, R_CALIB_TIME,
                            "", R_CALIB_TIME_LONG, 
-                           ncChar, _calDim, _stringLen32Dim, "");
-  iret |= _file.addAttr(_rCalTimeVar, META_GROUP, RADAR_CALIBRATION);
+                       ncxxChar, _calDim, _stringLen32Dim, "", true);
+  iret |= _rCalTimeVar.addAttr(META_GROUP, RADAR_CALIBRATION);
 
   iret |= _addCalVar(_rCalPulseWidthVar, R_CALIB_PULSE_WIDTH,
                      R_CALIB_PULSE_WIDTH_LONG, SECONDS);
@@ -1473,127 +1499,127 @@ int NcxxRadxFile::_addRayVariables()
   int iret = 0;
   
   if (_nGatesVary) {
-    iret |= _file.addMetaVar(_rayNGatesVar, RAY_N_GATES,
-                             "", "number_of_gates", ncInt, _timeDim);
-    iret |= _file.addMetaVar(_rayStartIndexVar, RAY_START_INDEX,
-                             "", "array_index_to_start_of_ray", ncInt, _timeDim);
+    iret |= _file.addVar(_rayNGatesVar, RAY_N_GATES,
+                         "", "number_of_gates", ncxxInt, _timeDim, "", true);
+    iret |= _file.addVar(_rayStartIndexVar, RAY_START_INDEX,
+                         "", "array_index_to_start_of_ray", ncxxInt, _timeDim, "", true);
   }
   
-  iret |= _file.addMetaVar(_rayStartRangeVar, RAY_START_RANGE,
-                           "", "start_range_for_ray", ncFloat, _timeDim, METERS);
-  iret |= _file.addAttr(_rayStartRangeVar, UNITS, METERS);
+  iret |= _file.addVar(_rayStartRangeVar, RAY_START_RANGE,
+                       "", "start_range_for_ray", ncxxFloat, _timeDim, METERS, true);
+  iret |= _rayStartRangeVar.addAttr(UNITS, METERS);
 
-  iret |= _file.addMetaVar(_rayGateSpacingVar, RAY_GATE_SPACING,
-                           "", "gate_spacing_for_ray", ncFloat, _timeDim, METERS);
-  iret |= _file.addAttr(_rayGateSpacingVar, UNITS, METERS);
+  iret |= _file.addVar(_rayGateSpacingVar, RAY_GATE_SPACING,
+                       "", "gate_spacing_for_ray", ncxxFloat, _timeDim, METERS, true);
+  iret |= _rayGateSpacingVar.addAttr(UNITS, METERS);
 
-  iret |= _file.addMetaVar(_azimuthVar, AZIMUTH,
-                           "", AZIMUTH_LONG, ncFloat, _timeDim, DEGREES);
+  iret |= _file.addVar(_azimuthVar, AZIMUTH,
+                       "", AZIMUTH_LONG, ncxxFloat, _timeDim, DEGREES, true);
 
-  iret |= _file.addMetaVar(_elevationVar, ELEVATION,
-                           "", ELEVATION_LONG, ncFloat, _timeDim, DEGREES);
-  iret |= _file.addAttr(_elevationVar, POSITIVE, UP);
+  iret |= _file.addVar(_elevationVar, ELEVATION,
+                       "", ELEVATION_LONG, ncxxFloat, _timeDim, DEGREES, true);
+  iret |= _elevationVar.addAttr(POSITIVE, UP);
   
-  iret |= _file.addMetaVar(_pulseWidthVar, PULSE_WIDTH,
-                           "", PULSE_WIDTH_LONG, ncFloat, _timeDim, SECONDS);
-  iret |= _file.addAttr(_pulseWidthVar, META_GROUP, INSTRUMENT_PARAMETERS);
+  iret |= _file.addVar(_pulseWidthVar, PULSE_WIDTH,
+                       "", PULSE_WIDTH_LONG, ncxxFloat, _timeDim, SECONDS, true);
+  iret |= _pulseWidthVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
 
-  iret |= _file.addMetaVar(_prtVar, PRT,
-                           "", PRT_LONG, ncFloat, _timeDim, SECONDS);
-  iret |= _file.addAttr(_prtVar, META_GROUP, INSTRUMENT_PARAMETERS);
+  iret |= _file.addVar(_prtVar, PRT,
+                       "", PRT_LONG, ncxxFloat, _timeDim, SECONDS, true);
+  iret |= _prtVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
   
-  iret |= _file.addMetaVar(_prtRatioVar, PRT_RATIO,
+  iret |= _file.addVar(_prtRatioVar, PRT_RATIO,
                            "", PRT_RATIO_LONG,
-                           ncFloat, _timeDim, SECONDS);
-  iret |= _file.addAttr(_prtRatioVar, META_GROUP, INSTRUMENT_PARAMETERS);
+                       ncxxFloat, _timeDim, SECONDS, true);
+  iret |= _prtRatioVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
 
-  iret |= _file.addMetaVar(_nyquistVar, NYQUIST_VELOCITY,
-                           "", NYQUIST_VELOCITY_LONG, ncFloat, _timeDim, METERS_PER_SECOND);
-  iret |= _file.addAttr(_nyquistVar, META_GROUP, INSTRUMENT_PARAMETERS);
+  iret |= _file.addVar(_nyquistVar, NYQUIST_VELOCITY,
+                       "", NYQUIST_VELOCITY_LONG, ncxxFloat, _timeDim, METERS_PER_SECOND, true);
+  iret |= _nyquistVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
 
-  iret |= _file.addMetaVar(_unambigRangeVar, UNAMBIGUOUS_RANGE,
-                           "", UNAMBIGUOUS_RANGE_LONG, ncFloat, _timeDim, METERS);
-  iret |= _file.addAttr(_unambigRangeVar, META_GROUP, INSTRUMENT_PARAMETERS);
+  iret |= _file.addVar(_unambigRangeVar, UNAMBIGUOUS_RANGE,
+                       "", UNAMBIGUOUS_RANGE_LONG, ncxxFloat, _timeDim, METERS, true);
+  iret |= _unambigRangeVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
 
-  iret |= _file.addMetaVar(_antennaTransitionVar, ANTENNA_TRANSITION,
-                           "", ANTENNA_TRANSITION_LONG, ncByte, _timeDim, "");
-  iret |= _file.addAttr(_antennaTransitionVar, COMMENT,
-                        "1 if antenna is in transition, 0 otherwise");
+  iret |= _file.addVar(_antennaTransitionVar, ANTENNA_TRANSITION,
+                       "", ANTENNA_TRANSITION_LONG, ncxxByte, _timeDim, "", true);
+  iret |= _antennaTransitionVar.addAttr(COMMENT,
+                                        "1 if antenna is in transition, 0 otherwise");
 
   if (_georefsActive) {
-    iret |= _file.addMetaVar(_georefsAppliedVar, GEOREFS_APPLIED,
-                             "", "georefs_have_been_applied_to_ray", ncByte, _timeDim, "");
-    iret |= _file.addAttr(_georefsAppliedVar, COMMENT,
-                          "1 if georefs have been applied, 0 otherwise");
+    iret |= _file.addVar(_georefsAppliedVar, GEOREFS_APPLIED,
+                         "", "georefs_have_been_applied_to_ray", ncxxByte, _timeDim, "", true);
+    iret |= _georefsAppliedVar.addAttr(COMMENT,
+                                       "1 if georefs have been applied, 0 otherwise");
   }
 
-  iret |= _file.addMetaVar(_nSamplesVar, N_SAMPLES,
-                           "", N_SAMPLES_LONG, ncInt, _timeDim, "");
-  iret |= _file.addAttr(_nSamplesVar, META_GROUP, INSTRUMENT_PARAMETERS);
+  iret |= _file.addVar(_nSamplesVar, N_SAMPLES,
+                       "", N_SAMPLES_LONG, ncxxInt, _timeDim, "", true);
+  iret |= _nSamplesVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
 
   if (_writeVol->getRcalibs().size() > 0) {
-    iret |= _file.addMetaVar(_calIndexVar, R_CALIB_INDEX,
-                             "", R_CALIB_INDEX_LONG, ncInt, _timeDim, "");
-    iret |= _file.addAttr(_calIndexVar, META_GROUP, RADAR_CALIBRATION);
-    iret |= _file.addAttr(_calIndexVar, COMMENT,
-                          "This is the index for the calibration which applies to this ray");
+    iret |= _file.addVar(_calIndexVar, R_CALIB_INDEX,
+                         "", R_CALIB_INDEX_LONG, ncxxInt, _timeDim, "", true);
+    iret |= _calIndexVar.addAttr(META_GROUP, RADAR_CALIBRATION);
+    iret |= _calIndexVar.addAttr(COMMENT,
+                                 "This is the index for the calibration which applies to this ray");
   }
 
-  iret |= _file.addMetaVar(_xmitPowerHVar,
+  iret |= _file.addVar(_xmitPowerHVar,
                            RADAR_MEASURED_TRANSMIT_POWER_H,
                            "", 
                            RADAR_MEASURED_TRANSMIT_POWER_H_LONG,
-                           ncFloat, _timeDim, DBM);
-  iret |= _file.addAttr(_xmitPowerHVar, META_GROUP, RADAR_PARAMETERS);
+                       ncxxFloat, _timeDim, DBM, true);
+  iret |= _xmitPowerHVar.addAttr(META_GROUP, RADAR_PARAMETERS);
 
-  iret |= _file.addMetaVar(_xmitPowerVVar,
+  iret |= _file.addVar(_xmitPowerVVar,
                            RADAR_MEASURED_TRANSMIT_POWER_V,
                            "", 
                            RADAR_MEASURED_TRANSMIT_POWER_V_LONG, 
-                           ncFloat, _timeDim, DBM);
-  iret |= _file.addAttr(_xmitPowerVVar, META_GROUP, RADAR_PARAMETERS);
+                       ncxxFloat, _timeDim, DBM, true);
+  iret |= _xmitPowerVVar.addAttr(META_GROUP, RADAR_PARAMETERS);
 
-  iret |= _file.addMetaVar(_scanRateVar, SCAN_RATE,
+  iret |= _file.addVar(_scanRateVar, SCAN_RATE,
                            "", SCAN_RATE_LONG, 
-                           ncFloat, _timeDim, DEGREES_PER_SECOND);
-  iret |= _file.addAttr(_scanRateVar, META_GROUP, INSTRUMENT_PARAMETERS);
+                       ncxxFloat, _timeDim, DEGREES_PER_SECOND, true);
+  iret |= _scanRateVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
 
   _setEstNoiseAvailFlags();
 
   if (_estNoiseAvailHc) {
-    iret |= _file.addMetaVar(_estNoiseDbmHcVar,
+    iret |= _file.addVar(_estNoiseDbmHcVar,
                              RADAR_ESTIMATED_NOISE_DBM_HC,
                              "", 
                              RADAR_ESTIMATED_NOISE_DBM_HC_LONG,
-                             ncFloat, _timeDim, DBM);
-    iret |= _file.addAttr(_estNoiseDbmHcVar, META_GROUP, RADAR_PARAMETERS);
+                         ncxxFloat, _timeDim, DBM, true);
+    iret |= _estNoiseDbmHcVar.addAttr(META_GROUP, RADAR_PARAMETERS);
   }
 
   if (_estNoiseAvailVc) {
-    iret |= _file.addMetaVar(_estNoiseDbmVcVar,
+    iret |= _file.addVar(_estNoiseDbmVcVar,
                              RADAR_ESTIMATED_NOISE_DBM_VC,
                              "", 
                              RADAR_ESTIMATED_NOISE_DBM_VC_LONG,
-                             ncFloat, _timeDim, DBM);
-    iret |= _file.addAttr(_estNoiseDbmVcVar, META_GROUP, RADAR_PARAMETERS);
+                         ncxxFloat, _timeDim, DBM, true);
+    iret |= _estNoiseDbmVcVar.addAttr(META_GROUP, RADAR_PARAMETERS);
   }
 
   if (_estNoiseAvailHx) {
-    iret |= _file.addMetaVar(_estNoiseDbmHxVar,
+    iret |= _file.addVar(_estNoiseDbmHxVar,
                              RADAR_ESTIMATED_NOISE_DBM_HX,
                              "", 
                              RADAR_ESTIMATED_NOISE_DBM_HX_LONG,
-                             ncFloat, _timeDim, DBM);
-    iret |= _file.addAttr(_estNoiseDbmHxVar, META_GROUP, RADAR_PARAMETERS);
+                         ncxxFloat, _timeDim, DBM, true);
+    iret |= _estNoiseDbmHxVar.addAttr(META_GROUP, RADAR_PARAMETERS);
   }
 
   if (_estNoiseAvailVx) {
-    iret |= _file.addMetaVar(_estNoiseDbmVxVar,
+    iret |= _file.addVar(_estNoiseDbmVxVar,
                              RADAR_ESTIMATED_NOISE_DBM_VX,
                              "", 
                              RADAR_ESTIMATED_NOISE_DBM_VX_LONG,
-                             ncFloat, _timeDim, DBM);
-    iret |= _file.addAttr(_estNoiseDbmVxVar, META_GROUP, RADAR_PARAMETERS);
+                         ncxxFloat, _timeDim, DBM, true);
+    iret |= _estNoiseDbmVxVar.addAttr(META_GROUP, RADAR_PARAMETERS);
   }
 
   if (iret) {
@@ -1670,154 +1696,154 @@ int NcxxRadxFile::_addGeorefVariables()
 
   // we always add the postion variables
   
-  iret |= _file.addMetaVar(_georefTimeVar, GEOREF_TIME,
-                           "", GEOREF_TIME_LONG, ncDouble,
-                           _timeDim, SECONDS);
+  iret |= _file.addVar(_georefTimeVar, GEOREF_TIME,
+                           "", GEOREF_TIME_LONG, ncxxDouble,
+                       _timeDim, SECONDS, true);
 
-  iret |= _file.addMetaVar(_latitudeVar, LATITUDE,
-                           "", LATITUDE_LONG, ncDouble,
-                           _timeDim, DEGREES_NORTH);
+  iret |= _file.addVar(_latitudeVar, LATITUDE,
+                           "", LATITUDE_LONG, ncxxDouble,
+                       _timeDim, DEGREES_NORTH, true);
 
-  iret |= _file.addMetaVar(_longitudeVar, LONGITUDE,
-                           "", LONGITUDE_LONG, ncDouble,
-                           _timeDim, DEGREES_EAST);
+  iret |= _file.addVar(_longitudeVar, LONGITUDE,
+                           "", LONGITUDE_LONG, ncxxDouble,
+                       _timeDim, DEGREES_EAST, true);
 
-  iret |= _file.addMetaVar(_altitudeVar, ALTITUDE,
-                           "", ALTITUDE_LONG, ncDouble,
-                           _timeDim, METERS);
-  iret |= _file.addAttr(_altitudeVar, POSITIVE, UP);
+  iret |= _file.addVar(_altitudeVar, ALTITUDE,
+                           "", ALTITUDE_LONG, ncxxDouble,
+                       _timeDim, METERS, true);
+  iret |= _altitudeVar.addAttr(POSITIVE, UP);
 
-  iret |= _file.addMetaVar(_altitudeAglVar, ALTITUDE_AGL,
-                           "", ALTITUDE_AGL_LONG, ncDouble,
-                           _timeDim, METERS);
-  iret |= _file.addAttr(_altitudeAglVar, POSITIVE, UP);
+  iret |= _file.addVar(_altitudeAglVar, ALTITUDE_AGL,
+                           "", ALTITUDE_AGL_LONG, ncxxDouble,
+                       _timeDim, METERS, true);
+  iret |= _altitudeAglVar.addAttr(POSITIVE, UP);
 
   // conditionally add the georeference variables
 
   if (_geoCount.getHeading() > 0) {
-    _file.addMetaVar(HEADING, "", HEADING_LONG, ncFloat,
-                     _timeDim, DEGREES);
+    _file.addVar(_headingVar, HEADING, "", HEADING_LONG, ncxxFloat,
+                 _timeDim, DEGREES, true);
   }
 
   if (_geoCount.getTrack() > 0) {
-    _file.addMetaVar(TRACK, "", TRACK_LONG, ncFloat,
-                     _timeDim, DEGREES);
+    _file.addVar(_trackVar, TRACK, "", TRACK_LONG, ncxxFloat,
+                 _timeDim, DEGREES, true);
   }
   
   if (_geoCount.getRoll() > 0) {
-    _file.addMetaVar(ROLL, "", ROLL_LONG, ncFloat,
-                     _timeDim, DEGREES);
+    _file.addVar(_rollVar, ROLL, "", ROLL_LONG, ncxxFloat,
+                 _timeDim, DEGREES, true);
   }
 
   if (_geoCount.getPitch() > 0) {
-    _file.addMetaVar(PITCH, "", PITCH_LONG, ncFloat,
-                     _timeDim, DEGREES);
+    _file.addVar(_pitchVar, PITCH, "", PITCH_LONG, ncxxFloat,
+                 _timeDim, DEGREES, true);
   }
 
   if (_geoCount.getDrift() > 0) {
-    _file.addMetaVar(DRIFT, "", DRIFT_LONG, ncFloat,
-                     _timeDim, DEGREES);
+    _file.addVar(_driftVar, DRIFT, "", DRIFT_LONG, ncxxFloat,
+                 _timeDim, DEGREES, true);
   }
 
   if (_geoCount.getRotation() > 0) {
-    _file.addMetaVar(ROTATION, "", ROTATION_LONG, ncFloat,
-                     _timeDim, DEGREES);
+    _file.addVar(_rotationVar, ROTATION, "", ROTATION_LONG, ncxxFloat,
+                 _timeDim, DEGREES, true);
   }
   
   if (_geoCount.getTilt() > 0) {
-    _file.addMetaVar(TILT, "", TILT_LONG, ncFloat,
-                     _timeDim, DEGREES);
+    _file.addVar(_tiltVar, TILT, "", TILT_LONG, ncxxFloat,
+                 _timeDim, DEGREES, true);
   }
-
+  
   if (_geoCount.getEwVelocity() > 0) {
-    NcVar *var = _file.addMetaVar(EASTWARD_VELOCITY, "", 
-                                  EASTWARD_VELOCITY_LONG, ncFloat,
-                                  _timeDim, METERS_PER_SECOND);
-    if (var != NULL) {
-      _file.addAttr(var, META_GROUP, PLATFORM_VELOCITY);
+    _file.addVar(_ewVelocityVar, EASTWARD_VELOCITY, "", 
+                 EASTWARD_VELOCITY_LONG, ncxxFloat,
+                 _timeDim, METERS_PER_SECOND, true);
+    if (!_ewVelocityVar.isNull()) {
+      _ewVelocityVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
     }
   }
   
   if (_geoCount.getNsVelocity() > 0) {
-    NcVar *var = _file.addMetaVar(NORTHWARD_VELOCITY,
-                                  "", NORTHWARD_VELOCITY_LONG, ncFloat,
-                                  _timeDim, METERS_PER_SECOND);
-    if (var != NULL) {
-      _file.addAttr(var, META_GROUP, PLATFORM_VELOCITY);
+    _file.addVar(_nsVelocityVar, NORTHWARD_VELOCITY,
+                 "", NORTHWARD_VELOCITY_LONG, ncxxFloat,
+                 _timeDim, METERS_PER_SECOND, true);
+    if (!_nsVelocityVar.isNull()) {
+      _nsVelocityVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
     }
   }
 
   if (_geoCount.getVertVelocity() > 0) {
-    NcVar *var = _file.addMetaVar(VERTICAL_VELOCITY,
-                                  "", VERTICAL_VELOCITY_LONG, ncFloat,
-                                  _timeDim, METERS_PER_SECOND);
-    if (var != NULL) {
-      _file.addAttr(var, META_GROUP, PLATFORM_VELOCITY);
+    _file.addVar(_vertVelocityVar, VERTICAL_VELOCITY,
+                 "", VERTICAL_VELOCITY_LONG, ncxxFloat,
+                 _timeDim, METERS_PER_SECOND, true);
+    if (!_vertVelocityVar.isNull()) {
+      _vertVelocityVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
     }
   }
   
   if (_geoCount.getEwWind() > 0) {
-    NcVar *var = _file.addMetaVar(EASTWARD_WIND,
-                                  "", EASTWARD_WIND_LONG, ncFloat,
-                                  _timeDim, METERS_PER_SECOND);
-    if (var != NULL) {
-      _file.addAttr(var, META_GROUP, PLATFORM_VELOCITY);
+    _file.addVar(_ewWindVar, EASTWARD_WIND,
+                 "", EASTWARD_WIND_LONG, ncxxFloat,
+                 _timeDim, METERS_PER_SECOND, true);
+    if (!_ewWindVar.isNull()) {
+      _ewWindVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
     }
   }
-
+  
   if (_geoCount.getNsWind() > 0) {
-    NcVar *var = _file.addMetaVar(NORTHWARD_WIND,
-                                  "", NORTHWARD_WIND_LONG, ncFloat,
-                                  _timeDim, METERS_PER_SECOND);
-    if (var != NULL) {
-      _file.addAttr(var, META_GROUP, PLATFORM_VELOCITY);
+    _file.addVar(_nsWindVar, NORTHWARD_WIND,
+                 "", NORTHWARD_WIND_LONG, ncxxFloat,
+                 _timeDim, METERS_PER_SECOND, true);
+    if (!_nsWindVar.isNull()) {
+      _nsWindVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
     }
   }
-
+  
   if (_geoCount.getVertWind() > 0) {
-    NcVar *var = _file.addMetaVar(VERTICAL_WIND,
-                                  "", VERTICAL_WIND_LONG, ncFloat,
-                                  _timeDim, METERS_PER_SECOND);
-    if (var != NULL) {
-      _file.addAttr(var, META_GROUP, PLATFORM_VELOCITY);
+    _file.addVar(_vertWindVar, VERTICAL_WIND,
+                 "", VERTICAL_WIND_LONG, ncxxFloat,
+                 _timeDim, METERS_PER_SECOND, true);
+    if (!_vertWindVar.isNull()) {
+      _vertWindVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
     }
   }
-
+  
   if (_geoCount.getHeadingRate() > 0) {
-    NcVar *var = _file.addMetaVar(HEADING_CHANGE_RATE,
-                                  "", HEADING_CHANGE_RATE_LONG, ncFloat,
-                                  _timeDim, DEGREES_PER_SECOND);
-    if (var != NULL) {
-      _file.addAttr(var, META_GROUP, PLATFORM_VELOCITY);
+    _file.addVar(_headingRateVar, HEADING_CHANGE_RATE,
+                 "", HEADING_CHANGE_RATE_LONG, ncxxFloat,
+                 _timeDim, DEGREES_PER_SECOND, true);
+    if (!_headingRateVar.isNull()) {
+      _headingRateVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
     }
   }
   
   if (_geoCount.getPitchRate() > 0) {
-    NcVar *var = _file.addMetaVar(PITCH_CHANGE_RATE,
-                                  "", PITCH_CHANGE_RATE_LONG, ncFloat,
-                                  _timeDim, DEGREES_PER_SECOND);
-    if (var != NULL) {
-      _file.addAttr(var, META_GROUP, PLATFORM_VELOCITY);
+    _file.addVar(_pitchRateVar, PITCH_CHANGE_RATE,
+                 "", PITCH_CHANGE_RATE_LONG, ncxxFloat,
+                 _timeDim, DEGREES_PER_SECOND, true);
+    if (!_pitchRateVar.isNull()) {
+      _pitchRateVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
     }
   }
-    
+  
   if (_geoCount.getRollRate() > 0) {
-    NcVar *var = _file.addMetaVar(ROLL_CHANGE_RATE,
-                                  "", ROLL_CHANGE_RATE_LONG, ncFloat,
-                                  _timeDim, DEGREES_PER_SECOND);
-    if (var != NULL) {
-      _file.addAttr(var, META_GROUP, PLATFORM_VELOCITY);
+    _file.addVar(_rollRateVar, ROLL_CHANGE_RATE,
+                 "", ROLL_CHANGE_RATE_LONG, ncxxFloat,
+                 _timeDim, DEGREES_PER_SECOND, true);
+    if (!_rollRateVar.isNull()) {
+      _rollRateVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
     }
   }
     
   if (_geoCount.getDriveAngle1() > 0) {
-    _file.addMetaVar(DRIVE_ANGLE_1, "", "antenna_drive_angle_1", ncFloat,
-                     _timeDim, DEGREES);
+    _file.addVar(_driveAngle1Var, DRIVE_ANGLE_1, "", "antenna_drive_angle_1", ncxxFloat,
+                 _timeDim, DEGREES, true);
   }
-
+  
   if (_geoCount.getDriveAngle2() > 0) {
-    _file.addMetaVar(DRIVE_ANGLE_2, "", "antenna_drive_angle_2", ncFloat,
-                     _timeDim, DEGREES);
+    _file.addVar(_driveAngle2Var, DRIVE_ANGLE_2, "", "antenna_drive_angle_2", ncxxFloat,
+                 _timeDim, DEGREES, true);
   }
   
   if (iret) {
@@ -1829,34 +1855,34 @@ int NcxxRadxFile::_addGeorefVariables()
 
 }
 
-int NcxxRadxFile::_addCalVar(NcVar* &var, const string &name,
+int NcxxRadxFile::_addCalVar(NcxxVar &var, const string &name,
                              const string &standardName,
                              const string &units /* = "" */)
 {
   
-  var = _file.getNcFile()->add_var(name.c_str(), ncFloat, _calDim);
-  if (var == NULL) {
+  var = _file.addVar(name, ncxxFloat, _calDim);
+  if (var.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_addCalVar");
     _addErrStr("  Cannot add calib var, name: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
 
   if (standardName.length() > 0) {
-    if (_file.addAttr(var, LONG_NAME, standardName)) {
+    if (var.addAttr(LONG_NAME, standardName)) {
       return -1;
     }
   }
 
-  if (_file.addAttr(var, UNITS, units)) {
+  if (var.addAttr(UNITS, units)) {
     return -1;
   }
   
-  if (_file.addAttr(var, META_GROUP, RADAR_CALIBRATION)) {
+  if (var.addAttr(META_GROUP, RADAR_CALIBRATION)) {
     return -1;
   }
   
-  if (_file.addAttr(var, FILL_VALUE, Radx::missingMetaFloat)) {
+  if (var.addAttr(FILL_VALUE, Radx::missingMetaFloat)) {
     return -1;
   }
 
@@ -1888,10 +1914,13 @@ int NcxxRadxFile::_writeCoordinateVariables()
     dsecs += ray.getNanoSecs() / 1.0e9;
     dtime[ii] = dsecs;
   }
-  if (!_timeVar->put(dtime, nRays)) {
+  try {
+    _timeVar.putVal(dtime);
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_writeCoordinateVariables");
     _addErrStr("  Cannot write time var");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
     return -1;
   }
 
@@ -1914,9 +1943,15 @@ int NcxxRadxFile::_writeCoordinateVariables()
         rangeMeters[index] = rangeKm * 1000.0;
       }
     }
-
-    if (!_rangeVar->put(rangeMeters, _writeVol->getNRays(), _writeVol->getMaxNGates())) {
+    
+    // if (!_rangeVar->putVal(rangeMeters, _writeVol->getNRays(), _writeVol->getMaxNGates())) {
+    try {
+      _rangeVar.putVal(rangeMeters);
+    } catch (NcxxException& e) {
       _addErrStr("ERROR - NcxxRadxFile::_writeCoordinateVariables");
+      _addErrStr("  Cannot write range var");
+      _addErrStr(_file.getErrStr());
+      _addErrStr("  Exception: ", e.what());
       return -1;
     }
   
@@ -1932,8 +1967,13 @@ int NcxxRadxFile::_writeCoordinateVariables()
       rangeMeters[ii] = rangeKm * 1000.0;
     }
 
-    if (_file.writeVar(_rangeVar, _rangeDim, rangeMeters)) {
+    try {
+      _rangeVar.putVal(rangeMeters);
+    } catch (NcxxException& e) {
       _addErrStr("ERROR - NcxxRadxFile::_writeCoordinateVariables");
+      _addErrStr("  Cannot write range var");
+      _addErrStr(_file.getErrStr());
+      _addErrStr("  Exception: ", e.what());
       return -1;
     }
   
@@ -1956,10 +1996,13 @@ int NcxxRadxFile::_writeScalarVariables()
   // volume number
   
   int volNum = _writeVol->getVolumeNumber();
-  if (!_volumeNumberVar->put(&volNum, 1)) {
+  try {
+    _volumeNumberVar.putVal(&volNum);
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write volumeNumber");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
     return -1;
   }
 
@@ -2114,7 +2157,7 @@ int NcxxRadxFile::_writeProjectionVariables()
   if (!_latitudeVar->put(&latitude, 1)) {
     _addErrStr("ERROR - NcxxRadxFile::_writeProjectionVariables");
     _addErrStr("  Cannot write latitude");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
 
@@ -2122,7 +2165,7 @@ int NcxxRadxFile::_writeProjectionVariables()
   if (!_longitudeVar->put(&longitude, 1)) {
     _addErrStr("ERROR - NcxxRadxFile::_writeProjectionVariables");
     _addErrStr("  Cannot write longitude");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
 
@@ -2133,7 +2176,7 @@ int NcxxRadxFile::_writeProjectionVariables()
   if (!_altitudeVar->put(&altitudeM, 1)) {
     _addErrStr("ERROR - NcxxRadxFile::_writeProjectionVariables");
     _addErrStr("  Cannot write altitude");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
 
@@ -2145,7 +2188,7 @@ int NcxxRadxFile::_writeProjectionVariables()
       !_altitudeAglVar->put(&htAglM, 1)) {
     _addErrStr("ERROR - NcxxRadxFile::_writeProjectionVariables");
     _addErrStr("  Cannot write altitude AGL");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   }
 
@@ -2469,7 +2512,7 @@ int NcxxRadxFile::_writeGeorefVariables()
 
   NcFile *ncFile = _file.getNcFile();
 
-  NcVar *var;
+  NcxxVar *var;
   if ((var = ncFile->get_var(EASTWARD_VELOCITY)) != NULL) {
     for (size_t ii = 0; ii < rays.size(); ii++) {
       const RadxGeoref *geo = rays[ii]->getGeoreference();
@@ -3196,7 +3239,7 @@ int NcxxRadxFile::_writeFieldVariables()
     
     if (copy != NULL) {
       // create variable
-      NcVar *var = _createFieldVar(*copy);
+      NcxxVar *var = _createFieldVar(*copy);
       if (var != NULL) {
         if (_writeFieldVar(var, copy)) {
           iret = -1;
@@ -3234,7 +3277,7 @@ int NcxxRadxFile::_writeFieldVariables()
 // Returns var ptr on success, NULL on failure
 // Adds to errStr as appropriate
 
-NcVar *NcxxRadxFile::_createFieldVar(const RadxField &field)
+NcxxVar *NcxxRadxFile::_createFieldVar(const RadxField &field)
 
 {
   
@@ -3281,7 +3324,7 @@ NcVar *NcxxRadxFile::_createFieldVar(const RadxField &field)
 
   NcType ncType = _getNcType(field.getDataType());
 
-  NcVar *var = NULL;
+  NcxxVar *var = NULL;
 
   if (_nGatesVary) {
     var = _file.getNcFile()->add_var(fieldName.c_str(), ncType, _nPointsDim);
@@ -3289,7 +3332,7 @@ NcVar *NcxxRadxFile::_createFieldVar(const RadxField &field)
     var = _file.getNcFile()->add_var(fieldName.c_str(), ncType, _timeDim, _rangeDim);
   }
   
-  if (var == NULL) {
+  if (var.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_createFieldVar");
     _addErrStr("  Cannot add variable to Nc file object");
     _addErrStr("  Input field name: ", name);
@@ -3299,66 +3342,66 @@ NcVar *NcxxRadxFile::_createFieldVar(const RadxField &field)
     _addErrInt("  Time dim size: ", _timeDim->size());
     _addErrStr("  Range dim name: ", _rangeDim->name());
     _addErrInt("  Range dim size: ", _rangeDim->size());
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return NULL;
   }
 
   if (field.getLongName().size() > 0) {
-    iret |= _file.addAttr(var, LONG_NAME, field.getLongName());
+    iret |= var.addAttr(LONG_NAME, field.getLongName());
   }
   if (field.getStandardName().size() > 0) {
-    iret |= _file.addAttr(var, STANDARD_NAME, field.getStandardName());
+    iret |= var.addAttr(STANDARD_NAME, field.getStandardName());
   }
-  iret |= _file.addAttr(var, UNITS, field.getUnits());
+  iret |= var.addAttr(UNITS, field.getUnits());
   if (field.getLegendXml().size() > 0) {
-    iret |= _file.addAttr(var, LEGEND_XML, field.getLegendXml());
+    iret |= var.addAttr(LEGEND_XML, field.getLegendXml());
   }
   if (field.getThresholdingXml().size() > 0) {
-    iret |= _file.addAttr(var, THRESHOLDING_XML, field.getThresholdingXml());
+    iret |= var.addAttr(THRESHOLDING_XML, field.getThresholdingXml());
   }
-  iret |= _file.addAttr(var, SAMPLING_RATIO, (float) field.getSamplingRatio());
+  iret |= var.addAttr(SAMPLING_RATIO, (float) field.getSamplingRatio());
   
   if (field.getFieldFolds()) {
-    iret |= _file.addAttr(var, FIELD_FOLDS, "true");
-    iret |= _file.addAttr(var, FOLD_LIMIT_LOWER, (float) field.getFoldLimitLower());
-    iret |= _file.addAttr(var, FOLD_LIMIT_UPPER, (float) field.getFoldLimitUpper());
+    iret |= var.addAttr(FIELD_FOLDS, "true");
+    iret |= var.addAttr(FOLD_LIMIT_LOWER, (float) field.getFoldLimitLower());
+    iret |= var.addAttr(FOLD_LIMIT_UPPER, (float) field.getFoldLimitUpper());
   }
   if (field.getIsDiscrete()) {
-    iret |= _file.addAttr(var, IS_DISCRETE, "true");
+    iret |= var.addAttr(IS_DISCRETE, "true");
   }
 
   switch (ncType) {
-    case ncDouble: {
-      iret |= _file.addAttr(var, FILL_VALUE, (double) field.getMissingFl64());
+    case ncxxDouble: {
+      iret |= var.addAttr(FILL_VALUE, (double) field.getMissingFl64());
       break;
     }
-    case ncFloat:
+    case ncxxFloat:
     default: {
-      iret |= _file.addAttr(var, FILL_VALUE, (float) field.getMissingFl32());
+      iret |= var.addAttr(FILL_VALUE, (float) field.getMissingFl32());
       break;
     }
-    case ncInt: {
-      iret |= _file.addAttr(var, FILL_VALUE, (int) field.getMissingSi32());
-      iret |= _file.addAttr(var, SCALE_FACTOR, (float) field.getScale());
-      iret |= _file.addAttr(var, ADD_OFFSET, (float) field.getOffset());
+    case ncxxInt: {
+      iret |= var.addAttr(FILL_VALUE, (int) field.getMissingSi32());
+      iret |= var.addAttr(SCALE_FACTOR, (float) field.getScale());
+      iret |= var.addAttr(ADD_OFFSET, (float) field.getOffset());
       break;
     }
     case ncShort: {
-      iret |= _file.addAttr(var, FILL_VALUE, (short) field.getMissingSi16());
-      iret |= _file.addAttr(var, SCALE_FACTOR, (float) field.getScale());
-      iret |= _file.addAttr(var, ADD_OFFSET, (float) field.getOffset());
+      iret |= var.addAttr(FILL_VALUE, (short) field.getMissingSi16());
+      iret |= var.addAttr(SCALE_FACTOR, (float) field.getScale());
+      iret |= var.addAttr(ADD_OFFSET, (float) field.getOffset());
       break;
     }
-    case ncByte: {
-      iret |= _file.addAttr(var, FILL_VALUE, (ncbyte) field.getMissingSi08());
-      iret |= _file.addAttr(var, SCALE_FACTOR, (float) field.getScale());
-      iret |= _file.addAttr(var, ADD_OFFSET, (float) field.getOffset());
+    case ncxxByte: {
+      iret |= var.addAttr(FILL_VALUE, (ncbyte) field.getMissingSi08());
+      iret |= var.addAttr(SCALE_FACTOR, (float) field.getScale());
+      iret |= var.addAttr(ADD_OFFSET, (float) field.getOffset());
       break;
     }
   } // switch
 
-  iret |= _file.addAttr(var, GRID_MAPPING, GRID_MAPPING);
-  iret |= _file.addAttr(var, COORDINATES, "time range");
+  iret |= var.addAttr(GRID_MAPPING, GRID_MAPPING);
+  iret |= var.addAttr(COORDINATES, "time range");
 
   // set compression
   
@@ -3377,7 +3420,7 @@ NcVar *NcxxRadxFile::_createFieldVar(const RadxField &field)
 // write a field variable
 // Returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_writeFieldVar(NcVar *var, RadxField *field)
+int NcxxRadxFile::_writeFieldVar(NcxxVar *var, RadxField *field)
   
 {
   
@@ -3386,7 +3429,7 @@ int NcxxRadxFile::_writeFieldVar(NcVar *var, RadxField *field)
     cerr << "  name: " << var->name() << endl;
   }
 
-  if (var == NULL) {
+  if (var.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_writeFieldVar");
     _addErrStr("  var is NULL");
     return -1;
@@ -3398,16 +3441,16 @@ int NcxxRadxFile::_writeFieldVar(NcVar *var, RadxField *field)
   if (_nGatesVary) {
 
     switch (var->type()) {
-      case ncDouble: {
+      case ncxxDouble: {
         iret = !var->put((double *) data, _writeVol->getNPoints());
         break;
       }
-      case ncFloat:
+      case ncxxFloat:
       default: {
         iret = !var->put((float *) data, _writeVol->getNPoints());
         break;
       }
-      case ncInt: {
+      case ncxxInt: {
         iret = !var->put((int *) data, _writeVol->getNPoints());
         break;
       }
@@ -3415,7 +3458,7 @@ int NcxxRadxFile::_writeFieldVar(NcVar *var, RadxField *field)
         iret = !var->put((short *) data, _writeVol->getNPoints());
         break;
       }
-      case ncByte: {
+      case ncxxByte: {
         iret = !var->put((ncbyte *) data, _writeVol->getNPoints());
         break;
       }
@@ -3428,16 +3471,16 @@ int NcxxRadxFile::_writeFieldVar(NcVar *var, RadxField *field)
     _writeVol->computeMaxNGates();
     
     switch (var->type()) {
-      case ncDouble: {
+      case ncxxDouble: {
         iret = !var->put((double *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
         break;
       }
-      case ncFloat:
+      case ncxxFloat:
       default: {
         iret = !var->put((float *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
         break;
       }
-      case ncInt: {
+      case ncxxInt: {
         iret = !var->put((int *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
         break;
       }
@@ -3445,7 +3488,7 @@ int NcxxRadxFile::_writeFieldVar(NcVar *var, RadxField *field)
         iret = !var->put((short *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
         break;
       }
-      case ncByte: {
+      case ncxxByte: {
         iret = !var->put((ncbyte *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
         break;
       }
@@ -3456,7 +3499,7 @@ int NcxxRadxFile::_writeFieldVar(NcVar *var, RadxField *field)
   if (iret) {
     _addErrStr("ERROR - NcxxRadxFile::_writeFieldVar");
     _addErrStr("  Canont write var, name: ", var->name());
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getErrStr());
     return -1;
   } else {
     return 0;
@@ -3479,7 +3522,7 @@ int NcxxRadxFile::_closeOnError(const string &caller)
 ///////////////////////////////////////////////////////////////////////////
 // Set output compression for variable
 
-int NcxxRadxFile::_setCompression(NcVar *var)  
+int NcxxRadxFile::_setCompression(NcxxVar *var)  
 {
 
   if (_ncFormat == NETCDF_CLASSIC || _ncFormat == NETCDF_OFFSET_64BIT) {
@@ -3487,7 +3530,7 @@ int NcxxRadxFile::_setCompression(NcVar *var)
     return 0;
   }
 
-  if (var == NULL) {
+  if (var.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_setCompression");
     _addErrStr("  var is NULL");
     return -1;

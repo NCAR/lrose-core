@@ -24,14 +24,14 @@
 /////////////////////////////////////////////////////////////
 // MslFile.hh
 //
-// MslFile object
+// For reading
+// NetCDF file data for HSRL radial data from UW
+// in MSL vert coords
 //
-// NetCDF data for radar radial data in CF-compliant file
-//
-// Mike Dixon, RAP, NCAR
+// Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Dec 2009
+// June 2015
 //
 ///////////////////////////////////////////////////////////////
 
@@ -57,11 +57,6 @@ class RadxRcalib;
 using namespace std;
 
 #include "Params.hh"
-
-///////////////////////////////////////////////////////////////
-/// FILE IO CLASS FOR NETCDF CF/RADIAL FILE FORMAT
-///
-/// This subclass of RadxFile handles I/O for netcdf files.
 
 class MslFile : public RadxFile
 

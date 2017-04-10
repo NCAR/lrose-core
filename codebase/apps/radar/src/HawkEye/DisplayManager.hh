@@ -125,8 +125,6 @@ signals:
   
 protected:
   
-  // void _contextMenuEvent(QContextMenuEvent *event);
-  
   const Params &_params;
   
   // reading data in
@@ -135,7 +133,7 @@ protected:
   vector<const RadxRay *> _rays;
   bool _initialRay;
   
-  // status panel
+  // instrument platform details 
 
   RadxPlatform _platform;
   

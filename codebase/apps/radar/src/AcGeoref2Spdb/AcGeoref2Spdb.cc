@@ -949,7 +949,16 @@ int AcGeoref2Spdb::_readTimes()
 
   // read the time coordinate variable
 
-  _timeVar = _file.getVar(_timeCoordName);
+  try {
+    _timeVar = _file.getVar(_timeCoordName);
+  } catch (NcxxException& e) {
+    cerr << "ERROR - AcGeoref2Spdb::_readTimes" << endl;
+    cerr << "  cannot get var time: " << _timeCoordName << endl;
+    cerr << "  exception: " << e.what() << endl;
+    return -1;
+  }
+
+
   if (_timeVar.isNull()) {
     cerr << "ERROR - AcGeoref2Spdb::_readTimes" << endl;
     cerr << "  Cannot get time variable: " << _timeCoordName << endl;
@@ -997,7 +1006,7 @@ int AcGeoref2Spdb::_readTimes()
   _times = _times_.alloc(_nTimes);
   TaArray<int> dTimes_;
   int *dTimes = dTimes_.alloc(_nTimes);
-  _timeVar.getVar(dTimes);
+  _timeVar.getVal(dTimes);
 
   for (size_t ii = 0; ii < _nTimes; ii++) {
     _times[ii] = _timeBase.utime() + dTimes[ii];
@@ -1117,8 +1126,10 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
 
   // get the variable
   
-  NcxxVar var = _file.getVar(varName);
-  if (var.isNull()) {
+  NcxxVar var;
+  try {
+    var = _file.getVar(varName);
+  } catch (NcxxException& e) {
     cerr << "ERROR - AcGeoref2Spdb::_readTimeSeriesVar" << endl;
     cerr << "  Cannot find var: " << varName << endl;
     return -1;
@@ -1190,7 +1201,7 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
 
   double *dArray = array.dat();
   if (varType == NC_DOUBLE) {
-    var.getVar(dArray);
+    var.getVal(dArray);
     for (size_t ii = 0; ii < _nTimes; ii++) {
       if (dArray[ii] == dfill) {
         dArray[ii] = _missingDbl;
@@ -1199,7 +1210,7 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
   } else if (varType == NC_FLOAT) {
     TaArray<float> fArray_;
     float *fArray = fArray_.alloc(_nTimes);
-    var.getVar(fArray);
+    var.getVal(fArray);
     for (size_t ii = 0; ii < _nTimes; ii++) {
       if (fArray[ii] == ffill) {
         dArray[ii] = _missingDbl;
@@ -1210,7 +1221,7 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
   } else if (varType == NC_INT) {
     TaArray<int> iArray_;
     int *iArray = iArray_.alloc(_nTimes);
-    var.getVar(iArray);
+    var.getVal(iArray);
     for (size_t ii = 0; ii < _nTimes; ii++) {
       if (iArray[ii] == ifill) {
         dArray[ii] = _missingDbl;

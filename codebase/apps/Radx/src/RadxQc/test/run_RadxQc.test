@@ -1,0 +1,9 @@
+#! /bin/csh
+#
+
+cd ~/apps/Radx/src/RadxQc/test
+
+../RadxQc -params RadxQc.test -debug -f ~/data/uae/cfradial/momentsDB.DP/20160525/cfrad.20160525_110357.000_to_20160525_110956.000_ARC_RADAR_Idle_SUR.nc
+
+
+

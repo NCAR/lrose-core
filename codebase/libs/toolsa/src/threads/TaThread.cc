@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// TaThread.cpp
+// TaThread.cc
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -36,6 +36,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <toolsa/TaThread.hh>
+#include <toolsa/TaThreadPool.hh>
 #include <cstring>
 #include <string>
 #include <cassert>
@@ -79,6 +80,8 @@ TaThread::TaThread()
   _completeFlag = false;
   _busyFlag = false;
   _exitFlag = false;
+
+  _pool = NULL;
   
 }
 
@@ -101,8 +104,10 @@ TaThread::~TaThread()
 
   // cancel thread
 
-  cancel();
-
+  if (_thread != 0) {
+    pthread_cancel(_thread);
+  }
+  
   // free up mutexes
 
   pthread_mutex_destroy(&_startMutex);
@@ -135,6 +140,9 @@ void TaThread::signalRunToStart()
 
   pthread_mutex_lock(&_startMutex);
   _startFlag = true;
+  if (_pool != NULL) {
+    _pool->incrementStartCount();
+  }
   pthread_cond_signal(&_startCond);
   pthread_mutex_unlock(&_startMutex);
   
@@ -302,6 +310,12 @@ void *TaThread::_run()
     // unlock done mutex
     
     _signalComplete();
+
+    // add to the done list on the pool, if part of a pool
+
+    if (_pool != NULL) {
+      _pool->addThreadToDone(this);
+    }
     
   } // while
 

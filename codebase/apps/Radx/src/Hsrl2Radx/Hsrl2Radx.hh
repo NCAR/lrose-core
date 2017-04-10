@@ -27,8 +27,10 @@
 // Hsrl2Radx object
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
 // June 2015
+// 
+// Brad Schoenrock, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// updated Mar 2017
 //
 ///////////////////////////////////////////////////////////////
 
@@ -38,10 +40,15 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <string>
+#include <Radx/RadxTime.hh>
+#include "CalReader.hh"
+#include "FullCals.hh"
+#include <Radx/Radx.hh>
 class RadxVol;
 class RadxFile;
 class MslFile;
 using namespace std;
+
 
 class Hsrl2Radx {
   
@@ -71,12 +78,14 @@ private:
   Args _args;
   Params _params;
   vector<string> _readPaths;
+  FullCals _cals;
 
   int _runFilelist();
   int _runArchive();
   int _runRealtimeWithLdata();
   int _runRealtimeNoLdata();
   int _processFile(const string &filePath);
+  int _processUwCfRadialFile(const string &filePath);
   void _setupRead(MslFile &file);
   void _overrideGateGeometry(RadxVol &vol);
   void _setRangeRelToInstrument(MslFile &file,
@@ -86,6 +95,28 @@ private:
   void _setGlobalAttr(RadxVol &vol);
   int _writeVol(RadxVol &vol);
 
+  int _processUwRawFile(const string &filePath);
+  void _addEnvFields(RadxVol &vol);
+  void _addDerivedFields(RadxVol &vol);
+
+  
+  double _nonLinCountCor(Radx::fl32 count, double deadtime, 
+			     double binWid, double shotCount);
+  double _baselineSubtract(double arrivalRate, double profile, 
+			       double polarization);
+  double _backgroundSub(double arrivalRate, double backgroundBins);
+  double _energyNorm(double arrivalRate, double totalEnergy);
+  vector<double> _diffOverlapCor(vector<double> arrivalRate, vector<double> diffOverlap);
+  vector<double> _processQWPRotation(vector<double>arrivalRate, vector<double> polCal);
+  double _hiAndloMerge(double hiRate, double loRate);
+  double _geoOverlapCor(double arrivalRate, double geoOverlap);
+  double _volDepol(double crossRate, double combineRate);
+  double _backscatRatio(double combineRate, double molRate);
+  double _partDepol(double volDepol, double backscatRatio);
+  double _backscatCo(double pressure, double temp, 
+			 double backscatRatio);
+  
 };
 
 #endif
+

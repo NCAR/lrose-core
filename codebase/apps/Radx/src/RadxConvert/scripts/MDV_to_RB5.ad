@@ -1,0 +1,50 @@
+#! /bin/bash
+# Script to run MDV to Rainbow for Abu Dhadi DP
+# Karel de Waal 20170227
+#
+##########################################
+pth=$PROJ_DIR/local/scripts
+pth1=$PROJ_DIR/data/mdv/radarPolarAD.DP.lim
+pth2=$PROJ_DIR/data/rainbow/rainbowAD
+
+# Setup day and time
+######################
+   read RTIME YY Mm dd hh mm ss < $pth1/_latest_data_info
+   if test $Mm -lt "10" 
+   then
+      MM='0'$Mm
+   else
+      MM=$Mm
+   fi
+   if test $dd -lt "10" 
+   then
+      DD='0'$dd
+   else
+      DD=$dd
+   fi
+   if test $hh -lt "10" 
+   then
+      hhh='0'$hh
+   else
+      hhh=$hh
+   fi
+   if test $mm -lt "10" 
+   then
+      mmm='0'$mm
+   else
+      mmm=$mm
+   fi
+   if test $ss -lt "10" 
+   then
+      sss='0'$ss
+   else
+      sss=$ss
+   fi
+
+   infile=$pth1/$YY$MM$DD/$hhh$mmm$sss.mdv
+   echo $infile
+   sleep 5
+   python3.6 $pth/MDV_to_RB5.py $infile $pth2
+   
+   cp -p $pth1/_latest_data_inf* $pth2
+

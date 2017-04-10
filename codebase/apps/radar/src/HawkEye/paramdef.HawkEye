@@ -98,20 +98,32 @@ paramdef boolean {
 paramdef string {
   p_default = "1970 01 01 00 00 00";
   p_descr = "Start time for archive mode.";
-  p_help = "If this is set to 1 Jan 1970, the app will initialize at 'now'.";
+  p_help = "In archive mode, data retrieval starts at this time.";
 } archive_start_time;
 
-paramdef string {
-  p_default = "1970 01 01 00 00 00";
-  p_descr = "End time for archive mode.";
-  p_help = "Generally this is applicable for image generation.";
-} archive_end_time;
+paramdef int {
+  p_default = 300;
+  p_descr = "Time between scans in archive mode (secs).";
+  p_help = "Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.";
+} archive_scan_interval_secs;
+
+paramdef int {
+  p_default = 12;
+  p_descr = "Number of scans in archive mode.";
+  p_help = "Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.";
+} archive_n_scans;
 
 paramdef string {
   p_default = "/scr/eldora1/hcr-test/cfradial/moments/wband";
   p_descr = "URL for archive data files.";
   p_help = "This should point to a CfRadial moments data set.";
 } archive_data_url;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Time margin for search in archive mode (secs).";
+  p_help = "We search for data within this margin, on either side of the required time.";
+} archive_search_margin_secs;
 
 commentdef {
   p_header = "STATUS TO BE SHOWN IN GUI";
@@ -379,6 +391,31 @@ paramdef double {
   p_descr = "Set to -1 to allow aspect ratio to vary as the main window is resized.";
 } ppi_aspect_ratio;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set PPI grids overlay on at startup.";
+} ppi_grids_on_at_startup;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set PPI range rings overlay on at startup.";
+} ppi_range_rings_on_at_startup;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set PPI azimuth lines overlay on at startup.";
+} ppi_azimuth_lines_on_at_startup;
+
+typedef enum {
+  LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
+} legend_pos_t;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of main legend in the PPI plot window";
+  p_help = "This include time, field name and elevation angle.";
+} ppi_main_legend_pos;
+
 commentdef {
   p_header = "RHI MODE DISPLAY";
 }
@@ -403,6 +440,50 @@ paramdef int {
   p_descr = "Startup Y for RHI window (pixels).";
 } rhi_window_start_y;
 
+paramdef int {
+  p_default = 20;
+  p_descr = "Height of top margin in RHI mode (pixels).";
+  p_help = "Titles go in the top margin.";
+} rhi_top_margin;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Height of bottom margin in RHI mode (pixels).";
+  p_help = "Time scale goes in the bottom margin.";
+} rhi_bottom_margin;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Width of left margin in RHI mode (pixels).";
+  p_help = "Height scale goes in the left margin.";
+} rhi_left_margin;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Width of right margin in RHI mode (pixels).";
+  p_help = "Height scale goes in the right margin.";
+} rhi_right_margin;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size for labels on range rings (pixels).";
+} rhi_label_font_size;
+
+paramdef int {
+  p_default = 7;
+  p_descr = "Length of ticks on axes (pixels).";
+} rhi_axis_tick_len;
+
+paramdef int {
+  p_default = 7;
+  p_descr = "Ideal number of ticks on axes.";
+} rhi_n_ticks_ideal;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Margin around some text (pixels).";
+} rhi_text_margin;
+
 paramdef boolean {
   p_default = false;
   p_descr = "Flag indicating to display full 180 degrees in RHI window. "
@@ -412,9 +493,41 @@ paramdef boolean {
 
 paramdef double {
   p_default = 1.0;
-  p_descr = "Aspect ratio (width/height) of PPI window.";
+  p_descr = "Aspect ratio (width/height) of RHI window.";
   p_descr = "Set to -1 to allow aspect ratio to vary as the RHI window is resized.";
 } rhi_aspect_ratio;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Max height of data in RHI window (km).";
+  p_descr = "This can be adjusted interactively.";
+} rhi_max_height_km;
+
+paramdef int {
+  p_default = 40;
+  p_descr = "Width of color scale for RHI window (pixels).";
+} rhi_color_scale_width;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set RHI grids overlay on at startup.";
+} rhi_grids_on_at_startup;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set RHI range rings overlay on at startup.";
+} rhi_range_rings_on_at_startup;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set RHI elevation lines overlay on at startup.";
+} rhi_elevation_lines_on_at_startup;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of main legend in the RHI plot window";
+  p_help = "This include time, field name and elevation angle.";
+} rhi_main_legend_pos;
 
 commentdef {
   p_header = "BSCAN TIME LIMITS";
@@ -668,10 +781,6 @@ commentdef {
   p_header = "BSCAN LEGENDS";
 }
 
-typedef enum {
-  LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
-} legend_pos_t;
-
 paramdef boolean {
   p_default = false;
   p_descr = "Option to plot the starting lat/lon position as a legend.";
@@ -825,6 +934,31 @@ paramdef int {
   p_descr = "Delay between scheduled time and image creation (secs).";
   p_help = "In order to ensure that the data has been written, a delay may be provided. This allows for the writing application to complete writing the data before this application tries to access it.";
 } images_schedule_delay_secs;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "Start time for image generation in archive mode.";
+  p_help = "Image generation starts with a seach at this time, and the proceeds at increments of images_schedule_interval_secs.";
+} images_archive_start_time;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "End time for image generation in archive mode.";
+  p_help = "Image generation is terminated when the search time exceeds this end time.";
+  p_help = "Only applicable for image generation.";
+} images_archive_end_time;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify the sweep indexes for the image generation.";
+  p_help = "If TRUE, only the specified sweeps will be processed.";
+} images_set_sweep_index_list;
+
+paramdef int {
+  p_default = { 0, 1, 2 };
+  p_descr = "List of valid sweep indexes for image generation.";
+  p_help = "See 'images_set_sweep_index_list'. Images will only be generated for the specified sweep indexes.";
+} images_sweep_index_list[];
 
 commentdef {
   p_header = "SIMULATION MODE";

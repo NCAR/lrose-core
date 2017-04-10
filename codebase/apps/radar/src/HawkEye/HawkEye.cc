@@ -164,11 +164,16 @@ int HawkEye::Run(QApplication &app)
   // start the reader thread
 
   _reader->signalRunToStart();
-
+  
   if (_params.display_mode == Params::POLAR_DISPLAY) {
-
+    
     _polarManager = new PolarManager(_params, _reader,
                                      _displayFields, _haveFilteredFields);
+
+    if (_args.inputFileList.size() > 0) {
+      _polarManager->setInputFileList(_args.inputFileList);
+    }
+
     return _polarManager->run(app);
 
   } else if (_params.display_mode == Params::BSCAN_DISPLAY) {
@@ -293,7 +298,8 @@ int HawkEye::_setupDisplayFields()
     // unfiltered field
 
     DisplayField *field =
-      new DisplayField(pfld.label, pfld.raw_name, pfld.units, pfld.shortcut, map, ifield, false);
+      new DisplayField(pfld.label, pfld.raw_name, pfld.units, 
+                       pfld.shortcut, map, ifield, false);
     
     _displayFields.push_back(field);
 
@@ -302,7 +308,8 @@ int HawkEye::_setupDisplayFields()
     if (strlen(pfld.filtered_name) > 0) {
       string filtLabel = string(pfld.label) + "-filt";
       DisplayField *filt =
-        new DisplayField(filtLabel, pfld.filtered_name, pfld.units, pfld.shortcut, map, ifield, true);
+        new DisplayField(filtLabel, pfld.filtered_name, pfld.units, pfld.shortcut, 
+                         map, ifield, true);
       _displayFields.push_back(filt);
     }
 

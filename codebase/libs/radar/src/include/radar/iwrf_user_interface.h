@@ -71,6 +71,7 @@ typedef struct iwrf_ui_schedule_info
 
 typedef struct iwrf_ui_tasklist_full
 {	si32 num_list_items;
+	si32 unused_padding;  /* required so structure is the same size on 64 bit architectures */
 	iwrf_ui_name_element_t tasks[IWRF_UI_MAX_TASKS_PER_TASKLIST];
 	iwrf_ui_schedule_info_t tasklist_schedule;
 	si32 unused[32];
@@ -105,10 +106,14 @@ typedef enum iwrf_ui_error
 	IWRF_TXCTRL_NOT_CONNECTED,			/**< txmit controller not connected */
 	IWRF_SCAN_STATE_TIMEOUT, 			/**< scan state machine time in state limit reached */
 	IWRF_SCAN_SEGMENT_LIST_ERROR,			/**< scan segment fixed angle list is bad */
+	IWRF_UI_ERROR_BAD_PACKET_ID,		/**< expected ui_task_operations packet ID not found */
+	IWRF_UI_WARN_START_TIME_WARN,		/**< start time is in the past */
+	IWRF_UI_DATA_SYSTEM_NOT_CONNECTED,	/**< syscon has no connection to control data system */
 } iwrf_ui_error_t;
 
 #define IWRF_UI_ENABLES_MASTER_RECORD_MASK 1
 #define IWRF_UI_ENABLES_IMMEDIATE_SCAN_UPDATE_MASK 2
+#define IWRF_UI_ENABLES_DONT_SEND_RSM_TO_UI 4
 
 
 /* The iwrf_ui_global structure is used to pass info relating to all tasks to system controller.
@@ -131,6 +136,7 @@ typedef struct iwrf_ui_rcs_status
 	ui32 el_status;		/**< el motor status bits, see MS_... in deltatau.h */
 } iwrf_ui_rcs_status_t;
 
+
 typedef enum iwrf_ui_opcodes
 {		/* Task Definition */
 	     /*        Opcode           Payload Flow Dir.      Payload  */
@@ -142,12 +148,18 @@ typedef enum iwrf_ui_opcodes
 			/* last opcode allows for alternative scheduling methods */
 		/* Tasklist operations */
 	IWRF_UI_TASKLIST_UPD_LIST,	    /**<  UI<>RCS    iwrf_ui_tasklist_full */
-	IWRF_UI_TASKLIST_UPD_UNUSED_LIST,   /**<  UI<-RCS  iwrf_ui_tasklist_full */
-	IWRF_UI_TASKLIST_UPD_CURRENT_INDEX, /**<  UI<-RCS  iwrf_ui_tasklist_mod->index1&2 */
-	IWRF_UI_TASKLIST_UPD_NEXT_INDEX,    /**<  UI<>RCS  iwrf_ui_tasklist_mod->index1 */
-	IWRF_UI_TASKLIST_SET_INDEX_IMMEDIATE, /**< UI->RCS iwrf_ui_tasklist_mod->index1 */
+	IWRF_UI_TASKLIST_GET_UNUSED_LIST,   /**<  UI<-RCS user query, in response, 
+				RCS sends iwrf_ui_tasklist_full containing unused task names */
+	IWRF_UI_TASKLIST_GET_CURRENT_INDEX, /**< UI<-RCS user query,  in response,
+						    RCS sends current and next task indexes in
+						    iwrf_ui_tasklist_mod->index1&2 */
+	IWRF_UI_TASKLIST_UPD_NEXT_INDEX,    /**<  UI<>RCS  iwrf_ui_tasklist_mod->index1 
+					indexed task starts when current task ends */
+	IWRF_UI_TASKLIST_SET_INDEX_IMMEDIATE, /**< UI->RCS iwrf_ui_tasklist_mod->index1 
+						indexed	task starts immediately */
 	IWRF_UI_TASKLIST_UPD_LIST_SCHEDULE, /**<  UI<>RCS  iwrf_schedule_info_t */
-	IWRF_UI_TASKLIST_GET_LIST_SCHEDULE, /**<  UI->RCS  iwrf_schedule_info_t */
+	IWRF_UI_TASKLIST_GET_LIST_SCHEDULE, /**<  UI->RCS user query, in response, 
+						RCS sends current iwrf_ui_tasklist_full + sched. */
 	IWRF_UI_TASKLIST_REMOVE_ALL,	    /**< UI<>RCS   none */
 	IWRF_UI_TASKLIST_REMOVE_ONE,	    /**< UI<>RCS   ...tasklist_mod->index1 */
 	IWRF_UI_TASKLIST_APPEND,	    /**< UI<>RCS   ...tasklist_mod->name */
@@ -157,9 +169,13 @@ typedef enum iwrf_ui_opcodes
 	IWRF_UI_UPD_GLOBAL,			/**< UI->RCS  iwrf_ui_global_t */
 	IWRF_UI_UPD_RSM_PACKET,			/**< UI<-RCS  rsm_pkt_t  */
 	IWRF_UI_RCS_STATUS,			/**< UI<-RCS  iwrf_ui_rcs_status_t */
+	IWRF_UI_SHUTDOWN_CONNECTION,  /** disconnect from server */
+        /* RCS requests UI to set Polarization mode */
+        IWRF_UI_SET_POL_MODE,                   /**< UI<-RCS  iwrf_scan_segment_t */
+        /* UI confirms Polarization mode */
+        IWRF_UI_CONFIRM_POL_MODE,               /**< UI->RCS  iwrf_scan_segment_t */
 	IWRF_UI_LAST
 } iwrf_ui_opcodes_t;
-
 
 
 typedef union iwrf_ui_rcs_payloads
@@ -181,8 +197,8 @@ typedef struct iwrf_ui_task_operations
 	iwrf_packet_info_t packet;		/**< packet id = IWRF_UI_OPERATIONS \*/
 	char task_name[IWRF_MAX_SEGMENT_NAME];  /**< req'd for Task Def operations \*/
 	char owner_name[IWRF_UI_MAX_OPERATOR_NAME]; /**< originating operator name \*/
-	si32 op_code;
-	ui32		  pad1;			/* structure  alignment - */
+	si32 op_code;			/**< see iwrf_ui_opcodes_t */
+	ui32 pad1;			/* structure  alignment - */
 	iwrf_ui_rcs_payloads_t un;
 } iwrf_ui_task_operations_t;
 
