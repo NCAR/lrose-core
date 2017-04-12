@@ -19,6 +19,19 @@ TAGS
 Entries.Log
 Entries.static
 
+# Ignore files and directories created by the Eclipse IDE
+
+.cproject
+.project
+.settings
+
+# Ignore bin, include, and lib directories which are created if
+# an install is done to the local directory
+
+bin
+include
+lib
+
 # configure
 
 makefile
@@ -588,4 +601,3 @@ codebase/libs/Fmq/src/.libs/
 codebase/libtool
 codebase/ltmain.sh
 codebase/m4/
-
