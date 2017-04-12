@@ -89,6 +89,9 @@ SunCal::SunCal(int argc, char **argv)
   _prevEl = 0;
   _globalPrintCount = 0;
 
+  _startGateSun = 0;
+  _endGateSun = 0;
+
   // set programe name
   
   _progName = "SunCal";
@@ -630,12 +633,7 @@ int SunCal::_processPulse(const IwrfTsPulse *pulse)
   
   MomentsSun *moments = new MomentsSun();
   
-  int startGateSun = _params.start_gate;
-  int endGateSun = startGateSun + _params.n_gates - 1;
-  if (endGateSun > _nGates - 1) {
-    endGateSun = _nGates - 1;
-  }
-  if (_computeMomentsSun(moments, startGateSun, endGateSun)) {
+  if (_computeMomentsSun(moments, _startGateSun, _endGateSun)) {
     delete moments;
   } else {
     _rawMoments[angleIndex].push_back(moments);
@@ -804,12 +802,12 @@ int SunCal::_processCovarFile(const char *filePath)
   }
   RadxVol vol;
   if (inFile.readFromPath(filePath, vol)) {
-    cerr << "ERROR - SunCal::_processMomentsFile" << endl;
+    cerr << "ERROR - SunCal::_processCovarFile" << endl;
     cerr << inFile.getErrStr() << endl;
     return -1;
   }
   if (vol.getNRays() < 100) {
-    cerr << "ERROR - SunCal::_processMomentsFile" << endl;
+    cerr << "ERROR - SunCal::_processCovarFile" << endl;
     cerr << "  less than 100 rays in file: " << filePath << endl;
     return -1;
   }
@@ -828,11 +826,27 @@ int SunCal::_processCovarFile(const char *filePath)
   _sunPosn.setLocation(_radarLat, _radarLon, _radarAltKm / 1000.0);
 
   vector<RadxRay *> &rays = vol.getRays();
+  RadxRay *ray0 = rays[0];
+  _volCount = 1;
+  _nGates = ray0->getNGates();
+  _startRangeKm = ray0->getStartRangeKm();
+  _gateSpacingKm = ray0->getGateSpacingKm();
+  _startGateSun = _params.start_gate;
+  _endGateSun = _startGateSun + _params.n_gates - 1;
+  if (_endGateSun > _nGates - 1) {
+    _endGateSun = _nGates - 1;
+  }
+  if (ray0->getPolarizationMode() == Radx::POL_MODE_HV_ALT) {
+    _alternating = TRUE;
+  } else {
+    _alternating = FALSE;
+  }
+
   for (size_t iray = 0; iray < rays.size(); iray++) {
     RadxRay *ray = rays[iray];
     ray->convertToFl32();
     if (_processCovarRay(ray)) {
-      cerr << "ERROR - SunCal::_processMomentsFile" << endl;
+      cerr << "ERROR - SunCal::_processCovarFile" << endl;
       cerr << "  Cannot process ray, el, az:"
            << ray->getElevationDeg() << ", "
            << ray->getAzimuthDeg() << endl;
@@ -840,11 +854,6 @@ int SunCal::_processCovarFile(const char *filePath)
     }
   }
   
-  RadxRay *ray0 = rays[0];
-  _volCount = 1;
-  _nGates = ray0->getNGates();
-  _startRangeKm = ray0->getStartRangeKm();
-  _gateSpacingKm = ray0->getGateSpacingKm();
 
   // perform analysis
 
@@ -864,11 +873,19 @@ int SunCal::_processCovarFile(const char *filePath)
 int SunCal::_processCovarRay(RadxRay *ray)
 {
 
+  // init moments object
+
   MomentsSun mom;
   mom.time = ray->getTimeSecs();
   mom.prt = ray->getPrtSec();
   mom.az = ray->getAzimuthDeg();
   mom.el = ray->getElevationDeg();
+
+  // compute mean moments along ray
+
+  if (_computeCovarMoments(ray, mom)) {
+    return -1;
+  }
 
   // compute the offset relative to the sun
 
@@ -894,16 +911,25 @@ int SunCal::_processCovarRay(RadxRay *ray)
   RadxField *rvvhh0_phase =
     ray->getField(_params.covar_field_names.RVVHH0_PHASE);
   
-  double meanLag0_Hc_Db = _computeFieldMean(lag0_hc_db);
-  double meanLag0_Vc_Db = _computeFieldMean(lag0_vc_db);
-  
-  double meanLag0_Hx_Db = _computeFieldMean(lag0_hx_db);
-  double meanLag0_Vx_Db = _computeFieldMean(lag0_vx_db);
+  // if (lag0_hc_db_fld == NULL ||
+  //     lag0_vc_db_fld == NULL ||
+  //     lag0_hx_db_fld == NULL ||
+  //     lag0_vx_db_fld == NULL ||
+  //     rvvhh0_db_fld == NULL ||
+  //     rvvhh0_phase_fld == NULL) {
+  //   return -1;
+  // }
 
-  mom.dbmHc = meanLag0_Hc_Db;
-  mom.dbmVc = meanLag0_Vc_Db;
-  mom.dbmHx = meanLag0_Hx_Db;
-  mom.dbmVx = meanLag0_Vx_Db;
+  double meanDbmHc = _computeFieldMean(lag0_hc_db);
+  double meanDbmVc = _computeFieldMean(lag0_vc_db);
+  
+  double meanDbmHx = _computeFieldMean(lag0_hx_db);
+  double meanDbmVx = _computeFieldMean(lag0_vx_db);
+
+  mom.dbmHc = meanDbmHc;
+  mom.dbmVc = meanDbmVc;
+  mom.dbmHx = meanDbmHx;
+  mom.dbmVx = meanDbmVx;
 
   double corrMag = 0;
   RadarComplex_t meanRvvhh0 =
@@ -911,9 +937,9 @@ int SunCal::_processCovarRay(RadxRay *ray)
   
   mom.Rvvhh0 = meanRvvhh0;
   mom.corrMag = corrMag;
-  if (meanLag0_Hc_Db > -9990 && meanLag0_Vc_Db > -9990) {
-    double powerHc = pow(10.0, meanLag0_Hc_Db / 10.0);
-    double powerVc = pow(10.0, meanLag0_Vc_Db / 10.0);
+  if (meanDbmHc > -9990 && meanDbmVc > -9990) {
+    double powerHc = pow(10.0, meanDbmHc / 10.0);
+    double powerVc = pow(10.0, meanDbmVc / 10.0);
     // MUST FIX THIS - 
     mom.corr00 = (corrMag / sqrt(powerHc * powerVc)) / 1000.0;
   }
@@ -1012,6 +1038,166 @@ int SunCal::_processCovarRay(RadxRay *ray)
 
   _nBeamsThisVol++;
 
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Compute moments from covariances
+
+int SunCal::_computeCovarMoments(RadxRay *ray,
+                                 MomentsSun &mom)
+{
+  
+  mom.time = ray->getTimeSecs();
+  mom.prt = ray->getPrtSec();
+  mom.az = ray->getAzimuthDeg();
+  mom.el = ray->getElevationDeg();
+
+  // compute the offset relative to the sun
+  
+  if (_params.specify_fixed_target_location) {
+    _targetEl = _params.target_elevation;
+    _targetAz = _params.target_azimuth;
+  } else {
+    _sunPosn.computePosnNova(ray->getTimeDouble(), _targetEl, _targetAz);
+  }
+  double cosElTarget = cos(_targetEl * DEG_TO_RAD);
+  _offsetEl = RadarComplex::diffDeg(mom.el, _targetEl);
+  _offsetAz = RadarComplex::diffDeg(mom.az, _targetAz) * cosElTarget;
+  mom.offsetEl = _offsetEl;
+  mom.offsetAz = _offsetAz;
+  
+  RadxField *lag0_hc_db_fld = ray->getField(_params.covar_field_names.LAG0_HC_DB);
+  RadxField *lag0_vc_db_fld = ray->getField(_params.covar_field_names.LAG0_VC_DB);
+  RadxField *lag0_hx_db_fld = ray->getField(_params.covar_field_names.LAG0_HX_DB);
+  RadxField *lag0_vx_db_fld = ray->getField(_params.covar_field_names.LAG0_VX_DB);
+  
+  RadxField *rvvhh0_db_fld =
+    ray->getField(_params.covar_field_names.RVVHH0_DB);
+  RadxField *rvvhh0_phase_fld =
+    ray->getField(_params.covar_field_names.RVVHH0_PHASE);
+
+  if (lag0_hc_db_fld == NULL ||
+      lag0_vc_db_fld == NULL ||
+      lag0_hx_db_fld == NULL ||
+      lag0_vx_db_fld == NULL ||
+      rvvhh0_db_fld == NULL ||
+      rvvhh0_phase_fld == NULL) {
+    cerr << "Warning - processCovarMoments()" << endl;
+    cerr << "  Required data field missing" << endl;
+    return -1;
+  }
+  
+  Radx::fl32 *lag0_hc_db = lag0_hc_db_fld->getDataFl32();
+  Radx::fl32 *lag0_vc_db = lag0_vc_db_fld->getDataFl32();
+  Radx::fl32 *lag0_hx_db = lag0_hx_db_fld->getDataFl32();
+  Radx::fl32 *lag0_vx_db = lag0_vx_db_fld->getDataFl32();
+  Radx::fl32 *rvvhh0_db = rvvhh0_db_fld->getDataFl32();
+  Radx::fl32 *rvvhh0_phase = rvvhh0_phase_fld->getDataFl32();
+  
+  // initialize summation quantities
+  
+  double sumPowerHc = 0.0;
+  double sumPowerHx = 0.0;
+  double sumPowerVx = 0.0;
+  double sumPowerVc = 0.0;
+  RadarComplex_t sumRvvhh0Hc(0.0, 0.0);
+  RadarComplex_t sumRvvhh0Vc(0.0, 0.0);
+  double nn = 0.0;
+  
+  // loop through gates to be used for sun computations
+
+  for (int igate = _startGateSun; igate <= _endGateSun; igate++, nn++) {
+    
+    // check power for interference
+    double dbmHc = lag0_hc_db[igate];
+    if (dbmHc > _maxValidSunPowerDbm) {
+      // don't use this gate - probably interference
+      continue;
+    }
+    
+    nn++;
+
+    double lag0_hc = pow(10.0, lag0_hc_db[igate] / 10.0);
+    double lag0_vc = pow(10.0, lag0_vc_db[igate] / 10.0);
+    double lag0_hx = pow(10.0, lag0_hx_db[igate] / 10.0);
+    double lag0_vx = pow(10.0, lag0_vx_db[igate] / 10.0);
+
+    double rvvhh0Mag = pow(10.0, rvvhh0_db[igate] / 20.0);
+    double rvvhh0Phase = rvvhh0_phase[igate] * DEG_TO_RAD;
+    double sinval, cosval;
+    ta_sincos(rvvhh0Phase, &sinval, &cosval);
+    RadarComplex_t rvvhh0;
+    rvvhh0.set(rvvhh0Mag * cosval, rvvhh0Mag * sinval);
+
+    sumPowerHc += lag0_hc;
+    sumPowerVc += lag0_vc;
+    sumPowerHx += lag0_hx;
+    sumPowerVx += lag0_vx;
+    
+    sumRvvhh0Hc = RadarComplex::complexSum(sumRvvhh0Hc, rvvhh0);
+    sumRvvhh0Vc = RadarComplex::complexSum(sumRvvhh0Vc, rvvhh0);
+
+  } // igate
+
+  if (nn < 3) {
+    cerr << "Warning - processCovarMoments()" << endl;
+    cerr << "  Insufficient good data found" << endl;
+    cerr << "  az, el: " << _midAz << ", " << _midEl << endl;
+    cerr << "  nn: " << nn << endl;
+    return -1;
+  }
+  
+  // compute moments
+
+  mom.nn = nn;
+
+  double meanPowerHc = sumPowerHc / nn;
+  double meanPowerVc = sumPowerVc / nn;
+  double meanPowerHx = sumPowerHx / nn;
+  double meanPowerVx = sumPowerVx / nn;
+  
+  mom.powerHc = meanPowerHc;
+  mom.powerVc = meanPowerVc;
+  mom.powerHx = meanPowerHx;
+  mom.powerVx = meanPowerVx;
+
+  mom.dbmHc = 10.0 * log10(meanPowerHc);
+  mom.dbmVc = 10.0 * log10(meanPowerVc);
+  mom.dbmHx = 10.0 * log10(meanPowerHx);
+  mom.dbmVx = 10.0 * log10(meanPowerVx);
+
+  mom.dbm = (mom.dbmHc + mom.dbmVc +
+                  mom.dbmHx + mom.dbmVx) / 4.0;
+
+  mom.sumRvvhh0Hc = sumRvvhh0Hc;
+  mom.sumRvvhh0Vc = sumRvvhh0Vc;
+
+  RadarComplex_t sumRvvhh0 =
+    RadarComplex::complexMean(sumRvvhh0Hc, sumRvvhh0Vc);
+  mom.sumRvvhh0 = sumRvvhh0;
+  
+  mom.Rvvhh0Hc = RadarComplex::mean(sumRvvhh0Hc, nn);
+  mom.Rvvhh0Vc = RadarComplex::mean(sumRvvhh0Vc, nn);
+  mom.Rvvhh0 = RadarComplex::mean(sumRvvhh0, nn);
+  
+  double corrMagHc = RadarComplex::mag(sumRvvhh0Hc) / nn;
+  mom.corrMagHc = corrMagHc;
+  double corrMagVc = RadarComplex::mag(sumRvvhh0Vc) / nn;
+  mom.corrMagVc = corrMagVc;
+  mom.corrMag = (corrMagHc + corrMagVc) / 2.0;
+  
+  double corr00Hc = corrMagHc / sqrt(meanPowerHc * meanPowerVx);
+  mom.corr00Hc = corr00Hc;
+  double corr00Vc = corrMagVc / sqrt(meanPowerVc * meanPowerHx);
+  mom.corr00Vc = corr00Vc;
+  mom.corr00 = (corr00Hc + corr00Vc) / 2.0;
+
+  mom.arg00Hc = RadarComplex::argDeg(sumRvvhh0Hc);
+  mom.arg00Vc = RadarComplex::argDeg(sumRvvhh0Vc);
+  mom.arg00 = RadarComplex::argDeg(sumRvvhh0);
+  
   return 0;
 
 }
@@ -1176,18 +1362,15 @@ int SunCal::_performAnalysis(bool force)
     }
   }
 
-  int startGateSun = _params.start_gate;
-  int endGateSun = startGateSun + _params.n_gates - 1;
-
-  double startRangeSun = _startRangeKm + _gateSpacingKm * startGateSun;
-  double endRangeSun = _startRangeKm + _gateSpacingKm * endGateSun;
+  double startRangeSun = _startRangeKm + _gateSpacingKm * _startGateSun;
+  double endRangeSun = _startRangeKm + _gateSpacingKm * _endGateSun;
 
   if (_params.debug) {
     cerr << "----------------------------------------------------" << endl;
     cerr << "Performing analysis, n volumes: " << _volCount << endl;
     cerr << "  nGates        : " << _nGates << endl;
-    cerr << "  startGateSun  : " << startGateSun << endl;
-    cerr << "  endGateSun    : " << endGateSun << endl;
+    cerr << "  startGateSun  : " << _startGateSun << endl;
+    cerr << "  endGateSun    : " << _endGateSun << endl;
     cerr << "  startRangeSun : " << startRangeSun << endl;
     cerr << "  endRangeSun   : " << endRangeSun << endl;
     cerr << "----------------------------------------------------" << endl;
@@ -1592,7 +1775,8 @@ int SunCal::_computeMomentsSunDualAlt(MomentsSun *moments,
   moments->sumRvvhh0Hc = sumRvvhh0Hc;
   moments->sumRvvhh0Vc = sumRvvhh0Vc;
 
-  RadarComplex_t sumRvvhh0 = RadarComplex::complexMean(sumRvvhh0Hc, sumRvvhh0Vc);
+  RadarComplex_t sumRvvhh0 =
+    RadarComplex::complexMean(sumRvvhh0Hc, sumRvvhh0Vc);
   moments->sumRvvhh0 = sumRvvhh0;
   
   moments->Rvvhh0Hc = RadarComplex::mean(sumRvvhh0Hc, nn);
@@ -4911,6 +5095,12 @@ void SunCal::_allocGateData()
     if (_nGates > _pulseQueue[ii]->getNGates()) {
       _nGates = _pulseQueue[ii]->getNGates();
     }
+  }
+
+  _startGateSun = _params.start_gate;
+  _endGateSun = _startGateSun + _params.n_gates - 1;
+  if (_endGateSun > _nGates - 1) {
+    _endGateSun = _nGates - 1;
   }
 
   // allocate

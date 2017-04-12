@@ -231,6 +231,8 @@ private:
   int _nSamples, _nSamplesHalf;
   vector<GateData *> _gateData;
   vector<MomentsFields> _fields;
+  int _startGateSun;
+  int _endGateSun;
 
   // volume number etc
 
@@ -377,6 +379,8 @@ private:
 
   int _processCovarFile(const char *filePath);
   int _processCovarRay(RadxRay *ray);
+  int _computeCovarMoments(RadxRay *ray, MomentsSun &mom);
+
   double _computeFieldMean(const RadxField *field);
   RadarComplex_t _computeRvvhh0Mean(const RadxField *rvvhh0_db,
                                     const RadxField *rvvhh0_phase,
