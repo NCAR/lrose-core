@@ -24,8 +24,8 @@ def main():
     # parse the command line
 
     usage = "usage: %prog [options]"
-    homeDir = os.environ['HOME']
-    defaultCodeDir = os.path.join(homeDir, "git/lrose-core/codebase")
+    coreDir = os.environ['LROSE_CORE_DIR']
+    defaultCodeDir = os.path.join(coreDir, "codebase")
     parser = OptionParser(usage)
     parser.add_option('--debug',
                       dest='debug', default='False',
