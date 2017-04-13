@@ -161,6 +161,7 @@ SunCal::SunCal(int argc, char **argv)
 
   _createRawMomentsArray();
   _createInterpMomentsArray();
+  _createQuadrantMomentsArrays();
 
   // calibration for noise
 
@@ -204,6 +205,7 @@ SunCal::~SunCal()
   _clearPulseQueue();
   _deleteRawMomentsArray();
   _deleteInterpMomentsArray();
+  // _deleteQuadrantMomentsArrays();
   _deleteXpolMomentsArray();
   _deleteTestPulseMomentsArray();
 
@@ -875,15 +877,16 @@ int SunCal::_processCovarRay(RadxRay *ray)
 
   // init moments object
 
-  MomentsSun mom;
-  mom.time = ray->getTimeSecs();
-  mom.prt = ray->getPrtSec();
-  mom.az = ray->getAzimuthDeg();
-  mom.el = ray->getElevationDeg();
+  MomentsSun *moments = new MomentsSun();
+  moments->time = ray->getTimeSecs();
+  moments->prt = ray->getPrtSec();
+  moments->az = ray->getAzimuthDeg();
+  moments->el = ray->getElevationDeg();
 
   // compute mean moments along ray
 
-  if (_computeCovarMoments(ray, mom)) {
+  if (_computeCovarMoments(ray, moments)) {
+    delete moments;
     return -1;
   }
 
@@ -896,10 +899,10 @@ int SunCal::_processCovarRay(RadxRay *ray)
     _sunPosn.computePosnNova(ray->getTimeDouble(), _targetEl, _targetAz);
   }
   double cosElTarget = cos(_targetEl * DEG_TO_RAD);
-  _offsetEl = RadarComplex::diffDeg(mom.el, _targetEl);
-  _offsetAz = RadarComplex::diffDeg(mom.az, _targetAz) * cosElTarget;
-  mom.offsetEl = _offsetEl;
-  mom.offsetAz = _offsetAz;
+  _offsetEl = RadarComplex::diffDeg(moments->el, _targetEl);
+  _offsetAz = RadarComplex::diffDeg(moments->az, _targetAz) * cosElTarget;
+  moments->offsetEl = _offsetEl;
+  moments->offsetAz = _offsetAz;
   
   int angleIndex = 0;
 
@@ -907,7 +910,7 @@ int SunCal::_processCovarRay(RadxRay *ray)
 
     // compute offset el
     
-    double offsetEl = RadarComplex::diffDeg(mom.el, _targetEl);
+    double offsetEl = RadarComplex::diffDeg(moments->el, _targetEl);
     
     // compute grid el closest to the offset el
     
@@ -917,12 +920,14 @@ int SunCal::_processCovarRay(RadxRay *ray)
     // have we moved far enough?
     
     if (fabs(offsetEl - _prevAngleOffset) < _gridDeltaEl / 2) {
+      delete moments;
       return 0;
     }
     
     // is the elevation correct?
     
     if (offsetEl > roundedOffsetEl) {
+      delete moments;
       return 0;
     }
     
@@ -934,6 +939,7 @@ int SunCal::_processCovarRay(RadxRay *ray)
     angleIndex = (int) ((_offsetEl - _gridMinEl) / _gridDeltaEl + 0.5);
 
     if (angleIndex < 0 || angleIndex > _gridNEl - 1) {
+      delete moments;
       return 0;
     }
 
@@ -941,7 +947,7 @@ int SunCal::_processCovarRay(RadxRay *ray)
 
     // compute offset az for mid pulses
     
-    double offsetAz = RadarComplex::diffDeg(mom.az, _targetAz) * cosElTarget;
+    double offsetAz = RadarComplex::diffDeg(moments->az, _targetAz) * cosElTarget;
     
     // compute grid az closest to the offset az
     
@@ -951,12 +957,14 @@ int SunCal::_processCovarRay(RadxRay *ray)
     // have we moved far enough?
     
     if (fabs(offsetAz - _prevAngleOffset) < _gridDeltaAz / 2) {
+      delete moments;
       return 0;
     }
     
     // is the azimuth correct?
     
     if (offsetAz > roundedOffsetAz) {
+      delete moments;
       return 0;
     }
     
@@ -973,10 +981,15 @@ int SunCal::_processCovarRay(RadxRay *ray)
   } // if (_isRhi) 
 
   // create moments object, add to raw moments array
+  // for memory management
 
-  MomentsSun *moments = new MomentsSun();
-  *moments = mom;
   _rawMoments[angleIndex].push_back(moments);
+
+  // add to quadrant arrays
+
+  _addMomentsToQuadrantArrays(moments);
+
+  // increment beam count
 
   _nBeamsThisVol++;
 
@@ -988,13 +1001,13 @@ int SunCal::_processCovarRay(RadxRay *ray)
 // Compute moments from covariances
 
 int SunCal::_computeCovarMoments(RadxRay *ray,
-                                 MomentsSun &mom)
+                                 MomentsSun *mom)
 {
   
-  mom.time = ray->getTimeSecs();
-  mom.prt = ray->getPrtSec();
-  mom.az = ray->getAzimuthDeg();
-  mom.el = ray->getElevationDeg();
+  mom->time = ray->getTimeSecs();
+  mom->prt = ray->getPrtSec();
+  mom->az = ray->getAzimuthDeg();
+  mom->el = ray->getElevationDeg();
 
   // compute the offset relative to the sun
   
@@ -1005,10 +1018,10 @@ int SunCal::_computeCovarMoments(RadxRay *ray,
     _sunPosn.computePosnNova(ray->getTimeDouble(), _targetEl, _targetAz);
   }
   double cosElTarget = cos(_targetEl * DEG_TO_RAD);
-  _offsetEl = RadarComplex::diffDeg(mom.el, _targetEl);
-  _offsetAz = RadarComplex::diffDeg(mom.az, _targetAz) * cosElTarget;
-  mom.offsetEl = _offsetEl;
-  mom.offsetAz = _offsetAz;
+  _offsetEl = RadarComplex::diffDeg(mom->el, _targetEl);
+  _offsetAz = RadarComplex::diffDeg(mom->az, _targetAz) * cosElTarget;
+  mom->offsetEl = _offsetEl;
+  mom->offsetAz = _offsetAz;
   
   RadxField *lag0_hc_db_fld = ray->getField(_params.covar_field_names.LAG0_HC_DB);
   RadxField *lag0_vc_db_fld = ray->getField(_params.covar_field_names.LAG0_VC_DB);
@@ -1178,52 +1191,52 @@ int SunCal::_computeCovarMoments(RadxRay *ray,
   
   // compute moments
 
-  mom.nn = nn;
+  mom->nn = nn;
 
   double meanPowerHc = sumPowerHc / nn;
   double meanPowerVc = sumPowerVc / nn;
   double meanPowerHx = sumPowerHx / nn;
   double meanPowerVx = sumPowerVx / nn;
   
-  mom.powerHc = meanPowerHc;
-  mom.powerVc = meanPowerVc;
-  mom.powerHx = meanPowerHx;
-  mom.powerVx = meanPowerVx;
+  mom->powerHc = meanPowerHc;
+  mom->powerVc = meanPowerVc;
+  mom->powerHx = meanPowerHx;
+  mom->powerVx = meanPowerVx;
 
-  mom.dbmHc = 10.0 * log10(meanPowerHc);
-  mom.dbmVc = 10.0 * log10(meanPowerVc);
-  mom.dbmHx = 10.0 * log10(meanPowerHx);
-  mom.dbmVx = 10.0 * log10(meanPowerVx);
+  mom->dbmHc = 10.0 * log10(meanPowerHc);
+  mom->dbmVc = 10.0 * log10(meanPowerVc);
+  mom->dbmHx = 10.0 * log10(meanPowerHx);
+  mom->dbmVx = 10.0 * log10(meanPowerVx);
+  
+  mom->dbm = (mom->dbmHc + mom->dbmVc +
+              mom->dbmHx + mom->dbmVx) / 4.0;
 
-  mom.dbm = (mom.dbmHc + mom.dbmVc +
-                  mom.dbmHx + mom.dbmVx) / 4.0;
-
-  mom.sumRvvhh0Hc = sumRvvhh0Hc;
-  mom.sumRvvhh0Vc = sumRvvhh0Vc;
+  mom->sumRvvhh0Hc = sumRvvhh0Hc;
+  mom->sumRvvhh0Vc = sumRvvhh0Vc;
 
   RadarComplex_t sumRvvhh0 =
     RadarComplex::complexMean(sumRvvhh0Hc, sumRvvhh0Vc);
-  mom.sumRvvhh0 = sumRvvhh0;
+  mom->sumRvvhh0 = sumRvvhh0;
   
-  mom.Rvvhh0Hc = RadarComplex::mean(sumRvvhh0Hc, nn);
-  mom.Rvvhh0Vc = RadarComplex::mean(sumRvvhh0Vc, nn);
-  mom.Rvvhh0 = RadarComplex::mean(sumRvvhh0, nn);
+  mom->Rvvhh0Hc = RadarComplex::mean(sumRvvhh0Hc, nn);
+  mom->Rvvhh0Vc = RadarComplex::mean(sumRvvhh0Vc, nn);
+  mom->Rvvhh0 = RadarComplex::mean(sumRvvhh0, nn);
   
   double corrMagHc = RadarComplex::mag(sumRvvhh0Hc) / nn;
-  mom.corrMagHc = corrMagHc;
+  mom->corrMagHc = corrMagHc;
   double corrMagVc = RadarComplex::mag(sumRvvhh0Vc) / nn;
-  mom.corrMagVc = corrMagVc;
-  mom.corrMag = (corrMagHc + corrMagVc) / 2.0;
+  mom->corrMagVc = corrMagVc;
+  mom->corrMag = (corrMagHc + corrMagVc) / 2.0;
   
   double corr00Hc = corrMagHc / sqrt(meanPowerHc * meanPowerVx);
-  mom.corr00Hc = corr00Hc;
+  mom->corr00Hc = corr00Hc;
   double corr00Vc = corrMagVc / sqrt(meanPowerVc * meanPowerHx);
-  mom.corr00Vc = corr00Vc;
-  mom.corr00 = (corr00Hc + corr00Vc) / 2.0;
+  mom->corr00Vc = corr00Vc;
+  mom->corr00 = (corr00Hc + corr00Vc) / 2.0;
 
-  mom.arg00Hc = RadarComplex::argDeg(sumRvvhh0Hc);
-  mom.arg00Vc = RadarComplex::argDeg(sumRvvhh0Vc);
-  mom.arg00 = RadarComplex::argDeg(sumRvvhh0);
+  mom->arg00Hc = RadarComplex::argDeg(sumRvvhh0Hc);
+  mom->arg00Vc = RadarComplex::argDeg(sumRvvhh0Vc);
+  mom->arg00 = RadarComplex::argDeg(sumRvvhh0);
   
   return 0;
 
@@ -2183,9 +2196,9 @@ void SunCal::_clearRawMomentsArray()
   
 {
   
-  for (int ii = 0; ii < (int) _rawMoments.size(); ii++) {
+  for (size_t ii = 0; ii < _rawMoments.size(); ii++) {
     vector<MomentsSun *> &moments = _rawMoments[ii];
-    for (int jj = 0; jj < (int) moments.size(); jj++) {
+    for (size_t jj = 0; jj < moments.size(); jj++) {
       delete moments[jj];
     }
     moments.clear();
@@ -2231,9 +2244,9 @@ void SunCal::_clearInterpMomentsArray()
   
 {
   
-  for (int iaz = 0; iaz < (int) _interpMoments.size(); iaz++) {
+  for (size_t iaz = 0; iaz < _interpMoments.size(); iaz++) {
     vector<MomentsSun *> &moments = _interpMoments[iaz];
-    for (int iel = 0; iel < (int) moments.size(); iel++) {
+    for (size_t iel = 0; iel < moments.size(); iel++) {
       moments[iel]->init();
     }
   }
@@ -2247,9 +2260,9 @@ void SunCal::_deleteInterpMomentsArray()
   
 {
   
-  for (int iaz = 0; iaz < (int) _interpMoments.size(); iaz++) {
+  for (size_t iaz = 0; iaz < _interpMoments.size(); iaz++) {
     vector<MomentsSun *> &moments = _interpMoments[iaz];
-    for (int iel = 0; iel < (int) moments.size(); iel++) {
+    for (size_t iel = 0; iel < moments.size(); iel++) {
       delete moments[iel];
     }
     moments.clear();
@@ -2257,6 +2270,158 @@ void SunCal::_deleteInterpMomentsArray()
 
   _interpMoments.clear();
 
+}
+
+/////////////////////////////////////////////////
+// create the moments arrays in the quadrants
+// ll - lower left
+// lr - lower right
+// ul - upper left
+// ur - upper right
+// ready for interp
+    
+void SunCal::_createQuadrantMomentsArrays()
+  
+{
+
+  for (int iaz = 0; iaz < _gridNAz; iaz++) {
+    vector<MomentsSun *> momentsVec;
+    for (int iel = 0; iel < _gridNEl; iel++) {
+      momentsVec.push_back(NULL);
+    }
+    _llMoments.push_back(momentsVec);
+    _lrMoments.push_back(momentsVec);
+    _ulMoments.push_back(momentsVec);
+    _urMoments.push_back(momentsVec);
+  }
+  
+}
+
+/////////////////////////////////////////////////
+// clear the quadrant moments array
+    
+void SunCal::_clearQuadrantMomentsArrays()
+  
+{
+  
+  for (size_t iaz = 0; iaz < _llMoments.size(); iaz++) {
+    for (size_t iel = 0; iel < _llMoments[iaz].size(); iel++) {
+      if (_llMoments[iaz][iel]) {
+        delete _llMoments[iaz][iel];
+        _llMoments[iaz][iel] = NULL;
+      }
+      if (_lrMoments[iaz][iel]) {
+        delete _lrMoments[iaz][iel];
+        _lrMoments[iaz][iel] = NULL;
+      }
+      if (_ulMoments[iaz][iel]) {
+        delete _ulMoments[iaz][iel];
+        _ulMoments[iaz][iel] = NULL;
+      }
+      if (_urMoments[iaz][iel]) {
+        delete _urMoments[iaz][iel];
+        _urMoments[iaz][iel] = NULL;
+      }
+    } // iel
+  } // iaz
+
+}
+
+/////////////////////////////////////////////////
+// delete the quadrant moments array
+    
+void SunCal::_deleteQuadrantMomentsArrays()
+  
+{
+  
+  _clearQuadrantMomentsArrays();
+  _llMoments.clear();
+  _ulMoments.clear();
+  _lrMoments.clear();
+  _urMoments.clear();
+
+}
+
+/////////////////////////////////
+// add moments to quadrant arrays
+
+void SunCal::_addMomentsToQuadrantArrays(MomentsSun *moments)
+
+{
+  
+  double offsetEl = moments->offsetEl;
+  double offsetAz = moments->offsetAz;
+  
+  int elPos = (int) ((offsetEl - _gridMinEl) / _gridDeltaEl);
+  int azPos = (int) ((offsetAz - _gridMinAz) / _gridDeltaAz);
+
+  int minSearchElPos = elPos - 1;
+  int maxSearchElPos = elPos + 2;
+  int minSearchAzPos = azPos - 1;
+  int maxSearchAzPos = azPos + 2;
+
+  if (minSearchElPos < 0) {
+    minSearchElPos = 0;
+  }
+  if (minSearchAzPos < 0) {
+    minSearchAzPos = 0;
+  }
+  if (maxSearchElPos > _gridNEl - 1) {
+    maxSearchElPos = _gridNEl - 1;
+  }
+  if (maxSearchAzPos > _gridNAz - 1) {
+    maxSearchAzPos = _gridNAz - 1;
+  }
+  
+  for (int iel = minSearchElPos; iel <= maxSearchElPos; iel++) {
+    for (int iaz = minSearchAzPos; iaz <= maxSearchAzPos; iaz++) {
+
+      double gridEl = _gridMinEl + iel * _gridDeltaEl;
+      double gridAz = _gridMinAz + iaz * _gridDeltaAz;
+
+      // lower left quadrant
+
+      if (offsetEl < gridEl && offsetAz < gridAz) {
+        if (_llMoments[iaz][iel] == NULL) {
+          _llMoments[iaz][iel] = moments;
+        } else {
+          double newDist = _computeDist(moments, gridEl, gridAz);
+          double oldDist = _computeDist(_llMoments[iaz][iel], gridEl, gridAz);
+          if (newDist < oldDist) {
+            _llMoments[iaz][iel] = moments;
+          }
+        }
+      }
+      
+      // lower right quadrant
+
+      if (offsetEl < gridEl && offsetAz >= gridAz) {
+        if (_lrMoments[iaz][iel] == NULL) {
+          _lrMoments[iaz][iel] = moments;
+        } else {
+          double newDist = _computeDist(moments, gridEl, gridAz);
+          double oldDist = _computeDist(_lrMoments[iaz][iel], gridEl, gridAz);
+          if (newDist < oldDist) {
+            _lrMoments[iaz][iel] = moments;
+          }
+        }
+      }
+      
+    } // iaz
+  } // iel
+  
+}
+
+//////////////////////////////////////////////////////////
+// compute distance from moments point to specified point
+    
+double SunCal::_computeDist(MomentsSun *moments, double el, double az)
+  
+{
+  double del = el - moments->offsetEl;
+  double daz = az - moments->offsetAz;
+  double dist = sqrt(del * del + daz * daz);
+  return dist;
 }
 
 /////////////////////////////////////////////////
@@ -2284,7 +2449,7 @@ void SunCal::_sortRawMomentsByEl()
   
 {
   
-  for (int iaz = 0; iaz < (int) _rawMoments.size(); iaz++) {
+  for (size_t iaz = 0; iaz < _rawMoments.size(); iaz++) {
     vector<MomentsSun *> &moments = _rawMoments[iaz];
     sort (moments.begin(), moments.end(), _compareMomentsEl);
   }
@@ -2298,7 +2463,7 @@ void SunCal::_sortRawMomentsByAz()
   
 {
   
-  for (int iel = 0; iel < (int) _rawMoments.size(); iel++) {
+  for (size_t iel = 0; iel < _rawMoments.size(); iel++) {
     vector<MomentsSun *> &moments = _rawMoments[iel];
     sort (moments.begin(), moments.end(), _compareMomentsAz);
   }
@@ -2327,7 +2492,7 @@ void SunCal::_interpMomentsPpi()
       // find the raw moments which straddle this elevation
       
       vector<MomentsSun *> &raw = _rawMoments[iaz];
-      for (int ii = 0; ii < (int) raw.size() - 1; ii++) {
+      for (size_t ii = 0; ii < raw.size() - 1; ii++) {
         
         double el0 = raw[ii]->offsetEl;
         double el1 = raw[ii+1]->offsetEl;
@@ -2382,7 +2547,7 @@ void SunCal::_interpMomentsRhi()
       // find the raw moments which straddle this azevation
 
       vector<MomentsSun *> &raw = _rawMoments[iel];
-      for (int ii = 0; ii < (int) raw.size() - 1; ii++) {
+      for (size_t ii = 0; ii < raw.size() - 1; ii++) {
         
         double az0 = raw[ii]->offsetAz;
         double az1 = raw[ii+1]->offsetAz;
