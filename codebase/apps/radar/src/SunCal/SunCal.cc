@@ -901,64 +901,6 @@ int SunCal::_processCovarRay(RadxRay *ray)
   mom.offsetEl = _offsetEl;
   mom.offsetAz = _offsetAz;
   
-  RadxField *lag0_hc_db = ray->getField(_params.covar_field_names.LAG0_HC_DB);
-  RadxField *lag0_vc_db = ray->getField(_params.covar_field_names.LAG0_VC_DB);
-  RadxField *lag0_hx_db = ray->getField(_params.covar_field_names.LAG0_HX_DB);
-  RadxField *lag0_vx_db = ray->getField(_params.covar_field_names.LAG0_VX_DB);
-  
-  RadxField *rvvhh0_db =
-    ray->getField(_params.covar_field_names.RVVHH0_DB);
-  RadxField *rvvhh0_phase =
-    ray->getField(_params.covar_field_names.RVVHH0_PHASE);
-  
-  // if (lag0_hc_db_fld == NULL ||
-  //     lag0_vc_db_fld == NULL ||
-  //     lag0_hx_db_fld == NULL ||
-  //     lag0_vx_db_fld == NULL ||
-  //     rvvhh0_db_fld == NULL ||
-  //     rvvhh0_phase_fld == NULL) {
-  //   return -1;
-  // }
-
-  double meanDbmHc = _computeFieldMean(lag0_hc_db);
-  double meanDbmVc = _computeFieldMean(lag0_vc_db);
-  
-  double meanDbmHx = _computeFieldMean(lag0_hx_db);
-  double meanDbmVx = _computeFieldMean(lag0_vx_db);
-
-  mom.dbmHc = meanDbmHc;
-  mom.dbmVc = meanDbmVc;
-  mom.dbmHx = meanDbmHx;
-  mom.dbmVx = meanDbmVx;
-
-  double corrMag = 0;
-  RadarComplex_t meanRvvhh0 =
-    _computeRvvhh0Mean(rvvhh0_db, rvvhh0_phase, corrMag);
-  
-  mom.Rvvhh0 = meanRvvhh0;
-  mom.corrMag = corrMag;
-  if (meanDbmHc > -9990 && meanDbmVc > -9990) {
-    double powerHc = pow(10.0, meanDbmHc / 10.0);
-    double powerVc = pow(10.0, meanDbmVc / 10.0);
-    // MUST FIX THIS - 
-    mom.corr00 = (corrMag / sqrt(powerHc * powerVc)) / 1000.0;
-  }
-  mom.arg00 = RadarComplex::argDeg(meanRvvhh0);
-
-  mom.ratioDbmHcHx = mom.dbmHc - mom.dbmHx;
-  mom.ratioDbmVcHx = mom.dbmVc - mom.dbmHx;
-
-  mom.ratioDbmVxHc = mom.dbmVx - mom.dbmHc;
-  mom.ratioDbmVcHx = mom.dbmVc - mom.dbmHx;
-  
-  mom.ratioDbmVcHc = mom.dbmVc - mom.dbmHc;
-  mom.ratioDbmVxHx = mom.dbmVx - mom.dbmHx;
-
-  // mom.zdr = _computeFieldMean(zdr);
-  // mom.phidp = _computeFieldMean(phidp);
-  // mom.rhohv = _computeFieldMean(rhohv);
-  // mom.ncp = _computeFieldMean(ncp);
-  
   int angleIndex = 0;
 
   if (_isRhi) {
@@ -1073,28 +1015,63 @@ int SunCal::_computeCovarMoments(RadxRay *ray,
   RadxField *lag0_hx_db_fld = ray->getField(_params.covar_field_names.LAG0_HX_DB);
   RadxField *lag0_vx_db_fld = ray->getField(_params.covar_field_names.LAG0_VX_DB);
   
+  RadxField *lag0_hcvx_db_fld =
+    ray->getField(_params.covar_field_names.LAG0_HCVX_DB);
+  RadxField *lag0_hcvx_phase_fld =
+    ray->getField(_params.covar_field_names.LAG0_HCVX_PHASE);
+
+  RadxField *lag0_vchx_db_fld =
+    ray->getField(_params.covar_field_names.LAG0_VCHX_DB);
+  RadxField *lag0_vchx_phase_fld =
+    ray->getField(_params.covar_field_names.LAG0_VCHX_PHASE);
+
   RadxField *rvvhh0_db_fld =
     ray->getField(_params.covar_field_names.RVVHH0_DB);
   RadxField *rvvhh0_phase_fld =
     ray->getField(_params.covar_field_names.RVVHH0_PHASE);
 
-  if (lag0_hc_db_fld == NULL ||
-      lag0_vc_db_fld == NULL ||
-      lag0_hx_db_fld == NULL ||
-      lag0_vx_db_fld == NULL ||
-      rvvhh0_db_fld == NULL ||
-      rvvhh0_phase_fld == NULL) {
-    cerr << "Warning - processCovarMoments()" << endl;
-    cerr << "  Required data field missing" << endl;
-    return -1;
+  Radx::fl32 *lag0_hc_db = NULL;
+  Radx::fl32 *lag0_vc_db = NULL;
+  Radx::fl32 *lag0_hx_db = NULL;
+  Radx::fl32 *lag0_vx_db = NULL;
+  Radx::fl32 *lag0_hcvx_db = NULL;
+  Radx::fl32 *lag0_hcvx_phase = NULL;
+  Radx::fl32 *lag0_vchx_db = NULL;
+  Radx::fl32 *lag0_vchx_phase = NULL;
+  Radx::fl32 *rvvhh0_db = NULL;
+  Radx::fl32 *rvvhh0_phase = NULL;
+
+  if (lag0_hc_db_fld) {
+    lag0_hc_db = lag0_hc_db_fld->getDataFl32();
   }
-  
-  Radx::fl32 *lag0_hc_db = lag0_hc_db_fld->getDataFl32();
-  Radx::fl32 *lag0_vc_db = lag0_vc_db_fld->getDataFl32();
-  Radx::fl32 *lag0_hx_db = lag0_hx_db_fld->getDataFl32();
-  Radx::fl32 *lag0_vx_db = lag0_vx_db_fld->getDataFl32();
-  Radx::fl32 *rvvhh0_db = rvvhh0_db_fld->getDataFl32();
-  Radx::fl32 *rvvhh0_phase = rvvhh0_phase_fld->getDataFl32();
+  if (lag0_vc_db_fld) {
+    lag0_vc_db = lag0_vc_db_fld->getDataFl32();
+  }
+  if (lag0_hx_db_fld) {
+    lag0_hx_db = lag0_hx_db_fld->getDataFl32();
+  }
+  if (lag0_vx_db_fld) {
+    lag0_vx_db = lag0_vx_db_fld->getDataFl32();
+  }
+
+  if (lag0_hcvx_db_fld) {
+    lag0_hcvx_db = lag0_hcvx_db_fld->getDataFl32();
+  }
+  if (lag0_hcvx_phase_fld) {
+    lag0_hcvx_phase = lag0_hcvx_phase_fld->getDataFl32();
+  }
+  if (lag0_vchx_db_fld) {
+    lag0_vchx_db = lag0_vchx_db_fld->getDataFl32();
+  }
+  if (lag0_vchx_phase_fld) {
+    lag0_vchx_phase = lag0_vchx_phase_fld->getDataFl32();
+  }
+  if (rvvhh0_db_fld) {
+    rvvhh0_db = rvvhh0_db_fld->getDataFl32();
+  }
+  if (rvvhh0_phase_fld) {
+    rvvhh0_phase = rvvhh0_phase_fld->getDataFl32();
+  }
   
   // initialize summation quantities
   
@@ -1118,26 +1095,76 @@ int SunCal::_computeCovarMoments(RadxRay *ray,
     }
     
     nn++;
+    
+    double lag0_hc = 0;
+    double lag0_vc = 0;
+    double lag0_hx = 0;
+    double lag0_vx = 0;
 
-    double lag0_hc = pow(10.0, lag0_hc_db[igate] / 10.0);
-    double lag0_vc = pow(10.0, lag0_vc_db[igate] / 10.0);
-    double lag0_hx = pow(10.0, lag0_hx_db[igate] / 10.0);
-    double lag0_vx = pow(10.0, lag0_vx_db[igate] / 10.0);
+    if (lag0_hc_db) {
+      lag0_hc = pow(10.0, lag0_hc_db[igate] / 10.0);
+    }
+    if (lag0_vc_db) {
+      lag0_vc = pow(10.0, lag0_vc_db[igate] / 10.0);
+    }
+    if (lag0_hx_db) {
+      lag0_hx = pow(10.0, lag0_hx_db[igate] / 10.0);
+    }
+    if (lag0_vx_db) {
+      lag0_vx = pow(10.0, lag0_vx_db[igate] / 10.0);
+    }
 
-    double rvvhh0Mag = pow(10.0, rvvhh0_db[igate] / 20.0);
-    double rvvhh0Phase = rvvhh0_phase[igate] * DEG_TO_RAD;
+    double lag0_hcvxMag = 0;
+    double lag0_hcvxPhase = 0;
+    if (lag0_hcvx_db) {
+      lag0_hcvxMag = pow(10.0, lag0_hcvx_db[igate] / 20.0);
+    }
+    if (lag0_hcvx_phase) {
+      lag0_hcvxPhase = lag0_hcvx_phase[igate] * DEG_TO_RAD;
+    }
     double sinval, cosval;
+    ta_sincos(lag0_hcvxPhase, &sinval, &cosval);
+    RadarComplex_t lag0_hcvx;
+    lag0_hcvx.set(lag0_hcvxMag * cosval, lag0_hcvxMag * sinval);
+
+    double lag0_vchxMag = 0;
+    double lag0_vchxPhase = 0;
+    if (lag0_vchx_db) {
+      lag0_vchxMag = pow(10.0, lag0_vchx_db[igate] / 20.0);
+    }
+    if (lag0_vchx_phase) {
+      lag0_vchxPhase = lag0_vchx_phase[igate] * DEG_TO_RAD;
+    }
+    ta_sincos(lag0_vchxPhase, &sinval, &cosval);
+    RadarComplex_t lag0_vchx;
+    lag0_vchx.set(lag0_vchxMag * cosval, lag0_vchxMag * sinval);
+
+    double rvvhh0Mag = 0;
+    double rvvhh0Phase = 0;
+    if (rvvhh0_db) {
+      rvvhh0Mag = pow(10.0, rvvhh0_db[igate] / 20.0);
+    }
+    if (rvvhh0_phase) {
+      rvvhh0Phase = rvvhh0_phase[igate] * DEG_TO_RAD;
+    }
     ta_sincos(rvvhh0Phase, &sinval, &cosval);
     RadarComplex_t rvvhh0;
     rvvhh0.set(rvvhh0Mag * cosval, rvvhh0Mag * sinval);
 
+    // cerr << "rvvhh0Mag, rvvhh0Phase: " << rvvhh0Mag << ", " << rvvhh0Phase << endl;
+    
     sumPowerHc += lag0_hc;
     sumPowerVc += lag0_vc;
     sumPowerHx += lag0_hx;
     sumPowerVx += lag0_vx;
     
-    sumRvvhh0Hc = RadarComplex::complexSum(sumRvvhh0Hc, rvvhh0);
-    sumRvvhh0Vc = RadarComplex::complexSum(sumRvvhh0Vc, rvvhh0);
+    if (_alternating) {
+      sumRvvhh0Hc = RadarComplex::complexSum(sumRvvhh0Hc, lag0_vchx);
+      sumRvvhh0Vc = RadarComplex::complexSum(sumRvvhh0Vc, lag0_hcvx);
+    } else {
+      sumRvvhh0Hc = RadarComplex::complexSum(sumRvvhh0Hc, rvvhh0);
+      sumRvvhh0Vc = RadarComplex::complexSum(sumRvvhh0Vc, rvvhh0);
+    }
 
   } // igate
 

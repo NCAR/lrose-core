@@ -768,7 +768,7 @@ using namespace std;
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("FIELD NAMES FOR COVAR FILES");
-    tt->comment_text = tdrpStrDup("Names of specified fields in the covariances files.");
+    tt->comment_text = tdrpStrDup("Names of specified fields in the covariances files. HCVX and VCHX fields are for alternating mode. RVVHH fields are for simultaneous mode.");
     tt++;
     
     // Parameter 'covar_field_names'

@@ -122,7 +122,7 @@ paramdef boolean {
 
 commentdef {
   p_header = "FIELD NAMES FOR COVAR FILES";
-  p_text = "Names of specified fields in the covariances files.";
+  p_text = "Names of specified fields in the covariances files. HCVX and VCHX fields are for alternating mode. RVVHH fields are for simultaneous mode.";
 };
 
 typedef struct {
