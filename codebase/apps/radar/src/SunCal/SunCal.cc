@@ -204,6 +204,7 @@ SunCal::~SunCal()
 
   _clearPulseQueue();
   _deleteRawMomentsArray();
+  _deleteQuadrantMomentsArrays();
   _deleteInterpMomentsArray();
   _deleteXpolMomentsArray();
   _deleteTestPulseMomentsArray();
@@ -2317,22 +2318,10 @@ void SunCal::_clearQuadrantMomentsArrays()
   
   for (size_t iaz = 0; iaz < _llMoments.size(); iaz++) {
     for (size_t iel = 0; iel < _llMoments[iaz].size(); iel++) {
-      if (_llMoments[iaz][iel]) {
-        delete _llMoments[iaz][iel];
-        _llMoments[iaz][iel] = NULL;
-      }
-      if (_lrMoments[iaz][iel]) {
-        delete _lrMoments[iaz][iel];
-        _lrMoments[iaz][iel] = NULL;
-      }
-      if (_ulMoments[iaz][iel]) {
-        delete _ulMoments[iaz][iel];
-        _ulMoments[iaz][iel] = NULL;
-      }
-      if (_urMoments[iaz][iel]) {
-        delete _urMoments[iaz][iel];
-        _urMoments[iaz][iel] = NULL;
-      }
+      _llMoments[iaz][iel] = NULL;
+      _lrMoments[iaz][iel] = NULL;
+      _ulMoments[iaz][iel] = NULL;
+      _urMoments[iaz][iel] = NULL;
     } // iel
   } // iaz
 
@@ -2366,6 +2355,11 @@ void SunCal::_addMomentsToQuadrantArrays(MomentsSun *moments)
   int elPos = (int) ((offsetEl - _gridMinEl) / _gridDeltaEl);
   int azPos = (int) ((offsetAz - _gridMinAz) / _gridDeltaAz);
 
+  // int minSearchElPos = elPos - 1;
+  // int maxSearchElPos = elPos + 2;
+  // int minSearchAzPos = azPos - 1;
+  // int maxSearchAzPos = azPos + 2;
+
   int minSearchElPos = elPos - 1;
   int maxSearchElPos = elPos + 2;
   int minSearchAzPos = azPos - 1;
@@ -2383,6 +2377,14 @@ void SunCal::_addMomentsToQuadrantArrays(MomentsSun *moments)
   if (maxSearchAzPos > _gridNAz - 1) {
     maxSearchAzPos = _gridNAz - 1;
   }
+
+  cerr << "1111111111111111111111111111111111111111111111111111111111111111111" << endl;
+  cerr << "11111111 offsetEl, offsetAz: " << offsetEl << ", " << offsetAz << endl;
+  cerr << "11111111 elPos, azPos: " << elPos << ", " << azPos << endl;
+  cerr << "11111111 minSearchElPos, maxSearchElPos: " 
+       << minSearchElPos << ", " << maxSearchElPos << endl;
+  cerr << "11111111 minSearchAzPos, maxSearchAzPos: " 
+       << minSearchAzPos << ", " << maxSearchAzPos << endl;
   
   for (int iel = minSearchElPos; iel <= maxSearchElPos; iel++) {
     for (int iaz = minSearchAzPos; iaz <= maxSearchAzPos; iaz++) {
@@ -2390,17 +2392,27 @@ void SunCal::_addMomentsToQuadrantArrays(MomentsSun *moments)
       double gridEl = _gridMinEl + iel * _gridDeltaEl;
       double gridAz = _gridMinAz + iaz * _gridDeltaAz;
 
+      cerr << "2222222 iel, iaz, gridEl, gridAz: "
+           << iel << ", " << iaz << ", "
+           << gridEl << ", " << gridAz << endl;
+
       if (offsetEl < gridEl && offsetAz < gridAz) {
 
+        cerr << "333333333333 LL quad" << endl;
+        
         // lower left quadrant
-
+        
         if (_llMoments[iaz][iel] == NULL) {
           _llMoments[iaz][iel] = moments;
+          cerr << "4444444444 initial moments, dist:"
+               << _computeDist(moments, gridEl, gridAz) << endl;
         } else {
           double newDist = _computeDist(moments, gridEl, gridAz);
           double oldDist = _computeDist(_llMoments[iaz][iel], gridEl, gridAz);
+          cerr << "4444444444 newDist, oldDist: " << newDist << ", " << oldDist << endl;
           if (newDist < oldDist) {
             _llMoments[iaz][iel] = moments;
+            cerr << "5555555555 replacing" << endl;
           }
         }
         
@@ -2628,12 +2640,13 @@ void SunCal::_interpMomentsUsingQuadrants()
   
 {
 
+  cerr << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
+
   // loop through azimuths
 
   for (int iaz = 0; iaz < _gridNAz; iaz++) {
     
     double gridAzOffset = _gridMinAz + iaz * _gridDeltaAz;
-    vector<MomentsSun *> &interp = _interpMoments[iaz];
     
     // find straddle if available
     
@@ -2728,9 +2741,13 @@ void SunCal::_interpMomentsUsingQuadrants()
       }
 
       if (finalValid) {
-        *interp[iel] = final;
+        *_interpMoments[iaz][iel] = final;
       } else {
-        interp[iel]->init();
+        _interpMoments[iaz][iel]->init();
+      }
+
+      if (llMom) {
+        *_interpMoments[iaz][iel] = *llMom;
       }
 
     } // iel
