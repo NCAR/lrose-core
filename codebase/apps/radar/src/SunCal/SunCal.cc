@@ -205,7 +205,6 @@ SunCal::~SunCal()
   _clearPulseQueue();
   _deleteRawMomentsArray();
   _deleteInterpMomentsArray();
-  // _deleteQuadrantMomentsArrays();
   _deleteXpolMomentsArray();
   _deleteTestPulseMomentsArray();
 
@@ -1430,20 +1429,32 @@ int SunCal::_performAnalysis(bool force)
     cerr << "  calTime: " << DateTime::strm((time_t) _calTime) << endl;
   }
   
-  // sort the raw moments and interp onto a regular grid
+  if (_tsReader != NULL) {
 
-  if (_isRhi) {
-    _sortRawMomentsByAz();
-    _interpMomentsRhi();
+    // time series processing,
+    // sort the raw moments and interp onto a regular grid
+    
+    if (_isRhi) {
+      _sortRawMomentsByAz();
+      _interpMomentsRhi();
+    } else {
+      _sortRawMomentsByEl();
+      _interpMomentsPpi();
+    }
+    
+    // print raw moments
+    
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      _printRawMomentsArray(cerr);
+    }
+
   } else {
-    _sortRawMomentsByEl();
-    _interpMomentsPpi();
-  }
 
-  // print raw moments
-  
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    _printRawMomentsArray(cerr);
+    // covariance processing
+    // interp onto 2-D grid using quadrants
+
+    _interpMomentsUsingQuadrants();
+
   }
 
   // compute the min power for each channel
@@ -2608,6 +2619,124 @@ void SunCal::_interpMomentsRhi()
 
   } // iel
 
+}
+
+////////////////////////////////////////////////////
+// interp moments onto regular grid using quadrants
+    
+void SunCal::_interpMomentsUsingQuadrants()
+  
+{
+
+  // loop through azimuths
+
+  for (int iaz = 0; iaz < _gridNAz; iaz++) {
+    
+    double gridAzOffset = _gridMinAz + iaz * _gridDeltaAz;
+    vector<MomentsSun *> &interp = _interpMoments[iaz];
+    
+    // find straddle if available
+    
+    for (int iel = 0; iel < _gridNEl; iel++) {
+      
+      double gridElOffset = _gridMinEl + iel * _gridDeltaEl;
+
+      // get the moments in each quadrant
+      
+      MomentsSun *llMom = _llMoments[iaz][iel];
+      MomentsSun *lrMom = _lrMoments[iaz][iel];
+      MomentsSun *ulMom = _ulMoments[iaz][iel];
+      MomentsSun *urMom = _urMoments[iaz][iel];
+
+      // interp in azimuth first, to get lower and upper moments
+
+      MomentsSun lower;
+      bool lowerValid = true;
+      if (llMom && lrMom) {
+        // get az offsets
+        double azLeft = llMom->offsetAz;
+        double azRight = lrMom->offsetAz;
+        // compute weights
+        double weightLeft = 1.0;
+        double weightRight = 0.0;
+        if (azLeft != azRight) {
+          weightLeft = (azRight - gridAzOffset) / (azRight - azLeft);
+          weightRight = 1.0 - weightRight;
+        }
+        // compute interpolated values
+        lower.interp(*llMom, *lrMom, weightLeft, weightRight);
+      } else if (llMom) {
+        // lower right missing, set to lower left
+        lower = *llMom;
+      } else if (lrMom) {
+        // lower left missing, set to lower right
+        lower = *lrMom;
+      } else {
+        lowerValid = false;
+      }
+
+      MomentsSun upper;
+      bool upperValid = true;
+      if (ulMom && urMom) {
+        // get az offsets
+        double azLeft = ulMom->offsetAz;
+        double azRight = urMom->offsetAz;
+        // compute weights
+        double weightLeft = 1.0;
+        double weightRight = 0.0;
+        if (azLeft != azRight) {
+          weightLeft = (azRight - gridAzOffset) / (azRight - azLeft);
+          weightRight = 1.0 - weightRight;
+        }
+        // compute interpolated values
+        upper.interp(*ulMom, *urMom, weightLeft, weightRight);
+      } else if (ulMom) {
+        // upper right missing, set to upper left
+        upper = *ulMom;
+      } else if (urMom) {
+        // upper left missing, set to upper right
+        upper = *urMom;
+      } else {
+        upperValid = false;
+      }
+      
+      // now interp in elevation
+
+      MomentsSun final;
+      bool finalValid = true;
+      if (upperValid && lowerValid) {
+        // get el offsets
+        double elLower = lower.offsetEl;
+        double elUpper = upper.offsetEl;
+        // compute weights
+        double weightLower = 1.0;
+        double weightUpper = 0.0;
+        if (elLower != elUpper) {
+          weightLower = (elUpper - gridElOffset) / (elUpper - elLower);
+          weightUpper = 1.0 - weightLower;
+        }
+        // compute interpolated values
+        final.interp(lower, upper, weightLower, weightUpper);
+      } else if (lowerValid) {
+        // upper missing, set to lower
+        final = lower;
+      } else if (upperValid) {
+        // lower missing, set to upper
+        final = upper;
+      } else {
+        finalValid = false;
+      }
+
+      if (finalValid) {
+        *interp[iel] = final;
+      } else {
+        interp[iel]->init();
+      }
+
+    } // iel
+    
+  } // iaz
+  
 }
 
 /////////////////////////////////////////////////

@@ -438,6 +438,7 @@ private:
 
   void _interpMomentsPpi();
   void _interpMomentsRhi();
+  void _interpMomentsUsingQuadrants();
   void _getNoiseFromCalFile();
   void _getNoiseFromTimeSeries();
   void _computeMeanNoise();
