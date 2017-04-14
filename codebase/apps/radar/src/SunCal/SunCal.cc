@@ -2379,9 +2379,10 @@ void SunCal::_addMomentsToQuadrantArrays(MomentsSun *moments)
       double gridEl = _gridMinEl + iel * _gridDeltaEl;
       double gridAz = _gridMinAz + iaz * _gridDeltaAz;
 
-      // lower left quadrant
-
       if (offsetEl < gridEl && offsetAz < gridAz) {
+
+        // lower left quadrant
+
         if (_llMoments[iaz][iel] == NULL) {
           _llMoments[iaz][iel] = moments;
         } else {
@@ -2391,11 +2392,11 @@ void SunCal::_addMomentsToQuadrantArrays(MomentsSun *moments)
             _llMoments[iaz][iel] = moments;
           }
         }
-      }
-      
-      // lower right quadrant
+        
+      } else if (offsetEl < gridEl && offsetAz >= gridAz) {
+        
+        // lower right quadrant
 
-      if (offsetEl < gridEl && offsetAz >= gridAz) {
         if (_lrMoments[iaz][iel] == NULL) {
           _lrMoments[iaz][iel] = moments;
         } else {
@@ -2405,7 +2406,36 @@ void SunCal::_addMomentsToQuadrantArrays(MomentsSun *moments)
             _lrMoments[iaz][iel] = moments;
           }
         }
-      }
+
+      } else if (offsetEl >= gridEl && offsetAz < gridAz) {
+        
+        // upper left quadrant
+
+        if (_ulMoments[iaz][iel] == NULL) {
+          _ulMoments[iaz][iel] = moments;
+        } else {
+          double newDist = _computeDist(moments, gridEl, gridAz);
+          double oldDist = _computeDist(_ulMoments[iaz][iel], gridEl, gridAz);
+          if (newDist < oldDist) {
+            _ulMoments[iaz][iel] = moments;
+          }
+        }
+
+      } else if (offsetEl >= gridEl && offsetAz >= gridAz) {
+        
+        // upper right quadrant
+
+        if (_urMoments[iaz][iel] == NULL) {
+          _urMoments[iaz][iel] = moments;
+        } else {
+          double newDist = _computeDist(moments, gridEl, gridAz);
+          double oldDist = _computeDist(_urMoments[iaz][iel], gridEl, gridAz);
+          if (newDist < oldDist) {
+            _urMoments[iaz][iel] = moments;
+          }
+        }
+
+      } // if
       
     } // iaz
   } // iel
