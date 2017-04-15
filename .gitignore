@@ -411,6 +411,7 @@ codebase/apps/radar/src/SimCpCompute/SimCpCompute
 codebase/apps/radar/src/SpectraPrint/SpectraPrint
 codebase/apps/radar/src/StaggeredLimits/StaggeredLimits
 codebase/apps/radar/src/SunCal/SunCal
+codebase/apps/radar/src/SunCal/testing/sunscan_ael_code
 codebase/apps/radar/src/SunCpCompute/SunCpCompute
 codebase/apps/radar/src/SweepInfo2Spdb/SweepInfo2Spdb
 codebase/apps/radar/src/Ts2NetCDF/Ts2NetCDF
