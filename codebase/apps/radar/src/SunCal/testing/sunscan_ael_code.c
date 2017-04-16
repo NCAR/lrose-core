@@ -633,12 +633,12 @@ int computeMoments(int startGate,
 /*****************************************************/
 /* Add a beam to the raw beam array */
 
-int addBeam(Beam beam)
+int addBeam(Beam *beam)
 {
 
   /* compute the azimuth index */
 
-  int azIndex = (int) ((beam.az - gridStartAz) / gridDeltaAz + 0.5);
+  int azIndex = (int) ((beam->azOffset - gridStartAz) / gridDeltaAz + 0.5);
 
   /* check for array space */
 
@@ -668,7 +668,7 @@ int addBeam(Beam beam)
 
     /* copy beam to the array */
 
-    _rawBeamArray[azIndex][_rawMaxEl[azIndex]] = beam;
+    _rawBeamArray[azIndex][_rawMaxEl[azIndex]] = *beam;
 
   }
 
@@ -790,17 +790,17 @@ void correctPowersForNoise()
   double noisePowerV = pow(10.0, noiseDbmV / 10.0);
   for (iel = 0; iel < gridNEl; iel++) {
     for (iaz = 0; iaz < gridNAz; iaz++) {
-      Beam beam = _interpBeamArray[iaz][iel];
-      beam.powerH -= noisePowerH;
-      beam.powerV -= noisePowerV;
-      if (beam.powerH <= 0) {
-        beam.powerH = 1.0e-12;
+      Beam *beam = &_interpBeamArray[iaz][iel];
+      beam->powerH -= noisePowerH;
+      beam->powerV -= noisePowerV;
+      if (beam->powerH <= 0) {
+        beam->powerH = 1.0e-12;
       }
-      if (beam.powerV <= 0) {
-        beam.powerV = 1.0e-12;
+      if (beam->powerV <= 0) {
+        beam->powerV = 1.0e-12;
       }
-      beam.dbmH = 10.0 * log10(beam.powerH);
-      beam.dbmV = 10.0 * log10(beam.powerV);
+      beam->dbmH = 10.0 * log10(beam->powerH);
+      beam->dbmV = 10.0 * log10(beam->powerV);
     } /* iaz */
   } /* iel */
 }
@@ -819,15 +819,15 @@ void computeMaxPower()
   int iel, iaz;
   for (iel = 0; iel < gridNEl; iel++) {
     for (iaz = 0; iaz < gridNAz; iaz++) {
-      Beam beam = _interpBeamArray[iaz][iel];
-      if (beam.dbmH <= maxValidDrxPowerDbm) {
-        _maxPowerDbmH = MAX(_maxPowerDbmH, beam.dbmH);
+      Beam *beam = &_interpBeamArray[iaz][iel];
+      if (beam->dbmH <= maxValidDrxPowerDbm) {
+        _maxPowerDbmH = MAX(_maxPowerDbmH, beam->dbmH);
       }
-      if (beam.dbmV <= maxValidDrxPowerDbm) {
-        _maxPowerDbmV = MAX(_maxPowerDbmV, beam.dbmV);
+      if (beam->dbmV <= maxValidDrxPowerDbm) {
+        _maxPowerDbmV = MAX(_maxPowerDbmV, beam->dbmV);
       }
-      if (beam.dbm <= maxValidDrxPowerDbm) {
-        _maxPowerDbm = MAX(_maxPowerDbm, beam.dbm);
+      if (beam->dbm <= maxValidDrxPowerDbm) {
+        _maxPowerDbm = MAX(_maxPowerDbm, beam->dbm);
       }
     }
   }
@@ -835,8 +835,8 @@ void computeMaxPower()
   /* compute dbm below peak */
   for (iel = 0; iel < gridNEl; iel++) {
     for (iaz = 0; iaz < gridNAz; iaz++) {
-      Beam beam = _interpBeamArray[iaz][iel];
-      beam.dbBelowPeak = beam.dbm - _maxPowerDbm;
+      Beam *beam = &_interpBeamArray[iaz][iel];
+      beam->dbBelowPeak = beam->dbm - _maxPowerDbm;
     }
   }
 }
@@ -944,9 +944,9 @@ double computeMeanSunLocation()
   int iel, iaz;
   for (iel = 0; iel < gridNEl; iel++) {
     for (iaz = 0; iaz < gridNAz; iaz++) {
-      Beam beam = _interpBeamArray[iaz][iel];
-      if (beam.dbBelowPeak > validEdgeBelowPeakDb) {
-        sumTime += beam.time;
+      Beam *beam = &_interpBeamArray[iaz][iel];
+      if (beam->dbBelowPeak > validEdgeBelowPeakDb) {
+        sumTime += beam->time;
         nn++;
       }
     } /* iaz */
@@ -994,12 +994,12 @@ int computeSunCentroid(double **interpDbm,
   int iel, iaz;
   for (iel = 0; iel < gridNEl; iel++) {
     for (iaz = 0; iaz < gridNAz; iaz++) {
-      Beam beam = _interpBeamArray[iaz][iel];
+      Beam *beam = &_interpBeamArray[iaz][iel];
       double dbm = interpDbm[iaz][iel];
       double power = pow(10.0, dbm / 10.0);
       if (dbm >= edgePowerThreshold && dbm <= maxValidDrxPowerDbm) {
-        double az = beam.azOffset;
-        double el = beam.elOffset;
+        double az = beam->azOffset;
+        double el = beam->elOffset;
         sumPower += power;
         sumWtAz += az * power;
         sumWtEl += el * power;
@@ -1182,9 +1182,9 @@ int computeMeanZdrAndSS(double solidAngle)
       double azOffset = az - _quadFitCentroidAzError;
       double offset = sqrt(elOffset * elOffset + azOffset * azOffset);
       if (offset <= searchRadius) {
-        Beam beam = _interpBeamArray[iaz][iel];
-        sumZdr += beam.zdr;
-        sumSS += beam.SS;
+        Beam *beam = &_interpBeamArray[iaz][iel];
+        sumZdr += beam->zdr;
+        sumSS += beam->SS;
         nn++;
       }
     } /* iaz */

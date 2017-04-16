@@ -265,6 +265,10 @@ private:
   vector<Xpol> _xpolMoments;
   vector<TestPulse> _testPulseMoments;
 
+  MomentsSun _prevRawMoments;
+  double _prevOffsetEl;
+  double _prevOffsetAz;
+
   // moments in each quadrant from covariance rays
   // these are used for interpolation
   // they are the moments closest to the grid point
@@ -390,8 +394,8 @@ private:
   void _clearPulseQueue();
 
   int _processCovarFile(const char *filePath);
-  int _processCovarRay(RadxRay *ray);
-  int _computeCovarMoments(RadxRay *ray, MomentsSun *mom);
+  int _processCovarRay(size_t rayIndex, RadxRay *ray);
+  int _computeCovarMoments(RadxRay *ray, MomentsSun &mom);
 
   double _computeFieldMean(const RadxField *field);
   RadarComplex_t _computeRvvhh0Mean(const RadxField *rvvhh0_db,
@@ -493,7 +497,6 @@ private:
                     int memOffset);
   
   int _writeSummaryToSpdb();
-  bool _volIsRhi(const RadxVol &vol);
 
   int _retrieveXpolRatioFromSpdb(time_t scanTime,
                                  double &xpolRatio,
