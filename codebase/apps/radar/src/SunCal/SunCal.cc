@@ -73,7 +73,7 @@ SunCal::SunCal(int argc, char **argv)
 
   isOK = true;
   _tsReader = NULL;
-  _momReader = NULL;
+  _covarReader = NULL;
 
   _pulseSeqNum = 0;
   _prevAngleOffset = -999;
@@ -88,6 +88,9 @@ SunCal::SunCal(int argc, char **argv)
   _volInProgress = true;
   _prevEl = 0;
   _globalPrintCount = 0;
+
+  _startGateSun = 0;
+  _endGateSun = 0;
 
   // set programe name
   
@@ -158,6 +161,7 @@ SunCal::SunCal(int argc, char **argv)
 
   _createRawMomentsArray();
   _createInterpMomentsArray();
+  _createQuadrantMomentsArrays();
 
   // calibration for noise
 
@@ -192,14 +196,15 @@ SunCal::~SunCal()
     delete _tsReader;
   }
 
-  if (_momReader) {
-    delete _momReader;
+  if (_covarReader) {
+    delete _covarReader;
   }
 
   // clean up memory
 
   _clearPulseQueue();
   _deleteRawMomentsArray();
+  _deleteQuadrantMomentsArrays();
   _deleteInterpMomentsArray();
   _deleteXpolMomentsArray();
   _deleteTestPulseMomentsArray();
@@ -234,8 +239,8 @@ int SunCal::Run ()
 
   if (_tsReader != NULL) {
     return _runForTimeSeries();
-  } else if (_momReader != NULL) {
-    return _runForMoments();
+  } else if (_covarReader != NULL) {
+    return _runForCovar();
   } else {
     cerr << "ERROR - SunCal::Run()" << endl;
     cerr << "  No reader object created" << endl;
@@ -314,9 +319,9 @@ int SunCal::_runForTimeSeries()
 }
 
 //////////////////////////////////////////////////
-// Run for moments analysis
+// Run for covariances analysis
 
-int SunCal::_runForMoments()
+int SunCal::_runForCovar()
 {
 
   PMU_auto_register("_runForMoments");
@@ -332,16 +337,10 @@ int SunCal::_runForMoments()
 
   int iret = 0;
   const char *filePath;
-  while ((filePath = _momReader->next()) != NULL) {
-    if (_processMomentsFile(filePath)) {
+  while ((filePath = _covarReader->next()) != NULL) {
+    if (_processCovarFile(filePath)) {
       iret = -1;
     }
-  }
-
-  // process any remaining data
-
-  if (_performAnalysis(true)) {
-    return -1;
   }
 
   return iret;
@@ -377,14 +376,14 @@ int SunCal::_createReaders()
 
     _tsReader = new IwrfTsReaderFmq(_params.input_fmq_name, iwrfDebug);
 
-  } else if (_params.input_mode == Params::MOMENTS_REALTIME_INPUT) {
+  } else if (_params.input_mode == Params::COVAR_REALTIME_INPUT) {
 
-    _momReader = new DsInputPath(_progName,
-                                 _params.debug >= Params::DEBUG_VERBOSE,
-                                 _params.input_dir,
-                                 600, PMU_auto_register, true);
+    _covarReader = new DsInputPath(_progName,
+                                   _params.debug >= Params::DEBUG_VERBOSE,
+                                   _params.input_dir,
+                                   600, PMU_auto_register, true);
 
-  } else if (_params.input_mode == Params::MOMENTS_ARCHIVE_INPUT) {
+  } else if (_params.input_mode == Params::COVAR_ARCHIVE_INPUT) {
 
     date_time_t start;
     if (sscanf(_params.archive_start_time, "%d %d %d %d %d %d",
@@ -406,17 +405,17 @@ int SunCal::_createReaders()
       cerr << "  Format is \"yyyy mm dd hh mm ss\"" << endl;
       iret = -1;
     }
-    _momReader = new DsInputPath(_progName,
-                                 _params.debug >= Params::DEBUG_VERBOSE,
-                                 _params.input_dir,
-                                 start.unix_time, end.unix_time);
-
-  } else if (_params.input_mode == Params::MOMENTS_FILELIST_INPUT) {
+    _covarReader = new DsInputPath(_progName,
+                                   _params.debug >= Params::DEBUG_VERBOSE,
+                                   _params.input_dir,
+                                   start.unix_time, end.unix_time);
+    
+  } else if (_params.input_mode == Params::COVAR_FILELIST_INPUT) {
 
     if (_args.inputFileList.size() > 0) {
-      _momReader = new DsInputPath(_progName,
-                                   _params.debug >= Params::DEBUG_VERBOSE,
-                                   _args.inputFileList);
+      _covarReader = new DsInputPath(_progName,
+                                     _params.debug >= Params::DEBUG_VERBOSE,
+                                     _args.inputFileList);
     } else {
       cerr << "ERROR: " << _progName << endl;
       cerr << "  In FILELIST mode you must specify the files using -f arg." << endl;
@@ -636,12 +635,7 @@ int SunCal::_processPulse(const IwrfTsPulse *pulse)
   
   MomentsSun *moments = new MomentsSun();
   
-  int startGateSun = _params.start_gate;
-  int endGateSun = startGateSun + _params.n_gates - 1;
-  if (endGateSun > _nGates - 1) {
-    endGateSun = _nGates - 1;
-  }
-  if (_computeMomentsSun(moments, startGateSun, endGateSun)) {
+  if (_computeMomentsSun(moments, _startGateSun, _endGateSun)) {
     delete moments;
   } else {
     _rawMoments[angleIndex].push_back(moments);
@@ -790,9 +784,9 @@ void SunCal::_clearPulseQueue()
 }
 
 //////////////////////////////////////////////////
-// Process a moments file
+// Process a covariances file
 
-int SunCal::_processMomentsFile(const char *filePath)
+int SunCal::_processCovarFile(const char *filePath)
 {
 
   if (_params.debug) {
@@ -810,8 +804,13 @@ int SunCal::_processMomentsFile(const char *filePath)
   }
   RadxVol vol;
   if (inFile.readFromPath(filePath, vol)) {
-    cerr << "ERROR - SunCal::_processMomentsFile" << endl;
+    cerr << "ERROR - SunCal::_processCovarFile" << endl;
     cerr << inFile.getErrStr() << endl;
+    return -1;
+  }
+  if (vol.getNRays() < 100) {
+    cerr << "ERROR - SunCal::_processCovarFile" << endl;
+    cerr << "  less than 100 rays in file: " << filePath << endl;
     return -1;
   }
 
@@ -829,11 +828,27 @@ int SunCal::_processMomentsFile(const char *filePath)
   _sunPosn.setLocation(_radarLat, _radarLon, _radarAltKm / 1000.0);
 
   vector<RadxRay *> &rays = vol.getRays();
+  RadxRay *ray0 = rays[0];
+  _volCount = 1;
+  _nGates = ray0->getNGates();
+  _startRangeKm = ray0->getStartRangeKm();
+  _gateSpacingKm = ray0->getGateSpacingKm();
+  _startGateSun = _params.start_gate;
+  _endGateSun = _startGateSun + _params.n_gates - 1;
+  if (_endGateSun > _nGates - 1) {
+    _endGateSun = _nGates - 1;
+  }
+  if (ray0->getPolarizationMode() == Radx::POL_MODE_HV_ALT) {
+    _alternating = TRUE;
+  } else {
+    _alternating = FALSE;
+  }
+
   for (size_t iray = 0; iray < rays.size(); iray++) {
     RadxRay *ray = rays[iray];
     ray->convertToFl32();
-    if (_processRay(ray)) {
-      cerr << "ERROR - SunCal::_processMomentsFile" << endl;
+    if (_processCovarRay(ray)) {
+      cerr << "ERROR - SunCal::_processCovarFile" << endl;
       cerr << "  Cannot process ray, el, az:"
            << ray->getElevationDeg() << ", "
            << ray->getAzimuthDeg() << endl;
@@ -841,8 +856,9 @@ int SunCal::_processMomentsFile(const char *filePath)
     }
   }
   
+
   // perform analysis
-  
+
   if (_performAnalysis(false)) {
     return -1;
   }
@@ -854,16 +870,25 @@ int SunCal::_processMomentsFile(const char *filePath)
 }
 
 //////////////////////////////////////////////////
-// Process a moments ray
+// Process a covariance ray
 
-int SunCal::_processRay(RadxRay *ray)
+int SunCal::_processCovarRay(RadxRay *ray)
 {
 
-  MomentsSun mom;
-  mom.time = ray->getTimeSecs();
-  mom.prt = ray->getPrtSec();
-  mom.az = ray->getAzimuthDeg();
-  mom.el = ray->getElevationDeg();
+  // init moments object
+
+  MomentsSun *moments = new MomentsSun();
+  moments->time = ray->getTimeSecs();
+  moments->prt = ray->getPrtSec();
+  moments->az = ray->getAzimuthDeg();
+  moments->el = ray->getElevationDeg();
+
+  // compute mean moments along ray
+
+  if (_computeCovarMoments(ray, moments)) {
+    delete moments;
+    return -1;
+  }
 
   // compute the offset relative to the sun
 
@@ -874,54 +899,10 @@ int SunCal::_processRay(RadxRay *ray)
     _sunPosn.computePosnNova(ray->getTimeDouble(), _targetEl, _targetAz);
   }
   double cosElTarget = cos(_targetEl * DEG_TO_RAD);
-  _offsetEl = RadarComplex::diffDeg(mom.el, _targetEl);
-  _offsetAz = RadarComplex::diffDeg(mom.az, _targetAz) * cosElTarget;
-  mom.offsetEl = _offsetEl;
-  mom.offsetAz = _offsetAz;
-  
-  RadxField *dbmhc = ray->getField(_params.moments_field_names.DBMHC);
-  RadxField *dbmvc = ray->getField(_params.moments_field_names.DBMVC);
-  RadxField *dbmhx = ray->getField(_params.moments_field_names.DBMHX);
-  RadxField *dbmvx = ray->getField(_params.moments_field_names.DBMVX);
-  RadxField *zdr = ray->getField(_params.moments_field_names.ZDR);
-  RadxField *phidp = ray->getField(_params.moments_field_names.PHIDP);
-  RadxField *rhohv = ray->getField(_params.moments_field_names.RHOHV);
-  RadxField *ncp = ray->getField(_params.moments_field_names.NCP);
-
-  RadxField *rvvhh0_db =
-    ray->getField(_params.moments_field_names.RVVHH0_DB);
-  RadxField *rvvhh0_phase =
-    ray->getField(_params.moments_field_names.RVVHH0_PHASE);
-  
-  double meanDbmHc = _computeFieldMean(dbmhc);
-  double meanDbmVc = _computeFieldMean(dbmvc);
-  
-  double meanDbmHx = _computeFieldMean(dbmhx);
-  double meanDbmVx = _computeFieldMean(dbmvx);
-
-  mom.dbmHc = meanDbmHc;
-  mom.dbmVc = meanDbmVc;
-  mom.dbmHx = meanDbmHx;
-  mom.dbmVx = meanDbmVx;
-
-  double corrMag = 0;
-  RadarComplex_t meanRvvhh0 =
-    _computeRvvhh0Mean(rvvhh0_db, rvvhh0_phase, corrMag);
-
-  mom.Rvvhh0 = meanRvvhh0;
-  mom.corrMag = corrMag;
-  if (meanDbmHc > -9990 && meanDbmVc > -9990) {
-    double powerHc = pow(10.0, meanDbmHc / 10.0);
-    double powerVc = pow(10.0, meanDbmVc / 10.0);
-    // MUST FIX THIS - 
-    mom.corr00 = (corrMag / sqrt(powerHc * powerVc)) / 1000.0;
-  }
-  mom.arg00 = RadarComplex::argDeg(meanRvvhh0);
-
-  mom.zdr = _computeFieldMean(zdr);
-  mom.phidp = _computeFieldMean(phidp);
-  mom.rhohv = _computeFieldMean(rhohv);
-  mom.ncp = _computeFieldMean(ncp);
+  _offsetEl = RadarComplex::diffDeg(moments->el, _targetEl);
+  _offsetAz = RadarComplex::diffDeg(moments->az, _targetAz) * cosElTarget;
+  moments->offsetEl = _offsetEl;
+  moments->offsetAz = _offsetAz;
   
   int angleIndex = 0;
 
@@ -929,7 +910,7 @@ int SunCal::_processRay(RadxRay *ray)
 
     // compute offset el
     
-    double offsetEl = RadarComplex::diffDeg(mom.el, _targetEl);
+    double offsetEl = RadarComplex::diffDeg(moments->el, _targetEl);
     
     // compute grid el closest to the offset el
     
@@ -939,12 +920,14 @@ int SunCal::_processRay(RadxRay *ray)
     // have we moved far enough?
     
     if (fabs(offsetEl - _prevAngleOffset) < _gridDeltaEl / 2) {
+      delete moments;
       return 0;
     }
     
     // is the elevation correct?
     
     if (offsetEl > roundedOffsetEl) {
+      delete moments;
       return 0;
     }
     
@@ -956,6 +939,7 @@ int SunCal::_processRay(RadxRay *ray)
     angleIndex = (int) ((_offsetEl - _gridMinEl) / _gridDeltaEl + 0.5);
 
     if (angleIndex < 0 || angleIndex > _gridNEl - 1) {
+      delete moments;
       return 0;
     }
 
@@ -963,7 +947,7 @@ int SunCal::_processRay(RadxRay *ray)
 
     // compute offset az for mid pulses
     
-    double offsetAz = RadarComplex::diffDeg(mom.az, _targetAz) * cosElTarget;
+    double offsetAz = RadarComplex::diffDeg(moments->az, _targetAz) * cosElTarget;
     
     // compute grid az closest to the offset az
     
@@ -973,12 +957,14 @@ int SunCal::_processRay(RadxRay *ray)
     // have we moved far enough?
     
     if (fabs(offsetAz - _prevAngleOffset) < _gridDeltaAz / 2) {
+      delete moments;
       return 0;
     }
     
     // is the azimuth correct?
     
     if (offsetAz > roundedOffsetAz) {
+      delete moments;
       return 0;
     }
     
@@ -995,13 +981,263 @@ int SunCal::_processRay(RadxRay *ray)
   } // if (_isRhi) 
 
   // create moments object, add to raw moments array
+  // for memory management
 
-  MomentsSun *moments = new MomentsSun();
-  *moments = mom;
   _rawMoments[angleIndex].push_back(moments);
+
+  // add to quadrant arrays
+
+  _addMomentsToQuadrantArrays(moments);
+
+  // increment beam count
 
   _nBeamsThisVol++;
 
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Compute moments from covariances
+
+int SunCal::_computeCovarMoments(RadxRay *ray,
+                                 MomentsSun *mom)
+{
+  
+  mom->time = ray->getTimeSecs();
+  mom->prt = ray->getPrtSec();
+  mom->az = ray->getAzimuthDeg();
+  mom->el = ray->getElevationDeg();
+
+  // compute the offset relative to the sun
+  
+  if (_params.specify_fixed_target_location) {
+    _targetEl = _params.target_elevation;
+    _targetAz = _params.target_azimuth;
+  } else {
+    _sunPosn.computePosnNova(ray->getTimeDouble(), _targetEl, _targetAz);
+  }
+  double cosElTarget = cos(_targetEl * DEG_TO_RAD);
+  _offsetEl = RadarComplex::diffDeg(mom->el, _targetEl);
+  _offsetAz = RadarComplex::diffDeg(mom->az, _targetAz) * cosElTarget;
+  mom->offsetEl = _offsetEl;
+  mom->offsetAz = _offsetAz;
+  
+  RadxField *lag0_hc_db_fld = ray->getField(_params.covar_field_names.LAG0_HC_DB);
+  RadxField *lag0_vc_db_fld = ray->getField(_params.covar_field_names.LAG0_VC_DB);
+  RadxField *lag0_hx_db_fld = ray->getField(_params.covar_field_names.LAG0_HX_DB);
+  RadxField *lag0_vx_db_fld = ray->getField(_params.covar_field_names.LAG0_VX_DB);
+  
+  RadxField *lag0_hcvx_db_fld =
+    ray->getField(_params.covar_field_names.LAG0_HCVX_DB);
+  RadxField *lag0_hcvx_phase_fld =
+    ray->getField(_params.covar_field_names.LAG0_HCVX_PHASE);
+
+  RadxField *lag0_vchx_db_fld =
+    ray->getField(_params.covar_field_names.LAG0_VCHX_DB);
+  RadxField *lag0_vchx_phase_fld =
+    ray->getField(_params.covar_field_names.LAG0_VCHX_PHASE);
+
+  RadxField *rvvhh0_db_fld =
+    ray->getField(_params.covar_field_names.RVVHH0_DB);
+  RadxField *rvvhh0_phase_fld =
+    ray->getField(_params.covar_field_names.RVVHH0_PHASE);
+
+  Radx::fl32 *lag0_hc_db = NULL;
+  Radx::fl32 *lag0_vc_db = NULL;
+  Radx::fl32 *lag0_hx_db = NULL;
+  Radx::fl32 *lag0_vx_db = NULL;
+  Radx::fl32 *lag0_hcvx_db = NULL;
+  Radx::fl32 *lag0_hcvx_phase = NULL;
+  Radx::fl32 *lag0_vchx_db = NULL;
+  Radx::fl32 *lag0_vchx_phase = NULL;
+  Radx::fl32 *rvvhh0_db = NULL;
+  Radx::fl32 *rvvhh0_phase = NULL;
+
+  if (lag0_hc_db_fld) {
+    lag0_hc_db = lag0_hc_db_fld->getDataFl32();
+  }
+  if (lag0_vc_db_fld) {
+    lag0_vc_db = lag0_vc_db_fld->getDataFl32();
+  }
+  if (lag0_hx_db_fld) {
+    lag0_hx_db = lag0_hx_db_fld->getDataFl32();
+  }
+  if (lag0_vx_db_fld) {
+    lag0_vx_db = lag0_vx_db_fld->getDataFl32();
+  }
+
+  if (lag0_hcvx_db_fld) {
+    lag0_hcvx_db = lag0_hcvx_db_fld->getDataFl32();
+  }
+  if (lag0_hcvx_phase_fld) {
+    lag0_hcvx_phase = lag0_hcvx_phase_fld->getDataFl32();
+  }
+  if (lag0_vchx_db_fld) {
+    lag0_vchx_db = lag0_vchx_db_fld->getDataFl32();
+  }
+  if (lag0_vchx_phase_fld) {
+    lag0_vchx_phase = lag0_vchx_phase_fld->getDataFl32();
+  }
+  if (rvvhh0_db_fld) {
+    rvvhh0_db = rvvhh0_db_fld->getDataFl32();
+  }
+  if (rvvhh0_phase_fld) {
+    rvvhh0_phase = rvvhh0_phase_fld->getDataFl32();
+  }
+  
+  // initialize summation quantities
+  
+  double sumPowerHc = 0.0;
+  double sumPowerHx = 0.0;
+  double sumPowerVx = 0.0;
+  double sumPowerVc = 0.0;
+  RadarComplex_t sumRvvhh0Hc(0.0, 0.0);
+  RadarComplex_t sumRvvhh0Vc(0.0, 0.0);
+  double nn = 0.0;
+  
+  // loop through gates to be used for sun computations
+
+  for (int igate = _startGateSun; igate <= _endGateSun; igate++, nn++) {
+    
+    // check power for interference
+    double dbmHc = lag0_hc_db[igate];
+    if (dbmHc > _maxValidSunPowerDbm) {
+      // don't use this gate - probably interference
+      continue;
+    }
+    
+    nn++;
+    
+    double lag0_hc = 0;
+    double lag0_vc = 0;
+    double lag0_hx = 0;
+    double lag0_vx = 0;
+
+    if (lag0_hc_db) {
+      lag0_hc = pow(10.0, lag0_hc_db[igate] / 10.0);
+    }
+    if (lag0_vc_db) {
+      lag0_vc = pow(10.0, lag0_vc_db[igate] / 10.0);
+    }
+    if (lag0_hx_db) {
+      lag0_hx = pow(10.0, lag0_hx_db[igate] / 10.0);
+    }
+    if (lag0_vx_db) {
+      lag0_vx = pow(10.0, lag0_vx_db[igate] / 10.0);
+    }
+
+    double lag0_hcvxMag = 0;
+    double lag0_hcvxPhase = 0;
+    if (lag0_hcvx_db) {
+      lag0_hcvxMag = pow(10.0, lag0_hcvx_db[igate] / 20.0);
+    }
+    if (lag0_hcvx_phase) {
+      lag0_hcvxPhase = lag0_hcvx_phase[igate] * DEG_TO_RAD;
+    }
+    double sinval, cosval;
+    ta_sincos(lag0_hcvxPhase, &sinval, &cosval);
+    RadarComplex_t lag0_hcvx;
+    lag0_hcvx.set(lag0_hcvxMag * cosval, lag0_hcvxMag * sinval);
+
+    double lag0_vchxMag = 0;
+    double lag0_vchxPhase = 0;
+    if (lag0_vchx_db) {
+      lag0_vchxMag = pow(10.0, lag0_vchx_db[igate] / 20.0);
+    }
+    if (lag0_vchx_phase) {
+      lag0_vchxPhase = lag0_vchx_phase[igate] * DEG_TO_RAD;
+    }
+    ta_sincos(lag0_vchxPhase, &sinval, &cosval);
+    RadarComplex_t lag0_vchx;
+    lag0_vchx.set(lag0_vchxMag * cosval, lag0_vchxMag * sinval);
+
+    double rvvhh0Mag = 0;
+    double rvvhh0Phase = 0;
+    if (rvvhh0_db) {
+      rvvhh0Mag = pow(10.0, rvvhh0_db[igate] / 20.0);
+    }
+    if (rvvhh0_phase) {
+      rvvhh0Phase = rvvhh0_phase[igate] * DEG_TO_RAD;
+    }
+    ta_sincos(rvvhh0Phase, &sinval, &cosval);
+    RadarComplex_t rvvhh0;
+    rvvhh0.set(rvvhh0Mag * cosval, rvvhh0Mag * sinval);
+
+    // cerr << "rvvhh0Mag, rvvhh0Phase: " << rvvhh0Mag << ", " << rvvhh0Phase << endl;
+    
+    sumPowerHc += lag0_hc;
+    sumPowerVc += lag0_vc;
+    sumPowerHx += lag0_hx;
+    sumPowerVx += lag0_vx;
+    
+    if (_alternating) {
+      sumRvvhh0Hc = RadarComplex::complexSum(sumRvvhh0Hc, lag0_vchx);
+      sumRvvhh0Vc = RadarComplex::complexSum(sumRvvhh0Vc, lag0_hcvx);
+    } else {
+      sumRvvhh0Hc = RadarComplex::complexSum(sumRvvhh0Hc, rvvhh0);
+      sumRvvhh0Vc = RadarComplex::complexSum(sumRvvhh0Vc, rvvhh0);
+    }
+
+  } // igate
+
+  if (nn < 3) {
+    cerr << "Warning - processCovarMoments()" << endl;
+    cerr << "  Insufficient good data found" << endl;
+    cerr << "  az, el: " << _midAz << ", " << _midEl << endl;
+    cerr << "  nn: " << nn << endl;
+    return -1;
+  }
+  
+  // compute moments
+
+  mom->nn = nn;
+
+  double meanPowerHc = sumPowerHc / nn;
+  double meanPowerVc = sumPowerVc / nn;
+  double meanPowerHx = sumPowerHx / nn;
+  double meanPowerVx = sumPowerVx / nn;
+  
+  mom->powerHc = meanPowerHc;
+  mom->powerVc = meanPowerVc;
+  mom->powerHx = meanPowerHx;
+  mom->powerVx = meanPowerVx;
+
+  mom->dbmHc = 10.0 * log10(meanPowerHc);
+  mom->dbmVc = 10.0 * log10(meanPowerVc);
+  mom->dbmHx = 10.0 * log10(meanPowerHx);
+  mom->dbmVx = 10.0 * log10(meanPowerVx);
+  
+  mom->dbm = (mom->dbmHc + mom->dbmVc +
+              mom->dbmHx + mom->dbmVx) / 4.0;
+
+  mom->sumRvvhh0Hc = sumRvvhh0Hc;
+  mom->sumRvvhh0Vc = sumRvvhh0Vc;
+
+  RadarComplex_t sumRvvhh0 =
+    RadarComplex::complexMean(sumRvvhh0Hc, sumRvvhh0Vc);
+  mom->sumRvvhh0 = sumRvvhh0;
+  
+  mom->Rvvhh0Hc = RadarComplex::mean(sumRvvhh0Hc, nn);
+  mom->Rvvhh0Vc = RadarComplex::mean(sumRvvhh0Vc, nn);
+  mom->Rvvhh0 = RadarComplex::mean(sumRvvhh0, nn);
+  
+  double corrMagHc = RadarComplex::mag(sumRvvhh0Hc) / nn;
+  mom->corrMagHc = corrMagHc;
+  double corrMagVc = RadarComplex::mag(sumRvvhh0Vc) / nn;
+  mom->corrMagVc = corrMagVc;
+  mom->corrMag = (corrMagHc + corrMagVc) / 2.0;
+  
+  double corr00Hc = corrMagHc / sqrt(meanPowerHc * meanPowerVx);
+  mom->corr00Hc = corr00Hc;
+  double corr00Vc = corrMagVc / sqrt(meanPowerVc * meanPowerHx);
+  mom->corr00Vc = corr00Vc;
+  mom->corr00 = (corr00Hc + corr00Vc) / 2.0;
+
+  mom->arg00Hc = RadarComplex::argDeg(sumRvvhh0Hc);
+  mom->arg00Vc = RadarComplex::argDeg(sumRvvhh0Vc);
+  mom->arg00 = RadarComplex::argDeg(sumRvvhh0);
+  
   return 0;
 
 }
@@ -1156,7 +1392,7 @@ int SunCal::_performAnalysis(bool force)
   if (_volCount < 1) {
     return 0;
   }
-  
+
   if (!_params.analyze_individual_volumes) {
     if (_volCount < _params.min_n_volumes_for_analysis) {
       return 0;
@@ -1166,21 +1402,15 @@ int SunCal::_performAnalysis(bool force)
     }
   }
 
-  int startGateSun = _params.start_gate;
-  int endGateSun = startGateSun + _params.n_gates - 1;
-  const IwrfTsPulse &pulse0 = *_pulseQueue[0];
-  int nGates = pulse0.getNGates();
-  double startRangeKm = pulse0.get_start_range_km();
-  double gateSpacingKm = pulse0.get_gate_spacing_km();
-  double startRangeSun = startRangeKm + gateSpacingKm * startGateSun;
-  double endRangeSun = startRangeKm + gateSpacingKm * endGateSun;
+  double startRangeSun = _startRangeKm + _gateSpacingKm * _startGateSun;
+  double endRangeSun = _startRangeKm + _gateSpacingKm * _endGateSun;
 
   if (_params.debug) {
     cerr << "----------------------------------------------------" << endl;
     cerr << "Performing analysis, n volumes: " << _volCount << endl;
-    cerr << "  nGates        : " << nGates << endl;
-    cerr << "  startGateSun  : " << startGateSun << endl;
-    cerr << "  endGateSun    : " << endGateSun << endl;
+    cerr << "  nGates        : " << _nGates << endl;
+    cerr << "  startGateSun  : " << _startGateSun << endl;
+    cerr << "  endGateSun    : " << _endGateSun << endl;
     cerr << "  startRangeSun : " << startRangeSun << endl;
     cerr << "  endRangeSun   : " << endRangeSun << endl;
     cerr << "----------------------------------------------------" << endl;
@@ -1200,20 +1430,32 @@ int SunCal::_performAnalysis(bool force)
     cerr << "  calTime: " << DateTime::strm((time_t) _calTime) << endl;
   }
   
-  // sort the raw moments and interp onto a regular grid
+  if (_tsReader != NULL) {
 
-  if (_isRhi) {
-    _sortRawMomentsByAz();
-    _interpMomentsRhi();
+    // time series processing,
+    // sort the raw moments and interp onto a regular grid
+    
+    if (_isRhi) {
+      _sortRawMomentsByAz();
+      _interpMomentsRhi();
+    } else {
+      _sortRawMomentsByEl();
+      _interpMomentsPpi();
+    }
+    
+    // print raw moments
+    
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      _printRawMomentsArray(cerr);
+    }
+
   } else {
-    _sortRawMomentsByEl();
-    _interpMomentsPpi();
-  }
 
-  // print raw moments
-  
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    _printRawMomentsArray(cerr);
+    // covariance processing
+    // interp onto 2-D grid using quadrants
+
+    _interpMomentsUsingQuadrants();
+
   }
 
   // compute the min power for each channel
@@ -1585,7 +1827,8 @@ int SunCal::_computeMomentsSunDualAlt(MomentsSun *moments,
   moments->sumRvvhh0Hc = sumRvvhh0Hc;
   moments->sumRvvhh0Vc = sumRvvhh0Vc;
 
-  RadarComplex_t sumRvvhh0 = RadarComplex::complexMean(sumRvvhh0Hc, sumRvvhh0Vc);
+  RadarComplex_t sumRvvhh0 =
+    RadarComplex::complexMean(sumRvvhh0Hc, sumRvvhh0Vc);
   moments->sumRvvhh0 = sumRvvhh0;
   
   moments->Rvvhh0Hc = RadarComplex::mean(sumRvvhh0Hc, nn);
@@ -1965,9 +2208,9 @@ void SunCal::_clearRawMomentsArray()
   
 {
   
-  for (int ii = 0; ii < (int) _rawMoments.size(); ii++) {
+  for (size_t ii = 0; ii < _rawMoments.size(); ii++) {
     vector<MomentsSun *> &moments = _rawMoments[ii];
-    for (int jj = 0; jj < (int) moments.size(); jj++) {
+    for (size_t jj = 0; jj < moments.size(); jj++) {
       delete moments[jj];
     }
     moments.clear();
@@ -2013,9 +2256,9 @@ void SunCal::_clearInterpMomentsArray()
   
 {
   
-  for (int iaz = 0; iaz < (int) _interpMoments.size(); iaz++) {
+  for (size_t iaz = 0; iaz < _interpMoments.size(); iaz++) {
     vector<MomentsSun *> &moments = _interpMoments[iaz];
-    for (int iel = 0; iel < (int) moments.size(); iel++) {
+    for (size_t iel = 0; iel < moments.size(); iel++) {
       moments[iel]->init();
     }
   }
@@ -2029,9 +2272,9 @@ void SunCal::_deleteInterpMomentsArray()
   
 {
   
-  for (int iaz = 0; iaz < (int) _interpMoments.size(); iaz++) {
+  for (size_t iaz = 0; iaz < _interpMoments.size(); iaz++) {
     vector<MomentsSun *> &moments = _interpMoments[iaz];
-    for (int iel = 0; iel < (int) moments.size(); iel++) {
+    for (size_t iel = 0; iel < moments.size(); iel++) {
       delete moments[iel];
     }
     moments.clear();
@@ -2039,6 +2282,199 @@ void SunCal::_deleteInterpMomentsArray()
 
   _interpMoments.clear();
 
+}
+
+/////////////////////////////////////////////////
+// create the moments arrays in the quadrants
+// ll - lower left
+// lr - lower right
+// ul - upper left
+// ur - upper right
+// ready for interp
+    
+void SunCal::_createQuadrantMomentsArrays()
+  
+{
+
+  for (int iaz = 0; iaz < _gridNAz; iaz++) {
+    vector<MomentsSun *> momentsVec;
+    for (int iel = 0; iel < _gridNEl; iel++) {
+      momentsVec.push_back(NULL);
+    }
+    _llMoments.push_back(momentsVec);
+    _lrMoments.push_back(momentsVec);
+    _ulMoments.push_back(momentsVec);
+    _urMoments.push_back(momentsVec);
+  }
+  
+}
+
+/////////////////////////////////////////////////
+// clear the quadrant moments array
+    
+void SunCal::_clearQuadrantMomentsArrays()
+  
+{
+  
+  for (size_t iaz = 0; iaz < _llMoments.size(); iaz++) {
+    for (size_t iel = 0; iel < _llMoments[iaz].size(); iel++) {
+      _llMoments[iaz][iel] = NULL;
+      _lrMoments[iaz][iel] = NULL;
+      _ulMoments[iaz][iel] = NULL;
+      _urMoments[iaz][iel] = NULL;
+    } // iel
+  } // iaz
+
+}
+
+/////////////////////////////////////////////////
+// delete the quadrant moments array
+    
+void SunCal::_deleteQuadrantMomentsArrays()
+  
+{
+  
+  _clearQuadrantMomentsArrays();
+  _llMoments.clear();
+  _ulMoments.clear();
+  _lrMoments.clear();
+  _urMoments.clear();
+
+}
+
+/////////////////////////////////
+// add moments to quadrant arrays
+
+void SunCal::_addMomentsToQuadrantArrays(MomentsSun *moments)
+
+{
+  
+  double offsetEl = moments->offsetEl;
+  double offsetAz = moments->offsetAz;
+  
+  int elPos = (int) ((offsetEl - _gridMinEl) / _gridDeltaEl);
+  int azPos = (int) ((offsetAz - _gridMinAz) / _gridDeltaAz);
+
+  // int minSearchElPos = elPos - 1;
+  // int maxSearchElPos = elPos + 2;
+  // int minSearchAzPos = azPos - 1;
+  // int maxSearchAzPos = azPos + 2;
+
+  int minSearchElPos = elPos - 1;
+  int maxSearchElPos = elPos + 2;
+  int minSearchAzPos = azPos - 1;
+  int maxSearchAzPos = azPos + 2;
+
+  if (minSearchElPos < 0) {
+    minSearchElPos = 0;
+  }
+  if (minSearchAzPos < 0) {
+    minSearchAzPos = 0;
+  }
+  if (maxSearchElPos > _gridNEl - 1) {
+    maxSearchElPos = _gridNEl - 1;
+  }
+  if (maxSearchAzPos > _gridNAz - 1) {
+    maxSearchAzPos = _gridNAz - 1;
+  }
+
+  cerr << "1111111111111111111111111111111111111111111111111111111111111111111" << endl;
+  cerr << "11111111 offsetEl, offsetAz: " << offsetEl << ", " << offsetAz << endl;
+  cerr << "11111111 elPos, azPos: " << elPos << ", " << azPos << endl;
+  cerr << "11111111 minSearchElPos, maxSearchElPos: " 
+       << minSearchElPos << ", " << maxSearchElPos << endl;
+  cerr << "11111111 minSearchAzPos, maxSearchAzPos: " 
+       << minSearchAzPos << ", " << maxSearchAzPos << endl;
+  
+  for (int iel = minSearchElPos; iel <= maxSearchElPos; iel++) {
+    for (int iaz = minSearchAzPos; iaz <= maxSearchAzPos; iaz++) {
+
+      double gridEl = _gridMinEl + iel * _gridDeltaEl;
+      double gridAz = _gridMinAz + iaz * _gridDeltaAz;
+
+      cerr << "2222222 iel, iaz, gridEl, gridAz: "
+           << iel << ", " << iaz << ", "
+           << gridEl << ", " << gridAz << endl;
+
+      if (offsetEl < gridEl && offsetAz < gridAz) {
+
+        cerr << "333333333333 LL quad" << endl;
+        
+        // lower left quadrant
+        
+        if (_llMoments[iaz][iel] == NULL) {
+          _llMoments[iaz][iel] = moments;
+          cerr << "4444444444 initial moments, dist:"
+               << _computeDist(moments, gridEl, gridAz) << endl;
+        } else {
+          double newDist = _computeDist(moments, gridEl, gridAz);
+          double oldDist = _computeDist(_llMoments[iaz][iel], gridEl, gridAz);
+          cerr << "4444444444 newDist, oldDist: " << newDist << ", " << oldDist << endl;
+          if (newDist < oldDist) {
+            _llMoments[iaz][iel] = moments;
+            cerr << "5555555555 replacing" << endl;
+          }
+        }
+        
+      } else if (offsetEl < gridEl && offsetAz >= gridAz) {
+        
+        // lower right quadrant
+
+        if (_lrMoments[iaz][iel] == NULL) {
+          _lrMoments[iaz][iel] = moments;
+        } else {
+          double newDist = _computeDist(moments, gridEl, gridAz);
+          double oldDist = _computeDist(_lrMoments[iaz][iel], gridEl, gridAz);
+          if (newDist < oldDist) {
+            _lrMoments[iaz][iel] = moments;
+          }
+        }
+
+      } else if (offsetEl >= gridEl && offsetAz < gridAz) {
+        
+        // upper left quadrant
+
+        if (_ulMoments[iaz][iel] == NULL) {
+          _ulMoments[iaz][iel] = moments;
+        } else {
+          double newDist = _computeDist(moments, gridEl, gridAz);
+          double oldDist = _computeDist(_ulMoments[iaz][iel], gridEl, gridAz);
+          if (newDist < oldDist) {
+            _ulMoments[iaz][iel] = moments;
+          }
+        }
+
+      } else if (offsetEl >= gridEl && offsetAz >= gridAz) {
+        
+        // upper right quadrant
+
+        if (_urMoments[iaz][iel] == NULL) {
+          _urMoments[iaz][iel] = moments;
+        } else {
+          double newDist = _computeDist(moments, gridEl, gridAz);
+          double oldDist = _computeDist(_urMoments[iaz][iel], gridEl, gridAz);
+          if (newDist < oldDist) {
+            _urMoments[iaz][iel] = moments;
+          }
+        }
+
+      } // if
+      
+    } // iaz
+  } // iel
+  
+}
+
+//////////////////////////////////////////////////////////
+// compute distance from moments point to specified point
+    
+double SunCal::_computeDist(MomentsSun *moments, double el, double az)
+  
+{
+  double del = el - moments->offsetEl;
+  double daz = az - moments->offsetAz;
+  double dist = sqrt(del * del + daz * daz);
+  return dist;
 }
 
 /////////////////////////////////////////////////
@@ -2066,7 +2502,7 @@ void SunCal::_sortRawMomentsByEl()
   
 {
   
-  for (int iaz = 0; iaz < (int) _rawMoments.size(); iaz++) {
+  for (size_t iaz = 0; iaz < _rawMoments.size(); iaz++) {
     vector<MomentsSun *> &moments = _rawMoments[iaz];
     sort (moments.begin(), moments.end(), _compareMomentsEl);
   }
@@ -2080,7 +2516,7 @@ void SunCal::_sortRawMomentsByAz()
   
 {
   
-  for (int iel = 0; iel < (int) _rawMoments.size(); iel++) {
+  for (size_t iel = 0; iel < _rawMoments.size(); iel++) {
     vector<MomentsSun *> &moments = _rawMoments[iel];
     sort (moments.begin(), moments.end(), _compareMomentsAz);
   }
@@ -2109,7 +2545,7 @@ void SunCal::_interpMomentsPpi()
       // find the raw moments which straddle this elevation
       
       vector<MomentsSun *> &raw = _rawMoments[iaz];
-      for (int ii = 0; ii < (int) raw.size() - 1; ii++) {
+      for (size_t ii = 0; ii < raw.size() - 1; ii++) {
         
         double el0 = raw[ii]->offsetEl;
         double el1 = raw[ii+1]->offsetEl;
@@ -2164,7 +2600,7 @@ void SunCal::_interpMomentsRhi()
       // find the raw moments which straddle this azevation
 
       vector<MomentsSun *> &raw = _rawMoments[iel];
-      for (int ii = 0; ii < (int) raw.size() - 1; ii++) {
+      for (size_t ii = 0; ii < raw.size() - 1; ii++) {
         
         double az0 = raw[ii]->offsetAz;
         double az1 = raw[ii+1]->offsetAz;
@@ -2195,6 +2631,129 @@ void SunCal::_interpMomentsRhi()
 
   } // iel
 
+}
+
+////////////////////////////////////////////////////
+// interp moments onto regular grid using quadrants
+    
+void SunCal::_interpMomentsUsingQuadrants()
+  
+{
+
+  cerr << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
+
+  // loop through azimuths
+
+  for (int iaz = 0; iaz < _gridNAz; iaz++) {
+    
+    double gridAzOffset = _gridMinAz + iaz * _gridDeltaAz;
+    
+    // find straddle if available
+    
+    for (int iel = 0; iel < _gridNEl; iel++) {
+      
+      double gridElOffset = _gridMinEl + iel * _gridDeltaEl;
+
+      // get the moments in each quadrant
+      
+      MomentsSun *llMom = _llMoments[iaz][iel];
+      MomentsSun *lrMom = _lrMoments[iaz][iel];
+      MomentsSun *ulMom = _ulMoments[iaz][iel];
+      MomentsSun *urMom = _urMoments[iaz][iel];
+
+      // interp in azimuth first, to get lower and upper moments
+
+      MomentsSun lower;
+      bool lowerValid = true;
+      if (llMom && lrMom) {
+        // get az offsets
+        double azLeft = llMom->offsetAz;
+        double azRight = lrMom->offsetAz;
+        // compute weights
+        double weightLeft = 1.0;
+        double weightRight = 0.0;
+        if (azLeft != azRight) {
+          weightLeft = (azRight - gridAzOffset) / (azRight - azLeft);
+          weightRight = 1.0 - weightRight;
+        }
+        // compute interpolated values
+        lower.interp(*llMom, *lrMom, weightLeft, weightRight);
+      } else if (llMom) {
+        // lower right missing, set to lower left
+        lower = *llMom;
+      } else if (lrMom) {
+        // lower left missing, set to lower right
+        lower = *lrMom;
+      } else {
+        lowerValid = false;
+      }
+
+      MomentsSun upper;
+      bool upperValid = true;
+      if (ulMom && urMom) {
+        // get az offsets
+        double azLeft = ulMom->offsetAz;
+        double azRight = urMom->offsetAz;
+        // compute weights
+        double weightLeft = 1.0;
+        double weightRight = 0.0;
+        if (azLeft != azRight) {
+          weightLeft = (azRight - gridAzOffset) / (azRight - azLeft);
+          weightRight = 1.0 - weightRight;
+        }
+        // compute interpolated values
+        upper.interp(*ulMom, *urMom, weightLeft, weightRight);
+      } else if (ulMom) {
+        // upper right missing, set to upper left
+        upper = *ulMom;
+      } else if (urMom) {
+        // upper left missing, set to upper right
+        upper = *urMom;
+      } else {
+        upperValid = false;
+      }
+      
+      // now interp in elevation
+
+      MomentsSun final;
+      bool finalValid = true;
+      if (upperValid && lowerValid) {
+        // get el offsets
+        double elLower = lower.offsetEl;
+        double elUpper = upper.offsetEl;
+        // compute weights
+        double weightLower = 1.0;
+        double weightUpper = 0.0;
+        if (elLower != elUpper) {
+          weightLower = (elUpper - gridElOffset) / (elUpper - elLower);
+          weightUpper = 1.0 - weightLower;
+        }
+        // compute interpolated values
+        final.interp(lower, upper, weightLower, weightUpper);
+      } else if (lowerValid) {
+        // upper missing, set to lower
+        final = lower;
+      } else if (upperValid) {
+        // lower missing, set to upper
+        final = upper;
+      } else {
+        finalValid = false;
+      }
+
+      if (finalValid) {
+        *_interpMoments[iaz][iel] = final;
+      } else {
+        _interpMoments[iaz][iel]->init();
+      }
+
+      if (llMom) {
+        *_interpMoments[iaz][iel] = *llMom;
+      }
+
+    } // iel
+    
+  } // iaz
+  
 }
 
 /////////////////////////////////////////////////
@@ -4906,6 +5465,12 @@ void SunCal::_allocGateData()
     }
   }
 
+  _startGateSun = _params.start_gate;
+  _endGateSun = _startGateSun + _params.n_gates - 1;
+  if (_endGateSun > _nGates - 1) {
+    _endGateSun = _nGates - 1;
+  }
+
   // allocate
 
   int nNeeded = _nGates - (int) _gateData.size();
@@ -4918,6 +5483,10 @@ void SunCal::_allocGateData()
   for (size_t ii = 0; ii < _gateData.size(); ii++) {
     _gateData[ii]->allocArrays(_nSamples, false, false, false);
   }
+
+  _startRangeKm = _pulseQueue[0]->get_start_range_km();
+  _gateSpacingKm = _pulseQueue[0]->get_gate_spacing_km();
+
 }
 
 /////////////////////////////////////////////////////////////////

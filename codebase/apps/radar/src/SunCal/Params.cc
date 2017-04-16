@@ -609,7 +609,7 @@ using namespace std;
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("input_mode");
     tt->descr = tdrpStrDup("Input mode - files or time series API.");
-    tt->help = tdrpStrDup("\n\nTS_FMQ_INPUT: the application will read the time series from a file message queue and process the pulses as they come in. \n\nTS_FILE_INPUT: the application will process all the files specified on the command line. \n\nTS_REALTIME_DIR_INPUT: the application will watch the input directory for new files, and will process those files as they arrive. This mode is suitable for automated operation. \n\nMOMENTS_REALTIME_INPUT: watch the input directory for new moments files, and process each volume as it arrives. \n\nMOMENTS_ARCHIVE_INPUT: will process the moments files in the input directory, between the start and end times. \n\nMOMENTS_FILELIST_INPUT: will process the moments files listed on the command line. ");
+    tt->help = tdrpStrDup("\n\nTS_FMQ_INPUT: the application will read the time series from a file message queue and process the pulses as they come in. \n\nTS_FILE_INPUT: the application will process all the files specified on the command line. \n\nTS_REALTIME_DIR_INPUT: the application will watch the input directory for new files, and will process those files as they arrive. This mode is suitable for automated operation. \n\nCOVAR_REALTIME_INPUT: watch the input directory for new covariances files, and process each volume as it arrives. \n\nCOVAR_ARCHIVE_INPUT: will process the covariances files in the input directory, between the start and end times. \n\nCOVAR_FILELIST_INPUT: will process the covariances files listed on the command line. ");
     tt->val_offset = (char *) &input_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("input_mode_t");
     tt->enum_def.nfields = 6;
@@ -621,12 +621,12 @@ using namespace std;
       tt->enum_def.fields[1].val = TS_FMQ_INPUT;
       tt->enum_def.fields[2].name = tdrpStrDup("TS_REALTIME_DIR_INPUT");
       tt->enum_def.fields[2].val = TS_REALTIME_DIR_INPUT;
-      tt->enum_def.fields[3].name = tdrpStrDup("MOMENTS_REALTIME_INPUT");
-      tt->enum_def.fields[3].val = MOMENTS_REALTIME_INPUT;
-      tt->enum_def.fields[4].name = tdrpStrDup("MOMENTS_ARCHIVE_INPUT");
-      tt->enum_def.fields[4].val = MOMENTS_ARCHIVE_INPUT;
-      tt->enum_def.fields[5].name = tdrpStrDup("MOMENTS_FILELIST_INPUT");
-      tt->enum_def.fields[5].val = MOMENTS_FILELIST_INPUT;
+      tt->enum_def.fields[3].name = tdrpStrDup("COVAR_REALTIME_INPUT");
+      tt->enum_def.fields[3].val = COVAR_REALTIME_INPUT;
+      tt->enum_def.fields[4].name = tdrpStrDup("COVAR_ARCHIVE_INPUT");
+      tt->enum_def.fields[4].val = COVAR_ARCHIVE_INPUT;
+      tt->enum_def.fields[5].name = tdrpStrDup("COVAR_FILELIST_INPUT");
+      tt->enum_def.fields[5].val = COVAR_FILELIST_INPUT;
     tt->single_val.e = TS_FILELIST_INPUT;
     tt++;
     
@@ -661,7 +661,7 @@ using namespace std;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("archive_start_time");
     tt->descr = tdrpStrDup("Specify the start time for the files in archive mode.");
-    tt->help = tdrpStrDup("Format is 'yyyy mm dd hh mm ss'. Applies to MOMENTS_ARCHIVE_INPUT mode.");
+    tt->help = tdrpStrDup("Format is 'yyyy mm dd hh mm ss'. Applies to COVAR_ARCHIVE_INPUT mode.");
     tt->val_offset = (char *) &archive_start_time - &_start_;
     tt->single_val.s = tdrpStrDup("2012 06 01 00 00 00");
     tt++;
@@ -673,7 +673,7 @@ using namespace std;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("archive_end_time");
     tt->descr = tdrpStrDup("Specify the end time for the files in archive mode.");
-    tt->help = tdrpStrDup("Format is 'yyyy mm dd hh mm ss'. Applies to MOMENTS_ARCHIVE_INPUT mode.");
+    tt->help = tdrpStrDup("Format is 'yyyy mm dd hh mm ss'. Applies to COVAR_ARCHIVE_INPUT mode.");
     tt->val_offset = (char *) &archive_end_time - &_start_;
     tt->single_val.s = tdrpStrDup("2012 06 02 00 00 00");
     tt++;
@@ -767,110 +767,86 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("FIELD NAMES FOR MOMENTS FILES");
-    tt->comment_text = tdrpStrDup("Names of specified fields in the moments files.");
+    tt->comment_hdr = tdrpStrDup("FIELD NAMES FOR COVAR FILES");
+    tt->comment_text = tdrpStrDup("Names of specified fields in the covariances files. HCVX and VCHX fields are for alternating mode. RVVHH fields are for simultaneous mode.");
     tt++;
     
-    // Parameter 'moments_field_names'
-    // ctype is '_moments_field_names_t'
+    // Parameter 'covar_field_names'
+    // ctype is '_covar_field_names_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("moments_field_names");
+    tt->param_name = tdrpStrDup("covar_field_names");
     tt->descr = tdrpStrDup("");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &moments_field_names - &_start_;
-    tt->struct_def.name = tdrpStrDup("moments_field_names_t");
-    tt->struct_def.nfields = 14;
+    tt->val_offset = (char *) &covar_field_names - &_start_;
+    tt->struct_def.name = tdrpStrDup("covar_field_names_t");
+    tt->struct_def.nfields = 10;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("DBMHC");
+      tt->struct_def.fields[0].fname = tdrpStrDup("LAG0_HC_DB");
       tt->struct_def.fields[0].ptype = STRING_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &moments_field_names.DBMHC - (char *) &moments_field_names;
+        (char *) &covar_field_names.LAG0_HC_DB - (char *) &covar_field_names;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("DBMVC");
+      tt->struct_def.fields[1].fname = tdrpStrDup("LAG0_HX_DB");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &moments_field_names.DBMVC - (char *) &moments_field_names;
+        (char *) &covar_field_names.LAG0_HX_DB - (char *) &covar_field_names;
       tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("DBMHX");
+      tt->struct_def.fields[2].fname = tdrpStrDup("LAG0_VC_DB");
       tt->struct_def.fields[2].ptype = STRING_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &moments_field_names.DBMHX - (char *) &moments_field_names;
+        (char *) &covar_field_names.LAG0_VC_DB - (char *) &covar_field_names;
       tt->struct_def.fields[3].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[3].fname = tdrpStrDup("DBMVX");
+      tt->struct_def.fields[3].fname = tdrpStrDup("LAG0_VX_DB");
       tt->struct_def.fields[3].ptype = STRING_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &moments_field_names.DBMVX - (char *) &moments_field_names;
+        (char *) &covar_field_names.LAG0_VX_DB - (char *) &covar_field_names;
       tt->struct_def.fields[4].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[4].fname = tdrpStrDup("ZDR");
+      tt->struct_def.fields[4].fname = tdrpStrDup("LAG0_HCVX_DB");
       tt->struct_def.fields[4].ptype = STRING_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &moments_field_names.ZDR - (char *) &moments_field_names;
+        (char *) &covar_field_names.LAG0_HCVX_DB - (char *) &covar_field_names;
       tt->struct_def.fields[5].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[5].fname = tdrpStrDup("PHIDP");
+      tt->struct_def.fields[5].fname = tdrpStrDup("LAG0_HCVX_PHASE");
       tt->struct_def.fields[5].ptype = STRING_TYPE;
       tt->struct_def.fields[5].rel_offset = 
-        (char *) &moments_field_names.PHIDP - (char *) &moments_field_names;
+        (char *) &covar_field_names.LAG0_HCVX_PHASE - (char *) &covar_field_names;
       tt->struct_def.fields[6].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[6].fname = tdrpStrDup("RHOHV");
+      tt->struct_def.fields[6].fname = tdrpStrDup("LAG0_VCHX_DB");
       tt->struct_def.fields[6].ptype = STRING_TYPE;
       tt->struct_def.fields[6].rel_offset = 
-        (char *) &moments_field_names.RHOHV - (char *) &moments_field_names;
+        (char *) &covar_field_names.LAG0_VCHX_DB - (char *) &covar_field_names;
       tt->struct_def.fields[7].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[7].fname = tdrpStrDup("NCP");
+      tt->struct_def.fields[7].fname = tdrpStrDup("LAG0_VCHX_PHASE");
       tt->struct_def.fields[7].ptype = STRING_TYPE;
       tt->struct_def.fields[7].rel_offset = 
-        (char *) &moments_field_names.NCP - (char *) &moments_field_names;
+        (char *) &covar_field_names.LAG0_VCHX_PHASE - (char *) &covar_field_names;
       tt->struct_def.fields[8].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[8].fname = tdrpStrDup("LAG1_HC_DB");
+      tt->struct_def.fields[8].fname = tdrpStrDup("RVVHH0_DB");
       tt->struct_def.fields[8].ptype = STRING_TYPE;
       tt->struct_def.fields[8].rel_offset = 
-        (char *) &moments_field_names.LAG1_HC_DB - (char *) &moments_field_names;
+        (char *) &covar_field_names.RVVHH0_DB - (char *) &covar_field_names;
       tt->struct_def.fields[9].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[9].fname = tdrpStrDup("LAG1_HC_PHASE");
+      tt->struct_def.fields[9].fname = tdrpStrDup("RVVHH0_PHASE");
       tt->struct_def.fields[9].ptype = STRING_TYPE;
       tt->struct_def.fields[9].rel_offset = 
-        (char *) &moments_field_names.LAG1_HC_PHASE - (char *) &moments_field_names;
-      tt->struct_def.fields[10].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[10].fname = tdrpStrDup("LAG1_VC_DB");
-      tt->struct_def.fields[10].ptype = STRING_TYPE;
-      tt->struct_def.fields[10].rel_offset = 
-        (char *) &moments_field_names.LAG1_VC_DB - (char *) &moments_field_names;
-      tt->struct_def.fields[11].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[11].fname = tdrpStrDup("LAG1_VC_PHASE");
-      tt->struct_def.fields[11].ptype = STRING_TYPE;
-      tt->struct_def.fields[11].rel_offset = 
-        (char *) &moments_field_names.LAG1_VC_PHASE - (char *) &moments_field_names;
-      tt->struct_def.fields[12].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[12].fname = tdrpStrDup("RVVHH0_DB");
-      tt->struct_def.fields[12].ptype = STRING_TYPE;
-      tt->struct_def.fields[12].rel_offset = 
-        (char *) &moments_field_names.RVVHH0_DB - (char *) &moments_field_names;
-      tt->struct_def.fields[13].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[13].fname = tdrpStrDup("RVVHH0_PHASE");
-      tt->struct_def.fields[13].ptype = STRING_TYPE;
-      tt->struct_def.fields[13].rel_offset = 
-        (char *) &moments_field_names.RVVHH0_PHASE - (char *) &moments_field_names;
-    tt->n_struct_vals = 14;
+        (char *) &covar_field_names.RVVHH0_PHASE - (char *) &covar_field_names;
+    tt->n_struct_vals = 10;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("DBMHC");
-      tt->struct_vals[1].s = tdrpStrDup("DBMVC");
-      tt->struct_vals[2].s = tdrpStrDup("DBMHX");
-      tt->struct_vals[3].s = tdrpStrDup("DBMVX");
-      tt->struct_vals[4].s = tdrpStrDup("ZDR");
-      tt->struct_vals[5].s = tdrpStrDup("PHIDP");
-      tt->struct_vals[6].s = tdrpStrDup("RHOHV");
-      tt->struct_vals[7].s = tdrpStrDup("NCP");
-      tt->struct_vals[8].s = tdrpStrDup("LAG1_HC_DB");
-      tt->struct_vals[9].s = tdrpStrDup("LAG1_HC_PHASE");
-      tt->struct_vals[10].s = tdrpStrDup("LAG1_VC_DB");
-      tt->struct_vals[11].s = tdrpStrDup("LAG1_VC_PHASE");
-      tt->struct_vals[12].s = tdrpStrDup("RVVHH0_DB");
-      tt->struct_vals[13].s = tdrpStrDup("RVVHH0_PHASE");
+      tt->struct_vals[0].s = tdrpStrDup("LAG0_HC_DB");
+      tt->struct_vals[1].s = tdrpStrDup("LAG0_HX_DB");
+      tt->struct_vals[2].s = tdrpStrDup("LAG0_VC_DB");
+      tt->struct_vals[3].s = tdrpStrDup("LAG0_VX_DB");
+      tt->struct_vals[4].s = tdrpStrDup("LAG0_HCVX_DB");
+      tt->struct_vals[5].s = tdrpStrDup("LAG0_HCVX_PHASE");
+      tt->struct_vals[6].s = tdrpStrDup("LAG0_VCHX_DB");
+      tt->struct_vals[7].s = tdrpStrDup("LAG0_VCHX_PHASE");
+      tt->struct_vals[8].s = tdrpStrDup("RVVHH0_DB");
+      tt->struct_vals[9].s = tdrpStrDup("RVVHH0_PHASE");
     tt++;
     
     // Parameter 'Comment 4'

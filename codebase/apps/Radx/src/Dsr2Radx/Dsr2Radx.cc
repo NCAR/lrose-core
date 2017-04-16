@@ -833,6 +833,9 @@ int Dsr2Radx::_doWrite()
       if (_isSolarScan) {
         // special case
         outputDir += _params.sun_subdir;
+        if (!_params.write_sun_files) {
+          doWrite = false;
+        }
       } else {
         switch (_scanMode) {
           case SCAN_MODE_RHI:

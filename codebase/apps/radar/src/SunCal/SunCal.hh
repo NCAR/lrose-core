@@ -197,7 +197,7 @@ private:
   Args _args;
   Params _params;
   IwrfTsReader *_tsReader;
-  DsInputPath *_momReader;
+  DsInputPath *_covarReader;
   SunPosn _sunPosn;
 
   // radar location
@@ -227,9 +227,12 @@ private:
   // gate data
 
   int _nGates;
+  double _startRangeKm, _gateSpacingKm;
   int _nSamples, _nSamplesHalf;
   vector<GateData *> _gateData;
   vector<MomentsFields> _fields;
+  int _startGateSun;
+  int _endGateSun;
 
   // volume number etc
 
@@ -261,6 +264,18 @@ private:
   vector<vector<MomentsSun *> > _interpMoments;
   vector<Xpol> _xpolMoments;
   vector<TestPulse> _testPulseMoments;
+
+  // moments in each quadrant from covariance rays
+  // these are used for interpolation
+  // they are the moments closest to the grid point
+  // in each quadrant, NULL if no data
+  //   ll - lower left
+  //   lr - lower right
+  //   ul - upper left
+  //   ur - upper right
+
+  vector<vector<MomentsSun *> > _llMoments, _lrMoments;
+  vector<vector<MomentsSun *> > _ulMoments, _urMoments;
 
   // noise
   
@@ -367,15 +382,17 @@ private:
   // methods
 
   int _runForTimeSeries();
-  int _runForMoments();
+  int _runForCovar();
   int _createReaders();
 
   int _processPulse(const IwrfTsPulse *pulse);
   void _addPulseToQueue(const IwrfTsPulse *pulse);
   void _clearPulseQueue();
 
-  int _processMomentsFile(const char *filePath);
-  int _processRay(RadxRay *ray);
+  int _processCovarFile(const char *filePath);
+  int _processCovarRay(RadxRay *ray);
+  int _computeCovarMoments(RadxRay *ray, MomentsSun *mom);
+
   double _computeFieldMean(const RadxField *field);
   RadarComplex_t _computeRvvhh0Mean(const RadxField *rvvhh0_db,
                                     const RadxField *rvvhh0_phase,
@@ -403,6 +420,12 @@ private:
   void _clearInterpMomentsArray();
   void _deleteInterpMomentsArray();
 
+  void _createQuadrantMomentsArrays();
+  void _clearQuadrantMomentsArrays();
+  void _deleteQuadrantMomentsArrays();
+  void _addMomentsToQuadrantArrays(MomentsSun *moments);
+  double _computeDist(MomentsSun *moments, double el, double az);
+
   void _deleteXpolMomentsArray();
   void _deleteTestPulseMomentsArray();
 
@@ -415,6 +438,7 @@ private:
 
   void _interpMomentsPpi();
   void _interpMomentsRhi();
+  void _interpMomentsUsingQuadrants();
   void _getNoiseFromCalFile();
   void _getNoiseFromTimeSeries();
   void _computeMeanNoise();
