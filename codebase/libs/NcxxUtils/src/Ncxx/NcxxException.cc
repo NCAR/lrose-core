@@ -54,18 +54,18 @@
 using namespace std;
 
 // Default object thrown if a netCDF exception is encountered.
-/*NcxxException::NcxxException(const string& complaint,const char* fileName,int lineNumber)
-  : what_msg(NULL)
-  , ec(0)
+NcxxException::NcxxException(const string &complaint, const string &fileName,  int lineNumber)
+        : what_msg(NULL)
+        , ec(0)
 {
-	try{
-		std::ostringstream oss;
-		oss << lineNumber;
-		what_msg = new std::string(complaint+"\nfile: "+fileName+"  line:"+oss.str());
-	}catch(...){
-		what_msg = NULL;
-	}
-}*/
+  try{
+    std::ostringstream oss;
+    oss << lineNumber;
+    what_msg = new std::string(complaint+"\nfile: "+fileName+"  line:"+oss.str());
+  }catch(...){
+    what_msg = NULL;
+  }
+}
 
 NcxxException::NcxxException(const char* complaint,const char* fileName,int lineNumber)
   : what_msg(NULL)
