@@ -68,7 +68,7 @@
 */
 class NcxxException : public std::exception {
 public:
-  //NcxxException(const string& complaint,const char* fileName,int lineNumber);
+  NcxxException(const std::string &complaint, const std::string &fileName, int lineNumber);
   NcxxException(const char* complaint,const char* fileName,int lineNumber);
   NcxxException(int errorCode, const char* complaint,const char* fileName,int lineNumber);
   NcxxException(const NcxxException& e) throw();
