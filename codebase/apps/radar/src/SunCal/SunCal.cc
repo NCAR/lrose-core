@@ -2140,11 +2140,11 @@ void SunCal::_addToXpol(int startGate, int endGate)
     
     double powerHx = RadarComplex::meanPower(iqhx, _nSamplesHalf - 1);
     double powerVx = RadarComplex::meanPower(iqvx, _nSamplesHalf - 1);
-    RadarComplex_t lag0VxHx =
+    RadarComplex_t lag1VxHx =
       RadarComplex::meanConjugateProduct(iqvx, iqhx, _nSamplesHalf - 1);
     
     double rhoVxHx =
-      RadarComplex::mag(lag0VxHx) / sqrt(powerVx * powerHx);
+      RadarComplex::mag(lag1VxHx) / sqrt(powerVx * powerHx);
     
     Xpol xpol(powerHx, powerVx, rhoVxHx);
     _xpolMoments.push_back(xpol);
