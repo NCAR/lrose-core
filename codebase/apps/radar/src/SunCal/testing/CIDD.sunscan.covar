@@ -73,28 +73,32 @@
 # Front Range
 #
 
-DB_BELOW_PEAK DB_BELOW_PEAK  $(DATA_DIR)/mdv/suncal/sband?use_http=true&DB_BELOW_PEAK sunscan_dbm_below.colors    dB     -5   80  5  dcont   1 0
-DBM-S        DBM-S        $(DATA_DIR)/mdv/suncal/sband?use_http=true&DBM     sunscan_dbm.colors    dBm     -5   80  5  dcont   1 0
-DBM-S-gird        DBM-S-grid        $(DATA_DIR)/mdv/suncal/sband?use_http=true&DBM     sunscan_dbm.colors    dBm     -5   80  5  cart   1 0
-DBM_HC-S     DBM_HC-S     $(DATA_DIR)/mdv/suncal/sband?use_http=true&DBM_HC  sunscan_dbm.colors    dBm     -5   80  5  dcont   1 0
-DBM_VC-S     DBM_VC-S     $(DATA_DIR)/mdv/suncal/sband?use_http=true&DBM_VC  sunscan_dbm.colors    dBm     -5   80  5  dcont   1 0
-DBM_HX-S     DBM_HX-S     $(DATA_DIR)/mdv/suncal/sband?use_http=true&DBM_HX  sunscan_dbm.colors    dBm     -5   80  5  dcont   1 0
-DBM_VX-S     DBM_VX-S     $(DATA_DIR)/mdv/suncal/sband?use_http=true&DBM_VX  sunscan_dbm.colors    dBm     -5   80  5  dcont   1 0
+AZ AZ  $(DATA_DIR)/mdv/suncal/sband&az vel_w_4.colors    deg     -5   80  5  dcont   1 0
 
-CORR_00_H-S  CORR_00_H-S  $(DATA_DIR)/mdv/suncal/sband?use_http=true&CORR_00_H sunscan_corr.colors  -     -5   80  5  dcont   1 0
-CORR_00_V-S  CORR_00_V-S  $(DATA_DIR)/mdv/suncal/sband?use_http=true&CORR_00_V sunscan_corr.colors  -     -5   80  5  dcont   1 0
+EL EL  $(DATA_DIR)/mdv/suncal/sband&el vel_w_4.colors    deg     -5   80  5  dcont   1 0
 
-ARG_00_H-S  ARG_00_H-S  $(DATA_DIR)/mdv/suncal/sband?use_http=true&ARG_00_H phidp.colors  -     -5   80  5  dcont   1 0
-ARG_00_V-S  ARG_00_V-S  $(DATA_DIR)/mdv/suncal/sband?use_http=true&ARG_00_V phidp.colors  -     -5   80  5  dcont   1 0
+DB_BELOW_PEAK DB_BELOW_PEAK  $(DATA_DIR)/mdv/suncal/sband&DB_BELOW_PEAK sunscan_dbm_below.colors    dB     -5   80  5  dcont   1 0
+DBM-S        DBM-S        $(DATA_DIR)/mdv/suncal/sband&DBM     sunscan_dbm.colors    dBm     -5   80  5  dcont   1 0
+DBM-S-gird        DBM-S-grid        $(DATA_DIR)/mdv/suncal/sband&DBM     sunscan_dbm.colors    dBm     -5   80  5  cart   1 0
+DBM_HC-S     DBM_HC-S     $(DATA_DIR)/mdv/suncal/sband&DBM_HC  sunscan_dbm.colors    dBm     -5   80  5  dcont   1 0
+DBM_VC-S     DBM_VC-S     $(DATA_DIR)/mdv/suncal/sband&DBM_VC  sunscan_dbm.colors    dBm     -5   80  5  dcont   1 0
+DBM_HX-S     DBM_HX-S     $(DATA_DIR)/mdv/suncal/sband&DBM_HX  sunscan_dbm.colors    dBm     -5   80  5  dcont   1 0
+DBM_VX-S     DBM_VX-S     $(DATA_DIR)/mdv/suncal/sband&DBM_VX  sunscan_dbm.colors    dBm     -5   80  5  dcont   1 0
 
-RATIO_VC_HC-S RATIO_VC_HC-S  $(DATA_DIR)/mdv/suncal/sband?use_http=true&RATIO_VC_HC sunscan_ratio.colors - -5 80 5 dcont 1 0
-RATIO_HC_HX-S RATIO_HC_HX-S  $(DATA_DIR)/mdv/suncal/sband?use_http=true&RATIO_HC_HX sunscan_ratio.colors - -5 80 5 dcont 1 0
-RATIO_VC_VX-S RATIO_VC_VX-S  $(DATA_DIR)/mdv/suncal/sband?use_http=true&RATIO_VC_VX sunscan_ratio.colors - -5 80 5 dcont 1 0
-RATIO_VX_HC-S RATIO_VX_HC-S  $(DATA_DIR)/mdv/suncal/sband?use_http=true&RATIO_VX_HC sunscan_ratio.colors - -5 80 5 dcont 1 0
-RATIO_VC_HX-S RATIO_VC_HX-S  $(DATA_DIR)/mdv/suncal/sband?use_http=true&RATIO_VC_HX sunscan_ratio.colors - -5 80 5 dcont 1 0
-RATIO_VX_HX-S RATIO_VX_HX-S  $(DATA_DIR)/mdv/suncal/sband?use_http=true&RATIO_VX_HX sunscan_ratio.colors - -5 80 5 dcont 1 0
+CORR_00_H-S  CORR_00_H-S  $(DATA_DIR)/mdv/suncal/sband&CORR_00_H sunscan_corr.colors  -     -5   80  5  dcont   1 0
+CORR_00_V-S  CORR_00_V-S  $(DATA_DIR)/mdv/suncal/sband&CORR_00_V sunscan_corr.colors  -     -5   80  5  dcont   1 0
 
-S1S2-S   S1S2-S  $(DATA_DIR)/mdv/suncal/sband?use_http=true&S1S2 sunscan_ratio.colors - -5 80 5 dcont 1 0
+ARG_00_H-S  ARG_00_H-S  $(DATA_DIR)/mdv/suncal/sband&ARG_00_H phidp.colors  -     -5   80  5  dcont   1 0
+ARG_00_V-S  ARG_00_V-S  $(DATA_DIR)/mdv/suncal/sband&ARG_00_V phidp.colors  -     -5   80  5  dcont   1 0
+
+RATIO_VC_HC-S RATIO_VC_HC-S  $(DATA_DIR)/mdv/suncal/sband&RATIO_VC_HC sunscan_ratio.colors - -5 80 5 dcont 1 0
+RATIO_HC_HX-S RATIO_HC_HX-S  $(DATA_DIR)/mdv/suncal/sband&RATIO_HC_HX sunscan_ratio.colors - -5 80 5 dcont 1 0
+RATIO_VC_VX-S RATIO_VC_VX-S  $(DATA_DIR)/mdv/suncal/sband&RATIO_VC_VX sunscan_ratio.colors - -5 80 5 dcont 1 0
+RATIO_VX_HC-S RATIO_VX_HC-S  $(DATA_DIR)/mdv/suncal/sband&RATIO_VX_HC sunscan_ratio.colors - -5 80 5 dcont 1 0
+RATIO_VC_HX-S RATIO_VC_HX-S  $(DATA_DIR)/mdv/suncal/sband&RATIO_VC_HX sunscan_ratio.colors - -5 80 5 dcont 1 0
+RATIO_VX_HX-S RATIO_VX_HX-S  $(DATA_DIR)/mdv/suncal/sband&RATIO_VX_HX sunscan_ratio.colors - -5 80 5 dcont 1 0
+
+S1S2-S   S1S2-S  $(DATA_DIR)/mdv/suncal/sband&S1S2 sunscan_ratio.colors - -5 80 5 dcont 1 0
 
 </GRIDS>
 
@@ -110,6 +114,7 @@ S1S2-S   S1S2-S  $(DATA_DIR)/mdv/suncal/sband?use_http=true&S1S2 sunscan_ratio.c
 #------------------------------------------------------------------------------------------
 
 Grid   Grid   sunscan_grid.map   1      0.0      10000.0     blue
+Grid   Grid   sunscan_grid.map   0      0.0      10000.0     blue
 
 </MAPS>
 
@@ -140,7 +145,7 @@ cidd.debug2_flag:           0
 #  System will startup using field 0, requesting data closest to the
 # demo time. The movie frame will be centered on the time after applying
 # temporal rounding. 
-cidd.demo_time:  20:25 04/05/2017
+cidd.demo_time:  23:40 04/12/2017
 
 # Set times to the nearest value divisible by the number of seconds
 cidd.temporal_rounding:    1

@@ -269,18 +269,6 @@ private:
   double _prevOffsetEl;
   double _prevOffsetAz;
 
-  // moments in each quadrant from covariance rays
-  // these are used for interpolation
-  // they are the moments closest to the grid point
-  // in each quadrant, NULL if no data
-  //   ll - lower left
-  //   lr - lower right
-  //   ul - upper left
-  //   ur - upper right
-
-  vector<vector<MomentsSun *> > _llMoments, _lrMoments;
-  vector<vector<MomentsSun *> > _ulMoments, _urMoments;
-
   // noise
   
   IwrfCalib _calib;
@@ -424,10 +412,6 @@ private:
   void _clearInterpMomentsArray();
   void _deleteInterpMomentsArray();
 
-  void _createQuadrantMomentsArrays();
-  void _clearQuadrantMomentsArrays();
-  void _deleteQuadrantMomentsArrays();
-  void _addMomentsToQuadrantArrays(MomentsSun *moments);
   double _computeDist(MomentsSun *moments, double el, double az);
 
   void _deleteXpolMomentsArray();
@@ -442,7 +426,6 @@ private:
 
   void _interpMomentsPpi();
   void _interpMomentsRhi();
-  void _interpMomentsUsingQuadrants();
   void _getNoiseFromCalFile();
   void _getNoiseFromTimeSeries();
   void _computeMeanNoise();

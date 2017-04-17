@@ -30,7 +30,7 @@
 //     DEBUG_EXTRA
 //
 
-debug = DEBUG_VERBOSE;
+debug = DEBUG_OFF;
 
 ///////////// instance ////////////////////////////////
 //
@@ -430,7 +430,7 @@ max_time_gap_within_volume = 120;
 // Type: double
 //
 
-max_pointing_angle_error_deg = 1;
+max_pointing_angle_error_deg = 0.3;
 
 //======================================================================
 //
@@ -584,7 +584,7 @@ grid_max_az = 5;
 // Type: double
 //
 
-grid_delta_az = 0.1;
+grid_delta_az = 0.05;
 
 ///////////// grid_min_el /////////////////////////////
 //
@@ -614,7 +614,7 @@ grid_max_el = 2;
 // Type: double
 //
 
-grid_delta_el = 0.1;
+grid_delta_el = 0.05;
 
 //======================================================================
 //
