@@ -173,8 +173,8 @@ int Rhi2Spdb::Run ()
     const Mdvx::master_header_t &mhdr = mdvx.getMasterHeaderFile();
     if (mdvx.getNFieldsFile() < 1) {
       cerr << "ERROR - Rhi2Spdb::Run()" << endl;
-      cerr << "  Working on file: " << //  mdvx.getPathInUse() << endl;
-        cerr << "  No fields in file" << endl;
+      cerr << "  Working on file: " << mdvx.getPathInUse() << endl;
+      cerr << "  No fields in file" << endl;
       continue;
     }
 
