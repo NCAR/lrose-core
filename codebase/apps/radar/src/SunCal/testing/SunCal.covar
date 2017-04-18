@@ -245,7 +245,9 @@ print_missing_pulses = FALSE;
 //
 // FIELD NAMES FOR COVAR FILES.
 //
-// Names of specified fields in the covariances files.
+// Names of specified fields in the covariances files. HCVX and VCHX 
+//   fields are for alternating mode. RVVHH fields are for simultaneous 
+//   mode.
 //
 //======================================================================
  
@@ -262,6 +264,8 @@ print_missing_pulses = FALSE;
 //      string LAG0_HCVX_PHASE;
 //      string LAG0_VCHX_DB;
 //      string LAG0_VCHX_PHASE;
+//      string LAG1_VXHX_DB;
+//      string LAG1_VXHX_PHASE;
 //      string RVVHH0_DB;
 //      string RVVHH0_PHASE;
 //   }
@@ -277,6 +281,8 @@ covar_field_names = {
     LAG0_HCVX_PHASE = "LAG0_HCVX_PHASE",
     LAG0_VCHX_DB = "LAG0_VCHX_DB",
     LAG0_VCHX_PHASE = "LAG0_VCHX_PHASE",
+    LAG1_VXHX_DB = "LAG1_VXHX_DB",
+    LAG1_VXHX_PHASE = "LAG1_VXHX_PHASE",
     RVVHH0_DB = "RVVHH0_DB",
     RVVHH0_PHASE = "RVVHH0_PHASE"
 };

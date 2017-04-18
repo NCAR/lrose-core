@@ -134,6 +134,8 @@ typedef struct {
   string LAG0_HCVX_PHASE;
   string LAG0_VCHX_DB;
   string LAG0_VCHX_PHASE;
+  string LAG1_VXHX_DB;
+  string LAG1_VXHX_PHASE;
   string RVVHH0_DB;
   string RVVHH0_PHASE;
  } covar_field_names_t;
@@ -148,6 +150,8 @@ paramdef struct covar_field_names_t {
     LAG0_HCVX_PHASE = "LAG0_HCVX_PHASE",
     LAG0_VCHX_DB = "LAG0_VCHX_DB",
     LAG0_VCHX_PHASE = "LAG0_VCHX_PHASE",
+    LAG1_VXHX_DB = "LAG1_VXHX_DB",
+    LAG1_VXHX_PHASE = "LAG1_VXHX_PHASE",
     RVVHH0_DB = "RVVHH0_DB",
     RVVHH0_PHASE = "RVVHH0_PHASE"
   };

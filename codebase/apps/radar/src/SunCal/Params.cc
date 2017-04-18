@@ -781,7 +781,7 @@ using namespace std;
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &covar_field_names - &_start_;
     tt->struct_def.name = tdrpStrDup("covar_field_names_t");
-    tt->struct_def.nfields = 10;
+    tt->struct_def.nfields = 12;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -825,16 +825,26 @@ using namespace std;
       tt->struct_def.fields[7].rel_offset = 
         (char *) &covar_field_names.LAG0_VCHX_PHASE - (char *) &covar_field_names;
       tt->struct_def.fields[8].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[8].fname = tdrpStrDup("RVVHH0_DB");
+      tt->struct_def.fields[8].fname = tdrpStrDup("LAG1_VXHX_DB");
       tt->struct_def.fields[8].ptype = STRING_TYPE;
       tt->struct_def.fields[8].rel_offset = 
-        (char *) &covar_field_names.RVVHH0_DB - (char *) &covar_field_names;
+        (char *) &covar_field_names.LAG1_VXHX_DB - (char *) &covar_field_names;
       tt->struct_def.fields[9].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[9].fname = tdrpStrDup("RVVHH0_PHASE");
+      tt->struct_def.fields[9].fname = tdrpStrDup("LAG1_VXHX_PHASE");
       tt->struct_def.fields[9].ptype = STRING_TYPE;
       tt->struct_def.fields[9].rel_offset = 
+        (char *) &covar_field_names.LAG1_VXHX_PHASE - (char *) &covar_field_names;
+      tt->struct_def.fields[10].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[10].fname = tdrpStrDup("RVVHH0_DB");
+      tt->struct_def.fields[10].ptype = STRING_TYPE;
+      tt->struct_def.fields[10].rel_offset = 
+        (char *) &covar_field_names.RVVHH0_DB - (char *) &covar_field_names;
+      tt->struct_def.fields[11].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[11].fname = tdrpStrDup("RVVHH0_PHASE");
+      tt->struct_def.fields[11].ptype = STRING_TYPE;
+      tt->struct_def.fields[11].rel_offset = 
         (char *) &covar_field_names.RVVHH0_PHASE - (char *) &covar_field_names;
-    tt->n_struct_vals = 10;
+    tt->n_struct_vals = 12;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("LAG0_HC_DB");
@@ -845,8 +855,10 @@ using namespace std;
       tt->struct_vals[5].s = tdrpStrDup("LAG0_HCVX_PHASE");
       tt->struct_vals[6].s = tdrpStrDup("LAG0_VCHX_DB");
       tt->struct_vals[7].s = tdrpStrDup("LAG0_VCHX_PHASE");
-      tt->struct_vals[8].s = tdrpStrDup("RVVHH0_DB");
-      tt->struct_vals[9].s = tdrpStrDup("RVVHH0_PHASE");
+      tt->struct_vals[8].s = tdrpStrDup("LAG1_VXHX_DB");
+      tt->struct_vals[9].s = tdrpStrDup("LAG1_VXHX_PHASE");
+      tt->struct_vals[10].s = tdrpStrDup("RVVHH0_DB");
+      tt->struct_vals[11].s = tdrpStrDup("RVVHH0_PHASE");
     tt++;
     
     // Parameter 'Comment 4'

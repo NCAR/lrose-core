@@ -1103,6 +1103,11 @@ int SunCal::_computeCovarMoments(RadxRay *ray,
   RadxField *lag0_vchx_phase_fld =
     ray->getField(_params.covar_field_names.LAG0_VCHX_PHASE);
 
+  RadxField *lag1_vxhx_db_fld =
+    ray->getField(_params.covar_field_names.LAG1_VXHX_DB);
+  RadxField *lag1_vxhx_phase_fld =
+    ray->getField(_params.covar_field_names.LAG1_VXHX_PHASE);
+
   RadxField *rvvhh0_db_fld =
     ray->getField(_params.covar_field_names.RVVHH0_DB);
   RadxField *rvvhh0_phase_fld =
@@ -1116,6 +1121,8 @@ int SunCal::_computeCovarMoments(RadxRay *ray,
   Radx::fl32 *lag0_hcvx_phase = NULL;
   Radx::fl32 *lag0_vchx_db = NULL;
   Radx::fl32 *lag0_vchx_phase = NULL;
+  Radx::fl32 *lag1_vxhx_db = NULL;
+  Radx::fl32 *lag1_vxhx_phase = NULL;
   Radx::fl32 *rvvhh0_db = NULL;
   Radx::fl32 *rvvhh0_phase = NULL;
 
@@ -1145,6 +1152,7 @@ int SunCal::_computeCovarMoments(RadxRay *ray,
     lag0_hcvx_phase = lag0_hcvx_phase_fld->getDataFl32();
     _dualPol = true;
   }
+
   if (lag0_vchx_db_fld) {
     lag0_vchx_db = lag0_vchx_db_fld->getDataFl32();
     _dualPol = true;
@@ -1153,6 +1161,21 @@ int SunCal::_computeCovarMoments(RadxRay *ray,
     lag0_vchx_phase = lag0_vchx_phase_fld->getDataFl32();
     _dualPol = true;
   }
+
+  bool haveVxHx = true;
+  if (lag1_vxhx_db_fld) {
+    lag1_vxhx_db = lag1_vxhx_db_fld->getDataFl32();
+    _dualPol = true;
+  } else {
+    haveVxHx = false;
+  }
+  if (lag1_vxhx_phase_fld) {
+    lag1_vxhx_phase = lag1_vxhx_phase_fld->getDataFl32();
+    _dualPol = true;
+  } else {
+    haveVxHx = false;
+  }
+
   if (rvvhh0_db_fld) {
     rvvhh0_db = rvvhh0_db_fld->getDataFl32();
     _dualPol = true;
@@ -1327,6 +1350,7 @@ int SunCal::_computeCovarMoments(RadxRay *ray,
     double count = 0;
     double sumPowerHxXpol = 0.0;
     double sumPowerVxXpol = 0.0;
+    RadarComplex_t sumRvxhx(0.0, 0.0);
 
     for (int igate = startGateXpol; igate <= endGateXpol; igate++, count++) {
       
@@ -1343,14 +1367,30 @@ int SunCal::_computeCovarMoments(RadxRay *ray,
       sumPowerHxXpol += lag0_hx_xpol;
       sumPowerVxXpol += lag0_vx_xpol;
       
+      double lag1_vxhxMag = 0;
+      double lag1_vxhxPhase = 0;
+      if (lag1_vxhx_db) {
+        lag1_vxhxMag = pow(10.0, lag1_vxhx_db[igate] / 20.0);
+      }
+      if (lag1_vxhx_phase) {
+        lag1_vxhxPhase = lag1_vxhx_phase[igate] * DEG_TO_RAD;
+      }
+      double sinval, cosval;
+      ta_sincos(lag1_vxhxPhase, &sinval, &cosval);
+      RadarComplex_t lag1_vxhx;
+      lag1_vxhx.set(lag1_vxhxMag * cosval, lag1_vxhxMag * sinval);
+      sumRvxhx = RadarComplex::complexSum(sumRvxhx, lag1_vxhx);
+      
     } // igate
     
     double meanPowerHxXpol = sumPowerHxXpol / count;
     double meanPowerVxXpol = sumPowerVxXpol / count;
+    RadarComplex_t Rvxhx = RadarComplex::mean(sumRvxhx, count);
 
-    // double rhoVxHx =
-    //   RadarComplex::mag(lag0VxHx) / sqrt(powerVx * powerHx);
     double rhoVxHx = 1.0;
+    if (haveVxHx) {
+      rhoVxHx = RadarComplex::mag(Rvxhx) / sqrt(meanPowerVxXpol * meanPowerHxXpol);
+    }
     Xpol xpol(meanPowerHxXpol, meanPowerVxXpol, rhoVxHx);
     _xpolMoments.push_back(xpol);
     

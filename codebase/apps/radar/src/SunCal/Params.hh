@@ -84,6 +84,8 @@ public:
     char* LAG0_HCVX_PHASE;
     char* LAG0_VCHX_DB;
     char* LAG0_VCHX_PHASE;
+    char* LAG1_VXHX_DB;
+    char* LAG1_VXHX_PHASE;
     char* RVVHH0_DB;
     char* RVVHH0_PHASE;
   } covar_field_names_t;
