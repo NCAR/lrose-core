@@ -479,7 +479,7 @@ int NidsRadxFile::_doRead(const string &path,
   if (_verbose) {
     _NIDS_print_mess_hdr(stderr, "", &_nhdr);
   } else if (printNative) {
-    if (out == cout) {
+    if (&out == &cout) {
       _NIDS_print_mess_hdr(stdout, "", &_nhdr);
     } else {
       _NIDS_print_mess_hdr(stderr, "", &_nhdr);
@@ -526,7 +526,7 @@ int NidsRadxFile::_doRead(const string &path,
   if (_verbose) {
     _NIDS_print_radial_hdr(stderr, "", &_rhdr);
   } else if (printNative) {
-    if (out == cout) {
+    if (&out == &cout) {
       _NIDS_print_radial_hdr(stdout, "", &_rhdr);
     } else {
       _NIDS_print_radial_hdr(stderr, "", &_rhdr);
@@ -908,7 +908,7 @@ int NidsRadxFile::_printRays(ostream &out, bool printData)
     memcpy(&bhdr, _dataPtr, sizeof(_NIDS_beam_header_t));
     _dataPtr += sizeof(_NIDS_beam_header_t);
     _NIDS_BE_to_beam_header(&bhdr);
-    if (out == cout) {
+    if (&out == &cout) {
       _NIDS_print_beam_hdr(stdout, "", &bhdr);
     } else {
       _NIDS_print_beam_hdr(stderr, "", &bhdr);
