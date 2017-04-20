@@ -8,7 +8,7 @@
  *
  * April 2017
  *
-*****************************************************************/
+ *****************************************************************/
 
 /* includes */
 
@@ -29,8 +29,18 @@ static double gridStartEl = -2.0;
 /* static int endGate = 800; */
 static double maxValidDrxPowerDbm = -60.0;
 static double validEdgeBelowPeakDb = 8.0;
-static double noiseDbmH = -115.0;
-static double noiseDbmV = -115.0;
+static double minAngleOffsetForNoisePower = 2.0;
+static double maxSolidAngleForMeanCorr = 2.0;
+static double solidAngleForSS = 1.0;
+
+/* missing value */
+
+static double _missing = -9999.0;
+
+/* noise in each channel */
+
+static double _noiseDbmH = -115.0;
+static double _noiseDbmV = -115.0;
 
 /* location and theoretical sun angle */
 
@@ -48,9 +58,11 @@ static Pulse *_pulseQueue;
 /* raw beam array, before interpolation */
 /* this is computed from the incoming pulses */
 
-static Beam _rawBeamArray[RAW_MAX_NAZ][RAW_MAX_NEL];
+/* static Beam _rawBeamArray[RAW_MAX_NAZ][RAW_MAX_NEL]; */
+static Beam **_rawBeamArray;
 static int _rawMaxAz;
 static int _rawMaxEl[RAW_MAX_NAZ];
+static double _prevAzOffset = -9999;
 
 /* interpolated beams */
 /* on regular grid */
@@ -72,6 +84,7 @@ static double _pwrWtCentroidAzError;
 static double _pwrWtCentroidElError;
 static double _quadFitCentroidAzError;
 static double _quadFitCentroidElError;
+static double _elAzWidthRatio;
 
 /* solar results - power is for H channel */
 
@@ -81,6 +94,7 @@ static double _pwrWtCentroidAzErrorH;
 static double _pwrWtCentroidElErrorH;
 static double _quadFitCentroidAzErrorH;
 static double _quadFitCentroidElErrorH;
+static double _elAzWidthRatioH;
 
 /* solar results - power is for V channel */
 
@@ -90,13 +104,17 @@ static double _pwrWtCentroidAzErrorV;
 static double _pwrWtCentroidElErrorV;
 static double _quadFitCentroidAzErrorV;
 static double _quadFitCentroidElErrorV;
+static double _elAzWidthRatioV;
+static double _elAzwidthRatioDiffHV;
 
 static double _meanSS;
 static double _meanZdr;
+static double _meanCorr00;
 
 /* receiver gain */
 static double _rxGainHdB;
 static double _rxGainVdB;
+
 
 /*****************************************************
  * extern functions
@@ -161,52 +179,52 @@ static double computeAngleMean(double ang1, double ang2);
  * compute mean power of time series 
  */
 
-static double meanPower(const sunscan_complex_t *c1, int len);
+static double meanPower(const radar_complex_t *c1, int len);
 
 /*****************************************************
  * compute mean conjugate product of series 
  */
 
-static sunscan_complex_t meanConjugateProduct(const sunscan_complex_t *c1,
-                                              const sunscan_complex_t *c2,
+static radar_complex_t meanConjugateProduct(const radar_complex_t *c1,
+                                              const radar_complex_t *c2,
                                               int len);
 
 /*****************************************************
  * compute sum
  */
 
-static sunscan_complex_t complexSum(const sunscan_complex_t *c1,
-                                    const sunscan_complex_t *c2);
+static radar_complex_t complexSum(const radar_complex_t *c1,
+                                  const radar_complex_t *c2);
 
 /*****************************************************
  * mean of complex sum 
  */
 
-/* static sunscan_complex_t complexMean(sunscan_complex_t *sum, double nn); */
+static radar_complex_t complexMean(radar_complex_t *sum, double nn);
 
 /*****************************************************
  * magnitude of complex val
  */
 
-/* static double complexMag(sunscan_complex_t *val); */
+static double complexMag(radar_complex_t *val);
 
 /*****************************************************
  * compute arg in degrees 
  */
 
-/* static double complexArgDeg(const sunscan_complex_t *cc); */
+/* static double complexArgDeg(const radar_complex_t *cc); */
   
 /*****************************************************
  * get gate IQ in H channel
  */
 
-static sunscan_complex_t *getGateIqH(int igate);
+static radar_complex_t *getGateIqH(int igate);
 
 /*****************************************************
  * get gate IQ in V channel
  */
 
-static sunscan_complex_t *getGateIqV(int igate);
+static radar_complex_t *getGateIqV(int igate);
 
 /*****************************************************
  * Compare for sort on elevation angles 
@@ -218,19 +236,7 @@ static int compareBeamEl(const void *lhs, const void *rhs);
  * sort the raw beam data by elevation 
  */
     
-/* static void sortRawBeamsByEl(); */
-
-/*****************************************************
- * interp ppi moments onto regular 2-D grid
- *
- * global 2D array of Beam objects to store the interpolated data:
- * Beam _interpBeamArray[gridNAz][gridNEl];
- * double _interpDbmH[gridNAz][gridNEl];
- * double _interpDbmV[gridNAz][gridNEl];
- * double _interpDbm[gridNAz][gridNEl];
- */
-
-static void interpMoments();
+static void sortRawBeamsByEl();
 
 /*****************************************************
  * correct powers by subtracting the noise
@@ -283,7 +289,8 @@ static int computeSunCentroid(double **interpDbm,
                               double *pwrWtCentroidAzError,
                               double *pwrWtCentroidElError,
                               double *quadFitCentroidAzError,
-                              double *quadFitCentroidElError);
+                              double *quadFitCentroidElError,
+                              double *elAzWidthRatio);
 
 /*****************************************************
  *
@@ -296,39 +303,15 @@ static int computeSunCentroidAllChannels();
  * compute mean ZDR and SS ratio
  */
     
-static int computeMeanZdrAndSS(double solidAngle);
+static int computeMeanZdrAndSS();
   
-/*****************************************************
- * compute receiver gain
- * based on solar flux from Penticton
- *
- * Reference: On Measuring WSR-88D Antenna Gain Using Solar Flux.
- *            Dale Sirmans, Bill Urell, ROC Engineering Branch
- *            2001/01/03.
- */
-   
-static void computeReceiverGain();
-
-/*****************************************************/
-/* Dummy main */
-
-/* static int main2(int argc, char **argv) */
-/* { */
-/*   int ii; */
-/*   _rawMaxAz = 0; */
-/*   for (ii = 0; ii < RAW_MAX_NAZ; ii++) { */
-/*     _rawMaxEl[ii] = 0; */
-/*   } */
-/*   return 0; */
-/* } */
-
 /*****************************************************
  * compute sun position using NOVA routines
  */
 
 void rsts_SunNovasComputePosAtTime
-(site_info here, double deltat,
- double *SunAz, double *SunEl, double distanceAU)
+  (site_info here, double deltat,
+   double *SunAz, double *SunEl, double distanceAU)
 {
   /* do what is needed here */
 }
@@ -375,6 +358,7 @@ void computePosnNova(double stime, double *el, double *az)
   
   /* compute sun posn */
   rsts_SunNovasComputePosAtTime(site, deltat, az, el, ttime);
+
 }
 
 /*****************************************************/
@@ -456,13 +440,12 @@ double computeAngleMean(double ang1, double ang2)
   return mean;
 }
 
-/*****************************************************/
-/* returns 0 on success, -1 on failure */
-
-/* globals */
-/* We keep track of the previous valid indexed azimuth found */
-/* Initialize _prevAzOffset. */
-double _prevAzOffset = -9999;
+/*****************************************************
+ * check if current beam is indexed to the grid
+ * returns 0 on success, -1 on failure
+ *
+ * We keep track of the previous valid indexed azimuth found
+ */
 
 int isBeamIndexedToGrid()
 
@@ -518,7 +501,7 @@ int isBeamIndexedToGrid()
   /* compute grid az closest to the offset az */
     
   double roundedOffsetAz =
-      (floor (offsetAz0 / gridDeltaAz + 0.5)) * gridDeltaAz;
+    (floor (offsetAz0 / gridDeltaAz + 0.5)) * gridDeltaAz;
     
   /* have we moved at least half grid point since last beam? */
     
@@ -553,7 +536,7 @@ int isBeamIndexedToGrid()
 /*****************************************************/
 /* compute mean power of time series */
 
-double meanPower(const sunscan_complex_t *c1, int len)
+double meanPower(const radar_complex_t *c1, int len)
 {
   double sum = 0.0;
   int ipos;
@@ -569,9 +552,9 @@ double meanPower(const sunscan_complex_t *c1, int len)
 /*****************************************************/
 /* compute mean conjugate product of series */
 
-sunscan_complex_t meanConjugateProduct(const sunscan_complex_t *c1,
-                               const sunscan_complex_t *c2,
-                               int len)
+radar_complex_t meanConjugateProduct(const radar_complex_t *c1,
+                                       const radar_complex_t *c2,
+                                       int len)
 {
   
   double sumRe = 0.0;
@@ -583,7 +566,7 @@ sunscan_complex_t meanConjugateProduct(const sunscan_complex_t *c1,
     sumIm += ((c1->im * c2->re) - (c1->re * c2->im));
   }
 
-  sunscan_complex_t meanProduct;
+  radar_complex_t meanProduct;
   meanProduct.re = sumRe / len;
   meanProduct.im = sumIm / len;
 
@@ -594,10 +577,10 @@ sunscan_complex_t meanConjugateProduct(const sunscan_complex_t *c1,
 /*****************************************************/
 /* compute sum */
 
-sunscan_complex_t complexSum(const sunscan_complex_t *c1,
-                     const sunscan_complex_t *c2)
+radar_complex_t complexSum(const radar_complex_t *c1,
+                           const radar_complex_t *c2)
 {
-  sunscan_complex_t sum;
+  radar_complex_t sum;
   sum.re = c1->re + c2->re;
   sum.im = c1->im + c2->im;
   return sum;
@@ -605,18 +588,18 @@ sunscan_complex_t complexSum(const sunscan_complex_t *c1,
 
 /* mean of complex sum */
 
-/* sunscan_complex_t complexMean(sunscan_complex_t *sum, double nn) */
-/* { */
-/*   sunscan_complex_t mean; */
-/*   mean.re = sum->re / nn; */
-/*   mean.im = sum->im / nn; */
-/*   return mean; */
-/* } */
+radar_complex_t complexMean(radar_complex_t *sum, double nn)
+{
+  radar_complex_t mean;
+  mean.re = sum->re / nn;
+  mean.im = sum->im / nn;
+  return mean;
+}
 
 /*****************************************************/
 /* mean of complex sum */
 
-double mag(sunscan_complex_t *val)
+double complexMag(radar_complex_t *val)
 {
   return sqrt(val->re * val->re + val->im * val->im);
 }
@@ -624,7 +607,7 @@ double mag(sunscan_complex_t *val)
 /*****************************************************/
 /* compute arg in degrees */
 
-double argDeg(const sunscan_complex_t *cc)
+double argDeg(const radar_complex_t *cc)
   
 {
   double arg = 0.0;
@@ -635,16 +618,16 @@ double argDeg(const sunscan_complex_t *cc)
   return arg;
 }
 
-sunscan_complex_t *getGateIqH(int igate)
+radar_complex_t *getGateIqH(int igate)
 {
-  sunscan_complex_t *val = (sunscan_complex_t *) malloc(sizeof(sunscan_complex_t));
+  radar_complex_t *val = (radar_complex_t *) malloc(sizeof(radar_complex_t));
   /* read from data array ... */
   return val;
 }
 
-sunscan_complex_t *getGateIqV(int igate)
+radar_complex_t *getGateIqV(int igate)
 {
-  sunscan_complex_t *val = (sunscan_complex_t *) malloc(sizeof(sunscan_complex_t));
+  radar_complex_t *val = (radar_complex_t *) malloc(sizeof(radar_complex_t));
   /* read from data array ... */
   return val;
 }
@@ -665,9 +648,9 @@ int computeMoments(int startGate,
   double sumPowerH = 0.0;
   double sumPowerV = 0.0;
   double nn = 0.0;
-  sunscan_complex_t sumRvh0;
-  sumRvh0.re = 0.0;
-  sumRvh0.im = 0.0;
+  radar_complex_t sumRvvhh0;
+  sumRvvhh0.re = 0.0;
+  sumRvvhh0.im = 0.0;
 
   /* loop through gates to be used for sun computations */
   
@@ -676,8 +659,8 @@ int computeMoments(int startGate,
     /* get the I/Q data time series for the gate */
     /* the getGateIq() functions must be provided externally. */
     
-    const sunscan_complex_t *iqh = getGateIqH(igate);
-    const sunscan_complex_t *iqv = getGateIqV(igate);
+    const radar_complex_t *iqh = getGateIqH(igate);
+    const radar_complex_t *iqv = getGateIqV(igate);
 
     /* compute lag 0 covariance = power */
     
@@ -697,14 +680,14 @@ int computeMoments(int startGate,
     
     /* compute lag0 conjugate product, for correlation */
 
-    sunscan_complex_t lag0_hv =
+    radar_complex_t lag0_hv =
       meanConjugateProduct(iqh, iqv, nSamples - 1);
     
     /* sum up */
 
     sumPowerH += lag0_h;
     sumPowerV += lag0_v;
-    sumRvh0 = complexSum(&sumRvh0, &lag0_hv);
+    sumRvvhh0 = complexSum(&sumRvvhh0, &lag0_hv);
     
   } /* igate */
 
@@ -729,9 +712,10 @@ int computeMoments(int startGate,
   beam->zdr = beam->dbmH - beam->dbmV;
   beam->SS = 1.0 / (2.0 * beam->zdr);
  
-  double corrMag = mag(&sumRvh0) / nn;
+  beam->rvvhh0 = complexMean(&sumRvvhh0, nn);
+  double corrMag = complexMag(&sumRvvhh0) / nn;
   beam->corrHV = corrMag / sqrt(beam->powerH * beam->powerV);
-  beam->phaseHV = argDeg(&sumRvh0);
+  beam->phaseHV = argDeg(&sumRvvhh0);
 
   /* compute sun angle offset */
   
@@ -791,8 +775,9 @@ int addBeam(Beam *beam)
 
 }
 
-/*****************************************************/
-/* Compare for sort on elevation angles */
+/*****************************************************
+ * Compare for sort on elevation angles
+ */
 
 int compareBeamEl(const void *lhs, const void *rhs)
 {
@@ -805,29 +790,30 @@ int compareBeamEl(const void *lhs, const void *rhs)
   }
 }
 
-/*****************************************************/
-/* sort the raw beam data by elevation */
+/*****************************************************
+ * sort the raw beam data by elevation
+ */
     
-/* void sortRawBeamsByEl()  */
-/* { */
-/*   int iaz; */
-/*   for (iaz = 0; iaz < _rawMaxAz; iaz++) { */
-/*     Beam *beams = _rawBeamArray[iaz]; */
-/*     qsort(beams, _rawMaxEl[iaz], sizeof(Beam), compareBeamEl); */
-/*   } */
-/* } */
+void sortRawBeamsByEl()
+{
+  int iaz;
+  for (iaz = 0; iaz < _rawMaxAz; iaz++) {
+    Beam *beams = _rawBeamArray[iaz];
+    qsort(beams, _rawMaxEl[iaz], sizeof(Beam), compareBeamEl);
+  }
+}
 
+/*****************************************************
+ * interp ppi moments onto regular 2-D grid
+ *
+ * global 2D array of Beam objects to store the interpolated data:
+ * Beam _interpBeamArray[gridNAz][gridNEl];
+ * double _interpDbmH[gridNAz][gridNEl];
+ * double _interpDbmV[gridNAz][gridNEl];
+ * double _interpDbm[gridNAz][gridNEl];
+ */
 
-/*****************************************************/
-/* interp ppi moments onto regular 2-D grid */
-    
-/* global 2D array of Beam objects to store the interpolated data: */
-/* Beam _interpBeamArray[gridNAz][gridNEl]; */
-/* double _interpDbmH[gridNAz][gridNEl]; */
-/* double _interpDbmV[gridNAz][gridNEl]; */
-/* double _interpDbm[gridNAz][gridNEl]; */
-
-void interpMoments() 
+void interpMomentsToRegularGrid() 
 {
 
   /* loop through azimuths */
@@ -866,26 +852,26 @@ void interpMoments()
 
         /* compute interpolated values */
         
-        Beam interp = _interpBeamArray[iaz][iel];
+        Beam *interp = &_interpBeamArray[iaz][iel];
 
-        interp.time = (wt0 * raw0.time) + (wt1 * raw1.time);
-        interp.az = (wt0 * raw0.az) + (wt1 * raw1.az);
-        interp.el = (wt0 * raw0.el) + (wt1 * raw1.el);
-        interp.elOffset = elOffset;
-        interp.azOffset = azOffset;
-        interp.powerH = (wt0 * raw0.powerH) + (wt1 * raw1.powerH);
-        interp.powerV = (wt0 * raw0.powerV) + (wt1 * raw1.powerV);
-        interp.dbmH = (wt0 * raw0.dbmH) + (wt1 * raw1.dbmV);
-        interp.dbmV = (wt0 * raw0.dbmV) + (wt1 * raw1.dbmV);
-        interp.dbm = (wt0 * raw0.dbm) + (wt1 * raw1.dbm);
-        interp.zdr = (wt0 * raw0.zdr) + (wt1 * raw1.zdr);
-        interp.SS = (wt0 * raw0.SS) + (wt1 * raw1.SS);
-        interp.corrHV = (wt0 * raw0.corrHV) + (wt1 * raw1.corrHV);
-        interp.phaseHV = (wt0 * raw0.phaseHV) + (wt1 * raw1.phaseHV);
+        interp->time = (wt0 * raw0.time) + (wt1 * raw1.time);
+        interp->az = (wt0 * raw0.az) + (wt1 * raw1.az);
+        interp->el = (wt0 * raw0.el) + (wt1 * raw1.el);
+        interp->elOffset = elOffset;
+        interp->azOffset = azOffset;
+        interp->powerH = (wt0 * raw0.powerH) + (wt1 * raw1.powerH);
+        interp->powerV = (wt0 * raw0.powerV) + (wt1 * raw1.powerV);
+        interp->dbmH = (wt0 * raw0.dbmH) + (wt1 * raw1.dbmV);
+        interp->dbmV = (wt0 * raw0.dbmV) + (wt1 * raw1.dbmV);
+        interp->dbm = (wt0 * raw0.dbm) + (wt1 * raw1.dbm);
+        interp->zdr = (wt0 * raw0.zdr) + (wt1 * raw1.zdr);
+        interp->SS = (wt0 * raw0.SS) + (wt1 * raw1.SS);
+        interp->corrHV = (wt0 * raw0.corrHV) + (wt1 * raw1.corrHV);
+        interp->phaseHV = (wt0 * raw0.phaseHV) + (wt1 * raw1.phaseHV);
 
-        _interpDbmH[iaz][iel] = interp.dbmH; 
-        _interpDbmV[iaz][iel] = interp.dbmV; 
-        _interpDbm[iaz][iel] = interp.dbm; 
+        _interpDbmH[iaz][iel] = interp->dbmH; 
+        _interpDbmV[iaz][iel] = interp->dbmV; 
+        _interpDbm[iaz][iel] = interp->dbm; 
 
         break;
 
@@ -901,8 +887,8 @@ void correctPowersForNoise()
   
 {
   int iel, iaz;
-  double noisePowerH = pow(10.0, noiseDbmH / 10.0);
-  double noisePowerV = pow(10.0, noiseDbmV / 10.0);
+  double noisePowerH = pow(10.0, _noiseDbmH / 10.0);
+  double noisePowerV = pow(10.0, _noiseDbmV / 10.0);
   for (iel = 0; iel < gridNEl; iel++) {
     for (iaz = 0; iaz < gridNAz; iaz++) {
       Beam *beam = &_interpBeamArray[iaz][iel];
@@ -1085,7 +1071,8 @@ int computeSunCentroid(double **interpDbm,
                        double *pwrWtCentroidAzError,
                        double *pwrWtCentroidElError,
                        double *quadFitCentroidAzError,
-                       double *quadFitCentroidElError)
+                       double *quadFitCentroidElError,
+                       double *elAzWidthRatio)
 
 {
 
@@ -1162,6 +1149,7 @@ int computeSunCentroid(double **interpDbm,
   int fitIsGood = 1;
   double azArray[gridNAz];
   double azDbm[gridNAz];
+  double widthAz3Db = _missing;
 
   for (iaz = 0; iaz < gridNAz; iaz++) {
     double dbm = interpDbm[iaz][elCentroidIndex]; /* row for el centroid */
@@ -1179,11 +1167,15 @@ int computeSunCentroid(double **interpDbm,
               &ccAz, &bbAz, &aaAz,
               &errEstAz, &rSqAz) == 0) {
     double rootTerm = bbAz * bbAz - 4.0 * aaAz * ccAz;
+    double rootTerm2 = bbAz * bbAz - 2.0 * aaAz * ccAz;
     if (rSqAz > 0.9 && rootTerm >= 0) {
       /* good fit, real roots, so override centroid */
       double root1 = (-bbAz - sqrt(rootTerm)) / (2.0 * aaAz); 
       double root2 = (-bbAz + sqrt(rootTerm)) / (2.0 * aaAz);
       *quadFitCentroidAzError = (root1 + root2) / 2.0;
+      if (rootTerm2 >= 0) {
+        widthAz3Db = -(sqrt(rootTerm2) / aaAz);
+      }
     } else {
       fitIsGood = 0;
     }
@@ -1196,6 +1188,7 @@ int computeSunCentroid(double **interpDbm,
 
   double elArray[gridNEl];
   double elDbm[gridNEl];
+  double widthEl3Db = _missing;
   
   for (iel = 0; iel < gridNEl; iel++) {
     double dbm = interpDbm[azCentroidIndex][iel]; /* column for az centroid */
@@ -1213,18 +1206,29 @@ int computeSunCentroid(double **interpDbm,
               &ccEl, &bbEl, &aaEl,
               &errEstEl, &rSqEl) == 0) {
     double rootTerm = bbEl * bbEl - 4.0 * aaEl * ccEl;
+    double rootTerm2 = bbEl * bbEl - 2.0 * aaEl * ccEl;
     if (rSqEl > 0.9 && rootTerm >= 0) {
       /* good fit, real roots, so override centroid */
       double root1 = (-bbEl - sqrt(rootTerm)) / (2.0 * aaEl); 
       double root2 = (-bbEl + sqrt(rootTerm)) / (2.0 * aaEl);
       *quadFitCentroidElError = (root1 + root2) / 2.0;
+      if (rootTerm2 >= 0) {
+        widthEl3Db = -(sqrt(rootTerm2) / aaEl);
+      }
     } else {
       fitIsGood = 0;
     }
   } else {
     fitIsGood = 0;
   }
-  
+
+  // compute the width ratio
+
+  *elAzWidthRatio = _missing;
+  if (widthEl3Db != _missing && widthAz3Db != _missing) {
+    *elAzWidthRatio = widthEl3Db / widthAz3Db;
+  }
+
   /* set power from quadratic fits */
 
   if (fitIsGood) {
@@ -1250,7 +1254,8 @@ int computeSunCentroidAllChannels()
                          &_pwrWtCentroidAzError,
                          &_pwrWtCentroidElError,
                          &_quadFitCentroidAzError,
-                         &_quadFitCentroidElError)) {
+                         &_quadFitCentroidElError,
+                         &_elAzWidthRatio)) {
     return -1;
   }
   
@@ -1262,7 +1267,8 @@ int computeSunCentroidAllChannels()
                          &_pwrWtCentroidAzErrorH,
                          &_pwrWtCentroidElErrorH,
                          &_quadFitCentroidAzErrorH,
-                         &_quadFitCentroidElErrorH)) {
+                         &_quadFitCentroidElErrorH,
+                         &_elAzWidthRatioH)) {
     return -1;
   }
   
@@ -1274,9 +1280,12 @@ int computeSunCentroidAllChannels()
                          &_pwrWtCentroidAzErrorV,
                          &_pwrWtCentroidElErrorV,
                          &_quadFitCentroidAzErrorV,
-                         &_quadFitCentroidElErrorV)) {
+                         &_quadFitCentroidElErrorV,
+                         &_elAzWidthRatioV)) {
     return -1;
   }
+
+  _elAzwidthRatioDiffHV = _elAzWidthRatioH - _elAzWidthRatioV;
 
   return 0;
  
@@ -1285,7 +1294,7 @@ int computeSunCentroidAllChannels()
 /*****************************************************/
 /* compute mean ZDR and SS ratio */
     
-int computeMeanZdrAndSS(double solidAngle)
+int computeMeanZdrAndSS()
   
 {
 
@@ -1293,7 +1302,7 @@ int computeMeanZdrAndSS(double solidAngle)
   double sumSS = 0.0;
   double nn = 0.0;
 
-  double searchRadius = solidAngle / 2.0;
+  double searchRadius = solidAngleForSS / 2.0;
   
   /* for points within the required solid angle, */
   /* sum up stats */
@@ -1318,8 +1327,8 @@ int computeMeanZdrAndSS(double solidAngle)
   /* if too few points, cannot compute mean */
 
   if (nn < 1) {
-    _meanSS = -9999; /* missing */
-    _meanZdr = -9999; /* missing */
+    _meanSS = _missing;
+    _meanZdr = _missing;
     return -1;
   }
 
@@ -1402,5 +1411,211 @@ void computeReceiverGain()
   double PrVdBm = 10.0 * log10(PrVWatts) + 30.0;
   _rxGainVdB = _quadPowerDbmV - PrVdBm;
   
+}
+
+/////////////////////////////////////////////////
+// compute the mean noise power for each channel
+    
+void computeMeanNoise()
+  
+{
+
+  double sumNoiseDbmH = 0.0;
+  double sumNoiseDbmV = 0.0;
+  double nBeamsNoise = 0.0;
+
+  int iel, iaz;
+  for (iel = 0; iel < gridNEl; iel++) {
+
+    double elOffset = gridStartEl + iel * gridDeltaEl;
+    
+    for (iaz = 0; iaz < gridNAz; iaz++) {
+
+      double offsetAz = gridStartAz + iaz * gridDeltaAz;
+
+      double offset = sqrt(elOffset * elOffset + offsetAz * offsetAz);
+
+      if (offset < minAngleOffsetForNoisePower) {
+        continue;
+      }
+      
+      Beam *beam = &_interpBeamArray[iaz][iel];
+      
+      if (beam->dbmH != _missing &&
+          beam->dbmV != _missing &&
+          beam->dbmH < maxValidDrxPowerDbm) {
+        
+        sumNoiseDbmH += beam->dbmH;
+        sumNoiseDbmV += beam->dbmV;
+        nBeamsNoise++;
+      }
+      
+    } /* iaz */
+
+  } /* iel */
+
+  if (nBeamsNoise == 0) {
+    /* use defaults */
+    return;
+  }
+
+  _noiseDbmH = sumNoiseDbmH / nBeamsNoise;
+  _noiseDbmV = sumNoiseDbmV / nBeamsNoise;
+
+}
+
+/**********************************************
+ * compute power ratios
+ */
+
+void computePowerRatios()
+
+{
+
+  int iel, iaz;
+  for (iel = 0; iel < gridNEl; iel++) {
+    for (iaz = 0; iaz < gridNAz; iaz++) {
+      Beam *beam = &_interpBeamArray[iaz][iel];
+      if (beam->dbmV != _missing && beam->dbmH != _missing) {
+        beam->ratioDbmVH = beam->dbmV - beam->dbmH;
+        beam->SS = beam->ratioDbmVH * 2.0;
+      }
+    } /* iaz */
+  } /* iel */
+
+}
+
+/*********************************************
+ * compute mean correlation for sun disk
+ */
+    
+void computeSunCorr()
+  
+{
+
+  double sumPowerH = 0.0;
+  double sumPowerV = 0.0;
+  radar_complex_t sumRvvhh0;
+  sumRvvhh0.re = 0.0;
+  sumRvvhh0.im = 0.0;
+  double nn = 0.0;
+  
+  int iel, iaz;
+  for (iel = 0; iel < gridNEl; iel++) {
+    double dEl = gridStartEl + iel * gridDeltaEl;
+    for (iaz = 0; iaz < gridNAz; iaz++) {
+      double dAz = gridStartAz + iaz * gridDeltaAz;
+      double angDist = sqrt(dEl * dEl + dAz * dAz);
+      if (angDist > maxSolidAngleForMeanCorr) {
+        continue;
+      }
+      Beam *beam = &_interpBeamArray[iaz][iel];
+      sumPowerH += beam->powerH;
+      sumPowerV += beam->powerV;
+      sumRvvhh0 = complexSum(&sumRvvhh0, &beam->rvvhh0);
+      nn++;
+    }
+  }
+  
+  if (nn < 2) {
+    return;
+  }
+  
+  double meanPowerH = sumPowerH / nn;
+  double meanPowerV = sumPowerV / nn;
+  radar_complex_t meanRvvhh0;
+  meanRvvhh0 = complexMean(&sumRvvhh0, nn);
+  
+  if (meanPowerH > 0 && meanPowerV > 0) {
+    _meanCorr00 = complexMag(&meanRvvhh0) / sqrt(meanPowerH * meanPowerV);
+  }
+  
+}
+
+/**************************************************
+ * perform analysis
+ *
+ * Returns 0 on success, -1 on failure
+ */
+
+void performAnalysis()
+{
+
+  /* set the sun location */
+  /* _sunPosn.setLocation(_radarLat, _radarLon, _radarAltKm / 1000.0); */
+
+  /* sort the raw moments and interp onto a regular grid */
+  
+  sortRawBeamsByEl();
+  interpMomentsToRegularGrid();
+    
+  /* compute the min power for each channel */
+  
+  computeMeanNoise();
+
+  /* adjust powers for noise */
+  
+  correctPowersForNoise();
+
+  /* compute power ratios */
+  
+  computePowerRatios();
+
+  /* compute the max power */
+  
+  computeMaxPower();
+
+  /* compute mean sun location */
+  
+  computeMeanSunLocation();
+  
+  /* if (_params.debug >= Params::DEBUG_VERBOSE) { */
+  /*   cerr << "========== mean sun location ==========" << endl; */
+  /*   cerr << "  calTime: " << DateTime::strm((time_t) _calTime) << endl; */
+  /*   cerr << "  _meanSunEl: " << _meanSunEl << endl; */
+  /*   cerr << "  _meanSunAz: " << _meanSunAz << endl; */
+  /* } */
+
+  /* compute sun centroid */
+  
+  computeSunCentroidAllChannels();
+
+  
+  /* if (_params.debug) { */
+  /*   cerr << "============================" << endl; */
+  /*   if (_dualPol) { */
+  /*     cerr << "_sunCentroidAzOffsetHc: " << _sunCentroidAzOffsetHc << endl; */
+  /*     cerr << "_sunCentroidElOffsetHc: " << _sunCentroidElOffsetHc << endl; */
+  /*     cerr << "_sunCentroidAzOffsetVc: " << _sunCentroidAzOffsetVc << endl; */
+  /*     cerr << "_sunCentroidElOffsetVc: " << _sunCentroidElOffsetVc << endl; */
+  /*     cerr << "Stats for ellipses at -3dB: " */
+  /*          << "widthRatioElAzHc, widthRatioElAzVc, widthRatioElAzDiffHV: " */
+  /*          << _widthRatioElAzHc << ", " */
+  /*          << _widthRatioElAzVc << ", " */
+  /*          << _widthRatioElAzDiffHV << endl; */
+      
+  /*   } */
+  /*   cerr << "_sunCentroidAzOffset: " << _sunCentroidAzOffset << endl; */
+  /*   cerr << "_sunCentroidElOffset: " << _sunCentroidElOffset << endl; */
+  /*   cerr << "============================" << endl; */
+  /* } */
+  
+  /* compute the mean correlation for sun disk */
+  
+  computeSunCorr();
+  
+  /* compute results from moments */
+  
+  computeMeanZdrAndSS();
+
+  /* write out results */
+
+  /* if (_writeGriddedTextFiles()) { */
+  /*   return -1; */
+  /* } */
+  /* if (_writeSummaryText()) { */
+  /*   return -1; */
+  /* } */
+    
 }
 

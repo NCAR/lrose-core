@@ -45,6 +45,39 @@
  * structs for holding pulse and beam data
  */
 
+/***************************************************************************
+ * struct site_info: data for the observer's location.  The atmospheric 
+ *                   parameters are used only by the refraction 
+ *                   function called from function 'equ_to_hor'.
+ *                   Additional parameters can be added to this 
+ *                   structure if a more sophisticated refraction model 
+ *                   is employed.
+ *                    
+ *  latitude         = geodetic latitude in degrees; north positive.
+ *  longitude        = geodetic longitude in degrees; east positive.
+ *  height           = height of the observer in meters.
+ *  temperature      = temperature (degrees Celsius).
+ *  pressure         = atmospheric pressure (millibars)
+ */
+
+typedef struct
+{
+  double latitude;
+  double longitude;
+  double height;
+  double temperature;
+  double pressure;
+} site_info;
+
+/*****************************************************
+ * Complex math object 
+ */
+
+typedef struct {
+  double re;
+  double im;
+} radar_complex_t;
+
 /******************************
  * Pulse implementation example
  */
@@ -101,42 +134,12 @@ typedef struct {
   double phaseHV; /* mean phase between H and V */
   double dbBelowPeak; /* peak sun power minus mean dbm */
   double zdr; /* dbmH minus dbmV */
+  double ratioDbmVH; /* ratio of V / H power */
   double SS; /* 1.0 / (zdr^2) */
 
+  radar_complex_t rvvhh0;
+
 } Beam;
-
-/***************************************************************************
- * struct site_info: data for the observer's location.  The atmospheric 
- *                   parameters are used only by the refraction 
- *                   function called from function 'equ_to_hor'.
- *                   Additional parameters can be added to this 
- *                   structure if a more sophisticated refraction model 
- *                   is employed.
- *                    
- *  latitude         = geodetic latitude in degrees; north positive.
- *  longitude        = geodetic longitude in degrees; east positive.
- *  height           = height of the observer in meters.
- *  temperature      = temperature (degrees Celsius).
- *  pressure         = atmospheric pressure (millibars)
- */
-
-typedef struct
-{
-  double latitude;
-  double longitude;
-  double height;
-  double temperature;
-  double pressure;
-} site_info;
-
-/*****************************************************
- * Complex math object 
- */
-
-typedef struct {
-  double re;
-  double im;
-} sunscan_complex_t;
 
 /*****************************************************
  * initialize the lat/lon/alt for which sun position
@@ -166,5 +169,28 @@ extern int computeMoments(int startGate,
  */
 
 extern int addBeam(Beam *beam);
+
+/*****************************************************
+ * interp ppi moments onto regular 2-D grid
+ *
+ * global 2D array of Beam objects to store the interpolated data:
+ * Beam _interpBeamArray[gridNAz][gridNEl];
+ * double _interpDbmH[gridNAz][gridNEl];
+ * double _interpDbmV[gridNAz][gridNEl];
+ * double _interpDbm[gridNAz][gridNEl];
+ */
+
+extern void interpMomentsToRegularGrid();
+
+/*****************************************************
+ * compute receiver gain
+ * based on solar flux from Penticton
+ *
+ * Reference: On Measuring WSR-88D Antenna Gain Using Solar Flux.
+ *            Dale Sirmans, Bill Urell, ROC Engineering Branch
+ *            2001/01/03.
+ */
+   
+extern void computeReceiverGain();
 
 #endif
