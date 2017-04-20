@@ -8,15 +8,19 @@
  *
  * April 2017
  *
-*****************************************************************/
+ *****************************************************************/
 
 #ifndef sunscan_nexrad_h
 #define sunscan_nexrad_h
 
 /* const variables */
 
+#ifndef RAD_TO_DEG
 #define RAD_TO_DEG 57.29577951308092
+#endif
+#ifndef DEG_TO_RAD
 #define DEG_TO_RAD 0.01745329251994372
+#endif
 
 /* macros */
 
@@ -28,18 +32,18 @@
  * this is computed from the incoming pulses 
  */
 
-#define RAW_MAX_NAZ 1000
-#define RAW_MAX_NEL 1000
+#define NEXRAD_RAW_MAX_NAZ 1000
+#define NEXRAD_RAW_MAX_NEL 1000
 
 /* number of gates and samples */
 
-#define maxGates 2000
-#define nSamples 128
+#define NEXRAD_MAX_GATES 2000
+#define nexradNSamples 128
 
 /* interpolated beams on regular grid */
 
-#define gridNAz 31
-#define gridNEl 21
+#define nexradGridNAz 31
+#define nexradGridNEl 21
 
 /************************************************
  * structs for holding pulse and beam data
@@ -67,7 +71,7 @@ typedef struct
   double height;
   double temperature;
   double pressure;
-} site_info;
+} nexrad_site_info;
 
 /*****************************************************
  * Complex math object 
@@ -76,7 +80,7 @@ typedef struct
 typedef struct {
   double re;
   double im;
-} radar_complex_t;
+} nexrad_complex_t;
 
 /******************************
  * Pulse implementation example
@@ -87,7 +91,7 @@ typedef struct {
   
   /* meta data */
   
-  /* int nGates; number of gates */
+  int nGates; /* number of gates in use */
   double time; /* time in secs and fractions from 1 Jan 1970 */
   double prt; /* pulse repetition time (secs) */
   double el; /* elevation angle (deg) */
@@ -95,9 +99,9 @@ typedef struct {
   
   /* IQ data */
   
-  float iq[maxGates * 2];
+  float *iq; /* nGates * 2 channels H and V */
   
-} Pulse;
+} NexradPulse_t;
 
 /*****************************
  * Beam implementation example
@@ -110,7 +114,7 @@ typedef struct {
   
   /* meta data */
   
-  /* int nSamples; number of pulse samples in beam */
+  /* int nexradNSamples; number of pulse samples in beam */
   int nGates; /* number of gates */
   double time; /* time for the center pulse of beam */
   double prt; /* pulse repetition time (secs) */
@@ -121,7 +125,7 @@ typedef struct {
   
   /* Array of Pulses */
   
-  Pulse pulses[nSamples]; /* pulses for this beam */
+  NexradPulse_t pulses[nexradNSamples]; /* pulses for this beam */
   
   /* moments */
   
@@ -137,17 +141,31 @@ typedef struct {
   double ratioDbmVH; /* ratio of V / H power */
   double SS; /* 1.0 / (zdr^2) */
 
-  radar_complex_t rvvhh0;
+  nexrad_complex_t rvvhh0;
 
-} Beam;
+} NexradBeam_t;
+
+/*****************************************************
+ * compute sun position using NOVA routines
+ */
+
+extern void rsts_SunNovasComputePosAtTime
+  (nexrad_site_info here, double deltat,
+   double *SunAz, double *SunEl, double distanceAU);
 
 /*****************************************************
  * initialize the lat/lon/alt for which sun position
  * is computed lat/lon in degrees, alt_m in meters
  */
 
-extern void setLocation(double lat, double lon, double alt_m);
+extern void nexradSetLocation(double lat, double lon, double alt_m);
 
+/*****************************************************
+ * initialize the pulse queue
+ */
+
+extern void nexradInitPulseQueue();
+  
 /*****************************************************
  * Check if beam is indexed to grid
  * returns 0 on success, -1 on failure
@@ -162,13 +180,13 @@ extern int isBeamIndexedToGrid();
 
 extern int computeMoments(int startGate,
                             int endGate,
-                            Beam *beam);
+                            NexradBeam_t *beam);
 
 /*****************************************************
  * Add a beam to the raw beam array 
  */
 
-extern int addBeam(Beam *beam);
+extern int addBeam(NexradBeam_t *beam);
 
 /*****************************************************
  * interp ppi moments onto regular 2-D grid

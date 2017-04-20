@@ -62,6 +62,7 @@
 #include <Radx/RadxFile.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxRay.hh>
+#include "sunscan_nexrad.h"
 
 using namespace std;
 

@@ -16,6 +16,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <sys/time.h>
 
@@ -51,23 +52,29 @@ static double _prevSunTime = 0.0;
 static double _meanSunTime;
 static double _meanSunEl, _meanSunAz;
 
-/* input pulse queue */
+/* input pulse queue
+ * this is an array of pointers that are
+ * reordered as new pulses are added
+ * pulses are added at the back of the queue
+ * and removed from the front
+ */
 
-static Pulse *_pulseQueue;
+static NexradPulse_t **_pulseQueue = NULL;
+static int *_nPulses = 0;
 
 /* raw beam array, before interpolation */
 /* this is computed from the incoming pulses */
 
 /* static Beam _rawBeamArray[RAW_MAX_NAZ][RAW_MAX_NEL]; */
-static Beam **_rawBeamArray;
+static NexradBeam_t **_rawBeamArray;
 static int _rawMaxAz;
-static int _rawMaxEl[RAW_MAX_NAZ];
+static int _rawMaxEl[NEXRAD_RAW_MAX_NAZ];
 static double _prevAzOffset = -9999;
 
 /* interpolated beams */
 /* on regular grid */
 
-static Beam _interpBeamArray[gridNAz][gridNEl];
+static NexradBeam_t _interpBeamArray[nexradGridNAz][nexradGridNEl];
 
 /* interpolated power arrays */
 /* on regular grid */
@@ -114,20 +121,6 @@ static double _meanCorr00;
 /* receiver gain */
 static double _rxGainHdB;
 static double _rxGainVdB;
-
-
-/*****************************************************
- * extern functions
- *****************************************************/
-
-/*****************************************************
- * compute sun position using NOVA routines
- */
-
-extern void rsts_SunNovasComputePosAtTime
-  (site_info here, double deltat,
-   double *SunAz, double *SunEl, double distanceAU);
-
 
 /*****************************************************
  * static file-scope functions
@@ -179,52 +172,52 @@ static double computeAngleMean(double ang1, double ang2);
  * compute mean power of time series 
  */
 
-static double meanPower(const radar_complex_t *c1, int len);
+static double meanPower(const nexrad_complex_t *c1, int len);
 
 /*****************************************************
  * compute mean conjugate product of series 
  */
 
-static radar_complex_t meanConjugateProduct(const radar_complex_t *c1,
-                                              const radar_complex_t *c2,
+static nexrad_complex_t meanConjugateProduct(const nexrad_complex_t *c1,
+                                              const nexrad_complex_t *c2,
                                               int len);
 
 /*****************************************************
  * compute sum
  */
 
-static radar_complex_t complexSum(const radar_complex_t *c1,
-                                  const radar_complex_t *c2);
+static nexrad_complex_t complexSum(const nexrad_complex_t *c1,
+                                  const nexrad_complex_t *c2);
 
 /*****************************************************
  * mean of complex sum 
  */
 
-static radar_complex_t complexMean(radar_complex_t *sum, double nn);
+static nexrad_complex_t complexMean(nexrad_complex_t *sum, double nn);
 
 /*****************************************************
  * magnitude of complex val
  */
 
-static double complexMag(radar_complex_t *val);
+static double complexMag(nexrad_complex_t *val);
 
 /*****************************************************
  * compute arg in degrees 
  */
 
-/* static double complexArgDeg(const radar_complex_t *cc); */
+/* static double complexArgDeg(const nexrad_complex_t *cc); */
   
 /*****************************************************
  * get gate IQ in H channel
  */
 
-static radar_complex_t *getGateIqH(int igate);
+static nexrad_complex_t *getGateIqH(int igate);
 
 /*****************************************************
  * get gate IQ in V channel
  */
 
-static radar_complex_t *getGateIqV(int igate);
+static nexrad_complex_t *getGateIqV(int igate);
 
 /*****************************************************
  * Compare for sort on elevation angles 
@@ -304,13 +297,24 @@ static int computeSunCentroidAllChannels();
  */
     
 static int computeMeanZdrAndSS();
-  
+
+/**********************************************************/
+/**********************************************************/
+/**********************************************************/
+/**********************************************************/
+/**********************************************************/
+/**********************************************************/
+/**********************************************************/
+/**********************************************************/
+
+/************* implementation code below ******************/
+
 /*****************************************************
  * compute sun position using NOVA routines
  */
 
 void rsts_SunNovasComputePosAtTime
-  (site_info here, double deltat,
+  (nexrad_site_info here, double deltat,
    double *SunAz, double *SunEl, double distanceAU)
 {
   /* do what is needed here */
@@ -321,13 +325,93 @@ void rsts_SunNovasComputePosAtTime
  * is computed lat/lon in degrees, alt_m in meters
  */
 
-void setLocation(double lat, double lon, double alt_m)
+void nexradSetLocation(double lat, double lon, double alt_m)
 
 {
   _prevSunTime = 0.0;
   _latitude = lat;
   _longitude = lon;
   _altitudeM = alt_m;
+}
+
+/*****************************************************
+ * initialize the pulse queue
+ */
+
+void nexradInitPulseQueue()
+  
+{
+  if (_pulseQueue != NULL) {
+    // already done, only initialize once
+    return;
+  }
+  _pulseQueue =
+    (NexradPulse_t **) malloc(nexradNSamples * sizeof(NexradPulse_t *));
+  memset((void *) _pulseQueue, 0, nexradNSamples * sizeof(NexradPulse_t *));
+  _nPulses = 0;
+}
+  
+/*****************************************************
+ * create a pulse
+ */
+
+NexradPulse_t *nexradCreatePulse(int n_gates)
+  
+{
+  NexradPulse_t *pulse = (NexradPulse_t *) malloc(sizeof(NexradPulse_t));
+  pulse->nGates = n_gates;
+  pulse->time = _missing;
+  pulse->prt = _missing;
+  pulse->el = _missing;
+  pulse->az = _missing;
+  pulse->iq = (float *) malloc(n_gates * 2 * sizeof(float));
+  memset(pulse->iq, 0, n_gates * 2 * sizeof(float));
+  return pulse;
+}
+  
+/*****************************************************
+ * resize a pulse
+ */
+
+void nexradResizePulse(NexradPulse_t *pulse, int n_gates)
+  
+{
+  if (pulse->iq) {
+    free(pulse->iq);
+  }
+  pulse->nGates = n_gates;
+  pulse->iq = (float *) malloc(n_gates * 2 * sizeof(float));
+  memset(pulse->iq, 0, n_gates * 2 * sizeof(float));
+}
+  
+/*****************************************************
+ * initialize a beam
+ * is computed lat/lon in degrees, alt_m in meters
+ */
+
+void initBeam(NexradBeam_t *beam)
+
+{
+  beam->nGates = 0;
+  beam->time = _missing;
+  beam->prt = _missing;
+  beam->el = _missing;
+  beam->az = _missing;
+  beam->elOffset = _missing;
+  beam->azOffset = _missing;
+  beam->powerH = _missing;
+  beam->powerV = _missing;
+  beam->dbmH = _missing;
+  beam->dbmV = _missing;
+  beam->dbm = _missing;
+  beam->corrHV = _missing;
+  beam->phaseHV = _missing;
+  beam->dbBelowPeak = _missing;
+  beam->zdr = _missing;
+  beam->ratioDbmVH = _missing;
+  beam->SS = _missing;
+  beam->rvvhh0.re = 0.0;
+  beam->rvvhh0.im = 0.0;
 }
 
 /*****************************************************
@@ -350,7 +434,7 @@ void computePosnNova(double stime, double *el, double *az)
   double tempC = 20;
   double pressureMb = 1013;
 
-  site_info site = { _latitude, _longitude, _altitudeM, tempC, pressureMb };
+  nexrad_site_info site = { _latitude, _longitude, _altitudeM, tempC, pressureMb };
   
   /* set time */
   time_t ttime = (time_t) stime;
@@ -453,15 +537,15 @@ int isBeamIndexedToGrid()
 
   /* find pulses either side of mid point of queue */
 
-  int midIndex0 = nSamples / 2;
+  int midIndex0 = nexradNSamples / 2;
   int midIndex1 = midIndex0 + 1;
-  Pulse pulse0 = _pulseQueue[midIndex0];
-  Pulse pulse1 = _pulseQueue[midIndex1];
+  NexradPulse_t *pulse0 = _pulseQueue[midIndex0];
+  NexradPulse_t *pulse1 = _pulseQueue[midIndex1];
   
   /* compute angles at mid queue ? i.e. in center of beam */
   
-  double az0 = pulse0.az;
-  double az1 = pulse1.az;
+  double az0 = pulse0->az;
+  double az1 = pulse1->az;
 
   /* adjust az angles if they cross north */
 
@@ -481,7 +565,7 @@ int isBeamIndexedToGrid()
   if (az < 0) {
     az += 360.0;
   }
-  double el = computeAngleMean(pulse0.el, pulse1.el);
+  double el = computeAngleMean(pulse0->el, pulse1->el);
 
   /* compute cosine of elevation for correcting azimuth relative to sun */
 
@@ -489,7 +573,7 @@ int isBeamIndexedToGrid()
 
   /* compute angles relative to sun position */
   
-  double midTime = (pulse0.time + pulse1.time) / 2.0;
+  double midTime = (pulse0->time + pulse1->time) / 2.0;
   double sunEl, sunAz;
   computePosnNova(midTime, &sunEl, &sunAz);
   
@@ -519,7 +603,7 @@ int isBeamIndexedToGrid()
     
   int azIndex = -1;
   azIndex = (int) ((roundedOffsetAz - gridStartAz) / gridDeltaAz + 0.5);
-  if (azIndex < 0 || azIndex > gridNAz - 1) {
+  if (azIndex < 0 || azIndex > nexradGridNAz - 1) {
     /* outside grid - failure */
     return -1;
   }
@@ -536,7 +620,7 @@ int isBeamIndexedToGrid()
 /*****************************************************/
 /* compute mean power of time series */
 
-double meanPower(const radar_complex_t *c1, int len)
+double meanPower(const nexrad_complex_t *c1, int len)
 {
   double sum = 0.0;
   int ipos;
@@ -552,8 +636,8 @@ double meanPower(const radar_complex_t *c1, int len)
 /*****************************************************/
 /* compute mean conjugate product of series */
 
-radar_complex_t meanConjugateProduct(const radar_complex_t *c1,
-                                       const radar_complex_t *c2,
+nexrad_complex_t meanConjugateProduct(const nexrad_complex_t *c1,
+                                       const nexrad_complex_t *c2,
                                        int len)
 {
   
@@ -566,7 +650,7 @@ radar_complex_t meanConjugateProduct(const radar_complex_t *c1,
     sumIm += ((c1->im * c2->re) - (c1->re * c2->im));
   }
 
-  radar_complex_t meanProduct;
+  nexrad_complex_t meanProduct;
   meanProduct.re = sumRe / len;
   meanProduct.im = sumIm / len;
 
@@ -577,10 +661,10 @@ radar_complex_t meanConjugateProduct(const radar_complex_t *c1,
 /*****************************************************/
 /* compute sum */
 
-radar_complex_t complexSum(const radar_complex_t *c1,
-                           const radar_complex_t *c2)
+nexrad_complex_t complexSum(const nexrad_complex_t *c1,
+                           const nexrad_complex_t *c2)
 {
-  radar_complex_t sum;
+  nexrad_complex_t sum;
   sum.re = c1->re + c2->re;
   sum.im = c1->im + c2->im;
   return sum;
@@ -588,9 +672,9 @@ radar_complex_t complexSum(const radar_complex_t *c1,
 
 /* mean of complex sum */
 
-radar_complex_t complexMean(radar_complex_t *sum, double nn)
+nexrad_complex_t complexMean(nexrad_complex_t *sum, double nn)
 {
-  radar_complex_t mean;
+  nexrad_complex_t mean;
   mean.re = sum->re / nn;
   mean.im = sum->im / nn;
   return mean;
@@ -599,7 +683,7 @@ radar_complex_t complexMean(radar_complex_t *sum, double nn)
 /*****************************************************/
 /* mean of complex sum */
 
-double complexMag(radar_complex_t *val)
+double complexMag(nexrad_complex_t *val)
 {
   return sqrt(val->re * val->re + val->im * val->im);
 }
@@ -607,7 +691,7 @@ double complexMag(radar_complex_t *val)
 /*****************************************************/
 /* compute arg in degrees */
 
-double argDeg(const radar_complex_t *cc)
+double argDeg(const nexrad_complex_t *cc)
   
 {
   double arg = 0.0;
@@ -618,16 +702,16 @@ double argDeg(const radar_complex_t *cc)
   return arg;
 }
 
-radar_complex_t *getGateIqH(int igate)
+nexrad_complex_t *getGateIqH(int igate)
 {
-  radar_complex_t *val = (radar_complex_t *) malloc(sizeof(radar_complex_t));
+  nexrad_complex_t *val = (nexrad_complex_t *) malloc(sizeof(nexrad_complex_t));
   /* read from data array ... */
   return val;
 }
 
-radar_complex_t *getGateIqV(int igate)
+nexrad_complex_t *getGateIqV(int igate)
 {
-  radar_complex_t *val = (radar_complex_t *) malloc(sizeof(radar_complex_t));
+  nexrad_complex_t *val = (nexrad_complex_t *) malloc(sizeof(nexrad_complex_t));
   /* read from data array ... */
   return val;
 }
@@ -638,7 +722,7 @@ radar_complex_t *getGateIqV(int igate)
 
 int computeMoments(int startGate,
                    int endGate,
-                   Beam *beam)
+                   NexradBeam_t *beam)
 
 {
   
@@ -648,7 +732,7 @@ int computeMoments(int startGate,
   double sumPowerH = 0.0;
   double sumPowerV = 0.0;
   double nn = 0.0;
-  radar_complex_t sumRvvhh0;
+  nexrad_complex_t sumRvvhh0;
   sumRvvhh0.re = 0.0;
   sumRvvhh0.im = 0.0;
 
@@ -659,13 +743,13 @@ int computeMoments(int startGate,
     /* get the I/Q data time series for the gate */
     /* the getGateIq() functions must be provided externally. */
     
-    const radar_complex_t *iqh = getGateIqH(igate);
-    const radar_complex_t *iqv = getGateIqV(igate);
+    const nexrad_complex_t *iqh = getGateIqH(igate);
+    const nexrad_complex_t *iqv = getGateIqV(igate);
 
     /* compute lag 0 covariance = power */
     
-    double lag0_h = meanPower(iqh, nSamples - 1);
-    double lag0_v = meanPower(iqv, nSamples - 1);
+    double lag0_h = meanPower(iqh, nexradNSamples - 1);
+    double lag0_v = meanPower(iqv, nexradNSamples - 1);
     
     /* check power for interference */
 
@@ -680,8 +764,8 @@ int computeMoments(int startGate,
     
     /* compute lag0 conjugate product, for correlation */
 
-    radar_complex_t lag0_hv =
-      meanConjugateProduct(iqh, iqv, nSamples - 1);
+    nexrad_complex_t lag0_hv =
+      meanConjugateProduct(iqh, iqv, nexradNSamples - 1);
     
     /* sum up */
 
@@ -732,7 +816,7 @@ int computeMoments(int startGate,
 /*****************************************************/
 /* Add a beam to the raw beam array */
 
-int addBeam(Beam *beam)
+int addBeam(NexradBeam_t *beam)
 {
 
   /* compute the azimuth index */
@@ -741,7 +825,7 @@ int addBeam(Beam *beam)
 
   /* check for array space */
 
-  if (azIndex > RAW_MAX_NAZ - 1) {
+  if (azIndex > NEXRAD_RAW_MAX_NAZ - 1) {
     fprintf(stderr, "ERROR - azIndex too great: %d\n", azIndex);
   }
 
@@ -752,11 +836,11 @@ int addBeam(Beam *beam)
     _rawMaxEl[azIndex] = 0;
   }
 
-  if (azIndex >= 0 || azIndex < gridNAz) {
+  if (azIndex >= 0 || azIndex < nexradGridNAz) {
 
     /* check for array space */
     
-    if (_rawMaxEl[azIndex] > RAW_MAX_NEL - 2) {
+    if (_rawMaxEl[azIndex] > NEXRAD_RAW_MAX_NEL - 2) {
       fprintf(stderr, "ERROR - elIndex too great: %d\n", _rawMaxEl[azIndex]);
       return -1;
     }
@@ -781,8 +865,8 @@ int addBeam(Beam *beam)
 
 int compareBeamEl(const void *lhs, const void *rhs)
 {
-  const Beam *lbeam = (Beam *) lhs;
-  const Beam *rbeam = (Beam *) rhs;
+  const NexradBeam_t *lbeam = (NexradBeam_t *) lhs;
+  const NexradBeam_t *rbeam = (NexradBeam_t *) rhs;
   if (lbeam->elOffset < rbeam->elOffset) {
     return 1;
   } else {
@@ -798,8 +882,8 @@ void sortRawBeamsByEl()
 {
   int iaz;
   for (iaz = 0; iaz < _rawMaxAz; iaz++) {
-    Beam *beams = _rawBeamArray[iaz];
-    qsort(beams, _rawMaxEl[iaz], sizeof(Beam), compareBeamEl);
+    NexradBeam_t *beams = _rawBeamArray[iaz];
+    qsort(beams, _rawMaxEl[iaz], sizeof(NexradBeam_t), compareBeamEl);
   }
 }
 
@@ -807,10 +891,10 @@ void sortRawBeamsByEl()
  * interp ppi moments onto regular 2-D grid
  *
  * global 2D array of Beam objects to store the interpolated data:
- * Beam _interpBeamArray[gridNAz][gridNEl];
- * double _interpDbmH[gridNAz][gridNEl];
- * double _interpDbmV[gridNAz][gridNEl];
- * double _interpDbm[gridNAz][gridNEl];
+ * Beam _interpBeamArray[nexradGridNAz][nexradGridNEl];
+ * double _interpDbmH[nexradGridNAz][nexradGridNEl];
+ * double _interpDbmV[nexradGridNAz][nexradGridNEl];
+ * double _interpDbm[nexradGridNAz][nexradGridNEl];
  */
 
 void interpMomentsToRegularGrid() 
@@ -818,22 +902,22 @@ void interpMomentsToRegularGrid()
 
   /* loop through azimuths */
   int iaz, iel, ii;
-  for (iaz = 0; iaz < gridNAz; iaz++) {
+  for (iaz = 0; iaz < nexradGridNAz; iaz++) {
     double azOffset = gridStartAz + iaz * gridDeltaAz;
     
     /* find elevation straddle if available */
     
-    for (iel = 0; iel < gridNEl; iel++) {
+    for (iel = 0; iel < nexradGridNEl; iel++) {
       double elOffset = gridStartEl + iel * gridDeltaEl;
 
       /* find the raw moments which straddle this elevation */
 
-      Beam *raw = _rawBeamArray[iaz];
+      NexradBeam_t *raw = _rawBeamArray[iaz];
       
       for (ii = 0; ii < _rawMaxEl[iaz] - 1; ii++) {
         
-        Beam raw0 = raw[ii];
-        Beam raw1 = raw[ii+1];
+        NexradBeam_t raw0 = raw[ii];
+        NexradBeam_t raw1 = raw[ii+1];
         double elOffset0 = raw0.elOffset;
         double elOffset1 = raw1.elOffset;
 
@@ -852,7 +936,7 @@ void interpMomentsToRegularGrid()
 
         /* compute interpolated values */
         
-        Beam *interp = &_interpBeamArray[iaz][iel];
+        NexradBeam_t *interp = &_interpBeamArray[iaz][iel];
 
         interp->time = (wt0 * raw0.time) + (wt1 * raw1.time);
         interp->az = (wt0 * raw0.az) + (wt1 * raw1.az);
@@ -889,9 +973,9 @@ void correctPowersForNoise()
   int iel, iaz;
   double noisePowerH = pow(10.0, _noiseDbmH / 10.0);
   double noisePowerV = pow(10.0, _noiseDbmV / 10.0);
-  for (iel = 0; iel < gridNEl; iel++) {
-    for (iaz = 0; iaz < gridNAz; iaz++) {
-      Beam *beam = &_interpBeamArray[iaz][iel];
+  for (iel = 0; iel < nexradGridNEl; iel++) {
+    for (iaz = 0; iaz < nexradGridNAz; iaz++) {
+      NexradBeam_t *beam = &_interpBeamArray[iaz][iel];
       beam->powerH -= noisePowerH;
       beam->powerV -= noisePowerV;
       if (beam->powerH <= 0) {
@@ -918,9 +1002,9 @@ void computeMaxPower()
   _maxPowerDbmV = -120.0;
   _maxPowerDbm = -120.0;
   int iel, iaz;
-  for (iel = 0; iel < gridNEl; iel++) {
-    for (iaz = 0; iaz < gridNAz; iaz++) {
-      Beam *beam = &_interpBeamArray[iaz][iel];
+  for (iel = 0; iel < nexradGridNEl; iel++) {
+    for (iaz = 0; iaz < nexradGridNAz; iaz++) {
+      NexradBeam_t *beam = &_interpBeamArray[iaz][iel];
       if (beam->dbmH <= maxValidDrxPowerDbm) {
         _maxPowerDbmH = MAX(_maxPowerDbmH, beam->dbmH);
       }
@@ -934,9 +1018,9 @@ void computeMaxPower()
   }
    
   /* compute dbm below peak */
-  for (iel = 0; iel < gridNEl; iel++) {
-    for (iaz = 0; iaz < gridNAz; iaz++) {
-      Beam *beam = &_interpBeamArray[iaz][iel];
+  for (iel = 0; iel < nexradGridNEl; iel++) {
+    for (iaz = 0; iaz < nexradGridNAz; iaz++) {
+      NexradBeam_t *beam = &_interpBeamArray[iaz][iel];
       beam->dbBelowPeak = beam->dbm - _maxPowerDbm;
     }
   }
@@ -1043,9 +1127,9 @@ void computeMeanSunLocation()
   double sumTime = 0.0;
   double nn = 0.0;
   int iel, iaz;
-  for (iel = 0; iel < gridNEl; iel++) {
-    for (iaz = 0; iaz < gridNAz; iaz++) {
-      Beam *beam = &_interpBeamArray[iaz][iel];
+  for (iel = 0; iel < nexradGridNEl; iel++) {
+    for (iaz = 0; iaz < nexradGridNAz; iaz++) {
+      NexradBeam_t *beam = &_interpBeamArray[iaz][iel];
       if (beam->dbBelowPeak > validEdgeBelowPeakDb) {
         sumTime += beam->time;
         nn++;
@@ -1094,9 +1178,9 @@ int computeSunCentroid(double **interpDbm,
   double edgePowerThreshold = maxPowerDbm - validEdgeBelowPeakDb;
 
   int iel, iaz;
-  for (iel = 0; iel < gridNEl; iel++) {
-    for (iaz = 0; iaz < gridNAz; iaz++) {
-      Beam *beam = &_interpBeamArray[iaz][iel];
+  for (iel = 0; iel < nexradGridNEl; iel++) {
+    for (iaz = 0; iaz < nexradGridNAz; iaz++) {
+      NexradBeam_t *beam = &_interpBeamArray[iaz][iel];
       double dbm = interpDbm[iaz][iel];
       double power = pow(10.0, dbm / 10.0);
       if (dbm >= edgePowerThreshold && dbm <= maxValidDrxPowerDbm) {
@@ -1120,8 +1204,8 @@ int computeSunCentroid(double **interpDbm,
   *pwrWtCentroidAzError = sumWtAz / sumPower;
   *pwrWtCentroidElError = sumWtEl / sumPower;
 
-  double gridMaxAz = gridStartAz + gridNAz * gridDeltaAz;
-  double gridMaxEl = gridStartEl + gridNEl * gridDeltaEl;
+  double gridMaxAz = gridStartAz + nexradGridNAz * gridDeltaAz;
+  double gridMaxEl = gridStartEl + nexradGridNEl * gridDeltaEl;
   
   if (*pwrWtCentroidAzError < gridStartAz ||
       *pwrWtCentroidAzError > gridMaxAz ||
@@ -1147,11 +1231,11 @@ int computeSunCentroid(double **interpDbm,
   /* this is done for the grid row at the elevation centroid */
 
   int fitIsGood = 1;
-  double azArray[gridNAz];
-  double azDbm[gridNAz];
+  double azArray[nexradGridNAz];
+  double azDbm[nexradGridNAz];
   double widthAz3Db = _missing;
 
-  for (iaz = 0; iaz < gridNAz; iaz++) {
+  for (iaz = 0; iaz < nexradGridNAz; iaz++) {
     double dbm = interpDbm[iaz][elCentroidIndex]; /* row for el centroid */
     if (dbm >= edgePowerThreshold) {
       double az = gridStartAz + iaz * gridDeltaAz;
@@ -1162,7 +1246,7 @@ int computeSunCentroid(double **interpDbm,
   }
   
   double ccAz, bbAz, aaAz, errEstAz, rSqAz;
-  if (quadFit(gridNAz,
+  if (quadFit(nexradGridNAz,
               azArray, azDbm,
               &ccAz, &bbAz, &aaAz,
               &errEstAz, &rSqAz) == 0) {
@@ -1186,11 +1270,11 @@ int computeSunCentroid(double **interpDbm,
   /* fit parabola in elevation to refine the elevation centroid */
   /* this is done for the grid column at the azimuth centroid */
 
-  double elArray[gridNEl];
-  double elDbm[gridNEl];
+  double elArray[nexradGridNEl];
+  double elDbm[nexradGridNEl];
   double widthEl3Db = _missing;
   
-  for (iel = 0; iel < gridNEl; iel++) {
+  for (iel = 0; iel < nexradGridNEl; iel++) {
     double dbm = interpDbm[azCentroidIndex][iel]; /* column for az centroid */
     if (dbm >= edgePowerThreshold) {
       double el = gridStartEl + iel * gridDeltaEl;
@@ -1201,7 +1285,7 @@ int computeSunCentroid(double **interpDbm,
   }
   
   double ccEl, bbEl, aaEl, errEstEl, rSqEl;
-  if (quadFit(gridNEl,
+  if (quadFit(nexradGridNEl,
               elArray, elDbm,
               &ccEl, &bbEl, &aaEl,
               &errEstEl, &rSqEl) == 0) {
@@ -1308,15 +1392,15 @@ int computeMeanZdrAndSS()
   /* sum up stats */
 
   int iel, iaz;
-  for (iel = 0; iel < gridNEl; iel++) {
+  for (iel = 0; iel < nexradGridNEl; iel++) {
     double el = gridStartEl + iel * gridDeltaEl;
     double elOffset = el - _quadFitCentroidElError;
-    for (iaz = 0; iaz < gridNAz; iaz++) {
+    for (iaz = 0; iaz < nexradGridNAz; iaz++) {
       double az = gridStartAz + iaz * gridDeltaAz;
       double azOffset = az - _quadFitCentroidAzError;
       double offset = sqrt(elOffset * elOffset + azOffset * azOffset);
       if (offset <= searchRadius) {
-        Beam *beam = &_interpBeamArray[iaz][iel];
+        NexradBeam_t *beam = &_interpBeamArray[iaz][iel];
         sumZdr += beam->zdr;
         sumSS += beam->SS;
         nn++;
@@ -1425,11 +1509,11 @@ void computeMeanNoise()
   double nBeamsNoise = 0.0;
 
   int iel, iaz;
-  for (iel = 0; iel < gridNEl; iel++) {
+  for (iel = 0; iel < nexradGridNEl; iel++) {
 
     double elOffset = gridStartEl + iel * gridDeltaEl;
     
-    for (iaz = 0; iaz < gridNAz; iaz++) {
+    for (iaz = 0; iaz < nexradGridNAz; iaz++) {
 
       double offsetAz = gridStartAz + iaz * gridDeltaAz;
 
@@ -1439,7 +1523,7 @@ void computeMeanNoise()
         continue;
       }
       
-      Beam *beam = &_interpBeamArray[iaz][iel];
+      NexradBeam_t *beam = &_interpBeamArray[iaz][iel];
       
       if (beam->dbmH != _missing &&
           beam->dbmV != _missing &&
@@ -1473,9 +1557,9 @@ void computePowerRatios()
 {
 
   int iel, iaz;
-  for (iel = 0; iel < gridNEl; iel++) {
-    for (iaz = 0; iaz < gridNAz; iaz++) {
-      Beam *beam = &_interpBeamArray[iaz][iel];
+  for (iel = 0; iel < nexradGridNEl; iel++) {
+    for (iaz = 0; iaz < nexradGridNAz; iaz++) {
+      NexradBeam_t *beam = &_interpBeamArray[iaz][iel];
       if (beam->dbmV != _missing && beam->dbmH != _missing) {
         beam->ratioDbmVH = beam->dbmV - beam->dbmH;
         beam->SS = beam->ratioDbmVH * 2.0;
@@ -1495,21 +1579,21 @@ void computeSunCorr()
 
   double sumPowerH = 0.0;
   double sumPowerV = 0.0;
-  radar_complex_t sumRvvhh0;
+  nexrad_complex_t sumRvvhh0;
   sumRvvhh0.re = 0.0;
   sumRvvhh0.im = 0.0;
   double nn = 0.0;
   
   int iel, iaz;
-  for (iel = 0; iel < gridNEl; iel++) {
+  for (iel = 0; iel < nexradGridNEl; iel++) {
     double dEl = gridStartEl + iel * gridDeltaEl;
-    for (iaz = 0; iaz < gridNAz; iaz++) {
+    for (iaz = 0; iaz < nexradGridNAz; iaz++) {
       double dAz = gridStartAz + iaz * gridDeltaAz;
       double angDist = sqrt(dEl * dEl + dAz * dAz);
       if (angDist > maxSolidAngleForMeanCorr) {
         continue;
       }
-      Beam *beam = &_interpBeamArray[iaz][iel];
+      NexradBeam_t *beam = &_interpBeamArray[iaz][iel];
       sumPowerH += beam->powerH;
       sumPowerV += beam->powerV;
       sumRvvhh0 = complexSum(&sumRvvhh0, &beam->rvvhh0);
@@ -1523,7 +1607,7 @@ void computeSunCorr()
   
   double meanPowerH = sumPowerH / nn;
   double meanPowerV = sumPowerV / nn;
-  radar_complex_t meanRvvhh0;
+  nexrad_complex_t meanRvvhh0;
   meanRvvhh0 = complexMean(&sumRvvhh0, nn);
   
   if (meanPowerH > 0 && meanPowerV > 0) {
@@ -1540,9 +1624,6 @@ void computeSunCorr()
 
 void performAnalysis()
 {
-
-  /* set the sun location */
-  /* _sunPosn.setLocation(_radarLat, _radarLon, _radarAltKm / 1000.0); */
 
   /* sort the raw moments and interp onto a regular grid */
   
