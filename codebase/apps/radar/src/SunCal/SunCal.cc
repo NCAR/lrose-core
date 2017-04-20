@@ -170,6 +170,10 @@ SunCal::SunCal(int argc, char **argv)
   _noiseDbmHx = -9999.0;
   _noiseDbmVx = -9999.0;
   
+  // initialize nexrad C processing
+
+  solarInitPulseQueue(_params.n_samples);
+
   // init process mapper registration
 
   if (_params.register_with_procmap) {
@@ -177,7 +181,7 @@ SunCal::SunCal(int argc, char **argv)
                   _params.instance,
                   PROCMAP_REGISTER_INTERVAL);
   }
-  
+
   return;
   
 }
@@ -207,6 +211,8 @@ SunCal::~SunCal()
   _deleteInterpMomentsArray();
   _deleteXpolMomentsArray();
   _deleteTestPulseMomentsArray();
+
+  solarFreePulseQueue();
 
   // unregister process
 
@@ -742,6 +748,8 @@ void SunCal::_addPulseToQueue(const IwrfTsPulse *pulse)
         cerr << "====>> Clearing pulse queue" << endl;
       }
       _clearPulseQueue();
+      // free NEXRAD queue
+      solarFreePulseQueue();
       return;
     }
 
@@ -751,9 +759,10 @@ void SunCal::_addPulseToQueue(const IwrfTsPulse *pulse)
   
   pulse->addClient();
   _pulseQueue.push_back(pulse);
-
+  _addPulseToNexradQueue(pulse);
+  
   // print missing pulses in verbose mode
-
+  
   if ((pulse->getSeqNum() - _pulseSeqNum) != 1) {
     if (_params.print_missing_pulses && _pulseSeqNum != 0) {
       cerr << "**** Missing seq num: " << _pulseSeqNum
@@ -763,6 +772,73 @@ void SunCal::_addPulseToQueue(const IwrfTsPulse *pulse)
   _pulseSeqNum = pulse->getSeqNum();
 
 }
+
+/////////////////////////////////////////////////
+// add pulse to the nexrad pulse queue
+    
+int SunCal::_addPulseToNexradQueue(const IwrfTsPulse *iwrfPulse)
+  
+{
+
+  // initialize summation quantities
+  
+  double sumPowerHc = 0.0;
+  double sumPowerVc = 0.0;
+  RadarComplex_t sumRvvhh0(0.0, 0.0);
+  int nn = 0.0;
+
+  // loop through gates to be used for sun computations
+  for (int igate = _startGateSun; igate <= _endGateSun; igate++, nn++) {
+    
+    GateData *gate = _gateData[igate];
+    
+    const RadarComplex_t *iqhc = gate->iqhc;
+    const RadarComplex_t *iqvc = gate->iqvc;
+    
+    double lag0_hc = RadarComplex::meanPower(iqhc, _nSamples - 1);
+    double lag0_vc = RadarComplex::meanPower(iqvc, _nSamples - 1);
+    
+    // check power for interference
+    double dbmHc = 10.0 * log10(lag0_hc);
+    if (dbmHc > _maxValidSunPowerDbm) {
+      // don't use this gate - probably interference
+      continue;
+    }
+    
+    RadarComplex_t lag0_hcvc =
+      RadarComplex::meanConjugateProduct(iqhc, iqvc, _nSamples - 1);
+    
+    sumPowerHc += lag0_hc;
+    sumPowerVc += lag0_vc;
+    
+    sumRvvhh0 = RadarComplex::complexSum(sumRvvhh0, lag0_hcvc);
+    
+  } // igate
+
+  if (nn < 3) {
+    return -1;
+  }
+
+  double meanPowerHc = sumPowerHc / nn;
+  double meanPowerVc = sumPowerVc / nn;
+  RadarComplex_t Rvvhh0 = RadarComplex::mean(sumRvvhh0, nn);
+
+  solar_pulse_t solarPulse;
+  solarPulse.time = iwrfPulse->getFTime();
+  solarPulse.el = iwrfPulse->getEl();
+  solarPulse.az = iwrfPulse->getAz();
+  solarPulse.powerH = meanPowerHc;
+  solarPulse.powerV = meanPowerVc;
+  solarPulse.rvvhh0.re = Rvvhh0.re;
+  solarPulse.rvvhh0.im = Rvvhh0.im;
+  solarPulse.nGatesUsed = nn;
+
+  solarAddPulseToQueue(&solarPulse);
+
+  return 0;
+
+}
+
 
 /////////////////////////////////////////////////
 // clear the pulse queue

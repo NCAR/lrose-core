@@ -10,35 +10,14 @@
  *
  *****************************************************************/
 
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
 #ifndef sunscan_nexrad_h
 #define sunscan_nexrad_h
 
-/* const variables */
-
-#ifndef RAD_TO_DEG
-#define RAD_TO_DEG 57.29577951308092
-#endif
-#ifndef DEG_TO_RAD
-#define DEG_TO_RAD 0.01745329251994372
-#endif
-
-/* macros */
-
-#ifndef MAX
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#endif
-
-/* raw beam array, before interpolation
- * this is computed from the incoming pulses 
- */
-
-#define NEXRAD_RAW_MAX_NAZ 1000
-#define NEXRAD_RAW_MAX_NEL 1000
-
-/* interpolated beams on regular grid */
-
-#define nexradGridNAz 31
-#define nexradGridNEl 21
+#include <sys/time.h>
 
 /************************************************
  * structs for holding pulse and beam data
@@ -66,7 +45,7 @@ typedef struct
   double height;
   double temperature;
   double pressure;
-} nexrad_site_info;
+} solar_site_info;
 
 /*****************************************************
  * Complex math object 
@@ -75,33 +54,33 @@ typedef struct
 typedef struct {
   double re;
   double im;
-} nexrad_complex_t;
+} solar_complex_t;
 
 /******************************
  * Pulse implementation example
  */
 
-
 typedef struct {
   
   /* meta data */
   
-  int nGates; /* number of gates in use */
   double time; /* time in secs and fractions from 1 Jan 1970 */
-  double prt; /* pulse repetition time (secs) */
   double el; /* elevation angle (deg) */
   double az; /* azimuth angle (deg) */
   
-  /* IQ data */
+  /* moments along the beam, between specified gates */
   
-  float *iq; /* nGates * 2 channels H and V */
+  int nGatesUsed; /* number of gates from which moments are computed */
+  double powerH; /* power for H channel I*I+Q*Q */
+  double powerV; /* power for V channel I*I+Q*Q */
+  solar_complex_t rvvhh0; // rvvhh0
   
-} NexradPulse_t;
+} solar_pulse_t;
 
 /*****************************
  * Beam implementation example
  *
- * Note that the meta-data  time, prt, el and az are not actually
+ * Note that the meta-data  time, el and az are not actually
  * used in this code, they are just included for context.
  */
 
@@ -109,18 +88,13 @@ typedef struct {
   
   /* meta data */
   
-  /* int nexradNSamples; number of pulse samples in beam */
+  /* int solarNSamples; number of pulse samples in beam */
   int nGates; /* number of gates */
   double time; /* time for the center pulse of beam */
-  double prt; /* pulse repetition time (secs) */
   double el; /* elevation angle for center of beam (deg) */
   double az; /* azimuth angle for center of beam(deg) */
   double elOffset; /* elevation offset to theoretical sun center (deg) */
   double azOffset; /* azimuth offset to theoretical sun center (deg) */
-  
-  /* Array of Pulses */
-  
-  // NexradPulse_t *pulses; /* pulses for this beam */
   
   /* moments */
   
@@ -136,52 +110,49 @@ typedef struct {
   double ratioDbmVH; /* ratio of V / H power */
   double SS; /* 1.0 / (zdr^2) */
 
-  nexrad_complex_t rvvhh0;
+  solar_complex_t rvvhh0;
 
-} NexradBeam_t;
-
-/*****************************************************
- * compute sun position using NOVA routines
- */
-
-extern void rsts_SunNovasComputePosAtTime
-  (nexrad_site_info here, double deltat,
-   double *SunAz, double *SunEl, double distanceAU);
+} solar_beam_t;
 
 /*****************************************************
  * initialize the lat/lon/alt for which sun position
  * is computed lat/lon in degrees, alt_m in meters
  */
 
-extern void nexradSetLocation(double lat, double lon, double alt_m);
+extern void solarSetLocation(double lat, double lon, double alt_m);
 
 /*****************************************************
  * initialize the pulse queue
  */
 
-extern void nexradInitPulseQueue();
+extern void solarInitPulseQueue(int n_samples);
   
 /*****************************************************
- * Check if beam is indexed to grid
- * returns 0 on success, -1 on failure
+ * delete the pulse queue
  */
 
-extern int isBeamIndexedToGrid();
+extern void solarFreePulseQueue();
+  
+/*****************************************************
+ * add a pulse to the queue
+ */
 
+extern void solarAddPulseToQueue(solar_pulse_t *pulse);
+  
 /*****************************************************
  * compute sun moments in dual-pol simultaneous mode
  * load up Beam with moments
  */
 
 extern int computeMoments(int startGate,
-                            int endGate,
-                            NexradBeam_t *beam);
+                          int endGate,
+                          solar_beam_t *beam);
 
 /*****************************************************
  * Add a beam to the raw beam array 
  */
 
-extern int addBeam(NexradBeam_t *beam);
+extern int addBeam(solar_beam_t *beam);
 
 /*****************************************************
  * interp ppi moments onto regular 2-D grid
@@ -207,3 +178,8 @@ extern void interpMomentsToRegularGrid();
 extern void computeReceiverGain();
 
 #endif
+
+#ifdef __cplusplus
+}
+#endif
+

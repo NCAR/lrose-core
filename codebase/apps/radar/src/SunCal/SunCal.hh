@@ -379,6 +379,7 @@ private:
 
   int _processPulse(const IwrfTsPulse *pulse);
   void _addPulseToQueue(const IwrfTsPulse *pulse);
+  int _addPulseToNexradQueue(const IwrfTsPulse *iwrfPulse);
   void _clearPulseQueue();
 
   int _processCovarFile(const char *filePath);
