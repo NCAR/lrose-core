@@ -134,37 +134,24 @@ extern void solarInitPulseQueue(int n_samples);
 extern void solarFreePulseQueue();
   
 /*****************************************************
+ * clear the pulse queue
+ */
+
+extern void solarClearPulseQueue();
+
+/*****************************************************
  * add a pulse to the queue
  */
 
 extern void solarAddPulseToQueue(solar_pulse_t *pulse);
   
-/*****************************************************
- * compute sun moments in dual-pol simultaneous mode
- * load up Beam with moments
- */
-
-extern int computeMoments(int startGate,
-                          int endGate,
-                          solar_beam_t *beam);
-
-/*****************************************************
- * Add a beam to the raw beam array 
- */
-
-extern int addBeam(solar_beam_t *beam);
-
-/*****************************************************
- * interp ppi moments onto regular 2-D grid
+/**************************************************
+ * perform analysis
  *
- * global 2D array of Beam objects to store the interpolated data:
- * Beam _interpBeamArray[gridNAz][gridNEl];
- * double _interpDbmH[gridNAz][gridNEl];
- * double _interpDbmV[gridNAz][gridNEl];
- * double _interpDbm[gridNAz][gridNEl];
+ * Returns 0 on success, -1 on failure
  */
 
-extern void interpMomentsToRegularGrid();
+extern void performNexradAnalysis();
 
 /*****************************************************
  * compute receiver gain
@@ -175,7 +162,7 @@ extern void interpMomentsToRegularGrid();
  *            2001/01/03.
  */
    
-extern void computeReceiverGain();
+extern void computeNexradReceiverGain();
 
 #endif
 

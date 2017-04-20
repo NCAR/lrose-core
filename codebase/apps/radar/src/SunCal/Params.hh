@@ -405,6 +405,8 @@ public:
 
   tdrp_bool_t print_missing_pulses;
 
+  tdrp_bool_t test_nexrad_processing;
+
   covar_field_names_t covar_field_names;
 
   tdrp_bool_t scan_mode_rhi;
@@ -560,7 +562,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[110];
+  mutable TDRPtable _table[111];
 
   const char *_className;
 

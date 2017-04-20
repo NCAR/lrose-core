@@ -762,6 +762,18 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'test_nexrad_processing'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("test_nexrad_processing");
+    tt->descr = tdrpStrDup("Option to test NEXRAD processing for solar analysis.");
+    tt->help = tdrpStrDup("For NEXRAD, a C-code module was added. Testing this module ensures that the NEXRAD processing works correctly as compared with the NCAR processing.");
+    tt->val_offset = (char *) &test_nexrad_processing - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));

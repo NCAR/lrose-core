@@ -172,7 +172,9 @@ SunCal::SunCal(int argc, char **argv)
   
   // initialize nexrad C processing
 
-  solarInitPulseQueue(_params.n_samples);
+  if (_params.test_nexrad_processing) {
+    solarInitPulseQueue(_params.n_samples);
+  }
 
   // init process mapper registration
 
@@ -212,7 +214,9 @@ SunCal::~SunCal()
   _deleteXpolMomentsArray();
   _deleteTestPulseMomentsArray();
 
-  solarFreePulseQueue();
+  if (_params.test_nexrad_processing) {
+    solarFreePulseQueue();
+  }
 
   // unregister process
 
@@ -749,7 +753,9 @@ void SunCal::_addPulseToQueue(const IwrfTsPulse *pulse)
       }
       _clearPulseQueue();
       // free NEXRAD queue
-      solarFreePulseQueue();
+      if (_params.test_nexrad_processing) {
+        solarClearPulseQueue();
+      }
       return;
     }
 
@@ -759,7 +765,9 @@ void SunCal::_addPulseToQueue(const IwrfTsPulse *pulse)
   
   pulse->addClient();
   _pulseQueue.push_back(pulse);
-  _addPulseToNexradQueue(pulse);
+  if (_params.test_nexrad_processing) {
+    _addPulseToNexradQueue(pulse);
+  }
   
   // print missing pulses in verbose mode
   
@@ -1864,7 +1872,11 @@ int SunCal::_performAnalysis(bool force)
         return -1;
       }
     }
+    
+  }
 
+  if (_params.test_nexrad_processing) {
+    performNexradAnalysis();
   }
 
   // initialize for next analysis
