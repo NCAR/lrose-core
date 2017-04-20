@@ -35,11 +35,6 @@
 #define NEXRAD_RAW_MAX_NAZ 1000
 #define NEXRAD_RAW_MAX_NEL 1000
 
-/* number of gates and samples */
-
-#define NEXRAD_MAX_GATES 2000
-#define nexradNSamples 128
-
 /* interpolated beams on regular grid */
 
 #define nexradGridNAz 31
@@ -125,7 +120,7 @@ typedef struct {
   
   /* Array of Pulses */
   
-  NexradPulse_t pulses[nexradNSamples]; /* pulses for this beam */
+  // NexradPulse_t *pulses; /* pulses for this beam */
   
   /* moments */
   

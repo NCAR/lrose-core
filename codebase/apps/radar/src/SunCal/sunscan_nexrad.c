@@ -60,7 +60,9 @@ static double _meanSunEl, _meanSunAz;
  */
 
 static NexradPulse_t **_pulseQueue = NULL;
-static int *_nPulses = 0;
+static int _pulseQueueSize = 0;
+static int _nPulsesInQueue = 0;
+static int _nSamples = 0;
 
 /* raw beam array, before interpolation */
 /* this is computed from the incoming pulses */
@@ -335,36 +337,19 @@ void nexradSetLocation(double lat, double lon, double alt_m)
 }
 
 /*****************************************************
- * initialize the pulse queue
- */
-
-void nexradInitPulseQueue()
-  
-{
-  if (_pulseQueue != NULL) {
-    // already done, only initialize once
-    return;
-  }
-  _pulseQueue =
-    (NexradPulse_t **) malloc(nexradNSamples * sizeof(NexradPulse_t *));
-  memset((void *) _pulseQueue, 0, nexradNSamples * sizeof(NexradPulse_t *));
-  _nPulses = 0;
-}
-  
-/*****************************************************
  * create a pulse
  */
 
 NexradPulse_t *nexradCreatePulse(int n_gates)
   
 {
-  NexradPulse_t *pulse = (NexradPulse_t *) malloc(sizeof(NexradPulse_t));
+  NexradPulse_t *pulse = malloc(sizeof(NexradPulse_t));
   pulse->nGates = n_gates;
   pulse->time = _missing;
   pulse->prt = _missing;
   pulse->el = _missing;
   pulse->az = _missing;
-  pulse->iq = (float *) malloc(n_gates * 2 * sizeof(float));
+  pulse->iq = malloc(n_gates * 2 * sizeof(float));
   memset(pulse->iq, 0, n_gates * 2 * sizeof(float));
   return pulse;
 }
@@ -380,8 +365,59 @@ void nexradResizePulse(NexradPulse_t *pulse, int n_gates)
     free(pulse->iq);
   }
   pulse->nGates = n_gates;
-  pulse->iq = (float *) malloc(n_gates * 2 * sizeof(float));
+  pulse->iq = malloc(n_gates * 2 * sizeof(float));
   memset(pulse->iq, 0, n_gates * 2 * sizeof(float));
+}
+  
+/*****************************************************
+ * free a pulse
+ */
+
+void nexradFreePulse(NexradPulse_t *pulse)
+  
+{
+  if (pulse->iq) {
+    free(pulse->iq);
+  }
+  pulse->nGates = 0;
+}
+  
+/*****************************************************
+ * initialize the pulse queue
+ */
+
+void nexradInitPulseQueue(int n_samples)
+  
+{
+
+  /* check for existence */
+
+  if (_pulseQueue != NULL) {
+    if (n_samples == _pulseQueueSize) {
+      // already done
+      return;
+    }
+  }
+
+  // free up if needed
+  
+  if (_pulseQueue != NULL) {
+    int ii;
+    for (ii = 0; ii < _pulseQueueSize; ii++) {
+      nexradFreePulse(_pulseQueue[ii]);
+    }
+    free(_pulseQueue);
+  }
+
+  /* create */
+
+  _pulseQueue = malloc(n_samples * sizeof(NexradPulse_t *));
+  memset(_pulseQueue, 0, n_samples * sizeof(NexradPulse_t *));
+
+  _pulseQueueSize = n_samples;
+  _nSamples = n_samples;
+  _nPulsesInQueue = 0;
+
 }
   
 /*****************************************************
@@ -537,7 +573,7 @@ int isBeamIndexedToGrid()
 
   /* find pulses either side of mid point of queue */
 
-  int midIndex0 = nexradNSamples / 2;
+  int midIndex0 = _nSamples / 2;
   int midIndex1 = midIndex0 + 1;
   NexradPulse_t *pulse0 = _pulseQueue[midIndex0];
   NexradPulse_t *pulse1 = _pulseQueue[midIndex1];
@@ -704,14 +740,14 @@ double argDeg(const nexrad_complex_t *cc)
 
 nexrad_complex_t *getGateIqH(int igate)
 {
-  nexrad_complex_t *val = (nexrad_complex_t *) malloc(sizeof(nexrad_complex_t));
+  nexrad_complex_t *val = malloc(sizeof(nexrad_complex_t));
   /* read from data array ... */
   return val;
 }
 
 nexrad_complex_t *getGateIqV(int igate)
 {
-  nexrad_complex_t *val = (nexrad_complex_t *) malloc(sizeof(nexrad_complex_t));
+  nexrad_complex_t *val = malloc(sizeof(nexrad_complex_t));
   /* read from data array ... */
   return val;
 }
@@ -748,8 +784,8 @@ int computeMoments(int startGate,
 
     /* compute lag 0 covariance = power */
     
-    double lag0_h = meanPower(iqh, nexradNSamples - 1);
-    double lag0_v = meanPower(iqv, nexradNSamples - 1);
+    double lag0_h = meanPower(iqh, _nSamples - 1);
+    double lag0_v = meanPower(iqv, _nSamples - 1);
     
     /* check power for interference */
 
@@ -765,7 +801,7 @@ int computeMoments(int startGate,
     /* compute lag0 conjugate product, for correlation */
 
     nexrad_complex_t lag0_hv =
-      meanConjugateProduct(iqh, iqv, nexradNSamples - 1);
+      meanConjugateProduct(iqh, iqv, _nSamples - 1);
     
     /* sum up */
 
