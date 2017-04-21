@@ -20,32 +20,8 @@
 #include <sys/time.h>
 
 /************************************************
- * structs for holding pulse and beam data
+ * structs for holding pulse data
  */
-
-/***************************************************************************
- * struct site_info: data for the observer's location.  The atmospheric 
- *                   parameters are used only by the refraction 
- *                   function called from function 'equ_to_hor'.
- *                   Additional parameters can be added to this 
- *                   structure if a more sophisticated refraction model 
- *                   is employed.
- *                    
- *  latitude         = geodetic latitude in degrees; north positive.
- *  longitude        = geodetic longitude in degrees; east positive.
- *  height           = height of the observer in meters.
- *  temperature      = temperature (degrees Celsius).
- *  pressure         = atmospheric pressure (millibars)
- */
-
-typedef struct
-{
-  double latitude;
-  double longitude;
-  double height;
-  double temperature;
-  double pressure;
-} solar_site_info;
 
 /*****************************************************
  * Complex math object 
@@ -77,73 +53,36 @@ typedef struct {
   
 } solar_pulse_t;
 
-/*****************************
- * Beam implementation example
- *
- * Note that the meta-data  time, el and az are not actually
- * used in this code, they are just included for context.
+/*****************************************************
+ * initialize the module for processing
  */
 
-typedef struct {
-  
-  /* meta data */
-  
-  /* int solarNSamples; number of pulse samples in beam */
-  int nGates; /* number of gates */
-  double time; /* time for the center pulse of beam */
-  double el; /* elevation angle for center of beam (deg) */
-  double az; /* azimuth angle for center of beam(deg) */
-  double elOffset; /* elevation offset to theoretical sun center (deg) */
-  double azOffset; /* azimuth offset to theoretical sun center (deg) */
-  
-  /* moments */
-  
-  double powerH; /* power for H channel I*I+Q*Q */
-  double powerV; /* power for V channel I*I+Q*Q */
-  double dbmH;   /* power for H channel in dBm */
-  double dbmV;   /* power for V channel in dBm */
-  double dbm;    /* mean of dbmH and dbmV */
-  double corrHV;  /* correlation between H and V */
-  double phaseHV; /* mean phase between H and V */
-  double dbBelowPeak; /* peak sun power minus mean dbm */
-  double zdr; /* dbmH minus dbmV */
-  double ratioDbmVH; /* ratio of V / H power */
-  double SS; /* 1.0 / (zdr^2) */
+extern void nexradSolarInit(int n_samples);
 
-  solar_complex_t rvvhh0;
+/*****************************************************
+ * free up the memory used in the module
+ */
 
-} solar_beam_t;
+extern void nexradSolarFree();
 
 /*****************************************************
  * initialize the lat/lon/alt for which sun position
  * is computed lat/lon in degrees, alt_m in meters
  */
 
-extern void solarSetLocation(double lat, double lon, double alt_m);
+extern void nexradSolarSetLocation(double lat, double lon, double alt_m);
 
-/*****************************************************
- * initialize the pulse queue
- */
-
-extern void solarInitPulseQueue(int n_samples);
-  
-/*****************************************************
- * delete the pulse queue
- */
-
-extern void solarFreePulseQueue();
-  
 /*****************************************************
  * clear the pulse queue
  */
 
-extern void solarClearPulseQueue();
+extern void nexradSolarClearPulseQueue();
 
 /*****************************************************
  * add a pulse to the queue
  */
 
-extern void solarAddPulseToQueue(solar_pulse_t *pulse);
+extern void nexradSolarAddPulseToQueue(solar_pulse_t *pulse);
   
 /**************************************************
  * perform analysis
@@ -151,7 +90,7 @@ extern void solarAddPulseToQueue(solar_pulse_t *pulse);
  * Returns 0 on success, -1 on failure
  */
 
-extern void performNexradAnalysis();
+extern void nexradSolarPerformAnalysis();
 
 /*****************************************************
  * compute receiver gain
@@ -162,7 +101,7 @@ extern void performNexradAnalysis();
  *            2001/01/03.
  */
    
-extern void computeNexradReceiverGain();
+extern void nexradSolarComputeReceiverGain();
 
 #endif
 
