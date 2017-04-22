@@ -1058,6 +1058,55 @@ public:
   //  data writing
   ////////////////////
 
+  // Write a scalar into the netCDF variable.
+  
+  // Write char scalar
+  void putVal(char dataVal) const;
+
+  // Write an unsigned char scalar
+  
+  void putVal(unsigned char dataVal) const;
+
+  // Write a signed char scalar
+  
+  void putVal(signed char dataVal) const;
+
+  // Write a short scalar.
+  
+  void putVal(short dataVal) const;
+
+  // Write an unsigned short scalar.
+  
+  void putVal(unsigned short dataVal) const;
+
+  // Write in int scalar
+  
+  void putVal(int dataVal) const;
+
+  // Write an unsigned int scalar
+  
+  void putVal(unsigned int dataVal) const;
+
+  // Write a long scalar
+  
+  void putVal(long dataVal) const;
+
+  // Write a long long scalar
+  
+  void putVal(long long dataVal) const;
+
+  // Write an unsigned long long scalar
+  
+  void putVal(unsigned long long dataVal) const;
+
+  // Write a float scalar
+  
+  void putVal(float dataVal) const;
+
+  // Write a double scalar
+  
+  void putVal(double dataVal) const;
+
   //////////////////////////////////////////////////////////////////////////////
   // Writes the entire data into the netCDF variable.
 
