@@ -61,51 +61,14 @@ typedef struct
   double pressure;
 } novas_site_into;
 
-/*****************************
- * Beam implementation example
- *
- * Note that the meta-data  time, el and az are not actually
- * used in this code, they are just included for context.
- */
-
-typedef struct {
-  
-  /* meta data */
-  
-  /* int solarNSamples; number of pulse samples in beam */
-  int nGates; /* number of gates */
-  double time; /* time for the center pulse of beam */
-  double el; /* elevation angle for center of beam (deg) */
-  double az; /* azimuth angle for center of beam(deg) */
-  double elOffset; /* elevation offset to theoretical sun center (deg) */
-  double azOffset; /* azimuth offset to theoretical sun center (deg) */
-  
-  /* moments */
-  
-  double powerH; /* power for H channel I*I+Q*Q */
-  double powerV; /* power for V channel I*I+Q*Q */
-  double dbmH;   /* power for H channel in dBm */
-  double dbmV;   /* power for V channel in dBm */
-  double dbm;    /* mean of dbmH and dbmV */
-  double corrHV;  /* correlation between H and V */
-  double phaseHV; /* mean phase between H and V */
-  double dbBelowPeak; /* peak sun power minus mean dbm */
-  double zdr; /* dbmH minus dbmV */
-  double ratioDbmVH; /* ratio of V / H power */
-  double SS; /* 1.0 / (zdr^2) */
-
-  solar_complex_t rvvhh0;
-
-} solar_beam_t;
-
 /* grid params */
 
-#define gridNAz 61
-#define gridNEl 41
-static double gridDeltaAz = 0.1;
-static double gridDeltaEl = 0.1;
+#define gridNAz 121
+#define gridNEl 81
 static double gridStartAz = -3.0;
 static double gridStartEl = -2.0;
+static double gridDeltaAz = 0.05;
+static double gridDeltaEl = 0.05;
 
 /* processing parameters */
 
@@ -129,7 +92,6 @@ static double _noiseDbmV = -115.0;
 static double _latitude = 0.0;
 static double _longitude = 0.0;
 static double _altitudeM = 0.0;
-static double _prevSunTime = 0.0;
 static double _meanSunTime;
 static double _meanSunEl, _meanSunAz;
 
@@ -151,6 +113,12 @@ static int *_elevAllocRaw = NULL; /* allocation for beams in el */
 static int *_elevCountRaw = NULL; /* active count of beams in el */
 static solar_beam_t **_rawBeamArray = NULL;  /* [gridNAz][variable] */
 static double _prevAzOffset = -9999;
+
+/* beam properties */
+
+double _beamTime;
+double _beamAz, _offsetAz;
+double _beamEl, _offsetEl;
 
 /* interpolated beams on regular grid */
 
@@ -204,6 +172,45 @@ static double _rxGainHdB;
 static double _rxGainVdB;
 
 /*****************************************************
+ * access to results
+ *****************************************************/
+
+int nexradSolarGetGridNAz() { return gridNAz; }
+int nexradSolarGetGridNEl() { return gridNEl; }
+double nexradSolarGetGridStartAz() { return gridStartAz; }
+double nexradSolarGetGridStartEl() { return gridStartEl; }
+double nexradSolarGetGridDeltaAz() { return gridDeltaAz; }
+double nexradSolarGetGridDeltaEl() { return gridDeltaEl; }
+
+double nexradSolarGetMissingVal() { return _missing; }
+double nexradSolarGetNoiseDbmH() { return _noiseDbmH; }
+double nexradSolarGetNoiseDbmV() { return _noiseDbmV; }
+
+double nexradSolarGetLatitude() { return _latitude; }
+double nexradSolarGetLongitude() { return _longitude; }
+double nexradSolarGetAltitudeM() { return _altitudeM; }
+
+double nexradSolarGetMeanSunTime() { return _meanSunTime; }
+double nexradSolarGetMeanSunEl() { return _meanSunEl; }
+double nexradSolarGetMeanSunAz() { return _meanSunAz; }
+
+solar_beam_t **nexradSolarGetInterpBeamArray() { return _interpBeamArray; }
+double **nexradSolarGetInterpDbm() { return _interpDbm; }
+double **nexradSolarGetInterpDbmH() { return _interpDbmH; }
+double **nexradSolarGetInterpDbmV() { return _interpDbmV; }
+
+double nexradSolarGetMaxPowerDbm() { return _maxPowerDbm; }
+double nexradSolarGetQuadPowerDbm() { return _quadPowerDbm; }
+
+double nexradSolarGetQuadFitCentroidAzError() { return _quadFitCentroidAzError; }
+double nexradSolarGetQuadFitCentroidElError() { return _quadFitCentroidElError; }
+double nexradSolarGetElAzWidthRatio() { return _elAzWidthRatio; }
+
+double nexradSolarGetMeanSS() { return _meanSS; }
+double nexradSolarGetMeanZdr() { return _meanZdr; }
+double nexradSolarGetMeanCorr00() { return _meanCorr00; }
+
+/*****************************************************
  * static file-scope functions
  *****************************************************/
 
@@ -217,16 +224,6 @@ extern void rsts_SunNovasComputePosAtTime
 
 static void _computePosnNova(double stime, double *el, double *az)
 {
-  /* check if time has changed */
-  /* if not do not recalculate */
-
-  double now = time(NULL);
-  if (fabs(now - _prevSunTime) < 1) {
-    /* time has not changed more than 1 sec */
-    return;
-  }
-  _prevSunTime = now;
-
   /* set up site info */
   double tempC = 20;
   double pressureMb = 1013;
@@ -263,7 +260,7 @@ static void _allocArrays()
     _rawBeamArray = malloc(gridNAz * sizeof(solar_beam_t *));
     for (iaz = 0; iaz < gridNAz; iaz++) {
       _rawBeamArray[iaz] = malloc(gridNEl * sizeof(solar_beam_t));
-      _elevAllocRaw[iaz] = gridNAz;
+      _elevAllocRaw[iaz] = gridNEl;
       _elevCountRaw[iaz] = 0;
     }
   }
@@ -498,10 +495,9 @@ static double _computeAngleMean(double ang1, double ang2)
 static void _initBeam(solar_beam_t *beam)
 
 {
-  beam->nGates = 0;
-  beam->time = _missing;
-  beam->el = _missing;
-  beam->az = _missing;
+  beam->time = 0;
+  beam->el = 0;
+  beam->az = 0;
   beam->elOffset = _missing;
   beam->azOffset = _missing;
   beam->powerH = _missing;
@@ -562,21 +558,21 @@ static int _readyForBeam()
 
   /* compute mean azimuth and elevation */
   
-  double az = _computeAngleMean(az0, az1);
-  if (az < 0) {
-    az += 360.0;
+  _beamAz = _computeAngleMean(az0, az1);
+  if (_beamAz < 0) {
+    _beamAz += 360.0;
   }
-  double el = _computeAngleMean(pulse0->el, pulse1->el);
-
+  double _beamEl = _computeAngleMean(pulse0->el, pulse1->el);
+  
   /* compute cosine of elevation for correcting azimuth relative to sun */
 
-  double cosel = cos(el * DEG_TO_RAD);
+  double cosel = cos(_beamEl * DEG_TO_RAD);
 
   /* compute angles relative to sun position */
 
-  double midTime = (pulse0->time + pulse1->time) / 2.0;
+  _beamTime = (pulse0->time + pulse1->time) / 2.0;
   double sunEl = 0.0, sunAz = 0.0;
-  _computePosnNova(midTime, &sunEl, &sunAz);
+  _computePosnNova(_beamTime, &sunEl, &sunAz);
 
   /* compute az offsets for 2 center pulses */
 
@@ -615,6 +611,9 @@ static int _readyForBeam()
 
   /* success */
 
+  _offsetAz = _computeAngleMean(offsetAz0, offsetAz1);
+  _offsetEl = _computeAngleDiff(_beamEl, sunEl);
+  
   return 0;
 
 }
@@ -671,7 +670,7 @@ static int _compareBeamEl(const void *lhs, const void *rhs)
 {
   const solar_beam_t *lbeam = (solar_beam_t *) lhs;
   const solar_beam_t *rbeam = (solar_beam_t *) rhs;
-  if (lbeam->elOffset < rbeam->elOffset) {
+  if (lbeam->elOffset > rbeam->elOffset) {
     return 1;
   } else {
     return 0;
@@ -706,6 +705,9 @@ static void _computeMaxPower()
   for (iel = 0; iel < gridNEl; iel++) {
     for (iaz = 0; iaz < gridNAz; iaz++) {
       solar_beam_t *beam = &_interpBeamArray[iaz][iel];
+      if (beam->time == 0.0) {
+        continue;
+      }
       if (beam->dbmH <= maxValidDrxPowerDbm) {
         _maxPowerDbmH = MAX(_maxPowerDbmH, beam->dbmH);
       }
@@ -722,6 +724,9 @@ static void _computeMaxPower()
   for (iel = 0; iel < gridNEl; iel++) {
     for (iaz = 0; iaz < gridNAz; iaz++) {
       solar_beam_t *beam = &_interpBeamArray[iaz][iel];
+      if (beam->time == 0.0) {
+        continue;
+      }
       beam->dbBelowPeak = beam->dbm - _maxPowerDbm;
     }
   }
@@ -739,6 +744,9 @@ static void _correctPowersForNoise()
   for (iel = 0; iel < gridNEl; iel++) {
     for (iaz = 0; iaz < gridNAz; iaz++) {
       solar_beam_t *beam = &_interpBeamArray[iaz][iel];
+      if (beam->time == 0.0) {
+        continue;
+      }
       beam->powerH -= noisePowerH;
       beam->powerV -= noisePowerV;
       if (beam->powerH <= 0) {
@@ -757,7 +765,7 @@ static void _correctPowersForNoise()
  * compute mean sun moments for a beam,
  * using moments from pulses in queue */
 
-static int _computeMeanMoments(solar_beam_t *beam)
+static int _computeMoments(solar_beam_t *beam)
 
 {
 
@@ -773,7 +781,7 @@ static int _computeMeanMoments(solar_beam_t *beam)
 
   /* loop through pulses */
 
-  for (ipulse = 0; ipulse <= _nSamples; ipulse++, nn++) {
+  for (ipulse = 0; ipulse < _nSamples; ipulse++, nn++) {
 
     solar_pulse_t *pulse = &_pulseQueue[ipulse];
 
@@ -799,13 +807,8 @@ static int _computeMeanMoments(solar_beam_t *beam)
   beam->corrHV = corrMag / sqrt(beam->powerH * beam->powerV);
   beam->phaseHV = _argDeg(&sumRvvhh0);
 
-  /* compute sun angle offset */
-
-  double sunEl = 0.0, sunAz = 0.0;
-  _computePosnNova(beam->time, &sunEl, &sunAz);
-  double cosel = cos(beam->el * DEG_TO_RAD);
-  beam->azOffset = _computeAngleDiff(beam->az, sunAz) * cosel;
-  beam->elOffset = _computeAngleDiff(beam->el, sunEl);
+  beam->azOffset = _offsetAz;
+  beam->elOffset = _offsetEl;
 
   return 0;
 
@@ -858,8 +861,18 @@ static int _addBeamToRawArray(solar_beam_t *beam)
 static void _interpMomentsToRegularGrid() 
 {
 
-  /* loop through azimuths */
   int iaz, iel, ii;
+
+  /* initialize */
+
+  for (iaz = 0; iaz < gridNAz; iaz++) {
+    for (iel = 0; iel < gridNEl; iel++) {
+      solar_beam_t *interp = &_interpBeamArray[iaz][iel];
+      _initBeam(interp);
+    }
+  }
+
+  /* loop through azimuths */
   for (iaz = 0; iaz < gridNAz; iaz++) {
     double azOffset = gridStartAz + iaz * gridDeltaAz;
     
@@ -880,7 +893,7 @@ static void _interpMomentsToRegularGrid()
         double elOffset1 = raw1.elOffset;
 
         /* is the elevation between these two values */
-        if (elOffset0 > elOffset || elOffset1 < elOffset) {
+         if (elOffset0 > elOffset || elOffset1 < elOffset) {
           continue;
         }
         
@@ -897,6 +910,7 @@ static void _interpMomentsToRegularGrid()
         solar_beam_t *interp = &_interpBeamArray[iaz][iel];
 
         interp->time = (wt0 * raw0.time) + (wt1 * raw1.time);
+
         interp->az = (wt0 * raw0.az) + (wt1 * raw1.az);
         interp->el = (wt0 * raw0.el) + (wt1 * raw1.el);
         interp->elOffset = elOffset;
@@ -1026,7 +1040,10 @@ static void _computeMeanSunLocation()
   for (iel = 0; iel < gridNEl; iel++) {
     for (iaz = 0; iaz < gridNAz; iaz++) {
       solar_beam_t *beam = &_interpBeamArray[iaz][iel];
-      if (beam->dbBelowPeak > validEdgeBelowPeakDb) {
+      if (beam->time == 0.0) {
+        continue;
+      }
+      if (beam->dbBelowPeak <= validEdgeBelowPeakDb) {
         sumTime += beam->time;
         nn++;
       }
@@ -1077,6 +1094,9 @@ static int _computeSunCentroid(double **interpDbm,
   for (iel = 0; iel < gridNEl; iel++) {
     for (iaz = 0; iaz < gridNAz; iaz++) {
       solar_beam_t *beam = &_interpBeamArray[iaz][iel];
+      if (beam->time == 0.0) {
+        continue;
+      }
       double dbm = interpDbm[iaz][iel];
       double power = pow(10.0, dbm / 10.0);
       if (dbm >= edgePowerThreshold && dbm <= maxValidDrxPowerDbm) {
@@ -1092,7 +1112,7 @@ static int _computeSunCentroid(double **interpDbm,
 
   if (count == 0) {
     /* no valid data */
-    fprintf(stderr, "1111111 Cannot estimate solar centroid:\n");
+    fprintf(stderr, "WARNING - cannot estimate solar centroid:\n");
     fprintf(stderr, "  no measured power\n");
     return -1;
   }
@@ -1107,7 +1127,7 @@ static int _computeSunCentroid(double **interpDbm,
       *pwrWtCentroidAzError > gridMaxAz ||
       *pwrWtCentroidElError < gridStartEl ||
       *pwrWtCentroidElError > gridMaxEl) {
-    fprintf(stderr, "1111111 Estimated centroid outside grid:\n");
+    fprintf(stderr, "WARNING- estimated centroid outside grid:\n");
     fprintf(stderr, "  pwrWtCentroidAzError: %g\n", *pwrWtCentroidAzError);
     fprintf(stderr, "  pwrWtCentroidElError: %g\n", *pwrWtCentroidElError);
     fprintf(stderr, "  Setting quad offsets to 0\n");
@@ -1292,11 +1312,14 @@ static int _computeMeanZdrAndSS()
     double el = gridStartEl + iel * gridDeltaEl;
     double elOffset = el - _quadFitCentroidElError;
     for (iaz = 0; iaz < gridNAz; iaz++) {
+      solar_beam_t *beam = &_interpBeamArray[iaz][iel];
+      if (beam->time == 0.0) {
+        continue;
+      }
       double az = gridStartAz + iaz * gridDeltaAz;
       double azOffset = az - _quadFitCentroidAzError;
       double offset = sqrt(elOffset * elOffset + azOffset * azOffset);
       if (offset <= searchRadius) {
-        solar_beam_t *beam = &_interpBeamArray[iaz][iel];
         sumZdr += beam->zdr;
         sumSS += beam->SS;
         nn++;
@@ -1337,15 +1360,17 @@ static void _computeMeanNoise()
     
     for (iaz = 0; iaz < gridNAz; iaz++) {
 
+      solar_beam_t *beam = &_interpBeamArray[iaz][iel];
+      if (beam->time == 0.0) {
+        continue;
+      }
+      
       double offsetAz = gridStartAz + iaz * gridDeltaAz;
-
       double offset = sqrt(elOffset * elOffset + offsetAz * offsetAz);
 
       if (offset < minAngleOffsetForNoisePower) {
         continue;
       }
-      
-      solar_beam_t *beam = &_interpBeamArray[iaz][iel];
       
       if (beam->dbmH != _missing &&
           beam->dbmV != _missing &&
@@ -1382,6 +1407,9 @@ static void _computePowerRatios()
   for (iel = 0; iel < gridNEl; iel++) {
     for (iaz = 0; iaz < gridNAz; iaz++) {
       solar_beam_t *beam = &_interpBeamArray[iaz][iel];
+      if (beam->time == 0.0) {
+        continue;
+      }
       if (beam->dbmV != _missing && beam->dbmH != _missing) {
         beam->ratioDbmVH = beam->dbmV - beam->dbmH;
         beam->SS = beam->ratioDbmVH * 2.0;
@@ -1410,12 +1438,15 @@ static void _computeSunCorr()
   for (iel = 0; iel < gridNEl; iel++) {
     double dEl = gridStartEl + iel * gridDeltaEl;
     for (iaz = 0; iaz < gridNAz; iaz++) {
+      solar_beam_t *beam = &_interpBeamArray[iaz][iel];
+      if (beam->time == 0.0) {
+        continue;
+      }
       double dAz = gridStartAz + iaz * gridDeltaAz;
       double angDist = sqrt(dEl * dEl + dAz * dAz);
       if (angDist > maxSolidAngleForMeanCorr) {
         continue;
       }
-      solar_beam_t *beam = &_interpBeamArray[iaz][iel];
       sumPowerH += beam->powerH;
       sumPowerV += beam->powerV;
       sumRvvhh0 = _complexSum(&sumRvvhh0, &beam->rvvhh0);
@@ -1478,7 +1509,6 @@ void nexradSolarFree()
 void nexradSolarSetLocation(double lat, double lon, double alt_m)
 
 {
-  _prevSunTime = 0.0;
   _latitude = lat;
   _longitude = lon;
   _altitudeM = alt_m;
@@ -1519,15 +1549,18 @@ void nexradSolarAddPulseToQueue(solar_pulse_t *pulse)
 
   // process beam if ready
 
-  if (_readyForBeam()) {
+  if (_readyForBeam() == 0) {
 
     /* create beam */
     solar_beam_t *beam = malloc(sizeof(solar_beam_t));
     _initBeam(beam);
+    beam->time = _beamTime;
+    beam->el = _beamEl;
+    beam->az = _beamAz;
 
     /* compute moments on the beam */
 
-    _computeMeanMoments(beam);
+    _computeMoments(beam);
 
     /* add the beam to the raw array */
 

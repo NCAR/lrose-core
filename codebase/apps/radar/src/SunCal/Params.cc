@@ -762,18 +762,6 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'test_nexrad_processing'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("test_nexrad_processing");
-    tt->descr = tdrpStrDup("Option to test NEXRAD processing for solar analysis.");
-    tt->help = tdrpStrDup("For NEXRAD, a C-code module was added. Testing this module ensures that the NEXRAD processing works correctly as compared with the NCAR processing.");
-    tt->val_offset = (char *) &test_nexrad_processing - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1903,6 +1891,63 @@ using namespace std;
     tt->help = tdrpStrDup("For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir");
     tt->val_offset = (char *) &spdb_output_url - &_start_;
     tt->single_val.s = tdrpStrDup("./spdb");
+    tt++;
+    
+    // Parameter 'Comment 20'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 20");
+    tt->comment_hdr = tdrpStrDup("OPTION TO TEST C CODE FOR NEXRAD PROCESSING");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'test_nexrad_processing'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("test_nexrad_processing");
+    tt->descr = tdrpStrDup("Option to test NEXRAD processing for solar analysis.");
+    tt->help = tdrpStrDup("For NEXRAD, a C-code module was added. Testing this module ensures that the NEXRAD processing works correctly as compared with the NCAR processing.");
+    tt->val_offset = (char *) &test_nexrad_processing - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'nexrad_text_output_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("nexrad_text_output_dir");
+    tt->descr = tdrpStrDup("Dir for output text files.");
+    tt->help = tdrpStrDup("The NEXRAD results will be written to sub-directories named from the cal time.");
+    tt->val_offset = (char *) &nexrad_text_output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/nexrad/output");
+    tt++;
+    
+    // Parameter 'nexrad_mdv_output_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("nexrad_mdv_output_url");
+    tt->descr = tdrpStrDup("URL for output MDV files.");
+    tt->help = tdrpStrDup("For NEXRAD writes, specify the directory.");
+    tt->val_offset = (char *) &nexrad_mdv_output_url - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/nexrad/mdv");
+    tt++;
+    
+    // Parameter 'nexrad_spdb_output_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("nexrad_spdb_output_url");
+    tt->descr = tdrpStrDup("URL for SPDB XML.");
+    tt->help = tdrpStrDup("For NEXRAD writes, specify the directory.");
+    tt->val_offset = (char *) &nexrad_spdb_output_url - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/nexrad/spdb");
     tt++;
     
     // trailing entry has param_name set to NULL

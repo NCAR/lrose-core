@@ -405,8 +405,6 @@ public:
 
   tdrp_bool_t print_missing_pulses;
 
-  tdrp_bool_t test_nexrad_processing;
-
   covar_field_names_t covar_field_names;
 
   tdrp_bool_t scan_mode_rhi;
@@ -555,6 +553,14 @@ public:
 
   char* spdb_output_url;
 
+  tdrp_bool_t test_nexrad_processing;
+
+  char* nexrad_text_output_dir;
+
+  char* nexrad_mdv_output_url;
+
+  char* nexrad_spdb_output_url;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -562,7 +568,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[111];
+  mutable TDRPtable _table[115];
 
   const char *_className;
 

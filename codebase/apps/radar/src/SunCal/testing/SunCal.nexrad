@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for SunCal
+ * TDRP params for ./SunCal
  **********************************************************************/
 
 //======================================================================
@@ -240,20 +240,6 @@ invert_hv_flag = FALSE;
 //
 
 print_missing_pulses = FALSE;
-
-///////////// test_nexrad_processing //////////////////
-//
-// Option to test NEXRAD processing for solar analysis.
-//
-// For NEXRAD, a C-code module was added. Testing this module ensures 
-//   that the NEXRAD processing works correctly as compared with the NCAR 
-//   processing.
-//
-//
-// Type: boolean
-//
-
-test_nexrad_processing = TRUE;
 
 //======================================================================
 //
@@ -1308,4 +1294,61 @@ write_summary_to_spdb = TRUE;
 //
 
 spdb_output_url = "$(HOME)/data/sunscan/spol/spdb";
+
+//======================================================================
+//
+// OPTION TO TEST C CODE FOR NEXRAD PROCESSING.
+//
+//======================================================================
+ 
+///////////// test_nexrad_processing //////////////////
+//
+// Option to test NEXRAD processing for solar analysis.
+//
+// For NEXRAD, a C-code module was added. Testing this module ensures 
+//   that the NEXRAD processing works correctly as compared with the NCAR 
+//   processing.
+//
+//
+// Type: boolean
+//
+
+test_nexrad_processing = TRUE;
+
+///////////// nexrad_text_output_dir //////////////////
+//
+// Dir for output text files.
+//
+// The NEXRAD results will be written to sub-directories named from the 
+//   cal time.
+//
+//
+// Type: string
+//
+
+nexrad_text_output_dir = "$(HOME)/data/sunscan/nexrad/output";
+
+///////////// nexrad_mdv_output_url ///////////////////
+//
+// URL for output MDV files.
+//
+// For NEXRAD writes, specify the directory.
+//
+//
+// Type: string
+//
+
+nexrad_mdv_output_url = "$(HOME)/data/sunscan/nexrad/mdv";
+
+///////////// nexrad_spdb_output_url //////////////////
+//
+// URL for SPDB XML.
+//
+// For NEXRAD writes, specify the directory.
+//
+//
+// Type: string
+//
+
+nexrad_spdb_output_url = "$(HOME)/data/sunscan/nexrad/spdb";
 

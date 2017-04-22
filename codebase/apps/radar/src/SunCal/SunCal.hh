@@ -462,6 +462,27 @@ private:
   
   void _checkEndOfVol(double el);
 
+  void _allocGateData();
+  void _freeGateData();
+
+  int _loadGateData();
+  int _loadGateDataDualPolAlt();
+  int _loadGateDataDualPolSim();
+  int _loadGateDataSinglePol();
+
+  int _checkAlternatingStartsOnH();
+  bool _isAlternating();
+  bool _startsOnH();
+  bool _isDualPol();
+  
+  int _retrieveXpolRatioFromSpdb(time_t scanTime,
+                                 double &xpolRatio,
+                                 time_t &timeForXpolRatio);
+
+  int _retrieveSiteTempFromSpdb(time_t scanTime,
+                                double &tempC,
+                                time_t &timeForTemp);
+
   int _writeSummaryText();
   void _writeSummaryText(FILE *out);
   int _appendToGlobalResults();
@@ -482,27 +503,16 @@ private:
   
   int _writeSummaryToSpdb();
 
-  int _retrieveXpolRatioFromSpdb(time_t scanTime,
-                                 double &xpolRatio,
-                                 time_t &timeForXpolRatio);
+  int _writeNexradToMdv();
+  void _initNexradMdvMasterHeader(DsMdvx &mdvx, time_t dataTime);
+  void _addNexradMdvField(DsMdvx &mdvx,
+                          const string &fieldName,
+                          const string &units,
+                          const string &transform,
+                          int memOffset);
 
-  int _retrieveSiteTempFromSpdb(time_t scanTime,
-                                double &tempC,
-                                time_t &timeForTemp);
+  int _writeNexradSummaryToSpdb();
 
-  void _allocGateData();
-  void _freeGateData();
-
-  int _loadGateData();
-  int _loadGateDataDualPolAlt();
-  int _loadGateDataDualPolSim();
-  int _loadGateDataSinglePol();
-
-  int _checkAlternatingStartsOnH();
-  bool _isAlternating();
-  bool _startsOnH();
-  bool _isDualPol();
-  
 };
 
 #endif
