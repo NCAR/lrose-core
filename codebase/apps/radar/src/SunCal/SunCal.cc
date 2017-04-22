@@ -72,26 +72,8 @@ SunCal::SunCal(int argc, char **argv)
   
 {
 
+  _initMembers();
   isOK = true;
-  _tsReader = NULL;
-  _covarReader = NULL;
-
-  _pulseSeqNum = 0;
-  _prevAngleOffset = -999;
-
-  _switching = false;
-  _dualPol = false;
-  _alternating = false;
-
-  _volNum = -1;
-  _prevVolNum = -1;
-  _endOfVol = false;
-  _volInProgress = true;
-  _prevEl = 0;
-  _globalPrintCount = 0;
-
-  _startGateSun = 0;
-  _endGateSun = 0;
 
   // set programe name
   
@@ -213,8 +195,9 @@ SunCal::~SunCal()
 
   // clean up memory
 
-  _clearPulseQueue();
+  _deletePulseQueue();
   _deleteRawMomentsArray();
+
   _deleteInterpMomentsArray();
   _deleteXpolMomentsArray();
   _deleteTestPulseMomentsArray();
@@ -223,9 +206,157 @@ SunCal::~SunCal()
     nexradSolarFree();
   }
 
+  _freeGateData();
+
   // unregister process
 
   PMU_auto_unregister();
+
+}
+
+//////////////////////////////////////////////////
+// init members
+
+void SunCal::_initMembers()
+{
+
+  _paramsPath = NULL;
+  _tsReader = NULL;
+  _covarReader = NULL;
+
+  _radarLat = 0;
+  _radarLon = 0;
+  _radarAltKm = 0;
+  
+  _isRhi = false;
+
+  _switching = false;
+  _dualPol = false;
+  _alternating = false;
+
+  _maxPulseQueueSize = 0;
+  _pulseSeqNum = 0;
+  _totalPulseCount = 0;
+  _prevAngleOffset = -999;
+
+  _nGates = 0;
+  _startRangeKm = 0;
+  _gateSpacingKm = 0;
+  _nSamples = 0;
+  _nSamplesHalf = 0;
+  _startGateSun = 0;
+  _endGateSun = 0;
+
+  _volNum = -1;
+  _prevVolNum = -1;
+
+  _startTime = 0;
+  _endTime = 0;
+  _calTime = 0;
+
+  _gridNAz = 0;
+  _gridNEl = 0;
+  _gridMinAz = 0;
+  _gridMinEl = 0;
+  _gridMaxAz = 0;
+  _gridMaxEl = 0;
+  _gridDeltaAz = 0;
+  _gridDeltaEl = 0;
+
+  _midTime = 0;
+  _midPrt = 0;
+  _midAz = 0;
+  _midEl = 0;
+  _targetEl = 0;
+  _targetAz = 0;
+  _offsetAz = 0;
+  _offsetEl = 0;
+
+  _prevOffsetEl = 0;
+  _prevOffsetAz = 0;
+
+  _nBeamsNoise = 0;
+  _noiseDbmHc = 0;
+  _noiseDbmHx = 0;
+  _noiseDbmVc = 0;
+  _noiseDbmVx = 0;
+
+  _maxValidSunPowerDbm = 0;
+
+  _maxPowerDbm = 0;
+  _quadPowerDbm = 0;
+  
+  _maxPowerDbmHc = 0;
+  _quadPowerDbmHc = 0;
+  
+  _maxPowerDbmVc = 0;
+  _quadPowerDbmVc = 0;
+  
+  _validCentroid = false;
+  _meanSunEl = 0;
+  _meanSunAz = 0;
+  _sunCentroidAzOffset = 0;
+  _sunCentroidElOffset = 0;
+  _sunCentroidAzOffsetHc = 0;
+  _sunCentroidElOffsetHc = 0;
+  _sunCentroidAzOffsetVc = 0;
+  _sunCentroidElOffsetVc = 0;
+
+  _ccAz = 0;
+  _bbAz = 0;
+  _aaAz = 0;
+  _errEstAz = 0;
+  _rSqAz = 0;
+  _ccEl = 0;
+  _bbEl = 0;
+  _aaEl = 0;
+  _errEstEl = 0;
+  _rSqEl = 0;
+
+  _widthRatioElAzHc = 0;
+  _widthRatioElAzVc = 0;
+  _widthRatioElAzDiffHV = 0;
+  _zdrDiffElAz = -9999.0;
+
+  _meanCorrSun = 0;
+  _meanCorr00H = 0;
+  _meanCorr00V = 0;
+  _meanCorr00 = 0;
+  
+  _nBeamsThisVol = 0;
+  _volMinEl = 0;
+  _volMaxEl = 0;
+  _volCount = 0;
+  _endOfVol = false;
+  _volInProgress = true;
+  _prevEl = 0;
+
+  _S1S2Sdev = 0;
+  _SSSdev = 0;
+
+  _nXpolPoints = 0;
+  _meanXpolRatioDb = 0;
+  _zdrCorr = 0;
+
+  _meanTestPulsePowerHcDbm = 0;
+  _meanTestPulsePowerVcDbm = 0;
+  _meanTestPulsePowerHxDbm = 0;
+  _meanTestPulsePowerVxDbm = 0;
+
+  _sumXmitPowerHDbm = 0;
+  _sumXmitPowerVDbm = 0;
+  _countXmitPowerH = 0;
+  _countXmitPowerV = 0;
+  _meanXmitPowerHDbm = 0;
+  _meanXmitPowerVDbm = 0;
+
+  _globalPrintCount = 0;
+
+  _timeForXpolRatio = 0;
+  _xpolRatioDbFromSpdb = 0;
+
+  _timeForSiteTemp = 0;
+  _siteTempFromSpdb = 0;
 
 }
 
@@ -887,6 +1018,20 @@ void SunCal::_clearPulseQueue()
     if (_pulseQueue[ii]->removeClient() == 0) {
       delete _pulseQueue[ii];
     }
+  }
+  _pulseQueue.clear();
+
+}
+
+/////////////////////////////////////////////////
+// delete the pulse queue, force memory freeing
+    
+void SunCal::_deletePulseQueue()
+  
+{
+
+  for (size_t ii = 0; ii < _pulseQueue.size(); ii++) {
+    delete _pulseQueue[ii];
   }
   _pulseQueue.clear();
 

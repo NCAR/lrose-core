@@ -373,6 +373,7 @@ private:
 
   // methods
 
+  void _initMembers();
   int _runForTimeSeries();
   int _runForCovar();
   int _createReaders();
@@ -381,6 +382,7 @@ private:
   void _addPulseToQueue(const IwrfTsPulse *pulse);
   int _addPulseToNexradQueue(const IwrfTsPulse *iwrfPulse);
   void _clearPulseQueue();
+  void _deletePulseQueue();
 
   int _processCovarFile(const char *filePath);
   int _processCovarRay(size_t rayIndex, RadxRay *ray);
