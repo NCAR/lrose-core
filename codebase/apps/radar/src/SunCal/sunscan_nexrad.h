@@ -178,6 +178,9 @@ extern void nexradSolarComputeReceiverGain();
    extern double nexradSolarGetMeanZdr();
    extern double nexradSolarGetMeanCorr00();
 
+   extern double nexradSolarGetRxGainHdB();
+   extern double nexradSolarGetRxGainVdB();
+
 #endif
 
 #ifdef __cplusplus

@@ -20,7 +20,7 @@
 #include <time.h>
 #include <sys/time.h>
 
-/* const variables and macros */
+/* macros */
 
 #ifndef RAD_TO_DEG
 #define RAD_TO_DEG 57.29577951308092
@@ -118,18 +118,17 @@ static int *_elevCountRaw = NULL; /* active count of beams in el */
 static solar_beam_t **_rawBeamArray = NULL;  /* [gridNAz][variable] */
 static double _prevAzOffset = -9999;
 
-/* beam properties */
+/* properties of current beam */
 
 double _beamTime;
 double _beamAz, _offsetAz;
 double _beamEl, _offsetEl;
 
-/* interpolated beams on regular grid */
+/* beams interpolated onto a regular grid */
 
 static solar_beam_t **_interpBeamArray = NULL;  /* [gridNAz][gridNel] */
 
-/* interpolated power arrays */
-/* on regular grid */
+/* interpolated power arrays on regular grid */
 
 static double **_interpDbm = NULL;   /* [gridNAz][gridNel] */
 static double **_interpDbmH = NULL;  /* [gridNAz][gridNel] */
@@ -145,7 +144,7 @@ static double _quadFitCentroidAzError;
 static double _quadFitCentroidElError;
 static double _elAzWidthRatio;
 
-/* solar results - power is for H channel */
+/* solar results - power is for H channel only */
 
 static double _maxPowerDbmH;
 static double _quadPowerDbmH;
@@ -155,7 +154,7 @@ static double _quadFitCentroidAzErrorH;
 static double _quadFitCentroidElErrorH;
 static double _elAzWidthRatioH;
 
-/* solar results - power is for V channel */
+/* solar results - power is for V channel only */
 
 static double _maxPowerDbmV;
 static double _quadPowerDbmV;
@@ -165,6 +164,8 @@ static double _quadFitCentroidAzErrorV;
 static double _quadFitCentroidElErrorV;
 static double _elAzWidthRatioV;
 static double _elAzwidthRatioDiffHV;
+
+/* mean stats on the solar disk */
 
 static double _meanSS;
 static double _meanZdr;
@@ -215,6 +216,9 @@ double nexradSolarGetElAzWidthRatio() { return _elAzWidthRatio; }
 double nexradSolarGetMeanSS() { return _meanSS; }
 double nexradSolarGetMeanZdr() { return _meanZdr; }
 double nexradSolarGetMeanCorr00() { return _meanCorr00; }
+
+double nexradSolarGetRxGainHdB() { return _rxGainHdB; }
+double nexradSolarGetRxGainVdB() { return _rxGainVdB; }
 
 /*****************************************************
  * static file-scope functions
@@ -1732,10 +1736,13 @@ void nexradSolarComputeReceiverGain()
   double radarFreqMhz = 2809.0; /* example */
   double solarFreqMhz = 2800.0;
 
+  /* wavelength */
+
+  double radarWavelengthM = (2.99735e8 / (radarFreqMhz * 1.0e6));
+
   /* estimated received power given solar flux */
   
   /* double beamWidthRad = radarBeamWidth * DEG_TO_RAD; */
-  double radarWavelengthM = (2.99735e8 / (radarFreqMhz * 1.0e6));
 
   /* antenna gains - from previous cal */
 
