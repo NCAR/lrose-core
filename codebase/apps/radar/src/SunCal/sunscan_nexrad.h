@@ -139,47 +139,53 @@ extern void nexradSolarPerformAnalysis();
 extern void nexradSolarComputeReceiverGain();
 
 /*****************************************************
+ * write gridded results to text files
+ */
+
+extern int nexradSolarWriteGriddedTextFiles(const char *output_dir);
+
+/*****************************************************
  * access to results
  *****************************************************/
 
-   extern void nexradSolarSetDebug(int level);
-   extern int nexradSolarGetGridNAz();
-   extern int nexradSolarGetGridNEl();
-   extern double nexradSolarGetGridStartAz();
-   extern double nexradSolarGetGridStartEl();
-   extern double nexradSolarGetGridDeltaAz();
-   extern double nexradSolarGetGridDeltaEl();
+extern void nexradSolarSetDebug(int level);
+extern int nexradSolarGetGridNAz();
+extern int nexradSolarGetGridNEl();
+extern double nexradSolarGetGridStartAz();
+extern double nexradSolarGetGridStartEl();
+extern double nexradSolarGetGridDeltaAz();
+extern double nexradSolarGetGridDeltaEl();
 
-   extern double nexradSolarGetMissingVal();
-   extern double nexradSolarGetNoiseDbmH();
-   extern double nexradSolarGetNoiseDbmV();
+extern double nexradSolarGetMissingVal();
+extern double nexradSolarGetNoiseDbmH();
+extern double nexradSolarGetNoiseDbmV();
 
-   extern double nexradSolarGetLatitude();
-   extern double nexradSolarGetLongitude();
-   extern double nexradSolarGetAltitudeM();
+extern double nexradSolarGetLatitude();
+extern double nexradSolarGetLongitude();
+extern double nexradSolarGetAltitudeM();
 
-   extern double nexradSolarGetMeanSunTime();
-   extern double nexradSolarGetMeanSunEl();
-   extern double nexradSolarGetMeanSunAz();
+extern double nexradSolarGetMeanSunTime();
+extern double nexradSolarGetMeanSunEl();
+extern double nexradSolarGetMeanSunAz();
 
-   extern solar_beam_t **nexradSolarGetInterpBeamArray();
-   extern double **nexradSolarGetInterpDbm();
-   extern double **nexradSolarGetInterpDbmH();
-   extern double **nexradSolarGetInterpDbmV();
+extern solar_beam_t **nexradSolarGetInterpBeamArray();
+extern double **nexradSolarGetInterpDbm();
+extern double **nexradSolarGetInterpDbmH();
+extern double **nexradSolarGetInterpDbmV();
 
-   extern double nexradSolarGetMaxPowerDbm();
-   extern double nexradSolarGetQuadPowerDbm();
+extern double nexradSolarGetMaxPowerDbm();
+extern double nexradSolarGetQuadPowerDbm();
 
-   extern double nexradSolarGetQuadFitCentroidAzError();
-   extern double nexradSolarGetQuadFitCentroidElError();
-   extern double nexradSolarGetElAzWidthRatio();
+extern double nexradSolarGetQuadFitCentroidAzError();
+extern double nexradSolarGetQuadFitCentroidElError();
+extern double nexradSolarGetElAzWidthRatio();
 
-   extern double nexradSolarGetMeanSS();
-   extern double nexradSolarGetMeanZdr();
-   extern double nexradSolarGetMeanCorr00();
+extern double nexradSolarGetMeanSS();
+extern double nexradSolarGetMeanZdr();
+extern double nexradSolarGetMeanCorr00();
 
-   extern double nexradSolarGetRxGainHdB();
-   extern double nexradSolarGetRxGainVdB();
+extern double nexradSolarGetRxGainHdB();
+extern double nexradSolarGetRxGainVdB();
 
 #endif
 

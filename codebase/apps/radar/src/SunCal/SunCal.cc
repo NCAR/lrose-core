@@ -2034,6 +2034,9 @@ int SunCal::_performAnalysis(bool force)
       if (_writeSummaryText()) {
         return -1;
       }
+      if (_params.test_nexrad_processing) {
+        nexradSolarWriteGriddedTextFiles(_params.nexrad_text_output_dir);
+      }
     }
     
     if (_params.append_to_global_results_file) {
@@ -5575,7 +5578,7 @@ int SunCal::_writeGriddedFieldDebug(const string &dirPath,
           _gridMinEl, _gridDeltaEl, _gridNEl);
   fprintf(out, "# minAz, deltaAz, nAz: %g %g %d\n",
           _gridMinAz, _gridDeltaAz, _gridNAz);
-  fprintf(out, "# sun offset el, az (deg): %g %g\n",
+  fprintf(out, "# sun offset az, el (deg): %g %g\n",
           _sunCentroidAzOffset, _sunCentroidElOffset);
 
 

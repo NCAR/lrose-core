@@ -19,6 +19,7 @@
 #include <string.h>
 #include <time.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 
 /* macros */
 
@@ -32,6 +33,8 @@
 #ifndef MAX
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #endif
+
+#define MAX_PATH_LEN 1024
 
 /************************************************
  * structs
@@ -1788,5 +1791,331 @@ void nexradSolarComputeReceiverGain()
   double PrVdBm = 10.0 * log10(PrVWatts) + 30.0;
   _rxGainVdB = _quadPowerDbmV - PrVdBm;
   
+}
+
+/********************************************************
+ * _makedir()
+ *
+ * Utility routine to create a directory.  If the directory
+ * already exists, does nothing.
+ *
+ * Returns -1 on error, 0 otherwise.
+ */
+
+static int _makedir(const char *path)
+{
+  struct stat stat_buf;
+  /*
+   * Status the directory to see if it already exists.
+   */
+  if (stat(path, &stat_buf) == 0) {
+    return 0;
+  }
+  /*
+   * Directory doesn't exist, create it.
+   */
+  if (mkdir(path,
+	    S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+    /*
+     * failed
+     * check if dir has been made bu some other process
+     * in the mean time, in which case return success
+     */
+    if (stat(path, &stat_buf) == 0) {
+      return 0;
+    }
+    return -1;
+  }
+  return 0;
+}
+
+
+/********************************************************
+ * _makedir_recurse()
+ *
+ * Utility routine to create a directory recursively.
+ * If the directory already exists, does nothing.
+ * Otherwise it recurses through the path, making all
+ * needed directories.
+ *
+ * Returns -1 on error, 0 otherwise.
+ */
+
+static int _makedir_recurse(const char *path)
+{
+
+  char up_dir[MAX_PATH_LEN];
+  char *last_delim;
+  struct stat dir_stat;
+  int delim = '/';
+  
+  /*
+   * Status the directory to see if it already exists.
+   * '/' dir will always exist, so this stops the recursion
+   * automatically.
+   */
+  
+  if (stat(path, &dir_stat) == 0) {
+    return 0;
+  }
+  
+  /*
+   * create up dir - one up the directory tree -
+   * by searching for the previous delim and removing it
+   * from the string.
+   * If no delim, try to make the directory non-recursively.
+   */
+  
+  strncpy(up_dir, path, MAX_PATH_LEN);
+  last_delim = strrchr(up_dir, delim);
+  if (last_delim == NULL) {
+    return (_makedir(up_dir));
+  }
+  *last_delim = '\0';
+  
+  /*
+   * make the up dir
+   */
+  
+  if (_makedir_recurse(up_dir)) {
+    return -1;
+  }
+
+  /*
+   * make this dir
+   */
+
+  if (_makedir(path)) {
+    return -1;
+  } else {
+    return 0;
+  }
+
+}
+
+/************************************************************
+ * write out debug file for data at given offset from 'time'
+ */
+
+static int _writeGriddedFieldDebug(const char *dirPath,
+                                   const char *fieldName,
+                                   int offset)
+  
+{
+
+  int iaz, iel;
+
+  /* compute file path */
+
+  char path[MAX_PATH_LEN];
+  sprintf(path, "%s/%s.debug.txt", dirPath, fieldName);
+  if (_debug) {
+    fprintf(stderr, "writing debug nexrad moments file: %s\n", path);
+  }
+
+  // open file
+  
+  FILE *out;
+  if ((out = fopen(path, "w")) == NULL) {
+    fprintf(stderr, "ERROR - nexradSolarWriteGriddedTextFiles\n");
+    fprintf(stderr, "  Cannot open debug file for writing: %s\n", path);
+    perror("  ");
+    return -1;
+  }
+
+  // compute the min value, set missing to this
+
+  double minVal = 1.0e99;
+  
+  for (iel = 0; iel < gridNEl; iel++) {
+    for (iaz = 0; iaz < gridNAz; iaz++) {
+      const solar_beam_t *moments = &_interpBeamArray[iaz][iel];
+      char *ptr = (char *) &moments->time + offset;
+      double val = *((double *) ptr);
+      if (val != _missing) {
+        if (val < minVal) {
+          minVal = val;
+        }
+      }
+    }
+  }
+
+  // write out grid details
+  
+  fprintf(out, "# minEl, deltaEl, nEl: %g %g %d\n",
+          gridStartEl, gridDeltaEl, gridNEl);
+  fprintf(out, "# minAz, deltaAz, nAz: %g %g %d\n",
+          gridStartAz, gridDeltaAz, gridNAz);
+  fprintf(out, "# sun offset az, el (deg): %g %g\n",
+          _quadFitCentroidAzError, _quadFitCentroidElError);
+  
+  // write out grid data
+  
+  for (iel = 0; iel < gridNEl; iel++) {
+    for (iaz = 0; iaz < gridNAz; iaz++) {
+      double el = gridStartEl + iel * gridDeltaEl;
+      double az = gridStartAz + iaz * gridDeltaAz;
+      const solar_beam_t *moments = &_interpBeamArray[iaz][iel];
+      char *ptr = (char *) &moments->time + offset;
+      double val = *((double *) ptr);
+      if (val == _missing) {
+        fprintf(out, " el, az, val: %10.5f %10.5f %10.5f\n", el, az, minVal);
+      } else {
+        fprintf(out, " el, az, val: %10.5f %10.5f %10.5f\n", el, az, val);
+      }
+    } // iaz
+  } // iel
+
+  fclose(out);
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////////
+// write out file for data at given offset from 'time' member
+
+static int _writeGriddedField(const char *dirPath,
+                              const char *fieldName,
+                              int offset)
+  
+{
+
+  int iaz, iel;
+
+  // compute file path
+
+  char path[MAX_PATH_LEN];
+  sprintf(path, "%s/%s.txt", dirPath, fieldName);
+  if (_debug) {
+    fprintf(stderr, "writing nexrad moments file: %s\n", path);
+  }
+
+  // open file
+  
+  FILE *out;
+  if ((out = fopen(path, "w")) == NULL) {
+    fprintf(stderr, "ERROR - nexradSolarWriteGriddedTextFiles\n");
+    fprintf(stderr, "  Cannot open file for writing: %s\n", path);
+    perror("  ");
+    return -1;
+  }
+
+  // compute the min value, set missing to this
+
+  double minVal = 1.0e99;
+  
+  for (iel = 0; iel < gridNEl; iel++) {
+    for (iaz = 0; iaz < gridNAz; iaz++) {
+      const solar_beam_t *moments = &_interpBeamArray[iaz][iel];
+      char *ptr = (char *) &moments->time + offset;
+      double val = *((double *) ptr);
+      if (val != _missing) {
+        if (val < minVal) {
+          minVal = val;
+        }
+      }
+    }
+  }
+
+  // write out grid details
+
+  fprintf(out, "%g %g %d\n", gridStartAz, gridDeltaAz, gridNAz);
+  fprintf(out, "%g %g %d\n", gridStartEl, gridDeltaEl, gridNEl);
+
+  // write out grid data
+
+  for (iel = 0; iel < gridNEl; iel++) {
+    for (iaz = 0; iaz < gridNAz; iaz++) {
+      const solar_beam_t *moments = &_interpBeamArray[iaz][iel];
+      char *ptr = (char *) &moments->time + offset;
+      double val = *((double *) ptr);
+      if (val == _missing) {
+        fprintf(out, " %10.3f", minVal);
+      } else {
+        fprintf(out, " %10.3f", val);
+      }
+    } // iaz
+    fprintf(out, "\n");
+  } // iel
+
+  // write out sun centroid
+  
+  fprintf(out, "%g %g\n", _quadFitCentroidAzError, _quadFitCentroidElError);
+  
+  fclose(out);
+
+  if (_debug >= 2) {
+    _writeGriddedFieldDebug(dirPath, fieldName, offset);
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////
+// write gridded results to text files
+
+int nexradSolarWriteGriddedTextFiles(const char *output_dir)
+
+{
+
+  fprintf(stderr, "11111111111111111111111111\n");
+
+ // create the directory for the output files
+  
+  struct tm *mtime;
+  time_t meanTime = (time_t) _meanSunTime;
+  mtime = gmtime(&meanTime);
+  char dirPath[MAX_PATH_LEN];
+  sprintf(dirPath, "%s/%.4d%.2d%.2d_%.2d%.2d%.2d",
+          output_dir,
+          mtime->tm_year + 1900,
+          mtime->tm_mon + 1,
+          mtime->tm_mday,
+          mtime->tm_hour,
+          mtime->tm_min,
+          mtime->tm_sec);
+
+  if (_makedir_recurse(dirPath)) {
+    fprintf(stderr, "ERROR - nexradSolarWriteGriddedTextFiles\n");
+    fprintf(stderr, "  Cannot create output dir: %s\n", dirPath);
+    perror("  ");
+    return -1;
+  }
+
+  // write out various data sets
+
+  solar_beam_t moments;
+  int offset = 0;
+
+  offset = (char *) &moments.dbm - (char *) &moments.time;
+  _writeGriddedField(dirPath, "dbm", offset);
+  
+  offset = (char *) &moments.dbBelowPeak - (char *) &moments.time;
+  _writeGriddedField(dirPath, "dbBelowPeak", offset);
+  
+  offset = (char *) &moments.dbmH - (char *) &moments.time;
+  _writeGriddedField(dirPath, "dbmH", offset);
+  
+  offset = (char *) &moments.dbm - (char *) &moments.time;
+  _writeGriddedField(dirPath, "dbm", offset);
+  
+  offset = (char *) &moments.dbmV - (char *) &moments.time;
+  _writeGriddedField(dirPath, "dbmV", offset);
+  
+  offset = (char *) &moments.corrHV - (char *) &moments.time;
+  _writeGriddedField(dirPath, "corrHV", offset);
+  
+  offset = (char *) &moments.phaseHV - (char *) &moments.time;
+  _writeGriddedField(dirPath, "phaseHV", offset);
+    
+  offset = (char *) &moments.zdr - (char *) &moments.time;
+  _writeGriddedField(dirPath, "zdr", offset);
+  
+  offset = (char *) &moments.SS - (char *) &moments.time;
+  _writeGriddedField(dirPath, "SS", offset);
+    
+  return 0;
+
 }
 
