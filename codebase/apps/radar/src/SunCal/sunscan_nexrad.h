@@ -142,6 +142,7 @@ extern void nexradSolarComputeReceiverGain();
  * access to results
  *****************************************************/
 
+   extern void nexradSolarSetDebug(int level);
    extern int nexradSolarGetGridNAz();
    extern int nexradSolarGetGridNEl();
    extern double nexradSolarGetGridStartAz();

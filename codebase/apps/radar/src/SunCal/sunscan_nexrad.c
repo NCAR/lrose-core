@@ -78,6 +78,10 @@ static double minAngleOffsetForNoisePower = 2.0;
 static double maxSolidAngleForMeanCorr = 2.0;
 static double solidAngleForSS = 1.0;
 
+/* debugging */
+
+int _debug = 0;
+
 /* missing value */
 
 static double _missing = -9999.0;
@@ -174,6 +178,8 @@ static double _rxGainVdB;
 /*****************************************************
  * access to results
  *****************************************************/
+
+void nexradSolarSetDebug(int level) { _debug = level; }
 
 int nexradSolarGetGridNAz() { return gridNAz; }
 int nexradSolarGetGridNEl() { return gridNEl; }
@@ -1092,9 +1098,14 @@ static int _computeSunCentroid(double **interpDbm,
   double count = 0.0;
 
   double edgePowerThreshold = maxPowerDbm - validEdgeBelowPeakDb;
-  fprintf(stderr, "aaaaaaaaa maxPowerDbm: %g\n", maxPowerDbm);
-  fprintf(stderr, "aaaaaaaaa validEdgeBelowPeakDb: %g\n", validEdgeBelowPeakDb);
-  fprintf(stderr, "aaaaaaaaa edgePowerThreshold: %g\n", edgePowerThreshold);
+
+  if (_debug > 0) {
+    fprintf(stderr, "===>> computeSunCentroid()\n");
+    fprintf(stderr, "  maxPowerDbm: %g\n", maxPowerDbm);
+    fprintf(stderr, "  validEdgeBelowPeakDb: %g\n", validEdgeBelowPeakDb);
+    fprintf(stderr, "  edgePowerThreshold: %g\n", edgePowerThreshold);
+  }
+
   int iel, iaz;
   for (iel = 0; iel < gridNEl; iel++) {
     for (iaz = 0; iaz < gridNAz; iaz++) {
@@ -1125,9 +1136,11 @@ static int _computeSunCentroid(double **interpDbm,
   *pwrWtCentroidAzError = sumWtAz / sumPower;
   *pwrWtCentroidElError = sumWtEl / sumPower;
 
-  fprintf(stderr, "bbbbbbbbbb pwrWtCentroidAzError: %lg\n", *pwrWtCentroidAzError);
-  fprintf(stderr, "bbbbbbbbbb pwrWtCentroidElError: %lg\n", *pwrWtCentroidElError);
-
+  if (_debug > 0) {
+    fprintf(stderr, "  pwrWtCentroidAzError: %lg\n", *pwrWtCentroidAzError);
+    fprintf(stderr, "  pwrWtCentroidElError: %lg\n", *pwrWtCentroidElError);
+  }
+    
   double gridMaxAz = gridStartAz + gridNAz * gridDeltaAz;
   double gridMaxEl = gridStartEl + gridNEl * gridDeltaEl;
   
@@ -1240,10 +1253,11 @@ static int _computeSunCentroid(double **interpDbm,
     fitIsGood = 0;
   }
 
-  fprintf(stderr, "0000000 _quadFitCentroidAzError, _quadFitCentroidElError: %g, %g\n",
-          *quadFitCentroidAzError, *quadFitCentroidElError);
+  if (_debug > 0) {
+    fprintf(stderr, "  quadFitCentroidAzError: %g\n", *quadFitCentroidAzError);
+    fprintf(stderr, "  quadFitCentroidElError: %g\n", *quadFitCentroidElError);
+  }
   
-
   // compute the width ratio
 
   *elAzWidthRatio = _missing;
@@ -1255,6 +1269,11 @@ static int _computeSunCentroid(double **interpDbm,
 
   if (fitIsGood) {
     *quadPowerDbm = (ccAz + ccEl) / 2.0 - 200.0;
+  }
+
+  if (_debug > 0) {
+    fprintf(stderr, "  elAzWidthRatio: %g\n", *elAzWidthRatio);
+    fprintf(stderr, "  quadPowerDbm: %g\n", *quadPowerDbm);
   }
 
   return 0;
@@ -1270,7 +1289,9 @@ static int _computeSunCentroidAllChannels()
 {
   /* compute centroid for mean dbm (mean of H and V) */
 
-  fprintf(stderr, "============== mean fit ============\n");
+  if (_debug > 0) {
+    fprintf(stderr, "============== quadratic mean fit ============\n");
+  }
 
   if (_computeSunCentroid(_interpDbm,
                           _maxPowerDbm,
@@ -1285,8 +1306,10 @@ static int _computeSunCentroidAllChannels()
 
   /* compute centroid for H channel */
   
-  fprintf(stderr, "============== H fit ============\n");
-
+  if (_debug > 0) {
+    fprintf(stderr, "============== quadratic H fit ============\n");
+  }
+  
   if (_computeSunCentroid(_interpDbmH,
                           _maxPowerDbmH,
                           &_quadPowerDbmH,
@@ -1300,8 +1323,10 @@ static int _computeSunCentroidAllChannels()
   
   /* compute centroid for V channel */
   
-  fprintf(stderr, "============== V fit ============\n");
-
+  if (_debug > 0) {
+    fprintf(stderr, "============== quadratic V fit ============\n");
+  }
+  
   if (_computeSunCentroid(_interpDbmV,
                           _maxPowerDbmV,
                           &_quadPowerDbmV,

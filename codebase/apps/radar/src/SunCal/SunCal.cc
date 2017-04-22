@@ -174,6 +174,11 @@ SunCal::SunCal(int argc, char **argv)
 
   if (_params.test_nexrad_processing) {
     nexradSolarInit(_params.n_samples);
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      nexradSolarSetDebug(2);
+    } else if (_params.debug) {
+      nexradSolarSetDebug(1);
+    }
   }
 
   // init process mapper registration
