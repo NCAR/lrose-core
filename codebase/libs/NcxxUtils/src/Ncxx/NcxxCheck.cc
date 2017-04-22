@@ -51,16 +51,33 @@
 #include <cstring>
 #include <netcdf.h>
 #include <ncException.h>
+#include <NcxxUtils/NcxxCheck.hh>
 #include <NcxxUtils/NcxxException.hh>
 using namespace std;
 
+////////////////////////
 //  C++ API for netCDF4.
 
 // function checks error code and if necessary throws appropriate exception.
-void ncxxCheck(int retCode, const char* file, int line){
-  if (retCode==NC_NOERR)
-    return;
+// \param retCode Integer value returned by %netCDF C-routines.
+// \param file    The name of the file from which this call originates.
+// \param line    The line number in the file from which this call originates.
+// \param context Optional extra context from the calling routine stack, to make
+//                the exception message more meaningful
 
+void ncxxCheck(int retCode, 
+               string file, 
+               int line, 
+               std::string context1 /* = "" */,
+               std::string context2 /* = "" */,
+               std::string context3 /* = "" */)
+  
+{
+
+  if (retCode == NC_NOERR) {
+    return;
+  }
+  
   const char* msg = 0;
   if (NC_ISSYSERR(retCode)){
     msg = std::strerror(retCode);
@@ -69,73 +86,101 @@ void ncxxCheck(int retCode, const char* file, int line){
     msg = nc_strerror(retCode);
   }
 
+  string complaint;
+  if (context1.size() > 0) {
+    complaint = context1 + " - ";
+  }
+  if (context2.size() > 0) {
+    complaint = context2 + " - ";
+  }
+  if (context3.size() > 0) {
+    complaint = context3 + " - ";
+  }
+  complaint += msg;
+
   switch(retCode) {
-    case NC_EBADID          : throw NcxxBadId(msg,file,line);
-    case NC_ENFILE          : throw NcxxNFile(msg,file,line);
-    case NC_EEXIST          : throw NcxxExist(msg,file,line);
-    case NC_EINVAL          : throw NcxxInvalidArg(msg,file,line);
-    case NC_EPERM           : throw NcxxInvalidWrite(msg,file,line);
-    case NC_ENOTINDEFINE    : throw NcxxNotInDefineMode(msg,file,line);
-    case NC_EINDEFINE       : throw NcxxInDefineMode(msg,file,line);
-    case NC_EINVALCOORDS    : throw NcxxInvalidCoords(msg,file,line);
-    case NC_EMAXDIMS        : throw NcxxMaxDims(msg,file,line);
-    case NC_ENAMEINUSE      : throw NcxxNameInUse(msg,file,line);
-    case NC_ENOTATT         : throw NcxxNotAtt(msg,file,line);
-    case NC_EMAXATTS        : throw NcxxMaxAtts(msg,file,line);
-    case NC_EBADTYPE        : throw NcxxBadType(msg,file,line);
-    case NC_EBADDIM         : throw NcxxBadDim(msg,file,line);
-    case NC_EUNLIMPOS       : throw NcxxUnlimPos(msg,file,line);
-    case NC_EMAXVARS        : throw NcxxMaxVars(msg,file,line);
-    case NC_ENOTVAR         : throw NcxxNotVar(msg,file,line);
-    case NC_EGLOBAL         : throw NcxxGlobal(msg,file,line);
-    case NC_ENOTNC          : throw NcxxNotNCF(msg,file,line);
-    case NC_ESTS            : throw NcxxSts(msg,file,line);
-    case NC_EMAXNAME        : throw NcxxMaxName(msg,file,line);
-    case NC_EUNLIMIT        : throw NcxxUnlimit(msg,file,line);
-    case NC_ENORECVARS      : throw NcxxNoRecVars(msg,file,line);
-    case NC_ECHAR           : throw NcxxCharConvert(msg,file,line);
-    case NC_EEDGE           : throw NcxxEdge(msg,file,line);
-    case NC_ESTRIDE         : throw NcxxStride(msg,file,line);
-    case NC_EBADNAME        : throw NcxxBadName(msg,file,line);
-    case NC_ERANGE          : throw NcxxRange(msg,file,line);
-    case NC_ENOMEM          : throw NcxxNoMem(msg,file,line);
-    case NC_EVARSIZE        : throw NcxxVarSize(msg,file,line);
-    case NC_EDIMSIZE        : throw NcxxDimSize(msg,file,line);
-    case NC_ETRUNC          : throw NcxxTrunc(msg,file,line);
+    case NC_EBADID          : throw NcxxBadId(complaint, file, line);
+    case NC_ENFILE          : throw NcxxNFile(complaint, file, line);
+    case NC_EEXIST          : throw NcxxExist(complaint, file, line);
+    case NC_EINVAL          : throw NcxxInvalidArg(complaint, file, line);
+    case NC_EPERM           : throw NcxxInvalidWrite(complaint, file, line);
+    case NC_ENOTINDEFINE    : throw NcxxNotInDefineMode(complaint, file, line);
+    case NC_EINDEFINE       : throw NcxxInDefineMode(complaint, file, line);
+    case NC_EINVALCOORDS    : throw NcxxInvalidCoords(complaint, file, line);
+    case NC_EMAXDIMS        : throw NcxxMaxDims(complaint, file, line);
+    case NC_ENAMEINUSE      : throw NcxxNameInUse(complaint, file, line);
+    case NC_ENOTATT         : throw NcxxNotAtt(complaint, file, line);
+    case NC_EMAXATTS        : throw NcxxMaxAtts(complaint, file, line);
+    case NC_EBADTYPE        : throw NcxxBadType(complaint, file, line);
+    case NC_EBADDIM         : throw NcxxBadDim(complaint, file, line);
+    case NC_EUNLIMPOS       : throw NcxxUnlimPos(complaint, file, line);
+    case NC_EMAXVARS        : throw NcxxMaxVars(complaint, file, line);
+    case NC_ENOTVAR         : throw NcxxNotVar(complaint, file, line);
+    case NC_EGLOBAL         : throw NcxxGlobal(complaint, file, line);
+    case NC_ENOTNC          : throw NcxxNotNCF(complaint, file, line);
+    case NC_ESTS            : throw NcxxSts(complaint, file, line);
+    case NC_EMAXNAME        : throw NcxxMaxName(complaint, file, line);
+    case NC_EUNLIMIT        : throw NcxxUnlimit(complaint, file, line);
+    case NC_ENORECVARS      : throw NcxxNoRecVars(complaint, file, line);
+    case NC_ECHAR           : throw NcxxCharConvert(complaint, file, line);
+    case NC_EEDGE           : throw NcxxEdge(complaint, file, line);
+    case NC_ESTRIDE         : throw NcxxStride(complaint, file, line);
+    case NC_EBADNAME        : throw NcxxBadName(complaint, file, line);
+    case NC_ERANGE          : throw NcxxRange(complaint, file, line);
+    case NC_ENOMEM          : throw NcxxNoMem(complaint, file, line);
+    case NC_EVARSIZE        : throw NcxxVarSize(complaint, file, line);
+    case NC_EDIMSIZE        : throw NcxxDimSize(complaint, file, line);
+    case NC_ETRUNC          : throw NcxxTrunc(complaint, file, line);
 
       // The following are specific netCDF4 errors.
-    case NC_EHDFERR         : throw NcxxHdfErr(msg,file,line);
-    case NC_ECANTREAD       : throw NcxxCantRead(msg,file,line);
-    case NC_ECANTWRITE      : throw NcxxCantWrite(msg,file,line);
-    case NC_ECANTCREATE     : throw NcxxCantCreate(msg,file,line);
-    case NC_EFILEMETA       : throw NcxxFileMeta(msg,file,line);
-    case NC_EDIMMETA        : throw NcxxDimMeta(msg,file,line);
-    case NC_EATTMETA        : throw NcxxAttMeta(msg,file,line);
-    case NC_EVARMETA        : throw NcxxVarMeta(msg,file,line);
-    case NC_ENOCOMPOUND     : throw NcxxNoCompound(msg,file,line);
-    case NC_EATTEXISTS      : throw NcxxAttExists(msg,file,line);
-    case NC_ENOTNC4         : throw NcxxNotNc4(msg,file,line);
-    case NC_ESTRICTNC3      : throw NcxxStrictNc3(msg,file,line);
-    case NC_EBADGRPID       : throw NcxxBadGroupId(msg,file,line);
-    case NC_EBADTYPID       : throw NcxxBadTypeId(msg,file,line);                       // netcdf.h file inconsistent with documentation!!
-    case NC_EBADFIELD       : throw NcxxBadFieldId(msg,file,line);                     // netcdf.h file inconsistent with documentation!!
-      //  case NC_EUNKNAME        : throw NcUnkownName("Cannot find the field id.",file,line);   // netcdf.h file inconsistent with documentation!!
+    case NC_EHDFERR         : throw NcxxHdfErr(complaint, file, line);
+    case NC_ECANTREAD       : throw NcxxCantRead(complaint, file, line);
+    case NC_ECANTWRITE      : throw NcxxCantWrite(complaint, file, line);
+    case NC_ECANTCREATE     : throw NcxxCantCreate(complaint, file, line);
+    case NC_EFILEMETA       : throw NcxxFileMeta(complaint, file, line);
+    case NC_EDIMMETA        : throw NcxxDimMeta(complaint, file, line);
+    case NC_EATTMETA        : throw NcxxAttMeta(complaint, file, line);
+    case NC_EVARMETA        : throw NcxxVarMeta(complaint, file, line);
+    case NC_ENOCOMPOUND     : throw NcxxNoCompound(complaint, file, line);
+    case NC_EATTEXISTS      : throw NcxxAttExists(complaint, file, line);
+    case NC_ENOTNC4         : throw NcxxNotNc4(complaint, file, line);
+    case NC_ESTRICTNC3      : throw NcxxStrictNc3(complaint, file, line);
+    case NC_EBADGRPID       : throw NcxxBadGroupId(complaint, file, line);
 
-    case NC_ENOGRP          : throw NcxxEnoGrp(msg,file,line);
-    case NC_ELATEDEF        : throw NcxxElateDef(msg,file,line);
+      // netcdf.h file inconsistent with documentation!!
+    case NC_EBADTYPID       : throw NcxxBadTypeId(complaint, file, line);
+
+      // netcdf.h file inconsistent with documentation!!
+    case NC_EBADFIELD       : throw NcxxBadFieldId(complaint, file, line);
+
+      // netcdf.h file inconsistent with documentation!!
+      //  case NC_EUNKNAME        : throw NcUnkownName("Cannot find the field id.",file,line);
+
+    case NC_ENOGRP          : throw NcxxEnoGrp(complaint, file, line);
+    case NC_ELATEDEF        : throw NcxxElateDef(complaint, file, line);
 
     default:
-      throw NcxxException(retCode, msg, file, line);
+      throw NcxxException(retCode, complaint, file, line);
   }
 }
 
-void ncxxCheckDefineMode(int ncid)
+// Function checks if the file (group) is in define mode.
+// If not, it places it in the define mode.
+// While this is automatically done by the underlying C API
+// for netCDF-4 files, the netCDF-3 files still need this call.
+
+void ncxxCheckDefineMode(int ncid, string context /* = "" */)
 {
   int status = nc_redef(ncid);
   if (status != NC_EINDEFINE) ncxxCheck(status, __FILE__, __LINE__);
 }
 
-void ncxxCheckDataMode(int ncid)
+// Function checks if the file (group) is in data mode.
+// If not, it places it in the data mode.
+// While this is automatically done by the underlying C API
+// for netCDF-4 files, the netCDF-3 files still need this call.
+
+void ncxxCheckDataMode(int ncid, string context /* = "" */)
 {
   int status = nc_enddef(ncid);
   if (status != NC_ENOTINDEFINE) ncxxCheck(status, __FILE__, __LINE__);
