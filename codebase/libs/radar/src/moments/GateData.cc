@@ -55,6 +55,13 @@ GateData::GateData() :
   _nSamplesAlloc = 0;
   _initArraysToNull();
 
+  censorStrong = false;
+  censorWeak = false;
+  trip1IsStrong = false;
+  clutterInStrong = false;
+  clutterInWeak = false;
+  szLeakage = 0;
+
 }
 
 // destructor
