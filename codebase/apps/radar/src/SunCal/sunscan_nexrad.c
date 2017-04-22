@@ -869,6 +869,9 @@ static void _interpMomentsToRegularGrid()
     for (iel = 0; iel < gridNEl; iel++) {
       solar_beam_t *interp = &_interpBeamArray[iaz][iel];
       _initBeam(interp);
+      _interpDbmH[iaz][iel] = _missing;
+      _interpDbmV[iaz][iel] = _missing;
+      _interpDbm[iaz][iel] = _missing;
     }
   }
 
@@ -1089,7 +1092,9 @@ static int _computeSunCentroid(double **interpDbm,
   double count = 0.0;
 
   double edgePowerThreshold = maxPowerDbm - validEdgeBelowPeakDb;
-
+  fprintf(stderr, "aaaaaaaaa maxPowerDbm: %g\n", maxPowerDbm);
+  fprintf(stderr, "aaaaaaaaa validEdgeBelowPeakDb: %g\n", validEdgeBelowPeakDb);
+  fprintf(stderr, "aaaaaaaaa edgePowerThreshold: %g\n", edgePowerThreshold);
   int iel, iaz;
   for (iel = 0; iel < gridNEl; iel++) {
     for (iaz = 0; iaz < gridNAz; iaz++) {
@@ -1119,6 +1124,9 @@ static int _computeSunCentroid(double **interpDbm,
 
   *pwrWtCentroidAzError = sumWtAz / sumPower;
   *pwrWtCentroidElError = sumWtEl / sumPower;
+
+  fprintf(stderr, "bbbbbbbbbb pwrWtCentroidAzError: %lg\n", *pwrWtCentroidAzError);
+  fprintf(stderr, "bbbbbbbbbb pwrWtCentroidElError: %lg\n", *pwrWtCentroidElError);
 
   double gridMaxAz = gridStartAz + gridNAz * gridDeltaAz;
   double gridMaxEl = gridStartEl + gridNEl * gridDeltaEl;
@@ -1150,19 +1158,24 @@ static int _computeSunCentroid(double **interpDbm,
   double azArray[gridNAz];
   double azDbm[gridNAz];
   double widthAz3Db = _missing;
+  int nvalid = 0;
 
   for (iaz = 0; iaz < gridNAz; iaz++) {
+    if (interpDbm[iaz][elCentroidIndex] == _missing) {
+      continue;
+    }
     double dbm = interpDbm[iaz][elCentroidIndex]; /* row for el centroid */
     if (dbm >= edgePowerThreshold) {
       double az = gridStartAz + iaz * gridDeltaAz;
-      azArray[iaz] = az;
+      azArray[nvalid] = az;
       /* add 200 to dbm to ensure real roots */
-      azDbm[iaz] = dbm + 200;
+      azDbm[nvalid] = dbm + 200;
+      nvalid++;
     }
   }
   
   double ccAz, bbAz, aaAz, errEstAz, rSqAz;
-  if (_quadFit(gridNAz,
+  if (_quadFit(nvalid,
                azArray, azDbm,
                &ccAz, &bbAz, &aaAz,
                &errEstAz, &rSqAz) == 0) {
@@ -1189,19 +1202,24 @@ static int _computeSunCentroid(double **interpDbm,
   double elArray[gridNEl];
   double elDbm[gridNEl];
   double widthEl3Db = _missing;
+  nvalid = 0;
   
   for (iel = 0; iel < gridNEl; iel++) {
+    if (interpDbm[azCentroidIndex][iel] == _missing) {
+      continue;
+    }
     double dbm = interpDbm[azCentroidIndex][iel]; /* column for az centroid */
     if (dbm >= edgePowerThreshold) {
       double el = gridStartEl + iel * gridDeltaEl;
-      elArray[iel] = el;
+      elArray[nvalid] = el;
       /* add 200 to dbm to ensure real roots */
-      elDbm[iel] = dbm + 200;
+      elDbm[nvalid] = dbm + 200;
+      nvalid++;
     }
   }
   
   double ccEl, bbEl, aaEl, errEstEl, rSqEl;
-  if (_quadFit(gridNEl,
+  if (_quadFit(nvalid,
                elArray, elDbm,
                &ccEl, &bbEl, &aaEl,
                &errEstEl, &rSqEl) == 0) {
@@ -1221,6 +1239,10 @@ static int _computeSunCentroid(double **interpDbm,
   } else {
     fitIsGood = 0;
   }
+
+  fprintf(stderr, "0000000 _quadFitCentroidAzError, _quadFitCentroidElError: %g, %g\n",
+          *quadFitCentroidAzError, *quadFitCentroidElError);
+  
 
   // compute the width ratio
 
@@ -1247,7 +1269,9 @@ static int _computeSunCentroidAllChannels()
 
 {
   /* compute centroid for mean dbm (mean of H and V) */
-  
+
+  fprintf(stderr, "============== mean fit ============\n");
+
   if (_computeSunCentroid(_interpDbm,
                           _maxPowerDbm,
                           &_quadPowerDbm,
@@ -1258,9 +1282,11 @@ static int _computeSunCentroidAllChannels()
                           &_elAzWidthRatio)) {
     return -1;
   }
-  
+
   /* compute centroid for H channel */
   
+  fprintf(stderr, "============== H fit ============\n");
+
   if (_computeSunCentroid(_interpDbmH,
                           _maxPowerDbmH,
                           &_quadPowerDbmH,
@@ -1274,6 +1300,8 @@ static int _computeSunCentroidAllChannels()
   
   /* compute centroid for V channel */
   
+  fprintf(stderr, "============== V fit ============\n");
+
   if (_computeSunCentroid(_interpDbmV,
                           _maxPowerDbmV,
                           &_quadPowerDbmV,
@@ -1618,7 +1646,6 @@ void nexradSolarPerformAnalysis()
   
   _computeSunCentroidAllChannels();
 
-  
   /* if (_params.debug) { */
   /*   cerr << "============================" << endl; */
   /*   if (_dualPol) { */
