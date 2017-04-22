@@ -185,6 +185,11 @@ public:
   /*! comparator operator  */
   friend bool operator>(const NcxxType& lhs,const NcxxType& rhs);
 
+  // Check if this is a complex type
+  // i.e. NC_VLEN, NC_OPAQUE, NC_ENUM, or NC_COMPOUND
+  
+  bool isComplex() const;
+
 protected:
 
   /*! assignment operator  */

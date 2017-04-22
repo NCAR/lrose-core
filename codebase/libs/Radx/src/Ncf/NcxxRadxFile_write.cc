@@ -2006,9 +2006,6 @@ int NcxxRadxFile::_writeScalarVariables()
     return -1;
   }
 
-  int iret = 0;
-  iret |= _file.writeVar(_volumeNumberVar, volNum);
-
   // instrument type
 
   String32_t strn;
@@ -2016,7 +2013,15 @@ int NcxxRadxFile::_writeScalarVariables()
   strncpy(strn,
           Radx::instrumentTypeToStr(_writeVol->getInstrumentType()).c_str(),
           sizeof(String32_t) - 1);
-  iret |= _file.writeStringVar(_instrumentTypeVar, strn);
+  try {
+    _instrumentTypeVar.putVal(strn);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
+    _addErrStr("  Cannot write instrumentType");
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
+    return -1;
+  }
 
   // platform type
 
@@ -2024,15 +2029,31 @@ int NcxxRadxFile::_writeScalarVariables()
   strncpy(strn,
           Radx::platformTypeToStr(_writeVol->getPlatformType()).c_str(),
           sizeof(String32_t) - 1);
-  iret |= _file.writeStringVar(_platformTypeVar, strn);
+  try {
+    _platformTypeVar.putVal(strn);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
+    _addErrStr("  Cannot write platformType");
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
+    return -1;
+  }
 
   // primary axis
-
+  
   memset(strn, 0, sizeof(String32_t));
   strncpy(strn,
           Radx::primaryAxisToStr(_writeVol->getPrimaryAxis()).c_str(),
           sizeof(String32_t) - 1);
-  iret |= _file.writeStringVar(_primaryAxisVar, strn);
+  try {
+    _primaryAxisVar.putVal(strn);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
+    _addErrStr("  Cannot write primaryAxis");
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
+    return -1;
+  }
 
   // status xml
   
@@ -2041,7 +2062,15 @@ int NcxxRadxFile::_writeScalarVariables()
   RadxArray<char> xmlStr_;
   char *xmlStr = xmlStr_.alloc(xmlLen);
   strncpy(xmlStr, _writeVol->getStatusXml().c_str(), xmlLen);
-  iret |= _file.writeStringVar(_statusXmlVar, xmlStr);
+  try {
+    _statusXmlVar.putVal(strn);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
+    _addErrStr("  Cannot write statusXml");
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
+    return -1;
+  }
 
   // start time
   
@@ -2049,7 +2078,15 @@ int NcxxRadxFile::_writeScalarVariables()
   memset(strn, 0, sizeof(String32_t));
   strncpy(strn, startTime.getW3cStr().c_str(),
           sizeof(String32_t) - 1);
-  iret |= _file.writeStringVar(_startTimeVar, strn);
+  try {
+    _startTimeVar.putVal(strn);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
+    _addErrStr("  Cannot write statusTime");
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
+    return -1;
+  }
 
   // end time
   
@@ -2057,46 +2094,49 @@ int NcxxRadxFile::_writeScalarVariables()
   memset(strn, 0, sizeof(String32_t));
   strncpy(strn, endTime.getW3cStr().c_str(),
           sizeof(String32_t) - 1);
-  iret |= _file.writeStringVar(_endTimeVar, strn);
-
-  if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
-    // radar params
-    iret |= _file.writeVar(_radarAntennaGainHVar,
-                           (float) _writeVol->getRadarAntennaGainDbH());
-    iret |= _file.writeVar(_radarAntennaGainVVar,
-                           (float) _writeVol->getRadarAntennaGainDbV());
-    iret |= _file.writeVar(_radarBeamWidthHVar,
-                           (float) _writeVol->getRadarBeamWidthDegH());
-    iret |= _file.writeVar(_radarBeamWidthVVar,
-                           (float) _writeVol->getRadarBeamWidthDegV());
-    double bandwidthHz = _writeVol->getRadarReceiverBandwidthMhz();
-    if (_writeVol->getRadarReceiverBandwidthMhz() > 0) {
-      bandwidthHz = _writeVol->getRadarReceiverBandwidthMhz() * 1.0e6; // non-missing
-    }
-    iret |= _file.writeVar(_radarRxBandwidthVar, (float) bandwidthHz);
-  } else {
-    // lidar params
-    iret |= _file.writeVar(_lidarConstantVar,
-                           (float) _writeVol->getLidarConstant());
-    iret |= _file.writeVar(_lidarPulseEnergyJVar,
-                           (float) _writeVol->getLidarPulseEnergyJ());
-    iret |= _file.writeVar(_lidarPeakPowerWVar,
-                           (float) _writeVol->getLidarPeakPowerW());
-    iret |= _file.writeVar(_lidarApertureDiamCmVar,
-                           (float) _writeVol->getLidarApertureDiamCm());
-    iret |= _file.writeVar(_lidarApertureEfficiencyVar,
-                           (float) _writeVol->getLidarApertureEfficiency());
-    iret |= _file.writeVar(_lidarFieldOfViewMradVar,
-                           (float) _writeVol->getLidarFieldOfViewMrad());
-    iret |= _file.writeVar(_lidarBeamDivergenceMradVar,
-                           (float) _writeVol->getLidarBeamDivergenceMrad());
-  }
-
-  if (iret) {
+  try {
+    _endTimeVar.putVal(strn);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
+    _addErrStr("  Cannot write endTime");
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
     return -1;
-  } else {
-    return 0;
   }
+  
+  try {
+    if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
+
+      // radar params
+      _radarAntennaGainHVar.putVal((float) _writeVol->getRadarAntennaGainDbH());
+      _radarAntennaGainVVar.putVal((float) _writeVol->getRadarAntennaGainDbV());
+      _radarBeamWidthHVar.putVal((float) _writeVol->getRadarBeamWidthDegH());
+      _radarBeamWidthVVar.putVal((float) _writeVol->getRadarBeamWidthDegV());
+      float bandwidthHz = _writeVol->getRadarReceiverBandwidthMhz();
+      if (_writeVol->getRadarReceiverBandwidthMhz() > 0) {
+        bandwidthHz = _writeVol->getRadarReceiverBandwidthMhz() * 1.0e6; // non-missing
+      }
+      _radarRxBandwidthVar.putVal(bandwidthHz);
+
+    } else {
+      // lidar params
+      _lidarConstantVar.putVal((float) _writeVol->getLidarConstant());
+      _lidarPulseEnergyJVar.putVal((float) _writeVol->getLidarPulseEnergyJ());
+      _lidarPeakPowerWVar.putVal((float) _writeVol->getLidarPeakPowerW());
+      _lidarApertureDiamCmVar.putVal((float) _writeVol->getLidarApertureDiamCm());
+      _lidarApertureEfficiencyVar.putVal((float) _writeVol->getLidarApertureEfficiency());
+      _lidarFieldOfViewMradVar.putVal((float) _writeVol->getLidarFieldOfViewMrad());
+      _lidarBeamDivergenceMradVar.putVal((float) _writeVol->getLidarBeamDivergenceMrad());
+    }
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
+    _addErrStr("  Cannot write var");
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
+    return -1;
+  }
+
+  return 0;
 
 }
 
@@ -2112,29 +2152,32 @@ int NcxxRadxFile::_writeCorrectionVariables()
 
   const RadxCfactors *cfac = _writeVol->getCfactors();
   
-  int iret = 0;
-  iret |= _file.writeVar(_azimuthCorrVar, (float) cfac->getAzimuthCorr());
-  iret |= _file.writeVar(_elevationCorrVar, (float) cfac->getElevationCorr());
-  iret |= _file.writeVar(_rangeCorrVar, (float) cfac->getRangeCorr());
-  iret |= _file.writeVar(_longitudeCorrVar, (float) cfac->getLongitudeCorr());
-  iret |= _file.writeVar(_latitudeCorrVar, (float) cfac->getLatitudeCorr());
-  iret |= _file.writeVar(_pressureAltCorrVar, (float) cfac->getPressureAltCorr());
-  iret |= _file.writeVar(_altitudeCorrVar, (float) cfac->getAltitudeCorr());
-  iret |= _file.writeVar(_ewVelCorrVar, (float) cfac->getEwVelCorr());
-  iret |= _file.writeVar(_nsVelCorrVar, (float) cfac->getNsVelCorr());
-  iret |= _file.writeVar(_vertVelCorrVar, (float) cfac->getVertVelCorr());
-  iret |= _file.writeVar(_headingCorrVar, (float) cfac->getHeadingCorr());
-  iret |= _file.writeVar(_rollCorrVar, (float) cfac->getRollCorr());
-  iret |= _file.writeVar(_pitchCorrVar, (float) cfac->getPitchCorr());
-  iret |= _file.writeVar(_driftCorrVar, (float) cfac->getDriftCorr());
-  iret |= _file.writeVar(_rotationCorrVar, (float) cfac->getRotationCorr());
-  iret |= _file.writeVar(_tiltCorrVar, (float) cfac->getTiltCorr());
-
-  if (iret) {
+  try {
+    _azimuthCorrVar.putVal((float) cfac->getAzimuthCorr());
+    _elevationCorrVar.putVal((float) cfac->getElevationCorr());
+    _rangeCorrVar.putVal((float) cfac->getRangeCorr());
+    _longitudeCorrVar.putVal((float) cfac->getLongitudeCorr());
+    _latitudeCorrVar.putVal((float) cfac->getLatitudeCorr());
+    _pressureAltCorrVar.putVal((float) cfac->getPressureAltCorr());
+    _altitudeCorrVar.putVal((float) cfac->getAltitudeCorr());
+    _ewVelCorrVar.putVal((float) cfac->getEwVelCorr());
+    _nsVelCorrVar.putVal((float) cfac->getNsVelCorr());
+    _vertVelCorrVar.putVal((float) cfac->getVertVelCorr());
+    _headingCorrVar.putVal((float) cfac->getHeadingCorr());
+    _rollCorrVar.putVal((float) cfac->getRollCorr());
+    _pitchCorrVar.putVal((float) cfac->getPitchCorr());
+    _driftCorrVar.putVal((float) cfac->getDriftCorr());
+    _rotationCorrVar.putVal((float) cfac->getRotationCorr());
+    _tiltCorrVar.putVal((float) cfac->getTiltCorr());
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxRadxFile::_writeCorrectionVariables");
+    _addErrStr("  Cannot write var");
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
     return -1;
-  } else {
-    return 0;
   }
+    
+  return 0;
 
 }
 
@@ -2153,45 +2196,33 @@ int NcxxRadxFile::_writeProjectionVariables()
     return 0;
   }
 
-  double latitude = _writeVol->getLatitudeDeg();
-  if (!_latitudeVar->put(&latitude, 1)) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeProjectionVariables");
-    _addErrStr("  Cannot write latitude");
-    _addErrStr(_file.getErrStr());
-    return -1;
-  }
+  try {
 
-  double longitude = _writeVol->getLongitudeDeg();
-  if (!_longitudeVar->put(&longitude, 1)) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeProjectionVariables");
-    _addErrStr("  Cannot write longitude");
-    _addErrStr(_file.getErrStr());
-    return -1;
-  }
+    _latitudeVar.putVal(_writeVol->getLatitudeDeg());
+    _longitudeVar.putVal(_writeVol->getLongitudeDeg());
 
-  double altitudeM = Radx::missingMetaDouble;
-  if (_writeVol->getAltitudeKm() != Radx::missingMetaDouble) {
-    altitudeM = _writeVol->getAltitudeKm() * 1000.0;
-  }
-  if (!_altitudeVar->put(&altitudeM, 1)) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeProjectionVariables");
-    _addErrStr("  Cannot write altitude");
-    _addErrStr(_file.getErrStr());
-    return -1;
-  }
+    double altitudeM = Radx::missingMetaDouble;
+    if (_writeVol->getAltitudeKm() != Radx::missingMetaDouble) {
+      altitudeM = _writeVol->getAltitudeKm() * 1000.0;
+    }
+    _altitudeVar.putVal(altitudeM);
 
-  double htAglM = Radx::missingMetaDouble;
-  if (_writeVol->getSensorHtAglM() != Radx::missingMetaDouble) {
-    htAglM = _writeVol->getSensorHtAglM();
-  }
-  if (htAglM != Radx::missingMetaDouble &&
-      !_altitudeAglVar->put(&htAglM, 1)) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeProjectionVariables");
-    _addErrStr("  Cannot write altitude AGL");
-    _addErrStr(_file.getErrStr());
-    return -1;
-  }
+    double htAglM = Radx::missingMetaDouble;
+    if (_writeVol->getSensorHtAglM() != Radx::missingMetaDouble) {
+      htAglM = _writeVol->getSensorHtAglM();
+    }
+    _altitudeAglVar.putVal(htAglM);
 
+  } catch (NcxxException& e) {
+
+    _addErrStr("ERROR - NcxxRadxFile::_writeProjectionVariables");
+    _addErrStr("  Cannot write var");
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
+    return -1;
+
+  }
+    
   return 0;
 
 }

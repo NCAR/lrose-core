@@ -60,8 +60,15 @@
   \param retCode Integer value returned by %netCDF C-routines.
   \param file    The name of the file from which this call originates.
   \param line    The line number in the file from which this call originates.
+  \param context Optional extra context from the calling routine stack, to make
+                 the exception message more meaningful
 */
-void ncxxCheck(int retCode, const char* file, int line);
+void ncxxCheck(int retCode,
+               std::string file, 
+               int line,
+               std::string context1 = "",
+               std::string context2 = "",
+               std::string context3 = "");
 
 /*! 
   Function checks if the file (group) is in define mode.
@@ -69,7 +76,7 @@ void ncxxCheck(int retCode, const char* file, int line);
   While this is automatically done by the underlying C API
   for netCDF-4 files, the netCDF-3 files still need this call.
 */
-void ncxxCheckDefineMode(int ncid);
+void ncxxCheckDefineMode(int ncid, std::string context = "");
 
 /*! 
   Function checks if the file (group) is in data mode.
@@ -77,6 +84,6 @@ void ncxxCheckDefineMode(int ncid);
   While this is automatically done by the underlying C API
   for netCDF-4 files, the netCDF-3 files still need this call.
 */
-void ncxxCheckDataMode(int ncid);
+void ncxxCheckDataMode(int ncid, std::string context = "");
 
 #endif
