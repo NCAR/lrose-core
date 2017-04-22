@@ -1733,8 +1733,13 @@ public:
   ////////////////////////////////////////
   // convert var type string
     
-  string varTypeToStr();
+  string varTypeToStr() const;
 
+  ////////////////////////////////////////
+  // create the description string
+  
+  string getDesc() const;
+      
 private:
 
   bool nullObject;

@@ -184,7 +184,7 @@ int NcxxVar::getDimCount() const
   // get the number of dimensions
   int dimCount;
   ncxxCheck(nc_inq_varndims(groupId, myId,  &dimCount),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, getName(), "getDimCount");
   return dimCount;
 }
 
@@ -198,7 +198,7 @@ vector<NcxxDim> NcxxVar::getDims() const
   if (dimCount){
     vector<int> dimids(dimCount);
     ncxxCheck(nc_inq_vardimid(groupId, myId,  &dimids[0]),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getName(), "getDims");
     ncDims.reserve(dimCount);
     for (int i=0; i<dimCount; i++) {
       NcxxDim tmpDim(getParentGroup(),dimids[i]);
@@ -214,7 +214,7 @@ NcxxDim NcxxVar::getDim(int i) const
 {
   vector<NcxxDim> ncDims = getDims();
   if((size_t)i >= ncDims.size() || i < 0) {
-    throw NcxxException("Index out of range",
+    throw NcxxException(getDesc() + " -index out of range",
                         __FILE__, __LINE__);
   }
   return ncDims[i];
@@ -230,7 +230,7 @@ int NcxxVar::getAttCount() const
   // get the number of attributes
   int attCount;
   ncxxCheck(nc_inq_varnatts(groupId, myId,  &attCount),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, getName(), "getAttCount");
   return attCount;
 }
 
@@ -268,7 +268,7 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
                            const string& dataValues) const {
   ncxxCheckDefineMode(groupId);
   ncxxCheck(nc_put_att_text(groupId, myId, name.c_str(),dataValues.size(),dataValues.c_str()),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -280,10 +280,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_uchar(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -296,10 +296,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_schar(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -314,10 +314,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_short(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -330,10 +330,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_int(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -345,10 +345,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_long(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -360,10 +360,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_float(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -376,10 +376,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_double(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -392,10 +392,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_ushort(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -407,10 +407,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_uint(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -422,10 +422,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_longlong(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -438,10 +438,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_ulonglong(groupId, myId, name.c_str(),type.getId(),1,&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -457,10 +457,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_short(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -474,10 +474,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_int(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -490,10 +490,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_long(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -506,10 +506,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_float(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -523,10 +523,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_double(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -540,10 +540,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_ushort(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -556,10 +556,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_uint(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -572,10 +572,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_longlong(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -589,10 +589,10 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheckDefineMode(groupId);
   if (type.isComplex())
     ncxxCheck(nc_put_att(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   else
     ncxxCheck(nc_put_att_ulonglong(groupId, myId, name.c_str(),type.getId(),len,dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -604,7 +604,7 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
                            const char** dataValues) const {
   ncxxCheckDefineMode(groupId);
   ncxxCheck(nc_put_att_string(groupId, myId, name.c_str(),len,dataValues),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -616,7 +616,7 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
                            const void* dataValues) const {
   ncxxCheckDefineMode(groupId);
   ncxxCheck(nc_put_att(groupId,myId ,name.c_str(),type.getId(),len,dataValues),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, "var", getName(), "putAtt()");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -905,10 +905,10 @@ void NcxxVar::putVal(const char** dataValues) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var_string(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write the entire data into the netCDF variable.
@@ -917,10 +917,10 @@ void NcxxVar::putVal(const char* dataValues) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var_text(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write the entire data into the netCDF variable.
@@ -929,10 +929,10 @@ void NcxxVar::putVal(const unsigned char* dataValues) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var_uchar(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write the entire data into the netCDF variable.
@@ -941,10 +941,10 @@ void NcxxVar::putVal(const signed char* dataValues) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var_schar(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write the entire data into the netCDF variable.
@@ -953,10 +953,10 @@ void NcxxVar::putVal(const short* dataValues) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var_short(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write the entire data into the netCDF variable.
@@ -965,10 +965,10 @@ void NcxxVar::putVal(const int* dataValues) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var_int(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write the entire data into the netCDF variable.
@@ -977,10 +977,10 @@ void NcxxVar::putVal(const long* dataValues) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var_long(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write the entire data into the netCDF variable.
@@ -989,10 +989,10 @@ void NcxxVar::putVal(const float* dataValues) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var_float(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1001,10 +1001,10 @@ void NcxxVar::putVal(const double* dataValues) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var_double(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1013,10 +1013,10 @@ void NcxxVar::putVal(const unsigned short* dataValues) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var_ushort(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1025,10 +1025,10 @@ void NcxxVar::putVal(const unsigned int* dataValues) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var_uint(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1037,10 +1037,10 @@ void NcxxVar::putVal(const long long* dataValues) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var_longlong(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1049,17 +1049,17 @@ void NcxxVar::putVal(const unsigned long long* dataValues) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var_ulonglong(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write the entire data into the netCDF variable with no data conversion.
 void NcxxVar::putVal(const void* dataValues) const {
   ncxxCheckDataMode(groupId);
   ncxxCheck(nc_put_var(groupId, myId, dataValues),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 
@@ -1070,12 +1070,12 @@ void NcxxVar::putVal(const vector<size_t>& index,
                      const string& datumValue) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex()) {
-    throw NcxxException("user-defined type must be of type void",
+    throw NcxxException(getDesc() + " putVal() - user-defined type must be of type void",
                         __FILE__, __LINE__);
   } else {
     const char* tmpPtr = datumValue.c_str();
     ncxxCheck(nc_put_var1_string(groupId, myId, &index[0],&tmpPtr),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   }
 }
 
@@ -1084,11 +1084,11 @@ void NcxxVar::putVal(const vector<size_t>& index,
                      const unsigned char* datumValue) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex()) {
-    throw NcxxException("user-defined type must be of type void",
+    throw NcxxException(getDesc() + " putVal() - user-defined type must be of type void",
                         __FILE__, __LINE__);
   } else {
     ncxxCheck(nc_put_var1_uchar(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   }
 }
 
@@ -1097,11 +1097,11 @@ void NcxxVar::putVal(const vector<size_t>& index,
                      const signed char* datumValue) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex()) {
-    throw NcxxException("user-defined type must be of type void",
+    throw NcxxException(getDesc() + " putVal() - user-defined type must be of type void",
                         __FILE__, __LINE__);
   } else {
     ncxxCheck(nc_put_var1_schar(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   }
 }
 
@@ -1111,10 +1111,10 @@ void NcxxVar::putVal(const vector<size_t>& index,
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var1(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var1_short(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write a single datum value into the netCDF variable.
@@ -1123,10 +1123,10 @@ void NcxxVar::putVal(const vector<size_t>& index,
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var1(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var1_int(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write a single datum value into the netCDF variable.
@@ -1135,10 +1135,10 @@ void NcxxVar::putVal(const vector<size_t>& index,
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var1(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var1_long(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write a single datum value into the netCDF variable.
@@ -1147,10 +1147,10 @@ void NcxxVar::putVal(const vector<size_t>& index,
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var1(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var1_float(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write a single datum value into the netCDF variable.
@@ -1159,10 +1159,10 @@ void NcxxVar::putVal(const vector<size_t>& index,
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var1(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var1_double(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write a single datum value into the netCDF variable.
@@ -1171,10 +1171,10 @@ void NcxxVar::putVal(const vector<size_t>& index,
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var1(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var1_ushort(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write a single datum value into the netCDF variable.
@@ -1183,10 +1183,10 @@ void NcxxVar::putVal(const vector<size_t>& index,
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var1(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var1_uint(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write a single datum value into the netCDF variable.
@@ -1195,10 +1195,10 @@ void NcxxVar::putVal(const vector<size_t>& index,
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var1(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var1_longlong(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write a single datum value into the netCDF variable.
@@ -1207,10 +1207,10 @@ void NcxxVar::putVal(const vector<size_t>& index,
   ncxxCheckDataMode(groupId);
   if (getType().isComplex())
     ncxxCheck(nc_put_var1(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_var1_ulonglong(groupId, myId, &index[0],&datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 // Write a single datum value into the netCDF variable.
@@ -1218,11 +1218,11 @@ void NcxxVar::putVal(const vector<size_t>& index,
                      const char** datumValue) const {
   ncxxCheckDataMode(groupId);
   if (getType().isComplex()) {
-    throw NcxxException("user-defined type must be of type void",
+    throw NcxxException(getDesc() + " putVal() - user-defined type must be of type void",
                         __FILE__, __LINE__);
   } else {
     ncxxCheck(nc_put_var1_string(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   }
 }
 
@@ -1231,7 +1231,7 @@ void NcxxVar::putVal(const vector<size_t>& index,
                      const void* datumValue) const {
   ncxxCheckDataMode(groupId);
   ncxxCheck(nc_put_var1(groupId, myId, &index[0],datumValue),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 
@@ -1245,11 +1245,11 @@ void NcxxVar::putVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_put_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vara_text(groupId, myId, 
                                &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write an array of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1259,11 +1259,11 @@ void NcxxVar::putVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_put_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vara_uchar(groupId, myId, 
                                 &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write an array of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1273,11 +1273,11 @@ void NcxxVar::putVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_put_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vara_schar(groupId, myId, 
                                 &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write an array of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1287,11 +1287,11 @@ void NcxxVar::putVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_put_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vara_short(groupId, myId, 
                                 &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write an array of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1301,11 +1301,11 @@ void NcxxVar::putVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_put_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vara_int(groupId, myId, 
                               &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write an array of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1315,11 +1315,11 @@ void NcxxVar::putVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_put_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vara_long(groupId, myId, 
                                &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write an array of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1329,11 +1329,11 @@ void NcxxVar::putVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_put_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vara_float(groupId, myId, 
                                 &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write an array of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1343,11 +1343,11 @@ void NcxxVar::putVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_put_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vara_double(groupId, myId, 
                                  &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write an array of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1357,11 +1357,11 @@ void NcxxVar::putVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_put_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vara_ushort(groupId, myId, 
                                  &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write an array of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1371,11 +1371,11 @@ void NcxxVar::putVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_put_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vara_uint(groupId, myId, 
                                &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write an array of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1385,11 +1385,11 @@ void NcxxVar::putVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_put_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vara_longlong(groupId, myId, 
                                    &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write an array of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1399,11 +1399,11 @@ void NcxxVar::putVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_put_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vara_ulonglong(groupId, myId, 
                                     &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write an array of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1413,11 +1413,11 @@ void NcxxVar::putVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_put_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vara_string(groupId, myId, 
                                  &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write an array of values into the netCDF variable with no data conversion.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1426,7 +1426,7 @@ void NcxxVar::putVal(const vector<size_t>& startp,
   ncxxCheckDataMode(groupId);
   ncxxCheck(nc_put_vara(groupId, myId, 
                         &startp[0],&countp[0],dataValues),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 
@@ -1443,12 +1443,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vars_text(groupId, myId, 
                                &startp[0],&countp[0],
                                &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a set of subsampled array values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1460,12 +1460,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vars_uchar(groupId, myId, 
                                 &startp[0],&countp[0],
                                 &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a set of subsampled array values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1477,12 +1477,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vars_schar(groupId, myId, 
                                 &startp[0],&countp[0],
                                 &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a set of subsampled array values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1494,12 +1494,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vars_short(groupId, myId, 
                                 &startp[0],&countp[0],
                                 &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a set of subsampled array values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1511,12 +1511,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vars_int(groupId, myId, 
                               &startp[0],&countp[0],
                               &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a set of subsampled array values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1528,12 +1528,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vars_long(groupId, myId, 
                                &startp[0],&countp[0],
                                &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a set of subsampled array values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1545,12 +1545,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vars_float(groupId, myId, 
                                 &startp[0],&countp[0],
                                 &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a set of subsampled array values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1562,12 +1562,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vars_double(groupId, myId, 
                                  &startp[0],&countp[0],
                                  &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a set of subsampled array values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1579,12 +1579,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vars_ushort(groupId, myId, 
                                  &startp[0],&countp[0],
                                  &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a set of subsampled array values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1596,12 +1596,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vars_uint(groupId, myId, 
                                &startp[0],&countp[0],
                                &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a set of subsampled array values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1613,12 +1613,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vars_longlong(groupId, myId, 
                                    &startp[0],&countp[0],
                                    &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a set of subsampled array values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1630,12 +1630,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vars_ulonglong(groupId, myId, 
                                     &startp[0],&countp[0],
                                     &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a set of subsampled array values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1647,12 +1647,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_vars_string(groupId, myId, 
                                  &startp[0],&countp[0],
                                  &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a set of subsampled array values into the netCDF variable with no data conversion.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1663,7 +1663,7 @@ void NcxxVar::putVal(const vector<size_t>& startp,
   ncxxCheck(nc_put_vars(groupId, myId, 
                         &startp[0],&countp[0],
                         &stridep[0],dataValues),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 
@@ -1679,12 +1679,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_varm_text(groupId, myId, 
                                &startp[0],&countp[0],
                                &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a mapped array section of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1697,12 +1697,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_varm_uchar(groupId, myId, 
                                 &startp[0],&countp[0],
                                 &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a mapped array section of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1715,12 +1715,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_varm_schar(groupId, myId, 
                                 &startp[0],&countp[0],
                                 &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a mapped array section of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1733,12 +1733,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_varm_short(groupId, myId, 
                                 &startp[0],&countp[0],
                                 &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a mapped array section of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1751,12 +1751,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_varm_int(groupId, myId, 
                               &startp[0],&countp[0],
                               &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a mapped array section of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1769,12 +1769,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_varm_long(groupId, myId, 
                                &startp[0],&countp[0],
                                &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a mapped array section of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1787,12 +1787,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_varm_float(groupId, myId, 
                                 &startp[0],&countp[0],
                                 &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a mapped array section of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1805,12 +1805,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_varm_double(groupId, myId, 
                                  &startp[0],&countp[0],
                                  &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a mapped array section of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1823,12 +1823,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_varm_ushort(groupId, myId, 
                                  &startp[0],&countp[0],
                                  &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a mapped array section of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1841,12 +1841,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_varm_uint(groupId, myId, 
                                &startp[0],&countp[0],
                                &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a mapped array section of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1859,12 +1859,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_varm_longlong(groupId, myId, 
                                    &startp[0],&countp[0],
                                    &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a mapped array section of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1877,12 +1877,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_varm_ulonglong(groupId, myId, 
                                     &startp[0],&countp[0],
                                     &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a mapped array section of values into the netCDF variable.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1895,12 +1895,12 @@ void NcxxVar::putVal(const vector<size_t>& startp,
     ncxxCheck(nc_put_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
   else
     ncxxCheck(nc_put_varm_string(groupId, myId, 
                                  &startp[0],&countp[0],
                                  &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "putVal()");
 }
 // Write a mapped array section of values into the netCDF variable with no data conversion.
 void NcxxVar::putVal(const vector<size_t>& startp,
@@ -1912,7 +1912,7 @@ void NcxxVar::putVal(const vector<size_t>& startp,
   ncxxCheck(nc_put_varm(groupId, myId, 
                         &startp[0],&countp[0],
                         &stridep[0],&imapp[0],dataValues),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, getDesc(), "putVal()");
 }
 
 
@@ -1927,64 +1927,64 @@ void NcxxVar::putVal(const vector<size_t>& startp,
 void NcxxVar::getVal(char* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var_text(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads the entire data of the netCDF variable.
 void NcxxVar::getVal(unsigned char* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var_uchar(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads the entire data of the netCDF variable.
 void NcxxVar::getVal(signed char* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var_schar(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads the entire data of the netCDF variable.
 void NcxxVar::getVal(short* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var_short(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads the entire data of the netCDF variable.
 void NcxxVar::getVal(int* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var_int(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads the entire data of the netCDF variable.
 void NcxxVar::getVal(long* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var_long(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads the entire data of the netCDF variable.
 void NcxxVar::getVal(float* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var_float(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 
 // Reads the entire data of the netCDF variable.
@@ -1992,61 +1992,61 @@ void NcxxVar::getVal(float* dataValues) const {
 void NcxxVar::getVal(double* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var_double(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 
 // Reads the entire data of the netCDF variable.
 void NcxxVar::getVal(unsigned short* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var_ushort(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads the entire data of the netCDF variable.
 void NcxxVar::getVal(unsigned int* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var_uint(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads the entire data of the netCDF variable.
 void NcxxVar::getVal(long long* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var_longlong(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads the entire data of the netCDF variable.
 void NcxxVar::getVal(unsigned long long* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var_ulonglong(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads the entire data of the netCDF variable.
 void NcxxVar::getVal(char** dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var_string(groupId, myId, dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads the entire data of the netCDF variable with no data conversion.
 void NcxxVar::getVal(void* dataValues) const {
   ncxxCheck(nc_get_var(groupId, myId, dataValues),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, getDesc(), "getVal()");
 }
 
 
@@ -2057,123 +2057,123 @@ void NcxxVar::getVal(void* dataValues) const {
 void NcxxVar::getVal(const vector<size_t>& index, char* datumValue) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var1(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var1_text(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a single datum value of a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& index, unsigned char* datumValue) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var1(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var1_uchar(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a single datum value of a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& index, signed char* datumValue) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var1(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var1_schar(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a single datum value of a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& index, short* datumValue) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var1(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var1_short(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a single datum value of a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& index, int* datumValue) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var1(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var1_int(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a single datum value of a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& index, long* datumValue) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var1(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var1_long(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a single datum value of a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& index, float* datumValue) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var1(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var1_float(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a single datum value of a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& index, double* datumValue) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var1(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var1_double(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a single datum value of a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& index, unsigned short* datumValue) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var1(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var1_ushort(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a single datum value of a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& index, unsigned int* datumValue) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var1(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var1_uint(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a single datum value of a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& index, long long* datumValue) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var1(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var1_longlong(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a single datum value of a netCDF variable
 void NcxxVar::getVal(const vector<size_t>& index, unsigned long long* datumValue) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var1(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var1_ulonglong(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a single datum value of a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& index, char** datumValue) const {
   if (getType().isComplex())
     ncxxCheck(nc_get_var1(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_var1_string(groupId, myId, &index[0],datumValue),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a single datum value of a netCDF variable with no data conversion.
 void NcxxVar::getVal(const vector<size_t>& index, void* datumValue) const {
   ncxxCheck(nc_get_var1(groupId, myId, &index[0],datumValue),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, getDesc(), "getVal()");
 }
 
 
@@ -2186,11 +2186,11 @@ void NcxxVar::getVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_get_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vara_text(groupId, myId, 
                                &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads an array of values from  a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2198,11 +2198,11 @@ void NcxxVar::getVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_get_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vara_uchar(groupId, myId, 
                                 &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads an array of values from  a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2210,11 +2210,11 @@ void NcxxVar::getVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_get_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vara_schar(groupId, myId, 
                                 &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads an array of values from  a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2222,11 +2222,11 @@ void NcxxVar::getVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_get_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vara_short(groupId, myId, 
                                 &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads an array of values from  a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2234,11 +2234,11 @@ void NcxxVar::getVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_get_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vara_int(groupId, myId, 
                               &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads an array of values from  a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2246,11 +2246,11 @@ void NcxxVar::getVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_get_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vara_long(groupId, myId, 
                                &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads an array of values from  a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2258,11 +2258,11 @@ void NcxxVar::getVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_get_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vara_float(groupId, myId, 
                                 &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads an array of values from  a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2270,11 +2270,11 @@ void NcxxVar::getVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_get_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vara_double(groupId, myId, 
                                  &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads an array of values from  a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2282,11 +2282,11 @@ void NcxxVar::getVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_get_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vara_ushort(groupId, myId, 
                                  &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads an array of values from  a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2294,11 +2294,11 @@ void NcxxVar::getVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_get_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vara_uint(groupId, myId, 
                                &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads an array of values from  a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2306,11 +2306,11 @@ void NcxxVar::getVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_get_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vara_longlong(groupId, myId, 
                                    &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads an array of values from  a netCDF variable
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2318,11 +2318,11 @@ void NcxxVar::getVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_get_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vara_ulonglong(groupId, myId, 
                                     &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads an array of values from  a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2330,18 +2330,18 @@ void NcxxVar::getVal(const vector<size_t>& startp,
   if (getType().isComplex())
     ncxxCheck(nc_get_vara(groupId, myId, 
                           &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vara_string(groupId, myId, 
                                  &startp[0],&countp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads an array of values from  a netCDF variable with no data conversion.
 void NcxxVar::getVal(const vector<size_t>& startp,
                      const vector<size_t>& countp, void* dataValues) const {
   ncxxCheck(nc_get_vara(groupId, myId, 
                         &startp[0],&countp[0],dataValues),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, getDesc(), "getVal()");
 }
 
 
@@ -2355,12 +2355,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vars_text(groupId, myId, 
                                &startp[0],&countp[0],
                                &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a subsampled (strided) array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2370,12 +2370,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vars_uchar(groupId, myId, 
                                 &startp[0],&countp[0],
                                 &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a subsampled (strided) array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2385,12 +2385,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vars_schar(groupId, myId, 
                                 &startp[0],&countp[0],
                                 &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a subsampled (strided) array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2400,12 +2400,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vars_short(groupId, myId, 
                                 &startp[0],&countp[0],
                                 &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a subsampled (strided) array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2415,12 +2415,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vars_int(groupId, myId, 
                               &startp[0],&countp[0],
                               &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a subsampled (strided) array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2430,12 +2430,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vars_long(groupId, myId, 
                                &startp[0],&countp[0],
                                &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a subsampled (strided) array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2445,12 +2445,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vars_float(groupId, myId, 
                                 &startp[0],&countp[0],
                                 &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a subsampled (strided) array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2460,12 +2460,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vars_double(groupId, myId, 
                                  &startp[0],&countp[0],
                                  &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a subsampled (strided) array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2475,12 +2475,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vars_ushort(groupId, myId, 
                                  &startp[0],&countp[0],
                                  &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a subsampled (strided) array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2490,12 +2490,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vars_uint(groupId, myId, 
                                &startp[0],&countp[0],
                                &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a subsampled (strided) array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2505,12 +2505,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vars_longlong(groupId, myId, 
                                    &startp[0],&countp[0],
                                    &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a subsampled (strided) array section of values from a netCDF variable
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2520,12 +2520,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vars_ulonglong(groupId, myId, 
                                     &startp[0],&countp[0],
                                     &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a subsampled (strided) array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2535,12 +2535,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_vars(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_vars_string(groupId, myId, 
                                  &startp[0],&countp[0],
                                  &stridep[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a subsampled (strided) array section of values from a netCDF variable with no data conversion.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2549,7 +2549,7 @@ void NcxxVar::getVal(const vector<size_t>& startp,
   ncxxCheck(nc_get_vars(groupId, myId, 
                         &startp[0],&countp[0],
                         &stridep[0],dataValues),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, getDesc(), "getVal()");
 }
 
 
@@ -2564,12 +2564,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_varm_text(groupId, myId, 
                                &startp[0],&countp[0],
                                &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a mapped array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2580,12 +2580,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_varm_uchar(groupId, myId, 
                                 &startp[0],&countp[0],
                                 &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a mapped array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2596,12 +2596,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_varm_schar(groupId, myId, 
                                 &startp[0],&countp[0],
                                 &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a mapped array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2612,12 +2612,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_varm_short(groupId, myId, 
                                 &startp[0],&countp[0],
                                 &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a mapped array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2628,12 +2628,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_varm_int(groupId, myId, 
                               &startp[0],&countp[0],
                               &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a mapped array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2644,12 +2644,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_varm_long(groupId, myId, 
                                &startp[0],&countp[0],
                                &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a mapped array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2660,12 +2660,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_varm_float(groupId, myId, 
                                 &startp[0],&countp[0],
                                 &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a mapped array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2676,12 +2676,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_varm_double(groupId, myId, 
                                  &startp[0],&countp[0],
                                  &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a mapped array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2692,12 +2692,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_varm_ushort(groupId, myId, 
                                  &startp[0],&countp[0],
                                  &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a mapped array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2708,12 +2708,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_varm_uint(groupId, myId, 
                                &startp[0],&countp[0],
                                &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a mapped array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2724,12 +2724,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_varm_longlong(groupId, myId, 
                                    &startp[0],&countp[0],
                                    &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a mapped array section of values from a netCDF variable
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2740,12 +2740,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_varm_ulonglong(groupId, myId, 
                                     &startp[0],&countp[0],
                                     &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a mapped array section of values from a netCDF variable.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2756,12 +2756,12 @@ void NcxxVar::getVal(const vector<size_t>& startp,
     ncxxCheck(nc_get_varm(groupId, myId, 
                           &startp[0],&countp[0],
                           &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
   else
     ncxxCheck(nc_get_varm_string(groupId, myId, 
                                  &startp[0],&countp[0],
                                  &stridep[0],&imapp[0],dataValues),
-              __FILE__, __LINE__);
+              __FILE__, __LINE__, getDesc(), "getVal()");
 }
 // Reads a mapped array section of values from a netCDF variable with no data conversion.
 void NcxxVar::getVal(const vector<size_t>& startp,
@@ -2771,7 +2771,7 @@ void NcxxVar::getVal(const vector<size_t>& startp,
   ncxxCheck(nc_get_varm(groupId, myId, 
                         &startp[0],&countp[0],
                         &stridep[0],&imapp[0],dataValues),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, getDesc(), "getVal()");
 }
 
 ///////////////////////////////////////////
@@ -3323,10 +3323,32 @@ void NcxxVar::setMetaFillValue()
 ////////////////////////////////////////
 // convert var type string
 
-string NcxxVar::varTypeToStr()
+string NcxxVar::varTypeToStr() const
       
 {
   nc_type vtype = getType().getId();
   return Ncxx::ncTypeToStr(vtype);
+}
+
+////////////////////////////////////////
+// create the description string
+
+string NcxxVar::getDesc() const
+      
+{
+
+  string desc;
+  desc += ("Var:" + getName());
+  desc += (" type:" + varTypeToStr());
+
+  for (int ii = 0; ii < getDimCount(); ii++) {
+    NcxxDim dim = getDim(ii);
+    char dimStr[256];
+    sprintf(dimStr, " dim[%d]:%s-size:%d", ii, dim.getName().c_str(), (int) dim.getSize());
+    desc += dimStr;
+  }
+  
+  return desc;
+
 }
 

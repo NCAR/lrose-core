@@ -88,13 +88,13 @@ void ncxxCheck(int retCode,
 
   string complaint;
   if (context1.size() > 0) {
-    complaint = context1 + " - ";
+    complaint = context1 + "-";
   }
   if (context2.size() > 0) {
-    complaint = context2 + " - ";
+    complaint = context2 + "-";
   }
   if (context3.size() > 0) {
-    complaint = context3 + " - ";
+    complaint = context3 + "-";
   }
   complaint += msg;
 
