@@ -2,37 +2,32 @@
 % plot sun calibration results for NEXRAD
 %
 
-function sunplot_nexrad(dirName)
+function x = sunplot_nexrad(dataDir)
 
-     currentDir = pwd;
-     dataDir = fullfile(currentDir, dirName);
-     fprintf('datadir: %s\n', dataDir);
+   fprintf('Input datadir is: %s\n', dataDir);
 
-     plot_var(dataDir, 'dbm', 'Power averaged (dBm)', 'color_axis', [-85 -63]);
-     plot_var(dataDir, 'dbmH', 'Power H channel (dBm)', 'color_axis', [-85 -63]);
-     plot_var(dataDir, 'dbmV', 'Power V channel (dBm)', 'color_axis', [-85 -63]);
-
+     plot_var(dataDir, 'dbm', 'Power averaged (dBm)', 'color_axis', [-80 -63]);
+     plot_var(dataDir, 'dbmH', 'Power H channel (dBm)', 'color_axis', [-80 -63]);
+     plot_var(dataDir, 'dbmV', 'Power V channel (dBm)', 'color_axis', [-80 -63]);
      plot_var(dataDir, 'corrHV', 'Correlation H-V', 'color_axis', [0.0 0.05]);
-
-     plot_var(dataDir, 'phaseHV', 'Arg H-V', 'color_axis', [0.0 0.05]);
-
-     plot_var(dataDir, 'SS', 'SS (dB)','color_axis',[-2.5 0.5]);
-     plot_var(dataDir, 'zdr', 'zdr (dB)','color_axis',[-2.5 0.5]);
+     plot_var(dataDir, 'phaseHV', 'Arg H-V', 'color_axis', [-180 180]);
+     plot_var(dataDir, 'SS', 'SS (dB)','color_axis',[-1.0 1.5]);
+     plot_var(dataDir, 'zdr', 'zdr (dB)','color_axis',[-1.0 1.0]);
 
 end
 
 %=================================================
-% plot a particular variable
+% plot a specified variable
 %
 
 function plot_var(dataDir, varName, label, col_axis, data_range)
 
-     color_axis = [];
+  % color_axis = [];
+     color_axis = data_range;
      
-     % paramparse(varargin);
-
-
      fileName = strcat(dataDir, '/', varName, '.txt');
+     fprintf('Input field fileName is: %s\n', fileName);
+     fprintf('Data range is: %s\n', data_range);
      %varData = load(fileName);
      
      %x_grid = num2cell(load(strcat(dataDir, '/', 'x_grid_info')));
@@ -71,8 +66,7 @@ function plot_var(dataDir, varName, label, col_axis, data_range)
      else
        isCentroid = 0;
      end;
-     
-     
+
      %fprintf('x_grid: %g %g %d %g\n', x_grid{:});
      %fprintf('y_grid: %g %g %d %g\n', y_grid{:});
      
@@ -112,13 +106,22 @@ function plot_var(dataDir, varName, label, col_axis, data_range)
      line(xlim,y_centroid*[1 1],'color','cyan');
      line(x_centroid*[1 1],ylim,'color','cyan');% [.5 .9 1], 'linewidth',2,'linestyle',{'-',':','-.'}  help plot
      
+
+%%   plot 1 deg and 2 deg circles
+
+     circle_pos = [(x_centroid-0.5) (y_centroid-0.5) 1 1];
+     rectangle('Position',circle_pos,'Curvature',[1 1],'EdgeColor','white','LineWidth',1.5);
+
+     circle_pos = [(x_centroid-1) (y_centroid-1) 2 2];
+     rectangle('Position',circle_pos,'Curvature',[1 1],'EdgeColor','white','LineWidth',1.5);
+
      %colormap(nex_cmap); 
      colormap(nex_cmap(20)); 
      colorbar;
      
      % title(label);
 
-     [pathstr, dirname, ext, versn] = fileparts(dataDir);
+     [pathstr, dirname, ext] = fileparts(dataDir);
      my_title = strcat(label, '---', dirname);
      my_title1 = strrep(my_title, '_', ' ');
      my_title2 = strrep(my_title1, '---', '   ');
@@ -174,4 +177,19 @@ x = min(x,1);
 x = max(x,0);
 
 end
+
+%======================================================
+%LINSPACE Linearly spaced vector.
+function y = linspacedel(d1, del, n)
+%
+%   LINSPACE(x1, del, N) generates N points between x1 and (N-1)*del.
+%
+%   See also LOGSPACE, :., linspace
+%   Copyright 1984-2001 The MathWorks, Inc. 
+%   $Revision: 1.1 $  $Date: 2002/08/20 19:10:58 $
+
+y = [d1:del:((n-1)*del+d1)];
+
+end
+
 
