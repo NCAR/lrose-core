@@ -3707,13 +3707,13 @@ int NcxxRadxFile::_addSi08FieldToRays(NcxxVar &var,
   Radx::si08 missingVal = Radx::missingSi08;
   NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
   if (!missingValueAtt.isNull()) {
-    vector<unsigned char> vals;
+    vector<signed char> vals;
     if (missingValueAtt.getValues(vals) == 0) {
       missingVal = vals[0];
     }
   } else {
     missingValueAtt = var.getAtt(FILL_VALUE);
-    vector<unsigned char> vals;
+    vector<signed char> vals;
     if (missingValueAtt.getValues(vals) == 0) {
       missingVal = vals[0];
     }

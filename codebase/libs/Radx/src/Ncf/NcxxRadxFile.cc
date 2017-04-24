@@ -437,7 +437,7 @@ int NcxxRadxFile::getTimeFromPath(const string &path, RadxTime &rtime)
 ////////////////////////////////////////
 // convert Radx::DataType_t to NcType
 
-NcxxType NcxxRadxFile::_getNcType(Radx::DataType_t dtype)
+NcxxType NcxxRadxFile::_getNcxxType(Radx::DataType_t dtype)
 
 {
   switch (dtype) {

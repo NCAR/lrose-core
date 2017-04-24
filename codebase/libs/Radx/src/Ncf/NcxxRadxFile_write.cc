@@ -2247,193 +2247,198 @@ int NcxxRadxFile::_writeRayVariables()
   RadxArray<int> ivals_;
   int *ivals = ivals_.alloc(nRays);
 
-  RadxArray<ncbyte> bvals_;
-  ncbyte *bvals = bvals_.alloc(nRays);
+  RadxArray<signed char> bvals_;
+  signed char *bvals = bvals_.alloc(nRays);
 
-  int iret = 0;
+  try {
 
-  if (_nGatesVary) {
-
-    // number of gates in ray
-  
-    const vector<size_t> &rayNGates = _writeVol->getRayNGates();
+    if (_nGatesVary) {
+      
+      // number of gates in ray
+      
+      const vector<size_t> &rayNGates = _writeVol->getRayNGates();
+      for (size_t ii = 0; ii < rays.size(); ii++) {
+        ivals[ii] = rayNGates[ii];
+      }
+      _rayNGatesVar.putVal(ivals);
+      
+      // start index for data in ray
+      
+      const vector<size_t> &rayStartIndex = _writeVol->getRayStartIndex();
+      for (size_t ii = 0; ii < rays.size(); ii++) {
+        ivals[ii] = rayStartIndex[ii];
+      }
+      _rayStartIndexVar.putVal(ivals);
+      
+    }
+    
+    // start range
+    
     for (size_t ii = 0; ii < rays.size(); ii++) {
-      ivals[ii] = rayNGates[ii];
+      fvals[ii] = rays[ii]->getStartRangeKm() * 1000.0;
     }
-    iret |= _file.writeVar(_rayNGatesVar, _timeDim, ivals);
-
-    // start index for data in ray
-  
-    const vector<size_t> &rayStartIndex = _writeVol->getRayStartIndex();
+    _rayStartRangeVar.putVal(fvals);
+    
+    // gate spacing
+    
     for (size_t ii = 0; ii < rays.size(); ii++) {
-      ivals[ii] = rayStartIndex[ii];
+      fvals[ii] = rays[ii]->getGateSpacingKm() * 1000.0;
     }
-    iret |= _file.writeVar(_rayStartIndexVar, _timeDim, ivals);
-
-  }
-
-  // start range
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    fvals[ii] = rays[ii]->getStartRangeKm() * 1000.0;
-  }
-  iret |= _file.writeVar(_rayStartRangeVar, _timeDim, fvals);
-
-  // gate spacing
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    fvals[ii] = rays[ii]->getGateSpacingKm() * 1000.0;
-  }
-  iret |= _file.writeVar(_rayGateSpacingVar, _timeDim, fvals);
-
-  // azimuth
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    fvals[ii] = rays[ii]->getAzimuthDeg();
-  }
-  iret |= _file.writeVar(_azimuthVar, _timeDim, fvals);
-
-  // elevation
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    fvals[ii] =  rays[ii]->getElevationDeg();
-  }
-  iret |= _file.writeVar(_elevationVar, _timeDim, fvals);
-
-  // pulse width
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    if (rays[ii]->getPulseWidthUsec() > 0) {
-      fvals[ii] = rays[ii]->getPulseWidthUsec() * 1.0e-6;
-    } else {
-      fvals[ii] = rays[ii]->getPulseWidthUsec();
-    }
-  }
-  iret |= _file.writeVar(_pulseWidthVar, _timeDim, fvals);
-
-  // prt
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    fvals[ii] = rays[ii]->getPrtSec();
-  }
-  iret |= _file.writeVar(_prtVar, _timeDim, fvals);
-
-  // prt ratio
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    fvals[ii] = rays[ii]->getPrtRatio();
-  }
-  iret |= _file.writeVar(_prtRatioVar, _timeDim, fvals);
-  
-  // nyquist
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    fvals[ii] = rays[ii]->getNyquistMps();
-  }
-  iret |= _file.writeVar(_nyquistVar, _timeDim, fvals);
-
-  // unambigRange
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    if (rays[ii]->getUnambigRangeKm() > 0) {
-      fvals[ii] = rays[ii]->getUnambigRangeKm() * 1000.0;
-    } else {
-      fvals[ii] = rays[ii]->getUnambigRangeKm();
-    }
-  }
-  iret |= _file.writeVar(_unambigRangeVar, _timeDim, fvals);
-
-  // antennaTransition
-  
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    bvals[ii] = rays[ii]->getAntennaTransition();
-  }
-  iret |= _file.writeVar(_antennaTransitionVar, _timeDim, bvals);
-
-  // georefs applied?
-
-  if (_georefsActive) {
+    _rayGateSpacingVar.putVal(fvals);
+    
+    // azimuth
+    
     for (size_t ii = 0; ii < rays.size(); ii++) {
-      if (_georefsApplied) {
-        bvals[ii] = 1;
+      fvals[ii] = rays[ii]->getAzimuthDeg();
+    }
+    _azimuthVar.putVal(fvals);
+    
+    // elevation
+    
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      fvals[ii] =  rays[ii]->getElevationDeg();
+    }
+    _elevationVar.putVal(fvals);
+    
+    // pulse width
+    
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      if (rays[ii]->getPulseWidthUsec() > 0) {
+        fvals[ii] = rays[ii]->getPulseWidthUsec() * 1.0e-6;
       } else {
-        bvals[ii] = rays[ii]->getGeorefApplied();
+        fvals[ii] = rays[ii]->getPulseWidthUsec();
       }
     }
-    iret |= _file.writeVar(_georefsAppliedVar, _timeDim, bvals);
-  }
-
-  // number of samples in dwell
-  
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    ivals[ii] = rays[ii]->getNSamples();
-  }
-  iret |= _file.writeVar(_nSamplesVar, _timeDim, ivals);
-
-  // calibration number
-
-  if (_calIndexVar != NULL) {
+    _pulseWidthVar.putVal(fvals);
+    
+    // prt
+    
     for (size_t ii = 0; ii < rays.size(); ii++) {
-      ivals[ii] = rays[ii]->getCalibIndex();
+      fvals[ii] = rays[ii]->getPrtSec();
     }
-    iret |= _file.writeVar(_calIndexVar, _timeDim, ivals);
-  }
-
-  // transmit power in H and V
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    fvals[ii] = _checkMissingFloat(rays[ii]->getMeasXmitPowerDbmH());
-  }
-  iret |= _file.writeVar(_xmitPowerHVar, _timeDim, fvals);
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    fvals[ii] = _checkMissingFloat(rays[ii]->getMeasXmitPowerDbmV());
-  }
-  iret |= _file.writeVar(_xmitPowerVVar, _timeDim, fvals);
-
-  // scan rate
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    fvals[ii] = rays[ii]->getTrueScanRateDegPerSec();
-  }
-  iret |= _file.writeVar(_scanRateVar, _timeDim, fvals);
-
-  // estimated noise per channel
-
-  if (_estNoiseDbmHcVar) {
+    _prtVar.putVal(fvals);
+    
+    // prt ratio
+    
     for (size_t ii = 0; ii < rays.size(); ii++) {
-      fvals[ii] = rays[ii]->getEstimatedNoiseDbmHc();
+      fvals[ii] = rays[ii]->getPrtRatio();
     }
-    iret |= _file.writeVar(_estNoiseDbmHcVar, _timeDim, fvals);
-  }
-
-  if (_estNoiseDbmVcVar) {
+    _prtRatioVar.putVal(fvals);
+    
+    // nyquist
+    
     for (size_t ii = 0; ii < rays.size(); ii++) {
-      fvals[ii] = rays[ii]->getEstimatedNoiseDbmVc();
+      fvals[ii] = rays[ii]->getNyquistMps();
     }
-    iret |= _file.writeVar(_estNoiseDbmVcVar, _timeDim, fvals);
-  }
-
-  if (_estNoiseDbmHxVar) {
+    _nyquistVar.putVal(fvals);
+    
+    // unambigRange
+    
     for (size_t ii = 0; ii < rays.size(); ii++) {
-      fvals[ii] = rays[ii]->getEstimatedNoiseDbmHx();
+      if (rays[ii]->getUnambigRangeKm() > 0) {
+        fvals[ii] = rays[ii]->getUnambigRangeKm() * 1000.0;
+      } else {
+        fvals[ii] = rays[ii]->getUnambigRangeKm();
+      }
     }
-    iret |= _file.writeVar(_estNoiseDbmHxVar, _timeDim, fvals);
-  }
-
-  if (_estNoiseDbmVxVar) {
+    _unambigRangeVar.putVal(fvals);
+    
+    // antennaTransition
+    
     for (size_t ii = 0; ii < rays.size(); ii++) {
-      fvals[ii] = rays[ii]->getEstimatedNoiseDbmVx();
+      bvals[ii] = rays[ii]->getAntennaTransition();
     }
-    iret |= _file.writeVar(_estNoiseDbmVxVar, _timeDim, fvals);
-  }
+    _antennaTransitionVar.putVal(bvals);
+    
+    // georefs applied?
+    
+    if (_georefsActive) {
+      for (size_t ii = 0; ii < rays.size(); ii++) {
+        if (_georefsApplied) {
+          bvals[ii] = 1;
+        } else {
+          bvals[ii] = rays[ii]->getGeorefApplied();
+        }
+      }
+      _georefsAppliedVar.putVal(bvals);
+    }
+    
+    // number of samples in dwell
+    
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      ivals[ii] = rays[ii]->getNSamples();
+    }
+    _nSamplesVar.putVal(ivals);
+    
+    // calibration number
+    
+    if (!_calIndexVar.isNull()) {
+      for (size_t ii = 0; ii < rays.size(); ii++) {
+        ivals[ii] = rays[ii]->getCalibIndex();
+      }
+      _calIndexVar.putVal(ivals);
+    }
+    
+    // transmit power in H and V
+    
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      fvals[ii] = _checkMissingFloat(rays[ii]->getMeasXmitPowerDbmH());
+    }
+    _xmitPowerHVar.putVal(fvals);
 
-  if (iret) {
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      fvals[ii] = _checkMissingFloat(rays[ii]->getMeasXmitPowerDbmV());
+    }
+    _xmitPowerVVar.putVal(fvals);
+
+    // scan rate
+
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      fvals[ii] = rays[ii]->getTrueScanRateDegPerSec();
+    }
+    _scanRateVar.putVal(fvals);
+
+    // estimated noise per channel
+
+    if (!_estNoiseDbmHcVar.isNull()) {
+      for (size_t ii = 0; ii < rays.size(); ii++) {
+        fvals[ii] = rays[ii]->getEstimatedNoiseDbmHc();
+      }
+      _estNoiseDbmHcVar.putVal(fvals);
+    }
+
+    if (!_estNoiseDbmVcVar.isNull()) {
+      for (size_t ii = 0; ii < rays.size(); ii++) {
+        fvals[ii] = rays[ii]->getEstimatedNoiseDbmVc();
+      }
+      _estNoiseDbmVcVar.putVal(fvals);
+    }
+
+    if (!_estNoiseDbmHxVar.isNull()) {
+      for (size_t ii = 0; ii < rays.size(); ii++) {
+        fvals[ii] = rays[ii]->getEstimatedNoiseDbmHx();
+      }
+      _estNoiseDbmHxVar.putVal(fvals);
+    }
+
+    if (!_estNoiseDbmVxVar.isNull()) {
+      for (size_t ii = 0; ii < rays.size(); ii++) {
+        fvals[ii] = rays[ii]->getEstimatedNoiseDbmVx();
+      }
+      _estNoiseDbmVxVar.putVal(fvals);
+    }
+
+  } catch (NcxxException& e) {
+
     _addErrStr("ERROR - NcxxRadxFile::_writeRayVariables");
+    _addErrStr("  Cannot write var");
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
     return -1;
-  } else {
-    return 0;
+
   }
+
+  return 0;
 
 }
 
@@ -2460,348 +2465,404 @@ int NcxxRadxFile::_writeGeorefVariables()
   RadxArray<double> dvals_;
   double *dvals = dvals_.alloc(nRays);
 
-  int iret = 0;
-
   // we always write the time and position variables
 
-  // geo time
+  try {
 
-  RadxTime volStartSecs(_writeVol->getStartTimeSecs());
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    const RadxGeoref *geo = rays[ii]->getGeoreference();
-    if (geo) {
-      RadxTime geoTime(geo->getTimeSecs(), geo->getNanoSecs() * 1.0e-9);
-      double dsecs = geoTime - volStartSecs;
-      dvals[ii] = dsecs;
-    } else {
-      dvals[ii] = Radx::missingMetaDouble;
-    }
-  }
-  iret |= _file.writeVar(_georefTimeVar, _timeDim, dvals);
+    // geo time
 
-  // latitude
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    const RadxGeoref *geo = rays[ii]->getGeoreference();
-    if (geo) {
-      dvals[ii] = _checkMissingDouble(geo->getLatitude());
-    } else {
-      dvals[ii] = Radx::missingMetaDouble;
-    }
-  }
-  iret |= _file.writeVar(_latitudeVar, _timeDim, dvals);
-
-  // longitude
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    const RadxGeoref *geo = rays[ii]->getGeoreference();
-    if (geo) {
-      dvals[ii] = _checkMissingDouble(geo->getLongitude());
-    } else {
-      dvals[ii] = Radx::missingMetaDouble;
-    }
-  }
-  iret |= _file.writeVar(_longitudeVar, _timeDim, dvals);
-
-  // altitude msl
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    const RadxGeoref *geo = rays[ii]->getGeoreference();
-    if (geo) {
-      double altKm = geo->getAltitudeKmMsl();
-      if (altKm > -9990) {
-        dvals[ii] = altKm * 1000.0; // meters
+    RadxTime volStartSecs(_writeVol->getStartTimeSecs());
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      const RadxGeoref *geo = rays[ii]->getGeoreference();
+      if (geo) {
+        RadxTime geoTime(geo->getTimeSecs(), geo->getNanoSecs() * 1.0e-9);
+        double dsecs = geoTime - volStartSecs;
+        dvals[ii] = dsecs;
       } else {
         dvals[ii] = Radx::missingMetaDouble;
       }
-    } else {
-      dvals[ii] = Radx::missingMetaDouble;
     }
-  }
-  iret |= _file.writeVar(_altitudeVar, _timeDim, dvals);
+    _georefTimeVar.putVal(dvals);
 
-  // altitude agl
-  
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    const RadxGeoref *geo = rays[ii]->getGeoreference();
-    if (geo) {
-      double altKm = geo->getAltitudeKmAgl();
-      if (altKm > -9990) {
-        dvals[ii] = altKm * 1000.0; // meters
+    // latitude
+
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      const RadxGeoref *geo = rays[ii]->getGeoreference();
+      if (geo) {
+        dvals[ii] = _checkMissingDouble(geo->getLatitude());
       } else {
         dvals[ii] = Radx::missingMetaDouble;
       }
-    } else {
-      dvals[ii] = Radx::missingMetaDouble;
     }
-  }
-  iret |= _file.writeVar(_altitudeAglVar, _timeDim, dvals);
+    _latitudeVar.putVal(dvals);
 
-  // we conditionally add the other georef variables
+    // longitude
 
-  // ewVelocity
-
-  NcFile *ncFile = _file.getNcFile();
-
-  NcxxVar *var;
-  if ((var = ncFile->get_var(EASTWARD_VELOCITY)) != NULL) {
     for (size_t ii = 0; ii < rays.size(); ii++) {
       const RadxGeoref *geo = rays[ii]->getGeoreference();
       if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getEwVelocity());
+        dvals[ii] = _checkMissingDouble(geo->getLongitude());
       } else {
-        fvals[ii] = Radx::missingMetaFloat;
+        dvals[ii] = Radx::missingMetaDouble;
       }
     }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
+    _longitudeVar.putVal(dvals);
 
-  // nsVelocity
+    // altitude msl
 
-  if ((var = ncFile->get_var(NORTHWARD_VELOCITY)) != NULL) {
     for (size_t ii = 0; ii < rays.size(); ii++) {
       const RadxGeoref *geo = rays[ii]->getGeoreference();
       if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getNsVelocity());
+        double altKm = geo->getAltitudeKmMsl();
+        if (altKm > -9990) {
+          dvals[ii] = altKm * 1000.0; // meters
+        } else {
+          dvals[ii] = Radx::missingMetaDouble;
+        }
       } else {
-        fvals[ii] = Radx::missingMetaFloat;
+        dvals[ii] = Radx::missingMetaDouble;
       }
     }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
+    _altitudeVar.putVal(dvals);
 
-  // vertVelocity
-
-  if ((var = ncFile->get_var(VERTICAL_VELOCITY)) != NULL) {
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      const RadxGeoref *geo = rays[ii]->getGeoreference();
-      if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getVertVelocity());
-      } else {
-        fvals[ii] = Radx::missingMetaFloat;
-      }
-    }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
-
-  // heading
-
-  if ((var = ncFile->get_var(HEADING)) != NULL) {
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      const RadxGeoref *geo = rays[ii]->getGeoreference();
-      if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getHeading());
-      } else {
-        fvals[ii] = Radx::missingMetaFloat;
-      }
-    }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
-
-  // track
-
-  if ((var = ncFile->get_var(TRACK)) != NULL) {
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      const RadxGeoref *geo = rays[ii]->getGeoreference();
-      if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getTrack());
-      } else {
-        fvals[ii] = Radx::missingMetaFloat;
-      }
-    }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
-
-  // roll
-
-  if ((var = ncFile->get_var(ROLL)) != NULL) {
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      const RadxGeoref *geo = rays[ii]->getGeoreference();
-      if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getRoll());
-      } else {
-        fvals[ii] = Radx::missingMetaFloat;
-      }
-    }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
-
-  // pitch
-
-  if ((var = ncFile->get_var(PITCH)) != NULL) {
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      const RadxGeoref *geo = rays[ii]->getGeoreference();
-      if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getPitch());
-      } else {
-        fvals[ii] = Radx::missingMetaFloat;
-      }
-    }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
-
-  // driftAngle
-
-  if ((var = ncFile->get_var(DRIFT)) != NULL) {
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      const RadxGeoref *geo = rays[ii]->getGeoreference();
-      if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getDrift());
-      } else {
-        fvals[ii] = Radx::missingMetaFloat;
-      }
-    }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
-
-  // rotation
+    // altitude agl
   
-  if ((var = ncFile->get_var(ROTATION)) != NULL) {
     for (size_t ii = 0; ii < rays.size(); ii++) {
       const RadxGeoref *geo = rays[ii]->getGeoreference();
       if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getRotation());
+        double altKm = geo->getAltitudeKmAgl();
+        if (altKm > -9990) {
+          dvals[ii] = altKm * 1000.0; // meters
+        } else {
+          dvals[ii] = Radx::missingMetaDouble;
+        }
       } else {
-        fvals[ii] = Radx::missingMetaFloat;
+        dvals[ii] = Radx::missingMetaDouble;
       }
     }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
+    _altitudeAglVar.putVal(dvals);
 
-  // tilt
+    ////////////////////////////////////////////////////
+    // we conditionally add the other georef variables
+    // if they exist
+
+    // ewVelocity
+
+    {
+      NcxxVar var = _file.getVar(EASTWARD_VELOCITY);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getEwVelocity());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
+      }
+    }
+
+    // nsVelocity
+
+    {
+      NcxxVar var = _file.getVar(NORTHWARD_VELOCITY);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getNsVelocity());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
+      }
+    }
+
+    // vertVelocity
+
+    {
+      NcxxVar var = _file.getVar(VERTICAL_VELOCITY);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getVertVelocity());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
+      }
+    }
+
+    // heading
+
+    {
+      NcxxVar var = _file.getVar(HEADING);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getHeading());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
+      }
+    }
+
+    // track
+
+    {
+      NcxxVar var = _file.getVar(TRACK);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getTrack());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
+      }
+    }
+
+    // roll
+
+    {
+      NcxxVar var = _file.getVar(ROLL);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getRoll());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
+      }
+    }
+
+    // pitch
+
+    {
+      NcxxVar var = _file.getVar(PITCH);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getPitch());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
+      }
+    }
+
+    // driftAngle
+
+    {
+      NcxxVar var = _file.getVar(DRIFT);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getDrift());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+      var.putVal(fvals);
+      }
+    }
+
+    // rotation
   
-  if ((var = ncFile->get_var(TILT)) != NULL) {
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      const RadxGeoref *geo = rays[ii]->getGeoreference();
-      if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getTilt());
-      } else {
-        fvals[ii] = Radx::missingMetaFloat;
+    {
+      NcxxVar var = _file.getVar(ROTATION);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getRotation());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
       }
     }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
 
-  // ewWind
-
-  if ((var = ncFile->get_var(EASTWARD_WIND)) != NULL) {
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      const RadxGeoref *geo = rays[ii]->getGeoreference();
-      if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getEwWind());
-      } else {
-        fvals[ii] = Radx::missingMetaFloat;
-      }
-    }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
-
-  // nsWind
-
-  if ((var = ncFile->get_var(NORTHWARD_WIND)) != NULL) {
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      const RadxGeoref *geo = rays[ii]->getGeoreference();
-      if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getNsWind());
-      } else {
-        fvals[ii] = Radx::missingMetaFloat;
-      }
-    }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
-
-  // verticalWind
+    // tilt
   
-  if ((var = ncFile->get_var(VERTICAL_WIND)) != NULL) {
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      const RadxGeoref *geo = rays[ii]->getGeoreference();
-      if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getVertWind());
-      } else {
-        fvals[ii] = Radx::missingMetaFloat;
+    {
+      NcxxVar var = _file.getVar(TILT);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getTilt());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
       }
     }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
 
-  // headingRate
+    // ewWind
+
+    {
+      NcxxVar var = _file.getVar(EASTWARD_WIND);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getEwWind());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
+      }
+    }
+
+    // nsWind
+
+    {
+      NcxxVar var = _file.getVar(NORTHWARD_WIND);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getNsWind());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
+      }
+    }
+
+    // verticalWind
   
-  if ((var = ncFile->get_var(HEADING_CHANGE_RATE)) != NULL) {
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      const RadxGeoref *geo = rays[ii]->getGeoreference();
-      if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getHeadingRate());
-      } else {
-        fvals[ii] = Radx::missingMetaFloat;
+    {
+      NcxxVar var = _file.getVar(VERTICAL_WIND);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getVertWind());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
       }
     }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
 
-  // pitchRate
-
-  if ((var = ncFile->get_var(PITCH_CHANGE_RATE)) != NULL) {
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      const RadxGeoref *geo = rays[ii]->getGeoreference();
-      if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getPitchRate());
-      } else {
-        fvals[ii] = Radx::missingMetaFloat;
-      }
-    }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
-
-  // rollRate
-
-  if ((var = ncFile->get_var(ROLL_CHANGE_RATE)) != NULL) {
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      const RadxGeoref *geo = rays[ii]->getGeoreference();
-      if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getRollRate());
-      } else {
-        fvals[ii] = Radx::missingMetaFloat;
-      }
-    }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
-
-  // driveAngle1
-
-  if ((var = ncFile->get_var(DRIVE_ANGLE_1)) != NULL) {
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      const RadxGeoref *geo = rays[ii]->getGeoreference();
-      if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getDriveAngle1());
-      } else {
-        fvals[ii] = Radx::missingMetaFloat;
-      }
-    }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
-
-  // driveAngle2
+    // headingRate
   
-  if ((var = ncFile->get_var(DRIVE_ANGLE_2)) != NULL) {
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      const RadxGeoref *geo = rays[ii]->getGeoreference();
-      if (geo) {
-        fvals[ii] = _checkMissingFloat(geo->getDriveAngle2());
-      } else {
-        fvals[ii] = Radx::missingMetaFloat;
+    {
+      NcxxVar var = _file.getVar(HEADING_CHANGE_RATE);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getHeadingRate());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
       }
     }
-    iret |= _file.writeVar(var, _timeDim, fvals);
-  }
 
-  // clean up
+    // pitchRate
 
-  if (iret) {
+    {
+      NcxxVar var = _file.getVar(PITCH_CHANGE_RATE);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getPitchRate());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
+      }
+    }
+
+    // rollRate
+
+    {
+      NcxxVar var = _file.getVar(ROLL_CHANGE_RATE);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getRollRate());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
+      }
+    }
+
+    // driveAngle1
+
+    {
+      NcxxVar var = _file.getVar(DRIVE_ANGLE_1);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getDriveAngle1());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
+      }
+    }
+      
+    // driveAngle2
+  
+    {
+      NcxxVar var = _file.getVar(DRIVE_ANGLE_2);
+      if (!var.isNull()) {
+        for (size_t ii = 0; ii < rays.size(); ii++) {
+          const RadxGeoref *geo = rays[ii]->getGeoreference();
+          if (geo) {
+            fvals[ii] = _checkMissingFloat(geo->getDriveAngle2());
+          } else {
+            fvals[ii] = Radx::missingMetaFloat;
+          }
+        }
+        var.putVal(fvals);
+      }
+    }
+
+  } catch (NcxxException& e) {
+
     _addErrStr("ERROR - NcxxRadxFile::_writeGeorefVariables");
+    _addErrStr("  Cannot write var");
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
     return -1;
-  } else {
-    return 0;
+
   }
+
+  return 0;
 
 }
 
@@ -2830,115 +2891,120 @@ int NcxxRadxFile::_writeSweepVariables()
   RadxArray<String32_t> strings32_;
   String32_t *strings32 = strings32_.alloc(nSweeps);
 
-  int iret = 0;
+  try {
 
-  // sweep number
-  
-  for (int ii = 0; ii < nSweeps; ii++) {
-    ivals[ii] = sweeps[ii]->getSweepNumber();
-  }
-  iret |= _file.writeVar(_sweepNumberVar, _sweepDim, ivals);
-  
-  // sweep mode
-  
-  for (int ii = 0; ii < nSweeps; ii++) {
-    memset(strings32[ii], 0, sizeof(String32_t));
-    Radx::SweepMode_t mode = sweeps[ii]->getSweepMode();
-    strncpy(strings32[ii], Radx::sweepModeToStr(mode).c_str(),
-            sizeof(String32_t) - 1);
-  }
-  iret |= _file.writeStringVar(_sweepModeVar, strings32);
-
-  // pol mode
-  
-  for (int ii = 0; ii < nSweeps; ii++) {
-    memset(strings32[ii], 0, sizeof(String32_t));
-    Radx::PolarizationMode_t mode = sweeps[ii]->getPolarizationMode();
-    strncpy(strings32[ii], Radx::polarizationModeToStr(mode).c_str(),
-            sizeof(String32_t) - 1);
-  }
-  iret |= _file.writeStringVar(_polModeVar, strings32);
-  
-  // prt mode
-  
-  for (int ii = 0; ii < nSweeps; ii++) {
-    memset(strings32[ii], 0, sizeof(String32_t));
-    Radx::PrtMode_t mode = sweeps[ii]->getPrtMode();
-    strncpy(strings32[ii], Radx::prtModeToStr(mode).c_str(),
-            sizeof(String32_t) - 1);
-  }
-  iret |= _file.writeStringVar(_prtModeVar, strings32);
-  
-  // follow mode
-  
-  for (int ii = 0; ii < nSweeps; ii++) {
-    memset(strings32[ii], 0, sizeof(String32_t));
-    Radx::FollowMode_t mode = sweeps[ii]->getFollowMode();
-    strncpy(strings32[ii], Radx::followModeToStr(mode).c_str(),
-            sizeof(String32_t) - 1);
-  }
-  iret |= _file.writeStringVar(_sweepFollowModeVar, strings32);
-  
-  // fixed angle
-  
-  for (int ii = 0; ii < nSweeps; ii++) {
-    fvals[ii] = sweeps[ii]->getFixedAngleDeg();
-  }
-  iret |= _file.writeVar(_sweepFixedAngleVar, _sweepDim, fvals);
-
-  // target scan rate
-  
-  for (int ii = 0; ii < nSweeps; ii++) {
-    fvals[ii] = sweeps[ii]->getTargetScanRateDegPerSec();
-  }
-  iret |= _file.writeVar(_targetScanRateVar, _sweepDim, fvals);
-
-  // start ray index
-  
-  for (int ii = 0; ii < nSweeps; ii++) {
-    ivals[ii] = sweeps[ii]->getStartRayIndex();
-  }
-  iret |= _file.writeVar(_sweepStartRayIndexVar, _sweepDim, ivals);
-
-  // end ray index
-  
-  for (int ii = 0; ii < nSweeps; ii++) {
-    ivals[ii] = sweeps[ii]->getEndRayIndex();
-  }
-  iret |= _file.writeVar(_sweepEndRayIndexVar, _sweepDim, ivals);
-
-  // rays are indexed
-  
-  for (int ii = 0; ii < nSweeps; ii++) {
-    memset(strings8[ii], 0, sizeof(String8_t));
-    if (sweeps[ii]->getRaysAreIndexed()) {
-      strcpy(strings8[ii], "true");
-    } else {
-      strcpy(strings8[ii], "false");
-    }
-  }
-  iret |= _file.writeStringVar(_raysAreIndexedVar, strings8);
-  
-  // ray angle res
-  
-  for (int ii = 0; ii < nSweeps; ii++) {
-    fvals[ii] = sweeps[ii]->getAngleResDeg();
-  }
-  iret |= _file.writeVar(_rayAngleResVar, _sweepDim, fvals);
-
-  if (_intermedFreqHzVar != NULL) {
+    // sweep number
+    
     for (int ii = 0; ii < nSweeps; ii++) {
-      fvals[ii] = sweeps[ii]->getIntermedFreqHz();
+      ivals[ii] = sweeps[ii]->getSweepNumber();
     }
-    iret |= _file.writeVar(_intermedFreqHzVar, _sweepDim, fvals);
+    _sweepNumberVar.putVal(ivals);
+    
+    // sweep mode
+    
+    for (int ii = 0; ii < nSweeps; ii++) {
+      memset(strings32[ii], 0, sizeof(String32_t));
+      Radx::SweepMode_t mode = sweeps[ii]->getSweepMode();
+      strncpy(strings32[ii], Radx::sweepModeToStr(mode).c_str(),
+              sizeof(String32_t) - 1);
+    }
+    _sweepModeVar.putVal(strings32);
+    
+    // pol mode
+    
+    for (int ii = 0; ii < nSweeps; ii++) {
+      memset(strings32[ii], 0, sizeof(String32_t));
+      Radx::PolarizationMode_t mode = sweeps[ii]->getPolarizationMode();
+      strncpy(strings32[ii], Radx::polarizationModeToStr(mode).c_str(),
+              sizeof(String32_t) - 1);
+    }
+    _polModeVar.putVal(strings32);
+    
+    // prt mode
+    
+    for (int ii = 0; ii < nSweeps; ii++) {
+      memset(strings32[ii], 0, sizeof(String32_t));
+      Radx::PrtMode_t mode = sweeps[ii]->getPrtMode();
+      strncpy(strings32[ii], Radx::prtModeToStr(mode).c_str(),
+              sizeof(String32_t) - 1);
+    }
+    _prtModeVar.putVal(strings32);
+    
+    // follow mode
+    
+    for (int ii = 0; ii < nSweeps; ii++) {
+      memset(strings32[ii], 0, sizeof(String32_t));
+      Radx::FollowMode_t mode = sweeps[ii]->getFollowMode();
+      strncpy(strings32[ii], Radx::followModeToStr(mode).c_str(),
+              sizeof(String32_t) - 1);
+    }
+    _sweepFollowModeVar.putVal(strings32);
+    
+    // fixed angle
+    
+    for (int ii = 0; ii < nSweeps; ii++) {
+      fvals[ii] = sweeps[ii]->getFixedAngleDeg();
+    }
+    _sweepFixedAngleVar.putVal(fvals);
+    
+    // target scan rate
+    
+    for (int ii = 0; ii < nSweeps; ii++) {
+      fvals[ii] = sweeps[ii]->getTargetScanRateDegPerSec();
+    }
+    _targetScanRateVar.putVal(fvals);
+    
+    // start ray index
+    
+    for (int ii = 0; ii < nSweeps; ii++) {
+      ivals[ii] = sweeps[ii]->getStartRayIndex();
+    }
+    _sweepStartRayIndexVar.putVal(ivals);
+    
+    // end ray index
+    
+    for (int ii = 0; ii < nSweeps; ii++) {
+      ivals[ii] = sweeps[ii]->getEndRayIndex();
+    }
+    _sweepEndRayIndexVar.putVal(ivals);
+    
+    // rays are indexed
+    
+    for (int ii = 0; ii < nSweeps; ii++) {
+      memset(strings8[ii], 0, sizeof(String8_t));
+      if (sweeps[ii]->getRaysAreIndexed()) {
+        strcpy(strings8[ii], "true");
+      } else {
+        strcpy(strings8[ii], "false");
+      }
+    }
+    _raysAreIndexedVar.putVal(strings8);
+    
+    // ray angle res
+    
+    for (int ii = 0; ii < nSweeps; ii++) {
+      fvals[ii] = sweeps[ii]->getAngleResDeg();
+    }
+    _rayAngleResVar.putVal(fvals);
+    
+    if (!_intermedFreqHzVar.isNull()) {
+      for (int ii = 0; ii < nSweeps; ii++) {
+        fvals[ii] = sweeps[ii]->getIntermedFreqHz();
+      }
+      _intermedFreqHzVar.putVal(fvals);
+    }
+
+  } catch (NcxxException& e) {
+    
+    _addErrStr("ERROR - NcxxRadxFile::_writeSweepVariables");
+    _addErrStr("  Cannot write var");
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
+    return -1;
+
   }
 
-  if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeSweepVariables");
-    return -1;
-  } else {
-    return 0;
-  }
+  return 0;
 
 }
 
@@ -2958,261 +3024,263 @@ int NcxxRadxFile::_writeCalibVariables()
     cerr << "NcxxRadxFile::_writeCalibVariables()" << endl;
   }
 
-  // calib time
+  try {
+
+    // calib time
   
-  RadxArray<String32_t> timesStr_;
-  String32_t *timesStr = timesStr_.alloc(nCalib);
+    RadxArray<String32_t> timesStr_;
+    String32_t *timesStr = timesStr_.alloc(nCalib);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    const RadxRcalib &calib = *calibs[ii];
-    memset(timesStr[ii], 0, sizeof(String32_t));
-    RadxTime rtime(calib.getCalibTime());
-    strncpy(timesStr[ii], rtime.getW3cStr().c_str(),
-            sizeof(String32_t) - 1);
-  }
-  if (_file.writeStringVar(_rCalTimeVar, timesStr)) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeCalibVariables");
-    return -1;
-  }
-
-  // calib params
+    for (int ii = 0; ii < nCalib; ii++) {
+      const RadxRcalib &calib = *calibs[ii];
+      memset(timesStr[ii], 0, sizeof(String32_t));
+      RadxTime rtime(calib.getCalibTime());
+      strncpy(timesStr[ii], rtime.getW3cStr().c_str(),
+              sizeof(String32_t) - 1);
+    }
+    _rCalTimeVar.putVal(timesStr);
+    
+    // calib params
   
-  RadxArray<float> fvals_;
-  float *fvals = fvals_.alloc(nCalib);
+    RadxArray<float> fvals_;
+    float *fvals = fvals_.alloc(nCalib);
 
-  int iret = 0;
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getPulseWidthUsec() * 1.0e-6;
+    }
+    _rCalPulseWidthVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getPulseWidthUsec() * 1.0e-6;
-  }
-  iret |= _file.writeVar(_rCalPulseWidthVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getXmitPowerDbmH();
+    }
+    _rCalXmitPowerHVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getXmitPowerDbmH();
-  }
-  iret |= _file.writeVar(_rCalXmitPowerHVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getXmitPowerDbmV();
+    }
+    _rCalXmitPowerVVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getXmitPowerDbmV();
-  }
-  iret |= _file.writeVar(_rCalXmitPowerVVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getTwoWayWaveguideLossDbH();
+    }
+    _rCalTwoWayWaveguideLossHVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getTwoWayWaveguideLossDbH();
-  }
-  iret |= _file.writeVar(_rCalTwoWayWaveguideLossHVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getTwoWayWaveguideLossDbV();
+    }
+    _rCalTwoWayWaveguideLossVVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getTwoWayWaveguideLossDbV();
-  }
-  iret |= _file.writeVar(_rCalTwoWayWaveguideLossVVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getTwoWayRadomeLossDbH();
+    }
+    _rCalTwoWayRadomeLossHVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getTwoWayRadomeLossDbH();
-  }
-  iret |= _file.writeVar(_rCalTwoWayRadomeLossHVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getTwoWayRadomeLossDbV();
+    }
+    _rCalTwoWayRadomeLossVVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getTwoWayRadomeLossDbV();
-  }
-  iret |= _file.writeVar(_rCalTwoWayRadomeLossVVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getReceiverMismatchLossDb();
+    }
+    _rCalReceiverMismatchLossVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getReceiverMismatchLossDb();
-  }
-  iret |= _file.writeVar(_rCalReceiverMismatchLossVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getRadarConstantH();
+    }
+    _rCalRadarConstHVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getRadarConstantH();
-  }
-  iret |= _file.writeVar(_rCalRadarConstHVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getRadarConstantV();
+    }
+    _rCalRadarConstVVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getRadarConstantV();
-  }
-  iret |= _file.writeVar(_rCalRadarConstVVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getAntennaGainDbH();
+    }
+    _rCalAntennaGainHVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getAntennaGainDbH();
-  }
-  iret |= _file.writeVar(_rCalAntennaGainHVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getAntennaGainDbV();
+    }
+    _rCalAntennaGainVVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getAntennaGainDbV();
-  }
-  iret |= _file.writeVar(_rCalAntennaGainVVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getNoiseDbmHc();
+    }
+    _rCalNoiseHcVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getNoiseDbmHc();
-  }
-  iret |= _file.writeVar(_rCalNoiseHcVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getNoiseDbmHx();
+    }
+    _rCalNoiseHxVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getNoiseDbmHx();
-  }
-  iret |= _file.writeVar(_rCalNoiseHxVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getNoiseDbmVc();
+    }
+    _rCalNoiseVcVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getNoiseDbmVc();
-  }
-  iret |= _file.writeVar(_rCalNoiseVcVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getNoiseDbmVx();
+    }
+    _rCalNoiseVxVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getNoiseDbmVx();
-  }
-  iret |= _file.writeVar(_rCalNoiseVxVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getReceiverGainDbHc();
+    }
+    _rCalReceiverGainHcVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getReceiverGainDbHc();
-  }
-  iret |= _file.writeVar(_rCalReceiverGainHcVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getReceiverGainDbHx();
+    }
+    _rCalReceiverGainHxVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getReceiverGainDbHx();
-  }
-  iret |= _file.writeVar(_rCalReceiverGainHxVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getReceiverGainDbVc();
+    }
+    _rCalReceiverGainVcVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getReceiverGainDbVc();
-  }
-  iret |= _file.writeVar(_rCalReceiverGainVcVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getReceiverGainDbVx();
+    }
+    _rCalReceiverGainVxVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getReceiverGainDbVx();
-  }
-  iret |= _file.writeVar(_rCalReceiverGainVxVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getBaseDbz1kmHc();
+    }
+    _rCalBaseDbz1kmHcVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getBaseDbz1kmHc();
-  }
-  iret |= _file.writeVar(_rCalBaseDbz1kmHcVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getBaseDbz1kmHx();
+    }
+    _rCalBaseDbz1kmHxVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getBaseDbz1kmHx();
-  }
-  iret |= _file.writeVar(_rCalBaseDbz1kmHxVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getBaseDbz1kmVc();
+    }
+    _rCalBaseDbz1kmVcVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getBaseDbz1kmVc();
-  }
-  iret |= _file.writeVar(_rCalBaseDbz1kmVcVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getBaseDbz1kmVx();
+    }
+    _rCalBaseDbz1kmVxVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getBaseDbz1kmVx();
-  }
-  iret |= _file.writeVar(_rCalBaseDbz1kmVxVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getSunPowerDbmHc();
+    }
+    _rCalSunPowerHcVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getSunPowerDbmHc();
-  }
-  iret |= _file.writeVar(_rCalSunPowerHcVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getSunPowerDbmHx();
+    }
+    _rCalSunPowerHxVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getSunPowerDbmHx();
-  }
-  iret |= _file.writeVar(_rCalSunPowerHxVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getSunPowerDbmVc();
+    }
+    _rCalSunPowerVcVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getSunPowerDbmVc();
-  }
-  iret |= _file.writeVar(_rCalSunPowerVcVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getSunPowerDbmVx();
+    }
+    _rCalSunPowerVxVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getSunPowerDbmVx();
-  }
-  iret |= _file.writeVar(_rCalSunPowerVxVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getNoiseSourcePowerDbmH();
+    }
+    _rCalNoiseSourcePowerHVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getNoiseSourcePowerDbmH();
-  }
-  iret |= _file.writeVar(_rCalNoiseSourcePowerHVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getNoiseSourcePowerDbmV();
+    }
+    _rCalNoiseSourcePowerVVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getNoiseSourcePowerDbmV();
-  }
-  iret |= _file.writeVar(_rCalNoiseSourcePowerVVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getPowerMeasLossDbH();
+    }
+    _rCalPowerMeasLossHVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getPowerMeasLossDbH();
-  }
-  iret |= _file.writeVar(_rCalPowerMeasLossHVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getPowerMeasLossDbV();
+    }
+    _rCalPowerMeasLossVVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getPowerMeasLossDbV();
-  }
-  iret |= _file.writeVar(_rCalPowerMeasLossVVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getCouplerForwardLossDbH();
+    }
+    _rCalCouplerForwardLossHVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getCouplerForwardLossDbH();
-  }
-  iret |= _file.writeVar(_rCalCouplerForwardLossHVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getCouplerForwardLossDbV();
+    }
+    _rCalCouplerForwardLossVVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getCouplerForwardLossDbV();
-  }
-  iret |= _file.writeVar(_rCalCouplerForwardLossVVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getDbzCorrection();
+    }
+    _rCalDbzCorrectionVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getDbzCorrection();
-  }
-  iret |= _file.writeVar(_rCalDbzCorrectionVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getZdrCorrectionDb();
+    }
+    _rCalZdrCorrectionVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getZdrCorrectionDb();
-  }
-  iret |= _file.writeVar(_rCalZdrCorrectionVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getLdrCorrectionDbH();
+    }
+    _rCalLdrCorrectionHVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getLdrCorrectionDbH();
-  }
-  iret |= _file.writeVar(_rCalLdrCorrectionHVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getLdrCorrectionDbV();
+    }
+    _rCalLdrCorrectionVVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getLdrCorrectionDbV();
-  }
-  iret |= _file.writeVar(_rCalLdrCorrectionVVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getSystemPhidpDeg();
+    }
+    _rCalSystemPhidpVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getSystemPhidpDeg();
-  }
-  iret |= _file.writeVar(_rCalSystemPhidpVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getTestPowerDbmH();
+    }
+    _rCalTestPowerHVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getTestPowerDbmH();
-  }
-  iret |= _file.writeVar(_rCalTestPowerHVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getTestPowerDbmV();
+    }
+    _rCalTestPowerVVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getTestPowerDbmV();
-  }
-  iret |= _file.writeVar(_rCalTestPowerVVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getReceiverSlopeDbHc();
+    }
+    _rCalReceiverSlopeHcVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getReceiverSlopeDbHc();
-  }
-  iret |= _file.writeVar(_rCalReceiverSlopeHcVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getReceiverSlopeDbHx();
+    }
+    _rCalReceiverSlopeHxVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getReceiverSlopeDbHx();
-  }
-  iret |= _file.writeVar(_rCalReceiverSlopeHxVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getReceiverSlopeDbVc();
+    }
+    _rCalReceiverSlopeVcVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getReceiverSlopeDbVc();
-  }
-  iret |= _file.writeVar(_rCalReceiverSlopeVcVar, _calDim, fvals);
+    for (int ii = 0; ii < nCalib; ii++) {
+      fvals[ii] = calibs[ii]->getReceiverSlopeDbVx();
+    }
+    _rCalReceiverSlopeVxVar.putVal(fvals);
 
-  for (int ii = 0; ii < nCalib; ii++) {
-    fvals[ii] = calibs[ii]->getReceiverSlopeDbVx();
-  }
-  iret |= _file.writeVar(_rCalReceiverSlopeVxVar, _calDim, fvals);
-
-  if (iret) {
+  } catch (NcxxException& e) {
+    
     _addErrStr("ERROR - NcxxRadxFile::_writeCalibVariables");
+    _addErrStr("  Cannot write var");
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
     return -1;
-  } else {
-    return 0;
+
   }
+
+  return 0;
 
 }
 
@@ -3228,87 +3296,34 @@ int NcxxRadxFile::_writeFrequencyVariable()
     return 0;
   }
   
-  RadxArray<float> fvals_;
-  float *fvals = fvals_.alloc(nFreq);
-  int iret = 0;
-  for (int ii = 0; ii < nFreq; ii++) {
-    fvals[ii] = frequency[ii];
-  }
-  iret |= _file.writeVar(_frequencyVar, _frequencyDim, fvals);
+  try {
 
-  if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeFrequencyVariable");
-    return -1;
-  } else {
-    return 0;
-  }
-
-}
-
-////////////////////////////////////////////////
-// write field variables
-
-int NcxxRadxFile::_writeFieldVariables()
-{
-
-  if (_verbose) {
-    cerr << "NcxxRadxFile::_writeFieldVariables()" << endl;
-  }
-
-  // loop through the list of unique fields names in this volume
-
-  int iret = 0;
-  for (size_t ii = 0; ii < _uniqueFieldNames.size(); ii++) {
-      
-    const string &name = _uniqueFieldNames[ii];
-
-    // make copy of the field
-
-    RadxField *copy = _writeVol->copyField(name);
-    
-    // write it out
-    
-    if (copy != NULL) {
-      // create variable
-      NcxxVar *var = _createFieldVar(*copy);
-      if (var != NULL) {
-        if (_writeFieldVar(var, copy)) {
-          iret = -1;
-        }
-      } else {
-        _addErrStr("ERROR - NcxxRadxFile::_writeFieldVariables");
-        _addErrStr("  Cannot create field: ", name);
-        return -1;
-      }
-      // free up
-      delete copy;
-      if (_debug) {
-        cerr << "  ... writing field: " << name << endl;
-      }
-    } else {
-      if (_debug) {
-        cerr << "  ... cannot find field: " << name
-             << " .... skipping" << endl;
-      }
+    RadxArray<float> fvals_;
+    float *fvals = fvals_.alloc(nFreq);
+    for (int ii = 0; ii < nFreq; ii++) {
+      fvals[ii] = frequency[ii];
     }
+    _frequencyVar.putVal(fvals);
+
+  } catch (NcxxException& e) {
     
+    _addErrStr("ERROR - NcxxRadxFile::_writeFrequencyVariables");
+    _addErrStr("  Cannot write var");
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
+    return -1;
+
   }
 
-  if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeFieldVariables");
-    return -1;
-  } else {
-    return 0;
-  }
+  return 0;
 
 }
 
 ///////////////////////////////////////////////
-// create a field variable
-// Returns var ptr on success, NULL on failure
+// create and add a field variable
 // Adds to errStr as appropriate
 
-NcxxVar *NcxxRadxFile::_createFieldVar(const RadxField &field)
+NcxxVar NcxxRadxFile::_addFieldVar(const RadxField &field)
 
 {
   
@@ -3317,21 +3332,12 @@ NcxxVar *NcxxRadxFile::_createFieldVar(const RadxField &field)
     cerr << "  Adding field: " << field.getName() << endl;
   }
 
-  int iret = 0;
-
-  const string &name = field.getName();
-  if (name.size() < 1) {
-    _addErrStr("ERROR - NcxxRadxFile::_createFieldVar");
-    _addErrStr("  Cannot add variable to Nc file object");
-    _addErrStr("  Field name is zero-length");
-    return NULL;
-  }
-  
   // check that the field name is CF-netCDF compliant - 
   // i.e must start with a letter
   //   if not, add "nc_" to start of name
   // and must only contain letters, digits and underscores
 
+  const string &name = field.getName();
   string fieldName;
   if (isalpha(name[0])) {
     fieldName = name;
@@ -3353,14 +3359,16 @@ NcxxVar *NcxxRadxFile::_createFieldVar(const RadxField &field)
   
   // Add var and the attributes relevant to no data packing
 
-  NcType ncType = _getNcType(field.getDataType());
-
-  NcxxVar *var = NULL;
+  NcxxType ncxxType = _getNcxxType(field.getDataType());
+  NcxxVar var;
 
   if (_nGatesVary) {
-    var = _file.getNcFile()->add_var(fieldName.c_str(), ncType, _nPointsDim);
+    var = _file.addVar(fieldName, ncxxType, _nPointsDim);
   } else {
-    var = _file.getNcFile()->add_var(fieldName.c_str(), ncType, _timeDim, _rangeDim);
+    vector<NcxxDim> dims;
+    dims.push_back(_timeDim);
+    dims.push_back(_rangeDim);
+    var = _file.addVar(fieldName, ncxxType, dims);
   }
   
   if (var.isNull()) {
@@ -3368,15 +3376,16 @@ NcxxVar *NcxxRadxFile::_createFieldVar(const RadxField &field)
     _addErrStr("  Cannot add variable to Nc file object");
     _addErrStr("  Input field name: ", name);
     _addErrStr("  Output field name: ", fieldName);
-    _addErrInt("  NcType: ", ncType);
-    _addErrStr("  Time dim name: ", _timeDim->name());
-    _addErrInt("  Time dim size: ", _timeDim->size());
-    _addErrStr("  Range dim name: ", _rangeDim->name());
-    _addErrInt("  Range dim size: ", _rangeDim->size());
+    _addErrStr("  NcxxType: ", Ncxx::ncxxTypeToStr(ncxxType));
+    _addErrStr("  Time dim name: ", _timeDim.getName());
+    _addErrInt("  Time dim size: ", _timeDim.getSize());
+    _addErrStr("  Range dim name: ", _rangeDim.getName());
+    _addErrInt("  Range dim size: ", _rangeDim.getSize());
     _addErrStr(_file.getErrStr());
-    return NULL;
+    return var;
   }
 
+  int iret = 0;
   if (field.getLongName().size() > 0) {
     iret |= var.addAttr(LONG_NAME, field.getLongName());
   }
@@ -3401,30 +3410,30 @@ NcxxVar *NcxxRadxFile::_createFieldVar(const RadxField &field)
     iret |= var.addAttr(IS_DISCRETE, "true");
   }
 
-  switch (ncType) {
-    case ncxxDouble: {
+  switch (ncxxType.getTypeClass()) {
+    case NcxxType::nc_DOUBLE: {
       iret |= var.addAttr(FILL_VALUE, (double) field.getMissingFl64());
       break;
     }
-    case ncxxFloat:
+    case NcxxType::nc_FLOAT:
     default: {
       iret |= var.addAttr(FILL_VALUE, (float) field.getMissingFl32());
       break;
     }
-    case ncxxInt: {
+    case NcxxType::nc_INT: {
       iret |= var.addAttr(FILL_VALUE, (int) field.getMissingSi32());
       iret |= var.addAttr(SCALE_FACTOR, (float) field.getScale());
       iret |= var.addAttr(ADD_OFFSET, (float) field.getOffset());
       break;
     }
-    case ncShort: {
+    case NcxxType::nc_SHORT: {
       iret |= var.addAttr(FILL_VALUE, (short) field.getMissingSi16());
       iret |= var.addAttr(SCALE_FACTOR, (float) field.getScale());
       iret |= var.addAttr(ADD_OFFSET, (float) field.getOffset());
       break;
     }
-    case ncxxByte: {
-      iret |= var.addAttr(FILL_VALUE, (ncbyte) field.getMissingSi08());
+    case NcxxType::nc_BYTE: {
+      iret |= var.addAttr(FILL_VALUE, (signed char) field.getMissingSi08());
       iret |= var.addAttr(SCALE_FACTOR, (float) field.getScale());
       iret |= var.addAttr(ADD_OFFSET, (float) field.getOffset());
       break;
@@ -3440,9 +3449,79 @@ NcxxVar *NcxxRadxFile::_createFieldVar(const RadxField &field)
   
   if (iret) {
     _addErrStr("ERROR - NcxxRadxFile::_createFieldVar");
-    return NULL;
+  }
+  
+  return var;
+
+}
+
+////////////////////////////////////////////////
+// write field variables
+
+int NcxxRadxFile::_writeFieldVariables()
+{
+
+  if (_verbose) {
+    cerr << "NcxxRadxFile::_writeFieldVariables()" << endl;
+  }
+
+  // loop through the list of unique fields names in this volume
+
+  int iret = 0;
+  for (size_t ifield = 0; ifield < _uniqueFieldNames.size(); ifield++) {
+      
+    const string &name = _uniqueFieldNames[ifield];
+    if (name.size() == 0) {
+      // invalid field name
+      continue;
+    }
+
+    // make copy of the field
+
+    RadxField *copy = _writeVol->copyField(name);
+    if (copy == NULL) {
+      if (_debug) {
+        cerr << "  ... cannot find field: " << name
+             << " .... skipping" << endl;
+      }
+      continue;
+    }
+    
+    // write it out
+    
+    NcxxVar var;
+    try {
+      // add field variable
+      var = _addFieldVar(*copy);
+    } catch (NcxxException& e) {
+      _addErrStr("ERROR - NcxxRadxFile::_writeFieldVariables");
+      _addErrStr("  Cannot add field: ", name);
+      delete copy;
+      return -1;
+    }
+
+    try {
+      _writeFieldVar(var, copy);
+    } catch (NcxxException& e) {
+      _addErrStr("ERROR - NcxxRadxFile::_writeFieldVariables");
+      _addErrStr("  Cannot write field: ", name);
+      delete copy;
+      return -1;
+    }
+
+    // free up
+    delete copy;
+    if (_debug) {
+      cerr << "  ... writing field: " << name << endl;
+    }
+    
+  } // ifield
+
+  if (iret) {
+    _addErrStr("ERROR - NcxxRadxFile::_writeFieldVariables");
+    return -1;
   } else {
-    return var;
+    return 0;
   }
 
 }
@@ -3451,13 +3530,13 @@ NcxxVar *NcxxRadxFile::_createFieldVar(const RadxField &field)
 // write a field variable
 // Returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_writeFieldVar(NcxxVar *var, RadxField *field)
+int NcxxRadxFile::_writeFieldVar(NcxxVar &var, RadxField *field)
   
 {
   
   if (_verbose) {
     cerr << "NcxxRadxFile::_writeFieldVar()" << endl;
-    cerr << "  name: " << var->name() << endl;
+    cerr << "  name: " << var.getName() << endl;
   }
 
   if (var.isNull()) {
@@ -3466,75 +3545,79 @@ int NcxxRadxFile::_writeFieldVar(NcxxVar *var, RadxField *field)
     return -1;
   }
 
-  int iret = 0;
   const void *data = field->getData();
   
-  if (_nGatesVary) {
-
-    switch (var->type()) {
-      case ncxxDouble: {
-        iret = !var->put((double *) data, _writeVol->getNPoints());
-        break;
-      }
-      case ncxxFloat:
-      default: {
-        iret = !var->put((float *) data, _writeVol->getNPoints());
-        break;
-      }
-      case ncxxInt: {
-        iret = !var->put((int *) data, _writeVol->getNPoints());
-        break;
-      }
-      case ncShort: {
-        iret = !var->put((short *) data, _writeVol->getNPoints());
-        break;
-      }
-      case ncxxByte: {
-        iret = !var->put((ncbyte *) data, _writeVol->getNPoints());
-        break;
-      }
-    } // switch
-
-  } else {
-
-    // get the max number of gates
+  try {
     
-    _writeVol->computeMaxNGates();
+    if (_nGatesVary) {
+      
+      switch (var.getType().getTypeClass()) {
+        case NcxxType::nc_DOUBLE: {
+          var.putVal((double *) data);
+          break;
+        }
+        case NcxxType::nc_INT: {
+          var.putVal((int *) data);
+          break;
+        }
+        case NcxxType::nc_SHORT: {
+          var.putVal((short *) data);
+          break;
+        }
+        case NcxxType::nc_BYTE: {
+          var.putVal((signed char *) data);
+          break;
+        }
+        case NcxxType::nc_FLOAT:
+        default: {
+          var.putVal((float *) data);
+          break;
+        }
+      } // switch
+      
+    } else {
+      
+      // get the max number of gates
+      
+      _writeVol->computeMaxNGates();
+      
+      switch (var.getType().getTypeClass()) {
+        case NcxxType::nc_DOUBLE: {
+          iret = !var.put((double *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
+          break;
+        }
+        case ncxxFloat:
+        default: {
+          iret = !var.put((float *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
+          break;
+        }
+        case ncxxInt: {
+          iret = !var.put((int *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
+          break;
+        }
+        case ncShort: {
+          iret = !var.put((short *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
+          break;
+        }
+        case ncxxByte: {
+          iret = !var.put((signed char *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
+          break;
+        }
+      } // switch
+      
+    } // if (_nGatesVary)
+        
+  } catch (NcxxException& e) {
     
-    switch (var->type()) {
-      case ncxxDouble: {
-        iret = !var->put((double *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
-        break;
-      }
-      case ncxxFloat:
-      default: {
-        iret = !var->put((float *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
-        break;
-      }
-      case ncxxInt: {
-        iret = !var->put((int *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
-        break;
-      }
-      case ncShort: {
-        iret = !var->put((short *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
-        break;
-      }
-      case ncxxByte: {
-        iret = !var->put((ncbyte *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
-        break;
-      }
-    } // switch
-
-  }
-
-  if (iret) {
     _addErrStr("ERROR - NcxxRadxFile::_writeFieldVar");
-    _addErrStr("  Canont write var, name: ", var->name());
+    _addErrStr("  Canont write var, name: ", var.name());
     _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
     return -1;
-  } else {
-    return 0;
+
   }
+
+  return 0;
 
 }
 
@@ -3553,7 +3636,7 @@ int NcxxRadxFile::_closeOnError(const string &caller)
 ///////////////////////////////////////////////////////////////////////////
 // Set output compression for variable
 
-int NcxxRadxFile::_setCompression(NcxxVar *var)  
+int NcxxRadxFile::_setCompression(NcxxVar &var)  
 {
 
   if (_ncFormat == NETCDF_CLASSIC || _ncFormat == NETCDF_OFFSET_64BIT) {
@@ -3572,7 +3655,7 @@ int NcxxRadxFile::_setCompression(NcxxVar *var)
   }
 
   int fileId = _file.getNcFile()->id();
-  int varId = var->id();
+  int varId = var.id();
   int shuffle = 0;
   
   if (nc_def_var_deflate(fileId, varId, shuffle,

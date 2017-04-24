@@ -997,7 +997,7 @@ private:
   void _clearCals();
   void _clearFields();
   
-  NcxxType _getNcType(Radx::DataType_t dtype);
+  NcxxType _getNcxxType(Radx::DataType_t dtype);
   NcxxFile::FileFormat _getFileFormat(RadxFile::netcdf_format_t format);
   
   // private methods for NcfRadial_read.cc
@@ -1124,7 +1124,7 @@ private:
   int _writeFrequencyVariable();
 
   int _writeFieldVariables();
-  NcxxVar _createFieldVar(const RadxField &field);
+  NcxxVar _addFieldVar(const RadxField &field);
   int _writeFieldVar(NcxxVar &var, RadxField *field);
   int _closeOnError(const string &caller);
 
