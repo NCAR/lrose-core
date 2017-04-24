@@ -6,6 +6,7 @@ function x = sunplot_nexrad(dataDir)
 
    fprintf('Input datadir is: %s\n', dataDir);
 
+   plot_var(dataDir, 'dbBelowPeak', 'Db below peak (dB)', [-20 0]);
    plot_var(dataDir, 'dbm', 'Power averaged (dBm)', [-80 -63]);
    plot_var(dataDir, 'dbmH', 'Power H channel (dBm)', [-80 -63]);
    plot_var(dataDir, 'dbmV', 'Power V channel (dBm)', [-80 -63]);
