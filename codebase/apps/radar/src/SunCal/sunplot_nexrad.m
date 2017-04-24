@@ -6,13 +6,13 @@ function x = sunplot_nexrad(dataDir)
 
    fprintf('Input datadir is: %s\n', dataDir);
 
-     plot_var(dataDir, 'dbm', 'Power averaged (dBm)', 'color_axis', [-80 -63]);
-     plot_var(dataDir, 'dbmH', 'Power H channel (dBm)', 'color_axis', [-80 -63]);
-     plot_var(dataDir, 'dbmV', 'Power V channel (dBm)', 'color_axis', [-80 -63]);
-     plot_var(dataDir, 'corrHV', 'Correlation H-V', 'color_axis', [0.0 0.05]);
-     plot_var(dataDir, 'phaseHV', 'Arg H-V', 'color_axis', [-180 180]);
-     plot_var(dataDir, 'SS', 'SS (dB)','color_axis',[-1.0 1.5]);
-     plot_var(dataDir, 'zdr', 'zdr (dB)','color_axis',[-1.0 1.0]);
+   plot_var(dataDir, 'dbm', 'Power averaged (dBm)', [-80 -63]);
+   plot_var(dataDir, 'dbmH', 'Power H channel (dBm)', [-80 -63]);
+   plot_var(dataDir, 'dbmV', 'Power V channel (dBm)', [-80 -63]);
+   plot_var(dataDir, 'corrHV', 'Correlation H-V', [0.0 0.05]);
+   plot_var(dataDir, 'phaseHV', 'Arg H-V', [-180 180]);
+   plot_var(dataDir, 'SS', 'SS (dB)', [-1.0 1.5]);
+   plot_var(dataDir, 'zdr', 'zdr (dB)', [-1.0 1.0]);
 
 end
 
@@ -20,19 +20,14 @@ end
 % plot a specified variable
 %
 
-function plot_var(dataDir, varName, label, col_axis, data_range)
+function plot_var(dataDir, varName, label, data_range)
 
-  % color_axis = [];
-     color_axis = data_range;
-     
+     % Read in grid info and data
+
      fileName = strcat(dataDir, '/', varName, '.txt');
      fprintf('Input field fileName is: %s\n', fileName);
      fprintf('Data range is: %s\n', data_range);
-     %varData = load(fileName);
      
-     %x_grid = num2cell(load(strcat(dataDir, '/', 'x_grid_info')));
-     %y_grid = num2cell(load(strcat(dataDir, '/', 'y_grid_info')));
-
      fid = fopen(fileName,'rt');
      
      [x_grid,count] = fscanf(fid,'%f',3);
@@ -51,12 +46,17 @@ function plot_var(dataDir, varName, label, col_axis, data_range)
      del_y = y_grid(2);
      Ny = y_grid(3);
      
+     fprintf('x_grid Nx min_x delx: %d %g %d\n', Nx, min_x, del_x);
+     fprintf('y_grid Ny min_y dely: %d %g %d\n', Ny, min_y, del_y);
+
      [varData,count] = fscanf(fid,'%f',Nx * Ny);
      if count ~= Nx * Ny
        error('bang');
      end;
      
      varData = reshape(varData,Nx,Ny).';
+
+     % Read in centroid
      
      [extraData,count] = fscanf(fid,'%f');
      if count == 2
@@ -67,47 +67,33 @@ function plot_var(dataDir, varName, label, col_axis, data_range)
        isCentroid = 0;
      end;
 
-     %fprintf('x_grid: %g %g %d %g\n', x_grid{:});
-     %fprintf('y_grid: %g %g %d %g\n', y_grid{:});
-     
-     %xlin=linspace(-5, 5, 101);
-     %ylin=linspace(-2, 2, 41);
-     %xlin=linspace(x_grid{1:3});
-     %ylin=linspace(y_grid{1:3});
      xlin=linspacedel(x_grid(1),x_grid(2),x_grid(3));
      ylin=linspacedel(y_grid(1),y_grid(2),y_grid(3));
-     %[X,Y]=meshgrid(xlin,ylin);
+
+     % draw figure
 
      figure;
-     %set(gcf,'units','inches','position',[x_ll, y_ll, x_w, y_h]);
-     %hold on;
-     %contour(X, Y, varData);
      
-     % [cs,h] = contourf(xlin, ylin, varData, 15);
-     if isempty(color_axis)
+     if isempty(data_range)
        [cs,h] = contourf(xlin, ylin, varData,15);
      else
-       [cs,h] = contourf(xlin, ylin, varData, linspace(color_axis(1),...
-                                                       color_axis(2),15));
+       [cs,h] = contourf(xlin, ylin, varData, linspace(data_range(1),...
+                                                       data_range(2),15));
      end
-     
-     colorbar;
-     %%clabel(cs,h);
 
-     %% surfmat(xlin, ylin, varData);
+     % axes
 
      axis square;
      xlim([(x_centroid - 1.5) (x_centroid + 1.5)]);
      ylim([(y_centroid - 1.5) (y_centroid + 1.5)]);
-     if ~isempty(color_axis)
-       caxis(color_axis);
+     if ~isempty(data_range)
+       caxis(data_range);
      end;
      
      line(xlim,y_centroid*[1 1],'color','cyan');
-     line(x_centroid*[1 1],ylim,'color','cyan');% [.5 .9 1], 'linewidth',2,'linestyle',{'-',':','-.'}  help plot
-     
+     line(x_centroid*[1 1],ylim,'color','cyan');
 
-%%   plot 1 deg and 2 deg circles
+     % plot 1 deg and 2 deg circles
 
      circle_pos = [(x_centroid-0.5) (y_centroid-0.5) 1 1];
      rectangle('Position',circle_pos,'Curvature',[1 1],'EdgeColor','white','LineWidth',1.5);
@@ -115,7 +101,8 @@ function plot_var(dataDir, varName, label, col_axis, data_range)
      circle_pos = [(x_centroid-1) (y_centroid-1) 2 2];
      rectangle('Position',circle_pos,'Curvature',[1 1],'EdgeColor','white','LineWidth',1.5);
 
-     %colormap(nex_cmap); 
+     % colormap
+
      colormap(nex_cmap(20)); 
      colorbar;
      
@@ -129,12 +116,6 @@ function plot_var(dataDir, varName, label, col_axis, data_range)
      title(my_title2);
      xlabel('Azim (deg) from theoretical sun center');
      ylabel('Elev (deg) from theoretical sun center');
-
-     % h = gca;
-     % axes(getcolorbar);
-     % ylabel('dBm');
-     % axes(h);
-     
 
      set(gcf,'Renderer','zbuffer','PaperPositionMode','auto');
      print(gcf,'-dpng',[fullfile(dataDir,varName) '.png']);
