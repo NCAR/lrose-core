@@ -14,7 +14,7 @@ function sunplot_nexrad(dirName)
 
      plot_var(dataDir, 'corrHV', 'Correlation H-V', 'color_axis', [0.0 0.05]);
 
-     plot_var(dataDir, 'phaseHV', 'Arg H-V');
+     plot_var(dataDir, 'phaseHV', 'Arg H-V', 'color_axis', [0.0 0.05]);
 
      plot_var(dataDir, 'SS', 'SS (dB)','color_axis',[-2.5 0.5]);
      plot_var(dataDir, 'zdr', 'zdr (dB)','color_axis',[-2.5 0.5]);
@@ -25,11 +25,11 @@ end
 % plot a particular variable
 %
 
-function plot_var(dataDir, varName, label, varargin)
+function plot_var(dataDir, varName, label, col_axis, data_range)
 
      color_axis = [];
      
-     paramparse(varargin);
+     % paramparse(varargin);
 
 
      fileName = strcat(dataDir, '/', varName, '.txt');
