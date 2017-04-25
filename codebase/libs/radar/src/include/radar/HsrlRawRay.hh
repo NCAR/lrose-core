@@ -108,15 +108,28 @@ public:
 
   int dserialize(const char *buffer, int bufLen);
 
+  // cookie to identify raw HSRL ray
+
+  static const int64_t cookie = 987654321;
+
+  // check if ID needs swapping
+  
+  static bool idIsSwapped(int64_t id) {
+    if (id == HsrlRawRay::cookie) {
+      // is swapped
+      return false;
+    }
+    return true;
+  }
+  
 protected:
 private:
 
   // typedef for header struct for tcp packet
   // 128 bytes long
 
-  const int64_t cookie = 987654321;
   int64_t _seqNum = 0;
-
+  
   typedef struct {
 
     int64_t id;
