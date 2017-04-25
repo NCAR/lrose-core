@@ -356,6 +356,14 @@ public:
 
   double delay_secs_between_rays;
 
+  tdrp_bool_t combine_bins_on_read;
+
+  int n_bins_per_gate;
+
+  double raw_bin_start_range_km;
+
+  double raw_bin_spacing_km;
+
   char* combined_hi_field_name;
 
   char* combined_lo_field_name;
@@ -371,7 +379,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[13];
+  mutable TDRPtable _table[18];
 
   const char *_className;
 

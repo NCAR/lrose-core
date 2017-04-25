@@ -56,6 +56,34 @@ paramdef double {
   p_help = "We need to simulate real-time ops, so we want to send data at approximatley the correct rate.";
 } delay_secs_between_rays;
 
+commentdef {
+  p_header = "READING RAW NetCDF DATA FILES";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to combine range gates on read.";
+  p_help = "If true, the specified number of range gates will be combined on read to create mean values with lower noisiness.";
+} combine_bins_on_read;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of bins to combine into a single gate.";
+  p_help = "In range, we will combine this number of gates to produce a data set with lower spatial resolution but less noiry data.";
+} n_bins_per_gate;
+
+paramdef double {
+  p_default = -0.300;
+  p_descr = "Start range to first bin (km).";
+  p_help = "Takes into account dead zone caused by digitizer starting before the pulse.";
+} raw_bin_start_range_km;
+
+paramdef double {
+  p_default = 0.0075;
+  p_descr = "Spacing of raw bins (km).";
+  p_help = "The distance between the ray bins in km.";
+} raw_bin_spacing_km;
+
 paramdef string {
   p_default = "combined_hi";
   p_descr = "Name of combined_hi field in netCDF file.";

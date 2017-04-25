@@ -632,6 +632,63 @@ using namespace std;
     tt->single_val.d = 0.5;
     tt++;
     
+    // Parameter 'Comment 1'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 1");
+    tt->comment_hdr = tdrpStrDup("READING RAW NetCDF DATA FILES");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'combine_bins_on_read'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("combine_bins_on_read");
+    tt->descr = tdrpStrDup("Option to combine range gates on read.");
+    tt->help = tdrpStrDup("If true, the specified number of range gates will be combined on read to create mean values with lower noisiness.");
+    tt->val_offset = (char *) &combine_bins_on_read - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'n_bins_per_gate'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("n_bins_per_gate");
+    tt->descr = tdrpStrDup("Number of bins to combine into a single gate.");
+    tt->help = tdrpStrDup("In range, we will combine this number of gates to produce a data set with lower spatial resolution but less noiry data.");
+    tt->val_offset = (char *) &n_bins_per_gate - &_start_;
+    tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'raw_bin_start_range_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("raw_bin_start_range_km");
+    tt->descr = tdrpStrDup("Start range to first bin (km).");
+    tt->help = tdrpStrDup("Takes into account dead zone caused by digitizer starting before the pulse.");
+    tt->val_offset = (char *) &raw_bin_start_range_km - &_start_;
+    tt->single_val.d = -0.3;
+    tt++;
+    
+    // Parameter 'raw_bin_spacing_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("raw_bin_spacing_km");
+    tt->descr = tdrpStrDup("Spacing of raw bins (km).");
+    tt->help = tdrpStrDup("The distance between the ray bins in km.");
+    tt->val_offset = (char *) &raw_bin_spacing_km - &_start_;
+    tt->single_val.d = 0.0075;
+    tt++;
+    
     // Parameter 'combined_hi_field_name'
     // ctype is 'char*'
     
