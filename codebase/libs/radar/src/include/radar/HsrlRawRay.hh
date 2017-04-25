@@ -89,14 +89,15 @@ public:
   const std::vector<float32> &getMolecular() const { return _molecular; }
   const std::vector<float32> &getCross() const { return _cross; }
 
-  // serialize into buffer for transmission
+  // serialize object into buffer for transmission
   // returns pointer to buffer
 
   char *serialize();
 
-  // dserialize from buffer
+  // dserialize from buffer into the object
+  // returns 0 on success, -1 on error
 
-  void dserialize(const void *buffer);
+  int dserialize(const char *buffer, int bufLen);
 
 protected:
 private:
@@ -151,6 +152,26 @@ private:
   int _fieldLen;
   int _bufLen;
   char *_packetBuf;
+
+  // swapping
+
+  // Swap the TCP header
+  
+  void _swapHdr(tcp_hdr_t *hdr);
+
+  /// Perform an in-place 64-bit word byte swap, if necessary, to produce
+  /// BE representation from machine representation, or vice-versa.
+  /// 
+  /// Array must be aligned on an 8-byte boundary in memory.
+  
+  void _swap64(void *array, size_t nbytes);
+  
+  /// Performs an in-place 32-bit word byte swap, if necessary, to produce
+  /// BE representation from machine representation, or vice-versa.
+  /// 
+  /// Array must be aligned on an 4-byte boundary in memory.
+  
+  void _swap32(void *array, size_t nbytes);
   
 };
 

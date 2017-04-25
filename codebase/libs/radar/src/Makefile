@@ -17,6 +17,7 @@ SUB_DIRS = \
 	dorade \
 	filter \
 	geom \
+	hsrl \
 	iwrf \
 	kdp \
 	moments \

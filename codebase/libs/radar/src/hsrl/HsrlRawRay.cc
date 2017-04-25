@@ -35,6 +35,7 @@
 
 #include <radar/HsrlRawRay.hh>
 #include <cstring>
+#include <iostream>
 using namespace std;
 
 ///////////////////////////////////////////////////////////////
@@ -102,7 +103,8 @@ void HsrlRawRay::setFields(int nGates,
 
 
 ///////////////////////////////////////////////////////////////
-// serialize into buffer for transmission
+// serialize object into buffer for transmission
+// returns pointer to buffer
 
 char *HsrlRawRay::serialize()
 
@@ -176,4 +178,166 @@ char *HsrlRawRay::serialize()
 
 }
 
+///////////////////////////////////////////////////////////////
+// dserialize from buffer into the object
+// returns 0 on success, -1 on error
+
+int HsrlRawRay::dserialize(const char *buffer, int bufLen)
+
+{
+
+  // check we have enough len for header
+
+  tcp_hdr_t hdr;
+  if (bufLen < (int) sizeof(hdr)) {
+    cerr << "ERROR - HsrlRawRay::dserialize()" << endl;
+    cerr << "  buffer too short" << endl;
+    cerr << "  bufLen: " << bufLen << endl;
+    cerr << "  min valid len: " << sizeof(hdr) << endl;
+    return -1;
+  }
+
+  // copy in header
+
+  memcpy(&hdr, buffer, sizeof(hdr));
+
+  // check if we need to swap
+  
+  int64_t id = hdr.id;
+  if (id != cookie) {
+    _swapHdr(&hdr);
+    if (hdr.id != cookie) {
+      cerr << "ERROR - HsrlRawRay::dserialize()" << endl;
+      cerr << "  unrecognized id: " << id << endl;
+      return -1;
+    }
+  }
+
+  // set members
+
+  _timeSecs = hdr.time_secs_utc;
+  _subSecs = (double) hdr.time_nano_secs / 1.0e9;
+  _totalEnergy = hdr.total_energy;
+  _polAngle = hdr.pol_angle;
+
+  // re-check the buffer length
+
+  int nGates = hdr.n_gates;
+  _fieldLen = nGates * sizeof(float32);
+  int bufSizeNeeded = sizeof(hdr) + _nFields * _fieldLen;
+  if (bufSizeNeeded > bufLen) {
+    cerr << "ERROR - HsrlRawRay::dserialize()" << endl;
+    cerr << "  buffer too short" << endl;
+    cerr << "  bufLen: " << bufLen << endl;
+    cerr << "  min valid len: " << bufSizeNeeded << endl;
+    return -1;
+  }
+
+  // populate the fields
+
+  int offset = sizeof(hdr);
+  const float32 *combinedHi = (float32 *) (buffer + offset);
+
+  offset += _fieldLen;
+  const float32 *combinedLo = (float32 *) (buffer + offset);
+
+  offset += _fieldLen;
+  const float32 *molecular = (float32 *) (buffer + offset);
+
+  offset += _fieldLen;
+  const float32 *cross = (float32 *) (buffer + offset);
+
+  setFields(nGates, combinedHi, combinedLo, molecular, cross);
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Swap the TCP header
+
+void HsrlRawRay::_swapHdr(tcp_hdr_t *hdr)
+{
+
+  // swap the 64-bit words
+
+  _swap64(hdr, 80);
+
+  // swap the 32-bit words
+
+  _swap32((char *) hdr + 80, 48);
+
+}
+  
+//////////////////////////////////////////////////////////////////////////
+//  Perform in-place 64-bit word byte swap, to produce
+//  BE representation from machine representation, or vice-versa.
+//  Array must be aligned.
+
+void HsrlRawRay::_swap64(void *array, size_t nbytes)
+  
+{
+
+  int ndoubles = nbytes / 8;
+  char *ptr = (char*) array;
+  for (int i = 0; i < ndoubles; i++) {
+    
+    // Copy the 8 bytes to 2 ui32's - Reversing 1st & 2nd
+    // PTR                 L1      L2
+    // 1 2 3 4 5 6 7 8 ->  5 6 7 8 1 2 3 4
+
+    int32_t l1,l2;
+    memcpy((void*)&l2,(void*)ptr,4);
+    memcpy((void*)&l1,(void*)(ptr+4),4);
+
+    // Reverse the 4 bytes of each ui32
+    // 5 6 7 8  -> 8 7 6 5
+    l1 = (((l1 & 0xff000000) >> 24) |
+	  ((l1 & 0x00ff0000) >> 8) |
+	  ((l1 & 0x0000ff00) << 8) |
+	  ((l1 & 0x000000ff) << 24));
+
+    // 1 2 3 4 -> 4 3 2 1
+    l2 = (((l2 & 0xff000000) >> 24) |
+	  ((l2 & 0x00ff0000) >> 8) |
+	  ((l2 & 0x0000ff00) << 8) |
+	  ((l2 & 0x000000ff) << 24));
+
+
+    // Copy the reversed value back into place
+    memcpy(ptr, &l1, 4);
+    memcpy(ptr + 4, &l2, 4);
+
+    ptr+=8;  // Move to the next 8 byte value
+
+  } // i
+
+}
+
+//////////////////////////////////////////////////////////////////////////
+//  Performs an in-place 32-bit word byte swap, if necessary, to produce
+//  BE representation from machine representation, or vice-versa.
+//  Array must be aligned.
+ 
+void HsrlRawRay::_swap32(void *array, size_t nbytes)
+  
+{
+
+  int nlongs = nbytes / sizeof(int32_t);
+  int32_t *this_long = (int32_t *) array;
+  
+  for (int i = 0; i < nlongs; i++) {
+
+    int32_t l = *this_long;
+    
+    *this_long = (((l & 0xff000000) >> 24) |
+		  ((l & 0x00ff0000) >> 8) |
+		  ((l & 0x0000ff00) << 8) |
+		  ((l & 0x000000ff) << 24));
+    
+    this_long++;
+
+  }
+
+}
 
