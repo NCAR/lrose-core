@@ -47,7 +47,6 @@
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
-#include "RawFile.hh"
 #include "HsrlSim.hh"
 using namespace std;
 
@@ -87,14 +86,14 @@ int HsrlSim::handleClient(Socket* socket)
 
   // read HSRL raw file into RadxVol
 
-  RadxVol vol;
-  RawFile rawFile(_params);
-  if (rawFile.readFromPath(_params.netcdf_file_path, vol)) {
-    cerr << "ERROR - HsrlSim::handleClient" << endl;
-    cerr << "  Cannot read in raw file: " << _params.netcdf_file_path << endl;
-    cerr << rawFile.getErrStr() << endl;
-    return -1;
-  }
+  // RadxVol vol;
+  // RawFile rawFile(_params);
+  // if (rawFile.readFromPath(_params.netcdf_file_path, vol)) {
+  //   cerr << "ERROR - HsrlSim::handleClient" << endl;
+  //   cerr << "  Cannot read in raw file: " << _params.netcdf_file_path << endl;
+  //   cerr << rawFile.getErrStr() << endl;
+  //   return -1;
+  // }
 
   // Loop forever, until client dies
 
@@ -104,7 +103,7 @@ int HsrlSim::handleClient(Socket* socket)
 
     // loop through the rays in the volume
     
-    vector<RadxRay *> &rays = vol.getRays();
+    vector<RadxRay *> &rays = _vol->getRays();
     for (size_t iray = 0; iray < rays.size(); iray++) {
       
       const RadxRay *ray = rays[iray];
@@ -168,6 +167,10 @@ int HsrlSim::handleClient(Socket* socket)
         return -1;
       }
       
+      if (_params.debug) {
+        cerr << "Sent ray to client" << endl;
+      }
+
       // sleep a bit
 
       umsleep(_params.delay_secs_between_rays * 1000.0);

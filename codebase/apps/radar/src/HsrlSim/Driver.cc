@@ -32,9 +32,11 @@
 #include <toolsa/pmu.h>
 #include <toolsa/umisc.h>
 #include <toolsa/DateTime.hh>
+#include <Radx/RadxVol.hh>
 
 #include "Driver.hh"
 #include "HsrlSim.hh"
+#include "RawFile.hh"
 
 using namespace std;
 
@@ -229,6 +231,23 @@ int Driver::_readParams(int argc, char **argv)
 int Driver::run()
 {
   
+  // read HSRL raw file into RadxVol
+
+  RadxVol vol;
+  RawFile rawFile(_params);
+  if (rawFile.readFromPath(_params.netcdf_file_path, vol)) {
+    cerr << "ERROR - Driver::run" << endl;
+    cerr << "  Cannot read in raw file: " << _params.netcdf_file_path << endl;
+    cerr << rawFile.getErrStr() << endl;
+    return -1;
+  }
+
+  // set the server to see the volume
+
+  _server->setVol(&vol);
+  
+  // wait for clients
+
   while(true) {
     _server->waitForClients();
   }

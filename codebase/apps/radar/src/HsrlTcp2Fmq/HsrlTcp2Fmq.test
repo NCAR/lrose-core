@@ -1,0 +1,168 @@
+/**********************************************************************
+ * TDRP params for HsrlTcp2Fmq
+ **********************************************************************/
+
+//======================================================================
+//
+// HsrlTcp2Fmq reads raw HSRL fields from the instrument server via 
+//   TCP/IP. It saves the data out to a file message queue (FMQ), which 
+//   can be read by multiple clients.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+//
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+//
+//
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+///////////// do_not_register_on_read /////////////////
+//
+// Option to only register with the process mapper during the write.
+//
+// Sometimes the reader keeps registering, but no data is being written 
+//   to the FMQ. If this parameter is true, we only register with procmap 
+//   during the write. So if no writes are occurring, no registrations 
+//   will occur and the auto_restarter will kill and restart this 
+//   application. This makes it robust when the reading hangs for some 
+//   reason.
+//
+//
+// Type: boolean
+//
+
+do_not_register_on_read = FALSE;
+
+//======================================================================
+//
+// TCP DETAILS.
+//
+//======================================================================
+ 
+///////////// hsrl_tcp_server_host ////////////////////
+//
+// Host name on which HSRL raw server is running.
+//
+//
+// Type: string
+//
+
+hsrl_tcp_server_host = "localhost";
+
+///////////// hsrl_tcp_server_port ////////////////////
+//
+// TCP/IP port on which HSRL server is running.
+//
+//
+// Type: int
+//
+
+hsrl_tcp_server_port = 12000;
+
+//======================================================================
+//
+// OUTPUT FMQ DETAILS.
+//
+//======================================================================
+ 
+///////////// output_fmq_path /////////////////////////
+//
+// Path to output FMQ.
+//
+// The FMQ consists of 2 files, ??.buf and ??.stat.
+//
+//
+// Type: string
+//
+
+output_fmq_path = "/tmp/fmq/hsrl_raw";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+//
+// This is the total size of the output FMQ buffer.
+//
+//
+// Type: int
+//
+
+output_fmq_size = 1000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in the output FMQ.
+//
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+//
+//
+// Type: int
+//
+
+output_fmq_nslots = 500;
+
+//======================================================================
+//
+// DATA MAPPER REGISTRATION.
+//
+// We let the data mapper know when we write a message.
+//
+//======================================================================
+ 
+///////////// data_mapper_report_interval /////////////
+//
+// Number of seconds between reports to DataMapper.
+//
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQ is written to. If <= 0, registration will not be performed.
+//
+//
+// Type: int
+//
+
+data_mapper_report_interval = 5;
+

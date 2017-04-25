@@ -45,6 +45,7 @@
 #include <string>
 #include <dsserver/ProcessServer.hh>
 #include <radar/HsrlRawRay.hh>
+#include <Radx/RadxVol.hh>
 #include "Params.hh"
 using namespace std;
 
@@ -56,11 +57,14 @@ public:
           const Params &params);
   
   virtual ~HsrlSim();
+
+  void setVol(RadxVol *vol) { _vol = vol; }
   
 protected:
   
   string _progName;
   const Params &_params;
+  RadxVol *_vol;
   
   // provide method missing in base class to handle client
   // Returns 0 on success, -1 on failure

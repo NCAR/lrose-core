@@ -200,6 +200,10 @@ int HsrlTcp2Fmq::_readFromServer()
 
 {
 
+  if (_params.debug) {
+    cerr << "Reading from server ...." << endl;
+  }
+
   // read data
 
   while (true) {
@@ -209,7 +213,7 @@ int HsrlTcp2Fmq::_readFromServer()
     }
 
     // read packet from HSRL server
-
+    
     if (_readMessage()) {
       if (!_sockTimedOut && !_unknownMsgId) {
         // error
@@ -218,6 +222,9 @@ int HsrlTcp2Fmq::_readFromServer()
       }
       // on timeout, skip to next message
       if (_sockTimedOut) {
+        if (_params.debug) {
+          cerr << " socket timed out" << endl;
+        }
         continue;
       }
     }
@@ -355,7 +362,7 @@ int HsrlTcp2Fmq::_readTcpPacket()
     return -1;
   }
   
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Read in HSRL raw ray packet" << endl;
     cerr << "  packetId: " << _packetId << endl;
     cerr << "  packetLen: " << _packetLen << endl;
@@ -415,8 +422,8 @@ int HsrlTcp2Fmq::_writeToOutputFmq()
     return -1;
   }
   
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "  Wrote msg, len, path: "
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "==>> Wrote msg, len, path: "
          << _inputBuf.getLen() << ", "
          << _params.output_fmq_path << endl;
   }

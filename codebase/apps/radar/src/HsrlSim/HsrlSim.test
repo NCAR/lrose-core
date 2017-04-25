@@ -1,0 +1,198 @@
+/**********************************************************************
+ * TDRP params for HsrlSim
+ **********************************************************************/
+
+//======================================================================
+//
+// HsrlSim listens for clients. When a client connects, it spawns a 
+//   child to handle the client. The child opens an HSRL raw NetCDF file, 
+//   and loops reading the file, creating raw rays and sending them to the 
+//   client.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// port ////////////////////////////////////
+//
+// Port number.
+//
+// The server listens on this port for client requests.
+//
+//
+// Type: int
+//
+
+port = 12000;
+
+///////////// max_clients /////////////////////////////
+//
+// Max number of clients supported.
+//
+//
+// Type: int
+//
+
+max_clients = 1;
+
+///////////// no_threads //////////////////////////////
+//
+// Option to prevent server from using a thread per client.
+//
+// For debugging purposes it it sometimes useful to suppress the use of 
+//   threads. Set no_threads to TRUE for this type of debugging.
+//
+//
+// Type: boolean
+//
+
+no_threads = FALSE;
+
+///////////// netcdf_file_path ////////////////////////
+//
+// Path of raw NetCDF file.
+//
+// We read the netCDF file and loop through the contents repeatedly, 
+//   forming rays and sending them to the client.
+//
+//
+// Type: string
+//
+
+netcdf_file_path = "/scr/eldora1/rsfdata/cset/hsrl/instrument/2015/07/07/raw/gvhsrl_20150707T160000_data_fl1.nc";
+
+///////////// delay_secs_between_rays /////////////////
+//
+// Delay between sending rays (secs).
+//
+// We need to simulate real-time ops, so we want to send data at 
+//   approximatley the correct rate.
+//
+//
+// Type: double
+//
+
+delay_secs_between_rays = 0.5;
+
+//======================================================================
+//
+// READING RAW NetCDF DATA FILES.
+//
+//======================================================================
+ 
+///////////// combine_bins_on_read ////////////////////
+//
+// Option to combine range gates on read.
+//
+// If true, the specified number of range gates will be combined on read 
+//   to create mean values with lower noisiness.
+//
+//
+// Type: boolean
+//
+
+combine_bins_on_read = FALSE;
+
+///////////// n_bins_per_gate /////////////////////////
+//
+// Number of bins to combine into a single gate.
+//
+// In range, we will combine this number of gates to produce a data set 
+//   with lower spatial resolution but less noiry data.
+//
+//
+// Type: int
+//
+
+n_bins_per_gate = 1;
+
+///////////// raw_bin_start_range_km //////////////////
+//
+// Start range to first bin (km).
+//
+// Takes into account dead zone caused by digitizer starting before the 
+//   pulse.
+//
+//
+// Type: double
+//
+
+raw_bin_start_range_km = -0.3;
+
+///////////// raw_bin_spacing_km //////////////////////
+//
+// Spacing of raw bins (km).
+//
+// The distance between the ray bins in km.
+//
+//
+// Type: double
+//
+
+raw_bin_spacing_km = 0.0075;
+
+///////////// combined_hi_field_name //////////////////
+//
+// Name of combined_hi field in netCDF file.
+//
+//
+// Type: string
+//
+
+combined_hi_field_name = "combined_hi";
+
+///////////// combined_lo_field_name //////////////////
+//
+// Name of combined_lo field in netCDF file.
+//
+//
+// Type: string
+//
+
+combined_lo_field_name = "combined_lo";
+
+///////////// molecular_field_name ////////////////////
+//
+// Name of molecular field in netCDF file.
+//
+//
+// Type: string
+//
+
+molecular_field_name = "molecular";
+
+///////////// cross_field_name ////////////////////////
+//
+// Name of cross field in netCDF file.
+//
+//
+// Type: string
+//
+
+cross_field_name = "cross";
+
