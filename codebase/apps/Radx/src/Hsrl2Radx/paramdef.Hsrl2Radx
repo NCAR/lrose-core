@@ -231,12 +231,110 @@ paramdef double {
   p_help = "The distance between the ray bins in km.";
 } raw_bin_spacing_km;
 
+
 //***************************************
 
-commentdef {
-  p_header = "Brad's test comment"; 
 
-}
+
+
+
+
+
+
+paramdef string {
+  p_default = "combined_hi";
+  p_descr = "Name of combined_hi field in netCDF file.";
+  p_help = "";
+} combined_hi_field_name;
+
+paramdef string {
+  p_default = "combined_lo";
+  p_descr = "Name of combined_lo field in netCDF file.";
+  p_help = "";
+} combined_lo_field_name;
+
+paramdef string {
+  p_default = "molecular";
+  p_descr = "Name of molecular field in netCDF file.";
+  p_help = "";
+} molecular_field_name;
+
+paramdef string {
+  p_default = "cross";
+  p_descr = "Name of cross field in netCDF file.";
+  p_help = "";
+} cross_field_name;
+
+
+
+paramdef string {
+  p_default = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/baseline_correction_20150601T0000.blc";
+  p_descr = "location of baseline calibration file.";
+  p_help = "";
+} baseline_calibration_path;
+
+paramdef string {
+  p_default = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/diff_default_geofile_20120201T0000.geo";
+  p_descr = "location of diff_default_geofile calibration file.";
+  p_help = "";
+} diff_default_geofile_path;
+
+paramdef string {
+  p_default = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/geofile_default_20150601T0000.geo";
+  p_descr = "location of geofile_default calibration file.";
+  p_help = "";
+} geofile_default_path;
+
+paramdef string {
+  p_default = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/afterpulse_default_20061001T0000.ap";
+  p_descr = "location of afterpulse_default calibration file.";
+  p_help = "";
+} afterpulse_default_path;
+
+paramdef string {
+  p_default = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/calvals_gvhsrl.txt";
+  p_descr = "location of calvals_gvhsrl calibration file.";
+  p_help = "";
+} calvals_gvhsrl_path;
+
+
+paramdef string {
+  p_default = "combined_hi_dead_time";
+  p_descr = "Name of combined_hi_dead_time field in CalVals file.";
+  p_help = "";
+} combined_hi_dead_time_name;
+
+paramdef string {
+  p_default = "combined_lo_dead_time";
+  p_descr = "Name of combined_lo_dead_time field in CalVals file.";
+  p_help = "";
+} combined_lo_dead_time_name;
+
+paramdef string {
+  p_default = "cross_pol_dead_time";
+  p_descr = "Name of cross_pol_dead_time field in CalVals file.";
+  p_help = "";
+} cross_pol_dead_time_name;
+
+paramdef string {
+  p_default = "molecular_dead_time";
+  p_descr = "Name of molecular_dead_time field in CalVals file.";
+  p_help = "";
+} molecular_dead_time_name;
+
+paramdef string {
+  p_default = "binwidth";
+  p_descr = "Name of binWidth field in CalVals file.";
+  p_help = "";
+} bin_width_name;
+
+paramdef string {
+  p_default = "i2_scan_adjustment";
+  p_descr = "Name of coefficient field in CalVals file.";
+  p_help = "";
+} scan_adjustment_name;
+
+
 
 
 //***************************************

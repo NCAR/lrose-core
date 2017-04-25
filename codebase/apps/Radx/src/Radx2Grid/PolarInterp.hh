@@ -37,6 +37,8 @@
 #define PolarInterp_HH
 
 #include "Interp.hh"
+#include <toolsa/TaThread.hh>
+#include <toolsa/TaThreadPool.hh>
 
 class PolarInterp : public Interp {
   
@@ -61,19 +63,12 @@ public:
 
   virtual int interpVol();
   
-  // get methods for threading
+  // get methods
 
   const Params &getParams() const { return _params; }
-  pthread_mutex_t *getDebugPrintMutex() { return &_debugPrintMutex; }
 
 protected:
 private:
-  
-  // threading
-  
-  deque<PolarThread *> _activeThreads;
-  deque<PolarThread *> _availThreads;
-  pthread_mutex_t _debugPrintMutex;
   
   // class for search matrix
 
@@ -136,8 +131,8 @@ private:
   void _initZLevels();
   void _initGrid();
   
-  void _initThreads();
-  static void *_computeInThread(void *thread_data);
+  void _createThreads();
+  void _freeThreads();
   
   void _allocOutputArrays();
   void _freeOutputArrays();
@@ -191,6 +186,27 @@ private:
   double _conditionAz(double az);
 
   int _writeOutputFile();
+
+  //////////////////////////////////////////////////////////////
+  // inner thread class for performing interpolation
+  
+  class PerformInterp : public TaThread
+  {
+  public:
+    // constructor
+    PerformInterp(PolarInterp *obj);
+    // set the el and az index
+    inline void setElIndex(int elIndex) { _elIndex = elIndex; }
+    inline void setAzIndex(int azIndex) { _azIndex = azIndex; }
+    // override run method
+    virtual void run();
+  private:
+    PolarInterp *_this; // context
+    int _elIndex; // elevation index in regular volume
+    int _azIndex; // azimuth index in regular volume
+  };
+  // instantiate thread pool for interpolation
+  TaThreadPool _threadPoolInterp;
 
 };
 

@@ -40,8 +40,8 @@
 #include "Interp.hh"
 #include <kd/kd.hh>
 #include <iostream>
-
-// class SvdData;
+#include <toolsa/TaThread.hh>
+#include <toolsa/TaThreadPool.hh>
 
 class ReorderInterp : public Interp {
   
@@ -68,21 +68,13 @@ public:
 
   virtual int interpVol();
   
-  // get methods for threading
+  // get params
 
   const Params &getParams() const { return _params; }
-  pthread_mutex_t *getDebugPrintMutex() { return &_debugPrintMutex; }
 
 protected:
 private:
 
-   // threading
-  
-  deque<ReorderThread *> _activeThreads;
-  deque<ReorderThread *> _availThreads;
-  pthread_mutex_t _debugPrintMutex;
-  pthread_mutex_t _kdTreeMutex;
-  
   // keeping track of points in radar space
 
   typedef struct {
@@ -139,8 +131,8 @@ private:
   void _initZLevels();
   void _initGrid();
   
-  void _initThreads();
-  static void *_computeInThread(void *thread_data);
+  void _createThreads();
+  void _freeThreads();
   
   void _allocOutputArrays();
   void _freeOutputArrays();
@@ -149,7 +141,7 @@ private:
   void _computeRadarPoints();
   void _computeTagGates(int nGates);
 
-  void _computeGridRelative();
+  void _initProjectionLocal();
   void _computeGridRelRow(int iz, int iy, GridLoc **loc);
 
   void _buildKdTree();
@@ -159,7 +151,6 @@ private:
   void _interpSingleThreaded();
   void _interpMultiThreaded();
 
-  // void _interpRow(int iz, int iy);
   void _interpPlane(int iz);
   void _interpPoint(const NeighborProps &neighborProps, const GridLoc &loc);
   
@@ -181,10 +172,6 @@ private:
                             int iz, int iy, int ix,
 			    const GridLoc &loc,
                             const vector<radar_point_t> &interpPts);
-  // bool _computeInterpSvdLookup(SvdData *svd, 
-  // 			       int ifield, int iz, int iy, int ix, 
-  // 			       const vector<radar_point_t> &interpPts,
-  // 			       double &v);
   bool _computeSvd(int ifield, int iz, int iy, int ix, const GridLoc &loc,
 		   const vector<radar_point_t> &interpPts, double &v);
   void _computeMinMax(const vector<double> &bb,
@@ -196,18 +183,47 @@ private:
 				    int iz, int iy, int ix,
 				    const vector<radar_point_t> &interpPts);
 
-  // bool _collectLocalData(int ifield, const vector<radar_point_t> &interpPts,
-  // 			 vector<double> &b, double &missing) const;
+  bool _getData(int ifield, const Interp::Ray *ray, 
+                int igate, double &v);
 
+  bool _getDataAllowMissing(int ifield, const Interp::Ray *ray,
+                            int igate, double &v, double &missing,
+                            bool &isMissing);
+    
   bool _collectLocalData(int ifield, vector<radar_point_t> &interpPts,
-			 const GridLoc &loc, vector<double> &b) const;
+			 const GridLoc &loc, vector<double> &b);
 
   bool _collectLocalFoldedData(int ifield, 
 			       vector<radar_point_t> &interpPts,
 			       vector<double> &x,
-			       vector<double> &y) const;
+			       vector<double> &y);
 
   int _writeOutputFile();
+
+  //////////////////////////////////////////////////////////////
+  // inner thread class for performing interpolation
+  
+  class PerformInterp : public TaThread
+  {  
+  public:
+    // constructor
+    PerformInterp(ReorderInterp *obj);
+    // set the z index
+    inline void setZIndex(int zIndex) { _zIndex = zIndex; }
+    // override run method
+    virtual void run();
+  private:
+    ReorderInterp *_this; // context
+    int _zIndex; // grid index of z plane
+  };
+  // instantiate thread pool for interpolation
+  TaThreadPool _threadPoolInterp;
+
+  // threading control
+  
+  pthread_mutex_t _kdTreeMutex;
+  
+
 };
 
 #endif

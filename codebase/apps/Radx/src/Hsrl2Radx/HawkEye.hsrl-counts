@@ -414,16 +414,62 @@ fields = {
     units = "K",
     color_map = "tempK.colors",
     shortcut = "a"
-  }
-  ,
-  {
+  } 
+  ,  
+  { 
     label = "pressure",
     raw_name = "pressure",
     filtered_name = "",
     units = "mb",
     color_map = "number_log.colors",
     shortcut = "b"
+  } 
+  ,
+  {
+    label = "volDepol",
+    raw_name = "volDepol",
+    filtered_name = "",
+    units = "",
+    color_map = "number_log_n3.colors",
+    shortcut = "c"
+  } 
+  ,
+  {
+    label = "backscatRatio",
+    raw_name = "backscatRatio",
+    filtered_name = "",
+    units = "",
+    color_map = "number_log_n1.colors",
+    shortcut = "d"
+  } 
+  ,
+  {
+    label = "partDepol",
+    raw_name = "partDepol",
+    filtered_name = "",
+    units = "",
+    color_map = "number_log_n3.colors",
+    shortcut = "e"
+  } 
+  ,
+  {
+    label = "backscatCoeff",
+    raw_name = "backscatCoeff",
+    filtered_name = "",
+    units = "",
+    color_map = "number_log_n5.colors",
+    shortcut = "f"
   }
+  , 
+  {
+    label = "extinction",
+    raw_name = "extinction",
+    filtered_name = "",
+    units = "",
+    color_map = "number_log_n2.colors",
+    shortcut = "g"
+  }
+ 
 };
 
 ///////////// background_render_mins //////////////////

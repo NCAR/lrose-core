@@ -35,6 +35,7 @@
 
 #include <Radx/Radx.hh>
 #include <Radx/RadxCfactors.hh>
+#include <Radx/RadxXml.hh>
 using namespace std;
 
 /////////////////////////////////////////////////////////
@@ -115,6 +116,37 @@ void RadxCfactors::print(ostream &out) const
   out << "  rotationCorr: " << _rotationCorr << endl;
   out << "  tiltCorr: " << _tiltCorr << endl;
   out << "============================================" << endl;
+
+}
+
+/////////////////////////////////////////////////////////
+// convert to XML
+
+void RadxCfactors::convert2Xml(string &xml, int level /* = 0 */)  const
+  
+{
+
+  xml.clear();
+  xml += RadxXml::writeStartTag("RadxCfactors", level);
+
+  xml += RadxXml::writeDouble("azimuthCorr", level + 1, _azimuthCorr);
+  xml += RadxXml::writeDouble("elevationCorr", level + 1, _elevationCorr);
+  xml += RadxXml::writeDouble("rangeCorr", level + 1, _rangeCorr);
+  xml += RadxXml::writeDouble("longitudeCorr", level + 1, _longitudeCorr);
+  xml += RadxXml::writeDouble("latitudeCorr", level + 1, _latitudeCorr);
+  xml += RadxXml::writeDouble("pressureAltCorr", level + 1, _pressureAltCorr);
+  xml += RadxXml::writeDouble("altitudeCorr", level + 1, _altitudeCorr);
+  xml += RadxXml::writeDouble("ewVelCorr", level + 1, _ewVelCorr);
+  xml += RadxXml::writeDouble("nsVelCorr", level + 1, _nsVelCorr);
+  xml += RadxXml::writeDouble("vertVelCorr", level + 1, _vertVelCorr);
+  xml += RadxXml::writeDouble("headingCorr", level + 1, _headingCorr);
+  xml += RadxXml::writeDouble("rollCorr", level + 1, _rollCorr);
+  xml += RadxXml::writeDouble("pitchCorr", level + 1, _pitchCorr);
+  xml += RadxXml::writeDouble("driftCorr", level + 1, _driftCorr);
+  xml += RadxXml::writeDouble("rotationCorr", level + 1, _rotationCorr);
+  xml += RadxXml::writeDouble("tiltCorr", level + 1, _tiltCorr);
+
+  xml += RadxXml::writeEndTag("RadxCFactors", level);
 
 }
 

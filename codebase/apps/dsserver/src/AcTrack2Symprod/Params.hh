@@ -57,6 +57,13 @@ public:
   } debug_t;
 
   typedef enum {
+    TIME_LABEL_YYYY_MM_DD_HH_MM_SS = 0,
+    TIME_LABEL_YYYY_MM_DD_HH_MM = 1,
+    TIME_LABEL_HH_MM_SS = 2,
+    TIME_LABEL_HH_MM = 3
+  } time_label_format_t;
+
+  typedef enum {
     HORIZ_ALIGN_LEFT = 0,
     HORIZ_ALIGN_CENTER = 1,
     HORIZ_ALIGN_RIGHT = 2
@@ -481,6 +488,22 @@ public:
   callsign_color_t *_callsign_colors;
   int callsign_colors_n;
 
+  tdrp_bool_t add_time_labels;
+
+  char* time_label_color;
+
+  int time_label_interval_secs;
+
+  time_label_format_t time_label_format;
+
+  label_offset_t time_label_offset;
+
+  int *_time_label_icon;
+  int time_label_icon_n;
+  int **__time_label_icon;
+  int time_label_icon_n1;
+  int time_label_icon_n2;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -488,7 +511,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[57];
+  mutable TDRPtable _table[64];
 
   const char *_className;
 

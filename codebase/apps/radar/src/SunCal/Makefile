@@ -47,6 +47,9 @@ LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_CPPC_CFLAGS =
 
+C_SRCS = \
+	sunscan_nexrad.c
+
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \

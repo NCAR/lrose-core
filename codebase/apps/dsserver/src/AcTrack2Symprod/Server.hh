@@ -219,6 +219,10 @@ private:
 
   bool _acceptPoint(double lat, double lon);
 
+  void _addTimeLabels(Symprod &prod,
+                      const Params &params,
+                      const vector<location_t> &track);
+
 };
 
 #endif

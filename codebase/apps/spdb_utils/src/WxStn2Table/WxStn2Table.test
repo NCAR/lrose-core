@@ -1,0 +1,275 @@
+/**********************************************************************
+ * TDRP params for WxStn2Table
+ **********************************************************************/
+
+//======================================================================
+//
+// WxStn2Table reads surface station entries from an SPDB data base, and 
+//   based on the specified parameters in the parameter file, reformats 
+//   these into a text table.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL to spdb data.
+//
+// This can either be (a) the path to the directory or (b) a url of the 
+//   form 'spdbp:://hostname::dir'. For (a), if the path starts with '/' 
+//   or '.', it will be treated as an absolute path. If not, it will be 
+//   relative to DATA_DIR. For (b) the dir is relative to DATA_DIR on the 
+//   host specified by hostname.
+//
+//
+// Type: string
+//
+
+input_url = "/tmp/spdb/test";
+
+///////////// station_names ///////////////////////////
+//
+// Names of stations to be included.
+//
+// This should be a valid station name. May be a comma-delimited list. 
+//   If empty, or 'all', then all stations are printed.
+//
+//
+// Type: string
+//
+
+station_names = "all";
+
+///////////// start_time //////////////////////////////
+//
+// The start time for extracting the data.
+//
+// Can be overridden by specifying -start on the command line.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+start_time = {
+    year = 2015,
+    month = 05,
+    day = 15,
+    hour = 0,
+    min = 0,
+    sec = 0
+};
+
+///////////// end_time ////////////////////////////////
+//
+// The end time for extracting the data.
+//
+// Can be overridden by specifying -end on the command line.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+end_time = {
+    year = 2015,
+    month = 07,
+    day = 17,
+    hour = 0,
+    min = 0,
+    sec = 0
+};
+
+//======================================================================
+//
+// Specify fields to be printed.
+//
+//======================================================================
+ 
+///////////// fields //////////////////////////////////
+//
+// List of fields to be printed.
+//
+// Specify the fields you want. The first line in the file will start 
+//   with #, followed by the field list.
+//
+//
+// Type: enum
+// Options:
+//     YEAR
+//     MONTH
+//     DAY
+//     HOUR
+//     MIN
+//     SEC
+//     UNIX_TIME_SECS
+//     UNIX_TIME_DAYS
+//     LATITUDE
+//     LONGITUDE
+//     ALTITUDE_M
+//     TEMP_C
+//     DEWPT_C
+//     RH_PERCENT
+//     WIND_DIRN_DEGT
+//     WIND_SPEED_MPS
+//     WIND_GUST_MPS
+//     PRESSURE_HPA
+//     LIQUID_ACCUM_MM
+//     PRECIP_RATE_MM_PER_HR
+//     VISIBILITY_KM
+//     RVR_KM
+//     CEILING_M
+// 1D array - variable length.
+//
+
+fields = {
+  STATION_NAME,
+  LATITUDE,
+  LONGITUDE,
+  ALTITUDE_M,
+  YEAR,
+  MONTH,
+  DAY,
+  HOUR,
+  MIN,
+  SEC,
+  UNIX_TIME_SECS,
+  UNIX_TIME_DAYS,
+  TEMP_C,
+  DEWPT_C,
+  RH_PERCENT,
+  WIND_DIRN_DEGT,
+  WIND_SPEED_MPS,
+  WIND_GUST_MPS,
+  PRESSURE_HPA,
+  LIQUID_ACCUM_MM,
+  PRECIP_RATE_MM_PER_HR,
+  VISIBILITY_KM,
+  CEILING_M
+};
+
+//======================================================================
+//
+// OPTIONAL BOUNDING BOX.
+//
+//======================================================================
+ 
+///////////// apply_bounding_box //////////////////////
+//
+// Apply a bounding box to the data.
+//
+// If set, only consider stations within the bounding box.
+//
+//
+// Type: boolean
+//
+
+apply_bounding_box = TRUE;
+
+///////////// bounding_box ////////////////////////////
+//
+// Bounding box limits.
+//
+// See 'apply_bounding_box'. Longitude values should be between -180 and 
+//   +180.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double min_lon;
+//      double max_lon;
+//      double min_lat;
+//      double max_lat;
+//   }
+//
+//
+
+bounding_box = {
+    min_lon = -100.17,
+    max_lon = -98.94,
+    min_lat = 38.05,
+    max_lat = 39.05
+};
+
+//======================================================================
+//
+// OUTPUT DETAILS.
+//
+//======================================================================
+ 
+///////////// add_commented_header ////////////////////
+//
+// If true, write a commented header at the start of the output.
+//
+//
+// Type: boolean
+//
+
+add_commented_header = TRUE;
+
+///////////// comment_character ///////////////////////
+//
+// Character at start of comment lines.
+//
+// Each comment line will be start with this character.
+//
+//
+// Type: string
+//
+
+comment_character = "#";
+
+///////////// column_delimiter ////////////////////////
+//
+// Delimiter between columns.
+//
+//
+// Type: string
+//
+
+column_delimiter = ",";
+

@@ -988,6 +988,10 @@ public:
   
   void printWithData(ostream &out) const;
 
+  /// convert to XML
+
+  void convert2Xml(string &xml, int level = 0) const;
+  
   //@}
 
 protected:

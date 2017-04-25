@@ -61,417 +61,438 @@
 */
 
 /*! 
-  Base object is thrown if a netCDF exception is encountered.
-  An unsatisfactory return from a call to one of the netCDF C-routines 
-  generates an exception using an object inheriting this class.  All other netCDF-related
-  errors  including those originating in the C++ binding, generates an NcxxException.
+  Base object is thrown if a netCDF exception is encountered.  An unsatisfactory
+  return from a call to one of the netCDF C-routines generates an exception
+  using an object inheriting this class.  All other netCDF-related errors
+  including those originating in the C++ binding, generates an NcxxException.
 */
 class NcxxException : public std::exception {
+
 public:
-  //NcxxException(const string& complaint,const char* fileName,int lineNumber);
-  NcxxException(const char* complaint,const char* fileName,int lineNumber);
-  NcxxException(int errorCode, const char* complaint,const char* fileName,int lineNumber);
+
+  NcxxException(std::string complaint, 
+                std::string fileName,
+                int lineNumber);
+
+  NcxxException(int errorCode,
+                std::string complaint,
+                std::string fileName,
+                int lineNumber);
+
   NcxxException(const NcxxException& e) throw();
+
   NcxxException& operator=(const NcxxException& e) throw();
+
   virtual ~NcxxException() throw();
-  const char* what() const throw();
+
+  const char *what() const throw();
+  const std::string whatStr() const throw();
+
   int errorCode() const throw();
+
 private:
-  std::string* what_msg;
-  int ec;
+
+  std::string _whatMsg;
+  int _ec;
+
 };
 
 
-/*! Thrown if the specified netCDF ID does not refer to an open netCDF dataset. */
+/*!
+  Thrown if the specified netCDF ID does not refer to an open netCDF
+  dataset.
+*/
+
 class NcxxBadId : public NcxxException
 {
 public:
-  NcxxBadId(const char* complaint,const char* file,int line);
+  NcxxBadId(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if too many netcdf files are open. */
 class NcxxNFile : public NcxxException
 {
 public:
-  NcxxNFile(const char* complaint,const char* file,int line);
+  NcxxNFile(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if, having set NC_NOCLOBBER, the specified dataset already exists. */
 class NcxxExist : public NcxxException
 {
 public:
-  NcxxExist(const char* complaint,const char* file,int line);
+  NcxxExist(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if not a netCDF id.  */
 class NcxxInvalidArg : public NcxxException
 {
 public:
-  NcxxInvalidArg(const char* complaint,const char* file,int line);
+  NcxxInvalidArg(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if invalid argument. */
 class NcxxInvalidWrite : public NcxxException
 {
 public:
-  NcxxInvalidWrite(const char* complaint,const char* file,int line);
+  NcxxInvalidWrite(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if operation not allowed in data mode. */
 class NcxxNotInDefineMode : public NcxxException
 {
 public:
-  NcxxNotInDefineMode(const char* complaint,const char* file,int line);
+  NcxxNotInDefineMode(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if operation not allowed in defined mode. */
 class NcxxInDefineMode : public NcxxException
 {
 public:
-  NcxxInDefineMode(const char* complaint,const char* file,int line);
+  NcxxInDefineMode(std::string complaint,std::string file,int line);
 };
 
 /*! 
-  Index exceeds dimension bound.
-  Exception may  be generated during operations to get or put  netCDF variable data.
-  The exception is thrown if the specified indices were out of range for the rank of the 
-  specified variable. For example, a negative index or an index that is larger than 
-  the corresponding dimension length will cause an error.
+  Index exceeds dimension bound.  Exception may be generated during operations
+  to get or put netCDF variable data.  The exception is thrown if the specified
+  indices were out of range for the rank of the specified variable. For example,
+  a negative index or an index that is larger than the corresponding dimension
+  length will cause an error.
 */
 class NcxxInvalidCoords : public NcxxException
 {
 public:
-  NcxxInvalidCoords(const char* complaint,const char* file,int line);
+  NcxxInvalidCoords(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if NC_MAX_DIMS is exceeded. */
 class NcxxMaxDims : public NcxxException
 {
 public:
-  NcxxMaxDims(const char* complaint,const char* file,int line);
+  NcxxMaxDims(std::string complaint,std::string file,int line);
 };
 
-/*! Thrown if string match to name is in use. */
+/*! Thrown if std::string match to name is in use. */
 class NcxxNameInUse : public NcxxException
 {
 public:
-  NcxxNameInUse(const char* complaint,const char* file,int line);
+  NcxxNameInUse(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if attribute is not found. */
 class NcxxNotAtt : public NcxxException
 {
 public:
-  NcxxNotAtt(const char* complaint,const char* file,int line);
+  NcxxNotAtt(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if Nc_MAX_ATTRS is exceeded. */
 class NcxxMaxAtts : public NcxxException
 {
 public:
-  NcxxMaxAtts(const char* complaint,const char* file,int line);
+  NcxxMaxAtts(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if not a valid netCDF data type. */
 class NcxxBadType : public NcxxException
 {
 public:
-  NcxxBadType(const char* complaint,const char* file,int line);
+  NcxxBadType(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if an invalid dimension id or name. */
 class NcxxBadDim : public NcxxException
 {
 public:
-  NcxxBadDim(const char* complaint,const char* file,int line);
+  NcxxBadDim(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if Nc_UNLIMITED is in the wrong index. */
 class NcxxUnlimPos : public NcxxException
 {
 public:
-  NcxxUnlimPos(const char* complaint,const char* file,int line);
+  NcxxUnlimPos(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if NC_MAX_VARS is exceeded. */
 class NcxxMaxVars : public NcxxException
 {
 public:
-  NcxxMaxVars(const char* complaint,const char* file,int line);
+  NcxxMaxVars(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if variable is not found. */
 class NcxxNotVar : public NcxxException
 {
 public:
-  NcxxNotVar(const char* complaint,const char* file,int line);
+  NcxxNotVar(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if the action is prohibited on the NC_GLOBAL varid. */
 class NcxxGlobal : public NcxxException
 {
 public:
-  NcxxGlobal(const char* complaint,const char* file,int line);
+  NcxxGlobal(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if not a netCDF file. */
 class NcxxNotNCF : public NcxxException
 {
 public:
-  NcxxNotNCF(const char* complaint,const char* file,int line);
+  NcxxNotNCF(std::string complaint,std::string file,int line);
 };
 
-/*! Thrown if in FORTRAN, string is too short. */
+/*! Thrown if in FORTRAN, std::string is too short. */
 class NcxxSts : public NcxxException
 {
 public:
-  NcxxSts(const char* complaint,const char* file,int line);
+  NcxxSts(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if NC_MAX_NAME is exceeded. */
 class NcxxMaxName : public NcxxException
 {
 public:
-  NcxxMaxName(const char* complaint,const char* file,int line);
+  NcxxMaxName(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if NC_UNLIMITED size is already in use. */
 class NcxxUnlimit : public NcxxException
 {
 public:
-  NcxxUnlimit(const char* complaint,const char* file,int line);
+  NcxxUnlimit(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if nc_rec op when there are no record vars. */
 class NcxxNoRecVars : public NcxxException
 {
 public:
-  NcxxNoRecVars(const char* complaint,const char* file,int line);
+  NcxxNoRecVars(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if attempt to convert between text and numbers. */
 class NcxxCharConvert : public NcxxException
 {
 public:
-  NcxxCharConvert(const char* complaint,const char* file,int line);
+  NcxxCharConvert(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if edge+start exceeds dimension bound. */
 class NcxxEdge : public NcxxException
 {
 public:
-  NcxxEdge(const char* complaint,const char* file,int line);
+  NcxxEdge(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if illegal stride. */
 class NcxxStride : public NcxxException
 {
 public:
-  NcxxStride(const char* complaint,const char* file,int line);
+  NcxxStride(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if attribute or variable name contains illegal characters. */
 class NcxxBadName : public NcxxException
 {
 public:
-  NcxxBadName(const char* complaint,const char* file,int line);
+  NcxxBadName(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if math result not representable. */
 class NcxxRange : public NcxxException
 {
 public:
-  NcxxRange(const char* complaint,const char* file,int line);
+  NcxxRange(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if memory allocation (malloc) failure. */
 class NcxxNoMem : public NcxxException
 {
 public:
-  NcxxNoMem(const char* complaint,const char* file,int line);
+  NcxxNoMem(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if one or more variable sizes violate format constraints */
 class NcxxVarSize : public NcxxException
 {
 public:
-  NcxxVarSize(const char* complaint,const char* file,int line);
+  NcxxVarSize(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if invalid dimension size. */
 class NcxxDimSize : public NcxxException
 {
 public:
-  NcxxDimSize(const char* complaint,const char* file,int line);
+  NcxxDimSize(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if file likely truncated or possibly corrupted. */
 class NcxxTrunc : public NcxxException
 {
 public:
-  NcxxTrunc(const char* complaint,const char* file,int line);
+  NcxxTrunc(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if an error was reported by the HDF5 layer. */
 class NcxxHdfErr : public NcxxException
 {
 public:
-  NcxxHdfErr(const char* complaint,const char* file,int line);
+  NcxxHdfErr(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if cannot read. */
 class NcxxCantRead : public NcxxException
 {
 public:
-  NcxxCantRead(const char* complaint,const char* file,int line);
+  NcxxCantRead(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if cannot write. */
 class NcxxCantWrite : public NcxxException
 {
 public:
-  NcxxCantWrite(const char* complaint,const char* file,int line);
+  NcxxCantWrite(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if cannot create. */
 class NcxxCantCreate : public NcxxException
 {
 public:
-  NcxxCantCreate(const char* complaint,const char* file,int line);
+  NcxxCantCreate(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if file meta. */
 class NcxxFileMeta : public NcxxException
 {
 public:
-  NcxxFileMeta(const char* complaint,const char* file,int line);
+  NcxxFileMeta(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if dim meta. */
 class NcxxDimMeta : public NcxxException
 {
 public:
-  NcxxDimMeta(const char* complaint,const char* file,int line);
+  NcxxDimMeta(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if attribute meta. */
 class NcxxAttMeta : public NcxxException
 {
 public:
-  NcxxAttMeta(const char* complaint,const char* file,int line);
+  NcxxAttMeta(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if variable meta. */
 class NcxxVarMeta : public NcxxException
 {
 public:
-  NcxxVarMeta(const char* complaint,const char* file,int line);
+  NcxxVarMeta(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if no compound. */
 class NcxxNoCompound : public NcxxException
 {
 public:
-  NcxxNoCompound(const char* complaint,const char* file,int line);
+  NcxxNoCompound(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if attribute exists. */
 class NcxxAttExists : public NcxxException
 {
 public:
-  NcxxAttExists(const char* complaint,const char* file,int line);
+  NcxxAttExists(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if attempting netcdf-4 operation on netcdf-3 file. */
 class NcxxNotNc4 : public NcxxException
 {
 public:
-  NcxxNotNc4(const char* complaint,const char* file,int line);
+  NcxxNotNc4(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if attempting netcdf-4 operation on strict nc3 netcdf-4 file. */
 class NcxxStrictNc3 : public NcxxException
 {
 public:
-  NcxxStrictNc3(const char* complaint,const char* file,int line);
+  NcxxStrictNc3(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if bad group id. */
 class NcxxBadGroupId : public NcxxException
 {
 public:
-  NcxxBadGroupId(const char* complaint,const char* file,int line);
+  NcxxBadGroupId(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if bad type id. */
 class NcxxBadTypeId : public NcxxException
 {
 public:
-  NcxxBadTypeId(const char* complaint,const char* file,int line);
+  NcxxBadTypeId(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if bad field id. */
 class NcxxBadFieldId : public NcxxException
 {
 public:
-  NcxxBadFieldId(const char* complaint,const char* file,int line);
+  NcxxBadFieldId(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if cannot find the field id. */
 class NcxxUnknownName : public NcxxException
 {
 public:
-  NcxxUnknownName(const char* complaint,const char* file,int line);
+  NcxxUnknownName(std::string complaint,std::string file,int line);
 };
 
 /*! Thrown if cannot return a netCDF group. */
 class NcxxEnoGrp : public NcxxException
 {
 public:
-  NcxxEnoGrp(const char* complaint,const char* file,int line);
+  NcxxEnoGrp(std::string complaint,std::string file,int line);
 };
 
 /*! 
   Thrown if the requested operation is on a NULL group.
-    
-  This exception is thrown if an operation on a NcxxGroup object is requested which is empty. To test if the object is empty used NcxxGroup::isNull()
+  This exception is thrown if an operation on a NcxxGroup object is requested
+  which is empty. To test if the object is empty used NcxxGroup::isNull()
 */
 class NcxxNullGrp : public NcxxException
 {
 public:
-  NcxxNullGrp(const char* complaint,const char* file,int line);
+  NcxxNullGrp(std::string complaint,std::string file,int line);
 };
 
 /*! 
   Thrown if the requested operation is on a NULL type.
-    
-  This exception is thrown if an operation on a NcxxType object is requested which is empty. To test if the object is empty used NcxxType::isNull()
+  This exception is thrown if an operation on a NcxxType object is requested
+  which is empty. To test if the object is empty used NcxxType::isNull()
 */
 class NcxxNullType : public NcxxException
 {
 public:
-  NcxxNullType(const char* complaint,const char* file,int line);
+  NcxxNullType(std::string complaint,std::string file,int line);
 };
 
 /*! 
-  Thrown if the requested operation is on a NULL dimension.
-    
-  This exception is thrown if an operation on a NcxxDim object is requested which is empty. To test if the object is empty used NcxxDim::isNull()
+  Thrown if the requested operation is on a NULL dimension.  This exception is
+  thrown if an operation on a NcxxDim object is requested which is empty. To
+  test if the object is empty used NcxxDim::isNull()
 */
 class NcxxNullDim : public NcxxException
 {
 public:
-  NcxxNullDim(const char* complaint,const char* file,int line);
+  NcxxNullDim(std::string complaint,std::string file,int line);
 };
 
 /*! 
-  Thrown if an operation to set the chunking, endianness, fill of a NcxxVar object is issued after a 
-  call to NcxxVar::getVar or NcxxVar::putVar has been made.
+  Thrown if an operation to set the chunking, endianness, fill of a NcxxVar
+  object is issued after a call to NcxxVar::getVar or NcxxVar::putVar has been
+  made.
 */
 class NcxxElateDef : public NcxxException
 {
 public:
-  NcxxElateDef(const char* complaint,const char* file,int line);
+  NcxxElateDef(std::string complaint,std::string file,int line);
 };
 
 #endif

@@ -2291,7 +2291,7 @@ int RadxEvad::_writeNetcdfOutput()
     cerr << file.getErrStr() << endl;
     return -1;
   }
-  file.addAttr(zVar, "long_name", "height above mean sea level");
+  file.addAttr(zVar, "long_name", "height above radar");
   file.addAttr(zVar, "positive", "up");
   file.addAttr(zVar, "azis", "Z");
 

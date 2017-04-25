@@ -3184,41 +3184,42 @@ int NcfRadxFile::_writeFieldVariables()
   // loop through the list of unique fields names in this volume
 
   int iret = 0;
-  for (size_t ii = 0; ii < _uniqueFieldNames.size(); ii++) {
+  for (size_t ifield = 0; ifield < _uniqueFieldNames.size(); ifield++) {
       
-    const string &name = _uniqueFieldNames[ii];
+    const string &name = _uniqueFieldNames[ifield];
 
     // make copy of the field
-
+    
     RadxField *copy = _writeVol->copyField(name);
-    
-    // write it out
-    
-    if (copy != NULL) {
-      // create variable
-      NcVar *var = _createFieldVar(*copy);
-      if (var != NULL) {
-        if (_writeFieldVar(var, copy)) {
-          iret = -1;
-        }
-      } else {
-        _addErrStr("ERROR - NcfRadxFile::_writeFieldVariables");
-        _addErrStr("  Cannot create field: ", name);
-        return -1;
-      }
-      // free up
-      delete copy;
-      if (_debug) {
-        cerr << "  ... writing field: " << name << endl;
-      }
-    } else {
+    if (copy == NULL) {
       if (_debug) {
         cerr << "  ... cannot find field: " << name
              << " .... skipping" << endl;
       }
+      continue;
     }
     
-  }
+    // write it out
+    
+    // create variable
+    NcVar *var = _createFieldVar(*copy);
+    if (var != NULL) {
+      if (_writeFieldVar(var, copy)) {
+        iret = -1;
+      }
+    } else {
+      _addErrStr("ERROR - NcfRadxFile::_writeFieldVariables");
+      _addErrStr("  Cannot create field: ", name);
+      delete copy;
+      return -1;
+    }
+    // free up
+    delete copy;
+    if (_debug) {
+      cerr << "  ... writing field: " << name << endl;
+    }
+    
+  } // ifield
 
   if (iret) {
     _addErrStr("ERROR - NcfRadxFile::_writeFieldVariables");

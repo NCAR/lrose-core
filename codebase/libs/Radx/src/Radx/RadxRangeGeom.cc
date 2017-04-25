@@ -34,6 +34,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <Radx/RadxRangeGeom.hh>
+#include <Radx/RadxXml.hh>
 #include <cmath>
 using namespace std;
 
@@ -149,3 +150,23 @@ void RadxRangeGeom::print(ostream &out) const
   out << "    gateSpacingKm: " << _gateSpacingKm << endl;
 
 }
+
+/////////////////////////////////////////////////////////
+// convert to XML
+
+void RadxRangeGeom::convert2Xml(string &xml, int level /* = 0 */)  const
+  
+{
+
+  xml.clear();
+  xml += RadxXml::writeStartTag("RadxRangeGeom", level);
+
+  xml += RadxXml::writeBoolean("rangeGeomSet", level + 1, _rangeGeomSet);
+  xml += RadxXml::writeDouble("startRangeKm", level + 1, _startRangeKm);
+  xml += RadxXml::writeDouble("gateSpacingKm", level + 1, _gateSpacingKm);
+
+  xml += RadxXml::writeEndTag("RadxRangeGeom", level);
+
+
+}
+

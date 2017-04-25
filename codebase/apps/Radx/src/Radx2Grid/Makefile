@@ -56,8 +56,7 @@ HDRS = \
 	PolarInterp.hh \
 	Radx2Grid.hh \
 	ReorderInterp.hh \
-	SatInterp.hh \
-	Thread.hh
+	SatInterp.hh
 
 CPPC_SRCS = \
 	Params.cc \
@@ -71,8 +70,7 @@ CPPC_SRCS = \
 	Radx2Grid.cc \
 	ReorderInterp.cc \
 	SatInterp.cc \
-	SvdData.cc \
-	Thread.cc
+	SvdData.cc
 
 #
 # tdrp macros

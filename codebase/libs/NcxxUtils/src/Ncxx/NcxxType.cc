@@ -210,3 +210,28 @@ string NcxxType::getTypeClassName() const{
   // we never get here!
   return "Dummy";
 }
+
+///////////////////////////////////////////////////////
+// Check if this is a complex type
+// i.e. NC_VLEN, NC_OPAQUE, NC_ENUM, or NC_COMPOUND
+
+bool NcxxType::isComplex() const {
+
+  switch (myId) {
+    case NC_BYTE    : return false;
+    case NC_UBYTE   : return false;
+    case NC_CHAR    : return false;
+    case NC_SHORT   : return false;
+    case NC_USHORT  : return false;
+    case NC_INT     : return false;
+    case NC_UINT    : return false;
+    case NC_INT64   : return false;
+    case NC_UINT64  : return false;
+    case NC_FLOAT   : return false;
+    case NC_DOUBLE  : return false;
+    case NC_STRING  : return false;
+    default         : return true;
+  }
+
+}
+

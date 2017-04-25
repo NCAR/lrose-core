@@ -1,0 +1,7 @@
+#! /bin/csh
+#
+
+cd ~/apps/Radx/src/RadxPartRain/test
+
+CIDD -p CIDD.RadxPartRain.test
+

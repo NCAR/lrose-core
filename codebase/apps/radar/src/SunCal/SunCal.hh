@@ -197,7 +197,7 @@ private:
   Args _args;
   Params _params;
   IwrfTsReader *_tsReader;
-  DsInputPath *_momReader;
+  DsInputPath *_covarReader;
   SunPosn _sunPosn;
 
   // radar location
@@ -227,9 +227,12 @@ private:
   // gate data
 
   int _nGates;
+  double _startRangeKm, _gateSpacingKm;
   int _nSamples, _nSamplesHalf;
   vector<GateData *> _gateData;
   vector<MomentsFields> _fields;
+  int _startGateSun;
+  int _endGateSun;
 
   // volume number etc
 
@@ -261,6 +264,10 @@ private:
   vector<vector<MomentsSun *> > _interpMoments;
   vector<Xpol> _xpolMoments;
   vector<TestPulse> _testPulseMoments;
+
+  MomentsSun _prevRawMoments;
+  double _prevOffsetEl;
+  double _prevOffsetAz;
 
   // noise
   
@@ -366,16 +373,21 @@ private:
 
   // methods
 
+  void _initMembers();
   int _runForTimeSeries();
-  int _runForMoments();
+  int _runForCovar();
   int _createReaders();
 
   int _processPulse(const IwrfTsPulse *pulse);
   void _addPulseToQueue(const IwrfTsPulse *pulse);
+  int _addPulseToNexradQueue(const IwrfTsPulse *iwrfPulse);
   void _clearPulseQueue();
+  void _deletePulseQueue();
 
-  int _processMomentsFile(const char *filePath);
-  int _processRay(RadxRay *ray);
+  int _processCovarFile(const char *filePath);
+  int _processCovarRay(size_t rayIndex, RadxRay *ray);
+  int _computeCovarMoments(RadxRay *ray, MomentsSun &mom);
+
   double _computeFieldMean(const RadxField *field);
   RadarComplex_t _computeRvvhh0Mean(const RadxField *rvvhh0_db,
                                     const RadxField *rvvhh0_phase,
@@ -402,6 +414,8 @@ private:
   void _createInterpMomentsArray();
   void _clearInterpMomentsArray();
   void _deleteInterpMomentsArray();
+
+  double _computeDist(MomentsSun *moments, double el, double az);
 
   void _deleteXpolMomentsArray();
   void _deleteTestPulseMomentsArray();
@@ -450,6 +464,27 @@ private:
   
   void _checkEndOfVol(double el);
 
+  void _allocGateData();
+  void _freeGateData();
+
+  int _loadGateData();
+  int _loadGateDataDualPolAlt();
+  int _loadGateDataDualPolSim();
+  int _loadGateDataSinglePol();
+
+  int _checkAlternatingStartsOnH();
+  bool _isAlternating();
+  bool _startsOnH();
+  bool _isDualPol();
+  
+  int _retrieveXpolRatioFromSpdb(time_t scanTime,
+                                 double &xpolRatio,
+                                 time_t &timeForXpolRatio);
+
+  int _retrieveSiteTempFromSpdb(time_t scanTime,
+                                double &tempC,
+                                time_t &timeForTemp);
+
   int _writeSummaryText();
   void _writeSummaryText(FILE *out);
   int _appendToGlobalResults();
@@ -469,29 +504,17 @@ private:
                     int memOffset);
   
   int _writeSummaryToSpdb();
-  bool _volIsRhi(const RadxVol &vol);
 
-  int _retrieveXpolRatioFromSpdb(time_t scanTime,
-                                 double &xpolRatio,
-                                 time_t &timeForXpolRatio);
+  int _writeNexradToMdv();
+  void _initNexradMdvMasterHeader(DsMdvx &mdvx, time_t dataTime);
+  void _addNexradMdvField(DsMdvx &mdvx,
+                          const string &fieldName,
+                          const string &units,
+                          const string &transform,
+                          int memOffset);
 
-  int _retrieveSiteTempFromSpdb(time_t scanTime,
-                                double &tempC,
-                                time_t &timeForTemp);
+  int _writeNexradSummaryToSpdb();
 
-  void _allocGateData();
-  void _freeGateData();
-
-  int _loadGateData();
-  int _loadGateDataDualPolAlt();
-  int _loadGateDataDualPolSim();
-  int _loadGateDataSinglePol();
-
-  int _checkAlternatingStartsOnH();
-  bool _isAlternating();
-  bool _startsOnH();
-  bool _isDualPol();
-  
 };
 
 #endif

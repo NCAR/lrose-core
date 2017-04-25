@@ -62,6 +62,7 @@
 #include <Radx/RadxFile.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxRay.hh>
+#include "sunscan_nexrad.h"
 
 using namespace std;
 
@@ -71,23 +72,8 @@ SunCal::SunCal(int argc, char **argv)
   
 {
 
+  _initMembers();
   isOK = true;
-  _tsReader = NULL;
-  _momReader = NULL;
-
-  _pulseSeqNum = 0;
-  _prevAngleOffset = -999;
-
-  _switching = false;
-  _dualPol = false;
-  _alternating = false;
-
-  _volNum = -1;
-  _prevVolNum = -1;
-  _endOfVol = false;
-  _volInProgress = true;
-  _prevEl = 0;
-  _globalPrintCount = 0;
 
   // set programe name
   
@@ -166,6 +152,17 @@ SunCal::SunCal(int argc, char **argv)
   _noiseDbmHx = -9999.0;
   _noiseDbmVx = -9999.0;
   
+  // initialize nexrad C processing
+
+  if (_params.test_nexrad_processing) {
+    nexradSolarInit(_params.n_samples);
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      nexradSolarSetDebug(2);
+    } else if (_params.debug) {
+      nexradSolarSetDebug(1);
+    }
+  }
+
   // init process mapper registration
 
   if (_params.register_with_procmap) {
@@ -173,7 +170,7 @@ SunCal::SunCal(int argc, char **argv)
                   _params.instance,
                   PROCMAP_REGISTER_INTERVAL);
   }
-  
+
   return;
   
 }
@@ -192,21 +189,174 @@ SunCal::~SunCal()
     delete _tsReader;
   }
 
-  if (_momReader) {
-    delete _momReader;
+  if (_covarReader) {
+    delete _covarReader;
   }
 
   // clean up memory
 
-  _clearPulseQueue();
+  _deletePulseQueue();
   _deleteRawMomentsArray();
+
   _deleteInterpMomentsArray();
   _deleteXpolMomentsArray();
   _deleteTestPulseMomentsArray();
 
+  if (_params.test_nexrad_processing) {
+    nexradSolarFree();
+  }
+
+  _freeGateData();
+
   // unregister process
 
   PMU_auto_unregister();
+
+}
+
+//////////////////////////////////////////////////
+// init members
+
+void SunCal::_initMembers()
+{
+
+  _paramsPath = NULL;
+  _tsReader = NULL;
+  _covarReader = NULL;
+
+  _radarLat = 0;
+  _radarLon = 0;
+  _radarAltKm = 0;
+  
+  _isRhi = false;
+
+  _switching = false;
+  _dualPol = false;
+  _alternating = false;
+
+  _maxPulseQueueSize = 0;
+  _pulseSeqNum = 0;
+  _totalPulseCount = 0;
+  _prevAngleOffset = -999;
+
+  _nGates = 0;
+  _startRangeKm = 0;
+  _gateSpacingKm = 0;
+  _nSamples = 0;
+  _nSamplesHalf = 0;
+  _startGateSun = 0;
+  _endGateSun = 0;
+
+  _volNum = -1;
+  _prevVolNum = -1;
+
+  _startTime = 0;
+  _endTime = 0;
+  _calTime = 0;
+
+  _gridNAz = 0;
+  _gridNEl = 0;
+  _gridMinAz = 0;
+  _gridMinEl = 0;
+  _gridMaxAz = 0;
+  _gridMaxEl = 0;
+  _gridDeltaAz = 0;
+  _gridDeltaEl = 0;
+
+  _midTime = 0;
+  _midPrt = 0;
+  _midAz = 0;
+  _midEl = 0;
+  _targetEl = 0;
+  _targetAz = 0;
+  _offsetAz = 0;
+  _offsetEl = 0;
+
+  _prevOffsetEl = 0;
+  _prevOffsetAz = 0;
+
+  _nBeamsNoise = 0;
+  _noiseDbmHc = 0;
+  _noiseDbmHx = 0;
+  _noiseDbmVc = 0;
+  _noiseDbmVx = 0;
+
+  _maxValidSunPowerDbm = 0;
+
+  _maxPowerDbm = 0;
+  _quadPowerDbm = 0;
+  
+  _maxPowerDbmHc = 0;
+  _quadPowerDbmHc = 0;
+  
+  _maxPowerDbmVc = 0;
+  _quadPowerDbmVc = 0;
+  
+  _validCentroid = false;
+  _meanSunEl = 0;
+  _meanSunAz = 0;
+  _sunCentroidAzOffset = 0;
+  _sunCentroidElOffset = 0;
+  _sunCentroidAzOffsetHc = 0;
+  _sunCentroidElOffsetHc = 0;
+  _sunCentroidAzOffsetVc = 0;
+  _sunCentroidElOffsetVc = 0;
+
+  _ccAz = 0;
+  _bbAz = 0;
+  _aaAz = 0;
+  _errEstAz = 0;
+  _rSqAz = 0;
+  _ccEl = 0;
+  _bbEl = 0;
+  _aaEl = 0;
+  _errEstEl = 0;
+  _rSqEl = 0;
+
+  _widthRatioElAzHc = 0;
+  _widthRatioElAzVc = 0;
+  _widthRatioElAzDiffHV = 0;
+  _zdrDiffElAz = -9999.0;
+
+  _meanCorrSun = 0;
+  _meanCorr00H = 0;
+  _meanCorr00V = 0;
+  _meanCorr00 = 0;
+  
+  _nBeamsThisVol = 0;
+  _volMinEl = 0;
+  _volMaxEl = 0;
+  _volCount = 0;
+  _endOfVol = false;
+  _volInProgress = true;
+  _prevEl = 0;
+
+  _S1S2Sdev = 0;
+  _SSSdev = 0;
+
+  _nXpolPoints = 0;
+  _meanXpolRatioDb = 0;
+  _zdrCorr = 0;
+
+  _meanTestPulsePowerHcDbm = 0;
+  _meanTestPulsePowerVcDbm = 0;
+  _meanTestPulsePowerHxDbm = 0;
+  _meanTestPulsePowerVxDbm = 0;
+
+  _sumXmitPowerHDbm = 0;
+  _sumXmitPowerVDbm = 0;
+  _countXmitPowerH = 0;
+  _countXmitPowerV = 0;
+  _meanXmitPowerHDbm = 0;
+  _meanXmitPowerVDbm = 0;
+
+  _globalPrintCount = 0;
+
+  _timeForXpolRatio = 0;
+  _xpolRatioDbFromSpdb = 0;
+
+  _timeForSiteTemp = 0;
+  _siteTempFromSpdb = 0;
 
 }
 
@@ -234,8 +384,8 @@ int SunCal::Run ()
 
   if (_tsReader != NULL) {
     return _runForTimeSeries();
-  } else if (_momReader != NULL) {
-    return _runForMoments();
+  } else if (_covarReader != NULL) {
+    return _runForCovar();
   } else {
     cerr << "ERROR - SunCal::Run()" << endl;
     cerr << "  No reader object created" << endl;
@@ -266,6 +416,9 @@ int SunCal::_runForTimeSeries()
   _radarLon = _params.radar_lon;
   _radarAltKm = _params.radar_alt_km;
   _sunPosn.setLocation(_radarLat, _radarLon, _radarAltKm / 1000.0);
+  if (_params.test_nexrad_processing) {
+    nexradSolarSetLocation(_radarLat, _radarLon, _radarAltKm / 1000.0);
+  }
 
   while (true) {
 
@@ -314,9 +467,9 @@ int SunCal::_runForTimeSeries()
 }
 
 //////////////////////////////////////////////////
-// Run for moments analysis
+// Run for covariances analysis
 
-int SunCal::_runForMoments()
+int SunCal::_runForCovar()
 {
 
   PMU_auto_register("_runForMoments");
@@ -324,24 +477,16 @@ int SunCal::_runForMoments()
     cerr << "_runForMoments ..." << endl;
   }
 
-  // initialize
-
-  _initForAnalysis();
-
   // read through the files
 
   int iret = 0;
   const char *filePath;
-  while ((filePath = _momReader->next()) != NULL) {
-    if (_processMomentsFile(filePath)) {
+  while ((filePath = _covarReader->next()) != NULL) {
+
+    if (_processCovarFile(filePath)) {
       iret = -1;
     }
-  }
 
-  // process any remaining data
-
-  if (_performAnalysis(true)) {
-    return -1;
   }
 
   return iret;
@@ -377,14 +522,14 @@ int SunCal::_createReaders()
 
     _tsReader = new IwrfTsReaderFmq(_params.input_fmq_name, iwrfDebug);
 
-  } else if (_params.input_mode == Params::MOMENTS_REALTIME_INPUT) {
+  } else if (_params.input_mode == Params::COVAR_REALTIME_INPUT) {
 
-    _momReader = new DsInputPath(_progName,
-                                 _params.debug >= Params::DEBUG_VERBOSE,
-                                 _params.input_dir,
-                                 600, PMU_auto_register, true);
+    _covarReader = new DsInputPath(_progName,
+                                   _params.debug >= Params::DEBUG_VERBOSE,
+                                   _params.input_dir,
+                                   600, PMU_auto_register, true);
 
-  } else if (_params.input_mode == Params::MOMENTS_ARCHIVE_INPUT) {
+  } else if (_params.input_mode == Params::COVAR_ARCHIVE_INPUT) {
 
     date_time_t start;
     if (sscanf(_params.archive_start_time, "%d %d %d %d %d %d",
@@ -406,17 +551,17 @@ int SunCal::_createReaders()
       cerr << "  Format is \"yyyy mm dd hh mm ss\"" << endl;
       iret = -1;
     }
-    _momReader = new DsInputPath(_progName,
-                                 _params.debug >= Params::DEBUG_VERBOSE,
-                                 _params.input_dir,
-                                 start.unix_time, end.unix_time);
-
-  } else if (_params.input_mode == Params::MOMENTS_FILELIST_INPUT) {
+    _covarReader = new DsInputPath(_progName,
+                                   _params.debug >= Params::DEBUG_VERBOSE,
+                                   _params.input_dir,
+                                   start.unix_time, end.unix_time);
+    
+  } else if (_params.input_mode == Params::COVAR_FILELIST_INPUT) {
 
     if (_args.inputFileList.size() > 0) {
-      _momReader = new DsInputPath(_progName,
-                                   _params.debug >= Params::DEBUG_VERBOSE,
-                                   _args.inputFileList);
+      _covarReader = new DsInputPath(_progName,
+                                     _params.debug >= Params::DEBUG_VERBOSE,
+                                     _args.inputFileList);
     } else {
       cerr << "ERROR: " << _progName << endl;
       cerr << "  In FILELIST mode you must specify the files using -f arg." << endl;
@@ -636,12 +781,7 @@ int SunCal::_processPulse(const IwrfTsPulse *pulse)
   
   MomentsSun *moments = new MomentsSun();
   
-  int startGateSun = _params.start_gate;
-  int endGateSun = startGateSun + _params.n_gates - 1;
-  if (endGateSun > _nGates - 1) {
-    endGateSun = _nGates - 1;
-  }
-  if (_computeMomentsSun(moments, startGateSun, endGateSun)) {
+  if (_computeMomentsSun(moments, _startGateSun, _endGateSun)) {
     delete moments;
   } else {
     _rawMoments[angleIndex].push_back(moments);
@@ -650,7 +790,7 @@ int SunCal::_processPulse(const IwrfTsPulse *pulse)
   // add to xpol data
 
   if (_params.compute_cross_polar_power_ratio) {
-
+    
     double elOffset = _midEl - _targetEl;
     double azOffset = _midAz - _targetAz;
     double offset = sqrt(elOffset * elOffset + azOffset * azOffset);
@@ -751,6 +891,10 @@ void SunCal::_addPulseToQueue(const IwrfTsPulse *pulse)
         cerr << "====>> Clearing pulse queue" << endl;
       }
       _clearPulseQueue();
+      // free NEXRAD queue
+      if (_params.test_nexrad_processing) {
+        nexradSolarClearPulseQueue();
+      }
       return;
     }
 
@@ -760,9 +904,12 @@ void SunCal::_addPulseToQueue(const IwrfTsPulse *pulse)
   
   pulse->addClient();
   _pulseQueue.push_back(pulse);
-
+  if (_params.test_nexrad_processing) {
+    _addPulseToNexradQueue(pulse);
+  }
+  
   // print missing pulses in verbose mode
-
+  
   if ((pulse->getSeqNum() - _pulseSeqNum) != 1) {
     if (_params.print_missing_pulses && _pulseSeqNum != 0) {
       cerr << "**** Missing seq num: " << _pulseSeqNum
@@ -772,6 +919,93 @@ void SunCal::_addPulseToQueue(const IwrfTsPulse *pulse)
   _pulseSeqNum = pulse->getSeqNum();
 
 }
+
+/////////////////////////////////////////////////
+// add pulse to the nexrad pulse queue
+    
+int SunCal::_addPulseToNexradQueue(const IwrfTsPulse *iwrfPulse)
+  
+{
+
+  if (_alternating) {
+    bool isHoriz = iwrfPulse->isHoriz();
+    // only use H transmit pulses in alternating mode
+    if (!isHoriz) {
+      return -1;
+    }
+  }
+
+  // load up IQ data for sun gates
+
+  int nGatesSun = _endGateSun - _startGateSun + 1;
+  if (nGatesSun < 3) {
+    return -1;
+  }
+
+  TaArray<RadarComplex_t> iqh_, iqv_;
+  RadarComplex_t *iqh = iqh_.alloc(nGatesSun);
+  RadarComplex_t *iqv = iqv_.alloc(nGatesSun);
+
+  const fl32 *iq0 = iwrfPulse->getIq0();
+  const fl32 *iq1 = iwrfPulse->getIq1();
+
+  // load up IQ data along the pulse
+  
+  int nn = 0;
+  int ii = _startGateSun;
+  int ii2 = _startGateSun * 2;
+  for (int igate = _startGateSun; igate <= _endGateSun; igate++) {
+    
+    iqh[nn].re = iq0[ii2];
+    iqh[nn].im = iq0[ii2 + 1];
+    
+    iqv[nn].re = iq1[ii2];
+    iqv[nn].im = iq1[ii2 + 1];
+
+    // check power for interference
+    
+    double power =
+      (RadarComplex::power(iqh[nn]) + RadarComplex::power(iqv[nn])) / 2.0;
+    double dbm = 10.0 * log10(power);
+    if (dbm > _maxValidSunPowerDbm) {
+      // don't use this gate - probably interference
+      continue;
+    }
+
+    nn++;
+    ii++;
+    ii2 += 2;
+
+  } // igate
+
+  if (nn < 3) {
+    return -1;
+  }
+
+  // compute moments
+  
+  double meanPowerH = RadarComplex::meanPower(iqh, nn - 1);
+  double meanPowerV = RadarComplex::meanPower(iqv, nn - 1);
+  
+  RadarComplex_t Rvvhh0 =
+    RadarComplex::meanConjugateProduct(iqh, iqv, nn - 1);
+  
+  solar_pulse_t solarPulse;
+  solarPulse.time = iwrfPulse->getFTime();
+  solarPulse.el = iwrfPulse->getEl();
+  solarPulse.az = iwrfPulse->getAz();
+  solarPulse.powerH = meanPowerH;
+  solarPulse.powerV = meanPowerV;
+  solarPulse.rvvhh0.re = Rvvhh0.re;
+  solarPulse.rvvhh0.im = Rvvhh0.im;
+  solarPulse.nGatesUsed = nn;
+
+  nexradSolarAddPulseToQueue(&solarPulse);
+
+  return 0;
+
+}
+
 
 /////////////////////////////////////////////////
 // clear the pulse queue
@@ -789,15 +1023,33 @@ void SunCal::_clearPulseQueue()
 
 }
 
-//////////////////////////////////////////////////
-// Process a moments file
+/////////////////////////////////////////////////
+// delete the pulse queue, force memory freeing
+    
+void SunCal::_deletePulseQueue()
+  
+{
 
-int SunCal::_processMomentsFile(const char *filePath)
+  for (size_t ii = 0; ii < _pulseQueue.size(); ii++) {
+    delete _pulseQueue[ii];
+  }
+  _pulseQueue.clear();
+
+}
+
+//////////////////////////////////////////////////
+// Process a covariances file
+
+int SunCal::_processCovarFile(const char *filePath)
 {
 
   if (_params.debug) {
     cerr << "Processing moments file: " << filePath << endl;
   }
+
+  // initialize for analysis
+
+  _initForAnalysis();
 
   // read in file
 
@@ -810,13 +1062,23 @@ int SunCal::_processMomentsFile(const char *filePath)
   }
   RadxVol vol;
   if (inFile.readFromPath(filePath, vol)) {
-    cerr << "ERROR - SunCal::_processMomentsFile" << endl;
+    cerr << "ERROR - SunCal::_processCovarFile" << endl;
     cerr << inFile.getErrStr() << endl;
+    return -1;
+  }
+  // increment beam count
+
+  _nBeamsThisVol = vol.getNRays();
+  if (_nBeamsThisVol < _params.min_beams_per_volume) {
+    cerr << "ERROR - SunCal::_processCovarFile" << endl;
+    cerr << "  too few rays in file:: " << filePath << endl;
+    cerr << "  min nRays required: " << _params.min_beams_per_volume << endl;
+    cerr << "      nRays found   : " << _nBeamsThisVol << endl;
     return -1;
   }
 
   _volNum = vol.getVolumeNumber();
-  _isRhi = _volIsRhi(vol);
+  _isRhi = vol.checkIsRhi();
 
   _startTime = vol.getStartTimeSecs();
   _endTime = vol.getEndTimeSecs();
@@ -829,11 +1091,29 @@ int SunCal::_processMomentsFile(const char *filePath)
   _sunPosn.setLocation(_radarLat, _radarLon, _radarAltKm / 1000.0);
 
   vector<RadxRay *> &rays = vol.getRays();
+  RadxRay *ray0 = rays[0];
+  _volCount = 1;
+  _nGates = ray0->getNGates();
+  _startRangeKm = ray0->getStartRangeKm();
+  _gateSpacingKm = ray0->getGateSpacingKm();
+  _startGateSun = _params.start_gate;
+  _endGateSun = _startGateSun + _params.n_gates - 1;
+  if (_endGateSun > _nGates - 1) {
+    _endGateSun = _nGates - 1;
+  }
+  if (ray0->getPolarizationMode() == Radx::POL_MODE_HV_ALT) {
+    _alternating = TRUE;
+  } else {
+    _alternating = FALSE;
+  }
+
+  // loop through rays
+
   for (size_t iray = 0; iray < rays.size(); iray++) {
     RadxRay *ray = rays[iray];
     ray->convertToFl32();
-    if (_processRay(ray)) {
-      cerr << "ERROR - SunCal::_processMomentsFile" << endl;
+    if (_processCovarRay(iray, ray)) {
+      cerr << "ERROR - SunCal::_processCovarFile" << endl;
       cerr << "  Cannot process ray, el, az:"
            << ray->getElevationDeg() << ", "
            << ray->getAzimuthDeg() << endl;
@@ -842,28 +1122,34 @@ int SunCal::_processMomentsFile(const char *filePath)
   }
   
   // perform analysis
-  
+
   if (_performAnalysis(false)) {
     return -1;
   }
     
-  _volCount++;
-
   return 0;
 
 }
 
 //////////////////////////////////////////////////
-// Process a moments ray
+// Process a covariance ray
 
-int SunCal::_processRay(RadxRay *ray)
+int SunCal::_processCovarRay(size_t rayIndex, RadxRay *ray)
 {
+
+  // init moments object
 
   MomentsSun mom;
   mom.time = ray->getTimeSecs();
   mom.prt = ray->getPrtSec();
   mom.az = ray->getAzimuthDeg();
   mom.el = ray->getElevationDeg();
+
+  // compute mean moments along ray
+
+  if (_computeCovarMoments(ray, mom)) {
+    return -1;
+  }
 
   // compute the offset relative to the sun
 
@@ -879,128 +1165,494 @@ int SunCal::_processRay(RadxRay *ray)
   mom.offsetEl = _offsetEl;
   mom.offsetAz = _offsetAz;
   
-  RadxField *dbmhc = ray->getField(_params.moments_field_names.DBMHC);
-  RadxField *dbmvc = ray->getField(_params.moments_field_names.DBMVC);
-  RadxField *dbmhx = ray->getField(_params.moments_field_names.DBMHX);
-  RadxField *dbmvx = ray->getField(_params.moments_field_names.DBMVX);
-  RadxField *zdr = ray->getField(_params.moments_field_names.ZDR);
-  RadxField *phidp = ray->getField(_params.moments_field_names.PHIDP);
-  RadxField *rhohv = ray->getField(_params.moments_field_names.RHOHV);
-  RadxField *ncp = ray->getField(_params.moments_field_names.NCP);
+  // if first ray, save moments and return now
 
-  RadxField *rvvhh0_db =
-    ray->getField(_params.moments_field_names.RVVHH0_DB);
-  RadxField *rvvhh0_phase =
-    ray->getField(_params.moments_field_names.RVVHH0_PHASE);
-  
-  double meanDbmHc = _computeFieldMean(dbmhc);
-  double meanDbmVc = _computeFieldMean(dbmvc);
-  
-  double meanDbmHx = _computeFieldMean(dbmhx);
-  double meanDbmVx = _computeFieldMean(dbmvx);
-
-  mom.dbmHc = meanDbmHc;
-  mom.dbmVc = meanDbmVc;
-  mom.dbmHx = meanDbmHx;
-  mom.dbmVx = meanDbmVx;
-
-  double corrMag = 0;
-  RadarComplex_t meanRvvhh0 =
-    _computeRvvhh0Mean(rvvhh0_db, rvvhh0_phase, corrMag);
-
-  mom.Rvvhh0 = meanRvvhh0;
-  mom.corrMag = corrMag;
-  if (meanDbmHc > -9990 && meanDbmVc > -9990) {
-    double powerHc = pow(10.0, meanDbmHc / 10.0);
-    double powerVc = pow(10.0, meanDbmVc / 10.0);
-    // MUST FIX THIS - 
-    mom.corr00 = (corrMag / sqrt(powerHc * powerVc)) / 1000.0;
+  if (rayIndex == 0) {
+    _prevRawMoments = mom;
+    _prevOffsetEl = _offsetEl;
+    _prevOffsetAz = _offsetAz;
+    return 0;
   }
-  mom.arg00 = RadarComplex::argDeg(meanRvvhh0);
-
-  mom.zdr = _computeFieldMean(zdr);
-  mom.phidp = _computeFieldMean(phidp);
-  mom.rhohv = _computeFieldMean(rhohv);
-  mom.ncp = _computeFieldMean(ncp);
-  
-  int angleIndex = 0;
 
   if (_isRhi) {
 
-    // compute offset el
+    // RHI mode
+
+    // interp onto the grid in elevation
+
+    // order the consecutive pair of moments
     
-    double offsetEl = RadarComplex::diffDeg(mom.el, _targetEl);
+    MomentsSun *momLower, *momUpper;
+    double offsetElLower, offsetElUpper;
+    if (_offsetEl > _prevOffsetEl) {
+      momLower = &_prevRawMoments;
+      momUpper = &mom;
+      offsetElLower = _prevOffsetEl;
+      offsetElUpper = _offsetEl;
+    } else {
+      momUpper = &_prevRawMoments;
+      momLower = &mom;
+      offsetElUpper = _prevOffsetEl;
+      offsetElLower = _offsetEl;
+    }
     
     // compute grid el closest to the offset el
-    
-    double roundedOffsetEl =
-      (floor (offsetEl / _gridDeltaEl + 0.5)) * _gridDeltaEl;
 
-    // have we moved far enough?
+    int elIndexLower = (int) ((offsetElLower - _gridMinEl) / _gridDeltaEl + 0.5);
+    int elIndexUpper = (int) ((offsetElUpper - _gridMinEl) / _gridDeltaEl + 0.5);
     
-    if (fabs(offsetEl - _prevAngleOffset) < _gridDeltaEl / 2) {
-      return 0;
-    }
-    
-    // is the elevation correct?
-    
-    if (offsetEl > roundedOffsetEl) {
-      return 0;
-    }
-    
-    // is this elevation contained in the grid?
-    
-    _offsetEl = roundedOffsetEl;
-    _prevAngleOffset = _offsetEl;
-    
-    angleIndex = (int) ((_offsetEl - _gridMinEl) / _gridDeltaEl + 0.5);
+    // have we moved across a grid cell boundary?
+    // if not, return now.
 
-    if (angleIndex < 0 || angleIndex > _gridNEl - 1) {
+    if (elIndexLower == elIndexUpper) {
+      _prevRawMoments = mom;
+      _prevOffsetEl = _offsetEl;
+      _prevOffsetAz = _offsetAz;
       return 0;
     }
+
+    // interp to grid in el
+
+    for (int elIndex = elIndexLower; elIndex < elIndexUpper; elIndex++) {
+
+      double gridEl = _gridMinEl + elIndex * _gridDeltaEl;
+      double wtUpper = (gridEl - momLower->el) / (momUpper->el - momLower->el);
+      double wtLower = 1.0 - wtUpper;
+      
+      MomentsSun *elMom = new MomentsSun;
+      elMom->interp(*momLower, *momUpper, wtLower, wtUpper);
+      int azIndex = (int) ((elMom->az - _gridMinAz) / _gridDeltaAz + 0.5);
+      if (azIndex >= 0 && azIndex < _gridNAz) {
+        _rawMoments[azIndex].push_back(elMom);
+      } else {
+        delete elMom;
+      }
+      
+      int elIndex2 = (int) ((elMom->el - _gridMinEl) / _gridDeltaEl + 0.5);
+
+      if (elIndex2 >= 0 && elIndex2 < _gridNEl) {
+        _rawMoments[elIndex].push_back(elMom);
+      } else {
+        delete elMom;
+      }
+      
+
+    } // elIndex
 
   } else {
 
-    // compute offset az for mid pulses
+    // PPI mode
+
+    // check for error relative to fixed angle
+
+    double pointingError = fabs(ray->getElevationDeg() - ray->getFixedAngleDeg());
+    if (pointingError > _params.max_pointing_angle_error_deg) {
+      _prevRawMoments = mom;
+      _prevOffsetEl = _offsetEl;
+      _prevOffsetAz = _offsetAz;
+      return 0;
+    }
+  
+    // interp onto the grid in azimuth
+
+    // order the consecutive pair of moments
     
-    double offsetAz = RadarComplex::diffDeg(mom.az, _targetAz) * cosElTarget;
+    MomentsSun momLeft, momRight;
+    double offsetAzLeft, offsetAzRight;
+    if (_offsetAz > _prevOffsetAz) {
+      momLeft = _prevRawMoments;
+      momRight = mom;
+      offsetAzLeft = _prevOffsetAz;
+      offsetAzRight = _offsetAz;
+    } else {
+      momRight = _prevRawMoments;
+      momLeft = mom;
+      offsetAzRight = _prevOffsetAz;
+      offsetAzLeft = _offsetAz;
+    }
     
     // compute grid az closest to the offset az
-    
-    double roundedOffsetAz =
-      (floor (offsetAz / _gridDeltaAz + 0.5)) * _gridDeltaAz;
-    
-    // have we moved far enough?
-    
-    if (fabs(offsetAz - _prevAngleOffset) < _gridDeltaAz / 2) {
+
+    int azIndexLeft = (int) ((offsetAzLeft - _gridMinAz) / _gridDeltaAz + 0.5);
+    int azIndexRight = (int) ((offsetAzRight - _gridMinAz) / _gridDeltaAz + 0.5);
+
+    // have we moved across a grid cell boundary?
+    // if not, return now.
+
+    if (azIndexLeft == azIndexRight) {
+      _prevRawMoments = mom;
+      _prevOffsetEl = _offsetEl;
+      _prevOffsetAz = _offsetAz;
       return 0;
     }
-    
-    // is the azimuth correct?
-    
-    if (offsetAz > roundedOffsetAz) {
-      return 0;
-    }
-    
-    // is this azimuth contained in the grid?
-    
-    _offsetAz = roundedOffsetAz;
-    _prevAngleOffset = _offsetAz;
-    
-    angleIndex = (int) ((_offsetAz - _gridMinAz) / _gridDeltaAz + 0.5);
-    if (angleIndex < 0 || angleIndex > _gridNAz - 1) {
-      return 0;
-    }
+
+    // interp to grid in az
+
+    for (int azIndex = azIndexLeft; azIndex < azIndexRight; azIndex++) {
+
+      double gridAz = _gridMinAz + azIndex * _gridDeltaAz;
+      double wtRight = 
+        (gridAz - momLeft.offsetAz) / (momRight.offsetAz - momLeft.offsetAz);
+      double wtLeft = 1.0 - wtRight;
+      
+      MomentsSun *azMom = new MomentsSun;
+      azMom->interp(momLeft, momRight, wtLeft, wtRight);
+      
+      int azIndex2 = (int) ((azMom->offsetAz - _gridMinAz) / _gridDeltaAz + 0.5);
+
+      if (azIndex2 >= 0 && azIndex2 < _gridNAz) {
+        _rawMoments[azIndex2].push_back(azMom);
+      } else {
+        delete azMom;
+      }
+
+    } // azIndex
 
   } // if (_isRhi) 
 
-  // create moments object, add to raw moments array
+  // save prev values for next time
 
-  MomentsSun *moments = new MomentsSun();
-  *moments = mom;
-  _rawMoments[angleIndex].push_back(moments);
+  _prevRawMoments = mom;
+  _prevOffsetEl = _offsetEl;
+  _prevOffsetAz = _offsetAz;
 
-  _nBeamsThisVol++;
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Compute moments from covariances
+
+int SunCal::_computeCovarMoments(RadxRay *ray,
+                                 MomentsSun &mom)
+{
+  
+  mom.time = ray->getTimeSecs();
+  mom.prt = ray->getPrtSec();
+  mom.az = ray->getAzimuthDeg();
+  mom.el = ray->getElevationDeg();
+
+  // compute the offset relative to the sun
+  
+  if (_params.specify_fixed_target_location) {
+    _targetEl = _params.target_elevation;
+    _targetAz = _params.target_azimuth;
+  } else {
+    _sunPosn.computePosnNova(ray->getTimeDouble(), _targetEl, _targetAz);
+  }
+  double cosElTarget = cos(_targetEl * DEG_TO_RAD);
+  _offsetEl = RadarComplex::diffDeg(mom.el, _targetEl);
+  _offsetAz = RadarComplex::diffDeg(mom.az, _targetAz) * cosElTarget;
+  mom.offsetEl = _offsetEl;
+  mom.offsetAz = _offsetAz;
+  
+  RadxField *lag0_hc_db_fld = ray->getField(_params.covar_field_names.LAG0_HC_DB);
+  RadxField *lag0_vc_db_fld = ray->getField(_params.covar_field_names.LAG0_VC_DB);
+  RadxField *lag0_hx_db_fld = ray->getField(_params.covar_field_names.LAG0_HX_DB);
+  RadxField *lag0_vx_db_fld = ray->getField(_params.covar_field_names.LAG0_VX_DB);
+  
+  RadxField *lag0_hcvx_db_fld =
+    ray->getField(_params.covar_field_names.LAG0_HCVX_DB);
+  RadxField *lag0_hcvx_phase_fld =
+    ray->getField(_params.covar_field_names.LAG0_HCVX_PHASE);
+
+  RadxField *lag0_vchx_db_fld =
+    ray->getField(_params.covar_field_names.LAG0_VCHX_DB);
+  RadxField *lag0_vchx_phase_fld =
+    ray->getField(_params.covar_field_names.LAG0_VCHX_PHASE);
+
+  RadxField *lag1_vxhx_db_fld =
+    ray->getField(_params.covar_field_names.LAG1_VXHX_DB);
+  RadxField *lag1_vxhx_phase_fld =
+    ray->getField(_params.covar_field_names.LAG1_VXHX_PHASE);
+
+  RadxField *rvvhh0_db_fld =
+    ray->getField(_params.covar_field_names.RVVHH0_DB);
+  RadxField *rvvhh0_phase_fld =
+    ray->getField(_params.covar_field_names.RVVHH0_PHASE);
+
+  Radx::fl32 *lag0_hc_db = NULL;
+  Radx::fl32 *lag0_vc_db = NULL;
+  Radx::fl32 *lag0_hx_db = NULL;
+  Radx::fl32 *lag0_vx_db = NULL;
+  Radx::fl32 *lag0_hcvx_db = NULL;
+  Radx::fl32 *lag0_hcvx_phase = NULL;
+  Radx::fl32 *lag0_vchx_db = NULL;
+  Radx::fl32 *lag0_vchx_phase = NULL;
+  Radx::fl32 *lag1_vxhx_db = NULL;
+  Radx::fl32 *lag1_vxhx_phase = NULL;
+  Radx::fl32 *rvvhh0_db = NULL;
+  Radx::fl32 *rvvhh0_phase = NULL;
+
+  _dualPol = false;
+
+  if (lag0_hc_db_fld) {
+    lag0_hc_db = lag0_hc_db_fld->getDataFl32();
+  }
+  if (lag0_vc_db_fld) {
+    lag0_vc_db = lag0_vc_db_fld->getDataFl32();
+    _dualPol = true;
+  }
+  if (lag0_hx_db_fld) {
+    lag0_hx_db = lag0_hx_db_fld->getDataFl32();
+    _dualPol = true;
+  }
+  if (lag0_vx_db_fld) {
+    lag0_vx_db = lag0_vx_db_fld->getDataFl32();
+    _dualPol = true;
+  }
+
+  if (lag0_hcvx_db_fld) {
+    lag0_hcvx_db = lag0_hcvx_db_fld->getDataFl32();
+    _dualPol = true;
+  }
+  if (lag0_hcvx_phase_fld) {
+    lag0_hcvx_phase = lag0_hcvx_phase_fld->getDataFl32();
+    _dualPol = true;
+  }
+
+  if (lag0_vchx_db_fld) {
+    lag0_vchx_db = lag0_vchx_db_fld->getDataFl32();
+    _dualPol = true;
+  }
+  if (lag0_vchx_phase_fld) {
+    lag0_vchx_phase = lag0_vchx_phase_fld->getDataFl32();
+    _dualPol = true;
+  }
+
+  bool haveVxHx = true;
+  if (lag1_vxhx_db_fld) {
+    lag1_vxhx_db = lag1_vxhx_db_fld->getDataFl32();
+    _dualPol = true;
+  } else {
+    haveVxHx = false;
+  }
+  if (lag1_vxhx_phase_fld) {
+    lag1_vxhx_phase = lag1_vxhx_phase_fld->getDataFl32();
+    _dualPol = true;
+  } else {
+    haveVxHx = false;
+  }
+
+  if (rvvhh0_db_fld) {
+    rvvhh0_db = rvvhh0_db_fld->getDataFl32();
+    _dualPol = true;
+  }
+  if (rvvhh0_phase_fld) {
+    rvvhh0_phase = rvvhh0_phase_fld->getDataFl32();
+    _dualPol = true;
+  }
+  
+  // initialize summation quantities
+  
+  double sumPowerHc = 0.0;
+  double sumPowerHx = 0.0;
+  double sumPowerVx = 0.0;
+  double sumPowerVc = 0.0;
+  RadarComplex_t sumRvvhh0Hc(0.0, 0.0);
+  RadarComplex_t sumRvvhh0Vc(0.0, 0.0);
+  double nn = 0.0;
+  
+  // loop through gates to be used for sun computations
+
+  for (int igate = _startGateSun; igate <= _endGateSun; igate++, nn++) {
+    
+    // check power for interference
+    double dbmHc = lag0_hc_db[igate];
+    if (dbmHc > _maxValidSunPowerDbm) {
+      // don't use this gate - probably interference
+      continue;
+    }
+    
+    double lag0_hc = 0;
+    double lag0_vc = 0;
+    double lag0_hx = 0;
+    double lag0_vx = 0;
+
+    if (lag0_hc_db) {
+      lag0_hc = pow(10.0, lag0_hc_db[igate] / 10.0);
+    }
+    if (lag0_vc_db) {
+      lag0_vc = pow(10.0, lag0_vc_db[igate] / 10.0);
+    }
+    if (lag0_hx_db) {
+      lag0_hx = pow(10.0, lag0_hx_db[igate] / 10.0);
+    }
+    if (lag0_vx_db) {
+      lag0_vx = pow(10.0, lag0_vx_db[igate] / 10.0);
+    }
+
+    double lag0_hcvxMag = 0;
+    double lag0_hcvxPhase = 0;
+    if (lag0_hcvx_db) {
+      lag0_hcvxMag = pow(10.0, lag0_hcvx_db[igate] / 20.0);
+    }
+    if (lag0_hcvx_phase) {
+      lag0_hcvxPhase = lag0_hcvx_phase[igate] * DEG_TO_RAD;
+    }
+    double sinval, cosval;
+    ta_sincos(lag0_hcvxPhase, &sinval, &cosval);
+    RadarComplex_t lag0_hcvx;
+    lag0_hcvx.set(lag0_hcvxMag * cosval, lag0_hcvxMag * sinval);
+
+    double lag0_vchxMag = 0;
+    double lag0_vchxPhase = 0;
+    if (lag0_vchx_db) {
+      lag0_vchxMag = pow(10.0, lag0_vchx_db[igate] / 20.0);
+    }
+    if (lag0_vchx_phase) {
+      lag0_vchxPhase = lag0_vchx_phase[igate] * DEG_TO_RAD;
+    }
+    ta_sincos(lag0_vchxPhase, &sinval, &cosval);
+    RadarComplex_t lag0_vchx;
+    lag0_vchx.set(lag0_vchxMag * cosval, lag0_vchxMag * sinval);
+
+    double rvvhh0Mag = 0;
+    double rvvhh0Phase = 0;
+    if (rvvhh0_db) {
+      rvvhh0Mag = pow(10.0, rvvhh0_db[igate] / 20.0);
+    }
+    if (rvvhh0_phase) {
+      rvvhh0Phase = rvvhh0_phase[igate] * DEG_TO_RAD;
+    }
+    ta_sincos(rvvhh0Phase, &sinval, &cosval);
+    RadarComplex_t rvvhh0;
+    rvvhh0.set(rvvhh0Mag * cosval, rvvhh0Mag * sinval);
+
+    sumPowerHc += lag0_hc;
+    sumPowerVc += lag0_vc;
+    sumPowerHx += lag0_hx;
+    sumPowerVx += lag0_vx;
+    
+    if (_alternating) {
+      sumRvvhh0Hc = RadarComplex::complexSum(sumRvvhh0Hc, lag0_vchx);
+      sumRvvhh0Vc = RadarComplex::complexSum(sumRvvhh0Vc, lag0_hcvx);
+    } else {
+      sumRvvhh0Hc = RadarComplex::complexSum(sumRvvhh0Hc, rvvhh0);
+      sumRvvhh0Vc = RadarComplex::complexSum(sumRvvhh0Vc, rvvhh0);
+    }
+
+  } // igate
+  
+  if (nn < 3) {
+    cerr << "Warning - processCovarMoments()" << endl;
+    cerr << "  Insufficient good data found" << endl;
+    cerr << "  az, el: " << _midAz << ", " << _midEl << endl;
+    cerr << "  nn: " << nn << endl;
+    return -1;
+  }
+  
+  // compute moments
+
+  mom.nn = nn;
+
+  double meanPowerHc = sumPowerHc / nn;
+  double meanPowerVc = sumPowerVc / nn;
+  double meanPowerHx = sumPowerHx / nn;
+  double meanPowerVx = sumPowerVx / nn;
+
+  mom.powerHc = meanPowerHc;
+  mom.powerVc = meanPowerVc;
+  mom.powerHx = meanPowerHx;
+  mom.powerVx = meanPowerVx;
+
+  mom.dbmHc = 10.0 * log10(meanPowerHc);
+  mom.dbmVc = 10.0 * log10(meanPowerVc);
+  mom.dbmHx = 10.0 * log10(meanPowerHx);
+  mom.dbmVx = 10.0 * log10(meanPowerVx);
+  
+  mom.dbm = (mom.dbmHc + mom.dbmVc +
+             mom.dbmHx + mom.dbmVx) / 4.0;
+
+  mom.sumRvvhh0Hc = sumRvvhh0Hc;
+  mom.sumRvvhh0Vc = sumRvvhh0Vc;
+
+  RadarComplex_t sumRvvhh0 =
+    RadarComplex::complexMean(sumRvvhh0Hc, sumRvvhh0Vc);
+  mom.sumRvvhh0 = sumRvvhh0;
+  
+  mom.Rvvhh0Hc = RadarComplex::mean(sumRvvhh0Hc, nn);
+  mom.Rvvhh0Vc = RadarComplex::mean(sumRvvhh0Vc, nn);
+  mom.Rvvhh0 = RadarComplex::mean(sumRvvhh0, nn);
+  
+  double corrMagHc = RadarComplex::mag(sumRvvhh0Hc) / nn;
+  mom.corrMagHc = corrMagHc;
+  double corrMagVc = RadarComplex::mag(sumRvvhh0Vc) / nn;
+  mom.corrMagVc = corrMagVc;
+  mom.corrMag = (corrMagHc + corrMagVc) / 2.0;
+  
+  double corr00Hc = corrMagHc / sqrt(meanPowerHc * meanPowerVx);
+  mom.corr00Hc = corr00Hc;
+  double corr00Vc = corrMagVc / sqrt(meanPowerVc * meanPowerHx);
+  mom.corr00Vc = corr00Vc;
+  mom.corr00 = (corr00Hc + corr00Vc) / 2.0;
+
+  mom.arg00Hc = RadarComplex::argDeg(sumRvvhh0Hc);
+  mom.arg00Vc = RadarComplex::argDeg(sumRvvhh0Vc);
+  mom.arg00 = RadarComplex::argDeg(sumRvvhh0);
+
+  // can we compute cross-polar power ratio?
+
+  double offset = sqrt(_offsetEl * _offsetEl + _offsetAz * _offsetAz);
+  if (_params.compute_cross_polar_power_ratio && _alternating &&
+      offset > _params.min_angle_offset_for_cross_pol_ratio) {
+    
+    // Compute xpol values, add to array
+    
+    int startGateXpol = _params.cross_polar_start_gate;
+    int endGateXpol = startGateXpol + _params.cross_polar_n_gates - 1;
+    if (endGateXpol > _nGates - 1) {
+      endGateXpol = _nGates - 1;
+    }
+    
+    double count = 0;
+    double sumPowerHxXpol = 0.0;
+    double sumPowerVxXpol = 0.0;
+    RadarComplex_t sumRvxhx(0.0, 0.0);
+
+    for (int igate = startGateXpol; igate <= endGateXpol; igate++, count++) {
+      
+      double lag0_hx_xpol = 0;
+      double lag0_vx_xpol = 0;
+      
+      if (lag0_hx_db) {
+        lag0_hx_xpol = pow(10.0, lag0_hx_db[igate] / 10.0);
+      }
+      if (lag0_vx_db) {
+        lag0_vx_xpol = pow(10.0, lag0_vx_db[igate] / 10.0);
+      }
+      
+      sumPowerHxXpol += lag0_hx_xpol;
+      sumPowerVxXpol += lag0_vx_xpol;
+      
+      double lag1_vxhxMag = 0;
+      double lag1_vxhxPhase = 0;
+      if (lag1_vxhx_db) {
+        lag1_vxhxMag = pow(10.0, lag1_vxhx_db[igate] / 20.0);
+      }
+      if (lag1_vxhx_phase) {
+        lag1_vxhxPhase = lag1_vxhx_phase[igate] * DEG_TO_RAD;
+      }
+      double sinval, cosval;
+      ta_sincos(lag1_vxhxPhase, &sinval, &cosval);
+      RadarComplex_t lag1_vxhx;
+      lag1_vxhx.set(lag1_vxhxMag * cosval, lag1_vxhxMag * sinval);
+      sumRvxhx = RadarComplex::complexSum(sumRvxhx, lag1_vxhx);
+      
+    } // igate
+    
+    double meanPowerHxXpol = sumPowerHxXpol / count;
+    double meanPowerVxXpol = sumPowerVxXpol / count;
+    RadarComplex_t Rvxhx = RadarComplex::mean(sumRvxhx, count);
+
+    double rhoVxHx = 1.0;
+    if (haveVxHx) {
+      rhoVxHx = RadarComplex::mag(Rvxhx) / sqrt(meanPowerVxXpol * meanPowerHxXpol);
+    }
+    Xpol xpol(meanPowerHxXpol, meanPowerVxXpol, rhoVxHx);
+    _xpolMoments.push_back(xpol);
+    
+  } // if (_params.compute_cross_polar_power_ratio ...
 
   return 0;
 
@@ -1166,8 +1818,18 @@ int SunCal::_performAnalysis(bool force)
     }
   }
 
+  double startRangeSun = _startRangeKm + _gateSpacingKm * _startGateSun;
+  double endRangeSun = _startRangeKm + _gateSpacingKm * _endGateSun;
+
   if (_params.debug) {
+    cerr << "----------------------------------------------------" << endl;
     cerr << "Performing analysis, n volumes: " << _volCount << endl;
+    cerr << "  nGates        : " << _nGates << endl;
+    cerr << "  startGateSun  : " << _startGateSun << endl;
+    cerr << "  endGateSun    : " << _endGateSun << endl;
+    cerr << "  startRangeSun : " << startRangeSun << endl;
+    cerr << "  endRangeSun   : " << endRangeSun << endl;
+    cerr << "----------------------------------------------------" << endl;
   }
 
   // set the sun location
@@ -1184,20 +1846,39 @@ int SunCal::_performAnalysis(bool force)
     cerr << "  calTime: " << DateTime::strm((time_t) _calTime) << endl;
   }
   
-  // sort the raw moments and interp onto a regular grid
+  if (_tsReader != NULL) {
 
-  if (_isRhi) {
-    _sortRawMomentsByAz();
-    _interpMomentsRhi();
+    // time series processing,
+    // sort the raw moments and interp onto a regular grid
+    
+    if (_isRhi) {
+      _sortRawMomentsByAz();
+      _interpMomentsRhi();
+    } else {
+      _sortRawMomentsByEl();
+      _interpMomentsPpi();
+    }
+    
+    // print raw moments
+    
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      _printRawMomentsArray(cerr);
+    }
+
   } else {
-    _sortRawMomentsByEl();
-    _interpMomentsPpi();
-  }
 
-  // print raw moments
-  
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    _printRawMomentsArray(cerr);
+    // covariance processing
+    // interp onto 2-D grid using quadrants
+
+    if (_isRhi) {
+      _sortRawMomentsByAz();
+      _interpMomentsRhi();
+    } else {
+      _sortRawMomentsByEl();
+      _interpMomentsPpi();
+    }
+    // _interpMomentsUsingQuadrants();
+
   }
 
   // compute the min power for each channel
@@ -1334,6 +2015,12 @@ int SunCal::_performAnalysis(bool force)
     }
   }
 
+  // perform nexrad analysis
+
+  if (_params.test_nexrad_processing) {
+    nexradSolarPerformAnalysis();
+  }
+
   // write out results
 
   PMU_auto_register("writing results");
@@ -1347,6 +2034,9 @@ int SunCal::_performAnalysis(bool force)
       if (_writeSummaryText()) {
         return -1;
       }
+      if (_params.test_nexrad_processing) {
+        nexradSolarWriteGriddedTextFiles(_params.nexrad_text_output_dir);
+      }
     }
     
     if (_params.append_to_global_results_file) {
@@ -1357,14 +2047,20 @@ int SunCal::_performAnalysis(bool force)
       if (_writeToMdv()) {
         return -1;
       }
+      if (_params.test_nexrad_processing) {
+        _writeNexradToMdv();
+      }
     }
     
     if (_params.write_summary_to_spdb) {
       if (_writeSummaryToSpdb()) {
         return -1;
       }
+      if (_params.test_nexrad_processing) {
+        _writeNexradSummaryToSpdb();
+      }
     }
-
+    
   }
 
   // initialize for next analysis
@@ -1569,7 +2265,8 @@ int SunCal::_computeMomentsSunDualAlt(MomentsSun *moments,
   moments->sumRvvhh0Hc = sumRvvhh0Hc;
   moments->sumRvvhh0Vc = sumRvvhh0Vc;
 
-  RadarComplex_t sumRvvhh0 = RadarComplex::complexMean(sumRvvhh0Hc, sumRvvhh0Vc);
+  RadarComplex_t sumRvvhh0 =
+    RadarComplex::complexMean(sumRvvhh0Hc, sumRvvhh0Vc);
   moments->sumRvvhh0 = sumRvvhh0;
   
   moments->Rvvhh0Hc = RadarComplex::mean(sumRvvhh0Hc, nn);
@@ -1756,11 +2453,11 @@ void SunCal::_addToXpol(int startGate, int endGate)
     
     double powerHx = RadarComplex::meanPower(iqhx, _nSamplesHalf - 1);
     double powerVx = RadarComplex::meanPower(iqvx, _nSamplesHalf - 1);
-    RadarComplex_t lag0VxHx =
+    RadarComplex_t lag1VxHx =
       RadarComplex::meanConjugateProduct(iqvx, iqhx, _nSamplesHalf - 1);
     
     double rhoVxHx =
-      RadarComplex::mag(lag0VxHx) / sqrt(powerVx * powerHx);
+      RadarComplex::mag(lag1VxHx) / sqrt(powerVx * powerHx);
     
     Xpol xpol(powerHx, powerVx, rhoVxHx);
     _xpolMoments.push_back(xpol);
@@ -1949,13 +2646,15 @@ void SunCal::_clearRawMomentsArray()
   
 {
   
-  for (int ii = 0; ii < (int) _rawMoments.size(); ii++) {
+  for (size_t ii = 0; ii < _rawMoments.size(); ii++) {
     vector<MomentsSun *> &moments = _rawMoments[ii];
-    for (int jj = 0; jj < (int) moments.size(); jj++) {
+    for (size_t jj = 0; jj < moments.size(); jj++) {
       delete moments[jj];
     }
     moments.clear();
   }
+
+  _prevRawMoments.init();
 
 }
 
@@ -1997,9 +2696,9 @@ void SunCal::_clearInterpMomentsArray()
   
 {
   
-  for (int iaz = 0; iaz < (int) _interpMoments.size(); iaz++) {
+  for (size_t iaz = 0; iaz < _interpMoments.size(); iaz++) {
     vector<MomentsSun *> &moments = _interpMoments[iaz];
-    for (int iel = 0; iel < (int) moments.size(); iel++) {
+    for (size_t iel = 0; iel < moments.size(); iel++) {
       moments[iel]->init();
     }
   }
@@ -2013,9 +2712,9 @@ void SunCal::_deleteInterpMomentsArray()
   
 {
   
-  for (int iaz = 0; iaz < (int) _interpMoments.size(); iaz++) {
+  for (size_t iaz = 0; iaz < _interpMoments.size(); iaz++) {
     vector<MomentsSun *> &moments = _interpMoments[iaz];
-    for (int iel = 0; iel < (int) moments.size(); iel++) {
+    for (size_t iel = 0; iel < moments.size(); iel++) {
       delete moments[iel];
     }
     moments.clear();
@@ -2023,6 +2722,18 @@ void SunCal::_deleteInterpMomentsArray()
 
   _interpMoments.clear();
 
+}
+
+//////////////////////////////////////////////////////////
+// compute distance from moments point to specified point
+    
+double SunCal::_computeDist(MomentsSun *moments, double el, double az)
+  
+{
+  double del = el - moments->offsetEl;
+  double daz = az - moments->offsetAz;
+  double dist = sqrt(del * del + daz * daz);
+  return dist;
 }
 
 /////////////////////////////////////////////////
@@ -2050,7 +2761,7 @@ void SunCal::_sortRawMomentsByEl()
   
 {
   
-  for (int iaz = 0; iaz < (int) _rawMoments.size(); iaz++) {
+  for (size_t iaz = 0; iaz < _rawMoments.size(); iaz++) {
     vector<MomentsSun *> &moments = _rawMoments[iaz];
     sort (moments.begin(), moments.end(), _compareMomentsEl);
   }
@@ -2064,7 +2775,7 @@ void SunCal::_sortRawMomentsByAz()
   
 {
   
-  for (int iel = 0; iel < (int) _rawMoments.size(); iel++) {
+  for (size_t iel = 0; iel < _rawMoments.size(); iel++) {
     vector<MomentsSun *> &moments = _rawMoments[iel];
     sort (moments.begin(), moments.end(), _compareMomentsAz);
   }
@@ -2093,8 +2804,16 @@ void SunCal::_interpMomentsPpi()
       // find the raw moments which straddle this elevation
       
       vector<MomentsSun *> &raw = _rawMoments[iaz];
-      for (int ii = 0; ii < (int) raw.size() - 1; ii++) {
+      if (raw.size() < 2) {
+        continue;
+      }
+
+      for (size_t ii = 0; ii < raw.size() - 1; ii++) {
         
+        if (raw[ii] == NULL || raw[ii+1] == NULL) {
+          continue;
+        }
+
         double el0 = raw[ii]->offsetEl;
         double el1 = raw[ii+1]->offsetEl;
 
@@ -2148,7 +2867,7 @@ void SunCal::_interpMomentsRhi()
       // find the raw moments which straddle this azevation
 
       vector<MomentsSun *> &raw = _rawMoments[iel];
-      for (int ii = 0; ii < (int) raw.size() - 1; ii++) {
+      for (size_t ii = 0; ii < raw.size() - 1; ii++) {
         
         double az0 = raw[ii]->offsetAz;
         double az1 = raw[ii+1]->offsetAz;
@@ -3592,6 +4311,531 @@ void SunCal::_checkEndOfVol(double el)
 
 }
 
+/////////////////////////////////////////////////////////////////
+// Allocate or re-allocate gate data
+
+void SunCal::_allocGateData()
+
+{
+
+  // set n samples
+  // ensure we have an even number of samples
+
+  _nSamples = (int) _pulseQueue.size();
+  _nSamplesHalf = _nSamples / 2;
+  _nSamples = _nSamplesHalf * 2;
+
+  // set n gates to minimum number for any pulse in queue
+
+  _nGates = _pulseQueue[0]->getNGates();
+  for (size_t ii = 1; ii < _pulseQueue.size(); ii++) {
+    if (_nGates > _pulseQueue[ii]->getNGates()) {
+      _nGates = _pulseQueue[ii]->getNGates();
+    }
+  }
+
+  _startGateSun = _params.start_gate;
+  _endGateSun = _startGateSun + _params.n_gates - 1;
+  if (_endGateSun > _nGates - 1) {
+    _endGateSun = _nGates - 1;
+  }
+
+  // allocate
+
+  int nNeeded = _nGates - (int) _gateData.size();
+  if (nNeeded > 0) {
+    for (int ii = 0; ii < nNeeded; ii++) {
+      GateData *gate = new GateData();
+      _gateData.push_back(gate);
+    }
+  }
+  for (size_t ii = 0; ii < _gateData.size(); ii++) {
+    _gateData[ii]->allocArrays(_nSamples, false, false, false);
+  }
+
+  _startRangeKm = _pulseQueue[0]->get_start_range_km();
+  _gateSpacingKm = _pulseQueue[0]->get_gate_spacing_km();
+
+}
+
+/////////////////////////////////////////////////////////////////
+// Free gate data
+
+void SunCal::_freeGateData()
+
+{
+  for (int ii = 0; ii < (int) _gateData.size(); ii++) {
+    delete _gateData[ii];
+  }
+  _gateData.clear();
+}
+
+/////////////////////////////////////////////////////////////////
+// Load gate IQ data.
+//
+// Assumptions:
+// 1. Data is in simultaneouse mode.
+// 2. Non-switching dual receivers,
+//    H is channel 0 and V channel 1.
+
+int SunCal::_loadGateData()
+  
+{
+
+  // alloc gate data
+  
+  _allocGateData();
+
+  if (_isDualPol()) {
+    _dualPol = true;
+  } else {
+    _dualPol = false;
+  }
+
+  if (_isAlternating()) {
+    _alternating = true;
+  } else {
+    _alternating = false;
+  }
+
+  if (_dualPol) {
+    if (_alternating) {
+      return _loadGateDataDualPolAlt();
+    } else {
+      return _loadGateDataDualPolSim();
+    }
+  } else {
+    return _loadGateDataSinglePol();
+  }
+
+}
+
+/////////////////////////////////////////////////////////////////
+// Load gate IQ data for alternating mode
+// returns 0 on success, -1 on failure
+
+int SunCal::_loadGateDataDualPolAlt()
+  
+{
+
+  // set up data pointer arrays
+
+  TaArray<const fl32 *> iqChan0_, iqChan1_;
+  const fl32* *iqChan0 = iqChan0_.alloc(_nSamples);
+  const fl32* *iqChan1 = iqChan1_.alloc(_nSamples);
+  for (int isamp = 0; isamp < _nSamples; isamp++) {
+    if (_pulseQueue[isamp]->getIq0() == NULL) {
+      cerr << "ERROR - SunCal::_loadGateDataDualPolAlt()" << endl;
+      cerr << "  Bad channel 0 IQ data, found NULL" << endl;
+      return -1;
+    }
+    if (_pulseQueue[isamp]->getIq1() == NULL) {
+      cerr << "ERROR - SunCal::_loadGateDataDualPolAlt()" << endl;
+      cerr << "  Bad channel 1 IQ data, found NULL" << endl;
+      return -1;
+    }
+    iqChan0[isamp] = _pulseQueue[isamp]->getIq0();
+    iqChan1[isamp] = _pulseQueue[isamp]->getIq1();
+  }
+  
+  // load up IQ arrays, gate by gate
+
+  for (int igate = 0, ipos = 0;  igate < _nGates; igate++, ipos += 2) {
+    
+    GateData *gate = _gateData[igate];
+    RadarComplex_t *iqhc = gate->iqhc;
+    RadarComplex_t *iqvc = gate->iqvc;
+    RadarComplex_t *iqhx = gate->iqhx;
+    RadarComplex_t *iqvx = gate->iqvx;
+
+    // samples start on horiz pulse
+    
+    for (int isamp = 0, jsamp = 0; isamp < _nSamplesHalf;
+         isamp++, iqhc++, iqvc++, iqhx++, iqvx++) {
+      
+      if (_switching) {
+        
+        // H co-polar, V cross-polar
+        
+        iqhc->re = iqChan0[jsamp][ipos];
+        iqhc->im = iqChan0[jsamp][ipos + 1];
+        iqvx->re = iqChan1[jsamp][ipos];
+        iqvx->im = iqChan1[jsamp][ipos + 1];
+        jsamp++;
+        
+        // V co-polar, H cross-polar
+        
+        iqvc->re = iqChan0[jsamp][ipos];
+        iqvc->im = iqChan0[jsamp][ipos + 1];
+        iqhx->re = iqChan1[jsamp][ipos];
+        iqhx->im = iqChan1[jsamp][ipos + 1];
+        jsamp++;
+        
+      } else {
+        
+        // H from chan 0, V from chan 1
+        
+        iqhc->re = iqChan0[jsamp][ipos];
+        iqhc->im = iqChan0[jsamp][ipos + 1];
+        iqvx->re = iqChan1[jsamp][ipos];
+        iqvx->im = iqChan1[jsamp][ipos + 1];
+        jsamp++;
+        
+        iqhx->re = iqChan0[jsamp][ipos];
+        iqhx->im = iqChan0[jsamp][ipos + 1];
+        iqvc->re = iqChan1[jsamp][ipos];
+        iqvc->im = iqChan1[jsamp][ipos + 1];
+        jsamp++;
+
+      }
+      
+    } // isamp
+
+  } // igate
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// Load gate IQ data for simultaneous mode
+
+int SunCal::_loadGateDataDualPolSim()
+  
+{
+
+  // set up data pointer arrays
+
+  TaArray<const fl32 *> iqChan0_, iqChan1_;
+  const fl32* *iqChan0 = iqChan0_.alloc(_nSamples);
+  const fl32* *iqChan1 = iqChan1_.alloc(_nSamples);
+  for (int isamp = 0; isamp < _nSamples; isamp++) {
+    if (_pulseQueue[isamp]->getIq0() == NULL) {
+      cerr << "ERROR - SunCal::_loadGateDataDualPolSim()" << endl;
+      cerr << "  Bad channel 0 IQ data, found NULL" << endl;
+      return -1;
+    }
+    if (_pulseQueue[isamp]->getIq1() == NULL) {
+      cerr << "ERROR - SunCal::_loadGateDataDualPolSim()" << endl;
+      cerr << "  Bad channel 1 IQ data, found NULL" << endl;
+      return -1;
+    }
+    iqChan0[isamp] = _pulseQueue[isamp]->getIq0();
+    iqChan1[isamp] = _pulseQueue[isamp]->getIq1();
+  }
+  
+  // load up IQ arrays, gate by gate
+
+  for (int igate = 0, ipos = 0;  igate < _nGates; igate++, ipos += 2) {
+    
+    GateData *gate = _gateData[igate];
+    RadarComplex_t *iqhc = gate->iqhc;
+    RadarComplex_t *iqvc = gate->iqvc;
+    
+    // samples start on horiz pulse
+    
+    for (int isamp = 0; isamp < _nSamples; isamp++, iqhc++, iqvc++) {
+      
+      // H from chan 0, V from chan 1
+        
+      iqhc->re = iqChan0[isamp][ipos];
+      iqhc->im = iqChan0[isamp][ipos + 1];
+      iqvc->re = iqChan1[isamp][ipos];
+      iqvc->im = iqChan1[isamp][ipos + 1];
+
+    } // isamp
+
+  } // igate
+  
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// Load gate IQ data for single pol
+
+int SunCal::_loadGateDataSinglePol()
+  
+{
+
+  // set up data pointer arrays
+  
+  TaArray<const fl32 *> iqChan0_;
+  const fl32* *iqChan0 = iqChan0_.alloc(_nSamples);
+  for (int isamp = 0; isamp < _nSamples; isamp++) {
+    if (_pulseQueue[isamp]->getIq0() == NULL) {
+      cerr << "ERROR - SunCal::_loadGateDataSinglePol()" << endl;
+      cerr << "  Bad channel 0 IQ data, found NULL" << endl;
+      return -1;
+    }
+    iqChan0[isamp] = _pulseQueue[isamp]->getIq0();
+  }
+  
+  // load up IQ arrays, gate by gate
+
+  for (int igate = 0, ipos = 0;  igate < _nGates; igate++, ipos += 2) {
+    
+    GateData *gate = _gateData[igate];
+    RadarComplex_t *iqhc = gate->iqhc;
+    
+    // samples start on horiz pulse
+    
+    for (int isamp = 0; isamp < _nSamples; isamp++, iqhc++) {
+      iqhc->re = iqChan0[isamp][ipos];
+      iqhc->im = iqChan0[isamp][ipos + 1];
+    }
+
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////////////
+// Make sure pulse queue starts on H for alternating mode
+// Returns 0 on success, -1 on failure
+
+int SunCal::_checkAlternatingStartsOnH()
+{
+
+  if (!_alternating) {
+    // does not apply
+    return 0;
+  }
+
+  if (_startsOnH()) {
+    // already starts on H
+    return 0;
+  }
+
+  // does not start on H, need to shift the queue by 1 pulse
+
+  // first delete oldest pulse
+  
+  const IwrfTsPulse *oldest = _pulseQueue.front();
+  if (oldest->removeClient() == 0) {
+    delete oldest;
+  }
+  _pulseQueue.pop_front();
+
+  // read another pulse
+  
+  const IwrfTsPulse *pulse = _tsReader->getNextPulse(true);
+  if (pulse == NULL) {
+    return -1;
+  }
+
+  // push pulse onto queue
+  
+  pulse->addClient();
+  _pulseQueue.push_back(pulse);
+  
+  return 0;
+
+}
+
+///////////////////////////////////////////      
+// check if we have alternating h/v pulses
+
+bool SunCal::_isAlternating()
+  
+{
+  
+  bool prevHoriz = _pulseQueue[0]->isHoriz();
+  for (size_t ii = 1; ii < _pulseQueue.size(); ii++) {
+    bool thisHoriz = _pulseQueue[ii]->isHoriz();
+    if (thisHoriz == prevHoriz) {
+      return false;
+    }
+    prevHoriz = thisHoriz;
+  }
+
+  return true;
+  
+}
+
+///////////////////////////////////////////      
+// check if pulse queue starts on h
+// only applies to alternating mode
+
+bool SunCal::_startsOnH()
+  
+{
+  
+  // we want to start on H
+  // the starting pulse is at the end of the queue
+
+  if (_pulseQueue[0]->isHoriz()) {
+    return true;
+  } else {
+    return false;
+  }
+
+}
+
+///////////////////////////////////////////      
+// check if data is dual pol
+
+bool SunCal::_isDualPol()
+  
+{
+
+  // check if we have both channels
+
+  if (_pulseQueue[0]->getIq0() != NULL &&
+      _pulseQueue[0]->getIq1() != NULL) {
+    return true;
+  }
+
+  // no, so single pol
+
+  return false;
+  
+}
+
+//////////////////////////////////////////////////
+// retrieve site temp from SPDB for scan time
+
+int SunCal::_retrieveSiteTempFromSpdb(time_t scanTime,
+                                      double &tempC,
+                                      time_t &timeForTemp)
+  
+{
+
+  tempC = -9999.0;
+  timeForTemp = time(NULL);
+  
+  if (!_params.read_site_temp_from_spdb) {
+    return 0;
+  }
+  
+  // get temp data from SPDB
+  
+  DsSpdb spdb;
+  si32 dataType = _params.site_temp_data_type;
+  if (dataType != -1 && strlen(_params.site_temp_station_name) > 0) {
+    dataType =  Spdb::hash4CharsToInt32(_params.site_temp_station_name);
+  }
+
+  if (spdb.getClosest(_params.site_temp_spdb_url,
+                      scanTime,
+                      _params.site_temp_search_margin_secs,
+                      dataType)) {
+    cerr << "WARNING - SunCal::_retrieveSiteTempFromSpdb" << endl;
+    cerr << "  Cannot get temperature from URL: "
+         << _params.site_temp_spdb_url << endl;
+    cerr << "  Station name: " << _params.site_temp_station_name << endl;
+    cerr << "  Search time: " << RadxTime::strm(scanTime) << endl;
+    cerr << "  Search margin (secs): "
+         << _params.site_temp_search_margin_secs << endl;
+    cerr << spdb.getErrStr() << endl;
+    return -1;
+  }
+  
+  // got chunks
+  
+  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
+  if (chunks.size() < 1) {
+    cerr << "WARNING - SunCal::_retrieveSiteTempFromSpdb" << endl;
+    cerr << "  No suitable temp data from URL: " 
+         << _params.site_temp_spdb_url << endl;
+    cerr << "  Search time: " << RadxTime::strm(scanTime) << endl;
+    cerr << "  Search margin (secs): "
+         << _params.site_temp_search_margin_secs << endl;
+    return -1;
+  }
+
+  const Spdb::chunk_t &chunk = chunks[0];
+  WxObs obs;
+  if (obs.disassemble(chunk.data, chunk.len)) {
+    cerr << "WARNING - SunCal::_retrieveSiteTempFromSpdb" << endl;
+    cerr << "  SPDB data is of incorrect type, prodLabel: "
+         << spdb.getProdLabel() << endl;
+    cerr << "  Should be station data type" << endl;
+    cerr << "  URL: " << _params.site_temp_spdb_url << endl;
+    return -1;
+  }
+  
+  tempC = obs.getTempC();
+  timeForTemp = obs.getObservationTime();
+
+  if (_params.debug) {
+    cerr << "Got temp data from URL: " << _params.site_temp_spdb_url << endl;
+    cerr << "  Search time: " << RadxTime::strm(scanTime) << endl;
+    cerr << "  Search margin (secs): "
+         << _params.site_temp_search_margin_secs << endl;
+    cerr << "  Temp time, tempC: "
+         << DateTime::strm(timeForTemp) << ", " << tempC << endl;
+  }
+  
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////
+// retrieve xpol ratio from SPDB for scan time
+
+int SunCal::_retrieveXpolRatioFromSpdb(time_t scanTime,
+                                       double &xpolRatio,
+                                       time_t &timeForXpolRatio)
+  
+{
+
+  xpolRatio = -9999.0;
+  timeForXpolRatio = time(NULL);
+  
+  if (!_params.read_xpol_ratio_from_spdb) {
+    return 0;
+  }
+  
+  // get temp data from SPDB
+  
+  DsSpdb spdb;
+  si32 dataType = 0;
+  if (strlen(_params.xpol_ratio_radar_name) > 0) {
+    dataType =  Spdb::hash4CharsToInt32(_params.xpol_ratio_radar_name);
+  }
+  if (spdb.getClosest(_params.xpol_ratio_spdb_url,
+                      scanTime,
+                      _params.xpol_ratio_search_margin_secs,
+                      dataType)) {
+    cerr << "WARNING - SunCal::_retrieveXpolRatioFromSpdb" << endl;
+    cerr << "  Cannot get xpol ratio from URL: " 
+         << _params.xpol_ratio_spdb_url << endl;
+    cerr << "  Search time: " << RadxTime::strm(scanTime) << endl;
+    cerr << "  Search margin (secs): "
+         << _params.xpol_ratio_search_margin_secs << endl;
+    cerr << spdb.getErrStr() << endl;
+    return -1;
+  }
+  
+  // got chunks
+  
+  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
+  if (chunks.size() < 1) {
+    cerr << "WARNING - SunCal::_retrieveXpolRatioFromSpdb" << endl;
+    cerr << "  No suitable xpol ratio data from URL: "
+         << _params.xpol_ratio_spdb_url << endl;
+    cerr << "  Search time: " << RadxTime::strm(scanTime) << endl;
+    cerr << "  Search margin (secs): "
+         << _params.xpol_ratio_search_margin_secs << endl;
+    return -1;
+  }
+
+  const Spdb::chunk_t &chunk = chunks[0];
+  string xml((const char *) chunk.data);
+  double ratio = 0.0;
+  if (TaXml::readDouble(xml, "ratioHxVxDbClutter", ratio)) {
+    return -1;
+  }
+
+  xpolRatio = ratio;
+  timeForXpolRatio = chunk.valid_time;
+  
+  return 0;
+  
+}
+
 //////////////////////////
 // write out results data
 
@@ -3624,7 +4868,9 @@ int SunCal::_writeSummaryText()
           ctime.getMin(),
           ctime.getSec());
 
-  cerr << "writing output file: " << path << endl;
+  if (_params.debug) {
+    cerr << "writing output file: " << path << endl;
+  }
 
   // open file
 
@@ -3945,10 +5191,14 @@ int SunCal::_appendToGlobalResults()
     _appendFloatToFile(out, _meanTestPulsePowerVcDbm);
     _appendFloatToFile(out, _meanTestPulsePowerHxDbm);
     _appendFloatToFile(out, _meanTestPulsePowerVxDbm);
-    _appendFloatToFile(out, _meanTestPulsePowerVcDbm - _meanTestPulsePowerHcDbm);
-    _appendFloatToFile(out, _meanTestPulsePowerVxDbm - _meanTestPulsePowerHxDbm);
-    _appendFloatToFile(out, _meanTestPulsePowerVcDbm - _meanTestPulsePowerHxDbm);
-    _appendFloatToFile(out, _meanTestPulsePowerVxDbm - _meanTestPulsePowerHcDbm);
+    _appendFloatToFile(out,
+                       _meanTestPulsePowerVcDbm - _meanTestPulsePowerHcDbm);
+    _appendFloatToFile(out,
+                       _meanTestPulsePowerVxDbm - _meanTestPulsePowerHxDbm);
+    _appendFloatToFile(out,
+                       _meanTestPulsePowerVcDbm - _meanTestPulsePowerHxDbm);
+    _appendFloatToFile(out,
+                       _meanTestPulsePowerVxDbm - _meanTestPulsePowerHcDbm);
   }
 
   if (_params.compute_mean_transmit_powers) {
@@ -4328,7 +5578,7 @@ int SunCal::_writeGriddedFieldDebug(const string &dirPath,
           _gridMinEl, _gridDeltaEl, _gridNEl);
   fprintf(out, "# minAz, deltaAz, nAz: %g %g %d\n",
           _gridMinAz, _gridDeltaAz, _gridNAz);
-  fprintf(out, "# sun offset el, az (deg): %g %g\n",
+  fprintf(out, "# sun offset az, el (deg): %g %g\n",
           _sunCentroidAzOffset, _sunCentroidElOffset);
 
 
@@ -4373,6 +5623,12 @@ int SunCal::_writeToMdv()
   MomentsSun moments;
   int offset = 0;
 
+  offset = (char *) &moments.offsetAz - (char *) &moments.time;
+  _addMdvField(mdvx, "az", "deg", "", offset);
+  
+  offset = (char *) &moments.offsetEl - (char *) &moments.time;
+  _addMdvField(mdvx, "el", "deg", "", offset);
+  
   offset = (char *) &moments.dbm - (char *) &moments.time;
   _addMdvField(mdvx, "DBM", "dBm", "dB", offset);
   
@@ -4691,551 +5947,262 @@ int SunCal::_writeSummaryToSpdb()
 
 }
 
-/////////////////////////////////////////////////////
-// check whether volume is predominantly in RHI mode
+/////////////////////////////////////////////////////////////
+// write NEXRAD results to MDV file
 
-bool SunCal::_volIsRhi(const RadxVol &vol)
+int SunCal::_writeNexradToMdv()
+
 {
   
-  const vector<RadxRay *> &rays = vol.getRays();
-  if (rays.size() < 10) {
-    return false;
-  }
-
-  double sumAzDiff = 0.0;
-  double sumElDiff = 0.0;
+  // create output file object, initialize master header
   
-  double prevAz = rays[0]->getAzimuthDeg();
-  double prevEl = rays[0]->getElevationDeg();
+  DsMdvx mdvx;
+  _initNexradMdvMasterHeader(mdvx,
+                             (time_t) nexradSolarGetMeanSunTime());
+
+  // add the fields
+
+  solar_beam_t moments;
+  int offset = 0;
+
+  offset = (char *) &moments.azOffset - (char *) &moments.time;
+  _addNexradMdvField(mdvx, "az", "deg", "", offset);
   
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-
-    double az = rays[ii]->getAzimuthDeg();
-    double el = rays[ii]->getElevationDeg();
-
-    double azDiff = fabs(az - prevAz);
-    if (azDiff > 180) {
-      azDiff = fabs(azDiff - 360);
-    }
-    double elDiff = fabs(el - prevEl);
-
-    sumAzDiff += azDiff;
-    sumElDiff += elDiff;
-
-    prevEl = el;
-    prevAz = az;
-
-  }
-
-  if (sumAzDiff > sumElDiff) {
-    return false;
-  } else {
-    return true;
-  }
-
-}
-
-//////////////////////////////////////////////////
-// retrieve site temp from SPDB for scan time
-
-int SunCal::_retrieveSiteTempFromSpdb(time_t scanTime,
-                                      double &tempC,
-                                      time_t &timeForTemp)
+  offset = (char *) &moments.elOffset - (char *) &moments.time;
+  _addNexradMdvField(mdvx, "el", "deg", "", offset);
   
-{
+  offset = (char *) &moments.dbm - (char *) &moments.time;
+  _addNexradMdvField(mdvx, "DBM", "dBm", "dB", offset);
+  
+  offset = (char *) &moments.dbBelowPeak - (char *) &moments.time;
+  _addNexradMdvField(mdvx, "DB_BELOW_PEAK", "dB", "dB", offset);
+  
+  offset = (char *) &moments.dbmH - (char *) &moments.time;
+  _addNexradMdvField(mdvx, "DBM_H", "dBm", "dB", offset);
+  
+  offset = (char *) &moments.dbmV - (char *) &moments.time;
+  _addNexradMdvField(mdvx, "DBM_V", "dBm", "dB", offset);
+  
+  offset = (char *) &moments.zdr - (char *) &moments.time;
+  _addNexradMdvField(mdvx, "ZDR", "dB", "dB", offset);
+  
+  offset = (char *) &moments.corrHV - (char *) &moments.time;
+  _addNexradMdvField(mdvx, "CORR_HV", "", "", offset);
+  
+  offset = (char *) &moments.phaseHV - (char *) &moments.time;
+  _addNexradMdvField(mdvx, "PHASE_HV", "", "", offset);
+    
+  offset = (char *) &moments.ratioDbmVH - (char *) &moments.time;
+  _addNexradMdvField(mdvx, "RATIO_V_H", "dB", "dB", offset);
+  
+  offset = (char *) &moments.SS - (char *) &moments.time;
+  _addNexradMdvField(mdvx, "SS", "", "", offset);
 
-  tempC = -9999.0;
-  timeForTemp = time(NULL);
-  
-  if (!_params.read_site_temp_from_spdb) {
-    return 0;
-  }
-  
-  // get temp data from SPDB
-  
-  DsSpdb spdb;
-  si32 dataType = _params.site_temp_data_type;
-  if (dataType != -1 && strlen(_params.site_temp_station_name) > 0) {
-    dataType =  Spdb::hash4CharsToInt32(_params.site_temp_station_name);
-  }
+  // write the file
 
-  if (spdb.getClosest(_params.site_temp_spdb_url,
-                      scanTime,
-                      _params.site_temp_search_margin_secs,
-                      dataType)) {
-    cerr << "WARNING - SunCal::_retrieveSiteTempFromSpdb" << endl;
-    cerr << "  Cannot get temperature from URL: " << _params.site_temp_spdb_url << endl;
-    cerr << "  Station name: " << _params.site_temp_station_name << endl;
-    cerr << "  Search time: " << RadxTime::strm(scanTime) << endl;
-    cerr << "  Search margin (secs): " << _params.site_temp_search_margin_secs << endl;
-    cerr << spdb.getErrStr() << endl;
+  if (mdvx.writeToDir(_params.nexrad_mdv_output_url)) {
+    cerr << "ERROR - SunCal::writeNexradToMdv" << endl;
+    cerr << mdvx.getErrStr() << endl;
     return -1;
   }
-  
-  // got chunks
-  
-  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
-  if (chunks.size() < 1) {
-    cerr << "WARNING - SunCal::_retrieveSiteTempFromSpdb" << endl;
-    cerr << "  No suitable temp data from URL: " << _params.site_temp_spdb_url << endl;
-    cerr << "  Search time: " << RadxTime::strm(scanTime) << endl;
-    cerr << "  Search margin (secs): " << _params.site_temp_search_margin_secs << endl;
-    return -1;
-  }
-
-  const Spdb::chunk_t &chunk = chunks[0];
-  WxObs obs;
-  if (obs.disassemble(chunk.data, chunk.len)) {
-    cerr << "WARNING - SunCal::_retrieveSiteTempFromSpdb" << endl;
-    cerr << "  SPDB data is of incorrect type, prodLabel: " << spdb.getProdLabel() << endl;
-    cerr << "  Should be station data type" << endl;
-    cerr << "  URL: " << _params.site_temp_spdb_url << endl;
-    return -1;
-  }
-  
-  tempC = obs.getTempC();
-  timeForTemp = obs.getObservationTime();
 
   if (_params.debug) {
-    cerr << "Got temp data from URL: " << _params.site_temp_spdb_url << endl;
-    cerr << "  Search time: " << RadxTime::strm(scanTime) << endl;
-    cerr << "  Search margin (secs): " << _params.site_temp_search_margin_secs << endl;
-    cerr << "  Temp time, tempC: " << DateTime::strm(timeForTemp) << ", " << tempC << endl;
+    cerr << "Wrote file: " << mdvx.getPathInUse() << endl;
   }
-  
+
   return 0;
+
+}
+
+////////////////////////////////////////////////////
+// init NEXRAD MDV master header
+
+void SunCal::_initNexradMdvMasterHeader(DsMdvx &mdvx, time_t dataTime)
+
+{
+  
+  // set the master header
+  
+  Mdvx::master_header_t mhdr;
+  MEM_zero(mhdr);
+
+  mhdr.time_begin = dataTime;
+  mhdr.time_end = dataTime;
+  mhdr.time_centroid = dataTime;
+
+  mhdr.num_data_times = 1;
+  mhdr.data_dimension = 2;
+  
+  mhdr.data_collection_type = Mdvx::DATA_MEASURED;
+  mhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  mhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  mhdr.max_nz = 1;
+  mhdr.vlevel_included = TRUE;
+  mhdr.grid_orientation = Mdvx::ORIENT_SN_WE;
+  mhdr.data_ordering = Mdvx::ORDER_XYZ;
+  mhdr.max_nx = nexradSolarGetGridNAz();
+  mhdr.max_ny = nexradSolarGetGridNEl();
+  mhdr.n_chunks = 0;
+  mhdr.field_grids_differ = FALSE;
+  mhdr.sensor_lon = _radarLat;
+  mhdr.sensor_lat = _radarLon;
+  mhdr.sensor_alt = _radarAltKm;
+  mdvx.setDataSetInfo("Sun scan results");
+  mdvx.setDataSetName("Sun calibration");
+  mdvx.setDataSetSource("SunCal application");
+
+  mdvx.setMasterHeader(mhdr);
   
 }
 
-//////////////////////////////////////////////////
-// retrieve xpol ratio from SPDB for scan time
+/////////////////////////////////////////////////////
+// add NEXRAD field to MDV object
 
-int SunCal::_retrieveXpolRatioFromSpdb(time_t scanTime,
-                                       double &xpolRatio,
-                                       time_t &timeForXpolRatio)
+void SunCal::_addNexradMdvField(DsMdvx &mdvx,
+                                const string &fieldName,
+                                const string &units,
+                                const string &transform,
+                                int memOffset)
   
 {
 
-  xpolRatio = -9999.0;
-  timeForXpolRatio = time(NULL);
+  // initialize field header and vlevel header
   
-  if (!_params.read_xpol_ratio_from_spdb) {
-    return 0;
+  Mdvx::field_header_t fhdr;
+  MEM_zero(fhdr);
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  
+  // fill out field header
+  
+  fhdr.nx = nexradSolarGetGridNAz();
+  fhdr.ny = nexradSolarGetGridNEl();
+  fhdr.nz = 1;
+
+  fhdr.proj_type = Mdvx::PROJ_LATLON;
+  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdr.data_element_nbytes = sizeof(fl32);
+  fhdr.volume_size = fhdr.nx * fhdr.ny * fhdr.nz * sizeof(fl32);
+  
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.dz_constant = 1;
+  fhdr.data_dimension = 2;
+
+  fhdr.proj_origin_lat = 0.0;
+  fhdr.proj_origin_lon = 0.0;
+
+  fhdr.grid_dx = nexradSolarGetGridDeltaAz();
+  fhdr.grid_dy = nexradSolarGetGridDeltaEl();
+  fhdr.grid_dz = 1.0;
+  
+  fhdr.grid_minx = nexradSolarGetGridStartAz();
+  fhdr.grid_miny = nexradSolarGetGridStartEl();
+  fhdr.grid_minz = 0.0;
+
+  fhdr.bad_data_value = -9999.0;
+  fhdr.missing_data_value = -9999.0;
+
+  // fill out vlevel header
+  
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  vhdr.level[0] = 0.0;
+
+  // load up data array
+
+  fl32 *data = new fl32[fhdr.nx * fhdr.ny * fhdr.nz];
+  double miss = nexradSolarGetMissingVal();
+  int index = 0;
+  for (int iel = 0; iel < nexradSolarGetGridNEl(); iel++) {
+    for (int iaz = 0; iaz < nexradSolarGetGridNAz(); iaz++) {
+      const solar_beam_t moments =
+        nexradSolarGetInterpBeamArray()[iaz][iel];
+      char *ptr = (char *) &moments.time + memOffset;
+      double val = *((double *) ptr);
+      if (val == miss) {
+        data[index] = -9999.0;
+      } else {
+        data[index] = val;
+      }
+      index++;
+    } // iaz
+  } // iel
+
+  // create field
+  
+  MdvxField *field = new MdvxField(fhdr, vhdr, data);
+
+  // set the names
+
+  field->setFieldName(fieldName.c_str());
+  field->setFieldNameLong(fieldName.c_str());
+  field->setUnits(units.c_str());
+  field->setTransform(transform.c_str());
+
+  // free up data array
+
+  delete[] data;
+
+  // add field to mdvx object
+
+  mdvx.addField(field);
+
+}
+
+/////////////////////////////////////////////////////////////
+// write NEXRAD summary results to SPDB in XML
+
+int SunCal::_writeNexradSummaryToSpdb()
+  
+{
+
+  string xml;
+
+  xml += TaXml::writeStartTag("RadarSunCal", 0);
+
+  xml += TaXml::writeString("radarName", 1, _params.radar_name);
+  xml += TaXml::writeString("radarSite", 1, _params.radar_site);
+  xml += TaXml::writeDouble("radarLatitude", 1, _radarLat);
+  xml += TaXml::writeDouble("radarLongitude", 1, _radarLon);
+  xml += TaXml::writeDouble("radarAltitudeKm", 1, _radarAltKm);
+
+  xml += TaXml::writeTime("CalTime", 1, (time_t) nexradSolarGetMeanSunTime());
+  xml += TaXml::writeInt("VolumeNumber", 1, 0);
+  
+  xml += TaXml::writeBoolean("validCentroid", 1, true);
+  xml += TaXml::writeDouble("meanSunEl", 1, nexradSolarGetMeanSunEl());
+  xml += TaXml::writeDouble("meanSunAz", 1, nexradSolarGetMeanSunAz());
+
+  xml += TaXml::writeDouble("maxPowerDbm", 1, nexradSolarGetMaxPowerDbm());
+  xml += TaXml::writeDouble("quadPowerDbm", 1, nexradSolarGetQuadPowerDbm());
+  xml += TaXml::writeDouble("centroidAzOffset", 1, nexradSolarGetQuadFitCentroidAzError());
+  xml += TaXml::writeDouble("centroidElOffset", 1, nexradSolarGetQuadFitCentroidElError());
+  xml += TaXml::writeDouble("SS", 1, nexradSolarGetMeanSS());
+
+  xml += TaXml::writeDouble("widthRatioElAz", 1, nexradSolarGetElAzWidthRatio());
+
+  xml += TaXml::writeEndTag("RadarSunCal", 0);
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Writing XML results to SPDB:" << endl;
+    cerr << xml << endl;
   }
-  
-  // get temp data from SPDB
-  
+
   DsSpdb spdb;
-  si32 dataType = 0;
-  if (strlen(_params.xpol_ratio_radar_name) > 0) {
-    dataType =  Spdb::hash4CharsToInt32(_params.xpol_ratio_radar_name);
-  }
-  if (spdb.getClosest(_params.xpol_ratio_spdb_url,
-                      scanTime,
-                      _params.xpol_ratio_search_margin_secs,
-                      dataType)) {
-    cerr << "WARNING - SunCal::_retrieveXpolRatioFromSpdb" << endl;
-    cerr << "  Cannot get xpol ratio from URL: " << _params.xpol_ratio_spdb_url << endl;
-    cerr << "  Search time: " << RadxTime::strm(scanTime) << endl;
-    cerr << "  Search margin (secs): " << _params.xpol_ratio_search_margin_secs << endl;
+  time_t calTime = (time_t) _calTime;
+  spdb.addPutChunk(0, calTime, calTime, xml.size() + 1, xml.c_str());
+  if (spdb.put(_params.nexrad_spdb_output_url,
+               SPDB_XML_ID, SPDB_XML_LABEL)) {
+    cerr << "ERROR - SunCal::_writeSummaryToSpdb" << endl;
     cerr << spdb.getErrStr() << endl;
     return -1;
   }
-  
-  // got chunks
-  
-  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
-  if (chunks.size() < 1) {
-    cerr << "WARNING - SunCal::_retrieveXpolRatioFromSpdb" << endl;
-    cerr << "  No suitable xpol ratio data from URL: " << _params.xpol_ratio_spdb_url << endl;
-    cerr << "  Search time: " << RadxTime::strm(scanTime) << endl;
-    cerr << "  Search margin (secs): " << _params.xpol_ratio_search_margin_secs << endl;
-    return -1;
-  }
 
-  const Spdb::chunk_t &chunk = chunks[0];
-  string xml((const char *) chunk.data);
-  double ratio = 0.0;
-  if (TaXml::readDouble(xml, "ratioHxVxDbClutter", ratio)) {
-    return -1;
-  }
-
-  xpolRatio = ratio;
-  timeForXpolRatio = chunk.valid_time;
-  
-  return 0;
-  
-}
-
-/////////////////////////////////////////////////////////////////
-// Allocate or re-allocate gate data
-
-void SunCal::_allocGateData()
-
-{
-
-  // set n samples
-  // ensure we have an even number of samples
-
-  _nSamples = (int) _pulseQueue.size();
-  _nSamplesHalf = _nSamples / 2;
-  _nSamples = _nSamplesHalf * 2;
-
-  // set n gates to minimum number for any pulse in queue
-
-  _nGates = _pulseQueue[0]->getNGates();
-  for (size_t ii = 1; ii < _pulseQueue.size(); ii++) {
-    if (_nGates > _pulseQueue[ii]->getNGates()) {
-      _nGates = _pulseQueue[ii]->getNGates();
-    }
-  }
-
-  // allocate
-
-  int nNeeded = _nGates - (int) _gateData.size();
-  if (nNeeded > 0) {
-    for (int ii = 0; ii < nNeeded; ii++) {
-      GateData *gate = new GateData();
-      _gateData.push_back(gate);
-    }
-  }
-  for (size_t ii = 0; ii < _gateData.size(); ii++) {
-    _gateData[ii]->allocArrays(_nSamples, false, false, false);
-  }
-}
-
-/////////////////////////////////////////////////////////////////
-// Free gate data
-
-void SunCal::_freeGateData()
-
-{
-  for (int ii = 0; ii < (int) _gateData.size(); ii++) {
-    delete _gateData[ii];
-  }
-  _gateData.clear();
-}
-
-/////////////////////////////////////////////////////////////////
-// Load gate IQ data.
-//
-// Assumptions:
-// 1. Data is in simultaneouse mode.
-// 2. Non-switching dual receivers,
-//    H is channel 0 and V channel 1.
-
-int SunCal::_loadGateData()
-  
-{
-
-  // alloc gate data
-  
-  _allocGateData();
-
-  if (_isDualPol()) {
-    _dualPol = true;
-  } else {
-    _dualPol = false;
-  }
-
-  if (_isAlternating()) {
-    _alternating = true;
-  } else {
-    _alternating = false;
-  }
-
-  if (_dualPol) {
-    if (_alternating) {
-      return _loadGateDataDualPolAlt();
-    } else {
-      return _loadGateDataDualPolSim();
-    }
-  } else {
-    return _loadGateDataSinglePol();
-  }
-
-}
-
-/////////////////////////////////////////////////////////////////
-// Load gate IQ data for alternating mode
-// returns 0 on success, -1 on failure
-
-int SunCal::_loadGateDataDualPolAlt()
-  
-{
-
-  // set up data pointer arrays
-
-  TaArray<const fl32 *> iqChan0_, iqChan1_;
-  const fl32* *iqChan0 = iqChan0_.alloc(_nSamples);
-  const fl32* *iqChan1 = iqChan1_.alloc(_nSamples);
-  for (int isamp = 0; isamp < _nSamples; isamp++) {
-    if (_pulseQueue[isamp]->getIq0() == NULL) {
-      cerr << "ERROR - SunCal::_loadGateDataDualPolAlt()" << endl;
-      cerr << "  Bad channel 0 IQ data, found NULL" << endl;
-      return -1;
-    }
-    if (_pulseQueue[isamp]->getIq1() == NULL) {
-      cerr << "ERROR - SunCal::_loadGateDataDualPolAlt()" << endl;
-      cerr << "  Bad channel 1 IQ data, found NULL" << endl;
-      return -1;
-    }
-    iqChan0[isamp] = _pulseQueue[isamp]->getIq0();
-    iqChan1[isamp] = _pulseQueue[isamp]->getIq1();
-  }
-  
-  // load up IQ arrays, gate by gate
-
-  for (int igate = 0, ipos = 0;  igate < _nGates; igate++, ipos += 2) {
-    
-    GateData *gate = _gateData[igate];
-    RadarComplex_t *iqhc = gate->iqhc;
-    RadarComplex_t *iqvc = gate->iqvc;
-    RadarComplex_t *iqhx = gate->iqhx;
-    RadarComplex_t *iqvx = gate->iqvx;
-
-    // samples start on horiz pulse
-    
-    for (int isamp = 0, jsamp = 0; isamp < _nSamplesHalf;
-         isamp++, iqhc++, iqvc++, iqhx++, iqvx++) {
-      
-      if (_switching) {
-        
-        // H co-polar, V cross-polar
-        
-        iqhc->re = iqChan0[jsamp][ipos];
-        iqhc->im = iqChan0[jsamp][ipos + 1];
-        iqvx->re = iqChan1[jsamp][ipos];
-        iqvx->im = iqChan1[jsamp][ipos + 1];
-        jsamp++;
-        
-        // V co-polar, H cross-polar
-        
-        iqvc->re = iqChan0[jsamp][ipos];
-        iqvc->im = iqChan0[jsamp][ipos + 1];
-        iqhx->re = iqChan1[jsamp][ipos];
-        iqhx->im = iqChan1[jsamp][ipos + 1];
-        jsamp++;
-        
-      } else {
-        
-        // H from chan 0, V from chan 1
-        
-        iqhc->re = iqChan0[jsamp][ipos];
-        iqhc->im = iqChan0[jsamp][ipos + 1];
-        iqvx->re = iqChan1[jsamp][ipos];
-        iqvx->im = iqChan1[jsamp][ipos + 1];
-        jsamp++;
-        
-        iqhx->re = iqChan0[jsamp][ipos];
-        iqhx->im = iqChan0[jsamp][ipos + 1];
-        iqvc->re = iqChan1[jsamp][ipos];
-        iqvc->im = iqChan1[jsamp][ipos + 1];
-        jsamp++;
-
-      }
-      
-    } // isamp
-
-  } // igate
-
-  return 0;
-
-}
-
-/////////////////////////////////////////////////////////////////
-// Load gate IQ data for simultaneous mode
-
-int SunCal::_loadGateDataDualPolSim()
-  
-{
-
-  // set up data pointer arrays
-
-  TaArray<const fl32 *> iqChan0_, iqChan1_;
-  const fl32* *iqChan0 = iqChan0_.alloc(_nSamples);
-  const fl32* *iqChan1 = iqChan1_.alloc(_nSamples);
-  for (int isamp = 0; isamp < _nSamples; isamp++) {
-    if (_pulseQueue[isamp]->getIq0() == NULL) {
-      cerr << "ERROR - SunCal::_loadGateDataDualPolSim()" << endl;
-      cerr << "  Bad channel 0 IQ data, found NULL" << endl;
-      return -1;
-    }
-    if (_pulseQueue[isamp]->getIq1() == NULL) {
-      cerr << "ERROR - SunCal::_loadGateDataDualPolSim()" << endl;
-      cerr << "  Bad channel 1 IQ data, found NULL" << endl;
-      return -1;
-    }
-    iqChan0[isamp] = _pulseQueue[isamp]->getIq0();
-    iqChan1[isamp] = _pulseQueue[isamp]->getIq1();
-  }
-  
-  // load up IQ arrays, gate by gate
-
-  for (int igate = 0, ipos = 0;  igate < _nGates; igate++, ipos += 2) {
-    
-    GateData *gate = _gateData[igate];
-    RadarComplex_t *iqhc = gate->iqhc;
-    RadarComplex_t *iqvc = gate->iqvc;
-    
-    // samples start on horiz pulse
-    
-    for (int isamp = 0; isamp < _nSamples; isamp++, iqhc++, iqvc++) {
-      
-      // H from chan 0, V from chan 1
-        
-      iqhc->re = iqChan0[isamp][ipos];
-      iqhc->im = iqChan0[isamp][ipos + 1];
-      iqvc->re = iqChan1[isamp][ipos];
-      iqvc->im = iqChan1[isamp][ipos + 1];
-
-    } // isamp
-
-  } // igate
-  
-  return 0;
-
-}
-
-/////////////////////////////////////////////////////////////////
-// Load gate IQ data for single pol
-
-int SunCal::_loadGateDataSinglePol()
-  
-{
-
-  // set up data pointer arrays
-  
-  TaArray<const fl32 *> iqChan0_;
-  const fl32* *iqChan0 = iqChan0_.alloc(_nSamples);
-  for (int isamp = 0; isamp < _nSamples; isamp++) {
-    if (_pulseQueue[isamp]->getIq0() == NULL) {
-      cerr << "ERROR - SunCal::_loadGateDataSinglePol()" << endl;
-      cerr << "  Bad channel 0 IQ data, found NULL" << endl;
-      return -1;
-    }
-    iqChan0[isamp] = _pulseQueue[isamp]->getIq0();
-  }
-  
-  // load up IQ arrays, gate by gate
-
-  for (int igate = 0, ipos = 0;  igate < _nGates; igate++, ipos += 2) {
-    
-    GateData *gate = _gateData[igate];
-    RadarComplex_t *iqhc = gate->iqhc;
-    
-    // samples start on horiz pulse
-    
-    for (int isamp = 0; isamp < _nSamples; isamp++, iqhc++) {
-      iqhc->re = iqChan0[isamp][ipos];
-      iqhc->im = iqChan0[isamp][ipos + 1];
-    }
-
+  if (_params.debug) {
+    cerr << "Wrote to spdb, url: " << _params.nexrad_spdb_output_url << endl;
   }
 
   return 0;
 
-}
-
-//////////////////////////////////////////////////////////
-// Make sure pulse queue starts on H for alternating mode
-// Returns 0 on success, -1 on failure
-
-int SunCal::_checkAlternatingStartsOnH()
-{
-
-  if (!_alternating) {
-    // does not apply
-    return 0;
-  }
-
-  if (_startsOnH()) {
-    // already starts on H
-    return 0;
-  }
-
-  // does not start on H, need to shift the queue by 1 pulse
-
-  // first delete oldest pulse
-  
-  const IwrfTsPulse *oldest = _pulseQueue.front();
-  if (oldest->removeClient() == 0) {
-    delete oldest;
-  }
-  _pulseQueue.pop_front();
-
-  // read another pulse
-  
-  const IwrfTsPulse *pulse = _tsReader->getNextPulse(true);
-  if (pulse == NULL) {
-    return -1;
-  }
-
-  // push pulse onto queue
-  
-  pulse->addClient();
-  _pulseQueue.push_back(pulse);
-  
-  return 0;
-
-}
-
-///////////////////////////////////////////      
-// check if we have alternating h/v pulses
-
-bool SunCal::_isAlternating()
-  
-{
-  
-  bool prevHoriz = _pulseQueue[0]->isHoriz();
-  for (size_t ii = 1; ii < _pulseQueue.size(); ii++) {
-    bool thisHoriz = _pulseQueue[ii]->isHoriz();
-    if (thisHoriz == prevHoriz) {
-      return false;
-    }
-    prevHoriz = thisHoriz;
-  }
-
-  return true;
-  
-}
-
-///////////////////////////////////////////      
-// check if pulse queue starts on h
-// only applies to alternating mode
-
-bool SunCal::_startsOnH()
-  
-{
-  
-  // we want to start on H
-  // the starting pulse is at the end of the queue
-
-  if (_pulseQueue[0]->isHoriz()) {
-    return true;
-  } else {
-    return false;
-  }
-
-}
-
-///////////////////////////////////////////      
-// check if data is dual pol
-
-bool SunCal::_isDualPol()
-  
-{
-
-  // check if we have both channels
-
-  if (_pulseQueue[0]->getIq0() != NULL &&
-      _pulseQueue[0]->getIq1() != NULL) {
-    return true;
-  }
-
-  // no, so single pol
-
-  return false;
-  
 }
 

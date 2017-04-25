@@ -46,15 +46,15 @@ typedef enum {
   TS_FILELIST_INPUT,
   TS_FMQ_INPUT, 
   TS_REALTIME_DIR_INPUT,
-  MOMENTS_REALTIME_INPUT,
-  MOMENTS_ARCHIVE_INPUT,
-  MOMENTS_FILELIST_INPUT
+  COVAR_REALTIME_INPUT,
+  COVAR_ARCHIVE_INPUT,
+  COVAR_FILELIST_INPUT
 } input_mode_t;
 
 paramdef enum input_mode_t {
   p_default = TS_FILELIST_INPUT;
   p_descr = "Input mode - files or time series API.";
-  p_help = "\n\nTS_FMQ_INPUT: the application will read the time series from a file message queue and process the pulses as they come in. \n\nTS_FILE_INPUT: the application will process all the files specified on the command line. \n\nTS_REALTIME_DIR_INPUT: the application will watch the input directory for new files, and will process those files as they arrive. This mode is suitable for automated operation. \n\nMOMENTS_REALTIME_INPUT: watch the input directory for new moments files, and process each volume as it arrives. \n\nMOMENTS_ARCHIVE_INPUT: will process the moments files in the input directory, between the start and end times. \n\nMOMENTS_FILELIST_INPUT: will process the moments files listed on the command line. ";
+  p_help = "\n\nTS_FMQ_INPUT: the application will read the time series from a file message queue and process the pulses as they come in. \n\nTS_FILE_INPUT: the application will process all the files specified on the command line. \n\nTS_REALTIME_DIR_INPUT: the application will watch the input directory for new files, and will process those files as they arrive. This mode is suitable for automated operation. \n\nCOVAR_REALTIME_INPUT: watch the input directory for new covariances files, and process each volume as it arrives. \n\nCOVAR_ARCHIVE_INPUT: will process the covariances files in the input directory, between the start and end times. \n\nCOVAR_FILELIST_INPUT: will process the covariances files listed on the command line. ";
 } input_mode;
 
 paramdef string {
@@ -72,13 +72,13 @@ paramdef string {
 paramdef string {
   p_default = "2012 06 01 00 00 00";
   p_descr = "Specify the start time for the files in archive mode.";
-  p_help = "Format is 'yyyy mm dd hh mm ss'. Applies to MOMENTS_ARCHIVE_INPUT mode.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'. Applies to COVAR_ARCHIVE_INPUT mode.";
 } archive_start_time;
 
 paramdef string {
   p_default = "2012 06 02 00 00 00";
   p_descr = "Specify the end time for the files in archive mode.";
-  p_help = "Format is 'yyyy mm dd hh mm ss'. Applies to MOMENTS_ARCHIVE_INPUT mode.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'. Applies to COVAR_ARCHIVE_INPUT mode.";
 } archive_end_time;
 
 paramdef int {
@@ -121,45 +121,41 @@ paramdef boolean {
 } print_missing_pulses;
 
 commentdef {
-  p_header = "FIELD NAMES FOR MOMENTS FILES";
-  p_text = "Names of specified fields in the moments files.";
+  p_header = "FIELD NAMES FOR COVAR FILES";
+  p_text = "Names of specified fields in the covariances files. HCVX and VCHX fields are for alternating mode. RVVHH fields are for simultaneous mode.";
 };
 
 typedef struct {
-  string DBMHC;
-  string DBMVC;
-  string DBMHX;
-  string DBMVX;
-  string ZDR;
-  string PHIDP;
-  string RHOHV;
-  string NCP;
-  string LAG1_HC_DB;
-  string LAG1_HC_PHASE;
-  string LAG1_VC_DB;
-  string LAG1_VC_PHASE;
+  string LAG0_HC_DB;
+  string LAG0_HX_DB;
+  string LAG0_VC_DB;
+  string LAG0_VX_DB;
+  string LAG0_HCVX_DB;
+  string LAG0_HCVX_PHASE;
+  string LAG0_VCHX_DB;
+  string LAG0_VCHX_PHASE;
+  string LAG1_VXHX_DB;
+  string LAG1_VXHX_PHASE;
   string RVVHH0_DB;
   string RVVHH0_PHASE;
-} moments_field_names_t;
+ } covar_field_names_t;
 
-paramdef struct moments_field_names_t {
+paramdef struct covar_field_names_t {
   p_default = {
-    DBMHC = "DBMHC",
-    DBMVC = "DBMVC",
-    DBMHX = "DBMHX",
-    DBMVX = "DBMVX",
-    ZDR = "ZDR",
-    PHIDP = "PHIDP",
-    RHOHV = "RHOHV",
-    NCP = "NCP",
-    LAG1_HC_DB = "LAG1_HC_DB",
-    LAG1_HC_PHASE = "LAG1_HC_PHASE",
-    LAG1_VC_DB = "LAG1_VC_DB",
-    LAG1_VC_PHASE = "LAG1_VC_PHASE",
+    LAG0_HC_DB = "LAG0_HC_DB",
+    LAG0_HX_DB = "LAG0_HX_DB",
+    LAG0_VC_DB = "LAG0_VC_DB",
+    LAG0_VX_DB = "LAG0_VX_DB",
+    LAG0_HCVX_DB = "LAG0_HCVX_DB",
+    LAG0_HCVX_PHASE = "LAG0_HCVX_PHASE",
+    LAG0_VCHX_DB = "LAG0_VCHX_DB",
+    LAG0_VCHX_PHASE = "LAG0_VCHX_PHASE",
+    LAG1_VXHX_DB = "LAG1_VXHX_DB",
+    LAG1_VXHX_PHASE = "LAG1_VXHX_PHASE",
     RVVHH0_DB = "RVVHH0_DB",
     RVVHH0_PHASE = "RVVHH0_PHASE"
   };
-} moments_field_names;
+} covar_field_names;
 
 commentdef {
   p_header = "VOLUME IDENTIFICATION OPTIONS";
@@ -652,4 +648,32 @@ paramdef string {
   p_descr = "URL for SPDB XML.";
   p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
 } spdb_output_url;
+
+commentdef {
+  p_header = "OPTION TO TEST C CODE FOR NEXRAD PROCESSING";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to test NEXRAD processing for solar analysis.";
+  p_help = "For NEXRAD, a C-code module was added. Testing this module ensures that the NEXRAD processing works correctly as compared with the NCAR processing.";
+} test_nexrad_processing;
+
+paramdef string {
+  p_default = "/tmp/nexrad/output";
+  p_descr = "Dir for output text files.";
+  p_help = "The NEXRAD results will be written to sub-directories named from the cal time.";
+} nexrad_text_output_dir;
+
+paramdef string {
+  p_default = "/tmp/nexrad/mdv";
+  p_descr = "URL for output MDV files.";
+  p_help = "For NEXRAD writes, specify the directory.";
+} nexrad_mdv_output_url;
+
+paramdef string {
+  p_default = "/tmp/nexrad/spdb";
+  p_descr = "URL for SPDB XML.";
+  p_help = "For NEXRAD writes, specify the directory.";
+} nexrad_spdb_output_url;
 

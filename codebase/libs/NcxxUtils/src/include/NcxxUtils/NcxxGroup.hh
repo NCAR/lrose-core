@@ -137,22 +137,27 @@ public:
 
   /*! Gets the group name. */
   /*!
-    Method will throw an NcNullgrp exception if the group is null (ie NcxxGroup::isNull()=true).
-    \param fullName If true then the full name is returned with subgroups separated by a forward slash "/" (default is false)
-    \return         The group name.
+    Method will throw an NcNullgrp exception if the group is null (ie
+    NcxxGroup::isNull()=true).
+    \param fullName
+    If true then the full name is returned with subgroups separated by a forward
+    slash "/" (default is false)
+    \return
+    The group name.
   */
   std::string getName(bool fullName=false) const;
 
   /*!
-    Gets the parent group.
-    Method will throw an NcNullgrp exception if the  group is null (ie NcxxGroup::isNull()=true).
-    If the current root is the parent group, then return a null group.
+    Gets the parent group.  Method will throw an NcNullgrp exception if the
+    group is null (ie NcxxGroup::isNull()=true).  If the current root is the
+    parent group, then return a null group.
   */
   NcxxGroup getParentGroup() const ;
 
   /*!
     Gets the group id.
-    Method will throw an NcNullgrp exception if the group is null (ie NcxxGroup::isNull()=true).
+    Method will throw an NcNullgrp exception if the group is null (ie
+    NcxxGroup::isNull()=true).
   */
   int  getId() const;
 
@@ -170,7 +175,8 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         A STL multimap object, containing pairs of <attribute name, NcxxGroup object> entities.
   */
-  std::multimap<std::string,NcxxGroup> getGroups(NcxxGroup::GroupLocation location=ChildrenGrps) const;
+  std::multimap<std::string,NcxxGroup>
+    getGroups(NcxxGroup::GroupLocation location=ChildrenGrps) const;
 
 
   /*!
@@ -180,7 +186,8 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         Set of NcxxGroup objects with given name.
   */
-  std::set<NcxxGroup> getGroups(const std::string& name,NcxxGroup::GroupLocation location=ChildrenGrps) const;
+  std::set<NcxxGroup> getGroups(const std::string& name,
+                                NcxxGroup::GroupLocation location=ChildrenGrps) const;
 
   /*!
     Gets the named child NcxxGroup object.
@@ -191,7 +198,8 @@ public:
     the object closest to the current group is returned. If no valid object is found ,
     a \ref NcxxGroup::isNull "null node" is returned.
   */
-  NcxxGroup getGroup(const std::string& name,NcxxGroup::GroupLocation location=ChildrenGrps) const;
+  NcxxGroup getGroup(const std::string& name,
+                     NcxxGroup::GroupLocation location=ChildrenGrps) const;
 
   /*!
     Adds a new child netCDF group object.
@@ -340,89 +348,122 @@ public:
   NcxxGroupAtt getAtt(const std::string& name,NcxxGroup::Location location=Current) const;
 
 
-  /*! \overload
-   */
-  NcxxGroupAtt putAtt(const std::string& name, size_t len, const char** dataValues) const ;
+  /*!
+
+    Creates a new NetCDF group attribute or if already exisiting replaces it.
+    If you are writing a _Fill_Value_ attribute, and will tell the HDF5 layer to
+    use the specified fill value for that variable.
+
+    Although it's possible to create attributes of all types, text and double
+    attributes are adequate for most purposes.
+
+    \param name Name of attribute.
+    \param type The attribute type.
+    \param len  The length of the attribute (number of Nctype repeats).
+
+    \param dataValues
+    Data Values to put into the new attribute.  If
+    the type of data values differs from the netCDF variable type, type
+    conversion will occur.  (However, no type conversion is carried out for
+    variables using the user-defined data types: nc_Vlen, nc_Opaque, nc_Compound
+    and nc_Enum.)
+
+    \return The NcxxGroupAtt object for this new netCDF attribute.
+
+  */
 
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const std::string& dataValues) const ;
+  NcxxGroupAtt putAtt(const std::string& name, 
+                      size_t len, const char** dataValues) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, short datumValue) const ;
+  NcxxGroupAtt putAtt(const std::string& name, 
+                      const std::string& dataValues) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, int datumValue) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, short datumValue) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, long datumValue) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, int datumValue) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, float datumValue) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, long datumValue) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, double datumValue) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, float datumValue) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, unsigned short datumValue) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, double datumValue) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, unsigned int datumValue) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, unsigned short datumValue) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, unsigned long long datumValue) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, unsigned int datumValue) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, long long datumValue) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, unsigned long long datumValue) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, size_t len, const unsigned char* dataValues) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, long long datumValue) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, size_t len, const signed char* dataValues) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, size_t len, const unsigned char* dataValues) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, size_t len, const short* dataValues) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, size_t len, const signed char* dataValues) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, size_t len, const int* dataValues) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, size_t len, const short* dataValues) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, size_t len, const long* dataValues) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, size_t len, const int* dataValues) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, size_t len, const float* dataValues) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, size_t len, const long* dataValues) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, size_t len, const double* dataValues) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, size_t len, const float* dataValues) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, size_t len, const unsigned short* dataValues) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, size_t len, const double* dataValues) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, size_t len, const unsigned int* dataValues) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, size_t len, const unsigned short* dataValues) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, size_t len, const unsigned long long* dataValues) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, size_t len, const unsigned int* dataValues) const ;
   /*! \overload
    */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, size_t len, const long long* dataValues) const ;
-  /*!
-    Creates a new NetCDF group attribute or if already exisiting replaces it.
-    If you are writing a _Fill_Value_ attribute, and will tell the HDF5 layer to use
-    the specified fill value for that variable.
-    \par
-    Although it's possible to create attributes of all types, text and double attributes are adequate for most purposes.
-    \param name        Name of attribute.
-    \param type    The attribute type.
-    \param len         The length of the attribute (number of Nctype repeats).
-    \param dataValues  Data Values to put into the new attribute.
-    If the type of data values differs from the netCDF variable type, type conversion will occur.
-    (However, no type conversion is carried out for variables using the user-defined data types:
-    nc_Vlen, nc_Opaque, nc_Compound and nc_Enum.)
-    \return            The NcxxGroupAtt object for this new netCDF attribute.
-  */
-  NcxxGroupAtt putAtt(const std::string& name, const NcxxType& type, size_t len, const void* dataValues) const ;
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, size_t len, const unsigned long long* dataValues) const ;
+  /*! \overload
+   */
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, size_t len, const long long* dataValues) const ;
+  /*! \overload
+   */
+  NcxxGroupAtt putAtt(const std::string& name,
+                      const NcxxType& type, size_t len, const void* dataValues) const ;
 
 
 
@@ -629,6 +670,12 @@ public:
   int addGlobAttr(const string &name, float val);
 
   ///////////////////////////////////////////
+  // add double global attribute
+  // Returns 0 on success, -1 on failure
+     
+  int addGlobAttr(const string &name, double val);
+
+  ///////////////////////////////////////////
   // read a global attribute
   // Returns 0 on success, -1 on failure
      
@@ -661,7 +708,8 @@ public:
              const string &standardName,
              const string &longName,
              NcxxType ncType, 
-             const string &units = "");
+             const string &units = "",
+             bool isMetadata = false);
 
   ///////////////////////////////////////
   // Add 1-D array var
@@ -674,7 +722,8 @@ public:
              const string &longName,
              NcxxType ncType, 
              NcxxDim &dim, 
-             const string &units = "");
+             const string &units = "",
+             bool isMetadata = false);
      
   ///////////////////////////////////////
   // Add 2-D array var
@@ -688,7 +737,8 @@ public:
              NcxxType ncType,
              NcxxDim &dim0,
              NcxxDim &dim1,
-             const string &units = "");
+             const string &units = "",
+             bool isMetadata = false);
 
   ///////////////////////////////////////
   // Add var in multiple-dimensions
@@ -701,7 +751,8 @@ public:
              const string &longName,
              NcxxType ncType,
              vector<NcxxDim> &dims,
-             const string &units = "");
+             const string &units = "",
+             bool isMetadata = false);
      
   ///////////////////////////////////////////////
   // read variable based on type, set var and val

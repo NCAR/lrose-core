@@ -33,6 +33,10 @@ $Revision: 1.2 $
 #ifndef _RSM_H_
 #define _RSM_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif 
+
 #include <arpa/inet.h>
 
 #define RSM_DEFAULT_GRP "224.0.0.3"
@@ -40,6 +44,7 @@ $Revision: 1.2 $
 #define RSM_MAX_TEXT 64
 #define RSM_MAX_STATUS 64
 #define RSM_MAX_VER 16
+#define MAX_DIGIO_NAME 8
 /**
 \brief RSM communications object
 */
@@ -84,6 +89,9 @@ typedef struct rsm_msghdr {
 typedef enum rsm_acq_id {
 	RSM_ACQ_ID_STATUS,
 	RSM_ACQ_ID_CONN_NOTICE,
+	RSM_ACQ_ID_MISC_STATS,
+	RSM_ACQ_ID_TXSAMPCTL,
+	RSM_ACQ_ID_CMD,
 } rsm_acq_id_t;
 
 typedef enum rsm_acq_status {
@@ -95,6 +103,12 @@ typedef enum rsm_acq_status {
 	RSM_ACQ_LAST_STATE
 } rsm_acq_status_t;
 
+typedef enum rsm_acq_cmd {
+	RSM_ACQ_CMD_RECONFIG,
+	RSM_ACQ_CMD_RESET,
+	RSM_ACQ_CMD_TXSAMPLE,
+} rsm_acq_cmd_t;
+
 typedef struct rsm_acq {
 	unsigned char id; /**< Set from rsm_acq_id_t */
 	union {
@@ -103,12 +117,33 @@ typedef struct rsm_acq {
 			char msg[RSM_MAX_STATUS]; /**< Status message */
 		} state;
 		struct {
+			unsigned char flags1;
+			unsigned char numclients;
+			unsigned char acq_len_lsb;
+			unsigned char acq_len_msb;
+		} misc_stats;
+		struct {
 			unsigned char type; /**< 0 = connect, 1 = disconnect */
 			char hostname[RSM_MAX_STATUS]; /**< Name of host that connected */
 		} conn_notice;
+		struct {
+			unsigned char port;
+			unsigned char length_lsb;
+			unsigned char length_msb;
+			unsigned char offset_lsb;
+			unsigned char offset_msb;
+		} tx_sample_control;
+		struct {
+			unsigned char cmd;
+		} control;
 	} data;
 } rsm_acq_t;
 
+#define RSM_ACQ_FLAGS_FIFO1_OVF 0x01
+#define RSM_ACQ_FLAGS_FIFO2_OVF 0x02
+#define RSM_ACQ_FLAGS_ADC1_OR  0x04
+#define RSM_ACQ_FLAGS_ADC3_OR  0x08
+#define RSM_ACQ_WANT_OVERSAMPLED 0x10
 
 /* Acquisition server version */
 #define RSM_ACQ_VER "ACQVER"
@@ -261,6 +296,8 @@ typedef enum rsm_syscon_id {	/**< describes the union element included in this p
 	RSM_SYSCON_ID_SCAN,  /**<  syscon scan related items */
 	RSM_SYSCON_ID_VERSION, /**< syscon version num */
 	RSM_SYSCON_ID_STATUS,  /**< syscon error conditions */
+	RSM_SYSCON_ID_ZDRBIAS, /**< Set ZDR bias */
+	RSM_SYSCON_ID_PHIDPOFFSET, /**< Set PHIDP offset */
 }  rsm_syscon_id_t;
 
 typedef enum {				/* this should track rcs_syscon_state_t in syscon/src/globals.h */
@@ -268,10 +305,29 @@ typedef enum {				/* this should track rcs_syscon_state_t in syscon/src/globals.
 	RSM_SYSCON_INITIALIZING,	/* connecting to txmit control and antenna controller */
 	RSM_SYSCON_IDLE,		/* connected, but not scanning */
 	RSM_SYSCON_BEGIN_SCAN_SENT,	/* begin scan sent to antenna control */
+	RSM_SYSCON_TIMER_WAIT,		/* waiting for timer to begin deferred start scan */
 	RSM_SYSCON_IN_SCAN,		/* currently scanning */
 	RSM_SYSCON_BETWEEN_SCANS,	/* between scans */
 	RSM_SYSCON_LAST_STATE	
 } rsm_syscon_state_t;
+
+typedef enum {			/* this should track iwrf_data.h -> IWRF_SCAN_MODE */
+ RSM_SCAN_MODE_NOT_SET = 0,
+ RSM_SCAN_MODE_SECTOR = 1, /**< sector scan mode */
+ RSM_SCAN_MODE_COPLANE = 2, /**< co-plane dual doppler mode */
+ RSM_SCAN_MODE_RHI = 3, /**< range height vertical scanning mode */
+ RSM_SCAN_MODE_VERTICAL_POINTING = 4, /**< vertical pointing for calibration */
+ RSM_SCAN_MODE_IDLE = 7, /**< between scans */
+ RSM_SCAN_MODE_AZ_SUR_360 = 8, /**< 360-degree azimuth mode - surveillance */
+ RSM_SCAN_MODE_EL_SUR_360 = 9, /**< 360-degree elevation mode - eg Eldora */
+ RSM_SCAN_MODE_SUNSCAN = 11, /**< scanning the sun for calibrations */
+ RSM_SCAN_MODE_POINTING = 12, /**< fixed pointing */
+ RSM_SCAN_MODE_MANPPI = 15, /**< Manual PPI mode (elevation does
+			       * not step automatically) */
+ RSM_SCAN_MODE_MANRHI = 16, /**< Manual RHI mode (azimuth does
+			       * not step automatically) */
+ RSM_SCAN_MODE_LAST /**< not used */
+} rsm_scan_mode_t;
 
 typedef enum {			/**< status codes set by syscon while talking to txctrl module */
 	RSM_TXCTRL_ERR_NO_ERROR=0,
@@ -286,21 +342,25 @@ typedef enum {			/**< status codes set by syscon while talking to txctrl module 
 	RSM_TXCTRL_ERR_SET_WAVEFORM=9,
 	RSM_TXCTRL_ERR_SET_COMMIT=10,
 	RSM_TXCTRL_ERR_TX_ENABLE=11,
+	RSM_TXCTRL_ERR_WAVEFORM_NOT_FOUND=12,
+	RSM_TXCTRL_ERR_PHASE_SEQUENCE_NOT_FOUND=13,
+	RSM_TXCTRL_ERR_PHASE_MODE_NOT_SUPPORTED=14,
+	RSM_TXCTRL_ERR_PRETRIG_H=15,
+	RSM_TXCTRL_ERR_PRETRIG_V=16,
 	RSM_TXCTRL_ERR_LAST,
 } rsm_txctrl_err_t;
 
 typedef enum {
- RSM_EVENT_CAUSE_NOT_SET = 0,
- RSM_EVENT_CAUSE_DONE = 1, /**< Scan completed normally */
- RSM_EVENT_CAUSE_TIMEOUT = 2, /**< Scan has timed out */
- RSM_EVENT_CAUSE_TIMER = 3, /**< Timer caused this scan to abort */
- RSM_EVENT_CAUSE_ABORT = 4, /**< Operator issued an abort */
- RSM_EVENT_CAUSE_SCAN_ABORT = 5, /**< Scan Controller detected error */
- RSM_EVENT_CAUSE_RESTART = 6, /**< communication fault was recovered,
-                                 *   restarting scan */
- RSM_EVENT_CAUSE_SCAN_STATE_TIMEOUT = 7, /**< Scan Controller state machine timeout */
- RSM_EVENT_CAUSE_LAST /**< not used */
-
+	RSM_EVENT_CAUSE_NOT_SET = 0,
+	RSM_EVENT_CAUSE_DONE = 1, /**< Scan completed normally */
+	RSM_EVENT_CAUSE_TIMEOUT = 2, /**< Scan has timed out */
+	RSM_EVENT_CAUSE_TIMER = 3, /**< Timer caused this scan to abort */
+	RSM_EVENT_CAUSE_ABORT = 4, /**< Operator issued an abort */
+	RSM_EVENT_CAUSE_SCAN_ABORT = 5, /**< Scan Controller detected error */
+	RSM_EVENT_CAUSE_RESTART = 6, /**< communication fault was recovered,
+		                         *   restarting scan */
+	RSM_EVENT_CAUSE_SCAN_STATE_TIMEOUT = 7, /**< Scan Controller state machine timeout */
+	RSM_EVENT_CAUSE_LAST /**< not used */
 } rsm_event_cause_t;
 
 #define RSM_SYSCON_ERR_STATE_TIMEOUT 1
@@ -308,29 +368,36 @@ typedef enum {
 #define RSM_MISC_STATUS_ANTCON_NOT_CONNECTED_MASK 1
 #define RSM_MISC_STATUS_TXCTRL_NOT_AVAILABLE_MASK 2
 #define RSM_MISC_STATUS_VOLUME_STARTED 4
+#define RSM_MISC_STATUS_SCAN_DEFERRED 8
+#define RSM_MISC_STATUS_ACQD_NOT_CONNECTED_MASK 16
 
 typedef struct rsm_syscon {
     unsigned char id;		/**< see rsm_syscon_id_t above */
     union {
-	struct rsm_syscon_state {
-		unsigned char rcs_state;	/**< current scan controller state (see rsm_syscon_state_t) */
-		unsigned char seconds_in_state1; /**< seconds elapsed in current scan state LSB */
-		unsigned char seconds_in_state2; /**< seconds elapsed in current scan state MSB */
-		unsigned char sweep_num;	/**< current sweep number */
-	} state;
-	struct rsm_syscon_scan {
-		char segname[RSM_MAX_SEGNAME_LENGTH];	/**< current scan segment name */
-		unsigned char cause;	   	/**< how did scan start - see rsm_event_cause_t above -> tracks iwrf_event_cause_t */
-		unsigned char scan_mode;	/**< iwrf_scan_mode */
-		unsigned char last_vol_duration1;  /**< duration of last scan in seconds (LSB) */
-		unsigned char last_vol_duration2;  /**< duration of last scan in seconds (MSB) */
-	} scan;
-	struct rsm_syscon_status {
-		char misc_status;		/**<  see RSM_MISC_STATUS above, this is LSB from syscon globals.  (rcs->misc_status word)*/
-		char syscon_error_code;		/**< see RSM_SYSCON_ERR defs above */
-		char txctrl_error_code;		/**< see rsm_txctrl_err_t, above */
-	} status;
-	char version[RSM_MAX_VER];	/** syscon version number */
+		struct rsm_syscon_state {
+			unsigned char rcs_state;	/**< current scan controller state (see rsm_syscon_state_t) */
+			unsigned char seconds_in_state1; /**< seconds elapsed in current scan state LSB */
+			unsigned char seconds_in_state2; /**< seconds elapsed in current scan state MSB */
+			unsigned char sweep_num;	/**< current sweep number */
+		} state;
+		struct rsm_syscon_scan {
+			char segname[RSM_MAX_SEGNAME_LENGTH];	/**< current scan segment name */
+			unsigned char cause;	   	/**< how did scan start - see rsm_event_cause_t above -> tracks iwrf_event_cause_t */
+			unsigned char scan_mode;	/**< iwrf_scan_mode */
+			unsigned char last_vol_duration1;  /**< duration of last scan in seconds (LSB) */
+			unsigned char last_vol_duration2;  /**< duration of last scan in seconds (MSB) */
+		} scan;
+		struct rsm_syscon_status {
+			char misc_status;		/**<  see RSM_MISC_STATUS above, this is LSB from syscon globals.  (rcs->misc_status word)*/
+			char syscon_error_code;		/**< see RSM_SYSCON_ERR defs above */
+			char txctrl_error_code;		/**< see rsm_txctrl_err_t, above */
+		} status;
+		struct rsm_syscon_bias {
+			unsigned char lsb; /**< least significant byte of bias */
+			unsigned char msb; /**< most significant byte of bias */
+		} bias; /**< Bias/offset term, a 16-bit signed int,
+				  (100ths of a dB for ZDR, 10ths of a degree for PHIDP) */
+		char version[RSM_MAX_VER];	/** syscon version number */
     } data;
 } rsm_syscon_t;
 
@@ -354,8 +421,11 @@ typedef enum RSM_ANT_STATE
 	RSM_ANT_PPI_EL_POSITIONING,
 	RSM_ANT_PPI_ACCEL,
 	RSM_ANT_PPI_IN_SWEEP,
-	RSM_PROG4_DO_SECTOR,
+	RSM_ANT_PROG4_DO_SECTOR,
+	RSM_ANT_PROG4_DO_SURV,
+	RSM_ANT_PROG4_DO_RHI,
 	RSM_ANT_DISCONNECTED,
+	RSM_ANT_PROG4_FAIL,
 	RSM_ANT_LAST_STATE,
 } rsm_ant_state_t;
 
@@ -402,35 +472,37 @@ typedef struct rsm_antcon {
     unsigned char current_el1;	/** current el LSB, 100ths of a degree */
     unsigned char current_el2;	/** current el MSB, 100ths of a degree */
     union {
-	struct rsm_antcon_state {
-		unsigned char ant_state;	/**< antenna controller state  -- see deltatau.h */
-		unsigned char sweep_num;	/**< current sweep number */
-		unsigned char scan_mode; 	/** current iwrf scan_mode */	
-	} state;
-	struct rsm_antcon_servo {
-		unsigned char az_servo;		/**< bit fields for servo status (RSM_ACON_MS_ defines) */
-		unsigned char el_servo;		/**< bit fields for servo status (RSM_ACON_MS_ defines) */
-		unsigned char last_event;	/** last antenna event detected by rticplc */
-	} servo;
-	struct rsm_antcon_motion {
-	unsigned char az_rate1;		/** current az rate LSB 100ths deg/sec */
-	unsigned char az_rate2;		/** current az rate MSB 100ths deg/sec */
-	unsigned char el_rate1;		/** current el rate LSB 100ths deg/sec */
-	unsigned char el_rate2;		/** current el rate MSB 100ths deg/sec */
-	unsigned char az_following_err1;	/** az fe LSB 100ths of a deg */
-	unsigned char az_following_err2;	/** az fe MSB 100ths of a deg */
-	unsigned char el_following_err1;	/** el fe LSB 100ths of a deg */
-	unsigned char el_following_err2;	/** el fe MSB 100ths of a deg */
-	} motion;
-	char motion_update_rate;		/** number of rsm_antcon_motion structures to send per second */
-	struct rsm_antcon_error {
-		unsigned char error_code;		/** bit mask of error conditions, see RSM_ANCTON_ERR above */
-		unsigned char unexpected_event_cnt1;  /**< total count of unexpected events on ant controller LSB */
-		unsigned char unexpected_event_cnt2;  /**< total count of unexpected events on ant controller MSB */
-		unsigned char state_sync_errcnt1;  /**< total times syscon fell behind in tracking ant_state */
-		unsigned char state_sync_errcnt2;  /**< total times syscon fell behind in tracking ant_state */
-	} error;
-	char version[RSM_MAX_VER];	/** antcon version number */
+		struct rsm_antcon_state {
+			unsigned char ant_state;	/**< antenna controller state  -- see deltatau.h */
+			unsigned char sweep_num;	/**< current sweep number */
+			unsigned char scan_mode; 	/** current iwrf scan_mode */	
+			unsigned char fixed_angle1;	/** current fixed_angle LSB, 100ths of a degree */
+			unsigned char fixed_angle2;	/** current fixed_angle MSB, 100ths of a degree */
+		} state;
+		struct rsm_antcon_servo {
+			unsigned char az_servo;		/**< bit fields for servo status (RSM_ACON_MS_ defines) */
+			unsigned char el_servo;		/**< bit fields for servo status (RSM_ACON_MS_ defines) */
+			unsigned char last_event;	/** last antenna event detected by rticplc */
+		} servo;
+		struct rsm_antcon_motion {
+			unsigned char az_rate1;		/** current az rate LSB 100ths deg/sec */
+			unsigned char az_rate2;		/** current az rate MSB 100ths deg/sec */
+			unsigned char el_rate1;		/** current el rate LSB 100ths deg/sec */
+			unsigned char el_rate2;		/** current el rate MSB 100ths deg/sec */
+			unsigned char az_following_err1;	/** az fe LSB 100ths of a deg */
+			unsigned char az_following_err2;	/** az fe MSB 100ths of a deg */
+			unsigned char el_following_err1;	/** el fe LSB 100ths of a deg */
+			unsigned char el_following_err2;	/** el fe MSB 100ths of a deg */
+		} motion;
+		unsigned char motion_update_rate;		/** number of rsm_antcon_motion structures to send per second */
+		struct rsm_antcon_error {
+			unsigned char error_code;		/** bit mask of error conditions, see RSM_ANCTON_ERR above */
+			unsigned char unexpected_event_cnt1;  /**< total count of unexpected events on ant controller LSB */
+			unsigned char unexpected_event_cnt2;  /**< total count of unexpected events on ant controller MSB */
+			unsigned char state_sync_errcnt1;  /**< total times syscon fell behind in tracking ant_state */
+			unsigned char state_sync_errcnt2;  /**< total times syscon fell behind in tracking ant_state */
+		} error;
+		char version[RSM_MAX_VER];	/** antcon version number */
     } data;
 } rsm_antcon_t;
 
@@ -528,6 +600,12 @@ typedef struct rsm_ins_pm {
 	char htxp2; /**< H Transmitter Power in 1/100 dBm, byte 2 (MSB) */
 	char vtxp1; /**< V Transmitter Power in 1/100 dBm, byte 1 (LSB) */
 	char vtxp2; /**< V Transmitter Power in 1/100 dBm, byte 2 (MSB) */
+  /*----------------------ADDED----------------------------------------------*/
+	char atxp1;
+        char atxp2;
+        char btxp1;
+        char btxp2;
+  /*-----------------------------------------------------------------------*/
 } rsm_ins_pm_t;
 
 /* Instrument query/status - Power meter settings */
@@ -549,6 +627,10 @@ typedef struct rsm_ins_pmset {
 typedef struct rsm_ins_pmver {
 	char v_version[RSM_MAX_VER_STR]; /**< Version ID of V channel PM */
 	char h_version[RSM_MAX_VER_STR]; /**< Version ID of H channel PM */
+ /*-----------------------ADDED-----------------------------------*/
+	char a_version[RSM_MAX_VER_STR]; /**< Version ID of A channel PM */
+	char b_version[RSM_MAX_VER_STR]; /**< Version ID of B channel PM */
+  /*-------------------------------------------------------------------*/
 } rsm_ins_pmver_t;
 
 /* Instrument status - Test Set */
@@ -672,12 +754,25 @@ typedef enum rsm_mserv_id {
 	RSM_MSERV_ID_SCAL, /**< Solar Calibration message */
 	RSM_MSERV_ID_PCAL, /**< Power Calibration message */
 	RSM_MSERV_ID_NCAL, /**< Noise Calibration message */
+	RSM_MSERV_ID_CONNECT, /**< SDB connection message */
+	RSM_MSERV_ID_Z_THRESHOLD, /**< Z threshold message */
+	RSM_MSERV_ID_ZDR_THRESHOLD, /**< ZDR threshold message */
+	RSM_MSERV_ID_LDR_THRESHOLD, /**< LDR threshold message */
+	RSM_MSERV_ID_W_THRESHOLD, /**< W threshold message */
 } rsm_mserv_id_t;
+
+typedef enum rsm_mserv_conn {
+	RSM_MSERV_CONN_SDB_CONNECT, /**< SDB connection */
+	RSM_MSERV_CONN_SDB_DISCONNECT, /**< SDB disconnection */
+	RSM_MSERV_CONN_VCHILL_CONNECT, /**< VCHILL connection */
+	RSM_MSERV_CONN_VCHILL_DISCONNECT, /**< VCHILL disconnection */
+} rsm_mserv_conn_t;
 
 typedef struct rsm_mserv {
 	unsigned char msg_id;
 	union {
 		char msg[RSM_MAX_STATUS];
+		char threshold;
 		struct {
 			char v_co_db_low;
 			char v_co_db_high;
@@ -693,6 +788,10 @@ typedef struct rsm_mserv {
 			unsigned char cal_time_3; /**< Byte 3 of UNIX time, last cal */
 			unsigned char cal_time_4; /**< MSB of UNIX time, last cal */
 		} cal;
+		struct {
+			char connect; /**< One of rsm_mserv_conn_t */
+			char hostname[RSM_MAX_STATUS - 1];
+		} conn;
 	} data;
 } rsm_mserv_t;
 
@@ -820,6 +919,130 @@ typedef struct rsm_tsarch {
 	} data;
 } rsm_tsarch_t;
 
+/*
+ * S-Pol monitoring and control 
+ */
+#define RSM_SPOL_MON_CTL "SPOL_MON_CTL"
+typedef enum rsm_status {
+	RSM_STATUS_OK = 0, 		/**< value is OK */
+      RSM_STATUS_WARN = 1, 		/**< warn user value is marginal */
+	RSM_STATUS_CRITICAL = 2, 	/**< value is critical */
+	RSM_STATUS_UNKNOWN = 3, 	/**< value has unknown state */
+} rsm_status_t;
+
+typedef struct scaled_float_val {
+ char msb;	/**< most significant byte */
+ char lsb;
+ unsigned char scale;   /** float_val = ((msb << 8) + lsb) / scale */
+ unsigned char status;  /**< rsm_status_t */
+} scaled_float_val_t;
+
+typedef struct rsm_spol_named_dig_io {
+char name[MAX_DIGIO_NAME];    
+char msb;    /**< most significant byte */
+char lsb;    /**< least significant byte */
+} rsm_spol_named_dig_io_t;
+
+
+typedef struct rsm_spol_temp {
+ scaled_float_val_t klystron_temp;
+ scaled_float_val_t shelter_ac_output_temp;
+ scaled_float_val_t shelter_ambient_temp;
+ scaled_float_val_t temperature_One;
+ scaled_float_val_t temperature_Two;
+ scaled_float_val_t temperature_Three;
+ scaled_float_val_t temperature_Four;
+ scaled_float_val_t temperature_Zero;
+} rsm_spol_temp_t;
+
+typedef struct rsm_spol_analog {
+ scaled_float_val_t xmit_v1;
+ scaled_float_val_t xmit_v2;
+ scaled_float_val_t value3;
+ scaled_float_val_t value4;
+ scaled_float_val_t check_voltage;
+ scaled_float_val_t check_voltage_AC;
+ scaled_float_val_t check_voltage_DC;
+ scaled_float_val_t check_voltage_High;
+ scaled_float_val_t check_voltage_Low;
+ scaled_float_val_t check_voltage_Trans;
+ scaled_float_val_t check_power_one;
+ scaled_float_val_t check_power_two;
+
+} rsm_spol_analog_t;
+
+/* digital values read for S-Pol */
+typedef struct rsm_spol_dig_read {
+ char waveguide_pressure_low;	/**< waveguide pressure below threshold */
+ char shelter_power_fail;
+ char antenna_not_scanning;
+ char smoke_alarm;
+}rsm_spol_dig_read_t;
+
+typedef enum rsm_dig_id {
+  RSM_SPOL_DIG_ID_XMIT_POWER_ENABLE,         /**< writing 0 disables transmitter */
+  RSM_SPOL_DIG_ID_XMIT_RESET_FAULT,          /**< writing 1 resets transmitter fault */
+  RSM_SPOL_DIG_ID_SERVO_RESET_FAULT,	      /**< writing 1 resets antenna servo fault */
+} rsm_dig_id_t;
+
+
+/* digital values read/written for S-Pol */
+typedef struct rsm_spol_dig_io {
+  char id; 	/**< from rsm_dig_it_t */ 
+  char pad;
+  char msb;	/**< most significant byte */
+  char lsb;	/**< least significant byte */
+} rsm_spol_dig_io_t;
+
+/* transmitter status for S-Pol - see NWS EHB 6-511 
+ * the NEXRAD transmitter has 8 bytes of digital fault status, which are read
+ * by setting the 3 select lines to the values 0-7
+ */
+typedef enum rsm_spol_xmit_bits {
+    RSM_SPOL_XMIT_AUTO_FAULT_CLEAR=0,
+    RSM_SPOL_XMIT_HARD_FAULT=1,
+    RSM_SPOL_XMIT_HV_ON=2,
+
+}rsm_spol_xmit_bits_t;
+
+#define NUM_SPOL_XMIT_FAULT_BYTES 8
+typedef struct rsm_spol_transmitter_status {
+  char faultData[NUM_SPOL_XMIT_FAULT_BYTES]; /**< digital fault data - select = 0*/
+  char status;  /**< bit 0 - transmitter clearing fault */
+  	        /**< bit 1 - transmitter can't clear fault */
+  	        /**< bit 2 - HV On/Off */
+  char spare0;
+  char spare1;
+  char spare2;
+  char spare3;
+
+} rsm_spol_transmitter_status_t;
+
+
+typedef enum rsm_spol_mon_id {
+RSM_SPOL_MON_ID_TEMP,
+RSM_SPOL_MON_ID_ANALOG,
+RSM_SPOL_MON_ID_DIG_READ,
+RSM_SPOL_MON_ID_DIG_IO,
+RSM_SPOL_MON_ID_DIG_NAME,
+RSM_SPOL_MON_ID_XMIT_STATUS
+} rsm_spol_mon_id_t;
+
+typedef struct rsm_spol_mon {
+unsigned char id;  /**< rsf_spol_mon_id_t */
+union {
+rsm_spol_temp_t  temp; 
+rsm_spol_analog_t analogs; 
+rsm_spol_dig_read_t dig_read; 
+rsm_spol_dig_io_t dig_io; 
+rsm_spol_named_dig_io_t dig_name;
+rsm_spol_transmitter_status_t xmit_status;
+
+} data;
+
+} rsm_spol_mon_t;
+
+
 /**
 \brief RSM message payload
 
@@ -847,7 +1070,10 @@ typedef union rsm_payload {
 	rsm_ins_fcset_t fcset; /**< Frequency counter settings (INS_FCSET) */
 	rsm_ins_fcver_t fcver; /**< Frequency counter version (INS_FCVER) */
 
+	rsm_spol_mon_t spol_mon; /**< S-Pol monitoring and control */
+	
 	rsm_xmit_t xmit; /**< Transmitter (XMIT) */
+	rsm_xmit_version_t xmit_ver;  /**< Transmitter version (XMIT_VER) */
 	rsm_mserv_t mserv; /**< Moment Server (DSP) */
 	rsm_mserv_version_t mservver; /**< Moment Server version (DSPVER) */
         rsm_syscon_detail_t scdet; /**< DTcontrol System Controller Details */
@@ -869,6 +1095,10 @@ void rsm_close(const rsm_t *rsm);
 int rsm_recvdata(rsm_t *rsm, char **msgid, rsm_pkt_t *pkt);
 int rsm_senddata(rsm_t *rsm, unsigned int length, rsm_msgtype_t type, const char *msgid, rsm_pkt_t *pkt);
 int rsm_waitfordata(rsm_t *rsm, unsigned int timeout);
+
+#ifdef __cplusplus
+}
+#endif 
 
 #endif /* _RSM_H_ */
 

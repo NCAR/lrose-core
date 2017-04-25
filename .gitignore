@@ -19,6 +19,19 @@ TAGS
 Entries.Log
 Entries.static
 
+# Ignore files and directories created by the Eclipse IDE
+
+.cproject
+.project
+.settings
+
+# Ignore bin, include, and lib directories which are created if
+# an install is done to the local directory
+
+bin
+include
+lib
+
 # configure
 
 makefile
@@ -379,6 +392,7 @@ codebase/apps/radar/src/HawkEye/moc_RhiWindow.cpp
 codebase/apps/radar/src/HcrVelCorrect/HcrVelCorrect
 codebase/apps/radar/src/IntfRemove/IntfRemove
 codebase/apps/radar/src/Iq2Dsr/Iq2Dsr
+codebase/apps/radar/src/JamesDealias/JamesDealias
 codebase/apps/radar/src/Mdv2Vad/Mdv2Vad
 codebase/apps/radar/src/MdvFold/MdvFold
 codebase/apps/radar/src/MdvPartRain/MdvPartRain
@@ -397,6 +411,7 @@ codebase/apps/radar/src/SimCpCompute/SimCpCompute
 codebase/apps/radar/src/SpectraPrint/SpectraPrint
 codebase/apps/radar/src/StaggeredLimits/StaggeredLimits
 codebase/apps/radar/src/SunCal/SunCal
+codebase/apps/radar/src/SunCal/testing/sunscan_ael_code
 codebase/apps/radar/src/SunCpCompute/SunCpCompute
 codebase/apps/radar/src/SweepInfo2Spdb/SweepInfo2Spdb
 codebase/apps/radar/src/Ts2NetCDF/Ts2NetCDF
@@ -433,6 +448,7 @@ codebase/apps/spdb_utils/src/Rhi2Spdb/Rhi2Spdb
 codebase/apps/spdb_utils/src/Taf2Spdb/Taf2Spdb
 codebase/apps/spdb_utils/src/extractStationLocationList/extractStationLocationList
 codebase/apps/spdb_utils/src/spdb_merge/spdb_merge
+codebase/apps/spdb_utils/src/WxStn2Table/WxStn2Table
 
 codebase/apps/spol/src/SpolAngles2Fmq/SpolAngles2Fmq
 codebase/apps/spol/src/SpolCal2Xml/SpolCal2Xml
@@ -586,4 +602,3 @@ codebase/libs/Fmq/src/.libs/
 codebase/libtool
 codebase/ltmain.sh
 codebase/m4/
-

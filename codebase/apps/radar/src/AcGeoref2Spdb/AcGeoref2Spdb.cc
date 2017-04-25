@@ -949,7 +949,16 @@ int AcGeoref2Spdb::_readTimes()
 
   // read the time coordinate variable
 
-  _timeVar = _file.getVar(_timeCoordName);
+  try {
+    _timeVar = _file.getVar(_timeCoordName);
+  } catch (NcxxException& e) {
+    cerr << "ERROR - AcGeoref2Spdb::_readTimes" << endl;
+    cerr << "  cannot get var time: " << _timeCoordName << endl;
+    cerr << "  exception: " << e.what() << endl;
+    return -1;
+  }
+
+
   if (_timeVar.isNull()) {
     cerr << "ERROR - AcGeoref2Spdb::_readTimes" << endl;
     cerr << "  Cannot get time variable: " << _timeCoordName << endl;
@@ -1117,8 +1126,10 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
 
   // get the variable
   
-  NcxxVar var = _file.getVar(varName);
-  if (var.isNull()) {
+  NcxxVar var;
+  try {
+    var = _file.getVar(varName);
+  } catch (NcxxException& e) {
     cerr << "ERROR - AcGeoref2Spdb::_readTimeSeriesVar" << endl;
     cerr << "  Cannot find var: " << varName << endl;
     return -1;

@@ -35,7 +35,6 @@
 #ifndef CalReader_HH
 #define CalReader_HH
 
-#include <string>
 #include <Radx/RadxTime.hh>
 #include <vector>
 
@@ -52,8 +51,10 @@ private:
 public:
 
   CalReader();
-  CalReader(string inName, string inUnits, vector< RadxTime > inTime, vector<string> inDataStr);//constructor for string type data
-  CalReader(string inName, string inUnits, vector< RadxTime > inTime, vector< vector<double> > inDataNum);////constructor for num type data
+  CalReader(string inName, string inUnits, vector< RadxTime > inTime, 
+	    vector<string> inDataStr);//constructor for string type data
+  CalReader(string inName, string inUnits, vector< RadxTime > inTime, 
+	    vector< vector<double> > inDataNum);//constructor for num type data
  
   void setVarName(string inName);
   void setVarUnits(string inUnits);
@@ -66,19 +67,17 @@ public:
   void setIsStr();
   void setIsNum();
   bool dataTypeisNum();
-  bool dataTypeisStr(); string getVarName();
+  bool dataTypeisStr(); 
+  string getVarName();
   string getVarUnits();
   vector<RadxTime> getTime();
   vector<string> getDataStr();
   vector< vector<double> > getDataNum();
   void printBlock();
+  CalReader sortTime(CalReader toSort);
+  int dateMatch(CalReader calIn, RadxTime check);
 
-
-  vector <vector<double> > readBaselineCorrection(const char* file, bool debug);
-  vector <vector<double> > readDiffDefaultGeo(const char* file, bool debug);
-  vector <vector<double> > readGeofileDefault(const char* file, bool debug);
-  vector <vector<double> > readAfterPulse(const char* file, bool debug);
-  CalReader readCalVals(const char* file, const char* variable, bool debug);
+  CalReader readCalVals(const char* file, const char* variable);
   string removeWhitespace(string s);
   int checkForChar(string subSt, string s);
 

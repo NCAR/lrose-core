@@ -73,7 +73,7 @@ PpiInterp::PpiInterp(const string &progName,
 
   // set up thread objects
 
-  _initThreads();
+  _createThreads();
   
 }
 
@@ -186,31 +186,23 @@ int PpiInterp::interpVol()
 }
 
 //////////////////////////////////////////////////
-// initialize the threading objects
+// create the threading objects
 
-void PpiInterp::_initThreads()
+void PpiInterp::_createThreads()
 {
 
-  // initialize compute object
+  // initialize thread pool for grid relative to radar
 
-  pthread_mutex_init(&_debugPrintMutex, NULL);
-  
-  if (_params.use_multiple_threads) {
-    
-    // set up compute thread pool
-    
-    for (int ii = 0; ii < _params.n_compute_threads; ii++) {
-      
-      PpiThread *thread = new PpiThread();
-      thread->setContext(this);
+  for (int ii = 0; ii < _params.n_compute_threads; ii++) {
+    ComputeGridRelative *thread = new ComputeGridRelative(this);
+    _threadPoolGridRel.addThreadToMain(thread);
+  }
 
-      pthread_t pth = 0;
-      pthread_create(&pth, NULL, _computeInThread, thread);
-      thread->setThreadId(pth);
-      _availThreads.push_back(thread);
-      
-    }
-    
+  // initialize thread pool for interpolation
+
+  for (int ii = 0; ii < _params.n_compute_threads; ii++) {
+    PerformInterp *thread = new PerformInterp(this);
+    _threadPoolInterp.addThreadToMain(thread);
   }
 
 }
@@ -220,44 +212,7 @@ void PpiInterp::_initThreads()
 
 void PpiInterp::_freeThreads()
 {
-
-  // wait for active thread pool to complete
-
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->waitForWorkToComplete();
-  }
-  
-  // signal all threads to exit
-
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    _availThreads[ii]->setExitFlag(true);
-    _availThreads[ii]->signalWorkToStart();
-  }
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->setExitFlag(true);
-    _activeThreads[ii]->signalWorkToStart();
-  }
-
-  // wait for all threads to exit
-  
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    _availThreads[ii]->waitForWorkToComplete();
-  }
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    _activeThreads[ii]->waitForWorkToComplete();
-  }
-
-  // delete all threads
-  
-  for (size_t ii = 0; ii < _availThreads.size(); ii++) {
-    delete _availThreads[ii];
-  }
-  for (size_t ii = 0; ii < _activeThreads.size(); ii++) {
-    delete _activeThreads[ii];
-  }
-
-  pthread_mutex_destroy(&_debugPrintMutex);
-
+  // thread pools free up threads in destructor
 }
 
 ////////////////////////////////////////////////////////////
@@ -483,57 +438,6 @@ void PpiInterp::_initOutputArrays()
 
 }
 
-///////////////////////////////////////////////////////////
-// Thread function to perform computations
-
-void *PpiInterp::_computeInThread(void *thread_data)
-  
-{
-  
-  // get thread data from args
-
-  PpiThread *thread = (PpiThread *) thread_data;
-  PpiInterp *context = thread->getContext();
-  assert(context);
-  
-  while (true) {
-
-    // wait for main to unlock start mutex on this thread
-    
-    thread->waitForStartSignal();
-    
-    // if exit flag is set, context is done, exit now
-    
-    if (thread->getExitFlag()) {
-      if (context->getParams().debug >= Params::DEBUG_VERBOSE) {
-        pthread_mutex_t *debugPrintMutex = context->getDebugPrintMutex();
-        pthread_mutex_lock(debugPrintMutex);
-        cerr << "====>> compute thread exiting" << endl;
-        pthread_mutex_unlock(debugPrintMutex);
-      }
-      thread->signalParentWorkIsComplete();
-      return NULL;
-    }
-    
-    // perform computations
-
-    if (thread->getTask() == PpiThread::INTERP) {
-      context->_interpRow(thread->getZIndex(), thread->getYIndex());
-    } else if (thread->getTask() == PpiThread::GRID_LOC) {
-      context->_computeGridRow(thread->getZIndex(), 
-                               thread->getYIndex());
-    }
-    
-    // unlock done mutex
-    
-    thread->signalParentWorkIsComplete();
-    
-  } // while
-
-  return NULL;
-
-}
-
 ////////////////////////////////////////////////////////////
 // Compute grid locations relative to radar
 
@@ -585,53 +489,46 @@ void PpiInterp::_computeGridRelative()
 void PpiInterp::_computeGridRelMultiThreaded()
 {
 
+  _threadPoolGridRel.initForRun();
+
   // loop through the Z layers
-  
-  for (int iz = 0; iz < _nEl; iz++) {
-
+  for (int iz = 0; iz < _gridNz; iz++) {
     // loop through the Y columns
-  
     for (int iy = 0; iy < _gridNy; iy++) {
-      
-      // is a thread available? if not wait for one
-    
-      PpiThread *thread = NULL;
-      if (_availThreads.size() > 0) {
-        // get thread from available pool
-        // it is doing no work
-        thread = _availThreads.front();
-        _availThreads.pop_front();
-      } else {
-        // get thread from active pool
-        thread = _activeThreads.front();
-        _activeThreads.pop_front();
-        // wait for current work to complete
-        thread->waitForWorkToComplete();
+      // get a thread from the pool
+      bool isDone = true;
+      ComputeGridRelative *thread = 
+        (ComputeGridRelative *) _threadPoolGridRel.getNextThread(true, isDone);
+      if (thread == NULL) {
+        break;
       }
-    
-      // set thread going to compute moments
-      
-      thread->setTask(PpiThread::GRID_LOC);
-      thread->setZIndex(iz);
-      thread->setYIndex(iy);
-      thread->signalWorkToStart();
-      
-      // push onto active pool
-      
-      _activeThreads.push_back(thread);
-
+      if (isDone) {
+        // if it is a done thread, return thread to the available pool
+        _threadPoolGridRel.addThreadToAvail(thread);
+        // reduce iy by 1 since we did not actually get a compute
+        // thread yet for this row
+        iy--;
+      } else {
+        // available thread, set it running
+        thread->setZIndex(iz);
+        thread->setYIndex(iy);
+        thread->signalRunToStart();
+      }
     } // iy
-
   } // iz
-    
-  // wait for all active threads to complete
   
-  while (_activeThreads.size() > 0) {
-    PpiThread *thread = _activeThreads.front();
-    _activeThreads.pop_front();
-    _availThreads.push_back(thread);
-    thread->waitForWorkToComplete();
-  }
+  // collect remaining done threads
+
+  _threadPoolGridRel.setReadyForDoneCheck();
+  while (!_threadPoolGridRel.checkAllDone()) {
+    ComputeGridRelative *thread = 
+      (ComputeGridRelative *) _threadPoolGridRel.getNextDoneThread();
+    if (thread == NULL) {
+      break;
+    } else {
+      _threadPoolGridRel.addThreadToAvail(thread);
+    }
+  } // while
 
 }
 
@@ -1008,53 +905,46 @@ void PpiInterp::_interpSingleThreaded()
 void PpiInterp::_interpMultiThreaded()
 {
 
+  _threadPoolInterp.initForRun();
+
   // loop through the Z layers
-  
-  for (int iz = 0; iz < _nEl; iz++) {
-
+  for (int iz = 0; iz < _gridNz; iz++) {
     // loop through the Y columns
-  
     for (int iy = 0; iy < _gridNy; iy++) {
-      
-      // is a thread available? if not wait for one
-    
-      PpiThread *thread = NULL;
-      if (_availThreads.size() > 0) {
-        // get thread from available pool
-        // it is doing no work
-        thread = _availThreads.front();
-        _availThreads.pop_front();
-      } else {
-        // get thread from active pool
-        thread = _activeThreads.front();
-        _activeThreads.pop_front();
-        // wait for current work to complete
-        thread->waitForWorkToComplete();
+      // get a thread from the pool
+      bool isDone = true;
+      PerformInterp *thread = 
+        (PerformInterp *) _threadPoolInterp.getNextThread(true, isDone);
+      if (thread == NULL) {
+        break;
       }
-    
-      // set thread going to compute moments
-      
-      thread->setTask(PpiThread::INTERP);
-      thread->setZIndex(iz);
-      thread->setYIndex(iy);
-      thread->signalWorkToStart();
-      
-      // push onto active pool
-      
-      _activeThreads.push_back(thread);
-
+      if (isDone) {
+        // if it is a done thread, return thread to the available pool
+        _threadPoolInterp.addThreadToAvail(thread);
+        // reduce iy by 1 since we did not actually get a compute
+        // thread yet for this row
+        iy--;
+      } else {
+        // available thread, set it running
+        thread->setZIndex(iz);
+        thread->setYIndex(iy);
+        thread->signalRunToStart();
+      }
     } // iy
-
   } // iz
     
-  // wait for all active threads to complete
-  
-  while (_activeThreads.size() > 0) {
-    PpiThread *thread = _activeThreads.front();
-    _activeThreads.pop_front();
-    _availThreads.push_back(thread);
-    thread->waitForWorkToComplete();
-  }
+  // collect remaining done threads
+
+  _threadPoolInterp.setReadyForDoneCheck();
+  while (!_threadPoolInterp.checkAllDone()) {
+    PerformInterp *thread = 
+      (PerformInterp *) _threadPoolInterp.getNextDoneThread();
+    if (thread == NULL) {
+      break;
+    } else {
+      _threadPoolInterp.addThreadToAvail(thread);
+    }
+  } // while
 
 }
 
@@ -1480,4 +1370,30 @@ int PpiInterp::_writeOutputFile()
 
 }
 
+///////////////////////////////////////////////////////////////
+// ComputeGridRelative thread
+///////////////////////////////////////////////////////////////
+// Constructor
+PpiInterp::ComputeGridRelative::ComputeGridRelative(PpiInterp *obj) :
+        _this(obj)
+{
+}  
+// run method
+void PpiInterp::ComputeGridRelative::run()
+{
+  _this->_computeGridRow(_zIndex, _yIndex);
+}
 
+///////////////////////////////////////////////////////////////
+// PerformInterp thread
+///////////////////////////////////////////////////////////////
+// Constructor
+PpiInterp::PerformInterp::PerformInterp(PpiInterp *obj) :
+        _this(obj)
+{
+}  
+// run method
+void PpiInterp::PerformInterp::run()
+{
+  _this->_interpRow(_zIndex, _yIndex);
+}

@@ -36,7 +36,6 @@
 #define Interp_HH
 
 #include "Params.hh"
-#include "Thread.hh"
 #include <string>
 #include <cmath>
 #include <deque>

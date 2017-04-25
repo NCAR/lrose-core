@@ -47,9 +47,7 @@
 #include "PpiInterp.hh"
 #include "PolarInterp.hh"
 #include "ReorderInterp.hh"
-#include "PrevReorderInterp.hh"
 #include "SatInterp.hh"
-#include "Thread.hh"
 #include <string>
 #include <deque>
 #include <toolsa/TaArray.hh>

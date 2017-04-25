@@ -775,11 +775,11 @@ using namespace std;
       tt->struct_vals[0].s = tdrpStrDup("<tag1><tag2><tag3>");
       tt->struct_vals[1].b = pTRUE;
       tt->struct_vals[2].s = tdrpStrDup("myLabel");
-      tt->struct_vals[3].b = pTRUE;
+      tt->struct_vals[3].b = pFALSE;
       tt->struct_vals[4].s = tdrpStrDup("<tag4><tag5>");
       tt->struct_vals[5].b = pFALSE;
       tt->struct_vals[6].s = tdrpStrDup("");
-      tt->struct_vals[7].b = pTRUE;
+      tt->struct_vals[7].b = pFALSE;
     tt++;
     
     // Parameter 'Comment 4'

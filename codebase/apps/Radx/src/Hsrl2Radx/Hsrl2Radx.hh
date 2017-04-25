@@ -27,8 +27,10 @@
 // Hsrl2Radx object
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
 // June 2015
+// 
+// Brad Schoenrock, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// updated Mar 2017
 //
 ///////////////////////////////////////////////////////////////
 
@@ -39,10 +41,12 @@
 #include "Params.hh"
 #include <string>
 #include <Radx/RadxTime.hh>
+#include "CalReader.hh"
+#include "FullCals.hh"
+#include <Radx/Radx.hh>
 class RadxVol;
 class RadxFile;
 class MslFile;
-class CalReader;
 using namespace std;
 
 
@@ -74,6 +78,7 @@ private:
   Args _args;
   Params _params;
   vector<string> _readPaths;
+  FullCals _cals;
 
   int _runFilelist();
   int _runArchive();
@@ -92,7 +97,26 @@ private:
 
   int _processUwRawFile(const string &filePath);
   void _addEnvFields(RadxVol &vol);
+  void _addDerivedFields(RadxVol &vol);
 
+  
+  double _nonLinCountCor(Radx::fl32 count, double deadtime, 
+			     double binWid, double shotCount);
+  double _baselineSubtract(double arrivalRate, double profile, 
+			       double polarization);
+  double _backgroundSub(double arrivalRate, double backgroundBins);
+  double _energyNorm(double arrivalRate, double totalEnergy);
+  vector<double> _diffOverlapCor(vector<double> arrivalRate, vector<double> diffOverlap);
+  vector<double> _processQWPRotation(vector<double>arrivalRate, vector<double> polCal);
+  double _hiAndloMerge(double hiRate, double loRate);
+  double _geoOverlapCor(double arrivalRate, double geoOverlap);
+  double _volDepol(double crossRate, double combineRate);
+  double _backscatRatio(double combineRate, double molRate);
+  double _partDepol(double volDepol, double backscatRatio);
+  double _backscatCo(double pressure, double temp, 
+			 double backscatRatio);
+  
 };
 
 #endif
+

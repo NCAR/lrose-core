@@ -111,6 +111,8 @@ IwrfTsPulse::IwrfTsPulse(const IwrfTsPulse &rhs) :
 IwrfTsPulse::~IwrfTsPulse()
 
 {
+  _clearIq();
+  _clearPacked();
   pthread_mutex_destroy(&_nClientsMutex);
 }
 
