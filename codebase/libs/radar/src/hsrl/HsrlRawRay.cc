@@ -103,10 +103,11 @@ void HsrlRawRay::setFields(int nGates,
 
 
 ///////////////////////////////////////////////////////////////
-// serialize object into buffer for transmission
-// returns pointer to buffer
+// Serialize object into buffer for transmission.
+// After calling, call getBufPtr() and getBufLen()
+// to get the details of the buffer.
 
-char *HsrlRawRay::serialize()
+void HsrlRawRay::serialize()
 
 {
   
@@ -172,10 +173,6 @@ char *HsrlRawRay::serialize()
   offset += fieldLen;
   memcpy(_packetBuf + offset, &_cross[0], fieldLen);
   
-  // return buffer
-  
-  return _packetBuf;
-
 }
 
 ///////////////////////////////////////////////////////////////

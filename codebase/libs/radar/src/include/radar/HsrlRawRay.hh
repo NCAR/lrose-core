@@ -89,10 +89,19 @@ public:
   const std::vector<float32> &getMolecular() const { return _molecular; }
   const std::vector<float32> &getCross() const { return _cross; }
 
-  // serialize object into buffer for transmission
-  // returns pointer to buffer
+  // Serialize object into buffer for transmission.
+  // After calling, call getBufPtr() and getBufLen()
+  // to get the details of the buffer.
 
-  char *serialize();
+  void serialize();
+
+  // get pointer to buffer from serialization
+  
+  const void *getBufPtr() const { return _packetBuf; }
+  
+  // get length of buffer from serialization
+
+  int getBufLen() const { return _bufLen; }
 
   // dserialize from buffer into the object
   // returns 0 on success, -1 on error
