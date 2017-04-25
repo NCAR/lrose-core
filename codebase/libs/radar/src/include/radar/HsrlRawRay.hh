@@ -90,8 +90,9 @@ public:
   const std::vector<float32> &getCross() const { return _cross; }
 
   // serialize into buffer for transmission
+  // returns pointer to buffer
 
-  void *serialize() const;
+  char *serialize();
 
   // dserialize from buffer
 
@@ -99,6 +100,34 @@ public:
 
 protected:
 private:
+
+  // typedef for header struct for tcp packet
+  // 128 bytes long
+
+  const int64_t cookie = 987654321;
+  int64_t _seqNum = 0;
+
+  typedef struct {
+
+    int64_t id;
+    int64_t len_bytes; // header plus data fields
+    int64_t seq_num;
+    int64_t version_num;
+
+    int64_t time_secs_utc;
+    int64_t time_nano_secs;
+
+    int64_t spares1[4];
+
+    int32_t total_energy;
+    float32 pol_angle;
+
+    int32_t n_gates;
+    int32_t spares2[9];
+
+  } tcp_hdr_t;
+
+  // private data
 
   time_t _timeSecs;
   double _subSecs;
@@ -111,10 +140,17 @@ private:
 
   int _nGates;
 
+  const int _nFields = 4;
   std::vector<float32> _combinedHi;
   std::vector<float32> _combinedLo;
   std::vector<float32> _molecular;
   std::vector<float32> _cross;
+
+  // tcp packet array
+
+  int _fieldLen;
+  int _bufLen;
+  char *_packetBuf;
   
 };
 

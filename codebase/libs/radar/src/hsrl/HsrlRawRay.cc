@@ -44,6 +44,11 @@ HsrlRawRay::HsrlRawRay()
 
 {
 
+  // initialize
+
+  _packetBuf = NULL;
+  _bufLen = 0;
+  
 }
   
 ///////////////////////////////////////////////////////////////
@@ -53,10 +58,18 @@ HsrlRawRay::~HsrlRawRay()
 
 {
 
+  // clear vectors
+
   _combinedHi.clear();
   _combinedLo.clear();
   _molecular.clear();
   _cross.clear();
+
+  // free up buffer
+
+  if (_packetBuf != NULL) {
+    delete[] _packetBuf;
+  }
 
 }
 
@@ -84,6 +97,82 @@ void HsrlRawRay::setFields(int nGates,
 
   _cross.resize(_nGates);
   memcpy(&_cross[0], cross, _nGates * sizeof(float32));
+
+}
+
+
+///////////////////////////////////////////////////////////////
+// serialize into buffer for transmission
+
+char *HsrlRawRay::serialize()
+
+{
+  
+  // compute buf sizes
+  
+  int fieldLen = _nGates * sizeof(float32);
+  int bufLen = sizeof(tcp_hdr_t) + _nFields * fieldLen;
+
+  // check buffer space
+  
+  if (fieldLen != _fieldLen || bufLen != _bufLen) {
+    if (_packetBuf != NULL) {
+      delete[] _packetBuf;
+    }
+    _packetBuf = NULL;
+  }
+
+  // set lengths
+
+  _fieldLen = fieldLen;
+  _bufLen = bufLen;
+
+  // allocate buffer space
+  
+  if (_packetBuf == NULL) {
+    _packetBuf = new char[_bufLen];
+  }
+
+  // set the header
+
+  tcp_hdr_t hdr;
+  memset(&hdr, 0, sizeof(hdr));
+
+  hdr.id = cookie;
+  hdr.len_bytes = _bufLen;
+  _seqNum++;
+  hdr.seq_num = _seqNum;
+  hdr.version_num = 1;
+
+  hdr.time_secs_utc = _timeSecs;
+  hdr.time_nano_secs = (int64_t) (_subSecs * 1.0e9 + 0.5);
+  
+  hdr.total_energy = _totalEnergy;
+  hdr.pol_angle = _polAngle;
+  hdr.n_gates = _nGates;
+
+  // copy the header into the buffer
+
+  int offset = 0;
+  memcpy(_packetBuf + offset, &hdr, sizeof(hdr));
+
+  // copy the fields into the buffer
+  
+  offset += sizeof(hdr);
+  memcpy(_packetBuf + offset, &_combinedHi[0], fieldLen);
+  
+  offset += fieldLen;
+  memcpy(_packetBuf + offset, &_combinedLo[0], fieldLen);
+  
+  offset += fieldLen;
+  memcpy(_packetBuf + offset, &_molecular[0], fieldLen);
+  
+  offset += fieldLen;
+  memcpy(_packetBuf + offset, &_cross[0], fieldLen);
+  
+  // return buffer
+  
+  return _packetBuf;
 
 }
 
