@@ -121,7 +121,6 @@ int Grib2Mdv::init(int nFiles, char** fileList, bool printVarList,
      _dataTrigger = data_trigger;
 
      _inputSuffix = "";
-     _inputSubstring = "";
    }
    else {
      if (_paramsPtr->latest_data_info_avail) {
@@ -135,7 +134,15 @@ int Grib2Mdv::init(int nFiles, char** fileList, bool printVarList,
        }
        _dataTrigger = data_trigger;
        _inputSuffix = _paramsPtr->input_suffix;
-       _inputSubstring = _paramsPtr->input_substring;
+       if (strlen(_paramsPtr->input_substring) > 0)
+       {
+         _inputSubstrings.push_back(_paramsPtr->input_substring);
+       }
+       else
+       {
+         for (int i = 0; i < _paramsPtr->input_substrings_n; ++i)
+           _inputSubstrings.push_back(_paramsPtr->_input_substrings[i]);
+       }
      } else {
        DsInputDirTrigger *data_trigger = new DsInputDirTrigger();
        if (data_trigger->init(_paramsPtr->input_dir,
@@ -151,7 +158,15 @@ int Grib2Mdv::init(int nFiles, char** fileList, bool printVarList,
        }
        _dataTrigger = data_trigger;
        _inputSuffix = _paramsPtr->input_suffix;
-       _inputSubstring = _paramsPtr->input_substring;
+       if (strlen(_paramsPtr->input_substring) > 0)
+       {
+         _inputSubstrings.push_back(_paramsPtr->input_substring);
+       }
+       else
+       {
+         for (int i = 0; i < _paramsPtr->input_substrings_n; ++i)
+           _inputSubstrings.push_back(_paramsPtr->_input_substrings[i]);
+       }
      }
    }
 
@@ -204,9 +219,18 @@ int Grib2Mdv::getData()
       
       // Check for appropriate substring and extension
 
-      if (!_inputSubstring.empty() &&
-	  file_path_obj.getFile().find(_inputSubstring, 0) == string::npos)
-	continue;
+      bool substring_found = false;
+      for (vector< string >::const_iterator substr = _inputSubstrings.begin();
+           substr != _inputSubstrings.end(); ++substr)
+      {
+        if (file_path_obj.getFile().find(*substr, 0) != string::npos)
+        {
+          substring_found = true;
+          break;
+        }
+      }
+      if (!substring_found)
+        continue;
       
       if (!_inputSuffix.empty() &&
 	  file_path_obj.getExt() != _inputSuffix)

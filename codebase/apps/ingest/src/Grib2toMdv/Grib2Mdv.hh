@@ -103,7 +103,7 @@ private:
   fl32 _missingVal;
   DsTrigger *_dataTrigger;
   string _inputSuffix;
-  string _inputSubstring;
+  vector< string > _inputSubstrings;
   
   //
   // list of GRIB fields to be processed
