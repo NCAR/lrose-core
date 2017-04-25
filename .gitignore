@@ -390,6 +390,7 @@ codebase/apps/radar/src/HawkEye/moc_PpiWidget.cpp
 codebase/apps/radar/src/HawkEye/moc_RhiWidget.cpp
 codebase/apps/radar/src/HawkEye/moc_RhiWindow.cpp
 codebase/apps/radar/src/HcrVelCorrect/HcrVelCorrect
+codebase/apps/radar/src/HsrlTcp2Fmq/HsrlTcp2Fmq
 codebase/apps/radar/src/IntfRemove/IntfRemove
 codebase/apps/radar/src/Iq2Dsr/Iq2Dsr
 codebase/apps/radar/src/JamesDealias/JamesDealias
