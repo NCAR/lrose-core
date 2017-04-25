@@ -78,6 +78,15 @@ paramdef string {
            "Used only if files are not specified on the command line";
 } input_substring;
 
+paramdef string {
+  p_default = {};
+  p_descr = "Input file substrings check.";
+  p_help = "Input files will be checked against these strings. "
+           "Can be used to filter different forecast times. "
+           "Used only if files are not specified on the command line "
+           "and input_substring is set to an empty string.";
+} input_substrings[];
+
 paramdef int {             
   p_min = 60;
   p_default = 10800;
