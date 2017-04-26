@@ -405,7 +405,7 @@ public:
 
   double gate_spacing_km;
 
-  tdrp_bool_t override_instrument_location;
+  tdrp_bool_t read_georef_data_from_aircraft_system;
 
   double instrument_latitude_deg;
 

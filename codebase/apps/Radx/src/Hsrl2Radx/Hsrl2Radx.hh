@@ -45,8 +45,11 @@
 #include "FullCals.hh"
 #include <Radx/Radx.hh>
 #include <Fmq/DsFmq.hh>
+#include <physics/IcaoStdAtmos.hh>
 class RadxVol;
+class RadxRay;
 class RadxFile;
+class HsrlRawRay;
 class MslFile;
 using namespace std;
 
@@ -82,12 +85,26 @@ private:
 
   DsFmq _inputFmq;
 
+  IcaoStdAtmos _stdAtmos;
+
   int _runFilelist();
   int _runArchive();
   int _runRealtimeWithLdata();
   int _runRealtimeNoLdata();
   int _runRealtimeFmq();
   int _readInputFmq();
+
+  RadxRay *_convertRawToRadx(HsrlRawRay &rawRay);
+
+  void _addRawFieldToRay(RadxRay *ray,
+                         double startRangeKm,
+                         double gateSpacingKm,
+                         const string &name,
+                         const string &units,
+                         const string &longName,
+                         int nGates,
+                         const Radx::fl32 *fcounts);
+  
   int _processFile(const string &filePath);
   int _processUwCfRadialFile(const string &filePath);
   void _setupRead(MslFile &file);
@@ -100,8 +117,8 @@ private:
   int _writeVol(RadxVol &vol);
 
   int _processUwRawFile(const string &filePath);
-  void _addEnvFields(RadxVol &vol);
-  void _addDerivedFields(RadxVol &vol);
+  void _addEnvFields(RadxRay *ray);
+  void _addDerivedFields(RadxRay *ray);
 
   
   double _nonLinCountCor(Radx::fl32 count, double deadtime, 

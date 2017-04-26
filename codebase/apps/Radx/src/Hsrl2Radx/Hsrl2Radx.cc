@@ -47,7 +47,6 @@
 #include <didss/DsInputPath.hh>
 #include <toolsa/TaXml.hh>
 #include <toolsa/pmu.h>
-#include <physics/IcaoStdAtmos.hh>
 #include <radar/HsrlRawRay.hh>
 #include "MslFile.hh"
 #include "RawFile.hh"
@@ -96,7 +95,7 @@ Hsrl2Radx::Hsrl2Radx(int argc, char **argv)
 
   // check on overriding radar location
 
-  if (_params.override_instrument_location) {
+  if (!_params.read_georef_data_from_aircraft_system) {
     if (_params.instrument_latitude_deg < -900 ||
         _params.instrument_longitude_deg < -900 ||
         _params.instrument_altitude_meters < -900) {
@@ -131,17 +130,17 @@ int Hsrl2Radx::Run()
   // reading in calibration files here ----- 
   
   _cals.setDeadTimeHi(_params.calvals_gvhsrl_path, 
-			  _params.combined_hi_dead_time_name);
+                      _params.combined_hi_dead_time_name);
   _cals.setDeadTimeLo(_params.calvals_gvhsrl_path, 
-			  _params.combined_lo_dead_time_name);
+                      _params.combined_lo_dead_time_name);
   _cals.setDeadTimeCross(_params.calvals_gvhsrl_path, 
-			  _params.cross_pol_dead_time_name);
+                         _params.cross_pol_dead_time_name);
   _cals.setDeadTimeMol(_params.calvals_gvhsrl_path, 
-			  _params.molecular_dead_time_name);
+                       _params.molecular_dead_time_name);
   _cals.setBinWidth(_params.calvals_gvhsrl_path, 
-			  _params.bin_width_name); 
+                    _params.bin_width_name); 
   _cals.setScanAdj(_params.calvals_gvhsrl_path, 
-			  _params.scan_adjustment_name); 
+                   _params.scan_adjustment_name); 
 
 
   _cals.setBLCor(_params.baseline_calibration_path);
@@ -415,10 +414,221 @@ int Hsrl2Radx::_readInputFmq()
       rawRay.printMetaData(cerr);
     }
 
+    // convert raw ray into RadxRay
+    
+    RadxRay *radxRay = _convertRawToRadx(rawRay);
+
+    // clean up
+
+    delete radxRay;
+
   } // while
 
   return 0;
 
+}
+
+//////////////////////////////////////////////////
+// Convert raw ray to Radx Ray
+
+RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
+
+{
+
+  // create ray
+  
+  RadxRay *ray = new RadxRay;
+
+  // range geom & ngates
+
+  double gateSpacingKm = _params.raw_bin_spacing_km;
+  double startRangeKm = _params.raw_bin_start_range_km;
+  ray->setRangeGeom(startRangeKm, gateSpacingKm);
+  ray->setNGates(rawRay.getNGates());
+
+  // time
+  
+  time_t secs = rawRay.getTimeSecs();
+  double nanoSecs = rawRay.getSubSecs() * 1.0e9;
+  ray->setTime(secs, nanoSecs);
+  
+  // sweep info
+  
+  ray->setVolumeNumber(-9999);
+  ray->setSweepNumber(0);
+  ray->setSweepMode(Radx::SWEEP_MODE_POINTING);
+  ray->setPrtMode(Radx::PRT_MODE_FIXED);
+  ray->setTargetScanRateDegPerSec(0.0);
+  ray->setIsIndexed(false);
+  
+  if (rawRay.getTelescopeDirn() == 1) {
+      // pointing up
+    ray->setAzimuthDeg(0.0);
+    ray->setElevationDeg(90.0);
+    ray->setFixedAngleDeg(90.0);
+  } else {
+    // pointing down
+    ray->setAzimuthDeg(0.0);
+    ray->setElevationDeg(-90.0);
+    ray->setFixedAngleDeg(-90.0);
+  }
+
+#ifdef NOT_YET
+
+  // TODO - read aircraft location etc from UDP
+  // georeference
+  
+  if (!_params.read_georef_data_from_aircraft_system) {
+
+    setLatitude(_latitude[ii]);
+    setLongitude(_longitude[ii]);
+    setAltitudeKmMsl(_altitude[ii] / 1000.0);
+
+  } else {
+    
+    RadxGeoref geo;
+    
+    if (_telescopeDirection[ii] == 1) {
+      
+      // pointing up
+      
+      geo.setRotation(-4.0);
+      geo.setTilt(0.0);
+      
+    } else {
+      
+      // pointing down
+      
+      geo.setRotation(184.0);
+      geo.setTilt(0.0);
+      
+    }
+    
+    geo.setRoll(_roll[ii]);
+    geo.setPitch(_pitch[ii]);
+    geo.setHeading(_heading[ii]);
+    geo.setDrift(0.0); // do not have drift in the file
+    geo.setVertVelocity(_vertVel[ii]);
+    
+    geo.setLatitude(_latitude[ii]);
+    geo.setLongitude(_longitude[ii]);
+    geo.setAltitudeKmMsl(_altitude[ii] / 1000.0);
+    
+    double sinVal, cosVal;
+    sincos(_heading[ii] * Radx::DegToRad, &sinVal, &cosVal);
+    geo.setEwVelocity(_gndSpeed[ii] * sinVal);
+    geo.setNsVelocity(_gndSpeed[ii] * cosVal);
+    
+    ray->setGeoref(geo);
+
+  }
+    
+  // compute az/el from geo
+  
+  double azimuth, elevation;
+  _computeRadarAngles(geo, corr, azimuth, elevation);
+  ray->setAzimuthDeg(azimuth);
+  ray->setElevationDeg(elevation);
+
+#endif
+  
+  // other metadata - overloading
+  
+  ray->setMeasXmitPowerDbmH(rawRay.getTotalEnergy());
+  ray->setEstimatedNoiseDbmHc(rawRay.getPolAngle());
+  // hard coded 2000 as replacement for DATA_shot_count from raw file
+  ray->setNSamples(2000);
+
+  // add the fields
+  
+  _addRawFieldToRay(ray, startRangeKm, gateSpacingKm,
+                    _params.combined_hi_field_name,
+                    "counts",
+                    "combined_hi_channel",
+                    rawRay.getNGates(),
+                    &rawRay.getCombinedHi()[0]);
+
+  _addRawFieldToRay(ray, startRangeKm, gateSpacingKm,
+                    _params.combined_lo_field_name,
+                    "counts",
+                    "combined_lo_channel",
+                    rawRay.getNGates(),
+                    &rawRay.getCombinedLo()[0]);
+
+  _addRawFieldToRay(ray, startRangeKm, gateSpacingKm,
+                    _params.molecular_field_name,
+                    "counts",
+                    "molecular_channel",
+                    rawRay.getNGates(),
+                    &rawRay.getMolecular()[0]);
+
+  _addRawFieldToRay(ray, startRangeKm, gateSpacingKm,
+                    _params.cross_field_name,
+                    "counts",
+                    "cross_channel",
+                    rawRay.getNGates(),
+                    &rawRay.getCross()[0]);
+
+
+  // return
+
+  return ray;
+
+}
+
+//////////////////////////////////////////////////////////////
+// Add fl32 field to rays
+
+void Hsrl2Radx::_addRawFieldToRay(RadxRay *ray,
+                                  double startRangeKm,
+                                  double gateSpacingKm,
+                                  const string &name,
+                                  const string &units,
+                                  const string &longName,
+                                  int nGates,
+                                  const Radx::fl32 *fcounts)
+  
+{
+
+  // create the field
+  
+  RadxField *field =
+    ray->addField(name, units, nGates,
+                  Radx::missingFl32,
+                  fcounts,
+                  true);
+  
+  field->setLongName(longName);
+  field->setRangeGeom(startRangeKm, gateSpacingKm);
+  
+  // add db of same field
+  
+  RadxArray<Radx::fl32> dbcounts_;
+  Radx::fl32 *dbcounts = dbcounts_.alloc(nGates);
+
+  for (int igate = 0; igate < nGates; igate++) {
+    if (fcounts[igate] > 0) {
+      dbcounts[igate] = 10.0 * log10(fcounts[igate]);
+    } else {
+      dbcounts[igate] = Radx::missingFl32;
+    }
+  }
+
+  string dbName = "db_";
+  dbName += name;
+  string dbUnits = "db_counts";
+  string dbLongName = "db_";
+  dbLongName += longName;
+  
+  RadxField *dbField =
+    ray->addField(dbName, dbUnits, nGates,
+                  Radx::missingFl32,
+                  fcounts,
+                  true);
+  
+  dbField->setLongName(dbLongName);
+  dbField->setRangeGeom(startRangeKm, gateSpacingKm);
+  
 }
 
 //////////////////////////////////////////////////
@@ -496,7 +706,7 @@ int Hsrl2Radx::_processUwCfRadialFile(const string &readPath)
 
   // override radar location if requested
   
-  if (_params.override_instrument_location) {
+  if (!_params.read_georef_data_from_aircraft_system) {
     vol.overrideLocation(_params.instrument_latitude_deg,
                          _params.instrument_longitude_deg,
                          _params.instrument_altitude_meters / 1000.0);
@@ -898,7 +1108,7 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
   RawFile inFile(_params);
   
   // read in file
-    RadxVol vol;
+  RadxVol vol;
   if (inFile.readFromPath(readPath, vol)) {
     cerr << "ERROR - Hsrl2Radx::Run" << endl;
     cerr << inFile.getErrStr() << endl;
@@ -906,7 +1116,7 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
   }
   
   // override radar name and site name if requested
-    if (_params.override_instrument_name) {
+  if (_params.override_instrument_name) {
     vol.setInstrumentName(_params.instrument_name);
   }
   if (_params.override_site_name) {
@@ -914,14 +1124,21 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
   }
     
   // set global attributes as needed
-    _setGlobalAttr(vol);
-
+  _setGlobalAttr(vol);
+  
   // add in height, temperature and pressure fields
-  _addEnvFields(vol);
-
-  //add corrections and derived data outputs  
-  _addDerivedFields(vol);
-
+  vector<RadxRay *> rays = vol.getRays();
+  for(size_t iray = 0; iray < rays.size(); iray++) {
+    _addEnvFields(rays[iray]);
+  }
+  
+  // add corrections and derived data outputs  
+  // loop through the rays
+  
+  for(size_t iray = 0; iray < rays.size(); iray++) {
+    _addDerivedFields(rays[iray]);
+  }
+    
   // write the file
   if (_writeVol(vol)) {
     cerr << "ERROR - Hsrl2Radx::_processFile" << endl;
@@ -938,201 +1155,175 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
 // Add in the height, pressure and temperature
 // environmental fields
 
-void Hsrl2Radx::_addEnvFields(RadxVol &vol)
+void Hsrl2Radx::_addEnvFields(RadxRay *ray)
 {
   
-  IcaoStdAtmos stdAtmos;
-
-  // loop through the rays
-
-  vector<RadxRay *> rays = vol.getRays();
+  double altitudeKm = _params.instrument_altitude_meters;
+  const RadxGeoref *geo = ray->getGeoreference();
+  if (geo) {
+    altitudeKm = geo->getAltitudeKmMsl();
+  }
   
-  //cout<<"rays.size()="<<rays.size()<<'\n';
+  double elevDeg = ray->getElevationDeg();
+  size_t nGates = ray->getNGates();
   
-  for(size_t iray = 0; iray < rays.size(); iray++) {
-
-    RadxRay *ray = rays[iray];
-    const RadxGeoref *geo = ray->getGeoreference();
-    if (!geo) {
-      continue;
-    }
-
-    double altitudeKm = geo->getAltitudeKmMsl();
-    double elevDeg = ray->getElevationDeg();
-    
-    size_t nGates = ray->getNGates();
-
-    //cout<<"nGates="<<nGates<<'\n';
-    
-    RadxArray<Radx::fl32> htKm_, tempK_, presHpa_;
-    Radx::fl32 *htKm = htKm_.alloc(nGates);
-    Radx::fl32 *tempK = tempK_.alloc(nGates);
-    Radx::fl32 *presHpa = presHpa_.alloc(nGates);
-
-    double sinEl = sin(elevDeg * Radx::DegToRad);
-    double startRangeKm = ray->getStartRangeKm();
-    double gateSpacingKm = ray->getGateSpacingKm();
-
-    double rangeKm = startRangeKm;
-    for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
-      htKm[igate] = altitudeKm + rangeKm * sinEl;
-      double htM = htKm[igate] * 1000.0;
-      tempK[igate] = stdAtmos.ht2temp(htM);
-      presHpa[igate] = stdAtmos.ht2pres(htM);
-    }
-
-    RadxField *htField =
-      ray->addField("height", "km", nGates, Radx::missingFl32, htKm, true);
-    htField->setLongName("height_MSL");
-    htField->setRangeGeom(startRangeKm, gateSpacingKm);
-
-    RadxField *tempField =
-      ray->addField("temperature", "K", nGates, Radx::missingFl32, tempK, true);
-    tempField->setLongName("temperaure_from_std_atmos");
-    tempField->setRangeGeom(startRangeKm, gateSpacingKm);
-
-    RadxField *presField =
-      ray->addField("pressure", "HPa", nGates, Radx::missingFl32, presHpa, true);
-    presField->setLongName("pressure_from_std_atmos");
-    presField->setRangeGeom(startRangeKm, gateSpacingKm);
-    
-    
-  } // iray
+  RadxArray<Radx::fl32> htKm_, tempK_, presHpa_;
+  Radx::fl32 *htKm = htKm_.alloc(nGates);
+  Radx::fl32 *tempK = tempK_.alloc(nGates);
+  Radx::fl32 *presHpa = presHpa_.alloc(nGates);
   
+  double sinEl = sin(elevDeg * Radx::DegToRad);
+  double startRangeKm = ray->getStartRangeKm();
+  double gateSpacingKm = ray->getGateSpacingKm();
+  
+  double rangeKm = startRangeKm;
+  for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
+    htKm[igate] = altitudeKm + rangeKm * sinEl;
+    double htM = htKm[igate] * 1000.0;
+    tempK[igate] = _stdAtmos.ht2temp(htM);
+    presHpa[igate] = _stdAtmos.ht2pres(htM);
+  }
 
+  RadxField *htField =
+    ray->addField("height", "km", nGates, Radx::missingFl32, htKm, true);
+  htField->setLongName("height_MSL");
+  htField->setRangeGeom(startRangeKm, gateSpacingKm);
+
+  RadxField *tempField =
+    ray->addField("temperature", "K", nGates, Radx::missingFl32, tempK, true);
+  tempField->setLongName("temperaure_from_std_atmos");
+  tempField->setRangeGeom(startRangeKm, gateSpacingKm);
+
+  RadxField *presField =
+    ray->addField("pressure", "HPa", nGates, Radx::missingFl32, presHpa, true);
+  presField->setLongName("pressure_from_std_atmos");
+  presField->setRangeGeom(startRangeKm, gateSpacingKm);
+    
 }
 
-void Hsrl2Radx::_addDerivedFields(RadxVol &vol)
+//////////////////////////////////////////////////
+// Add in the HSRL moments
+
+void Hsrl2Radx::_addDerivedFields(RadxRay *ray)
 {
- 
-  IcaoStdAtmos stdAtmos;
 
-  // loop through the rays
-  vector<RadxRay *> rays = vol.getRays();
-  
-  for(size_t iray = 0; iray < rays.size(); iray++) {
-    
-    RadxRay *ray = rays[iray];
-    const RadxGeoref *geo = ray->getGeoreference();
-    if (!geo) {
-      continue;
-    }
-
-    double altitudeKm = geo->getAltitudeKmMsl();
-    double elevDeg = ray->getElevationDeg();
-    
-    size_t nGates = ray->getNGates();
-        
-    //get more info from ray here
-    
-    double power = ray->getMeasXmitPowerDbmH();
-    
-    double shotCount=ray->getNSamples();
-    
-    RadxArray<Radx::fl32> htKm_, tempK_, presHpa_;
-    Radx::fl32 *htKm = htKm_.alloc(nGates);
-    Radx::fl32 *tempK = tempK_.alloc(nGates);
-    Radx::fl32 *presHpa = presHpa_.alloc(nGates);
-    
-    double sinEl = sin(elevDeg * Radx::DegToRad);
-    double startRangeKm = ray->getStartRangeKm();
-    double gateSpacingKm = ray->getGateSpacingKm();
-
-    double rangeKm = startRangeKm;
-    for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
-      htKm[igate] = altitudeKm + rangeKm * sinEl;
-      double htM = htKm[igate] * 1000.0;
-      tempK[igate] = stdAtmos.ht2temp(htM);
-      presHpa[igate] = stdAtmos.ht2pres(htM);
-    }
-     
-    //get raw data fields
-    const RadxField *hiField = ray->getField(_params.combined_hi_field_name);
-    const RadxField *loField = ray->getField(_params.combined_lo_field_name);
-    const RadxField *crossField = ray->getField(_params.cross_field_name);
-    const RadxField *molField = ray->getField(_params.molecular_field_name);
-
-    //holds derived data fields
-    RadxArray<Radx::fl32> volDepol_, backscatRatio_, partDepol_, 
-      backscatCoeff_, extinction_;
-    Radx::fl32 *volDepol = volDepol_.alloc(nGates);
-    Radx::fl32 *backscatRatio = backscatRatio_.alloc(nGates);
-    Radx::fl32 *partDepol = partDepol_.alloc(nGates);
-    Radx::fl32 *backscatCoeff = backscatCoeff_.alloc(nGates);
-    Radx::fl32 *extinction = extinction_.alloc(nGates);
-    
-    if(hiField != NULL && loField != NULL && molField != NULL && crossField != NULL)
-      {
-	const Radx::fl32 *hiData = hiField->getDataFl32();
-	const Radx::fl32 *loData = loField->getDataFl32();
-	const Radx::fl32 *crossData = crossField->getDataFl32();
-	const Radx::fl32 *molData = molField->getDataFl32();
-	vector< Radx::fl32> hiDataVec;
-	vector< Radx::fl32> loDataVec;
-	vector< Radx::fl32> crossDataVec;
-	vector< Radx::fl32> molDataVec;
-	vector< Radx::fl32> htKmVec;
-	vector< Radx::fl32> tempKVec;
-	vector< Radx::fl32> presHpaVec;
-	
-	for(unsigned int igate=0;igate<nGates;igate++)
-	  {
-	    hiDataVec.push_back(hiData[igate]);
-	    loDataVec.push_back(loData[igate]);
-	    crossDataVec.push_back(crossData[igate]);
-	    molDataVec.push_back(molData[igate]);
-	    htKmVec.push_back(htKm[igate]* 1000.0);
-	    tempKVec.push_back(tempK[igate]);
-	    presHpaVec.push_back(presHpa[igate]);
-	  }
-
-	
-	DerFieldCalcs data=DerFieldCalcs(_cals, hiDataVec, loDataVec, crossDataVec, 
-					 molDataVec, htKmVec, tempKVec, presHpaVec, 
-					 shotCount, power);
-	
-	vector<Radx::fl32> volDepolVec=data.get_volDepol();
-	vector<Radx::fl32> backscatRatioVec=data.get_backscatRatio();
-	vector<Radx::fl32> partDepolVec=data.get_partDepol();
-	vector<Radx::fl32> backscatCoeffVec=data.get_backscatCoeff(); 
-	vector<Radx::fl32> extinctionVec=data.get_extinction();
-	
-	for(unsigned int i=0;i<volDepolVec.size();i++)
-	  {
-	    volDepol[i]=volDepolVec.at(i);
-	    backscatRatio[i]=backscatRatioVec.at(i);
-	    partDepol[i]=partDepolVec.at(i);
-	    backscatCoeff[i]=backscatCoeffVec.at(i);
-	    if(i<volDepolVec.size()-1)
-	      extinction[i]=extinctionVec.at(i);
-
-	  }
-      }
-
-    RadxField *volDepolField =
-      ray->addField("volDepol", "unit", nGates, Radx::missingFl32, volDepol, true);
-    volDepolField->setLongName("volume_depolarization");
-    volDepolField->setRangeGeom(startRangeKm, gateSpacingKm);
-        
-    RadxField *backscatRatioField =
-      ray->addField("backscatRatio", "unit", nGates, Radx::missingFl32, backscatRatio, true);
-    backscatRatioField->setLongName("backscatter_ratio");
-    backscatRatioField->setRangeGeom(startRangeKm, gateSpacingKm);
-    
-    RadxField *partDepolField =
-      ray->addField("partDepol", "unit", nGates, Radx::missingFl32, partDepol, true);
-    partDepolField->setLongName("particle_depolarization");
-    partDepolField->setRangeGeom(startRangeKm, gateSpacingKm);
-    
-    RadxField *backscatCoeffField =
-      ray->addField("backscatCoeff", "unit", nGates, Radx::missingFl32, backscatCoeff, true);
-    backscatCoeffField->setLongName("backscatter_coefficient");
-    backscatCoeffField->setRangeGeom(startRangeKm, gateSpacingKm);
-   
-    RadxField *extinctionField =
-      ray->addField("extinction", "unit", nGates, Radx::missingFl32, extinction, true);
-    extinctionField->setLongName("extinction");
-    extinctionField->setRangeGeom(startRangeKm, gateSpacingKm);
-       
+  double altitudeKm = _params.instrument_altitude_meters;
+  const RadxGeoref *geo = ray->getGeoreference();
+  if (geo) {
+    altitudeKm = geo->getAltitudeKmMsl();
   }
+  
+  double elevDeg = ray->getElevationDeg();
+  size_t nGates = ray->getNGates();
+        
+  // get more info from ray here
+    
+  double power = ray->getMeasXmitPowerDbmH();
+  double shotCount = ray->getNSamples();
+  
+  RadxArray<Radx::fl32> htKm_, tempK_, presHpa_;
+  Radx::fl32 *htKm = htKm_.alloc(nGates);
+  Radx::fl32 *tempK = tempK_.alloc(nGates);
+  Radx::fl32 *presHpa = presHpa_.alloc(nGates);
+  
+  double sinEl = sin(elevDeg * Radx::DegToRad);
+  double startRangeKm = ray->getStartRangeKm();
+  double gateSpacingKm = ray->getGateSpacingKm();
+  
+  double rangeKm = startRangeKm;
+  for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
+    htKm[igate] = altitudeKm + rangeKm * sinEl;
+    double htM = htKm[igate] * 1000.0;
+    tempK[igate] = _stdAtmos.ht2temp(htM);
+    presHpa[igate] = _stdAtmos.ht2pres(htM);
+  }
+  
+  //get raw data fields
+  const RadxField *hiField = ray->getField(_params.combined_hi_field_name);
+  const RadxField *loField = ray->getField(_params.combined_lo_field_name);
+  const RadxField *crossField = ray->getField(_params.cross_field_name);
+  const RadxField *molField = ray->getField(_params.molecular_field_name);
+
+  //holds derived data fields
+  RadxArray<Radx::fl32> volDepol_, backscatRatio_, partDepol_, 
+    backscatCoeff_, extinction_;
+  Radx::fl32 *volDepol = volDepol_.alloc(nGates);
+  Radx::fl32 *backscatRatio = backscatRatio_.alloc(nGates);
+  Radx::fl32 *partDepol = partDepol_.alloc(nGates);
+  Radx::fl32 *backscatCoeff = backscatCoeff_.alloc(nGates);
+  Radx::fl32 *extinction = extinction_.alloc(nGates);
+    
+  if(hiField != NULL && loField != NULL && molField != NULL && crossField != NULL)
+  {
+    const Radx::fl32 *hiData = hiField->getDataFl32();
+    const Radx::fl32 *loData = loField->getDataFl32();
+    const Radx::fl32 *crossData = crossField->getDataFl32();
+    const Radx::fl32 *molData = molField->getDataFl32();
+    vector< Radx::fl32> hiDataVec;
+    vector< Radx::fl32> loDataVec;
+    vector< Radx::fl32> crossDataVec;
+    vector< Radx::fl32> molDataVec;
+    vector< Radx::fl32> htKmVec;
+    vector< Radx::fl32> tempKVec;
+    vector< Radx::fl32> presHpaVec;
+	
+    for(unsigned int igate=0;igate<nGates;igate++)
+    {
+      hiDataVec.push_back(hiData[igate]);
+      loDataVec.push_back(loData[igate]);
+      crossDataVec.push_back(crossData[igate]);
+      molDataVec.push_back(molData[igate]);
+      htKmVec.push_back(htKm[igate]* 1000.0);
+      tempKVec.push_back(tempK[igate]);
+      presHpaVec.push_back(presHpa[igate]);
+    }
+
+	
+    DerFieldCalcs data=DerFieldCalcs(_cals, hiDataVec, loDataVec, crossDataVec, 
+                                     molDataVec, htKmVec, tempKVec, presHpaVec, 
+                                     shotCount, power);
+	
+    vector<Radx::fl32> volDepolVec=data.get_volDepol();
+    vector<Radx::fl32> backscatRatioVec=data.get_backscatRatio();
+    vector<Radx::fl32> partDepolVec=data.get_partDepol();
+    vector<Radx::fl32> backscatCoeffVec=data.get_backscatCoeff(); 
+    vector<Radx::fl32> extinctionVec=data.get_extinction();
+	
+    for(unsigned int i=0;i<volDepolVec.size();i++)
+    {
+      volDepol[i]=volDepolVec.at(i);
+      backscatRatio[i]=backscatRatioVec.at(i);
+      partDepol[i]=partDepolVec.at(i);
+      backscatCoeff[i]=backscatCoeffVec.at(i);
+      if(i<volDepolVec.size()-1)
+        extinction[i]=extinctionVec.at(i);
+
+    }
+  }
+
+  RadxField *volDepolField =
+    ray->addField("volDepol", "unit", nGates, Radx::missingFl32, volDepol, true);
+  volDepolField->setLongName("volume_depolarization");
+  volDepolField->setRangeGeom(startRangeKm, gateSpacingKm);
+        
+  RadxField *backscatRatioField =
+    ray->addField("backscatRatio", "unit", nGates, Radx::missingFl32, backscatRatio, true);
+  backscatRatioField->setLongName("backscatter_ratio");
+  backscatRatioField->setRangeGeom(startRangeKm, gateSpacingKm);
+    
+  RadxField *partDepolField =
+    ray->addField("partDepol", "unit", nGates, Radx::missingFl32, partDepol, true);
+  partDepolField->setLongName("particle_depolarization");
+  partDepolField->setRangeGeom(startRangeKm, gateSpacingKm);
+    
+  RadxField *backscatCoeffField =
+    ray->addField("backscatCoeff", "unit", nGates, Radx::missingFl32, backscatCoeff, true);
+  backscatCoeffField->setLongName("backscatter_coefficient");
+  backscatCoeffField->setRangeGeom(startRangeKm, gateSpacingKm);
+   
+  RadxField *extinctionField =
+    ray->addField("extinction", "unit", nGates, Radx::missingFl32, extinction, true);
+  extinctionField->setLongName("extinction");
+  extinctionField->setRangeGeom(startRangeKm, gateSpacingKm);
+       
 }

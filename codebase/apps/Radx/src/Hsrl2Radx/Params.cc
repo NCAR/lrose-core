@@ -786,19 +786,19 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE INSTRUMENT LOCATION");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_hdr = tdrpStrDup("OPTION TO READ GEOREF DATA FROM AIRCRAFT SYSTEM");
+    tt->comment_text = tdrpStrDup("If not read from aircraft, need to set the instrument location from the config file.");
     tt++;
     
-    // Parameter 'override_instrument_location'
+    // Parameter 'read_georef_data_from_aircraft_system'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_instrument_location");
+    tt->param_name = tdrpStrDup("read_georef_data_from_aircraft_system");
     tt->descr = tdrpStrDup("Option to override the instrument location.");
     tt->help = tdrpStrDup("If true, the location in this file will be used. If not, the location in the time series data will be used.");
-    tt->val_offset = (char *) &override_instrument_location - &_start_;
+    tt->val_offset = (char *) &read_georef_data_from_aircraft_system - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

@@ -139,14 +139,15 @@ paramdef double {
 } gate_spacing_km;
 
 commentdef {
-  p_header = "OPTION TO OVERRIDE INSTRUMENT LOCATION";
+  p_header = "OPTION TO READ GEOREF DATA FROM AIRCRAFT SYSTEM";
+  p_text = "If not read from aircraft, need to set the instrument location from the config file.";
 }
 
 paramdef boolean {
   p_default = false;
   p_descr = "Option to override the instrument location.";
   p_help = "If true, the location in this file will be used. If not, the location in the time series data will be used.";
-} override_instrument_location;
+} read_georef_data_from_aircraft_system;
 
 paramdef double {
   p_default = -999;
