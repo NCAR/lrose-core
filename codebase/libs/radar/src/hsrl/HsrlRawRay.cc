@@ -150,6 +150,9 @@ void HsrlRawRay::serialize()
   hdr.time_secs_utc = _timeSecs;
   hdr.time_nano_secs = (int64_t) (_subSecs * 1.0e9 + 0.5);
   
+  hdr.telescope_locked = _telescopeLocked;
+  hdr.telescope_dirn = _telescopeDirn;
+
   hdr.total_energy = _totalEnergy;
   hdr.pol_angle = _polAngle;
   hdr.n_gates = _nGates;
@@ -183,6 +186,29 @@ int HsrlRawRay::dserialize(const char *buffer, int bufLen)
 
 {
 
+  // save to local buffer
+
+  if (bufLen != _bufLen) {
+    if (_packetBuf != NULL) {
+      delete[] _packetBuf;
+    }
+    _packetBuf = NULL;
+  }
+
+  // set lengths
+
+  _bufLen = bufLen;
+
+  // allocate buffer space
+  
+  if (_packetBuf == NULL) {
+    _packetBuf = new char[_bufLen];
+  }
+  
+  // copy it in
+
+  memcpy(_packetBuf, buffer, _bufLen);
+
   // check we have enough len for header
 
   tcp_hdr_t hdr;
@@ -212,8 +238,12 @@ int HsrlRawRay::dserialize(const char *buffer, int bufLen)
 
   // set members
 
+  _seqNum = hdr.seq_num;
   _timeSecs = hdr.time_secs_utc;
   _subSecs = (double) hdr.time_nano_secs / 1.0e9;
+  _telescopeLocked = hdr.telescope_locked;
+  _telescopeDirn = hdr.telescope_dirn;
+
   _totalEnergy = hdr.total_energy;
   _polAngle = hdr.pol_angle;
 
@@ -387,6 +417,8 @@ void HsrlRawRay::printTcpHdr(ostream &out)
   out << "  time_secs_utc: " << hdr->time_secs_utc << endl;
   out << "  time_nano_secs: " << hdr->time_nano_secs << endl;
   out << "  total_energy: " << hdr->total_energy << endl;
+  out << "  telescope_locked: " << hdr->telescope_locked << endl;
+  out << "  telescope_dirn: " << hdr->telescope_dirn << endl;
   out << "  pol_angle: " << hdr->pol_angle << endl;
   out << "  n_gates: " << hdr->n_gates << endl;
 

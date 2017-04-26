@@ -416,6 +416,13 @@ int HsrlTcp2Fmq::_writeToOutputFmq()
 
   PMU_auto_register("writeToFmq");
 
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    HsrlRawRay rawRay;
+    rawRay.dserialize((const char *) _inputBuf.getPtr(), _inputBuf.getLen());
+    rawRay.printTcpHdr(cerr);
+    rawRay.printMetaData(cerr);
+  }
+  
   if (_outputFmq.writeMsg(0, 0, _inputBuf.getPtr(), _inputBuf.getLen())) {
     cerr << "ERROR - HsrlTcp2Fmq" << endl;
     cerr << "  Cannot write FMQ: " << _params.output_fmq_path << endl;

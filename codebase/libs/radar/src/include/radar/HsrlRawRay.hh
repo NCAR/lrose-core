@@ -151,11 +151,14 @@ private:
 
     int64_t spares1[4];
 
+    int32_t telescope_locked;
+    int32_t telescope_dirn;
+
     int32_t total_energy;
     float32 pol_angle;
 
     int32_t n_gates;
-    int32_t spares2[9];
+    int32_t spares2[7];
 
   } tcp_hdr_t;
 
