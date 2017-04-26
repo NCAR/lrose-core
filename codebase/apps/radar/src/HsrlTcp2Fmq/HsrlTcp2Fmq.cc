@@ -418,7 +418,7 @@ int HsrlTcp2Fmq::_writeToOutputFmq()
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
     HsrlRawRay rawRay;
-    rawRay.dserialize((const char *) _inputBuf.getPtr(), _inputBuf.getLen());
+    rawRay.deserialize(_inputBuf.getPtr(), _inputBuf.getLen());
     rawRay.printTcpHdr(cerr);
     rawRay.printMetaData(cerr);
   }

@@ -179,10 +179,10 @@ void HsrlRawRay::serialize()
 }
 
 ///////////////////////////////////////////////////////////////
-// dserialize from buffer into the object
+// deserialize from buffer into the object
 // returns 0 on success, -1 on error
 
-int HsrlRawRay::dserialize(const char *buffer, int bufLen)
+int HsrlRawRay::deserialize(const void *buffer, int bufLen)
 
 {
 
@@ -263,16 +263,16 @@ int HsrlRawRay::dserialize(const char *buffer, int bufLen)
   // populate the fields
 
   int offset = sizeof(hdr);
-  const float32 *combinedHi = (float32 *) (buffer + offset);
+  const float32 *combinedHi = (float32 *) ((char *) buffer + offset);
 
   offset += _fieldLen;
-  const float32 *combinedLo = (float32 *) (buffer + offset);
+  const float32 *combinedLo = (float32 *) ((char *) buffer + offset);
 
   offset += _fieldLen;
-  const float32 *molecular = (float32 *) (buffer + offset);
+  const float32 *molecular = (float32 *) ((char *) buffer + offset);
 
   offset += _fieldLen;
-  const float32 *cross = (float32 *) (buffer + offset);
+  const float32 *cross = (float32 *) ((char *) buffer + offset);
 
   setFields(nGates, combinedHi, combinedLo, molecular, cross);
 

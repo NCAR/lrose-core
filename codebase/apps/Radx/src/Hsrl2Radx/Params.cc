@@ -609,19 +609,33 @@ using namespace std;
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode");
-    tt->help = tdrpStrDup("In REALTIME mode, the program waits for a new input file.  In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. Paths (in ARCHIVE mode, at least) MUST contain a day-directory above the data file -- ./data_file.ext will not work as a file path, but ./yyyymmdd/data_file.ext will.");
+    tt->help = tdrpStrDup("In REALTIME_FMQ, the program reads raw rays from an FMQ and writes output to an FMQ.  In REALTIME_FILE mode, the program waits for a new input file.  In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. Paths (in ARCHIVE mode, at least) MUST contain a day-directory above the data file -- ./data_file.ext will not work as a file path, but ./yyyymmdd/data_file.ext will.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
-    tt->enum_def.nfields = 3;
+    tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("REALTIME");
-      tt->enum_def.fields[0].val = REALTIME;
-      tt->enum_def.fields[1].name = tdrpStrDup("ARCHIVE");
-      tt->enum_def.fields[1].val = ARCHIVE;
-      tt->enum_def.fields[2].name = tdrpStrDup("FILELIST");
-      tt->enum_def.fields[2].val = FILELIST;
-    tt->single_val.e = REALTIME;
+      tt->enum_def.fields[0].name = tdrpStrDup("REALTIME_FMQ");
+      tt->enum_def.fields[0].val = REALTIME_FMQ;
+      tt->enum_def.fields[1].name = tdrpStrDup("REALTIME_FILE");
+      tt->enum_def.fields[1].val = REALTIME_FILE;
+      tt->enum_def.fields[2].name = tdrpStrDup("ARCHIVE");
+      tt->enum_def.fields[2].val = ARCHIVE;
+      tt->enum_def.fields[3].name = tdrpStrDup("FILELIST");
+      tt->enum_def.fields[3].val = FILELIST;
+    tt->single_val.e = ARCHIVE;
+    tt++;
+    
+    // Parameter 'input_fmq_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_fmq_path");
+    tt->descr = tdrpStrDup("Path to input FMQ.");
+    tt->help = tdrpStrDup("REATIME_FMQ mode only. The FMQ consists of 2 files, ??.buf and ??.stat. Specify only the root, not the extensions.");
+    tt->val_offset = (char *) &input_fmq_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/fmq/hsrl_raw");
     tt++;
     
     // Parameter 'max_realtime_data_age_secs'
@@ -631,7 +645,7 @@ using namespace std;
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("max_realtime_data_age_secs");
     tt->descr = tdrpStrDup("Maximum age of realtime data (secs)");
-    tt->help = tdrpStrDup("Only data less old than this will be used.");
+    tt->help = tdrpStrDup("REALTIME_FILE mode only. Only data less old than this will be used.");
     tt->val_offset = (char *) &max_realtime_data_age_secs - &_start_;
     tt->single_val.i = 300;
     tt++;
@@ -643,7 +657,7 @@ using namespace std;
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("latest_data_info_avail");
     tt->descr = tdrpStrDup("Is _latest_data_info file available?");
-    tt->help = tdrpStrDup("If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.");
+    tt->help = tdrpStrDup("REALTIME_FILE mode only. If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.");
     tt->val_offset = (char *) &latest_data_info_avail - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
@@ -655,7 +669,7 @@ using namespace std;
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("search_recursively");
     tt->descr = tdrpStrDup("Option to recurse to subdirectories while looking for new files.");
-    tt->help = tdrpStrDup("If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use. Only applies if latest_data_info_avail is FALSE.");
+    tt->help = tdrpStrDup("REALTIME_FILE mode only. If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use. Only applies if latest_data_info_avail is FALSE.");
     tt->val_offset = (char *) &search_recursively - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
@@ -667,7 +681,7 @@ using namespace std;
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("max_recursion_depth");
     tt->descr = tdrpStrDup("Maximum depth for recursive directory scan.");
-    tt->help = tdrpStrDup("Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.");
+    tt->help = tdrpStrDup("REALTIME_FILE mode only. Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.");
     tt->val_offset = (char *) &max_recursion_depth - &_start_;
     tt->single_val.i = 5;
     tt++;
@@ -679,7 +693,7 @@ using namespace std;
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("wait_between_checks");
     tt->descr = tdrpStrDup("Sleep time between checking directory for input - secs.");
-    tt->help = tdrpStrDup("If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory. Only applies if latest_data_info_avail is FALSE.");
+    tt->help = tdrpStrDup("REALTIME_FILE mode only. If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory. Only applies if latest_data_info_avail is FALSE.");
     tt->val_offset = (char *) &wait_between_checks - &_start_;
     tt->has_min = TRUE;
     tt->min_val.i = 1;
@@ -693,7 +707,7 @@ using namespace std;
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("file_quiescence");
     tt->descr = tdrpStrDup("File quiescence when checking for files - secs.");
-    tt->help = tdrpStrDup("This allows you to make sure that a file coming from a remote machine is complete before reading it. Only applies if latest_data_info_avail is FALSE.");
+    tt->help = tdrpStrDup("REALTIME_FILE mode only. This allows you to make sure that a file coming from a remote machine is complete before reading it. Only applies if latest_data_info_avail is FALSE.");
     tt->val_offset = (char *) &file_quiescence - &_start_;
     tt->single_val.i = 5;
     tt++;
@@ -705,7 +719,7 @@ using namespace std;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("search_ext");
     tt->descr = tdrpStrDup("File name extension.");
-    tt->help = tdrpStrDup("If set, only files with this extension will be processed.");
+    tt->help = tdrpStrDup("REALTIME_FILE mode only. If set, only files with this extension will be processed.");
     tt->val_offset = (char *) &search_ext - &_start_;
     tt->single_val.s = tdrpStrDup("");
     tt++;
@@ -1156,6 +1170,27 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("OUTPUT FMQ IN REALTIME_FMQ mode");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'output_fmq_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_fmq_path");
+    tt->descr = tdrpStrDup("Path to output FMQ.");
+    tt->help = tdrpStrDup("REATIME_FMQ mode only. The FMQ consists of 2 files, ??.buf and ??.stat. Specify only the root, not the extensions.");
+    tt->val_offset = (char *) &output_fmq_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/fmq/hsrl_moments");
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY FIELD NAMES FOR OUTPUT FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1294,11 +1329,11 @@ using namespace std;
       tt->array_vals[1].s = tdrpStrDup("VEL");
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1399,11 +1434,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("Files are written in CfRadial");
     tt++;
@@ -1432,11 +1467,11 @@ using namespace std;
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1501,11 +1536,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;

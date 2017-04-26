@@ -84,7 +84,7 @@ input_dir = "$(DATA_DIR)/cfradial/uw";
 //     FILELIST
 //
 
-mode = REALTIME;
+mode = REALTIME_FILE;
 
 ///////////// max_realtime_data_age_secs //////////////
 //

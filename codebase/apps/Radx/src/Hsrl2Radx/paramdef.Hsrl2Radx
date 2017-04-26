@@ -43,63 +43,71 @@ paramdef string {
 } input_dir;
 
 typedef enum {
-  REALTIME, ARCHIVE, FILELIST
+  REALTIME_FMQ, REALTIME_FILE, ARCHIVE, FILELIST
 } mode_t;
 
 paramdef enum mode_t {
-  p_default = REALTIME;
+  p_default = ARCHIVE;
   p_descr = "Operating mode";
-  p_help = "In REALTIME mode, the program waits for a new input file.  "
-           "In ARCHIVE mode, it moves through the data between the start "
-           "and end times set on the command line. "
-           "In FILELIST mode, it moves through the list of file names "
-           "specified on the command line. "
-           "Paths (in ARCHIVE mode, at least) MUST contain a "
-           "day-directory above the data file -- ./data_file.ext will not "
-           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+  p_help = 
+  "In REALTIME_FMQ, the program reads raw rays from an FMQ and writes output to an FMQ.  "
+  "In REALTIME_FILE mode, the program waits for a new input file.  "
+  "In ARCHIVE mode, it moves through the data between the start "
+  "and end times set on the command line. "
+  "In FILELIST mode, it moves through the list of file names "
+  "specified on the command line. "
+  "Paths (in ARCHIVE mode, at least) MUST contain a "
+  "day-directory above the data file -- ./data_file.ext will not "
+  "work as a file path, but ./yyyymmdd/data_file.ext will.";
 } mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/hsrl_raw";
+  p_descr = "Path to input FMQ.";
+  p_help = "REATIME_FMQ mode only. The FMQ consists of 2 files, ??.buf and ??.stat. Specify only the root, not the extensions.";
+} input_fmq_path;
 
 paramdef int {
   p_default = 300;
   p_descr = "Maximum age of realtime data (secs)";
-  p_help =  "Only data less old than this will be used.";
+  p_help =  "REALTIME_FILE mode only. Only data less old than this will be used.";
 } max_realtime_data_age_secs;
 
 paramdef boolean {
   p_default = TRUE;
   p_descr = "Is _latest_data_info file available?";
-  p_help = "If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.";
+  p_help = "REALTIME_FILE mode only. If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.";
 } latest_data_info_avail;
 
 paramdef boolean {
   p_default = TRUE;
   p_descr = "Option to recurse to subdirectories while looking for new files.";
-  p_help = "If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use. Only applies if latest_data_info_avail is FALSE."; 
+  p_help = "REALTIME_FILE mode only. If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use. Only applies if latest_data_info_avail is FALSE."; 
 } search_recursively;
 
 paramdef int {
   p_default = 5;
   p_descr = "Maximum depth for recursive directory scan.";
-  p_help = "Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.";
+  p_help = "REALTIME_FILE mode only. Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.";
 } max_recursion_depth;
 
 paramdef int {
   p_default = 2;
   p_min = 1;
   p_descr = "Sleep time between checking directory for input - secs.";
-  p_help = "If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory. Only applies if latest_data_info_avail is FALSE.";
+  p_help = "REALTIME_FILE mode only. If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory. Only applies if latest_data_info_avail is FALSE.";
 } wait_between_checks;
 
 paramdef int {
   p_default = 5;
   p_descr = "File quiescence when checking for files - secs.";
-  p_help = "This allows you to make sure that a file coming from a remote machine is complete before reading it. Only applies if latest_data_info_avail is FALSE.";
+  p_help = "REALTIME_FILE mode only. This allows you to make sure that a file coming from a remote machine is complete before reading it. Only applies if latest_data_info_avail is FALSE.";
 } file_quiescence;
 
 paramdef string {
   p_default = "";
   p_descr = "File name extension.";
-  p_help = "If set, only files with this extension will be processed.";
+  p_help = "REALTIME_FILE mode only. If set, only files with this extension will be processed.";
 } search_ext;
 
 commentdef {
@@ -231,16 +239,6 @@ paramdef double {
   p_help = "The distance between the ray bins in km.";
 } raw_bin_spacing_km;
 
-
-//***************************************
-
-
-
-
-
-
-
-
 paramdef string {
   p_default = "combined_hi";
   p_descr = "Name of combined_hi field in netCDF file.";
@@ -264,8 +262,6 @@ paramdef string {
   p_descr = "Name of cross field in netCDF file.";
   p_help = "";
 } cross_field_name;
-
-
 
 paramdef string {
   p_default = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/baseline_correction_20150601T0000.blc";
@@ -296,7 +292,6 @@ paramdef string {
   p_descr = "location of calvals_gvhsrl calibration file.";
   p_help = "";
 } calvals_gvhsrl_path;
-
 
 paramdef string {
   p_default = "combined_hi_dead_time";
@@ -334,10 +329,15 @@ paramdef string {
   p_help = "";
 } scan_adjustment_name;
 
+commentdef {
+  p_header = "OUTPUT FMQ IN REALTIME_FMQ mode";
+}
 
-
-
-//***************************************
+paramdef string {
+  p_default = "/tmp/fmq/hsrl_moments";
+  p_descr = "Path to output FMQ.";
+  p_help = "REATIME_FMQ mode only. The FMQ consists of 2 files, ??.buf and ??.stat. Specify only the root, not the extensions.";
+} output_fmq_path;
 
 commentdef {
   p_header = "OPTION TO SPECIFY FIELD NAMES FOR OUTPUT FILES";

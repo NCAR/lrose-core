@@ -104,10 +104,10 @@ public:
 
   int getBufLen() const { return _bufLen; }
 
-  // dserialize from buffer into the object
+  // de-serialize from buffer into the object
   // returns 0 on success, -1 on error
 
-  int dserialize(const char *buffer, int bufLen);
+  int deserialize(const void *buffer, int bufLen);
 
   // cookie to identify raw HSRL ray
 

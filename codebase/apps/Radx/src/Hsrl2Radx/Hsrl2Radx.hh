@@ -44,11 +44,11 @@
 #include "CalReader.hh"
 #include "FullCals.hh"
 #include <Radx/Radx.hh>
+#include <Fmq/DsFmq.hh>
 class RadxVol;
 class RadxFile;
 class MslFile;
 using namespace std;
-
 
 class Hsrl2Radx {
   
@@ -80,10 +80,14 @@ private:
   vector<string> _readPaths;
   FullCals _cals;
 
+  DsFmq _inputFmq;
+
   int _runFilelist();
   int _runArchive();
   int _runRealtimeWithLdata();
   int _runRealtimeNoLdata();
+  int _runRealtimeFmq();
+  int _readInputFmq();
   int _processFile(const string &filePath);
   int _processUwCfRadialFile(const string &filePath);
   void _setupRead(MslFile &file);

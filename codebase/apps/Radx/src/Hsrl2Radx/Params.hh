@@ -58,9 +58,10 @@ public:
   } debug_t;
 
   typedef enum {
-    REALTIME = 0,
-    ARCHIVE = 1,
-    FILELIST = 2
+    REALTIME_FMQ = 0,
+    REALTIME_FILE = 1,
+    ARCHIVE = 2,
+    FILELIST = 3
   } mode_t;
 
   typedef enum {
@@ -380,6 +381,8 @@ public:
 
   mode_t mode;
 
+  char* input_fmq_path;
+
   int max_realtime_data_age_secs;
 
   tdrp_bool_t latest_data_info_avail;
@@ -460,6 +463,8 @@ public:
 
   char* scan_adjustment_name;
 
+  char* output_fmq_path;
+
   tdrp_bool_t set_output_fields;
 
   output_field_t *_output_fields;
@@ -527,7 +532,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[87];
+  mutable TDRPtable _table[90];
 
   const char *_className;
 

@@ -48,6 +48,7 @@
 #include <toolsa/TaXml.hh>
 #include <toolsa/pmu.h>
 #include <physics/IcaoStdAtmos.hh>
+#include <radar/HsrlRawRay.hh>
 #include "MslFile.hh"
 #include "RawFile.hh"
 #include "CalReader.hh"
@@ -154,13 +155,19 @@ int Hsrl2Radx::Run()
     return _runArchive();
   } else if (_params.mode == Params::FILELIST) {
     return _runFilelist();
-  } else {
+  } else if (_params.mode == Params::REALTIME_FMQ) {
+    return _runRealtimeFmq();
+  } else if (_params.mode == Params::REALTIME_FILE) {
     if (_params.latest_data_info_avail) {
       return _runRealtimeWithLdata();
     } else {
       return _runRealtimeNoLdata();
     }
   }
+
+  // will not reach here
+  return -1;
+
 }
 
 //////////////////////////////////////////////////
@@ -315,6 +322,102 @@ int Hsrl2Radx::_runRealtimeNoLdata()
   } // while
 
   return iret;
+
+}
+
+//////////////////////////////////////////////////
+// Run in realtime mode,
+// reads raw rays from an FMQ
+// writes moments to and FMQ
+
+int Hsrl2Radx::_runRealtimeFmq()
+{
+  
+  // init process mapper registration
+  
+  PMU_auto_init(_progName.c_str(), _params.instance,
+                PROCMAP_REGISTER_INTERVAL);
+
+  int iret = 0;
+
+  while (true) {
+
+    PMU_auto_register("Opening FMQ");
+    
+    if (_params.debug) {
+      cerr << "  Opening Fmq: " << _params.input_fmq_path << endl;
+    }
+    
+    _inputFmq.setHeartbeat(PMU_auto_register);
+    int msecsSleepBlocking = 100;
+    
+    if (_inputFmq.initReadBlocking(_params.input_fmq_path,
+                                   "Hsrl2Radx",
+                                   _params.debug >= Params::DEBUG_EXTRA,
+                                   Fmq::END,
+                                   msecsSleepBlocking)) {
+      cerr << "ERROR - Hsrl2Radx::_runRealtimeFmq" << endl;
+      cerr << "  Cannot init FMQ for reading" << endl;
+      cerr << "  Fmq: " << _params.input_fmq_path << endl;
+      cerr << _inputFmq.getErrStr() << endl;
+      umsleep(1000);
+      iret = -1;
+      continue;
+    }
+    
+    // read data from the incoming FMQ and process it
+    
+    if (_readInputFmq()) {
+      _inputFmq.closeMsgQueue();
+      iret = -1;
+    }
+    
+  } // while(true)
+
+  return iret;
+
+}
+
+///////////////////////////////////////////////////
+// read data from the incoming FMQ and process it
+
+int Hsrl2Radx::_readInputFmq()
+
+{
+
+  // read data
+  
+  while (true) {
+    
+    PMU_auto_register("Reading data");
+    
+    // we need a new message
+    // blocking read registers with Procmap while waiting
+    
+    if (_inputFmq.readMsgBlocking()) {
+      cerr << "ERROR - Hsrl2Radx::_readInputFmq()" << endl;
+      cerr << "  Cannot read message from FMQ" << endl;
+      cerr << "  Fmq: " << _params.input_fmq_path << endl;
+      return -1;
+    }
+    
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Got message from FMQ, len: " << _inputFmq.getMsgLen() << endl;
+    }
+
+    // deserialize the ray
+
+    HsrlRawRay rawRay;
+    rawRay.deserialize(_inputFmq.getMsg(), _inputFmq.getMsgLen());
+
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      rawRay.printTcpHdr(cerr);
+      rawRay.printMetaData(cerr);
+    }
+
+  } // while
+
+  return 0;
 
 }
 
