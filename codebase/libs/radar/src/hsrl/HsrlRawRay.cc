@@ -34,8 +34,8 @@
 ///////////////////////////////////////////////////////////////
 
 #include <radar/HsrlRawRay.hh>
+#include <Radx/RadxTime.hh>
 #include <cstring>
-#include <iostream>
 using namespace std;
 
 ///////////////////////////////////////////////////////////////
@@ -335,6 +335,62 @@ void HsrlRawRay::_swap32(void *array, size_t nbytes)
     this_long++;
 
   }
+
+}
+
+//////////////////////////////////////////////////////////////////////////
+//  Print metadata
+ 
+void HsrlRawRay::printMetaData(ostream &out)
+  
+{
+
+  out << "========= HsrlRawRay =============" << endl;
+
+  RadxTime dataTime(_timeSecs, _subSecs);
+  out << "  time: " << dataTime.asString(3) << endl;
+  out << "  seqNum: " << _seqNum << endl;
+  out << "  telescopeLocked: " << (_telescopeLocked?"Y":"N") << endl;
+  if (_telescopeDirn == 1) {
+    out << "  telescope pointing up" << endl;
+  } else {
+    out << "  telescope pointing down" << endl;
+  }
+  out << "  totalEnergy: " << _totalEnergy << endl;
+  out << "  polAngle: " << _polAngle << endl;
+  out << "  nGates: " << _nGates << endl;
+  out << "  size of combinedHi: " << _combinedHi.size() << endl;
+  out << "  size of combinedLo: " << _combinedLo.size() << endl;
+  out << "  size of molecular: " << _molecular.size() << endl;
+  out << "  size of cross: " << _cross.size() << endl;
+  out << "  bufLen: " << _bufLen << endl;
+
+  out << "==================================" << endl;
+
+}
+
+//////////////////////////////////////////////////////////////////////////
+//  Print tcp message header in the current buffer
+ 
+void HsrlRawRay::printTcpHdr(ostream &out)
+  
+{
+  
+  out << "========= HsrlRawRay TCP header =============" << endl;
+
+  const tcp_hdr_t *hdr = (tcp_hdr_t *) _packetBuf;
+
+  out << "  id: " << hdr->id << endl;
+  out << "  len_bytes: " << hdr->len_bytes << endl;
+  out << "  seq_num: " << hdr->seq_num << endl;
+  out << "  version_num: " << hdr->version_num << endl;
+  out << "  time_secs_utc: " << hdr->time_secs_utc << endl;
+  out << "  time_nano_secs: " << hdr->time_nano_secs << endl;
+  out << "  total_energy: " << hdr->total_energy << endl;
+  out << "  pol_angle: " << hdr->pol_angle << endl;
+  out << "  n_gates: " << hdr->n_gates << endl;
+
+  out << "=============================================" << endl;
 
 }
 

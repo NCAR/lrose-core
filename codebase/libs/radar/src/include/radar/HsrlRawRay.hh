@@ -38,6 +38,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 #include <sys/types.h>
 
 typedef float float32; 
@@ -122,6 +123,14 @@ public:
     return true;
   }
   
+  //  Print metadata
+  
+  void printMetaData(std::ostream &out);
+
+  //  Print tcp message header in the current buffer
+ 
+  void printTcpHdr(std::ostream &out);
+
 protected:
 private:
 
