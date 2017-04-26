@@ -516,7 +516,7 @@ cross_field_name = "cross";
 // Type: string
 //
 
-baseline_calibration_path = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/baseline_correction_20150601T0000.blc";
+baseline_calibration_path = "./cals/baseline_correction_20150601T0000.blc";
 
 ///////////// diff_default_geofile_path ///////////////
 //
@@ -526,7 +526,7 @@ baseline_calibration_path = "/h/eol/brads/git/hsrl_configuration/projDir/calfile
 // Type: string
 //
 
-diff_default_geofile_path = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/diff_default_geofile_20120201T0000.geo";
+diff_default_geofile_path = "./cals/diff_default_geofile_20120201T0000.geo";
 
 ///////////// geofile_default_path ////////////////////
 //
@@ -536,7 +536,7 @@ diff_default_geofile_path = "/h/eol/brads/git/hsrl_configuration/projDir/calfile
 // Type: string
 //
 
-geofile_default_path = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/geofile_default_20150601T0000.geo";
+geofile_default_path = "./cals/geofile_default_20150601T0000.geo";
 
 ///////////// afterpulse_default_path /////////////////
 //
@@ -546,7 +546,7 @@ geofile_default_path = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/geo
 // Type: string
 //
 
-afterpulse_default_path = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/afterpulse_default_20061001T0000.ap";
+afterpulse_default_path = "./cals/afterpulse_default_20061001T0000.ap";
 
 ///////////// calvals_gvhsrl_path /////////////////////
 //
@@ -556,7 +556,7 @@ afterpulse_default_path = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/
 // Type: string
 //
 
-calvals_gvhsrl_path = "/h/eol/brads/git/hsrl_configuration/projDir/calfiles/calvals_gvhsrl.txt";
+calvals_gvhsrl_path = "./cals/calvals_gvhsrl.txt";
 
 ///////////// combined_hi_dead_time_name //////////////
 //
