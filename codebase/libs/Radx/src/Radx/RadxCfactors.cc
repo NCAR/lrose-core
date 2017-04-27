@@ -122,7 +122,7 @@ void RadxCfactors::print(ostream &out) const
 /////////////////////////////////////////////////////////
 // convert to XML
 
-void RadxCfactors::convert2Xml(string &xml, int level /* = 0 */)  const
+void RadxCfactors::convertToXml(string &xml, int level /* = 0 */)  const
   
 {
 

@@ -154,7 +154,7 @@ void RadxRangeGeom::print(ostream &out) const
 /////////////////////////////////////////////////////////
 // convert to XML
 
-void RadxRangeGeom::convert2Xml(string &xml, int level /* = 0 */)  const
+void RadxRangeGeom::convertToXml(string &xml, int level /* = 0 */)  const
   
 {
 

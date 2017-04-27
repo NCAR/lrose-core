@@ -159,7 +159,7 @@ int Radx::getByteWidth(DataType_t dtype)
 }
 
 ///////////////////////////////////////////
-// convert enums to strings and vice versa
+// convert enums to strings
 
 string Radx::dataTypeToStr(DataType_t dtype)
 
@@ -513,6 +513,35 @@ string Radx::sweepModeToShortStr(SweepMode_t mode)
       return "SUR";
     }
   }
+}
+
+///////////////////////////////////////////
+// convert strings to enums
+
+Radx::DataType_t Radx::dataTypeFromStr(const string &str)
+
+{
+  
+  if (str == "fl64") {
+    return FL64;
+  }
+  if (str == "fl32") {
+    return FL32;
+  }
+  if (str == "si32") {
+    return SI32;
+  }
+  if (str == "si16") {
+    return SI16;
+  }
+  if (str == "si08") {
+    return SI08;
+  }
+
+  // default
+
+  return FL32;
+
 }
 
 Radx::SweepMode_t Radx::sweepModeFromStr(const string &str)

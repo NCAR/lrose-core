@@ -1764,7 +1764,7 @@ void RadxRay::deleteIfUnused(const RadxRay *ray)
 /////////////////////////////////////////////////////////
 // convert to XML
 
-void RadxRay::convert2Xml(string &xml, int level /* = 0 */)  const
+void RadxRay::convertToXml(string &xml, int level /* = 0 */)  const
   
 {
 
@@ -1825,14 +1825,14 @@ void RadxRay::convert2Xml(string &xml, int level /* = 0 */)  const
 
   if (_georef != NULL) {
     string georefXml;
-    _georef->convert2Xml(georefXml, level + 1);
+    _georef->convertToXml(georefXml, level + 1);
     xml += georefXml;
   }
   xml += RadxXml::writeBoolean("georefApplied", level + 1, _georefApplied);
 
   if (_cfactors != NULL) {
     string cfactorsXml;
-    _cfactors->convert2Xml(cfactorsXml, level + 1);
+    _cfactors->convertToXml(cfactorsXml, level + 1);
     xml += cfactorsXml;
   }
 

@@ -404,7 +404,7 @@ void
   out << endl;
 
   string xml;
-  convert2Xml(xml);
+  convertToXml(xml);
   out << xml;
 
 }
@@ -412,7 +412,7 @@ void
 ////////////////////////////////////////////
 // convert to XML - load up xml string
 
-void RadxRcalib::convert2Xml(string &xml)  const
+void RadxRcalib::convertToXml(string &xml)  const
 {
 
   xml.clear();

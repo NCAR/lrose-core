@@ -3253,9 +3253,9 @@ string RadxField::statsMethodToStr(StatsMethod_t method)
 }
 
 /////////////////////////////////////////////////////////
-// convert to XML
+// convert metadata to XML
 
-void RadxField::convert2Xml(string &xml, int level /* = 0 */)  const
+void RadxField::convertToXml(string &xml, int level /* = 0 */)  const
   
 {
 
@@ -3296,6 +3296,62 @@ void RadxField::convert2Xml(string &xml, int level /* = 0 */)  const
 
   xml += RadxXml::writeEndTag("RadxField", level);
 
+
+}
+
+/////////////////////////////////////////////////////////
+// set metadata from XML
+// returns 0 on success, -1 on failure
+
+int RadxField::setFromXml(const string &xml)
+  
+{
+
+  _init();
+  
+  int iret = 0;
+  string contents;
+  iret |= RadxXml::readString(xml, "RadxField", contents);
+
+  iret |= RadxXml::readString(contents, "name", _name);
+  iret |= RadxXml::readString(contents, "longName", _longName);
+  iret |= RadxXml::readString(contents, "standardName", _standardName);
+  iret |= RadxXml::readString(contents, "units", _units);
+  iret |= RadxXml::readString(contents, "legendXml", _legendXml);
+  iret |= RadxXml::readString(contents, "thresholdingXml", _thresholdingXml);
+
+  string dataTypeStr;
+  iret |= RadxXml::readString(contents, "dataType", dataTypeStr);
+  _dataType = Radx::dataTypeFromStr(dataTypeStr);
+  iret |= RadxXml::readInt(contents, "byteWidth", _byteWidth);
+
+  iret |= RadxXml::readDouble(contents, "samplingRatio", _samplingRatio);
+  
+  iret |= RadxXml::readBoolean(contents, "fieldFolds", _fieldFolds);
+  iret |= RadxXml::readDouble(contents, "foldLimitLower", _foldLimitLower);
+  iret |= RadxXml::readDouble(contents, "foldLimitUpper", _foldLimitUpper);
+  iret |= RadxXml::readDouble(contents, "foldRange", _foldRange);
+
+  iret |= RadxXml::readBoolean(contents, "isDiscrete", _isDiscrete);
+
+  iret |= RadxXml::readDouble(contents, "minVal", _minVal);
+  iret |= RadxXml::readDouble(contents, "maxVal", _maxVal);
+
+  iret |= RadxXml::readDouble(contents, "missingFl64", _missingFl64);
+  iret |= RadxXml::readFloat(contents, "missingFl32", _missingFl32);
+
+  int ival;
+  iret |= RadxXml::readInt(contents, "missingSi32", ival);
+  _missingSi32 = ival;
+  iret |= RadxXml::readInt(contents, "missingSi16", ival);
+  _missingSi16 = ival;
+  iret |= RadxXml::readInt(contents, "missingSi08", ival);
+  _missingSi08 = ival;
+
+  iret |= RadxXml::readString(contents, "thresholdFieldName", _thresholdFieldName);
+  iret |= RadxXml::readDouble(contents, "thresholdValue", _thresholdValue);
+
+  return iret;
 
 }
 

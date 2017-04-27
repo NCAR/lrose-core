@@ -508,6 +508,7 @@ public:
   /// \name Convert strings to enums.
   //@{
 
+  static DataType_t dataTypeFromStr(const string &str);
   static InstrumentType_t instrumentTypeFromStr(const string &str);
   static PlatformType_t platformTypeFromStr(const string &str);
   static SweepMode_t sweepModeFromStr(const string &str);

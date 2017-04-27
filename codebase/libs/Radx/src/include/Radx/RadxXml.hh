@@ -339,6 +339,27 @@ public:
                         vector<attribute> &attributes);
   
   /////////////////////////////////////////////
+  // read float
+  // methods return 0 on success, -1 on failure
+  
+  // float from a string
+  
+  static int readFloat(const string &valStr, float &val);
+  
+  // float from xml buffer, given a tag
+  
+  static int readFloat(const string &xmlBuf,
+                       const string &tag,
+                       float &val);
+  
+  // float with attributes from xml buffer, given a tag
+  
+  static int readFloat(const string &xmlBuf,
+                       const string &tag,
+                       float &val,
+                       vector<attribute> &attributes);
+  
+  /////////////////////////////////////////////
   // read time from a string
   // fill out time_t &val
   // will decode either yyyy-mm-ddThh:mm:ss or

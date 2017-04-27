@@ -896,6 +896,60 @@ int RadxXml::readDouble(const string &xmlBuf,
 }
 
 /////////////////////////////////////////////
+// read float
+// methods return 0 on success, -1 on failure
+
+// float from a string
+
+int RadxXml::readFloat(const string &valStr, float &val)
+  
+{
+  float fval;
+  if (sscanf(valStr.c_str(), "%g", &fval) != 1) {
+    cerr << "ERROR - RadxXml::readFloat" << endl;
+    cerr << "  Cannot decode string into float: " << valStr << endl;
+    return -1;
+  }
+  val = fval;
+  return 0;
+}
+
+// float from xml buffer, given a tag
+
+int RadxXml::readFloat(const string &xmlBuf,
+                       const string &tag,
+                       float &val)
+  
+{
+  string valStr;
+  if (readString(xmlBuf, tag, valStr)) {
+    return -1;
+  }
+  if (readFloat(valStr, val)) {
+    return -1;
+  }
+  return 0;
+}
+
+// float with attributes from xml buffer, given a tag
+
+int RadxXml::readFloat(const string &xmlBuf,
+                       const string &tag,
+                       float &val,
+                       vector<attribute> &attributes)
+  
+{
+  string valStr;
+  if (readString(xmlBuf, tag, valStr, attributes)) {
+    return -1;
+  }
+  if (readFloat(valStr, val)) {
+    return -1;
+  }
+  return 0;
+}
+
+/////////////////////////////////////////////
 // read time from a string
 // fill out time_t &val
 // will decode either yyyy-mm-ddThh:mm:ss or

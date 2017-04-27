@@ -122,7 +122,7 @@ public:
 
   /// convert to XML
 
-  void convert2Xml(string &xml, int level = 0) const;
+  void convertToXml(string &xml, int level = 0) const;
   
 protected:
 

@@ -988,9 +988,14 @@ public:
   
   void printWithData(ostream &out) const;
 
-  /// convert to XML
+  /// convert metadata to XML
 
-  void convert2Xml(string &xml, int level = 0) const;
+  void convertToXml(string &xml, int level = 0) const;
+  
+  /// set metadata from XML
+  /// returns 0 on success, -1 on failure
+
+  int setFromXml(const string &xml);
   
   //@}
 

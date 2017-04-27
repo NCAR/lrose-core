@@ -212,7 +212,7 @@ void RadxGeoref::print(ostream &out) const
 /////////////////////////////////////////////////////////
 // convert to XML
 
-void RadxGeoref::convert2Xml(string &xml, int level /* = 0 */)  const
+void RadxGeoref::convertToXml(string &xml, int level /* = 0 */)  const
   
 {
 
