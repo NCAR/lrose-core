@@ -213,7 +213,7 @@ int HsrlRawRay::deserialize(const void *buffer, int bufLen)
 
   tcp_hdr_t hdr;
   if (bufLen < (int) sizeof(hdr)) {
-    cerr << "ERROR - HsrlRawRay::dserialize()" << endl;
+    cerr << "ERROR - HsrlRawRay::deserialize()" << endl;
     cerr << "  buffer too short" << endl;
     cerr << "  bufLen: " << bufLen << endl;
     cerr << "  min valid len: " << sizeof(hdr) << endl;
@@ -228,9 +228,9 @@ int HsrlRawRay::deserialize(const void *buffer, int bufLen)
   
   int64_t id = hdr.id;
   if (id != cookie) {
-    _swapHdr(&hdr);
+    _SwapHdr(&hdr);
     if (hdr.id != cookie) {
-      cerr << "ERROR - HsrlRawRay::dserialize()" << endl;
+      cerr << "ERROR - HsrlRawRay::deserialize()" << endl;
       cerr << "  unrecognized id: " << id << endl;
       return -1;
     }
@@ -253,7 +253,7 @@ int HsrlRawRay::deserialize(const void *buffer, int bufLen)
   _fieldLen = nGates * sizeof(float32);
   int bufSizeNeeded = sizeof(hdr) + _nFields * _fieldLen;
   if (bufSizeNeeded > bufLen) {
-    cerr << "ERROR - HsrlRawRay::dserialize()" << endl;
+    cerr << "ERROR - HsrlRawRay::deserialize()" << endl;
     cerr << "  buffer too short" << endl;
     cerr << "  bufLen: " << bufLen << endl;
     cerr << "  min valid len: " << bufSizeNeeded << endl;
@@ -283,16 +283,16 @@ int HsrlRawRay::deserialize(const void *buffer, int bufLen)
 //////////////////////////////////////////////////////////////////////////
 // Swap the TCP header
 
-void HsrlRawRay::_swapHdr(tcp_hdr_t *hdr)
+void HsrlRawRay::_SwapHdr(tcp_hdr_t *hdr)
 {
 
   // swap the 64-bit words
 
-  _swap64(hdr, 80);
+  _Swap64(hdr, 80);
 
   // swap the 32-bit words
 
-  _swap32((char *) hdr + 80, 48);
+  _Swap32((char *) hdr + 80, 48);
 
 }
   
@@ -301,7 +301,7 @@ void HsrlRawRay::_swapHdr(tcp_hdr_t *hdr)
 //  BE representation from machine representation, or vice-versa.
 //  Array must be aligned.
 
-void HsrlRawRay::_swap64(void *array, size_t nbytes)
+void HsrlRawRay::_Swap64(void *array, size_t nbytes)
   
 {
 
@@ -346,7 +346,7 @@ void HsrlRawRay::_swap64(void *array, size_t nbytes)
 //  BE representation from machine representation, or vice-versa.
 //  Array must be aligned.
  
-void HsrlRawRay::_swap32(void *array, size_t nbytes)
+void HsrlRawRay::_Swap32(void *array, size_t nbytes)
   
 {
 

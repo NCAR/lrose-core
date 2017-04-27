@@ -201,7 +201,7 @@ private:
   // 128 bytes long
 
   int64_t _seqNum = 0;
-  
+
   typedef struct {
 
     int64_t id;
@@ -254,21 +254,21 @@ private:
 
   // Swap the TCP header
   
-  void _swapHdr(tcp_hdr_t *hdr);
+  void _SwapHdr(tcp_hdr_t *hdr);
 
   /// Perform an in-place 64-bit word byte swap, if necessary, to produce
   /// BE representation from machine representation, or vice-versa.
   /// 
   /// Array must be aligned on an 8-byte boundary in memory.
   
-  void _swap64(void *array, size_t nbytes);
+  void _Swap64(void *array, size_t nbytes);
   
   /// Performs an in-place 32-bit word byte swap, if necessary, to produce
   /// BE representation from machine representation, or vice-versa.
   /// 
   /// Array must be aligned on an 4-byte boundary in memory.
   
-  void _swap32(void *array, size_t nbytes);
+  void _Swap32(void *array, size_t nbytes);
   
 };
 
