@@ -104,9 +104,9 @@ Hsrl2Radx::Hsrl2Radx(int argc, char **argv)
         _params.instrument_altitude_meters < -900) {
       cerr << "ERROR: " << _progName << endl;
       cerr << "  Problem with command line or TDRP parameters." << endl;
-      cerr << "  You have chosen to override radar location" << endl;
-      cerr << "  You must override latitude, longitude and altitude" << endl;
-      cerr << "  You must override all 3 values." << endl;
+      cerr << "  You do not have aircraft data position information" << endl;
+      cerr << "  Therefore you must set latitude, longitude and altitude" << endl;
+      cerr << "  You must set all 3 values." << endl;
       OK = FALSE;
     }
   }
@@ -1183,7 +1183,7 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
 void Hsrl2Radx::_addEnvFields(RadxRay *ray)
 {
   
-  double altitudeKm = _params.instrument_altitude_meters;
+  double altitudeKm = _params.instrument_altitude_meters / 1000.0;
   const RadxGeoref *geo = ray->getGeoreference();
   if (geo) {
     altitudeKm = geo->getAltitudeKmMsl();
@@ -1232,7 +1232,7 @@ void Hsrl2Radx::_addEnvFields(RadxRay *ray)
 void Hsrl2Radx::_addDerivedFields(RadxRay *ray)
 {
 
-  double altitudeKm = _params.instrument_altitude_meters;
+  double altitudeKm = _params.instrument_altitude_meters / 1000.0;
   const RadxGeoref *geo = ray->getGeoreference();
   if (geo) {
     altitudeKm = geo->getAltitudeKmMsl();

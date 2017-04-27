@@ -258,11 +258,14 @@ gate_spacing_km = 0.0075;
 
 //======================================================================
 //
-// OPTION TO OVERRIDE INSTRUMENT LOCATION.
+// OPTION TO READ GEOREF DATA FROM AIRCRAFT SYSTEM.
+//
+// If not read from aircraft, need to set the instrument location from 
+//   the config file.
 //
 //======================================================================
  
-///////////// override_instrument_location ////////////
+///////////// read_georef_data_from_aircraft_system ///
 //
 // Option to override the instrument location.
 //
@@ -273,49 +276,49 @@ gate_spacing_km = 0.0075;
 // Type: boolean
 //
 
-override_instrument_location = FALSE;
+read_georef_data_from_aircraft_system = FALSE;
 
 ///////////// instrument_latitude_deg /////////////////
 //
 // Instrument latitude (deg).
 //
-// See override_instrument_location.
+// Applies if read_georef_data_from_aircraft_system is false.
 //
 //
 // Type: double
 //
 
-instrument_latitude_deg = -999;
+instrument_latitude_deg = 40.0;
 
 ///////////// instrument_longitude_deg ////////////////
 //
 // Instrument longitude (deg).
 //
-// See override_instrument_location.
+// Applies if read_georef_data_from_aircraft_system is false.
 //
 //
 // Type: double
 //
 
-instrument_longitude_deg = -999;
+instrument_longitude_deg = -105.4;
 
 ///////////// instrument_altitude_meters //////////////
 //
 // Instrument altitude (meters).
 //
-// See override_instrument_location.
+// Applies if read_georef_data_from_aircraft_system is false.
 //
 //
 // Type: double
 //
 
-instrument_altitude_meters = -999;
+instrument_altitude_meters = 1650;
 
 //======================================================================
 //
-// OPTION TO SET RANGE RELATIVE TO INSTRUNENT - CfRadial files only.
+// OPTION TO SET RANGE RELATIVE TO INSTRUMENT - MSL CfRadial files only.
 //
-// This applies to python-generated CfRadial files only.
+// This applies to python-generated CfRadial files relative to MSL only.
 //
 //======================================================================
  
@@ -346,70 +349,6 @@ set_range_relative_to_instrument = TRUE;
 //
 
 telescope_direction_is_up = 1;
-
-//======================================================================
-//
-// OPTION TO CORRECT ANTENNA ANGLES.
-//
-//======================================================================
- 
-///////////// apply_azimuth_offset ////////////////////
-//
-// Option to apply an offset to the azimuth values.
-//
-// If TRUE, this offset will be ADDED to the measured azimuth angles. 
-//   This is useful, for example, in the case of a mobile platform which 
-//   is not set up oriented to true north. Suppose you have a truck (like 
-//   the DOWs) which is oriented off true north. Then if you add in the 
-//   truck HEADING relative to true north, the measured azimuth angles 
-//   will be adjusted by the heading, to give azimuth relative to TRUE 
-//   north.
-//
-//
-// Type: boolean
-//
-
-apply_azimuth_offset = FALSE;
-
-///////////// azimuth_offset //////////////////////////
-//
-// Azimuth offset (degrees).
-//
-// See 'apply_azimuth_offset'. This value will be ADDED to the measured 
-//   azimuths.
-//
-//
-// Type: double
-//
-
-azimuth_offset = 0;
-
-///////////// apply_elevation_offset //////////////////
-//
-// Option to apply an offset to the elevation values.
-//
-// If TRUE, this offset will be ADDED to the measured elevation angles. 
-//   This is useful to correct for a systematic bias in measured elevation 
-//   angles.
-//
-//
-// Type: boolean
-//
-
-apply_elevation_offset = FALSE;
-
-///////////// elevation_offset ////////////////////////
-//
-// Elevation offset (degrees).
-//
-// See 'apply_elevation_offset'. This value will be ADDED to the 
-//   measured elevations.
-//
-//
-// Type: double
-//
-
-elevation_offset = 0;
 
 //======================================================================
 //
@@ -620,22 +559,88 @@ scan_adjustment_name = "i2_scan_adjustment";
 
 //======================================================================
 //
-// OUTPUT FMQ IN REALTIME_FMQ mode.
+// OUTPUT FMQ DETAILS.
+//
+// REALTIME_FMQ mode only.
 //
 //======================================================================
  
-///////////// output_fmq_path /////////////////////////
+///////////// output_fmq_url //////////////////////////
 //
-// Path to output FMQ.
+// URL for output FMQ.
 //
-// REATIME_FMQ mode only. The FMQ consists of 2 files, ??.buf and 
-//   ??.stat. Specify only the root, not the extensions.
+// The FMQ consists of 2 files, ??.buf and ??.stat.
 //
 //
 // Type: string
 //
 
-output_fmq_path = "/tmp/fmq/hsrl_moments";
+output_fmq_url = "fmqp:://localhost::/tmp/fmq/hsrl_moments";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+//
+// This is the total size of the output FMQ buffer.
+//
+//
+// Type: int
+//
+
+output_fmq_size = 10000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in the output FMQ.
+//
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+//
+//
+// Type: int
+//
+
+output_fmq_nslots = 500;
+
+///////////// output_fmq_compress /////////////////////
+//
+// Option to compress the FMQ data on write.
+//
+// This helps to keep the size of the queue entries small. Should only 
+//   be used for remote FMQs over slow networks.
+//
+//
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+///////////// nrays_for_params ////////////////////////
+//
+// Number of rays between sending params.
+//
+// The params will be sent when this number of rays have been written.
+//
+//
+// Type: int
+//
+
+nrays_for_params = 10;
+
+///////////// write_blocking //////////////////////////
+//
+// Option to set up the FMQ as blocking.
+//
+// If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ 
+//   becomes full, Test2Dsr will then block until there is space for more 
+//   data.
+//
+//
+// Type: boolean
+//
+
+write_blocking = FALSE;
 
 //======================================================================
 //

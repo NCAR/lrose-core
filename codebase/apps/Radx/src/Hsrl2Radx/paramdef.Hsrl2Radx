@@ -308,13 +308,13 @@ commentdef {
 };
 
 paramdef string {
-  p_default = "fmqp:://localhost::/tmp/fmq/hsrl_raw";
+  p_default = "fmqp:://localhost::/tmp/fmq/hsrl_moments";
   p_descr = "URL for output FMQ.";
   p_help = "The FMQ consists of 2 files, ??.buf and ??.stat.";
 } output_fmq_url;
 
 paramdef int {
-  p_default = 1000000;
+  p_default = 10000000;
   p_descr = "Size of output FMQ, in bytes.";
   p_help = "This is the total size of the output FMQ buffer.";
 } output_fmq_size;

@@ -1126,7 +1126,7 @@ using namespace std;
     tt->descr = tdrpStrDup("URL for output FMQ.");
     tt->help = tdrpStrDup("The FMQ consists of 2 files, ??.buf and ??.stat.");
     tt->val_offset = (char *) &output_fmq_url - &_start_;
-    tt->single_val.s = tdrpStrDup("fmqp:://localhost::/tmp/fmq/hsrl_raw");
+    tt->single_val.s = tdrpStrDup("fmqp:://localhost::/tmp/fmq/hsrl_moments");
     tt++;
     
     // Parameter 'output_fmq_size'
@@ -1138,7 +1138,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Size of output FMQ, in bytes.");
     tt->help = tdrpStrDup("This is the total size of the output FMQ buffer.");
     tt->val_offset = (char *) &output_fmq_size - &_start_;
-    tt->single_val.i = 1000000;
+    tt->single_val.i = 10000000;
     tt++;
     
     // Parameter 'output_fmq_nslots'

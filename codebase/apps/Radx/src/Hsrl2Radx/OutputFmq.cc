@@ -128,11 +128,10 @@ int OutputFmq::writeParams(const RadxRay *ray)
   
   // initialize 
 
-  int nGatesOut = ray->getNGates();
-  int nSamples = ray->getNSamples();
+  int nGates = ray->getNGates();
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "-->> OutputFmq::writeParams, nGates: " << nGatesOut << endl;
+    cerr << "-->> OutputFmq::writeParams, nGates: " << nGates << endl;
   }
   
   // create message
@@ -160,8 +159,9 @@ int OutputFmq::writeParams(const RadxRay *ray)
   rp.radarId = 0;
   rp.radarType = DS_RADAR_GROUND_TYPE;
   rp.numFields = _nFields;
-  rp.numGates = nGatesOut;
-  rp.samplesPerBeam = nSamples;
+  rp.numGates = nGates;
+  rp.samplesPerBeam = ray->getNSamples();
+
   rp.scanType = 0;
   rp.scanMode = 0;
   rp.followMode = 0;
@@ -366,6 +366,11 @@ int OutputFmq::writeRay(const RadxRay *ray)
   }
 
   _nRaysWritten++;
+
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "-->> OutputFmq::writeRay, nFields: " << nFields << endl;
+  }
+  
   return 0;
 
 }
