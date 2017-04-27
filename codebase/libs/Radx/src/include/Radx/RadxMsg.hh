@@ -21,19 +21,35 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// RadxFile.hh
+//////////////////////////////////////////////////////////////////////////
+// RadxMsg.hh
 //
-// RadxFile object
-//
-// Base class for radar radial data files
+// Class for serializing and deserializing Radx objects
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Dec 2014
+// April 2017
 //
-///////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//
+// A message consists of:
+//
+// (1) a Hdr_t which contains n_parts, the number of message parts 
+// (2) n_parts * Part_t, the header for each part
+// (3) n_parts * contents - which are padded to align on
+//     8-byte boundaries 
+//
+// The message length is:
+//   sizeof(Hdr_t) +
+//   n_parts * sizeof(Part_t) +
+//   sum of padded length for each part.
+//
+// The Part_t headers contain the length and offset of each part.
+//
+// The type, subType and partType values are defined by the user.
+//
+//////////////////////////////////////////////////////////////////////////
 
 #ifndef _RADX_MSG_HH_
 #define _RADX_MSG_HH_
@@ -46,8 +62,7 @@
 using namespace std;
 
 //////////////////////////////
-// forward class declarations
-//
+// class declarations
 
 class RadxMsg
 
@@ -60,25 +75,26 @@ public:
   /*
    * header struct
    *
-   * type, subType are defined and used for the
-   * specific message type. These values may be used in whatever manner
+   * msgType and subType are defined and used for the
+   * specific message type.
+   * These values may be used in whatever manner
    * the author chooses.
    *
    */
   
   typedef struct {
     
-    Radx::si32 type;
-    Radx::si32 subType;
-    Radx::si32 nParts;
-    Radx::si32 spare[6];
+    Radx::si64 msgType;
+    Radx::si64 subType;
+    Radx::si64 nParts;
+    Radx::si64 spare[1];
     
   } Hdr_t;
 
   /*
    * part struct
    *
-   * dataType is defined by the author of the message type.
+   * partType is defined by the author of the message type.
    * length refers to the length of the part data in bytes.
    * offset refers to the offset of the part data from the start
    * of the message.
@@ -86,10 +102,10 @@ public:
   
   typedef struct {
     
-    Radx::si32 dataType;
-    Radx::si32 offset;
-    Radx::si32 len;
-    Radx::si32 spare[3];
+    Radx::si64 partType;
+    Radx::si64 offset;
+    Radx::si64 len;
+    Radx::si64 spare[1];
     
   } Part_t;
   
@@ -115,42 +131,42 @@ public:
   // This is used if you just want to peek at the header before
   // deciding how to handle the message.
   // 
-  // If msg_len is set, checks that the msg is big enough
+  // If msgLen is set, checks that the msg is big enough
   //   to hold at least a DsMsgHdr_t. Otherwise, assumes
   //   that the message is big enough and blindly copies
   //   memory.
   //
-  // Returns: -1 If msg_len is set and is smaller than a DsMsgHdr_t.
+  // Returns: -1 If msgLen is set and is smaller than a DsMsgHdr_t.
   //           0 Otherwise.
 
-  virtual int decodeHeader(const void *in_msg, const ssize_t msg_len = -1);
+  virtual int decodeHeader(const void *inMsg, const ssize_t msgLen = -1);
 
   ////////////////////////////////////////////////////
   // disassemble a message into parts, store in
   // RadxMsg object.
   //
-  // If msg_len is provided, the parts are checked to make
+  // If msgLen is provided, the parts are checked to make
   // sure they do not run over the end of the message.
   //
-  // If msg_len is provided, the parts are checked to make
+  // If msgLen is provided, the parts are checked to make
   // sure they do not run over the end of the message.
   // 
-  // If msg_len is set, checks that the msg is big enough
+  // If msgLen is set, checks that the msg is big enough
   //   to hold at least a DsMsgHdr_t. Otherwise, assumes
   //   that the message is big enough and blindly copies
   //   memory.
   //
-  // Returns: -1 If msg_len is set and is smaller than a DsMsgHdr_t.
+  // Returns: -1 If msgLen is set and is smaller than a DsMsgHdr_t.
   //               or if one of the message parts cannot be decoded.
   //           0 Otherwise.
 
-  int disassemble(const void *in_msg, const ssize_t msg_len = -1);
+  int disassemble(const void *inMsg, const ssize_t msgLen = -1);
 
   /////////////////////////////
   // get the message attributes
 
   inline const string &getName() const { return _name; }
-  int getType() const { return (_type); }
+  int getMsgType() const { return (_msgType); }
   int getSubType() const { return (_subType); }
 
   //////////////////////////
@@ -162,7 +178,7 @@ public:
   // does a part exist?
   // returns the number of parts of the given type
 
-  int partExists(const int data_type) const;
+  int partExists(const int partType) const;
 
   ////////////////////////////////////////////
   // Get a part from the parts array, given
@@ -183,23 +199,19 @@ public:
   //
   // Returns pointer to the requested part, NULL on failure.
 
-  Part *getPartByType(const int data_type, const ssize_t index = 0) const;
+  Part *getPartByType(const int partType, const ssize_t index = 0) const;
   
-  // get the xml header for message
-  
-  string getXmlHdr() const;
-
   //////////////////////////////////////////
   // set the message header attributes
   //
   // These overwrite the existing attributes.
 
-  void setHdrAttr(const int type,
-		  const int sub_type = -1);
-
-  void setType(const int type) { _type = type; }
-
-  void setSubType(const int sub_type) {_subType = sub_type; }
+  void setHdrAttr(const int msgType,
+		  const int subType = -1);
+  
+  void setType(const int msgType) { _msgType = msgType; }
+  
+  void setSubType(const int subType) {_subType = subType; }
 
   /////////////////////////////
   // clear before adding parts.
@@ -226,7 +238,7 @@ public:
   //
   // The buffer must be in BE byte order.
 
-  void addPart(const int type, const ssize_t len, const void *data);
+  void addPart(const int partType, const ssize_t len, const void *data);
   void addPart(const string &name, ssize_t len, const void *data);
 
   /////////////////////////////////////
@@ -289,12 +301,12 @@ protected:
   //
 
   string _name;
-  int _type;
+  int _msgType;
   int _subType;
   ssize_t _nParts;
 
   // individual parts
-
+  
   vector<Part *> _parts;
 
   // assembled message
@@ -316,7 +328,7 @@ private:
 
   // allocate the parts vector
   
-  void _allocParts(const ssize_t n_parts);
+  void _allocParts(const ssize_t nParts);
 
   // allocate the buffer for the assembled message
 
@@ -362,38 +374,34 @@ public:
     // load a part from an incoming message which is assumed to
     // be in BE byte order
     //
-    // If msg_len is provided, the part is checked to make
+    // If msgLen is provided, the part is checked to make
     // sure it does not run over the end of the message.
     //
     // Returns 0 on success, -1 on error
     // Error occurs if end of part is beyond end of message.
     
-    int loadFromMsg(const ssize_t part_num,
-                    const void *in_msg,
-                    const ssize_t msg_len = -1);
+    int loadFromMsg(const ssize_t partNum,
+                    const void *inMsg,
+                    const ssize_t msgLen = -1);
     
     ////////////////////////////////////////////////////
     // load a part from memory which is assumed to be in
     // host byte order
     
-    void loadFromMem(const int type,
+    void loadFromMem(const int partType,
                      const ssize_t len,
-                     const void *in_mem);
+                     const void *inMem);
     
     //////////////////////////////////////////////////
     // get the type, length, offset and buffer pointer
 
     inline const string &getName() const { return _name; }
-    inline int getType() const { return _type; }
+    inline int getPartType() const { return _partType; }
     inline ssize_t getLength() const { return _length; }
     inline ssize_t getPaddedLength() const { return _paddedLength; }
     inline ssize_t getOffset() const { return _offset; }
     inline const Radx::ui08 *getBuf() const { return _buf; }
     
-    // get the xml header for the part
-
-    string getXmlHdr() const;
-
     // set offset
     inline void setOffset(const ssize_t offset) { _offset = offset; }
     
@@ -413,7 +421,7 @@ public:
   private:
 
     string _name;
-    int _type; // part type
+    int _partType; // part type
     ssize_t _length; // length of part data
     ssize_t _paddedLength; // padded to even 8-bytes
     ssize_t _offset; // offset in assembled message

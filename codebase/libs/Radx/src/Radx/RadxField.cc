@@ -3355,3 +3355,26 @@ int RadxField::setFromXml(const string &xml)
 
 }
 
+/////////////////////////////////////////////////////////
+// serialize into a RadxBuf
+
+void RadxField::serialize(RadxBuf &buf)
+  
+{
+
+
+}
+
+/////////////////////////////////////////////////////////
+// deserialize from a RadxBuf
+// return 0 on success, -1 on failure
+
+int RadxField::deserialize(const RadxBuf &buf)
+  
+{
+
+  return 0;
+
+}
+
+

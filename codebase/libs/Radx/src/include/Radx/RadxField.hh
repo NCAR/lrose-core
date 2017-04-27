@@ -988,6 +988,11 @@ public:
   
   void printWithData(ostream &out) const;
 
+  //@}
+
+  /// \name Serialization:
+  //@{
+
   /// convert metadata to XML
 
   void convertToXml(string &xml, int level = 0) const;
@@ -997,6 +1002,15 @@ public:
 
   int setFromXml(const string &xml);
   
+  // serialize into a RadxBuf
+  
+  void serialize(RadxBuf &buf);
+  
+  // deserialize from a RadxBuf
+  // return 0 on success, -1 on failure
+
+  int deserialize(const RadxBuf &buf);
+
   //@}
 
 protected:

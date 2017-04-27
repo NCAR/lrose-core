@@ -21,23 +21,36 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// RadxFile.cc
+//////////////////////////////////////////////////////////////////////////
+// RadxMsg.cc
 //
-// RadxFile object
-//
-// Base class for radar radial data files
+// Class for serializing and deserializing Radx objects
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Dec 2014
+// April 2017
 //
-///////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//
+// A message consists of:
+//
+// (1) a Hdr_t which contains n_parts, the number of message parts 
+// (2) n_parts * Part_t, the header for each part
+// (3) n_parts * contents - which are padded to align on
+//     8-byte boundaries 
+//
+// The message length is:
+//   sizeof(Hdr_t) +
+//   n_parts * sizeof(Part_t) +
+//   sum of padded length for each part.
+//
+// The Part_t headers contain the length and offset of each part.
+//
+//////////////////////////////////////////////////////////////////////////
 
 #include <Radx/ByteOrder.hh>      
 #include <Radx/RadxMsg.hh>
-#include <Radx/RadxXml.hh>
 #include <cstring>
 #include <iostream>
 using namespace std;
@@ -105,27 +118,27 @@ RadxMsg &RadxMsg::operator=(const RadxMsg &rhs)
 // This is used if you just want to peek at the header before
 // deciding how to handle the message.
 // 
-// If msg_len is set, checks that the msg is big enough
+// If msgLen is set, checks that the msg is big enough
 //   to hold at least a Hdr_t. Otherwise, assumes
 //   that the message is big enough and blindly copies
 //   memory.
 //
-// Returns: -1 If msg_len is set and is smaller than a Hdr_t.
+// Returns: -1 If msgLen is set and is smaller than a Hdr_t.
 //           0 Otherwise.
 // Virtual.
-int RadxMsg::decodeHeader(const void *in_msg, const ssize_t msg_len /* = -1*/ )
+int RadxMsg::decodeHeader(const void *inMsg, const ssize_t msgLen /* = -1*/ )
 
 {
 
-  if (!in_msg || (msg_len != -1 && msg_len < (int) sizeof(Hdr_t))) {
+  if (!inMsg || (msgLen != -1 && msgLen < (int) sizeof(Hdr_t))) {
     return -1;
   }
   
   Hdr_t hdr;
-  memcpy(&hdr, in_msg, sizeof(Hdr_t));
+  memcpy(&hdr, inMsg, sizeof(Hdr_t));
   BE_to_Hdr(&hdr);
 
-  _type = hdr.type;
+  _msgType = hdr.msgType;
   _subType = hdr.subType;
   _nParts = hdr.nParts;
 
@@ -136,46 +149,46 @@ int RadxMsg::decodeHeader(const void *in_msg, const ssize_t msg_len /* = -1*/ )
 // disassemble a message into parts, store in
 // RadxMsg object.
 //
-// If msg_len is provided, the parts are checked to make
+// If msgLen is provided, the parts are checked to make
 // sure they do not run over the end of the message.
 // 
-// If msg_len is set, checks that the msg is big enough
+// If msgLen is set, checks that the msg is big enough
 //   to hold at least a Hdr_t. Otherwise, assumes
 //   that the message is big enough and blindly copies
 //   memory.
 //
-// Returns: -1 If msg_len is set and is smaller than a Hdr_t.
+// Returns: -1 If msgLen is set and is smaller than a Hdr_t.
 //               or if one of the message parts cannot be decoded.
 //           0 Otherwise.
 
-int RadxMsg::disassemble(const void *in_msg, const ssize_t msg_len /* = -1*/ )
+int RadxMsg::disassemble(const void *inMsg, const ssize_t msgLen /* = -1*/ )
 
 {
-  int status = decodeHeader(in_msg, msg_len);
+  int status = decodeHeader(inMsg, msgLen);
   if (status < 0) {
     return -1;
   }
   
   _allocParts(_nParts);
   for (ssize_t i = 0; i < _nParts; i++) {
-    if (_parts[i]->loadFromMsg(i, in_msg, msg_len)) {
+    if (_parts[i]->loadFromMsg(i, inMsg, msgLen)) {
       printHeader(cerr, "  ");
-      return (-1);
+      return -1;
     }
   }
-  return (0);
+  return 0;
 }
 
 ////////////////////////////////////////////////
 // does a part exist?
 // returns the number of parts of the given type
 
-int RadxMsg::partExists(const int data_type) const
+int RadxMsg::partExists(const int partType) const
 
 {
   int count = 0;
   for (ssize_t i = 0; i < _nParts; i++) {
-    if (_parts[i]->getType() == data_type) {
+    if (_parts[i]->getPartType() == partType) {
       count++;
     }
   }
@@ -205,13 +218,13 @@ RadxMsg::Part *RadxMsg::getPart(const ssize_t index) const
 //
 // Returns pointer to the requested part, NULL on failure.
 
-RadxMsg::Part *RadxMsg::getPartByType(const int data_type,
+RadxMsg::Part *RadxMsg::getPartByType(const int partType,
                                       const ssize_t index /* = 0*/ ) const
   
 {
   ssize_t count = 0;
   for (ssize_t i = 0; i < _nParts; i++) {
-    if (_parts[i]->getType() == data_type) {
+    if (_parts[i]->getPartType() == partType) {
       if (count == index) {
 	return(_parts[i]);
       }
@@ -221,38 +234,17 @@ RadxMsg::Part *RadxMsg::getPartByType(const int data_type,
   return (NULL);
 }
   
-////////////////////////////////////////////////////////////
-// get the xml header for the message
-
-string RadxMsg::getXmlHdr() const
-{
-
-  string xml;
-  xml += RadxXml::writeStartTag("RadxMsg", 0);
-  xml += RadxXml::writeString("name", 1, _name);
-  xml += RadxXml::writeInt("hdrLen", 1, 0, "%16d");
-  xml += RadxXml::writeInt("msgLen", 1, 0, "%16d");
-  xml += RadxXml::writeInt("nParts", 1, _nParts);
-  for (size_t ipart = 0; ipart < _parts.size(); ipart++) {
-    xml += _parts[ipart]->getXmlHdr();
-  }
-  xml += RadxXml::writeEndTag("RadxMsg", 0);
-
-  return xml;
-
-}
-  
 ////////////////////////////////////
 // set the message headerattributes
 //
 // These overwrite the existing attributes.
 
-void RadxMsg::setHdrAttr(const int type,
-                         const int sub_type /* = -1*/)
+void RadxMsg::setHdrAttr(const int msgType,
+                         const int subType /* = -1*/)
 
 {
-  _type = type;
-  _subType = sub_type;
+  _msgType = msgType;
+  _subType = subType;
 }
 
 /////////////////////////////
@@ -277,7 +269,7 @@ void RadxMsg::clearParts()
 
 void RadxMsg::clearAll()
 {
-  _type = -1;
+  _msgType = -1;
   _subType = -1;
   _nParts = 0;
 }
@@ -332,7 +324,7 @@ Radx::ui08 *RadxMsg::assemble()
 
   Hdr_t header;
   memset(&header, 0, sizeof(Hdr_t));
-  header.type = _type;
+  header.msgType = _msgType;
   header.subType = _subType;
   header.nParts = _nParts;
   BE_from_Hdr(&header);
@@ -346,7 +338,7 @@ Radx::ui08 *RadxMsg::assemble()
   for (ssize_t i = 0; i < _nParts; i++) {
     Part_t msgPart;
     memset(&msgPart, 0, sizeof(Part_t));
-    msgPart.dataType = _parts[i]->getType();
+    msgPart.partType = _parts[i]->getPartType();
     msgPart.len = _parts[i]->getLength();
     _parts[i]->setOffset(partDataOffset);
     msgPart.offset = partDataOffset;
@@ -379,7 +371,7 @@ void RadxMsg::print(ostream &out, const char *spacer) const
 void RadxMsg::printHeader(ostream &out, const char *spacer) const
 {
 
-  out << spacer << "Message type: " << _type << endl;
+  out << spacer << "Message type: " << _msgType << endl;
   out << spacer << "        subType: " << _subType << endl;
   out << spacer << "        nParts: " << _nParts << endl;
 
@@ -405,7 +397,7 @@ void RadxMsg::printPartHeaders(ostream &out, const char *spacer,
 {
   for (ssize_t i = 0; i < getNParts(); i++) {
     Part *part = getPart(i);
-    int id = part->getType();
+    int id = part->getPartType();
     PartHeaderLabelMap::const_iterator pos = labels.find(id);
     if (pos != labels.end()) {
       part->printHeader(out, spacer, pos->second, i);
@@ -427,10 +419,10 @@ void RadxMsg::printHeader(ostream *out, const char *spacer) const
 ////////////////////////////////////////////////
 // allocate the buffer for the assembled message
 
-void RadxMsg::_allocParts(const ssize_t n_parts)
+void RadxMsg::_allocParts(const ssize_t nParts)
   
 {
-  while (n_parts > (int) _parts.size()) {
+  while (nParts > (int) _parts.size()) {
     Part *newPart = new Part;
     _parts.push_back(newPart);
   }
@@ -465,7 +457,7 @@ RadxMsg &RadxMsg::_copy(const RadxMsg &rhs)
   }
 
   _name = rhs._name;
-  _type = rhs._type;
+  _msgType = rhs._msgType;
   _subType = rhs._subType;
   _debug = rhs._debug;
 
@@ -495,7 +487,7 @@ RadxMsg &RadxMsg::_copy(const RadxMsg &rhs)
 RadxMsg::Part::Part()
 
 {
-  _type   = -1;
+  _partType   = -1;
   _length = 0;
   _paddedLength = 0;
   _buf = NULL;
@@ -554,45 +546,45 @@ RadxMsg::Part &RadxMsg::Part::operator=(const Part &rhs)
 // load a part from an incoming message which is assumed to
 // be in BE byte order
 //
-// If msg_len is provided, the part is checked to make
+// If msgLen is provided, the part is checked to make
 // sure it does not run over the end of the message.
 //
 // Returns 0 on success, -1 on error
 // Error occurs if end of part is beyond end of message.
 
-int RadxMsg::Part::loadFromMsg(const ssize_t part_num,
-                               const void *in_msg,
-                               const ssize_t msg_len /* = -1*/ )
+int RadxMsg::Part::loadFromMsg(const ssize_t partNum,
+                               const void *inMsg,
+                               const ssize_t msgLen /* = -1*/ )
 
 {
 
-  Radx::ui08 *inBuf = (Radx::ui08 *) in_msg;
+  Radx::ui08 *inBuf = (Radx::ui08 *) inMsg;
 
   Part_t msgPart;
 
   memcpy(&msgPart,
-	 inBuf + sizeof(Hdr_t) + part_num * sizeof(Part_t),
+	 inBuf + sizeof(Hdr_t) + partNum * sizeof(Part_t),
 	 sizeof(Part_t));
 
   BE_to_Part(&msgPart);
 
-  _type = msgPart.dataType;
+  _partType = msgPart.partType;
   _length = msgPart.len;
   _paddedLength = ((_length / 8) + 1) * 8;
   _offset = msgPart.offset;
   
-  if (msg_len > 0 && (_offset + _length) > msg_len) {
-    cerr << "ERROR - Part::loadFromMsg.\n";
-    cerr << "  End of part " << part_num << " is beyond end of message.\n";
+  if (msgLen > 0 && (_offset + _length) > msgLen) {
+    cerr << "ERROR - RadxMsg::Part::loadFromMsg.\n";
+    cerr << "  End of part " << partNum << " is beyond end of message.\n";
     cerr << "  End of part offset: " << _offset + _length << endl;
-    cerr << "  End of message offset: " << msg_len << endl;
-    return (-1);
+    cerr << "  End of message offset: " << msgLen << endl;
+    return -1;
   }
 
   _allocBuf();
   memcpy(_buf, inBuf + _offset, _length);
 
-  return (0);
+  return 0;
 
 }
 
@@ -600,18 +592,18 @@ int RadxMsg::Part::loadFromMsg(const ssize_t part_num,
 // load a part from a memory buffer which is assumed to
 // be in host byte order
 
-void RadxMsg::Part::loadFromMem(const int data_type,
+void RadxMsg::Part::loadFromMem(const int partType,
                                 const ssize_t len,
-                                const void *in_mem)
+                                const void *inMem)
 
 {
 
-  _type = data_type;
+  _partType = partType;
   _length = len;
   _paddedLength = ((_length / 8) + 1) * 8;
   
   _allocBuf();
-  memcpy(_buf, in_mem, _length);
+  memcpy(_buf, inMem, _length);
 
 }
 
@@ -624,7 +616,7 @@ void RadxMsg::Part::printHeader(ostream &out, const char *spacer,
   if (num >= 0) {
     out << spacer << "---- part: " << num << " ----" << endl;
   }
-  out << spacer << "  type:   " << getType() << endl;
+  out << spacer << "  partType:   " << getPartType() << endl;
   out << spacer << "  length: " << getLength() << endl;
   out << spacer << "  padded: " << getPaddedLength() << endl;
   out << spacer << "  offset: " << getOffset() << endl;
@@ -638,7 +630,7 @@ void RadxMsg::Part::printHeader(ostream &out, const char *spacer,
     out << spacer << "---- part: " << num << " ----" << endl;
   }
   out << spacer << "  label:   " << label << endl;
-  out << spacer << "  type:   " << getType() << endl;
+  out << spacer << "  partType:   " << getPartType() << endl;
   out << spacer << "  length: " << getLength() << endl;
   out << spacer << "  padded: " << getPaddedLength() << endl;
   out << spacer << "  offset: " << getOffset() << endl;
@@ -670,7 +662,7 @@ RadxMsg::Part &RadxMsg::Part::_copy(const Part &rhs)
     return *this;
   }
 
-  _type = rhs._type;
+  _partType = rhs._partType;
   _length = rhs._length;
   _paddedLength = rhs._paddedLength;
   _offset = rhs._offset;
@@ -687,25 +679,6 @@ RadxMsg::Part &RadxMsg::Part::_copy(const Part &rhs)
 
 }
 
-////////////////////////////////////////////////////////////
-// get the xml header for the part
-
-string RadxMsg::Part::getXmlHdr() const
-{
-
-  string xml;
-  xml += RadxXml::writeStartTag("Part", 1);
-  xml += RadxXml::writeString("name", 2, _name);
-  xml += RadxXml::writeInt("len", 2, _length, "%16d");
-  xml += RadxXml::writeInt("lenPadded", 2, _paddedLength, "%16d");
-  xml += RadxXml::writeInt("bufLen", 2, _rbuf.getLen(), "%16d");
-  xml += RadxXml::writeInt("offset", 2, _offset, "%16d");
-  xml += RadxXml::writeEndTag("Part", 1);
-
-  return xml;
-
-}
-  
 /*
  * BE swapping routines
  */
@@ -765,107 +738,4 @@ void RadxMsg::BE_from_Part(Part_t *part)
     ByteOrder::swap32(part, sizeof(Part_t));
   }
 }
-
-#ifdef JUNK
-
-//////////////////////////////////////////////////
-// Run
-
-int TTest::Run()
-{
-
-  RadxMsg msg("message_type_1");
-
-  string content1("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-  string content2("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
-  string content3("cccccccccccccccccccccccccccccccccccccccc");
-
-  msg.addPart("content1", content1.size() + 1, content1.c_str());
-  msg.addPart("content2", content2.size() + 1, content2.c_str());
-  msg.addPart("content3", content3.size() + 1, content3.c_str());
-
-  string hdr = msg.getXmlHdr();
-
-  cerr << "=================================================" << endl;
-  cerr << hdr;
-  cerr << "=================================================" << endl;
-
-  string msgName;
-  if (RadxXml::readString(hdr, "name", msgName)) {
-    cerr << "Cannot read name" << endl;
-    return -1;
-  }
-  cerr << "msgName: " << msgName << endl;
-
-  int hdrLen, msgLen, nParts;
-  if (RadxXml::readInt(hdr, "hdrLen", hdrLen)) {
-    cerr << "Cannot read hdrLen" << endl;
-    return -1;
-  }
-  if (RadxXml::readInt(hdr, "msgLen", msgLen)) {
-    cerr << "Cannot read msgLen" << endl;
-    return -1;
-  }
-  if (RadxXml::readInt(hdr, "nParts", nParts)) {
-    cerr << "Cannot read nParts" << endl;
-    return -1;
-  }
-
-  cerr << "hdrLen: " << hdrLen << endl;
-  cerr << "msgLen: " << msgLen << endl;
-  cerr << "nParts: " << nParts << endl;
-
-  vector<string> partsXml;
-  if (RadxXml::readStringArray(hdr, "Part", partsXml)) {
-    cerr << "Cannot read Parts" << endl;
-    return -1;
-  }
-
-  for (size_t ipart = 0; ipart < partsXml.size(); ipart++) {
-
-    const string &partXml = partsXml[ipart];
-
-    cerr << "------------------------------------" << endl;
-    cerr << "Part: " << ipart << endl;
-    cerr << "  xml: " << endl;
-    cerr << partXml;
-    cerr << "------------------------------------" << endl;
-
-    string partName;
-    if (RadxXml::readString(partXml, "name", partName)) {
-      cerr << "Cannot read part name" << endl;
-      return -1;
-    }
-    cerr << "   partName: " << partName << endl;
-    
-    int partLen, lenPadded, bufLen, offset;
-    if (RadxXml::readInt(partXml, "len", partLen)) {
-      cerr << "Cannot read partLen" << endl;
-      return -1;
-    }
-    if (RadxXml::readInt(partXml, "lenPadded", lenPadded)) {
-      cerr << "Cannot read lenPadded" << endl;
-      return -1;
-    }
-    if (RadxXml::readInt(partXml, "bufLen", bufLen)) {
-      cerr << "Cannot read bufLen" << endl;
-      return -1;
-    }
-    if (RadxXml::readInt(hdr, "offset", offset)) {
-      cerr << "Cannot read offset" << endl;
-      return -1;
-    }
-    
-    cerr << "partLen: " << partLen << endl;
-    cerr << "lenPadded: " << lenPadded << endl;
-    cerr << "bufLen: " << bufLen << endl;
-    cerr << "offset: " << offset << endl;
-
-  }
-
-  return 0;
-
-}
-
-#endif
 
