@@ -114,7 +114,7 @@ void HsrlRawRay::serialize()
   // compute buf sizes
   
   int fieldLen = _nGates * sizeof(float32);
-  int bufLen = sizeof(tcp_hdr_t) + _nFields * fieldLen;
+  int bufLen = sizeof(tcp_hdr_t) + _NFIELDS * fieldLen;
 
   // check buffer space
   
@@ -141,11 +141,11 @@ void HsrlRawRay::serialize()
   tcp_hdr_t hdr;
   memset(&hdr, 0, sizeof(hdr));
 
-  hdr.id = cookie;
+  hdr.id = COOKIE;
   hdr.len_bytes = _bufLen;
   _seqNum++;
   hdr.seq_num = _seqNum;
-  hdr.version_num = 1;
+  hdr.version_num = _HEADER_VERSION;
 
   hdr.time_secs_utc = _timeSecs;
   hdr.time_nano_secs = (int64_t) (_subSecs * 1.0e9 + 0.5);
@@ -227,9 +227,9 @@ int HsrlRawRay::deserialize(const void *buffer, int bufLen)
   // check if we need to swap
   
   int64_t id = hdr.id;
-  if (id != cookie) {
+  if (id != COOKIE) {
     _SwapHdr(&hdr);
-    if (hdr.id != cookie) {
+    if (hdr.id != COOKIE) {
       cerr << "ERROR - HsrlRawRay::deserialize()" << endl;
       cerr << "  unrecognized id: " << id << endl;
       return -1;
@@ -251,7 +251,7 @@ int HsrlRawRay::deserialize(const void *buffer, int bufLen)
 
   int nGates = hdr.n_gates;
   _fieldLen = nGates * sizeof(float32);
-  int bufSizeNeeded = sizeof(hdr) + _nFields * _fieldLen;
+  int bufSizeNeeded = sizeof(hdr) + _NFIELDS * _fieldLen;
   if (bufSizeNeeded > bufLen) {
     cerr << "ERROR - HsrlRawRay::deserialize()" << endl;
     cerr << "  buffer too short" << endl;

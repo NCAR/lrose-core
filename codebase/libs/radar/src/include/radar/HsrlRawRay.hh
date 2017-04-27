@@ -174,12 +174,12 @@ public:
   int deserialize(const void *buffer, int bufLen);
 
   /// @brief Cookie used to identify if bytes have been swapped in transmission
-  static const int64_t cookie = 987654321;
+  static const int64_t COOKIE = 987654321;
 
   // check if ID needs swapping
   
   static bool idIsSwapped(int64_t id) {
-    if (id == HsrlRawRay::cookie) {
+    if (id == HsrlRawRay::COOKIE) {
       // is swapped
       return false;
     }
@@ -201,6 +201,10 @@ private:
   // 128 bytes long
 
   int64_t _seqNum = 0;
+
+  /// @brief Header version number
+  // This number should be incremented if the _tcp_hdr_t struct below is altered
+  static const int64_t _HEADER_VERSION = 1;
 
   typedef struct {
 
@@ -238,7 +242,7 @@ private:
 
   int _nGates;
 
-  const int _nFields = 4;
+  static const int _NFIELDS = 4;
   std::vector<float32> _combinedHi;
   std::vector<float32> _combinedLo;
   std::vector<float32> _molecular;

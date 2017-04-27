@@ -332,10 +332,10 @@ int HsrlTcp2Fmq::_readTcpPacket()
 
   // check message is valid
 
-  if (_packetId != HsrlRawRay::cookie) {
+  if (_packetId != HsrlRawRay::COOKIE) {
     cerr << "ERROR - HsrlTcp2Fmq::_readTcpPacket" << endl;
     cerr << "  Bad message id: " << _packetId << endl;
-    cerr << "  Should be cookie: " << HsrlRawRay::cookie << endl;
+    cerr << "  Should be cookie: " << HsrlRawRay::COOKIE << endl;
     _unknownMsgId = true;
     return -1;
   }
