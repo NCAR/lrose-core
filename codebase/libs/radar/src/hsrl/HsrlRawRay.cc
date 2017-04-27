@@ -41,15 +41,19 @@ using namespace std;
 ///////////////////////////////////////////////////////////////
 // default constructor
 
-HsrlRawRay::HsrlRawRay()
+HsrlRawRay::HsrlRawRay() :
+  _timeSecs(0),
+  _subSecs(0),
+  _telescopeLocked(false),
+  _telescopeDirn(0),  // pointing down
+  _totalEnergy(0),
+  _polAngle(0.0),
+  _nGates(0),
+  _fieldLen(0),
+  _bufLen(0),
+  _packetBuf(NULL)
 
 {
-
-  // initialize
-
-  _packetBuf = NULL;
-  _bufLen = 0;
-  
 }
   
 ///////////////////////////////////////////////////////////////
