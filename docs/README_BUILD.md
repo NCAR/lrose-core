@@ -102,7 +102,6 @@ For a full LROSE build under LINUX, you need the following packages:
   flex-devel
   fftw3-devel
   bzip2-devel
-  jasper-devel
   qt4-devel
 
   gnuplot
