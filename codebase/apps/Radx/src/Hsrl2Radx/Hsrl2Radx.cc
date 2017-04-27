@@ -418,6 +418,16 @@ int Hsrl2Radx::_readInputFmq()
     
     RadxRay *radxRay = _convertRawToRadx(rawRay);
 
+    // add environment fields
+    
+    _addEnvFields(radxRay);
+
+    // add moments
+
+    _addDerivedFields(radxRay);
+
+    // write ray to the output FMQ
+
     // clean up
 
     delete radxRay;

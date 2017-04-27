@@ -341,6 +341,53 @@ paramdef string {
 } output_fmq_path;
 
 commentdef {
+  p_header = "OUTPUT FMQ DETAILS";
+};
+
+paramdef string {
+  p_default = "fmqp:://localhost::/tmp/fmq/hsrl_raw";
+  p_descr = "URL for output FMQ.";
+  p_help = "The FMQ consists of 2 files, ??.buf and ??.stat.";
+} output_fmq_url;
+
+paramdef int {
+  p_default = 1000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer.";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 500;
+  p_descr = "Number of slots in the output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compress the FMQ data on write.";
+  p_help = "This helps to keep the size of the queue entries small. Should only be used for remote FMQs over slow networks.";
+} output_fmq_compress;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Number of rays between sending params.";
+  p_help = "The params will be sent when this number of rays have been written.";
+} nrays_for_params;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set up the FMQ as blocking.";
+  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.";
+} write_blocking;
+
+paramdef int {
+  p_private = TRUE;
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+
+commentdef {
   p_header = "OPTION TO SPECIFY FIELD NAMES FOR OUTPUT FILES";
 }
 

@@ -465,6 +465,20 @@ public:
 
   char* output_fmq_path;
 
+  char* output_fmq_url;
+
+  int output_fmq_size;
+
+  int output_fmq_nslots;
+
+  tdrp_bool_t output_fmq_compress;
+
+  int nrays_for_params;
+
+  tdrp_bool_t write_blocking;
+
+  int data_mapper_report_interval;
+
   tdrp_bool_t set_output_fields;
 
   output_field_t *_output_fields;
@@ -532,7 +546,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[90];
+  mutable TDRPtable _table[98];
 
   const char *_className;
 

@@ -1191,6 +1191,100 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 9");
+    tt->comment_hdr = tdrpStrDup("OUTPUT FMQ DETAILS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'output_fmq_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_fmq_url");
+    tt->descr = tdrpStrDup("URL for output FMQ.");
+    tt->help = tdrpStrDup("The FMQ consists of 2 files, ??.buf and ??.stat.");
+    tt->val_offset = (char *) &output_fmq_url - &_start_;
+    tt->single_val.s = tdrpStrDup("fmqp:://localhost::/tmp/fmq/hsrl_raw");
+    tt++;
+    
+    // Parameter 'output_fmq_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("output_fmq_size");
+    tt->descr = tdrpStrDup("Size of output FMQ, in bytes.");
+    tt->help = tdrpStrDup("This is the total size of the output FMQ buffer.");
+    tt->val_offset = (char *) &output_fmq_size - &_start_;
+    tt->single_val.i = 1000000;
+    tt++;
+    
+    // Parameter 'output_fmq_nslots'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("output_fmq_nslots");
+    tt->descr = tdrpStrDup("Number of slots in the output FMQ.");
+    tt->help = tdrpStrDup("The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.");
+    tt->val_offset = (char *) &output_fmq_nslots - &_start_;
+    tt->single_val.i = 500;
+    tt++;
+    
+    // Parameter 'output_fmq_compress'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("output_fmq_compress");
+    tt->descr = tdrpStrDup("Option to compress the FMQ data on write.");
+    tt->help = tdrpStrDup("This helps to keep the size of the queue entries small. Should only be used for remote FMQs over slow networks.");
+    tt->val_offset = (char *) &output_fmq_compress - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'nrays_for_params'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("nrays_for_params");
+    tt->descr = tdrpStrDup("Number of rays between sending params.");
+    tt->help = tdrpStrDup("The params will be sent when this number of rays have been written.");
+    tt->val_offset = (char *) &nrays_for_params - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'write_blocking'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_blocking");
+    tt->descr = tdrpStrDup("Option to set up the FMQ as blocking.");
+    tt->help = tdrpStrDup("If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.");
+    tt->val_offset = (char *) &write_blocking - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'data_mapper_report_interval'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("data_mapper_report_interval");
+    tt->descr = tdrpStrDup("Number of seconds between reports to DataMapper.");
+    tt->help = tdrpStrDup("If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.");
+    tt->val_offset = (char *) &data_mapper_report_interval - &_start_;
+    tt->is_private = TRUE;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'Comment 10'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY FIELD NAMES FOR OUTPUT FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1329,11 +1423,11 @@ using namespace std;
       tt->array_vals[1].s = tdrpStrDup("VEL");
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1434,11 +1528,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("Files are written in CfRadial");
     tt++;
@@ -1467,11 +1561,11 @@ using namespace std;
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1536,11 +1630,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
