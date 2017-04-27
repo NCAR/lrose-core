@@ -1006,8 +1006,8 @@ void RawFile::_loadReadVolume()
   _readVol->setPlatformType(_platformType);
   _readVol->setPrimaryAxis(_primaryAxis);
   
-  _readVol->addFrequencyHz(Radx::LIGHT_SPEED / 538.0e-6);
-  _readVol->addFrequencyHz(Radx::LIGHT_SPEED / 1064.0e-6);
+  _readVol->addFrequencyHz(Radx::LIGHT_SPEED / 538.0e-9);
+  _readVol->addFrequencyHz(Radx::LIGHT_SPEED / 1064.0e-9);
   
   _readVol->setLidarConstant(-9999.0);
   _readVol->setLidarPulseEnergyJ(-9999.0);

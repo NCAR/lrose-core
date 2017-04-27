@@ -152,24 +152,24 @@ paramdef boolean {
 paramdef double {
   p_default = -999;
   p_descr = "Instrument latitude (deg).";
-  p_help = "See override_instrument_location.";
+  p_help = "Applies if read_georef_data_from_aircraft_system is false.";
 } instrument_latitude_deg;
 
 paramdef double {
   p_default = -999;
   p_descr = "Instrument longitude (deg).";
-  p_help = "See override_instrument_location.";
+  p_help = "Applies if read_georef_data_from_aircraft_system is false.";
 } instrument_longitude_deg;
 
 paramdef double {
   p_default = -999;
   p_descr = "Instrument altitude (meters).";
-  p_help = "See override_instrument_location.";
+  p_help = "Applies if read_georef_data_from_aircraft_system is false.";
 } instrument_altitude_meters;
 
 commentdef {
-  p_header = "OPTION TO SET RANGE RELATIVE TO INSTRUNENT - CfRadial files only";
-  p_text = "This applies to python-generated CfRadial files only";
+  p_header = "OPTION TO SET RANGE RELATIVE TO INSTRUMENT - MSL CfRadial files only";
+  p_text = "This applies to python-generated CfRadial files relative to MSL only";
 }
 
 paramdef boolean {
@@ -183,34 +183,6 @@ paramdef int {
   p_descr = "Integer value for telescope direction is up.";
   p_help = "This value indicates the telescope is pointing up. If the telescope_direction value is not equal to this value it is pointing down.";
 } telescope_direction_is_up;
-
-commentdef {
-  p_header = "OPTION TO CORRECT ANTENNA ANGLES";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to apply an offset to the azimuth values.";
-  p_help = "If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north.";
-} apply_azimuth_offset;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Azimuth offset (degrees).";
-  p_help = "See 'apply_azimuth_offset'. This value will be ADDED to the measured azimuths.";
-} azimuth_offset;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to apply an offset to the elevation values.";
-  p_help = "If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles.";
-} apply_elevation_offset;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Elevation offset (degrees).";
-  p_help = "See 'apply_elevation_offset'. This value will be ADDED to the measured elevations.";
-} elevation_offset;
 
 commentdef {
   p_header = "READING RAW NetCDF DATA FILES";
@@ -331,17 +303,8 @@ paramdef string {
 } scan_adjustment_name;
 
 commentdef {
-  p_header = "OUTPUT FMQ IN REALTIME_FMQ mode";
-}
-
-paramdef string {
-  p_default = "/tmp/fmq/hsrl_moments";
-  p_descr = "Path to output FMQ.";
-  p_help = "REATIME_FMQ mode only. The FMQ consists of 2 files, ??.buf and ??.stat. Specify only the root, not the extensions.";
-} output_fmq_path;
-
-commentdef {
   p_header = "OUTPUT FMQ DETAILS";
+  p_text = "REALTIME_FMQ mode only";
 };
 
 paramdef string {

@@ -54,9 +54,8 @@ HDRS = \
 	RawFile.hh \
 	CalReader.hh \
 	FullCals.hh \
-	DerFieldCalcs.hh
-
-#	OutputFmq.hh
+	DerFieldCalcs.hh \
+	OutputFmq.hh
 
 CPPC_SRCS = \
 	Params.cc \
@@ -67,9 +66,8 @@ CPPC_SRCS = \
 	RawFile.cc \
 	CalReader.cc \
 	FullCals.cc \
-	DerFieldCalcs.cc
-
-#	OutputFmq.cc
+	DerFieldCalcs.cc \
+	OutputFmq.cc
 
 #
 # tdrp macros

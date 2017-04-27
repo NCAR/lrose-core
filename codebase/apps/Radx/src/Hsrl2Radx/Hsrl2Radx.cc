@@ -47,17 +47,20 @@
 #include <didss/DsInputPath.hh>
 #include <toolsa/TaXml.hh>
 #include <toolsa/pmu.h>
+#include <Fmq/DsFmq.hh>
 #include <radar/HsrlRawRay.hh>
+
+#include <cmath>  
+#include <fstream>
+#include <sstream>
+#include <string>
+
 #include "MslFile.hh"
 #include "RawFile.hh"
 #include "CalReader.hh"
 #include "FullCals.hh"
 #include "DerFieldCalcs.hh"
-#include <math.h>  
-
-#include <fstream>
-#include <sstream>
-#include <string>
+#include "OutputFmq.hh"
 
 using namespace std;
 
@@ -337,28 +340,43 @@ int Hsrl2Radx::_runRealtimeFmq()
   PMU_auto_init(_progName.c_str(), _params.instance,
                 PROCMAP_REGISTER_INTERVAL);
 
+  // create output queue
+  
+  OutputFmq outputFmq(_progName, _params);
+  if (!outputFmq.constructorOK) {
+    cerr << "ERROR - Hsrl2Radx::_runRealtimeFmq" << endl;
+    cerr << "  Cannot init FMQ for writing" << endl;
+    cerr << "  Fmq: " << _params.output_fmq_url << endl;
+    return -1;
+  }
+
+  // create input queue
+
   int iret = 0;
+  DsFmq inputFmq;
+  
+  // loop
 
   while (true) {
-
-    PMU_auto_register("Opening FMQ");
+    
+    PMU_auto_register("Opening input FMQ");
     
     if (_params.debug) {
       cerr << "  Opening Fmq: " << _params.input_fmq_path << endl;
     }
     
-    _inputFmq.setHeartbeat(PMU_auto_register);
+    inputFmq.setHeartbeat(PMU_auto_register);
     int msecsSleepBlocking = 100;
     
-    if (_inputFmq.initReadBlocking(_params.input_fmq_path,
-                                   "Hsrl2Radx",
-                                   _params.debug >= Params::DEBUG_EXTRA,
-                                   Fmq::END,
-                                   msecsSleepBlocking)) {
+    if (inputFmq.initReadBlocking(_params.input_fmq_path,
+                                  "Hsrl2Radx",
+                                  _params.debug >= Params::DEBUG_EXTRA,
+                                  Fmq::END,
+                                  msecsSleepBlocking)) {
       cerr << "ERROR - Hsrl2Radx::_runRealtimeFmq" << endl;
       cerr << "  Cannot init FMQ for reading" << endl;
       cerr << "  Fmq: " << _params.input_fmq_path << endl;
-      cerr << _inputFmq.getErrStr() << endl;
+      cerr << inputFmq.getErrStr() << endl;
       umsleep(1000);
       iret = -1;
       continue;
@@ -366,8 +384,8 @@ int Hsrl2Radx::_runRealtimeFmq()
     
     // read data from the incoming FMQ and process it
     
-    if (_readInputFmq()) {
-      _inputFmq.closeMsgQueue();
+    if (_readFmq(inputFmq, outputFmq)) {
+      inputFmq.closeMsgQueue();
       iret = -1;
     }
     
@@ -378,14 +396,19 @@ int Hsrl2Radx::_runRealtimeFmq()
 }
 
 ///////////////////////////////////////////////////
-// read data from the incoming FMQ and process it
+// read data from the incoming FMQ and process it,
+// writing to the output FMQ
 
-int Hsrl2Radx::_readInputFmq()
-
+int Hsrl2Radx::_readFmq(DsFmq &inputFmq,
+                        OutputFmq &outputFmq)
+  
 {
 
-  // read data
+  // read data from the input queue
+  // convert it and write it to the output queue
   
+  int64_t rayCount = 0;
+
   while (true) {
     
     PMU_auto_register("Reading data");
@@ -393,7 +416,7 @@ int Hsrl2Radx::_readInputFmq()
     // we need a new message
     // blocking read registers with Procmap while waiting
     
-    if (_inputFmq.readMsgBlocking()) {
+    if (inputFmq.readMsgBlocking()) {
       cerr << "ERROR - Hsrl2Radx::_readInputFmq()" << endl;
       cerr << "  Cannot read message from FMQ" << endl;
       cerr << "  Fmq: " << _params.input_fmq_path << endl;
@@ -401,20 +424,20 @@ int Hsrl2Radx::_readInputFmq()
     }
     
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Got message from FMQ, len: " << _inputFmq.getMsgLen() << endl;
+      cerr << "Got message from FMQ, len: " << inputFmq.getMsgLen() << endl;
     }
-
-    // deserialize the ray
+    
+    // deserialize the raw ray
 
     HsrlRawRay rawRay;
-    rawRay.deserialize(_inputFmq.getMsg(), _inputFmq.getMsgLen());
-
+    rawRay.deserialize(inputFmq.getMsg(), inputFmq.getMsgLen());
+    
     if (_params.debug >= Params::DEBUG_EXTRA) {
       rawRay.printTcpHdr(cerr);
       rawRay.printMetaData(cerr);
     }
 
-    // convert raw ray into RadxRay
+    // convert incoming raw ray into RadxRay
     
     RadxRay *radxRay = _convertRawToRadx(rawRay);
 
@@ -426,11 +449,20 @@ int Hsrl2Radx::_readInputFmq()
 
     _addDerivedFields(radxRay);
 
+    // write params to FMQ every n rays
+
+    if (rayCount % _params.nrays_for_params == 0) {
+      outputFmq.writeParams(radxRay);
+    }
+
     // write ray to the output FMQ
 
+    outputFmq.writeRay(radxRay);
+    
     // clean up
 
     delete radxRay;
+    rayCount++;
 
   } // while
 
@@ -464,8 +496,8 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
   
   // sweep info
   
-  ray->setVolumeNumber(-9999);
-  ray->setSweepNumber(0);
+  ray->setVolumeNumber(-1);
+  ray->setSweepNumber(-1);
   ray->setSweepMode(Radx::SWEEP_MODE_POINTING);
   ray->setPrtMode(Radx::PRT_MODE_FIXED);
   ray->setTargetScanRateDegPerSec(0.0);
@@ -490,15 +522,15 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
   
   if (!_params.read_georef_data_from_aircraft_system) {
 
-    setLatitude(_latitude[ii]);
-    setLongitude(_longitude[ii]);
-    setAltitudeKmMsl(_altitude[ii] / 1000.0);
+    setLatitude(_latitude);
+    setLongitude(_longitude);
+    setAltitudeKmMsl(_altitude / 1000.0);
 
   } else {
     
     RadxGeoref geo;
     
-    if (_telescopeDirection[ii] == 1) {
+    if (_telescopeDirection == 1) {
       
       // pointing up
       
@@ -514,20 +546,20 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
       
     }
     
-    geo.setRoll(_roll[ii]);
-    geo.setPitch(_pitch[ii]);
-    geo.setHeading(_heading[ii]);
+    geo.setRoll(_roll);
+    geo.setPitch(_pitch);
+    geo.setHeading(_heading);
     geo.setDrift(0.0); // do not have drift in the file
-    geo.setVertVelocity(_vertVel[ii]);
+    geo.setVertVelocity(_vertVel);
     
-    geo.setLatitude(_latitude[ii]);
-    geo.setLongitude(_longitude[ii]);
-    geo.setAltitudeKmMsl(_altitude[ii] / 1000.0);
+    geo.setLatitude(_latitude);
+    geo.setLongitude(_longitude);
+    geo.setAltitudeKmMsl(_altitude / 1000.0);
     
     double sinVal, cosVal;
-    sincos(_heading[ii] * Radx::DegToRad, &sinVal, &cosVal);
-    geo.setEwVelocity(_gndSpeed[ii] * sinVal);
-    geo.setNsVelocity(_gndSpeed[ii] * cosVal);
+    sincos(_heading * Radx::DegToRad, &sinVal, &cosVal);
+    geo.setEwVelocity(_gndSpeed * sinVal);
+    geo.setNsVelocity(_gndSpeed * cosVal);
     
     ray->setGeoref(geo);
 
@@ -731,23 +763,6 @@ int Hsrl2Radx::_processUwCfRadialFile(const string &readPath)
     vol.setSiteName(_params.site_name);
   }
     
-  // apply angle offsets
-
-  if (_params.apply_azimuth_offset) {
-    if (_params.debug) {
-      cerr << "NOTE: applying azimuth offset (deg): " 
-           << _params.azimuth_offset << endl;
-    }
-    vol.applyAzimuthOffset(_params.azimuth_offset);
-  }
-  if (_params.apply_elevation_offset) {
-    if (_params.debug) {
-      cerr << "NOTE: applying elevation offset (deg): " 
-           << _params.elevation_offset << endl;
-    }
-    vol.applyElevationOffset(_params.elevation_offset);
-  }
-
   // override start range and/or gate spacing
 
   if (_params.override_start_range || _params.override_gate_spacing) {

@@ -44,13 +44,16 @@
 #include "CalReader.hh"
 #include "FullCals.hh"
 #include <Radx/Radx.hh>
-#include <Fmq/DsFmq.hh>
 #include <physics/IcaoStdAtmos.hh>
+
 class RadxVol;
 class RadxRay;
 class RadxFile;
 class HsrlRawRay;
 class MslFile;
+class DsFmq;
+class OutputFmq;
+
 using namespace std;
 
 class Hsrl2Radx {
@@ -83,8 +86,6 @@ private:
   vector<string> _readPaths;
   FullCals _cals;
 
-  DsFmq _inputFmq;
-
   IcaoStdAtmos _stdAtmos;
 
   int _runFilelist();
@@ -92,7 +93,9 @@ private:
   int _runRealtimeWithLdata();
   int _runRealtimeNoLdata();
   int _runRealtimeFmq();
-  int _readInputFmq();
+
+  int _readFmq(DsFmq &inputFmq,
+               OutputFmq &outputFmq);
 
   RadxRay *_convertRawToRadx(HsrlRawRay &rawRay);
 

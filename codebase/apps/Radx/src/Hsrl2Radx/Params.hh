@@ -417,14 +417,6 @@ public:
 
   int telescope_direction_is_up;
 
-  tdrp_bool_t apply_azimuth_offset;
-
-  double azimuth_offset;
-
-  tdrp_bool_t apply_elevation_offset;
-
-  double elevation_offset;
-
   tdrp_bool_t combine_bins_on_read;
 
   int n_bins_per_gate;
@@ -462,8 +454,6 @@ public:
   char* bin_width_name;
 
   char* scan_adjustment_name;
-
-  char* output_fmq_path;
 
   char* output_fmq_url;
 
@@ -546,7 +536,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[98];
+  mutable TDRPtable _table[91];
 
   const char *_className;
 

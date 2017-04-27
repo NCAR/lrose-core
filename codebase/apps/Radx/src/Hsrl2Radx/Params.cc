@@ -809,7 +809,7 @@ using namespace std;
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("instrument_latitude_deg");
     tt->descr = tdrpStrDup("Instrument latitude (deg).");
-    tt->help = tdrpStrDup("See override_instrument_location.");
+    tt->help = tdrpStrDup("Applies if read_georef_data_from_aircraft_system is false.");
     tt->val_offset = (char *) &instrument_latitude_deg - &_start_;
     tt->single_val.d = -999;
     tt++;
@@ -821,7 +821,7 @@ using namespace std;
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("instrument_longitude_deg");
     tt->descr = tdrpStrDup("Instrument longitude (deg).");
-    tt->help = tdrpStrDup("See override_instrument_location.");
+    tt->help = tdrpStrDup("Applies if read_georef_data_from_aircraft_system is false.");
     tt->val_offset = (char *) &instrument_longitude_deg - &_start_;
     tt->single_val.d = -999;
     tt++;
@@ -833,7 +833,7 @@ using namespace std;
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("instrument_altitude_meters");
     tt->descr = tdrpStrDup("Instrument altitude (meters).");
-    tt->help = tdrpStrDup("See override_instrument_location.");
+    tt->help = tdrpStrDup("Applies if read_georef_data_from_aircraft_system is false.");
     tt->val_offset = (char *) &instrument_altitude_meters - &_start_;
     tt->single_val.d = -999;
     tt++;
@@ -843,8 +843,8 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("OPTION TO SET RANGE RELATIVE TO INSTRUNENT - CfRadial files only");
-    tt->comment_text = tdrpStrDup("This applies to python-generated CfRadial files only");
+    tt->comment_hdr = tdrpStrDup("OPTION TO SET RANGE RELATIVE TO INSTRUMENT - MSL CfRadial files only");
+    tt->comment_text = tdrpStrDup("This applies to python-generated CfRadial files relative to MSL only");
     tt++;
     
     // Parameter 'set_range_relative_to_instrument'
@@ -876,63 +876,6 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("OPTION TO CORRECT ANTENNA ANGLES");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'apply_azimuth_offset'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_azimuth_offset");
-    tt->descr = tdrpStrDup("Option to apply an offset to the azimuth values.");
-    tt->help = tdrpStrDup("If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north.");
-    tt->val_offset = (char *) &apply_azimuth_offset - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'azimuth_offset'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("azimuth_offset");
-    tt->descr = tdrpStrDup("Azimuth offset (degrees).");
-    tt->help = tdrpStrDup("See 'apply_azimuth_offset'. This value will be ADDED to the measured azimuths.");
-    tt->val_offset = (char *) &azimuth_offset - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'apply_elevation_offset'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_elevation_offset");
-    tt->descr = tdrpStrDup("Option to apply an offset to the elevation values.");
-    tt->help = tdrpStrDup("If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles.");
-    tt->val_offset = (char *) &apply_elevation_offset - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'elevation_offset'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("elevation_offset");
-    tt->descr = tdrpStrDup("Elevation offset (degrees).");
-    tt->help = tdrpStrDup("See 'apply_elevation_offset'. This value will be ADDED to the measured elevations.");
-    tt->val_offset = (char *) &elevation_offset - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("READING RAW NetCDF DATA FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1165,34 +1108,13 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("i2_scan_adjustment");
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("OUTPUT FMQ IN REALTIME_FMQ mode");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_fmq_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_fmq_path");
-    tt->descr = tdrpStrDup("Path to output FMQ.");
-    tt->help = tdrpStrDup("REATIME_FMQ mode only. The FMQ consists of 2 files, ??.buf and ??.stat. Specify only the root, not the extensions.");
-    tt->val_offset = (char *) &output_fmq_path - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/fmq/hsrl_moments");
-    tt++;
-    
-    // Parameter 'Comment 9'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT FMQ DETAILS");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("REALTIME_FMQ mode only");
     tt++;
     
     // Parameter 'output_fmq_url'
@@ -1280,11 +1202,11 @@ using namespace std;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY FIELD NAMES FOR OUTPUT FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1423,11 +1345,11 @@ using namespace std;
       tt->array_vals[1].s = tdrpStrDup("VEL");
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1528,11 +1450,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("Files are written in CfRadial");
     tt++;
@@ -1561,11 +1483,11 @@ using namespace std;
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1630,11 +1552,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;

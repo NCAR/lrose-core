@@ -98,52 +98,6 @@ private:
 
   int _openFmq();
 
-  // Add a field to the field params message.
-  
-  inline void _addField(const string &name,
-                        const string &units,
-                        double scale,
-                        double bias,
-                        vector<DsFieldParams*> &fp)
-  {
-    DsFieldParams* fparams =
-      new DsFieldParams(name.c_str(), units.c_str(),
-                        scale, bias, sizeof(ui16));
-    fp.push_back(fparams);
-  }
-
-  // convert double to ui16, applying scale and bias
-
-  inline ui16 _convertDouble(double val, double scale, double bias) {
-    if (val == _missingDbl) {
-      return 0;
-    }
-    int ival = (int) ((val - bias) / scale + 0.5);
-    if (ival < 1) {
-      ival = 1;
-    }
-    if (ival > 65535) {
-      ival = 65535;
-    }
-    return (ui16) ival;
-  }
-
-  // convert int to ui16, checking bias
-
-  inline ui16 _convertInt(int val, int bias) {
-    if (val == 0) {
-      return 0;
-    }
-    int ival = val - bias;
-    if (ival < 0) {
-      ival = 0;
-    }
-    if (ival > 65535) {
-      ival = 65535;
-    }
-    return (ui16) ival;
-  }
-
 };
 
 #endif
