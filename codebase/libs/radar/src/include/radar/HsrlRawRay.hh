@@ -48,26 +48,51 @@ class HsrlRawRay {
 
 public:
 
-  // default constructor
-  
+  /// @brief Construct a HsrlRawRay instance with no time or data
   HsrlRawRay();
-  
-  // destructor
-  
+
+  /// @brief default destructor
   virtual ~HsrlRawRay();
 
   // set methods
 
+  /// @brief Set the time of the ray
+  /// @param timeSecs time of the ray in integer seconds since
+  /// 1970-01-01 00:00:00 UTC
+  /// @param subSecs subsecond time to be added to timeSecs to obtain the
+  /// complete time of the ray; this should be < 1 second.
   void setTime(time_t timeSecs, double subSecs) {
     _timeSecs = timeSecs;
     _subSecs = subSecs;
   }
 
+  /// @brief Set the "locked" state of the telescope for the ray
+  /// @param val true iff the telescope is locked
   void setTelescopeLocked(bool val) { _telescopeLocked = val; }
+
+  /// @brief Set the telescope pointing direction for the ray
+  /// @param val 0 = down, 1 = up
   void setTelescopeDirn(int val) { _telescopeDirn = val; }
+
+  /// @brief Set the total energy counts for the ray
+  /// @param val the total energy counts for the ray
   void setTotalEnergy(int val) { _totalEnergy = val; }
+
+  /// @brief Set the polarization angle for the ray, in degrees
+  /// @param val polarization angle for the ray, in degrees
   void setPolAngle(double val) { _polAngle = val; }
 
+  /// @brief Set the vectors of combinedHi, combinedLo, molecular, and cross-
+  /// channel returns for the ray
+  /// @param nGates the number of gates recorded in the ray
+  /// @param combinedHi pointer to an array containing @p nGates of combinedHi
+  /// channel returns for the ray
+  /// @param combinedLo pointer to an array containing @p nGates of combinedLo
+  /// channel returns for the ray
+  /// @param molecular pointer to an array containing @p nGates of molecular
+  /// channel returns for the ray
+  /// @param cross pointer to an array containing @p nGates of cross channel
+  /// returns for the ray
   void setFields(int nGates,
                  const float32 *combinedHi,
                  const float32 *combinedLo,
@@ -76,41 +101,79 @@ public:
 
   // get methods
 
+  /// @brief Return the time of the ray in integer seconds since 1970-01-01
+  /// 00:00:00 UTC
   time_t getTimeSecs() const { return _timeSecs; }
+
+  /// @brief Return the subsecond time of the ray
+  ///
+  /// This time should be added to the value from getTimeSecs() to obtain the
+  /// complete time of the ray. The returned value will be < 1 second.
+  /// @return the subsecond time of the ray
   double getSubSecs() const { return _subSecs; }
 
+  /// @brief Return true iff the telescope was locked for this ray
+  /// @return true iff the telescope was locked for this ray
   bool getTelescopeLocked() const { return _telescopeLocked; }
+
+  /// @brief Return the telescope pointing direction for this ray: 0 = down,
+  /// 1 = up
+  /// @return the telescope pointing direction for this ray: 0 = down, 1 = up
   int getTelescopeDirn() const { return _telescopeDirn; }
+
+  /// @brief Return the total energy counts for this ray
+  /// @return the total energy counts for this ray
   int getTotalEnergy() const { return _totalEnergy; }
+
+  /// @brief Return the polarization angle for this ray
+  /// @return the polarization angle for this ray
   double getPolAngle() const { return _polAngle; }
 
+  /// @brief Return the number of gates recorded in this ray
+  /// @return the number of gates recorded in this ray
   int getNGates() const { return _nGates; }
+
+  /// @brief Return the array of combined high channel counts for all gates of
+  /// this ray
+  /// @return the array of combined high channel counts for all gates of this ray
   const std::vector<float32> &getCombinedHi() const { return _combinedHi; }
+
+  /// @brief Return the array of combined low channel counts for all gates of
+  /// this ray
+  /// @return the array of combined low channel counts for all gates of this ray
   const std::vector<float32> &getCombinedLo() const { return _combinedLo; }
+
+  /// @brief Return the array of molecular channel counts for all gates of
+  /// this ray
+  /// @return the array of molecular channel counts for all gates of this ray
   const std::vector<float32> &getMolecular() const { return _molecular; }
+
+  /// @brief Return the array of cross channel counts for all gates of
+  /// this ray
+  /// @return the array of cross channel counts for all gates of this ray
   const std::vector<float32> &getCross() const { return _cross; }
 
-  // Serialize object into buffer for transmission.
-  // After calling, call getBufPtr() and getBufLen()
-  // to get the details of the buffer.
-
+  /// @brief Serialize object into a buffer for transmission.
+  ///
+  /// After calling, use getBufPtr() and getBufLen() to get the contents and
+  /// length of the buffer.
   void serialize();
 
-  // get pointer to buffer from serialization
-  
+  /// @brief Return a pointer to the buffer populated by serialize()
+  /// @return a pointer to the buffer populated by serialize()
   const void *getBufPtr() const { return _packetBuf; }
   
-  // get length of buffer from serialization
-
+  /// @brief Return the length of the buffer populated by serialize()
+  /// @return the length of the buffer populated by serialize()
   int getBufLen() const { return _bufLen; }
 
-  // de-serialize from buffer into the object
-  // returns 0 on success, -1 on error
-
+  /// @brief Deserialize from the given buffer to populate this object.
+  /// @param buffer pointer to the buffer from which to deserialize
+  /// @param bufLen the length of the buffer
+  /// @return 0 on success or -1 on error
   int deserialize(const void *buffer, int bufLen);
 
-  // cookie to identify raw HSRL ray
-
+  /// @brief Cookie used to identify if bytes have been swapped in transmission
   static const int64_t cookie = 987654321;
 
   // check if ID needs swapping
