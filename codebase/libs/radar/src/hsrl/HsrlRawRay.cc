@@ -114,7 +114,7 @@ void HsrlRawRay::serialize()
   // compute buf sizes
   
   int fieldLen = _nGates * sizeof(float32);
-  int bufLen = sizeof(tcp_hdr_t) + _NFIELDS * fieldLen;
+  int bufLen = sizeof(_tcp_hdr_t) + _NFIELDS * fieldLen;
 
   // check buffer space
   
@@ -138,13 +138,11 @@ void HsrlRawRay::serialize()
 
   // set the header
 
-  tcp_hdr_t hdr;
+  _tcp_hdr_t hdr;
   memset(&hdr, 0, sizeof(hdr));
 
   hdr.id = COOKIE;
   hdr.len_bytes = _bufLen;
-  _seqNum++;
-  hdr.seq_num = _seqNum;
   hdr.version_num = _HEADER_VERSION;
 
   hdr.time_secs_utc = _timeSecs;
@@ -211,7 +209,7 @@ int HsrlRawRay::deserialize(const void *buffer, int bufLen)
 
   // check we have enough len for header
 
-  tcp_hdr_t hdr;
+  _tcp_hdr_t hdr;
   if (bufLen < (int) sizeof(hdr)) {
     cerr << "ERROR - HsrlRawRay::deserialize()" << endl;
     cerr << "  buffer too short" << endl;
@@ -238,7 +236,6 @@ int HsrlRawRay::deserialize(const void *buffer, int bufLen)
 
   // set members
 
-  _seqNum = hdr.seq_num;
   _timeSecs = hdr.time_secs_utc;
   _subSecs = (double) hdr.time_nano_secs / 1.0e9;
   _telescopeLocked = hdr.telescope_locked;
@@ -283,7 +280,7 @@ int HsrlRawRay::deserialize(const void *buffer, int bufLen)
 //////////////////////////////////////////////////////////////////////////
 // Swap the TCP header
 
-void HsrlRawRay::_SwapHdr(tcp_hdr_t *hdr)
+void HsrlRawRay::_SwapHdr(_tcp_hdr_t *hdr)
 {
 
   // swap the 64-bit words
@@ -379,7 +376,6 @@ void HsrlRawRay::printMetaData(ostream &out)
 
   RadxTime dataTime(_timeSecs, _subSecs);
   out << "  time: " << dataTime.asString(3) << endl;
-  out << "  seqNum: " << _seqNum << endl;
   out << "  telescopeLocked: " << (_telescopeLocked?"Y":"N") << endl;
   if (_telescopeDirn == 1) {
     out << "  telescope pointing up" << endl;
@@ -408,11 +404,10 @@ void HsrlRawRay::printTcpHdr(ostream &out)
   
   out << "========= HsrlRawRay TCP header =============" << endl;
 
-  const tcp_hdr_t *hdr = (tcp_hdr_t *) _packetBuf;
+  const _tcp_hdr_t *hdr = (_tcp_hdr_t *) _packetBuf;
 
   out << "  id: " << hdr->id << endl;
   out << "  len_bytes: " << hdr->len_bytes << endl;
-  out << "  seq_num: " << hdr->seq_num << endl;
   out << "  version_num: " << hdr->version_num << endl;
   out << "  time_secs_utc: " << hdr->time_secs_utc << endl;
   out << "  time_nano_secs: " << hdr->time_nano_secs << endl;

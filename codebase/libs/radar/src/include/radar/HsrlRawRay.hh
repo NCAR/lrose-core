@@ -197,26 +197,24 @@ public:
 protected:
 private:
 
-  // typedef for header struct for tcp packet
-  // 128 bytes long
-
-  int64_t _seqNum = 0;
-
-  /// @brief Header version number
+  /// @brief Current version number for the _tcp_hdr_t struct
   // This number should be incremented if the _tcp_hdr_t struct below is altered
   static const int64_t _HEADER_VERSION = 1;
 
+  /// @brief Inner class defining the header structure used when serializing
+  /// an instance of HsrlRawRay.
+  ///
+  /// The length of the struct is 128 bytes
   typedef struct {
 
     int64_t id;
     int64_t len_bytes; // header plus data fields
-    int64_t seq_num;
     int64_t version_num;
 
     int64_t time_secs_utc;
     int64_t time_nano_secs;
 
-    int64_t spares1[4];
+    int64_t spares64bit[5];
 
     int32_t telescope_locked;
     int32_t telescope_dirn;
@@ -225,9 +223,9 @@ private:
     float32 pol_angle;
 
     int32_t n_gates;
-    int32_t spares2[7];
+    int32_t spares32bit[7];
 
-  } tcp_hdr_t;
+  } _tcp_hdr_t;
 
   // private data
 
@@ -258,7 +256,7 @@ private:
 
   // Swap the TCP header
   
-  void _SwapHdr(tcp_hdr_t *hdr);
+  void _SwapHdr(_tcp_hdr_t *hdr);
 
   /// Perform an in-place 64-bit word byte swap, if necessary, to produce
   /// BE representation from machine representation, or vice-versa.
