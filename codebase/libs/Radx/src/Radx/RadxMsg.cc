@@ -94,11 +94,10 @@ RadxMsg::~RadxMsg()
 
   // free parts
 
-  vector< Part* >::iterator i;
-  for(i = _parts.begin(); i != _parts.end(); i++) {
-    delete *i;
+  for (size_t ii = 0; ii < _parts.size(); ii++) {
+    delete _parts[ii];
   }
-  _parts.erase(_parts.begin(), _parts.end());
+  _parts.clear();
   
 }
 
@@ -170,8 +169,8 @@ int RadxMsg::disassemble(const void *inMsg, const ssize_t msgLen /* = -1*/ )
   }
   
   _allocParts(_nParts);
-  for (ssize_t i = 0; i < _nParts; i++) {
-    if (_parts[i]->loadFromMsg(i, inMsg, msgLen)) {
+  for (ssize_t ii = 0; ii < _nParts; ii++) {
+    if (_parts[ii]->loadFromMsg(ii, inMsg, msgLen)) {
       printHeader(cerr, "  ");
       return -1;
     }
@@ -187,12 +186,12 @@ int RadxMsg::partExists(const int partType) const
 
 {
   int count = 0;
-  for (ssize_t i = 0; i < _nParts; i++) {
-    if (_parts[i]->getPartType() == partType) {
+  for (ssize_t ii = 0; ii < _nParts; ii++) {
+    if (_parts[ii]->getPartType() == partType) {
       count++;
     }
   }
-  return (count);
+  return count;
 }
 
 ////////////////////////////////////////////
@@ -207,7 +206,7 @@ RadxMsg::Part *RadxMsg::getPart(const ssize_t index) const
   if (index > _nParts - 1) {
     return (NULL);
   }
-  return (_parts[index]);
+  return _parts[index];
 }
 
 ////////////////////////////////////////////////////////////
@@ -223,15 +222,15 @@ RadxMsg::Part *RadxMsg::getPartByType(const int partType,
   
 {
   ssize_t count = 0;
-  for (ssize_t i = 0; i < _nParts; i++) {
-    if (_parts[i]->getPartType() == partType) {
+  for (ssize_t ii = 0; ii < _nParts; ii++) {
+    if (_parts[ii]->getPartType() == partType) {
       if (count == index) {
-	return(_parts[i]);
+	return _parts[ii];
       }
       count++;
     }
   }
-  return (NULL);
+  return NULL;
 }
   
 ////////////////////////////////////
@@ -481,8 +480,8 @@ RadxMsg &RadxMsg::_copy(const RadxMsg &rhs)
 
 }
 
-///////////////
-// constructor
+///////////////////////////
+// Part default constructor
 
 RadxMsg::Part::Part()
 
@@ -495,7 +494,7 @@ RadxMsg::Part::Part()
 }
 
 /////////////////////////////
-// Copy constructor
+// Part copy constructor
 //
 
 RadxMsg::Part::Part(const Part &rhs)
@@ -506,8 +505,8 @@ RadxMsg::Part::Part(const Part &rhs)
   }
 }
 
-///////////////////////////
-// construct with message
+///////////////////////////////////
+// Part constructor with message
 
 RadxMsg::Part::Part(const string &name, size_t length, const void *data) :
         _name(name),
