@@ -83,10 +83,13 @@ public:
   typedef struct {
     
     Radx::si64 cookie;
-    Radx::si64 msgType;
-    Radx::si64 subType;
-    Radx::si64 nParts;
-    Radx::si64 spare[2];
+    Radx::si64 msgLen; // bytes
+    Radx::si64 spare64[2];
+
+    Radx::si32 msgType;
+    Radx::si32 subType;
+    Radx::si32 nParts;
+    Radx::si32 spare32[3];
     
   } MsgHdr_t;
 
@@ -104,7 +107,7 @@ public:
     Radx::si64 offset;
     Radx::si64 length;
     Radx::si64 paddedLength;
-    Radx::si64 spare[2];
+    Radx::si64 spare64[2];
     
   } PartHdr_t;
   
@@ -124,6 +127,51 @@ public:
   
   RadxMsg & operator=(const RadxMsg &rhs);
 
+  ///////////////////////////////////////////////////////////////
+  // clear everything -- header and parts.
+  //
+  // A convenience routine for clients who want to call setType()
+  // instead of setHdrAttr() before assembling a message.
+
+  void clearAll();
+
+  /////////////////////////////
+  // clear before adding parts.
+  //
+  // This initializes the number of parts to 0.
+  //
+  // It does NOT clear the header.
+
+  void clearParts();
+
+  //////////////////////////////////////////
+  // set the message header types
+
+  void setMsgType(int msgType) { _msgType = msgType; }
+  void setSubType(int subType) {_subType = subType; }
+
+  ////////////////////////////
+  // Add a part to the object.
+  // The part is added at the end of the part list.
+  
+  void addPart(int partType, size_t len, const void *data);
+  
+  /////////////////////////////////////
+  // assemble the parts into a message
+  // Returns pointer to the assembled message.
+  
+  void *assemble();
+
+  //////////////////////////////////
+  // get pointer to assembled buffer
+
+  inline void *assembledMsg() const { return _assembledMsg.getPtr(); }
+  
+  ///////////////////////////////
+  // length of assembled message
+  
+  inline size_t lengthAssembled() const { return _assembledMsg.getLen(); }
+  
   //////////////////////////
   // decode a message header
   //
@@ -154,7 +202,7 @@ public:
   //////////////////////////
   // get the number of parts
 
-  inline ssize_t getNParts() const { return _nParts; }
+  inline size_t getNParts() const { return _parts.size(); }
 
   ////////////////////////////////////////////////
   // does a part exist?
@@ -168,7 +216,7 @@ public:
   //
   // Returns pointer to part, NULL on failure.
 
-  Part *getPart(size_t index) const;
+  const Part *getPart(size_t index) const;
 
   ////////////////////////////////////////////////////////////
   // Get a part by type.
@@ -181,53 +229,7 @@ public:
   //
   // Returns pointer to the requested part, NULL on failure.
 
-  Part *getPartByType(int partType, int index = 0) const;
-  
-  //////////////////////////////////////////
-  // set the message header types
-
-  void setMsgType(int msgType) { _msgType = msgType; }
-  void setSubType(int subType) {_subType = subType; }
-
-  /////////////////////////////
-  // clear before adding parts.
-  //
-  // This initializes the number of parts to 0.
-  //
-  // It does NOT clear the header attributes set using the
-  // set() routines.
-
-  void clearParts();
-
-  ///////////////////////////////////////////////////////////////
-  // clear everything -- header and parts.
-  //
-  // A convenience routine for clients who want to call setType()
-  // instead of setHdrAttr() before assembling a message.
-
-  void clearAll();
-
-  ////////////////////////////
-  // Add a part to the object.
-  // The part is added at the end of the part list.
-  
-  void addPart(int partType, size_t len, const void *data);
-  
-  /////////////////////////////////////
-  // assemble the parts into a message
-  // Returns pointer to the assembled message.
-  
-  void *assemble();
-
-  //////////////////////////////////
-  // get pointer to assembled buffer
-
-  inline void *assembledMsg() const { return _assembledMsg.getPtr(); }
-  
-  ///////////////////////////////
-  // length of assembled message
-  
-  inline ssize_t lengthAssembled() const { return _assembledMsg.getLen(); }
+  Part *getPartByType(int partType, size_t index = 0) const;
   
   //////////////////////////////////////////
   // print out main header and parts headers
@@ -254,19 +256,27 @@ public:
   void printPartHeaders(ostream &out, const char *spacer,
 			const PartHeaderLabelMap &labels) const;
   
+  /////////////////////////////////////
   // debugging
 
   void setDebug(bool debugFlag = true) { _debug = debugFlag; }
 
+  /////////////////////////////////////
   // is swapping required?
 
   bool getSwap() const { return _swap; }
+
+  /////////////////////////////////////
+  // swap headers
+
+  static void swapMsgHdr(MsgHdr_t &hdr);
+  static void swapPartHdr(PartHdr_t &part);
 
 protected:
 
   // well known value - used to check for swapping
 
-  static const int _cookie = 1234567890;
+  static const Radx::si64 _cookie = 1234567898754321;
 
   // debugging
   
@@ -280,14 +290,14 @@ protected:
 
   int _msgType;
   int _subType;
-  int _nParts;
 
   // individual parts
   
   vector<Part *> _parts;
 
-  // assembled message
-  
+  // message
+
+  MsgHdr_t _msgHdr;
   RadxBuf _assembledMsg;
   
   // copy this object
@@ -296,16 +306,14 @@ protected:
   
 private:
 
-  // allocate the parts vector
-  
-  void _allocParts(size_t nParts);
-
 public:
 
   // inner class for message part
   
   class Part
   {
+
+    friend RadxMsg;
     
   public:
     
@@ -336,42 +344,18 @@ public:
     
     Part &operator=(const Part &rhs);
     
-    ////////////////////////////////////////////////////////////
-    // load part header from the part object
-    
-    void loadPartHdr(PartHdr_t &phdr);
-
-    ////////////////////////////////////////////////////////////
-    // load a part from an incoming message, which may
-    // be swapped.
-    //
-    // Returns 0 on success, -1 on error
-    // Error occurs if end of part is beyond end of message.
-    
-    int loadFromMsg(size_t partNum,
-                    const void *inMsg,
-                    size_t msgLen,
-                    bool swap);
-    
-    ////////////////////////////////////////////////////
-    // load a part from memory which is assumed to be in
-    // host byte order
-    
-    void loadFromMem(int partType,
-                     size_t len,
-                     const void *inMem);
-    
     //////////////////////////////////////////////////
-    // get the type, length, offset and buffer pointer
+    // get metadata
     
     inline int getPartType() const { return _partType; }
-    inline ssize_t getLength() const { return _length; }
-    inline ssize_t getPaddedLength() const { return _paddedLength; }
-    inline ssize_t getOffset() const { return _offset; }
+    inline size_t getLength() const { return _length; }
+    inline size_t getPaddedLength() const { return _paddedLength; }
+    inline size_t getOffset() const { return _offset; }
+
+    // get message components
+
+    inline const PartHdr_t &getPartHdr() const { return _partHdr; }
     inline const void *getBuf() const { return _rbuf.getPtr(); }
-    
-    // set offset
-    inline void setOffset(size_t offset) { _offset = offset; }
     
     // print header
     // If num is not specified, it is not printed
@@ -389,22 +373,52 @@ public:
   private:
 
     int _partType; // part type
-    ssize_t _length; // length of part data
-    ssize_t _paddedLength; // padded to even 8-bytes
-    ssize_t _offset; // offset in assembled message
+    size_t _length; // length of part data
+    size_t _paddedLength; // padded to even 8-bytes
+    size_t _offset; // offset in assembled message
+    
+    // buffer for part contents
     
     RadxBuf _rbuf;
-    
+
+    // message header
+
+    PartHdr_t _partHdr;
+
+    // copy method
+
     Part &_copy(const Part &rhs);
     
+    // set offset
+
+    inline void _setOffset(size_t offset) { _offset = offset; }
+    
+    // load part header for the part object
+    // call getPartHdr() to get the header afterwards
+    
+    void _loadPartHdr();
+
+    ////////////////////////////////////////////////////////////
+    // load a part from an incoming message, which may
+    // be swapped.
+    //
+    // Returns 0 on success, -1 on error
+    // Error occurs if end of part is beyond end of message.
+    
+    int _loadFromMsg(size_t partNum,
+                     const void *inMsg,
+                     size_t msgLen,
+                     bool swap);
+    
+    ////////////////////////////////////////////////////
+    // load a part from memory which is assumed to be in
+    // host byte order
+    
+    void _loadFromMem(int partType,
+                      size_t len,
+                      const void *inMem);
+    
   };
-
-  /////////////////////////////////////
-  // swap headers
-  /////////////////////////////////////
-
-  static void swapMsgHdr(MsgHdr_t &hdr);
-  static void swapPartHdr(PartHdr_t &part);
 
 };
 

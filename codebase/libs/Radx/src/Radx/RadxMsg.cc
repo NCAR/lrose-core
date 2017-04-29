@@ -121,163 +121,37 @@ RadxMsg &RadxMsg::_copy(const RadxMsg &rhs)
   
   _msgType = rhs._msgType;
   _subType = rhs._subType;
-  _nParts = rhs._nParts;
   
   // copy in the parts
   
-  for (ssize_t ii = 0; ii < _nParts; ii++) {
+  for (size_t ii = 0; ii < _parts.size(); ii++) {
     Part *part = new Part(*rhs._parts[ii]);
     _parts.push_back(part);
   }
 
   _assembledMsg = rhs._assembledMsg;
+  _msgHdr = rhs._msgHdr;
 
   return *this;
 
 }
 
-//////////////////////////
-// decode a message header
+///////////////////////////////////////////////////////////////
+// clear everything -- header and parts.
 //
-// This is used if you just want to peek at the header before
-// deciding how to handle the message.
-// 
-// Returns 0 on success, -1 on error
+// A convenience routine for clients who want to call setType()
+// instead of setHdrAttr() before assembling a message.
 
-int RadxMsg::decodeHeader(const void *inMsg, size_t msgLen)
-
+void RadxMsg::clearAll()
 {
 
-  // check validity of operation
-  
-  if (!inMsg) {
-    cerr << "ERROR - RadxMsg::decodeHeader" << endl;
-    cerr << "  null message" << endl;
-    return -1;
-  }
-  
-  if (msgLen < sizeof(MsgHdr_t)) {
-    cerr << "ERROR - RadxMsg::decodeHeader" << endl;
-    cerr << "  Message too short, len: " << msgLen << endl;
-    cerr << "  requiredLen: " << sizeof(MsgHdr_t) << endl;
-    return -1;
-  }
-  
-  // copy in header
-  
-  MsgHdr_t hdr;
-  memcpy(&hdr, inMsg, sizeof(MsgHdr_t));
-
-  // check for swapping
+  _msgType = -1;
+  _subType = -1;
   _swap = false;
-  if (hdr.cookie != _cookie) {
-    Radx::si64 cookie = hdr.cookie;
-    swapMsgHdr(hdr);
-    if (hdr.cookie != _cookie) {
-      // bad data
-      cerr << "ERROR - RadxMsg::decodeHeader" << endl;
-      cerr << "  Bad cookie: " << cookie << endl;
-      return -1;
-    }
-    _swap = true;
-  }
-  
-  _msgType = hdr.msgType;
-  _subType = hdr.subType;
-  _nParts = hdr.nParts;
-
-  return 0;
+  clearParts();
 
 }
 
-////////////////////////////////////////////////////
-// disassemble a message into parts, store in
-// RadxMsg object.
-//
-// If msgLen is provided, the parts are checked to make
-// sure they do not run over the end of the message.
-// 
-// If msgLen is set, checks that the msg is big enough
-//   to hold at least a MsgHdr_t. Otherwise, assumes
-//   that the message is big enough and blindly copies
-//   memory.
-//
-// Returns 0 on success, -1 on error
-
-int RadxMsg::disassemble(const void *inMsg, size_t msgLen)
-
-{
-
-  int status = decodeHeader(inMsg, msgLen);
-  if (status < 0) {
-    return -1;
-  }
-  
-  _allocParts(_nParts);
-  for (ssize_t ii = 0; ii < _nParts; ii++) {
-    if (_parts[ii]->loadFromMsg(ii, inMsg, msgLen, _swap)) {
-      printHeader(cerr, "  ");
-      return -1;
-    }
-  }
-  return 0;
-}
-
-////////////////////////////////////////////////
-// does a part exist?
-// returns the number of parts of the given type
-
-int RadxMsg::partExists(int partType) const
-
-{
-  int count = 0;
-  for (ssize_t ii = 0; ii < _nParts; ii++) {
-    if (_parts[ii]->getPartType() == partType) {
-      count++;
-    }
-  }
-  return count;
-}
-
-////////////////////////////////////////////
-// Get a part from the parts array, given
-// the index into the array.
-//
-// Returns pointer to part, NULL on failure.
-
-RadxMsg::Part *RadxMsg::getPart(size_t index) const
-  
-{
-  if ((int) index > _nParts - 1) {
-    return NULL;
-  }
-  return _parts[index];
-}
-
-////////////////////////////////////////////////////////////
-// get a part by type.
-//
-// If more than 1 part of this type exists, use index to
-// select the required one.
-//
-// Returns pointer to the requested part, NULL on failure.
-
-RadxMsg::Part *RadxMsg::getPartByType(int partType,
-                                      int index /* = 0*/ ) const
-  
-{
-  ssize_t count = 0;
-  for (ssize_t ii = 0; ii < _nParts; ii++) {
-    if (_parts[ii]->getPartType() == partType) {
-      if (count == index) {
-	return _parts[ii];
-      }
-      count++;
-    }
-  }
-  return NULL;
-}
-  
 /////////////////////////////
 // clear before adding parts.
 //
@@ -289,20 +163,12 @@ RadxMsg::Part *RadxMsg::getPartByType(int partType,
 void RadxMsg::clearParts()
 
 {
-  _nParts = 0;
-}
 
-///////////////////////////////////////////////////////////////
-// clear everything -- header and parts.
-//
-// A convenience routine for clients who want to call setType()
-// instead of setHdrAttr() before assembling a message.
+  for (size_t ii = 0; ii < _parts.size(); ii++) {
+    delete[] _parts[ii];
+  }
+  _parts.clear();
 
-void RadxMsg::clearAll()
-{
-  _msgType = -1;
-  _subType = -1;
-  _nParts = 0;
 }
 
 ////////////////////////////
@@ -315,9 +181,9 @@ void RadxMsg::clearAll()
 void RadxMsg::addPart(int partType, size_t len, const void *data)
 
 {
-  _allocParts(_nParts + 1);
-  _parts[_nParts]->loadFromMem(partType, len, data);
-  _nParts++;
+  Part *part = new Part;
+  part->_loadFromMem(partType, len, data);
+  _parts.push_back(part);
 }
 
 /////////////////////////////////////
@@ -340,7 +206,7 @@ void *RadxMsg::assemble()
   header.cookie = _cookie;
   header.msgType = _msgType;
   header.subType = _subType;
-  header.nParts = _nParts;
+  header.nParts = _parts.size();
   _assembledMsg.add(&header, sizeof(MsgHdr_t));
 
   // memcpy(_assembledMsg, &header, sizeof(MsgHdr_t));
@@ -348,21 +214,20 @@ void *RadxMsg::assemble()
   // compute data offset for each part
   // and load the part headers into the message
   
-  ssize_t offset = sizeof(MsgHdr_t);
-  offset += _nParts * sizeof(PartHdr_t);
+  size_t offset = sizeof(MsgHdr_t);
+  offset += _parts.size() * sizeof(PartHdr_t);
 
-  for (ssize_t ii = 0; ii < _nParts; ii++) {
+  for (size_t ii = 0; ii < _parts.size(); ii++) {
     Part *part = _parts[ii];
-    part->setOffset(offset);
+    part->_setOffset(offset);
     offset += part->getPaddedLength();
-    PartHdr_t phdr;
-    part->loadPartHdr(phdr);
-    _assembledMsg.add(&phdr, sizeof(PartHdr_t));
+    part->_loadPartHdr();
+    _assembledMsg.add(&part->getPartHdr(), sizeof(PartHdr_t));
   }
 
   // add the data for each part to the message
 
-  for (ssize_t ii = 0; ii < _nParts; ii++) {
+  for (size_t ii = 0; ii < _parts.size(); ii++) {
     Part *part = _parts[ii];
     _assembledMsg.add(part->getBuf(), part->getPaddedLength());
   }
@@ -371,6 +236,169 @@ void *RadxMsg::assemble()
 
 }
 
+//////////////////////////
+// decode a message header
+//
+// This is used if you just want to peek at the header before
+// deciding how to handle the message.
+//
+// Side effects:
+//  (1) Sets flag to indicate swapping
+//  (2) Sets _msgHdr
+//  (3) Sets _msgType and _subType.
+// 
+// Returns 0 on success, -1 on error
+
+int RadxMsg::decodeHeader(const void *inMsg, size_t msgLen)
+
+{
+
+  // clear header
+
+  memset(&_msgHdr, 0, sizeof(MsgHdr_t));
+  
+  // check validity of operation
+  
+  if (!inMsg) {
+    cerr << "ERROR - RadxMsg::decodeHeader" << endl;
+    cerr << "  null message" << endl;
+    return -1;
+  }
+  
+  if (msgLen < sizeof(MsgHdr_t)) {
+    cerr << "ERROR - RadxMsg::decodeHeader" << endl;
+    cerr << "  Message too short, len: " << msgLen << endl;
+    cerr << "  requiredLen: " << sizeof(MsgHdr_t) << endl;
+    return -1;
+  }
+  
+  // copy in header from message
+  
+  memcpy(&_msgHdr, inMsg, sizeof(MsgHdr_t));
+  
+  // check for swapping
+
+  _swap = false;
+  Radx::si64 cookie = _msgHdr.cookie;
+
+  if (cookie != _cookie) {
+    swapMsgHdr(_msgHdr);
+    if (_msgHdr.cookie != _cookie) {
+      // bad data
+      cerr << "ERROR - RadxMsg::decodeHeader" << endl;
+      cerr << "  Bad cookie: " << cookie << endl;
+      return -1;
+    }
+    _swap = true;
+  }
+  
+  // set types
+  
+  _msgType = _msgHdr.msgType;
+  _subType = _msgHdr.subType;
+  
+  return 0;
+
+}
+
+////////////////////////////////////////////////////
+// disassemble a message into parts, store in
+// RadxMsg object.
+//
+// If msgLen is provided, the parts are checked to make
+// sure they do not run over the end of the message.
+// 
+// If msgLen is set, checks that the msg is big enough
+//   to hold at least a MsgHdr_t. Otherwise, assumes
+//   that the message is big enough and blindly copies
+//   memory.
+//
+// Returns 0 on success, -1 on error
+
+int RadxMsg::disassemble(const void *inMsg, size_t msgLen)
+
+{
+  
+  // initialize
+
+  clearAll();
+  
+  // decode the header in the message
+  
+  int status = decodeHeader(inMsg, msgLen);
+  if (status < 0) {
+    return -1;
+  }
+
+  for (int ii = 0; ii < _msgHdr.nParts; ii++) {
+    Part *part = new Part;
+    if (part->_loadFromMsg(ii, inMsg, msgLen, _swap)) {
+      printHeader(cerr, "  ");
+      delete part;
+      return -1;
+    }
+    _parts.push_back(part);
+  }
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////
+// does a part exist?
+// returns the number of parts of the given type
+
+int RadxMsg::partExists(int partType) const
+
+{
+  int count = 0;
+  for (size_t ii = 0; ii < _parts.size(); ii++) {
+    if (_parts[ii]->getPartType() == partType) {
+      count++;
+    }
+  }
+  return count;
+}
+
+////////////////////////////////////////////
+// Get a part from the parts array, given
+// the index into the array.
+//
+// Returns pointer to part, NULL on failure.
+
+const RadxMsg::Part *RadxMsg::getPart(size_t index) const
+  
+{
+  if (index > _parts.size() - 1) {
+    return NULL;
+  }
+  return _parts[index];
+}
+
+////////////////////////////////////////////////////////////
+// get a part by type.
+//
+// If more than 1 part of this type exists, use index to
+// select the required one.
+//
+// Returns pointer to the requested part, NULL on failure.
+
+RadxMsg::Part *RadxMsg::getPartByType(int partType,
+                                      size_t index /* = 0*/ ) const
+  
+{
+  size_t count = 0;
+  for (size_t ii = 0; ii < _parts.size(); ii++) {
+    if (_parts[ii]->getPartType() == partType) {
+      if (count == index) {
+	return _parts[ii];
+      }
+      count++;
+    }
+  }
+  return NULL;
+}
+  
 //////////////////////////////////////////
 // print out main header and parts headers
 //
@@ -390,7 +418,7 @@ void RadxMsg::printHeader(ostream &out, const char *spacer) const
 
   out << spacer << "Message type: " << _msgType << endl;
   out << spacer << "        subType: " << _subType << endl;
-  out << spacer << "        nParts: " << _nParts << endl;
+  out << spacer << "        nParts: " << _parts.size() << endl;
 
 }
 
@@ -399,9 +427,9 @@ void RadxMsg::printHeader(ostream &out, const char *spacer) const
 
 void RadxMsg::printPartHeaders(ostream &out, const char *spacer) const
 {
-  for (ssize_t i = 0; i < getNParts(); i++) {
-    Part *part = getPart(i);
-    part->printHeader(out, spacer, i);
+  for (size_t ii = 0; ii < getNParts(); ii++) {
+    const Part *part = getPart(ii);
+    part->printHeader(out, spacer, ii);
   }
 }
 
@@ -412,27 +440,15 @@ void RadxMsg::printPartHeaders(ostream &out, const char *spacer) const
 void RadxMsg::printPartHeaders(ostream &out, const char *spacer,
                                const PartHeaderLabelMap &labels) const
 {
-  for (ssize_t i = 0; i < getNParts(); i++) {
-    Part *part = getPart(i);
+  for (size_t ii = 0; ii < getNParts(); ii++) {
+    const Part *part = getPart(ii);
     int id = part->getPartType();
     PartHeaderLabelMap::const_iterator pos = labels.find(id);
     if (pos != labels.end()) {
-      part->printHeader(out, spacer, pos->second, i);
+      part->printHeader(out, spacer, pos->second, ii);
     } else {
-      part->printHeader(out, spacer, i);
+      part->printHeader(out, spacer, ii);
     }
-  }
-}
-
-////////////////////////////////////////////////
-// allocate the buffer for the assembled message
-
-void RadxMsg::_allocParts(size_t nParts)
-  
-{
-  while (nParts > _parts.size()) {
-    Part *newPart = new Part;
-    _parts.push_back(newPart);
   }
 }
 
@@ -486,16 +502,25 @@ RadxMsg::Part::Part(int partType, size_t length, const void *data) :
         _partType(partType),
         _length(length),
         _offset(0)
+
 {
-  _paddedLength = ((_length / 8) + 1) * 8;
+
+  // add the data to the buffer
+  
   _rbuf.add(data, length);
+  
+  // compute padded length
+
+  _paddedLength = ((_length / 8) + 1) * 8;
+
+  // add extra bytes for padding, as required
+
   int nExtra = _paddedLength - _length;
   if (nExtra > 0) {
-    char *extra = new char[nExtra];
-    memset(extra, 0, nExtra);
-    _rbuf.add(extra, nExtra);
-    delete[] extra;
+    Radx::si64 zeros = 0;
+    _rbuf.add(&zeros, nExtra);
   }
+
 }
     
 //////////////
@@ -540,16 +565,16 @@ RadxMsg::Part &RadxMsg::Part::_copy(const Part &rhs)
 }
 
 ////////////////////////////////////////////////////////////
-// load part header from the paryt object
+// load part header for the Part
 
-void RadxMsg::Part::loadPartHdr(PartHdr_t &phdr)
+void RadxMsg::Part::_loadPartHdr()
 {
-  memset(&phdr, 0, sizeof(phdr));
-  phdr.partType = _partType;
-  phdr.offset = _offset;
-  phdr.length = _length;
-  phdr.length = _length;
-  phdr.paddedLength = _paddedLength;
+  memset(&_partHdr, 0, sizeof(_partHdr));
+  _partHdr.partType = _partType;
+  _partHdr.offset = _offset;
+  _partHdr.length = _length;
+  _partHdr.length = _length;
+  _partHdr.paddedLength = _paddedLength;
 }
   
 ////////////////////////////////////////////////////////////
@@ -558,10 +583,10 @@ void RadxMsg::Part::loadPartHdr(PartHdr_t &phdr)
 // Returns 0 on success, -1 on error
 // Error occurs if end of part is beyond end of message.
 
-int RadxMsg::Part::loadFromMsg(size_t partNum,
-                               const void *inMsg,
-                               size_t msgLen,
-                               bool swap)
+int RadxMsg::Part::_loadFromMsg(size_t partNum,
+                                const void *inMsg,
+                                size_t msgLen,
+                                bool swap)
   
 {
   
@@ -577,17 +602,15 @@ int RadxMsg::Part::loadFromMsg(size_t partNum,
   }
 
   Radx::ui08 *inBuf = (Radx::ui08 *) inMsg;
-  PartHdr_t phdr;
-  memcpy(&phdr, inBuf + offset, sizeof(PartHdr_t));
+  memcpy(&_partHdr, inBuf + offset, sizeof(PartHdr_t));
   if (swap) {
-    swapPartHdr(phdr);
+    swapPartHdr(_partHdr);
   }
 
-  _partType = phdr.partType;
-  _length = phdr.length;
+  _partType = _partHdr.partType;
+  _length = _partHdr.length;
   _paddedLength = ((_length / 8) + 1) * 8;
-  _offset = phdr.offset;
-  
+  _offset = _partHdr.offset;
 
   _rbuf.load(inBuf + _offset, _length);
 
@@ -597,18 +620,18 @@ int RadxMsg::Part::loadFromMsg(size_t partNum,
 
 ////////////////////////////////////////////////////////////
 // load a part from a memory buffer which is assumed to
-// be in host byte order
+// be in host byte order.
+// Used when assembling a message.
 
-void RadxMsg::Part::loadFromMem(int partType,
-                                size_t len,
-                                const void *inMem)
+void RadxMsg::Part::_loadFromMem(int partType,
+                                 size_t len,
+                                 const void *inMem)
 
 {
 
   _partType = partType;
   _length = len;
   _paddedLength = ((_length / 8) + 1) * 8;
-  
   _rbuf.load(inMem, _length);
   
 }
@@ -616,7 +639,8 @@ void RadxMsg::Part::loadFromMem(int partType,
 ///////////////
 // print header
 
-void RadxMsg::Part::printHeader(ostream &out, const char *spacer,
+void RadxMsg::Part::printHeader(ostream &out,
+                                const char *spacer,
                                 int num /* = -1*/ ) const
 {
   if (num >= 0) {
@@ -628,7 +652,8 @@ void RadxMsg::Part::printHeader(ostream &out, const char *spacer,
   out << spacer << "  offset: " << getOffset() << endl;
 }
 
-void RadxMsg::Part::printHeader(ostream &out, const char *spacer,
+void RadxMsg::Part::printHeader(ostream &out, 
+                                const char *spacer,
                                 const string &label,
                                 int num /* = -1*/ ) const
 {
