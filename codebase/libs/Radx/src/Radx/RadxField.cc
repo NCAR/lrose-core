@@ -36,6 +36,7 @@
 #include <Radx/RadxField.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxXml.hh>
+#include <Radx/ByteOrder.hh>
 #include <iostream>
 #include <cstdio>
 #include <cstring>
@@ -3253,46 +3254,123 @@ string RadxField::statsMethodToStr(StatsMethod_t method)
 }
 
 /////////////////////////////////////////////////////////
-// convert metadata to XML
+// serialize into a RadxMsg
 
-void RadxField::convertToXml(string &xml, int level /* = 0 */)  const
+void RadxField::serialize(RadxMsg &msg)
+  
+{
+
+  // init
+
+  msg.clearAll();
+  msg.setMsgType(RadxMsg::RadxFieldMsgType);
+
+  // add metadata strings as xml part
+  // include null at string end
+
+  string xml;
+  _loadMetaStringsToXml(xml);
+  msg.addPart(_metaStringsPartId, xml.c_str(), xml.size() + 1);
+
+  // add metadata numbers
+
+  _loadMetaNumbersToMsg();
+  msg.addPart(_metaNumbersPartId, &_metaNumbers, sizeof(msgMetaNumbers_t));
+
+  // add field data
+
+  msg.addPart(_dataPartId, _data, _nPoints * _byteWidth);
+
+}
+
+/////////////////////////////////////////////////////////
+// deserialize from a RadxMsg
+// return 0 on success, -1 on failure
+
+int RadxField::deserialize(const RadxMsg &msg)
+  
+{
+  
+  // initialize object
+
+  _init();
+
+  // check type
+
+  if (msg.getMsgType() != RadxMsg::RadxFieldMsgType) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxField::deserialize" << endl;
+    cerr << "  incorrect message type" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // get the metadata strings
+
+  const RadxMsg::Part *metaStringPart = msg.getPartByType(_metaStringsPartId);
+  if (metaStringPart == NULL) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxField::deserialize" << endl;
+    cerr << "  No metadata string part in message" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+  if (_setMetaStringsFromXml((char *) metaStringPart->getBuf(),
+                             metaStringPart->getLength())) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxField::deserialize" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "  Bad string XML for metadata: " << endl;
+    string bufStr((char *) metaStringPart->getBuf(),
+                  metaStringPart->getLength());
+    cerr << "  " << bufStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // get the metadata numbers
+  
+  const RadxMsg::Part *metaNumsPart = msg.getPartByType(_metaNumbersPartId);
+  if (metaNumsPart == NULL) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxField::deserialize" << endl;
+    cerr << "  No metadata numbers part in message" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+  if (_setMetaNumbersFromMsg((msgMetaNumbers_t *) metaNumsPart->getBuf(),
+                             metaStringPart->getLength())) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxField::deserialize" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// convert string metadata to XML
+
+void RadxField::_loadMetaStringsToXml(string &xml, int level /* = 0 */)  const
   
 {
 
   xml.clear();
   xml += RadxXml::writeStartTag("RadxField", level);
-
+  
   xml += RadxXml::writeString("name", level + 1, _name);
   xml += RadxXml::writeString("longName", level + 1, _longName);
   xml += RadxXml::writeString("standardName", level + 1, _standardName);
   xml += RadxXml::writeString("units", level + 1, _units);
   xml += RadxXml::writeString("legendXml", level + 1, _legendXml);
   xml += RadxXml::writeString("thresholdingXml", level + 1, _thresholdingXml);
-
-  xml += RadxXml::writeString("dataType", level + 1,
-                              Radx::dataTypeToStr(_dataType));
-  xml += RadxXml::writeInt("byteWidth", level + 1, _byteWidth);
-
-  xml += RadxXml::writeDouble("samplingRatio", level + 1, _samplingRatio);
-
-  xml += RadxXml::writeBoolean("fieldFolds", level + 1, _fieldFolds);
-  xml += RadxXml::writeDouble("foldLimitLower", level + 1, _foldLimitLower);
-  xml += RadxXml::writeDouble("foldLimitUpper", level + 1, _foldLimitUpper);
-  xml += RadxXml::writeDouble("foldRange", level + 1, _foldRange);
-
-  xml += RadxXml::writeBoolean("isDiscrete", level + 1, _isDiscrete);
-
-  xml += RadxXml::writeDouble("minVal", level + 1, _minVal);
-  xml += RadxXml::writeDouble("maxVal", level + 1, _maxVal);
-
-  xml += RadxXml::writeDouble("missingFl64", level + 1, _missingFl64);
-  xml += RadxXml::writeDouble("missingFl32", level + 1, _missingFl32);
-  xml += RadxXml::writeInt("missingSi32", level + 1, _missingSi32);
-  xml += RadxXml::writeInt("missingSi16", level + 1, _missingSi16);
-  xml += RadxXml::writeInt("missingSi08", level + 1, _missingSi08);
-
   xml += RadxXml::writeString("thresholdFieldName", level + 1, _thresholdFieldName);
-  xml += RadxXml::writeDouble("thresholdValue", level + 1, _thresholdValue);
 
   xml += RadxXml::writeEndTag("RadxField", level);
 
@@ -3300,81 +3378,192 @@ void RadxField::convertToXml(string &xml, int level /* = 0 */)  const
 }
 
 /////////////////////////////////////////////////////////
-// set metadata from XML
+// set metadata strings from XML
 // returns 0 on success, -1 on failure
 
-int RadxField::setFromXml(const string &xml)
-  
+int RadxField::_setMetaStringsFromXml(const char *xml,
+                                      size_t bufLen)
+
 {
 
-  _init();
+  // check for NULL
+
+  if (xml[bufLen - 1] != ' ') {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxField::_setMetaStringsFromXml" << endl;
+    cerr << "  XML string not null terminated" << endl;
+    string xmlStr(xml, bufLen);
+    cerr << "  " << xmlStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;    
+  }
+
+  string xmlStr(xml);
   
-  int iret = 0;
   string contents;
-  iret |= RadxXml::readString(xml, "RadxField", contents);
+  if (RadxXml::readString(xmlStr, "RadxField", contents)) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxField::_setMetaStringsFromXml" << endl;
+    cerr << "  XML not delimited by 'RadxField' tags" << endl;
+    cerr << "  " << xmlStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;
+  }
 
-  iret |= RadxXml::readString(contents, "name", _name);
-  iret |= RadxXml::readString(contents, "longName", _longName);
-  iret |= RadxXml::readString(contents, "standardName", _standardName);
-  iret |= RadxXml::readString(contents, "units", _units);
-  iret |= RadxXml::readString(contents, "legendXml", _legendXml);
-  iret |= RadxXml::readString(contents, "thresholdingXml", _thresholdingXml);
+  int iret = 0;
+  vector<string> missingTags;
+  if (RadxXml::readString(contents, "name", _name)) {
+    missingTags.push_back("name");
+    iret = -1;
+  }
+  if (RadxXml::readString(contents, "longName", _longName)) {
+    missingTags.push_back("longName");
+    iret = -1;
+  }
+  if (RadxXml::readString(contents, "standardName", _standardName)) {
+    missingTags.push_back("standardName");
+    iret = -1;
+  }
+  if (RadxXml::readString(contents, "units", _units)) {
+    missingTags.push_back("units");
+    iret = -1;
+  }
+  if (RadxXml::readString(contents, "legendXml", _legendXml)) {
+    missingTags.push_back("legendXml");
+    iret = -1;
+  }
+  if (RadxXml::readString(contents, "thresholdingXml", _thresholdingXml)) {
+    missingTags.push_back("thresholdingXml");
+    iret = -1;
+  }
+  if (RadxXml::readString(contents, "thresholdFieldName", _thresholdFieldName)) {
+    missingTags.push_back("thresholdFieldName");
+    iret = -1;
+  }
 
-  string dataTypeStr;
-  iret |= RadxXml::readString(contents, "dataType", dataTypeStr);
-  _dataType = Radx::dataTypeFromStr(dataTypeStr);
-  iret |= RadxXml::readInt(contents, "byteWidth", _byteWidth);
-
-  iret |= RadxXml::readDouble(contents, "samplingRatio", _samplingRatio);
+  if (iret) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxField::_setMetaStringsFromXml" << endl;
+    cerr << "  Tags missing from Xml str:" << endl;
+    cerr << "  " << xmlStr << endl;
+    for (size_t ii = 0; ii < missingTags.size(); ii++) {
+      cerr << "    missing tag: " << missingTags[ii] << endl;
+    }
+    cerr << "=======================================" << endl;
+    return -1;
+  }
   
-  iret |= RadxXml::readBoolean(contents, "fieldFolds", _fieldFolds);
-  iret |= RadxXml::readDouble(contents, "foldLimitLower", _foldLimitLower);
-  iret |= RadxXml::readDouble(contents, "foldLimitUpper", _foldLimitUpper);
-  iret |= RadxXml::readDouble(contents, "foldRange", _foldRange);
-
-  iret |= RadxXml::readBoolean(contents, "isDiscrete", _isDiscrete);
-
-  iret |= RadxXml::readDouble(contents, "minVal", _minVal);
-  iret |= RadxXml::readDouble(contents, "maxVal", _maxVal);
-
-  iret |= RadxXml::readDouble(contents, "missingFl64", _missingFl64);
-  iret |= RadxXml::readFloat(contents, "missingFl32", _missingFl32);
-
-  int ival;
-  iret |= RadxXml::readInt(contents, "missingSi32", ival);
-  _missingSi32 = ival;
-  iret |= RadxXml::readInt(contents, "missingSi16", ival);
-  _missingSi16 = ival;
-  iret |= RadxXml::readInt(contents, "missingSi08", ival);
-  _missingSi08 = ival;
-
-  iret |= RadxXml::readString(contents, "thresholdFieldName", _thresholdFieldName);
-  iret |= RadxXml::readDouble(contents, "thresholdValue", _thresholdValue);
-
   return iret;
 
 }
 
 /////////////////////////////////////////////////////////
-// serialize into a RadxBuf
+// load the meta number to the message struct
 
-void RadxField::serialize(RadxBuf &buf)
+void RadxField::_loadMetaNumbersToMsg()
   
 {
 
+  // clear
+
+  memset(&_metaNumbers, 0, sizeof(_metaNumbers));
+  
+  // set fl64
+
+  _metaNumbers.startRangeKm = _startRangeKm;
+  _metaNumbers.gateSpacingKm = _gateSpacingKm;
+  _metaNumbers.scale = _scale;
+  _metaNumbers.offset = _offset;
+  _metaNumbers.samplingRatio = _samplingRatio;
+  _metaNumbers.foldLimitLower = _foldLimitLower;
+  _metaNumbers.foldLimitUpper = _foldLimitUpper;
+  _metaNumbers.foldRange = _foldRange;
+  _metaNumbers.minVal = _minVal;
+  _metaNumbers.maxVal = _maxVal;
+  _metaNumbers.missingFl64 = _missingFl64;
+  _metaNumbers.thresholdValue = _thresholdValue;
+
+  // set fl32
+
+  _metaNumbers.missingFl32 = _missingFl32;
+
+  // set si32
+
+  _metaNumbers.rangeGeomSet = _rangeGeomSet;
+  _metaNumbers.nGates = _nPoints;
+  _metaNumbers.dataType = _dataType;
+  _metaNumbers.byteWidth = _byteWidth;
+  _metaNumbers.fieldFolds = _fieldFolds;
+  _metaNumbers.isDiscrete = _isDiscrete;
+  _metaNumbers.missingSi32 = _missingSi32;
+  _metaNumbers.missingSi16 = _missingSi16;
+  _metaNumbers.missingSi08 = _missingSi08;
 
 }
 
 /////////////////////////////////////////////////////////
-// deserialize from a RadxBuf
-// return 0 on success, -1 on failure
+// set the meta number data from the message struct
 
-int RadxField::deserialize(const RadxBuf &buf)
+int RadxField::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                                      size_t bufLen)
   
 {
+
+  // check size
+
+  if (bufLen != sizeof(msgMetaNumbers_t)) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxField::_setMetaNumbersFromMsg" << endl;
+    cerr << "  Incorrect message size: " << bufLen << endl;
+    cerr << "  Should be: " << sizeof(msgMetaNumbers_t) << endl;
+    return -1;
+  }
+
+  // copy into local struct
+  
+  _metaNumbers = *metaNumbers;
+
+  // set members
+
+  setRangeGeom(_metaNumbers.startRangeKm,
+               _metaNumbers.gateSpacingKm);
+
+  clearPacking();
+  addToPacking(_metaNumbers.nGates);
+  
+  _scale = _metaNumbers.scale;
+  _offset = _metaNumbers.offset;
+  _samplingRatio = _metaNumbers.samplingRatio;
+  _foldLimitLower = _metaNumbers.foldLimitLower;
+  _foldLimitUpper = _metaNumbers.foldLimitUpper;
+  _foldRange = _metaNumbers.foldRange;
+  _minVal = _metaNumbers.minVal;
+  _maxVal = _metaNumbers.maxVal;
+  _missingFl64 = _metaNumbers.missingFl64;
+  _thresholdValue = _metaNumbers.thresholdValue;
+  
+  _missingFl32 = _metaNumbers.missingFl32;
+  
+  _rangeGeomSet = _metaNumbers.rangeGeomSet;
+  _dataType = (Radx::DataType_t) _metaNumbers.dataType;
+  _byteWidth = _metaNumbers.byteWidth;
+  _fieldFolds = _metaNumbers.fieldFolds;
+  _isDiscrete = _metaNumbers.isDiscrete;
+  _missingSi32 = _metaNumbers.missingSi32;
+  _missingSi16 = (Radx::si16) _metaNumbers.missingSi16;
+  _missingSi08 = (Radx::si08) _metaNumbers.missingSi08;
 
   return 0;
 
 }
 
+/////////////////////////////////////////////////////////
+// swap meta numbers
+
+void RadxField::_swapMetaNumbers(msgMetaNumbers_t &meta)
+{
+  ByteOrder::swap64(&meta.scale, 16 * sizeof(Radx::si64));
+  ByteOrder::swap32(&meta.missingFl32, 16 * sizeof(Radx::si32));
+}
+          
 

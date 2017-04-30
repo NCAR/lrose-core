@@ -72,6 +72,22 @@ class RadxMsg
 
 public:
 
+  // message types
+
+  typedef enum {
+    RadxVolMsgType = 222001,
+    RadxPlatformMsgType = 222002,
+    RadxSweepMsgType = 222003,
+    RadxRayMsgType = 222004,
+    RadxGeorefMsgType = 222005,
+    RadxCfactorsMsgType = 222006,
+    RadxFieldMsgType = 222007,
+    RadxEventMsgType = 222008,
+    RadxRcalibMsgType = 222009
+  } RadxMsgType_t;
+  
+  // forward declaration
+
   class Part;
 
   // message header struct - for assembled messages
@@ -154,7 +170,7 @@ public:
   // Add a part to the object.
   // The part is added at the end of the part list.
   
-  void addPart(int partType, size_t len, const void *data);
+  void addPart(int partType, const void *data, size_t length);
   
   /////////////////////////////////////
   // assemble the parts into a message
@@ -272,11 +288,11 @@ public:
   static void swapMsgHdr(MsgHdr_t &hdr);
   static void swapPartHdr(PartHdr_t &part);
 
-protected:
-
   // well known value - used to check for swapping
 
-  static const Radx::si64 _cookie = 1234567898754321;
+  static const Radx::si64 COOKIE = 1234567898754321;
+
+protected:
 
   // debugging
   
@@ -331,7 +347,7 @@ public:
 
     // construct with data
 
-    Part(int partType, size_t length, const void *data);
+    Part(int partType, const void *data, size_t length);
     
     //////////////
     // destructor

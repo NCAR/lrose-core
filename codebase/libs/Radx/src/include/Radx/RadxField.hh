@@ -41,6 +41,7 @@
 #include <Radx/RadxRangeGeom.hh>
 #include <Radx/RadxPacking.hh>
 #include <Radx/RadxBuf.hh>
+#include <Radx/RadxMsg.hh>
 #include <Radx/RadxRemap.hh>
 using namespace std;
 
@@ -993,23 +994,14 @@ public:
   /// \name Serialization:
   //@{
 
-  /// convert metadata to XML
-
-  void convertToXml(string &xml, int level = 0) const;
+  // serialize into a RadxMsg
   
-  /// set metadata from XML
-  /// returns 0 on success, -1 on failure
-
-  int setFromXml(const string &xml);
+  void serialize(RadxMsg &msg);
   
-  // serialize into a RadxBuf
-  
-  void serialize(RadxBuf &buf);
-  
-  // deserialize from a RadxBuf
+  // deserialize from a RadxMsg
   // return 0 on success, -1 on failure
 
-  int deserialize(const RadxBuf &buf);
+  int deserialize(const RadxMsg &msg);
 
   //@}
 
@@ -1121,6 +1113,75 @@ private:
                               const vector<const RadxField *> &fieldsIn,
                               Radx::fl64 *data);
 
+  /////////////////////////////////////////////////
+  // serialization
+  /////////////////////////////////////////////////
+
+  static const int _metaStringsPartId = 1;
+  static const int _metaNumbersPartId = 2;
+  static const int _dataPartId = 3;
+  
+  // struct for metadata numbers in messages
+  // strings not included - they are passed as XML
+  
+  typedef struct {
+
+    Radx::fl64 startRangeKm;
+    Radx::fl64 gateSpacingKm;
+    Radx::fl64 scale;
+    Radx::fl64 offset;
+    Radx::fl64 samplingRatio;
+    Radx::fl64 foldLimitLower;
+    Radx::fl64 foldLimitUpper;
+    Radx::fl64 foldRange;
+    Radx::fl64 minVal;
+    Radx::fl64 maxVal;
+    Radx::fl64 missingFl64;
+    Radx::fl64 thresholdValue;
+    Radx::fl64 spareFl64[4];
+  
+    Radx::fl32 missingFl32;
+    Radx::fl32 spareFl32[1];
+    
+    Radx::si32 rangeGeomSet;
+    Radx::si32 nGates;
+    Radx::si32 dataType;
+    Radx::si32 byteWidth;
+    Radx::si32 fieldFolds;
+    Radx::si32 isDiscrete;
+    Radx::si32 missingSi32;
+    Radx::si32 missingSi16;
+    Radx::si32 missingSi08;
+    Radx::si32 spareSi32[5];
+
+  } msgMetaNumbers_t;
+
+  msgMetaNumbers_t _metaNumbers;
+  
+  /// convert metadata to XML
+
+  void _loadMetaStringsToXml(string &xml, int level = 0) const;
+  
+  /// set metadata from XML
+  /// returns 0 on success, -1 on failure
+
+  int _setMetaStringsFromXml(const char *xml, 
+                             size_t bufLen);
+
+  /// load meta numbers to message struct
+  
+  void _loadMetaNumbersToMsg();
+  
+  /// set the meta number data from the message struct
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                             size_t bufLen);
+  
+  /// swap meta numbers
+  
+  static void _swapMetaNumbers(msgMetaNumbers_t &msgMetaNumbers);
+          
 };
 
 #endif

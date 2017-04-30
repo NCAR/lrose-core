@@ -178,11 +178,11 @@ void RadxMsg::clearParts()
 //
 // The buffer must be in BE byte order.
 
-void RadxMsg::addPart(int partType, size_t len, const void *data)
+void RadxMsg::addPart(int partType, const void *data, size_t length)
 
 {
   Part *part = new Part;
-  part->_loadFromMem(partType, len, data);
+  part->_loadFromMem(partType, length, data);
   _parts.push_back(part);
 }
 
@@ -203,7 +203,7 @@ void *RadxMsg::assemble()
 
   MsgHdr_t header;
   memset(&header, 0, sizeof(MsgHdr_t));
-  header.cookie = _cookie;
+  header.cookie = COOKIE;
   header.msgType = _msgType;
   header.subType = _subType;
   header.nParts = _parts.size();
@@ -281,9 +281,9 @@ int RadxMsg::decodeHeader(const void *inMsg, size_t msgLen)
   _swap = false;
   Radx::si64 cookie = _msgHdr.cookie;
 
-  if (cookie != _cookie) {
+  if (cookie != COOKIE) {
     swapMsgHdr(_msgHdr);
-    if (_msgHdr.cookie != _cookie) {
+    if (_msgHdr.cookie != COOKIE) {
       // bad data
       cerr << "ERROR - RadxMsg::decodeHeader" << endl;
       cerr << "  Bad cookie: " << cookie << endl;
@@ -460,7 +460,8 @@ void RadxMsg::printPartHeaders(ostream &out, const char *spacer,
 
 void RadxMsg::swapMsgHdr(MsgHdr_t &hdr)
 {
-  ByteOrder::swap64(&hdr, sizeof(MsgHdr_t));
+  ByteOrder::swap64(&hdr.cookie, 4 * sizeof(Radx::si64));
+  ByteOrder::swap32(&hdr.msgType, 6 * sizeof(Radx::si32));
 }
 
 // swap part header
@@ -498,7 +499,7 @@ RadxMsg::Part::Part(const Part &rhs)
 // Part constructor given data.
 // Buffer contains padded length.
 
-RadxMsg::Part::Part(int partType, size_t length, const void *data) :
+RadxMsg::Part::Part(int partType, const void *data, size_t length) :
         _partType(partType),
         _length(length),
         _offset(0)
