@@ -49,8 +49,8 @@ using namespace std;
 /////////////////////////////////////////////////////////
 // RadxField constructor
 
-RadxField::RadxField(const string &name,
-                     const string &units) :
+RadxField::RadxField(const string &name /*= "not-set" */,
+                     const string &units /* = "" */) :
         _name(name),
         _units(units)
   
@@ -3337,17 +3337,88 @@ int RadxField::deserialize(const RadxMsg &msg)
     cerr << "=======================================" << endl;
     cerr << "ERROR - RadxField::deserialize" << endl;
     cerr << "  No metadata numbers part in message" << endl;
+    cerr << "  Field name: " << _name << endl;
     msg.printHeader(cerr, "  ");
     cerr << "=======================================" << endl;
     return -1;
   }
   if (_setMetaNumbersFromMsg((msgMetaNumbers_t *) metaNumsPart->getBuf(),
-                             metaStringPart->getLength())) {
+                             metaNumsPart->getLength(),
+                             msg.getSwap())) {
     cerr << "=======================================" << endl;
     cerr << "ERROR - RadxField::deserialize" << endl;
+    cerr << "  Field name: " << _name << endl;
     msg.printHeader(cerr, "  ");
     cerr << "=======================================" << endl;
     return -1;
+  }
+
+  // get the data part
+
+  const RadxMsg::Part *dataPart = msg.getPartByType(_dataPartId);
+  if (dataPart == NULL) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxField::deserialize" << endl;
+    cerr << "  No data part in message" << endl;
+    cerr << "  Field name: " << _name << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+  
+  // check the length
+
+  size_t nGates = _nPoints;
+  size_t requiredLen = nGates * _byteWidth;
+  if (dataPart->getLength() != requiredLen) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxField::deserialize" << endl;
+    cerr << "  Incorrect field len (nbytes): " << dataPart->getLength() << endl;
+    cerr << "  Should be: " << requiredLen << endl;
+    cerr << "  Field name: " << _name << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // add field data
+
+  clearData();
+
+  switch (_dataType) {
+    case Radx::FL64: {
+      addDataFl64(nGates, (const Radx::fl64 *) dataPart->getBuf());
+      if (msg.getSwap()) {
+        ByteOrder::swap64((Radx::fl64 *) _data, requiredLen);
+      }
+      break;
+    }
+    case Radx::FL32: {
+      addDataFl32(nGates, (const Radx::fl32 *) dataPart->getBuf());
+      if (msg.getSwap()) {
+        ByteOrder::swap32((Radx::fl32 *) _data, requiredLen);
+      }
+      break;
+    }
+    case Radx::SI32: {
+      addDataSi32(nGates, (const Radx::si32 *) dataPart->getBuf());
+      if (msg.getSwap()) {
+        ByteOrder::swap32((Radx::si32 *) _data, requiredLen);
+      }
+      break;
+    }
+    case Radx::SI16: {
+      addDataSi16(nGates, (const Radx::si16 *) dataPart->getBuf());
+      if (msg.getSwap()) {
+        ByteOrder::swap16((Radx::si16 *) _data, requiredLen);
+      }
+      break;
+    }
+    case Radx::SI08:
+    default: {
+      addDataSi08(nGates, (const Radx::si08 *) dataPart->getBuf());
+      break;
+    }
   }
 
   return 0;
@@ -3388,7 +3459,7 @@ int RadxField::_setMetaStringsFromXml(const char *xml,
 
   // check for NULL
 
-  if (xml[bufLen - 1] != ' ') {
+  if (xml[bufLen - 1] != '\0') {
     cerr << "=======================================" << endl;
     cerr << "ERROR - RadxField::_setMetaStringsFromXml" << endl;
     cerr << "  XML string not null terminated" << endl;
@@ -3505,7 +3576,8 @@ void RadxField::_loadMetaNumbersToMsg()
 // set the meta number data from the message struct
 
 int RadxField::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
-                                      size_t bufLen)
+                                      size_t bufLen,
+                                      bool swap)
   
 {
 
@@ -3522,6 +3594,12 @@ int RadxField::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
   // copy into local struct
   
   _metaNumbers = *metaNumbers;
+
+  // swap as needed
+
+  if (swap) {
+    _swapMetaNumbers(_metaNumbers); 
+  }
 
   // set members
 

@@ -112,8 +112,8 @@ public:
 
   /// Constructor
   
-  RadxField(const string &name,
-            const string &units);
+  RadxField(const string &name = "not-set",
+            const string &units = "");
   
   /// Copy constructor
   
@@ -1176,7 +1176,8 @@ private:
   /// returns 0 on success, -1 on failure
   
   int _setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
-                             size_t bufLen);
+                             size_t bufLen,
+                             bool swap);
   
   /// swap meta numbers
   
