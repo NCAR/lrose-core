@@ -39,6 +39,7 @@
 #include <Radx/RadxCfactors.hh>
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxXml.hh>
+#include <Radx/ByteOrder.hh>
 #include <iostream>
 #include <cstring>
 #include <cstdio>
@@ -1762,6 +1763,368 @@ void RadxRay::deleteIfUnused(const RadxRay *ray)
 }
 
 /////////////////////////////////////////////////////////
+// serialize into a RadxMsg
+
+void RadxRay::serialize(RadxMsg &msg)
+  
+{
+
+  // init
+
+  msg.clearAll();
+  msg.setMsgType(RadxMsg::RadxRayMsgType);
+
+  // add metadata strings as xml part
+  // include null at string end
+  
+  string xml;
+  _loadMetaStringsToXml(xml);
+  msg.addPart(_metaStringsPartId, xml.c_str(), xml.size() + 1);
+
+  // add metadata numbers
+
+  _loadMetaNumbersToMsg();
+  msg.addPart(_metaNumbersPartId, &_metaNumbers, sizeof(msgMetaNumbers_t));
+
+  // add field data
+
+  for (size_t ii = 0; ii < _fields.size(); ii++) {
+
+    // get field
+
+    RadxField *field = _fields[ii];
+
+    // serialize
+
+    RadxMsg fieldMsg(RadxMsg::RadxFieldMsgType);
+    field->serialize(fieldMsg);
+    fieldMsg.assemble();
+    msg.addPart(_fieldPartId,
+                fieldMsg.assembledMsg(), 
+                fieldMsg.lengthAssembled());
+
+  } // ifield
+
+}
+
+/////////////////////////////////////////////////////////
+// deserialize from a RadxMsg
+// return 0 on success, -1 on failure
+
+int RadxRay::deserialize(const RadxMsg &msg)
+  
+{
+  
+  // initialize object
+
+  _init();
+
+  // check type
+
+  if (msg.getMsgType() != RadxMsg::RadxRayMsgType) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRay::deserialize" << endl;
+    cerr << "  incorrect message type" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // get the metadata strings
+
+  const RadxMsg::Part *metaStringPart = msg.getPartByType(_metaStringsPartId);
+  if (metaStringPart == NULL) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRay::deserialize" << endl;
+    cerr << "  No metadata string part in message" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+  if (_setMetaStringsFromXml((char *) metaStringPart->getBuf(),
+                             metaStringPart->getLength())) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRay::deserialize" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "  Bad string XML for metadata: " << endl;
+    string bufStr((char *) metaStringPart->getBuf(),
+                  metaStringPart->getLength());
+    cerr << "  " << bufStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // get the metadata numbers
+  
+  const RadxMsg::Part *metaNumsPart = msg.getPartByType(_metaNumbersPartId);
+  if (metaNumsPart == NULL) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRay::deserialize" << endl;
+    cerr << "  No metadata numbers part in message" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+  if (_setMetaNumbersFromMsg((msgMetaNumbers_t *) metaNumsPart->getBuf(),
+                             metaNumsPart->getLength(),
+                             msg.getSwap())) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRay::deserialize" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // add fields
+
+  size_t nFields = msg.partExists(_fieldPartId);
+  for (size_t ifield = 0; ifield < nFields; ifield++) {
+    
+    // get field part
+
+    const RadxMsg::Part *fieldPart =
+      msg.getPartByType(_fieldPartId, ifield);
+
+    // create a message from the field part
+
+    RadxMsg fieldMsg;
+    fieldMsg.disassemble(fieldPart->getBuf(), fieldPart->getLength());
+    
+    // create a field, dserialize from the message
+    
+    RadxField *field = new RadxField;
+    if (field->deserialize(fieldMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxRay::deserialize" << endl;
+      cerr << "  Adding field num: " << ifield << endl;
+      fieldMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      delete field;
+      return -1;
+    }
+
+    // add the field
+
+    addField(field);
+
+  } // ifield
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// convert string metadata to XML
+
+void RadxRay::_loadMetaStringsToXml(string &xml, int level /* = 0 */)  const
+  
+{
+  xml.clear();
+  xml += RadxXml::writeStartTag("RadxRay", level);
+  xml += RadxXml::writeString("scanName", level + 1, _scanName);
+  xml += RadxXml::writeEndTag("RadxRay", level);
+}
+
+/////////////////////////////////////////////////////////
+// set metadata strings from XML
+// returns 0 on success, -1 on failure
+
+int RadxRay::_setMetaStringsFromXml(const char *xml,
+                                    size_t bufLen)
+
+{
+
+  // check for NULL
+  
+  if (xml[bufLen - 1] != '\0') {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRay::_setMetaStringsFromXml" << endl;
+    cerr << "  XML string not null terminated" << endl;
+    string xmlStr(xml, bufLen);
+    cerr << "  " << xmlStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;    
+  }
+
+  string xmlStr(xml);
+  string contents;
+
+  if (RadxXml::readString(xmlStr, "RadxRay", contents)) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRay::_setMetaStringsFromXml" << endl;
+    cerr << "  XML not delimited by 'RadxRay' tags" << endl;
+    cerr << "  " << xmlStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  if (RadxXml::readString(contents, "scanName", _scanName)) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRay::_setMetaStringsFromXml" << endl;
+    cerr << "  Cannot find 'scanName' tag" << endl;
+    cerr << "  " << xmlStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// load the meta number to the message struct
+
+void RadxRay::_loadMetaNumbersToMsg()
+  
+{
+
+  // clear
+
+  memset(&_metaNumbers, 0, sizeof(_metaNumbers));
+  
+  // set 64 bit values
+
+  _metaNumbers.startRangeKm = _startRangeKm;
+  _metaNumbers.gateSpacingKm = _gateSpacingKm;
+  _metaNumbers.timeSecs = _timeSecs;
+  _metaNumbers.nanoSecs = _nanoSecs;
+  _metaNumbers.az = _az;
+  _metaNumbers.elev = _elev;
+  _metaNumbers.fixedAngle = _fixedAngle;
+  _metaNumbers.targetScanRate = _targetScanRate;
+  _metaNumbers.trueScanRate = _trueScanRate;
+  _metaNumbers.angleRes = _angleRes;
+  _metaNumbers.pulseWidthUsec = _pulseWidthUsec;
+  _metaNumbers.prtSec = _prtSec;
+  _metaNumbers.prtRatio = _prtRatio;
+  _metaNumbers.nyquistMps = _nyquistMps;
+  _metaNumbers.unambigRangeKm = _unambigRangeKm;
+  _metaNumbers.measXmitPowerDbmH = _measXmitPowerDbmH;
+  _metaNumbers.measXmitPowerDbmV = _measXmitPowerDbmV;
+  _metaNumbers.estimatedNoiseDbmHc = _estimatedNoiseDbmHc;
+  _metaNumbers.estimatedNoiseDbmVc = _estimatedNoiseDbmVc;
+  _metaNumbers.estimatedNoiseDbmHx = _estimatedNoiseDbmHx;
+  _metaNumbers.estimatedNoiseDbmVx = _estimatedNoiseDbmVx;
+  _metaNumbers.nGates = _nGates;
+
+  // set 32-bit values
+
+  _metaNumbers.volNum = _volNum;
+  _metaNumbers.sweepNum = _sweepNum;
+  _metaNumbers.calibIndex = _calibIndex;
+  _metaNumbers.sweepMode = _sweepMode;
+  _metaNumbers.polarizationMode = _polarizationMode;
+  _metaNumbers.prtMode = _prtMode;
+  _metaNumbers.followMode = _followMode;
+  _metaNumbers.isIndexed = _isIndexed;
+  _metaNumbers.antennaTransition = _antennaTransition;
+  _metaNumbers.nSamples = _nSamples;
+  _metaNumbers.eventFlagsSet = _eventFlagsSet;
+  _metaNumbers.startOfSweepFlag = _startOfSweepFlag;
+  _metaNumbers.endOfSweepFlag = _endOfSweepFlag;
+  _metaNumbers.startOfVolumeFlag = _startOfVolumeFlag;
+  _metaNumbers.endOfVolumeFlag = _endOfVolumeFlag;
+  _metaNumbers.utilityFlag = _utilityFlag;
+  _metaNumbers.isLongRange = _isLongRange;
+  _metaNumbers.georefApplied = _georefApplied;
+  
+}
+
+/////////////////////////////////////////////////////////
+// set the meta number data from the message struct
+
+int RadxRay::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                                    size_t bufLen,
+                                    bool swap)
+  
+{
+
+  // check size
+
+  if (bufLen != sizeof(msgMetaNumbers_t)) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxRay::_setMetaNumbersFromMsg" << endl;
+    cerr << "  Incorrect message size: " << bufLen << endl;
+    cerr << "  Should be: " << sizeof(msgMetaNumbers_t) << endl;
+    return -1;
+  }
+
+  // copy into local struct
+  
+  _metaNumbers = *metaNumbers;
+
+  // swap as needed
+
+  if (swap) {
+    _swapMetaNumbers(_metaNumbers); 
+  }
+
+  // set members
+
+  setRangeGeom(_metaNumbers.startRangeKm,
+               _metaNumbers.gateSpacingKm);
+
+  // set 64 bit values
+
+  _timeSecs = _metaNumbers.timeSecs;
+  _nanoSecs = _metaNumbers.nanoSecs;
+  _az = _metaNumbers.az;
+  _elev = _metaNumbers.elev;
+  _fixedAngle = _metaNumbers.fixedAngle;
+  _targetScanRate = _metaNumbers.targetScanRate;
+  _trueScanRate = _metaNumbers.trueScanRate;
+  _angleRes = _metaNumbers.angleRes;
+  _pulseWidthUsec = _metaNumbers.pulseWidthUsec;
+  _prtSec = _metaNumbers.prtSec;
+  _prtRatio = _metaNumbers.prtRatio;
+  _nyquistMps = _metaNumbers.nyquistMps;
+  _unambigRangeKm = _metaNumbers.unambigRangeKm;
+  _measXmitPowerDbmH = _metaNumbers.measXmitPowerDbmH;
+  _measXmitPowerDbmV = _metaNumbers.measXmitPowerDbmV;
+  _estimatedNoiseDbmHc = _metaNumbers.estimatedNoiseDbmHc;
+  _estimatedNoiseDbmVc = _metaNumbers.estimatedNoiseDbmVc;
+  _estimatedNoiseDbmHx = _metaNumbers.estimatedNoiseDbmHx;
+  _estimatedNoiseDbmVx = _metaNumbers.estimatedNoiseDbmVx;
+  _nGates = _metaNumbers.nGates;
+
+  // set 32-bit values
+
+  _volNum = _metaNumbers.volNum;
+  _sweepNum = _metaNumbers.sweepNum;
+  _calibIndex = _metaNumbers.calibIndex;
+  _sweepMode = (Radx::SweepMode_t) _metaNumbers.sweepMode;
+  _polarizationMode = (Radx::PolarizationMode_t) _metaNumbers.polarizationMode;
+  _prtMode = (Radx::PrtMode_t) _metaNumbers.prtMode;
+  _followMode = (Radx::FollowMode_t) _metaNumbers.followMode;
+  _isIndexed = _metaNumbers.isIndexed;
+  _antennaTransition = _metaNumbers.antennaTransition;
+  _nSamples = _metaNumbers.nSamples;
+  _eventFlagsSet = _metaNumbers.eventFlagsSet;
+  _startOfSweepFlag = _metaNumbers.startOfSweepFlag;
+  _endOfSweepFlag = _metaNumbers.endOfSweepFlag;
+  _startOfVolumeFlag = _metaNumbers.startOfVolumeFlag;
+  _endOfVolumeFlag = _metaNumbers.endOfVolumeFlag;
+  _utilityFlag = _metaNumbers.utilityFlag;
+  _isLongRange = _metaNumbers.isLongRange;
+  _georefApplied = _metaNumbers.georefApplied;
+  
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// swap meta numbers
+
+void RadxRay::_swapMetaNumbers(msgMetaNumbers_t &meta)
+{
+  ByteOrder::swap64(&meta.startRangeKm, 32 * sizeof(Radx::si64));
+  ByteOrder::swap32(&meta.volNum, 32 * sizeof(Radx::si32));
+}
+          
+
+#ifdef JUNK
+
+/////////////////////////////////////////////////////////
 // convert to XML
 
 void RadxRay::convertToXml(string &xml, int level /* = 0 */)  const
@@ -1843,3 +2206,4 @@ void RadxRay::convertToXml(string &xml, int level /* = 0 */)  const
 
 }
 
+#endif

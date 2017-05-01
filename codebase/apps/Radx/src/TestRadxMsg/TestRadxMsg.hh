@@ -88,8 +88,8 @@ private:
   
   int _processFile(const string filePath);
   void _setupRead(RadxFile &file);
-  int _testRadxField();
-  int _testRadxRay();
+  int _testRadxFields();
+  int _testRadxRays();
   int _testRadxVol();
 
 };

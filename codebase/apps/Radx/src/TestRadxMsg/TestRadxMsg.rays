@@ -1,0 +1,174 @@
+/**********************************************************************
+ * TDRP params for TestRadxMsg
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: TestRadxMsg.
+//
+// TestRadxMsg test the serialization and deserialization of Radx 
+//   objects, using RadxMsg.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROCESS CONTROL AND DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data.
+//
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+//
+//
+// Type: string
+//
+
+input_dir = "./input";
+
+//======================================================================
+//
+// TEST TYPE.
+//
+//======================================================================
+ 
+///////////// test_type ///////////////////////////////
+//
+// Type of test to be run.
+//
+// TEST_RADX_FIELD: serialize and deserialze a single field. Write text 
+//   for In REALTIME mode, the program waits for a new input file. In 
+//   ARCHIVE mode, it moves through the data between the start and end 
+//   times set on the command line. In FILELIST mode, it moves through the 
+//   list of file names specified on the command line.
+//
+//
+// Type: enum
+// Options:
+//     TEST_RADX_FIELD
+//     TEST_RADX_RAY
+//     TEST_RADX_VOL
+//
+
+test_type = TEST_RADX_RAY;
+
+//======================================================================
+//
+// SPECIFY FIELD NAMES.
+//
+//======================================================================
+ 
+///////////// read_set_field_names ////////////////////
+//
+// Option to set field names.
+//
+//
+// Type: boolean
+//
+
+ read_set_field_names = TRUE;
+
+///////////// read_field_names ////////////////////////
+//
+// Field name list.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+read_field_names = {
+ "SNRHC",
+ "CMD_FLAG",
+ "CPA"
+};
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Dir for output files.
+//
+// Converted files are written to this directory.
+//
+//
+// Type: string
+//
+
+output_dir = "/tmp/TestRadxMsg/field";
+
+///////////// text_path_before ////////////////////////
+//
+// Path for output text file before conversion.
+//
+// We write the text for the test object to this path, before 
+//   serialization.
+//
+//
+// Type: string
+//
+
+text_path_before = "/tmp/TestRadxMsg/field/before.txt";
+
+///////////// text_path_after /////////////////////////
+//
+// Path for output text file after conversion.
+//
+// We write the text for the test object to this path, after 
+//   deserialization.
+//
+//
+// Type: string
+//
+
+text_path_after = "/tmp/TestRadxMsg/field/after.txt";
+

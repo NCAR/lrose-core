@@ -193,9 +193,9 @@ int TestRadxMsg::_processFile(const string filePath)
   }
 
   if (_params.test_type == Params::TEST_RADX_FIELD) {
-    return _testRadxField();
+    return _testRadxFields();
   } else if (_params.test_type == Params::TEST_RADX_RAY) {
-    return _testRadxRay();
+    return _testRadxRays();
   } else if (_params.test_type == Params::TEST_RADX_VOL) {
     return _testRadxVol();
   }
@@ -230,15 +230,15 @@ void TestRadxMsg::_setupRead(RadxFile &file)
 }
 
 //////////////////////////////////////////////////
-// test a radx field
+// test radx fields from the volume
 
-int TestRadxMsg::_testRadxField()
+int TestRadxMsg::_testRadxFields()
 {
 
   // check file for non-zero rays
 
   if (_vol.getNRays() == 0) {
-    cerr << "ERROR - TestRadxMsg::_testRadxField()" << endl;
+    cerr << "ERROR - TestRadxMsg::_testRadxFields()" << endl;
     cerr << "  No rays in volume" << endl;
     cerr << "  File: " << _vol.getPathInUse() << endl;
     return -1;
@@ -247,14 +247,14 @@ int TestRadxMsg::_testRadxField()
   // open output files
 
   if (ta_makedir_for_file(_params.text_path_before)) {
-    cerr << "ERROR - TestRadxMsg::_testRadxField()" << endl;
+    cerr << "ERROR - TestRadxMsg::_testRadxFields()" << endl;
     cerr << "  Cannot make dir for before file: " 
          << _params.text_path_before << endl;
     return -1;
   }
   
   if (ta_makedir_for_file(_params.text_path_after)) {
-    cerr << "ERROR - TestRadxMsg::_testRadxField()" << endl;
+    cerr << "ERROR - TestRadxMsg::_testRadxFields()" << endl;
     cerr << "  Cannot make dir for after file: " 
          << _params.text_path_after << endl;
     return -1;
@@ -281,20 +281,20 @@ int TestRadxMsg::_testRadxField()
 
       RadxField *field = ray->getField(ifield);
   
+      // print the contents of the before field for comparison
+      
+      field->printWithData(beforeFile);
+      
       // serialize the field into a RadxMsg
       
       RadxMsg msg(RadxMsg::RadxFieldMsgType);
       field->serialize(msg);
       
-      // print the contents of the before field for comparison
-      
-      field->printWithData(beforeFile);
-      
       // deserialize the field from the RadxMsg
 
       RadxField copy;
       if (copy.deserialize(msg)) {
-        cerr << "ERROR - TestRadxMsg::_testRadxField()" << endl;
+        cerr << "ERROR - TestRadxMsg::_testRadxFields()" << endl;
         cerr << "  Cannot deserialize field from msg" << endl;
         msg.printHeader(cerr, "  ");
         return -1;
@@ -318,10 +318,82 @@ int TestRadxMsg::_testRadxField()
 }
 
 //////////////////////////////////////////////////
-// test a radx ray
+// test radx rays from volume
 
-int TestRadxMsg::_testRadxRay()
+int TestRadxMsg::_testRadxRays()
 {
+
+  // check file for non-zero rays
+
+  if (_vol.getNRays() == 0) {
+    cerr << "ERROR - TestRadxMsg::_testRadxRays()" << endl;
+    cerr << "  No rays in volume" << endl;
+    cerr << "  File: " << _vol.getPathInUse() << endl;
+    return -1;
+  }
+  
+  // open output files
+
+  if (ta_makedir_for_file(_params.text_path_before)) {
+    cerr << "ERROR - TestRadxMsg::_testRadxRays()" << endl;
+    cerr << "  Cannot make dir for before file: " 
+         << _params.text_path_before << endl;
+    return -1;
+  }
+  
+  if (ta_makedir_for_file(_params.text_path_after)) {
+    cerr << "ERROR - TestRadxMsg::_testRadxRays()" << endl;
+    cerr << "  Cannot make dir for after file: " 
+         << _params.text_path_after << endl;
+    return -1;
+  }
+
+  ofstream beforeFile(_params.text_path_before);
+  ofstream afterFile(_params.text_path_after);
+
+  if (_params.debug) {
+    cerr << "Writing 'before' fields to file: " << _params.text_path_before << endl;
+  }
+  if (_params.debug) {
+    cerr << "Writing 'after' fields to file: " << _params.text_path_after << endl;
+  }
+  
+  // loop through the rays
+  
+  const vector<RadxRay *> &rays = _vol.getRays();
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+
+    RadxRay *ray = rays[iray];
+    
+    // print the contents of the before ray for comparison
+    
+    ray->printWithFieldData(beforeFile);
+      
+    // serialize the ray into a RadxMsg
+      
+    RadxMsg msg(RadxMsg::RadxRayMsgType);
+    ray->serialize(msg);
+    
+    // deserialize the field from the RadxMsg
+    
+    RadxRay copy;
+    if (copy.deserialize(msg)) {
+      cerr << "ERROR - TestRadxMsg::_testRadxRays()" << endl;
+      cerr << "  Cannot deserialize ray from msg" << endl;
+      msg.printHeader(cerr, "  ");
+      return -1;
+    }
+    
+    // print the contents of the after field for comparison
+    
+    copy.printWithFieldData(afterFile);
+    
+  } // iray
+
+  // close files
+
+  beforeFile.close();
+  afterFile.close();
 
   return 0;
 

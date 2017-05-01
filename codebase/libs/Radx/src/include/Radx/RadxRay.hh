@@ -44,6 +44,7 @@
 #include <Radx/RadxRangeGeom.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxTime.hh>
+#include <Radx/RadxMsg.hh>
 class RadxGeoref;
 class RadxCfactors;
 using namespace std;
@@ -1049,10 +1050,6 @@ public:
   
   void printFieldNameMap(ostream &out) const;
   
-  /// convert to XML
-
-  void convertToXml(string &xml, int level = 0) const;
-  
   //@}
 
   ///////////////////////////////////////////////
@@ -1078,9 +1075,23 @@ public:
   /// delete this ray if no longer used by any client
 
   static void deleteIfUnused(const RadxRay *ray);
-
+  
   //@}
 
+  /// \name Serialization:
+  //@{
+
+  // serialize into a RadxMsg
+  
+  void serialize(RadxMsg &msg);
+  
+  // deserialize from a RadxMsg
+  // return 0 on success, -1 on failure
+
+  int deserialize(const RadxMsg &msg);
+
+  //@}
+  
 protected:
 private:
 
@@ -1179,6 +1190,107 @@ private:
   
   string _addToFieldNameMap(const string &name, int index);
 
+  /////////////////////////////////////////////////
+  // serialization
+  /////////////////////////////////////////////////
+  
+  static const int _metaStringsPartId = 1;
+  static const int _metaNumbersPartId = 2;
+  static const int _georefPartId = 3;
+  static const int _cfactorsPartId = 4;
+  static const int _fieldPartId = 5;
+  
+  // struct for metadata numbers in messages
+  // strings not included - they are passed as XML
+  
+  typedef struct {
+    
+    Radx::fl64 startRangeKm;
+    Radx::fl64 gateSpacingKm;
+
+    Radx::si64 timeSecs;
+    Radx::fl64 nanoSecs;
+    
+    Radx::fl64 az;
+    Radx::fl64 elev;
+    Radx::fl64 fixedAngle;
+    Radx::fl64 targetScanRate;
+    Radx::fl64 trueScanRate;
+    Radx::fl64 angleRes;
+
+    Radx::fl64 pulseWidthUsec;
+    Radx::fl64 prtSec;
+    Radx::fl64 prtRatio;
+
+    Radx::fl64 nyquistMps;
+    Radx::fl64 unambigRangeKm;
+
+    Radx::fl64 measXmitPowerDbmH;
+    Radx::fl64 measXmitPowerDbmV;
+
+    Radx::fl64 estimatedNoiseDbmHc;
+    Radx::fl64 estimatedNoiseDbmVc;
+    Radx::fl64 estimatedNoiseDbmHx;
+    Radx::fl64 estimatedNoiseDbmVx;
+
+    Radx::si64 nGates;
+
+    Radx::fl64 spareFl64[10];
+  
+    Radx::si32 volNum;
+    Radx::si32 sweepNum;
+    Radx::si32 calibIndex;
+
+    Radx::si32 sweepMode;
+    Radx::si32 polarizationMode;
+    Radx::si32 prtMode;
+    Radx::si32 followMode;
+
+    Radx::si32 isIndexed;
+    Radx::si32 antennaTransition;
+    Radx::si32 nSamples;
+
+    Radx::si32 eventFlagsSet;
+    Radx::si32 startOfSweepFlag;
+    Radx::si32 endOfSweepFlag;
+    Radx::si32 startOfVolumeFlag;
+    Radx::si32 endOfVolumeFlag;
+    Radx::si32 utilityFlag;
+
+    Radx::si32 isLongRange;
+    Radx::si32 georefApplied;
+
+    Radx::si32 spareSi32[14];
+
+  } msgMetaNumbers_t;
+
+  msgMetaNumbers_t _metaNumbers;
+  
+  /// convert metadata to XML
+  
+  void _loadMetaStringsToXml(string &xml, int level = 0) const;
+  
+  /// set metadata from XML
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaStringsFromXml(const char *xml, 
+                             size_t bufLen);
+
+  /// load meta numbers to message struct
+  
+  void _loadMetaNumbersToMsg();
+  
+  /// set the meta number data from the message struct
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                             size_t bufLen,
+                             bool swap);
+  
+  /// swap meta numbers
+  
+  static void _swapMetaNumbers(msgMetaNumbers_t &msgMetaNumbers);
+          
 };
 
 #endif
