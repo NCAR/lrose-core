@@ -1786,6 +1786,18 @@ void RadxRay::serialize(RadxMsg &msg)
   _loadMetaNumbersToMsg();
   msg.addPart(_metaNumbersPartId, &_metaNumbers, sizeof(msgMetaNumbers_t));
 
+  // add georef part if needed
+
+  if (_georef != NULL) {
+    // _georef->convertToXml(georefXml, level + 1);
+  }
+
+  // add correction factors part if needed
+  
+  if (_cfactors != NULL) {
+    // _cfactors->convertToXml(cfactorsXml, level + 1);
+  }
+
   // add field data
 
   for (size_t ii = 0; ii < _fields.size(); ii++) {
@@ -2120,90 +2132,3 @@ void RadxRay::_swapMetaNumbers(msgMetaNumbers_t &meta)
   ByteOrder::swap64(&meta.startRangeKm, 32 * sizeof(Radx::si64));
   ByteOrder::swap32(&meta.volNum, 32 * sizeof(Radx::si32));
 }
-          
-
-#ifdef JUNK
-
-/////////////////////////////////////////////////////////
-// convert to XML
-
-void RadxRay::convertToXml(string &xml, int level /* = 0 */)  const
-  
-{
-
-  xml.clear();
-  xml += RadxXml::writeStartTag("RadxRay", level);
-
-  xml += RadxXml::writeInt("volNum", level + 1, _volNum);
-  xml += RadxXml::writeInt("sweepNum", level + 1, _sweepNum);
-  xml += RadxXml::writeInt("calibIndex", level + 1, _calibIndex);
-
-  xml += RadxXml::writeString("scanName", level + 1, _scanName);
-
-  xml += RadxXml::writeString("sweepMode", level + 1, 
-                              Radx::sweepModeToStr(_sweepMode));
-  xml += RadxXml::writeString("polarizationMode", level + 1, 
-                              Radx::polarizationModeToStr(_polarizationMode));
-  xml += RadxXml::writeString("prtMode", level + 1, 
-                              Radx::prtModeToStr(_prtMode));
-  xml += RadxXml::writeString("followMode", level + 1, 
-                              Radx::followModeToStr(_followMode));
-
-  xml += RadxXml::writeTime("timeSecs", level + 1, _timeSecs);
-  xml += RadxXml::writeDouble("nanoSecs", level + 1, _nanoSecs);
-
-  xml += RadxXml::writeDouble("az", level + 1, _az);
-  xml += RadxXml::writeDouble("elev", level + 1, _elev);
-  xml += RadxXml::writeDouble("fixedAngle", level + 1, _fixedAngle);
-  xml += RadxXml::writeDouble("targetScanRate", level + 1, _targetScanRate);
-  xml += RadxXml::writeDouble("trueScanRate", level + 1, _trueScanRate);
-
-  xml += RadxXml::writeBoolean("isIndexed", level + 1, _isIndexed);
-  xml += RadxXml::writeDouble("angleRes", level + 1, _angleRes);
-
-  xml += RadxXml::writeBoolean("antennaTransition", level + 1, _antennaTransition);
-
-  xml += RadxXml::writeInt("nSamples", level + 1, _nSamples);
-  xml += RadxXml::writeDouble("pulseWidthUsec", level + 1, _pulseWidthUsec);
-  xml += RadxXml::writeDouble("prtSec", level + 1, _prtSec);
-  xml += RadxXml::writeInt("prtRatio", level + 1, _prtRatio);
-  xml += RadxXml::writeInt("nyquistMps", level + 1, _nyquistMps);
-  xml += RadxXml::writeInt("unambigRangeKm", level + 1, _unambigRangeKm);
-
-  xml += RadxXml::writeDouble("measXmitPowerDbmH", level + 1, _measXmitPowerDbmH);
-  xml += RadxXml::writeDouble("measXmitPowerDbmV", level + 1, _measXmitPowerDbmV);
-
-  xml += RadxXml::writeDouble("estimatedNoiseDbmHc", level + 1, _estimatedNoiseDbmHc);
-  xml += RadxXml::writeDouble("estimatedNoiseDbmVc", level + 1, _estimatedNoiseDbmVc);
-  xml += RadxXml::writeDouble("estimatedNoiseDbmHx", level + 1, _estimatedNoiseDbmHx);
-  xml += RadxXml::writeDouble("estimatedNoiseDbmVx", level + 1, _estimatedNoiseDbmVx);
-
-  xml += RadxXml::writeBoolean("eventFlagsSet", level + 1, _eventFlagsSet);
-  xml += RadxXml::writeBoolean("startOfSweepFlag", level + 1, _startOfSweepFlag);
-  xml += RadxXml::writeBoolean("endOfSweepFlag", level + 1, _endOfSweepFlag);
-  xml += RadxXml::writeBoolean("startOfVolumeFlag", level + 1, _startOfVolumeFlag);
-  xml += RadxXml::writeBoolean("endOfVolumeFlag", level + 1, _endOfVolumeFlag);
-  xml += RadxXml::writeBoolean("utilityFlag", level + 1, _utilityFlag);
-  xml += RadxXml::writeBoolean("isLongRange", level + 1, _isLongRange);
-
-  if (_georef != NULL) {
-    string georefXml;
-    _georef->convertToXml(georefXml, level + 1);
-    xml += georefXml;
-  }
-  xml += RadxXml::writeBoolean("georefApplied", level + 1, _georefApplied);
-
-  if (_cfactors != NULL) {
-    string cfactorsXml;
-    _cfactors->convertToXml(cfactorsXml, level + 1);
-    xml += cfactorsXml;
-  }
-
-  xml += RadxXml::writeInt("nGates", level + 1, _nGates);
-
-  xml += RadxXml::writeEndTag("RadxRay", level);
-
-
-}
-
-#endif
