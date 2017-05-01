@@ -90,12 +90,12 @@ input_dir = "./input";
 //
 // Type: enum
 // Options:
-//     TEST_RADX_FIELD
-//     TEST_RADX_RAY
+//     TEST_RADX_FIELDS
+//     TEST_RADX_RAYS
 //     TEST_RADX_VOL
 //
 
-test_type = TEST_RADX_FIELD;
+test_type = TEST_RADX_FIELDS;
 
 //======================================================================
 //

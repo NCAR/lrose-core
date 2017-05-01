@@ -192,9 +192,9 @@ int TestRadxMsg::_processFile(const string filePath)
     _vol.print(cerr);
   }
 
-  if (_params.test_type == Params::TEST_RADX_FIELD) {
+  if (_params.test_type == Params::TEST_RADX_FIELDS) {
     return _testRadxFields();
-  } else if (_params.test_type == Params::TEST_RADX_RAY) {
+  } else if (_params.test_type == Params::TEST_RADX_RAYS) {
     return _testRadxRays();
   } else if (_params.test_type == Params::TEST_RADX_VOL) {
     return _testRadxVol();

@@ -51,13 +51,13 @@ commentdef {
 }
 
 typedef enum {
-  TEST_RADX_FIELD, TEST_RADX_RAY, TEST_RADX_VOL
+  TEST_RADX_FIELDS, TEST_RADX_RAYS, TEST_RADX_VOL
 } test_type_t;
 
 paramdef enum test_type_t {
   p_default = TEST_RADX_VOL;
   p_descr = "Type of test to be run.";
-  p_help = "TEST_RADX_FIELD: serialize and deserialze a single field. Write text for In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
+  p_help = "TEST_RADX_FIELDS: serialize and deserialze all fields in all rays in volume. TEST_RADX_RAYS: serialize and deserialize all rays in a volume. TEST_RADX_VOL: serialize and dserialize volume object.";
 } test_type;
 
 commentdef {

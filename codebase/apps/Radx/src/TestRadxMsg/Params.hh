@@ -63,8 +63,8 @@ public:
   } mode_t;
 
   typedef enum {
-    TEST_RADX_FIELD = 0,
-    TEST_RADX_RAY = 1,
+    TEST_RADX_FIELDS = 0,
+    TEST_RADX_RAYS = 1,
     TEST_RADX_VOL = 2
   } test_type_t;
 
