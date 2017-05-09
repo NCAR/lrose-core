@@ -36,6 +36,7 @@
 #include <Radx/Radx.hh>
 #include <Radx/RadxCfactors.hh>
 #include <Radx/RadxXml.hh>
+#include <Radx/ByteOrder.hh>
 using namespace std;
 
 /////////////////////////////////////////////////////////
@@ -122,7 +123,7 @@ void RadxCfactors::print(ostream &out) const
 /////////////////////////////////////////////////////////
 // convert to XML
 
-void RadxCfactors::convertToXml(string &xml, int level /* = 0 */)  const
+void RadxCfactors::convert2Xml(string &xml, int level /* = 0 */)  const
   
 {
 
@@ -150,4 +151,161 @@ void RadxCfactors::convertToXml(string &xml, int level /* = 0 */)  const
 
 }
 
+/////////////////////////////////////////////////////////
+// serialize into a RadxMsg
 
+void RadxCfactors::serialize(RadxMsg &msg)
+  
+{
+
+  // init
+
+  msg.clearAll();
+  msg.setMsgType(RadxMsg::RadxCfactorsMsgType);
+
+  // add metadata numbers
+  
+  _loadMetaNumbersToMsg();
+  msg.addPart(_metaNumbersPartId, &_metaNumbers, sizeof(msgMetaNumbers_t));
+
+}
+
+/////////////////////////////////////////////////////////
+// deserialize from a RadxMsg
+// return 0 on success, -1 on failure
+
+int RadxCfactors::deserialize(const RadxMsg &msg)
+  
+{
+  
+  // initialize object
+
+  _init();
+
+  // check type
+
+  if (msg.getMsgType() != RadxMsg::RadxCfactorsMsgType) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxCfactors::deserialize" << endl;
+    cerr << "  incorrect message type" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // get the metadata numbers
+  
+  const RadxMsg::Part *metaNumsPart = msg.getPartByType(_metaNumbersPartId);
+  if (metaNumsPart == NULL) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxCfactors::deserialize" << endl;
+    cerr << "  No metadata numbers part in message" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+  if (_setMetaNumbersFromMsg((msgMetaNumbers_t *) metaNumsPart->getBuf(),
+                             metaNumsPart->getLength(),
+                             msg.getSwap())) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxCfactors::deserialize" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// load the meta number to the message struct
+
+void RadxCfactors::_loadMetaNumbersToMsg()
+  
+{
+
+  // clear
+
+  memset(&_metaNumbers, 0, sizeof(_metaNumbers));
+  
+  // set
+
+  _metaNumbers.azimuthCorr = _azimuthCorr;
+  _metaNumbers.elevationCorr = _elevationCorr;
+  _metaNumbers.rangeCorr = _rangeCorr;
+  _metaNumbers.longitudeCorr = _longitudeCorr;
+  _metaNumbers.latitudeCorr = _latitudeCorr;
+  _metaNumbers.pressureAltCorr = _pressureAltCorr;
+  _metaNumbers.altitudeCorr = _altitudeCorr;
+  _metaNumbers.ewVelCorr = _ewVelCorr;
+  _metaNumbers.nsVelCorr = _nsVelCorr;
+  _metaNumbers.vertVelCorr = _vertVelCorr;
+  _metaNumbers.headingCorr = _headingCorr;
+  _metaNumbers.rollCorr = _rollCorr;
+  _metaNumbers.pitchCorr = _pitchCorr;
+  _metaNumbers.driftCorr = _driftCorr;
+  _metaNumbers.rotationCorr = _rotationCorr;
+  _metaNumbers.tiltCorr = _tiltCorr;
+
+}
+
+/////////////////////////////////////////////////////////
+// set the meta number data from the message struct
+
+int RadxCfactors::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                                       size_t bufLen,
+                                       bool swap)
+  
+{
+  
+  // check size
+  
+  if (bufLen != sizeof(msgMetaNumbers_t)) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxCfactors::_setMetaNumbersFromMsg" << endl;
+    cerr << "  Incorrect message size: " << bufLen << endl;
+    cerr << "  Should be: " << sizeof(msgMetaNumbers_t) << endl;
+    return -1;
+  }
+
+  // copy into local struct
+  
+  _metaNumbers = *metaNumbers;
+  
+  // swap as needed
+
+  if (swap) {
+    _swapMetaNumbers(_metaNumbers); 
+  }
+
+  // set members
+  
+  _azimuthCorr = _metaNumbers.azimuthCorr;
+  _elevationCorr = _metaNumbers.elevationCorr;
+  _rangeCorr = _metaNumbers.rangeCorr;
+  _longitudeCorr = _metaNumbers.longitudeCorr;
+  _latitudeCorr = _metaNumbers.latitudeCorr;
+  _pressureAltCorr = _metaNumbers.pressureAltCorr;
+  _altitudeCorr = _metaNumbers.altitudeCorr;
+  _ewVelCorr = _metaNumbers.ewVelCorr;
+  _nsVelCorr = _metaNumbers.nsVelCorr;
+  _vertVelCorr = _metaNumbers.vertVelCorr;
+  _headingCorr = _metaNumbers.headingCorr;
+  _rollCorr = _metaNumbers.rollCorr;
+  _pitchCorr = _metaNumbers.pitchCorr;
+  _driftCorr = _metaNumbers.driftCorr;
+  _rotationCorr = _metaNumbers.rotationCorr;
+  _tiltCorr = _metaNumbers.tiltCorr;
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// swap meta numbers
+
+void RadxCfactors::_swapMetaNumbers(msgMetaNumbers_t &meta)
+{
+  ByteOrder::swap64(&meta, sizeof(msgMetaNumbers_t));
+}

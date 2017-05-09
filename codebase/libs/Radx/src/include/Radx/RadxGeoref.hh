@@ -37,6 +37,7 @@
 #define RadxGeoref_HH
 
 #include <iostream>
+#include <Radx/RadxMsg.hh>
 using namespace std;
 
 /////////////////Ra//////////////////////////////////////////////
@@ -147,8 +148,22 @@ public:
   
   /// convert to XML
 
-  void convertToXml(string &xml, int level = 0) const;
+  void convert2Xml(string &xml, int level = 0) const;
   
+  /// \name Serialization:
+  //@{
+
+  // serialize into a RadxMsg
+  
+  void serialize(RadxMsg &msg);
+  
+  // deserialize from a RadxMsg
+  // return 0 on success, -1 on failure
+
+  int deserialize(const RadxMsg &msg);
+
+  //@}
+
 protected:
 private:
 
@@ -213,8 +228,64 @@ private:
 
   // methods
   
-  void _setToMissing();
+  void _init();
 
+  /////////////////////////////////////////////////
+  // serialization
+  /////////////////////////////////////////////////
+
+  static const int _metaNumbersPartId = 2;
+  
+  // struct for metadata numbers in messages
+  // strings not included - they are passed as XML
+  
+  typedef struct {
+    
+    Radx::si32 timeSecs;
+    Radx::fl64 nanoSecs;
+    Radx::fl64 longitude;
+    Radx::fl64 latitude;
+    Radx::fl64 altitudeKmMsl;
+    Radx::fl64 altitudeKmAgl;
+    Radx::fl64 ewVelocity;
+    Radx::fl64 nsVelocity;
+    Radx::fl64 vertVelocity;
+    Radx::fl64 heading;
+    Radx::fl64 track;
+    Radx::fl64 roll;
+    Radx::fl64 pitch;
+    Radx::fl64 drift;
+    Radx::fl64 rotation;
+    Radx::fl64 tilt;
+    Radx::fl64 ewWind;
+    Radx::fl64 nsWind;
+    Radx::fl64 vertWind;
+    Radx::fl64 headingRate;
+    Radx::fl64 pitchRate;
+    Radx::fl64 rollRate;
+    Radx::fl64 driveAngle1;
+    Radx::fl64 driveAngle2;
+    Radx::fl64 spareFl64[8];
+  
+  } msgMetaNumbers_t;
+
+  msgMetaNumbers_t _metaNumbers;
+  
+  /// load meta numbers to message struct
+  
+  void _loadMetaNumbersToMsg();
+  
+  /// set the meta number data from the message struct
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                             size_t bufLen,
+                             bool swap);
+  
+  /// swap meta numbers
+  
+  static void _swapMetaNumbers(msgMetaNumbers_t &msgMetaNumbers);
+          
 };
 
 #endif

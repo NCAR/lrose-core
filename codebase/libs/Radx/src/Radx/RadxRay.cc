@@ -1789,13 +1789,21 @@ void RadxRay::serialize(RadxMsg &msg)
   // add georef part if needed
 
   if (_georef != NULL) {
-    // _georef->convertToXml(georefXml, level + 1);
+    RadxMsg georefMsg;
+    _georef->serialize(georefMsg);
+    msg.addPart(_georefPartId,
+                georefMsg.assembledMsg(), 
+                georefMsg.lengthAssembled());
   }
 
   // add correction factors part if needed
   
   if (_cfactors != NULL) {
-    // _cfactors->convertToXml(cfactorsXml, level + 1);
+    RadxMsg cfactorsMsg;
+    _cfactors->serialize(cfactorsMsg);
+    msg.addPart(_cfactorsPartId,
+                cfactorsMsg.assembledMsg(), 
+                cfactorsMsg.lengthAssembled());
   }
 
   // add field data
@@ -1887,6 +1895,50 @@ int RadxRay::deserialize(const RadxMsg &msg)
     return -1;
   }
 
+  // get georefs if available
+  
+  const RadxMsg::Part *georefPart = msg.getPartByType(_georefPartId);
+  if (georefPart != NULL) {
+    RadxMsg georefMsg;
+    georefMsg.disassemble(georefPart->getBuf(), georefPart->getLength());
+    if (_georef) {
+      delete _georef;
+    }
+    _georef = new RadxGeoref;
+    if (_georef->deserialize(georefMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxRay::deserialize" << endl;
+      cerr << "  Cannot dserialize georef" << endl;
+      georefMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      delete _georef;
+      _georef = NULL;
+      return -1;
+    }
+  }
+  
+  // get cfactors if available
+  
+  const RadxMsg::Part *cfactorsPart = msg.getPartByType(_cfactorsPartId);
+  if (cfactorsPart != NULL) {
+    RadxMsg cfactorsMsg;
+    cfactorsMsg.disassemble(cfactorsPart->getBuf(), cfactorsPart->getLength());
+    if (_cfactors) {
+      delete _cfactors;
+    }
+    _cfactors = new RadxCfactors;
+    if (_cfactors->deserialize(cfactorsMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxRay::deserialize" << endl;
+      cerr << "  Cannot dserialize cfactors" << endl;
+      cfactorsMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      delete _cfactors;
+      _cfactors = NULL;
+      return -1;
+    }
+  }
+  
   // add fields
 
   size_t nFields = msg.partExists(_fieldPartId);

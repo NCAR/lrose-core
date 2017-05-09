@@ -311,7 +311,7 @@ public:
 
   /// convert to XML string
 
-  void convertToXml(string &xml) const;
+  void convert2Xml(string &xml) const;
 
   /// set from XML string
 
