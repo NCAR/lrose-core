@@ -1,0 +1,2 @@
+nice find . '(' -name '*.gz' ')' \
+         -user $USER -type f -print -exec gunzip '{}' \;
