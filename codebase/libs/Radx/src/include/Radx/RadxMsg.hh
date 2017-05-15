@@ -329,7 +329,7 @@ public:
   class Part
   {
 
-    friend RadxMsg;
+    friend class RadxMsg;
     
   public:
     
