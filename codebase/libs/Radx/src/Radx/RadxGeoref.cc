@@ -37,6 +37,7 @@
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxXml.hh>
+#include <Radx/ByteOrder.hh>
 using namespace std;
 
 /////////////////////////////////////////////////////////
@@ -45,7 +46,7 @@ using namespace std;
 RadxGeoref::RadxGeoref()
   
 {
-  _setToMissing();
+  _init();
 }
 
 /////////////////////////////////////////////////////////
@@ -59,7 +60,7 @@ RadxGeoref::~RadxGeoref()
 //////////////////////////////////////////////////
 // initialize
 
-void RadxGeoref::_setToMissing()
+void RadxGeoref::_init()
   
 {
 
@@ -96,7 +97,7 @@ void RadxGeoref::_setToMissing()
 void RadxGeoref::clear()
   
 {
-  _setToMissing();
+  _init();
 }
 
 //////////////////////////////////////////////////
@@ -212,7 +213,7 @@ void RadxGeoref::print(ostream &out) const
 /////////////////////////////////////////////////////////
 // convert to XML
 
-void RadxGeoref::convertToXml(string &xml, int level /* = 0 */)  const
+void RadxGeoref::convert2Xml(string &xml, int level /* = 0 */)  const
   
 {
 
@@ -249,3 +250,177 @@ void RadxGeoref::convertToXml(string &xml, int level /* = 0 */)  const
 
 }
 
+/////////////////////////////////////////////////////////
+// serialize into a RadxMsg
+
+void RadxGeoref::serialize(RadxMsg &msg)
+  
+{
+
+  // init
+
+  msg.clearAll();
+  msg.setMsgType(RadxMsg::RadxGeorefMsgType);
+
+  // add metadata numbers
+  
+  _loadMetaNumbersToMsg();
+  msg.addPart(_metaNumbersPartId, &_metaNumbers, sizeof(msgMetaNumbers_t));
+
+}
+
+/////////////////////////////////////////////////////////
+// deserialize from a RadxMsg
+// return 0 on success, -1 on failure
+
+int RadxGeoref::deserialize(const RadxMsg &msg)
+  
+{
+  
+  // initialize object
+
+  _init();
+
+  // check type
+
+  if (msg.getMsgType() != RadxMsg::RadxGeorefMsgType) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxGeoref::deserialize" << endl;
+    cerr << "  incorrect message type" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // get the metadata numbers
+  
+  const RadxMsg::Part *metaNumsPart = msg.getPartByType(_metaNumbersPartId);
+  if (metaNumsPart == NULL) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxGeoref::deserialize" << endl;
+    cerr << "  No metadata numbers part in message" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+  if (_setMetaNumbersFromMsg((msgMetaNumbers_t *) metaNumsPart->getBuf(),
+                             metaNumsPart->getLength(),
+                             msg.getSwap())) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxGeoref::deserialize" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// load the meta number to the message struct
+
+void RadxGeoref::_loadMetaNumbersToMsg()
+  
+{
+
+  // clear
+
+  memset(&_metaNumbers, 0, sizeof(_metaNumbers));
+  
+  // set
+
+  _metaNumbers.timeSecs = _timeSecs;
+  _metaNumbers.nanoSecs = _nanoSecs;
+  _metaNumbers.longitude = _longitude;
+  _metaNumbers.latitude = _latitude;
+  _metaNumbers.altitudeKmMsl = _altitudeKmMsl;
+  _metaNumbers.altitudeKmAgl = _altitudeKmAgl;
+  _metaNumbers.ewVelocity = _ewVelocity;
+  _metaNumbers.nsVelocity = _nsVelocity;
+  _metaNumbers.vertVelocity = _vertVelocity;
+  _metaNumbers.heading = _heading;
+  _metaNumbers.track = _track;
+  _metaNumbers.roll = _roll;
+  _metaNumbers.pitch = _pitch;
+  _metaNumbers.drift = _drift;
+  _metaNumbers.rotation = _rotation;
+  _metaNumbers.tilt = _tilt;
+  _metaNumbers.ewWind = _ewWind;
+  _metaNumbers.nsWind = _nsWind;
+  _metaNumbers.vertWind = _vertWind;
+  _metaNumbers.headingRate = _headingRate;
+  _metaNumbers.pitchRate = _pitchRate;
+  _metaNumbers.rollRate = _rollRate;
+  _metaNumbers.driveAngle1 = _driveAngle1;
+  _metaNumbers.driveAngle2 = _driveAngle2;
+
+}
+
+/////////////////////////////////////////////////////////
+// set the meta number data from the message struct
+
+int RadxGeoref::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                                       size_t bufLen,
+                                       bool swap)
+  
+{
+  
+  // check size
+  
+  if (bufLen != sizeof(msgMetaNumbers_t)) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxGeoref::_setMetaNumbersFromMsg" << endl;
+    cerr << "  Incorrect message size: " << bufLen << endl;
+    cerr << "  Should be: " << sizeof(msgMetaNumbers_t) << endl;
+    return -1;
+  }
+
+  // copy into local struct
+  
+  _metaNumbers = *metaNumbers;
+  
+  // swap as needed
+
+  if (swap) {
+    _swapMetaNumbers(_metaNumbers); 
+  }
+
+  // set members
+  
+  _timeSecs = _metaNumbers.timeSecs;
+  _nanoSecs = _metaNumbers.nanoSecs;
+  _longitude = _metaNumbers.longitude;
+  _latitude = _metaNumbers.latitude;
+  _altitudeKmMsl = _metaNumbers.altitudeKmMsl;
+  _altitudeKmAgl = _metaNumbers.altitudeKmAgl;
+  _ewVelocity = _metaNumbers.ewVelocity;
+  _nsVelocity = _metaNumbers.nsVelocity;
+  _vertVelocity = _metaNumbers.vertVelocity;
+  _heading = _metaNumbers.heading;
+  _track = _metaNumbers.track;
+  _roll = _metaNumbers.roll;
+  _pitch = _metaNumbers.pitch;
+  _drift = _metaNumbers.drift;
+  _rotation = _metaNumbers.rotation;
+  _tilt = _metaNumbers.tilt;
+  _ewWind = _metaNumbers.ewWind;
+  _nsWind = _metaNumbers.nsWind;
+  _vertWind = _metaNumbers.vertWind;
+  _headingRate = _metaNumbers.headingRate;
+  _pitchRate = _metaNumbers.pitchRate;
+  _rollRate = _metaNumbers.rollRate;
+  _driveAngle1 = _metaNumbers.driveAngle1;
+  _driveAngle2 = _metaNumbers.driveAngle2;
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// swap meta numbers
+
+void RadxGeoref::_swapMetaNumbers(msgMetaNumbers_t &meta)
+{
+  ByteOrder::swap64(&meta, sizeof(msgMetaNumbers_t));
+}

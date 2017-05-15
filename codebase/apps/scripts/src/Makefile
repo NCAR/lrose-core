@@ -47,6 +47,7 @@ SCRIPTS = \
 	get_mss_ls_cvs_repository.sh \
 	gm2gif.py \
 	grab_backup.pl \
+	gunzip_recurse \
 	ipcrm_irix \
 	ipcrm_libc5 \
 	ipcrm_linux \

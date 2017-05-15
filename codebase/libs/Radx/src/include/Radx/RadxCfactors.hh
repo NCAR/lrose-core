@@ -37,6 +37,7 @@
 #define RadxCfactors_HH
 
 #include <iostream>
+#include <Radx/RadxMsg.hh>
 using namespace std;
 
 ///////////////////////////////////////////////////////////////
@@ -115,8 +116,22 @@ public:
   
   /// convert to XML
 
-  void convertToXml(string &xml, int level = 0) const;
+  void convert2Xml(string &xml, int level = 0) const;
   
+  /// \name Serialization:
+  //@{
+
+  // serialize into a RadxMsg
+  
+  void serialize(RadxMsg &msg);
+  
+  // deserialize from a RadxMsg
+  // return 0 on success, -1 on failure
+
+  int deserialize(const RadxMsg &msg);
+
+  //@}
+
 protected:
 private:
 
@@ -149,6 +164,55 @@ private:
   
   void _init();
 
+  /////////////////////////////////////////////////
+  // serialization
+  /////////////////////////////////////////////////
+
+  static const int _metaNumbersPartId = 2;
+  
+  // struct for metadata numbers in messages
+  // strings not included - they are passed as XML
+  
+  typedef struct {
+    
+    Radx::fl64 azimuthCorr;
+    Radx::fl64 elevationCorr;
+    Radx::fl64 rangeCorr;
+    Radx::fl64 longitudeCorr;
+    Radx::fl64 latitudeCorr;
+    Radx::fl64 pressureAltCorr;
+    Radx::fl64 altitudeCorr;
+    Radx::fl64 ewVelCorr;
+    Radx::fl64 nsVelCorr;
+    Radx::fl64 vertVelCorr;
+    Radx::fl64 headingCorr;
+    Radx::fl64 rollCorr;
+    Radx::fl64 pitchCorr;
+    Radx::fl64 driftCorr;
+    Radx::fl64 rotationCorr;
+    Radx::fl64 tiltCorr;
+
+    Radx::fl64 spareFl64[8];
+  
+  } msgMetaNumbers_t;
+
+  msgMetaNumbers_t _metaNumbers;
+  
+  /// load meta numbers to message struct
+  
+  void _loadMetaNumbersToMsg();
+  
+  /// set the meta number data from the message struct
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                             size_t bufLen,
+                             bool swap);
+  
+  /// swap meta numbers
+  
+  static void _swapMetaNumbers(msgMetaNumbers_t &msgMetaNumbers);
+          
 };
 
 #endif
