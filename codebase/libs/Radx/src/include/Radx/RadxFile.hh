@@ -367,6 +367,18 @@ public:
 
   void setWriteForceNgatesVary(bool val) { _writeForceNgatesVary = val; }
   
+  /// Set the option to write CfRadial files using the
+  /// 'proposed_standard_name' attribute instead of
+  /// the usual 'standard_name' attribute.
+  /// Default is FALSE.
+  ///
+  /// NOTE: only applies to CF_RADIAL files,
+
+  void setWriteProposedStdNameInNcf(bool val)
+  {
+    _writeProposedStdNameInNcf = val;
+  }
+  
   //////////////////////////////////////////////////////////////
   /// force writing of ragged arrays
   /// even if the number of gates is constant
@@ -894,6 +906,9 @@ protected:
   bool _writeCompressed; ///< write out compressed? CfRadial only
   int _compressionLevel; ///< write compression level
   bool _writeLdataInfo; ///< write latest_data_info on write
+  
+  ///< Use 'proposed_standard_name' instead of 'standard_name' in CfRadial files
+  bool _writeProposedStdNameInNcf;
 
   // netcdf format for writing - CfRadial only
   

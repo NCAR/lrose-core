@@ -1109,6 +1109,10 @@ void RadxConvert::_setupWrite(RadxFile &file)
   file.setWriteVolNumInFileName(_params.include_vol_num_in_file_name);
   file.setWriteHyphenInDateTime(_params.use_hyphen_in_file_name_datetime_part);
 
+  if (_params.write_using_proposed_standard_name_attr) {
+    file.setWriteProposedStdNameInNcf(true);
+  }
+
 }
 
 //////////////////////////////////////////////////

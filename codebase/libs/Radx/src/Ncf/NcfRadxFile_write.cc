@@ -3308,7 +3308,11 @@ NcVar *NcfRadxFile::_createFieldVar(const RadxField &field)
     iret |= _file.addAttr(var, LONG_NAME, field.getLongName());
   }
   if (field.getStandardName().size() > 0) {
-    iret |= _file.addAttr(var, STANDARD_NAME, field.getStandardName());
+    if (_writeProposedStdNameInNcf) {
+      iret |= _file.addAttr(var, PROPOSED_STANDARD_NAME, field.getStandardName());
+    } else {
+      iret |= _file.addAttr(var, STANDARD_NAME, field.getStandardName());
+    }
   }
   iret |= _file.addAttr(var, UNITS, field.getUnits());
   if (field.getLegendXml().size() > 0) {

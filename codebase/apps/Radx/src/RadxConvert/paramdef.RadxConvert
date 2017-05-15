@@ -948,6 +948,12 @@ paramdef boolean {
   p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
 } write_latest_data_info;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write CfRadial files using 'proposed_standard_name' attribute.";
+  p_help = "Default is false. Only applies to CfRadial files. Normally we use the 'standard_name' attribute. However, some organizations reject these as valid files since the standard names are not yet accepted. Using proposed_standard_name' instead avoids this issue.";
+} write_using_proposed_standard_name_attr;
+
 commentdef {
   p_header = "SEPARATING VOLUMES BY TYPE";
 };

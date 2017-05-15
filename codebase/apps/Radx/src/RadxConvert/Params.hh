@@ -675,6 +675,8 @@ public:
 
   tdrp_bool_t write_latest_data_info;
 
+  tdrp_bool_t write_using_proposed_standard_name_attr;
+
   tdrp_bool_t separate_output_dirs_by_scan_type;
 
   char* surveillance_subdir;
@@ -716,7 +718,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[156];
+  mutable TDRPtable _table[157];
 
   const char *_className;
 

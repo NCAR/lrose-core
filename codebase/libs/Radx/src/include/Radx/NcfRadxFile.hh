@@ -684,6 +684,7 @@ private:
   const static char* POSITIVE;
   const static char* PRESSURE_ALTITUDE_CORRECTION;
   const static char* PRIMARY_AXIS;
+  const static char* PROPOSED_STANDARD_NAME;
   const static char* PRT;
   const static char* PRT_MODE;
   const static char* PRT_RATIO;

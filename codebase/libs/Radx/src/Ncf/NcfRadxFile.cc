@@ -722,6 +722,7 @@ const char* NcfRadxFile::POLARIZATION_SEQUENCE = "polarization_sequence";
 const char* NcfRadxFile::POSITIVE = "positive";
 const char* NcfRadxFile::PRESSURE_ALTITUDE_CORRECTION = "pressure_altitude_correction";
 const char* NcfRadxFile::PRIMARY_AXIS = "primary_axis";
+const char* NcfRadxFile::PROPOSED_STANDARD_NAME = "proposed_standard_name";
 const char* NcfRadxFile::PRT = "prt";
 const char* NcfRadxFile::PRT_MODE = "prt_mode";
 const char* NcfRadxFile::PRT_RATIO = "prt_ratio";

@@ -2460,6 +2460,18 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'write_using_proposed_standard_name_attr'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_using_proposed_standard_name_attr");
+    tt->descr = tdrpStrDup("Option to write CfRadial files using 'proposed_standard_name' attribute.");
+    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. Normally we use the 'standard_name' attribute. However, some organizations reject these as valid files since the standard names are not yet accepted. Using proposed_standard_name' instead avoids this issue.");
+    tt->val_offset = (char *) &write_using_proposed_standard_name_attr - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));

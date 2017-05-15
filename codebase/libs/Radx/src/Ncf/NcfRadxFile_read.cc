@@ -2405,6 +2405,13 @@ int NcfRadxFile::_readFieldVariables(bool metaOnly)
     if (standardNameAtt != NULL) {
       standardName = NetcdfClassic::asString(standardNameAtt);
       delete standardNameAtt;
+    } else {
+      // check also for 'proposed_standard_name'
+      standardNameAtt = var->get_att(PROPOSED_STANDARD_NAME);
+      if (standardNameAtt != NULL) {
+        standardName = NetcdfClassic::asString(standardNameAtt);
+        delete standardNameAtt;
+      }
     }
     
     string longName;

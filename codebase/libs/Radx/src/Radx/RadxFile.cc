@@ -395,6 +395,7 @@ void RadxFile::clearWrite()
   _writeHyphenInDateTime = false; 
   _writeNativeByteOrder = false;
   _writeForceNgatesVary = false;
+  _writeProposedStdNameInNcf = false;
 }
 
 /////////////////////////////////////////////////////////
@@ -419,6 +420,7 @@ void RadxFile::copyWriteDirectives(const RadxFile &other)
   _writeCompressed = other._writeCompressed;
   _compressionLevel = other._compressionLevel;
   _writeLdataInfo = other._writeLdataInfo;
+  _writeProposedStdNameInNcf = other._writeProposedStdNameInNcf;
   _ncFormat = other._ncFormat;
   _debug = other._debug;
   _verbose = other._verbose;
@@ -2220,6 +2222,8 @@ void RadxFile::printReadRequest(ostream &out) const
       << (_writeNativeByteOrder?"Y":"N") << endl;
   out << "  writeForceNgatesVary: "
       << (_writeForceNgatesVary?"Y":"N") << endl;
+  out << "  writeProposedStdNameInNcf: "
+      << (_writeProposedStdNameInNcf?"Y":"N") << endl;
   out << "  writeFileNameMode: "
       << getFileNameModeAsString() << endl;
   out << "  writeFileNamePrefix: " << _writeFileNamePrefix << endl;

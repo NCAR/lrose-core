@@ -383,6 +383,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "output_encoding = OUTPUT_ENCODING_INT08;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-prop_std_name")) {
+      
+      sprintf(tmp_str, "write_using_proposed_standard_name_attr = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-start")) {
       
       if (i < argc - 1) {
@@ -859,6 +864,10 @@ void Args::_usage(ostream &out)
       << "     consolidate sweeps by combining split-cut sweeps\n"
       << "     into a single sweep.\n"
       << "     If this flag is true, we leave the sweeps unchanged.\n"
+      << "\n"
+      << "  [ -prop_std_name ] use 'proposed_standard_name' attribute\n"
+      << "                     instead of 'standard_name' attribute\n"
+      << "                     for CfRadial files\n"
       << "\n"
       << "  [ -radar_num ? ] set radar number\n"
       << "     Applies to NOAA HRD data. LF radar = 1, TA radar = 2\n"
