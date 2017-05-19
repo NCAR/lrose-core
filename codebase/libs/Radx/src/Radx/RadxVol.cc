@@ -50,6 +50,7 @@
 #include <algorithm>
 #include <vector>
 #include <set>
+#include <multiset>
 #include <map>
 #include <iostream>
 #include <sys/stat.h>
@@ -4037,7 +4038,7 @@ void RadxVol::sortRaysByTime()
 
   // create set with sorted ray pointers
 
-  set<RayPtr, SortByRayTime> sortedRayPtrs;
+  multiset<RayPtr, SortByRayTime> sortedRayPtrs;
   for (size_t iray = 0; iray < _rays.size(); iray++) {
     RayPtr rptr(_rays[iray]);
     sortedRayPtrs.insert(rptr);
@@ -4046,7 +4047,7 @@ void RadxVol::sortRaysByTime()
   // reload _rays array in time-sorted order
 
   _rays.clear();
-  for (set<RayPtr, SortByRayTime>::iterator ii = sortedRayPtrs.begin();
+  for (multiset<RayPtr, SortByRayTime>::iterator ii = sortedRayPtrs.begin();
        ii != sortedRayPtrs.end(); ii++) {
     _rays.push_back(ii->ptr);
   }
