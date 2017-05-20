@@ -30,11 +30,10 @@ HDRS = \
 CPPC_SRCS = \
 	NcfRadxFile.cc \
 	NcfRadxFile_read.cc \
-	NcfRadxFile_write.cc
-
-#	NcxxRadxFile.cc \
-#	NcxxRadxFile_read.cc \
-#	NcxxRadxFile_write.cc
+	NcfRadxFile_write.cc \
+	NcxxRadxFile.cc \
+	NcxxRadxFile_read.cc \
+	NcxxRadxFile_write.cc
 
 #
 # general targets

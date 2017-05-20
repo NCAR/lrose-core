@@ -365,8 +365,7 @@ int NcxxRadxFile::writeToPath(const RadxVol &vol,
     return -1;
   }
 
-  // do the number of gates vary by ray?
-  // force this on for now
+  // will we write for variable number of gates?
   
   _writeVol->computeMaxNGates();
   _nGatesVary = _writeVol->getNGatesVary();
@@ -3363,8 +3362,10 @@ NcxxVar NcxxRadxFile::_addFieldVar(const RadxField &field)
   NcxxVar var;
 
   if (_nGatesVary) {
+    // 1-D
     var = _file.addVar(fieldName, ncxxType, _nPointsDim);
   } else {
+    // 2-D
     vector<NcxxDim> dims;
     dims.push_back(_timeDim);
     dims.push_back(_rangeDim);
@@ -3576,31 +3577,34 @@ int NcxxRadxFile::_writeFieldVar(NcxxVar &var, RadxField *field)
       } // switch
       
     } else {
-      
-      // get the max number of gates
-      
-      _writeVol->computeMaxNGates();
-      
+
+      // TODO - test, and merge with above
+
       switch (var.getType().getTypeClass()) {
         case NcxxType::nc_DOUBLE: {
-          iret = !var.put((double *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
+          // var.put((double *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
+          var.putVal((double *) data);
           break;
         }
-        case ncxxFloat:
+        case NcxxType::nc_INT: {
+          // iret = !var.put((int *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
+          var.putVal((int *) data);
+          break;
+        }
+        case NcxxType::nc_SHORT: {
+          // iret = !var.put((short *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
+          var.putVal((short *) data);
+          break;
+        }
+        case NcxxType::nc_BYTE: {
+          // iret = !var.put((signed char *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
+          var.putVal((signed char *) data);
+          break;
+        }
+        case NcxxType::nc_FLOAT:
         default: {
-          iret = !var.put((float *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
-          break;
-        }
-        case ncxxInt: {
-          iret = !var.put((int *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
-          break;
-        }
-        case ncShort: {
-          iret = !var.put((short *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
-          break;
-        }
-        case ncxxByte: {
-          iret = !var.put((signed char *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
+          var.putVal((float *) data);
+          // iret = !var.put((float *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
           break;
         }
       } // switch
@@ -3610,7 +3614,7 @@ int NcxxRadxFile::_writeFieldVar(NcxxVar &var, RadxField *field)
   } catch (NcxxException& e) {
     
     _addErrStr("ERROR - NcxxRadxFile::_writeFieldVar");
-    _addErrStr("  Canont write var, name: ", var.name());
+    _addErrStr("  Cannot write var, name: ", var.getName());
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
     return -1;
@@ -3654,15 +3658,17 @@ int NcxxRadxFile::_setCompression(NcxxVar &var)
     return 0;
   }
 
-  int fileId = _file.getNcFile()->id();
-  int varId = var.id();
-  int shuffle = 0;
-  
-  if (nc_def_var_deflate(fileId, varId, shuffle,
-                         _writeCompressed, _compressionLevel)!= NC_NOERR) {
-    cerr << "WARNING NcxxRadxFile::_setCompression" << endl;
-    cerr << "  Cannot compress field: " << var->name() << endl;
-    cerr << "  Will be written uncompressed instead" << endl;
+  try {
+
+    var.setCompression(false, _writeCompressed, _compressionLevel);
+        
+  } catch (NcxxException& e) {
+    
+    _addErrStr("ERROR - NcxxRadxFile::_setCompression");
+    _addErrStr("  Cannot set compression: ", var.getName());
+    _addErrStr("  Exception: ", e.what());
+    return -1;
+
   }
 
   return 0;
