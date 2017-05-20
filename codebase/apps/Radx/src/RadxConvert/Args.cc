@@ -186,6 +186,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "output_format = OUTPUT_FORMAT_CFRADIAL;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-ncxx")) {
+      
+      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_NCXX;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-dorade")) {
       
       sprintf(tmp_str, "output_format = OUTPUT_FORMAT_DORADE;");
@@ -836,6 +841,8 @@ void Args::_usage(ostream &out)
       << "  [ -native ] output in host-native byte ordering\n"
       << "\n"
       << "  [ -name ? ] override instrument name\n"
+      << "\n"
+      << "  [ -ncxx ] convert to cfradial using Ncxx classes\n"
       << "\n"
       << "  [ -nexrad ] convert to NEXRAD archive level 2\n"
       << "\n"

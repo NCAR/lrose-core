@@ -343,7 +343,7 @@ bool NcxxRadxFile::isSupported(const string &path)
 
 {
   
-  if (isCfRadial(path)) {
+  if (isCfRadialXx(path)) {
     return true;
   }
   return false;
@@ -354,7 +354,7 @@ bool NcxxRadxFile::isSupported(const string &path)
 // Check if this is a CfRadial file
 // Returns true on success, false on failure
 
-bool NcxxRadxFile::isCfRadial(const string &path)
+bool NcxxRadxFile::isCfRadialXx(const string &path)
   
 {
 
@@ -375,8 +375,30 @@ bool NcxxRadxFile::isCfRadial(const string &path)
   if (_readDimensions()) {
     _file.close();
     if (_verbose) {
-      cerr << "DEBUG - not CfRadial file" << endl;
+      cerr << "DEBUG - not CfRadialXx file" << endl;
       cerr << _errStr << endl;
+    }
+    return false;
+  }
+
+  // read global attributes
+  
+  if (_readGlobalAttributes()) {
+    _file.close();
+    if (_verbose) {
+      cerr << "DEBUG - not CfRadialXx file" << endl;
+      cerr << _errStr << endl;
+    }
+    return false;
+  }
+
+  // check history
+
+  if (_history.find("NcxxRadxFile") == string::npos) {
+    _file.close();
+    if (_verbose) {
+      cerr << "DEBUG - not CfRadialXx file" << endl;
+      cerr << "  No NcxxRadxFile string in history" << endl;
     }
     return false;
   }

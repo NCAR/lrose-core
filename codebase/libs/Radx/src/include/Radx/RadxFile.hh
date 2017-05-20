@@ -109,7 +109,9 @@ public:
     FILE_FORMAT_D3R_NC,       ///< D3R CSU/NASA netcdf format
     FILE_FORMAT_NSSL_MRD,     ///< NSSL MRD format for NOAA aircraft tail radars
     FILE_FORMAT_NOXP_NC,      ///< netcdf for OU NOXP
-    FILE_FORMAT_EDGE_NC       ///< EEC EDGE netcdf format
+    FILE_FORMAT_EDGE_NC,      ///< EEC EDGE netcdf format
+    FILE_FORMAT_NCXX,         ///< NetCDF CF RADIAL using Ncxx Classes
+    FILE_FORMAT_CFRADIAL2     ///< NetCDF CF RADIAL2
   } file_format_t;
 
   /// write format for CfRadial

@@ -1066,6 +1066,9 @@ void RadxConvert::_setupWrite(RadxFile &file)
     case Params::OUTPUT_FORMAT_ODIM_HDF5:
       file.setFileFormat(RadxFile::FILE_FORMAT_ODIM_HDF5);
       break;
+    case Params::OUTPUT_FORMAT_NCXX:
+      file.setFileFormat(RadxFile::FILE_FORMAT_NCXX);
+      break;
     default:
     case Params::OUTPUT_FORMAT_CFRADIAL:
       file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL);

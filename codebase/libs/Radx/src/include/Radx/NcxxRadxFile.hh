@@ -85,10 +85,10 @@ public:
   
   virtual bool isSupported(const string &path);
     
-  /// Check if specified file is a CfRadial file.
+  /// Check if specified file is a CfRadialXx file.
   /// Returns true on success, false on failure
   
-  bool isCfRadial(const string &path);
+  bool isCfRadialXx(const string &path);
     
   //////////////////////////////////////////////////////////////
   /// \name Perform writing:

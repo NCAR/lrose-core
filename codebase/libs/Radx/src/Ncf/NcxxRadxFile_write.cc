@@ -347,7 +347,7 @@ int NcxxRadxFile::writeToPath(const RadxVol &vol,
 
   _gateGeomVaries = _writeVol->gateGeomVariesByRay();
 
-  // open the output Nc file
+  // open the output Ncxx file
 
   _tmpPath = tmpPathFromFilePath(path, "");
 
@@ -360,7 +360,7 @@ int NcxxRadxFile::writeToPath(const RadxVol &vol,
 
   if (_file.openWrite(_tmpPath, _getFileFormat(_ncFormat))) {
     _addErrStr("ERROR - NcxxRadxFile::writeToPath");
-    _addErrStr("  Cannot open tmp Nc file: ", _tmpPath);
+    _addErrStr("  Cannot open tmp Ncxx file: ", _tmpPath);
     _addErrStr(_file.getErrStr());
     return -1;
   }
@@ -606,7 +606,9 @@ int NcxxRadxFile::_addGlobalAttributes()
     return -1;
   }
 
-  if (_file.addGlobAttr(HISTORY,  _writeVol->getHistory())) {
+  string history = "Written by NcxxRadxFile class. ";
+  history += _writeVol->getHistory();
+  if (_file.addGlobAttr(HISTORY,  history)) {
     return -1;
   }
 
@@ -3374,7 +3376,7 @@ NcxxVar NcxxRadxFile::_addFieldVar(const RadxField &field)
   
   if (var.isNull()) {
     _addErrStr("ERROR - NcxxRadxFile::_createFieldVar");
-    _addErrStr("  Cannot add variable to Nc file object");
+    _addErrStr("  Cannot add variable to Ncxx file object");
     _addErrStr("  Input field name: ", name);
     _addErrStr("  Output field name: ", fieldName);
     _addErrStr("  NcxxType: ", Ncxx::ncxxTypeToStr(ncxxType));
