@@ -699,6 +699,13 @@ public:
   int readDim(const string &name, NcxxDim &dim);
 
   //////////////////////////////////////////////
+  // When adding variables, you have the option
+  // to use the 'proposed_standard_name' attribute
+  // instead of 'standard_name'.
+
+  void setUsedProposedStandardName(bool val) { _useProposedStandardName = val; }
+
+  //////////////////////////////////////////////
   // Add scalar var
   // Returns 0 on success, -1 on failure
   // Side effect: var is set
@@ -781,6 +788,11 @@ protected:
   bool nullObject;
 
   int myId;
+
+  // option to use the 'proposed_standard_name' attribute instead
+  // of 'standard_name'.
+
+  bool _useProposedStandardName;
 
 };
 

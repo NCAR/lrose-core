@@ -366,6 +366,9 @@ int NcxxRadxFile::writeToPath(const RadxVol &vol,
     _addErrStr("  exception: ", e.what());
     return -1;
   }
+  if (_writeProposedStdNameInNcf) {
+    _file.setUsedProposedStandardName(true);
+  }
 
   // will we write for variable number of gates?
   
@@ -2064,9 +2067,10 @@ int NcxxRadxFile::_writeScalarVariables()
     _writeVol->getStatusXml().size() + 1; // includes trailing NULL
   RadxArray<char> xmlStr_;
   char *xmlStr = xmlStr_.alloc(xmlLen);
+  memset(xmlStr, 0, xmlLen);
   strncpy(xmlStr, _writeVol->getStatusXml().c_str(), xmlLen);
   try {
-    _statusXmlVar.putVal(strn);
+    _statusXmlVar.putVal(xmlStr);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write statusXml");
@@ -3395,7 +3399,11 @@ NcxxVar NcxxRadxFile::_addFieldVar(const RadxField &field)
     iret |= var.addAttr(LONG_NAME, field.getLongName());
   }
   if (field.getStandardName().size() > 0) {
-    iret |= var.addAttr(STANDARD_NAME, field.getStandardName());
+    if (_writeProposedStdNameInNcf) {
+      iret |= var.addAttr(PROPOSED_STANDARD_NAME, field.getStandardName());
+    } else {
+      iret |= var.addAttr(STANDARD_NAME, field.getStandardName());
+    }
   }
   iret |= var.addAttr(UNITS, field.getUnits());
   if (field.getLegendXml().size() > 0) {

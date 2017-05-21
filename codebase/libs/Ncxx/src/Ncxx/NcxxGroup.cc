@@ -95,7 +95,8 @@ NcxxGroup::~NcxxGroup()
 NcxxGroup::NcxxGroup() :
         NcxxErrStr(),
         nullObject(true),
-        myId(-1)
+        myId(-1),
+        _useProposedStandardName(false)
 {
 }
 
@@ -104,7 +105,8 @@ NcxxGroup::NcxxGroup() :
 NcxxGroup::NcxxGroup(const int groupId) :
         NcxxErrStr(),
         nullObject(false),
-        myId(groupId)
+        myId(groupId),
+        _useProposedStandardName(false)
 { 
 }
 
@@ -117,6 +119,7 @@ NcxxGroup& NcxxGroup::operator=(const NcxxGroup & rhs)
   _errStr = rhs._errStr;
   nullObject = rhs.nullObject;
   myId = rhs.myId;
+  _useProposedStandardName = rhs._useProposedStandardName;
   return *this;
 }
 
@@ -126,6 +129,7 @@ NcxxGroup::NcxxGroup(const NcxxGroup& rhs):
         myId(rhs.myId)
 {
   _errStr = rhs._errStr;
+  _useProposedStandardName = rhs._useProposedStandardName;
 }
 
 
@@ -1775,14 +1779,18 @@ int NcxxGroup::addVar(NcxxVar &var,
   }
 
   if (standardName.length() > 0) {
-    var.addAttr("standard_name", standardName);
+    if (_useProposedStandardName) {
+      var.addAttr("proposed_standard_name", standardName);
+    } else {
+      var.addAttr("standard_name", standardName);
+    }
   }
   
   if (longName.length() > 0) {
     var.addAttr("long_name", longName);
   }
-
-  if (units.length() > 0) {
+  
+  if (units.length() > 0 || !isMetadata) {
     var.addAttr("units", units);
   }
   

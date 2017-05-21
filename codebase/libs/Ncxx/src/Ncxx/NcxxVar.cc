@@ -3261,30 +3261,29 @@ void NcxxVar::setDefaultFillValue()
 
   nc_type vtype = getType().getId();
   if (vtype == NC_DOUBLE) {
-    addAttr("_fillValue", Ncxx::missingDouble);
+    addAttr("_FillValue", Ncxx::missingDouble);
     return;
   }
   if (vtype == NC_FLOAT) {
-    addAttr("_fillValue", Ncxx::missingFloat);
+    addAttr("_FillValue", Ncxx::missingFloat);
     return;
   }
   if (vtype == NC_INT) {
-    addAttr("_fillValue", Ncxx::missingInt);
+    addAttr("_FillValue", Ncxx::missingInt);
     return;
   }
   if (vtype == NC_LONG) {
-    addAttr("_fillValue", /* (long) */ Ncxx::missingInt);
+    addAttr("_FillValue", /* (long) */ Ncxx::missingInt);
     return;
   }
   if (vtype == NC_SHORT) {
-    addAttr("_fillValue", (short) Ncxx::missingInt);
+    addAttr("_FillValue", (short) Ncxx::missingInt);
     return;
   }
   if (vtype == NC_UBYTE) {
-    addAttr("_fillValue", Ncxx::missingUchar);
+    addAttr("_FillValue", Ncxx::missingUchar);
     return;
   }
-  addAttr("_fillValue", Ncxx::missingInt);
 }
 
 ////////////////////////////////////////
@@ -3296,30 +3295,29 @@ void NcxxVar::setMetaFillValue()
 
   nc_type vtype = getType().getId();
   if (vtype == NC_DOUBLE) {
-    addAttr("_fillValue", Ncxx::missingMetaDouble);
+    addAttr("_FillValue", Ncxx::missingMetaDouble);
     return;
   }
   if (vtype == NC_FLOAT) {
-    addAttr("_fillValue", Ncxx::missingMetaFloat);
+    addAttr("_FillValue", Ncxx::missingMetaFloat);
     return;
   }
   if (vtype == NC_INT) {
-    addAttr("_fillValue", Ncxx::missingMetaInt);
+    addAttr("_FillValue", Ncxx::missingMetaInt);
     return;
   }
   if (vtype == NC_LONG) {
-    addAttr("_fillValue", /* (long) */ Ncxx::missingMetaInt);
+    addAttr("_FillValue", /* (long) */ Ncxx::missingMetaInt);
     return;
   }
   if (vtype == NC_SHORT) {
-    addAttr("_fillValue", (short) Ncxx::missingMetaInt);
+    addAttr("_FillValue", (short) Ncxx::missingMetaInt);
     return;
   }
   if (vtype == NC_UBYTE) {
-    addAttr("_fillValue", Ncxx::missingMetaUchar);
+    addAttr("_FillValue", Ncxx::missingMetaUchar);
     return;
   }
-  addAttr("_fillValue", Ncxx::missingMetaInt);
 }
 
 ////////////////////////////////////////

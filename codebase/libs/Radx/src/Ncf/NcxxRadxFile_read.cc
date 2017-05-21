@@ -3832,7 +3832,11 @@ void NcxxRadxFile::_loadReadVolume()
   _readVol->setRadarAntennaGainDbV(_radarAntennaGainDbV);
   _readVol->setRadarBeamWidthDegH(_radarBeamWidthDegH);
   _readVol->setRadarBeamWidthDegV(_radarBeamWidthDegV);
-  _readVol->setRadarReceiverBandwidthMhz(_radarRxBandwidthHz / 1.0e6);
+  if (_radarRxBandwidthHz > 0) {
+    _readVol->setRadarReceiverBandwidthMhz(_radarRxBandwidthHz / 1.0e6);
+  } else {
+    _readVol->setRadarReceiverBandwidthMhz(_radarRxBandwidthHz); // missing
+  }
 
   _readVol->setVersion(_version);
   _readVol->setTitle(_title);
