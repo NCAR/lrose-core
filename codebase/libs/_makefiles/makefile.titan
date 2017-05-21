@@ -41,7 +41,7 @@ SUB_DIRS = \
 	advect \
         contour \
         Radx \
-        NcxxUtils
+        Ncxx
 
 #	apiTitan
 

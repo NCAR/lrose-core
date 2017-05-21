@@ -747,10 +747,12 @@ int AcGeoref2Spdb::_processRafNetcdfFile(const string &path)
 
   // open file
 
-  if (_file.openRead(path)) {
+  try {
+    _file.open(path, NcxxFile::read);
+  } catch (NcxxException& e) {
     cerr << "ERROR - AcGeoref2Spdb::_processRafNetcdfFile()" << endl;
     cerr << "  Reading file: " << path << endl;
-    cerr << _file.getErrStr() << endl;
+    cerr << "  exception: " << e.what() << endl;
     return -1;
   }
 

@@ -339,11 +339,11 @@ def fixMakefile(makefilePath):
     if (useMdv):
         libsList.append('-lMdv')
         libsList.append('-lRadx')
-        libsList.append('-lNcxxUtils')
+        libsList.append('-lNcxx')
         modified = True
     elif (useRadx):
         libsList.append('-lRadx')
-        libsList.append('-lNcxxUtils')
+        libsList.append('-lNcxx')
         modified = True
 
     if (useNetcdf4):

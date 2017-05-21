@@ -12,7 +12,7 @@ SUB_DIRS = \
         euclid \
 	physics \
         Radx \
-        NcxxUtils \
+        Ncxx \
         radar \
 	shapelib \
 	devguide \

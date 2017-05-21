@@ -58,7 +58,7 @@
 #include <Radx/RadxTime.hh>
 #include <rapformats/ac_georef.hh>
 #include <Spdb/DsSpdb.hh>
-#include <NcxxUtils/Ncxx.hh>
+#include <Ncxx/Ncxx.hh>
 
 using namespace std;
 

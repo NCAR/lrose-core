@@ -10,7 +10,7 @@ SUB_DIRS = \
 	FiltAlg \
 	Fmq \
 	Mdv \
-        NcxxUtils \
+        Ncxx \
 	Radx \
         Refract \
 	Spdb \
