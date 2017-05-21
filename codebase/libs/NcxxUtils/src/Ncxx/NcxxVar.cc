@@ -214,8 +214,10 @@ NcxxDim NcxxVar::getDim(int i) const
 {
   vector<NcxxDim> ncDims = getDims();
   if((size_t)i >= ncDims.size() || i < 0) {
-    throw NcxxException(getDesc() + " -index out of range",
-                        __FILE__, __LINE__);
+    char errStr[4096];
+    sprintf(errStr, "%s - index out of range: index = %d, size = %d",
+            getDesc().c_str(), i, (int) ncDims.size());
+    throw NcxxException(errStr, __FILE__, __LINE__);
   }
   return ncDims[i];
 }

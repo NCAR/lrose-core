@@ -358,10 +358,12 @@ int NcxxRadxFile::writeToPath(const RadxVol &vol,
     cerr << "  Writing fields and compressing ..." << endl;
   }
 
-  if (_file.openWrite(_tmpPath, _getFileFormat(_ncFormat))) {
+  try {
+    _file.open(_tmpPath, NcxxFile::replace, _getFileFormat(_ncFormat));
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::writeToPath");
-    _addErrStr("  Cannot open tmp Ncxx file: ", _tmpPath);
-    _addErrStr(_file.getErrStr());
+    _addErrStr("  Cannot open tmp Ncxx file for writing: ", _tmpPath);
+    _addErrStr("  exception: ", e.what());
     return -1;
   }
 

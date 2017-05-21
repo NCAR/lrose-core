@@ -216,62 +216,6 @@ void NcxxFile::open(const string& filePath,
 
 }
 
-//////////////////////////////////////
-// open file for reading
-// Returns 0 on success, -1 on failure
-
-int NcxxFile::openRead(const string &path)
-  
-{
-
-  close();
-  clearErrStr();
-
-  try {
-    open(path, read, nc4);
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxFile::openRead");
-    _addErrStr("  Cannot open file for reading: ", path);
-    _addErrStr("  File is not NetCDF");
-    _addErrStr("  exception: ", e.what());
-    return -1;
-  }
-
-  return 0;
-
-}
-
-//////////////////////////////////////////////
-/// open file for writing
-/// set the netcdf format, before a write
-/// format options are:
-///   classic - classic format (i.e. version 1 format)
-///   classic64 - 64-bit offset format
-///   nc4 - using HDF5 format
-///   nc4classic - netCDF-4 using HDF5 but only netCDF-3 calls
-/// Returns 0 on success, -1 on failure
-
-int NcxxFile::openWrite(const string &path,
-                        NcxxFile::FileFormat format) 
-
-{
-  
-  close();
-  clearErrStr();
-  
-  try {
-    open(path, write, format);
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxFile::openWrite");
-    _addErrStr("  Cannot open file for writing: ", path);
-    _addErrStr("  exception: ", e.what());
-    return -1;
-  }
-  
-  return 0;
-
-}
-
 /////////////////////////////////////////////
 // Synchronize an open netcdf dataset to disk
 

@@ -362,10 +362,11 @@ bool NcxxRadxFile::isCfRadialXx(const string &path)
   
   // open file
 
-  if (_file.openRead(path)) {
+  try {
+    _file.open(path, NcxxFile::read);
+  } catch (NcxxException& e) {
     if (_verbose) {
-      cerr << "DEBUG - not CfRadial file" << endl;
-      cerr << _file.getErrStr() << endl;
+      cerr << "DEBUG - not CfRadial file: " << path << endl;
     }
     return false;
   }

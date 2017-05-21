@@ -149,11 +149,15 @@ int NcxxRadxFile::_readPath(const string &path, size_t pathNum)
 
   // open file
 
-  if (_file.openRead(path)) {
-    _addErrStr(_file.getErrStr());
+  try {
+    _file.open(path, NcxxFile::read);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxRadxFile::_readPath");
+    _addErrStr("  Cannot open file for reading: ", path);
+    _addErrStr("  exception: ", e.what());
     return -1;
   }
-  
+
   // read dimensions
   
   if (_readDimensions()) {
@@ -635,9 +639,12 @@ int NcxxRadxFile::_appendSweepInfo(const string &path)
 
   // open file
 
-  if (_file.openRead(path)) {
-    _addErrStr("ERROR - NcxxRadxFile::_appendSweepInfo");
-    _addErrStr(_file.getErrStr());
+  try {
+    _file.open(path, NcxxFile::read);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - NcxxRadxFile::readFromPath");
+    _addErrStr("  Cannot open file for reading: ", path);
+    _addErrStr("  exception: ", e.what());
     return -1;
   }
 
@@ -686,6 +693,9 @@ void NcxxRadxFile::_checkGeorefsActiveOnRead()
 
   _latitudeVar = _file.getVar(LATITUDE);
   if (_latitudeVar.isNull()) {
+    return;
+  }
+  if (_latitudeVar.getDimCount() < 1) {
     return;
   }
 
@@ -765,14 +775,15 @@ int NcxxRadxFile::_readGlobalAttributes()
 {
 
   // check for conventions
-
-  NcxxGroupAtt att = _file.getAtt(CONVENTIONS);
-  if (att.isNull()) {
+  
+  try {
+    NcxxGroupAtt att = _file.getAtt(CONVENTIONS);
+    _conventions = att.asString();
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_readGlobalAttributes");
     _addErrStr("  Cannot find conventions attribute");
     return -1;
   }
-  _conventions = att.asString();
   if (_conventions.find(BaseConvention) == string::npos) {
     if (_conventions.find("CF") == string::npos &&
         _conventions.find("Radial") == string::npos) {
@@ -784,15 +795,16 @@ int NcxxRadxFile::_readGlobalAttributes()
 
   // check for instrument name
 
-  att = _file.getAtt(INSTRUMENT_NAME);
-  if (att.isNull()) {
+  try {
+    NcxxGroupAtt att = _file.getAtt(INSTRUMENT_NAME);
+    _instrumentName = att.asString();
+    if (_instrumentName.size() < 1) {
+      _instrumentName = "unknown";
+    }
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_readGlobalAttributes");
     _addErrStr("  Cannot find instrument_name attribute");
     return -1;
-  }
-  _instrumentName = att.asString();
-  if (_instrumentName.size() < 1) {
-    _instrumentName = "unknown";
   }
 
   // Loop through the global attributes, use the ones which make sense
@@ -897,19 +909,18 @@ int NcxxRadxFile::_readTimes(int pathNum)
   }
 
   // get units attribute
-  
-  NcxxVarAtt unitsAtt = _timeVar.getAtt(UNITS);
-  if (unitsAtt.isNull()) {
+
+  try {
+    NcxxVarAtt unitsAtt = _timeVar.getAtt(UNITS);
+    string units = unitsAtt.asString();
+    // parse the time units reference time
+    RadxTime stime(units);
+    _refTimeSecsFile = stime.utime();
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcxxRadxFile::_readTimes");
     _addErrStr("  Time has no units");
     return -1;
   }
-  string units = unitsAtt.asString();
-
-  // parse the time units reference time
-
-  RadxTime stime(units);
-  _refTimeSecsFile = stime.utime();
   
   // set the time array
   
@@ -2410,42 +2421,52 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     // set names, units, etc
     
     string standardName;
-    NcxxVarAtt standardNameAtt = var.getAtt(STANDARD_NAME);
-    if (!standardNameAtt.isNull()) {
-      standardName = standardNameAtt.asString();
+    try {
+      NcxxVarAtt standardNameAtt = var.getAtt(STANDARD_NAME);
+      if (!standardNameAtt.isNull()) {
+        standardName = standardNameAtt.asString();
+      }
+    } catch (NcxxException& e) {
     }
-    
+
     string longName;
-    NcxxVarAtt longNameAtt = var.getAtt(LONG_NAME);
-    if (!longNameAtt.isNull()) {
+    try {
+      NcxxVarAtt longNameAtt = var.getAtt(LONG_NAME);
       longName = longNameAtt.asString();
+    } catch (NcxxException& e) {
     }
 
     string units;
-    NcxxVarAtt unitsAtt = var.getAtt(UNITS);
-    if (!unitsAtt.isNull()) {
+    try {
+      NcxxVarAtt unitsAtt = var.getAtt(UNITS);
       units = unitsAtt.asString();
+    } catch (NcxxException& e) {
     }
 
     string legendXml;
-    NcxxVarAtt legendXmlAtt = var.getAtt(LEGEND_XML);
-    if (!legendXmlAtt.isNull()) {
-      legendXml = legendXmlAtt.asString();
+    try {
+      NcxxVarAtt legendXmlAtt = var.getAtt(LEGEND_XML);
+      if (!legendXmlAtt.isNull()) {
+        legendXml = legendXmlAtt.asString();
+      }
+    } catch (NcxxException& e) {
     }
 
     string thresholdingXml;
-    NcxxVarAtt thresholdingXmlAtt = var.getAtt(THRESHOLDING_XML);
-    if (!thresholdingXmlAtt.isNull()) {
+    try {
+      NcxxVarAtt thresholdingXmlAtt = var.getAtt(THRESHOLDING_XML);
       thresholdingXml = thresholdingXmlAtt.asString();
+    } catch (NcxxException& e) {
     }
     
     float samplingRatio = Radx::missingMetaFloat;
-    NcxxVarAtt samplingRatioAtt = var.getAtt(SAMPLING_RATIO);
-    if (!samplingRatioAtt.isNull()) {
+    try {
+      NcxxVarAtt samplingRatioAtt = var.getAtt(SAMPLING_RATIO);
       vector<float> vals;
       if (samplingRatioAtt.getValues(vals) == 0) {
         samplingRatio = vals[0];
       }
+    } catch (NcxxException& e) {
     }
 
     // folding
@@ -2453,65 +2474,71 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     bool fieldFolds = false;
     float foldLimitLower = Radx::missingMetaFloat;
     float foldLimitUpper = Radx::missingMetaFloat;
-    NcxxVarAtt fieldFoldsAtt = var.getAtt(FIELD_FOLDS);
-    if (!fieldFoldsAtt.isNull()) {
+    try {
+      NcxxVarAtt fieldFoldsAtt = var.getAtt(FIELD_FOLDS);
       string fieldFoldsStr = fieldFoldsAtt.asString();
       if (fieldFoldsStr == "true"
           || fieldFoldsStr == "TRUE"
           || fieldFoldsStr == "True") {
         fieldFolds = true;
-        NcxxVarAtt foldLimitLowerAtt = var.getAtt(FOLD_LIMIT_LOWER);
-        if (!foldLimitLowerAtt.isNull()) {
+        try {
+          NcxxVarAtt foldLimitLowerAtt = var.getAtt(FOLD_LIMIT_LOWER);
           vector<float> vals;
           if (foldLimitLowerAtt.getValues(vals) == 0) {
             foldLimitLower = vals[0];
           }
+        } catch (NcxxException& e) {
         }
-        NcxxVarAtt foldLimitUpperAtt = var.getAtt(FOLD_LIMIT_UPPER);
-        if (!foldLimitUpperAtt.isNull()) {
+        try {
+          NcxxVarAtt foldLimitUpperAtt = var.getAtt(FOLD_LIMIT_UPPER);
           vector<float> vals;
           if (foldLimitUpperAtt.getValues(vals) == 0) {
             foldLimitUpper = vals[0];
           }
+        } catch (NcxxException& e) {
         }
       }
+    } catch (NcxxException& e) {
     }
 
     // is this field discrete
 
     bool isDiscrete = false;
-    NcxxVarAtt isDiscreteAtt = var.getAtt(IS_DISCRETE);
-    if (!isDiscreteAtt.isNull()) {
+    try {
+      NcxxVarAtt isDiscreteAtt = var.getAtt(IS_DISCRETE);
       string isDiscreteStr = isDiscreteAtt.asString();
       if (isDiscreteStr == "true"
           || isDiscreteStr == "TRUE"
           || isDiscreteStr == "True") {
         isDiscrete = true;
       }
+    } catch (NcxxException& e) {
     }
 
     // get offset and scale
 
     double offset = 0.0;
-    NcxxVarAtt offsetAtt = var.getAtt(ADD_OFFSET);
-    if (!offsetAtt.isNull()) {
+    try {
+      NcxxVarAtt offsetAtt = var.getAtt(ADD_OFFSET);
       vector<double> vals;
       if (offsetAtt.getValues(vals) == 0) {
         offset = vals[0];
       }
+    } catch (NcxxException& e) {
     }
 
     double scale = 1.0;
-    NcxxVarAtt scaleAtt = var.getAtt(SCALE_FACTOR);
-    if (!scaleAtt.isNull()) {
+    try {
+      NcxxVarAtt scaleAtt = var.getAtt(SCALE_FACTOR);
       vector<double> vals;
       if (scaleAtt.getValues(vals) == 0) {
         scale = vals[0];
       }
+    } catch (NcxxException& e) {
     }
 
     // if metadata only, don't read in fields
-
+    
     if (metaOnly) {
       bool fieldAlreadyAdded = false;
       for (size_t ii = 0; ii < _readVol->getNFields(); ii++) {
@@ -3197,10 +3224,8 @@ int NcxxRadxFile::_readCalTime(const string &name, NcxxVar &var,
              &year, &month, &day, &hour, &min, &sec) != 6) {
     _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
     _addErrStr("  Cannot parse cal time string: ", timeStr);
-    delete[] cvalues;
     return -1;
   }
-  delete[] cvalues;
   RadxTime ctime(year, month, day, hour, min, sec);
   val = ctime.utime();
 
@@ -3296,17 +3321,20 @@ int NcxxRadxFile::_addFl64FieldToRays(NcxxVar &var,
   // set missing value
   
   Radx::fl64 missingVal = Radx::missingFl64;
-  NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
-  if (!missingValueAtt.isNull()) {
+  try {
+    NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
     vector<double> vals;
     if (missingValueAtt.getValues(vals) == 0) {
       missingVal = vals[0];
     }
-  } else {
-    missingValueAtt = var.getAtt(FILL_VALUE);
-    vector<double> vals;
-    if (missingValueAtt.getValues(vals) == 0) {
-      missingVal = vals[0];
+  } catch (NcxxException& e) {
+    try {
+      NcxxVarAtt missingValueAtt = var.getAtt(FILL_VALUE);
+      vector<double> vals;
+      if (missingValueAtt.getValues(vals) == 0) {
+        missingVal = vals[0];
+      }
+    } catch (NcxxException& e) {
     }
   }
 
@@ -3401,17 +3429,20 @@ int NcxxRadxFile::_addFl32FieldToRays(NcxxVar &var,
   // set missing value
   
   Radx::fl32 missingVal = Radx::missingFl32;
-  NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
-  if (!missingValueAtt.isNull()) {
+  try {
+    NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
     vector<float> vals;
     if (missingValueAtt.getValues(vals) == 0) {
       missingVal = vals[0];
     }
-  } else {
-    missingValueAtt = var.getAtt(FILL_VALUE);
-    vector<float> vals;
-    if (missingValueAtt.getValues(vals) == 0) {
-      missingVal = vals[0];
+  } catch (NcxxException& e) {
+    try {
+      NcxxVarAtt missingValueAtt = var.getAtt(FILL_VALUE);
+      vector<float> vals;
+      if (missingValueAtt.getValues(vals) == 0) {
+        missingVal = vals[0];
+      }
+    } catch (NcxxException& e) {
     }
   }
 
@@ -3507,17 +3538,20 @@ int NcxxRadxFile::_addSi32FieldToRays(NcxxVar &var,
   // set missing value
   
   Radx::si32 missingVal = Radx::missingSi32;
-  NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
-  if (!missingValueAtt.isNull()) {
+  try {
+    NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
     vector<int> vals;
     if (missingValueAtt.getValues(vals) == 0) {
       missingVal = vals[0];
     }
-  } else {
-    missingValueAtt = var.getAtt(FILL_VALUE);
-    vector<int> vals;
-    if (missingValueAtt.getValues(vals) == 0) {
-      missingVal = vals[0];
+  } catch (NcxxException& e) {
+    try {
+      NcxxVarAtt missingValueAtt = var.getAtt(FILL_VALUE);
+      vector<int> vals;
+      if (missingValueAtt.getValues(vals) == 0) {
+        missingVal = vals[0];
+      }
+    } catch (NcxxException& e) {
     }
   }
 
@@ -3606,17 +3640,20 @@ int NcxxRadxFile::_addSi16FieldToRays(NcxxVar &var,
   // set missing value
   
   Radx::si16 missingVal = Radx::missingSi16;
-  NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
-  if (!missingValueAtt.isNull()) {
+  try {
+    NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
     vector<short> vals;
     if (missingValueAtt.getValues(vals) == 0) {
       missingVal = vals[0];
     }
-  } else {
-    missingValueAtt = var.getAtt(FILL_VALUE);
-    vector<short> vals;
-    if (missingValueAtt.getValues(vals) == 0) {
-      missingVal = vals[0];
+  } catch (NcxxException& e) {
+    try {
+      NcxxVarAtt missingValueAtt = var.getAtt(FILL_VALUE);
+      vector<short> vals;
+      if (missingValueAtt.getValues(vals) == 0) {
+        missingVal = vals[0];
+      }
+    } catch (NcxxException& e) {
     }
   }
 
@@ -3705,17 +3742,20 @@ int NcxxRadxFile::_addSi08FieldToRays(NcxxVar &var,
   // set missing value
   
   Radx::si08 missingVal = Radx::missingSi08;
-  NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
-  if (!missingValueAtt.isNull()) {
+  try {
+    NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
     vector<char> vals;
     if (missingValueAtt.getValues(vals) == 0) {
       missingVal = vals[0];
     }
-  } else {
-    missingValueAtt = var.getAtt(FILL_VALUE);
-    vector<char> vals;
-    if (missingValueAtt.getValues(vals) == 0) {
-      missingVal = vals[0];
+  } catch (NcxxException& e) {
+    try {
+      NcxxVarAtt missingValueAtt = var.getAtt(FILL_VALUE);
+      vector<char> vals;
+      if (missingValueAtt.getValues(vals) == 0) {
+        missingVal = vals[0];
+      }
+    } catch (NcxxException& e) {
     }
   }
 
