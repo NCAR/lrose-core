@@ -334,29 +334,6 @@ NcxxType Cf2RadxFile::_getNcxxType(Radx::DataType_t dtype)
   }
 }
 
-//////////////////////////////////////////////////////////
-// convert RadxFile::netcdf_format_t to NcFile::FileFormat
-
-NcxxFile::FileFormat 
-  Cf2RadxFile::_getFileFormat(RadxFile::netcdf_format_t format)
-
-{
-  switch (format) {
-    case NETCDF4_CLASSIC:
-      return NcxxFile::nc4classic;
-      break;
-    case NETCDF_OFFSET_64BIT:
-      return NcxxFile::classic64;
-      break;
-    case NETCDF4:
-      return NcxxFile::nc4;
-      break;
-    case NETCDF_CLASSIC:
-    default:
-      return NcxxFile::classic;
-  }
-}
-
 /////////////////////////////////////////////////////////
 // print summary after read
 
@@ -718,6 +695,7 @@ const char* Cf2RadxFile::SUB_CONVENTIONS = "Sub_conventions";
 const char* Cf2RadxFile::SWEEP = "sweep";
 const char* Cf2RadxFile::SWEEP_END_RAY_INDEX = "sweep_end_ray_index";
 const char* Cf2RadxFile::SWEEP_MODE = "sweep_mode";
+const char* Cf2RadxFile::SWEEP_GROUP_NAME = "sweep_group_name";
 const char* Cf2RadxFile::SWEEP_NUMBER = "sweep_number";
 const char* Cf2RadxFile::SWEEP_START_RAY_INDEX = "sweep_start_ray_index";
 const char* Cf2RadxFile::TARGET_SCAN_RATE = "target_scan_rate";
@@ -882,6 +860,7 @@ const char* Cf2RadxFile::CROSS_SPECTRUM_OF_COPOLAR_VERTICAL = "cross_spectrum_of
 const char* Cf2RadxFile::CROSS_SPECTRUM_OF_CROSSPOLAR_HORIZONTAL = "cross_spectrum_of_crosspolar_horizontal";
 const char* Cf2RadxFile::CROSS_SPECTRUM_OF_CROSSPOLAR_VERTICAL = "cross_spectrum_of_crosspolar_vertical";
 const char* Cf2RadxFile::SWEEP_END_RAY_INDEX_LONG = "index_of_last_ray_in_sweep";
+const char* Cf2RadxFile::SWEEP_GROUP_NAME_LONG = "group_name_for_sweep";
 const char* Cf2RadxFile::SWEEP_MODE_LONG = "scan_mode_for_sweep";
 const char* Cf2RadxFile::SWEEP_NUMBER_LONG = "sweep_index_number_0_based";
 const char* Cf2RadxFile::SWEEP_START_RAY_INDEX_LONG = "index_of_first_ray_in_sweep";

@@ -91,8 +91,6 @@ int Cf2RadxFile::writeToDir(const RadxVol &vol,
 
   if (_writeIndividualSweeps) {
     return _writeSweepsToDir(vol, dir, addDaySubDir, addYearSubDir);
-    // } else if (vol.getSweeps().size() == 1) {
-    //   return _writeSweepToDir(vol, dir, addDaySubDir, addYearSubDir);
   }
 
   _writeVol = &vol;
@@ -284,7 +282,7 @@ int Cf2RadxFile::_writeSweepToDir(const RadxVol &vol,
   char fileName[BUFSIZ];
   if (_writeFileNameMode == FILENAME_WITH_START_AND_END_TIMES) {
     sprintf(fileName,
-            "cfrad.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
+            "cfrad2.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
             "_to_%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
             "_%s_v%d_s%.2d_%s%.2f_%s.nc",
             startTime.getYear(), startTime.getMonth(), startTime.getDay(),
@@ -299,7 +297,7 @@ int Cf2RadxFile::_writeSweepToDir(const RadxVol &vol,
             scanType.c_str());
   } else {
     sprintf(fileName,
-            "cfrad.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
+            "cfrad2.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
             "_%s_v%d_s%.2d_%s%.2f_%s.nc",
             fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
             fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
@@ -347,7 +345,8 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
 
   _gateGeomVaries = _writeVol->gateGeomVariesByRay();
 
-  // open the output Ncxx file
+  // open the output CfRadial2 file
+  // always netcdf4 style
 
   _tmpPath = tmpPathFromFilePath(path, "");
 
@@ -359,10 +358,10 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
   }
 
   try {
-    _file.open(_tmpPath, NcxxFile::replace, _getFileFormat(_ncFormat));
+    _file.open(_tmpPath, NcxxFile::replace, NcxxFile::nc4);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::writeToPath");
-    _addErrStr("  Cannot open tmp Ncxx file for writing: ", _tmpPath);
+    _addErrStr("  Cannot open tmp CfRadial2 file for writing: ", _tmpPath);
     _addErrStr("  exception: ", e.what());
     return -1;
   }
@@ -871,28 +870,6 @@ int Cf2RadxFile::_addDimensions()
     return -1;
   }
 
-  // add dimensions for strings in the file
-
-  if (_file.addDim(_stringLen8Dim,
-                   STRING_LENGTH_8, NCF_STRING_LEN_8)) {
-    return -1;
-  }
-  if (_file.addDim(_stringLen32Dim,
-                   STRING_LENGTH_32, NCF_STRING_LEN_32)) {
-    return -1;
-  }
-
-#ifdef NOTYET
-  if (_file.addDim(_stringLen64Dim,
-                   STRING_LENGTH_64, NCF_STRING_LEN_64)) {
-    return -1;
-  }
-  if (_file.addDim(_stringLen256Dim,
-                   STRING_LENGTH_256, NCF_STRING_LEN_256)) {
-    return -1;
-  }
-#endif
-
   if (_file.addDim(_statusXmlDim,
                    STATUS_XML_LENGTH,
                    _writeVol->getStatusXml().size() + 1)) {
@@ -1024,22 +1001,22 @@ int Cf2RadxFile::_addScalarVariables()
     cerr << "Cf2RadxFile::_addScalarVariables()" << endl;
   }
 
-  iret |= _file.addVar(_volumeNumberVar, VOLUME_NUMBER,
-                       "", VOLUME_NUMBER_LONG, ncxxInt, "", true);
+  iret |= _file.addVar(_volumeNumberVar, VOLUME_NUMBER, "",
+                       VOLUME_NUMBER_LONG, ncxxInt, "", true);
   
-  iret |= _file.addVar(_platformTypeVar, PLATFORM_TYPE,
-                       "", PLATFORM_TYPE_LONG, ncxxChar, _stringLen32Dim, "", true);
+  iret |= _file.addVar(_platformTypeVar, PLATFORM_TYPE, "",
+                       PLATFORM_TYPE_LONG, ncxxString, "", true);
   iret |= _platformTypeVar.addAttr(OPTIONS, Radx::platformTypeOptions());
   
-  iret |= _file.addVar(_primaryAxisVar, PRIMARY_AXIS,
-                       "", PRIMARY_AXIS_LONG, ncxxChar, _stringLen32Dim, "", true);
+  iret |= _file.addVar(_primaryAxisVar, PRIMARY_AXIS, "", 
+                       PRIMARY_AXIS_LONG, ncxxString, "", true);
   iret |= _primaryAxisVar.addAttr(OPTIONS, Radx::primaryAxisOptions());
 
-  iret |= _file.addVar(_statusXmlVar, STATUS_XML,
-                       "", "status_of_instrument", ncxxChar, _statusXmlDim, "", true);
+  iret |= _file.addVar(_statusXmlVar, STATUS_XML, "", 
+                       "status_of_instrument", ncxxChar, _statusXmlDim, "", true);
   
-  iret |= _file.addVar(_instrumentTypeVar, INSTRUMENT_TYPE,
-                       "", INSTRUMENT_TYPE_LONG, ncxxChar, _stringLen32Dim, "", true);
+  iret |= _file.addVar(_instrumentTypeVar, INSTRUMENT_TYPE, "",
+                       INSTRUMENT_TYPE_LONG, ncxxString, "", true);
   iret |= _instrumentTypeVar.addAttr(OPTIONS, Radx::instrumentTypeOptions());
   iret |= _instrumentTypeVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
 
@@ -1047,16 +1024,16 @@ int Cf2RadxFile::_addScalarVariables()
 
     // radar
 
-    iret |= _file.addVar(_radarAntennaGainHVar, RADAR_ANTENNA_GAIN_H,
-                         "", RADAR_ANTENNA_GAIN_H_LONG, ncxxFloat, DB, true);
-    iret |= _file.addVar(_radarAntennaGainVVar, RADAR_ANTENNA_GAIN_V,
-                         "", RADAR_ANTENNA_GAIN_V_LONG, ncxxFloat, DB, true);
-    iret |= _file.addVar(_radarBeamWidthHVar, RADAR_BEAM_WIDTH_H,
-                         "", RADAR_BEAM_WIDTH_H_LONG, ncxxFloat, DEGREES, true);
-    iret |= _file.addVar(_radarBeamWidthVVar, RADAR_BEAM_WIDTH_V,
-                         "", RADAR_BEAM_WIDTH_V_LONG, ncxxFloat, DEGREES, true);
-    iret |= _file.addVar(_radarRxBandwidthVar, RADAR_RX_BANDWIDTH,
-                         "", RADAR_RX_BANDWIDTH_LONG, ncxxFloat, HZ, true);
+    iret |= _file.addVar(_radarAntennaGainHVar, RADAR_ANTENNA_GAIN_H, "",
+                         RADAR_ANTENNA_GAIN_H_LONG, ncxxFloat, DB, true);
+    iret |= _file.addVar(_radarAntennaGainVVar, RADAR_ANTENNA_GAIN_V, "",
+                         RADAR_ANTENNA_GAIN_V_LONG, ncxxFloat, DB, true);
+    iret |= _file.addVar(_radarBeamWidthHVar, RADAR_BEAM_WIDTH_H, "",
+                         RADAR_BEAM_WIDTH_H_LONG, ncxxFloat, DEGREES, true);
+    iret |= _file.addVar(_radarBeamWidthVVar, RADAR_BEAM_WIDTH_V, "",
+                         RADAR_BEAM_WIDTH_V_LONG, ncxxFloat, DEGREES, true);
+    iret |= _file.addVar(_radarRxBandwidthVar, RADAR_RX_BANDWIDTH, "",
+                         RADAR_RX_BANDWIDTH_LONG, ncxxFloat, HZ, true);
     
     iret |= _radarAntennaGainHVar.addAttr(META_GROUP, RADAR_PARAMETERS);
     iret |= _radarAntennaGainVVar.addAttr(META_GROUP, RADAR_PARAMETERS);
@@ -1068,20 +1045,20 @@ int Cf2RadxFile::_addScalarVariables()
 
     // lidar
 
-    iret |= _file.addVar(_lidarConstantVar, LIDAR_CONSTANT,
-                         "", LIDAR_CONSTANT_LONG, ncxxFloat, DB, true);
-    iret |= _file.addVar(_lidarPulseEnergyJVar, LIDAR_PULSE_ENERGY,
-                         "", LIDAR_PULSE_ENERGY_LONG, ncxxFloat, JOULES, true);
-    iret |= _file.addVar(_lidarPeakPowerWVar, LIDAR_PEAK_POWER,
-                         "", LIDAR_PEAK_POWER_LONG, ncxxFloat, WATTS, true);
-    iret |= _file.addVar(_lidarApertureDiamCmVar, LIDAR_APERTURE_DIAMETER,
-                         "", LIDAR_APERTURE_DIAMETER_LONG, ncxxFloat, CM, true);
-    iret |= _file.addVar(_lidarApertureEfficiencyVar, LIDAR_APERTURE_EFFICIENCY,
-                         "", LIDAR_APERTURE_EFFICIENCY_LONG, ncxxFloat, PERCENT, true);
-    iret |= _file.addVar(_lidarFieldOfViewMradVar, LIDAR_FIELD_OF_VIEW,
-                         "", LIDAR_FIELD_OF_VIEW_LONG, ncxxFloat, MRAD, true);
-    iret |= _file.addVar(_lidarBeamDivergenceMradVar, LIDAR_BEAM_DIVERGENCE,
-                         "", LIDAR_BEAM_DIVERGENCE_LONG, ncxxFloat, MRAD, true);
+    iret |= _file.addVar(_lidarConstantVar, LIDAR_CONSTANT, "",
+                         LIDAR_CONSTANT_LONG, ncxxFloat, DB, true);
+    iret |= _file.addVar(_lidarPulseEnergyJVar, LIDAR_PULSE_ENERGY, "",
+                         LIDAR_PULSE_ENERGY_LONG, ncxxFloat, JOULES, true);
+    iret |= _file.addVar(_lidarPeakPowerWVar, LIDAR_PEAK_POWER, "",
+                         LIDAR_PEAK_POWER_LONG, ncxxFloat, WATTS, true);
+    iret |= _file.addVar(_lidarApertureDiamCmVar, LIDAR_APERTURE_DIAMETER, "",
+                         LIDAR_APERTURE_DIAMETER_LONG, ncxxFloat, CM, true);
+    iret |= _file.addVar(_lidarApertureEfficiencyVar, LIDAR_APERTURE_EFFICIENCY, "",
+                         LIDAR_APERTURE_EFFICIENCY_LONG, ncxxFloat, PERCENT, true);
+    iret |= _file.addVar(_lidarFieldOfViewMradVar, LIDAR_FIELD_OF_VIEW, "",
+                         LIDAR_FIELD_OF_VIEW_LONG, ncxxFloat, MRAD, true);
+    iret |= _file.addVar(_lidarBeamDivergenceMradVar, LIDAR_BEAM_DIVERGENCE, "",
+                         LIDAR_BEAM_DIVERGENCE_LONG, ncxxFloat, MRAD, true);
     
     iret |= _lidarConstantVar.addAttr(META_GROUP, LIDAR_PARAMETERS);
     iret |= _lidarPulseEnergyJVar.addAttr(META_GROUP, LIDAR_PARAMETERS);
@@ -1096,14 +1073,14 @@ int Cf2RadxFile::_addScalarVariables()
   // start time
 
   iret |= _file.addVar(_startTimeVar, TIME_COVERAGE_START,
-                       "", TIME_COVERAGE_START_LONG, ncxxChar, _stringLen32Dim, "", true);
+                       "", TIME_COVERAGE_START_LONG, ncxxString, "", true);
   iret |= _startTimeVar.addAttr(COMMENT,
                                 "ray times are relative to start time in secs");
 
   // end time
 
   iret |= _file.addVar(_endTimeVar, TIME_COVERAGE_END,
-                       "", TIME_COVERAGE_END_LONG, ncxxChar, _stringLen32Dim, "", true);
+                       "", TIME_COVERAGE_END_LONG, ncxxString, "", true);
 
   if (iret) {
     _addErrStr("ERROR - Cf2RadxFile::_addScalarVariables");
@@ -1299,36 +1276,41 @@ int Cf2RadxFile::_addSweepVariables()
   
   int iret = 0;
 
+  iret |= _file.addVar(_sweepGroupNameVar, SWEEP_GROUP_NAME,
+                       "", SWEEP_GROUP_NAME_LONG, 
+                       ncxxString, _sweepDim, "", true);
+
   iret |= _file.addVar(_sweepNumberVar, SWEEP_NUMBER,
                        "", SWEEP_NUMBER_LONG,
                        ncxxInt, _sweepDim, "", true);
 
   iret |= _file.addVar(_sweepModeVar, SWEEP_MODE,
                        "", SWEEP_MODE_LONG,
-                       ncxxChar, _sweepDim, _stringLen32Dim, "", true);
+                       ncxxString, _sweepDim, "", true);
   iret |= _sweepModeVar.addAttr(OPTIONS, Radx::sweepModeOptions());
 
   iret |= _file.addVar(_polModeVar, POLARIZATION_MODE,
                        "", POLARIZATION_MODE_LONG, 
-                       ncxxChar, _sweepDim, _stringLen32Dim, "", true);
+                       ncxxString, _sweepDim, "", true);
   iret |= _polModeVar.addAttr(OPTIONS, Radx::polarizationModeOptions());
   iret |= _polModeVar.addAttr(META_GROUP, RADAR_PARAMETERS);
   
   iret |= _file.addVar(_prtModeVar, PRT_MODE,
                        "", PRT_MODE_LONG, 
-                       ncxxChar, _sweepDim, _stringLen32Dim, "", true);
+                       ncxxString, _sweepDim, "", true);
   iret |= _prtModeVar.addAttr(OPTIONS, Radx::prtModeOptions());
   iret |= _prtModeVar.addAttr(META_GROUP, RADAR_PARAMETERS);
   
   iret |= _file.addVar(_sweepFollowModeVar, FOLLOW_MODE,
                        "", FOLLOW_MODE_LONG, 
-                       ncxxChar, _sweepDim, _stringLen32Dim, "", true);
+                       ncxxString, _sweepDim, "", true);
   iret |= _sweepFollowModeVar.addAttr(OPTIONS, Radx::followModeOptions());
   iret |= _sweepFollowModeVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
   
   iret |= _file.addVar(_sweepFixedAngleVar, FIXED_ANGLE,
                        "", FIXED_ANGLE_LONG, 
                        ncxxFloat, _sweepDim, DEGREES, true);
+
   iret |= _file.addVar(_targetScanRateVar, TARGET_SCAN_RATE,
                        "", TARGET_SCAN_RATE_LONG, 
                        ncxxFloat, _sweepDim, DEGREES_PER_SECOND, true);
@@ -1342,7 +1324,7 @@ int Cf2RadxFile::_addSweepVariables()
   
   iret |= _file.addVar(_raysAreIndexedVar, RAYS_ARE_INDEXED,
                        "", RAYS_ARE_INDEXED_LONG, 
-                       ncxxChar, _sweepDim, _stringLen8Dim, "", true);
+                       ncxxString, _sweepDim, "", true);
 
   iret |= _file.addVar(_rayAngleResVar, RAY_ANGLE_RES,
                        "", RAY_ANGLE_RES_LONG, 
@@ -1389,7 +1371,7 @@ int Cf2RadxFile::_addCalibVariables()
 
   iret |= _file.addVar(_rCalTimeVar, R_CALIB_TIME,
                        "", R_CALIB_TIME_LONG, 
-                       ncxxChar, _calDim, _stringLen32Dim, "", true);
+                       ncxxString, _calDim, "", true);
   iret |= _rCalTimeVar.addAttr(META_GROUP, RADAR_CALIBRATION);
 
   iret |= _addCalVar(_rCalPulseWidthVar, R_CALIB_PULSE_WIDTH,
@@ -2012,15 +1994,24 @@ int Cf2RadxFile::_writeScalarVariables()
     return -1;
   }
 
+  // primary axis
+  
+  try {
+    string primaryAxis = Radx::primaryAxisToStr(_writeVol->getPrimaryAxis());
+    _primaryAxisVar.putVal(primaryAxis.c_str());
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
+    _addErrStr("  Cannot write primaryAxis");
+    _addErrStr(_file.getErrStr());
+    _addErrStr("  Exception: ", e.what());
+    return -1;
+  }
+
   // instrument type
 
-  String32_t strn;
-  memset(strn, 0, sizeof(String32_t));
-  strncpy(strn,
-          Radx::instrumentTypeToStr(_writeVol->getInstrumentType()).c_str(),
-          sizeof(String32_t) - 1);
   try {
-    _instrumentTypeVar.putVal(strn);
+    string instrumentType = Radx::instrumentTypeToStr(_writeVol->getInstrumentType());
+    _instrumentTypeVar.putVal(instrumentType.c_str());
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write instrumentType");
@@ -2031,31 +2022,12 @@ int Cf2RadxFile::_writeScalarVariables()
 
   // platform type
 
-  memset(strn, 0, sizeof(String32_t));
-  strncpy(strn,
-          Radx::platformTypeToStr(_writeVol->getPlatformType()).c_str(),
-          sizeof(String32_t) - 1);
   try {
-    _platformTypeVar.putVal(strn);
+    _platformTypeVar.putVal(Radx::platformTypeToStr
+                            (_writeVol->getPlatformType()).c_str());
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write platformType");
-    _addErrStr(_file.getErrStr());
-    _addErrStr("  Exception: ", e.what());
-    return -1;
-  }
-
-  // primary axis
-  
-  memset(strn, 0, sizeof(String32_t));
-  strncpy(strn,
-          Radx::primaryAxisToStr(_writeVol->getPrimaryAxis()).c_str(),
-          sizeof(String32_t) - 1);
-  try {
-    _primaryAxisVar.putVal(strn);
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
-    _addErrStr("  Cannot write primaryAxis");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
     return -1;
@@ -2082,11 +2054,8 @@ int Cf2RadxFile::_writeScalarVariables()
   // start time
   
   RadxTime startTime(_writeVol->getStartTimeSecs());
-  memset(strn, 0, sizeof(String32_t));
-  strncpy(strn, startTime.getW3cStr().c_str(),
-          sizeof(String32_t) - 1);
   try {
-    _startTimeVar.putVal(strn);
+    _startTimeVar.putVal(startTime.getW3cStr().c_str());
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write statusTime");
@@ -2098,11 +2067,8 @@ int Cf2RadxFile::_writeScalarVariables()
   // end time
   
   RadxTime endTime(_writeVol->getEndTimeSecs());
-  memset(strn, 0, sizeof(String32_t));
-  strncpy(strn, endTime.getW3cStr().c_str(),
-          sizeof(String32_t) - 1);
   try {
-    _endTimeVar.putVal(strn);
+    _endTimeVar.putVal(endTime.getW3cStr().c_str());
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write endTime");
@@ -2892,12 +2858,6 @@ int Cf2RadxFile::_writeSweepVariables()
   RadxArray<int> ivals_;
   int *ivals = ivals_.alloc(nSweeps);
 
-  RadxArray<String8_t> strings8_;
-  String8_t *strings8 = strings8_.alloc(nSweeps);
-
-  RadxArray<String32_t> strings32_;
-  String32_t *strings32 = strings32_.alloc(nSweeps);
-
   try {
 
     // sweep number
@@ -2907,45 +2867,75 @@ int Cf2RadxFile::_writeSweepVariables()
     }
     _sweepNumberVar.putVal(ivals);
     
-    // sweep mode
-    
-    for (int ii = 0; ii < nSweeps; ii++) {
-      memset(strings32[ii], 0, sizeof(String32_t));
-      Radx::SweepMode_t mode = sweeps[ii]->getSweepMode();
-      strncpy(strings32[ii], Radx::sweepModeToStr(mode).c_str(),
-              sizeof(String32_t) - 1);
+    // group names for sweeps
+
+    {
+      vector<string> sweepNameVec;
+      const char **sweepNames = new const char*[nSweeps];
+      for (int ii = 0; ii < nSweeps; ii++) {
+        char name[128];
+        sprintf(name, "sweep_%.4d", ii + 1);
+        sweepNameVec.push_back(name);
+        sweepNames[ii] = sweepNameVec[ii].c_str();
+      }
+      _sweepGroupNameVar.putVal(sweepNames);
+      delete[] sweepNames;
     }
-    _sweepModeVar.putVal(strings32);
+    
+    // sweep mode
+
+    {
+      vector<string> sweepModeVec;
+      const char **sweepModes = new const char*[nSweeps];
+      for (int ii = 0; ii < nSweeps; ii++) {
+        sweepModeVec.push_back(Radx::sweepModeToStr(sweeps[ii]->getSweepMode()));
+        sweepModes[ii] = sweepModeVec[ii].c_str();
+      }
+      _sweepModeVar.putVal(sweepModes);
+      delete[] sweepModes;
+    }
     
     // pol mode
     
-    for (int ii = 0; ii < nSweeps; ii++) {
-      memset(strings32[ii], 0, sizeof(String32_t));
-      Radx::PolarizationMode_t mode = sweeps[ii]->getPolarizationMode();
-      strncpy(strings32[ii], Radx::polarizationModeToStr(mode).c_str(),
-              sizeof(String32_t) - 1);
+    {
+      vector<string> polModeVec;
+      const char **polModes = new const char*[nSweeps];
+      for (int ii = 0; ii < nSweeps; ii++) {
+        polModeVec.push_back
+          (Radx::polarizationModeToStr(sweeps[ii]->getPolarizationMode()));
+        polModes[ii] = polModeVec[ii].c_str();
+      }
+      _polModeVar.putVal(polModes);
+      delete[] polModes;
     }
-    _polModeVar.putVal(strings32);
     
     // prt mode
-    
-    for (int ii = 0; ii < nSweeps; ii++) {
-      memset(strings32[ii], 0, sizeof(String32_t));
-      Radx::PrtMode_t mode = sweeps[ii]->getPrtMode();
-      strncpy(strings32[ii], Radx::prtModeToStr(mode).c_str(),
-              sizeof(String32_t) - 1);
+
+    {
+      vector<string> prtModeVec;
+      const char **prtModes = new const char*[nSweeps];
+      for (int ii = 0; ii < nSweeps; ii++) {
+        prtModeVec.push_back
+          (Radx::prtModeToStr(sweeps[ii]->getPrtMode()));
+        prtModes[ii] = prtModeVec[ii].c_str();
+      }
+      _prtModeVar.putVal(prtModes);
+      delete[] prtModes;
     }
-    _prtModeVar.putVal(strings32);
     
     // follow mode
-    
-    for (int ii = 0; ii < nSweeps; ii++) {
-      memset(strings32[ii], 0, sizeof(String32_t));
-      Radx::FollowMode_t mode = sweeps[ii]->getFollowMode();
-      strncpy(strings32[ii], Radx::followModeToStr(mode).c_str(),
-              sizeof(String32_t) - 1);
+
+    {
+      vector<string> followModeVec;
+      const char **followModes = new const char*[nSweeps];
+      for (int ii = 0; ii < nSweeps; ii++) {
+        followModeVec.push_back
+          (Radx::followModeToStr(sweeps[ii]->getFollowMode()));
+        followModes[ii] = followModeVec[ii].c_str();
+      }
+      _sweepFollowModeVar.putVal(followModes);
+      delete[] followModes;
     }
-    _sweepFollowModeVar.putVal(strings32);
     
     // fixed angle
     
@@ -2976,16 +2966,21 @@ int Cf2RadxFile::_writeSweepVariables()
     _sweepEndRayIndexVar.putVal(ivals);
     
     // rays are indexed
-    
-    for (int ii = 0; ii < nSweeps; ii++) {
-      memset(strings8[ii], 0, sizeof(String8_t));
-      if (sweeps[ii]->getRaysAreIndexed()) {
-        strcpy(strings8[ii], "true");
-      } else {
-        strcpy(strings8[ii], "false");
+
+    {
+      vector<string> indexedVec;
+      const char **indexed = new const char*[nSweeps];
+      for (int ii = 0; ii < nSweeps; ii++) {
+        if (sweeps[ii]->getRaysAreIndexed()) {
+          indexedVec.push_back("true");
+        } else {
+          indexedVec.push_back("false");
+        }
+        indexed[ii] = indexedVec[ii].c_str();
       }
+      _raysAreIndexedVar.putVal(indexed);
+      delete[] indexed;
     }
-    _raysAreIndexedVar.putVal(strings8);
     
     // ray angle res
     
@@ -3035,17 +3030,18 @@ int Cf2RadxFile::_writeCalibVariables()
 
     // calib time
   
-    RadxArray<String32_t> timesStr_;
-    String32_t *timesStr = timesStr_.alloc(nCalib);
-
-    for (int ii = 0; ii < nCalib; ii++) {
-      const RadxRcalib &calib = *calibs[ii];
-      memset(timesStr[ii], 0, sizeof(String32_t));
-      RadxTime rtime(calib.getCalibTime());
-      strncpy(timesStr[ii], rtime.getW3cStr().c_str(),
-              sizeof(String32_t) - 1);
+    {
+      vector<string> timeStrings;
+      const char **timeChars = new const char*[nCalib];
+      for (int ii = 0; ii < nCalib; ii++) {
+        const RadxRcalib &calib = *calibs[ii];
+        RadxTime rtime(calib.getCalibTime());
+        timeStrings.push_back(rtime.getW3cStr());
+        timeChars[ii] = timeStrings[ii].c_str();
+      }
+      _rCalTimeVar.putVal(timeChars);
+      delete[] timeChars;
     }
-    _rCalTimeVar.putVal(timesStr);
     
     // calib params
   
