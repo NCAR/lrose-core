@@ -35,6 +35,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
+#include <Radx/Cf2RadxFile.hh>
 #include <Radx/D3rNcRadxFile.hh>
 #include <Radx/DoeNcRadxFile.hh>
 #include <Radx/DoradeRadxFile.hh>
@@ -149,6 +150,14 @@ bool RadxFile::_isSupportedNetCDF(const string &path)
   {
     NcfRadxFile file;
     if (file.isCfRadial(path)) {
+      return true;
+    }
+  }
+  
+  // try Cfradial2
+  {
+    Cf2RadxFile file;
+    if (file.isCfRadial2(path)) {
       return true;
     }
   }
@@ -512,7 +521,6 @@ int RadxFile::writeToDir(const RadxVol &vol,
   int iret = 0;
 
   if (_fileFormat == FILE_FORMAT_CFRADIAL ||
-      _fileFormat == FILE_FORMAT_CFRADIAL2 ||
       _fileFormat == FILE_FORMAT_SIGMET_RAW ||
       _fileFormat == FILE_FORMAT_DOE_NC ||
       _fileFormat == FILE_FORMAT_NOXP_NC ||
@@ -546,6 +554,34 @@ int RadxFile::writeToDir(const RadxVol &vol,
       } else {
         cerr << "INFO: RadxFile::writeToDir" << endl;
         cerr << "  Wrote CfRadial file to path: " << _pathInUse << endl;
+      }
+    }
+
+  } else if (_fileFormat == FILE_FORMAT_CFRADIAL2) {
+
+    // CfRadial2
+    
+    if (_debug) {
+      cerr << "INFO: RadxFile::writeToDir" << endl;
+      cerr << "  Writing CFRadial2 file to dir: " << dir << endl;
+    }
+
+    Cf2RadxFile file;
+    file.copyWriteDirectives(*this);
+    iret = file.writeToDir(vol, dir, addDaySubDir, addYearSubDir);
+    _errStr = file.getErrStr();
+    _dirInUse = file.getDirInUse();
+    _pathInUse = file.getPathInUse();
+    vol.setPathInUse(_pathInUse);
+    _writePaths = file.getWritePaths();
+    _writeDataTimes = file.getWriteDataTimes();
+
+    if (_debug) {
+      if (iret) {
+        cerr << file.getErrStr() << endl;
+      } else {
+        cerr << "INFO: RadxFile::writeToDir" << endl;
+        cerr << "  Wrote CFRadial2 file to path: " << _pathInUse << endl;
       }
     }
 
@@ -780,7 +816,6 @@ int RadxFile::writeToPath(const RadxVol &vol,
   int iret = 0;
 
   if (_fileFormat == FILE_FORMAT_CFRADIAL ||
-      _fileFormat == FILE_FORMAT_CFRADIAL2 ||
       _fileFormat == FILE_FORMAT_SIGMET_RAW ||
       _fileFormat == FILE_FORMAT_DOE_NC ||
       _fileFormat == FILE_FORMAT_NOXP_NC ||
@@ -814,6 +849,34 @@ int RadxFile::writeToPath(const RadxVol &vol,
       } else {
         cerr << "INFO: RadxFile::writeToPath" << endl;
         cerr << "  Wrote CfRadial file to path: " << _pathInUse << endl;
+      }
+    }
+
+  } else if (_fileFormat == FILE_FORMAT_CFRADIAL2) {
+
+    // CfRadial2
+    
+    if (_debug) {
+      cerr << "INFO: RadxFile::writeToPath" << endl;
+      cerr << "  Writing CFRadial2 file to path: " << path << endl;
+    }
+
+    Cf2RadxFile file;
+    file.copyWriteDirectives(*this);
+    iret = file.writeToPath(vol, path);
+    _errStr = file.getErrStr();
+    _dirInUse = file.getDirInUse();
+    _pathInUse = file.getPathInUse();
+    vol.setPathInUse(_pathInUse);
+    _writePaths = file.getWritePaths();
+    _writeDataTimes = file.getWriteDataTimes();
+
+    if (_debug) {
+      if (iret) {
+        cerr << file.getErrStr() << endl;
+      } else {
+        cerr << "INFO: RadxFile::writeToPath" << endl;
+        cerr << "  Wrote CFRadial2 file to path: " << _pathInUse << endl;
       }
     }
 
@@ -1048,7 +1111,7 @@ int RadxFile::_readFromPathNetCDF(const string &path,
     }
   }
 
-  // try CF radial first
+  // try CF radial next
 
   {
     NcfRadxFile file;
@@ -1065,6 +1128,29 @@ int RadxFile::_readFromPathNetCDF(const string &path,
         if (_debug) {
           cerr << "INFO: RadxFile::readFromPath" << endl;
           cerr << "  Read CfRadial file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
+  // try CFRadial2 next
+
+  {
+    Cf2RadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isCfRadial2(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read CfRadial2 file, path: " << _pathInUse << endl;
         }
       }
       return iret;

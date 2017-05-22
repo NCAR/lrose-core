@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// NcxxRadxFile_read.cc
+// Cf2RadxFile_read.cc
 //
-// Read methods for NcxxRadxFile object
+// Read methods for Cfradial2 files
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -33,7 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include <Radx/NcxxRadxFile.hh>
+#include <Radx/Cf2RadxFile.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxField.hh>
@@ -59,8 +59,8 @@ using namespace std;
 //
 // Use getErrStr() if error occurs
 
-int NcxxRadxFile::readFromPath(const string &path,
-                               RadxVol &vol)
+int Cf2RadxFile::readFromPath(const string &path,
+                              RadxVol &vol)
   
 {
 
@@ -89,7 +89,7 @@ int NcxxRadxFile::readFromPath(const string &path,
   // load sweep information from files
 
   if (_loadSweepInfo(paths)) {
-    _addErrStr("ERROR - NcxxRadxFile::readFromPath");
+    _addErrStr("ERROR - Cf2RadxFile::readFromPath");
     _addErrStr("  Loading sweep info");
     return -1;
   }
@@ -130,7 +130,7 @@ int NcxxRadxFile::readFromPath(const string &path,
 // Read in data from specified path, load up volume object.
 // Returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_readPath(const string &path, size_t pathNum)
+int Cf2RadxFile::_readPath(const string &path, size_t pathNum)
   
 {
 
@@ -139,7 +139,7 @@ int NcxxRadxFile::_readPath(const string &path, size_t pathNum)
          << pathNum << ", " << path << endl;
   }
 
-  string errStr("ERROR - NcxxRadxFile::readFromPath::_readPath");
+  string errStr("ERROR - Cf2RadxFile::readFromPath::_readPath");
 
   // clear tmp rays
 
@@ -152,7 +152,7 @@ int NcxxRadxFile::_readPath(const string &path, size_t pathNum)
   try {
     _file.open(path, NcxxFile::read);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_readPath");
+    _addErrStr("ERROR - Cf2RadxFile::_readPath");
     _addErrStr("  Cannot open file for reading: ", path);
     _addErrStr("  exception: ", e.what());
     return -1;
@@ -166,12 +166,12 @@ int NcxxRadxFile::_readPath(const string &path, size_t pathNum)
   }
 
   if (_nTimesInFile < 1) {
-    _addErrStr("ERROR - NcxxRadxFile::_readPath");
+    _addErrStr("ERROR - Cf2RadxFile::_readPath");
     _addErrStr("  No times in file");
     return -1;
   }
   if (_nRangeInFile < 1) {
-    _addErrStr("ERROR - NcxxRadxFile::_readPath");
+    _addErrStr("ERROR - Cf2RadxFile::_readPath");
     _addErrStr("  No ranges in file");
     return -1;
   }
@@ -365,8 +365,8 @@ int NcxxRadxFile::_readPath(const string &path, size_t pathNum)
 // get list of paths for the volume for the specified path
 // returns the volume number
 
-int NcxxRadxFile::_getVolumePaths(const string &path,
-                                  vector<string> &paths)
+int Cf2RadxFile::_getVolumePaths(const string &path,
+                                 vector<string> &paths)
   
 {
 
@@ -463,10 +463,10 @@ int NcxxRadxFile::_getVolumePaths(const string &path,
 ///////////////////////////////////////////////////////////
 // add to the path list, given time constraints
 
-void NcxxRadxFile::_addToPathList(const string &dir,
-                                  const string &volStr,
-                                  int minHour, int maxHour,
-                                  vector<string> &paths)
+void Cf2RadxFile::_addToPathList(const string &dir,
+                                 const string &volStr,
+                                 int minHour, int maxHour,
+                                 vector<string> &paths)
   
 {
 
@@ -519,7 +519,7 @@ void NcxxRadxFile::_addToPathList(const string &dir,
 // Load up sweep information from files
 // Returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_loadSweepInfo(const vector<string> &paths)
+int Cf2RadxFile::_loadSweepInfo(const vector<string> &paths)
 {
 
   // read in the sweep info
@@ -574,7 +574,7 @@ int NcxxRadxFile::_loadSweepInfo(const vector<string> &paths)
     // strict checking?
 
     if (_readStrictAngleLimits) {
-      _addErrStr("ERROR - NcxxRadxFile::_loadSweepInfo");
+      _addErrStr("ERROR - Cf2RadxFile::_loadSweepInfo");
       _addErrStr("  No sweeps found within limits:");
       if (_readFixedAngleLimitsSet) {
         _addErrDbl("    min fixed angle: ", _readMinFixedAngle, "%g");
@@ -634,7 +634,7 @@ int NcxxRadxFile::_loadSweepInfo(const vector<string> &paths)
 
 }
 
-int NcxxRadxFile::_appendSweepInfo(const string &path)
+int Cf2RadxFile::_appendSweepInfo(const string &path)
 {
 
   // open file
@@ -642,7 +642,7 @@ int NcxxRadxFile::_appendSweepInfo(const string &path)
   try {
     _file.open(path, NcxxFile::read);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::readFromPath");
+    _addErrStr("ERROR - Cf2RadxFile::readFromPath");
     _addErrStr("  Cannot open file for reading: ", path);
     _addErrStr("  exception: ", e.what());
     return -1;
@@ -651,12 +651,12 @@ int NcxxRadxFile::_appendSweepInfo(const string &path)
   // read dimensions
   
   if (_readDimensions()) {
-    _addErrStr("ERROR - NcxxRadxFile::_appendSweepInfo");
+    _addErrStr("ERROR - Cf2RadxFile::_appendSweepInfo");
     return -1;
   }
 
   if (_readSweepVariables()) {
-    _addErrStr("ERROR - NcxxRadxFile::_appendSweepInfo");
+    _addErrStr("ERROR - Cf2RadxFile::_appendSweepInfo");
     return -1;
   }
   
@@ -684,7 +684,7 @@ int NcxxRadxFile::_appendSweepInfo(const string &path)
 /////////////////////////////////////////////////
 // check if corrections are active on read
 
-void NcxxRadxFile::_checkGeorefsActiveOnRead()
+void Cf2RadxFile::_checkGeorefsActiveOnRead()
 {
 
   _georefsActive = false;
@@ -712,7 +712,7 @@ void NcxxRadxFile::_checkGeorefsActiveOnRead()
 /////////////////////////////////////////////////
 // check if corrections are active on read
 
-void NcxxRadxFile::_checkCorrectionsActiveOnRead()
+void Cf2RadxFile::_checkCorrectionsActiveOnRead()
 {
 
   _correctionsActive = false;
@@ -725,7 +725,7 @@ void NcxxRadxFile::_checkCorrectionsActiveOnRead()
 ///////////////////////////////////
 // read in the dimensions
 
-int NcxxRadxFile::_readDimensions()
+int Cf2RadxFile::_readDimensions()
 
 {
 
@@ -755,7 +755,7 @@ int NcxxRadxFile::_readDimensions()
   iret |= _file.readDim(SWEEP, _sweepDim);
 
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::readDimensions");
+    _addErrStr("ERROR - Cf2RadxFile::readDimensions");
     return -1;
   }
 
@@ -770,7 +770,7 @@ int NcxxRadxFile::_readDimensions()
 ///////////////////////////////////
 // read the global attributes
 
-int NcxxRadxFile::_readGlobalAttributes()
+int Cf2RadxFile::_readGlobalAttributes()
 
 {
 
@@ -780,14 +780,14 @@ int NcxxRadxFile::_readGlobalAttributes()
     NcxxGroupAtt att = _file.getAtt(CONVENTIONS);
     _conventions = att.asString();
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_readGlobalAttributes");
+    _addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
     _addErrStr("  Cannot find conventions attribute");
     return -1;
   }
   if (_conventions.find(BaseConvention) == string::npos) {
     if (_conventions.find("CF") == string::npos &&
         _conventions.find("Radial") == string::npos) {
-      _addErrStr("ERROR - NcxxRadxFile::_readGlobalAttributes");
+      _addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
       _addErrStr("  Invalid Conventions attribute: ", _conventions);
       return -1;
     }
@@ -802,7 +802,7 @@ int NcxxRadxFile::_readGlobalAttributes()
       _instrumentName = "unknown";
     }
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_readGlobalAttributes");
+    _addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
     _addErrStr("  Cannot find instrument_name attribute");
     return -1;
   }
@@ -883,7 +883,7 @@ int NcxxRadxFile::_readGlobalAttributes()
 ///////////////////////////////////
 // read the times
 
-int NcxxRadxFile::_readTimes(int pathNum)
+int Cf2RadxFile::_readTimes(int pathNum)
 
 {
 
@@ -891,19 +891,19 @@ int NcxxRadxFile::_readTimes(int pathNum)
 
   _timeVar = _file.getVar(TIME);
   if (_timeVar.isNull()) {
-    _addErrStr("ERROR - NcxxRadxFile::_readTimes");
+    _addErrStr("ERROR - Cf2RadxFile::_readTimes");
     _addErrStr("  Cannot find time variable, name: ", TIME);
     _addErrStr(_file.getErrStr());
     return -1;
   }
   if (_timeVar.getDimCount() < 1) {
-    _addErrStr("ERROR - NcxxRadxFile::_readTimes");
+    _addErrStr("ERROR - Cf2RadxFile::_readTimes");
     _addErrStr("  time variable has no dimensions");
     return -1;
   }
   NcxxDim timeDim = _timeVar.getDim(0);
   if (timeDim != _timeDim) {
-    _addErrStr("ERROR - NcxxRadxFile::_readTimes");
+    _addErrStr("ERROR - Cf2RadxFile::_readTimes");
     _addErrStr("  Time has incorrect dimension, name: ", timeDim.getName());
     return -1;
   }
@@ -917,7 +917,7 @@ int NcxxRadxFile::_readTimes(int pathNum)
     RadxTime stime(units);
     _refTimeSecsFile = stime.utime();
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_readTimes");
+    _addErrStr("ERROR - Cf2RadxFile::_readTimes");
     _addErrStr("  Time has no units");
     return -1;
   }
@@ -929,7 +929,7 @@ int NcxxRadxFile::_readTimes(int pathNum)
   try {
     _timeVar.getVal(dtimes);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_readTimes");
+    _addErrStr("ERROR - Cf2RadxFile::_readTimes");
     _addErrStr("  Cannot read times variable");
     _addErrStr("  exception: ", e.what());
     return -1;
@@ -956,13 +956,13 @@ int NcxxRadxFile::_readTimes(int pathNum)
 ///////////////////////////////////
 // read the range variable
 
-int NcxxRadxFile::_readRangeVariable()
+int Cf2RadxFile::_readRangeVariable()
 
 {
 
   _rangeVar = _file.getVar(RANGE);
   if (_rangeVar.isNull() || _rangeVar.numVals() < 1) {
-    _addErrStr("ERROR - NcxxRadxFile::_readRangeVariable");
+    _addErrStr("ERROR - Cf2RadxFile::_readRangeVariable");
     _addErrStr("  Cannot read range");
     _addErrStr(_file.getErrStr());
     return -1;
@@ -983,7 +983,7 @@ int NcxxRadxFile::_readRangeVariable()
 
     NcxxDim rangeDim = _rangeVar.getDim(0);
     if (rangeDim != _rangeDim) {
-      _addErrStr("ERROR - NcxxRadxFile::_readRangeVariable");
+      _addErrStr("ERROR - Cf2RadxFile::_readRangeVariable");
       _addErrStr("  Range has incorrect dimension, name: ", rangeDim.getName());
       return -1;
     }
@@ -996,7 +996,7 @@ int NcxxRadxFile::_readRangeVariable()
         _rangeKm.push_back(*rr / 1000.0);
       }
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - NcxxRadxFile::_readRangeVariable");
+      _addErrStr("ERROR - Cf2RadxFile::_readRangeVariable");
       _addErrStr("  getVal fails, cannot get range data array, var name: ", rangeDim.getName());
       return -1;
     }
@@ -1011,7 +1011,7 @@ int NcxxRadxFile::_readRangeVariable()
     NcxxDim timeDim = _rangeVar.getDim(0);
     NcxxDim rangeDim = _rangeVar.getDim(1);
     if (timeDim != _timeDim || rangeDim != _rangeDim) {
-      _addErrStr("ERROR - NcxxRadxFile::_readRangeVariable");
+      _addErrStr("ERROR - Cf2RadxFile::_readRangeVariable");
       _addErrStr("  Range has incorrect dimensions");
       _addErrStr("  dim0, name: ", timeDim.getName());
       _addErrStr("  dim1, name: ", rangeDim.getName());
@@ -1095,7 +1095,7 @@ int NcxxRadxFile::_readRangeVariable()
 ///////////////////////////////////
 // read the scalar variables
 
-int NcxxRadxFile::_readScalarVariables()
+int Cf2RadxFile::_readScalarVariables()
 
 {
   
@@ -1160,7 +1160,7 @@ int NcxxRadxFile::_readScalarVariables()
   }
 
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_readScalarVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_readScalarVariables");
     return -1;
   } else {
     return 0;
@@ -1171,7 +1171,7 @@ int NcxxRadxFile::_readScalarVariables()
 ///////////////////////////////////
 // read the correction variables
 
-int NcxxRadxFile::_readCorrectionVariables()
+int Cf2RadxFile::_readCorrectionVariables()
 
 {
   
@@ -1261,7 +1261,7 @@ int NcxxRadxFile::_readCorrectionVariables()
 ///////////////////////////////////
 // read the position variables
 
-int NcxxRadxFile::_readPositionVariables()
+int Cf2RadxFile::_readPositionVariables()
 
 {
 
@@ -1270,13 +1270,13 @@ int NcxxRadxFile::_readPositionVariables()
   _georefTimeVar = _file.getVar(GEOREF_TIME);
   if (!_georefTimeVar.isNull()) {
     if (_georefTimeVar.numVals() < 1) {
-      _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
       _addErrStr("  Cannot read georef time");
       _addErrStr(_file.getErrStr());
       return -1;
     }
     if (_georefTimeVar.getType() != ncxxDouble) {
-      _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
       _addErrStr("  georef time is incorrect type: ", 
                  Ncxx::ncxxTypeToStr(_georefTimeVar.getType()));
       _addErrStr("  expecting type: double");
@@ -1289,20 +1289,20 @@ int NcxxRadxFile::_readPositionVariables()
   _latitudeVar = _file.getVar(LATITUDE);
   if (!_latitudeVar.isNull()) {
     if (_latitudeVar.numVals() < 1) {
-      _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
       _addErrStr("  Cannot read latitude");
       _addErrStr(_file.getErrStr());
       return -1;
     }
     if (_latitudeVar.getType() != ncxxDouble) {
-      _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
       _addErrStr("  latitude is incorrect type: ", 
                  Ncxx::ncTypeToStr(_latitudeVar.getType().getId()));
       _addErrStr("  expecting type: double");
       return -1;
     }
   } else {
-    cerr << "WARNING - NcxxRadxFile::_readPositionVariables" << endl;
+    cerr << "WARNING - Cf2RadxFile::_readPositionVariables" << endl;
     cerr << "  No latitude variable" << endl;
     cerr << "  Setting latitude to 0" << endl;
   }
@@ -1310,20 +1310,20 @@ int NcxxRadxFile::_readPositionVariables()
   _longitudeVar = _file.getVar(LONGITUDE);
   if (!_longitudeVar.isNull()) {
     if (_longitudeVar.numVals() < 1) {
-      _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
       _addErrStr("  Cannot read longitude");
       _addErrStr(_file.getErrStr());
       return -1;
     }
     if (_longitudeVar.getType() != ncxxDouble) {
-      _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
       _addErrStr("  longitude is incorrect type: ",
                  Ncxx::ncTypeToStr(_longitudeVar.getType().getId()));
       _addErrStr("  expecting type: double");
       return -1;
     }
   } else {
-    cerr << "WARNING - NcxxRadxFile::_readPositionVariables" << endl;
+    cerr << "WARNING - Cf2RadxFile::_readPositionVariables" << endl;
     cerr << "  No longitude variable" << endl;
     cerr << "  Setting longitude to 0" << endl;
   }
@@ -1331,20 +1331,20 @@ int NcxxRadxFile::_readPositionVariables()
   _altitudeVar = _file.getVar(ALTITUDE);
   if (!_altitudeVar.isNull()) {
     if (_altitudeVar.numVals() < 1) {
-      _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
       _addErrStr("  Cannot read altitude");
       _addErrStr(_file.getErrStr());
       return -1;
     }
     if (_altitudeVar.getType() != ncxxDouble) {
-      _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
       _addErrStr("  altitude is incorrect type: ",
                  Ncxx::ncTypeToStr(_altitudeVar.getType().getId()));
       _addErrStr("  expecting type: double");
       return -1;
     }
   } else {
-    cerr << "WARNING - NcxxRadxFile::_readPositionVariables" << endl;
+    cerr << "WARNING - Cf2RadxFile::_readPositionVariables" << endl;
     cerr << "  No altitude variable" << endl;
     cerr << "  Setting altitude to 0" << endl;
   }
@@ -1352,12 +1352,12 @@ int NcxxRadxFile::_readPositionVariables()
   _altitudeAglVar = _file.getVar(ALTITUDE_AGL);
   if (!_altitudeAglVar.isNull()) {
     if (_altitudeAglVar.numVals() < 1) {
-      _addErrStr("WARNING - NcxxRadxFile::_readPositionVariables");
+      _addErrStr("WARNING - Cf2RadxFile::_readPositionVariables");
       _addErrStr("  Bad variable - altitudeAgl");
       _addErrStr(_file.getErrStr());
     }
     if (_altitudeAglVar.getType() != ncxxDouble) {
-      _addErrStr("WARNING - NcxxRadxFile::_readPositionVariables");
+      _addErrStr("WARNING - Cf2RadxFile::_readPositionVariables");
       _addErrStr("  altitudeAgl is incorrect type: ",
                  Ncxx::ncTypeToStr(_altitudeAglVar.getType().getId()));
       _addErrStr("  expecting type: double");
@@ -1371,7 +1371,7 @@ int NcxxRadxFile::_readPositionVariables()
     try {
       _latitudeVar.getVal(data);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
       _addErrStr("  Cannot read var, name: ", _latitudeVar.getName());
       _addErrStr("  exception: ", e.what());
       return -1;
@@ -1389,7 +1389,7 @@ int NcxxRadxFile::_readPositionVariables()
     try {
       _longitudeVar.getVal(data);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
       _addErrStr("  Cannot read var, name", _longitudeVar.getName());
       _addErrStr("  exception: ", e.what());
       return -1;
@@ -1407,7 +1407,7 @@ int NcxxRadxFile::_readPositionVariables()
     try {
       _altitudeVar.getVal(data);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
       _addErrStr("  Cannot read var, name", _altitudeVar.getName());
       _addErrStr("  exception: ", e.what());
       return -1;
@@ -1425,7 +1425,7 @@ int NcxxRadxFile::_readPositionVariables()
     try {
       _altitudeAglVar.getVal(data);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - NcxxRadxFile::_readPositionVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
       _addErrStr("  Cannot read var, name", _altitudeAglVar.getName());
       _addErrStr("  exception: ", e.what());
       return -1;
@@ -1445,7 +1445,7 @@ int NcxxRadxFile::_readPositionVariables()
 ///////////////////////////////////
 // read the sweep meta-data
 
-int NcxxRadxFile::_readSweepVariables()
+int Cf2RadxFile::_readSweepVariables()
 
 {
 
@@ -1504,7 +1504,7 @@ int NcxxRadxFile::_readSweepVariables()
   _readSweepVar(_intermedFreqHzVar, INTERMED_FREQ_HZ, intermedFreqHz, false);
 
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_readSweepVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_readSweepVariables");
     return -1;
   }
   
@@ -1570,7 +1570,7 @@ int NcxxRadxFile::_readSweepVariables()
 ///////////////////////////////////
 // clear the georeference vectors
 
-void NcxxRadxFile::_clearGeorefVariables()
+void Cf2RadxFile::_clearGeorefVariables()
 
 {
 
@@ -1601,7 +1601,7 @@ void NcxxRadxFile::_clearGeorefVariables()
 ///////////////////////////////////
 // read the georeference meta-data
 
-int NcxxRadxFile::_readGeorefVariables()
+int Cf2RadxFile::_readGeorefVariables()
 
 {
 
@@ -1652,7 +1652,7 @@ int NcxxRadxFile::_readGeorefVariables()
   _readRayVar(DRIVE_ANGLE_2, _geoDriveAngle2, false);
 
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_readGeorefVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_readGeorefVariables");
     return -1;
   }
 
@@ -1663,7 +1663,7 @@ int NcxxRadxFile::_readGeorefVariables()
 ///////////////////////////////////
 // clear the ray variables
 
-void NcxxRadxFile::_clearRayVariables()
+void Cf2RadxFile::_clearRayVariables()
 
 {
 
@@ -1691,7 +1691,7 @@ void NcxxRadxFile::_clearRayVariables()
 ///////////////////////////////////
 // read in ray variables
 
-int NcxxRadxFile::_readRayVariables()
+int Cf2RadxFile::_readRayVariables()
 
 {
 
@@ -1750,7 +1750,7 @@ int NcxxRadxFile::_readRayVariables()
               _rayEstNoiseDbmVx, false);
   
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_readRayVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_readRayVariables");
     return -1;
   }
 
@@ -1762,7 +1762,7 @@ int NcxxRadxFile::_readRayVariables()
 // create the rays to be read in
 // and set meta data
 
-int NcxxRadxFile::_createRays(const string &path)
+int Cf2RadxFile::_createRays(const string &path)
 
 {
 
@@ -1991,7 +1991,7 @@ int NcxxRadxFile::_createRays(const string &path)
 ///////////////////////////////////
 // read the frequency variable
 
-int NcxxRadxFile::_readFrequencyVariable()
+int Cf2RadxFile::_readFrequencyVariable()
 
 {
 
@@ -2020,7 +2020,7 @@ int NcxxRadxFile::_readFrequencyVariable()
 // read the geometry, if available
 // if not available, use main geometry for all rays
 
-void NcxxRadxFile::_readRayGateGeom()
+void Cf2RadxFile::_readRayGateGeom()
 
 {
 
@@ -2071,7 +2071,7 @@ void NcxxRadxFile::_readRayGateGeom()
 /////////////////////////////////////
 // read the ngates and offsets arrays
 
-int NcxxRadxFile::_readRayNgatesAndOffsets()
+int Cf2RadxFile::_readRayNgatesAndOffsets()
 
 {
 
@@ -2097,12 +2097,12 @@ int NcxxRadxFile::_readRayNgatesAndOffsets()
   int iret = 0;
 
   if (_readRayVar(_rayNGatesVar, RAY_N_GATES, _rayNGates)) {
-    _addErrStr("ERROR - NcxxRadxFile::_readRayNGatesAndOffsets");
+    _addErrStr("ERROR - Cf2RadxFile::_readRayNGatesAndOffsets");
     iret = -1;
   }
   
   if (_readRayVar(_rayStartIndexVar, RAY_START_INDEX, _rayStartIndex)) {
-    _addErrStr("ERROR - NcxxRadxFile::_readRayNGatesAndOffsets");
+    _addErrStr("ERROR - Cf2RadxFile::_readRayNGatesAndOffsets");
     iret = -1;
   }
 
@@ -2113,7 +2113,7 @@ int NcxxRadxFile::_readRayNgatesAndOffsets()
 ///////////////////////////////////
 // read the calibration variables
 
-int NcxxRadxFile::_readCalibrationVariables()
+int Cf2RadxFile::_readCalibrationVariables()
 
 {
 
@@ -2126,7 +2126,7 @@ int NcxxRadxFile::_readCalibrationVariables()
   for (size_t ii = 0; ii < _calDim.getSize(); ii++) {
     RadxRcalib *cal = new RadxRcalib;
     if (_readCal(*cal, ii)) {
-      _addErrStr("ERROR - NcxxRadxFile::_readCalibrationVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_readCalibrationVariables");
       _addErrStr("  calibration required, but error on read");
       iret = -1;
     }
@@ -2148,7 +2148,7 @@ int NcxxRadxFile::_readCalibrationVariables()
 
 }
   
-int NcxxRadxFile::_readCal(RadxRcalib &cal, int index)
+int Cf2RadxFile::_readCal(RadxRcalib &cal, int index)
 
 {
 
@@ -2347,7 +2347,7 @@ int NcxxRadxFile::_readCal(RadxRcalib &cal, int index)
 ////////////////////////////////////////////
 // read the field variables
 
-int NcxxRadxFile::_readFieldVariables(bool metaOnly)
+int Cf2RadxFile::_readFieldVariables(bool metaOnly)
 
 {
 
@@ -2400,21 +2400,21 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     
     if (!isFieldRequiredOnRead(name)) {
       if (_verbose) {
-        cerr << "DEBUG - NcxxRadxFile::_readFieldVariables" << endl;
+        cerr << "DEBUG - Cf2RadxFile::_readFieldVariables" << endl;
         cerr << "  -->> rejecting field: " << name << endl;
       }
       continue;
     }
     if (name == "range") {
       if (_verbose) {
-        cerr << "DEBUG - NcxxRadxFile::_readFieldVariables" << endl;
+        cerr << "DEBUG - Cf2RadxFile::_readFieldVariables" << endl;
         cerr << "  -->> ignoring dimension variable: " << name << endl;
       }
       continue;
     }
 
     if (_verbose) {
-      cerr << "DEBUG - NcxxRadxFile::_readFieldVariables" << endl;
+      cerr << "DEBUG - Cf2RadxFile::_readFieldVariables" << endl;
       cerr << "  -->> adding field: " << name << endl;
     }
 
@@ -2625,7 +2625,7 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     } // switch
     
     if (iret) {
-      _addErrStr("ERROR - NcxxRadxFile::_readFieldVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_readFieldVariables");
       _addErrStr("  cannot read field name: ", name);
       _addErrStr(_file.getErrStr());
       return -1;
@@ -2641,8 +2641,8 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
 // read a ray variable - double
 // side effects: set var, vals
 
-int NcxxRadxFile::_readRayVar(NcxxVar &var, const string &name,
-                              vector<double> &vals, bool required)
+int Cf2RadxFile::_readRayVar(NcxxVar &var, const string &name,
+                             vector<double> &vals, bool required)
 
 {
 
@@ -2658,7 +2658,7 @@ int NcxxRadxFile::_readRayVar(NcxxVar &var, const string &name,
       clearErrStr();
       return 0;
     } else {
-      _addErrStr("ERROR - NcxxRadxFile::_readRayVar");
+      _addErrStr("ERROR - Cf2RadxFile::_readRayVar");
       return -1;
     }
   }
@@ -2679,7 +2679,7 @@ int NcxxRadxFile::_readRayVar(NcxxVar &var, const string &name,
       }
       clearErrStr();
     } else {
-      _addErrStr("ERROR - NcxxRadxFile::_readRayVar");
+      _addErrStr("ERROR - Cf2RadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
       _addErrStr(_file.getErrStr());
       iret = -1;
@@ -2694,8 +2694,8 @@ int NcxxRadxFile::_readRayVar(NcxxVar &var, const string &name,
 // read a ray variable - double
 // side effects: set vals only
 
-int NcxxRadxFile::_readRayVar(const string &name,
-                              vector<double> &vals, bool required)
+int Cf2RadxFile::_readRayVar(const string &name,
+                             vector<double> &vals, bool required)
 {
   NcxxVar var;
   return _readRayVar(var, name, vals, required);
@@ -2705,8 +2705,8 @@ int NcxxRadxFile::_readRayVar(const string &name,
 // read a ray variable - integer
 // side effects: set var, vals
 
-int NcxxRadxFile::_readRayVar(NcxxVar &var, const string &name,
-                              vector<int> &vals, bool required)
+int Cf2RadxFile::_readRayVar(NcxxVar &var, const string &name,
+                             vector<int> &vals, bool required)
 
 {
 
@@ -2722,7 +2722,7 @@ int NcxxRadxFile::_readRayVar(NcxxVar &var, const string &name,
       clearErrStr();
       return 0;
     } else {
-      _addErrStr("ERROR - NcxxRadxFile::_readRayVar");
+      _addErrStr("ERROR - Cf2RadxFile::_readRayVar");
       return -1;
     }
   }
@@ -2743,7 +2743,7 @@ int NcxxRadxFile::_readRayVar(NcxxVar &var, const string &name,
       }
       clearErrStr();
     } else {
-      _addErrStr("ERROR - NcxxRadxFile::_readRayVar");
+      _addErrStr("ERROR - Cf2RadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
       _addErrStr(_file.getErrStr());
       iret = -1;
@@ -2758,8 +2758,8 @@ int NcxxRadxFile::_readRayVar(NcxxVar &var, const string &name,
 // read a ray variable - integer
 // side effects: set vals only
 
-int NcxxRadxFile::_readRayVar(const string &name,
-                              vector<int> &vals, bool required)
+int Cf2RadxFile::_readRayVar(const string &name,
+                             vector<int> &vals, bool required)
 {
   NcxxVar var;
   return _readRayVar(var, name, vals, required);
@@ -2769,8 +2769,8 @@ int NcxxRadxFile::_readRayVar(const string &name,
 // read a ray variable - boolean
 // side effects: set var, vals
 
-int NcxxRadxFile::_readRayVar(NcxxVar &var, const string &name,
-                              vector<bool> &vals, bool required)
+int Cf2RadxFile::_readRayVar(NcxxVar &var, const string &name,
+                             vector<bool> &vals, bool required)
   
 {
   
@@ -2786,7 +2786,7 @@ int NcxxRadxFile::_readRayVar(NcxxVar &var, const string &name,
       clearErrStr();
       return 0;
     } else {
-      _addErrStr("ERROR - NcxxRadxFile::_readRayVar");
+      _addErrStr("ERROR - Cf2RadxFile::_readRayVar");
       return -1;
     }
   }
@@ -2811,7 +2811,7 @@ int NcxxRadxFile::_readRayVar(NcxxVar &var, const string &name,
       }
       clearErrStr();
     } else {
-      _addErrStr("ERROR - NcxxRadxFile::_readRayVar");
+      _addErrStr("ERROR - Cf2RadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
       _addErrStr(_file.getErrStr());
       iret = -1;
@@ -2826,8 +2826,8 @@ int NcxxRadxFile::_readRayVar(NcxxVar &var, const string &name,
 // read a ray variable - boolean
 // side effects: set vals only
 
-int NcxxRadxFile::_readRayVar(const string &name,
-                              vector<bool> &vals, bool required)
+int Cf2RadxFile::_readRayVar(const string &name,
+                             vector<bool> &vals, bool required)
 {
   NcxxVar var;
   return _readRayVar(var, name, vals, required);
@@ -2837,7 +2837,7 @@ int NcxxRadxFile::_readRayVar(const string &name,
 // get a ray variable by name
 // returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_getRayVar(NcxxVar &var, const string &name, bool required)
+int Cf2RadxFile::_getRayVar(NcxxVar &var, const string &name, bool required)
 
 {
 
@@ -2846,7 +2846,7 @@ int NcxxRadxFile::_getRayVar(NcxxVar &var, const string &name, bool required)
   var = _file.getVar(name);
   if (var.isNull()) {
     if (required) {
-      _addErrStr("ERROR - NcxxRadxFile::_getRayVar");
+      _addErrStr("ERROR - Cf2RadxFile::_getRayVar");
       _addErrStr("  Cannot read variable, name: ", name);
       _addErrStr(_file.getErrStr());
     }
@@ -2857,7 +2857,7 @@ int NcxxRadxFile::_getRayVar(NcxxVar &var, const string &name, bool required)
   
   if (var.getDimCount() < 1) {
     if (required) {
-      _addErrStr("ERROR - NcxxRadxFile::_getRayVar");
+      _addErrStr("ERROR - Cf2RadxFile::_getRayVar");
       _addErrStr("  variable name: ", name);
       _addErrStr("  variable has no dimensions");
     }
@@ -2866,7 +2866,7 @@ int NcxxRadxFile::_getRayVar(NcxxVar &var, const string &name, bool required)
   NcxxDim timeDim = var.getDim(0);
   if (timeDim != _timeDim) {
     if (required) {
-      _addErrStr("ERROR - NcxxRadxFile::_getRayVar");
+      _addErrStr("ERROR - Cf2RadxFile::_getRayVar");
       _addErrStr("  variable name: ", name);
       _addErrStr("  variable has incorrect dimension, dim name: ", 
                  timeDim.getName());
@@ -2882,8 +2882,8 @@ int NcxxRadxFile::_getRayVar(NcxxVar &var, const string &name, bool required)
 ///////////////////////////////////
 // read a sweep variable - double
 
-int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
-                                vector<double> &vals, bool required)
+int Cf2RadxFile::_readSweepVar(NcxxVar &var, const string &name,
+                               vector<double> &vals, bool required)
 
 {
 
@@ -2900,7 +2900,7 @@ int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
       clearErrStr();
       return 0;
     } else {
-      _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
+      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
       return -1;
     }
   }
@@ -2921,7 +2921,7 @@ int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
       }
       clearErrStr();
     } else {
-      _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
+      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
       _addErrStr("  Cannot read variable: ", name);
       _addErrStr(_file.getErrStr());
       iret = -1;
@@ -2935,8 +2935,8 @@ int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
 ///////////////////////////////////
 // read a sweep variable - integer
 
-int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
-                                vector<int> &vals, bool required)
+int Cf2RadxFile::_readSweepVar(NcxxVar &var, const string &name,
+                               vector<int> &vals, bool required)
 
 {
 
@@ -2953,7 +2953,7 @@ int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
       clearErrStr();
       return 0;
     } else {
-      _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
+      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
       return -1;
     }
   }
@@ -2974,7 +2974,7 @@ int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
       }
       clearErrStr();
     } else {
-      _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
+      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
       _addErrStr("  Cannot read variable: ", name);
       _addErrStr(_file.getErrStr());
       iret = -1;
@@ -2988,8 +2988,8 @@ int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
 ///////////////////////////////////
 // read a sweep variable - string
 
-int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
-                                vector<string> &vals, bool required)
+int Cf2RadxFile::_readSweepVar(NcxxVar &var, const string &name,
+                               vector<string> &vals, bool required)
 
 {
 
@@ -3005,7 +3005,7 @@ int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
       clearErrStr();
       return 0;
     } else {
-      _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
+      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
       _addErrStr("  Cannot read variable, name: ", name);
       _addErrStr(_file.getErrStr());
       return -1;
@@ -3015,14 +3015,14 @@ int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
   // check sweep dimension
   
   if (var.getDimCount() < 2) {
-    _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
+    _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has fewer than 2 dimensions");
     return -1;
   }
   NcxxDim sweepDim = var.getDim(0);
   if (sweepDim != _sweepDim) {
-    _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
+    _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has incorrect first dimension, dim name: ",
                sweepDim.getName());
@@ -3031,7 +3031,7 @@ int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
   }
   NcxxDim stringLenDim = var.getDim(1);
   if (stringLenDim.isNull()) {
-    _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
+    _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has NULL second dimension");
     _addErrStr("  should be a string length dimension");
@@ -3040,7 +3040,7 @@ int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
 
   int ntype = var.getType().getId();
   if (ntype != NC_CHAR) {
-    _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
+    _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
     _addErrStr("  Incorrect variable type");
     _addErrStr("  Expecting char");
     _addErrStr("  Found: ", Ncxx::ncTypeToStr(ntype));
@@ -3073,7 +3073,7 @@ int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
     if (!required) {
       clearErrStr();
     } else {
-      _addErrStr("ERROR - NcxxRadxFile::_readSweepVar");
+      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
       _addErrStr("  Cannot read variable: ", name);
       _addErrStr(_file.getErrStr());
       return -1;
@@ -3089,7 +3089,7 @@ int NcxxRadxFile::_readSweepVar(NcxxVar &var, const string &name,
 // get a sweep variable
 // returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_getSweepVar(NcxxVar &var, const string &name)
+int Cf2RadxFile::_getSweepVar(NcxxVar &var, const string &name)
 
 {
   
@@ -3097,7 +3097,7 @@ int NcxxRadxFile::_getSweepVar(NcxxVar &var, const string &name)
   
   var = _file.getVar(name);
   if (var.isNull()) {
-    _addErrStr("ERROR - NcxxRadxFile::_getSweepVar");
+    _addErrStr("ERROR - Cf2RadxFile::_getSweepVar");
     _addErrStr("  Cannot read variable, name: ", name);
     _addErrStr(_file.getErrStr());
     return -1;
@@ -3106,14 +3106,14 @@ int NcxxRadxFile::_getSweepVar(NcxxVar &var, const string &name)
   // check sweep dimension
   
   if (var.getDimCount() < 1) {
-    _addErrStr("ERROR - NcxxRadxFile::_getSweepVar");
+    _addErrStr("ERROR - Cf2RadxFile::_getSweepVar");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has no dimensions");
     return -1;
   }
   NcxxDim sweepDim = var.getDim(0);
   if (sweepDim != _sweepDim) {
-    _addErrStr("ERROR - NcxxRadxFile::_getSweepVar");
+    _addErrStr("ERROR - Cf2RadxFile::_getSweepVar");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has incorrect dimension, dim name: ",
                sweepDim.getName());
@@ -3129,15 +3129,15 @@ int NcxxRadxFile::_getSweepVar(NcxxVar &var, const string &name)
 // get calibration time
 // returns -1 on failure
 
-int NcxxRadxFile::_readCalTime(const string &name, NcxxVar &var,
-                               int index, time_t &val)
+int Cf2RadxFile::_readCalTime(const string &name, NcxxVar &var,
+                              int index, time_t &val)
 
 {
 
   var = _file.getVar(name);
 
   if (var.isNull()) {
-    _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
+    _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
     _addErrStr("  cal variable name: ", name);
     _addErrStr("  Cannot read calibration time");
     _addErrStr(_file.getErrStr());
@@ -3147,7 +3147,7 @@ int NcxxRadxFile::_readCalTime(const string &name, NcxxVar &var,
   // check cal dimension
 
   if (var.getDimCount() < 2) {
-    _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
+    _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has fewer than 2 dimensions");
     return -1;
@@ -3155,7 +3155,7 @@ int NcxxRadxFile::_readCalTime(const string &name, NcxxVar &var,
 
   NcxxDim rCalDim = var.getDim(0);
   if (rCalDim != _calDim) {
-    _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
+    _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has incorrect first dimension, dim name: ", 
                rCalDim.getName());
@@ -3165,7 +3165,7 @@ int NcxxRadxFile::_readCalTime(const string &name, NcxxVar &var,
 
   NcxxDim stringLenDim = var.getDim(1);
   if (stringLenDim.isNull()) {
-    _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
+    _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has NULL second dimension");
     _addErrStr("  should be a string length dimension");
@@ -3174,7 +3174,7 @@ int NcxxRadxFile::_readCalTime(const string &name, NcxxVar &var,
   
   int ntype = var.getType().getId();
   if (ntype != NC_CHAR) {
-    _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
+    _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
     _addErrStr("  Incorrect variable type");
     _addErrStr("  Expecting char");
     _addErrStr("  Found: ", Ncxx::ncTypeToStr(ntype));
@@ -3185,7 +3185,7 @@ int NcxxRadxFile::_readCalTime(const string &name, NcxxVar &var,
   
   size_t nCals = _calDim.getSize();
   if (index > (int) nCals - 1) {
-    _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
+    _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
     _addErrStr("  requested index too high");
     _addErrStr("  cal variable name: ", name);
     _addErrInt("  requested index: ", index);
@@ -3210,7 +3210,7 @@ int NcxxRadxFile::_readCalTime(const string &name, NcxxVar &var,
     }
     delete[] cval;
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
+    _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
     _addErrStr("  Cannot read variable: ", name);
     _addErrStr(_file.getErrStr());
     delete[] cvalues;
@@ -3222,7 +3222,7 @@ int NcxxRadxFile::_readCalTime(const string &name, NcxxVar &var,
   int year, month, day, hour, min, sec;
   if (sscanf(timeStr, "%4d-%2d-%2dT%2d:%2d:%2dZ",
              &year, &month, &day, &hour, &min, &sec) != 6) {
-    _addErrStr("ERROR - NcxxRadxFile::_readCalTime");
+    _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
     _addErrStr("  Cannot parse cal time string: ", timeStr);
     return -1;
   }
@@ -3237,8 +3237,8 @@ int NcxxRadxFile::_readCalTime(const string &name, NcxxVar &var,
 // get calibration variable
 // returns -1 on failure
 
-int NcxxRadxFile::_readCalVar(const string &name, NcxxVar &var,
-                              int index, double &val, bool required)
+int Cf2RadxFile::_readCalVar(const string &name, NcxxVar &var,
+                             int index, double &val, bool required)
   
 {
 
@@ -3249,7 +3249,7 @@ int NcxxRadxFile::_readCalVar(const string &name, NcxxVar &var,
     if (!required) {
       return 0;
     } else {
-      _addErrStr("ERROR - NcxxRadxFile::_readCalVar");
+      _addErrStr("ERROR - Cf2RadxFile::_readCalVar");
       _addErrStr("  cal variable name: ", name);
       _addErrStr("  Cannot read calibration variable");
       _addErrStr(_file.getErrStr());
@@ -3258,7 +3258,7 @@ int NcxxRadxFile::_readCalVar(const string &name, NcxxVar &var,
   }
 
   if (var.numVals() < index-1) {
-    _addErrStr("ERROR - NcxxRadxFile::_readCalVar");
+    _addErrStr("ERROR - Cf2RadxFile::_readCalVar");
     _addErrStr("  requested index too high");
     _addErrStr("  cal variable name: ", name);
     _addErrInt("  requested index: ", index);
@@ -3276,7 +3276,7 @@ int NcxxRadxFile::_readCalVar(const string &name, NcxxVar &var,
     var.getVal(indices, &data);
     val = data;
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_readCalVarVar");
+    _addErrStr("ERROR - Cf2RadxFile::_readCalVarVar");
     _addErrStr("  Cannot read variable: ", name);
     _addErrStr(_file.getErrStr());
     iret = -1;
@@ -3291,15 +3291,15 @@ int NcxxRadxFile::_readCalVar(const string &name, NcxxVar &var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_addFl64FieldToRays(NcxxVar &var,
-                                      const string &name,
-                                      const string &units,
-                                      const string &standardName,
-                                      const string &longName,
-                                      bool isDiscrete,
-                                      bool fieldFolds,
-                                      float foldLimitLower,
-                                      float foldLimitUpper)
+int Cf2RadxFile::_addFl64FieldToRays(NcxxVar &var,
+                                     const string &name,
+                                     const string &units,
+                                     const string &standardName,
+                                     const string &longName,
+                                     bool isDiscrete,
+                                     bool fieldFolds,
+                                     float foldLimitLower,
+                                     float foldLimitUpper)
   
 {
 
@@ -3353,7 +3353,7 @@ int NcxxRadxFile::_addFl64FieldToRays(NcxxVar &var,
     size_t rayIndex = _raysToRead[ii].indexInFile;
 
     if (rayIndex > _nTimesInFile - 1) {
-      cerr << "WARNING - NcxxRadxFile::_addFl64FieldToRays" << endl;
+      cerr << "WARNING - Cf2RadxFile::_addFl64FieldToRays" << endl;
       cerr << "  Trying to access ray beyond data" << endl;
       cerr << "  Trying to read ray index: " << rayIndex << endl;
       cerr << "  nTimesInFile: " << _nTimesInFile << endl;
@@ -3399,15 +3399,15 @@ int NcxxRadxFile::_addFl64FieldToRays(NcxxVar &var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_addFl32FieldToRays(NcxxVar &var,
-                                      const string &name,
-                                      const string &units,
-                                      const string &standardName,
-                                      const string &longName,
-                                      bool isDiscrete,
-                                      bool fieldFolds,
-                                      float foldLimitLower,
-                                      float foldLimitUpper)
+int Cf2RadxFile::_addFl32FieldToRays(NcxxVar &var,
+                                     const string &name,
+                                     const string &units,
+                                     const string &standardName,
+                                     const string &longName,
+                                     bool isDiscrete,
+                                     bool fieldFolds,
+                                     float foldLimitLower,
+                                     float foldLimitUpper)
   
 {
 
@@ -3461,7 +3461,7 @@ int NcxxRadxFile::_addFl32FieldToRays(NcxxVar &var,
     size_t rayIndex = _raysToRead[ii].indexInFile;
 
     if (rayIndex > _nTimesInFile - 1) {
-      cerr << "WARNING - NcxxRadxFile::_addFl32FieldToRays" << endl;
+      cerr << "WARNING - Cf2RadxFile::_addFl32FieldToRays" << endl;
       cerr << "  Trying to access ray beyond data" << endl;
       cerr << "  Trying to read ray index: " << rayIndex << endl;
       cerr << "  nTimesInFile: " << _nTimesInFile << endl;
@@ -3507,16 +3507,16 @@ int NcxxRadxFile::_addFl32FieldToRays(NcxxVar &var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_addSi32FieldToRays(NcxxVar &var,
-                                      const string &name,
-                                      const string &units,
-                                      const string &standardName,
-                                      const string &longName,
-                                      double scale, double offset,
-                                      bool isDiscrete,
-                                      bool fieldFolds,
-                                      float foldLimitLower,
-                                      float foldLimitUpper)
+int Cf2RadxFile::_addSi32FieldToRays(NcxxVar &var,
+                                     const string &name,
+                                     const string &units,
+                                     const string &standardName,
+                                     const string &longName,
+                                     double scale, double offset,
+                                     bool isDiscrete,
+                                     bool fieldFolds,
+                                     float foldLimitLower,
+                                     float foldLimitUpper)
   
 {
 
@@ -3562,7 +3562,7 @@ int NcxxRadxFile::_addSi32FieldToRays(NcxxVar &var,
     size_t rayIndex = _raysToRead[ii].indexInFile;
 
     if (rayIndex > _nTimesInFile - 1) {
-      cerr << "WARNING - NcxxRadxFile::_addSi32FieldToRays" << endl;
+      cerr << "WARNING - Cf2RadxFile::_addSi32FieldToRays" << endl;
       cerr << "  Trying to access ray beyond data" << endl;
       cerr << "  Trying to read ray index: " << rayIndex << endl;
       cerr << "  nTimesInFile: " << _nTimesInFile << endl;
@@ -3609,16 +3609,16 @@ int NcxxRadxFile::_addSi32FieldToRays(NcxxVar &var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_addSi16FieldToRays(NcxxVar &var,
-                                      const string &name,
-                                      const string &units,
-                                      const string &standardName,
-                                      const string &longName,
-                                      double scale, double offset,
-                                      bool isDiscrete,
-                                      bool fieldFolds,
-                                      float foldLimitLower,
-                                      float foldLimitUpper)
+int Cf2RadxFile::_addSi16FieldToRays(NcxxVar &var,
+                                     const string &name,
+                                     const string &units,
+                                     const string &standardName,
+                                     const string &longName,
+                                     double scale, double offset,
+                                     bool isDiscrete,
+                                     bool fieldFolds,
+                                     float foldLimitLower,
+                                     float foldLimitUpper)
   
 {
 
@@ -3664,7 +3664,7 @@ int NcxxRadxFile::_addSi16FieldToRays(NcxxVar &var,
     size_t rayIndex = _raysToRead[ii].indexInFile;
 
     if (rayIndex > _nTimesInFile - 1) {
-      cerr << "WARNING - NcxxRadxFile::_addSi16FieldToRays" << endl;
+      cerr << "WARNING - Cf2RadxFile::_addSi16FieldToRays" << endl;
       cerr << "  Trying to access ray beyond data" << endl;
       cerr << "  Trying to read ray index: " << rayIndex << endl;
       cerr << "  nTimesInFile: " << _nTimesInFile << endl;
@@ -3711,16 +3711,16 @@ int NcxxRadxFile::_addSi16FieldToRays(NcxxVar &var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_addSi08FieldToRays(NcxxVar &var,
-                                      const string &name,
-                                      const string &units,
-                                      const string &standardName,
-                                      const string &longName,
-                                      double scale, double offset,
-                                      bool isDiscrete,
-                                      bool fieldFolds,
-                                      float foldLimitLower,
-                                      float foldLimitUpper)
+int Cf2RadxFile::_addSi08FieldToRays(NcxxVar &var,
+                                     const string &name,
+                                     const string &units,
+                                     const string &standardName,
+                                     const string &longName,
+                                     double scale, double offset,
+                                     bool isDiscrete,
+                                     bool fieldFolds,
+                                     float foldLimitLower,
+                                     float foldLimitUpper)
   
 {
 
@@ -3766,7 +3766,7 @@ int NcxxRadxFile::_addSi08FieldToRays(NcxxVar &var,
     size_t rayIndex = _raysToRead[ii].indexInFile;
 
     if (rayIndex > _nTimesInFile - 1) {
-      cerr << "WARNING - NcxxRadxFile::_addSi08FieldToRays" << endl;
+      cerr << "WARNING - Cf2RadxFile::_addSi08FieldToRays" << endl;
       cerr << "  Trying to access ray beyond data" << endl;
       cerr << "  Trying to read ray index: " << rayIndex << endl;
       cerr << "  nTimesInFile: " << _nTimesInFile << endl;
@@ -3811,7 +3811,7 @@ int NcxxRadxFile::_addSi08FieldToRays(NcxxVar &var,
 /////////////////////////////////////////////////////////
 // load up the read volume with the data from this object
 
-void NcxxRadxFile::_loadReadVolume()
+void Cf2RadxFile::_loadReadVolume()
   
 {
 
@@ -3942,7 +3942,7 @@ void NcxxRadxFile::_loadReadVolume()
 // Compute the fixed angles by averaging the elevation angles
 // on the sweeps
 
-void NcxxRadxFile::_computeFixedAngles()
+void Cf2RadxFile::_computeFixedAngles()
   
 {
 

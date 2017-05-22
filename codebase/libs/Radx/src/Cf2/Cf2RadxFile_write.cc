@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// NcxxRadxFile_write.cc
+// Cf2RadxFile_write.cc
 //
-// Write methods for NcxxRadxFile object
+// Write methods for Cfradial2 files
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -33,7 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include <Radx/NcxxRadxFile.hh>
+#include <Radx/Cf2RadxFile.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxField.hh>
@@ -71,15 +71,15 @@ using namespace std;
 // Use getDirInUse() for dir written
 // Use getPathInUse() for path written
 
-int NcxxRadxFile::writeToDir(const RadxVol &vol,
-                             const string &dir,
-                             bool addDaySubDir,
-                             bool addYearSubDir)
+int Cf2RadxFile::writeToDir(const RadxVol &vol,
+                            const string &dir,
+                            bool addDaySubDir,
+                            bool addYearSubDir)
   
 {
 
   if (_debug) {
-    cerr << "DEBUG - NcxxRadxFile::writeToDir" << endl;
+    cerr << "DEBUG - Cf2RadxFile::writeToDir" << endl;
     cerr << "  Writing to dir: " << dir << endl;
   }
 
@@ -134,7 +134,7 @@ int NcxxRadxFile::writeToDir(const RadxVol &vol,
   // make sure output subdir exists
   
   if (makeDirRecurse(outDir)) {
-    _addErrStr("ERROR - NcxxRadxFile::writeToDir");
+    _addErrStr("ERROR - Cf2RadxFile::writeToDir");
     _addErrStr("  Cannot make output dir: ", outDir);
     return -1;
   }
@@ -152,7 +152,7 @@ int NcxxRadxFile::writeToDir(const RadxVol &vol,
   int iret = writeToPath(*_writeVol, writePath);
 
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeToDir");
+    _addErrStr("ERROR - Cf2RadxFile::_writeToDir");
     return -1;
   }
 
@@ -163,15 +163,15 @@ int NcxxRadxFile::writeToDir(const RadxVol &vol,
 ////////////////////////////////////////////
 // split volume into sweeps and write to dir
 
-int NcxxRadxFile::_writeSweepsToDir(const RadxVol &vol,
-                                    const string &dir,
-                                    bool addDaySubDir,
-                                    bool addYearSubDir)
+int Cf2RadxFile::_writeSweepsToDir(const RadxVol &vol,
+                                   const string &dir,
+                                   bool addDaySubDir,
+                                   bool addYearSubDir)
   
 {
 
   if (_debug) {
-    cerr << "DEBUG - NcxxRadxFile::_writeSweepsToDir" << endl;
+    cerr << "DEBUG - Cf2RadxFile::_writeSweepsToDir" << endl;
     cerr << "  Splitting volume into sweeps" << endl;
   }
   
@@ -209,10 +209,10 @@ int NcxxRadxFile::_writeSweepsToDir(const RadxVol &vol,
 ////////////////////////
 // write a sweep to dir
 
-int NcxxRadxFile::_writeSweepToDir(const RadxVol &vol,
-                                   const string &dir,
-                                   bool addDaySubDir,
-                                   bool addYearSubDir)
+int Cf2RadxFile::_writeSweepToDir(const RadxVol &vol,
+                                  const string &dir,
+                                  bool addDaySubDir,
+                                  bool addYearSubDir)
   
 {
   
@@ -227,7 +227,7 @@ int NcxxRadxFile::_writeSweepToDir(const RadxVol &vol,
   double fixedAngle = sweep.getFixedAngleDeg();
 
   if (_debug) {
-    cerr << "DEBUG - NcxxRadxFile::_writeSweepToDir" << endl;
+    cerr << "DEBUG - Cf2RadxFile::_writeSweepToDir" << endl;
     cerr << "  Writing sweep to dir: " << dir << endl;
     cerr << "  Vol num, scan mode: "
          << volNum << ", " << scanType << endl;
@@ -263,7 +263,7 @@ int NcxxRadxFile::_writeSweepToDir(const RadxVol &vol,
   // make sure output subdir exists
   
   if (makeDirRecurse(outDir)) {
-    _addErrStr("ERROR - NcxxRadxFile::writeToDir");
+    _addErrStr("ERROR - Cf2RadxFile::writeToDir");
     _addErrStr("  Cannot make output dir: ", outDir);
     return -1;
   }
@@ -317,7 +317,7 @@ int NcxxRadxFile::_writeSweepToDir(const RadxVol &vol,
   int iret = writeToPath(*_writeVol, outPath);
 
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeToDir");
+    _addErrStr("ERROR - Cf2RadxFile::_writeToDir");
     return -1;
   }
 
@@ -333,8 +333,8 @@ int NcxxRadxFile::_writeSweepToDir(const RadxVol &vol,
 // Use getErrStr() if error occurs
 // Use getPathInUse() for path written
 
-int NcxxRadxFile::writeToPath(const RadxVol &vol,
-                              const string &path)
+int Cf2RadxFile::writeToPath(const RadxVol &vol,
+                             const string &path)
   
 {
 
@@ -352,7 +352,7 @@ int NcxxRadxFile::writeToPath(const RadxVol &vol,
   _tmpPath = tmpPathFromFilePath(path, "");
 
   if (_debug) {
-    cerr << "DEBUG - NcxxRadxFile::writeToPath" << endl;
+    cerr << "DEBUG - Cf2RadxFile::writeToPath" << endl;
     cerr << "  Writing to path: " << path << endl;
     cerr << "  Tmp path is: " << _tmpPath << endl;
     cerr << "  Writing fields and compressing ..." << endl;
@@ -361,7 +361,7 @@ int NcxxRadxFile::writeToPath(const RadxVol &vol,
   try {
     _file.open(_tmpPath, NcxxFile::replace, _getFileFormat(_ncFormat));
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::writeToPath");
+    _addErrStr("ERROR - Cf2RadxFile::writeToPath");
     _addErrStr("  Cannot open tmp Ncxx file for writing: ", _tmpPath);
     _addErrStr("  exception: ", e.what());
     return -1;
@@ -480,7 +480,7 @@ int NcxxRadxFile::writeToPath(const RadxVol &vol,
   
   if (rename(_tmpPath.c_str(), _pathInUse.c_str())) {
     int errNum = errno;
-    _addErrStr("ERROR - NcxxRadxFile::writeToPath");
+    _addErrStr("ERROR - Cf2RadxFile::writeToPath");
     _addErrStr("  Cannot rename tmp file: ", _tmpPath);
     _addErrStr("  to: ", _pathInUse);
     _addErrStr(strerror(errNum));
@@ -488,7 +488,7 @@ int NcxxRadxFile::writeToPath(const RadxVol &vol,
   }
 
   if (_debug) {
-    cerr << "DEBUG - NcxxRadxFile::writeToPath" << endl;
+    cerr << "DEBUG - Cf2RadxFile::writeToPath" << endl;
     cerr << "  Renamed tmp path: " << _tmpPath << endl;
     cerr << "     to final path: " << path << endl;
   }
@@ -503,7 +503,7 @@ int NcxxRadxFile::writeToPath(const RadxVol &vol,
 /////////////////////////////////////////////////
 // check if georeferences are active on write
 
-void NcxxRadxFile::_checkGeorefsActiveOnWrite()
+void Cf2RadxFile::_checkGeorefsActiveOnWrite()
 {
   
   _georefsActive = false;
@@ -529,7 +529,7 @@ void NcxxRadxFile::_checkGeorefsActiveOnWrite()
 /////////////////////////////////////////////////
 // check if corrections are active on write
 
-void NcxxRadxFile::_checkCorrectionsActiveOnWrite()
+void Cf2RadxFile::_checkCorrectionsActiveOnWrite()
 {
   
   _correctionsActive = false;
@@ -543,11 +543,11 @@ void NcxxRadxFile::_checkCorrectionsActiveOnWrite()
 // addGlobalAttributes()
 //
 
-int NcxxRadxFile::_addGlobalAttributes()
+int Cf2RadxFile::_addGlobalAttributes()
 {
 
   if (_verbose) {
-    cerr << "NcxxRadxFile::_addGlobalAttributes()" << endl;
+    cerr << "Cf2RadxFile::_addGlobalAttributes()" << endl;
   }
 
   // Add required CF-1.5 global attributes
@@ -611,7 +611,7 @@ int NcxxRadxFile::_addGlobalAttributes()
     return -1;
   }
 
-  string history = "Written by NcxxRadxFile class. ";
+  string history = "Written by Cf2RadxFile class. ";
   history += _writeVol->getHistory();
   if (_file.addGlobAttr(HISTORY,  history)) {
     return -1;
@@ -724,7 +724,7 @@ int NcxxRadxFile::_addGlobalAttributes()
         if (sscanf(attr.val.c_str(), "%d", &ival) == 1) {
           _file.addGlobAttr(attr.name, ival);
         } else {
-          _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+          _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
           _addErrStr("  Cannot decode user-defined global attribute");
           _addErrStr("   name: ", attr.name);
           _addErrStr("    type: int");
@@ -737,7 +737,7 @@ int NcxxRadxFile::_addGlobalAttributes()
         if (sscanf(attr.val.c_str(), "%lg", &dval) == 1) {
           _file.addGlobAttr(attr.name, dval);
         } else {
-          _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+          _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
           _addErrStr("  Cannot decode user-defined global attribute");
           _addErrStr("   name: ", attr.name);
           _addErrStr("    type: double");
@@ -768,12 +768,12 @@ int NcxxRadxFile::_addGlobalAttributes()
             _file.putAtt(attr.name, ncxxInt, toks.size(), ivals);
           } catch (NcxxException& e) {
             haveError = true;
-            _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+            _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
             _addErrStr("  Cannot put attribute");
             _addErrStr("  Exception: ", e.what());
           }
         } else {
-          _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+          _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
           _addErrStr("  Cannot decode user-defined global attribute");
         }
         if (haveError) {
@@ -806,12 +806,12 @@ int NcxxRadxFile::_addGlobalAttributes()
             _file.putAtt(attr.name, ncxxDouble, toks.size(), dvals);
           } catch (NcxxException& e) {
             haveError = true;
-            _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+            _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
             _addErrStr("  Cannot put attribute");
             _addErrStr("  Exception: ", e.what());
           }
         } else {
-          _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes()");
+          _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
           _addErrStr("  Cannot decode user-defined global attribute");
         }
         if (haveError) {
@@ -837,11 +837,11 @@ int NcxxRadxFile::_addGlobalAttributes()
 //  x and y coordinates. Then we loop through the VlevelInfo
 //  objects and record the dimensions of the vertical coordinates
 
-int NcxxRadxFile::_addDimensions()
+int Cf2RadxFile::_addDimensions()
 {
 
   if (_verbose) {
-    cerr << "NcxxRadxFile::_addDimensions()" << endl;
+    cerr << "Cf2RadxFile::_addDimensions()" << endl;
   }
 
   // add time dimension - unlimited??
@@ -924,11 +924,11 @@ int NcxxRadxFile::_addDimensions()
 ////////////////////////////////////////////////
 // add variables and attributes for coordinates
 
-int NcxxRadxFile::_addCoordinateVariables()
+int Cf2RadxFile::_addCoordinateVariables()
 {
 
   if (_verbose) {
-    cerr << "NcxxRadxFile::_addCoordinateVariables()" << endl;
+    cerr << "Cf2RadxFile::_addCoordinateVariables()" << endl;
   }
 
   // Note that in CF coordinate variables have the same name as their
@@ -940,7 +940,7 @@ int NcxxRadxFile::_addCoordinateVariables()
   try {
     _timeVar = _file.addVar(TIME, ncxxDouble, _timeDim);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_addCoordinateVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_addCoordinateVariables");
     _addErrStr("  Exception: ", e.what());
     _addErrStr("  Cannot add time var");
     _addErrStr(_file.getErrStr());
@@ -972,7 +972,7 @@ int NcxxRadxFile::_addCoordinateVariables()
       dims.push_back(_rangeDim);
       _rangeVar = _file.addVar(RANGE, ncxxFloat, dims);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - NcxxRadxFile::_addCoordinateVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_addCoordinateVariables");
       _addErrStr("  Exception: ", e.what());
       _addErrStr("  Cannot add range var");
       _addErrStr(_file.getErrStr());
@@ -984,7 +984,7 @@ int NcxxRadxFile::_addCoordinateVariables()
     try {
       _rangeVar = _file.addVar(RANGE, ncxxFloat, _rangeDim);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - NcxxRadxFile::_addCoordinateVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_addCoordinateVariables");
       _addErrStr("  Exception: ", e.what());
       _addErrStr("  Cannot add range var");
       _addErrStr(_file.getErrStr());
@@ -1004,7 +1004,7 @@ int NcxxRadxFile::_addCoordinateVariables()
                             (float) _writeVol->getGateSpacingKm() * 1000.0);
   
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_addCoordinateVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_addCoordinateVariables");
     _addErrStr("  Cannot add attributes");
     return -1;
   } else {
@@ -1016,12 +1016,12 @@ int NcxxRadxFile::_addCoordinateVariables()
 //////////////////////////////////////////////
 // add scalar variables
 
-int NcxxRadxFile::_addScalarVariables()
+int Cf2RadxFile::_addScalarVariables()
 {
 
   int iret = 0;
   if (_verbose) {
-    cerr << "NcxxRadxFile::_addScalarVariables()" << endl;
+    cerr << "Cf2RadxFile::_addScalarVariables()" << endl;
   }
 
   iret |= _file.addVar(_volumeNumberVar, VOLUME_NUMBER,
@@ -1106,7 +1106,7 @@ int NcxxRadxFile::_addScalarVariables()
                        "", TIME_COVERAGE_END_LONG, ncxxChar, _stringLen32Dim, "", true);
 
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_addScalarVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_addScalarVariables");
     return -1;
   } else {
     return 0;
@@ -1117,7 +1117,7 @@ int NcxxRadxFile::_addScalarVariables()
 //////////////////////////////////////////////
 // add variable for one or more frequencies
 
-int NcxxRadxFile::_addFrequencyVariable()
+int Cf2RadxFile::_addFrequencyVariable()
 {
   
   if (_writeVol->getFrequencyHz().size() < 1) {
@@ -1126,7 +1126,7 @@ int NcxxRadxFile::_addFrequencyVariable()
   
   if(_file.addVar(_frequencyVar, FREQUENCY,
                   "", FREQUENCY_LONG, ncxxFloat, _frequencyDim, HZ, true)) {
-    _addErrStr("ERROR - NcxxRadxFile::_addFrequencyVariable");
+    _addErrStr("ERROR - Cf2RadxFile::_addFrequencyVariable");
     return -1;
   }
   _frequencyVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
@@ -1138,12 +1138,12 @@ int NcxxRadxFile::_addFrequencyVariable()
 //////////////////////////////////////////////
 // add correction variables
 
-int NcxxRadxFile::_addCorrectionVariables()
+int Cf2RadxFile::_addCorrectionVariables()
 {
 
   int iret = 0;
   if (_verbose) {
-    cerr << "NcxxRadxFile::_addCorrectionVariables()" << endl;
+    cerr << "Cf2RadxFile::_addCorrectionVariables()" << endl;
   }
 
   iret |= _file.addVar(_azimuthCorrVar, AZIMUTH_CORRECTION,
@@ -1167,7 +1167,7 @@ int NcxxRadxFile::_addCorrectionVariables()
   iret |= _latitudeCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
   iret |= _file.addVar(_pressureAltCorrVar, PRESSURE_ALTITUDE_CORRECTION,
-                           "", PRESSURE_ALTITUDE_CORRECTION_LONG,
+                       "", PRESSURE_ALTITUDE_CORRECTION_LONG,
                        ncxxFloat, METERS, true);
   iret |= _pressureAltCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
   
@@ -1176,17 +1176,17 @@ int NcxxRadxFile::_addCorrectionVariables()
   iret |= _altitudeCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
   iret |= _file.addVar(_ewVelCorrVar, EASTWARD_VELOCITY_CORRECTION,
-                           "", EASTWARD_VELOCITY_CORRECTION_LONG, 
+                       "", EASTWARD_VELOCITY_CORRECTION_LONG, 
                        ncxxFloat, METERS_PER_SECOND, true);
   iret |= _ewVelCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
   iret |= _file.addVar(_nsVelCorrVar, NORTHWARD_VELOCITY_CORRECTION,
-                           "", NORTHWARD_VELOCITY_CORRECTION_LONG,
+                       "", NORTHWARD_VELOCITY_CORRECTION_LONG,
                        ncxxFloat, METERS_PER_SECOND, true);
   iret |= _nsVelCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
   iret |= _file.addVar(_vertVelCorrVar, VERTICAL_VELOCITY_CORRECTION,
-                           "", VERTICAL_VELOCITY_CORRECTION_LONG,
+                       "", VERTICAL_VELOCITY_CORRECTION_LONG,
                        ncxxFloat, METERS_PER_SECOND, true);
   iret |= _vertVelCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
@@ -1215,7 +1215,7 @@ int NcxxRadxFile::_addCorrectionVariables()
   iret |= _tiltCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
 
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_addCorrectionVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_addCorrectionVariables");
     return -1;
   } else {
     return 0;
@@ -1226,11 +1226,11 @@ int NcxxRadxFile::_addCorrectionVariables()
 //////////////////////////////////////////////
 // add variables and attributes for projection
 
-int NcxxRadxFile::_addProjectionVariables()
+int Cf2RadxFile::_addProjectionVariables()
 {
 
   if (_verbose) {
-    cerr << "NcxxRadxFile::_addProjectionVariables()" << endl;
+    cerr << "Cf2RadxFile::_addProjectionVariables()" << endl;
   }
 
   int iret = 0;
@@ -1239,7 +1239,7 @@ int NcxxRadxFile::_addProjectionVariables()
   
   _projVar = _file.addVar(GRID_MAPPING, ncxxInt);
   if (_projVar.isNull()) {
-    _addErrStr("ERROR - NcxxRadxFile::_addProjectionVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_addProjectionVariables");
     _addErrStr("  Cannot add projection variable:", GRID_MAPPING);
     _addErrStr(_file.getErrStr());
     return -1;
@@ -1278,7 +1278,7 @@ int NcxxRadxFile::_addProjectionVariables()
   }
     
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_addProjectionVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_addProjectionVariables");
     _addErrStr("  Cannot add attributes");
     return -1;
   } else {
@@ -1290,62 +1290,62 @@ int NcxxRadxFile::_addProjectionVariables()
 //////////////////////////////////////////////
 // add variables for sweep info
 
-int NcxxRadxFile::_addSweepVariables()
+int Cf2RadxFile::_addSweepVariables()
 {
   
   if (_verbose) {
-    cerr << "NcxxRadxFile::_addSweepVariables()" << endl;
+    cerr << "Cf2RadxFile::_addSweepVariables()" << endl;
   }
   
   int iret = 0;
 
   iret |= _file.addVar(_sweepNumberVar, SWEEP_NUMBER,
-                           "", SWEEP_NUMBER_LONG,
+                       "", SWEEP_NUMBER_LONG,
                        ncxxInt, _sweepDim, "", true);
 
   iret |= _file.addVar(_sweepModeVar, SWEEP_MODE,
-                           "", SWEEP_MODE_LONG,
+                       "", SWEEP_MODE_LONG,
                        ncxxChar, _sweepDim, _stringLen32Dim, "", true);
   iret |= _sweepModeVar.addAttr(OPTIONS, Radx::sweepModeOptions());
 
   iret |= _file.addVar(_polModeVar, POLARIZATION_MODE,
-                           "", POLARIZATION_MODE_LONG, 
+                       "", POLARIZATION_MODE_LONG, 
                        ncxxChar, _sweepDim, _stringLen32Dim, "", true);
   iret |= _polModeVar.addAttr(OPTIONS, Radx::polarizationModeOptions());
   iret |= _polModeVar.addAttr(META_GROUP, RADAR_PARAMETERS);
   
   iret |= _file.addVar(_prtModeVar, PRT_MODE,
-                           "", PRT_MODE_LONG, 
+                       "", PRT_MODE_LONG, 
                        ncxxChar, _sweepDim, _stringLen32Dim, "", true);
   iret |= _prtModeVar.addAttr(OPTIONS, Radx::prtModeOptions());
   iret |= _prtModeVar.addAttr(META_GROUP, RADAR_PARAMETERS);
   
   iret |= _file.addVar(_sweepFollowModeVar, FOLLOW_MODE,
-                           "", FOLLOW_MODE_LONG, 
+                       "", FOLLOW_MODE_LONG, 
                        ncxxChar, _sweepDim, _stringLen32Dim, "", true);
   iret |= _sweepFollowModeVar.addAttr(OPTIONS, Radx::followModeOptions());
   iret |= _sweepFollowModeVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
   
   iret |= _file.addVar(_sweepFixedAngleVar, FIXED_ANGLE,
-                           "", FIXED_ANGLE_LONG, 
+                       "", FIXED_ANGLE_LONG, 
                        ncxxFloat, _sweepDim, DEGREES, true);
   iret |= _file.addVar(_targetScanRateVar, TARGET_SCAN_RATE,
-                           "", TARGET_SCAN_RATE_LONG, 
+                       "", TARGET_SCAN_RATE_LONG, 
                        ncxxFloat, _sweepDim, DEGREES_PER_SECOND, true);
 
   iret |= _file.addVar(_sweepStartRayIndexVar, SWEEP_START_RAY_INDEX,
-                           "", SWEEP_START_RAY_INDEX_LONG, 
+                       "", SWEEP_START_RAY_INDEX_LONG, 
                        ncxxInt, _sweepDim, "", true);
   iret |= _file.addVar(_sweepEndRayIndexVar, SWEEP_END_RAY_INDEX,
-                           "", SWEEP_END_RAY_INDEX_LONG, 
+                       "", SWEEP_END_RAY_INDEX_LONG, 
                        ncxxInt, _sweepDim, "", true);
   
   iret |= _file.addVar(_raysAreIndexedVar, RAYS_ARE_INDEXED,
-                           "", RAYS_ARE_INDEXED_LONG, 
+                       "", RAYS_ARE_INDEXED_LONG, 
                        ncxxChar, _sweepDim, _stringLen8Dim, "", true);
 
   iret |= _file.addVar(_rayAngleResVar, RAY_ANGLE_RES,
-                           "", RAY_ANGLE_RES_LONG, 
+                       "", RAY_ANGLE_RES_LONG, 
                        ncxxFloat, _sweepDim, DEGREES, true);
   
   bool haveIF = false;
@@ -1358,12 +1358,12 @@ int NcxxRadxFile::_addSweepVariables()
   }
   if (haveIF) {
     iret |= _file.addVar(_intermedFreqHzVar, INTERMED_FREQ_HZ,
-                             "", INTERMED_FREQ_HZ_LONG, 
+                         "", INTERMED_FREQ_HZ_LONG, 
                          ncxxFloat, _sweepDim, HZ, true);
   }
   
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_addSweepVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_addSweepVariables");
     return -1;
   } else {
     return 0;
@@ -1374,7 +1374,7 @@ int NcxxRadxFile::_addSweepVariables()
 //////////////////////////////////////////////
 // add variables for calibration info
 
-int NcxxRadxFile::_addCalibVariables()
+int Cf2RadxFile::_addCalibVariables()
 {
   
   if (_writeVol->getRcalibs().size() < 1) {
@@ -1382,13 +1382,13 @@ int NcxxRadxFile::_addCalibVariables()
   }
 
   if (_verbose) {
-    cerr << "NcxxRadxFile::_addCalibVariables()" << endl;
+    cerr << "Cf2RadxFile::_addCalibVariables()" << endl;
   }
     
   int iret = 0;
 
   iret |= _file.addVar(_rCalTimeVar, R_CALIB_TIME,
-                           "", R_CALIB_TIME_LONG, 
+                       "", R_CALIB_TIME_LONG, 
                        ncxxChar, _calDim, _stringLen32Dim, "", true);
   iret |= _rCalTimeVar.addAttr(META_GROUP, RADAR_CALIBRATION);
 
@@ -1484,7 +1484,7 @@ int NcxxRadxFile::_addCalibVariables()
                      R_CALIB_RECEIVER_SLOPE_VX_LONG);
 
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_addCalibVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_addCalibVariables");
     return -1;
   } else {
     return 0;
@@ -1495,11 +1495,11 @@ int NcxxRadxFile::_addCalibVariables()
 //////////////////////////////////////////////
 // add variables for angles
 
-int NcxxRadxFile::_addRayVariables()
+int Cf2RadxFile::_addRayVariables()
 {
 
   if (_verbose) {
-    cerr << "NcxxRadxFile::_addRayVariables()" << endl;
+    cerr << "Cf2RadxFile::_addRayVariables()" << endl;
   }
 
   int iret = 0;
@@ -1535,7 +1535,7 @@ int NcxxRadxFile::_addRayVariables()
   iret |= _prtVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
   
   iret |= _file.addVar(_prtRatioVar, PRT_RATIO,
-                           "", PRT_RATIO_LONG,
+                       "", PRT_RATIO_LONG,
                        ncxxFloat, _timeDim, SECONDS, true);
   iret |= _prtRatioVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
 
@@ -1572,21 +1572,21 @@ int NcxxRadxFile::_addRayVariables()
   }
 
   iret |= _file.addVar(_xmitPowerHVar,
-                           RADAR_MEASURED_TRANSMIT_POWER_H,
-                           "", 
-                           RADAR_MEASURED_TRANSMIT_POWER_H_LONG,
+                       RADAR_MEASURED_TRANSMIT_POWER_H,
+                       "", 
+                       RADAR_MEASURED_TRANSMIT_POWER_H_LONG,
                        ncxxFloat, _timeDim, DBM, true);
   iret |= _xmitPowerHVar.addAttr(META_GROUP, RADAR_PARAMETERS);
 
   iret |= _file.addVar(_xmitPowerVVar,
-                           RADAR_MEASURED_TRANSMIT_POWER_V,
-                           "", 
-                           RADAR_MEASURED_TRANSMIT_POWER_V_LONG, 
+                       RADAR_MEASURED_TRANSMIT_POWER_V,
+                       "", 
+                       RADAR_MEASURED_TRANSMIT_POWER_V_LONG, 
                        ncxxFloat, _timeDim, DBM, true);
   iret |= _xmitPowerVVar.addAttr(META_GROUP, RADAR_PARAMETERS);
 
   iret |= _file.addVar(_scanRateVar, SCAN_RATE,
-                           "", SCAN_RATE_LONG, 
+                       "", SCAN_RATE_LONG, 
                        ncxxFloat, _timeDim, DEGREES_PER_SECOND, true);
   iret |= _scanRateVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
 
@@ -1594,42 +1594,42 @@ int NcxxRadxFile::_addRayVariables()
 
   if (_estNoiseAvailHc) {
     iret |= _file.addVar(_estNoiseDbmHcVar,
-                             RADAR_ESTIMATED_NOISE_DBM_HC,
-                             "", 
-                             RADAR_ESTIMATED_NOISE_DBM_HC_LONG,
+                         RADAR_ESTIMATED_NOISE_DBM_HC,
+                         "", 
+                         RADAR_ESTIMATED_NOISE_DBM_HC_LONG,
                          ncxxFloat, _timeDim, DBM, true);
     iret |= _estNoiseDbmHcVar.addAttr(META_GROUP, RADAR_PARAMETERS);
   }
 
   if (_estNoiseAvailVc) {
     iret |= _file.addVar(_estNoiseDbmVcVar,
-                             RADAR_ESTIMATED_NOISE_DBM_VC,
-                             "", 
-                             RADAR_ESTIMATED_NOISE_DBM_VC_LONG,
+                         RADAR_ESTIMATED_NOISE_DBM_VC,
+                         "", 
+                         RADAR_ESTIMATED_NOISE_DBM_VC_LONG,
                          ncxxFloat, _timeDim, DBM, true);
     iret |= _estNoiseDbmVcVar.addAttr(META_GROUP, RADAR_PARAMETERS);
   }
 
   if (_estNoiseAvailHx) {
     iret |= _file.addVar(_estNoiseDbmHxVar,
-                             RADAR_ESTIMATED_NOISE_DBM_HX,
-                             "", 
-                             RADAR_ESTIMATED_NOISE_DBM_HX_LONG,
+                         RADAR_ESTIMATED_NOISE_DBM_HX,
+                         "", 
+                         RADAR_ESTIMATED_NOISE_DBM_HX_LONG,
                          ncxxFloat, _timeDim, DBM, true);
     iret |= _estNoiseDbmHxVar.addAttr(META_GROUP, RADAR_PARAMETERS);
   }
 
   if (_estNoiseAvailVx) {
     iret |= _file.addVar(_estNoiseDbmVxVar,
-                             RADAR_ESTIMATED_NOISE_DBM_VX,
-                             "", 
-                             RADAR_ESTIMATED_NOISE_DBM_VX_LONG,
+                         RADAR_ESTIMATED_NOISE_DBM_VX,
+                         "", 
+                         RADAR_ESTIMATED_NOISE_DBM_VX_LONG,
                          ncxxFloat, _timeDim, DBM, true);
     iret |= _estNoiseDbmVxVar.addAttr(META_GROUP, RADAR_PARAMETERS);
   }
 
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_addRayVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_addRayVariables");
     return -1;
   } else {
     return 0;
@@ -1641,7 +1641,7 @@ int NcxxRadxFile::_addRayVariables()
 // set flags to indicate whether estimate noise
 // is available
 
-void NcxxRadxFile::_setEstNoiseAvailFlags()
+void Cf2RadxFile::_setEstNoiseAvailFlags()
 
 {
 
@@ -1687,11 +1687,11 @@ void NcxxRadxFile::_setEstNoiseAvailFlags()
 /////////////////////////////////////////////////
 // add variables for ray georeference, if active
 
-int NcxxRadxFile::_addGeorefVariables()
+int Cf2RadxFile::_addGeorefVariables()
 {
 
   if (_verbose) {
-    cerr << "NcxxRadxFile::_addGeorefVariables()" << endl;
+    cerr << "Cf2RadxFile::_addGeorefVariables()" << endl;
   }
 
   if (!_georefsActive) {
@@ -1703,24 +1703,24 @@ int NcxxRadxFile::_addGeorefVariables()
   // we always add the postion variables
   
   iret |= _file.addVar(_georefTimeVar, GEOREF_TIME,
-                           "", GEOREF_TIME_LONG, ncxxDouble,
+                       "", GEOREF_TIME_LONG, ncxxDouble,
                        _timeDim, SECONDS, true);
 
   iret |= _file.addVar(_latitudeVar, LATITUDE,
-                           "", LATITUDE_LONG, ncxxDouble,
+                       "", LATITUDE_LONG, ncxxDouble,
                        _timeDim, DEGREES_NORTH, true);
 
   iret |= _file.addVar(_longitudeVar, LONGITUDE,
-                           "", LONGITUDE_LONG, ncxxDouble,
+                       "", LONGITUDE_LONG, ncxxDouble,
                        _timeDim, DEGREES_EAST, true);
 
   iret |= _file.addVar(_altitudeVar, ALTITUDE,
-                           "", ALTITUDE_LONG, ncxxDouble,
+                       "", ALTITUDE_LONG, ncxxDouble,
                        _timeDim, METERS, true);
   iret |= _altitudeVar.addAttr(POSITIVE, UP);
 
   iret |= _file.addVar(_altitudeAglVar, ALTITUDE_AGL,
-                           "", ALTITUDE_AGL_LONG, ncxxDouble,
+                       "", ALTITUDE_AGL_LONG, ncxxDouble,
                        _timeDim, METERS, true);
   iret |= _altitudeAglVar.addAttr(POSITIVE, UP);
 
@@ -1853,7 +1853,7 @@ int NcxxRadxFile::_addGeorefVariables()
   }
   
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_addGeorefVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_addGeorefVariables");
     return -1;
   } else {
     return 0;
@@ -1861,14 +1861,14 @@ int NcxxRadxFile::_addGeorefVariables()
 
 }
 
-int NcxxRadxFile::_addCalVar(NcxxVar &var, const string &name,
-                             const string &standardName,
-                             const string &units /* = "" */)
+int Cf2RadxFile::_addCalVar(NcxxVar &var, const string &name,
+                            const string &standardName,
+                            const string &units /* = "" */)
 {
   
   var = _file.addVar(name, ncxxFloat, _calDim);
   if (var.isNull()) {
-    _addErrStr("ERROR - NcxxRadxFile::_addCalVar");
+    _addErrStr("ERROR - Cf2RadxFile::_addCalVar");
     _addErrStr("  Cannot add calib var, name: ", name);
     _addErrStr(_file.getErrStr());
     return -1;
@@ -1899,11 +1899,11 @@ int NcxxRadxFile::_addCalVar(NcxxVar &var, const string &name,
 ////////////////////////////////////////////////
 // write coordinate variables
 
-int NcxxRadxFile::_writeCoordinateVariables()
+int Cf2RadxFile::_writeCoordinateVariables()
 {
 
   if (_verbose) {
-    cerr << "NcxxRadxFile::_writeCoordinateVariables()" << endl;
+    cerr << "Cf2RadxFile::_writeCoordinateVariables()" << endl;
   }
 
   // time
@@ -1923,7 +1923,7 @@ int NcxxRadxFile::_writeCoordinateVariables()
   try {
     _timeVar.putVal(dtime);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeCoordinateVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeCoordinateVariables");
     _addErrStr("  Cannot write time var");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -1954,7 +1954,7 @@ int NcxxRadxFile::_writeCoordinateVariables()
     try {
       _rangeVar.putVal(rangeMeters);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - NcxxRadxFile::_writeCoordinateVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_writeCoordinateVariables");
       _addErrStr("  Cannot write range var");
       _addErrStr(_file.getErrStr());
       _addErrStr("  Exception: ", e.what());
@@ -1976,7 +1976,7 @@ int NcxxRadxFile::_writeCoordinateVariables()
     try {
       _rangeVar.putVal(rangeMeters);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - NcxxRadxFile::_writeCoordinateVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_writeCoordinateVariables");
       _addErrStr("  Cannot write range var");
       _addErrStr(_file.getErrStr());
       _addErrStr("  Exception: ", e.what());
@@ -1992,11 +1992,11 @@ int NcxxRadxFile::_writeCoordinateVariables()
 ////////////////////////////////////////////////
 // write scalar variables
 
-int NcxxRadxFile::_writeScalarVariables()
+int Cf2RadxFile::_writeScalarVariables()
 {
 
   if (_verbose) {
-    cerr << "NcxxRadxFile::_writeScalarVariables()" << endl;
+    cerr << "Cf2RadxFile::_writeScalarVariables()" << endl;
   }
   
   // volume number
@@ -2005,7 +2005,7 @@ int NcxxRadxFile::_writeScalarVariables()
   try {
     _volumeNumberVar.putVal(&volNum);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write volumeNumber");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -2022,7 +2022,7 @@ int NcxxRadxFile::_writeScalarVariables()
   try {
     _instrumentTypeVar.putVal(strn);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write instrumentType");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -2038,7 +2038,7 @@ int NcxxRadxFile::_writeScalarVariables()
   try {
     _platformTypeVar.putVal(strn);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write platformType");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -2054,7 +2054,7 @@ int NcxxRadxFile::_writeScalarVariables()
   try {
     _primaryAxisVar.putVal(strn);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write primaryAxis");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -2072,7 +2072,7 @@ int NcxxRadxFile::_writeScalarVariables()
   try {
     _statusXmlVar.putVal(xmlStr);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write statusXml");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -2088,7 +2088,7 @@ int NcxxRadxFile::_writeScalarVariables()
   try {
     _startTimeVar.putVal(strn);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write statusTime");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -2104,7 +2104,7 @@ int NcxxRadxFile::_writeScalarVariables()
   try {
     _endTimeVar.putVal(strn);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write endTime");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -2136,7 +2136,7 @@ int NcxxRadxFile::_writeScalarVariables()
       _lidarBeamDivergenceMradVar.putVal((float) _writeVol->getLidarBeamDivergenceMrad());
     }
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeScalarVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write var");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -2150,11 +2150,11 @@ int NcxxRadxFile::_writeScalarVariables()
 ////////////////////////////////////////////////
 // write correction variables
 
-int NcxxRadxFile::_writeCorrectionVariables()
+int Cf2RadxFile::_writeCorrectionVariables()
 {
 
   if (_verbose) {
-    cerr << "NcxxRadxFile::_writeCorrectionVariables()" << endl;
+    cerr << "Cf2RadxFile::_writeCorrectionVariables()" << endl;
   }
 
   const RadxCfactors *cfac = _writeVol->getCfactors();
@@ -2177,7 +2177,7 @@ int NcxxRadxFile::_writeCorrectionVariables()
     _rotationCorrVar.putVal((float) cfac->getRotationCorr());
     _tiltCorrVar.putVal((float) cfac->getTiltCorr());
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeCorrectionVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeCorrectionVariables");
     _addErrStr("  Cannot write var");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -2191,11 +2191,11 @@ int NcxxRadxFile::_writeCorrectionVariables()
 ////////////////////////////////////////////////
 // write projection variables
 
-int NcxxRadxFile::_writeProjectionVariables()
+int Cf2RadxFile::_writeProjectionVariables()
 {
 
   if (_verbose) {
-    cerr << "NcxxRadxFile::_writeProjectionVariables()" << endl;
+    cerr << "Cf2RadxFile::_writeProjectionVariables()" << endl;
   }
 
   if (_georefsActive) {
@@ -2222,7 +2222,7 @@ int NcxxRadxFile::_writeProjectionVariables()
 
   } catch (NcxxException& e) {
 
-    _addErrStr("ERROR - NcxxRadxFile::_writeProjectionVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeProjectionVariables");
     _addErrStr("  Cannot write var");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -2237,11 +2237,11 @@ int NcxxRadxFile::_writeProjectionVariables()
 ////////////////////////////////////////////////
 // write angle variables
 
-int NcxxRadxFile::_writeRayVariables()
+int Cf2RadxFile::_writeRayVariables()
 {
 
   if (_verbose) {
-    cerr << "NcxxRadxFile::_writeRayVariables()" << endl;
+    cerr << "Cf2RadxFile::_writeRayVariables()" << endl;
   }
 
   int nRays = _writeVol->getNRays();
@@ -2437,7 +2437,7 @@ int NcxxRadxFile::_writeRayVariables()
 
   } catch (NcxxException& e) {
 
-    _addErrStr("ERROR - NcxxRadxFile::_writeRayVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeRayVariables");
     _addErrStr("  Cannot write var");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -2452,11 +2452,11 @@ int NcxxRadxFile::_writeRayVariables()
 ////////////////////////////////////////////////
 // write ray georeference variables, if active
 
-int NcxxRadxFile::_writeGeorefVariables()
+int Cf2RadxFile::_writeGeorefVariables()
 {
 
   if (_verbose) {
-    cerr << "NcxxRadxFile::_writeGeorefVariables()" << endl;
+    cerr << "Cf2RadxFile::_writeGeorefVariables()" << endl;
   }
 
   if (!_georefsActive) {
@@ -2685,7 +2685,7 @@ int NcxxRadxFile::_writeGeorefVariables()
             fvals[ii] = Radx::missingMetaFloat;
           }
         }
-      var.putVal(fvals);
+        var.putVal(fvals);
       }
     }
 
@@ -2861,7 +2861,7 @@ int NcxxRadxFile::_writeGeorefVariables()
 
   } catch (NcxxException& e) {
 
-    _addErrStr("ERROR - NcxxRadxFile::_writeGeorefVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeGeorefVariables");
     _addErrStr("  Cannot write var");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -2876,11 +2876,11 @@ int NcxxRadxFile::_writeGeorefVariables()
 ////////////////////////////////////////////////
 // write sweep variables
 
-int NcxxRadxFile::_writeSweepVariables()
+int Cf2RadxFile::_writeSweepVariables()
 {
 
   if (_verbose) {
-    cerr << "NcxxRadxFile::_writeSweepVariables()" << endl;
+    cerr << "Cf2RadxFile::_writeSweepVariables()" << endl;
   }
   
   const vector<RadxSweep *> &sweeps = _writeVol->getSweeps();
@@ -3003,7 +3003,7 @@ int NcxxRadxFile::_writeSweepVariables()
 
   } catch (NcxxException& e) {
     
-    _addErrStr("ERROR - NcxxRadxFile::_writeSweepVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeSweepVariables");
     _addErrStr("  Cannot write var");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -3018,7 +3018,7 @@ int NcxxRadxFile::_writeSweepVariables()
 ////////////////////////////////////////////////
 // write calibration variables
 
-int NcxxRadxFile::_writeCalibVariables()
+int Cf2RadxFile::_writeCalibVariables()
 {
 
   const vector<RadxRcalib *> &calibs = _writeVol->getRcalibs();
@@ -3028,7 +3028,7 @@ int NcxxRadxFile::_writeCalibVariables()
   }
 
   if (_verbose) {
-    cerr << "NcxxRadxFile::_writeCalibVariables()" << endl;
+    cerr << "Cf2RadxFile::_writeCalibVariables()" << endl;
   }
 
   try {
@@ -3279,7 +3279,7 @@ int NcxxRadxFile::_writeCalibVariables()
 
   } catch (NcxxException& e) {
     
-    _addErrStr("ERROR - NcxxRadxFile::_writeCalibVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeCalibVariables");
     _addErrStr("  Cannot write var");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -3294,7 +3294,7 @@ int NcxxRadxFile::_writeCalibVariables()
 ////////////////////////////////////////////////
 // write frequency variable
 
-int NcxxRadxFile::_writeFrequencyVariable()
+int Cf2RadxFile::_writeFrequencyVariable()
 {
 
   const vector<double> &frequency = _writeVol->getFrequencyHz();
@@ -3314,7 +3314,7 @@ int NcxxRadxFile::_writeFrequencyVariable()
 
   } catch (NcxxException& e) {
     
-    _addErrStr("ERROR - NcxxRadxFile::_writeFrequencyVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeFrequencyVariables");
     _addErrStr("  Cannot write var");
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -3330,12 +3330,12 @@ int NcxxRadxFile::_writeFrequencyVariable()
 // create and add a field variable
 // Adds to errStr as appropriate
 
-NcxxVar NcxxRadxFile::_addFieldVar(const RadxField &field)
+NcxxVar Cf2RadxFile::_addFieldVar(const RadxField &field)
 
 {
   
   if (_verbose) {
-    cerr << "NcxxRadxFile::_createFieldVar()" << endl;
+    cerr << "Cf2RadxFile::_createFieldVar()" << endl;
     cerr << "  Adding field: " << field.getName() << endl;
   }
 
@@ -3381,7 +3381,7 @@ NcxxVar NcxxRadxFile::_addFieldVar(const RadxField &field)
   }
   
   if (var.isNull()) {
-    _addErrStr("ERROR - NcxxRadxFile::_createFieldVar");
+    _addErrStr("ERROR - Cf2RadxFile::_createFieldVar");
     _addErrStr("  Cannot add variable to Ncxx file object");
     _addErrStr("  Input field name: ", name);
     _addErrStr("  Output field name: ", fieldName);
@@ -3461,7 +3461,7 @@ NcxxVar NcxxRadxFile::_addFieldVar(const RadxField &field)
   iret |= _setCompression(var);
   
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_createFieldVar");
+    _addErrStr("ERROR - Cf2RadxFile::_createFieldVar");
   }
   
   return var;
@@ -3471,11 +3471,11 @@ NcxxVar NcxxRadxFile::_addFieldVar(const RadxField &field)
 ////////////////////////////////////////////////
 // write field variables
 
-int NcxxRadxFile::_writeFieldVariables()
+int Cf2RadxFile::_writeFieldVariables()
 {
 
   if (_verbose) {
-    cerr << "NcxxRadxFile::_writeFieldVariables()" << endl;
+    cerr << "Cf2RadxFile::_writeFieldVariables()" << endl;
   }
 
   // loop through the list of unique fields names in this volume
@@ -3507,7 +3507,7 @@ int NcxxRadxFile::_writeFieldVariables()
       // add field variable
       var = _addFieldVar(*copy);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - NcxxRadxFile::_writeFieldVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_writeFieldVariables");
       _addErrStr("  Cannot add field: ", name);
       delete copy;
       return -1;
@@ -3516,7 +3516,7 @@ int NcxxRadxFile::_writeFieldVariables()
     try {
       _writeFieldVar(var, copy);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - NcxxRadxFile::_writeFieldVariables");
+      _addErrStr("ERROR - Cf2RadxFile::_writeFieldVariables");
       _addErrStr("  Cannot write field: ", name);
       delete copy;
       return -1;
@@ -3531,7 +3531,7 @@ int NcxxRadxFile::_writeFieldVariables()
   } // ifield
 
   if (iret) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeFieldVariables");
+    _addErrStr("ERROR - Cf2RadxFile::_writeFieldVariables");
     return -1;
   } else {
     return 0;
@@ -3543,17 +3543,17 @@ int NcxxRadxFile::_writeFieldVariables()
 // write a field variable
 // Returns 0 on success, -1 on failure
 
-int NcxxRadxFile::_writeFieldVar(NcxxVar &var, RadxField *field)
+int Cf2RadxFile::_writeFieldVar(NcxxVar &var, RadxField *field)
   
 {
   
   if (_verbose) {
-    cerr << "NcxxRadxFile::_writeFieldVar()" << endl;
+    cerr << "Cf2RadxFile::_writeFieldVar()" << endl;
     cerr << "  name: " << var.getName() << endl;
   }
 
   if (var.isNull()) {
-    _addErrStr("ERROR - NcxxRadxFile::_writeFieldVar");
+    _addErrStr("ERROR - Cf2RadxFile::_writeFieldVar");
     _addErrStr("  var is NULL");
     return -1;
   }
@@ -3625,7 +3625,7 @@ int NcxxRadxFile::_writeFieldVar(NcxxVar &var, RadxField *field)
         
   } catch (NcxxException& e) {
     
-    _addErrStr("ERROR - NcxxRadxFile::_writeFieldVar");
+    _addErrStr("ERROR - Cf2RadxFile::_writeFieldVar");
     _addErrStr("  Cannot write var, name: ", var.getName());
     _addErrStr(_file.getErrStr());
     _addErrStr("  Exception: ", e.what());
@@ -3640,9 +3640,9 @@ int NcxxRadxFile::_writeFieldVar(NcxxVar &var, RadxField *field)
 //////////////////
 // close on error
 
-int NcxxRadxFile::_closeOnError(const string &caller)
+int Cf2RadxFile::_closeOnError(const string &caller)
 {
-  _addErrStr("ERROR - NcxxRadxFile::" + caller);
+  _addErrStr("ERROR - Cf2RadxFile::" + caller);
   _addErrStr(_file.getErrStr());
   _file.close();
   unlink(_tmpPath.c_str());
@@ -3652,7 +3652,7 @@ int NcxxRadxFile::_closeOnError(const string &caller)
 ///////////////////////////////////////////////////////////////////////////
 // Set output compression for variable
 
-int NcxxRadxFile::_setCompression(NcxxVar &var)  
+int Cf2RadxFile::_setCompression(NcxxVar &var)  
 {
 
   if (_ncFormat == NETCDF_CLASSIC || _ncFormat == NETCDF_OFFSET_64BIT) {
@@ -3661,7 +3661,7 @@ int NcxxRadxFile::_setCompression(NcxxVar &var)
   }
 
   if (var.isNull()) {
-    _addErrStr("ERROR - NcxxRadxFile::_setCompression");
+    _addErrStr("ERROR - Cf2RadxFile::_setCompression");
     _addErrStr("  var is NULL");
     return -1;
   }
@@ -3676,7 +3676,7 @@ int NcxxRadxFile::_setCompression(NcxxVar &var)
         
   } catch (NcxxException& e) {
     
-    _addErrStr("ERROR - NcxxRadxFile::_setCompression");
+    _addErrStr("ERROR - Cf2RadxFile::_setCompression");
     _addErrStr("  Cannot set compression: ", var.getName());
     _addErrStr("  Exception: ", e.what());
     return -1;
@@ -3690,14 +3690,14 @@ int NcxxRadxFile::_setCompression(NcxxVar &var)
 ///////////////////////////////////////////////////////////////////////////
 // Compute the output path
 
-string NcxxRadxFile::_computeWritePath(const RadxVol &vol,
-                                       const RadxTime &startTime,
-                                       int startMillisecs,
-                                       const RadxTime &endTime,
-                                       int endMillisecs,
-                                       const RadxTime &fileTime,
-                                       int fileMillisecs,
-                                       const string &dir)
+string Cf2RadxFile::_computeWritePath(const RadxVol &vol,
+                                      const RadxTime &startTime,
+                                      int startMillisecs,
+                                      const RadxTime &endTime,
+                                      int endMillisecs,
+                                      const RadxTime &fileTime,
+                                      int fileMillisecs,
+                                      const string &dir)
 
 {
 

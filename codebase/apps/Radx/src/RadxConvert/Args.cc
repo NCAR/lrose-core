@@ -186,6 +186,14 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "output_format = OUTPUT_FORMAT_CFRADIAL;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-cf2")) {
+      
+      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_CFRADIAL2;");
+      TDRP_add_override(&override, tmp_str);
+
+      sprintf(tmp_str, "netcdf_style = NETCDF4;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-ncxx")) {
       
       sprintf(tmp_str, "output_format = OUTPUT_FORMAT_NCXX;");
@@ -745,7 +753,7 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -ag ] aggregate sweep files into volume on read.\n"
       << "     Files with the SAME VOLUME NUMBER in the name are aggregated.\n"
-      << "    A pplies to CfRadial and DORADE sweep files.\n"
+      << "    Applies to CfRadial and DORADE sweep files.\n"
       << "\n"
       << "  [ -ag_all ] aggregate files in input list on read.\n"
       << "     ALL FILES in the input list are aggregated into a volume.\n"
@@ -764,6 +772,7 @@ void Args::_usage(ostream &out)
       << "    Useful for RAPIC files that always have a positive latitude.\n"
       << "\n"
       << "  [ -cfradial ] convert to cfradial (the default)\n"
+      << "  [ -cf2 ] convert to cfradial2, forces use of netcdf4\n"
       << "\n"
       << "  [ -cf_classic ] output classic-style netcdf (the default)\n"
       << "  [ -cf_netcdf4 ] output netcdf4 style\n"

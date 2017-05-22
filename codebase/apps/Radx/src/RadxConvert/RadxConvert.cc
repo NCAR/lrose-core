@@ -1069,6 +1069,9 @@ void RadxConvert::_setupWrite(RadxFile &file)
     case Params::OUTPUT_FORMAT_NCXX:
       file.setFileFormat(RadxFile::FILE_FORMAT_NCXX);
       break;
+    case Params::OUTPUT_FORMAT_CFRADIAL2:
+      file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL2);
+      break;
     default:
     case Params::OUTPUT_FORMAT_CFRADIAL:
       file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL);
