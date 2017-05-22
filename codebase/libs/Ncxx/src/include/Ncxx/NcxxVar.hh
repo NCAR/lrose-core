@@ -1060,6 +1060,10 @@ public:
 
   // Write a scalar into the netCDF variable.
   
+  // Write string scalar
+  
+  void putStringScalar(const string &dataVal) const;
+
   // Write char scalar
   void putVal(char dataVal) const;
 

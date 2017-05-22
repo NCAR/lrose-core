@@ -377,7 +377,7 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
     _nGatesVary = true;
   }
 
-  // get the set of unique field name
+  // get the set of unique field names
 
   _uniqueFieldNames = _writeVol->getUniqueFieldNameList();
 
@@ -870,12 +870,6 @@ int Cf2RadxFile::_addDimensions()
     return -1;
   }
 
-  if (_file.addDim(_statusXmlDim,
-                   STATUS_XML_LENGTH,
-                   _writeVol->getStatusXml().size() + 1)) {
-    return -1;
-  }
-
   // add calib dimension
 
   if (_writeVol->getRcalibs().size() > 0) {
@@ -1013,7 +1007,7 @@ int Cf2RadxFile::_addScalarVariables()
   iret |= _primaryAxisVar.addAttr(OPTIONS, Radx::primaryAxisOptions());
 
   iret |= _file.addVar(_statusXmlVar, STATUS_XML, "", 
-                       "status_of_instrument", ncxxChar, _statusXmlDim, "", true);
+                       "status_of_instrument", ncxxString, "", true);
   
   iret |= _file.addVar(_instrumentTypeVar, INSTRUMENT_TYPE, "",
                        INSTRUMENT_TYPE_LONG, ncxxString, "", true);
@@ -1998,7 +1992,7 @@ int Cf2RadxFile::_writeScalarVariables()
   
   try {
     string primaryAxis = Radx::primaryAxisToStr(_writeVol->getPrimaryAxis());
-    _primaryAxisVar.putVal(primaryAxis.c_str());
+    _primaryAxisVar.putStringScalar(primaryAxis);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write primaryAxis");
@@ -2011,7 +2005,7 @@ int Cf2RadxFile::_writeScalarVariables()
 
   try {
     string instrumentType = Radx::instrumentTypeToStr(_writeVol->getInstrumentType());
-    _instrumentTypeVar.putVal(instrumentType.c_str());
+    _instrumentTypeVar.putStringScalar(instrumentType);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write instrumentType");
@@ -2023,8 +2017,8 @@ int Cf2RadxFile::_writeScalarVariables()
   // platform type
 
   try {
-    _platformTypeVar.putVal(Radx::platformTypeToStr
-                            (_writeVol->getPlatformType()).c_str());
+    string platformType = Radx::platformTypeToStr(_writeVol->getPlatformType());
+    _platformTypeVar.putStringScalar(platformType);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write platformType");
@@ -2035,14 +2029,8 @@ int Cf2RadxFile::_writeScalarVariables()
 
   // status xml
   
-  size_t xmlLen =
-    _writeVol->getStatusXml().size() + 1; // includes trailing NULL
-  RadxArray<char> xmlStr_;
-  char *xmlStr = xmlStr_.alloc(xmlLen);
-  memset(xmlStr, 0, xmlLen);
-  strncpy(xmlStr, _writeVol->getStatusXml().c_str(), xmlLen);
   try {
-    _statusXmlVar.putVal(xmlStr);
+    _statusXmlVar.putStringScalar(_writeVol->getStatusXml());
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write statusXml");
@@ -2055,7 +2043,7 @@ int Cf2RadxFile::_writeScalarVariables()
   
   RadxTime startTime(_writeVol->getStartTimeSecs());
   try {
-    _startTimeVar.putVal(startTime.getW3cStr().c_str());
+    _startTimeVar.putStringScalar(startTime.getW3cStr());
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write statusTime");
@@ -2068,7 +2056,7 @@ int Cf2RadxFile::_writeScalarVariables()
   
   RadxTime endTime(_writeVol->getEndTimeSecs());
   try {
-    _endTimeVar.putVal(endTime.getW3cStr().c_str());
+    _endTimeVar.putStringScalar(endTime.getW3cStr());
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write endTime");

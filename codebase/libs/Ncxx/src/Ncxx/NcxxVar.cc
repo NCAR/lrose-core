@@ -804,6 +804,14 @@ void NcxxVar::rename( const string& newname ) const
 
 // Write a scalar into the netCDF variable.
 
+// Write string scalar
+
+void NcxxVar::putStringScalar(const string &dataVal) const {
+  vector<size_t> index;
+  index.push_back(0);
+  putVal(index, dataVal);
+}
+
 // Write char scalar
 
 void NcxxVar::putVal(char dataVal) const {
