@@ -419,6 +419,9 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
   if (_addSweepVariables()) {
     return _closeOnError("_addSweepVariables");
   }
+  if (_addSweepGroups()) {
+    return _closeOnError("_addSweepGroups");
+  }
   if (_addCalibVariables()) {
     return _closeOnError("_addCalibVariables");
   }
@@ -1255,6 +1258,50 @@ int Cf2RadxFile::_addProjectionVariables()
   } else {
     return 0;
   }
+
+}
+
+////////////////////////////////////////////////
+// add sweep groups
+
+int Cf2RadxFile::_addSweepGroups()
+{
+
+  if (_verbose) {
+    cerr << "Cf2RadxFile::_addSweepGroups()" << endl;
+  }
+  
+  // loop through the sweeps
+  
+  _sweepGroupNames.clear();
+  _sweepGroups.clear();
+
+  const vector<RadxSweep *> &sweeps = _writeVol->getSweeps();
+  int nSweeps = (int) sweeps.size();
+
+  for (int ii = 0; ii < nSweeps; ii++) {
+
+    // create name
+  
+    char name[128];
+    sprintf(name, "sweep_%.4d", ii + 1);
+    _sweepGroupNames.push_back(name);
+
+    // add group
+  
+    try {
+      NcxxGroup sweepGroup = _file.addGroup(name);
+      _sweepGroups.push_back(sweepGroup);
+    } catch (NcxxException& e) {
+      _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
+      _addErrStr("  Cannot add sweep group: ", name);
+      _addErrStr("  Exception: ", e.what());
+      return -1;
+    }
+
+  } // ii
+  
+  return 0;
 
 }
 
@@ -2852,19 +2899,16 @@ int Cf2RadxFile::_writeSweepVariables()
     
     for (int ii = 0; ii < nSweeps; ii++) {
       ivals[ii] = sweeps[ii]->getSweepNumber();
+      _sweepGroups[ii].putAtt(SWEEP_NUMBER, ncxxInt, ivals[ii]);
     }
     _sweepNumberVar.putVal(ivals);
     
     // group names for sweeps
 
     {
-      vector<string> sweepNameVec;
       const char **sweepNames = new const char*[nSweeps];
       for (int ii = 0; ii < nSweeps; ii++) {
-        char name[128];
-        sprintf(name, "sweep_%.4d", ii + 1);
-        sweepNameVec.push_back(name);
-        sweepNames[ii] = sweepNameVec[ii].c_str();
+        sweepNames[ii] = _sweepGroupNames[ii].c_str();
       }
       _sweepGroupNameVar.putVal(sweepNames);
       delete[] sweepNames;
@@ -2878,6 +2922,7 @@ int Cf2RadxFile::_writeSweepVariables()
       for (int ii = 0; ii < nSweeps; ii++) {
         sweepModeVec.push_back(Radx::sweepModeToStr(sweeps[ii]->getSweepMode()));
         sweepModes[ii] = sweepModeVec[ii].c_str();
+        _sweepGroups[ii].putAtt(SWEEP_MODE, sweepModeVec[ii]);
       }
       _sweepModeVar.putVal(sweepModes);
       delete[] sweepModes;
@@ -2892,6 +2937,7 @@ int Cf2RadxFile::_writeSweepVariables()
         polModeVec.push_back
           (Radx::polarizationModeToStr(sweeps[ii]->getPolarizationMode()));
         polModes[ii] = polModeVec[ii].c_str();
+        _sweepGroups[ii].putAtt(POLARIZATION_MODE, polModeVec[ii]);
       }
       _polModeVar.putVal(polModes);
       delete[] polModes;
@@ -2906,6 +2952,7 @@ int Cf2RadxFile::_writeSweepVariables()
         prtModeVec.push_back
           (Radx::prtModeToStr(sweeps[ii]->getPrtMode()));
         prtModes[ii] = prtModeVec[ii].c_str();
+        _sweepGroups[ii].putAtt(PRT_MODE, prtModeVec[ii]);
       }
       _prtModeVar.putVal(prtModes);
       delete[] prtModes;
@@ -2920,6 +2967,7 @@ int Cf2RadxFile::_writeSweepVariables()
         followModeVec.push_back
           (Radx::followModeToStr(sweeps[ii]->getFollowMode()));
         followModes[ii] = followModeVec[ii].c_str();
+        _sweepGroups[ii].putAtt(FOLLOW_MODE, followModeVec[ii]);
       }
       _sweepFollowModeVar.putVal(followModes);
       delete[] followModes;
@@ -2929,6 +2977,7 @@ int Cf2RadxFile::_writeSweepVariables()
     
     for (int ii = 0; ii < nSweeps; ii++) {
       fvals[ii] = sweeps[ii]->getFixedAngleDeg();
+      _sweepGroups[ii].putAtt(FIXED_ANGLE, ncxxFloat, fvals[ii]);
     }
     _sweepFixedAngleVar.putVal(fvals);
     
@@ -2936,6 +2985,7 @@ int Cf2RadxFile::_writeSweepVariables()
     
     for (int ii = 0; ii < nSweeps; ii++) {
       fvals[ii] = sweeps[ii]->getTargetScanRateDegPerSec();
+      _sweepGroups[ii].putAtt(TARGET_SCAN_RATE, ncxxFloat, fvals[ii]);
     }
     _targetScanRateVar.putVal(fvals);
     
@@ -2961,8 +3011,10 @@ int Cf2RadxFile::_writeSweepVariables()
       for (int ii = 0; ii < nSweeps; ii++) {
         if (sweeps[ii]->getRaysAreIndexed()) {
           indexedVec.push_back("true");
+          _sweepGroups[ii].putAtt(RAYS_ARE_INDEXED, "true");
         } else {
           indexedVec.push_back("false");
+          _sweepGroups[ii].putAtt(RAYS_ARE_INDEXED, "false");
         }
         indexed[ii] = indexedVec[ii].c_str();
       }
@@ -2974,12 +3026,14 @@ int Cf2RadxFile::_writeSweepVariables()
     
     for (int ii = 0; ii < nSweeps; ii++) {
       fvals[ii] = sweeps[ii]->getAngleResDeg();
+      _sweepGroups[ii].putAtt(RAY_ANGLE_RES, ncxxFloat, fvals[ii]);
     }
     _rayAngleResVar.putVal(fvals);
     
     if (!_intermedFreqHzVar.isNull()) {
       for (int ii = 0; ii < nSweeps; ii++) {
         fvals[ii] = sweeps[ii]->getIntermedFreqHz();
+        _sweepGroups[ii].putAtt(INTERMED_FREQ_HZ, ncxxFloat, fvals[ii]);
       }
       _intermedFreqHzVar.putVal(fvals);
     }
