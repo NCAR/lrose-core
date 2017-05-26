@@ -394,33 +394,46 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
     cerr << "===================================================" << endl;
   }
 
-  // add attributes, dimensions and variables
+  // add global attributes and dimensions
   
   if (_addGlobalAttributes()) {
     return _closeOnError("_addGlobalAttributes");
   }
+
   if (_addDimensions()) {
     return _closeOnError("_addDimensions");
   }
+
+  // add sweep groups
+
+  if (_addSweepGroups()) {
+    return _closeOnError("_addSweepGroups");
+  }
+
+  // add root group variables
+
   if (_addScalarVariables()) {
     return _closeOnError("_addScalarVariables");
   }
+
   if (_addFrequencyVariable()) {
     return _closeOnError("_addFrequencyVariable");
   }
+
   if (_correctionsActive) {
     if (_addCorrectionVariables()) {
       return _closeOnError("_addCorrectionVariables");
     }
   }
+
   if (_addProjectionVariables()) {
     return _closeOnError("_addProjectionVariables");
   }
+
+  // add other variables
+
   if (_addSweepVariables()) {
     return _closeOnError("_addSweepVariables");
-  }
-  if (_addSweepGroups()) {
-    return _closeOnError("_addSweepGroups");
   }
   if (_addCalibVariables()) {
     return _closeOnError("_addCalibVariables");
@@ -1271,11 +1284,11 @@ int Cf2RadxFile::_addSweepGroups()
     cerr << "Cf2RadxFile::_addSweepGroups()" << endl;
   }
   
-  // loop through the sweeps
-  
   _sweepGroupNames.clear();
   _sweepGroups.clear();
 
+  // loop through the sweeps
+  
   const vector<RadxSweep *> &sweeps = _writeVol->getSweeps();
   int nSweeps = (int) sweeps.size();
 
@@ -1301,6 +1314,39 @@ int Cf2RadxFile::_addSweepGroups()
 
   } // ii
   
+  // create variable for sweep names
+  
+  if (_file.addVar(_sweepGroupNameVar, SWEEP_GROUP_NAME,
+                   "", SWEEP_GROUP_NAME_LONG, 
+                   ncxxString, _sweepDim, "", true)) {
+    _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
+    _addErrStr("  Cannot add root group var: ", SWEEP_GROUP_NAME);
+    return -1;
+  }
+  const char **sweepNames = new const char*[nSweeps];
+  for (int ii = 0; ii < nSweeps; ii++) {
+    sweepNames[ii] = _sweepGroupNames[ii].c_str();
+  }
+  _sweepGroupNameVar.putVal(sweepNames);
+  delete[] sweepNames;
+
+  // sweep fixed angles
+  
+  if (_file.addVar(_sweepFixedAngleVar, FIXED_ANGLE,
+                   "", FIXED_ANGLE_LONG, 
+                   ncxxFloat, _sweepDim, DEGREES, true)) {
+    _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
+    _addErrStr("  Cannot add root group var: ", FIXED_ANGLE);
+    return -1;
+  }
+  RadxArray<float> fvals_;
+  float *fvals = fvals_.alloc(nSweeps);
+  for (int ii = 0; ii < nSweeps; ii++) {
+    fvals[ii] = sweeps[ii]->getFixedAngleDeg();
+    _sweepGroups[ii].putAtt(FIXED_ANGLE, ncxxFloat, fvals[ii]);
+  }
+  _sweepFixedAngleVar.putVal(fvals);
+
   return 0;
 
 }
@@ -1316,10 +1362,6 @@ int Cf2RadxFile::_addSweepVariables()
   }
   
   int iret = 0;
-
-  iret |= _file.addVar(_sweepGroupNameVar, SWEEP_GROUP_NAME,
-                       "", SWEEP_GROUP_NAME_LONG, 
-                       ncxxString, _sweepDim, "", true);
 
   iret |= _file.addVar(_sweepNumberVar, SWEEP_NUMBER,
                        "", SWEEP_NUMBER_LONG,
@@ -1348,10 +1390,6 @@ int Cf2RadxFile::_addSweepVariables()
   iret |= _sweepFollowModeVar.addAttr(OPTIONS, Radx::followModeOptions());
   iret |= _sweepFollowModeVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
   
-  iret |= _file.addVar(_sweepFixedAngleVar, FIXED_ANGLE,
-                       "", FIXED_ANGLE_LONG, 
-                       ncxxFloat, _sweepDim, DEGREES, true);
-
   iret |= _file.addVar(_targetScanRateVar, TARGET_SCAN_RATE,
                        "", TARGET_SCAN_RATE_LONG, 
                        ncxxFloat, _sweepDim, DEGREES_PER_SECOND, true);
@@ -2903,17 +2941,6 @@ int Cf2RadxFile::_writeSweepVariables()
     }
     _sweepNumberVar.putVal(ivals);
     
-    // group names for sweeps
-
-    {
-      const char **sweepNames = new const char*[nSweeps];
-      for (int ii = 0; ii < nSweeps; ii++) {
-        sweepNames[ii] = _sweepGroupNames[ii].c_str();
-      }
-      _sweepGroupNameVar.putVal(sweepNames);
-      delete[] sweepNames;
-    }
-    
     // sweep mode
 
     {
@@ -2972,14 +2999,6 @@ int Cf2RadxFile::_writeSweepVariables()
       _sweepFollowModeVar.putVal(followModes);
       delete[] followModes;
     }
-    
-    // fixed angle
-    
-    for (int ii = 0; ii < nSweeps; ii++) {
-      fvals[ii] = sweeps[ii]->getFixedAngleDeg();
-      _sweepGroups[ii].putAtt(FIXED_ANGLE, ncxxFloat, fvals[ii]);
-    }
-    _sweepFixedAngleVar.putVal(fvals);
     
     // target scan rate
     
