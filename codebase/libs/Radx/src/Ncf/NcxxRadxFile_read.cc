@@ -860,8 +860,10 @@ int NcxxRadxFile::_readGlobalAttributes()
     }
     if (att.getName().find(SCAN_ID) != string::npos) {
       vector<int> scanIds;
-      if (att.getValues(scanIds) == 0) {
+      try {
+        att.getValues(scanIds);
         _scanId = scanIds[0];
+      } catch (NcxxException& e) {
       }
     }
     
@@ -1066,8 +1068,10 @@ int NcxxRadxFile::_readRangeVariable()
     if (att.getName().find(METERS_TO_CENTER_OF_FIRST_GATE) != string::npos) {
       if (att.getType() == ncxxFloat || att.getType() == ncxxDouble) {
         vector<double> vals;
-        if (att.getValues(vals) == 0) {
+        try {
+          att.getValues(vals);
           startRangeKm = vals[0] / 1000.0;
+        } catch (NcxxException& e) {
         }
       }
     }
@@ -1075,8 +1079,10 @@ int NcxxRadxFile::_readRangeVariable()
     if (att.getName().find(METERS_BETWEEN_GATES) != string::npos) {
       if (att.getType() == ncxxFloat || att.getType() == ncxxDouble) {
         vector<double> vals;
-        if (att.getValues(vals) == 0) {
+        try {
+          att.getValues(vals);
           gateSpacingKm = vals[0] / 1000.0;
+        } catch (NcxxException& e) {
         }
       }
     }
@@ -2463,8 +2469,10 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     try {
       NcxxVarAtt samplingRatioAtt = var.getAtt(SAMPLING_RATIO);
       vector<float> vals;
-      if (samplingRatioAtt.getValues(vals) == 0) {
+      try {
+        samplingRatioAtt.getValues(vals);
         samplingRatio = vals[0];
+      } catch (NcxxException& e) {
       }
     } catch (NcxxException& e) {
     }
@@ -2484,16 +2492,20 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
         try {
           NcxxVarAtt foldLimitLowerAtt = var.getAtt(FOLD_LIMIT_LOWER);
           vector<float> vals;
-          if (foldLimitLowerAtt.getValues(vals) == 0) {
+          try {
+            foldLimitLowerAtt.getValues(vals);
             foldLimitLower = vals[0];
+          } catch (NcxxException& e) {
           }
         } catch (NcxxException& e) {
         }
         try {
           NcxxVarAtt foldLimitUpperAtt = var.getAtt(FOLD_LIMIT_UPPER);
           vector<float> vals;
-          if (foldLimitUpperAtt.getValues(vals) == 0) {
+          try {
+            foldLimitUpperAtt.getValues(vals);
             foldLimitUpper = vals[0];
+          } catch (NcxxException& e) {
           }
         } catch (NcxxException& e) {
         }
@@ -2521,8 +2533,10 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     try {
       NcxxVarAtt offsetAtt = var.getAtt(ADD_OFFSET);
       vector<double> vals;
-      if (offsetAtt.getValues(vals) == 0) {
+      try {
+        offsetAtt.getValues(vals);
         offset = vals[0];
+      } catch (NcxxException& e) {
       }
     } catch (NcxxException& e) {
     }
@@ -2531,8 +2545,10 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     try {
       NcxxVarAtt scaleAtt = var.getAtt(SCALE_FACTOR);
       vector<double> vals;
-      if (scaleAtt.getValues(vals) == 0) {
+      try {
+        scaleAtt.getValues(vals);
         scale = vals[0];
+      } catch (NcxxException& e) {
       }
     } catch (NcxxException& e) {
     }
@@ -3324,15 +3340,19 @@ int NcxxRadxFile::_addFl64FieldToRays(NcxxVar &var,
   try {
     NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
     vector<double> vals;
-    if (missingValueAtt.getValues(vals) == 0) {
+    try {
+      missingValueAtt.getValues(vals);
       missingVal = vals[0];
+    } catch (NcxxException& e) {
     }
   } catch (NcxxException& e) {
     try {
       NcxxVarAtt missingValueAtt = var.getAtt(FILL_VALUE);
       vector<double> vals;
-      if (missingValueAtt.getValues(vals) == 0) {
+      try {
+        missingValueAtt.getValues(vals);
         missingVal = vals[0];
+      } catch (NcxxException& e) {
       }
     } catch (NcxxException& e) {
     }
@@ -3432,15 +3452,19 @@ int NcxxRadxFile::_addFl32FieldToRays(NcxxVar &var,
   try {
     NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
     vector<float> vals;
-    if (missingValueAtt.getValues(vals) == 0) {
+    try {
+      missingValueAtt.getValues(vals);
       missingVal = vals[0];
+    } catch (NcxxException& e) {
     }
   } catch (NcxxException& e) {
     try {
       NcxxVarAtt missingValueAtt = var.getAtt(FILL_VALUE);
       vector<float> vals;
-      if (missingValueAtt.getValues(vals) == 0) {
+      try {
+        missingValueAtt.getValues(vals);
         missingVal = vals[0];
+      } catch (NcxxException& e) {
       }
     } catch (NcxxException& e) {
     }
@@ -3541,15 +3565,19 @@ int NcxxRadxFile::_addSi32FieldToRays(NcxxVar &var,
   try {
     NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
     vector<int> vals;
-    if (missingValueAtt.getValues(vals) == 0) {
+    try {
+      missingValueAtt.getValues(vals);
       missingVal = vals[0];
+    } catch (NcxxException& e) {
     }
   } catch (NcxxException& e) {
     try {
       NcxxVarAtt missingValueAtt = var.getAtt(FILL_VALUE);
       vector<int> vals;
-      if (missingValueAtt.getValues(vals) == 0) {
+      try {
+        missingValueAtt.getValues(vals);
         missingVal = vals[0];
+      } catch (NcxxException& e) {
       }
     } catch (NcxxException& e) {
     }
@@ -3643,15 +3671,19 @@ int NcxxRadxFile::_addSi16FieldToRays(NcxxVar &var,
   try {
     NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
     vector<short> vals;
-    if (missingValueAtt.getValues(vals) == 0) {
+    try {
+      missingValueAtt.getValues(vals);
       missingVal = vals[0];
+    } catch (NcxxException& e) {
     }
   } catch (NcxxException& e) {
     try {
       NcxxVarAtt missingValueAtt = var.getAtt(FILL_VALUE);
       vector<short> vals;
-      if (missingValueAtt.getValues(vals) == 0) {
+      try {
+        missingValueAtt.getValues(vals);
         missingVal = vals[0];
+      } catch (NcxxException& e) {
       }
     } catch (NcxxException& e) {
     }
@@ -3745,15 +3777,19 @@ int NcxxRadxFile::_addSi08FieldToRays(NcxxVar &var,
   try {
     NcxxVarAtt missingValueAtt = var.getAtt(MISSING_VALUE);
     vector<char> vals;
-    if (missingValueAtt.getValues(vals) == 0) {
+    try {
+      missingValueAtt.getValues(vals);
       missingVal = vals[0];
+    } catch (NcxxException& e) {
     }
   } catch (NcxxException& e) {
     try {
       NcxxVarAtt missingValueAtt = var.getAtt(FILL_VALUE);
       vector<char> vals;
-      if (missingValueAtt.getValues(vals) == 0) {
+      try {
+        missingValueAtt.getValues(vals);
         missingVal = vals[0];
+      } catch (NcxxException& e) {
       }
     } catch (NcxxException& e) {
     }
