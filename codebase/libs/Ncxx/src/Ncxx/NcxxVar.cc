@@ -3352,7 +3352,8 @@ string NcxxVar::getDesc() const
   for (int ii = 0; ii < getDimCount(); ii++) {
     NcxxDim dim = getDim(ii);
     char dimStr[256];
-    sprintf(dimStr, " dim[%d]:%s-size:%d", ii, dim.getName().c_str(), (int) dim.getSize());
+    sprintf(dimStr, " dim[%d]:%s-size:%ld",
+            ii, dim.getName().c_str(), dim.getSize());
     desc += dimStr;
   }
   
