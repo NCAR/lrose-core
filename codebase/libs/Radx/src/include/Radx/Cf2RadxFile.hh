@@ -611,6 +611,7 @@ private:
   const static char* FOLD_LIMIT_UPPER;
   const static char* FOLLOW_MODE;
   const static char* FREQUENCY;
+  const static char* GATE_SPACING;
   const static char* GEOMETRY_CORRECTION;
   const static char* GEOREFS_APPLIED;
   const static char* GEOREF_TIME;
@@ -791,6 +792,7 @@ private:
   const static char* STANDARD_NAME;
   const static char* STARING;
   const static char* START_DATETIME;
+  const static char* START_RANGE;
   const static char* STATIONARY;
   const static char* STATUS_XML;
   const static char* STATUS_XML_LENGTH;

@@ -1960,20 +1960,19 @@ void NcxxGroup::readDim(const string &name, NcxxDim &dim)
 // Throws NcxxException on failure
 // Side effect: var is set
 
-void NcxxGroup::addVar(NcxxVar &var,
-                       const string &name, 
-                       const string &standardName,
-                       const string &longName,
-                       NcxxType ncType, 
-                       const string &units /* = "" */,
-                       bool isMetadata /* = false */)
+NcxxVar NcxxGroup::addVar(const string &name, 
+                          const string &standardName,
+                          const string &longName,
+                          NcxxType ncType, 
+                          const string &units /* = "" */,
+                          bool isMetadata /* = false */)
   
 {
   
   vector<NcxxDim> dims; // 0 length - for scalar
   
-  addVar(var, name, standardName, longName,
-         ncType, dims, units, isMetadata);
+  return addVar(name, standardName, longName,
+                ncType, dims, units, isMetadata);
   
 }
 
@@ -1982,22 +1981,21 @@ void NcxxGroup::addVar(NcxxVar &var,
 // Throws NcxxException on failure
 // Side effect: var is set
 
-void NcxxGroup::addVar(NcxxVar &var, 
-                       const string &name, 
-                       const string &standardName,
-                       const string &longName,
-                       NcxxType ncType, 
-                       NcxxDim &dim, 
-                       const string &units /* = "" */,
-                       bool isMetadata /* = false */)
+NcxxVar NcxxGroup::addVar(const string &name, 
+                          const string &standardName,
+                          const string &longName,
+                          NcxxType ncType, 
+                          NcxxDim &dim, 
+                          const string &units /* = "" */,
+                          bool isMetadata /* = false */)
   
 {
   
   vector<NcxxDim> dims;
   dims.push_back(dim);
   
-  addVar(var, name, standardName, longName,
-         ncType, dims, units, isMetadata);
+  return addVar(name, standardName, longName,
+                ncType, dims, units, isMetadata);
 
 }
 
@@ -2006,23 +2004,22 @@ void NcxxGroup::addVar(NcxxVar &var,
 // Throws NcxxException on failure
 // Side effect: var is set
 
-void NcxxGroup::addVar(NcxxVar &var, 
-                       const string &name,
-                       const string &standardName,
-                       const string &longName,
-                       NcxxType ncType,
-                       NcxxDim &dim0,
-                       NcxxDim &dim1,
-                       const string &units /* = "" */,
-                       bool isMetadata /* = false */)
+NcxxVar NcxxGroup::addVar(const string &name,
+                          const string &standardName,
+                          const string &longName,
+                          NcxxType ncType,
+                          NcxxDim &dim0,
+                          NcxxDim &dim1,
+                          const string &units /* = "" */,
+                          bool isMetadata /* = false */)
 {
-
+  
   vector<NcxxDim> dims;
   dims.push_back(dim0);
   dims.push_back(dim1);
 
-  addVar(var, name, standardName, longName,
-         ncType, dims, units, isMetadata);
+  return addVar(name, standardName, longName,
+                ncType, dims, units, isMetadata);
   
 }
 
@@ -2031,17 +2028,16 @@ void NcxxGroup::addVar(NcxxVar &var,
 // Throws NcxxException on failure
 // Side effect: var is set
 
-void NcxxGroup::addVar(NcxxVar &var, 
-                       const string &name,
-                       const string &standardName,
-                       const string &longName,
-                       NcxxType ncType,
-                       vector<NcxxDim> &dims,
-                       const string &units /* = "" */,
-                       bool isMetadata /* = false */)
+NcxxVar NcxxGroup::addVar(const string &name,
+                          const string &standardName,
+                          const string &longName,
+                          NcxxType ncType,
+                          vector<NcxxDim> &dims,
+                          const string &units /* = "" */,
+                          bool isMetadata /* = false */)
 {
 
-  var = addVar(name, ncType, dims);
+  NcxxVar var = addVar(name, ncType, dims);
   nc_type vtype = ncType.getId();
   if (var.isNull()) {
     _addErrStr("ERROR - NcxxGroup::addVar");
@@ -2071,6 +2067,8 @@ void NcxxGroup::addVar(NcxxVar &var,
   } else {
     var.setDefaultFillValue();
   }
+
+  return var;
 
 }
 

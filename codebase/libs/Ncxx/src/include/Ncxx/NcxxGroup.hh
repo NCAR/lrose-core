@@ -783,56 +783,52 @@ public:
   // Throws NcxxException on failure
   // Side effect: var is set
      
-  void addVar(NcxxVar &var,
-              const string &name, 
-              const string &standardName,
-              const string &longName,
-              NcxxType ncType, 
-              const string &units = "",
-              bool isMetadata = false);
+  NcxxVar addVar(const string &name, 
+                 const string &standardName,
+                 const string &longName,
+                 NcxxType ncType, 
+                 const string &units = "",
+                 bool isMetadata = false);
 
   ///////////////////////////////////////
   // Add 1-D array var
   // Throws NcxxException on failure
   // Side effect: var is set
      
-  void addVar(NcxxVar &var, 
-              const string &name, 
-              const string &standardName,
-              const string &longName,
-              NcxxType ncType, 
-              NcxxDim &dim, 
-              const string &units = "",
-              bool isMetadata = false);
+  NcxxVar addVar(const string &name, 
+                 const string &standardName,
+                 const string &longName,
+                 NcxxType ncType, 
+                 NcxxDim &dim, 
+                 const string &units = "",
+                 bool isMetadata = false);
   
   ///////////////////////////////////////
   // Add 2-D array var
   // Throws NcxxException on failure
   // Side effect: var is set
      
-  void addVar(NcxxVar &var, 
-              const string &name,
-              const string &standardName,
-              const string &longName,
-              NcxxType ncType,
-              NcxxDim &dim0,
-              NcxxDim &dim1,
-              const string &units = "",
-              bool isMetadata = false);
+  NcxxVar addVar(const string &name,
+                 const string &standardName,
+                 const string &longName,
+                 NcxxType ncType,
+                 NcxxDim &dim0,
+                 NcxxDim &dim1,
+                 const string &units = "",
+                 bool isMetadata = false);
 
   ///////////////////////////////////////
   // Add var in multiple-dimensions
   // Throws NcxxException on failure
   // Side effect: var is set
      
-  void addVar(NcxxVar &var, 
-              const string &name,
-              const string &standardName,
-              const string &longName,
-              NcxxType ncType,
-              vector<NcxxDim> &dims,
-              const string &units = "",
-              bool isMetadata = false);
+  NcxxVar addVar(const string &name,
+                 const string &standardName,
+                 const string &longName,
+                 NcxxType ncType,
+                 vector<NcxxDim> &dims,
+                 const string &units = "",
+                 bool isMetadata = false);
      
   ///////////////////////////////////////////////
   // read variable based on type, set var and val
