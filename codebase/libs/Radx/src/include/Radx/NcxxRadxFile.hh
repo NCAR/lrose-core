@@ -1110,9 +1110,9 @@ private:
   void _setEstNoiseAvailFlags();
   int _addGeorefVariables();
 
-  int _addCalVar(NcxxVar &var, const string &name, 
-                 const string &standardName,
-                 const string &units = "");
+  void _addCalVar(NcxxVar &var, const string &name, 
+                  const string &standardName,
+                  const string &units = "");
     
   int _writeCoordinateVariables();
   int _writeScalarVariables();

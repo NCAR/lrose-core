@@ -24,7 +24,7 @@
 /////////////////////////////////////////////////////////////
 // Cf2RadxFile_write.cc
 //
-// Write methods for Cfradial2 files
+// Write methods for Cf2RadxFile object
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -91,6 +91,8 @@ int Cf2RadxFile::writeToDir(const RadxVol &vol,
 
   if (_writeIndividualSweeps) {
     return _writeSweepsToDir(vol, dir, addDaySubDir, addYearSubDir);
+    // } else if (vol.getSweeps().size() == 1) {
+    //   return _writeSweepToDir(vol, dir, addDaySubDir, addYearSubDir);
   }
 
   _writeVol = &vol;
@@ -282,7 +284,7 @@ int Cf2RadxFile::_writeSweepToDir(const RadxVol &vol,
   char fileName[BUFSIZ];
   if (_writeFileNameMode == FILENAME_WITH_START_AND_END_TIMES) {
     sprintf(fileName,
-            "cfrad2.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
+            "cfrad.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
             "_to_%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
             "_%s_v%d_s%.2d_%s%.2f_%s.nc",
             startTime.getYear(), startTime.getMonth(), startTime.getDay(),
@@ -297,7 +299,7 @@ int Cf2RadxFile::_writeSweepToDir(const RadxVol &vol,
             scanType.c_str());
   } else {
     sprintf(fileName,
-            "cfrad2.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
+            "cfrad.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
             "_%s_v%d_s%.2d_%s%.2f_%s.nc",
             fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
             fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
@@ -345,8 +347,7 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
 
   _gateGeomVaries = _writeVol->gateGeomVariesByRay();
 
-  // open the output CfRadial2 file
-  // always netcdf4 style
+  // open the output Ncxx file
 
   _tmpPath = tmpPathFromFilePath(path, "");
 
@@ -361,7 +362,7 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
     _file.open(_tmpPath, NcxxFile::replace, NcxxFile::nc4);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::writeToPath");
-    _addErrStr("  Cannot open tmp CfRadial2 file for writing: ", _tmpPath);
+    _addErrStr("  Cannot open tmp Ncxx file for writing: ", _tmpPath);
     _addErrStr("  exception: ", e.what());
     return -1;
   }
@@ -377,7 +378,7 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
     _nGatesVary = true;
   }
 
-  // get the set of unique field names
+  // get the set of unique field name
 
   _uniqueFieldNames = _writeVol->getUniqueFieldNameList();
 
@@ -394,7 +395,7 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
     cerr << "===================================================" << endl;
   }
 
-  // add global attributes and dimensions
+  // add attributes, dimensions and variables
   
   if (_addGlobalAttributes()) {
     return _closeOnError("_addGlobalAttributes");
@@ -409,8 +410,6 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
   if (_addSweepGroups()) {
     return _closeOnError("_addSweepGroups");
   }
-
-  // add root group variables
 
   if (_addScalarVariables()) {
     return _closeOnError("_addScalarVariables");
@@ -430,20 +429,22 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
     return _closeOnError("_addProjectionVariables");
   }
 
-  // add other variables
-
   if (_addSweepVariables()) {
     return _closeOnError("_addSweepVariables");
   }
+
   if (_addCalibVariables()) {
     return _closeOnError("_addCalibVariables");
   }
+
   if (_addCoordinateVariables()) {
     return _closeOnError("_addCoordinateVariables");
   }
+
   if (_addRayVariables()) {
     return _closeOnError("_addRayVariables");
   }
+
   if (_georefsActive) {
     if (_addGeorefVariables()) {
       return _closeOnError("_addGeorefVariables");
@@ -565,280 +566,249 @@ int Cf2RadxFile::_addGlobalAttributes()
     cerr << "Cf2RadxFile::_addGlobalAttributes()" << endl;
   }
 
-  // Add required CF-1.5 global attributes
+  bool haveError = false;
+  try {
+
+    // Add required CF-1.5 global attributes
   
-  _conventions = CfConvention;
-  _subconventions = BaseConvention;
-  _subconventions += " ";
-  _subconventions += INSTRUMENT_PARAMETERS;
-  if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
+    _conventions = CfConvention;
+    _subconventions = BaseConvention;
     _subconventions += " ";
-    _subconventions += RADAR_PARAMETERS;
-    if (_writeVol->getRcalibs().size() > 0) {
+    _subconventions += INSTRUMENT_PARAMETERS;
+    if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
       _subconventions += " ";
-      _subconventions += RADAR_CALIBRATION;
-    }
-  } else {
-    _subconventions += " ";
-    _subconventions += LIDAR_PARAMETERS;
-  }
-  if (_writeVol->getPlatformType() != Radx::PLATFORM_TYPE_FIXED) {
-    _subconventions += " ";
-    _subconventions += PLATFORM_VELOCITY;
-  }
-  if (_writeVol->getCfactors() != NULL) {
-    _subconventions += " ";
-    _subconventions += GEOMETRY_CORRECTION;
-  }
-
-  if (_file.addGlobAttr(CONVENTIONS, _conventions)) {
-    return -1;
-  }
-  if (_file.addGlobAttr(SUB_CONVENTIONS, _subconventions)) {
-    return -1;
-  }
-  
-  // Version
-
-  _version = CurrentVersion;
-  if (_writeVol->getVersion().size() > 0) {
-    _version = _writeVol->getVersion();
-  }
-  if (_file.addGlobAttr(VERSION, _version)) {
-    return -1;
-  }
-  
-  // info strings
-
-  if (_file.addGlobAttr(TITLE,  _writeVol->getTitle())) {
-    return -1;
-  }
-
-  if (_file.addGlobAttr(INSTITUTION, _writeVol->getInstitution())) {
-    return -1;
-  }
-
-  if (_file.addGlobAttr(REFERENCES,  _writeVol->getReferences())) {
-    return -1;
-  }
-
-  if (_file.addGlobAttr(SOURCE,  _writeVol->getSource())) {
-    return -1;
-  }
-
-  string history = "Written by Cf2RadxFile class. ";
-  history += _writeVol->getHistory();
-  if (_file.addGlobAttr(HISTORY,  history)) {
-    return -1;
-  }
-
-  if (_file.addGlobAttr(COMMENT,  _writeVol->getComment())) {
-    return -1;
-  }
-
-  if (_writeVol->getAuthor().size() > 0) {
-    if (_file.addGlobAttr(AUTHOR,  _writeVol->getAuthor())) {
-      return -1;
-    }
-  }
-
-  string origFormat = "CFRADIAL";
-  if (_writeVol->getOrigFormat().size() > 0) {
-    origFormat = _writeVol->getOrigFormat();
-  }
-  if (origFormat.find("AR2") != string::npos) {
-    // special case for NEXRAD AR2
-    _file.addGlobAttr("format",  origFormat);
-    _file.addGlobAttr(ORIGINAL_FORMAT, "NEXRAD");
-  } else {
-    if (_file.addGlobAttr(ORIGINAL_FORMAT,  origFormat)) {
-      return -1;
-    }
-  }
-
-  if (_file.addGlobAttr(DRIVER,  _writeVol->getDriver())) {
-    return -1;
-  }
-
-  if (_file.addGlobAttr(CREATED,  _writeVol->getCreated())) {
-    return -1;
-  }
-
-  // times
-  
-  RadxTime startTime(_writeVol->getStartTimeSecs());
-  _file.addGlobAttr(START_DATETIME, startTime.getW3cStr());
-  _file.addGlobAttr(TIME_COVERAGE_START, startTime.getW3cStr());
-  startTime += _writeVol->getStartNanoSecs() / 1.0e9;
-  _file.addGlobAttr("start_time", startTime.asStringDashed(3));
-
-  RadxTime endTime(_writeVol->getEndTimeSecs());
-  _file.addGlobAttr(END_DATETIME, endTime.getW3cStr());
-  _file.addGlobAttr(TIME_COVERAGE_END, endTime.getW3cStr());
-  endTime += _writeVol->getEndNanoSecs() / 1.0e9;
-  _file.addGlobAttr("end_time", endTime.asStringDashed(3));
-
-  // names
-
-  if (_file.addGlobAttr(INSTRUMENT_NAME,  _writeVol->getInstrumentName())) {
-    return -1;
-  }
-
-  if (_file.addGlobAttr(SITE_NAME,  _writeVol->getSiteName())) {
-    return -1;
-  }
-
-  if (_file.addGlobAttr(SCAN_NAME,  _writeVol->getScanName())) {
-    return -1;
-  }
-
-  if (_file.addGlobAttr(SCAN_ID,  _writeVol->getScanId())) {
-    return -1;
-  }
-
-  string attrStr;
-  if (_writeVol->getPlatformType() == Radx::PLATFORM_TYPE_FIXED) {
-    attrStr = "false";
-  } else {
-    attrStr = "true";
-  }
-  if (_file.addGlobAttr(PLATFORM_IS_MOBILE, attrStr)) {
-    return -1;
-  }
-  
-  if (_nGatesVary) {
-    attrStr = "true";
-  } else {
-    attrStr = "false";
-  }
-  if (_file.addGlobAttr(N_GATES_VARY, attrStr)) {
-    return -1;
-  }
-
-  if (_rayTimesIncrease) {
-    attrStr = "true";
-  } else {
-    attrStr = "false";
-  }
-  if (_file.addGlobAttr(RAY_TIMES_INCREASE, attrStr)) {
-    return -1;
-  }
-
-  // add user-specified global attributes
-
-  const vector<RadxVol::UserGlobAttr> &attrs = _writeVol->getUserGlobAttr();
-  for (size_t ii = 0; ii < attrs.size(); ii++) {
-    const RadxVol::UserGlobAttr &attr = attrs[ii];
-    switch (attr.attrType) {
-      case RadxVol::UserGlobAttr::ATTR_STRING: {
-        _file.addGlobAttr(attr.name, attr.val);
-        break;
+      _subconventions += RADAR_PARAMETERS;
+      if (_writeVol->getRcalibs().size() > 0) {
+        _subconventions += " ";
+        _subconventions += RADAR_CALIBRATION;
       }
-      case RadxVol::UserGlobAttr::ATTR_INT: {
-        int ival;
-        if (sscanf(attr.val.c_str(), "%d", &ival) == 1) {
-          _file.addGlobAttr(attr.name, ival);
-        } else {
-          _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
-          _addErrStr("  Cannot decode user-defined global attribute");
-          _addErrStr("   name: ", attr.name);
-          _addErrStr("    type: int");
-          _addErrStr("    val: ", attr.val);
+    } else {
+      _subconventions += " ";
+      _subconventions += LIDAR_PARAMETERS;
+    }
+    if (_writeVol->getPlatformType() != Radx::PLATFORM_TYPE_FIXED) {
+      _subconventions += " ";
+      _subconventions += PLATFORM_VELOCITY;
+    }
+    if (_writeVol->getCfactors() != NULL) {
+      _subconventions += " ";
+      _subconventions += GEOMETRY_CORRECTION;
+    }
+
+    _file.addGlobAttr(CONVENTIONS, _conventions);
+    _file.addGlobAttr(SUB_CONVENTIONS, _subconventions);
+  
+    // Version
+
+    _version = CurrentVersion;
+    if (_writeVol->getVersion().size() > 0) {
+      _version = _writeVol->getVersion();
+    }
+    _file.addGlobAttr(VERSION, _version);
+  
+    // info strings
+
+    _file.addGlobAttr(TITLE, _writeVol->getTitle());
+    _file.addGlobAttr(INSTITUTION, _writeVol->getInstitution());
+    _file.addGlobAttr(REFERENCES,  _writeVol->getReferences());
+    _file.addGlobAttr(SOURCE,  _writeVol->getSource());
+
+    string history = "Written by Cf2RadxFile class. ";
+    history += _writeVol->getHistory();
+    _file.addGlobAttr(HISTORY,  history);
+
+    _file.addGlobAttr(COMMENT,  _writeVol->getComment());
+
+    if (_writeVol->getAuthor().size() > 0) {
+      _file.addGlobAttr(AUTHOR,  _writeVol->getAuthor());
+    }
+
+    string origFormat = "CFRADIAL";
+    if (_writeVol->getOrigFormat().size() > 0) {
+      origFormat = _writeVol->getOrigFormat();
+    }
+    if (origFormat.find("AR2") != string::npos) {
+      // special case for NEXRAD AR2
+      _file.addGlobAttr("format",  origFormat);
+      _file.addGlobAttr(ORIGINAL_FORMAT, "NEXRAD");
+    } else {
+      _file.addGlobAttr(ORIGINAL_FORMAT,  origFormat);
+    }
+
+    _file.addGlobAttr(DRIVER,  _writeVol->getDriver());
+    _file.addGlobAttr(CREATED,  _writeVol->getCreated());
+    
+    // times
+  
+    RadxTime startTime(_writeVol->getStartTimeSecs());
+    _file.addGlobAttr(START_DATETIME, startTime.getW3cStr());
+    _file.addGlobAttr(TIME_COVERAGE_START, startTime.getW3cStr());
+    startTime += _writeVol->getStartNanoSecs() / 1.0e9;
+    _file.addGlobAttr("start_time", startTime.asStringDashed(3));
+
+    RadxTime endTime(_writeVol->getEndTimeSecs());
+    _file.addGlobAttr(END_DATETIME, endTime.getW3cStr());
+    _file.addGlobAttr(TIME_COVERAGE_END, endTime.getW3cStr());
+    endTime += _writeVol->getEndNanoSecs() / 1.0e9;
+    _file.addGlobAttr("end_time", endTime.asStringDashed(3));
+
+    // names
+
+    _file.addGlobAttr(INSTRUMENT_NAME,  _writeVol->getInstrumentName());
+    _file.addGlobAttr(SITE_NAME,  _writeVol->getSiteName());
+    _file.addGlobAttr(SCAN_NAME,  _writeVol->getScanName());
+    _file.addGlobAttr(SCAN_ID,  _writeVol->getScanId());
+
+    string attrStr;
+    if (_writeVol->getPlatformType() == Radx::PLATFORM_TYPE_FIXED) {
+      attrStr = "false";
+    } else {
+      attrStr = "true";
+    }
+    _file.addGlobAttr(PLATFORM_IS_MOBILE, attrStr);
+    
+    if (_nGatesVary) {
+      attrStr = "true";
+    } else {
+      attrStr = "false";
+    }
+    _file.addGlobAttr(N_GATES_VARY, attrStr);
+
+    if (_rayTimesIncrease) {
+      attrStr = "true";
+    } else {
+      attrStr = "false";
+    }
+    _file.addGlobAttr(RAY_TIMES_INCREASE, attrStr);
+
+    // add user-specified global attributes
+
+    const vector<RadxVol::UserGlobAttr> &attrs = _writeVol->getUserGlobAttr();
+    for (size_t ii = 0; ii < attrs.size(); ii++) {
+      const RadxVol::UserGlobAttr &attr = attrs[ii];
+      switch (attr.attrType) {
+        case RadxVol::UserGlobAttr::ATTR_STRING: {
+          _file.addGlobAttr(attr.name, attr.val);
+          break;
         }
-        break;
-      }
-      case RadxVol::UserGlobAttr::ATTR_DOUBLE: {
-        double dval;
-        if (sscanf(attr.val.c_str(), "%lg", &dval) == 1) {
-          _file.addGlobAttr(attr.name, dval);
-        } else {
-          _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
-          _addErrStr("  Cannot decode user-defined global attribute");
-          _addErrStr("   name: ", attr.name);
-          _addErrStr("    type: double");
-          _addErrStr("    val: ", attr.val);
-        }
-        break;
-      }
-      case RadxVol::UserGlobAttr::ATTR_INT_ARRAY: {
-        bool haveError = false;
-        // tokenize values string
-        vector<string> toks;
-        RadxStr::tokenize(attr.val, " ,", toks);
-        if (toks.size() == 0) {
-          haveError = true;
-        }
-        RadxArray<int> ivals_;
-        int *ivals = ivals_.alloc(toks.size());
-        for (size_t jj = 0; jj < toks.size(); jj++) {
+        case RadxVol::UserGlobAttr::ATTR_INT: {
           int ival;
-          if (sscanf(toks[jj].c_str(), "%d", &ival) == 1) {
-            ivals[jj] = ival;
+          if (sscanf(attr.val.c_str(), "%d", &ival) == 1) {
+            _file.addGlobAttr(attr.name, ival);
           } else {
-            haveError = true;
-          }
-        } // jj
-        if (!haveError) {
-          try {
-            _file.putAtt(attr.name, ncxxInt, toks.size(), ivals);
-          } catch (NcxxException& e) {
-            haveError = true;
             _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
-            _addErrStr("  Cannot put attribute");
-            _addErrStr("  Exception: ", e.what());
+            _addErrStr("  Cannot decode user-defined global attribute");
+            _addErrStr("   name: ", attr.name);
+            _addErrStr("    type: int");
+            _addErrStr("    val: ", attr.val);
           }
-        } else {
-          _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
-          _addErrStr("  Cannot decode user-defined global attribute");
+          break;
         }
-        if (haveError) {
-          _addErrStr("   name: ", attr.name);
-          _addErrStr("    type: int[]");
-          _addErrStr("    val: ", attr.val);
-        }
-        break;
-      }
-      case RadxVol::UserGlobAttr::ATTR_DOUBLE_ARRAY: {
-        bool haveError = false;
-        // tokenize values string
-        vector<string> toks;
-        RadxStr::tokenize(attr.val, " ,", toks);
-        if (toks.size() == 0) {
-          haveError = true;
-        }
-        RadxArray<double> dvals_;
-        double *dvals = dvals_.alloc(toks.size());
-        for (size_t jj = 0; jj < toks.size(); jj++) {
+        case RadxVol::UserGlobAttr::ATTR_DOUBLE: {
           double dval;
-          if (sscanf(toks[jj].c_str(), "%lg", &dval) == 1) {
-            dvals[jj] = dval;
+          if (sscanf(attr.val.c_str(), "%lg", &dval) == 1) {
+            _file.addGlobAttr(attr.name, dval);
           } else {
-            haveError = true;
-          }
-        } // jj
-        if (!haveError) {
-          try {
-            _file.putAtt(attr.name, ncxxDouble, toks.size(), dvals);
-          } catch (NcxxException& e) {
-            haveError = true;
             _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
-            _addErrStr("  Cannot put attribute");
-            _addErrStr("  Exception: ", e.what());
+            _addErrStr("  Cannot decode user-defined global attribute");
+            _addErrStr("   name: ", attr.name);
+            _addErrStr("    type: double");
+            _addErrStr("    val: ", attr.val);
           }
-        } else {
-          _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
-          _addErrStr("  Cannot decode user-defined global attribute");
+          break;
         }
-        if (haveError) {
-          _addErrStr("   name: ", attr.name);
-          _addErrStr("    type: double[]");
-          _addErrStr("    val: ", attr.val);
+        case RadxVol::UserGlobAttr::ATTR_INT_ARRAY: {
+          // tokenize values string
+          vector<string> toks;
+          RadxStr::tokenize(attr.val, " ,", toks);
+          if (toks.size() == 0) {
+            haveError = true;
+          }
+          RadxArray<int> ivals_;
+          int *ivals = ivals_.alloc(toks.size());
+          for (size_t jj = 0; jj < toks.size(); jj++) {
+            int ival;
+            if (sscanf(toks[jj].c_str(), "%d", &ival) == 1) {
+              ivals[jj] = ival;
+            } else {
+              haveError = true;
+            }
+          } // jj
+          if (!haveError) {
+            try {
+              _file.putAtt(attr.name, ncxxInt, toks.size(), ivals);
+            } catch (NcxxException& e) {
+              haveError = true;
+              _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
+              _addErrStr("  Cannot put attribute");
+              _addErrStr("  Exception: ", e.what());
+            }
+          } else {
+            _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
+            _addErrStr("  Cannot decode user-defined global attribute");
+          }
+          if (haveError) {
+            _addErrStr("   name: ", attr.name);
+            _addErrStr("    type: int[]");
+            _addErrStr("    val: ", attr.val);
+          }
+          break;
         }
-        break;
-      }
-      default: {}
-    } // switch
-  } // ii
+        case RadxVol::UserGlobAttr::ATTR_DOUBLE_ARRAY: {
+          // tokenize values string
+          vector<string> toks;
+          RadxStr::tokenize(attr.val, " ,", toks);
+          if (toks.size() == 0) {
+            haveError = true;
+          }
+          RadxArray<double> dvals_;
+          double *dvals = dvals_.alloc(toks.size());
+          for (size_t jj = 0; jj < toks.size(); jj++) {
+            double dval;
+            if (sscanf(toks[jj].c_str(), "%lg", &dval) == 1) {
+              dvals[jj] = dval;
+            } else {
+              haveError = true;
+            }
+          } // jj
+          if (!haveError) {
+            try {
+              _file.putAtt(attr.name, ncxxDouble, toks.size(), dvals);
+            } catch (NcxxException& e) {
+              haveError = true;
+              _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
+              _addErrStr("  Cannot put attribute");
+              _addErrStr("  Exception: ", e.what());
+            }
+          } else {
+            _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
+            _addErrStr("  Cannot decode user-defined global attribute");
+          }
+          if (haveError) {
+            _addErrStr("   name: ", attr.name);
+            _addErrStr("    type: double[]");
+            _addErrStr("    val: ", attr.val);
+          }
+          break;
+        }
+        default: {}
+      } // switch
+    } // ii
+    
+  } catch (NcxxException e) {
+
+    _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes");
+    _addErrStr("  exception: ", e.what());
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    return -1;
+
+  } // try
+
+  if (haveError) {
+    _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes");
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    return -1;
+  }
 
   return 0;
 
@@ -859,49 +829,47 @@ int Cf2RadxFile::_addDimensions()
     cerr << "Cf2RadxFile::_addDimensions()" << endl;
   }
 
-  // add time dimension - unlimited??
+  try {
 
-  // if (_addDim(_timeDim, TIME, -1)) {
-  if (_file.addDim(_timeDim, TIME, _writeVol->getRays().size())) {
-    return -1;
-  }
+    // add time dimension - unlimited??
+    
+    _file.addDim(_timeDim, TIME, _writeVol->getRays().size());
 
-  // add range dimension
+    // add range dimension
+    
+    _file.addDim(_rangeDim, RANGE, _writeVol->getMaxNGates());
 
-  if (_file.addDim(_rangeDim, RANGE, _writeVol->getMaxNGates())) {
-    return -1;
-  }
-
-  // add n_points dimension if applicable
-
-  if (_nGatesVary) {
-    if (_file.addDim(_nPointsDim, N_POINTS, _writeVol->getNPoints())) {
-      return -1;
+    // add n_points dimension if applicable
+    
+    if (_nGatesVary) {
+      _file.addDim(_nPointsDim, N_POINTS, _writeVol->getNPoints());
     }
-  }
 
-  // add sweep dimension
+    // add sweep dimension
+    
+    _file.addDim(_sweepDim, SWEEP, _writeVol->getSweeps().size());
 
-  if (_file.addDim(_sweepDim, SWEEP, _writeVol->getSweeps().size())) {
+    // add calib dimension
+    
+    if (_writeVol->getRcalibs().size() > 0) {
+      _file.addDim(_calDim, R_CALIB, 
+                   _writeVol->getRcalibs().size());
+    }
+    
+    // add multiple frequencies dimension
+
+    if (_writeVol->getFrequencyHz().size() > 0) {
+      _file.addDim(_frequencyDim, FREQUENCY, 
+                   _writeVol->getFrequencyHz().size());
+    }
+
+  } catch (NcxxException e) {
+
+    _addErrStr("ERROR - Cf2RadxFile::_addDimensions");
+    _addErrStr("  exception: ", e.what());
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     return -1;
-  }
 
-  // add calib dimension
-
-  if (_writeVol->getRcalibs().size() > 0) {
-    if (_file.addDim(_calDim, R_CALIB, 
-                     _writeVol->getRcalibs().size())) {
-      return -1;
-    }
-  }
-
-  // add multiple frequencies dimension
-
-  if (_writeVol->getFrequencyHz().size() > 0) {
-    if (_file.addDim(_frequencyDim, FREQUENCY, 
-                     _writeVol->getFrequencyHz().size())) {
-      return -1;
-    }
   }
 
   return 0;
@@ -933,21 +901,29 @@ int Cf2RadxFile::_addCoordinateVariables()
     _addErrStr(_file.getErrStr());
     return -1;
   }
-  int iret = 0;
-  iret |= _timeVar.addAttr(STANDARD_NAME, TIME);
-  iret |= _timeVar.addAttr(LONG_NAME,
-                           "time in seconds since volume start");
-  iret |= _timeVar.addAttr(CALENDAR, GREGORIAN);
 
-  char timeUnitsStr[256];
-  RadxTime stime(_writeVol->getStartTimeSecs());
-  sprintf(timeUnitsStr, "seconds since %.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
-          stime.getYear(), stime.getMonth(), stime.getDay(),
-          stime.getHour(), stime.getMin(), stime.getSec());
-  iret |= _timeVar.addAttr(UNITS, timeUnitsStr);
-
-  iret |= _timeVar.addAttr( COMMENT,
-                            "times are relative to the volume start_time");
+  try {
+    _timeVar.putAtt(STANDARD_NAME, TIME);
+    _timeVar.putAtt(LONG_NAME,
+                    "time in seconds since volume start");
+    _timeVar.putAtt(CALENDAR, GREGORIAN);
+    
+    char timeUnitsStr[256];
+    RadxTime stime(_writeVol->getStartTimeSecs());
+    sprintf(timeUnitsStr, "seconds since %.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
+            stime.getYear(), stime.getMonth(), stime.getDay(),
+            stime.getHour(), stime.getMin(), stime.getSec());
+    _timeVar.putAtt(UNITS, timeUnitsStr);
+    
+    _timeVar.putAtt( COMMENT,
+                     "times are relative to the volume start_time");
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Cf2RadxFile::_addCoordinateVariables");
+    _addErrStr("  Exception: ", e.what());
+    _addErrStr("  Cannot set time var attributes");
+    _addErrStr(_file.getErrStr());
+    return -1;
+  } 
   
   // range
   
@@ -980,23 +956,25 @@ int Cf2RadxFile::_addCoordinateVariables()
 
   }
 
-  iret |= _rangeVar.addAttr(LONG_NAME, RANGE_LONG);
-  iret |= _rangeVar.addAttr(LONG_NAME,
-                            "Range from instrument to center of gate");
-  iret |= _rangeVar.addAttr(UNITS, METERS);
-  iret |= _rangeVar.addAttr(SPACING_IS_CONSTANT, "true");
-  iret |= _rangeVar.addAttr(METERS_TO_CENTER_OF_FIRST_GATE,
+  try {
+    _rangeVar.putAtt(LONG_NAME, RANGE_LONG);
+    _rangeVar.putAtt(LONG_NAME,
+                     "Range from instrument to center of gate");
+    _rangeVar.putAtt(UNITS, METERS);
+    _rangeVar.putAtt(SPACING_IS_CONSTANT, "true");
+    _rangeVar.addScalarAttr(METERS_TO_CENTER_OF_FIRST_GATE,
                             (float) _writeVol->getStartRangeKm() * 1000.0);
-  iret |= _rangeVar.addAttr(METERS_BETWEEN_GATES, 
+    _rangeVar.addScalarAttr(METERS_BETWEEN_GATES, 
                             (float) _writeVol->getGateSpacingKm() * 1000.0);
-  
-  if (iret) {
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_addCoordinateVariables");
-    _addErrStr("  Cannot add attributes");
+    _addErrStr("  Exception: ", e.what());
+    _addErrStr("  Cannot set range var attributes");
+    _addErrStr(_file.getErrStr());
     return -1;
-  } else {
-    return 0;
   }
+  
+  return 0;
 
 }
 
@@ -1006,98 +984,102 @@ int Cf2RadxFile::_addCoordinateVariables()
 int Cf2RadxFile::_addScalarVariables()
 {
 
-  int iret = 0;
   if (_verbose) {
     cerr << "Cf2RadxFile::_addScalarVariables()" << endl;
   }
 
-  iret |= _file.addVar(_volumeNumberVar, VOLUME_NUMBER, "",
-                       VOLUME_NUMBER_LONG, ncxxInt, "", true);
-  
-  iret |= _file.addVar(_platformTypeVar, PLATFORM_TYPE, "",
-                       PLATFORM_TYPE_LONG, ncxxString, "", true);
-  iret |= _platformTypeVar.addAttr(OPTIONS, Radx::platformTypeOptions());
-  
-  iret |= _file.addVar(_primaryAxisVar, PRIMARY_AXIS, "", 
-                       PRIMARY_AXIS_LONG, ncxxString, "", true);
-  iret |= _primaryAxisVar.addAttr(OPTIONS, Radx::primaryAxisOptions());
-
-  iret |= _file.addVar(_statusXmlVar, STATUS_XML, "", 
-                       "status_of_instrument", ncxxString, "", true);
-  
-  iret |= _file.addVar(_instrumentTypeVar, INSTRUMENT_TYPE, "",
-                       INSTRUMENT_TYPE_LONG, ncxxString, "", true);
-  iret |= _instrumentTypeVar.addAttr(OPTIONS, Radx::instrumentTypeOptions());
-  iret |= _instrumentTypeVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
-
-  if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
-
-    // radar
-
-    iret |= _file.addVar(_radarAntennaGainHVar, RADAR_ANTENNA_GAIN_H, "",
-                         RADAR_ANTENNA_GAIN_H_LONG, ncxxFloat, DB, true);
-    iret |= _file.addVar(_radarAntennaGainVVar, RADAR_ANTENNA_GAIN_V, "",
-                         RADAR_ANTENNA_GAIN_V_LONG, ncxxFloat, DB, true);
-    iret |= _file.addVar(_radarBeamWidthHVar, RADAR_BEAM_WIDTH_H, "",
-                         RADAR_BEAM_WIDTH_H_LONG, ncxxFloat, DEGREES, true);
-    iret |= _file.addVar(_radarBeamWidthVVar, RADAR_BEAM_WIDTH_V, "",
-                         RADAR_BEAM_WIDTH_V_LONG, ncxxFloat, DEGREES, true);
-    iret |= _file.addVar(_radarRxBandwidthVar, RADAR_RX_BANDWIDTH, "",
-                         RADAR_RX_BANDWIDTH_LONG, ncxxFloat, HZ, true);
+  try {
+ 
+    _file.addVar(_volumeNumberVar, VOLUME_NUMBER,
+                 "", VOLUME_NUMBER_LONG, ncxxInt, "", true);
     
-    iret |= _radarAntennaGainHVar.addAttr(META_GROUP, RADAR_PARAMETERS);
-    iret |= _radarAntennaGainVVar.addAttr(META_GROUP, RADAR_PARAMETERS);
-    iret |= _radarBeamWidthHVar.addAttr(META_GROUP, RADAR_PARAMETERS);
-    iret |= _radarBeamWidthVVar.addAttr(META_GROUP, RADAR_PARAMETERS);
-    iret |= _radarRxBandwidthVar.addAttr(META_GROUP, RADAR_PARAMETERS);
-
-  } else {
-
-    // lidar
-
-    iret |= _file.addVar(_lidarConstantVar, LIDAR_CONSTANT, "",
-                         LIDAR_CONSTANT_LONG, ncxxFloat, DB, true);
-    iret |= _file.addVar(_lidarPulseEnergyJVar, LIDAR_PULSE_ENERGY, "",
-                         LIDAR_PULSE_ENERGY_LONG, ncxxFloat, JOULES, true);
-    iret |= _file.addVar(_lidarPeakPowerWVar, LIDAR_PEAK_POWER, "",
-                         LIDAR_PEAK_POWER_LONG, ncxxFloat, WATTS, true);
-    iret |= _file.addVar(_lidarApertureDiamCmVar, LIDAR_APERTURE_DIAMETER, "",
-                         LIDAR_APERTURE_DIAMETER_LONG, ncxxFloat, CM, true);
-    iret |= _file.addVar(_lidarApertureEfficiencyVar, LIDAR_APERTURE_EFFICIENCY, "",
-                         LIDAR_APERTURE_EFFICIENCY_LONG, ncxxFloat, PERCENT, true);
-    iret |= _file.addVar(_lidarFieldOfViewMradVar, LIDAR_FIELD_OF_VIEW, "",
-                         LIDAR_FIELD_OF_VIEW_LONG, ncxxFloat, MRAD, true);
-    iret |= _file.addVar(_lidarBeamDivergenceMradVar, LIDAR_BEAM_DIVERGENCE, "",
-                         LIDAR_BEAM_DIVERGENCE_LONG, ncxxFloat, MRAD, true);
+    _file.addVar(_platformTypeVar, PLATFORM_TYPE,
+                 "", PLATFORM_TYPE_LONG, ncxxString, "", true);
+    _platformTypeVar.putAtt(OPTIONS, Radx::platformTypeOptions());
     
-    iret |= _lidarConstantVar.addAttr(META_GROUP, LIDAR_PARAMETERS);
-    iret |= _lidarPulseEnergyJVar.addAttr(META_GROUP, LIDAR_PARAMETERS);
-    iret |= _lidarPeakPowerWVar.addAttr(META_GROUP, LIDAR_PARAMETERS);
-    iret |= _lidarApertureDiamCmVar.addAttr(META_GROUP, LIDAR_PARAMETERS);
-    iret |= _lidarApertureEfficiencyVar.addAttr(META_GROUP, LIDAR_PARAMETERS);
-    iret |= _lidarFieldOfViewMradVar.addAttr(META_GROUP, LIDAR_PARAMETERS);
-    iret |= _lidarBeamDivergenceMradVar.addAttr(META_GROUP, LIDAR_PARAMETERS);
+    _file.addVar(_primaryAxisVar, PRIMARY_AXIS,
+                 "", PRIMARY_AXIS_LONG, ncxxString, "", true);
+    _primaryAxisVar.putAtt(OPTIONS, Radx::primaryAxisOptions());
+    
+    _file.addVar(_statusXmlVar, STATUS_XML,
+                 "", "status_of_instrument", ncxxString, "", true);
+    
+    _file.addVar(_instrumentTypeVar, INSTRUMENT_TYPE,
+                 "", INSTRUMENT_TYPE_LONG, ncxxString, "", true);
+    _instrumentTypeVar.putAtt(OPTIONS, Radx::instrumentTypeOptions());
+    _instrumentTypeVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
+    
+    if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
+      
+      // radar
+      
+      _file.addVar(_radarAntennaGainHVar, RADAR_ANTENNA_GAIN_H,
+                   "", RADAR_ANTENNA_GAIN_H_LONG, ncxxFloat, DB, true);
+      _file.addVar(_radarAntennaGainVVar, RADAR_ANTENNA_GAIN_V,
+                   "", RADAR_ANTENNA_GAIN_V_LONG, ncxxFloat, DB, true);
+      _file.addVar(_radarBeamWidthHVar, RADAR_BEAM_WIDTH_H,
+                   "", RADAR_BEAM_WIDTH_H_LONG, ncxxFloat, DEGREES, true);
+      _file.addVar(_radarBeamWidthVVar, RADAR_BEAM_WIDTH_V,
+                   "", RADAR_BEAM_WIDTH_V_LONG, ncxxFloat, DEGREES, true);
+      _file.addVar(_radarRxBandwidthVar, RADAR_RX_BANDWIDTH,
+                   "", RADAR_RX_BANDWIDTH_LONG, ncxxFloat, HZ, true);
+      
+      _radarAntennaGainHVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+      _radarAntennaGainVVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+      _radarBeamWidthHVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+      _radarBeamWidthVVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+      _radarRxBandwidthVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+      
+    } else {
+      
+      // lidar
+      
+      _file.addVar(_lidarConstantVar, LIDAR_CONSTANT,
+                   "", LIDAR_CONSTANT_LONG, ncxxFloat, DB, true);
+      _file.addVar(_lidarPulseEnergyJVar, LIDAR_PULSE_ENERGY,
+                   "", LIDAR_PULSE_ENERGY_LONG, ncxxFloat, JOULES, true);
+      _file.addVar(_lidarPeakPowerWVar, LIDAR_PEAK_POWER,
+                   "", LIDAR_PEAK_POWER_LONG, ncxxFloat, WATTS, true);
+      _file.addVar(_lidarApertureDiamCmVar, LIDAR_APERTURE_DIAMETER,
+                   "", LIDAR_APERTURE_DIAMETER_LONG, ncxxFloat, CM, true);
+      _file.addVar(_lidarApertureEfficiencyVar, LIDAR_APERTURE_EFFICIENCY,
+                   "", LIDAR_APERTURE_EFFICIENCY_LONG, ncxxFloat, PERCENT, true);
+      _file.addVar(_lidarFieldOfViewMradVar, LIDAR_FIELD_OF_VIEW,
+                   "", LIDAR_FIELD_OF_VIEW_LONG, ncxxFloat, MRAD, true);
+      _file.addVar(_lidarBeamDivergenceMradVar, LIDAR_BEAM_DIVERGENCE,
+                   "", LIDAR_BEAM_DIVERGENCE_LONG, ncxxFloat, MRAD, true);
+      
+      _lidarConstantVar.putAtt(META_GROUP, LIDAR_PARAMETERS);
+      _lidarPulseEnergyJVar.putAtt(META_GROUP, LIDAR_PARAMETERS);
+      _lidarPeakPowerWVar.putAtt(META_GROUP, LIDAR_PARAMETERS);
+      _lidarApertureDiamCmVar.putAtt(META_GROUP, LIDAR_PARAMETERS);
+      _lidarApertureEfficiencyVar.putAtt(META_GROUP, LIDAR_PARAMETERS);
+      _lidarFieldOfViewMradVar.putAtt(META_GROUP, LIDAR_PARAMETERS);
+      _lidarBeamDivergenceMradVar.putAtt(META_GROUP, LIDAR_PARAMETERS);
+      
+    }
+    
+    // start time
+    
+    _file.addVar(_startTimeVar, TIME_COVERAGE_START,
+                 "", TIME_COVERAGE_START_LONG, ncxxString, "", true);
+    _startTimeVar.putAtt(COMMENT,
+                         "ray times are relative to start time in secs");
+    
+    // end time
 
-  }
+    _file.addVar(_endTimeVar, TIME_COVERAGE_END,
+                 "", TIME_COVERAGE_END_LONG, ncxxString, "", true);
 
-  // start time
+  } catch (NcxxException& e) {
 
-  iret |= _file.addVar(_startTimeVar, TIME_COVERAGE_START,
-                       "", TIME_COVERAGE_START_LONG, ncxxString, "", true);
-  iret |= _startTimeVar.addAttr(COMMENT,
-                                "ray times are relative to start time in secs");
-
-  // end time
-
-  iret |= _file.addVar(_endTimeVar, TIME_COVERAGE_END,
-                       "", TIME_COVERAGE_END_LONG, ncxxString, "", true);
-
-  if (iret) {
     _addErrStr("ERROR - Cf2RadxFile::_addScalarVariables");
+    _addErrStr("  Exception: ", e.what());
     return -1;
-  } else {
-    return 0;
+
   }
+
+  return 0;
 
 }
 
@@ -1110,13 +1092,20 @@ int Cf2RadxFile::_addFrequencyVariable()
   if (_writeVol->getFrequencyHz().size() < 1) {
     return 0;
   }
-  
-  if(_file.addVar(_frequencyVar, FREQUENCY,
-                  "", FREQUENCY_LONG, ncxxFloat, _frequencyDim, HZ, true)) {
+
+  try {
+
+    _file.addVar(_frequencyVar, FREQUENCY,
+                 "", FREQUENCY_LONG, ncxxFloat, _frequencyDim, HZ, true);
+    _frequencyVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
+
+  } catch (NcxxException& e) {
+
     _addErrStr("ERROR - Cf2RadxFile::_addFrequencyVariable");
+    _addErrStr("  Exception: ", e.what());
     return -1;
+
   }
-  _frequencyVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
 
   return 0;
 
@@ -1128,85 +1117,89 @@ int Cf2RadxFile::_addFrequencyVariable()
 int Cf2RadxFile::_addCorrectionVariables()
 {
 
-  int iret = 0;
   if (_verbose) {
     cerr << "Cf2RadxFile::_addCorrectionVariables()" << endl;
   }
 
-  iret |= _file.addVar(_azimuthCorrVar, AZIMUTH_CORRECTION,
-                       "", AZIMUTH_CORRECTION_LONG, ncxxFloat, DEGREES, true);
-  iret |= _azimuthCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
+  try {
 
-  iret |= _file.addVar(_elevationCorrVar, ELEVATION_CORRECTION,
-                       "", ELEVATION_CORRECTION_LONG, ncxxFloat, DEGREES, true);
-  iret |= _elevationCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
+    _file.addVar(_azimuthCorrVar, AZIMUTH_CORRECTION,
+                 "", AZIMUTH_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+    _azimuthCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
+    
+    _file.addVar(_elevationCorrVar, ELEVATION_CORRECTION,
+                 "", ELEVATION_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+    _elevationCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
+    
+    _file.addVar(_rangeCorrVar, RANGE_CORRECTION,
+                 "", RANGE_CORRECTION_LONG, ncxxFloat, METERS, true);
+    _rangeCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
+    
+    _file.addVar(_longitudeCorrVar, LONGITUDE_CORRECTION,
+                 "", LONGITUDE_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+    _longitudeCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
+    
+    _file.addVar(_latitudeCorrVar, LATITUDE_CORRECTION,
+                 "", LATITUDE_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+    _latitudeCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
+    
+    _file.addVar(_pressureAltCorrVar, PRESSURE_ALTITUDE_CORRECTION,
+                 "", PRESSURE_ALTITUDE_CORRECTION_LONG,
+                 ncxxFloat, METERS, true);
+    _pressureAltCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
+    
+    _file.addVar(_altitudeCorrVar, ALTITUDE_CORRECTION,
+                 "", ALTITUDE_CORRECTION_LONG, ncxxFloat, METERS, true);
+    _altitudeCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
+    
+    _file.addVar(_ewVelCorrVar, EASTWARD_VELOCITY_CORRECTION,
+                 "", EASTWARD_VELOCITY_CORRECTION_LONG, 
+                 ncxxFloat, METERS_PER_SECOND, true);
+    _ewVelCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
+    
+    _file.addVar(_nsVelCorrVar, NORTHWARD_VELOCITY_CORRECTION,
+                 "", NORTHWARD_VELOCITY_CORRECTION_LONG,
+                 ncxxFloat, METERS_PER_SECOND, true);
+    _nsVelCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
+    
+    _file.addVar(_vertVelCorrVar, VERTICAL_VELOCITY_CORRECTION,
+                 "", VERTICAL_VELOCITY_CORRECTION_LONG,
+                 ncxxFloat, METERS_PER_SECOND, true);
+    _vertVelCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
+    
+    _file.addVar(_headingCorrVar, HEADING_CORRECTION,
+                 "", HEADING_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+    _headingCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
+    
+    _file.addVar(_rollCorrVar, ROLL_CORRECTION,
+                 "", ROLL_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+    _rollCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
+    
+    _file.addVar(_pitchCorrVar, PITCH_CORRECTION,
+                 "", PITCH_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+    _pitchCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
+    
+    _file.addVar(_driftCorrVar, DRIFT_CORRECTION,
+                 "", DRIFT_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+    _driftCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
+    
+    _file.addVar(_rotationCorrVar, ROTATION_CORRECTION,
+                 "", ROTATION_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+    _rotationCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
+    
+    _file.addVar(_tiltCorrVar, TILT_CORRECTION,
+                 "", TILT_CORRECTION_LONG, ncxxFloat, DEGREES, true);
+    _tiltCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
 
-  iret |= _file.addVar(_rangeCorrVar, RANGE_CORRECTION,
-                       "", RANGE_CORRECTION_LONG, ncxxFloat, METERS, true);
-  iret |= _rangeCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
+  } catch (NcxxException& e) {
 
-  iret |= _file.addVar(_longitudeCorrVar, LONGITUDE_CORRECTION,
-                       "", LONGITUDE_CORRECTION_LONG, ncxxFloat, DEGREES, true);
-  iret |= _longitudeCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
-
-  iret |= _file.addVar(_latitudeCorrVar, LATITUDE_CORRECTION,
-                       "", LATITUDE_CORRECTION_LONG, ncxxFloat, DEGREES, true);
-  iret |= _latitudeCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
-
-  iret |= _file.addVar(_pressureAltCorrVar, PRESSURE_ALTITUDE_CORRECTION,
-                       "", PRESSURE_ALTITUDE_CORRECTION_LONG,
-                       ncxxFloat, METERS, true);
-  iret |= _pressureAltCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
-  
-  iret |= _file.addVar(_altitudeCorrVar, ALTITUDE_CORRECTION,
-                       "", ALTITUDE_CORRECTION_LONG, ncxxFloat, METERS, true);
-  iret |= _altitudeCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
-
-  iret |= _file.addVar(_ewVelCorrVar, EASTWARD_VELOCITY_CORRECTION,
-                       "", EASTWARD_VELOCITY_CORRECTION_LONG, 
-                       ncxxFloat, METERS_PER_SECOND, true);
-  iret |= _ewVelCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
-
-  iret |= _file.addVar(_nsVelCorrVar, NORTHWARD_VELOCITY_CORRECTION,
-                       "", NORTHWARD_VELOCITY_CORRECTION_LONG,
-                       ncxxFloat, METERS_PER_SECOND, true);
-  iret |= _nsVelCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
-
-  iret |= _file.addVar(_vertVelCorrVar, VERTICAL_VELOCITY_CORRECTION,
-                       "", VERTICAL_VELOCITY_CORRECTION_LONG,
-                       ncxxFloat, METERS_PER_SECOND, true);
-  iret |= _vertVelCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
-
-  iret |= _file.addVar(_headingCorrVar, HEADING_CORRECTION,
-                       "", HEADING_CORRECTION_LONG, ncxxFloat, DEGREES, true);
-  iret |= _headingCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
-
-  iret |= _file.addVar(_rollCorrVar, ROLL_CORRECTION,
-                       "", ROLL_CORRECTION_LONG, ncxxFloat, DEGREES, true);
-  iret |= _rollCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
-
-  iret |= _file.addVar(_pitchCorrVar, PITCH_CORRECTION,
-                       "", PITCH_CORRECTION_LONG, ncxxFloat, DEGREES, true);
-  iret |= _pitchCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
-
-  iret |= _file.addVar(_driftCorrVar, DRIFT_CORRECTION,
-                       "", DRIFT_CORRECTION_LONG, ncxxFloat, DEGREES, true);
-  iret |= _driftCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
-
-  iret |= _file.addVar(_rotationCorrVar, ROTATION_CORRECTION,
-                       "", ROTATION_CORRECTION_LONG, ncxxFloat, DEGREES, true);
-  iret |= _rotationCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
-
-  iret |= _file.addVar(_tiltCorrVar, TILT_CORRECTION,
-                       "", TILT_CORRECTION_LONG, ncxxFloat, DEGREES, true);
-  iret |= _tiltCorrVar.addAttr(META_GROUP, GEOMETRY_CORRECTION);
-
-  if (iret) {
     _addErrStr("ERROR - Cf2RadxFile::_addCorrectionVariables");
+    _addErrStr("  Exception: ", e.what());
     return -1;
-  } else {
-    return 0;
+
   }
+
+  return 0;
 
 }
 
@@ -1220,57 +1213,52 @@ int Cf2RadxFile::_addProjectionVariables()
     cerr << "Cf2RadxFile::_addProjectionVariables()" << endl;
   }
 
-  int iret = 0;
+  try {
 
-  // projection variable
-  
-  _projVar = _file.addVar(GRID_MAPPING, ncxxInt);
-  if (_projVar.isNull()) {
-    _addErrStr("ERROR - Cf2RadxFile::_addProjectionVariables");
-    _addErrStr("  Cannot add projection variable:", GRID_MAPPING);
-    _addErrStr(_file.getErrStr());
-    return -1;
-  }
-  
-  iret |= _projVar.addAttr(GRID_MAPPING_NAME, "radar_lidar_radial_scan");
-
-  if (_writeVol->getPlatformType() == Radx::PLATFORM_TYPE_FIXED) {
-    iret |= _projVar.addAttr(LONGITUDE_OF_PROJECTION_ORIGIN,
-                             _writeVol->getLongitudeDeg());
-    iret |= _projVar.addAttr(LATITUDE_OF_PROJECTION_ORIGIN,
-                             _writeVol->getLatitudeDeg());
-    iret |= _projVar.addAttr(ALTITUDE_OF_PROJECTION_ORIGIN,
-                             _writeVol->getAltitudeKm() * 1000.0);
-    iret |= _projVar.addAttr(FALSE_NORTHING, 0.0);
-    iret |= _projVar.addAttr(FALSE_EASTING, 0.0);
-  }
-
-  // lat/lon/alt
-
-  if (!_georefsActive) {
-
-    // georeferencs on rays are not active, so write as scalars
-
-    iret |= _file.addVar(_latitudeVar, LATITUDE,
-                         "", LATITUDE_LONG, ncxxDouble, DEGREES_NORTH, true);
-    iret |= _file.addVar(_longitudeVar, LONGITUDE,
-                         "", LONGITUDE_LONG, ncxxDouble, DEGREES_EAST, true);
-    iret |= _file.addVar(_altitudeVar, ALTITUDE,
-                         "", ALTITUDE_LONG, ncxxDouble, METERS, true);
-    iret |= _altitudeVar.addAttr(POSITIVE, UP);
-    iret |= _file.addVar(_altitudeAglVar, ALTITUDE_AGL,
-                         "", ALTITUDE_AGL_LONG, ncxxDouble, METERS, true);
-    iret |= _altitudeAglVar.addAttr(POSITIVE, UP);
-
-  }
+    // projection variable
     
-  if (iret) {
+    _projVar = _file.addVar(GRID_MAPPING, ncxxInt);
+    _projVar.putAtt(GRID_MAPPING_NAME, "radar_lidar_radial_scan");
+
+    if (_writeVol->getPlatformType() == Radx::PLATFORM_TYPE_FIXED) {
+      _projVar.addScalarAttr(LONGITUDE_OF_PROJECTION_ORIGIN,
+                             _writeVol->getLongitudeDeg());
+      _projVar.addScalarAttr(LATITUDE_OF_PROJECTION_ORIGIN,
+                             _writeVol->getLatitudeDeg());
+      _projVar.addScalarAttr(ALTITUDE_OF_PROJECTION_ORIGIN,
+                             _writeVol->getAltitudeKm() * 1000.0);
+      _projVar.addScalarAttr(FALSE_NORTHING, 0.0);
+      _projVar.addScalarAttr(FALSE_EASTING, 0.0);
+    }
+    
+    // lat/lon/alt
+    
+    if (!_georefsActive) {
+      
+      // georeferencs on rays are not active, so write as scalars
+      
+      _file.addVar(_latitudeVar, LATITUDE,
+                   "", LATITUDE_LONG, ncxxDouble, DEGREES_NORTH, true);
+      _file.addVar(_longitudeVar, LONGITUDE,
+                   "", LONGITUDE_LONG, ncxxDouble, DEGREES_EAST, true);
+      _file.addVar(_altitudeVar, ALTITUDE,
+                   "", ALTITUDE_LONG, ncxxDouble, METERS, true);
+      _altitudeVar.putAtt(POSITIVE, UP);
+      _file.addVar(_altitudeAglVar, ALTITUDE_AGL,
+                   "", ALTITUDE_AGL_LONG, ncxxDouble, METERS, true);
+      _altitudeAglVar.putAtt(POSITIVE, UP);
+      
+    }
+    
+  } catch (NcxxException& e) {
+
     _addErrStr("ERROR - Cf2RadxFile::_addProjectionVariables");
-    _addErrStr("  Cannot add attributes");
+    _addErrStr("  Exception: ", e.what());
     return -1;
-  } else {
-    return 0;
+    
   }
+
+  return 0;
 
 }
 
@@ -1316,36 +1304,43 @@ int Cf2RadxFile::_addSweepGroups()
   
   // create variable for sweep names
   
-  if (_file.addVar(_sweepGroupNameVar, SWEEP_GROUP_NAME,
-                   "", SWEEP_GROUP_NAME_LONG, 
-                   ncxxString, _sweepDim, "", true)) {
+  try {
+    _file.addVar(_sweepGroupNameVar, SWEEP_GROUP_NAME,
+                 "", SWEEP_GROUP_NAME_LONG, 
+                 ncxxString, _sweepDim, "", true);
+    const char **sweepNames = new const char*[nSweeps];
+    for (int ii = 0; ii < nSweeps; ii++) {
+      sweepNames[ii] = _sweepGroupNames[ii].c_str();
+    }
+    _sweepGroupNameVar.putVal(sweepNames);
+    delete[] sweepNames;
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
     _addErrStr("  Cannot add root group var: ", SWEEP_GROUP_NAME);
+    _addErrStr("  Exception: ", e.what());
     return -1;
   }
-  const char **sweepNames = new const char*[nSweeps];
-  for (int ii = 0; ii < nSweeps; ii++) {
-    sweepNames[ii] = _sweepGroupNames[ii].c_str();
-  }
-  _sweepGroupNameVar.putVal(sweepNames);
-  delete[] sweepNames;
+
 
   // sweep fixed angles
   
-  if (_file.addVar(_sweepFixedAngleVar, FIXED_ANGLE,
-                   "", FIXED_ANGLE_LONG, 
-                   ncxxFloat, _sweepDim, DEGREES, true)) {
+  try {
+    _file.addVar(_sweepFixedAngleVar, FIXED_ANGLE,
+                 "", FIXED_ANGLE_LONG, 
+                 ncxxFloat, _sweepDim, DEGREES, true);
+    RadxArray<float> fvals_;
+    float *fvals = fvals_.alloc(nSweeps);
+    for (int ii = 0; ii < nSweeps; ii++) {
+      fvals[ii] = sweeps[ii]->getFixedAngleDeg();
+      _sweepGroups[ii].putAtt(FIXED_ANGLE, ncxxFloat, fvals[ii]);
+    }
+    _sweepFixedAngleVar.putVal(fvals);
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
     _addErrStr("  Cannot add root group var: ", FIXED_ANGLE);
+    _addErrStr("  Exception: ", e.what());
     return -1;
   }
-  RadxArray<float> fvals_;
-  float *fvals = fvals_.alloc(nSweeps);
-  for (int ii = 0; ii < nSweeps; ii++) {
-    fvals[ii] = sweeps[ii]->getFixedAngleDeg();
-    _sweepGroups[ii].putAtt(FIXED_ANGLE, ncxxFloat, fvals[ii]);
-  }
-  _sweepFixedAngleVar.putVal(fvals);
 
   return 0;
 
@@ -1360,75 +1355,81 @@ int Cf2RadxFile::_addSweepVariables()
   if (_verbose) {
     cerr << "Cf2RadxFile::_addSweepVariables()" << endl;
   }
-  
-  int iret = 0;
 
-  iret |= _file.addVar(_sweepNumberVar, SWEEP_NUMBER,
-                       "", SWEEP_NUMBER_LONG,
-                       ncxxInt, _sweepDim, "", true);
+  try {
 
-  iret |= _file.addVar(_sweepModeVar, SWEEP_MODE,
-                       "", SWEEP_MODE_LONG,
-                       ncxxString, _sweepDim, "", true);
-  iret |= _sweepModeVar.addAttr(OPTIONS, Radx::sweepModeOptions());
-
-  iret |= _file.addVar(_polModeVar, POLARIZATION_MODE,
-                       "", POLARIZATION_MODE_LONG, 
-                       ncxxString, _sweepDim, "", true);
-  iret |= _polModeVar.addAttr(OPTIONS, Radx::polarizationModeOptions());
-  iret |= _polModeVar.addAttr(META_GROUP, RADAR_PARAMETERS);
+    _file.addVar(_sweepNumberVar, SWEEP_NUMBER,
+                 "", SWEEP_NUMBER_LONG,
+                 ncxxInt, _sweepDim, "", true);
+    
+    _file.addVar(_sweepModeVar, SWEEP_MODE,
+                 "", SWEEP_MODE_LONG,
+                 ncxxString, _sweepDim, "", true);
+    _sweepModeVar.putAtt(OPTIONS, Radx::sweepModeOptions());
+    
+    _file.addVar(_polModeVar, POLARIZATION_MODE,
+                 "", POLARIZATION_MODE_LONG, 
+                 ncxxString, _sweepDim, "", true);
+    _polModeVar.putAtt(OPTIONS, Radx::polarizationModeOptions());
+    _polModeVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+    
+    _file.addVar(_prtModeVar, PRT_MODE,
+                 "", PRT_MODE_LONG, 
+                 ncxxString, _sweepDim, "", true);
+    _prtModeVar.putAtt(OPTIONS, Radx::prtModeOptions());
+    _prtModeVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+    
+    _file.addVar(_sweepFollowModeVar, FOLLOW_MODE,
+                 "", FOLLOW_MODE_LONG, 
+                 ncxxString, _sweepDim, "", true);
+    _sweepFollowModeVar.putAtt(OPTIONS, Radx::followModeOptions());
+    _sweepFollowModeVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
+    
+    _file.addVar(_sweepFixedAngleVar, FIXED_ANGLE,
+                 "", FIXED_ANGLE_LONG, 
+                 ncxxFloat, _sweepDim, DEGREES, true);
+    _file.addVar(_targetScanRateVar, TARGET_SCAN_RATE,
+                 "", TARGET_SCAN_RATE_LONG, 
+                 ncxxFloat, _sweepDim, DEGREES_PER_SECOND, true);
+    
+    _file.addVar(_sweepStartRayIndexVar, SWEEP_START_RAY_INDEX,
+                 "", SWEEP_START_RAY_INDEX_LONG, 
+                 ncxxInt, _sweepDim, "", true);
+    _file.addVar(_sweepEndRayIndexVar, SWEEP_END_RAY_INDEX,
+                 "", SWEEP_END_RAY_INDEX_LONG, 
+                 ncxxInt, _sweepDim, "", true);
+    
+    _file.addVar(_raysAreIndexedVar, RAYS_ARE_INDEXED,
+                 "", RAYS_ARE_INDEXED_LONG, 
+                 ncxxString, _sweepDim, "", true);
+    
+    _file.addVar(_rayAngleResVar, RAY_ANGLE_RES,
+                 "", RAY_ANGLE_RES_LONG, 
+                 ncxxFloat, _sweepDim, DEGREES, true);
   
-  iret |= _file.addVar(_prtModeVar, PRT_MODE,
-                       "", PRT_MODE_LONG, 
-                       ncxxString, _sweepDim, "", true);
-  iret |= _prtModeVar.addAttr(OPTIONS, Radx::prtModeOptions());
-  iret |= _prtModeVar.addAttr(META_GROUP, RADAR_PARAMETERS);
-  
-  iret |= _file.addVar(_sweepFollowModeVar, FOLLOW_MODE,
-                       "", FOLLOW_MODE_LONG, 
-                       ncxxString, _sweepDim, "", true);
-  iret |= _sweepFollowModeVar.addAttr(OPTIONS, Radx::followModeOptions());
-  iret |= _sweepFollowModeVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
-  
-  iret |= _file.addVar(_targetScanRateVar, TARGET_SCAN_RATE,
-                       "", TARGET_SCAN_RATE_LONG, 
-                       ncxxFloat, _sweepDim, DEGREES_PER_SECOND, true);
-
-  iret |= _file.addVar(_sweepStartRayIndexVar, SWEEP_START_RAY_INDEX,
-                       "", SWEEP_START_RAY_INDEX_LONG, 
-                       ncxxInt, _sweepDim, "", true);
-  iret |= _file.addVar(_sweepEndRayIndexVar, SWEEP_END_RAY_INDEX,
-                       "", SWEEP_END_RAY_INDEX_LONG, 
-                       ncxxInt, _sweepDim, "", true);
-  
-  iret |= _file.addVar(_raysAreIndexedVar, RAYS_ARE_INDEXED,
-                       "", RAYS_ARE_INDEXED_LONG, 
-                       ncxxString, _sweepDim, "", true);
-
-  iret |= _file.addVar(_rayAngleResVar, RAY_ANGLE_RES,
-                       "", RAY_ANGLE_RES_LONG, 
-                       ncxxFloat, _sweepDim, DEGREES, true);
-  
-  bool haveIF = false;
-  const vector<RadxSweep *> &sweeps = _writeVol->getSweeps();
-  for (size_t ii = 0; ii < sweeps.size(); ii++) {
-    if (sweeps[ii]->getIntermedFreqHz() != Radx::missingMetaDouble) {
-      haveIF = true;
-      break;
+    bool haveIF = false;
+    const vector<RadxSweep *> &sweeps = _writeVol->getSweeps();
+    for (size_t ii = 0; ii < sweeps.size(); ii++) {
+      if (sweeps[ii]->getIntermedFreqHz() != Radx::missingMetaDouble) {
+        haveIF = true;
+        break;
+      }
     }
-  }
-  if (haveIF) {
-    iret |= _file.addVar(_intermedFreqHzVar, INTERMED_FREQ_HZ,
-                         "", INTERMED_FREQ_HZ_LONG, 
-                         ncxxFloat, _sweepDim, HZ, true);
+    if (haveIF) {
+      _file.addVar(_intermedFreqHzVar, INTERMED_FREQ_HZ,
+                   "", INTERMED_FREQ_HZ_LONG, 
+                   ncxxFloat, _sweepDim, HZ, true);
+    }
+    
+  } catch (NcxxException& e) {
+
+    _addErrStr("ERROR - Cf2RadxFile::_addSweepVariables");
+    _addErrStr("  Exception: ", e.what());
+    return -1;
+    
   }
   
-  if (iret) {
-    _addErrStr("ERROR - Cf2RadxFile::_addSweepVariables");
-    return -1;
-  } else {
-    return 0;
-  }
+  return 0;
 
 }
 
@@ -1445,111 +1446,114 @@ int Cf2RadxFile::_addCalibVariables()
   if (_verbose) {
     cerr << "Cf2RadxFile::_addCalibVariables()" << endl;
   }
+
+  try {
+
+    _file.addVar(_rCalTimeVar, R_CALIB_TIME,
+                 "", R_CALIB_TIME_LONG, 
+                 ncxxString, _calDim, "", true);
+    _rCalTimeVar.putAtt(META_GROUP, RADAR_CALIBRATION);
     
-  int iret = 0;
+    _addCalVar(_rCalPulseWidthVar, R_CALIB_PULSE_WIDTH,
+               R_CALIB_PULSE_WIDTH_LONG, SECONDS);
+    _addCalVar(_rCalXmitPowerHVar, R_CALIB_XMIT_POWER_H,
+               R_CALIB_XMIT_POWER_H_LONG, DBM);
+    _addCalVar(_rCalXmitPowerVVar, R_CALIB_XMIT_POWER_V,
+               R_CALIB_XMIT_POWER_V_LONG, DBM);
+    _addCalVar(_rCalTwoWayWaveguideLossHVar, R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_H,
+               R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_H_LONG, DB);
+    _addCalVar(_rCalTwoWayWaveguideLossVVar, R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_V,
+               R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_V_LONG, DB);
+    _addCalVar(_rCalTwoWayRadomeLossHVar, R_CALIB_TWO_WAY_RADOME_LOSS_H,
+               R_CALIB_TWO_WAY_RADOME_LOSS_H_LONG, DB);
+    _addCalVar(_rCalTwoWayRadomeLossVVar, R_CALIB_TWO_WAY_RADOME_LOSS_V,
+               R_CALIB_TWO_WAY_RADOME_LOSS_V_LONG, DB);
+    _addCalVar(_rCalReceiverMismatchLossVar, R_CALIB_RECEIVER_MISMATCH_LOSS,
+               R_CALIB_RECEIVER_MISMATCH_LOSS_LONG, DB);
+    _addCalVar(_rCalRadarConstHVar, R_CALIB_RADAR_CONSTANT_H,
+               R_CALIB_RADAR_CONSTANT_H_LONG, DB);
+    _addCalVar(_rCalRadarConstVVar, R_CALIB_RADAR_CONSTANT_V,
+               R_CALIB_RADAR_CONSTANT_V_LONG, DB);
+    _addCalVar(_rCalAntennaGainHVar, R_CALIB_ANTENNA_GAIN_H,
+               R_CALIB_ANTENNA_GAIN_H_LONG, DB);
+    _addCalVar(_rCalAntennaGainVVar, R_CALIB_ANTENNA_GAIN_V,
+               R_CALIB_ANTENNA_GAIN_V_LONG, DB);
+    _addCalVar(_rCalNoiseHcVar, R_CALIB_NOISE_HC,
+               R_CALIB_NOISE_HC_LONG, DBM);
+    _addCalVar(_rCalNoiseVcVar, R_CALIB_NOISE_VC,
+               R_CALIB_NOISE_VC_LONG, DBM);
+    _addCalVar(_rCalNoiseHxVar, R_CALIB_NOISE_HX,
+               R_CALIB_NOISE_HX_LONG, DBM);
+    _addCalVar(_rCalNoiseVxVar, R_CALIB_NOISE_VX,
+               R_CALIB_NOISE_VX_LONG, DBM);
+    _addCalVar(_rCalReceiverGainHcVar, R_CALIB_RECEIVER_GAIN_HC,
+               R_CALIB_RECEIVER_GAIN_HC_LONG, DB);
+    _addCalVar(_rCalReceiverGainVcVar, R_CALIB_RECEIVER_GAIN_VC,
+               R_CALIB_RECEIVER_GAIN_VC_LONG, DB);
+    _addCalVar(_rCalReceiverGainHxVar, R_CALIB_RECEIVER_GAIN_HX,
+               R_CALIB_RECEIVER_GAIN_HX_LONG, DB);
+    _addCalVar(_rCalReceiverGainVxVar, R_CALIB_RECEIVER_GAIN_VX,
+               R_CALIB_RECEIVER_GAIN_VX_LONG, DB);
+    _addCalVar(_rCalBaseDbz1kmHcVar, R_CALIB_BASE_DBZ_1KM_HC,
+               R_CALIB_BASE_DBZ_1KM_HC_LONG, DBZ);
+    _addCalVar(_rCalBaseDbz1kmVcVar, R_CALIB_BASE_DBZ_1KM_VC,
+               R_CALIB_BASE_DBZ_1KM_VC_LONG, DBZ);
+    _addCalVar(_rCalBaseDbz1kmHxVar, R_CALIB_BASE_DBZ_1KM_HX,
+               R_CALIB_BASE_DBZ_1KM_HX_LONG, DBZ);
+    _addCalVar(_rCalBaseDbz1kmVxVar, R_CALIB_BASE_DBZ_1KM_VX,
+               R_CALIB_BASE_DBZ_1KM_VX_LONG, DBZ);
+    _addCalVar(_rCalSunPowerHcVar, R_CALIB_SUN_POWER_HC,
+               R_CALIB_SUN_POWER_HC_LONG, DBM);
+    _addCalVar(_rCalSunPowerVcVar, R_CALIB_SUN_POWER_VC,
+               R_CALIB_SUN_POWER_VC_LONG, DBM);
+    _addCalVar(_rCalSunPowerHxVar, R_CALIB_SUN_POWER_HX,
+               R_CALIB_SUN_POWER_HX_LONG, DBM);
+    _addCalVar(_rCalSunPowerVxVar, R_CALIB_SUN_POWER_VX,
+               R_CALIB_SUN_POWER_VX_LONG, DBM);
+    _addCalVar(_rCalNoiseSourcePowerHVar, R_CALIB_NOISE_SOURCE_POWER_H,
+               R_CALIB_NOISE_SOURCE_POWER_H_LONG, DBM);
+    _addCalVar(_rCalNoiseSourcePowerVVar, R_CALIB_NOISE_SOURCE_POWER_V,
+               R_CALIB_NOISE_SOURCE_POWER_V_LONG, DBM);
+    _addCalVar(_rCalPowerMeasLossHVar, R_CALIB_POWER_MEASURE_LOSS_H,
+               R_CALIB_POWER_MEASURE_LOSS_H_LONG, DB);
+    _addCalVar(_rCalPowerMeasLossVVar, R_CALIB_POWER_MEASURE_LOSS_V,
+               R_CALIB_POWER_MEASURE_LOSS_V_LONG, DB);
+    _addCalVar(_rCalCouplerForwardLossHVar, R_CALIB_COUPLER_FORWARD_LOSS_H,
+               R_CALIB_COUPLER_FORWARD_LOSS_H_LONG, DB);
+    _addCalVar(_rCalCouplerForwardLossVVar, R_CALIB_COUPLER_FORWARD_LOSS_V,
+               R_CALIB_COUPLER_FORWARD_LOSS_V_LONG, DB);
+    _addCalVar(_rCalDbzCorrectionVar, R_CALIB_DBZ_CORRECTION,
+               R_CALIB_DBZ_CORRECTION_LONG, DB);
+    _addCalVar(_rCalZdrCorrectionVar, R_CALIB_ZDR_CORRECTION,
+               R_CALIB_ZDR_CORRECTION_LONG, DB);
+    _addCalVar(_rCalLdrCorrectionHVar, R_CALIB_LDR_CORRECTION_H,
+               R_CALIB_LDR_CORRECTION_H_LONG, DB);
+    _addCalVar(_rCalLdrCorrectionVVar, R_CALIB_LDR_CORRECTION_V,
+               R_CALIB_LDR_CORRECTION_V_LONG, DB);
+    _addCalVar(_rCalSystemPhidpVar, R_CALIB_SYSTEM_PHIDP,
+               R_CALIB_SYSTEM_PHIDP_LONG, DEGREES);
+    _addCalVar(_rCalTestPowerHVar, R_CALIB_TEST_POWER_H,
+               R_CALIB_TEST_POWER_H_LONG, DBM);
+    _addCalVar(_rCalTestPowerVVar, R_CALIB_TEST_POWER_V,
+               R_CALIB_TEST_POWER_V_LONG, DBM);
+    _addCalVar(_rCalReceiverSlopeHcVar, R_CALIB_RECEIVER_SLOPE_HC,
+               R_CALIB_RECEIVER_SLOPE_HC_LONG);
+    _addCalVar(_rCalReceiverSlopeVcVar, R_CALIB_RECEIVER_SLOPE_VC,
+               R_CALIB_RECEIVER_SLOPE_VC_LONG);
+    _addCalVar(_rCalReceiverSlopeHxVar, R_CALIB_RECEIVER_SLOPE_HX,
+               R_CALIB_RECEIVER_SLOPE_HX_LONG);
+    _addCalVar(_rCalReceiverSlopeVxVar, R_CALIB_RECEIVER_SLOPE_VX,
+               R_CALIB_RECEIVER_SLOPE_VX_LONG);
 
-  iret |= _file.addVar(_rCalTimeVar, R_CALIB_TIME,
-                       "", R_CALIB_TIME_LONG, 
-                       ncxxString, _calDim, "", true);
-  iret |= _rCalTimeVar.addAttr(META_GROUP, RADAR_CALIBRATION);
+  } catch (NcxxException& e) {
 
-  iret |= _addCalVar(_rCalPulseWidthVar, R_CALIB_PULSE_WIDTH,
-                     R_CALIB_PULSE_WIDTH_LONG, SECONDS);
-  iret |= _addCalVar(_rCalXmitPowerHVar, R_CALIB_XMIT_POWER_H,
-                     R_CALIB_XMIT_POWER_H_LONG, DBM);
-  iret |= _addCalVar(_rCalXmitPowerVVar, R_CALIB_XMIT_POWER_V,
-                     R_CALIB_XMIT_POWER_V_LONG, DBM);
-  iret |= _addCalVar(_rCalTwoWayWaveguideLossHVar, R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_H,
-                     R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_H_LONG, DB);
-  iret |= _addCalVar(_rCalTwoWayWaveguideLossVVar, R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_V,
-                     R_CALIB_TWO_WAY_WAVEGUIDE_LOSS_V_LONG, DB);
-  iret |= _addCalVar(_rCalTwoWayRadomeLossHVar, R_CALIB_TWO_WAY_RADOME_LOSS_H,
-                     R_CALIB_TWO_WAY_RADOME_LOSS_H_LONG, DB);
-  iret |= _addCalVar(_rCalTwoWayRadomeLossVVar, R_CALIB_TWO_WAY_RADOME_LOSS_V,
-                     R_CALIB_TWO_WAY_RADOME_LOSS_V_LONG, DB);
-  iret |= _addCalVar(_rCalReceiverMismatchLossVar, R_CALIB_RECEIVER_MISMATCH_LOSS,
-                     R_CALIB_RECEIVER_MISMATCH_LOSS_LONG, DB);
-  iret |= _addCalVar(_rCalRadarConstHVar, R_CALIB_RADAR_CONSTANT_H,
-                     R_CALIB_RADAR_CONSTANT_H_LONG, DB);
-  iret |= _addCalVar(_rCalRadarConstVVar, R_CALIB_RADAR_CONSTANT_V,
-                     R_CALIB_RADAR_CONSTANT_V_LONG, DB);
-  iret |= _addCalVar(_rCalAntennaGainHVar, R_CALIB_ANTENNA_GAIN_H,
-                     R_CALIB_ANTENNA_GAIN_H_LONG, DB);
-  iret |= _addCalVar(_rCalAntennaGainVVar, R_CALIB_ANTENNA_GAIN_V,
-                     R_CALIB_ANTENNA_GAIN_V_LONG, DB);
-  iret |= _addCalVar(_rCalNoiseHcVar, R_CALIB_NOISE_HC,
-                     R_CALIB_NOISE_HC_LONG, DBM);
-  iret |= _addCalVar(_rCalNoiseVcVar, R_CALIB_NOISE_VC,
-                     R_CALIB_NOISE_VC_LONG, DBM);
-  iret |= _addCalVar(_rCalNoiseHxVar, R_CALIB_NOISE_HX,
-                     R_CALIB_NOISE_HX_LONG, DBM);
-  iret |= _addCalVar(_rCalNoiseVxVar, R_CALIB_NOISE_VX,
-                     R_CALIB_NOISE_VX_LONG, DBM);
-  iret |= _addCalVar(_rCalReceiverGainHcVar, R_CALIB_RECEIVER_GAIN_HC,
-                     R_CALIB_RECEIVER_GAIN_HC_LONG, DB);
-  iret |= _addCalVar(_rCalReceiverGainVcVar, R_CALIB_RECEIVER_GAIN_VC,
-                     R_CALIB_RECEIVER_GAIN_VC_LONG, DB);
-  iret |= _addCalVar(_rCalReceiverGainHxVar, R_CALIB_RECEIVER_GAIN_HX,
-                     R_CALIB_RECEIVER_GAIN_HX_LONG, DB);
-  iret |= _addCalVar(_rCalReceiverGainVxVar, R_CALIB_RECEIVER_GAIN_VX,
-                     R_CALIB_RECEIVER_GAIN_VX_LONG, DB);
-  iret |= _addCalVar(_rCalBaseDbz1kmHcVar, R_CALIB_BASE_DBZ_1KM_HC,
-                     R_CALIB_BASE_DBZ_1KM_HC_LONG, DBZ);
-  iret |= _addCalVar(_rCalBaseDbz1kmVcVar, R_CALIB_BASE_DBZ_1KM_VC,
-                     R_CALIB_BASE_DBZ_1KM_VC_LONG, DBZ);
-  iret |= _addCalVar(_rCalBaseDbz1kmHxVar, R_CALIB_BASE_DBZ_1KM_HX,
-                     R_CALIB_BASE_DBZ_1KM_HX_LONG, DBZ);
-  iret |= _addCalVar(_rCalBaseDbz1kmVxVar, R_CALIB_BASE_DBZ_1KM_VX,
-                     R_CALIB_BASE_DBZ_1KM_VX_LONG, DBZ);
-  iret |= _addCalVar(_rCalSunPowerHcVar, R_CALIB_SUN_POWER_HC,
-                     R_CALIB_SUN_POWER_HC_LONG, DBM);
-  iret |= _addCalVar(_rCalSunPowerVcVar, R_CALIB_SUN_POWER_VC,
-                     R_CALIB_SUN_POWER_VC_LONG, DBM);
-  iret |= _addCalVar(_rCalSunPowerHxVar, R_CALIB_SUN_POWER_HX,
-                     R_CALIB_SUN_POWER_HX_LONG, DBM);
-  iret |= _addCalVar(_rCalSunPowerVxVar, R_CALIB_SUN_POWER_VX,
-                     R_CALIB_SUN_POWER_VX_LONG, DBM);
-  iret |= _addCalVar(_rCalNoiseSourcePowerHVar, R_CALIB_NOISE_SOURCE_POWER_H,
-                     R_CALIB_NOISE_SOURCE_POWER_H_LONG, DBM);
-  iret |= _addCalVar(_rCalNoiseSourcePowerVVar, R_CALIB_NOISE_SOURCE_POWER_V,
-                     R_CALIB_NOISE_SOURCE_POWER_V_LONG, DBM);
-  iret |= _addCalVar(_rCalPowerMeasLossHVar, R_CALIB_POWER_MEASURE_LOSS_H,
-                     R_CALIB_POWER_MEASURE_LOSS_H_LONG, DB);
-  iret |= _addCalVar(_rCalPowerMeasLossVVar, R_CALIB_POWER_MEASURE_LOSS_V,
-                     R_CALIB_POWER_MEASURE_LOSS_V_LONG, DB);
-  iret |= _addCalVar(_rCalCouplerForwardLossHVar, R_CALIB_COUPLER_FORWARD_LOSS_H,
-                     R_CALIB_COUPLER_FORWARD_LOSS_H_LONG, DB);
-  iret |= _addCalVar(_rCalCouplerForwardLossVVar, R_CALIB_COUPLER_FORWARD_LOSS_V,
-                     R_CALIB_COUPLER_FORWARD_LOSS_V_LONG, DB);
-  iret |= _addCalVar(_rCalDbzCorrectionVar, R_CALIB_DBZ_CORRECTION,
-                     R_CALIB_DBZ_CORRECTION_LONG, DB);
-  iret |= _addCalVar(_rCalZdrCorrectionVar, R_CALIB_ZDR_CORRECTION,
-                     R_CALIB_ZDR_CORRECTION_LONG, DB);
-  iret |= _addCalVar(_rCalLdrCorrectionHVar, R_CALIB_LDR_CORRECTION_H,
-                     R_CALIB_LDR_CORRECTION_H_LONG, DB);
-  iret |= _addCalVar(_rCalLdrCorrectionVVar, R_CALIB_LDR_CORRECTION_V,
-                     R_CALIB_LDR_CORRECTION_V_LONG, DB);
-  iret |= _addCalVar(_rCalSystemPhidpVar, R_CALIB_SYSTEM_PHIDP,
-                     R_CALIB_SYSTEM_PHIDP_LONG, DEGREES);
-  iret |= _addCalVar(_rCalTestPowerHVar, R_CALIB_TEST_POWER_H,
-                     R_CALIB_TEST_POWER_H_LONG, DBM);
-  iret |= _addCalVar(_rCalTestPowerVVar, R_CALIB_TEST_POWER_V,
-                     R_CALIB_TEST_POWER_V_LONG, DBM);
-  iret |= _addCalVar(_rCalReceiverSlopeHcVar, R_CALIB_RECEIVER_SLOPE_HC,
-                     R_CALIB_RECEIVER_SLOPE_HC_LONG);
-  iret |= _addCalVar(_rCalReceiverSlopeVcVar, R_CALIB_RECEIVER_SLOPE_VC,
-                     R_CALIB_RECEIVER_SLOPE_VC_LONG);
-  iret |= _addCalVar(_rCalReceiverSlopeHxVar, R_CALIB_RECEIVER_SLOPE_HX,
-                     R_CALIB_RECEIVER_SLOPE_HX_LONG);
-  iret |= _addCalVar(_rCalReceiverSlopeVxVar, R_CALIB_RECEIVER_SLOPE_VX,
-                     R_CALIB_RECEIVER_SLOPE_VX_LONG);
-
-  if (iret) {
     _addErrStr("ERROR - Cf2RadxFile::_addCalibVariables");
+    _addErrStr("  Exception: ", e.what());
     return -1;
-  } else {
-    return 0;
+    
   }
+
+  return 0;
 
 }
 
@@ -1563,138 +1567,142 @@ int Cf2RadxFile::_addRayVariables()
     cerr << "Cf2RadxFile::_addRayVariables()" << endl;
   }
 
-  int iret = 0;
+  try {
+
+    if (_nGatesVary) {
+      _file.addVar(_rayNGatesVar, RAY_N_GATES,
+                   "", "number_of_gates", ncxxInt, _timeDim, "", true);
+      _file.addVar(_rayStartIndexVar, RAY_START_INDEX,
+                   "", "array_index_to_start_of_ray", ncxxInt, _timeDim, "", true);
+    }
   
-  if (_nGatesVary) {
-    iret |= _file.addVar(_rayNGatesVar, RAY_N_GATES,
-                         "", "number_of_gates", ncxxInt, _timeDim, "", true);
-    iret |= _file.addVar(_rayStartIndexVar, RAY_START_INDEX,
-                         "", "array_index_to_start_of_ray", ncxxInt, _timeDim, "", true);
-  }
+    _file.addVar(_rayStartRangeVar, RAY_START_RANGE,
+                 "", "start_range_for_ray", ncxxFloat, _timeDim, METERS, true);
+    _rayStartRangeVar.putAtt(UNITS, METERS);
+
+    _file.addVar(_rayGateSpacingVar, RAY_GATE_SPACING,
+                 "", "gate_spacing_for_ray", ncxxFloat, _timeDim, METERS, true);
+    _rayGateSpacingVar.putAtt(UNITS, METERS);
+
+    _file.addVar(_azimuthVar, AZIMUTH,
+                 "", AZIMUTH_LONG, ncxxFloat, _timeDim, DEGREES, true);
+
+    _file.addVar(_elevationVar, ELEVATION,
+                 "", ELEVATION_LONG, ncxxFloat, _timeDim, DEGREES, true);
+    _elevationVar.putAtt(POSITIVE, UP);
   
-  iret |= _file.addVar(_rayStartRangeVar, RAY_START_RANGE,
-                       "", "start_range_for_ray", ncxxFloat, _timeDim, METERS, true);
-  iret |= _rayStartRangeVar.addAttr(UNITS, METERS);
+    _file.addVar(_pulseWidthVar, PULSE_WIDTH,
+                 "", PULSE_WIDTH_LONG, ncxxFloat, _timeDim, SECONDS, true);
+    _pulseWidthVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
 
-  iret |= _file.addVar(_rayGateSpacingVar, RAY_GATE_SPACING,
-                       "", "gate_spacing_for_ray", ncxxFloat, _timeDim, METERS, true);
-  iret |= _rayGateSpacingVar.addAttr(UNITS, METERS);
-
-  iret |= _file.addVar(_azimuthVar, AZIMUTH,
-                       "", AZIMUTH_LONG, ncxxFloat, _timeDim, DEGREES, true);
-
-  iret |= _file.addVar(_elevationVar, ELEVATION,
-                       "", ELEVATION_LONG, ncxxFloat, _timeDim, DEGREES, true);
-  iret |= _elevationVar.addAttr(POSITIVE, UP);
+    _file.addVar(_prtVar, PRT,
+                 "", PRT_LONG, ncxxFloat, _timeDim, SECONDS, true);
+    _prtVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   
-  iret |= _file.addVar(_pulseWidthVar, PULSE_WIDTH,
-                       "", PULSE_WIDTH_LONG, ncxxFloat, _timeDim, SECONDS, true);
-  iret |= _pulseWidthVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
+    _file.addVar(_prtRatioVar, PRT_RATIO,
+                 "", PRT_RATIO_LONG,
+                 ncxxFloat, _timeDim, SECONDS, true);
+    _prtRatioVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
 
-  iret |= _file.addVar(_prtVar, PRT,
-                       "", PRT_LONG, ncxxFloat, _timeDim, SECONDS, true);
-  iret |= _prtVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
-  
-  iret |= _file.addVar(_prtRatioVar, PRT_RATIO,
-                       "", PRT_RATIO_LONG,
-                       ncxxFloat, _timeDim, SECONDS, true);
-  iret |= _prtRatioVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
+    _file.addVar(_nyquistVar, NYQUIST_VELOCITY,
+                 "", NYQUIST_VELOCITY_LONG, ncxxFloat, _timeDim, METERS_PER_SECOND, true);
+    _nyquistVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
 
-  iret |= _file.addVar(_nyquistVar, NYQUIST_VELOCITY,
-                       "", NYQUIST_VELOCITY_LONG, ncxxFloat, _timeDim, METERS_PER_SECOND, true);
-  iret |= _nyquistVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
+    _file.addVar(_unambigRangeVar, UNAMBIGUOUS_RANGE,
+                 "", UNAMBIGUOUS_RANGE_LONG, ncxxFloat, _timeDim, METERS, true);
+    _unambigRangeVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
 
-  iret |= _file.addVar(_unambigRangeVar, UNAMBIGUOUS_RANGE,
-                       "", UNAMBIGUOUS_RANGE_LONG, ncxxFloat, _timeDim, METERS, true);
-  iret |= _unambigRangeVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
+    _file.addVar(_antennaTransitionVar, ANTENNA_TRANSITION,
+                 "", ANTENNA_TRANSITION_LONG, ncxxByte, _timeDim, "", true);
+    _antennaTransitionVar.putAtt(COMMENT,
+                                 "1 if antenna is in transition, 0 otherwise");
 
-  iret |= _file.addVar(_antennaTransitionVar, ANTENNA_TRANSITION,
-                       "", ANTENNA_TRANSITION_LONG, ncxxByte, _timeDim, "", true);
-  iret |= _antennaTransitionVar.addAttr(COMMENT,
-                                        "1 if antenna is in transition, 0 otherwise");
+    if (_georefsActive) {
+      _file.addVar(_georefsAppliedVar, GEOREFS_APPLIED,
+                   "", "georefs_have_been_applied_to_ray", ncxxByte, _timeDim, "", true);
+      _georefsAppliedVar.putAtt
+        (COMMENT, "1 if georefs have been applied, 0 otherwise");
+    }
 
-  if (_georefsActive) {
-    iret |= _file.addVar(_georefsAppliedVar, GEOREFS_APPLIED,
-                         "", "georefs_have_been_applied_to_ray", ncxxByte, _timeDim, "", true);
-    iret |= _georefsAppliedVar.addAttr(COMMENT,
-                                       "1 if georefs have been applied, 0 otherwise");
-  }
+    _file.addVar(_nSamplesVar, N_SAMPLES,
+                 "", N_SAMPLES_LONG, ncxxInt, _timeDim, "", true);
+    _nSamplesVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
 
-  iret |= _file.addVar(_nSamplesVar, N_SAMPLES,
-                       "", N_SAMPLES_LONG, ncxxInt, _timeDim, "", true);
-  iret |= _nSamplesVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
+    if (_writeVol->getRcalibs().size() > 0) {
+      _file.addVar(_calIndexVar, R_CALIB_INDEX,
+                   "", R_CALIB_INDEX_LONG, ncxxInt, _timeDim, "", true);
+      _calIndexVar.putAtt(META_GROUP, RADAR_CALIBRATION);
+      _calIndexVar.putAtt
+        (COMMENT,
+         "This is the index for the calibration which applies to this ray");
+    }
 
-  if (_writeVol->getRcalibs().size() > 0) {
-    iret |= _file.addVar(_calIndexVar, R_CALIB_INDEX,
-                         "", R_CALIB_INDEX_LONG, ncxxInt, _timeDim, "", true);
-    iret |= _calIndexVar.addAttr(META_GROUP, RADAR_CALIBRATION);
-    iret |= _calIndexVar.addAttr(COMMENT,
-                                 "This is the index for the calibration which applies to this ray");
-  }
+    _file.addVar(_xmitPowerHVar,
+                 RADAR_MEASURED_TRANSMIT_POWER_H,
+                 "", 
+                 RADAR_MEASURED_TRANSMIT_POWER_H_LONG,
+                 ncxxFloat, _timeDim, DBM, true);
+    _xmitPowerHVar.putAtt(META_GROUP, RADAR_PARAMETERS);
 
-  iret |= _file.addVar(_xmitPowerHVar,
-                       RADAR_MEASURED_TRANSMIT_POWER_H,
-                       "", 
-                       RADAR_MEASURED_TRANSMIT_POWER_H_LONG,
-                       ncxxFloat, _timeDim, DBM, true);
-  iret |= _xmitPowerHVar.addAttr(META_GROUP, RADAR_PARAMETERS);
+    _file.addVar(_xmitPowerVVar,
+                 RADAR_MEASURED_TRANSMIT_POWER_V,
+                 "", 
+                 RADAR_MEASURED_TRANSMIT_POWER_V_LONG, 
+                 ncxxFloat, _timeDim, DBM, true);
+    _xmitPowerVVar.putAtt(META_GROUP, RADAR_PARAMETERS);
 
-  iret |= _file.addVar(_xmitPowerVVar,
-                       RADAR_MEASURED_TRANSMIT_POWER_V,
-                       "", 
-                       RADAR_MEASURED_TRANSMIT_POWER_V_LONG, 
-                       ncxxFloat, _timeDim, DBM, true);
-  iret |= _xmitPowerVVar.addAttr(META_GROUP, RADAR_PARAMETERS);
+    _file.addVar(_scanRateVar, SCAN_RATE,
+                 "", SCAN_RATE_LONG, 
+                 ncxxFloat, _timeDim, DEGREES_PER_SECOND, true);
+    _scanRateVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
 
-  iret |= _file.addVar(_scanRateVar, SCAN_RATE,
-                       "", SCAN_RATE_LONG, 
-                       ncxxFloat, _timeDim, DEGREES_PER_SECOND, true);
-  iret |= _scanRateVar.addAttr(META_GROUP, INSTRUMENT_PARAMETERS);
+    _setEstNoiseAvailFlags();
 
-  _setEstNoiseAvailFlags();
+    if (_estNoiseAvailHc) {
+      _file.addVar(_estNoiseDbmHcVar,
+                   RADAR_ESTIMATED_NOISE_DBM_HC,
+                   "", 
+                   RADAR_ESTIMATED_NOISE_DBM_HC_LONG,
+                   ncxxFloat, _timeDim, DBM, true);
+      _estNoiseDbmHcVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+    }
 
-  if (_estNoiseAvailHc) {
-    iret |= _file.addVar(_estNoiseDbmHcVar,
-                         RADAR_ESTIMATED_NOISE_DBM_HC,
-                         "", 
-                         RADAR_ESTIMATED_NOISE_DBM_HC_LONG,
-                         ncxxFloat, _timeDim, DBM, true);
-    iret |= _estNoiseDbmHcVar.addAttr(META_GROUP, RADAR_PARAMETERS);
-  }
+    if (_estNoiseAvailVc) {
+      _file.addVar(_estNoiseDbmVcVar,
+                   RADAR_ESTIMATED_NOISE_DBM_VC,
+                   "", 
+                   RADAR_ESTIMATED_NOISE_DBM_VC_LONG,
+                   ncxxFloat, _timeDim, DBM, true);
+      _estNoiseDbmVcVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+    }
 
-  if (_estNoiseAvailVc) {
-    iret |= _file.addVar(_estNoiseDbmVcVar,
-                         RADAR_ESTIMATED_NOISE_DBM_VC,
-                         "", 
-                         RADAR_ESTIMATED_NOISE_DBM_VC_LONG,
-                         ncxxFloat, _timeDim, DBM, true);
-    iret |= _estNoiseDbmVcVar.addAttr(META_GROUP, RADAR_PARAMETERS);
-  }
+    if (_estNoiseAvailHx) {
+      _file.addVar(_estNoiseDbmHxVar,
+                   RADAR_ESTIMATED_NOISE_DBM_HX,
+                   "", 
+                   RADAR_ESTIMATED_NOISE_DBM_HX_LONG,
+                   ncxxFloat, _timeDim, DBM, true);
+      _estNoiseDbmHxVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+    }
 
-  if (_estNoiseAvailHx) {
-    iret |= _file.addVar(_estNoiseDbmHxVar,
-                         RADAR_ESTIMATED_NOISE_DBM_HX,
-                         "", 
-                         RADAR_ESTIMATED_NOISE_DBM_HX_LONG,
-                         ncxxFloat, _timeDim, DBM, true);
-    iret |= _estNoiseDbmHxVar.addAttr(META_GROUP, RADAR_PARAMETERS);
-  }
+    if (_estNoiseAvailVx) {
+      _file.addVar(_estNoiseDbmVxVar,
+                   RADAR_ESTIMATED_NOISE_DBM_VX,
+                   "", 
+                   RADAR_ESTIMATED_NOISE_DBM_VX_LONG,
+                   ncxxFloat, _timeDim, DBM, true);
+      _estNoiseDbmVxVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+    }
 
-  if (_estNoiseAvailVx) {
-    iret |= _file.addVar(_estNoiseDbmVxVar,
-                         RADAR_ESTIMATED_NOISE_DBM_VX,
-                         "", 
-                         RADAR_ESTIMATED_NOISE_DBM_VX_LONG,
-                         ncxxFloat, _timeDim, DBM, true);
-    iret |= _estNoiseDbmVxVar.addAttr(META_GROUP, RADAR_PARAMETERS);
-  }
-
-  if (iret) {
+  } catch (NcxxException& e) {
+    
     _addErrStr("ERROR - Cf2RadxFile::_addRayVariables");
+    _addErrStr("  Exception: ", e.what());
     return -1;
-  } else {
-    return 0;
+    
   }
+
+  return 0;
 
 }
 
@@ -1758,202 +1766,199 @@ int Cf2RadxFile::_addGeorefVariables()
   if (!_georefsActive) {
     return 0;
   }
+
+  try {
+
+    // we always add the postion variables
   
-  int iret = 0;
+    _file.addVar(_georefTimeVar, GEOREF_TIME,
+                 "", GEOREF_TIME_LONG, ncxxDouble,
+                 _timeDim, SECONDS, true);
 
-  // we always add the postion variables
-  
-  iret |= _file.addVar(_georefTimeVar, GEOREF_TIME,
-                       "", GEOREF_TIME_LONG, ncxxDouble,
-                       _timeDim, SECONDS, true);
+    _file.addVar(_latitudeVar, LATITUDE,
+                 "", LATITUDE_LONG, ncxxDouble,
+                 _timeDim, DEGREES_NORTH, true);
 
-  iret |= _file.addVar(_latitudeVar, LATITUDE,
-                       "", LATITUDE_LONG, ncxxDouble,
-                       _timeDim, DEGREES_NORTH, true);
+    _file.addVar(_longitudeVar, LONGITUDE,
+                 "", LONGITUDE_LONG, ncxxDouble,
+                 _timeDim, DEGREES_EAST, true);
 
-  iret |= _file.addVar(_longitudeVar, LONGITUDE,
-                       "", LONGITUDE_LONG, ncxxDouble,
-                       _timeDim, DEGREES_EAST, true);
+    _file.addVar(_altitudeVar, ALTITUDE,
+                 "", ALTITUDE_LONG, ncxxDouble,
+                 _timeDim, METERS, true);
+    _altitudeVar.putAtt(POSITIVE, UP);
 
-  iret |= _file.addVar(_altitudeVar, ALTITUDE,
-                       "", ALTITUDE_LONG, ncxxDouble,
-                       _timeDim, METERS, true);
-  iret |= _altitudeVar.addAttr(POSITIVE, UP);
+    _file.addVar(_altitudeAglVar, ALTITUDE_AGL,
+                 "", ALTITUDE_AGL_LONG, ncxxDouble,
+                 _timeDim, METERS, true);
+    _altitudeAglVar.putAtt(POSITIVE, UP);
 
-  iret |= _file.addVar(_altitudeAglVar, ALTITUDE_AGL,
-                       "", ALTITUDE_AGL_LONG, ncxxDouble,
-                       _timeDim, METERS, true);
-  iret |= _altitudeAglVar.addAttr(POSITIVE, UP);
+    // conditionally add the georeference variables
 
-  // conditionally add the georeference variables
-
-  if (_geoCount.getHeading() > 0) {
-    _file.addVar(_headingVar, HEADING, "", HEADING_LONG, ncxxFloat,
-                 _timeDim, DEGREES, true);
-  }
-
-  if (_geoCount.getTrack() > 0) {
-    _file.addVar(_trackVar, TRACK, "", TRACK_LONG, ncxxFloat,
-                 _timeDim, DEGREES, true);
-  }
-  
-  if (_geoCount.getRoll() > 0) {
-    _file.addVar(_rollVar, ROLL, "", ROLL_LONG, ncxxFloat,
-                 _timeDim, DEGREES, true);
-  }
-
-  if (_geoCount.getPitch() > 0) {
-    _file.addVar(_pitchVar, PITCH, "", PITCH_LONG, ncxxFloat,
-                 _timeDim, DEGREES, true);
-  }
-
-  if (_geoCount.getDrift() > 0) {
-    _file.addVar(_driftVar, DRIFT, "", DRIFT_LONG, ncxxFloat,
-                 _timeDim, DEGREES, true);
-  }
-
-  if (_geoCount.getRotation() > 0) {
-    _file.addVar(_rotationVar, ROTATION, "", ROTATION_LONG, ncxxFloat,
-                 _timeDim, DEGREES, true);
-  }
-  
-  if (_geoCount.getTilt() > 0) {
-    _file.addVar(_tiltVar, TILT, "", TILT_LONG, ncxxFloat,
-                 _timeDim, DEGREES, true);
-  }
-  
-  if (_geoCount.getEwVelocity() > 0) {
-    _file.addVar(_ewVelocityVar, EASTWARD_VELOCITY, "", 
-                 EASTWARD_VELOCITY_LONG, ncxxFloat,
-                 _timeDim, METERS_PER_SECOND, true);
-    if (!_ewVelocityVar.isNull()) {
-      _ewVelocityVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
+    if (_geoCount.getHeading() > 0) {
+      _file.addVar(_headingVar, HEADING, "", HEADING_LONG, ncxxFloat,
+                   _timeDim, DEGREES, true);
     }
-  }
-  
-  if (_geoCount.getNsVelocity() > 0) {
-    _file.addVar(_nsVelocityVar, NORTHWARD_VELOCITY,
-                 "", NORTHWARD_VELOCITY_LONG, ncxxFloat,
-                 _timeDim, METERS_PER_SECOND, true);
-    if (!_nsVelocityVar.isNull()) {
-      _nsVelocityVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
-    }
-  }
 
-  if (_geoCount.getVertVelocity() > 0) {
-    _file.addVar(_vertVelocityVar, VERTICAL_VELOCITY,
-                 "", VERTICAL_VELOCITY_LONG, ncxxFloat,
-                 _timeDim, METERS_PER_SECOND, true);
-    if (!_vertVelocityVar.isNull()) {
-      _vertVelocityVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
+    if (_geoCount.getTrack() > 0) {
+      _file.addVar(_trackVar, TRACK, "", TRACK_LONG, ncxxFloat,
+                   _timeDim, DEGREES, true);
     }
-  }
   
-  if (_geoCount.getEwWind() > 0) {
-    _file.addVar(_ewWindVar, EASTWARD_WIND,
-                 "", EASTWARD_WIND_LONG, ncxxFloat,
-                 _timeDim, METERS_PER_SECOND, true);
-    if (!_ewWindVar.isNull()) {
-      _ewWindVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
+    if (_geoCount.getRoll() > 0) {
+      _file.addVar(_rollVar, ROLL, "", ROLL_LONG, ncxxFloat,
+                   _timeDim, DEGREES, true);
     }
-  }
+
+    if (_geoCount.getPitch() > 0) {
+      _file.addVar(_pitchVar, PITCH, "", PITCH_LONG, ncxxFloat,
+                   _timeDim, DEGREES, true);
+    }
+
+    if (_geoCount.getDrift() > 0) {
+      _file.addVar(_driftVar, DRIFT, "", DRIFT_LONG, ncxxFloat,
+                   _timeDim, DEGREES, true);
+    }
+
+    if (_geoCount.getRotation() > 0) {
+      _file.addVar(_rotationVar, ROTATION, "", ROTATION_LONG, ncxxFloat,
+                   _timeDim, DEGREES, true);
+    }
   
-  if (_geoCount.getNsWind() > 0) {
-    _file.addVar(_nsWindVar, NORTHWARD_WIND,
-                 "", NORTHWARD_WIND_LONG, ncxxFloat,
-                 _timeDim, METERS_PER_SECOND, true);
-    if (!_nsWindVar.isNull()) {
-      _nsWindVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
+    if (_geoCount.getTilt() > 0) {
+      _file.addVar(_tiltVar, TILT, "", TILT_LONG, ncxxFloat,
+                   _timeDim, DEGREES, true);
     }
-  }
   
-  if (_geoCount.getVertWind() > 0) {
-    _file.addVar(_vertWindVar, VERTICAL_WIND,
-                 "", VERTICAL_WIND_LONG, ncxxFloat,
-                 _timeDim, METERS_PER_SECOND, true);
-    if (!_vertWindVar.isNull()) {
-      _vertWindVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
+    if (_geoCount.getEwVelocity() > 0) {
+      _file.addVar(_ewVelocityVar, EASTWARD_VELOCITY, "", 
+                   EASTWARD_VELOCITY_LONG, ncxxFloat,
+                   _timeDim, METERS_PER_SECOND, true);
+      if (!_ewVelocityVar.isNull()) {
+        _ewVelocityVar.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      }
     }
-  }
   
-  if (_geoCount.getHeadingRate() > 0) {
-    _file.addVar(_headingRateVar, HEADING_CHANGE_RATE,
-                 "", HEADING_CHANGE_RATE_LONG, ncxxFloat,
-                 _timeDim, DEGREES_PER_SECOND, true);
-    if (!_headingRateVar.isNull()) {
-      _headingRateVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
+    if (_geoCount.getNsVelocity() > 0) {
+      _file.addVar(_nsVelocityVar, NORTHWARD_VELOCITY,
+                   "", NORTHWARD_VELOCITY_LONG, ncxxFloat,
+                   _timeDim, METERS_PER_SECOND, true);
+      if (!_nsVelocityVar.isNull()) {
+        _nsVelocityVar.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      }
     }
-  }
+
+    if (_geoCount.getVertVelocity() > 0) {
+      _file.addVar(_vertVelocityVar, VERTICAL_VELOCITY,
+                   "", VERTICAL_VELOCITY_LONG, ncxxFloat,
+                   _timeDim, METERS_PER_SECOND, true);
+      if (!_vertVelocityVar.isNull()) {
+        _vertVelocityVar.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      }
+    }
   
-  if (_geoCount.getPitchRate() > 0) {
-    _file.addVar(_pitchRateVar, PITCH_CHANGE_RATE,
-                 "", PITCH_CHANGE_RATE_LONG, ncxxFloat,
-                 _timeDim, DEGREES_PER_SECOND, true);
-    if (!_pitchRateVar.isNull()) {
-      _pitchRateVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
+    if (_geoCount.getEwWind() > 0) {
+      _file.addVar(_ewWindVar, EASTWARD_WIND,
+                   "", EASTWARD_WIND_LONG, ncxxFloat,
+                   _timeDim, METERS_PER_SECOND, true);
+      if (!_ewWindVar.isNull()) {
+        _ewWindVar.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      }
     }
-  }
   
-  if (_geoCount.getRollRate() > 0) {
-    _file.addVar(_rollRateVar, ROLL_CHANGE_RATE,
-                 "", ROLL_CHANGE_RATE_LONG, ncxxFloat,
-                 _timeDim, DEGREES_PER_SECOND, true);
-    if (!_rollRateVar.isNull()) {
-      _rollRateVar.addAttr(META_GROUP, PLATFORM_VELOCITY);
+    if (_geoCount.getNsWind() > 0) {
+      _file.addVar(_nsWindVar, NORTHWARD_WIND,
+                   "", NORTHWARD_WIND_LONG, ncxxFloat,
+                   _timeDim, METERS_PER_SECOND, true);
+      if (!_nsWindVar.isNull()) {
+        _nsWindVar.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      }
     }
-  }
+  
+    if (_geoCount.getVertWind() > 0) {
+      _file.addVar(_vertWindVar, VERTICAL_WIND,
+                   "", VERTICAL_WIND_LONG, ncxxFloat,
+                   _timeDim, METERS_PER_SECOND, true);
+      if (!_vertWindVar.isNull()) {
+        _vertWindVar.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      }
+    }
+  
+    if (_geoCount.getHeadingRate() > 0) {
+      _file.addVar(_headingRateVar, HEADING_CHANGE_RATE,
+                   "", HEADING_CHANGE_RATE_LONG, ncxxFloat,
+                   _timeDim, DEGREES_PER_SECOND, true);
+      if (!_headingRateVar.isNull()) {
+        _headingRateVar.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      }
+    }
+  
+    if (_geoCount.getPitchRate() > 0) {
+      _file.addVar(_pitchRateVar, PITCH_CHANGE_RATE,
+                   "", PITCH_CHANGE_RATE_LONG, ncxxFloat,
+                   _timeDim, DEGREES_PER_SECOND, true);
+      if (!_pitchRateVar.isNull()) {
+        _pitchRateVar.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      }
+    }
+  
+    if (_geoCount.getRollRate() > 0) {
+      _file.addVar(_rollRateVar, ROLL_CHANGE_RATE,
+                   "", ROLL_CHANGE_RATE_LONG, ncxxFloat,
+                   _timeDim, DEGREES_PER_SECOND, true);
+      if (!_rollRateVar.isNull()) {
+        _rollRateVar.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      }
+    }
     
-  if (_geoCount.getDriveAngle1() > 0) {
-    _file.addVar(_driveAngle1Var, DRIVE_ANGLE_1, "", "antenna_drive_angle_1", ncxxFloat,
-                 _timeDim, DEGREES, true);
-  }
-  
-  if (_geoCount.getDriveAngle2() > 0) {
-    _file.addVar(_driveAngle2Var, DRIVE_ANGLE_2, "", "antenna_drive_angle_2", ncxxFloat,
-                 _timeDim, DEGREES, true);
-  }
-  
-  if (iret) {
-    _addErrStr("ERROR - Cf2RadxFile::_addGeorefVariables");
-    return -1;
-  } else {
-    return 0;
-  }
-
-}
-
-int Cf2RadxFile::_addCalVar(NcxxVar &var, const string &name,
-                            const string &standardName,
-                            const string &units /* = "" */)
-{
-  
-  var = _file.addVar(name, ncxxFloat, _calDim);
-  if (var.isNull()) {
-    _addErrStr("ERROR - Cf2RadxFile::_addCalVar");
-    _addErrStr("  Cannot add calib var, name: ", name);
-    _addErrStr(_file.getErrStr());
-    return -1;
-  }
-
-  if (standardName.length() > 0) {
-    if (var.addAttr(LONG_NAME, standardName)) {
-      return -1;
+    if (_geoCount.getDriveAngle1() > 0) {
+      _file.addVar(_driveAngle1Var, DRIVE_ANGLE_1, "", "antenna_drive_angle_1", ncxxFloat,
+                   _timeDim, DEGREES, true);
     }
-  }
-
-  if (var.addAttr(UNITS, units)) {
-    return -1;
-  }
   
-  if (var.addAttr(META_GROUP, RADAR_CALIBRATION)) {
-    return -1;
-  }
+    if (_geoCount.getDriveAngle2() > 0) {
+      _file.addVar(_driveAngle2Var, DRIVE_ANGLE_2, "", "antenna_drive_angle_2", ncxxFloat,
+                   _timeDim, DEGREES, true);
+    }
   
-  if (var.addAttr(FILL_VALUE, Radx::missingMetaFloat)) {
+  } catch (NcxxException& e) {
+    
+    _addErrStr("ERROR - Cf2RadxFile::_addGeorefVariables");
+    _addErrStr("  Exception: ", e.what());
     return -1;
+    
   }
 
   return 0;
+
+}
+
+void Cf2RadxFile::_addCalVar(NcxxVar &var, const string &name,
+                             const string &standardName,
+                             const string &units /* = "" */)
+{
+
+  try {
+    var = _file.addVar(name, ncxxFloat, _calDim);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Cf2RadxFile::_addCalVar");
+    _addErrStr("  Cannot add calib var, name: ", name);
+    _addErrStr("  exception: ", e.what());
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+  }
+
+  try {
+    if (standardName.length() > 0) {
+      var.addScalarAttr(LONG_NAME, standardName);
+    }
+    var.putAtt(UNITS, units);
+    var.putAtt(META_GROUP, RADAR_CALIBRATION);
+    var.addScalarAttr(FILL_VALUE, Radx::missingMetaFloat);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Cf2RadxFile::_addCalVar");
+    _addErrStr("  exception: ", e.what());
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+  }
 
 }
 
@@ -3426,99 +3431,112 @@ NcxxVar Cf2RadxFile::_addFieldVar(const RadxField &field)
   NcxxType ncxxType = _getNcxxType(field.getDataType());
   NcxxVar var;
 
-  if (_nGatesVary) {
-    // 1-D
-    var = _file.addVar(fieldName, ncxxType, _nPointsDim);
-  } else {
-    // 2-D
-    vector<NcxxDim> dims;
-    dims.push_back(_timeDim);
-    dims.push_back(_rangeDim);
-    var = _file.addVar(fieldName, ncxxType, dims);
-  }
-  
-  if (var.isNull()) {
-    _addErrStr("ERROR - Cf2RadxFile::_createFieldVar");
+  try {
+    if (_nGatesVary) {
+      // 1-D
+      var = _file.addVar(fieldName, ncxxType, _nPointsDim);
+    } else {
+      // 2-D
+      vector<NcxxDim> dims;
+      dims.push_back(_timeDim);
+      dims.push_back(_rangeDim);
+      var = _file.addVar(fieldName, ncxxType, dims);
+    }
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Cf2RadxFile::_addFieldVar");
     _addErrStr("  Cannot add variable to Ncxx file object");
     _addErrStr("  Input field name: ", name);
     _addErrStr("  Output field name: ", fieldName);
     _addErrStr("  NcxxType: ", Ncxx::ncxxTypeToStr(ncxxType));
-    _addErrStr("  Time dim name: ", _timeDim.getName());
-    _addErrInt("  Time dim size: ", _timeDim.getSize());
-    _addErrStr("  Range dim name: ", _rangeDim.getName());
-    _addErrInt("  Range dim size: ", _rangeDim.getSize());
-    _addErrStr(_file.getErrStr());
-    return var;
-  }
-
-  int iret = 0;
-  if (field.getLongName().size() > 0) {
-    iret |= var.addAttr(LONG_NAME, field.getLongName());
-  }
-  if (field.getStandardName().size() > 0) {
-    if (_writeProposedStdNameInNcf) {
-      iret |= var.addAttr(PROPOSED_STANDARD_NAME, field.getStandardName());
+    if (_nGatesVary) {
+      _addErrStr("  nPointsDim name: ", _nPointsDim.getName());
+      _addErrInt("  nPointsDim size: ", _nPointsDim.getSize());
     } else {
-      iret |= var.addAttr(STANDARD_NAME, field.getStandardName());
+      _addErrStr("  Time dim name: ", _timeDim.getName());
+      _addErrInt("  Time dim size: ", _timeDim.getSize());
+      _addErrStr("  Range dim name: ", _rangeDim.getName());
+      _addErrInt("  Range dim size: ", _rangeDim.getSize());
     }
+    _addErrStr("  Exception: ", e.what());
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
-  iret |= var.addAttr(UNITS, field.getUnits());
-  if (field.getLegendXml().size() > 0) {
-    iret |= var.addAttr(LEGEND_XML, field.getLegendXml());
-  }
-  if (field.getThresholdingXml().size() > 0) {
-    iret |= var.addAttr(THRESHOLDING_XML, field.getThresholdingXml());
-  }
-  iret |= var.addAttr(SAMPLING_RATIO, (float) field.getSamplingRatio());
   
-  if (field.getFieldFolds()) {
-    iret |= var.addAttr(FIELD_FOLDS, "true");
-    iret |= var.addAttr(FOLD_LIMIT_LOWER, (float) field.getFoldLimitLower());
-    iret |= var.addAttr(FOLD_LIMIT_UPPER, (float) field.getFoldLimitUpper());
-  }
-  if (field.getIsDiscrete()) {
-    iret |= var.addAttr(IS_DISCRETE, "true");
-  }
+  try {
 
-  switch (ncxxType.getTypeClass()) {
-    case NcxxType::nc_DOUBLE: {
-      iret |= var.addAttr(FILL_VALUE, (double) field.getMissingFl64());
-      break;
+    if (field.getLongName().size() > 0) {
+      var.putAtt(LONG_NAME, field.getLongName());
     }
-    case NcxxType::nc_FLOAT:
-    default: {
-      iret |= var.addAttr(FILL_VALUE, (float) field.getMissingFl32());
-      break;
+    if (field.getStandardName().size() > 0) {
+      if (_writeProposedStdNameInNcf) {
+        var.putAtt(PROPOSED_STANDARD_NAME, field.getStandardName());
+      } else {
+        var.putAtt(STANDARD_NAME, field.getStandardName());
+      }
     }
-    case NcxxType::nc_INT: {
-      iret |= var.addAttr(FILL_VALUE, (int) field.getMissingSi32());
-      iret |= var.addAttr(SCALE_FACTOR, (float) field.getScale());
-      iret |= var.addAttr(ADD_OFFSET, (float) field.getOffset());
-      break;
+    var.putAtt(UNITS, field.getUnits());
+    if (field.getLegendXml().size() > 0) {
+      var.putAtt(LEGEND_XML, field.getLegendXml());
     }
-    case NcxxType::nc_SHORT: {
-      iret |= var.addAttr(FILL_VALUE, (short) field.getMissingSi16());
-      iret |= var.addAttr(SCALE_FACTOR, (float) field.getScale());
-      iret |= var.addAttr(ADD_OFFSET, (float) field.getOffset());
-      break;
+    if (field.getThresholdingXml().size() > 0) {
+      var.putAtt(THRESHOLDING_XML, field.getThresholdingXml());
     }
-    case NcxxType::nc_BYTE: {
-      iret |= var.addAttr(FILL_VALUE, (signed char) field.getMissingSi08());
-      iret |= var.addAttr(SCALE_FACTOR, (float) field.getScale());
-      iret |= var.addAttr(ADD_OFFSET, (float) field.getOffset());
-      break;
+    var.addScalarAttr(SAMPLING_RATIO, (float) field.getSamplingRatio());
+    
+    if (field.getFieldFolds()) {
+      var.putAtt(FIELD_FOLDS, "true");
+      var.addScalarAttr(FOLD_LIMIT_LOWER, (float) field.getFoldLimitLower());
+      var.addScalarAttr(FOLD_LIMIT_UPPER, (float) field.getFoldLimitUpper());
     }
-  } // switch
+    if (field.getIsDiscrete()) {
+      var.putAtt(IS_DISCRETE, "true");
+    }
+    
+    switch (ncxxType.getTypeClass()) {
+      case NcxxType::nc_DOUBLE: {
+        var.addScalarAttr(FILL_VALUE, (double) field.getMissingFl64());
+        break;
+      }
+      case NcxxType::nc_FLOAT:
+      default: {
+        var.addScalarAttr(FILL_VALUE, (float) field.getMissingFl32());
+        break;
+      }
+      case NcxxType::nc_INT: {
+        var.addScalarAttr(FILL_VALUE, (int) field.getMissingSi32());
+        var.addScalarAttr(SCALE_FACTOR, (float) field.getScale());
+        var.addScalarAttr(ADD_OFFSET, (float) field.getOffset());
+        break;
+      }
+      case NcxxType::nc_SHORT: {
+        var.addScalarAttr(FILL_VALUE, (short) field.getMissingSi16());
+        var.addScalarAttr(SCALE_FACTOR, (float) field.getScale());
+        var.addScalarAttr(ADD_OFFSET, (float) field.getOffset());
+        break;
+      }
+      case NcxxType::nc_BYTE: {
+        var.addScalarAttr(FILL_VALUE, (signed char) field.getMissingSi08());
+        var.addScalarAttr(SCALE_FACTOR, (float) field.getScale());
+        var.addScalarAttr(ADD_OFFSET, (float) field.getOffset());
+        break;
+      }
+    } // switch
 
-  iret |= var.addAttr(GRID_MAPPING, GRID_MAPPING);
-  iret |= var.addAttr(COORDINATES, "time range");
+    var.putAtt(GRID_MAPPING, GRID_MAPPING);
+    var.putAtt(COORDINATES, "time range");
+    
+    // set compression
+    
+    _setCompression(var);
 
-  // set compression
-  
-  iret |= _setCompression(var);
-  
-  if (iret) {
-    _addErrStr("ERROR - Cf2RadxFile::_createFieldVar");
+  } catch (NcxxException& e) {
+
+    _addErrStr("ERROR - Cf2RadxFile::_addFieldVar");
+    _addErrStr("  Adding var to Ncxx file object");
+    _addErrStr("  Input field name: ", name);
+    _addErrStr("  Output field name: ", fieldName);
+    _addErrStr("  Exception: ", e.what());
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+
   }
   
   return var;

@@ -731,32 +731,34 @@ int Cf2RadxFile::_readDimensions()
 
   // read required dimensions
 
-  int iret = 0;
-  iret |= _file.readDim(TIME, _timeDim);
-  if (iret == 0) {
-    _nTimesInFile = _timeDim.getSize();
-  }
-
+  _nTimesInFile = 0;
   _nRangeInFile = 0;
-  iret |= _file.readDim(RANGE, _rangeDim);
-  if (iret == 0) {
+
+  try {
+    
+    _file.readDim(TIME, _timeDim);
+    _nTimesInFile = _timeDim.getSize();
+
+    _file.readDim(RANGE, _rangeDim);
     _nRangeInFile = _rangeDim.getSize();
-  }
+    
+    _nPointsDim = _file.getDim(N_POINTS);
+    if (_nPointsDim.isNull()) {
+      _nGatesVary = false;
+      _nPoints = 0;
+    } else {
+      _nGatesVary = true;
+      _nPoints = _nPointsDim.getSize();
+    }
 
-  _nPointsDim = _file.getDim(N_POINTS);
-  if (_nPointsDim.isNull()) {
-    _nGatesVary = false;
-    _nPoints = 0;
-  } else {
-    _nGatesVary = true;
-    _nPoints = _nPointsDim.getSize();
-  }
+    _file.readDim(SWEEP, _sweepDim);
 
-  iret |= _file.readDim(SWEEP, _sweepDim);
+  } catch (NcxxException e) {
 
-  if (iret) {
     _addErrStr("ERROR - Cf2RadxFile::readDimensions");
-    return -1;
+    _addErrStr("  exception: ", e.what());
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+
   }
 
   // calibration dimension is optional
@@ -1104,73 +1106,86 @@ int Cf2RadxFile::_readRangeVariable()
 int Cf2RadxFile::_readScalarVariables()
 
 {
-  
-  int iret = 0;
 
-  iret |= _file.readIntVar(_volumeNumberVar, VOLUME_NUMBER, 
-                           _volumeNumber, Radx::missingMetaInt);
+  try {
 
-  string pstring;
-  _instrumentType = Radx::INSTRUMENT_TYPE_RADAR;
-  if (_file.readCharStringVar(_instrumentTypeVar, INSTRUMENT_TYPE, pstring) == 0) {
-    _instrumentType = Radx::instrumentTypeFromStr(pstring);
-  }
-
-  if (_file.readCharStringVar(_platformTypeVar, PLATFORM_TYPE, pstring) == 0) {
-    _platformType = Radx::platformTypeFromStr(pstring);
-  }
-
-  if (_file.readCharStringVar(_primaryAxisVar, PRIMARY_AXIS, pstring) == 0) {
-    _primaryAxis = Radx::primaryAxisFromStr(pstring);
-  }
-
-  if (!_file.getVar(STATUS_XML).isNull()) {
-    if (_file.readCharStringVar(_statusXmlVar, STATUS_XML, pstring) == 0) {
-      _statusXml = pstring;
-    }
-  }
-
-  if (_instrumentType == Radx::INSTRUMENT_TYPE_RADAR) {
-
-    _file.readDoubleVar(_radarAntennaGainHVar,
-                        RADAR_ANTENNA_GAIN_H, _radarAntennaGainDbH, false);
-    _file.readDoubleVar(_radarAntennaGainVVar,
-                        RADAR_ANTENNA_GAIN_V, _radarAntennaGainDbV, false);
-    _file.readDoubleVar(_radarBeamWidthHVar,
-                        RADAR_BEAM_WIDTH_H, _radarBeamWidthDegH, false);
-    _file.readDoubleVar(_radarBeamWidthVVar,
-                        RADAR_BEAM_WIDTH_V, _radarBeamWidthDegV, false);
-    _file.readDoubleVar(_radarRxBandwidthVar,
-                        RADAR_RX_BANDWIDTH, _radarRxBandwidthHz, false);
-  } else {
-
-    _file.readDoubleVar(_lidarConstantVar, 
-                        LIDAR_CONSTANT, _lidarConstant, false);
-    _file.readDoubleVar(_lidarPulseEnergyJVar, 
-                        LIDAR_PULSE_ENERGY, _lidarPulseEnergyJ, false);
-    _file.readDoubleVar(_lidarPeakPowerWVar, 
-                        LIDAR_PEAK_POWER, _lidarPeakPowerW, false);
-    _file.readDoubleVar(_lidarApertureDiamCmVar, 
-                        LIDAR_APERTURE_DIAMETER,
-                        _lidarApertureDiamCm, false);
-    _file.readDoubleVar(_lidarApertureEfficiencyVar, 
-                        LIDAR_APERTURE_EFFICIENCY,
-                        _lidarApertureEfficiency, false);
-    _file.readDoubleVar(_lidarFieldOfViewMradVar, 
-                        LIDAR_FIELD_OF_VIEW,
-                        _lidarFieldOfViewMrad, false);
-    _file.readDoubleVar(_lidarBeamDivergenceMradVar, 
-                        LIDAR_BEAM_DIVERGENCE,
-                        _lidarBeamDivergenceMrad, false);
+    _file.readIntVar(_volumeNumberVar, VOLUME_NUMBER, 
+                     _volumeNumber, Radx::missingMetaInt);
     
-  }
+    _instrumentType = Radx::INSTRUMENT_TYPE_RADAR;
 
-  if (iret) {
+    try {
+      string pstring;
+      _file.readCharStringVar(_instrumentTypeVar, INSTRUMENT_TYPE, pstring);
+      _instrumentType = Radx::instrumentTypeFromStr(pstring);
+    } catch (NcxxException e) {
+    }
+
+    try {
+      string pstring;
+      _file.readCharStringVar(_platformTypeVar, PLATFORM_TYPE, pstring);
+      _platformType = Radx::platformTypeFromStr(pstring);
+    } catch (NcxxException e) {
+    }
+
+    try {
+      string pstring;
+      _file.readCharStringVar(_primaryAxisVar, PRIMARY_AXIS, pstring);
+      _primaryAxis = Radx::primaryAxisFromStr(pstring);
+    } catch (NcxxException e) {
+    }
+    
+    if (!_file.getVar(STATUS_XML).isNull()) {
+      try {
+        string pstring;
+        _file.readCharStringVar(_statusXmlVar, STATUS_XML, pstring);
+        _statusXml = pstring;
+      } catch (NcxxException e) {
+      }
+    }
+
+    if (_instrumentType == Radx::INSTRUMENT_TYPE_RADAR) {
+    
+      _file.readDoubleVar(_radarAntennaGainHVar,
+                          RADAR_ANTENNA_GAIN_H, _radarAntennaGainDbH, false);
+      _file.readDoubleVar(_radarAntennaGainVVar,
+                          RADAR_ANTENNA_GAIN_V, _radarAntennaGainDbV, false);
+      _file.readDoubleVar(_radarBeamWidthHVar,
+                          RADAR_BEAM_WIDTH_H, _radarBeamWidthDegH, false);
+      _file.readDoubleVar(_radarBeamWidthVVar,
+                          RADAR_BEAM_WIDTH_V, _radarBeamWidthDegV, false);
+      _file.readDoubleVar(_radarRxBandwidthVar,
+                          RADAR_RX_BANDWIDTH, _radarRxBandwidthHz, false);
+    } else {
+      
+      _file.readDoubleVar(_lidarConstantVar, 
+                          LIDAR_CONSTANT, _lidarConstant, false);
+      _file.readDoubleVar(_lidarPulseEnergyJVar, 
+                          LIDAR_PULSE_ENERGY, _lidarPulseEnergyJ, false);
+      _file.readDoubleVar(_lidarPeakPowerWVar, 
+                          LIDAR_PEAK_POWER, _lidarPeakPowerW, false);
+      _file.readDoubleVar(_lidarApertureDiamCmVar, 
+                          LIDAR_APERTURE_DIAMETER,
+                          _lidarApertureDiamCm, false);
+      _file.readDoubleVar(_lidarApertureEfficiencyVar, 
+                          LIDAR_APERTURE_EFFICIENCY,
+                          _lidarApertureEfficiency, false);
+      _file.readDoubleVar(_lidarFieldOfViewMradVar, 
+                          LIDAR_FIELD_OF_VIEW,
+                          _lidarFieldOfViewMrad, false);
+      _file.readDoubleVar(_lidarBeamDivergenceMradVar, 
+                          LIDAR_BEAM_DIVERGENCE,
+                          _lidarBeamDivergenceMrad, false);
+      
+    }
+
+  } catch (NcxxException e) {
     _addErrStr("ERROR - Cf2RadxFile::_readScalarVariables");
+    _addErrStr("  exception: ", e.what());
     return -1;
-  } else {
-    return 0;
-  }
+  } // try
+  
+  return 0;
 
 }
 
@@ -1182,82 +1197,72 @@ int Cf2RadxFile::_readCorrectionVariables()
 {
   
   _cfactors.clear();
-  double val;
 
-  if (_file.readDoubleVar(_azimuthCorrVar, 
-                          AZIMUTH_CORRECTION, val, 0) == 0) {
+  try {
+
+    double val;
+
+    _file.readDoubleVar(_azimuthCorrVar, 
+                        AZIMUTH_CORRECTION, val, 0);
     _cfactors.setAzimuthCorr(val);
-  }
   
-  if (_file.readDoubleVar(_elevationCorrVar,
-                          ELEVATION_CORRECTION, val, 0) == 0) {
+    _file.readDoubleVar(_elevationCorrVar,
+                        ELEVATION_CORRECTION, val, 0);
     _cfactors.setElevationCorr(val);
-  }
 
-  if (_file.readDoubleVar(_rangeCorrVar,
-                          RANGE_CORRECTION, val, 0) == 0) {
+    _file.readDoubleVar(_rangeCorrVar,
+                        RANGE_CORRECTION, val, 0);
     _cfactors.setRangeCorr(val);
-  }
 
-  if (_file.readDoubleVar(_longitudeCorrVar,
-                          LONGITUDE_CORRECTION, val, 0) == 0) {
+    _file.readDoubleVar(_longitudeCorrVar,
+                        LONGITUDE_CORRECTION, val, 0);
     _cfactors.setLongitudeCorr(val);
-  }
 
-  if (_file.readDoubleVar(_latitudeCorrVar,
-                          LATITUDE_CORRECTION, val, 0) == 0) {
+    _file.readDoubleVar(_latitudeCorrVar,
+                        LATITUDE_CORRECTION, val, 0);
     _cfactors.setLatitudeCorr(val);
-  }
 
-  if (_file.readDoubleVar(_pressureAltCorrVar,
-                          PRESSURE_ALTITUDE_CORRECTION, val, 0) == 0) {
+    _file.readDoubleVar(_pressureAltCorrVar,
+                        PRESSURE_ALTITUDE_CORRECTION, val, 0);
     _cfactors.setPressureAltCorr(val);
-  }
 
-  if (_file.readDoubleVar(_altitudeCorrVar,
-                          ALTITUDE_CORRECTION, val, 0) == 0) {
+    _file.readDoubleVar(_altitudeCorrVar,
+                        ALTITUDE_CORRECTION, val, 0);
     _cfactors.setAltitudeCorr(val);
-  }
 
-  if (_file.readDoubleVar(_ewVelCorrVar, 
-                          EASTWARD_VELOCITY_CORRECTION, val, 0) == 0) {
+    _file.readDoubleVar(_ewVelCorrVar, 
+                        EASTWARD_VELOCITY_CORRECTION, val, 0);
     _cfactors.setEwVelCorr(val);
-  }
 
-  if (_file.readDoubleVar(_nsVelCorrVar, 
-                          NORTHWARD_VELOCITY_CORRECTION, val, 0) == 0) {
+    _file.readDoubleVar(_nsVelCorrVar, 
+                        NORTHWARD_VELOCITY_CORRECTION, val, 0);
     _cfactors.setNsVelCorr(val);
-  }
 
-  if (_file.readDoubleVar(_vertVelCorrVar,
-                          VERTICAL_VELOCITY_CORRECTION, val, 0) == 0) {
+    _file.readDoubleVar(_vertVelCorrVar,
+                        VERTICAL_VELOCITY_CORRECTION, val, 0);
     _cfactors.setVertVelCorr(val);
-  }
 
-  if (_file.readDoubleVar(_headingCorrVar, 
-                          HEADING_CORRECTION, val, 0) == 0) {
+    _file.readDoubleVar(_headingCorrVar, 
+                        HEADING_CORRECTION, val, 0);
     _cfactors.setHeadingCorr(val);
-  }
 
-  if (_file.readDoubleVar(_rollCorrVar, 
-                          ROLL_CORRECTION, val, 0) == 0) {
+    _file.readDoubleVar(_rollCorrVar, 
+                        ROLL_CORRECTION, val, 0);
     _cfactors.setRollCorr(val);
-  }
   
-  if (_file.readDoubleVar(_pitchCorrVar, PITCH_CORRECTION, val, 0) == 0) {
+    _file.readDoubleVar(_pitchCorrVar, PITCH_CORRECTION, val, 0);
     _cfactors.setPitchCorr(val);
-  }
 
-  if (_file.readDoubleVar(_driftCorrVar, DRIFT_CORRECTION, val, 0) == 0) {
+    _file.readDoubleVar(_driftCorrVar, DRIFT_CORRECTION, val, 0);
     _cfactors.setDriftCorr(val);
-  }
 
-  if (_file.readDoubleVar(_rotationCorrVar, ROTATION_CORRECTION, val, 0) == 0) {
+    _file.readDoubleVar(_rotationCorrVar, ROTATION_CORRECTION, val, 0);
     _cfactors.setRotationCorr(val);
-  }
 
-  if (_file.readDoubleVar(_tiltCorrVar, TILT_CORRECTION, val, 0) == 0) {
+    _file.readDoubleVar(_tiltCorrVar, TILT_CORRECTION, val, 0);
     _cfactors.setTiltCorr(val);
+
+  } catch (NcxxException e) {
   }
 
   return 0;
