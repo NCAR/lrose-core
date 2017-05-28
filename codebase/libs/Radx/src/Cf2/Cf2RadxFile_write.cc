@@ -1482,11 +1482,11 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
   RadxArray<float> fvals_;
   float *fvals = fvals_.alloc(nRays);
 
-  // RadxArray<int> ivals_;
-  // int *ivals = ivals_.alloc(nRays);
+  RadxArray<int> ivals_;
+  int *ivals = ivals_.alloc(nRays);
 
-  // RadxArray<signed char> bvals_;
-  // signed char *bvals = bvals_.alloc(nRays);
+  RadxArray<signed char> bvals_;
+  signed char *bvals = bvals_.alloc(nRays);
 
   // add time coordinate variable
   // Note that in CF, coordinate variables have the same name
@@ -1555,6 +1555,7 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
   for (size_t ii = 0; ii < nRays; ii++) {
     fvals[ii] =  rays[ii]->getElevationDeg();
   }
+  // elVar.putAtt(POSITIVE, UP);
   elVar.putVal(fvals);
 
   // azimuth 
@@ -1567,61 +1568,89 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
   }
   azVar.putVal(fvals);
   
-#ifdef JUNK
-
   // pulse width
-  
+
+  NcxxVar pulseWidthVar = 
+    sweepGroup.addVar(PULSE_WIDTH, "", PULSE_WIDTH_LONG,
+                      ncxxFloat, timeDim, SECONDS, true);
+  pulseWidthVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t ii = 0; ii < nRays; ii++) {
     if (rays[ii]->getPulseWidthUsec() > 0) {
       fvals[ii] = rays[ii]->getPulseWidthUsec() * 1.0e-6;
     } else {
-      fvals[ii] = rays[ii]->getPulseWidthUsec();
+      fvals[ii] = Radx::missingFl32;
     }
   }
-  _pulseWidthVar.putVal(fvals);
+  pulseWidthVar.putVal(fvals);
   
   // prt
   
+  NcxxVar prtVar = 
+    sweepGroup.addVar(PRT, "", PRT_LONG,
+                      ncxxFloat, timeDim, SECONDS, true);
+  prtVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t ii = 0; ii < nRays; ii++) {
     fvals[ii] = rays[ii]->getPrtSec();
   }
-  _prtVar.putVal(fvals);
+  prtVar.putVal(fvals);
   
   // prt ratio
   
+  NcxxVar prtRatioVar = 
+    sweepGroup.addVar(PRT_RATIO, "", PRT_RATIO_LONG,
+                      ncxxFloat, timeDim, SECONDS, true);
+  prtRatioVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t ii = 0; ii < nRays; ii++) {
     fvals[ii] = rays[ii]->getPrtRatio();
   }
-  _prtRatioVar.putVal(fvals);
+  prtRatioVar.putVal(fvals);
   
   // nyquist
   
+  NcxxVar nyquistVar = 
+    sweepGroup.addVar(NYQUIST_VELOCITY, "", NYQUIST_VELOCITY_LONG, 
+                      ncxxFloat, timeDim, METERS_PER_SECOND, true);
+  nyquistVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t ii = 0; ii < nRays; ii++) {
     fvals[ii] = rays[ii]->getNyquistMps();
   }
-  _nyquistVar.putVal(fvals);
+  nyquistVar.putVal(fvals);
   
   // unambigRange
   
+  NcxxVar unambigRangeVar = 
+    sweepGroup.addVar(UNAMBIGUOUS_RANGE, "", UNAMBIGUOUS_RANGE_LONG,
+                      ncxxFloat, timeDim, METERS, true);
+  unambigRangeVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t ii = 0; ii < nRays; ii++) {
     if (rays[ii]->getUnambigRangeKm() > 0) {
       fvals[ii] = rays[ii]->getUnambigRangeKm() * 1000.0;
     } else {
-      fvals[ii] = rays[ii]->getUnambigRangeKm();
+      fvals[ii] = Radx::missingFl32;
     }
   }
-  _unambigRangeVar.putVal(fvals);
+  unambigRangeVar.putVal(fvals);
   
   // antennaTransition
   
+  NcxxVar antennaTransitionVar = 
+    sweepGroup.addVar(ANTENNA_TRANSITION, "", ANTENNA_TRANSITION_LONG,
+                      ncxxByte, _timeDim, "", true);
+  antennaTransitionVar.putAtt(COMMENT,
+                              "1 if antenna is in transition, 0 otherwise");
   for (size_t ii = 0; ii < nRays; ii++) {
     bvals[ii] = rays[ii]->getAntennaTransition();
   }
-  _antennaTransitionVar.putVal(bvals);
+  antennaTransitionVar.putVal(bvals);
   
   // georefs applied?
   
   if (_georefsActive) {
+    NcxxVar georefsAppliedVar = 
+      sweepGroup.addVar(GEOREFS_APPLIED, "", "georefs_have_been_applied_to_ray",
+                        ncxxByte, timeDim, "", true);
+    georefsAppliedVar.putAtt
+      (COMMENT, "1 if georefs have been applied, 0 otherwise");
     for (size_t ii = 0; ii < nRays; ii++) {
       if (_georefsApplied) {
         bvals[ii] = 1;
@@ -1629,76 +1658,124 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
         bvals[ii] = rays[ii]->getGeorefApplied();
       }
     }
-    _georefsAppliedVar.putVal(bvals);
+    georefsAppliedVar.putVal(bvals);
   }
   
   // number of samples in dwell
   
+  NcxxVar nSamplesVar = 
+    sweepGroup.addVar(N_SAMPLES, "", N_SAMPLES_LONG,
+                      ncxxInt, _timeDim, "", true);
+  nSamplesVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t ii = 0; ii < nRays; ii++) {
     ivals[ii] = rays[ii]->getNSamples();
   }
-  _nSamplesVar.putVal(ivals);
+  nSamplesVar.putVal(ivals);
   
   // calibration number
   
-  if (!_calIndexVar.isNull()) {
+  if (_writeVol->getRcalibs().size() > 0) {
+    NcxxVar calIndexVar = 
+      sweepGroup.addVar(R_CALIB_INDEX, "", R_CALIB_INDEX_LONG,
+                        ncxxInt, timeDim, "", true);
+    calIndexVar.putAtt(META_GROUP, RADAR_CALIBRATION);
+    calIndexVar.putAtt
+      (COMMENT, "This is the index for the calibration which applies to this ray");
     for (size_t ii = 0; ii < nRays; ii++) {
       ivals[ii] = rays[ii]->getCalibIndex();
     }
-    _calIndexVar.putVal(ivals);
+    calIndexVar.putVal(ivals);
   }
   
   // transmit power in H and V
   
+  NcxxVar xmitPowerHVar =
+    sweepGroup.addVar(RADAR_MEASURED_TRANSMIT_POWER_H, "", 
+                      RADAR_MEASURED_TRANSMIT_POWER_H_LONG,
+                      ncxxFloat, timeDim, DBM, true);
+  xmitPowerHVar.putAtt(META_GROUP, RADAR_PARAMETERS);
   for (size_t ii = 0; ii < nRays; ii++) {
     fvals[ii] = _checkMissingFloat(rays[ii]->getMeasXmitPowerDbmH());
   }
-  _xmitPowerHVar.putVal(fvals);
+  xmitPowerHVar.putVal(fvals);
   
+  NcxxVar xmitPowerVVar =
+    sweepGroup.addVar(RADAR_MEASURED_TRANSMIT_POWER_V, "", 
+                      RADAR_MEASURED_TRANSMIT_POWER_V_LONG,
+                      ncxxFloat, timeDim, DBM, true);
+  xmitPowerVVar.putAtt(META_GROUP, RADAR_PARAMETERS);
   for (size_t ii = 0; ii < nRays; ii++) {
     fvals[ii] = _checkMissingFloat(rays[ii]->getMeasXmitPowerDbmV());
   }
-  _xmitPowerVVar.putVal(fvals);
+  xmitPowerVVar.putVal(fvals);
+  for (size_t ii = 0; ii < nRays; ii++) {
+    fvals[ii] = _checkMissingFloat(rays[ii]->getMeasXmitPowerDbmV());
+  }
+  xmitPowerVVar.putVal(fvals);
   
   // scan rate
   
+  NcxxVar scanRateVar = 
+    sweepGroup.addVar(SCAN_RATE, "", SCAN_RATE_LONG, 
+                      ncxxFloat, timeDim, DEGREES_PER_SECOND, true);
+  scanRateVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t ii = 0; ii < nRays; ii++) {
     fvals[ii] = rays[ii]->getTrueScanRateDegPerSec();
   }
-  _scanRateVar.putVal(fvals);
+  scanRateVar.putVal(fvals);
   
   // estimated noise per channel
   
-  if (!_estNoiseDbmHcVar.isNull()) {
+  _setEstNoiseAvailFlags();
+
+  if (_estNoiseAvailHc) {
+    NcxxVar estNoiseDbmHcVar = 
+      sweepGroup.addVar(RADAR_ESTIMATED_NOISE_DBM_HC, "", 
+                        RADAR_ESTIMATED_NOISE_DBM_HC_LONG,
+                        ncxxFloat, timeDim, DBM, true);
+    estNoiseDbmHcVar.putAtt(META_GROUP, RADAR_PARAMETERS);
     for (size_t ii = 0; ii < nRays; ii++) {
       fvals[ii] = rays[ii]->getEstimatedNoiseDbmHc();
     }
-    _estNoiseDbmHcVar.putVal(fvals);
-  }
+    estNoiseDbmHcVar.putVal(fvals);
+  } // if (_estNoiseAvailHc)
   
-  if (!_estNoiseDbmVcVar.isNull()) {
+  if (_estNoiseAvailVc) {
+    NcxxVar estNoiseDbmVcVar = 
+      sweepGroup.addVar(RADAR_ESTIMATED_NOISE_DBM_VC, "", 
+                        RADAR_ESTIMATED_NOISE_DBM_VC_LONG,
+                        ncxxFloat, timeDim, DBM, true);
+    estNoiseDbmVcVar.putAtt(META_GROUP, RADAR_PARAMETERS);
     for (size_t ii = 0; ii < nRays; ii++) {
       fvals[ii] = rays[ii]->getEstimatedNoiseDbmVc();
     }
-    _estNoiseDbmVcVar.putVal(fvals);
-  }
-  
-  if (!_estNoiseDbmHxVar.isNull()) {
+    estNoiseDbmVcVar.putVal(fvals);
+  } // if (_estNoiseAvailVc)
+
+  if (_estNoiseAvailHx) {
+    NcxxVar estNoiseDbmHxVar = 
+      sweepGroup.addVar(RADAR_ESTIMATED_NOISE_DBM_HX, "", 
+                        RADAR_ESTIMATED_NOISE_DBM_HX_LONG,
+                        ncxxFloat, timeDim, DBM, true);
+    estNoiseDbmHxVar.putAtt(META_GROUP, RADAR_PARAMETERS);
     for (size_t ii = 0; ii < nRays; ii++) {
       fvals[ii] = rays[ii]->getEstimatedNoiseDbmHx();
     }
-    _estNoiseDbmHxVar.putVal(fvals);
-  }
+    estNoiseDbmHxVar.putVal(fvals);
+  } // if (_estNoiseAvailHx)
   
-  if (!_estNoiseDbmVxVar.isNull()) {
+  if (_estNoiseAvailVx) {
+    NcxxVar estNoiseDbmVxVar = 
+      sweepGroup.addVar(RADAR_ESTIMATED_NOISE_DBM_VX, "", 
+                        RADAR_ESTIMATED_NOISE_DBM_VX_LONG,
+                        ncxxFloat, timeDim, DBM, true);
+    estNoiseDbmVxVar.putAtt(META_GROUP, RADAR_PARAMETERS);
     for (size_t ii = 0; ii < nRays; ii++) {
       fvals[ii] = rays[ii]->getEstimatedNoiseDbmVx();
     }
-    _estNoiseDbmVxVar.putVal(fvals);
-  }
-
-#endif  
-
+    estNoiseDbmVxVar.putVal(fvals);
+  } // if (_estNoiseAvailVx)
+  
 }
 
 //////////////////////////////////////////////
