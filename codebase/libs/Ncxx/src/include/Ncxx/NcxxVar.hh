@@ -42,7 +42,6 @@
 //    P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 //  The base code makes extensive use of exceptions.
-//  Additional methods have been added to return error conditions. 
 //
 //  December 2016
 //
@@ -1674,17 +1673,16 @@ public:
               const void* dataValues) const;
 
   //////////////////////////////////////////////////////////////////////////
-  /// add attribute of various types
-  /// Returns 0 on success, -1 on failure
-  /// Sets ErrStr on failure
+  /// add scalar attribute of various types
+  /// throws NcxxException on error
     
-  int addAttr(const string &name, const string &val);
-  int addAttr(const string &name, unsigned char val);
-  int addAttr(const string &name, short val);
-  int addAttr(const string &name, int val);
-  int addAttr(const string &name, int64_t val);
-  int addAttr(const string &name, float val);
-  int addAttr(const string &name, double val);
+  void addScalarAttr(const string &name, const string &val);
+  void addScalarAttr(const string &name, unsigned char val);
+  void addScalarAttr(const string &name, short val);
+  void addScalarAttr(const string &name, int val);
+  void addScalarAttr(const string &name, int64_t val);
+  void addScalarAttr(const string &name, float val);
+  void addScalarAttr(const string &name, double val);
 
   /// get the total number of values in a variable
   /// this is the product of the dimension sizes
@@ -1694,43 +1692,41 @@ public:
   
   ///////////////////////////////////////////////////////////////////////////
   /// write a scalar variables
-  /// Returns 0 on success, -1 on failure
-  /// Sets ErrStr on failure
-
-  int write(double val);
-  int write(float val);
-  int write(int val);
+  /// throws NcxxException on error
+  
+  void write(double val);
+  void write(float val);
+  void write(int val);
 
   /// write a 1-D vector variable
   /// number of elements specified in dimension
-  /// Returns 0 on success, -1 on failure
-  /// Sets ErrStr on failure
+  /// throws NcxxException on error
 
-  int write(const NcxxDim &dim, const void *data);
+  void write(const NcxxDim &dim, const void *data);
   
   /// write a 1-D vector variable
   /// number of elements specified in arguments
-  /// Returns 0 on success, -1 on failure
-  /// Sets ErrStr on failure
+  /// throws NcxxException on error
     
-  int write(const NcxxDim &dim,
-            size_t count, 
-            const void *data);
+  void write(const NcxxDim &dim,
+             size_t count, 
+             const void *data);
 
   ///////////////////////////////////////////////////////////////////////////
   /// write a string variable
-  /// Returns 0 on success, -1 on failure
-  /// Sets ErrStr on failure
-
-  int writeStrings(const void *str);
+  /// throws NcxxException on error
+  
+  void writeStrings(const void *str);
   
   ////////////////////////////////////////
   // set default fill value, based on type
+  // throws NcxxException on error
     
   void setDefaultFillValue();
       
   ////////////////////////////////////////
   // set meta fill value, based on type
+  // throws NcxxException on error
   
   void setMetaFillValue();
 

@@ -42,7 +42,6 @@
 //    P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 //  The base code makes extensive use of exceptions.
-//  Additional methods have been added to return error conditions. 
 //
 //  December 2016
 //

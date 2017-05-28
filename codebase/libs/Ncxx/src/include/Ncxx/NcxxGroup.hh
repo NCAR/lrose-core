@@ -42,7 +42,6 @@
 //    P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 //  The base code makes extensive use of exceptions.
-//  Additional methods have been added to return error conditions. 
 //
 //  December 2016
 //
@@ -167,7 +166,7 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         Number of groups.
   */
-  int getGroupCount(NcxxGroup::GroupLocation location=ChildrenGrps) const;
+  int getGroupCount(NcxxGroup::GroupLocation location = ChildrenGrps) const;
 
   /*!
     Gets the collection of NcxxGroup objects.
@@ -176,7 +175,7 @@ public:
     \return         A STL multimap object, containing pairs of <attribute name, NcxxGroup object> entities.
   */
   std::multimap<std::string,NcxxGroup>
-    getGroups(NcxxGroup::GroupLocation location=ChildrenGrps) const;
+    getGroups(NcxxGroup::GroupLocation location = ChildrenGrps) const;
 
 
   /*!
@@ -186,8 +185,9 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         Set of NcxxGroup objects with given name.
   */
-  std::set<NcxxGroup> getGroups(const std::string& name,
-                                NcxxGroup::GroupLocation location=ChildrenGrps) const;
+  std::set<NcxxGroup>
+    getGroups(const std::string& name,
+              NcxxGroup::GroupLocation location = ChildrenGrps) const;
 
   /*!
     Gets the named child NcxxGroup object.
@@ -199,7 +199,7 @@ public:
     a \ref NcxxGroup::isNull "null node" is returned.
   */
   NcxxGroup getGroup(const std::string& name,
-                     NcxxGroup::GroupLocation location=ChildrenGrps) const;
+                     NcxxGroup::GroupLocation location = ChildrenGrps) const;
 
   /*!
     Adds a new child netCDF group object.
@@ -225,14 +225,15 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         Number of variables.
   */
-  int getVarCount(NcxxGroup::Location location=Current) const;
+  int getVarCount(NcxxGroup::Location location = Current) const;
 
   /*!
     Get the collection of NcxxVar objects.
     \param location Enumeration type controlling the groups to search.
     \return         A STL multimap object, containing pairs of <attribute name, NcxxVar object> entities.
   */
-  std::multimap<std::string,NcxxVar> getVars(NcxxGroup::Location location=Current) const;
+  std::multimap<std::string,NcxxVar>
+    getVars(NcxxGroup::Location location = Current) const;
 
   /*!
     Gets all NcxxVar objects with a given name.
@@ -240,7 +241,9 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         Set of NcxxVar objects.
   */
-  std::set<NcxxVar> getVars(const std::string& name,NcxxGroup::Location location=Current) const;
+  std::set<NcxxVar> 
+    getVars(const std::string& name,
+            NcxxGroup::Location location = Current) const;
 
   /*!
     Gets the named NcxxVar object..
@@ -250,7 +253,8 @@ public:
     same name, the object closest  to the current group is returned.
     If no valid object is found , a \ref NcxxVar::isNull "null node" is returned.
   */
-  NcxxVar getVar(const std::string& name,NcxxGroup::Location location=Current) const;
+  NcxxVar getVar(const std::string& name,
+                 NcxxGroup::Location location = Current) const;
 
   /*!
     Adds a new netCDF scalar variable.
@@ -260,7 +264,8 @@ public:
     \param   typeName  Type name.
     \return            The NcxxVar object for this new netCDF variable.
   */
-  NcxxVar addVar(const std::string& name, const NcxxType& ncType) const;
+  NcxxVar addVar(const std::string& name,
+                 const NcxxType& ncType) const;
 
   /*!
     Adds a new netCDF variable.
@@ -272,7 +277,9 @@ public:
     \param   dimName   Dimension name.
     \return            The NcxxVar object for this new netCDF variable.
   */
-  NcxxVar addVar(const std::string& name, const std::string& typeName, const std::string& dimName) const;
+  NcxxVar addVar(const std::string& name,
+                 const std::string& typeName,
+                 const std::string& dimName) const;
 
   /*!
     Adds a new netCDF variable.
@@ -284,7 +291,9 @@ public:
     \param    ncDim     NcxxDim object.
     \return             The NcxxVar object for this new netCDF variable.
   */
-  NcxxVar addVar(const std::string& name, const NcxxType& ncType, const NcxxDim& ncDim) const;
+  NcxxVar addVar(const std::string& name,
+                 const NcxxType& ncType,
+                 const NcxxDim& ncDim) const;
 
   /*!
     Adds a new netCDF multi-dimensional variable.
@@ -296,7 +305,9 @@ public:
     \param   dimNames Vector of dimension names.
     \return           The NcxxVar object for this new netCDF variable.
   */
-  NcxxVar addVar(const std::string& name, const std::string& typeName, const std::vector<std::string>& dimNames) const;
+  NcxxVar addVar(const std::string& name,
+                 const std::string& typeName,
+                 const std::vector<std::string>& dimNames) const;
 
 
   /*!
@@ -309,7 +320,9 @@ public:
     \param    ncDimvector Vector of NcxxDim objects.
     \return               The NcxxVar object for this new netCDF variable.
   */
-  NcxxVar addVar(const std::string& name, const NcxxType& ncType, const std::vector<NcxxDim>& ncDimVector) const;
+  NcxxVar addVar(const std::string& name,
+                 const NcxxType& ncType,
+                 const std::vector<NcxxDim>& ncDimVector) const;
 
   // /////////////
   // NcxxGroupAtt-related methods
@@ -320,14 +333,15 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         Number of attributes.
   */
-  int getAttCount(NcxxGroup::Location location=Current) const;
+  int getAttCount(NcxxGroup::Location location = Current) const;
 
   /*!
     Gets the collection of NcxxGroupAtt objects.
     \param location Enumeration type controlling the groups to search.
     \return         A STL multimap object, containing pairs of <attribute name, NcxxGroupAtt object> entities.
   */
-  std::multimap<std::string,NcxxGroupAtt> getAtts(NcxxGroup::Location location=Current) const;
+  std::multimap<std::string, NcxxGroupAtt>
+    getAtts(NcxxGroup::Location location = Current) const;
 
   /*!
     Gets all NcxxGroupAtt objects with a given name.
@@ -335,7 +349,9 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         Set of NcxxGroupAtt objects.
   */
-  std::set<NcxxGroupAtt> getAtts(const std::string& name,NcxxGroup::Location location=Current) const;
+  std::set<NcxxGroupAtt>
+    getAtts(const std::string& name,
+            NcxxGroup::Location location = Current) const;
 
   /*!
     Gets the named NcxxGroupAtt object.
@@ -345,7 +361,8 @@ public:
     same name, the object closest  to the current group is returned.  If no valid object is found ,
     a \ref NcxxGroupAtt::isNull "null node" is returned.
   */
-  NcxxGroupAtt getAtt(const std::string& name,NcxxGroup::Location location=Current) const;
+  NcxxGroupAtt getAtt(const std::string& name,
+                      NcxxGroup::Location location = Current) const;
 
 
   /*!
@@ -375,7 +392,8 @@ public:
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name, 
-                      size_t len, const char** dataValues) const ;
+                      size_t len,
+                      const char** dataValues) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name, 
@@ -383,87 +401,120 @@ public:
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, short datumValue) const ;
+                      const NcxxType& type,
+                      short datumValue) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, int datumValue) const ;
+                      const NcxxType& type,
+                      int datumValue) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, long datumValue) const ;
+                      const NcxxType& type,
+                      long datumValue) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, float datumValue) const ;
+                      const NcxxType& type,
+                      float datumValue) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, double datumValue) const ;
+                      const NcxxType& type,
+                      double datumValue) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, unsigned short datumValue) const ;
+                      const NcxxType& type,
+                      unsigned short datumValue) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, unsigned int datumValue) const ;
+                      const NcxxType& type,
+                      unsigned int datumValue) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, unsigned long long datumValue) const ;
+                      const NcxxType& type,
+                      unsigned long long datumValue) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, long long datumValue) const ;
+                      const NcxxType& type,
+                      long long datumValue) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, size_t len, const unsigned char* dataValues) const ;
+                      const NcxxType& type,
+                      size_t len,
+                      const unsigned char* dataValues) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, size_t len, const signed char* dataValues) const ;
+                      const NcxxType& type,
+                      size_t len,
+                      const signed char* dataValues) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, size_t len, const short* dataValues) const ;
+                      const NcxxType& type,
+                      size_t len,
+                      const short* dataValues) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, size_t len, const int* dataValues) const ;
+                      const NcxxType& type,
+                      size_t len,
+                      const int* dataValues) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, size_t len, const long* dataValues) const ;
+                      const NcxxType& type,
+                      size_t len, 
+                      const long* dataValues) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, size_t len, const float* dataValues) const ;
+                      const NcxxType& type,
+                      size_t len,
+                      const float* dataValues) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, size_t len, const double* dataValues) const ;
+                      const NcxxType& type,
+                      size_t len,
+                      const double* dataValues) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, size_t len, const unsigned short* dataValues) const ;
+                      const NcxxType& type,
+                      size_t len,
+                      const unsigned short* dataValues) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, size_t len, const unsigned int* dataValues) const ;
+                      const NcxxType& type,
+                      size_t len,
+                      const unsigned int* dataValues) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, size_t len, const unsigned long long* dataValues) const ;
+                      const NcxxType& type,
+                      size_t len,
+                      const unsigned long long* dataValues) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, size_t len, const long long* dataValues) const ;
+                      const NcxxType& type,
+                      size_t len,
+                      const long long* dataValues) const ;
   /*! \overload
    */
   NcxxGroupAtt putAtt(const std::string& name,
-                      const NcxxType& type, size_t len, const void* dataValues) const ;
+                      const NcxxType& type,
+                      size_t len,
+                      const void* dataValues) const ;
 
 
 
@@ -476,14 +527,15 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         Number of dimensions.
   */
-  int getDimCount(NcxxGroup::Location location=Current) const;
+  int getDimCount(NcxxGroup::Location location = Current) const;
 
   /*!
     Gets the collection of NcxxDim objects.
     \param location Enumeration type controlling the groups to search.
     \return         A STL multimap object, containing pairs of <attribute name, NcxxDim object> entities.
   */
-  std::multimap<std::string,NcxxDim> getDims(NcxxGroup::Location location=Current) const;
+  std::multimap<std::string,NcxxDim>
+    getDims(NcxxGroup::Location location = Current) const;
 
   /*!
     Gets NcxxDim objects with a given name.
@@ -491,7 +543,9 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         Set of NcxxDim objects with given name.
   */
-  std::set<NcxxDim> getDims(const std::string& name,NcxxGroup::Location location=Current) const;
+  std::set<NcxxDim>
+    getDims(const std::string& name,
+            NcxxGroup::Location location = Current) const;
 
   /*!
     Gets the named NcxxDim object.
@@ -500,7 +554,8 @@ public:
     \return           An NcxxDim object. If there are multiple objects indentied with the same name,
     the object closest to the current group is returned. If no valid object is found , a \ref NcxxDim::isNull "null node" is returned.
   */
-  NcxxDim getDim(const std::string& name,NcxxGroup::Location location=Current) const;
+  NcxxDim getDim(const std::string&
+                 name,NcxxGroup::Location location = Current) const;
 
   /*!
     Adds a new netCDF dimension.
@@ -509,7 +564,8 @@ public:
     that use it.
     \return   The NcxxDim object for this new netCDF dimension.
   */
-  NcxxDim addDim(const std::string& name, size_t dimSize) const;
+  NcxxDim addDim(const std::string& name,
+                 size_t dimSize) const;
 
   /*!
     Adds a new unlimited netCDF dimension.
@@ -527,7 +583,7 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         Number of types.
   */
-  int getTypeCount(NcxxGroup::Location location=Current) const;
+  int getTypeCount(NcxxGroup::Location location = Current) const;
 
 
   /*!
@@ -536,7 +592,8 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         Number of types of the given enumeration type.
   */
-  int getTypeCount(NcxxType::ncxxType enumType, NcxxGroup::Location location=Current) const;
+  int getTypeCount(NcxxType::ncxxType enumType,
+                   NcxxGroup::Location location = Current) const;
 
 
   /*!
@@ -545,7 +602,8 @@ public:
     \return         A STL multimap object, on return contains pairs of <Type name, NcxxType object> entities.
     For atomic types, the type returned is the CDL name.
   */
-  std::multimap<std::string,NcxxType> getTypes(NcxxGroup::Location location=Current) const;
+  std::multimap<std::string,NcxxType> 
+    getTypes(NcxxGroup::Location location = Current) const;
 
 
   /*!
@@ -555,7 +613,8 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         Set of  NcxxType objects.
   */
-  std::set<NcxxType> getTypes(const std::string& name, NcxxGroup::Location location=Current) const;
+  std::set<NcxxType> getTypes(const std::string& name,
+                              NcxxGroup::Location location = Current) const;
 
   /*!
     Gets the collection of NcxxType objects with a given data type.
@@ -563,7 +622,8 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         Set of Nctype objects.
   */
-  std::set<NcxxType> getTypes(NcxxType::ncxxType enumType, NcxxGroup::Location location=Current) const;
+  std::set<NcxxType> getTypes(NcxxType::ncxxType enumType,
+                              NcxxGroup::Location location = Current) const;
 
 
   /*!
@@ -574,7 +634,9 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         Set of Nctype objects.
   */
-  std::set<NcxxType> getTypes(const std::string& name, NcxxType::ncxxType enumType, NcxxGroup::Location location=Current) const;
+  std::set<NcxxType> getTypes(const std::string& name,
+                              NcxxType::ncxxType enumType,
+                              NcxxGroup::Location location = Current) const;
 
 
   /*!
@@ -586,7 +648,8 @@ public:
     the object closest to the current group is returned.  If no valid object is found , a \ref NcxxType::isNull "null node" is returned.
 
   */
-  NcxxType getType(const std::string& name, NcxxGroup::Location location=Current) const;
+  NcxxType getType(const std::string& name,
+                   NcxxGroup::Location location = Current) const;
 
 
   /*!
@@ -596,7 +659,8 @@ public:
     \param enumType    The enumeration value of the object type.
     \return            The NcxxEnumType object for this new netCDF enum type.
   */
-  NcxxEnumType addEnumType(const std::string& name,NcxxEnumType::ncEnumType basetype) const;
+  NcxxEnumType addEnumType(const std::string& name,
+                           NcxxEnumType::ncEnumType basetype) const;
 
 
   /*!
@@ -605,7 +669,8 @@ public:
     \param basetype    A NcxxType object to be used for the basetype.
     \return            The NcxxVlenType object for this new netCDF vlen type.
   */
-  NcxxVlenType addVlenType(const std::string& name,NcxxType& basetype) const;
+  NcxxVlenType addVlenType(const std::string& name,
+                           NcxxType& basetype) const;
 
 
   /*!
@@ -614,7 +679,8 @@ public:
     \param size     The size of the new type in bytes.
     \return         The NcxxOpaqueType object for this new netCDF opaque type..
   */
-  NcxxOpaqueType addOpaqueType(const std::string& name, size_t size) const;
+  NcxxOpaqueType addOpaqueType(const std::string& name, 
+                               size_t size) const;
 
 
   /*!
@@ -623,7 +689,9 @@ public:
     \param size     The size of the new type in bytes.
     \return         The new NcxxCompoundType object for this new netCDF userDefined type.
   */
-  NcxxCompoundType addCompoundType(const std::string& name, size_t size) const;
+
+  NcxxCompoundType addCompoundType(const std::string& name,
+                                   size_t size) const;
 
 
   /*!
@@ -637,7 +705,8 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         The NcxxVar dimension variable. If no valid object is found , a \ref NcxxVar::isNull "null node" is returned.
   */
-  std::map<std::string,NcxxGroup> getCoordVars(NcxxGroup::Location location=Current) const;
+  std::map<std::string,NcxxGroup>
+    getCoordVars(NcxxGroup::Location location = Current) const;
 
   /*!
     Gets the NcxxDim and NcxxVar object pair for a named coordinate variable.
@@ -648,137 +717,152 @@ public:
     \param location Enumeration type controlling the groups to search.
     \return         The set of names of dimension variables.
   */
-  void getCoordVar(std::string& coordVarName, NcxxDim& ncDim, NcxxVar& ncVar, NcxxGroup::Location location=Current) const;
-
+  void getCoordVar(std::string& coordVarName,
+                   NcxxDim& ncDim,
+                   NcxxVar& ncVar,
+                   NcxxGroup::Location location = Current) const;
 
   ///////////////////////////////////////////
   // add string global attribute
-  // Returns 0 on success, -1 on failure
+  // Throws NcxxException on failure
      
-  int addGlobAttr(const string &name, const string &val);
+  void addGlobAttr(const string &name, const string &val);
 
   ///////////////////////////////////////////
   // add int global attribute
-  // Returns 0 on success, -1 on failure
+  // Throws NcxxException on failure
      
-  int addGlobAttr(const string &name, int val);
+  void addGlobAttr(const string &name, int val);
 
   ///////////////////////////////////////////
   // add float global attribute
-  // Returns 0 on success, -1 on failure
+  // Throws NcxxException on failure
      
-  int addGlobAttr(const string &name, float val);
+  void addGlobAttr(const string &name, float val);
 
   ///////////////////////////////////////////
   // add double global attribute
-  // Returns 0 on success, -1 on failure
+  // Throws NcxxException on failure
      
-  int addGlobAttr(const string &name, double val);
+  void addGlobAttr(const string &name, double val);
 
   ///////////////////////////////////////////
   // read a global attribute
-  // Returns 0 on success, -1 on failure
+  // Throws NcxxException on failure
      
-  int readGlobAttr(const string &name, string &val);
-  int readGlobAttr(const string &name, int &val);
-  int readGlobAttr(const string &name, float &val);
-  int readGlobAttr(const string &name, double &val);
+  void readGlobAttr(const string &name, string &val);
+  void readGlobAttr(const string &name, int &val);
+  void readGlobAttr(const string &name, float &val);
+  void readGlobAttr(const string &name, double &val);
 
   ///////////////////////////////////////////
   // add a dimension
-  // Returns 0 on success, -1 on failure
+  // Throws NcxxException on failure
   // Side effect: dim arg is updated
      
-  int addDim(NcxxDim &dim, const string &name, int size);
+  void addDim(NcxxDim &dim, const string &name, int size);
 
   ///////////////////////////////////////////
   // read a dimension
-  // Returns 0 on success, -1 on failure
+  // Throws NcxxException on failure
   // Side effect: dim arg is set
      
-  int readDim(const string &name, NcxxDim &dim);
+  void readDim(const string &name, NcxxDim &dim);
 
   //////////////////////////////////////////////
   // When adding variables, you have the option
   // to use the 'proposed_standard_name' attribute
   // instead of 'standard_name'.
 
-  void setUsedProposedStandardName(bool val) { _useProposedStandardName = val; }
+  void setUsedProposedStandardName(bool val) {
+    _useProposedStandardName = val;
+  }
 
   //////////////////////////////////////////////
   // Add scalar var
-  // Returns 0 on success, -1 on failure
+  // Throws NcxxException on failure
   // Side effect: var is set
      
-  int addVar(NcxxVar &var,
-             const string &name, 
-             const string &standardName,
-             const string &longName,
-             NcxxType ncType, 
-             const string &units = "",
-             bool isMetadata = false);
+  void addVar(NcxxVar &var,
+              const string &name, 
+              const string &standardName,
+              const string &longName,
+              NcxxType ncType, 
+              const string &units = "",
+              bool isMetadata = false);
 
   ///////////////////////////////////////
   // Add 1-D array var
-  // Returns 0 on success, -1 on failure
+  // Throws NcxxException on failure
   // Side effect: var is set
      
-  int addVar(NcxxVar &var, 
-             const string &name, 
-             const string &standardName,
-             const string &longName,
-             NcxxType ncType, 
-             NcxxDim &dim, 
-             const string &units = "",
-             bool isMetadata = false);
-     
+  void addVar(NcxxVar &var, 
+              const string &name, 
+              const string &standardName,
+              const string &longName,
+              NcxxType ncType, 
+              NcxxDim &dim, 
+              const string &units = "",
+              bool isMetadata = false);
+  
   ///////////////////////////////////////
   // Add 2-D array var
-  // Returns 0 on success, -1 on failure
+  // Throws NcxxException on failure
   // Side effect: var is set
      
-  int addVar(NcxxVar &var, 
-             const string &name,
-             const string &standardName,
-             const string &longName,
-             NcxxType ncType,
-             NcxxDim &dim0,
-             NcxxDim &dim1,
-             const string &units = "",
-             bool isMetadata = false);
+  void addVar(NcxxVar &var, 
+              const string &name,
+              const string &standardName,
+              const string &longName,
+              NcxxType ncType,
+              NcxxDim &dim0,
+              NcxxDim &dim1,
+              const string &units = "",
+              bool isMetadata = false);
 
   ///////////////////////////////////////
   // Add var in multiple-dimensions
-  // Returns 0 on success, -1 on failure
+  // Throws NcxxException on failure
   // Side effect: var is set
      
-  int addVar(NcxxVar &var, 
-             const string &name,
-             const string &standardName,
-             const string &longName,
-             NcxxType ncType,
-             vector<NcxxDim> &dims,
-             const string &units = "",
-             bool isMetadata = false);
+  void addVar(NcxxVar &var, 
+              const string &name,
+              const string &standardName,
+              const string &longName,
+              NcxxType ncType,
+              vector<NcxxDim> &dims,
+              const string &units = "",
+              bool isMetadata = false);
      
   ///////////////////////////////////////////////
   // read variable based on type, set var and val
-  // Returns 0 on success, -1 on failure
-    
-  int readIntVar(NcxxVar &var, const string &name,
-                 int &val, int missingVal, bool required = true);
-    
-  int readFloatVar(NcxxVar &var, const string &name,
-                   float &val, float missingVal, bool required = true);
-    
-  int readDoubleVar(NcxxVar &var, const string &name,
-                    double &val, double missingVal, bool required = true);
+  // Throws NcxxException on failure
+  
+  void readIntVar(NcxxVar &var,
+                  const string &name,
+                  int &val,
+                  int missingVal,
+                  bool required = true);
+  
+  void readFloatVar(NcxxVar &var,
+                    const string &name,
+                    float &val,
+                    float missingVal,
+                    bool required = true);
+  
+  void readDoubleVar(NcxxVar &var,
+                     const string &name,
+                     double &val,
+                     double missingVal,
+                     bool required = true);
       
   ///////////////////////////////////
   // read a scalar char string variable
-  // Returns 0 on success, -1 on failure
+  // Throws NcxxException on failure
     
-  int readCharStringVar(NcxxVar &var, const string &name, string &val);
+  void readCharStringVar(NcxxVar &var,
+                         const string &name,
+                         string &val);
 
 protected:
 
