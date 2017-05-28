@@ -1385,9 +1385,9 @@ int Cf2RadxFile::_addSweepVariables()
     _sweepFollowModeVar.putAtt(OPTIONS, Radx::followModeOptions());
     _sweepFollowModeVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
     
-    _file.addVar(_sweepFixedAngleVar, FIXED_ANGLE,
-                 "", FIXED_ANGLE_LONG, 
-                 ncxxFloat, _sweepDim, DEGREES, true);
+    // _file.addVar(_sweepFixedAngleVar, FIXED_ANGLE,
+    //              "", FIXED_ANGLE_LONG, 
+    //              ncxxFloat, _sweepDim, DEGREES, true);
     _file.addVar(_targetScanRateVar, TARGET_SCAN_RATE,
                  "", TARGET_SCAN_RATE_LONG, 
                  ncxxFloat, _sweepDim, DEGREES_PER_SECOND, true);
