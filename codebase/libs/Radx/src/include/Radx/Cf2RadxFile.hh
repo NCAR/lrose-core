@@ -1101,6 +1101,10 @@ private:
   int _addCorrectionVariables();
   int _addProjectionVariables();
   int _addSweepGroups();
+  void _addSweepGroupAttributes(const RadxSweep *sweep,
+                                NcxxGroup &sweepGroup);
+  void _addSweepGroupVariables(const RadxSweep *sweep,
+                               NcxxGroup &sweepGroup);
   int _addSweepVariables();
   int _addCalibVariables();
   int _addRayVariables();

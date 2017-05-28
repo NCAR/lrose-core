@@ -1290,8 +1290,9 @@ int Cf2RadxFile::_addSweepGroups()
 
     // add group
   
+    NcxxGroup sweepGroup;
     try {
-      NcxxGroup sweepGroup = _file.addGroup(name);
+      sweepGroup = _file.addGroup(name);
       _sweepGroups.push_back(sweepGroup);
     } catch (NcxxException& e) {
       _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
@@ -1300,9 +1301,31 @@ int Cf2RadxFile::_addSweepGroups()
       return -1;
     }
 
+    // add sweep group attributes
+
+    try {
+      _addSweepGroupAttributes(sweeps[ii], sweepGroup);
+    } catch (NcxxException& e) {
+      _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
+      _addErrStr("  Adding sweep group attributes");
+      _addErrStr("  Exception: ", e.what());
+      return -1;
+    }
+
+    // add sweep group variables
+
+    try {
+      _addSweepGroupVariables(sweeps[ii], sweepGroup);
+    } catch (NcxxException& e) {
+      _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
+      _addErrStr("  Adding sweep group variables");
+      _addErrStr("  Exception: ", e.what());
+      return -1;
+    }
+
   } // ii
   
-  // create variable for sweep names
+  // create variable for sweep names at root level
   
   try {
     _file.addVar(_sweepGroupNameVar, SWEEP_GROUP_NAME,
@@ -1322,7 +1345,7 @@ int Cf2RadxFile::_addSweepGroups()
   }
 
 
-  // sweep fixed angles
+  // sweep fixed angles at root level
   
   try {
     _file.addVar(_sweepFixedAngleVar, FIXED_ANGLE,
@@ -1332,7 +1355,6 @@ int Cf2RadxFile::_addSweepGroups()
     float *fvals = fvals_.alloc(nSweeps);
     for (int ii = 0; ii < nSweeps; ii++) {
       fvals[ii] = sweeps[ii]->getFixedAngleDeg();
-      _sweepGroups[ii].putAtt(FIXED_ANGLE, ncxxFloat, fvals[ii]);
     }
     _sweepFixedAngleVar.putVal(fvals);
   } catch (NcxxException& e) {
@@ -1346,6 +1368,322 @@ int Cf2RadxFile::_addSweepGroups()
 
 }
 
+//////////////////////////////////////////////
+// add sweep group attributes
+// throws exception on error
+
+void Cf2RadxFile::_addSweepGroupAttributes(const RadxSweep *sweep,
+                                           NcxxGroup &sweepGroup)
+
+{
+  
+  sweepGroup.putAtt(SWEEP_NUMBER, ncxxInt, sweep->getSweepNumber());
+
+  float fixedAngle = sweep->getFixedAngleDeg();
+  sweepGroup.putAtt(FIXED_ANGLE, ncxxFloat, fixedAngle);
+  
+  string sweepModeStr = Radx::sweepModeToStr(sweep->getSweepMode());
+  sweepGroup.putAtt(SWEEP_MODE, sweepModeStr);
+  
+  string polModeStr =
+    Radx::polarizationModeToStr(sweep->getPolarizationMode());
+  sweepGroup.putAtt(POLARIZATION_MODE, polModeStr);
+
+  string prtModeStr = Radx::prtModeToStr(sweep->getPrtMode());
+  sweepGroup.putAtt(PRT_MODE, prtModeStr);
+  
+  string followModeStr = Radx::followModeToStr(sweep->getFollowMode());
+  sweepGroup.putAtt(FOLLOW_MODE, followModeStr);
+  
+  float targetScanRate = sweep->getTargetScanRateDegPerSec();
+  sweepGroup.putAtt(TARGET_SCAN_RATE, ncxxFloat, targetScanRate);
+  
+  if (sweep->getRaysAreIndexed()) {
+    sweepGroup.putAtt(RAYS_ARE_INDEXED, "true");
+    float angleRes = sweep->getAngleResDeg();
+    sweepGroup.putAtt(RAY_ANGLE_RES, ncxxFloat, angleRes);
+  } else {
+    sweepGroup.putAtt(RAYS_ARE_INDEXED, "false");
+    float angleRes = -9999.0;
+    sweepGroup.putAtt(RAY_ANGLE_RES, ncxxFloat, angleRes);
+  }
+  
+  float IFreq = sweep->getIntermedFreqHz();
+  sweepGroup.putAtt(INTERMED_FREQ_HZ, ncxxFloat, IFreq);
+
+}
+
+//////////////////////////////////////////////
+// add sweep group variables
+// throws exception on error
+
+void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
+                                          NcxxGroup &sweepGroup)
+  
+{
+
+  // create a volume with just this sweep
+  
+  RadxVol sweepVol(*_writeVol, sweep->getSweepNumber());
+  const vector<RadxRay *> &rays = sweepVol.getRays();
+
+  // make the geometry constant
+  // set the number of gates to be constant
+
+  sweepVol.remapToPredomGeom();
+  sweepVol.setNGatesConstant();
+  double startRangeKm = sweepVol.getStartRangeKm();
+  double gateSpacingKm = sweepVol.getGateSpacingKm();
+  // double startRangeKm, gateSpacingKm;
+  sweepVol.getPredomRayGeom(startRangeKm, gateSpacingKm);
+  sweepGroup.putAtt("start_range_m", ncxxFloat, startRangeKm * 1000.0);
+  sweepGroup.putAtt("gate_spacing_m", ncxxFloat, gateSpacingKm * 1000.0);
+
+  // add dimensions
+  
+  NcxxDim timeDim;
+  size_t nRays = sweepVol.getNRays();
+  sweepGroup.addDim(timeDim, TIME, nRays);
+
+  NcxxDim rangeDim;
+  size_t nGates = sweepVol.getMaxNGates();
+  sweepGroup.addDim(rangeDim, RANGE, nGates);
+
+  // alloc arrays
+
+  RadxArray<double> dvals_;
+  double *dvals = dvals_.alloc(nRays);
+
+  RadxArray<float> fvals_;
+  float *fvals = fvals_.alloc(nRays);
+
+  // RadxArray<int> ivals_;
+  // int *ivals = ivals_.alloc(nRays);
+
+  // RadxArray<signed char> bvals_;
+  // signed char *bvals = bvals_.alloc(nRays);
+
+  // add time coordinate variable
+  // Note that in CF, coordinate variables have the same name
+  // as their dimension
+
+  NcxxVar timeVar = sweepGroup.addVar(TIME, ncxxDouble, timeDim);
+  timeVar.putAtt(STANDARD_NAME, TIME);
+  timeVar.putAtt(LONG_NAME, "time in seconds since volume start");
+  timeVar.putAtt(CALENDAR, GREGORIAN);
+  
+  char timeUnitsStr[256];
+  RadxTime stime(_writeVol->getStartTimeSecs());
+  sprintf(timeUnitsStr, "seconds since %.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
+          stime.getYear(), stime.getMonth(), stime.getDay(),
+          stime.getHour(), stime.getMin(), stime.getSec());
+  timeVar.putAtt(UNITS, timeUnitsStr);
+  timeVar.putAtt(COMMENT, "times are relative to the volume start_time");
+
+  for (size_t ii = 0; ii < nRays; ii++) {
+    RadxTime rayTime = rays[ii]->getRadxTime();
+    double dsecs = rayTime - stime;
+    dvals[ii] = dsecs;
+  }
+  timeVar.putVal(dvals);
+
+  // add range coordinate variable
+  
+  NcxxVar rangeVar = sweepGroup.addVar(RANGE, ncxxFloat, rangeDim);
+  rangeVar.putAtt(LONG_NAME, RANGE_LONG);
+  rangeVar.putAtt(LONG_NAME, "Range from instrument to center of gate");
+  rangeVar.putAtt(UNITS, METERS);
+  rangeVar.putAtt(SPACING_IS_CONSTANT, "true");
+  rangeVar.addScalarAttr(METERS_TO_CENTER_OF_FIRST_GATE,
+                         (float) startRangeKm * 1000.0);
+  rangeVar.addScalarAttr(METERS_BETWEEN_GATES, 
+                         (float) gateSpacingKm * 1000.0);
+  double rangeKm = startRangeKm;
+  RadxArray<float> rangeM_;
+  float *rangeM = rangeM_.alloc(nGates);
+  for (size_t ii = 0; ii < nGates; ii++, rangeKm += gateSpacingKm) {
+    rangeM[ii] = rangeKm * 1000.0;
+  }
+  rangeVar.putVal(rangeM);
+  
+  // elevation
+  
+  NcxxVar elVar;
+  sweepGroup.addVar(elVar, ELEVATION, "", ELEVATION_LONG,
+                    ncxxFloat, timeDim, DEGREES, true);
+  for (size_t ii = 0; ii < nRays; ii++) {
+    fvals[ii] =  rays[ii]->getElevationDeg();
+  }
+  elVar.putVal(fvals);
+
+  // azimuth 
+
+  NcxxVar azVar;
+  sweepGroup.addVar(azVar, AZIMUTH, "", AZIMUTH_LONG,
+                    ncxxFloat, timeDim, DEGREES, true);
+  for (size_t ii = 0; ii < nRays; ii++) {
+    fvals[ii] = rays[ii]->getAzimuthDeg();
+  }
+  azVar.putVal(fvals);
+  
+#ifdef JUNK
+
+  // start range
+
+  NcxxVar startRangeVar;
+  sweepGroup.addVar(startRangeVar, RAY_START_RANGE,
+                    "", "start_range_for_ray", ncxxFloat,
+                    timeDim, METERS, true);
+  startRangeVar.putAtt(UNITS, METERS);
+  for (size_t ii = 0; ii < nRays; ii++) {
+    fvals[ii] = rays[ii]->getStartRangeKm() * 1000.0;
+  }
+  startRangeVar.putVal(fvals);
+  
+  // gate spacing
+
+  NcxxVar gateSpacingVar;
+  sweepGroup.addVar(gateSpacingVar, RAY_GATE_SPACING,
+                    "", "gate_spacing_for_ray", ncxxFloat,
+                    timeDim, METERS, true);
+  gateSpacingVar.putAtt(UNITS, METERS);
+  for (size_t ii = 0; ii < nRays; ii++) {
+    fvals[ii] = rays[ii]->getGateSpacingKm() * 1000.0;
+  }
+  gateSpacingVar.putVal(fvals);
+
+  // pulse width
+  
+  for (size_t ii = 0; ii < nRays; ii++) {
+    if (rays[ii]->getPulseWidthUsec() > 0) {
+      fvals[ii] = rays[ii]->getPulseWidthUsec() * 1.0e-6;
+    } else {
+      fvals[ii] = rays[ii]->getPulseWidthUsec();
+    }
+  }
+  _pulseWidthVar.putVal(fvals);
+  
+  // prt
+  
+  for (size_t ii = 0; ii < nRays; ii++) {
+    fvals[ii] = rays[ii]->getPrtSec();
+  }
+  _prtVar.putVal(fvals);
+  
+  // prt ratio
+  
+  for (size_t ii = 0; ii < nRays; ii++) {
+    fvals[ii] = rays[ii]->getPrtRatio();
+  }
+  _prtRatioVar.putVal(fvals);
+  
+  // nyquist
+  
+  for (size_t ii = 0; ii < nRays; ii++) {
+    fvals[ii] = rays[ii]->getNyquistMps();
+  }
+  _nyquistVar.putVal(fvals);
+  
+  // unambigRange
+  
+  for (size_t ii = 0; ii < nRays; ii++) {
+    if (rays[ii]->getUnambigRangeKm() > 0) {
+      fvals[ii] = rays[ii]->getUnambigRangeKm() * 1000.0;
+    } else {
+      fvals[ii] = rays[ii]->getUnambigRangeKm();
+    }
+  }
+  _unambigRangeVar.putVal(fvals);
+  
+  // antennaTransition
+  
+  for (size_t ii = 0; ii < nRays; ii++) {
+    bvals[ii] = rays[ii]->getAntennaTransition();
+  }
+  _antennaTransitionVar.putVal(bvals);
+  
+  // georefs applied?
+  
+  if (_georefsActive) {
+    for (size_t ii = 0; ii < nRays; ii++) {
+      if (_georefsApplied) {
+        bvals[ii] = 1;
+      } else {
+        bvals[ii] = rays[ii]->getGeorefApplied();
+      }
+    }
+    _georefsAppliedVar.putVal(bvals);
+  }
+  
+  // number of samples in dwell
+  
+  for (size_t ii = 0; ii < nRays; ii++) {
+    ivals[ii] = rays[ii]->getNSamples();
+  }
+  _nSamplesVar.putVal(ivals);
+  
+  // calibration number
+  
+  if (!_calIndexVar.isNull()) {
+    for (size_t ii = 0; ii < nRays; ii++) {
+      ivals[ii] = rays[ii]->getCalibIndex();
+    }
+    _calIndexVar.putVal(ivals);
+  }
+  
+  // transmit power in H and V
+  
+  for (size_t ii = 0; ii < nRays; ii++) {
+    fvals[ii] = _checkMissingFloat(rays[ii]->getMeasXmitPowerDbmH());
+  }
+  _xmitPowerHVar.putVal(fvals);
+  
+  for (size_t ii = 0; ii < nRays; ii++) {
+    fvals[ii] = _checkMissingFloat(rays[ii]->getMeasXmitPowerDbmV());
+  }
+  _xmitPowerVVar.putVal(fvals);
+  
+  // scan rate
+  
+  for (size_t ii = 0; ii < nRays; ii++) {
+    fvals[ii] = rays[ii]->getTrueScanRateDegPerSec();
+  }
+  _scanRateVar.putVal(fvals);
+  
+  // estimated noise per channel
+  
+  if (!_estNoiseDbmHcVar.isNull()) {
+    for (size_t ii = 0; ii < nRays; ii++) {
+      fvals[ii] = rays[ii]->getEstimatedNoiseDbmHc();
+    }
+    _estNoiseDbmHcVar.putVal(fvals);
+  }
+  
+  if (!_estNoiseDbmVcVar.isNull()) {
+    for (size_t ii = 0; ii < nRays; ii++) {
+      fvals[ii] = rays[ii]->getEstimatedNoiseDbmVc();
+    }
+    _estNoiseDbmVcVar.putVal(fvals);
+  }
+  
+  if (!_estNoiseDbmHxVar.isNull()) {
+    for (size_t ii = 0; ii < nRays; ii++) {
+      fvals[ii] = rays[ii]->getEstimatedNoiseDbmHx();
+    }
+    _estNoiseDbmHxVar.putVal(fvals);
+  }
+  
+  if (!_estNoiseDbmVxVar.isNull()) {
+    for (size_t ii = 0; ii < nRays; ii++) {
+      fvals[ii] = rays[ii]->getEstimatedNoiseDbmVx();
+    }
+    _estNoiseDbmVxVar.putVal(fvals);
+  }
+
+#endif  
+
+}
+  
 //////////////////////////////////////////////
 // add variables for sweep info
 
@@ -2942,7 +3280,6 @@ int Cf2RadxFile::_writeSweepVariables()
     
     for (int ii = 0; ii < nSweeps; ii++) {
       ivals[ii] = sweeps[ii]->getSweepNumber();
-      _sweepGroups[ii].putAtt(SWEEP_NUMBER, ncxxInt, ivals[ii]);
     }
     _sweepNumberVar.putVal(ivals);
     
@@ -2954,7 +3291,6 @@ int Cf2RadxFile::_writeSweepVariables()
       for (int ii = 0; ii < nSweeps; ii++) {
         sweepModeVec.push_back(Radx::sweepModeToStr(sweeps[ii]->getSweepMode()));
         sweepModes[ii] = sweepModeVec[ii].c_str();
-        _sweepGroups[ii].putAtt(SWEEP_MODE, sweepModeVec[ii]);
       }
       _sweepModeVar.putVal(sweepModes);
       delete[] sweepModes;
@@ -2969,7 +3305,6 @@ int Cf2RadxFile::_writeSweepVariables()
         polModeVec.push_back
           (Radx::polarizationModeToStr(sweeps[ii]->getPolarizationMode()));
         polModes[ii] = polModeVec[ii].c_str();
-        _sweepGroups[ii].putAtt(POLARIZATION_MODE, polModeVec[ii]);
       }
       _polModeVar.putVal(polModes);
       delete[] polModes;
@@ -2984,7 +3319,6 @@ int Cf2RadxFile::_writeSweepVariables()
         prtModeVec.push_back
           (Radx::prtModeToStr(sweeps[ii]->getPrtMode()));
         prtModes[ii] = prtModeVec[ii].c_str();
-        _sweepGroups[ii].putAtt(PRT_MODE, prtModeVec[ii]);
       }
       _prtModeVar.putVal(prtModes);
       delete[] prtModes;
@@ -2999,7 +3333,6 @@ int Cf2RadxFile::_writeSweepVariables()
         followModeVec.push_back
           (Radx::followModeToStr(sweeps[ii]->getFollowMode()));
         followModes[ii] = followModeVec[ii].c_str();
-        _sweepGroups[ii].putAtt(FOLLOW_MODE, followModeVec[ii]);
       }
       _sweepFollowModeVar.putVal(followModes);
       delete[] followModes;
@@ -3009,7 +3342,6 @@ int Cf2RadxFile::_writeSweepVariables()
     
     for (int ii = 0; ii < nSweeps; ii++) {
       fvals[ii] = sweeps[ii]->getTargetScanRateDegPerSec();
-      _sweepGroups[ii].putAtt(TARGET_SCAN_RATE, ncxxFloat, fvals[ii]);
     }
     _targetScanRateVar.putVal(fvals);
     
@@ -3035,10 +3367,8 @@ int Cf2RadxFile::_writeSweepVariables()
       for (int ii = 0; ii < nSweeps; ii++) {
         if (sweeps[ii]->getRaysAreIndexed()) {
           indexedVec.push_back("true");
-          _sweepGroups[ii].putAtt(RAYS_ARE_INDEXED, "true");
         } else {
           indexedVec.push_back("false");
-          _sweepGroups[ii].putAtt(RAYS_ARE_INDEXED, "false");
         }
         indexed[ii] = indexedVec[ii].c_str();
       }
@@ -3050,14 +3380,12 @@ int Cf2RadxFile::_writeSweepVariables()
     
     for (int ii = 0; ii < nSweeps; ii++) {
       fvals[ii] = sweeps[ii]->getAngleResDeg();
-      _sweepGroups[ii].putAtt(RAY_ANGLE_RES, ncxxFloat, fvals[ii]);
     }
     _rayAngleResVar.putVal(fvals);
     
     if (!_intermedFreqHzVar.isNull()) {
       for (int ii = 0; ii < nSweeps; ii++) {
         fvals[ii] = sweeps[ii]->getIntermedFreqHz();
-        _sweepGroups[ii].putAtt(INTERMED_FREQ_HZ, ncxxFloat, fvals[ii]);
       }
       _intermedFreqHzVar.putVal(fvals);
     }
