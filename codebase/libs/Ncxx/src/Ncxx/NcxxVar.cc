@@ -150,7 +150,9 @@ NcxxType NcxxVar::getType() const {
 
   // first get the typeid
   nc_type xtypep;
-  ncxxCheck(nc_inq_vartype(groupId, myId, &xtypep), __FILE__, __LINE__);
+  ncxxCheck(nc_inq_vartype(groupId, myId, &xtypep), 
+            __FILE__, __LINE__,
+            getName(), "getType()");
   
   if(xtypep ==  ncxxByte.getId()    ) return ncxxByte;
   if(xtypep ==  ncxxUbyte.getId()   ) return ncxxUbyte;
@@ -186,7 +188,7 @@ int NcxxVar::getDimCount() const
   int dimCount;
   ncxxCheck(nc_inq_varndims(groupId, myId,  &dimCount),
             __FILE__, __LINE__,
-            getName(), "getDimCount");
+            getName(), "getDimCount()");
   return dimCount;
 }
 
@@ -201,7 +203,7 @@ vector<NcxxDim> NcxxVar::getDims() const
     vector<int> dimids(dimCount);
     ncxxCheck(nc_inq_vardimid(groupId, myId,  &dimids[0]),
               __FILE__, __LINE__,
-              getName(), "getDims");
+              getName(), "getDims()");
     ncDims.reserve(dimCount);
     for (int i=0; i<dimCount; i++) {
       NcxxDim tmpDim(getParentGroup(),dimids[i]);
@@ -236,7 +238,7 @@ int NcxxVar::getAttCount() const
   int attCount;
   ncxxCheck(nc_inq_varnatts(groupId, myId,  &attCount),
             __FILE__, __LINE__,
-            getName(), "getAttCount");
+            getName(), "getAttCount()");
   return attCount;
 }
 
@@ -276,7 +278,7 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheck(nc_put_att_text(groupId, myId, 
                             name.c_str(), dataValues.size(), dataValues.c_str()),
             __FILE__, __LINE__,
-            "var", getName(), "putAtt()");
+            "var", getName(), "putAtt(string)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -290,12 +292,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId,
                          name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(char*)");
   else
     ncxxCheck(nc_put_att_uchar(groupId, myId,
                                name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(char*)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -310,12 +312,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(signed char*)");
   else
     ncxxCheck(nc_put_att_schar(groupId, myId, 
                                name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(signed char*)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -332,12 +334,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(short)");
   else
     ncxxCheck(nc_put_att_short(groupId, myId, 
                                name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(short)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -352,12 +354,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(int)");
   else
     ncxxCheck(nc_put_att_int(groupId, myId, 
                              name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(int)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -371,12 +373,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(long)");
   else
     ncxxCheck(nc_put_att_long(groupId, myId, 
                               name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(long)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -390,12 +392,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(float)");
   else
     ncxxCheck(nc_put_att_float(groupId, myId, 
                                name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(float)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -410,12 +412,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(double)");
   else
     ncxxCheck(nc_put_att_double(groupId, myId, 
                                 name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(double)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -430,12 +432,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(unsigned short)");
   else
     ncxxCheck(nc_put_att_ushort(groupId, myId, 
                                 name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(unsigned short)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -449,12 +451,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(unsigned int)");
   else
     ncxxCheck(nc_put_att_uint(groupId, myId, 
                               name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(unsigned int)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -468,12 +470,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(long long)");
   else
     ncxxCheck(nc_put_att_longlong(groupId, myId, 
                                   name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(long long)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -488,12 +490,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(unsigned long long)");
   else
     ncxxCheck(nc_put_att_ulonglong(groupId, myId, 
                                    name.c_str(), type.getId(), 1, &datumValue),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(unsigned long long)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -511,12 +513,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(short*)");
   else
     ncxxCheck(nc_put_att_short(groupId, myId, 
                                name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(short*)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -532,12 +534,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(int*)");
   else
     ncxxCheck(nc_put_att_int(groupId, myId, 
                              name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(int*)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -552,12 +554,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(long*)");
   else
     ncxxCheck(nc_put_att_long(groupId, myId, 
                               name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(long*)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -572,12 +574,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(float*)");
   else
     ncxxCheck(nc_put_att_float(groupId, myId, 
                                name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(float*)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -593,12 +595,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(double*)");
   else
     ncxxCheck(nc_put_att_double(groupId, myId, 
                                 name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(double*)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -614,12 +616,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(unsigned short*)");
   else
     ncxxCheck(nc_put_att_ushort(groupId, myId, 
                                 name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(unsigned short*)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -634,12 +636,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(unsigned int*)");
   else
     ncxxCheck(nc_put_att_uint(groupId, myId, 
                               name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(unsigned int*)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -654,12 +656,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(long long*)");
   else
     ncxxCheck(nc_put_att_longlong(groupId, myId, 
                                   name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(long long*)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -675,12 +677,12 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
     ncxxCheck(nc_put_att(groupId, myId, 
                          name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(unsigned long long*)");
   else
     ncxxCheck(nc_put_att_ulonglong(groupId, myId, 
                                    name.c_str(), type.getId(), len, dataValues),
               __FILE__, __LINE__,
-              "var", getName(), "putAtt()");
+              "var", getName(), "putAtt(unsigned long long*)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -694,7 +696,7 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheck(nc_put_att_string(groupId, myId, 
                               name.c_str(), len, dataValues), 
             __FILE__, __LINE__,
-            "var", getName(), "putAtt()");
+            "var", getName(), "putAtt(char**)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -708,7 +710,7 @@ NcxxVarAtt NcxxVar::putAtt(const string& name,
   ncxxCheck(nc_put_att(groupId,myId ,
                        name.c_str(), type.getId(), len, dataValues),
             __FILE__, __LINE__,
-            "var", getName(), "putAtt()");
+            "var", getName(), "putAtt(void*)");
   // finally instantiate this attribute and return
   return getAtt(name);
 }
@@ -737,8 +739,9 @@ string NcxxVar::getName() const{
 void NcxxVar::setChunking(ChunkMode chunkMode,
                           vector<size_t>& chunkSizes) const {
   size_t *chunkSizesPtr = chunkSizes.empty() ? 0 : &chunkSizes[0];
-  ncxxCheck(nc_def_var_chunking(groupId, myId, static_cast<int> (chunkMode), chunkSizesPtr),
-            __FILE__, __LINE__);
+  ncxxCheck(nc_def_var_chunking(groupId, myId, 
+                                static_cast<int> (chunkMode), chunkSizesPtr),
+            __FILE__, __LINE__, "var", getName(), "setChunking()");
 }
 
 
@@ -750,7 +753,7 @@ void NcxxVar::getChunkingParameters(ChunkMode& chunkMode,
   chunkSizes.resize(getDimCount());
   size_t *chunkSizesPtr = chunkSizes.empty() ? 0 : &chunkSizes[0];
   ncxxCheck(nc_inq_var_chunking(groupId, myId,  &chunkModeInt, chunkSizesPtr),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, "var", getName(), "setChunkingParameters()");
   chunkMode = static_cast<ChunkMode> (chunkModeInt);
 }
 
@@ -767,7 +770,7 @@ void NcxxVar::setFill(bool fillMode,
                         __FILE__, __LINE__);
 
   ncxxCheck(nc_def_var_fill(groupId, myId, static_cast<int> (!fillMode),fillValue),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, "var", getName(), "setFill()");
 }
 
 // Sets the fill parameters
@@ -783,7 +786,7 @@ void NcxxVar::getFillModeParameters(bool& fillMode,
                                     void* fillValue) const {
   int fillModeInt;
   ncxxCheck(nc_inq_var_fill(groupId, myId, &fillModeInt,fillValue),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, "var", getName(), "getFillModeParameters()");
   fillMode= static_cast<bool> (fillModeInt == 0);
 }
 
@@ -807,7 +810,7 @@ void NcxxVar::setCompression(bool enableShuffleFilter,
                                static_cast<int> (enableShuffleFilter),
                                static_cast<int> (enableDeflateFilter),
                                deflateLevel),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, "var", getName(), "setCompression()");
 }
 
 
@@ -822,7 +825,7 @@ void NcxxVar::getCompressionParameters(bool& shuffleFilterEnabled,
                                &enableShuffleFilterInt,
                                &enableDeflateFilterInt,
                                &deflateLevel),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, "var", getName(), "getCompressionParameters()");
   shuffleFilterEnabled =  static_cast<bool> (enableShuffleFilterInt);
   deflateFilterEnabled =  static_cast<bool> (enableDeflateFilterInt);
 }
@@ -838,7 +841,7 @@ void NcxxVar::getCompressionParameters(bool& shuffleFilterEnabled,
 void NcxxVar::setEndianness(EndianMode endianMode) const {
 
   ncxxCheck(nc_def_var_endian(groupId, myId, static_cast<int> (endianMode)),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, "var", getName(), "setEndianness(endianMode)");
 }
 
 
@@ -847,7 +850,7 @@ NcxxVar::EndianMode NcxxVar::getEndianness() const {
 
   int endianInt;
   ncxxCheck(nc_inq_var_endian(groupId, myId, &endianInt),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, "var", getName(), "setEndianness()");
   return static_cast<EndianMode> (endianInt);
 }
 
@@ -863,7 +866,7 @@ NcxxVar::EndianMode NcxxVar::getEndianness() const {
 // Sets the checksum parameters of a variable.
 void NcxxVar::setChecksum(ChecksumMode checksumMode) const {
   ncxxCheck(nc_def_var_fletcher32(groupId, myId, static_cast<int> (checksumMode)),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, "var", getName(), "setChecksum()");
 }
 
 
@@ -871,7 +874,7 @@ void NcxxVar::setChecksum(ChecksumMode checksumMode) const {
 NcxxVar::ChecksumMode NcxxVar::getChecksum() const {
   int checksumInt;
   ncxxCheck(nc_inq_var_fletcher32(groupId, myId, &checksumInt),
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, "var", getName(), "getChecksum()");
   return static_cast<ChecksumMode> (checksumInt);
 }
 
@@ -883,7 +886,7 @@ NcxxVar::ChecksumMode NcxxVar::getChecksum() const {
 void NcxxVar::rename( const string& newname ) const
 {
   ncxxCheck(nc_rename_var(groupId, myId, newname.c_str()), 
-            __FILE__, __LINE__);
+            __FILE__, __LINE__, "var rename", getName(), newname);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1006,11 +1009,11 @@ void NcxxVar::putVal(const char** dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(char**)");
   else
     ncxxCheck(nc_put_var_string(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(char**)");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1020,11 +1023,11 @@ void NcxxVar::putVal(const char* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(char*)");
   else
     ncxxCheck(nc_put_var_text(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(char*)");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1034,11 +1037,11 @@ void NcxxVar::putVal(const unsigned char* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(unsigned char*)");
   else
     ncxxCheck(nc_put_var_uchar(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(unsigned char*)");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1048,11 +1051,11 @@ void NcxxVar::putVal(const signed char* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(signed char*)");
   else
     ncxxCheck(nc_put_var_schar(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(signed char*)");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1062,11 +1065,11 @@ void NcxxVar::putVal(const short* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(short*)");
   else
     ncxxCheck(nc_put_var_short(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(short*)");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1076,11 +1079,11 @@ void NcxxVar::putVal(const int* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(int*)");
   else
     ncxxCheck(nc_put_var_int(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(int*)");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1090,11 +1093,11 @@ void NcxxVar::putVal(const long* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(long*)");
   else
     ncxxCheck(nc_put_var_long(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(long*)");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1104,11 +1107,11 @@ void NcxxVar::putVal(const float* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(float*)");
   else
     ncxxCheck(nc_put_var_float(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(float*)");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1118,11 +1121,11 @@ void NcxxVar::putVal(const double* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(double*)");
   else
     ncxxCheck(nc_put_var_double(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(double*)");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1132,11 +1135,11 @@ void NcxxVar::putVal(const unsigned short* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(unsigned short*)");
   else
     ncxxCheck(nc_put_var_ushort(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(unsigned short*)");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1146,11 +1149,11 @@ void NcxxVar::putVal(const unsigned int* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(unsigned int*)");
   else
     ncxxCheck(nc_put_var_uint(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(unsigned int*)");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1160,11 +1163,11 @@ void NcxxVar::putVal(const long long* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(long long*)");
   else
     ncxxCheck(nc_put_var_longlong(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(long long*)");
 }
 
 // Write the entire data into the netCDF variable.
@@ -1174,11 +1177,11 @@ void NcxxVar::putVal(const unsigned long long* dataValues) const {
   if (getType().isComplex())
     ncxxCheck(nc_put_var(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(unsigned long long*)");
   else
     ncxxCheck(nc_put_var_ulonglong(groupId, myId, dataValues),
               __FILE__, __LINE__,
-              getDesc(), "putVal()");
+              getDesc(), "putVal(unsigned long long*)");
 }
 
 // Write the entire data into the netCDF variable with no data conversion.
@@ -1186,7 +1189,7 @@ void NcxxVar::putVal(const void* dataValues) const {
   ncxxCheckDataMode(groupId);
   ncxxCheck(nc_put_var(groupId, myId, dataValues),
             __FILE__, __LINE__,
-            getDesc(), "putVal()");
+            getDesc(), "putVal(void*)");
 }
 
 
