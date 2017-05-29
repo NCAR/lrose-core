@@ -447,7 +447,7 @@ Radx::fl32 Cf2RadxFile::_checkMissingFloat(float val)
 
 const string Cf2RadxFile::CfConvention = "CF-1.6";
 const string Cf2RadxFile::BaseConvention = "CF-Radial";
-const string Cf2RadxFile::CurrentVersion = "CF-Radial-2.0";
+const string Cf2RadxFile::CurrentVersion = "2.0";
 
 const char* Cf2RadxFile::ADD_OFFSET = "add_offset";
 const char* Cf2RadxFile::AIRBORNE = "airborne";
@@ -517,6 +517,7 @@ const char* Cf2RadxFile::FOLLOW_MODE = "follow_mode";
 const char* Cf2RadxFile::FREQUENCY = "frequency";
 const char* Cf2RadxFile::GATE_SPACING = "gate_spacing";
 const char* Cf2RadxFile::GEOMETRY_CORRECTION = "geometry_correction";
+const char* Cf2RadxFile::GEOREFERENCE = "georeference";
 const char* Cf2RadxFile::GEOREFS_APPLIED = "georefs_applied";
 const char* Cf2RadxFile::GEOREF_CORRECTION = "georef_correction";
 const char* Cf2RadxFile::GEOREF_TIME = "georef_time";
@@ -565,6 +566,7 @@ const char* Cf2RadxFile::METERS_PER_SECOND = "meters per second";
 const char* Cf2RadxFile::METERS_TO_CENTER_OF_FIRST_GATE = "meters_to_center_of_first_gate";
 const char* Cf2RadxFile::MISSING_VALUE = "missing_value";
 const char* Cf2RadxFile::MOVING = "moving";
+const char* Cf2RadxFile::MONITORING = "monitoring";
 const char* Cf2RadxFile::MRAD = "mrad";
 const char* Cf2RadxFile::NOISE_HC = "noise_hc";
 const char* Cf2RadxFile::NOISE_HX = "noise_hx";
@@ -753,6 +755,8 @@ const char* Cf2RadxFile::CROSS_SPECTRUM_OF_CROSSPOLAR_VERTICAL = "cross_spectrum
 const char* Cf2RadxFile::DBZ_CORRECTION_LONG = "calibrated_radar_dbz_correction";
 const char* Cf2RadxFile::DRIFT_CORRECTION_LONG = "platform_drift_angle_correction";
 const char* Cf2RadxFile::DRIFT_LONG = "platform_drift_angle";
+const char* Cf2RadxFile::DRIVE_ANGLE_1_LONG = "antenna_drive_angle_1";
+const char* Cf2RadxFile::DRIVE_ANGLE_2_LONG = "antenna_drive_angle_2";
 const char* Cf2RadxFile::EASTWARD_VELOCITY_CORRECTION_LONG = "platform_eastward_velocity_correction";
 const char* Cf2RadxFile::EASTWARD_VELOCITY_LONG = "platform_eastward_velocity";
 const char* Cf2RadxFile::EASTWARD_WIND_LONG = "eastward_wind_speed";

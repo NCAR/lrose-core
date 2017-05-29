@@ -649,43 +649,57 @@ private:
 
   void _loadReadVolume();
 
-  // private methods for NcfRadial_write.cc
-  
+  // preparation
+
   void _checkGeorefsActiveOnWrite();
   void _checkCorrectionsActiveOnWrite();
+  void _setEstNoiseAvailFlags();
 
+  // writing top level
+  
   void _addGlobalAttributes();
   void _addRootDimensions();
   void _addRootScalarVariables();
 
+  // parameters
+
   void _addRadarParameters();
   void _addLidarParameters();
-
-  void _addFrequencyVariable(NcxxGroup &group);
+  
+  void _addFrequency(NcxxGroup &group);
   void _addGeorefCorrections();
   void _addProjection();
-  void _addSweepGroups();
 
-  void _addSweepGroupAttributes(const RadxSweep *sweep,
-                                NcxxGroup &sweepGroup);
+  // writing sweeps
 
-  void _addSweepGroupVariables(const RadxSweep *sweep,
-                               RadxVol &sweepVol,
-                               NcxxGroup &sweepGroup,
-                               NcxxDim &timeDim,
-                               NcxxDim &rangeDim);
+  void _addSweeps();
 
-  void _addSweepGroupGeorefs(const RadxSweep *sweep,
-                             RadxVol &sweepVol,
-                             NcxxGroup &sweepGroup,
-                             NcxxDim &timeDim);
+  void _addSweepAttributes(const RadxSweep *sweep,
+                           NcxxGroup &sweepGroup);
+  
+  void _addSweepVariables(const RadxSweep *sweep,
+                          RadxVol &sweepVol,
+                          NcxxGroup &sweepGroup,
+                          NcxxDim &timeDim,
+                          NcxxDim &rangeDim);
 
-  void _addSweepGroupFields(const RadxSweep *sweep,
-                            RadxVol &sweepVol,
-                            NcxxGroup &sweepGroup,
-                            NcxxDim &timeDim,
-                            NcxxDim &rangeDim);
-
+  void _addSweepScalars(const RadxSweep *sweep,
+                        NcxxGroup &sweepGroup);
+  
+  void _addSweepGeorefs(RadxVol &sweepVol,
+                        NcxxGroup &sweepGroup,
+                        NcxxDim &timeDim);
+  
+  void _addSweepMon(RadxVol &sweepVol,
+                    NcxxGroup &sweepGroup,
+                    NcxxDim &timeDim);
+  
+  void _addSweepFields(const RadxSweep *sweep,
+                       RadxVol &sweepVol,
+                       NcxxGroup &sweepGroup,
+                       NcxxDim &timeDim,
+                       NcxxDim &rangeDim);
+  
   NcxxVar _createFieldVar(const RadxField &field,
                           NcxxGroup &sweepGroup,
                           NcxxDim &timeDim,
@@ -702,8 +716,6 @@ private:
                   const string &standardName,
                   const string &units = "");
     
-  void _setEstNoiseAvailFlags();
-
   int _writeProjectionVariables();
 
   int _closeOnError(const string &caller);
@@ -793,6 +805,7 @@ private:
   const static char* FREQUENCY;
   const static char* GATE_SPACING;
   const static char* GEOMETRY_CORRECTION;
+  const static char* GEOREFERENCE;
   const static char* GEOREFS_APPLIED;
   const static char* GEOREF_CORRECTION;
   const static char* GEOREF_TIME;
@@ -840,6 +853,7 @@ private:
   const static char* METERS_PER_SECOND;
   const static char* METERS_TO_CENTER_OF_FIRST_GATE;
   const static char* MISSING_VALUE;
+  const static char* MONITORING;
   const static char* MOVING;
   const static char* MRAD;
   const static char* NOISE_HC;
@@ -1028,6 +1042,8 @@ private:
   const static char* DBZ_CORRECTION_LONG;
   const static char* DRIFT_CORRECTION_LONG;
   const static char* DRIFT_LONG;
+  const static char* DRIVE_ANGLE_1_LONG;
+  const static char* DRIVE_ANGLE_2_LONG;
   const static char* EASTWARD_VELOCITY_CORRECTION_LONG;
   const static char* EASTWARD_VELOCITY_LONG;
   const static char* EASTWARD_WIND_LONG;

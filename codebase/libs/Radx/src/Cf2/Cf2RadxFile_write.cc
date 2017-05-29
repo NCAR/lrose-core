@@ -424,12 +424,6 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
   }
 
   try {
-    _addFrequencyVariable(_file);
-  } catch (NcxxException e) {
-    return _closeOnError("_addFrequencyVariable");
-  }
-
-  try {
     _addRadarCalibration();
   } catch (NcxxException e) {
     return _closeOnError("_addRadarCalibration");
@@ -452,9 +446,9 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
   // add sweep groups
 
   try {
-    _addSweepGroups();
+    _addSweeps();
   } catch (NcxxException e) {
-    return _closeOnError("_addSweepGroups");
+    return _closeOnError("_addSweeps");
   }
 
   // close output file
@@ -524,6 +518,53 @@ void Cf2RadxFile::_checkCorrectionsActiveOnWrite()
 
 }
   
+/////////////////////////////////////////////////
+// set flags to indicate whether estimate noise
+// is available
+
+void Cf2RadxFile::_setEstNoiseAvailFlags()
+
+{
+
+  _estNoiseAvailHc = false;
+  _estNoiseAvailVc = false;
+  _estNoiseAvailHx = false;
+  _estNoiseAvailVx = false;
+
+  // estimated noise per channel
+
+  const vector<RadxRay *> &rays = _writeVol->getRays();
+
+  for (size_t ii = 0; ii < rays.size(); ii++) {
+    if (rays[ii]->getEstimatedNoiseDbmHc() > -9990) {
+      _estNoiseAvailHc = true;
+      break;
+    }
+  }
+
+  for (size_t ii = 0; ii < rays.size(); ii++) {
+    if (rays[ii]->getEstimatedNoiseDbmVc() > -9990) {
+      _estNoiseAvailVc = true;
+      break;
+    }
+  }
+
+  for (size_t ii = 0; ii < rays.size(); ii++) {
+    if (rays[ii]->getEstimatedNoiseDbmHx() > -9990) {
+      _estNoiseAvailHx = true;
+      break;
+    }
+  }
+
+  for (size_t ii = 0; ii < rays.size(); ii++) {
+    if (rays[ii]->getEstimatedNoiseDbmVx() > -9990) {
+      _estNoiseAvailVx = true;
+      break;
+    }
+  }
+
+}
+
 ///////////////////////////////////////////////////////////////
 // add global attributes
 // throws exception on error
@@ -537,7 +578,7 @@ void Cf2RadxFile::_addGlobalAttributes()
 
   bool haveError = false;
 
-  // Add required CF-1.5 global attributes
+  // Add required CF global attributes
   
   _conventions = CfConvention;
   _subconventions = BaseConvention;
@@ -840,8 +881,9 @@ void Cf2RadxFile::_addRootScalarVariables()
     NcxxVar var = _file.addVar(INSTRUMENT_TYPE, "", INSTRUMENT_TYPE_LONG,
                                ncxxString, "", true);
     var.putAtt(OPTIONS, Radx::instrumentTypeOptions());
-    var.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
-    string instrumentType = Radx::instrumentTypeToStr(_writeVol->getInstrumentType());
+    // var.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
+    string instrumentType =
+      Radx::instrumentTypeToStr(_writeVol->getInstrumentType());
     var.putStringScalar(instrumentType);
   }
     
@@ -887,14 +929,18 @@ void Cf2RadxFile::_addRadarParameters()
   }
 
   NcxxGroup rparamsGroup = _file.addGroup(RADAR_PARAMETERS);
-  
+
+  // frequency
+
+  _addFrequency(rparamsGroup);
+
   // radar antenna gain H
   
   {
     NcxxVar var =
       rparamsGroup.addVar(RADAR_ANTENNA_GAIN_H, "", RADAR_ANTENNA_GAIN_H_LONG,
                           ncxxFloat, DB, true);
-    var.putAtt(META_GROUP, RADAR_PARAMETERS);
+    // var.putAtt(META_GROUP, RADAR_PARAMETERS);
     var.putVal((float) _writeVol->getRadarAntennaGainDbH());
   }
   
@@ -904,8 +950,8 @@ void Cf2RadxFile::_addRadarParameters()
     NcxxVar var =
       rparamsGroup.addVar(RADAR_ANTENNA_GAIN_V, "", RADAR_ANTENNA_GAIN_V_LONG,
                           ncxxFloat, DB, true);
-    var.putAtt(META_GROUP, RADAR_PARAMETERS);
-      var.putVal((float) _writeVol->getRadarAntennaGainDbV());
+    // var.putAtt(META_GROUP, RADAR_PARAMETERS);
+    var.putVal((float) _writeVol->getRadarAntennaGainDbV());
   }
   
   // radar beam width H
@@ -914,7 +960,7 @@ void Cf2RadxFile::_addRadarParameters()
     NcxxVar var =
       rparamsGroup.addVar(RADAR_BEAM_WIDTH_H, "", RADAR_BEAM_WIDTH_H_LONG,
                           ncxxFloat, DEGREES, true);
-    var.putAtt(META_GROUP, RADAR_PARAMETERS);
+    // var.putAtt(META_GROUP, RADAR_PARAMETERS);
     var.putVal((float) _writeVol->getRadarBeamWidthDegH());
   }
   
@@ -924,7 +970,7 @@ void Cf2RadxFile::_addRadarParameters()
     NcxxVar var =
       rparamsGroup.addVar(RADAR_BEAM_WIDTH_V, "", RADAR_BEAM_WIDTH_V_LONG,
                           ncxxFloat, DEGREES, true);
-    var.putAtt(META_GROUP, RADAR_PARAMETERS);
+    // var.putAtt(META_GROUP, RADAR_PARAMETERS);
     var.putVal((float) _writeVol->getRadarBeamWidthDegV());
   }
   
@@ -934,7 +980,7 @@ void Cf2RadxFile::_addRadarParameters()
     NcxxVar var =
       rparamsGroup.addVar(RADAR_RX_BANDWIDTH, "", RADAR_RX_BANDWIDTH_LONG,
                           ncxxFloat, HZ, true);
-    var.putAtt(META_GROUP, RADAR_PARAMETERS);
+    // var.putAtt(META_GROUP, RADAR_PARAMETERS);
     float bandwidthHz = _writeVol->getRadarReceiverBandwidthMhz();
     if (bandwidthHz < 0) {
       bandwidthHz = Radx::missingFl32;
@@ -957,6 +1003,10 @@ void Cf2RadxFile::_addLidarParameters()
 
   NcxxGroup lparamsGroup = _file.addGroup(LIDAR_PARAMETERS);
 
+  // frequency
+
+  _addFrequency(lparamsGroup);
+
   // lidar constant
       
   {
@@ -964,7 +1014,7 @@ void Cf2RadxFile::_addLidarParameters()
       lparamsGroup.addVar(LIDAR_CONSTANT, "",
                           LIDAR_CONSTANT_LONG,
                           ncxxFloat, DB, true);
-    var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+    // var.putAtt(META_GROUP, LIDAR_PARAMETERS);
     var.putVal((float) _writeVol->getLidarConstant());
   }
   
@@ -973,7 +1023,7 @@ void Cf2RadxFile::_addLidarParameters()
       lparamsGroup.addVar(LIDAR_PULSE_ENERGY, "",
                           LIDAR_PULSE_ENERGY_LONG,
                           ncxxFloat, JOULES, true);
-    var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+    // var.putAtt(META_GROUP, LIDAR_PARAMETERS);
     var.putVal((float) _writeVol->getLidarPulseEnergyJ());
   }
   
@@ -982,7 +1032,7 @@ void Cf2RadxFile::_addLidarParameters()
       lparamsGroup.addVar(LIDAR_PEAK_POWER, "",
                           LIDAR_PEAK_POWER_LONG,
                           ncxxFloat, WATTS, true);
-    var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+    // var.putAtt(META_GROUP, LIDAR_PARAMETERS);
     var.putVal((float) _writeVol->getLidarPeakPowerW());
   }
   
@@ -991,7 +1041,7 @@ void Cf2RadxFile::_addLidarParameters()
       lparamsGroup.addVar(LIDAR_APERTURE_DIAMETER, "",
                           LIDAR_APERTURE_DIAMETER_LONG,
                           ncxxFloat, CM, true);
-    var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+    // var.putAtt(META_GROUP, LIDAR_PARAMETERS);
     var.putVal((float) _writeVol->getLidarApertureDiamCm());
   }
   
@@ -1000,16 +1050,16 @@ void Cf2RadxFile::_addLidarParameters()
       lparamsGroup.addVar(LIDAR_APERTURE_EFFICIENCY, "", 
                           LIDAR_APERTURE_EFFICIENCY_LONG,
                           ncxxFloat, PERCENT, true);
-    var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+    // var.putAtt(META_GROUP, LIDAR_PARAMETERS);
     var.putVal((float) _writeVol->getLidarApertureEfficiency());
-    }
+  }
 
   {
     NcxxVar var =
       lparamsGroup.addVar(LIDAR_FIELD_OF_VIEW, "",
                           LIDAR_FIELD_OF_VIEW_LONG,
                           ncxxFloat, MRAD, true);
-    var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+    // var.putAtt(META_GROUP, LIDAR_PARAMETERS);
     var.putVal((float) _writeVol->getLidarFieldOfViewMrad());
   }
   
@@ -1017,7 +1067,7 @@ void Cf2RadxFile::_addLidarParameters()
     NcxxVar var =
       lparamsGroup.addVar(LIDAR_BEAM_DIVERGENCE,
                           "", LIDAR_BEAM_DIVERGENCE_LONG, ncxxFloat, MRAD, true);
-    var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+    // var.putAtt(META_GROUP, LIDAR_PARAMETERS);
     var.putVal((float) _writeVol->getLidarBeamDivergenceMrad());
   }
   
@@ -1027,7 +1077,7 @@ void Cf2RadxFile::_addLidarParameters()
 // add one or more frequencies
 // throws exception on error
 
-void Cf2RadxFile::_addFrequencyVariable(NcxxGroup &group)
+void Cf2RadxFile::_addFrequency(NcxxGroup &group)
 {
   
   const vector<double> &frequency = _writeVol->getFrequencyHz();
@@ -1043,7 +1093,6 @@ void Cf2RadxFile::_addFrequencyVariable(NcxxGroup &group)
   NcxxVar var =
     group.addVar(FREQUENCY, "", FREQUENCY_LONG,
                  ncxxFloat, _frequencyDim, HZ, true);
-  // _frequencyVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
 
   RadxArray<float> fvals_;
   float *fvals = fvals_.alloc(nFreq);
@@ -1285,11 +1334,11 @@ void Cf2RadxFile::_addProjection()
 // add sweep groups
 // throws exception on error
 
-void Cf2RadxFile::_addSweepGroups()
+void Cf2RadxFile::_addSweeps()
 {
 
   if (_verbose) {
-    cerr << "Cf2RadxFile::_addSweepGroups()" << endl;
+    cerr << "Cf2RadxFile::_addSweeps()" << endl;
   }
   
   _sweepGroupNames.clear();
@@ -1323,7 +1372,7 @@ void Cf2RadxFile::_addSweepGroups()
       sweepGroup = _file.addGroup(name);
       _sweepGroups.push_back(sweepGroup);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
+      _addErrStr("ERROR - Cf2RadxFile::_addSweeps");
       _addErrStr("  Cannot add sweep group: ", name);
       _addErrStr("  Exception: ", e.what());
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
@@ -1340,9 +1389,9 @@ void Cf2RadxFile::_addSweepGroups()
     // add sweep group attributes
 
     try {
-      _addSweepGroupAttributes(sweeps[isweep], sweepGroup);
+      _addSweepAttributes(sweeps[isweep], sweepGroup);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
+      _addErrStr("ERROR - Cf2RadxFile::_addSweeps");
       _addErrStr("  Adding sweep group attributes");
       _addErrStr("  Exception: ", e.what());
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
@@ -1351,11 +1400,22 @@ void Cf2RadxFile::_addSweepGroups()
     // add sweep group variables
 
     try {
-      _addSweepGroupVariables(sweeps[isweep], sweepVol, sweepGroup, 
-                              timeDim, rangeDim);
+      _addSweepVariables(sweeps[isweep], sweepVol, 
+                         sweepGroup, timeDim, rangeDim);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
+      _addErrStr("ERROR - Cf2RadxFile::_addSweeps");
       _addErrStr("  Adding sweep group variables");
+      _addErrStr("  Exception: ", e.what());
+      throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    }
+
+    // add monitoring
+
+    try {
+      _addSweepMon(sweepVol, sweepGroup, timeDim);
+    } catch (NcxxException& e) {
+      _addErrStr("ERROR - Cf2RadxFile::_addSweeps");
+      _addErrStr("  Adding sweep group monitoring");
       _addErrStr("  Exception: ", e.what());
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     }
@@ -1364,9 +1424,9 @@ void Cf2RadxFile::_addSweepGroups()
 
     if (_georefsActive) {
       try {
-        _addSweepGroupGeorefs(sweeps[isweep], sweepVol, sweepGroup, timeDim);
+        _addSweepGeorefs(sweepVol, sweepGroup, timeDim);
       } catch (NcxxException& e) {
-        _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
+        _addErrStr("ERROR - Cf2RadxFile::_addSweeps");
         _addErrStr("  Adding sweep group georefs");
         _addErrStr("  Exception: ", e.what());
         throw(NcxxException(getErrStr(), __FILE__, __LINE__));
@@ -1376,9 +1436,10 @@ void Cf2RadxFile::_addSweepGroups()
     // add sweep group fields
 
     try {
-      _addSweepGroupFields(sweeps[isweep], sweepVol, sweepGroup, timeDim, rangeDim);
+      _addSweepFields(sweeps[isweep], sweepVol, 
+                      sweepGroup, timeDim, rangeDim);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
+      _addErrStr("ERROR - Cf2RadxFile::_addSweeps");
       _addErrStr("  Adding sweep group fields");
       _addErrStr("  Exception: ", e.what());
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
@@ -1398,7 +1459,7 @@ void Cf2RadxFile::_addSweepGroups()
     var.putVal(sweepNames);
     delete[] sweepNames;
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
+    _addErrStr("ERROR - Cf2RadxFile::_addSweeps");
     _addErrStr("  Cannot add root group var: ", SWEEP_GROUP_NAME);
     _addErrStr("  Exception: ", e.what());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
@@ -1417,7 +1478,7 @@ void Cf2RadxFile::_addSweepGroups()
     }
     var.putVal(fvals);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
+    _addErrStr("ERROR - Cf2RadxFile::_addSweeps");
     _addErrStr("  Cannot add root group var: ", SWEEP_FIXED_ANGLE);
     _addErrStr("  Exception: ", e.what());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
@@ -1429,11 +1490,15 @@ void Cf2RadxFile::_addSweepGroups()
 // add sweep group attributes
 // throws exception on error
 
-void Cf2RadxFile::_addSweepGroupAttributes(const RadxSweep *sweep,
-                                           NcxxGroup &sweepGroup)
+void Cf2RadxFile::_addSweepAttributes(const RadxSweep *sweep,
+                                      NcxxGroup &sweepGroup)
 
 {
-  
+
+  // for now, using variables intead of attributes for
+  // these values
+  return;
+
   sweepGroup.putAtt(SWEEP_NUMBER, ncxxInt, sweep->getSweepNumber());
 
   float fixedAngle = sweep->getFixedAngleDeg();
@@ -1474,110 +1539,17 @@ void Cf2RadxFile::_addSweepGroupAttributes(const RadxSweep *sweep,
 // add sweep group variables
 // throws exception on error
 
-void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
-                                          RadxVol &sweepVol,
-                                          NcxxGroup &sweepGroup,
-                                          NcxxDim &timeDim,
-                                          NcxxDim &rangeDim)
+void Cf2RadxFile::_addSweepVariables(const RadxSweep *sweep,
+                                     RadxVol &sweepVol,
+                                     NcxxGroup &sweepGroup,
+                                     NcxxDim &timeDim,
+                                     NcxxDim &rangeDim)
   
 {
+  
+  // first the scalars
 
-  // sweep number
-  {
-    NcxxVar var = 
-      sweepGroup.addVar(SWEEP_NUMBER, "", SWEEP_NUMBER_LONG,
-                        ncxxInt, "", true);
-    var.putVal((int) sweep->getSweepNumber());
-  }
-
-  // fixed angle
-  {
-    NcxxVar var = 
-      sweepGroup.addVar(FIXED_ANGLE, "", FIXED_ANGLE_LONG,
-                        ncxxFloat, "", true);
-    var.putAtt(UNITS, DEGREES);
-    var.putVal((float) sweep->getFixedAngleDeg());
-  }
-
-  // sweep mode
-  {
-    NcxxVar var = 
-      sweepGroup.addVar(SWEEP_MODE, "", SWEEP_MODE_LONG,
-                        ncxxString, "", true);
-    var.putAtt(OPTIONS, Radx::sweepModeOptions());
-    string modeStr = Radx::sweepModeToStr(sweep->getSweepMode());
-    var.putStringScalar(modeStr);
-  }
-
-  // polarization mode
-  {
-    NcxxVar var = 
-      sweepGroup.addVar(POLARIZATION_MODE, "", POLARIZATION_MODE_LONG,
-                        ncxxString, "", true);
-    var.putAtt(OPTIONS, Radx::polarizationModeOptions());
-    string modeStr = Radx::polarizationModeToStr(sweep->getPolarizationMode());
-    var.putStringScalar(modeStr);
-  }
-
-  // prt mode
-  {
-    NcxxVar var = 
-      sweepGroup.addVar(PRT_MODE, "", PRT_MODE_LONG,
-                        ncxxString, "", true);
-    var.putAtt(OPTIONS, Radx::prtModeOptions());
-    string modeStr = Radx::prtModeToStr(sweep->getPrtMode());
-    var.putStringScalar(modeStr);
-  }
-
-  // follow mode
-  {
-    NcxxVar var = 
-      sweepGroup.addVar(FOLLOW_MODE, "", FOLLOW_MODE_LONG,
-                        ncxxString, "", true);
-    var.putAtt(OPTIONS, Radx::followModeOptions());
-    string modeStr = Radx::followModeToStr(sweep->getFollowMode());
-    var.putStringScalar(modeStr);
-  }
-
-  // target scan rate
-  if ( sweep->getTargetScanRateDegPerSec() >= 0) {
-    NcxxVar var = 
-      sweepGroup.addVar(TARGET_SCAN_RATE, "", TARGET_SCAN_RATE_LONG,
-                        ncxxFloat, "", true);
-    var.putAtt(UNITS, DEGREES_PER_SECOND);
-    var.putVal((float) sweep->getTargetScanRateDegPerSec());
-  }
-
-  // are rays indexed?
-  {
-    NcxxVar var = 
-      sweepGroup.addVar(RAYS_ARE_INDEXED, "", RAYS_ARE_INDEXED_LONG,
-                        ncxxString, "", true);
-    var.putAtt(OPTIONS, "true, false");
-    if (sweep->getRaysAreIndexed()) {
-      var.putStringScalar("true");
-    } else {
-      var.putStringScalar("false");
-    }
-  }
-
-  // ray angle resolution
-  if (sweep->getRaysAreIndexed()) {
-    NcxxVar var = 
-      sweepGroup.addVar(RAY_ANGLE_RES, "", RAY_ANGLE_RES_LONG,
-                        ncxxFloat, "", true);
-    var.putAtt(UNITS, DEGREES);
-    var.putVal((float) sweep->getAngleResDeg());
-  }
-
-  // intermediate frequency
-  if (sweep->getIntermedFreqHz() > 0) {
-    NcxxVar var = 
-      sweepGroup.addVar(INTERMED_FREQ_HZ, "", INTERMED_FREQ_HZ_LONG,
-                        ncxxFloat, "", true);
-    var.putAtt(UNITS, HZ);
-    var.putVal((float) sweep->getIntermedFreqHz());
-  }
+  _addSweepScalars(sweep, sweepGroup);
 
   // get rays
   
@@ -1692,7 +1664,7 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
   NcxxVar pulseWidthVar = 
     sweepGroup.addVar(PULSE_WIDTH, "", PULSE_WIDTH_LONG,
                       ncxxFloat, timeDim, SECONDS, true);
-  pulseWidthVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
+  // pulseWidthVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t iray = 0; iray < nRays; iray++) {
     if (rays[iray]->getPulseWidthUsec() > 0) {
       fvals[iray] = rays[iray]->getPulseWidthUsec() * 1.0e-6;
@@ -1707,7 +1679,7 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
   NcxxVar prtVar = 
     sweepGroup.addVar(PRT, "", PRT_LONG,
                       ncxxFloat, timeDim, SECONDS, true);
-  prtVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
+  // prtVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t iray = 0; iray < nRays; iray++) {
     fvals[iray] = rays[iray]->getPrtSec();
   }
@@ -1718,7 +1690,7 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
   NcxxVar prtRatioVar = 
     sweepGroup.addVar(PRT_RATIO, "", PRT_RATIO_LONG,
                       ncxxFloat, timeDim, SECONDS, true);
-  prtRatioVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
+  // prtRatioVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t iray = 0; iray < nRays; iray++) {
     fvals[iray] = rays[iray]->getPrtRatio();
   }
@@ -1729,7 +1701,7 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
   NcxxVar nyquistVar = 
     sweepGroup.addVar(NYQUIST_VELOCITY, "", NYQUIST_VELOCITY_LONG, 
                       ncxxFloat, timeDim, METERS_PER_SECOND, true);
-  nyquistVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
+  // nyquistVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t iray = 0; iray < nRays; iray++) {
     fvals[iray] = rays[iray]->getNyquistMps();
   }
@@ -1740,7 +1712,7 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
   NcxxVar unambigRangeVar = 
     sweepGroup.addVar(UNAMBIGUOUS_RANGE, "", UNAMBIGUOUS_RANGE_LONG,
                       ncxxFloat, timeDim, METERS, true);
-  unambigRangeVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
+  // unambigRangeVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t iray = 0; iray < nRays; iray++) {
     if (rays[iray]->getUnambigRangeKm() > 0) {
       fvals[iray] = rays[iray]->getUnambigRangeKm() * 1000.0;
@@ -1785,7 +1757,7 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
   NcxxVar nSamplesVar = 
     sweepGroup.addVar(N_SAMPLES, "", N_SAMPLES_LONG,
                       ncxxInt, timeDim, "", true);
-  nSamplesVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
+  // nSamplesVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t iray = 0; iray < nRays; iray++) {
     ivals[iray] = rays[iray]->getNSamples();
   }
@@ -1797,7 +1769,7 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
     NcxxVar calIndexVar = 
       sweepGroup.addVar(R_CALIB_INDEX, "", R_CALIB_INDEX_LONG,
                         ncxxInt, timeDim, "", true);
-    // calIndexVar.putAtt(META_GROUP, RADAR_CALIBRATION);
+    // // calIndexVar.putAtt(META_GROUP, RADAR_CALIBRATION);
     calIndexVar.putAtt
       (COMMENT, "This is the index for the calibration which applies to this ray");
     for (size_t iray = 0; iray < nRays; iray++) {
@@ -1806,110 +1778,128 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
     calIndexVar.putVal(ivals);
   }
   
-  // transmit power in H and V
-  
-  NcxxVar xmitPowerHVar =
-    sweepGroup.addVar(RADAR_MEASURED_TRANSMIT_POWER_H, "", 
-                      RADAR_MEASURED_TRANSMIT_POWER_H_LONG,
-                      ncxxFloat, timeDim, DBM, true);
-  xmitPowerHVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-  for (size_t iray = 0; iray < nRays; iray++) {
-    fvals[iray] = _checkMissingFloat(rays[iray]->getMeasXmitPowerDbmH());
-  }
-  xmitPowerHVar.putVal(fvals);
-  
-  NcxxVar xmitPowerVVar =
-    sweepGroup.addVar(RADAR_MEASURED_TRANSMIT_POWER_V, "", 
-                      RADAR_MEASURED_TRANSMIT_POWER_V_LONG,
-                      ncxxFloat, timeDim, DBM, true);
-  xmitPowerVVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-  for (size_t iray = 0; iray < nRays; iray++) {
-    fvals[iray] = _checkMissingFloat(rays[iray]->getMeasXmitPowerDbmV());
-  }
-  xmitPowerVVar.putVal(fvals);
-  for (size_t iray = 0; iray < nRays; iray++) {
-    fvals[iray] = _checkMissingFloat(rays[iray]->getMeasXmitPowerDbmV());
-  }
-  xmitPowerVVar.putVal(fvals);
-  
-  // scan rate
-  
-  NcxxVar scanRateVar = 
-    sweepGroup.addVar(SCAN_RATE, "", SCAN_RATE_LONG, 
-                      ncxxFloat, timeDim, DEGREES_PER_SECOND, true);
-  scanRateVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
-  for (size_t iray = 0; iray < nRays; iray++) {
-    fvals[iray] = rays[iray]->getTrueScanRateDegPerSec();
-  }
-  scanRateVar.putVal(fvals);
-  
-  // estimated noise per channel
-  
-  _setEstNoiseAvailFlags();
+}
 
-  if (_estNoiseAvailHc) {
-    NcxxVar estNoiseDbmHcVar = 
-      sweepGroup.addVar(RADAR_ESTIMATED_NOISE_DBM_HC, "", 
-                        RADAR_ESTIMATED_NOISE_DBM_HC_LONG,
-                        ncxxFloat, timeDim, DBM, true);
-    estNoiseDbmHcVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-    for (size_t iray = 0; iray < nRays; iray++) {
-      fvals[iray] = rays[iray]->getEstimatedNoiseDbmHc();
-    }
-    estNoiseDbmHcVar.putVal(fvals);
-  }
+//////////////////////////////////////////////
+// add sweep group scalars at the top level
+// throws exception on error
+
+void Cf2RadxFile::_addSweepScalars(const RadxSweep *sweep,
+                                   NcxxGroup &sweepGroup)
   
-  if (_estNoiseAvailVc) {
-    NcxxVar estNoiseDbmVcVar = 
-      sweepGroup.addVar(RADAR_ESTIMATED_NOISE_DBM_VC, "", 
-                        RADAR_ESTIMATED_NOISE_DBM_VC_LONG,
-                        ncxxFloat, timeDim, DBM, true);
-    estNoiseDbmVcVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-    for (size_t iray = 0; iray < nRays; iray++) {
-      fvals[iray] = rays[iray]->getEstimatedNoiseDbmVc();
-    }
-    estNoiseDbmVcVar.putVal(fvals);
+{
+  
+  // sweep number
+  {
+    NcxxVar var = 
+      sweepGroup.addVar(SWEEP_NUMBER, "", SWEEP_NUMBER_LONG,
+                        ncxxInt, "", true);
+    var.putVal((int) sweep->getSweepNumber());
   }
 
-  if (_estNoiseAvailHx) {
-    NcxxVar estNoiseDbmHxVar = 
-      sweepGroup.addVar(RADAR_ESTIMATED_NOISE_DBM_HX, "", 
-                        RADAR_ESTIMATED_NOISE_DBM_HX_LONG,
-                        ncxxFloat, timeDim, DBM, true);
-    estNoiseDbmHxVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-    for (size_t iray = 0; iray < nRays; iray++) {
-      fvals[iray] = rays[iray]->getEstimatedNoiseDbmHx();
-    }
-    estNoiseDbmHxVar.putVal(fvals);
+  // fixed angle
+  {
+    NcxxVar var = 
+      sweepGroup.addVar(FIXED_ANGLE, "", FIXED_ANGLE_LONG,
+                        ncxxFloat, "", true);
+    var.putAtt(UNITS, DEGREES);
+    var.putVal((float) sweep->getFixedAngleDeg());
   }
-  
-  if (_estNoiseAvailVx) {
-    NcxxVar estNoiseDbmVxVar = 
-      sweepGroup.addVar(RADAR_ESTIMATED_NOISE_DBM_VX, "", 
-                        RADAR_ESTIMATED_NOISE_DBM_VX_LONG,
-                        ncxxFloat, timeDim, DBM, true);
-    estNoiseDbmVxVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-    for (size_t iray = 0; iray < nRays; iray++) {
-      fvals[iray] = rays[iray]->getEstimatedNoiseDbmVx();
-    }
-    estNoiseDbmVxVar.putVal(fvals);
+
+  // sweep mode
+  {
+    NcxxVar var = 
+      sweepGroup.addVar(SWEEP_MODE, "", SWEEP_MODE_LONG,
+                        ncxxString, "", true);
+    var.putAtt(OPTIONS, Radx::sweepModeOptions());
+    string modeStr = Radx::sweepModeToStr(sweep->getSweepMode());
+    var.putStringScalar(modeStr);
   }
-  
+
+  // polarization mode
+  {
+    NcxxVar var = 
+      sweepGroup.addVar(POLARIZATION_MODE, "", POLARIZATION_MODE_LONG,
+                        ncxxString, "", true);
+    var.putAtt(OPTIONS, Radx::polarizationModeOptions());
+    string modeStr = Radx::polarizationModeToStr(sweep->getPolarizationMode());
+    var.putStringScalar(modeStr);
+  }
+
+  // prt mode
+  {
+    NcxxVar var = 
+      sweepGroup.addVar(PRT_MODE, "", PRT_MODE_LONG,
+                        ncxxString, "", true);
+    var.putAtt(OPTIONS, Radx::prtModeOptions());
+    string modeStr = Radx::prtModeToStr(sweep->getPrtMode());
+    var.putStringScalar(modeStr);
+  }
+
+  // follow mode
+  {
+    NcxxVar var = 
+      sweepGroup.addVar(FOLLOW_MODE, "", FOLLOW_MODE_LONG,
+                        ncxxString, "", true);
+    var.putAtt(OPTIONS, Radx::followModeOptions());
+    string modeStr = Radx::followModeToStr(sweep->getFollowMode());
+    var.putStringScalar(modeStr);
+  }
+
+  // target scan rate
+  if ( sweep->getTargetScanRateDegPerSec() >= 0) {
+    NcxxVar var = 
+      sweepGroup.addVar(TARGET_SCAN_RATE, "", TARGET_SCAN_RATE_LONG,
+                        ncxxFloat, "", true);
+    var.putAtt(UNITS, DEGREES_PER_SECOND);
+    var.putVal((float) sweep->getTargetScanRateDegPerSec());
+  }
+
+  // are rays indexed?
+  {
+    NcxxVar var = 
+      sweepGroup.addVar(RAYS_ARE_INDEXED, "", RAYS_ARE_INDEXED_LONG,
+                        ncxxString, "", true);
+    var.putAtt(OPTIONS, "true, false");
+    if (sweep->getRaysAreIndexed()) {
+      var.putStringScalar("true");
+    } else {
+      var.putStringScalar("false");
+    }
+  }
+
+  // ray angle resolution
+  if (sweep->getRaysAreIndexed()) {
+    NcxxVar var = 
+      sweepGroup.addVar(RAY_ANGLE_RES, "", RAY_ANGLE_RES_LONG,
+                        ncxxFloat, "", true);
+    var.putAtt(UNITS, DEGREES);
+    var.putVal((float) sweep->getAngleResDeg());
+  }
+
+  // intermediate frequency
+  if (sweep->getIntermedFreqHz() > 0) {
+    NcxxVar var = 
+      sweepGroup.addVar(INTERMED_FREQ_HZ, "", INTERMED_FREQ_HZ_LONG,
+                        ncxxFloat, "", true);
+    var.putAtt(UNITS, HZ);
+    var.putVal((float) sweep->getIntermedFreqHz());
+  }
+
 }
 
 //////////////////////////////////////////////
 // add sweep group georefs
 // throws exception on error
 
-void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
-                                        RadxVol &sweepVol,
-                                        NcxxGroup &sweepGroup,
-                                        NcxxDim &timeDim)
+void Cf2RadxFile::_addSweepGeorefs(RadxVol &sweepVol,
+                                   NcxxGroup &sweepGroup,
+                                   NcxxDim &timeDim)
   
 {
 
   if (_verbose) {
-    cerr << "Cf2RadxFile::_addSweepGroupGeorefs()" << endl;
+    cerr << "Cf2RadxFile::_addSweepGeorefs()" << endl;
   }
   
   // get rays
@@ -1925,13 +1915,17 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
   RadxArray<float> fvals_;
   float *fvals = fvals_.alloc(nRays);
 
+  // create georeference subgroup
+
+  NcxxGroup georefGroup = sweepGroup.addGroup(GEOREFERENCE);
+
   try {
     
     // always add geo time
     
     NcxxVar georefTimeVar = 
-      sweepGroup.addVar(GEOREF_TIME, "", GEOREF_TIME_LONG,
-                        ncxxDouble, timeDim, SECONDS, true);
+      georefGroup.addVar(GEOREF_TIME, "", GEOREF_TIME_LONG,
+                         ncxxDouble, timeDim, SECONDS, true);
     RadxTime volStartSecs(_writeVol->getStartTimeSecs());
     for (size_t iray = 0; iray < rays.size(); iray++) {
       const RadxGeoref *geo = rays[iray]->getGeoreference();
@@ -1950,8 +1944,8 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
     // latitude
 
     NcxxVar latitudeVar = 
-      sweepGroup.addVar(LATITUDE, "", LATITUDE_LONG,
-                        ncxxDouble, timeDim, DEGREES_NORTH, true);
+      georefGroup.addVar(LATITUDE, "", LATITUDE_LONG,
+                         ncxxDouble, timeDim, DEGREES_NORTH, true);
     for (size_t iray = 0; iray < rays.size(); iray++) {
       const RadxGeoref *geo = rays[iray]->getGeoreference();
       if (geo) {
@@ -1965,8 +1959,8 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
     // longitude
 
     NcxxVar longitudeVar = 
-      sweepGroup.addVar(LONGITUDE, "", LONGITUDE_LONG,
-                        ncxxDouble, timeDim, DEGREES_EAST, true);
+      georefGroup.addVar(LONGITUDE, "", LONGITUDE_LONG,
+                         ncxxDouble, timeDim, DEGREES_EAST, true);
     for (size_t iray = 0; iray < rays.size(); iray++) {
       const RadxGeoref *geo = rays[iray]->getGeoreference();
       if (geo) {
@@ -1980,8 +1974,8 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
     // altitude msl
     
     NcxxVar altitudeVar = 
-      sweepGroup.addVar(ALTITUDE, "", ALTITUDE_LONG,
-                        ncxxDouble, timeDim, METERS, true);
+      georefGroup.addVar(ALTITUDE, "", ALTITUDE_LONG,
+                         ncxxDouble, timeDim, METERS, true);
     altitudeVar.putAtt(POSITIVE, UP);
     for (size_t iray = 0; iray < rays.size(); iray++) {
       const RadxGeoref *geo = rays[iray]->getGeoreference();
@@ -2001,8 +1995,8 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
     // altitude agl
 
     NcxxVar altitudeAglVar = 
-      sweepGroup.addVar(ALTITUDE_AGL, "", ALTITUDE_AGL_LONG,
-                        ncxxDouble, timeDim, METERS, true);
+      georefGroup.addVar(ALTITUDE_AGL, "", ALTITUDE_AGL_LONG,
+                         ncxxDouble, timeDim, METERS, true);
     altitudeAglVar.putAtt(POSITIVE, UP);
     for (size_t iray = 0; iray < rays.size(); iray++) {
       const RadxGeoref *geo = rays[iray]->getGeoreference();
@@ -2025,8 +2019,8 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getHeading() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(HEADING, "", HEADING_LONG,
-                          ncxxFloat, timeDim, DEGREES, true);
+        georefGroup.addVar(HEADING, "", HEADING_LONG,
+                           ncxxFloat, timeDim, DEGREES, true);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2042,8 +2036,8 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getTrack() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(TRACK, "", TRACK_LONG, 
-                          ncxxFloat, timeDim, DEGREES, true);
+        georefGroup.addVar(TRACK, "", TRACK_LONG, 
+                           ncxxFloat, timeDim, DEGREES, true);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2059,8 +2053,8 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getRoll() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(ROLL, "", ROLL_LONG, 
-                          ncxxFloat, timeDim, DEGREES, true);
+        georefGroup.addVar(ROLL, "", ROLL_LONG, 
+                           ncxxFloat, timeDim, DEGREES, true);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2076,8 +2070,8 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getPitch() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(PITCH, "", PITCH_LONG, 
-                          ncxxFloat, timeDim, DEGREES, true);
+        georefGroup.addVar(PITCH, "", PITCH_LONG, 
+                           ncxxFloat, timeDim, DEGREES, true);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2093,8 +2087,8 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getDrift() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(DRIFT, "", DRIFT_LONG, ncxxFloat,
-                          timeDim, DEGREES, true);
+        georefGroup.addVar(DRIFT, "", DRIFT_LONG, ncxxFloat,
+                           timeDim, DEGREES, true);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2110,8 +2104,8 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getRotation() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(ROTATION, "", ROTATION_LONG,
-                          ncxxFloat, timeDim, DEGREES, true);
+        georefGroup.addVar(ROTATION, "", ROTATION_LONG,
+                           ncxxFloat, timeDim, DEGREES, true);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2127,8 +2121,8 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getTilt() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(TILT, "", TILT_LONG,
-                          ncxxFloat, timeDim, DEGREES, true);
+        georefGroup.addVar(TILT, "", TILT_LONG,
+                           ncxxFloat, timeDim, DEGREES, true);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2144,9 +2138,9 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getEwVelocity() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(EASTWARD_VELOCITY, "", EASTWARD_VELOCITY_LONG,
-                          ncxxFloat, timeDim, METERS_PER_SECOND, true);
-      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+        georefGroup.addVar(EASTWARD_VELOCITY, "", EASTWARD_VELOCITY_LONG,
+                           ncxxFloat, timeDim, METERS_PER_SECOND, true);
+      // var.putAtt(META_GROUP, PLATFORM_VELOCITY);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2162,9 +2156,9 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getNsVelocity() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(NORTHWARD_VELOCITY, "", NORTHWARD_VELOCITY_LONG,
-                          ncxxFloat, timeDim, METERS_PER_SECOND, true);
-      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+        georefGroup.addVar(NORTHWARD_VELOCITY, "", NORTHWARD_VELOCITY_LONG,
+                           ncxxFloat, timeDim, METERS_PER_SECOND, true);
+      // var.putAtt(META_GROUP, PLATFORM_VELOCITY);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2180,9 +2174,9 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getVertVelocity() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(VERTICAL_VELOCITY, "", VERTICAL_VELOCITY_LONG,
-                          ncxxFloat, timeDim, METERS_PER_SECOND, true);
-      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+        georefGroup.addVar(VERTICAL_VELOCITY, "", VERTICAL_VELOCITY_LONG,
+                           ncxxFloat, timeDim, METERS_PER_SECOND, true);
+      // var.putAtt(META_GROUP, PLATFORM_VELOCITY);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2198,9 +2192,9 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getEwWind() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(EASTWARD_WIND, "", EASTWARD_WIND_LONG,
-                          ncxxFloat, timeDim, METERS_PER_SECOND, true);
-      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+        georefGroup.addVar(EASTWARD_WIND, "", EASTWARD_WIND_LONG,
+                           ncxxFloat, timeDim, METERS_PER_SECOND, true);
+      // var.putAtt(META_GROUP, PLATFORM_VELOCITY);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2216,9 +2210,9 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getNsWind() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(NORTHWARD_WIND, "", NORTHWARD_WIND_LONG,
-                          ncxxFloat, timeDim, METERS_PER_SECOND, true);
-      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+        georefGroup.addVar(NORTHWARD_WIND, "", NORTHWARD_WIND_LONG,
+                           ncxxFloat, timeDim, METERS_PER_SECOND, true);
+      // var.putAtt(META_GROUP, PLATFORM_VELOCITY);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2234,9 +2228,9 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getVertWind() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(VERTICAL_WIND, "", VERTICAL_WIND_LONG,
-                          ncxxFloat, timeDim, METERS_PER_SECOND, true);
-      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+        georefGroup.addVar(VERTICAL_WIND, "", VERTICAL_WIND_LONG,
+                           ncxxFloat, timeDim, METERS_PER_SECOND, true);
+      // var.putAtt(META_GROUP, PLATFORM_VELOCITY);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2252,9 +2246,9 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getHeadingRate() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(HEADING_CHANGE_RATE, "", HEADING_CHANGE_RATE_LONG,
-                          ncxxFloat, timeDim, DEGREES_PER_SECOND, true);
-      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+        georefGroup.addVar(HEADING_CHANGE_RATE, "", HEADING_CHANGE_RATE_LONG,
+                           ncxxFloat, timeDim, DEGREES_PER_SECOND, true);
+      // var.putAtt(META_GROUP, PLATFORM_VELOCITY);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2270,9 +2264,9 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getPitchRate() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(PITCH_CHANGE_RATE, "", PITCH_CHANGE_RATE_LONG,
-                          ncxxFloat, timeDim, DEGREES_PER_SECOND, true);
-      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+        georefGroup.addVar(PITCH_CHANGE_RATE, "", PITCH_CHANGE_RATE_LONG,
+                           ncxxFloat, timeDim, DEGREES_PER_SECOND, true);
+      // var.putAtt(META_GROUP, PLATFORM_VELOCITY);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2288,9 +2282,9 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getRollRate() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(ROLL_CHANGE_RATE, "", ROLL_CHANGE_RATE_LONG,
-                          ncxxFloat, timeDim, DEGREES_PER_SECOND, true);
-      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+        georefGroup.addVar(ROLL_CHANGE_RATE, "", ROLL_CHANGE_RATE_LONG,
+                           ncxxFloat, timeDim, DEGREES_PER_SECOND, true);
+      // var.putAtt(META_GROUP, PLATFORM_VELOCITY);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2306,8 +2300,8 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getDriveAngle1() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(DRIVE_ANGLE_1, "", "antenna_drive_angle_1",
-                          ncxxFloat, timeDim, DEGREES, true);
+        georefGroup.addVar(DRIVE_ANGLE_1, "", DRIVE_ANGLE_1_LONG,
+                           ncxxFloat, timeDim, DEGREES, true);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2323,8 +2317,8 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 
     if (_geoCount.getDriveAngle2() > 0) {
       NcxxVar var = 
-        sweepGroup.addVar(DRIVE_ANGLE_2, "", "antenna_drive_angle_2",
-                          ncxxFloat, timeDim, DEGREES, true);
+        georefGroup.addVar(DRIVE_ANGLE_2, "", DRIVE_ANGLE_2_LONG,
+                           ncxxFloat, timeDim, DEGREES, true);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
         if (geo) {
@@ -2338,7 +2332,7 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
   
   } catch (NcxxException& e) {
     
-    _addErrStr("ERROR - Cf2RadxFile::_addSweepGroupGeoref");
+    _addErrStr("ERROR - Cf2RadxFile::_addSweepGeorefs");
     _addErrStr("  Exception: ", e.what());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     
@@ -2347,19 +2341,138 @@ void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
 }
 
 //////////////////////////////////////////////
+// add sweep group monitoring
+// throws exception on error
+
+void Cf2RadxFile::_addSweepMon(RadxVol &sweepVol,
+                               NcxxGroup &sweepGroup,
+                               NcxxDim &timeDim)
+  
+{
+
+  if (_verbose) {
+    cerr << "Cf2RadxFile::_addSweepMonitoring()" << endl;
+  }
+  
+  // get rays
+  
+  const vector<RadxRay *> &rays = sweepVol.getRays();
+  size_t nRays = sweepVol.getNRays(); 
+  
+  // alloc utility arrays
+
+  RadxArray<float> fvals_;
+  float *fvals = fvals_.alloc(nRays);
+
+  // create monitoring subgroup
+
+  NcxxGroup monGroup = sweepGroup.addGroup(MONITORING);
+
+  // transmit power in H and V
+  
+  NcxxVar xmitPowerHVar =
+    monGroup.addVar(RADAR_MEASURED_TRANSMIT_POWER_H, "", 
+                    RADAR_MEASURED_TRANSMIT_POWER_H_LONG,
+                    ncxxFloat, timeDim, DBM, true);
+  // xmitPowerHVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+  for (size_t iray = 0; iray < nRays; iray++) {
+    fvals[iray] = _checkMissingFloat(rays[iray]->getMeasXmitPowerDbmH());
+  }
+  xmitPowerHVar.putVal(fvals);
+  
+  NcxxVar xmitPowerVVar =
+    monGroup.addVar(RADAR_MEASURED_TRANSMIT_POWER_V, "", 
+                    RADAR_MEASURED_TRANSMIT_POWER_V_LONG,
+                    ncxxFloat, timeDim, DBM, true);
+  // xmitPowerVVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+  for (size_t iray = 0; iray < nRays; iray++) {
+    fvals[iray] = _checkMissingFloat(rays[iray]->getMeasXmitPowerDbmV());
+  }
+  xmitPowerVVar.putVal(fvals);
+  for (size_t iray = 0; iray < nRays; iray++) {
+    fvals[iray] = _checkMissingFloat(rays[iray]->getMeasXmitPowerDbmV());
+  }
+  xmitPowerVVar.putVal(fvals);
+  
+  // scan rate
+  
+  NcxxVar scanRateVar = 
+    monGroup.addVar(SCAN_RATE, "", SCAN_RATE_LONG, 
+                    ncxxFloat, timeDim, DEGREES_PER_SECOND, true);
+  // scanRateVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
+  for (size_t iray = 0; iray < nRays; iray++) {
+    fvals[iray] = rays[iray]->getTrueScanRateDegPerSec();
+  }
+  scanRateVar.putVal(fvals);
+  
+  // estimated noise per channel
+  
+  _setEstNoiseAvailFlags();
+
+  if (_estNoiseAvailHc) {
+    NcxxVar estNoiseDbmHcVar = 
+      monGroup.addVar(RADAR_ESTIMATED_NOISE_DBM_HC, "", 
+                      RADAR_ESTIMATED_NOISE_DBM_HC_LONG,
+                      ncxxFloat, timeDim, DBM, true);
+    // estNoiseDbmHcVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+    for (size_t iray = 0; iray < nRays; iray++) {
+      fvals[iray] = rays[iray]->getEstimatedNoiseDbmHc();
+    }
+    estNoiseDbmHcVar.putVal(fvals);
+  }
+  
+  if (_estNoiseAvailVc) {
+    NcxxVar estNoiseDbmVcVar = 
+      monGroup.addVar(RADAR_ESTIMATED_NOISE_DBM_VC, "", 
+                      RADAR_ESTIMATED_NOISE_DBM_VC_LONG,
+                      ncxxFloat, timeDim, DBM, true);
+    // estNoiseDbmVcVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+    for (size_t iray = 0; iray < nRays; iray++) {
+      fvals[iray] = rays[iray]->getEstimatedNoiseDbmVc();
+    }
+    estNoiseDbmVcVar.putVal(fvals);
+  }
+
+  if (_estNoiseAvailHx) {
+    NcxxVar estNoiseDbmHxVar = 
+      monGroup.addVar(RADAR_ESTIMATED_NOISE_DBM_HX, "", 
+                      RADAR_ESTIMATED_NOISE_DBM_HX_LONG,
+                      ncxxFloat, timeDim, DBM, true);
+    // estNoiseDbmHxVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+    for (size_t iray = 0; iray < nRays; iray++) {
+      fvals[iray] = rays[iray]->getEstimatedNoiseDbmHx();
+    }
+    estNoiseDbmHxVar.putVal(fvals);
+  }
+  
+  if (_estNoiseAvailVx) {
+    NcxxVar estNoiseDbmVxVar = 
+      monGroup.addVar(RADAR_ESTIMATED_NOISE_DBM_VX, "", 
+                      RADAR_ESTIMATED_NOISE_DBM_VX_LONG,
+                      ncxxFloat, timeDim, DBM, true);
+    // estNoiseDbmVxVar.putAtt(META_GROUP, RADAR_PARAMETERS);
+    for (size_t iray = 0; iray < nRays; iray++) {
+      fvals[iray] = rays[iray]->getEstimatedNoiseDbmVx();
+    }
+    estNoiseDbmVxVar.putVal(fvals);
+  }
+  
+}
+
+//////////////////////////////////////////////
 // add sweep group fields
 // throws exception on error
 
-void Cf2RadxFile::_addSweepGroupFields(const RadxSweep *sweep,
-                                       RadxVol &sweepVol,
-                                       NcxxGroup &sweepGroup,
-                                       NcxxDim &timeDim,
-                                       NcxxDim &rangeDim)
+void Cf2RadxFile::_addSweepFields(const RadxSweep *sweep,
+                                  RadxVol &sweepVol,
+                                  NcxxGroup &sweepGroup,
+                                  NcxxDim &timeDim,
+                                  NcxxDim &rangeDim)
   
 {
   
   if (_verbose) {
-    cerr << "Cf2RadxFile::_addSweepGroupFields()" << endl;
+    cerr << "Cf2RadxFile::_addSweepFields()" << endl;
   }
 
   // loop through the list of unique fields names in this volume
@@ -2392,7 +2505,7 @@ void Cf2RadxFile::_addSweepGroupFields(const RadxSweep *sweep,
       // add field variable
       var = _createFieldVar(*copy, sweepGroup, timeDim, rangeDim);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - Cf2RadxFile::_addSweepGroupFields");
+      _addErrStr("ERROR - Cf2RadxFile::_addSweepFields");
       _addErrStr("  Cannot add field: ", name);
       delete copy;
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
@@ -2403,7 +2516,7 @@ void Cf2RadxFile::_addSweepGroupFields(const RadxSweep *sweep,
     try {
       _writeFieldVar(var, copy);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - Cf2RadxFile::_addSweepGroupFields");
+      _addErrStr("ERROR - Cf2RadxFile::_addSweepFields");
       _addErrStr("  Cannot write field: ", name);
       delete copy;
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
@@ -2975,53 +3088,6 @@ void Cf2RadxFile::_addCalVar(NcxxGroup &group,
   // add data
 
   var.putVal(vals);
-
-}
-
-/////////////////////////////////////////////////
-// set flags to indicate whether estimate noise
-// is available
-
-void Cf2RadxFile::_setEstNoiseAvailFlags()
-
-{
-
-  _estNoiseAvailHc = false;
-  _estNoiseAvailVc = false;
-  _estNoiseAvailHx = false;
-  _estNoiseAvailVx = false;
-
-  // estimated noise per channel
-
-  const vector<RadxRay *> &rays = _writeVol->getRays();
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    if (rays[ii]->getEstimatedNoiseDbmHc() > -9990) {
-      _estNoiseAvailHc = true;
-      break;
-    }
-  }
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    if (rays[ii]->getEstimatedNoiseDbmVc() > -9990) {
-      _estNoiseAvailVc = true;
-      break;
-    }
-  }
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    if (rays[ii]->getEstimatedNoiseDbmHx() > -9990) {
-      _estNoiseAvailHx = true;
-      break;
-    }
-  }
-
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    if (rays[ii]->getEstimatedNoiseDbmVx() > -9990) {
-      _estNoiseAvailVx = true;
-      break;
-    }
-  }
 
 }
 
