@@ -276,13 +276,13 @@ int Cf2RadxFile::_readPath(const string &path, size_t pathNum)
       return -1;
     }
     
-    if (_nGatesVary) {
-      // set the packing so that the number of gates varies
-      // this will ensure that a call to getNGatesVary() on
-      // the volume will return true
-      _readVol->addToPacking(1);
-      _readVol->addToPacking(2);
-    }
+    // if (_nGatesVary) {
+    //   // set the packing so that the number of gates varies
+    //   // this will ensure that a call to getNGatesVary() on
+    //   // the volume will return true
+    //   _readVol->addToPacking(1);
+    //   _readVol->addToPacking(2);
+    // }
 
   } else {
 
@@ -744,10 +744,10 @@ int Cf2RadxFile::_readDimensions()
     
     _nPointsDimRead = _file.getDim(N_POINTS);
     if (_nPointsDimRead.isNull()) {
-      _nGatesVary = false;
+      // _nGatesVary = false;
       _nPoints = 0;
     } else {
-      _nGatesVary = true;
+      // _nGatesVary = true;
       _nPoints = _nPointsDimRead.getSize();
     }
 
@@ -2093,7 +2093,7 @@ int Cf2RadxFile::_readRayNgatesAndOffsets()
 
   // for constant number of gates, compute start indices
   
-  if (!_nGatesVary) {
+  // if (!_nGatesVary) {
     _nPoints = 0;
     for (size_t ii = 0; ii < _nTimesInFile; ii++) {
       _rayNGates.push_back(_nRangeInFile);
@@ -2101,7 +2101,7 @@ int Cf2RadxFile::_readRayNgatesAndOffsets()
       _nPoints += _nRangeInFile;
     }
     return 0;
-  }
+  // }
   
   // non-constant nGates - read in arrays
 
@@ -2375,17 +2375,17 @@ int Cf2RadxFile::_readFieldVariables(bool metaOnly)
     string name = var.getName();
     
     int numDims = var.getDimCount();
-    if (_nGatesVary) {
-      // variable number of gates per ray
-      // we need fields with 1 dimension
-      if (numDims != 1) {
-        continue;
-      }
-      const NcxxDim& nPointsDim = var.getDim(0);
-      if (nPointsDim != _nPointsDimRead) {
-        continue;
-      }
-    } else {
+    // if (_nGatesVary) {
+    //   // variable number of gates per ray
+    //   // we need fields with 1 dimension
+    //   if (numDims != 1) {
+    //     continue;
+    //   }
+    //   const NcxxDim& nPointsDim = var.getDim(0);
+    //   if (nPointsDim != _nPointsDimRead) {
+    //     continue;
+    //   }
+    // } else {
       // constant number of gates per ray
       // we need fields with 2 dimensions
       if (numDims != 2) {
@@ -2397,7 +2397,7 @@ int Cf2RadxFile::_readFieldVariables(bool metaOnly)
       if (timeDim != _timeDimRead || rangeDim != _rangeDimRead) {
         continue;
       }
-    }
+    // }
     
     // check the type
     NcxxType ftype = var.getType();
@@ -3327,9 +3327,9 @@ int Cf2RadxFile::_addFl64FieldToRays(NcxxVar &var,
   // get data from array
 
   size_t nVals = _nTimesInFile * _nRangeInFile;
-  if (_nGatesVary) {
-    nVals = _nPoints;
-  }
+  // if (_nGatesVary) {
+  //   nVals = _nPoints;
+  // }
   Radx::fl64 *data = new Radx::fl64[nVals];
 
   try {
@@ -3388,10 +3388,10 @@ int Cf2RadxFile::_addFl64FieldToRays(NcxxVar &var,
     
     int nGates = _nRangeInFile;
     int startIndex = rayIndex * _nRangeInFile;
-    if (_nGatesVary) {
-      nGates = _rayNGates[rayIndex];
-      startIndex = _rayStartIndex[rayIndex];
-    }
+    // if (_nGatesVary) {
+    //   nGates = _rayNGates[rayIndex];
+    //   startIndex = _rayStartIndex[rayIndex];
+    // }
     
     RadxField *field =
       _raysFromFile[ii]->addField(name, units, nGates,
@@ -3439,9 +3439,9 @@ int Cf2RadxFile::_addFl32FieldToRays(NcxxVar &var,
   // get data from array
 
   size_t nVals = _nTimesInFile * _nRangeInFile;
-  if (_nGatesVary) {
-    nVals = _nPoints;
-  }
+  // if (_nGatesVary) {
+  //   nVals = _nPoints;
+  // }
   Radx::fl32 *data = new Radx::fl32[nVals];
 
   try {
@@ -3500,10 +3500,10 @@ int Cf2RadxFile::_addFl32FieldToRays(NcxxVar &var,
     
     int nGates = _nRangeInFile;
     int startIndex = rayIndex * _nRangeInFile;
-    if (_nGatesVary) {
-      nGates = _rayNGates[rayIndex];
-      startIndex = _rayStartIndex[rayIndex];
-    }
+    // if (_nGatesVary) {
+    //   nGates = _rayNGates[rayIndex];
+    //   startIndex = _rayStartIndex[rayIndex];
+    // }
 
     RadxField *field =
       _raysFromFile[ii]->addField(name, units, nGates,
@@ -3552,9 +3552,9 @@ int Cf2RadxFile::_addSi32FieldToRays(NcxxVar &var,
   // get data from array
 
   size_t nVals = _nTimesInFile * _nRangeInFile;
-  if (_nGatesVary) {
-    nVals = _nPoints;
-  }
+  // if (_nGatesVary) {
+  //   nVals = _nPoints;
+  // }
   Radx::si32 *data = new Radx::si32[nVals];
   
   try {
@@ -3605,10 +3605,10 @@ int Cf2RadxFile::_addSi32FieldToRays(NcxxVar &var,
     
     int nGates = _nRangeInFile;
     int startIndex = rayIndex * _nRangeInFile;
-    if (_nGatesVary) {
-      nGates = _rayNGates[rayIndex];
-      startIndex = _rayStartIndex[rayIndex];
-    }
+    // if (_nGatesVary) {
+    //   nGates = _rayNGates[rayIndex];
+    //   startIndex = _rayStartIndex[rayIndex];
+    // }
     
     RadxField *field =
       _raysFromFile[ii]->addField(name, units, nGates,
@@ -3658,9 +3658,9 @@ int Cf2RadxFile::_addSi16FieldToRays(NcxxVar &var,
   // get data from array
 
   size_t nVals = _nTimesInFile * _nRangeInFile;
-  if (_nGatesVary) {
-    nVals = _nPoints;
-  }
+  // if (_nGatesVary) {
+  //   nVals = _nPoints;
+  // }
   Radx::si16 *data = new Radx::si16[nVals];
   
   try {
@@ -3711,10 +3711,10 @@ int Cf2RadxFile::_addSi16FieldToRays(NcxxVar &var,
     
     int nGates = _nRangeInFile;
     int startIndex = rayIndex * _nRangeInFile;
-    if (_nGatesVary) {
-      nGates = _rayNGates[rayIndex];
-      startIndex = _rayStartIndex[rayIndex];
-    }
+    // if (_nGatesVary) {
+    //   nGates = _rayNGates[rayIndex];
+    //   startIndex = _rayStartIndex[rayIndex];
+    // }
     
     RadxField *field =
       _raysFromFile[ii]->addField(name, units, nGates,
@@ -3764,9 +3764,9 @@ int Cf2RadxFile::_addSi08FieldToRays(NcxxVar &var,
   // get data from array
 
   size_t nVals = _nTimesInFile * _nRangeInFile;
-  if (_nGatesVary) {
-    nVals = _nPoints;
-  }
+  // if (_nGatesVary) {
+  //   nVals = _nPoints;
+  // }
   Radx::si08 *data = new Radx::si08[nVals];
   
   try {
@@ -3817,10 +3817,10 @@ int Cf2RadxFile::_addSi08FieldToRays(NcxxVar &var,
     
     int nGates = _nRangeInFile;
     int startIndex = rayIndex * _nRangeInFile;
-    if (_nGatesVary) {
-      nGates = _rayNGates[rayIndex];
-      startIndex = _rayStartIndex[rayIndex];
-    }
+    // if (_nGatesVary) {
+    //   nGates = _rayNGates[rayIndex];
+    //   startIndex = _rayStartIndex[rayIndex];
+    // }
     
     RadxField *field =
       _raysFromFile[ii]->addField(name, units, nGates,

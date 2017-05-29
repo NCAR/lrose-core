@@ -154,7 +154,6 @@ void Cf2RadxFile::clear()
   _sweepsInFile.clear();
   _sweepsToRead.clear();
 
-  _nGatesVary = false;
   _nPoints = 0;
 
 }

@@ -373,10 +373,6 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
   // will we write for variable number of gates?
   
   _writeVol->computeMaxNGates();
-  _nGatesVary = _writeVol->getNGatesVary();
-  if (_writeForceNgatesVary) {
-    _nGatesVary = true;
-  }
 
   // get the set of unique field name
 
@@ -397,16 +393,36 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
 
   // add attributes, dimensions and variables
   
-  if (_addGlobalAttributes()) {
+  try {
+    _addGlobalAttributes();
+  } catch (NcxxException e) {
     return _closeOnError("_addGlobalAttributes");
   }
 
-  if (_addRootDimensions()) {
+  try {
+    _addRootDimensions();
+  } catch (NcxxException e) {
     return _closeOnError("_addRootDimensions");
   }
 
-  if (_addRootScalarVariables()) {
+  try {
+    _addRootScalarVariables();
+  } catch (NcxxException e) {
     return _closeOnError("_addRootScalarVariables");
+  }
+
+  if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
+    try {
+      _addRadarParameters();
+    } catch (NcxxException e) {
+      return _closeOnError("_addRadarParameters");
+    }
+  } else {
+    try {
+      _addLidarParameters();
+    } catch (NcxxException e) {
+      return _closeOnError("_addLidarParameters");
+    }
   }
 
   if (_addFrequencyVariable()) {
@@ -521,10 +537,10 @@ void Cf2RadxFile::_checkCorrectionsActiveOnWrite()
 }
   
 ///////////////////////////////////////////////////////////////
-// addGlobalAttributes()
-//
+// add global attributes
+// throws exception on error
 
-int Cf2RadxFile::_addGlobalAttributes()
+void Cf2RadxFile::_addGlobalAttributes()
 {
 
   if (_verbose) {
@@ -532,508 +548,494 @@ int Cf2RadxFile::_addGlobalAttributes()
   }
 
   bool haveError = false;
-  try {
 
-    // Add required CF-1.5 global attributes
+  // Add required CF-1.5 global attributes
   
-    _conventions = CfConvention;
-    _subconventions = BaseConvention;
+  _conventions = CfConvention;
+  _subconventions = BaseConvention;
+  _subconventions += " ";
+  _subconventions += INSTRUMENT_PARAMETERS;
+  if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
     _subconventions += " ";
-    _subconventions += INSTRUMENT_PARAMETERS;
-    if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
+    _subconventions += RADAR_PARAMETERS;
+    if (_writeVol->getRcalibs().size() > 0) {
       _subconventions += " ";
-      _subconventions += RADAR_PARAMETERS;
-      if (_writeVol->getRcalibs().size() > 0) {
-        _subconventions += " ";
-        _subconventions += RADAR_CALIBRATION;
+      _subconventions += RADAR_CALIBRATION;
+    }
+  } else {
+    _subconventions += " ";
+    _subconventions += LIDAR_PARAMETERS;
+  }
+  if (_writeVol->getPlatformType() != Radx::PLATFORM_TYPE_FIXED) {
+    _subconventions += " ";
+    _subconventions += PLATFORM_VELOCITY;
+  }
+  if (_writeVol->getCfactors() != NULL) {
+    _subconventions += " ";
+    _subconventions += GEOMETRY_CORRECTION;
+  }
+
+  _file.addGlobAttr(CONVENTIONS, _conventions);
+  _file.addGlobAttr(SUB_CONVENTIONS, _subconventions);
+  
+  // Version
+
+  _version = CurrentVersion;
+  if (_writeVol->getVersion().size() > 0) {
+    _version = _writeVol->getVersion();
+  }
+  _file.addGlobAttr(VERSION, _version);
+  
+  // info strings
+
+  _file.addGlobAttr(TITLE, _writeVol->getTitle());
+  _file.addGlobAttr(INSTITUTION, _writeVol->getInstitution());
+  _file.addGlobAttr(REFERENCES,  _writeVol->getReferences());
+  _file.addGlobAttr(SOURCE,  _writeVol->getSource());
+
+  string history = "Written by Cf2RadxFile class. ";
+  history += _writeVol->getHistory();
+  _file.addGlobAttr(HISTORY,  history);
+
+  _file.addGlobAttr(COMMENT,  _writeVol->getComment());
+
+  if (_writeVol->getAuthor().size() > 0) {
+    _file.addGlobAttr(AUTHOR,  _writeVol->getAuthor());
+  }
+
+  string origFormat = "CFRADIAL";
+  if (_writeVol->getOrigFormat().size() > 0) {
+    origFormat = _writeVol->getOrigFormat();
+  }
+  if (origFormat.find("AR2") != string::npos) {
+    // special case for NEXRAD AR2
+    _file.addGlobAttr("format",  origFormat);
+    _file.addGlobAttr(ORIGINAL_FORMAT, "NEXRAD");
+  } else {
+    _file.addGlobAttr(ORIGINAL_FORMAT,  origFormat);
+  }
+
+  _file.addGlobAttr(DRIVER,  _writeVol->getDriver());
+  _file.addGlobAttr(CREATED,  _writeVol->getCreated());
+    
+  // times
+  
+  RadxTime startTime(_writeVol->getStartTimeSecs());
+  _file.addGlobAttr(START_DATETIME, startTime.getW3cStr());
+  _file.addGlobAttr(TIME_COVERAGE_START, startTime.getW3cStr());
+  startTime += _writeVol->getStartNanoSecs() / 1.0e9;
+  _file.addGlobAttr("start_time", startTime.asStringDashed(3));
+
+  RadxTime endTime(_writeVol->getEndTimeSecs());
+  _file.addGlobAttr(END_DATETIME, endTime.getW3cStr());
+  _file.addGlobAttr(TIME_COVERAGE_END, endTime.getW3cStr());
+  endTime += _writeVol->getEndNanoSecs() / 1.0e9;
+  _file.addGlobAttr("end_time", endTime.asStringDashed(3));
+
+  // names
+
+  _file.addGlobAttr(INSTRUMENT_NAME,  _writeVol->getInstrumentName());
+  _file.addGlobAttr(SITE_NAME,  _writeVol->getSiteName());
+  _file.addGlobAttr(SCAN_NAME,  _writeVol->getScanName());
+  _file.addGlobAttr(SCAN_ID,  _writeVol->getScanId());
+
+  string attrStr;
+  if (_writeVol->getPlatformType() == Radx::PLATFORM_TYPE_FIXED) {
+    attrStr = "false";
+  } else {
+    attrStr = "true";
+  }
+  _file.addGlobAttr(PLATFORM_IS_MOBILE, attrStr);
+    
+  if (_rayTimesIncrease) {
+    attrStr = "true";
+  } else {
+    attrStr = "false";
+  }
+  _file.addGlobAttr(RAY_TIMES_INCREASE, attrStr);
+
+  // add user-specified global attributes
+
+  const vector<RadxVol::UserGlobAttr> &attrs = _writeVol->getUserGlobAttr();
+  for (size_t ii = 0; ii < attrs.size(); ii++) {
+    const RadxVol::UserGlobAttr &attr = attrs[ii];
+    switch (attr.attrType) {
+      case RadxVol::UserGlobAttr::ATTR_STRING: {
+        _file.addGlobAttr(attr.name, attr.val);
+        break;
       }
-    } else {
-      _subconventions += " ";
-      _subconventions += LIDAR_PARAMETERS;
-    }
-    if (_writeVol->getPlatformType() != Radx::PLATFORM_TYPE_FIXED) {
-      _subconventions += " ";
-      _subconventions += PLATFORM_VELOCITY;
-    }
-    if (_writeVol->getCfactors() != NULL) {
-      _subconventions += " ";
-      _subconventions += GEOMETRY_CORRECTION;
-    }
-
-    _file.addGlobAttr(CONVENTIONS, _conventions);
-    _file.addGlobAttr(SUB_CONVENTIONS, _subconventions);
-  
-    // Version
-
-    _version = CurrentVersion;
-    if (_writeVol->getVersion().size() > 0) {
-      _version = _writeVol->getVersion();
-    }
-    _file.addGlobAttr(VERSION, _version);
-  
-    // info strings
-
-    _file.addGlobAttr(TITLE, _writeVol->getTitle());
-    _file.addGlobAttr(INSTITUTION, _writeVol->getInstitution());
-    _file.addGlobAttr(REFERENCES,  _writeVol->getReferences());
-    _file.addGlobAttr(SOURCE,  _writeVol->getSource());
-
-    string history = "Written by Cf2RadxFile class. ";
-    history += _writeVol->getHistory();
-    _file.addGlobAttr(HISTORY,  history);
-
-    _file.addGlobAttr(COMMENT,  _writeVol->getComment());
-
-    if (_writeVol->getAuthor().size() > 0) {
-      _file.addGlobAttr(AUTHOR,  _writeVol->getAuthor());
-    }
-
-    string origFormat = "CFRADIAL";
-    if (_writeVol->getOrigFormat().size() > 0) {
-      origFormat = _writeVol->getOrigFormat();
-    }
-    if (origFormat.find("AR2") != string::npos) {
-      // special case for NEXRAD AR2
-      _file.addGlobAttr("format",  origFormat);
-      _file.addGlobAttr(ORIGINAL_FORMAT, "NEXRAD");
-    } else {
-      _file.addGlobAttr(ORIGINAL_FORMAT,  origFormat);
-    }
-
-    _file.addGlobAttr(DRIVER,  _writeVol->getDriver());
-    _file.addGlobAttr(CREATED,  _writeVol->getCreated());
-    
-    // times
-  
-    RadxTime startTime(_writeVol->getStartTimeSecs());
-    _file.addGlobAttr(START_DATETIME, startTime.getW3cStr());
-    _file.addGlobAttr(TIME_COVERAGE_START, startTime.getW3cStr());
-    startTime += _writeVol->getStartNanoSecs() / 1.0e9;
-    _file.addGlobAttr("start_time", startTime.asStringDashed(3));
-
-    RadxTime endTime(_writeVol->getEndTimeSecs());
-    _file.addGlobAttr(END_DATETIME, endTime.getW3cStr());
-    _file.addGlobAttr(TIME_COVERAGE_END, endTime.getW3cStr());
-    endTime += _writeVol->getEndNanoSecs() / 1.0e9;
-    _file.addGlobAttr("end_time", endTime.asStringDashed(3));
-
-    // names
-
-    _file.addGlobAttr(INSTRUMENT_NAME,  _writeVol->getInstrumentName());
-    _file.addGlobAttr(SITE_NAME,  _writeVol->getSiteName());
-    _file.addGlobAttr(SCAN_NAME,  _writeVol->getScanName());
-    _file.addGlobAttr(SCAN_ID,  _writeVol->getScanId());
-
-    string attrStr;
-    if (_writeVol->getPlatformType() == Radx::PLATFORM_TYPE_FIXED) {
-      attrStr = "false";
-    } else {
-      attrStr = "true";
-    }
-    _file.addGlobAttr(PLATFORM_IS_MOBILE, attrStr);
-    
-    if (_nGatesVary) {
-      attrStr = "true";
-    } else {
-      attrStr = "false";
-    }
-    _file.addGlobAttr(N_GATES_VARY, attrStr);
-
-    if (_rayTimesIncrease) {
-      attrStr = "true";
-    } else {
-      attrStr = "false";
-    }
-    _file.addGlobAttr(RAY_TIMES_INCREASE, attrStr);
-
-    // add user-specified global attributes
-
-    const vector<RadxVol::UserGlobAttr> &attrs = _writeVol->getUserGlobAttr();
-    for (size_t ii = 0; ii < attrs.size(); ii++) {
-      const RadxVol::UserGlobAttr &attr = attrs[ii];
-      switch (attr.attrType) {
-        case RadxVol::UserGlobAttr::ATTR_STRING: {
-          _file.addGlobAttr(attr.name, attr.val);
-          break;
+      case RadxVol::UserGlobAttr::ATTR_INT: {
+        int ival;
+        if (sscanf(attr.val.c_str(), "%d", &ival) == 1) {
+          _file.addGlobAttr(attr.name, ival);
+        } else {
+          _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
+          _addErrStr("  Cannot decode user-defined global attribute");
+          _addErrStr("   name: ", attr.name);
+          _addErrStr("    type: int");
+          _addErrStr("    val: ", attr.val);
         }
-        case RadxVol::UserGlobAttr::ATTR_INT: {
+        break;
+      }
+      case RadxVol::UserGlobAttr::ATTR_DOUBLE: {
+        double dval;
+        if (sscanf(attr.val.c_str(), "%lg", &dval) == 1) {
+          _file.addGlobAttr(attr.name, dval);
+        } else {
+          _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
+          _addErrStr("  Cannot decode user-defined global attribute");
+          _addErrStr("   name: ", attr.name);
+          _addErrStr("    type: double");
+          _addErrStr("    val: ", attr.val);
+        }
+        break;
+      }
+      case RadxVol::UserGlobAttr::ATTR_INT_ARRAY: {
+        // tokenize values string
+        vector<string> toks;
+        RadxStr::tokenize(attr.val, " ,", toks);
+        if (toks.size() == 0) {
+          haveError = true;
+        }
+        RadxArray<int> ivals_;
+        int *ivals = ivals_.alloc(toks.size());
+        for (size_t jj = 0; jj < toks.size(); jj++) {
           int ival;
-          if (sscanf(attr.val.c_str(), "%d", &ival) == 1) {
-            _file.addGlobAttr(attr.name, ival);
+          if (sscanf(toks[jj].c_str(), "%d", &ival) == 1) {
+            ivals[jj] = ival;
           } else {
-            _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
-            _addErrStr("  Cannot decode user-defined global attribute");
-            _addErrStr("   name: ", attr.name);
-            _addErrStr("    type: int");
-            _addErrStr("    val: ", attr.val);
+            haveError = true;
           }
-          break;
+        } // jj
+        if (!haveError) {
+          try {
+            _file.putAtt(attr.name, ncxxInt, toks.size(), ivals);
+          } catch (NcxxException& e) {
+            haveError = true;
+            _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
+            _addErrStr("  Cannot put attribute");
+            _addErrStr("  Exception: ", e.what());
+          }
+        } else {
+          _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
+          _addErrStr("  Cannot decode user-defined global attribute");
         }
-        case RadxVol::UserGlobAttr::ATTR_DOUBLE: {
+        if (haveError) {
+          _addErrStr("   name: ", attr.name);
+          _addErrStr("    type: int[]");
+          _addErrStr("    val: ", attr.val);
+        }
+        break;
+      }
+      case RadxVol::UserGlobAttr::ATTR_DOUBLE_ARRAY: {
+        // tokenize values string
+        vector<string> toks;
+        RadxStr::tokenize(attr.val, " ,", toks);
+        if (toks.size() == 0) {
+          haveError = true;
+        }
+        RadxArray<double> dvals_;
+        double *dvals = dvals_.alloc(toks.size());
+        for (size_t jj = 0; jj < toks.size(); jj++) {
           double dval;
-          if (sscanf(attr.val.c_str(), "%lg", &dval) == 1) {
-            _file.addGlobAttr(attr.name, dval);
+          if (sscanf(toks[jj].c_str(), "%lg", &dval) == 1) {
+            dvals[jj] = dval;
           } else {
-            _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
-            _addErrStr("  Cannot decode user-defined global attribute");
-            _addErrStr("   name: ", attr.name);
-            _addErrStr("    type: double");
-            _addErrStr("    val: ", attr.val);
-          }
-          break;
-        }
-        case RadxVol::UserGlobAttr::ATTR_INT_ARRAY: {
-          // tokenize values string
-          vector<string> toks;
-          RadxStr::tokenize(attr.val, " ,", toks);
-          if (toks.size() == 0) {
             haveError = true;
           }
-          RadxArray<int> ivals_;
-          int *ivals = ivals_.alloc(toks.size());
-          for (size_t jj = 0; jj < toks.size(); jj++) {
-            int ival;
-            if (sscanf(toks[jj].c_str(), "%d", &ival) == 1) {
-              ivals[jj] = ival;
-            } else {
-              haveError = true;
-            }
-          } // jj
-          if (!haveError) {
-            try {
-              _file.putAtt(attr.name, ncxxInt, toks.size(), ivals);
-            } catch (NcxxException& e) {
-              haveError = true;
-              _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
-              _addErrStr("  Cannot put attribute");
-              _addErrStr("  Exception: ", e.what());
-            }
-          } else {
-            _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
-            _addErrStr("  Cannot decode user-defined global attribute");
-          }
-          if (haveError) {
-            _addErrStr("   name: ", attr.name);
-            _addErrStr("    type: int[]");
-            _addErrStr("    val: ", attr.val);
-          }
-          break;
-        }
-        case RadxVol::UserGlobAttr::ATTR_DOUBLE_ARRAY: {
-          // tokenize values string
-          vector<string> toks;
-          RadxStr::tokenize(attr.val, " ,", toks);
-          if (toks.size() == 0) {
+        } // jj
+        if (!haveError) {
+          try {
+            _file.putAtt(attr.name, ncxxDouble, toks.size(), dvals);
+          } catch (NcxxException& e) {
             haveError = true;
-          }
-          RadxArray<double> dvals_;
-          double *dvals = dvals_.alloc(toks.size());
-          for (size_t jj = 0; jj < toks.size(); jj++) {
-            double dval;
-            if (sscanf(toks[jj].c_str(), "%lg", &dval) == 1) {
-              dvals[jj] = dval;
-            } else {
-              haveError = true;
-            }
-          } // jj
-          if (!haveError) {
-            try {
-              _file.putAtt(attr.name, ncxxDouble, toks.size(), dvals);
-            } catch (NcxxException& e) {
-              haveError = true;
-              _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
-              _addErrStr("  Cannot put attribute");
-              _addErrStr("  Exception: ", e.what());
-            }
-          } else {
             _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
-            _addErrStr("  Cannot decode user-defined global attribute");
+            _addErrStr("  Cannot put attribute");
+            _addErrStr("  Exception: ", e.what());
           }
-          if (haveError) {
-            _addErrStr("   name: ", attr.name);
-            _addErrStr("    type: double[]");
-            _addErrStr("    val: ", attr.val);
-          }
-          break;
+        } else {
+          _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes()");
+          _addErrStr("  Cannot decode user-defined global attribute");
         }
-        default: {}
-      } // switch
-    } // ii
+        if (haveError) {
+          _addErrStr("   name: ", attr.name);
+          _addErrStr("    type: double[]");
+          _addErrStr("    val: ", attr.val);
+        }
+        break;
+      }
+      default: {}
+    } // switch
+  } // ii
     
-  } catch (NcxxException e) {
-
-    _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes");
-    _addErrStr("  exception: ", e.what());
-    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
-    return -1;
-
-  } // try
-
   if (haveError) {
     _addErrStr("ERROR - Cf2RadxFile::_addGlobalAttributes");
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
-    return -1;
   }
-
-  return 0;
 
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// addRootDimensions()
-//
-//  Add top-level dims.
+// Add top-level dims
+// throws exception on error
 
-int Cf2RadxFile::_addRootDimensions()
+void Cf2RadxFile::_addRootDimensions()
 {
 
   if (_verbose) {
     cerr << "Cf2RadxFile::_addRootDimensions()" << endl;
   }
 
-  try {
-
-    // add sweep dimension
-    
-    _sweepDim = _file.addDim(SWEEP, _writeVol->getSweeps().size());
-
-    // add calib dimension
-    
-    if (_writeVol->getRcalibs().size() > 0) {
-      _calDim = _file.addDim(R_CALIB, _writeVol->getRcalibs().size());
-    }
-    
-    // add multiple frequencies dimension
-
-    if (_writeVol->getFrequencyHz().size() > 0) {
-      _frequencyDim = _file.addDim(FREQUENCY, _writeVol->getFrequencyHz().size());
-    }
-
-  } catch (NcxxException e) {
-
-    _addErrStr("ERROR - Cf2RadxFile::_addRootDimensions");
-    _addErrStr("  exception: ", e.what());
-    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
-    return -1;
-
+  // add sweep dimension
+  
+  _sweepDim = _file.addDim(SWEEP, _writeVol->getSweeps().size());
+  
+  // add calib dimension
+  
+  if (_writeVol->getRcalibs().size() > 0) {
+    _calDim = _file.addDim(R_CALIB, _writeVol->getRcalibs().size());
   }
-
-  return 0;
-
+  
+  // add multiple frequencies dimension
+  
+  if (_writeVol->getFrequencyHz().size() > 0) {
+    _frequencyDim = _file.addDim(FREQUENCY, _writeVol->getFrequencyHz().size());
+  }
+  
 }
 
 //////////////////////////////////////////////
 // add root-level scalar variables
+// throws exception on error
 
-int Cf2RadxFile::_addRootScalarVariables()
+void Cf2RadxFile::_addRootScalarVariables()
 {
 
   if (_verbose) {
     cerr << "Cf2RadxFile::_addRootScalarVariables()" << endl;
   }
 
-  try {
+  // start time
+  
+  {
+    NcxxVar var =
+      _file.addVar(TIME_COVERAGE_START, "", TIME_COVERAGE_START_LONG,
+                   ncxxString, "", true);
+    var.putAtt(COMMENT,
+               "ray times are relative to start time in secs");
+    RadxTime startTime(_writeVol->getStartTimeSecs());
+    var.putStringScalar(startTime.getW3cStr());
+  }
     
-    // start time
-    
-    {
-      NcxxVar var =
-        _file.addVar(TIME_COVERAGE_START, "", TIME_COVERAGE_START_LONG,
-                     ncxxString, "", true);
-      var.putAtt(COMMENT,
-                 "ray times are relative to start time in secs");
-      RadxTime startTime(_writeVol->getStartTimeSecs());
-      var.putStringScalar(startTime.getW3cStr());
-    }
-    
-    // end time
+  // end time
 
-    {
-      NcxxVar var =
-        _file.addVar(TIME_COVERAGE_END, "", TIME_COVERAGE_END_LONG,
-                     ncxxString, "", true);
-      var.putAtt(COMMENT,
-                 "ray times are relative to start time in secs");
-      RadxTime endTime(_writeVol->getEndTimeSecs());
-      var.putStringScalar(endTime.getW3cStr());
-    }
-
-    // volume number
-
-    {
-      NcxxVar var = _file.addVar(VOLUME_NUMBER, "", VOLUME_NUMBER_LONG,
-                                 ncxxInt, "", true);
-      int volNum = _writeVol->getVolumeNumber();
-      var.putVal(volNum);
-    }
-
-    // platform type
-
-    {
-      NcxxVar var = _file.addVar(PLATFORM_TYPE, "", PLATFORM_TYPE_LONG,
-                                 ncxxString, "", true);
-      var.putAtt(OPTIONS, Radx::platformTypeOptions());
-      string platformType = Radx::platformTypeToStr(_writeVol->getPlatformType());
-      var.putStringScalar(platformType);
-    }
-
-    // primary axis
-
-    {
-      NcxxVar var = _file.addVar(PRIMARY_AXIS, "", PRIMARY_AXIS_LONG,
-                                 ncxxString, "", true);
-      var.putAtt(OPTIONS, Radx::primaryAxisOptions());
-      string primaryAxis = Radx::primaryAxisToStr(_writeVol->getPrimaryAxis());
-      var.putStringScalar(primaryAxis);
-    }
-    
-    // status XML
-
-    {
-      NcxxVar var = _file.addVar(STATUS_XML, "", "status_of_instrument",
-                                 ncxxString, "", true);
-      var.putStringScalar(_writeVol->getStatusXml());
-    }
-
-    // instrument type
-
-    {
-      NcxxVar var = _file.addVar(INSTRUMENT_TYPE, "", INSTRUMENT_TYPE_LONG,
-                                 ncxxString, "", true);
-      var.putAtt(OPTIONS, Radx::instrumentTypeOptions());
-      var.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
-      string instrumentType = Radx::instrumentTypeToStr(_writeVol->getInstrumentType());
-      var.putStringScalar(instrumentType);
-    }
-    
-    if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
-      
-      // radar antenna gain H
-
-      {
-        NcxxVar var =
-          _file.addVar(RADAR_ANTENNA_GAIN_H, "", RADAR_ANTENNA_GAIN_H_LONG,
-                       ncxxFloat, DB, true);
-        var.putAtt(META_GROUP, RADAR_PARAMETERS);
-        var.putVal((float) _writeVol->getRadarAntennaGainDbH());
-      }
-
-      // radar antenna gain V
-
-      {
-        NcxxVar var =
-          _file.addVar(RADAR_ANTENNA_GAIN_V, "", RADAR_ANTENNA_GAIN_V_LONG,
-                       ncxxFloat, DB, true);
-        var.putAtt(META_GROUP, RADAR_PARAMETERS);
-        var.putVal((float) _writeVol->getRadarAntennaGainDbV());
-      }
-
-      // radar beam width H
-
-      {
-        NcxxVar var =
-          _file.addVar(RADAR_BEAM_WIDTH_H, "", RADAR_BEAM_WIDTH_H_LONG,
-                       ncxxFloat, DEGREES, true);
-        var.putAtt(META_GROUP, RADAR_PARAMETERS);
-        var.putVal((float) _writeVol->getRadarBeamWidthDegH());
-      }
-
-      // radar beam width V
-
-      {
-        NcxxVar var =
-          _file.addVar(RADAR_BEAM_WIDTH_V, "", RADAR_BEAM_WIDTH_V_LONG,
-                       ncxxFloat, DEGREES, true);
-        var.putAtt(META_GROUP, RADAR_PARAMETERS);
-        var.putVal((float) _writeVol->getRadarBeamWidthDegV());
-      }
-      
-      // radar band width
-
-      {
-        NcxxVar var =
-          _file.addVar(RADAR_RX_BANDWIDTH, "", RADAR_RX_BANDWIDTH_LONG,
-                       ncxxFloat, HZ, true);
-        var.putAtt(META_GROUP, RADAR_PARAMETERS);
-        float bandwidthHz = _writeVol->getRadarReceiverBandwidthMhz();
-        if (bandwidthHz < 0) {
-          bandwidthHz = Radx::missingFl32;
-        }
-        var.putVal(bandwidthHz);
-      }
-      
-    } else {
-      
-      // lidar constant
-      
-      {
-        NcxxVar var =
-          _file.addVar(LIDAR_CONSTANT, "", LIDAR_CONSTANT_LONG,
-                       ncxxFloat, DB, true);
-        var.putAtt(META_GROUP, LIDAR_PARAMETERS);
-        var.putVal((float) _writeVol->getLidarConstant());
-      }
-
-      {
-        NcxxVar var =
-          _file.addVar(LIDAR_PULSE_ENERGY, "", LIDAR_PULSE_ENERGY_LONG,
-                       ncxxFloat, JOULES, true);
-        var.putAtt(META_GROUP, LIDAR_PARAMETERS);
-        var.putVal((float) _writeVol->getLidarPulseEnergyJ());
-      }
-
-      {
-        NcxxVar var =
-          _file.addVar(LIDAR_PEAK_POWER, "", LIDAR_PEAK_POWER_LONG,
-                       ncxxFloat, WATTS, true);
-        var.putAtt(META_GROUP, LIDAR_PARAMETERS);
-        var.putVal((float) _writeVol->getLidarPeakPowerW());
-      }
-
-      {
-        NcxxVar var =
-          _file.addVar(LIDAR_APERTURE_DIAMETER, "", LIDAR_APERTURE_DIAMETER_LONG,
-                       ncxxFloat, CM, true);
-        var.putAtt(META_GROUP, LIDAR_PARAMETERS);
-        var.putVal((float) _writeVol->getLidarApertureDiamCm());
-      }
-
-      {
-        NcxxVar var =
-          _file.addVar(LIDAR_APERTURE_EFFICIENCY, "", LIDAR_APERTURE_EFFICIENCY_LONG,
-                       ncxxFloat, PERCENT, true);
-        var.putAtt(META_GROUP, LIDAR_PARAMETERS);
-        var.putVal((float) _writeVol->getLidarApertureEfficiency());
-      }
-
-      {
-        NcxxVar var =
-          _file.addVar(LIDAR_FIELD_OF_VIEW, "", LIDAR_FIELD_OF_VIEW_LONG,
-                       ncxxFloat, MRAD, true);
-        var.putAtt(META_GROUP, LIDAR_PARAMETERS);
-        var.putVal((float) _writeVol->getLidarFieldOfViewMrad());
-      }
-
-      {
-        NcxxVar var =
-          _file.addVar(LIDAR_BEAM_DIVERGENCE,
-                       "", LIDAR_BEAM_DIVERGENCE_LONG, ncxxFloat, MRAD, true);
-        var.putAtt(META_GROUP, LIDAR_PARAMETERS);
-        var.putVal((float) _writeVol->getLidarBeamDivergenceMrad());
-      }
-      
-    }
-    
-  } catch (NcxxException& e) {
-
-    _addErrStr("ERROR - Cf2RadxFile::_addScalarVariables");
-    _addErrStr("  Exception: ", e.what());
-    return -1;
-
+  {
+    NcxxVar var =
+      _file.addVar(TIME_COVERAGE_END, "", TIME_COVERAGE_END_LONG,
+                   ncxxString, "", true);
+    var.putAtt(COMMENT,
+               "ray times are relative to start time in secs");
+    RadxTime endTime(_writeVol->getEndTimeSecs());
+    var.putStringScalar(endTime.getW3cStr());
   }
 
-  return 0;
+  // volume number
 
+  {
+    NcxxVar var = _file.addVar(VOLUME_NUMBER, "", VOLUME_NUMBER_LONG,
+                               ncxxInt, "", true);
+    int volNum = _writeVol->getVolumeNumber();
+    var.putVal(volNum);
+  }
+
+
+  // instrument type
+
+  {
+    NcxxVar var = _file.addVar(INSTRUMENT_TYPE, "", INSTRUMENT_TYPE_LONG,
+                               ncxxString, "", true);
+    var.putAtt(OPTIONS, Radx::instrumentTypeOptions());
+    var.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
+    string instrumentType = Radx::instrumentTypeToStr(_writeVol->getInstrumentType());
+    var.putStringScalar(instrumentType);
+  }
+    
+  // platform type
+
+  {
+    NcxxVar var = _file.addVar(PLATFORM_TYPE, "", PLATFORM_TYPE_LONG,
+                               ncxxString, "", true);
+    var.putAtt(OPTIONS, Radx::platformTypeOptions());
+    string platformType = Radx::platformTypeToStr(_writeVol->getPlatformType());
+    var.putStringScalar(platformType);
+  }
+
+  // primary axis
+
+  {
+    NcxxVar var = _file.addVar(PRIMARY_AXIS, "", PRIMARY_AXIS_LONG,
+                               ncxxString, "", true);
+    var.putAtt(OPTIONS, Radx::primaryAxisOptions());
+    string primaryAxis = Radx::primaryAxisToStr(_writeVol->getPrimaryAxis());
+    var.putStringScalar(primaryAxis);
+  }
+    
+  // status XML
+
+  {
+    NcxxVar var = _file.addVar(STATUS_XML, "", "status_of_instrument",
+                               ncxxString, "", true);
+    var.putStringScalar(_writeVol->getStatusXml());
+  }
+
+}
+
+//////////////////////////////////////////////
+// add radar parameters
+// throws exception on error
+
+void Cf2RadxFile::_addRadarParameters()
+{
+  
+  if (_verbose) {
+    cerr << "Cf2RadxFile::_addRadarParameters()" << endl;
+  }
+
+  NcxxGroup rparamsGroup = _file.addGroup(RADAR_PARAMETERS);
+  
+  // radar antenna gain H
+  
+  {
+    NcxxVar var =
+      rparamsGroup.addVar(RADAR_ANTENNA_GAIN_H, "", RADAR_ANTENNA_GAIN_H_LONG,
+                          ncxxFloat, DB, true);
+    var.putAtt(META_GROUP, RADAR_PARAMETERS);
+    var.putVal((float) _writeVol->getRadarAntennaGainDbH());
+  }
+  
+  // radar antenna gain V
+  
+  {
+    NcxxVar var =
+      rparamsGroup.addVar(RADAR_ANTENNA_GAIN_V, "", RADAR_ANTENNA_GAIN_V_LONG,
+                          ncxxFloat, DB, true);
+    var.putAtt(META_GROUP, RADAR_PARAMETERS);
+      var.putVal((float) _writeVol->getRadarAntennaGainDbV());
+  }
+  
+  // radar beam width H
+  
+  {
+    NcxxVar var =
+      rparamsGroup.addVar(RADAR_BEAM_WIDTH_H, "", RADAR_BEAM_WIDTH_H_LONG,
+                          ncxxFloat, DEGREES, true);
+    var.putAtt(META_GROUP, RADAR_PARAMETERS);
+    var.putVal((float) _writeVol->getRadarBeamWidthDegH());
+  }
+  
+  // radar beam width V
+  
+  {
+    NcxxVar var =
+      rparamsGroup.addVar(RADAR_BEAM_WIDTH_V, "", RADAR_BEAM_WIDTH_V_LONG,
+                          ncxxFloat, DEGREES, true);
+    var.putAtt(META_GROUP, RADAR_PARAMETERS);
+    var.putVal((float) _writeVol->getRadarBeamWidthDegV());
+  }
+  
+  // radar band width
+  
+  {
+    NcxxVar var =
+      rparamsGroup.addVar(RADAR_RX_BANDWIDTH, "", RADAR_RX_BANDWIDTH_LONG,
+                          ncxxFloat, HZ, true);
+    var.putAtt(META_GROUP, RADAR_PARAMETERS);
+    float bandwidthHz = _writeVol->getRadarReceiverBandwidthMhz();
+    if (bandwidthHz < 0) {
+      bandwidthHz = Radx::missingFl32;
+    }
+    var.putVal(bandwidthHz);
+  }
+      
+}
+
+//////////////////////////////////////////////
+// add lidar parameters
+// throws exception on error
+
+void Cf2RadxFile::_addLidarParameters()
+{
+
+  if (_verbose) {
+    cerr << "Cf2RadxFile::_addLidarParameters()" << endl;
+  }
+
+  NcxxGroup lparamsGroup = _file.addGroup(LIDAR_PARAMETERS);
+
+  // lidar constant
+      
+  {
+    NcxxVar var =
+      lparamsGroup.addVar(LIDAR_CONSTANT, "",
+                          LIDAR_CONSTANT_LONG,
+                          ncxxFloat, DB, true);
+    var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+    var.putVal((float) _writeVol->getLidarConstant());
+  }
+  
+  {
+    NcxxVar var =
+      lparamsGroup.addVar(LIDAR_PULSE_ENERGY, "",
+                          LIDAR_PULSE_ENERGY_LONG,
+                          ncxxFloat, JOULES, true);
+    var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+    var.putVal((float) _writeVol->getLidarPulseEnergyJ());
+  }
+  
+  {
+    NcxxVar var =
+      lparamsGroup.addVar(LIDAR_PEAK_POWER, "",
+                          LIDAR_PEAK_POWER_LONG,
+                          ncxxFloat, WATTS, true);
+    var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+    var.putVal((float) _writeVol->getLidarPeakPowerW());
+  }
+  
+  {
+    NcxxVar var =
+      lparamsGroup.addVar(LIDAR_APERTURE_DIAMETER, "",
+                          LIDAR_APERTURE_DIAMETER_LONG,
+                          ncxxFloat, CM, true);
+    var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+    var.putVal((float) _writeVol->getLidarApertureDiamCm());
+  }
+  
+  {
+    NcxxVar var =
+      lparamsGroup.addVar(LIDAR_APERTURE_EFFICIENCY, "", 
+                          LIDAR_APERTURE_EFFICIENCY_LONG,
+                          ncxxFloat, PERCENT, true);
+    var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+    var.putVal((float) _writeVol->getLidarApertureEfficiency());
+    }
+
+  {
+    NcxxVar var =
+      lparamsGroup.addVar(LIDAR_FIELD_OF_VIEW, "",
+                          LIDAR_FIELD_OF_VIEW_LONG,
+                          ncxxFloat, MRAD, true);
+    var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+    var.putVal((float) _writeVol->getLidarFieldOfViewMrad());
+  }
+  
+  {
+    NcxxVar var =
+      lparamsGroup.addVar(LIDAR_BEAM_DIVERGENCE,
+                          "", LIDAR_BEAM_DIVERGENCE_LONG, ncxxFloat, MRAD, true);
+    var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+    var.putVal((float) _writeVol->getLidarBeamDivergenceMrad());
+  }
+  
 }
 
 //////////////////////////////////////////////
@@ -2504,13 +2506,13 @@ void Cf2RadxFile::_addRadarCalibration()
 
   // add group
   
-  NcxxGroup rparamsGroup;
-  rparamsGroup = _file.addGroup(RADAR_PARAMETERS);
+  NcxxGroup rcalibGroup;
+  rcalibGroup = _file.addGroup(RADAR_CALIBRATION);
 
   // time
   
   NcxxVar rCalTimeVar = 
-    rparamsGroup.addVar(CALIBRATION_TIME, "", "", 
+    rcalibGroup.addVar(CALIBRATION_TIME, "", "", 
                         ncxxString, _calDim, "", true);
   // rCalTimeVar.putAtt(META_GROUP, RADAR_CALIBRATION);
   
@@ -2532,271 +2534,271 @@ void Cf2RadxFile::_addRadarCalibration()
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getPulseWidthUsec() * 1.0e-6;
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              PULSE_WIDTH, PULSE_WIDTH_LONG, SECONDS);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getXmitPowerDbmH();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              XMIT_POWER_H, XMIT_POWER_H_LONG, DBM);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getXmitPowerDbmV();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              XMIT_POWER_V, XMIT_POWER_V_LONG, DBM);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getTwoWayWaveguideLossDbH();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              TWO_WAY_WAVEGUIDE_LOSS_H, TWO_WAY_WAVEGUIDE_LOSS_H_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getTwoWayWaveguideLossDbV();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              TWO_WAY_WAVEGUIDE_LOSS_V, TWO_WAY_WAVEGUIDE_LOSS_V_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getTwoWayRadomeLossDbH();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              TWO_WAY_RADOME_LOSS_H, TWO_WAY_RADOME_LOSS_H_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getTwoWayRadomeLossDbV();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              TWO_WAY_RADOME_LOSS_V, TWO_WAY_RADOME_LOSS_V_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getReceiverMismatchLossDb();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              RECEIVER_MISMATCH_LOSS, RECEIVER_MISMATCH_LOSS_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getRadarConstantH();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              RADAR_CONSTANT_H, RADAR_CONSTANT_H_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getRadarConstantV();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              RADAR_CONSTANT_V, RADAR_CONSTANT_V_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getAntennaGainDbH();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              ANTENNA_GAIN_H, ANTENNA_GAIN_H_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getAntennaGainDbV();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              ANTENNA_GAIN_V, ANTENNA_GAIN_V_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getNoiseDbmHc();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              NOISE_HC, NOISE_HC_LONG, DBM);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getNoiseDbmVc();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              NOISE_VC, NOISE_VC_LONG, DBM);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getNoiseDbmHx();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              NOISE_HX, NOISE_HX_LONG, DBM);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getNoiseDbmVx();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              NOISE_VX, NOISE_VX_LONG, DBM);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getReceiverGainDbHc();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              RECEIVER_GAIN_HC, RECEIVER_GAIN_HC_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getReceiverGainDbVc();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              RECEIVER_GAIN_VC, RECEIVER_GAIN_VC_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getReceiverGainDbHx();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              RECEIVER_GAIN_HX, RECEIVER_GAIN_HX_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getReceiverGainDbVx();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              RECEIVER_GAIN_VX, RECEIVER_GAIN_VX_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getBaseDbz1kmHc();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              BASE_DBZ_1KM_HC, BASE_DBZ_1KM_HC_LONG, DBZ);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getBaseDbz1kmVc();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              BASE_DBZ_1KM_VC, BASE_DBZ_1KM_VC_LONG, DBZ);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getBaseDbz1kmHx();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              BASE_DBZ_1KM_HX, BASE_DBZ_1KM_HX_LONG, DBZ);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getBaseDbz1kmVx();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              BASE_DBZ_1KM_VX, BASE_DBZ_1KM_VX_LONG, DBZ);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getSunPowerDbmHc();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              SUN_POWER_HC, SUN_POWER_HC_LONG, DBM);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getSunPowerDbmVc();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              SUN_POWER_VC, SUN_POWER_VC_LONG, DBM);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getSunPowerDbmHx();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              SUN_POWER_HX, SUN_POWER_HX_LONG, DBM);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getSunPowerDbmVx();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              SUN_POWER_VX, SUN_POWER_VX_LONG, DBM);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getNoiseSourcePowerDbmH();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              NOISE_SOURCE_POWER_H, NOISE_SOURCE_POWER_H_LONG, DBM);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getNoiseSourcePowerDbmV();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              NOISE_SOURCE_POWER_V, NOISE_SOURCE_POWER_V_LONG, DBM);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getPowerMeasLossDbH();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              POWER_MEASURE_LOSS_H, POWER_MEASURE_LOSS_H_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getPowerMeasLossDbV();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              POWER_MEASURE_LOSS_V, POWER_MEASURE_LOSS_V_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getCouplerForwardLossDbH();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              COUPLER_FORWARD_LOSS_H, COUPLER_FORWARD_LOSS_H_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getCouplerForwardLossDbV();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              COUPLER_FORWARD_LOSS_V, COUPLER_FORWARD_LOSS_V_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getDbzCorrection();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              DBZ_CORRECTION, DBZ_CORRECTION_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getZdrCorrectionDb();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              ZDR_CORRECTION, ZDR_CORRECTION_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getLdrCorrectionDbH();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              LDR_CORRECTION_H, LDR_CORRECTION_H_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getLdrCorrectionDbV();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              LDR_CORRECTION_V, LDR_CORRECTION_V_LONG, DB);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getSystemPhidpDeg();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              SYSTEM_PHIDP, SYSTEM_PHIDP_LONG, DEGREES);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getTestPowerDbmH();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              TEST_POWER_H, TEST_POWER_H_LONG, DBM);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getTestPowerDbmV();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              TEST_POWER_V, TEST_POWER_V_LONG, DBM);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getReceiverSlopeDbHc();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              RECEIVER_SLOPE_HC, RECEIVER_SLOPE_HC_LONG);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getReceiverSlopeDbVc();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              RECEIVER_SLOPE_VC, RECEIVER_SLOPE_VC_LONG);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getReceiverSlopeDbHx();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              RECEIVER_SLOPE_HX, RECEIVER_SLOPE_HX_LONG);
 
   for (size_t ii = 0; ii < nCalib; ii++) {
     fvals[ii] = calibs[ii]->getReceiverSlopeDbVx();
   }
-  _addCalVar(rparamsGroup, fvals,
+  _addCalVar(rcalibGroup, fvals,
              RECEIVER_SLOPE_VX, RECEIVER_SLOPE_VX_LONG);
 
 }

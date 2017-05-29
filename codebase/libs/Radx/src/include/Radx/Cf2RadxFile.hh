@@ -145,16 +145,6 @@ public:
   //@}
 
   ////////////////////////
-  /// \name Checks
-  //@{
-  
-  /// Check if number of gates vary in volume
-  
-  bool getNGatesVary() const { return _nGatesVary; }
-    
-  //@}
-
-  ////////////////////////
   /// \name Printing:
   //@{
   
@@ -462,7 +452,7 @@ private:
   vector<double> _rangeKm;
   size_t _nRangeInFile;
 
-  bool _nGatesVary;
+  // bool _nGatesVary;
   int _nPoints;
   vector<int> _rayNGates;
   vector<int> _rayStartIndex;
@@ -664,10 +654,13 @@ private:
   void _checkGeorefsActiveOnWrite();
   void _checkCorrectionsActiveOnWrite();
 
-  int _addGlobalAttributes();
-  int _addRootDimensions();
+  void _addGlobalAttributes();
+  void _addRootDimensions();
+  void _addRootScalarVariables();
 
-  int _addRootScalarVariables();
+  void _addRadarParameters();
+  void _addLidarParameters();
+
   int _addFrequencyVariable();
   int _addCorrectionVariables();
   int _addProjectionVariables();
