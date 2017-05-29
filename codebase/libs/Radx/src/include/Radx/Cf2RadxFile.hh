@@ -661,8 +661,8 @@ private:
   void _addRadarParameters();
   void _addLidarParameters();
 
-  int _addFrequencyVariable();
-  int _addCorrectionVariables();
+  void _addFrequencyVariable(NcxxGroup &group);
+  void _addGeorefCorrections();
   int _addProjectionVariables();
   int _addSweepGroups();
 
@@ -703,9 +703,7 @@ private:
     
   void _setEstNoiseAvailFlags();
 
-  int _writeCorrectionVariables();
   int _writeProjectionVariables();
-  int _writeFrequencyVariable();
 
   int _closeOnError(const string &caller);
 
@@ -794,6 +792,7 @@ private:
   const static char* GATE_SPACING;
   const static char* GEOMETRY_CORRECTION;
   const static char* GEOREFS_APPLIED;
+  const static char* GEOREF_CORRECTION;
   const static char* GEOREF_TIME;
   const static char* GREGORIAN;
   const static char* GRID_MAPPING;

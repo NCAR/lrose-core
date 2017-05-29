@@ -447,7 +447,7 @@ Radx::fl32 Cf2RadxFile::_checkMissingFloat(float val)
 
 const string Cf2RadxFile::CfConvention = "CF-1.6";
 const string Cf2RadxFile::BaseConvention = "CF-Radial";
-const string Cf2RadxFile::CurrentVersion = "CF-Radial-1.3";
+const string Cf2RadxFile::CurrentVersion = "CF-Radial-2.0";
 
 const char* Cf2RadxFile::ADD_OFFSET = "add_offset";
 const char* Cf2RadxFile::AIRBORNE = "airborne";
@@ -517,6 +517,7 @@ const char* Cf2RadxFile::FREQUENCY = "frequency";
 const char* Cf2RadxFile::GATE_SPACING = "gate_spacing";
 const char* Cf2RadxFile::GEOMETRY_CORRECTION = "geometry_correction";
 const char* Cf2RadxFile::GEOREFS_APPLIED = "georefs_applied";
+const char* Cf2RadxFile::GEOREF_CORRECTION = "georef_correction";
 const char* Cf2RadxFile::GEOREF_TIME = "georef_time";
 const char* Cf2RadxFile::GREGORIAN = "gregorian";
 const char* Cf2RadxFile::GRID_MAPPING = "grid_mapping";

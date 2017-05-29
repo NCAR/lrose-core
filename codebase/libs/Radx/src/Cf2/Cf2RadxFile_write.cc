@@ -91,8 +91,6 @@ int Cf2RadxFile::writeToDir(const RadxVol &vol,
 
   if (_writeIndividualSweeps) {
     return _writeSweepsToDir(vol, dir, addDaySubDir, addYearSubDir);
-    // } else if (vol.getSweeps().size() == 1) {
-    //   return _writeSweepToDir(vol, dir, addDaySubDir, addYearSubDir);
   }
 
   _writeVol = &vol;
@@ -284,7 +282,7 @@ int Cf2RadxFile::_writeSweepToDir(const RadxVol &vol,
   char fileName[BUFSIZ];
   if (_writeFileNameMode == FILENAME_WITH_START_AND_END_TIMES) {
     sprintf(fileName,
-            "cfrad.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
+            "cfrad2.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
             "_to_%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
             "_%s_v%d_s%.2d_%s%.2f_%s.nc",
             startTime.getYear(), startTime.getMonth(), startTime.getDay(),
@@ -299,7 +297,7 @@ int Cf2RadxFile::_writeSweepToDir(const RadxVol &vol,
             scanType.c_str());
   } else {
     sprintf(fileName,
-            "cfrad.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
+            "cfrad2.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
             "_%s_v%d_s%.2d_%s%.2f_%s.nc",
             fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
             fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
@@ -425,7 +423,9 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
     }
   }
 
-  if (_addFrequencyVariable()) {
+  try {
+    _addFrequencyVariable(_file);
+  } catch (NcxxException e) {
     return _closeOnError("_addFrequencyVariable");
   }
 
@@ -436,8 +436,10 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
   }
 
   if (_correctionsActive) {
-    if (_addCorrectionVariables()) {
-      return _closeOnError("_addCorrectionVariables");
+    try {
+      _addGeorefCorrections();
+    } catch (NcxxException e) {
+      return _closeOnError("_addGeorefCorrections");
     }
   }
 
@@ -445,26 +447,12 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
     return _closeOnError("_addProjectionVariables");
   }
 
-  // if (_addSweepVariables()) {
-  //   return _closeOnError("_addSweepVariables");
-  // }
-
   // add sweep groups
 
   if (_addSweepGroups()) {
     return _closeOnError("_addSweepGroups");
   }
 
-  // write variables
-
-  if (_writeFrequencyVariable()) {
-    return _closeOnError("_writeFrequencyVariable");
-  }
-  if (_correctionsActive) {
-    if (_writeCorrectionVariables()) {
-      return _closeOnError("_writeCorrectionVariables");
-    }
-  }
   if (_writeProjectionVariables()) {
     return _closeOnError("_writeProjectionVariables");
   }
@@ -1039,136 +1027,178 @@ void Cf2RadxFile::_addLidarParameters()
 }
 
 //////////////////////////////////////////////
-// add variable for one or more frequencies
+// add one or more frequencies
+// throws exception on error
 
-int Cf2RadxFile::_addFrequencyVariable()
+void Cf2RadxFile::_addFrequencyVariable(NcxxGroup &group)
 {
   
-  if (_writeVol->getFrequencyHz().size() < 1) {
-    return 0;
+  const vector<double> &frequency = _writeVol->getFrequencyHz();
+  size_t nFreq = frequency.size();
+  if (nFreq < 1) {
+    return;
   }
-
-  try {
-
-    _frequencyVar =
-      _file.addVar(FREQUENCY, "", FREQUENCY_LONG,
-                   ncxxFloat, _frequencyDim, HZ, true);
-    _frequencyVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
-
-  } catch (NcxxException& e) {
-
-    _addErrStr("ERROR - Cf2RadxFile::_addFrequencyVariable");
-    _addErrStr("  Exception: ", e.what());
-    return -1;
-
+  
+  if (_verbose) {
+    cerr << "Cf2RadxFile::_addFrequencyVariable()" << endl;
   }
+  
+  NcxxVar var =
+    group.addVar(FREQUENCY, "", FREQUENCY_LONG,
+                 ncxxFloat, _frequencyDim, HZ, true);
+  // _frequencyVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
 
-  return 0;
+  RadxArray<float> fvals_;
+  float *fvals = fvals_.alloc(nFreq);
+  for (size_t ii = 0; ii < nFreq; ii++) {
+    fvals[ii] = frequency[ii];
+  }
+  var.putVal(fvals);
 
 }
 
 //////////////////////////////////////////////
-// add correction variables
+// add georef corrections
+// throws exception on error
 
-int Cf2RadxFile::_addCorrectionVariables()
+void Cf2RadxFile::_addGeorefCorrections()
 {
-
+  
   if (_verbose) {
-    cerr << "Cf2RadxFile::_addCorrectionVariables()" << endl;
+    cerr << "Cf2RadxFile::_addGeorefCorrections()" << endl;
   }
 
-  try {
-
-    _azimuthCorrVar = 
-      _file.addVar(AZIMUTH_CORRECTION, "", AZIMUTH_CORRECTION_LONG,
+  NcxxGroup group = _file.addGroup(GEOREF_CORRECTION);
+  const RadxCfactors *cfac = _writeVol->getCfactors();
+  
+  {
+    NcxxVar var =
+      group.addVar(AZIMUTH_CORRECTION, "",
+                   AZIMUTH_CORRECTION_LONG,
                    ncxxFloat, DEGREES, true);
-    _azimuthCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
-    
-    _elevationCorrVar = 
-      _file.addVar(ELEVATION_CORRECTION, "", ELEVATION_CORRECTION_LONG,
+    var.putVal((float) cfac->getAzimuthCorr());
+  }
+  
+  {
+    NcxxVar var =
+      group.addVar(ELEVATION_CORRECTION, "",
+                   ELEVATION_CORRECTION_LONG,
                    ncxxFloat, DEGREES, true);
-    _elevationCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
-    
-    _rangeCorrVar = 
-      _file.addVar(RANGE_CORRECTION, "", RANGE_CORRECTION_LONG,
+    var.putVal((float) cfac->getElevationCorr());
+  }
+  
+  {
+    NcxxVar var =
+      group.addVar(RANGE_CORRECTION, "",
+                   RANGE_CORRECTION_LONG,
                    ncxxFloat, METERS, true);
-    _rangeCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
-    
-    _longitudeCorrVar = 
-      _file.addVar(LONGITUDE_CORRECTION, "", LONGITUDE_CORRECTION_LONG,
+    var.putVal((float) cfac->getRangeCorr());
+  }
+  
+  {
+    NcxxVar var =
+      group.addVar(LONGITUDE_CORRECTION, "",
+                   LONGITUDE_CORRECTION_LONG,
                    ncxxFloat, DEGREES, true);
-    _longitudeCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
-    
-    _latitudeCorrVar = 
-      _file.addVar(LATITUDE_CORRECTION, "", LATITUDE_CORRECTION_LONG,
+    var.putVal((float) cfac->getLongitudeCorr());
+  }
+  
+  {
+    NcxxVar var =
+      group.addVar(LATITUDE_CORRECTION, "",
+                   LATITUDE_CORRECTION_LONG,
                    ncxxFloat, DEGREES, true);
-    _latitudeCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
-    
-    _pressureAltCorrVar = 
-      _file.addVar(PRESSURE_ALTITUDE_CORRECTION, "", PRESSURE_ALTITUDE_CORRECTION_LONG,
+    var.putVal((float) cfac->getLatitudeCorr());
+  }
+  
+  {
+    NcxxVar var =
+      group.addVar(PRESSURE_ALTITUDE_CORRECTION, "",
+                   PRESSURE_ALTITUDE_CORRECTION_LONG,
                    ncxxFloat, METERS, true);
-    _pressureAltCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
-    
-    _altitudeCorrVar = 
-      _file.addVar(ALTITUDE_CORRECTION, "", ALTITUDE_CORRECTION_LONG,
+    var.putVal((float) cfac->getPressureAltCorr());
+  }
+  
+  {
+    NcxxVar var =
+      group.addVar(ALTITUDE_CORRECTION, "",
+                   ALTITUDE_CORRECTION_LONG,
                    ncxxFloat, METERS, true);
-    _altitudeCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
-    
-    _ewVelCorrVar = 
-      _file.addVar(EASTWARD_VELOCITY_CORRECTION, "", EASTWARD_VELOCITY_CORRECTION_LONG, 
-                   ncxxFloat, METERS_PER_SECOND, true);
-    _ewVelCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
-    
-    _nsVelCorrVar = 
-      _file.addVar(NORTHWARD_VELOCITY_CORRECTION, "", NORTHWARD_VELOCITY_CORRECTION_LONG,
-                   ncxxFloat, METERS_PER_SECOND, true);
-    _nsVelCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
-    
-    _vertVelCorrVar = 
-      _file.addVar(VERTICAL_VELOCITY_CORRECTION, "", VERTICAL_VELOCITY_CORRECTION_LONG,
-                   ncxxFloat, METERS_PER_SECOND, true);
-    _vertVelCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
-    
-    _headingCorrVar = 
-      _file.addVar(HEADING_CORRECTION, "", HEADING_CORRECTION_LONG,
-                   ncxxFloat, DEGREES, true);
-    _headingCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
-    
-    _rollCorrVar = 
-      _file.addVar(ROLL_CORRECTION, "", ROLL_CORRECTION_LONG,
-                   ncxxFloat, DEGREES, true);
-    _rollCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
-    
-    _pitchCorrVar = 
-      _file.addVar(PITCH_CORRECTION, "", PITCH_CORRECTION_LONG,
-                   ncxxFloat, DEGREES, true);
-    _pitchCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
-    
-    _driftCorrVar = 
-      _file.addVar(DRIFT_CORRECTION, "", DRIFT_CORRECTION_LONG,
-                   ncxxFloat, DEGREES, true);
-    _driftCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
-    
-    _rotationCorrVar = 
-      _file.addVar(ROTATION_CORRECTION, "", ROTATION_CORRECTION_LONG,
-                   ncxxFloat, DEGREES, true);
-    _rotationCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
-    
-    _tiltCorrVar = 
-      _file.addVar(TILT_CORRECTION, "", TILT_CORRECTION_LONG,
-                   ncxxFloat, DEGREES, true);
-    _tiltCorrVar.putAtt(META_GROUP, GEOMETRY_CORRECTION);
-
-  } catch (NcxxException& e) {
-
-    _addErrStr("ERROR - Cf2RadxFile::_addCorrectionVariables");
-    _addErrStr("  Exception: ", e.what());
-    return -1;
-
+    var.putVal((float) cfac->getAltitudeCorr());
   }
 
-  return 0;
+  {
+    NcxxVar var =
+      group.addVar(EASTWARD_VELOCITY_CORRECTION, "",
+                   EASTWARD_VELOCITY_CORRECTION_LONG, 
+                   ncxxFloat, METERS_PER_SECOND, true);
+    var.putVal((float) cfac->getEwVelCorr());
+  }
+    
+  {
+    NcxxVar var =
+      group.addVar(NORTHWARD_VELOCITY_CORRECTION, "",
+                   NORTHWARD_VELOCITY_CORRECTION_LONG,
+                   ncxxFloat, METERS_PER_SECOND, true);
+    var.putVal((float) cfac->getNsVelCorr());
+  }
+  
+  {
+    NcxxVar var =
+      group.addVar(VERTICAL_VELOCITY_CORRECTION, "",
+                   VERTICAL_VELOCITY_CORRECTION_LONG,
+                   ncxxFloat, METERS_PER_SECOND, true);
+    var.putVal((float) cfac->getVertVelCorr());
+  }
+  
+  {
+    NcxxVar var =
+      group.addVar(HEADING_CORRECTION, "",
+                   HEADING_CORRECTION_LONG,
+                   ncxxFloat, DEGREES, true);
+    var.putVal((float) cfac->getHeadingCorr());
+  }
 
+  {
+    NcxxVar var =
+      group.addVar(ROLL_CORRECTION, "",
+                   ROLL_CORRECTION_LONG,
+                   ncxxFloat, DEGREES, true);
+    var.putVal((float) cfac->getRollCorr());
+  }
+  
+  {
+    NcxxVar var =
+      group.addVar(PITCH_CORRECTION, "",
+                   PITCH_CORRECTION_LONG,
+                   ncxxFloat, DEGREES, true);
+    var.putVal((float) cfac->getPitchCorr());
+  }
+  
+  {
+    NcxxVar var =
+      group.addVar(DRIFT_CORRECTION, "",
+                   DRIFT_CORRECTION_LONG,
+                   ncxxFloat, DEGREES, true);
+    var.putVal((float) cfac->getDriftCorr());
+  }
+  
+  {
+    NcxxVar var =
+      group.addVar(ROTATION_CORRECTION, "",
+                   ROTATION_CORRECTION_LONG,
+                   ncxxFloat, DEGREES, true);
+    var.putVal((float) cfac->getRotationCorr());
+  }
+  
+  {
+    NcxxVar var =
+      group.addVar(TILT_CORRECTION, "",
+                   TILT_CORRECTION_LONG,
+                   ncxxFloat, DEGREES, true);
+    var.putVal((float) cfac->getTiltCorr());
+  }
+  
 }
 
 //////////////////////////////////////////////
@@ -2883,47 +2913,6 @@ void Cf2RadxFile::_setEstNoiseAvailFlags()
 }
 
 ////////////////////////////////////////////////
-// write correction variables
-
-int Cf2RadxFile::_writeCorrectionVariables()
-{
-
-  if (_verbose) {
-    cerr << "Cf2RadxFile::_writeCorrectionVariables()" << endl;
-  }
-
-  const RadxCfactors *cfac = _writeVol->getCfactors();
-  
-  try {
-    _azimuthCorrVar.putVal((float) cfac->getAzimuthCorr());
-    _elevationCorrVar.putVal((float) cfac->getElevationCorr());
-    _rangeCorrVar.putVal((float) cfac->getRangeCorr());
-    _longitudeCorrVar.putVal((float) cfac->getLongitudeCorr());
-    _latitudeCorrVar.putVal((float) cfac->getLatitudeCorr());
-    _pressureAltCorrVar.putVal((float) cfac->getPressureAltCorr());
-    _altitudeCorrVar.putVal((float) cfac->getAltitudeCorr());
-    _ewVelCorrVar.putVal((float) cfac->getEwVelCorr());
-    _nsVelCorrVar.putVal((float) cfac->getNsVelCorr());
-    _vertVelCorrVar.putVal((float) cfac->getVertVelCorr());
-    _headingCorrVar.putVal((float) cfac->getHeadingCorr());
-    _rollCorrVar.putVal((float) cfac->getRollCorr());
-    _pitchCorrVar.putVal((float) cfac->getPitchCorr());
-    _driftCorrVar.putVal((float) cfac->getDriftCorr());
-    _rotationCorrVar.putVal((float) cfac->getRotationCorr());
-    _tiltCorrVar.putVal((float) cfac->getTiltCorr());
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_writeCorrectionVariables");
-    _addErrStr("  Cannot write var");
-    _addErrStr(_file.getErrStr());
-    _addErrStr("  Exception: ", e.what());
-    return -1;
-  }
-    
-  return 0;
-
-}
-
-////////////////////////////////////////////////
 // write projection variables
 
 int Cf2RadxFile::_writeProjectionVariables()
@@ -2965,41 +2954,6 @@ int Cf2RadxFile::_writeProjectionVariables()
 
   }
     
-  return 0;
-
-}
-
-////////////////////////////////////////////////
-// write frequency variable
-
-int Cf2RadxFile::_writeFrequencyVariable()
-{
-
-  const vector<double> &frequency = _writeVol->getFrequencyHz();
-  int nFreq = frequency.size();
-  if (nFreq < 1) {
-    return 0;
-  }
-  
-  try {
-
-    RadxArray<float> fvals_;
-    float *fvals = fvals_.alloc(nFreq);
-    for (int ii = 0; ii < nFreq; ii++) {
-      fvals[ii] = frequency[ii];
-    }
-    _frequencyVar.putVal(fvals);
-
-  } catch (NcxxException& e) {
-    
-    _addErrStr("ERROR - Cf2RadxFile::_writeFrequencyVariables");
-    _addErrStr("  Cannot write var");
-    _addErrStr(_file.getErrStr());
-    _addErrStr("  Exception: ", e.what());
-    return -1;
-
-  }
-
   return 0;
 
 }
@@ -3112,7 +3066,7 @@ string Cf2RadxFile::_computeWritePath(const RadxVol &vol,
     volNumStr[0] = '\0'; // NULL str
   }
 
-  string prefix = "cfrad.";
+  string prefix = "cfrad2.";
   if (_writeFileNamePrefix.size() > 0) {
     prefix = _writeFileNamePrefix;
   }
