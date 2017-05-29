@@ -763,7 +763,7 @@ int Cf2RadxFile::_readDimensions()
 
   // calibration dimension is optional
 
-  _calDim = _file.getDim(R_CALIB);
+  _calDimRead = _file.getDim(R_CALIB);
 
   return 0;
 
@@ -2128,13 +2128,13 @@ int Cf2RadxFile::_readCalibrationVariables()
 
 {
 
-  if (_calDim.isNull()) {
+  if (_calDimRead.isNull()) {
     // no cal available
     return 0;
   }
   
   int iret = 0;
-  for (size_t ii = 0; ii < _calDim.getSize(); ii++) {
+  for (size_t ii = 0; ii < _calDimRead.getSize(); ii++) {
     RadxRcalib *cal = new RadxRcalib;
     if (_readCal(*cal, ii)) {
       _addErrStr("ERROR - Cf2RadxFile::_readCalibrationVariables");
@@ -3175,7 +3175,7 @@ int Cf2RadxFile::_readCalTime(const string &name, NcxxVar &var,
   }
 
   NcxxDim rCalDim = var.getDim(0);
-  if (rCalDim != _calDim) {
+  if (rCalDim != _calDimRead) {
     _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has incorrect first dimension, dim name: ", 
@@ -3204,7 +3204,7 @@ int Cf2RadxFile::_readCalTime(const string &name, NcxxVar &var,
 
   // load up data
   
-  size_t nCals = _calDim.getSize();
+  size_t nCals = _calDimRead.getSize();
   if (index > (int) nCals - 1) {
     _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
     _addErrStr("  requested index too high");

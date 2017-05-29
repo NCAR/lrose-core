@@ -199,8 +199,8 @@ private:
   NcxxDim _timeDimRead;
   NcxxDim _rangeDimRead;
   NcxxDim _nPointsDimRead;
+  NcxxDim _calDimRead;
   NcxxDim _sweepDim;
-  NcxxDim _calDim;
   NcxxDim _frequencyDim;
 
   // coordinate variables
@@ -663,8 +663,8 @@ private:
 
   void _addFrequencyVariable(NcxxGroup &group);
   void _addGeorefCorrections();
-  int _addProjectionVariables();
-  int _addSweepGroups();
+  void _addProjection();
+  void _addSweepGroups();
 
   void _addSweepGroupAttributes(const RadxSweep *sweep,
                                 NcxxGroup &sweepGroup);
@@ -695,7 +695,8 @@ private:
   
   void _addRadarCalibration();
 
-  void _addCalVar(NcxxGroup group,
+  void _addCalVar(NcxxGroup &group,
+                  NcxxDim &dim,
                   float *vals,
                   const string &name,
                   const string &standardName,
@@ -776,6 +777,7 @@ private:
   const static char* ELEVATION;
   const static char* ELEVATION_CORRECTION;
   const static char* END_DATETIME;
+  const static char* END_TIME;
   const static char* FALSE_EASTING;
   const static char* FALSE_NORTHING;
   const static char* FFT_LENGTH;
@@ -945,6 +947,7 @@ private:
   const static char* STARING;
   const static char* START_DATETIME;
   const static char* START_RANGE;
+  const static char* START_TIME;
   const static char* STATIONARY;
   const static char* STATUS_XML;
   const static char* STATUS_XML_LENGTH;
