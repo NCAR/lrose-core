@@ -1113,6 +1113,11 @@ private:
                                NcxxDim &timeDim,
                                NcxxDim &rangeDim);
 
+  void _addSweepGroupGeorefs(const RadxSweep *sweep,
+                             RadxVol &sweepVol,
+                             NcxxGroup &sweepGroup,
+                             NcxxDim &timeDim);
+
   void _addSweepGroupFields(const RadxSweep *sweep,
                             RadxVol &sweepVol,
                             NcxxGroup &sweepGroup,

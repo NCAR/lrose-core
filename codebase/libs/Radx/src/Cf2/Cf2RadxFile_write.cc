@@ -405,12 +405,6 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
     return _closeOnError("_addDimensions");
   }
 
-  // add sweep groups
-
-  if (_addSweepGroups()) {
-    return _closeOnError("_addSweepGroups");
-  }
-
   if (_addScalarVariables()) {
     return _closeOnError("_addScalarVariables");
   }
@@ -437,13 +431,11 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
     return _closeOnError("_addCalibVariables");
   }
 
-  // if (_addCoordinateVariables()) {
-  //   return _closeOnError("_addCoordinateVariables");
-  // }
+  // add sweep groups
 
-  // if (_addRayVariables()) {
-  //   return _closeOnError("_addRayVariables");
-  // }
+  if (_addSweepGroups()) {
+    return _closeOnError("_addSweepGroups");
+  }
 
   // if (_georefsActive) {
   //   if (_addGeorefVariables()) {
@@ -1358,7 +1350,7 @@ int Cf2RadxFile::_addSweepGroups()
       _addErrStr("  Exception: ", e.what());
       return -1;
     }
-
+    
     // add sweep group variables
 
     try {
@@ -1369,6 +1361,19 @@ int Cf2RadxFile::_addSweepGroups()
       _addErrStr("  Adding sweep group variables");
       _addErrStr("  Exception: ", e.what());
       return -1;
+    }
+
+    // add georefs as needed
+
+    if (_georefsActive) {
+      try {
+        _addSweepGroupGeorefs(sweeps[isweep], sweepVol, sweepGroup, timeDim);
+      } catch (NcxxException& e) {
+        _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
+        _addErrStr("  Adding sweep group georefs");
+        _addErrStr("  Exception: ", e.what());
+        return -1;
+      }
     }
 
     // add sweep group fields
@@ -1798,6 +1803,455 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
     estNoiseDbmVxVar.putVal(fvals);
   }
   
+}
+
+//////////////////////////////////////////////
+// add sweep group georefs
+// throws exception on error
+
+void Cf2RadxFile::_addSweepGroupGeorefs(const RadxSweep *sweep,
+                                        RadxVol &sweepVol,
+                                        NcxxGroup &sweepGroup,
+                                        NcxxDim &timeDim)
+  
+{
+
+  if (_verbose) {
+    cerr << "Cf2RadxFile::_addSweepGroupGeorefs()" << endl;
+  }
+  
+  // get rays
+  
+  const vector<RadxRay *> &rays = sweepVol.getRays();
+  size_t nRays = sweepVol.getNRays(); 
+  
+  // alloc utility arrays
+
+  RadxArray<double> dvals_;
+  double *dvals = dvals_.alloc(nRays);
+
+  RadxArray<float> fvals_;
+  float *fvals = fvals_.alloc(nRays);
+
+  try {
+    
+    // always add geo time
+    
+    NcxxVar georefTimeVar = 
+      sweepGroup.addVar(GEOREF_TIME, "", GEOREF_TIME_LONG,
+                        ncxxDouble, timeDim, SECONDS, true);
+    RadxTime volStartSecs(_writeVol->getStartTimeSecs());
+    for (size_t iray = 0; iray < rays.size(); iray++) {
+      const RadxGeoref *geo = rays[iray]->getGeoreference();
+      if (geo) {
+        RadxTime geoTime(geo->getTimeSecs(), geo->getNanoSecs() * 1.0e-9);
+        double dsecs = geoTime - volStartSecs;
+        dvals[iray] = dsecs;
+      } else {
+        dvals[iray] = Radx::missingMetaDouble;
+      }
+    }
+    georefTimeVar.putVal(dvals);
+    
+    // we always add the postion variables
+    
+    // latitude
+
+    NcxxVar latitudeVar = 
+      sweepGroup.addVar(LATITUDE, "", LATITUDE_LONG,
+                        ncxxDouble, timeDim, DEGREES_NORTH, true);
+    for (size_t iray = 0; iray < rays.size(); iray++) {
+      const RadxGeoref *geo = rays[iray]->getGeoreference();
+      if (geo) {
+        dvals[iray] = _checkMissingDouble(geo->getLatitude());
+      } else {
+        dvals[iray] = Radx::missingMetaDouble;
+      }
+    }
+    latitudeVar.putVal(dvals);
+
+    // longitude
+
+    NcxxVar longitudeVar = 
+      sweepGroup.addVar(LONGITUDE, "", LONGITUDE_LONG,
+                        ncxxDouble, timeDim, DEGREES_EAST, true);
+    for (size_t iray = 0; iray < rays.size(); iray++) {
+      const RadxGeoref *geo = rays[iray]->getGeoreference();
+      if (geo) {
+        dvals[iray] = _checkMissingDouble(geo->getLongitude());
+      } else {
+        dvals[iray] = Radx::missingMetaDouble;
+      }
+    }
+    longitudeVar.putVal(dvals);
+
+    // altitude msl
+    
+    NcxxVar altitudeVar = 
+      sweepGroup.addVar(ALTITUDE, "", ALTITUDE_LONG,
+                        ncxxDouble, timeDim, METERS, true);
+    altitudeVar.putAtt(POSITIVE, UP);
+    for (size_t iray = 0; iray < rays.size(); iray++) {
+      const RadxGeoref *geo = rays[iray]->getGeoreference();
+      if (geo) {
+        double altKm = geo->getAltitudeKmMsl();
+        if (altKm > -9990) {
+          dvals[iray] = altKm * 1000.0; // meters
+        } else {
+          dvals[iray] = Radx::missingMetaDouble;
+        }
+      } else {
+        dvals[iray] = Radx::missingMetaDouble;
+      }
+    }
+    altitudeVar.putVal(dvals);
+
+    // altitude agl
+
+    NcxxVar altitudeAglVar = 
+      sweepGroup.addVar(ALTITUDE_AGL, "", ALTITUDE_AGL_LONG,
+                        ncxxDouble, timeDim, METERS, true);
+    altitudeAglVar.putAtt(POSITIVE, UP);
+    for (size_t iray = 0; iray < rays.size(); iray++) {
+      const RadxGeoref *geo = rays[iray]->getGeoreference();
+      if (geo) {
+        double altKm = geo->getAltitudeKmAgl();
+        if (altKm > -9990) {
+          dvals[iray] = altKm * 1000.0; // meters
+        } else {
+          dvals[iray] = Radx::missingMetaDouble;
+        }
+      } else {
+        dvals[iray] = Radx::missingMetaDouble;
+      }
+    }
+    altitudeAglVar.putVal(dvals);
+
+    // conditionally add the georeference variables
+
+    // heading
+
+    if (_geoCount.getHeading() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(HEADING, "", HEADING_LONG,
+                          ncxxFloat, timeDim, DEGREES, true);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getHeading());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+
+    // track
+
+    if (_geoCount.getTrack() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(TRACK, "", TRACK_LONG, 
+                          ncxxFloat, timeDim, DEGREES, true);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getTrack());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+
+    // roll
+
+    if (_geoCount.getRoll() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(ROLL, "", ROLL_LONG, 
+                          ncxxFloat, timeDim, DEGREES, true);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getRoll());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+
+    // pitch
+
+    if (_geoCount.getPitch() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(PITCH, "", PITCH_LONG, 
+                          ncxxFloat, timeDim, DEGREES, true);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getPitch());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+
+    // drift
+
+    if (_geoCount.getDrift() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(DRIFT, "", DRIFT_LONG, ncxxFloat,
+                          timeDim, DEGREES, true);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getDrift());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+
+    // rotation
+
+    if (_geoCount.getRotation() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(ROTATION, "", ROTATION_LONG,
+                          ncxxFloat, timeDim, DEGREES, true);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getRotation());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+  
+    // tilt
+
+    if (_geoCount.getTilt() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(TILT, "", TILT_LONG,
+                          ncxxFloat, timeDim, DEGREES, true);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getTilt());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+
+    // EW velocity
+
+    if (_geoCount.getEwVelocity() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(EASTWARD_VELOCITY, "", EASTWARD_VELOCITY_LONG,
+                          ncxxFloat, timeDim, METERS_PER_SECOND, true);
+      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getEwVelocity());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+  
+    // NS velocity
+
+    if (_geoCount.getNsVelocity() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(NORTHWARD_VELOCITY, "", NORTHWARD_VELOCITY_LONG,
+                          ncxxFloat, timeDim, METERS_PER_SECOND, true);
+      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getNsVelocity());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+
+    // vert velocity
+
+    if (_geoCount.getVertVelocity() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(VERTICAL_VELOCITY, "", VERTICAL_VELOCITY_LONG,
+                          ncxxFloat, timeDim, METERS_PER_SECOND, true);
+      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getVertVelocity());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+
+    // EW wind
+
+    if (_geoCount.getEwWind() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(EASTWARD_WIND, "", EASTWARD_WIND_LONG,
+                          ncxxFloat, timeDim, METERS_PER_SECOND, true);
+      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getEwWind());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+
+    // NS wind
+
+    if (_geoCount.getNsWind() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(NORTHWARD_WIND, "", NORTHWARD_WIND_LONG,
+                          ncxxFloat, timeDim, METERS_PER_SECOND, true);
+      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getNsWind());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+
+    // vert wind
+
+    if (_geoCount.getVertWind() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(VERTICAL_WIND, "", VERTICAL_WIND_LONG,
+                          ncxxFloat, timeDim, METERS_PER_SECOND, true);
+      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getVertWind());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+
+    // heading rate
+
+    if (_geoCount.getHeadingRate() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(HEADING_CHANGE_RATE, "", HEADING_CHANGE_RATE_LONG,
+                          ncxxFloat, timeDim, DEGREES_PER_SECOND, true);
+      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getHeadingRate());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+
+    // pitch rate
+
+    if (_geoCount.getPitchRate() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(PITCH_CHANGE_RATE, "", PITCH_CHANGE_RATE_LONG,
+                          ncxxFloat, timeDim, DEGREES_PER_SECOND, true);
+      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getPitchRate());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+
+    // roll rate
+
+    if (_geoCount.getRollRate() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(ROLL_CHANGE_RATE, "", ROLL_CHANGE_RATE_LONG,
+                          ncxxFloat, timeDim, DEGREES_PER_SECOND, true);
+      var.putAtt(META_GROUP, PLATFORM_VELOCITY);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getRollRate());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+
+    // drive angle 1 - HCR
+
+    if (_geoCount.getDriveAngle1() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(DRIVE_ANGLE_1, "", "antenna_drive_angle_1",
+                          ncxxFloat, timeDim, DEGREES, true);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getDriveAngle1());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+  
+    // drive angle 2 - HCR
+
+    if (_geoCount.getDriveAngle2() > 0) {
+      NcxxVar var = 
+        sweepGroup.addVar(DRIVE_ANGLE_2, "", "antenna_drive_angle_2",
+                          ncxxFloat, timeDim, DEGREES, true);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          fvals[iray] = _checkMissingFloat(geo->getDriveAngle2());
+        } else {
+          fvals[iray] = Radx::missingMetaFloat;
+        }
+      }
+      var.putVal(fvals);
+    }
+  
+  } catch (NcxxException& e) {
+    
+    _addErrStr("ERROR - Cf2RadxFile::_addSweepGroupGeoref");
+    _addErrStr("  Exception: ", e.what());
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    
+  }
+
 }
 
 //////////////////////////////////////////////
