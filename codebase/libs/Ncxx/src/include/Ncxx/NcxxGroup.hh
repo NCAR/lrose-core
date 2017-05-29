@@ -755,20 +755,6 @@ public:
   void readGlobAttr(const string &name, float &val);
   void readGlobAttr(const string &name, double &val);
 
-  ///////////////////////////////////////////
-  // add a dimension
-  // Throws NcxxException on failure
-  // Side effect: dim arg is updated
-     
-  void addDim(NcxxDim &dim, const string &name, int size);
-
-  ///////////////////////////////////////////
-  // read a dimension
-  // Throws NcxxException on failure
-  // Side effect: dim arg is set
-     
-  void readDim(const string &name, NcxxDim &dim);
-
   //////////////////////////////////////////////
   // When adding variables, you have the option
   // to use the 'proposed_standard_name' attribute

@@ -1103,10 +1103,28 @@ private:
   int _addCorrectionVariables();
   int _addProjectionVariables();
   int _addSweepGroups();
+
   void _addSweepGroupAttributes(const RadxSweep *sweep,
                                 NcxxGroup &sweepGroup);
+
   void _addSweepGroupVariables(const RadxSweep *sweep,
-                               NcxxGroup &sweepGroup);
+                               RadxVol &sweepVol,
+                               NcxxGroup &sweepGroup,
+                               NcxxDim &timeDim,
+                               NcxxDim &rangeDim);
+
+  void _addSweepGroupFields(const RadxSweep *sweep,
+                            RadxVol &sweepVol,
+                            NcxxGroup &sweepGroup,
+                            NcxxDim &timeDim,
+                            NcxxDim &rangeDim);
+
+  NcxxVar _createFieldVar(const RadxField &field,
+                          NcxxDim &timeDim,
+                          NcxxDim &rangeDim);
+
+  void _writeFieldVar(NcxxVar &var, RadxField *field);
+  
   int _addSweepVariables();
   int _addCalibVariables();
   int _addRayVariables();
@@ -1129,7 +1147,7 @@ private:
 
   int _writeFieldVariables();
   NcxxVar _addFieldVar(const RadxField &field);
-  int _writeFieldVar(NcxxVar &var, RadxField *field);
+  NcxxVar _createFieldVar(const RadxField &field);
   int _closeOnError(const string &caller);
 
   int _setCompression(NcxxVar &var);

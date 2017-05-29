@@ -833,34 +833,32 @@ int Cf2RadxFile::_addDimensions()
 
     // add time dimension - unlimited??
     
-    _file.addDim(_timeDim, TIME, _writeVol->getRays().size());
+    _timeDim = _file.addDim(TIME, _writeVol->getRays().size());
 
     // add range dimension
     
-    _file.addDim(_rangeDim, RANGE, _writeVol->getMaxNGates());
+    _rangeDim = _file.addDim(RANGE, _writeVol->getMaxNGates());
 
     // add n_points dimension if applicable
     
     if (_nGatesVary) {
-      _file.addDim(_nPointsDim, N_POINTS, _writeVol->getNPoints());
+      _nPointsDim = _file.addDim(N_POINTS, _writeVol->getNPoints());
     }
 
     // add sweep dimension
     
-    _file.addDim(_sweepDim, SWEEP, _writeVol->getSweeps().size());
+    _sweepDim = _file.addDim(SWEEP, _writeVol->getSweeps().size());
 
     // add calib dimension
     
     if (_writeVol->getRcalibs().size() > 0) {
-      _file.addDim(_calDim, R_CALIB, 
-                   _writeVol->getRcalibs().size());
+      _calDim = _file.addDim(R_CALIB, _writeVol->getRcalibs().size());
     }
     
     // add multiple frequencies dimension
 
     if (_writeVol->getFrequencyHz().size() > 0) {
-      _file.addDim(_frequencyDim, FREQUENCY, 
-                   _writeVol->getFrequencyHz().size());
+      _frequencyDim = _file.addDim(FREQUENCY, _writeVol->getFrequencyHz().size());
     }
 
   } catch (NcxxException e) {
@@ -1311,12 +1309,20 @@ int Cf2RadxFile::_addSweepGroups()
   const vector<RadxSweep *> &sweeps = _writeVol->getSweeps();
   int nSweeps = (int) sweeps.size();
 
-  for (int ii = 0; ii < nSweeps; ii++) {
+  for (int isweep = 0; isweep < nSweeps; isweep++) {
 
+    // create a volume with just this sweep
+    
+    RadxSweep *sweep = sweeps[isweep];
+    RadxVol sweepVol(*_writeVol, sweep->getSweepNumber());
+
+    // convert fields from rays to 2-D arrays
+    sweepVol.loadFieldsFromRays(true);
+    
     // create name
   
     char name[128];
-    sprintf(name, "sweep_%.4d", ii + 1);
+    sprintf(name, "sweep_%.4d", isweep + 1);
     _sweepGroupNames.push_back(name);
 
     // add group
@@ -1332,10 +1338,18 @@ int Cf2RadxFile::_addSweepGroups()
       return -1;
     }
 
+    // add dimensions
+    
+    size_t nRays = sweepVol.getNRays();
+    NcxxDim timeDim = sweepGroup.addDim(TIME, nRays);
+    
+    size_t nGates = sweepVol.getMaxNGates();
+    NcxxDim rangeDim = sweepGroup.addDim(RANGE, nGates);
+    
     // add sweep group attributes
 
     try {
-      _addSweepGroupAttributes(sweeps[ii], sweepGroup);
+      _addSweepGroupAttributes(sweeps[isweep], sweepGroup);
     } catch (NcxxException& e) {
       _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
       _addErrStr("  Adding sweep group attributes");
@@ -1346,7 +1360,8 @@ int Cf2RadxFile::_addSweepGroups()
     // add sweep group variables
 
     try {
-      _addSweepGroupVariables(sweeps[ii], sweepGroup);
+      _addSweepGroupVariables(sweeps[isweep], sweepVol, sweepGroup, 
+                              timeDim, rangeDim);
     } catch (NcxxException& e) {
       _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
       _addErrStr("  Adding sweep group variables");
@@ -1354,7 +1369,18 @@ int Cf2RadxFile::_addSweepGroups()
       return -1;
     }
 
-  } // ii
+    // add sweep group fields
+
+    try {
+      _addSweepGroupFields(sweeps[isweep], sweepVol, sweepGroup, timeDim, rangeDim);
+    } catch (NcxxException& e) {
+      _addErrStr("ERROR - Cf2RadxFile::_addSweepGroups");
+      _addErrStr("  Adding sweep group fields");
+      _addErrStr("  Exception: ", e.what());
+      return -1;
+    }
+
+  } // isweep
   
   // save sweep names at root level
   
@@ -1362,8 +1388,8 @@ int Cf2RadxFile::_addSweepGroups()
     NcxxVar var = _file.addVar(SWEEP_GROUP_NAME, "", SWEEP_GROUP_NAME_LONG, 
                                ncxxString, _sweepDim, "", true);
     const char **sweepNames = new const char*[nSweeps];
-    for (int ii = 0; ii < nSweeps; ii++) {
-      sweepNames[ii] = _sweepGroupNames[ii].c_str();
+    for (int isweep = 0; isweep < nSweeps; isweep++) {
+      sweepNames[isweep] = _sweepGroupNames[isweep].c_str();
     }
     var.putVal(sweepNames);
     delete[] sweepNames;
@@ -1382,8 +1408,8 @@ int Cf2RadxFile::_addSweepGroups()
                                ncxxFloat, _sweepDim, DEGREES, true);
     RadxArray<float> fvals_;
     float *fvals = fvals_.alloc(nSweeps);
-    for (int ii = 0; ii < nSweeps; ii++) {
-      fvals[ii] = sweeps[ii]->getFixedAngleDeg();
+    for (int isweep = 0; isweep < nSweeps; isweep++) {
+      fvals[isweep] = sweeps[isweep]->getFixedAngleDeg();
     }
     var.putVal(fvals);
   } catch (NcxxException& e) {
@@ -1447,15 +1473,18 @@ void Cf2RadxFile::_addSweepGroupAttributes(const RadxSweep *sweep,
 // throws exception on error
 
 void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
-                                          NcxxGroup &sweepGroup)
+                                          RadxVol &sweepVol,
+                                          NcxxGroup &sweepGroup,
+                                          NcxxDim &timeDim,
+                                          NcxxDim &rangeDim)
   
 {
-
-  // create a volume with just this sweep
   
-  RadxVol sweepVol(*_writeVol, sweep->getSweepNumber());
+  // get rays
+  
   const vector<RadxRay *> &rays = sweepVol.getRays();
-
+  size_t nRays = sweepVol.getNRays(); 
+  
   // make the geometry constant
   // set the number of gates to be constant
 
@@ -1464,17 +1493,7 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
   double startRangeKm = sweepVol.getStartRangeKm();
   double gateSpacingKm = sweepVol.getGateSpacingKm();
   
-  // add dimensions
-  
-  NcxxDim timeDim;
-  size_t nRays = sweepVol.getNRays();
-  sweepGroup.addDim(timeDim, TIME, nRays);
-
-  NcxxDim rangeDim;
-  size_t nGates = sweepVol.getMaxNGates();
-  sweepGroup.addDim(rangeDim, RANGE, nGates);
-
-  // alloc arrays
+  // alloc utility arrays
 
   RadxArray<double> dvals_;
   double *dvals = dvals_.alloc(nRays);
@@ -1488,7 +1507,7 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
   RadxArray<signed char> bvals_;
   signed char *bvals = bvals_.alloc(nRays);
 
-  // add time coordinate variable
+  // Add time coordinate variable.
   // Note that in CF, coordinate variables have the same name
   // as their dimension
 
@@ -1505,10 +1524,10 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
   timeVar.putAtt(UNITS, timeUnitsStr);
   timeVar.putAtt(COMMENT, "times are relative to the volume start_time");
 
-  for (size_t ii = 0; ii < nRays; ii++) {
-    RadxTime rayTime = rays[ii]->getRadxTime();
+  for (size_t iray = 0; iray < nRays; iray++) {
+    RadxTime rayTime = rays[iray]->getRadxTime();
     double dsecs = rayTime - stime;
-    dvals[ii] = dsecs;
+    dvals[iray] = dsecs;
   }
   timeVar.putVal(dvals);
 
@@ -1541,9 +1560,10 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
                          (float) gateSpacingKm * 1000.0);
   double rangeKm = startRangeKm;
   RadxArray<float> rangeM_;
-  float *rangeM = rangeM_.alloc(nGates);
-  for (size_t ii = 0; ii < nGates; ii++, rangeKm += gateSpacingKm) {
-    rangeM[ii] = rangeKm * 1000.0;
+  float *rangeM = rangeM_.alloc(rangeDim.getSize());
+  for (size_t igate = 0; igate < rangeDim.getSize();
+       igate++, rangeKm += gateSpacingKm) {
+    rangeM[igate] = rangeKm * 1000.0;
   }
   rangeVar.putVal(rangeM);
   
@@ -1552,8 +1572,8 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
   NcxxVar elVar =
     sweepGroup.addVar(ELEVATION, "", ELEVATION_LONG,
                       ncxxFloat, timeDim, DEGREES, true);
-  for (size_t ii = 0; ii < nRays; ii++) {
-    fvals[ii] =  rays[ii]->getElevationDeg();
+  for (size_t iray = 0; iray < nRays; iray++) {
+    fvals[iray] =  rays[iray]->getElevationDeg();
   }
   // elVar.putAtt(POSITIVE, UP);
   elVar.putVal(fvals);
@@ -1563,8 +1583,8 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
   NcxxVar azVar = 
     sweepGroup.addVar(AZIMUTH, "", AZIMUTH_LONG,
                       ncxxFloat, timeDim, DEGREES, true);
-  for (size_t ii = 0; ii < nRays; ii++) {
-    fvals[ii] = rays[ii]->getAzimuthDeg();
+  for (size_t iray = 0; iray < nRays; iray++) {
+    fvals[iray] = rays[iray]->getAzimuthDeg();
   }
   azVar.putVal(fvals);
   
@@ -1574,11 +1594,11 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
     sweepGroup.addVar(PULSE_WIDTH, "", PULSE_WIDTH_LONG,
                       ncxxFloat, timeDim, SECONDS, true);
   pulseWidthVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
-  for (size_t ii = 0; ii < nRays; ii++) {
-    if (rays[ii]->getPulseWidthUsec() > 0) {
-      fvals[ii] = rays[ii]->getPulseWidthUsec() * 1.0e-6;
+  for (size_t iray = 0; iray < nRays; iray++) {
+    if (rays[iray]->getPulseWidthUsec() > 0) {
+      fvals[iray] = rays[iray]->getPulseWidthUsec() * 1.0e-6;
     } else {
-      fvals[ii] = Radx::missingFl32;
+      fvals[iray] = Radx::missingFl32;
     }
   }
   pulseWidthVar.putVal(fvals);
@@ -1589,8 +1609,8 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
     sweepGroup.addVar(PRT, "", PRT_LONG,
                       ncxxFloat, timeDim, SECONDS, true);
   prtVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
-  for (size_t ii = 0; ii < nRays; ii++) {
-    fvals[ii] = rays[ii]->getPrtSec();
+  for (size_t iray = 0; iray < nRays; iray++) {
+    fvals[iray] = rays[iray]->getPrtSec();
   }
   prtVar.putVal(fvals);
   
@@ -1600,8 +1620,8 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
     sweepGroup.addVar(PRT_RATIO, "", PRT_RATIO_LONG,
                       ncxxFloat, timeDim, SECONDS, true);
   prtRatioVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
-  for (size_t ii = 0; ii < nRays; ii++) {
-    fvals[ii] = rays[ii]->getPrtRatio();
+  for (size_t iray = 0; iray < nRays; iray++) {
+    fvals[iray] = rays[iray]->getPrtRatio();
   }
   prtRatioVar.putVal(fvals);
   
@@ -1611,8 +1631,8 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
     sweepGroup.addVar(NYQUIST_VELOCITY, "", NYQUIST_VELOCITY_LONG, 
                       ncxxFloat, timeDim, METERS_PER_SECOND, true);
   nyquistVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
-  for (size_t ii = 0; ii < nRays; ii++) {
-    fvals[ii] = rays[ii]->getNyquistMps();
+  for (size_t iray = 0; iray < nRays; iray++) {
+    fvals[iray] = rays[iray]->getNyquistMps();
   }
   nyquistVar.putVal(fvals);
   
@@ -1622,24 +1642,24 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
     sweepGroup.addVar(UNAMBIGUOUS_RANGE, "", UNAMBIGUOUS_RANGE_LONG,
                       ncxxFloat, timeDim, METERS, true);
   unambigRangeVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
-  for (size_t ii = 0; ii < nRays; ii++) {
-    if (rays[ii]->getUnambigRangeKm() > 0) {
-      fvals[ii] = rays[ii]->getUnambigRangeKm() * 1000.0;
+  for (size_t iray = 0; iray < nRays; iray++) {
+    if (rays[iray]->getUnambigRangeKm() > 0) {
+      fvals[iray] = rays[iray]->getUnambigRangeKm() * 1000.0;
     } else {
-      fvals[ii] = Radx::missingFl32;
+      fvals[iray] = Radx::missingFl32;
     }
   }
   unambigRangeVar.putVal(fvals);
   
-  // antennaTransition
+  // antenna transition
   
   NcxxVar antennaTransitionVar = 
     sweepGroup.addVar(ANTENNA_TRANSITION, "", ANTENNA_TRANSITION_LONG,
                       ncxxByte, _timeDim, "", true);
   antennaTransitionVar.putAtt(COMMENT,
                               "1 if antenna is in transition, 0 otherwise");
-  for (size_t ii = 0; ii < nRays; ii++) {
-    bvals[ii] = rays[ii]->getAntennaTransition();
+  for (size_t iray = 0; iray < nRays; iray++) {
+    bvals[iray] = rays[iray]->getAntennaTransition();
   }
   antennaTransitionVar.putVal(bvals);
   
@@ -1651,11 +1671,11 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
                         ncxxByte, timeDim, "", true);
     georefsAppliedVar.putAtt
       (COMMENT, "1 if georefs have been applied, 0 otherwise");
-    for (size_t ii = 0; ii < nRays; ii++) {
+    for (size_t iray = 0; iray < nRays; iray++) {
       if (_georefsApplied) {
-        bvals[ii] = 1;
+        bvals[iray] = 1;
       } else {
-        bvals[ii] = rays[ii]->getGeorefApplied();
+        bvals[iray] = rays[iray]->getGeorefApplied();
       }
     }
     georefsAppliedVar.putVal(bvals);
@@ -1667,8 +1687,8 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
     sweepGroup.addVar(N_SAMPLES, "", N_SAMPLES_LONG,
                       ncxxInt, _timeDim, "", true);
   nSamplesVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
-  for (size_t ii = 0; ii < nRays; ii++) {
-    ivals[ii] = rays[ii]->getNSamples();
+  for (size_t iray = 0; iray < nRays; iray++) {
+    ivals[iray] = rays[iray]->getNSamples();
   }
   nSamplesVar.putVal(ivals);
   
@@ -1681,8 +1701,8 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
     calIndexVar.putAtt(META_GROUP, RADAR_CALIBRATION);
     calIndexVar.putAtt
       (COMMENT, "This is the index for the calibration which applies to this ray");
-    for (size_t ii = 0; ii < nRays; ii++) {
-      ivals[ii] = rays[ii]->getCalibIndex();
+    for (size_t iray = 0; iray < nRays; iray++) {
+      ivals[iray] = rays[iray]->getCalibIndex();
     }
     calIndexVar.putVal(ivals);
   }
@@ -1694,8 +1714,8 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
                       RADAR_MEASURED_TRANSMIT_POWER_H_LONG,
                       ncxxFloat, timeDim, DBM, true);
   xmitPowerHVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-  for (size_t ii = 0; ii < nRays; ii++) {
-    fvals[ii] = _checkMissingFloat(rays[ii]->getMeasXmitPowerDbmH());
+  for (size_t iray = 0; iray < nRays; iray++) {
+    fvals[iray] = _checkMissingFloat(rays[iray]->getMeasXmitPowerDbmH());
   }
   xmitPowerHVar.putVal(fvals);
   
@@ -1704,12 +1724,12 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
                       RADAR_MEASURED_TRANSMIT_POWER_V_LONG,
                       ncxxFloat, timeDim, DBM, true);
   xmitPowerVVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-  for (size_t ii = 0; ii < nRays; ii++) {
-    fvals[ii] = _checkMissingFloat(rays[ii]->getMeasXmitPowerDbmV());
+  for (size_t iray = 0; iray < nRays; iray++) {
+    fvals[iray] = _checkMissingFloat(rays[iray]->getMeasXmitPowerDbmV());
   }
   xmitPowerVVar.putVal(fvals);
-  for (size_t ii = 0; ii < nRays; ii++) {
-    fvals[ii] = _checkMissingFloat(rays[ii]->getMeasXmitPowerDbmV());
+  for (size_t iray = 0; iray < nRays; iray++) {
+    fvals[iray] = _checkMissingFloat(rays[iray]->getMeasXmitPowerDbmV());
   }
   xmitPowerVVar.putVal(fvals);
   
@@ -1719,8 +1739,8 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
     sweepGroup.addVar(SCAN_RATE, "", SCAN_RATE_LONG, 
                       ncxxFloat, timeDim, DEGREES_PER_SECOND, true);
   scanRateVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
-  for (size_t ii = 0; ii < nRays; ii++) {
-    fvals[ii] = rays[ii]->getTrueScanRateDegPerSec();
+  for (size_t iray = 0; iray < nRays; iray++) {
+    fvals[iray] = rays[iray]->getTrueScanRateDegPerSec();
   }
   scanRateVar.putVal(fvals);
   
@@ -1734,11 +1754,11 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
                         RADAR_ESTIMATED_NOISE_DBM_HC_LONG,
                         ncxxFloat, timeDim, DBM, true);
     estNoiseDbmHcVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-    for (size_t ii = 0; ii < nRays; ii++) {
-      fvals[ii] = rays[ii]->getEstimatedNoiseDbmHc();
+    for (size_t iray = 0; iray < nRays; iray++) {
+      fvals[iray] = rays[iray]->getEstimatedNoiseDbmHc();
     }
     estNoiseDbmHcVar.putVal(fvals);
-  } // if (_estNoiseAvailHc)
+  }
   
   if (_estNoiseAvailVc) {
     NcxxVar estNoiseDbmVcVar = 
@@ -1746,11 +1766,11 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
                         RADAR_ESTIMATED_NOISE_DBM_VC_LONG,
                         ncxxFloat, timeDim, DBM, true);
     estNoiseDbmVcVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-    for (size_t ii = 0; ii < nRays; ii++) {
-      fvals[ii] = rays[ii]->getEstimatedNoiseDbmVc();
+    for (size_t iray = 0; iray < nRays; iray++) {
+      fvals[iray] = rays[iray]->getEstimatedNoiseDbmVc();
     }
     estNoiseDbmVcVar.putVal(fvals);
-  } // if (_estNoiseAvailVc)
+  }
 
   if (_estNoiseAvailHx) {
     NcxxVar estNoiseDbmHxVar = 
@@ -1758,11 +1778,11 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
                         RADAR_ESTIMATED_NOISE_DBM_HX_LONG,
                         ncxxFloat, timeDim, DBM, true);
     estNoiseDbmHxVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-    for (size_t ii = 0; ii < nRays; ii++) {
-      fvals[ii] = rays[ii]->getEstimatedNoiseDbmHx();
+    for (size_t iray = 0; iray < nRays; iray++) {
+      fvals[iray] = rays[iray]->getEstimatedNoiseDbmHx();
     }
     estNoiseDbmHxVar.putVal(fvals);
-  } // if (_estNoiseAvailHx)
+  }
   
   if (_estNoiseAvailVx) {
     NcxxVar estNoiseDbmVxVar = 
@@ -1770,12 +1790,294 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
                         RADAR_ESTIMATED_NOISE_DBM_VX_LONG,
                         ncxxFloat, timeDim, DBM, true);
     estNoiseDbmVxVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-    for (size_t ii = 0; ii < nRays; ii++) {
-      fvals[ii] = rays[ii]->getEstimatedNoiseDbmVx();
+    for (size_t iray = 0; iray < nRays; iray++) {
+      fvals[iray] = rays[iray]->getEstimatedNoiseDbmVx();
     }
     estNoiseDbmVxVar.putVal(fvals);
-  } // if (_estNoiseAvailVx)
+  }
   
+}
+
+//////////////////////////////////////////////
+// add sweep group fields
+// throws exception on error
+
+void Cf2RadxFile::_addSweepGroupFields(const RadxSweep *sweep,
+                                       RadxVol &sweepVol,
+                                       NcxxGroup &sweepGroup,
+                                       NcxxDim &timeDim,
+                                       NcxxDim &rangeDim)
+  
+{
+  
+  if (_verbose) {
+    cerr << "Cf2RadxFile::_addSweepGroupFields()" << endl;
+  }
+
+  // loop through the list of unique fields names in this volume
+
+  vector<string> uniqueFieldNames = sweepVol.getUniqueFieldNameList();
+
+  for (size_t ifield = 0; ifield < uniqueFieldNames.size(); ifield++) {
+      
+    const string &name = uniqueFieldNames[ifield];
+    if (name.size() == 0) {
+      // invalid field name
+      continue;
+    }
+
+    // make copy of the field
+
+    RadxField *copy = sweepVol.copyField(name);
+    if (copy == NULL) {
+      if (_debug) {
+        cerr << "  ... cannot find field: " << name
+             << " .... skipping" << endl;
+      }
+      continue;
+    }
+    
+    // create the variable
+    
+    NcxxVar var;
+    try {
+      // add field variable
+      var = _createFieldVar(*copy, timeDim, rangeDim);
+    } catch (NcxxException& e) {
+      _addErrStr("ERROR - Cf2RadxFile::_addSweepGroupFields");
+      _addErrStr("  Cannot add field: ", name);
+      delete copy;
+      throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    }
+
+    // write it out
+    
+    try {
+      _writeFieldVar(var, copy);
+    } catch (NcxxException& e) {
+      _addErrStr("ERROR - Cf2RadxFile::_addSweepGroupFields");
+      _addErrStr("  Cannot write field: ", name);
+      delete copy;
+      throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    }
+
+    // free up
+    delete copy;
+    if (_debug) {
+      cerr << "  ... field written: " << name << endl;
+    }
+    
+  } // ifield
+
+}
+
+///////////////////////////////////////////////
+// create and add a field variable
+// Adds to errStr as appropriate
+
+NcxxVar Cf2RadxFile::_createFieldVar(const RadxField &field,
+                                     NcxxDim &timeDim,
+                                     NcxxDim &rangeDim)
+  
+{
+  
+  if (_verbose) {
+    cerr << "Cf2RadxFile::_createFieldVar()" << endl;
+    cerr << "  Creating field: " << field.getName() << endl;
+  }
+
+  // check that the field name is CF-netCDF compliant - 
+  // i.e must start with a letter
+  //   if not, add "nc_" to start of name
+  // and must only contain letters, digits and underscores
+
+  const string &name = field.getName();
+  string fieldName;
+  if (isalpha(name[0])) {
+    fieldName = name;
+  } else {
+    fieldName = "nc_";
+    fieldName += name;
+  }
+  for (int ii = 0; ii < (int) fieldName.size(); ii++) {
+    if (!isalnum(fieldName[ii]) && fieldName[ii] != '_') {
+      fieldName[ii] = '_';
+    }
+  }
+  if (fieldName == "range") {
+    // range is reserved
+    fieldName += "_";
+    cerr << "NOTE - 'range' is a reserved field name" << endl;
+    cerr << "  Changing to: '" << fieldName << "'" << endl;
+  }
+  
+  // Add var and the attributes relevant to no data packing
+
+  NcxxType ncxxType = _getNcxxType(field.getDataType());
+  NcxxVar var;
+
+  try {
+    vector<NcxxDim> dims;
+    dims.push_back(timeDim);
+    dims.push_back(rangeDim);
+    var = _file.addVar(fieldName, ncxxType, dims);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Cf2RadxFile::_addFieldVar");
+    _addErrStr("  Cannot add variable to Ncxx file object");
+    _addErrStr("  Input field name: ", name);
+    _addErrStr("  Output field name: ", fieldName);
+    _addErrStr("  NcxxType: ", Ncxx::ncxxTypeToStr(ncxxType));
+    _addErrStr("  Time dim name: ", _timeDim.getName());
+    _addErrInt("  Time dim size: ", _timeDim.getSize());
+    _addErrStr("  Range dim name: ", _rangeDim.getName());
+    _addErrInt("  Range dim size: ", _rangeDim.getSize());
+    _addErrStr("  Exception: ", e.what());
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+  }
+  
+  try {
+
+    if (field.getLongName().size() > 0) {
+      var.putAtt(LONG_NAME, field.getLongName());
+    }
+    if (field.getStandardName().size() > 0) {
+      if (_writeProposedStdNameInNcf) {
+        var.putAtt(PROPOSED_STANDARD_NAME, field.getStandardName());
+      } else {
+        var.putAtt(STANDARD_NAME, field.getStandardName());
+      }
+    }
+    var.putAtt(UNITS, field.getUnits());
+    if (field.getLegendXml().size() > 0) {
+      var.putAtt(LEGEND_XML, field.getLegendXml());
+    }
+    if (field.getThresholdingXml().size() > 0) {
+      var.putAtt(THRESHOLDING_XML, field.getThresholdingXml());
+    }
+    var.addScalarAttr(SAMPLING_RATIO, (float) field.getSamplingRatio());
+    
+    if (field.getFieldFolds()) {
+      var.putAtt(FIELD_FOLDS, "true");
+      var.addScalarAttr(FOLD_LIMIT_LOWER, (float) field.getFoldLimitLower());
+      var.addScalarAttr(FOLD_LIMIT_UPPER, (float) field.getFoldLimitUpper());
+    }
+    if (field.getIsDiscrete()) {
+      var.putAtt(IS_DISCRETE, "true");
+    }
+    
+    switch (ncxxType.getTypeClass()) {
+      case NcxxType::nc_DOUBLE: {
+        var.addScalarAttr(FILL_VALUE, (double) field.getMissingFl64());
+        break;
+      }
+      case NcxxType::nc_FLOAT:
+      default: {
+        var.addScalarAttr(FILL_VALUE, (float) field.getMissingFl32());
+        break;
+      }
+      case NcxxType::nc_INT: {
+        var.addScalarAttr(FILL_VALUE, (int) field.getMissingSi32());
+        var.addScalarAttr(SCALE_FACTOR, (float) field.getScale());
+        var.addScalarAttr(ADD_OFFSET, (float) field.getOffset());
+        break;
+      }
+      case NcxxType::nc_SHORT: {
+        var.addScalarAttr(FILL_VALUE, (short) field.getMissingSi16());
+        var.addScalarAttr(SCALE_FACTOR, (float) field.getScale());
+        var.addScalarAttr(ADD_OFFSET, (float) field.getOffset());
+        break;
+      }
+      case NcxxType::nc_BYTE: {
+        var.addScalarAttr(FILL_VALUE, (signed char) field.getMissingSi08());
+        var.addScalarAttr(SCALE_FACTOR, (float) field.getScale());
+        var.addScalarAttr(ADD_OFFSET, (float) field.getOffset());
+        break;
+      }
+    } // switch
+
+    var.putAtt(GRID_MAPPING, GRID_MAPPING);
+    var.putAtt(COORDINATES, "time range");
+    
+    // set compression
+    
+    _setCompression(var);
+
+  } catch (NcxxException& e) {
+
+    _addErrStr("ERROR - Cf2RadxFile::_addFieldVar");
+    _addErrStr("  Adding var to Ncxx file object");
+    _addErrStr("  Input field name: ", name);
+    _addErrStr("  Output field name: ", fieldName);
+    _addErrStr("  Exception: ", e.what());
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+
+  }
+  
+  return var;
+
+}
+
+///////////////////////////////////////////////////////////////////////////
+// write a field variable
+// Returns 0 on success, -1 on failure
+
+void Cf2RadxFile::_writeFieldVar(NcxxVar &var, RadxField *field)
+  
+{
+  
+  if (_verbose) {
+    cerr << "Cf2RadxFile::_writeFieldVar()" << endl;
+    cerr << "  name: " << var.getName() << endl;
+  }
+
+  if (var.isNull()) {
+    _addErrStr("ERROR - Cf2RadxFile::_writeFieldVar");
+    _addErrStr("  var is NULL");
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+  }
+
+  const void *data = field->getData();
+  if (data == NULL) {
+    _addErrStr("ERROR - Cf2RadxFile::_writeFieldVar");
+    _addErrStr("  data is NULL");
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+  }
+
+  try {
+
+    switch (var.getType().getTypeClass()) {
+      case NcxxType::nc_DOUBLE: {
+        var.putVal((double *) data);
+        break;
+      }
+      case NcxxType::nc_INT: {
+        var.putVal((int *) data);
+        break;
+      }
+      case NcxxType::nc_SHORT: {
+        var.putVal((short *) data);
+        break;
+      }
+      case NcxxType::nc_BYTE: {
+        var.putVal((signed char *) data);
+        break;
+      }
+      case NcxxType::nc_FLOAT:
+      default: {
+        var.putVal((float *) data);
+        break;
+      }
+    } // switch
+
+  } catch (NcxxException& e) {
+    
+    _addErrStr("ERROR - Cf2RadxFile::_writeFieldVar");
+    _addErrStr("  Cannot write var, name: ", var.getName());
+    _addErrStr("  Exception: ", e.what());
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    
+  }
+
 }
 
 //////////////////////////////////////////////
@@ -4000,7 +4302,7 @@ int Cf2RadxFile::_writeFieldVariables()
 
   int iret = 0;
   for (size_t ifield = 0; ifield < _uniqueFieldNames.size(); ifield++) {
-      
+    
     const string &name = _uniqueFieldNames[ifield];
     if (name.size() == 0) {
       // invalid field name
@@ -4054,104 +4356,6 @@ int Cf2RadxFile::_writeFieldVariables()
   } else {
     return 0;
   }
-
-}
-
-///////////////////////////////////////////////////////////////////////////
-// write a field variable
-// Returns 0 on success, -1 on failure
-
-int Cf2RadxFile::_writeFieldVar(NcxxVar &var, RadxField *field)
-  
-{
-  
-  if (_verbose) {
-    cerr << "Cf2RadxFile::_writeFieldVar()" << endl;
-    cerr << "  name: " << var.getName() << endl;
-  }
-
-  if (var.isNull()) {
-    _addErrStr("ERROR - Cf2RadxFile::_writeFieldVar");
-    _addErrStr("  var is NULL");
-    return -1;
-  }
-
-  const void *data = field->getData();
-  
-  try {
-    
-    if (_nGatesVary) {
-      
-      switch (var.getType().getTypeClass()) {
-        case NcxxType::nc_DOUBLE: {
-          var.putVal((double *) data);
-          break;
-        }
-        case NcxxType::nc_INT: {
-          var.putVal((int *) data);
-          break;
-        }
-        case NcxxType::nc_SHORT: {
-          var.putVal((short *) data);
-          break;
-        }
-        case NcxxType::nc_BYTE: {
-          var.putVal((signed char *) data);
-          break;
-        }
-        case NcxxType::nc_FLOAT:
-        default: {
-          var.putVal((float *) data);
-          break;
-        }
-      } // switch
-      
-    } else {
-
-      // TODO - test, and merge with above
-
-      switch (var.getType().getTypeClass()) {
-        case NcxxType::nc_DOUBLE: {
-          // var.put((double *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
-          var.putVal((double *) data);
-          break;
-        }
-        case NcxxType::nc_INT: {
-          // iret = !var.put((int *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
-          var.putVal((int *) data);
-          break;
-        }
-        case NcxxType::nc_SHORT: {
-          // iret = !var.put((short *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
-          var.putVal((short *) data);
-          break;
-        }
-        case NcxxType::nc_BYTE: {
-          // iret = !var.put((signed char *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
-          var.putVal((signed char *) data);
-          break;
-        }
-        case NcxxType::nc_FLOAT:
-        default: {
-          var.putVal((float *) data);
-          // iret = !var.put((float *) data, _writeVol->getNRays(), _writeVol->getMaxNGates());
-          break;
-        }
-      } // switch
-      
-    } // if (_nGatesVary)
-        
-  } catch (NcxxException& e) {
-    
-    _addErrStr("ERROR - Cf2RadxFile::_writeFieldVar");
-    _addErrStr("  Cannot write var, name: ", var.getName());
-    _addErrStr(_file.getErrStr());
-    _addErrStr("  Exception: ", e.what());
-    return -1;
-
-  }
-
-  return 0;
 
 }
 

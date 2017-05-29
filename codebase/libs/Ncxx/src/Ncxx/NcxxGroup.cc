@@ -1918,43 +1918,6 @@ void NcxxGroup::readGlobAttr(const string &name, double &val)
   delete[] vals;
 }
 
-///////////////////////////////////////////
-// add a dimension
-// Throws NcxxException on failure
-// Side effect: dim arg is updated
-
-void NcxxGroup::addDim(NcxxDim &dim, const string &name, int size)
-{
-  if (size < 1) {
-    dim = addDim(name);
-  } else {
-    dim = addDim(name, size);
-  }
-  if (dim.isNull()) {
-    _addErrStr("ERROR - NcxxGroup::addDim");
-    _addErrStr("  Cannot add dimension: ", name);
-    _addErrStr("  group: ", getName());
-    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
-  }
-}
-
-///////////////////////////////////////////
-// read a dimension
-// Throws NcxxException on failure
-// Side effect: dim arg is set
-
-void NcxxGroup::readDim(const string &name, NcxxDim &dim)
-  
-{
-  dim = getDim(name);
-  if (dim.isNull()) {
-    _addErrStr("ERROR - NcxxGroup::readDim");
-    _addErrStr("  Cannot read dimension, name: ", name);
-    _addErrStr("  group: ", getName());
-    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
-  }
-}
-
 //////////////////////////////////////////////
 // Add scalar var
 // Throws NcxxException on failure

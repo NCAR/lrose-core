@@ -817,43 +817,40 @@ int NcxxRadxFile::_addDimensions()
 
     // add time dimension - unlimited??
     
-    _file.addDim(_timeDim, TIME, _writeVol->getRays().size());
+    _timeDim = _file.addDim(TIME, _writeVol->getRays().size());
 
     // add range dimension
     
-    _file.addDim(_rangeDim, RANGE, _writeVol->getMaxNGates());
+    _rangeDim = _file.addDim(RANGE, _writeVol->getMaxNGates());
 
     // add n_points dimension if applicable
     
     if (_nGatesVary) {
-      _file.addDim(_nPointsDim, N_POINTS, _writeVol->getNPoints());
+      _nPointsDim = _file.addDim(N_POINTS, _writeVol->getNPoints());
     }
 
     // add sweep dimension
     
-    _file.addDim(_sweepDim, SWEEP, _writeVol->getSweeps().size());
+    _sweepDim = _file.addDim(SWEEP, _writeVol->getSweeps().size());
 
     // add dimensions for strings in the file
 
-    _file.addDim(_stringLen8Dim, STRING_LENGTH_8, NCF_STRING_LEN_8);
-    _file.addDim(_stringLen32Dim, STRING_LENGTH_32, NCF_STRING_LEN_32);
+    _stringLen8Dim = _file.addDim(STRING_LENGTH_8, NCF_STRING_LEN_8);
+    _stringLen32Dim = _file.addDim(STRING_LENGTH_32, NCF_STRING_LEN_32);
 
-    _file.addDim(_statusXmlDim,
-                 STATUS_XML_LENGTH,
-                 _writeVol->getStatusXml().size() + 1);
+    _statusXmlDim = _file.addDim(STATUS_XML_LENGTH,
+                                 _writeVol->getStatusXml().size() + 1);
     
     // add calib dimension
     
     if (_writeVol->getRcalibs().size() > 0) {
-      _file.addDim(_calDim, R_CALIB, 
-                   _writeVol->getRcalibs().size());
+      _calDim = _file.addDim(R_CALIB, _writeVol->getRcalibs().size());
     }
     
     // add multiple frequencies dimension
 
     if (_writeVol->getFrequencyHz().size() > 0) {
-      _file.addDim(_frequencyDim, FREQUENCY, 
-                   _writeVol->getFrequencyHz().size());
+      _frequencyDim = _file.addDim(FREQUENCY, _writeVol->getFrequencyHz().size());
     }
 
   } catch (NcxxException e) {

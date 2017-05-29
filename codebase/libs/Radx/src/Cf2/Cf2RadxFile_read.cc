@@ -736,10 +736,10 @@ int Cf2RadxFile::_readDimensions()
 
   try {
     
-    _file.readDim(TIME, _timeDim);
+    _timeDim = _file.getDim(TIME);
     _nTimesInFile = _timeDim.getSize();
 
-    _file.readDim(RANGE, _rangeDim);
+    _rangeDim = _file.getDim(RANGE);
     _nRangeInFile = _rangeDim.getSize();
     
     _nPointsDim = _file.getDim(N_POINTS);
@@ -751,7 +751,7 @@ int Cf2RadxFile::_readDimensions()
       _nPoints = _nPointsDim.getSize();
     }
 
-    _file.readDim(SWEEP, _sweepDim);
+    _sweepDim = _file.getDim(SWEEP);
 
   } catch (NcxxException e) {
 
