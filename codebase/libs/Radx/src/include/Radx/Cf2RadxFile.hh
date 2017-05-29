@@ -1095,10 +1095,9 @@ private:
   void _checkCorrectionsActiveOnWrite();
 
   int _addGlobalAttributes();
-  int _addDimensions();
+  int _addRootDimensions();
 
-  int _addCoordinateVariables();
-  int _addScalarVariables();
+  int _addRootScalarVariables();
   int _addFrequencyVariable();
   int _addCorrectionVariables();
   int _addProjectionVariables();
@@ -1131,29 +1130,19 @@ private:
 
   void _writeFieldVar(NcxxVar &var, RadxField *field);
   
-  int _addSweepVariables();
   int _addCalibVariables();
-  int _addRayVariables();
   void _setEstNoiseAvailFlags();
-  int _addGeorefVariables();
 
   void _addCalVar(NcxxVar &var, const string &name, 
                   const string &standardName,
                   const string &units = "");
     
-  int _writeCoordinateVariables();
-  int _writeScalarVariables();
+  int _writeRootScalarVariables();
   int _writeCorrectionVariables();
   int _writeProjectionVariables();
-  int _writeRayVariables();
-  int _writeGeorefVariables();
-  int _writeSweepVariables();
   int _writeCalibVariables();
   int _writeFrequencyVariable();
 
-  int _writeFieldVariables();
-  NcxxVar _addFieldVar(const RadxField &field);
-  NcxxVar _createFieldVar(const RadxField &field);
   int _closeOnError(const string &caller);
 
   int _setCompression(NcxxVar &var);
