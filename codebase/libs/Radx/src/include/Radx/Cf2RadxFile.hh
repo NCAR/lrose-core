@@ -1120,6 +1120,7 @@ private:
                             NcxxDim &rangeDim);
 
   NcxxVar _createFieldVar(const RadxField &field,
+                          NcxxGroup &sweepGroup,
                           NcxxDim &timeDim,
                           NcxxDim &rangeDim);
 

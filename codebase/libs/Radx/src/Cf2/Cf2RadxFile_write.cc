@@ -833,17 +833,17 @@ int Cf2RadxFile::_addDimensions()
 
     // add time dimension - unlimited??
     
-    _timeDim = _file.addDim(TIME, _writeVol->getRays().size());
+    // _timeDim = _file.addDim(TIME, _writeVol->getRays().size());
 
     // add range dimension
     
-    _rangeDim = _file.addDim(RANGE, _writeVol->getMaxNGates());
+    // _rangeDim = _file.addDim(RANGE, _writeVol->getMaxNGates());
 
     // add n_points dimension if applicable
     
-    if (_nGatesVary) {
-      _nPointsDim = _file.addDim(N_POINTS, _writeVol->getNPoints());
-    }
+    // if (_nGatesVary) {
+    //   _nPointsDim = _file.addDim(N_POINTS, _writeVol->getNPoints());
+    // }
 
     // add sweep dimension
     
@@ -874,6 +874,7 @@ int Cf2RadxFile::_addDimensions()
 
 }
 
+#ifdef NOTNOW
 ////////////////////////////////////////////////
 // add variables and attributes for coordinates
 
@@ -975,6 +976,7 @@ int Cf2RadxFile::_addCoordinateVariables()
   return 0;
 
 }
+#endif
 
 //////////////////////////////////////////////
 // add scalar variables
@@ -1655,7 +1657,7 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
   
   NcxxVar antennaTransitionVar = 
     sweepGroup.addVar(ANTENNA_TRANSITION, "", ANTENNA_TRANSITION_LONG,
-                      ncxxByte, _timeDim, "", true);
+                      ncxxByte, timeDim, "", true);
   antennaTransitionVar.putAtt(COMMENT,
                               "1 if antenna is in transition, 0 otherwise");
   for (size_t iray = 0; iray < nRays; iray++) {
@@ -1685,7 +1687,7 @@ void Cf2RadxFile::_addSweepGroupVariables(const RadxSweep *sweep,
   
   NcxxVar nSamplesVar = 
     sweepGroup.addVar(N_SAMPLES, "", N_SAMPLES_LONG,
-                      ncxxInt, _timeDim, "", true);
+                      ncxxInt, timeDim, "", true);
   nSamplesVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t iray = 0; iray < nRays; iray++) {
     ivals[iray] = rays[iray]->getNSamples();
@@ -1842,7 +1844,7 @@ void Cf2RadxFile::_addSweepGroupFields(const RadxSweep *sweep,
     NcxxVar var;
     try {
       // add field variable
-      var = _createFieldVar(*copy, timeDim, rangeDim);
+      var = _createFieldVar(*copy, sweepGroup, timeDim, rangeDim);
     } catch (NcxxException& e) {
       _addErrStr("ERROR - Cf2RadxFile::_addSweepGroupFields");
       _addErrStr("  Cannot add field: ", name);
@@ -1876,6 +1878,7 @@ void Cf2RadxFile::_addSweepGroupFields(const RadxSweep *sweep,
 // Adds to errStr as appropriate
 
 NcxxVar Cf2RadxFile::_createFieldVar(const RadxField &field,
+                                     NcxxGroup &sweepGroup,
                                      NcxxDim &timeDim,
                                      NcxxDim &rangeDim)
   
@@ -1920,17 +1923,17 @@ NcxxVar Cf2RadxFile::_createFieldVar(const RadxField &field,
     vector<NcxxDim> dims;
     dims.push_back(timeDim);
     dims.push_back(rangeDim);
-    var = _file.addVar(fieldName, ncxxType, dims);
+    var = sweepGroup.addVar(fieldName, ncxxType, dims);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_addFieldVar");
     _addErrStr("  Cannot add variable to Ncxx file object");
     _addErrStr("  Input field name: ", name);
     _addErrStr("  Output field name: ", fieldName);
     _addErrStr("  NcxxType: ", Ncxx::ncxxTypeToStr(ncxxType));
-    _addErrStr("  Time dim name: ", _timeDim.getName());
-    _addErrInt("  Time dim size: ", _timeDim.getSize());
-    _addErrStr("  Range dim name: ", _rangeDim.getName());
-    _addErrInt("  Range dim size: ", _rangeDim.getSize());
+    _addErrStr("  Time dim name: ", timeDim.getName());
+    _addErrInt("  Time dim size: ", timeDim.getSize());
+    _addErrStr("  Range dim name: ", rangeDim.getName());
+    _addErrInt("  Range dim size: ", rangeDim.getSize());
     _addErrStr("  Exception: ", e.what());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
@@ -2296,6 +2299,7 @@ int Cf2RadxFile::_addCalibVariables()
 
 }
 
+#ifdef JUNK
 //////////////////////////////////////////////
 // add variables for angles
 
@@ -2451,6 +2455,7 @@ int Cf2RadxFile::_addRayVariables()
   return 0;
 
 }
+#endif
 
 /////////////////////////////////////////////////
 // set flags to indicate whether estimate noise
@@ -2499,6 +2504,7 @@ void Cf2RadxFile::_setEstNoiseAvailFlags()
 
 }
 
+#ifdef JUNK
 /////////////////////////////////////////////////
 // add variables for ray georeference, if active
 
@@ -2687,6 +2693,7 @@ int Cf2RadxFile::_addGeorefVariables()
   return 0;
 
 }
+#endif
 
 void Cf2RadxFile::_addCalVar(NcxxVar &var, const string &name,
                              const string &standardName,
@@ -4133,6 +4140,7 @@ int Cf2RadxFile::_writeFrequencyVariable()
 
 }
 
+#ifdef JUNK
 ///////////////////////////////////////////////
 // create and add a field variable
 // Adds to errStr as appropriate
@@ -4358,6 +4366,7 @@ int Cf2RadxFile::_writeFieldVariables()
   }
 
 }
+#endif
 
 //////////////////
 // close on error
