@@ -439,9 +439,6 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
 
   // write variables
 
-  if (_writeRootScalarVariables()) {
-    return _closeOnError("_writeRootScalarVariables");
-  }
   if (_writeFrequencyVariable()) {
     return _closeOnError("_writeFrequencyVariable");
   }
@@ -837,102 +834,197 @@ int Cf2RadxFile::_addRootScalarVariables()
   }
 
   try {
- 
-    _volumeNumberVar = _file.addVar(VOLUME_NUMBER, "", VOLUME_NUMBER_LONG,
-                                    ncxxInt, "", true);
-    
-    _platformTypeVar = _file.addVar(PLATFORM_TYPE, "", PLATFORM_TYPE_LONG,
-                                    ncxxString, "", true);
-    _platformTypeVar.putAtt(OPTIONS, Radx::platformTypeOptions());
-    
-    _primaryAxisVar = _file.addVar(PRIMARY_AXIS, "", PRIMARY_AXIS_LONG,
-                                   ncxxString, "", true);
-    _primaryAxisVar.putAtt(OPTIONS, Radx::primaryAxisOptions());
-    
-    _statusXmlVar = _file.addVar(STATUS_XML, "", "status_of_instrument",
-                                 ncxxString, "", true);
-    
-    _instrumentTypeVar = _file.addVar(INSTRUMENT_TYPE, "", INSTRUMENT_TYPE_LONG,
-                                      ncxxString, "", true);
-    _instrumentTypeVar.putAtt(OPTIONS, Radx::instrumentTypeOptions());
-    _instrumentTypeVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
-    
-    if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
-      
-      // radar
-      
-      _radarAntennaGainHVar =
-        _file.addVar(RADAR_ANTENNA_GAIN_H, "", RADAR_ANTENNA_GAIN_H_LONG,
-                     ncxxFloat, DB, true);
-      _radarAntennaGainVVar =
-        _file.addVar(RADAR_ANTENNA_GAIN_V, "", RADAR_ANTENNA_GAIN_V_LONG,
-                     ncxxFloat, DB, true);
-      _radarBeamWidthHVar =
-        _file.addVar(RADAR_BEAM_WIDTH_H, "", RADAR_BEAM_WIDTH_H_LONG,
-                     ncxxFloat, DEGREES, true);
-      _radarBeamWidthVVar =
-        _file.addVar(RADAR_BEAM_WIDTH_V, "", RADAR_BEAM_WIDTH_V_LONG,
-                     ncxxFloat, DEGREES, true);
-      _radarRxBandwidthVar =
-        _file.addVar(RADAR_RX_BANDWIDTH, "", RADAR_RX_BANDWIDTH_LONG,
-                     ncxxFloat, HZ, true);
-      
-      _radarAntennaGainHVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-      _radarAntennaGainVVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-      _radarBeamWidthHVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-      _radarBeamWidthVVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-      _radarRxBandwidthVar.putAtt(META_GROUP, RADAR_PARAMETERS);
-      
-    } else {
-      
-      // lidar
-      
-      _lidarConstantVar =
-        _file.addVar(LIDAR_CONSTANT, "", LIDAR_CONSTANT_LONG,
-                     ncxxFloat, DB, true);
-      _lidarPulseEnergyJVar =
-        _file.addVar(LIDAR_PULSE_ENERGY, "", LIDAR_PULSE_ENERGY_LONG,
-                     ncxxFloat, JOULES, true);
-      _lidarPeakPowerWVar =
-        _file.addVar(LIDAR_PEAK_POWER, "", LIDAR_PEAK_POWER_LONG,
-                     ncxxFloat, WATTS, true);
-      _lidarApertureDiamCmVar =
-        _file.addVar(LIDAR_APERTURE_DIAMETER, "", LIDAR_APERTURE_DIAMETER_LONG,
-                     ncxxFloat, CM, true);
-      _lidarApertureEfficiencyVar =
-        _file.addVar(LIDAR_APERTURE_EFFICIENCY, "", LIDAR_APERTURE_EFFICIENCY_LONG,
-                     ncxxFloat, PERCENT, true);
-      _lidarFieldOfViewMradVar =
-        _file.addVar(LIDAR_FIELD_OF_VIEW, "", LIDAR_FIELD_OF_VIEW_LONG,
-                     ncxxFloat, MRAD, true);
-      _lidarBeamDivergenceMradVar =
-        _file.addVar(LIDAR_BEAM_DIVERGENCE,
-                     "", LIDAR_BEAM_DIVERGENCE_LONG, ncxxFloat, MRAD, true);
-      
-      _lidarConstantVar.putAtt(META_GROUP, LIDAR_PARAMETERS);
-      _lidarPulseEnergyJVar.putAtt(META_GROUP, LIDAR_PARAMETERS);
-      _lidarPeakPowerWVar.putAtt(META_GROUP, LIDAR_PARAMETERS);
-      _lidarApertureDiamCmVar.putAtt(META_GROUP, LIDAR_PARAMETERS);
-      _lidarApertureEfficiencyVar.putAtt(META_GROUP, LIDAR_PARAMETERS);
-      _lidarFieldOfViewMradVar.putAtt(META_GROUP, LIDAR_PARAMETERS);
-      _lidarBeamDivergenceMradVar.putAtt(META_GROUP, LIDAR_PARAMETERS);
-      
-    }
     
     // start time
     
-    _startTimeVar =
-      _file.addVar(TIME_COVERAGE_START, "", TIME_COVERAGE_START_LONG,
-                   ncxxString, "", true);
-    _startTimeVar.putAtt(COMMENT,
-                         "ray times are relative to start time in secs");
+    {
+      NcxxVar var =
+        _file.addVar(TIME_COVERAGE_START, "", TIME_COVERAGE_START_LONG,
+                     ncxxString, "", true);
+      var.putAtt(COMMENT,
+                 "ray times are relative to start time in secs");
+      RadxTime startTime(_writeVol->getStartTimeSecs());
+      var.putStringScalar(startTime.getW3cStr());
+    }
     
     // end time
 
-    _endTimeVar =
-      _file.addVar(TIME_COVERAGE_END, "", TIME_COVERAGE_END_LONG,
-                   ncxxString, "", true);
+    {
+      NcxxVar var =
+        _file.addVar(TIME_COVERAGE_END, "", TIME_COVERAGE_END_LONG,
+                     ncxxString, "", true);
+      var.putAtt(COMMENT,
+                 "ray times are relative to start time in secs");
+      RadxTime endTime(_writeVol->getEndTimeSecs());
+      var.putStringScalar(endTime.getW3cStr());
+    }
 
+    // volume number
+
+    {
+      NcxxVar var = _file.addVar(VOLUME_NUMBER, "", VOLUME_NUMBER_LONG,
+                                 ncxxInt, "", true);
+      int volNum = _writeVol->getVolumeNumber();
+      var.putVal(volNum);
+    }
+
+    // platform type
+
+    {
+      NcxxVar var = _file.addVar(PLATFORM_TYPE, "", PLATFORM_TYPE_LONG,
+                                 ncxxString, "", true);
+      var.putAtt(OPTIONS, Radx::platformTypeOptions());
+      string platformType = Radx::platformTypeToStr(_writeVol->getPlatformType());
+      var.putStringScalar(platformType);
+    }
+
+    // primary axis
+
+    {
+      NcxxVar var = _file.addVar(PRIMARY_AXIS, "", PRIMARY_AXIS_LONG,
+                                 ncxxString, "", true);
+      var.putAtt(OPTIONS, Radx::primaryAxisOptions());
+      string primaryAxis = Radx::primaryAxisToStr(_writeVol->getPrimaryAxis());
+      var.putStringScalar(primaryAxis);
+    }
+    
+    // status XML
+
+    {
+      NcxxVar var = _file.addVar(STATUS_XML, "", "status_of_instrument",
+                                 ncxxString, "", true);
+      var.putStringScalar(_writeVol->getStatusXml());
+    }
+
+    // instrument type
+
+    {
+      NcxxVar var = _file.addVar(INSTRUMENT_TYPE, "", INSTRUMENT_TYPE_LONG,
+                                 ncxxString, "", true);
+      var.putAtt(OPTIONS, Radx::instrumentTypeOptions());
+      var.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
+      string instrumentType = Radx::instrumentTypeToStr(_writeVol->getInstrumentType());
+      var.putStringScalar(instrumentType);
+    }
+    
+    if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
+      
+      // radar antenna gain H
+
+      {
+        NcxxVar var =
+          _file.addVar(RADAR_ANTENNA_GAIN_H, "", RADAR_ANTENNA_GAIN_H_LONG,
+                       ncxxFloat, DB, true);
+        var.putAtt(META_GROUP, RADAR_PARAMETERS);
+        var.putVal((float) _writeVol->getRadarAntennaGainDbH());
+      }
+
+      // radar antenna gain V
+
+      {
+        NcxxVar var =
+          _file.addVar(RADAR_ANTENNA_GAIN_V, "", RADAR_ANTENNA_GAIN_V_LONG,
+                       ncxxFloat, DB, true);
+        var.putAtt(META_GROUP, RADAR_PARAMETERS);
+        var.putVal((float) _writeVol->getRadarAntennaGainDbV());
+      }
+
+      // radar beam width H
+
+      {
+        NcxxVar var =
+          _file.addVar(RADAR_BEAM_WIDTH_H, "", RADAR_BEAM_WIDTH_H_LONG,
+                       ncxxFloat, DEGREES, true);
+        var.putAtt(META_GROUP, RADAR_PARAMETERS);
+        var.putVal((float) _writeVol->getRadarBeamWidthDegH());
+      }
+
+      // radar beam width V
+
+      {
+        NcxxVar var =
+          _file.addVar(RADAR_BEAM_WIDTH_V, "", RADAR_BEAM_WIDTH_V_LONG,
+                       ncxxFloat, DEGREES, true);
+        var.putAtt(META_GROUP, RADAR_PARAMETERS);
+        var.putVal((float) _writeVol->getRadarBeamWidthDegV());
+      }
+      
+      // radar band width
+
+      {
+        NcxxVar var =
+          _file.addVar(RADAR_RX_BANDWIDTH, "", RADAR_RX_BANDWIDTH_LONG,
+                       ncxxFloat, HZ, true);
+        var.putAtt(META_GROUP, RADAR_PARAMETERS);
+        float bandwidthHz = _writeVol->getRadarReceiverBandwidthMhz();
+        if (bandwidthHz < 0) {
+          bandwidthHz = Radx::missingFl32;
+        }
+        var.putVal(bandwidthHz);
+      }
+      
+    } else {
+      
+      // lidar constant
+      
+      {
+        NcxxVar var =
+          _file.addVar(LIDAR_CONSTANT, "", LIDAR_CONSTANT_LONG,
+                       ncxxFloat, DB, true);
+        var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+        var.putVal((float) _writeVol->getLidarConstant());
+      }
+
+      {
+        NcxxVar var =
+          _file.addVar(LIDAR_PULSE_ENERGY, "", LIDAR_PULSE_ENERGY_LONG,
+                       ncxxFloat, JOULES, true);
+        var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+        var.putVal((float) _writeVol->getLidarPulseEnergyJ());
+      }
+
+      {
+        NcxxVar var =
+          _file.addVar(LIDAR_PEAK_POWER, "", LIDAR_PEAK_POWER_LONG,
+                       ncxxFloat, WATTS, true);
+        var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+        var.putVal((float) _writeVol->getLidarPeakPowerW());
+      }
+
+      {
+        NcxxVar var =
+          _file.addVar(LIDAR_APERTURE_DIAMETER, "", LIDAR_APERTURE_DIAMETER_LONG,
+                       ncxxFloat, CM, true);
+        var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+        var.putVal((float) _writeVol->getLidarApertureDiamCm());
+      }
+
+      {
+        NcxxVar var =
+          _file.addVar(LIDAR_APERTURE_EFFICIENCY, "", LIDAR_APERTURE_EFFICIENCY_LONG,
+                       ncxxFloat, PERCENT, true);
+        var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+        var.putVal((float) _writeVol->getLidarApertureEfficiency());
+      }
+
+      {
+        NcxxVar var =
+          _file.addVar(LIDAR_FIELD_OF_VIEW, "", LIDAR_FIELD_OF_VIEW_LONG,
+                       ncxxFloat, MRAD, true);
+        var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+        var.putVal((float) _writeVol->getLidarFieldOfViewMrad());
+      }
+
+      {
+        NcxxVar var =
+          _file.addVar(LIDAR_BEAM_DIVERGENCE,
+                       "", LIDAR_BEAM_DIVERGENCE_LONG, ncxxFloat, MRAD, true);
+        var.putAtt(META_GROUP, LIDAR_PARAMETERS);
+        var.putVal((float) _writeVol->getLidarBeamDivergenceMrad());
+      }
+      
+    }
+    
   } catch (NcxxException& e) {
 
     _addErrStr("ERROR - Cf2RadxFile::_addScalarVariables");
@@ -2941,142 +3033,6 @@ void Cf2RadxFile::_addCalVar(NcxxVar &var, const string &name,
     _addErrStr("  exception: ", e.what());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
-
-}
-
-////////////////////////////////////////////////
-// write root-level scalar variables
-
-int Cf2RadxFile::_writeRootScalarVariables()
-{
-
-  if (_verbose) {
-    cerr << "Cf2RadxFile::_writeScalarVariables()" << endl;
-  }
-  
-  // volume number
-  
-  int volNum = _writeVol->getVolumeNumber();
-  try {
-    _volumeNumberVar.putVal(&volNum);
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
-    _addErrStr("  Cannot write volumeNumber");
-    _addErrStr(_file.getErrStr());
-    _addErrStr("  Exception: ", e.what());
-    return -1;
-  }
-
-  // primary axis
-  
-  try {
-    string primaryAxis = Radx::primaryAxisToStr(_writeVol->getPrimaryAxis());
-    _primaryAxisVar.putStringScalar(primaryAxis);
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
-    _addErrStr("  Cannot write primaryAxis");
-    _addErrStr(_file.getErrStr());
-    _addErrStr("  Exception: ", e.what());
-    return -1;
-  }
-
-  // instrument type
-
-  try {
-    string instrumentType = Radx::instrumentTypeToStr(_writeVol->getInstrumentType());
-    _instrumentTypeVar.putStringScalar(instrumentType);
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
-    _addErrStr("  Cannot write instrumentType");
-    _addErrStr(_file.getErrStr());
-    _addErrStr("  Exception: ", e.what());
-    return -1;
-  }
-
-  // platform type
-
-  try {
-    string platformType = Radx::platformTypeToStr(_writeVol->getPlatformType());
-    _platformTypeVar.putStringScalar(platformType);
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
-    _addErrStr("  Cannot write platformType");
-    _addErrStr(_file.getErrStr());
-    _addErrStr("  Exception: ", e.what());
-    return -1;
-  }
-
-  // status xml
-  
-  try {
-    _statusXmlVar.putStringScalar(_writeVol->getStatusXml());
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
-    _addErrStr("  Cannot write statusXml");
-    _addErrStr(_file.getErrStr());
-    _addErrStr("  Exception: ", e.what());
-    return -1;
-  }
-
-  // start time
-  
-  RadxTime startTime(_writeVol->getStartTimeSecs());
-  try {
-    _startTimeVar.putStringScalar(startTime.getW3cStr());
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
-    _addErrStr("  Cannot write statusTime");
-    _addErrStr(_file.getErrStr());
-    _addErrStr("  Exception: ", e.what());
-    return -1;
-  }
-
-  // end time
-  
-  RadxTime endTime(_writeVol->getEndTimeSecs());
-  try {
-    _endTimeVar.putStringScalar(endTime.getW3cStr());
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
-    _addErrStr("  Cannot write endTime");
-    _addErrStr(_file.getErrStr());
-    _addErrStr("  Exception: ", e.what());
-    return -1;
-  }
-  
-  try {
-    if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
-
-      // radar params
-      _radarAntennaGainHVar.putVal((float) _writeVol->getRadarAntennaGainDbH());
-      _radarAntennaGainVVar.putVal((float) _writeVol->getRadarAntennaGainDbV());
-      _radarBeamWidthHVar.putVal((float) _writeVol->getRadarBeamWidthDegH());
-      _radarBeamWidthVVar.putVal((float) _writeVol->getRadarBeamWidthDegV());
-      float bandwidthHz = _writeVol->getRadarReceiverBandwidthMhz();
-      if (_writeVol->getRadarReceiverBandwidthMhz() > 0) {
-        bandwidthHz = _writeVol->getRadarReceiverBandwidthMhz() * 1.0e6; // non-missing
-      }
-      _radarRxBandwidthVar.putVal(bandwidthHz);
-
-    } else {
-      // lidar params
-      _lidarConstantVar.putVal((float) _writeVol->getLidarConstant());
-      _lidarPulseEnergyJVar.putVal((float) _writeVol->getLidarPulseEnergyJ());
-      _lidarPeakPowerWVar.putVal((float) _writeVol->getLidarPeakPowerW());
-      _lidarApertureDiamCmVar.putVal((float) _writeVol->getLidarApertureDiamCm());
-      _lidarApertureEfficiencyVar.putVal((float) _writeVol->getLidarApertureEfficiency());
-      _lidarFieldOfViewMradVar.putVal((float) _writeVol->getLidarFieldOfViewMrad());
-      _lidarBeamDivergenceMradVar.putVal((float) _writeVol->getLidarBeamDivergenceMrad());
-    }
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_writeScalarVariables");
-    _addErrStr("  Cannot write var");
-    _addErrStr(_file.getErrStr());
-    _addErrStr("  Exception: ", e.what());
-    return -1;
-  }
-
-  return 0;
 
 }
 

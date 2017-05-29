@@ -1137,7 +1137,6 @@ private:
                   const string &standardName,
                   const string &units = "");
     
-  int _writeRootScalarVariables();
   int _writeCorrectionVariables();
   int _writeProjectionVariables();
   int _writeCalibVariables();
