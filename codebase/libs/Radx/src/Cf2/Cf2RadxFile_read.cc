@@ -703,7 +703,7 @@ void Cf2RadxFile::_checkGeorefsActiveOnRead()
   // vector and georefs are active
   
   NcxxDim timeDim = _latitudeVar.getDim(0);
-  if (timeDim == _timeDim) {
+  if (timeDim == _timeDimRead) {
     _georefsActive = true;
   }
 
@@ -736,19 +736,19 @@ int Cf2RadxFile::_readDimensions()
 
   try {
     
-    _timeDim = _file.getDim(TIME);
-    _nTimesInFile = _timeDim.getSize();
+    _timeDimRead = _file.getDim(TIME);
+    _nTimesInFile = _timeDimRead.getSize();
 
-    _rangeDim = _file.getDim(RANGE);
-    _nRangeInFile = _rangeDim.getSize();
+    _rangeDimRead = _file.getDim(RANGE);
+    _nRangeInFile = _rangeDimRead.getSize();
     
-    _nPointsDim = _file.getDim(N_POINTS);
-    if (_nPointsDim.isNull()) {
+    _nPointsDimRead = _file.getDim(N_POINTS);
+    if (_nPointsDimRead.isNull()) {
       _nGatesVary = false;
       _nPoints = 0;
     } else {
       _nGatesVary = true;
-      _nPoints = _nPointsDim.getSize();
+      _nPoints = _nPointsDimRead.getSize();
     }
 
     _sweepDim = _file.getDim(SWEEP);
@@ -906,7 +906,7 @@ int Cf2RadxFile::_readTimes(int pathNum)
     return -1;
   }
   NcxxDim timeDim = _timeVar.getDim(0);
-  if (timeDim != _timeDim) {
+  if (timeDim != _timeDimRead) {
     _addErrStr("ERROR - Cf2RadxFile::_readTimes");
     _addErrStr("  Time has incorrect dimension, name: ", timeDim.getName());
     return -1;
@@ -978,7 +978,7 @@ int Cf2RadxFile::_readRangeVariable()
   }
 
   _rangeKm.clear();
-  _nRangeInFile = _rangeDim.getSize();
+  _nRangeInFile = _rangeDimRead.getSize();
 
   if (_rangeVar.getDimCount() == 1) {
 
@@ -986,7 +986,7 @@ int Cf2RadxFile::_readRangeVariable()
     // for gate geom that does not vary by ray
 
     NcxxDim rangeDim = _rangeVar.getDim(0);
-    if (rangeDim != _rangeDim) {
+    if (rangeDim != _rangeDimRead) {
       _addErrStr("ERROR - Cf2RadxFile::_readRangeVariable");
       _addErrStr("  Range has incorrect dimension, name: ", rangeDim.getName());
       return -1;
@@ -1014,7 +1014,7 @@ int Cf2RadxFile::_readRangeVariable()
     // check that we have the correct dimensions
     NcxxDim timeDim = _rangeVar.getDim(0);
     NcxxDim rangeDim = _rangeVar.getDim(1);
-    if (timeDim != _timeDim || rangeDim != _rangeDim) {
+    if (timeDim != _timeDimRead || rangeDim != _rangeDimRead) {
       _addErrStr("ERROR - Cf2RadxFile::_readRangeVariable");
       _addErrStr("  Range has incorrect dimensions");
       _addErrStr("  dim0, name: ", timeDim.getName());
@@ -2382,7 +2382,7 @@ int Cf2RadxFile::_readFieldVariables(bool metaOnly)
         continue;
       }
       const NcxxDim& nPointsDim = var.getDim(0);
-      if (nPointsDim != _nPointsDim) {
+      if (nPointsDim != _nPointsDimRead) {
         continue;
       }
     } else {
@@ -2394,7 +2394,7 @@ int Cf2RadxFile::_readFieldVariables(bool metaOnly)
       // check that we have the correct dimensions
       const NcxxDim &timeDim = var.getDim(0);
       const NcxxDim &rangeDim = var.getDim(1);
-      if (timeDim != _timeDim || rangeDim != _rangeDim) {
+      if (timeDim != _timeDimRead || rangeDim != _rangeDimRead) {
         continue;
       }
     }
@@ -2885,7 +2885,7 @@ int Cf2RadxFile::_getRayVar(NcxxVar &var, const string &name, bool required)
     return -1;
   }
   NcxxDim timeDim = var.getDim(0);
-  if (timeDim != _timeDim) {
+  if (timeDim != _timeDimRead) {
     if (required) {
       _addErrStr("ERROR - Cf2RadxFile::_getRayVar");
       _addErrStr("  variable name: ", name);

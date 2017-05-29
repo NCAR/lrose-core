@@ -1866,7 +1866,8 @@ void Cf2RadxFile::_addSweepGroupFields(const RadxSweep *sweep,
     // free up
     delete copy;
     if (_debug) {
-      cerr << "  ... field written: " << name << endl;
+      cerr << "  ... sweep: " << sweep->getSweepNumber()
+           << "  ... field written: " << name << endl;
     }
     
   } // ifield

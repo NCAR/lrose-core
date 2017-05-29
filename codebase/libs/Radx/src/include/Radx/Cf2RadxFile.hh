@@ -206,9 +206,9 @@ private:
 
   // dimensions
 
-  NcxxDim _timeDim;
-  NcxxDim _rangeDim;
-  NcxxDim _nPointsDim;
+  NcxxDim _timeDimRead;
+  NcxxDim _rangeDimRead;
+  NcxxDim _nPointsDimRead;
   NcxxDim _sweepDim;
   NcxxDim _calDim;
   NcxxDim _frequencyDim;
