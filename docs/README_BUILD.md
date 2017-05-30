@@ -170,6 +170,8 @@ For a full CIDD build under LINUX, you need the following packages:
   xorg-x11-fonts-misc
   xorg-x11-fonts-75dpi
   xorg-x11-fonts-100dpi
+  xorg-x11-fonts-ISO8859-1-100dpi
+  xorg-x11-fonts-ISO8859-1-75dpi
 ```
 
 On Redhat-based hosts you can achieve this by running:
@@ -182,8 +184,10 @@ libtiff-devel.i686 libpng-devel.i686 \
 libstdc++-devel.i686 libtiff-devel.i686 \
 zlib-devel.i686 expat-devel.i686 flex-devel.i686 \
 fftw-devel.i686 bzip2-devel.i686 xrdb Xvfb \
-xorg-x11-fonts-misc xorg-x11-fonts-75dpi xorg-x11-fonts-100dpi \
-gnuplot ImageMagick-devel ImageMagick-c++-devel
+gnuplot ImageMagick-devel ImageMagick-c++-devel \
+xorg-x11-fonts-100dpi xorg-x11-fonts-ISO8859-1-100dpi \
+xorg-x11-fonts-75dpi xorg-x11-fonts-ISO8859-1-75dpi \
+xorg-x11-fonts-misc
 ```
 
 On Debian, you need to run the following:
