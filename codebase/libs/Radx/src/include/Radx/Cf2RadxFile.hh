@@ -427,10 +427,10 @@ private:
   Radx::PlatformType_t _platformType;
   Radx::PrimaryAxis_t _primaryAxis;
 
-  vector<double> _latitude;
-  vector<double> _longitude;
-  vector<double> _altitude;
-  vector<double> _altitudeAgl;
+  double _latitude;
+  double _longitude;
+  double _altitudeM;
+  double _altitudeAglM;
 
   vector<double> _frequency;
 
@@ -570,41 +570,53 @@ private:
   int _loadSweepInfo(const vector<string> &paths);
   int _appendSweepInfo(const string &path);
 
-  void _checkGeorefsActiveOnRead();
-  void _checkCorrectionsActiveOnRead();
-
-  int _readDimensions();
-  int _readGlobalAttributes();
+  void _readDimensions();
+  void _readGlobalAttributes();
 
   void _readTimes();
   void _readSweepTimes(NcxxGroup &group,
                        vector<double> &times);
 
+  void _readRootScalarVariables();
+  void _readRadarParameters();
+  void _readLidarParameters();
+  void _readFrequency(NcxxGroup &group);
+  void _readGeorefCorrections();
+  void _readLocation();
+
+  void _readRadarCalibration();
+  void _readRcal(NcxxGroup &group, NcxxDim &dim,
+                 RadxRcalib &cal, size_t index);
+  void _readCalTime(NcxxGroup &group, NcxxDim &dim,
+                    const string &name, size_t index, time_t &val);
+  NcxxVar _readCalVar(NcxxGroup &group, NcxxDim &dim,
+                      const string &name, size_t index,
+                      double &val, bool required = false);
+
+  void _readLidarCalibration();
+
   int _readRangeVariable();
-  int _readScalarVariables();
-  int _readCorrectionVariables();
-  int _readPositionVariables();
   void _clearGeorefVariables();
   int _readGeorefVariables();
   void _clearRayVariables();
   int _readRayVariables();
   int _createRays(const string &path);
-  int _readFrequencyVariable();
   void _readRayGateGeom();
   int _readRayNgatesAndOffsets();
-  int _readCalibrationVariables();
-  int _readCal(RadxRcalib &cal, int index);
   int _readFieldVariables(bool metaOnly);
   
   void _readSweepsAsInFile();
   void _readSweepMetadata(NcxxGroup &group, RadxSweep *sweep);
-  void _readSweepVar(NcxxGroup &group, NcxxVar &var, const string &name,
+
+  NcxxVar _read1DVar(NcxxGroup &group, NcxxDim &dim,
+                     const string &name,
                      vector<double> &vals, bool required = true);
-  void _readSweepVar(NcxxGroup &group, NcxxVar &var, const string &name, 
+  NcxxVar _read1DVar(NcxxGroup &group, NcxxDim &dim,
+                     const string &name, 
                      vector<int> &vals, bool required = true);
-  void _readSweepVar(NcxxGroup &group, NcxxVar &var, const string &name,
+  NcxxVar _read1DVar(NcxxGroup &group, NcxxDim &dim,
+                     const string &name,
                      vector<string> &vals, bool required = true);
-  void _getSweepVar(NcxxGroup &group, NcxxVar &var, const string &name);
 
   int _readRayVar(NcxxVar &var, const string &name, 
                   vector<double> &vals, bool required = true);
@@ -622,9 +634,6 @@ private:
   
   int _getRayVar(NcxxVar &var, const string &name, bool required);
 
-  int _readCalTime(const string &name, NcxxVar &var, int index, time_t &val);
-  int _readCalVar(const string &name, NcxxVar &var, int index,
-                  double &val, bool required = false);
 
   int _addFl64FieldToRays(NcxxVar &var,
                           const string &name, const string &units,

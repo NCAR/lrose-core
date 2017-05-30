@@ -163,19 +163,23 @@ int Cf2RadxFile::_readPath(const string &path, size_t pathNum)
 
   // read dimensions
   
-  if (_readDimensions()) {
-    _addErrStr(errStr);
+  try {
+    _readDimensions();
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Cf2RadxFile::_readPath");
+    _addErrStr("  Cannot read dimensions, path: ", path);
+    // _addErrStr("  exception: ", e.what());
     return -1;
   }
   
   // read in sweep variables
-
+  
   try {
     _readSweepsAsInFile();
   } catch (NcxxException e) {
     _addErrStr("ERROR - Cf2RadxFile::_readPath()");
     _addErrStr("  path: ", path);
-    _addErrStr(e.what());
+    _addErrStr("  exception: ", e.what());
     if (_debug) {
       cerr << "====>> ERROR - _readPath <<====" << endl;
       cerr << _errStr << endl;
@@ -184,17 +188,6 @@ int Cf2RadxFile::_readPath(const string &path, size_t pathNum)
     return -1;
   }
 
-  // if (_nTimesInFile < 1) {
-  //   _addErrStr("ERROR - Cf2RadxFile::_readPath");
-  //   _addErrStr("  No times in file");
-  //   return -1;
-  // }
-  // if (_nRangeInFile < 1) {
-  //   _addErrStr("ERROR - Cf2RadxFile::_readPath");
-  //   _addErrStr("  No ranges in file");
-  //   return -1;
-  // }
-  
   // read time variable now if that is all that is needed
   
   if (_readTimesOnly) {
@@ -206,38 +199,43 @@ int Cf2RadxFile::_readPath(const string &path, size_t pathNum)
     return 0;
   }
   
-  // check if georeferences and/or corrections are active
-
-  _checkGeorefsActiveOnRead();
-  _checkCorrectionsActiveOnRead();
-
   // for first path in aggregated list, read in non-varying values
 
   if (pathNum == 0) {
 
     // read global attributes
     
-    if (_readGlobalAttributes()) {
-      _addErrStr(errStr);
+    try {
+      _readGlobalAttributes();
+    } catch (NcxxException e) {
+      _addErrStr("ERROR - Cf2RadxFile::_readPath()");
+      _addErrStr("  reading global attributes, path: ", path);
+      _addErrStr("  exception: ", e.what());
       return -1;
     }
 
     // read in scalar variables
     
-    _readScalarVariables();
-    
-    // read frequency variable
-    
-    if (_readFrequencyVariable()) {
-      _addErrStr(errStr);
+    try {
+      _readRootScalarVariables();
+    } catch (NcxxException e) {
+      _addErrStr("ERROR - Cf2RadxFile::_readPath()");
+      _addErrStr("  reading scalar variables, path: ", path);
+      _addErrStr("  exception: ", e.what());
       return -1;
     }
-
-    // read in correction variables
     
-    if (_correctionsActive) {
-      _readCorrectionVariables();
+    // read in instrument paramaters
+    
+    if (_instrumentType == Radx::INSTRUMENT_TYPE_RADAR) {
+      _readRadarParameters();
+    } else {
+      _readLidarParameters();
     }
+    
+    // read in correction variables, if available
+    
+    _readGeorefCorrections();
 
   }
 
@@ -249,20 +247,16 @@ int Cf2RadxFile::_readPath(const string &path, size_t pathNum)
     return -1;
   }
 
-  // read range variable
-  // the range array size will be the max of the arrays found in
-  // the files
-  
-  if (_readRangeVariable()) {
-    _addErrStr(errStr);
-    return -1;
-  }
-  
   // read position variables - lat/lon/alt
   
-  if (_readPositionVariables()) {
-    _addErrStr(errStr);
-    return -1;
+  _readLocation();
+
+  // read in calibration variables
+  
+  if (_instrumentType == Radx::INSTRUMENT_TYPE_RADAR) {
+    _readRadarCalibration();
+  } else {
+    _readLidarCalibration();
   }
 
   // read in ray variables
@@ -286,6 +280,7 @@ int Cf2RadxFile::_readPath(const string &path, size_t pathNum)
     // read field variables
     
     if (_readFieldVariables(true)) {
+      NcxxErrStr err;
       _addErrStr(errStr);
       return -1;
     }
@@ -313,13 +308,6 @@ int Cf2RadxFile::_readPath(const string &path, size_t pathNum)
       return -1;
     }
 
-  }
-
-  // read in calibration variables
-  
-  if (_readCalibrationVariables()) {
-    _addErrStr(errStr);
-    return -1;
   }
 
   // close file
@@ -648,7 +636,7 @@ int Cf2RadxFile::_appendSweepInfo(const string &path)
   try {
     _file.open(path, NcxxFile::read);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::readFromPath");
+    _addErrStr("ERROR - Cf2RadxFile::_appendSweepInfo");
     _addErrStr("  Cannot open file for reading: ", path);
     _addErrStr("  exception: ", e.what());
     return -1;
@@ -656,8 +644,11 @@ int Cf2RadxFile::_appendSweepInfo(const string &path)
 
   // read dimensions
   
-  if (_readDimensions()) {
+  try {
+    _readDimensions();
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_appendSweepInfo");
+    _addErrStr("  Cannot read dimensions");
     return -1;
   }
 
@@ -696,86 +687,41 @@ int Cf2RadxFile::_appendSweepInfo(const string &path)
 
 }
 
-/////////////////////////////////////////////////
-// check if corrections are active on read
-
-void Cf2RadxFile::_checkGeorefsActiveOnRead()
-{
-
-  _georefsActive = false;
-
-  // get latitude variable
-
-  _latitudeVar = _file.getVar(LATITUDE);
-  if (_latitudeVar.isNull()) {
-    return;
-  }
-  if (_latitudeVar.getDimCount() < 1) {
-    return;
-  }
-
-  // if the latitude has dimension of time, then latitude is a 
-  // vector and georefs are active
-  
-  NcxxDim timeDim = _latitudeVar.getDim(0);
-  if (timeDim == _timeDimRead) {
-    _georefsActive = true;
-  }
-
-}
-  
-/////////////////////////////////////////////////
-// check if corrections are active on read
-
-void Cf2RadxFile::_checkCorrectionsActiveOnRead()
-{
-
-  _correctionsActive = false;
-  if (!_file.getVar(AZIMUTH_CORRECTION).isNull()) {
-    _correctionsActive = true;
-  }
-
-}
-  
 ///////////////////////////////////
 // read in the dimensions
+// throws exception on error
 
-int Cf2RadxFile::_readDimensions()
+void Cf2RadxFile::_readDimensions()
 
 {
 
   _nTimesInFile = 0;
   _nRangeInFile = 0;
-
+  
   // sweep dimension
 
   _sweepDim.setNull();
   try {
     _sweepDim = _file.getDim(SWEEP);
   } catch (NcxxException e) {
-    _addErrStr("ERROR - Cf2RadxFile::readDimensions");
-    _addErrStr("  Cannot find sweep dimension");
-    _addErrStr("  exception: ", e.what());
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::readDimensions");
+    err.addErrStr("  Cannot find sweep dimension");
+    err.addErrStr("  exception: ", e.what());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 
   // frequency dimension is optional
 
-  _frequencyDim.setNull();
-  try {
-    _frequencyDim = _file.getDim(FREQUENCY);
-  } catch (NcxxException e) {
-    _frequencyDim.setNull();
-  }
-
-  return 0;
+  _frequencyDim = _file.getDim(FREQUENCY);
 
 }
 
 ///////////////////////////////////
 // read the global attributes
+// throws exception on error
 
-int Cf2RadxFile::_readGlobalAttributes()
+void Cf2RadxFile::_readGlobalAttributes()
 
 {
 
@@ -785,16 +731,18 @@ int Cf2RadxFile::_readGlobalAttributes()
     NcxxGroupAtt att = _file.getAtt(CONVENTIONS);
     _conventions = att.asString();
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
-    _addErrStr("  Cannot find conventions attribute");
-    return -1;
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
+    err.addErrStr("  Cannot find conventions attribute");
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   if (_conventions.find(BaseConvention) == string::npos) {
     if (_conventions.find("CF") == string::npos) {
-      _addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
-      _addErrStr("  Invalid Conventions attribute: ", _conventions);
-      _addErrStr("  Should be 'CF...'");
-      return -1;
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
+      err.addErrStr("  Invalid Conventions attribute: ", _conventions);
+      err.addErrStr("  Should be 'CF...'");
+      throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     }
   }
 
@@ -804,14 +752,16 @@ int Cf2RadxFile::_readGlobalAttributes()
     NcxxGroupAtt att = _file.getAtt(SUB_CONVENTIONS);
     _subconventions = att.asString();
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
-    _addErrStr("  Cannot find subconventions attribute");
-    return -1;
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
+    err.addErrStr("  Cannot find subconventions attribute");
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   if (_subconventions.find(BaseConvention) == string::npos) {
-    _addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
-    _addErrStr("  Invalid sub_conventions attribute: ", _subconventions);
-    return -1;
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
+    err.addErrStr("  Invalid sub_conventions attribute: ", _subconventions);
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 
   // check for version
@@ -820,15 +770,17 @@ int Cf2RadxFile::_readGlobalAttributes()
     NcxxGroupAtt att = _file.getAtt(VERSION);
     _version = att.asString();
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
-    _addErrStr("  Cannot find version attribute");
-    return -1;
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
+    err.addErrStr("  Cannot find version attribute");
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   if (_version.size() < 1 || _version[0] != '2') {
-    _addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
-    _addErrStr("  Invalid version: ", _version);
-    _addErrStr("  Should be 2.x");
-    return -1;
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
+    err.addErrStr("  Invalid version: ", _version);
+    err.addErrStr("  Should be 2.x");
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 
   // Loop through the global attributes, use the ones which make sense
@@ -887,8 +839,6 @@ int Cf2RadxFile::_readGlobalAttributes()
 
   } // ii
 
-  return 0;
-
 }
 
 /////////////////////////////////////////////
@@ -906,7 +856,8 @@ void Cf2RadxFile::_readTimes()
     try {
       _readSweepTimes(_sweepGroups[isweep], _dTimes);
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - Cf2RadxFile::_readTimes");
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_readTimes");
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     }
   }
@@ -929,24 +880,27 @@ void Cf2RadxFile::_readSweepTimes(NcxxGroup &group,
 
   NcxxVar timeVar = group.getVar(TIME);
   if (timeVar.isNull()) {
-    _addErrStr("ERROR - Cf2RadxFile::_readSweepTimes");
-    _addErrStr("  Cannot find time variable, name: ", TIME);
-    _addErrStr("  group: ", group.getName());
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readSweepTimes");
+    err.addErrStr("  Cannot find time variable, name: ", TIME);
+    err.addErrStr("  group: ", group.getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   
   if (timeVar.getDimCount() < 1) {
-    _addErrStr("ERROR - Cf2RadxFile::_readSweepTimes");
-    _addErrStr("  time variable has no dimensions");
-    _addErrStr("  group: ", group.getName());
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readSweepTimes");
+    err.addErrStr("  time variable has no dimensions");
+    err.addErrStr("  group: ", group.getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 
   NcxxDim varTimeDim = timeVar.getDim(0);
   if (varTimeDim != timeDim) {
-    _addErrStr("ERROR - Cf2RadxFile::_readSweepTimes");
-    _addErrStr("  Time has incorrect dimension, name: ", varTimeDim.getName());
-    _addErrStr("  group: ", group.getName());
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readSweepTimes");
+    err.addErrStr("  Time has incorrect dimension, name: ", varTimeDim.getName());
+    err.addErrStr("  group: ", group.getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   
@@ -959,9 +913,10 @@ void Cf2RadxFile::_readSweepTimes(NcxxGroup &group,
     RadxTime stime(units);
     _refTimeSecsFile = stime.utime();
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_readSweepTimes");
-    _addErrStr("  Time has no units");
-    _addErrStr("  group: ", group.getName());
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readSweepTimes");
+    err.addErrStr("  Time has no units");
+    err.addErrStr("  group: ", group.getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   
@@ -973,9 +928,10 @@ void Cf2RadxFile::_readSweepTimes(NcxxGroup &group,
   try {
     timeVar.getVal(dtimes);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_readSweepTimes");
-    _addErrStr("  Cannot read times variable");
-    _addErrStr("  exception: ", e.what());
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readSweepTimes");
+    err.addErrStr("  Cannot read times variable");
+    err.addErrStr("  exception: ", e.what());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   for (size_t ii = 0; ii < nTimes; ii++) {
@@ -993,9 +949,10 @@ int Cf2RadxFile::_readRangeVariable()
 
   _rangeVar = _file.getVar(RANGE);
   if (_rangeVar.isNull() || _rangeVar.numVals() < 1) {
-    _addErrStr("ERROR - Cf2RadxFile::_readRangeVariable");
-    _addErrStr("  Cannot read range");
-    _addErrStr(_file.getErrStr());
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readRangeVariable");
+    err.addErrStr("  Cannot read range");
+    err.addErrStr(_file.getErrStr());
     return -1;
   }
 
@@ -1014,8 +971,9 @@ int Cf2RadxFile::_readRangeVariable()
 
     NcxxDim rangeDim = _rangeVar.getDim(0);
     if (rangeDim != _rangeDimRead) {
-      _addErrStr("ERROR - Cf2RadxFile::_readRangeVariable");
-      _addErrStr("  Range has incorrect dimension, name: ", rangeDim.getName());
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_readRangeVariable");
+      err.addErrStr("  Range has incorrect dimension, name: ", rangeDim.getName());
       return -1;
     }
 
@@ -1027,8 +985,9 @@ int Cf2RadxFile::_readRangeVariable()
         _rangeKm.push_back(*rr / 1000.0);
       }
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - Cf2RadxFile::_readRangeVariable");
-      _addErrStr("  getVal fails, cannot get range data array, var name: ", rangeDim.getName());
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_readRangeVariable");
+      err.addErrStr("  getVal fails, cannot get range data array, var name: ", rangeDim.getName());
       return -1;
     }
     delete[] rangeMeters;
@@ -1042,10 +1001,11 @@ int Cf2RadxFile::_readRangeVariable()
     NcxxDim timeDim = _rangeVar.getDim(0);
     NcxxDim rangeDim = _rangeVar.getDim(1);
     if (timeDim != _timeDimRead || rangeDim != _rangeDimRead) {
-      _addErrStr("ERROR - Cf2RadxFile::_readRangeVariable");
-      _addErrStr("  Range has incorrect dimensions");
-      _addErrStr("  dim0, name: ", timeDim.getName());
-      _addErrStr("  dim1, name: ", rangeDim.getName());
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_readRangeVariable");
+      err.addErrStr("  Range has incorrect dimensions");
+      err.addErrStr("  dim0, name: ", timeDim.getName());
+      err.addErrStr("  dim1, name: ", rangeDim.getName());
       return -1;
     }
 
@@ -1127,359 +1087,593 @@ int Cf2RadxFile::_readRangeVariable()
 
 }
 
-///////////////////////////////////
-// read the scalar variables
+//////////////////////////////////////////////////////////////
+// read the root level scalar variables
+// throws exception on read
 
-int Cf2RadxFile::_readScalarVariables()
-
+  void Cf2RadxFile::_readRootScalarVariables()
+  
 {
 
   try {
+    _file.readIntVar(VOLUME_NUMBER, _volumeNumber, Radx::missingMetaInt);
+  } catch (NcxxException e) {
+    _volumeNumber = 0;
+  }
 
-    _file.readIntVar(_volumeNumberVar, VOLUME_NUMBER, 
-                     _volumeNumber, Radx::missingMetaInt);
-    
+  try {
+    string pstring;
+    _file.readScalarStringVar(INSTRUMENT_TYPE, pstring);
+    _instrumentType = Radx::instrumentTypeFromStr(pstring);
+  } catch (NcxxException e) {
     _instrumentType = Radx::INSTRUMENT_TYPE_RADAR;
+  }
 
-    try {
-      string pstring;
-      _file.readScalarStringVar(_instrumentTypeVar, INSTRUMENT_TYPE, pstring);
-      _instrumentType = Radx::instrumentTypeFromStr(pstring);
-    } catch (NcxxException e) {
-    }
+  try {
+    string pstring;
+    _file.readScalarStringVar(PLATFORM_TYPE, pstring);
+    _platformType = Radx::platformTypeFromStr(pstring);
+  } catch (NcxxException e) {
+    _platformType = Radx::PLATFORM_TYPE_FIXED;
+  }
+  
+  try {
+    string pstring;
+    _file.readScalarStringVar(PRIMARY_AXIS, pstring);
+    _primaryAxis = Radx::primaryAxisFromStr(pstring);
+  } catch (NcxxException e) {
+    _primaryAxis = Radx::PRIMARY_AXIS_Z;
+  }
+  
+  try {
+    string pstring;
+    _file.readScalarStringVar(STATUS_XML, pstring);
+    _statusXml = pstring;
+  } catch (NcxxException e) {
+    _statusXml.clear();
+  }
+  
+}
 
-    try {
-      string pstring;
-      _file.readScalarStringVar(_platformTypeVar, PLATFORM_TYPE, pstring);
-      _platformType = Radx::platformTypeFromStr(pstring);
-    } catch (NcxxException e) {
-    }
+//////////////////////////////////////////////////////////////
+// read the radar parameters
 
-    try {
-      string pstring;
-      _file.readScalarStringVar(_primaryAxisVar, PRIMARY_AXIS, pstring);
-      _primaryAxis = Radx::primaryAxisFromStr(pstring);
-    } catch (NcxxException e) {
-    }
+void Cf2RadxFile::_readRadarParameters()
+  
+{
+
+  if (_instrumentType != Radx::INSTRUMENT_TYPE_RADAR) {
+    return;
+  }
+
+  try {
+
+    NcxxGroup group = _file.getGroup(RADAR_PARAMETERS);
     
-    if (!_file.getVar(STATUS_XML).isNull()) {
-      try {
-        string pstring;
-        _file.readScalarStringVar(_statusXmlVar, STATUS_XML, pstring);
-        _statusXml = pstring;
-      } catch (NcxxException e) {
-      }
-    }
-
-    if (_instrumentType == Radx::INSTRUMENT_TYPE_RADAR) {
+    group.readDoubleVar(RADAR_ANTENNA_GAIN_H, _radarAntennaGainDbH, false);
+    group.readDoubleVar(RADAR_ANTENNA_GAIN_V, _radarAntennaGainDbV, false);
+    group.readDoubleVar(RADAR_BEAM_WIDTH_H, _radarBeamWidthDegH, false);
+    group.readDoubleVar(RADAR_BEAM_WIDTH_V, _radarBeamWidthDegV, false);
+    group.readDoubleVar(RADAR_RX_BANDWIDTH, _radarRxBandwidthHz, false);
     
-      _file.readDoubleVar(_radarAntennaGainHVar,
-                          RADAR_ANTENNA_GAIN_H, _radarAntennaGainDbH, false);
-      _file.readDoubleVar(_radarAntennaGainVVar,
-                          RADAR_ANTENNA_GAIN_V, _radarAntennaGainDbV, false);
-      _file.readDoubleVar(_radarBeamWidthHVar,
-                          RADAR_BEAM_WIDTH_H, _radarBeamWidthDegH, false);
-      _file.readDoubleVar(_radarBeamWidthVVar,
-                          RADAR_BEAM_WIDTH_V, _radarBeamWidthDegV, false);
-      _file.readDoubleVar(_radarRxBandwidthVar,
-                          RADAR_RX_BANDWIDTH, _radarRxBandwidthHz, false);
-    } else {
-      
-      _file.readDoubleVar(_lidarConstantVar, 
-                          LIDAR_CONSTANT, _lidarConstant, false);
-      _file.readDoubleVar(_lidarPulseEnergyJVar, 
-                          LIDAR_PULSE_ENERGY, _lidarPulseEnergyJ, false);
-      _file.readDoubleVar(_lidarPeakPowerWVar, 
-                          LIDAR_PEAK_POWER, _lidarPeakPowerW, false);
-      _file.readDoubleVar(_lidarApertureDiamCmVar, 
-                          LIDAR_APERTURE_DIAMETER,
-                          _lidarApertureDiamCm, false);
-      _file.readDoubleVar(_lidarApertureEfficiencyVar, 
-                          LIDAR_APERTURE_EFFICIENCY,
-                          _lidarApertureEfficiency, false);
-      _file.readDoubleVar(_lidarFieldOfViewMradVar, 
-                          LIDAR_FIELD_OF_VIEW,
-                          _lidarFieldOfViewMrad, false);
-      _file.readDoubleVar(_lidarBeamDivergenceMradVar, 
-                          LIDAR_BEAM_DIVERGENCE,
-                          _lidarBeamDivergenceMrad, false);
-      
-    }
+    _readFrequency(group);
 
   } catch (NcxxException e) {
-    _addErrStr("ERROR - Cf2RadxFile::_readScalarVariables");
-    _addErrStr("  exception: ", e.what());
-    return -1;
-  } // try
+  }
+
+}
+
+//////////////////////////////////////////////////////////////
+// read the lidar parameters
+
+void Cf2RadxFile::_readLidarParameters()
   
-  return 0;
+{
+
+  if (_instrumentType != Radx::INSTRUMENT_TYPE_LIDAR) {
+    return;
+  }
+
+  try {
+
+    NcxxGroup group = _file.getGroup(LIDAR_PARAMETERS);
+    
+    group.readDoubleVar(LIDAR_CONSTANT, _lidarConstant, false);
+    group.readDoubleVar(LIDAR_PULSE_ENERGY, _lidarPulseEnergyJ, false);
+    group.readDoubleVar(LIDAR_PEAK_POWER, _lidarPeakPowerW, false);
+    group.readDoubleVar(LIDAR_APERTURE_DIAMETER, _lidarApertureDiamCm, false);
+    group.readDoubleVar(LIDAR_APERTURE_EFFICIENCY, _lidarApertureEfficiency, false);
+    group.readDoubleVar(LIDAR_FIELD_OF_VIEW, _lidarFieldOfViewMrad, false);
+    group.readDoubleVar(LIDAR_BEAM_DIVERGENCE, _lidarBeamDivergenceMrad, false);
+    
+    _readFrequency(group);
+    
+  } catch (NcxxException e) {
+  }
 
 }
 
 ///////////////////////////////////
-// read the correction variables
+// read the frequency variable
+// throws exception on error
 
-int Cf2RadxFile::_readCorrectionVariables()
+void Cf2RadxFile::_readFrequency(NcxxGroup &group)
+
+{
+  
+  _frequency.clear();
+  _frequencyVar = group.getVar(FREQUENCY);
+  if (_frequencyVar.isNull()) {
+    return;
+  }
+  
+  int nFreq = _frequencyVar.numVals();
+  RadxArray<double> freq_;
+  double *freq = freq_.alloc(nFreq);
+  _frequencyVar.getVal(freq);
+  for (int ii = 0; ii < nFreq; ii++) {
+    _frequency.push_back(freq[ii]);
+  }
+  
+}
+
+/////////////////////////////////////////////////////////
+// read the georeference corrections
+
+void Cf2RadxFile::_readGeorefCorrections()
 
 {
   
   _cfactors.clear();
+  _correctionsActive = false;
 
   try {
+    
+    NcxxGroup group = _file.getGroup(GEOREF_CORRECTION);
+    _correctionsActive = true;
 
     double val;
 
-    _file.readDoubleVar(_azimuthCorrVar, 
-                        AZIMUTH_CORRECTION, val, 0);
+    _file.readDoubleVar(AZIMUTH_CORRECTION, val, 0);
     _cfactors.setAzimuthCorr(val);
   
-    _file.readDoubleVar(_elevationCorrVar,
-                        ELEVATION_CORRECTION, val, 0);
+    _file.readDoubleVar(ELEVATION_CORRECTION, val, 0);
     _cfactors.setElevationCorr(val);
 
-    _file.readDoubleVar(_rangeCorrVar,
-                        RANGE_CORRECTION, val, 0);
+    _file.readDoubleVar(RANGE_CORRECTION, val, 0);
     _cfactors.setRangeCorr(val);
 
-    _file.readDoubleVar(_longitudeCorrVar,
-                        LONGITUDE_CORRECTION, val, 0);
+    _file.readDoubleVar(LONGITUDE_CORRECTION, val, 0);
     _cfactors.setLongitudeCorr(val);
 
-    _file.readDoubleVar(_latitudeCorrVar,
-                        LATITUDE_CORRECTION, val, 0);
+    _file.readDoubleVar(LATITUDE_CORRECTION, val, 0);
     _cfactors.setLatitudeCorr(val);
 
-    _file.readDoubleVar(_pressureAltCorrVar,
-                        PRESSURE_ALTITUDE_CORRECTION, val, 0);
+    _file.readDoubleVar(PRESSURE_ALTITUDE_CORRECTION, val, 0);
     _cfactors.setPressureAltCorr(val);
 
-    _file.readDoubleVar(_altitudeCorrVar,
-                        ALTITUDE_CORRECTION, val, 0);
+    _file.readDoubleVar(ALTITUDE_CORRECTION, val, 0);
     _cfactors.setAltitudeCorr(val);
 
-    _file.readDoubleVar(_ewVelCorrVar, 
-                        EASTWARD_VELOCITY_CORRECTION, val, 0);
+    _file.readDoubleVar(EASTWARD_VELOCITY_CORRECTION, val, 0);
     _cfactors.setEwVelCorr(val);
 
-    _file.readDoubleVar(_nsVelCorrVar, 
-                        NORTHWARD_VELOCITY_CORRECTION, val, 0);
+    _file.readDoubleVar(NORTHWARD_VELOCITY_CORRECTION, val, 0);
     _cfactors.setNsVelCorr(val);
 
-    _file.readDoubleVar(_vertVelCorrVar,
-                        VERTICAL_VELOCITY_CORRECTION, val, 0);
+    _file.readDoubleVar(VERTICAL_VELOCITY_CORRECTION, val, 0);
     _cfactors.setVertVelCorr(val);
 
-    _file.readDoubleVar(_headingCorrVar, 
-                        HEADING_CORRECTION, val, 0);
+    _file.readDoubleVar(HEADING_CORRECTION, val, 0);
     _cfactors.setHeadingCorr(val);
 
-    _file.readDoubleVar(_rollCorrVar, 
-                        ROLL_CORRECTION, val, 0);
+    _file.readDoubleVar(ROLL_CORRECTION, val, 0);
     _cfactors.setRollCorr(val);
   
-    _file.readDoubleVar(_pitchCorrVar, PITCH_CORRECTION, val, 0);
+    _file.readDoubleVar(PITCH_CORRECTION, val, 0);
     _cfactors.setPitchCorr(val);
 
-    _file.readDoubleVar(_driftCorrVar, DRIFT_CORRECTION, val, 0);
+    _file.readDoubleVar(DRIFT_CORRECTION, val, 0);
     _cfactors.setDriftCorr(val);
 
-    _file.readDoubleVar(_rotationCorrVar, ROTATION_CORRECTION, val, 0);
+    _file.readDoubleVar(ROTATION_CORRECTION, val, 0);
     _cfactors.setRotationCorr(val);
 
-    _file.readDoubleVar(_tiltCorrVar, TILT_CORRECTION, val, 0);
+    _file.readDoubleVar(TILT_CORRECTION, val, 0);
     _cfactors.setTiltCorr(val);
 
   } catch (NcxxException e) {
   }
 
-  return 0;
-  
 }
 
 ///////////////////////////////////
-// read the position variables
+// read the location
 
-int Cf2RadxFile::_readPositionVariables()
+void Cf2RadxFile::_readLocation()
 
 {
 
-  // time
+  // latitude
 
-  _georefTimeVar = _file.getVar(GEOREF_TIME);
-  if (!_georefTimeVar.isNull()) {
-    if (_georefTimeVar.numVals() < 1) {
-      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
-      _addErrStr("  Cannot read georef time");
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
-    if (_georefTimeVar.getType() != ncxxDouble) {
-      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
-      _addErrStr("  georef time is incorrect type: ", 
-                 Ncxx::ncxxTypeToStr(_georefTimeVar.getType()));
-      _addErrStr("  expecting type: double");
-      return -1;
-    }
-  }
-
-  // find latitude, longitude, altitude
-
-  _latitudeVar = _file.getVar(LATITUDE);
-  if (!_latitudeVar.isNull()) {
-    if (_latitudeVar.numVals() < 1) {
-      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
-      _addErrStr("  Cannot read latitude");
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
-    if (_latitudeVar.getType() != ncxxDouble) {
-      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
-      _addErrStr("  latitude is incorrect type: ", 
-                 Ncxx::ncTypeToStr(_latitudeVar.getType().getId()));
-      _addErrStr("  expecting type: double");
-      return -1;
-    }
-  } else {
-    cerr << "WARNING - Cf2RadxFile::_readPositionVariables" << endl;
+  try {
+    _file.readDoubleVar(LATITUDE, _latitude, Radx::missingFl64);
+  } catch (NcxxException e) {
+    _latitude = 0.0;
+    cerr << "WARNING - Cf2RadxFile::_readLocation" << endl;
     cerr << "  No latitude variable" << endl;
     cerr << "  Setting latitude to 0" << endl;
   }
 
-  _longitudeVar = _file.getVar(LONGITUDE);
-  if (!_longitudeVar.isNull()) {
-    if (_longitudeVar.numVals() < 1) {
-      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
-      _addErrStr("  Cannot read longitude");
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
-    if (_longitudeVar.getType() != ncxxDouble) {
-      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
-      _addErrStr("  longitude is incorrect type: ",
-                 Ncxx::ncTypeToStr(_longitudeVar.getType().getId()));
-      _addErrStr("  expecting type: double");
-      return -1;
-    }
-  } else {
-    cerr << "WARNING - Cf2RadxFile::_readPositionVariables" << endl;
+  // longitude
+  
+  try {
+    _file.readDoubleVar(LONGITUDE, _longitude, Radx::missingFl64);
+  } catch (NcxxException e) {
+    _longitude = 0.0;
+    cerr << "WARNING - Cf2RadxFile::_readLocation" << endl;
     cerr << "  No longitude variable" << endl;
     cerr << "  Setting longitude to 0" << endl;
   }
+  
+  // altitude
 
-  _altitudeVar = _file.getVar(ALTITUDE);
-  if (!_altitudeVar.isNull()) {
-    if (_altitudeVar.numVals() < 1) {
-      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
-      _addErrStr("  Cannot read altitude");
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
-    if (_altitudeVar.getType() != ncxxDouble) {
-      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
-      _addErrStr("  altitude is incorrect type: ",
-                 Ncxx::ncTypeToStr(_altitudeVar.getType().getId()));
-      _addErrStr("  expecting type: double");
-      return -1;
-    }
-  } else {
-    cerr << "WARNING - Cf2RadxFile::_readPositionVariables" << endl;
+  try {
+    _file.readDoubleVar(ALTITUDE, _altitudeM, Radx::missingFl64);
+  } catch (NcxxException e) {
+    _altitudeM = 0.0;
+    cerr << "WARNING - Cf2RadxFile::_readLocation" << endl;
     cerr << "  No altitude variable" << endl;
     cerr << "  Setting altitude to 0" << endl;
   }
+  
+  // altitude AGL
 
-  _altitudeAglVar = _file.getVar(ALTITUDE_AGL);
-  if (!_altitudeAglVar.isNull()) {
-    if (_altitudeAglVar.numVals() < 1) {
-      _addErrStr("WARNING - Cf2RadxFile::_readPositionVariables");
-      _addErrStr("  Bad variable - altitudeAgl");
-      _addErrStr(_file.getErrStr());
-    }
-    if (_altitudeAglVar.getType() != ncxxDouble) {
-      _addErrStr("WARNING - Cf2RadxFile::_readPositionVariables");
-      _addErrStr("  altitudeAgl is incorrect type: ",
-                 Ncxx::ncTypeToStr(_altitudeAglVar.getType().getId()));
-      _addErrStr("  expecting type: double");
-    }
+  try {
+    _file.readDoubleVar(ALTITUDE_AGL, _altitudeAglM, Radx::missingFl64);
+  } catch (NcxxException e) {
+    _altitudeAglM = 0.0;
+  }
+  
+}
+
+////////////////////////////////////////
+// read the radar calibrations
+
+void Cf2RadxFile::_readRadarCalibration()
+
+{
+  
+  try {
+    
+    NcxxGroup group = _file.getGroup(RADAR_CALIBRATION);
+    NcxxDim dim = group.getDim(R_CALIB);
+    size_t nCalib = dim.getSize();
+
+    for (size_t ical = 0; ical < nCalib; ical++) {
+      RadxRcalib *cal = new RadxRcalib;
+      try {
+        _readRcal(group, dim, *cal, ical);
+      } catch (NcxxException& e) {
+        NcxxErrStr err;
+        cerr << "WARNING - Cf2RadxFile::_readCalibrationVariables" << endl;
+        cerr << "  calibration found, but error on read" << endl;
+        cerr << "  ical: " << ical << endl;
+        continue;
+      }
+      // there is generally one cal per pulse width
+      // check that this is not a duplicate
+      bool alreadyAdded = false;
+      for (size_t ii = 0; ii < _rCals.size(); ii++) {
+        const RadxRcalib *rcal = _rCals[ii];
+        if (fabs(rcal->getPulseWidthUsec() -
+                 cal->getPulseWidthUsec()) < 0.0001) {
+          alreadyAdded = true;
+        }
+      }
+      if (!alreadyAdded) {
+        _rCals.push_back(cal);
+      }
+    } // ical
+
+  } catch (NcxxException& e) {
   }
 
-  // set variables
+}
+  
+////////////////////////////////////////
+// read a specific cal
+// throws exception on error
 
-  if (!_latitudeVar.isNull()) {
-    double *data = new double[_latitudeVar.numVals()];
-    try {
-      _latitudeVar.getVal(data);
-    } catch (NcxxException& e) {
-      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
-      _addErrStr("  Cannot read var, name: ", _latitudeVar.getName());
-      _addErrStr("  exception: ", e.what());
-      return -1;
-    }
-    for (int ii = 0; ii < _latitudeVar.numVals(); ii++) {
-      _latitude.push_back(data[ii]);
-    }
-    delete[] data;
-  } else {
-    _latitude.push_back(0.0);
+void Cf2RadxFile::_readRcal(NcxxGroup &group,
+                            NcxxDim &dim,
+                            RadxRcalib &cal,
+                            size_t index)
+
+{
+
+  // must have time, pulse width and receiver gain for HC channel
+
+  try {
+    time_t ctime;
+    _readCalTime(group, dim, CALIBRATION_TIME, index, ctime);
+    cal.setCalibTime(ctime);
+  } catch (NcxxException e) {
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readRcal");
+    err.addErrStr("  Cannot read cal time");
+    err.addErrStr(e.what());
+    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
 
-  if (!_longitudeVar.isNull()) {
-    double *data = new double[_longitudeVar.numVals()];
-    try {
-      _longitudeVar.getVal(data);
-    } catch (NcxxException& e) {
-      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
-      _addErrStr("  Cannot read var, name", _longitudeVar.getName());
-      _addErrStr("  exception: ", e.what());
-      return -1;
-    }
-    for (int ii = 0; ii < _longitudeVar.numVals(); ii++) {
-      _longitude.push_back(data[ii]);
-    }
-    delete[] data;
-  } else {
-    _longitude.push_back(0.0);
+
+  try {
+    double val;
+    _readCalVar(group, dim, PULSE_WIDTH, index, val, true);
+    cal.setPulseWidthUsec(val * 1.0e6);
+  } catch (NcxxException e) {
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readRcal");
+    err.addErrStr("  Cannot read pusle width");
+    err.addErrStr(e.what());
+    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
 
-  if (!_altitudeVar.isNull()) {
-    double *data = new double[_altitudeVar.numVals()];
-    try {
-      _altitudeVar.getVal(data);
-    } catch (NcxxException& e) {
-      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
-      _addErrStr("  Cannot read var, name", _altitudeVar.getName());
-      _addErrStr("  exception: ", e.what());
-      return -1;
-    }
-    for (int ii = 0; ii < _altitudeVar.numVals(); ii++) {
-      _altitude.push_back(data[ii]);
-    }
-    delete[] data;
-  } else {
-    _altitude.push_back(0.0);
+  try {
+    double val;
+    _readCalVar(group, dim, RECEIVER_GAIN_HC, index, val, true);
+    cal.setReceiverGainDbHc(val);
+  } catch (NcxxException e) {
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readRcal");
+    err.addErrStr("  Cannot read receiver gain");
+    err.addErrStr(e.what());
+    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
 
-  if (!_altitudeAglVar.isNull()) {
-    double *data = new double[_altitudeAglVar.numVals()];
-    try {
-      _altitudeAglVar.getVal(data);
-    } catch (NcxxException& e) {
-      _addErrStr("ERROR - Cf2RadxFile::_readPositionVariables");
-      _addErrStr("  Cannot read var, name", _altitudeAglVar.getName());
-      _addErrStr("  exception: ", e.what());
-      return -1;
-    }
-    for (int ii = 0; ii < _altitudeAglVar.numVals(); ii++) {
-      _altitudeAgl.push_back(data[ii]);
-    }
-    delete[] data;
-  } else {
-    _altitudeAgl.push_back(0.0);
-  }
+  // other values are not required
 
-  return 0;
+  try {
+
+    double val;
+
+    _readCalVar(group, dim, XMIT_POWER_H, index, val);
+    cal.setXmitPowerDbmH(val);
+
+    _readCalVar(group, dim, XMIT_POWER_V, index, val);
+    cal.setXmitPowerDbmV(val);
+
+    _readCalVar(group, dim, TWO_WAY_WAVEGUIDE_LOSS_H, index, val);
+    cal.setTwoWayWaveguideLossDbH(val);
+
+    _readCalVar(group, dim, TWO_WAY_WAVEGUIDE_LOSS_V, index, val);
+    cal.setTwoWayWaveguideLossDbV(val);
+
+    _readCalVar(group, dim, TWO_WAY_RADOME_LOSS_H, index, val);
+    cal.setTwoWayRadomeLossDbH(val);
+
+    _readCalVar(group, dim, TWO_WAY_RADOME_LOSS_V, index, val);
+    cal.setTwoWayRadomeLossDbV(val);
+
+    _readCalVar(group, dim, RECEIVER_MISMATCH_LOSS, index, val);
+    cal.setReceiverMismatchLossDb(val);
+
+    _readCalVar(group, dim, RADAR_CONSTANT_H, index, val);
+    cal.setRadarConstantH(val);
+
+    _readCalVar(group, dim, RADAR_CONSTANT_V, index, val);
+    cal.setRadarConstantV(val);
+
+    _readCalVar(group, dim, ANTENNA_GAIN_H, index, val);
+    cal.setAntennaGainDbH(val);
+  
+    _readCalVar(group, dim, ANTENNA_GAIN_V, index, val);
+    cal.setAntennaGainDbV(val);
+
+    _readCalVar(group, dim, NOISE_HC, index, val, true);
+    cal.setNoiseDbmHc(val);
+
+    _readCalVar(group, dim, NOISE_HX, index, val);
+    cal.setNoiseDbmHx(val);
+
+    _readCalVar(group, dim, NOISE_VC, index, val);
+    cal.setNoiseDbmVc(val);
+
+    _readCalVar(group, dim, NOISE_VX, index, val);
+    cal.setNoiseDbmVx(val);
+
+    _readCalVar(group, dim, RECEIVER_GAIN_HX, index, val);
+    cal.setReceiverGainDbHx(val);
+
+    _readCalVar(group, dim, RECEIVER_GAIN_VC, index, val);
+    cal.setReceiverGainDbVc(val);
+
+    _readCalVar(group, dim, RECEIVER_GAIN_VX, index, val);
+    cal.setReceiverGainDbVx(val);
+
+    _readCalVar(group, dim, BASE_DBZ_1KM_HC, index, val);
+    cal.setBaseDbz1kmHc(val);
+
+    _readCalVar(group, dim, BASE_DBZ_1KM_HX, index, val);
+    cal.setBaseDbz1kmHx(val);
+
+    _readCalVar(group, dim, BASE_DBZ_1KM_VC, index, val);
+    cal.setBaseDbz1kmVc(val);
+
+    _readCalVar(group, dim, BASE_DBZ_1KM_VX, index, val);
+    cal.setBaseDbz1kmVx(val);
+
+    _readCalVar(group, dim, SUN_POWER_HC, index, val);
+    cal.setSunPowerDbmHc(val);
+
+    _readCalVar(group, dim, SUN_POWER_HX, index, val);
+    cal.setSunPowerDbmHx(val);
+
+    _readCalVar(group, dim, SUN_POWER_VC, index, val);
+    cal.setSunPowerDbmVc(val);
+
+    _readCalVar(group, dim, SUN_POWER_VX, index, val);
+    cal.setSunPowerDbmVx(val);
+
+    _readCalVar(group, dim, NOISE_SOURCE_POWER_H, index, val);
+    cal.setNoiseSourcePowerDbmH(val);
+
+    _readCalVar(group, dim, NOISE_SOURCE_POWER_V, index, val);
+    cal.setNoiseSourcePowerDbmV(val);
+
+    _readCalVar(group, dim, POWER_MEASURE_LOSS_H, index, val);
+    cal.setPowerMeasLossDbH(val);
+
+    _readCalVar(group, dim, POWER_MEASURE_LOSS_V, index, val);
+    cal.setPowerMeasLossDbV(val);
+
+    _readCalVar(group, dim, COUPLER_FORWARD_LOSS_H, index, val);
+    cal.setCouplerForwardLossDbH(val);
+
+    _readCalVar(group, dim, COUPLER_FORWARD_LOSS_V, index, val);
+    cal.setCouplerForwardLossDbV(val);
+
+    _readCalVar(group, dim, DBZ_CORRECTION, index, val);
+    cal.setDbzCorrection(val);
+
+    _readCalVar(group, dim, ZDR_CORRECTION, index, val);
+    cal.setZdrCorrectionDb(val);
+
+    _readCalVar(group, dim, LDR_CORRECTION_H, index, val);
+    cal.setLdrCorrectionDbH(val);
+
+    _readCalVar(group, dim, LDR_CORRECTION_V, index, val);
+    cal.setLdrCorrectionDbV(val);
+
+    _readCalVar(group, dim, SYSTEM_PHIDP, index, val);
+    cal.setSystemPhidpDeg(val);
+
+    _readCalVar(group, dim, TEST_POWER_H, index, val);
+    cal.setTestPowerDbmH(val);
+
+    _readCalVar(group, dim, TEST_POWER_V, index, val);
+    cal.setTestPowerDbmV(val);
+
+    _readCalVar(group, dim, RECEIVER_SLOPE_HC, index, val);
+    cal.setReceiverSlopeDbHc(val);
+
+    _readCalVar(group, dim, RECEIVER_SLOPE_HX, index, val);
+    cal.setReceiverSlopeDbHx(val);
+
+    _readCalVar(group, dim, RECEIVER_SLOPE_VC, index, val);
+    cal.setReceiverSlopeDbVc(val);
+
+    _readCalVar(group, dim, RECEIVER_SLOPE_VX, index, val);
+    cal.setReceiverSlopeDbVx(val);
+
+  } catch (NcxxException e) {
+  }
 
 }
 
+///////////////////////////////////
+// get calibration time
+// throws exception on error
+
+void Cf2RadxFile::_readCalTime(NcxxGroup &group,
+                               NcxxDim &dim,
+                               const string &name,
+                               size_t index,
+                               time_t &val)
+  
+{
+
+  // read the time strings
+
+  vector<string> timeStrings;
+  _read1DVar(group, dim, name, timeStrings);
+
+  if (index > timeStrings.size() - 1) {
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readCalTime");
+    err.addErrStr("  index value exceeds dim size");
+    err.addErrInt("  index: ", index);
+    err.addErrInt("  dim: ", timeStrings.size());
+    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+  }
+  
+  // scan the string to get the time
+
+  const char *timeStr = timeStrings[index].c_str();
+  int year, month, day, hour, min, sec;
+  if (sscanf(timeStr, "%4d-%2d-%2dT%2d:%2d:%2dZ",
+             &year, &month, &day, &hour, &min, &sec) != 6) {
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readCalTime");
+    err.addErrStr("  Cannot parse cal time string: ", timeStr);
+    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+  }
+  RadxTime ctime(year, month, day, hour, min, sec);
+  val = ctime.utime();
+
+}
+
+///////////////////////////////////
+// get calibration variable
+// throws exception on error
+
+NcxxVar Cf2RadxFile::_readCalVar(NcxxGroup &group,
+                                 NcxxDim &dim,
+                                 const string &name,
+                                 size_t index, 
+                                 double &val,
+                                 bool required)
+  
+{
+
+  val = Radx::missingMetaDouble;
+
+  NcxxVar var = _file.getVar(name);
+  
+  if (var.isNull()) {
+    if (!required) {
+      return var;
+    } else {
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_readCalVar");
+      err.addErrStr("  cal variable name: ", name);
+      err.addErrStr("  group name: ", group.getName());
+      err.addErrStr("  Cannot read calibration variable");
+      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+    }
+  }
+
+  if (var.numVals() < (int) index - 1) {
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readCalVar");
+    err.addErrStr("  requested index too high");
+    err.addErrStr("  cal variable name: ", name);
+    err.addErrInt("  requested index: ", index);
+    err.addErrInt("  n cals available: ", var.numVals());
+    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+  }
+
+  // read value
+  
+  vector<size_t> indices;
+  indices.push_back(index);
+  double data;
+  var.getVal(indices, &data);
+  val = data;
+
+  return var;
+
+}
+
+////////////////////////////////////////
+// read the lidar calibrations
+
+void Cf2RadxFile::_readLidarCalibration()
+
+{
+
+}
+  
 ////////////////////////////////////////////////////
 // read the sweep meta-data as it exists in the file
 // loads up _sweepsInFile vector
@@ -1495,8 +1689,9 @@ void Cf2RadxFile::_readSweepsAsInFile()
   
   size_t nSweepsInFile = _sweepDim.getSize();
   if (nSweepsInFile < 1) {
-    _addErrStr("ERROR - Cf2RadxFile::_readSweepsAsInFile");
-    _addErrStr("  No sweeps found");
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readSweepsAsInFile");
+    err.addErrStr("  No sweeps found");
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 
@@ -1506,13 +1701,13 @@ void Cf2RadxFile::_readSweepsAsInFile()
   
   // get the sweep group names - at root level
   {
-    NcxxVar var;
     try {
-      _readSweepVar(_file, var, SWEEP_GROUP_NAME, _sweepGroupNames);
+      _read1DVar(_file, _sweepDim, SWEEP_GROUP_NAME, _sweepGroupNames);
     } catch (NcxxException e) {
-      _addErrStr("ERROR - Cf2RadxFile::_readSweepsAsInFile");
-      _addErrStr("  Cannot read var, name", SWEEP_GROUP_NAME);
-      _addErrStr("  exception: ", e.what());
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_readSweepsAsInFile");
+      err.addErrStr("  Cannot read var, name", SWEEP_GROUP_NAME);
+      err.addErrStr("  exception: ", e.what());
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     }
   }
@@ -1537,9 +1732,10 @@ void Cf2RadxFile::_readSweepsAsInFile()
       _sweeps.push_back(sweep);
       startRayIndex = sweep->getEndRayIndex() + 1;
     } catch (NcxxException e) {
-      _addErrStr("ERROR - Cf2RadxFile::_readSweepsAsInFile");
-      _addErrStr("  Cannot read sweep group, name", _sweepGroupNames[isweep]);
-      _addErrStr("  exception: ", e.what());
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_readSweepsAsInFile");
+      err.addErrStr("  Cannot read sweep group, name", _sweepGroupNames[isweep]);
+      err.addErrStr("  exception: ", e.what());
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     }
     
@@ -1566,9 +1762,10 @@ void Cf2RadxFile::_readSweepMetadata(NcxxGroup &group,
     if (!var.isNull()) {
       size_t len = var.getDimCount();
       if (len != 0) {
-        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
-        _addErrStr("  Reading var: ", SWEEP_NUMBER);
-        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        NcxxErrStr err;
+        err.addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        err.addErrStr("  Reading var: ", SWEEP_NUMBER);
+        err.addErrInt("  Bad dimCount, should be 0, found: ", len);
         throw(NcxxException(getErrStr(), __FILE__, __LINE__));
       }
       int val;
@@ -1583,9 +1780,10 @@ void Cf2RadxFile::_readSweepMetadata(NcxxGroup &group,
     if (!var.isNull()) {
       size_t len = var.getDimCount();
       if (var.isNull() || len != 0) {
-        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
-        _addErrStr("  Reading var: ", FIXED_ANGLE);
-        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        NcxxErrStr err;
+        err.addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        err.addErrStr("  Reading var: ", FIXED_ANGLE);
+        err.addErrInt("  Bad dimCount, should be 0, found: ", len);
         throw(NcxxException(getErrStr(), __FILE__, __LINE__));
       }
       float val;
@@ -1600,9 +1798,10 @@ void Cf2RadxFile::_readSweepMetadata(NcxxGroup &group,
     if (!var.isNull()) {
       size_t len = var.getDimCount();
       if (len != 0) {
-        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
-        _addErrStr("  Reading var: ", TARGET_SCAN_RATE);
-        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        NcxxErrStr err;
+        err.addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        err.addErrStr("  Reading var: ", TARGET_SCAN_RATE);
+        err.addErrInt("  Bad dimCount, should be 0, found: ", len);
         throw(NcxxException(getErrStr(), __FILE__, __LINE__));
       }
       float val;
@@ -1617,9 +1816,10 @@ void Cf2RadxFile::_readSweepMetadata(NcxxGroup &group,
     if (!var.isNull()) {
       size_t len = var.getDimCount();
       if (len != 0) {
-        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
-        _addErrStr("  Reading var: ", SWEEP_MODE);
-        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        NcxxErrStr err;
+        err.addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        err.addErrStr("  Reading var: ", SWEEP_MODE);
+        err.addErrInt("  Bad dimCount, should be 0, found: ", len);
         throw(NcxxException(getErrStr(), __FILE__, __LINE__));
       }
       char *val;
@@ -1634,9 +1834,10 @@ void Cf2RadxFile::_readSweepMetadata(NcxxGroup &group,
     if (!var.isNull()) {
       size_t len = var.getDimCount();
       if (len != 0) {
-        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
-        _addErrStr("  Reading var: ", POLARIZATION_MODE);
-        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        NcxxErrStr err;
+        err.addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        err.addErrStr("  Reading var: ", POLARIZATION_MODE);
+        err.addErrInt("  Bad dimCount, should be 0, found: ", len);
         throw(NcxxException(getErrStr(), __FILE__, __LINE__));
       }
       char *val;
@@ -1651,9 +1852,10 @@ void Cf2RadxFile::_readSweepMetadata(NcxxGroup &group,
     if (!var.isNull()) {
       size_t len = var.getDimCount();
       if (len != 0) {
-        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
-        _addErrStr("  Reading var: ", PRT_MODE);
-        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        NcxxErrStr err;
+        err.addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        err.addErrStr("  Reading var: ", PRT_MODE);
+        err.addErrInt("  Bad dimCount, should be 0, found: ", len);
         throw(NcxxException(getErrStr(), __FILE__, __LINE__));
       }
       char *val;
@@ -1668,9 +1870,10 @@ void Cf2RadxFile::_readSweepMetadata(NcxxGroup &group,
     if (!var.isNull()) {
       size_t len = var.getDimCount();
       if (len != 0) {
-        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
-        _addErrStr("  Reading var: ", FOLLOW_MODE);
-        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        NcxxErrStr err;
+        err.addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        err.addErrStr("  Reading var: ", FOLLOW_MODE);
+        err.addErrInt("  Bad dimCount, should be 0, found: ", len);
         throw(NcxxException(getErrStr(), __FILE__, __LINE__));
       }
       char *val;
@@ -1685,9 +1888,10 @@ void Cf2RadxFile::_readSweepMetadata(NcxxGroup &group,
     if (!var.isNull()) {
       size_t len = var.getDimCount();
       if (len != 0) {
-        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
-        _addErrStr("  Reading var: ", RAYS_ARE_INDEXED);
-        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        NcxxErrStr err;
+        err.addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        err.addErrStr("  Reading var: ", RAYS_ARE_INDEXED);
+        err.addErrInt("  Bad dimCount, should be 0, found: ", len);
         throw(NcxxException(getErrStr(), __FILE__, __LINE__));
       }
       char *val;
@@ -1706,9 +1910,10 @@ void Cf2RadxFile::_readSweepMetadata(NcxxGroup &group,
     if (!var.isNull()) {
       size_t len = var.getDimCount();
       if (var.isNull() || len != 0) {
-        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
-        _addErrStr("  Reading var: ", RAY_ANGLE_RES);
-        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        NcxxErrStr err;
+        err.addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        err.addErrStr("  Reading var: ", RAY_ANGLE_RES);
+        err.addErrInt("  Bad dimCount, should be 0, found: ", len);
         throw(NcxxException(getErrStr(), __FILE__, __LINE__));
       }
       float val;
@@ -1723,9 +1928,10 @@ void Cf2RadxFile::_readSweepMetadata(NcxxGroup &group,
     if (!var.isNull()) {
       size_t len = var.getDimCount();
       if (var.isNull() || len != 0) {
-        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
-        _addErrStr("  Reading var: ", INTERMED_FREQ_HZ);
-        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        NcxxErrStr err;
+        err.addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        err.addErrStr("  Reading var: ", INTERMED_FREQ_HZ);
+        err.addErrInt("  Bad dimCount, should be 0, found: ", len);
         throw(NcxxException(getErrStr(), __FILE__, __LINE__));
       }
       float val;
@@ -1750,8 +1956,8 @@ void Cf2RadxFile::_readSweepMetadata(NcxxGroup &group,
 // read a sweep variable - double
 // throws exception on error
 
-void Cf2RadxFile::_readSweepVar(NcxxGroup &group,
-                                NcxxVar &var,
+NcxxVar Cf2RadxFile::_read1DVar(NcxxGroup &group,
+                                NcxxDim &dim,
                                 const string &name,
                                 vector<double> &vals,
                                 bool required)
@@ -1761,20 +1967,21 @@ void Cf2RadxFile::_readSweepVar(NcxxGroup &group,
   vals.clear();
 
   // get var
-
-  size_t nSweeps = _sweepDim.getSize();
-  try {
-    _getSweepVar(group, var, name);
-  } catch (NcxxException& e) {
+  
+  size_t nVals = dim.getSize();
+  NcxxVar var = group.getVar(name);
+  if (var.isNull()) {
     if (!required) {
-      for (size_t ii = 0; ii < nSweeps; ii++) {
+      for (size_t ii = 0; ii < nVals; ii++) {
         vals.push_back(Radx::missingMetaDouble);
       }
       clearErrStr();
-      return;
+      return var;
     } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar(double *)");
-      _addErrStr("  exception: ", e.what());
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_read1DVar(double *)");
+      err.addErrStr("  var missing, name: ", name);
+      err.addErrStr("  group: ", group.getName());
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     }
   }
@@ -1782,26 +1989,29 @@ void Cf2RadxFile::_readSweepVar(NcxxGroup &group,
   // load up data
 
   RadxArray<double> data_;
-  double *data = data_.alloc(nSweeps);
+  double *data = data_.alloc(nVals);
   try {
     var.getVal(data);
-    for (size_t ii = 0; ii < nSweeps; ii++) {
+    for (size_t ii = 0; ii < nVals; ii++) {
       vals.push_back(data[ii]);
     }
   } catch (NcxxException& e) {
     if (!required) {
-      for (size_t ii = 0; ii < nSweeps; ii++) {
+      for (size_t ii = 0; ii < nVals; ii++) {
         vals.push_back(Radx::missingMetaDouble);
       }
       clearErrStr();
-      return;
+      return var;
     } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar(double *)");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr("  exception: ", e.what());
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_read1DVar(double *)");
+      err.addErrStr("  Cannot read variable: ", name);
+      err.addErrStr("  exception: ", e.what());
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     }
   }
+
+  return var;
 
 }
 
@@ -1809,9 +2019,11 @@ void Cf2RadxFile::_readSweepVar(NcxxGroup &group,
 // read a sweep variable - integer
 // throws exception on error
 
-void Cf2RadxFile::_readSweepVar(NcxxGroup &group, NcxxVar &var,
+NcxxVar Cf2RadxFile::_read1DVar(NcxxGroup &group,
+                                NcxxDim &dim,
                                 const string &name,
-                                vector<int> &vals, bool required)
+                                vector<int> &vals,
+                                bool required)
 
 {
 
@@ -1819,19 +2031,20 @@ void Cf2RadxFile::_readSweepVar(NcxxGroup &group, NcxxVar &var,
 
   // get var
 
-  size_t nSweeps = _sweepDim.getSize();
-  try {
-    _getSweepVar(group, var, name);
-  } catch (NcxxException& e) {
+  size_t nVals = dim.getSize();
+  NcxxVar var = group.getVar(name);
+  if (var.isNull()) {
     if (!required) {
-      for (size_t ii = 0; ii < nSweeps; ii++) {
+      for (size_t ii = 0; ii < nVals; ii++) {
         vals.push_back(Radx::missingMetaInt);
       }
       clearErrStr();
-      return;
+      return var;
     } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar(int *)");
-      _addErrStr("  exception: ", e.what());
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_read1DVar(int *)");
+      err.addErrStr("  var missing, name: ", name);
+      err.addErrStr("  group: ", group.getName());
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     }
   }
@@ -1839,54 +2052,61 @@ void Cf2RadxFile::_readSweepVar(NcxxGroup &group, NcxxVar &var,
   // load up data
 
   RadxArray<int> data_;
-  int *data = data_.alloc(nSweeps);
+  int *data = data_.alloc(nVals);
   try {
     var.getVal(data);
-    for (size_t ii = 0; ii < nSweeps; ii++) {
+    for (size_t ii = 0; ii < nVals; ii++) {
       vals.push_back(data[ii]);
     }
   } catch (NcxxException& e) {
     if (!required) {
-      for (size_t ii = 0; ii < nSweeps; ii++) {
+      for (size_t ii = 0; ii < nVals; ii++) {
         vals.push_back(Radx::missingMetaInt);
       }
       clearErrStr();
-      return;
+      return var;
     } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr("  exception: ", e.what());
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_read1DVar");
+      err.addErrStr("  Cannot read variable: ", name);
+      err.addErrStr("  exception: ", e.what());
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     }
   }
+
+  return var;
 
 }
 
 ///////////////////////////////////
 // read a sweep variable - string
 
-void Cf2RadxFile::_readSweepVar(NcxxGroup &group, NcxxVar &var, const string &name,
-                                vector<string> &vals, bool required)
+NcxxVar Cf2RadxFile::_read1DVar(NcxxGroup &group,
+                                NcxxDim &dim,
+                                const string &name,
+                                vector<string> &vals,
+                                bool required)
 
 {
-
+  
   vals.clear();
 
   // get var
 
-  size_t nSweeps = _sweepDim.getSize();
-  try {
-    _getSweepVar(group, var, name);
-  } catch (NcxxException& e) {
+  size_t nVals = dim.getSize();
+  NcxxVar var = group.getVar(name);
+  if (var.isNull()) {
     if (!required) {
-      for (size_t ii = 0; ii < nSweeps; ii++) {
+      for (size_t ii = 0; ii < nVals; ii++) {
         vals.push_back("");
       }
       clearErrStr();
-      return;
+      return var;
     } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar(int *)");
-      _addErrStr("  exception: ", e.what());
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_read1DVar(int *)");
+      err.addErrStr("  var missing, name: ", name);
+      err.addErrStr("  group: ", group.getName());
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     }
   }
@@ -1894,71 +2114,29 @@ void Cf2RadxFile::_readSweepVar(NcxxGroup &group, NcxxVar &var, const string &na
   // load up data
 
   RadxArray<char *> data_;
-  char **data = data_.alloc(nSweeps);
+  char **data = data_.alloc(nVals);
   try {
     var.getVal(data);
-    for (size_t ii = 0; ii < nSweeps; ii++) {
+    for (size_t ii = 0; ii < nVals; ii++) {
       vals.push_back(data[ii]);
     }
   } catch (NcxxException& e) {
     if (!required) {
-      for (size_t ii = 0; ii < nSweeps; ii++) {
+      for (size_t ii = 0; ii < nVals; ii++) {
         vals.push_back("");
       }
       clearErrStr();
-      return;
+      return var;
     } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr("  exception: ", e.what());
-      throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_read1DVar");
+      err.addErrStr("  Cannot read variable: ", name);
+      err.addErrStr("  exception: ", e.what());
+      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
     }
   }
 
-}
-
-///////////////////////////////////
-// get a sweep variable
-// throws exception on error
-
-void Cf2RadxFile::_getSweepVar(NcxxGroup &group,
-                               NcxxVar &var,
-                               const string &name)
-
-{
-  
-  // get var
-  
-  var = group.getVar(name);
-  if (var.isNull()) {
-    _addErrStr("ERROR - Cf2RadxFile::_getSweepVar");
-    _addErrStr("  cannot read sweep variable");
-    _addErrStr("  group name: ", group.getName());
-    _addErrStr("  var name: ", name);
-    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
-  }
-
-  // check sweep dimension
-  
-  int nVarDims = var.getDimCount();
-  if (nVarDims < 1) {
-    _addErrStr("ERROR - Cf2RadxFile::_getSweepVar");
-    _addErrStr("  variable has no dimensions");
-    _addErrStr("  group name: ", group.getName());
-    _addErrStr("  var name: ", name);
-    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
-  }
-
-  NcxxDim sweepDim = var.getDim(0);
-  if (sweepDim != _sweepDim) {
-    _addErrStr("ERROR - Cf2RadxFile::_getSweepVar");
-    _addErrStr("  group name: ", group.getName());
-    _addErrStr("  var name: ", name);
-    _addErrStr("  var has incorrect dimension, dim name: ",
-               sweepDim.getName());
-    _addErrStr("  should be: ", SWEEP);
-    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
-  }
+  return var;
 
 }
 
@@ -2047,7 +2225,8 @@ int Cf2RadxFile::_readGeorefVariables()
   _readRayVar(DRIVE_ANGLE_2, _geoDriveAngle2, false);
 
   if (iret) {
-    _addErrStr("ERROR - Cf2RadxFile::_readGeorefVariables");
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readGeorefVariables");
     return -1;
   }
 
@@ -2095,7 +2274,8 @@ int Cf2RadxFile::_readRayVariables()
 
   _readRayVar(_azimuthVar, AZIMUTH, _rayAzimuths);
   if (_rayAzimuths.size() < _raysFromFile.size()) {
-    _addErrStr("ERROR - azimuth variable required");
+    NcxxErrStr err;
+    err.addErrStr("ERROR - azimuth variable required");
     iret = -1;
   }
 
@@ -2115,7 +2295,8 @@ int Cf2RadxFile::_readRayVariables()
     _readRayVar(_elevationVar, ELEVATION, _rayElevations);
   }
   if (_rayElevations.size() < _raysFromFile.size()) {
-    _addErrStr("ERROR - elevation variable required");
+    NcxxErrStr err;
+    err.addErrStr("ERROR - elevation variable required");
     iret = -1;
   }
 
@@ -2145,7 +2326,8 @@ int Cf2RadxFile::_readRayVariables()
               _rayEstNoiseDbmVx, false);
   
   if (iret) {
-    _addErrStr("ERROR - Cf2RadxFile::_readRayVariables");
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readRayVariables");
     return -1;
   }
 
@@ -2383,34 +2565,6 @@ int Cf2RadxFile::_createRays(const string &path)
 
 }
 
-///////////////////////////////////
-// read the frequency variable
-
-int Cf2RadxFile::_readFrequencyVariable()
-
-{
-
-  _frequency.clear();
-  _frequencyVar = _file.getVar(FREQUENCY);
-  if (_frequencyVar.isNull()) {
-    return 0;
-  }
-
-  int nFreq = _frequencyVar.numVals();
-  double *freq = new double[nFreq];
-  try {
-    _frequencyVar.getVal(freq);
-    for (int ii = 0; ii < nFreq; ii++) {
-      _frequency.push_back(freq[ii]);
-    }
-  } catch (NcxxException& e) {
-  }
-  delete[] freq;
-
-  return 0;
-
-}
-
 /////////////////////////////////////
 // read the geometry, if available
 // if not available, use main geometry for all rays
@@ -2478,13 +2632,13 @@ int Cf2RadxFile::_readRayNgatesAndOffsets()
   // for constant number of gates, compute start indices
   
   // if (!_nGatesVary) {
-    _nPoints = 0;
-    for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-      _rayNGates.push_back(_nRangeInFile);
-      _rayStartIndex.push_back(_nPoints);
-      _nPoints += _nRangeInFile;
-    }
-    return 0;
+  _nPoints = 0;
+  for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+    _rayNGates.push_back(_nRangeInFile);
+    _rayStartIndex.push_back(_nPoints);
+    _nPoints += _nRangeInFile;
+  }
+  return 0;
   // }
   
   // non-constant nGates - read in arrays
@@ -2492,248 +2646,16 @@ int Cf2RadxFile::_readRayNgatesAndOffsets()
   int iret = 0;
 
   if (_readRayVar(_rayNGatesVar, RAY_N_GATES, _rayNGates)) {
-    _addErrStr("ERROR - Cf2RadxFile::_readRayNGatesAndOffsets");
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readRayNGatesAndOffsets");
     iret = -1;
   }
   
   if (_readRayVar(_rayStartIndexVar, RAY_START_INDEX, _rayStartIndex)) {
-    _addErrStr("ERROR - Cf2RadxFile::_readRayNGatesAndOffsets");
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Cf2RadxFile::_readRayNGatesAndOffsets");
     iret = -1;
   }
-
-  return iret;
-
-}
-
-///////////////////////////////////
-// read the calibration variables
-
-int Cf2RadxFile::_readCalibrationVariables()
-
-{
-
-  if (_calDimRead.isNull()) {
-    // no cal available
-    return 0;
-  }
-  
-  int iret = 0;
-  for (size_t ii = 0; ii < _calDimRead.getSize(); ii++) {
-    RadxRcalib *cal = new RadxRcalib;
-    if (_readCal(*cal, ii)) {
-      _addErrStr("ERROR - Cf2RadxFile::_readCalibrationVariables");
-      _addErrStr("  calibration required, but error on read");
-      iret = -1;
-    }
-    // check that this is not a duplicate
-    bool alreadyAdded = false;
-    for (size_t ii = 0; ii < _rCals.size(); ii++) {
-      const RadxRcalib *rcal = _rCals[ii];
-      if (fabs(rcal->getPulseWidthUsec()
-               - cal->getPulseWidthUsec()) < 0.0001) {
-        alreadyAdded = true;
-      }
-    }
-    if (!alreadyAdded) {
-      _rCals.push_back(cal);
-    }
-  } // ii
-
-  return iret;
-
-}
-  
-int Cf2RadxFile::_readCal(RadxRcalib &cal, int index)
-
-{
-
-  int iret = 0;
-  double val;
-  time_t ctime;
-
-  iret |= _readCalTime(CALIBRATION_TIME, 
-                       _rCalTimeVar, index, ctime);
-  cal.setCalibTime(ctime);
-
-  iret |= _readCalVar(PULSE_WIDTH, 
-                      _rCalPulseWidthVar, index, val, true);
-  cal.setPulseWidthUsec(val * 1.0e6);
-
-  iret |= _readCalVar(XMIT_POWER_H, 
-                      _rCalXmitPowerHVar, index, val);
-  cal.setXmitPowerDbmH(val);
-
-  iret |= _readCalVar(XMIT_POWER_V, 
-                      _rCalXmitPowerVVar, index, val);
-  cal.setXmitPowerDbmV(val);
-
-  iret |= _readCalVar(TWO_WAY_WAVEGUIDE_LOSS_H,
-                      _rCalTwoWayWaveguideLossHVar, index, val);
-  cal.setTwoWayWaveguideLossDbH(val);
-
-  iret |= _readCalVar(TWO_WAY_WAVEGUIDE_LOSS_V,
-                      _rCalTwoWayWaveguideLossVVar, index, val);
-  cal.setTwoWayWaveguideLossDbV(val);
-
-  iret |= _readCalVar(TWO_WAY_RADOME_LOSS_H,
-                      _rCalTwoWayRadomeLossHVar, index, val);
-  cal.setTwoWayRadomeLossDbH(val);
-
-  iret |= _readCalVar(TWO_WAY_RADOME_LOSS_V,
-                      _rCalTwoWayRadomeLossVVar, index, val);
-  cal.setTwoWayRadomeLossDbV(val);
-
-  iret |= _readCalVar(RECEIVER_MISMATCH_LOSS,
-                      _rCalReceiverMismatchLossVar, index, val);
-  cal.setReceiverMismatchLossDb(val);
-
-  iret |= _readCalVar(RADAR_CONSTANT_H, 
-                      _rCalRadarConstHVar, index, val);
-  cal.setRadarConstantH(val);
-
-  iret |= _readCalVar(RADAR_CONSTANT_V, 
-                      _rCalRadarConstVVar, index, val);
-  cal.setRadarConstantV(val);
-
-  iret |= _readCalVar(ANTENNA_GAIN_H, 
-                      _rCalAntennaGainHVar, index, val);
-  cal.setAntennaGainDbH(val);
-  
-  iret |= _readCalVar(ANTENNA_GAIN_V, 
-                      _rCalAntennaGainVVar, index, val);
-  cal.setAntennaGainDbV(val);
-
-  iret |= _readCalVar(NOISE_HC, 
-                      _rCalNoiseHcVar, index, val, true);
-  cal.setNoiseDbmHc(val);
-
-  iret |= _readCalVar(NOISE_HX, 
-                      _rCalNoiseHxVar, index, val);
-  cal.setNoiseDbmHx(val);
-
-  iret |= _readCalVar(NOISE_VC, 
-                      _rCalNoiseVcVar, index, val);
-  cal.setNoiseDbmVc(val);
-
-  iret |= _readCalVar(NOISE_VX, 
-                      _rCalNoiseVxVar, index, val);
-  cal.setNoiseDbmVx(val);
-
-  iret |= _readCalVar(RECEIVER_GAIN_HC, 
-                      _rCalReceiverGainHcVar, index, val, true);
-  cal.setReceiverGainDbHc(val);
-
-  iret |= _readCalVar(RECEIVER_GAIN_HX, 
-                      _rCalReceiverGainHxVar, index, val);
-  cal.setReceiverGainDbHx(val);
-
-  iret |= _readCalVar(RECEIVER_GAIN_VC, 
-                      _rCalReceiverGainVcVar, index, val);
-  cal.setReceiverGainDbVc(val);
-
-  iret |= _readCalVar(RECEIVER_GAIN_VX, 
-                      _rCalReceiverGainVxVar, index, val);
-  cal.setReceiverGainDbVx(val);
-
-  iret |= _readCalVar(BASE_DBZ_1KM_HC, 
-                      _rCalBaseDbz1kmHcVar, index, val);
-  cal.setBaseDbz1kmHc(val);
-
-  iret |= _readCalVar(BASE_DBZ_1KM_HX, 
-                      _rCalBaseDbz1kmHxVar, index, val);
-  cal.setBaseDbz1kmHx(val);
-
-  iret |= _readCalVar(BASE_DBZ_1KM_VC, 
-                      _rCalBaseDbz1kmVcVar, index, val);
-  cal.setBaseDbz1kmVc(val);
-
-  iret |= _readCalVar(BASE_DBZ_1KM_VX, 
-                      _rCalBaseDbz1kmVxVar, index, val);
-  cal.setBaseDbz1kmVx(val);
-
-  iret |= _readCalVar(SUN_POWER_HC, 
-                      _rCalSunPowerHcVar, index, val);
-  cal.setSunPowerDbmHc(val);
-
-  iret |= _readCalVar(SUN_POWER_HX, 
-                      _rCalSunPowerHxVar, index, val);
-  cal.setSunPowerDbmHx(val);
-
-  iret |= _readCalVar(SUN_POWER_VC, 
-                      _rCalSunPowerVcVar, index, val);
-  cal.setSunPowerDbmVc(val);
-
-  iret |= _readCalVar(SUN_POWER_VX, 
-                      _rCalSunPowerVxVar, index, val);
-  cal.setSunPowerDbmVx(val);
-
-  iret |= _readCalVar(NOISE_SOURCE_POWER_H, 
-                      _rCalNoiseSourcePowerHVar, index, val);
-  cal.setNoiseSourcePowerDbmH(val);
-
-  iret |= _readCalVar(NOISE_SOURCE_POWER_V, 
-                      _rCalNoiseSourcePowerVVar, index, val);
-  cal.setNoiseSourcePowerDbmV(val);
-
-  iret |= _readCalVar(POWER_MEASURE_LOSS_H, 
-                      _rCalPowerMeasLossHVar, index, val);
-  cal.setPowerMeasLossDbH(val);
-
-  iret |= _readCalVar(POWER_MEASURE_LOSS_V, 
-                      _rCalPowerMeasLossVVar, index, val);
-  cal.setPowerMeasLossDbV(val);
-
-  iret |= _readCalVar(COUPLER_FORWARD_LOSS_H, 
-                      _rCalCouplerForwardLossHVar, index, val);
-  cal.setCouplerForwardLossDbH(val);
-
-  iret |= _readCalVar(COUPLER_FORWARD_LOSS_V, 
-                      _rCalCouplerForwardLossVVar, index, val);
-  cal.setCouplerForwardLossDbV(val);
-
-  iret |= _readCalVar(DBZ_CORRECTION, 
-                      _rCalDbzCorrectionVar, index, val);
-  cal.setDbzCorrection(val);
-
-  iret |= _readCalVar(ZDR_CORRECTION, 
-                      _rCalZdrCorrectionVar, index, val);
-  cal.setZdrCorrectionDb(val);
-
-  iret |= _readCalVar(LDR_CORRECTION_H, 
-                      _rCalLdrCorrectionHVar, index, val);
-  cal.setLdrCorrectionDbH(val);
-
-  iret |= _readCalVar(LDR_CORRECTION_V, 
-                      _rCalLdrCorrectionVVar, index, val);
-  cal.setLdrCorrectionDbV(val);
-
-  iret |= _readCalVar(SYSTEM_PHIDP, 
-                      _rCalSystemPhidpVar, index, val);
-  cal.setSystemPhidpDeg(val);
-
-  iret |= _readCalVar(TEST_POWER_H, 
-                      _rCalTestPowerHVar, index, val);
-  cal.setTestPowerDbmH(val);
-
-  iret |= _readCalVar(TEST_POWER_V, 
-                      _rCalTestPowerVVar, index, val);
-  cal.setTestPowerDbmV(val);
-
-  iret |= _readCalVar(RECEIVER_SLOPE_HC, 
-                      _rCalReceiverSlopeHcVar, index, val);
-  cal.setReceiverSlopeDbHc(val);
-
-  iret |= _readCalVar(RECEIVER_SLOPE_HX, 
-                      _rCalReceiverSlopeHxVar, index, val);
-  cal.setReceiverSlopeDbHx(val);
-
-  iret |= _readCalVar(RECEIVER_SLOPE_VC, 
-                      _rCalReceiverSlopeVcVar, index, val);
-  cal.setReceiverSlopeDbVc(val);
-
-  iret |= _readCalVar(RECEIVER_SLOPE_VX, 
-                      _rCalReceiverSlopeVxVar, index, val);
-  cal.setReceiverSlopeDbVx(val);
 
   return iret;
 
@@ -2770,17 +2692,17 @@ int Cf2RadxFile::_readFieldVariables(bool metaOnly)
     //     continue;
     //   }
     // } else {
-      // constant number of gates per ray
-      // we need fields with 2 dimensions
-      if (numDims != 2) {
-        continue;
-      }
-      // check that we have the correct dimensions
-      const NcxxDim &timeDim = var.getDim(0);
-      const NcxxDim &rangeDim = var.getDim(1);
-      if (timeDim != _timeDimRead || rangeDim != _rangeDimRead) {
-        continue;
-      }
+    // constant number of gates per ray
+    // we need fields with 2 dimensions
+    if (numDims != 2) {
+      continue;
+    }
+    // check that we have the correct dimensions
+    const NcxxDim &timeDim = var.getDim(0);
+    const NcxxDim &rangeDim = var.getDim(1);
+    if (timeDim != _timeDimRead || rangeDim != _rangeDimRead) {
+      continue;
+    }
     // }
     
     // check the type
@@ -3030,9 +2952,10 @@ int Cf2RadxFile::_readFieldVariables(bool metaOnly)
     } // switch
     
     if (iret) {
-      _addErrStr("ERROR - Cf2RadxFile::_readFieldVariables");
-      _addErrStr("  cannot read field name: ", name);
-      _addErrStr(_file.getErrStr());
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_readFieldVariables");
+      err.addErrStr("  cannot read field name: ", name);
+      err.addErrStr(_file.getErrStr());
       return -1;
     }
 
@@ -3063,7 +2986,8 @@ int Cf2RadxFile::_readRayVar(NcxxVar &var, const string &name,
       clearErrStr();
       return 0;
     } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readRayVar");
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_readRayVar");
       return -1;
     }
   }
@@ -3084,9 +3008,10 @@ int Cf2RadxFile::_readRayVar(NcxxVar &var, const string &name,
       }
       clearErrStr();
     } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readRayVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getErrStr());
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_readRayVar");
+      err.addErrStr("  Cannot read variable: ", name);
+      err.addErrStr(_file.getErrStr());
       iret = -1;
     }
   }
@@ -3127,7 +3052,8 @@ int Cf2RadxFile::_readRayVar(NcxxVar &var, const string &name,
       clearErrStr();
       return 0;
     } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readRayVar");
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_readRayVar");
       return -1;
     }
   }
@@ -3148,9 +3074,10 @@ int Cf2RadxFile::_readRayVar(NcxxVar &var, const string &name,
       }
       clearErrStr();
     } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readRayVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getErrStr());
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_readRayVar");
+      err.addErrStr("  Cannot read variable: ", name);
+      err.addErrStr(_file.getErrStr());
       iret = -1;
     }
   }
@@ -3191,7 +3118,8 @@ int Cf2RadxFile::_readRayVar(NcxxVar &var, const string &name,
       clearErrStr();
       return 0;
     } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readRayVar");
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_readRayVar");
       return -1;
     }
   }
@@ -3216,9 +3144,10 @@ int Cf2RadxFile::_readRayVar(NcxxVar &var, const string &name,
       }
       clearErrStr();
     } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readRayVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getErrStr());
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_readRayVar");
+      err.addErrStr("  Cannot read variable: ", name);
+      err.addErrStr(_file.getErrStr());
       iret = -1;
     }
   }
@@ -3251,9 +3180,10 @@ int Cf2RadxFile::_getRayVar(NcxxVar &var, const string &name, bool required)
   var = _file.getVar(name);
   if (var.isNull()) {
     if (required) {
-      _addErrStr("ERROR - Cf2RadxFile::_getRayVar");
-      _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr(_file.getErrStr());
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_getRayVar");
+      err.addErrStr("  Cannot read variable, name: ", name);
+      err.addErrStr(_file.getErrStr());
     }
     return -1;
   }
@@ -3262,186 +3192,27 @@ int Cf2RadxFile::_getRayVar(NcxxVar &var, const string &name, bool required)
   
   if (var.getDimCount() < 1) {
     if (required) {
-      _addErrStr("ERROR - Cf2RadxFile::_getRayVar");
-      _addErrStr("  variable name: ", name);
-      _addErrStr("  variable has no dimensions");
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_getRayVar");
+      err.addErrStr("  variable name: ", name);
+      err.addErrStr("  variable has no dimensions");
     }
     return -1;
   }
   NcxxDim timeDim = var.getDim(0);
   if (timeDim != _timeDimRead) {
     if (required) {
-      _addErrStr("ERROR - Cf2RadxFile::_getRayVar");
-      _addErrStr("  variable name: ", name);
-      _addErrStr("  variable has incorrect dimension, dim name: ", 
-                 timeDim.getName());
-      _addErrStr("  should be: ", TIME);
+      NcxxErrStr err;
+      err.addErrStr("ERROR - Cf2RadxFile::_getRayVar");
+      err.addErrStr("  variable name: ", name);
+      err.addErrStr("  variable has incorrect dimension, dim name: ", 
+                    timeDim.getName());
+      err.addErrStr("  should be: ", TIME);
     }
     return -1;
   }
 
   return 0;
-
-}
-
-///////////////////////////////////
-// get calibration time
-// returns -1 on failure
-
-int Cf2RadxFile::_readCalTime(const string &name, NcxxVar &var,
-                              int index, time_t &val)
-
-{
-
-  var = _file.getVar(name);
-
-  if (var.isNull()) {
-    _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
-    _addErrStr("  cal variable name: ", name);
-    _addErrStr("  Cannot read calibration time");
-    _addErrStr(_file.getErrStr());
-    return -1;
-  }
-
-  // check cal dimension
-
-  if (var.getDimCount() < 2) {
-    _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has fewer than 2 dimensions");
-    return -1;
-  }
-
-  NcxxDim rCalDim = var.getDim(0);
-  if (rCalDim != _calDimRead) {
-    _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has incorrect first dimension, dim name: ", 
-               rCalDim.getName());
-    _addErrStr("  should be: ", R_CALIB);
-    return -1;
-  }
-
-  NcxxDim stringLenDim = var.getDim(1);
-  if (stringLenDim.isNull()) {
-    _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has NULL second dimension");
-    _addErrStr("  should be a string length dimension");
-    return -1;
-  }
-  
-  int ntype = var.getType().getId();
-  if (ntype != NC_CHAR) {
-    _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
-    _addErrStr("  Incorrect variable type");
-    _addErrStr("  Expecting char");
-    _addErrStr("  Found: ", Ncxx::ncTypeToStr(ntype));
-    return -1;
-  }
-
-  // load up data
-  
-  size_t nCals = _calDimRead.getSize();
-  if (index > (int) nCals - 1) {
-    _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
-    _addErrStr("  requested index too high");
-    _addErrStr("  cal variable name: ", name);
-    _addErrInt("  requested index: ", index);
-    _addErrInt("  n cals available: ", nCals);
-    return -1;
-  }
-
-  size_t stringLen = stringLenDim.getSize();
-  size_t nChars = nCals * stringLen;
-  char *cvalues = new char[nChars];
-  vector<string> times;
-  try {
-    var.getVal(cvalues);
-    char *cv = cvalues;
-    char *cval = new char[stringLen+1];
-    for (size_t ii = 0; ii < nCals; ii++, cv += stringLen) {
-      // ensure null termination
-      memcpy(cval, cv, stringLen);
-      cval[stringLen] = '\0';
-      times.push_back(string(cval));
-      cv[stringLen-1] = '\0';
-    }
-    delete[] cval;
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
-    _addErrStr("  Cannot read variable: ", name);
-    _addErrStr(_file.getErrStr());
-    delete[] cvalues;
-    return -1;
-  }
-  delete[] cvalues;
-  
-  const char *timeStr = times[index].c_str();
-  int year, month, day, hour, min, sec;
-  if (sscanf(timeStr, "%4d-%2d-%2dT%2d:%2d:%2dZ",
-             &year, &month, &day, &hour, &min, &sec) != 6) {
-    _addErrStr("ERROR - Cf2RadxFile::_readCalTime");
-    _addErrStr("  Cannot parse cal time string: ", timeStr);
-    return -1;
-  }
-  RadxTime ctime(year, month, day, hour, min, sec);
-  val = ctime.utime();
-
-  return 0;
-
-}
-
-///////////////////////////////////
-// get calibration variable
-// returns -1 on failure
-
-int Cf2RadxFile::_readCalVar(const string &name, NcxxVar &var,
-                             int index, double &val, bool required)
-  
-{
-
-  val = Radx::missingMetaDouble;
-  var = _file.getVar(name);
-
-  if (var.isNull()) {
-    if (!required) {
-      return 0;
-    } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readCalVar");
-      _addErrStr("  cal variable name: ", name);
-      _addErrStr("  Cannot read calibration variable");
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
-  }
-
-  if (var.numVals() < index-1) {
-    _addErrStr("ERROR - Cf2RadxFile::_readCalVar");
-    _addErrStr("  requested index too high");
-    _addErrStr("  cal variable name: ", name);
-    _addErrInt("  requested index: ", index);
-    _addErrInt("  n cals available: ", var.numVals());
-    return -1;
-  }
-
-  // read value
-
-  vector<size_t> indices;
-  indices.push_back(index);
-  double data;
-  int iret = 0;
-  try {
-    var.getVal(indices, &data);
-    val = data;
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_readCalVarVar");
-    _addErrStr("  Cannot read variable: ", name);
-    _addErrStr(_file.getErrStr());
-    iret = -1;
-  }
-
-  return iret;
 
 }
 
@@ -4033,38 +3804,10 @@ void Cf2RadxFile::_loadReadVolume()
   _readVol->setScanId(_scanId);
   _readVol->setInstrumentName(_instrumentName);
 
-  if (_latitude.size() > 0) {
-    for (size_t ii = 0; ii < _latitude.size(); ii++) {
-      if (_latitude[ii] > -9990) {
-        _readVol->setLatitudeDeg(_latitude[ii]);
-        break;
-      }
-    }
-  }
-  if (_longitude.size() > 0) {
-    for (size_t ii = 0; ii < _longitude.size(); ii++) {
-      if (_longitude[ii] > -9990) {
-        _readVol->setLongitudeDeg(_longitude[ii]);
-        break;
-      }
-    }
-  }
-  if (_altitude.size() > 0) {
-    for (size_t ii = 0; ii < _altitude.size(); ii++) {
-      if (_altitude[ii] > -9990) {
-        _readVol->setAltitudeKm(_altitude[ii] / 1000.0);
-        break;
-      }
-    }
-  }
-  if (_altitudeAgl.size() > 0) {
-    for (size_t ii = 0; ii < _altitudeAgl.size(); ii++) {
-      if (_altitudeAgl[ii] > -9990) {
-        _readVol->setSensorHtAglM(_altitudeAgl[ii]);
-        break;
-      }
-    }
-  }
+  _readVol->setLatitudeDeg(_latitude);
+  _readVol->setLongitudeDeg(_longitude);
+  _readVol->setAltitudeKm(_altitudeM / 1000.0);
+  _readVol->setSensorHtAglM(_altitudeAglM);
 
   _readVol->copyRangeGeom(_geom);
 

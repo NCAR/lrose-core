@@ -1113,28 +1113,29 @@ int NcxxRadxFile::_readScalarVariables()
 
   try {
 
-    _file.readIntVar(_volumeNumberVar, VOLUME_NUMBER, 
-                     _volumeNumber, Radx::missingMetaInt);
+    _volumeNumberVar = 
+      _file.readIntVar(VOLUME_NUMBER, 
+                       _volumeNumber, Radx::missingMetaInt);
     
     _instrumentType = Radx::INSTRUMENT_TYPE_RADAR;
-
+    
     try {
       string pstring;
-      _file.readCharStringVar(_instrumentTypeVar, INSTRUMENT_TYPE, pstring);
+      _instrumentTypeVar = _file.readCharStringVar(INSTRUMENT_TYPE, pstring);
       _instrumentType = Radx::instrumentTypeFromStr(pstring);
     } catch (NcxxException e) {
     }
 
     try {
       string pstring;
-      _file.readCharStringVar(_platformTypeVar, PLATFORM_TYPE, pstring);
+      _platformTypeVar = _file.readCharStringVar(PLATFORM_TYPE, pstring);
       _platformType = Radx::platformTypeFromStr(pstring);
     } catch (NcxxException e) {
     }
 
     try {
       string pstring;
-      _file.readCharStringVar(_primaryAxisVar, PRIMARY_AXIS, pstring);
+      _primaryAxisVar = _file.readCharStringVar(PRIMARY_AXIS, pstring);
       _primaryAxis = Radx::primaryAxisFromStr(pstring);
     } catch (NcxxException e) {
     }
@@ -1142,43 +1143,44 @@ int NcxxRadxFile::_readScalarVariables()
     if (!_file.getVar(STATUS_XML).isNull()) {
       try {
         string pstring;
-        _file.readCharStringVar(_statusXmlVar, STATUS_XML, pstring);
+        _statusXmlVar = _file.readCharStringVar(STATUS_XML, pstring);
         _statusXml = pstring;
       } catch (NcxxException e) {
       }
     }
 
     if (_instrumentType == Radx::INSTRUMENT_TYPE_RADAR) {
+      
+      _radarAntennaGainHVar =
+        _file.readDoubleVar(RADAR_ANTENNA_GAIN_H, _radarAntennaGainDbH, false);
+      _radarAntennaGainVVar =
+        _file.readDoubleVar(RADAR_ANTENNA_GAIN_V, _radarAntennaGainDbV, false);
+      _radarBeamWidthHVar =
+        _file.readDoubleVar(RADAR_BEAM_WIDTH_H, _radarBeamWidthDegH, false);
+      _radarBeamWidthVVar =
+        _file.readDoubleVar(RADAR_BEAM_WIDTH_V, _radarBeamWidthDegV, false);
+      _radarRxBandwidthVar =
+        _file.readDoubleVar(RADAR_RX_BANDWIDTH, _radarRxBandwidthHz, false);
     
-      _file.readDoubleVar(_radarAntennaGainHVar,
-                          RADAR_ANTENNA_GAIN_H, _radarAntennaGainDbH, false);
-      _file.readDoubleVar(_radarAntennaGainVVar,
-                          RADAR_ANTENNA_GAIN_V, _radarAntennaGainDbV, false);
-      _file.readDoubleVar(_radarBeamWidthHVar,
-                          RADAR_BEAM_WIDTH_H, _radarBeamWidthDegH, false);
-      _file.readDoubleVar(_radarBeamWidthVVar,
-                          RADAR_BEAM_WIDTH_V, _radarBeamWidthDegV, false);
-      _file.readDoubleVar(_radarRxBandwidthVar,
-                          RADAR_RX_BANDWIDTH, _radarRxBandwidthHz, false);
     } else {
       
-      _file.readDoubleVar(_lidarConstantVar, 
-                          LIDAR_CONSTANT, _lidarConstant, false);
-      _file.readDoubleVar(_lidarPulseEnergyJVar, 
-                          LIDAR_PULSE_ENERGY, _lidarPulseEnergyJ, false);
-      _file.readDoubleVar(_lidarPeakPowerWVar, 
-                          LIDAR_PEAK_POWER, _lidarPeakPowerW, false);
-      _file.readDoubleVar(_lidarApertureDiamCmVar, 
-                          LIDAR_APERTURE_DIAMETER,
-                          _lidarApertureDiamCm, false);
-      _file.readDoubleVar(_lidarApertureEfficiencyVar, 
-                          LIDAR_APERTURE_EFFICIENCY,
-                          _lidarApertureEfficiency, false);
-      _file.readDoubleVar(_lidarFieldOfViewMradVar, 
-                          LIDAR_FIELD_OF_VIEW,
-                          _lidarFieldOfViewMrad, false);
-      _file.readDoubleVar(_lidarBeamDivergenceMradVar, 
-                          LIDAR_BEAM_DIVERGENCE,
+      _lidarConstantVar = 
+        _file.readDoubleVar(LIDAR_CONSTANT, _lidarConstant, false);
+      _lidarPulseEnergyJVar = 
+        _file.readDoubleVar(LIDAR_PULSE_ENERGY, _lidarPulseEnergyJ, false);
+      _lidarPeakPowerWVar = 
+        _file.readDoubleVar(LIDAR_PEAK_POWER, _lidarPeakPowerW, false);
+      _lidarApertureDiamCmVar = 
+        _file.readDoubleVar(LIDAR_APERTURE_DIAMETER,
+                            _lidarApertureDiamCm, false);
+      _lidarApertureEfficiencyVar = 
+        _file.readDoubleVar(LIDAR_APERTURE_EFFICIENCY,
+                            _lidarApertureEfficiency, false);
+      _lidarFieldOfViewMradVar = 
+        _file.readDoubleVar(LIDAR_FIELD_OF_VIEW,
+                            _lidarFieldOfViewMrad, false);
+      _lidarBeamDivergenceMradVar = 
+        _file.readDoubleVar(LIDAR_BEAM_DIVERGENCE,
                           _lidarBeamDivergenceMrad, false);
       
     }
@@ -1206,64 +1208,56 @@ int NcxxRadxFile::_readCorrectionVariables()
 
     double val;
 
-    _file.readDoubleVar(_azimuthCorrVar, 
-                        AZIMUTH_CORRECTION, val, 0);
+    _azimuthCorrVar = _file.readDoubleVar(AZIMUTH_CORRECTION, val, 0);
     _cfactors.setAzimuthCorr(val);
   
-    _file.readDoubleVar(_elevationCorrVar,
-                        ELEVATION_CORRECTION, val, 0);
+    _elevationCorrVar = _file.readDoubleVar(ELEVATION_CORRECTION, val, 0);
     _cfactors.setElevationCorr(val);
 
-    _file.readDoubleVar(_rangeCorrVar,
-                        RANGE_CORRECTION, val, 0);
+    _rangeCorrVar = _file.readDoubleVar(RANGE_CORRECTION, val, 0);
     _cfactors.setRangeCorr(val);
 
-    _file.readDoubleVar(_longitudeCorrVar,
-                        LONGITUDE_CORRECTION, val, 0);
+    _longitudeCorrVar = _file.readDoubleVar(LONGITUDE_CORRECTION, val, 0);
     _cfactors.setLongitudeCorr(val);
-
-    _file.readDoubleVar(_latitudeCorrVar,
-                        LATITUDE_CORRECTION, val, 0);
+    
+    _latitudeCorrVar = _file.readDoubleVar(LATITUDE_CORRECTION, val, 0);
     _cfactors.setLatitudeCorr(val);
-
-    _file.readDoubleVar(_pressureAltCorrVar,
-                        PRESSURE_ALTITUDE_CORRECTION, val, 0);
+    
+    _pressureAltCorrVar =
+      _file.readDoubleVar(PRESSURE_ALTITUDE_CORRECTION, val, 0);
     _cfactors.setPressureAltCorr(val);
-
-    _file.readDoubleVar(_altitudeCorrVar,
-                        ALTITUDE_CORRECTION, val, 0);
+    
+    _altitudeCorrVar = _file.readDoubleVar(ALTITUDE_CORRECTION, val, 0);
     _cfactors.setAltitudeCorr(val);
-
-    _file.readDoubleVar(_ewVelCorrVar, 
-                        EASTWARD_VELOCITY_CORRECTION, val, 0);
+    
+    _ewVelCorrVar = 
+      _file.readDoubleVar(EASTWARD_VELOCITY_CORRECTION, val, 0);
     _cfactors.setEwVelCorr(val);
-
-    _file.readDoubleVar(_nsVelCorrVar, 
-                        NORTHWARD_VELOCITY_CORRECTION, val, 0);
+    
+    _nsVelCorrVar = 
+      _file.readDoubleVar(NORTHWARD_VELOCITY_CORRECTION, val, 0);
     _cfactors.setNsVelCorr(val);
 
-    _file.readDoubleVar(_vertVelCorrVar,
-                        VERTICAL_VELOCITY_CORRECTION, val, 0);
+    _vertVelCorrVar = 
+      _file.readDoubleVar(VERTICAL_VELOCITY_CORRECTION, val, 0);
     _cfactors.setVertVelCorr(val);
 
-    _file.readDoubleVar(_headingCorrVar, 
-                        HEADING_CORRECTION, val, 0);
+    _headingCorrVar = _file.readDoubleVar(HEADING_CORRECTION, val, 0);
     _cfactors.setHeadingCorr(val);
-
-    _file.readDoubleVar(_rollCorrVar, 
-                        ROLL_CORRECTION, val, 0);
+    
+    _rollCorrVar = _file.readDoubleVar(ROLL_CORRECTION, val, 0);
     _cfactors.setRollCorr(val);
   
-    _file.readDoubleVar(_pitchCorrVar, PITCH_CORRECTION, val, 0);
+    _pitchCorrVar = _file.readDoubleVar(PITCH_CORRECTION, val, 0);
     _cfactors.setPitchCorr(val);
-
-    _file.readDoubleVar(_driftCorrVar, DRIFT_CORRECTION, val, 0);
+    
+    _driftCorrVar = _file.readDoubleVar(DRIFT_CORRECTION, val, 0);
     _cfactors.setDriftCorr(val);
 
-    _file.readDoubleVar(_rotationCorrVar, ROTATION_CORRECTION, val, 0);
+    _rotationCorrVar = _file.readDoubleVar(ROTATION_CORRECTION, val, 0);
     _cfactors.setRotationCorr(val);
 
-    _file.readDoubleVar(_tiltCorrVar, TILT_CORRECTION, val, 0);
+    _tiltCorrVar = _file.readDoubleVar(TILT_CORRECTION, val, 0);
     _cfactors.setTiltCorr(val);
 
   } catch (NcxxException e) {

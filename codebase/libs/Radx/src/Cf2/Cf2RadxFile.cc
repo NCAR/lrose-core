@@ -138,9 +138,9 @@ void Cf2RadxFile::clear()
   _lidarFieldOfViewMrad = Radx::missingMetaDouble;
   _lidarBeamDivergenceMrad = Radx::missingMetaDouble;
 
-  _latitude.clear();
-  _longitude.clear();
-  _altitude.clear();
+  // _latitude.clear();
+  // _longitude.clear();
+  // _altitude.clear();
 
   _rangeKm.clear();
   _gateSpacingIsConstant = true;
@@ -228,7 +228,9 @@ bool Cf2RadxFile::isCfRadial2(const string &path)
 
   // read dimensions
   
-  if (_readDimensions()) {
+  try {
+    _readDimensions();
+  } catch (NcxxException& e) {
     _file.close();
     if (_verbose) {
       cerr << "DEBUG - not CfRadial2 file" << endl;
@@ -239,7 +241,9 @@ bool Cf2RadxFile::isCfRadial2(const string &path)
 
   // read global attributes
   
-  if (_readGlobalAttributes()) {
+  try {
+    _readGlobalAttributes();
+  } catch (NcxxException& e) {
     _file.close();
     if (_verbose) {
       cerr << "DEBUG - not CfRadial2 file" << endl;
@@ -352,15 +356,10 @@ void Cf2RadxFile::print(ostream &out) const
   out << "  instrumentType: " << Radx::instrumentTypeToStr(_instrumentType) << endl;
   out << "  platformType: " << Radx::platformTypeToStr(_platformType) << endl;
   out << "  primaryAxis: " << Radx::primaryAxisToStr(_primaryAxis) << endl;
-  if (_latitude.size() > 0) {
-    out << "  latitude: " << _latitude[0] << endl;
-  }
-  if (_longitude.size() > 0) {
-    out << "  longitude: " << _longitude[0] << endl;
-  }
-  if (_altitude.size() > 0) {
-    out << "  altitude: " << _altitude[0] << endl;
-  }
+  out << "  latitude: " << _latitude << endl;
+  out << "  longitude: " << _longitude << endl;
+  out << "  altitudeM: " << _altitudeM << endl;
+  out << "  altitudeAlgM: " << _altitudeAglM << endl;
   for (size_t ii = 0; ii < _frequency.size(); ii++) {
     out << "  frequencyHz[" << ii << "]: " << _frequency[ii] << endl;
   }
