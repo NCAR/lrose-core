@@ -1088,30 +1088,7 @@ int RadxFile::_readFromPathNetCDF(const string &path,
 
   clearErrStr();
 
-  // try CF Ncxx first
-
-  {
-    NcxxRadxFile file;
-    file.copyReadDirectives(*this);
-    if (file.isCfRadialXx(path)) {
-      int iret = file.readFromPath(path, vol);
-      if (_verbose) file.print(cerr);
-      _errStr = file.getErrStr();
-      _dirInUse = file.getDirInUse();
-      _pathInUse = file.getPathInUse();
-      vol.setPathInUse(_pathInUse);
-      _readPaths = file.getReadPaths();
-      if (iret == 0) {
-        if (_debug) {
-          cerr << "INFO: RadxFile::readFromPath" << endl;
-          cerr << "  Read Ncxx file, path: " << _pathInUse << endl;
-        }
-      }
-      return iret;
-    }
-  }
-
-  // try CF radial next
+  // try CF radial first
 
   {
     NcfRadxFile file;
@@ -1151,6 +1128,29 @@ int RadxFile::_readFromPathNetCDF(const string &path,
         if (_debug) {
           cerr << "INFO: RadxFile::readFromPath" << endl;
           cerr << "  Read CfRadial2 file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
+  // try CF Ncxx next
+
+  {
+    NcxxRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isCfRadialXx(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read Ncxx file, path: " << _pathInUse << endl;
         }
       }
       return iret;

@@ -757,13 +757,17 @@ int NcxxRadxFile::_readDimensions()
 
     _addErrStr("ERROR - NcxxRadxFile::readDimensions");
     _addErrStr("  exception: ", e.what());
-    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    return -1;
 
   }
 
   // calibration dimension is optional
 
-  _calDim = _file.getDim(R_CALIB);
+  try {
+    _calDim = _file.getDim(R_CALIB);
+  } catch (NcxxException e) {
+    _calDim.setNull();
+  }
 
   return 0;
 

@@ -1465,7 +1465,6 @@ void Cf2RadxFile::_addSweeps()
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 
-
   // save sweep fixed angles at root level
   
   try {

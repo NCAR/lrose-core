@@ -248,18 +248,8 @@ bool Cf2RadxFile::isCfRadial2(const string &path)
     return false;
   }
 
-  // check history
-
-  if (_history.find("Cf2RadxFile") == string::npos) {
-    _file.close();
-    if (_verbose) {
-      cerr << "DEBUG - not CfRadial2 file" << endl;
-      cerr << "  No Cf2RadxFile string in history" << endl;
-    }
-    return false;
-  }
-
-  // file has the correct dimensions, so it is a CfRadial file
+  // file has the correct dimensions and attributes,
+  // so it is a CfRadial2 file
 
   _file.close();
   return true;

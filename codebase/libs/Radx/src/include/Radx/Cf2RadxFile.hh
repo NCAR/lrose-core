@@ -579,7 +579,6 @@ private:
   int _readScalarVariables();
   int _readCorrectionVariables();
   int _readPositionVariables();
-  int _readSweepVariables();
   void _clearGeorefVariables();
   int _readGeorefVariables();
   void _clearRayVariables();
@@ -592,6 +591,16 @@ private:
   int _readCal(RadxRcalib &cal, int index);
   int _readFieldVariables(bool metaOnly);
   
+  void _readSweepVariables();
+  void _readSweepMetadata(NcxxGroup &group, RadxSweep *sweep);
+  void _readSweepVar(NcxxGroup &group, NcxxVar &var, const string &name,
+                     vector<double> &vals, bool required = true);
+  void _readSweepVar(NcxxGroup &group, NcxxVar &var, const string &name, 
+                     vector<int> &vals, bool required = true);
+  void _readSweepVar(NcxxGroup &group, NcxxVar &var, const string &name,
+                     vector<string> &vals, bool required = true);
+  void _getSweepVar(NcxxGroup &group, NcxxVar &var, const string &name);
+
   int _readRayVar(NcxxVar &var, const string &name, 
                   vector<double> &vals, bool required = true);
   int _readRayVar(NcxxVar &var, const string &name, 
@@ -607,13 +616,7 @@ private:
                   vector<bool> &vals, bool required = true);
   
   int _getRayVar(NcxxVar &var, const string &name, bool required);
-  int _readSweepVar(NcxxVar &var, const string &name,
-                    vector<double> &vals, bool required = true);
-  int _readSweepVar(NcxxVar &var, const string &name, 
-                    vector<int> &vals, bool required = true);
-  int _readSweepVar(NcxxVar &var, const string &name,
-                    vector<string> &vals, bool required = true);
-  int _getSweepVar(NcxxVar &var, const string &name);
+
   int _readCalTime(const string &name, NcxxVar &var, int index, time_t &val);
   int _readCalVar(const string &name, NcxxVar &var, int index,
                   double &val, bool required = false);

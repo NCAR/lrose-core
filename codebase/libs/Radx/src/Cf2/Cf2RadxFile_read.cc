@@ -138,7 +138,7 @@ int Cf2RadxFile::_readPath(const string &path, size_t pathNum)
     cerr << "Reading file num, path: "
          << pathNum << ", " << path << endl;
   }
-
+  
   string errStr("ERROR - Cf2RadxFile::readFromPath::_readPath");
 
   // clear tmp rays
@@ -246,8 +246,17 @@ int Cf2RadxFile::_readPath(const string &path, size_t pathNum)
 
   // read in sweep variables
 
-  if (_readSweepVariables()) {
-    _addErrStr(errStr);
+  try {
+    _readSweepVariables();
+  } catch (NcxxException e) {
+    _addErrStr("ERROR - Cf2RadxFile::_readPath()");
+    _addErrStr("  path: ", path);
+    _addErrStr(e.what());
+    if (_debug) {
+      cerr << "====>> ERROR - _readPath <<====" << endl;
+      cerr << _errStr << endl;
+      cerr << "===============================" << endl;
+    }
     return -1;
   }
 
@@ -276,14 +285,6 @@ int Cf2RadxFile::_readPath(const string &path, size_t pathNum)
       return -1;
     }
     
-    // if (_nGatesVary) {
-    //   // set the packing so that the number of gates varies
-    //   // this will ensure that a call to getNGatesVary() on
-    //   // the volume will return true
-    //   _readVol->addToPacking(1);
-    //   _readVol->addToPacking(2);
-    // }
-
   } else {
 
     // create the rays to be read in, filling out the metadata
@@ -655,11 +656,20 @@ int Cf2RadxFile::_appendSweepInfo(const string &path)
     return -1;
   }
 
-  if (_readSweepVariables()) {
+  try {
+    _readSweepVariables();
+  } catch (NcxxException e) {
     _addErrStr("ERROR - Cf2RadxFile::_appendSweepInfo");
+    _addErrStr("  path: ", path);
+    _addErrStr(e.what());
+    if (_debug) {
+      cerr << "====>> ERROR - _readPath <<====" << endl;
+      cerr << _errStr << endl;
+      cerr << "===============================" << endl;
+    }
     return -1;
   }
-  
+
   // done with file
 
   _file.close();
@@ -729,41 +739,29 @@ int Cf2RadxFile::_readDimensions()
 
 {
 
-  // read required dimensions
-
   _nTimesInFile = 0;
   _nRangeInFile = 0;
 
+  // sweep dimension
+
+  _sweepDim.setNull();
   try {
-    
-    _timeDimRead = _file.getDim(TIME);
-    _nTimesInFile = _timeDimRead.getSize();
-
-    _rangeDimRead = _file.getDim(RANGE);
-    _nRangeInFile = _rangeDimRead.getSize();
-    
-    _nPointsDimRead = _file.getDim(N_POINTS);
-    if (_nPointsDimRead.isNull()) {
-      // _nGatesVary = false;
-      _nPoints = 0;
-    } else {
-      // _nGatesVary = true;
-      _nPoints = _nPointsDimRead.getSize();
-    }
-
     _sweepDim = _file.getDim(SWEEP);
-
   } catch (NcxxException e) {
-
     _addErrStr("ERROR - Cf2RadxFile::readDimensions");
+    _addErrStr("  Cannot find sweep dimension");
     _addErrStr("  exception: ", e.what());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
-
   }
 
-  // calibration dimension is optional
+  // frequency dimension is optional
 
-  _calDimRead = _file.getDim(R_CALIB);
+  _frequencyDim.setNull();
+  try {
+    _frequencyDim = _file.getDim(FREQUENCY);
+  } catch (NcxxException e) {
+    _frequencyDim.setNull();
+  }
 
   return 0;
 
@@ -787,31 +785,51 @@ int Cf2RadxFile::_readGlobalAttributes()
     return -1;
   }
   if (_conventions.find(BaseConvention) == string::npos) {
-    if (_conventions.find("CF") == string::npos &&
-        _conventions.find("Radial") == string::npos) {
+    if (_conventions.find("CF") == string::npos) {
       _addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
       _addErrStr("  Invalid Conventions attribute: ", _conventions);
+      _addErrStr("  Should be 'CF...'");
       return -1;
     }
   }
 
-  // check for instrument name
-
+  // check for conventions
+  
   try {
-    NcxxGroupAtt att = _file.getAtt(INSTRUMENT_NAME);
-    _instrumentName = att.asString();
-    if (_instrumentName.size() < 1) {
-      _instrumentName = "unknown";
-    }
+    NcxxGroupAtt att = _file.getAtt(SUB_CONVENTIONS);
+    _subconventions = att.asString();
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
-    _addErrStr("  Cannot find instrument_name attribute");
+    _addErrStr("  Cannot find subconventions attribute");
+    return -1;
+  }
+  if (_subconventions.find(BaseConvention) == string::npos) {
+    _addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
+    _addErrStr("  Invalid sub_conventions attribute: ", _subconventions);
+    return -1;
+  }
+
+  // check for version
+  
+  try {
+    NcxxGroupAtt att = _file.getAtt(VERSION);
+    _version = att.asString();
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
+    _addErrStr("  Cannot find version attribute");
+    return -1;
+  }
+  if (_version.size() < 1 || _version[0] != '2') {
+    _addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
+    _addErrStr("  Invalid version: ", _version);
+    _addErrStr("  Should be 2.x");
     return -1;
   }
 
   // Loop through the global attributes, use the ones which make sense
 
-  _origFormat = "CFRADIAL"; // default
+  _origFormat = "CFRADIAL2"; // default
+  _instrumentName = "unknown";
 
   multimap<string,NcxxGroupAtt> atts = _file.getAtts();
   for (auto ii = atts.begin(); ii != atts.end(); ii++) {
@@ -820,56 +838,40 @@ int Cf2RadxFile::_readGlobalAttributes()
     
     if (att.isNull()) {
       continue;
-    }
-    if (att.getName().find(VERSION) != string::npos) {
-      _version = att.asString();
-    }
-    if (att.getName().find(TITLE) != string::npos) {
+    } else if (att.getName().find(INSTRUMENT_NAME) != string::npos) {
+      _instrumentName = att.asString();
+    } else if (att.getName().find(TITLE) != string::npos) {
       _title = att.asString();
-    }
-    if (att.getName().find(SOURCE) != string::npos) {
+    } else if (att.getName().find(SOURCE) != string::npos) {
       _source = att.asString();
-    }
-    if (att.getName().find(HISTORY) != string::npos) {
+    } else if (att.getName().find(HISTORY) != string::npos) {
       _history = att.asString();
-    }
-    if (att.getName().find(INSTITUTION) != string::npos) {
+    } else if (att.getName().find(INSTITUTION) != string::npos) {
       _institution = att.asString();
-    }
-    if (att.getName().find(REFERENCES) != string::npos) {
+    } else if (att.getName().find(REFERENCES) != string::npos) {
       _references = att.asString();
-    }
-    if (att.getName().find(COMMENT) != string::npos) {
+    } else if (att.getName().find(COMMENT) != string::npos) {
       _comment = att.asString();
-    }
-    if (att.getName().find(AUTHOR) != string::npos) {
+    } else if (att.getName().find(AUTHOR) != string::npos) {
       _author = att.asString();
-    }
-    if (att.getName().find(ORIGINAL_FORMAT) != string::npos) {
+    } else if (att.getName().find(ORIGINAL_FORMAT) != string::npos) {
       _origFormat = att.asString();
-    }
-    if (att.getName().find(DRIVER) != string::npos) {
+    } else if (att.getName().find(DRIVER) != string::npos) {
       _driver = att.asString();
-    }
-    if (att.getName().find(CREATED) != string::npos) {
+    } else if (att.getName().find(CREATED) != string::npos) {
       _created = att.asString();
-    }
-    if (att.getName().find(SITE_NAME) != string::npos) {
+    } else if (att.getName().find(SITE_NAME) != string::npos) {
       _siteName = att.asString();
-    }
-    if (att.getName().find(SCAN_NAME) != string::npos) {
+    } else if (att.getName().find(SCAN_NAME) != string::npos) {
       _scanName = att.asString();
-    }
-    if (att.getName().find(SCAN_ID) != string::npos) {
+    } else if (att.getName().find(SCAN_ID) != string::npos) {
       vector<int> scanIds;
       try {
         att.getValues(scanIds);
         _scanId = scanIds[0];
       } catch (NcxxException& e) {
       }
-    }
-    
-    if (att.getName().find(RAY_TIMES_INCREASE) != string::npos) {
+    } else if (att.getName().find(RAY_TIMES_INCREASE) != string::npos) {
       string rayTimesIncrease = att.asString();
       if (rayTimesIncrease == "true") {
         _rayTimesIncrease = true;
@@ -1455,8 +1457,9 @@ int Cf2RadxFile::_readPositionVariables()
 
 ///////////////////////////////////
 // read the sweep meta-data
+// throws exception on error
 
-int Cf2RadxFile::_readSweepVariables()
+void Cf2RadxFile::_readSweepVariables()
 
 {
 
@@ -1464,117 +1467,468 @@ int Cf2RadxFile::_readSweepVariables()
 
   size_t nSweepsInFile = _sweepDim.getSize();
 
-  // initialize
-  
-  vector<int> sweepNums, startRayIndexes, endRayIndexes;
-  vector<double> fixedAngles, targetScanRates, rayAngleRes, intermedFreqHz;
-  vector<string> sweepModes, polModes, prtModes, followModes, raysAreIndexed;
-
-  int iret = 0;
-  
-  _readSweepVar(_sweepNumberVar, SWEEP_NUMBER, sweepNums);
-  if (sweepNums.size() < nSweepsInFile) {
-    iret = -1;
-  }
-
-  _readSweepVar(_sweepStartRayIndexVar, SWEEP_START_RAY_INDEX, startRayIndexes);
-  if (startRayIndexes.size() < nSweepsInFile) {
-    iret = -1;
-  }
-
-  _readSweepVar(_sweepEndRayIndexVar, SWEEP_END_RAY_INDEX, endRayIndexes);
-  if (endRayIndexes.size() < nSweepsInFile) {
-    iret = -1;
-  }
-
-  // _sweepFixedAngleVar = NULL;
-  _readSweepVar(_sweepFixedAngleVar, FIXED_ANGLE, fixedAngles, false);
-  if (_sweepFixedAngleVar.isNull()) {
-    // try old string
-    _readSweepVar(_sweepFixedAngleVar, "sweep_fixed_angle", fixedAngles, false);
-  }
-  if (_sweepFixedAngleVar.isNull()) {
-    _fixedAnglesFound = false;
-  } else {
-    _fixedAnglesFound = true;
-  }
-
-  _readSweepVar(_targetScanRateVar, TARGET_SCAN_RATE, targetScanRates, false);
-
-  _readSweepVar(_sweepModeVar, SWEEP_MODE, sweepModes);
-  if (sweepModes.size() < nSweepsInFile) {
-    iret = -1;
-  }
-
-  _readSweepVar(_polModeVar, POLARIZATION_MODE, polModes, false);
-  _readSweepVar(_prtModeVar, PRT_MODE, prtModes, false);
-  _readSweepVar(_sweepFollowModeVar, FOLLOW_MODE, followModes, false);
-  
-  _readSweepVar(_raysAreIndexedVar, RAYS_ARE_INDEXED, raysAreIndexed, false);
-  _readSweepVar(_rayAngleResVar, RAY_ANGLE_RES, rayAngleRes, false);
-  _readSweepVar(_intermedFreqHzVar, INTERMED_FREQ_HZ, intermedFreqHz, false);
-
-  if (iret) {
-    _addErrStr("ERROR - Cf2RadxFile::_readSweepVariables");
-    return -1;
+  if (_debug) {
+    cerr << "=====>> nSweeps: " << nSweepsInFile << endl;
   }
   
+  // get the sweep group names
+  
+  vector<string> sweepGroupNames;
+  {
+    NcxxVar var;
+    try {
+      _readSweepVar(_file, var, SWEEP_GROUP_NAME, sweepGroupNames);
+    } catch (NcxxException e) {
+      _addErrStr("ERROR - Cf2RadxFile::_readSweepVariables");
+      _addErrStr("  Cannot read var, name", _altitudeAglVar.getName());
+      _addErrStr("  exception: ", e.what());
+      throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    }
+    
+  }
+
+  // read each sweep group, accumulating sweeps in file
+
   _sweepsInFile.clear();
-  for (size_t ii = 0; ii < nSweepsInFile; ii++) {
+  size_t startRayIndex = 0;
+  for (size_t isweep = 0; isweep < sweepGroupNames.size(); isweep++) {
+    
+    if (_debug) {
+      cerr << "======>>> reading sweepGroupName: " 
+           << sweepGroupNames[isweep] << endl;
+    }
+    
+    try {
+      NcxxGroup group = _file.getGroup(sweepGroupNames[isweep]);
+      RadxSweep *sweep = new RadxSweep;
+      sweep->setStartRayIndex(startRayIndex);
+      _readSweepMetadata(group, sweep);
+      _sweepsInFile.push_back(sweep);
+      _sweeps.push_back(sweep);
+      startRayIndex = sweep->getEndRayIndex() + 1;
+    } catch (NcxxException e) {
+      _addErrStr("ERROR - Cf2RadxFile::_readSweepVariables");
+      _addErrStr("  Cannot read sweep group, name", sweepGroupNames[isweep]);
+      _addErrStr("  exception: ", e.what());
+      throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    }
+    
+  } // isweep
 
-    RadxSweep *sweep = new RadxSweep;
-    sweep->setVolumeNumber(_volumeNumber);
+}
 
-    if (sweepNums.size() > ii) {
-      sweep->setSweepNumber(sweepNums[ii]);
-    }
-    if (startRayIndexes.size() > ii) {
-      sweep->setStartRayIndex(startRayIndexes[ii]);
-    }
-    if (endRayIndexes.size() > ii) {
-      sweep->setEndRayIndex(endRayIndexes[ii]);
-    }
-    if (fixedAngles.size() > ii) {
-      sweep->setFixedAngleDeg(fixedAngles[ii]);
-    }
-    if (targetScanRates.size() > ii) {
-      sweep->setTargetScanRateDegPerSec(targetScanRates[ii]);
-    }
-    if (sweepModes.size() > ii) {
-      sweep->setSweepMode(Radx::sweepModeFromStr(sweepModes[ii]));
-    }
-    if (polModes.size() > ii) {
-      sweep->setPolarizationMode(Radx::polarizationModeFromStr(polModes[ii]));
-    }
-    if (prtModes.size() > ii) {
-      sweep->setPrtMode(Radx::prtModeFromStr(prtModes[ii]));
-    }
-    if (followModes.size() > ii) {
-      sweep->setFollowMode(Radx::followModeFromStr(followModes[ii]));
-    }
+///////////////////////////////////
+// read the sweep meta-data
+// throws exception on error
 
-    if (raysAreIndexed.size() > ii) {
-      if (raysAreIndexed[ii] == "true") {
+void Cf2RadxFile::_readSweepMetadata(NcxxGroup &group,
+                                     RadxSweep *sweep)
+  
+{
+  
+  // volume number
+
+  sweep->setVolumeNumber(_volumeNumber);
+
+  // sweep number
+  {
+    NcxxVar var = group.getVar(SWEEP_NUMBER);
+    if (!var.isNull()) {
+      size_t len = var.getDimCount();
+      if (len != 0) {
+        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        _addErrStr("  Reading var: ", SWEEP_NUMBER);
+        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+      }
+      int val;
+      var.getVal(&val);
+      sweep->setSweepNumber(val);
+    }
+  }
+
+  // fixed angle
+  {
+    NcxxVar var = group.getVar(FIXED_ANGLE);
+    if (!var.isNull()) {
+      size_t len = var.getDimCount();
+      if (var.isNull() || len != 0) {
+        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        _addErrStr("  Reading var: ", FIXED_ANGLE);
+        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+      }
+      float val;
+      var.getVal(&val);
+      sweep->setFixedAngleDeg(val);
+    }
+  }
+  
+  // target scan rate
+  {
+    NcxxVar var = group.getVar(TARGET_SCAN_RATE);
+    if (!var.isNull()) {
+      size_t len = var.getDimCount();
+      if (len != 0) {
+        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        _addErrStr("  Reading var: ", TARGET_SCAN_RATE);
+        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+      }
+      float val;
+      var.getVal(&val);
+      sweep->setTargetScanRateDegPerSec(val);
+    }
+  }
+  
+  // sweep mode
+  {
+    NcxxVar var = group.getVar(SWEEP_MODE);
+    if (!var.isNull()) {
+      size_t len = var.getDimCount();
+      if (len != 0) {
+        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        _addErrStr("  Reading var: ", SWEEP_MODE);
+        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+      }
+      char *val;
+      var.getVal(&val);
+      sweep->setSweepMode(Radx::sweepModeFromStr(val));
+    }
+  }
+
+  // polarization mode
+  {
+    NcxxVar var = group.getVar(POLARIZATION_MODE);
+    if (!var.isNull()) {
+      size_t len = var.getDimCount();
+      if (len != 0) {
+        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        _addErrStr("  Reading var: ", POLARIZATION_MODE);
+        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+      }
+      char *val;
+      var.getVal(&val);
+      sweep->setPolarizationMode(Radx::polarizationModeFromStr(val));
+    }
+  }
+
+  // prt mode
+  {
+    NcxxVar var = group.getVar(PRT_MODE);
+    if (!var.isNull()) {
+      size_t len = var.getDimCount();
+      if (len != 0) {
+        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        _addErrStr("  Reading var: ", PRT_MODE);
+        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+      }
+      char *val;
+      var.getVal(&val);
+      sweep->setPrtMode(Radx::prtModeFromStr(val));
+    }
+  }
+
+  // follow mode
+  {
+    NcxxVar var = group.getVar(FOLLOW_MODE);
+    if (!var.isNull()) {
+      size_t len = var.getDimCount();
+      if (len != 0) {
+        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        _addErrStr("  Reading var: ", FOLLOW_MODE);
+        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+      }
+      char *val;
+      var.getVal(&val);
+      sweep->setFollowMode(Radx::followModeFromStr(val));
+    }
+  }
+
+  // indexed rays?
+  {
+    NcxxVar var = group.getVar(RAYS_ARE_INDEXED);
+    if (!var.isNull()) {
+      size_t len = var.getDimCount();
+      if (len != 0) {
+        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        _addErrStr("  Reading var: ", RAYS_ARE_INDEXED);
+        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+      }
+      char *val;
+      var.getVal(&val);
+      string sval(val);
+      if (sval == "true") {
         sweep->setRaysAreIndexed(true);
       } else {
         sweep->setRaysAreIndexed(false);
       }
     }
+  }
 
-    if (rayAngleRes.size() > ii) {
-      sweep->setAngleResDeg(rayAngleRes[ii]);
+  if (sweep->getRaysAreIndexed()) {
+    NcxxVar var = group.getVar(RAY_ANGLE_RES);
+    if (!var.isNull()) {
+      size_t len = var.getDimCount();
+      if (var.isNull() || len != 0) {
+        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        _addErrStr("  Reading var: ", RAY_ANGLE_RES);
+        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+      }
+      float val;
+      var.getVal(&val);
+      sweep->setAngleResDeg(val);
     }
+  }
 
-    if (intermedFreqHz.size() > ii) {
-      sweep->setIntermedFreqHz(intermedFreqHz[ii]);
+  // intermediate frequency
+  {
+    NcxxVar var = group.getVar(INTERMED_FREQ_HZ);
+    if (!var.isNull()) {
+      size_t len = var.getDimCount();
+      if (var.isNull() || len != 0) {
+        _addErrStr("ERROR - Cf2RadxFile::_readSweepMetadata");
+        _addErrStr("  Reading var: ", INTERMED_FREQ_HZ);
+        _addErrInt("  Bad dimCount, should be 0, found: ", len);
+        throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+      }
+      float val;
+      var.getVal(&val);
+      sweep->setIntermedFreqHz(val);
     }
+  }
 
-    _sweepsInFile.push_back(sweep);
-    _sweeps.push_back(sweep);
+  // ray index counts
 
-  } // ii
+  NcxxDim timeDim = group.getDim(TIME);
+  size_t nRays = timeDim.getSize();
+  sweep->setEndRayIndex(sweep->getStartRayIndex() + nRays - 1);
 
-  return 0;
+  if (_debug) {
+    sweep->print(cerr);
+  }
+    
+}
+
+///////////////////////////////////
+// read a sweep variable - double
+// throws exception on error
+
+void Cf2RadxFile::_readSweepVar(NcxxGroup &group,
+                                NcxxVar &var,
+                                const string &name,
+                                vector<double> &vals,
+                                bool required)
+  
+{
+  
+  vals.clear();
+
+  // get var
+
+  size_t nSweeps = _sweepDim.getSize();
+  try {
+    _getSweepVar(group, var, name);
+  } catch (NcxxException& e) {
+    if (!required) {
+      for (size_t ii = 0; ii < nSweeps; ii++) {
+        vals.push_back(Radx::missingMetaDouble);
+      }
+      clearErrStr();
+      return;
+    } else {
+      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar(double *)");
+      _addErrStr("  exception: ", e.what());
+      throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    }
+  }
+
+  // load up data
+
+  RadxArray<double> data_;
+  double *data = data_.alloc(nSweeps);
+  try {
+    var.getVal(data);
+    for (size_t ii = 0; ii < nSweeps; ii++) {
+      vals.push_back(data[ii]);
+    }
+  } catch (NcxxException& e) {
+    if (!required) {
+      for (size_t ii = 0; ii < nSweeps; ii++) {
+        vals.push_back(Radx::missingMetaDouble);
+      }
+      clearErrStr();
+      return;
+    } else {
+      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar(double *)");
+      _addErrStr("  Cannot read variable: ", name);
+      _addErrStr("  exception: ", e.what());
+      throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    }
+  }
+
+}
+
+///////////////////////////////////
+// read a sweep variable - integer
+// throws exception on error
+
+void Cf2RadxFile::_readSweepVar(NcxxGroup &group, NcxxVar &var,
+                                const string &name,
+                                vector<int> &vals, bool required)
+
+{
+
+  vals.clear();
+
+  // get var
+
+  size_t nSweeps = _sweepDim.getSize();
+  try {
+    _getSweepVar(group, var, name);
+  } catch (NcxxException& e) {
+    if (!required) {
+      for (size_t ii = 0; ii < nSweeps; ii++) {
+        vals.push_back(Radx::missingMetaInt);
+      }
+      clearErrStr();
+      return;
+    } else {
+      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar(int *)");
+      _addErrStr("  exception: ", e.what());
+      throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    }
+  }
+
+  // load up data
+
+  RadxArray<int> data_;
+  int *data = data_.alloc(nSweeps);
+  try {
+    var.getVal(data);
+    for (size_t ii = 0; ii < nSweeps; ii++) {
+      vals.push_back(data[ii]);
+    }
+  } catch (NcxxException& e) {
+    if (!required) {
+      for (size_t ii = 0; ii < nSweeps; ii++) {
+        vals.push_back(Radx::missingMetaInt);
+      }
+      clearErrStr();
+      return;
+    } else {
+      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
+      _addErrStr("  Cannot read variable: ", name);
+      _addErrStr("  exception: ", e.what());
+      throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    }
+  }
+
+}
+
+///////////////////////////////////
+// read a sweep variable - string
+
+void Cf2RadxFile::_readSweepVar(NcxxGroup &group, NcxxVar &var, const string &name,
+                                vector<string> &vals, bool required)
+
+{
+
+  vals.clear();
+
+  // get var
+
+  size_t nSweeps = _sweepDim.getSize();
+  try {
+    _getSweepVar(group, var, name);
+  } catch (NcxxException& e) {
+    if (!required) {
+      for (size_t ii = 0; ii < nSweeps; ii++) {
+        vals.push_back("");
+      }
+      clearErrStr();
+      return;
+    } else {
+      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar(int *)");
+      _addErrStr("  exception: ", e.what());
+      throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    }
+  }
+
+  // load up data
+
+  RadxArray<char *> data_;
+  char **data = data_.alloc(nSweeps);
+  try {
+    var.getVal(data);
+    for (size_t ii = 0; ii < nSweeps; ii++) {
+      vals.push_back(data[ii]);
+    }
+  } catch (NcxxException& e) {
+    if (!required) {
+      for (size_t ii = 0; ii < nSweeps; ii++) {
+        vals.push_back("");
+      }
+      clearErrStr();
+      return;
+    } else {
+      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
+      _addErrStr("  Cannot read variable: ", name);
+      _addErrStr("  exception: ", e.what());
+      throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    }
+  }
+
+}
+
+///////////////////////////////////
+// get a sweep variable
+// throws exception on error
+
+void Cf2RadxFile::_getSweepVar(NcxxGroup &group,
+                               NcxxVar &var,
+                               const string &name)
+
+{
+  
+  // get var
+  
+  var = group.getVar(name);
+  if (var.isNull()) {
+    _addErrStr("ERROR - Cf2RadxFile::_getSweepVar");
+    _addErrStr("  cannot read sweep variable");
+    _addErrStr("  group name: ", group.getName());
+    _addErrStr("  var name: ", name);
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+  }
+
+  // check sweep dimension
+  
+  int nVarDims = var.getDimCount();
+  if (nVarDims < 1) {
+    _addErrStr("ERROR - Cf2RadxFile::_getSweepVar");
+    _addErrStr("  variable has no dimensions");
+    _addErrStr("  group name: ", group.getName());
+    _addErrStr("  var name: ", name);
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+  }
+
+  NcxxDim sweepDim = var.getDim(0);
+  if (sweepDim != _sweepDim) {
+    _addErrStr("ERROR - Cf2RadxFile::_getSweepVar");
+    _addErrStr("  group name: ", group.getName());
+    _addErrStr("  var name: ", name);
+    _addErrStr("  var has incorrect dimension, dim name: ",
+               sweepDim.getName());
+    _addErrStr("  should be: ", SWEEP);
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+  }
 
 }
 
@@ -2893,252 +3247,6 @@ int Cf2RadxFile::_getRayVar(NcxxVar &var, const string &name, bool required)
                  timeDim.getName());
       _addErrStr("  should be: ", TIME);
     }
-    return -1;
-  }
-
-  return 0;
-
-}
-
-///////////////////////////////////
-// read a sweep variable - double
-
-int Cf2RadxFile::_readSweepVar(NcxxVar &var, const string &name,
-                               vector<double> &vals, bool required)
-
-{
-
-  vals.clear();
-
-  // get var
-
-  size_t nSweeps = _sweepDim.getSize();
-  if (_getSweepVar(var, name)) {
-    if (!required) {
-      for (size_t ii = 0; ii < nSweeps; ii++) {
-        vals.push_back(Radx::missingMetaDouble);
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
-      return -1;
-    }
-  }
-
-  // load up data
-
-  int iret = 0;
-  double *data = new double[nSweeps];
-  try {
-    var.getVal(data);
-    for (size_t ii = 0; ii < nSweeps; ii++) {
-      vals.push_back(data[ii]);
-    }
-  } catch (NcxxException& e) {
-    if (!required) {
-      for (size_t ii = 0; ii < nSweeps; ii++) {
-        vals.push_back(Radx::missingMetaDouble);
-      }
-      clearErrStr();
-    } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getErrStr());
-      iret = -1;
-    }
-  }
-  delete[] data;
-  return iret;
-
-}
-
-///////////////////////////////////
-// read a sweep variable - integer
-
-int Cf2RadxFile::_readSweepVar(NcxxVar &var, const string &name,
-                               vector<int> &vals, bool required)
-
-{
-
-  vals.clear();
-
-  // get var
-
-  size_t nSweeps = _sweepDim.getSize();
-  if (_getSweepVar(var, name)) {
-    if (!required) {
-      for (size_t ii = 0; ii < nSweeps; ii++) {
-        vals.push_back(Radx::missingMetaInt);
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
-      return -1;
-    }
-  }
-
-  // load up data
-
-  int iret = 0;
-  int *data = new int[nSweeps];
-  try {
-    var.getVal(data);
-    for (size_t ii = 0; ii < nSweeps; ii++) {
-      vals.push_back(data[ii]);
-    }
-  } catch (NcxxException& e) {
-    if (!required) {
-      for (size_t ii = 0; ii < nSweeps; ii++) {
-        vals.push_back(Radx::missingMetaInt);
-      }
-      clearErrStr();
-    } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getErrStr());
-      iret = -1;
-    }
-  }
-  delete[] data;
-  return iret;
-
-}
-
-///////////////////////////////////
-// read a sweep variable - string
-
-int Cf2RadxFile::_readSweepVar(NcxxVar &var, const string &name,
-                               vector<string> &vals, bool required)
-
-{
-
-  // get var
-  
-  size_t nSweeps = _sweepDim.getSize();
-  var = _file.getVar(name);
-  if (var.isNull()) {
-    if (!required) {
-      for (size_t ii = 0; ii < nSweeps; ii++) {
-        vals.push_back("");
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
-      _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
-  }
-
-  // check sweep dimension
-  
-  if (var.getDimCount() < 2) {
-    _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has fewer than 2 dimensions");
-    return -1;
-  }
-  NcxxDim sweepDim = var.getDim(0);
-  if (sweepDim != _sweepDim) {
-    _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has incorrect first dimension, dim name: ",
-               sweepDim.getName());
-    _addErrStr("  should be: ", SWEEP);
-    return -1;
-  }
-  NcxxDim stringLenDim = var.getDim(1);
-  if (stringLenDim.isNull()) {
-    _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has NULL second dimension");
-    _addErrStr("  should be a string length dimension");
-    return -1;
-  }
-
-  int ntype = var.getType().getId();
-  if (ntype != NC_CHAR) {
-    _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
-    _addErrStr("  Incorrect variable type");
-    _addErrStr("  Expecting char");
-    _addErrStr("  Found: ", Ncxx::ncTypeToStr(ntype));
-    return -1;
-  }
-
-  // load up data
-
-  size_t stringLen = stringLenDim.getSize();
-  size_t nChars = nSweeps * stringLen;
-  char *cvalues = new char[nChars];
-  try {
-    var.getVal(cvalues);
-    // replace white space with nulls
-    for (size_t ii = 0; ii < nChars; ii++) {
-      if (isspace(cvalues[ii])) {
-        cvalues[ii] = '\0';
-      }
-    }
-    // ensure null termination
-    char *cv = cvalues;
-    char *cval = new char[stringLen+1];
-    for (size_t ii = 0; ii < nSweeps; ii++, cv += stringLen) {
-      memcpy(cval, cv, stringLen);
-      cval[stringLen] = '\0';
-      vals.push_back(string(cval));
-    }
-    delete[] cval;
-  } catch (NcxxException& e) {
-    if (!required) {
-      clearErrStr();
-    } else {
-      _addErrStr("ERROR - Cf2RadxFile::_readSweepVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
-  }
-  delete[] cvalues;
-
-  return 0;
-
-}
-
-///////////////////////////////////
-// get a sweep variable
-// returns 0 on success, -1 on failure
-
-int Cf2RadxFile::_getSweepVar(NcxxVar &var, const string &name)
-
-{
-  
-  // get var
-  
-  var = _file.getVar(name);
-  if (var.isNull()) {
-    _addErrStr("ERROR - Cf2RadxFile::_getSweepVar");
-    _addErrStr("  Cannot read variable, name: ", name);
-    _addErrStr(_file.getErrStr());
-    return -1;
-  }
-
-  // check sweep dimension
-  
-  if (var.getDimCount() < 1) {
-    _addErrStr("ERROR - Cf2RadxFile::_getSweepVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has no dimensions");
-    return -1;
-  }
-  NcxxDim sweepDim = var.getDim(0);
-  if (sweepDim != _sweepDim) {
-    _addErrStr("ERROR - Cf2RadxFile::_getSweepVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has incorrect dimension, dim name: ",
-               sweepDim.getName());
-    _addErrStr("  should be: ", SWEEP);
     return -1;
   }
 

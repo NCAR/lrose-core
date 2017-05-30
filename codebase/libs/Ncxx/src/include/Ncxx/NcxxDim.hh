@@ -108,6 +108,10 @@ public:
   /*! Returns true if this object is null (i.e. it has no contents); otherwise returns false. */
   bool isNull() const  {return nullObject;}
 
+  // set to null
+
+  void setNull() { nullObject = true; }
+
   /*! comparator operator  */
   friend bool operator<(const NcxxDim& lhs,const NcxxDim& rhs);
 
