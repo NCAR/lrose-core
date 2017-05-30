@@ -846,6 +846,14 @@ public:
                          const string &name,
                          string &val);
 
+  ///////////////////////////////////
+  // read a scalar char string variable
+  // Throws NcxxException on failure
+
+  void readScalarStringVar(NcxxVar &var,
+                           const string &name,
+                           string &val);
+
 protected:
 
   /*! assignment operator  */

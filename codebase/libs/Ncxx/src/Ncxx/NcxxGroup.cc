@@ -2186,7 +2186,9 @@ void NcxxGroup::readDoubleVar(NcxxVar &var, const string &name,
 // read a scalar char string variable
 // Throws NcxxException on failure
 
-void NcxxGroup::readCharStringVar(NcxxVar &var, const string &name, string &val)
+void NcxxGroup::readCharStringVar(NcxxVar &var,
+                                  const string &name,
+                                  string &val)
 
 {
 
@@ -2249,6 +2251,35 @@ void NcxxGroup::readCharStringVar(NcxxVar &var, const string &name, string &val)
 
   delete[] cvalues;
 
+}
+
+
+///////////////////////////////////
+// read a scalar string variable
+// Throws NcxxException on failure
+
+void NcxxGroup::readScalarStringVar(NcxxVar &var,
+                                    const string &name,
+                                    string &val)
+
+{
+
+  val.clear();
+  
+  // get var
+  
+  var = getVar(name);
+  if (var.isNull()) {
+    _addErrStr("ERROR - NcxxGroup::readCharStringVar");
+    _addErrStr("  Cannot read variable, name: ", name);
+    _addErrStr("  group: ", getName());
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+  }
+
+  char *charVal;
+  var.getVal(&charVal);
+  val = charVal;
+  
 }
 
 

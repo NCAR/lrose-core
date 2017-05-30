@@ -1143,21 +1143,21 @@ int Cf2RadxFile::_readScalarVariables()
 
     try {
       string pstring;
-      _file.readCharStringVar(_instrumentTypeVar, INSTRUMENT_TYPE, pstring);
+      _file.readScalarStringVar(_instrumentTypeVar, INSTRUMENT_TYPE, pstring);
       _instrumentType = Radx::instrumentTypeFromStr(pstring);
     } catch (NcxxException e) {
     }
 
     try {
       string pstring;
-      _file.readCharStringVar(_platformTypeVar, PLATFORM_TYPE, pstring);
+      _file.readScalarStringVar(_platformTypeVar, PLATFORM_TYPE, pstring);
       _platformType = Radx::platformTypeFromStr(pstring);
     } catch (NcxxException e) {
     }
 
     try {
       string pstring;
-      _file.readCharStringVar(_primaryAxisVar, PRIMARY_AXIS, pstring);
+      _file.readScalarStringVar(_primaryAxisVar, PRIMARY_AXIS, pstring);
       _primaryAxis = Radx::primaryAxisFromStr(pstring);
     } catch (NcxxException e) {
     }
@@ -1165,7 +1165,7 @@ int Cf2RadxFile::_readScalarVariables()
     if (!_file.getVar(STATUS_XML).isNull()) {
       try {
         string pstring;
-        _file.readCharStringVar(_statusXmlVar, STATUS_XML, pstring);
+        _file.readScalarStringVar(_statusXmlVar, STATUS_XML, pstring);
         _statusXml = pstring;
       } catch (NcxxException e) {
       }
