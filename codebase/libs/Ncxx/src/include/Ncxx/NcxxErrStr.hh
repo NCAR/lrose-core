@@ -109,8 +109,22 @@ public:
   
   void clearErrStr() const { _errStr.clear(); }
 
+  /// add integer value to error string, with label
+  
+  void addErrInt(string label, int iarg,
+                 bool cr = true) const;
+  
+  /// add double value to error string, with label
+  
+  void addErrDbl(string label, double darg,
+                 string format, bool cr = true) const;
+  
+  /// add string value to error string, with label
+  
+  void addErrStr(string label, string strarg = "",
+                 bool cr = true) const;
+  
   /// Get the Error String.
-  ///
   /// The contents are only meaningful if an error has returned.
   
   string getErrStr() const { return _errStr; }
@@ -120,21 +134,6 @@ protected:
   // error string
 
   mutable string _errStr; ///< Error string is set on read or write error
-  
-  /// add integer value to error string, with label
-  
-  void _addErrInt(string label, int iarg,
-                  bool cr = true) const;
-  
-  /// add double value to error string, with label
-  
-  void _addErrDbl(string label, double darg,
-                  string format, bool cr = true) const;
-  
-  /// add string value to error string, with label
-  
-  void _addErrStr(string label, string strarg = "",
-                  bool cr = true) const;
   
 private:
 

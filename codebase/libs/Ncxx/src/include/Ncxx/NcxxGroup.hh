@@ -817,42 +817,40 @@ public:
                  bool isMetadata = false);
      
   ///////////////////////////////////////////////
-  // read variable based on type, set var and val
-  // Throws NcxxException on failure
+  // read variable based on type, set and val
+  // returns var used
+  // throws NcxxException on failure
   
-  void readIntVar(NcxxVar &var,
-                  const string &name,
-                  int &val,
-                  int missingVal,
-                  bool required = true);
-  
-  void readFloatVar(NcxxVar &var,
-                    const string &name,
-                    float &val,
-                    float missingVal,
-                    bool required = true);
-  
-  void readDoubleVar(NcxxVar &var,
-                     const string &name,
-                     double &val,
-                     double missingVal,
+  NcxxVar readIntVar(const string &name,
+                     int &val,
+                     int missingVal,
                      bool required = true);
+  
+  NcxxVar readFloatVar(const string &name,
+                       float &val,
+                       float missingVal,
+                       bool required = true);
+  
+  NcxxVar readDoubleVar(const string &name,
+                        double &val,
+                        double missingVal,
+                        bool required = true);
       
   ///////////////////////////////////
   // read a scalar char string variable
-  // Throws NcxxException on failure
+  // throws NcxxException on failure
+  // returns var used
     
-  void readCharStringVar(NcxxVar &var,
-                         const string &name,
-                         string &val);
+  NcxxVar readCharStringVar(const string &name,
+                            string &val);
 
   ///////////////////////////////////
   // read a scalar char string variable
-  // Throws NcxxException on failure
+  // throws NcxxException on failure
+  // returns var used
 
-  void readScalarStringVar(NcxxVar &var,
-                           const string &name,
-                           string &val);
+  NcxxVar readScalarStringVar(const string &name,
+                              string &val);
 
 protected:
 

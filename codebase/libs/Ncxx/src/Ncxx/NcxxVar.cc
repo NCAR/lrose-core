@@ -3154,11 +3154,11 @@ void NcxxVar::addScalarAttr(const string &name,
   try {
     putAtt(name.c_str(), val.c_str());
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxVar::addAttr");
-    _addErrStr("  Cannot add string var attr, name: ", name);
-    _addErrStr("  val: ", val);
-    _addErrStr("  var name: ", getName());
-    _addErrStr("  exception: ", e.what());
+    addErrStr("ERROR - NcxxVar::addAttr");
+    addErrStr("  Cannot add string var attr, name: ", name);
+    addErrStr("  val: ", val);
+    addErrStr("  var name: ", getName());
+    addErrStr("  exception: ", e.what());
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
 }
@@ -3174,11 +3174,11 @@ void NcxxVar::addScalarAttr(const string &name, double val)
     NcxxType vtype(NcxxType::nc_DOUBLE);
     putAtt(name.c_str(), vtype, 1, &val);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxVar::addAttr");
-    _addErrStr("  Cannot add double var attr, name: ", name);
-    _addErrDbl("  val: ", val, "%g");
-    _addErrStr("  var name: ", getName());
-    _addErrStr("  exception: ", e.what());
+    addErrStr("ERROR - NcxxVar::addAttr");
+    addErrStr("  Cannot add double var attr, name: ", name);
+    addErrDbl("  val: ", val, "%g");
+    addErrStr("  var name: ", getName());
+    addErrStr("  exception: ", e.what());
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
 }
@@ -3194,11 +3194,11 @@ void NcxxVar::addScalarAttr(const string &name, float val)
     NcxxType vtype(NcxxType::nc_FLOAT);
     putAtt(name.c_str(), vtype, 1, &val);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxVar::addAttr");
-    _addErrStr("  Cannot add float var attr, name: ", name);
-    _addErrDbl("  val: ", val, "%g");
-    _addErrStr("  var name: ", getName());
-    _addErrStr("  exception: ", e.what());
+    addErrStr("ERROR - NcxxVar::addAttr");
+    addErrStr("  Cannot add float var attr, name: ", name);
+    addErrDbl("  val: ", val, "%g");
+    addErrStr("  var name: ", getName());
+    addErrStr("  exception: ", e.what());
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
 }
@@ -3214,11 +3214,11 @@ void NcxxVar::addScalarAttr(const string &name, int val)
     NcxxType vtype(NcxxType::nc_INT);
     putAtt(name.c_str(), vtype, 1, &val);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxVar::addAttr");
-    _addErrStr("  Cannot add int var attr, name: ", name);
-    _addErrDbl("  val: ", val, "%d");
-    _addErrStr("  var name: ", getName());
-    _addErrStr("  exception: ", e.what());
+    addErrStr("ERROR - NcxxVar::addAttr");
+    addErrStr("  Cannot add int var attr, name: ", name);
+    addErrDbl("  val: ", val, "%d");
+    addErrStr("  var name: ", getName());
+    addErrStr("  exception: ", e.what());
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
 }
@@ -3234,11 +3234,11 @@ void NcxxVar::addScalarAttr(const string &name, int64_t val)
     NcxxType vtype(NcxxType::nc_INT64);
     putAtt(name.c_str(), vtype, 1, &val);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxVar::addAttr");
-    _addErrStr("  Cannot add int64_t var attr, name: ", name);
-    _addErrDbl("  val: ", val, "%ld");
-    _addErrStr("  var name: ", getName());
-    _addErrStr("  exception: ", e.what());
+    addErrStr("ERROR - NcxxVar::addAttr");
+    addErrStr("  Cannot add int64_t var attr, name: ", name);
+    addErrDbl("  val: ", val, "%ld");
+    addErrStr("  var name: ", getName());
+    addErrStr("  exception: ", e.what());
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
 }
@@ -3254,11 +3254,11 @@ void NcxxVar::addScalarAttr(const string &name, short val)
     NcxxType vtype(NcxxType::nc_SHORT);
     putAtt(name.c_str(), vtype, 1, &val);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxVar::addAttr");
-    _addErrStr("  Cannot add short var attr, name: ", name);
-    _addErrDbl("  val: ", (int) val, "%d");
-    _addErrStr("  var name: ", getName());
-    _addErrStr("  exception: ", e.what());
+    addErrStr("ERROR - NcxxVar::addAttr");
+    addErrStr("  Cannot add short var attr, name: ", name);
+    addErrDbl("  val: ", (int) val, "%d");
+    addErrStr("  var name: ", getName());
+    addErrStr("  exception: ", e.what());
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
 }
@@ -3274,11 +3274,11 @@ void NcxxVar::addScalarAttr(const string &name, unsigned char val)
     NcxxType vtype(NcxxType::nc_UBYTE);
     putAtt(name.c_str(), vtype, 1, &val);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxVar::addAttr");
-    _addErrStr("  Cannot add byte var attr, name: ", name);
-    _addErrDbl("  val: ", (int) val, "%d");
-    _addErrStr("  var name: ", getName());
-    _addErrStr("  exception: ", e.what());
+    addErrStr("ERROR - NcxxVar::addAttr");
+    addErrStr("  Cannot add byte var attr, name: ", name);
+    addErrDbl("  val: ", (int) val, "%d");
+    addErrStr("  var name: ", getName());
+    addErrStr("  exception: ", e.what());
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
 }
@@ -3312,15 +3312,15 @@ void NcxxVar::write(double val)
   clearErrStr();
   
   if (isNull()) {
-    _addErrStr("ERROR - NcxxVar::write");
-    _addErrStr("  var is NULL");
+    addErrStr("ERROR - NcxxVar::write");
+    addErrStr("  var is NULL");
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
   
   nc_type vtype = getType().getId();
   if (vtype != NC_DOUBLE) {
-    _addErrStr("ERROR - NcxxVar::write");
-    _addErrStr("  Var type should be double, name: ", getName());
+    addErrStr("ERROR - NcxxVar::write");
+    addErrStr("  Var type should be double, name: ", getName());
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
   
@@ -3329,9 +3329,9 @@ void NcxxVar::write(double val)
   try {
     putVal(index, val);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxVar::write");
-    _addErrStr("  Cannot write scalar double var, name: ", getName());
-    _addErrStr("  exception: ", e.what());
+    addErrStr("ERROR - NcxxVar::write");
+    addErrStr("  Cannot write scalar double var, name: ", getName());
+    addErrStr("  exception: ", e.what());
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
 
@@ -3348,15 +3348,15 @@ void NcxxVar::write(float val)
   clearErrStr();
 
   if (isNull()) {
-    _addErrStr("ERROR - NcxxVar::write");
-    _addErrStr("  var is NULL");
+    addErrStr("ERROR - NcxxVar::write");
+    addErrStr("  var is NULL");
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
   
   nc_type vtype = getType().getId();
   if (vtype != NC_FLOAT) {
-    _addErrStr("ERROR - NcxxVar::write");
-    _addErrStr("  Var type should be float, name: ", getName());
+    addErrStr("ERROR - NcxxVar::write");
+    addErrStr("  Var type should be float, name: ", getName());
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
   
@@ -3365,9 +3365,9 @@ void NcxxVar::write(float val)
   try {
     putVal(index, val);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxVar::write");
-    _addErrStr("  Cannot write scalar float var, name: ", getName());
-    _addErrStr("  exception: ", e.what());
+    addErrStr("ERROR - NcxxVar::write");
+    addErrStr("  Cannot write scalar float var, name: ", getName());
+    addErrStr("  exception: ", e.what());
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
 
@@ -3384,15 +3384,15 @@ void NcxxVar::write(int val)
   clearErrStr();
 
   if (isNull()) {
-    _addErrStr("ERROR - NcxxVar::write");
-    _addErrStr("  var is NULL");
+    addErrStr("ERROR - NcxxVar::write");
+    addErrStr("  var is NULL");
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
   
   nc_type vtype = getType().getId();
   if (vtype != NC_INT) {
-    _addErrStr("ERROR - NcxxVar::write");
-    _addErrStr("  Var type should be int, name: ", getName());
+    addErrStr("ERROR - NcxxVar::write");
+    addErrStr("  Var type should be int, name: ", getName());
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
   
@@ -3401,9 +3401,9 @@ void NcxxVar::write(int val)
   try {
     putVal(index, val);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxVar::write");
-    _addErrStr("  Cannot write scalar int var, name: ", getName());
-    _addErrStr("  exception: ", e.what());
+    addErrStr("ERROR - NcxxVar::write");
+    addErrStr("  Cannot write scalar int var, name: ", getName());
+    addErrStr("  exception: ", e.what());
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
 
@@ -3435,8 +3435,8 @@ void NcxxVar::write(const NcxxDim &dim,
   clearErrStr();
 
   if (isNull()) {
-    _addErrStr("ERROR - NcxxVar::write");
-    _addErrStr("  var is NULL");
+    addErrStr("ERROR - NcxxVar::write");
+    addErrStr("  var is NULL");
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
 
@@ -3450,7 +3450,7 @@ void NcxxVar::write(const NcxxDim &dim,
       try {
         putVal(starts, counts, (double *) data);
       } catch (NcxxException& e) {
-        _addErrStr("  exception: ", e.what());
+        addErrStr("  exception: ", e.what());
         throw NcxxException(getErrStr(), __FILE__, __LINE__);
       }
       break;
@@ -3459,7 +3459,7 @@ void NcxxVar::write(const NcxxDim &dim,
       try {
         putVal(starts, counts, (int *) data);
       } catch (NcxxException& e) {
-        _addErrStr("  exception: ", e.what());
+        addErrStr("  exception: ", e.what());
         throw NcxxException(getErrStr(), __FILE__, __LINE__);
       }
       break;
@@ -3468,7 +3468,7 @@ void NcxxVar::write(const NcxxDim &dim,
       try {
         putVal(starts, counts, (short *) data);
       } catch (NcxxException& e) {
-        _addErrStr("  exception: ", e.what());
+        addErrStr("  exception: ", e.what());
         throw NcxxException(getErrStr(), __FILE__, __LINE__);
       }
       break;
@@ -3477,7 +3477,7 @@ void NcxxVar::write(const NcxxDim &dim,
       try {
         putVal(starts, counts, (unsigned char *) data);
       } catch (NcxxException& e) {
-        _addErrStr("  exception: ", e.what());
+        addErrStr("  exception: ", e.what());
         throw NcxxException(getErrStr(), __FILE__, __LINE__);
       }
       break;
@@ -3487,7 +3487,7 @@ void NcxxVar::write(const NcxxDim &dim,
       try {
         putVal(starts, counts, (float *) data);
       } catch (NcxxException& e) {
-        _addErrStr("  exception: ", e.what());
+        addErrStr("  exception: ", e.what());
         throw NcxxException(getErrStr(), __FILE__, __LINE__);
       }
       break;
@@ -3508,17 +3508,17 @@ void NcxxVar::writeStrings(const void *str)
   clearErrStr();
 
   if (isNull()) {
-    _addErrStr("ERROR - NcxxVar::writeStrings");
-    _addErrStr("  var is NULL");
+    addErrStr("ERROR - NcxxVar::writeStrings");
+    addErrStr("  var is NULL");
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
   
   std::vector<NcxxDim> dims = getDims();
   size_t nDims = dims.size();
   if (nDims < 1) {
-    _addErrStr("ERROR - NcxxVar::writeStrings");
-    _addErrStr("  var has no dimensions");
-    _addErrStr("  var name: ", getName());
+    addErrStr("ERROR - NcxxVar::writeStrings");
+    addErrStr("  var has no dimensions");
+    addErrStr("  var name: ", getName());
     throw NcxxException(getErrStr(), __FILE__, __LINE__);
   }
 
@@ -3528,9 +3528,9 @@ void NcxxVar::writeStrings(const void *str)
 
     NcxxDim &dim0 = dims[0];
     if (dim0.isNull()) {
-      _addErrStr("ERROR - NcxxVar::writeStrings");
-      _addErrStr("  Canont write var, name: ", getName());
-      _addErrStr("  dim 0 is NULL");
+      addErrStr("ERROR - NcxxVar::writeStrings");
+      addErrStr("  Canont write var, name: ", getName());
+      addErrStr("  dim 0 is NULL");
       throw NcxxException(getErrStr(), __FILE__, __LINE__);
     }
 
@@ -3541,9 +3541,9 @@ void NcxxVar::writeStrings(const void *str)
       putVal(starts, counts, (char *) str);
       return;
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - NcxxVar::writeStrings");
-      _addErrStr("  Canont write var, name: ", getName());
-      _addErrStr("  exception: ", e.what());
+      addErrStr("ERROR - NcxxVar::writeStrings");
+      addErrStr("  Canont write var, name: ", getName());
+      addErrStr("  exception: ", e.what());
       throw NcxxException(getErrStr(), __FILE__, __LINE__);
     }
 
@@ -3555,17 +3555,17 @@ void NcxxVar::writeStrings(const void *str)
 
     NcxxDim &dim0 = dims[0];
     if (dim0.isNull()) {
-      _addErrStr("ERROR - NcxxVar::writeStrings");
-      _addErrStr("  Canont write var, name: ", getName());
-      _addErrStr("  dim 0 is NULL");
+      addErrStr("ERROR - NcxxVar::writeStrings");
+      addErrStr("  Canont write var, name: ", getName());
+      addErrStr("  dim 0 is NULL");
       throw NcxxException(getErrStr(), __FILE__, __LINE__);
     }
 
     NcxxDim &dim1 = dims[1];
     if (dim1.isNull()) {
-      _addErrStr("ERROR - NcxxVar::writeStrings");
-      _addErrStr("  Canont write var, name: ", getName());
-      _addErrStr("  dim 1 is NULL");
+      addErrStr("ERROR - NcxxVar::writeStrings");
+      addErrStr("  Canont write var, name: ", getName());
+      addErrStr("  dim 1 is NULL");
       throw NcxxException(getErrStr(), __FILE__, __LINE__);
     }
 
@@ -3576,9 +3576,9 @@ void NcxxVar::writeStrings(const void *str)
       putVal(starts, counts, (char *) str);
       return;
     } catch (NcxxException& e) {
-      _addErrStr("ERROR - NcxxVar::writeStrings");
-      _addErrStr("  Canont write var, name: ", getName());
-      _addErrStr("  exception: ", e.what());
+      addErrStr("ERROR - NcxxVar::writeStrings");
+      addErrStr("  Canont write var, name: ", getName());
+      addErrStr("  exception: ", e.what());
       throw NcxxException(getErrStr(), __FILE__, __LINE__);
     }
 
@@ -3586,9 +3586,9 @@ void NcxxVar::writeStrings(const void *str)
   
   // more than 2 is an error
   
-  _addErrStr("ERROR - NcxxVar::writeStrings");
-  _addErrStr("  Canont write var, name: ", getName());
-  _addErrInt("  more than 2 dimensions: ", nDims);
+  addErrStr("ERROR - NcxxVar::writeStrings");
+  addErrStr("  Canont write var, name: ", getName());
+  addErrInt("  more than 2 dimensions: ", nDims);
   throw NcxxException(getErrStr(), __FILE__, __LINE__);
 
 }

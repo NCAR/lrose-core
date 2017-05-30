@@ -1733,11 +1733,11 @@ void NcxxGroup::addGlobAttr(const string &name, const string &val)
   try {
     putAtt(name, val);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxGroup::addGlobalAttr");
-    _addErrStr("  Cannot add global attr name: ", name);
-    _addErrStr("  val: ", val);
-    _addErrStr("  group: ", getName());
-    _addErrStr("  exception: ", e.what());
+    addErrStr("ERROR - NcxxGroup::addGlobalAttr");
+    addErrStr("  Cannot add global attr name: ", name);
+    addErrStr("  val: ", val);
+    addErrStr("  group: ", getName());
+    addErrStr("  exception: ", e.what());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 }
@@ -1751,11 +1751,11 @@ void NcxxGroup::addGlobAttr(const string &name, int val)
   try {
     putAtt(name, ncxxInt, val);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxGroup::addGlobAttr");
-    _addErrStr("  Cannot add global attr name: ", name);
-    _addErrInt("  val: ", val);
-    _addErrStr("  group: ", getName());
-    _addErrStr("  exception: ", e.what());
+    addErrStr("ERROR - NcxxGroup::addGlobAttr");
+    addErrStr("  Cannot add global attr name: ", name);
+    addErrInt("  val: ", val);
+    addErrStr("  group: ", getName());
+    addErrStr("  exception: ", e.what());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 }
@@ -1769,11 +1769,11 @@ void NcxxGroup::addGlobAttr(const string &name, float val)
   try {
     putAtt(name, ncxxFloat, val);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxGroup::addGlobAttr");
-    _addErrStr("  Cannot add global attr name: ", name);
-    _addErrDbl("  val: ", val, "%g");
-    _addErrStr("  group: ", getName());
-    _addErrStr("  exception: ", e.what());
+    addErrStr("ERROR - NcxxGroup::addGlobAttr");
+    addErrStr("  Cannot add global attr name: ", name);
+    addErrDbl("  val: ", val, "%g");
+    addErrStr("  group: ", getName());
+    addErrStr("  exception: ", e.what());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 }
@@ -1787,11 +1787,11 @@ void NcxxGroup::addGlobAttr(const string &name, double val)
   try {
     putAtt(name, ncxxDouble, val);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxGroup::addGlobAttr");
-    _addErrStr("  Cannot add global attr name: ", name);
-    _addErrDbl("  val: ", val, "%lg");
-    _addErrStr("  group: ", getName());
-    _addErrStr("  exception: ", e.what());
+    addErrStr("ERROR - NcxxGroup::addGlobAttr");
+    addErrStr("  Cannot add global attr name: ", name);
+    addErrDbl("  val: ", val, "%lg");
+    addErrStr("  group: ", getName());
+    addErrStr("  exception: ", e.what());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 }
@@ -1804,18 +1804,18 @@ void NcxxGroup::readGlobAttr(const string &name, string &val)
 {
   NcxxGroupAtt att = getAtt(name);
   if (att.isNull()) {
-    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
-    _addErrStr("  Cannot read global attr name: ", name);
+    addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    addErrStr("  Cannot read global attr name: ", name);
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   try {
     att.getValues(val);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
-    _addErrStr("  Cannot read global attr name: ", name);
-    _addErrStr("  group: ", getName());
-    _addErrStr("  exception: ", e.what());
-    _addErrStr("  Cannot read value as string");
+    addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    addErrStr("  Cannot read global attr name: ", name);
+    addErrStr("  group: ", getName());
+    addErrStr("  exception: ", e.what());
+    addErrStr("  Cannot read value as string");
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 }
@@ -1824,28 +1824,28 @@ void NcxxGroup::readGlobAttr(const string &name, int &val)
 {
   NcxxGroupAtt att = getAtt(name);
   if (att.isNull()) {
-    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
-    _addErrStr("  Cannot read global attr name: ", name);
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    addErrStr("  Cannot read global attr name: ", name);
+    addErrStr("  group: ", getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   size_t nvals = att.getAttLength();
   if (nvals < 1) {
-    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
-    _addErrStr("  Cannot read global attr name: ", name);
-    _addErrStr("  no values supplied");
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    addErrStr("  Cannot read global attr name: ", name);
+    addErrStr("  no values supplied");
+    addErrStr("  group: ", getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   int *vals = new int[nvals];
   try {
     att.getValues(vals);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
-    _addErrStr("  Cannot read global attr name: ", name);
-    _addErrStr("  exception: ", e.what());
-    _addErrStr("  Cannot read value as int");
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    addErrStr("  Cannot read global attr name: ", name);
+    addErrStr("  exception: ", e.what());
+    addErrStr("  Cannot read value as int");
+    addErrStr("  group: ", getName());
     delete[] vals;
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
@@ -1857,27 +1857,27 @@ void NcxxGroup::readGlobAttr(const string &name, float &val)
 {
   NcxxGroupAtt att = getAtt(name);
   if (att.isNull()) {
-    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
-    _addErrStr("  Cannot read global attr name: ", name);
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    addErrStr("  Cannot read global attr name: ", name);
+    addErrStr("  group: ", getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   size_t nvals = att.getAttLength();
   if (nvals < 1) {
-    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
-    _addErrStr("  Cannot read global attr name: ", name);
-    _addErrStr("  no values supplied");
+    addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    addErrStr("  Cannot read global attr name: ", name);
+    addErrStr("  no values supplied");
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   float *vals = new float[nvals];
   try {
     att.getValues(vals);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
-    _addErrStr("  Cannot read global attr name: ", name);
-    _addErrStr("  exception: ", e.what());
-    _addErrStr("  Cannot read value as float");
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    addErrStr("  Cannot read global attr name: ", name);
+    addErrStr("  exception: ", e.what());
+    addErrStr("  Cannot read value as float");
+    addErrStr("  group: ", getName());
     delete[] vals;
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
@@ -1889,28 +1889,28 @@ void NcxxGroup::readGlobAttr(const string &name, double &val)
 {
   NcxxGroupAtt att = getAtt(name);
   if (att.isNull()) {
-    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
-    _addErrStr("  Cannot read global attr name: ", name);
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    addErrStr("  Cannot read global attr name: ", name);
+    addErrStr("  group: ", getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   size_t nvals = att.getAttLength();
   if (nvals < 1) {
-    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
-    _addErrStr("  Cannot read global attr name: ", name);
-    _addErrStr("  no values supplied");
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    addErrStr("  Cannot read global attr name: ", name);
+    addErrStr("  no values supplied");
+    addErrStr("  group: ", getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   double *vals = new double[nvals];
   try {
     att.getValues(vals);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxGroup::readGlobAttr");
-    _addErrStr("  Cannot read global attr name: ", name);
-    _addErrStr("  exception: ", e.what());
-    _addErrStr("  Cannot read value as double");
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readGlobAttr");
+    addErrStr("  Cannot read global attr name: ", name);
+    addErrStr("  exception: ", e.what());
+    addErrStr("  Cannot read value as double");
+    addErrStr("  group: ", getName());
     delete[] vals;
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
@@ -2003,9 +2003,9 @@ NcxxVar NcxxGroup::addVar(const string &name,
   NcxxVar var = addVar(name, ncType, dims);
   nc_type vtype = ncType.getId();
   if (var.isNull()) {
-    _addErrStr("ERROR - NcxxGroup::addVar");
-    _addErrStr("  Cannot add var, name: ", name);
-    _addErrStr("  Type: ", Ncxx::ncTypeToStr(vtype));
+    addErrStr("ERROR - NcxxGroup::addVar");
+    addErrStr("  Cannot add var, name: ", name);
+    addErrStr("  Type: ", Ncxx::ncTypeToStr(vtype));
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 
@@ -2037,24 +2037,29 @@ NcxxVar NcxxGroup::addVar(const string &name,
 
 /////////////////////////////////////
 // read int variable, set var and val
-// Throws NcxxException on failure
+// throws NcxxException on failure
+// returns var
 
-void NcxxGroup::readIntVar(NcxxVar &var, const string &name,
-                           int &val, int missingVal, bool required)
+NcxxVar NcxxGroup::readIntVar(const string &name, int &val,
+                              int missingVal, bool required)
   
 {
-  
+
+  // init to missing
+
   val = missingVal;
-  var = getVar(name);
-  
+
+  // get var
+
+  NcxxVar var = getVar(name);
   if (var.isNull()) {
     if (!required) {
       val = missingVal;
-      return;
+      return var;
     } else {
-      _addErrStr("ERROR - NcxxGroup::readIntVar");
-      _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr("  group: ", getName());
+      addErrStr("ERROR - NcxxGroup::readIntVar");
+      addErrStr("  Cannot read variable, name: ", name);
+      addErrStr("  group: ", getName());
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     }
   }
@@ -2062,10 +2067,10 @@ void NcxxGroup::readIntVar(NcxxVar &var, const string &name,
   // check size
   
   if (var.numVals() < 1) {
-    _addErrStr("ERROR - NcxxGroup::readIntVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has no data");
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readIntVar");
+    addErrStr("  variable name: ", name);
+    addErrStr("  variable has no data");
+    addErrStr("  group: ", getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 
@@ -2074,36 +2079,43 @@ void NcxxGroup::readIntVar(NcxxVar &var, const string &name,
   try {
     var.getVal(&vals[0]);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxGroup::readIntVar");
-    _addErrStr("  cannot read variable, name: ", name);
-    _addErrStr("  exception: ", e.what());
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readIntVar");
+    addErrStr("  cannot read variable, name: ", name);
+    addErrStr("  exception: ", e.what());
+    addErrStr("  group: ", getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   val = vals[0];
+
+  return var;
 
 }
 
 /////////////////////////////////////
 // read float variable, set var and val
-// Throws NcxxException on failure
+// throws NcxxException on failure
+// returns var
 
-void NcxxGroup::readFloatVar(NcxxVar &var, const string &name,
-                             float &val, float missingVal, bool required)
+NcxxVar NcxxGroup::readFloatVar(const string &name, float &val,
+                                float missingVal, bool required)
   
 {
 
+  // init to missing
+
   val = missingVal;
 
-  var = getVar(name);
+  // get var
+
+  NcxxVar var = getVar(name);
   if (var.isNull()) {
     if (!required) {
       val = missingVal;
-      return;
+      return var;
     } else {
-      _addErrStr("ERROR - NcxxGroup::readFloatVar");
-      _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr("  group: ", getName());
+      addErrStr("ERROR - NcxxGroup::readFloatVar");
+      addErrStr("  Cannot read variable, name: ", name);
+      addErrStr("  group: ", getName());
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     }
   }
@@ -2111,10 +2123,10 @@ void NcxxGroup::readFloatVar(NcxxVar &var, const string &name,
   // check size
   
   if (var.numVals() < 1) {
-    _addErrStr("ERROR - NcxxGroup::readFloatVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has no data");
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readFloatVar");
+    addErrStr("  variable name: ", name);
+    addErrStr("  variable has no data");
+    addErrStr("  group: ", getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 
@@ -2123,36 +2135,43 @@ void NcxxGroup::readFloatVar(NcxxVar &var, const string &name,
   try {
     var.getVal(&vals[0]);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxGroup::readFloatVar");
-    _addErrStr("  cannot read variable, name: ", name);
-    _addErrStr("  exception: ", e.what());
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readFloatVar");
+    addErrStr("  cannot read variable, name: ", name);
+    addErrStr("  exception: ", e.what());
+    addErrStr("  group: ", getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   val = vals[0];
+
+  return var;
 
 }
 
 /////////////////////////////////////
 // read double variable, set var and val
-// Throws NcxxException on failure
+// throws NcxxException on failure
+// returns var
 
-void NcxxGroup::readDoubleVar(NcxxVar &var, const string &name,
-                              double &val, double missingVal, bool required)
+NcxxVar NcxxGroup::readDoubleVar(const string &name, double &val,
+                                 double missingVal, bool required)
   
 {
 
+  // init to missing
+
   val = missingVal;
 
-  var = getVar(name);
+  // get var
+
+  NcxxVar var = getVar(name);
   if (var.isNull()) {
     if (!required) {
       val = missingVal;
-      return;
+      return var;
     } else {
-      _addErrStr("ERROR - NcxxGroup::readDoubleVar");
-      _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr("  group: ", getName());
+      addErrStr("ERROR - NcxxGroup::readDoubleVar");
+      addErrStr("  Cannot read variable, name: ", name);
+      addErrStr("  group: ", getName());
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     }
   }
@@ -2160,76 +2179,82 @@ void NcxxGroup::readDoubleVar(NcxxVar &var, const string &name,
   // check size
   
   if (var.numVals() < 1) {
-    _addErrStr("ERROR - NcxxGroup::readDoubleVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has no data");
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readDoubleVar");
+    addErrStr("  variable name: ", name);
+    addErrStr("  variable has no data");
+    addErrStr("  group: ", getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
+
+  // get data
 
   vector<double> vals;
   vals.resize(var.numVals());
   try {
     var.getVal(&vals[0]);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxGroup::readDoubleVar");
-    _addErrStr("  cannot read variable, name: ", name);
-    _addErrStr("  exception: ", e.what());
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readDoubleVar");
+    addErrStr("  cannot read variable, name: ", name);
+    addErrStr("  exception: ", e.what());
+    addErrStr("  group: ", getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   val = vals[0];
+
+  return var;
 
 }
 
 ///////////////////////////////////
 // read a scalar char string variable
-// Throws NcxxException on failure
+// throws NcxxException on failure
+// returns var
 
-void NcxxGroup::readCharStringVar(NcxxVar &var,
-                                  const string &name,
-                                  string &val)
+NcxxVar NcxxGroup::readCharStringVar(const string &name,
+                                     string &val)
 
 {
+
+  // init to missing
 
   val.clear();
 
   // get var
   
-  var = getVar(name);
+  NcxxVar var = getVar(name);
   if (var.isNull()) {
-    _addErrStr("ERROR - NcxxGroup::readCharStringVar");
-    _addErrStr("  Cannot read variable, name: ", name);
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readCharStringVar");
+    addErrStr("  Cannot read variable, name: ", name);
+    addErrStr("  group: ", getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 
   // check dimension
   
   if (var.getDimCount() != 1) {
-    _addErrStr("ERROR - NcxxGroup::readCharStringVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable does not have 1 dimension");
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readCharStringVar");
+    addErrStr("  variable name: ", name);
+    addErrStr("  variable does not have 1 dimension");
+    addErrStr("  group: ", getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   NcxxDim stringLenDim = var.getDim(0);
   if (stringLenDim.isNull()) {
-    _addErrStr("ERROR - NcxxGroup::readCharStringVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has NULL 0th dimension");
-    _addErrStr("  should be a string length dimension");
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readCharStringVar");
+    addErrStr("  variable name: ", name);
+    addErrStr("  variable has NULL 0th dimension");
+    addErrStr("  should be a string length dimension");
+    addErrStr("  group: ", getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   
   NcxxType ntype = var.getType();
   if (ntype != NcxxType::nc_CHAR) {
-    _addErrStr("ERROR - NcxxGroup::readCharStringVar");
-    _addErrStr("  Incorrect variable type");
-    _addErrStr("  expecting char");
-    _addErrStr("  found: ", Ncxx::ncxxTypeToStr(ntype));
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readCharStringVar");
+    addErrStr("  Incorrect variable type");
+    addErrStr("  expecting char");
+    addErrStr("  found: ", Ncxx::ncxxTypeToStr(ntype));
+    addErrStr("  group: ", getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 
@@ -2241,45 +2266,53 @@ void NcxxGroup::readCharStringVar(NcxxVar &var,
   try {
     var.getVal(cvalues);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - NcxxGroup::readCharStringVar");
-    _addErrStr("  cannot read variable, name: ", name);
-    _addErrStr("  exception: ", e.what());
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readCharStringVar");
+    addErrStr("  cannot read variable, name: ", name);
+    addErrStr("  exception: ", e.what());
+    addErrStr("  group: ", getName());
     delete[] cvalues;
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 
   delete[] cvalues;
 
+  return var;
+
 }
 
 
 ///////////////////////////////////
 // read a scalar string variable
-// Throws NcxxException on failure
+// throws NcxxException on failure
+// returns var
 
-void NcxxGroup::readScalarStringVar(NcxxVar &var,
-                                    const string &name,
-                                    string &val)
+NcxxVar NcxxGroup::readScalarStringVar(const string &name,
+                                       string &val)
 
 {
+
+  // init to missing
 
   val.clear();
   
   // get var
   
-  var = getVar(name);
+  NcxxVar var = getVar(name);
   if (var.isNull()) {
-    _addErrStr("ERROR - NcxxGroup::readCharStringVar");
-    _addErrStr("  Cannot read variable, name: ", name);
-    _addErrStr("  group: ", getName());
+    addErrStr("ERROR - NcxxGroup::readCharStringVar");
+    addErrStr("  Cannot read variable, name: ", name);
+    addErrStr("  group: ", getName());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
+
+  // get val
 
   char *charVal;
   var.getVal(&charVal);
   val = charVal;
   
+  return var;
+
 }
 
 
