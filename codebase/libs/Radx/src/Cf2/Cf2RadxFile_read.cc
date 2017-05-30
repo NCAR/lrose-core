@@ -98,6 +98,9 @@ int Cf2RadxFile::readFromPath(const string &path,
 
   for (size_t ii = 0; ii < paths.size(); ii++) {
     if (_readPath(paths[ii], ii)) {
+      cerr << "1111111111111111111111" << endl;
+      cerr << _errStr << endl;
+      cerr << "1111111111111111111111" << endl;
       return -1;
     }
   }
@@ -164,23 +167,40 @@ int Cf2RadxFile::_readPath(const string &path, size_t pathNum)
     _addErrStr(errStr);
     return -1;
   }
+  
+  // read in sweep variables
 
-  if (_nTimesInFile < 1) {
-    _addErrStr("ERROR - Cf2RadxFile::_readPath");
-    _addErrStr("  No times in file");
+  try {
+    _readSweepsAsInFile();
+  } catch (NcxxException e) {
+    _addErrStr("ERROR - Cf2RadxFile::_readPath()");
+    _addErrStr("  path: ", path);
+    _addErrStr(e.what());
+    if (_debug) {
+      cerr << "====>> ERROR - _readPath <<====" << endl;
+      cerr << _errStr << endl;
+      cerr << "===============================" << endl;
+    }
     return -1;
   }
-  if (_nRangeInFile < 1) {
-    _addErrStr("ERROR - Cf2RadxFile::_readPath");
-    _addErrStr("  No ranges in file");
-    return -1;
-  }
 
+  // if (_nTimesInFile < 1) {
+  //   _addErrStr("ERROR - Cf2RadxFile::_readPath");
+  //   _addErrStr("  No times in file");
+  //   return -1;
+  // }
+  // if (_nRangeInFile < 1) {
+  //   _addErrStr("ERROR - Cf2RadxFile::_readPath");
+  //   _addErrStr("  No ranges in file");
+  //   return -1;
+  // }
+  
   // read time variable now if that is all that is needed
   
   if (_readTimesOnly) {
-    if (_readTimes(pathNum)) {
-      _addErrStr(errStr);
+    try {
+      _readTimes();
+    } catch (NcxxException e) {
       return -1;
     }
     return 0;
@@ -223,8 +243,9 @@ int Cf2RadxFile::_readPath(const string &path, size_t pathNum)
 
   // read time variable
   
-  if (_readTimes(pathNum)) {
-    _addErrStr(errStr);
+  try {
+    _readTimes();
+  } catch (NcxxException e) {
     return -1;
   }
 
@@ -241,22 +262,6 @@ int Cf2RadxFile::_readPath(const string &path, size_t pathNum)
   
   if (_readPositionVariables()) {
     _addErrStr(errStr);
-    return -1;
-  }
-
-  // read in sweep variables
-
-  try {
-    _readSweepVariables();
-  } catch (NcxxException e) {
-    _addErrStr("ERROR - Cf2RadxFile::_readPath()");
-    _addErrStr("  path: ", path);
-    _addErrStr(e.what());
-    if (_debug) {
-      cerr << "====>> ERROR - _readPath <<====" << endl;
-      cerr << _errStr << endl;
-      cerr << "===============================" << endl;
-    }
     return -1;
   }
 
@@ -657,7 +662,7 @@ int Cf2RadxFile::_appendSweepInfo(const string &path)
   }
 
   try {
-    _readSweepVariables();
+    _readSweepsAsInFile();
   } catch (NcxxException e) {
     _addErrStr("ERROR - Cf2RadxFile::_appendSweepInfo");
     _addErrStr("  path: ", path);
@@ -886,76 +891,96 @@ int Cf2RadxFile::_readGlobalAttributes()
 
 }
 
-///////////////////////////////////
+/////////////////////////////////////////////
 // read the times
+// assumes sweeps have been previously read
+// loads up _dTimes vector
+// throws exception on error
 
-int Cf2RadxFile::_readTimes(int pathNum)
+void Cf2RadxFile::_readTimes()
+  
+{
+
+  _dTimes.clear();
+  for (size_t isweep = 0; isweep < _sweepsInFile.size(); isweep++) {
+    try {
+      _readSweepTimes(_sweepGroups[isweep], _dTimes);
+    } catch (NcxxException& e) {
+      _addErrStr("ERROR - Cf2RadxFile::_readTimes");
+      throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+    }
+  }
+
+}
+
+///////////////////////////////////
+// read the times in a sweep group
+// loads up times vector
+// throws exception on error
+
+void Cf2RadxFile::_readSweepTimes(NcxxGroup &group,
+                                  vector<double> &times)
 
 {
 
+  NcxxDim timeDim = group.getDim(TIME);
+  
   // read the time variable
 
-  _timeVar = _file.getVar(TIME);
-  if (_timeVar.isNull()) {
-    _addErrStr("ERROR - Cf2RadxFile::_readTimes");
+  NcxxVar timeVar = group.getVar(TIME);
+  if (timeVar.isNull()) {
+    _addErrStr("ERROR - Cf2RadxFile::_readSweepTimes");
     _addErrStr("  Cannot find time variable, name: ", TIME);
-    _addErrStr(_file.getErrStr());
-    return -1;
+    _addErrStr("  group: ", group.getName());
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
-  if (_timeVar.getDimCount() < 1) {
-    _addErrStr("ERROR - Cf2RadxFile::_readTimes");
+  
+  if (timeVar.getDimCount() < 1) {
+    _addErrStr("ERROR - Cf2RadxFile::_readSweepTimes");
     _addErrStr("  time variable has no dimensions");
-    return -1;
-  }
-  NcxxDim timeDim = _timeVar.getDim(0);
-  if (timeDim != _timeDimRead) {
-    _addErrStr("ERROR - Cf2RadxFile::_readTimes");
-    _addErrStr("  Time has incorrect dimension, name: ", timeDim.getName());
-    return -1;
+    _addErrStr("  group: ", group.getName());
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
 
+  NcxxDim varTimeDim = timeVar.getDim(0);
+  if (varTimeDim != timeDim) {
+    _addErrStr("ERROR - Cf2RadxFile::_readSweepTimes");
+    _addErrStr("  Time has incorrect dimension, name: ", varTimeDim.getName());
+    _addErrStr("  group: ", group.getName());
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+  }
+  
   // get units attribute
-
+  
   try {
-    NcxxVarAtt unitsAtt = _timeVar.getAtt(UNITS);
+    NcxxVarAtt unitsAtt = timeVar.getAtt(UNITS);
     string units = unitsAtt.asString();
     // parse the time units reference time
     RadxTime stime(units);
     _refTimeSecsFile = stime.utime();
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_readTimes");
+    _addErrStr("ERROR - Cf2RadxFile::_readSweepTimes");
     _addErrStr("  Time has no units");
-    return -1;
+    _addErrStr("  group: ", group.getName());
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
   
   // set the time array
   
+  size_t nTimes = varTimeDim.getSize();
   RadxArray<double> dtimes_;
-  double *dtimes = dtimes_.alloc(_nTimesInFile);
+  double *dtimes = dtimes_.alloc(nTimes);
   try {
-    _timeVar.getVal(dtimes);
+    timeVar.getVal(dtimes);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - Cf2RadxFile::_readTimes");
+    _addErrStr("ERROR - Cf2RadxFile::_readSweepTimes");
     _addErrStr("  Cannot read times variable");
     _addErrStr("  exception: ", e.what());
-    return -1;
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
-  _dTimes.clear();
-  for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-    _dTimes.push_back(dtimes[ii]);
+  for (size_t ii = 0; ii < nTimes; ii++) {
+    times.push_back(dtimes[ii]);
   }
-
-  double startTime = _dTimes[0];
-  double endTime = _dTimes[_dTimes.size()-1];
-  time_t startTimeSecs = _refTimeSecsFile + (int) startTime;
-  time_t endTimeSecs = _refTimeSecsFile + (int) endTime;
-  double startNanoSecs = (startTime - (int) startTime) * 1.0e9;
-  double endNanoSecs = (endTime - (int) endTime) * 1.0e9;
-
-  _readVol->setStartTime(startTimeSecs, startNanoSecs);
-  _readVol->setEndTime(endTimeSecs, endNanoSecs);
-
-  return 0;
 
 }
 
@@ -1455,60 +1480,65 @@ int Cf2RadxFile::_readPositionVariables()
 
 }
 
-///////////////////////////////////
-// read the sweep meta-data
+////////////////////////////////////////////////////
+// read the sweep meta-data as it exists in the file
+// loads up _sweepsInFile vector
 // throws exception on error
 
-void Cf2RadxFile::_readSweepVariables()
+void Cf2RadxFile::_readSweepsAsInFile()
 
 {
 
-  // create vector for the sweeps
-
+  _sweepGroups.clear();
+  _sweepGroupNames.clear();
+  _sweepsInFile.clear();
+  
   size_t nSweepsInFile = _sweepDim.getSize();
+  if (nSweepsInFile < 1) {
+    _addErrStr("ERROR - Cf2RadxFile::_readSweepsAsInFile");
+    _addErrStr("  No sweeps found");
+    throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+  }
 
   if (_debug) {
     cerr << "=====>> nSweeps: " << nSweepsInFile << endl;
   }
   
-  // get the sweep group names
-  
-  vector<string> sweepGroupNames;
+  // get the sweep group names - at root level
   {
     NcxxVar var;
     try {
-      _readSweepVar(_file, var, SWEEP_GROUP_NAME, sweepGroupNames);
+      _readSweepVar(_file, var, SWEEP_GROUP_NAME, _sweepGroupNames);
     } catch (NcxxException e) {
-      _addErrStr("ERROR - Cf2RadxFile::_readSweepVariables");
-      _addErrStr("  Cannot read var, name", _altitudeAglVar.getName());
+      _addErrStr("ERROR - Cf2RadxFile::_readSweepsAsInFile");
+      _addErrStr("  Cannot read var, name", SWEEP_GROUP_NAME);
       _addErrStr("  exception: ", e.what());
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     }
-    
   }
 
-  // read each sweep group, accumulating sweeps in file
+  // read each sweep group, accumulating sweeps as in file
 
-  _sweepsInFile.clear();
   size_t startRayIndex = 0;
-  for (size_t isweep = 0; isweep < sweepGroupNames.size(); isweep++) {
+  for (size_t isweep = 0; isweep < _sweepGroupNames.size(); isweep++) {
     
     if (_debug) {
       cerr << "======>>> reading sweepGroupName: " 
-           << sweepGroupNames[isweep] << endl;
+           << _sweepGroupNames[isweep] << endl;
     }
     
     try {
-      NcxxGroup group = _file.getGroup(sweepGroupNames[isweep]);
+      NcxxGroup group = _file.getGroup(_sweepGroupNames[isweep]);
       RadxSweep *sweep = new RadxSweep;
       sweep->setStartRayIndex(startRayIndex);
       _readSweepMetadata(group, sweep);
+      _sweepGroups.push_back(group);
       _sweepsInFile.push_back(sweep);
       _sweeps.push_back(sweep);
       startRayIndex = sweep->getEndRayIndex() + 1;
     } catch (NcxxException e) {
-      _addErrStr("ERROR - Cf2RadxFile::_readSweepVariables");
-      _addErrStr("  Cannot read sweep group, name", sweepGroupNames[isweep]);
+      _addErrStr("ERROR - Cf2RadxFile::_readSweepsAsInFile");
+      _addErrStr("  Cannot read sweep group, name", _sweepGroupNames[isweep]);
       _addErrStr("  exception: ", e.what());
       throw(NcxxException(getErrStr(), __FILE__, __LINE__));
     }

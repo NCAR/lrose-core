@@ -476,6 +476,7 @@ private:
     size_t indexInFile;
     double fixedAngle;
   };
+
   vector<RadxSweep *> _sweeps;
   vector<RadxSweep *> _sweepsInFile;
   vector<SweepInfo> _sweepsOrig;
@@ -574,7 +575,11 @@ private:
 
   int _readDimensions();
   int _readGlobalAttributes();
-  int _readTimes(int pathNum);
+
+  void _readTimes();
+  void _readSweepTimes(NcxxGroup &group,
+                       vector<double> &times);
+
   int _readRangeVariable();
   int _readScalarVariables();
   int _readCorrectionVariables();
@@ -591,7 +596,7 @@ private:
   int _readCal(RadxRcalib &cal, int index);
   int _readFieldVariables(bool metaOnly);
   
-  void _readSweepVariables();
+  void _readSweepsAsInFile();
   void _readSweepMetadata(NcxxGroup &group, RadxSweep *sweep);
   void _readSweepVar(NcxxGroup &group, NcxxVar &var, const string &name,
                      vector<double> &vals, bool required = true);
