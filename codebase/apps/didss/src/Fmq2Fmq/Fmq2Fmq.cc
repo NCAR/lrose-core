@@ -74,7 +74,7 @@ Fmq2Fmq::Fmq2Fmq(int argc, char **argv)
 
   // get TDRP params
   
-  _paramsPath = "unknown";
+  _paramsPath = (char *) "unknown";
   if (_params.loadFromArgs(argc, argv, _args.override.list,
 			   &_paramsPath)) {
     cerr << "ERROR: " << _progName << endl;
@@ -83,8 +83,8 @@ Fmq2Fmq::Fmq2Fmq(int argc, char **argv)
   }
 
   // init process mapper registration
-
-  PMU_auto_init((char *) _progName.c_str(),
+  
+  PMU_auto_init(_progName.c_str(),
 		_params.instance,
 		PROCMAP_REGISTER_INTERVAL);
 
@@ -138,7 +138,7 @@ int Fmq2Fmq::_run ()
 
   // register with procmap
   
-  PMU_auto_register("Run");
+  PMU_auto_register("_run");
 
   // open input and output FMQ's
 
@@ -161,6 +161,7 @@ int Fmq2Fmq::_run ()
   if (_params.debug) {
     cerr << "Opened input from URL: " << _params.input_url << endl;
   }
+  PMU_auto_register("opened input");
 
   for (int i = 0; i < _params.output_urls_n; i++) {
 
@@ -212,6 +213,8 @@ int Fmq2Fmq::_run ()
 
   } // i
 
+  PMU_auto_register("opened outputs");
+
   // read / write
 
   while (true) {
@@ -239,6 +242,7 @@ int Fmq2Fmq::_run ()
       // add message to write cache
       
       for (int ii = 0; ii < _params.output_urls_n; ii++) {
+        PMU_auto_register("write to cache");
 	outputs[ii].addToWriteCache(input.getMsgType(), input.getMsgSubtype(),
 				    input.getMsg(), input.getMsgLen());
       }
@@ -248,6 +252,8 @@ int Fmq2Fmq::_run ()
     // write
 
     for (int ii = 0; ii < _params.output_urls_n; ii++) {
+
+      PMU_auto_register("write to output");
 
       int cacheSize = outputs[ii].getWriteCacheSize();
       if (cacheSize > 0 && (!gotOne || cacheSize > _params.max_cache_size)) {
