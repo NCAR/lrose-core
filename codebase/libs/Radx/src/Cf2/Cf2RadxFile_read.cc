@@ -99,9 +99,11 @@ int Cf2RadxFile::readFromPath(const string &path,
   for (size_t ii = 0; ii < paths.size(); ii++) {
     if (_readPath(paths[ii], ii)) {
       if (_debug) {
-        cerr << "========================================" << endl;
+        cerr << "###########################################" << endl;
+        cerr << "|||||||||||||||||||||||||||||||||||||||||||" << endl;
         cerr << _errStr << endl;
-        cerr << "========================================" << endl;
+        cerr << "|||||||||||||||||||||||||||||||||||||||||||" << endl;
+        cerr << "###########################################" << endl;
       }
       return -1;
     }
@@ -1812,7 +1814,6 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
 
    // get dimensions
 
-   NcxxDim _timeDimSweep;
    try {
      _timeDimSweep = _sweepGroup.getDim(TIME);
    } catch (NcxxException e) {
@@ -1821,7 +1822,6 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
    }
 
-   NcxxDim _rangeDimSweep;
    try {
      _rangeDimSweep = _sweepGroup.getDim(RANGE);
    } catch (NcxxException e) {
@@ -2063,15 +2063,25 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
                _rayXmitPowerH, false);
    _readRayVar(_sweepGroup, _timeDimSweep, RADAR_MEASURED_TRANSMIT_POWER_V, 
                _rayXmitPowerV, false);
-   _readRayVar(_sweepGroup, _timeDimSweep, SCAN_RATE, _rayScanRate, false);
-   _readRayVar(_sweepGroup, _timeDimSweep, RADAR_ESTIMATED_NOISE_DBM_HC,
-               _rayEstNoiseDbmHc, false);
-   _readRayVar(_sweepGroup, _timeDimSweep, RADAR_ESTIMATED_NOISE_DBM_VC,
-               _rayEstNoiseDbmVc, false);
-   _readRayVar(_sweepGroup, _timeDimSweep, RADAR_ESTIMATED_NOISE_DBM_HX,
-               _rayEstNoiseDbmHx, false);
-   _readRayVar(_sweepGroup, _timeDimSweep, RADAR_ESTIMATED_NOISE_DBM_VX,
-               _rayEstNoiseDbmVx, false);
+
+   // monitoring
+
+   try {
+
+     NcxxGroup monGroup = _sweepGroup.getGroup(MONITORING);
+
+     _readRayVar(monGroup, _timeDimSweep, SCAN_RATE, _rayScanRate, false);
+     _readRayVar(monGroup, _timeDimSweep, RADAR_ESTIMATED_NOISE_DBM_HC,
+                 _rayEstNoiseDbmHc, false);
+     _readRayVar(monGroup, _timeDimSweep, RADAR_ESTIMATED_NOISE_DBM_VC,
+                 _rayEstNoiseDbmVc, false);
+     _readRayVar(monGroup, _timeDimSweep, RADAR_ESTIMATED_NOISE_DBM_HX,
+                 _rayEstNoiseDbmHx, false);
+     _readRayVar(monGroup, _timeDimSweep, RADAR_ESTIMATED_NOISE_DBM_VX,
+                 _rayEstNoiseDbmVx, false);
+
+   } catch (NcxxException& e) {
+   }
 
  }
 
