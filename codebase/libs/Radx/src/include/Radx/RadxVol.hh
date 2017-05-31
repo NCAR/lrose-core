@@ -420,6 +420,11 @@ public:
                         double longitudeDeg,
                         double altitudeKm);
 
+  /// set the radar location from the start ray,
+  // if georefs are active
+
+  void setLocationFromStartRay();
+
   /// override the radar ht AGL
   /// this also sets the location in any georeference objects
   /// attached to the rays

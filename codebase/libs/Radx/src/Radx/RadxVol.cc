@@ -5493,6 +5493,28 @@ void RadxVol::overrideLocation(double latitudeDeg,
 }
 
 ////////////////////////////////////////////////
+/// set the radar location from the start ray
+/// provided georefs are active
+
+void RadxVol::setLocationFromStartRay()
+
+{
+
+  if (_rays.size() < 1) {
+    return;
+  }
+
+  const RadxRay *ray0 = _rays[0];
+  const RadxGeoref *georef = ray0->getGeoreference();
+  if (georef) {
+    _platform.setLatitudeDeg(georef->getLatitude());
+    _platform.setLongitudeDeg(georef->getLongitude());
+    _platform.setAltitudeKm(georef->getAltitudeKmMsl());
+  }
+
+}
+
+////////////////////////////////////////////////
 /// override the radar ht AGL
 /// this also sets the location in any georeference objects
 /// attached to the rays
