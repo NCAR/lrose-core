@@ -1306,52 +1306,52 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
 
      double val;
 
-     _file.readDoubleVar(AZIMUTH_CORRECTION, val, 0);
+     group.readDoubleVar(AZIMUTH_CORRECTION, val, 0);
      _cfactors.setAzimuthCorr(val);
 
-     _file.readDoubleVar(ELEVATION_CORRECTION, val, 0);
+     group.readDoubleVar(ELEVATION_CORRECTION, val, 0);
      _cfactors.setElevationCorr(val);
 
-     _file.readDoubleVar(RANGE_CORRECTION, val, 0);
+     group.readDoubleVar(RANGE_CORRECTION, val, 0);
      _cfactors.setRangeCorr(val);
 
-     _file.readDoubleVar(LONGITUDE_CORRECTION, val, 0);
+     group.readDoubleVar(LONGITUDE_CORRECTION, val, 0);
      _cfactors.setLongitudeCorr(val);
 
-     _file.readDoubleVar(LATITUDE_CORRECTION, val, 0);
+     group.readDoubleVar(LATITUDE_CORRECTION, val, 0);
      _cfactors.setLatitudeCorr(val);
 
-     _file.readDoubleVar(PRESSURE_ALTITUDE_CORRECTION, val, 0);
+     group.readDoubleVar(PRESSURE_ALTITUDE_CORRECTION, val, 0);
      _cfactors.setPressureAltCorr(val);
 
-     _file.readDoubleVar(ALTITUDE_CORRECTION, val, 0);
+     group.readDoubleVar(ALTITUDE_CORRECTION, val, 0);
      _cfactors.setAltitudeCorr(val);
 
-     _file.readDoubleVar(EASTWARD_VELOCITY_CORRECTION, val, 0);
+     group.readDoubleVar(EASTWARD_VELOCITY_CORRECTION, val, 0);
      _cfactors.setEwVelCorr(val);
 
-     _file.readDoubleVar(NORTHWARD_VELOCITY_CORRECTION, val, 0);
+     group.readDoubleVar(NORTHWARD_VELOCITY_CORRECTION, val, 0);
      _cfactors.setNsVelCorr(val);
 
-     _file.readDoubleVar(VERTICAL_VELOCITY_CORRECTION, val, 0);
+     group.readDoubleVar(VERTICAL_VELOCITY_CORRECTION, val, 0);
      _cfactors.setVertVelCorr(val);
 
-     _file.readDoubleVar(HEADING_CORRECTION, val, 0);
+     group.readDoubleVar(HEADING_CORRECTION, val, 0);
      _cfactors.setHeadingCorr(val);
 
-     _file.readDoubleVar(ROLL_CORRECTION, val, 0);
+     group.readDoubleVar(ROLL_CORRECTION, val, 0);
      _cfactors.setRollCorr(val);
 
-     _file.readDoubleVar(PITCH_CORRECTION, val, 0);
+     group.readDoubleVar(PITCH_CORRECTION, val, 0);
      _cfactors.setPitchCorr(val);
 
-     _file.readDoubleVar(DRIFT_CORRECTION, val, 0);
+     group.readDoubleVar(DRIFT_CORRECTION, val, 0);
      _cfactors.setDriftCorr(val);
 
-     _file.readDoubleVar(ROTATION_CORRECTION, val, 0);
+     group.readDoubleVar(ROTATION_CORRECTION, val, 0);
      _cfactors.setRotationCorr(val);
 
-     _file.readDoubleVar(TILT_CORRECTION, val, 0);
+     group.readDoubleVar(TILT_CORRECTION, val, 0);
      _cfactors.setTiltCorr(val);
 
    } catch (NcxxException e) {
@@ -1480,27 +1480,32 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
    }
 
 
-   double val;
+   double width;
    try {
-     _readCalVar(group, dim, PULSE_WIDTH, index, val, true);
-     cal.setPulseWidthUsec(val * 1.0e6);
+     _readCalVar(group, dim, PULSE_WIDTH, index, width, true);
+     if (width > 0) {
+       cal.setPulseWidthUsec(width * 1.0e6);
+     }
    } catch (NcxxException e) {
      NcxxErrStr err;
      err.addErrStr("ERROR - Cf2RadxFile::_readRcal");
      err.addErrStr("  Cannot read pulse width");
-     err.addErrDbl("  pulse_width: ", val, "%g");
+     err.addErrDbl("  pulse_width: ", width, "%g");
      err.addErrStr(e.what());
      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
    }
 
+   double gain;
    try {
-     double val;
-     _readCalVar(group, dim, RECEIVER_GAIN_HC, index, val, true);
-     cal.setReceiverGainDbHc(val);
+     _readCalVar(group, dim, RECEIVER_GAIN_HC, index, gain, true);
+     if (gain > -9000) {
+       cal.setReceiverGainDbHc(gain);
+     }
    } catch (NcxxException e) {
      NcxxErrStr err;
      err.addErrStr("ERROR - Cf2RadxFile::_readRcal");
      err.addErrStr("  Cannot read receiver gain");
+     err.addErrDbl("  receiver_gain_hc: ", gain, "%g");
      err.addErrStr(e.what());
      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
    }
@@ -1702,7 +1707,7 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
 
    val = Radx::missingMetaDouble;
 
-   NcxxVar var = _file.getVar(name);
+   NcxxVar var = group.getVar(name);
 
    if (var.isNull()) {
      if (!required) {
@@ -1900,7 +1905,6 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
      err.addErrStr("ERROR - Cf2RadxFile::_readSweepRange");
      err.addErrStr("  group: ", group.getName());
      err.addErrStr("  Cannot find range variable");
-     err.addErrStr(_file.getErrStr());
      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
    }
 
