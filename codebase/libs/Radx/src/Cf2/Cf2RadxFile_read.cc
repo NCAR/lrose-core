@@ -98,6 +98,11 @@ int Cf2RadxFile::readFromPath(const string &path,
 
   for (size_t ii = 0; ii < paths.size(); ii++) {
     if (_readPath(paths[ii], ii)) {
+      if (_debug) {
+        cerr << "========================================" << endl;
+        cerr << _errStr << endl;
+        cerr << "========================================" << endl;
+      }
       return -1;
     }
   }
@@ -114,7 +119,7 @@ int Cf2RadxFile::readFromPath(const string &path,
 
   // set format as read
 
-  _fileFormat = FILE_FORMAT_CFRADIAL;
+  _fileFormat = FILE_FORMAT_CFRADIAL2;
 
   return 0;
 
@@ -158,7 +163,7 @@ int Cf2RadxFile::_readPath(const string &path, size_t pathNum)
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_readPath");
     _addErrStr("  Cannot read dimensions, path: ", path);
-    // _addErrStr("  exception: ", e.what());
+    _addErrStr("  exception: ", e.what());
     return -1;
   }
   
