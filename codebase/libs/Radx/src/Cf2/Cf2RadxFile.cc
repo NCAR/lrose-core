@@ -154,8 +154,6 @@ void Cf2RadxFile::clear()
   _sweepsInFile.clear();
   _sweepsToRead.clear();
 
-  _nPoints = 0;
-
 }
 
 void Cf2RadxFile::_clearRays()
@@ -229,7 +227,7 @@ bool Cf2RadxFile::isCfRadial2(const string &path)
   // read dimensions
   
   try {
-    _readDimensions();
+    _readRootDimensions();
   } catch (NcxxException& e) {
     _file.close();
     if (_verbose) {
@@ -378,7 +376,7 @@ void Cf2RadxFile::print(ostream &out) const
     out << "  lidarFieldOfViewMrad: " << _lidarFieldOfViewMrad << endl;
     out << "  lidarBeamDivergenceMrad: " << _lidarBeamDivergenceMrad << endl;
   }
-  _geom.print(out);
+  _geomSweep.print(out);
   out << "  gateSpacingIsConstant: " << _gateSpacingIsConstant << endl;
   out << "===========================================" << endl;
 

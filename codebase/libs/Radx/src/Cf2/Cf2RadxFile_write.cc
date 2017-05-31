@@ -343,8 +343,6 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
   _writePaths.clear();
   _writeDataTimes.clear();
 
-  _gateGeomVaries = _writeVol->gateGeomVariesByRay();
-
   // open the output Ncxx file
 
   _tmpPath = tmpPathFromFilePath(path, "");
@@ -3122,6 +3120,7 @@ void Cf2RadxFile::_addCalVar(NcxxGroup &group,
 
 }
 
+#ifdef JUNK
 ////////////////////////////////////////////////
 // write projection variables
 
@@ -3167,6 +3166,7 @@ int Cf2RadxFile::_writeProjectionVariables()
   return 0;
 
 }
+#endif
 
 //////////////////
 // close on error

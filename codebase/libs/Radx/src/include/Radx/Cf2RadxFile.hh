@@ -201,198 +201,12 @@ private:
   NcxxDim _sweepDim;
   NcxxDim _frequencyDim;
 
-  // coordinate variables
-
-  NcxxVar _timeVar;
-  NcxxVar _rangeVar;
-
-  // gate geometry variables
-  
-  NcxxVar _rayNGatesVar;
-  NcxxVar _rayStartIndexVar;
-
-  NcxxVar _rayStartRangeVar;
-  NcxxVar _rayGateSpacingVar;
-  bool _gateGeomVaries;
-
-  // scalar variables
-  
-  NcxxVar _volumeNumberVar;
-  NcxxVar _instrumentTypeVar;
-  NcxxVar _platformTypeVar;
-  NcxxVar _primaryAxisVar;
-  NcxxVar _statusXmlVar;
-  NcxxVar _startTimeVar;
-  NcxxVar _endTimeVar;
-
-  // frequencies
-
-  NcxxVar _frequencyVar;
-
-  // projection variables
-  
-  NcxxVar _projVar;
-  NcxxVar _latitudeVar;
-  NcxxVar _longitudeVar;
-  NcxxVar _altitudeVar;
-  NcxxVar _altitudeAglVar;
-  
-  // operational modes
-
-  NcxxVar _polModeVar;
-  NcxxVar _prtModeVar;
-
-  // sweep variables
-
-  NcxxVar _sweepNumberVar;
-  NcxxVar _sweepModeVar;
-  NcxxVar _sweepFollowModeVar;
-  bool _fixedAnglesFound;
-  NcxxVar _targetScanRateVar;
-  NcxxVar _sweepStartRayIndexVar;
-  NcxxVar _sweepEndRayIndexVar;
-  NcxxVar _raysAreIndexedVar;
-  NcxxVar _rayAngleResVar;
-  NcxxVar _intermedFreqHzVar;
-
-  NcxxVar _sweepFixedAngleVar;
-  NcxxVar _sweepGroupNameVar;
-
-  vector<string> _sweepGroupNames;
-  vector<NcxxGroup> _sweepGroups;
-  NcxxGroup _sweepGroup;
-
-  // radar param variables
-
-  NcxxVar _radarAntennaGainHVar;
-  NcxxVar _radarAntennaGainVVar;
-  NcxxVar _radarBeamWidthHVar;
-  NcxxVar _radarBeamWidthVVar;
-  NcxxVar _radarRxBandwidthVar;
-
-  // lidar param variables
-
-  NcxxVar _lidarConstantVar;
-  NcxxVar _lidarPulseEnergyJVar;
-  NcxxVar _lidarPeakPowerWVar;
-  NcxxVar _lidarApertureDiamCmVar;
-  NcxxVar _lidarApertureEfficiencyVar;
-  NcxxVar _lidarFieldOfViewMradVar;
-  NcxxVar _lidarBeamDivergenceMradVar;
-
-  // calibration variables
-
-  NcxxVar _rCalTimeVar;
-  NcxxVar _rCalPulseWidthVar;
-  NcxxVar _rCalXmitPowerHVar;
-  NcxxVar _rCalXmitPowerVVar;
-  NcxxVar _rCalTwoWayWaveguideLossHVar;
-  NcxxVar _rCalTwoWayWaveguideLossVVar;
-  NcxxVar _rCalTwoWayRadomeLossHVar;
-  NcxxVar _rCalTwoWayRadomeLossVVar;
-  NcxxVar _rCalReceiverMismatchLossVar;
-  NcxxVar _rCalRadarConstHVar;
-  NcxxVar _rCalRadarConstVVar;
-  NcxxVar _rCalAntennaGainHVar;
-  NcxxVar _rCalAntennaGainVVar;
-  NcxxVar _rCalNoiseHcVar;
-  NcxxVar _rCalNoiseHxVar;
-  NcxxVar _rCalNoiseVcVar;
-  NcxxVar _rCalNoiseVxVar;
-  NcxxVar _rCalReceiverGainHcVar;
-  NcxxVar _rCalReceiverGainHxVar;
-  NcxxVar _rCalReceiverGainVcVar;
-  NcxxVar _rCalReceiverGainVxVar;
-  NcxxVar _rCalBaseDbz1kmHcVar;
-  NcxxVar _rCalBaseDbz1kmHxVar;
-  NcxxVar _rCalBaseDbz1kmVcVar;
-  NcxxVar _rCalBaseDbz1kmVxVar;
-  NcxxVar _rCalSunPowerHcVar;
-  NcxxVar _rCalSunPowerHxVar;
-  NcxxVar _rCalSunPowerVcVar;
-  NcxxVar _rCalSunPowerVxVar;
-  NcxxVar _rCalNoiseSourcePowerHVar;
-  NcxxVar _rCalNoiseSourcePowerVVar;
-  NcxxVar _rCalPowerMeasLossHVar;
-  NcxxVar _rCalPowerMeasLossVVar;
-  NcxxVar _rCalCouplerForwardLossHVar;
-  NcxxVar _rCalCouplerForwardLossVVar;
-  NcxxVar _rCalDbzCorrectionVar;
-  NcxxVar _rCalZdrCorrectionVar;
-  NcxxVar _rCalLdrCorrectionHVar;
-  NcxxVar _rCalLdrCorrectionVVar;
-  NcxxVar _rCalSystemPhidpVar;
-  NcxxVar _rCalTestPowerHVar;
-  NcxxVar _rCalTestPowerVVar;
-  NcxxVar _rCalReceiverSlopeHcVar;
-  NcxxVar _rCalReceiverSlopeHxVar;
-  NcxxVar _rCalReceiverSlopeVcVar;
-  NcxxVar _rCalReceiverSlopeVxVar;
-
-  // ray variables
-
-  NcxxVar _azimuthVar;
-  NcxxVar _elevationVar;
-  NcxxVar _pulseWidthVar;
-  NcxxVar _prtVar;
-  NcxxVar _prtRatioVar;
-  NcxxVar _nyquistVar;
-  NcxxVar _unambigRangeVar;
-  NcxxVar _antennaTransitionVar;
-  NcxxVar _georefsAppliedVar;
-  NcxxVar _georefTimeVar;
-  NcxxVar _nSamplesVar;
-  NcxxVar _calIndexVar;
-  NcxxVar _xmitPowerHVar;
-  NcxxVar _xmitPowerVVar;
-  NcxxVar _scanRateVar;
-  NcxxVar _estNoiseDbmHcVar;
-  NcxxVar _estNoiseDbmVcVar;
-  NcxxVar _estNoiseDbmHxVar;
-  NcxxVar _estNoiseDbmVxVar;
-
-  // georeference variables
+  // flags
 
   bool _georefsActive;
   bool _georefsApplied;
-  NcxxVar _headingVar;
-  NcxxVar _trackVar;
-  NcxxVar _rollVar;
-  NcxxVar _pitchVar;
-  NcxxVar _driftVar;
-  NcxxVar _rotationVar;
-  NcxxVar _tiltVar;
-  NcxxVar _ewVelocityVar;
-  NcxxVar _nsVelocityVar;
-  NcxxVar _vertVelocityVar;
-  NcxxVar _ewWindVar;
-  NcxxVar _nsWindVar;
-  NcxxVar _vertWindVar;
-  NcxxVar _headingRateVar;
-  NcxxVar _pitchRateVar;
-  NcxxVar _rollRateVar;
-  NcxxVar _driveAngle1Var;
-  NcxxVar _driveAngle2Var;
-
-  // correction factor variables
-
   bool _correctionsActive;
-  NcxxVar _azimuthCorrVar;
-  NcxxVar _elevationCorrVar;
-  NcxxVar _rangeCorrVar;
-  NcxxVar _longitudeCorrVar;
-  NcxxVar _latitudeCorrVar;
-  NcxxVar _pressureAltCorrVar;
-  NcxxVar _altitudeCorrVar;
-  NcxxVar _ewVelCorrVar;
-  NcxxVar _nsVelCorrVar;
-  NcxxVar _vertVelCorrVar;
-  NcxxVar _headingCorrVar;
-  NcxxVar _rollCorrVar;
-  NcxxVar _pitchCorrVar;
-  NcxxVar _driftCorrVar;
-  NcxxVar _rotationCorrVar;
-  NcxxVar _tiltCorrVar;
+  bool _fixedAngleFound;
 
   // unique field names for writing
 
@@ -447,29 +261,28 @@ private:
   double _lidarFieldOfViewMrad;
   double _lidarBeamDivergenceMrad;
 
-  size_t _nTimesInFile;
   vector<double> _rangeKm;
   size_t _nRangeInSweep;
 
   vector<double> _sweepTimes;
   vector<double> _sweepRangeKm;
 
-  // bool _nGatesVary;
-  // int _nPoints;
-  // vector<int> _rayNGates;
-  // vector<int> _rayStartIndex;
-  // vector<double> _rayStartRange;
-  // vector<double> _rayGateSpacing;
-  
   RadxRangeGeom _geomSweep;
   RadxRemap _remapSweep;
   bool _gateSpacingIsConstant;
+
   vector<RadxRay *> _raysVol, _raysFromFile;
   vector<RadxRcalib *> _rCals;
   vector<RadxField *> _fields;
   RadxCfactors _cfactors;
 
   // storing sweep information
+
+  vector<string> _sweepGroupNames;
+  vector<NcxxGroup> _sweepGroups;
+  NcxxGroup _sweepGroup;
+  vector<RadxSweep *> _sweeps;
+  vector<RadxSweep *> _sweepsInFile;
 
   class SweepInfo {
   public:
@@ -479,20 +292,9 @@ private:
     double fixedAngle;
   };
 
-  vector<RadxSweep *> _sweeps;
-  vector<RadxSweep *> _sweepsInFile;
   vector<SweepInfo> _sweepsOrig;
   vector<SweepInfo> _sweepsToRead;
   vector<RadxRay *> _sweepRays;
-
-  // storing ray information for reading from file
-
-  class RayInfo {
-  public:
-    size_t indexInFile;
-    const RadxSweep *sweep;
-  };
-  vector<RayInfo> _raysToRead;
 
   // ray meta data arrays
 
@@ -524,7 +326,6 @@ private:
   // georeference meta data
 
   RadxGeoref _geoCount;
-
   vector<double> _geoTime;
   vector<double> _geoLatitude;
   vector<double> _geoLongitude;
@@ -601,7 +402,7 @@ private:
   void _readLidarCalibration();
   
   void _readSweeps();
-  void _readSweep(const RadxSweep *sweep);
+  void _readSweep(RadxSweep *sweep);
   void _readSweepRange(NcxxGroup &group,
                        NcxxDim &dim,
                        vector<double> rangeKm);
@@ -686,7 +487,7 @@ private:
   void _addLocation();
   void _addProjection();
 
-  // writing sweeps
+  // writing
 
   void _addSweeps();
 
@@ -732,12 +533,10 @@ private:
                   const string &standardName,
                   const string &units = "");
     
-  int _writeProjectionVariables();
-
   int _closeOnError(const string &caller);
 
   int _setCompression(NcxxVar &var);
-  void _computeFixedAngles();
+  void _computeFixedAngle(RadxSweep *sweep);
 
   Radx::fl64 _checkMissingDouble(double val);
   Radx::fl32 _checkMissingFloat(float val);
