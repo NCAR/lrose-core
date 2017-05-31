@@ -438,6 +438,12 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
   }
 
   try {
+    _addLocation();
+  } catch (NcxxException e) {
+    return _closeOnError("_addLocation");
+  }
+
+  try {
     _addProjection();
   } catch (NcxxException e) {
     return _closeOnError("_addProjection");
@@ -1248,6 +1254,85 @@ void Cf2RadxFile::_addGeorefCorrections()
 }
 
 //////////////////////////////////////////////
+// add location variables
+// throws exception on error
+
+void Cf2RadxFile::_addLocation()
+{
+
+  if (_verbose) {
+    cerr << "Cf2RadxFile::_addLocation()" << endl;
+  }
+
+  // set from volume
+
+  double latitude = _writeVol->getLatitudeDeg();
+  double longitude = _writeVol->getLongitudeDeg();
+  double altitudeM = Radx::missingMetaDouble;
+  if (_writeVol->getAltitudeKm() != Radx::missingMetaDouble) {
+    altitudeM = _writeVol->getAltitudeKm() * 1000.0;
+  }
+  double altitudeAglM = Radx::missingMetaDouble;
+  if (_writeVol->getSensorHtAglM() != Radx::missingMetaDouble) {
+    altitudeAglM = _writeVol->getSensorHtAglM();
+  }
+
+  // if georefs are active, use starting ray
+
+  if (_georefsActive && _writeVol->getNRays() > 0) {
+    const RadxRay *ray0 = _writeVol->getRays()[0];
+    const RadxGeoref *georef = ray0->getGeoreference();
+    latitude = georef->getLatitude();
+    longitude = georef->getLongitude();
+    if (georef->getAltitudeKmMsl() > 0) {
+      altitudeM = georef->getAltitudeKmMsl() * 1000.0;
+    }
+    if (georef->getAltitudeKmAgl() > 0) {
+      altitudeAglM = georef->getAltitudeKmAgl() * 1000.0;
+    }
+  }
+
+  // latitude
+  
+  {
+    NcxxVar var = 
+      _file.addVar(LATITUDE, "", LATITUDE_LONG,
+                   ncxxDouble, DEGREES_NORTH, true);
+    var.putVal(latitude);
+  }
+  
+  // longitude
+  
+  {
+    NcxxVar var = 
+      _file.addVar(LONGITUDE, "", LONGITUDE_LONG,
+                   ncxxDouble, DEGREES_EAST, true);
+    var.putVal(longitude);
+  }
+  
+  // altitude MSL
+  
+  {
+    NcxxVar var = 
+      _file.addVar(ALTITUDE, "", ALTITUDE_LONG,
+                   ncxxDouble, METERS, true);
+    var.putAtt(POSITIVE, UP);
+    var.putVal(altitudeM);
+  }
+  
+  // altitude AGL
+  
+  {
+    NcxxVar var = 
+      _file.addVar(ALTITUDE_AGL, "", ALTITUDE_AGL_LONG,
+                   ncxxDouble, METERS, true);
+    var.putAtt(POSITIVE, UP);
+    var.putVal(altitudeAglM);
+  }
+  
+}
+
+//////////////////////////////////////////////
 // add variables and attributes for projection
 // throws exception on error
 
@@ -1255,7 +1340,7 @@ void Cf2RadxFile::_addProjection()
 {
 
   if (_verbose) {
-    cerr << "Cf2RadxFile::_addProjectionVariables()" << endl;
+    cerr << "Cf2RadxFile::_addProjection()" << endl;
   }
 
   // projection variable
@@ -1275,61 +1360,8 @@ void Cf2RadxFile::_addProjection()
     var.addScalarAttr(FALSE_NORTHING, 0.0);
     var.addScalarAttr(FALSE_EASTING, 0.0);
   }
-    
-  if (!_georefsActive) {
-    
-    // georeferencs on rays are not active, so write as scalars
 
-    // latitude
-
-    {
-      NcxxVar var = 
-        _file.addVar(LATITUDE, "", LATITUDE_LONG,
-                     ncxxDouble, DEGREES_NORTH, true);
-      var.putVal(_writeVol->getLatitudeDeg());
-    }
-
-    // longitude
-
-    {
-      NcxxVar var = 
-        _file.addVar(LONGITUDE, "", LONGITUDE_LONG,
-                     ncxxDouble, DEGREES_EAST, true);
-      var.putVal(_writeVol->getLongitudeDeg());
-    }
-    
-    // altitude MSL
-
-    {
-      NcxxVar var = 
-        _file.addVar(ALTITUDE, "", ALTITUDE_LONG,
-                     ncxxDouble, METERS, true);
-      var.putAtt(POSITIVE, UP);
-      double altitudeM = Radx::missingMetaDouble;
-      if (_writeVol->getAltitudeKm() != Radx::missingMetaDouble) {
-        altitudeM = _writeVol->getAltitudeKm() * 1000.0;
-      }
-      var.putVal(altitudeM);
-    }
-    
-    // altitude AGL
-    
-    {
-      NcxxVar var = 
-        _file.addVar(ALTITUDE_AGL, "", ALTITUDE_AGL_LONG,
-                     ncxxDouble, METERS, true);
-      var.putAtt(POSITIVE, UP);
-      double htAglM = Radx::missingMetaDouble;
-      if (_writeVol->getSensorHtAglM() != Radx::missingMetaDouble) {
-        htAglM = _writeVol->getSensorHtAglM();
-      }
-      var.putVal(htAglM);
-    }
-    
-  } // if (!_georefsActive)
-    
 }
-
 ////////////////////////////////////////////////
 // add sweep groups
 // throws exception on error

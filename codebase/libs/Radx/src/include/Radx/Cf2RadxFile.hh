@@ -196,10 +196,8 @@ private:
 
   // dimensions
 
-  NcxxDim _timeDimRead;
-  NcxxDim _rangeDimRead;
-  NcxxDim _nPointsDimRead;
-  NcxxDim _calDimRead;
+  NcxxDim _timeDimSweep;
+  NcxxDim _rangeDimSweep;
   NcxxDim _sweepDim;
   NcxxDim _frequencyDim;
 
@@ -262,6 +260,7 @@ private:
 
   vector<string> _sweepGroupNames;
   vector<NcxxGroup> _sweepGroups;
+  NcxxGroup _sweepGroup;
 
   // radar param variables
 
@@ -418,7 +417,7 @@ private:
   int _scanId;
   string _instrumentName;
 
-  vector<double> _dTimes;
+  vector<double> _rayTimes;
   time_t _refTimeSecsFile;
   bool _rayTimesIncrease;
 
@@ -450,17 +449,20 @@ private:
 
   size_t _nTimesInFile;
   vector<double> _rangeKm;
-  size_t _nRangeInFile;
+  size_t _nRangeInSweep;
+
+  vector<double> _sweepTimes;
+  vector<double> _sweepRangeKm;
 
   // bool _nGatesVary;
-  int _nPoints;
-  vector<int> _rayNGates;
-  vector<int> _rayStartIndex;
-  vector<double> _rayStartRange;
-  vector<double> _rayGateSpacing;
+  // int _nPoints;
+  // vector<int> _rayNGates;
+  // vector<int> _rayStartIndex;
+  // vector<double> _rayStartRange;
+  // vector<double> _rayGateSpacing;
   
-  RadxRangeGeom _geom;
-  RadxRemap _remap;
+  RadxRangeGeom _geomSweep;
+  RadxRemap _remapSweep;
   bool _gateSpacingIsConstant;
   vector<RadxRay *> _raysVol, _raysFromFile;
   vector<RadxRcalib *> _rCals;
@@ -481,6 +483,7 @@ private:
   vector<RadxSweep *> _sweepsInFile;
   vector<SweepInfo> _sweepsOrig;
   vector<SweepInfo> _sweepsToRead;
+  vector<RadxRay *> _sweepRays;
 
   // storing ray information for reading from file
 
@@ -570,12 +573,14 @@ private:
   int _loadSweepInfo(const vector<string> &paths);
   int _appendSweepInfo(const string &path);
 
-  void _readDimensions();
+  void _readRootDimensions();
   void _readGlobalAttributes();
 
   void _readTimes();
   void _readSweepTimes(NcxxGroup &group,
                        vector<double> &times);
+  void _readSweepsMetaAsInFile();
+  void _readSweepMeta(NcxxGroup &group, RadxSweep *sweep);
 
   void _readRootScalarVariables();
   void _readRadarParameters();
@@ -592,21 +597,62 @@ private:
   NcxxVar _readCalVar(NcxxGroup &group, NcxxDim &dim,
                       const string &name, size_t index,
                       double &val, bool required = false);
-
-  void _readLidarCalibration();
-
-  int _readRangeVariable();
-  void _clearGeorefVariables();
-  int _readGeorefVariables();
-  void _clearRayVariables();
-  int _readRayVariables();
-  int _createRays(const string &path);
-  void _readRayGateGeom();
-  int _readRayNgatesAndOffsets();
-  int _readFieldVariables(bool metaOnly);
   
-  void _readSweepsAsInFile();
-  void _readSweepMetadata(NcxxGroup &group, RadxSweep *sweep);
+  void _readLidarCalibration();
+  
+  void _readSweeps();
+  void _readSweep(const RadxSweep *sweep);
+  void _readSweepRange(NcxxGroup &group,
+                       NcxxDim &dim,
+                       vector<double> rangeKm);
+
+  void _clearRayVariables();
+  void _readRayVariables();
+
+  void _clearGeorefVariables();
+  void _readGeorefVariables();
+
+  void _createSweepRays(const RadxSweep *sweep);
+
+  void _readFieldVariables(bool metaOnly);
+  
+  NcxxVar _readRayVar(NcxxGroup &group, NcxxDim &dim, const string &name, 
+                      vector<double> &vals, bool required = true);
+  NcxxVar _readRayVar(NcxxGroup &group, NcxxDim &dim, const string &name, 
+                      vector<int> &vals, bool required = true);
+  NcxxVar _readRayVar(NcxxGroup &group, NcxxDim &dim, const string &name, 
+                      vector<bool> &vals, bool required = true);
+  
+  void _addFl64FieldToRays(NcxxVar &var,
+                           const string &name, const string &units,
+                           const string &standardName, const string &longName,
+                           bool isDiscrete, bool fieldFolds,
+                           float foldLimitLower, float foldLimitUpper);
+  void _addFl32FieldToRays(NcxxVar &var,
+                           const string &name, const string &units,
+                           const string &standardName, const string &longName,
+                           bool isDiscrete, bool fieldFolds,
+                           float foldLimitLower, float foldLimitUpper);
+  void _addSi32FieldToRays(NcxxVar &var,
+                           const string &name, const string &units,
+                           const string &standardName, const string &longName,
+                           double scale, double offset,
+                           bool isDiscrete, bool fieldFolds,
+                           float foldLimitLower, float foldLimitUpper);
+  void _addSi16FieldToRays(NcxxVar &var,
+                           const string &name, const string &units,
+                           const string &standardName, const string &longName,
+                           double scale, double offset,
+                           bool isDiscrete, bool fieldFolds,
+                           float foldLimitLower, float foldLimitUpper);
+  void _addSi08FieldToRays(NcxxVar &var,
+                           const string &name, const string &units,
+                           const string &standardName, const string &longName,
+                           double scale, double offset,
+                           bool isDiscrete, bool fieldFolds,
+                           float foldLimitLower, float foldLimitUpper);
+
+  void _loadReadVolume();
 
   NcxxVar _read1DVar(NcxxGroup &group, NcxxDim &dim,
                      const string &name,
@@ -617,54 +663,6 @@ private:
   NcxxVar _read1DVar(NcxxGroup &group, NcxxDim &dim,
                      const string &name,
                      vector<string> &vals, bool required = true);
-
-  int _readRayVar(NcxxVar &var, const string &name, 
-                  vector<double> &vals, bool required = true);
-  int _readRayVar(NcxxVar &var, const string &name, 
-                  vector<int> &vals, bool required = true);
-  int _readRayVar(NcxxVar &var, const string &name, 
-                  vector<bool> &vals, bool required = true);
-  
-  int _readRayVar(const string &name, 
-                  vector<double> &vals, bool required = true);
-  int _readRayVar(const string &name, 
-                  vector<int> &vals, bool required = true);
-  int _readRayVar(const string &name, 
-                  vector<bool> &vals, bool required = true);
-  
-  int _getRayVar(NcxxVar &var, const string &name, bool required);
-
-
-  int _addFl64FieldToRays(NcxxVar &var,
-                          const string &name, const string &units,
-                          const string &standardName, const string &longName,
-                          bool isDiscrete, bool fieldFolds,
-                          float foldLimitLower, float foldLimitUpper);
-  int _addFl32FieldToRays(NcxxVar &var,
-                          const string &name, const string &units,
-                          const string &standardName, const string &longName,
-                          bool isDiscrete, bool fieldFolds,
-                          float foldLimitLower, float foldLimitUpper);
-  int _addSi32FieldToRays(NcxxVar &var,
-                          const string &name, const string &units,
-                          const string &standardName, const string &longName,
-                          double scale, double offset,
-                          bool isDiscrete, bool fieldFolds,
-                          float foldLimitLower, float foldLimitUpper);
-  int _addSi16FieldToRays(NcxxVar &var,
-                          const string &name, const string &units,
-                          const string &standardName, const string &longName,
-                          double scale, double offset,
-                          bool isDiscrete, bool fieldFolds,
-                          float foldLimitLower, float foldLimitUpper);
-  int _addSi08FieldToRays(NcxxVar &var,
-                          const string &name, const string &units,
-                          const string &standardName, const string &longName,
-                          double scale, double offset,
-                          bool isDiscrete, bool fieldFolds,
-                          float foldLimitLower, float foldLimitUpper);
-
-  void _loadReadVolume();
 
   // preparation
 
@@ -685,6 +683,7 @@ private:
   
   void _addFrequency(NcxxGroup &group);
   void _addGeorefCorrections();
+  void _addLocation();
   void _addProjection();
 
   // writing sweeps
