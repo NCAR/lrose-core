@@ -987,7 +987,7 @@ void Cf2RadxFile::_addRadarParameters()
     // var.putAtt(META_GROUP, RADAR_PARAMETERS);
     float bandwidthHz = _writeVol->getRadarReceiverBandwidthMhz();
     if (bandwidthHz < 0) {
-      bandwidthHz = Radx::missingFl32;
+      bandwidthHz = Radx::missingMetaFloat;
     }
     var.putVal(bandwidthHz);
   }

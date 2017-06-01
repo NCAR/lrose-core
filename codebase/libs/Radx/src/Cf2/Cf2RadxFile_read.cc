@@ -728,7 +728,8 @@ void Cf2RadxFile::_readGlobalAttributes()
     err.addErrStr("  Cannot find version attribute");
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
-  if (_version.size() < 1 || _version[0] != '2') {
+  if (_version.size() < 1 ||
+      _version.find("CF-Radial-2") == string::npos) {
     NcxxErrStr err;
     err.addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
     err.addErrStr("  Invalid version: ", _version);
@@ -941,22 +942,21 @@ void Cf2RadxFile::_readSweepsMetaAsInFile()
            << _sweepGroupNames[isweep] << endl;
     }
     
-    try {
-      NcxxGroup group = _file.getGroup(_sweepGroupNames[isweep]);
-      RadxSweep *sweep = new RadxSweep;
-      sweep->setStartRayIndex(startRayIndex);
-      _readSweepMeta(group, sweep);
-      _sweepGroups.push_back(group);
-      _sweepsInFile.push_back(sweep);
-      _sweeps.push_back(sweep);
-      startRayIndex = sweep->getEndRayIndex() + 1;
-    } catch (NcxxException e) {
+    NcxxGroup group = _file.getGroup(_sweepGroupNames[isweep]);
+    if (group.isNull()) {
       NcxxErrStr err;
       err.addErrStr("ERROR - Cf2RadxFile::_readSweepsMetaAsInFile");
       err.addErrStr("  Cannot read sweep group, name", _sweepGroupNames[isweep]);
-      err.addErrStr("  exception: ", e.what());
       throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
     }
+
+    RadxSweep *sweep = new RadxSweep;
+    sweep->setStartRayIndex(startRayIndex);
+    _readSweepMeta(group, sweep);
+    _sweepGroups.push_back(group);
+    _sweepsInFile.push_back(sweep);
+    _sweeps.push_back(sweep);
+    startRayIndex = sweep->getEndRayIndex() + 1;
     
   } // isweep
 
@@ -1225,19 +1225,14 @@ void Cf2RadxFile::_readRadarParameters()
     return;
   }
 
-  try {
-
-    NcxxGroup group = _file.getGroup(RADAR_PARAMETERS);
-    
+  NcxxGroup group = _file.getGroup(RADAR_PARAMETERS);
+  if (!group.isNull()) {
     group.readDoubleVar(RADAR_ANTENNA_GAIN_H, _radarAntennaGainDbH, false);
     group.readDoubleVar(RADAR_ANTENNA_GAIN_V, _radarAntennaGainDbV, false);
     group.readDoubleVar(RADAR_BEAM_WIDTH_H, _radarBeamWidthDegH, false);
     group.readDoubleVar(RADAR_BEAM_WIDTH_V, _radarBeamWidthDegV, false);
     group.readDoubleVar(RADAR_RX_BANDWIDTH, _radarRxBandwidthHz, false);
-    
     _readFrequency(group);
-
-  } catch (NcxxException e) {
   }
 
 }
@@ -1253,10 +1248,9 @@ void Cf2RadxFile::_readLidarParameters()
     return;
   }
 
-  try {
+  NcxxGroup group = _file.getGroup(LIDAR_PARAMETERS);
+  if (!group.isNull()) {
 
-    NcxxGroup group = _file.getGroup(LIDAR_PARAMETERS);
-    
     group.readDoubleVar(LIDAR_CONSTANT, _lidarConstant, false);
     group.readDoubleVar(LIDAR_PULSE_ENERGY, _lidarPulseEnergyJ, false);
     group.readDoubleVar(LIDAR_PEAK_POWER, _lidarPeakPowerW, false);
@@ -1267,7 +1261,6 @@ void Cf2RadxFile::_readLidarParameters()
     
     _readFrequency(group);
     
-  } catch (NcxxException e) {
   }
 
 }
@@ -1304,66 +1297,64 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
  {
 
    _cfactors.clear();
-   _correctionsActive = false;
 
-   try {
-
-     NcxxGroup group = _file.getGroup(GEOREF_CORRECTION);
-     _correctionsActive = true;
-
-     double val;
-
-     group.readDoubleVar(AZIMUTH_CORRECTION, val, 0);
-     _cfactors.setAzimuthCorr(val);
-
-     group.readDoubleVar(ELEVATION_CORRECTION, val, 0);
-     _cfactors.setElevationCorr(val);
-
-     group.readDoubleVar(RANGE_CORRECTION, val, 0);
-     _cfactors.setRangeCorr(val);
-
-     group.readDoubleVar(LONGITUDE_CORRECTION, val, 0);
-     _cfactors.setLongitudeCorr(val);
-
-     group.readDoubleVar(LATITUDE_CORRECTION, val, 0);
-     _cfactors.setLatitudeCorr(val);
-
-     group.readDoubleVar(PRESSURE_ALTITUDE_CORRECTION, val, 0);
-     _cfactors.setPressureAltCorr(val);
-
-     group.readDoubleVar(ALTITUDE_CORRECTION, val, 0);
-     _cfactors.setAltitudeCorr(val);
-
-     group.readDoubleVar(EASTWARD_VELOCITY_CORRECTION, val, 0);
-     _cfactors.setEwVelCorr(val);
-
-     group.readDoubleVar(NORTHWARD_VELOCITY_CORRECTION, val, 0);
-     _cfactors.setNsVelCorr(val);
-
-     group.readDoubleVar(VERTICAL_VELOCITY_CORRECTION, val, 0);
-     _cfactors.setVertVelCorr(val);
-
-     group.readDoubleVar(HEADING_CORRECTION, val, 0);
-     _cfactors.setHeadingCorr(val);
-
-     group.readDoubleVar(ROLL_CORRECTION, val, 0);
-     _cfactors.setRollCorr(val);
-
-     group.readDoubleVar(PITCH_CORRECTION, val, 0);
-     _cfactors.setPitchCorr(val);
-
-     group.readDoubleVar(DRIFT_CORRECTION, val, 0);
-     _cfactors.setDriftCorr(val);
-
-     group.readDoubleVar(ROTATION_CORRECTION, val, 0);
-     _cfactors.setRotationCorr(val);
-
-     group.readDoubleVar(TILT_CORRECTION, val, 0);
-     _cfactors.setTiltCorr(val);
-
-   } catch (NcxxException e) {
+   NcxxGroup group = _file.getGroup(GEOREF_CORRECTION);
+   if (group.isNull()) {
+     _correctionsActive = false;
+     return;
    }
 
+   _correctionsActive = true;
+   double val;
+   
+   group.readDoubleVar(AZIMUTH_CORRECTION, val, 0);
+   _cfactors.setAzimuthCorr(val);
+   
+   group.readDoubleVar(ELEVATION_CORRECTION, val, 0);
+   _cfactors.setElevationCorr(val);
+   
+   group.readDoubleVar(RANGE_CORRECTION, val, 0);
+   _cfactors.setRangeCorr(val);
+   
+   group.readDoubleVar(LONGITUDE_CORRECTION, val, 0);
+   _cfactors.setLongitudeCorr(val);
+   
+   group.readDoubleVar(LATITUDE_CORRECTION, val, 0);
+   _cfactors.setLatitudeCorr(val);
+   
+   group.readDoubleVar(PRESSURE_ALTITUDE_CORRECTION, val, 0);
+   _cfactors.setPressureAltCorr(val);
+   
+   group.readDoubleVar(ALTITUDE_CORRECTION, val, 0);
+   _cfactors.setAltitudeCorr(val);
+   
+   group.readDoubleVar(EASTWARD_VELOCITY_CORRECTION, val, 0);
+   _cfactors.setEwVelCorr(val);
+   
+   group.readDoubleVar(NORTHWARD_VELOCITY_CORRECTION, val, 0);
+   _cfactors.setNsVelCorr(val);
+   
+   group.readDoubleVar(VERTICAL_VELOCITY_CORRECTION, val, 0);
+   _cfactors.setVertVelCorr(val);
+   
+   group.readDoubleVar(HEADING_CORRECTION, val, 0);
+   _cfactors.setHeadingCorr(val);
+   
+   group.readDoubleVar(ROLL_CORRECTION, val, 0);
+   _cfactors.setRollCorr(val);
+   
+   group.readDoubleVar(PITCH_CORRECTION, val, 0);
+   _cfactors.setPitchCorr(val);
+   
+   group.readDoubleVar(DRIFT_CORRECTION, val, 0);
+   _cfactors.setDriftCorr(val);
+   
+   group.readDoubleVar(ROTATION_CORRECTION, val, 0);
+   _cfactors.setRotationCorr(val);
+   
+   group.readDoubleVar(TILT_CORRECTION, val, 0);
+   _cfactors.setTiltCorr(val);
+   
  }
 
  ///////////////////////////////////
@@ -1423,42 +1414,41 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
 
  {
 
-   try {
-
-     NcxxGroup group = _file.getGroup(RADAR_CALIBRATION);
-     NcxxDim dim = group.getDim(R_CALIB);
-     size_t nCalib = dim.getSize();
-
-     for (size_t ical = 0; ical < nCalib; ical++) {
-       RadxRcalib *cal = new RadxRcalib;
-       try {
-         _readRcal(group, dim, *cal, ical);
-       } catch (NcxxException& e) {
-         NcxxErrStr err;
-         cerr << "WARNING - Cf2RadxFile::_readCalibrationVariables" << endl;
-         cerr << "  calibration found, but error on read" << endl;
-         cerr << "  ical: " << ical << endl;
-         cerr << e.what() << endl;
-         continue;
-       }
-       // there is generally one cal per pulse width
-       // check that this is not a duplicate
-       bool alreadyAdded = false;
-       for (size_t ii = 0; ii < _rCals.size(); ii++) {
-         const RadxRcalib *rcal = _rCals[ii];
-         if (fabs(rcal->getPulseWidthUsec() -
-                  cal->getPulseWidthUsec()) < 0.0001) {
-           alreadyAdded = true;
-         }
-       }
-       if (!alreadyAdded) {
-         _rCals.push_back(cal);
-       }
-     } // ical
-
-   } catch (NcxxException& e) {
+   NcxxGroup group = _file.getGroup(RADAR_CALIBRATION);
+   if (group.isNull()) {
+     return;
    }
 
+   NcxxDim dim = group.getDim(R_CALIB);
+   size_t nCalib = dim.getSize();
+   
+   for (size_t ical = 0; ical < nCalib; ical++) {
+     RadxRcalib *cal = new RadxRcalib;
+     try {
+       _readRcal(group, dim, *cal, ical);
+     } catch (NcxxException& e) {
+       NcxxErrStr err;
+       cerr << "WARNING - Cf2RadxFile::_readCalibrationVariables" << endl;
+       cerr << "  calibration found, but error on read" << endl;
+       cerr << "  ical: " << ical << endl;
+       cerr << e.what() << endl;
+       continue;
+     }
+     // there is generally one cal per pulse width
+     // check that this is not a duplicate
+     bool alreadyAdded = false;
+     for (size_t ii = 0; ii < _rCals.size(); ii++) {
+       const RadxRcalib *rcal = _rCals[ii];
+       if (fabs(rcal->getPulseWidthUsec() -
+                cal->getPulseWidthUsec()) < 0.0001) {
+         alreadyAdded = true;
+       }
+     }
+     if (!alreadyAdded) {
+       _rCals.push_back(cal);
+     }
+   } // ical
+   
  }
 
  ////////////////////////////////////////
@@ -2059,16 +2049,11 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
                _rayGeorefsApplied, false);
    _readRayVar(_sweepGroup, _timeDimSweep, N_SAMPLES, _rayNSamples, false);
    _readRayVar(_sweepGroup, _timeDimSweep, R_CALIB_INDEX, _rayCalNum, false);
-   _readRayVar(_sweepGroup, _timeDimSweep, RADAR_MEASURED_TRANSMIT_POWER_H, 
-               _rayXmitPowerH, false);
-   _readRayVar(_sweepGroup, _timeDimSweep, RADAR_MEASURED_TRANSMIT_POWER_V, 
-               _rayXmitPowerV, false);
 
    // monitoring
 
-   try {
-
-     NcxxGroup monGroup = _sweepGroup.getGroup(MONITORING);
+   NcxxGroup monGroup = _sweepGroup.getGroup(MONITORING);
+   if (!monGroup.isNull()) {
 
      _readRayVar(monGroup, _timeDimSweep, SCAN_RATE, _rayScanRate, false);
      _readRayVar(monGroup, _timeDimSweep, RADAR_ESTIMATED_NOISE_DBM_HC,
@@ -2080,7 +2065,11 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
      _readRayVar(monGroup, _timeDimSweep, RADAR_ESTIMATED_NOISE_DBM_VX,
                  _rayEstNoiseDbmVx, false);
 
-   } catch (NcxxException& e) {
+     _readRayVar(monGroup, _timeDimSweep, RADAR_MEASURED_TRANSMIT_POWER_H, 
+                 _rayXmitPowerH, false);
+     _readRayVar(monGroup, _timeDimSweep, RADAR_MEASURED_TRANSMIT_POWER_V, 
+                 _rayXmitPowerV, false);
+
    }
 
  }
@@ -2131,10 +2120,8 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
 
    // do we have a georef group in this sweep?
 
-   NcxxGroup georefGroup;
-   try {
-     georefGroup = _sweepGroup.getGroup(GEOREFERENCE);
-   } catch (NcxxException& e) {
+   NcxxGroup georefGroup = _sweepGroup.getGroup(GEOREFERENCE);
+   if (georefGroup.isNull()) {
      // no georef group
      return;
    }
@@ -2277,7 +2264,7 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
      if (_rayAntennaTransitions.size() > iray) {
        ray->setAntennaTransition(_rayAntennaTransitions[iray]);
      }
-     if (_rayGeorefsApplied.size() > iray) {
+     if (_georefsActive && _rayGeorefsApplied.size() > iray) {
        ray->setGeorefApplied(_rayGeorefsApplied[iray]);
      }
      if (_rayNSamples.size() > iray) {

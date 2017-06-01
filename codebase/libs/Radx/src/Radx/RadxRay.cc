@@ -1350,8 +1350,9 @@ void RadxRay::print(ostream &out) const
     out << "  timeSecs: " << RadxTime::strm(_timeSecs) << ".0" << endl;
   } else {
     char text[128];
-    sprintf(text, "  timeSecs: %s.%.9d",
-            RadxTime::strm(_timeSecs).c_str(), (int) (_nanoSecs + 0.5));
+    sprintf(text, "  timeSecs: %s.%.6d",
+            RadxTime::strm(_timeSecs).c_str(),
+            (int) ((_nanoSecs / 1000.0) + 0.5));
     out << text << endl;
   }
   out << "  az: " << _az << endl;
