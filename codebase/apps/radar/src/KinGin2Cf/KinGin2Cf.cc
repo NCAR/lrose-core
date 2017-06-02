@@ -384,7 +384,7 @@ int KinGin2Cf::_openRead(const string &path)
 {
 
   _close();
-  _file = new NcFile(path.c_str(), NcFile::ReadOnly);
+  _file = new Nc3File(path.c_str(), Nc3File::ReadOnly);
   
   // Check that constructor succeeded
   
@@ -395,13 +395,13 @@ int KinGin2Cf::_openRead(const string &path)
   }
   
   // Change the error behavior of the netCDF C++ API by creating an
-  // NcError object. Until it is destroyed, this NcError object will
+  // Nc3Error object. Until it is destroyed, this Nc3Error object will
   // ensure that the netCDF C++ API silently returns error codes
   // on any failure, and leaves any other error handling to the
   // calling program.
 
   if (_err == NULL) {
-    _err = new NcError(NcError::silent_nonfatal);
+    _err = new Nc3Error(Nc3Error::silent_nonfatal);
   }
 
   return 0;
@@ -459,7 +459,7 @@ int KinGin2Cf::_readDimensions()
 ///////////////////////////////////////////
 // read a dimension
 
-int KinGin2Cf::_readDim(const string &name, NcDim* &dim)
+int KinGin2Cf::_readDim(const string &name, Nc3Dim* &dim)
 
 {
   dim = _file->get_dim(name.c_str());
@@ -481,7 +481,7 @@ void KinGin2Cf::_readGlobalAttributes()
 
   for (int ii = 0; ii < _file->num_atts(); ii++) {
     
-    NcAtt* att = _file->get_att(ii);
+    Nc3Att* att = _file->get_att(ii);
     
     if (att == NULL) {
       continue;
@@ -510,7 +510,7 @@ void KinGin2Cf::_readGlobalAttributes()
 ///////////////////////////////////////////
 // get string representation of component
 
-string KinGin2Cf::_asString(const NcTypedComponent *component,
+string KinGin2Cf::_asString(const Nc3TypedComponent *component,
                             int index /* = 0 */)
   
 {
@@ -592,7 +592,7 @@ int KinGin2Cf::_readIntVar(const string &name, int &val, bool required)
   
 {
   
-  NcVar*var = _file->get_var(name.c_str());
+  Nc3Var*var = _file->get_var(name.c_str());
   if (var == NULL) {
     if (required) {
       cerr << "ERROR - KinGin2Cf::_readIntVar" << endl;
@@ -626,7 +626,7 @@ int KinGin2Cf::_readDoubleVar(const string &name, double &val, bool required)
 
 {
   
-  NcVar* var = _file->get_var(name.c_str());
+  Nc3Var* var = _file->get_var(name.c_str());
   if (var == NULL) {
     if (required) {
       cerr << "ERROR - KinGin2Cf::_readDoubleVar" << endl;
@@ -666,7 +666,7 @@ int KinGin2Cf::_readRangeVariable()
 
   // get var
   
-  NcVar *var = _file->get_var("RANGE");
+  Nc3Var *var = _file->get_var("RANGE");
   if (var == NULL) {
     cerr << "ERROR - KinGin2Cf::_getRangeVariable" << endl;
     cerr << "  Cannot read RANGE variable" << endl;
@@ -681,7 +681,7 @@ int KinGin2Cf::_readRangeVariable()
     cerr << "  RANGE variable has no dimensions" << endl;
     return -1;
   }
-  NcDim *rangeDim = var->get_dim(0);
+  Nc3Dim *rangeDim = var->get_dim(0);
   if (rangeDim != _binsDim) {
     cerr << "ERROR - KinGin2Cf::_getRangeVariable" << endl;
     cerr << "  RANGE variable has incorrect dimension" << endl;
@@ -830,7 +830,7 @@ int KinGin2Cf::_readRayVar(const string &name, vector<double> &vals)
 
   // get var
 
-  NcVar* var = _getRayVar(name);
+  Nc3Var* var = _getRayVar(name);
   if (var == NULL) {
     cerr << "ERROR - KinGin2Cf::_readRayVar" << endl;
     return -1;
@@ -860,13 +860,13 @@ int KinGin2Cf::_readRayVar(const string &name, vector<double> &vals)
 // get a ray variable by name
 // returns NULL on failure
 
-NcVar* KinGin2Cf::_getRayVar(const string &name)
+Nc3Var* KinGin2Cf::_getRayVar(const string &name)
 
 {
 
   // get var
 
-  NcVar *var = _file->get_var(name.c_str());
+  Nc3Var *var = _file->get_var(name.c_str());
   if (var == NULL) {
     cerr << "ERROR - KinGin2Cf::_getRayVar" << endl;
     cerr << "  Cannot read variable, name: " << name << endl;
@@ -883,7 +883,7 @@ NcVar* KinGin2Cf::_getRayVar(const string &name)
     return NULL;
   }
 
-  NcDim *raysDim = var->get_dim(0);
+  Nc3Dim *raysDim = var->get_dim(0);
   if (raysDim != _raysDim) {
     cerr << "ERROR - KinGin2Cf::_getRayVar" << endl;
     cerr << "  variable name: " << name << endl;
@@ -912,7 +912,7 @@ int KinGin2Cf::_readFieldVariables()
     
     const Params::output_field_t &field = _params._output_fields[ifld];
     string inputFieldName = field.input_field_name;
-    NcVar* var = _file->get_var(inputFieldName.c_str());
+    Nc3Var* var = _file->get_var(inputFieldName.c_str());
     if (var == NULL) {
       continue;
     }
@@ -926,15 +926,15 @@ int KinGin2Cf::_readFieldVariables()
     
     // check that we have the correct dimensions
     
-    NcDim* raysDim = var->get_dim(0);
-    NcDim* binsDim = var->get_dim(1);
+    Nc3Dim* raysDim = var->get_dim(0);
+    Nc3Dim* binsDim = var->get_dim(1);
     if (raysDim != _raysDim || binsDim != _binsDim) {
       continue;
     }
     
     // check the type
-    NcType ftype = var->type();
-    if (ftype != ncFloat) {
+    Nc3Type ftype = var->type();
+    if (ftype != nc3Float) {
       // not a valid type
       cerr << "WARNING - field: " << inputFieldName << endl;
       cerr << "  Not a float type field - ignoring" << endl;
@@ -970,7 +970,7 @@ int KinGin2Cf::_readFieldVariables()
 // The _rays array has previously been set up by _readRayVariables().
 // Returns 0 on success, -1 on failure
 
-int KinGin2Cf::_addFl32FieldToRays(NcVar* var,
+int KinGin2Cf::_addFl32FieldToRays(Nc3Var* var,
                                    const string &name,
                                    const string &units,
                                    const string &standardName,
@@ -991,7 +991,7 @@ int KinGin2Cf::_addFl32FieldToRays(NcVar* var,
   }
 
   Radx::fl32 missingVal = -1000.0f;
-  NcAtt *missingValueAtt = var->get_att("missing_value");
+  Nc3Att *missingValueAtt = var->get_att("missing_value");
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_float(0);
     delete missingValueAtt;

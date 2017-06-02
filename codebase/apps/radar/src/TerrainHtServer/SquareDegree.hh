@@ -45,7 +45,7 @@
 #include <toolsa/os_config.h>
 #include <dataport/port_types.h>
 #include <ncvalues.h>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 
 using namespace std;
 
@@ -116,17 +116,17 @@ private:
   ui08 **_waterArray;
   bool _waterAvail;
 
-  NcFile *_ncFile;
-  NcError *_ncErr;
+  Nc3File *_ncFile;
+  Nc3Error *_ncErr;
   string _ncPathInUse;
 
   int _readFromFile();
   int _readWaterFile(size_t ulOffset);
   int _findFiles();
 
-  int _openNcFile(const string &path);
-  void _closeNcFile();
-  int _readNcDim(const string &name, NcDim* &dim);
+  int _openNc3File(const string &path);
+  void _closeNc3File();
+  int _readNc3Dim(const string &name, Nc3Dim* &dim);
 
 };
 

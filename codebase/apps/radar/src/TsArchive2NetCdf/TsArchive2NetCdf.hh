@@ -42,7 +42,7 @@
 #include <string>
 #include <vector>
 #include <cstdio>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include "Args.hh"
 using namespace std;
 class InputPath;

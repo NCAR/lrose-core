@@ -901,10 +901,10 @@ int Ts2NetCDF::_writeFileTmp()
 {
 
   ////////////////////////
-  // create NcFile object
+  // create Nc3File object
   
-  NcError err(NcError::verbose_nonfatal);
-  NcFile file(_tmpPath.c_str(), NcFile::Replace);
+  Nc3Error err(Nc3Error::verbose_nonfatal);
+  Nc3File file(_tmpPath.c_str(), Nc3File::Replace);
   if (!file.is_valid()) {
     cerr << "ERROR - Ts2NetCDF::_writeFileTmp" << endl;
     cerr << "  Cannot create file: " << _tmpPath << endl;
@@ -919,8 +919,8 @@ int Ts2NetCDF::_writeFileTmp()
   //////////////////
   // add dimensions
   
-  NcDim *gatesDim = file.add_dim("gates", _nGates);
-  NcDim *timeDim = file.add_dim("time", _nTimes);
+  Nc3Dim *gatesDim = file.add_dim("gates", _nGates);
+  Nc3Dim *timeDim = file.add_dim("time", _nTimes);
 
   /////////////////////////////////
   // add vars and their attributes
@@ -992,7 +992,7 @@ int Ts2NetCDF::_writeFileTmp()
 ////////////////////////////////////////
 // add global attributes
 
-void Ts2NetCDF::_addGlobAtt(NcFile &file)
+void Ts2NetCDF::_addGlobAtt(Nc3File &file)
   
 {
 
@@ -1232,8 +1232,8 @@ void Ts2NetCDF::_addGlobAtt(NcFile &file)
 // write out base time variables
 // Returns 0 on success, -1 on failure
 
-int Ts2NetCDF::_writeBaseTimeVars(NcFile &file,
-                                  NcError &err)
+int Ts2NetCDF::_writeBaseTimeVars(Nc3File &file,
+                                  Nc3Error &err)
   
 {
   
@@ -1244,8 +1244,8 @@ int Ts2NetCDF::_writeBaseTimeVars(NcFile &file,
   sprintf(timeUnitsStr, "seconds since %.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
           1970, 1, 1, 0, 0, 0);
   
-  NcVar *baseTimeVar;
-  if (_addVar(file, err, baseTimeVar, ncDouble,
+  Nc3Var *baseTimeVar;
+  if (_addVar(file, err, baseTimeVar, nc3Double,
               "base_time", "time_since_Jan1_1970", timeUnitsStr)) {
     cerr << "ERROR - Ts2NetCDF::_writeBaseTimeVars" << endl;
     cerr << "  Cannot create base_time var" << endl;
@@ -1262,8 +1262,8 @@ int Ts2NetCDF::_writeBaseTimeVars(NcFile &file,
   int min = stime.getMin();
   int sec = stime.getSec();
 
-  NcVar *baseYearVar;
-  if (_addVar(file, err, baseYearVar, ncInt,
+  Nc3Var *baseYearVar;
+  if (_addVar(file, err, baseYearVar, nc3Int,
               "base_year", "base_time_year", "")) {
     cerr << "ERROR - Ts2NetCDF::_writeBaseTimeVars" << endl;
     cerr << "  Cannot create base_year var" << endl;
@@ -1271,8 +1271,8 @@ int Ts2NetCDF::_writeBaseTimeVars(NcFile &file,
   }
   baseYearVar->put(&year, &edge);
 
-  NcVar *baseMonthVar;
-  if (_addVar(file, err, baseMonthVar, ncInt,
+  Nc3Var *baseMonthVar;
+  if (_addVar(file, err, baseMonthVar, nc3Int,
               "base_month", "base_time_month", "")) {
     cerr << "ERROR - Ts2NetCDF::_writeBaseTimeVars" << endl;
     cerr << "  Cannot create base_month var" << endl;
@@ -1280,8 +1280,8 @@ int Ts2NetCDF::_writeBaseTimeVars(NcFile &file,
   }
   baseMonthVar->put(&month, &edge);
 
-  NcVar *baseDayVar;
-  if (_addVar(file, err, baseDayVar, ncInt,
+  Nc3Var *baseDayVar;
+  if (_addVar(file, err, baseDayVar, nc3Int,
               "base_day", "base_time_day", "")) {
     cerr << "ERROR - Ts2NetCDF::_writeBaseTimeVars" << endl;
     cerr << "  Cannot create base_day var" << endl;
@@ -1289,8 +1289,8 @@ int Ts2NetCDF::_writeBaseTimeVars(NcFile &file,
   }
   baseDayVar->put(&day, &edge);
 
-  NcVar *baseHourVar;
-  if (_addVar(file, err, baseHourVar, ncInt,
+  Nc3Var *baseHourVar;
+  if (_addVar(file, err, baseHourVar, nc3Int,
               "base_hour", "base_time_hour", "")) {
     cerr << "ERROR - Ts2NetCDF::_writeBaseTimeVars" << endl;
     cerr << "  Cannot create base_hour var" << endl;
@@ -1298,8 +1298,8 @@ int Ts2NetCDF::_writeBaseTimeVars(NcFile &file,
   }
   baseHourVar->put(&hour, &edge);
 
-  NcVar *baseMinVar;
-  if (_addVar(file, err, baseMinVar, ncInt,
+  Nc3Var *baseMinVar;
+  if (_addVar(file, err, baseMinVar, nc3Int,
               "base_min", "base_time_min", "")) {
     cerr << "ERROR - Ts2NetCDF::_writeBaseTimeVars" << endl;
     cerr << "  Cannot create base_min var" << endl;
@@ -1307,8 +1307,8 @@ int Ts2NetCDF::_writeBaseTimeVars(NcFile &file,
   }
   baseMinVar->put(&min, &edge);
 
-  NcVar *baseSecVar;
-  if (_addVar(file, err, baseSecVar, ncInt,
+  Nc3Var *baseSecVar;
+  if (_addVar(file, err, baseSecVar, nc3Int,
               "base_sec", "base_time_sec", "")) {
     cerr << "ERROR - Ts2NetCDF::_writeBaseTimeVars" << endl;
     cerr << "  Cannot create base_sec var" << endl;
@@ -1325,9 +1325,9 @@ int Ts2NetCDF::_writeBaseTimeVars(NcFile &file,
 // in iwrf format
 // Returns 0 on success, -1 on failure
 
-int Ts2NetCDF::_writeTimeDimVars(NcFile &file,
-                                 NcError &err,
-                                 NcDim *timeDim)
+int Ts2NetCDF::_writeTimeDimVars(Nc3File &file,
+                                 Nc3Error &err,
+                                 Nc3Dim *timeDim)
   
 {
   
@@ -1339,8 +1339,8 @@ int Ts2NetCDF::_writeTimeDimVars(NcFile &file,
           stime.getYear(), stime.getMonth(), stime.getDay(),
           stime.getHour(), stime.getMin(), stime.getSec());
   
-  NcVar *timeVarHc;
-  if (_addVar(file, err, timeVarHc, ncDouble, timeDim,
+  Nc3Var *timeVarHc;
+  if (_addVar(file, err, timeVarHc, nc3Double, timeDim,
               "time_offset", "time_offset_from_base_time", timeUnitsStr)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     cerr << "  Cannot create time var" << endl;
@@ -1456,9 +1456,9 @@ int Ts2NetCDF::_writeTimeDimVars(NcFile &file,
 // write out time variables in alternating dual pol mode
 // Returns 0 on success, -1 on failure
 
-int Ts2NetCDF::_writeTimeDimVarsAlt(NcFile &file,
-                                    NcError &err,
-                                    NcDim *timeDim)
+int Ts2NetCDF::_writeTimeDimVarsAlt(Nc3File &file,
+                                    Nc3Error &err,
+                                    Nc3Dim *timeDim)
   
 {
 
@@ -1472,8 +1472,8 @@ int Ts2NetCDF::_writeTimeDimVarsAlt(NcFile &file,
   
   // h copolar times
 
-  NcVar *timeVarHc;
-  if (_addVar(file, err, timeVarHc, ncDouble, timeDim,
+  Nc3Var *timeVarHc;
+  if (_addVar(file, err, timeVarHc, nc3Double, timeDim,
               "time_offset_hc", "time_offset_from_base_time_hc", 
               timeUnitsStr)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1491,8 +1491,8 @@ int Ts2NetCDF::_writeTimeDimVarsAlt(NcFile &file,
 
   // v copolar times
   
-  NcVar *timeVarVc;
-  if (_addVar(file, err, timeVarVc, ncDouble, timeDim,
+  Nc3Var *timeVarVc;
+  if (_addVar(file, err, timeVarVc, nc3Double, timeDim,
               "time_offset_vc", "time_offset_from_base_time_vc", 
               timeUnitsStr)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
@@ -1651,14 +1651,14 @@ int Ts2NetCDF::_writeTimeDimVarsAlt(NcFile &file,
 // write out range coordinate variable
 // Returns 0 on success, -1 on failure
 
-int Ts2NetCDF::_writeRangeVar(NcFile &file,
-                              NcError &err,
-                              NcDim *gatesDim)
+int Ts2NetCDF::_writeRangeVar(Nc3File &file,
+                              Nc3Error &err,
+                              Nc3Dim *gatesDim)
   
 {
   
-  NcVar *rangeVar;
-  if (_addVar(file, err, rangeVar, ncFloat, gatesDim,
+  Nc3Var *rangeVar;
+  if (_addVar(file, err, rangeVar, nc3Float, gatesDim,
               "range", "range_to_center_of_gate", "m")) {
     cerr << "ERROR - Ts2NetCDF::_writeRangeVar" << endl;
     cerr << "  Cannot create range var" << endl;
@@ -1779,10 +1779,10 @@ int Ts2NetCDF::_computeOutputFilePaths()
 ////////////////////////////////////////////////
 // add string attribute to a variable
 
-int Ts2NetCDF::_addAttr(NcVar *var,
+int Ts2NetCDF::_addAttr(Nc3Var *var,
                         const string &name,
                         const string &val,
-                        NcError &err)
+                        Nc3Error &err)
 
 {
   if (!var->add_att(name.c_str(), val.c_str())) {
@@ -1799,10 +1799,10 @@ int Ts2NetCDF::_addAttr(NcVar *var,
 ////////////////////////////////////////////////
 // add double attribute to a variable
 
-int Ts2NetCDF::_addAttr(NcVar *var,
+int Ts2NetCDF::_addAttr(Nc3Var *var,
                         const string &name,
                         double val,
-                        NcError &err)
+                        Nc3Error &err)
 
 {
   if (!var->add_att(name.c_str(), val)) {
@@ -1819,10 +1819,10 @@ int Ts2NetCDF::_addAttr(NcVar *var,
 ////////////////////////////////////////////////
 // add int attribute to a variable
 
-int Ts2NetCDF::_addAttr(NcVar *var,
+int Ts2NetCDF::_addAttr(Nc3Var *var,
                         const string &name,
                         int val,
-                        NcError &err)
+                        Nc3Error &err)
   
 {
   if (!var->add_att(name.c_str(), val)) {
@@ -1839,10 +1839,10 @@ int Ts2NetCDF::_addAttr(NcVar *var,
 //////////////////////////////////////////////
 // add scalar variable
 
-int Ts2NetCDF::_addVar(NcFile &file,
-                       NcError &err,
-                       NcVar* &var,
-                       NcType ncType,
+int Ts2NetCDF::_addVar(Nc3File &file,
+                       Nc3Error &err,
+                       Nc3Var* &var,
+                       Nc3Type ncType,
                        const string &name,
                        const string &standardName,
                        const string &units /* = "" */)
@@ -1877,11 +1877,11 @@ int Ts2NetCDF::_addVar(NcFile &file,
 //////////////////////////////////////////////
 // add a 1-D variable
 
-int Ts2NetCDF::_addVar(NcFile &file,
-                       NcError &err,
-                       NcVar* &var,
-                       NcType ncType,
-                       NcDim *dim, 
+int Ts2NetCDF::_addVar(Nc3File &file,
+                       Nc3Error &err,
+                       Nc3Var* &var,
+                       Nc3Type ncType,
+                       Nc3Dim *dim, 
                        const string &name,
                        const string &standardName,
                        const string &units /* = "" */)
@@ -1917,12 +1917,12 @@ int Ts2NetCDF::_addVar(NcFile &file,
 //////////////////////////////////////////////
 // add a 2-D variable
 
-int Ts2NetCDF::_addVar(NcFile &file,
-                       NcError &err,
-                       NcVar* &var,
-                       NcType ncType,
-                       NcDim *dim0, 
-                       NcDim *dim1, 
+int Ts2NetCDF::_addVar(Nc3File &file,
+                       Nc3Error &err,
+                       Nc3Var* &var,
+                       Nc3Type ncType,
+                       Nc3Dim *dim0, 
+                       Nc3Dim *dim1, 
                        const string &name,
                        const string &standardName,
                        const string &units /* = "" */)
@@ -1960,9 +1960,9 @@ int Ts2NetCDF::_addVar(NcFile &file,
 // add and write float var
 // Returns 0 on success, -1 on failure
 
-int Ts2NetCDF::_writeVar(NcFile &file,
-                         NcError &err,
-                         NcDim *timeDim,
+int Ts2NetCDF::_writeVar(Nc3File &file,
+                         Nc3Error &err,
+                         Nc3Dim *timeDim,
                          const char *name,
                          const char *standardName,
                          const char *units,
@@ -1974,8 +1974,8 @@ int Ts2NetCDF::_writeVar(NcFile &file,
   float *floats = floats_.alloc(timeDim->size());
   long edge = timeDim->size();
   
-  NcVar *var;
-  if (_addVar(file, err, var, ncFloat, timeDim,
+  Nc3Var *var;
+  if (_addVar(file, err, var, nc3Float, timeDim,
               name, standardName, units)) {
     cerr << "ERROR - Ts2NetCDF::_addFloatVar" << endl;
     cerr << "  Cannot create var, name: " << name << endl;
@@ -1995,9 +1995,9 @@ int Ts2NetCDF::_writeVar(NcFile &file,
 // add and write int var
 // Returns 0 on success, -1 on failure
 
-int Ts2NetCDF::_writeVar(NcFile &file,
-                         NcError &err,
-                         NcDim *timeDim,
+int Ts2NetCDF::_writeVar(Nc3File &file,
+                         Nc3Error &err,
+                         Nc3Dim *timeDim,
                          const char *name,
                          const char *standardName,
                          const char *units,
@@ -2009,8 +2009,8 @@ int Ts2NetCDF::_writeVar(NcFile &file,
   int *ints = ints_.alloc(timeDim->size());
   long edge = timeDim->size();
   
-  NcVar *var;
-  if (_addVar(file, err, var, ncInt, timeDim,
+  Nc3Var *var;
+  if (_addVar(file, err, var, nc3Int, timeDim,
               name, standardName, units)) {
     cerr << "ERROR - Ts2NetCDF::_addIntVar" << endl;
     cerr << "  Cannot create var, name: " << name << endl;
@@ -2030,10 +2030,10 @@ int Ts2NetCDF::_writeVar(NcFile &file,
 // add and write IQ vars
 // Returns 0 on success, -1 on failure
 
-int Ts2NetCDF::_writeIqVars(NcFile &file,
-                            NcError &err,
-                            NcDim *timeDim,
-                            NcDim *gatesDim,
+int Ts2NetCDF::_writeIqVars(Nc3File &file,
+                            Nc3Error &err,
+                            Nc3Dim *timeDim,
+                            Nc3Dim *gatesDim,
                             const char *iName,
                             const char *qName,
                             const float *ivals,
@@ -2043,7 +2043,7 @@ int Ts2NetCDF::_writeIqVars(NcFile &file,
 
   // I variable
   
-  NcVar *iVar = file.add_var(iName, ncFloat, timeDim, gatesDim);
+  Nc3Var *iVar = file.add_var(iName, nc3Float, timeDim, gatesDim);
   iVar->add_att("standard_name", "time_series_in_phase");
   iVar->add_att("units", "scaled A/D counts");
   iVar->add_att("_FillValue", (float) -9999.0);
@@ -2056,7 +2056,7 @@ int Ts2NetCDF::_writeIqVars(NcFile &file,
 
   // Q variable
 
-  NcVar *qVar = file.add_var(qName, ncFloat, timeDim, gatesDim);
+  Nc3Var *qVar = file.add_var(qName, nc3Float, timeDim, gatesDim);
   qVar->add_att("standard_name", "time_series_quadrature");
   qVar->add_att("units", "scaled A/D counts");
   qVar->add_att("_FillValue", (float) -9999.0);
@@ -2070,22 +2070,22 @@ int Ts2NetCDF::_writeIqVars(NcFile &file,
 ////////////////////////////////////////
 // convert enums to strings
 
-string Ts2NetCDF::_ncTypeToStr(NcType nctype)
+string Ts2NetCDF::_ncTypeToStr(Nc3Type nctype)
   
 {
   
   switch (nctype) {
-    case ncDouble:
-      return "ncDouble";
-    case ncFloat:
-      return "ncFloat";
-    case ncInt:
-      return "ncInt";
-    case ncShort:
-      return "ncShort";
-    case ncByte:
+    case nc3Double:
+      return "nc3Double";
+    case nc3Float:
+      return "nc3Float";
+    case nc3Int:
+      return "nc3Int";
+    case nc3Short:
+      return "nc3Short";
+    case nc3Byte:
     default:
-      return "ncByte";
+      return "nc3Byte";
   }
   
 }
@@ -2093,7 +2093,7 @@ string Ts2NetCDF::_ncTypeToStr(NcType nctype)
 ///////////////////////////////////////////
 // get string representation of component
 
-string Ts2NetCDF::_asString(const NcTypedComponent *component,
+string Ts2NetCDF::_asString(const Nc3TypedComponent *component,
                             int index /* = 0 */)
   
 {

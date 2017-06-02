@@ -179,7 +179,7 @@ int TrmmClimo2Mdv::_processFile(const char *input_path)
 
   // open file
 
-  NcFile ncf(input_path);
+  Nc3File ncf(input_path);
   if (!ncf.is_valid()) {
     cerr << "ERROR - TrmmClimo2Mdv::_processFile" << endl;
     cerr << "  File: " << input_path << endl;
@@ -188,7 +188,7 @@ int TrmmClimo2Mdv::_processFile(const char *input_path)
   
   // declare an error object
   
-  NcError err(NcError::silent_nonfatal);
+  Nc3Error err(Nc3Error::silent_nonfatal);
 
   // get dimensions
   
@@ -246,7 +246,7 @@ int TrmmClimo2Mdv::_processFile(const char *input_path)
 
   _dataVar = NULL;
   for (int iiv = 0; iiv < ncf.num_vars(); iiv++) {
-    NcVar* var = ncf.get_var(iiv);
+    Nc3Var* var = ncf.get_var(iiv);
     if (var == NULL) {
       continue;
     }

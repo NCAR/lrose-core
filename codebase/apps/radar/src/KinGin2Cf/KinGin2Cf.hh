@@ -41,7 +41,7 @@
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxTime.hh>
 #include <ncvalues.h>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 class RadxFile;
 using namespace std;
 
@@ -75,8 +75,8 @@ private:
 
   // reading
   
-  NcFile *_file;
-  NcError *_err;
+  Nc3File *_file;
+  Nc3Error *_err;
   time_t _prevTime;
 
   // writing
@@ -88,8 +88,8 @@ private:
 
   // NetCDF dimensions
   
-  NcDim *_binsDim;
-  NcDim *_raysDim;
+  Nc3Dim *_binsDim;
+  Nc3Dim *_raysDim;
   int _nBins, _nRaysSweep;
 
   // metadata
@@ -151,11 +151,11 @@ private:
   void _close();
   
   int _readDimensions();
-  int _readDim(const string &name, NcDim* &dim);
+  int _readDim(const string &name, Nc3Dim* &dim);
   void _readGlobalAttributes();
   int _readScalarVariables();
 
-  string _asString(const NcTypedComponent *component,
+  string _asString(const Nc3TypedComponent *component,
                    int index = 0);
 
   int _readIntVar(const string &name, int &val, bool required);
@@ -165,11 +165,11 @@ private:
   int _readRayVariables();
 
   int _readRayVar(const string &name, vector<double> &vals);
-  NcVar* _getRayVar(const string &name);
+  Nc3Var* _getRayVar(const string &name);
 
   int _readFieldVariables();
 
-  int _addFl32FieldToRays(NcVar* var,
+  int _addFl32FieldToRays(Nc3Var* var,
                           const string &name,
                           const string &units,
                           const string &standardName,

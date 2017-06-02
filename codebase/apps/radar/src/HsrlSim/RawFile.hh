@@ -135,9 +135,9 @@ private:
   
   // dimensions
 
-  NcDim *_timeDim;
-  NcDim *_timeVecDim;
-  NcDim *_binCountDim;
+  Nc3Dim *_timeDim;
+  Nc3Dim *_timeVecDim;
+  Nc3Dim *_binCountDim;
 
   size_t _nTimesInFile;
   size_t _timeVecSize;
@@ -159,23 +159,23 @@ private:
   
   // times
   
-  NcVar *_timeVar;
+  Nc3Var *_timeVar;
   vector<RadxTime> _dataTimes;
   vector<double> _dTimes;
 
   // georeference variables
 
-  NcVar *_telescopeLockedVar;
-  NcVar *_telescopeDirectionVar;
+  Nc3Var *_telescopeLockedVar;
+  Nc3Var *_telescopeDirectionVar;
 
-  NcVar *_latitudeVar;
-  NcVar *_longitudeVar;
-  NcVar *_altitudeVar;
-  NcVar *_headingVar;
-  NcVar *_gndSpeedVar;
-  NcVar *_vertVelVar;
-  NcVar *_pitchVar;
-  NcVar *_rollVar;
+  Nc3Var *_latitudeVar;
+  Nc3Var *_longitudeVar;
+  Nc3Var *_altitudeVar;
+  Nc3Var *_headingVar;
+  Nc3Var *_gndSpeedVar;
+  Nc3Var *_vertVelVar;
+  Nc3Var *_pitchVar;
+  Nc3Var *_rollVar;
 
   vector<int> _telescopeLocked;
   vector<int> _telescopeDirection;
@@ -189,8 +189,8 @@ private:
   vector<double> _pitch;
   vector<double> _roll;
 
-  NcVar *_pollAngleVar;
-  NcVar *_totalEnergyVar;
+  Nc3Var *_pollAngleVar;
+  Nc3Var *_totalEnergyVar;
 
   vector<float> _polAngle;
   vector<int> _totalEnergy;
@@ -224,13 +224,13 @@ private:
   void _clearRayVariables();
   int _readRayVariables();
 
-  int _readRayVar(NcVar* &var, const string &name, 
+  int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<double> &vals, bool required = true);
-  int _readRayVar(NcVar* &var, const string &name, 
+  int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<float> &vals, bool required = true);
-  int _readRayVar(NcVar* &var, const string &name, 
+  int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<int> &vals, bool required = true);
-  int _readRayVar(NcVar* &var, const string &name, 
+  int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<bool> &vals, bool required = true);
   
   int _readRayVar(const string &name, 
@@ -240,7 +240,7 @@ private:
   int _readRayVar(const string &name, 
                   vector<bool> &vals, bool required = true);
   
-  NcVar* _getRayVar(const string &name, bool required);
+  Nc3Var* _getRayVar(const string &name, bool required);
 
   int _createRays(const string &path);
 
@@ -248,7 +248,7 @@ private:
 
   int _readFieldVariables();
 
-  int _addCountFieldToRays(NcVar* var,
+  int _addCountFieldToRays(Nc3Var* var,
                            const string &name,
                            const string &units,
                            const string &longName);

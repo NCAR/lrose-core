@@ -37,7 +37,7 @@ RM = /bin/rm -f
 NETCDF_INSTALL_DIR = /opt/local
 INCLUDES = -I$(NETCDF_INSTALL_DIR)/include -I$(RAP_INC_DIR)
 CFLAGS = -g
-LDFLAGS = -L$(NETCDF_INSTALL_DIR)/lib -L$(RAP_LIB_DIR) -lnetcdf_c++ -lnetcdf
+LDFLAGS = -L$(NETCDF_INSTALL_DIR)/lib -L$(RAP_LIB_DIR) -lNcxx -lnetcdf
 C++ = g++
 
 SRCS = \

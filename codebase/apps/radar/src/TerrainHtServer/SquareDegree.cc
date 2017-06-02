@@ -336,19 +336,19 @@ int SquareDegree::_readWaterFile(size_t ulOffset)
   
   TaThread::LockForScope lock(_globalMutex);
   
-  if (_openNcFile(_waterFilePath)) {
+  if (_openNc3File(_waterFilePath)) {
     return -1;
   }
 
   // get dimensions
 
-  NcDim *latDim, *lonDim;
-  if (_readNcDim("lat", latDim)) {
-    _closeNcFile();
+  Nc3Dim *latDim, *lonDim;
+  if (_readNc3Dim("lat", latDim)) {
+    _closeNc3File();
     return -1;
   }
-  if (_readNcDim("lon", lonDim)) {
-    _closeNcFile();
+  if (_readNc3Dim("lon", lonDim)) {
+    _closeNc3File();
     return -1;
   }
   size_t nLon = lonDim->size();
@@ -356,12 +356,12 @@ int SquareDegree::_readWaterFile(size_t ulOffset)
 
   // find the water variable
 
-  NcVar* waterVar = _ncFile->get_var("water");
+  Nc3Var* waterVar = _ncFile->get_var("water");
   if (waterVar == NULL) {
     cerr << "ERROR - SquareDegree::_readWaterFile" << endl;
     cerr << "  Cannot find variable 'water'" << endl;
     cerr << "  file: " << _ncPathInUse << endl;
-    _closeNcFile();
+    _closeNc3File();
     return -1;
   }
   
@@ -374,7 +374,7 @@ int SquareDegree::_readWaterFile(size_t ulOffset)
     cerr << "  Cannot read variable 'water'" << endl;
     cerr << "  file: " << _ncPathInUse << endl;
     cerr << _ncErr->get_errmsg() << endl;
-    _closeNcFile();
+    _closeNc3File();
     delete[] data;
     return -1;
   }
@@ -399,7 +399,7 @@ int SquareDegree::_readWaterFile(size_t ulOffset)
   }
 
   delete[] data;
-  _closeNcFile();
+  _closeNc3File();
 
   return 0;
 
@@ -492,32 +492,32 @@ int SquareDegree::_findFiles()
 // open netcdf file for reading
 // Returns 0 on success, -1 on failure
 
-int SquareDegree::_openNcFile(const string &path)
+int SquareDegree::_openNc3File(const string &path)
   
 {
 
-  _closeNcFile();
-  _ncFile = new NcFile(path.c_str(), NcFile::ReadOnly);
+  _closeNc3File();
+  _ncFile = new Nc3File(path.c_str(), Nc3File::ReadOnly);
   
   // Check that constructor succeeded
   
   if (!_ncFile || !_ncFile->is_valid()) {
-    cerr << "ERROR - SquareDegree::_openNcFile" << endl;
+    cerr << "ERROR - SquareDegree::_openNc3File" << endl;
     cerr << "  Cannot open file for reading, path: " << path << endl;
-    _closeNcFile();
+    _closeNc3File();
     return -1;
   }
 
   _ncPathInUse = path;
   
   // Change the error behavior of the netCDF C++ API by creating an
-  // NcError object. Until it is destroyed, this NcError object will
+  // Nc3Error object. Until it is destroyed, this Nc3Error object will
   // ensure that the netCDF C++ API silently returns error codes
   // on any failure, and leaves any other error handling to the
   // calling program.
 
   if (_ncErr == NULL) {
-    _ncErr = new NcError(NcError::silent_nonfatal);
+    _ncErr = new Nc3Error(Nc3Error::silent_nonfatal);
   }
   
   return 0;
@@ -528,7 +528,7 @@ int SquareDegree::_openNcFile(const string &path)
 // close netcdf file if open
 // remove error object if it exists
 
-void SquareDegree::_closeNcFile()
+void SquareDegree::_closeNc3File()
   
 {
   
@@ -552,12 +552,12 @@ void SquareDegree::_closeNcFile()
 // Returns 0 on success, -1 on failure
 // Side effect: dim arg is set
 
-int SquareDegree::_readNcDim(const string &name, NcDim* &dim)
+int SquareDegree::_readNc3Dim(const string &name, Nc3Dim* &dim)
   
 {
   dim = _ncFile->get_dim(name.c_str());
   if (dim == NULL) {
-    cerr << "ERROR - SquareDegree::_readNcDim" << endl;
+    cerr << "ERROR - SquareDegree::_readNc3Dim" << endl;
     cerr << "  Cannot read dimension, name: " << name << endl;
     cerr << "  file: " << _ncPathInUse << endl;
     cerr << _ncErr->get_errmsg() << endl;

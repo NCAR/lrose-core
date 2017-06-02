@@ -188,7 +188,7 @@
 // NetCDF: See doc at:
 //   netcdfC/tda/netcdf-4.1.3/examples/CXX/pres_temp_4D_wr.cpp
 //   /usr/local/netcdf4/include/netcdfcpp.h
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3File.hh>
 
 
 // GeographicLib.  See doc at:
@@ -3368,7 +3368,7 @@ void RadarWind::writeNetcdf(
     fname = outNc;
   }
   if (bugs >= 1) cout << "fname: \"" << fname << "\"" << endl;
-  NcFile ncout( fname.c_str(), NcFile::Replace);
+  Nc3File ncout( fname.c_str(), Nc3File::Replace);
   ncout.add_att("Conventions", "CF-1.5");
 
   // Dimension arrays
@@ -3392,36 +3392,36 @@ void RadarWind::writeNetcdf(
   }
 
   // Dimensions
-  NcDim * tdim = ncout.add_dim("time", ntime);
-  NcDim * zdim = ncout.add_dim("z0", nradz);
-  NcDim * ydim = ncout.add_dim("y0", nrady);
-  NcDim * xdim = ncout.add_dim("x0", nradx);
+  Nc3Dim * tdim = ncout.add_dim("time", ntime);
+  Nc3Dim * zdim = ncout.add_dim("z0", nradz);
+  Nc3Dim * ydim = ncout.add_dim("y0", nrady);
+  Nc3Dim * xdim = ncout.add_dim("x0", nradx);
 
-  const NcDim * dataDims4[] = { tdim, zdim, ydim, xdim};
-  const NcDim * dataDims2[] = { ydim, xdim};
-  const NcDim * dataDims1[] = { tdim};
+  const Nc3Dim * dataDims4[] = { tdim, zdim, ydim, xdim};
+  const Nc3Dim * dataDims2[] = { ydim, xdim};
+  const Nc3Dim * dataDims1[] = { tdim};
 
   // Dimension vars
-  NcVar * tvar = ncout.add_var("time", ncDouble, tdim);
+  Nc3Var * tvar = ncout.add_var("time", nc3Double, tdim);
   tvar->add_att("standard_name", "time");
   tvar->add_att("units", "seconds since 1970-01-01T00:00:00Z");
   tvar->add_att("calendar", "gregorian");
 
-  NcVar * zvar = ncout.add_var("z0", ncDouble, zdim);
+  Nc3Var * zvar = ncout.add_var("z0", nc3Double, zdim);
   zvar->add_att("standard_name", "height");
   zvar->add_att("units", "m");
   zvar->add_att("positive", "up");
 
-  NcVar * yvar = ncout.add_var("y0", ncDouble, ydim);
+  Nc3Var * yvar = ncout.add_var("y0", nc3Double, ydim);
   yvar->add_att("standard_name", "projection_y_coordinate");
   yvar->add_att("units", "m");
 
-  NcVar * xvar = ncout.add_var("x0", ncDouble, xdim);
+  Nc3Var * xvar = ncout.add_var("x0", nc3Double, xdim);
   xvar->add_att("standard_name", "projection_x_coordinate");
   xvar->add_att("units", "m");
 
   // Metadata vars
-  NcVar * gridMapVar = ncout.add_var("grid_mapping_0", ncInt);
+  Nc3Var * gridMapVar = ncout.add_var("grid_mapping_0", nc3Int);
   gridMapVar->add_att("grid_mapping_name", "transverse_mercator");
   gridMapVar->add_att("semi_major_axis", earthRadiusMeter);
   gridMapVar->add_att("semi_minor_axis", earthRadiusMeter);
@@ -3431,50 +3431,50 @@ void RadarWind::writeNetcdf(
   gridMapVar->add_att("false_easting", 0);
   gridMapVar->add_att("false_northing", 0);
 
-  NcVar * latVar = ncout.add_var("lat0", ncDouble, 2, dataDims2);
+  Nc3Var * latVar = ncout.add_var("lat0", nc3Double, 2, dataDims2);
   latVar->add_att("standard_name", "latitude");
   latVar->add_att("units", "degrees_north");
 
-  NcVar * lonVar = ncout.add_var("lon0", ncDouble, 2, dataDims2);
+  Nc3Var * lonVar = ncout.add_var("lon0", nc3Double, 2, dataDims2);
   lonVar->add_att("standard_name", "longitude");
   lonVar->add_att("units", "degrees_east");
 
   // Data variables
 
-  NcVar * timeStartVar = ncout.add_var("start_time", ncDouble, 1, dataDims1);
+  Nc3Var * timeStartVar = ncout.add_var("start_time", nc3Double, 1, dataDims1);
   timeStartVar->add_att("standard_name", "start_time");
   timeStartVar->add_att("units", "s");
 
-  NcVar * timeStopVar = ncout.add_var("stop_time", ncDouble, 1, dataDims1);
+  Nc3Var * timeStopVar = ncout.add_var("stop_time", nc3Double, 1, dataDims1);
   timeStopVar->add_att("standard_name", "stop_time");
   timeStopVar->add_att("units", "s");
 
-  NcVar * wVar = ncout.add_var("upward_air_velocity", ncFloat, 4, dataDims4);
+  Nc3Var * wVar = ncout.add_var("upward_air_velocity", nc3Float, 4, dataDims4);
   wVar->add_att("standard_name", "upward_air_velocity");
   wVar->add_att("units", "m s-1");
   wVar->add_att("grid_mapping", "grid_mapping_0");
 
-  NcVar * vVar = ncout.add_var("northward_wind", ncFloat, 4, dataDims4);
+  Nc3Var * vVar = ncout.add_var("northward_wind", nc3Float, 4, dataDims4);
   vVar->add_att("standard_name", "northward_wind");
   vVar->add_att("units", "m s-1");
   vVar->add_att("grid_mapping", "grid_mapping_0");
 
-  NcVar * uVar = ncout.add_var("eastward_wind", ncFloat, 4, dataDims4);
+  Nc3Var * uVar = ncout.add_var("eastward_wind", nc3Float, 4, dataDims4);
   uVar->add_att("standard_name", "eastward_wind");
   uVar->add_att("units", "m s-1");
   uVar->add_att("grid_mapping", "grid_mapping_0");
 
-  NcVar * dbzVar = ncout.add_var("meanNbrDbz", ncFloat, 4, dataDims4);
+  Nc3Var * dbzVar = ncout.add_var("meanNbrDbz", nc3Float, 4, dataDims4);
   dbzVar->add_att("standard_name", "mean_neighbor_dbz");
   dbzVar->add_att("units", "1");  // Apparently CF uses "1" to mean ratio
   dbzVar->add_att("grid_mapping", "grid_mapping_0");
 
-  NcVar * ncpVar = ncout.add_var("meanNbrNcp", ncFloat, 4, dataDims4);
+  Nc3Var * ncpVar = ncout.add_var("meanNbrNcp", nc3Float, 4, dataDims4);
   ncpVar->add_att("standard_name", "mean_neighbor_ncp");
   ncpVar->add_att("units", "1");  // Apparently CF uses "1" to mean ratio
   ncpVar->add_att("grid_mapping", "grid_mapping_0");
 
-  NcVar * condNumVar = ncout.add_var("conditionNumber", ncFloat, 4, dataDims4);
+  Nc3Var * condNumVar = ncout.add_var("conditionNumber", nc3Float, 4, dataDims4);
   condNumVar->add_att("standard_name", "matrix_condition_number");
   condNumVar->add_att("units", "1");
   condNumVar->add_att("grid_mapping", "grid_mapping_0");
@@ -3543,7 +3543,7 @@ void RadarWind::writeNetcdf(
   ncpVar->put( ncpLinear, counts4);
   condNumVar->put( condNumLinear, counts4);
 
-  // The NcFile destructor automatically closes the file.
+  // The Nc3File destructor automatically closes the file.
 
   delete[] tvals;
   delete[] zvals;

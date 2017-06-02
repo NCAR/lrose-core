@@ -43,7 +43,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <ctime>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include "TsArchive2NetCdf.hh"
 #include "InputPath.hh"
 
@@ -711,11 +711,11 @@ int TsArchive2NetCdf::_writeTmpFile(const string &tmpPath,
   }
 
   ////////////////////////
-  // create NcFile object
+  // create Nc3File object
   
-  NcError err(NcError::verbose_nonfatal);
+  Nc3Error err(Nc3Error::verbose_nonfatal);
   
-  NcFile out(tmpPath.c_str(), NcFile::Replace);
+  Nc3File out(tmpPath.c_str(), Nc3File::Replace);
   if (!out.is_valid()) {
     cerr << "ERROR - TsArchive2NetCdf::_writeTmpFile" << endl;
     cerr << "  Cannot create file: " << tmpPath << endl;
@@ -747,10 +747,10 @@ int TsArchive2NetCdf::_writeTmpFile(const string &tmpPath,
   //////////////////
   // add dimensions
   
-  NcDim *gatesDim = out.add_dim("gates", _nGatesSave);
+  Nc3Dim *gatesDim = out.add_dim("gates", _nGatesSave);
   //int gatesId = gatesDim->id();
   
-  NcDim *frtimeDim = out.add_dim("frtime");
+  Nc3Dim *frtimeDim = out.add_dim("frtime");
   //int frtimeId = frtimeDim->id();
 
   /////////////////////////////////
@@ -758,7 +758,7 @@ int TsArchive2NetCdf::_writeTmpFile(const string &tmpPath,
   
   // Time variable
 
-  NcVar *timeVar = out.add_var("Time", ncDouble, frtimeDim);
+  Nc3Var *timeVar = out.add_var("Time", nc3Double, frtimeDim);
   timeVar->add_att("long_name", "Date/Time value");
   timeVar->add_att("units", "days since 0000-01-01");
   timeVar->add_att("_FillValue", 0.0);
@@ -773,7 +773,7 @@ int TsArchive2NetCdf::_writeTmpFile(const string &tmpPath,
 
   // Elevation variable
   
-  NcVar *elVar = out.add_var("Elevation", ncFloat, frtimeDim);
+  Nc3Var *elVar = out.add_var("Elevation", nc3Float, frtimeDim);
   elVar->add_att("long_name", "Antenna Elevation");
   elVar->add_att("units", "degrees");
   {
@@ -792,7 +792,7 @@ int TsArchive2NetCdf::_writeTmpFile(const string &tmpPath,
 
   // Azimuth variable
 
-  NcVar *azVar = out.add_var("Azimuth", ncFloat, frtimeDim);
+  Nc3Var *azVar = out.add_var("Azimuth", nc3Float, frtimeDim);
   azVar->add_att("long_name", "Antenna Azimuth");
   azVar->add_att("units", "degrees");
   {
@@ -811,7 +811,7 @@ int TsArchive2NetCdf::_writeTmpFile(const string &tmpPath,
 
   // modulation code variable
 
-  NcVar *modCodeVar = out.add_var("ModCode", ncFloat, frtimeDim);
+  Nc3Var *modCodeVar = out.add_var("ModCode", nc3Float, frtimeDim);
   modCodeVar->add_att("long_name", "Modulation code, pulse-to-pulse");
   modCodeVar->add_att("units", "degrees");
   {
@@ -830,7 +830,7 @@ int TsArchive2NetCdf::_writeTmpFile(const string &tmpPath,
 
   // PRT variable
 
-  NcVar *prtVar = out.add_var("Prt", ncInt, frtimeDim);
+  Nc3Var *prtVar = out.add_var("Prt", nc3Int, frtimeDim);
   prtVar->add_att("long_name", "Pulse Repetition Time");
   prtVar->add_att("units", "microseconds");
   prtVar->add_att("valid_range", 1000000);
@@ -845,7 +845,7 @@ int TsArchive2NetCdf::_writeTmpFile(const string &tmpPath,
   
   // SampleNum variable
 
-  NcVar *sampleNumVar = out.add_var("SampleNum", ncInt, frtimeDim);
+  Nc3Var *sampleNumVar = out.add_var("SampleNum", nc3Int, frtimeDim);
   sampleNumVar->add_att("long_name", "Sample Number");
   sampleNumVar->add_att("units", "Counter");
   sampleNumVar->add_att("valid_range", 100000000);
@@ -860,7 +860,7 @@ int TsArchive2NetCdf::_writeTmpFile(const string &tmpPath,
 
   // I variable
   
-  NcVar *iVar = out.add_var("I", ncFloat, frtimeDim, gatesDim);
+  Nc3Var *iVar = out.add_var("I", nc3Float, frtimeDim, gatesDim);
   iVar->add_att("long_name", "In-phase time series variable");
   iVar->add_att("units", "scaled A/D counts");
   {
@@ -882,7 +882,7 @@ int TsArchive2NetCdf::_writeTmpFile(const string &tmpPath,
 
   // Q variable
 
-  NcVar *qVar = out.add_var("Q", ncFloat, frtimeDim, gatesDim);
+  Nc3Var *qVar = out.add_var("Q", nc3Float, frtimeDim, gatesDim);
   qVar->add_att("long_name", "Quadruture time series variable");
   qVar->add_att("units", "scaled A/D counts");
   {

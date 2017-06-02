@@ -43,7 +43,7 @@
 #define TrmmClimo2Mdv_H
 
 #include <string>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include <didss/DsInputPath.hh>
 #include <didss/LdataInfo.hh>
 #include <Mdv/DsMdvx.hh>
@@ -86,13 +86,13 @@ private:
   Params _params;
   DsInputPath *_input;
 
-  NcDim *_xDim;
-  NcDim *_yDim;
-  NcDim *_tDim;
-  NcVar *_xVar;
-  NcVar *_yVar;
-  NcVar *_tVar;
-  NcVar *_dataVar;
+  Nc3Dim *_xDim;
+  Nc3Dim *_yDim;
+  Nc3Dim *_tDim;
+  Nc3Var *_xVar;
+  Nc3Var *_yVar;
+  Nc3Var *_tVar;
+  Nc3Var *_dataVar;
 
   int _processFile(const char *input_path);
   int _writeAsSingleFile();

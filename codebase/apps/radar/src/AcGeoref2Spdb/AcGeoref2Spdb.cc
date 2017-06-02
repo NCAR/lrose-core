@@ -903,21 +903,30 @@ int AcGeoref2Spdb::_readGlobalAttr()
   _latCoordName.clear();
   _lonCoordName.clear();
   
-  if (_file.readGlobAttr("time_coordinate", _timeCoordName)) {
+  try {
+    _file.readGlobAttr("time_coordinate", _timeCoordName);
+  } catch (NcxxException e) {
     cerr << "ERROR - AcGeoref2Spdb::_readGlobalAttr()" << endl;
     cerr << "  Cannot find global attr: 'time_coordinate'" << endl;
+    cerr << "  exception: " << e.what() << endl;
     iret = -1;
   }
 
-  if (_file.readGlobAttr("latitude_coordinate", _latCoordName)) {
+  try {
+    _file.readGlobAttr("latitude_coordinate", _latCoordName);
+  } catch (NcxxException e) {
     cerr << "ERROR - AcGeoref2Spdb::_readGlobalAttr()" << endl;
     cerr << "  Cannot find global attr: 'latitude_coordinate'" << endl;
+    cerr << "  exception: " << e.what() << endl;
     iret = -1;
   }
 
-  if (_file.readGlobAttr("longitude_coordinate", _lonCoordName)) {
+  try {
+    _file.readGlobAttr("longitude_coordinate", _lonCoordName);
+  } catch (NcxxException e) {
     cerr << "ERROR - AcGeoref2Spdb::_readGlobalAttr()" << endl;
     cerr << "  Cannot find global attr: 'longitude_coordinate'" << endl;
+    cerr << "  exception: " << e.what() << endl;
     iret = -1;
   }
 
