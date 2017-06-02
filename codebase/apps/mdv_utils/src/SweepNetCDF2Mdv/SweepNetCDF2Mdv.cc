@@ -48,7 +48,7 @@
 #include <iostream>
 #include <signal.h>
 #include <math.h>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include <string>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -121,7 +121,7 @@ SweepNetCDF2Mdv::SweepNetCDF2Mdv(int argc, char **argv) :
   // Get TDRP parameters.
 
   _params = new Params();
-  char *params_path = "unknown";
+  char *params_path = (char *) "unknown";
   
   if (_params->loadFromArgs(argc, argv,
 			    _args->override.list,

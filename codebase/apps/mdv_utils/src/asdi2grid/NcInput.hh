@@ -45,7 +45,7 @@ Jason Craig, Aug 2007
 
 #include <string>
 #include <dirent.h>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include <toolsa/Path.hh>
 
 typedef struct
@@ -81,7 +81,7 @@ public:
 
 private:
   
-  NcFile *_ncFile;
+  Nc3File *_ncFile;
   
   bool _readOK;
 
@@ -89,14 +89,12 @@ private:
 
   void _clearRead();
 
-  int getDimensionSize(char *dimName);
-  double getScalarDouble(char *varName);
-  int *get1dInt(char *varName, long varSize, int *missing_value);
-  float *get1dFloat(char *varName, long varSize, float *missing_value);
-  double *get1dDouble(char *varName, long varSize, double *missing_value);
-  char *get1DString(char *varName, long varSize, int stringSize);
+  int getDimensionSize(const char *dimName);
+  double getScalarDouble(const char *varName);
+  int *get1dInt(const char *varName, long varSize, int *missing_value);
+  float *get1dFloat(const char *varName, long varSize, float *missing_value);
+  double *get1dDouble(const char *varName, long varSize, double *missing_value);
+  char *get1DString(const char *varName, long varSize, int stringSize);
 };
 
 #endif
-   
-   

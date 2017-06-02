@@ -42,7 +42,7 @@
 
 #include <string>
 #include <cmath>
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3File.hh>
 #include <Mdv/DsMdvx.hh>
 #include <didss/DsInputPath.hh>
 #include <toolsa/pmu.h>

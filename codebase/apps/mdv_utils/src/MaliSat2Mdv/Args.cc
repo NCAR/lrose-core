@@ -50,7 +50,7 @@
 
 #include <string.h>
 
-#include <os_config.h>
+#include <toolsa/os_config.h>
 #include <tdrp/tdrp.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/str.h>

@@ -47,8 +47,8 @@
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
 #include <Mdv/MdvxRemapLut.hh>
-#include <netcdf.hh>
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3File.hh>
+#include <Ncxx/Nc3File.hh>
 #include "Args.hh"
 #include "Params.hh"
 #include "SunAngle.hh"
@@ -91,23 +91,23 @@ private:
 
   // NetCDF file
 
-  NcFile *_ncFile;
-  NcError *_ncErr;
+  Nc3File *_ncFile;
+  Nc3Error *_ncErr;
   
   // NetCDF dimensions
 
-  NcDim *_timeDim;
-  NcDim *_zDim;
-  NcDim *_yDim;
-  NcDim *_xDim;
+  Nc3Dim *_timeDim;
+  Nc3Dim *_zDim;
+  Nc3Dim *_yDim;
+  Nc3Dim *_xDim;
 
   // NetCDF coordinate variables
 
-  NcVar *_baseTimeVar;
-  NcVar *_timeOffsetVar;
-  NcVar *_zVar;
-  NcVar *_yVar;
-  NcVar *_xVar;
+  Nc3Var *_baseTimeVar;
+  Nc3Var *_timeOffsetVar;
+  Nc3Var *_zVar;
+  Nc3Var *_yVar;
+  Nc3Var *_xVar;
 
   TaArray<float> _zArray_, _yArray_, _xArray_;
   float *_zArray, *_yArray, *_xArray;
@@ -147,12 +147,12 @@ private:
   /// create error object so we can handle errors
   /// Returns 0 on success, -1 on failure
 
-  int _openNcFile(const string &path);
+  int _openNc3File(const string &path);
 
   /// close netcdf file if open
   /// remove error object if it exists
   
-  void _closeNcFile();
+  void _closeNc3File();
 
   // load up dimensions and variables
 
@@ -162,7 +162,7 @@ private:
 
   int _setMasterHeader(DsMdvx &mdvx, int itime);
   int _addDataFields(DsMdvx &mdvx, int itime);
-  int _addDataField(NcVar *var, DsMdvx &mdvx, int itime);
+  int _addDataField(Nc3Var *var, DsMdvx &mdvx, int itime);
   
   MdvxField *_createMdvxField(const string &fieldName,
                               const string &longName,
@@ -177,9 +177,9 @@ private:
                                        const string &units,
                                        const float *vals);
 
-  void _printFile(NcFile &ncf);
-  void _printAtt(NcAtt *att);
-  void _printVarVals(NcVar *var);
+  void _printFile(Nc3File &ncf);
+  void _printAtt(Nc3Att *att);
+  void _printVarVals(Nc3Var *var);
 
   void _correctForSunAngle(MdvxField *field);
 

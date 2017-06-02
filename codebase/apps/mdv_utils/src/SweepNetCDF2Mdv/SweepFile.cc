@@ -186,11 +186,11 @@ bool SweepFile::initialize()
   // error is encountered.  This object is not explicitly used in the below
   // code, but is used implicitly by the netCDF library.
 
-  _ncError = new NcError(NcError::silent_nonfatal);
+  _ncError = new Nc3Error(Nc3Error::silent_nonfatal);
 
   // Initialize the input netCDF file
 
-  _sweepFile = new NcFile(_filePath.c_str());
+  _sweepFile = new Nc3File(_filePath.c_str());
   
   if (!_sweepFile->is_valid())
   {
@@ -271,7 +271,7 @@ bool SweepFile::_createAzimuthLookupTable()
   
   // Get the azimuth data
 
-  NcVar *az_var;
+  Nc3Var *az_var;
 
   if ((az_var = _getFieldVar(AZIMUTH_VAR_NAME)) == 0)
     return 0;
@@ -280,7 +280,7 @@ bool SweepFile::_createAzimuthLookupTable()
     cerr << "Getting azimuth values for variable: "
 	 << AZIMUTH_VAR_NAME << endl;
 
-  NcValues *az_values;
+  Nc3Values *az_values;
   if ((az_values = az_var->values()) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
@@ -314,7 +314,7 @@ MdvxField *SweepFile::_createMdvField(const string &field_name) const
   
   // Access the field data
 
-  NcVar *field_var;
+  Nc3Var *field_var;
 
   if ((field_var = _getFieldVar(field_name)) == 0)
     return 0;
@@ -405,7 +405,7 @@ bool SweepFile::_updateMdvFieldData(const string &field_name,
   
   // Get the field data
 
-  NcVar *field_var;
+  Nc3Var *field_var;
 
   if ((field_var = _getFieldVar(field_name)) == 0)
     return false;
@@ -413,7 +413,7 @@ bool SweepFile::_updateMdvFieldData(const string &field_name,
   if (_debug)
     cerr << "Getting field values for variable: " << field_name << endl;
 
-  NcValues *field_values;
+  Nc3Values *field_values;
   if ((field_values = field_var->values()) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
@@ -502,7 +502,7 @@ bool SweepFile::_updateMdvFieldData(const string &field_name,
   
   switch (field_var->type())
   {
-  case ncFloat :
+  case nc3Float :
   {
     for (int az = 0; az < ny; ++az)
     {
@@ -535,7 +535,7 @@ bool SweepFile::_updateMdvFieldData(const string &field_name,
     break;
   }
   
-  case ncShort :
+  case nc3Short :
   {
     double scale = _getVarFloatAtt(*field_var, SCALE_ATT_NAME);
     double bias;
@@ -578,11 +578,11 @@ bool SweepFile::_updateMdvFieldData(const string &field_name,
     break;
   }
   
-  case ncNoType :
-  case ncByte :
-  case ncChar :
-  case ncInt :
-  case ncDouble :
+  case nc3NoType :
+  case nc3Byte :
+  case nc3Char :
+  case nc3Int :
+  case nc3Double :
   {
     cerr << "ERROR: " << method_name << endl;
     cerr << "Don't yet handle this netCDF data type" << endl;
@@ -742,7 +742,7 @@ bool SweepFile::_getDimensions()
   
   // Get the number of gates
 
-  NcDim *gates_dim;
+  Nc3Dim *gates_dim;
   if ((gates_dim = _sweepFile->get_dim(_numGatesDimName.c_str())) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
@@ -756,7 +756,7 @@ bool SweepFile::_getDimensions()
 
   // Get the number of azimuths
 
-  NcDim *az_dim;
+  Nc3Dim *az_dim;
   if ((az_dim = _sweepFile->get_dim(NUM_AZIMUTHS_DIM_NAME.c_str())) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
@@ -786,7 +786,7 @@ vector< string> SweepFile::_getFieldList() const
   
   // Get the number of fields
 
-  NcDim *fields_dim;
+  Nc3Dim *fields_dim;
   if ((fields_dim = _sweepFile->get_dim(NUM_FIELDS_DIM_NAME.c_str())) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
@@ -800,7 +800,7 @@ vector< string> SweepFile::_getFieldList() const
 
   // Get the length of the field names
 
-  NcDim *field_name_len_dim;
+  Nc3Dim *field_name_len_dim;
   if ((field_name_len_dim =
        _sweepFile->get_dim(FIELD_NAME_LEN_DIM_NAME.c_str())) == 0)
   {
@@ -815,7 +815,7 @@ vector< string> SweepFile::_getFieldList() const
 
   // Get the list of fields
 
-  NcVar *field_list_var;
+  Nc3Var *field_list_var;
   
   if ((field_list_var =
        _sweepFile->get_var(_fieldListVarName.c_str())) == 0)
@@ -836,7 +836,7 @@ vector< string> SweepFile::_getFieldList() const
     return field_list;
   }
 
-  NcValues *field_values;
+  Nc3Values *field_values;
 
   if ((field_values = field_list_var->values()) == 0)
   {
@@ -873,14 +873,14 @@ vector< string> SweepFile::_getFieldList() const
  * Returns a pointer to the variable on success, 0 on failure.
  */
 
-NcVar *SweepFile::_getFieldVar(const string &field_name) const
+Nc3Var *SweepFile::_getFieldVar(const string &field_name) const
 {
   static const string method_name = "SweepFile::_getFieldVar()";
 
   if (_debug)
     cerr << "Getting NC variable object for field: " << field_name << endl;
 
-  NcVar *field = 0;
+  Nc3Var *field = 0;
 
   if ((field = _sweepFile->get_var(field_name.c_str())) == 0)
   {
@@ -924,7 +924,7 @@ int SweepFile::_getGlobalIntAtt(const string &att_name) const
     cerr << "Getting global attribute from NC file:"
 	 << att_name << endl;
 
-  NcAtt *attribute;
+  Nc3Att *attribute;
   
   if ((attribute = _sweepFile->get_att(att_name.c_str())) == 0)
   {
@@ -955,7 +955,7 @@ float SweepFile::_getScalarVarFloat(const string &variable_name,
   if (_debug)
     cerr << "Getting variable from NC file: " << variable_name << endl;
 
-  NcVar *variable = 0;
+  Nc3Var *variable = 0;
 
   if ((variable = _sweepFile->get_var(variable_name.c_str())) == 0)
   {
@@ -975,7 +975,7 @@ float SweepFile::_getScalarVarFloat(const string &variable_name,
     return FLOAT_MISSING_DATA_VALUE;
   }
 
-  NcValues *variable_values;
+  Nc3Values *variable_values;
   
   if ((variable_values = variable->values()) == 0)
   {
@@ -1006,7 +1006,7 @@ int SweepFile::_getScalarVarInt(const string &variable_name,
 {
   static const string method_name = "SweepFile::_getScalarVarInt()";
 
-  NcVar *variable = 0;
+  Nc3Var *variable = 0;
 
   if ((variable = _sweepFile->get_var(variable_name.c_str())) == 0)
   {
@@ -1026,7 +1026,7 @@ int SweepFile::_getScalarVarInt(const string &variable_name,
     return INT_MISSING_DATA_VALUE;
   }
 
-  NcValues *variable_values;
+  Nc3Values *variable_values;
   
   if ((variable_values = variable->values()) == 0)
   {
@@ -1052,7 +1052,7 @@ int SweepFile::_getScalarVarInt(const string &variable_name,
  * success, the global FLOAT_MISSING_DATA_VALUE on failure.
  */
 
-float SweepFile::_getVarFloatAtt(const NcVar &variable,
+float SweepFile::_getVarFloatAtt(const Nc3Var &variable,
 				 const string &att_name) const
 {
   static const string method_name = "SweepFile::_getVarFloatAtt()";
@@ -1061,7 +1061,7 @@ float SweepFile::_getVarFloatAtt(const NcVar &variable,
     cerr << "Getting variable attribute from NC file:"
 	 << att_name << endl;
 
-  NcAtt *attribute;
+  Nc3Att *attribute;
   
   if ((attribute = variable.get_att(att_name.c_str())) == 0)
   {
@@ -1073,7 +1073,7 @@ float SweepFile::_getVarFloatAtt(const NcVar &variable,
     return FLOAT_MISSING_DATA_VALUE;
   }
   
-  NcValues *att_values;
+  Nc3Values *att_values;
   
   if ((att_values = attribute->values()) == 0)
   {
@@ -1101,12 +1101,12 @@ float SweepFile::_getVarFloatAtt(const NcVar &variable,
  * success, "" on failure.
  */
 
-string SweepFile::_getVarStringAtt(const NcVar &variable,
+string SweepFile::_getVarStringAtt(const Nc3Var &variable,
 				   const string &att_name) const
 {
   static const string method_name = "SweepFile::_getVarStringAtt()";
   
-  NcAtt *attribute;
+  Nc3Att *attribute;
   
   if ((attribute = variable.get_att(att_name.c_str())) == 0)
   {
@@ -1118,7 +1118,7 @@ string SweepFile::_getVarStringAtt(const NcVar &variable,
     return "";
   }
   
-  NcValues *att_values;
+  Nc3Values *att_values;
   
   if ((att_values = attribute->values()) == 0)
   {

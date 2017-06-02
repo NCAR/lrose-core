@@ -50,7 +50,7 @@
 
 #include <string>
 #include <vector>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 
 #include <Mdv/Mdvx.hh>
 #include <Mdv/MdvxField.hh>
@@ -216,8 +216,8 @@ protected:
   bool _biasSpecified;
 
   string _filePath;
-  NcError *_ncError;
-  NcFile *_sweepFile;
+  Nc3Error *_ncError;
+  Nc3File *_sweepFile;
   
   // Data dimensions
 
@@ -299,7 +299,7 @@ protected:
    * Returns a pointer to the variable on success, 0 on failure.
    */
 
-  NcVar *_getFieldVar(const string &field_name) const;
+  Nc3Var *_getFieldVar(const string &field_name) const;
   
 
   /*********************************************************************
@@ -345,7 +345,7 @@ protected:
    * success, the global FLOAT_MISSING_DATA_VALUE on failure.
    */
 
-  float _getVarFloatAtt(const NcVar &variable,
+  float _getVarFloatAtt(const Nc3Var &variable,
 			const string &att_name) const;
   
 
@@ -357,7 +357,7 @@ protected:
    * success, "" on failure.
    */
 
-  string _getVarStringAtt(const NcVar &variable,
+  string _getVarStringAtt(const Nc3Var &variable,
 			  const string &att_name) const;
   
 

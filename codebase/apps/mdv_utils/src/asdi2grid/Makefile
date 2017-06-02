@@ -32,23 +32,17 @@
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = asdi2grid
-MODULE_TYPE = progcpp
 
 LOC_INCLUDES = $(NETCDF_INCS) $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -leuclid -ldsserver \
-	-lrapformats -ldidss -lnetcdf -lnetcdf_c++ \
-	-lncf -ltoolsa -ldataport -ltdrp \
+	-lrapformats -ldidss -ltoolsa -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF_LDFLAGS) $(NETCDF4_LDFLAGS)
 
-LOC_CFLAGS      =
+LOC_CFLAGS =
 LOC_CPPC_CFLAGS = 
-
-
-
-
 
 HDRS = \
 	$(PARAMS_HH) \

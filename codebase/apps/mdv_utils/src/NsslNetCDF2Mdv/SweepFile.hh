@@ -40,9 +40,9 @@
 class Mdvx;
 class MdvxField;
 class DateTime;
-class NcError;
-class NcFile;
-class NcVar;
+class Nc3Error;
+class Nc3File;
+class Nc3Var;
 
 class SweepFile
 {
@@ -154,8 +154,8 @@ protected:
   std::string _numGatesDimName;
 
 
-  NcError *_ncError;
-  NcFile * _sweepFile;
+  Nc3Error *_ncError;
+  Nc3File * _sweepFile;
   
   // Data dimensions
 
@@ -179,7 +179,7 @@ protected:
   bool _updateMdvFieldData(MdvxField &field)const;
 
   bool _getDimensions();
-  NcVar *_getFieldVar(const std::string &field_name) const;
+  Nc3Var *_getFieldVar(const std::string &field_name) const;
   int _getGlobalIntAtt(const std::string &att_name) const;
   std::string _getGlobalStringAtt(const std::string &att_name) const;
   float _getGlobalFloatAtt(const std::string &att_name) const;
@@ -187,9 +187,9 @@ protected:
 			   const int data_index = 0) const;
   int _getScalarVarInt(const std::string &variable_name,
 		       const int data_index = 0) const;
-  float _getVarFloatAtt(const NcVar &variable,
+  float _getVarFloatAtt(const Nc3Var &variable,
 			const std::string &att_name) const;
-  std::string _getVarStringAtt(const NcVar &variable,
+  std::string _getVarStringAtt(const Nc3Var &variable,
 			       const std::string &att_name) const;
 };
 

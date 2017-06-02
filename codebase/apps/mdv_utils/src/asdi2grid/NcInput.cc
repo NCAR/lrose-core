@@ -53,7 +53,7 @@ NcInput::NcInput()
   _data.altType = NULL;
   _data.callsign = NULL;
 
-  NcError ncError( NcError::silent_nonfatal );
+  Nc3Error ncError( Nc3Error::silent_nonfatal );
 }
 
 NcInput::~NcInput()
@@ -94,9 +94,9 @@ bool NcInput::readFile(char *filePath )
   _clearRead();
   _readOK = true;
 
-  NcError ncError( NcError::silent_nonfatal );
+  Nc3Error ncError( Nc3Error::silent_nonfatal );
 
-  _ncFile = new NcFile( filePath, NcFile::ReadOnly );
+  _ncFile = new Nc3File( filePath, Nc3File::ReadOnly );
   if( !_ncFile || !_ncFile->is_valid() ) {
     printf("Failed to open file '%s'\n", filePath);
     return 1;
@@ -152,9 +152,9 @@ bool NcInput::readFile(char *filePath )
   return 0;
 }
 
-int NcInput::getDimensionSize(char *dimName)
+int NcInput::getDimensionSize(const char *dimName)
 {
-  NcDim *dim = _ncFile->get_dim(dimName);
+  Nc3Dim *dim = _ncFile->get_dim(dimName);
   if( !dim || !dim->is_valid() ) {
     printf("Could not get '%s' dimension from file '%s'\n", dimName, _data.filePath);
     _readOK = false;
@@ -163,9 +163,9 @@ int NcInput::getDimensionSize(char *dimName)
   return dim->size();
 }
 
-double NcInput::getScalarDouble(char *varName)
+double NcInput::getScalarDouble(const char *varName)
 {
-  NcVar *var = _ncFile->get_var(varName);
+  Nc3Var *var = _ncFile->get_var(varName);
   if( !var || !var->is_valid() ) {
     printf("Could not get '%s' variable from file '%s'\n", varName, _data.filePath);
     _readOK = false;
@@ -174,9 +174,9 @@ double NcInput::getScalarDouble(char *varName)
   return var->as_double(0);
 }
 
-int *NcInput::get1dInt(char *varName, long varSize, int *missing_value)
+int *NcInput::get1dInt(const char *varName, long varSize, int *missing_value)
 {
-  NcVar *var = _ncFile->get_var(varName);
+  Nc3Var *var = _ncFile->get_var(varName);
   if( !var || !var->is_valid() ) {
     printf("Could not get '%s' variable from file '%s'\n", varName, _data.filePath);
     _readOK = false;
@@ -196,7 +196,7 @@ int *NcInput::get1dInt(char *varName, long varSize, int *missing_value)
     return NULL;
   }
 
-  NcAtt *att = var->get_att("missing_value");
+  Nc3Att *att = var->get_att("missing_value");
   if( missing_value && att && att->is_valid() ) {
     *missing_value = att->as_int(0);
   }
@@ -206,9 +206,9 @@ int *NcInput::get1dInt(char *varName, long varSize, int *missing_value)
   return values;
 }
 
-float *NcInput::get1dFloat(char *varName, long varSize, float *missing_value)
+float *NcInput::get1dFloat(const char *varName, long varSize, float *missing_value)
 {
-  NcVar *var = _ncFile->get_var(varName);
+  Nc3Var *var = _ncFile->get_var(varName);
   if( !var || !var->is_valid() ) {
     printf("Could not get '%s' variable from file '%s'\n", varName, _data.filePath);
     _readOK = false;
@@ -228,7 +228,7 @@ float *NcInput::get1dFloat(char *varName, long varSize, float *missing_value)
     return NULL;
   }
 
-  NcAtt *att = var->get_att("_FillValue");
+  Nc3Att *att = var->get_att("_FillValue");
   if( missing_value && att && att->is_valid() ) {
     *missing_value = att->as_float(0);
   }
@@ -238,10 +238,10 @@ float *NcInput::get1dFloat(char *varName, long varSize, float *missing_value)
   return values;
 }
 
-double *NcInput::get1dDouble(char *varName, long varSize, double *missing_value)
+double *NcInput::get1dDouble(const char *varName, long varSize, double *missing_value)
 {
   const char *FUNCTION_NAME = "get1dDouble";
-  NcVar *var = _ncFile->get_var(varName);
+  Nc3Var *var = _ncFile->get_var(varName);
   if( !var || !var->is_valid() ) {
     printf("Could not get '%s' variable from file '%s'\n", varName, _data.filePath);
     _readOK = false;
@@ -261,7 +261,7 @@ double *NcInput::get1dDouble(char *varName, long varSize, double *missing_value)
     return NULL;
   }
 
-  NcAtt *att = var->get_att("missing_value");
+  Nc3Att *att = var->get_att("missing_value");
   if( missing_value && att && att->is_valid() ) {
     *missing_value = att->as_double(0);
   }
@@ -271,10 +271,10 @@ double *NcInput::get1dDouble(char *varName, long varSize, double *missing_value)
   return values;
 }
 
-char *NcInput::get1DString(char *varName, long varSize, int stringSize)
+char *NcInput::get1DString(const char *varName, long varSize, int stringSize)
 {
   const char *FUNCTION_NAME = "getVar";
-  NcVar *var = _ncFile->get_var(varName);
+  Nc3Var *var = _ncFile->get_var(varName);
   if( !var || !var->is_valid() ) {
     printf("Could not get '%s' variable from file '%s'\n", varName, _data.filePath);
     _readOK = false;
@@ -294,7 +294,7 @@ char *NcInput::get1DString(char *varName, long varSize, int stringSize)
 
   char *data = new char[varSize*stringSize];
 
-  if(var->type() != ncChar) {
+  if(var->type() != nc3Char) {
     printf("Variable '%s' is not NcChar from file '%s'\n", varName, _data.filePath);
     _readOK = false;
     delete [] edges;

@@ -48,7 +48,7 @@
 #ifndef MaliSat2Mdv_HH
 #define MaliSat2Mdv_HH
 
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include <string>
 #include <sys/time.h>
 #include <vector>
@@ -175,7 +175,7 @@ class MaliSat2Mdv
    */
 
   bool _getTempField(Mdvx &mdvx,
-		     const NcFile &nc_file,
+		     const Nc3File &nc_file,
 		     const string &input_file_path) const;
   
 
@@ -211,7 +211,7 @@ class MaliSat2Mdv
    */
 
   bool _updateFieldHeader(Mdvx::field_header_t &field_hdr,
-			  const NcFile &nc_file,
+			  const Nc3File &nc_file,
 			  const string &input_file_path,
 			  const string &units) const;
   

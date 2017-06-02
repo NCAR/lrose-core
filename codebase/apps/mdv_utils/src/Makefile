@@ -60,6 +60,7 @@ SUB_DIRS = \
 	MdvOutlier \
 	MdvPatch \
 	MdvPointExtract \
+	MdvPull \
 	mdvRadialDecimate \
 	MdvRepeatDay \
 	MdvResample \

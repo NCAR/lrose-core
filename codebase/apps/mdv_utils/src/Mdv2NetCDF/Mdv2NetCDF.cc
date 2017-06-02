@@ -573,7 +573,7 @@ string Mdv2NetCDF::_computeOutputPath(const DsMdvx &mdvx)
   // ensure output dir exists
   
   if (ta_makedir_recurse(_outputDir.c_str())) {
-    cerr << "ERROR - Mdv2NetCDF::_initNcFile()" << endl;
+    cerr << "ERROR - Mdv2NetCDF::_initNc3File()" << endl;
     cerr << "  Cannot make output dir: " << _outputDir;
   }
 

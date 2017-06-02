@@ -257,6 +257,7 @@ codebase/apps/interp/src/surf_interp/surf_interp
 
 codebase/apps/mdv_utils/src/Binary2Mdv/Binary2Mdv
 codebase/apps/mdv_utils/src/GribNc2Mdv/GribNc2Mdv
+codebase/apps/mdv_utils/src/MaliSat2Mdv/MaliSat2Mdv
 codebase/apps/mdv_utils/src/McidasNcf2Mdv/McidasNcf2Mdv
 codebase/apps/mdv_utils/src/Mdv2Ascii/Mdv2Ascii
 codebase/apps/mdv_utils/src/Mdv2AsciiContour/Mdv2AsciiContour
@@ -270,6 +271,7 @@ codebase/apps/mdv_utils/src/Mdv2SoundingSpdb/Mdv2SoundingSpdb
 codebase/apps/mdv_utils/src/Mdv2SweepNetCDF/Mdv2SweepNetCDF
 codebase/apps/mdv_utils/src/Mdv2TextHdr/Mdv2TextHdr
 codebase/apps/mdv_utils/src/Mdv2Vil/Mdv2Vil
+codebase/apps/mdv_utils/src/Mdv2ZebraNetCDF/Mdv2ZebraNetCDF
 codebase/apps/mdv_utils/src/Mdv3Dto2D/Mdv3Dto2D
 codebase/apps/mdv_utils/src/MdvAccumulate/MdvAccumulate
 codebase/apps/mdv_utils/src/MdvAreaCoverage/MdvAreaCoverage
@@ -304,6 +306,7 @@ codebase/apps/mdv_utils/src/MdvMultFilt/MdvMultFilt
 codebase/apps/mdv_utils/src/MdvOffsetField/MdvOffsetField
 codebase/apps/mdv_utils/src/MdvPatch/MdvPatch
 codebase/apps/mdv_utils/src/MdvPointExtract/MdvPointExtract
+codebase/apps/mdv_utils/src/MdvPull/MdvPull
 codebase/apps/mdv_utils/src/MdvScatterPlot/MdvScatterPlot
 codebase/apps/mdv_utils/src/MdvSmooth/MdvSmooth
 codebase/apps/mdv_utils/src/MdvSpdDir2UV/MdvSpdDir2UV
@@ -319,6 +322,7 @@ codebase/apps/mdv_utils/src/Mdvx2Vil/Mdvx2Vil
 codebase/apps/mdv_utils/src/MdvxHowBad/MdvxHowBad
 codebase/apps/mdv_utils/src/NcGeneric2Mdv/NcGeneric2Mdv
 codebase/apps/mdv_utils/src/NetCDF2Mdv/NetCDF2Mdv
+codebase/apps/mdv_utils/src/NsslNetCDF2Mdv/NsslNetCDF2Mdv
 codebase/apps/mdv_utils/src/Plain2Mdv/Plain2Mdv
 codebase/apps/mdv_utils/src/PrintMdv/PrintMdv
 codebase/apps/mdv_utils/src/ReadDEM/ReadDEM

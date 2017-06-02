@@ -37,7 +37,7 @@
 #include <string>
 #include <vector>
 #include "Params.hh"
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxRadar.hh>
 #include <toolsa/DateTime.hh>
@@ -75,7 +75,7 @@ protected:
 private:
 
   const Params &_params;
-  const NcFile _ncfIn;
+  const Nc3File _ncfIn;
   const DsMdvx &_mdvx;
   const DsRadarParams &_radarParams;
 

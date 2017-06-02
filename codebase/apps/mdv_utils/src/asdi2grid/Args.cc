@@ -58,7 +58,6 @@ void Args::usage(string prog_name)
 int Args::parse(int argc, char **argv, string prog_name, Params *params)
 {
 
-  int iret = 0;
   char paramVal[256];
 
   // intialize

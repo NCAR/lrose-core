@@ -33,8 +33,6 @@
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
-MODULE_TYPE=progcpp
-
 TARGET_FILE = SweepNetCDF2Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
@@ -71,27 +69,22 @@ CPPC_SRCS = \
 	VolumeTrigger.cc
 
 #
-# standard targets
+# tdrp macros
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_targets
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
 
 #
-# local targets
+# C++ targets
 #
 
-depend: depend_generic
+include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
 
 #
-# TDRP support
+# tdrp targets
 #
 
-Params.cc: paramdef.$(TARGET_FILE)
-	tdrp_gen -f paramdef.$(TARGET_FILE) -c++ \
-		-prog $(TARGET_FILE)
-
-clean_tdrp:
-	$(RM) Params.hh Params.cc
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

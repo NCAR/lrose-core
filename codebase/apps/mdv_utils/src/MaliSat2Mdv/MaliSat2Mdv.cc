@@ -53,7 +53,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <os_config.h>
+#include <toolsa/os_config.h>
 #include <dsdata/DsFileListTrigger.hh>
 #include <dsdata/DsInputDirTrigger.hh>
 #include <dsdata/DsLdataTrigger.hh>
@@ -253,14 +253,14 @@ void MaliSat2Mdv::run()
  */
 
 bool MaliSat2Mdv::_getTempField(Mdvx &mdvx,
-				const NcFile &nc_file,
+				const Nc3File &nc_file,
 				const string &input_file_path) const
 {
   static const string method_name = "MaliSat2Mdv::_getTempField()";
 
   // Get the temperature variable and its attributes from the netCDF file
 
-  NcVar *temp_var;
+  Nc3Var *temp_var;
   
   if ((temp_var = nc_file.get_var(TEMP_VAR_NAME.c_str())) == 0)
   {
@@ -271,7 +271,7 @@ bool MaliSat2Mdv::_getTempField(Mdvx &mdvx,
     return false;
   }
   
-  NcAtt *units_att;
+  Nc3Att *units_att;
   
   if ((units_att = temp_var->get_att(TEMP_UNITS_ATT_NAME.c_str())) == 0)
   {
@@ -285,7 +285,7 @@ bool MaliSat2Mdv::_getTempField(Mdvx &mdvx,
   string units = units_att->as_string(0);
   delete units_att;
   
-  NcAtt *missing_value_att;
+  Nc3Att *missing_value_att;
   
   if ((missing_value_att =
        temp_var->get_att(TEMP_MISSING_VALUE_ATT_NAME.c_str())) == 0)
@@ -528,11 +528,11 @@ bool MaliSat2Mdv::_processFile(const string &input_file_path)
   // error is encountered.  This object is not explicitly used in the below
   // code, but is used implicitly by the netCDF library.
 
-  NcError nc_error(NcError::silent_nonfatal);
+  Nc3Error nc_error(Nc3Error::silent_nonfatal);
 
   // Open the input file
   
-  NcFile nc_file(input_file_path.c_str());
+  Nc3File nc_file(input_file_path.c_str());
   
   if (!nc_file.is_valid())
   {
@@ -584,7 +584,7 @@ bool MaliSat2Mdv::_processFile(const string &input_file_path)
  */
 
 bool MaliSat2Mdv::_updateFieldHeader(Mdvx::field_header_t &field_hdr,
-				     const NcFile &nc_file,
+				     const Nc3File &nc_file,
 				     const string &input_file_path,
 				     const string &units) const
 {
@@ -592,7 +592,7 @@ bool MaliSat2Mdv::_updateFieldHeader(Mdvx::field_header_t &field_hdr,
 
   // Get the needed information from the netCDF file
 
-  NcDim *lat_dim;
+  Nc3Dim *lat_dim;
 
   if ((lat_dim = nc_file.get_dim(LAT_DIM_NAME.c_str())) == 0)
   {
@@ -603,7 +603,7 @@ bool MaliSat2Mdv::_updateFieldHeader(Mdvx::field_header_t &field_hdr,
     return false;
   }
   
-  NcDim *lon_dim;
+  Nc3Dim *lon_dim;
 
   if ((lon_dim = nc_file.get_dim(LON_DIM_NAME.c_str())) == 0)
   {
@@ -617,7 +617,7 @@ bool MaliSat2Mdv::_updateFieldHeader(Mdvx::field_header_t &field_hdr,
   if (_params->debug)
     cerr << "   nx = " << lon_dim->size() << ", ny = " << lat_dim->size() << endl;
   
-  NcAtt *latmin_att;
+  Nc3Att *latmin_att;
   
   if ((latmin_att = nc_file.get_att(LATMIN_ATT_NAME.c_str())) == 0)
   {
@@ -631,7 +631,7 @@ bool MaliSat2Mdv::_updateFieldHeader(Mdvx::field_header_t &field_hdr,
   double latmin = latmin_att->as_double(0);
   delete latmin_att;
   
-  NcAtt *lonmin_att;
+  Nc3Att *lonmin_att;
   
   if ((lonmin_att = nc_file.get_att(LONMIN_ATT_NAME.c_str())) == 0)
   {
@@ -645,7 +645,7 @@ bool MaliSat2Mdv::_updateFieldHeader(Mdvx::field_header_t &field_hdr,
   double lonmin = lonmin_att->as_double(0);
   delete lonmin_att;
   
-  NcAtt *latres_att;
+  Nc3Att *latres_att;
   
   if ((latres_att = nc_file.get_att(LATRES_ATT_NAME.c_str())) == 0)
   {
@@ -659,7 +659,7 @@ bool MaliSat2Mdv::_updateFieldHeader(Mdvx::field_header_t &field_hdr,
   double latres = latres_att->as_double(0);
   delete latres_att;
   
-  NcAtt *lonres_att;
+  Nc3Att *lonres_att;
   
   if ((lonres_att = nc_file.get_att(LONRES_ATT_NAME.c_str())) == 0)
   {

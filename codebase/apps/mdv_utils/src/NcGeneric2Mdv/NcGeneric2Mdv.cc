@@ -195,7 +195,7 @@ int NcGeneric2Mdv::_processFile(const char *input_path)
 
   // open file
   
-  if (_openNcFile(input_path)) {
+  if (_openNc3File(input_path)) {
     cerr << "ERROR - NcGeneric2Mdv::_processFile" << endl;
     cerr << "  File path: " << input_path << endl;
     return -1;
@@ -355,7 +355,7 @@ void NcGeneric2Mdv::_initInputProjection()
 //
 // Returns 0 on success, -1 on failure
 
-int NcGeneric2Mdv::_openNcFile(const string &path)
+int NcGeneric2Mdv::_openNc3File(const string &path)
   
 {
   
@@ -364,23 +364,23 @@ int NcGeneric2Mdv::_openNcFile(const string &path)
     delete _ncFile;
   }
 
-  _ncFile = new NcFile(path.c_str(), NcFile::ReadOnly);
+  _ncFile = new Nc3File(path.c_str(), Nc3File::ReadOnly);
 
   // Check that constructor succeeded
 
   if (!_ncFile->is_valid()) {
-    cerr << "ERROR - NcGeneric2Mdv::_openNcFile" << endl;
+    cerr << "ERROR - NcGeneric2Mdv::_openNc3File" << endl;
     cerr << "  Opening file, path: " << path << endl;
     return 1;
   }
   
   // Change the error behavior of the netCDF C++ API by creating an
-  // NcError object. Until it is destroyed, this NcError object will
+  // Nc3Error object. Until it is destroyed, this Nc3Error object will
   // ensure that the netCDF C++ API silently returns error codes
   // on any failure, and leaves any other error handling to the
   // calling program.
   
-  _ncErr = new NcError(NcError::silent_nonfatal);
+  _ncErr = new Nc3Error(Nc3Error::silent_nonfatal);
 
   if (_params.debug) {
     cerr << "Opened input file: " << path << endl;
@@ -395,7 +395,7 @@ int NcGeneric2Mdv::_openNcFile(const string &path)
 // close netcdf file if open
 // remove error object if it exists
 
-void NcGeneric2Mdv::_closeNcFile()
+void NcGeneric2Mdv::_closeNc3File()
   
 {
   
@@ -525,7 +525,7 @@ int NcGeneric2Mdv::_loadMetaData()
     // convert to km
     
     double zScale = 1.0;
-    NcAtt *zUnits = _zVar->get_att("units");
+    Nc3Att *zUnits = _zVar->get_att("units");
     if (zUnits != NULL) {
       string units = zUnits->as_string(0);
       if (units == "m" || units == "meters") {
@@ -553,7 +553,7 @@ int NcGeneric2Mdv::_loadMetaData()
   // convert to km
 
   double yScale = 1.0;
-  NcAtt *yUnits = _yVar->get_att("units");
+  Nc3Att *yUnits = _yVar->get_att("units");
   if (yUnits != NULL) {
     string units = yUnits->as_string(0);
     if (units == "m" || units == "meters") {
@@ -579,7 +579,7 @@ int NcGeneric2Mdv::_loadMetaData()
   // convert to km
 
   double xScale = 1.0;
-  NcAtt *xUnits = _xVar->get_att("units");
+  Nc3Att *xUnits = _xVar->get_att("units");
   if (xUnits != NULL) {
     string units = xUnits->as_string(0);
     if (units == "m" || units == "meters") {
@@ -595,7 +595,7 @@ int NcGeneric2Mdv::_loadMetaData()
   
   // attributes
   
-  NcAtt *source = _ncFile->get_att("source");
+  Nc3Att *source = _ncFile->get_att("source");
   if (source != NULL) {
     _source = source->as_string(0);
     delete source;
@@ -605,7 +605,7 @@ int NcGeneric2Mdv::_loadMetaData()
 
   // data set info
 
-  NcAtt *history = _ncFile->get_att("history");
+  Nc3Att *history = _ncFile->get_att("history");
   if (history != NULL) {
     _history = history->as_string(0);
     delete history;
@@ -727,7 +727,7 @@ int NcGeneric2Mdv::_setMasterHeader(DsMdvx &mdvx, int itime)
   }
 
   bool offsetIsDays = false;
-  NcAtt *timeUnits = _timeOffsetVar->get_att("units");
+  Nc3Att *timeUnits = _timeOffsetVar->get_att("units");
   if (timeUnits != NULL) {
     string units = timeUnits->as_string(0);
     if (units.find("day") != string::npos) {
@@ -776,7 +776,7 @@ int NcGeneric2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
   
   for (int ivar = 0; ivar < _ncFile->num_vars(); ivar++) {
 
-    NcVar *var = _ncFile->get_var(ivar);
+    Nc3Var *var = _ncFile->get_var(ivar);
     
     if (var->get_dim(0) != _timeDim) {
       continue;
@@ -828,11 +828,11 @@ int NcGeneric2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
 //
 // Returns 0 on success, -1 on failure
 
-int NcGeneric2Mdv::_addDataField(NcVar *var, DsMdvx &mdvx, int itime)
+int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx, int itime)
 
 {
 
-  NcAtt *missingAtt = var->get_att("missing_value");
+  Nc3Att *missingAtt = var->get_att("missing_value");
   if (missingAtt == NULL) {
     missingAtt = var->get_att("_FillValue");
     if (missingAtt == NULL) {
@@ -928,7 +928,7 @@ int NcGeneric2Mdv::_addDataField(NcVar *var, DsMdvx &mdvx, int itime)
     // for int fields, we need scale and offset
 
     double scale = 1.0;
-    NcAtt *scaleAtt = var->get_att("scale");
+    Nc3Att *scaleAtt = var->get_att("scale");
     if (scaleAtt == NULL) {
       scaleAtt = var->get_att("scale_factor");
     }
@@ -943,7 +943,7 @@ int NcGeneric2Mdv::_addDataField(NcVar *var, DsMdvx &mdvx, int itime)
     }
       
     double offset = 0.0;
-    NcAtt *offsetAtt = var->get_att("offset");
+    Nc3Att *offsetAtt = var->get_att("offset");
     if (offsetAtt == NULL) {
       if (_params.debug) {
         cerr << "WARNING - NcGeneric2Mdv::_addDataField" << endl;
@@ -1094,14 +1094,14 @@ int NcGeneric2Mdv::_addDataField(NcVar *var, DsMdvx &mdvx, int itime)
   string fieldName(var->name());
 
   string units;
-  NcAtt *unitsAtt = var->get_att("units");
+  Nc3Att *unitsAtt = var->get_att("units");
   if (unitsAtt != NULL) {
     units = unitsAtt->as_string(0);
     delete unitsAtt;
   }
 
   string longName(fieldName);
-  NcAtt *longNameAtt = var->get_att("long_name");
+  Nc3Att *longNameAtt = var->get_att("long_name");
   if (longNameAtt != NULL) {
     longName = longNameAtt->as_string(0);
     delete longNameAtt;
@@ -1379,22 +1379,22 @@ MdvxField *NcGeneric2Mdv::_createRegularLatlonField
 ///////////////////////////////
 // print data in file
 
-void NcGeneric2Mdv::_printFile(NcFile &ncf)
+void NcGeneric2Mdv::_printFile(Nc3File &ncf)
 
 {
 
   cout << "ndims: " << ncf.num_dims() << endl;
   cout << "nvars: " << ncf.num_vars() << endl;
   cout << "ngatts: " << ncf.num_atts() << endl;
-  NcDim *unlimd = ncf.rec_dim();
+  Nc3Dim *unlimd = ncf.rec_dim();
   if (unlimd != NULL) {
     cout << "unlimd: " << unlimd->size() << endl;
   }
   
   // dimensions
 
-  TaArray<NcDim *> dims_;
-  NcDim **dims = dims_.alloc(ncf.num_dims());
+  TaArray<Nc3Dim *> dims_;
+  Nc3Dim **dims = dims_.alloc(ncf.num_dims());
   for (int idim = 0; idim < ncf.num_dims(); idim++) {
     dims[idim] = ncf.get_dim(idim);
 
@@ -1415,15 +1415,15 @@ void NcGeneric2Mdv::_printFile(NcFile &ncf)
 
   for (int iatt = 0; iatt < ncf.num_atts(); iatt++) {
     cout << "  Att num: " << iatt << endl;
-    NcAtt *att = ncf.get_att(iatt);
+    Nc3Att *att = ncf.get_att(iatt);
     _printAtt(att);
     delete att;
   }
 
   // loop through variables
 
-  TaArray<NcVar *> vars_;
-  NcVar **vars = vars_.alloc(ncf.num_vars());
+  TaArray<Nc3Var *> vars_;
+  Nc3Var **vars = vars_.alloc(ncf.num_vars());
   for (int ivar = 0; ivar < ncf.num_vars(); ivar++) {
 
     vars[ivar] = ncf.get_var(ivar);
@@ -1432,7 +1432,7 @@ void NcGeneric2Mdv::_printFile(NcFile &ncf)
     cout << "  Name: " << vars[ivar]->name() << endl;
     cout << "  Is valid: " << vars[ivar]->is_valid() << endl;
     cout << "  N dims: " << vars[ivar]->num_dims();
-    NcDim *vdims[vars[ivar]->num_dims()];
+    Nc3Dim *vdims[vars[ivar]->num_dims()];
     if (vars[ivar]->num_dims() > 0) {
       cout << ": (";
       for (int ii = 0; ii < vars[ivar]->num_dims(); ii++) {
@@ -1450,7 +1450,7 @@ void NcGeneric2Mdv::_printFile(NcFile &ncf)
     for (int iatt = 0; iatt < vars[ivar]->num_atts(); iatt++) {
 
       cout << "  Att num: " << iatt << endl;
-      NcAtt *att = vars[ivar]->get_att(iatt);
+      Nc3Att *att = vars[ivar]->get_att(iatt);
       _printAtt(att);
       delete att;
 
@@ -1466,7 +1466,7 @@ void NcGeneric2Mdv::_printFile(NcFile &ncf)
 /////////////////////
 // print an attribute
 
-void NcGeneric2Mdv::_printAtt(NcAtt *att)
+void NcGeneric2Mdv::_printAtt(Nc3Att *att)
 
 {
 
@@ -1474,16 +1474,16 @@ void NcGeneric2Mdv::_printAtt(NcAtt *att)
   cout << "    Num vals: " << att->num_vals() << endl;
   cout << "    Type: ";
   
-  NcValues *values = att->values();
+  Nc3Values *values = att->values();
 
   switch(att->type()) {
     
-  case ncNoType: {
+  case nc3NoType: {
     cout << "No type: ";
   }
   break;
   
-  case ncByte: {
+  case nc3Byte: {
     cout << "BYTE: ";
     unsigned char *vals = (unsigned char *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -1492,7 +1492,7 @@ void NcGeneric2Mdv::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncChar: {
+  case nc3Char: {
     cout << "CHAR: ";
     char vals[att->num_vals() + 1];
     MEM_zero(vals);
@@ -1501,7 +1501,7 @@ void NcGeneric2Mdv::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncShort: {
+  case nc3Short: {
     cout << "SHORT: ";
     short *vals = (short *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -1510,7 +1510,7 @@ void NcGeneric2Mdv::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncInt: {
+  case nc3Int: {
     cout << "INT: ";
     int *vals = (int *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -1519,7 +1519,7 @@ void NcGeneric2Mdv::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncFloat: {
+  case nc3Float: {
     cout << "FLOAT: ";
     float *vals = (float *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -1528,7 +1528,7 @@ void NcGeneric2Mdv::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncDouble: {
+  case nc3Double: {
     cout << "DOUBLE: ";
     double *vals = (double *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -1549,7 +1549,7 @@ void NcGeneric2Mdv::_printAtt(NcAtt *att)
 ///////////////////////////////
 // print variable values
 
-void NcGeneric2Mdv::_printVarVals(NcVar *var)
+void NcGeneric2Mdv::_printVarVals(Nc3Var *var)
 
 {
 
@@ -1558,17 +1558,17 @@ void NcGeneric2Mdv::_printVarVals(NcVar *var)
     nprint = 100;
   }
 
-  NcValues *values = var->values();
+  Nc3Values *values = var->values();
 
   cout << "  Variable vals:";
   
   switch(var->type()) {
     
-  case ncNoType: {
+  case nc3NoType: {
   }
   break;
   
-  case ncByte: {
+  case nc3Byte: {
     cout << "(byte)";
     unsigned char *vals = (unsigned char *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -1577,7 +1577,7 @@ void NcGeneric2Mdv::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncChar: {
+  case nc3Char: {
     cout << "(char)";
     char str[nprint + 1];
     MEM_zero(str);
@@ -1586,7 +1586,7 @@ void NcGeneric2Mdv::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncShort: {
+  case nc3Short: {
     cout << "(short)";
     short *vals = (short *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -1595,7 +1595,7 @@ void NcGeneric2Mdv::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncInt: {
+  case nc3Int: {
     cout << "(int)";
     int *vals = (int *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -1604,7 +1604,7 @@ void NcGeneric2Mdv::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncFloat: {
+  case nc3Float: {
     cout << "(float)";
     float *vals = (float *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -1613,7 +1613,7 @@ void NcGeneric2Mdv::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncDouble: {
+  case nc3Double: {
     cout << "(double)";
     double *vals = (double *) values->base();
     for (long ii = 0; ii < nprint; ii++) {

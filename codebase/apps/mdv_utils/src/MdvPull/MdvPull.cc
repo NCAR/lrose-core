@@ -849,7 +849,7 @@ void MdvPull::_convertOutput(DsMdvx &mdvx)
   for (int ii = 0; ii < mdvx.getNFields(); ii++) {
     
     MdvxField *field = mdvx.getField(ii);
-    Mdvx::field_header_t fhdr = field->getFieldHeader();
+    // Mdvx::field_header_t fhdr = field->getFieldHeader();
     const Mdvx::field_header_t *fhdrFile = field->getFieldHeaderFile();
 
     Mdvx::encoding_type_t encoding =
@@ -1123,7 +1123,8 @@ string MdvPull::_computeNcfOutputPath(const DsMdvx &mdvx,
   DateTime genTime(mhdr.time_gen);
   
   bool isForecast = false;
-  int year, month, day, hour, minute, seconds;
+  int year, month, day;
+  // int hour, minute, seconds;
   
   if (mhdr.data_collection_type == Mdvx::DATA_EXTRAPOLATED ||
       mhdr.data_collection_type == Mdvx::DATA_FORECAST ||
@@ -1131,17 +1132,17 @@ string MdvPull::_computeNcfOutputPath(const DsMdvx &mdvx,
     year = genTime.getYear();
     month = genTime.getMonth();
     day =  genTime.getDay();
-    hour = genTime.getHour();
-    minute = genTime.getMin();
-    seconds = genTime.getSec();
+    // hour = genTime.getHour();
+    // minute = genTime.getMin();
+    // seconds = genTime.getSec();
     isForecast = true;
   } else {
     year = validTime.getYear();
     month = validTime.getMonth();
     day =  validTime.getDay();
-    hour = validTime.getHour();
-    minute = validTime.getMin();
-    seconds = validTime.getSec();
+    // hour = validTime.getHour();
+    // minute = validTime.getMin();
+    // seconds = validTime.getSec();
   }
 
   if(_params.search_mode != Params::GEN_TIME){
@@ -1176,6 +1177,13 @@ string MdvPull::_computeNcfOutputPath(const DsMdvx &mdvx,
     }
   } // if (mdvx.getNFields() > 0) 
 
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "isPolar: " << isPolar << endl;
+    cerr << "isRhi: " << isRhi << endl;
+    cerr << "isSector: " << isSector << endl;
+    cerr << "fixedAngle: " << fixedAngle << endl;
+  }
+  
   // compute output dir
 
   char dayStr[128];

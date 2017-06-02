@@ -62,7 +62,6 @@ asdi2grid *prog;
 
 int main( int argc, char **argv )
 {
-  static const char *FUNCTION_NAME = "main";
 
   int status;
 

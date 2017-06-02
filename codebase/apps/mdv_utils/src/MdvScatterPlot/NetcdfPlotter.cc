@@ -182,11 +182,11 @@ bool NetcdfPlotter::createPlot(const string &output_path,
   // error is encountered.  This object is not explicitly used in the below
   // code, but is used implicitly by the netCDF library.
 
-  NcError nc_error(NcError::silent_nonfatal);
+  Nc3Error nc_error(Nc3Error::silent_nonfatal);
 
   // Get a pointer to the netCDF file.
 
-  NcFile *nc_file;
+  Nc3File *nc_file;
   
   if ((nc_file = _getFile(output_path,
 			  x_field_name,
@@ -205,12 +205,12 @@ bool NetcdfPlotter::createPlot(const string &output_path,
   
   // Get all of the pointers we need from the file
 
-  NcDim *dimension = 0;
-  NcVar *lat_var = 0;
-  NcVar *lon_var = 0;
-  NcVar *time_var = 0;
-  NcVar *x_var = 0;
-  NcVar *y_var = 0;
+  Nc3Dim *dimension = 0;
+  Nc3Var *lat_var = 0;
+  Nc3Var *lon_var = 0;
+  Nc3Var *time_var = 0;
+  Nc3Var *x_var = 0;
+  Nc3Var *y_var = 0;
   
   if ((dimension = nc_file->get_dim(DIMENSION_NAME.c_str())) == 0)
   {
@@ -357,7 +357,7 @@ bool NetcdfPlotter::createPlot(const string &output_path,
  */
 
 template< class T >
-bool NetcdfPlotter::_appendData(NcVar *variable,
+bool NetcdfPlotter::_appendData(Nc3Var *variable,
 				const string &variable_name,
 				const int current_data_size,
 				const T *data,
@@ -412,13 +412,13 @@ bool NetcdfPlotter::_appendData(NcVar *variable,
  * file.
  */
 
-NcFile *NetcdfPlotter::_getExistingFile(const string &output_path,
+Nc3File *NetcdfPlotter::_getExistingFile(const string &output_path,
 					const string &x_field_name,
 					const string &y_field_name) const
 {
   static const string method_name = "NetcdfPlotter::_getExistingFile()";
   
-  NcFile *nc_file = new NcFile(output_path.c_str(), NcFile::Write);
+  Nc3File *nc_file = new Nc3File(output_path.c_str(), Nc3File::Write);
   
   return nc_file;
 }
@@ -438,7 +438,7 @@ NcFile *NetcdfPlotter::_getExistingFile(const string &output_path,
  * file.
  */
 
-NcFile *NetcdfPlotter::_getFile(const string &output_path,
+Nc3File *NetcdfPlotter::_getFile(const string &output_path,
 				const string &x_field_name,
 				const string &y_field_name) const
 {
@@ -467,7 +467,7 @@ NcFile *NetcdfPlotter::_getFile(const string &output_path,
  * file.
  */
 
-NcFile *NetcdfPlotter::_getNewFile(const string &output_path,
+Nc3File *NetcdfPlotter::_getNewFile(const string &output_path,
 				   const string &x_field_name,
 				   const string &y_field_name) const
 {
@@ -477,14 +477,14 @@ NcFile *NetcdfPlotter::_getNewFile(const string &output_path,
   // this data to the existing file because we're in accumulation mode.
   // If the file doesn't exist, we need to create a new one.
 
-  NcFile *nc_file = new NcFile(output_path.c_str(), NcFile::Replace);
+  Nc3File *nc_file = new Nc3File(output_path.c_str(), Nc3File::Replace);
   
   // If this is a new file, add our dimension and variables.  If the file
   // currently exists, check for compatibility with our current fields and
   // get pointers to the dimension and variables.
 
-  NcDim *dimension = 0;
-  NcVar *variable = 0;
+  Nc3Dim *dimension = 0;
+  Nc3Var *variable = 0;
   
   if ((dimension = nc_file->add_dim(DIMENSION_NAME.c_str())) == 0)
   {
@@ -498,7 +498,7 @@ NcFile *NetcdfPlotter::_getNewFile(const string &output_path,
   }
     
   if ((variable =
-       nc_file->add_var(LAT_VAR_NAME.c_str(), ncFloat, dimension)) == 0)
+       nc_file->add_var(LAT_VAR_NAME.c_str(), nc3Float, dimension)) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
     cerr << "Error creating " << LAT_VAR_NAME << " variable in file "
@@ -510,7 +510,7 @@ NcFile *NetcdfPlotter::_getNewFile(const string &output_path,
   }
     
   if ((variable =
-       nc_file->add_var(LON_VAR_NAME.c_str(), ncFloat, dimension)) == 0)
+       nc_file->add_var(LON_VAR_NAME.c_str(), nc3Float, dimension)) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
     cerr << "Error creating " << LON_VAR_NAME << " variable in file "
@@ -522,7 +522,7 @@ NcFile *NetcdfPlotter::_getNewFile(const string &output_path,
   }
     
   if ((variable =
-       nc_file->add_var(TIME_VAR_NAME.c_str(), ncInt, dimension)) == 0)
+       nc_file->add_var(TIME_VAR_NAME.c_str(), nc3Int, dimension)) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
     cerr << "Error creating " << TIME_VAR_NAME << " variable in file "
@@ -534,7 +534,7 @@ NcFile *NetcdfPlotter::_getNewFile(const string &output_path,
   }
     
   if ((variable =
-       nc_file->add_var(x_field_name.c_str(), ncFloat, dimension)) == 0)
+       nc_file->add_var(x_field_name.c_str(), nc3Float, dimension)) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
     cerr << "Error creating " << x_field_name << " variable in file "
@@ -546,7 +546,7 @@ NcFile *NetcdfPlotter::_getNewFile(const string &output_path,
   }
     
   if ((variable =
-       nc_file->add_var(y_field_name.c_str(), ncFloat, dimension)) == 0)
+       nc_file->add_var(y_field_name.c_str(), nc3Float, dimension)) == 0)
   {
     cerr << "ERROR: " << method_name << endl;
     cerr << "Error creating " << y_field_name << " variable in file "

@@ -41,7 +41,7 @@
 #ifndef MdvPull_H
 #define MdvPull_H
 
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3File.hh>
 #include <string>
 #include "Args.hh"
 #include "Params.hh"

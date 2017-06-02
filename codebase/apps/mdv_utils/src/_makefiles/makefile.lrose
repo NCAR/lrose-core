@@ -55,6 +55,7 @@ SUB_DIRS = \
          MdvMultFilt \
          MdvOffsetField \
          MdvPatch \
+         MdvPull \
          MdvPointExtract \
          MdvScatterPlot \
          MdvSmooth \

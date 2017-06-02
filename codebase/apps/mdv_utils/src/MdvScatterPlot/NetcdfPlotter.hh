@@ -50,7 +50,7 @@
 #ifndef NetcdfPlotter_H
 #define NetcdfPlotter_H
 
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 
 #include "Plotter.hh"
 
@@ -128,7 +128,7 @@ protected:
    */
   
   template< class T >
-  bool _appendData(NcVar *variable,
+  bool _appendData(Nc3Var *variable,
 		   const string &variable_name,
 		   const int current_data_size,
 		   const T *data,
@@ -145,7 +145,7 @@ protected:
    * file.
    */
 
-  NcFile *_getExistingFile(const string &output_path,
+  Nc3File *_getExistingFile(const string &output_path,
 			   const string &x_field_name,
 			   const string &y_field_name) const;
   
@@ -164,7 +164,7 @@ protected:
    * file.
    */
 
-  NcFile *_getFile(const string &output_path,
+  Nc3File *_getFile(const string &output_path,
 		   const string &x_field_name,
 		   const string &y_field_name) const;
   
@@ -180,7 +180,7 @@ protected:
    * file.
    */
 
-  NcFile *_getNewFile(const string &output_path,
+  Nc3File *_getNewFile(const string &output_path,
 		      const string &x_field_name,
 		      const string &y_field_name) const;
   
