@@ -37,7 +37,7 @@
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
-#include <Radx/NetcdfClassic.hh>
+#include <Ncxx/Nc3xFile.hh>
 #include <Mdv/GenericRadxFile.hh>
 #include <didss/LdataInfo.hh>
 #include <toolsa/pmu.h>
@@ -2215,10 +2215,10 @@ int RadxEvad::_writeNetcdfOutput()
 
   // open file for writing
 
-  NetcdfClassic file;
-  if (file.openWrite(outPath, NcFile::Classic)) {
+  Nc3xFile file;
+  if (file.openRead(outPath)) {
     cerr << "ERROR - RadxEvad::_writeNetcdfOutput" << endl;
-    cerr << file.getErrStr() << endl;
+    cerr << "  Cannot open netCDF file: " << outPath << endl;
     return -1;
   }
 
@@ -2233,7 +2233,7 @@ int RadxEvad::_writeNetcdfOutput()
   // add dimensions
   
   int nZ = _getNValidLevels();
-  NcDim *zDim;
+  Nc3Dim *zDim;
   if (file.addDim(zDim, "z", nZ)) {
     cerr << "ERROR - RadxEvad::_writeNetcdfOutput" << endl;
     cerr << file.getErrStr() << endl;
@@ -2242,16 +2242,16 @@ int RadxEvad::_writeNetcdfOutput()
 
   // add variables
 
-  NcVar *profileVar;
-  if (file.addMetaVar(profileVar, "profile", "profile_id", "", ncInt)) {
+  Nc3Var *profileVar;
+  if (file.addMetaVar(profileVar, "profile", "profile_id", "", nc3Int)) {
     cerr << "ERROR - RadxEvad::_writeNetcdfOutput" << endl;
     cerr << file.getErrStr() << endl;
     return -1;
   }
   file.addAttr(profileVar, "profile_role", "profile_id");
   
-  NcVar *timeVar;
-  if (file.addMetaVar(timeVar, "time", "time", "", ncDouble, 
+  Nc3Var *timeVar;
+  if (file.addMetaVar(timeVar, "time", "time", "", nc3Double, 
                       "seconds since 1970-01-01 00:00:0")) {
     cerr << "ERROR - RadxEvad::_writeNetcdfOutput" << endl;
     cerr << file.getErrStr() << endl;
@@ -2259,8 +2259,8 @@ int RadxEvad::_writeNetcdfOutput()
   }
   file.addAttr(timeVar, "long_name", "time");
   
-  NcVar *lonVar;
-  if (file.addMetaVar(lonVar, "lon", "longitude", "", ncDouble, 
+  Nc3Var *lonVar;
+  if (file.addMetaVar(lonVar, "lon", "longitude", "", nc3Double, 
                       "degrees_east")) {
     cerr << "ERROR - RadxEvad::_writeNetcdfOutput" << endl;
     cerr << file.getErrStr() << endl;
@@ -2268,8 +2268,8 @@ int RadxEvad::_writeNetcdfOutput()
   }
   file.addAttr(lonVar, "long_name", "longitude_of_radar");
   
-  NcVar *latVar;
-  if (file.addMetaVar(latVar, "lat", "latitude", "", ncDouble, 
+  Nc3Var *latVar;
+  if (file.addMetaVar(latVar, "lat", "latitude", "", nc3Double, 
                       "degrees_north")) {
     cerr << "ERROR - RadxEvad::_writeNetcdfOutput" << endl;
     cerr << file.getErrStr() << endl;
@@ -2277,16 +2277,16 @@ int RadxEvad::_writeNetcdfOutput()
   }
   file.addAttr(latVar, "long_name", "latitude_of_radar");
   
-  NcVar *altVar;
-  if (file.addMetaVar(altVar, "alt", "altitude", "", ncDouble, "km")) {
+  Nc3Var *altVar;
+  if (file.addMetaVar(altVar, "alt", "altitude", "", nc3Double, "km")) {
     cerr << "ERROR - RadxEvad::_writeNetcdfOutput" << endl;
     cerr << file.getErrStr() << endl;
     return -1;
   }
   file.addAttr(altVar, "long_name", "altitude_of_radar");
   
-  NcVar *zVar;
-  if (file.addMetaVar(zVar, "z", "altitude", "", ncFloat, zDim, "km")) {
+  Nc3Var *zVar;
+  if (file.addMetaVar(zVar, "z", "altitude", "", nc3Float, zDim, "km")) {
     cerr << "ERROR - RadxEvad::_writeNetcdfOutput" << endl;
     cerr << file.getErrStr() << endl;
     return -1;
@@ -2296,8 +2296,8 @@ int RadxEvad::_writeNetcdfOutput()
   file.addAttr(zVar, "azis", "Z");
 
 
-  NcVar *uVar;
-  if (file.addMetaVar(uVar, "u", "eastward_wind", "", ncFloat, zDim, "m s-1")) {
+  Nc3Var *uVar;
+  if (file.addMetaVar(uVar, "u", "eastward_wind", "", nc3Float, zDim, "m s-1")) {
     cerr << "ERROR - RadxEvad::_writeNetcdfOutput" << endl;
     cerr << file.getErrStr() << endl;
     return -1;
@@ -2305,8 +2305,8 @@ int RadxEvad::_writeNetcdfOutput()
   file.addAttr(uVar, "long_name", "wind speed eastward positive");
   file.addAttr(uVar, "_fillValue", missingVal);
 
-  NcVar *vVar;
-  if (file.addMetaVar(vVar, "v", "northward_wind", "", ncFloat, zDim, "m s-1")) {
+  Nc3Var *vVar;
+  if (file.addMetaVar(vVar, "v", "northward_wind", "", nc3Float, zDim, "m s-1")) {
     cerr << "ERROR - RadxEvad::_writeNetcdfOutput" << endl;
     cerr << file.getErrStr() << endl;
     return -1;
@@ -2314,8 +2314,8 @@ int RadxEvad::_writeNetcdfOutput()
   file.addAttr(vVar, "long_name", "wind speed northward positive");
   file.addAttr(vVar, "_fillValue", missingVal);
 
-  NcVar *wVar;
-  if (file.addMetaVar(wVar, "w", "upward_wind", "", ncFloat, zDim, "m s-1")) {
+  Nc3Var *wVar;
+  if (file.addMetaVar(wVar, "w", "upward_wind", "", nc3Float, zDim, "m s-1")) {
     cerr << "ERROR - RadxEvad::_writeNetcdfOutput" << endl;
     cerr << file.getErrStr() << endl;
     return -1;
@@ -2323,9 +2323,9 @@ int RadxEvad::_writeNetcdfOutput()
   file.addAttr(wVar, "long_name", "wind speed upward positive");
   file.addAttr(wVar, "_fillValue", missingVal);
 
-  NcVar *divVar;
+  Nc3Var *divVar;
   if (file.addMetaVar(divVar, "div", "divergence_of_wind", "", 
-                      ncFloat, zDim, "s-1")) {
+                      nc3Float, zDim, "s-1")) {
     cerr << "ERROR - RadxEvad::_writeNetcdfOutput" << endl;
     cerr << file.getErrStr() << endl;
     return -1;

@@ -974,7 +974,7 @@ int OutputMdv::_writeZebraLatLonNetCDF()
 
   // open file
 
-  NcFile zebFile(zebPath.c_str(), NcFile::Replace, NULL, 0, NcFile::Classic);
+  Nc3File zebFile(zebPath.c_str(), Nc3File::Replace, NULL, 0, Nc3File::Classic);
   if (!zebFile.is_valid()) {
     cerr << "ERROR - OutputMdv::_writeZebraLatLonNetCDF" << endl;
     cerr << "  Cannot open netCDF file: " << zebPath << endl;
@@ -983,7 +983,7 @@ int OutputMdv::_writeZebraLatLonNetCDF()
 
   // create error object
 
-  NcError zebErr(NcError::verbose_nonfatal);
+  Nc3Error zebErr(Nc3Error::verbose_nonfatal);
 
   // add global attributes
 
@@ -1001,7 +1001,7 @@ int OutputMdv::_writeZebraLatLonNetCDF()
 
   // add time dimension
 
-  NcDim *timeDim = zebFile.add_dim("time", 1);
+  Nc3Dim *timeDim = zebFile.add_dim("time", 1);
   if (timeDim == NULL) {
     cerr << "ERROR - OutputMdv::_writeZebraLatLonNetCDF" << endl;
     cerr << "  Cannot add time dim to  file: " << zebPath << endl;
@@ -1014,21 +1014,21 @@ int OutputMdv::_writeZebraLatLonNetCDF()
   const Mdvx::field_header_t &fhdr0 = field0->getFieldHeader();
   const Mdvx::vlevel_header_t &vhdr0 = field0->getVlevelHeader();
 
-  NcDim *altDim = zebFile.add_dim("altitude", fhdr0.nz);
+  Nc3Dim *altDim = zebFile.add_dim("altitude", fhdr0.nz);
   if (altDim == NULL) {
     cerr << "ERROR - OutputMdv::_writeZebraLatLonNetCDF" << endl;
     cerr << "  Cannot add altitude dim to file: " << zebPath << endl;
     return -1;
   }
 
-  NcDim *latDim = zebFile.add_dim("latitude", fhdr0.ny);
+  Nc3Dim *latDim = zebFile.add_dim("latitude", fhdr0.ny);
   if (latDim == NULL) {
     cerr << "ERROR - OutputMdv::_writeZebraLatLonNetCDF" << endl;
     cerr << "  Cannot add latitude dim to file: " << zebPath << endl;
     return -1;
   }
 
-  NcDim *lonDim = zebFile.add_dim("longitude", fhdr0.nx);
+  Nc3Dim *lonDim = zebFile.add_dim("longitude", fhdr0.nx);
   if (lonDim == NULL) {
     cerr << "ERROR - OutputMdv::_writeZebraLatLonNetCDF" << endl;
     cerr << "  Cannot add longitude dim to file: " << zebPath << endl;
@@ -1037,43 +1037,43 @@ int OutputMdv::_writeZebraLatLonNetCDF()
 
   // add variables
 
-  NcVar *baseTimeVar = zebFile.add_var("base_time", ncInt);
+  Nc3Var *baseTimeVar = zebFile.add_var("base_time", nc3Int);
   baseTimeVar->add_att("units", "seconds since 1970-01-01 00:00:00 +0000");
 
-  NcVar *timeOffsetVar = zebFile.add_var("time_offset", ncFloat, timeDim);
+  Nc3Var *timeOffsetVar = zebFile.add_var("time_offset", nc3Float, timeDim);
   timeOffsetVar->add_att("units", "seconds");
   
-  //   NcVar *timeVar = zebFile.add_var("time", ncInt, timeDim);
+  //   Nc3Var *timeVar = zebFile.add_var("time", ncInt, timeDim);
   //   timeVar->add_att("units", "seconds since 1970-01-01 00:00:00 +0000");
   //   timeVar->add_att("missing_value", -2147483647);
   //   timeVar->add_att("valid_min", -2147483646);
   //   timeVar->add_att("valid_max", 2147483647);
 
-  NcVar *altVar = zebFile.add_var("altitude", ncFloat, altDim);
+  Nc3Var *altVar = zebFile.add_var("altitude", nc3Float, altDim);
   altVar->add_att("units", "km");
   altVar->add_att("missing_value", -9999.0);
   altVar->add_att("valid_min", -2.0);
   altVar->add_att("valid_max", 100.0);
 
-  NcVar *latVar = zebFile.add_var("latitude", ncFloat, latDim);
+  Nc3Var *latVar = zebFile.add_var("latitude", nc3Float, latDim);
   latVar->add_att("units", "degrees_north");
   latVar->add_att("missing_value", -9999.0);
   latVar->add_att("valid_min", -90.0);
   latVar->add_att("valid_max", 90.0);
 
-  NcVar *lonVar = zebFile.add_var("longitude", ncFloat, lonDim);
+  Nc3Var *lonVar = zebFile.add_var("longitude", nc3Float, lonDim);
   lonVar->add_att("units", "degrees_east");
   lonVar->add_att("missing_value", -9999.0);
   lonVar->add_att("valid_min", -360.0);
   lonVar->add_att("valid_max", 360.0);
 
-  vector<NcVar *> dataVars;
+  vector<Nc3Var *> dataVars;
   for (int ifield = 0; ifield < _mdvx.getNFields(); ifield++) {
     MdvxField *field = _mdvx.getField(ifield);
     const Mdvx::field_header_t &fhdr = field->getFieldHeader();
-    NcVar *dataVar =
+    Nc3Var *dataVar =
       zebFile.add_var(field->getFieldName(),
-                      ncFloat, timeDim, altDim, latDim, lonDim);
+                      nc3Float, timeDim, altDim, latDim, lonDim);
     if (dataVar == NULL) {
       cerr << "ERROR: " << zebErr.get_err() << endl;
       cerr << "  Bad field: " << field->getFieldName() << endl;
@@ -1237,7 +1237,7 @@ int OutputMdv::_writeZebraXYNetCDF()
 
   // open file
 
-  NcFile zebFile(zebPath.c_str(), NcFile::Replace, NULL, 0, NcFile::Classic);
+  Nc3File zebFile(zebPath.c_str(), Nc3File::Replace, NULL, 0, Nc3File::Classic);
   if (!zebFile.is_valid()) {
     cerr << "ERROR - OutputMdv::_writeZebraLatLonNetCDF" << endl;
     cerr << "  Cannot open netCDF file: " << zebPath << endl;
@@ -1246,11 +1246,11 @@ int OutputMdv::_writeZebraXYNetCDF()
 
   // create error object
 
-  NcError zebErr(NcError::verbose_nonfatal);
+  Nc3Error zebErr(Nc3Error::verbose_nonfatal);
 
   // add time dimension
 
-  NcDim *timeDim = zebFile.add_dim("time", 1);
+  Nc3Dim *timeDim = zebFile.add_dim("time", 1);
   if (timeDim == NULL) {
     cerr << "ERROR - OutputMdv::_writeZebraLatLonNetCDF" << endl;
     cerr << "  Cannot add time dim to  file: " << zebPath << endl;
@@ -1264,21 +1264,21 @@ int OutputMdv::_writeZebraXYNetCDF()
   const Mdvx::field_header_t &fhdr0 = field0->getFieldHeader();
   // const Mdvx::vlevel_header_t &vhdr0 = field0->getVlevelHeader();
   
-  NcDim *zDim = zebFile.add_dim("z", fhdr0.nz);
+  Nc3Dim *zDim = zebFile.add_dim("z", fhdr0.nz);
   if (zDim == NULL) {
     cerr << "ERROR - OutputMdv::_writeZebraLatLonNetCDF" << endl;
     cerr << "  Cannot add z dim to file: " << zebPath << endl;
     return -1;
   }
   
-  NcDim *yDim = zebFile.add_dim("y", fhdr0.ny);
+  Nc3Dim *yDim = zebFile.add_dim("y", fhdr0.ny);
   if (yDim == NULL) {
     cerr << "ERROR - OutputMdv::_writeZebraLatLonNetCDF" << endl;
     cerr << "  Cannot add y dim to file: " << zebPath << endl;
     return -1;
   }
 
-  NcDim *xDim = zebFile.add_dim("x", fhdr0.nx);
+  Nc3Dim *xDim = zebFile.add_dim("x", fhdr0.nx);
   if (xDim == NULL) {
     cerr << "ERROR - OutputMdv::_writeZebraLatLonNetCDF" << endl;
     cerr << "  Cannot add x dim to file: " << zebPath << endl;
@@ -1287,37 +1287,37 @@ int OutputMdv::_writeZebraXYNetCDF()
 
   // add variables
   
-  NcVar *baseTimeVar = zebFile.add_var("base_time", ncInt);
+  Nc3Var *baseTimeVar = zebFile.add_var("base_time", nc3Int);
   baseTimeVar->add_att("units", "seconds since 1970-01-01 00:00:00 +0000");
 
-  NcVar *timeOffsetVar = zebFile.add_var("time_offset", ncFloat, timeDim);
+  Nc3Var *timeOffsetVar = zebFile.add_var("time_offset", nc3Float, timeDim);
   timeOffsetVar->add_att("units", "seconds since base_time");
   
-  NcVar *latVar = zebFile.add_var("lat", ncFloat);
+  Nc3Var *latVar = zebFile.add_var("lat", nc3Float);
   latVar->add_att("units", "degrees_north");
   
-  NcVar *lonVar = zebFile.add_var("lon", ncFloat);
+  Nc3Var *lonVar = zebFile.add_var("lon", nc3Float);
   lonVar->add_att("units", "degrees_east");
   
-  NcVar *altVar = zebFile.add_var("alt", ncFloat);
+  Nc3Var *altVar = zebFile.add_var("alt", nc3Float);
   altVar->add_att("units", "km");
   
-  NcVar *xSpacingVar = zebFile.add_var("x_spacing", ncFloat);
+  Nc3Var *xSpacingVar = zebFile.add_var("x_spacing", nc3Float);
   xSpacingVar->add_att("units", "km");
   
-  NcVar *ySpacingVar = zebFile.add_var("y_spacing", ncFloat);
+  Nc3Var *ySpacingVar = zebFile.add_var("y_spacing", nc3Float);
   ySpacingVar->add_att("units", "km");
   
-  NcVar *zSpacingVar = zebFile.add_var("z_spacing", ncFloat);
+  Nc3Var *zSpacingVar = zebFile.add_var("z_spacing", nc3Float);
   zSpacingVar->add_att("units", "km");
   
-  vector<NcVar *> dataVars;
+  vector<Nc3Var *> dataVars;
   for (int ifield = 0; ifield < _mdvx.getNFields(); ifield++) {
     MdvxField *field = _mdvx.getField(ifield);
     const Mdvx::field_header_t &fhdr = field->getFieldHeader();
-    NcVar *dataVar =
+    Nc3Var *dataVar =
       zebFile.add_var(field->getFieldName(),
-                      ncFloat, timeDim, zDim, yDim, xDim);
+                      nc3Float, timeDim, zDim, yDim, xDim);
     if (dataVar == NULL) {
       cerr << "ERROR: " << zebErr.get_err() << endl;
       cerr << "  Bad field: " << field->getFieldName() << endl;
