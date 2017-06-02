@@ -26,7 +26,7 @@
 // NcfVlevelInfo.hh
 //
 // Vertical level information object for gridded dataset
-//
+// 
 // Sue Dettling, RAP, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -44,7 +44,7 @@
 
 #include <string>
 #include <math.h>
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3xFile.hh>
 #include <Mdv/MdvxField.hh> 
 #include <Mdv/DsMdvx.hh>
 #include <euclid/Pjg.hh>
@@ -71,21 +71,21 @@ public:
   
   /// add dimension for this object
 
-  int addDim(int vlevelNum, NcFile *ncFile, string &errStr);
+  int addDim(int vlevelNum, Nc3File *ncFile, string &errStr);
 
   /// add vert level variable to NcFile object
   
-  int addVlevelVar(int vlevelNum, NcFile *ncFile, string &errStr);
+  int addVlevelVar(int vlevelNum, Nc3File *ncFile, string &errStr);
 
   /// Write the vlevel data
   /// Returns 0 on success, -1 on error
 
-  int writeDataToFile(NcFile *ncFile, string &errStr);
+  int writeDataToFile(Nc3File *ncFile, string &errStr);
 
   /// Get methods
 
-  NcDim *getNcZdim() const { return _zDim; }
-  NcVar *getNcZvar() const { return _zVar; }
+  Nc3Dim *getNcZdim() const { return _zDim; }
+  Nc3Var *getNcZvar() const { return _zVar; }
 
   /// equality
 
@@ -109,9 +109,9 @@ private:
 
   int _nz;
 
-  NcDim *_zDim;
+  Nc3Dim *_zDim;
 
-  NcVar *_zVar;
+  Nc3Var *_zVar;
 
   float _zData[MDV_MAX_VLEVELS];
 

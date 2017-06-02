@@ -695,7 +695,7 @@ int ForayNcRadxFile::_createRays()
   if (timeVar == NULL) {
     _addErrStr("ERROR - ForayNcRadxFile::_createRays");
     _addErrStr("  Cannot find time variable, name: ", TIME_OFFSET);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   if (timeVar->num_dims() < 1) {
@@ -1050,7 +1050,7 @@ int ForayNcRadxFile::_readRayVar(const string &name, vector<double> &vals)
   } else {
     _addErrStr("ERROR - ForayNcRadxFile::_readRayVar");
     _addErrStr("  Cannot read variable: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   delete[] data;
@@ -1088,7 +1088,7 @@ int ForayNcRadxFile::_readRayVar(const string &name, vector<int> &vals)
   } else {
     _addErrStr("ERROR - ForayNcRadxFile::_readRayVar");
     _addErrStr("  Cannot read variable: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   delete[] data;
@@ -1111,7 +1111,7 @@ Nc3Var* ForayNcRadxFile::_getRayVar(const string &name)
   if (var == NULL) {
     _addErrStr("ERROR - ForayNcRadxFile::_getRayVar");
     _addErrStr("  Cannot read variable, name: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return NULL;
   }
 
@@ -1289,7 +1289,7 @@ int ForayNcRadxFile::_readFieldVariables()
     if (iret) {
       _addErrStr("ERROR - ForayNcRadxFile::_readFieldVariables");
       _addErrStr("  cannot read field name: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
 

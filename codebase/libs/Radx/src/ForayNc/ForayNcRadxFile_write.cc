@@ -669,7 +669,7 @@ int ForayNcRadxFile::_addFieldNamesVariable()
     _addErrStr("  Type: ", _file.ncTypeToStr(nc3Char));
     _addErrStr("  Dim0: ", _fieldsDim->name());
     _addErrStr("  Dim1: ", _short_stringDim->name());
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   
@@ -1093,7 +1093,7 @@ int ForayNcRadxFile::_addDataFieldVariables()
       _addErrStr("  Type: ", _file.ncTypeToStr(nc3Short));
       _addErrStr("  Dim0: ", _TimeDim->name());
       _addErrStr("  Dim1: ", _maxCellsDim->name());
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
 
@@ -1191,7 +1191,7 @@ int ForayNcRadxFile::_addTimeVar(Nc3Var* &var,
     _addErrStr("ERROR - ForayNcRadxFile::_addTimeVar");
     _addErrStr("  Cannot add time var, name: ", name);
     _addErrStr("  Type: ", _file.ncTypeToStr(nc3Int));
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   
@@ -1227,7 +1227,7 @@ int ForayNcRadxFile::_addVar(Nc3Var* &var,
     _addErrStr("ERROR - ForayNcRadxFile::_addVar");
     _addErrStr("  Cannot add var, name: ", name);
     _addErrStr("  Type: ", _file.ncTypeToStr(ncType));
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   
@@ -1289,7 +1289,7 @@ int ForayNcRadxFile::_addVar(Nc3Var* &var,
     _addErrStr("  Cannot add var, name: ", name);
     _addErrStr("  Type: ", _file.ncTypeToStr(ncType));
     _addErrStr("  Dim: ", dim->name());
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   
@@ -1358,7 +1358,7 @@ int ForayNcRadxFile::_addTimeOffsetVar(Nc3Var* &var,
     _addErrStr("  Cannot add var, name: ", name);
     _addErrStr("  Type: ", _file.ncTypeToStr(nc3Double));
     _addErrStr("  Dim: ", dim->name());
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
 

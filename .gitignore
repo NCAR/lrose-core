@@ -210,6 +210,7 @@ codebase/apps/ingest/src/GemVolXml2Dsr/GemVolXml2Dsr
 codebase/apps/ingest/src/Gini2Mdv/Gini2Mdv
 codebase/apps/ingest/src/Grib2Mdv/Grib2Mdv
 codebase/apps/ingest/src/Grib2toMdv/Grib2toMdv
+codebase/apps/ingest/src/Grib2toNc/Grib2toNc
 codebase/apps/ingest/src/GtsSockIngest/GtsSockIngest
 codebase/apps/ingest/src/LdmDynamic2Static/LdmDynamic2Static
 codebase/apps/ingest/src/LdmMetars2File/LdmMetars2File

@@ -43,8 +43,8 @@ HDRS = \
 
 CPPC_SRCS = \
 	Nc3xFile.cc \
-	nc3cdf.cc \
-	nc3values.cc
+	Nc3File.cc \
+	Nc3Values.cc
 
 #
 # general targets

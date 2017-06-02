@@ -40,7 +40,7 @@
 #define NCF_MDV_HH
 
 #include <string>
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3xFile.hh>
 
 using namespace std;
 

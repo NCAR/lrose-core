@@ -882,7 +882,7 @@ int NcfRadxFile::_readTimes(int pathNum)
   if (_timeVar == NULL) {
     _addErrStr("ERROR - NcfRadxFile::_readTimes");
     _addErrStr("  Cannot find time variable, name: ", TIME);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   if (_timeVar->num_dims() < 1) {
@@ -981,7 +981,7 @@ int NcfRadxFile::_readRangeVariable()
   if (_rangeVar == NULL || _rangeVar->num_vals() < 1) {
     _addErrStr("ERROR - NcfRadxFile::_readRangeVariable");
     _addErrStr("  Cannot read range");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
 
@@ -1276,7 +1276,7 @@ int NcfRadxFile::_readPositionVariables()
     if (_georefTimeVar->num_vals() < 1) {
       _addErrStr("ERROR - NcfRadxFile::_readPositionVariables");
       _addErrStr("  Cannot read georef time");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
     if (_latitudeVar->type() != nc3Double) {
@@ -1295,7 +1295,7 @@ int NcfRadxFile::_readPositionVariables()
     if (_latitudeVar->num_vals() < 1) {
       _addErrStr("ERROR - NcfRadxFile::_readPositionVariables");
       _addErrStr("  Cannot read latitude");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
     if (_latitudeVar->type() != nc3Double) {
@@ -1316,7 +1316,7 @@ int NcfRadxFile::_readPositionVariables()
     if (_longitudeVar->num_vals() < 1) {
       _addErrStr("ERROR - NcfRadxFile::_readPositionVariables");
       _addErrStr("  Cannot read longitude");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
     if (_longitudeVar->type() != nc3Double) {
@@ -1337,7 +1337,7 @@ int NcfRadxFile::_readPositionVariables()
     if (_altitudeVar->num_vals() < 1) {
       _addErrStr("ERROR - NcfRadxFile::_readPositionVariables");
       _addErrStr("  Cannot read altitude");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
     if (_altitudeVar->type() != nc3Double) {
@@ -1358,7 +1358,7 @@ int NcfRadxFile::_readPositionVariables()
     if (_altitudeAglVar->num_vals() < 1) {
       _addErrStr("WARNING - NcfRadxFile::_readPositionVariables");
       _addErrStr("  Bad variable - altitudeAgl");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
     }
     if (_altitudeAglVar->type() != nc3Double) {
       _addErrStr("WARNING - NcfRadxFile::_readPositionVariables");
@@ -2595,7 +2595,7 @@ int NcfRadxFile::_readFieldVariables(bool metaOnly)
     if (iret) {
       _addErrStr("ERROR - NcfRadxFile::_readFieldVariables");
       _addErrStr("  cannot read field name: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
 
@@ -2650,7 +2650,7 @@ int NcfRadxFile::_readRayVar(Nc3Var* &var, const string &name,
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       iret = -1;
     }
   }
@@ -2715,7 +2715,7 @@ int NcfRadxFile::_readRayVar(Nc3Var* &var, const string &name,
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       iret = -1;
     }
   }
@@ -2812,7 +2812,7 @@ Nc3Var* NcfRadxFile::_getRayVar(const string &name, bool required)
     if (required) {
       _addErrStr("ERROR - NcfRadxFile::_getRayVar");
       _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
     }
     return NULL;
   }
@@ -2888,7 +2888,7 @@ int NcfRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readSweepVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       iret = -1;
     }
   }
@@ -2942,7 +2942,7 @@ int NcfRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readSweepVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       iret = -1;
     }
   }
@@ -2973,7 +2973,7 @@ int NcfRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
     } else {
       _addErrStr("ERROR - NcfRadxFile::_readSweepVar");
       _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
   }
@@ -3037,7 +3037,7 @@ int NcfRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
   } else {
     _addErrStr("ERROR - NcfRadxFile::_readSweepVar");
     _addErrStr("  Cannot read variable: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   delete[] cvalues;
@@ -3060,7 +3060,7 @@ Nc3Var* NcfRadxFile::_getSweepVar(const string &name)
   if (var == NULL) {
     _addErrStr("ERROR - NcfRadxFile::_getSweepVar");
     _addErrStr("  Cannot read variable, name: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return NULL;
   }
 
@@ -3101,7 +3101,7 @@ int NcfRadxFile::_readCalTime(const string &name, Nc3Var* &var,
     _addErrStr("ERROR - NcfRadxFile::_readCalTime");
     _addErrStr("  cal variable name: ", name);
     _addErrStr("  Cannot read calibration time");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
 
@@ -3172,7 +3172,7 @@ int NcfRadxFile::_readCalTime(const string &name, Nc3Var* &var,
   } else {
     _addErrStr("ERROR - NcfRadxFile::_readCalTime");
     _addErrStr("  Cannot read variable: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     delete[] cvalues;
     return -1;
   }
@@ -3213,7 +3213,7 @@ int NcfRadxFile::_readCalVar(const string &name, Nc3Var* &var,
       _addErrStr("ERROR - NcfRadxFile::_readCalVar");
       _addErrStr("  cal variable name: ", name);
       _addErrStr("  Cannot read calibration variable");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
   }

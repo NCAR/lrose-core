@@ -433,7 +433,7 @@ int Ncf2MdvTrans::_openNcFile(const string &path)
     delete _ncFile;
   }
 
-  _ncFile = new NcFile(path.c_str(), NcFile::ReadOnly);
+  _ncFile = new Nc3File(path.c_str(), Nc3File::ReadOnly);
 
   // Check that constructor succeeded
 
@@ -444,12 +444,12 @@ int Ncf2MdvTrans::_openNcFile(const string &path)
   }
   
   // Change the error behavior of the netCDF C++ API by creating an
-  // NcError object. Until it is destroyed, this NcError object will
+  // Nc3Error object. Until it is destroyed, this Nc3Error object will
   // ensure that the netCDF C++ API returns error codes
   // on any failure, and leaves any other error handling to the
   // calling program.
   
-  _ncErr = new NcError(NcError::silent_nonfatal);
+  _ncErr = new Nc3Error(Nc3Error::silent_nonfatal);
 
   if (_debug) {
     cerr << "SUCCESS - opened file: " << path << endl;
@@ -500,7 +500,7 @@ int Ncf2MdvTrans::_setMasterHeader()
 
   for (int i = 0; i < _ncFile->num_atts(); i++) {
     
-    NcAtt* att = _ncFile->get_att(i);
+    Nc3Att* att = _ncFile->get_att(i);
     
     if (att == NULL) {
       continue;
@@ -533,12 +533,12 @@ int Ncf2MdvTrans::_setMasterHeader()
 
   // find the master header variable, and decode it it available
 
-  NcVar *mhdrVar = _ncFile->get_var(NcfMdv::mdv_master_header);
+  Nc3Var *mhdrVar = _ncFile->get_var(NcfMdv::mdv_master_header);
   if (mhdrVar != NULL) {
     
     for (int i = 0; i < mhdrVar->num_atts(); i++) {
       
-      NcAtt* att = mhdrVar->get_att(i);
+      Nc3Att* att = mhdrVar->get_att(i);
       
       if (att == NULL) {
         continue;
@@ -653,7 +653,7 @@ int Ncf2MdvTrans::_setTimeInfo()
 
   for (int ivar = 0; ivar < _ncFile->num_vars(); ivar++) {
     
-    NcVar* var = _ncFile->get_var(ivar);
+    Nc3Var* var = _ncFile->get_var(ivar);
     if (var == NULL) {
       continue;
     }
@@ -702,14 +702,14 @@ int Ncf2MdvTrans::_setTimeInfo()
   
   // if time_bounds exists, use it to set time_begin and time_end
   
-  NcAtt* boundsAtt = _timeDim.var->get_att(NcfMdv::bounds);
+  Nc3Att* boundsAtt = _timeDim.var->get_att(NcfMdv::bounds);
   if (boundsAtt != NULL) {
     string boundsName = asString(boundsAtt);
     delete boundsAtt;
-    NcVar* boundsVar = _ncFile->get_var(boundsName.c_str());
+    Nc3Var* boundsVar = _ncFile->get_var(boundsName.c_str());
     if (boundsVar != NULL) {
       double timeBounds[2];
-      NcBool ok = boundsVar->get(timeBounds, 1, 2);
+      Nc3Bool ok = boundsVar->get(timeBounds, 1, 2);
       if (ok) {
         if (timeBounds[0] != 0.0) {
           _mhdr.time_begin = (si32) timeBounds[0];
@@ -746,7 +746,7 @@ int Ncf2MdvTrans::_setTimeInfo()
 // Also, 'forecast_period' is the standard name for the forecast lead time.
 // 
 
-void Ncf2MdvTrans::_setTimeInfoForVar(NcVar *var)
+void Ncf2MdvTrans::_setTimeInfoForVar(Nc3Var *var)
 {
   if ( var->num_vals() == 0 ) {
     return;
@@ -756,7 +756,7 @@ void Ncf2MdvTrans::_setTimeInfoForVar(NcVar *var)
     
   string name = var->name();
   string stdName;
-  NcAtt* stdNameAtt = var->get_att(NcfMdv::standard_name);
+  Nc3Att* stdNameAtt = var->get_att(NcfMdv::standard_name);
   if (stdNameAtt != NULL) {
     stdName = asString(stdNameAtt);
     delete stdNameAtt;
@@ -772,7 +772,7 @@ void Ncf2MdvTrans::_setTimeInfoForVar(NcVar *var)
 
   // get units attribute
     
-  NcAtt* unitsAtt = var->get_att(NcfMdv::units);
+  Nc3Att* unitsAtt = var->get_att(NcfMdv::units);
   if (unitsAtt == NULL) {
     // time variables must have units
     return;
@@ -863,7 +863,7 @@ void Ncf2MdvTrans::_setTimeInfoForVar(NcVar *var)
     return;
   }
     
-  NcDim* dim = var->get_dim(0);
+  Nc3Dim* dim = var->get_dim(0);
   if (dim == NULL) {
     return;
   }
@@ -973,7 +973,7 @@ int Ncf2MdvTrans::_addDataFields()
 //
 //  Add one field to mdv state, return 0 for good, -1 for bad
 
-int Ncf2MdvTrans::_addOneField(NcVar *dataVar, int &fieldNum)
+int Ncf2MdvTrans::_addOneField(Nc3Var *dataVar, int &fieldNum)
 {
   ArrayDim arrayDim;
 
@@ -1039,7 +1039,7 @@ int Ncf2MdvTrans::_addOneField(NcVar *dataVar, int &fieldNum)
 //
 // adjust nTimes for a field return -1 for bad, 0 for good
 
-int Ncf2MdvTrans::_adjustTimeInfo(NcVar *dataVar, int &fieldNum,
+int Ncf2MdvTrans::_adjustTimeInfo(Nc3Var *dataVar, int &fieldNum,
 				  vector<int> &nTimes)
 {
   ArrayDim arrayDim;
@@ -1084,7 +1084,7 @@ int Ncf2MdvTrans::_adjustTimeInfo(NcVar *dataVar, int &fieldNum,
 // Initialization for adding one field, check if it is a grid
 // return 0 if field should be added, -1 if not
 
-int Ncf2MdvTrans::_addOneFieldInit(NcVar *dataVar, int &fieldNum,
+int Ncf2MdvTrans::_addOneFieldInit(Nc3Var *dataVar, int &fieldNum,
 				   ArrayDim &arrayDim)
 
 {
@@ -1122,7 +1122,7 @@ int Ncf2MdvTrans::_addOneFieldInit(NcVar *dataVar, int &fieldNum,
 //////////////////////////
 // Look a a field and adjust arrayDim if appropriate
 
-void Ncf2MdvTrans::_inspectDim(NcDim *dim, int jdim, ArrayDim &arrayDim)
+void Ncf2MdvTrans::_inspectDim(Nc3Dim *dim, int jdim, ArrayDim &arrayDim)
 {
   if (dim == NULL) {
     if (_debug) {
@@ -1131,7 +1131,7 @@ void Ncf2MdvTrans::_inspectDim(NcDim *dim, int jdim, ArrayDim &arrayDim)
     return;
   }
       
-  NcVar *coordVar = _ncFile->get_var(dim->name());
+  Nc3Var *coordVar = _ncFile->get_var(dim->name());
   if (coordVar == NULL) {
     if (_debug) {
       cerr << "REJECT var as field: no coords" << endl;
@@ -1139,7 +1139,7 @@ void Ncf2MdvTrans::_inspectDim(NcDim *dim, int jdim, ArrayDim &arrayDim)
     return;
   }
       
-  NcAtt *standardNameAtt = coordVar->get_att(NcfMdv::standard_name);
+  Nc3Att *standardNameAtt = coordVar->get_att(NcfMdv::standard_name);
   string stdName;
   if (standardNameAtt != NULL) {
     stdName = asString(standardNameAtt);
@@ -1150,7 +1150,7 @@ void Ncf2MdvTrans::_inspectDim(NcDim *dim, int jdim, ArrayDim &arrayDim)
     }
   }
 
-  NcAtt *longNameAtt = coordVar->get_att(NcfMdv::long_name);
+  Nc3Att *longNameAtt = coordVar->get_att(NcfMdv::long_name);
   string longName;
   if (longNameAtt != NULL) {
     longName = asString(longNameAtt);
@@ -1178,7 +1178,7 @@ void Ncf2MdvTrans::_inspectDim(NcDim *dim, int jdim, ArrayDim &arrayDim)
     }
     return;
   }
-  NcAtt *positiveAtt = coordVar->get_att(NcfMdv::positive);
+  Nc3Att *positiveAtt = coordVar->get_att(NcfMdv::positive);
   if (positiveAtt != NULL) {
     arrayDim.zVar = coordVar;
     arrayDim.zDim = dim;
@@ -1193,13 +1193,13 @@ void Ncf2MdvTrans::_inspectDim(NcDim *dim, int jdim, ArrayDim &arrayDim)
 //////////////////////////
 // Look a a field in another way and adjust arrayDim if appropriate
 
-void Ncf2MdvTrans::_reInspectDim(NcDim *dim, int jdim, ArrayDim &arrayDim)
+void Ncf2MdvTrans::_reInspectDim(Nc3Dim *dim, int jdim, ArrayDim &arrayDim)
 {
   if (dim == NULL) {
     return;
   }
   string name = dim->name();
-  NcVar *coordVar = _ncFile->get_var(name.c_str());
+  Nc3Var *coordVar = _ncFile->get_var(name.c_str());
   if (coordVar == NULL) {
     return;
   }
@@ -1244,7 +1244,7 @@ void Ncf2MdvTrans::_reInspectDim(NcDim *dim, int jdim, ArrayDim &arrayDim)
 //
 // returns true if yes.
 
-bool Ncf2MdvTrans::_shouldAddField(NcVar *dataVar, int &fieldNum)
+bool Ncf2MdvTrans::_shouldAddField(Nc3Var *dataVar, int &fieldNum)
 {
   if (dataVar == NULL) {
     return false;
@@ -1310,13 +1310,13 @@ bool Ncf2MdvTrans::_shouldAddField(NcVar *dataVar, int &fieldNum)
 // find the time dimension for this variable
 // if set, it will be the first dimension
 
-Ncf2MdvTrans::TimeDim * Ncf2MdvTrans::_findTimeDim(NcVar *dataVar)
+Ncf2MdvTrans::TimeDim * Ncf2MdvTrans::_findTimeDim(Nc3Var *dataVar)
 {
   // find the time dimension for this variable
   // if set, it will be the first dimension
 
   TimeDim *ret = NULL;
-  NcDim* vdim = dataVar->get_dim(0);
+  Nc3Dim* vdim = dataVar->get_dim(0);
   for (int ii = 0; ii < (int) _timeDims.size(); ii++) {
     string tname = vdim->name();
     if (tname == _timeDims[ii].name) {
@@ -1337,7 +1337,7 @@ Ncf2MdvTrans::TimeDim * Ncf2MdvTrans::_findTimeDim(NcVar *dataVar)
 // return 0 for good, -1 for error
 
 int Ncf2MdvTrans::_addOneTimeDataField(int itime, TimeDim *tdim, 
-				       NcVar* dataVar, ArrayDim &arrayDim)
+				       Nc3Var* dataVar, ArrayDim &arrayDim)
 {
   time_t validTime = tdim->times[itime];
         
@@ -1542,7 +1542,7 @@ int Ncf2MdvTrans::_addChunks()
 
     char dimName[128];
     sprintf(dimName, "%s_%.4d", NcfMdv::nbytes_mdv_chunk, ii);
-    NcDim *dim = _ncFile->get_dim(dimName);
+    Nc3Dim *dim = _ncFile->get_dim(dimName);
     if (dim == NULL) {
       return 0;
     }
@@ -1551,7 +1551,7 @@ int Ncf2MdvTrans::_addChunks()
     
     char varName[128];
     sprintf(varName, "%s_%.4d", NcfMdv::mdv_chunk, ii);
-    NcVar *var = _ncFile->get_var(varName);
+    Nc3Var *var = _ncFile->get_var(varName);
     if (var == NULL) {
       return 0;
     }
@@ -1559,7 +1559,7 @@ int Ncf2MdvTrans::_addChunks()
     // id
 
     int id = 0;
-    NcAtt *idAtt = var->get_att(NcfMdv::id);
+    Nc3Att *idAtt = var->get_att(NcfMdv::id);
     if (idAtt != NULL) {
       id = idAtt->as_int(0);
       delete idAtt;
@@ -1568,7 +1568,7 @@ int Ncf2MdvTrans::_addChunks()
     // info
 
     string info;
-    NcAtt *infoAtt = var->get_att(NcfMdv::info);
+    Nc3Att *infoAtt = var->get_att(NcfMdv::info);
     if (infoAtt != NULL) {
       info = asString(infoAtt);
       delete infoAtt;
@@ -1632,7 +1632,7 @@ string Ncf2MdvTrans::_getGlobalAttrXml()
 
   for (int i = 0; i < _ncFile->num_atts(); i++) {
     
-    NcAtt* att = _ncFile->get_att(i);
+    Nc3Att* att = _ncFile->get_att(i);
     
     if (att == NULL) {
       continue;
@@ -1661,7 +1661,7 @@ string Ncf2MdvTrans::_getGlobalAttrXml()
 ////////////////////////////////////////
 // add attribute to string
 
-void Ncf2MdvTrans::_addAttr2Str(NcAtt *att, const string &requiredName,
+void Ncf2MdvTrans::_addAttr2Str(Nc3Att *att, const string &requiredName,
 				string &str, const string &label)
   
 {
@@ -1677,7 +1677,7 @@ void Ncf2MdvTrans::_addAttr2Str(NcAtt *att, const string &requiredName,
 ////////////////////////////////////////
 // set si32 from attribute
 
-void Ncf2MdvTrans::_setSi32FromAttr(NcAtt *att, const string &requiredName, si32 &val)
+void Ncf2MdvTrans::_setSi32FromAttr(Nc3Att *att, const string &requiredName, si32 &val)
 
 {
   if (requiredName.compare(att->name()) == 0) {
@@ -1688,7 +1688,7 @@ void Ncf2MdvTrans::_setSi32FromAttr(NcAtt *att, const string &requiredName, si32
 ////////////////////////////////////////
 // set fl32 from attribute
 
-void Ncf2MdvTrans::_setFl32FromAttr(NcAtt *att, const string &requiredName, fl32 &val)
+void Ncf2MdvTrans::_setFl32FromAttr(Nc3Att *att, const string &requiredName, fl32 &val)
 
 {
   if (requiredName.compare(att->name()) == 0) {
@@ -1700,7 +1700,7 @@ void Ncf2MdvTrans::_setFl32FromAttr(NcAtt *att, const string &requiredName, fl32
 ///////////////////////////////////////////
 // get string representation of component
 
-string Ncf2MdvTrans::asString(const NcTypedComponent *component,
+string Ncf2MdvTrans::asString(const Nc3TypedComponent *component,
 			      int index /* = 0 */)
   
 {

@@ -713,7 +713,7 @@ int OdimHdf5RadxFile::_readFromPath(const string &path,
 
     // root attributes
 
-    Hdf5Utils::DecodedAttr decodedAttr;
+    Hdf5xx::DecodedAttr decodedAttr;
     _utils.loadAttribute(root, "Conventions", "root-attr", decodedAttr);
     _conventions = decodedAttr.getAsString();
 
@@ -1131,7 +1131,7 @@ int OdimHdf5RadxFile::_readRootWhat(Group &what)
 
 {
 
-  Hdf5Utils::DecodedAttr decodedAttr;
+  Hdf5xx::DecodedAttr decodedAttr;
 
   if (_utils.loadAttribute(what, "object", "root-what", decodedAttr)) {
     _addErrStr(_utils.getErrStr());
@@ -1177,7 +1177,7 @@ int OdimHdf5RadxFile::_readRootWhere(Group &where)
 
 {
 
-  Hdf5Utils::DecodedAttr decodedAttr;
+  Hdf5xx::DecodedAttr decodedAttr;
   
   if (_utils.loadAttribute(where, "height", "root-where", decodedAttr)) {
     _addErrStr(_utils.getErrStr());
@@ -1214,7 +1214,7 @@ void OdimHdf5RadxFile::_readHow(Group &how, const string &label)
 
 {
 
-  Hdf5Utils::DecodedAttr decodedAttr;
+  Hdf5xx::DecodedAttr decodedAttr;
 
   if (_utils.loadAttribute(how, "task", label, decodedAttr) == 0) {
     _task = decodedAttr.getAsString();
@@ -1665,7 +1665,7 @@ int OdimHdf5RadxFile::_readSweepHow(Group &how, const string &label)
   double rayDeltaSecs = sweepDeltaSecs / (double) (_nRaysSweep - 1);
 
   _aStart = 0;
-  Hdf5Utils::DecodedAttr decodedAttr;
+  Hdf5xx::DecodedAttr decodedAttr;
   if (_utils.loadAttribute(how, "astart", label, decodedAttr) == 0) {
     _aStart = decodedAttr.getAsDouble();
   }
@@ -1698,7 +1698,7 @@ int OdimHdf5RadxFile::_readSweepHow(Group &how, const string &label)
 
     // ray azimuth angles
 
-    Hdf5Utils::ArrayAttr rayAz;
+    Hdf5xx::ArrayAttr rayAz;
     if (_utils.loadArrayAttribute(how, "azangles", label, rayAz) == 0) {
       if ((int) rayAz.getLen() != _nRaysSweep) {
         _addErrStr("ERROR - In reading PPI sweep, incorrect number of azangles");
@@ -1714,7 +1714,7 @@ int OdimHdf5RadxFile::_readSweepHow(Group &how, const string &label)
 
     // ray elevation angles
 
-    Hdf5Utils::ArrayAttr startEl, stopEl;
+    Hdf5xx::ArrayAttr startEl, stopEl;
     if ((_utils.loadArrayAttribute(how, "startelA", label, startEl) == 0) &&
         (_utils.loadArrayAttribute(how, "stopelA", label, stopEl)) == 0) {
       
@@ -1739,7 +1739,7 @@ int OdimHdf5RadxFile::_readSweepHow(Group &how, const string &label)
 
     // ray times
     
-    Hdf5Utils::ArrayAttr startTime, stopTime;
+    Hdf5xx::ArrayAttr startTime, stopTime;
     if ((_utils.loadArrayAttribute(how, "startelT", label, startTime) == 0) &&
         (_utils.loadArrayAttribute(how, "stopelT", label, stopTime)) == 0) {
       
@@ -1766,7 +1766,7 @@ int OdimHdf5RadxFile::_readSweepHow(Group &how, const string &label)
 
     // ray elevation angles
 
-    Hdf5Utils::ArrayAttr rayEl;
+    Hdf5xx::ArrayAttr rayEl;
     if (_utils.loadArrayAttribute(how, "elangles", label, rayEl) == 0) {
       if ((int) rayEl.getLen() != _nRaysSweep) {
         _addErrStr("ERROR - In reading PPI sweep, incorrect number of elangles");
@@ -1782,7 +1782,7 @@ int OdimHdf5RadxFile::_readSweepHow(Group &how, const string &label)
 
     // ray azimuth angles
 
-    Hdf5Utils::ArrayAttr startAz, stopAz;
+    Hdf5xx::ArrayAttr startAz, stopAz;
     if ((_utils.loadArrayAttribute(how, "startazA", label, startAz) == 0) &&
         (_utils.loadArrayAttribute(how, "stopazA", label, stopAz)) == 0) {
       
@@ -1810,7 +1810,7 @@ int OdimHdf5RadxFile::_readSweepHow(Group &how, const string &label)
 
     // ray times
     
-    Hdf5Utils::ArrayAttr startTime, stopTime;
+    Hdf5xx::ArrayAttr startTime, stopTime;
     if ((_utils.loadArrayAttribute(how, "startazT", label, startTime) == 0) &&
         (_utils.loadArrayAttribute(how, "stopazT", label, stopTime)) == 0) {
       
@@ -1846,7 +1846,7 @@ int OdimHdf5RadxFile::_readSweepWhat(Group &what, const string &label)
 
 {
   
-  Hdf5Utils::DecodedAttr decodedAttr;
+  Hdf5xx::DecodedAttr decodedAttr;
 
   // product scan type
   
@@ -1919,7 +1919,7 @@ int OdimHdf5RadxFile::_readDataWhat(Group &what, const string &label)
 
 {
 
-  Hdf5Utils::DecodedAttr decodedAttr;
+  Hdf5xx::DecodedAttr decodedAttr;
 
   // field quantity
 
@@ -1969,7 +1969,7 @@ int OdimHdf5RadxFile::_readSweepWhere(Group &where, const string& label)
 
 {
 
-  Hdf5Utils::DecodedAttr decodedAttr;
+  Hdf5xx::DecodedAttr decodedAttr;
 
   if (_utils.loadAttribute(where, "a1gate", label, decodedAttr)) {
     _addErrStr(_utils.getErrStr());
@@ -3562,27 +3562,27 @@ int OdimHdf5RadxFile::_doWrite(const RadxVol &vol,
   // add file (root) attributes
 
   Group root(_file->openGroup("/"));
-  Hdf5Utils::addAttr(root, "Conventions", "ODIM_H5/V2_2");
+  Hdf5xx::addAttr(root, "Conventions", "ODIM_H5/V2_2");
 
   // add mandatory top-level what attributes
 
   if (vol.getNSweeps() > 1) {
-    Hdf5Utils::addAttr(what, "object", "PVOL");
+    Hdf5xx::addAttr(what, "object", "PVOL");
   } else {
     if (_sweepMode == Radx::SWEEP_MODE_SECTOR) {
-      Hdf5Utils::addAttr(what, "object", "AZIM");
+      Hdf5xx::addAttr(what, "object", "AZIM");
     } else if (_sweepMode == Radx::SWEEP_MODE_RHI) {
-      Hdf5Utils::addAttr(what, "object", "ELEV");
+      Hdf5xx::addAttr(what, "object", "ELEV");
     } else {
-      Hdf5Utils::addAttr(what, "object", "SCAN");
+      Hdf5xx::addAttr(what, "object", "SCAN");
     }
   }
 
   _version = vol.getVersion();
   if (_version.size() > 0 && _version.find("H5rad") != string::npos) {
-    Hdf5Utils::addAttr(what, "version", vol.getVersion());
+    Hdf5xx::addAttr(what, "version", vol.getVersion());
   } else {
-    Hdf5Utils::addAttr(what, "version", "H5rad 2.2");
+    Hdf5xx::addAttr(what, "version", "H5rad 2.2");
   }
   _extendedMetaDataOnWrite = false;
   if (_version.find("H5rad 3") != string::npos) {
@@ -3593,54 +3593,54 @@ int OdimHdf5RadxFile::_doWrite(const RadxVol &vol,
   char dateStr[32];
   sprintf(dateStr, "%.4d%.2d%.2d",
           startTime.getYear(), startTime.getMonth(), startTime.getDay());
-  Hdf5Utils::addAttr(what, "date", dateStr);
+  Hdf5xx::addAttr(what, "date", dateStr);
 
   char timeStr[32];
   sprintf(timeStr, "%.2d%.2d%.2d",
           startTime.getHour(), startTime.getMin(), startTime.getSec());
-  Hdf5Utils::addAttr(what, "time", timeStr);
+  Hdf5xx::addAttr(what, "time", timeStr);
 
   if (vol.getSource().size() > 0) {
-    Hdf5Utils::addAttr(what, "source", vol.getSource());
+    Hdf5xx::addAttr(what, "source", vol.getSource());
   } else {
     string radarName("RAD:");
     radarName += vol.getInstrumentName();
-    Hdf5Utils::addAttr(what, "source", radarName);
+    Hdf5xx::addAttr(what, "source", radarName);
   }
 
   // add top-level where attributes
   
-  Hdf5Utils::addAttr(where, "height", vol.getAltitudeKm() * 1000.0);
-  Hdf5Utils::addAttr(where, "lat", vol.getLatitudeDeg());
-  Hdf5Utils::addAttr(where, "lon", vol.getLongitudeDeg());
+  Hdf5xx::addAttr(where, "height", vol.getAltitudeKm() * 1000.0);
+  Hdf5xx::addAttr(where, "lat", vol.getLatitudeDeg());
+  Hdf5xx::addAttr(where, "lon", vol.getLongitudeDeg());
 
   // add top-level how attributes
 
   Radx::fl64 startepochs = (Radx::fl64) vol.getStartTimeSecs();
-  Hdf5Utils::addAttr(how, "startepochs", startepochs);
+  Hdf5xx::addAttr(how, "startepochs", startepochs);
   
   Radx::fl64 endepochs = (Radx::fl64) vol.getEndTimeSecs();
-  Hdf5Utils::addAttr(how, "endepochs", endepochs);
+  Hdf5xx::addAttr(how, "endepochs", endepochs);
 
   Radx::si64 nSweeps = vol.getNSweeps();
-  Hdf5Utils::addAttr(how, "scan_count", nSweeps);
+  Hdf5xx::addAttr(how, "scan_count", nSweeps);
   
-  Hdf5Utils::addAttr(what, "software", "LROSE-Radx");
+  Hdf5xx::addAttr(what, "software", "LROSE-Radx");
 
-  Hdf5Utils::addAttr(how, "wavelength", vol.getWavelengthCm());
+  Hdf5xx::addAttr(how, "wavelength", vol.getWavelengthCm());
 
   double beamWidthH = vol.getRadarBeamWidthDegH();
-  Hdf5Utils::addAttr(how, "beamwidth", beamWidthH);
+  Hdf5xx::addAttr(how, "beamwidth", beamWidthH);
 
   // nominal antenna gain
 
   double antennaGainH = vol.getRadarAntennaGainDbH();
-  Hdf5Utils::addAttr(how, "nomAntgain", antennaGainH);
-  Hdf5Utils::addAttr(how, "nomAntgainH", antennaGainH);
+  Hdf5xx::addAttr(how, "nomAntgain", antennaGainH);
+  Hdf5xx::addAttr(how, "nomAntgainH", antennaGainH);
   double antennaGainV = vol.getRadarAntennaGainDbV();
-  Hdf5Utils::addAttr(how, "nomAntgainV", antennaGainV);
+  Hdf5xx::addAttr(how, "nomAntgainV", antennaGainV);
   
-  Hdf5Utils::addAttr(how, "RXbandwidth", vol.getPlatform().getRadarReceiverBandwidthMhz());
+  Hdf5xx::addAttr(how, "RXbandwidth", vol.getPlatform().getRadarReceiverBandwidthMhz());
   
   if (vol.getNRcalibs() > 0) {
 
@@ -3648,106 +3648,106 @@ int OdimHdf5RadxFile::_doWrite(const RadxVol &vol,
     
     if (cal.getTwoWayWaveguideLossDbH() != Radx::missingMetaDouble) {
       double txLossH = cal.getTwoWayWaveguideLossDbH() / 2.0;
-      Hdf5Utils::addAttr(how, "TXlossH", txLossH);
+      Hdf5xx::addAttr(how, "TXlossH", txLossH);
     }
     if (cal.getTwoWayWaveguideLossDbV() != Radx::missingMetaDouble) {
       double txLossV = cal.getTwoWayWaveguideLossDbV() / 2.0;
-      Hdf5Utils::addAttr(how, "TXlossV", txLossV);
+      Hdf5xx::addAttr(how, "TXlossV", txLossV);
     }
     
     if (cal.getPowerMeasLossDbH() != Radx::missingMetaDouble &&
         cal.getCouplerForwardLossDbH() != Radx::missingMetaDouble) {
       double injectLossH =
         cal.getPowerMeasLossDbH() + cal.getCouplerForwardLossDbH();
-      Hdf5Utils::addAttr(how, "injectLossH", injectLossH);
+      Hdf5xx::addAttr(how, "injectLossH", injectLossH);
     }
     if (cal.getPowerMeasLossDbV() != Radx::missingMetaDouble &&
         cal.getCouplerForwardLossDbV() != Radx::missingMetaDouble) {
       double injectLossV =
         cal.getPowerMeasLossDbV() + cal.getCouplerForwardLossDbV();
-      Hdf5Utils::addAttr(how, "injectLossV", injectLossV);
+      Hdf5xx::addAttr(how, "injectLossV", injectLossV);
     }
 
     if (cal.getTwoWayWaveguideLossDbH() != Radx::missingMetaDouble &&
         cal.getReceiverGainDbHc() != Radx::missingMetaDouble) {
       double rxLossH =
         cal.getTwoWayWaveguideLossDbH() / 2.0 - cal.getReceiverGainDbHc();
-      Hdf5Utils::addAttr(how, "RXlossH", rxLossH);
+      Hdf5xx::addAttr(how, "RXlossH", rxLossH);
     }
     if (cal.getTwoWayWaveguideLossDbV() != Radx::missingMetaDouble &&
         cal.getReceiverGainDbVc() != Radx::missingMetaDouble) {
       double rxLossV =
         cal.getTwoWayWaveguideLossDbV() / 2.0 - cal.getReceiverGainDbVc();
-      Hdf5Utils::addAttr(how, "RXlossV", rxLossV);
+      Hdf5xx::addAttr(how, "RXlossV", rxLossV);
     }
 
     if (cal.getTwoWayRadomeLossDbH() != Radx::missingMetaDouble) {
       double radomeLossH = cal.getTwoWayRadomeLossDbH() / 2.0;
-      Hdf5Utils::addAttr(how, "radomelossH", radomeLossH);
+      Hdf5xx::addAttr(how, "radomelossH", radomeLossH);
     }
     if (cal.getTwoWayRadomeLossDbV() != Radx::missingMetaDouble) {
       double radomeLossV = cal.getTwoWayRadomeLossDbV() / 2.0;
-      Hdf5Utils::addAttr(how, "radomelossV", radomeLossV);
+      Hdf5xx::addAttr(how, "radomelossV", radomeLossV);
     }
 
     if (cal.getAntennaGainDbH() != Radx::missingMetaDouble) {
       double antGainH = cal.getAntennaGainDbH();
-      Hdf5Utils::addAttr(how, "antgainH", antGainH);
+      Hdf5xx::addAttr(how, "antgainH", antGainH);
     }
     if (cal.getAntennaGainDbV() != Radx::missingMetaDouble) {
       double antGainV = cal.getAntennaGainDbV();
-      Hdf5Utils::addAttr(how, "antgainV", antGainV);
+      Hdf5xx::addAttr(how, "antgainV", antGainV);
     }
 
     if (cal.getBeamWidthDegH() != Radx::missingMetaDouble) {
       double beamWidthH = cal.getBeamWidthDegH();
-      Hdf5Utils::addAttr(how, "beamwH", beamWidthH);
+      Hdf5xx::addAttr(how, "beamwH", beamWidthH);
     }
     if (cal.getBeamWidthDegV() != Radx::missingMetaDouble) {
       double beamWidthV = cal.getBeamWidthDegV();
-      Hdf5Utils::addAttr(how, "beamwV", beamWidthV);
+      Hdf5xx::addAttr(how, "beamwV", beamWidthV);
     }
 
     if (cal.getRadarConstantH() != Radx::missingMetaDouble) {
       double radarConstH = cal.getRadarConstantH();
-      Hdf5Utils::addAttr(how, "radconstH", radarConstH);
+      Hdf5xx::addAttr(how, "radconstH", radarConstH);
     }
     if (cal.getRadarConstantV() != Radx::missingMetaDouble) {
       double radarConstV = cal.getRadarConstantV();
-      Hdf5Utils::addAttr(how, "radconstV", radarConstV);
+      Hdf5xx::addAttr(how, "radconstV", radarConstV);
     }
 
     if (cal.getXmitPowerDbmH() != Radx::missingMetaDouble) {
       double txPwrHKw = pow(10.0, cal.getXmitPowerDbmH() / 10.0) * 1.0e-6;
-      Hdf5Utils::addAttr(how, "nomTXpower", txPwrHKw);
+      Hdf5xx::addAttr(how, "nomTXpower", txPwrHKw);
     }
 
     if (cal.getZdrCorrectionDb() != Radx::missingMetaDouble) {
       double zdrCorrDb = cal.getZdrCorrectionDb();
-      Hdf5Utils::addAttr(how, "powerdiff", zdrCorrDb);
+      Hdf5xx::addAttr(how, "powerdiff", zdrCorrDb);
     }
 
     if (cal.getSystemPhidpDeg() != Radx::missingMetaDouble) {
       double systemPhidp = cal.getSystemPhidpDeg();
-      Hdf5Utils::addAttr(how, "phasediff", systemPhidp);
+      Hdf5xx::addAttr(how, "phasediff", systemPhidp);
     }
 
     if (cal.getBaseDbz1kmHc() != Radx::missingMetaDouble) {
       double dbz1kmH = cal.getBaseDbz1kmHc();
-      Hdf5Utils::addAttr(how, "NEZH", dbz1kmH);
+      Hdf5xx::addAttr(how, "NEZH", dbz1kmH);
     }
     if (cal.getBaseDbz1kmVc() != Radx::missingMetaDouble) {
       double dbz1kmV = cal.getBaseDbz1kmVc();
-      Hdf5Utils::addAttr(how, "NEZV", dbz1kmV);
+      Hdf5xx::addAttr(how, "NEZV", dbz1kmV);
     }
 
     if (cal.getNoiseDbmHc() != Radx::missingMetaDouble) {
       double noiseH = cal.getNoiseDbmHc();
-      Hdf5Utils::addAttr(how, "nsampleH", noiseH);
+      Hdf5xx::addAttr(how, "nsampleH", noiseH);
     }
     if (cal.getNoiseDbmVc() != Radx::missingMetaDouble) {
       double noiseV = cal.getNoiseDbmVc();
-      Hdf5Utils::addAttr(how, "nsampleV", noiseV);
+      Hdf5xx::addAttr(how, "nsampleV", noiseV);
     }
 
   } // if (vol.getNRcalibs() > 0) {
@@ -3872,32 +3872,32 @@ int OdimHdf5RadxFile::_writeSweep(RadxVol &sweepVol,
   char startDateStr[32];
   sprintf(startDateStr, "%.4d%.2d%.2d",
           startTime.getYear(), startTime.getMonth(), startTime.getDay());
-  Hdf5Utils::addAttr(what, "startdate", startDateStr);
+  Hdf5xx::addAttr(what, "startdate", startDateStr);
 
   char startTimeStr[32];
   sprintf(startTimeStr, "%.2d%.2d%.2d",
           startTime.getHour(), startTime.getMin(), startTime.getSec());
-  Hdf5Utils::addAttr(what, "starttime", startTimeStr);
+  Hdf5xx::addAttr(what, "starttime", startTimeStr);
 
   char endDateStr[32];
   sprintf(endDateStr, "%.4d%.2d%.2d",
           endTime.getYear(), endTime.getMonth(), endTime.getDay());
-  Hdf5Utils::addAttr(what, "enddate", endDateStr);
+  Hdf5xx::addAttr(what, "enddate", endDateStr);
 
   char endTimeStr[32];
   sprintf(endTimeStr, "%.2d%.2d%.2d",
           endTime.getHour(), endTime.getMin(), endTime.getSec());
-  Hdf5Utils::addAttr(what, "endtime", endTimeStr);
+  Hdf5xx::addAttr(what, "endtime", endTimeStr);
 
   switch(sweepVol.getPredomSweepModeFromAngles()) {
     case Radx::SWEEP_MODE_RHI:
-      Hdf5Utils::addAttr(what, "product", "RHI");
+      Hdf5xx::addAttr(what, "product", "RHI");
       break;
     case Radx::SWEEP_MODE_SECTOR:
-      Hdf5Utils::addAttr(what, "product", "AZIM");
+      Hdf5xx::addAttr(what, "product", "AZIM");
       break;
     default:
-      Hdf5Utils::addAttr(what, "product", "SCAN");
+      Hdf5xx::addAttr(what, "product", "SCAN");
   }
   
   // add the where group attributes
@@ -3906,50 +3906,50 @@ int OdimHdf5RadxFile::_writeSweep(RadxVol &sweepVol,
   RadxRay *ray1 = sweepVol.getRays()[1];
 
   Radx::fl64 elevDeg = sweep->getFixedAngleDeg();
-  Hdf5Utils::addAttr(where, "elangle", elevDeg);
+  Hdf5xx::addAttr(where, "elangle", elevDeg);
 
   Radx::si64 nbins = ray0->getNGates();
-  Hdf5Utils::addAttr(where, "nbins", nbins);
+  Hdf5xx::addAttr(where, "nbins", nbins);
 
   Radx::fl64 rstartKm = ray0->getStartRangeKm();
-  Hdf5Utils::addAttr(where, "rstart", rstartKm);
+  Hdf5xx::addAttr(where, "rstart", rstartKm);
 
   Radx::fl64 rscaleM = ray0->getGateSpacingKm() * 1000.0;
-  Hdf5Utils::addAttr(where, "rscale", rscaleM);
+  Hdf5xx::addAttr(where, "rscale", rscaleM);
 
   Radx::si64 nrays = sweepVol.getNRays();
-  Hdf5Utils::addAttr(where, "nrays", nrays);
+  Hdf5xx::addAttr(where, "nrays", nrays);
 
-  Hdf5Utils::addAttr(where, "a1gate", ray1Offset);
+  Hdf5xx::addAttr(where, "a1gate", ray1Offset);
 
   if (sweepVol.checkIsSector()) {
     Radx::fl64 startAz = ray0->getAzimuthDeg();
     RadxRay *rayLast = sweepVol.getRays()[sweepVol.getNRays()-1];
     Radx::fl64 stopAz = rayLast->getAzimuthDeg();
-    Hdf5Utils::addAttr(where, "startaz", startAz);
-    Hdf5Utils::addAttr(where, "stopaz", stopAz);
+    Hdf5xx::addAttr(where, "startaz", startAz);
+    Hdf5xx::addAttr(where, "stopaz", stopAz);
   }
 
   // add the how group attributes
   
   Radx::si64 scanIndex = isweep + 1;
-  Hdf5Utils::addAttr(how, "scan_index", scanIndex);
+  Hdf5xx::addAttr(how, "scan_index", scanIndex);
 
   double az0 = ray0->getAzimuthDeg();
   double az1 = ray1->getAzimuthDeg();
   double deltaAz = Radx::conditionAngleDelta(az1 - az0);
   _aStart = Radx::conditionAz(az0 - deltaAz / 2.0);
-  Hdf5Utils::addAttr(how, "astart", _aStart);
+  Hdf5xx::addAttr(how, "astart", _aStart);
 
   Radx::fl64 pulseWidthUs = ray0->getPulseWidthUsec();
-  Hdf5Utils::addAttr(how, "pulsewidth", pulseWidthUs);
+  Hdf5xx::addAttr(how, "pulsewidth", pulseWidthUs);
   
   if (_sweepMode == Radx::SWEEP_MODE_RHI) {
     Radx::fl64 elevRate = sweep->getMeasuredScanRateDegPerSec();
-    Hdf5Utils::addAttr(how, "elevspeed", elevRate);
+    Hdf5xx::addAttr(how, "elevspeed", elevRate);
   } else {
     Radx::fl64 rpm = sweep->getMeasuredScanRateDegPerSec() / 6.0;
-    Hdf5Utils::addAttr(how, "rpm", rpm);
+    Hdf5xx::addAttr(how, "rpm", rpm);
   }
 
   if (ray0->getPrtSec() != Radx::missingMetaDouble) {
@@ -3965,66 +3965,66 @@ int OdimHdf5RadxFile::_writeSweep(RadxVol &sweepVol,
         lowprf = 1.0 / longPrt;
       }
     }
-    Hdf5Utils::addAttr(how, "lowprf", lowprf);
-    Hdf5Utils::addAttr(how, "highprf", highprf);
+    Hdf5xx::addAttr(how, "lowprf", lowprf);
+    Hdf5xx::addAttr(how, "highprf", highprf);
 
   }
 
-  Hdf5Utils::addAttr(how, "TXtype", "unknown");
+  Hdf5xx::addAttr(how, "TXtype", "unknown");
 
   _polMode = ray0->getPolarizationMode();
   if (_polMode == Radx::POL_MODE_HORIZONTAL) {
-    Hdf5Utils::addAttr(how, "poltype", "single");
-    Hdf5Utils::addAttr(how, "polmode", "single-H");
+    Hdf5xx::addAttr(how, "poltype", "single");
+    Hdf5xx::addAttr(how, "polmode", "single-H");
   } else if (_polMode == Radx::POL_MODE_VERTICAL) {
-    Hdf5Utils::addAttr(how, "poltype", "single");
-    Hdf5Utils::addAttr(how, "polmode", "single-V");
+    Hdf5xx::addAttr(how, "poltype", "single");
+    Hdf5xx::addAttr(how, "polmode", "single-V");
   } else if (_polMode == Radx::POL_MODE_CIRCULAR) {
-    Hdf5Utils::addAttr(how, "poltype", "single");
-    Hdf5Utils::addAttr(how, "polmode", "single-C");
+    Hdf5xx::addAttr(how, "poltype", "single");
+    Hdf5xx::addAttr(how, "polmode", "single-C");
   } else if (_polMode == Radx::POL_MODE_HV_ALT) {
-    Hdf5Utils::addAttr(how, "poltype", "switched-dual");
-    Hdf5Utils::addAttr(how, "polmode", "switched-dual");
+    Hdf5xx::addAttr(how, "poltype", "switched-dual");
+    Hdf5xx::addAttr(how, "polmode", "switched-dual");
   } else if (_polMode == Radx::POL_MODE_HV_SIM) {
-    Hdf5Utils::addAttr(how, "poltype", "simultaneous-dual");
-    Hdf5Utils::addAttr(how, "polmode", "simultaneous-dual");
+    Hdf5xx::addAttr(how, "poltype", "simultaneous-dual");
+    Hdf5xx::addAttr(how, "polmode", "simultaneous-dual");
   } else if (_polMode == Radx::POL_MODE_HV_H_XMIT) {
-    Hdf5Utils::addAttr(how, "poltype", "single");
-    Hdf5Utils::addAttr(how, "polmode", "LDR-H");
+    Hdf5xx::addAttr(how, "poltype", "single");
+    Hdf5xx::addAttr(how, "polmode", "LDR-H");
   } else if (_polMode == Radx::POL_MODE_HV_V_XMIT) {
-    Hdf5Utils::addAttr(how, "poltype", "single");
-    Hdf5Utils::addAttr(how, "polmode", "LDR-V");
+    Hdf5xx::addAttr(how, "poltype", "single");
+    Hdf5xx::addAttr(how, "polmode", "LDR-V");
   } else {
-    Hdf5Utils::addAttr(how, "poltype", "single");
-    Hdf5Utils::addAttr(how, "polmode", "single-H");
+    Hdf5xx::addAttr(how, "poltype", "single");
+    Hdf5xx::addAttr(how, "polmode", "single-H");
   }
 
   Radx::fl64 nyquist = ray0->getNyquistMps();
-  Hdf5Utils::addAttr(how, "NI", nyquist);
+  Hdf5xx::addAttr(how, "NI", nyquist);
 
   Radx::si64 nsamples = ray0->getNSamples();
-  Hdf5Utils::addAttr(how, "Vsamples", nsamples);
+  Hdf5xx::addAttr(how, "Vsamples", nsamples);
 
   if (_extendedMetaDataOnWrite) {
     switch(sweepVol.getPredomSweepModeFromAngles()) {
       case Radx::SWEEP_MODE_RHI:
-        Hdf5Utils::addAttr(how, "description", "rhi_sweep");
+        Hdf5xx::addAttr(how, "description", "rhi_sweep");
         break;
       case Radx::SWEEP_MODE_SECTOR:
-        Hdf5Utils::addAttr(how, "description", "sector_sweep");
+        Hdf5xx::addAttr(how, "description", "sector_sweep");
         break;
       default:
-        Hdf5Utils::addAttr(how, "description", "surveillance_sweep");
+        Hdf5xx::addAttr(how, "description", "surveillance_sweep");
     }
   }
   
   // ray times
 
   const vector<RadxRay *> &rays = sweepVol.getRays();
-  RadxArray<Radx::fl64> rayTimes_, timeStart_, timeEnd_;
-  Radx::fl64 *rayTimes = rayTimes_.alloc(rays.size());
-  Radx::fl64 *timeStart = timeStart_.alloc(rays.size());
-  Radx::fl64 *timeEnd = timeEnd_.alloc(rays.size());
+  vector<Radx::fl64> rayTimes, timeStart, timeEnd;
+  rayTimes.resize(rays.size());
+  timeStart.resize(rays.size());
+  timeEnd.resize(rays.size());
   for (size_t ii = 0; ii < rays.size(); ii++) {
     const RadxRay *ray = rays[ii];
     RadxTime rayTime(ray->getRadxTime());
@@ -4046,20 +4046,19 @@ int OdimHdf5RadxFile::_writeSweep(RadxVol &sweepVol,
 
     // ray azimuth angles
     
-    RadxArray<Radx::fl64> azAngles_;
-    Radx::fl64 *azAngles = azAngles_.alloc(rays.size());
+    vector<Radx::fl64> azAngles;
     for (size_t ii = 0; ii < rays.size(); ii++) {
       const RadxRay *ray = rays[ii];
-      azAngles[ii] = ray->getAzimuthDeg();
+      azAngles.push_back(ray->getAzimuthDeg());
     } // ii
-    Hdf5Utils::addAttr(how, "azangles", azAngles_);
+    Hdf5xx::addAttr(how, "azangles", azAngles);
     
     // ray elevation angles
     
-    RadxArray<Radx::fl64> elAngles_, elStart_, elEnd_;
-    Radx::fl64 *elAngles = elAngles_.alloc(rays.size());
-    Radx::fl64 *elStart = elStart_.alloc(rays.size());
-    Radx::fl64 *elEnd = elEnd_.alloc(rays.size());
+    vector<Radx::fl64> elAngles, elStart, elEnd;
+    elAngles.resize(rays.size());
+    elStart.resize(rays.size());
+    elEnd.resize(rays.size());
     for (size_t ii = 0; ii < rays.size(); ii++) {
       const RadxRay *ray = rays[ii];
       elAngles[ii] = ray->getElevationDeg();
@@ -4075,30 +4074,28 @@ int OdimHdf5RadxFile::_writeSweep(RadxVol &sweepVol,
         elEnd[ii] = Radx::conditionEl(elAngles[ii] + deltaHalf);
       }
     } // ii
-    Hdf5Utils::addAttr(how, "startelA", elStart_);
-    Hdf5Utils::addAttr(how, "stopelA", elEnd_);
-
-    Hdf5Utils::addAttr(how, "startelT", timeStart_);
-    Hdf5Utils::addAttr(how, "stopelT", timeEnd_);
+    Hdf5xx::addAttr(how, "startelA", elStart);
+    Hdf5xx::addAttr(how, "stopelA", elEnd);
+    Hdf5xx::addAttr(how, "startelT", timeStart);
+    Hdf5xx::addAttr(how, "stopelT", timeEnd);
 
   } else {
 
     // ray elevation angles
     
-    RadxArray<Radx::fl64> elevAngles_;
-    Radx::fl64 *elevAngles = elevAngles_.alloc(rays.size());
+    vector<Radx::fl64> elevAngles;
     for (size_t ii = 0; ii < rays.size(); ii++) {
       const RadxRay *ray = rays[ii];
-      elevAngles[ii] = ray->getElevationDeg();
+      elevAngles.push_back(ray->getElevationDeg());
     } // ii
-    Hdf5Utils::addAttr(how, "elangles", elevAngles_);
+    Hdf5xx::addAttr(how, "elangles", elevAngles);
     
     // ray azimuth angles
     
-    RadxArray<Radx::fl64> azAngles_, azStart_, azEnd_;
-    Radx::fl64 *azAngles = azAngles_.alloc(rays.size());
-    Radx::fl64 *azStart = azStart_.alloc(rays.size());
-    Radx::fl64 *azEnd = azEnd_.alloc(rays.size());
+    vector<Radx::fl64> azAngles, azStart, azEnd;
+    azAngles.resize(rays.size());
+    azStart.resize(rays.size());
+    azEnd.resize(rays.size());
     for (size_t ii = 0; ii < rays.size(); ii++) {
       const RadxRay *ray = rays[ii];
       azAngles[ii] = ray->getAzimuthDeg();
@@ -4114,11 +4111,10 @@ int OdimHdf5RadxFile::_writeSweep(RadxVol &sweepVol,
         azEnd[ii] = Radx::conditionAz(azAngles[ii] + deltaHalf);
       }
     } // ii
-    Hdf5Utils::addAttr(how, "startazA", azStart_);
-    Hdf5Utils::addAttr(how, "stopazA", azEnd_);
-
-    Hdf5Utils::addAttr(how, "startazT", timeStart_);
-    Hdf5Utils::addAttr(how, "stopazT", timeEnd_);
+    Hdf5xx::addAttr(how, "startazA", azStart);
+    Hdf5xx::addAttr(how, "stopazA", azEnd);
+    Hdf5xx::addAttr(how, "startazT", timeStart);
+    Hdf5xx::addAttr(how, "stopazT", timeEnd);
 
   }
 
@@ -4165,7 +4161,7 @@ int OdimHdf5RadxFile::_writeField(RadxVol &sweepVol,
   
   Group what(data.createGroup("what"));
 
-  Hdf5Utils::addAttr(what, "quantity", field.getName());
+  Hdf5xx::addAttr(what, "quantity", field.getName());
   if (_verbose) {
     cerr << "... sweep index: " << isweep 
          << ", adding field: " << field.getName() << endl;
@@ -4180,21 +4176,21 @@ int OdimHdf5RadxFile::_writeField(RadxVol &sweepVol,
     offset = field.getOffset();
   }
   
-  Hdf5Utils::addAttr(what, "gain", scale);
-  Hdf5Utils::addAttr(what, "offset", offset);
+  Hdf5xx::addAttr(what, "gain", scale);
+  Hdf5xx::addAttr(what, "offset", offset);
 
   Radx::fl64 miss = field.getMissing();
-  Hdf5Utils::addAttr(what, "undetect", miss);
-  Hdf5Utils::addAttr(what, "nodata", miss);
+  Hdf5xx::addAttr(what, "undetect", miss);
+  Hdf5xx::addAttr(what, "nodata", miss);
 
   Group how(data.createGroup("how"));
   field.computeMinAndMax();
-  Hdf5Utils::addAttr(how, "min", field.getMinValue());
-  Hdf5Utils::addAttr(how, "max", field.getMaxValue());
+  Hdf5xx::addAttr(how, "min", field.getMinValue());
+  Hdf5xx::addAttr(how, "max", field.getMaxValue());
   if (_extendedMetaDataOnWrite) {
-    Hdf5Utils::addAttr(how, "standard_name", field.getStandardName());
-    Hdf5Utils::addAttr(how, "long_name", field.getLongName());
-    Hdf5Utils::addAttr(how, "units", field.getUnits());
+    Hdf5xx::addAttr(how, "standard_name", field.getStandardName());
+    Hdf5xx::addAttr(how, "long_name", field.getLongName());
+    Hdf5xx::addAttr(how, "units", field.getUnits());
   }
 
   // create the data space
@@ -4221,8 +4217,8 @@ int OdimHdf5RadxFile::_writeField(RadxVol &sweepVol,
       DataSet dset(data.createDataSet("data", predType,
                                       fspace, plist));
       dset.write(field.getDataFl64(), predType, fspace, fspace);
-      Hdf5Utils::addAttr(dset, "CLASS", "IMAGE");
-      Hdf5Utils::addAttr(dset, "IMAGE_VERSION", "1.2");
+      Hdf5xx::addAttr(dset, "CLASS", "IMAGE");
+      Hdf5xx::addAttr(dset, "IMAGE_VERSION", "1.2");
       break;
     }
     case Radx::FL32: {
@@ -4235,8 +4231,8 @@ int OdimHdf5RadxFile::_writeField(RadxVol &sweepVol,
       DataSet dset(data.createDataSet("data", predType,
                                       fspace, plist));
       dset.write(field.getDataFl32(), predType, fspace, fspace);
-      Hdf5Utils::addAttr(dset, "CLASS", "IMAGE");
-      Hdf5Utils::addAttr(dset, "IMAGE_VERSION", "1.2");
+      Hdf5xx::addAttr(dset, "CLASS", "IMAGE");
+      Hdf5xx::addAttr(dset, "IMAGE_VERSION", "1.2");
       break;
     }
     case Radx::SI32: {
@@ -4249,8 +4245,8 @@ int OdimHdf5RadxFile::_writeField(RadxVol &sweepVol,
       DataSet dset(data.createDataSet("data", predType,
                                       fspace, plist));
       dset.write(field.getDataSi32(), predType, fspace, fspace);
-      Hdf5Utils::addAttr(dset, "CLASS", "IMAGE");
-      Hdf5Utils::addAttr(dset, "IMAGE_VERSION", "1.2");
+      Hdf5xx::addAttr(dset, "CLASS", "IMAGE");
+      Hdf5xx::addAttr(dset, "IMAGE_VERSION", "1.2");
       break;
     }
     case Radx::SI16: {
@@ -4263,8 +4259,8 @@ int OdimHdf5RadxFile::_writeField(RadxVol &sweepVol,
       DataSet dset(data.createDataSet("data", predType,
                                       fspace, plist));
       dset.write(field.getDataSi16(), predType, fspace, fspace);
-      Hdf5Utils::addAttr(dset, "CLASS", "IMAGE");
-      Hdf5Utils::addAttr(dset, "IMAGE_VERSION", "1.2");
+      Hdf5xx::addAttr(dset, "CLASS", "IMAGE");
+      Hdf5xx::addAttr(dset, "IMAGE_VERSION", "1.2");
       break;
     }
     case Radx::SI08:
@@ -4278,8 +4274,8 @@ int OdimHdf5RadxFile::_writeField(RadxVol &sweepVol,
       DataSet dset(data.createDataSet("data", predType,
                                       fspace, plist));
       dset.write(field.getDataSi08(), predType, fspace, fspace);
-      Hdf5Utils::addAttr(dset, "CLASS", "IMAGE");
-      Hdf5Utils::addAttr(dset, "IMAGE_VERSION", "1.2");
+      Hdf5xx::addAttr(dset, "CLASS", "IMAGE");
+      Hdf5xx::addAttr(dset, "IMAGE_VERSION", "1.2");
       break;
     }
   }

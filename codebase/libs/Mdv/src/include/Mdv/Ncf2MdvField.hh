@@ -47,7 +47,7 @@
 
 #include <toolsa/TaArray.hh>
 #include <Mdv/MdvxField.hh>
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3xFile.hh>
 using namespace std;
 
 ////////////////////////
@@ -69,12 +69,12 @@ public:
 #ifdef USE_UDUNITS
                ut_system *uds,
 #endif
-               NcFile *ncFile, NcError *ncErr,
-               NcVar *dataVar,
-               NcDim *tDim, NcVar *tVar,
-               NcDim *zDim, NcVar *zVar,
-               NcDim *yDim, NcVar *yVar,
-               NcDim *xDim, NcVar *xVar);
+               Nc3File *ncFile, Nc3Error *ncErr,
+               Nc3Var *dataVar,
+               Nc3Dim *tDim, Nc3Var *tVar,
+               Nc3Dim *zDim, Nc3Var *zVar,
+               Nc3Dim *yDim, Nc3Var *yVar,
+               Nc3Dim *xDim, Nc3Var *xVar);
   
   // destructor
 
@@ -117,36 +117,36 @@ protected:
 
   // netCDF file
 
-  NcFile *_ncFile;
-  NcError *_ncErr;
+  Nc3File *_ncFile;
+  Nc3Error *_ncErr;
 
   // main data variable and type
   
-  NcVar *_dataVar;
-  NcType _dataType;
+  Nc3Var *_dataVar;
+  Nc3Type _dataType;
   TaArray<ui08> _data_;
   ui08 *_data;
 
   // dimensions and coordinate variables
 
-  NcDim *_tDim;
-  NcVar *_tVar;
+  Nc3Dim *_tDim;
+  Nc3Var *_tVar;
 
-  NcDim *_zDim;
-  NcVar *_zVar;
+  Nc3Dim *_zDim;
+  Nc3Var *_zVar;
 
-  NcDim *_yDim;
-  NcVar *_yVar;
+  Nc3Dim *_yDim;
+  Nc3Var *_yVar;
 
-  NcDim *_xDim;
-  NcVar *_xVar;
+  Nc3Dim *_xDim;
+  Nc3Var *_xVar;
 
   // projection
 
   Mdvx::projection_type_t _projType;
   MdvxProj _proj;
   string _projTypeStr;
-  NcVar *_projVar;
+  Nc3Var *_projVar;
 
   // error string
 
@@ -197,9 +197,9 @@ protected:
   // Returns 0 on success, -1 on failure
   
   int _setXYAxis(const string &axisName,
-                 const NcVar *axisVar,
+                 const Nc3Var *axisVar,
                  const string &latlonStdName,
-                 const NcDim *axisDim,
+                 const Nc3Dim *axisDim,
                  int &nn,
                  double &minVal,
                  double &dVal);
@@ -216,13 +216,13 @@ protected:
 
   // set vals from attribute
 
-  void _setSi32FromAttr(NcAtt *att, const string &requiredName, si32 &val);
-  void _setFl32FromAttr(NcAtt *att, const string &requiredName, fl32 &val);
-  void _setStrFromAttr(NcAtt *att, const string &requiredName, string &val);
+  void _setSi32FromAttr(Nc3Att *att, const string &requiredName, si32 &val);
+  void _setFl32FromAttr(Nc3Att *att, const string &requiredName, fl32 &val);
+  void _setStrFromAttr(Nc3Att *att, const string &requiredName, string &val);
 
   // get string from component
   
-  string _asString(const NcTypedComponent *component, int index = 0) const;
+  string _asString(const Nc3TypedComponent *component, int index = 0) const;
 
   // get multiplier to convert to km
 

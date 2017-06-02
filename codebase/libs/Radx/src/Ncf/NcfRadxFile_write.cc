@@ -917,7 +917,7 @@ int NcfRadxFile::_addCoordinateVariables()
                                              nc3Double, _timeDim)) == NULL) {
     _addErrStr("ERROR - NcfRadxFile::_addCoordinateVariables");
     _addErrStr("  Cannot add time var");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   int iret = 0;
@@ -945,7 +945,7 @@ int NcfRadxFile::_addCoordinateVariables()
                                     nc3Float, _timeDim, _rangeDim)) == NULL) {
       _addErrStr("ERROR - NcfRadxFile::_addCoordinateVariables");
       _addErrStr("  Cannot add range var");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
 
@@ -955,7 +955,7 @@ int NcfRadxFile::_addCoordinateVariables()
                                                 nc3Float, _rangeDim)) == NULL) {
       _addErrStr("ERROR - NcfRadxFile::_addCoordinateVariables");
       _addErrStr("  Cannot add range var");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
 
@@ -1209,7 +1209,7 @@ int NcfRadxFile::_addProjectionVariables()
   if (_projVar == NULL) {
     _addErrStr("ERROR - NcfRadxFile::_addProjectionVariables");
     _addErrStr("  Cannot add projection variable:", GRID_MAPPING);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   
@@ -1839,7 +1839,7 @@ int NcfRadxFile::_addCalVar(Nc3Var* &var, const string &name,
   if (var == NULL) {
     _addErrStr("ERROR - NcfRadxFile::_addCalVar");
     _addErrStr("  Cannot add calib var, name: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
 
@@ -1892,7 +1892,7 @@ int NcfRadxFile::_writeCoordinateVariables()
   if (!_timeVar->put(dtime, nRays)) {
     _addErrStr("ERROR - NcfRadxFile::_writeCoordinateVariables");
     _addErrStr("  Cannot write time var");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
 
@@ -1960,7 +1960,7 @@ int NcfRadxFile::_writeScalarVariables()
   if (!_volumeNumberVar->put(&volNum, 1)) {
     _addErrStr("ERROR - NcfRadxFile::_writeScalarVariables");
     _addErrStr("  Cannot write volumeNumber");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
 
@@ -2115,7 +2115,7 @@ int NcfRadxFile::_writeProjectionVariables()
   if (!_latitudeVar->put(&latitude, 1)) {
     _addErrStr("ERROR - NcfRadxFile::_writeProjectionVariables");
     _addErrStr("  Cannot write latitude");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
 
@@ -2123,7 +2123,7 @@ int NcfRadxFile::_writeProjectionVariables()
   if (!_longitudeVar->put(&longitude, 1)) {
     _addErrStr("ERROR - NcfRadxFile::_writeProjectionVariables");
     _addErrStr("  Cannot write longitude");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
 
@@ -2134,7 +2134,7 @@ int NcfRadxFile::_writeProjectionVariables()
   if (!_altitudeVar->put(&altitudeM, 1)) {
     _addErrStr("ERROR - NcfRadxFile::_writeProjectionVariables");
     _addErrStr("  Cannot write altitude");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
 
@@ -2146,7 +2146,7 @@ int NcfRadxFile::_writeProjectionVariables()
       !_altitudeAglVar->put(&htAglM, 1)) {
     _addErrStr("ERROR - NcfRadxFile::_writeProjectionVariables");
     _addErrStr("  Cannot write altitude AGL");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
 
@@ -3301,7 +3301,7 @@ Nc3Var *NcfRadxFile::_createFieldVar(const RadxField &field)
     _addErrInt("  Time dim size: ", _timeDim->size());
     _addErrStr("  Range dim name: ", _rangeDim->name());
     _addErrInt("  Range dim size: ", _rangeDim->size());
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return NULL;
   }
 
@@ -3462,7 +3462,7 @@ int NcfRadxFile::_writeFieldVar(Nc3Var *var, RadxField *field)
   if (iret) {
     _addErrStr("ERROR - NcfRadxFile::_writeFieldVar");
     _addErrStr("  Canont write var, name: ", var->name());
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   } else {
     return 0;

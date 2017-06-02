@@ -39,7 +39,6 @@
 #include <toolsa/TaStr.hh>
 #include <Mdv/NcfMdv.hh>
 #include <Mdv/NcfFieldData.hh>
-#include <ncvalues.h>
 
 NcfFieldData::NcfFieldData(bool debug,
                      const MdvxField *mdvField,
@@ -57,7 +56,7 @@ NcfFieldData::NcfFieldData(bool debug,
                      bool output_latlon_arrays,
                      bool compress,
                      int compression_level,
-                     NcFile::FileFormat format) :
+                     Nc3File::FileFormat format) :
         _debug(debug),
         _mdvField(*mdvField),
         _gridInfo(gridInfo),
@@ -102,27 +101,27 @@ NcfFieldData::NcfFieldData(bool debug,
       
   // determine packing
 
-  _ncType = ncFloat;
+  _ncType = nc3Float;
   if (_packingRequested == DsMdvx::NCF_PACK_ASIS) {
     // ASIS packing
     // inspect the original header to determine packing
     if (_fhdrIn.encoding_type == Mdvx::ENCODING_INT8) {
       _packingUsed = DsMdvx::NCF_PACK_BYTE;
-      _ncType = ncByte;
+      _ncType = nc3Byte;
     } else if (_fhdrIn.encoding_type == Mdvx::ENCODING_INT16) {
       _packingUsed = DsMdvx::NCF_PACK_SHORT;
-      _ncType = ncShort;
+      _ncType = nc3Short;
     } else {
       _packingUsed = DsMdvx::NCF_PACK_FLOAT;
-      _ncType = ncFloat;
+      _ncType = nc3Float;
     }
   } else {
     // Specified packing
     _packingUsed = _packingRequested;
     if (_packingRequested == DsMdvx::NCF_PACK_BYTE) {
-      _ncType = ncByte;
+      _ncType = nc3Byte;
     } else if (_packingRequested == DsMdvx::NCF_PACK_SHORT) {
-      _ncType = ncShort;
+      _ncType = nc3Short;
     }
   }
 
@@ -138,7 +137,7 @@ NcfFieldData::~NcfFieldData()
 // add field variable to Nc File object
 // Returns 0 on success, -1 on failure
 
-int NcfFieldData::addToNc(NcFile *ncFile, NcDim *timeDim,
+int NcfFieldData::addToNc(Nc3File *ncFile, Nc3Dim *timeDim,
                           bool outputMdvAttr, string &errStr)
 
 {
@@ -189,7 +188,7 @@ int NcfFieldData::addToNc(NcFile *ncFile, NcDim *timeDim,
     }
   }
   
-  // Add NcVar to NcFile object and the attributes relevant to no data packing
+  // Add Nc3Var to NcFile object and the attributes relevant to no data packing
 
   if (_debug) {
     cerr << "adding field: " << fieldName << endl;
@@ -205,7 +204,7 @@ int NcfFieldData::addToNc(NcFile *ncFile, NcDim *timeDim,
     errStr += "  Cannot add variable to Nc file object\n";
     TaStr::AddStr(errStr, "  Input field name: ", _ncfName);
     TaStr::AddStr(errStr, "  Output field name: ", fieldName);
-    TaStr::AddInt(errStr, "  NcType: ", _ncType);
+    TaStr::AddInt(errStr, "  Nc3Type: ", _ncType);
     TaStr::AddStr(errStr, "  Time dim name: ", timeDim->name());
     TaStr::AddInt(errStr, "  Time dim size: ", timeDim->size());
     TaStr::AddStr(errStr, "  Z dim name: ", _vlevelInfo->getNcZdim()->name());
@@ -347,7 +346,7 @@ int NcfFieldData::addToNc(NcFile *ncFile, NcDim *timeDim,
   // Set compression if we are working with netCDF4 hdf files
 
   if (_compress &&
-      (_ncFormat == NcFile::Netcdf4 || _ncFormat == NcFile::Netcdf4Classic)) {
+      (_ncFormat == Nc3File::Netcdf4 || _ncFormat == Nc3File::Netcdf4Classic)) {
     if (_setCompression(ncFile, errStr)) {
       cerr << "WARNING: NcfFieldData::addToNcf" << endl;
       cerr << "  Compression will not be used" << endl;
@@ -367,7 +366,7 @@ int NcfFieldData::addToNc(NcFile *ncFile, NcDim *timeDim,
 //
 // Returns 0 on success, -1 on error
 
-int NcfFieldData::writeToFile(NcFile *ncFile, string &errStr)
+int NcfFieldData::writeToFile(Nc3File *ncFile, string &errStr)
 
 {
 
@@ -466,7 +465,7 @@ int NcfFieldData::writeToFile(NcFile *ncFile, string &errStr)
 ///////////////////////////////////////////////////////////////////////////
 // Set compression for data.
 
-int NcfFieldData::_setCompression(NcFile *ncFile,
+int NcfFieldData::_setCompression(Nc3File *ncFile,
                                   string &errStr)
   
 {

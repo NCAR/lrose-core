@@ -50,7 +50,7 @@
 #include <Mdv/NcfGridInfo.hh>
 #include <Mdv/NcfFieldData.hh>
 #include <Mdv/NcfVlevelInfo.hh>
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3xFile.hh>
 #include <Radx/RadxFile.hh>
 #include <Radx/RadxRay.hh>
 
@@ -123,7 +123,7 @@ public:
 
   /// after translation, get reference to NcFile object etc
 
-  const NcFile *getNcFile() { return _ncFile; }
+  const Nc3File *getNcFile() { return _ncFile; }
   const string &getNcFilePath() { return _ncFilePath; }
   
   /// Clear the data, ready for reuse
@@ -144,10 +144,10 @@ protected:
   const DsMdvx *_mdv;
   
   string _ncFilePath;
-  NcFile *_ncFile;
-  NcFile::FileFormat _ncFormat;
+  Nc3File *_ncFile;
+  Nc3File::FileFormat _ncFormat;
   RadxFile::netcdf_format_t _radxNcFormat;
-  NcError *_ncErr;
+  Nc3Error *_ncErr;
   bool _isXSect;
   bool _isPolar;
   bool _isRhi;
@@ -186,17 +186,17 @@ protected:
   
   /// netCDF variables
 
-  NcDim *_timeDim;
-  NcDim *_boundsDim;
-  vector<NcDim*> _chunkDims;
+  Nc3Dim *_timeDim;
+  Nc3Dim *_boundsDim;
+  vector<Nc3Dim*> _chunkDims;
 
-  NcVar *_timeVar;
-  NcVar *_forecastRefTimeVar;
-  NcVar *_forecastPeriodVar;
-  NcVar *_startTimeVar;
-  NcVar *_stopTimeVar;
-  NcVar *_timeBoundsVar;
-  vector<NcVar*> _chunkVars;
+  Nc3Var *_timeVar;
+  Nc3Var *_forecastRefTimeVar;
+  Nc3Var *_forecastPeriodVar;
+  Nc3Var *_startTimeVar;
+  Nc3Var *_stopTimeVar;
+  Nc3Var *_timeBoundsVar;
+  vector<Nc3Var*> _chunkVars;
 
   bool _outputLatlonArrays;
 

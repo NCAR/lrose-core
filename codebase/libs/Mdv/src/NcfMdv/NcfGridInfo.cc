@@ -232,7 +232,7 @@ int NcfGridInfo::setCoordinateVarsFromSamplePoints(vector<Mdvx::vsect_samplept_t
 // add xy dimension for this grid
 // returns 0 on success, -1 on failure
 
-int NcfGridInfo::addXyDim(int gridNum, NcFile *ncFile, string &errStr)
+int NcfGridInfo::addXyDim(int gridNum, Nc3File *ncFile, string &errStr)
 
 {
 
@@ -255,7 +255,7 @@ int NcfGridInfo::addXyDim(int gridNum, NcFile *ncFile, string &errStr)
 ////////////////////////////////////////////////////////////
 // add nc projection variable for this grid
 
-int NcfGridInfo::addProjVar(int gridNum, NcFile *ncFile, string &errStr)
+int NcfGridInfo::addProjVar(int gridNum, Nc3File *ncFile, string &errStr)
 
 {
 
@@ -266,7 +266,7 @@ int NcfGridInfo::addProjVar(int gridNum, NcFile *ncFile, string &errStr)
   char projVarName[16];
   sprintf(projVarName, "%s_%d", NcfMdv::grid_mapping, gridNum);
     
-  _projVar = ncFile->add_var(projVarName, ncInt);
+  _projVar = ncFile->add_var(projVarName, nc3Int);
   if (_projVar == NULL) {
     TaStr::AddStr(errStr, "ERROR: NcfGridInfo::addProjVar");
     TaStr::AddStr(errStr, "  Cannot add projection: ", projVarName);
@@ -440,7 +440,7 @@ int NcfGridInfo::addProjVar(int gridNum, NcFile *ncFile, string &errStr)
 // add nc coordinate variables for this grid
 
 int NcfGridInfo::addCoordVars(int gridNum, bool outputLatlonArrays,
-                           NcFile *ncFile, string &errStr)
+                           Nc3File *ncFile, string &errStr)
 
 {
   
@@ -454,12 +454,12 @@ int NcfGridInfo::addCoordVars(int gridNum, bool outputLatlonArrays,
   sprintf(xVarName, "x%d", gridNum);
   sprintf(yVarName, "y%d", gridNum);
   
-  if ((_xVar = ncFile->add_var(xVarName, ncFloat, _xDim)) == NULL) {
+  if ((_xVar = ncFile->add_var(xVarName, nc3Float, _xDim)) == NULL) {
     TaStr::AddStr(errStr, "Mdv2NcfTrans::NcfGridInfo::addCoordVars");
     TaStr::AddStr(errStr, "  Cannot add xVar");
     return -1;
   }
-  if ((_yVar = ncFile->add_var(yVarName, ncFloat, _yDim)) == NULL) {
+  if ((_yVar = ncFile->add_var(yVarName, nc3Float, _yDim)) == NULL) {
     TaStr::AddStr(errStr, "Mdv2NcfTrans::NcfGridInfo::addCoordVars");
     TaStr::AddStr(errStr, "  Cannot add yVar");
     return -1;
@@ -494,13 +494,13 @@ int NcfGridInfo::addCoordVars(int gridNum, bool outputLatlonArrays,
       sprintf(latVarName, "lat%d", gridNum);
       sprintf(lonVarName, "lon%d", gridNum);
       
-      if ((_latVar = ncFile->add_var(latVarName, ncFloat,
+      if ((_latVar = ncFile->add_var(latVarName, nc3Float,
                                      _yDim, _xDim)) == NULL) {
         TaStr::AddStr(errStr, "Mdv2NcfTrans::NcfGridInfo::addCoordVars");
         TaStr::AddStr(errStr, "  Cannot add latVar");
         return -1;
       }
-      if ((_lonVar = ncFile->add_var(lonVarName, ncFloat,
+      if ((_lonVar = ncFile->add_var(lonVarName, nc3Float,
                                      _yDim, _xDim)) == NULL) {
         TaStr::AddStr(errStr, "Mdv2NcfTrans::NcfGridInfo::addCoordVars");
         TaStr::AddStr(errStr, "  Cannot add lonVar");
@@ -528,7 +528,7 @@ int NcfGridInfo::addCoordVars(int gridNum, bool outputLatlonArrays,
 // add nc vert section coordinate variables for this grid
 
 int NcfGridInfo::addVsectCoordVars(int gridNum,
-                                NcFile *ncFile, string &errStr)
+                                Nc3File *ncFile, string &errStr)
 
 {
   
@@ -538,13 +538,13 @@ int NcfGridInfo::addVsectCoordVars(int gridNum,
   sprintf(xVarName, "x%d", gridNum);
   sprintf(yVarName, "y%d", gridNum);
   
-  if ((_xVar = ncFile->add_var(xVarName, ncFloat, _xDim)) == NULL) {
+  if ((_xVar = ncFile->add_var(xVarName, nc3Float, _xDim)) == NULL) {
     TaStr::AddStr(errStr, "Mdv2NcfTrans::NcfGridInfo::addVsectCoordVars");
     TaStr::AddStr(errStr, "  Cannot add xVar");
     return -1;
   }
   
-  if ((_yVar = ncFile->add_var(yVarName, ncFloat, _yDim)) == NULL) {
+  if ((_yVar = ncFile->add_var(yVarName, nc3Float, _yDim)) == NULL) {
     TaStr::AddStr(errStr, "Mdv2NcfTrans::NcfGridInfo::addVsectCoordVars");
     TaStr::AddStr(errStr, "  Cannot add yVar");
     return -1;
@@ -570,17 +570,17 @@ int NcfGridInfo::addVsectCoordVars(int gridNum,
   sprintf(lonVarName, "lon%d", gridNum);
   sprintf(altVarName, "alt%d", gridNum);
   
-  if ((_latVar = ncFile->add_var(latVarName, ncFloat, _xDim)) == NULL) {
+  if ((_latVar = ncFile->add_var(latVarName, nc3Float, _xDim)) == NULL) {
     TaStr::AddStr(errStr, "Mdv2NcfTrans::NcfGridInfo::addVsectCoordVars");
     TaStr::AddStr(errStr, "  Cannot add latVar");
     return -1;
   }
-  if ((_lonVar = ncFile->add_var(lonVarName, ncFloat, _xDim)) == NULL) {
+  if ((_lonVar = ncFile->add_var(lonVarName, nc3Float, _xDim)) == NULL) {
     TaStr::AddStr(errStr, "Mdv2NcfTrans::NcfGridInfo::addVsectCoordVars");
     TaStr::AddStr(errStr, "  Cannot add lonVar");
     return -1;
   }
-  if ((_altVar = ncFile->add_var(altVarName, ncFloat, _xDim)) == NULL) {
+  if ((_altVar = ncFile->add_var(altVarName, nc3Float, _xDim)) == NULL) {
     TaStr::AddStr(errStr, "Mdv2NcfTrans::NcfGridInfo::addVsectCoordVars");
     TaStr::AddStr(errStr, "  Cannot add altVar");
     return -1;
@@ -608,7 +608,7 @@ int NcfGridInfo::addVsectCoordVars(int gridNum,
 //
 // Returns 0 on success, -1 on error
 
-int NcfGridInfo::writeCoordDataToFile(NcFile *ncFile, string &errStr)
+int NcfGridInfo::writeCoordDataToFile(Nc3File *ncFile, string &errStr)
   
 {
   

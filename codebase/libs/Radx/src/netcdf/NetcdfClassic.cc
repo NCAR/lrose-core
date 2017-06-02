@@ -102,13 +102,13 @@ int Nc3xFile::openRead(const string &path)
   }
   
   // Change the error behavior of the netCDF C++ API by creating an
-  // NcError object. Until it is destroyed, this NcError object will
+  // Nc3Error object. Until it is destroyed, this Nc3Error object will
   // ensure that the netCDF C++ API silently returns error codes
   // on any failure, and leaves any other error handling to the
   // calling program.
 
   if (_err == NULL) {
-    _err = new NcError(NcError::silent_nonfatal);
+    _err = new Nc3Error(Nc3Error::silent_nonfatal);
   }
 
   return 0;
@@ -144,13 +144,13 @@ int Nc3xFile::openWrite(const string &path,
   }
   
   // Change the error behavior of the netCDF C++ API by creating an
-  // NcError object. Until it is destroyed, this NcError object will
+  // Nc3Error object. Until it is destroyed, this Nc3Error object will
   // ensure that the netCDF C++ API silently returns error codes
   // on any failure, and leaves any other error handling to the
   // calling program.
   
   if (_err == NULL) {
-    _err = new NcError(NcError::silent_nonfatal);
+    _err = new Nc3Error(Nc3Error::silent_nonfatal);
   }
 
   return 0;

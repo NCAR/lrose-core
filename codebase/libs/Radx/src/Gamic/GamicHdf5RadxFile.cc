@@ -602,7 +602,7 @@ int GamicHdf5RadxFile::_readRootHow(Group &how)
 
 {
 
-  Hdf5Utils::DecodedAttr decodedAttr;
+  Hdf5xx::DecodedAttr decodedAttr;
 
   if (_utils.loadAttribute(how, "azimuth_beam", "root-how-group", decodedAttr)) {
     return -1;
@@ -664,7 +664,7 @@ int GamicHdf5RadxFile::_readRootWhat(Group &what)
 
 {
 
-  Hdf5Utils::DecodedAttr decodedAttr;
+  Hdf5xx::DecodedAttr decodedAttr;
 
   _utils.loadAttribute(what, "date", "root-what-group", decodedAttr);
   _dateStr = decodedAttr.getAsString();
@@ -709,7 +709,7 @@ int GamicHdf5RadxFile::_readRootWhere(Group &where)
 
 {
 
-  Hdf5Utils::DecodedAttr decodedAttr;
+  Hdf5xx::DecodedAttr decodedAttr;
   
   if (_utils.loadAttribute(where, "height", "root-where-group", decodedAttr)) {
     return -1;
@@ -862,7 +862,7 @@ int GamicHdf5RadxFile::_readSweepHow(Group &how, int sweepNum)
 
 {
 
-  Hdf5Utils::DecodedAttr decodedAttr;
+  Hdf5xx::DecodedAttr decodedAttr;
 
   _utils.loadAttribute(how, "PRF", "sweep-how-group", decodedAttr);
   _prfHz = decodedAttr.getAsDouble();
@@ -1015,7 +1015,7 @@ int GamicHdf5RadxFile::_readSweepWhat(Group &what, int sweepNum)
 
 {
 
-  Hdf5Utils::DecodedAttr decodedAttr;
+  Hdf5xx::DecodedAttr decodedAttr;
 
   _product = "SCAN";
   if (_utils.loadAttribute(what, "product", "sweep-what-group", decodedAttr) == 0) {
@@ -1064,11 +1064,11 @@ int GamicHdf5RadxFile::_readSweepExtended(Group &extended)
   // get attribute names
   
   vector<string> attrNames;
-  extended.iterateAttrs(Hdf5Utils::appendAttrNames, NULL, &attrNames);
+  extended.iterateAttrs(Hdf5xx::appendAttrNames, NULL, &attrNames);
   
   // loop through attributes, decoding each
   
-  Hdf5Utils::DecodedAttr decodedAttr;
+  Hdf5xx::DecodedAttr decodedAttr;
   for (size_t ii = 0; ii < attrNames.size(); ii++) {
     
     string name(attrNames[ii]);
@@ -1365,7 +1365,7 @@ int GamicHdf5RadxFile::_addFieldToRays(Group &sweep,
   
   // get field name
 
-  Hdf5Utils::DecodedAttr decodedAttr;
+  Hdf5xx::DecodedAttr decodedAttr;
 
   if (_utils.loadAttribute(*ds, "moment", 
                            momentName, decodedAttr)) {

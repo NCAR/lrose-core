@@ -745,7 +745,7 @@ int NexradCmdRadxFile::_readRangeVariable()
   if (_rangeVar == NULL || _rangeVar->num_vals() < 1) {
     _addErrStr("ERROR - NexradCmdRadxFile::_readRangeVariable");
     _addErrStr("  Cannot read ranges");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
 
@@ -807,21 +807,21 @@ int NexradCmdRadxFile::_readRangeVariable()
 //   if (_file.readDoubleVar(_latitudeVar, "lat", _latitudeDeg, 0, true)) {
 //     _addErrStr("ERROR - NexradCmdRadxFile::_readPositionVariables");
 //     _addErrStr("  Cannot read latitude");
-//     _addErrStr(_file.getNcError()->get_errmsg());
+//     _addErrStr(_file.getNc3Error()->get_errmsg());
 //     iret = -1;
 //   }
 
 //   if (_file.readDoubleVar(_longitudeVar, "lon", _longitudeDeg, 0, true)) {
 //     _addErrStr("ERROR - NexradCmdRadxFile::_readPositionVariables");
 //     _addErrStr("  Cannot read longitude");
-//     _addErrStr(_file.getNcError()->get_errmsg());
+//     _addErrStr(_file.getNc3Error()->get_errmsg());
 //     iret = -1;
 //   }
 
 //   if (_file.readDoubleVar(_altitudeVar, "alt", _altitudeKm, 0, true)) {
 //     _addErrStr("ERROR - NexradCmdRadxFile::_readPositionVariables");
 //     _addErrStr("  Cannot read altitude");
-//     _addErrStr(_file.getNcError()->get_errmsg());
+//     _addErrStr(_file.getNc3Error()->get_errmsg());
 //     iret = -1;
 //   }
 //   Nc3Att* unitsAtt = _altitudeVar->get_att("units");
@@ -1183,7 +1183,7 @@ int NexradCmdRadxFile::_readRayVar(Nc3Var* &var, const string &name,
     } else {
       _addErrStr("ERROR - NexradCmdRadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       iret = -1;
     }
   }
@@ -1236,7 +1236,7 @@ int NexradCmdRadxFile::_readRayVar(Nc3Var* &var, const string &name,
     } else {
       _addErrStr("ERROR - NexradCmdRadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       iret = -1;
     }
   }
@@ -1260,7 +1260,7 @@ Nc3Var* NexradCmdRadxFile::_getRayVar(const string &name, bool required)
     if (required) {
       _addErrStr("ERROR - NexradCmdRadxFile::_getRayVar");
       _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
     }
     return NULL;
   }
@@ -1310,7 +1310,7 @@ int NexradCmdRadxFile::_addFl64FieldToRays(Nc3Var* var,
   if (iret) {
     _addErrStr("ERROR - NexradCmdRadxFile::_addFl64FieldToRays");
     _addErrStr("  variable name: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     delete[] data;
     return -1;
   }
@@ -1378,7 +1378,7 @@ int NexradCmdRadxFile::_addFl32FieldToRays(Nc3Var* var,
   if (iret) {
     _addErrStr("ERROR - NexradCmdRadxFile::_addFl32FieldToRays");
     _addErrStr("  variable name: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     delete[] data;
     return -1;
   }
@@ -1445,7 +1445,7 @@ int NexradCmdRadxFile::_addSi08FieldToRays(Nc3Var* var,
   if (iret) {
     _addErrStr("ERROR - NexradCmdRadxFile::_addSi08FieldToRays");
     _addErrStr("  variable name: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     delete[] data;
     return -1;
   }

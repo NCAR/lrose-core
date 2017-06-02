@@ -1024,7 +1024,7 @@ int EdgeNcRadxFile::_readFieldVariable(bool metaOnly)
     if (iret) {
       _addErrStr("ERROR - EdgeNcRadxFile::_readFieldVariables");
       _addErrStr("  cannot read field name: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
 
@@ -1078,7 +1078,7 @@ int EdgeNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
     } else {
       _addErrStr("ERROR - EdgeNcRadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       iret = -1;
     }
   }
@@ -1102,7 +1102,7 @@ Nc3Var* EdgeNcRadxFile::_getRayVar(const string &name, bool required)
     if (required) {
       _addErrStr("ERROR - EdgeNcRadxFile::_getRayVar");
       _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
     }
     return NULL;
   }

@@ -1014,7 +1014,7 @@ int D3rNcRadxFile::_readTimes()
   if (_timeVar == NULL) {
     _addErrStr("ERROR - D3rNcRadxFile::_readTimes");
     _addErrStr("  Cannot find time variable, name: ", "Time");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   if (_timeVar->num_dims() < 1) {
@@ -1076,7 +1076,7 @@ int D3rNcRadxFile::_readRangeVariables()
   if (_readRayVar(_startRangeVar, "StartRange", _startRangeUnits, _startRangeInt, true)) {
     _addErrStr("ERROR - D3rNcRadxFile::_readRangeVariable");
     _addErrStr("  Cannot read StartRange");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   
@@ -1099,7 +1099,7 @@ int D3rNcRadxFile::_readRangeVariables()
   if (_readRayVar(_gateWidthVar, "GateWidth", _gateWidthUnits, _gateWidth, true)) {
     _addErrStr("ERROR - D3rNcRadxFile::_readRangeVariable");
     _addErrStr("  Cannot read GateWidth");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   
@@ -1460,7 +1460,7 @@ int D3rNcRadxFile::_readFieldVariables(bool metaOnly)
     if (iret) {
       _addErrStr("ERROR - D3rNcRadxFile::_readFieldVariables");
       _addErrStr("  cannot read field name: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
 
@@ -1517,7 +1517,7 @@ int D3rNcRadxFile::_readRayVar(Nc3Var* &var,
     } else {
       _addErrStr("ERROR - D3rNcRadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       iret = -1;
     }
   }
@@ -1584,7 +1584,7 @@ int D3rNcRadxFile::_readRayVar(Nc3Var* &var,
     } else {
       _addErrStr("ERROR - D3rNcRadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       iret = -1;
     }
   }
@@ -1632,7 +1632,7 @@ Nc3Var* D3rNcRadxFile::_getRayVar(const string &name, bool required)
     if (required) {
       _addErrStr("ERROR - D3rNcRadxFile::_getRayVar");
       _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
     }
     return NULL;
   }

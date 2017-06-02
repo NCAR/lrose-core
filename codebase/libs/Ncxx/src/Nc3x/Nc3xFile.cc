@@ -102,13 +102,13 @@ int Nc3xFile::openRead(const string &path)
   }
   
   // Change the error behavior of the netCDF C++ API by creating an
-  // NcError object. Until it is destroyed, this NcError object will
+  // Nc3Error object. Until it is destroyed, this Nc3Error object will
   // ensure that the netCDF C++ API silently returns error codes
   // on any failure, and leaves any other error handling to the
   // calling program.
 
   if (_err == NULL) {
-    _err = new NcError(NcError::silent_nonfatal);
+    _err = new Nc3Error(Nc3Error::silent_nonfatal);
   }
 
   return 0;
@@ -127,7 +127,7 @@ int Nc3xFile::openRead(const string &path)
 /// Returns 0 on success, -1 on failure
 
 int Nc3xFile::openWrite(const string &path,
-                       Nc3File::FileFormat format) 
+                        Nc3File::FileFormat format) 
 
 {
   
@@ -144,13 +144,13 @@ int Nc3xFile::openWrite(const string &path,
   }
   
   // Change the error behavior of the netCDF C++ API by creating an
-  // NcError object. Until it is destroyed, this NcError object will
+  // Nc3Error object. Until it is destroyed, this Nc3Error object will
   // ensure that the netCDF C++ API silently returns error codes
   // on any failure, and leaves any other error handling to the
   // calling program.
   
   if (_err == NULL) {
-    _err = new NcError(NcError::silent_nonfatal);
+    _err = new Nc3Error(Nc3Error::silent_nonfatal);
   }
 
   return 0;
@@ -558,11 +558,11 @@ int Nc3xFile::readDim(const string &name, Nc3Dim* &dim)
 // Side effect: var is set
 
 int Nc3xFile::addMetaVar(Nc3Var* &var,
-                        const string &name, 
-                        const string &standardName,
-                        const string &longName,
-                        Nc3Type ncType, 
-                        const string &units /* = "" */)
+                         const string &name, 
+                         const string &standardName,
+                         const string &longName,
+                         Nc3Type ncType, 
+                         const string &units /* = "" */)
   
 {
   
@@ -580,10 +580,10 @@ int Nc3xFile::addMetaVar(Nc3Var* &var,
 // Returns var on success, NULL on failure
 
 Nc3Var *Nc3xFile::addMetaVar(const string &name, 
-                           const string &standardName,
-                           const string &longName,
-                           Nc3Type ncType, 
-                           const string &units /* = "" */)
+                             const string &standardName,
+                             const string &longName,
+                             Nc3Type ncType, 
+                             const string &units /* = "" */)
   
 {
   
@@ -621,12 +621,12 @@ Nc3Var *Nc3xFile::addMetaVar(const string &name,
 // Side effect: var is set
 
 int Nc3xFile::addMetaVar(Nc3Var* &var, 
-                        const string &name, 
-                        const string &standardName,
-                        const string &longName,
-                        Nc3Type ncType, 
-                        Nc3Dim *dim, 
-                        const string &units /* = "" */)
+                         const string &name, 
+                         const string &standardName,
+                         const string &longName,
+                         Nc3Type ncType, 
+                         Nc3Dim *dim, 
+                         const string &units /* = "" */)
 {
   
   var = addMetaVar(name, standardName, longName, ncType, dim, units);
@@ -643,11 +643,11 @@ int Nc3xFile::addMetaVar(Nc3Var* &var,
 // Returns var on success, NULL on failure
 
 Nc3Var *Nc3xFile::addMetaVar(const string &name, 
-                           const string &standardName,
-                           const string &longName,
-                           Nc3Type ncType, 
-                           Nc3Dim *dim, 
-                           const string &units /* = "" */)
+                             const string &standardName,
+                             const string &longName,
+                             Nc3Type ncType, 
+                             Nc3Dim *dim, 
+                             const string &units /* = "" */)
 {
   
   Nc3Var *var = _ncFile->add_var(name.c_str(), ncType, dim);
@@ -685,13 +685,13 @@ Nc3Var *Nc3xFile::addMetaVar(const string &name,
 // Side effect: var is set
 
 int Nc3xFile::addMetaVar(Nc3Var* &var, 
-                        const string &name,
-                        const string &standardName,
-                        const string &longName,
-                        Nc3Type ncType,
-                        Nc3Dim *dim0,
-                        Nc3Dim *dim1,
-                        const string &units /* = "" */)
+                         const string &name,
+                         const string &standardName,
+                         const string &longName,
+                         Nc3Type ncType,
+                         Nc3Dim *dim0,
+                         Nc3Dim *dim1,
+                         const string &units /* = "" */)
 {
 
   var = addMetaVar(name, standardName, longName, ncType, dim0, dim1, units);
@@ -709,12 +709,12 @@ int Nc3xFile::addMetaVar(Nc3Var* &var,
 // Returns var on success, NULL on failure
 
 Nc3Var *Nc3xFile::addMetaVar(const string &name,
-                           const string &standardName,
-                           const string &longName,
-                           Nc3Type ncType,
-                           Nc3Dim *dim0,
-                           Nc3Dim *dim1,
-                           const string &units /* = "" */)
+                             const string &standardName,
+                             const string &longName,
+                             Nc3Type ncType,
+                             Nc3Dim *dim0,
+                             Nc3Dim *dim1,
+                             const string &units /* = "" */)
 {
 
   Nc3Var *var = _ncFile->add_var(name.c_str(), ncType, dim0, dim1);
@@ -753,7 +753,7 @@ Nc3Var *Nc3xFile::addMetaVar(const string &name,
 // Returns 0 on success, -1 on failure
 
 int Nc3xFile::readIntVar(Nc3Var* &var, const string &name,
-                        int &val, int missingVal, bool required)
+                         int &val, int missingVal, bool required)
   
 {
   
@@ -791,8 +791,8 @@ int Nc3xFile::readIntVar(Nc3Var* &var, const string &name,
 // read int variable, set val
 
 int Nc3xFile::readIntVal(const string &name, 
-                        int &val, int missingVal,
-                        bool required)
+                         int &val, int missingVal,
+                         bool required)
   
 {
   
@@ -832,8 +832,8 @@ int Nc3xFile::readIntVal(const string &name,
 // Returns 0 on success, -1 on failure
 
 int Nc3xFile::readFloatVar(Nc3Var* &var, const string &name,
-                          float &val, 
-                          float missingVal, bool required)
+                           float &val, 
+                           float missingVal, bool required)
 
 {
   
@@ -871,9 +871,9 @@ int Nc3xFile::readFloatVar(Nc3Var* &var, const string &name,
 // read float value
 
 int Nc3xFile::readFloatVal(const string &name,
-                          float &val,
-                          float missingVal,
-                          bool required)
+                           float &val,
+                           float missingVal,
+                           bool required)
   
 {
   
@@ -911,8 +911,8 @@ int Nc3xFile::readFloatVal(const string &name,
 // Returns 0 on success, -1 on failure
 
 int Nc3xFile::readDoubleVar(Nc3Var* &var, const string &name,
-                           double &val, 
-                           double missingVal, bool required)
+                            double &val, 
+                            double missingVal, bool required)
   
 {
   
@@ -950,9 +950,9 @@ int Nc3xFile::readDoubleVar(Nc3Var* &var, const string &name,
 // read double value
 
 int Nc3xFile::readDoubleVal(const string &name,
-                           double &val,
-                           double missingVal,
-                           bool required)
+                            double &val,
+                            double missingVal,
+                            bool required)
 
 {
   
@@ -1174,8 +1174,8 @@ int Nc3xFile::writeVar(Nc3Var *var, const Nc3Dim *dim, const void *data)
 // Returns 0 on success, -1 on failure
 
 int Nc3xFile::writeVar(Nc3Var *var, 
-                      const Nc3Dim *dim, size_t count, 
-                      const void *data)
+                       const Nc3Dim *dim, size_t count, 
+                       const void *data)
   
 {
   
@@ -1389,7 +1389,7 @@ string Nc3xFile::ncTypeToStr(Nc3Type nctype)
 // get string representation of component
 
 string Nc3xFile::asString(const Nc3TypedComponent *component,
-                         int index /* = 0 */)
+                          int index /* = 0 */)
   
 {
   
@@ -1421,7 +1421,7 @@ void Nc3xFile::_addErrInt(string label, int iarg, bool cr)
 // Default format is %g.
 
 void Nc3xFile::_addErrDbl(string label, double darg,
-                         string format, bool cr)
+                          string format, bool cr)
 
 {
   _errStr += label;

@@ -235,7 +235,7 @@ bool NcfVlevelInfo::operator==(const NcfVlevelInfo &other)
 // add dimension for this vlevel object
 // returns 0 on success, -1 on failure
 
-int NcfVlevelInfo::addDim(int vlevelNum, NcFile *ncFile, string &errStr)
+int NcfVlevelInfo::addDim(int vlevelNum, Nc3File *ncFile, string &errStr)
 
 {
 
@@ -254,7 +254,7 @@ int NcfVlevelInfo::addDim(int vlevelNum, NcFile *ncFile, string &errStr)
 ////////////////////////////////////////////////////////////
 // add vert level variable
 
-int NcfVlevelInfo::addVlevelVar(int vlevelNum, NcFile *ncFile, string &errStr)
+int NcfVlevelInfo::addVlevelVar(int vlevelNum, Nc3File *ncFile, string &errStr)
 
 {
 
@@ -263,7 +263,7 @@ int NcfVlevelInfo::addVlevelVar(int vlevelNum, NcFile *ncFile, string &errStr)
   char zVarName[32];
   sprintf(zVarName, "z%d", vlevelNum);
   
-  if ((_zVar = ncFile->add_var(zVarName, ncFloat, _zDim)) == NULL) {
+  if ((_zVar = ncFile->add_var(zVarName, nc3Float, _zDim)) == NULL) {
     TaStr::AddStr(errStr, "Mdv2NcfTrans::NcfVlevelInfo::addVlevelVar");
     TaStr::AddStr(errStr, "  Cannot add zVar");
     return -1;
@@ -303,7 +303,7 @@ int NcfVlevelInfo::addVlevelVar(int vlevelNum, NcFile *ncFile, string &errStr)
 //
 // Returns 0 on success, -1 on error
 
-int NcfVlevelInfo::writeDataToFile(NcFile *ncFile, string &errStr)
+int NcfVlevelInfo::writeDataToFile(Nc3File *ncFile, string &errStr)
   
 {
   

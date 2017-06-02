@@ -42,7 +42,7 @@
 #include <iostream>
 #include <string>
 #include <cstring>
-#include <Ncxx/nc3values.hh>
+#include <Ncxx/Nc3Values.hh>
 
 Nc3Values::Nc3Values( void ) : the_type(nc3NoType), the_number(0)
 {}

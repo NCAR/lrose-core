@@ -310,9 +310,9 @@ public:
   
   Nc3File *getNc3File() { return _ncFile; }
 
-  /// Get the NcError object
+  /// Get the Nc3Error object
   
-  NcError *getNcError() { return _err; }
+  Nc3Error *getNc3Error() { return _err; }
 
   //@}
 
@@ -346,7 +346,7 @@ private:
   
   Nc3File *_ncFile;
   string _pathInUse;
-  NcError *_err;
+  Nc3Error *_err;
   Nc3File::FileFormat _ncFormat;
   
   /// add integer value to error string, with label

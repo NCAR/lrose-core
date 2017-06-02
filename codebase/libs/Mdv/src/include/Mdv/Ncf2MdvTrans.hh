@@ -47,7 +47,7 @@
 
 #include <Mdv/Mdvx.hh>
 #include <Radx/Radx.hh>
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3xFile.hh>
 #include <set>
 
 using namespace std;
@@ -144,7 +144,7 @@ public:
 
   // get string from component
   
-  static string asString(const NcTypedComponent *component, int index = 0);
+  static string asString(const Nc3TypedComponent *component, int index = 0);
 
 protected:  
 
@@ -152,8 +152,8 @@ protected:
 
   // netCDF file
 
-  NcFile *_ncFile;
-  NcError *_ncErr;
+  Nc3File *_ncFile;
+  Nc3Error *_ncErr;
 
   // MDV objects
 
@@ -174,8 +174,8 @@ protected:
   class TimeDim {
   public:
     string name;           // field name
-    NcDim *dim;            // pointer to dimension
-    NcVar *var;            // pointer to the variable
+    Nc3Dim *dim;            // pointer to dimension
+    Nc3Var *var;            // pointer to the variable
     vector<time_t> times;  // the time values in the time dimension
 
     TimeDim() {
@@ -216,12 +216,12 @@ protected:
   // or not.
   class ArrayDim {
   public:
-    NcDim *xDim;
-    NcDim *yDim;
-    NcDim *zDim;
-    NcVar *xVar;
-    NcVar *yVar;
-    NcVar *zVar;
+    Nc3Dim *xDim;
+    Nc3Dim *yDim;
+    Nc3Dim *zDim;
+    Nc3Var *xVar;
+    Nc3Var *yVar;
+    Nc3Var *zVar;
 
     ArrayDim() {
       xDim = NULL;
@@ -301,7 +301,7 @@ protected:
 
   // set time information if found in one variable
 
-  void _setTimeInfoForVar(NcVar *var);
+  void _setTimeInfoForVar(Nc3Var *var);
 
   // search for data fields with time dimension, hoping for exactly one
   // consistent result. returns time dimension, or -1 for inconsistent or
@@ -315,37 +315,37 @@ protected:
 
   //  Add one field to mdv state, return 0 for good, -1 for bad
   
-  int _addOneField(NcVar *dataVar, int &fieldNum);
+  int _addOneField(Nc3Var *dataVar, int &fieldNum);
 
 
   // adjust nTimes for a field return -1 for bad, 0 for good
 
-  int _adjustTimeInfo(NcVar *dataVar, int &fieldNum, vector<int> &nTimes);
+  int _adjustTimeInfo(Nc3Var *dataVar, int &fieldNum, vector<int> &nTimes);
 
   // Initialization for adding one field, check if it is a grid
   // return 0 if field should be added, -1 if not
 
-  int _addOneFieldInit(NcVar *dataVar, int &fieldNum, ArrayDim &arrayDim);
+  int _addOneFieldInit(Nc3Var *dataVar, int &fieldNum, ArrayDim &arrayDim);
 
   // Look a a field and adjust arrayDim if appropriate
 
-  void _inspectDim(NcDim *dim, int jdim, ArrayDim &arrayDim);
+  void _inspectDim(Nc3Dim *dim, int jdim, ArrayDim &arrayDim);
 
   // Look a a field in another way and adjust arrayDim if appropriate
 
-  void _reInspectDim(NcDim *dim, int jdim, ArrayDim &arrayDim);
+  void _reInspectDim(Nc3Dim *dim, int jdim, ArrayDim &arrayDim);
 
   //////////////////////////
   // Check if variable is a field that should be added
   //
   // returns true if yes.
 
-  bool _shouldAddField(NcVar *dataVar, int &fieldNum);
+  bool _shouldAddField(Nc3Var *dataVar, int &fieldNum);
 
 
   // find the time dimension for this variable
   // if set, it will be the first dimension
-  TimeDim * _findTimeDim(NcVar *dataVar);
+  TimeDim * _findTimeDim(Nc3Var *dataVar);
 
 
   //////////////////////////
@@ -353,7 +353,7 @@ protected:
   // return 0 for good, -1 for error
 
   int _addOneTimeDataField(int itime, TimeDim *tdim, 
-			   NcVar* dataVar, ArrayDim &arrayDim);
+			   Nc3Var* dataVar, ArrayDim &arrayDim);
 
   // finalize fields
   //   (a) convert to vert section as needed
@@ -377,13 +377,13 @@ protected:
 
   // add attribute to string
   
-  void _addAttr2Str(NcAtt *att, const string &requiredName,
+  void _addAttr2Str(Nc3Att *att, const string &requiredName,
                     string &str, const string &label);
   
   // set vals from attribute
 
-  void _setSi32FromAttr(NcAtt *att, const string &requiredName, si32 &val);
-  void _setFl32FromAttr(NcAtt *att, const string &requiredName, fl32 &val);
+  void _setSi32FromAttr(Nc3Att *att, const string &requiredName, si32 &val);
+  void _setFl32FromAttr(Nc3Att *att, const string &requiredName, fl32 &val);
 
   // translate CfRadial using Radx
 

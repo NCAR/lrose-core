@@ -27,6 +27,7 @@ HDRS = \
 	../include/Ncxx/NcxxPort.hh
 
 CPPC_SRCS = \
+	ByteOrder.cc \
 	NcxxPort.cc
 
 #

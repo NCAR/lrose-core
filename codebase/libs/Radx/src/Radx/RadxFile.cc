@@ -60,7 +60,7 @@
 #include <Radx/UfRadxFile.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
-#include <Radx/Hdf5Utils.hh>
+#include <Ncxx/Hdf5xx.hh>
 #include <Radx/RadxSweep.hh>
 #include <unistd.h>
 #include <cstring>

@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// Hdf5Utils.cc
+// Hdf5xx.cc
 //
 // GAMIC HDF% file data for radar radial data
 //
@@ -33,7 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include <Radx/Hdf5Utils.hh>
+#include <Ncxx/Hdf5xx.hh>
 #include <Radx/ByteOrder.hh>
 #include <cstring>
 #include <cmath>
@@ -41,7 +41,7 @@
 //////////////////////////////////////////////////
 // get float val for a specific comp header member
 
-int Hdf5Utils::loadFloatVar(CompType compType,
+int Hdf5xx::loadFloatVar(CompType compType,
                             char *buf,
                             const string &varName,
                             Radx::fl64 &floatVal)
@@ -76,7 +76,7 @@ int Hdf5Utils::loadFloatVar(CompType compType,
 //////////////////////////////////////////////////
 // get int val for a specific comp header member
 
-int Hdf5Utils::loadIntVar(CompType compType,
+int Hdf5xx::loadIntVar(CompType compType,
                           char *buf,
                           const string &varName,
                           Radx::si64 &intVal)
@@ -111,7 +111,7 @@ int Hdf5Utils::loadIntVar(CompType compType,
 //////////////////////////////////////////////////
 // get string val for a specific comp header member
 
-int Hdf5Utils::loadStringVar(CompType compType,
+int Hdf5xx::loadStringVar(CompType compType,
                              char *buf,
                              const string &varName,
                              string &stringVal)
@@ -147,7 +147,7 @@ int Hdf5Utils::loadStringVar(CompType compType,
 /////////////////////////////////////////////////
 // get val for a specific compound header member
 
-int Hdf5Utils::loadCompVar(CompType compType,
+int Hdf5xx::loadCompVar(CompType compType,
                            char *buf,
                            const string &varName,
                            bool &isInt,
@@ -376,7 +376,7 @@ int Hdf5Utils::loadCompVar(CompType compType,
 // load an attribute from an object, given the name
 // returns 0 on success, -1 on failure
 
-int Hdf5Utils::loadAttribute(H5Location &obj,
+int Hdf5xx::loadAttribute(H5Location &obj,
                              const string &name,
                              const string &context,
                              DecodedAttr &decodedAttr)
@@ -391,7 +391,7 @@ int Hdf5Utils::loadAttribute(H5Location &obj,
     attr = new Attribute(obj.openAttribute(name));
   }
   catch (const H5::Exception &e) {
-    _addErrStr("Hdf5Utils::loadAttribute");
+    _addErrStr("Hdf5xx::loadAttribute");
     _addErrStr("  Cannot find attribute, name: ", name);
     _addErrStr("  Context: ", context);
     if (attr) delete attr;
@@ -606,7 +606,7 @@ int Hdf5Utils::loadAttribute(H5Location &obj,
 // load an array attribute from an object, given the name
 // returns 0 on success, -1 on failure
 
-int Hdf5Utils::loadArrayAttribute(H5Location &obj,
+int Hdf5xx::loadArrayAttribute(H5Location &obj,
                                   const string &name,
                                   const string &context,
                                   ArrayAttr &arrayAttr)
@@ -621,7 +621,7 @@ int Hdf5Utils::loadArrayAttribute(H5Location &obj,
     attr = new Attribute(obj.openAttribute(name));
   }
   catch (const H5::Exception &e) {
-    _addErrStr("Hdf5Utils::loadArrayAttribute");
+    _addErrStr("Hdf5xx::loadArrayAttribute");
     _addErrStr("  Cannot find attribute, name: ", name);
     _addErrStr("  Context: ", context);
     if (attr) delete attr;
@@ -851,7 +851,7 @@ int Hdf5Utils::loadArrayAttribute(H5Location &obj,
 // append to vector of attribute names
 // called by obj.iterateAttrs()
 
-void Hdf5Utils::appendAttrNames(H5Location &obj,
+void Hdf5xx::appendAttrNames(H5Location &obj,
                                 const H5std_string attr_name,
                                 void *operator_data)
   
@@ -863,7 +863,7 @@ void Hdf5Utils::appendAttrNames(H5Location &obj,
 ///////////////////////////////////////////////////////////////////
 // Print HDF5 group, and recursively any contained groups
 
-void Hdf5Utils::printGroup(Group &group, const string grname,
+void Hdf5xx::printGroup(Group &group, const string grname,
                            ostream &out,
                            bool printRays, bool printData)
   
@@ -913,7 +913,7 @@ void Hdf5Utils::printGroup(Group &group, const string grname,
 // add a string attribute to an object
 // returns the attribute
 
-Attribute Hdf5Utils::addAttr(H5Location &loc,
+Attribute Hdf5xx::addAttr(H5Location &loc,
                              const string &name,
                              const string &val)
 {
@@ -941,7 +941,7 @@ Attribute Hdf5Utils::addAttr(H5Location &loc,
 // add a 64-bit int attribute to an object
 // returns the attribute
 
-Attribute Hdf5Utils::addAttr(H5Location &loc,
+Attribute Hdf5xx::addAttr(H5Location &loc,
                              const string &name,
                              Radx::si64 val)
 {
@@ -967,7 +967,7 @@ Attribute Hdf5Utils::addAttr(H5Location &loc,
 // add a 64-bit float attribute to an object
 // returns the attribute
 
-Attribute Hdf5Utils::addAttr(H5Location &loc,
+Attribute Hdf5xx::addAttr(H5Location &loc,
                              const string &name,
                              Radx::fl64 val)
 {
@@ -993,7 +993,7 @@ Attribute Hdf5Utils::addAttr(H5Location &loc,
 // add a 64-bit float array attribute to an object
 // returns the attribute
 
-Attribute Hdf5Utils::addAttr(H5Location &loc,
+Attribute Hdf5xx::addAttr(H5Location &loc,
                              const string &name,
                              const RadxArray<Radx::fl64> &vals)
 {
@@ -1019,7 +1019,7 @@ Attribute Hdf5Utils::addAttr(H5Location &loc,
 ///////////////////////////////////////////////////////////////////
 // Print HDF5 data set
 
-void Hdf5Utils::printDataSet(DataSet &ds, const string dsname,
+void Hdf5xx::printDataSet(DataSet &ds, const string dsname,
                              ostream &out,
                              bool printRays, bool printData)
   
@@ -1332,7 +1332,7 @@ void Hdf5Utils::printDataSet(DataSet &ds, const string dsname,
 //////////////////////
 // print compound type
 
-void Hdf5Utils::printCompoundType(CompType &compType,
+void Hdf5xx::printCompoundType(CompType &compType,
                                   int ipoint,
                                   char *buf,
                                   ostream &out)
@@ -1577,7 +1577,7 @@ void Hdf5Utils::printCompoundType(CompType &compType,
 /////////////////////////////////////////////////////////
 // print Data field values
 
-void Hdf5Utils::_printDataVals(ostream &out,
+void Hdf5xx::_printDataVals(ostream &out,
                                int nPoints,
                                Radx::fl64 *vals) const
   
@@ -1607,7 +1607,7 @@ void Hdf5Utils::_printDataVals(ostream &out,
 
 }
 
-void Hdf5Utils::_printDataVals(ostream &out,
+void Hdf5xx::_printDataVals(ostream &out,
                                int nPoints,
                                Radx::si64 *vals) const
   
@@ -1640,7 +1640,7 @@ void Hdf5Utils::_printDataVals(ostream &out,
 /////////////////////////////////////////////////////////////////
 // print in packed format, using count for identical data values
 
-void Hdf5Utils::_printPacked(Radx::fl64 val,
+void Hdf5xx::_printPacked(Radx::fl64 val,
                                      int count,
                                      string &outStr) const
 
@@ -1667,7 +1667,7 @@ void Hdf5Utils::_printPacked(Radx::fl64 val,
   outStr += " ";
 }
 
-void Hdf5Utils::_printPacked(Radx::si64 val,
+void Hdf5xx::_printPacked(Radx::si64 val,
                              int count,
                              string &outStr) const
 
@@ -1690,7 +1690,7 @@ void Hdf5Utils::_printPacked(Radx::si64 val,
 ///////////////////////////////////////////////////////////////////
 // print all attributes in an object
 
-void Hdf5Utils::printAttributes(H5Location &obj, ostream &out)
+void Hdf5xx::printAttributes(H5Location &obj, ostream &out)
 
 {
   
@@ -1715,7 +1715,7 @@ void Hdf5Utils::printAttributes(H5Location &obj, ostream &out)
 ///////////////////////////////////////////////////////////////////
 // print details of one attribute
 
-void Hdf5Utils::printAttribute(Attribute &attr, ostream &out)
+void Hdf5xx::printAttribute(Attribute &attr, ostream &out)
 
 {
 
@@ -1981,7 +1981,7 @@ void Hdf5Utils::printAttribute(Attribute &attr, ostream &out)
 ///////////////////////////////
 // clear the error string
 
-void Hdf5Utils::clearErrStr()
+void Hdf5xx::clearErrStr()
 {
   _errStr.clear();
 }
@@ -1990,7 +1990,7 @@ void Hdf5Utils::clearErrStr()
 // add labelled integer value to error string,
 // with optional following carriage return.
 
-void Hdf5Utils::_addErrInt(string label, int iarg, bool cr)
+void Hdf5xx::_addErrInt(string label, int iarg, bool cr)
 {
   Radx::addErrInt(_errStr, label, iarg, cr);
 }
@@ -2000,7 +2000,7 @@ void Hdf5Utils::_addErrInt(string label, int iarg, bool cr)
 // with optional following carriage return.
 // Default format is %g.
 
-void Hdf5Utils::_addErrDbl(string label, double darg,
+void Hdf5xx::_addErrDbl(string label, double darg,
                            string format, bool cr)
 
 {
@@ -2011,7 +2011,7 @@ void Hdf5Utils::_addErrDbl(string label, double darg,
 // add labelled string to error string
 // with optional following carriage return.
 
-void Hdf5Utils::_addErrStr(string label, string strarg, bool cr)
+void Hdf5xx::_addErrStr(string label, string strarg, bool cr)
 
 {
   Radx::addErrStr(_errStr, label, strarg, cr);
@@ -2020,12 +2020,12 @@ void Hdf5Utils::_addErrStr(string label, string strarg, bool cr)
 /////////////////////////////////////////
 // private class for decoding attributes
   
-Hdf5Utils::DecodedAttr::DecodedAttr()
+Hdf5xx::DecodedAttr::DecodedAttr()
 {
   clear();
 }
 
-void Hdf5Utils::DecodedAttr::clear() 
+void Hdf5xx::DecodedAttr::clear() 
 {
   _name.clear();
   _intVal = 0;
@@ -2036,25 +2036,25 @@ void Hdf5Utils::DecodedAttr::clear()
   _isString = false;
 }
 
-void Hdf5Utils::DecodedAttr::setAsString(const string &val) 
+void Hdf5xx::DecodedAttr::setAsString(const string &val) 
 { 
   _stringVal = val;
   _isString = true;
 }
 
-void Hdf5Utils::DecodedAttr::setAsInt(Radx::si64 val) 
+void Hdf5xx::DecodedAttr::setAsInt(Radx::si64 val) 
 {
   _intVal = val;
   _isInt = true;
 }
 
-void Hdf5Utils::DecodedAttr::setAsDouble(double val) 
+void Hdf5xx::DecodedAttr::setAsDouble(double val) 
 {
   _doubleVal = val;
   _isDouble = true;
 }
 
-Radx::fl64 Hdf5Utils::DecodedAttr::getAsDouble() 
+Radx::fl64 Hdf5xx::DecodedAttr::getAsDouble() 
 {
   if (_isDouble) return _doubleVal;
   if (_isInt) return (double) _intVal;
@@ -2066,7 +2066,7 @@ Radx::fl64 Hdf5Utils::DecodedAttr::getAsDouble()
   return -9.0e33;
 }
 
-Radx::si64 Hdf5Utils::DecodedAttr::getAsInt() 
+Radx::si64 Hdf5xx::DecodedAttr::getAsInt() 
 {
   if (_isInt) return _intVal;
   if (_isDouble) return (Radx::si64) _doubleVal;
@@ -2080,7 +2080,7 @@ Radx::si64 Hdf5Utils::DecodedAttr::getAsInt()
   return -9999;
 }
 
-string Hdf5Utils::DecodedAttr::getAsString() 
+string Hdf5xx::DecodedAttr::getAsString() 
 {
   if (_isString) return _stringVal;
   return "not-set";
@@ -2089,7 +2089,7 @@ string Hdf5Utils::DecodedAttr::getAsString()
 ///////////////////////////////////////////////
 // private class for decoding array attributes
   
-Hdf5Utils::ArrayAttr::ArrayAttr()
+Hdf5xx::ArrayAttr::ArrayAttr()
 {
   _intVals = NULL;
   _doubleVals = NULL;
@@ -2097,7 +2097,7 @@ Hdf5Utils::ArrayAttr::ArrayAttr()
   clear();
 }
 
-void Hdf5Utils::ArrayAttr::clear() 
+void Hdf5xx::ArrayAttr::clear() 
 {
   _name.clear();
   _isInt = false;
@@ -2113,7 +2113,7 @@ void Hdf5Utils::ArrayAttr::clear()
   _len = 0;
 }
 
-void Hdf5Utils::ArrayAttr::setAsInts(const Radx::si64 *vals,
+void Hdf5xx::ArrayAttr::setAsInts(const Radx::si64 *vals,
                                      size_t len) 
 {
   if (_intVals) {
@@ -2126,7 +2126,7 @@ void Hdf5Utils::ArrayAttr::setAsInts(const Radx::si64 *vals,
   _isInt = true;
 }
 
-void Hdf5Utils::ArrayAttr::setAsDoubles(const Radx::fl64 *vals, 
+void Hdf5xx::ArrayAttr::setAsDoubles(const Radx::fl64 *vals, 
                                         size_t len)
 {
   if (_doubleVals) {
@@ -2139,7 +2139,7 @@ void Hdf5Utils::ArrayAttr::setAsDoubles(const Radx::fl64 *vals,
   _isDouble = true;
 }
 
-const Radx::fl64 *Hdf5Utils::ArrayAttr::getAsDoubles() 
+const Radx::fl64 *Hdf5xx::ArrayAttr::getAsDoubles() 
 {
   if (_isDouble) return _doubleVals;
   if (_doubleVals == NULL) {
@@ -2151,7 +2151,7 @@ const Radx::fl64 *Hdf5Utils::ArrayAttr::getAsDoubles()
   return _doubleVals;
 }
 
-const Radx::si64 *Hdf5Utils::ArrayAttr::getAsInts() 
+const Radx::si64 *Hdf5xx::ArrayAttr::getAsInts() 
 {
   if (_isInt) return _intVals;
   if (_intVals == NULL) {

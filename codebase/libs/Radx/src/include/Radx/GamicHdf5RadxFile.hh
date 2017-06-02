@@ -45,7 +45,7 @@
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxRay.hh>
-#include <Radx/Hdf5Utils.hh>
+#include <Ncxx/Hdf5xx.hh>
 
 class RadxVol;
 using namespace std;
@@ -160,7 +160,7 @@ private:
 
   // hdf5 utilities
 
-  Hdf5Utils _utils;
+  Hdf5xx _utils;
 
   // basics
 

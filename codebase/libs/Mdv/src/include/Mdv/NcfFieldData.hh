@@ -46,7 +46,7 @@
 
 #include <string>
 #include <math.h>
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3xFile.hh>
 #include <Mdv/MdvxField.hh> 
 #include <Mdv/DsMdvx.hh>
 #include <euclid/Pjg.hh>
@@ -79,7 +79,7 @@ public:
             bool output_latlon_arrays,
             bool compress,
             int compression_level,
-            NcFile::FileFormat format);
+            Nc3File::FileFormat format);
 
   /// destructor
 
@@ -88,12 +88,12 @@ public:
   /// add to NetCDF file object
   /// returns 0 on success, -1 on error
   
-  int addToNc(NcFile *ncFile, NcDim *timeDim, bool outputMdvAttr, string &errStr);
+  int addToNc(Nc3File *ncFile, Nc3Dim *timeDim, bool outputMdvAttr, string &errStr);
   
   /// Write the data to the NcFile
   /// Returns 0 on success, -1 on error
 
-  int writeToFile(NcFile *ncFile, string &errStr);
+  int writeToFile(Nc3File *ncFile, string &errStr);
 
 protected:
     
@@ -130,7 +130,7 @@ private:
   double _linearOffset;
   DsMdvx::ncf_pack_t _packingRequested;
   DsMdvx::ncf_pack_t _packingUsed;
-  NcType _ncType;
+  Nc3Type _ncType;
   
   float _addOffset;
   float _scaleFactor;
@@ -138,13 +138,13 @@ private:
   bool _outputLatlonArrays;
   bool _compress;
   int _compressionLevel;
-  NcFile::FileFormat _ncFormat;
+  Nc3File::FileFormat _ncFormat;
 
-  NcVar *_ncVar;
+  Nc3Var *_ncVar;
 
   // set compression
 
-  int _setCompression(NcFile *ncFile, string &errStr);
+  int _setCompression(Nc3File *ncFile, string &errStr);
 
 };
 

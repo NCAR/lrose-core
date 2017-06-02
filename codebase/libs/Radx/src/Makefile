@@ -28,12 +28,10 @@ SUB_DIRS = \
 	ForayNc \
 	Gamic \
 	Gematronik \
-	hdf5 \
 	Hrd \
 	Leosphere \
 	Ncf \
 	Nexrad \
-	netcdf \
 	Noxp \
 	NsslMrd \
 	Odim \

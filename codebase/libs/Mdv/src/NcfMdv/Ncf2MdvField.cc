@@ -54,12 +54,12 @@ Ncf2MdvField::Ncf2MdvField(bool debug,
 #ifdef USE_UDUNITS
                            ut_system *uds,
 #endif
-                           NcFile *ncFile, NcError *ncErr,
-                           NcVar *dataVar,
-                           NcDim *tDim, NcVar *tVar,
-                           NcDim *zDim, NcVar *zVar,
-                           NcDim *yDim, NcVar *yVar,
-                           NcDim *xDim, NcVar *xVar) :
+                           Nc3File *ncFile, Nc3Error *ncErr,
+                           Nc3Var *dataVar,
+                           Nc3Dim *tDim, Nc3Var *tVar,
+                           Nc3Dim *zDim, Nc3Var *zVar,
+                           Nc3Dim *yDim, Nc3Var *yVar,
+                           Nc3Dim *xDim, Nc3Var *xVar) :
         _debug(debug),
 #ifdef USE_UDUNITS
        _uds(uds),
@@ -196,7 +196,7 @@ int Ncf2MdvField::_setProjType()
 
   // find the grid mapping variable name
   
-  NcAtt *gridMapAtt = _dataVar->get_att(NcfMdv::grid_mapping);
+  Nc3Att *gridMapAtt = _dataVar->get_att(NcfMdv::grid_mapping);
   if (gridMapAtt != NULL) {
     
     string projVarName = _asString(gridMapAtt);
@@ -217,8 +217,8 @@ int Ncf2MdvField::_setProjType()
     // look for var with grid_mapping_name attribute
     
     for (int ivar = 0; ivar < _ncFile->num_vars(); ivar++) {
-      NcVar* mappingVar = _ncFile->get_var(ivar);
-      NcAtt *mappingNameAtt = mappingVar->get_att(NcfMdv::grid_mapping_name);
+      Nc3Var* mappingVar = _ncFile->get_var(ivar);
+      Nc3Att *mappingNameAtt = mappingVar->get_att(NcfMdv::grid_mapping_name);
       if (mappingNameAtt != NULL) {
         delete mappingNameAtt;
         _projVar = mappingVar;
@@ -237,7 +237,7 @@ int Ncf2MdvField::_setProjType()
 
   // get the projection type
   
-  NcAtt *projTypeAtt = _projVar->get_att(NcfMdv::grid_mapping_name);
+  Nc3Att *projTypeAtt = _projVar->get_att(NcfMdv::grid_mapping_name);
   if (projTypeAtt == NULL) {
     TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::_setProjType");
     TaStr::AddStr(_errStr, "  No grid_mapping_name, var: ",
@@ -538,7 +538,7 @@ int Ncf2MdvField::_setProjParam(const string &param_name,
 
 {
 
-  NcAtt *att = _projVar->get_att(param_name.c_str());
+  Nc3Att *att = _projVar->get_att(param_name.c_str());
   
   if (att == NULL) {
     TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::_setProjParam");
@@ -565,7 +565,7 @@ int Ncf2MdvField::_setProjParams(const string &param_name,
   
 {
 
-  NcAtt *att = _projVar->get_att(param_name.c_str());
+  Nc3Att *att = _projVar->get_att(param_name.c_str());
   
   if (att == NULL) {
     TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::_setProjParams");
@@ -601,13 +601,13 @@ void Ncf2MdvField::_setNamesAndUnits()
   string name = _dataVar->name();
   STRncopy(_fhdr.field_name, name.c_str(), MDV_SHORT_FIELD_LEN);
 
-  NcAtt* longNameAtt = _dataVar->get_att(NcfMdv::long_name);
+  Nc3Att* longNameAtt = _dataVar->get_att(NcfMdv::long_name);
   if (longNameAtt != NULL) {
     STRncopy(_fhdr.field_name_long, _asString(longNameAtt).c_str(), MDV_LONG_FIELD_LEN);
     delete longNameAtt;
   }
 
-  NcAtt* unitsAtt = _dataVar->get_att(NcfMdv::units);
+  Nc3Att* unitsAtt = _dataVar->get_att(NcfMdv::units);
   if (unitsAtt != NULL) {
     STRncopy(_fhdr.units, _asString(unitsAtt).c_str(), MDV_UNITS_LEN);
     delete unitsAtt;
@@ -675,9 +675,9 @@ int Ncf2MdvField::_setGridDimensions()
 // Returns 0 on success, -1 on failure
 
 int Ncf2MdvField::_setXYAxis(const string &axisName,
-                             const NcVar *axisVar,
+                             const Nc3Var *axisVar,
                              const string &latlonStdName,
-                             const NcDim *axisDim,
+                             const Nc3Dim *axisDim,
                              int &nn,
                              double &minVal,
                              double &dVal)
@@ -686,7 +686,7 @@ int Ncf2MdvField::_setXYAxis(const string &axisName,
 
   // x dimension
   
-  NcAtt *attxName = axisVar->get_att(NcfMdv::standard_name);
+  Nc3Att *attxName = axisVar->get_att(NcfMdv::standard_name);
   if (attxName != NULL) {
     string stdName = _asString(attxName);
     delete attxName;
@@ -717,7 +717,7 @@ int Ncf2MdvField::_setXYAxis(const string &axisName,
 
   // get units
 
-  NcAtt *attUnits = axisVar->get_att(NcfMdv::units);
+  Nc3Att *attUnits = axisVar->get_att(NcfMdv::units);
   if (attUnits == NULL) {
     return 0;
   }
@@ -798,21 +798,21 @@ void Ncf2MdvField::_setZAxis()
   // get attributes
 
   string standardName;
-  NcAtt *standardNameAtt = _zVar->get_att(NcfMdv::standard_name);
+  Nc3Att *standardNameAtt = _zVar->get_att(NcfMdv::standard_name);
   if (standardNameAtt != NULL) {
     standardName = _asString(standardNameAtt);
     delete standardNameAtt;
   }
   
   string longName;
-  NcAtt *longNameAtt = _zVar->get_att(NcfMdv::long_name);
+  Nc3Att *longNameAtt = _zVar->get_att(NcfMdv::long_name);
   if (longNameAtt != NULL) {
     longName = _asString(longNameAtt);
     delete longNameAtt;
   }
   
   string units;
-  NcAtt *unitsAtt = _zVar->get_att(NcfMdv::units);
+  Nc3Att *unitsAtt = _zVar->get_att(NcfMdv::units);
   if (unitsAtt != NULL) {
     units = _asString(unitsAtt);
     delete unitsAtt;
@@ -966,14 +966,14 @@ int Ncf2MdvField::_setGridData()
   // get scale and offset
 
   double scale = 1.0;
-  NcAtt *scaleAtt = _dataVar->get_att(NcfMdv::scale_factor); 
+  Nc3Att *scaleAtt = _dataVar->get_att(NcfMdv::scale_factor); 
   if (scaleAtt != NULL) {
     scale = scaleAtt->as_double(0);
     delete scaleAtt;
   }
 
   double offset = 0.0;
-  NcAtt *offsetAtt = _dataVar->get_att(NcfMdv::add_offset); 
+  Nc3Att *offsetAtt = _dataVar->get_att(NcfMdv::add_offset); 
   if (offsetAtt != NULL) {
     offset = offsetAtt->as_double(0);
     delete offsetAtt;
@@ -983,8 +983,8 @@ int Ncf2MdvField::_setGridData()
 
   switch (_dataType) {
 
-    case ncChar:
-    case ncByte: {
+    case nc3Char:
+    case nc3Byte: {
 
       _fhdr.encoding_type = Mdvx::ENCODING_INT8;
       _fhdr.data_element_nbytes = sizeof(ui08);
@@ -998,7 +998,7 @@ int Ncf2MdvField::_setGridData()
       
       bool hasFillValue = false;
       ncbyte fillValue = -128;
-      NcAtt *fillAtt = _dataVar->get_att(NcfMdv::FillValue); 
+      Nc3Att *fillAtt = _dataVar->get_att(NcfMdv::FillValue); 
       if (fillAtt != NULL) {
         fillValue = fillAtt->as_ncbyte(0);
         delete fillAtt;
@@ -1007,7 +1007,7 @@ int Ncf2MdvField::_setGridData()
       
       bool hasValidMin = false;
       ncbyte validMin = -128;
-      NcAtt *minAtt = _dataVar->get_att(NcfMdv::valid_min); 
+      Nc3Att *minAtt = _dataVar->get_att(NcfMdv::valid_min); 
       if (minAtt != NULL) {
         validMin = minAtt->as_ncbyte(0);
         delete minAtt;
@@ -1016,7 +1016,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasValidMax = false;
       ncbyte validMax = 127;
-      NcAtt *maxAtt = _dataVar->get_att(NcfMdv::valid_max); 
+      Nc3Att *maxAtt = _dataVar->get_att(NcfMdv::valid_max); 
       if (maxAtt != NULL) {
         validMax = maxAtt->as_ncbyte(0);
         delete maxAtt;
@@ -1039,7 +1039,7 @@ int Ncf2MdvField::_setGridData()
 
       TaArray<ncbyte> inData_;
       ncbyte *inData = inData_.alloc(nPtsTotal);
-      NcBool iret = 0;
+      Nc3Bool iret = 0;
 
       int ndims = _dataVar->num_dims();
       if (ndims == 2) {
@@ -1090,7 +1090,7 @@ int Ncf2MdvField::_setGridData()
       break;
     }
 
-    case ncShort: {
+    case nc3Short: {
 
       _fhdr.encoding_type = Mdvx::ENCODING_INT16;
       _fhdr.data_element_nbytes = sizeof(ui16);
@@ -1104,7 +1104,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasFillValue = false;
       short fillValue = -32768;
-      NcAtt *fillAtt = _dataVar->get_att(NcfMdv::FillValue); 
+      Nc3Att *fillAtt = _dataVar->get_att(NcfMdv::FillValue); 
       if (fillAtt != NULL) {
         fillValue = fillAtt->as_short(0);
         delete fillAtt;
@@ -1113,7 +1113,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasValidMin = false;
       short validMin = -32768;
-      NcAtt *minAtt = _dataVar->get_att(NcfMdv::valid_min); 
+      Nc3Att *minAtt = _dataVar->get_att(NcfMdv::valid_min); 
       if (minAtt != NULL) {
         validMin = minAtt->as_short(0);
         delete minAtt;
@@ -1122,7 +1122,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasValidMax = false;
       short validMax = 32767;
-      NcAtt *maxAtt = _dataVar->get_att(NcfMdv::valid_max); 
+      Nc3Att *maxAtt = _dataVar->get_att(NcfMdv::valid_max); 
       if (maxAtt != NULL) {
         validMax = maxAtt->as_short(0);
         delete maxAtt;
@@ -1145,7 +1145,7 @@ int Ncf2MdvField::_setGridData()
 
       TaArray<short> inData_;
       short *inData = inData_.alloc(nPtsTotal);
-      NcBool iret = 0;
+      Nc3Bool iret = 0;
     
       int ndims = _dataVar->num_dims();
       if (ndims == 2) {
@@ -1194,7 +1194,7 @@ int Ncf2MdvField::_setGridData()
       break;
     }
 
-    case ncInt: {
+    case nc3Int: {
 
       _fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
       _fhdr.data_element_nbytes = sizeof(fl32);
@@ -1205,7 +1205,7 @@ int Ncf2MdvField::_setGridData()
       
       bool hasFillValue = false;
       int fillValue = 0;
-      NcAtt *fillAtt = _dataVar->get_att(NcfMdv::FillValue); 
+      Nc3Att *fillAtt = _dataVar->get_att(NcfMdv::FillValue); 
       if (fillAtt != NULL) {
         fillValue = fillAtt->as_int(0);
         delete fillAtt;
@@ -1214,7 +1214,7 @@ int Ncf2MdvField::_setGridData()
       
       bool hasValidMin = false;
       int validMin = -2147483648;
-      NcAtt *minAtt = _dataVar->get_att(NcfMdv::valid_min); 
+      Nc3Att *minAtt = _dataVar->get_att(NcfMdv::valid_min); 
       if (minAtt != NULL) {
         validMin = minAtt->as_int(0);
         delete minAtt;
@@ -1223,7 +1223,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasValidMax = false;
       int validMax = 2147483647;
-      NcAtt *maxAtt = _dataVar->get_att(NcfMdv::valid_max); 
+      Nc3Att *maxAtt = _dataVar->get_att(NcfMdv::valid_max); 
       if (maxAtt != NULL) {
         validMax = maxAtt->as_int(0);
         delete maxAtt;
@@ -1243,7 +1243,7 @@ int Ncf2MdvField::_setGridData()
       
       TaArray<int> inData_;
       int *inData = inData_.alloc(nPtsTotal);
-      NcBool iret = 0;
+      Nc3Bool iret = 0;
 
       int ndims = _dataVar->num_dims();
       if (ndims == 2) {
@@ -1291,7 +1291,7 @@ int Ncf2MdvField::_setGridData()
       break;
     }
 
-    case ncFloat: {
+    case nc3Float: {
 
       _fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
       _fhdr.data_element_nbytes = sizeof(fl32);
@@ -1302,7 +1302,7 @@ int Ncf2MdvField::_setGridData()
       
       bool hasFillValue = false;
       float fillValue = -9.0e33;
-      NcAtt *fillAtt = _dataVar->get_att(NcfMdv::FillValue); 
+      Nc3Att *fillAtt = _dataVar->get_att(NcfMdv::FillValue); 
       if (fillAtt != NULL) {
         fillValue = fillAtt->as_float(0);
         delete fillAtt;
@@ -1311,7 +1311,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasValidMin = false;
       float validMin = -9.0e33;
-      NcAtt *minAtt = _dataVar->get_att(NcfMdv::valid_min); 
+      Nc3Att *minAtt = _dataVar->get_att(NcfMdv::valid_min); 
       if (minAtt != NULL) {
         validMin = minAtt->as_float(0);
         delete minAtt;
@@ -1320,7 +1320,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasValidMax = false;
       float validMax = 9.0e33;
-      NcAtt *maxAtt = _dataVar->get_att(NcfMdv::valid_max); 
+      Nc3Att *maxAtt = _dataVar->get_att(NcfMdv::valid_max); 
       if (maxAtt != NULL) {
         validMax = maxAtt->as_float(0);
         delete maxAtt;
@@ -1339,7 +1339,7 @@ int Ncf2MdvField::_setGridData()
       _fhdr.bad_data_value = _fhdr.missing_data_value;
       TaArray<float> inData_;
       float *inData = inData_.alloc(nPtsTotal);
-      NcBool iret = 0;
+      Nc3Bool iret = 0;
 
       int ndims = _dataVar->num_dims();
       if (ndims == 2) {
@@ -1387,7 +1387,7 @@ int Ncf2MdvField::_setGridData()
       break;
     }
 
-    case ncDouble: {
+    case nc3Double: {
 
       _fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
       _fhdr.data_element_nbytes = sizeof(fl32);
@@ -1398,7 +1398,7 @@ int Ncf2MdvField::_setGridData()
       
       bool hasFillValue = false;
       double fillValue = 0;
-      NcAtt *fillAtt = _dataVar->get_att(NcfMdv::FillValue); 
+      Nc3Att *fillAtt = _dataVar->get_att(NcfMdv::FillValue); 
       if (fillAtt != NULL) {
         fillValue = fillAtt->as_double(0);
         delete fillAtt;
@@ -1407,7 +1407,7 @@ int Ncf2MdvField::_setGridData()
       
       bool hasValidMin = false;
       double validMin = -9.0e33;
-      NcAtt *minAtt = _dataVar->get_att(NcfMdv::valid_min); 
+      Nc3Att *minAtt = _dataVar->get_att(NcfMdv::valid_min); 
       if (minAtt != NULL) {
         validMin = minAtt->as_double(0);
         delete minAtt;
@@ -1416,7 +1416,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasValidMax = false;
       double validMax = 9.0e33;
-      NcAtt *maxAtt = _dataVar->get_att(NcfMdv::valid_max); 
+      Nc3Att *maxAtt = _dataVar->get_att(NcfMdv::valid_max); 
       if (maxAtt != NULL) {
         validMax = maxAtt->as_double(0);
         delete maxAtt;
@@ -1435,7 +1435,7 @@ int Ncf2MdvField::_setGridData()
       _fhdr.bad_data_value = _fhdr.missing_data_value;
       TaArray<double> inData_;
       double *inData = inData_.alloc(nPtsTotal);
-      NcBool iret = 0;
+      Nc3Bool iret = 0;
 
       if (_tVar != NULL && _zVar != NULL) {
         iret = _dataVar->get( inData, tDimSize, _fhdr.nz, _fhdr.ny, _fhdr.nx);
@@ -1501,7 +1501,7 @@ int Ncf2MdvField::_setMdvSpecific()
 
   for (int i = 0; i < _dataVar->num_atts(); i++) {
     
-    NcAtt* att = _dataVar->get_att(i);
+    Nc3Att* att = _dataVar->get_att(i);
       
     if (att == NULL) {
       continue;
@@ -1564,7 +1564,7 @@ int Ncf2MdvField::_setMdvSpecific()
 ////////////////////////////////////////
 // set si32 from attribute
 
-void Ncf2MdvField::_setSi32FromAttr(NcAtt *att, const string &requiredName, si32 &val)
+void Ncf2MdvField::_setSi32FromAttr(Nc3Att *att, const string &requiredName, si32 &val)
 
 {
   if (att == NULL) {
@@ -1578,7 +1578,7 @@ void Ncf2MdvField::_setSi32FromAttr(NcAtt *att, const string &requiredName, si32
 ////////////////////////////////////////
 // set fl32 from attribute
 
-void Ncf2MdvField::_setFl32FromAttr(NcAtt *att, const string &requiredName, fl32 &val)
+void Ncf2MdvField::_setFl32FromAttr(Nc3Att *att, const string &requiredName, fl32 &val)
 
 {
   if (att == NULL) {
@@ -1592,7 +1592,7 @@ void Ncf2MdvField::_setFl32FromAttr(NcAtt *att, const string &requiredName, fl32
 ////////////////////////////////////////
 // set string from attribute
 
-void Ncf2MdvField::_setStrFromAttr(NcAtt *att, const string &requiredName, string &val)
+void Ncf2MdvField::_setStrFromAttr(Nc3Att *att, const string &requiredName, string &val)
 
 {
   if (att == NULL) {
@@ -1606,7 +1606,7 @@ void Ncf2MdvField::_setStrFromAttr(NcAtt *att, const string &requiredName, strin
 ///////////////////////////////////////////
 // get string representation of component
 
-string Ncf2MdvField::_asString(const NcTypedComponent *component,
+string Ncf2MdvField::_asString(const Nc3TypedComponent *component,
                                int index /* = 0 */) const
   
 {

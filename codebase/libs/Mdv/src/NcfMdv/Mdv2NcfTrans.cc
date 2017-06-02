@@ -72,7 +72,7 @@ Mdv2NcfTrans::Mdv2NcfTrans()
   _outputLatlonArrays = true;
 
   _ncFile = NULL;
-  _ncFormat = NcFile::Netcdf4;
+  _ncFormat = Nc3File::Netcdf4;
   _radxNcFormat = RadxFile::NETCDF4;
   _ncErr = NULL;
 
@@ -242,23 +242,23 @@ void Mdv2NcfTrans::_setTransParams()
   
   switch (_mdv->_ncfFileFormat) {
     case DsMdvx::NCF_FORMAT_NETCDF4:
-      _ncFormat = NcFile::Netcdf4;
+      _ncFormat = Nc3File::Netcdf4;
       _radxNcFormat = RadxFile::NETCDF4;
       break;
     case DsMdvx::NCF_FORMAT_CLASSIC:
-      _ncFormat = NcFile::Classic;
+      _ncFormat = Nc3File::Classic;
       _radxNcFormat = RadxFile::NETCDF_CLASSIC;
       break;
     case DsMdvx::NCF_FORMAT_OFFSET64BITS:
-      _ncFormat = NcFile::Offset64Bits;
+      _ncFormat = Nc3File::Offset64Bits;
       _radxNcFormat = RadxFile::NETCDF_OFFSET_64BIT;
       break;
     case DsMdvx::NCF_FORMAT_NETCFD4_CLASSIC:
-      _ncFormat = NcFile::Netcdf4Classic;
+      _ncFormat = Nc3File::Netcdf4Classic;
       _radxNcFormat = RadxFile::NETCDF4_CLASSIC;
       break;
     default:
-      _ncFormat = NcFile::Netcdf4;
+      _ncFormat = Nc3File::Netcdf4;
       _radxNcFormat = RadxFile::NETCDF4;
   }
 
@@ -498,7 +498,7 @@ int Mdv2NcfTrans::_openNcFile(const string &path)
     TaStr::AddStr(_errStr, "  Cannot make dir: ", ppath.getDirectory());
   }
 
-  _ncFile = new NcFile(path.c_str(), NcFile::Replace, NULL, 0, _ncFormat);
+  _ncFile = new Nc3File(path.c_str(), Nc3File::Replace, NULL, 0, _ncFormat);
   
   if (!_ncFile || !_ncFile->is_valid()) {
     TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::openNcFile");
@@ -511,12 +511,12 @@ int Mdv2NcfTrans::_openNcFile(const string &path)
   }
   
   // Change the error behavior of the netCDF C++ API by creating an
-  // NcError object. Until it is destroyed, this NcError object will
+  // Nc3Error object. Until it is destroyed, this Nc3Error object will
   // ensure that the netCDF C++ API returns error codes
   // on any failure, and leaves any other error handling to the
   // calling program.
   
-  _ncErr = new NcError(NcError::silent_nonfatal);
+  _ncErr = new Nc3Error(Nc3Error::silent_nonfatal);
  
   return 0;
 
@@ -758,7 +758,7 @@ int Mdv2NcfTrans::_addDimensions()
       const MdvxChunk *chunk = _mdv->getChunkByNum(i);
       char chunkName[128];
       sprintf(chunkName, "%s_%.4d", NcfMdv::nbytes_mdv_chunk, i);
-      NcDim *chunkDim = _ncFile->add_dim(chunkName, chunk->getSize());
+      Nc3Dim *chunkDim = _ncFile->add_dim(chunkName, chunk->getSize());
       if (chunkDim == NULL) {
         return -1;
       }
@@ -877,7 +877,7 @@ int Mdv2NcfTrans::_addTimeVariables()
 
   string timeStr("time");
   
-  if ((_timeVar = _ncFile->add_var(timeStr.c_str(), ncDouble, _timeDim)) == NULL) {
+  if ((_timeVar = _ncFile->add_var(timeStr.c_str(), nc3Double, _timeDim)) == NULL) {
     return -1;
   }
   iret |= !_timeVar->add_att(NcfMdv::standard_name, NcfMdv::time);
@@ -894,7 +894,7 @@ int Mdv2NcfTrans::_addTimeVariables()
   if (_isForecast) {
 
     if ((_forecastRefTimeVar =
-         _ncFile->add_var(NcfMdv::forecast_reference_time, ncDouble, _timeDim)) == NULL) {
+         _ncFile->add_var(NcfMdv::forecast_reference_time, nc3Double, _timeDim)) == NULL) {
       return -1;
     }
     iret |= !_forecastRefTimeVar->add_att(NcfMdv::standard_name,
@@ -910,7 +910,7 @@ int Mdv2NcfTrans::_addTimeVariables()
     string forecastPeriodStr(NcfMdv::forecast_period);
     
     if ((_forecastPeriodVar =
-         _ncFile->add_var(forecastPeriodStr.c_str(), ncDouble, _timeDim)) == NULL) {
+         _ncFile->add_var(forecastPeriodStr.c_str(), nc3Double, _timeDim)) == NULL) {
       return -1;
     }
     
@@ -929,7 +929,7 @@ int Mdv2NcfTrans::_addTimeVariables()
   
   if (_timeBegin != 0) {
     if ((_startTimeVar = _ncFile->add_var(NcfMdv::start_time,
-                                          ncDouble, _timeDim)) == NULL) {
+                                          nc3Double, _timeDim)) == NULL) {
       return -1;
     }
     iret |= !_startTimeVar->add_att(NcfMdv::units, NcfMdv::secs_since_jan1_1970);
@@ -938,7 +938,7 @@ int Mdv2NcfTrans::_addTimeVariables()
 
   if (_timeEnd != 0) {
     if ((_stopTimeVar = _ncFile->add_var(NcfMdv::stop_time,
-                                         ncDouble, _timeDim)) == NULL) {
+                                         nc3Double, _timeDim)) == NULL) {
       return -1;
     }
     iret |= !_stopTimeVar->add_att(NcfMdv::units, NcfMdv::secs_since_jan1_1970);
@@ -948,7 +948,7 @@ int Mdv2NcfTrans::_addTimeVariables()
   if (_timeBegin != _timeEnd &&
       _timeBegin <= _timeCentroid &&
       _timeEnd >= _timeCentroid) {
-    if ((_timeBoundsVar = _ncFile->add_var(NcfMdv::time_bounds, ncDouble,
+    if ((_timeBoundsVar = _ncFile->add_var(NcfMdv::time_bounds, nc3Double,
                                            _timeDim, _boundsDim)) == NULL) {
       return -1;
     }
@@ -998,7 +998,7 @@ int Mdv2NcfTrans::_addMdvMasterHeaderVariable()
     
     // create a variable to hold the master header attributes
     
-    NcVar *mhdrVar = _ncFile->add_var(NcfMdv::mdv_master_header, ncInt, _timeDim);
+    Nc3Var *mhdrVar = _ncFile->add_var(NcfMdv::mdv_master_header, nc3Int, _timeDim);
     if (mhdrVar == NULL) {
       TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::writeFile");
       TaStr::AddStr(_errStr, "  Adding master header var");
@@ -1073,8 +1073,8 @@ int Mdv2NcfTrans::_addMdvChunkVariables()
     char chunkName[128];
     sprintf(chunkName, "%s_%.4d", NcfMdv::mdv_chunk, i);
     
-     NcVar *chunkVar =
-       _ncFile->add_var(chunkName, ncByte, _timeDim, _chunkDims[i]);
+     Nc3Var *chunkVar =
+       _ncFile->add_var(chunkName, nc3Byte, _timeDim, _chunkDims[i]);
 
      if (chunkVar == NULL) {
        return -1;
@@ -1427,7 +1427,7 @@ int Mdv2NcfTrans::_putMdvChunkVariables()
     }
 
     const MdvxChunk *chunk = _mdv->getChunkByNum(i);
-    NcVar *chunkVar = _chunkVars[i];
+    Nc3Var *chunkVar = _chunkVars[i];
     const ncbyte *cdata = (ncbyte*) chunk->getData();
     iret |= !chunkVar->put(cdata, 1, chunk->getSize());
     

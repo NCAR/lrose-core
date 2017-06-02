@@ -35,6 +35,7 @@
 
 #include <Ncxx/Hdf5xx.hh>
 #include <Ncxx/Ncxx.hh>
+#include <Ncxx/ByteOrder.hh>
 #include <cstring>
 #include <cmath>
 
@@ -45,15 +46,15 @@ int Hdf5xx::loadFloatVar(CompType compType,
                          char *buf,
                          const string &varName,
                          NcxxPort::fl64 &floatVal)
-
+  
 {
-
+  
   clearErrStr();  
-
+  
   bool isInt, isFloat, isString;
   NcxxPort::si64 intVal;
   string stringVal;
-
+  
   if (loadCompVar(compType, buf, varName,
                   isInt, isFloat, isString,
                   intVal, floatVal, stringVal)) {
@@ -72,7 +73,7 @@ int Hdf5xx::loadFloatVar(CompType compType,
   return 0;
 
 }
-  
+
 //////////////////////////////////////////////////
 // get int val for a specific comp header member
 
@@ -82,13 +83,13 @@ int Hdf5xx::loadIntVar(CompType compType,
                        NcxxPort::si64 &intVal)
 
 {
-  
+
   clearErrStr();  
 
   bool isInt, isFloat, isString;
   NcxxPort::fl64 floatVal;
   string stringVal;
-  
+
   if (loadCompVar(compType, buf, varName,
                   isInt, isFloat, isString,
                   intVal, floatVal, stringVal)) {
@@ -107,7 +108,7 @@ int Hdf5xx::loadIntVar(CompType compType,
   return 0;
 
 }
-  
+
 //////////////////////////////////////////////////
 // get string val for a specific comp header member
 
@@ -123,7 +124,7 @@ int Hdf5xx::loadStringVar(CompType compType,
   bool isInt, isFloat, isString;
   NcxxPort::si64 intVal;
   NcxxPort::fl64 floatVal;
-  
+
   if (loadCompVar(compType, buf, varName,
                   isInt, isFloat, isString,
                   intVal, floatVal, stringVal)) {
@@ -142,8 +143,8 @@ int Hdf5xx::loadStringVar(CompType compType,
   return 0;
 
 }
-  
-  
+
+
 /////////////////////////////////////////////////
 // get val for a specific compound header member
 
@@ -156,14 +157,14 @@ int Hdf5xx::loadCompVar(CompType compType,
                         NcxxPort::si64 &intVal,
                         NcxxPort::fl64 &floatVal,
                         string &stringVal)
-  
-  
+
+
 {
 
   isInt = false;
   isFloat = false;
   isString = false;
-  
+
   int nMembers = compType.getNmembers();
   int index = -1;
   try {
@@ -183,28 +184,28 @@ int Hdf5xx::loadCompVar(CompType compType,
   DataType dtype = compType.getMemberDataType(index);
   int offset = compType.getMemberOffset(index);
   H5T_class_t mclass = compType.getMemberClass(index);
-  
+
   if (mclass == H5T_INTEGER) {
 
     isInt = true;
-      
+
     IntType intType = compType.getMemberIntType(index);
     H5T_order_t order = intType.getOrder();
     H5T_sign_t sign = intType.getSign();
     size_t tsize = intType.getSize();
-    
+
     if (sign == H5T_SGN_NONE) {
-      
+
       // unsigned
-      
+
       if (tsize == 1) {
-        
+
         NcxxPort::ui08 ival;
         memcpy(&ival, buf + offset, sizeof(ival));
         intVal = (int) ival;
-        
+
       } else if (tsize == 2) {
-        
+
         NcxxPort::ui16 ival;
         memcpy(&ival, buf + offset, sizeof(ival));
         if (NcxxPort::hostIsBigEndian()) {
@@ -217,9 +218,9 @@ int Hdf5xx::loadCompVar(CompType compType,
           }
         }
         intVal = ival;
-        
+
       } else if (tsize == 4) {
-        
+
         NcxxPort::ui32 ival;
         memcpy(&ival, buf + offset, sizeof(ival));
         if (NcxxPort::hostIsBigEndian()) {
@@ -232,9 +233,9 @@ int Hdf5xx::loadCompVar(CompType compType,
           }
         }
         intVal = ival;
-        
+
       } else if (tsize == 8) {
-        
+
         NcxxPort::ui64 ival;
         memcpy(&ival, buf + offset, sizeof(ival));
         if (NcxxPort::hostIsBigEndian()) {
@@ -247,21 +248,21 @@ int Hdf5xx::loadCompVar(CompType compType,
           }
         }
         intVal = ival;
-        
+
       }
-      
+
     } else {
-      
+
       // signed
-      
+
       if (tsize == 1) {
-        
+
         NcxxPort::si08 ival;
         memcpy(&ival, buf + offset, sizeof(ival));
         intVal = (int) ival;
-        
+
       } else if (tsize == 2) {
-        
+
         NcxxPort::si16 ival;
         memcpy(&ival, buf + offset, sizeof(ival));
         if (NcxxPort::hostIsBigEndian()) {
@@ -274,9 +275,9 @@ int Hdf5xx::loadCompVar(CompType compType,
           }
         }
         intVal = ival;
-        
+
       } else if (tsize == 4) {
-        
+
         NcxxPort::si32 ival;
         memcpy(&ival, buf + offset, sizeof(ival));
         if (NcxxPort::hostIsBigEndian()) {
@@ -289,9 +290,9 @@ int Hdf5xx::loadCompVar(CompType compType,
           }
         }
         intVal = ival;
-        
+
       } else if (tsize == 8) {
-        
+
         NcxxPort::si64 ival;
         memcpy(&ival, buf + offset, sizeof(ival));
         if (NcxxPort::hostIsBigEndian()) {
@@ -304,21 +305,21 @@ int Hdf5xx::loadCompVar(CompType compType,
           }
         }
         intVal = ival;
-        
+
       }
-      
+
     }
-    
+
   } else if (mclass == H5T_FLOAT) {
-    
+
     isFloat = true;
 
     FloatType flType = compType.getMemberFloatType(index);
     H5T_order_t order = flType.getOrder();
     size_t tsize = flType.getSize();
-    
+
     if (tsize == 4) {
-      
+
       NcxxPort::fl32 fval;
       memcpy(&fval, buf + offset, sizeof(fval));
       if (NcxxPort::hostIsBigEndian()) {
@@ -331,9 +332,9 @@ int Hdf5xx::loadCompVar(CompType compType,
         }
       }
       floatVal = fval;
-      
+
     } else if (tsize == 8) {
-      
+
       NcxxPort::fl64 fval;
       memcpy(&fval, buf + offset, sizeof(fval));
       if (NcxxPort::hostIsBigEndian()) {
@@ -346,11 +347,11 @@ int Hdf5xx::loadCompVar(CompType compType,
         }
       }
       floatVal = fval;
-      
+
     }
-    
+
   } else if (mclass == H5T_STRING) {
-    
+
     isString = true;
 
     StrType strType = compType.getMemberStrType(index);
@@ -359,15 +360,15 @@ int Hdf5xx::loadCompVar(CompType compType,
     memcpy(str, buf + offset, strLen);
     str[strLen] = '\0';
     stringVal = str;
-    
+
   } else if (mclass == H5T_COMPOUND) {
-    
+
     _addErrStr("Found nested compound type for variable: ", varName);
     _addErrStr("  Cannot deal with nested compound types");
     return -1;
 
   }
-  
+
   return 0;
 
 }
@@ -380,7 +381,7 @@ int Hdf5xx::loadAttribute(H5Location &obj,
                           const string &name,
                           const string &context,
                           DecodedAttr &decodedAttr)
-  
+
 {
 
   clearErrStr();
@@ -416,11 +417,11 @@ int Hdf5xx::loadAttribute(H5Location &obj,
     H5T_sign_t sign = intType.getSign();
     size_t tsize = intType.getSize();
     NcxxPort::si64 lval = 0;
-    
+
     if (sign == H5T_SGN_NONE) {
 
       // unsigned
-      
+
       if (tsize == 1) {
 
         NcxxPort::ui08 *ivals = new NcxxPort::ui08[npoints];
@@ -549,7 +550,7 @@ int Hdf5xx::loadAttribute(H5Location &obj,
     NcxxPort::fl64 dval = 0;
 
     if (tsize == 4) {
-      
+
       NcxxPort::fl32 *fvals = new NcxxPort::fl32[npoints];
       attr->read(dtype, fvals);
       if (NcxxPort::hostIsBigEndian()) {
@@ -858,6 +859,113 @@ void Hdf5xx::appendAttrNames(H5Location &obj,
 {
   vector<string> *names = (vector<string> *) operator_data;
   names->push_back(attr_name);
+}
+
+/////////////////////////////////////////
+// add a string attribute to an object
+// returns the attribute
+
+Attribute Hdf5xx::addAttr(H5Location &loc,
+                          const string &name,
+                          const string &val)
+{
+
+  // Create dataspace for attribute
+  DataSpace attrDataspace = DataSpace(H5S_SCALAR);
+  
+  // Create string datatype for attribute
+  StrType strDatatype(PredType::C_S1, val.size() + 1);
+  strDatatype.setCset(H5T_CSET_ASCII);
+  strDatatype.setStrpad(H5T_STR_NULLTERM);
+
+  // Set up write buffer for attribute
+  const H5std_string strWritebuf(val);
+  
+  // Create attribute and write to it
+  Attribute att = loc.createAttribute(name, strDatatype, attrDataspace);
+  att.write(strDatatype, strWritebuf); 
+
+  return att;
+
+}
+
+/////////////////////////////////////////
+// add a 64-bit int attribute to an object
+// returns the attribute
+
+Attribute Hdf5xx::addAttr(H5Location &loc,
+                          const string &name,
+                          NcxxPort::si64 val)
+{
+
+  // Create dataspace for attribute
+  DataSpace attrDataspace = DataSpace(H5S_SCALAR);
+  
+  // Create datatype for attribute
+  IntType intDatatype(H5::PredType::STD_I64LE);
+  if (ByteOrder::hostIsBigEndian()) {
+    intDatatype = H5::PredType::STD_I64BE;
+  }
+
+  // Create attribute and write to it
+  Attribute att = loc.createAttribute(name, intDatatype, attrDataspace);
+  att.write(intDatatype, &val); 
+
+  return att;
+
+}
+
+/////////////////////////////////////////
+// add a 64-bit float attribute to an object
+// returns the attribute
+
+Attribute Hdf5xx::addAttr(H5Location &loc,
+                          const string &name,
+                          NcxxPort::fl64 val)
+{
+
+  // Create dataspace for attribute
+  DataSpace attrDataspace = DataSpace(H5S_SCALAR);
+  
+  // Create datatype for attribute
+  FloatType floatDatatype(H5::PredType::IEEE_F64LE);
+  if (ByteOrder::hostIsBigEndian()) {
+    floatDatatype = H5::PredType::IEEE_F64BE;
+  }
+
+  // Create attribute and write to it
+  Attribute att = loc.createAttribute(name, floatDatatype, attrDataspace);
+  att.write(floatDatatype, &val); 
+
+  return att;
+
+}
+
+////////////////////////////////////////////////////
+// add a 64-bit float array attribute to an object
+// returns the attribute
+
+Attribute Hdf5xx::addAttr(H5Location &loc,
+                          const string &name,
+                          const vector<NcxxPort::fl64> &vals)
+{
+
+  // Create dataspace for attribute
+  hsize_t dim = vals.size();
+  DataSpace attrDataspace = DataSpace(1, &dim);
+  
+  // Create datatype for attribute
+  FloatType floatDatatype(H5::PredType::IEEE_F64LE);
+  if (ByteOrder::hostIsBigEndian()) {
+    floatDatatype = H5::PredType::IEEE_F64BE;
+  }
+
+  // Create attribute and write to it
+  Attribute att = loc.createAttribute(name, floatDatatype, attrDataspace);
+  att.write(floatDatatype, &vals[0]); 
+
+  return att;
+
 }
 
 ///////////////////////////////////////////////////////////////////

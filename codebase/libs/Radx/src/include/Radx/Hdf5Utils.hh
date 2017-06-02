@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// Hdf5Utils.hh
+// Hdf5xx.hh
 //
 // GAMIC Hdf5 data for radar radial data
 //
@@ -33,8 +33,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef Hdf5Utils_HH
-#define Hdf5Utils_HH
+#ifndef Hdf5xx_HH
+#define Hdf5xx_HH
 
 #include <string>
 #include <vector>
@@ -76,7 +76,7 @@ using namespace std;
 ///
 /// This subclass of RadxFile handles I/O for ODIM HDF5 files.
 
-class Hdf5Utils
+class Hdf5xx
 
 {
   

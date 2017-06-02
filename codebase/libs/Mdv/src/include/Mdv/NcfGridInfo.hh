@@ -43,7 +43,7 @@
 
 #include <string>
 #include <math.h>
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3xFile.hh>
 #include <Mdv/MdvxField.hh> 
 #include <Mdv/DsMdvx.hh>
 #include <euclid/Pjg.hh>
@@ -79,38 +79,38 @@ public:
   /// add xy dimension for this grid
   /// returns 0 on success, -1 on failure
   
-  int addXyDim(int gridNum, NcFile *ncFile, string &errStr);
+  int addXyDim(int gridNum, Nc3File *ncFile, string &errStr);
 
   /// add projection variable for this grid
   
-  int addProjVar(int projNum, NcFile *ncFile, string &errStr);
+  int addProjVar(int projNum, Nc3File *ncFile, string &errStr);
 
   /// add coordinate variables for this grid
   
   int addCoordVars(int gridNum, bool outputLatlonArrays,
-                   NcFile *ncFile, string &errStr);
+                   Nc3File *ncFile, string &errStr);
 
   /// add vert section coordinate variables for this grid
   
   int addVsectCoordVars(int gridNum,
-                        NcFile *ncFile, string &errStr);
+                        Nc3File *ncFile, string &errStr);
     
   /// Write the coordinate data to file
   /// Returns 0 on success, -1 on error
   
-  int writeCoordDataToFile(NcFile *ncFile, string &errStr);
+  int writeCoordDataToFile(Nc3File *ncFile, string &errStr);
   
   // Get methods
   
-  NcDim *getNcXdim() const { return _xDim; }
-  NcDim *getNcYdim() const { return _yDim; }
-  NcVar *getNcXvar() const { return _xVar; }
-  NcVar *getNcYvar() const { return _yVar; }
-  NcVar *getNcLatVar() const { return _latVar; }
-  NcVar *getNcLonVar() const { return _lonVar; }
+  Nc3Dim *getNcXdim() const { return _xDim; }
+  Nc3Dim *getNcYdim() const { return _yDim; }
+  Nc3Var *getNcXvar() const { return _xVar; }
+  Nc3Var *getNcYvar() const { return _yVar; }
+  Nc3Var *getNcLatVar() const { return _latVar; }
+  Nc3Var *getNcLonVar() const { return _lonVar; }
   
   Mdvx::projection_type_t getProjType() const { return _proj.getProjType();}
-  const NcVar *getNcProjVar()  const{ return _projVar;}
+  const Nc3Var *getNcProjVar()  const{ return _projVar;}
 
   bool getOutputLatlonArrays() const { return _outputLatlonArrays; }
 
@@ -127,18 +127,18 @@ private:
   Mdvx::field_header_t _fHdr;
   MdvxProj _proj;
   Mdvx::coord_t _coord;
-  NcVar *_projVar;
+  Nc3Var *_projVar;
   bool _outputLatlonArrays;
   bool _isXSect;
   
-  NcDim *_xDim;
-  NcDim *_yDim;
+  Nc3Dim *_xDim;
+  Nc3Dim *_yDim;
 
-  NcVar *_xVar;
-  NcVar *_yVar;
-  NcVar *_latVar;
-  NcVar *_lonVar;
-  NcVar *_altVar;
+  Nc3Var *_xVar;
+  Nc3Var *_yVar;
+  Nc3Var *_latVar;
+  Nc3Var *_lonVar;
+  Nc3Var *_altVar;
 
   float *_xData;
   float *_yData;

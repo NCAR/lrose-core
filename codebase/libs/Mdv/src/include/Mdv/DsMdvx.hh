@@ -362,10 +362,10 @@ public:
   // format of the netcdf file
 
   typedef enum {
-    NCF_FORMAT_CLASSIC = 0,         // NcFile::Classic
-    NCF_FORMAT_OFFSET64BITS = 1,    // NcFile::Offset64Bits
-    NCF_FORMAT_NETCFD4_CLASSIC = 2, // NcFile::Netcdf4Classic
-    NCF_FORMAT_NETCDF4 = 3          // NcFile::Netcdf4
+    NCF_FORMAT_CLASSIC = 0,         // Nc3File::Classic
+    NCF_FORMAT_OFFSET64BITS = 1,    // Nc3File::Offset64Bits
+    NCF_FORMAT_NETCFD4_CLASSIC = 2, // Nc3File::Netcdf4Classic
+    NCF_FORMAT_NETCDF4 = 3          // Nc3File::Netcdf4
   } nc_file_format_t;
   
   // set NCF attributes for MDV to NetCDF CF conversion

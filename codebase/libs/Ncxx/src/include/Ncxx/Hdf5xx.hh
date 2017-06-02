@@ -46,7 +46,7 @@
 // #if H5_VERSION_LE(1,8,11)
 // H5_VERSION_LE macro does not work, use folling instead
 #if (((H5_VERS_MAJOR==1) && (H5_VERS_MINOR==8) && (H5_VERS_RELEASE<=11)) || \
-     ((H5_VERS_MAJOR==1) && (H5_VERS_MINOR<8)) || \
+     ((H5_VERS_MAJOR==1) && (H5_VERS_MINOR<8)) ||                       \
      (H5_VERS_MAJOR<1))
 #define H5Location H5Object
 #endif
@@ -57,15 +57,15 @@
 
 #ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
-    using std::cout;
-    using std::endl;
+using std::cout;
+using std::endl;
 #endif  // H5_NO_STD
 #endif
 
 #include <H5Cpp.h>
 
 #ifndef H5_NO_NAMESPACE
-    using namespace H5;
+using namespace H5;
 #endif
 using namespace std;
 
@@ -150,9 +150,9 @@ public:
                    NcxxPort::fl64 &floatVal);
 
   int loadIntVar(CompType compType,
-                        char *buf,
-                        const string &varName,
-                        NcxxPort::si64 &intVal);
+                 char *buf,
+                 const string &varName,
+                 NcxxPort::si64 &intVal);
   
   int loadStringVar(CompType compType,
                     char *buf,
@@ -168,6 +168,35 @@ public:
                   NcxxPort::si64 &intVal,
                   NcxxPort::fl64 &floatVal,
                   string &stringVal);
+  
+  /////////////////////////////////////////////////
+  // add a string attribute to an object on write
+  // returns the attribute
+  
+  static Attribute addAttr(H5Location &loc,
+                           const string &name,
+                           const string &val);
+  
+  // add a 64-bit int attribute to an object
+  // returns the attribute
+  
+  static Attribute addAttr(H5Location &loc,
+                           const string &name,
+                           NcxxPort::si64 val);
+
+  // add a 64-bit float attribute to an object
+  // returns the attribute
+  
+  static Attribute addAttr(H5Location &loc,
+                           const string &name,
+                           NcxxPort::fl64 val);
+  
+  // add a 64-bit float array attribute to an object
+  // returns the attribute
+  
+  static Attribute addAttr(H5Location &loc,
+                           const string &name,
+                           const vector<NcxxPort::fl64> &vals);
   
   ////////////////////////////////////////////
   /// printing
