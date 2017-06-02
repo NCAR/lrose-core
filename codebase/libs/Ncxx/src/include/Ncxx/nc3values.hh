@@ -51,38 +51,38 @@
 // consistency with C interface 
 typedef signed char ncbyte;
 
-#define NC_UNSPECIFIED ((nc_type)0)
+#define NC3_UNSPECIFIED ((nc_type)0)
 
 // C++ interface dates from before netcdf-3, still uses some netcdf-2 names
 #ifdef NO_NETCDF_2
-#define NC_LONG NC_INT
-#define FILL_LONG NC_FILL_INT
+#define NC3_LONG NC_INT
+#define NC3_FILL_LONG NC_FILL_INT
 typedef int nclong;
-#define	NC_FATAL	1
-#define	NC_VERBOSE	2
+#define	NC3_FATAL	1
+#define	NC3_VERBOSE	2
 #endif
 
-enum NcType 
+enum Nc3Type 
 {
-  ncNoType = NC_UNSPECIFIED, 
-  ncByte = NC_BYTE, 
-  ncChar = NC_CHAR, 
-  ncShort = NC_SHORT, 
-  ncInt = NC_INT,
-  ncLong = NC_LONG,		// deprecated, someday want to use for 64-bit ints
-  ncFloat = NC_FLOAT, 
-  ncDouble = NC_DOUBLE
+  nc3NoType = NC3_UNSPECIFIED, 
+  nc3Byte = NC_BYTE, 
+  nc3Char = NC_CHAR, 
+  nc3Short = NC_SHORT, 
+  nc3Int = NC_INT,
+  nc3Long = NC_LONG,		// deprecated, someday want to use for 64-bit ints
+  nc3Float = NC_FLOAT, 
+  nc3Double = NC_DOUBLE
 };
 
-#define ncBad_ncbyte ncBad_byte
-static const ncbyte ncBad_byte = NC_FILL_BYTE;
-static const char ncBad_char = NC_FILL_CHAR;
-static const short ncBad_short = NC_FILL_SHORT;
-static const nclong ncBad_nclong = FILL_LONG; // deprecated
-static const int ncBad_int = NC_FILL_INT;
-static const long ncBad_long = FILL_LONG; // deprecated
-static const float ncBad_float = NC_FILL_FLOAT;
-static const double ncBad_double = NC_FILL_DOUBLE;
+#define nc3Bad_ncbyte nc3Bad_byte
+static const ncbyte nc3Bad_byte = NC_FILL_BYTE;
+static const char nc3Bad_char = NC_FILL_CHAR;
+static const short nc3Bad_short = NC_FILL_SHORT;
+static const nclong nc3Bad_nclong = FILL_LONG; // deprecated
+static const int nc3Bad_int = NC_FILL_INT;
+static const long nc3Bad_long = FILL_LONG; // deprecated
+static const float nc3Bad_float = NC_FILL_FLOAT;
+static const double nc3Bad_double = NC_FILL_DOUBLE;
 
 // macros to glue tokens together to form new names (used to be in generic.h)
 #define name2(a,b) a ## b
@@ -94,18 +94,18 @@ static const double ncBad_double = NC_FILL_DOUBLE;
 #define makename2(z, y)		makename2_x(z, y)
 #define makename2_x(z, y)		z##y
 
-#define NcVal(TYPE) makename2(NcValues_,TYPE)
+#define Nc3Val(TYPE) makename2(Nc3Values_,TYPE)
 
-#define NcValuesdeclare(TYPE)						      \
-class NcVal(TYPE) : public NcValues					      \
+#define Nc3Valuesdeclare(TYPE)						      \
+class Nc3Val(TYPE) : public Nc3Values					      \
 {									      \
   public:								      \
-    NcVal(TYPE)( void );						      \
-    NcVal(TYPE)(long num);						      \
-    NcVal(TYPE)(long num, const TYPE* vals);				      \
-    NcVal(TYPE)(const NcVal(TYPE)&);					      \
-    virtual NcVal(TYPE)& operator=(const NcVal(TYPE)&);			      \
-    virtual ~NcVal(TYPE)( void );					      \
+    Nc3Val(TYPE)( void );						      \
+    Nc3Val(TYPE)(long num);						      \
+    Nc3Val(TYPE)(long num, const TYPE* vals);				      \
+    Nc3Val(TYPE)(const Nc3Val(TYPE)&);					      \
+    virtual Nc3Val(TYPE)& operator=(const Nc3Val(TYPE)&);			      \
+    virtual ~Nc3Val(TYPE)( void );					      \
     virtual void* base( void ) const;					      \
     virtual int bytes_for_one( void ) const;				      \
     virtual ncbyte as_ncbyte( long n ) const;				      \
@@ -123,34 +123,34 @@ class NcVal(TYPE) : public NcValues					      \
     std::ostream& print(std::ostream&) const;				      \
 };
 
-#define NcTypeEnum(TYPE) makename2(_nc__,TYPE)
-#define _nc__ncbyte ncByte
-#define _nc__char ncChar
-#define _nc__short ncShort
-#define _nc__int ncInt
-#define _nc__nclong ncLong
-#define _nc__long ncLong
-#define _nc__float ncFloat
-#define _nc__double ncDouble
-#define NcValuesimplement(TYPE)						      \
-NcVal(TYPE)::NcVal(TYPE)( void )					      \
-	: NcValues(NcTypeEnum(TYPE), 0), the_values(0)			      \
+#define Nc3TypeEnum(TYPE) makename2(_nc__,TYPE)
+#define _nc__ncbyte nc3Byte
+#define _nc__char nc3Char
+#define _nc__short nc3Short
+#define _nc__int nc3Int
+#define _nc__nclong nc3Long
+#define _nc__long nc3Long
+#define _nc__float nc3Float
+#define _nc__double nc3Double
+#define Nc3Valuesimplement(TYPE)						      \
+Nc3Val(TYPE)::Nc3Val(TYPE)( void )					      \
+	: Nc3Values(Nc3TypeEnum(TYPE), 0), the_values(0)			      \
 {}									      \
 									      \
-NcVal(TYPE)::NcVal(TYPE)(long num, const TYPE* vals)			      \
-	: NcValues(NcTypeEnum(TYPE), num)				      \
+Nc3Val(TYPE)::Nc3Val(TYPE)(long num, const TYPE* vals)			      \
+	: Nc3Values(Nc3TypeEnum(TYPE), num)				      \
 {									      \
     the_values = new TYPE[num];						      \
     for(int i = 0; i < num; i++)					      \
       the_values[i] = vals[i];						      \
 }									      \
 									      \
-NcVal(TYPE)::NcVal(TYPE)(long num)					      \
-	: NcValues(NcTypeEnum(TYPE), num), the_values(new TYPE[num])	      \
+Nc3Val(TYPE)::Nc3Val(TYPE)(long num)					      \
+	: Nc3Values(Nc3TypeEnum(TYPE), num), the_values(new TYPE[num])	      \
 {}									      \
 									      \
-NcVal(TYPE)::NcVal(TYPE)(const NcVal(TYPE)& v) :			      \
-    NcValues(v)								      \
+Nc3Val(TYPE)::Nc3Val(TYPE)(const Nc3Val(TYPE)& v) :			      \
+    Nc3Values(v)								      \
 {									      \
     delete[] the_values;						      \
     the_values = new TYPE[v.the_number];				      \
@@ -158,10 +158,10 @@ NcVal(TYPE)::NcVal(TYPE)(const NcVal(TYPE)& v) :			      \
       the_values[i] = v.the_values[i];					      \
 }									      \
 									      \
-NcVal(TYPE)& NcVal(TYPE)::operator=(const NcVal(TYPE)& v)		      \
+Nc3Val(TYPE)& Nc3Val(TYPE)::operator=(const Nc3Val(TYPE)& v)		      \
 {									      \
     if ( &v != this) {							      \
-      NcValues::operator=(v);						      \
+      Nc3Values::operator=(v);						      \
       delete[] the_values;						      \
       the_values = new TYPE[v.the_number];				      \
       for(int i = 0; i < v.the_number; i++)				      \
@@ -170,96 +170,96 @@ NcVal(TYPE)& NcVal(TYPE)::operator=(const NcVal(TYPE)& v)		      \
     return *this;							      \
 }									      \
 									      \
-void* NcVal(TYPE)::base( void ) const					      \
+void* Nc3Val(TYPE)::base( void ) const					      \
 {									      \
     return the_values;							      \
 }									      \
 									      \
-NcVal(TYPE)::~NcVal(TYPE)( void )					      \
+Nc3Val(TYPE)::~Nc3Val(TYPE)( void )					      \
 {									      \
     delete[] the_values;						      \
 }									      \
 									      \
-int NcVal(TYPE)::invalid( void ) const					      \
+int Nc3Val(TYPE)::invalid( void ) const					      \
 {									      \
     for(int i=0;i<the_number;i++)					      \
-	if (the_values[i] == makename2(ncBad_,TYPE)) return 1; 	       	      \
+	if (the_values[i] == makename2(nc3Bad_,TYPE)) return 1; 	       	      \
     return 0;                                                                 \
 }                                                                             \
 
 
 #define Ncbytes_for_one_implement(TYPE)					      \
-int NcVal(TYPE)::bytes_for_one( void ) const				      \
+int Nc3Val(TYPE)::bytes_for_one( void ) const				      \
 {									      \
     return sizeof(TYPE); 			                              \
 }
 
 #define as_ncbyte_implement(TYPE)					      \
-ncbyte NcVal(TYPE)::as_ncbyte( long n ) const				      \
+ncbyte Nc3Val(TYPE)::as_ncbyte( long n ) const				      \
 {									      \
     if (the_values[n] < 0 || the_values[n] > UCHAR_MAX)		              \
-      return ncBad_byte;						      \
+      return nc3Bad_byte;						      \
     return (ncbyte) the_values[n];			                      \
 }
 
 #define as_char_implement(TYPE)						      \
-char NcVal(TYPE)::as_char( long n ) const				      \
+char Nc3Val(TYPE)::as_char( long n ) const				      \
 {									      \
     if (the_values[n] < CHAR_MIN || the_values[n] > CHAR_MAX)		      \
-      return ncBad_char;						      \
+      return nc3Bad_char;						      \
     return (char) the_values[n];					      \
 }
 
 #define as_short_implement(TYPE)					      \
-short NcVal(TYPE)::as_short( long n ) const				      \
+short Nc3Val(TYPE)::as_short( long n ) const				      \
 {									      \
     if (the_values[n] < SHRT_MIN || the_values[n] > SHRT_MAX)		      \
-      return ncBad_short;						      \
+      return nc3Bad_short;						      \
     return (short) the_values[n];				              \
 }
 
 #define NCINT_MIN INT_MIN
 #define NCINT_MAX INT_MAX
 #define as_int_implement(TYPE)					      \
-int NcVal(TYPE)::as_int( long n ) const				      \
+int Nc3Val(TYPE)::as_int( long n ) const				      \
 {									      \
     if (the_values[n] < NCINT_MIN || the_values[n] > NCINT_MAX)	      \
-      return ncBad_int;						      \
+      return nc3Bad_int;						      \
     return (int) the_values[n];				              \
 }
 
 #define NCLONG_MIN INT_MIN
 #define NCLONG_MAX INT_MAX
 #define as_nclong_implement(TYPE)					      \
-nclong NcVal(TYPE)::as_nclong( long n ) const				      \
+nclong Nc3Val(TYPE)::as_nclong( long n ) const				      \
 {									      \
     if (the_values[n] < NCLONG_MIN || the_values[n] > NCLONG_MAX)	      \
-      return ncBad_nclong;						      \
+      return nc3Bad_nclong;						      \
     return (nclong) the_values[n];				              \
 }
 
 #define as_long_implement(TYPE)					              \
-long NcVal(TYPE)::as_long( long n ) const				      \
+long Nc3Val(TYPE)::as_long( long n ) const				      \
 {									      \
     if (the_values[n] < LONG_MIN || the_values[n] > LONG_MAX)	              \
-      return ncBad_long;						      \
+      return nc3Bad_long;						      \
     return (long) the_values[n];		       	                      \
 }
 
 #define as_float_implement(TYPE)					      \
-inline float NcVal(TYPE)::as_float( long n ) const			      \
+inline float Nc3Val(TYPE)::as_float( long n ) const			      \
 {									      \
     return (float) the_values[n];				              \
 }
 
 #define as_double_implement(TYPE)					      \
-inline double NcVal(TYPE)::as_double( long n ) const			      \
+inline double Nc3Val(TYPE)::as_double( long n ) const			      \
 {									      \
     return (double) the_values[n];				              \
 }
 
 #define as_string_implement(TYPE)					      \
-char* NcVal(TYPE)::as_string( long n ) const				      \
+char* Nc3Val(TYPE)::as_string( long n ) const				      \
 {									      \
     char* s = new char[32];                                                   \
     std::ostringstream ostr;                                                  \
@@ -269,12 +269,12 @@ char* NcVal(TYPE)::as_string( long n ) const				      \
     return s;								      \
 }
 
-class NcValues			// ABC for value blocks
+class Nc3Values			// ABC for value blocks
 {
   public:
-    NcValues( void );
-    NcValues(NcType, long);
-    virtual ~NcValues( void );
+    Nc3Values( void );
+    Nc3Values(Nc3Type, long);
+    virtual ~Nc3Values( void );
     virtual long num( void );
     virtual std::ostream& print(std::ostream&) const = 0;
     virtual void* base( void ) const = 0;
@@ -294,18 +294,18 @@ class NcValues			// ABC for value blocks
     virtual char* as_string( long n ) const = 0;  // value as string
     
   protected:
-    NcType the_type;
+    Nc3Type the_type;
     long the_number;
-    friend std::ostream& operator<< (std::ostream&, const NcValues&);
+    friend std::ostream& operator<< (std::ostream&, const Nc3Values&);
 };
 
-declare(NcValues,ncbyte)
-declare(NcValues,char)
-declare(NcValues,short)
-declare(NcValues,int)
-declare(NcValues,nclong)
-declare(NcValues,long)
-declare(NcValues,float)
-declare(NcValues,double)
+declare(Nc3Values,ncbyte)
+declare(Nc3Values,char)
+declare(Nc3Values,short)
+declare(Nc3Values,int)
+declare(Nc3Values,nclong)
+declare(Nc3Values,long)
+declare(Nc3Values,float)
+declare(Nc3Values,double)
 
 #endif

@@ -47,20 +47,20 @@
 typedef const char* NcToken;    // names for netCDF objects
 typedef unsigned int NcBool;    // many members return 0 on failure
 
-class NcDim;                    // dimensions
-class NcVar;                    // variables
-class NcAtt;                    // attributes
+class Nc3Dim;                    // dimensions
+class Nc3Var;                    // variables
+class Nc3Att;                    // attributes
 
 /*
  * ***********************************************************************
  * A netCDF file.
  * ***********************************************************************
  */
-class NcFile
+class Nc3File
 {
   public:
 
-    virtual ~NcFile( void );
+    virtual ~Nc3File( void );
 
     enum FileMode {
 	ReadOnly,	// file exists, open read-only
@@ -77,7 +77,7 @@ class NcFile
        BadFormat
     };
 
-    NcFile( const char * path, FileMode = ReadOnly ,
+    Nc3File( const char * path, FileMode = ReadOnly ,
 	    size_t *bufrsizeptr = NULL,    // optional tuning parameters
 	    size_t initialsize = 0,
 	    FileFormat = Classic );
@@ -88,28 +88,28 @@ class NcFile
     int num_vars( void ) const;            // number of variables
     int num_atts( void ) const;            // number of (global) attributes
 
-    NcDim* get_dim( NcToken ) const;       // dimension by name
-    NcVar* get_var( NcToken ) const;       // variable by name
-    NcAtt* get_att( NcToken ) const;       // global attribute by name
+    Nc3Dim* get_dim( NcToken ) const;       // dimension by name
+    Nc3Var* get_var( NcToken ) const;       // variable by name
+    Nc3Att* get_att( NcToken ) const;       // global attribute by name
 
-    NcDim* get_dim( int ) const;           // n-th dimension
-    NcVar* get_var( int ) const;           // n-th variable
-    NcAtt* get_att( int ) const;           // n-th global attribute
-    NcDim* rec_dim( void ) const;          // unlimited dimension, if any
+    Nc3Dim* get_dim( int ) const;           // n-th dimension
+    Nc3Var* get_var( int ) const;           // n-th variable
+    Nc3Att* get_att( int ) const;           // n-th global attribute
+    Nc3Dim* rec_dim( void ) const;          // unlimited dimension, if any
     
     // Add new dimensions, variables, global attributes.
     // These put the file in "define" mode, so could be expensive.
-    virtual NcDim* add_dim( NcToken dimname, long dimsize );
-    virtual NcDim* add_dim( NcToken dimname );     // unlimited
+    virtual Nc3Dim* add_dim( NcToken dimname, long dimsize );
+    virtual Nc3Dim* add_dim( NcToken dimname );     // unlimited
 
-    virtual NcVar* add_var( NcToken varname, NcType type,       // scalar
-                    const NcDim* dim0=0,                // 1-dim
-                    const NcDim* dim1=0,                // 2-dim
-                    const NcDim* dim2=0,                // 3-dim
-                    const NcDim* dim3=0,                // 4-dim
-                    const NcDim* dim4=0 );              // 5-dim
-    virtual NcVar* add_var( NcToken varname, NcType type,       // n-dim
-                          int ndims, const NcDim** dims );
+    virtual Nc3Var* add_var( NcToken varname, Nc3Type type,       // scalar
+                    const Nc3Dim* dim0=0,                // 1-dim
+                    const Nc3Dim* dim1=0,                // 2-dim
+                    const Nc3Dim* dim2=0,                // 3-dim
+                    const Nc3Dim* dim3=0,                // 4-dim
+                    const Nc3Dim* dim4=0 );              // 5-dim
+    virtual Nc3Var* add_var( NcToken varname, Nc3Type type,       // n-dim
+                          int ndims, const Nc3Dim** dims );
 
     NcBool add_att( NcToken attname, char );             // scalar attributes
     NcBool add_att( NcToken attname, ncbyte );
@@ -150,28 +150,28 @@ class NcFile
     int the_id;
     int in_define_mode;
     FillMode the_fill_mode;
-    NcDim** dimensions;
-    NcVar** variables;
-    NcVar* globalv;             // "variable" for global attributes
+    Nc3Dim** dimensions;
+    Nc3Var** variables;
+    Nc3Var* globalv;             // "variable" for global attributes
 };
 
 /*
  * For backward compatibility.  We used to derive NcOldFile and NcNewFile
- * from NcFile, but that was over-zealous inheritance.
+ * from Nc3File, but that was over-zealous inheritance.
  */
-#define NcOldFile NcFile
-#define NcNewFile NcFile
+#define NcOldFile Nc3File
+#define NcNewFile Nc3File
 #define Clobber Replace
 #define NoClobber New
 
 /*
  * **********************************************************************
  * A netCDF dimension, with a name and a size.  These are only created
- * by NcFile member functions, because they cannot exist independently
+ * by Nc3File member functions, because they cannot exist independently
  * of an open netCDF file.
  * **********************************************************************
  */
-class NcDim
+class Nc3Dim
 {
   public:
     NcToken name( void ) const;
@@ -183,16 +183,16 @@ class NcDim
     NcBool sync( void );
 
   private:
-    NcFile *the_file;		// not const because of rename
+    Nc3File *the_file;		// not const because of rename
     int the_id;
     char *the_name;
 
-    NcDim(NcFile*, int num);	// existing dimension
-    NcDim(NcFile*, NcToken name, long sz); // defines a new dim
-    virtual ~NcDim( void );
+    Nc3Dim(Nc3File*, int num);	// existing dimension
+    Nc3Dim(Nc3File*, NcToken name, long sz); // defines a new dim
+    virtual ~Nc3Dim( void );
     
     // to construct dimensions, since constructor is private
-    friend class NcFile;
+    friend class Nc3File;
 };
 
 
@@ -203,16 +203,16 @@ class NcDim
  * components of an open netCDF file.
  * **********************************************************************
  */
-class NcTypedComponent
+class Nc3TypedComponent
 {
   public:
-    virtual ~NcTypedComponent( void ) {}
+    virtual ~Nc3TypedComponent( void ) {}
     virtual NcToken name( void ) const = 0;
-    virtual NcType type( void ) const = 0;
+    virtual Nc3Type type( void ) const = 0;
     virtual NcBool is_valid( void ) const = 0;
     virtual long num_vals( void ) const = 0; 
     virtual NcBool rename( NcToken newname ) = 0;
-    virtual NcValues* values( void ) const = 0; // block of all values
+    virtual Nc3Values* values( void ) const = 0; // block of all values
 
     // The following member functions provide conversions from the value
     // type to a desired basic type.  If the value is out of range,
@@ -229,9 +229,9 @@ class NcTypedComponent
     virtual char* as_string( long n ) const;     // nth value as string
 
   protected:
-    NcFile *the_file;
-    NcTypedComponent( NcFile* );
-    virtual NcValues* get_space( long numVals = 0 ) const;  // to hold values
+    Nc3File *the_file;
+    Nc3TypedComponent( Nc3File* );
+    virtual Nc3Values* get_space( long numVals = 0 ) const;  // to hold values
 };
 
 
@@ -241,21 +241,21 @@ class NcTypedComponent
  * a shape, given by a list of dimensions
  * **********************************************************************
  */
-class NcVar : public NcTypedComponent
+class Nc3Var : public Nc3TypedComponent
 {
   public:
-    virtual ~NcVar( void );
+    virtual ~Nc3Var( void );
     NcToken name( void ) const;
-    NcType type( void ) const;
+    Nc3Type type( void ) const;
     NcBool is_valid( void ) const;
     int num_dims( void ) const;         // dimensionality of variable
-    NcDim* get_dim( int ) const;        // n-th dimension
+    Nc3Dim* get_dim( int ) const;        // n-th dimension
     long* edges( void ) const;          // dimension sizes
     int num_atts( void ) const;         // number of attributes
-    NcAtt* get_att( NcToken ) const;    // attribute by name
-    NcAtt* get_att( int ) const;        // n-th attribute
+    Nc3Att* get_att( NcToken ) const;    // attribute by name
+    Nc3Att* get_att( int ) const;        // n-th attribute
     long num_vals( void ) const;        // product of dimension sizes
-    NcValues* values( void ) const;     // all values
+    Nc3Values* values( void ) const;     // all values
     
     // Put scalar or 1, ..., 5 dimensional arrays by providing enough
     // arguments.  Arguments are edge lengths, and their number must not
@@ -340,16 +340,16 @@ class NcVar : public NcTypedComponent
     NcBool rename( NcToken newname );
 
     long rec_size ( void );             // number of values per record
-    long rec_size ( NcDim* );           // number of values per dimension slice
+    long rec_size ( Nc3Dim* );           // number of values per dimension slice
 
     // Though following are intended for record variables, they also work
     // for other variables, using first dimension as record dimension.
 
     // Get a record's worth of data
-    NcValues *get_rec(void);	        // get current record
-    NcValues *get_rec(long rec);        // get specified record
-    NcValues *get_rec(NcDim* d);        // get current dimension slice
-    NcValues *get_rec(NcDim* d, long slice); // get specified dimension slice
+    Nc3Values *get_rec(void);	        // get current record
+    Nc3Values *get_rec(long rec);        // get specified record
+    Nc3Values *get_rec(Nc3Dim* d);        // get current dimension slice
+    Nc3Values *get_rec(Nc3Dim* d, long slice); // get specified dimension slice
 
     // Put a record's worth of data in current record
     NcBool put_rec( const ncbyte* vals );
@@ -361,13 +361,13 @@ class NcVar : public NcTypedComponent
     NcBool put_rec( const double* vals );
 
     // Put a dimension slice worth of data in current dimension slice
-    NcBool put_rec( NcDim* d, const ncbyte* vals );
-    NcBool put_rec( NcDim* d, const char* vals );
-    NcBool put_rec( NcDim* d, const short* vals );
-    NcBool put_rec( NcDim* d, const int* vals );
-    NcBool put_rec( NcDim* d, const long* vals );
-    NcBool put_rec( NcDim* d, const float* vals );
-    NcBool put_rec( NcDim* d, const double* vals );
+    NcBool put_rec( Nc3Dim* d, const ncbyte* vals );
+    NcBool put_rec( Nc3Dim* d, const char* vals );
+    NcBool put_rec( Nc3Dim* d, const short* vals );
+    NcBool put_rec( Nc3Dim* d, const int* vals );
+    NcBool put_rec( Nc3Dim* d, const long* vals );
+    NcBool put_rec( Nc3Dim* d, const float* vals );
+    NcBool put_rec( Nc3Dim* d, const double* vals );
 
     // Put a record's worth of data in specified record
     NcBool put_rec( const ncbyte* vals, long rec );
@@ -379,13 +379,13 @@ class NcVar : public NcTypedComponent
     NcBool put_rec( const double* vals, long rec );
 
     // Put a dimension slice worth of data in specified dimension slice
-    NcBool put_rec( NcDim* d, const ncbyte* vals, long slice );
-    NcBool put_rec( NcDim* d, const char* vals, long slice );
-    NcBool put_rec( NcDim* d, const short* vals, long slice );
-    NcBool put_rec( NcDim* d, const int* vals, long slice );
-    NcBool put_rec( NcDim* d, const long* vals, long slice );
-    NcBool put_rec( NcDim* d, const float* vals, long slice );
-    NcBool put_rec( NcDim* d, const double* vals, long slice );
+    NcBool put_rec( Nc3Dim* d, const ncbyte* vals, long slice );
+    NcBool put_rec( Nc3Dim* d, const char* vals, long slice );
+    NcBool put_rec( Nc3Dim* d, const short* vals, long slice );
+    NcBool put_rec( Nc3Dim* d, const int* vals, long slice );
+    NcBool put_rec( Nc3Dim* d, const long* vals, long slice );
+    NcBool put_rec( Nc3Dim* d, const float* vals, long slice );
+    NcBool put_rec( Nc3Dim* d, const double* vals, long slice );
 
     // Get first record index corresponding to specified key value(s)
     long get_index( const ncbyte* vals );
@@ -397,39 +397,39 @@ class NcVar : public NcTypedComponent
     long get_index( const double* vals );
 
     // Get first index of specified dimension corresponding to key values
-    long get_index( NcDim* d, const ncbyte* vals );
-    long get_index( NcDim* d, const char* vals );
-    long get_index( NcDim* d, const short* vals );
-    long get_index( NcDim* d, const int* vals );
-    long get_index( NcDim* d, const long* vals );
-    long get_index( NcDim* d, const float* vals );
-    long get_index( NcDim* d, const double* vals );
+    long get_index( Nc3Dim* d, const ncbyte* vals );
+    long get_index( Nc3Dim* d, const char* vals );
+    long get_index( Nc3Dim* d, const short* vals );
+    long get_index( Nc3Dim* d, const int* vals );
+    long get_index( Nc3Dim* d, const long* vals );
+    long get_index( Nc3Dim* d, const float* vals );
+    long get_index( Nc3Dim* d, const double* vals );
 
     // Set current record
     void set_rec ( long rec );
     // Set current dimension slice
-    void set_rec ( NcDim* d, long slice );
+    void set_rec ( Nc3Dim* d, long slice );
 
     int id( void ) const;               // rarely needed, C interface id
     NcBool sync( void );
     
   private:
-    int dim_to_index(NcDim* rdim);
+    int dim_to_index(Nc3Dim* rdim);
     int the_id;
     long* the_cur;
     char* the_name;
     long* cur_rec;
 
-    // private constructors because only an NcFile creates these
-    NcVar( void );
-    NcVar(NcFile*, int);
+    // private constructors because only an Nc3File creates these
+    Nc3Var( void );
+    Nc3Var(Nc3File*, int);
 
     int attnum( NcToken attname ) const;
     NcToken attname( int attnum ) const;
     void init_cur( void );
 
     // to make variables, since constructor is private
-  friend class NcFile;
+  friend class Nc3File;
 };
 
 
@@ -439,29 +439,29 @@ class NcVar : public NcTypedComponent
  * associated with a specific variable, or are global to the file.
  * **********************************************************************
  */
-class NcAtt : public NcTypedComponent
+class Nc3Att : public Nc3TypedComponent
 {
   public:          
-    virtual ~NcAtt( void );
+    virtual ~Nc3Att( void );
     NcToken name( void ) const;
-    NcType type( void ) const;
+    Nc3Type type( void ) const;
     NcBool is_valid( void ) const;
     long num_vals( void ) const; 
-    NcValues* values( void ) const;
+    Nc3Values* values( void ) const;
     NcBool rename( NcToken newname );
     NcBool remove( void );
 
   private:
-    const NcVar* the_variable;
+    const Nc3Var* the_variable;
     char* the_name;
-    // protected constructors because only NcVars and NcFiles create
+    // protected constructors because only Nc3Vars and Nc3Files create
     // attributes
-    NcAtt( NcFile*, const NcVar*, NcToken);
-    NcAtt( NcFile*, NcToken); // global attribute
+    Nc3Att( Nc3File*, const Nc3Var*, NcToken);
+    Nc3Att( Nc3File*, NcToken); // global attribute
     
     // To make attributes, since constructor is private
-  friend class NcFile;
-  friend NcAtt* NcVar::get_att( NcToken ) const;
+  friend class Nc3File;
+  friend Nc3Att* Nc3Var::get_att( NcToken ) const;
 };
 
 

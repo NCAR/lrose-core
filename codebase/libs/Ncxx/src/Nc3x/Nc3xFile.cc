@@ -50,7 +50,7 @@ Nc3xFile::Nc3xFile()
   
 {
 
-  _ncFormat = NcFile::Classic;
+  _ncFormat = Nc3File::Classic;
 
   _ncFile = NULL;
   _err = NULL;
@@ -90,7 +90,7 @@ int Nc3xFile::openRead(const string &path)
 
   close();
   _pathInUse = path;
-  _ncFile = new NcFile(path.c_str(), NcFile::ReadOnly);
+  _ncFile = new Nc3File(path.c_str(), Nc3File::ReadOnly);
   
   // Check that constructor succeeded
   
@@ -127,14 +127,14 @@ int Nc3xFile::openRead(const string &path)
 /// Returns 0 on success, -1 on failure
 
 int Nc3xFile::openWrite(const string &path,
-                       NcFile::FileFormat format) 
+                       Nc3File::FileFormat format) 
 
 {
   
   close();
   _pathInUse = path;
   _ncFormat = format;
-  _ncFile = new NcFile(path.c_str(), NcFile::Replace, NULL, 0, _ncFormat);
+  _ncFile = new Nc3File(path.c_str(), Nc3File::Replace, NULL, 0, _ncFormat);
   
   if (!_ncFile || !_ncFile->is_valid()) {
     _addErrStr("ERROR - Nc3xFile::openWrite");
@@ -305,7 +305,7 @@ int Nc3xFile::addGlobAttr(const string &name, int len, double *vals)
 
 int Nc3xFile::readGlobAttr(const string &name, string &val)
 {
-  NcAtt *att = _ncFile->get_att(name.c_str());
+  Nc3Att *att = _ncFile->get_att(name.c_str());
   if (att == NULL) {
     _addErrStr("ERROR - Nc3xFile::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
@@ -318,7 +318,7 @@ int Nc3xFile::readGlobAttr(const string &name, string &val)
 
 int Nc3xFile::readGlobAttr(const string &name, int &val)
 {
-  NcAtt *att = _ncFile->get_att(name.c_str());
+  Nc3Att *att = _ncFile->get_att(name.c_str());
   if (att == NULL) {
     _addErrStr("ERROR - Nc3xFile::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
@@ -341,7 +341,7 @@ int Nc3xFile::readGlobAttr(const string &name, int &val)
 
 int Nc3xFile::readGlobAttr(const string &name, float &val)
 {
-  NcAtt *att = _ncFile->get_att(name.c_str());
+  Nc3Att *att = _ncFile->get_att(name.c_str());
   if (att == NULL) {
     _addErrStr("ERROR - Nc3xFile::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
@@ -364,7 +364,7 @@ int Nc3xFile::readGlobAttr(const string &name, float &val)
 
 int Nc3xFile::readGlobAttr(const string &name, double &val)
 {
-  NcAtt *att = _ncFile->get_att(name.c_str());
+  Nc3Att *att = _ncFile->get_att(name.c_str());
   if (att == NULL) {
     _addErrStr("ERROR - Nc3xFile::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
@@ -389,7 +389,7 @@ int Nc3xFile::readGlobAttr(const string &name, double &val)
 // add string attribute
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::addAttr(NcVar *var, const string &name, const string &val)
+int Nc3xFile::addAttr(Nc3Var *var, const string &name, const string &val)
 {
   if (!var->add_att(name.c_str(), val.c_str())) {
     _addErrStr("ERROR - Nc3xFile::addAttr");
@@ -407,7 +407,7 @@ int Nc3xFile::addAttr(NcVar *var, const string &name, const string &val)
 // add double attribute
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::addAttr(NcVar *var, const string &name, double val)
+int Nc3xFile::addAttr(Nc3Var *var, const string &name, double val)
 {
   if (!var->add_att(name.c_str(), val)) {
     _addErrStr("ERROR - Nc3xFile::addAttr");
@@ -425,7 +425,7 @@ int Nc3xFile::addAttr(NcVar *var, const string &name, double val)
 // add float attribute
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::addAttr(NcVar *var, const string &name, float val)
+int Nc3xFile::addAttr(Nc3Var *var, const string &name, float val)
 {
   if (!var->add_att(name.c_str(), val)) {
     _addErrStr("ERROR - Nc3xFile::addAttr");
@@ -443,7 +443,7 @@ int Nc3xFile::addAttr(NcVar *var, const string &name, float val)
 // add int attribute
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::addAttr(NcVar *var, const string &name, int val)
+int Nc3xFile::addAttr(Nc3Var *var, const string &name, int val)
 {
   if (!var->add_att(name.c_str(), val)) {
     _addErrStr("ERROR - Nc3xFile::addAttr");
@@ -461,7 +461,7 @@ int Nc3xFile::addAttr(NcVar *var, const string &name, int val)
 // add long attribute
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::addAttr(NcVar *var, const string &name, long val)
+int Nc3xFile::addAttr(Nc3Var *var, const string &name, long val)
 {
   if (!var->add_att(name.c_str(), val)) {
     _addErrStr("ERROR - Nc3xFile::addAttr");
@@ -479,7 +479,7 @@ int Nc3xFile::addAttr(NcVar *var, const string &name, long val)
 // add short attribute
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::addAttr(NcVar *var, const string &name, short val)
+int Nc3xFile::addAttr(Nc3Var *var, const string &name, short val)
 {
   if (!var->add_att(name.c_str(), val)) {
     _addErrStr("ERROR - Nc3xFile::addAttr");
@@ -497,7 +497,7 @@ int Nc3xFile::addAttr(NcVar *var, const string &name, short val)
 // add ncbyte attribute
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::addAttr(NcVar *var, const string &name, ncbyte val)
+int Nc3xFile::addAttr(Nc3Var *var, const string &name, ncbyte val)
 {
   if (!var->add_att(name.c_str(), val)) {
     _addErrStr("ERROR - Nc3xFile::addAttr");
@@ -516,7 +516,7 @@ int Nc3xFile::addAttr(NcVar *var, const string &name, ncbyte val)
 // Returns 0 on success, -1 on failure
 // Side effect: dim arg is updated
 
-int Nc3xFile::addDim(NcDim* &dim, const char *name, int size)
+int Nc3xFile::addDim(Nc3Dim* &dim, const char *name, int size)
 {
   if (size < 1) {
     dim = _ncFile->add_dim(name);
@@ -538,7 +538,7 @@ int Nc3xFile::addDim(NcDim* &dim, const char *name, int size)
 // Returns 0 on success, -1 on failure
 // Side effect: dim arg is set
 
-int Nc3xFile::readDim(const string &name, NcDim* &dim)
+int Nc3xFile::readDim(const string &name, Nc3Dim* &dim)
 
 {
   dim = _ncFile->get_dim(name.c_str());
@@ -557,11 +557,11 @@ int Nc3xFile::readDim(const string &name, NcDim* &dim)
 // Returns 0 on success, -1 on failure
 // Side effect: var is set
 
-int Nc3xFile::addMetaVar(NcVar* &var,
+int Nc3xFile::addMetaVar(Nc3Var* &var,
                         const string &name, 
                         const string &standardName,
                         const string &longName,
-                        NcType ncType, 
+                        Nc3Type ncType, 
                         const string &units /* = "" */)
   
 {
@@ -579,15 +579,15 @@ int Nc3xFile::addMetaVar(NcVar* &var,
 // Add scalar meta-data variable
 // Returns var on success, NULL on failure
 
-NcVar *Nc3xFile::addMetaVar(const string &name, 
+Nc3Var *Nc3xFile::addMetaVar(const string &name, 
                            const string &standardName,
                            const string &longName,
-                           NcType ncType, 
+                           Nc3Type ncType, 
                            const string &units /* = "" */)
   
 {
   
-  NcVar *var = _ncFile->add_var(name.c_str(), ncType);
+  Nc3Var *var = _ncFile->add_var(name.c_str(), ncType);
   if (var == NULL) {
     _addErrStr("ERROR - Nc3xFile::addMetaVar");
     _addErrStr("  Cannot add var, name: ", name);
@@ -605,7 +605,7 @@ NcVar *Nc3xFile::addMetaVar(const string &name,
     addAttr(var, "long_name", longName);
   }
   
-  if (units.length() > 0 || ncType != ncChar) {
+  if (units.length() > 0 || ncType != nc3Char) {
     addAttr(var, "units", units);
   }
 
@@ -620,12 +620,12 @@ NcVar *Nc3xFile::addMetaVar(const string &name,
 // Returns 0 on success, -1 on failure
 // Side effect: var is set
 
-int Nc3xFile::addMetaVar(NcVar* &var, 
+int Nc3xFile::addMetaVar(Nc3Var* &var, 
                         const string &name, 
                         const string &standardName,
                         const string &longName,
-                        NcType ncType, 
-                        NcDim *dim, 
+                        Nc3Type ncType, 
+                        Nc3Dim *dim, 
                         const string &units /* = "" */)
 {
   
@@ -642,15 +642,15 @@ int Nc3xFile::addMetaVar(NcVar* &var,
 // Add 1-D array  meta-data variable
 // Returns var on success, NULL on failure
 
-NcVar *Nc3xFile::addMetaVar(const string &name, 
+Nc3Var *Nc3xFile::addMetaVar(const string &name, 
                            const string &standardName,
                            const string &longName,
-                           NcType ncType, 
-                           NcDim *dim, 
+                           Nc3Type ncType, 
+                           Nc3Dim *dim, 
                            const string &units /* = "" */)
 {
   
-  NcVar *var = _ncFile->add_var(name.c_str(), ncType, dim);
+  Nc3Var *var = _ncFile->add_var(name.c_str(), ncType, dim);
   if (var == NULL) {
     _addErrStr("ERROR - Nc3xFile::addMetaVar");
     _addErrStr("  Cannot add var, name: ", name);
@@ -669,7 +669,7 @@ NcVar *Nc3xFile::addMetaVar(const string &name,
     addAttr(var, "long_name", longName);
   }
 
-  if (units.length() > 0 || ncType != ncChar) {
+  if (units.length() > 0 || ncType != nc3Char) {
     addAttr(var, "units", units);
   }
   
@@ -684,13 +684,13 @@ NcVar *Nc3xFile::addMetaVar(const string &name,
 // Returns 0 on success, -1 on failure
 // Side effect: var is set
 
-int Nc3xFile::addMetaVar(NcVar* &var, 
+int Nc3xFile::addMetaVar(Nc3Var* &var, 
                         const string &name,
                         const string &standardName,
                         const string &longName,
-                        NcType ncType,
-                        NcDim *dim0,
-                        NcDim *dim1,
+                        Nc3Type ncType,
+                        Nc3Dim *dim0,
+                        Nc3Dim *dim1,
                         const string &units /* = "" */)
 {
 
@@ -708,16 +708,16 @@ int Nc3xFile::addMetaVar(NcVar* &var,
 // Add 2-D array  meta-data variable
 // Returns var on success, NULL on failure
 
-NcVar *Nc3xFile::addMetaVar(const string &name,
+Nc3Var *Nc3xFile::addMetaVar(const string &name,
                            const string &standardName,
                            const string &longName,
-                           NcType ncType,
-                           NcDim *dim0,
-                           NcDim *dim1,
+                           Nc3Type ncType,
+                           Nc3Dim *dim0,
+                           Nc3Dim *dim1,
                            const string &units /* = "" */)
 {
 
-  NcVar *var = _ncFile->add_var(name.c_str(), ncType, dim0, dim1);
+  Nc3Var *var = _ncFile->add_var(name.c_str(), ncType, dim0, dim1);
 
   if (var == NULL) {
     _addErrStr("ERROR - Nc3xFile::addMetaVar");
@@ -738,7 +738,7 @@ NcVar *Nc3xFile::addMetaVar(const string &name,
     addAttr(var, "long_name", longName);
   }
 
-  if (units.length() > 0 || ncType != ncChar) {
+  if (units.length() > 0 || ncType != nc3Char) {
     addAttr(var, "units", units);
   }
   
@@ -752,7 +752,7 @@ NcVar *Nc3xFile::addMetaVar(const string &name,
 // read int variable, set var and val
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::readIntVar(NcVar* &var, const string &name,
+int Nc3xFile::readIntVar(Nc3Var* &var, const string &name,
                         int &val, int missingVal, bool required)
   
 {
@@ -798,7 +798,7 @@ int Nc3xFile::readIntVal(const string &name,
   
   val = missingVal;
 
-  NcVar*var = _ncFile->get_var(name.c_str());
+  Nc3Var*var = _ncFile->get_var(name.c_str());
   if (var == NULL) {
     if (required) {
       _addErrStr("ERROR - Nc3xFile::_readIntVal");
@@ -831,7 +831,7 @@ int Nc3xFile::readIntVal(const string &name,
 // read float variable
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::readFloatVar(NcVar* &var, const string &name,
+int Nc3xFile::readFloatVar(Nc3Var* &var, const string &name,
                           float &val, 
                           float missingVal, bool required)
 
@@ -879,7 +879,7 @@ int Nc3xFile::readFloatVal(const string &name,
   
   val = missingVal;
   
-  NcVar* var = _ncFile->get_var(name.c_str());
+  Nc3Var* var = _ncFile->get_var(name.c_str());
   if (var == NULL) {
     if (required) {
       _addErrStr("ERROR - Nc3xFile::readFloatVal");
@@ -910,7 +910,7 @@ int Nc3xFile::readFloatVal(const string &name,
 // read double variable
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::readDoubleVar(NcVar* &var, const string &name,
+int Nc3xFile::readDoubleVar(Nc3Var* &var, const string &name,
                            double &val, 
                            double missingVal, bool required)
   
@@ -958,7 +958,7 @@ int Nc3xFile::readDoubleVal(const string &name,
   
   val = missingVal;
 
-  NcVar* var = _ncFile->get_var(name.c_str());
+  Nc3Var* var = _ncFile->get_var(name.c_str());
   if (var == NULL) {
     if (required) {
       _addErrStr("ERROR - Nc3xFile::readDoubleVal");
@@ -989,7 +989,7 @@ int Nc3xFile::readDoubleVal(const string &name,
 // read a scalar string variable
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::readStringVar(NcVar* &var, const string &name, string &val)
+int Nc3xFile::readStringVar(Nc3Var* &var, const string &name, string &val)
 
 {
 
@@ -1013,7 +1013,7 @@ int Nc3xFile::readStringVar(NcVar* &var, const string &name, string &val)
     _addErrStr("  file: ", _pathInUse);
     return -1;
   }
-  NcDim *stringLenDim = var->get_dim(0);
+  Nc3Dim *stringLenDim = var->get_dim(0);
   if (stringLenDim == NULL) {
     _addErrStr("ERROR - Nc3xFile::readStringVar");
     _addErrStr("  variable name: ", name);
@@ -1023,8 +1023,8 @@ int Nc3xFile::readStringVar(NcVar* &var, const string &name, string &val)
     return -1;
   }
   
-  NcType ntype = var->type();
-  if (ntype != ncChar) {
+  Nc3Type ntype = var->type();
+  if (ntype != nc3Char) {
     _addErrStr("ERROR - Nc3xFile::readStringVar");
     _addErrStr("  Incorrect variable type");
     _addErrStr("  expecting char");
@@ -1059,7 +1059,7 @@ int Nc3xFile::readStringVar(NcVar* &var, const string &name, string &val)
 // write a scalar double variable
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::writeVar(NcVar *var, double val)
+int Nc3xFile::writeVar(Nc3Var *var, double val)
   
 {
   
@@ -1070,7 +1070,7 @@ int Nc3xFile::writeVar(NcVar *var, double val)
     return -1;
   }
   
-  if (var->type() != ncDouble) {
+  if (var->type() != nc3Double) {
     _addErrStr("ERROR - Nc3xFile::writeVar");
     _addErrStr("  var type should be double, name: ", var->name());
     _addErrStr("  file: ", _pathInUse);
@@ -1093,7 +1093,7 @@ int Nc3xFile::writeVar(NcVar *var, double val)
 // write a scalar float variable
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::writeVar(NcVar *var, float val)
+int Nc3xFile::writeVar(Nc3Var *var, float val)
   
 {
   
@@ -1104,7 +1104,7 @@ int Nc3xFile::writeVar(NcVar *var, float val)
     return -1;
   }
   
-  if (var->type() != ncFloat) {
+  if (var->type() != nc3Float) {
     _addErrStr("ERROR - Nc3xFile::writeVar");
     _addErrStr("  var type should be float, name: ", var->name());
     _addErrStr("  file: ", _pathInUse);
@@ -1127,7 +1127,7 @@ int Nc3xFile::writeVar(NcVar *var, float val)
 // write a scalar int variable
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::writeVar(NcVar *var, int val)
+int Nc3xFile::writeVar(Nc3Var *var, int val)
   
 {
   
@@ -1138,7 +1138,7 @@ int Nc3xFile::writeVar(NcVar *var, int val)
     return -1;
   }
   
-  if (var->type() != ncInt) {
+  if (var->type() != nc3Int) {
     _addErrStr("ERROR - Nc3xFile::writeVar");
     _addErrStr("  var type should be int, name: ", var->name());
     _addErrStr("  file: ", _pathInUse);
@@ -1162,7 +1162,7 @@ int Nc3xFile::writeVar(NcVar *var, int val)
 // number of elements specified in dimension
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::writeVar(NcVar *var, const NcDim *dim, const void *data)
+int Nc3xFile::writeVar(Nc3Var *var, const Nc3Dim *dim, const void *data)
   
 {
   return writeVar(var, dim, dim->size(), data);
@@ -1173,8 +1173,8 @@ int Nc3xFile::writeVar(NcVar *var, const NcDim *dim, const void *data)
 // number of elements specified in arguments
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::writeVar(NcVar *var, 
-                      const NcDim *dim, size_t count, 
+int Nc3xFile::writeVar(Nc3Var *var, 
+                      const Nc3Dim *dim, size_t count, 
                       const void *data)
   
 {
@@ -1189,24 +1189,24 @@ int Nc3xFile::writeVar(NcVar *var,
   int iret = 0;
   
   switch (var->type()) {
-    case ncDouble: {
+    case nc3Double: {
       iret = !var->put((double *) data, count);
       break;
     }
-    case ncFloat:
+    case nc3Float:
     default: {
       iret = !var->put((float *) data, count);
       break;
     }
-    case ncInt: {
+    case nc3Int: {
       iret = !var->put((int *) data, count);
       break;
     }
-    case ncShort: {
+    case nc3Short: {
       iret = !var->put((short *) data, count);
       break;
     }
-    case ncByte: {
+    case nc3Byte: {
       iret = !var->put((ncbyte *) data, count);
       break;
     }
@@ -1231,7 +1231,7 @@ int Nc3xFile::writeVar(NcVar *var,
 // write a string variable
 // Returns 0 on success, -1 on failure
 
-int Nc3xFile::writeStringVar(NcVar *var, const void *str)
+int Nc3xFile::writeStringVar(Nc3Var *var, const void *str)
   
 {
   
@@ -1255,7 +1255,7 @@ int Nc3xFile::writeStringVar(NcVar *var, const void *str)
 
     // single dimension
 
-    NcDim *dim0 = var->get_dim(0);
+    Nc3Dim *dim0 = var->get_dim(0);
     if (dim0 == NULL) {
       _addErrStr("ERROR - Nc3xFile::writeStringVar");
       _addErrStr("  Canont write var, name: ", var->name());
@@ -1282,7 +1282,7 @@ int Nc3xFile::writeStringVar(NcVar *var, const void *str)
 
     // two dimensions
 
-    NcDim *dim0 = var->get_dim(0);
+    Nc3Dim *dim0 = var->get_dim(0);
     if (dim0 == NULL) {
       _addErrStr("ERROR - Nc3xFile::writeStringVar");
       _addErrStr("  Canont write var, name: ", var->name());
@@ -1291,7 +1291,7 @@ int Nc3xFile::writeStringVar(NcVar *var, const void *str)
       return -1;
     }
 
-    NcDim *dim1 = var->get_dim(1);
+    Nc3Dim *dim1 = var->get_dim(1);
     if (dim1 == NULL) {
       _addErrStr("ERROR - Nc3xFile::writeStringVar");
       _addErrStr("  Canont write var, name: ", var->name());
@@ -1329,11 +1329,11 @@ int Nc3xFile::writeStringVar(NcVar *var, const void *str)
 ///////////////////////////////////////////////////////////////////////////
 // compress a variable
 
-int Nc3xFile::compressVar(NcVar *var, int compressionLevel)
+int Nc3xFile::compressVar(Nc3Var *var, int compressionLevel)
 {
   
-  if (_ncFormat == NcFile::Netcdf4Classic ||
-      _ncFormat == NcFile::Offset64Bits) {
+  if (_ncFormat == Nc3File::Netcdf4Classic ||
+      _ncFormat == Nc3File::Offset64Bits) {
     // cannot compress
     return 0;
   }
@@ -1365,22 +1365,22 @@ int Nc3xFile::compressVar(NcVar *var, int compressionLevel)
 ////////////////////////////////////////
 // convert type enum to strings
 
-string Nc3xFile::ncTypeToStr(NcType nctype)
+string Nc3xFile::ncTypeToStr(Nc3Type nctype)
   
 {
   
   switch (nctype) {
-    case ncDouble:
-      return "ncDouble";
-    case ncFloat:
-      return "ncFloat";
-    case ncInt:
-      return "ncInt";
-    case ncShort:
-      return "ncShort";
-    case ncByte:
+    case nc3Double:
+      return "nc3Double";
+    case nc3Float:
+      return "nc3Float";
+    case nc3Int:
+      return "nc3Int";
+    case nc3Short:
+      return "nc3Short";
+    case nc3Byte:
     default:
-      return "ncByte";
+      return "nc3Byte";
   }
   
 }
@@ -1388,7 +1388,7 @@ string Nc3xFile::ncTypeToStr(NcType nctype)
 ///////////////////////////////////////////
 // get string representation of component
 
-string Nc3xFile::asString(const NcTypedComponent *component,
+string Nc3xFile::asString(const Nc3TypedComponent *component,
                          int index /* = 0 */)
   
 {
@@ -1450,32 +1450,32 @@ void Nc3xFile::_addErrStr(string label, string strarg, bool cr)
 ////////////////////////////////////////
 // set fill value for metadata
 
-void Nc3xFile::_setMetaFillvalue(NcVar *var)
+void Nc3xFile::_setMetaFillvalue(Nc3Var *var)
 
 {
 
-  NcType vtype = var->type();
-  if (vtype == ncDouble) {
+  Nc3Type vtype = var->type();
+  if (vtype == nc3Double) {
     addAttr(var, "_FillValue", Ncxx::missingMetaDouble);
     return;
   }
-  if (vtype == ncFloat) {
+  if (vtype == nc3Float) {
     addAttr(var, "_FillValue", Ncxx::missingMetaFloat);
     return;
   }
-  if (vtype == ncInt) {
+  if (vtype == nc3Int) {
     addAttr(var, "_FillValue", Ncxx::missingMetaInt);
     return;
   }
-  if (vtype == ncLong) {
+  if (vtype == nc3Long) {
     addAttr(var, "_FillValue", (long) Ncxx::missingMetaInt);
     return;
   }
-  if (vtype == ncShort) {
+  if (vtype == nc3Short) {
     addAttr(var, "_FillValue", (short) Ncxx::missingMetaInt);
     return;
   }
-  if (vtype == ncByte) {
+  if (vtype == nc3Byte) {
     addAttr(var, "_FillValue", (ncbyte) Ncxx::missingMetaChar);
     return;
   }

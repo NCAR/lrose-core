@@ -44,34 +44,34 @@
 #include <cstring>
 #include <Ncxx/nc3values.hh>
 
-NcValues::NcValues( void ) : the_type(ncNoType), the_number(0)
+Nc3Values::Nc3Values( void ) : the_type(nc3NoType), the_number(0)
 {}
 
-NcValues::NcValues(NcType type, long num)
+Nc3Values::Nc3Values(Nc3Type type, long num)
 	: the_type(type), the_number(num)
 {}
 
-NcValues::~NcValues( void )
+Nc3Values::~Nc3Values( void )
 {}
 
-long NcValues::num( void )
+long Nc3Values::num( void )
 {
     return the_number;
 }    
 
-std::ostream& operator<< (std::ostream& os, const NcValues& vals)
+std::ostream& operator<< (std::ostream& os, const Nc3Values& vals)
 {
     return vals.print(os);
 }
 
-implement(NcValues,ncbyte)
-implement(NcValues,char)
-implement(NcValues,short)
-implement(NcValues,int)
-implement(NcValues,nclong)
-implement(NcValues,long)
-implement(NcValues,float)
-implement(NcValues,double)
+implement(Nc3Values,ncbyte)
+implement(Nc3Values,char)
+implement(Nc3Values,short)
+implement(Nc3Values,int)
+implement(Nc3Values,nclong)
+implement(Nc3Values,long)
+implement(Nc3Values,float)
+implement(Nc3Values,double)
 
 Ncbytes_for_one_implement(ncbyte)
 Ncbytes_for_one_implement(char)
@@ -89,12 +89,12 @@ as_ncbyte_implement(long)
 as_ncbyte_implement(float)
 as_ncbyte_implement(double)
 
-inline ncbyte NcValues_char::as_ncbyte( long n ) const
+inline ncbyte Nc3Values_char::as_ncbyte( long n ) const
 {
     return the_values[n];
 }
 
-inline ncbyte NcValues_ncbyte::as_ncbyte( long n ) const
+inline ncbyte Nc3Values_ncbyte::as_ncbyte( long n ) const
 {
     return the_values[n];
 }
@@ -106,12 +106,12 @@ as_char_implement(long)
 as_char_implement(float)
 as_char_implement(double)
 
-inline char NcValues_ncbyte::as_char( long n ) const
+inline char Nc3Values_ncbyte::as_char( long n ) const
 {
-    return the_values[n] > CHAR_MAX ? ncBad_char : (char) the_values[n];
+    return the_values[n] > CHAR_MAX ? nc3Bad_char : (char) the_values[n];
 }
 
-inline char NcValues_char::as_char( long n ) const
+inline char Nc3Values_char::as_char( long n ) const
 {
     return the_values[n];
 }
@@ -122,17 +122,17 @@ as_short_implement(long)
 as_short_implement(float)
 as_short_implement(double)
 
-inline short NcValues_ncbyte::as_short( long n ) const
+inline short Nc3Values_ncbyte::as_short( long n ) const
 {
     return the_values[n];
 }
 
-inline short NcValues_char::as_short( long n ) const
+inline short Nc3Values_char::as_short( long n ) const
 {
     return the_values[n];
 }
 
-inline short NcValues_short::as_short( long n ) const
+inline short Nc3Values_short::as_short( long n ) const
 {
     return the_values[n];
 }
@@ -141,32 +141,32 @@ inline short NcValues_short::as_short( long n ) const
 as_int_implement(float)
 as_int_implement(double)
 
-inline int NcValues_ncbyte::as_int( long n ) const
+inline int Nc3Values_ncbyte::as_int( long n ) const
 {
     return the_values[n];
 }
 
-inline int NcValues_char::as_int( long n ) const
+inline int Nc3Values_char::as_int( long n ) const
 {
     return the_values[n];
 }
 
-inline int NcValues_short::as_int( long n ) const
+inline int Nc3Values_short::as_int( long n ) const
 {
     return the_values[n];
 }
 
-inline int NcValues_int::as_int( long n ) const
+inline int Nc3Values_int::as_int( long n ) const
 {
     return the_values[n];
 }
 
-inline int NcValues_nclong::as_int( long n ) const
+inline int Nc3Values_nclong::as_int( long n ) const
 {
     return the_values[n];
 }
 
-inline int NcValues_long::as_int( long n ) const
+inline int Nc3Values_long::as_int( long n ) const
 {
     return the_values[n];
 }
@@ -174,32 +174,32 @@ inline int NcValues_long::as_int( long n ) const
 as_nclong_implement(float)
 as_nclong_implement(double)
 
-inline nclong NcValues_ncbyte::as_nclong( long n ) const
+inline nclong Nc3Values_ncbyte::as_nclong( long n ) const
 {
     return the_values[n];
 }
 
-inline nclong NcValues_char::as_nclong( long n ) const
+inline nclong Nc3Values_char::as_nclong( long n ) const
 {
     return the_values[n];
 }
 
-inline nclong NcValues_short::as_nclong( long n ) const
+inline nclong Nc3Values_short::as_nclong( long n ) const
 {
     return the_values[n];
 }
 
-inline nclong NcValues_int::as_nclong( long n ) const
+inline nclong Nc3Values_int::as_nclong( long n ) const
 {
     return the_values[n];
 }
 
-inline nclong NcValues_nclong::as_nclong( long n ) const
+inline nclong Nc3Values_nclong::as_nclong( long n ) const
 {
     return the_values[n];
 }
 
-inline nclong NcValues_long::as_nclong( long n ) const
+inline nclong Nc3Values_long::as_nclong( long n ) const
 {
     return the_values[n];
 }
@@ -207,32 +207,32 @@ inline nclong NcValues_long::as_nclong( long n ) const
 as_long_implement(float)
 as_long_implement(double)
 
-inline long NcValues_ncbyte::as_long( long n ) const
+inline long Nc3Values_ncbyte::as_long( long n ) const
 {
     return the_values[n];
 }
 
-inline long NcValues_char::as_long( long n ) const
+inline long Nc3Values_char::as_long( long n ) const
 {
     return the_values[n];
 }
 
-inline long NcValues_short::as_long( long n ) const
+inline long Nc3Values_short::as_long( long n ) const
 {
     return the_values[n];
 }
 
-inline long NcValues_int::as_long( long n ) const
+inline long Nc3Values_int::as_long( long n ) const
 {
     return the_values[n];
 }
 
-inline long NcValues_nclong::as_long( long n ) const
+inline long Nc3Values_nclong::as_long( long n ) const
 {
     return the_values[n];
 }
 
-inline long NcValues_long::as_long( long n ) const
+inline long Nc3Values_long::as_long( long n ) const
 {
     return the_values[n];
 }
@@ -262,7 +262,7 @@ as_string_implement(long)
 as_string_implement(float)
 as_string_implement(double)
 
-inline char* NcValues_ncbyte::as_string( long n ) const
+inline char* Nc3Values_ncbyte::as_string( long n ) const
 {
     char* s = new char[the_number + 1];
     s[the_number] = '\0';
@@ -270,7 +270,7 @@ inline char* NcValues_ncbyte::as_string( long n ) const
     return s;
 }
 
-inline char* NcValues_char::as_string( long n ) const
+inline char* Nc3Values_char::as_string( long n ) const
 {
     char* s = new char[the_number + 1];
     s[the_number] = '\0';
@@ -278,7 +278,7 @@ inline char* NcValues_char::as_string( long n ) const
     return s;
 }
 
-std::ostream& NcValues_short::print(std::ostream& os) const
+std::ostream& Nc3Values_short::print(std::ostream& os) const
 {
     for(int i = 0; i < the_number - 1; i++)
       os << the_values[i] << ", ";
@@ -287,7 +287,7 @@ std::ostream& NcValues_short::print(std::ostream& os) const
     return os;
 }
 
-std::ostream& NcValues_int::print(std::ostream& os) const
+std::ostream& Nc3Values_int::print(std::ostream& os) const
 {
     for(int i = 0; i < the_number - 1; i++)
       os << the_values[i] << ", ";
@@ -296,7 +296,7 @@ std::ostream& NcValues_int::print(std::ostream& os) const
     return os;
 }
 
-std::ostream& NcValues_nclong::print(std::ostream& os) const
+std::ostream& Nc3Values_nclong::print(std::ostream& os) const
 {
     for(int i = 0; i < the_number - 1; i++)
       os << the_values[i] << ", ";
@@ -305,7 +305,7 @@ std::ostream& NcValues_nclong::print(std::ostream& os) const
     return os;
 }
 
-std::ostream& NcValues_long::print(std::ostream& os) const
+std::ostream& Nc3Values_long::print(std::ostream& os) const
 {
     for(int i = 0; i < the_number - 1; i++)
       os << the_values[i] << ", ";
@@ -314,7 +314,7 @@ std::ostream& NcValues_long::print(std::ostream& os) const
     return os;
 }
 
-std::ostream& NcValues_ncbyte::print(std::ostream& os) const
+std::ostream& Nc3Values_ncbyte::print(std::ostream& os) const
 {
     for(int i = 0; i < the_number - 1; i++)
       os << the_values[i] << ", ";
@@ -323,7 +323,7 @@ std::ostream& NcValues_ncbyte::print(std::ostream& os) const
     return os;
 }
 
-std::ostream& NcValues_char::print(std::ostream& os) const
+std::ostream& Nc3Values_char::print(std::ostream& os) const
 {
     os << '"';
     long len = the_number;
@@ -336,7 +336,7 @@ std::ostream& NcValues_char::print(std::ostream& os) const
     return os;
 }
 
-std::ostream& NcValues_float::print(std::ostream& os) const
+std::ostream& Nc3Values_float::print(std::ostream& os) const
 {
     std::streamsize save=os.precision();
     os.precision(7);
@@ -348,7 +348,7 @@ std::ostream& NcValues_float::print(std::ostream& os) const
     return os;
 }
 
-std::ostream& NcValues_double::print(std::ostream& os) const
+std::ostream& Nc3Values_double::print(std::ostream& os) const
 {
     std::streamsize save=os.precision();
     os.precision(15);
