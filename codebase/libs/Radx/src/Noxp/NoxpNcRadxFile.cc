@@ -199,7 +199,7 @@ bool NoxpNcRadxFile::isNoxpNc(const string &path)
     return false;
   }
 
-  NcVar *azVar = _file.getNcFile()->get_var("AZ");
+  Nc3Var *azVar = _file.getNc3File()->get_var("AZ");
   if (azVar == NULL) {
     _file.close();
     if (_verbose) {
@@ -209,7 +209,7 @@ bool NoxpNcRadxFile::isNoxpNc(const string &path)
     return false;
   }
 
-  NcVar *elVar = _file.getNcFile()->get_var("EL");
+  Nc3Var *elVar = _file.getNc3File()->get_var("EL");
   if (elVar == NULL) {
     _file.close();
     if (_verbose) {
@@ -651,8 +651,8 @@ int NoxpNcRadxFile::_readGlobalAttributes()
   
   _statusXml.clear();
   _statusXml += RadxXml::writeStartTag("STATUS", 0);
-  for (int ii = 0; ii < _file.getNcFile()->num_atts(); ii++) {
-    NcAtt *att = _file.getNcFile()->get_att(ii);
+  for (int ii = 0; ii < _file.getNc3File()->num_atts(); ii++) {
+    Nc3Att *att = _file.getNc3File()->get_att(ii);
     if (att != NULL) {
       const char* strc = att->as_string(0);
       string val(strc);
@@ -677,7 +677,7 @@ int NoxpNcRadxFile::_readTimes()
 
   // read the time variable
 
-  _timeVar = _file.getNcFile()->get_var("time");
+  _timeVar = _file.getNc3File()->get_var("time");
   if (_timeVar == NULL) {
     _addErrStr("ERROR - NoxpNcRadxFile::_readTimes");
     _addErrStr("  Cannot find time variable, name: ", "time");
@@ -689,7 +689,7 @@ int NoxpNcRadxFile::_readTimes()
     _addErrStr("  time variable has no dimensions");
     return -1;
   }
-  NcDim *timeDim = _timeVar->get_dim(0);
+  Nc3Dim *timeDim = _timeVar->get_dim(0);
   if (timeDim != _timeDim) {
     _addErrStr("ERROR - NoxpNcRadxFile::_readTimes");
     _addErrStr("  Time has incorrect dimension, name: ", timeDim->name());
@@ -698,13 +698,13 @@ int NoxpNcRadxFile::_readTimes()
 
   // get units attribute
   
-  NcAtt* unitsAtt = _timeVar->get_att("units");
+  Nc3Att* unitsAtt = _timeVar->get_att("units");
   if (unitsAtt == NULL) {
     _addErrStr("ERROR - NoxpNcRadxFile::_readTimes");
     _addErrStr("  Time has no units");
     return -1;
   }
-  string units = NetcdfClassic::asString(unitsAtt);
+  string units = Nc3xFile::asString(unitsAtt);
   delete unitsAtt;
 
 #ifdef NOTNOW
@@ -857,9 +857,9 @@ int NoxpNcRadxFile::_readPositionVariables()
     _addErrStr(_file.getNcError()->get_errmsg());
     iret = -1;
   }
-  NcAtt* unitsAtt = _altitudeVar->get_att("units");
+  Nc3Att* unitsAtt = _altitudeVar->get_att("units");
   if (unitsAtt != NULL) {
-    string units = NetcdfClassic::asString(unitsAtt);
+    string units = Nc3xFile::asString(unitsAtt);
     if (units.find("meters") != string::npos) {
       _altitudeKm /= 1000.0;
     }
@@ -971,9 +971,9 @@ int NoxpNcRadxFile::_readFieldVariables(bool metaOnly)
 
   // loop through the variables, adding data fields as appropriate
   
-  for (int ivar = 0; ivar < _file.getNcFile()->num_vars(); ivar++) {
+  for (int ivar = 0; ivar < _file.getNc3File()->num_vars(); ivar++) {
     
-    NcVar* var = _file.getNcFile()->get_var(ivar);
+    Nc3Var* var = _file.getNc3File()->get_var(ivar);
     if (var == NULL) {
       continue;
     }
@@ -984,16 +984,16 @@ int NoxpNcRadxFile::_readFieldVariables(bool metaOnly)
       continue;
     }
     // check that we have the correct dimensions
-    NcDim* rangeDim = var->get_dim(0);
-    NcDim* timeDim = var->get_dim(1);
+    Nc3Dim* rangeDim = var->get_dim(0);
+    Nc3Dim* timeDim = var->get_dim(1);
     if (timeDim != _timeDim || rangeDim != _gateDim) {
       continue;
     }
     
     // check the type
     string fieldName = var->name();
-    NcType ftype = var->type();
-    if (ftype != ncDouble && ftype != ncFloat && ftype != ncInt && ftype != ncShort) {
+    Nc3Type ftype = var->type();
+    if (ftype != nc3Double && ftype != nc3Float && ftype != nc3Int && ftype != nc3Short) {
       // not a valid type
       if (_verbose) {
         cerr << "DEBUG - NoxpNcRadxFile::_readFieldVariables" << endl;
@@ -1023,23 +1023,23 @@ int NoxpNcRadxFile::_readFieldVariables(bool metaOnly)
     string name = var->name();
     
     string standardName;
-    NcAtt *standardNameAtt = var->get_att("standard_name");
+    Nc3Att *standardNameAtt = var->get_att("standard_name");
     if (standardNameAtt != NULL) {
-      standardName = NetcdfClassic::asString(standardNameAtt);
+      standardName = Nc3xFile::asString(standardNameAtt);
       delete standardNameAtt;
     }
     
     string longName;
-    NcAtt *longNameAtt = var->get_att("long_name");
+    Nc3Att *longNameAtt = var->get_att("long_name");
     if (longNameAtt != NULL) {
-      longName = NetcdfClassic::asString(longNameAtt);
+      longName = Nc3xFile::asString(longNameAtt);
       delete longNameAtt;
     }
     
     string units;
-    NcAtt *unitsAtt = var->get_att("units");
+    Nc3Att *unitsAtt = var->get_att("units");
     if (unitsAtt != NULL) {
-      units = NetcdfClassic::asString(unitsAtt);
+      units = Nc3xFile::asString(unitsAtt);
       delete unitsAtt;
     }
 
@@ -1083,7 +1083,7 @@ int NoxpNcRadxFile::_readFieldVariables(bool metaOnly)
     bool isDiscrete = false;
 
     switch (var->type()) {
-      case ncDouble: {
+      case nc3Double: {
         if (_addFl64FieldToRays(var, name, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
@@ -1091,7 +1091,7 @@ int NoxpNcRadxFile::_readFieldVariables(bool metaOnly)
         }
         break;
       }
-      case ncFloat: {
+      case nc3Float: {
         if (_addFl32FieldToRays(var, name, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
@@ -1099,7 +1099,7 @@ int NoxpNcRadxFile::_readFieldVariables(bool metaOnly)
         }
         break;
       }
-      case ncInt: {
+      case nc3Int: {
         if (_addSi32FieldToRays(var, name, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
@@ -1107,7 +1107,7 @@ int NoxpNcRadxFile::_readFieldVariables(bool metaOnly)
         }
         break;
       }
-      case ncShort: {
+      case nc3Short: {
         if (_addSi16FieldToRays(var, name, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
@@ -1138,7 +1138,7 @@ int NoxpNcRadxFile::_readFieldVariables(bool metaOnly)
 ///////////////////////////////////
 // read a ray variable - double
 
-int NoxpNcRadxFile::_readRayVar(NcVar* &var, const string &name,
+int NoxpNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
                                 vector<double> &vals, bool required)
   
 {
@@ -1191,7 +1191,7 @@ int NoxpNcRadxFile::_readRayVar(NcVar* &var, const string &name,
 ///////////////////////////////////
 // read a ray variable - integer
 
-int NoxpNcRadxFile::_readRayVar(NcVar* &var, const string &name,
+int NoxpNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
                                 vector<int> &vals, bool required)
 
 {
@@ -1245,13 +1245,13 @@ int NoxpNcRadxFile::_readRayVar(NcVar* &var, const string &name,
 // get a ray variable by name
 // returns NULL on failure
 
-NcVar* NoxpNcRadxFile::_getRayVar(const string &name, bool required)
+Nc3Var* NoxpNcRadxFile::_getRayVar(const string &name, bool required)
 
 {
 
   // get var
   
-  NcVar *var = _file.getNcFile()->get_var(name.c_str());
+  Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
     if (required) {
       _addErrStr("ERROR - NoxpNcRadxFile::_getRayVar");
@@ -1271,7 +1271,7 @@ NcVar* NoxpNcRadxFile::_getRayVar(const string &name, bool required)
     }
     return NULL;
   }
-  NcDim *timeDim = var->get_dim(0);
+  Nc3Dim *timeDim = var->get_dim(0);
   if (timeDim != _timeDim) {
     if (required) {
       _addErrStr("ERROR - NoxpNcRadxFile::_getRayVar");
@@ -1291,7 +1291,7 @@ NcVar* NoxpNcRadxFile::_getRayVar(const string &name, bool required)
 // Add fl64 fields to _rays
 // Returns 0 on success, -1 on failure
 
-int NoxpNcRadxFile::_addFl64FieldToRays(NcVar* var,
+int NoxpNcRadxFile::_addFl64FieldToRays(Nc3Var* var,
                                         const string &name,
                                         const string &units,
                                         const string &standardName,
@@ -1319,7 +1319,7 @@ int NoxpNcRadxFile::_addFl64FieldToRays(NcVar* var,
   // set missing value
   
   Radx::fl64 missingVal = Radx::missingFl64;
-  NcAtt *missingValueAtt = var->get_att("missing_value");
+  Nc3Att *missingValueAtt = var->get_att("missing_value");
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
@@ -1362,7 +1362,7 @@ int NoxpNcRadxFile::_addFl64FieldToRays(NcVar* var,
 // Add fl32 fields to _rays
 // Returns 0 on success, -1 on failure
 
-int NoxpNcRadxFile::_addFl32FieldToRays(NcVar* var,
+int NoxpNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
                                         const string &name,
                                         const string &units,
                                         const string &standardName,
@@ -1390,7 +1390,7 @@ int NoxpNcRadxFile::_addFl32FieldToRays(NcVar* var,
   // set missing value
 
   Radx::fl32 missingVal = Radx::missingFl32;
-  NcAtt *missingValueAtt = var->get_att("missing_value");
+  Nc3Att *missingValueAtt = var->get_att("missing_value");
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
@@ -1433,7 +1433,7 @@ int NoxpNcRadxFile::_addFl32FieldToRays(NcVar* var,
 // Add si32 fields to _rays
 // Returns 0 on success, -1 on failure
 
-int NoxpNcRadxFile::_addSi32FieldToRays(NcVar* var,
+int NoxpNcRadxFile::_addSi32FieldToRays(Nc3Var* var,
                                         const string &name,
                                         const string &units,
                                         const string &standardName,
@@ -1461,21 +1461,21 @@ int NoxpNcRadxFile::_addSi32FieldToRays(NcVar* var,
   // set missing value, scale factor and add offset
 
   Radx::si32 missingVal = Radx::missingSi32;
-  NcAtt *missingValueAtt = var->get_att("missing_value");
+  Nc3Att *missingValueAtt = var->get_att("missing_value");
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
   }
 
   double scaleFactor = 1.0;
-  NcAtt *scaleFactorAtt = var->get_att("scale_factor");
+  Nc3Att *scaleFactorAtt = var->get_att("scale_factor");
   if (scaleFactorAtt != NULL) {
     scaleFactor = scaleFactorAtt->as_double(0);
     delete scaleFactorAtt;
   }
   
   double addOffset = 0.0;
-  NcAtt *addOffsetAtt = var->get_att("add_offset");
+  Nc3Att *addOffsetAtt = var->get_att("add_offset");
   if (addOffsetAtt != NULL) {
     addOffset = addOffsetAtt->as_double(0);
     delete addOffsetAtt;
@@ -1520,7 +1520,7 @@ int NoxpNcRadxFile::_addSi32FieldToRays(NcVar* var,
 // Add si16 fields to _rays
 // Returns 0 on success, -1 on failure
 
-int NoxpNcRadxFile::_addSi16FieldToRays(NcVar* var,
+int NoxpNcRadxFile::_addSi16FieldToRays(Nc3Var* var,
                                         const string &name,
                                         const string &units,
                                         const string &standardName,
@@ -1548,21 +1548,21 @@ int NoxpNcRadxFile::_addSi16FieldToRays(NcVar* var,
   // set missing value, scale factor and add offset
 
   Radx::si16 missingVal = Radx::missingSi16;
-  NcAtt *missingValueAtt = var->get_att("missing_value");
+  Nc3Att *missingValueAtt = var->get_att("missing_value");
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
   }
 
   double scaleFactor = 1.0;
-  NcAtt *scaleFactorAtt = var->get_att("scale_factor");
+  Nc3Att *scaleFactorAtt = var->get_att("scale_factor");
   if (scaleFactorAtt != NULL) {
     scaleFactor = scaleFactorAtt->as_double(0);
     delete scaleFactorAtt;
   }
   
   double addOffset = 0.0;
-  NcAtt *addOffsetAtt = var->get_att("add_offset");
+  Nc3Att *addOffsetAtt = var->get_att("add_offset");
   if (addOffsetAtt != NULL) {
     addOffset = addOffsetAtt->as_double(0);
     delete addOffsetAtt;

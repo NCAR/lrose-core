@@ -47,7 +47,7 @@
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxRay.hh>
-#include <Radx/NetcdfClassic.hh>
+#include <Ncxx/Nc3xFile.hh>
 
 class RadxField;
 class RadxVol;
@@ -175,17 +175,17 @@ private:
 
   // netcdf file
   
-  NetcdfClassic _file;
+  Nc3xFile _file;
 
   // dimensions
 
-  NcDim *_timeDim;
-  NcDim *_gateDim;
-  NcDim *_positionDim;
+  Nc3Dim *_timeDim;
+  Nc3Dim *_gateDim;
+  Nc3Dim *_positionDim;
 
   // times
   
-  NcVar *_timeVar;
+  Nc3Var *_timeVar;
   vector<double> _dTimes;
   time_t _refTimeSecsFile;
   bool _rayTimesIncrease;
@@ -193,7 +193,7 @@ private:
   
   // range
 
-  NcVar *_rangeVar;
+  Nc3Var *_rangeVar;
   vector<double> _rangeKm;
   size_t _nGates;
   bool _gateSpacingIsConstant;
@@ -206,9 +206,9 @@ private:
 
   // georef variables
   
-  NcVar *_latitudeVar;
-  NcVar *_longitudeVar;
-  NcVar *_altitudeVar;
+  Nc3Var *_latitudeVar;
+  Nc3Var *_longitudeVar;
+  Nc3Var *_altitudeVar;
   
   double _latitudeDeg;
   double _longitudeDeg;
@@ -216,8 +216,8 @@ private:
 
   // ray variables
 
-  NcVar *_azimuthVar;
-  NcVar *_elevationVar;
+  Nc3Var *_azimuthVar;
+  Nc3Var *_elevationVar;
   
   vector<double> _azimuths;
   vector<double> _elevations;
@@ -275,32 +275,32 @@ private:
   int _createRays(const string &path);
   int _readFieldVariables(bool metaOnly);
 
-  int _readRayVar(NcVar* &var, const string &name, 
+  int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<double> &vals, bool required = true);
-  int _readRayVar(NcVar* &var, const string &name, 
+  int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<int> &vals, bool required = true);
   
-  NcVar* _getRayVar(const string &name, bool required);
+  Nc3Var* _getRayVar(const string &name, bool required);
 
-  int _addFl64FieldToRays(NcVar* var,
+  int _addFl64FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           bool isDiscrete, bool fieldFolds,
                           float foldLimitLower, float foldLimitUpper);
 
-  int _addFl32FieldToRays(NcVar* var,
+  int _addFl32FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           bool isDiscrete, bool fieldFolds,
                           float foldLimitLower, float foldLimitUpper);
 
-  int _addSi32FieldToRays(NcVar* var,
+  int _addSi32FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           bool isDiscrete, bool fieldFolds,
                           float foldLimitLower, float foldLimitUpper);
 
-  int _addSi16FieldToRays(NcVar* var,
+  int _addSi16FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           bool isDiscrete, bool fieldFolds,

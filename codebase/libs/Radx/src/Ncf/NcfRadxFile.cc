@@ -439,46 +439,46 @@ int NcfRadxFile::getTimeFromPath(const string &path, RadxTime &rtime)
 }
 
 ////////////////////////////////////////
-// convert Radx::DataType_t to NcType
+// convert Radx::DataType_t to Nc3Type
 
-NcType NcfRadxFile::_getNcType(Radx::DataType_t dtype)
+Nc3Type NcfRadxFile::_getNc3Type(Radx::DataType_t dtype)
 
 {
   switch (dtype) {
     case Radx::FL64:
-      return ncDouble;
+      return nc3Double;
     case Radx::FL32:
-      return ncFloat;
+      return nc3Float;
     case Radx::SI32:
-      return ncInt;
+      return nc3Int;
     case Radx::SI16:
-      return ncShort;
+      return nc3Short;
     case Radx::SI08:
     default:
-      return ncByte;
+      return nc3Byte;
   }
 }
 
 //////////////////////////////////////////////////////////
-// convert RadxFile::netcdf_format_t to NcFile::FileFormat
+// convert RadxFile::netcdf_format_t to Nc3File::FileFormat
 
-NcFile::FileFormat 
+Nc3File::FileFormat 
   NcfRadxFile::_getFileFormat(RadxFile::netcdf_format_t format)
 
 {
   switch (format) {
     case NETCDF4_CLASSIC:
-      return NcFile::Netcdf4Classic;
+      return Nc3File::Netcdf4Classic;
       break;
     case NETCDF_OFFSET_64BIT:
-      return NcFile::Offset64Bits;
+      return Nc3File::Offset64Bits;
       break;
     case NETCDF4:
-      return NcFile::Netcdf4;
+      return Nc3File::Netcdf4;
       break;
     case NETCDF_CLASSIC:
     default:
-      return NcFile::Classic;
+      return Nc3File::Classic;
   }
 }
 

@@ -80,7 +80,7 @@ public:
   ///   Netcdf4Classic - netCDF-4 using HDF5 but only netCDF-3 calls
   /// Returns 0 on success, -1 on failure
   
-  int openWrite(const string &path, NcFile::FileFormat format);
+  int openWrite(const string &path, Nc3File::FileFormat format);
 
   /// close previously-opened file
 
@@ -118,13 +118,13 @@ public:
   /// add attribute of various types
   /// Returns 0 on success, -1 on failure
 
-  int addAttr(NcVar &var, const string &name, const string &val);
-  int addAttr(NcVar &var, const string &name, unsigned char val);
-  int addAttr(NcVar &var, const string &name, short val);
-  int addAttr(NcVar &var, const string &name, int val);
-  int addAttr(NcVar &var, const string &name, int64_t val);
-  int addAttr(NcVar &var, const string &name, float val);
-  int addAttr(NcVar &var, const string &name, double val);
+  int addAttr(Nc3Var &var, const string &name, const string &val);
+  int addAttr(Nc3Var &var, const string &name, unsigned char val);
+  int addAttr(Nc3Var &var, const string &name, short val);
+  int addAttr(Nc3Var &var, const string &name, int val);
+  int addAttr(Nc3Var &var, const string &name, int64_t val);
+  int addAttr(Nc3Var &var, const string &name, float val);
+  int addAttr(Nc3Var &var, const string &name, double val);
 
   //@}
 
@@ -132,8 +132,8 @@ public:
   /// \name dimensions
   //@{
   
-  int addDim(NcDim &dim, const string &name, int size);
-  int readDim(const string &name, NcDim &dim);
+  int addDim(Nc3Dim &dim, const string &name, int size);
+  int readDim(const string &name, Nc3Dim &dim);
 
   //@}
 
@@ -144,54 +144,54 @@ public:
   /// Add scalar var
   /// Returns 0 on success, -1 on failure
 
-  int addVar(NcVar &var, const string &name, 
+  int addVar(Nc3Var &var, const string &name, 
              const string &standardName,
              const string &longName,
-             NcType ncType, 
+             Nc3Type ncType, 
              const string &units = "");
 
   /// Add 1-D array var
   /// Returns 0 on success, -1 on failure
 
-  int addVar(NcVar &var, const string &name, 
+  int addVar(Nc3Var &var, const string &name, 
              const string &standardName,
              const string &longName,
-             NcType ncType,
-             NcDim &dim,
+             Nc3Type ncType,
+             Nc3Dim &dim,
              const string &units = "");
   
   /// Add 2-D array var
   /// Returns 0 on success, -1 on failure
   
-  int addVar(NcVar &var, const string &name, 
+  int addVar(Nc3Var &var, const string &name, 
              const string &standardName,
              const string &longName,
-             NcType ncType,
-             NcDim &dim0, NcDim &dim1, 
+             Nc3Type ncType,
+             Nc3Dim &dim0, Nc3Dim &dim1, 
              const string &units = "");
 
   /// Add var in multiple-dimensions
   /// Returns 0 on success, -1 on failure
   /// Side effect: var is set
 
-  int addVar(NcVar &var, 
+  int addVar(Nc3Var &var, 
              const string &name,
              const string &standardName,
              const string &longName,
-             NcType ncType,
-             vector<NcDim> &dims,
+             Nc3Type ncType,
+             vector<Nc3Dim> &dims,
              const string &units = "");
 
   /// get the total number of values in a variable
   /// this is the product of the dimension sizes
   /// and is 1 for a scalar (i.e. no dimensions)
 
-  int64_t numVals(NcVar &var);
+  int64_t numVals(Nc3Var &var);
   
   /// read int variable, set var and val
   /// Returns 0 on success, -1 on failure
 
-  int readIntVar(NcVar &var, const string &name,
+  int readIntVar(Nc3Var &var, const string &name,
                  int &val, int missingVal, bool required = true);
   
   /// read int variable, set val
@@ -203,7 +203,7 @@ public:
   /// read float variable
   /// Returns 0 on success, -1 on failure
   
-  int readFloatVar(NcVar &var, const string &name, float &val, 
+  int readFloatVar(Nc3Var &var, const string &name, float &val, 
                    float missingVal, bool required = true);
   
   /// read float value
@@ -215,7 +215,7 @@ public:
   /// read double variable
   /// Returns 0 on success, -1 on failure
   
-  int readDoubleVar(NcVar &var, const string &name, double &val, 
+  int readDoubleVar(Nc3Var &var, const string &name, double &val, 
                     double missingVal, bool required = true);
   
   /// read double value
@@ -227,44 +227,44 @@ public:
   /// read a scalar string variable
   /// Returns 0 on success, -1 on failure
 
-  int readStringVar(NcVar &var, const string &name, string &val);
+  int readStringVar(Nc3Var &var, const string &name, string &val);
   
   /// write a scalar double variable
   /// Returns 0 on success, -1 on failure
 
-  int writeVar(NcVar &var, double val);
+  int writeVar(Nc3Var &var, double val);
 
   /// write a scalar float variable
   /// Returns 0 on success, -1 on failure
   
-  int writeVar(NcVar &var, float val);
+  int writeVar(Nc3Var &var, float val);
 
   /// write a scalar int variable
   /// Returns 0 on success, -1 on failure
   
-  int writeVar(NcVar &var, int val);
+  int writeVar(Nc3Var &var, int val);
 
   /// write a 1-D vector variable
   /// number of elements specified in dimension
   /// Returns 0 on success, -1 on failure
 
-  int writeVar(NcVar &var, const NcDim &dim, const void *data);
+  int writeVar(Nc3Var &var, const Nc3Dim &dim, const void *data);
 
   /// write a 1-D vector variable
   /// number of elements specified in arguments
   /// Returns 0 on success, -1 on failure
   
-  int writeVar(NcVar &var, const NcDim &dim, size_t count, 
+  int writeVar(Nc3Var &var, const Nc3Dim &dim, size_t count, 
                const void *data);
   
   /// write a string variable
   /// Returns 0 on success, -1 on failure
   
-  int writeStringVar(NcVar &var, const void *data);
+  int writeStringVar(Nc3Var &var, const void *data);
   
   /// compress a variable
 
-  int compressVar(NcVar &var, int compressionLevel);
+  int compressVar(Nc3Var &var, int compressionLevel);
   
   //@}
 
@@ -278,11 +278,11 @@ public:
 
   /// convert var type string
 
-  string varTypeToStr(const NcVar &var);
+  string varTypeToStr(const Nc3Var &var);
   
   /// get string representation of component
 
-  static string asString(const NcAtt &att);
+  static string asString(const Nc3Att &att);
   static string asString(const NcGroupAtt &att);
   
   //@}
@@ -297,11 +297,11 @@ public:
   
   /// Get the Nc format after a write
   
-  NcFile::FileFormat getNcFileFormat() const { return _ncFormat; }
+  Nc3File::FileFormat getNc3FileFormat() const { return _ncFormat; }
   
-  /// Get the NcFile object
+  /// Get the Nc3File object
   
-  NcFile *getNcFile() { return _ncFile; }
+  Nc3File *getNc3File() { return _ncFile; }
 
   //@}
 
@@ -344,9 +344,9 @@ private:
   
   // handles
   
-  NcFile *_ncFile;
+  Nc3File *_ncFile;
   string _pathInUse;
-  NcFile::FileFormat _ncFormat;
+  Nc3File::FileFormat _ncFormat;
   
   /// add integer value to error string, with label
   
@@ -365,7 +365,7 @@ private:
   
   // set fill value appropriately for the variable type
   
-  void _setFillvalue(NcVar &var);
+  void _setFillvalue(Nc3Var &var);
 
 };
 

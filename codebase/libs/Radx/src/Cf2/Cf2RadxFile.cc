@@ -305,7 +305,7 @@ int Cf2RadxFile::getTimeFromPath(const string &path, RadxTime &rtime)
 }
 
 ////////////////////////////////////////
-// convert Radx::DataType_t to NcType
+// convert Radx::DataType_t to Nc3Type
 
 NcxxType Cf2RadxFile::_getNcxxType(Radx::DataType_t dtype)
 

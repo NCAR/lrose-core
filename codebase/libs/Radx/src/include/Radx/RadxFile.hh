@@ -354,10 +354,10 @@ public:
   /// Set the NetCDF format for writing files - CfRadial only.
   /// 
   /// Options are:
-  ///  - NcFile::Netcdf4
-  ///  - NcFile::Classic
-  ///  - NcFile::Offset64Bits
-  ///  - NcFile::Netcdf4Classic
+  ///  - Nc3File::Netcdf4
+  ///  - Nc3File::Classic
+  ///  - Nc3File::Offset64Bits
+  ///  - Nc3File::Netcdf4Classic
   
   void setNcFormat(netcdf_format_t val) { _ncFormat = val; }
   

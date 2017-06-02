@@ -597,9 +597,9 @@ void ForayNcRadxFile::_readGlobalAttributes()
   _platformType = Radx::PLATFORM_TYPE_FIXED;
   _sweepMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
   
-  for (int ii = 0; ii < _file.getNcFile()->num_atts(); ii++) {
+  for (int ii = 0; ii < _file.getNc3File()->num_atts(); ii++) {
     
-    NcAtt* att = _file.getNcFile()->get_att(ii);
+    Nc3Att* att = _file.getNc3File()->get_att(ii);
     
     if (att == NULL) {
       continue;
@@ -691,7 +691,7 @@ int ForayNcRadxFile::_createRays()
 
   // read the time variable
 
-  NcVar *timeVar = _file.getNcFile()->get_var(TIME_OFFSET);
+  Nc3Var *timeVar = _file.getNc3File()->get_var(TIME_OFFSET);
   if (timeVar == NULL) {
     _addErrStr("ERROR - ForayNcRadxFile::_createRays");
     _addErrStr("  Cannot find time variable, name: ", TIME_OFFSET);
@@ -703,7 +703,7 @@ int ForayNcRadxFile::_createRays()
     _addErrStr("  time variable has no dimensions");
     return -1;
   }
-  NcDim *timeDim = timeVar->get_dim(0);
+  Nc3Dim *timeDim = timeVar->get_dim(0);
   if (timeDim != _TimeDim) {
     _addErrStr("ERROR - ForayNcRadxFile::_createRays");
     _addErrStr("  Time has incorrect dimension, name: ", timeDim->name());
@@ -713,7 +713,7 @@ int ForayNcRadxFile::_createRays()
 
   // get units attribute
   
-  NcAtt* unitsAtt = timeVar->get_att(UNITS);
+  Nc3Att* unitsAtt = timeVar->get_att(UNITS);
   if (unitsAtt == NULL) {
     _addErrStr("ERROR - ForayNcRadxFile::_createRays");
     _addErrStr("  Time has no units");
@@ -1032,7 +1032,7 @@ int ForayNcRadxFile::_readRayVar(const string &name, vector<double> &vals)
 
   // get var
 
-  NcVar* var = _getRayVar(name);
+  Nc3Var* var = _getRayVar(name);
   if (var == NULL) {
     _addErrStr("ERROR - ForayNcRadxFile::_readRayVar");
     return -1;
@@ -1070,7 +1070,7 @@ int ForayNcRadxFile::_readRayVar(const string &name, vector<int> &vals)
 
   // get var
 
-  NcVar* var = _getRayVar(name);
+  Nc3Var* var = _getRayVar(name);
   if (var == NULL) {
     _addErrStr("ERROR - ForayNcRadxFile::_readRayVar");
     return -1;
@@ -1101,13 +1101,13 @@ int ForayNcRadxFile::_readRayVar(const string &name, vector<int> &vals)
 // get a ray variable by name
 // returns NULL on failure
 
-NcVar* ForayNcRadxFile::_getRayVar(const string &name)
+Nc3Var* ForayNcRadxFile::_getRayVar(const string &name)
 
 {
 
   // get var
 
-  NcVar *var = _file.getNcFile()->get_var(name.c_str());
+  Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
     _addErrStr("ERROR - ForayNcRadxFile::_getRayVar");
     _addErrStr("  Cannot read variable, name: ", name);
@@ -1123,7 +1123,7 @@ NcVar* ForayNcRadxFile::_getRayVar(const string &name)
     _addErrStr("  variable has no dimensions");
     return NULL;
   }
-  NcDim *timeDim = var->get_dim(0);
+  Nc3Dim *timeDim = var->get_dim(0);
   if (timeDim != _TimeDim) {
     _addErrStr("ERROR - ForayNcRadxFile::_getRayVar");
     _addErrStr("  variable name: ", name);
@@ -1145,9 +1145,9 @@ int ForayNcRadxFile::_readFieldVariables()
 
   // loop through the variables, adding data fields as appropriate
   
-  for (int ivar = 0; ivar < _file.getNcFile()->num_vars(); ivar++) {
+  for (int ivar = 0; ivar < _file.getNc3File()->num_vars(); ivar++) {
     
-    NcVar* var = _file.getNcFile()->get_var(ivar);
+    Nc3Var* var = _file.getNc3File()->get_var(ivar);
     if (var == NULL) {
       continue;
     }
@@ -1161,16 +1161,16 @@ int ForayNcRadxFile::_readFieldVariables()
     
     // check that we have the correct dimensions
     
-    NcDim* timeDim = var->get_dim(0);
-    NcDim* maxCellsDim = var->get_dim(1);
+    Nc3Dim* timeDim = var->get_dim(0);
+    Nc3Dim* maxCellsDim = var->get_dim(1);
     if (timeDim != _TimeDim || maxCellsDim != _maxCellsDim) {
       continue;
     }
     
     // check the type
-    NcType ftype = var->type();
-    if (ftype != ncDouble && ftype != ncFloat && ftype != ncInt &&
-        ftype != ncShort && ftype != ncByte) {
+    Nc3Type ftype = var->type();
+    if (ftype != nc3Double && ftype != nc3Float && ftype != nc3Int &&
+        ftype != nc3Short && ftype != nc3Byte) {
       // not a valid type
       continue;
     }
@@ -1195,21 +1195,21 @@ int ForayNcRadxFile::_readFieldVariables()
     string name = var->name();
     
     string standardName;
-    NcAtt *standardNameAtt = var->get_att(STANDARD_NAME);
+    Nc3Att *standardNameAtt = var->get_att(STANDARD_NAME);
     if (standardNameAtt != NULL) {
       standardName = _file.asString(standardNameAtt);
       delete standardNameAtt;
     }
     
     string longName;
-    NcAtt *longNameAtt = var->get_att(LONG_NAME);
+    Nc3Att *longNameAtt = var->get_att(LONG_NAME);
     if (longNameAtt != NULL) {
       longName = _file.asString(longNameAtt);
       delete longNameAtt;
     }
 
     string units;
-    NcAtt *unitsAtt = var->get_att(UNITS);
+    Nc3Att *unitsAtt = var->get_att(UNITS);
     if (unitsAtt != NULL) {
       units = _file.asString(unitsAtt);
       delete unitsAtt;
@@ -1217,17 +1217,17 @@ int ForayNcRadxFile::_readFieldVariables()
 
     // get missing val, offset and scale
 
-    NcAtt *missingValueAtt = var->get_att(MISSING_VALUE);
+    Nc3Att *missingValueAtt = var->get_att(MISSING_VALUE);
 
     double offset = 0.0;
-    NcAtt *offsetAtt = var->get_att(ADD_OFFSET);
+    Nc3Att *offsetAtt = var->get_att(ADD_OFFSET);
     if (offsetAtt != NULL) {
       offset = offsetAtt->as_double(0);
       delete offsetAtt;
     }
 
     double scale = 1.0;
-    NcAtt *scaleAtt = var->get_att(SCALE_FACTOR);
+    Nc3Att *scaleAtt = var->get_att(SCALE_FACTOR);
     if (scaleAtt != NULL) {
       scale = scaleAtt->as_double(0);
       delete scaleAtt;
@@ -1237,21 +1237,21 @@ int ForayNcRadxFile::_readFieldVariables()
     int iret = 0;
     
     switch (var->type()) {
-      case ncDouble: {
+      case nc3Double: {
         if (_addFl64FieldToRays(var, nPoints,
                                 name, units, standardName, longName)) {
           iret = -1;
         }
         break;
       }
-      case ncFloat: {
+      case nc3Float: {
         if (_addFl32FieldToRays(var, nPoints,
                                 name, units, standardName, longName)) {
           iret = -1;
         }
         break;
       }
-      case ncInt: {
+      case nc3Int: {
         if (_addSi32FieldToRays(var, nPoints,
                                 name, units, standardName, longName,
                                 scale, offset)) {
@@ -1259,7 +1259,7 @@ int ForayNcRadxFile::_readFieldVariables()
         }
         break;
       }
-      case ncShort: {
+      case nc3Short: {
         if (_addSi16FieldToRays(var, nPoints,
                                 name, units, standardName, longName,
                                 scale, offset)) {
@@ -1267,7 +1267,7 @@ int ForayNcRadxFile::_readFieldVariables()
         }
         break;
       }
-      case ncByte: {
+      case nc3Byte: {
         if (_addSi08FieldToRays(var, nPoints,
                                 name, units, standardName, longName,
                                 scale, offset)) {
@@ -1304,7 +1304,7 @@ int ForayNcRadxFile::_readFieldVariables()
 // The _rays array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int ForayNcRadxFile::_addFl64FieldToRays(NcVar* var, int nPoints,
+int ForayNcRadxFile::_addFl64FieldToRays(Nc3Var* var, int nPoints,
                                          const string &name,
                                          const string &units,
                                          const string &standardName,
@@ -1320,7 +1320,7 @@ int ForayNcRadxFile::_addFl64FieldToRays(NcVar* var, int nPoints,
   }
 
   Radx::fl64 missingVal = Radx::missingFl64;
-  NcAtt *missingValueAtt = var->get_att(MISSING_VALUE);
+  Nc3Att *missingValueAtt = var->get_att(MISSING_VALUE);
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
@@ -1347,7 +1347,7 @@ int ForayNcRadxFile::_addFl64FieldToRays(NcVar* var, int nPoints,
 // The _rays array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int ForayNcRadxFile::_addFl32FieldToRays(NcVar* var, int nPoints,
+int ForayNcRadxFile::_addFl32FieldToRays(Nc3Var* var, int nPoints,
                                          const string &name,
                                          const string &units,
                                          const string &standardName,
@@ -1363,7 +1363,7 @@ int ForayNcRadxFile::_addFl32FieldToRays(NcVar* var, int nPoints,
   }
 
   Radx::fl32 missingVal = Radx::missingFl32;
-  NcAtt *missingValueAtt = var->get_att(MISSING_VALUE);
+  Nc3Att *missingValueAtt = var->get_att(MISSING_VALUE);
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
@@ -1390,7 +1390,7 @@ int ForayNcRadxFile::_addFl32FieldToRays(NcVar* var, int nPoints,
 // The _rays array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int ForayNcRadxFile::_addSi32FieldToRays(NcVar* var, int nPoints,
+int ForayNcRadxFile::_addSi32FieldToRays(Nc3Var* var, int nPoints,
                                          const string &name,
                                          const string &units,
                                          const string &standardName,
@@ -1407,7 +1407,7 @@ int ForayNcRadxFile::_addSi32FieldToRays(NcVar* var, int nPoints,
   }
 
   Radx::si32 missingVal = Radx::missingSi32;
-  NcAtt *missingValueAtt = var->get_att(MISSING_VALUE);
+  Nc3Att *missingValueAtt = var->get_att(MISSING_VALUE);
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_int(0);
     delete missingValueAtt;
@@ -1435,7 +1435,7 @@ int ForayNcRadxFile::_addSi32FieldToRays(NcVar* var, int nPoints,
 // The _rays array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int ForayNcRadxFile::_addSi16FieldToRays(NcVar* var, int nPoints,
+int ForayNcRadxFile::_addSi16FieldToRays(Nc3Var* var, int nPoints,
                                          const string &name,
                                          const string &units,
                                          const string &standardName,
@@ -1452,7 +1452,7 @@ int ForayNcRadxFile::_addSi16FieldToRays(NcVar* var, int nPoints,
   }
   
   Radx::si16 missingVal = Radx::missingSi16;
-  NcAtt *missingValueAtt = var->get_att(MISSING_VALUE);
+  Nc3Att *missingValueAtt = var->get_att(MISSING_VALUE);
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_short(0);
     delete missingValueAtt;
@@ -1493,7 +1493,7 @@ int ForayNcRadxFile::_addSi16FieldToRays(NcVar* var, int nPoints,
 // The _rays array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int ForayNcRadxFile::_addSi08FieldToRays(NcVar* var, int nPoints,
+int ForayNcRadxFile::_addSi08FieldToRays(Nc3Var* var, int nPoints,
                                          const string &name,
                                          const string &units,
                                          const string &standardName,
@@ -1510,7 +1510,7 @@ int ForayNcRadxFile::_addSi08FieldToRays(NcVar* var, int nPoints,
   }
 
   Radx::si08 missingVal = Radx::missingSi08;
-  NcAtt *missingValueAtt = var->get_att(MISSING_VALUE);
+  Nc3Att *missingValueAtt = var->get_att(MISSING_VALUE);
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_ncbyte(0);
     delete missingValueAtt;

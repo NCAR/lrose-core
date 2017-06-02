@@ -186,7 +186,7 @@ bool NexradCmdRadxFile::isNexradCmd(const string &path)
 
   // check existence of some variables
 
-  NcVar *stdZdrFVar = _file.getNcFile()->get_var("STD_ZDR_F");
+  Nc3Var *stdZdrFVar = _file.getNc3File()->get_var("STD_ZDR_F");
   if (stdZdrFVar == NULL) {
     _file.close();
     if (_verbose) {
@@ -196,7 +196,7 @@ bool NexradCmdRadxFile::isNexradCmd(const string &path)
     return false;
   }
 
-  NcVar *tdbzFVar = _file.getNcFile()->get_var("TDBZ_F");
+  Nc3Var *tdbzFVar = _file.getNc3File()->get_var("TDBZ_F");
   if (tdbzFVar == NULL) {
     _file.close();
     if (_verbose) {
@@ -618,9 +618,9 @@ int NexradCmdRadxFile::_readStatusVariables()
 
   // loop through the variables, adding data fields as appropriate
   
-  for (int ivar = 0; ivar < _file.getNcFile()->num_vars(); ivar++) {
+  for (int ivar = 0; ivar < _file.getNc3File()->num_vars(); ivar++) {
     
-    NcVar* var = _file.getNcFile()->get_var(ivar);
+    Nc3Var* var = _file.getNc3File()->get_var(ivar);
     if (var == NULL) {
       continue;
     }
@@ -629,24 +629,24 @@ int NexradCmdRadxFile::_readStatusVariables()
     int numDims = var->num_dims();
 
     string units;
-    NcAtt *unitsAtt = var->get_att("units");
+    Nc3Att *unitsAtt = var->get_att("units");
     if (unitsAtt != NULL) {
-      units = NetcdfClassic::asString(unitsAtt);
+      units = Nc3xFile::asString(unitsAtt);
       delete unitsAtt;
     }
     
     string descr;
-    NcAtt *descrAtt = var->get_att("description");
+    Nc3Att *descrAtt = var->get_att("description");
     if (descrAtt != NULL) {
-      descr = NetcdfClassic::asString(descrAtt);
+      descr = Nc3xFile::asString(descrAtt);
       delete descrAtt;
     }
     
     // field variable? not needed here
     
     if (numDims == 2) {
-      NcDim* timeDim = var->get_dim(0);
-      NcDim* rangeDim = var->get_dim(1);
+      Nc3Dim* timeDim = var->get_dim(0);
+      Nc3Dim* rangeDim = var->get_dim(1);
       if (timeDim == _timeDim && rangeDim == _rangeDim) {
         continue;
       }
@@ -660,32 +660,32 @@ int NexradCmdRadxFile::_readStatusVariables()
       _statusXml += RadxXml::writeString("units", 2, units);
       _statusXml += RadxXml::writeString("description", 2, descr);
 
-      NcType ftype = var->type();
-      if (ftype == ncDouble) {
+      Nc3Type ftype = var->type();
+      if (ftype == nc3Double) {
         double val;
         if (var->get(&val, 1)) {
           _statusXml += RadxXml::writeString("type", 2, "double");
           _statusXml += RadxXml::writeDouble("value", 2, val, "%g");
         }
-      } else if (ftype == ncFloat) {
+      } else if (ftype == nc3Float) {
         float val;
         if (var->get(&val, 1)) {
           _statusXml += RadxXml::writeString("type", 2, "float");
           _statusXml += RadxXml::writeDouble("value", 2, val, "%g");
         }
-      } else if (ftype == ncInt) {
+      } else if (ftype == nc3Int) {
         int val;
         if (var->get(&val, 1)) {
           _statusXml += RadxXml::writeString("type", 2, "int");
           _statusXml += RadxXml::writeInt("value", 2, val);
         }
-      } else if (ftype == ncShort) {
+      } else if (ftype == nc3Short) {
         short val;
         if (var->get(&val, 1)) {
           _statusXml += RadxXml::writeString("type", 2, "short");
           _statusXml += RadxXml::writeInt("value", 2, val);
         }
-      } else if (ftype == ncByte) {
+      } else if (ftype == nc3Byte) {
         ncbyte val;
         if (var->get(&val, 1)) {
           _statusXml += RadxXml::writeString("type", 2, "byte");
@@ -703,12 +703,12 @@ int NexradCmdRadxFile::_readStatusVariables()
     
     if (numDims == 1) {
 
-      NcDim* varDim = var->get_dim(0);
+      Nc3Dim* varDim = var->get_dim(0);
       string dimName = varDim->name();
       if (dimName.find("membership") != string::npos) {
         int nPoints = varDim->size();
-        NcType ftype = var->type();
-        if (ftype == ncFloat) {
+        Nc3Type ftype = var->type();
+        if (ftype == nc3Float) {
           float *vals = new float[nPoints];
           if (var->get(vals, nPoints)) {
             _statusXml += RadxXml::writeStartTag(varName, 1);
@@ -741,7 +741,7 @@ int NexradCmdRadxFile::_readRangeVariable()
 
 {
 
-  _rangeVar = _file.getNcFile()->get_var("ranges");
+  _rangeVar = _file.getNc3File()->get_var("ranges");
   if (_rangeVar == NULL || _rangeVar->num_vals() < 1) {
     _addErrStr("ERROR - NexradCmdRadxFile::_readRangeVariable");
     _addErrStr("  Cannot read ranges");
@@ -752,9 +752,9 @@ int NexradCmdRadxFile::_readRangeVariable()
   // get units
   
   double kmPerUnit = 1.0; // default - units in km
-  NcAtt* unitsAtt = _rangeVar->get_att("units");
+  Nc3Att* unitsAtt = _rangeVar->get_att("units");
   if (unitsAtt != NULL) {
-    string units = NetcdfClassic::asString(unitsAtt);
+    string units = Nc3xFile::asString(unitsAtt);
     if (units == "m") {
       kmPerUnit = 0.001;
     } else if (units == "meters") {
@@ -824,9 +824,9 @@ int NexradCmdRadxFile::_readRangeVariable()
 //     _addErrStr(_file.getNcError()->get_errmsg());
 //     iret = -1;
 //   }
-//   NcAtt* unitsAtt = _altitudeVar->get_att("units");
+//   Nc3Att* unitsAtt = _altitudeVar->get_att("units");
 //   if (unitsAtt != NULL) {
-//     string units = NetcdfClassic::asString(unitsAtt);
+//     string units = Nc3xFile::asString(unitsAtt);
 //     if (units == "m") {
 //       _altitudeKm /= 1000.0;
 //     }
@@ -1017,9 +1017,9 @@ int NexradCmdRadxFile::_readFieldVariables()
 
   // loop through the variables, adding data fields as appropriate
   
-  for (int ivar = 0; ivar < _file.getNcFile()->num_vars(); ivar++) {
+  for (int ivar = 0; ivar < _file.getNc3File()->num_vars(); ivar++) {
     
-    NcVar* var = _file.getNcFile()->get_var(ivar);
+    Nc3Var* var = _file.getNc3File()->get_var(ivar);
     if (var == NULL) {
       continue;
     }
@@ -1030,16 +1030,16 @@ int NexradCmdRadxFile::_readFieldVariables()
       continue;
     }
     // check that we have the correct dimensions
-    NcDim* timeDim = var->get_dim(0);
-    NcDim* rangeDim = var->get_dim(1);
+    Nc3Dim* timeDim = var->get_dim(0);
+    Nc3Dim* rangeDim = var->get_dim(1);
     if (timeDim != _timeDim || rangeDim != _rangeDim) {
       continue;
     }
     
     // check the type
     string fieldName = var->name();
-    NcType ftype = var->type();
-    if (ftype != ncDouble && ftype != ncFloat && ftype != ncByte) {
+    Nc3Type ftype = var->type();
+    if (ftype != nc3Double && ftype != nc3Float && ftype != nc3Byte) {
       // not a valid type
       if (_verbose) {
         cerr << "DEBUG - NexradCmdRadxFile::_readFieldVariables" << endl;
@@ -1069,16 +1069,16 @@ int NexradCmdRadxFile::_readFieldVariables()
     string name = var->name();
     
     string longName;
-    NcAtt *longNameAtt = var->get_att("description");
+    Nc3Att *longNameAtt = var->get_att("description");
     if (longNameAtt != NULL) {
-      longName = NetcdfClassic::asString(longNameAtt);
+      longName = Nc3xFile::asString(longNameAtt);
       delete longNameAtt;
     }
 
     string units;
-    NcAtt *unitsAtt = var->get_att("units");
+    Nc3Att *unitsAtt = var->get_att("units");
     if (unitsAtt != NULL) {
-      units = NetcdfClassic::asString(unitsAtt);
+      units = Nc3xFile::asString(unitsAtt);
       delete unitsAtt;
     }
 
@@ -1103,19 +1103,19 @@ int NexradCmdRadxFile::_readFieldVariables()
     int iret = 0;
 
     switch (var->type()) {
-      case ncDouble: {
+      case nc3Double: {
         if (_addFl64FieldToRays(var, name, units, longName)) {
           iret = -1;
         }
         break;
       }
-      case ncFloat: {
+      case nc3Float: {
         if (_addFl32FieldToRays(var, name, units, longName)) {
           iret = -1;
         }
         break;
       }
-      case ncByte: {
+      case nc3Byte: {
         if (_addSi08FieldToRays(var, name, units, longName)) {
           iret = -1;
         }
@@ -1142,7 +1142,7 @@ int NexradCmdRadxFile::_readFieldVariables()
 ///////////////////////////////////
 // read a ray variable - double
 
-int NexradCmdRadxFile::_readRayVar(NcVar* &var, const string &name,
+int NexradCmdRadxFile::_readRayVar(Nc3Var* &var, const string &name,
                                    vector<double> &vals, bool required)
 
 {
@@ -1195,7 +1195,7 @@ int NexradCmdRadxFile::_readRayVar(NcVar* &var, const string &name,
 ///////////////////////////////////
 // read a ray variable - integer
 
-int NexradCmdRadxFile::_readRayVar(NcVar* &var, const string &name,
+int NexradCmdRadxFile::_readRayVar(Nc3Var* &var, const string &name,
                                    vector<int> &vals, bool required)
 
 {
@@ -1249,13 +1249,13 @@ int NexradCmdRadxFile::_readRayVar(NcVar* &var, const string &name,
 // get a ray variable by name
 // returns NULL on failure
 
-NcVar* NexradCmdRadxFile::_getRayVar(const string &name, bool required)
+Nc3Var* NexradCmdRadxFile::_getRayVar(const string &name, bool required)
 
 {
 
   // get var
   
-  NcVar *var = _file.getNcFile()->get_var(name.c_str());
+  Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
     if (required) {
       _addErrStr("ERROR - NexradCmdRadxFile::_getRayVar");
@@ -1275,7 +1275,7 @@ NcVar* NexradCmdRadxFile::_getRayVar(const string &name, bool required)
     }
     return NULL;
   }
-  NcDim *timeDim = var->get_dim(0);
+  Nc3Dim *timeDim = var->get_dim(0);
   if (timeDim != _timeDim) {
     if (required) {
       _addErrStr("ERROR - NexradCmdRadxFile::_getRayVar");
@@ -1296,7 +1296,7 @@ NcVar* NexradCmdRadxFile::_getRayVar(const string &name, bool required)
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int NexradCmdRadxFile::_addFl64FieldToRays(NcVar* var,
+int NexradCmdRadxFile::_addFl64FieldToRays(Nc3Var* var,
                                            const string &name,
                                            const string &units,
                                            const string &longName)
@@ -1318,7 +1318,7 @@ int NexradCmdRadxFile::_addFl64FieldToRays(NcVar* var,
   // set missing value
 
   Radx::fl64 missingVal = Radx::missingFl64;
-  NcAtt *missingValueAtt = var->get_att("missing_value");
+  Nc3Att *missingValueAtt = var->get_att("missing_value");
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
@@ -1364,7 +1364,7 @@ int NexradCmdRadxFile::_addFl64FieldToRays(NcVar* var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int NexradCmdRadxFile::_addFl32FieldToRays(NcVar* var,
+int NexradCmdRadxFile::_addFl32FieldToRays(Nc3Var* var,
                                            const string &name,
                                            const string &units,
                                            const string &longName)
@@ -1386,7 +1386,7 @@ int NexradCmdRadxFile::_addFl32FieldToRays(NcVar* var,
   // set missing value
   
   Radx::fl32 missingVal = Radx::missingFl32;
-  NcAtt *missingValueAtt = var->get_att("missing_value");
+  Nc3Att *missingValueAtt = var->get_att("missing_value");
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
@@ -1431,7 +1431,7 @@ int NexradCmdRadxFile::_addFl32FieldToRays(NcVar* var,
 // Add byte field to _raysFromFile
 // Returns 0 on success, -1 on failure
 
-int NexradCmdRadxFile::_addSi08FieldToRays(NcVar* var,
+int NexradCmdRadxFile::_addSi08FieldToRays(Nc3Var* var,
                                            const string &name,
                                            const string &units,
                                            const string &longName)
@@ -1453,7 +1453,7 @@ int NexradCmdRadxFile::_addSi08FieldToRays(NcVar* var,
   // set missing value
   
   Radx::si08 missingVal = Radx::missingSi08;
-  NcAtt *missingValueAtt = var->get_att("_FillValue");
+  Nc3Att *missingValueAtt = var->get_att("_FillValue");
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;

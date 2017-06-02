@@ -47,7 +47,7 @@
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxRay.hh>
-#include <Radx/NetcdfClassic.hh>
+#include <Ncxx/Nc3xFile.hh>
 // #include <Radx/Udunits2.hh>
 
 class RadxField;
@@ -176,7 +176,7 @@ private:
 
   // netcdf file
   
-  NetcdfClassic _file;
+  Nc3xFile _file;
 
   // udunits
 
@@ -184,13 +184,13 @@ private:
   
   // dimensions
 
-  NcDim *_timeDim;
-  NcDim *_rangeDim;
-  NcDim *_sweepDim;
+  Nc3Dim *_timeDim;
+  Nc3Dim *_rangeDim;
+  Nc3Dim *_sweepDim;
 
   // times
   
-  NcVar *_timeVar;
+  Nc3Var *_timeVar;
   vector<double> _dTimes;
   time_t _refTimeSecsFile;
   bool _rayTimesIncrease;
@@ -198,7 +198,7 @@ private:
   
   // range
 
-  NcVar *_rangeVar;
+  Nc3Var *_rangeVar;
   vector<double> _rangeKm;
   size_t _nRangeInFile;
   bool _gateSpacingIsConstant;
@@ -207,9 +207,9 @@ private:
 
   // georef variables
   
-  NcVar *_latitudeVar;
-  NcVar *_longitudeVar;
-  NcVar *_altitudeVar;
+  Nc3Var *_latitudeVar;
+  Nc3Var *_longitudeVar;
+  Nc3Var *_altitudeVar;
   
   double _latitudeDeg;
   double _longitudeDeg;
@@ -217,13 +217,13 @@ private:
 
   // ray variables
 
-  NcVar *_azimuthVar;
-  NcVar *_azimuthRateVar;
-  NcVar *_elevationVar;
-  NcVar *_elevationRateVar;
-  NcVar *_noiseVar;
-  NcVar *_pedestalOpModeVar;
-  NcVar *_polarizationVar;
+  Nc3Var *_azimuthVar;
+  Nc3Var *_azimuthRateVar;
+  Nc3Var *_elevationVar;
+  Nc3Var *_elevationRateVar;
+  Nc3Var *_noiseVar;
+  Nc3Var *_pedestalOpModeVar;
+  Nc3Var *_polarizationVar;
 
   vector<double> _azimuths;
   vector<double> _elevations;
@@ -235,9 +235,9 @@ private:
   
   // sweep variables
 
-  NcVar *_sweepTypeVar;
-  NcVar *_sweepStartIndexVar;
-  NcVar *_sweepLengthVar;
+  Nc3Var *_sweepTypeVar;
+  Nc3Var *_sweepStartIndexVar;
+  Nc3Var *_sweepLengthVar;
   vector<RadxSweep *> _sweeps;
 
   // global attributes
@@ -347,22 +347,22 @@ private:
   int _createRays(const string &path);
   int _readFieldVariables(bool metaOnly);
 
-  int _readRayVar(NcVar* &var, const string &name, 
+  int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<double> &vals, bool required = true);
-  int _readRayVar(NcVar* &var, const string &name, 
+  int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<int> &vals, bool required = true);
   
-  NcVar* _getRayVar(const string &name, bool required);
-  int _readSweepVar(NcVar* &var, const string &name, 
+  Nc3Var* _getRayVar(const string &name, bool required);
+  int _readSweepVar(Nc3Var* &var, const string &name, 
                     vector<int> &vals, bool required = true);
-  NcVar* _getSweepVar(const string &name);
+  Nc3Var* _getSweepVar(const string &name);
 
-  int _addFl64FieldToRays(NcVar* var,
+  int _addFl64FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           bool isDiscrete, bool fieldFolds,
                           float foldLimitLower, float foldLimitUpper);
-  int _addFl32FieldToRays(NcVar* var,
+  int _addFl32FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           bool isDiscrete, bool fieldFolds,

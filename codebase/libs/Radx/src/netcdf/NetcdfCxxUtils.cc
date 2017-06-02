@@ -41,7 +41,7 @@ NetcdfCxxUtils::NetcdfCxxUtils()
   
 {
 
-  _ncFormat = NcFile::classic;
+  _ncFormat = Nc3File::classic;
   _ncFile = NULL;
 
   clear();
@@ -79,7 +79,7 @@ int NetcdfCxxUtils::openRead(const string &path)
 
   close();
   _pathInUse = path;
-  _ncFile = new NcFile(path, NcFile::read);
+  _ncFile = new Nc3File(path, Nc3File::read);
   
   // Check that constructor succeeded
   
@@ -106,14 +106,14 @@ int NetcdfCxxUtils::openRead(const string &path)
 /// Returns 0 on success, -1 on failure
 
 int NetcdfCxxUtils::openWrite(const string &path,
-                             NcFile::FileFormat format) 
+                             Nc3File::FileFormat format) 
 
 {
   
   close();
   _pathInUse = path;
   _ncFormat = format;
-  _ncFile = new NcFile(path, NcFile::replace, _ncFormat);
+  _ncFile = new Nc3File(path, Nc3File::replace, _ncFormat);
   
   if (!_ncFile || !_ncFile->isNull()) {
     _addErrStr("ERROR - NetcdfCxxUtils::openWrite");
@@ -334,7 +334,7 @@ int NetcdfCxxUtils::readGlobAttr(const string &name, double &val)
 // add string attribute
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::addAttr(NcVar &var, const string &name, const string &val)
+int NetcdfCxxUtils::addAttr(Nc3Var &var, const string &name, const string &val)
 {
   try {
     var.putAtt(name.c_str(), val.c_str());
@@ -354,10 +354,10 @@ int NetcdfCxxUtils::addAttr(NcVar &var, const string &name, const string &val)
 // add double attribute
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::addAttr(NcVar &var, const string &name, double val)
+int NetcdfCxxUtils::addAttr(Nc3Var &var, const string &name, double val)
 {
   try {
-    NcType vtype(NcType::nc_DOUBLE);
+    Nc3Type vtype(Nc3Type::nc_DOUBLE);
     var.putAtt(name.c_str(), vtype, 1, &val);
   } catch (NcException& e) {
     _addErrStr("ERROR - NetcdfCxxUtils::addAttr");
@@ -375,10 +375,10 @@ int NetcdfCxxUtils::addAttr(NcVar &var, const string &name, double val)
 // add float attribute
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::addAttr(NcVar &var, const string &name, float val)
+int NetcdfCxxUtils::addAttr(Nc3Var &var, const string &name, float val)
 {
   try {
-    NcType vtype(NcType::nc_FLOAT);
+    Nc3Type vtype(Nc3Type::nc_FLOAT);
     var.putAtt(name.c_str(), vtype, 1, &val);
   } catch (NcException& e) {
     _addErrStr("ERROR - NetcdfCxxUtils::addAttr");
@@ -396,10 +396,10 @@ int NetcdfCxxUtils::addAttr(NcVar &var, const string &name, float val)
 // add int attribute
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::addAttr(NcVar &var, const string &name, int val)
+int NetcdfCxxUtils::addAttr(Nc3Var &var, const string &name, int val)
 {
   try {
-    NcType vtype(NcType::nc_INT);
+    Nc3Type vtype(Nc3Type::nc_INT);
     var.putAtt(name.c_str(), vtype, 1, &val);
   } catch (NcException& e) {
     _addErrStr("ERROR - NetcdfCxxUtils::addAttr");
@@ -417,10 +417,10 @@ int NetcdfCxxUtils::addAttr(NcVar &var, const string &name, int val)
 // add long attribute
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::addAttr(NcVar &var, const string &name, int64_t val)
+int NetcdfCxxUtils::addAttr(Nc3Var &var, const string &name, int64_t val)
 {
   try {
-    NcType vtype(NcType::nc_INT64);
+    Nc3Type vtype(Nc3Type::nc_INT64);
     var.putAtt(name.c_str(), vtype, 1, &val);
   } catch (NcException& e) {
     _addErrStr("ERROR - NetcdfCxxUtils::addAttr");
@@ -438,10 +438,10 @@ int NetcdfCxxUtils::addAttr(NcVar &var, const string &name, int64_t val)
 // add short attribute
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::addAttr(NcVar &var, const string &name, short val)
+int NetcdfCxxUtils::addAttr(Nc3Var &var, const string &name, short val)
 {
   try {
-    NcType vtype(NcType::nc_SHORT);
+    Nc3Type vtype(Nc3Type::nc_SHORT);
     var.putAtt(name.c_str(), vtype, 1, &val);
   } catch (NcException& e) {
     _addErrStr("ERROR - NetcdfCxxUtils::addAttr");
@@ -459,10 +459,10 @@ int NetcdfCxxUtils::addAttr(NcVar &var, const string &name, short val)
 // add ncbyte attribute
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::addAttr(NcVar &var, const string &name, unsigned char val)
+int NetcdfCxxUtils::addAttr(Nc3Var &var, const string &name, unsigned char val)
 {
   try {
-    NcType vtype(NcType::nc_UBYTE);
+    Nc3Type vtype(Nc3Type::nc_UBYTE);
     var.putAtt(name.c_str(), vtype, 1, &val);
   } catch (NcException& e) {
     _addErrStr("ERROR - NetcdfCxxUtils::addAttr");
@@ -481,7 +481,7 @@ int NetcdfCxxUtils::addAttr(NcVar &var, const string &name, unsigned char val)
 // Returns 0 on success, -1 on failure
 // Side effect: dim arg is updated
 
-int NetcdfCxxUtils::addDim(NcDim &dim, const string &name, int size)
+int NetcdfCxxUtils::addDim(Nc3Dim &dim, const string &name, int size)
 {
   if (size < 1) {
     dim = _ncFile->addDim(name);
@@ -502,7 +502,7 @@ int NetcdfCxxUtils::addDim(NcDim &dim, const string &name, int size)
 // Returns 0 on success, -1 on failure
 // Side effect: dim arg is set
 
-int NetcdfCxxUtils::readDim(const string &name, NcDim &dim)
+int NetcdfCxxUtils::readDim(const string &name, Nc3Dim &dim)
 
 {
   dim = _ncFile->getDim(name);
@@ -520,16 +520,16 @@ int NetcdfCxxUtils::readDim(const string &name, NcDim &dim)
 // Returns 0 on success, -1 on failure
 // Side effect: var is set
 
-int NetcdfCxxUtils::addVar(NcVar &var,
+int NetcdfCxxUtils::addVar(Nc3Var &var,
                           const string &name, 
                           const string &standardName,
                           const string &longName,
-                          NcType ncType, 
+                          Nc3Type ncType, 
                           const string &units /* = "" */)
   
 {
   
-  vector<NcDim> dims; // 0 length - for scalar
+  vector<Nc3Dim> dims; // 0 length - for scalar
 
   return addVar(var, name, standardName, longName,
                 ncType, dims, units);
@@ -541,17 +541,17 @@ int NetcdfCxxUtils::addVar(NcVar &var,
 // Returns 0 on success, -1 on failure
 // Side effect: var is set
 
-int NetcdfCxxUtils::addVar(NcVar &var, 
+int NetcdfCxxUtils::addVar(Nc3Var &var, 
                           const string &name, 
                           const string &standardName,
                           const string &longName,
-                          NcType ncType, 
-                          NcDim &dim, 
+                          Nc3Type ncType, 
+                          Nc3Dim &dim, 
                           const string &units /* = "" */)
   
 {
   
-  vector<NcDim> dims;
+  vector<Nc3Dim> dims;
   dims.push_back(dim);
 
   return addVar(var, name, standardName, longName,
@@ -564,17 +564,17 @@ int NetcdfCxxUtils::addVar(NcVar &var,
 // Returns 0 on success, -1 on failure
 // Side effect: var is set
 
-int NetcdfCxxUtils::addVar(NcVar &var, 
+int NetcdfCxxUtils::addVar(Nc3Var &var, 
                           const string &name,
                           const string &standardName,
                           const string &longName,
-                          NcType ncType,
-                          NcDim &dim0,
-                          NcDim &dim1,
+                          Nc3Type ncType,
+                          Nc3Dim &dim0,
+                          Nc3Dim &dim1,
                           const string &units /* = "" */)
 {
 
-  vector<NcDim> dims;
+  vector<Nc3Dim> dims;
   dims.push_back(dim0);
   dims.push_back(dim1);
 
@@ -588,12 +588,12 @@ int NetcdfCxxUtils::addVar(NcVar &var,
 // Returns 0 on success, -1 on failure
 // Side effect: var is set
 
-int NetcdfCxxUtils::addVar(NcVar &var, 
+int NetcdfCxxUtils::addVar(Nc3Var &var, 
                           const string &name,
                           const string &standardName,
                           const string &longName,
-                          NcType ncType,
-                          vector<NcDim> &dims,
+                          Nc3Type ncType,
+                          vector<Nc3Dim> &dims,
                           const string &units /* = "" */)
 {
 
@@ -630,11 +630,11 @@ int NetcdfCxxUtils::addVar(NcVar &var,
 // this is the product of the dimension sizes
 // and is 1 for a scalar (i.e. no dimensions)
 
-int64_t NetcdfCxxUtils::numVals(NcVar &var)
+int64_t NetcdfCxxUtils::numVals(Nc3Var &var)
   
 {
 
-  std::vector<NcDim> dims = var.getDims();
+  std::vector<Nc3Dim> dims = var.getDims();
   int64_t prod = 1;
   for (size_t ii = 0; ii < dims.size(); ii++) {
     prod *=  var.getDim(ii).getSize();
@@ -647,7 +647,7 @@ int64_t NetcdfCxxUtils::numVals(NcVar &var)
 // read int variable, set var and val
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::readIntVar(NcVar &var, const string &name,
+int NetcdfCxxUtils::readIntVar(Nc3Var &var, const string &name,
                               int &val, int missingVal, bool required)
   
 {
@@ -694,7 +694,7 @@ int NetcdfCxxUtils::readIntVal(const string &name,
   
   val = missingVal;
   
-  NcVar var = _ncFile->getVar(name);
+  Nc3Var var = _ncFile->getVar(name);
   if (var.isNull()) {
     if (required) {
       _addErrStr("ERROR - NetcdfCxxUtils::_readIntVal");
@@ -728,7 +728,7 @@ int NetcdfCxxUtils::readIntVal(const string &name,
 // read float variable
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::readFloatVar(NcVar &var, const string &name,
+int NetcdfCxxUtils::readFloatVar(Nc3Var &var, const string &name,
                                 float &val, 
                                 float missingVal, bool required)
 
@@ -777,7 +777,7 @@ int NetcdfCxxUtils::readFloatVal(const string &name,
   
   val = missingVal;
   
-  NcVar var = _ncFile->getVar(name);
+  Nc3Var var = _ncFile->getVar(name);
   if (var.isNull()) {
     if (required) {
       _addErrStr("ERROR - NetcdfCxxUtils::_readIntVal");
@@ -811,7 +811,7 @@ int NetcdfCxxUtils::readFloatVal(const string &name,
 // read double variable
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::readDoubleVar(NcVar &var, const string &name,
+int NetcdfCxxUtils::readDoubleVar(Nc3Var &var, const string &name,
                                  double &val, 
                                  double missingVal, bool required)
   
@@ -860,7 +860,7 @@ int NetcdfCxxUtils::readDoubleVal(const string &name,
   
   val = missingVal;
   
-  NcVar var = _ncFile->getVar(name);
+  Nc3Var var = _ncFile->getVar(name);
   if (var.isNull()) {
     if (required) {
       _addErrStr("ERROR - NetcdfCxxUtils::_readIntVal");
@@ -894,7 +894,7 @@ int NetcdfCxxUtils::readDoubleVal(const string &name,
 // read a scalar string variable
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::readStringVar(NcVar &var, const string &name, string &val)
+int NetcdfCxxUtils::readStringVar(Nc3Var &var, const string &name, string &val)
 
 {
   
@@ -910,7 +910,7 @@ int NetcdfCxxUtils::readStringVar(NcVar &var, const string &name, string &val)
 
   // check dimension
   
-  std::vector<NcDim> dims = var.getDims();
+  std::vector<Nc3Dim> dims = var.getDims();
   int64_t prod = 1;
   for (size_t ii = 0; ii < dims.size(); ii++) {
     prod *=  var.getDim(ii).getSize();
@@ -925,7 +925,7 @@ int NetcdfCxxUtils::readStringVar(NcVar &var, const string &name, string &val)
     return -1;
   }
 
-  NcDim stringLenDim = dims[0];
+  Nc3Dim stringLenDim = dims[0];
   if (stringLenDim.isNull()) {
     _addErrStr("ERROR - NetcdfCxxUtils::readStringVar");
     _addErrStr("  variable name: ", name);
@@ -966,7 +966,7 @@ int NetcdfCxxUtils::readStringVar(NcVar &var, const string &name, string &val)
 // write a scalar double variable
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::writeVar(NcVar &var, double val)
+int NetcdfCxxUtils::writeVar(Nc3Var &var, double val)
   
 {
   
@@ -1005,7 +1005,7 @@ int NetcdfCxxUtils::writeVar(NcVar &var, double val)
 // write a scalar float variable
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::writeVar(NcVar &var, float val)
+int NetcdfCxxUtils::writeVar(Nc3Var &var, float val)
   
 {
   
@@ -1044,7 +1044,7 @@ int NetcdfCxxUtils::writeVar(NcVar &var, float val)
 // write a scalar int variable
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::writeVar(NcVar &var, int val)
+int NetcdfCxxUtils::writeVar(Nc3Var &var, int val)
   
 {
   
@@ -1084,7 +1084,7 @@ int NetcdfCxxUtils::writeVar(NcVar &var, int val)
 // number of elements specified in dimension
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::writeVar(NcVar &var, const NcDim &dim, const void *data)
+int NetcdfCxxUtils::writeVar(Nc3Var &var, const Nc3Dim &dim, const void *data)
   
 {
   return writeVar(var, dim, dim.getSize(), data);
@@ -1095,8 +1095,8 @@ int NetcdfCxxUtils::writeVar(NcVar &var, const NcDim &dim, const void *data)
 // number of elements specified in arguments
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::writeVar(NcVar &var, 
-                            const NcDim &dim, size_t count, 
+int NetcdfCxxUtils::writeVar(Nc3Var &var, 
+                            const Nc3Dim &dim, size_t count, 
                             const void *data)
   
 {
@@ -1181,7 +1181,7 @@ int NetcdfCxxUtils::writeVar(NcVar &var,
 // write a string variable
 // Returns 0 on success, -1 on failure
 
-int NetcdfCxxUtils::writeStringVar(NcVar &var, const void *str)
+int NetcdfCxxUtils::writeStringVar(Nc3Var &var, const void *str)
   
 {
   
@@ -1192,7 +1192,7 @@ int NetcdfCxxUtils::writeStringVar(NcVar &var, const void *str)
     return -1;
   }
   
-  std::vector<NcDim> dims = var.getDims();
+  std::vector<Nc3Dim> dims = var.getDims();
   size_t nDims = dims.size();
   if (nDims < 1) {
     _addErrStr("ERROR - NetcdfCxxUtils::writeStringVar");
@@ -1206,7 +1206,7 @@ int NetcdfCxxUtils::writeStringVar(NcVar &var, const void *str)
 
     // single dimension
 
-    NcDim &dim0 = dims[0];
+    Nc3Dim &dim0 = dims[0];
     if (dim0.isNull()) {
       _addErrStr("ERROR - NetcdfCxxUtils::writeStringVar");
       _addErrStr("  Canont write var, name: ", var.getName());
@@ -1236,7 +1236,7 @@ int NetcdfCxxUtils::writeStringVar(NcVar &var, const void *str)
 
     // two dimensions
 
-    NcDim &dim0 = dims[0];
+    Nc3Dim &dim0 = dims[0];
     if (dim0.isNull()) {
       _addErrStr("ERROR - NetcdfCxxUtils::writeStringVar");
       _addErrStr("  Canont write var, name: ", var.getName());
@@ -1245,7 +1245,7 @@ int NetcdfCxxUtils::writeStringVar(NcVar &var, const void *str)
       return -1;
     }
 
-    NcDim &dim1 = dims[1];
+    Nc3Dim &dim1 = dims[1];
     if (dim1.isNull()) {
       _addErrStr("ERROR - NetcdfCxxUtils::writeStringVar");
       _addErrStr("  Canont write var, name: ", var.getName());
@@ -1284,11 +1284,11 @@ int NetcdfCxxUtils::writeStringVar(NcVar &var, const void *str)
 ///////////////////////////////////////////////////////////////////////////
 // compress a variable
 
-int NetcdfCxxUtils::compressVar(NcVar &var, int compressionLevel)
+int NetcdfCxxUtils::compressVar(Nc3Var &var, int compressionLevel)
 {
   
-  if (_ncFormat == NcFile::classic ||
-      _ncFormat == NcFile::classic64) {
+  if (_ncFormat == Nc3File::classic ||
+      _ncFormat == Nc3File::classic64) {
     // cannot compress
     return 0;
   }
@@ -1343,7 +1343,7 @@ string NetcdfCxxUtils::ncTypeToStr(nc_type nctype)
 ////////////////////////////////////////
 // convert var type string
 
-string NetcdfCxxUtils::varTypeToStr(const NcVar &var)
+string NetcdfCxxUtils::varTypeToStr(const Nc3Var &var)
   
 {
   nc_type vtype = var.getType().getId();
@@ -1353,7 +1353,7 @@ string NetcdfCxxUtils::varTypeToStr(const NcVar &var)
 ///////////////////////////////////////////
 // get string representation of component
 
-string NetcdfCxxUtils::asString(const NcAtt &att)
+string NetcdfCxxUtils::asString(const Nc3Att &att)
   
 {
   
@@ -1423,7 +1423,7 @@ void NetcdfCxxUtils::_addErrStr(string label, string strarg, bool cr)
 ////////////////////////////////////////
 // set fill value
 
-void NetcdfCxxUtils::_setFillvalue(NcVar &var)
+void NetcdfCxxUtils::_setFillvalue(Nc3Var &var)
 
 {
 

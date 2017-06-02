@@ -713,8 +713,8 @@ int EdgeNcRadxFile::_readGlobalAttributes()
   
   _statusXml.clear();
   _statusXml += RadxXml::writeStartTag("STATUS", 0);
-  for (int ii = 0; ii < _file.getNcFile()->num_atts(); ii++) {
-    NcAtt *att = _file.getNcFile()->get_att(ii);
+  for (int ii = 0; ii < _file.getNc3File()->num_atts(); ii++) {
+    Nc3Att *att = _file.getNc3File()->get_att(ii);
     if (att != NULL) {
       const char* strc = att->as_string(0);
       string val(strc);
@@ -766,9 +766,9 @@ void EdgeNcRadxFile::_setRangeArray()
   // get range units
 
   double kmPerUnit = 1.0; // default - units in km
-  NcAtt* unitsAtt = _gateWidthVar->get_att("Units");
+  Nc3Att* unitsAtt = _gateWidthVar->get_att("Units");
   if (unitsAtt != NULL) {
-    string units = NetcdfClassic::asString(unitsAtt);
+    string units = Nc3xFile::asString(unitsAtt);
     if (units == "m" || units == "Meters") {
       kmPerUnit = 0.001;
     }
@@ -899,9 +899,9 @@ int EdgeNcRadxFile::_readFieldVariable(bool metaOnly)
 
   // loop through the variables, adding data fields as appropriate
   
-  for (int ivar = 0; ivar < _file.getNcFile()->num_vars(); ivar++) {
+  for (int ivar = 0; ivar < _file.getNc3File()->num_vars(); ivar++) {
     
-    NcVar* var = _file.getNcFile()->get_var(ivar);
+    Nc3Var* var = _file.getNc3File()->get_var(ivar);
     if (var == NULL) {
       continue;
     }
@@ -912,16 +912,16 @@ int EdgeNcRadxFile::_readFieldVariable(bool metaOnly)
       continue;
     }
     // check that we have the correct dimensions
-    NcDim* azDim = var->get_dim(0);
-    NcDim* gateDim = var->get_dim(1);
+    Nc3Dim* azDim = var->get_dim(0);
+    Nc3Dim* gateDim = var->get_dim(1);
     if (azDim != _azimuthDim || gateDim != _gateDim) {
       continue;
     }
     
     // check the type
     string fieldName = var->name();
-    NcType ftype = var->type();
-    if (ftype != ncDouble && ftype != ncFloat) {
+    Nc3Type ftype = var->type();
+    if (ftype != nc3Double && ftype != nc3Float) {
       // not a valid type
       if (_verbose) {
         cerr << "DEBUG - EdgeNcRadxFile::_readFieldVariable" << endl;
@@ -953,9 +953,9 @@ int EdgeNcRadxFile::_readFieldVariable(bool metaOnly)
     string longName = var->name();
     
     string units;
-    NcAtt *unitsAtt = var->get_att("Units");
+    Nc3Att *unitsAtt = var->get_att("Units");
     if (unitsAtt != NULL) {
-      units = NetcdfClassic::asString(unitsAtt);
+      units = Nc3xFile::asString(unitsAtt);
       delete unitsAtt;
     }
 
@@ -998,7 +998,7 @@ int EdgeNcRadxFile::_readFieldVariable(bool metaOnly)
     bool isDiscrete = false;
 
     switch (var->type()) {
-      case ncDouble: {
+      case nc3Double: {
         if (_addFl64FieldToRays(var, name, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
@@ -1006,7 +1006,7 @@ int EdgeNcRadxFile::_readFieldVariable(bool metaOnly)
         }
         break;
       }
-      case ncFloat: {
+      case nc3Float: {
         if (_addFl32FieldToRays(var, name, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
@@ -1037,7 +1037,7 @@ int EdgeNcRadxFile::_readFieldVariable(bool metaOnly)
 ///////////////////////////////////
 // read a ray variable - float
 
-int EdgeNcRadxFile::_readRayVar(NcVar* &var, const string &name,
+int EdgeNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
                                 vector<float> &vals, bool required)
 
 {
@@ -1091,13 +1091,13 @@ int EdgeNcRadxFile::_readRayVar(NcVar* &var, const string &name,
 // get a ray variable by name
 // returns NULL on failure
 
-NcVar* EdgeNcRadxFile::_getRayVar(const string &name, bool required)
+Nc3Var* EdgeNcRadxFile::_getRayVar(const string &name, bool required)
 
 {
 
   // get var
   
-  NcVar *var = _file.getNcFile()->get_var(name.c_str());
+  Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
     if (required) {
       _addErrStr("ERROR - EdgeNcRadxFile::_getRayVar");
@@ -1117,7 +1117,7 @@ NcVar* EdgeNcRadxFile::_getRayVar(const string &name, bool required)
     }
     return NULL;
   }
-  NcDim *timeDim = var->get_dim(0);
+  Nc3Dim *timeDim = var->get_dim(0);
   if (timeDim != _azimuthDim) {
     if (required) {
       _addErrStr("ERROR - EdgeNcRadxFile::_getRayVar");
@@ -1138,7 +1138,7 @@ NcVar* EdgeNcRadxFile::_getRayVar(const string &name, bool required)
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int EdgeNcRadxFile::_addFl64FieldToRays(NcVar* var,
+int EdgeNcRadxFile::_addFl64FieldToRays(Nc3Var* var,
                                         const string &name,
                                         const string &units,
                                         const string &standardName,
@@ -1201,7 +1201,7 @@ int EdgeNcRadxFile::_addFl64FieldToRays(NcVar* var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int EdgeNcRadxFile::_addFl32FieldToRays(NcVar* var,
+int EdgeNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
                                         const string &name,
                                         const string &units,
                                         const string &standardName,

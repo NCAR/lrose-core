@@ -801,7 +801,7 @@ int NcxxRadxFile::_addGlobalAttributes()
 ///////////////////////////////////////////////////////////////////////////
 // addDimensions()
 //
-//  Add NcDims to the NetCDF file. We loop through the
+//  Add Nc3Dims to the NetCDF file. We loop through the
 //  GridInfo objects and record the dimensions of the
 //  x and y coordinates. Then we loop through the VlevelInfo
 //  objects and record the dimensions of the vertical coordinates

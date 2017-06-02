@@ -458,7 +458,7 @@ int NcxxRadxFile::getTimeFromPath(const string &path, RadxTime &rtime)
 }
 
 ////////////////////////////////////////
-// convert Radx::DataType_t to NcType
+// convert Radx::DataType_t to Nc3Type
 
 NcxxType NcxxRadxFile::_getNcxxType(Radx::DataType_t dtype)
 
@@ -479,7 +479,7 @@ NcxxType NcxxRadxFile::_getNcxxType(Radx::DataType_t dtype)
 }
 
 //////////////////////////////////////////////////////////
-// convert RadxFile::netcdf_format_t to NcFile::FileFormat
+// convert RadxFile::netcdf_format_t to Nc3File::FileFormat
 
 NcxxFile::FileFormat 
   NcxxRadxFile::_getFileFormat(RadxFile::netcdf_format_t format)

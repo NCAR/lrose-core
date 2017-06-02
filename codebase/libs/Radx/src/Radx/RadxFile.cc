@@ -365,7 +365,7 @@ bool RadxFile::_isSupportedOther(const string &path)
 bool RadxFile::isNetCDF(const string &path)
 {
 
-  NetcdfClassic ncf;
+  Nc3xFile ncf;
   if (ncf.openRead(path) == 0) {
     // open succeeded, so must be netcdf
     ncf.close();

@@ -47,7 +47,7 @@
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxRay.hh>
-#include <Radx/NetcdfClassic.hh>
+#include <Ncxx/Nc3xFile.hh>
 
 class RadxField;
 class RadxVol;
@@ -175,16 +175,16 @@ private:
 
   // netcdf file
   
-  NetcdfClassic _file;
+  Nc3xFile _file;
 
   // dimensions
 
-  NcDim *_timeDim;  // "Radial"
-  NcDim *_rangeDim; // "Gate"
+  Nc3Dim *_timeDim;  // "Radial"
+  Nc3Dim *_rangeDim; // "Gate"
   
   // times
   
-  NcVar *_timeVar;
+  Nc3Var *_timeVar;
   vector<int> _iTimes;
   vector<double> _dTimes;
   bool _rayTimesIncrease;
@@ -200,10 +200,10 @@ private:
 
   // ray variables
   
-  NcVar *_azimuthVar;
-  NcVar *_elevationVar;
-  NcVar *_gateWidthVar;
-  NcVar *_startRangeVar;
+  Nc3Var *_azimuthVar;
+  Nc3Var *_elevationVar;
+  Nc3Var *_gateWidthVar;
+  Nc3Var *_startRangeVar;
 
   vector<double> _azimuth;
   vector<double> _elevation;
@@ -214,20 +214,20 @@ private:
   string _azimuthUnits, _elevationUnits;
   string _gateWidthUnits, _startRangeUnits;
 
-  NcVar *_startGateVar;
-  NcVar *_gcfStateVar;
-  NcVar *_polarizationModeVar;
-  NcVar *_prtModeVar;
+  Nc3Var *_startGateVar;
+  Nc3Var *_gcfStateVar;
+  Nc3Var *_polarizationModeVar;
+  Nc3Var *_prtModeVar;
 
   vector<int> _startGate;
   vector<int> _gcfState;
   vector<int> _polarizationMode;
   vector<int> _prtMode;
   
-  NcVar *_txFreqShortVar;
-  NcVar *_txFreqMediumVar;
-  NcVar *_txLengthShortVar;
-  NcVar *_txLengthMediumVar;
+  Nc3Var *_txFreqShortVar;
+  Nc3Var *_txFreqMediumVar;
+  Nc3Var *_txLengthShortVar;
+  Nc3Var *_txLengthMediumVar;
   
   vector<double> _txFreqShort;
   vector<double> _txFreqMedium;
@@ -237,10 +237,10 @@ private:
   string _txFreqShortUnits, _txFreqMediumUnits;
   string _txLengthShortUnits, _txLengthMediumUnits;
   
-  NcVar *_txPowerHShortVar;
-  NcVar *_txPowerHMediumVar;
-  NcVar *_txPowerVShortVar;
-  NcVar *_txPowerVMediumVar;
+  Nc3Var *_txPowerHShortVar;
+  Nc3Var *_txPowerHMediumVar;
+  Nc3Var *_txPowerVShortVar;
+  Nc3Var *_txPowerVMediumVar;
 
   vector<double> _txPowerHShort;
   vector<double> _txPowerHMedium;
@@ -250,10 +250,10 @@ private:
   string _txPowerHShortUnits, _txPowerHMediumUnits;
   string _txPowerVShortUnits, _txPowerVMediumUnits;
 
-  NcVar *_txPhaseHShortVar;
-  NcVar *_txPhaseHMediumVar;
-  NcVar *_txPhaseVShortVar;
-  NcVar *_txPhaseVMediumVar;
+  Nc3Var *_txPhaseHShortVar;
+  Nc3Var *_txPhaseHMediumVar;
+  Nc3Var *_txPhaseVShortVar;
+  Nc3Var *_txPhaseVMediumVar;
   
   vector<double> _txPhaseHShort;
   vector<double> _txPhaseHMedium;
@@ -263,18 +263,18 @@ private:
   string _txPhaseHShortUnits, _txPhaseHMediumUnits;
   string _txPhaseVShortUnits, _txPhaseVMediumUnits;
 
-  NcVar *_noiseSourcePowerHShortVar;
-  NcVar *_noiseSourcePowerVShortVar;
+  Nc3Var *_noiseSourcePowerHShortVar;
+  Nc3Var *_noiseSourcePowerVShortVar;
 
   vector<double> _noiseSourcePowerHShort;
   vector<double> _noiseSourcePowerVShort;
 
   string _noiseSourcePowerHShortUnits, _noiseSourcePowerVShortUnits;
 
-  NcVar *_rxGainHShortVar;
-  NcVar *_rxGainHMediumVar;
-  NcVar *_rxGainVShortVar;
-  NcVar *_rxGainVMediumVar;
+  Nc3Var *_rxGainHShortVar;
+  Nc3Var *_rxGainHMediumVar;
+  Nc3Var *_rxGainVShortVar;
+  Nc3Var *_rxGainVMediumVar;
   
   vector<double> _rxGainHShort;
   vector<double> _rxGainHMedium;
@@ -284,8 +284,8 @@ private:
   string _rxGainHShortUnits, _rxGainHMediumUnits;
   string _rxGainVShortUnits, _rxGainVMediumUnits;
 
-  NcVar *_zdrBiasAppliedShortVar;
-  NcVar *_zdrBiasAppliedMediumVar;
+  Nc3Var *_zdrBiasAppliedShortVar;
+  Nc3Var *_zdrBiasAppliedMediumVar;
   
   vector<double> _zdrBiasAppliedShort;
   vector<double> _zdrBiasAppliedMedium;
@@ -354,21 +354,21 @@ private:
   int _createRays(const string &path);
   int _readFieldVariables(bool metaOnly);
   
-  int _readRayVar(NcVar* &var, const string &name, string &units,
+  int _readRayVar(Nc3Var* &var, const string &name, string &units,
                   vector<double> &vals, bool required = true);
-  int _readRayVar(NcVar* &var, const string &name, string &units,
+  int _readRayVar(Nc3Var* &var, const string &name, string &units,
                   vector<int> &vals, bool required = true);
-  int _readRayVar(NcVar* &var, const string &name,
+  int _readRayVar(Nc3Var* &var, const string &name,
                   vector<int> &vals, bool required = true);
   
-  NcVar* _getRayVar(const string &name, bool required);
+  Nc3Var* _getRayVar(const string &name, bool required);
 
-  int _addFl64FieldToRays(NcVar* var,
+  int _addFl64FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           bool isDiscrete, bool fieldFolds,
                           float foldLimitLower, float foldLimitUpper);
-  int _addFl32FieldToRays(NcVar* var,
+  int _addFl32FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           bool isDiscrete, bool fieldFolds,

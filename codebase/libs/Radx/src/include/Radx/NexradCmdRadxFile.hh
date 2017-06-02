@@ -47,7 +47,7 @@
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxRay.hh>
-#include <Radx/NetcdfClassic.hh>
+#include <Ncxx/Nc3xFile.hh>
 
 class RadxField;
 class RadxVol;
@@ -174,13 +174,13 @@ private:
 
   // netcdf file
   
-  NetcdfClassic _file;
+  Nc3xFile _file;
 
   // dimensions
 
-  NcDim *_timeDim;
-  NcDim *_rangeDim;
-  NcDim *_rangeMaskDim;
+  Nc3Dim *_timeDim;
+  Nc3Dim *_rangeDim;
+  Nc3Dim *_rangeMaskDim;
 
   // times
   
@@ -189,7 +189,7 @@ private:
   
   // range
 
-  NcVar *_rangeVar;
+  Nc3Var *_rangeVar;
   vector<double> _rangeKm;
   size_t _nRangeInFile;
   size_t _nRangeMask;
@@ -199,9 +199,9 @@ private:
 
   // georef variables
   
-  // NcVar *_latitudeVar;
-  // NcVar *_longitudeVar;
-  // NcVar *_altitudeVar;
+  // Nc3Var *_latitudeVar;
+  // Nc3Var *_longitudeVar;
+  // Nc3Var *_altitudeVar;
   
   // double _latitudeDeg;
   // double _longitudeDeg;
@@ -209,15 +209,15 @@ private:
 
   // ray variables
 
-  NcVar *_startAzVar;
-  NcVar *_endAzVar;
-  NcVar *_startElVar;
-  NcVar *_endElVar;
-  NcVar *_startTimeVar;
-  NcVar *_endTimeVar;
-  NcVar *_hNoiseVar;
-  NcVar *_vNoiseVar;
-  NcVar *_dbz0Var;
+  Nc3Var *_startAzVar;
+  Nc3Var *_endAzVar;
+  Nc3Var *_startElVar;
+  Nc3Var *_endElVar;
+  Nc3Var *_startTimeVar;
+  Nc3Var *_endTimeVar;
+  Nc3Var *_hNoiseVar;
+  Nc3Var *_vNoiseVar;
+  Nc3Var *_dbz0Var;
 
   vector<double> _startAz;
   vector<double> _endAz;
@@ -290,24 +290,24 @@ private:
   int _createRays(const string &path);
   int _readFieldVariables();
 
-  int _readRayVar(NcVar* &var, const string &name, 
+  int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<double> &vals, bool required = true);
-  int _readRayVar(NcVar* &var, const string &name, 
+  int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<int> &vals, bool required = true);
   
-  NcVar* _getRayVar(const string &name, bool required);
+  Nc3Var* _getRayVar(const string &name, bool required);
   
-  int _addFl64FieldToRays(NcVar* var,
+  int _addFl64FieldToRays(Nc3Var* var,
                           const string &name,
                           const string &units,
                           const string &longName);
 
-  int _addFl32FieldToRays(NcVar* var,
+  int _addFl32FieldToRays(Nc3Var* var,
                           const string &name,
                           const string &units,
                           const string &longName);
 
-  int _addSi08FieldToRays(NcVar* var,
+  int _addSi08FieldToRays(Nc3Var* var,
                           const string &name,
                           const string &units,
                           const string &longName);

@@ -576,7 +576,7 @@ int ForayNcRadxFile::_addGlobalAttributes()
 ///////////////////////////////////////////////////////////////////////////
 // addDimensions()
 //
-//  Add NcDims to the NetCDF file. We loop through the
+//  Add Nc3Dims to the NetCDF file. We loop through the
 //  GridInfo objects and record the dimensions of the
 //  x and y coordinates. Then we loop through the VlevelInfo
 //  objects and record the dimensions of the vertical coordinates
@@ -660,13 +660,13 @@ int ForayNcRadxFile::_addTimeVariables()
 int ForayNcRadxFile::_addFieldNamesVariable()
 {
   
-  _field_namesVar = _file.getNcFile()->add_var("field_names",  ncChar,
+  _field_namesVar = _file.getNc3File()->add_var("field_names",  nc3Char,
                                                _fieldsDim, _short_stringDim);
 
   if (_field_namesVar == NULL) {
     _addErrStr("ERROR - ForayNcRadxFile::_addFieldNamesVariable");
     _addErrStr("  Cannot add var field_names");
-    _addErrStr("  Type: ", _file.ncTypeToStr(ncChar));
+    _addErrStr("  Type: ", _file.ncTypeToStr(nc3Char));
     _addErrStr("  Dim0: ", _fieldsDim->name());
     _addErrStr("  Dim1: ", _short_stringDim->name());
     _addErrStr(_file.getNcError()->get_errmsg());
@@ -688,25 +688,25 @@ int ForayNcRadxFile::_addScalarVariables()
     cerr << "ForayNcRadxFile::_addScalarVariables()" << endl;
   }
 
-  iret |= _addVar(_Fixed_AngleVar, ncFloat, "Fixed_Angle", 
+  iret |= _addVar(_Fixed_AngleVar, nc3Float, "Fixed_Angle", 
                   "Targeted fixed angle for this scan", "degrees");
   
-  iret |= _addVar(_Range_to_First_CellVar, ncFloat, "Range_to_First_Cell", 
+  iret |= _addVar(_Range_to_First_CellVar, nc3Float, "Range_to_First_Cell", 
                   "Range to the center of the first cell", "meters");
   
-  iret |= _addVar(_Cell_Spacing_MethodVar, ncInt, "Cell_Spacing_Method", 
+  iret |= _addVar(_Cell_Spacing_MethodVar, nc3Int, "Cell_Spacing_Method", 
                   "Technique for recording cell spacing: 0 = by vector, 1 = by segment", 
                   "");
-  iret |= _addVar(_Cell_SpacingVar, ncFloat, "Cell_Spacing", 
+  iret |= _addVar(_Cell_SpacingVar, nc3Float, "Cell_Spacing", 
                   "Distance between cells", "meters");
   
-  iret |= _addVar(_Nyquist_VelocityVar, ncFloat, "Nyquist_Velocity", 
+  iret |= _addVar(_Nyquist_VelocityVar, nc3Float, "Nyquist_Velocity", 
                   "Effective unambigous velocity", "meters/second");
   
-  iret |= _addVar(_Unambiguous_RangeVar, ncFloat, "Unambiguous_Range", 
+  iret |= _addVar(_Unambiguous_RangeVar, nc3Float, "Unambiguous_Range", 
                   "Effective unambigous range", "meters");
   
-  iret |= _addVar(_LatitudeVar, ncDouble, "Latitude", 
+  iret |= _addVar(_LatitudeVar, nc3Double, "Latitude", 
                   "Latitude of the instrument", "degrees");
   
   double range[2];
@@ -714,14 +714,14 @@ int ForayNcRadxFile::_addScalarVariables()
   range[1] = 90.0;
   _LatitudeVar->add_att("valid_range", 2, range);
 
-  iret |= _addVar(_LongitudeVar, ncDouble, "Longitude", 
+  iret |= _addVar(_LongitudeVar, nc3Double, "Longitude", 
                   "Longitude of the instrument", "degrees");
   
   range[0] = -360.0;
   range[1] = 360.0;
   _LongitudeVar->add_att("valid_range", 2, range);
 
-  iret |= _addVar(_AltitudeVar, ncDouble, "Altitude", 
+  iret |= _addVar(_AltitudeVar, nc3Double, "Altitude", 
                   "Altitude in meters (asl) of the instrument", "meters");
   
   range[0] = -10000.0;
@@ -748,268 +748,268 @@ int ForayNcRadxFile::_addNumSystemsVariables()
   
   int iret = 0;
 
-  iret |= _addVar(_Radar_ConstantVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_Radar_ConstantVar, _numSystemsDim, nc3Float,
                   "Radar_Constant",
                   "Radar Constant",
                   "mm6/(m3.mW.km-2)");
 
-  iret |= _addVar(_rcvr_gainVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_rcvr_gainVar, _numSystemsDim, nc3Float,
                   "rcvr_gain",
                   "Receiver Gain",
                   "dB");
 
-  iret |= _addVar(_ant_gainVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_ant_gainVar, _numSystemsDim, nc3Float,
                   "ant_gain",
                   "Antenna Gain",
                   "dB");
 
-  iret |= _addVar(_sys_gainVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_sys_gainVar, _numSystemsDim, nc3Float,
                   "sys_gain",
                   "System Gain",
                   "dB");
 
-  iret |= _addVar(_bm_widthVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_bm_widthVar, _numSystemsDim, nc3Float,
                   "bm_width",
                   "Beam Width",
                   "degrees");
 
-  iret |= _addVar(_pulse_widthVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_pulse_widthVar, _numSystemsDim, nc3Float,
                   "pulse_width",
                   "Pulse Width",
                   "seconds");
 
-  iret |= _addVar(_band_widthVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_band_widthVar, _numSystemsDim, nc3Float,
                   "band_width",
                   "Band Width",
                   "hertz");
 
-  iret |= _addVar(_peak_pwrVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_peak_pwrVar, _numSystemsDim, nc3Float,
                   "peak_pwr",
                   "Peak Power",
                   "watts");
 
-  iret |= _addVar(_xmtr_pwrVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_xmtr_pwrVar, _numSystemsDim, nc3Float,
                   "xmtr_pwr",
                   "Transmitter Power",
                   "dBM");
 
-  iret |= _addVar(_noise_pwrVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_noise_pwrVar, _numSystemsDim, nc3Float,
                   "noise_pwr",
                   "Noise Power",
                   "dBM");
 
-  iret |= _addVar(_tst_pls_pwrVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_tst_pls_pwrVar, _numSystemsDim, nc3Float,
                   "tst_pls_pwr",
                   "Test Pulse Power",
                   "dBM");
 
-  iret |= _addVar(_tst_pls_rng0Var, _numSystemsDim, ncFloat,
+  iret |= _addVar(_tst_pls_rng0Var, _numSystemsDim, nc3Float,
                   "tst_pls_rng0",
                   "Range to start of test pulse",
                   "meters");
 
-  iret |= _addVar(_tst_pls_rng1Var, _numSystemsDim, ncFloat,
+  iret |= _addVar(_tst_pls_rng1Var, _numSystemsDim, nc3Float,
                   "tst_pls_rng1",
                   "Range to end of test pulse",
                   "meters");
 
-  iret |= _addVar(_WavelengthVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_WavelengthVar, _numSystemsDim, nc3Float,
                   "Wavelength",
                   "System wavelength",
                   "meters");
 
-  iret |= _addVar(_PRFVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_PRFVar, _numSystemsDim, nc3Float,
                   "PRF",
                   "System pulse repetition frequency",
                   "pulses/sec");
 
-  iret |= _addVar(_calibration_data_presentVar, _numSystemsDim, ncInt,
+  iret |= _addVar(_calibration_data_presentVar, _numSystemsDim, nc3Int,
                   "calibration_data_present",
                   "Used as bool; 0 = calibration variables used, "
                   "1 = calibration variables not used",
                   "");
 
-  iret |= _addVar(_ant_gain_h_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_ant_gain_h_dbVar, _numSystemsDim, nc3Float,
                   "ant_gain_h_db",
                   "Antenna gain H in db",
                   "dB");
 
-  iret |= _addVar(_ant_gain_v_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_ant_gain_v_dbVar, _numSystemsDim, nc3Float,
                   "ant_gain_v_db",
                   "Antenna gain V in db",
                   "dB");
 
-  iret |= _addVar(_xmit_power_h_dbmVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_xmit_power_h_dbmVar, _numSystemsDim, nc3Float,
                   "xmit_power_h_dbm",
                   "Peak transmit H power in dBm",
                   "dBm");
 
-  iret |= _addVar(_xmit_power_v_dbmVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_xmit_power_v_dbmVar, _numSystemsDim, nc3Float,
                   "xmit_power_v_dbm",
                   "Peak transmit V power in dBm",
                   "dBm");
 
-  iret |= _addVar(_two_way_waveguide_loss_h_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_two_way_waveguide_loss_h_dbVar, _numSystemsDim, nc3Float,
                   "two_way_waveguide_loss_h_db",
                   "two way H waveguide loss in dB",
                   "dB");
 
-  iret |= _addVar(_two_way_waveguide_loss_v_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_two_way_waveguide_loss_v_dbVar, _numSystemsDim, nc3Float,
                   "two_way_waveguide_loss_v_db",
                   "two way V waveguide loss in dB",
                   "dB");
 
-  iret |= _addVar(_two_way_radome_loss_h_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_two_way_radome_loss_h_dbVar, _numSystemsDim, nc3Float,
                   "two_way_radome_loss_h_db",
                   "two way H radome loss in dB",
                   "dB");
 
-  iret |= _addVar(_two_way_radome_loss_v_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_two_way_radome_loss_v_dbVar, _numSystemsDim, nc3Float,
                   "two_way_radome_loss_v_db",
                   "two way V radome loss in dB",
                   "dB");
 
-  iret |= _addVar(_receiver_mismatch_loss_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_receiver_mismatch_loss_dbVar, _numSystemsDim, nc3Float,
                   "receiver_mismatch_loss_db",
                   "Receiver mismatch loss in dB",
                   "dB");
 
-  iret |= _addVar(_radar_constant_hVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_radar_constant_hVar, _numSystemsDim, nc3Float,
                   "radar_constant_h",
                   "Radar constant H",
                   "mm6/(m3.mW.km-2)");
 
-  iret |= _addVar(_radar_constant_vVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_radar_constant_vVar, _numSystemsDim, nc3Float,
                   "radar_constant_v",
                   "Radar constant V",
                   "mm6/(m3.mW.km-2)");
 
-  iret |= _addVar(_noise_hc_dbmVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_noise_hc_dbmVar, _numSystemsDim, nc3Float,
                   "noise_hc_dbm",
                   "calibrated moise value H co-polar",
                   "dBm");
 
-  iret |= _addVar(_noise_vc_dbmVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_noise_vc_dbmVar, _numSystemsDim, nc3Float,
                   "noise_vc_dbm",
                   "calibrated moise value V co-polar",
                   "dBm");
 
-  iret |= _addVar(_noise_hx_dbmVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_noise_hx_dbmVar, _numSystemsDim, nc3Float,
                   "noise_hx_dbm",
                   "calibrated moise value H cross-polar",
                   "dBm");
 
-  iret |= _addVar(_noise_vx_dbmVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_noise_vx_dbmVar, _numSystemsDim, nc3Float,
                   "noise_vx_dbm",
                   "calibrated moise value V cross-polar",
                   "dBm");
 
-  iret |= _addVar(_receiver_gain_hc_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_receiver_gain_hc_dbVar, _numSystemsDim, nc3Float,
                   "receiver_gain_hc_db",
                   "Receiver gain H co-polar",
                   "dB");
 
-  iret |= _addVar(_receiver_gain_vc_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_receiver_gain_vc_dbVar, _numSystemsDim, nc3Float,
                   "receiver_gain_vc_db",
                   "Receiver gain V co-polar",
                   "dB");
 
-  iret |= _addVar(_receiver_gain_hx_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_receiver_gain_hx_dbVar, _numSystemsDim, nc3Float,
                   "receiver_gain_hx_db",
                   "Receiver gain H cross-polar",
                   "dB");
 
-  iret |= _addVar(_receiver_gain_vx_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_receiver_gain_vx_dbVar, _numSystemsDim, nc3Float,
                   "receiver_gain_vx_db",
                   "Receiver gain V cross-polar",
                   "dB");
 
-  iret |= _addVar(_base_1km_hc_dbzVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_base_1km_hc_dbzVar, _numSystemsDim, nc3Float,
                   "base_1km_hc_dbz",
                   "Base reflectivity at 1km, H co-polar",
                   "dBz");
 
-  iret |= _addVar(_base_1km_vc_dbzVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_base_1km_vc_dbzVar, _numSystemsDim, nc3Float,
                   "base_1km_vc_dbz",
                   "Base reflectivity at 1km, V co-polar",
                   "dBz");
 
-  iret |= _addVar(_base_1km_hx_dbzVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_base_1km_hx_dbzVar, _numSystemsDim, nc3Float,
                   "base_1km_hx_dbz",
                   "Base reflectivity at 1km, H cross-polar",
                   "dBz");
 
-  iret |= _addVar(_base_1km_vx_dbzVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_base_1km_vx_dbzVar, _numSystemsDim, nc3Float,
                   "base_1km_vx_dbz",
                   "Base reflectivity at 1km, V cross-polar",
                   "dBz");
 
-  iret |= _addVar(_sun_power_hc_dbmVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_sun_power_hc_dbmVar, _numSystemsDim, nc3Float,
                   "sun_power_hc_dbm",
                   "Sun power H co-polar",
                   "dBm");
 
-  iret |= _addVar(_sun_power_vc_dbmVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_sun_power_vc_dbmVar, _numSystemsDim, nc3Float,
                   "sun_power_vc_dbm",
                   "Sun power V co-polar",
                   "dBm");
 
-  iret |= _addVar(_sun_power_hx_dbmVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_sun_power_hx_dbmVar, _numSystemsDim, nc3Float,
                   "sun_power_hx_dbm",
                   "Sun power H cross-polar",
                   "dBm");
 
-  iret |= _addVar(_sun_power_vx_dbmVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_sun_power_vx_dbmVar, _numSystemsDim, nc3Float,
                   "sun_power_vx_dbm",
                   "Sun power V cross-polar",
                   "dBm");
 
-  iret |= _addVar(_noise_source_power_h_dbmVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_noise_source_power_h_dbmVar, _numSystemsDim, nc3Float,
                   "noise_source_power_h_dbm",
                   "Noise source power H in dBm",
                   "dBm");
 
-  iret |= _addVar(_noise_source_power_v_dbmVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_noise_source_power_v_dbmVar, _numSystemsDim, nc3Float,
                   "noise_source_power_v_dbm",
                   "Noise source power V in dBm",
                   "dBm");
 
-  iret |= _addVar(_power_measure_loss_h_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_power_measure_loss_h_dbVar, _numSystemsDim, nc3Float,
                   "power_measure_loss_h_db",
                   "power measurement loss H in dB",
                   "dB");
 
-  iret |= _addVar(_power_measure_loss_v_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_power_measure_loss_v_dbVar, _numSystemsDim, nc3Float,
                   "power_measure_loss_v_db",
                   "power measurement loss V in dB",
                   "dB");
 
-  iret |= _addVar(_coupler_forward_loss_h_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_coupler_forward_loss_h_dbVar, _numSystemsDim, nc3Float,
                   "coupler_forward_loss_h_db",
                   "Directional coupler forward loss H in dB",
                   "dB");
 
-  iret |= _addVar(_coupler_forward_loss_v_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_coupler_forward_loss_v_dbVar, _numSystemsDim, nc3Float,
                   "coupler_forward_loss_v_db",
                   "Directional coupler forward loss V in dB",
                   "dB");
 
-  iret |= _addVar(_zdr_correction_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_zdr_correction_dbVar, _numSystemsDim, nc3Float,
                   "zdr_correction_db",
                   "zdr correction in dB",
                   "dB");
 
-  iret |= _addVar(_ldr_correction_h_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_ldr_correction_h_dbVar, _numSystemsDim, nc3Float,
                   "ldr_correction_h_db",
                   "ldr correction H in dB",
                   "dB");
 
-  iret |= _addVar(_ldr_correction_v_dbVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_ldr_correction_v_dbVar, _numSystemsDim, nc3Float,
                   "ldr_correction_v_db",
                   "ldr correction V in dB",
                   "dB");
 
-  iret |= _addVar(_system_phidp_degVar, _numSystemsDim, ncFloat,
+  iret |= _addVar(_system_phidp_degVar, _numSystemsDim, nc3Float,
                   "system_phidp_deg",
                   "system phidp, degrees",
                   "degrees");
@@ -1039,7 +1039,7 @@ int ForayNcRadxFile::_addTimeArrayVariables()
                             "time offset of the current record from base_time",
                             "seconds");
   
-  iret |= _addVar(_AzimuthVar, _TimeDim, ncFloat,
+  iret |= _addVar(_AzimuthVar, _TimeDim, nc3Float,
                   "Azimuth",
                   "Earth relative azimuth of the ray",
                   "degrees");
@@ -1048,7 +1048,7 @@ int ForayNcRadxFile::_addTimeArrayVariables()
   _AzimuthVar->add_att("valid_range", 2, range);
   _AzimuthVar->add_att("comment", "Degrees clockwise from true North");
 
-  iret |= _addVar(_ElevationVar, _TimeDim, ncFloat,
+  iret |= _addVar(_ElevationVar, _TimeDim, nc3Float,
                   "Elevation",
                   "Earth relative elevation of the ray",
                   "degrees");
@@ -1056,7 +1056,7 @@ int ForayNcRadxFile::_addTimeArrayVariables()
   _ElevationVar->add_att("valid_range", 2, range);
   _ElevationVar->add_att("comment", "Degrees from earth tangent towards zenith");
   
-  iret |= _addVar(_clip_rangeVar, _TimeDim, ncFloat,
+  iret |= _addVar(_clip_rangeVar, _TimeDim, nc3Float,
                   "clip_range",
                   "Range of last useful cell",
                   "meters");
@@ -1085,12 +1085,12 @@ int ForayNcRadxFile::_addDataFieldVariables()
     RadxField &field = *_writeVol->getFields()[ifield];
     field.convertToSi16();
     
-    NcVar *var = _file.getNcFile()->add_var(field.getName().c_str(),
-                                            ncShort, _TimeDim, _maxCellsDim);
+    Nc3Var *var = _file.getNc3File()->add_var(field.getName().c_str(),
+                                            nc3Short, _TimeDim, _maxCellsDim);
     if (var == NULL) {
       _addErrStr("ERROR - ForayNcRadxFile::_addDataFieldVariables");
       _addErrStr("  Cannot add data field var, name: ", field.getName());
-      _addErrStr("  Type: ", _file.ncTypeToStr(ncShort));
+      _addErrStr("  Type: ", _file.ncTypeToStr(nc3Short));
       _addErrStr("  Dim0: ", _TimeDim->name());
       _addErrStr("  Dim1: ", _maxCellsDim->name());
       _addErrStr(_file.getNcError()->get_errmsg());
@@ -1179,18 +1179,18 @@ int ForayNcRadxFile::_addDataFieldVariables()
 //////////////////////////////////////////////
 // add time variable
 
-int ForayNcRadxFile::_addTimeVar(NcVar* &var,
+int ForayNcRadxFile::_addTimeVar(Nc3Var* &var,
                                  const string &name,
                                  const string &longName,
                                  const string &units)
 
 {
   
-  var = _file.getNcFile()->add_var(name.c_str(), ncInt);
+  var = _file.getNc3File()->add_var(name.c_str(), nc3Int);
   if (var == NULL) {
     _addErrStr("ERROR - ForayNcRadxFile::_addTimeVar");
     _addErrStr("  Cannot add time var, name: ", name);
-    _addErrStr("  Type: ", _file.ncTypeToStr(ncInt));
+    _addErrStr("  Type: ", _file.ncTypeToStr(nc3Int));
     _addErrStr(_file.getNcError()->get_errmsg());
     return -1;
   }
@@ -1214,15 +1214,15 @@ int ForayNcRadxFile::_addTimeVar(NcVar* &var,
 //////////////////////////////////////////////
 // add variable
 
-int ForayNcRadxFile::_addVar(NcVar* &var,
-                             NcType ncType,
+int ForayNcRadxFile::_addVar(Nc3Var* &var,
+                             Nc3Type ncType,
                              const string &name,
                              const string &longName,
                              const string &units)
   
 {
   
-  var = _file.getNcFile()->add_var(name.c_str(), ncType);
+  var = _file.getNc3File()->add_var(name.c_str(), ncType);
   if (var == NULL) {
     _addErrStr("ERROR - ForayNcRadxFile::_addVar");
     _addErrStr("  Cannot add var, name: ", name);
@@ -1244,7 +1244,7 @@ int ForayNcRadxFile::_addVar(NcVar* &var,
   }
   
   switch (ncType) {
-    case ncDouble:
+    case nc3Double:
       if (_file.addAttr(var, FILL_VALUE, missingDouble)) {
         return -1;
       }
@@ -1252,7 +1252,7 @@ int ForayNcRadxFile::_addVar(NcVar* &var,
         return -1;
       }
       break;
-    case ncFloat:
+    case nc3Float:
       if (_file.addAttr(var, FILL_VALUE, missingFloat)) {
         return -1;
       }
@@ -1260,7 +1260,7 @@ int ForayNcRadxFile::_addVar(NcVar* &var,
         return -1;
       }
       break;
-    case ncInt:
+    case nc3Int:
     default:
       if (_file.addAttr(var, FILL_VALUE, missingInt)) {
         return -1;
@@ -1274,16 +1274,16 @@ int ForayNcRadxFile::_addVar(NcVar* &var,
   
 }
 
-int ForayNcRadxFile::_addVar(NcVar* &var,
-                             NcDim *dim,
-                             NcType ncType,
+int ForayNcRadxFile::_addVar(Nc3Var* &var,
+                             Nc3Dim *dim,
+                             Nc3Type ncType,
                              const string &name,
                              const string &longName,
                              const string &units)
   
 {
   
-  var = _file.getNcFile()->add_var(name.c_str(), ncType, dim);
+  var = _file.getNc3File()->add_var(name.c_str(), ncType, dim);
   if (var == NULL) {
     _addErrStr("ERROR - ForayNcRadxFile::_addVar");
     _addErrStr("  Cannot add var, name: ", name);
@@ -1308,7 +1308,7 @@ int ForayNcRadxFile::_addVar(NcVar* &var,
   }
   
   switch (ncType) {
-    case ncDouble:
+    case nc3Double:
       if (_file.addAttr(var, FILL_VALUE, missingDouble)) {
         _addErrStr(_file.getErrStr());
         return -1;
@@ -1318,7 +1318,7 @@ int ForayNcRadxFile::_addVar(NcVar* &var,
         return -1;
       }
       break;
-    case ncFloat:
+    case nc3Float:
       if (_file.addAttr(var, FILL_VALUE, missingFloat)) {
         _addErrStr(_file.getErrStr());
         return -1;
@@ -1328,7 +1328,7 @@ int ForayNcRadxFile::_addVar(NcVar* &var,
         return -1;
       }
       break;
-    case ncInt:
+    case nc3Int:
     default:
       if (_file.addAttr(var, FILL_VALUE, (int) -32768)) {
         _addErrStr(_file.getErrStr());
@@ -1344,19 +1344,19 @@ int ForayNcRadxFile::_addVar(NcVar* &var,
   
 }
 
-int ForayNcRadxFile::_addTimeOffsetVar(NcVar* &var,
-                                       NcDim *dim,
+int ForayNcRadxFile::_addTimeOffsetVar(Nc3Var* &var,
+                                       Nc3Dim *dim,
                                        const string &name,
                                        const string &longName,
                                        const string &units)
 
 {
   
-  var = _file.getNcFile()->add_var(name.c_str(), ncDouble, dim);
+  var = _file.getNc3File()->add_var(name.c_str(), nc3Double, dim);
   if (var == NULL) {
     _addErrStr("ERROR - ForayNcRadxFile::_addTimeOffsetVar");
     _addErrStr("  Cannot add var, name: ", name);
-    _addErrStr("  Type: ", _file.ncTypeToStr(ncDouble));
+    _addErrStr("  Type: ", _file.ncTypeToStr(nc3Double));
     _addErrStr("  Dim: ", dim->name());
     _addErrStr(_file.getNcError()->get_errmsg());
     return -1;
@@ -1811,7 +1811,7 @@ int ForayNcRadxFile::_writeDataFieldVariables()
   int iret = 0;
   for (size_t ifield = 0; ifield < _writeVol->getNFields(); ifield++) {
     RadxField &field = *_writeVol->getFields()[ifield];
-    NcVar *var = _dataFieldVars[ifield];
+    Nc3Var *var = _dataFieldVars[ifield];
     iret |= !var->put((short *) field.getData(),
                       _writeVol->getNRays(), _writeVol->getMaxNGates());
   } // ifield
@@ -1828,7 +1828,7 @@ int ForayNcRadxFile::_writeDataFieldVariables()
 ////////////////////////////////////////////////
 // write numSystems variable
 
-int ForayNcRadxFile::_writeNumSystemsVar(NcVar *var, float val)
+int ForayNcRadxFile::_writeNumSystemsVar(Nc3Var *var, float val)
 {
   if (_file.writeVar(var, _numSystemsDim, &val)) {
     _addErrStr(_file.getErrStr());
@@ -1854,7 +1854,7 @@ int ForayNcRadxFile::_writeCalibDataPresent(int val)
 ///////////////////////////////////////////////////////////////////////////
 // Set output compression for variable
 
-int ForayNcRadxFile::_setCompression(NcVar *var)  
+int ForayNcRadxFile::_setCompression(Nc3Var *var)  
 {
   
   if (_ncFormat == NETCDF_CLASSIC || _ncFormat == NETCDF_OFFSET_64BIT) {
@@ -1872,7 +1872,7 @@ int ForayNcRadxFile::_setCompression(NcVar *var)
     return 0;
   }
 
-  int fileId = _file.getNcFile()->id();
+  int fileId = _file.getNc3File()->id();
   int varId = var->id();
   int shuffle = 0;
   

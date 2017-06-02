@@ -45,7 +45,7 @@
 #include <Radx/RadxCfactors.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxRcalib.hh>
-#include <Radx/NetcdfClassic.hh>
+#include <Ncxx/Nc3xFile.hh>
 
 class RadxField;
 class RadxVol;
@@ -192,99 +192,99 @@ private:
   
   // netcdf file
   
-  NetcdfClassic _file;
+  Nc3xFile _file;
   string _tmpPath;
 
   // NetCDF dimensions
   
-  NcDim *_TimeDim;
-  NcDim *_maxCellsDim;
-  NcDim *_numSystemsDim;
-  NcDim *_fieldsDim;
-  NcDim *_short_stringDim; 
-  NcDim *_long_stringDim;
+  Nc3Dim *_TimeDim;
+  Nc3Dim *_maxCellsDim;
+  Nc3Dim *_numSystemsDim;
+  Nc3Dim *_fieldsDim;
+  Nc3Dim *_short_stringDim; 
+  Nc3Dim *_long_stringDim;
 
   // NetCDF scalar variables
 
-  NcVar *_field_namesVar;
-  NcVar *_volume_start_timeVar;
-  NcVar *_base_timeVar;
-  NcVar *_Fixed_AngleVar;
-  NcVar *_Range_to_First_CellVar;
-  NcVar *_Cell_Spacing_MethodVar;
-  NcVar *_Cell_SpacingVar;
-  NcVar *_Nyquist_VelocityVar;
-  NcVar *_Unambiguous_RangeVar;
-  NcVar *_LatitudeVar;
-  NcVar *_LongitudeVar;
-  NcVar *_AltitudeVar;
+  Nc3Var *_field_namesVar;
+  Nc3Var *_volume_start_timeVar;
+  Nc3Var *_base_timeVar;
+  Nc3Var *_Fixed_AngleVar;
+  Nc3Var *_Range_to_First_CellVar;
+  Nc3Var *_Cell_Spacing_MethodVar;
+  Nc3Var *_Cell_SpacingVar;
+  Nc3Var *_Nyquist_VelocityVar;
+  Nc3Var *_Unambiguous_RangeVar;
+  Nc3Var *_LatitudeVar;
+  Nc3Var *_LongitudeVar;
+  Nc3Var *_AltitudeVar;
 
   // NetCDF numSystems variables
 
-  NcVar *_Radar_ConstantVar;
-  NcVar *_rcvr_gainVar;
-  NcVar *_ant_gainVar;
-  NcVar *_sys_gainVar;
-  NcVar *_bm_widthVar;
-  NcVar *_pulse_widthVar;
-  NcVar *_band_widthVar;
-  NcVar *_peak_pwrVar;
-  NcVar *_xmtr_pwrVar;
-  NcVar *_noise_pwrVar;
-  NcVar *_tst_pls_pwrVar;
-  NcVar *_tst_pls_rng0Var;
-  NcVar *_tst_pls_rng1Var;
-  NcVar *_WavelengthVar;
-  NcVar *_PRFVar;
-  NcVar *_ant_gain_h_dbVar;
-  NcVar *_ant_gain_v_dbVar;
-  NcVar *_xmit_power_h_dbmVar;
-  NcVar *_xmit_power_v_dbmVar;
-  NcVar *_two_way_waveguide_loss_h_dbVar;
-  NcVar *_two_way_waveguide_loss_v_dbVar;
-  NcVar *_two_way_radome_loss_h_dbVar;
-  NcVar *_two_way_radome_loss_v_dbVar;
-  NcVar *_receiver_mismatch_loss_dbVar;
-  NcVar *_radar_constant_hVar;
-  NcVar *_radar_constant_vVar;
-  NcVar *_noise_hc_dbmVar;
-  NcVar *_noise_vc_dbmVar;
-  NcVar *_noise_hx_dbmVar;
-  NcVar *_noise_vx_dbmVar;
-  NcVar *_receiver_gain_hc_dbVar;
-  NcVar *_receiver_gain_vc_dbVar;
-  NcVar *_receiver_gain_hx_dbVar;
-  NcVar *_receiver_gain_vx_dbVar;
-  NcVar *_base_1km_hc_dbzVar;
-  NcVar *_base_1km_vc_dbzVar;
-  NcVar *_base_1km_hx_dbzVar;
-  NcVar *_base_1km_vx_dbzVar;
-  NcVar *_sun_power_hc_dbmVar;
-  NcVar *_sun_power_vc_dbmVar;
-  NcVar *_sun_power_hx_dbmVar;
-  NcVar *_sun_power_vx_dbmVar;
-  NcVar *_noise_source_power_h_dbmVar;
-  NcVar *_noise_source_power_v_dbmVar;
-  NcVar *_power_measure_loss_h_dbVar;
-  NcVar *_power_measure_loss_v_dbVar;
-  NcVar *_coupler_forward_loss_h_dbVar;
-  NcVar *_coupler_forward_loss_v_dbVar;
-  NcVar *_zdr_correction_dbVar;
-  NcVar *_ldr_correction_h_dbVar;
-  NcVar *_ldr_correction_v_dbVar;
-  NcVar *_system_phidp_degVar;
-  NcVar *_calibration_data_presentVar;
+  Nc3Var *_Radar_ConstantVar;
+  Nc3Var *_rcvr_gainVar;
+  Nc3Var *_ant_gainVar;
+  Nc3Var *_sys_gainVar;
+  Nc3Var *_bm_widthVar;
+  Nc3Var *_pulse_widthVar;
+  Nc3Var *_band_widthVar;
+  Nc3Var *_peak_pwrVar;
+  Nc3Var *_xmtr_pwrVar;
+  Nc3Var *_noise_pwrVar;
+  Nc3Var *_tst_pls_pwrVar;
+  Nc3Var *_tst_pls_rng0Var;
+  Nc3Var *_tst_pls_rng1Var;
+  Nc3Var *_WavelengthVar;
+  Nc3Var *_PRFVar;
+  Nc3Var *_ant_gain_h_dbVar;
+  Nc3Var *_ant_gain_v_dbVar;
+  Nc3Var *_xmit_power_h_dbmVar;
+  Nc3Var *_xmit_power_v_dbmVar;
+  Nc3Var *_two_way_waveguide_loss_h_dbVar;
+  Nc3Var *_two_way_waveguide_loss_v_dbVar;
+  Nc3Var *_two_way_radome_loss_h_dbVar;
+  Nc3Var *_two_way_radome_loss_v_dbVar;
+  Nc3Var *_receiver_mismatch_loss_dbVar;
+  Nc3Var *_radar_constant_hVar;
+  Nc3Var *_radar_constant_vVar;
+  Nc3Var *_noise_hc_dbmVar;
+  Nc3Var *_noise_vc_dbmVar;
+  Nc3Var *_noise_hx_dbmVar;
+  Nc3Var *_noise_vx_dbmVar;
+  Nc3Var *_receiver_gain_hc_dbVar;
+  Nc3Var *_receiver_gain_vc_dbVar;
+  Nc3Var *_receiver_gain_hx_dbVar;
+  Nc3Var *_receiver_gain_vx_dbVar;
+  Nc3Var *_base_1km_hc_dbzVar;
+  Nc3Var *_base_1km_vc_dbzVar;
+  Nc3Var *_base_1km_hx_dbzVar;
+  Nc3Var *_base_1km_vx_dbzVar;
+  Nc3Var *_sun_power_hc_dbmVar;
+  Nc3Var *_sun_power_vc_dbmVar;
+  Nc3Var *_sun_power_hx_dbmVar;
+  Nc3Var *_sun_power_vx_dbmVar;
+  Nc3Var *_noise_source_power_h_dbmVar;
+  Nc3Var *_noise_source_power_v_dbmVar;
+  Nc3Var *_power_measure_loss_h_dbVar;
+  Nc3Var *_power_measure_loss_v_dbVar;
+  Nc3Var *_coupler_forward_loss_h_dbVar;
+  Nc3Var *_coupler_forward_loss_v_dbVar;
+  Nc3Var *_zdr_correction_dbVar;
+  Nc3Var *_ldr_correction_h_dbVar;
+  Nc3Var *_ldr_correction_v_dbVar;
+  Nc3Var *_system_phidp_degVar;
+  Nc3Var *_calibration_data_presentVar;
 
   // NetCDF time variables
 
-  NcVar *_time_offsetVar;
-  NcVar *_AzimuthVar;
-  NcVar *_ElevationVar;
-  NcVar *_clip_rangeVar;
+  Nc3Var *_time_offsetVar;
+  Nc3Var *_AzimuthVar;
+  Nc3Var *_ElevationVar;
+  Nc3Var *_clip_rangeVar;
 
   // netCDF data fields
 
-  vector<NcVar *> _dataFieldVars;
+  vector<Nc3Var *> _dataFieldVars;
 
   // times
 
@@ -437,31 +437,31 @@ private:
   int _readRayVariables();
   int _readRayVar(const string &name, vector<double> &vals);
   int _readRayVar(const string &name, vector<int> &vals);
-  NcVar* _getRayVar(const string &name);
+  Nc3Var* _getRayVar(const string &name);
   int _readFieldVariables();
-  int _addFl64FieldToRays(NcVar* var, int nPoints,
+  int _addFl64FieldToRays(Nc3Var* var, int nPoints,
                           const string &name,
                           const string &units,
                           const string &standardName,
                           const string &longName);
-  int _addFl32FieldToRays(NcVar* var, int nPoints,
+  int _addFl32FieldToRays(Nc3Var* var, int nPoints,
                           const string &name,
                           const string &units,
                           const string &standardName,
                           const string &longName);
-  int _addSi32FieldToRays(NcVar* var, int nPoints,
+  int _addSi32FieldToRays(Nc3Var* var, int nPoints,
                           const string &name,
                           const string &units,
                           const string &standardName,
                           const string &longName,
                           double scale, double offset);
-  int _addSi16FieldToRays(NcVar* var, int nPoints,
+  int _addSi16FieldToRays(Nc3Var* var, int nPoints,
                           const string &name,
                           const string &units,
                           const string &standardName,
                           const string &longName,
                           double scale, double offset);
-  int _addSi08FieldToRays(NcVar* var, int nPoints,
+  int _addSi08FieldToRays(Nc3Var* var, int nPoints,
                           const string &name,
                           const string &units,
                           const string &standardName,
@@ -494,26 +494,26 @@ private:
   int _addTimeArrayVariables();
   int _addDataFieldVariables();
 
-  int _addTimeVar(NcVar* &var,
+  int _addTimeVar(Nc3Var* &var,
                   const string &name,
                   const string &longName,
                   const string &units);
 
-  int _addVar(NcVar* &var,
-              NcType ncType,
+  int _addVar(Nc3Var* &var,
+              Nc3Type ncType,
               const string &name,
               const string &longName,
               const string &units);
 
-  int _addVar(NcVar* &var,
-              NcDim *dim,
-              NcType ncType,
+  int _addVar(Nc3Var* &var,
+              Nc3Dim *dim,
+              Nc3Type ncType,
               const string &name,
               const string &longName,
               const string &units);
 
-  int _addTimeOffsetVar(NcVar* &var,
-                        NcDim *dim,
+  int _addTimeOffsetVar(Nc3Var* &var,
+                        Nc3Dim *dim,
                         const string &name,
                         const string &longName,
                         const string &units);
@@ -526,13 +526,13 @@ private:
   int _writeAngleVariables();
   int _writeClipRangeVariable();
   int _writeDataFieldVariables();
-  int _writeNumSystemsVar(NcVar *var, float val);
+  int _writeNumSystemsVar(Nc3Var *var, float val);
   int _writeCalibDataPresent(int val);
 
-  NcType _getNcType(Radx::DataType_t dtype);
-  NcFile::FileFormat _getFileFormat(RadxFile::netcdf_format_t format);
+  Nc3Type _getNc3Type(Radx::DataType_t dtype);
+  Nc3File::FileFormat _getFileFormat(RadxFile::netcdf_format_t format);
 
-  int _setCompression(NcVar *var);
+  int _setCompression(Nc3Var *var);
   
 };
 

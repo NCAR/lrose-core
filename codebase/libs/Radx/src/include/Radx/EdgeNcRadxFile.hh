@@ -47,7 +47,7 @@
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxRay.hh>
-#include <Radx/NetcdfClassic.hh>
+#include <Ncxx/Nc3xFile.hh>
 
 class RadxField;
 class RadxVol;
@@ -175,12 +175,12 @@ private:
  
   // netcdf file
   
-  NetcdfClassic _file;
+  Nc3xFile _file;
 
   // dimensions
 
-  NcDim *_azimuthDim;
-  NcDim *_gateDim;
+  Nc3Dim *_azimuthDim;
+  Nc3Dim *_gateDim;
   size_t _nAzimuthsInFile;
   size_t _nGatesInFile;
 
@@ -201,9 +201,9 @@ private:
 
   // ray variables
 
-  NcVar *_azimuthVar;
-  NcVar *_beamWidthVar;
-  NcVar *_gateWidthVar;
+  Nc3Var *_azimuthVar;
+  Nc3Var *_beamWidthVar;
+  Nc3Var *_gateWidthVar;
 
   vector<float> _azimuths;
   vector<float> _beamWidths;
@@ -286,19 +286,19 @@ private:
   int _createRays();
   void _setRangeArray();
 
-  int _readRayVar(NcVar* &var, const string &name, 
+  int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<float> &vals, bool required = true);
   
-  NcVar* _getRayVar(const string &name, bool required);
+  Nc3Var* _getRayVar(const string &name, bool required);
   
   int _readFieldVariable(bool metaOnly);
 
-  int _addFl64FieldToRays(NcVar* var,
+  int _addFl64FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           bool isDiscrete, bool fieldFolds,
                           float foldLimitLower, float foldLimitUpper);
-  int _addFl32FieldToRays(NcVar* var,
+  int _addFl32FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           bool isDiscrete, bool fieldFolds,

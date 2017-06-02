@@ -236,7 +236,7 @@ bool DoeNcRadxFile::isDoeNc(const string &path)
 
   // check existence of some variables
 
-  NcVar *baseTimeVar = _file.getNcFile()->get_var("base_time");
+  Nc3Var *baseTimeVar = _file.getNc3File()->get_var("base_time");
   if (baseTimeVar == NULL) {
     _file.close();
     if (_verbose) {
@@ -246,7 +246,7 @@ bool DoeNcRadxFile::isDoeNc(const string &path)
     return false;
   }
 
-  NcVar *qcTimeVar = _file.getNcFile()->get_var("qc_time");
+  Nc3Var *qcTimeVar = _file.getNc3File()->get_var("qc_time");
   if (qcTimeVar == NULL) {
     _file.close();
     if (_verbose) {
@@ -777,8 +777,8 @@ int DoeNcRadxFile::_readGlobalAttributes()
 
   _statusXml.clear();
   _statusXml += RadxXml::writeStartTag("STATUS", 0);
-  for (int ii = 0; ii < _file.getNcFile()->num_atts(); ii++) {
-    NcAtt *att = _file.getNcFile()->get_att(ii);
+  for (int ii = 0; ii < _file.getNc3File()->num_atts(); ii++) {
+    Nc3Att *att = _file.getNc3File()->get_att(ii);
     if (att != NULL) {
       const char* strc = att->as_string(0);
       string val(strc);
@@ -803,7 +803,7 @@ int DoeNcRadxFile::_readTimes()
 
   // read the time variable
 
-  _timeVar = _file.getNcFile()->get_var("time");
+  _timeVar = _file.getNc3File()->get_var("time");
   if (_timeVar == NULL) {
     _addErrStr("ERROR - DoeNcRadxFile::_readTimes");
     _addErrStr("  Cannot find time variable, name: ", "time");
@@ -815,7 +815,7 @@ int DoeNcRadxFile::_readTimes()
     _addErrStr("  time variable has no dimensions");
     return -1;
   }
-  NcDim *timeDim = _timeVar->get_dim(0);
+  Nc3Dim *timeDim = _timeVar->get_dim(0);
   if (timeDim != _timeDim) {
     _addErrStr("ERROR - DoeNcRadxFile::_readTimes");
     _addErrStr("  Time has incorrect dimension, name: ", timeDim->name());
@@ -824,13 +824,13 @@ int DoeNcRadxFile::_readTimes()
 
   // get units attribute
   
-  NcAtt* unitsAtt = _timeVar->get_att("units");
+  Nc3Att* unitsAtt = _timeVar->get_att("units");
   if (unitsAtt == NULL) {
     _addErrStr("ERROR - DoeNcRadxFile::_readTimes");
     _addErrStr("  Time has no units");
     return -1;
   }
-  string units = NetcdfClassic::asString(unitsAtt);
+  string units = Nc3xFile::asString(unitsAtt);
   delete unitsAtt;
 
 #ifdef NOTNOW
@@ -892,7 +892,7 @@ int DoeNcRadxFile::_readRangeVariable()
 
 {
 
-  _rangeVar = _file.getNcFile()->get_var("range");
+  _rangeVar = _file.getNc3File()->get_var("range");
   if (_rangeVar == NULL || _rangeVar->num_vals() < 1) {
     _addErrStr("ERROR - DoeNcRadxFile::_readRangeVariable");
     _addErrStr("  Cannot read range");
@@ -903,9 +903,9 @@ int DoeNcRadxFile::_readRangeVariable()
   // get units
 
   double kmPerUnit = 1.0; // default - units in km
-  NcAtt* unitsAtt = _rangeVar->get_att("units");
+  Nc3Att* unitsAtt = _rangeVar->get_att("units");
   if (unitsAtt != NULL) {
-    string units = NetcdfClassic::asString(unitsAtt);
+    string units = Nc3xFile::asString(unitsAtt);
     if (units == "m") {
       kmPerUnit = 0.001;
     }
@@ -965,9 +965,9 @@ int DoeNcRadxFile::_readPositionVariables()
     _addErrStr(_file.getNcError()->get_errmsg());
     iret = -1;
   }
-  NcAtt* unitsAtt = _altitudeVar->get_att("units");
+  Nc3Att* unitsAtt = _altitudeVar->get_att("units");
   if (unitsAtt != NULL) {
-    string units = NetcdfClassic::asString(unitsAtt);
+    string units = Nc3xFile::asString(unitsAtt);
     if (units == "m") {
       _altitudeKm /= 1000.0;
     }
@@ -1199,9 +1199,9 @@ int DoeNcRadxFile::_readFieldVariables(bool metaOnly)
 
   // loop through the variables, adding data fields as appropriate
   
-  for (int ivar = 0; ivar < _file.getNcFile()->num_vars(); ivar++) {
+  for (int ivar = 0; ivar < _file.getNc3File()->num_vars(); ivar++) {
     
-    NcVar* var = _file.getNcFile()->get_var(ivar);
+    Nc3Var* var = _file.getNc3File()->get_var(ivar);
     if (var == NULL) {
       continue;
     }
@@ -1212,16 +1212,16 @@ int DoeNcRadxFile::_readFieldVariables(bool metaOnly)
       continue;
     }
     // check that we have the correct dimensions
-    NcDim* timeDim = var->get_dim(0);
-    NcDim* rangeDim = var->get_dim(1);
+    Nc3Dim* timeDim = var->get_dim(0);
+    Nc3Dim* rangeDim = var->get_dim(1);
     if (timeDim != _timeDim || rangeDim != _rangeDim) {
       continue;
     }
     
     // check the type
     string fieldName = var->name();
-    NcType ftype = var->type();
-    if (ftype != ncDouble && ftype != ncFloat) {
+    Nc3Type ftype = var->type();
+    if (ftype != nc3Double && ftype != nc3Float) {
       // not a valid type
       if (_verbose) {
         cerr << "DEBUG - DoeNcRadxFile::_readFieldVariables" << endl;
@@ -1251,23 +1251,23 @@ int DoeNcRadxFile::_readFieldVariables(bool metaOnly)
     string name = var->name();
     
     string standardName;
-    NcAtt *standardNameAtt = var->get_att("standard_name");
+    Nc3Att *standardNameAtt = var->get_att("standard_name");
     if (standardNameAtt != NULL) {
-      standardName = NetcdfClassic::asString(standardNameAtt);
+      standardName = Nc3xFile::asString(standardNameAtt);
       delete standardNameAtt;
     }
     
     string longName;
-    NcAtt *longNameAtt = var->get_att("long_name");
+    Nc3Att *longNameAtt = var->get_att("long_name");
     if (longNameAtt != NULL) {
-      longName = NetcdfClassic::asString(longNameAtt);
+      longName = Nc3xFile::asString(longNameAtt);
       delete longNameAtt;
     }
 
     string units;
-    NcAtt *unitsAtt = var->get_att("units");
+    Nc3Att *unitsAtt = var->get_att("units");
     if (unitsAtt != NULL) {
-      units = NetcdfClassic::asString(unitsAtt);
+      units = Nc3xFile::asString(unitsAtt);
       delete unitsAtt;
     }
 
@@ -1310,7 +1310,7 @@ int DoeNcRadxFile::_readFieldVariables(bool metaOnly)
     bool isDiscrete = false;
 
     switch (var->type()) {
-      case ncDouble: {
+      case nc3Double: {
         if (_addFl64FieldToRays(var, name, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
@@ -1318,7 +1318,7 @@ int DoeNcRadxFile::_readFieldVariables(bool metaOnly)
         }
         break;
       }
-      case ncFloat: {
+      case nc3Float: {
         if (_addFl32FieldToRays(var, name, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
@@ -1349,7 +1349,7 @@ int DoeNcRadxFile::_readFieldVariables(bool metaOnly)
 ///////////////////////////////////
 // read a ray variable - double
 
-int DoeNcRadxFile::_readRayVar(NcVar* &var, const string &name,
+int DoeNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
                                vector<double> &vals, bool required)
 
 {
@@ -1402,7 +1402,7 @@ int DoeNcRadxFile::_readRayVar(NcVar* &var, const string &name,
 ///////////////////////////////////
 // read a ray variable - integer
 
-int DoeNcRadxFile::_readRayVar(NcVar* &var, const string &name,
+int DoeNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
                                vector<int> &vals, bool required)
 
 {
@@ -1456,13 +1456,13 @@ int DoeNcRadxFile::_readRayVar(NcVar* &var, const string &name,
 // get a ray variable by name
 // returns NULL on failure
 
-NcVar* DoeNcRadxFile::_getRayVar(const string &name, bool required)
+Nc3Var* DoeNcRadxFile::_getRayVar(const string &name, bool required)
 
 {
 
   // get var
   
-  NcVar *var = _file.getNcFile()->get_var(name.c_str());
+  Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
     if (required) {
       _addErrStr("ERROR - DoeNcRadxFile::_getRayVar");
@@ -1482,7 +1482,7 @@ NcVar* DoeNcRadxFile::_getRayVar(const string &name, bool required)
     }
     return NULL;
   }
-  NcDim *timeDim = var->get_dim(0);
+  Nc3Dim *timeDim = var->get_dim(0);
   if (timeDim != _timeDim) {
     if (required) {
       _addErrStr("ERROR - DoeNcRadxFile::_getRayVar");
@@ -1501,7 +1501,7 @@ NcVar* DoeNcRadxFile::_getRayVar(const string &name, bool required)
 ///////////////////////////////////
 // read a sweep variable - integer
 
-int DoeNcRadxFile::_readSweepVar(NcVar* &var, const string &name,
+int DoeNcRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
                                  vector<int> &vals, bool required)
 
 {
@@ -1556,13 +1556,13 @@ int DoeNcRadxFile::_readSweepVar(NcVar* &var, const string &name,
 // get a sweep variable
 // returns NULL on failure
 
-NcVar* DoeNcRadxFile::_getSweepVar(const string &name)
+Nc3Var* DoeNcRadxFile::_getSweepVar(const string &name)
 
 {
   
   // get var
   
-  NcVar *var = _file.getNcFile()->get_var(name.c_str());
+  Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
     _addErrStr("ERROR - DoeNcRadxFile::_getSweepVar");
     _addErrStr("  Cannot read variable, name: ", name);
@@ -1578,7 +1578,7 @@ NcVar* DoeNcRadxFile::_getSweepVar(const string &name)
     _addErrStr("  variable has no dimensions");
     return NULL;
   }
-  NcDim *sweepDim = var->get_dim(0);
+  Nc3Dim *sweepDim = var->get_dim(0);
   if (sweepDim != _sweepDim) {
     _addErrStr("ERROR - DoeNcRadxFile::_getSweepVar");
     _addErrStr("  variable name: ", name);
@@ -1597,7 +1597,7 @@ NcVar* DoeNcRadxFile::_getSweepVar(const string &name)
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int DoeNcRadxFile::_addFl64FieldToRays(NcVar* var,
+int DoeNcRadxFile::_addFl64FieldToRays(Nc3Var* var,
                                        const string &name,
                                        const string &units,
                                        const string &standardName,
@@ -1621,7 +1621,7 @@ int DoeNcRadxFile::_addFl64FieldToRays(NcVar* var,
   // set missing value
 
   Radx::fl64 missingVal = Radx::missingFl64;
-  NcAtt *missingValueAtt = var->get_att("missing_value");
+  Nc3Att *missingValueAtt = var->get_att("missing_value");
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
@@ -1676,7 +1676,7 @@ int DoeNcRadxFile::_addFl64FieldToRays(NcVar* var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int DoeNcRadxFile::_addFl32FieldToRays(NcVar* var,
+int DoeNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
                                        const string &name,
                                        const string &units,
                                        const string &standardName,
@@ -1700,7 +1700,7 @@ int DoeNcRadxFile::_addFl32FieldToRays(NcVar* var,
   // set missing value
   
   Radx::fl32 missingVal = Radx::missingFl32;
-  NcAtt *missingValueAtt = var->get_att("missing_value");
+  Nc3Att *missingValueAtt = var->get_att("missing_value");
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
