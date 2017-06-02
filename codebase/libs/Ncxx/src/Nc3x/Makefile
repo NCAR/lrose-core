@@ -42,7 +42,9 @@ HDRS = \
 	../include/Ncxx/Nc3xFile.hh
 
 CPPC_SRCS = \
-	Nc3xFile.cc
+	Nc3xFile.cc \
+	nc3cdf.cc \
+	nc3values.cc
 
 #
 # general targets
