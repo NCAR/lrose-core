@@ -44,8 +44,8 @@
 
 #include <Ncxx/nc3values.hh>    // arrays that know their element type
 
-typedef const char* NcToken;    // names for netCDF objects
-typedef unsigned int NcBool;    // many members return 0 on failure
+typedef const char* Nc3Token;    // names for netCDF objects
+typedef unsigned int Nc3Bool;    // many members return 0 on failure
 
 class Nc3Dim;                    // dimensions
 class Nc3Var;                    // variables
@@ -82,15 +82,15 @@ class Nc3File
 	    size_t initialsize = 0,
 	    FileFormat = Classic );
 
-    NcBool is_valid( void ) const;         // opened OK in ctr, still valid
+    Nc3Bool is_valid( void ) const;         // opened OK in ctr, still valid
 
     int num_dims( void ) const;            // number of dimensions
     int num_vars( void ) const;            // number of variables
     int num_atts( void ) const;            // number of (global) attributes
 
-    Nc3Dim* get_dim( NcToken ) const;       // dimension by name
-    Nc3Var* get_var( NcToken ) const;       // variable by name
-    Nc3Att* get_att( NcToken ) const;       // global attribute by name
+    Nc3Dim* get_dim( Nc3Token ) const;       // dimension by name
+    Nc3Var* get_var( Nc3Token ) const;       // variable by name
+    Nc3Att* get_att( Nc3Token ) const;       // global attribute by name
 
     Nc3Dim* get_dim( int ) const;           // n-th dimension
     Nc3Var* get_var( int ) const;           // n-th variable
@@ -99,33 +99,33 @@ class Nc3File
     
     // Add new dimensions, variables, global attributes.
     // These put the file in "define" mode, so could be expensive.
-    virtual Nc3Dim* add_dim( NcToken dimname, long dimsize );
-    virtual Nc3Dim* add_dim( NcToken dimname );     // unlimited
+    virtual Nc3Dim* add_dim( Nc3Token dimname, long dimsize );
+    virtual Nc3Dim* add_dim( Nc3Token dimname );     // unlimited
 
-    virtual Nc3Var* add_var( NcToken varname, Nc3Type type,       // scalar
+    virtual Nc3Var* add_var( Nc3Token varname, Nc3Type type,       // scalar
                     const Nc3Dim* dim0=0,                // 1-dim
                     const Nc3Dim* dim1=0,                // 2-dim
                     const Nc3Dim* dim2=0,                // 3-dim
                     const Nc3Dim* dim3=0,                // 4-dim
                     const Nc3Dim* dim4=0 );              // 5-dim
-    virtual Nc3Var* add_var( NcToken varname, Nc3Type type,       // n-dim
+    virtual Nc3Var* add_var( Nc3Token varname, Nc3Type type,       // n-dim
                           int ndims, const Nc3Dim** dims );
 
-    NcBool add_att( NcToken attname, char );             // scalar attributes
-    NcBool add_att( NcToken attname, ncbyte );
-    NcBool add_att( NcToken attname, short );
-    NcBool add_att( NcToken attname, long );
-    NcBool add_att( NcToken attname, int );
-    NcBool add_att( NcToken attname, float );
-    NcBool add_att( NcToken attname, double );
-    NcBool add_att( NcToken attname, const char*);       // string attribute
-    NcBool add_att( NcToken attname, int, const char* ); // vector attributes
-    NcBool add_att( NcToken attname, int, const ncbyte* );
-    NcBool add_att( NcToken attname, int, const short* );
-    NcBool add_att( NcToken attname, int, const long* );
-    NcBool add_att( NcToken attname, int, const int* );
-    NcBool add_att( NcToken attname, int, const float* );
-    NcBool add_att( NcToken attname, int, const double* );
+    Nc3Bool add_att( Nc3Token attname, char );             // scalar attributes
+    Nc3Bool add_att( Nc3Token attname, ncbyte );
+    Nc3Bool add_att( Nc3Token attname, short );
+    Nc3Bool add_att( Nc3Token attname, long );
+    Nc3Bool add_att( Nc3Token attname, int );
+    Nc3Bool add_att( Nc3Token attname, float );
+    Nc3Bool add_att( Nc3Token attname, double );
+    Nc3Bool add_att( Nc3Token attname, const char*);       // string attribute
+    Nc3Bool add_att( Nc3Token attname, int, const char* ); // vector attributes
+    Nc3Bool add_att( Nc3Token attname, int, const ncbyte* );
+    Nc3Bool add_att( Nc3Token attname, int, const short* );
+    Nc3Bool add_att( Nc3Token attname, int, const long* );
+    Nc3Bool add_att( Nc3Token attname, int, const int* );
+    Nc3Bool add_att( Nc3Token attname, int, const float* );
+    Nc3Bool add_att( Nc3Token attname, int, const double* );
 
     enum FillMode {
         Fill = NC_FILL,                    // prefill (default)
@@ -133,17 +133,17 @@ class Nc3File
         Bad
       };
 
-    NcBool set_fill( FillMode = Fill );    // set fill-mode
+    Nc3Bool set_fill( FillMode = Fill );    // set fill-mode
     FillMode get_fill( void ) const;       // get fill-mode
     FileFormat get_format( void ) const;   // get format version
 
-    NcBool sync( void );                   // synchronize to disk
-    NcBool close( void );                  // to close earlier than dtr
-    NcBool abort( void );                  // back out of bad defines
+    Nc3Bool sync( void );                   // synchronize to disk
+    Nc3Bool close( void );                  // to close earlier than dtr
+    Nc3Bool abort( void );                  // back out of bad defines
     
     // Needed by other Nc classes, but users will not need them
-    NcBool define_mode( void ); // leaves in define mode, if possible
-    NcBool data_mode( void );   // leaves in data mode, if possible
+    Nc3Bool define_mode( void ); // leaves in define mode, if possible
+    Nc3Bool data_mode( void );   // leaves in data mode, if possible
     int id( void ) const;       // id used by C interface
 
   protected:
@@ -174,13 +174,13 @@ class Nc3File
 class Nc3Dim
 {
   public:
-    NcToken name( void ) const;
+    Nc3Token name( void ) const;
     long size( void ) const;
-    NcBool is_valid( void ) const;
-    NcBool is_unlimited( void ) const;
-    NcBool rename( NcToken newname );
+    Nc3Bool is_valid( void ) const;
+    Nc3Bool is_unlimited( void ) const;
+    Nc3Bool rename( Nc3Token newname );
     int id( void ) const;
-    NcBool sync( void );
+    Nc3Bool sync( void );
 
   private:
     Nc3File *the_file;		// not const because of rename
@@ -188,7 +188,7 @@ class Nc3Dim
     char *the_name;
 
     Nc3Dim(Nc3File*, int num);	// existing dimension
-    Nc3Dim(Nc3File*, NcToken name, long sz); // defines a new dim
+    Nc3Dim(Nc3File*, Nc3Token name, long sz); // defines a new dim
     virtual ~Nc3Dim( void );
     
     // to construct dimensions, since constructor is private
@@ -207,11 +207,11 @@ class Nc3TypedComponent
 {
   public:
     virtual ~Nc3TypedComponent( void ) {}
-    virtual NcToken name( void ) const = 0;
+    virtual Nc3Token name( void ) const = 0;
     virtual Nc3Type type( void ) const = 0;
-    virtual NcBool is_valid( void ) const = 0;
+    virtual Nc3Bool is_valid( void ) const = 0;
     virtual long num_vals( void ) const = 0; 
-    virtual NcBool rename( NcToken newname ) = 0;
+    virtual Nc3Bool rename( Nc3Token newname ) = 0;
     virtual Nc3Values* values( void ) const = 0; // block of all values
 
     // The following member functions provide conversions from the value
@@ -245,14 +245,14 @@ class Nc3Var : public Nc3TypedComponent
 {
   public:
     virtual ~Nc3Var( void );
-    NcToken name( void ) const;
+    Nc3Token name( void ) const;
     Nc3Type type( void ) const;
-    NcBool is_valid( void ) const;
+    Nc3Bool is_valid( void ) const;
     int num_dims( void ) const;         // dimensionality of variable
     Nc3Dim* get_dim( int ) const;        // n-th dimension
     long* edges( void ) const;          // dimension sizes
     int num_atts( void ) const;         // number of attributes
-    Nc3Att* get_att( NcToken ) const;    // attribute by name
+    Nc3Att* get_att( Nc3Token ) const;    // attribute by name
     Nc3Att* get_att( int ) const;        // n-th attribute
     long num_vals( void ) const;        // product of dimension sizes
     Nc3Values* values( void ) const;     // all values
@@ -262,82 +262,82 @@ class Nc3Var : public Nc3TypedComponent
     // exceed variable's dimensionality.  Start corner is [0,0,..., 0] by
     // default, but may be reset using the set_cur() member.  FALSE is
     // returned if type of values does not match type for variable.
-    NcBool put( const ncbyte* vals,
+    Nc3Bool put( const ncbyte* vals,
                 long c0=0, long c1=0, long c2=0, long c3=0, long c4=0 );
-    NcBool put( const char* vals,
+    Nc3Bool put( const char* vals,
                 long c0=0, long c1=0, long c2=0, long c3=0, long c4=0 );
-    NcBool put( const short* vals,
+    Nc3Bool put( const short* vals,
                 long c0=0, long c1=0, long c2=0, long c3=0, long c4=0 );
-    NcBool put( const int* vals,
+    Nc3Bool put( const int* vals,
                 long c0=0, long c1=0, long c2=0, long c3=0, long c4=0 );
-    NcBool put( const long* vals,
+    Nc3Bool put( const long* vals,
                 long c0=0, long c1=0, long c2=0, long c3=0, long c4=0 );
-    NcBool put( const float* vals,
+    Nc3Bool put( const float* vals,
                 long c0=0, long c1=0, long c2=0, long c3=0, long c4=0 );
-    NcBool put( const double* vals,
+    Nc3Bool put( const double* vals,
                 long c0=0, long c1=0, long c2=0, long c3=0, long c4=0 );
 
     // Put n-dimensional arrays, starting at [0, 0, ..., 0] by default,
     // may be reset with set_cur().
-    NcBool put( const ncbyte* vals, const long* counts );
-    NcBool put( const char* vals, const long* counts );
-    NcBool put( const short* vals, const long* counts );
-    NcBool put( const int* vals, const long* counts );
-    NcBool put( const long* vals, const long* counts );
-    NcBool put( const float* vals, const long* counts );
-    NcBool put( const double* vals, const long* counts );
+    Nc3Bool put( const ncbyte* vals, const long* counts );
+    Nc3Bool put( const char* vals, const long* counts );
+    Nc3Bool put( const short* vals, const long* counts );
+    Nc3Bool put( const int* vals, const long* counts );
+    Nc3Bool put( const long* vals, const long* counts );
+    Nc3Bool put( const float* vals, const long* counts );
+    Nc3Bool put( const double* vals, const long* counts );
 
     // Get scalar or 1, ..., 5 dimensional arrays by providing enough
     // arguments.  Arguments are edge lengths, and their number must not
     // exceed variable's dimensionality.  Start corner is [0,0,..., 0] by
     // default, but may be reset using the set_cur() member.
-    NcBool get( ncbyte* vals, long c0=0, long c1=0,
+    Nc3Bool get( ncbyte* vals, long c0=0, long c1=0,
                 long c2=0, long c3=0, long c4=0 ) const;
-    NcBool get( char* vals, long c0=0, long c1=0,
+    Nc3Bool get( char* vals, long c0=0, long c1=0,
                 long c2=0, long c3=0, long c4=0 ) const;
-    NcBool get( short* vals, long c0=0, long c1=0,
+    Nc3Bool get( short* vals, long c0=0, long c1=0,
                 long c2=0, long c3=0, long c4=0 ) const;
-    NcBool get( int* vals, long c0=0, long c1=0,
+    Nc3Bool get( int* vals, long c0=0, long c1=0,
                 long c2=0, long c3=0, long c4=0 ) const;
-    NcBool get( long* vals, long c0=0, long c1=0,
+    Nc3Bool get( long* vals, long c0=0, long c1=0,
                 long c2=0, long c3=0, long c4=0 ) const;
-    NcBool get( float* vals, long c0=0, long c1=0,
+    Nc3Bool get( float* vals, long c0=0, long c1=0,
                 long c2=0, long c3=0, long c4=0 ) const;
-    NcBool get( double* vals, long c0=0, long c1=0,
+    Nc3Bool get( double* vals, long c0=0, long c1=0,
                 long c2=0, long c3=0, long c4=0 ) const; 
 
     // Get n-dimensional arrays, starting at [0, 0, ..., 0] by default,
     // may be reset with set_cur().
-    NcBool get( ncbyte* vals, const long* counts ) const;
-    NcBool get( char* vals, const long* counts ) const;
-    NcBool get( short* vals, const long* counts ) const;
-    NcBool get( int* vals, const long* counts ) const;
-    NcBool get( long* vals, const long* counts ) const;
-    NcBool get( float* vals, const long* counts ) const;
-    NcBool get( double* vals, const long* counts ) const;
+    Nc3Bool get( ncbyte* vals, const long* counts ) const;
+    Nc3Bool get( char* vals, const long* counts ) const;
+    Nc3Bool get( short* vals, const long* counts ) const;
+    Nc3Bool get( int* vals, const long* counts ) const;
+    Nc3Bool get( long* vals, const long* counts ) const;
+    Nc3Bool get( float* vals, const long* counts ) const;
+    Nc3Bool get( double* vals, const long* counts ) const;
 
-    NcBool set_cur(long c0=-1, long c1=-1, long c2=-1,
+    Nc3Bool set_cur(long c0=-1, long c1=-1, long c2=-1,
                          long c3=-1, long c4=-1);
-    NcBool set_cur(long* cur);
+    Nc3Bool set_cur(long* cur);
 
     // these put file in define mode, so could be expensive
-    NcBool add_att( NcToken, char );             // add scalar attributes
-    NcBool add_att( NcToken, ncbyte );
-    NcBool add_att( NcToken, short );
-    NcBool add_att( NcToken, int );
-    NcBool add_att( NcToken, long );
-    NcBool add_att( NcToken, float );
-    NcBool add_att( NcToken, double );
-    NcBool add_att( NcToken, const char* );      // string attribute
-    NcBool add_att( NcToken, int, const char* ); // vector attributes
-    NcBool add_att( NcToken, int, const ncbyte* );
-    NcBool add_att( NcToken, int, const short* );
-    NcBool add_att( NcToken, int, const int* );
-    NcBool add_att( NcToken, int, const long* );
-    NcBool add_att( NcToken, int, const float* );
-    NcBool add_att( NcToken, int, const double* );
+    Nc3Bool add_att( Nc3Token, char );             // add scalar attributes
+    Nc3Bool add_att( Nc3Token, ncbyte );
+    Nc3Bool add_att( Nc3Token, short );
+    Nc3Bool add_att( Nc3Token, int );
+    Nc3Bool add_att( Nc3Token, long );
+    Nc3Bool add_att( Nc3Token, float );
+    Nc3Bool add_att( Nc3Token, double );
+    Nc3Bool add_att( Nc3Token, const char* );      // string attribute
+    Nc3Bool add_att( Nc3Token, int, const char* ); // vector attributes
+    Nc3Bool add_att( Nc3Token, int, const ncbyte* );
+    Nc3Bool add_att( Nc3Token, int, const short* );
+    Nc3Bool add_att( Nc3Token, int, const int* );
+    Nc3Bool add_att( Nc3Token, int, const long* );
+    Nc3Bool add_att( Nc3Token, int, const float* );
+    Nc3Bool add_att( Nc3Token, int, const double* );
 
-    NcBool rename( NcToken newname );
+    Nc3Bool rename( Nc3Token newname );
 
     long rec_size ( void );             // number of values per record
     long rec_size ( Nc3Dim* );           // number of values per dimension slice
@@ -352,40 +352,40 @@ class Nc3Var : public Nc3TypedComponent
     Nc3Values *get_rec(Nc3Dim* d, long slice); // get specified dimension slice
 
     // Put a record's worth of data in current record
-    NcBool put_rec( const ncbyte* vals );
-    NcBool put_rec( const char* vals );
-    NcBool put_rec( const short* vals );
-    NcBool put_rec( const int* vals );
-    NcBool put_rec( const long* vals );
-    NcBool put_rec( const float* vals );
-    NcBool put_rec( const double* vals );
+    Nc3Bool put_rec( const ncbyte* vals );
+    Nc3Bool put_rec( const char* vals );
+    Nc3Bool put_rec( const short* vals );
+    Nc3Bool put_rec( const int* vals );
+    Nc3Bool put_rec( const long* vals );
+    Nc3Bool put_rec( const float* vals );
+    Nc3Bool put_rec( const double* vals );
 
     // Put a dimension slice worth of data in current dimension slice
-    NcBool put_rec( Nc3Dim* d, const ncbyte* vals );
-    NcBool put_rec( Nc3Dim* d, const char* vals );
-    NcBool put_rec( Nc3Dim* d, const short* vals );
-    NcBool put_rec( Nc3Dim* d, const int* vals );
-    NcBool put_rec( Nc3Dim* d, const long* vals );
-    NcBool put_rec( Nc3Dim* d, const float* vals );
-    NcBool put_rec( Nc3Dim* d, const double* vals );
+    Nc3Bool put_rec( Nc3Dim* d, const ncbyte* vals );
+    Nc3Bool put_rec( Nc3Dim* d, const char* vals );
+    Nc3Bool put_rec( Nc3Dim* d, const short* vals );
+    Nc3Bool put_rec( Nc3Dim* d, const int* vals );
+    Nc3Bool put_rec( Nc3Dim* d, const long* vals );
+    Nc3Bool put_rec( Nc3Dim* d, const float* vals );
+    Nc3Bool put_rec( Nc3Dim* d, const double* vals );
 
     // Put a record's worth of data in specified record
-    NcBool put_rec( const ncbyte* vals, long rec );
-    NcBool put_rec( const char* vals, long rec );
-    NcBool put_rec( const short* vals, long rec );
-    NcBool put_rec( const int* vals, long rec );
-    NcBool put_rec( const long* vals, long rec );
-    NcBool put_rec( const float* vals, long rec );
-    NcBool put_rec( const double* vals, long rec );
+    Nc3Bool put_rec( const ncbyte* vals, long rec );
+    Nc3Bool put_rec( const char* vals, long rec );
+    Nc3Bool put_rec( const short* vals, long rec );
+    Nc3Bool put_rec( const int* vals, long rec );
+    Nc3Bool put_rec( const long* vals, long rec );
+    Nc3Bool put_rec( const float* vals, long rec );
+    Nc3Bool put_rec( const double* vals, long rec );
 
     // Put a dimension slice worth of data in specified dimension slice
-    NcBool put_rec( Nc3Dim* d, const ncbyte* vals, long slice );
-    NcBool put_rec( Nc3Dim* d, const char* vals, long slice );
-    NcBool put_rec( Nc3Dim* d, const short* vals, long slice );
-    NcBool put_rec( Nc3Dim* d, const int* vals, long slice );
-    NcBool put_rec( Nc3Dim* d, const long* vals, long slice );
-    NcBool put_rec( Nc3Dim* d, const float* vals, long slice );
-    NcBool put_rec( Nc3Dim* d, const double* vals, long slice );
+    Nc3Bool put_rec( Nc3Dim* d, const ncbyte* vals, long slice );
+    Nc3Bool put_rec( Nc3Dim* d, const char* vals, long slice );
+    Nc3Bool put_rec( Nc3Dim* d, const short* vals, long slice );
+    Nc3Bool put_rec( Nc3Dim* d, const int* vals, long slice );
+    Nc3Bool put_rec( Nc3Dim* d, const long* vals, long slice );
+    Nc3Bool put_rec( Nc3Dim* d, const float* vals, long slice );
+    Nc3Bool put_rec( Nc3Dim* d, const double* vals, long slice );
 
     // Get first record index corresponding to specified key value(s)
     long get_index( const ncbyte* vals );
@@ -411,7 +411,7 @@ class Nc3Var : public Nc3TypedComponent
     void set_rec ( Nc3Dim* d, long slice );
 
     int id( void ) const;               // rarely needed, C interface id
-    NcBool sync( void );
+    Nc3Bool sync( void );
     
   private:
     int dim_to_index(Nc3Dim* rdim);
@@ -424,8 +424,8 @@ class Nc3Var : public Nc3TypedComponent
     Nc3Var( void );
     Nc3Var(Nc3File*, int);
 
-    int attnum( NcToken attname ) const;
-    NcToken attname( int attnum ) const;
+    int attnum( Nc3Token attname ) const;
+    Nc3Token attname( int attnum ) const;
     void init_cur( void );
 
     // to make variables, since constructor is private
@@ -443,25 +443,25 @@ class Nc3Att : public Nc3TypedComponent
 {
   public:          
     virtual ~Nc3Att( void );
-    NcToken name( void ) const;
+    Nc3Token name( void ) const;
     Nc3Type type( void ) const;
-    NcBool is_valid( void ) const;
+    Nc3Bool is_valid( void ) const;
     long num_vals( void ) const; 
     Nc3Values* values( void ) const;
-    NcBool rename( NcToken newname );
-    NcBool remove( void );
+    Nc3Bool rename( Nc3Token newname );
+    Nc3Bool remove( void );
 
   private:
     const Nc3Var* the_variable;
     char* the_name;
     // protected constructors because only Nc3Vars and Nc3Files create
     // attributes
-    Nc3Att( Nc3File*, const Nc3Var*, NcToken);
-    Nc3Att( Nc3File*, NcToken); // global attribute
+    Nc3Att( Nc3File*, const Nc3Var*, Nc3Token);
+    Nc3Att( Nc3File*, Nc3Token); // global attribute
     
     // To make attributes, since constructor is private
   friend class Nc3File;
-  friend Nc3Att* Nc3Var::get_att( NcToken ) const;
+  friend Nc3Att* Nc3Var::get_att( Nc3Token ) const;
 };
 
 

@@ -58,7 +58,7 @@ Nc3File::~Nc3File( void )
     (void) close();
 }
 
-NcBool Nc3File::is_valid( void ) const
+Nc3Bool Nc3File::is_valid( void ) const
 {
     return the_id != ncBad;
 }
@@ -93,7 +93,7 @@ int Nc3File::num_atts( void ) const
     return num;
 }
 
-Nc3Dim* Nc3File::get_dim( NcToken name ) const
+Nc3Dim* Nc3File::get_dim( Nc3Token name ) const
 {
     int dimid;
     if(NcError::set_err(
@@ -103,7 +103,7 @@ Nc3Dim* Nc3File::get_dim( NcToken name ) const
     return get_dim(dimid);
 }
 
-Nc3Var* Nc3File::get_var( NcToken name ) const
+Nc3Var* Nc3File::get_var( Nc3Token name ) const
 {
     int varid;
     if(NcError::set_err(
@@ -113,7 +113,7 @@ Nc3Var* Nc3File::get_var( NcToken name ) const
     return get_var(varid);
 }
 
-Nc3Att* Nc3File::get_att( NcToken aname ) const
+Nc3Att* Nc3File::get_att( Nc3Token aname ) const
 {
     return is_valid() ? globalv->get_att(aname) : 0;
 }
@@ -149,7 +149,7 @@ Nc3Dim* Nc3File::rec_dim( ) const
     return get_dim(recdim);
 }
 
-Nc3Dim* Nc3File::add_dim(NcToken name, long size)
+Nc3Dim* Nc3File::add_dim(Nc3Token name, long size)
 {
     if (!is_valid() || !define_mode())
       return 0;
@@ -159,7 +159,7 @@ Nc3Dim* Nc3File::add_dim(NcToken name, long size)
     return dimp;
 }
 
-Nc3Dim* Nc3File::add_dim(NcToken name)
+Nc3Dim* Nc3File::add_dim(Nc3Token name)
 {
     return add_dim(name, NC_UNLIMITED);
 }
@@ -167,7 +167,7 @@ Nc3Dim* Nc3File::add_dim(NcToken name)
 // To create scalar, 1-dimensional, ..., 5-dimensional variables, just supply
 // as many dimension arguments as necessary
 
-Nc3Var* Nc3File::add_var(NcToken name, Nc3Type type, // scalar to 5D var
+Nc3Var* Nc3File::add_var(Nc3Token name, Nc3Type type, // scalar to 5D var
 			    const Nc3Dim* dim0,
 			    const Nc3Dim* dim1,
 			    const Nc3Dim* dim2,
@@ -213,7 +213,7 @@ Nc3Var* Nc3File::add_var(NcToken name, Nc3Type type, // scalar to 5D var
 // For variables with more than 5 dimensions, use n-dimensional interface
 // with vector of dimensions.
 
-Nc3Var* Nc3File::add_var(NcToken name, Nc3Type type, int ndims, const Nc3Dim** dims)
+Nc3Var* Nc3File::add_var(Nc3Token name, Nc3Type type, int ndims, const Nc3Dim** dims)
 {
     if (!is_valid() || !define_mode())
       return 0;
@@ -234,7 +234,7 @@ Nc3Var* Nc3File::add_var(NcToken name, Nc3Type type, int ndims, const Nc3Dim** d
 }
 
 #define Nc3File_add_scalar_att(TYPE)					      \
-NcBool Nc3File::add_att(NcToken aname, TYPE val)				      \
+Nc3Bool Nc3File::add_att(Nc3Token aname, TYPE val)				      \
 {									      \
     return globalv->add_att(aname, val);				      \
 }
@@ -249,7 +249,7 @@ Nc3File_add_scalar_att(double)
 Nc3File_add_scalar_att(const char*)
 
 #define Nc3File_add_vector_att(TYPE)					      \
-NcBool Nc3File::add_att(NcToken aname, int n, const TYPE* val)		      \
+Nc3Bool Nc3File::add_att(Nc3Token aname, int n, const TYPE* val)		      \
 {									      \
     return globalv->add_att(aname, n, val);				      \
 }
@@ -262,7 +262,7 @@ Nc3File_add_vector_att(long)
 Nc3File_add_vector_att(float)
 Nc3File_add_vector_att(double)
 
-NcBool Nc3File::set_fill( FillMode a_mode )
+Nc3Bool Nc3File::set_fill( FillMode a_mode )
 {
   int prev_mode;
   if (NcError::set_err(
@@ -299,7 +299,7 @@ Nc3File::FileFormat Nc3File::get_format( void ) const
     }
 }
 
-NcBool Nc3File::sync( void )
+Nc3Bool Nc3File::sync( void )
 {
     if (!data_mode())
       return 0;
@@ -325,7 +325,7 @@ NcBool Nc3File::sync( void )
     return 1;
 }
 
-NcBool Nc3File::close( void )
+Nc3Bool Nc3File::close( void )
 {
     int i;
     
@@ -345,14 +345,14 @@ NcBool Nc3File::close( void )
 			    ) == NC_NOERR;
 }
 
-NcBool Nc3File::abort( void )
+Nc3Bool Nc3File::abort( void )
 {
     return NcError::set_err(
 			    nc_abort(the_id)
 			    ) == NC_NOERR;
 }
 
-NcBool Nc3File::define_mode( void )
+Nc3Bool Nc3File::define_mode( void )
 {
     if (! is_valid())
       return FALSE;
@@ -366,7 +366,7 @@ NcBool Nc3File::define_mode( void )
     return TRUE;
 }
 
-NcBool Nc3File::data_mode( void )
+Nc3Bool Nc3File::data_mode( void )
 {
     if (! is_valid())
       return FALSE;
@@ -457,7 +457,7 @@ Nc3File::Nc3File( const char* path, FileMode fmode,
     }
 }
 
-NcToken Nc3Dim::name( void ) const
+Nc3Token Nc3Dim::name( void ) const
 {
     return the_name;
 }
@@ -472,12 +472,12 @@ long Nc3Dim::size( void ) const
     return sz;
 }
 
-NcBool Nc3Dim::is_valid( void ) const
+Nc3Bool Nc3Dim::is_valid( void ) const
 {
     return the_file->is_valid() && the_id != ncBad;
 }
 
-NcBool Nc3Dim::is_unlimited( void ) const
+Nc3Bool Nc3Dim::is_unlimited( void ) const
 {
     if (!the_file)
       return FALSE;
@@ -488,13 +488,13 @@ NcBool Nc3Dim::is_unlimited( void ) const
     return the_id == recdim;
 }
 
-NcBool Nc3Dim::rename(NcToken newname)
+Nc3Bool Nc3Dim::rename(Nc3Token newname)
 {
     if (strlen(newname) > strlen(the_name)) {
 	if (! the_file->define_mode())
 	    return FALSE;
     }
-    NcBool ret = NcError::set_err(
+    Nc3Bool ret = NcError::set_err(
 				  nc_rename_dim(the_file->id(), the_id, newname)
 				  ) == NC_NOERR;
     if (ret) {
@@ -510,7 +510,7 @@ int Nc3Dim::id( void ) const
     return the_id;
 }
 
-NcBool Nc3Dim::sync(void) 
+Nc3Bool Nc3Dim::sync(void) 
 {    
     char nam[NC_MAX_NAME];
     if (the_name) {
@@ -541,7 +541,7 @@ Nc3Dim::Nc3Dim(Nc3File* nc, int id)
     }
 }
 
-Nc3Dim::Nc3Dim(Nc3File* nc, NcToken name, long sz)
+Nc3Dim::Nc3Dim(Nc3File* nc, Nc3Token name, long sz)
 	: the_file(nc)
 {
     size_t dimlen = sz;
@@ -626,7 +626,7 @@ Nc3Var::~Nc3Var( void )
     delete[] the_name;
 }
 
-NcToken Nc3Var::name( void ) const
+Nc3Token Nc3Var::name( void ) const
 {
     return the_name;
 }
@@ -640,7 +640,7 @@ Nc3Type Nc3Var::type( void ) const
     return (Nc3Type) typ;
 }
 
-NcBool Nc3Var::is_valid( void ) const
+Nc3Bool Nc3Var::is_valid( void ) const
 {
     return the_file->is_valid() && the_id != ncBad;
 }
@@ -690,7 +690,7 @@ int Nc3Var::num_atts( void ) const // handles variable and global atts
     return natt;
 }
 
-Nc3Att* Nc3Var::get_att( NcToken aname ) const
+Nc3Att* Nc3Var::get_att( Nc3Token aname ) const
 {
     Nc3Att* att = new Nc3Att(the_file, this, aname);
     if (! att->is_valid()) {
@@ -704,7 +704,7 @@ Nc3Att* Nc3Var::get_att( int n ) const
 {
     if (n < 0 || n >= num_atts())
       return 0;
-    NcToken aname = attname(n);
+    Nc3Token aname = attname(n);
     Nc3Att* ap = get_att(aname);
     delete [] (char*)aname;
     return ap;
@@ -826,7 +826,7 @@ Nc3Values* Nc3Var::get_rec(Nc3Dim* rdim, long slice)
     }
     start[idx] = slice;
     startl[idx] = slice;
-    NcBool result = set_cur(startl);
+    Nc3Bool result = set_cur(startl);
     if (! result ) {
 	delete [] start;
 	delete [] startl;
@@ -896,24 +896,24 @@ Nc3Values* Nc3Var::get_rec(Nc3Dim* rdim, long slice)
 
 
 #define Nc3Var_put_rec(TYPE)                                                   \
-NcBool Nc3Var::put_rec( const TYPE* vals)                                      \
+Nc3Bool Nc3Var::put_rec( const TYPE* vals)                                      \
 {                                                                             \
     return put_rec(get_dim(0), vals, cur_rec[0]);                             \
 }                                                                             \
                                                                               \
-NcBool Nc3Var::put_rec( Nc3Dim *rdim, const TYPE* vals)                         \
+Nc3Bool Nc3Var::put_rec( Nc3Dim *rdim, const TYPE* vals)                         \
 {                                                                             \
     int idx = dim_to_index(rdim);                                             \
     return put_rec(rdim, vals, cur_rec[idx]);                                 \
 }                                                                             \
                                                                               \
-NcBool Nc3Var::put_rec( const TYPE* vals,                                      \
+Nc3Bool Nc3Var::put_rec( const TYPE* vals,                                      \
                      long rec)                                                \
 {                                                                             \
    return put_rec(get_dim(0), vals, rec);                                     \
 }                                                                             \
                                                                               \
-NcBool Nc3Var::put_rec( Nc3Dim* rdim, const TYPE* vals,                         \
+Nc3Bool Nc3Var::put_rec( Nc3Dim* rdim, const TYPE* vals,                         \
                      long slice)                                              \
 {                                                                             \
     int idx = dim_to_index(rdim);                                             \
@@ -921,7 +921,7 @@ NcBool Nc3Var::put_rec( Nc3Dim* rdim, const TYPE* vals,                         
     long* start = new long[size];                                             \
     for (int i=1; i < size ; i++) start[i] = 0;                               \
     start[idx] = slice;                                                       \
-    NcBool result = set_cur(start);                                           \
+    Nc3Bool result = set_cur(start);                                           \
     delete [] start;                                                          \
     if (! result )                                                            \
       return FALSE;                                                           \
@@ -1000,7 +1000,7 @@ Nc3Var_get_index(double)
 // and char, we must use corresponding schar, uchar, or text C functions, so in 
 // these cases macros are expanded manually.
 #define Nc3Var_put_array(TYPE)						      \
-NcBool Nc3Var::put( const TYPE* vals,					      \
+Nc3Bool Nc3Var::put( const TYPE* vals,					      \
 		     long edge0,					      \
 		     long edge1,					      \
 		     long edge2,					      \
@@ -1032,7 +1032,7 @@ NcBool Nc3Var::put( const TYPE* vals,					      \
 			    ) == NC_NOERR;     \
 }
 
-NcBool Nc3Var::put( const ncbyte* vals,
+Nc3Bool Nc3Var::put( const ncbyte* vals,
 		     long edge0,
 		     long edge1,
 		     long edge2,
@@ -1064,7 +1064,7 @@ NcBool Nc3Var::put( const ncbyte* vals,
 			    ) == NC_NOERR;
 }
 
-NcBool Nc3Var::put( const char* vals,
+Nc3Bool Nc3Var::put( const char* vals,
 		     long edge0,
 		     long edge1,
 		     long edge2,
@@ -1103,7 +1103,7 @@ Nc3Var_put_array(float)
 Nc3Var_put_array(double)
 
 #define Nc3Var_put_nd_array(TYPE)					      \
-NcBool Nc3Var::put( const TYPE* vals, const long* count )		      \
+Nc3Bool Nc3Var::put( const TYPE* vals, const long* count )		      \
 {									      \
     /* no need to check type() vs. TYPE, invoked C function will do that */   \
     if (! the_file->data_mode())					      \
@@ -1116,7 +1116,7 @@ NcBool Nc3Var::put( const TYPE* vals, const long* count )		      \
 			    ) == NC_NOERR;                                    \
 }
 
-NcBool Nc3Var::put( const ncbyte* vals, const long* count )
+Nc3Bool Nc3Var::put( const ncbyte* vals, const long* count )
 {
     /* no need to check type() vs. TYPE, invoked C function will do that */
     if (! the_file->data_mode())
@@ -1129,7 +1129,7 @@ NcBool Nc3Var::put( const ncbyte* vals, const long* count )
 			    ) == NC_NOERR;
 }
 
-NcBool Nc3Var::put( const char* vals, const long* count )
+Nc3Bool Nc3Var::put( const char* vals, const long* count )
 {
     /* no need to check type() vs. TYPE, invoked C function will do that */
     if (! the_file->data_mode())
@@ -1149,7 +1149,7 @@ Nc3Var_put_nd_array(float)
 Nc3Var_put_nd_array(double)
 
 #define Nc3Var_get_array(TYPE)						      \
-NcBool Nc3Var::get( TYPE* vals,						      \
+Nc3Bool Nc3Var::get( TYPE* vals,						      \
 		     long edge0,					      \
 		     long edge1,					      \
 		     long edge2,					      \
@@ -1180,7 +1180,7 @@ NcBool Nc3Var::get( TYPE* vals,						      \
 			    ) == NC_NOERR;                                    \
 }
 
-NcBool Nc3Var::get( ncbyte* vals,
+Nc3Bool Nc3Var::get( ncbyte* vals,
 		     long edge0,
 		     long edge1,
 		     long edge2,
@@ -1211,7 +1211,7 @@ NcBool Nc3Var::get( ncbyte* vals,
 			    ) == NC_NOERR;
 }
 
-NcBool Nc3Var::get( char* vals,
+Nc3Bool Nc3Var::get( char* vals,
 		     long edge0,
 		     long edge1,
 		     long edge2,
@@ -1249,7 +1249,7 @@ Nc3Var_get_array(float)
 Nc3Var_get_array(double)
 
 #define Nc3Var_get_nd_array(TYPE)					      \
-NcBool Nc3Var::get( TYPE* vals, const long* count ) const		      \
+Nc3Bool Nc3Var::get( TYPE* vals, const long* count ) const		      \
 {									      \
     if (! the_file->data_mode())					      \
       return FALSE;							      \
@@ -1261,7 +1261,7 @@ NcBool Nc3Var::get( TYPE* vals, const long* count ) const		      \
 			    ) == NC_NOERR;     \
 }
 
-NcBool Nc3Var::get( ncbyte* vals, const long* count ) const
+Nc3Bool Nc3Var::get( ncbyte* vals, const long* count ) const
 {
     if (! the_file->data_mode())
       return FALSE;
@@ -1271,7 +1271,7 @@ NcBool Nc3Var::get( ncbyte* vals, const long* count ) const
     return nc_get_vara_schar (the_file->id(), the_id, start,  (const size_t *) count, vals) == NC_NOERR;
 }
 
-NcBool Nc3Var::get( char* vals, const long* count ) const
+Nc3Bool Nc3Var::get( char* vals, const long* count ) const
 {
     if (! the_file->data_mode())
       return FALSE;
@@ -1289,7 +1289,7 @@ Nc3Var_get_nd_array(double)
 
 // If no args, set cursor to all zeros.	 Else set initial elements of cursor
 // to args provided, rest to zeros.
-NcBool Nc3Var::set_cur(long c0, long c1, long c2, long c3, long c4)
+Nc3Bool Nc3Var::set_cur(long c0, long c1, long c2, long c3, long c4)
 {
     long t[6];
     t[0] = c0;
@@ -1316,7 +1316,7 @@ NcBool Nc3Var::set_cur(long c0, long c1, long c2, long c3, long c4)
     return TRUE;
 }
 
-NcBool Nc3Var::set_cur(long* cur)
+Nc3Bool Nc3Var::set_cur(long* cur)
 {
     for(int i = 0; i < num_dims(); i++) {
 	if (cur[i] >= get_dim(i)->size() && ! get_dim(i)->is_unlimited())
@@ -1327,7 +1327,7 @@ NcBool Nc3Var::set_cur(long* cur)
 }
 
 #define Nc3Var_add_scalar_att(TYPE)					      \
-NcBool Nc3Var::add_att(NcToken aname, TYPE val)				      \
+Nc3Bool Nc3Var::add_att(Nc3Token aname, TYPE val)				      \
 {									      \
     if (! the_file->define_mode())					      \
       return FALSE;							      \
@@ -1339,7 +1339,7 @@ NcBool Nc3Var::add_att(NcToken aname, TYPE val)				      \
     return TRUE;							      \
 }
 
-NcBool Nc3Var::add_att(NcToken aname, ncbyte val)
+Nc3Bool Nc3Var::add_att(Nc3Token aname, ncbyte val)
 {
     if (! the_file->define_mode())
       return FALSE;
@@ -1349,7 +1349,7 @@ NcBool Nc3Var::add_att(NcToken aname, ncbyte val)
     return TRUE;
 }
 
-NcBool Nc3Var::add_att(NcToken aname, char val)
+Nc3Bool Nc3Var::add_att(Nc3Token aname, char val)
 {
     if (! the_file->define_mode())
       return FALSE;
@@ -1364,7 +1364,7 @@ Nc3Var_add_scalar_att(int)
 Nc3Var_add_scalar_att(long)
 Nc3Var_add_scalar_att(double)
 
-NcBool Nc3Var::add_att(NcToken aname, float val)
+Nc3Bool Nc3Var::add_att(Nc3Token aname, float val)
 {
     if (! the_file->define_mode())
       return FALSE;
@@ -1375,7 +1375,7 @@ NcBool Nc3Var::add_att(NcToken aname, float val)
     return TRUE;
 }
 
-NcBool Nc3Var::add_att(NcToken aname, const char* val)
+Nc3Bool Nc3Var::add_att(Nc3Token aname, const char* val)
 {
     if (! the_file->define_mode())
       return FALSE;
@@ -1386,7 +1386,7 @@ NcBool Nc3Var::add_att(NcToken aname, const char* val)
 }
 
 #define Nc3Var_add_vector_att(TYPE)					      \
-NcBool Nc3Var::add_att(NcToken aname, int len, const TYPE* vals)		      \
+Nc3Bool Nc3Var::add_att(Nc3Token aname, int len, const TYPE* vals)		      \
 {									      \
     if (! the_file->define_mode())					      \
       return FALSE;							      \
@@ -1398,7 +1398,7 @@ NcBool Nc3Var::add_att(NcToken aname, int len, const TYPE* vals)		      \
     return TRUE;							      \
 }
 
-NcBool Nc3Var::add_att(NcToken aname, int len, const ncbyte* vals)
+Nc3Bool Nc3Var::add_att(Nc3Token aname, int len, const ncbyte* vals)
 {
     if (! the_file->define_mode())
       return FALSE;
@@ -1410,7 +1410,7 @@ NcBool Nc3Var::add_att(NcToken aname, int len, const ncbyte* vals)
     return TRUE;
 }
 
-NcBool Nc3Var::add_att(NcToken aname, int len, const char* vals)
+Nc3Bool Nc3Var::add_att(Nc3Token aname, int len, const char* vals)
 {
     if (! the_file->define_mode())
       return FALSE;
@@ -1428,13 +1428,13 @@ Nc3Var_add_vector_att(long)
 Nc3Var_add_vector_att(float)
 Nc3Var_add_vector_att(double)
 
-NcBool Nc3Var::rename(NcToken newname)
+Nc3Bool Nc3Var::rename(Nc3Token newname)
 {
     if (strlen(newname) > strlen(the_name)) {
 	if (! the_file->define_mode())
 	    return FALSE;
     }
-    NcBool ret = NcError::set_err(
+    Nc3Bool ret = NcError::set_err(
 				  nc_rename_var(the_file->id(), the_id, newname)
 				  ) == NC_NOERR;
     if (ret) {
@@ -1450,7 +1450,7 @@ int Nc3Var::id( void ) const
     return the_id;
 }
 
-NcBool Nc3Var::sync(void)
+Nc3Bool Nc3Var::sync(void)
 {
     if (the_name) {
 	delete [] the_name;
@@ -1493,7 +1493,7 @@ Nc3Var::Nc3Var(Nc3File* nc, int id)
     init_cur();
 }
 
-int Nc3Var::attnum( NcToken attrname ) const
+int Nc3Var::attnum( Nc3Token attrname ) const
 {
     int num;
     for(num=0; num < num_atts(); num++) {
@@ -1507,7 +1507,7 @@ int Nc3Var::attnum( NcToken attrname ) const
     return num;			// num_atts() if no such attribute
 }
 
-NcToken Nc3Var::attname( int attnum ) const // caller must delete[]
+Nc3Token Nc3Var::attname( int attnum ) const // caller must delete[]
 {
     if (attnum < 0 || attnum >= num_atts())
       return 0;
@@ -1529,14 +1529,14 @@ void Nc3Var::init_cur( void )
 	the_cur[i] = 0; cur_rec[i] = 0; }
 }
 
-Nc3Att::Nc3Att(Nc3File* nc, const Nc3Var* var, NcToken name)
+Nc3Att::Nc3Att(Nc3File* nc, const Nc3Var* var, Nc3Token name)
    : Nc3TypedComponent(nc), the_variable(var)
 {
     the_name = new char[1 + strlen(name)];
     strcpy(the_name, name);
 }
 
-Nc3Att::Nc3Att(Nc3File* nc, NcToken name)
+Nc3Att::Nc3Att(Nc3File* nc, Nc3Token name)
    : Nc3TypedComponent(nc), the_variable(NULL)
 {
     the_name = new char[1 + strlen(name)];
@@ -1548,7 +1548,7 @@ Nc3Att::~Nc3Att( void )
     delete [] the_name;
 }
 
-NcToken Nc3Att::name( void ) const
+Nc3Token Nc3Att::name( void ) const
 {
     return the_name;
 }
@@ -1571,7 +1571,7 @@ long Nc3Att::num_vals( void ) const
     return len;
 }
 
-NcBool Nc3Att::is_valid( void ) const
+Nc3Bool Nc3Att::is_valid( void ) const
 {
     int num;
     return the_file->is_valid() &&
@@ -1633,7 +1633,7 @@ Nc3Values* Nc3Att::values( void ) const
     return valp;
 }
 
-NcBool Nc3Att::rename(NcToken newname)
+Nc3Bool Nc3Att::rename(Nc3Token newname)
 {
     if (strlen(newname) > strlen(the_name)) {
 	if (! the_file->define_mode())
@@ -1645,7 +1645,7 @@ NcBool Nc3Att::rename(NcToken newname)
 			    ) == NC_NOERR;
 }
 
-NcBool Nc3Att::remove( void )
+Nc3Bool Nc3Att::remove( void )
 {
     if (! the_file->define_mode())
 	return FALSE;
