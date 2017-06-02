@@ -45,7 +45,7 @@
 #include <didss/DsInputPath.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include "Args.hh"
 #include "Params.hh"
 class DataSet;
@@ -55,7 +55,7 @@ using namespace std;
 // This class
 
 class McidasNcf2Mdv {
-  
+
 public:
 
   // constructor

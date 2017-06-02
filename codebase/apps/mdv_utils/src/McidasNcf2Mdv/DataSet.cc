@@ -178,7 +178,7 @@ int DataSet::processFile(const char *input_path)
 
   // open file
 
-  NcFile ncf(input_path);
+  Nc3File ncf(input_path);
   if (!ncf.is_valid()) {
     cerr << "ERROR - DataSet::_processFile" << endl;
     cerr << "  File: " << input_path << endl;
@@ -187,7 +187,7 @@ int DataSet::processFile(const char *input_path)
 
   // declare an error object
 
-  NcError err(NcError::silent_nonfatal);
+  Nc3Error err(Nc3Error::silent_nonfatal);
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
     _printFile(ncf);
@@ -243,7 +243,7 @@ int DataSet::processFile(const char *input_path)
 //
 // Returns 0 on success, -1 on failure
 
-int DataSet::_checkFile(NcFile &ncf)
+int DataSet::_checkFile(Nc3File &ncf)
 
 {
 
@@ -310,7 +310,7 @@ int DataSet::_checkFile(NcFile &ncf)
 //
 // Returns 0 on success, -1 on failure
 
-int DataSet::_setMasterHeader(NcFile &ncf, DsMdvx &mdvx)
+int DataSet::_setMasterHeader(Nc3File &ncf, DsMdvx &mdvx)
 
 {
 
@@ -318,7 +318,7 @@ int DataSet::_setMasterHeader(NcFile &ncf, DsMdvx &mdvx)
 
   // image time
 
-  NcVar *imageDateVar = ncf.get_var(_params.netcdf_var_image_date);
+  Nc3Var *imageDateVar = ncf.get_var(_params.netcdf_var_image_date);
   if (imageDateVar == NULL) {
     cerr << "ERROR - DataSet::_setMasterHeader" << endl;
     cerr << "  variable missing" << _params.netcdf_var_image_date << endl;
@@ -331,7 +331,7 @@ int DataSet::_setMasterHeader(NcFile &ncf, DsMdvx &mdvx)
   }
   int iday = idate % 1000;
 
-  NcVar *imageTimeVar = ncf.get_var(_params.netcdf_var_image_time);
+  Nc3Var *imageTimeVar = ncf.get_var(_params.netcdf_var_image_time);
   if (imageTimeVar == NULL) {
     cerr << "ERROR - DataSet::_setMasterHeader" << endl;
     cerr << "  variable missing" << _params.netcdf_var_image_time << endl;
@@ -344,7 +344,7 @@ int DataSet::_setMasterHeader(NcFile &ncf, DsMdvx &mdvx)
   int isec = ileft % 100;
   
   DateTime imageTime(iyear, 1, iday, ihour, imin, isec);
-  NcVar *timeVar = ncf.get_var(_params.netcdf_var_time);
+  Nc3Var *timeVar = ncf.get_var(_params.netcdf_var_time);
   if (timeVar != NULL) {
     int itime = timeVar->as_int(0);
     imageTime.set(itime);
@@ -357,8 +357,8 @@ int DataSet::_setMasterHeader(NcFile &ncf, DsMdvx &mdvx)
   
   // CR time
 
-  NcVar *crDateVar = ncf.get_var(_params.netcdf_var_creation_date);
-  NcVar *crTimeVar = ncf.get_var(_params.netcdf_var_creation_time);
+  Nc3Var *crDateVar = ncf.get_var(_params.netcdf_var_creation_date);
+  Nc3Var *crTimeVar = ncf.get_var(_params.netcdf_var_creation_time);
   if (crDateVar != NULL && crTimeVar != NULL) {
     int jdate = crDateVar->as_int(0);
     int jyear = jdate / 1000;
@@ -389,7 +389,7 @@ int DataSet::_setMasterHeader(NcFile &ncf, DsMdvx &mdvx)
 
   string dataSetInfo;
 
-  NcVar *sensorIdVar = ncf.get_var(_params.netcdf_var_sensor_id);
+  Nc3Var *sensorIdVar = ncf.get_var(_params.netcdf_var_sensor_id);
   _sensorId = 0;
   if (sensorIdVar != NULL) {
     _sensorId = sensorIdVar->as_int(0);
@@ -398,7 +398,7 @@ int DataSet::_setMasterHeader(NcFile &ncf, DsMdvx &mdvx)
     dataSetInfo += text;
   }
 
-  NcVar *auditTrailVar = ncf.get_var(_params.netcdf_var_audit_trail);
+  Nc3Var *auditTrailVar = ncf.get_var(_params.netcdf_var_audit_trail);
   if (auditTrailVar != NULL) {
     dataSetInfo += auditTrailVar->as_string(0);
     dataSetInfo += "\n";
@@ -415,7 +415,7 @@ int DataSet::_setMasterHeader(NcFile &ncf, DsMdvx &mdvx)
 //
 // Returns 0 on success, -1 on failure
 
-int DataSet::_addDataField(NcFile &ncf,
+int DataSet::_addDataField(Nc3File &ncf,
 			   DsMdvx &mdvx)
 
 {
@@ -427,7 +427,7 @@ int DataSet::_addDataField(NcFile &ncf,
   
   // get dimensions of input data field
 
-  NcDim *linesDim = ncf.get_dim(_params.netcdf_dim_n_lines);
+  Nc3Dim *linesDim = ncf.get_dim(_params.netcdf_dim_n_lines);
   if (linesDim == NULL) {
     cerr << "ERROR - DataSet::_addDataField" << endl;
     cerr << "  dimension missing: " << _params.netcdf_dim_n_lines << endl;
@@ -435,7 +435,7 @@ int DataSet::_addDataField(NcFile &ncf,
   }
   int nLines = linesDim->size();
   
-  NcDim *elemsDim = ncf.get_dim(_params.netcdf_dim_n_elems);
+  Nc3Dim *elemsDim = ncf.get_dim(_params.netcdf_dim_n_elems);
   if (elemsDim == NULL) {
     cerr << "ERROR - DataSet::_addDataField" << endl;
     cerr << "  dimension missing" << _params.netcdf_dim_n_elems << endl;
@@ -443,7 +443,7 @@ int DataSet::_addDataField(NcFile &ncf,
   }
   int nElems = elemsDim->size();
 
-  NcDim *bandsDim = ncf.get_dim(_params.netcdf_dim_n_bands);
+  Nc3Dim *bandsDim = ncf.get_dim(_params.netcdf_dim_n_bands);
   int nBands = 1;
   if (bandsDim != NULL) {
     nBands = bandsDim->size();
@@ -455,14 +455,14 @@ int DataSet::_addDataField(NcFile &ncf,
 
   // lat / lon arrays
 
-  NcVar *latVar = ncf.get_var(_params.netcdf_var_latitude);
+  Nc3Var *latVar = ncf.get_var(_params.netcdf_var_latitude);
   if (latVar == NULL) {
     cerr << "ERROR - DataSet::_addDataField" << endl;
     cerr << "  variable missing" << _params.netcdf_var_latitude << endl;
     return -1;
   }
 
-  NcVar *lonVar = ncf.get_var(_params.netcdf_var_longitude);
+  Nc3Var *lonVar = ncf.get_var(_params.netcdf_var_longitude);
   if (lonVar == NULL) {
     cerr << "ERROR - DataSet::_addDataField" << endl;
     cerr << "  variable missing" << _params.netcdf_var_longitude << endl;
@@ -491,14 +491,14 @@ int DataSet::_addDataField(NcFile &ncf,
 
   // get grid input resolution
 
-  NcVar *lineResVar = ncf.get_var(_params.netcdf_var_line_res);
+  Nc3Var *lineResVar = ncf.get_var(_params.netcdf_var_line_res);
   if (lineResVar != NULL) {
     _lineRes = lineResVar->as_double(0);
   } else {
     _lineRes = 1.0;
   }
   
-  NcVar *elemResVar = ncf.get_var(_params.netcdf_var_elem_res);
+  Nc3Var *elemResVar = ncf.get_var(_params.netcdf_var_elem_res);
   if (elemResVar != NULL) {
     _elemRes = elemResVar->as_double(0);
   } else {
@@ -540,7 +540,7 @@ int DataSet::_addDataField(NcFile &ncf,
 
   // get data in netCDF file
 
-  NcVar *dataVar = ncf.get_var(_params.netcdf_var_image_data);
+  Nc3Var *dataVar = ncf.get_var(_params.netcdf_var_image_data);
   if (dataVar == NULL) {
     cerr << "ERROR - DataSet::_addDataField" << endl;
     cerr << "  variable missing" << _params.netcdf_var_image_data << endl;
@@ -549,7 +549,7 @@ int DataSet::_addDataField(NcFile &ncf,
   
   // get input data, and associated lat/lon location
   
-  NcVar *dataWidthVar = ncf.get_var(_params.netcdf_var_data_width);
+  Nc3Var *dataWidthVar = ncf.get_var(_params.netcdf_var_data_width);
   if (dataWidthVar != NULL) {
     _dataWidth = dataWidthVar->as_int(0);
   } else {
@@ -904,21 +904,21 @@ void DataSet::_checkForRegularLatLonInput(int nLines, int nElems,
 ///////////////////////////////
 // print data in file
 
-void DataSet::_printFile(NcFile &ncf)
+void DataSet::_printFile(Nc3File &ncf)
 
 {
 
   cout << "ndims: " << ncf.num_dims() << endl;
   cout << "nvars: " << ncf.num_vars() << endl;
   cout << "ngatts: " << ncf.num_atts() << endl;
-  NcDim *unlimd = ncf.rec_dim();
+  Nc3Dim *unlimd = ncf.rec_dim();
   if (unlimd != NULL) {
     cout << "unlimdimid: " << unlimd->size() << endl;
   }
   
   // dimensions
 
-  NcDim *dims[ncf.num_dims()];
+  Nc3Dim *dims[ncf.num_dims()];
   for (int idim = 0; idim < ncf.num_dims(); idim++) {
     dims[idim] = ncf.get_dim(idim);
 
@@ -939,14 +939,14 @@ void DataSet::_printFile(NcFile &ncf)
 
   for (int iatt = 0; iatt < ncf.num_atts(); iatt++) {
     cout << "  Att num: " << iatt << endl;
-    NcAtt *att = ncf.get_att(iatt);
+    Nc3Att *att = ncf.get_att(iatt);
     _printAtt(att);
     delete att;
   }
 
   // loop through variables
 
-  NcVar *vars[ncf.num_vars()];
+  Nc3Var *vars[ncf.num_vars()];
   for (int ivar = 0; ivar < ncf.num_vars(); ivar++) {
 
     vars[ivar] = ncf.get_var(ivar);
@@ -955,7 +955,7 @@ void DataSet::_printFile(NcFile &ncf)
     cout << "  Name: " << vars[ivar]->name() << endl;
     cout << "  Is valid: " << vars[ivar]->is_valid() << endl;
     cout << "  N dims: " << vars[ivar]->num_dims();
-    NcDim *vdims[vars[ivar]->num_dims()];
+    Nc3Dim *vdims[vars[ivar]->num_dims()];
     if (vars[ivar]->num_dims() > 0) {
       cout << ": (";
       for (int ii = 0; ii < vars[ivar]->num_dims(); ii++) {
@@ -973,7 +973,7 @@ void DataSet::_printFile(NcFile &ncf)
     for (int iatt = 0; iatt < vars[ivar]->num_atts(); iatt++) {
 
       cout << "  Att num: " << iatt << endl;
-      NcAtt *att = vars[ivar]->get_att(iatt);
+      Nc3Att *att = vars[ivar]->get_att(iatt);
       _printAtt(att);
       delete att;
 
@@ -989,7 +989,7 @@ void DataSet::_printFile(NcFile &ncf)
 /////////////////////
 // print an attribute
 
-void DataSet::_printAtt(NcAtt *att)
+void DataSet::_printAtt(Nc3Att *att)
 
 {
 
@@ -997,16 +997,16 @@ void DataSet::_printAtt(NcAtt *att)
   cout << "    Num vals: " << att->num_vals() << endl;
   cout << "    Type: ";
   
-  NcValues *values = att->values();
+  Nc3Values *values = att->values();
 
   switch(att->type()) {
     
-  case ncNoType: {
+  case nc3NoType: {
     cout << "No type: ";
   }
   break;
   
-  case ncByte: {
+  case nc3Byte: {
     cout << "BYTE: ";
     unsigned char *vals = (unsigned char *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -1015,7 +1015,7 @@ void DataSet::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncChar: {
+  case nc3Char: {
     cout << "CHAR: ";
     char vals[att->num_vals() + 1];
     MEM_zero(vals);
@@ -1024,7 +1024,7 @@ void DataSet::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncShort: {
+  case nc3Short: {
     cout << "SHORT: ";
     short *vals = (short *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -1033,7 +1033,7 @@ void DataSet::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncInt: {
+  case nc3Int: {
     cout << "INT: ";
     int *vals = (int *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -1042,7 +1042,7 @@ void DataSet::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncFloat: {
+  case nc3Float: {
     cout << "FLOAT: ";
     float *vals = (float *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -1051,7 +1051,7 @@ void DataSet::_printAtt(NcAtt *att)
   }
   break;
   
-  case ncDouble: {
+  case nc3Double: {
     cout << "DOUBLE: ";
     double *vals = (double *) values->base();
     for (long ii = 0; ii < att->num_vals(); ii++) {
@@ -1072,7 +1072,7 @@ void DataSet::_printAtt(NcAtt *att)
 ///////////////////////////////
 // print variable values
 
-void DataSet::_printVarVals(NcVar *var)
+void DataSet::_printVarVals(Nc3Var *var)
 
 {
 
@@ -1081,17 +1081,17 @@ void DataSet::_printVarVals(NcVar *var)
     nprint = 100;
   }
 
-  NcValues *values = var->values();
+  Nc3Values *values = var->values();
 
   cout << "  Variable vals:";
   
   switch(var->type()) {
     
-  case ncNoType: {
+  case nc3NoType: {
   }
   break;
   
-  case ncByte: {
+  case nc3Byte: {
     cout << "(byte)";
     unsigned char *vals = (unsigned char *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -1100,7 +1100,7 @@ void DataSet::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncChar: {
+  case nc3Char: {
     cout << "(char)";
     char str[nprint + 1];
     MEM_zero(str);
@@ -1109,7 +1109,7 @@ void DataSet::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncShort: {
+  case nc3Short: {
     cout << "(short)";
     short *vals = (short *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -1118,7 +1118,7 @@ void DataSet::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncInt: {
+  case nc3Int: {
     cout << "(int)";
     int *vals = (int *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -1127,7 +1127,7 @@ void DataSet::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncFloat: {
+  case nc3Float: {
     cout << "(float)";
     float *vals = (float *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -1136,7 +1136,7 @@ void DataSet::_printVarVals(NcVar *var)
   }
   break;
   
-  case ncDouble: {
+  case nc3Double: {
     cout << "(double)";
     double *vals = (double *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
@@ -1209,7 +1209,7 @@ int DataSet::_writeZebraNetCDF(const string &dataSetName,
 
   // open file
 
-  NcFile zebFile(zebPath.c_str(), NcFile::Replace, NULL, 0, NcFile::Classic);
+  Nc3File zebFile(zebPath.c_str(), Nc3File::Replace, NULL, 0, Nc3File::Classic);
   if (!zebFile.is_valid()) {
     cerr << "ERROR - DataSet::_writeZebraNetCDF" << endl;
     cerr << "  Cannot open netCDF file: " << zebPath << endl;
@@ -1218,7 +1218,7 @@ int DataSet::_writeZebraNetCDF(const string &dataSetName,
 
   // create error object
 
-  NcError zebErr(NcError::silent_nonfatal);
+  Nc3Error zebErr(Nc3Error::silent_nonfatal);
 
   // add global attributes
 
@@ -1237,7 +1237,7 @@ int DataSet::_writeZebraNetCDF(const string &dataSetName,
 
   // add time dimension
 
-  NcDim *timeDim = zebFile.add_dim("time", 1);
+  Nc3Dim *timeDim = zebFile.add_dim("time", 1);
   if (timeDim == NULL) {
     cerr << "ERROR - DataSet::_writeZebraNetCDF" << endl;
     cerr << "  Cannot add time dim to  file: " << zebPath << endl;
@@ -1246,14 +1246,14 @@ int DataSet::_writeZebraNetCDF(const string &dataSetName,
 
   // add latitude and longitude dimensions
 
-  NcDim *latDim = zebFile.add_dim("latitude",  _ny);
+  Nc3Dim *latDim = zebFile.add_dim("latitude",  _ny);
   if (latDim == NULL) {
     cerr << "ERROR - DataSet::_writeZebraNetCDF" << endl;
     cerr << "  Cannot add latitude dim to  file: " << zebPath << endl;
     return -1;
   }
 
-  NcDim *lonDim = zebFile.add_dim("longitude",  _nx);
+  Nc3Dim *lonDim = zebFile.add_dim("longitude",  _nx);
   if (lonDim == NULL) {
     cerr << "ERROR - DataSet::_writeZebraNetCDF" << endl;
     cerr << "  Cannot add longitude dim to  file: " << zebPath << endl;
@@ -1262,25 +1262,25 @@ int DataSet::_writeZebraNetCDF(const string &dataSetName,
 
   // add variables
 
-  NcVar *timeVar = zebFile.add_var("time", ncInt, timeDim);
+  Nc3Var *timeVar = zebFile.add_var("time", nc3Int, timeDim);
   timeVar->add_att("units", "seconds since 1970-01-01 00:00:00 +0000");
   timeVar->add_att("missing_value", -2147483647);
   timeVar->add_att("valid_min", -2147483646);
   timeVar->add_att("valid_max", 2147483647);
 
-  NcVar *latVar = zebFile.add_var("latitude", ncFloat, latDim);
+  Nc3Var *latVar = zebFile.add_var("latitude", nc3Float, latDim);
   latVar->add_att("units", "degrees_north");
   latVar->add_att("missing_value", -9999.0);
   latVar->add_att("valid_min", -90.0);
   latVar->add_att("valid_max", 90.0);
 
-  NcVar *lonVar = zebFile.add_var("longitude", ncFloat, lonDim);
+  Nc3Var *lonVar = zebFile.add_var("longitude", nc3Float, lonDim);
   lonVar->add_att("units", "degrees_east");
   lonVar->add_att("missing_value", -9999.0);
   lonVar->add_att("valid_min", -360.0);
   lonVar->add_att("valid_max", 360.0);
 
-  NcVar *dataVar = zebFile.add_var(fieldName.c_str(), ncShort, timeDim, latDim, lonDim);
+  Nc3Var *dataVar = zebFile.add_var(fieldName.c_str(), nc3Short, timeDim, latDim, lonDim);
   dataVar->add_att("units", units.c_str());
   dataVar->add_att("missing_value", (short) -32768);
   dataVar->add_att("valid_min", (short) -32767);

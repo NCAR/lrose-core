@@ -39,7 +39,7 @@
 #include <string>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
-#include <netcdf.hh>
+#include <Ncxx/Nc3File.hh>
 #include "Params.hh"
 #include "SunAngle.hh"
 
@@ -120,8 +120,8 @@ private:
 
   int _sensorId;
 
-  int _setMasterHeader(NcFile &ncf, DsMdvx &mdvx);
-  int _addDataField(NcFile &ncf, DsMdvx &mdvx);
+  int _setMasterHeader(Nc3File &ncf, DsMdvx &mdvx);
+  int _addDataField(Nc3File &ncf, DsMdvx &mdvx);
   
   void _insertDataVal(float dataVal,
 		      float lat, float lon,
@@ -131,15 +131,15 @@ private:
 		      fl32 **outputLat,
 		      fl32 **outputLon);
   
-  int _checkFile(NcFile &ncf);
+  int _checkFile(Nc3File &ncf);
 
   void _checkForRegularLatLonInput(int nLines, int nElems,
                                    const float *latArray,
                                    const float *lonArray);
     
-  void _printFile(NcFile &ncf);
-  void _printAtt(NcAtt *att);
-  void _printVarVals(NcVar *var);
+  void _printFile(Nc3File &ncf);
+  void _printAtt(Nc3Att *att);
+  void _printVarVals(Nc3Var *var);
 
   int _writeZebraNetCDF(const string &dataSetName,
                         const string &fieldName,
