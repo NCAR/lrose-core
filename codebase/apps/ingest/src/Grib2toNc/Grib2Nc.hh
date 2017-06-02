@@ -34,7 +34,7 @@
 #include <map>
 #include <vector>
 #include <list>
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3File.hh>
 
 #ifndef NOT_RAL
 #include <dsdata/DsTrigger.hh>

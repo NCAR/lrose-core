@@ -477,7 +477,7 @@ int Grib2Nc::getData()
 	  UTIMstruct timeStruct;
 	  UTIMunix_to_date(lastGenerateTime, &timeStruct);
 
-	  sprintf(whenChar, "%4d/%02d/%02d %02d:%02d:%02d",
+	  sprintf(whenChar, "%4ld/%02ld/%02ld %02ld:%02ld:%02ld",
 		  timeStruct.year, timeStruct.month, timeStruct.day,
 		  timeStruct.hour, timeStruct.min, timeStruct.sec);
 	  
@@ -1313,7 +1313,7 @@ void *Grib2Nc::_float32_to_int16(fl32 *inDataPtr)
   // allocate the output buffer
   
   size_t npoints = _fieldInfo.gridInfo.nx * _fieldInfo.gridInfo.ny * _fieldInfo.vlevelInfo.nz;
-  size_t output_size = npoints * sizeof(ui16);
+  // size_t output_size = npoints * sizeof(ui16);
   void *outDataPtr = new ui16[npoints];
 
   // convert data
@@ -1444,7 +1444,7 @@ fl32 *Grib2Nc::_reMapReducedOrGaussian(fl32 *data)
     else
       x = 0.0;
 
-    int ix = floor(x);
+    // int ix = floor(x);
 
     for(int i = 0; i < nx; i++)
     {

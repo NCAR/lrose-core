@@ -29,7 +29,7 @@
 #ifndef _NC_OUTPUT_
 #define _NC_OUTPUT_
 
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3File.hh>
 
 #include "Params.hh"
 #include "Grib2Nc.hh"
@@ -191,34 +191,34 @@ private:
 
   char* _outputFile;
 
-  NcFile *_ncFile;
-  NcError *_ncErr;
+  Nc3File *_ncFile;
+  Nc3Error *_ncErr;
 
-  NcDim *_timeDim;
-  NcDim *_boundsDim;
-  NcVar *_timeVar;
-  NcVar *_forecastPeriodVar;
-  NcVar *_forecastReferenceVar;
+  Nc3Dim *_timeDim;
+  Nc3Dim *_boundsDim;
+  Nc3Var *_timeVar;
+  Nc3Var *_forecastPeriodVar;
+  Nc3Var *_forecastReferenceVar;
 
   vector <Grib2Nc::FieldInfo> _fieldInfo;
   vector <fl32 *> _fieldData;
   int _numUniqueGrid;
   vector <int> _uniqueGrid;
- int _numUniqueVertical;
+  int _numUniqueVertical;
   vector <int> _uniqueVertical;
 
-  vector <NcVar *> _fieldVar;
+  vector <Nc3Var *> _fieldVar;
 
-  vector <NcDim *> _uniqueGridxDim;
-  vector <NcDim *> _uniqueGridyDim;
-  vector <NcVar *> _uniqueGridxVar;
-  vector <NcVar *> _uniqueGridyVar;
-  vector <NcVar *> _uniqueGridlatVar;
-  vector <NcVar *> _uniqueGridlonVar;
-  vector <NcVar *> _uniqueGridprojVar;
+  vector <Nc3Dim *> _uniqueGridxDim;
+  vector <Nc3Dim *> _uniqueGridyDim;
+  vector <Nc3Var *> _uniqueGridxVar;
+  vector <Nc3Var *> _uniqueGridyVar;
+  vector <Nc3Var *> _uniqueGridlatVar;
+  vector <Nc3Var *> _uniqueGridlonVar;
+  vector <Nc3Var *> _uniqueGridprojVar;
 
-  vector <NcDim *> _uniqueVerticalzDim;
-  vector <NcVar *> _uniqueVerticalzVar;
+  vector <Nc3Dim *> _uniqueVerticalzDim;
+  vector <Nc3Var *> _uniqueVerticalzVar;
 
 
   int _openNcFile(const string &path);
