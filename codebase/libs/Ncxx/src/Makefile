@@ -36,7 +36,7 @@ LIBNAME = lib$(MODULE_NAME).a
 SUB_DIRS = \
 	DataPort \
 	Hdf5 \
-	Nc3 \
+	Nc3x \
 	Ncxx \
 	Udunits
 

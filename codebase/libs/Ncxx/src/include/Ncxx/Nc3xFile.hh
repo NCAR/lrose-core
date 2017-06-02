@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// Nc3File.hh
+// Nc3xFile.hh
 //
 // NetCDF file wrapper
 //
@@ -33,8 +33,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef Nc3File_HH
-#define Nc3File_HH
+#ifndef Nc3xFile_HH
+#define Nc3xFile_HH
 
 #include <string>
 #include <vector>
@@ -46,7 +46,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////
 /// CLASS FOR NETCDF IO OPERATIONS
 
-class Nc3File
+class Nc3xFile
 
 {
   
@@ -54,11 +54,11 @@ public:
 
   /// Constructor
   
-  Nc3File();
+  Nc3xFile();
   
   /// Destructor
   
-  virtual ~Nc3File();
+  virtual ~Nc3xFile();
 
   //////////////////////////////////////////////////////////////
   /// \name File operations

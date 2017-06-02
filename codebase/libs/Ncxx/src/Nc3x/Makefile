@@ -39,10 +39,10 @@ LOC_INCLUDES = -I../include $(NETCDF4_INCS) $(UDUNITS_INCS)
 LOC_CFLAGS = 
 
 HDRS = \
-	../include/Ncxx/Nc3File.hh
+	../include/Ncxx/Nc3xFile.hh
 
 CPPC_SRCS = \
-	Nc3File.cc
+	Nc3xFile.cc
 
 #
 # general targets
