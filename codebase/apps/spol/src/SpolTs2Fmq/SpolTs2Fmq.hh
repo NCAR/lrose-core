@@ -236,9 +236,6 @@ private:
   // secondary status Xml input message and FMQ
 
   DsFmq _secondaryStatusFmq;
-  DsMessage _secondaryStatusMsg;
-  DsMsgPart *_secondaryStatusPart;
-  int _secondaryStatusPos, _secondaryStatusNParts;
   
   // status xml
 

@@ -580,6 +580,8 @@ int SpolTs2Fmq::_readTcpPacket()
       cerr << "Read in TCP packet, id, len: "
            << iwrf_packet_id_to_str(_packetId) << ", "
            << _packetLen << endl;
+    } else if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "p";
     }
   }
   
@@ -1675,6 +1677,7 @@ void SpolTs2Fmq::_doReadDelay(iwrf_packet_info &pulsePacket)
 
   if (pulseLateSecs < _sysconLateSecs) {
     int usecsWait = (int) ((_sysconLateSecs - pulseLateSecs) * 1.5e6);
+    cerr << "====>> usecsWait: " << usecsWait << endl;
     uusleep(usecsWait);
     PMU_auto_register("Delaying pulse");
   }
@@ -2304,20 +2307,19 @@ int SpolTs2Fmq::_openSecondaryStatusFmq()
 {
   
   Fmq::openPosition initPos = Fmq::END;
-  
+
   if (_secondaryStatusFmq.initReadOnly
       (_params.secondary_status_fmq_path,
        _progName.c_str(),
        _params.debug >= Params::DEBUG_EXTRA, // set debug?
        initPos)) {
-    cerr << "ERROR: " << _progName << endl;
-    cerr << "  Cannot initialize FMQ: " << _params.secondary_status_fmq_path << endl;
-    cerr << _secondaryStatusFmq.getErrStr() << endl;
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "  Cannot initialize FMQ: " << _params.secondary_status_fmq_path << endl;
+      cerr << _secondaryStatusFmq.getErrStr() << endl;
+    }
     return -1;
   }
-  
-  _secondaryStatusMsg.clearAll();
-  _secondaryStatusMsg.setType(0);
 
   return 0;
 
@@ -2337,63 +2339,39 @@ int SpolTs2Fmq::_readSecondaryStatusFromFmq()
   // check we have an open FMQ
   
   if (!_secondaryStatusFmq.isOpen()) {
+    cerr << "ooooooooooooooooooooooooooooooooooooooo" << endl;
     if (_openSecondaryStatusFmq()) {
       return -1;
     }
   }
   
-  if (_secondaryStatusPos >= _secondaryStatusNParts) {
-    
-    // read in a new message
-    
-    bool gotOne;
-    if (_secondaryStatusFmq.readMsg(&gotOne)) {
-      cerr << "ERROR -  SpolTs2Fmq::_readSysconInfo" << endl;
-      cerr << "  Cannot read syscon from FMQ" << endl;
-      cerr << "  Fmq: " << _params.syscon_fmq_path << endl;
-      cerr << _sysconFmq.getErrStr() << endl;
-      _sysconFmq.closeMsgQueue();
-      return -1;
-    }
-
-    if (!gotOne) {
-      // no data
-      return 0;
-    }
-    
-    // disassemble the message
-    
-    const void *msg = _secondaryStatusFmq.getMsg();
-    int len = _secondaryStatusFmq.getMsgLen();
-    if (_secondaryStatusMsg.disassemble(msg, len) == 0) {
-      _secondaryStatusPos = 0;
-      _secondaryStatusNParts = _secondaryStatusMsg.getNParts();
-    }
-    
-  } // if (_secondaryStatusPos >= _secondaryStatusNParts) 
+  // read in a new message
   
-  _secondaryStatusPart = _secondaryStatusMsg.getPart(_secondaryStatusPos);
-  _secondaryStatusPos++;
-
-  si32 len = _secondaryStatusPart->getLength();
-  char *buf = (char *) _secondaryStatusPart->getBuf();
-  
-  iwrf_packet_swap(buf, len);
-  int packetId;
-  iwrf_get_packet_id(buf, len, packetId);
-  
-  if (packetId == IWRF_STATUS_XML_ID) {
-    iwrf_status_xml_t *xmlHdr = (iwrf_status_xml_t *) buf;
-    int xmlLen = xmlHdr->xml_len;
-    char *xml = buf + sizeof(iwrf_status_xml_t);
-    TaArray<char> copy_;
-    char *copy = copy_.alloc(xmlLen + 1);
-    memcpy(copy, xml, xmlLen);
-    copy[xmlLen] = '\0';
-    _secondaryStatusXml = copy;
-    _secondaryStatusLatestTime = time(NULL);
+  bool gotOne;
+  if (_secondaryStatusFmq.readMsg(&gotOne)) {
+    cerr << "ERROR -  SpolTs2Fmq::_readSysconInfo" << endl;
+    cerr << "  Cannot read syscon from FMQ" << endl;
+    cerr << "  Fmq: " << _params.syscon_fmq_path << endl;
+    cerr << _sysconFmq.getErrStr() << endl;
+    _sysconFmq.closeMsgQueue();
+    return -1;
   }
-
+  
+  if (!gotOne) {
+    // no data
+    return 0;
+  }
+  
+  // get the xml, ensure null termination
+  
+  const void *msg = _secondaryStatusFmq.getMsg();
+  int len = _secondaryStatusFmq.getMsgLen();
+  TaArray<char> xml_;
+  char *xml = xml_.alloc(len);
+  memcpy(xml, msg, len);
+  xml[len-1] = '\0';
+  _secondaryStatusXml = xml;
+  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "========== latest secondary status XML ==============" << endl;
     cerr << _secondaryStatusXml << endl;
