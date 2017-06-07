@@ -45,17 +45,43 @@ paramdef boolean {
 } do_not_register_on_read;
 
 commentdef {
+  p_header = "DATA INPUT MODE";
+  p_text = "We can read time series data either from an FMQ, or from a socket via TCP.";
+};
+
+typedef enum {
+  INPUT_FMQ, INPUT_TCP
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = INPUT_FMQ;
+  p_descr = "Input mode - FMQ or TCP";
+} input_mode;
+
+commentdef {
+  p_header = "READING TIME SERIES FROM FMQ";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "Name of input FMQ path. INPUT_FMQ mode only.";
+  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
+} input_fmq_path;
+
+commentdef {
   p_header = "READING TIME SERIES VIA TCP";
 };
 
 paramdef string {
   p_default = "localhost";
   p_descr = "Host name on which time series server is running.";
+  p_help = "TCP_INPUT mode only.";
 } ts_tcp_server_host;
 
 paramdef int {
   p_default = 12000;
   p_descr = "TCP/IP port on which time series server is running.";
+  p_help = "TCP_INPUT mode only.";
 } ts_tcp_server_port;
 
 commentdef {

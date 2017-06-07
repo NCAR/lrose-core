@@ -57,6 +57,11 @@ public:
     DEBUG_EXTRA = 3
   } debug_t;
 
+  typedef enum {
+    INPUT_FMQ = 0,
+    INPUT_TCP = 1
+  } input_mode_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -350,6 +355,10 @@ public:
 
   tdrp_bool_t do_not_register_on_read;
 
+  input_mode_t input_mode;
+
+  char* input_fmq_path;
+
   char* ts_tcp_server_host;
 
   int ts_tcp_server_port;
@@ -447,7 +456,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[62];
+  mutable TDRPtable _table[66];
 
   const char *_className;
 

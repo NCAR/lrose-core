@@ -92,6 +92,13 @@ private:
   char *_paramsPath;
   Params _params;
 
+  // FMQ input
+  
+  Fmq _inputFmq;
+  DsMessage _msg;
+  int _msgNParts;
+  int _msgPos;
+  
   // tcp input socket
 
   Socket _sock;
@@ -256,12 +263,30 @@ private:
 
   bool _scaleWarningPrinted;
 
-  // reading data
+  // run mode
 
-  int _readFromServer();
-  int _readMessage();
+  int _runFmqMode();
+  int _runTcpMode();
+
+  // reading data from FMQ
+
+  int _readFromFmq();
+  const DsMsgPart *_getNextFromFmq();
+
+  // reading data from TCP
+
+  int _readFromTcpServer();
+  int _readTcpMessage();
   int _readTcpPacket();
-  void _handlePulsePacket();
+
+  // packet handling
+
+  void _handlePacket();
+  int _checkPacket();
+
+  // handle the pulse
+  
+  void _handlePulse();
   
   // sweep number mods
 

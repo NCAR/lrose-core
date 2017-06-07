@@ -257,12 +257,78 @@ int SpolTs2Fmq::Run ()
   } else if (_params.debug) {
     cerr << "Running SpolTs2Fmq - debug mode" << endl;
   }
+
   if (_params.debug) {
-    cerr << "  FMQ: " << _params.output_fmq_path << endl;
-    cerr << "  nSlots: " << _params.output_fmq_nslots << endl;
-    cerr << "  nBytes: " << _params.output_fmq_size << endl;
+    cerr << "  OUTPUT FMQ: " << _params.output_fmq_path << endl;
+    cerr << "    nSlots: " << _params.output_fmq_nslots << endl;
+    cerr << "    nBytes: " << _params.output_fmq_size << endl;
   }
+
+  if (_params.input_mode == Params::INPUT_FMQ) {
+    return _runFmqMode();
+  } else {
+    return _runTcpMode();
+  }
+
+}
   
+//////////////////////////////////////////////////
+// Run in FMQ mode
+
+int SpolTs2Fmq::_runFmqMode()
+{
+
+  PMU_auto_register("_runFmqMode");
+
+  if (_params.debug) {
+    cerr << "  Input mode: FMQ" << endl;
+  }
+
+  while (true) {
+
+    PMU_auto_register("Opening FMQ");
+    if (_params.debug) {
+      cerr << "  Opening Fmq: " << _params.input_fmq_path << endl;
+    }
+
+    _inputFmq.setHeartbeat(PMU_auto_register);
+    int msecsSleepBlocking = 100;
+    
+    if (_inputFmq.initReadBlocking(_params.input_fmq_path,
+                                   "SpolTs2Fmq",
+                                   _params.debug >= Params::DEBUG_EXTRA,
+                                   Fmq::END, msecsSleepBlocking)) {
+      cerr << "ERROR - SpolTs2Fmq::_runFmqMode" << endl;
+      cerr << "  Cannot init FMQ for reading" << endl;
+      cerr << "  Fmq: " << _params.input_fmq_path << endl;
+      cerr << _inputFmq.getErrStr() << endl;
+      umsleep(1000);
+      continue;
+    }
+
+    // read data from the FMQ, send to client
+    
+    if (_readFromFmq()) {
+      _inputFmq.closeMsgQueue();
+      return -1;
+    }
+
+  } // while(true)
+
+}
+
+//////////////////////////////////////////////////
+// Run in TCP mode
+
+int SpolTs2Fmq::_runTcpMode()
+{
+
+  PMU_auto_register("_runTcpMode");
+
+  if (_params.debug) {
+    cerr << "  Input mode: TCP" << endl;
+  }
+
   int iret = 0;
 
   while (true) {
@@ -294,7 +360,7 @@ int SpolTs2Fmq::Run ()
 
     // read from the server
     
-    if (_readFromServer()) {
+    if (_readFromTcpServer()) {
       iret = -1;
     }
 
@@ -307,9 +373,111 @@ int SpolTs2Fmq::Run ()
 }
 
 /////////////////////////////
+// read data from the FMQ
+
+int SpolTs2Fmq::_readFromFmq()
+
+{
+
+  // initialize
+  
+  _msgNParts = 0;
+  _msgPos = 0;
+  
+  // read data
+  
+  while (true) {
+    
+    PMU_auto_register("Reading data");
+    
+    // read next message
+
+    const DsMsgPart *part = _getNextFromFmq();
+    if (part == NULL) {
+      cerr << "ERROR - TsFmq2Tcp::_readFromFmq" << endl;
+      return -1;
+    }
+    
+    // set ID and length
+
+    _packetId = part->getType();
+    _packetLen = part->getLength();
+
+    if (iwrf_check_packet_id(_packetId)) {
+      cerr << "ERROR - TsFmq2Tcp::_readFromFmq" << endl;
+      cerr << "  Incorrect packet type - ignoring id: " << _packetId << endl;
+      continue;
+    }
+
+    // load up buffer
+    
+    _msgBuf.reset();
+    _msgBuf.add(part->getBuf(), part->getLength());
+
+    // swap if needed
+    
+    iwrf_packet_swap(_msgBuf.getPtr(), _msgBuf.getLen());
+
+    // check packet for validity
+    
+    if (_checkPacket()) {
+      continue;
+    }
+
+    // handle the packet
+
+    _handlePacket();
+
+  } // while (true)
+
+  return 0;
+
+}
+
+///////////////////////////////////////////
+// get next message part from FMQ
+// returns DsMsgPart object pointer on success, NULL on failure
+// returns NULL at end of data, or error
+
+const DsMsgPart *SpolTs2Fmq::_getNextFromFmq()
+  
+{
+  
+  while (_msgPos >= _msgNParts) {
+    
+    // we need a new message
+    // blocking read registers with Procmap while waiting
+    
+    if (_inputFmq.readMsgBlocking()) {
+      cerr << "ERROR - SpolTs2Fmq::_getNextPart" << endl;
+      cerr << "  Cannot read message from FMQ" << endl;
+      cerr << "  Fmq: " << _params.input_fmq_path << endl;
+      return NULL;
+    }
+    
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Got message from FMQ, len: " << _inputFmq.getMsgLen() << endl;
+    }
+
+    // disassemble the message
+    
+    if (_msg.disassemble(_inputFmq.getMsg(), _inputFmq.getMsgLen()) == 0) {
+      _msgPos = 0;
+      _msgNParts = _msg.getNParts();
+    }
+    
+  } // while
+  
+  DsMsgPart *part = _msg.getPart(_msgPos);
+  _msgPos++;
+
+  return part;
+  
+}
+/////////////////////////////
 // read data from the server
 
-int SpolTs2Fmq::_readFromServer()
+int SpolTs2Fmq::_readFromTcpServer()
 
 {
 
@@ -323,7 +491,7 @@ int SpolTs2Fmq::_readFromServer()
 
     // read packet from time series server server
 
-    if (_readMessage()) {
+    if (_readTcpMessage()) {
       if (!_sockTimedOut && !_unknownMsgId) {
         // error
         cerr << "ERROR - SpolTs2Fmq::_readFromServer" << endl;
@@ -333,95 +501,10 @@ int SpolTs2Fmq::_readFromServer()
       continue;
     }
     
-    // if appropriate, merge in syscon data
+    // handle the packet
+
+    _handlePacket();
     
-    if (_params.merge_syscon_info) {
-      _readSysconFromFmq();
-    }
-
-    // if appropriate, merge in status xml
-
-    if (_params.merge_secondary_status_from_fmq) {
-      _readSecondaryStatusFromFmq();
-    }
-    
-    // handle packet types
-
-    if (_packetId == IWRF_PULSE_HEADER_ID) {
-
-      _handlePulsePacket();
-
-    } else if (_packetId == IWRF_RADAR_INFO_ID) {
-      
-      // radar info - make local copy
-
-      iwrf_radar_info_t *radar = (iwrf_radar_info_t *) _msgBuf.getPtr();
-      _tsRadarInfo = *radar;
-      
-      // add to FMQ
-      
-      _writeRadarInfoToFmq();
-      
-    } else if (_packetId == IWRF_SCAN_SEGMENT_ID) {
-      
-      // scan segment - make local copy
-
-      iwrf_scan_segment_t *scan = (iwrf_scan_segment_t *) _msgBuf.getPtr();
-      _tsScanSeg = *scan;
-
-      // add to FMQ
-      
-      _writeScanSegmentToFmq();
-      
-    } else if (_packetId == IWRF_TS_PROCESSING_ID) {
-      
-      // ts processing - make local copy
-
-      iwrf_ts_processing_t *proc = (iwrf_ts_processing_t *) _msgBuf.getPtr();
-      _tsTsProc = *proc;
-      
-      // add to FMQ
-
-      _writeTsProcessingToFmq();
-      
-    } else if (_packetId == IWRF_XMIT_POWER_ID) {
-      
-      // xmit power - make local copy
-
-      iwrf_xmit_power_t *power = (iwrf_xmit_power_t *) _msgBuf.getPtr();
-      _tsXmitPower = *power;
-      
-      // add to FMQ
-
-      _writeXmitPowerToFmq();
-      
-    } else if (_packetId == IWRF_STATUS_XML_ID) {
-      
-      _handleStatusXml();
-      
-    } else if (_packetId == IWRF_CALIBRATION_ID) {
-      
-      _handleCalibration();
-      
-    } else {
-
-      // other packet type
-      // add to outgoing message
-      
-      _outputMsg.addPart(_packetId, _packetLen, _msgBuf.getPtr());
-
-    }
-
-    // if the message is large enough, write to the FMQ
-    
-    _writeToOutputFmq();
-
-    // check that status XML is up to date
-
-    if (_params.augment_status_xml) {
-      _checkStatusXml();
-    }
-
   } // while (true)
 
   return 0;
@@ -429,17 +512,17 @@ int SpolTs2Fmq::_readFromServer()
 }
 
 ///////////////////////////////////////////////////////////////////
-// Read in next message, set id and load buffer.
+// Read in next message from TCP, set id and load buffer.
 // Returns 0 on success, -1 on failure
 
-int SpolTs2Fmq::_readMessage()
+int SpolTs2Fmq::_readTcpMessage()
   
 {
 
   while (true) {
 
     if (!_params.do_not_register_on_read) {
-      PMU_auto_register("_readMessage");
+      PMU_auto_register("_readTcpMessage");
     }
 
     if (_readTcpPacket() == 0) {
@@ -448,7 +531,7 @@ int SpolTs2Fmq::_readMessage()
     
     if (!_sockTimedOut && !_unknownMsgId) {
       // socket error
-      cerr << "ERROR - SpolTs2Fmq::_readFromServer" << endl;
+      cerr << "ERROR - SpolTs2Fmq::_readTcpMessage" << endl;
       return -1;
     }
 
@@ -546,15 +629,34 @@ int SpolTs2Fmq::_readTcpPacket()
     cerr << "  " << _sock.getErrStr() << endl;
     return -1;
   }
-  
+
+  // check packet for validity
+
+  if (_checkPacket()) {
+    return -1;
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////
+// check packet for validity
+// returns 0 on success, -1 on error
+
+int SpolTs2Fmq::_checkPacket()
+
+{
+
   // check that we have a valid message
 
   if (iwrf_check_packet_id(_packetId, _packetLen)) {
     // unknown packet type, read it in and continue without processing
     _unknownCount++;
-    if (_unknownCount > 100) {
+    if (_unknownCount > 1000) {
       cerr << "ERROR - SpolTs2Fmq::_readTcpPacket" << endl;
-      cerr << "  Too many resync tries, need to reconnect" << endl;
+      cerr << "  Too many bad packets" << endl;
+      _unknownCount = 0;
       return -1;
     }
     _unknownMsgId = true;
@@ -604,9 +706,107 @@ int SpolTs2Fmq::_readTcpPacket()
 }
 
 /////////////////////////////
-// handle a pulse type packet
+// handle a packet
 
-void SpolTs2Fmq::_handlePulsePacket()
+void SpolTs2Fmq::_handlePacket()
+
+{
+  
+  // if appropriate, merge in syscon data
+  
+  if (_params.merge_syscon_info) {
+    _readSysconFromFmq();
+  }
+  
+  // if appropriate, merge in status xml
+  
+  if (_params.merge_secondary_status_from_fmq) {
+    _readSecondaryStatusFromFmq();
+  }
+  
+  // handle packet types
+  
+  if (_packetId == IWRF_PULSE_HEADER_ID) {
+    
+    _handlePulse();
+    
+  } else if (_packetId == IWRF_RADAR_INFO_ID) {
+    
+    // radar info - make local copy
+    
+    iwrf_radar_info_t *radar = (iwrf_radar_info_t *) _msgBuf.getPtr();
+    _tsRadarInfo = *radar;
+    
+    // add to FMQ
+    
+    _writeRadarInfoToFmq();
+    
+  } else if (_packetId == IWRF_SCAN_SEGMENT_ID) {
+    
+    // scan segment - make local copy
+    
+    iwrf_scan_segment_t *scan = (iwrf_scan_segment_t *) _msgBuf.getPtr();
+    _tsScanSeg = *scan;
+    
+    // add to FMQ
+    
+    _writeScanSegmentToFmq();
+    
+  } else if (_packetId == IWRF_TS_PROCESSING_ID) {
+    
+    // ts processing - make local copy
+    
+    iwrf_ts_processing_t *proc = (iwrf_ts_processing_t *) _msgBuf.getPtr();
+    _tsTsProc = *proc;
+    
+    // add to FMQ
+    
+    _writeTsProcessingToFmq();
+    
+  } else if (_packetId == IWRF_XMIT_POWER_ID) {
+    
+    // xmit power - make local copy
+    
+    iwrf_xmit_power_t *power = (iwrf_xmit_power_t *) _msgBuf.getPtr();
+    _tsXmitPower = *power;
+    
+    // add to FMQ
+    
+    _writeXmitPowerToFmq();
+    
+  } else if (_packetId == IWRF_STATUS_XML_ID) {
+    
+    _handleStatusXml();
+    
+  } else if (_packetId == IWRF_CALIBRATION_ID) {
+    
+    _handleCalibration();
+    
+  } else {
+    
+    // other packet type
+    // add to outgoing message
+    
+    _outputMsg.addPart(_packetId, _packetLen, _msgBuf.getPtr());
+    
+  }
+
+  // if the message is large enough, write to the FMQ
+  
+  _writeToOutputFmq();
+  
+    // check that status XML is up to date
+  
+  if (_params.augment_status_xml) {
+    _checkStatusXml();
+  }
+
+}
+
+/////////////////////////////
+// handle pulse data
+
+void SpolTs2Fmq::_handlePulse()
 
 {
 

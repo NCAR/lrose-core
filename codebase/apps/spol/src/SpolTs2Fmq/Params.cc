@@ -610,6 +610,56 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
+    tt->comment_hdr = tdrpStrDup("DATA INPUT MODE");
+    tt->comment_text = tdrpStrDup("We can read time series data either from an FMQ, or from a socket via TCP.");
+    tt++;
+    
+    // Parameter 'input_mode'
+    // ctype is '_input_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("input_mode");
+    tt->descr = tdrpStrDup("Input mode - FMQ or TCP");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &input_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("input_mode_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("INPUT_FMQ");
+      tt->enum_def.fields[0].val = INPUT_FMQ;
+      tt->enum_def.fields[1].name = tdrpStrDup("INPUT_TCP");
+      tt->enum_def.fields[1].val = INPUT_TCP;
+    tt->single_val.e = INPUT_FMQ;
+    tt++;
+    
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("READING TIME SERIES FROM FMQ");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'input_fmq_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_fmq_path");
+    tt->descr = tdrpStrDup("Name of input FMQ path. INPUT_FMQ mode only.");
+    tt->help = tdrpStrDup("Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.");
+    tt->val_offset = (char *) &input_fmq_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/fmq/ts");
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("READING TIME SERIES VIA TCP");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -621,7 +671,7 @@ using namespace std;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("ts_tcp_server_host");
     tt->descr = tdrpStrDup("Host name on which time series server is running.");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("TCP_INPUT mode only.");
     tt->val_offset = (char *) &ts_tcp_server_host - &_start_;
     tt->single_val.s = tdrpStrDup("localhost");
     tt++;
@@ -633,16 +683,16 @@ using namespace std;
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("ts_tcp_server_port");
     tt->descr = tdrpStrDup("TCP/IP port on which time series server is running.");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("TCP_INPUT mode only.");
     tt->val_offset = (char *) &ts_tcp_server_port - &_start_;
     tt->single_val.i = 12000;
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("MERGING SYSCON INFORMATION");
     tt->comment_text = tdrpStrDup("The syscon information is written to an FMQ by SpolSysconRelay. This information is optionally read in by this application and merged with the time series data. Generally this is scan information and transmit power.");
     tt++;
@@ -695,11 +745,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("MERGING ANGLES FROM S2D");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -824,11 +874,11 @@ using namespace std;
     tt->single_val.d = 0.1;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OVERRIDE CALIBRATION");
     tt->comment_text = tdrpStrDup("Limited calibration information is passed down from the drx. This option allows you to override this calibration information with that from a file on disk.");
     tt++;
@@ -857,11 +907,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("./cal.xml");
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("AUGMENTING THE STATUS XML");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -974,11 +1024,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("/tmp/data/fmq/secondary_status");
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("MONITOR TEST PULSE POWER");
     tt->comment_text = tdrpStrDup("If test pulse monitoring is active, an extra XML block will be generate to hold the test pulse powers. The main tag for this block is specified in test_pulse_tag. Within the test pulse block, the following values will the stored, as applicable:\n\tTestPulsePowerHcDb\n\tTestPulsePowerVcDb\n\tTestPulsePowerHxDb\n\tTestPulsePowerVxDb.");
     tt++;
@@ -1043,11 +1093,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("SWEEP NUMBER");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1076,11 +1126,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("IQ DATA SCALING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1121,11 +1171,11 @@ using namespace std;
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("OUTPUT FMQ DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1166,11 +1216,11 @@ using namespace std;
     tt->single_val.i = 500;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("OUTPUT FMQ MESSAGE DETAILS");
     tt->comment_text = tdrpStrDup("The output messages are written to the FMQ. To improve performance, each message contains a number of time series pulses.");
     tt++;
