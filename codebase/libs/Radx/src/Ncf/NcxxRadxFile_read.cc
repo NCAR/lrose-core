@@ -818,7 +818,8 @@ int NcxxRadxFile::_readGlobalAttributes()
   _origFormat = "CFRADIAL"; // default
 
   multimap<string,NcxxGroupAtt> atts = _file.getAtts();
-  for (auto ii = atts.begin(); ii != atts.end(); ii++) {
+  for (multimap<string,NcxxGroupAtt>::iterator ii = atts.begin();
+       ii != atts.end(); ii++) {
 
     NcxxGroupAtt att = ii->second;
     
@@ -1054,7 +1055,8 @@ int NcxxRadxFile::_readRangeVariable()
   double gateSpacingKm = Radx::missingMetaDouble;
 
   map<string, NcxxVarAtt> atts = _rangeVar.getAtts();
-  for (auto ii = atts.begin(); ii != atts.end(); ii++) {
+  for (map<string, NcxxVarAtt>::iterator ii = atts.begin();
+       ii != atts.end(); ii++) {
     
     NcxxVarAtt att = ii->second;
     
@@ -2364,7 +2366,8 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
   
   const multimap<string, NcxxVar> &vars = _file.getVars();
 
-  for (auto iter = vars.begin(); iter != vars.end(); iter++) {
+  for (multimap<string, NcxxVar>::const_iterator iter = vars.begin();
+       iter != vars.end(); iter++) {
     
     NcxxVar var = iter->second;
     if (var.isNull()) {

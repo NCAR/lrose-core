@@ -743,7 +743,8 @@ void Cf2RadxFile::_readGlobalAttributes()
   _instrumentName = "unknown";
 
   multimap<string,NcxxGroupAtt> atts = _file.getAtts();
-  for (auto ii = atts.begin(); ii != atts.end(); ii++) {
+  for (multimap<string,NcxxGroupAtt>::iterator ii = atts.begin();
+       ii != atts.end(); ii++) {
 
     NcxxGroupAtt att = ii->second;
     
@@ -1943,7 +1944,8 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
    double gateSpacingKm = Radx::missingMetaDouble;
 
    map<string, NcxxVarAtt> atts = rangeVar.getAtts();
-   for (auto ii = atts.begin(); ii != atts.end(); ii++) {
+   for (map<string, NcxxVarAtt>::iterator ii = atts.begin();
+        ii != atts.end(); ii++) {
 
      NcxxVarAtt att = ii->second;
 
@@ -2392,7 +2394,8 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
 
    const multimap<string, NcxxVar> &vars = _sweepGroup.getVars();
 
-   for (auto iter = vars.begin(); iter != vars.end(); iter++) {
+   for (multimap<string, NcxxVar>::const_iterator iter = vars.begin();
+        iter != vars.end(); iter++) {
 
      NcxxVar var = iter->second;
      if (var.isNull()) {
