@@ -2448,10 +2448,10 @@ void SpolTs2Fmq::_augmentStatusXml(const iwrf_packet_info_t &packet,
     return;
   }
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "============== Augmented XML ==============" << endl;
+  if (_params.debug) {
+    cerr << "=============== Augmented XML ================" << endl;
     cerr << augXml << endl;
-    cerr << "===========================================" << endl;
+    cerr << "============ End of augmented XML ============" << endl;
   }
 
   // create packet
@@ -2539,7 +2539,6 @@ int SpolTs2Fmq::_readSecondaryStatusFromFmq()
   // check we have an open FMQ
   
   if (!_secondaryStatusFmq.isOpen()) {
-    cerr << "ooooooooooooooooooooooooooooooooooooooo" << endl;
     if (_openSecondaryStatusFmq()) {
       return -1;
     }
@@ -2571,6 +2570,7 @@ int SpolTs2Fmq::_readSecondaryStatusFromFmq()
   memcpy(xml, msg, len);
   xml[len-1] = '\0';
   _secondaryStatusXml = xml;
+  _secondaryStatusLatestTime = time(NULL);
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "========== latest secondary status XML ==============" << endl;
