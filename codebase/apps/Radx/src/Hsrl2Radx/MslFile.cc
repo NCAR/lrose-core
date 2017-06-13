@@ -435,44 +435,44 @@ int MslFile::getTimeFromPath(const string &path, RadxTime &rtime)
 ////////////////////////////////////////
 // convert Radx::DataType_t to NcType
 
-NcType MslFile::_getNcType(Radx::DataType_t dtype)
+Nc3Type MslFile::_getNc3Type(Radx::DataType_t dtype)
 
 {
   switch (dtype) {
     case Radx::FL64:
-      return ncDouble;
+      return nc3Double;
     case Radx::FL32:
-      return ncFloat;
+      return nc3Float;
     case Radx::SI32:
-      return ncInt;
+      return nc3Int;
     case Radx::SI16:
-      return ncShort;
+      return nc3Short;
     case Radx::SI08:
     default:
-      return ncByte;
+      return nc3Byte;
   }
 }
 
 //////////////////////////////////////////////////////////
 // convert RadxFile::netcdf_format_t to NcFile::FileFormat
 
-NcFile::FileFormat 
+Nc3File::FileFormat 
   MslFile::_getFileFormat(RadxFile::netcdf_format_t format)
 
 {
   switch (format) {
     case NETCDF4_CLASSIC:
-      return NcFile::Netcdf4Classic;
+      return Nc3File::Netcdf4Classic;
       break;
     case NETCDF_OFFSET_64BIT:
-      return NcFile::Offset64Bits;
+      return Nc3File::Offset64Bits;
       break;
     case NETCDF4:
-      return NcFile::Netcdf4;
+      return Nc3File::Netcdf4;
       break;
     case NETCDF_CLASSIC:
     default:
-      return NcFile::Classic;
+      return Nc3File::Classic;
   }
 }
 
@@ -544,7 +544,7 @@ void MslFile::print(ostream &out) const
 // Use getErrStr() if error occurs
 
 int MslFile::printNative(const string &path, ostream &out,
-                             bool printRays, bool printData)
+                         bool printRays, bool printData)
   
 {
 
@@ -592,7 +592,7 @@ Radx::fl32 MslFile::_checkMissingFloat(float val)
 // Use getErrStr() if error occurs
 
 int MslFile::readFromPath(const string &path,
-                              RadxVol &vol)
+                          RadxVol &vol)
   
 {
 
@@ -874,7 +874,7 @@ int MslFile::_readPath(const string &path, size_t pathNum)
 // returns the volume number
 
 int MslFile::_getVolumePaths(const string &path,
-                                 vector<string> &paths)
+                             vector<string> &paths)
   
 {
 
@@ -972,9 +972,9 @@ int MslFile::_getVolumePaths(const string &path,
 // add to the path list, given time constraints
 
 void MslFile::_addToPathList(const string &dir,
-                                 const string &volStr,
-                                 int minHour, int maxHour,
-                                 vector<string> &paths)
+                             const string &volStr,
+                             int minHour, int maxHour,
+                             vector<string> &paths)
   
 {
 
@@ -1196,7 +1196,7 @@ void MslFile::_checkGeorefsActiveOnRead()
 
   // get latitude variable
 
-  _latitudeVar = _file.getNcFile()->get_var(LATITUDE);
+  _latitudeVar = _file.getNc3File()->get_var(LATITUDE);
   if (_latitudeVar == NULL) {
     return;
   }
@@ -1204,7 +1204,7 @@ void MslFile::_checkGeorefsActiveOnRead()
   // if the latitude has dimension of time, then latitude is a 
   // vector and georefs are active
   
-  NcDim *timeDim = _latitudeVar->get_dim(0);
+  Nc3Dim *timeDim = _latitudeVar->get_dim(0);
   if (timeDim == _timeDim) {
     _georefsActive = true;
   }
@@ -1218,7 +1218,7 @@ void MslFile::_checkCorrectionsActiveOnRead()
 {
 
   _correctionsActive = false;
-  if (_file.getNcFile()->get_var(AZIMUTH_CORRECTION) != NULL) {
+  if (_file.getNc3File()->get_var(AZIMUTH_CORRECTION) != NULL) {
     _correctionsActive = true;
   }
 
@@ -1245,7 +1245,7 @@ int MslFile::_readDimensions()
     _nRangeInFile = _rangeDim->size();
   }
 
-  _nPointsDim = _file.getNcFile()->get_dim(N_POINTS);
+  _nPointsDim = _file.getNc3File()->get_dim(N_POINTS);
   if (_nPointsDim == NULL) {
     _nGatesVary = false;
     _nPoints = 0;
@@ -1263,7 +1263,7 @@ int MslFile::_readDimensions()
 
   // calibration dimension is optional
 
-  _calDim = _file.getNcFile()->get_dim(R_CALIB);
+  _calDim = _file.getNc3File()->get_dim(R_CALIB);
 
   return 0;
 
@@ -1276,17 +1276,17 @@ int MslFile::_readGlobalAttributes()
 
 {
 
-  NcAtt *att;
+  Nc3Att *att;
   
   // check for conventions
 
-  att = _file.getNcFile()->get_att(CONVENTIONS);
+  att = _file.getNc3File()->get_att(CONVENTIONS);
   if (att == NULL) {
     _addErrStr("ERROR - MslFile::_readGlobalAttributes");
     _addErrStr("  Cannot find conventions attribute");
     return -1;
   }
-  _conventions = NetcdfClassic::asString(att);
+  _conventions = Nc3xFile::asString(att);
   if (_conventions.find(BaseConvention) == string::npos) {
     if (_conventions.find("CF") == string::npos &&
         _conventions.find("Radial") == string::npos) {
@@ -1298,13 +1298,13 @@ int MslFile::_readGlobalAttributes()
 
   // check for instrument name
 
-  att = _file.getNcFile()->get_att(INSTRUMENT_NAME);
+  att = _file.getNc3File()->get_att(INSTRUMENT_NAME);
   if (att == NULL) {
     _addErrStr("ERROR - MslFile::_readGlobalAttributes");
     _addErrStr("  Cannot find instrument_name attribute");
     return -1;
   }
-  _instrumentName = NetcdfClassic::asString(att);
+  _instrumentName = Nc3xFile::asString(att);
   if (_instrumentName.size() < 1) {
     _instrumentName = "unknown";
   }
@@ -1313,58 +1313,58 @@ int MslFile::_readGlobalAttributes()
 
   _origFormat = "CFRADIAL"; // default
 
-  for (int ii = 0; ii < _file.getNcFile()->num_atts(); ii++) {
+  for (int ii = 0; ii < _file.getNc3File()->num_atts(); ii++) {
     
-    NcAtt* att = _file.getNcFile()->get_att(ii);
+    Nc3Att* att = _file.getNc3File()->get_att(ii);
     
     if (att == NULL) {
       continue;
     }
     if (!strcmp(att->name(), VERSION)) {
-      _version = NetcdfClassic::asString(att);
+      _version = Nc3xFile::asString(att);
     }
     if (!strcmp(att->name(), TITLE)) {
-      _title = NetcdfClassic::asString(att);
+      _title = Nc3xFile::asString(att);
     }
     if (!strcmp(att->name(), SOURCE)) {
-      _source = NetcdfClassic::asString(att);
+      _source = Nc3xFile::asString(att);
     }
     if (!strcmp(att->name(), HISTORY)) {
-      _history = NetcdfClassic::asString(att);
+      _history = Nc3xFile::asString(att);
     }
     if (!strcmp(att->name(), INSTITUTION)) {
-      _institution = NetcdfClassic::asString(att);
+      _institution = Nc3xFile::asString(att);
     }
     if (!strcmp(att->name(), REFERENCES)) {
-      _references = NetcdfClassic::asString(att);
+      _references = Nc3xFile::asString(att);
     }
     if (!strcmp(att->name(), COMMENT)) {
-      _comment = NetcdfClassic::asString(att);
+      _comment = Nc3xFile::asString(att);
     }
     if (!strcmp(att->name(), AUTHOR)) {
-      _author = NetcdfClassic::asString(att);
+      _author = Nc3xFile::asString(att);
     }
     if (!strcmp(att->name(), ORIGINAL_FORMAT)) {
-      _origFormat = NetcdfClassic::asString(att);
+      _origFormat = Nc3xFile::asString(att);
     }
     if (!strcmp(att->name(), DRIVER)) {
-      _driver = NetcdfClassic::asString(att);
+      _driver = Nc3xFile::asString(att);
     }
     if (!strcmp(att->name(), CREATED)) {
-      _created = NetcdfClassic::asString(att);
+      _created = Nc3xFile::asString(att);
     }
     if (!strcmp(att->name(), SITE_NAME)) {
-      _siteName = NetcdfClassic::asString(att);
+      _siteName = Nc3xFile::asString(att);
     }
     if (!strcmp(att->name(), SCAN_NAME)) {
-      _scanName = NetcdfClassic::asString(att);
+      _scanName = Nc3xFile::asString(att);
     }
     if (!strcmp(att->name(), SCAN_ID)) {
       _scanId = att->as_int(0);
     }
     
     if (!strcmp(att->name(), RAY_TIMES_INCREASE)) {
-      string rayTimesIncrease = NetcdfClassic::asString(att);
+      string rayTimesIncrease = Nc3xFile::asString(att);
       if (rayTimesIncrease == "true") {
         _rayTimesIncrease = true;
       } else {
@@ -1391,11 +1391,11 @@ int MslFile::_readTimes(int pathNum)
 
   // read the time variable
 
-  _timeVar = _file.getNcFile()->get_var(TIME);
+  _timeVar = _file.getNc3File()->get_var(TIME);
   if (_timeVar == NULL) {
     _addErrStr("ERROR - MslFile::_readTimes");
     _addErrStr("  Cannot find time variable, name: ", TIME);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   if (_timeVar->num_dims() < 1) {
@@ -1403,7 +1403,7 @@ int MslFile::_readTimes(int pathNum)
     _addErrStr("  time variable has no dimensions");
     return -1;
   }
-  NcDim *timeDim = _timeVar->get_dim(0);
+  Nc3Dim *timeDim = _timeVar->get_dim(0);
   if (timeDim != _timeDim) {
     _addErrStr("ERROR - MslFile::_readTimes");
     _addErrStr("  Time has incorrect dimension, name: ", timeDim->name());
@@ -1412,13 +1412,13 @@ int MslFile::_readTimes(int pathNum)
 
   // get units attribute
   
-  NcAtt* unitsAtt = _timeVar->get_att(UNITS);
+  Nc3Att* unitsAtt = _timeVar->get_att(UNITS);
   if (unitsAtt == NULL) {
     _addErrStr("ERROR - MslFile::_readTimes");
     _addErrStr("  Time has no units");
     return -1;
   }
-  string units = NetcdfClassic::asString(unitsAtt);
+  string units = Nc3xFile::asString(unitsAtt);
   delete unitsAtt;
 
   // parse the time units reference time
@@ -1480,11 +1480,11 @@ int MslFile::_readRangeVariable()
 
 {
 
-  _rangeVar = _file.getNcFile()->get_var(RANGE);
+  _rangeVar = _file.getNc3File()->get_var(RANGE);
   if (_rangeVar == NULL || _rangeVar->num_vals() < 1) {
     _addErrStr("ERROR - MslFile::_readRangeVariable");
     _addErrStr("  Cannot read range");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
 
@@ -1516,14 +1516,14 @@ int MslFile::_readRangeVariable()
 
   for (int ii = 0; ii < _rangeVar->num_atts(); ii++) {
     
-    NcAtt* att = _rangeVar->get_att(ii);
+    Nc3Att* att = _rangeVar->get_att(ii);
     
     if (att == NULL) {
       continue;
     }
     
     if (!strcmp(att->name(), SPACING_IS_CONSTANT)) {
-      string spacingIsConstant = NetcdfClassic::asString(att);
+      string spacingIsConstant = Nc3xFile::asString(att);
       if (spacingIsConstant == "true") {
         _gateSpacingIsConstant = true;
       } else {
@@ -1532,13 +1532,13 @@ int MslFile::_readRangeVariable()
     }
 
     if (!strcmp(att->name(), METERS_TO_CENTER_OF_FIRST_GATE)) {
-      if (att->type() == ncFloat || att->type() == ncDouble) {
+      if (att->type() == nc3Float || att->type() == nc3Double) {
         startRangeKm = att->as_double(0) / 1000.0;
       }
     }
 
     if (!strcmp(att->name(), METERS_BETWEEN_GATES)) {
-      if (att->type() == ncFloat || att->type() == ncDouble) {
+      if (att->type() == nc3Float || att->type() == nc3Double) {
         gateSpacingKm = att->as_double(0) / 1000.0;
       }
     }
@@ -1584,13 +1584,13 @@ int MslFile::_readScalarVariables()
     _primaryAxis = Radx::primaryAxisFromStr(pstring);
   }
 
-  if (_file.getNcFile()->get_var(STATUS_XML) != NULL) {
+  if (_file.getNc3File()->get_var(STATUS_XML) != NULL) {
     if (_file.readStringVar(_statusXmlVar, STATUS_XML, pstring) == 0) {
       _statusXml = pstring;
     }
   }
 
-  NcVar *var;
+  Nc3Var *var;
   if (_file.readStringVar(var, TIME_COVERAGE_START, pstring) == 0) {
     RadxTime stime(pstring);
     _timeCoverageStart = stime.utime();
@@ -1743,18 +1743,18 @@ int MslFile::_readPositionVariables()
 
   // time
 
-  _georefTimeVar = _file.getNcFile()->get_var(GEOREF_TIME);
+  _georefTimeVar = _file.getNc3File()->get_var(GEOREF_TIME);
   if (_georefTimeVar != NULL) {
     if (_georefTimeVar->num_vals() < 1) {
       _addErrStr("ERROR - MslFile::_readPositionVariables");
       _addErrStr("  Cannot read georef time");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
-    if (_latitudeVar->type() != ncDouble) {
+    if (_latitudeVar->type() != nc3Double) {
       _addErrStr("ERROR - MslFile::_readPositionVariables");
       _addErrStr("  georef time is incorrect type: ", 
-                 NetcdfClassic::ncTypeToStr(_georefTimeVar->type()));
+                 Nc3xFile::ncTypeToStr(_georefTimeVar->type()));
       _addErrStr("  expecting type: double");
       return -1;
     }
@@ -1762,18 +1762,18 @@ int MslFile::_readPositionVariables()
 
   // find latitude, longitude, altitude
 
-  _latitudeVar = _file.getNcFile()->get_var(LATITUDE);
+  _latitudeVar = _file.getNc3File()->get_var(LATITUDE);
   if (_latitudeVar != NULL) {
     if (_latitudeVar->num_vals() < 1) {
       _addErrStr("ERROR - MslFile::_readPositionVariables");
       _addErrStr("  Cannot read latitude");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
-    if (_latitudeVar->type() != ncDouble) {
+    if (_latitudeVar->type() != nc3Double) {
       _addErrStr("ERROR - MslFile::_readPositionVariables");
       _addErrStr("  latitude is incorrect type: ", 
-                 NetcdfClassic::ncTypeToStr(_latitudeVar->type()));
+                 Nc3xFile::ncTypeToStr(_latitudeVar->type()));
       _addErrStr("  expecting type: double");
       return -1;
     }
@@ -1783,18 +1783,18 @@ int MslFile::_readPositionVariables()
     cerr << "  Setting latitude to 0" << endl;
   }
 
-  _longitudeVar = _file.getNcFile()->get_var(LONGITUDE);
+  _longitudeVar = _file.getNc3File()->get_var(LONGITUDE);
   if (_longitudeVar != NULL) {
     if (_longitudeVar->num_vals() < 1) {
       _addErrStr("ERROR - MslFile::_readPositionVariables");
       _addErrStr("  Cannot read longitude");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
-    if (_longitudeVar->type() != ncDouble) {
+    if (_longitudeVar->type() != nc3Double) {
       _addErrStr("ERROR - MslFile::_readPositionVariables");
       _addErrStr("  longitude is incorrect type: ",
-                 NetcdfClassic::ncTypeToStr(_longitudeVar->type()));
+                 Nc3xFile::ncTypeToStr(_longitudeVar->type()));
       _addErrStr("  expecting type: double");
       return -1;
     }
@@ -1804,18 +1804,18 @@ int MslFile::_readPositionVariables()
     cerr << "  Setting longitude to 0" << endl;
   }
 
-  _altitudeVar = _file.getNcFile()->get_var(ALTITUDE);
+  _altitudeVar = _file.getNc3File()->get_var(ALTITUDE);
   if (_altitudeVar != NULL) {
     if (_altitudeVar->num_vals() < 1) {
       _addErrStr("ERROR - MslFile::_readPositionVariables");
       _addErrStr("  Cannot read altitude");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
-    if (_altitudeVar->type() != ncDouble) {
+    if (_altitudeVar->type() != nc3Double) {
       _addErrStr("ERROR - MslFile::_readPositionVariables");
       _addErrStr("  altitude is incorrect type: ",
-                 NetcdfClassic::ncTypeToStr(_altitudeVar->type()));
+                 Nc3xFile::ncTypeToStr(_altitudeVar->type()));
       _addErrStr("  expecting type: double");
       return -1;
     }
@@ -1825,17 +1825,17 @@ int MslFile::_readPositionVariables()
     cerr << "  Setting altitude to 0" << endl;
   }
 
-  _altitudeAglVar = _file.getNcFile()->get_var(ALTITUDE_AGL);
+  _altitudeAglVar = _file.getNc3File()->get_var(ALTITUDE_AGL);
   if (_altitudeAglVar != NULL) {
     if (_altitudeAglVar->num_vals() < 1) {
       _addErrStr("WARNING - MslFile::_readPositionVariables");
       _addErrStr("  Bad variable - altitudeAgl");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
     }
-    if (_altitudeAglVar->type() != ncDouble) {
+    if (_altitudeAglVar->type() != nc3Double) {
       _addErrStr("WARNING - MslFile::_readPositionVariables");
       _addErrStr("  altitudeAgl is incorrect type: ",
-                 NetcdfClassic::ncTypeToStr(_altitudeAglVar->type()));
+                 Nc3xFile::ncTypeToStr(_altitudeAglVar->type()));
       _addErrStr("  expecting type: double");
     }
   }
@@ -2505,7 +2505,7 @@ int MslFile::_readFrequencyVariable()
 {
 
   _frequency.clear();
-  _frequencyVar = _file.getNcFile()->get_var(FREQUENCY);
+  _frequencyVar = _file.getNc3File()->get_var(FREQUENCY);
   if (_frequencyVar == NULL) {
     return 0;
   }
@@ -2802,9 +2802,9 @@ int MslFile::_readFieldVariables(bool metaOnly)
 
   // loop through the variables, adding data fields as appropriate
   
-  for (int ivar = 0; ivar < _file.getNcFile()->num_vars(); ivar++) {
+  for (int ivar = 0; ivar < _file.getNc3File()->num_vars(); ivar++) {
     
-    NcVar* var = _file.getNcFile()->get_var(ivar);
+    Nc3Var* var = _file.getNc3File()->get_var(ivar);
     if (var == NULL) {
       continue;
     }
@@ -2816,7 +2816,7 @@ int MslFile::_readFieldVariables(bool metaOnly)
       if (numDims != 1) {
         continue;
       }
-      NcDim* nPointsDim = var->get_dim(0);
+      Nc3Dim* nPointsDim = var->get_dim(0);
       if (nPointsDim != _nPointsDim) {
         continue;
       }
@@ -2827,17 +2827,17 @@ int MslFile::_readFieldVariables(bool metaOnly)
         continue;
       }
       // check that we have the correct dimensions
-      NcDim* timeDim = var->get_dim(0);
-      NcDim* rangeDim = var->get_dim(1);
+      Nc3Dim* timeDim = var->get_dim(0);
+      Nc3Dim* rangeDim = var->get_dim(1);
       if (timeDim != _timeDim || rangeDim != _rangeDim) {
         continue;
       }
     }
     
     // check the type
-    NcType ftype = var->type();
-    if (ftype != ncDouble && ftype != ncFloat && ftype != ncInt &&
-        ftype != ncShort && ftype != ncByte) {
+    Nc3Type ftype = var->type();
+    if (ftype != nc3Double && ftype != nc3Float && ftype != nc3Int &&
+        ftype != nc3Short && ftype != nc3Byte) {
       // not a valid type
       continue;
     }
@@ -2863,42 +2863,42 @@ int MslFile::_readFieldVariables(bool metaOnly)
     string name = var->name();
 
     string standardName;
-    NcAtt *standardNameAtt = var->get_att(STANDARD_NAME);
+    Nc3Att *standardNameAtt = var->get_att(STANDARD_NAME);
     if (standardNameAtt != NULL) {
-      standardName = NetcdfClassic::asString(standardNameAtt);
+      standardName = Nc3xFile::asString(standardNameAtt);
       delete standardNameAtt;
     }
     
     string longName;
-    NcAtt *longNameAtt = var->get_att(LONG_NAME);
+    Nc3Att *longNameAtt = var->get_att(LONG_NAME);
     if (longNameAtt != NULL) {
-      longName = NetcdfClassic::asString(longNameAtt);
+      longName = Nc3xFile::asString(longNameAtt);
       delete longNameAtt;
     }
 
     string units;
-    NcAtt *unitsAtt = var->get_att(UNITS);
+    Nc3Att *unitsAtt = var->get_att(UNITS);
     if (unitsAtt != NULL) {
-      units = NetcdfClassic::asString(unitsAtt);
+      units = Nc3xFile::asString(unitsAtt);
       delete unitsAtt;
     }
 
     string legendXml;
-    NcAtt *legendXmlAtt = var->get_att(LEGEND_XML);
+    Nc3Att *legendXmlAtt = var->get_att(LEGEND_XML);
     if (legendXmlAtt != NULL) {
-      legendXml = NetcdfClassic::asString(legendXmlAtt);
+      legendXml = Nc3xFile::asString(legendXmlAtt);
       delete legendXmlAtt;
     }
 
     string thresholdingXml;
-    NcAtt *thresholdingXmlAtt = var->get_att(THRESHOLDING_XML);
+    Nc3Att *thresholdingXmlAtt = var->get_att(THRESHOLDING_XML);
     if (thresholdingXmlAtt != NULL) {
-      thresholdingXml = NetcdfClassic::asString(thresholdingXmlAtt);
+      thresholdingXml = Nc3xFile::asString(thresholdingXmlAtt);
       delete thresholdingXmlAtt;
     }
 
     float samplingRatio = Radx::missingMetaFloat;
-    NcAtt *samplingRatioAtt = var->get_att(SAMPLING_RATIO);
+    Nc3Att *samplingRatioAtt = var->get_att(SAMPLING_RATIO);
     if (samplingRatioAtt != NULL) {
       samplingRatio = samplingRatioAtt->as_float(0);
       delete samplingRatioAtt;
@@ -2909,19 +2909,19 @@ int MslFile::_readFieldVariables(bool metaOnly)
     bool fieldFolds = false;
     float foldLimitLower = Radx::missingMetaFloat;
     float foldLimitUpper = Radx::missingMetaFloat;
-    NcAtt *fieldFoldsAtt = var->get_att(FIELD_FOLDS);
+    Nc3Att *fieldFoldsAtt = var->get_att(FIELD_FOLDS);
     if (fieldFoldsAtt != NULL) {
-      string fieldFoldsStr = NetcdfClassic::asString(fieldFoldsAtt);
+      string fieldFoldsStr = Nc3xFile::asString(fieldFoldsAtt);
       if (fieldFoldsStr == "true"
           || fieldFoldsStr == "TRUE"
           || fieldFoldsStr == "True") {
         fieldFolds = true;
-        NcAtt *foldLimitLowerAtt = var->get_att(FOLD_LIMIT_LOWER);
+        Nc3Att *foldLimitLowerAtt = var->get_att(FOLD_LIMIT_LOWER);
         if (foldLimitLowerAtt != NULL) {
           foldLimitLower = foldLimitLowerAtt->as_float(0);
           delete foldLimitLowerAtt;
         }
-        NcAtt *foldLimitUpperAtt = var->get_att(FOLD_LIMIT_UPPER);
+        Nc3Att *foldLimitUpperAtt = var->get_att(FOLD_LIMIT_UPPER);
         if (foldLimitUpperAtt != NULL) {
           foldLimitUpper = foldLimitUpperAtt->as_float(0);
           delete foldLimitUpperAtt;
@@ -2933,9 +2933,9 @@ int MslFile::_readFieldVariables(bool metaOnly)
     // is this field discrete
 
     bool isDiscrete = false;
-    NcAtt *isDiscreteAtt = var->get_att(IS_DISCRETE);
+    Nc3Att *isDiscreteAtt = var->get_att(IS_DISCRETE);
     if (isDiscreteAtt != NULL) {
-      string isDiscreteStr = NetcdfClassic::asString(isDiscreteAtt);
+      string isDiscreteStr = Nc3xFile::asString(isDiscreteAtt);
       if (isDiscreteStr == "true"
           || isDiscreteStr == "TRUE"
           || isDiscreteStr == "True") {
@@ -2947,14 +2947,14 @@ int MslFile::_readFieldVariables(bool metaOnly)
     // get offset and scale
 
     double offset = 0.0;
-    NcAtt *offsetAtt = var->get_att(ADD_OFFSET);
+    Nc3Att *offsetAtt = var->get_att(ADD_OFFSET);
     if (offsetAtt != NULL) {
       offset = offsetAtt->as_double(0);
       delete offsetAtt;
     }
 
     double scale = 1.0;
-    NcAtt *scaleAtt = var->get_att(SCALE_FACTOR);
+    Nc3Att *scaleAtt = var->get_att(SCALE_FACTOR);
     if (scaleAtt != NULL) {
       scale = scaleAtt->as_double(0);
       delete scaleAtt;
@@ -2997,7 +2997,7 @@ int MslFile::_readFieldVariables(bool metaOnly)
     int iret = 0;
     
     switch (var->type()) {
-      case ncDouble: {
+      case nc3Double: {
         if (_addFl64FieldToRays(var, name, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
@@ -3005,7 +3005,7 @@ int MslFile::_readFieldVariables(bool metaOnly)
         }
         break;
       }
-      case ncFloat: {
+      case nc3Float: {
         if (_addFl32FieldToRays(var, name, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
@@ -3013,7 +3013,7 @@ int MslFile::_readFieldVariables(bool metaOnly)
         }
         break;
       }
-      case ncInt: {
+      case nc3Int: {
         if (_addSi32FieldToRays(var, name, units, standardName, longName,
                                 scale, offset,
                                 isDiscrete, fieldFolds,
@@ -3022,7 +3022,7 @@ int MslFile::_readFieldVariables(bool metaOnly)
         }
         break;
       }
-      case ncShort: {
+      case nc3Short: {
         if (_addSi16FieldToRays(var, name, units, standardName, longName,
                                 scale, offset,
                                 isDiscrete, fieldFolds,
@@ -3031,7 +3031,7 @@ int MslFile::_readFieldVariables(bool metaOnly)
         }
         break;
       }
-      case ncByte: {
+      case nc3Byte: {
         if (_addSi08FieldToRays(var, name, units, standardName, longName,
                                 scale, offset,
                                 isDiscrete, fieldFolds,
@@ -3050,7 +3050,7 @@ int MslFile::_readFieldVariables(bool metaOnly)
     if (iret) {
       _addErrStr("ERROR - MslFile::_readFieldVariables");
       _addErrStr("  cannot read field name: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
 
@@ -3064,8 +3064,8 @@ int MslFile::_readFieldVariables(bool metaOnly)
 // read a ray variable - double
 // side effects: set var, vals
 
-int MslFile::_readRayVar(NcVar* &var, const string &name,
-                             vector<double> &vals, bool required)
+int MslFile::_readRayVar(Nc3Var* &var, const string &name,
+                         vector<double> &vals, bool required)
 
 {
 
@@ -3105,7 +3105,7 @@ int MslFile::_readRayVar(NcVar* &var, const string &name,
     } else {
       _addErrStr("ERROR - MslFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       iret = -1;
     }
   }
@@ -3119,9 +3119,9 @@ int MslFile::_readRayVar(NcVar* &var, const string &name,
 // side effects: set vals only
 
 int MslFile::_readRayVar(const string &name,
-                             vector<double> &vals, bool required)
+                         vector<double> &vals, bool required)
 {
-  NcVar *var;
+  Nc3Var *var;
   return _readRayVar(var, name, vals, required);
 }
 
@@ -3129,8 +3129,8 @@ int MslFile::_readRayVar(const string &name,
 // read a ray variable - integer
 // side effects: set var, vals
 
-int MslFile::_readRayVar(NcVar* &var, const string &name,
-                             vector<int> &vals, bool required)
+int MslFile::_readRayVar(Nc3Var* &var, const string &name,
+                         vector<int> &vals, bool required)
 
 {
 
@@ -3170,7 +3170,7 @@ int MslFile::_readRayVar(NcVar* &var, const string &name,
     } else {
       _addErrStr("ERROR - MslFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       iret = -1;
     }
   }
@@ -3184,9 +3184,9 @@ int MslFile::_readRayVar(NcVar* &var, const string &name,
 // side effects: set vals only
 
 int MslFile::_readRayVar(const string &name,
-                             vector<int> &vals, bool required)
+                         vector<int> &vals, bool required)
 {
-  NcVar *var;
+  Nc3Var *var;
   return _readRayVar(var, name, vals, required);
 }
 
@@ -3194,8 +3194,8 @@ int MslFile::_readRayVar(const string &name,
 // read a ray variable - boolean
 // side effects: set var, vals
 
-int MslFile::_readRayVar(NcVar* &var, const string &name,
-                             vector<bool> &vals, bool required)
+int MslFile::_readRayVar(Nc3Var* &var, const string &name,
+                         vector<bool> &vals, bool required)
   
 {
   
@@ -3246,9 +3246,9 @@ int MslFile::_readRayVar(NcVar* &var, const string &name,
 // side effects: set vals only
 
 int MslFile::_readRayVar(const string &name,
-                             vector<bool> &vals, bool required)
+                         vector<bool> &vals, bool required)
 {
-  NcVar *var;
+  Nc3Var *var;
   return _readRayVar(var, name, vals, required);
 }
 
@@ -3256,18 +3256,18 @@ int MslFile::_readRayVar(const string &name,
 // get a ray variable by name
 // returns NULL on failure
 
-NcVar* MslFile::_getRayVar(const string &name, bool required)
+Nc3Var* MslFile::_getRayVar(const string &name, bool required)
 
 {
 
   // get var
   
-  NcVar *var = _file.getNcFile()->get_var(name.c_str());
+  Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
     if (required) {
       _addErrStr("ERROR - MslFile::_getRayVar");
       _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
     }
     return NULL;
   }
@@ -3282,7 +3282,7 @@ NcVar* MslFile::_getRayVar(const string &name, bool required)
     }
     return NULL;
   }
-  NcDim *timeDim = var->get_dim(0);
+  Nc3Dim *timeDim = var->get_dim(0);
   if (timeDim != _timeDim) {
     if (required) {
       _addErrStr("ERROR - MslFile::_getRayVar");
@@ -3301,8 +3301,8 @@ NcVar* MslFile::_getRayVar(const string &name, bool required)
 ///////////////////////////////////
 // read a sweep variable - double
 
-int MslFile::_readSweepVar(NcVar* &var, const string &name,
-                               vector<double> &vals, bool required)
+int MslFile::_readSweepVar(Nc3Var* &var, const string &name,
+                           vector<double> &vals, bool required)
 
 {
 
@@ -3343,7 +3343,7 @@ int MslFile::_readSweepVar(NcVar* &var, const string &name,
     } else {
       _addErrStr("ERROR - MslFile::_readSweepVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       iret = -1;
     }
   }
@@ -3355,8 +3355,8 @@ int MslFile::_readSweepVar(NcVar* &var, const string &name,
 ///////////////////////////////////
 // read a sweep variable - integer
 
-int MslFile::_readSweepVar(NcVar* &var, const string &name,
-                               vector<int> &vals, bool required)
+int MslFile::_readSweepVar(Nc3Var* &var, const string &name,
+                           vector<int> &vals, bool required)
 
 {
 
@@ -3397,7 +3397,7 @@ int MslFile::_readSweepVar(NcVar* &var, const string &name,
     } else {
       _addErrStr("ERROR - MslFile::_readSweepVar");
       _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       iret = -1;
     }
   }
@@ -3409,15 +3409,15 @@ int MslFile::_readSweepVar(NcVar* &var, const string &name,
 ///////////////////////////////////
 // read a sweep variable - string
 
-int MslFile::_readSweepVar(NcVar* &var, const string &name,
-                               vector<string> &vals, bool required)
+int MslFile::_readSweepVar(Nc3Var* &var, const string &name,
+                           vector<string> &vals, bool required)
 
 {
 
   // get var
   
   int nSweeps = _sweepDim->size();
-  var = _file.getNcFile()->get_var(name.c_str());
+  var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
     if (!required) {
       for (int ii = 0; ii < nSweeps; ii++) {
@@ -3428,7 +3428,7 @@ int MslFile::_readSweepVar(NcVar* &var, const string &name,
     } else {
       _addErrStr("ERROR - MslFile::_readSweepVar");
       _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
   }
@@ -3441,7 +3441,7 @@ int MslFile::_readSweepVar(NcVar* &var, const string &name,
     _addErrStr("  variable has fewer than 2 dimensions");
     return -1;
   }
-  NcDim *sweepDim = var->get_dim(0);
+  Nc3Dim *sweepDim = var->get_dim(0);
   if (sweepDim != _sweepDim) {
     _addErrStr("ERROR - MslFile::_readSweepVar");
     _addErrStr("  variable name: ", name);
@@ -3450,7 +3450,7 @@ int MslFile::_readSweepVar(NcVar* &var, const string &name,
     _addErrStr("  should be: ", SWEEP);
     return -1;
   }
-  NcDim *stringLenDim = var->get_dim(1);
+  Nc3Dim *stringLenDim = var->get_dim(1);
   if (stringLenDim == NULL) {
     _addErrStr("ERROR - MslFile::_readSweepVar");
     _addErrStr("  variable name: ", name);
@@ -3459,12 +3459,12 @@ int MslFile::_readSweepVar(NcVar* &var, const string &name,
     return -1;
   }
 
-  NcType ntype = var->type();
-  if (ntype != ncChar) {
+  Nc3Type ntype = var->type();
+  if (ntype != nc3Char) {
     _addErrStr("ERROR - MslFile::_readSweepVar");
     _addErrStr("  Incorrect variable type");
     _addErrStr("  Expecting char");
-    _addErrStr("  Found: ", NetcdfClassic::ncTypeToStr(ntype));
+    _addErrStr("  Found: ", Nc3xFile::ncTypeToStr(ntype));
     return -1;
   }
 
@@ -3492,7 +3492,7 @@ int MslFile::_readSweepVar(NcVar* &var, const string &name,
   } else {
     _addErrStr("ERROR - MslFile::_readSweepVar");
     _addErrStr("  Cannot read variable: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   delete[] cvalues;
@@ -3505,17 +3505,17 @@ int MslFile::_readSweepVar(NcVar* &var, const string &name,
 // get a sweep variable
 // returns NULL on failure
 
-NcVar* MslFile::_getSweepVar(const string &name)
+Nc3Var* MslFile::_getSweepVar(const string &name)
 
 {
   
   // get var
   
-  NcVar *var = _file.getNcFile()->get_var(name.c_str());
+  Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
     _addErrStr("ERROR - MslFile::_getSweepVar");
     _addErrStr("  Cannot read variable, name: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return NULL;
   }
 
@@ -3527,7 +3527,7 @@ NcVar* MslFile::_getSweepVar(const string &name)
     _addErrStr("  variable has no dimensions");
     return NULL;
   }
-  NcDim *sweepDim = var->get_dim(0);
+  Nc3Dim *sweepDim = var->get_dim(0);
   if (sweepDim != _sweepDim) {
     _addErrStr("ERROR - MslFile::_getSweepVar");
     _addErrStr("  variable name: ", name);
@@ -3545,18 +3545,18 @@ NcVar* MslFile::_getSweepVar(const string &name)
 // get calibration time
 // returns -1 on failure
 
-int MslFile::_readCalTime(const string &name, NcVar* &var,
-                              int index, time_t &val)
+int MslFile::_readCalTime(const string &name, Nc3Var* &var,
+                          int index, time_t &val)
 
 {
 
-  var = _file.getNcFile()->get_var(name.c_str());
+  var = _file.getNc3File()->get_var(name.c_str());
 
   if (var == NULL) {
     _addErrStr("ERROR - MslFile::_readCalTime");
     _addErrStr("  cal variable name: ", name);
     _addErrStr("  Cannot read calibration time");
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
 
@@ -3569,7 +3569,7 @@ int MslFile::_readCalTime(const string &name, NcVar* &var,
     return -1;
   }
 
-  NcDim *rCalDim = var->get_dim(0);
+  Nc3Dim *rCalDim = var->get_dim(0);
   if (rCalDim != _calDim) {
     _addErrStr("ERROR - MslFile::_readCalTime");
     _addErrStr("  variable name: ", name);
@@ -3579,7 +3579,7 @@ int MslFile::_readCalTime(const string &name, NcVar* &var,
     return -1;
   }
 
-  NcDim *stringLenDim = var->get_dim(1);
+  Nc3Dim *stringLenDim = var->get_dim(1);
   if (stringLenDim == NULL) {
     _addErrStr("ERROR - MslFile::_readCalTime");
     _addErrStr("  variable name: ", name);
@@ -3588,12 +3588,12 @@ int MslFile::_readCalTime(const string &name, NcVar* &var,
     return -1;
   }
   
-  NcType ntype = var->type();
-  if (ntype != ncChar) {
+  Nc3Type ntype = var->type();
+  if (ntype != nc3Char) {
     _addErrStr("ERROR - MslFile::_readCalTime");
     _addErrStr("  Incorrect variable type");
     _addErrStr("  Expecting char");
-    _addErrStr("  Found: ", NetcdfClassic::ncTypeToStr(ntype));
+    _addErrStr("  Found: ", Nc3xFile::ncTypeToStr(ntype));
     return -1;
   }
 
@@ -3627,7 +3627,7 @@ int MslFile::_readCalTime(const string &name, NcVar* &var,
   } else {
     _addErrStr("ERROR - MslFile::_readCalTime");
     _addErrStr("  Cannot read variable: ", name);
-    _addErrStr(_file.getNcError()->get_errmsg());
+    _addErrStr(_file.getNc3Error()->get_errmsg());
     delete[] cvalues;
     return -1;
   }
@@ -3653,13 +3653,13 @@ int MslFile::_readCalTime(const string &name, NcVar* &var,
 // get calibration variable
 // returns -1 on failure
 
-int MslFile::_readCalVar(const string &name, NcVar* &var,
-                             int index, double &val, bool required)
+int MslFile::_readCalVar(const string &name, Nc3Var* &var,
+                         int index, double &val, bool required)
   
 {
 
   val = Radx::missingMetaDouble;
-  var = _file.getNcFile()->get_var(name.c_str());
+  var = _file.getNc3File()->get_var(name.c_str());
 
   if (var == NULL) {
     if (!required) {
@@ -3668,7 +3668,7 @@ int MslFile::_readCalVar(const string &name, NcVar* &var,
       _addErrStr("ERROR - MslFile::_readCalVar");
       _addErrStr("  cal variable name: ", name);
       _addErrStr("  Cannot read calibration variable");
-      _addErrStr(_file.getNcError()->get_errmsg());
+      _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
   }
@@ -3693,15 +3693,15 @@ int MslFile::_readCalVar(const string &name, NcVar* &var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int MslFile::_addFl64FieldToRays(NcVar* var,
-                                     const string &name,
-                                     const string &units,
-                                     const string &standardName,
-                                     const string &longName,
-                                     bool isDiscrete,
-                                     bool fieldFolds,
-                                     float foldLimitLower,
-                                     float foldLimitUpper)
+int MslFile::_addFl64FieldToRays(Nc3Var* var,
+                                 const string &name,
+                                 const string &units,
+                                 const string &standardName,
+                                 const string &longName,
+                                 bool isDiscrete,
+                                 bool fieldFolds,
+                                 float foldLimitLower,
+                                 float foldLimitUpper)
   
 {
 
@@ -3722,7 +3722,7 @@ int MslFile::_addFl64FieldToRays(NcVar* var,
   // set missing value
 
   Radx::fl64 missingVal = Radx::missingFl64;
-  NcAtt *missingValueAtt = var->get_att(MISSING_VALUE);
+  Nc3Att *missingValueAtt = var->get_att(MISSING_VALUE);
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
@@ -3795,15 +3795,15 @@ int MslFile::_addFl64FieldToRays(NcVar* var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int MslFile::_addFl32FieldToRays(NcVar* var,
-                                     const string &name,
-                                     const string &units,
-                                     const string &standardName,
-                                     const string &longName,
-                                     bool isDiscrete,
-                                     bool fieldFolds,
-                                     float foldLimitLower,
-                                     float foldLimitUpper)
+int MslFile::_addFl32FieldToRays(Nc3Var* var,
+                                 const string &name,
+                                 const string &units,
+                                 const string &standardName,
+                                 const string &longName,
+                                 bool isDiscrete,
+                                 bool fieldFolds,
+                                 float foldLimitLower,
+                                 float foldLimitUpper)
   
 {
 
@@ -3824,7 +3824,7 @@ int MslFile::_addFl32FieldToRays(NcVar* var,
   // set missing value
 
   Radx::fl32 missingVal = Radx::missingFl32;
-  NcAtt *missingValueAtt = var->get_att(MISSING_VALUE);
+  Nc3Att *missingValueAtt = var->get_att(MISSING_VALUE);
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
@@ -3897,16 +3897,16 @@ int MslFile::_addFl32FieldToRays(NcVar* var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int MslFile::_addSi32FieldToRays(NcVar* var,
-                                     const string &name,
-                                     const string &units,
-                                     const string &standardName,
-                                     const string &longName,
-                                     double scale, double offset,
-                                     bool isDiscrete,
-                                     bool fieldFolds,
-                                     float foldLimitLower,
-                                     float foldLimitUpper)
+int MslFile::_addSi32FieldToRays(Nc3Var* var,
+                                 const string &name,
+                                 const string &units,
+                                 const string &standardName,
+                                 const string &longName,
+                                 double scale, double offset,
+                                 bool isDiscrete,
+                                 bool fieldFolds,
+                                 float foldLimitLower,
+                                 float foldLimitUpper)
   
 {
 
@@ -3927,7 +3927,7 @@ int MslFile::_addSi32FieldToRays(NcVar* var,
   // set missing value
 
   Radx::si32 missingVal = Radx::missingSi32;
-  NcAtt *missingValueAtt = var->get_att(MISSING_VALUE);
+  Nc3Att *missingValueAtt = var->get_att(MISSING_VALUE);
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_int(0);
     delete missingValueAtt;
@@ -3993,16 +3993,16 @@ int MslFile::_addSi32FieldToRays(NcVar* var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int MslFile::_addSi16FieldToRays(NcVar* var,
-                                     const string &name,
-                                     const string &units,
-                                     const string &standardName,
-                                     const string &longName,
-                                     double scale, double offset,
-                                     bool isDiscrete,
-                                     bool fieldFolds,
-                                     float foldLimitLower,
-                                     float foldLimitUpper)
+int MslFile::_addSi16FieldToRays(Nc3Var* var,
+                                 const string &name,
+                                 const string &units,
+                                 const string &standardName,
+                                 const string &longName,
+                                 double scale, double offset,
+                                 bool isDiscrete,
+                                 bool fieldFolds,
+                                 float foldLimitLower,
+                                 float foldLimitUpper)
   
 {
 
@@ -4023,7 +4023,7 @@ int MslFile::_addSi16FieldToRays(NcVar* var,
   // set missing value
 
   Radx::si16 missingVal = Radx::missingSi16;
-  NcAtt *missingValueAtt = var->get_att(MISSING_VALUE);
+  Nc3Att *missingValueAtt = var->get_att(MISSING_VALUE);
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_short(0);
     delete missingValueAtt;
@@ -4089,16 +4089,16 @@ int MslFile::_addSi16FieldToRays(NcVar* var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int MslFile::_addSi08FieldToRays(NcVar* var,
-                                     const string &name,
-                                     const string &units,
-                                     const string &standardName,
-                                     const string &longName,
-                                     double scale, double offset,
-                                     bool isDiscrete,
-                                     bool fieldFolds,
-                                     float foldLimitLower,
-                                     float foldLimitUpper)
+int MslFile::_addSi08FieldToRays(Nc3Var* var,
+                                 const string &name,
+                                 const string &units,
+                                 const string &standardName,
+                                 const string &longName,
+                                 double scale, double offset,
+                                 bool isDiscrete,
+                                 bool fieldFolds,
+                                 float foldLimitLower,
+                                 float foldLimitUpper)
   
 {
 
@@ -4119,7 +4119,7 @@ int MslFile::_addSi08FieldToRays(NcVar* var,
   // set missing value
 
   Radx::si08 missingVal = Radx::missingSi08;
-  NcAtt *missingValueAtt = var->get_att(MISSING_VALUE);
+  Nc3Att *missingValueAtt = var->get_att(MISSING_VALUE);
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_ncbyte(0);
     delete missingValueAtt;
