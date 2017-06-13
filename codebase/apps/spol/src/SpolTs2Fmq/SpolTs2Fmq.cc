@@ -767,12 +767,11 @@ void SpolTs2Fmq::_handlePacket()
     
     // xmit power - make local copy
     
-    iwrf_xmit_power_t *power = (iwrf_xmit_power_t *) _msgBuf.getPtr();
-    _tsXmitPower = *power;
+    _tsXmitPower = *((iwrf_xmit_power_t *) _msgBuf.getPtr());
     
     // add to FMQ
     
-    _writeXmitPowerToFmq();
+    _writeXmitPowerToFmq(_tsXmitPower);
     
   } else if (_packetId == IWRF_STATUS_XML_ID) {
     
@@ -1781,7 +1780,7 @@ int SpolTs2Fmq::_readSysconFromFmq()
             _sysconXmitPowerActive = true;
             memcpy(&_sysconXmitPower, msg, sizeof(_sysconXmitPower));
             _setReadDelay(_sysconXmitPower.packet);
-            _writeXmitPowerToFmq();
+            _writeXmitPowerToFmq(_sysconXmitPower);
           }
         }
         break;
@@ -1988,7 +1987,7 @@ void SpolTs2Fmq::_writeTsProcessingToFmq()
 /////////////////////////////////////////////
 // write power info to FMQ
 
-void SpolTs2Fmq::_writeXmitPowerToFmq()
+void SpolTs2Fmq::_writeXmitPowerToFmq(const iwrf_xmit_power_t &powerPkt)
   
 {
   
@@ -1996,39 +1995,30 @@ void SpolTs2Fmq::_writeXmitPowerToFmq()
     cerr << "Writing xmit_power to FMQ" << endl;
   }
   
-  iwrf_xmit_power_t power;
-  if (_sysconXmitPowerActive) {
-    // use syscon
-    power = _sysconXmitPower;
-  } else {
-    // use time series
-    power = _tsXmitPower;
-  }
-  _info.setXmitPower(power);
+  _info.setXmitPower(powerPkt);
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    iwrf_xmit_power_print(stderr, power);
+    iwrf_xmit_power_print(stderr, powerPkt);
   }
 
   // write to FMQ
   
-  _outputMsg.addPart(IWRF_XMIT_POWER_ID, sizeof(power), &power);
+  _outputMsg.addPart(IWRF_XMIT_POWER_ID, sizeof(powerPkt), &powerPkt);
   
   if (_params.append_xmit_power_to_status_xml) {
 
     // create xmit power XML
     
-    _xmitPowerLatestTime = power.packet.time_secs_utc;
-
+    _xmitPowerLatestTime = powerPkt.packet.time_secs_utc;
+    
     _xmitPowerXml.clear();
     _xmitPowerXml += TaXml::writeStartTag(_params.xmit_power_xml_tag, 0);
     _xmitPowerXml += TaXml::writeTime("Time", 1, _xmitPowerLatestTime);
     _xmitPowerXml +=
-      TaXml::writeDouble("XmitPowerDbmH", 1, power.power_dbm_h);
+      TaXml::writeDouble("XmitPowerDbmH", 1, powerPkt.power_dbm_h);
     _xmitPowerXml +=
-      TaXml::writeDouble("XmitPowerDbmV", 1, power.power_dbm_v);
+      TaXml::writeDouble("XmitPowerDbmV", 1, powerPkt.power_dbm_v);
     _xmitPowerXml += TaXml::writeEndTag(_params.xmit_power_xml_tag, 0);
-
 
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "======================================" << endl;
@@ -2576,6 +2566,29 @@ int SpolTs2Fmq::_readSecondaryStatusFromFmq()
     cerr << "========== latest secondary status XML ==============" << endl;
     cerr << _secondaryStatusXml << endl;
     cerr << "=====================================================" << endl;
+  }
+
+  // write power packet to FMQ
+
+  iwrf_xmit_power_t powerPkt;
+  iwrf_xmit_power_init(powerPkt);
+  string xmitPowerBlock;
+  bool gotPower = false;
+  if (TaXml::readString(_secondaryStatusXml,
+                        _params.xmit_power_xml_tag, xmitPowerBlock) == 0) {
+    double powerH = -9999.0;
+    double powerV = -9999.0;
+    if (TaXml::readDouble(xmitPowerBlock, "XmitPowerDbmH", powerH) == 0) {
+      powerPkt.power_dbm_h = powerH;
+      gotPower = true;
+    }
+    if (TaXml::readDouble(xmitPowerBlock, "XmitPowerDbmV", powerV) == 0) {
+      powerPkt.power_dbm_v = powerV;
+      gotPower = true;
+    }
+  }
+  if (gotPower) {
+    _writeXmitPowerToFmq(powerPkt);
   }
 
   return 0;

@@ -336,7 +336,7 @@ private:
   void _writeRadarInfoToFmq();
   void _writeScanSegmentToFmq();
   void _writeTsProcessingToFmq();
-  void _writeXmitPowerToFmq();
+  void _writeXmitPowerToFmq(const iwrf_xmit_power_t &power);
   void _writeSysconEventToFmq(const iwrf_event_notice_t &event);
   void _modifyPulseHeaderFromSyscon(iwrf_pulse_header_t &pHdr);
   void _monitorTestPulse();
