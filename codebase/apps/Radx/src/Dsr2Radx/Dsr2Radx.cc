@@ -1695,6 +1695,7 @@ void Dsr2Radx::_addRayToVol(RadxRay *ray)
 {
   if (_acceptRay(ray)) {
     _vol.addRay(ray);
+    _prevAz = ray->getAzimuthDeg();
   } else {
     delete ray;
   }

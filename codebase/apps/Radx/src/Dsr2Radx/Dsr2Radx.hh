@@ -127,6 +127,7 @@ private:
 
   // previous ray
 
+  double _prevAz;
   double _prevAzMoving;
   double _prevElevMoving;
 
