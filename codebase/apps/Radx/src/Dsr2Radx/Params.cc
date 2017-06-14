@@ -1534,10 +1534,10 @@ using namespace std;
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("end_of_vol_decision");
     tt->descr = tdrpStrDup("Decision type for end-of-volume.");
-    tt->help = tdrpStrDup("If END_OF_VOL_FLAG, the end-of-volume flag in the data will be used to trigger the end of volume. If CHANGE_IN_VOL_NUM, and end of volume will be assumed when the volume number changes from one ray to the next. If CHANGE_IN_SWEEP_NUM, then each sweep will be written out as a separate volume. If LAST_SWEEP_IN_VOL, the end of the sweep number given by 'last_sweep_in_vol' will be used  to trigger the end-of-volume. If AUTOMATIC, this program will determine the end-of-volume condition by using the antenna-angle information. If ELAPSED_TIME, and end-of-volume will be triggered after 'nsecs_per_volume' seconds.");
+    tt->help = tdrpStrDup("\nEND_OF_VOL_FLAG: the end-of-volume flag in the data will be used to trigger the end of volume.\n\nCHANGE_IN_VOL_NUM: an end of volume will be assumed when the volume number changes from one ray to the next.\n\nCHANGE_IN_SWEEP_NUM: each sweep will be written out as a separate volume.\n\nEVERY_360_DEG: the volume will end after every 360 degree sweep. The azimuth at which the vol changes is specified by end_of_vol_az.\n\nLAST_SWEEP_IN_VOL: the end of the sweep number given by 'last_sweep_in_vol' will be used  to trigger the end-of-volume.\n\nAUTOMATIC: end-of-volume condition will be determined from the antenna-angle information.\n\nELAPSED_TIME: an end-of-volume will be triggered after 'nsecs_per_volume' seconds.");
     tt->val_offset = (char *) &end_of_vol_decision - &_start_;
     tt->enum_def.name = tdrpStrDup("end_of_vol_decision_t");
-    tt->enum_def.nfields = 6;
+    tt->enum_def.nfields = 7;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("END_OF_VOL_FLAG");
@@ -1546,12 +1546,14 @@ using namespace std;
       tt->enum_def.fields[1].val = CHANGE_IN_VOL_NUM;
       tt->enum_def.fields[2].name = tdrpStrDup("CHANGE_IN_SWEEP_NUM");
       tt->enum_def.fields[2].val = CHANGE_IN_SWEEP_NUM;
-      tt->enum_def.fields[3].name = tdrpStrDup("LAST_SWEEP_IN_VOL");
-      tt->enum_def.fields[3].val = LAST_SWEEP_IN_VOL;
-      tt->enum_def.fields[4].name = tdrpStrDup("AUTOMATIC");
-      tt->enum_def.fields[4].val = AUTOMATIC;
-      tt->enum_def.fields[5].name = tdrpStrDup("ELAPSED_TIME");
-      tt->enum_def.fields[5].val = ELAPSED_TIME;
+      tt->enum_def.fields[3].name = tdrpStrDup("EVERY_360_DEG");
+      tt->enum_def.fields[3].val = EVERY_360_DEG;
+      tt->enum_def.fields[4].name = tdrpStrDup("LAST_SWEEP_IN_VOL");
+      tt->enum_def.fields[4].val = LAST_SWEEP_IN_VOL;
+      tt->enum_def.fields[5].name = tdrpStrDup("AUTOMATIC");
+      tt->enum_def.fields[5].val = AUTOMATIC;
+      tt->enum_def.fields[6].name = tdrpStrDup("ELAPSED_TIME");
+      tt->enum_def.fields[6].val = ELAPSED_TIME;
     tt->single_val.e = END_OF_VOL_FLAG;
     tt++;
     
@@ -1565,6 +1567,18 @@ using namespace std;
     tt->help = tdrpStrDup("Only applies if 'end_of_vol_decision' is set to LAST_SWEEP_IN_VOL.");
     tt->val_offset = (char *) &last_sweep_in_vol - &_start_;
     tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'end_of_vol_az'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("end_of_vol_az");
+    tt->descr = tdrpStrDup("Azimuth at which the volume changes.");
+    tt->help = tdrpStrDup("An end-of-vol is triggered every time the antenna moves across this azimuth.");
+    tt->val_offset = (char *) &end_of_vol_az - &_start_;
+    tt->single_val.d = 0;
     tt++;
     
     // Parameter 'write_end_of_vol_when_data_stops'

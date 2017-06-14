@@ -66,9 +66,10 @@ public:
     END_OF_VOL_FLAG = 0,
     CHANGE_IN_VOL_NUM = 1,
     CHANGE_IN_SWEEP_NUM = 2,
-    LAST_SWEEP_IN_VOL = 3,
-    AUTOMATIC = 4,
-    ELAPSED_TIME = 5
+    EVERY_360_DEG = 3,
+    LAST_SWEEP_IN_VOL = 4,
+    AUTOMATIC = 5,
+    ELAPSED_TIME = 6
   } end_of_vol_decision_t;
 
   typedef enum {
@@ -541,6 +542,8 @@ public:
 
   int last_sweep_in_vol;
 
+  double end_of_vol_az;
+
   tdrp_bool_t write_end_of_vol_when_data_stops;
 
   int nsecs_no_data_for_end_of_vol;
@@ -682,7 +685,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[160];
+  mutable TDRPtable _table[161];
 
   const char *_className;
 
