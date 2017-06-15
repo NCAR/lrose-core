@@ -87,6 +87,14 @@ void SweepMgr::setSweepNumbers(bool isRhi,
   }
   
   _isRhi = isRhi;
+  
+  if (!_isRhi && _params.end_of_vol_decision == Params::EVERY_360_DEG) {
+    // if we save out a vol every 360, set sweep number to 0
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      rays[ii]->setSweepNumber(0);
+    }
+    return;
+  }
 
   // load up angle table from histogram
   

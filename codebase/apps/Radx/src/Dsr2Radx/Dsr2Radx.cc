@@ -498,6 +498,7 @@ int Dsr2Radx::_readMsg(DsRadarQueue &radarQueue,
     // end of vol condition
     
     if (_params.end_of_vol_decision == Params::ELAPSED_TIME) {
+
       if (_endOfVolTime < 0) {
         _computeEndOfVolTime(ray->getTimeSecs());
       }
@@ -505,41 +506,44 @@ int Dsr2Radx::_readMsg(DsRadarQueue &radarQueue,
         _endOfVol = true;
         _computeEndOfVolTime(ray->getTimeSecs() + 1);
       }
-    }
-    
-    if (_params.end_of_vol_decision == Params::EVERY_360_DEG) {
+
+    } else if (_params.end_of_vol_decision == Params::EVERY_360_DEG) {
+
       if (_checkEndOfVol360(ray)) {
         _endOfVol = true;
       }
-    }
+
+    } else {
     
-    int volNum = ray->getVolumeNumber();
-    if (volNum != -1 && volNum != _prevVolNum) {
-      if (_prevVolNum != -99999 &&
-          _params.end_of_vol_decision == Params::CHANGE_IN_VOL_NUM) {
-        _endOfVol = true;
+      int volNum = ray->getVolumeNumber();
+      if (volNum != -1 && volNum != _prevVolNum) {
+        if (_prevVolNum != -99999 &&
+            _params.end_of_vol_decision == Params::CHANGE_IN_VOL_NUM) {
+          _endOfVol = true;
+        }
+        if (_prevVolNum != -99999 &&
+            _params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
+          _endOfVol = true;
+        }
+        _prevVolNum = volNum;
       }
-      if (_prevVolNum != -99999 &&
-          _params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
-        _endOfVol = true;
+      
+      int sweepNum = ray->getSweepNumber();
+      if (sweepNum >= 0 && sweepNum != _prevSweepNum) {
+        if (_prevSweepNum >= 0 &&
+            _params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
+          _endOfVol = true;
+        }
+        _prevSweepNum = sweepNum;
       }
-      _prevVolNum = volNum;
-    }
-    
-    int sweepNum = ray->getSweepNumber();
-    if (sweepNum >= 0 && sweepNum != _prevSweepNum) {
-      if (_prevSweepNum >= 0 &&
-          _params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
-        _endOfVol = true;
+      
+      if (_endOfVolAutomatic) {
+        if (_antenna->addRay(ray)) {
+          _endOfVol = true;
+        }
       }
-      _prevSweepNum = sweepNum;
-    }
-    
-    if (_endOfVolAutomatic) {
-      if (_antenna->addRay(ray)) {
-        _endOfVol = true;
-      }
-    }
+
+    } // else
     
   } // if (msgContents ...
   
@@ -642,7 +646,7 @@ int Dsr2Radx::_processVol()
   _loadCurrentScanMode();
 
   // set the sweep numbers in the input rays, if needed
-  
+
   if (_sweepNumbersMissing || _params.find_sweep_numbers_using_histogram) {
     _sweepMgr->setSweepNumbers(_scanMode == SCAN_MODE_RHI, _vol.getRays());
   }
