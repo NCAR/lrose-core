@@ -72,8 +72,8 @@ Dsr2Radx::Dsr2Radx(int argc, char **argv)
   _nCheckPrint = 0;
   _nWarnCensorPrint = 0;
 
-  _prevElevMoving = -999;
   _prevAzMoving = -999;
+  _prevElevMoving = -999;
 
   _lutRadarAltitudeKm = -9999;
 
@@ -84,6 +84,7 @@ Dsr2Radx::Dsr2Radx(int argc, char **argv)
   _antenna = NULL;
   _outFile = NULL;
   _sweepMgr = NULL;
+  _cachedRay = NULL;
   _prevRay = NULL;
 
   _scanMode = SCAN_MODE_UNKNOWN;
@@ -506,6 +507,12 @@ int Dsr2Radx::_readMsg(DsRadarQueue &radarQueue,
       }
     }
     
+    if (_params.end_of_vol_decision == Params::EVERY_360_DEG) {
+      if (_checkEndOfVol360(ray)) {
+        _endOfVol = true;
+      }
+    }
+    
     int volNum = ray->getVolumeNumber();
     if (volNum != -1 && volNum != _prevVolNum) {
       if (_prevVolNum != -99999 &&
@@ -593,15 +600,15 @@ int Dsr2Radx::_readMsg(DsRadarQueue &radarQueue,
       }
       delete ray;
     } else {
-      if (_prevRay) {
-        _addRayToVol(_prevRay);
-        _prevRay = NULL;
+      if (_cachedRay) {
+        _addRayToVol(_cachedRay);
+        _cachedRay = NULL;
       }
       if (_endOfVol) {
         if (_endOfVolAutomatic ||
             _params.end_of_vol_decision == Params::CHANGE_IN_VOL_NUM ||
             _params.end_of_vol_decision == Params::CHANGE_IN_SWEEP_NUM) {
-          _prevRay = ray;
+          _cachedRay = ray;
         } else {
           _addRayToVol(ray);
         }
@@ -1695,7 +1702,7 @@ void Dsr2Radx::_addRayToVol(RadxRay *ray)
 {
   if (_acceptRay(ray)) {
     _vol.addRay(ray);
-    _prevAz = ray->getAzimuthDeg();
+    _prevRay = ray;
   } else {
     delete ray;
   }
@@ -2065,6 +2072,7 @@ void Dsr2Radx::_clearData()
   _vol.clear();
   _sweepNumbersMissing = false;
   _nRaysRead = 0;
+  _prevRay = NULL;
 }
 
 /////////////////////////////////////////////
@@ -2264,3 +2272,50 @@ void Dsr2Radx::_computeEndOfVolTime(time_t beamTime)
 
 }
 
+/////////////////////////////////////////////////////////////////
+// check for end of vol in 360_deg mode
+// we check for az passing az_for_end_of_vol_360
+	
+bool Dsr2Radx::_checkEndOfVol360(RadxRay *ray)
+
+{
+  
+  if (_prevRay == NULL) {
+    // no previous ray in this volume
+    return false;
+  }
+  
+  // get azimuths for this ray and the previous one
+
+  double az = ray->getAzimuthDeg();
+  double prevAz = _prevRay->getAzimuthDeg();
+
+  // compute az diffs between these and the az at which the vol changes
+  
+  double azDiff = Radx::computeAngleDiff(az, _params.az_for_end_of_vol_360);
+  double prevAzDiff = Radx::computeAngleDiff(prevAz, _params.az_for_end_of_vol_360);
+
+  // if exact, then we are at the target az
+
+  if (azDiff == 0.0 || prevAzDiff == 0.0) {
+    return true;
+  }
+
+  // if diff is too large, we are not close to the target
+  
+  if (fabs(azDiff) > 10.0 || fabs(prevAzDiff) > 10.0) {
+    return false;
+  }
+
+  // if the sign changed from one diff to the next
+  // we have crossed the target az
+
+  if (azDiff * prevAzDiff < 0.0) {
+    return true;
+  }
+
+  // failure
+
+  return false;
+
+}

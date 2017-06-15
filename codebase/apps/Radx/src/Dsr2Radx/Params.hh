@@ -542,7 +542,7 @@ public:
 
   int last_sweep_in_vol;
 
-  double end_of_vol_az;
+  double az_for_end_of_vol_360;
 
   tdrp_bool_t write_end_of_vol_when_data_stops;
 

@@ -1534,7 +1534,7 @@ using namespace std;
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("end_of_vol_decision");
     tt->descr = tdrpStrDup("Decision type for end-of-volume.");
-    tt->help = tdrpStrDup("\nEND_OF_VOL_FLAG: the end-of-volume flag in the data will be used to trigger the end of volume.\n\nCHANGE_IN_VOL_NUM: an end of volume will be assumed when the volume number changes from one ray to the next.\n\nCHANGE_IN_SWEEP_NUM: each sweep will be written out as a separate volume.\n\nEVERY_360_DEG: the volume will end after every 360 degree sweep. The azimuth at which the vol changes is specified by end_of_vol_az.\n\nLAST_SWEEP_IN_VOL: the end of the sweep number given by 'last_sweep_in_vol' will be used  to trigger the end-of-volume.\n\nAUTOMATIC: end-of-volume condition will be determined from the antenna-angle information.\n\nELAPSED_TIME: an end-of-volume will be triggered after 'nsecs_per_volume' seconds.");
+    tt->help = tdrpStrDup("\nEND_OF_VOL_FLAG: the end-of-volume flag in the data will be used to trigger the end of volume.\n\nCHANGE_IN_VOL_NUM: an end of volume will be assumed when the volume number changes from one ray to the next.\n\nCHANGE_IN_SWEEP_NUM: each sweep will be written out as a separate volume.\n\nEVERY_360_DEG: the volume will end after every 360 degree sweep. The azimuth at which the vol changes is specified by az_for_end_of_vol_360.\n\nLAST_SWEEP_IN_VOL: the end of the sweep number given by 'last_sweep_in_vol' will be used  to trigger the end-of-volume.\n\nAUTOMATIC: end-of-volume condition will be determined from the antenna-angle information.\n\nELAPSED_TIME: an end-of-volume will be triggered after 'nsecs_per_volume' seconds.");
     tt->val_offset = (char *) &end_of_vol_decision - &_start_;
     tt->enum_def.name = tdrpStrDup("end_of_vol_decision_t");
     tt->enum_def.nfields = 7;
@@ -1569,15 +1569,15 @@ using namespace std;
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'end_of_vol_az'
+    // Parameter 'az_for_end_of_vol_360'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("end_of_vol_az");
+    tt->param_name = tdrpStrDup("az_for_end_of_vol_360");
     tt->descr = tdrpStrDup("Azimuth at which the volume changes.");
     tt->help = tdrpStrDup("An end-of-vol is triggered every time the antenna moves across this azimuth.");
-    tt->val_offset = (char *) &end_of_vol_az - &_start_;
+    tt->val_offset = (char *) &az_for_end_of_vol_360 - &_start_;
     tt->single_val.d = 0;
     tt++;
     

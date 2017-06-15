@@ -125,15 +125,14 @@ private:
   bool _scanInfoFromHeaders;
   bool _endOfVolAutomatic;
 
-  // previous ray
-
-  double _prevAz;
-  double _prevAzMoving;
-  double _prevElevMoving;
-
   // antenna object
 
   Antenna *_antenna;
+
+  // previous angles for determining antenna movement
+
+  double _prevAzMoving;
+  double _prevElevMoving;
 
   // radial volume data set
 
@@ -143,6 +142,7 @@ private:
   // end of volume condition
 
   RadxRay *_prevRay;
+  RadxRay *_cachedRay;
   time_t _endOfVolTime;
   int _prevVolNum;
   int _prevSweepNum;
@@ -207,6 +207,8 @@ private:
   void _computeMaxRangeLut(double radarAltitudeKm);
   
   void _computeEndOfVolTime(time_t beamTime);
+
+  bool _checkEndOfVol360(RadxRay *ray);
 
 };
 
