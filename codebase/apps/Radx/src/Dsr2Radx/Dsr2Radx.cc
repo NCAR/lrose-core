@@ -649,6 +649,12 @@ int Dsr2Radx::_processVol()
 
   if (_sweepNumbersMissing || _params.find_sweep_numbers_using_histogram) {
     _sweepMgr->setSweepNumbers(_scanMode == SCAN_MODE_RHI, _vol.getRays());
+  } else if (_scanMode != SCAN_MODE_RHI &&
+             _params.end_of_vol_decision == Params::EVERY_360_DEG) {
+    const vector<RadxRay *> &rays = _vol.getRays();
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      rays[ii]->setSweepNumber(0);
+    }
   }
   
   // load up rays from ray data
