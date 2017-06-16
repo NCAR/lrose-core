@@ -36,38 +36,30 @@ See the full TDRP docs at:
 
  https://rawgit.com/NCAR/lrose-docs/master/tdrp/index.html
 
-## Running LROSE applications
+## LROSE applications and data system
 
 LROSE is a derivation of the older TITAN distribution. TITAN is now included in LROSE.
 
-LROSE apps are run in the same manner as the TITAN apps.
+LROSE apps are run in the same manner as the TITAN apps. The following documents 
+are useful in the short term. We need to update these and bring them into the
+LROSE documentation.
 
-See:
+| TITAN doc         | URL      |
+| -------------     |:-------------:|
+| overview       | http://www.ral.ucar.edu/projects/titan/home/ |
+| runtime        | http://www.ral.ucar.edu/projects/titan/docs/TitanRunning.pdf |
+| data system    | http://www.ral.ucar.edu/projects/titan/docs/TitanDataSystem.pdf |
 
-  http://www.ral.ucar.edu/projects/titan/home/
+### RADX library and applications
 
-and specifically:
+Radx is aimed specifically at handling radar and lidar data in polar/radial coordinates.
 
-  http://www.ral.ucar.edu/projects/titan/docs/TitanRunning.pdf
+Fundamental to the Radx package is the RadxVol class, which represents a radar volume, and its associated classes.
 
-As a starting point, these give a good idea about the philosophy behind the
-LROSE runtime environment.
-
-We need to bring these docs over into LROSE, and update them accordingly.
-
-
-### Available package builds
-
-LROSE has the following package options:
-
-| Package       | Comments      |
-| ------------- |:-------------:|
-| lrose         | standard full package - the default |
-| radx          | Radx apps only |
-| hcr           | HCR (HIAPER Cloud Radar) package |
-| cidd          | CIDD display apps only, 32-bit build |
-
-`lrose` is the standard build, which includes all of the libraries and applications in lrose, except for the `cidd` display and its related applications.
+| Class       | Purpose      |
+| ----------- |:-------------:|
+| RadxVol     | Represents a radar volume. Contains metadata, sweeps, rays and fields |
+| RadxRay     | Represents a single ray (beam). Contains fields |
 
 `radx` is a sub package that only includes the `Radx` applications.
 
