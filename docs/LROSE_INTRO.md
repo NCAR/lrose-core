@@ -56,27 +56,19 @@ Radx is aimed specifically at handling radar and lidar data in polar/radial coor
 
 Fundamental to the Radx package is the RadxVol class, which represents a radar volume, and its associated classes.
 
+| Radx code        | URL      |
+| -------------    |:-------------:|
+| libs       | https://github.com/NCAR/lrose-core/tree/master/codebase/libs/Radx |
+| apps       | https://github.com/NCAR/lrose-core/tree/master/codebase/apps/Radx |
+
 | Class       | Purpose      |
 | ----------- |:-------------:|
 | RadxVol     | Represents a radar volume. Contains metadata, sweeps, rays and fields |
-| RadxRay     | Represents a single ray (beam). Contains fields |
+| RadxSweep   | Metadata and ray indexes for a sweep, not the data itself |
+| RadxRay     | Represents a single ray (beam). Contains vector of RadxFields |
+| RadxField   | Represents a single field variable |
 
-`radx` is a sub package that only includes the `Radx` applications.
+The data model which Radx is intended to represent is documented as follows:
 
-`hcr` is a sub package that only includes the applications required for the HIAPER Cloud Radar.
-
-`cidd` is a special package, that must be built using 32-bit emulation, because the applications are based on the `xview` library that has no 64-bit port. This package includes the CIDD display, and other applications that depend on `xview`.
-
-### Options for building LROSE on LINUX
-
-There are three ways to build LROSE:
-
-1. Check out the source from GitHub, and use the NCAR build system.
-This is recommended if you are actively involved in developing the code.
-See [README_NCAR_BUILD.md](./README_NCAR_BUILD.md) for details
-2. Check out the source from GitHub, and use AUTOMAKE and CONFIGURE for the build.
-This is the more standard approach.
-See [README_AUTOMAKE_BUILD.md](./README_AUTOMAKE_BUILD.md) for details
-3. Download a pre-configured source distribution, and build from that.
-See [README_DOWNLOAD_BUILD.md](./README_DOWNLOAD_BUILD.md) for details
+https://github.com/NCAR/CfRadial/blob/master/docs/WMO_IM_Radar_and_Lidar_v0.5.pdf
 
