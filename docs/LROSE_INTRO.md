@@ -34,9 +34,7 @@ The most important TDRP app is `tdrp_gen`.
 
 See the full TDRP docs at:
 
-```
   https://github.com/NCAR/lrose-docs/tree/master/tdrp
-```
 
 ## Running LROSE applications
 
@@ -46,16 +44,11 @@ LROSE apps are run in the same manner as the TITAN apps.
 
 See:
 
-```
   http://www.ral.ucar.edu/projects/titan/home/
-  http://www.ral.ucar.edu/projects/titan/home/
-```
 
 and specifically:
 
-```
   http://www.ral.ucar.edu/projects/titan/docs/TitanRunning.pdf
-```
 
 As a starting point, these give a good idea about the philosophy behind the
 LROSE runtime environment.
