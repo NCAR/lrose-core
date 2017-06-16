@@ -5,7 +5,7 @@
 | Package           | Comments      |
 | -------------     |:-------------:|
 | core              | https://github.com/NCAR/lrose-core |
-| core docs         | https://github.com/NCAR/lrose-core/docs |
+| core docs         | https://github.com/NCAR/lrose-core/tree/master/docs |
 | user docs         | https://github.com/NCAR/lrose-docs |
 | netcdf support    | https://github.com/NCAR/lrose-netcdf |
 | display support   | https://github.com/NCAR/lrose-displays |
