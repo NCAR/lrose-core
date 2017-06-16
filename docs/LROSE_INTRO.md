@@ -2,7 +2,7 @@
 
 ## Primary links
 
-| Package           | Comments      |
+| Package           | URL      |
 | -------------     |:-------------:|
 | core              | https://github.com/NCAR/lrose-core |
 | core docs         | https://github.com/NCAR/lrose-core/tree/master/docs |
@@ -15,6 +15,8 @@
 
 ## Code organization
 
+| LROSE code        | URL      |
+| -------------     |:-------------:|
 | libs       | https://github.com/NCAR/lrose-core/blob/master/docs/lrose-libs-summary.pdf |
 | apps       | https://github.com/NCAR/lrose-core/blob/master/docs/lrose-apps-summary.pdf |
 
@@ -23,6 +25,8 @@
 Most LROSE apps use TDRP - Table Driven Runtime Parameters - to handle the parameters
 that govern how the app runs.
 
+| TDRP code         | URL      |
+| -------------     |:-------------:|
 | lib       | https://github.com/NCAR/lrose-core/tree/master/codebase/libs/tdrp |
 | apps      | https://github.com/NCAR/lrose-core/tree/master/codebase/apps/tdrp |
 
