@@ -36,7 +36,7 @@
 #ifndef NcxxPort_HH
 #define NcxxPort_HH
 
-#include <sys/types.h>
+#include <cstdint>
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////
@@ -93,11 +93,11 @@ public:
   typedef char si08; ///< portable unsigned 8-bit integer
   typedef unsigned char ui08; ///< portable unsigned 8-bit integer
   typedef int16_t si16; ///< portable signed 16-bit integer
-  typedef u_int16_t ui16; ///< portable unsigned 16-bit integer
+  typedef uint16_t ui16; ///< portable unsigned 16-bit integer
   typedef int32_t si32; ///< portable signed 32-bit integer
-  typedef u_int32_t ui32; ///< portable unsigned 32-bit integer
+  typedef uint32_t ui32; ///< portable unsigned 32-bit integer
   typedef int64_t si64; ///< portable signed 32-bit integer
-  typedef u_int64_t ui64; ///< portable unsigned 32-bit integer
+  typedef uint64_t ui64; ///< portable unsigned 32-bit integer
   typedef float fl32; ///< portable 32-bit IEEE float
   typedef double fl64; ///< portable 64-bit IEEE float
 
