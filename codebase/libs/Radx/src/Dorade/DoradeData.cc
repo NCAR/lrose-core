@@ -849,8 +849,8 @@ void DoradeData::print(const DoradeData::radar_t &val, ostream &out)
   out << "  radar_type: " << radarTypeToStr((radar_type_t) val.radar_type) << endl;
   out << "  scan_mode: " << scanModeToStr((scan_mode_t) val.scan_mode) << endl;
   out << "  req_rotat_vel: " << val.req_rotat_vel << endl;
-  out << "  scan_mode_pram0: " << scanModeToStr((scan_mode_t) val.scan_mode_pram0) << endl;
-  out << "  scan_mode_pram1: " << scanModeToStr((scan_mode_t) val.scan_mode_pram1) << endl;
+  out << "  scan_mode_pram0: " << scanModeToStr((scan_mode_t) (int)val.scan_mode_pram0) << endl;
+  out << "  scan_mode_pram1: " << scanModeToStr((scan_mode_t) (int)val.scan_mode_pram1) << endl;
   out << "  num_parameter_des: " << val.num_parameter_des << endl;
   out << "  total_num_des: " << val.total_num_des << endl;
   out << "  data_compress: " << val.data_compress << endl;
