@@ -44,7 +44,12 @@
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxStr.hh>
+#ifdef _MSC_VER
+#include <io.h>
+#include <strcasestr.h>
+#else
 #include <unistd.h>
+#endif
 #include <cstring>
 #include <cstdio>
 #include <cmath>
@@ -52,6 +57,10 @@
 #include <dirent.h>
 #include <algorithm>
 using namespace std;
+
+#ifdef _MSC_VER
+#define unlink(filename) _unlink(filename)
+#endif
 
 /////////////////////////////////////////////////////////
 // Write data from volume to specified directory

@@ -57,6 +57,10 @@
 #include <algorithm>
 using namespace std;
 
+#ifdef _MSC_VER
+#define strcasecmp _stricmp
+#endif
+
 const double SigmetRadxFile::_angleConversion = 360.0 / 65536.0;
 int SigmetRadxFile::_volumeNumber = 0;
  

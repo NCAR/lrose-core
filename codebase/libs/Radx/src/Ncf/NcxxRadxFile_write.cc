@@ -44,7 +44,12 @@
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxStr.hh>
+#ifdef _MSC_VER
+#include <io.h>
+#include <strcasestr.h>
+#else
 #include <unistd.h>
+#endif
 #include <cstring>
 #include <cstdio>
 #include <cmath>

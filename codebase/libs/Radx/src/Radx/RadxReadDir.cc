@@ -33,7 +33,11 @@
 ////////////////////////////////////////////////////////////////////
 
 #include <Radx/RadxReadDir.hh>
+#ifdef _MSC_VER
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 #include <cerrno>
 using namespace std;
 
@@ -82,8 +86,12 @@ int RadxReadDir::open(const char *dir_path)
   
   // reserve buffer for the results
 
+#ifdef _WIN32
+  int bufSize = sizeof(struct  dirent) + 260; // MAX_PATH
+#else
   int bufSize =
     sizeof(struct  dirent) + pathconf(dir_path, _PC_NAME_MAX) + 1;
+#endif
   _buf.reserve(bufSize);
   
   if ((_dirp = opendir(dir_path)) == NULL) {
@@ -101,7 +109,7 @@ struct dirent *RadxReadDir::read()
   
 {
   
-#if defined(SUNOS5) || defined (SUNOS5_INTEL)
+#if defined(SUNOS5) || defined (SUNOS5_INTEL) || defined (_WIN32)
   return (readdir(_dirp));
 #else
   struct dirent *result;
