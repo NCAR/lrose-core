@@ -36,7 +36,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <ctype.h>
-#include <sys/time.h>
+#include <chrono>
 #include <vector>
 #include <Radx/RadxTime.hh>
 using namespace std;
@@ -158,11 +158,14 @@ void RadxTime::clear()
 void RadxTime::set(SpecifyTime_t spec)
 {
   switch(spec) {
-    case NOW:
-      struct timeval tv;
-      gettimeofday(&tv, NULL);
-      _uTime = tv.tv_sec;
-      _subSec = tv.tv_usec / 1.0e6;
+  case NOW: {
+      auto tval = chrono::system_clock::now();
+      auto duration = tval.time_since_epoch();
+      auto sec = chrono::duration_cast<chrono::seconds>(duration);
+      auto usec = chrono::duration_cast<chrono::microseconds>(duration - sec);
+      _uTime = chrono::system_clock::to_time_t(tval);
+      _subSec = chrono::duration<double>(usec).count();
+      }
       break;
     case ZERO:
     default:
@@ -549,12 +552,12 @@ string RadxTime::asStringDashed(int subsecPrecision /* = 0*/) const
 //////////////////////////////////////
 // get current time as double secs
 
-double RadxTime::getCurrentTimeAsDouble()
-  
+double RadxTime::getCurrentTimeAsDouble() 
 {
-  struct timeval tval;
-  gettimeofday(&tval, NULL);
-  return (tval.tv_sec + tval.tv_usec / 1000000.0);
+  auto tval = chrono::system_clock::now();
+  auto duration = tval.time_since_epoch();
+  auto sec = chrono::duration_cast<chrono::seconds>(duration);
+  return std::chrono::duration<double>(sec).count();
 }
 
 
