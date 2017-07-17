@@ -1299,15 +1299,15 @@ void RadxField::convert(Radx::DataType_t dtype,
   if (name.length() > 0) {
     _name = name;
   }
-  if (units.length() > 0) {
+  // if (units.length() > 0) {
     _units = units;
-  }
-  if (standardName.length() > 0) {
+  // }
+  // if (standardName.length() > 0) {
     _standardName = standardName;
-  }
-  if (longName.length() > 0) {
+  // }
+  // if (longName.length() > 0) {
     _longName = longName;
-  }
+  // }
 }
 
 //////////////////////////////////////////////////////
