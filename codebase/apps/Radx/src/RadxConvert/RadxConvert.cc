@@ -551,6 +551,23 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
     }
   }
 
+  if (_params.set_output_fields && !_params.write_other_fields_unchanged) {
+    vector<string> uniqueFields = vol.getUniqueFieldNameList();
+    for (size_t jj = 0; jj < uniqueFields.size(); jj++) {
+      string fname = uniqueFields[jj]; 
+      bool keep = false;
+      for (int ii = 0; ii < _params.output_fields_n; ii++) {
+        if (fname == _params._output_fields[ii].input_field_name) {
+          keep = true;
+          break;
+        }
+      } // ii
+      if (!keep) {
+        vol.removeField(fname);
+      }
+    } // jj
+  }
+
   // override start range and/or gate spacing
 
   if (_params.override_start_range || _params.override_gate_spacing) {
