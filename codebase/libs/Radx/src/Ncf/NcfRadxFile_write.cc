@@ -3308,11 +3308,26 @@ Nc3Var *NcfRadxFile::_createFieldVar(const RadxField &field)
   if (field.getLongName().size() > 0) {
     iret |= _file.addAttr(var, LONG_NAME, field.getLongName());
   }
-  if (field.getStandardName().size() > 0) {
-    if (_writeProposedStdNameInNcf) {
-      iret |= _file.addAttr(var, PROPOSED_STANDARD_NAME, field.getStandardName());
+
+  // for standard names, we need to check if it is a proposed name
+  // for proposed names, use the correct tag
+
+  string stdName = field.getStandardName();
+  bool isProposed = false;
+  if (_writeProposedStdNameInNcf) {
+    isProposed = true;
+  }
+  string propStr("(proposed)");
+  size_t ppos = stdName.find(propStr);
+  if (ppos != string::npos) {
+    stdName.replace(ppos, propStr.size(), "");
+    isProposed = true;
+  }
+  if (stdName.size() > 0) {
+    if (isProposed) {
+      iret |= _file.addAttr(var, PROPOSED_STANDARD_NAME, stdName);
     } else {
-      iret |= _file.addAttr(var, STANDARD_NAME, field.getStandardName());
+      iret |= _file.addAttr(var, STANDARD_NAME, stdName);
     }
   }
   iret |= _file.addAttr(var, UNITS, field.getUnits());
