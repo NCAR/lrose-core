@@ -243,6 +243,40 @@ private:
 
   // global attributes
 
+  int _ADC_bits_per_sample_attr;
+  int _ADC_channels_attr;
+  int _delay_clocks_attr;
+  int _experiment_id_attr;
+  int _file_number_attr;
+  int _pulses_per_daq_cycle_attr;
+  int _pulses_per_ray_attr;
+  int _samples_per_pulse_attr;
+  int _scan_number_attr;
+
+  float  _cable_losses_attr;
+  float _extra_attenuation_attr;
+  float _max_angle_attr;
+  float _max_range_attr;
+  float _min_angle_attr;
+  float _min_range_attr;
+  float _radar_constant_attr;
+  float _receiver_gain_attr;
+  float _scan_angle_attr;
+  float _scan_velocity_attr;
+
+  string _British_National_Grid_Reference_attr;
+  string _Conventions_attr;
+  string _comment_attr;
+  string _history_attr;
+  string _institution_attr;
+  string _operator_attr;
+  string _radar_attr;
+  string _references_attr;
+  string _scan_datetime_attr;
+  string _scantype_attr;
+  string _source_attr;
+  string _title_attr;
+
   string _command_line_attr;
   string _process_version_attr;
   string _ingest_software_attr;
@@ -281,7 +315,6 @@ private:
   string _antenna_diameter_attr;
   string _elevation_correction_attr;
   string _scan_mode_attr;
-  string _comment_attr;
   string _polarization_state_attr;
   string _qc_standards_version_attr;
   string _qc_method_attr;
@@ -295,7 +328,6 @@ private:
   string _qc_bit_4_description_attr;
   string _qc_bit_4_assessment_attr;
   string _zeb_platform_attr;
-  string _history_attr;
 
   double _pulseLenNs;
   double _frequencyGhz;
