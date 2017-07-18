@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// CfarNcRadxFile.hh
+// CfarrNcRadxFile.hh
 //
-// CfarNcRadxFile object
+// CfarrNcRadxFile object
 //
 // NetCDF data for radar radial data in CFAR netcdf format
 // CFAR = Chilbolton Facility for Atmospheric and Radio Research
@@ -36,8 +36,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef CfarNcRadxFile_HH
-#define CfarNcRadxFile_HH
+#ifndef CfarrNcRadxFile_HH
+#define CfarrNcRadxFile_HH
 
 #include <string>
 #include <vector>
@@ -62,7 +62,7 @@ using namespace std;
 ///
 /// This subclass of RadxFile handles I/O for DOE netcdf files.
 
-class CfarNcRadxFile : public RadxFile
+class CfarrNcRadxFile : public RadxFile
 
 {
   
@@ -70,11 +70,11 @@ public:
 
   /// Constructor
   
-  CfarNcRadxFile();
+  CfarrNcRadxFile();
   
   /// Destructor
   
-  virtual ~CfarNcRadxFile();
+  virtual ~CfarrNcRadxFile();
   
   /// clear all data
   
@@ -88,7 +88,7 @@ public:
   /// Check if specified file is a DOE file.
   /// Returns true on success, false on failure
   
-  bool isCfarNc(const string &path);
+  bool isCfarrNc(const string &path);
     
   //////////////////////////////////////////////////////////////
   /// \name Perform writing:

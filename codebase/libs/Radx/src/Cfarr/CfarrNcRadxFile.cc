@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// CfarNcRadxFile.cc
+// CfarrNcRadxFile.cc
 //
-// CfarNcRadxFile object
+// CfarrNcRadxFile object
 //
 // NetCDF file data for radar radial data in early DOE Netcdf
 //
@@ -37,7 +37,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <Radx/NcfRadxFile.hh>
-#include <Radx/CfarNcRadxFile.hh>
+#include <Radx/CfarrNcRadxFile.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxField.hh>
@@ -54,7 +54,7 @@ using namespace std;
 //////////////
 // Constructor
 
-CfarNcRadxFile::CfarNcRadxFile() : RadxFile()
+CfarrNcRadxFile::CfarrNcRadxFile() : RadxFile()
   
 {
 
@@ -67,7 +67,7 @@ CfarNcRadxFile::CfarNcRadxFile() : RadxFile()
 /////////////
 // destructor
 
-CfarNcRadxFile::~CfarNcRadxFile()
+CfarrNcRadxFile::~CfarrNcRadxFile()
 
 {
   clear();
@@ -76,7 +76,7 @@ CfarNcRadxFile::~CfarNcRadxFile()
 /////////////////////////////////////////////////////////
 // clear the data in the object
 
-void CfarNcRadxFile::clear()
+void CfarrNcRadxFile::clear()
   
 {
 
@@ -193,11 +193,11 @@ void CfarNcRadxFile::clear()
 // Check if specified file is CfRadial format
 // Returns true if supported, false otherwise
 
-bool CfarNcRadxFile::isSupported(const string &path)
+bool CfarrNcRadxFile::isSupported(const string &path)
 
 {
   
-  if (isCfarNc(path)) {
+  if (isCfarrNc(path)) {
     return true;
   }
   return false;
@@ -205,10 +205,10 @@ bool CfarNcRadxFile::isSupported(const string &path)
 }
 
 ////////////////////////////////////////////////////////////
-// Check if this is a CfarNc file
+// Check if this is a CfarrNc file
 // Returns true on success, false on failure
 
-bool CfarNcRadxFile::isCfarNc(const string &path)
+bool CfarrNcRadxFile::isCfarrNc(const string &path)
   
 {
 
@@ -218,7 +218,7 @@ bool CfarNcRadxFile::isCfarNc(const string &path)
 
   if (_file.openRead(path)) {
     if (_verbose) {
-      cerr << "DEBUG - not CfarNc file" << endl;
+      cerr << "DEBUG - not CfarrNc file" << endl;
       cerr << _file.getErrStr() << endl;
     }
     return false;
@@ -229,7 +229,7 @@ bool CfarNcRadxFile::isCfarNc(const string &path)
   if (_readDimensions()) {
     _file.close();
     if (_verbose) {
-      cerr << "DEBUG - not CfarNc file" << endl;
+      cerr << "DEBUG - not CfarrNc file" << endl;
       cerr << _errStr << endl;
     }
     return false;
@@ -241,7 +241,7 @@ bool CfarNcRadxFile::isCfarNc(const string &path)
   if (baseTimeVar == NULL) {
     _file.close();
     if (_verbose) {
-      cerr << "DEBUG - not CfarNc file" << endl;
+      cerr << "DEBUG - not CfarrNc file" << endl;
       cerr << "  base_time variable missing" << endl;
     }
     return false;
@@ -251,13 +251,13 @@ bool CfarNcRadxFile::isCfarNc(const string &path)
   if (qcTimeVar == NULL) {
     _file.close();
     if (_verbose) {
-      cerr << "DEBUG - not CfarNc file" << endl;
+      cerr << "DEBUG - not CfarrNc file" << endl;
       cerr << "  qc_time variable missing" << endl;
     }
     return false;
   }
 
-  // file has the correct dimensions, so it is a CfarNc file
+  // file has the correct dimensions, so it is a CfarrNc file
 
   _file.close();
   return true;
@@ -272,18 +272,18 @@ bool CfarNcRadxFile::isCfarNc(const string &path)
 //
 // Returns 0 on success, -1 on failure
 
-int CfarNcRadxFile::writeToDir(const RadxVol &vol,
-			       const string &dir,
-			       bool addDaySubDir,
-			       bool addYearSubDir)
+int CfarrNcRadxFile::writeToDir(const RadxVol &vol,
+                                const string &dir,
+                                bool addDaySubDir,
+                                bool addYearSubDir)
   
 {
 
-  // Writing CfarNc files is not supported
+  // Writing CfarrNc files is not supported
   // therefore write in CF Radial format instead
   
-  cerr << "WARNING - CfarNcRadxFile::writeToDir" << endl;
-  cerr << "  Writing CfarNc raw format files not supported" << endl;
+  cerr << "WARNING - CfarrNcRadxFile::writeToDir" << endl;
+  cerr << "  Writing CfarrNc raw format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
   
   // set up NcfRadxFile object
@@ -314,16 +314,16 @@ int CfarNcRadxFile::writeToDir(const RadxVol &vol,
 //
 // Returns 0 on success, -1 on failure
 
-int CfarNcRadxFile::writeToPath(const RadxVol &vol,
-				const string &path)
+int CfarrNcRadxFile::writeToPath(const RadxVol &vol,
+                                 const string &path)
   
 {
 
-  // Writing CfarNc files is not supported
+  // Writing CfarrNc files is not supported
   // therefore write in CF Radial format instead
 
-  cerr << "WARNING - CfarNcRadxFile::writeToPath" << endl;
-  cerr << "  Writing CfarNc raw format files not supported" << endl;
+  cerr << "WARNING - CfarrNcRadxFile::writeToPath" << endl;
+  cerr << "  Writing CfarrNc raw format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
@@ -349,7 +349,7 @@ int CfarNcRadxFile::writeToPath(const RadxVol &vol,
 // get the date and time from a dorade file path
 // returns 0 on success, -1 on failure
 
-int CfarNcRadxFile::getTimeFromPath(const string &path, RadxTime &rtime)
+int CfarrNcRadxFile::getTimeFromPath(const string &path, RadxTime &rtime)
 
 {
 
@@ -395,11 +395,11 @@ int CfarNcRadxFile::getTimeFromPath(const string &path, RadxTime &rtime)
 /////////////////////////////////////////////////////////
 // print summary after read
 
-void CfarNcRadxFile::print(ostream &out) const
+void CfarrNcRadxFile::print(ostream &out) const
   
 {
   
-  out << "=============== CfarNcRadxFile ===============" << endl;
+  out << "=============== CfarrNcRadxFile ===============" << endl;
   RadxFile::print(out);
   out << "  title: " << _title << endl;
   out << "  institution: " << _institution << endl;
@@ -435,12 +435,12 @@ void CfarNcRadxFile::print(ostream &out) const
 // Returns 0 on success, -1 on failure
 // Use getErrStr() if error occurs
 
-int CfarNcRadxFile::printNative(const string &path, ostream &out,
-				bool printRays, bool printData)
+int CfarrNcRadxFile::printNative(const string &path, ostream &out,
+                                 bool printRays, bool printData)
   
 {
 
-  _addErrStr("ERROR - CfarNcRadxFile::printNative");
+  _addErrStr("ERROR - CfarrNcRadxFile::printNative");
   _addErrStr("  Native print does not apply to NetCDF file: ", path);
   _addErrStr("  Use 'ncdump' instead");
   return -1;
@@ -454,8 +454,8 @@ int CfarNcRadxFile::printNative(const string &path, ostream &out,
 //
 // Use getErrStr() if error occurs
 
-int CfarNcRadxFile::readFromPath(const string &path,
-				 RadxVol &vol)
+int CfarrNcRadxFile::readFromPath(const string &path,
+                                  RadxVol &vol)
   
 {
 
@@ -465,7 +465,7 @@ int CfarNcRadxFile::readFromPath(const string &path,
     cerr << "Reading path: " << path << endl;
   }
 
-  string errStr("ERROR - CfarNcRadxFile::readFromPath");
+  string errStr("ERROR - CfarrNcRadxFile::readFromPath");
   
   // clear tmp rays
 
@@ -631,7 +631,7 @@ int CfarNcRadxFile::readFromPath(const string &path,
 ///////////////////////////////////
 // read in the dimensions
 
-int CfarNcRadxFile::_readDimensions()
+int CfarrNcRadxFile::_readDimensions()
 
 {
 
@@ -654,7 +654,7 @@ int CfarNcRadxFile::_readDimensions()
   iret |= _file.readDim("sweep", _sweepDim);
 
   if (iret) {
-    _addErrStr("ERROR - CfarNcRadxFile::_file.readDimensions");
+    _addErrStr("ERROR - CfarrNcRadxFile::_file.readDimensions");
     return -1;
   }
 
@@ -665,7 +665,7 @@ int CfarNcRadxFile::_readDimensions()
 ///////////////////////////////////
 // read the global attributes
 
-int CfarNcRadxFile::_readGlobalAttributes()
+int CfarrNcRadxFile::_readGlobalAttributes()
 
 {
 
@@ -798,7 +798,7 @@ int CfarNcRadxFile::_readGlobalAttributes()
 ///////////////////////////////////
 // read the times
 
-int CfarNcRadxFile::_readTimes()
+int CfarrNcRadxFile::_readTimes()
 
 {
 
@@ -806,19 +806,19 @@ int CfarNcRadxFile::_readTimes()
 
   _timeVar = _file.getNc3File()->get_var("time");
   if (_timeVar == NULL) {
-    _addErrStr("ERROR - CfarNcRadxFile::_readTimes");
+    _addErrStr("ERROR - CfarrNcRadxFile::_readTimes");
     _addErrStr("  Cannot find time variable, name: ", "time");
     _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
   if (_timeVar->num_dims() < 1) {
-    _addErrStr("ERROR - CfarNcRadxFile::_readTimes");
+    _addErrStr("ERROR - CfarrNcRadxFile::_readTimes");
     _addErrStr("  time variable has no dimensions");
     return -1;
   }
   Nc3Dim *timeDim = _timeVar->get_dim(0);
   if (timeDim != _timeDim) {
-    _addErrStr("ERROR - CfarNcRadxFile::_readTimes");
+    _addErrStr("ERROR - CfarrNcRadxFile::_readTimes");
     _addErrStr("  Time has incorrect dimension, name: ", timeDim->name());
     return -1;
   }
@@ -827,7 +827,7 @@ int CfarNcRadxFile::_readTimes()
   
   Nc3Att* unitsAtt = _timeVar->get_att("units");
   if (unitsAtt == NULL) {
-    _addErrStr("ERROR - CfarNcRadxFile::_readTimes");
+    _addErrStr("ERROR - CfarrNcRadxFile::_readTimes");
     _addErrStr("  Time has no units");
     return -1;
   }
@@ -840,7 +840,7 @@ int CfarNcRadxFile::_readTimes()
   
   ut_unit *udUnit = ut_parse(_udunits.getSystem(), units.c_str(), UT_ASCII);
   if (udUnit == NULL) {
-    _addErrStr("ERROR - CfarNcRadxFile::_readTimes");
+    _addErrStr("ERROR - CfarrNcRadxFile::_readTimes");
     _addErrStr("  Cannot parse time units: ", units);
     _addErrInt("  udunits status: ", ut_get_status());
     return -1;
@@ -848,7 +848,7 @@ int CfarNcRadxFile::_readTimes()
     
   if (ut_are_convertible(udUnit, _udunits.getEpoch()) == 0) {
     // not a time variable
-    _addErrStr("ERROR - CfarNcRadxFile::_readTimes");
+    _addErrStr("ERROR - CfarrNcRadxFile::_readTimes");
     _addErrStr("  Time does not have convertible units: ", units);
     _addErrInt("  udunits status: ", ut_get_status());
     ut_free(udUnit);
@@ -873,7 +873,7 @@ int CfarNcRadxFile::_readTimes()
   RadxArray<double> dtimes_;
   double *dtimes = dtimes_.alloc(_nTimesInFile);
   if (_timeVar->get(dtimes, _nTimesInFile) == 0) {
-    _addErrStr("ERROR - CfarNcRadxFile::_readTimes");
+    _addErrStr("ERROR - CfarrNcRadxFile::_readTimes");
     _addErrStr("  Cannot read times variable");
     return -1;
   }
@@ -889,13 +889,13 @@ int CfarNcRadxFile::_readTimes()
 ///////////////////////////////////
 // read the range variable
 
-int CfarNcRadxFile::_readRangeVariable()
+int CfarrNcRadxFile::_readRangeVariable()
 
 {
 
   _rangeVar = _file.getNc3File()->get_var("range");
   if (_rangeVar == NULL || _rangeVar->num_vals() < 1) {
-    _addErrStr("ERROR - CfarNcRadxFile::_readRangeVariable");
+    _addErrStr("ERROR - CfarrNcRadxFile::_readRangeVariable");
     _addErrStr("  Cannot read range");
     _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
@@ -939,7 +939,7 @@ int CfarNcRadxFile::_readRangeVariable()
 ///////////////////////////////////
 // read the position variables
 
-int CfarNcRadxFile::_readPositionVariables()
+int CfarrNcRadxFile::_readPositionVariables()
 
 {
 
@@ -947,21 +947,21 @@ int CfarNcRadxFile::_readPositionVariables()
 
   int iret = 0;
   if (_file.readDoubleVar(_latitudeVar, "lat", _latitudeDeg, 0, true)) {
-    _addErrStr("ERROR - CfarNcRadxFile::_readPositionVariables");
+    _addErrStr("ERROR - CfarrNcRadxFile::_readPositionVariables");
     _addErrStr("  Cannot read latitude");
     _addErrStr(_file.getNc3Error()->get_errmsg());
     iret = -1;
   }
 
   if (_file.readDoubleVar(_longitudeVar, "lon", _longitudeDeg, 0, true)) {
-    _addErrStr("ERROR - CfarNcRadxFile::_readPositionVariables");
+    _addErrStr("ERROR - CfarrNcRadxFile::_readPositionVariables");
     _addErrStr("  Cannot read longitude");
     _addErrStr(_file.getNc3Error()->get_errmsg());
     iret = -1;
   }
 
   if (_file.readDoubleVar(_altitudeVar, "alt", _altitudeKm, 0, true)) {
-    _addErrStr("ERROR - CfarNcRadxFile::_readPositionVariables");
+    _addErrStr("ERROR - CfarrNcRadxFile::_readPositionVariables");
     _addErrStr("  Cannot read altitude");
     _addErrStr(_file.getNc3Error()->get_errmsg());
     iret = -1;
@@ -982,7 +982,7 @@ int CfarNcRadxFile::_readPositionVariables()
 ///////////////////////////////////
 // read the sweep meta-data
 
-int CfarNcRadxFile::_readSweepVariables()
+int CfarrNcRadxFile::_readSweepVariables()
 
 {
 
@@ -1041,7 +1041,7 @@ int CfarNcRadxFile::_readSweepVariables()
 ///////////////////////////////////
 // clear the ray variables
 
-void CfarNcRadxFile::_clearRayVariables()
+void CfarrNcRadxFile::_clearRayVariables()
 
 {
 
@@ -1058,7 +1058,7 @@ void CfarNcRadxFile::_clearRayVariables()
 ///////////////////////////////////
 // read in ray variables
 
-int CfarNcRadxFile::_readRayVariables()
+int CfarrNcRadxFile::_readRayVariables()
 
 {
 
@@ -1084,7 +1084,7 @@ int CfarNcRadxFile::_readRayVariables()
   _readRayVar(_polarizationVar, "Polarization", _polarizations, false);
 
   if (iret) {
-    _addErrStr("ERROR - CfarNcRadxFile::_readRayVariables");
+    _addErrStr("ERROR - CfarrNcRadxFile::_readRayVariables");
     return -1;
   }
 
@@ -1096,7 +1096,7 @@ int CfarNcRadxFile::_readRayVariables()
 // create the rays to be read in
 // and set meta data
 
-int CfarNcRadxFile::_createRays(const string &path)
+int CfarrNcRadxFile::_createRays(const string &path)
 
 {
 
@@ -1152,11 +1152,11 @@ int CfarNcRadxFile::_createRays(const string &path)
       int opMode = _pedestalOpModes[rayIndex];
       Radx::SweepMode_t sweepMode = Radx::SWEEP_MODE_NOT_SET;
       switch (opMode) {
-      case 2: sweepMode = Radx::SWEEP_MODE_IDLE; break;
-      case 3: sweepMode = Radx::SWEEP_MODE_POINTING; break;
-      case 7: sweepMode = Radx::SWEEP_MODE_RHI; break;
-      case 8: sweepMode = Radx::SWEEP_MODE_SECTOR; break;
-      case 9: sweepMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE; break;
+        case 2: sweepMode = Radx::SWEEP_MODE_IDLE; break;
+        case 3: sweepMode = Radx::SWEEP_MODE_POINTING; break;
+        case 7: sweepMode = Radx::SWEEP_MODE_RHI; break;
+        case 8: sweepMode = Radx::SWEEP_MODE_SECTOR; break;
+        case 9: sweepMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE; break;
       }
       ray->setSweepMode(sweepMode);
     }
@@ -1194,7 +1194,7 @@ int CfarNcRadxFile::_createRays(const string &path)
 ////////////////////////////////////////////
 // read the field variables
 
-int CfarNcRadxFile::_readFieldVariables(bool metaOnly)
+int CfarrNcRadxFile::_readFieldVariables(bool metaOnly)
 
 {
 
@@ -1225,7 +1225,7 @@ int CfarNcRadxFile::_readFieldVariables(bool metaOnly)
     if (ftype != nc3Double && ftype != nc3Float) {
       // not a valid type
       if (_verbose) {
-        cerr << "DEBUG - CfarNcRadxFile::_readFieldVariables" << endl;
+        cerr << "DEBUG - CfarrNcRadxFile::_readFieldVariables" << endl;
         cerr << "  -->> rejecting field: " << fieldName << endl;
         cerr << "  -->> Should be float or double: " << fieldName << endl;
       }
@@ -1236,14 +1236,14 @@ int CfarNcRadxFile::_readFieldVariables(bool metaOnly)
 
     if (!isFieldRequiredOnRead(fieldName)) {
       if (_verbose) {
-        cerr << "DEBUG - CfarNcRadxFile::_readFieldVariables" << endl;
+        cerr << "DEBUG - CfarrNcRadxFile::_readFieldVariables" << endl;
         cerr << "  -->> rejecting field: " << fieldName << endl;
       }
       continue;
     }
 
     if (_verbose) {
-      cerr << "DEBUG - CfarNcRadxFile::_readFieldVariables" << endl;
+      cerr << "DEBUG - CfarrNcRadxFile::_readFieldVariables" << endl;
       cerr << "  -->> adding field: " << fieldName << endl;
     }
     
@@ -1311,31 +1311,31 @@ int CfarNcRadxFile::_readFieldVariables(bool metaOnly)
     bool isDiscrete = false;
 
     switch (var->type()) {
-    case nc3Double: {
-      if (_addFl64FieldToRays(var, name, units, standardName, longName,
-			      isDiscrete, fieldFolds,
-			      foldLimitLower, foldLimitUpper)) {
-	iret = -1;
+      case nc3Double: {
+        if (_addFl64FieldToRays(var, name, units, standardName, longName,
+                                isDiscrete, fieldFolds,
+                                foldLimitLower, foldLimitUpper)) {
+          iret = -1;
+        }
+        break;
       }
-      break;
-    }
-    case nc3Float: {
-      if (_addFl32FieldToRays(var, name, units, standardName, longName,
-			      isDiscrete, fieldFolds,
-			      foldLimitLower, foldLimitUpper)) {
-	iret = -1;
+      case nc3Float: {
+        if (_addFl32FieldToRays(var, name, units, standardName, longName,
+                                isDiscrete, fieldFolds,
+                                foldLimitLower, foldLimitUpper)) {
+          iret = -1;
+        }
+        break;
       }
-      break;
-    }
-    default: {
-      iret = -1;
-      // will not reach here because of earlier check on type
-    }
+      default: {
+        iret = -1;
+        // will not reach here because of earlier check on type
+      }
 
     } // switch
     
     if (iret) {
-      _addErrStr("ERROR - CfarNcRadxFile::_readFieldVariables");
+      _addErrStr("ERROR - CfarrNcRadxFile::_readFieldVariables");
       _addErrStr("  cannot read field name: ", name);
       _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
@@ -1350,8 +1350,8 @@ int CfarNcRadxFile::_readFieldVariables(bool metaOnly)
 ///////////////////////////////////
 // read a ray variable - double
 
-int CfarNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
-				vector<double> &vals, bool required)
+int CfarrNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
+                                 vector<double> &vals, bool required)
 
 {
 
@@ -1368,7 +1368,7 @@ int CfarNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
       clearErrStr();
       return 0;
     } else {
-      _addErrStr("ERROR - CfarNcRadxFile::_readRayVar");
+      _addErrStr("ERROR - CfarrNcRadxFile::_readRayVar");
       return -1;
     }
   }
@@ -1389,7 +1389,7 @@ int CfarNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
       }
       clearErrStr();
     } else {
-      _addErrStr("ERROR - CfarNcRadxFile::_readRayVar");
+      _addErrStr("ERROR - CfarrNcRadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
       _addErrStr(_file.getNc3Error()->get_errmsg());
       iret = -1;
@@ -1403,8 +1403,8 @@ int CfarNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
 ///////////////////////////////////
 // read a ray variable - integer
 
-int CfarNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
-				vector<int> &vals, bool required)
+int CfarrNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
+                                 vector<int> &vals, bool required)
 
 {
 
@@ -1421,7 +1421,7 @@ int CfarNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
       clearErrStr();
       return 0;
     } else {
-      _addErrStr("ERROR - CfarNcRadxFile::_readRayVar");
+      _addErrStr("ERROR - CfarrNcRadxFile::_readRayVar");
       return -1;
     }
   }
@@ -1442,7 +1442,7 @@ int CfarNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
       }
       clearErrStr();
     } else {
-      _addErrStr("ERROR - CfarNcRadxFile::_readRayVar");
+      _addErrStr("ERROR - CfarrNcRadxFile::_readRayVar");
       _addErrStr("  Cannot read variable: ", name);
       _addErrStr(_file.getNc3Error()->get_errmsg());
       iret = -1;
@@ -1457,7 +1457,7 @@ int CfarNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
 // get a ray variable by name
 // returns NULL on failure
 
-Nc3Var* CfarNcRadxFile::_getRayVar(const string &name, bool required)
+Nc3Var* CfarrNcRadxFile::_getRayVar(const string &name, bool required)
 
 {
 
@@ -1466,7 +1466,7 @@ Nc3Var* CfarNcRadxFile::_getRayVar(const string &name, bool required)
   Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
     if (required) {
-      _addErrStr("ERROR - CfarNcRadxFile::_getRayVar");
+      _addErrStr("ERROR - CfarrNcRadxFile::_getRayVar");
       _addErrStr("  Cannot read variable, name: ", name);
       _addErrStr(_file.getNc3Error()->get_errmsg());
     }
@@ -1477,7 +1477,7 @@ Nc3Var* CfarNcRadxFile::_getRayVar(const string &name, bool required)
   
   if (var->num_dims() < 1) {
     if (required) {
-      _addErrStr("ERROR - CfarNcRadxFile::_getRayVar");
+      _addErrStr("ERROR - CfarrNcRadxFile::_getRayVar");
       _addErrStr("  variable name: ", name);
       _addErrStr("  variable has no dimensions");
     }
@@ -1486,7 +1486,7 @@ Nc3Var* CfarNcRadxFile::_getRayVar(const string &name, bool required)
   Nc3Dim *timeDim = var->get_dim(0);
   if (timeDim != _timeDim) {
     if (required) {
-      _addErrStr("ERROR - CfarNcRadxFile::_getRayVar");
+      _addErrStr("ERROR - CfarrNcRadxFile::_getRayVar");
       _addErrStr("  variable name: ", name);
       _addErrStr("  variable has incorrect dimension, dim name: ", 
                  timeDim->name());
@@ -1502,8 +1502,8 @@ Nc3Var* CfarNcRadxFile::_getRayVar(const string &name, bool required)
 ///////////////////////////////////
 // read a sweep variable - integer
 
-int CfarNcRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
-				  vector<int> &vals, bool required)
+int CfarrNcRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
+                                   vector<int> &vals, bool required)
 
 {
 
@@ -1521,7 +1521,7 @@ int CfarNcRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
       clearErrStr();
       return 0;
     } else {
-      _addErrStr("ERROR - CfarNcRadxFile::_readSweepVar");
+      _addErrStr("ERROR - CfarrNcRadxFile::_readSweepVar");
       return -1;
     }
   }
@@ -1542,7 +1542,7 @@ int CfarNcRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
       }
       clearErrStr();
     } else {
-      _addErrStr("ERROR - CfarNcRadxFile::_readSweepVar");
+      _addErrStr("ERROR - CfarrNcRadxFile::_readSweepVar");
       _addErrStr("  Cannot read variable: ", name);
       _addErrStr(_file.getNc3Error()->get_errmsg());
       iret = -1;
@@ -1557,7 +1557,7 @@ int CfarNcRadxFile::_readSweepVar(Nc3Var* &var, const string &name,
 // get a sweep variable
 // returns NULL on failure
 
-Nc3Var* CfarNcRadxFile::_getSweepVar(const string &name)
+Nc3Var* CfarrNcRadxFile::_getSweepVar(const string &name)
 
 {
   
@@ -1565,7 +1565,7 @@ Nc3Var* CfarNcRadxFile::_getSweepVar(const string &name)
   
   Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
-    _addErrStr("ERROR - CfarNcRadxFile::_getSweepVar");
+    _addErrStr("ERROR - CfarrNcRadxFile::_getSweepVar");
     _addErrStr("  Cannot read variable, name: ", name);
     _addErrStr(_file.getNc3Error()->get_errmsg());
     return NULL;
@@ -1574,14 +1574,14 @@ Nc3Var* CfarNcRadxFile::_getSweepVar(const string &name)
   // check sweep dimension
 
   if (var->num_dims() < 1) {
-    _addErrStr("ERROR - CfarNcRadxFile::_getSweepVar");
+    _addErrStr("ERROR - CfarrNcRadxFile::_getSweepVar");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has no dimensions");
     return NULL;
   }
   Nc3Dim *sweepDim = var->get_dim(0);
   if (sweepDim != _sweepDim) {
-    _addErrStr("ERROR - CfarNcRadxFile::_getSweepVar");
+    _addErrStr("ERROR - CfarrNcRadxFile::_getSweepVar");
     _addErrStr("  variable name: ", name);
     _addErrStr("  variable has incorrect dimension, dim name: ",
                sweepDim->name());
@@ -1598,15 +1598,15 @@ Nc3Var* CfarNcRadxFile::_getSweepVar(const string &name)
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int CfarNcRadxFile::_addFl64FieldToRays(Nc3Var* var,
-					const string &name,
-					const string &units,
-					const string &standardName,
-					const string &longName,
-					bool isDiscrete,
-					bool fieldFolds,
-					float foldLimitLower,
-					float foldLimitUpper)
+int CfarrNcRadxFile::_addFl64FieldToRays(Nc3Var* var,
+                                         const string &name,
+                                         const string &units,
+                                         const string &standardName,
+                                         const string &longName,
+                                         bool isDiscrete,
+                                         bool fieldFolds,
+                                         float foldLimitLower,
+                                         float foldLimitUpper)
   
 {
 
@@ -1635,7 +1635,7 @@ int CfarNcRadxFile::_addFl64FieldToRays(Nc3Var* var,
     size_t rayIndex = _raysToRead[ii].indexInFile;
 
     if (rayIndex > _nTimesInFile - 1) {
-      cerr << "WARNING - CfarNcRadxFile::_addSi16FieldToRays" << endl;
+      cerr << "WARNING - CfarrNcRadxFile::_addSi16FieldToRays" << endl;
       cerr << "  Trying to access ray beyond data" << endl;
       cerr << "  Trying to read ray index: " << rayIndex << endl;
       cerr << "  nTimesInFile: " << _nTimesInFile << endl;
@@ -1677,15 +1677,15 @@ int CfarNcRadxFile::_addFl64FieldToRays(Nc3Var* var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int CfarNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
-					const string &name,
-					const string &units,
-					const string &standardName,
-					const string &longName,
-					bool isDiscrete,
-					bool fieldFolds,
-					float foldLimitLower,
-					float foldLimitUpper)
+int CfarrNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
+                                         const string &name,
+                                         const string &units,
+                                         const string &standardName,
+                                         const string &longName,
+                                         bool isDiscrete,
+                                         bool fieldFolds,
+                                         float foldLimitLower,
+                                         float foldLimitUpper)
   
 {
 
@@ -1714,7 +1714,7 @@ int CfarNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
     size_t rayIndex = _raysToRead[ii].indexInFile;
 
     if (rayIndex > _nTimesInFile - 1) {
-      cerr << "WARNING - CfarNcRadxFile::_addSi16FieldToRays" << endl;
+      cerr << "WARNING - CfarrNcRadxFile::_addSi16FieldToRays" << endl;
       cerr << "  Trying to access ray beyond data" << endl;
       cerr << "  Trying to read ray index: " << rayIndex << endl;
       cerr << "  nTimesInFile: " << _nTimesInFile << endl;
@@ -1754,7 +1754,7 @@ int CfarNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
 /////////////////////////////////////////////////////////
 // load up the read volume with the data from this object
 
-int CfarNcRadxFile::_loadReadVolume()
+int CfarrNcRadxFile::_loadReadVolume()
   
 {
 
@@ -1826,7 +1826,7 @@ int CfarNcRadxFile::_loadReadVolume()
   if (_readFixedAngleLimitsSet) {
     if (_readVol->constrainByFixedAngle(_readMinFixedAngle, _readMaxFixedAngle,
                                         _readStrictAngleLimits)) {
-      _addErrStr("ERROR - CfarNcRadxFile::_loadReadVolume");
+      _addErrStr("ERROR - CfarrNcRadxFile::_loadReadVolume");
       _addErrStr("  No data found within fixed angle limits");
       _addErrDbl("  min fixed angle: ", _readMinFixedAngle);
       _addErrDbl("  max fixed angle: ", _readMaxFixedAngle);
@@ -1835,7 +1835,7 @@ int CfarNcRadxFile::_loadReadVolume()
   } else if (_readSweepNumLimitsSet) {
     if (_readVol->constrainBySweepNum(_readMinSweepNum, _readMaxSweepNum,
                                       _readStrictAngleLimits)) {
-      _addErrStr("ERROR - CfarNcRadxFile::_loadReadVolume");
+      _addErrStr("ERROR - CfarrNcRadxFile::_loadReadVolume");
       _addErrStr("  No data found within sweep num limits");
       _addErrInt("  min sweep num: ", _readMinSweepNum);
       _addErrInt("  max sweep num: ", _readMaxSweepNum);
@@ -1859,7 +1859,7 @@ int CfarNcRadxFile::_loadReadVolume()
 // Compute the fixed angles by averaging the elevation angles
 // on the sweeps
 
-void CfarNcRadxFile::_computeFixedAngles()
+void CfarrNcRadxFile::_computeFixedAngles()
   
 {
 

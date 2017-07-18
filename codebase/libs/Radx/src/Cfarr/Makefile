@@ -24,10 +24,10 @@ LOC_INCLUDES = -I../include $(NETCDF4_INCS)
 LOC_CFLAGS = 
 
 HDRS = \
-	../include/Radx/CfarNcRadxFile.hh
+	../include/Radx/CfarrNcRadxFile.hh
 
 CPPC_SRCS = \
-	CfarNcRadxFile.cc
+	CfarrNcRadxFile.cc
 
 #
 # general targets
