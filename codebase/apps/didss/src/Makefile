@@ -50,7 +50,6 @@ SUB_DIRS = \
 	nprtLtg2Spdb \
 	print_clutter_table \
 	print_polar2mdv_lookup \
-	ridds2mom \
 	setuid_starter \
 	tape_test \
 	wsi_ingest \
