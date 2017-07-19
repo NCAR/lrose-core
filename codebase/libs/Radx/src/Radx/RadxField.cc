@@ -145,6 +145,7 @@ RadxField &RadxField::copyMetaData(const RadxField &rhs)
   _units = rhs._units;
   _legendXml = rhs._legendXml;
   _thresholdingXml = rhs._thresholdingXml;
+  _comment = rhs._comment;
 
   _dataType = rhs._dataType;
   _byteWidth = rhs._byteWidth;
@@ -2744,6 +2745,11 @@ void RadxField::print(ostream &out) const
     out << _thresholdingXml << endl;
     out << "-------------------------------------------" <<  endl;
   }
+  if (_comment.size() > 0) {
+    out << "----------------- comment -----------------" <<  endl;
+    out << _comment << endl;
+    out << "-------------------------------------------" <<  endl;
+  }
   out << "=========================================" << endl;
 
 }
@@ -3442,6 +3448,7 @@ void RadxField::_loadMetaStringsToXml(string &xml, int level /* = 0 */)  const
   xml += RadxXml::writeString("legendXml", level + 1, _legendXml);
   xml += RadxXml::writeString("thresholdingXml", level + 1, _thresholdingXml);
   xml += RadxXml::writeString("thresholdFieldName", level + 1, _thresholdFieldName);
+  xml += RadxXml::writeString("comment", level + 1, _comment);
 
   xml += RadxXml::writeEndTag("RadxField", level);
 
@@ -3509,6 +3516,10 @@ int RadxField::_setMetaStringsFromXml(const char *xml,
   }
   if (RadxXml::readString(contents, "thresholdFieldName", _thresholdFieldName)) {
     missingTags.push_back("thresholdFieldName");
+    iret = -1;
+  }
+  if (RadxXml::readString(contents, "comment", _comment)) {
+    missingTags.push_back("comment");
     iret = -1;
   }
 

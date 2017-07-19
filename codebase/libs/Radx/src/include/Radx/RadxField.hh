@@ -164,6 +164,12 @@ public:
 
   void setThresholdingXml(const string &val) { _thresholdingXml = val; }
 
+  /// Set the comment
+  /// The comment is used to document specific and non-standard
+  /// aspects of a field
+
+  void setComment(const string &val) { _comment = val; }
+
   /// Set sampling ratio.
   ///
   /// Sometimes the number of samples used to compute different
@@ -675,6 +681,12 @@ public:
 
   const string &getThresholdingXml() const { return _thresholdingXml; }
 
+  /// Get comment
+  /// The comment is used to document specific and non-standard
+  /// aspects of a field
+
+  const string &getComment() const { return _comment; }
+
   /// Get number of rays represented in field data.
   
   size_t getNRays() const { return _rayStartIndex.size(); }
@@ -1016,6 +1028,7 @@ private:
   string _units;
   string _legendXml;
   string _thresholdingXml;
+  string _comment;
   
   Radx::DataType_t _dataType;
   int _byteWidth;
