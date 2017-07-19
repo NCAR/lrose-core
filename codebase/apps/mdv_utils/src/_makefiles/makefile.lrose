@@ -83,7 +83,6 @@ SUB_DIRS = \
          UpdateMdvStartEndTimes \
          UpdateMdvVlevelTypes \
          WorldTerrain \
-         mdv2netCDF \
          mdv_bin_data \
          mdv_constant_data \
          print_mdv \
