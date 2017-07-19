@@ -62,7 +62,6 @@ SUB_DIRS = \
 	rctable_generate \
 	rdacs2gate \
 	read_bprp_tape \
-	rview \
 	storm_file_v3_to_v5 \
 	suncal \
 	test2gate \
@@ -70,7 +69,6 @@ SUB_DIRS = \
 	titan_print \
 	track_server \
 	tstorm_refl_fcst \
-	tstorms2spdb \
 	uf2gate \
 	ufnexrad2gate \
 	wmi_ac_ingest \

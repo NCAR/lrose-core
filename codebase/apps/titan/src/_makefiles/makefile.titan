@@ -64,14 +64,12 @@ SUB_DIRS = \
 	rctable_generate \
 	rdacs2gate \
 	read_bprp_tape \
-	rview \
 	suncal \
 	test2gate \
 	time_hist \
 	titan_print \
 	track_server \
 	tstorm_refl_fcst \
-	tstorms2spdb \
 	uf2gate \
 	ufnexrad2gate \
 	wmi_ac_ingest \
