@@ -82,11 +82,7 @@ SUB_DIRS = \
          WorldTerrain \
          ascii2mdv \
          check_mdv \
-         mdv2ascii \
          mdv2gif \
-         mdv2netCDF \
-         mdv2plain \
-         mdv2vil \
          mdv_adjust_data \
          mdv_be2le \
          mdv_bin_data \

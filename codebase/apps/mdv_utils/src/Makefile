@@ -105,12 +105,8 @@ SUB_DIRS = \
 	mdv_update_levels \
 	mdv_update_origin \
 	mdvRhiExtract \
-	mdv2ascii \
-	mdv2netCDF \
-	mdv2plain \
 	mdv2prf \
 	mdv2VectorFile \
-	mdv2vil \
 	mdvMonitorYesterday \
 	nsslMosaic2Mdv \
 	ppi2comp \
