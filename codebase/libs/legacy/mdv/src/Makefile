@@ -23,7 +23,7 @@ SUB_DIRS = \
 	MdvFile \
 	MdvInputPath \
 	MdvRead \
-	mdv \
+	mdv_c \
 	mdvChunks
 
 
