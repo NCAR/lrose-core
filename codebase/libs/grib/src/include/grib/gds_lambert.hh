@@ -25,7 +25,7 @@
 #ifndef __GDS_LAMBERT_HH__
 #define __GDS_LAMBERT_HH__
 
-#include <grib/gds.hh>
+#include <grib/gds_.hh>
 
 //=============================================================================
 //   Lambert Projection class

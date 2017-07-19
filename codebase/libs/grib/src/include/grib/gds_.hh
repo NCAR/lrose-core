@@ -38,7 +38,7 @@
 // The gribrecord class handles which gds extended class to call.
 //    -JCraig-
 //
-// $Id: gds.hh,v 1.13 2016/03/03 19:22:03 dixon Exp $
+// $Id: gds_.hh,v 1.13 2016/03/03 19:22:03 dixon Exp $
 //
 //////////////////////////////////////////////////
 #ifndef _GDS_

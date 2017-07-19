@@ -32,7 +32,7 @@
 //////////////////////////////////////////////////
 
 #include <grib/constants.h>
-#include <grib/gds.hh>
+#include <grib/gds_.hh>
 
 const double gds::DEGREES_SCALE_FACTOR = 0.001;
 const double gds::GRID_SCALE_FACTOR = 0.001;

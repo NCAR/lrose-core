@@ -34,7 +34,7 @@
 #include <sys/stat.h>
 
 #include <grib/constants.h>
-#include <grib/gribrecord.hh>
+#include <grib/gribrecord_.hh>
 #include <toolsa/file_io.h>
 
 using namespace std;

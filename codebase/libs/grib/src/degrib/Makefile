@@ -29,20 +29,20 @@ MODULE_TYPE=library
 #
 
 HDRS = \
-	$(RAP_INC_DIR)/grib/BDS.hh \
-	$(RAP_INC_DIR)/grib/BMS.hh \
-	$(RAP_INC_DIR)/grib/ES.hh \
-	$(RAP_INC_DIR)/grib/EquidistantCylind.hh \
-	$(RAP_INC_DIR)/grib/PolarStereographic.hh \
-        $(RAP_INC_DIR)/grib/GDS.hh \
-        $(RAP_INC_DIR)/grib/gds.hh \
-	$(RAP_INC_DIR)/grib/GribFile.hh \
-	$(RAP_INC_DIR)/grib/GribRecord.hh \
-	$(RAP_INC_DIR)/grib/gribrecord.hh \
-	$(RAP_INC_DIR)/grib/GribSection.hh \
-	$(RAP_INC_DIR)/grib/GribVertType.hh \
-	$(RAP_INC_DIR)/grib/IdSec.hh \
-	$(RAP_INC_DIR)/grib/PDS.hh
+	../include/grib/BDS.hh \
+	../include/grib/BMS.hh \
+	../include/grib/ES.hh \
+	../include/grib/EquidistantCylind.hh \
+	../include/grib/PolarStereographic.hh \
+        ../include/grib/GDS.hh \
+        ../include/grib/gds_.hh \
+	../include/grib/GribFile.hh \
+	../include/grib/GribRecord.hh \
+	../include/grib/gribrecord_.hh \
+	../include/grib/GribSection.hh \
+	../include/grib/GribVertType.hh \
+	../include/grib/IdSec.hh \
+	../include/grib/PDS.hh
 
 CPPC_SRCS = \
 	BDS.cc \
@@ -51,10 +51,10 @@ CPPC_SRCS = \
 	EquidistantCylind.cc \
 	PolarStereographic.cc \
         GDS.cc \
-        gds.cc \
+        gds_.cc \
 	GribFile.cc \
 	GribRecord.cc \
-	gribrecord.cc \
+	gribrecord_.cc \
 	GribSection.cc \
 	GribVertType.cc \
 	IdSec.cc \

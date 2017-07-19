@@ -26,7 +26,7 @@
 #define __GDS_EQUIDISTANT_HH__
 
 #include <grib/constants.h>
-#include <grib/gds.hh>
+#include <grib/gds_.hh>
 
 //=============================================================================
 //   Equidistant (Lat/Lon) Projection class

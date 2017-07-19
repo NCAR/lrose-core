@@ -24,7 +24,7 @@
 /////////////////////////////////////////////
 // gribrecord - Main class for manipulating GRIB records.
 //
-// $Id: gribrecord.hh,v 1.3 2016/03/03 19:22:03 dixon Exp $
+// $Id: gribrecord_.hh,v 1.3 2016/03/03 19:22:03 dixon Exp $
 ////////////////////////////////////////////
 
 #ifndef gribrecord_HH
@@ -32,7 +32,7 @@
 
 #include <grib/IdSec.hh>
 #include <grib/PDS.hh>
-#include "gds.hh"
+#include "gds_.hh"
 #include <grib/BMS.hh>
 #include <grib/BDS.hh>
 #include <grib/ES.hh>
