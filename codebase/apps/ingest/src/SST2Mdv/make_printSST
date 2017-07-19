@@ -1,1 +1,0 @@
-g++ -o printSST printSST.cc SSTData.cc -I/rap/include -L/rap/lib -ldataport

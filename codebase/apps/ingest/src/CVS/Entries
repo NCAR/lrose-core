@@ -91,7 +91,6 @@ D/QPESumBinary2Mdv////
 D/QPESumVectors2Mdv////
 D/RawIQ2NetCDF////
 D/Rdas2Dsr////
-D/SST2Mdv////
 D/Sams2Spdb////
 D/SatOrbit2AcPosn////
 D/SawsUm2Mdv////
@@ -145,7 +144,6 @@ D/asdi2netcdf////
 D/asdi2spdb////
 D/asdiVector2mdv////
 D/asdiXml2spdb////
-D/aws2Spdb////
 D/axfProfiler////
 D/axfSonde////
 D/axfSurface////
@@ -194,7 +192,6 @@ D/mysqlSurface2Spdb////
 D/netCDF2StnRptSpdb////
 D/netCDFmesonet2SPDB////
 D/nexrad2dsr////
-D/nexrad2netcdf////
 D/nexradBzUncomp////
 D/nexradII_bz////
 D/noaaportLtg2Spdb////
