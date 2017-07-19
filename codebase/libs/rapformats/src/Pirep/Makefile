@@ -29,7 +29,11 @@ TARGET_FILE = ../librapformats.a
 
 HDRS =
 
+SRCS = \
+	pirep_c.c
+
 CPPC_SRCS = \
+	pirepXml.cc \
 	Pirep.cc
 
 #
