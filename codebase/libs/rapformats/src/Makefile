@@ -49,7 +49,6 @@ SUB_DIRS = \
 	nids \
 	nws_wwa \
 	Pirep \
-	pirep \
 	radar \
 	r_data \
 	SigAirMet \
