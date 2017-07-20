@@ -87,11 +87,11 @@ void DoeNcRadxFile::clear()
   _rangeDim = NULL;
   _sweepDim = NULL;
 
+  _timeVar = NULL;
   _rangeVar = NULL;
   _latitudeVar = NULL;
   _longitudeVar = NULL;
   _altitudeVar = NULL;
-  _timeVar = NULL;
   _azimuthVar = NULL;
   _azimuthRateVar = NULL;
   _elevationVar = NULL;

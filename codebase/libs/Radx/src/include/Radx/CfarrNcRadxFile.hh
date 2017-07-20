@@ -27,7 +27,7 @@
 // CfarrNcRadxFile object
 //
 // NetCDF data for radar radial data in CFAR netcdf format
-// CFAR = Chilbolton Facility for Atmospheric and Radio Research
+// CFARR = Chilbolton Facility for Atmospheric and Radio Research
 //
 // Mike Dixon, RAP, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -49,7 +49,6 @@
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxRay.hh>
 #include <Ncxx/Nc3xFile.hh>
-// #include <Radx/Udunits2.hh>
 
 class RadxField;
 class RadxVol;
@@ -187,7 +186,6 @@ private:
 
   Nc3Dim *_timeDim;
   Nc3Dim *_rangeDim;
-  Nc3Dim *_sweepDim;
 
   // times
   
@@ -210,37 +208,38 @@ private:
   
   Nc3Var *_latitudeVar;
   Nc3Var *_longitudeVar;
-  Nc3Var *_altitudeVar;
+  Nc3Var *_heightVar;
   
   double _latitudeDeg;
   double _longitudeDeg;
-  double _altitudeKm;
+  double _heightKm;
 
+  // scalar variables
+  
+  Nc3Var *_frequencyVar;
+  Nc3Var *_prfVar;
+  Nc3Var *_beamwidthHVar;
+  Nc3Var *_beamwidthVVar;
+  Nc3Var *_antennaDiameterVar;
+  Nc3Var *_pulsePeriodVar;
+  Nc3Var *_transmitPowerVar;
+  
+  double _frequencyGhz;
+  double _prfHz;
+  double _beamwidthHDeg;
+  double _beamwidthVDeg;
+  double _antennaDiameterM;
+  double _pulsePeriodUs;
+  double _transmitPowerW;
+  
   // ray variables
 
   Nc3Var *_azimuthVar;
-  Nc3Var *_azimuthRateVar;
   Nc3Var *_elevationVar;
-  Nc3Var *_elevationRateVar;
-  Nc3Var *_noiseVar;
-  Nc3Var *_pedestalOpModeVar;
-  Nc3Var *_polarizationVar;
 
   vector<double> _azimuths;
   vector<double> _elevations;
-  vector<double> _azScanRates;
-  vector<double> _elScanRates;
-  vector<double> _noiseDbms;
-  vector<int> _pedestalOpModes;
-  vector<int> _polarizations;
   
-  // sweep variables
-
-  Nc3Var *_sweepTypeVar;
-  Nc3Var *_sweepStartIndexVar;
-  Nc3Var *_sweepLengthVar;
-  vector<RadxSweep *> _sweeps;
-
   // global attributes
 
   int _ADC_bits_per_sample_attr;
@@ -266,76 +265,11 @@ private:
 
   string _British_National_Grid_Reference_attr;
   string _Conventions_attr;
-  string _comment_attr;
-  string _history_attr;
-  string _institution_attr;
   string _operator_attr;
   string _radar_attr;
   string _references_attr;
   string _scan_datetime_attr;
   string _scantype_attr;
-  string _source_attr;
-  string _title_attr;
-
-  string _command_line_attr;
-  string _process_version_attr;
-  string _ingest_software_attr;
-  string _dod_version_attr;
-  string _site_id_attr;
-  string _facility_id_attr;
-  string _data_level_attr;
-  string _input_source_attr;
-  string _resolution_description_attr;
-  string _sample_int_attr;
-  string _serial_number_attr;
-  string _calibration_constant_attr;
-  string _averaging_int_attr;
-  string _pulse_length_attr;
-  string _corner_power_attr;
-  string _center_freq_attr;
-  string _decimation_attr;
-  string _drx_gcsync_attr;
-  string _drx_ncosync_attr;
-  string _drx_zerorx_attr;
-  string _external_clock_attr;
-  string _integration_attr;
-  string _resolution_setpoint_attr;
-  string _radar_operating_frequency_attr;
-  string _radar_wavelength_attr;
-  string _pedestal_true_north_attr;
-  string _nyquist_velocity_attr;
-  string _nearfield_correction_description_attr;
-  string _NumSpectralAverages_attr;
-  string _fftlen_attr;
-  string _prf_attr;
-  string _StartGateDelay_attr;
-  string _GateSpacing_attr;
-  string _pol_mode_attr;
-  string _antenna_altitude_attr;
-  string _antenna_diameter_attr;
-  string _elevation_correction_attr;
-  string _scan_mode_attr;
-  string _polarization_state_attr;
-  string _qc_standards_version_attr;
-  string _qc_method_attr;
-  string _qc_comment_attr;
-  string _qc_bit_1_description_attr;
-  string _qc_bit_1_assessment_attr;
-  string _qc_bit_2_description_attr;
-  string _qc_bit_2_assessment_attr;
-  string _qc_bit_3_description_attr;
-  string _qc_bit_3_assessment_attr;
-  string _qc_bit_4_description_attr;
-  string _qc_bit_4_assessment_attr;
-  string _zeb_platform_attr;
-
-  double _pulseLenNs;
-  double _frequencyGhz;
-  double _wavelengthM;
-  double _nyquistMps;
-  double _prfHz;
-  double _antennaHtAgl;
-  double _antennaDiameterInches;
 
   string _title;
   string _institution;
@@ -374,7 +308,7 @@ private:
   int _readTimes();
   int _readRangeVariable();
   int _readPositionVariables();
-  int _readSweepVariables();
+  int _readScalarVariables();
   void _clearRayVariables();
   int _readRayVariables();
   int _createRays(const string &path);
@@ -386,9 +320,6 @@ private:
                   vector<int> &vals, bool required = true);
   
   Nc3Var* _getRayVar(const string &name, bool required);
-  int _readSweepVar(Nc3Var* &var, const string &name, 
-                    vector<int> &vals, bool required = true);
-  Nc3Var* _getSweepVar(const string &name);
 
   int _addFl64FieldToRays(Nc3Var* var,
                           const string &name, const string &units,

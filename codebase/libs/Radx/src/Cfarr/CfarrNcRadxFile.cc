@@ -1,4 +1,4 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+`// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 // ** Copyright UCAR (c) 1990 - 2016                                         
 // ** University Corporation for Atmospheric Research (UCAR)                 
 // ** National Center for Atmospheric Research (NCAR)                        
@@ -26,13 +26,12 @@
 //
 // CfarrNcRadxFile object
 //
-// NetCDF file data for radar radial data in early DOE Netcdf
+// NetCDF data for radar radial data in CFAR netcdf format
+// CFARR = Chilbolton Facility for Atmospheric and Radio Research
 //
 // Mike Dixon, EOL, NCAR
-// P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-
-// March 2013
+// P.O.Box 3000, Boulder, CO, 80307-3000, 
+// July 2017
 //
 ///////////////////////////////////////////////////////////////
 
@@ -86,77 +85,55 @@ void CfarrNcRadxFile::clear()
 
   _timeDim = NULL;
   _rangeDim = NULL;
-  _sweepDim = NULL;
 
+  _timeVar = NULL;
   _rangeVar = NULL;
   _latitudeVar = NULL;
   _longitudeVar = NULL;
-  _altitudeVar = NULL;
-  _timeVar = NULL;
-  _azimuthVar = NULL;
-  _azimuthRateVar = NULL;
-  _elevationVar = NULL;
-  _elevationRateVar = NULL;
-  _noiseVar = NULL;
-  _pedestalOpModeVar = NULL;
-  _polarizationVar = NULL;
-  _sweepTypeVar = NULL;
-  _sweepStartIndexVar = NULL;
-  _sweepLengthVar = NULL;
+  _heightVar = NULL;
 
-  _command_line_attr.clear();
-  _process_version_attr.clear();
-  _ingest_software_attr.clear();
-  _dod_version_attr.clear();
-  _site_id_attr.clear();
-  _facility_id_attr.clear();
-  _data_level_attr.clear();
-  _input_source_attr.clear();
-  _resolution_description_attr.clear();
-  _sample_int_attr.clear();
-  _serial_number_attr.clear();
-  _calibration_constant_attr.clear();
-  _averaging_int_attr.clear();
-  _pulse_length_attr.clear();
-  _corner_power_attr.clear();
-  _center_freq_attr.clear();
-  _decimation_attr.clear();
-  _drx_gcsync_attr.clear();
-  _drx_ncosync_attr.clear();
-  _drx_zerorx_attr.clear();
-  _external_clock_attr.clear();
-  _integration_attr.clear();
-  _resolution_setpoint_attr.clear();
-  _radar_operating_frequency_attr.clear();
-  _radar_wavelength_attr.clear();
-  _pedestal_true_north_attr.clear();
-  _nyquist_velocity_attr.clear();
-  _nearfield_correction_description_attr.clear();
-  _NumSpectralAverages_attr.clear();
-  _fftlen_attr.clear();
-  _prf_attr.clear();
-  _StartGateDelay_attr.clear();
-  _GateSpacing_attr.clear();
-  _pol_mode_attr.clear();
-  _antenna_altitude_attr.clear();
-  _antenna_diameter_attr.clear();
-  _elevation_correction_attr.clear();
-  _scan_mode_attr.clear();
-  _comment_attr.clear();
-  _polarization_state_attr.clear();
-  _qc_standards_version_attr.clear();
-  _qc_method_attr.clear();
-  _qc_comment_attr.clear();
-  _qc_bit_1_description_attr.clear();
-  _qc_bit_1_assessment_attr.clear();
-  _qc_bit_2_description_attr.clear();
-  _qc_bit_2_assessment_attr.clear();
-  _qc_bit_3_description_attr.clear();
-  _qc_bit_3_assessment_attr.clear();
-  _qc_bit_4_description_attr.clear();
-  _qc_bit_4_assessment_attr.clear();
-  _zeb_platform_attr.clear();
-  _history_attr.clear();
+  _frequencyVar = NULL;
+  _prfVar = NULL;
+  _beamwidthHVar = NULL;
+  _beamwidthVVar = NULL;
+  _antennaDiameterVar = NULL;
+  _pulsePeriodVar = NULL;
+  _transmitPowerVar = NULL;
+
+  _azimuthVar = NULL;
+  _elevationVar = NULL;
+
+  _dTimes.clear();
+  _nTimesInFile = 0;
+  _rayTimesIncrease = true;
+  _refTimeSecsFile = 0;
+
+  _rangeKm.clear();
+  _nRangeInFile = 0;
+  _gateSpacingIsConstant = true;
+
+  _latitudeDeg = 0;
+  _longitudeDeg = 0;
+  _heightKm = 0;
+
+  _frequencyGhz = Radx::missingMetaDouble;
+  _prfHz = Radx::missingMetaDouble;
+  _beamwidthHDeg = Radx::missingMetaDouble;
+  _beamwidthVDeg = Radx::missingMetaDouble;
+  _antennaDiameterM = Radx::missingMetaDouble;
+  _pulsePeriodUs = Radx::missingMetaDouble;
+  _transmitPowerW = Radx::missingMetaDouble;  
+
+  _azimuths.clear();
+  _elevations.clear();
+  
+  _British_National_Grid_Reference_attr.clear();
+  _Conventions_attr.clear();
+  _operator_attr.clear();
+  _radar_attr.clear();
+  _references_attr.clear();
+  _scan_datetime_attr.clear();
+  _scantype_attr.clear();
 
   _title.clear();
   _institution.clear();
@@ -172,25 +149,15 @@ void CfarrNcRadxFile::clear()
 
   _scanId = 0;
 
-  _rayTimesIncrease = true;
-  _refTimeSecsFile = 0;
-
   _volumeNumber = 0;
   _instrumentType = Radx::missingInstrumentType;
   _platformType = Radx::missingPlatformType;
   _primaryAxis = Radx::PRIMARY_AXIS_Z;
 
-  _latitudeDeg = 0.0;
-  _longitudeDeg = 0.0;;
-  _altitudeKm = 0.0;
-
-  _rangeKm.clear();
-  _gateSpacingIsConstant = true;
-
 }
 
 /////////////////////////////////////////////////////////
-// Check if specified file is CfRadial format
+// Check if specified file is Cfarr format
 // Returns true if supported, false otherwise
 
 bool CfarrNcRadxFile::isSupported(const string &path)
@@ -420,7 +387,7 @@ void CfarrNcRadxFile::print(ostream &out) const
   out << "  primaryAxis: " << Radx::primaryAxisToStr(_primaryAxis) << endl;
   out << "  latitude: " << _latitudeDeg << endl;
   out << "  longitude: " << _longitudeDeg << endl;
-  out << "  altitude: " << _altitudeKm << endl;
+  out << "  height: " << _heightKm << endl;
   out << "  frequencyGhz: " << _frequencyGhz << endl;
   
   out << "  startRangeKm: " << _remap.getStartRangeKm() << endl;
@@ -943,7 +910,7 @@ int CfarrNcRadxFile::_readPositionVariables()
 
 {
 
-  // find latitude, longitude, altitude
+  // find latitude, longitude, height
 
   int iret = 0;
   if (_file.readDoubleVar(_latitudeVar, "lat", _latitudeDeg, 0, true)) {
@@ -960,17 +927,17 @@ int CfarrNcRadxFile::_readPositionVariables()
     iret = -1;
   }
 
-  if (_file.readDoubleVar(_altitudeVar, "alt", _altitudeKm, 0, true)) {
+  if (_file.readDoubleVar(_heightVar, "alt", _heightKm, 0, true)) {
     _addErrStr("ERROR - CfarrNcRadxFile::_readPositionVariables");
-    _addErrStr("  Cannot read altitude");
+    _addErrStr("  Cannot read height");
     _addErrStr(_file.getNc3Error()->get_errmsg());
     iret = -1;
   }
-  Nc3Att* unitsAtt = _altitudeVar->get_att("units");
+  Nc3Att* unitsAtt = _heightVar->get_att("units");
   if (unitsAtt != NULL) {
     string units = Nc3xFile::asString(unitsAtt);
     if (units == "m") {
-      _altitudeKm /= 1000.0;
+      _heightKm /= 1000.0;
     }
     delete unitsAtt;
   }
@@ -1782,7 +1749,7 @@ int CfarrNcRadxFile::_loadReadVolume()
 
   _readVol->setLatitudeDeg(_latitudeDeg);
   _readVol->setLongitudeDeg(_longitudeDeg);
-  _readVol->setAltitudeKm(_altitudeKm);
+  _readVol->setAltitudeKm(_heightKm);
 
   _readVol->copyRangeGeom(_geom);
 

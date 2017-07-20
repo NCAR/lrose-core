@@ -2496,6 +2496,10 @@ string RadxFile::getFileFormatAsString() const
     return "D3R_NC";
   } else if (_fileFormat == FILE_FORMAT_NOXP_NC) {
     return "NOXP_NC";
+  } else if (_fileFormat == FILE_FORMAT_CFARR) {
+    return "CFARR";
+  } else if (_fileFormat == FILE_FORMAT_NIMROD) {
+    return "NIMROD";
   } else {
     return "UNKNOWN";
   }
