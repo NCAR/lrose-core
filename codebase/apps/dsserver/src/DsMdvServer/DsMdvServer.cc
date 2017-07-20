@@ -298,17 +298,32 @@ void DsMdvServer::_checkForRhiDir(const string &dataDir)
   string dirParent(dirPath.getDirectory());
   string dirName(dirPath.getFile());
   if (dirName.compare("sur") == 0 ||
-      dirName.compare("sec") == 0) {
+      dirName.compare("sec") == 0 ||
+      dirName.compare("SUR") == 0 ||
+      dirName.compare("SEC") == 0) {
+
     string rhiDir = dirParent + PATH_DELIM;
     rhiDir += "rhi";
     if (ta_stat_exists(rhiDir.c_str())) {
-      // RHI directory exists
+      // rhi sub directory exists
       // set polar RHI mode on
       _params.serve_rhi_data = pTRUE;
       _params.polar_rhi = pTRUE;
       string rhiUrl = "mdvp:://localhost:0:" + rhiDir;
       TDRP_str_replace(&_params.rhi_url, rhiUrl.c_str());
+    } else {
+      rhiDir = dirParent + PATH_DELIM;
+      rhiDir += "RHI";
+      if (ta_stat_exists(rhiDir.c_str())) {
+        // RHI sub directory exists
+        // set polar RHI mode on
+        _params.serve_rhi_data = pTRUE;
+        _params.polar_rhi = pTRUE;
+        string rhiUrl = "mdvp:://localhost:0:" + rhiDir;
+        TDRP_str_replace(&_params.rhi_url, rhiUrl.c_str());
+      }
     }
+    
   }
 
   // debug
