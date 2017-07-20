@@ -2428,10 +2428,10 @@ int NcfRadxFile::_readFieldVariables(bool metaOnly)
       delete unitsAtt;
     }
 
-    string comment;
+    string fieldComment;
     Nc3Att *commentAtt = var->get_att(COMMENT);
     if (commentAtt != NULL) {
-      comment = Nc3xFile::asString(commentAtt);
+      fieldComment = Nc3xFile::asString(commentAtt);
       delete commentAtt;
     }
 
@@ -2541,8 +2541,8 @@ int NcfRadxFile::_readFieldVariables(bool metaOnly)
         if (thresholdingXml.size() > 0) {
           field->setThresholdingXml(thresholdingXml);
         }
-        if (comment.size() > 0) {
-          field->setComment(comment);
+        if (fieldComment.size() > 0) {
+          field->setComment(fieldComment);
         }
         _readVol->addField(field);
       }

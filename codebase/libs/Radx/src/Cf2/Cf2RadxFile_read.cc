@@ -2484,6 +2484,13 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
      } catch (NcxxException& e) {
      }
 
+     string fieldComment;
+     try {
+       NcxxVarAtt fieldCommentAtt = var.getAtt(COMMENT);
+       fieldComment = fieldCommentAtt.asString();
+     } catch (NcxxException& e) {
+     }
+
      float samplingRatio = Radx::missingMetaFloat;
      try {
        NcxxVarAtt samplingRatioAtt = var.getAtt(SAMPLING_RATIO);
@@ -2600,6 +2607,9 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
          }
          if (thresholdingXml.size() > 0) {
            field->setThresholdingXml(thresholdingXml);
+         }
+         if (fieldComment.size() > 0) {
+           field->setComment(fieldComment);
          }
          _readVol->addField(field);
        }

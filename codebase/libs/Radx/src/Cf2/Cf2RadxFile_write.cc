@@ -2646,6 +2646,9 @@ NcxxVar Cf2RadxFile::_createFieldVar(const RadxField &field,
     if (field.getThresholdingXml().size() > 0) {
       var.putAtt(THRESHOLDING_XML, field.getThresholdingXml());
     }
+    if (field.getComment().size() > 0) {
+      var.putAtt(COMMENT, field.getComment());
+    }
     var.addScalarAttr(SAMPLING_RATIO, (float) field.getSamplingRatio());
     
     if (field.getFieldFolds()) {
