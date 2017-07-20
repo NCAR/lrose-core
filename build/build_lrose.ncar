@@ -141,11 +141,11 @@ cd $codebaseDir
 ./make_bin/install_package_makefiles.py --package $package
 
 cd $codebaseDir/libs/tdrp/src
-make -j 8 -k opt
+make -j 8 opt
 make install
 
 cd $codebaseDir/apps/tdrp/src/tdrp_gen
-make -j 8 -k opt
+make -j 8 opt
 make install
 
 cd $codebaseDir/libs
