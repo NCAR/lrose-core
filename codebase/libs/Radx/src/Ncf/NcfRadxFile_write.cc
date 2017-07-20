@@ -3337,6 +3337,9 @@ Nc3Var *NcfRadxFile::_createFieldVar(const RadxField &field)
   if (field.getThresholdingXml().size() > 0) {
     iret |= _file.addAttr(var, THRESHOLDING_XML, field.getThresholdingXml());
   }
+  if (field.getComment().size() > 0) {
+    iret |= _file.addAttr(var, COMMENT, field.getComment());
+  }
   iret |= _file.addAttr(var, SAMPLING_RATIO, (float) field.getSamplingRatio());
   
   if (field.getFieldFolds()) {
