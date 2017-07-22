@@ -12,6 +12,9 @@
 
 setenv HOST_OS LINUX_64_CIDD32
 
+setenv LROSE_CORE_DIR ~/cidd/lrose-core
+setenv LROSE_INSTALL_DIR ~/cidd
+
 setenv RAP_MAKE_INC_DIR $LROSE_CORE_DIR/codebase/make_include
 setenv RAP_MAKE_BIN_DIR $LROSE_CORE_DIR/codebase/make_bin
 
