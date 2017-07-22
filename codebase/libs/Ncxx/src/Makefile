@@ -37,8 +37,9 @@ SUB_DIRS = \
 	DataPort \
 	Hdf5 \
 	Nc3x \
-	Ncxx \
-	Udunits
+	Ncxx
+
+#	Udunits
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
 
