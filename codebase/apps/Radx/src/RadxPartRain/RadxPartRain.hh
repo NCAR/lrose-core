@@ -230,13 +230,17 @@ private:
 
   void _computeZdrBias();
 
-  void _loadZdrResults(vector<double> &results,
+  void _loadZdrResults(string label,
+                       vector<double> &results,
                        ZdrStats &stats,
                        int nPercentiles,
                        double *percentiles);
 
   double _computeZdrPerc(const vector<double> &zdrmResults,
                          double percent);
+  
+  void _loadHistogram(string label,
+                      vector<double> &results);
 
   void _computeSelfConZBias();
 

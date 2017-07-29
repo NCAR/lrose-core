@@ -51,12 +51,14 @@ HDRS = \
 	Params.hh \
 	Args.hh \
 	ComputeEngine.hh \
+	Histogram.hh \
 	RadxPartRain.hh
 
 CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
 	ComputeEngine.cc \
+	Histogram.cc \
 	Main.cc \
 	RadxPartRain.cc
 

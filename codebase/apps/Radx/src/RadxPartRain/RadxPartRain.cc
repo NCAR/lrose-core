@@ -37,6 +37,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "RadxPartRain.hh"
+#include "Histogram.hh"
 #include <algorithm>
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
@@ -1215,28 +1216,33 @@ void RadxPartRain::_computeZdrBias()
   _zdrmStatsBragg.clear();
 
   if ((int) _zdrInIceResults.size() > _params.zdr_bias_ice_min_npoints_valid) {
-    _loadZdrResults(_zdrInIceResults,
+    _loadZdrResults("ZdrInIce",
+                    _zdrInIceResults,
                     _zdrStatsIce,
                     _params.zdr_bias_ice_percentiles_n,
                     _params._zdr_bias_ice_percentiles);
   }
   
   if ((int) _zdrmInIceResults.size() > _params.zdr_bias_ice_min_npoints_valid) {
-    _loadZdrResults(_zdrmInIceResults,
+    _loadZdrResults("ZdrmInIce",
+                    _zdrmInIceResults,
                     _zdrmStatsIce,
                     _params.zdr_bias_ice_percentiles_n,
                     _params._zdr_bias_ice_percentiles);
+    // _loadHistogram("ZdrmInIce", _zdrmInIceResults);
   }
   
   if ((int) _zdrInBraggResults.size() > _params.zdr_bias_bragg_min_npoints_valid) {
-    _loadZdrResults(_zdrInBraggResults,
+    _loadZdrResults("ZdrInBragg",
+                    _zdrInBraggResults,
                     _zdrStatsBragg,
                     _params.zdr_bias_bragg_percentiles_n,
                     _params._zdr_bias_bragg_percentiles);
   }
   
   if ((int) _zdrmInBraggResults.size() > _params.zdr_bias_bragg_min_npoints_valid) {
-    _loadZdrResults(_zdrmInBraggResults,
+    _loadZdrResults("ZdrmInBragg",
+                    _zdrmInBraggResults,
                     _zdrmStatsBragg,
                     _params.zdr_bias_bragg_percentiles_n,
                     _params._zdr_bias_bragg_percentiles);
@@ -1334,7 +1340,8 @@ void RadxPartRain::_computeZdrBias()
 //////////////////////////////////
 // load stats for zdr results
 
-void RadxPartRain::_loadZdrResults(vector<double> &results,
+void RadxPartRain::_loadZdrResults(string label,
+                                   vector<double> &results,
                                    ZdrStats &stats,
                                    int nPercentiles,
                                    double *percentiles)
@@ -1356,6 +1363,24 @@ void RadxPartRain::_loadZdrResults(vector<double> &results,
   for (int ii = 0; ii < nPercentiles; ii++) {
     stats.percentiles.push_back(_computeZdrPerc(results, percentiles[ii]));
   }
+
+}
+
+////////////////////////////////////////////
+// load and print a histogram of results
+
+void RadxPartRain::_loadHistogram(string label,
+                                  vector<double> &results)
+
+{
+
+  Histogram hist(-4.0, 0.1, 16.0);
+  for (size_t ii = 0; ii < results.size(); ii++) {
+    hist.update(results[ii]);
+  }
+  cerr << "======== histogram for: " << label << " ==============" << endl;
+  hist.print(stderr);
+  cerr << "======================================================" << endl;
 
 }
 
