@@ -239,8 +239,7 @@ private:
   double _computeZdrPerc(const vector<double> &zdrmResults,
                          double percent);
   
-  void _loadHistogram(string label,
-                      vector<double> &results);
+  void _saveZdrInIceToFile();
 
   void _computeSelfConZBias();
 

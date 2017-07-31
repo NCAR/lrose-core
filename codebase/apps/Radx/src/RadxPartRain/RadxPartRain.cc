@@ -37,10 +37,12 @@
 ///////////////////////////////////////////////////////////////
 
 #include "RadxPartRain.hh"
-#include "Histogram.hh"
+#include <cerrno>
 #include <algorithm>
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
+#include <toolsa/file_io.h>
+#include <toolsa/TaFile.hh>
 #include <toolsa/TaArray.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <rapformats/WxObs.hh>
@@ -1229,10 +1231,6 @@ void RadxPartRain::_computeZdrBias()
                     _zdrmStatsIce,
                     _params.zdr_bias_ice_percentiles_n,
                     _params._zdr_bias_ice_percentiles);
-    for (size_t ii = 0; ii < _zdrmInIceResults.size(); ii++) {
-      fprintf(stdout, " %.4f", _zdrmInIceResults[ii]);
-    }
-    fprintf(stdout, "\n");
   }
   
   if ((int) _zdrInBraggResults.size() > _params.zdr_bias_bragg_min_npoints_valid) {
@@ -1249,6 +1247,10 @@ void RadxPartRain::_computeZdrBias()
                     _zdrmStatsBragg,
                     _params.zdr_bias_bragg_percentiles_n,
                     _params._zdr_bias_bragg_percentiles);
+  }
+
+  if (_params.save_ice_zdr_to_file) {
+    _saveZdrInIceToFile();
   }
 
   // write results to SPDB
@@ -1370,21 +1372,100 @@ void RadxPartRain::_loadZdrResults(string label,
 }
 
 ////////////////////////////////////////////
-// load and print a histogram of results
+// save ZDR data in ice to files
 
-void RadxPartRain::_loadHistogram(string label,
-                                  vector<double> &results)
+void RadxPartRain::_saveZdrInIceToFile()
 
 {
 
-  Histogram hist(-4.0, 0.1, 16.0);
-  for (size_t ii = 0; ii < results.size(); ii++) {
-    hist.update(results[ii]);
-  }
-  cerr << "======== histogram for: " << label << " ==============" << endl;
-  hist.print(stderr);
-  cerr << "======================================================" << endl;
+  // make output dir
 
+  if (ta_makedir_recurse(_params.ice_zdr_save_dir)) {
+    int errNum = errno;
+    cerr << "ERROR - RadxPartRain::_saveZdrInIceToFile()" << endl;
+    cerr << "  Cannot make dir: " << _params.ice_zdr_save_dir << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return;
+  }
+  
+  // compute file names
+
+  RadxTime startTime(_vol.getStartTimeSecs());
+
+  char appendPath[1024];
+  sprintf(appendPath, "%s%sZdrInIce.txt", 
+          _params.ice_zdr_save_dir, PATH_DELIM);
+
+  char appendmPath[1024];
+  sprintf(appendmPath, "%s%sZdrmInIce.txt", 
+          _params.ice_zdr_save_dir, PATH_DELIM);
+  
+  char volPath[1024];
+  sprintf(volPath, "%s%sZdrInIce_%.4d%.2d%.2d_%.2d%.2d%.2d.txt", 
+          _params.ice_zdr_save_dir, PATH_DELIM,
+          startTime.getYear(), startTime.getMonth(), startTime.getDay(),
+          startTime.getHour(), startTime.getMin(), startTime.getSec());
+
+  char volmPath[1024];
+  sprintf(volmPath, "%s%sZdrmInIce_%.4d%.2d%.2d_%.2d%.2d%.2d.txt", 
+          _params.ice_zdr_save_dir, PATH_DELIM,
+          startTime.getYear(), startTime.getMonth(), startTime.getDay(),
+          startTime.getHour(), startTime.getMin(), startTime.getSec());
+
+  // open files
+
+  TaFile append; // closes when goes out of scope
+  FILE *appendFile;
+  if ((appendFile = append.fopen(appendPath, "a")) == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - RadxPartRain::_saveZdrInIceToFile()" << endl;
+    cerr << "  Cannot open zdr output file: " << appendPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return;
+  }
+  
+  TaFile appendm; // closes when goes out of scope
+  FILE *appendmFile;
+  if ((appendmFile = append.fopen(appendmPath, "a")) == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - RadxPartRain::_saveZdrInIceToFile()" << endl;
+    cerr << "  Cannot open zdr output file: " << appendmPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return;
+  }
+  
+  TaFile vol; // closes when goes out of scope
+  FILE *volFile;
+  if ((volFile = vol.fopen(volPath, "w")) == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - RadxPartRain::_saveZdrInIceToFile()" << endl;
+    cerr << "  Cannot open zdr output file: " << volPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return;
+  }
+  
+  TaFile volm; // closes when goes out of scope
+  FILE *volmFile;
+  if ((volmFile = vol.fopen(volmPath, "w")) == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - RadxPartRain::_saveZdrInIceToFile()" << endl;
+    cerr << "  Cannot open zdr output file: " << volmPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return;
+  }
+  
+  // write to files
+
+  for (size_t ii = 0; ii < _zdrInIceResults.size(); ii++) {
+    fprintf(appendFile, " %.4f", _zdrInIceResults[ii]);
+    fprintf(volFile, " %.4f", _zdrInIceResults[ii]);
+  }
+
+  for (size_t ii = 0; ii < _zdrmInIceResults.size(); ii++) {
+    fprintf(appendmFile, " %.4f", _zdrmInIceResults[ii]);
+    fprintf(volmFile, " %.4f", _zdrmInIceResults[ii]);
+  }
+  
 }
 
 /////////////////////////////////////////////////////////////

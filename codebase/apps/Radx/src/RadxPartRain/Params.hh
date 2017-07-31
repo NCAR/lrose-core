@@ -828,6 +828,10 @@ public:
   double *_zdr_bias_ice_percentiles;
   int zdr_bias_ice_percentiles_n;
 
+  tdrp_bool_t save_ice_zdr_to_file;
+
+  char* ice_zdr_save_dir;
+
   tdrp_bool_t zdr_bias_bragg_check_pid;
 
   int *_zdr_bias_bragg_pid_types;
@@ -990,7 +994,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[277];
+  mutable TDRPtable _table[279];
 
   const char *_className;
 
