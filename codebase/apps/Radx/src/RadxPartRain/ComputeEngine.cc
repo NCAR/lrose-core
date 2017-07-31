@@ -1404,7 +1404,7 @@ void ComputeEngine::_accumForZdrBiasInIce()
       continue;
     }
     
-    double zdr = _zdrmArray[igate];
+    double zdr = _zdrArray[igate];
     if (zdr == missingDbl ||
         fabs(zdr) > _params.zdr_bias_max_abs_zdr) {
       continue;

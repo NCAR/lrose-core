@@ -66,6 +66,9 @@ def main():
 
 def doPlot(zdr):
 
+    mean = np.mean(zdr)
+    sdev = np.std(zdr)
+
     widthIn = float(options.figWidthMm) / 25.4
     htIn = float(options.figHeightMm) / 25.4
     

@@ -1457,14 +1457,19 @@ void RadxPartRain::_saveZdrInIceToFile()
   // write to files
 
   for (size_t ii = 0; ii < _zdrInIceResults.size(); ii++) {
-    fprintf(appendFile, " %.4f", _zdrInIceResults[ii]);
-    fprintf(volFile, " %.4f", _zdrInIceResults[ii]);
+    fprintf(appendFile, "%.4f\n", _zdrInIceResults[ii]);
+    fprintf(volFile, "%.4f\n", _zdrInIceResults[ii]);
   }
 
   for (size_t ii = 0; ii < _zdrmInIceResults.size(); ii++) {
-    fprintf(appendmFile, " %.4f", _zdrmInIceResults[ii]);
-    fprintf(volmFile, " %.4f", _zdrmInIceResults[ii]);
+    fprintf(appendmFile, "%.4f\n", _zdrmInIceResults[ii]);
+    fprintf(volmFile, "%.4f\n", _zdrmInIceResults[ii]);
   }
+
+  fflush(appendFile);
+  fflush(appendmFile);
+  fflush(volFile);
+  fflush(volmFile);
   
 }
 
