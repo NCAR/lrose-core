@@ -1229,7 +1229,10 @@ void RadxPartRain::_computeZdrBias()
                     _zdrmStatsIce,
                     _params.zdr_bias_ice_percentiles_n,
                     _params._zdr_bias_ice_percentiles);
-    // _loadHistogram("ZdrmInIce", _zdrmInIceResults);
+    for (size_t ii = 0; ii < _zdrmInIceResults.size(); ii++) {
+      fprintf(stdout, " %.4f", _zdrmInIceResults[ii]);
+    }
+    fprintf(stdout, "\n");
   }
   
   if ((int) _zdrInBraggResults.size() > _params.zdr_bias_bragg_min_npoints_valid) {
