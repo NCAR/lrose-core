@@ -12,6 +12,7 @@ import sys
 import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
+import matplotlib.mlab as mlab
 from optparse import OptionParser
 
 def main():
@@ -84,6 +85,9 @@ def doPlot(zdr):
     ax1.set_ylabel('Probability')
     ax1.set_title('PDF Histogram of ZDR in ice')
     ax1.grid(True)
+
+    yy = mlab.normpdf(bins, mean, sdev)
+    ll = ax1.plot(bins, yy, 'r--', linewidth=2)
 
     # CDF of ZDR
 
