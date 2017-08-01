@@ -314,6 +314,32 @@ extern double STATS_normal_pdf(double mean, double sdev, double xx);
 extern int STATS_normal_fit(int nx, double *x,
 			    double *mean_p, double *sdev_p);
 
+/*********************************************
+ * STATS_normal_skewness()
+ *
+ * Compute the skewness of a normally-distributed
+ * data set, given the mean and standard deviation.
+ *
+ * Returns the skewness.
+ *
+ */
+
+extern double STATS_normal_skewness(int nx, double *x,
+                                    double mean, double sdev);
+
+/*********************************************
+ * STATS_normal_kurtosis()
+ *
+ * Compute the kurtosis of a normally-distributed
+ * data set, given the mean and standard deviation.
+ *
+ * Returns the kurtosis.
+ *
+ */
+
+extern double STATS_normal_kurtosis(int nx, double *x,
+                                    double mean, double sdev);
+
 /************************************************************
  * STATS_normal_chisq()
  *
