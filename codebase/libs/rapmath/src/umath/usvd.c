@@ -757,6 +757,7 @@ usvd_solve( double *x, 		/* I - input x array 			*/
   for ( idat=0; idat<ndata; ++idat )
     {
       /* calculate the basis functions for x[idat] */
+      wt = 1.0;
       bfunc( x[idat], nfit, basis );
       for ( ifit=0; ifit<nfit; ++ifit )
 	{
@@ -828,6 +829,7 @@ usvd_solve_peek( double *x, 		/* I - input x array 			*/
   for ( idat=0; idat<ndata; ++idat )
     {
       /* calculate the basis functions for x[idat] */
+      wt = 1.0;
       bfunc( x[idat], nfit, basis );
       for ( ifit=0; ifit<nfit; ++ifit )
 	{
