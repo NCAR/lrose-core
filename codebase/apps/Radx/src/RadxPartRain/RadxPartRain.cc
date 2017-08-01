@@ -46,6 +46,7 @@
 #include <toolsa/TaArray.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <rapformats/WxObs.hh>
+#include <rapmath/stats.h>
 #include <Spdb/DsSpdb.hh>
 #include <rapmath/trig.h>
 #include <Mdv/GenericRadxFile.hh>
@@ -1269,6 +1270,9 @@ void RadxPartRain::_computeZdrBias()
   
   xml += RadxXml::writeInt("ZdrInIceNpts", 1, (int) _zdrStatsIce.count);
   xml += RadxXml::writeDouble("ZdrInIceMean", 1, _zdrStatsIce.mean);
+  xml += RadxXml::writeDouble("ZdrInIceSdev", 1, _zdrStatsIce.sdev);
+  xml += RadxXml::writeDouble("ZdrInIceSkewness", 1, _zdrStatsIce.skewness);
+  xml += RadxXml::writeDouble("ZdrInIceKurtosis", 1, _zdrStatsIce.kurtosis);
   for (size_t ii = 0; ii < _zdrStatsIce.percentiles.size(); ii++) {
     double percent = _params._zdr_bias_ice_percentiles[ii];
     double val = _zdrStatsIce.percentiles[ii];
@@ -1279,6 +1283,9 @@ void RadxPartRain::_computeZdrBias()
 
   xml += RadxXml::writeInt("ZdrmInIceNpts", 1, (int) _zdrmStatsIce.count);
   xml += RadxXml::writeDouble("ZdrmInIceMean", 1, _zdrmStatsIce.mean);
+  xml += RadxXml::writeDouble("ZdrmInIceSdev", 1, _zdrmStatsIce.sdev);
+  xml += RadxXml::writeDouble("ZdrmInIceSkewness", 1, _zdrmStatsIce.skewness);
+  xml += RadxXml::writeDouble("ZdrmInIceKurtosis", 1, _zdrmStatsIce.kurtosis);
   for (size_t ii = 0; ii < _zdrmStatsIce.percentiles.size(); ii++) {
     double percent = _params._zdr_bias_ice_percentiles[ii];
     double val = _zdrmStatsIce.percentiles[ii];
@@ -1289,6 +1296,9 @@ void RadxPartRain::_computeZdrBias()
 
   xml += RadxXml::writeInt("ZdrInBraggNpts", 1, (int) _zdrStatsBragg.count);
   xml += RadxXml::writeDouble("ZdrInBraggMean", 1, _zdrStatsBragg.mean);
+  xml += RadxXml::writeDouble("ZdrInBraggSdev", 1, _zdrStatsBragg.sdev);
+  xml += RadxXml::writeDouble("ZdrInBraggSkewness", 1, _zdrStatsBragg.skewness);
+  xml += RadxXml::writeDouble("ZdrInBraggKurtosis", 1, _zdrStatsBragg.kurtosis);
   for (size_t ii = 0; ii < _zdrStatsBragg.percentiles.size(); ii++) {
     double percent = _params._zdr_bias_bragg_percentiles[ii];
     double val = _zdrStatsBragg.percentiles[ii];
@@ -1299,6 +1309,9 @@ void RadxPartRain::_computeZdrBias()
 
   xml += RadxXml::writeInt("ZdrmInBraggNpts", 1, (int) _zdrmStatsBragg.count);
   xml += RadxXml::writeDouble("ZdrmInBraggMean", 1, _zdrmStatsBragg.mean);
+  xml += RadxXml::writeDouble("ZdrmInBraggSdev", 1, _zdrmStatsBragg.sdev);
+  xml += RadxXml::writeDouble("ZdrmInBraggSkewness", 1, _zdrmStatsBragg.skewness);
+  xml += RadxXml::writeDouble("ZdrmInBraggKurtosis", 1, _zdrmStatsBragg.kurtosis);
   for (size_t ii = 0; ii < _zdrmStatsBragg.percentiles.size(); ii++) {
     double percent = _params._zdr_bias_bragg_percentiles[ii];
     double val = _zdrmStatsBragg.percentiles[ii];
@@ -1353,17 +1366,24 @@ void RadxPartRain::_loadZdrResults(string label,
 
 {
 
-  stats.clear();
-
-  for (size_t ii = 0; ii < results.size(); ii++) {
-    stats.sum += results[ii];
-    stats.count++;
-  }
-  stats.mean = stats.sum / stats.count;
-
   // sort results vector
   
   sort(results.begin(), results.end());
+
+  // compute stats
+
+  stats.clear();
+
+  double mean, sdev;
+  STATS_normal_fit(results.size(), &results[0], &mean, &sdev);
+  double skewness = STATS_normal_skewness(results.size(), &results[0], mean, sdev);
+  double kurtosis = STATS_normal_kurtosis(results.size(), &results[0], mean, sdev);
+
+  stats.count = results.size();
+  stats.mean = mean;
+  stats.sdev = sdev;
+  stats.skewness = skewness;
+  stats.kurtosis = kurtosis;
 
   for (int ii = 0; ii < nPercentiles; ii++) {
     stats.percentiles.push_back(_computeZdrPerc(results, percentiles[ii]));
@@ -1600,7 +1620,7 @@ void RadxPartRain::_computeSelfConZBias()
                      xml.c_str(),
                      dataType2);
     
-    if (_params.debug >= Params::DEBUG_EXTRA) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Writing self consistency results to SPDB, url: "
            << _params.self_consistency_spdb_output_url << endl;
       cerr << xml << endl;

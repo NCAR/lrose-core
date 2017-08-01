@@ -133,14 +133,18 @@ private:
   class ZdrStats {
   public:
     void clear() {
-      count = 0.0;
-      sum = 0.0;
+      count = 0;
       mean = NAN;
+      sdev = NAN;
+      skewness = NAN;
+      kurtosis = NAN;
       percentiles.clear();
     }
-    double sum;
-    double count;
+    int count;
     double mean;
+    double sdev;
+    double skewness;
+    double kurtosis;
     vector<double> percentiles;
   };
   ZdrStats _zdrmStatsIce;
