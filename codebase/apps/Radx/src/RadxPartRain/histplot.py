@@ -10,6 +10,7 @@ import os
 import sys
 
 import numpy as np
+import scipy.stats as stats
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
@@ -67,8 +68,20 @@ def main():
 
 def doPlot(zdr):
 
-    mean = np.mean(zdr)
-    sdev = np.std(zdr)
+    zdrSorted = np.sort(zdr)
+    mean = np.mean(zdrSorted)
+    sdev = np.std(zdrSorted)
+    skew = stats.skew(zdrSorted)
+    kurtosis = stats.kurtosis(zdrSorted)
+
+    percPoints = np.arange(0,100,1.0)
+    percs = np.percentile(zdrSorted, percPoints)
+
+    print >>sys.stderr, "  ==>> mean: ", mean
+    print >>sys.stderr, "  ==>> sdev: ", sdev
+    print >>sys.stderr, "  ==>> skew: ", skew
+    print >>sys.stderr, "  ==>> kurtosis: ", kurtosis
+    print >>sys.stderr, "  ==>> percs: ", percs
 
     widthIn = float(options.figWidthMm) / 25.4
     htIn = float(options.figHeightMm) / 25.4
@@ -79,7 +92,7 @@ def doPlot(zdr):
 
     # the histogram of ZDR
 
-    n, bins, patches = ax1.hist(zdr, 50, normed=True, facecolor='green', alpha=0.75)
+    n, bins, patches = ax1.hist(zdrSorted, 50, normed=True, facecolor='green', alpha=0.75)
 
     ax1.set_xlabel('ZDR')
     ax1.set_ylabel('Probability')
@@ -91,7 +104,7 @@ def doPlot(zdr):
 
     # CDF of ZDR
 
-    n, bins, patches = ax2.hist(zdr, 50, normed=True, cumulative=True,
+    n, bins, patches = ax2.hist(zdrSorted, 50, normed=True, cumulative=True,
                                 facecolor='green', alpha=0.75)
 
     ax2.set_xlabel('ZDR')
@@ -102,26 +115,6 @@ def doPlot(zdr):
     # show
 
     plt.show()
-
-    
-    # add a 'best fit' line
-    #y = mlab.normpdf( bins, mu, sigma)
-    #l = plt.plot(bins, y, 'r--', linewidth=1)
-
-    
-    
-    
-    # #ax1c = fig1.add_subplot(3,1,3,xmargin=0.0)
-    
-    # if (haveTemps):
-    #     fig2 = plt.figure(2, (widthIn/2, htIn/2))
-    #     ax2a = fig2.add_subplot(1,1,1,xmargin=1.0, ymargin=1.0)
-        
-    #     oneDay = datetime.timedelta(1.0)
-    #     ax1a.set_xlim([btimes[0] - oneDay, btimes[-1] + oneDay])
-    #     ax1a.set_title("DYNAMO - ZDR bias in ice, compared with VERT results (dB)")
-    #     ax1b.set_xlim([btimes[0] - oneDay, btimes[-1] + oneDay])
-    #     ax1b.set_title("Daily mean ZDR bias in ice (dB)")
 
 ########################################################################
 # Run a command in a shell, wait for it to complete
