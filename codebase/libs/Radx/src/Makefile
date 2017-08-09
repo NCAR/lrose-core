@@ -21,6 +21,7 @@ LIBNAME = lib$(MODULE_NAME).a
 
 SUB_DIRS = \
 	Cf2 \
+	Cfarr \
 	DOE \
 	D3R \
 	Dorade \

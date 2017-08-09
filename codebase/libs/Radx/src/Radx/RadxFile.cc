@@ -36,6 +36,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <Radx/Cf2RadxFile.hh>
+#include <Radx/CfarrNcRadxFile.hh>
 #include <Radx/D3rNcRadxFile.hh>
 #include <Radx/DoeNcRadxFile.hh>
 #include <Radx/DoradeRadxFile.hh>
@@ -209,11 +210,20 @@ bool RadxFile::_isSupportedNetCDF(const string &path)
       return true;
     }
   }
-    
+  
   // try EEC Edge netcdf
   {
     EdgeNcRadxFile file;
     if (file.isEdgeNc(path)) {
+      return true;
+    }
+  }
+ 
+  cerr << "DEBUG - trying isCfarrNc file" << endl;   
+  // try Cfarr netcdf
+  {
+    CfarrNcRadxFile file;
+    if (file.isCfarrNc(path)) {
       return true;
     }
   }
@@ -1295,6 +1305,29 @@ int RadxFile::_readFromPathNetCDF(const string &path,
     }
   }
 
+  // try Cfarr netcdf next
+
+  {
+    CfarrNcRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isCfarrNc(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read Cfarr NC file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
   // do not recognize file type
   
   return -1;
@@ -2346,7 +2379,6 @@ void RadxFile::printReadRequest(ostream &out) const
 {
   
   out << "======= RadxFile read request =======" << endl;
-
   out << "  debug: " << (_debug?"Y":"N") << endl;
   out << "  verbose: " << (_verbose?"Y":"N") << endl;
 
@@ -2645,6 +2677,19 @@ int RadxFile::_printNativeNetCDF(const string &path, ostream &out,
     EdgeNcRadxFile file;
     file.copyReadDirectives(*this);
     if (file.isEdgeNc(path)) {
+      int iret = file.printNative(path, out, printRays, printData);
+      if (iret) {
+        _errStr = file.getErrStr();
+      }
+      return iret;
+    }
+  }
+  
+  // try Cfarr netcdf next
+  {
+    CfarrNcRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isCfarrNc(path)) {
       int iret = file.printNative(path, out, printRays, printData);
       if (iret) {
         _errStr = file.getErrStr();
