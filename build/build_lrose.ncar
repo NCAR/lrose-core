@@ -157,6 +157,12 @@ cd $codebaseDir/apps
 make -j 8 -k opt
 make -j 8 -k install
 
+cd $codebaseDir/apps/scripts/src
+make install
+
+cd $codebaseDir/apps/procmap/src/scripts
+make install
+
 # Install perl lib modules
 #-------------------------
 
