@@ -41,6 +41,7 @@ SCRIPTS = \
 	procmap_list_kill \
 	procmap_list_check \
 	procmap_list_start \
+	procmap_list_start.lrose \
 	start_inst
 
 #	Targets
