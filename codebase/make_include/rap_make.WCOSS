@@ -62,6 +62,13 @@ DEBUG_FLAG = -g
 OPT_FLAG = -O2
 
 #
+# intel c
+#
+
+INTEL_CC = icc
+INTEL_SYS_CFLAGS = -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 $(MY_INTEL_CFLAGS)
+
+#
 # c++
 #
 
@@ -71,6 +78,28 @@ SYS_CPPC_CFLAGS = $(GCC_WARNINGS) -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 -D_L
 SYS_CPPC_INCLUDES =
 ACC = $(CC)
 
+
+INTEL_CPPC = icc
+INTEL_SYS_CPPC_CFLAGS = -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 $(MY_INTEL_CPPC_CFLAGS)
+
+
+
+# fortran
+FC = gfortran
+F90C = gfortran
+F95C = gfortran
+
+F90FLAGS=$(MY_F90FFLAGS) $(LOC_F90FFLAGS)
+
+PGI_F90C=pgf90
+PGI_FC=pgf90
+PGI_F95C=pgf95
+SYS_PGI_FFLAGS=-DLITENDIAN $(MY_PGI_FFLAGS)
+
+INTEL_F90C = ifort
+INTEL_FC = ifort
+INTEL_F95C = ifort
+SYS_INTEL_FFLAGS=$(MY_INTEL_FFLAGS)
 
 
 #
@@ -142,8 +171,8 @@ HDF5_INCLUDES =$(MY_HDF5_INCS) -I/usr/local/hdf5/include
 HDF5_LDFLAGS =$(MY_HDF5_LDFLAGS) -L/usr/local/hdf5/lib
 HDF5_LIBS = $(MY_HDF5_LIBS) -lhdf5 -lhdf5_hl
 
-UDUNITS_INCS=$(MY_UDUNITS_INCS) -I/usr/include/udunits2 -I/usr/local/include
-UDUNITS_LDFLAGS=$(MY_UDUNITS_LDFLAGS) -L/usr/local/lib
+UDUNITS_INCS=$(MY_UDUNITS_INCS) -I/usr/include/udunits2 -I/usr/local/include -I /usr/local/udunits2/include
+UDUNITS_LDFLAGS=$(MY_UDUNITS_LDFLAGS) -L/usr/local/lib -L/usr/local/udunits2/lib
 
 NETCDF3_INCS=$(MY_NETCDF3_INCS) -I/usr/local/netcdf/include -I/usr/local/include -I/opt/include -I/opt/netcdf/include
 NETCDF3_LIBS=$(MY_NETCDF3_LIBS) -L/usr/local/netcdf/lib -L/usr/local/lib -L/opt/netcdf/lib -L/opt/lib
@@ -162,8 +191,14 @@ PGI_NETCDF_LDFLAGS=$(MY_PGI_NETCDF_LDFLAGS) $(PGI_NETCDF3_LIBS)
 
 INTEL_NETCDF3_INCS=$(MY_INTEL_NETCDF3_INCS) -I/usr/local/netcdf3-ifort/include
 INTEL_NETCDF3_LIBS=$(MY_INTEL_NETCDF3_LIBS) -L/usr/local/netcdf3-ifort/lib
-INTEL_NETCDF4_INCS=$(MY_INTEL_NETCDF4_INCS) -I/usr/local/netcdf4-ifort/include
-INTEL_NETCDF4_LDFLAGS=$(MY_INTEL_NETCDF4_LDFLAGS) -L/usr/local/netcdf4-ifort/lib
+
+#INTEL_NETCDF4_INCS=$(MY_INTEL_NETCDF4_INCS) -I/usr/local/netcdf4-intel/include
+#INTEL_NETCDF4_LDFLAGS=$(MY_INTEL_NETCDF4_LDFLAGS) -L/usr/local/netcdf4-intel/lib
+
+INTEL_NETCDF4_INCS=$(MY_INTEL_NETCDF4_INCS) -I/usr/local/netcdf4-intel/include $(HDF5_INCLUDES) $(ZLIB_INCLUDES) $(UDUNITS_INCS)
+INTEL_NETCDF4_LDFLAGS=$(MY_INTEL_NETCDF4_LDFLAGS) -L/usr/local/netcdf4-intel/lib $(HDF5_LDFLAGS) $(UDUNITS_LDFLAGS) $(ZLIB_LDFLAGS)
+
+
 INTEL_NETCDF_INCS=$(MY_INTEL_NETCDF_INCS) $(INTEL_NETCDF3_INCS)
 INTEL_NETCDF_LDFLAGS=$(MY_INTEL_NETCDF_LDFLAGS) $(INTEL_NETCDF3_LIBS)
 
