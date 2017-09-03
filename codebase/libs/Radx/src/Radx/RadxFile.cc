@@ -67,6 +67,7 @@
 #include <cstring>
 #include <cstdio>
 #include <sys/stat.h>
+#include <sys/time.h>
 using namespace std;
 
 const char *RadxFile::PATH_SEPARATOR = "/";
@@ -1989,17 +1990,22 @@ string RadxFile::tmpPathFromDir(const string &dir,
   
 {
 
-  // load up the tmp path
+  // get current time
 
+  struct timeval now;
+  gettimeofday(&now, NULL);
+
+  // load up the tmp path
+  
   string tmpPath(dir);
   tmpPath += PATH_SEPARATOR;
   
   if (tmpFileName.size() > 0) {
     tmpPath += tmpFileName;
   } else {
-    char tmpPidName[128];
-    sprintf(tmpPidName, "tmp.%d.tmp", getpid());
-    tmpPath += tmpPidName;
+    char tmpName[1024];
+    sprintf(tmpName, "tmp.%d.%ld.%ld.tmp", getpid(), now.tv_sec, now.tv_usec);
+    tmpPath += tmpName;
   }
 
   return tmpPath;
