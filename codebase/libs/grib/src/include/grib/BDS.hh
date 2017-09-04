@@ -27,8 +27,6 @@
 // Used wgrib by Wesley Ebisuzaki at NOAA as
 // reference (http://wesley.wwb.noaa.gov/wgrib.html)
 //
-// $Id: BDS.hh,v 1.18 2016/03/03 19:22:03 dixon Exp $
-//
 //////////////////////////////////////////////
 #ifndef _BDS_
 #define _BDS_

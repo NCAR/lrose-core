@@ -31,7 +31,7 @@
 #include <grib/PolarStereographic.hh>
 #include <grib/constants.h>
 #include <iostream>
-#include <euclid/euclid_macros.h>
+// #include <euclid/euclid_macros.h>
 using namespace std;
 
 

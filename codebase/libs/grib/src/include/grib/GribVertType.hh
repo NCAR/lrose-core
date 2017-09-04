@@ -24,7 +24,6 @@
 /////////////////////////////////////////////
 // GribVertType - Main class for manipulating GRIB files.
 //
-// $Id: GribVertType.hh,v 1.8 2016/03/03 19:22:03 dixon Exp $
 ////////////////////////////////////////////
 
 #ifndef GribVertType_HH

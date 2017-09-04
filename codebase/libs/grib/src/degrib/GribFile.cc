@@ -24,7 +24,6 @@
 /////////////////////////////////////////////
 // GribFile - Main class for manipulating GRIB files.
 //
-// $Id: GribFile.cc,v 1.11 2016/03/03 18:37:35 dixon Exp $
 ////////////////////////////////////////////
 
 #include <iostream>

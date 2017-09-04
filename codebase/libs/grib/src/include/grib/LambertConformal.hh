@@ -27,8 +27,6 @@
 // Used wgrib by Wesley Ebisuzaki at NOAA as
 // reference (http://wesley.wwb.noaa.gov/wgrib.html)
 // 
-// $Id: LambertConformal.hh,v 1.4 2016/03/03 19:22:03 dixon Exp $
-//
 //////////////////////////////////////////////////
 #ifndef _LAMBERT_CONF_
 #define _LAMBERT_CONF_

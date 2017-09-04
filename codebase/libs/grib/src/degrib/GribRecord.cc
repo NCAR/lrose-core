@@ -24,7 +24,6 @@
 /////////////////////////////////////////////
 // GribRecord - Main class for manipulating GRIB records.
 //
-// $Id: GribRecord.cc,v 1.20 2016/03/03 18:37:35 dixon Exp $
 ////////////////////////////////////////////
 
 #include <iostream>

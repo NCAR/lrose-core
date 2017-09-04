@@ -25,7 +25,6 @@
 // GribVertType - Class providing utilities for using the GRIB
 //                vertical level type
 //
-// $Id: GribVertType.cc,v 1.5 2016/03/03 18:37:35 dixon Exp $
 ////////////////////////////////////////////
 
 #include <iostream>

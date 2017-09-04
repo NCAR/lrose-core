@@ -12,8 +12,6 @@
 // Used wgrib by Wesley Ebisuzaki at NOAA as
 // reference (http://wesley.wwb.noaa.gov/wgrib.html)
 // 
-// $Id: LambertConformal.cc,v 1.3 2010/10/07 23:50:04 dave Exp $
-//
 ///////////////////////////////////////////////////
 #include <grib/LambertConformal.hh>
 using namespace std;

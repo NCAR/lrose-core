@@ -22,8 +22,6 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 //
-// $Id: constants.h,v 1.3 2016/03/03 19:22:03 dixon Exp $
-//
 
 #ifndef _GRIB_CONSTS_INC_
 #define _GRIB_CONSTS_INC_
