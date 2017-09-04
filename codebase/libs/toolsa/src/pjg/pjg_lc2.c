@@ -88,14 +88,14 @@ PJGstruct *PJGs_lc2_init(double lat0, double lon0, double lat1, double lat2)
 	    cs->Lc2_F = cos(lat1) * t1n / cs->Lc2_n;
 	
 	    t0n = pow( tan(M_PI_4 + lat0/2), cs->Lc2_n);
-	    cs->Lc2_rho = EARTH_RADIUS * cs->Lc2_F / t0n;
+	    cs->Lc2_rho = PJG_get_earth_radius() * cs->Lc2_F / t0n;
 
 	    cs->Lc2_lon0 = lon0 * DEG_TO_RAD;
 	}
 	else {
 	    cs->Lc2_sin0 = sin(lat0);
 	    cs->Lc2_tan0 = tan(M_PI_4 - lat0/2.);
-	    cs->Lc2_rho = EARTH_RADIUS/tan(lat0);
+	    cs->Lc2_rho = PJG_get_earth_radius() / tan(lat0);
 	    cs->Lc2_lon0 = lon0 * DEG_TO_RAD;
 	}
 	return ps;
@@ -122,7 +122,7 @@ void PJGs_lc2_latlon2xy(PJGstruct *ps, double lat, double lon, double *x, double
 	    theta = cs->Lc2_n * (lon - cs->Lc2_lon0);
 
 	    tn = pow( tan(M_PI_4 + lat/2), cs->Lc2_n);
-	    r = EARTH_RADIUS * cs->Lc2_F / tn;
+	    r = PJG_get_earth_radius() * cs->Lc2_F / tn;
 
 	    ta_sincos(theta, &sin_theta, &cos_theta);
 	    *x = r * sin_theta;
@@ -171,7 +171,7 @@ void PJGs_lc2_xy2latlon(PJGstruct *ps, double x, double y, double *lat, double *
 	        *lat = ((cs->Lc2_n < 0.0) ? -90.0 : 90.0);
 	    }
 	    else {
-	        rn = pow( EARTH_RADIUS * cs->Lc2_F / r, 1/cs->Lc2_n);
+	        rn = pow(PJG_get_earth_radius() * cs->Lc2_F / r, 1/cs->Lc2_n);
 	        *lat = (2.0 * atan( rn) - M_PI_2) * RAD_TO_DEG;
 	    }
 	    *lat = PJGrange180( *lat);

@@ -29,11 +29,31 @@
  */
 
 #include <stdio.h>
-#include <toolsa/globals.h>
+#include <toolsa/toolsa_macros.h>
 #include <toolsa/err.h>
 
 #include <toolsa/pjg.h>
 #include "pjg_int.h"
+
+/*****************************************************************************
+ * earth radius
+ */
+
+static double _earthRadiusKm = EARTH_RADIUS;
+
+void PJG_set_earth_radius(double val)
+{
+  _earthRadiusKm = val;
+}
+
+double PJG_get_earth_radius()
+{
+  return _earthRadiusKm;
+}
+
+/*****************************************************************************
+ * projection names
+ */
 
 #define MAX_PROJ 10
 static char *ProjName[MAX_PROJ] = 	{
@@ -48,11 +68,9 @@ static char *ProjName[MAX_PROJ] = 	{
 					"Cylindrical Equidistant"
 					};
 
-void PJG_free_struct(PJGstruct *ps)
-
-{
-  free(ps);
-}
+/*****************************************************************************
+ * get projection name
+ */
 
 char *PJGname( int proj_type)
     {
@@ -62,6 +80,11 @@ char *PJGname( int proj_type)
 	return ProjName[ proj_type-1];
     }
 	
+
+/*****************************************************************************
+ * Initialize projection, allocates struct
+ * Returns that struct.
+ */
 
 PJGstruct *PJGinit( int proj_type, double *p)
     {
@@ -86,10 +109,10 @@ PJGstruct *PJGinit( int proj_type, double *p)
 		return PJGs_art_init();
 	    case PJG_LATLON:
 		return PJGs_ll_init(p[0], p[1], p[2], p[3]);
-/*
-	    case PJG_CYLINDICAL_EQUIDISTANT:
-		return PJGs_ce_init(p[0], p[1]);
- */
+
+	    /* case PJG_CYLINDICAL_EQUIDISTANT: */
+	    /*     return PJGs_ce_init(p[0], p[1]); */
+
 	    default:
 		{
 		ERRprintf( ERR_PROGRAM, "Projection %d = %s not available through PJGinit()",
@@ -100,6 +123,21 @@ PJGstruct *PJGinit( int proj_type, double *p)
 	    }
     }
 
+
+
+/*****************************************************************************
+ * Free struct created by init()
+ */
+
+void PJG_free_struct(PJGstruct *ps)
+
+{
+  free(ps);
+}
+
+/*****************************************************************************
+ * convert latlon to XY in current projection
+ */
 
 void PJGlatlon2xy(PJGstruct *proj, double lat, double lon, double *x, double *y)
 /*
@@ -151,6 +189,10 @@ void PJGlatlon2xy(PJGstruct *proj, double lat, double lon, double *x, double *y)
 	return;
 
     }
+
+/*****************************************************************************
+ * convert XY in current projection to latlon
+ */
 
 void PJGxy2latlon(PJGstruct *proj, double x, double y, double *lat, double *lon)
 /*

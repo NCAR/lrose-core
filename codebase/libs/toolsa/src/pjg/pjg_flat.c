@@ -34,8 +34,7 @@
 
 #include <memory.h>
 #include "pjg_int.h"
-#include <toolsa/pjg_types.h>
-#include <toolsa/pjg_flat.h>
+#include <toolsa/pjg.h>
 #include <toolsa/sincos.h>
 
 /*
@@ -206,7 +205,7 @@ void PJGLatLon2RTheta(double lat1, double lon1,
   darc = acos(xx);
   ta_sincos(darc, &sin_darc, &cos_darc);
   
-  *r = darc* EARTH_RADIUS;
+  *r = darc * PJG_get_earth_radius();
   
   denom = sin_colat1 * sin_darc;
 
@@ -284,7 +283,7 @@ void PJGLatLonPlusRTheta(double lat1, double lon1,
   double cos_colat2, sin_colat2;
   double sin_darc, cos_darc;
   
-  darc = r / EARTH_RADIUS;
+  darc = r / PJG_get_earth_radius();
   ta_sincos(darc, &sin_darc, &cos_darc);
 
   therad = theta * DEG_TO_RAD;

@@ -50,7 +50,7 @@ PJGstruct *PJGs_tm_init(double lat0, double central_lon, double scale)
 
 	cs->Tm_lat0 = lat0 * DEG_TO_RAD;
 	cs->Tm_lon0 = central_lon * DEG_TO_RAD;
-	cs->Tm_scale = EARTH_RADIUS * scale;
+	cs->Tm_scale = PJG_get_earth_radius() * scale;
 
 	return ps;
     }
