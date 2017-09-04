@@ -44,17 +44,18 @@
 
 class GridAdvect
 {
-  
+
 public:
 
   // constructor
 
   GridAdvect(const double image_val_min = 0.0,
-	     const double image_val_max = 0.0,
-	     const bool debug_flag = false);
-  
+             const double image_val_max = 0.0,
+             const bool debug_flag = false,
+             const bool replace_value_with_Max = false);
+
   // destructor
-  
+
   virtual ~GridAdvect();
 
   // compute the forecast grid
@@ -62,9 +63,9 @@ public:
   // Returns true on success, false on failure
 
   bool compute(Advector &advector,
-	       const Pjg &projection,
-	       const fl32 *image_data,
-	       const fl32 missing_data_value);
+               const Pjg &projection,
+               const fl32 *image_data,
+               const fl32 missing_data_value);
 
   // Retrieve the forecast data
 
@@ -72,20 +73,21 @@ public:
   {
     return _forecastData;
   }
-  
+
 protected:
-  
+
 private:
 
   bool _debugFlag;
-  
+
   double _imageValMin;
   double _imageValMax;
-  bool   _checkImageValues;
-  
+  bool _checkImageValues;
+  bool _replaceValueWithMax;
+
   Pjg _forecastProj;
   fl32 *_forecastData;
-  
+
 };
 
 #endif
