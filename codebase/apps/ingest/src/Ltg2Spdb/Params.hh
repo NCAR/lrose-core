@@ -2,7 +2,8 @@
 // ** Copyright UCAR (c) 1992 - 2017
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
-// ** Boulder, Colorado, USA
+// ** Research Applications Laboratory(RAL)
+// ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 ////////////////////////////////////////////
 // Params.hh
@@ -75,7 +76,8 @@ public:
     NAPLN = 9,
     NLDN_BINARY = 10,
     AOAWS_NETCDF = 11,
-    KSC = 12
+    KSC = 12,
+    ALBLM = 13
   } input_format_t;
 
   typedef enum {

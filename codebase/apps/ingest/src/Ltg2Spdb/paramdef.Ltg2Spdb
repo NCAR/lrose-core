@@ -145,7 +145,8 @@ typedef enum {
   NAPLN,
   NLDN_BINARY,
   AOAWS_NETCDF,
-  KSC
+  KSC,
+  ALBLM
 } input_format_t;
 
 paramdef enum input_format_t {
@@ -234,6 +235,9 @@ paramdef enum input_format_t {
   "   (c) y-coordinate in meters from KSC ldar latitude 28.538486\n"
   "   (d) z-coordinate in meters from KSC ldar\n"
   "   (e) Event type is two strings composed of 'LDAR EVENT', '4DLSS EVENT', 'GGLSS EVENT', or 'CAL EVENT' \n"
+  "ALBLM: Alaska BLM\n"
+  " 15 comma delimited fields:\n"
+  " OBJECTID,STROKETYPE,NETWORKCODE,UTCDATETIME,LOCALDATETIME,MILLISECONDS,LATITUDE,LONGITUDE,AMPLITUDE,GDOP,ERRSEMIMAJOR,ERRSEMIMINOR,ERRELIPSEANGLE,STRIKETIME,STRIKESEQNUMBER\n"
   "\n";  
 } input_format;
 
