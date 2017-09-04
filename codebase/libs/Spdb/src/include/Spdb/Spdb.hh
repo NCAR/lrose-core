@@ -593,8 +593,8 @@ public:
   // access to time list
 
   const vector<time_t> &getTimeList() const { return (_timeList); }
-  const int getNTimesInList() const { return (_timeList.size()); }
-  const time_t getTimeFromList(int i) const { return (_timeList[i]); }
+  int getNTimesInList() const { return (_timeList.size()); }
+  time_t getTimeFromList(int i) const { return (_timeList[i]); }
 
   ////////////////////////////////////////////////////////////////////
   // makeUniqueLatest()

@@ -237,7 +237,10 @@
 // EDR data is stored in the SPDB data base in the
 // rapformats/Edr.hh format. 
 // 
+// VER2 uses an expanded Edr_t (as opposed to edr_t) to allow for future
+// expanson.
 #define SPDB_EDR_POINT_ID               600
+#define SPDB_EDR_VER2_POINT_ID          650
 #define SPDB_EDR_POINT_LABEL           "Eddy Dissipation Rate Data" 
 
 //////////////////////////////////////////////////////////////////////

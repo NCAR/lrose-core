@@ -648,7 +648,7 @@ public:
   
   // Get the reference time.
 
-  const time_t getRefTime() const;
+  time_t getRefTime() const;
 
   // auxiliary XML
 

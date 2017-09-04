@@ -1355,7 +1355,7 @@ void *DsSpdbMsg::_assembleGet(const mode_enum_t request_mode)
 ////////////////////////////////////////////////
 // Function to return the reference time.
 
-const time_t DsSpdbMsg::getRefTime() const {
+time_t DsSpdbMsg::getRefTime() const {
   //
   // Only relevant for get functions - return 0 otherwise.
   //
