@@ -22,7 +22,7 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 
-#include <rapmath/math_macros.h>
+#include <toolsa/toolsa_macros.h>
 #include <rapmath/trig.h>
 
 /*----------------------------------------------------------------*/

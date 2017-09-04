@@ -41,7 +41,8 @@
 
 #include <math.h>
 #include <rapmath/trig.h>
-#include <rapmath/math_macros.h>
+#include <toolsa/toolsa_macros.h>
+#include <toolsa/pjg.h>
 
 #define TOLERANCE 1.e-8
 #define TINY_FLOAT 1.e-10
@@ -133,7 +134,7 @@ void uLatLon2RTheta(double lat1, double lon1,
   darc = acos(xx);
   rap_sincos(darc, &sin_darc, &cos_darc);
   
-  *r = darc* EARTH_RADIUS;
+  *r = darc * PJG_get_earth_radius();
   
   denom = sin_colat1 * sin_darc;
 
@@ -212,7 +213,7 @@ void uLatLonPlusRTheta(double lat1, double lon1,
   double cos_colat2, sin_colat2;
   double sin_darc, cos_darc;
   
-  darc = r / EARTH_RADIUS;
+  darc = r / PJG_get_earth_radius();
   rap_sincos(darc, &sin_darc, &cos_darc);
 
   therad = theta * DEG_TO_RAD;

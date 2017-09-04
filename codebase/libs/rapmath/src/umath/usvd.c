@@ -42,7 +42,7 @@ Description: Routines for Singular Value Decomposition
 
 #include <rapmath/usvd.h>
 #include <rapmath/RMmalloc.h>
-#include <rapmath/math_macros.h>
+#include <toolsa/toolsa_macros.h>
 
 /* Constant definitions / Macro definitions / Type definitions */
 

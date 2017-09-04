@@ -34,7 +34,7 @@ extern "C" {
 
 #include <math.h>
 #include <stdio.h>
-#include <rapmath/math_macros.h>
+#include <toolsa/toolsa_macros.h>
 
 /*********************************************
  * STATS_beta_gen()
