@@ -39,8 +39,8 @@ TARGET_FILE = Mdv2Vil
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -ldsserver -lrapmath \
-	-lrapformats -ldidss -ltoolsa -ldataport \
-	-leuclid -lphysics -lrapmath -ltdrp \
+	-lrapformats -ldidss -ldataport \
+	-leuclid -lphysics -lrapmath -ltoolsa -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

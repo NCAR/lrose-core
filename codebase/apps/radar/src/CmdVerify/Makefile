@@ -38,8 +38,8 @@ TARGET_FILE = CmdVerify
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -ldsserver -ldidss \
-	-lrapformats -ltoolsa -ltdrp -ldataport \
-	-leuclid $(NETCDF4_LIBS) -lbz2 -lz
+	-lrapformats -ltdrp -ldataport \
+	-leuclid -ltoolsa $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 

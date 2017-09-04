@@ -37,8 +37,8 @@ TARGET_FILE = WrfVIL2Mdv
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -ldsserver -ldidss \
-	-lrapformats -lphysics -ltoolsa -ldataport \
-	-ltdrp -leuclid $(NETCDF4_LIBS) -lbz2 \
+	-lrapformats -lphysics -ldataport \
+	-ltdrp -leuclid -ltoolsa $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

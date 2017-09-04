@@ -38,7 +38,7 @@ TARGET_FILE = Hsrl2Radx
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lFmq -lRadx -lMdv -lRadx -lradar -ldsserver \
-	-ldidss -lrapformats -ltoolsa -leuclid -lphysics \
+	-ldidss -lrapformats -leuclid -ltoolsa -lphysics \
 	-ltdrp -ldataport $(NETCDF4_LIBS) -lbz2 \
 	-lz
 

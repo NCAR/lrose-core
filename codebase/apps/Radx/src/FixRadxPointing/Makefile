@@ -38,7 +38,7 @@ TARGET_FILE = FixRadxPointing
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lRadx -lMdv -lRadx -ldsserver \
-	-ldidss -lrapformats -ltoolsa -leuclid \
+	-ldidss -lrapformats -leuclid -ltoolsa \
 	-ltdrp -ldataport $(NETCDF4_LIBS) -lbz2 \
 	-lz
 

@@ -38,7 +38,7 @@ TARGET_FILE = RadxClutMon
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -lRadx -lMdv -ldsserver \
-	-ldidss -lrapformats -ltoolsa -leuclid \
+	-ldidss -lrapformats -leuclid -ltoolsa \
 	-ltdrp -ldataport $(NETCDF4_LIBS) -lbz2 \
 	-lz
 
