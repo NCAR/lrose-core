@@ -29,6 +29,7 @@
 // 
 //////////////////////////////////////////////////
 
+#include <euclid/Pjg.hh>
 #include <euclid/PjgLc1Calc.hh>
 #include <euclid/PjgLc2Calc.hh>
 #include <euclid/PjgGrib.hh>
