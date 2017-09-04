@@ -266,7 +266,7 @@ public:
    * getProjType() - Retrieve the Mdvx projection type.
    */
 
-  const int getProjType(void) const;
+  int getProjType(void) const;
   
 
   /**********************************************************************

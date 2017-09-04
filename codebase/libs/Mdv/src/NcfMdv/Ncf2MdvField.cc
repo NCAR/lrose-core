@@ -505,7 +505,7 @@ int Ncf2MdvField::_setProjInfo()
       
       double ppt_ht_m = 0.0;
       iret |= _setProjParam(NcfMdv::perspective_point_height, ppt_ht_m);
-      double persp_radius = ppt_ht_m / 1000.0 + PjgMath::EradKm;
+      double persp_radius = ppt_ht_m / 1000.0 + Pjg::EradKm;
 
       _proj.initVertPersp(origin_lat, origin_lon, persp_radius);
       _proj.setOffsetCoords(falseNorthing, falseEasting);

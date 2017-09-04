@@ -767,7 +767,7 @@ void MdvxPjg::setSensorPosn(double sensor_lat,
  * getProjType() - Retrieve the Mdvx projection type.
  */
 
-const int MdvxPjg::getProjType(void) const
+int MdvxPjg::getProjType(void) const
 {
   switch (Pjg::getProjType())
   {
