@@ -32,6 +32,7 @@
 #define FILT_INFO_INPUT_HH
 
 #include <FiltAlg/GridProj.hh>
+#include <vector>
 class Data;
 class Filter;
 class VlevelSlice;
@@ -50,6 +51,7 @@ public:
    * Constructor for vlevels
    *
    * @param[in] gi  Pointer to the VlevelSlice
+   * @param[in] vlevel2  The set of vertical levels
    * @param[in] f  Pointer to the Filter
    * @param[in] g  Pointer to output data
    * @param[in] index  Vlevel index
@@ -58,7 +60,8 @@ public:
    *
    * All inputs are stored as members
    */
-  FiltInfoInput(const VlevelSlice *gi, const Filter *f, const Data *g,
+  FiltInfoInput(const VlevelSlice *gi, const std::vector<double> &vlevels,
+		const Filter *f, const Data *g,
 		const int index, const double vlevel, const GridProj &gp);
 
   /** 
@@ -90,6 +93,7 @@ public:
   inline const VlevelSlice *getSlice(void) const {return _gin;}
   inline const Filter *getFilter(void) const {return _filter;}
   inline const Data *getDataOut(void) const {return _gout;}
+  inline std::vector<double> getVlevels(void) const {return _vlevels;}
   inline const int getVlevelIndex(void) const {return _vIndex;}
   inline const double getVlevel(void) const {return _vlevel;}
   inline const GridProj &getGridProj(void) const {return _gp;}
@@ -104,7 +108,7 @@ private:
    * True if the input info is for data with vertical levels
    */
   bool _has_vlevels;
-
+  std::vector<double> _vlevels;  /**< all vlevels, when _has_vlevels  */
   const VlevelSlice *_gin;   /**< Used only when _has_vlevels = true */
   const Filter *_filter;     /**< Used only when _has_vlevels = true */
   const Data *_gout;         /**< Used only when _has_vlevels = true */

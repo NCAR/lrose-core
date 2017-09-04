@@ -193,6 +193,12 @@ void FiltSRemap::set_input_info(Info **info) const
 }
 
 //------------------------------------------------------------------
+void FiltSRemap::vertical_level_change(void)
+{
+  // default is to do nothing
+}
+
+//------------------------------------------------------------------
 bool FiltSRemap::_remap(FiltInfoOutput &o) const
 {
   if (o.isGrid())

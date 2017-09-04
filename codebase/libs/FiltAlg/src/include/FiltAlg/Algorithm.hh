@@ -119,6 +119,7 @@ private:
 
   bool _ok;             /**< True if object well formed */
   time_t _last_time;    /**< Previous processing time, used for feedback*/
+  vector<double> _last_vlevel;    /**< vertical levels, previous */
   vector<Data> _input;  /**< The input data which is read in */
   vector<Data> _output; /**< The output data which is written out */
   vector<Filter *> _filters;  /**< The filters, in order, pointers because
@@ -128,7 +129,7 @@ private:
    * during a filter, needed for thread safeness
    */
   vector<FiltInfo> _filtInfo; 
-
+  vector<double> _vlevel;    /**< vertical levels */
   Mdvx::field_header_t _hdr;   /**< MDV information pulled from input data*/
   Mdvx::vlevel_header_t _vhdr; /**< MDV information pulled from input data*/
   MdvxProj _proj;              /**< MDV information pulled from input data*/
@@ -166,10 +167,12 @@ private:
    * @param[in] t
    * @param[in] p
    * @param[out] dout
+   * @param[out] vlevelChange
    *
    * @return true for success
    */
-  bool _update_init(const time_t &t, const FiltAlgParms &p, DsMdvx &dout);
+  bool _update_init(const time_t &t, const FiltAlgParms &p, DsMdvx &dout,
+		    bool &vlevelChange);
 
   /**
    * Write output that is found in dout
@@ -252,6 +255,7 @@ private:
   /**
    * Do filtering for one filter
    * @param[in] t  Time
+   * @param[in] vlevelChange  True if vertical levels have changed
    * @param[in] vlevel_tolerance  Vertical level error allowance (degrees)
    * @param[in] f The filter
    * @param[in,out] dout  Object to put results into
@@ -259,7 +263,8 @@ private:
    *
    * Changes local state
    */
-  bool _filter(const time_t &t, const double vlevel_tolerance,
+  bool _filter(const time_t &t, bool vlevelChange,
+	       const double vlevel_tolerance,
 	       Filter *f, DsMdvx &dout);
 
   /**

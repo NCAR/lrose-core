@@ -146,6 +146,12 @@ void FiltMask::set_input_info(Info **info) const
 }
 
 //------------------------------------------------------------------
+void FiltMask::vertical_level_change(void)
+{
+  // default is to do nothing
+}
+
+//------------------------------------------------------------------
 void FiltMask::_set_ranges(const int n, const FiltAlgParams::mask_range_t *r)
 {
   _range.clear();

@@ -206,3 +206,10 @@ void FiltVertComb::set_input_info(Info **info) const
 {
   return;
 }
+
+//------------------------------------------------------------------
+void FiltVertComb::vertical_level_change(void)
+{
+  // default is to do nothing
+}
+

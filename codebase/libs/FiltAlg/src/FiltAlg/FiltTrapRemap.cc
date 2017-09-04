@@ -195,6 +195,12 @@ void FiltTrapRemap::set_input_info(Info **info) const
 }
 
 //------------------------------------------------------------------
+void FiltTrapRemap::vertical_level_change(void)
+{
+  // default is to do nothing
+}
+
+//------------------------------------------------------------------
 bool FiltTrapRemap::_remap(FiltInfoOutput &o) const
 {
   if (o.isGrid())

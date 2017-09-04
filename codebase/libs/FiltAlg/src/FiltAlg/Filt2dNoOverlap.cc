@@ -120,4 +120,10 @@ void Filt2dNoOverlap::set_input_info(Info **info) const
   return;
 }
 
+//------------------------------------------------------------------
+void Filt2dNoOverlap::vertical_level_change(void)
+{
+  // default is to do nothing
+}
+
 
