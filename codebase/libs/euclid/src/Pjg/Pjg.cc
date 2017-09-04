@@ -44,6 +44,7 @@
  *********************************************************************/
 
 #include <euclid/Pjg.hh>
+#include <euclid/PjgCalc.hh>
 #include <euclid/PjgFlatCalc.hh>
 #include <euclid/PjgLatlonCalc.hh>
 #include <euclid/PjgLc1Calc.hh>
@@ -263,18 +264,308 @@ void Pjg::initObliqueStereo(const double origin_lat, const double origin_lon,
  */
 
 void Pjg::initMercator(const double origin_lat, const double origin_lon,
-		   const int nx, const int ny, const int nz,
-		   const double dx, const double dy, const double dz,
-		   const double minx, const double miny, const double minz)
+                       const int nx, const int ny, const int nz,
+                       const double dx, const double dy, const double dz,
+                       const double minx, const double miny, const double minz)
 {
   delete _calculator;
   
   _calculator = new PjgMercatorCalc(origin_lat, origin_lon,
-				nx, ny, nz,
-				dx, dy, dz,
-				minx, miny, minz);
+                                    nx, ny, nz,
+                                    dx, dy, dz,
+                                    minx, miny, minz);
 }
 
+/**********************************************************************
+ * getProjType() - Retrieve the current PjgTypes projection type.
+ */
+
+int Pjg::getProjType() const
+{
+  return _calculator->getProjType();
+}
+  
+/**********************************************************************
+ * isConstantNx() - Retrieve the flag indicating whether the grid has a
+ *                  constant nx value.
+ */
+
+bool Pjg::isConstantNx()
+{
+  return _calculator->isConstantNx();
+}
+  
+  
+/**********************************************************************
+ * getGridDims() - Retrieve the current grid dimensions.  Returns a -1
+ *                 for nx if the grid doesn't have a constant nx value.
+ */
+
+void Pjg::getGridDims(int &nx, int &ny, int &nz) const
+{
+  _calculator->getGridDims(nx, ny, nz);
+}
+  
+  
+/**********************************************************************
+ * getGridDims() - Retrieve the current grid dimensions with a non-
+ *                 constant nx.
+ */
+
+void Pjg::getGridDims(vector< int > &nx_list, int &ny, int &nz) const
+{
+  _calculator->getGridDims(nx_list, ny, nz);
+}
+  
+  
+/**********************************************************************
+ * setGridDims() - Set the current grid dimensions.
+ */
+
+void Pjg::setGridDims(const int nx, const int ny, const int nz)
+{
+  _calculator->setGridDims(nx, ny, nz);
+}
+  
+  
+/**********************************************************************
+ * setGridDims() - Set the current grid dimensions with a non-constant
+ *                 nx.
+ */
+
+void Pjg::setGridDims(const vector< int > nx_list,
+                      const int ny, const int nz)
+{
+  _calculator->setGridDims(nx_list, ny, nz);
+}
+  
+  
+/**********************************************************************
+ * getNx() - Retrieve the current value of nx.  Returns a -1 if the
+ *           projection doesn't have a constant nx.
+ */
+
+int Pjg::getNx() const
+{
+  return _calculator->getNx();
+}
+  
+  
+/**********************************************************************
+ * getNxList() - Retrieve the current list of nx values.
+ */
+
+vector< int > Pjg::getNxList() const
+{
+  return _calculator->getNxList();
+}
+  
+  
+/**********************************************************************
+ * getNy() - Retrieve the current value of ny.
+ */
+
+int Pjg::getNy() const
+{
+  return _calculator->getNy();
+}
+  
+  
+/**********************************************************************
+ * getNz() - Retrieve the current value of nz.
+ */
+
+int Pjg::getNz() const
+{
+  return _calculator->getNz();
+}
+  
+  
+/**********************************************************************
+ * getGridDeltas() - Retrieve the current grid deltas.
+ */
+
+void Pjg::getGridDeltas(double &dx, double &dy, double &dz) const
+{
+  _calculator->getGridDeltas(dx, dy, dz);
+}
+  
+  
+/**********************************************************************
+ * setGridDeltas() - Set the current grid deltas.
+ */
+
+void Pjg::setGridDeltas(const double dx, const double dy, const double dz)
+{
+  _calculator->setGridDeltas(dx, dy, dz);
+}
+  
+  
+/**********************************************************************
+ * getDx() - Retrieve the current value of dx.
+ */
+
+double Pjg::getDx() const
+{
+  return _calculator->getDx();
+}
+  
+  
+/**********************************************************************
+ * getDy() - Retrieve the current value of dy.
+ */
+
+double Pjg::getDy() const
+{
+  return _calculator->getDy();
+}
+  
+  
+/**********************************************************************
+ * getDz() - Retrieve the current value of dz.
+ */
+
+double Pjg::getDz() const
+{
+  return _calculator->getDz();
+}
+  
+  
+/**********************************************************************
+ * getGridMins() - Retrieve the current grid minimums.
+ */
+
+void Pjg::getGridMins(double &minx, double &miny, double &minz) const
+{
+  _calculator->getGridMins(minx, miny, minz);
+}
+  
+  
+/**********************************************************************
+ * setGridMins() - Set the current grid minimums.
+ */
+
+void Pjg::setGridMins(const double minx, const double miny,
+                      const double minz)
+{
+  _calculator->setGridMins(minx, miny, minz);
+}
+  
+  
+/**********************************************************************
+ * getMinx() - Retrieve the current value of minx.
+ */
+
+double Pjg::getMinx() const
+{
+  return _calculator->getMinx();
+}
+  
+  
+/**********************************************************************
+ * getMiny() - Retrieve the current value of miny.
+ */
+
+double Pjg::getMiny() const
+{
+  return _calculator->getMiny();
+}
+  
+  
+/**********************************************************************
+ * getMinz() - Retrieve the current value of minz.
+ */
+
+double Pjg::getMinz() const
+{
+  return _calculator->getMinz();
+}
+  
+  
+/**********************************************************************
+ * getOriginLat() - Retrieve the current value of the latitude of the
+ *                  projection origin.  For projections that don't
+ *                  support an origin, 0.0 will be returned.
+ */
+
+double Pjg::getOriginLat() const
+{
+  return _calculator->getOriginLat();
+}
+  
+  
+/**********************************************************************
+ * getOriginLon() - Retrieve the current value of the longitude of the
+ *                  projection origin.  For projections that don't
+ *                  support an origin, 0.0 will be returned.
+ */
+
+double Pjg::getOriginLon() const
+{
+  return _calculator->getOriginLon();
+}
+  
+  
+/**********************************************************************
+ * setOrigin() - Sets the projection origin for the projection, if the
+ *               projection uses an origin.  Does nothing for projections
+ *               that don't use an origin.
+ */
+
+void Pjg::setOrigin(const double origin_lat,
+                    const double origin_lon)
+{
+  _calculator->setOrigin(origin_lat, origin_lon);
+}
+  
+  
+/**********************************************************************
+ * getRotation() - Retrieve the current value of the projection rotation.
+ *                 For projections that don't support a rotation value,
+ *                 0.0 will be returned.
+ */
+
+double Pjg::getRotation() const
+{
+  return _calculator->getRotation();
+}
+
+
+/**********************************************************************
+ * getPole() - Retrieve the current value of the pole (north or south).
+ *                 For projections that don't support a pole,
+ *                 POLE_NORTH will be returned.
+ */
+
+PjgTypes::pole_type_t Pjg::getPole() const
+{
+  return _calculator->getPole();
+}
+
+
+/**********************************************************************
+ * getLat1() - Retrieve the current value of the projection lat1.  For
+ *             projections that don't latitude values in their definitions,
+ *             0.0 will be returned.
+ */
+
+double Pjg::getLat1() const
+{
+  return _calculator->getLat1();
+}
+  
+  
+/**********************************************************************
+ * getLat2() - Retrieve the current value of the projection lat2.  For
+ *             projections that don't latitude values in their definitions,
+ *             0.0 will be returned.
+ */
+
+double Pjg::getLat2() const
+{
+  return _calculator->getLat2();
+}
+  
 /**********************************************************************
  * getLL() - Calculate the lower left lat/lon of the grid
  *
@@ -532,4 +823,40 @@ int Pjg::xyIndex2arrayIndex(const int ix, const int iy, const int iz /* = 0 */) 
   return _calculator->xyIndex2arrayIndex(ix, iy, iz);
 }
   
+
+///////////////
+// Operators //
+///////////////
+
+const Pjg& Pjg::operator=(const Pjg &rhs)
+{
+  if (&rhs == this)
+    return *this;
+  
+  delete _calculator;
+  _calculator = PjgCalc::copyCalc(rhs._calculator);
+  
+  return *this;
+}
+
+bool Pjg::operator==(const Pjg &other) const
+{
+  return *_calculator == *other._calculator;
+}
+
+bool Pjg::operator!=(const Pjg &other) const
+{
+  return !(*_calculator == *other._calculator);
+}
+  
+/**********************************************************************
+ * print() - Print the projection parameters to the given stream
+ */
+
+void Pjg::print(ostream &stream) const
+{
+  _calculator->print(stream);
+}
+  
+
 

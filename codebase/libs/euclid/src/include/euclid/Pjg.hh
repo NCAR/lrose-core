@@ -53,10 +53,10 @@
 #define Pjg_hh
 
 #include <iostream>
-
+#include <vector>
 #include <euclid/PjgTypes.hh>
-#include <euclid/PjgCalc.hh>
 
+class PjgCalc;
 using namespace std;
 
 class Pjg
@@ -207,54 +207,34 @@ public:
    * getProjType() - Retrieve the current PjgTypes projection type.
    */
 
-  virtual int getProjType(void) const
-  {
-    return _calculator->getProjType();
-  }
-  
+  virtual int getProjType() const;
   
   /**********************************************************************
    * isConstantNx() - Retrieve the flag indicating whether the grid has a
    *                  constant nx value.
    */
 
-  virtual bool isConstantNx()
-  {
-    return _calculator->isConstantNx();
-  }
-  
-  
+  virtual bool isConstantNx();
+
   /**********************************************************************
    * getGridDims() - Retrieve the current grid dimensions.  Returns a -1
    *                 for nx if the grid doesn't have a constant nx value.
    */
 
-  virtual void getGridDims(int &nx, int &ny, int &nz) const
-  {
-    _calculator->getGridDims(nx, ny, nz);
-  }
-  
-  
+  virtual void getGridDims(int &nx, int &ny, int &nz) const;
+
   /**********************************************************************
    * getGridDims() - Retrieve the current grid dimensions with a non-
    *                 constant nx.
    */
 
-  virtual void getGridDims(vector< int > &nx_list, int &ny, int &nz) const
-  {
-    _calculator->getGridDims(nx_list, ny, nz);
-  }
-  
-  
+  virtual void getGridDims(vector< int > &nx_list, int &ny, int &nz) const;
+
   /**********************************************************************
    * setGridDims() - Set the current grid dimensions.
    */
 
-  virtual void setGridDims(const int nx, const int ny, const int nz)
-  {
-    _calculator->setGridDims(nx, ny, nz);
-  }
-  
+  virtual void setGridDims(const int nx, const int ny, const int nz);
   
   /**********************************************************************
    * setGridDims() - Set the current grid dimensions with a non-constant
@@ -262,165 +242,101 @@ public:
    */
 
   virtual void setGridDims(const vector< int > nx_list,
-			   const int ny, const int nz)
-  {
-    _calculator->setGridDims(nx_list, ny, nz);
-  }
-  
+			   const int ny, const int nz);
   
   /**********************************************************************
    * getNx() - Retrieve the current value of nx.  Returns a -1 if the
    *           projection doesn't have a constant nx.
    */
 
-  virtual inline int getNx(void) const
-  {
-    return _calculator->getNx();
-  }
-  
+  virtual int getNx() const;
   
   /**********************************************************************
    * getNxList() - Retrieve the current list of nx values.
    */
 
-  virtual inline vector< int > getNxList(void) const
-  {
-    return _calculator->getNxList();
-  }
-  
+  virtual vector< int > getNxList() const;
   
   /**********************************************************************
    * getNy() - Retrieve the current value of ny.
    */
 
-  virtual inline int getNy(void) const
-  {
-    return _calculator->getNy();
-  }
-  
+  virtual int getNy() const;
   
   /**********************************************************************
    * getNz() - Retrieve the current value of nz.
    */
 
-  virtual inline int getNz(void) const
-  {
-    return _calculator->getNz();
-  }
-  
+  virtual int getNz() const;
   
   /**********************************************************************
    * getGridDeltas() - Retrieve the current grid deltas.
    */
 
-  virtual void getGridDeltas(double &dx, double &dy, double &dz) const
-  {
-    _calculator->getGridDeltas(dx, dy, dz);
-  }
-  
+  virtual void getGridDeltas(double &dx, double &dy, double &dz) const;
   
   /**********************************************************************
    * setGridDeltas() - Set the current grid deltas.
    */
 
-  virtual void setGridDeltas(const double dx, const double dy, const double dz)
-  {
-    _calculator->setGridDeltas(dx, dy, dz);
-  }
-  
-  
+  virtual void setGridDeltas(const double dx, const double dy, const double dz);
+
   /**********************************************************************
    * getDx() - Retrieve the current value of dx.
    */
 
-  virtual inline double getDx(void) const
-  {
-    return _calculator->getDx();
-  }
-  
+  virtual double getDx() const;
   
   /**********************************************************************
    * getDy() - Retrieve the current value of dy.
    */
 
-  virtual inline double getDy(void) const
-  {
-    return _calculator->getDy();
-  }
-  
+  virtual double getDy() const;
   
   /**********************************************************************
    * getDz() - Retrieve the current value of dz.
    */
 
-  virtual inline double getDz(void) const
-  {
-    return _calculator->getDz();
-  }
-  
-  
+  virtual double getDz() const;
+
   /**********************************************************************
    * getGridMins() - Retrieve the current grid minimums.
    */
 
-  virtual void getGridMins(double &minx, double &miny, double &minz) const
-  {
-    _calculator->getGridMins(minx, miny, minz);
-  }
-  
-  
+  virtual void getGridMins(double &minx, double &miny, double &minz) const;
+
   /**********************************************************************
    * setGridMins() - Set the current grid minimums.
    */
 
   virtual void setGridMins(const double minx, const double miny,
-			   const double minz)
-  {
-    _calculator->setGridMins(minx, miny, minz);
-  }
-  
+			   const double minz);
   
   /**********************************************************************
    * getMinx() - Retrieve the current value of minx.
    */
 
-  virtual inline double getMinx(void) const
-  {
-    return _calculator->getMinx();
-  }
-  
+  virtual double getMinx() const;
   
   /**********************************************************************
    * getMiny() - Retrieve the current value of miny.
    */
 
-  virtual inline double getMiny(void) const
-  {
-    return _calculator->getMiny();
-  }
-  
+  virtual double getMiny() const;
   
   /**********************************************************************
    * getMinz() - Retrieve the current value of minz.
    */
 
-  virtual inline double getMinz(void) const
-  {
-    return _calculator->getMinz();
-  }
-  
-  
+  virtual double getMinz() const;
+
   /**********************************************************************
    * getOriginLat() - Retrieve the current value of the latitude of the
    *                  projection origin.  For projections that don't
    *                  support an origin, 0.0 will be returned.
    */
 
-  virtual inline double getOriginLat(void) const
-  {
-    return _calculator->getOriginLat();
-  }
-  
+  virtual double getOriginLat() const;
   
   /**********************************************************************
    * getOriginLon() - Retrieve the current value of the longitude of the
@@ -428,24 +344,16 @@ public:
    *                  support an origin, 0.0 will be returned.
    */
 
-  virtual inline double getOriginLon(void) const
-  {
-    return _calculator->getOriginLon();
-  }
-  
-  
+  virtual double getOriginLon() const;
+
   /**********************************************************************
    * setOrigin() - Sets the projection origin for the projection, if the
    *               projection uses an origin.  Does nothing for projections
    *               that don't use an origin.
    */
 
-  virtual inline void setOrigin(const double origin_lat,
-				const double origin_lon)
-  {
-    _calculator->setOrigin(origin_lat, origin_lon);
-  }
-  
+  virtual void setOrigin(const double origin_lat,
+                         const double origin_lon);
   
   /**********************************************************************
    * getRotation() - Retrieve the current value of the projection rotation.
@@ -453,11 +361,7 @@ public:
    *                 0.0 will be returned.
    */
 
-  virtual inline double getRotation(void) const
-  {
-    return _calculator->getRotation();
-  }
-
+  virtual double getRotation() const;
 
   /**********************************************************************
    * getPole() - Retrieve the current value of the pole (north or south).
@@ -465,11 +369,7 @@ public:
    *                 POLE_NORTH will be returned.
    */
 
-  virtual inline PjgTypes::pole_type_t getPole(void) const
-  {
-    return _calculator->getPole();
-  }
-
+  virtual PjgTypes::pole_type_t getPole() const;
 
   /**********************************************************************
    * getLat1() - Retrieve the current value of the projection lat1.  For
@@ -477,11 +377,7 @@ public:
    *             0.0 will be returned.
    */
 
-  virtual inline double getLat1(void) const
-  {
-    return _calculator->getLat1();
-  }
-  
+  virtual double getLat1() const;
   
   /**********************************************************************
    * getLat2() - Retrieve the current value of the projection lat2.  For
@@ -489,11 +385,7 @@ public:
    *             0.0 will be returned.
    */
 
-  virtual inline double getLat2(void) const
-  {
-    return _calculator->getLat2();
-  }
-  
+  virtual double getLat2() const;
   
   ///////////////////////////////////////////////
   // Generic coordinate transformation methods //
@@ -670,37 +562,15 @@ public:
    * print() - Print the projection parameters to the given stream
    */
 
-  void print(ostream &stream) const
-  {
-    _calculator->print(stream);
-  }
-  
+  void print(ostream &stream) const;
 
   ///////////////
   // Operators //
   ///////////////
 
-  const Pjg& operator=(const Pjg &rhs)
-  {
-    if (&rhs == this)
-      return *this;
-    
-    delete _calculator;
-    _calculator = PjgCalc::copyCalc(rhs._calculator);
-
-    return *this;
-  }
-  
-  bool operator==(const Pjg &other) const
-  {
-    return *_calculator == *other._calculator;
-  }
-  
-  bool operator!=(const Pjg &other) const
-  {
-    return !(*_calculator == *other._calculator);
-  }
-  
+  const Pjg& operator=(const Pjg &rhs);
+  bool operator==(const Pjg &other) const;
+  bool operator!=(const Pjg &other) const;
 
 protected:
 
