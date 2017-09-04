@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: dixon $
 //   $Locker:  $
-//   $Date: 2016/03/03 18:19:27 $
-//   $Id: Pjg.cc,v 1.13 2016/03/03 18:19:27 dixon Exp $
-//   $Revision: 1.13 $
+//   $Date: 2017/09/03 16:00:30 $
+//   $Id: Pjg.cc,v 1.14 2017/09/03 16:00:30 dixon Exp $
+//   $Revision: 1.14 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -52,9 +52,15 @@
 #include <euclid/PjgPolarStereoCalc.hh>
 #include <euclid/PjgObliqueStereoCalc.hh>
 #include <euclid/PjgMercatorCalc.hh>
-#include <euclid/euclid_macros.h>
+#include <euclid/geometry.h>
+#include <toolsa/toolsa_macros.h>
+#include <toolsa/TaPjg.hh>
 #include <math.h>
 using namespace std;
+
+double Pjg::EradKm = EARTH_RADIUS; // from toolsa_macros.h
+const double Pjg::Rad2Deg = 180.0 / M_PI;
+const double Pjg::Deg2Rad = 1.0 / Pjg::Rad2Deg;
 
 //////////////////
 // Constructors //
@@ -93,6 +99,16 @@ Pjg::~Pjg()
   delete _calculator;
 }
 
+
+/**********************************************************************
+ * setEarthRadiusKm() - overrides the default earth radius in km
+ */
+  
+void Pjg::setEarthRadiusKm(double earthRadiusKm) {
+  EradKm = earthRadiusKm;
+  EG_set_earth_radius_km(earthRadiusKm);
+  TaPjg::setEarthRadius(earthRadiusKm);
+}
 
 /**********************************************************************
  * initFlat() - Initialize flat earth projection.
@@ -258,4 +274,262 @@ void Pjg::initMercator(const double origin_lat, const double origin_lon,
 				dx, dy, dz,
 				minx, miny, minz);
 }
+
+/**********************************************************************
+ * getLL() - Calculate the lower left lat/lon of the grid
+ *
+ */
+
+void Pjg::getLL(double &LLlat, double &LLlon) const
+{
+  double LLx, LLy;
+  LLx = getMinx() - getDx() / 2.0;
+  LLy = getMiny() - getDy() / 2.0;
+  xy2latlon(LLx, LLy, LLlat, LLlon);
+}
+
+/**********************************************************************
+ * getUR() - Calculate the upper right lat/lon of the grid
+ *
+ */
+
+void Pjg::getUR(double &URlat, double &URlon) const
+{
+  double URx, URy;
+  URx = getMinx() + (((double)getNx() - 0.5) * getDx());
+  URy = getMiny() + (((double)getNy() - 0.5) * getDy());
+  xy2latlon(URx, URy, URlat, URlon);
+}
+
+
+/**********************************************************************
+ * latlon2RTheta() - Calculate the distance and angle between two
+ *                   lat/lon points.
+ *
+ * Input:  lat1, lon1, lat2, lon2 in degrees (lat N+, lon E+)
+ * Output: r = the arc length from 1 to 2, in km
+ *         theta = angle with True North: positive if east of North,
+ *                 negative if west of North, 0 = North
+ */
+
+void Pjg::latlon2RTheta(const double lat1, const double lon1,
+                        const double lat2, const double lon2,
+                        double &r, double &theta)
+{
+  PjgCalc::latlon2RTheta(lat1, lon1, lat2, lon2, r, theta);
+}
+  
+/**********************************************************************
+ * latlonPlusRTheta() - Starting from a given lat/lon, draw an arc
+ *                      (part of a great circle) of length r which makes
+ *                      an angle of theta from true North.  Theta is
+ *                      positive if east of North, negative (or > PI) if
+ *                      west of North, 0 = North
+ *
+ * Input:  Starting point lat1, lon1 in degrees (lat N+, lon E+)
+ *         arclength r (km), angle theta (degrees)
+ * Output: Ending point lat2, lon2 in degrees
+ */
+
+void Pjg::latlonPlusRTheta(const double lat1, const double lon1,
+                           const double r, const double theta,
+                           double &lat2, double &lon2)
+{
+  PjgCalc::latlonPlusRTheta(lat1, lon1, r, theta, lat2, lon2);
+}
+  
+  
+void Pjg::latlonPlusRTheta(const float lat1, const float lon1,
+                           const float r, const float theta,
+                           float &lat2, float &lon2)
+{
+  double lat1_double = lat1;
+  double lon1_double = lon1;
+  double r_double = r;
+  double theta_double = theta;
+    
+  double lat2_double, lon2_double;
+    
+  latlonPlusRTheta(lat1_double, lon1_double, r_double, theta_double,
+                   lat2_double, lon2_double);
+
+  lat2 = lat2_double;
+  lon2 = lon2_double;
+}
+  
+  
+/**********************************************************************
+ * latlon2xy() - Convert the given lat/lon location to the grid location
+ *               in grid units.
+ */
+
+void Pjg::latlon2xy(const double lat, const double lon,
+                    double  &x, double &y) const
+{
+  _calculator->latlon2xy(lat, lon, x, y);
+}
+  
+
+/**********************************************************************
+ * xy2latlon() - Convert the given grid location specified in grid units
+ *               to the appropriate lat/lon location.
+ *
+ * Z is only used if set for the polar radar projection.
+ */
+  
+void Pjg::xy2latlon(const double x, const double y,
+                    double &lat, double &lon,
+                    const double z /* = -9999.0 */) const
+{
+  _calculator->xy2latlon(x, y, lat, lon, z);
+}
+  
+
+void Pjg::xy2latlon(const float x, const float y,
+                    float &lat, float &lon,
+                    const float z /* = -9999.0 */) const
+{
+  double lat_double, lon_double;
+    
+  _calculator->xy2latlon(x, y, lat_double, lon_double, z);
+
+  lat = (float)lat_double;
+  lon = (float)lon_double;
+}
+  
+
+/**********************************************************************
+ * latlon2xyIndex() - Computes the the data x, y indices for the given
+ *                    lat/lon location.
+ *
+ * Returns 0 on success, -1 on failure (data outside grid)
+ */
+
+int Pjg::latlon2xyIndex(const double lat, const double lon,
+                        int &x_index, int &y_index) const
+{
+  return _calculator->latlon2xyIndex(lat, lon, x_index, y_index);
+}
+  
+
+/**********************************************************************
+ * latlon2arrayIndex() - Computes the index into the data array.
+ *
+ * Returns 0 on success, -1 on failure (data outside grid).
+ */
+
+int Pjg::latlon2arrayIndex(const double lat, const double lon,
+                           int &array_index) const
+{
+  return _calculator->latlon2arrayIndex(lat, lon, array_index);
+}
+  
+
+/**********************************************************************
+ * xyIndex2latlon() - Computes the lat & lon given ix and iy rel to grid.
+ */
+
+void Pjg::xyIndex2latlon(const int ix, const int iy,
+                         double &lat, double &lon) const
+{
+  _calculator->xyIndex2latlon(ix, iy, lat, lon);
+}
+  
+  
+/**********************************************************************
+ * km2x() - Converts the given distance in kilometers to the same
+ *          distance in the units appropriate to the projection.
+ */
+
+double Pjg::km2x(const double km) const
+{
+  return _calculator->km2x(km);
+}
+  
+  
+/**********************************************************************
+ * x2km() - Converts the given distance to kilometers.  The distance
+ *          is assumed to be in the units appropriate to the projection.
+ */
+
+double Pjg::x2km(const double x) const
+{
+  return _calculator->x2km(x);
+}
+  
+  
+/**********************************************************************
+ * km2xGrid() - Converts the given distance in kilometers to the
+ *              appropriate number of grid spaces along the X axis.
+ */
+
+double Pjg::km2xGrid(const double x_km) const
+{
+  return _calculator->km2xGrid(x_km);
+}
+  
+  
+/**********************************************************************
+ * km2yGrid() - Converts the given distance in kilometers to the
+ *              appropriate number of grid spaces along the Y axis.
+ */
+
+double Pjg::km2yGrid(const double y_km) const
+{
+  return _calculator->km2yGrid(y_km);
+}
+  
+  
+/**********************************************************************
+ * xGrid2km() - Converts the given distance in number of grid spaces
+ *              along the X axis to kilometers.  If y_index is non-negative,
+ *              the conversion is done at that point in the grid;
+ *              otherwise, the conversion is done at the center of the
+ *              grid.
+ */
+
+double Pjg::xGrid2km(const double x_grid,
+                     const int y_index /* = -1 */) const
+{
+  return _calculator->xGrid2km(x_grid, y_index);
+}
+  
+  
+/**********************************************************************
+ * yGrid2km() - Converts the given distance in number of grid spaces
+ *              along the Y axis to kilometers.
+ */
+
+double Pjg::yGrid2km(const double y_grid) const
+{
+  return _calculator->yGrid2km(y_grid);
+}
+  
+  
+/**********************************************************************
+ * xy2xyIndex() - Computes the the data x, y indices for the given
+ *                grid units location.
+ *
+ * Returns 0 on success, -1 on failure (data outside grid)
+ */
+
+int Pjg::xy2xyIndex(const double x, const double y,
+                    int &x_index, int &y_index) const
+{
+  return _calculator->xy2xyIndex(x, y, x_index, y_index);
+}
+  
+
+/**********************************************************************
+ * xyIndex2arrayIndex() - Computes the index into the data array.
+ *
+ * Returns the calculated array index on success, -1 on failure
+ * (data outside grid).
+ */
+
+int Pjg::xyIndex2arrayIndex(const int ix, const int iy, const int iz /* = 0 */) const
+{
+  return _calculator->xyIndex2arrayIndex(ix, iy, iz);
+}
+  
 

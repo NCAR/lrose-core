@@ -37,7 +37,7 @@
 
 #include <euclid/copyright.h>
 #include <euclid/geometry.h>
-#include <euclid/euclid_macros.h>
+#include <toolsa/toolsa_macros.h>
 /*
  * Given the four points a, b, c, d, determine the intersection of the
  * lines determined by ab with cd.  If one point intersection exists,

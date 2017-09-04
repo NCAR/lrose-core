@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 /* RCS info
- *   $Author: dixon $
+ *   $Author: prestop $
  *   $Locker:  $
- *   $Date: 2016/03/03 18:19:28 $
- *   $Id: PjgCalc.hh,v 1.20 2016/03/03 18:19:28 dixon Exp $
- *   $Revision: 1.20 $
+ *   $Date: 2017/06/09 16:27:58 $
+ *   $Id: PjgCalc.hh,v 1.21 2017/06/09 16:27:58 prestop Exp $
+ *   $Revision: 1.21 $
  *   $State: Exp $
  */
  
@@ -112,7 +112,7 @@ public:
    * getProjType() - Retrieve the current PjgTypes projection type.
    */
 
-  virtual const int getProjType(void) const = 0;
+  virtual int getProjType(void) const = 0;
   
   
   /**********************************************************************

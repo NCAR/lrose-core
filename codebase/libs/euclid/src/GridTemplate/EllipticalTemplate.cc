@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: dixon $
 //   $Locker:  $
-//   $Date: 2016/03/03 18:19:27 $
-//   $Id: EllipticalTemplate.cc,v 1.9 2016/03/03 18:19:27 dixon Exp $
-//   $Revision: 1.9 $
+//   $Date: 2017/09/03 16:00:30 $
+//   $Id: EllipticalTemplate.cc,v 1.10 2017/09/03 16:00:30 dixon Exp $
+//   $Revision: 1.10 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -52,7 +52,7 @@
 #include <euclid/EllipticalTemplate.hh>
 #include <euclid/GridOffset.hh>
 #include <euclid/GridTemplate.hh>
-#include <euclid/euclid_macros.h>
+#include <toolsa/toolsa_macros.h>
 
 using namespace std;
 

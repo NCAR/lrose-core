@@ -40,6 +40,8 @@
 #ifndef PjgPolarStereoMath_hh
 #define PjgPolarStereoMath_hh
 
+#include <euclid/PjgMath.hh>
+
 class PjgPolarStereoMath : public PjgMath
 {
 
@@ -53,40 +55,13 @@ public:
                      double central_scale = 1.0);
   
   ////////////////////////////////////////////////
-  /// access methods
+  /// set methods
 
-  inline void setTangentLon(const double tangent_lon)
-  {
-    _origin_lon = tangent_lon; 
-    _tangent_lon = tangent_lon;
-    _tangent_lon_rad = _tangent_lon * Deg2Rad;
-    _offset_lon = _origin_lon;
-  }
-  
-  inline void setPole(const bool pole_is_north)
-  {
-    _pole_is_north = pole_is_north;
+  void setTangentLon(const double tangent_lon);
 
-    if(_pole_is_north) {
-      _origin_lat = 90.0;
-      _tangent_lat = 90.0;
-      _sin_tangent_lat = 1.0;
-    } else {
-      _origin_lat = -90.0;
-      _tangent_lat = -90.0;
-      _sin_tangent_lat = -1.0;
-    }
-    
-    _offset_lat = _origin_lat;
-  }
+  void setPole(const bool pole_is_north);
   
-  inline void setCentralScale(const double central_scale)
-  {
-    _central_scale = central_scale;
-    if( _central_scale == 0.0) {
-      _central_scale = 1.0;
-    }
-  }
+  void setCentralScale(const double central_scale);
   
   ////////////////////////////////////////////////
   /// functions for XY to LatLon / LatLon to XY

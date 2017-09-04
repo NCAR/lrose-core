@@ -26,9 +26,9 @@
 /* RCS info
  *   $Author: dixon $
  *   $Locker:  $
- *   $Date: 2016/03/03 18:19:28 $
- *   $Id: PjgPolarRadarCalc.hh,v 1.9 2016/03/03 18:19:28 dixon Exp $
- *   $Revision: 1.9 $
+ *   $Date: 2017/09/03 16:00:30 $
+ *   $Id: PjgPolarRadarCalc.hh,v 1.11 2017/09/03 16:00:30 dixon Exp $
+ *   $Revision: 1.11 $
  *   $State: Exp $
  */
  
@@ -53,7 +53,7 @@
 #define PjgPolarRadarCalc_hh
 
 
-#include <euclid/euclid_macros.h>
+#include <toolsa/toolsa_macros.h>
 #include <euclid/PjgCalc.hh>
 #include <euclid/PjgTypes.hh>
 
@@ -89,7 +89,7 @@ public:
    * getProjType() - Retrieve the current projection type.
    */
 
-  const int getProjType(void) const
+  int getProjType(void) const
   {
     return PjgTypes::PROJ_POLAR_RADAR;
   }

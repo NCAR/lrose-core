@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: dixon $
 //   $Locker:  $
-//   $Date: 2016/03/03 18:19:27 $
-//   $Id: GridPoint.cc,v 1.7 2016/03/03 18:19:27 dixon Exp $
-//   $Revision: 1.7 $
+//   $Date: 2017/09/03 16:00:30 $
+//   $Id: GridPoint.cc,v 1.8 2017/09/03 16:00:30 dixon Exp $
+//   $Revision: 1.8 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -50,7 +50,7 @@
 
 #include <euclid/GridOffset.hh>
 #include <euclid/GridPoint.hh>
-#include <euclid/euclid_macros.h>
+#include <toolsa/toolsa_macros.h>
 using namespace std;
 
 /**********************************************************************

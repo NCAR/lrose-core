@@ -26,9 +26,9 @@
 /* RCS info
  *   $Author: dixon $
  *   $Locker:  $
- *   $Date: 2016/03/03 18:19:28 $
- *   $Id: Pjg.hh,v 1.24 2016/03/03 18:19:28 dixon Exp $
- *   $Revision: 1.24 $
+ *   $Date: 2017/09/03 16:00:30 $
+ *   $Id: Pjg.hh,v 1.26 2017/09/03 16:00:30 dixon Exp $
+ *   $Revision: 1.26 $
  *   $State: Exp $
  */
  
@@ -54,8 +54,8 @@
 
 #include <iostream>
 
-#include <euclid/PjgCalc.hh>
 #include <euclid/PjgTypes.hh>
+#include <euclid/PjgCalc.hh>
 
 using namespace std;
 
@@ -63,6 +63,12 @@ class Pjg
 {
 
 public:
+
+  /// EARTH RADIUS, DEG/RAD conversions
+  
+  static double EradKm; /* default is 6378.137 */
+  static const double Rad2Deg;
+  static const double Deg2Rad;
 
   ////////////////////
   // Public methods //
@@ -87,6 +93,12 @@ public:
   ////////////////////////////
   // Initialization methods //
   ////////////////////////////
+
+  /**********************************************************************
+   * setEarthRadiusKm() - overrides the default earth radius in km
+   */
+  
+  void setEarthRadiusKm(double earthRadiusKm);
 
   /**********************************************************************
    * initFlat() - Initialize flat earth projection.
@@ -195,7 +207,7 @@ public:
    * getProjType() - Retrieve the current PjgTypes projection type.
    */
 
-  virtual const int getProjType(void) const
+  virtual int getProjType(void) const
   {
     return _calculator->getProjType();
   }
@@ -493,27 +505,14 @@ public:
    *
    */
 
-  void getLL(double &LLlat, double &LLlon) const
-  {
-    double LLx, LLy;
-    LLx = getMinx() - getDx() / 2.0;
-    LLy = getMiny() - getDy() / 2.0;
-    xy2latlon(LLx, LLy, LLlat, LLlon);
-  }
+  void getLL(double &LLlat, double &LLlon) const;
 
   /**********************************************************************
    * getUR() - Calculate the upper right lat/lon of the grid
    *
    */
 
-  void getUR(double &URlat, double &URlon) const
-  {
-    double URx, URy;
-    URx = getMinx() + (((double)getNx() - 0.5) * getDx());
-    URy = getMiny() + (((double)getNy() - 0.5) * getDy());
-    xy2latlon(URx, URy, URlat, URlon);
-  }
-
+  void getUR(double &URlat, double &URlon) const;
 
   /**********************************************************************
    * latlon2RTheta() - Calculate the distance and angle between two
@@ -527,10 +526,7 @@ public:
 
   static void latlon2RTheta(const double lat1, const double lon1,
 			    const double lat2, const double lon2,
-			    double &r, double &theta)
-  {
-    PjgCalc::latlon2RTheta(lat1, lon1, lat2, lon2, r, theta);
-  }
+			    double &r, double &theta);
   
   /**********************************************************************
    * latlonPlusRTheta() - Starting from a given lat/lon, draw an arc
@@ -546,30 +542,11 @@ public:
 
   static void latlonPlusRTheta(const double lat1, const double lon1,
 			       const double r, const double theta,
-			       double &lat2, double &lon2)
-  {
-    PjgCalc::latlonPlusRTheta(lat1, lon1, r, theta, lat2, lon2);
-  }
-  
+			       double &lat2, double &lon2);
   
   static void latlonPlusRTheta(const float lat1, const float lon1,
 			       const float r, const float theta,
-			       float &lat2, float &lon2)
-  {
-    double lat1_double = lat1;
-    double lon1_double = lon1;
-    double r_double = r;
-    double theta_double = theta;
-    
-    double lat2_double, lon2_double;
-    
-    latlonPlusRTheta(lat1_double, lon1_double, r_double, theta_double,
-		     lat2_double, lon2_double);
-
-    lat2 = lat2_double;
-    lon2 = lon2_double;
-  }
-  
+			       float &lat2, float &lon2);
   
   /**********************************************************************
    * latlon2xy() - Convert the given lat/lon location to the grid location
@@ -577,11 +554,7 @@ public:
    */
 
   void latlon2xy(const double lat, const double lon,
-		 double  &x, double &y) const
-  {
-    _calculator->latlon2xy(lat, lon, x, y);
-  }
-  
+		 double  &x, double &y) const;
 
   /**********************************************************************
    * xy2latlon() - Convert the given grid location specified in grid units
@@ -592,24 +565,11 @@ public:
   
   void xy2latlon(const double x, const double y,
 		 double &lat, double &lon,
-		 const double z = -9999.0) const
-  {
-    _calculator->xy2latlon(x, y, lat, lon, z);
-  }
-  
+		 const double z = -9999.0) const;
 
   void xy2latlon(const float x, const float y,
 		 float &lat, float &lon,
-		 const float z = -9999.0) const
-  {
-    double lat_double, lon_double;
-    
-    _calculator->xy2latlon(x, y, lat_double, lon_double, z);
-
-    lat = (float)lat_double;
-    lon = (float)lon_double;
-  }
-  
+		 const float z = -9999.0) const;
 
   /**********************************************************************
    * latlon2xyIndex() - Computes the the data x, y indices for the given
@@ -619,11 +579,7 @@ public:
    */
 
   int latlon2xyIndex(const double lat, const double lon,
-		     int &x_index, int &y_index) const
-  {
-    return _calculator->latlon2xyIndex(lat, lon, x_index, y_index);
-  }
-  
+		     int &x_index, int &y_index) const;
 
   /**********************************************************************
    * latlon2arrayIndex() - Computes the index into the data array.
@@ -632,66 +588,42 @@ public:
    */
 
   int latlon2arrayIndex(const double lat, const double lon,
-			int &array_index) const
-  {
-    return _calculator->latlon2arrayIndex(lat, lon, array_index);
-  }
-  
+			int &array_index) const;
 
   /**********************************************************************
    * xyIndex2latlon() - Computes the lat & lon given ix and iy rel to grid.
    */
 
   void xyIndex2latlon(const int ix, const int iy,
-		      double &lat, double &lon) const
-  {
-    _calculator->xyIndex2latlon(ix, iy, lat, lon);
-  }
-  
+		      double &lat, double &lon) const;
   
   /**********************************************************************
    * km2x() - Converts the given distance in kilometers to the same
    *          distance in the units appropriate to the projection.
    */
 
-  double km2x(const double km) const
-  {
-    return _calculator->km2x(km);
-  }
-  
+  double km2x(const double km) const;
   
   /**********************************************************************
    * x2km() - Converts the given distance to kilometers.  The distance
    *          is assumed to be in the units appropriate to the projection.
    */
 
-  double x2km(const double x) const
-  {
-    return _calculator->x2km(x);
-  }
-  
+  double x2km(const double x) const;
   
   /**********************************************************************
    * km2xGrid() - Converts the given distance in kilometers to the
    *              appropriate number of grid spaces along the X axis.
    */
 
-  double km2xGrid(const double x_km) const
-  {
-    return _calculator->km2xGrid(x_km);
-  }
-  
+  double km2xGrid(const double x_km) const;
   
   /**********************************************************************
    * km2yGrid() - Converts the given distance in kilometers to the
    *              appropriate number of grid spaces along the Y axis.
    */
 
-  double km2yGrid(const double y_km) const
-  {
-    return _calculator->km2yGrid(y_km);
-  }
-  
+  double km2yGrid(const double y_km) const;
   
   /**********************************************************************
    * xGrid2km() - Converts the given distance in number of grid spaces
@@ -702,22 +634,14 @@ public:
    */
 
   double xGrid2km(const double x_grid,
-		  const int y_index = -1) const
-  {
-    return _calculator->xGrid2km(x_grid, y_index);
-  }
-  
+		  const int y_index = -1) const;
   
   /**********************************************************************
    * yGrid2km() - Converts the given distance in number of grid spaces
    *              along the Y axis to kilometers.
    */
 
-  double yGrid2km(const double y_grid) const
-  {
-    return _calculator->yGrid2km(y_grid);
-  }
-  
+  double yGrid2km(const double y_grid) const;
   
   /**********************************************************************
    * xy2xyIndex() - Computes the the data x, y indices for the given
@@ -727,11 +651,7 @@ public:
    */
 
   int xy2xyIndex(const double x, const double y,
-		 int &x_index, int &y_index) const
-  {
-    return _calculator->xy2xyIndex(x, y, x_index, y_index);
-  }
-  
+		 int &x_index, int &y_index) const;
 
   /**********************************************************************
    * xyIndex2arrayIndex() - Computes the index into the data array.
@@ -740,11 +660,7 @@ public:
    * (data outside grid).
    */
 
-  int xyIndex2arrayIndex(const int ix, const int iy, const int iz = 0) const
-  {
-    return _calculator->xyIndex2arrayIndex(ix, iy, iz);
-  }
-  
+  int xyIndex2arrayIndex(const int ix, const int iy, const int iz = 0) const;
 
   ////////////////////
   // Output methods //

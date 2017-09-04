@@ -100,14 +100,14 @@ PjgLambertConfMath::PjgLambertConfMath(double origin_lat,
   _offset_lat = _origin_lat;
   _offset_lon = _origin_lon;
   
-  _origin_lat_rad = origin_lat * Deg2Rad;
-  _origin_lon_rad = origin_lon * Deg2Rad;
-  _origin_colat_rad = (90.0 - _origin_lat) * Deg2Rad;
+  _origin_lat_rad = origin_lat * Pjg::Deg2Rad;
+  _origin_lon_rad = origin_lon * Pjg::Deg2Rad;
+  _origin_colat_rad = (90.0 - _origin_lat) * Pjg::Deg2Rad;
 
   _lat1 = lat1;
   _lat2 = lat2;
-  _lat1_rad = _lat1 * Deg2Rad;
-  _lat2_rad = _lat2 * Deg2Rad;
+  _lat1_rad = _lat1 * Pjg::Deg2Rad;
+  _lat2_rad = _lat2 * Pjg::Deg2Rad;
 
   if (_2tan_line) {
 
@@ -120,13 +120,13 @@ PjgLambertConfMath::PjgLambertConfMath(double origin_lat,
     _F = cos(_lat1_rad) * t1n / _n;
     
     t0n = pow( tan(M_PI_4 + _origin_lat_rad/2), _n);
-    _rho = EradKm * _F / t0n;
+    _rho = Pjg::EradKm * _F / t0n;
 
   } else {
 
     _sin0 = sin(_lat1_rad);
     _tan0 = tan( M_PI_4 - _lat1_rad / 2);
-    _rho = EradKm / tan(_lat1_rad);
+    _rho = Pjg::EradKm / tan(_lat1_rad);
 
   }
   
@@ -241,13 +241,13 @@ void PjgLambertConfMath::_latlon2xy_2tan(double lat, double lon,
   
 {
 
-  double lat_rad = lat * Deg2Rad;
-  double lon_rad = lon * Deg2Rad;
+  double lat_rad = lat * Pjg::Deg2Rad;
+  double lon_rad = lon * Pjg::Deg2Rad;
 
   double theta = _n * (lon_rad - _origin_lon_rad);
 
   double tn = pow( tan(M_PI_4 + lat_rad / 2.0), _n);
-  double r = EradKm * _F / tn;
+  double r = Pjg::EradKm * _F / tn;
 
   double sin_theta, cos_theta;
   EG_sincos(theta, &sin_theta, &cos_theta);
@@ -264,8 +264,8 @@ void PjgLambertConfMath::_latlon2xy_1tan(double lat, double lon,
   
 {
 
-  double lat_rad = lat * Deg2Rad;
-  double lon_rad = lon * Deg2Rad;
+  double lat_rad = lat * Pjg::Deg2Rad;
+  double lon_rad = lon * Pjg::Deg2Rad;
 
   double tan_phi = tan(M_PI_4 - lat_rad / 2);
   double f1 = pow((tan_phi/_tan0), _sin0);
@@ -299,15 +299,15 @@ void PjgLambertConfMath::_xy2latlon_2tan(double x, double y,
     r = sqrt(x * x + yd * yd);
   }
 
-  lon = (theta / _n + _origin_lon_rad) * Rad2Deg;
+  lon = (theta / _n + _origin_lon_rad) * Pjg::Rad2Deg;
   lon = conditionRange180(lon);
 
   if (fabs(r) < TINY_DBL) {
     lat = ((_n < 0.0) ? -90.0 : 90.0);
   }
   else {
-    rn = pow( EradKm * _F / r, 1 / _n);
-    lat = (2.0 * atan(rn) - M_PI_2) * Rad2Deg;
+    rn = pow( Pjg::EradKm * _F / r, 1 / _n);
+    lat = (2.0 * atan(rn) - M_PI_2) * Pjg::Rad2Deg;
   }
 
   lat = conditionRange180(lat);
@@ -342,9 +342,9 @@ void PjgLambertConfMath::_xy2latlon_1tan(double x, double y,
   to_sin0 = pow((loc_x/r), inv_sin0);
   f1 = 2*atan(_tan0 * to_sin0);
 
-  lon = conditionRange180(lon*Rad2Deg);
+  lon = conditionRange180(lon*Pjg::Rad2Deg);
  
-  lat = (M_PI_2 - f1) * Rad2Deg;
+  lat = (M_PI_2 - f1) * Pjg::Rad2Deg;
   lat = conditionRange180(lat);
 
 }

@@ -52,8 +52,8 @@ PjgTransMercatorMath::PjgTransMercatorMath(double origin_lat,
   _origin_lat = origin_lat;
   _origin_lon = origin_lon; 
 
-  _origin_lat_rad = origin_lat * Deg2Rad;
-  _origin_lon_rad = origin_lon * Deg2Rad;
+  _origin_lat_rad = origin_lat * Pjg::Deg2Rad;
+  _origin_lon_rad = origin_lon * Pjg::Deg2Rad;
   
   _central_scale = central_scale;
   
@@ -114,14 +114,14 @@ void PjgTransMercatorMath::latlon2xy(double lat, double lon,
     return;
   }
   
-  double lat_rad = lat * Deg2Rad;
-  double lon_rad = lon * Deg2Rad;
+  double lat_rad = lat * Pjg::Deg2Rad;
+  double lon_rad = lon * Pjg::Deg2Rad;
 
   double deltaLonRad = lon_rad - _origin_lon_rad;
   double sinDeltaLon, cosDeltaLon;
   EG_sincos(deltaLonRad, &sinDeltaLon, &cosDeltaLon);
   
-  double scaledRadius = EradKm * _central_scale;
+  double scaledRadius = Pjg::EradKm * _central_scale;
   double B = cos(lat_rad) * sinDeltaLon; // (8-5)
 
   double xx = scaledRadius * atanh(B); // (8-2)
@@ -150,7 +150,7 @@ void PjgTransMercatorMath::xy2latlon(double x, double y,
   
   // correct for offsets, compute angular position for x,y
 
-  double scaledRadius = EradKm * _central_scale;
+  double scaledRadius = Pjg::EradKm * _central_scale;
   double xxRad = x / scaledRadius;
   double yyRad = y / scaledRadius;
   
@@ -161,8 +161,8 @@ void PjgTransMercatorMath::xy2latlon(double x, double y,
   double latRad = asin(sinD / cosh(xxRad));
   double lonRad = _origin_lon_rad + atan2(sinh(xxRad), cosD);  // (8-7)
 
-  lat = latRad * Rad2Deg;
-  lon = lonRad * Rad2Deg;
+  lat = latRad * Pjg::Rad2Deg;
+  lon = lonRad * Pjg::Rad2Deg;
 
 }
      

@@ -490,6 +490,12 @@ extern double EG_unit_vector_perp(Point_d *c, Point_d *d);
 extern double EG_hypot(double dx, double dy);
 
 /*********************************************************************
+ * override the earth radius
+ ********************************************************************/
+
+extern void EG_set_earth_radius_km(double earth_radius_km);
+
+/*********************************************************************
  * EG_lat_lon_to_dx_dy()
  *
  *  Given the latitude and longitude of a start point in degrees as well

@@ -26,9 +26,9 @@
 /* RCS info
  *   $Author: dixon $
  *   $Locker:  $
- *   $Date: 2016/03/03 18:19:28 $
- *   $Id: PjgLc1Calc.hh,v 1.10 2016/03/03 18:19:28 dixon Exp $
- *   $Revision: 1.10 $
+ *   $Date: 2017/09/03 16:00:30 $
+ *   $Id: PjgLc1Calc.hh,v 1.12 2017/09/03 16:00:30 dixon Exp $
+ *   $Revision: 1.12 $
  *   $State: Exp $
  */
  
@@ -51,7 +51,7 @@
 
 #include <string>
 
-#include <euclid/euclid_macros.h>
+#include <toolsa/toolsa_macros.h>
 #include <euclid/PjgCalc.hh>
 #include <euclid/PjgTypes.hh>
 
@@ -89,7 +89,7 @@ public:
    * getProjType() - Retrieve the current projection type.
    */
 
-  const int getProjType(void) const
+  int getProjType(void) const
   {
     return PjgTypes::PROJ_LC1;
   }

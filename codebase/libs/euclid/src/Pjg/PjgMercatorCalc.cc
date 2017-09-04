@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: dixon $
 //   $Locker:  $
-//   $Date: 2016/03/03 18:19:27 $
-//   $Id: PjgMercatorCalc.cc,v 1.4 2016/03/03 18:19:27 dixon Exp $
-//   $Revision: 1.4 $
+//   $Date: 2017/09/03 16:00:30 $
+//   $Id: PjgMercatorCalc.cc,v 1.5 2017/09/03 16:00:30 dixon Exp $
+//   $Revision: 1.5 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -101,8 +101,8 @@ void PjgMercatorCalc::latlon2xy(const double lat, const double lon,
   x = r * sin(theta_rad);
   y = r * cos(theta_rad);
 #else
-  x = EARTH_RADIUS * (lon - getOriginLon()) * DEG_TO_RAD;
-  y = EARTH_RADIUS * log(tan((PI + 2 * (lat - getOriginLat()) * DEG_TO_RAD) / 4));
+  x = Pjg::EradKm * (lon - getOriginLon()) * DEG_TO_RAD;
+  y = Pjg::EradKm * log(tan((PI + 2 * (lat - getOriginLat()) * DEG_TO_RAD) / 4));
 #endif
 }
 
@@ -131,8 +131,8 @@ void PjgMercatorCalc::xy2latlon(const double x, const double y,
 		    _projOriginLonRad,
 		    r, theta_rad, lat, lon);
 #else
-  lon = (x / EARTH_RADIUS) * RAD_TO_DEG + getOriginLon();
-  lat = (PI/2 - 2 * atan(pow(M_E, -y / EARTH_RADIUS))) * RAD_TO_DEG + getOriginLat();
+  lon = (x / Pjg::EradKm) * RAD_TO_DEG + getOriginLon();
+  lat = (PI/2 - 2 * atan(pow(M_E, -y / Pjg::EradKm))) * RAD_TO_DEG + getOriginLat();
 #endif
 }
 

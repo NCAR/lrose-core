@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 /* RCS info
- *   $Author: dixon $
+ *   $Author: hardt $
  *   $Locker:  $
- *   $Date: 2016/03/03 19:21:31 $
- *   $Id: WorldPolygon2D.hh,v 1.11 2016/03/03 19:21:31 dixon Exp $
- *   $Revision: 1.11 $
+ *   $Date: 2017/06/16 02:22:52 $
+ *   $Id: WorldPolygon2D.hh,v 1.12 2017/06/16 02:22:52 hardt Exp $
+ *   $Revision: 1.12 $
  *   $State: Exp $
  */
  
@@ -146,7 +146,19 @@ class WorldPolygon2D
 		    const double missing_data_value,
 		    const double bad_data_value,
 		    const fl32 *data_grid) const;
-  
+
+  /**********************************************************************
+   * getGridAvg() - Get the average data value from the given grid within
+   *                this polygon.
+   *
+   * Returns the average data value found, or missing_data_value if no
+   * data values were found.
+   */
+
+  double getGridAvg(const Pjg &projection,
+                    const double missing_data_value,
+                    const double bad_data_value,
+                    const fl32 *data_grid) const;
 
   /**********************************************************************
    * getGridNumValues() - Get the number of grid squares within this polygon

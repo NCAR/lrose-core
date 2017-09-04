@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: dixon $
 //   $Locker:  $
-//   $Date: 2016/03/03 18:19:27 $
-//   $Id: PjgLc1Calc.cc,v 1.14 2016/03/03 18:19:27 dixon Exp $
-//   $Revision: 1.14 $
+//   $Date: 2017/09/03 16:00:30 $
+//   $Id: PjgLc1Calc.cc,v 1.15 2017/09/03 16:00:30 dixon Exp $
+//   $Revision: 1.15 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -101,7 +101,7 @@ PjgLc1Calc::PjgLc1Calc(const double origin_lat, const double origin_lon,
 
   _sin0 = sin(lc2_lat1_rad);
   _tan0 = tan( M_PI_4 - lc2_lat1_rad / 2);
-  _rho = EARTH_RADIUS / tan(lc2_lat1_rad);
+  _rho = Pjg::EradKm / tan(lc2_lat1_rad);
 }
 
 

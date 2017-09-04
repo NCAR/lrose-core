@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 /* RCS info
- *   $Author: dixon $
+ *   $Author: prestop $
  *   $Locker:  $
- *   $Date: 2016/03/03 18:19:28 $
- *   $Id: PjgLatlonCalc.hh,v 1.7 2016/03/03 18:19:28 dixon Exp $
- *   $Revision: 1.7 $
+ *   $Date: 2017/06/09 16:27:58 $
+ *   $Id: PjgLatlonCalc.hh,v 1.8 2017/06/09 16:27:58 prestop Exp $
+ *   $Revision: 1.8 $
  *   $State: Exp $
  */
  
@@ -87,7 +87,7 @@ public:
    * getProjType() - Retrieve the current projection type.
    */
 
-  const int getProjType(void) const
+  int getProjType(void) const
   {
     return PjgTypes::PROJ_LATLON;
   }

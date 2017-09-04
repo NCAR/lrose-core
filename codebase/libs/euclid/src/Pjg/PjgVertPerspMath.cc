@@ -55,11 +55,11 @@ PjgVertPerspMath::PjgVertPerspMath(double origin_lat,
   _offset_lat = _origin_lat;
   _offset_lon = _origin_lon;
 
-  _origin_lat_rad = origin_lat * Deg2Rad;
-  _origin_lon_rad = origin_lon * Deg2Rad;
+  _origin_lat_rad = origin_lat * Pjg::Deg2Rad;
+  _origin_lon_rad = origin_lon * Pjg::Deg2Rad;
   
   _persp_radius = persp_radius;
-  _p = _persp_radius / EradKm;
+  _p = _persp_radius / Pjg::EradKm;
   
   EG_sincos(_origin_lat_rad, &_sin_origin_lat, &_cos_origin_lat);
 
@@ -120,8 +120,8 @@ void PjgVertPerspMath::latlon2xy(double lat, double lon,
     return;
   }
   
-  double lat_rad = lat * Deg2Rad;
-  double lon_rad = lon * Deg2Rad;
+  double lat_rad = lat * Pjg::Deg2Rad;
+  double lon_rad = lon * Pjg::Deg2Rad;
   double sinLat, cosLat;
   EG_sincos(lat_rad, &sinLat, &cosLat);
   
@@ -140,7 +140,7 @@ void PjgVertPerspMath::latlon2xy(double lat, double lon,
   
   double p_minus_1 = _p - 1.0;
   double kk = p_minus_1 / denom;
-  double rk = EradKm * kk;
+  double rk = Pjg::EradKm * kk;
 
   double xx = rk * cosLat * sinDeltaLon;
   double yy =
@@ -170,8 +170,8 @@ void PjgVertPerspMath::xy2latlon(double x, double y,
   double p_plus_1 = _p + 1.0;
 
   double term1 =
-    _p - sqrt(1.0 - (rho * rho * p_plus_1) / (EradKm * EradKm * p_minus_1));
-  double term2 = (EradKm * p_minus_1 / rho);
+    _p - sqrt(1.0 - (rho * rho * p_plus_1) / (Pjg::EradKm * Pjg::EradKm * p_minus_1));
+  double term2 = (Pjg::EradKm * p_minus_1 / rho);
   double term3 = term2 + 1.0 / term2;
 
   double cc = asin(term1 / term3);
@@ -184,8 +184,8 @@ void PjgVertPerspMath::xy2latlon(double x, double y,
     atan2(x * sinCC,
           rho * _cos_origin_lat * cosCC - y * _sin_origin_lat * sinCC);
 
-  lat = latRad * Rad2Deg;
-  lon = lonRad * Rad2Deg;
+  lat = latRad * Pjg::Rad2Deg;
+  lon = lonRad * Pjg::Rad2Deg;
   lon = conditionRange180(lon);
   conditionLon2Origin(lon);
 

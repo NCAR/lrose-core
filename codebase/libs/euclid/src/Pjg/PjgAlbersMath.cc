@@ -55,8 +55,8 @@ PjgAlbersMath::PjgAlbersMath(double origin_lat,
   _offset_lat = _origin_lat;
   _offset_lon = _origin_lon;
 
-  _origin_lat_rad = origin_lat * Deg2Rad;
-  _origin_lon_rad = origin_lon * Deg2Rad;
+  _origin_lat_rad = origin_lat * Pjg::Deg2Rad;
+  _origin_lon_rad = origin_lon * Pjg::Deg2Rad;
   
   EG_sincos(_origin_lat_rad, &_sin_origin_lat, &_cos_origin_lat);
 
@@ -64,14 +64,14 @@ PjgAlbersMath::PjgAlbersMath(double origin_lat,
   _lat2 = lat2;
   
   double sinLat1, cosLat1;
-  EG_sincos(lat1 * Deg2Rad, &sinLat1, &cosLat1);
+  EG_sincos(lat1 * Pjg::Deg2Rad, &sinLat1, &cosLat1);
 
   double sinLat2, cosLat2;
-  EG_sincos(lat2 * Deg2Rad, &sinLat2, &cosLat2);
+  EG_sincos(lat2 * Pjg::Deg2Rad, &sinLat2, &cosLat2);
   
   _n = (sinLat1 + sinLat2) / 2.0;
   _c = cosLat1 * cosLat1 + 2.0 * _n * sinLat1;
-  _rho0 = (EradKm * sqrt(_c - 2.0 * _n * _sin_origin_lat) / _n);
+  _rho0 = (Pjg::EradKm * sqrt(_c - 2.0 * _n * _sin_origin_lat) / _n);
   
 }
 
@@ -134,8 +134,8 @@ void PjgAlbersMath::latlon2xy(double lat, double lon,
     return;
   }
 
-  double lat_rad = lat * Deg2Rad;
-  double lon_rad = lon * Deg2Rad;
+  double lat_rad = lat * Pjg::Deg2Rad;
+  double lon_rad = lon * Pjg::Deg2Rad;
   
   double sinLat = sin(lat_rad);
 
@@ -149,7 +149,7 @@ void PjgAlbersMath::latlon2xy(double lat, double lon,
   double sinTheta, cosTheta;
   EG_sincos(thetaRad, &sinTheta, &cosTheta);
 
-  double rho = EradKm * sqrt(_c - 2.0 * _n * sinLat) / _n;
+  double rho = Pjg::EradKm * sqrt(_c - 2.0 * _n * sinLat) / _n;
 
   double xx = rho * sinTheta;
   double yy = _rho0 - rho * cosTheta;
@@ -182,14 +182,14 @@ void PjgAlbersMath::xy2latlon(double x, double y,
   }
   double theta = atan2(x * mult, dy * mult);
 
-  double aa = (rho * _n / EradKm);
+  double aa = (rho * _n / Pjg::EradKm);
   double aa2 = aa * aa;
 
   double latRad = asin((_c - aa2) / (2.0 * _n));
   double lonRad = _origin_lon_rad + theta / _n;
   
-  lat = latRad * Rad2Deg;
-  lon = lonRad * Rad2Deg;
+  lat = latRad * Pjg::Rad2Deg;
+  lon = lonRad * Pjg::Rad2Deg;
   lon = conditionRange180(lon);
   conditionLon2Origin(lon);
 

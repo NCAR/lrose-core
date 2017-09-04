@@ -97,12 +97,12 @@ void PjgPolarRadarMath::latlon2xy(double lat, double lon,
   _latlon_2_r_theta(lat, lon, r, theta_rad);
   
   if (fabs(z - -9999.0) > 0.0001) {
-    x = r / cos(z * Deg2Rad);
+    x = r / cos(z * Pjg::Deg2Rad);
   } else {
     x = r;
   }
 
-  y = theta_rad * Rad2Deg;
+  y = theta_rad * Pjg::Rad2Deg;
   if (y < 0) {
     y += 360.0;
   }
@@ -122,12 +122,12 @@ void PjgPolarRadarMath::xy2latlon(double x, double y,
 
   double r;
   if (fabs(z - -9999.0) > 0.0001) {
-    r = x * cos(z * Deg2Rad);
+    r = x * cos(z * Pjg::Deg2Rad);
   } else {
     r = x;
   }
   
-  double theta_rad = y * Deg2Rad;
+  double theta_rad = y * Pjg::Deg2Rad;
   _latlon_plus_r_theta(r, theta_rad, lat, lon);
     
 }

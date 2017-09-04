@@ -40,7 +40,7 @@
 #define PjgMath_hh
 
 #include <iostream>
-#include <euclid/PjgTypes.hh>
+#include <euclid/Pjg.hh>
 #include <euclid/sincos.h>
 using namespace std;
 
@@ -138,12 +138,6 @@ public:
   /// print offset origin
   
   void printOffsetOrigin(ostream &out) const;
-
-  /// EARTH RADIUS, DEG/RAD conversions
-  
-  static const double EradKm;
-  static const double Rad2Deg;
-  static const double Deg2Rad;
 
   //////////////
   // get methods

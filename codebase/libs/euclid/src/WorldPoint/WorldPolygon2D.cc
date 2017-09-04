@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: hardt $
 //   $Locker:  $
-//   $Date: 2016/06/07 04:02:43 $
-//   $Id: WorldPolygon2D.cc,v 1.18 2016/06/07 04:02:43 hardt Exp $
-//   $Revision: 1.18 $
+//   $Date: 2017/06/16 02:22:52 $
+//   $Id: WorldPolygon2D.cc,v 1.19 2017/06/16 02:22:52 hardt Exp $
+//   $Revision: 1.19 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -398,6 +398,44 @@ double WorldPolygon2D::getGridMin(const Pjg &projection,
   return min_data_value;
 }
 
+/**********************************************************************
+ * getGridAvg() - Get the Average data value from the given grid within
+ *                this polygon.
+ *
+ * Returns the average data value found, or missing_data_value if no
+ * data values were found.
+ */
+
+double WorldPolygon2D::getGridAvg(const Pjg &projection,
+                                  const double missing_data_value,
+                                  const double bad_data_value,
+                                  const fl32 *data_grid) const {
+  _getGriddedPolygon(projection);
+
+  // Find the average interest value within the grid
+
+  double sum = missing_data_value;
+  int num_values = 0;
+
+  for (int x = _minPolygonX; x <= _maxPolygonX; ++x) {
+    for (int y = _minPolygonY; y <= _maxPolygonY; ++y) {
+      int data_index = projection.xyIndex2arrayIndex(x, y);
+
+      if (_polygonGrid[data_index]) {
+        double data_value = data_grid[data_index];
+
+        if (data_value != missing_data_value &&
+            data_value != bad_data_value) {
+          num_values = num_values + 1;
+          sum = sum + data_value;
+        }
+      }
+
+    } /* endfor - y */
+  } /* endfor - x */
+
+  return (sum / num_values);
+}
 
 /**********************************************************************
  * getGridNumValues() - Get the number of grid squares within this polygon
