@@ -44,11 +44,13 @@ CPPC_SRCS = \
 	LocalUseSec.cc \
 	GribProj.cc \
 	LatLonProj.cc \
+	RotLatLonProj.cc \
 	MercatorProj.cc \
 	PolarStereoProj.cc \
         LambertConfProj.cc \
 	GausLatLonProj.cc \
 	SpaceViewProj.cc \
+	RotLatLonProjArakawaNonE.cc \
         GDS.cc \
 	PDS.cc \
 	ProdDefTemp.cc \

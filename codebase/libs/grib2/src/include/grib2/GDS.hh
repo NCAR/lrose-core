@@ -76,6 +76,12 @@ public:
 
   // Get Functions
 
+  /** @brief get the earth radius or earth major_axis and earth minor_axis
+   *  @param[out] major_axis earth major axis in m if earth assumed oblate spheriod, 0 otherwise
+   *  @param[out] minor_axis earth minor axis in m if earth assumed oblate spheriod, 0 otherwise
+   *  @return earth radius in m if earth assumed spherical, 0 otherwise */
+  fl32 getEarthRadius(fl32 &major_axis, fl32 &minor_axis);
+
   /** @brief Get the number of data points in the grid */
   inline si32 getNumDataPoints() { return _numDataPoints; };
 
@@ -126,6 +132,8 @@ public:
   // Implemented projection IDs
   /** @brief Projection ID 0, Lat/Lon Projection */
   static const si32 EQUIDISTANT_CYL_PROJ_ID;
+  /** @brief Projection ID 1, Rotated Lat/Lon Projection */
+  static const si32 ROT_EQUIDISTANT_CYL_PROJ_ID;
   /** @brief Projection ID 10, Mercator Projection */
   static const si32 MERCATOR_PROJ_ID;
   /** @brief Projection ID 20, Polar Sterographic Projection */
@@ -136,6 +144,8 @@ public:
   static const si32 GAUSSIAN_LAT_LON_PROJ_ID;
   /** @brief Projection ID 90, Space View or Orthographic Projection */
   static const si32 SPACE_VIEW_PROJ_ID;
+  /** @brief Projection ID 32769, Rotated Latitude/Longitude (Arakawa Non-E Staggered grid) */
+  static const si32 ROT_LAT_LON_ARAKAWA_NON_E_PROJ_ID;
 
   // All degree values stored in grib2 are stored with this scale factor 
   /** @brief Grib2 Degree scale factor */

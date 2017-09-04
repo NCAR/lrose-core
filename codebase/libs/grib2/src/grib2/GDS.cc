@@ -27,28 +27,33 @@
 // Used wgrib by Wesley Ebisuzaki at NOAA as
 // reference (http://wesley.wwb.noaa.gov/wgrib.html)
 // 
-// $Id: GDS.cc,v 1.18 2016/09/14 15:13:42 jcraig Exp $
+// $Id: GDS.cc,v 1.20 2017/08/18 16:13:23 jcraig Exp $
 //
 //////////////////////////////////////////////////
 #include <iostream>
+#include <cmath>
 #include <grib2/GDS.hh>
 #include <grib2/LatLonProj.hh>
+#include <grib2/RotLatLonProj.hh>
 #include <grib2/PolarStereoProj.hh>
 #include <grib2/LambertConfProj.hh>
 #include <grib2/GausLatLonProj.hh>
 #include <grib2/MercatorProj.hh>
 #include <grib2/SpaceViewProj.hh>
+#include <grib2/RotLatLonProjArakawaNonE.hh>
 
 using namespace std;
 
 namespace Grib2 {
 
 const int GDS::EQUIDISTANT_CYL_PROJ_ID = 0;
+const int GDS::ROT_EQUIDISTANT_CYL_PROJ_ID = 1;
 const int GDS::MERCATOR_PROJ_ID = 10;
 const int GDS::POLAR_STEREOGRAPHIC_PROJ_ID = 20;
 const int GDS::LAMBERT_CONFORMAL_PROJ_ID = 30;
 const int GDS::GAUSSIAN_LAT_LON_PROJ_ID = 40;
 const int GDS::SPACE_VIEW_PROJ_ID = 90;
+const int GDS::ROT_LAT_LON_ARAKAWA_NON_E_PROJ_ID = 32769;
 const fl32 GDS::DEGREES_SCALE_FACTOR = 0.000001;
 const fl32 GDS::GRID_SCALE_FACTOR =    0.000001;
 
@@ -79,11 +84,13 @@ GDS::GDS(si32 numberDataPoints, si32 gridDefNum, GribProj *projectionTemplate) :
 
   switch (_gridTemplateNum) {
     case EQUIDISTANT_CYL_PROJ_ID:
+    case ROT_EQUIDISTANT_CYL_PROJ_ID:
     case POLAR_STEREOGRAPHIC_PROJ_ID:
     case LAMBERT_CONFORMAL_PROJ_ID:
     case GAUSSIAN_LAT_LON_PROJ_ID:
     case MERCATOR_PROJ_ID:
     case SPACE_VIEW_PROJ_ID:
+    case ROT_LAT_LON_ARAKAWA_NON_E_PROJ_ID:
       break;
     default:
       _projection = NULL;
@@ -212,6 +219,12 @@ void GDS::print(FILE *stream) const
     case 120:
       fprintf(stream, "     Azimuth-range projection\n");
       break;
+    case 32768:
+      fprintf(stream, "     Rotated Latitude/Longitude (Arakawa Staggered E-Grid)\n");
+      break;
+    case 32769:
+      fprintf(stream, "     Rotated Latitude/Longitude (Arakawa Non-E Staggered grid)\n");
+      break;
     case 65535:
       fprintf(stream, "     Missing\n");
       break;
@@ -272,6 +285,9 @@ int GDS::unpack(ui08 *gdsPtr)
      case EQUIDISTANT_CYL_PROJ_ID:
        _projection = new LatLonProj();
        break;
+     case ROT_EQUIDISTANT_CYL_PROJ_ID:
+       _projection = new RotLatLonProj();
+       break;
      case MERCATOR_PROJ_ID:
        _projection = new MercatorProj();
        break;
@@ -286,6 +302,9 @@ int GDS::unpack(ui08 *gdsPtr)
        break;
      case SPACE_VIEW_PROJ_ID:
        _projection = new SpaceViewProj();
+       break;
+     case ROT_LAT_LON_ARAKAWA_NON_E_PROJ_ID:
+       _projection = new RotLatLonAwaNonEProj();
        break;
      default:
        cerr << "ERROR: GDS::unpack()" << endl;
@@ -331,11 +350,13 @@ int GDS::pack(ui08 *gdsPtr)
   // Pack based on projection type
    switch (_gridTemplateNum) {
      case EQUIDISTANT_CYL_PROJ_ID:
+     case ROT_EQUIDISTANT_CYL_PROJ_ID:
      case MERCATOR_PROJ_ID:
      case POLAR_STEREOGRAPHIC_PROJ_ID:
      case LAMBERT_CONFORMAL_PROJ_ID:
      case GAUSSIAN_LAT_LON_PROJ_ID:
      case SPACE_VIEW_PROJ_ID:
+     case ROT_LAT_LON_ARAKAWA_NON_E_PROJ_ID:
        return _projection->pack(&gdsPtr[14]);
 
      default:
@@ -346,6 +367,150 @@ int GDS::pack(ui08 *gdsPtr)
    }
 
 }
+
+fl32 GDS::getEarthRadius(fl32 &major_axis, fl32 &minor_axis)
+{
+  si32 earth_shape = 255;
+  si32 earth_factor = 0;
+  si32 earth_value = 0;
+  si32 major_factor = 0;
+  si32 major_value = 0;
+  si32 minor_factor = 0;
+  si32 minor_value = 0;
+  major_axis = 0;
+  minor_axis = 0;
+  switch (_gridTemplateNum) {
+     case EQUIDISTANT_CYL_PROJ_ID:
+       earth_shape = ((LatLonProj *)_projection)->_earthShape;
+       earth_factor = ((LatLonProj *)_projection)->_radiusScaleFactor;
+       earth_value = ((LatLonProj *)_projection)->_radiusScaleValue;
+       major_factor = ((LatLonProj *)_projection)->_majorAxisScaleFactor;
+       major_value = ((LatLonProj *)_projection)->_majorAxisScaleValue;
+       minor_factor = ((LatLonProj *)_projection)->_minorAxisScaleFactor;
+       minor_value = ((LatLonProj *)_projection)->_minorAxisScaleValue;
+       break;
+     case ROT_EQUIDISTANT_CYL_PROJ_ID:
+       earth_shape = ((RotLatLonProj *)_projection)->_earthShape;
+       earth_factor = ((RotLatLonProj *)_projection)->_radiusScaleFactor;
+       earth_value = ((RotLatLonProj *)_projection)->_radiusScaleValue;
+       major_factor = ((RotLatLonProj *)_projection)->_majorAxisScaleFactor;
+       major_value = ((RotLatLonProj *)_projection)->_majorAxisScaleValue;
+       minor_factor = ((RotLatLonProj *)_projection)->_minorAxisScaleFactor;
+       minor_value = ((RotLatLonProj *)_projection)->_minorAxisScaleValue;
+       break;
+     case MERCATOR_PROJ_ID:
+       earth_shape = ((MercatorProj *)_projection)->_earthShape;
+       earth_factor = ((MercatorProj *)_projection)->_radiusScaleFactor;
+       earth_value = ((MercatorProj *)_projection)->_radiusScaleValue;
+       major_factor = ((MercatorProj *)_projection)->_majorAxisScaleFactor;
+       major_value = ((MercatorProj *)_projection)->_majorAxisScaleValue;
+       minor_factor = ((MercatorProj *)_projection)->_minorAxisScaleFactor;
+       minor_value = ((MercatorProj *)_projection)->_minorAxisScaleValue;
+       break;
+     case POLAR_STEREOGRAPHIC_PROJ_ID:
+       earth_shape = ((PolarStereoProj *)_projection)->_earthShape;
+       earth_factor = ((PolarStereoProj *)_projection)->_radiusScaleFactor;
+       earth_value = ((PolarStereoProj *)_projection)->_radiusScaleValue;
+       major_factor = ((PolarStereoProj *)_projection)->_majorAxisScaleFactor;
+       major_value = ((PolarStereoProj *)_projection)->_majorAxisScaleValue;
+       minor_factor = ((PolarStereoProj *)_projection)->_minorAxisScaleFactor;
+       minor_value = ((PolarStereoProj *)_projection)->_minorAxisScaleValue;
+       break;
+     case LAMBERT_CONFORMAL_PROJ_ID:
+       earth_shape = ((LambertConfProj *)_projection)->_earthShape;
+       earth_factor = ((LambertConfProj *)_projection)->_radiusScaleFactor;
+       earth_value = ((LambertConfProj *)_projection)->_radiusScaleValue;
+       major_factor = ((LambertConfProj *)_projection)->_majorAxisScaleFactor;
+       major_value = ((LambertConfProj *)_projection)->_majorAxisScaleValue;
+       minor_factor = ((LambertConfProj *)_projection)->_minorAxisScaleFactor;
+       minor_value = ((LambertConfProj *)_projection)->_minorAxisScaleValue;
+       break;
+     case GAUSSIAN_LAT_LON_PROJ_ID:
+       earth_shape = ((GausLatLonProj *)_projection)->_earthShape;
+       earth_factor = ((GausLatLonProj *)_projection)->_radiusScaleFactor;
+       earth_value = ((GausLatLonProj *)_projection)->_radiusScaleValue;
+       major_factor = ((GausLatLonProj *)_projection)->_majorAxisScaleFactor;
+       major_value = ((GausLatLonProj *)_projection)->_majorAxisScaleValue;
+       minor_factor = ((GausLatLonProj *)_projection)->_minorAxisScaleFactor;
+       minor_value = ((GausLatLonProj *)_projection)->_minorAxisScaleValue;
+       break;
+     case ROT_LAT_LON_ARAKAWA_NON_E_PROJ_ID:
+       earth_shape = ((RotLatLonAwaNonEProj *)_projection)->_earthShape;
+       earth_factor = ((RotLatLonAwaNonEProj *)_projection)->_radiusScaleFactor;
+       earth_value = ((RotLatLonAwaNonEProj *)_projection)->_radiusScaleValue;
+       major_factor = ((RotLatLonAwaNonEProj *)_projection)->_majorAxisScaleFactor;
+       major_value = ((RotLatLonAwaNonEProj *)_projection)->_majorAxisScaleValue;
+       minor_factor = ((RotLatLonAwaNonEProj *)_projection)->_minorAxisScaleFactor;
+       minor_value = ((RotLatLonAwaNonEProj *)_projection)->_minorAxisScaleValue;
+       break;
+     case SPACE_VIEW_PROJ_ID:
+       earth_shape = ((SpaceViewProj *)_projection)->_earthShape;
+       earth_factor = ((SpaceViewProj *)_projection)->_radiusScaleFactor;
+       earth_value = ((SpaceViewProj *)_projection)->_radiusScaleValue;
+       major_factor = ((SpaceViewProj *)_projection)->_majorAxisScaleFactor;
+       major_value = ((SpaceViewProj *)_projection)->_majorAxisScaleValue;
+       minor_factor = ((SpaceViewProj *)_projection)->_minorAxisScaleFactor;
+       minor_value = ((SpaceViewProj *)_projection)->_minorAxisScaleValue;
+       break;
+     default:
+       earth_shape = 255;
+   }
+
+   switch (earth_shape) {
+   case 0:
+     return 6367470.0;
+   case 1:
+     if(earth_factor == 0)
+       return (fl32)earth_value;
+     else
+       return (fl32)earth_value / (fl32)pow(10, earth_factor);
+   case 2:
+     major_axis = 6378160.0;
+     minor_axis = 6356775.0;
+     return 0;
+   case 3:
+     if(major_factor == 0)
+       major_axis = (fl32)major_value * 1000.0;
+     else
+       major_axis = (fl32)major_value / ((fl32)pow(10, major_factor) / 1000.0);
+     if(minor_factor == 0)
+       minor_axis = (fl32)minor_value * 1000.0;
+     else
+       minor_axis = (fl32)minor_value / ((fl32)pow(10, minor_factor) / 1000.0);
+     return 0;
+   case 4:
+     major_axis = 6378137.0;
+     minor_axis = 6356752.314;
+     return 0;
+   case 5:
+     major_axis = 6378137.0;
+     minor_axis = 6356752.3142;
+     return 0;
+   case 6:
+     return 6371229.0;
+   case 7:
+     if(major_factor == 0)
+       major_axis = (fl32)major_value;
+     else
+       major_axis = (fl32)major_value / (fl32)pow(10, major_factor);
+     if(minor_factor == 0)
+       minor_axis = (fl32)minor_value;
+     else
+       minor_axis = (fl32)minor_value / (fl32)pow(10, minor_factor);
+     return 0;
+   case 8:
+     return 6371200.0;
+   case 9:
+     major_axis = 6377563.396;
+     minor_axis = 6356256.909;
+     return 0;
+   case 255:
+   default:
+     return 0;
+   }
+   return 0;
+}
+
 
 } // namespace Grib2
 
