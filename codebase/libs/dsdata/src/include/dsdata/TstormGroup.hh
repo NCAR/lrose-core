@@ -25,7 +25,7 @@
 // TstormGroup class
 //   Contains information on a group of storms
 //
-// $Id: TstormGroup.hh,v 1.12 2016/03/03 18:06:34 dixon Exp $
+// $Id: TstormGroup.hh,v 1.13 2017/06/09 16:27:58 prestop Exp $
 //////////////////////////////////////////////////////////////
 #ifndef _TSTORM_GROUP_HH_
 #define _TSTORM_GROUP_HH_
@@ -136,26 +136,26 @@ class TstormGroup {
    // Access methods //
    ////////////////////
 
-   const int getProjType() const 
+   int getProjType() const 
            { return grid.getProjType(); }
   
    const TstormGrid &getGrid() const { return grid; }
   
-   const int getNStorms() const { return tstorms.size(); }
+   int getNStorms() const { return tstorms.size(); }
+
+	 int getNSides() const { return nSides; }
   
-   const int getNSides() const { return nSides; }
-  
-   const time_t getDataTime() const { return dataTime; }
+   time_t getDataTime() const { return dataTime; }
    void setDataTime(const time_t data_time) { dataTime = data_time; }
 
-   const time_t getExpireTime() const { return expireTime; }
+   time_t getExpireTime() const { return expireTime; }
    void setExpireTime(const time_t expire_time) { expireTime = expire_time; }
 
-   const float getDbzThreshold() const { return dbzThreshold; }
+   float getDbzThreshold() const { return dbzThreshold; }
  
-   const float getStartAzimuth() const { return startAz; }
+   float getStartAzimuth() const { return startAz; }
   
-   const float getDeltaAzimuth() const { return deltaAz; }
+   float getDeltaAzimuth() const { return deltaAz; }
   
    vector< Tstorm* >&         getTstorms() { return tstorms; }
    

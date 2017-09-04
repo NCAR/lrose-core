@@ -23,7 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: TriggerInfo.hh,v 1.9 2016/03/03 18:06:34 dixon Exp $
+// $Id: TriggerInfo.hh,v 1.10 2017/06/09 16:27:58 prestop Exp $
 //
 //   Description: Contains basic trigger info
 //
@@ -76,8 +76,8 @@ public:
    //
    // Fetching the trigger info explicitly
    //
-   const time_t     getIssueTime() const { return issueTime; }
-   const time_t     getForecastTime() const { return forecastTime; }
+   time_t     getIssueTime() const { return issueTime; }
+   time_t     getForecastTime() const { return forecastTime; }
    const string&    getSaysWho() const { return saysWho; }
    const string&    getFilePath() const { return filePath; }
 

@@ -25,7 +25,7 @@
 // TstormGrid class
 //   Contains information about the grid used for thunderstorms
 //
-// $Id: TstormGrid.hh,v 1.9 2016/03/03 18:06:34 dixon Exp $
+// $Id: TstormGrid.hh,v 1.10 2017/06/09 16:27:58 prestop Exp $
 ///////////////////////////////////////////////////////////////////
 #ifndef _TSTORM_GRID_HH
 #define _TSTORM_GRID_HH
@@ -68,7 +68,7 @@ class TstormGrid : public Pjg
    // Access methods //
    ////////////////////
 
-  const int getProjType() const { return projection; }
+   int getProjType() const { return projection; }
 
    const string &getXUnits() const { return xUnits; }
    const string &getYUnits() const { return yUnits; }

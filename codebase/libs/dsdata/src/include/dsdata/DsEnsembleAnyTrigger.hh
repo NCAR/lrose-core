@@ -231,9 +231,9 @@ private:
 
   /**
    * the triggering handler for each URL which is basically the information that
-   * goes into each thread.
+   * goes into each thread, set as pointers to help it be thread safe.
    */
-  std::vector<DsEnsembleAnyTrigger1> _elem;
+  std::vector<DsEnsembleAnyTrigger1 *> _elem;
 
   /**
    * Seconds to sleep in polling loops
