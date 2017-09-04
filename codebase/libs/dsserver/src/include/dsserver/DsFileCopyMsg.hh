@@ -285,8 +285,8 @@ public:
   const file_info_t &getFileInfo() const { return (_fileInfo); }
   const LdataInfo &getLdataInfo() const { return (_ldataInfo); }
   const void *getFileBuf() const { return (_fileBuf); }
-  const int getFileLen() const { return (_fileLen); }
-  const bool DoPut() const { return (_doPut); }
+  int getFileLen() const { return (_fileLen); }
+  bool DoPut() const { return (_doPut); }
 
 protected:
 
@@ -309,7 +309,7 @@ private:
   void _intErr(const char *err_str, const int iarg);
   void _strErr(const char *err_str, const string &sarg);
 
-  const bool ForcePut() const { return (_forcePut); } // deprecated
+  bool ForcePut() const { return (_forcePut); } // deprecated
 
 };
 
