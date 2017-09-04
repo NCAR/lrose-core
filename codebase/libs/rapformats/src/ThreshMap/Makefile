@@ -27,16 +27,25 @@ TARGET_FILE = ../librapformats.a
 
 HDRS = \
 	../include/rapformats/FieldThresh.hh \
+	../include/rapformats/FieldThresh2.hh \
+	../include/rapformats/FieldThresh2WithGrid.hh \
 	../include/rapformats/MultiThresh.hh \
 	../include/rapformats/MultiThreshItem.hh \
 	../include/rapformats/MultiThreshFcstBiasMapping.hh \
-	../include/rapformats/MultiThresholdsBiasMapping.hh
+	../include/rapformats/MultiThresholdsBiasMapping.hh \
+	../include/rapformats/TiledMultiThresh.hh \
+	../include/rapformats/TileInfo.hh
 
 CPPC_SRCS = \
 	FieldThresh.cc \
+	FieldThresh2.cc \
+	FieldThresh2WithGrid.cc \
 	MultiThresh.cc \
 	MultiThreshFcstBiasMapping.cc \
-	MultiThresholdsBiasMapping.cc
+	MultiThreshItem.cc \
+	MultiThresholdsBiasMapping.cc \
+	TiledMultiThresh.cc \
+	TileInfo.cc
 
 #
 # general targets

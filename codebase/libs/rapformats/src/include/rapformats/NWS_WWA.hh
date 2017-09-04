@@ -54,7 +54,7 @@ using namespace std;
 /* A Magic cookie to identify specific data structure */
 enum nws_wwa_msg_id_t{ NWS_WWA_ID = 27000 };
 
-#define NUM_NWS_WWA_TYPES 40  // Number of possible types.
+#define NUM_NWS_WWA_TYPES 80  // Number of possible types.
 #define NWS_WWA_MAX_POINTS 64 // Boundry points
 
 /* Hazardouus Weather Type Bitwize flags - Taken from NOAA/NWS definitions */
@@ -256,12 +256,26 @@ static char wwa_labels[NUM_NWS_WWA_TYPES][WWA_LBL_STR_LEN] = {
   "EARTHQUAKE WARNING\0", "FIRE WARNING\0", "BLIZZARD WARNING\0", 
   "HEAVY SNOW WARNING\0", "LAKE EFFECT SNOW WARNING\0", "ICE STORM WARNING\0", 
   "HEAVY SLEET WARNING\0", "SNOW ADVISORY\0","LAKE EFFECT SNOW ADVISORY\0", 
-  "SLEET ADVISORY\0"
+  "SLEET ADVISORY\0",
+  "Tornado Warning\0", "Tornado Watch\0", "Severe Thunderstorm Warning\0",
+  "Severe Thunderstorm Watch\0", "Severe Weather Statement\0", "Flash Flood Warning\0",
+  "Flash Flood Watch\0", "Tropical Storm Warning\0", "Tropical Storm Watch\0",
+  "Hurricane Warning\0", "Hurricane Watch\0", "Flood Warning\0",
+  "Flood Watch\0", "Winter Storm Warning\0", "Winter Storm Watch\0",
+  "Special Marine Warning\0", "Wind Chill Warning\0", "Wind Chill Advisory\0",
+  "Excessive Heat Warning\0", "Heat Advisory\0", "High Wind Warning\0",
+  "Wind Advisory\0", "Dense Fog Advisory\0", "freeze Warning\0",
+  "Lakeshore warning\0", "Blowing Snow Advisory\0", "Radiological Hazard Warning\0",
+  "Nuclear Hazard Warning\0", "Hazardous Materials Warning\0", "Volcano Warning\0",
+  "Earthquake Warning\0", "Fire Warning\0", "Blizzard Warning\0",
+  "Heavy Snow Warning\0", "Lake Effect Snow Warning\0", "Ice Storm Warning\0",
+  "Heavy Sleet Warning\0", "Snow Advisory\0","Lake Effect Snow Advisory\0",
+  "Sleet Advisory\0"
 };
 
 
 nws_wwa_match_code_t wwa[NUM_NWS_WWA_TYPES] = {
-        { wwa_labels[0], HW_TOWAR, wwa_colors[0] },
+  { wwa_labels[0], HW_TOWAR, wwa_colors[0] },
 	{ wwa_labels[1], HW_TOWAT, wwa_colors[1] },
 	{ wwa_labels[2], HW_STWAR, wwa_colors[2] },
 	{ wwa_labels[3], HW_STWAT, wwa_colors[3] },
@@ -300,7 +314,48 @@ nws_wwa_match_code_t wwa[NUM_NWS_WWA_TYPES] = {
 	{ wwa_labels[36], WS_HLWAR, wwa_colors[36] },
 	{ wwa_labels[37], WS_SNADV, wwa_colors[37] },
 	{ wwa_labels[38], WS_LEADV, wwa_colors[38] },
-	{ wwa_labels[39], WS_SLADV, wwa_colors[39] }
+	{ wwa_labels[39], WS_SLADV, wwa_colors[39] },
+	{ wwa_labels[40], HW_TOWAR, wwa_colors[0] },
+	{ wwa_labels[41], HW_TOWAT, wwa_colors[1] },
+	{ wwa_labels[42], HW_STWAR, wwa_colors[2] },
+	{ wwa_labels[43], HW_STWAT, wwa_colors[3] },
+	{ wwa_labels[44], HW_SWS, wwa_colors[4] },
+	{ wwa_labels[45], HW_FFWAR, wwa_colors[5] },
+	{ wwa_labels[46], HW_FFWAT, wwa_colors[6] },
+	{ wwa_labels[47], HW_TSWAR, wwa_colors[7] },
+	{ wwa_labels[48], HW_TSWAT, wwa_colors[8] },
+	{ wwa_labels[49], HW_HUWAR, wwa_colors[9] },
+	{ wwa_labels[50], HW_HUWAT, wwa_colors[10] },
+	{ wwa_labels[51], HW_FLWAR, wwa_colors[11] },
+	{ wwa_labels[52], HW_FLWAT, wwa_colors[12] },
+	{ wwa_labels[53], HW_WSWAR, wwa_colors[13] },
+	{ wwa_labels[54], HW_WSWAT, wwa_colors[14] },
+	{ wwa_labels[55], HW_SMWAR, wwa_colors[15] },
+	{ wwa_labels[56], HW_WCWAR, wwa_colors[16] },
+	{ wwa_labels[57], HW_WCADV, wwa_colors[17] },
+	{ wwa_labels[58], HW_EHWAR, wwa_colors[18] },
+	{ wwa_labels[59], HW_HEADV, wwa_colors[19] },
+	{ wwa_labels[60], HW_HWWAR, wwa_colors[20] },
+	{ wwa_labels[61], HW_WIADV, wwa_colors[21] },
+	{ wwa_labels[62], HW_DFADV, wwa_colors[22] },
+	{ wwa_labels[63], HW_FZWAR, wwa_colors[23] },
+	{ wwa_labels[64], HW_LSWAR, wwa_colors[24] },
+	{ wwa_labels[65], HW_BSADV, wwa_colors[25] },
+	{ wwa_labels[66], HW_RAWAR, wwa_colors[26] },
+	{ wwa_labels[67], HW_NUWAR, wwa_colors[27] },
+	{ wwa_labels[68], HW_HMWAR, wwa_colors[28] },
+	{ wwa_labels[69], HW_VOWAR, wwa_colors[29] },
+	{ wwa_labels[70], HW_EAWAR, wwa_colors[30] },
+	{ wwa_labels[71], HW_FIWAR, wwa_colors[31] },
+	{ wwa_labels[72], WS_BLWAR, wwa_colors[32] },
+	{ wwa_labels[73], WS_HSWAR, wwa_colors[33] },
+	{ wwa_labels[74], WS_LEWAR, wwa_colors[34] },
+	{ wwa_labels[75], WS_ISWAR, wwa_colors[35] },
+	{ wwa_labels[76], WS_HLWAR, wwa_colors[36] },
+	{ wwa_labels[77], WS_SNADV, wwa_colors[37] },
+	{ wwa_labels[78], WS_LEADV, wwa_colors[38] },
+	{ wwa_labels[79], WS_SLADV, wwa_colors[39] }
+
 };
 
 #else 
