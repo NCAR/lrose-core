@@ -283,7 +283,7 @@ bool RadxApp::retrieveRay(const std::string &name, const RadxRay &ray,
     }
   }
     
-  LOG(ERROR) << "Field " << name << "never found";
+  LOG(ERROR) << "Field " << name << " never found";
   return false;
 }  
 
@@ -313,7 +313,7 @@ bool RadxApp::retrieveRay(const std::string &name, const RadxRay &ray,
   }
   if (showError)
   {
-    LOG(ERROR) << "Field " << name << "never found";
+    LOG(ERROR) << "Field " << name << " never found";
   }
   return false;
 }
