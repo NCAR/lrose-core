@@ -8,11 +8,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for RefFile module of the Refract library
-#
-# Nancy Rehak, RAP, NCAR, Boulder, Co, USA, 80307
-#
-# January 2009
+# Makefile for RefractInput module of the Refract library
 #
 ###########################################################################
 
@@ -30,10 +26,11 @@ MODULE_TYPE = library
 #
 
 HDRS = \
-	$(RAP_INC_DIR)/Refract/RefFile.hh
+	$(RAP_INC_DIR)/Refract/RefractInput.hh
 
 CPPC_SRCS = \
-	RefFile.cc
+	RefDebug.cc \
+	RefractInput.cc
 
 #
 # general targets

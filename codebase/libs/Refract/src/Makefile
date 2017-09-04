@@ -19,8 +19,12 @@ MODULE_NAME = Refract
 LIBNAME = lib$(MODULE_NAME).a
 
 SUB_DIRS = \
+	Data \
 	RefFile \
-	refract
+	RefractInput \
+	RefParms
+
+xxx = 	refract
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
 

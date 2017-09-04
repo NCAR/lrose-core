@@ -8,11 +8,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for RefFile module of the Refract library
-#
-# Nancy Rehak, RAP, NCAR, Boulder, Co, USA, 80307
-#
-# January 2009
+# Makefile for RefractInput module of the Refract library
 #
 ###########################################################################
 
@@ -30,10 +26,21 @@ MODULE_TYPE = library
 #
 
 HDRS = \
-	$(RAP_INC_DIR)/Refract/RefFile.hh
+	$(RAP_INC_DIR)/Refract/MdvCreate.hh \
+	$(RAP_INC_DIR)/Refract/RefractUtil.hh \
+	$(RAP_INC_DIR)/Refract/RefractConstants.hh \
+	$(RAP_INC_DIR)/Refract/FieldDataPair.hh \
+	$(RAP_INC_DIR)/Refract/FieldWithData.hh \
+	$(RAP_INC_DIR)/Refract/IQ.hh \
+	$(RAP_INC_DIR)/Refract/VectorIQ.hh
 
 CPPC_SRCS = \
-	RefFile.cc
+	IQ.cc \
+	RefractUtil.cc \
+	MdvCreate.cc \
+	FieldDataPair.cc \
+	FieldWithData.cc \
+	VectorIQ.cc
 
 #
 # general targets
