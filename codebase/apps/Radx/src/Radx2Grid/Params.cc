@@ -833,6 +833,18 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'compute_sweep_angles_from_vcp_tables'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("compute_sweep_angles_from_vcp_tables");
+    tt->descr = tdrpStrDup("Option to compute sweep angles using the VCP tables when reading NEXRAD data.");
+    tt->help = tdrpStrDup("If true, the VCP tables will be used to assign sweep angles. This is useful if rounding angles to fit the VCP is desired. For NEXRAD data files that don't follow a known VCP and the VCP header is not included, set this to false.");
+    tt->val_offset = (char *) &compute_sweep_angles_from_vcp_tables - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));

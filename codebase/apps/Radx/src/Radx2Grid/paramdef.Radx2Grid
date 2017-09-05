@@ -162,6 +162,12 @@ paramdef boolean {
   p_help = "If true, sweeps will be checked to see if they are in ascending angle order. If not they are reordered. If the sweeps are reordered, this means that the rays times will no longer be monotonically increasing";
 } reorder_sweeps_by_ascending_angle;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute sweep angles using the VCP tables when reading NEXRAD data.";
+  p_help = "If true, the VCP tables will be used to assign sweep angles. This is useful if rounding angles to fit the VCP is desired. For NEXRAD data files that don't follow a known VCP and the VCP header is not included, set this to false.";
+} compute_sweep_angles_from_vcp_tables;
+
 commentdef {
   p_header = "OPTION TO CORRECT TIME";
 }

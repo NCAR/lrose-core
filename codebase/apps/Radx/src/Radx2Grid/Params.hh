@@ -493,6 +493,8 @@ public:
 
   tdrp_bool_t reorder_sweeps_by_ascending_angle;
 
+  tdrp_bool_t compute_sweep_angles_from_vcp_tables;
+
   tdrp_bool_t apply_time_offset;
 
   double time_offset_secs;
@@ -786,7 +788,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[194];
+  mutable TDRPtable _table[195];
 
   const char *_className;
 

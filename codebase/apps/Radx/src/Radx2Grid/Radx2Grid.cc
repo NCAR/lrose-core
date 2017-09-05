@@ -571,6 +571,12 @@ void Radx2Grid::_setupRead(RadxFile &file)
     file.setReadRemoveShortRange(false);
   }
 
+  if (_params.compute_sweep_angles_from_vcp_tables) {
+    file.setReadComputeSweepAnglesFromVcpTables(true);
+  } else {
+    file.setReadComputeSweepAnglesFromVcpTables(false);
+  }
+
   if (_params.interp_mode == Params::INTERP_MODE_POLAR ||
       _params.interp_mode == Params::INTERP_MODE_PPI) {
     if (_params.set_elevation_angle_limits) {
