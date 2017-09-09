@@ -581,6 +581,40 @@ public:
   void logBase10(void);
 
   /**
+   * FIR filter edge extension techniques
+   */
+  typedef enum
+  {
+    FIR_EDGE_CLOSEST,
+    FIR_EDGE_MIRROR,
+    FIR_EDGE_MEAN,
+    FIR_EDGE_INTERP
+  } FirFilter_t;
+
+  /**
+   * Apply FIR (finite impulse response) filter to a beam
+   * @param[in] coeff The filter coefficients, with output index
+   *                  assumed at the center coefficient point, which implies
+   *                  an odd number of coefficients. Warning given if even.
+   * @param[in] type  When the range of values extends outside the range of
+   *                  valid data, one of several techniques is used to extend
+   *                  the data so the filter can be applied.
+   * @param[out] quality  A measure of quality for each point in the beam
+   *
+   * If there are any problems, no filtering is done.
+   */
+  void FIRfilter(const std::vector<double> coeff, FirFilter_t type,
+		 RayxData &quality);
+		 
+  /**
+   * Constrain data to a range of gates, set to missing outside that range
+   * 
+   * @param[in] minGateIndex  Minimum gate index with valid data
+   * @param[in] maxGateIndex  Maximum gate index with valid data
+   */
+  void constrain(int minGateIndex, int maxGateIndex);
+
+  /**
    * Set debugging on
    */
   void setDebug(bool state) { _debug = state; }
@@ -598,17 +632,41 @@ private:
   double _elev;         /**< Elevation of ray (degrees) */
   double _gate_spacing; /**< distance between gates (km) */
   double _start_range;  /**< distance to first gate (km) */
-
-  bool _debug;
+  bool _debug;          /**< Debugging flag */
 
   /**
    * Set output at index to either input or local value if non missing.
    * and missing_ok = true, otherwise set output at index to missing
    */
-  void pPassthrough(const RayxData &inp, const int i, const bool missing_ok);
+  void _passthrough(const RayxData &inp, const int i, const bool missing_ok);
 
-  bool pIsOnePointOutlier(int i, double outlierThresh) const;
-  bool pIsTwoPointOutlier(int i, double outlierThresh) const;
+  bool _isOnePointOutlier(int i, double outlierThresh) const;
+  bool _isTwoPointOutlier(int i, double outlierThresh) const;
+  double _FIRquality(int centerCoeff, const vector<double> &tmpData,
+		     const vector<double> &gapFilledData,
+		     int tindex);
+  void _fillGaps(std::vector<double> &data) const;
+  void _interp(double d0, double d1, int i0, int i1,
+	       std::vector<double> &iData) const;
+  std::vector<double> _extendData(int i0, int i1, int centerCoeff, int nCoeff,
+				  FirFilter_t type, bool allbad0,
+				  double m0, double int0, bool allbad1,
+				  double m1, double int1) const;
+  double _extend(int mirrorIndex, int interpIndex, int boundaryDataIndex,
+		 int otherAveIndex, FirFilter_t type, double m,
+		 double intercept, bool allbad) const;
+  double _sumProduct(const std::vector<double> &coeff, double sumCoeff,
+		     const std::vector<double> &data, int i0) const;
+  int _firstValidIndex(void) const;
+  int _lastValidIndex(void) const;
+  bool _linearRegression(int i0, int i1, int npt, bool up,
+			 double &slope, double &intercept) const;
+  double _applyFIR(int j, int i0, int i1, int centerCoeff, 
+		   FirFilter_t type,
+		   const std::vector<double> &tmpData,
+		   const std::vector<double> &gapFilledData,
+		   const std::vector<double> &coeff, double sumCoeff);
+  double _mean(int i0, int i1) const;
 };
 
 #endif

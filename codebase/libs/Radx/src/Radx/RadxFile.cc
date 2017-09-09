@@ -480,6 +480,7 @@ void RadxFile::copyReadDirectives(const RadxFile &other)
   _readMaxRangeKm = other._readMaxRangeKm;
   _readRemoveLongRange = other._readRemoveLongRange;
   _readPreserveSweeps = other._readPreserveSweeps;
+  _readComputeSweepAnglesFromVcpTables = other._readComputeSweepAnglesFromVcpTables;
   _readRemoveShortRange = other._readRemoveShortRange;
   _readMetadataOnly = other._readMetadataOnly;
   _readTimesOnly = other._readTimesOnly;
@@ -2066,6 +2067,7 @@ void RadxFile::clearRead()
   _readMaxRangeKm = Radx::missingMetaDouble;
   _readRemoveLongRange = false;
   _readPreserveSweeps = false;
+  _readComputeSweepAnglesFromVcpTables = false;
   _readRemoveShortRange = false;
   _readMetadataOnly = false;
   _readTimesOnly = false;
@@ -2269,6 +2271,21 @@ void RadxFile::setReadPreserveSweeps(bool val)
 
 {
   _readPreserveSweeps = val;
+}
+
+/////////////////////////////////////////////////////////////////
+/// Set flag to indicate that we want to preserve the
+/// sweep angles in the file we read in.
+/// This generally applies to NEXRAD data - by default we
+/// compute fixed angles when the file does not contain
+/// a vcp header.
+/// If this flag is true, we leave the sweeps unchanged.
+/// Defaults to false.
+
+void RadxFile::setReadComputeSweepAnglesFromVcpTables(bool val)
+
+{
+  _readComputeSweepAnglesFromVcpTables = val;
 }
 
 /////////////////////////////////////////////////////////////////
