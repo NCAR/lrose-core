@@ -1,0 +1,6 @@
+.deps
+JamesDealias
+__makefile.template
+makefile
+makefile.am
+makefile.in

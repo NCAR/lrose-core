@@ -44,8 +44,8 @@ LOC_LDFLAGS = $(QT4_LDFLAGS)
 
 LOC_LIBS = \
 	-lradar -lRadx -lFmq -ldsserver \
-	-lrapformats -ldidss -ltoolsa -ldataport \
-	-leuclid -ltdrp -lQtGui -lQtCore \
+	-lrapformats -ldidss -ldataport \
+	-leuclid -ltoolsa -ltdrp -lQtGui -lQtCore \
 	-lbz2 -lz -lpthread
 
 HDRS = \
