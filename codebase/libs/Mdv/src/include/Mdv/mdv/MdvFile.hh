@@ -21,13 +21,7 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-////////////////////////////////////////////////////////////////////////////////
-//
-//  Simple wrapper for MDV file management
-//
-//  $Id:
-//
-////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _MDV_FILE_INC_
 #define _MDV_FILE_INC_
 

@@ -21,11 +21,7 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-////////////////////////////////////////////////////////////////////////////////
-//
-//  $Id: TimestampChunk.hh,v 1.5 2017/06/09 16:27:58 prestop Exp $
-//
-////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _TIME_STAMP_INC_
 #define _TIME_STAMP_INC_
 

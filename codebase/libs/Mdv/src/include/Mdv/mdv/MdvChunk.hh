@@ -21,11 +21,7 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-////////////////////////////////////////////////////////////////////////////////
-//
-//  $Id: MdvChunk.hh,v 1.4 2016/03/03 18:59:25 dixon Exp $
-//
-////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _MDV_CHUNK_INC_
 #define _MDV_CHUNK_INC_
 
