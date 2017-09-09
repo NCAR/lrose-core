@@ -39,7 +39,7 @@ TARGET_FILE = forecast_monitor
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -ltitan -lrapmath -lMdv -lRadx \
-	-ldsserver -ldidss -lrapformats -lrapmath -ltoolsa -leuclid \
+	-ldsserver -ldidss -lrapformats -lrapmath -leuclid -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm
 
