@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: dixon $
 //   $Locker:  $
-//   $Date: 2016/03/06 23:28:57 $
-//   $Id: Ctrec.cc,v 1.42 2016/03/06 23:28:57 dixon Exp $
-//   $Revision: 1.42 $
+//   $Date: 2017/09/09 22:11:06 $
+//   $Id: Ctrec.cc,v 1.43 2017/09/09 22:11:06 dixon Exp $
+//   $Revision: 1.43 $
 //   $State: Exp $
 //
  
