@@ -1,0 +1,679 @@
+/**********************************************************************
+ * TDRP params for RadxFilter
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxFilter reads data from Radx-supported format files, runs a filter 
+//   on specified fields, and writes out the results.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+// This application registers with procmap. This is the instance used 
+//   for registration.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// THREADING FOR SPEED.
+//
+//======================================================================
+ 
+///////////// use_multiple_threads ////////////////////
+//
+// Option to use multiple compute threads to improve performance.
+// The read and write stages occur in the main thread, since netCDF is 
+//   not thread safe. The compute stage can be multi-threaded to improve 
+//   performance.
+// Type: boolean
+//
+
+use_multiple_threads = TRUE;
+
+///////////// n_compute_threads ///////////////////////
+//
+// The number of compute threads.
+// The moments computations are segmented in range, with each thread 
+//   computing a fraction of the number of gates. For maximum performance, 
+//   n_threads should be set to the number of processors multiplied by 4. 
+//   For further tuning, use top to maximize CPU usage while varying the 
+//   number of threads.
+// Minimum val: 1
+// Type: int
+//
+
+n_compute_threads = 8;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+// Files will be searched for in this directory.
+// Type: string
+//
+
+input_dir = ".";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = FILELIST;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+// Only data less old than this will be used.
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+//======================================================================
+//
+// READ OPTIONS.
+//
+//======================================================================
+ 
+///////////// aggregate_sweep_files_on_read ///////////
+//
+// Option to aggregate sweep files into a volume on read.
+// If true, and the input data is in sweeps rather than volumes (e.g. 
+//   DORADE), the sweep files from a volume will be aggregated into a 
+//   volume.
+// Type: boolean
+//
+
+aggregate_sweep_files_on_read = FALSE;
+
+///////////// remove_rays_with_antenna_transitions ////
+//
+// Option to remove rays taken while the antenna was in transition.
+// If true, rays with the transition flag set will not be used. The 
+//   transiton flag is set when the antenna is in transtion between one 
+//   sweep and the next.
+// Type: boolean
+//
+
+remove_rays_with_antenna_transitions = FALSE;
+
+///////////// transition_nrays_margin /////////////////
+//
+// Number of transition rays to include as a margin.
+// Sometimes the transition flag is turned on too early in a transition, 
+//   on not turned off quickly enough after a transition. If you set this 
+//   to a number greater than 0, that number of rays will be included at 
+//   each end of the transition, i.e. the transition will effectively be 
+//   shorter at each end by this number of rays.
+// Type: int
+//
+
+transition_nrays_margin = 0;
+
+///////////// trim_surveillance_sweeps_to_360deg //////
+//
+// Option to trip surveillance sweeps so that they only cover 360 
+//   degrees.
+// Some sweeps will have rays which cover more than a 360-degree 
+//   rotation. Often these include antenna transitions. If this is set to 
+//   true, rays are trimmed off either end of the sweep to limit the 
+//   coverage to 360 degrees. The median elevation angle is computed and 
+//   the end ray which deviates from the median in elevation is trimmed 
+//   first.
+// Type: boolean
+//
+
+trim_surveillance_sweeps_to_360deg = FALSE;
+
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range for any ray.
+// Type: boolean
+//
+
+set_max_range = FALSE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+// Gates beyond this range are removed.
+// Type: double
+//
+
+max_range_km = 9999;
+
+///////////// set_ngates_constant /////////////////////
+//
+// Option to force the number of gates to be constant.
+// If TRUE, the number of gates on all rays will be set to the maximum, 
+//   and gates added to shorter rays will be filled with missing values.
+// Type: boolean
+//
+
+set_ngates_constant = FALSE;
+
+///////////// set_fixed_angle_limits //////////////////
+//
+// Option to set fixed angle limits.
+// Only use sweeps within the specified fixed angle limits.
+// Type: boolean
+//
+
+set_fixed_angle_limits = FALSE;
+
+///////////// lower_fixed_angle_limit /////////////////
+//
+// Lower fixed angle limit - degrees.
+// Type: double
+//
+
+lower_fixed_angle_limit = 0;
+
+///////////// upper_fixed_angle_limit /////////////////
+//
+// Upper fixed angle limit - degrees.
+// Type: double
+//
+
+upper_fixed_angle_limit = 90;
+
+///////////// set_sweep_num_limits ////////////////////
+//
+// Option to set sweep number limits.
+// Only read sweeps within the specified sweep number limits.
+// Type: boolean
+//
+
+set_sweep_num_limits = FALSE;
+
+///////////// lower_sweep_num /////////////////////////
+//
+// Lower sweep number limit.
+// Type: int
+//
+
+lower_sweep_num = 0;
+
+///////////// upper_sweep_num /////////////////////////
+//
+// Upper sweep number limit.
+// Type: int
+//
+
+upper_sweep_num = 0;
+
+//======================================================================
+//
+// OPTION TO OVERRIDE RADAR LOCATION.
+//
+//======================================================================
+ 
+///////////// override_radar_location /////////////////
+//
+// Option to override the radar location.
+// If true, the location in this file will be used. If not, the location 
+//   in the time series data will be used.
+// Type: boolean
+//
+
+override_radar_location = TRUE;
+
+///////////// radar_latitude_deg //////////////////////
+//
+// Radar latitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+radar_latitude_deg = -0.630447;
+
+///////////// radar_longitude_deg /////////////////////
+//
+// Radar longitude (deg).
+// See override_radar_location.
+// Type: double
+//
+
+radar_longitude_deg = 73.1028;
+
+///////////// radar_altitude_meters ///////////////////
+//
+// Radar altitude (meters).
+// See override_radar_location.
+// Type: double
+//
+
+radar_altitude_meters = 10;
+
+//======================================================================
+//
+// SPECIFYING THE FIELDS TO BE READ IN.
+//
+// By default, all fields will be read.
+//
+//======================================================================
+ 
+///////////// select_fields ///////////////////////////
+//
+// Option to select the fields for interpolation.
+// If FALSE, all fields will be processed.
+// Type: boolean
+//
+
+select_fields = FALSE;
+
+///////////// selected_fields /////////////////////////
+//
+// Select the list of fields to be processed.
+// Only applies if 'select_fields' is TRUE.
+//
+// Type: struct
+//   typedef struct {
+//      string input_name;
+//      boolean process_this_field;
+//   }
+//
+// 1D array - variable length.
+//
+
+selected_fields = {
+  {
+    input_name = "DBZ",
+    process_this_field = TRUE
+  }
+  ,
+  {
+    input_name = "VEL",
+    process_this_field = TRUE
+  }
+  ,
+  {
+    input_name = "WIDTH",
+    process_this_field = TRUE
+  }
+  ,
+  {
+    input_name = "PHIDP",
+    process_this_field = TRUE
+  }
+};
+
+///////////// rename_fields ///////////////////////////
+//
+// Option to rename some or all of the fields.
+// If FALSE, no fields will be renamed.
+// Type: boolean
+//
+
+rename_fields = TRUE;
+
+///////////// renamed_fields //////////////////////////
+//
+// Specify the list of fields to be renamed.
+// Only applies if 'rename_fields' is TRUE. The field is changed from 
+//   input_name to output_name.
+//
+// Type: struct
+//   typedef struct {
+//      string input_name;
+//      string output_name;
+//   }
+//
+// 1D array - variable length.
+//
+
+renamed_fields = {
+  {
+    input_name = "DZ",
+    output_name = "DBZ"
+  }
+  ,
+  {
+    input_name = "VE",
+    output_name = "VEL"
+  }
+  ,
+  {
+    input_name = "SW",
+    output_name = "WIDTH"
+  }
+  ,
+  {
+    input_name = "PHI",
+    output_name = "PHIDP"
+  }
+};
+
+//======================================================================
+//
+// FILTER DETAILS.
+//
+// Names of fields in the input file. The following fields are required: 
+//   SNR, DBZ, ZDR, PHIDP and RHOHV. KDP is also required internally, but 
+//   if KDP is not available it will be computed from PHIDP. LDR is 
+//   optional, and is used for PID only.
+//
+//======================================================================
+ 
+///////////// field_filters ///////////////////////////
+//
+// Specify the filter to be applied to selected fields.
+
+// (a) partial_field_name: this is treated as a search string. We loop 
+//   through all of the fields in the data. If the partial_field_name is 
+//   contained in the data field_name, we apply the specified filter to 
+//   that field. If more than one partial_field_name matches, we use the 
+//   first one specified.
+
+// (b) filter_types - these are all applied along range:
+//     NONE - do nothing.
+//     MEDIAN - median filter.
+//     TRIANGULAR - a weighted filter in which the weights drop off from 
+//   the center gate in a linear manner.
+//     LEAST_SQUARES - linear least squares fit.
+
+// (c) length: the number of gates over which the filter is applied. 
+//   This should be an odd number, so that the gate at which the filtered 
+//   value is computed is in the center of the range.
+//
+// Type: struct
+//   typedef struct {
+//      string partial_field_name;
+//      filter_type_t filter_type;
+//        Options:
+//          FILTER_MEDIAN
+//          FILTER_TRIANGULAR
+//          FILTER_LEAST_SQUARES
+//          FILTER_NONE
+//      int length;
+//   }
+//
+// 1D array - variable length.
+//
+
+field_filters = {
+  {
+    partial_field_name = "",
+    //    filter_type = FILTER_NONE,
+    // filter_type = FILTER_TRIANGULAR,
+    filter_type = FILTER_LEAST_SQUARES,
+    length = 7
+  }
+};
+
+//======================================================================
+//
+// OPTION TO OVERRIDE THE NYQUIST VELOCITY.
+//
+//======================================================================
+ 
+///////////// override_nyquist ////////////////////////
+//
+// Option to override nyquist velocity in incoming data.
+// If true, the nyquist_velocity parameter is used to specify the 
+//   nyquist. If false, the nyquist is computed from the incoming radar 
+//   data stream. The nyquist is used for velocity interpolation, to 
+//   ensure that folded values are treated correctlty.
+// Type: boolean
+//
+
+override_nyquist = FALSE;
+
+///////////// nyquist_velocity ////////////////////////
+//
+// Specify nyquist velocity (m/s).
+// See 'override_nyquist'.
+// Type: double
+//
+
+nyquist_velocity = 25;
+
+//======================================================================
+//
+// OPTION TO SET FOLDING LIMITS ON A PER FIELD BASIS.
+//
+//======================================================================
+ 
+///////////// set_fold_limits /////////////////////////
+//
+// Option to set the folding limits for individual fields.
+// Type: boolean
+//
+
+set_fold_limits = TRUE;
+
+///////////// folded_fields ///////////////////////////
+//
+// Use this to set the fold limits for a particular field.
+// If this is specified, the interpolation for this field will be 
+//   performed 'on the circle' so that folding is handled correctly. If 
+//   use_global_nyquist_velocity is true, the fold limits are set to plus 
+//   and minus the main nyquist velocity. If false, the specified fold 
+//   limits are used instead.
+//
+// Type: struct
+//   typedef struct {
+//      string input_name;
+//      boolean field_folds;
+//      boolean use_global_nyquist;
+//      double fold_limit_lower;
+//      double fold_limit_upper;
+//   }
+//
+// 1D array - variable length.
+//
+
+folded_fields = {
+  {
+    input_name = "VEL",
+    field_folds = TRUE,
+    use_global_nyquist = TRUE,
+    fold_limit_lower = -25,
+    fold_limit_upper = 25
+  }
+  ,
+  {
+    input_name = "VEL_F",
+    field_folds = TRUE,
+    use_global_nyquist = TRUE,
+    fold_limit_lower = -25,
+    fold_limit_upper = 25
+  }
+  ,
+  {
+    input_name = "PHIDP",
+    field_folds = TRUE,
+    use_global_nyquist = FALSE,
+    fold_limit_lower = -90,
+    fold_limit_upper = 90
+  }
+  ,
+  {
+    input_name = "PHIDP_F",
+    field_folds = TRUE,
+    use_global_nyquist = FALSE,
+    fold_limit_lower = -90,
+    fold_limit_upper = 90
+  }
+};
+
+//======================================================================
+//
+// OUTPUT FILE FORMAT.
+//
+//======================================================================
+ 
+///////////// output_format ///////////////////////////
+//
+// Format for the output files.
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_CFRADIAL
+//     OUTPUT_FORMAT_DORADE
+//     OUTPUT_FORMAT_FORAY
+//     OUTPUT_FORMAT_NEXRAD
+//     OUTPUT_FORMAT_UF
+//     OUTPUT_FORMAT_MDV_RADIAL
+//
+
+output_format = OUTPUT_FORMAT_CFRADIAL;
+
+///////////// netcdf_style ////////////////////////////
+//
+// NetCDF style - if output_format is CFRADIAL.
+// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
+//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
+// Type: enum
+// Options:
+//     CLASSIC
+//     NC64BIT
+//     NETCDF4
+//     NETCDF4_CLASSIC
+//
+
+netcdf_style = CLASSIC;
+
+//======================================================================
+//
+// OUTPUT BYTE-SWAPPING and COMPRESSION.
+//
+//======================================================================
+ 
+///////////// output_native_byte_order ////////////////
+//
+// Option to leave data in native byte order.
+// If false, data will be byte-swapped as appropriate on output.
+// Type: boolean
+//
+
+output_native_byte_order = FALSE;
+
+///////////// output_compressed ///////////////////////
+//
+// Option to compress data fields on output.
+// Applies to netCDF and Dorade. UF does not support compression.
+// Type: boolean
+//
+
+output_compressed = FALSE;
+
+///////////// compression_level ///////////////////////
+//
+// Compression level for output, if compressed.
+// Applies to netCDF only. Dorade compression is run-length encoding, 
+//   and has not options..
+// Type: int
+//
+
+compression_level = 4;
+
+//======================================================================
+//
+// OUTPUT DIRECTORY AND FILE NAME.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+// Files will be written to this directory.
+// Type: string
+//
+
+// output_dir = "$(RADX_DATA_DIR)/cfradial/filtered/tri";
+output_dir = "$(RADX_DATA_DIR)/cfradial/filtered/lstsq";
+// output_dir = "$(RADX_DATA_DIR)/examples/cfradial4";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name.
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+// Path will be output_dir/yyyymmdd/filename.
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// write_individual_sweeps /////////////////
+//
+// Option to write out individual sweeps if appropriate.
+// If true, the volume is split into individual sweeps for writing. 
+//   Applies to CfRadial format. This is always true for DORADE format 
+//   files.
+// Type: boolean
+//
+
+write_individual_sweeps = FALSE;
+

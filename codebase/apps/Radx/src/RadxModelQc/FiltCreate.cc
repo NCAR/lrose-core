@@ -29,6 +29,8 @@
 #include "FiltAzGradient.hh"
 #include "FiltClutter2dQual.hh"
 #include "FiltComment.hh"
+#include "FiltConstrain.hh"
+#include "FiltFIR.hh"
 #include "Filt2dGaussianMapping.hh"
 #include "FiltGriddedMath.hh"
 #include "FiltMath.hh"
@@ -53,6 +55,12 @@ Filter *modelQc::filtCreate(const Params::data_filter_t f, const Params &P)
     break;
   case Params::COMMENT:
     filt = new FiltComment(f, P);
+    break;
+  case Params::CONSTRAIN:
+    filt = new FiltConstrain(f, P);
+    break;
+  case Params::FIR:
+    filt = new FiltFIR(f, P);
     break;
   case Params::GAUSSIAN_2D_REMAP:
     filt = new Filt2dGaussianMapping(f, P);
