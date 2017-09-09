@@ -21,17 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2017/09/03 16:00:30 $
-//   $Id: EllipticalTemplate.cc,v 1.10 2017/09/03 16:00:30 dixon Exp $
-//   $Revision: 1.10 $
-//   $State: Exp $
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
  * EllipticalTemplate.cc: class implementing an elliptical template to be
  *                        applied on gridded data.

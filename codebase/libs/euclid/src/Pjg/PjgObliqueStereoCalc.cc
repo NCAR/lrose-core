@@ -21,17 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2017/09/03 16:00:30 $
-//   $Id: PjgObliqueStereoCalc.cc,v 1.8 2017/09/03 16:00:30 dixon Exp $
-//   $Revision: 1.8 $
-//   $State: Exp $
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
  * PjgObliqueStereoCalc.cc: Class for calculating transformations 
  *                          using a oblique stereographic projection.

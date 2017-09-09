@@ -21,18 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-/* RCS info
- *   $Author: dixon $
- *   $Locker:  $
- *   $Date: 2017/09/03 16:00:30 $
- *   $Id: PjgMercatorCalc.hh,v 1.4 2017/09/03 16:00:30 dixon Exp $
- *   $Revision: 1.4 $
- *   $State: Exp $
- */
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 
 /************************************************************************
  * PjgMercatorCalc.hh: class implementing projective geometry transformations.

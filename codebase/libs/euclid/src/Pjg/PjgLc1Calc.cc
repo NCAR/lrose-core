@@ -21,17 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2017/09/03 16:00:30 $
-//   $Id: PjgLc1Calc.cc,v 1.15 2017/09/03 16:00:30 dixon Exp $
-//   $Revision: 1.15 $
-//   $State: Exp $
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
  * PjgLc1Calc.cc: Class for calculating transformations using a Lambert
  *                Conformal projection with a single latitude.

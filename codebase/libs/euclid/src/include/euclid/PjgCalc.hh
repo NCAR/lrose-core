@@ -21,18 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-/* RCS info
- *   $Author: prestop $
- *   $Locker:  $
- *   $Date: 2017/06/09 16:27:58 $
- *   $Id: PjgCalc.hh,v 1.21 2017/06/09 16:27:58 prestop Exp $
- *   $Revision: 1.21 $
- *   $State: Exp $
- */
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 
 /************************************************************************
  * PjgCalc.hh: class implementing projective geometry transformations.

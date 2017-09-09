@@ -21,17 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2016/03/03 18:19:27 $
-//   $Id: GridTemplateList.cc,v 1.6 2016/03/03 18:19:27 dixon Exp $
-//   $Revision: 1.6 $
-//   $State: Exp $
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
  * GridTemplateList.cc: class implementing a list of grid templates.
  *

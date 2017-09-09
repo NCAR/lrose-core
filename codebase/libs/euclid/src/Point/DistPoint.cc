@@ -21,9 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-//
-// $Id: DistPoint.cc,v 1.5 2016/03/03 18:19:28 dixon Exp $
-//
 
 #include <euclid/DistPoint.hh>
 #include <euclid/Polyline.hh>

@@ -36,8 +36,6 @@
 // Paddy McCarthy, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 // March 1999
 //
-// $Id: Grid.hh,v 1.65 2016/03/03 19:21:31 dixon Exp $
-//
 ///////////////////////////////////////////////////////////////
 
 #ifndef GridINCLUDED

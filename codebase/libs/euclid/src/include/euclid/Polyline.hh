@@ -21,9 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-//
-// $Id: Polyline.hh,v 1.29 2016/03/03 18:19:28 dixon Exp $
-//
 
 #ifndef _POLYLINE_INC_
 #define _POLYLINE_INC_

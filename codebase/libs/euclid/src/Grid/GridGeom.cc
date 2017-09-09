@@ -26,8 +26,6 @@
 // Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
 // January 1998
 //
-// $Id: GridGeom.cc,v 1.24 2017/09/03 16:00:30 dixon Exp $
-//
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <cassert>

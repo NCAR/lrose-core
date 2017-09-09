@@ -21,18 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-/* RCS info
- *   $Author: hardt $
- *   $Locker:  $
- *   $Date: 2017/06/16 02:22:52 $
- *   $Id: WorldPolygon2D.hh,v 1.12 2017/06/16 02:22:52 hardt Exp $
- *   $Revision: 1.12 $
- *   $State: Exp $
- */
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 
 /************************************************************************
  * WorldPolygon2D.hh: class implementing a polygon specified by

@@ -21,18 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-/* RCS info
- *   $Author: dixon $
- *   $Locker:  $
- *   $Date: 2017/09/03 16:00:30 $
- *   $Id: PjgLc1Calc.hh,v 1.12 2017/09/03 16:00:30 dixon Exp $
- *   $Revision: 1.12 $
- *   $State: Exp $
- */
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 
 /************************************************************************
  * PjgLc1Calc.hh: Class for calculating transformations using a Lambert
