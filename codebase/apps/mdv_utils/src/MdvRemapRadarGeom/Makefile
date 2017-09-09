@@ -38,8 +38,8 @@ TARGET_FILE = MdvRemapRadarGeom
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -ldsserver -lrapmath \
-	-lrapformats -ldidss -ltoolsa -ldataport \
-	-leuclid -ltdrp $(NETCDF4_LIBS) -lbz2 \
+	-lrapformats -ldidss -ldataport \
+	-leuclid -ltoolsa -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

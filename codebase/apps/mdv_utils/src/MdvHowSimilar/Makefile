@@ -33,8 +33,8 @@ TARGET_FILE = MdvHowSimilar
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -ldsdata -ldsserver \
-	-ldidss -ltdrp -ltoolsa -ldataport \
-	-lrapformats -leuclid $(NETCDF4_LIBS) -lbz2 \
+	-ldidss -ltdrp -ldataport \
+	-lrapformats -leuclid -ltoolsa $(NETCDF4_LIBS) -lbz2 \
 	-lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

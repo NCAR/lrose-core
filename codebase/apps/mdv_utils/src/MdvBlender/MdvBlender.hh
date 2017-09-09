@@ -33,7 +33,7 @@
  * 
  *  @date July 2014
  *
- *  @version $Id: MdvBlender.hh,v 1.12 2016/08/23 21:24:39 mccabe Exp $
+ *  @version $Id: MdvBlender.hh,v 1.14 2017/08/15 18:29:19 mccabe Exp $
  */
 
 
@@ -101,6 +101,7 @@ public:
     std::vector<std::string> inputWeightNames;
     std::vector<double> inputConstantWeights;
     std::vector<std::vector<pass_through_t> > inputPassThroughs;
+    std::vector<Params::blender_t> blendMethods;
   };
 
 protected:
@@ -182,8 +183,10 @@ private:
                        const string& longName, const string& unit,
 		       int fCode, int nx, int ny, int nz);
   bool _verifyDimensions(MdvxField* input1Field, MdvxField* input2Field);
-
-  double _evaluateAverage(vector<double> d, vector<double> w, vector<double> miss, Params::round_t round);
+  float* _ditherFields(vector<const float*> dataVols, vector<float> miss, vector<float> bad);
+  float* _averageFields(vector<const float*> dataVols, vector<float> constants, vector<const float*> weightVols, vector<float> miss, vector<float> bad);  
+	double _evaluateAverage(vector<double> d, vector<double> w, vector<double> miss, vector<double> bad, Params::round_t round);
+  
   int _evaluateDither(vector<double> w);
 
   /**  Disallow the constructor (singleton)*/

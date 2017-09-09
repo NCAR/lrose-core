@@ -180,6 +180,19 @@ paramdef double {
   p_help =  "Has effect only if ReplacePassValues is TRUE";
   p_default = 1.0;
 } PassValue;
+
+paramdef boolean {
+  p_descr = "Set this to replace values that fail the thresholding\n"
+            "with a contsant value specified by FailValue";
+  p_help = "If FALSE the data values that fail set to missing."; 
+  p_default = FALSE;
+} ReplaceFailValues;
+
+paramdef double {
+  p_descr = "Value to use for data points that fails the threshold test.";
+  p_help =  "Has effect only if ReplaceFailValues is TRUE";
+  p_default = 0.0;
+} FailValue;
  
 paramdef string {
   p_descr = "Output mdv URL, typically of the form\n"

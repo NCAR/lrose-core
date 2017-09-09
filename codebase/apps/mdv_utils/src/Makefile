@@ -119,7 +119,8 @@ SUB_DIRS = \
 	unisysm2mdv \
 	update_mdv_times \
 	wrfFreezingLevel \
-	wrfLtgPotential
+	wrfLtgPotential \
+	MdvInterpMissing
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
 

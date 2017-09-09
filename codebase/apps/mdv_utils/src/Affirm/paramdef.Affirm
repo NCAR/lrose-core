@@ -143,6 +143,15 @@ paramdef long
 
 paramdef long
 {
+  p_descr = "Number of seconds to sleep after triggering.";
+  p_help = "This is helpful when look_back_time is 0. This allows time for the input files to be produced. "
+            "Set to 0 if a wait is not desired.";
+  p_min = { 0 };
+  p_default = { 0 };
+} sleep_after_trigger;
+
+paramdef long
+{
   p_descr = "max data offset time in seconds";
   p_help = "In REALTIME mode, the maximum amount of time between the time the first data was GENERATED and the valid time of the second grid.  In ARCHIVE mode, maximum amount of time allowed between the second data time and the first data time for the files to be combined to form an output grid.";
   p_min = { 0 };
@@ -165,7 +174,8 @@ paramdef int {
 paramdef string
 {
   p_descr = "Trigger URL";
-  p_help = "URL to watch to begin processing in REALTIME mode.";
+  p_help = "URL to watch to begin processing in REALTIME mode. "
+           "Also required for ARCHIVE mode to find files within time range.";
   p_default = "mdvp:://localhost:43000:mdv/input";
 } trigger_url;
 

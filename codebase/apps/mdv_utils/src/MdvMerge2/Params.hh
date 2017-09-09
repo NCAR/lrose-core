@@ -457,6 +457,8 @@ public:
 
   char* instance;
 
+  int procmap_register_interval_secs;
+
   mode_t mode;
 
   trigger_t trigger;
@@ -537,7 +539,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[43];
+  mutable TDRPtable _table[44];
 
   const char *_className;
 

@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 /* RCS info
- *   $Author: dixon $
+ *   $Author: prestop $
  *   $Locker:  $
- *   $Date: 2016/03/04 02:22:09 $
- *   $Id: Args.hh,v 1.3 2016/03/04 02:22:09 dixon Exp $
- *   $Revision: 1.3 $
+ *   $Date: 2017/06/14 18:41:37 $
+ *   $Id: Args.hh,v 1.4 2017/06/14 18:41:37 prestop Exp $
+ *   $Revision: 1.4 $
  *   $State: Exp $
  */
  
@@ -107,7 +107,12 @@ class Args
   {
     return _archiveEndTime;
   }
-  
+
+	  // Print the usage for this program.
+
+	void usage(char *prog_name,
+	      FILE *stream);
+
 
  private:
 
@@ -128,10 +133,6 @@ class Args
 
   static time_t _convertTimeString(const char *time_string);
   
-  // Print the usage for this program.
-
-  void _usage(char *prog_name,
-	      FILE *stream);
   
   // Return the class name for error messages.
 

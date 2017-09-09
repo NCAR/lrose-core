@@ -32,6 +32,8 @@
 #include <toolsa/TaThreadSimple.hh>
 #include <cstdio>
 #include <algorithm>
+#include <unistd.h>
+
 using std::vector;
 using std::pair;
 

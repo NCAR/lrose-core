@@ -1,0 +1,6 @@
+.deps
+Mdv2SoundingSpdb
+__makefile.template
+makefile
+makefile.am
+makefile.in

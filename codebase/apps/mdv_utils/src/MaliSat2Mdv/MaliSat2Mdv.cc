@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: dixon $
 //   $Locker:  $
-//   $Date: 2016/03/04 02:22:09 $
-//   $Id: MaliSat2Mdv.cc,v 1.3 2016/03/04 02:22:09 dixon Exp $
-//   $Revision: 1.3 $
+//   $Date: 2017/09/09 21:22:27 $
+//   $Id: MaliSat2Mdv.cc,v 1.4 2017/09/09 21:22:27 dixon Exp $
+//   $Revision: 1.4 $
 //   $State: Exp $
 //
  

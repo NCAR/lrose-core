@@ -38,8 +38,8 @@ TARGET_FILE = Parf2Mdv
 LOC_INCLUDES = -D_LINUX_TYPES_H $(NETCDF4_INCS)
 
 LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx \
-	-lrapformats -ldsserver -ldidss -ltoolsa \
-	-ltdrp -ldataport -leuclid $(NETCDF4_LIBS) \
+	-lrapformats -ldsserver -ldidss \
+	-ltdrp -ldataport -leuclid -ltoolsa $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

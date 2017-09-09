@@ -114,11 +114,26 @@ int main(int argc, char *argv[]){
   MdvxField *AField = A.getFieldByName( mdvField1 );
   fl32 *AData = (fl32 *) AField->getVol();
   Mdvx::field_header_t AFhdr = AField->getFieldHeader();
+  
   //
   // Get master header for A so we can get time_centroid
   //
-  Mdvx::master_header_t AMhdr = A.getMasterHeader();
+  //Mdvx::master_header_t AMhdr = A.getMasterHeader();
   
+  //
+  // Apply transform if needed.
+  //
+  if (AField->getFieldHeader().transform_type == Mdvx::DATA_TRANSFORM_LOG)  {
+    cerr << "found a field that has log transform: " << AField->getFieldName() << endl;
+    int ret = AField->transform2Linear();
+    if (ret != 0) {
+      cerr << "Transform failed for " << AField->getFieldName() << endl;
+      cerr << AField->getErrStr() << endl;
+      cerr << "Program terminated." << endl;
+      exit(-1);
+    }
+  }
+
 
   ///////////////////////////////////////////////////////////////
   //
@@ -143,6 +158,20 @@ int main(int argc, char *argv[]){
   fl32 *BData = (fl32 *) BField->getVol();
   Mdvx::field_header_t BFhdr = BField->getFieldHeader();
   
+  //
+  // Apply transform if needed.
+  //
+  if (BField->getFieldHeader().transform_type == Mdvx::DATA_TRANSFORM_LOG)  {
+    cerr << "found a field that has log transform: " << BField->getFieldName() << endl;
+    int ret = BField->transform2Linear();
+    if (ret != 0) {
+      cerr << "Transform failed for " << BField->getFieldName() << endl;
+      cerr << BField->getErrStr() << endl;
+      cerr << "Program terminated." << endl;
+      exit(-1);
+    }
+  }
+
   //
   // Gross check of geometry
   //

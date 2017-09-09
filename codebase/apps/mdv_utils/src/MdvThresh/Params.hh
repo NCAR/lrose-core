@@ -397,6 +397,10 @@ public:
 
   double PassValue;
 
+  tdrp_bool_t ReplaceFailValues;
+
+  double FailValue;
+
   char* OutUrl;
 
   char* *_OutFieldName;
@@ -440,7 +444,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[43];
+  mutable TDRPtable _table[45];
 
   const char *_className;
 

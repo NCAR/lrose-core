@@ -26,9 +26,9 @@
 /* RCS info
  *   $Author: dixon $
  *   $Locker:  $
- *   $Date: 2016/03/04 02:22:12 $
- *   $Id: NetcdfPlotter.hh,v 1.3 2016/03/04 02:22:12 dixon Exp $
- *   $Revision: 1.3 $
+ *   $Date: 2017/09/09 21:22:28 $
+ *   $Id: NetcdfPlotter.hh,v 1.4 2017/09/09 21:22:28 dixon Exp $
+ *   $Revision: 1.4 $
  *   $State: Exp $
  */
  

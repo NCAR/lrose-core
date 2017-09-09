@@ -74,7 +74,8 @@ paramdef struct fcast_lead_time_t {
   p_default = { 0, false };
   p_descr = "Forecast lead time information for forecast "
             "files to be processed.";
-  p_help = "Used only if mode is set to SPEC_FCAST_REALTIME.";
+  p_help = "Used only if mode is set to SPEC_FCAST_REALTIME or if "
+           " write_forecast is set to TRUE.";
 } fcast_lead_time;
       
 commentdef {

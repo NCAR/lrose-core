@@ -43,8 +43,8 @@ TARGET_FILE = RunForest
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx \
-	-ldsserver -ldidss -lrapformats -ltoolsa \
-	-leuclid -ldataport -ltdrp $(NETCDF4_LIBS) \
+	-ldsserver -ldidss -lrapformats \
+	-leuclid -ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
 	-lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
