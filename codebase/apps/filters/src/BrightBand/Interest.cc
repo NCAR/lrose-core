@@ -193,6 +193,7 @@ void Interest::_initInterestFields(MdvxField *dbz_field)
 
   _dbzField = dbz_field;
   _dbzFieldHdr = dbz_field->getFieldHeader();
+  _vlevelHdr = dbz_field->getVlevelHeader();
   
   // set npoints
 

@@ -134,7 +134,9 @@ Args::Args (int argc, char **argv, char *prog_name)
 	// set file name array
 
 	filePaths = argv + i + 1;
-	
+
+	sprintf(tmp_str, "mode = ARCHIVE;");
+        TDRP_add_override(&override, tmp_str);	
       }
 
     } // if

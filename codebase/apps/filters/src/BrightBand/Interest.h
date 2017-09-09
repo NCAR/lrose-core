@@ -92,6 +92,7 @@ protected:
   
   MdvxField *_dbzField;
   Mdvx::field_header_t _dbzFieldHdr;
+  Mdvx::vlevel_header_t _vlevelHdr;  
   
   void _initInterestFields(MdvxField *dbz_field);
   

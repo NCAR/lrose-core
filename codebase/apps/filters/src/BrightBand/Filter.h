@@ -77,6 +77,7 @@ private:
   DsMdvx *_input_data;
   MdvxField *_dbz_field;
   Mdvx::field_header_t _dbzFieldHdr;
+  Mdvx::vlevel_header_t _vlevelHdr;  
   
   string _file_path;
   string _dir_path;
