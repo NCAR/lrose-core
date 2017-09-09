@@ -23,6 +23,7 @@ SUB_DIRS = \
 	attributes \
 	compress \
 	db_access \
+	err \
 	utim \
 	file_io \
 	fmq \
