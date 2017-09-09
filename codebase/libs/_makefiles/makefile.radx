@@ -10,7 +10,6 @@ SUB_DIRS = \
 	Fmq \
 	Mdv \
 	Radx \
-        Ncxx \
 	Spdb \
 	dataport \
 	didss \
