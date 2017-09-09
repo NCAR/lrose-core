@@ -50,6 +50,7 @@
 #include <math.h>
 #include <iostream>
 #include <iomanip>
+#include <limits>
 using namespace std;
 
 #define PSEUDO_RADIUS 8533.0
@@ -5733,8 +5734,8 @@ int MdvxField::computeMinAndMax(bool force /* = false*/ )
   } else if (_fhdr.encoding_type == Mdvx::ENCODING_FLOAT32) {
 
     fl32 *val = (fl32 *) _volBuf.getPtr();
-    fl32 min_val = 1.0e99;
-    fl32 max_val = -1.0e99;
+    fl32 min_val = numeric_limits<float>::max(); //1.0e99;
+    fl32 max_val = -1 * numeric_limits<float>::max(); //-1.0e99;
     fl32 missing = _fhdr.missing_data_value;
     fl32 bad = _fhdr.bad_data_value;
     

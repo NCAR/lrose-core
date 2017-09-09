@@ -286,8 +286,10 @@ int NcfVlevelInfo::addVlevelVar(int vlevelNum, Nc3File *ncFile, string &errStr)
   // iret |= !_zVar->add_att("long_name",
   //                         "distance from trajectory in vertical dimension");
 
-  iret |= !_zVar->add_att(NcfMdv::units, _units.c_str());
-  
+  if (_units != string("level")){
+    iret |= !_zVar->add_att(NcfMdv::units, _units.c_str());
+  }
+
   if (_positive.size() > 0) {
     iret |= !_zVar->add_att(NcfMdv::positive, _positive.c_str());
   }

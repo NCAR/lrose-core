@@ -38,6 +38,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 #include <toolsa/TaStr.hh>
+#include <toolsa/TaPjg.hh>
 #include <toolsa/mem.h>
 #include <toolsa/str.h>
 #include <Mdv/MdvxField.hh>
@@ -338,10 +339,15 @@ int Ncf2MdvField::_setProjInfo()
       double origin_lat = 0.0;
       iret |= _setProjParam(NcfMdv::latitude_of_projection_origin,
                             origin_lat);
-      
+     
+      double earth_radius;
+      if ( !_setProjParam(NcfMdv::earth_radius, earth_radius)) {
+        TaPjg::setEarthRadius( earth_radius/1000);
+      }
+ 
       _proj.initAzimEquiDist(origin_lat, origin_lon, 0.0);
       _proj.setOffsetCoords(falseNorthing, falseEasting);
-      
+ 
       break;
 
     }
@@ -376,6 +382,11 @@ int Ncf2MdvField::_setProjInfo()
       double lat1 = 0.0, lat2 = 0.0;
       iret |= _setProjParams(NcfMdv::standard_parallel, lat1, lat2);
 
+      double earth_radius;
+      if ( !_setProjParam(NcfMdv::earth_radius, earth_radius)) {
+        TaPjg::setEarthRadius( earth_radius/1000);
+      }
+   
       _proj.initLambertConf(origin_lat, origin_lon,
                             lat1, lat2);
       _proj.setOffsetCoords(falseNorthing, falseEasting);
@@ -433,10 +444,15 @@ int Ncf2MdvField::_setProjInfo()
       if (tangent_lat < 0) {
         poleType = Mdvx::POLE_SOUTH;
       }
-      
+     
+      double earth_radius;
+      if ( !_setProjParam(NcfMdv::earth_radius, earth_radius)) {
+        TaPjg::setEarthRadius( earth_radius/1000);
+      }
+
       _proj.initPolarStereo(tangent_lon, poleType, central_scale);
       _proj.setOffsetCoords(falseNorthing, falseEasting);
-      
+     
       break;
 
     }
@@ -473,9 +489,13 @@ int Ncf2MdvField::_setProjInfo()
       double scale = 1.0;
       iret |= _setProjParam(NcfMdv::scale_factor_at_central_meridian, scale);
 
+      double earth_radius;
+      if ( !_setProjParam(NcfMdv::earth_radius, earth_radius))
+        TaPjg::setEarthRadius( earth_radius/1000);
+
       _proj.initTransMercator(origin_lat, origin_lon, scale);
       _proj.setOffsetCoords(falseNorthing, falseEasting);
-      
+     
       break;
 
     }
@@ -487,13 +507,17 @@ int Ncf2MdvField::_setProjInfo()
 
       double origin_lat = 0.0;
       iret |= _setProjParam(NcfMdv::latitude_of_projection_origin, origin_lat);
-      
+
+      double earth_radius;
+      if ( !_setProjParam(NcfMdv::earth_radius, earth_radius))  
+        TaPjg::setEarthRadius( earth_radius/1000);
+
       _proj.initMercator(origin_lat, origin_lon);
       _proj.setOffsetCoords(falseNorthing, falseEasting);
-      
-      break;
 
-    }
+      break;
+    
+   }
 
     case Mdvx::PROJ_VERT_PERSP: {
 

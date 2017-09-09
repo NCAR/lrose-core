@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 /* RCS info
- *   $Author: dixon $
+ *   $Author: prestop $
  *   $Locker:  $
- *   $Date: 2016/03/03 18:09:41 $
- *   $Id: MdvxPjg.hh,v 1.19 2016/03/03 18:09:41 dixon Exp $
- *   $Revision: 1.19 $
+ *   $Date: 2017/06/09 16:27:58 $
+ *   $Id: MdvxPjg.hh,v 1.20 2017/06/09 16:27:58 prestop Exp $
+ *   $Revision: 1.20 $
  *   $State: Exp $
  */
  

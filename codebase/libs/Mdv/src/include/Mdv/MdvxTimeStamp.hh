@@ -63,7 +63,7 @@ public:
   // data member access
 
   const string& getName(){ return name; }
-  const time_t  getTime(){ return when.utime(); }
+  time_t  getTime(){ return when.utime(); }
 
   // printing
 

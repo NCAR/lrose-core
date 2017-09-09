@@ -77,7 +77,7 @@ public:
   const MdvxProj &getProjSource() const { return (_projSource); }
   const MdvxProj &getProjTarget() const { return (_projTarget); }
   
-  const int getNOffsets() const { return (_nOffsets); }
+  int getNOffsets() const { return (_nOffsets); }
   const int *getSourceOffsets() const { return (_sourceOffsets); }
   const int *getTargetOffsets() const { return (_targetOffsets); }
   

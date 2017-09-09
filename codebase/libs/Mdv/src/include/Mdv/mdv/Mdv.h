@@ -233,7 +233,7 @@ class MdvGrid
   
     double _setTolerance(void);
   
-    virtual const char *const _className(void)
+    virtual const char * _className(void)
     {
       return("MdvGrid");
     }
@@ -418,7 +418,7 @@ class MdvFieldData
   
     char _errorMsg[1024];
   
-    virtual const char *const _className(void)
+    virtual const char * _className(void)
     {
       return("MdvFieldData");
     }
@@ -687,7 +687,7 @@ class Mdv
   
     char _errorMsg[1024];
   
-    virtual const char *const _className(void)
+    virtual const char * _className(void)
     {
       return("Mdv");
     }

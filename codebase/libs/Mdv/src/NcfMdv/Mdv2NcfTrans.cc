@@ -670,7 +670,7 @@ int Mdv2NcfTrans::_addGlobalAttributes()
 
   // Add required CF-1.0 global attributes
 
-  iret |= !_ncFile->add_att("Conventions" , "CF-1.0");
+  iret |= !_ncFile->add_att("Conventions" , "CF-1.6");
 
   // history: from the mdv master header data_set_info
 
@@ -932,6 +932,7 @@ int Mdv2NcfTrans::_addTimeVariables()
                                           nc3Double, _timeDim)) == NULL) {
       return -1;
     }
+    iret |= !_startTimeVar->add_att(NcfMdv::long_name, "start_time");
     iret |= !_startTimeVar->add_att(NcfMdv::units, NcfMdv::secs_since_jan1_1970);
     iret |= !_startTimeVar->add_att(NcfMdv::comment, startTime.getW3cStr().c_str());
   }
@@ -941,6 +942,7 @@ int Mdv2NcfTrans::_addTimeVariables()
                                          nc3Double, _timeDim)) == NULL) {
       return -1;
     }
+    iret |= !_stopTimeVar->add_att(NcfMdv::long_name, "stop_time");
     iret |= !_stopTimeVar->add_att(NcfMdv::units, NcfMdv::secs_since_jan1_1970);
     iret |= !_stopTimeVar->add_att(NcfMdv::comment, stopTime.getW3cStr().c_str());
   }

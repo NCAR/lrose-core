@@ -23,7 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ////////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: TimestampChunk.hh,v 1.4 2016/03/03 18:59:25 dixon Exp $
+//  $Id: TimestampChunk.hh,v 1.5 2017/06/09 16:27:58 prestop Exp $
 //
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef _TIME_STAMP_INC_
@@ -55,7 +55,7 @@ public:
    void setPostMark( const string &newName, time_t newTime );
 
    const string& getName(){ return name; }
-   const time_t  getTime(){ return when.utime(); }
+   time_t  getTime(){ return when.utime(); }
 
    //
    // Mdv chunk support

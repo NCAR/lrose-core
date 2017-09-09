@@ -219,7 +219,7 @@ void MDV_init_lc2(double origin_lat,
   comps->lc2_F = cos(comps->lc2_lat1_rad) * t1n / comps->lc2_n;
 
   t0n = pow( tan(M_PI_4 + comps->origin_lat_rad/2), comps->lc2_n);
-  comps->lc2_rho = EARTH_RADIUS * comps->lc2_F / t0n;
+  comps->lc2_rho = PJG_get_earth_radius() * comps->lc2_F / t0n;
   
   comps->latlon2xy = lc2_latlon2xy;
   comps->xy2latlon = lc2_xy2latlon;
@@ -373,7 +373,7 @@ static void latlon_plus_r_theta(double cos_colat1,
   double cos_colat2, sin_colat2;
   double xx;
   
-  darc = r / EARTH_RADIUS;
+  darc = r / PJG_get_earth_radius();
   cos_theta = cos(theta_rad);
 
   xx = cos_colat1 * cos(darc) + sin_colat1 * sin(darc) * cos_theta;
@@ -455,7 +455,7 @@ static void latlon_2_r_theta(double colat1,
   if (xx > 1.0) xx = 1.0;
   darc = acos(xx);
   
-  *r = darc* EARTH_RADIUS;
+  *r = darc* PJG_get_earth_radius();
   
   denom = sin_colat1 * sin(darc);
 
@@ -487,7 +487,7 @@ static void lc2_latlon2xy(mdv_grid_comps_t *comps,
   theta = comps->lc2_n * (lon - comps->origin_lon_rad);
 
   tn = pow( tan(M_PI_4 + lat / 2), comps->lc2_n);
-  r = EARTH_RADIUS * comps->lc2_F / tn;
+  r = PJG_get_earth_radius() * comps->lc2_F / tn;
 
   *x = r * sin (theta);
   *y = comps->lc2_rho - r * cos(theta);
@@ -513,7 +513,7 @@ static void lc2_xy2latlon(mdv_grid_comps_t *comps,
     *lat = ((comps->lc2_n < 0.0) ? -90.0 : 90.0);
   }
   else {
-    rn = pow( EARTH_RADIUS * comps->lc2_F / r, 1 / comps->lc2_n);
+    rn = pow( PJG_get_earth_radius() * comps->lc2_F / r, 1 / comps->lc2_n);
     *lat = (2.0 * atan(rn) - M_PI_2) * RAD_TO_DEG;
   }
 
