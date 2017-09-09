@@ -39,7 +39,7 @@ LOC_LDFLAGS = $(NETCDF_LDFLAGS)
 
 LOC_LIBS = \
 	-ltinyxml -ldsdata -lFmq -ldsserver \
-	-ldidss -lrapformats -ltoolsa -leuclid \
+	-ldidss -lrapformats -leuclid -ltoolsa \
 	-ldataport -ltdrp $(NETCDF_LIB_LIST) -lsz \
 	-lbz2 -lpthread -lm
 

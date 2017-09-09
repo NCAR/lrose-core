@@ -39,9 +39,9 @@ MODULE_TYPE = progcpp
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lMdv -lRadx -ldsserver \
+LOC_LIBS = -ldsdata -lNcxx -lMdv -lRadx -ldsserver \
 	-ldidss -lrapformats -lgrib2 -leuclid \
-	-ltoolsa -lphysics -ljasper -lpng \
+	-ltoolsa -ljasper -lpng \
 	-ldataport -ltdrp -lrapmath $(NETCDF4_LIBS) \
 	-lbz2 -lz
 
@@ -62,6 +62,7 @@ CPPC_SRCS = \
 	Args.cc \
 	Grib2Nc.cc \
 	NcOutput.cc \
+	rotated_grid.cc \
 	Grib2toNc.cc \
 	main.cc
 

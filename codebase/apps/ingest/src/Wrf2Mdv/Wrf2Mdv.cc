@@ -1610,7 +1610,7 @@ void Wrf2Mdv::_interp3dField(WRFData &inData,
   
   // put into targetVol
   
-  Mdvx::field_header_t fhdr = field->getFieldHeader();
+  //Mdvx::field_header_t fhdr = field->getFieldHeader();
   fl32 *targetVol = (fl32 *) field->getVol();
   fl32 *ffp = targetVol + planeOffset;
 
@@ -1688,7 +1688,7 @@ void Wrf2Mdv::_interp2dField(WRFData &inData,
     return;
   }
 
-  Mdvx::field_header_t fhdr = field->getFieldHeader();
+  //Mdvx::field_header_t fhdr = field->getFieldHeader();
   fl32 *targetVol = (fl32 *) field->getVol();
   fl32 *ffp = targetVol + planeOffset;
 

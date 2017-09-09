@@ -39,8 +39,8 @@ LOC_INCLUDES = $(NETCDF4_INCS)
 LOC_CPPC_CFLAGS = -g
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS) 
 
-LOC_LIBS = -lMdv -lrapformats -ldsserver -ldidss -ltoolsa \
-           -ltdrp -ldataport -leuclid  -lRadx $(NETCDF4_LIBS) 
+LOC_LIBS = -lMdv -lrapformats -ldsserver -ldidss \
+           -ltdrp -ldataport -leuclid -ltoolsa -lRadx $(NETCDF4_LIBS) 
 
 HDRS = \
 	$(PARAMS_HH) \

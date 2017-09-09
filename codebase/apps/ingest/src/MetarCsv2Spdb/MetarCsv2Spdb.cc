@@ -603,6 +603,9 @@ int MetarCsv2Spdb::run()
   int iret = 0;
 
   char *input_filename;
+  int totalMetarLines = 0;
+  int successfulMetarDeocdings = 0;
+  
   while( _useStdin || (input_filename = _inputPath->next()) != NULL)
   {
     // create SPDB object
@@ -633,7 +636,7 @@ int MetarCsv2Spdb::run()
 	  {
       procmap_status = "Input from <STDIN>";
       if (_params.debug) {
-        cerr << "New data from STDIN" << endl;
+        cout << "New data from STDIN" << endl;
       }
     }
     else
@@ -641,7 +644,7 @@ int MetarCsv2Spdb::run()
       Path path(input_filename);
       procmap_status = "File <" + path.getFile() + ">";
       if (_params.debug) {
-        cerr << "New data in file: " << input_filename << endl;
+        cout << "New data in file: " << input_filename << endl;
       }
 	  }
     PMU_auto_register(procmap_status.c_str());
@@ -662,7 +665,7 @@ int MetarCsv2Spdb::run()
       in_file.open(input_filename);
 	  }
     if(!in_file) {
-      cerr << "Unable to open file: " 
+      cerr << "ERROR: Unable to open file: " 
 	   << input_filename << "; continuing ..." << endl;
       continue;
     }
@@ -670,11 +673,11 @@ int MetarCsv2Spdb::run()
     string line;
     getline(in_file, line); // get header
     if(!_parseHeader(line))
-	  {
-		  cerr << "ERROR: _parseHeader failed" << endl;
-		  if(_useStdin) break;
-		  continue;
-    }
+    {
+      cerr << "ERROR: _parseHeader failed" << endl;
+      if(_useStdin) break;
+        continue;
+      }
 
     while(getline(in_file, line)) {
       if(line.size() == 0){ 
@@ -690,15 +693,18 @@ int MetarCsv2Spdb::run()
         if(!getline(ss, s, ',')) break;
         arrayTokens.push_back(s);
       }
-
+      totalMetarLines++;
       WxObs m;
         if(!fillMetarObject(arrayTokens, m)) {
+
+	  verifyMetar(m, line);
+	  successfulMetarDeocdings++;
           if(strlen(_params.decoded_spdb_url) != 0) {
             addXmlSpdb(&spdbXml, &m, _params.expire_secs);
     	    }
 	      }
         else {
-	        cerr << "WARNING: Decoder failed on line: " << line  << endl;
+          cerr << "WARNING: Decoder failed on line: " << line  << endl;
         }
     }  
     // Write
@@ -714,9 +720,46 @@ int MetarCsv2Spdb::run()
 	    break;
     }
   } // while((input_filename = _inputPath->next() ...
-    
+
+  cout << "Read " << totalMetarLines << " lines of metars.\n";
+  cout << "Processed " << successfulMetarDeocdings << " metars.\n";
   return iret;
 
+}
+
+
+void MetarCsv2Spdb::verifyMetar(const WxObs& m, const string& line){
+
+  
+  
+  //test 1:
+  // precip type is RA, -RA, +RA, DZ, -DZ, +DZ and T <= -10C.
+  // NOTE that -DZ and +DZ are not supported weather types, so we don't check for them.
+  if (m.getTempC() <= -10){
+    for (int ix = 0; ix < m.getWeatherTypeSize(); ix++){
+      if ( (m.getWeatherType(ix) == WxT_RA) ||
+	   (m.getWeatherType(ix) == WxT_MRA) ||
+	   (m.getWeatherType(ix) == WxT_PRA) ||
+	   (m.getWeatherType(ix) == WxT_DZ) ) {
+	cerr << "ERROR: Decoded metar has Temp < -10 (" << m.getTempC() << ") and invalid weather (" << m.wxType2Str(m.getWeatherType(ix)) << ")" << endl;
+	cerr << "ERROR:         input line: " << line << endl;	  	     
+      }
+      
+    }
+      
+  }
+  //test 2:
+  // precip type is UNKNOWN
+      for (int ix = 0; ix < m.getWeatherTypeSize(); ix++){
+	if ( (m.getWeatherType(ix) == WxT_UNKNOWN) &&
+	     ( m.getMetarWx().length() > 0 )){
+	  cerr << "ERROR: Decoded metar has Wx Type UNKNOWN.  Weather String was: " << m.getMetarWx() << endl;
+          cerr << "ERROR: input line: " << line << endl;
+
+	}
+      }
+
+  
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -740,7 +783,7 @@ int MetarCsv2Spdb::_writeSpdb(DsSpdb &spdb, string url)
 {
   if (spdb.nPutChunks() > 0) {
     if (_params.debug) {
-      cerr << "Putting decoded metars to URL: " << url << endl;
+      cout << "Putting decoded metars to URL: " << url << endl;
     }
     spdb.setPutMode(Spdb::putModeAddUnique);
     
@@ -1047,7 +1090,7 @@ int MetarCsv2Spdb::fillMetarObject(const vector<string>& in, WxObs& out)
 
   if(_iRawText >= 0) {
 	  if (_params.debug >= Params::DEBUG_VERBOSE) {
-		  cerr << "\n" << in[_iRawText] << "\n";
+		  cout << "\n" << in[_iRawText] << "\n";
 	  }
     out.setMetarText(trimWhitespace(in[_iRawText]));
     std::size_t rmkPos = in[_iRawText].find("RMK");

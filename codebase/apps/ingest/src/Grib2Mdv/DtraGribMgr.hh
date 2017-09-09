@@ -23,6 +23,9 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////
 // DtraGribMgr
+//
+// $Id: DtraGribMgr.hh,v 1.5 2017/06/09 16:27:58 prestop Exp $
+//
 ////////////////////////////////////////////////////////
 #ifndef _DTRA_GRIB_MGR
 #define _DTRA_GRIB_MGR
@@ -55,9 +58,9 @@ public:
  // we store the Dtra grib table in our own structure
   typedef struct {
     int paramId;
-    char *name;
-    char *long_name;
-    char *units;
+    const char *name;
+    const char *long_name;
+    const char *units;
   } DtraParmTable;
 
   static const DtraParmTable _dtraParmTable[];

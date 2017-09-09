@@ -37,8 +37,8 @@ TARGET_FILE = axfSonde
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -ldsserver -ldidss -ltoolsa \
-	-ldataport -lphysics -leuclid -ltdrp \
+LOC_LIBS = -lSpdb -ldsserver -ldidss \
+	-ldataport -lphysics -leuclid -ltoolsa -ltdrp \
 	-lrapmath $(NETCDF4_LIBS) -lbz2 -lz \
 	-lpthread -lm
 

@@ -1,11 +1,11 @@
-/.cvsignore/1.1/Thu Aug 11 22:50:42 2016//
-/Main.cc/1.2/Thu Aug 11 22:50:42 2016//
-/Makefile/1.5/Thu Aug 11 22:50:42 2016//
-/Params.cc/1.2/Thu Aug 11 22:50:42 2016//
-/Params.hh/1.2/Thu Aug 11 22:50:42 2016//
-/Usgs2Spdb.cc/1.2/Thu Aug 11 22:50:42 2016//
-/Usgs2Spdb.hh/1.2/Thu Aug 11 22:50:42 2016//
-/paramdef.Usgs2Spdb/1.2/Thu Aug 11 22:50:42 2016//
-/theyokeVA.pm/1.1/Thu Aug 11 22:50:42 2016//
-/xml_cap.pl/1.1/Thu Aug 11 22:50:42 2016//
+/.cvsignore/1.1/Thu Dec 29 22:57:34 2016//
+/Main.cc/1.2/Thu Dec 29 22:57:34 2016//
+/Makefile/1.5/Thu Dec 29 22:57:34 2016//
+/Usgs2Spdb.cc/1.2/Thu Dec 29 22:57:34 2016//
+/Usgs2Spdb.hh/1.2/Thu Dec 29 22:57:34 2016//
+/paramdef.Usgs2Spdb/1.2/Thu Dec 29 22:57:34 2016//
+/theyokeVA.pm/1.1/Thu Dec 29 22:57:34 2016//
+/xml_cap.pl/1.1/Thu Dec 29 22:57:34 2016//
+/Params.cc/1.3/Fri Jan  6 23:36:24 2017//
+/Params.hh/1.3/Fri Jan  6 23:36:24 2017//
 D

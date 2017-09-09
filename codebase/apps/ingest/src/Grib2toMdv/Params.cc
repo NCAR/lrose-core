@@ -848,6 +848,36 @@ using namespace std;
     tt->single_val.i = 86400;
     tt++;
     
+    // Parameter 'lead_time_subsampling'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("lead_time_subsampling");
+    tt->descr = tdrpStrDup("Lead time subsampling flag");
+    tt->help = tdrpStrDup("Set to true to enable lead time subsampling.");
+    tt->val_offset = (char *) &lead_time_subsampling - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'subsample_lead_times'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("subsample_lead_times");
+    tt->descr = tdrpStrDup("The subsampled lead times to process");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_subsample_lead_times - &_start_;
+    tt->array_n_offset = (char *) &subsample_lead_times_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(int);
+    tt->array_n = 0;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+    tt++;
+    
     // Parameter 'write_forecast'
     // ctype is 'tdrp_bool_t'
     

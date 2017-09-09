@@ -33,7 +33,7 @@
  * 
  *  @date March, 2013
  *
- *  @version $Id: MetarCsv2Spdb.hh,v 1.4 2016/03/07 01:23:02 dixon Exp $
+ *  @version $Id: MetarCsv2Spdb.hh,v 1.5 2017/08/29 17:50:07 mccabe Exp $
  */
 
 
@@ -89,7 +89,14 @@ class MetarCsv2Spdb
 	 * @param[out] out the Metar object to fill 
 	 */
   int fillMetarObject(const vector<string>& in, WxObs& out);
-  
+
+
+  /** 
+   * performs quality control and verification of the metar
+   * 
+   */
+  void verifyMetar(const WxObs& out, const string& line);
+
 	/** Flag indicating whether the program status is currently okay. 
 	 * set when constructor exits in a bad state.
 	 */

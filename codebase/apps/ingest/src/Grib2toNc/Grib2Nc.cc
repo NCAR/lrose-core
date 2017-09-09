@@ -56,6 +56,7 @@
 #include <grib2/PolarStereoProj.hh>
 #include <grib2/MercatorProj.hh>
 #include <grib2/GausLatLonProj.hh>
+#include <grib2/RotLatLonProjArakawaNonE.hh>
 #include <grib2/Template5.2.hh>
 #include <grib2/Template5.3.hh>
 
@@ -409,6 +410,8 @@ int Grib2Nc::getData()
 	      _reOrderNS2SN(data, _fieldInfo.gridInfo.nx, _fieldInfo.gridInfo.ny);
 	    if(_reOrderAdjacent_Rows)
 	      _reOrderAdjacentRows(data, _fieldInfo.gridInfo.nx, _fieldInfo.gridInfo.ny);
+	    if(_reOrderDate_Line)
+	      _reOrderDateLine(data, _fieldInfo.gridInfo.nx, _fieldInfo.gridInfo.ny, _fieldInfo.gridInfo.dx);
 	    
 	    memcpy ( currDataPtr, data, sizeof(fl32)*_fieldInfo.gridInfo.nx*_fieldInfo.gridInfo.ny );
 	    currDataPtr += _fieldInfo.gridInfo.nx*_fieldInfo.gridInfo.ny;
@@ -511,7 +514,7 @@ void Grib2Nc::_convertGribLevel2CFLevel(const string &GribLevel, const string &G
 {
   const char *GribLevelCStr = GribLevel.c_str();
   if (!strcmp(GribLevelCStr, "SFC") || !strcmp(GribLevelCStr, "SURFACE") || 
-      !strcmp(GribLevelCStr, "SEAB") || !strcmp(GribLevelCStr, "PVL") || !strcmp(GribLevelCStr, "MSL")) 
+      !strcmp(GribLevelCStr, "PVL") || !strcmp(GribLevelCStr, "MSL")) 
   {
       _fieldInfo.vlevelInfo.standardName = "";
       _fieldInfo.vlevelInfo.units = GribLevelUnits;
@@ -532,13 +535,16 @@ void Grib2Nc::_convertGribLevel2CFLevel(const string &GribLevel, const string &G
       if(!strcmp(GribLevelCStr, "TMPL") || !strcmp(GribLevelCStr, "SPH_ABV_GRD") || 
 	 !strcmp(GribLevelCStr, "HTGL") || !strcmp(GribLevelCStr, "GPML") || 
 	 !strcmp(GribLevelCStr, "DBLL") || !strcmp(GribLevelCStr, "THEL") ||
-	 !strcmp(GribLevelCStr, "EtaL") || !strcmp(GribLevelCStr, "DBSL")) {
+	 !strcmp(GribLevelCStr, "EtaL") || !strcmp(GribLevelCStr, "DBSL") ||
+	 !strcmp(GribLevelCStr, "CBB") || !strcmp(GribLevelCStr, "CBT") |\
+	 !strcmp(GribLevelCStr, "AGL")) {
 	_fieldInfo.vlevelInfo.standardName = "altitude";
 	_fieldInfo.vlevelInfo.units = GribLevelUnits;
 	_fieldInfo.vlevelInfo.longName = GribLevelLong;
 	_fieldInfo.vlevelInfo.positive = NcOutput::up;
       } else
-       if(!strcmp(GribLevelCStr, "SPDL") || !strcmp(GribLevelCStr, "ISOB") || !strcmp(GribLevelCStr, "ISBL")) {
+       if(!strcmp(GribLevelCStr, "SPDL") || !strcmp(GribLevelCStr, "ISOB") 
+	  || !strcmp(GribLevelCStr, "ISBL") || !strcmp(GribLevelCStr, "PREST")) {
 	 _fieldInfo.vlevelInfo.standardName = "air_pressure";
 	 _fieldInfo.vlevelInfo.units = GribLevelUnits;
 	 _fieldInfo.vlevelInfo.longName = GribLevelLong;
@@ -551,39 +557,39 @@ void Grib2Nc::_convertGribLevel2CFLevel(const string &GribLevel, const string &G
 	 _fieldInfo.vlevelInfo.positive = NcOutput::up;
 	 if (!strcmp(GribLevelCStr, "CBL")) {
 	   _fieldInfo.vlevelInfo.standardName = "";
-	   _fieldInfo.vlevelInfo.units = NcOutput::level;
+	   _fieldInfo.vlevelInfo.units = NcOutput::units_missing;
 	   _fieldInfo.vlevelInfo.longName = GribLevelLong;
 	 } else if (!strcmp(GribLevelCStr, "CTL")) {
 	   _fieldInfo.vlevelInfo.standardName = "";
-	   _fieldInfo.vlevelInfo.units = NcOutput::level;
+	   _fieldInfo.vlevelInfo.units = NcOutput::units_missing;
 	   _fieldInfo.vlevelInfo.longName = GribLevelLong;
 	 } else if (!strcmp(GribLevelCStr, "0DEG")) {
 	   _fieldInfo.vlevelInfo.standardName = "";
-	   _fieldInfo.vlevelInfo.units = NcOutput::level;
+	   _fieldInfo.vlevelInfo.units = NcOutput::units_missing;
 	   _fieldInfo.vlevelInfo.longName = GribLevelLong;
 	 } else if (!strcmp(GribLevelCStr, "0_ISO")) {
 	   _fieldInfo.vlevelInfo.standardName = "";
-	   _fieldInfo.vlevelInfo.units = NcOutput::level;
+	   _fieldInfo.vlevelInfo.units = NcOutput::units_missing;
 	   _fieldInfo.vlevelInfo.longName = GribLevelLong;
 	 } else if (!strcmp(GribLevelCStr, "ADCL")) {
 	   _fieldInfo.vlevelInfo.standardName = "";
-	   _fieldInfo.vlevelInfo.units = NcOutput::level;
+	   _fieldInfo.vlevelInfo.units = NcOutput::units_missing;
 	   _fieldInfo.vlevelInfo.longName = GribLevelLong;
 	 } else if (!strcmp(GribLevelCStr, "MWSL")) {
 	   _fieldInfo.vlevelInfo.standardName = "";
-	   _fieldInfo.vlevelInfo.units = NcOutput::level;
+	   _fieldInfo.vlevelInfo.units = NcOutput::units_missing;
 	   _fieldInfo.vlevelInfo.longName = GribLevelLong;
 	 } else if (!strcmp(GribLevelCStr, "TRO")) {
 	   _fieldInfo.vlevelInfo.standardName = "";
-	   _fieldInfo.vlevelInfo.units = NcOutput::level;
+	   _fieldInfo.vlevelInfo.units = NcOutput::units_missing;
 	   _fieldInfo.vlevelInfo.longName = GribLevelLong;
 	 } else if (!strcmp(GribLevelCStr, "NTAT")) {
 	   _fieldInfo.vlevelInfo.standardName = "";
-	   _fieldInfo.vlevelInfo.units = NcOutput::level;
+	   _fieldInfo.vlevelInfo.units = NcOutput::units_missing;
 	   _fieldInfo.vlevelInfo.longName = GribLevelLong;
 	 } else {
 	   _fieldInfo.vlevelInfo.standardName = "";
-	   _fieldInfo.vlevelInfo.units = NcOutput::level;
+	   _fieldInfo.vlevelInfo.units = NcOutput::units_missing;
 	   _fieldInfo.vlevelInfo.longName = GribLevelLong;
 	 }
        }
@@ -596,6 +602,7 @@ int Grib2Nc::_setFieldInfo()
 
   _reOrderNS_2_SN = false;
   _reOrderAdjacent_Rows = false;
+  _reOrderDate_Line = false;
   _reMapField = false;
 
   _fieldInfo.addOffset = 0.0;
@@ -624,23 +631,29 @@ int Grib2Nc::_setFieldInfo()
     Grib2::Template5_pt_2 *Template5_2 = (Grib2::Template5_pt_2 *)drsTemplate;
 
     if(Template5_2->_missingType != 0 && Template5_2->_missingType != 255) {
-      _fieldInfo.secondaryMissing  = Template5_2->_primaryMissingVal;
-      _fieldInfo.missing           = Template5_2->_secondaryMissingVal;
+      _fieldInfo.secondaryMissing  = Template5_2->_secondaryMissingVal;
+      _fieldInfo.missing           = Template5_2->_primaryMissingVal;
     }
 
   } else if(drsConstants.templateNumber == 3) {
     Grib2::Template5_pt_3 *Template5_3 = (Grib2::Template5_pt_3 *)drsTemplate;
 
     if(Template5_3->_missingType != 0 && Template5_3->_missingType != 255) {
-      _fieldInfo.secondaryMissing  = Template5_3->_primaryMissingVal;
-      _fieldInfo.missing           = Template5_3->_secondaryMissingVal;
+      _fieldInfo.secondaryMissing  = Template5_3->_secondaryMissingVal;
+      _fieldInfo.missing           = Template5_3->_primaryMissingVal;
     }
 
   }
 
   si32 projID = _GribRecord->gds->getGridID();
+  _fieldInfo.gridInfo.earth_radius = _GribRecord->gds->getEarthRadius(_fieldInfo.gridInfo.earth_major_axis,
+								      _fieldInfo.gridInfo.earth_minor_axis);
+  if(_fieldInfo.gridInfo.earth_radius != 0.0)
+    Pjg::setEarthRadiusKm(_fieldInfo.gridInfo.earth_radius);
+
   Grib2::GribProj *proj = _GribRecord->gds->getProjection();
   
+  ui08 scanModeFlag = 0;
   if(projID == Grib2::GDS::EQUIDISTANT_CYL_PROJ_ID) {
     Grib2::LatLonProj *latlonProj = (Grib2::LatLonProj *)proj;
     
@@ -670,19 +683,17 @@ int Grib2Nc::_setFieldInfo()
     if(_fieldInfo.gridInfo.minx > 180.0 && _fieldInfo.gridInfo.minx <= 360.0)
       _fieldInfo.gridInfo.minx -= 360.0;
 
-    // If _scanModeFlag & 64 == true
-    // Data is order north to south
-    // We expect south to north so switch la1 with la2 
-    // and reorder the data
-    if ((latlonProj->_scanModeFlag & 64) == 0) {
-      _fieldInfo.gridInfo.miny = latlonProj->_la2;
-      _reOrderNS_2_SN = true;  // flag to reorder the data
+    // Handle global lat/lon data that goes from 0-360 lon
+    // Re-order -180 to 180
+    if(_fieldInfo.gridInfo.minx == 0.0 && _fieldInfo.gridInfo.minx + (_fieldInfo.gridInfo.dx * _fieldInfo.gridInfo.nx) > 358.0) {
+      _reOrderDate_Line = true;
+      _fieldInfo.gridInfo.minx = -180.0;
     }
-    // If _scanModeFlag & 16 == true
-    // Adjacent rows scan in opposite direction
-    // reorder to scan in the same direction
-    if (latlonProj->_scanModeFlag & 16) {
-      _reOrderAdjacent_Rows = true;  // flag to reorder the data
+
+    scanModeFlag = latlonProj->_scanModeFlag;
+    // We expect south to north so switch la1 with la2 
+    if ((scanModeFlag & 64) == 0) {
+      _fieldInfo.gridInfo.miny = latlonProj->_la2;
     }
 
     _fieldInfo.gridInfo.proj_origin_lat = _fieldInfo.gridInfo.miny;
@@ -701,19 +712,15 @@ int Grib2Nc::_setFieldInfo()
     _fieldInfo.gridInfo.dy          = lambertProj->_dy;
     _fieldInfo.gridInfo.lat1        = lambertProj->_latin1;
     _fieldInfo.gridInfo.lat2        = lambertProj->_latin2;
+    _fieldInfo.gridInfo.false_easting  = 0.0;
+    _fieldInfo.gridInfo.false_northing  = 0.0;
 
     if(_fieldInfo.gridInfo.proj_origin_lon > 180.0 && _fieldInfo.gridInfo.proj_origin_lon <= 360.0)
       _fieldInfo.gridInfo.proj_origin_lon -= 360.0;
 
-    if ((lambertProj->_scanModeFlag & 64) == 0) {
-      _reOrderNS_2_SN = true;
-    }
-    if (lambertProj->_scanModeFlag & 16) {
-      _reOrderAdjacent_Rows = true;
-    }
+    scanModeFlag = lambertProj->_scanModeFlag;
 
-     // 
-     // calculate min_x and min_y
+     // must calculate min_x and min_y
      double min_x, min_y;
      
      PjgCalc *calculator;
@@ -746,18 +753,12 @@ int Grib2Nc::_setFieldInfo()
     _fieldInfo.gridInfo.tan_lon = polarProj->_lov;
     _fieldInfo.gridInfo.pole_type = polarProj->_projCtrFlag;
     _fieldInfo.gridInfo.central_scale = 1.0 / polarStereoAdjustment;
-    _fieldInfo.gridInfo.false_easting  = 500.0;
+    _fieldInfo.gridInfo.false_easting  = 0.0;
     _fieldInfo.gridInfo.false_northing  = 0.0;
 
-    if ((polarProj->_scanModeFlag & 64) == 0) {
-      _reOrderNS_2_SN = true;
-    }
-    if (polarProj->_scanModeFlag & 16) {
-      _reOrderAdjacent_Rows = true;
-    }
+    scanModeFlag = polarProj->_scanModeFlag;
 
-    // 
-    // calculate min_x and min_y
+    // must calculate min_x and min_y
     double min_x, min_y;
     
     PjgCalc *calculator;
@@ -787,14 +788,13 @@ int Grib2Nc::_setFieldInfo()
     _fieldInfo.gridInfo.proj_origin_lat = 0.0;  // mercatorProj->_lad;
     _fieldInfo.gridInfo.proj_origin_lon = mercatorProj->_lo1;
     _fieldInfo.gridInfo.tan_lon         = mercatorProj->_lov;
-    _fieldInfo.gridInfo.false_easting  = 500.0;
+    _fieldInfo.gridInfo.false_easting  = 0.0;
     _fieldInfo.gridInfo.false_northing  = 0.0;
 
     if(_fieldInfo.gridInfo.proj_origin_lon > 180.0 && _fieldInfo.gridInfo.proj_origin_lon <= 360.0)
       _fieldInfo.gridInfo.proj_origin_lon -= 360.0;
 
-     // 
-     // calculate min_x and min_y
+     // must calculate min_x and min_y
      double min_x, min_y;
      
      PjgCalc *calculator;
@@ -805,12 +805,7 @@ int Grib2Nc::_setFieldInfo()
     _fieldInfo.gridInfo.minx = min_x;
     _fieldInfo.gridInfo.miny = min_y;
 
-    if ((mercatorProj->_scanModeFlag & 64) == 0) {
-      _reOrderNS_2_SN = true;
-    }
-    if (mercatorProj->_scanModeFlag & 16) {
-      _reOrderAdjacent_Rows = true;
-    }
+    scanModeFlag = mercatorProj->_scanModeFlag;
 
   } else if(projID == Grib2::GDS::GAUSSIAN_LAT_LON_PROJ_ID) {
     Grib2::GausLatLonProj *latlonProj = (Grib2::GausLatLonProj *)proj;
@@ -831,26 +826,60 @@ int Grib2Nc::_setFieldInfo()
     // We must re-map gaussian lat/lon to a regularaly spaced grid
     _reMapField = true;
 
-    // If _scanModeFlag & 64 == true
-    // Data is order north to south
-    // MDV expects south to north so switch la1 with la2 
-    // and reorder the data
-    if ((latlonProj->_scanModeFlag & 64) == 0) {
+    scanModeFlag = latlonProj->_scanModeFlag;
+    // We expect south to north so switch la1 with la2 
+    if ((scanModeFlag & 64) == 0) {
       _fieldInfo.gridInfo.miny = latlonProj->_la2;
-      _reOrderNS_2_SN = true;  // flag to reorder the data
     }
-    // If _scanModeFlag & 16 == true
-    // Adjacent rows scan in opposite direction
-    // reorder to scan in the same direction
-    if (latlonProj->_scanModeFlag & 16) {
-      _reOrderAdjacent_Rows = true;  // flag to reorder the data
-    }
+
+  } else if(projID == Grib2::GDS::ROT_LAT_LON_ARAKAWA_NON_E_PROJ_ID) {
+    Grib2::RotLatLonAwaNonEProj *rotatedProj = (Grib2::RotLatLonAwaNonEProj *)proj;
+    
+    _fieldInfo.gridInfo.ncfGridName     = NcOutput::rotated_latitude_longitude;
+    _fieldInfo.gridInfo.nx              = rotatedProj->_nj;
+    _fieldInfo.gridInfo.ny              = rotatedProj->_ni;
+    _fieldInfo.gridInfo.minx            = rotatedProj->_la1;
+    _fieldInfo.gridInfo.miny            = rotatedProj->_lo1;
+    _fieldInfo.gridInfo.dx              = rotatedProj->_dj / 1000.;
+    _fieldInfo.gridInfo.dy              = rotatedProj->_di / 1000.;
+    _fieldInfo.gridInfo.proj_origin_lat = rotatedProj->_la2;
+    _fieldInfo.gridInfo.proj_origin_lon = rotatedProj->_lo2;
+    _fieldInfo.gridInfo.lat2            = rotatedProj->_laNiNj;
+    _fieldInfo.gridInfo.tan_lon         = rotatedProj->_loNiNj;
+
+    scanModeFlag = rotatedProj->_scanModeFlag;
 
   } else {
     cerr << "ERROR: Unimplemented projection type " << projID << endl << flush;
     return( RI_FAILURE );
   }
   
+  // If _scanModeFlag & 128 == true
+  // Data is order west to east
+  // We expect west to east must reorder the data
+  //if ((scanModeFlag & 128) == 128) {
+  //  cerr << "ERROR: Unimplemented data order, east to west. " << endl << flush;
+  //  return( RI_FAILURE );
+  //}
+  // If _scanModeFlag & 64 == false
+  // Data is order north to south
+  // We expect south to north must reorder the data
+  if ((scanModeFlag & 64) == 0) {
+    _reOrderNS_2_SN = true;  // flag to reorder the data
+  }
+  // If _scanModeFlag & 16 == true
+  // Adjacent rows scan in opposite direction
+  // reorder to scan in the same direction
+  if ((scanModeFlag & 16) == 16) {
+    _reOrderAdjacent_Rows = true;  // flag to reorder the data
+  }
+  // If _scanModeFlag & (8|4|2) is true 
+  // Points are offset by Di/2 in some direction
+  if ((scanModeFlag & 8) == 8 || (scanModeFlag & 4) == 4 || (scanModeFlag & 2) == 2) {
+    cerr << "ERROR: Unimplemented data ofset flag is set.. " << endl << flush;
+    return( RI_FAILURE );
+  }
+
   return( RI_SUCCESS );
 }
 
@@ -929,6 +958,30 @@ void Grib2Nc::_reOrderAdjacentRows (fl32 *data, int numX, int numY)
 }
 
 //
+// Reorders global data that spans the dateline (0 to 360)
+// to data that starts on the dateline (-180 to 180)
+// Grid size remains the same.
+void Grib2Nc::_reOrderDateLine (fl32 *data, int numX, int numY, fl32 dX)
+{
+  size_t length = (size_t)numX * (size_t)numY;
+  fl32 *bufPtr = new fl32[length];
+  memcpy(bufPtr, data, length*sizeof(fl32));
+  int xOffset = (int)(180. / dX);
+  for (int y = 0; y < numY; y ++) {
+    int newX = xOffset;
+    for (int x = 0;  x < numX; x++) {
+      if(newX >= numX)
+	newX -= numX;
+      data[(y * numX) + newX] = bufPtr[(y * numX) + x];
+      newX++;
+    }
+  }
+
+  delete [] bufPtr;
+
+}
+
+//
 // Selects the field name. Uses the abbreviated name from the Grib2 product table along
 // with the abbreviated level name to form a unique name for this field.
 // If there is an mdv field name specfied in the parameter file it is used instead.
@@ -976,7 +1029,7 @@ void Grib2Nc::_limitDataRange(int paramsIndex, fl32 *dataPtr)
     upperLimit = tmp;
   }
 
-  fl32 replacementValue = _fieldInfo.secondaryMissing;
+  fl32 replacementValue = _fieldInfo.missing;
   Params::qc_default_t qcDefaultType = 
     _paramsPtr->_output_fields[paramsIndex].qc_default_type;
 
@@ -995,7 +1048,7 @@ void Grib2Nc::_limitDataRange(int paramsIndex, fl32 *dataPtr)
   size_t numPts = _fieldInfo.gridInfo.nx*_fieldInfo.gridInfo.ny*_fieldInfo.vlevelInfo.nz;
   
   for (size_t j = 0; j < numPts; j++,  flPtr++) {
-    if((*flPtr < lowerLimit) || (*flPtr > upperLimit)) {
+    if((*flPtr < lowerLimit) || (*flPtr > upperLimit) || (*flPtr == _fieldInfo.secondaryMissing)) {
       *flPtr = replacementValue;
     }
   }
@@ -1146,8 +1199,8 @@ void Grib2Nc::_convertUnits(int paramsIndex, fl32 *dataPtr)
 }
 
 //
-// Performs data encoding if requested
-fl32 *Grib2Nc::_encode(fl32 *dataPtr, Params::data_pack_t output_encoding)
+// Performs data calculation if it hasnt been done
+fl32 *Grib2Nc::_calcMinMax(fl32 *dataPtr)
 {
   //
   // Calculate min and max for every field
@@ -1160,13 +1213,27 @@ fl32 *Grib2Nc::_encode(fl32 *dataPtr, Params::data_pack_t output_encoding)
   
   for (size_t i = 0; i < npoints; i++, val++) {
     fl32 this_val = *val;
-    if (this_val != missing && this_val != bad) {
-      min_val = MIN(min_val, this_val);
-      max_val = MAX(max_val, this_val);
+    if (this_val == bad) {
+      this_val = missing;
+    } else {
+      if (this_val != missing ) {
+	min_val = MIN(min_val, this_val);
+	max_val = MAX(max_val, this_val);
+      }
     }
   }
   _fieldInfo.min_value = min_val;
   _fieldInfo.max_value = max_val;
+  
+  return dataPtr;
+}
+
+
+//
+// Performs data encoding if requested
+fl32 *Grib2Nc::_encode(fl32 *dataPtr, Params::data_pack_t output_encoding)
+{
+  dataPtr = _calcMinMax(dataPtr);
   
   if (output_encoding != Params::DATA_PACK_NONE)
   {    
@@ -1176,6 +1243,7 @@ fl32 *Grib2Nc::_encode(fl32 *dataPtr, Params::data_pack_t output_encoding)
       dataPtr = (fl32*)  _float32_to_int16(dataPtr);
     }
   }
+
   return dataPtr;
 }
 
@@ -1190,12 +1258,7 @@ void *Grib2Nc::_float32_to_int8(fl32 *inDataPtr)
   fl32 in_missing = _fieldInfo.missing;
   fl32 in_bad =  _fieldInfo.secondaryMissing;
   ui08 out_missing = 0;
-  ui08 out_bad;
-  if (in_missing == in_bad) {
-    out_bad = out_missing;
-  } else {
-    out_bad = 1;
-  }
+  ui08 out_bad = out_missing;
 
   // compute scale and bias
   
@@ -1286,12 +1349,7 @@ void *Grib2Nc::_float32_to_int16(fl32 *inDataPtr)
   fl32 in_missing = _fieldInfo.missing;
   fl32 in_bad =  _fieldInfo.secondaryMissing;
   ui16 out_missing = 0;
-  ui16 out_bad;
-  if (in_missing == in_bad) {
-    out_bad = out_missing;
-  } else {
-    out_bad = 1;
-  }
+  ui16 out_bad = out_missing;
 
   // compute scale and bias
 

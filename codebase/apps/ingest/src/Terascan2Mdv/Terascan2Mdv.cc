@@ -97,6 +97,7 @@ extern "C" {
 #include "FieldProcessor.hh"
 #include "FlatFieldProcessor.hh"
 #include "LatlonFieldProcessor.hh"
+#include "PolarStereoFieldProcessor.hh"
 
 using namespace std;
 
@@ -477,7 +478,7 @@ bool Terascan2Mdv::_processDataset(const string &input_filename,
   {
     return false;
   }
-  
+
 }
 
 /*********************************************************************
@@ -535,6 +536,12 @@ bool Terascan2Mdv::_childsPlay(const string &input_filename,
 	cerr << "new failed" << endl;
       }
 
+      break;
+    case Params::POLARSTEREO :
+      if(!(field_processor = new(nothrow) PolarStereoFieldProcessor(input_dataset))) {
+	cerr << "new failed" << endl;
+      }
+      dynamic_cast<PolarStereoFieldProcessor*>(field_processor)->setMapScaleFactor(_params->map_scale_factor);
       break;
     } /* endswitch - _params->projection */
   

@@ -425,13 +425,13 @@ void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
 
     case Params::QNRAIN_FIELD:
       MdvxFieldCode::getEntryByAbbrev("UNDEFINED", codeEntry);
-      _setFieldName(fhdr, _params._output_fields[out_field].name, "",
+      _setFieldName(fhdr, _params._output_fields[out_field].name, "kg-1",
 		    "none", codeEntry.code);
       break;
 
     case Params::QNCLOUD_FIELD:
       MdvxFieldCode::getEntryByAbbrev("UNDEFINED", codeEntry);
-      _setFieldName(fhdr, _params._output_fields[out_field].name, "",
+      _setFieldName(fhdr, _params._output_fields[out_field].name, "kg-1",
 		    "none", codeEntry.code);
       break;
 
@@ -672,7 +672,7 @@ void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
     case Params::HGT_FIELD:
       MdvxFieldCode::getEntryByAbbrev("UNDEFINED", codeEntry);
       _setFieldName(fhdr, _params._output_fields[out_field].name,
-		    "m", "none", codeEntry.code);
+		    "gpm", "none", codeEntry.code);
       break;
 
     case Params::GEO_POT_FIELD:

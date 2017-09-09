@@ -67,6 +67,8 @@ int main( int argc, char **argv )
 
    Prog->run();
 
+   delete Prog;
+
    return (0);
 }
 

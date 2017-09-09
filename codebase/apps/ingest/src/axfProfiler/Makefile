@@ -37,8 +37,8 @@ TARGET_FILE = axfProfiler
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -ldsserver -ldidss -ltoolsa \
-	-ldataport -ltdrp -lphysics -leuclid \
+LOC_LIBS = -lSpdb -ldsserver -ldidss \
+	-ldataport -ltdrp -lphysics -leuclid -ltoolsa \
 	-lrapmath $(NETCDF4_LIBS) -lbz2 -lz \
 	-lpthread -lm
 

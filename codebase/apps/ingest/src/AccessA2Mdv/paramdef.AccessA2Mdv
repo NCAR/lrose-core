@@ -199,12 +199,12 @@ paramdef string {
   p_default = "source";
   p_descr = "name for netCDF global attribute for source.";
 } netcdf_gattr_source;
-
-paramdef string {
-  p_default = "modl_vrsn";
-  p_descr = "name for netCDF global attribute for model version.";
-} netcdf_gattr_version;
-
+//
+//paramdef string {
+//  p_default = "modl_vrsn";
+//  p_descr = "name for netCDF global attribute for model version.";
+//} netcdf_gattr_version;
+//
 paramdef string {
   p_default = "scale_factor";
   p_descr = "name for netCDF variable attribute for scale.";

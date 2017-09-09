@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 // RCS info
-//   $Author: dixon $
+//   $Author: cunning $
 //   $Locker:  $
-//   $Date: 2016/03/07 01:23:06 $
-//   $Id: FlatFieldProcessor.cc,v 1.6 2016/03/07 01:23:06 dixon Exp $
-//   $Revision: 1.6 $
+//   $Date: 2016/11/28 16:54:31 $
+//   $Id: FlatFieldProcessor.cc,v 1.7 2016/11/28 16:54:31 cunning Exp $
+//   $Revision: 1.7 $
 //   $State: Exp $
 //
  
@@ -106,6 +106,8 @@ bool FlatFieldProcessor::_initLocal(ETXFORM mxfm)
   // called.
 
   double adjacent_lat, adjacent_lon;
+  
+  PJGflat_init(_centerLat, _centerLon, 0.0);
   
   etxll(mxfm, _numLines - 1, 2, &adjacent_lat, &adjacent_lon);
   PJGLatLon2DxDy(_lowerLeftLat, _lowerLeftLon,

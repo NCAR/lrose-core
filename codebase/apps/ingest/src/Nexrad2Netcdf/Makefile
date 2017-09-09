@@ -36,7 +36,7 @@ TARGET_FILE = Nexrad2Netcdf
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -ldsdata -lFmq -ldsserver -ldidss \
-	-lrapformats -ltoolsa -leuclid -ldataport \
+	-lrapformats -leuclid -ltoolsa -ldataport \
 	-ltdrp -lsz $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread -lm
 

@@ -478,6 +478,11 @@ public:
 
   int max_lead_time_secs;
 
+  tdrp_bool_t lead_time_subsampling;
+
+  int *_subsample_lead_times;
+  int subsample_lead_times_n;
+
   tdrp_bool_t write_forecast;
 
   char* forecast_mdv_url;
@@ -538,7 +543,11 @@ private:
 
   void _init();
 
+<<<<<<< Params.hh
   mutable TDRPtable _table[54];
+=======
+  mutable TDRPtable _table[55];
+>>>>>>> 1.15
 
   const char *_className;
 

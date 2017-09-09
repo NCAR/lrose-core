@@ -611,7 +611,7 @@ void NidsIngest::_createMdvVolume( NidsFile & nidsFile, const string filepath, c
 
   PMU_auto_register("NidsFile to Mdv or Spdb");
  
-  _setEndOfVolFlag(filepath,  nidsFile.getEndOfVolStr(), nidsFile.getElevNumber());
+  _setEndOfVolFlag(filepath,  nidsFile.getEndOfVolStr(), nidsFile.getTiltIndex());
   
   if (newVolume)
   {
@@ -1528,10 +1528,7 @@ void  NidsIngest::_writeSpdbTvs( NidsFile &nidsFile, FILE *txtFile)
       cerr << "NidsIngest::_writeSpdbTvs(): Writing to " << url.c_str() << endl;
     }
   }
-  
-
 }
-
 
 void  NidsIngest:: _writeSpdbMesocyclone( NidsFile &nidsFile, FILE *txtFile)
 {
@@ -1747,7 +1744,7 @@ void  NidsIngest:: _writeSpdbStormIDs( NidsFile &nidsFile)
   }  
 }
 
-void  NidsIngest::_setEndOfVolFlag(const string filepath, const string endOfVolStr, const int tiltNum)
+void  NidsIngest::_setEndOfVolFlag(const string filepath, const string endOfVolStr, const int tiltIndex)
 {
 
   int strLen = endOfVolStr.length();
@@ -1762,7 +1759,7 @@ void  NidsIngest::_setEndOfVolFlag(const string filepath, const string endOfVolS
 	   << endOfVolStr.c_str() << " File processed: " <<  filepath.c_str() << endl;
     }
   }
-  else if  (_outputLastTiltInVol && tiltNum == _lastTiltNum)
+  else if  (_outputLastTiltInVol && tiltIndex == _lastTiltNum)
   {
     _endOfVol = true;
     
@@ -1770,7 +1767,7 @@ void  NidsIngest::_setEndOfVolFlag(const string filepath, const string endOfVolS
     {
       cerr << "NidsIngest::_setEndOfVolFlag(): End of vol == TRUE. "
 	   << "_outputLastTiltInVol = true and parameter _lastTiltNum = "  
-	   << _lastTiltNum << ", current tilt is " << tiltNum << endl;
+	   << _lastTiltNum << ", index of current tilt is " << tiltIndex << endl;
     }
   }
   else

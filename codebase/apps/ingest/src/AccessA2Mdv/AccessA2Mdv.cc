@@ -23,11 +23,11 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 /*
- *  $Id: AccessA2Mdv.cc,v 1.17 2016/03/07 01:22:59 dixon Exp $
+ *  $Id: AccessA2Mdv.cc,v 1.18 2017/07/02 20:51:23 cunning Exp $
  */
 
 # ifndef    lint
-static char RCSid[] = "$Id: AccessA2Mdv.cc,v 1.17 2016/03/07 01:22:59 dixon Exp $";
+static char RCSid[] = "$Id: AccessA2Mdv.cc,v 1.18 2017/07/02 20:51:23 cunning Exp $";
 # endif     /* not lint */
 
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -457,17 +457,17 @@ AccessA2Mdv::_checkFile(NcFile &ncf)
 
   int errorCount = 0;
   
-  if (ncf.get_att(_params->netcdf_gattr_source) == 0) {
-    cerr << "ERROR - " << methodName << endl;
-    cerr << "  attribute missing: " << _params->netcdf_gattr_source << endl;
-    errorCount++;
-  }
+   if (ncf.get_att(_params->netcdf_gattr_source) == 0) {
+     cerr << "WARNING - " << methodName << endl;
+     cerr << "  attribute missing: " << _params->netcdf_gattr_source << endl;
+     errorCount++;
+   }
   
-  if (ncf.get_att(_params->netcdf_gattr_version) == 0) {
-    cerr << "ERROR - " << methodName << endl;
-    cerr << "  attribute missing: " << _params->netcdf_gattr_version << endl;
-    errorCount++;
-  }
+  // if (ncf.get_att(_params->netcdf_gattr_version) == 0) {
+  //   cerr << "WARNING - " << methodName << endl;
+  //   cerr << "  attribute missing: " << _params->netcdf_gattr_version << endl;
+  //   warnCount++;
+  // }
   
   if (ncf.get_dim(_params->netcdf_dim_n_lat) == 0) {
     cerr << "ERROR - " << methodName << endl;
@@ -498,34 +498,34 @@ AccessA2Mdv::_checkFile(NcFile &ncf)
   
   if (ncf.get_var(_params->netcdf_var_base_time) == 0) {
     cerr << "ERROR - " << methodName << endl;
-    cerr << "  variable missing" << _params->netcdf_var_base_time << endl;
+    cerr << "  variable missing: " << _params->netcdf_var_base_time << endl;
     errorCount++;
   }
   
 
   if (ncf.get_var(_params->netcdf_var_time_offset) == 0) {
     cerr << "ERROR - " << methodName << endl;
-    cerr << "  variable missing" << _params->netcdf_var_time_offset << endl;
+    cerr << "  variable missing: " << _params->netcdf_var_time_offset << endl;
     errorCount++;
   }
   
 
   if (ncf.get_var(_params->netcdf_var_latitude) == 0) {
     cerr << "ERROR - " << methodName << endl;
-    cerr << "  variable missing" << _params->netcdf_var_latitude << endl;
+    cerr << "  variable missing: " << _params->netcdf_var_latitude << endl;
     errorCount++;
   }
   
   if (ncf.get_var(_params->netcdf_var_longitude) == 0) {
     cerr << "ERROR - " << methodName << endl;
-    cerr << "  variable missing" << _params->netcdf_var_longitude << endl;
+    cerr << "  variable missing: " << _params->netcdf_var_longitude << endl;
     errorCount++;
   }
   
   for(int i = 0; i < _params->output_fields_n; i++) {
     if (ncf.get_var(_params->_output_fields[i].nc_var_name) == 0) {
       cerr << "ERROR - " << methodName << endl;
-      cerr << "  variable missing" << _params->_output_fields[i].nc_var_name << endl;
+      cerr << "  variable missing: " << _params->_output_fields[i].nc_var_name << endl;
       errorCount++;
     }
   }
@@ -785,8 +785,7 @@ AccessA2Mdv::_setMasterHeader(const string& path, NcFile &ncf)
   hdr.data_ordering = Mdvx::ORDER_XYZ;
 
   string info = string(_params->data_set_name) + " data\n" +
-    string(ncf.get_att(_params->netcdf_gattr_source)->as_string(0)) + "\n" +
-    string(ncf.get_att(_params->netcdf_gattr_version)->as_string(0));
+    string(ncf.get_att(_params->netcdf_gattr_source)->as_string(0));
 
 
   char* cptr = STRcopy(&(hdr.data_set_info[0]), const_cast<char*>(info.c_str()), MDV_INFO_LEN);

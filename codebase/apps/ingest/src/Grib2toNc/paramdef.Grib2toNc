@@ -179,6 +179,13 @@ paramdef int {
   p_help = "See 'check_lead_time'.";
 } max_lead_time_secs;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to always output lead time variables.";
+  p_help = "This forcess output of forecast_period and forecast_reference_time even when lead_time is 0. "
+           "Used for model data to have output files all contain the same variables.";
+} force_lead_time_output;
+
 paramdef string {
   p_default = "./nc";
   p_descr = "Directory for output files";

@@ -31,7 +31,7 @@
 //
 // July 2005
 //
-// $Id: Beam.hh,v 1.13 2016/03/07 01:23:03 dixon Exp $
+// $Id: Beam.hh,v 1.14 2017/06/07 22:34:17 jcraig Exp $
 //
 ///////////////////////////////////////////////////////////////
 
@@ -343,6 +343,7 @@ private:
   //   bias         = bias to be applied
   //
   void _storeData( ui08* nexradData, int numGatesIn, ui08** shortData);
+  void _storeData(ui08* nexradData, int numGatesOut, int numGatesIn, ui08** data);
   void _storeData(RIDDS_data_31* nexradData, int compression, int length, ui08** data);
 
   //

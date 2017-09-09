@@ -37,7 +37,7 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-lshapelib -ldidss -ltoolsa -leuclid \
+	-lshapelib -ldidss -leuclid -ltoolsa \
 	-ldataport -ltdrp -lrapmath -lbz2 \
 	-lz -lpthread -lm
 

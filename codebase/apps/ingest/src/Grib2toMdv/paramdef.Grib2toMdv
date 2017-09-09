@@ -193,6 +193,21 @@ paramdef int {
   p_help = "See 'check_lead_time'.";
 } max_lead_time_secs;
 
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Lead time subsampling flag";
+  p_help = "Set to true to enable lead time subsampling.";
+} lead_time_subsampling;
+
+paramdef int
+{ 
+  p_default = {};
+  p_descr = "The subsampled lead times to process";
+  p_descr = "Units are seconds.  Used only when do_lead_time_subsampling "
+    "is TRUE. If it empty, all lead times are sampled, even when do_lead_time_subsampling=TRUE";
+} subsample_lead_times[];
+
 paramdef boolean {
   p_default = TRUE;
   p_descr = "Write mdv files in a forecast directory structure";

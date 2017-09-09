@@ -55,7 +55,8 @@ paramdef enum mode_t
 typedef enum
 {
   FLAT,
-  LATLON
+  LATLON,
+  POLARSTEREO
 } proj_t;
 
 paramdef enum proj_t
@@ -178,4 +179,13 @@ paramdef long
            "running on the same computer and ingest data from the same satellite.";
   p_default = 0;
 } process_delay;
+
+paramdef double
+{
+  p_descr = "The scale factor for the underlying map projection for the input TDF file.";
+  p_help = "This parameter is only used for the POLARSTEREO projection. The value is not "
+           "readily apparent from the various Terascan utilities such as contents or etx_info. "
+           "The same is true for C API.";
+  p_default = 1.0;
+} map_scale_factor;
 
