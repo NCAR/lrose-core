@@ -33,17 +33,19 @@
  *
  */
 
-#include <stdlib.h>
-
+#include "Input.hh"
+#include "Calib.hh"
+#include <Refract/RefractConstants.hh>
+#include <Mdv/DsMdvx.hh>
+#include <Mdv/Mdvx.hh>
+#include <Mdv/MdvxField.hh>
 #include <Mdv/MdvxPjg.hh>
 #include <rapmath/math_macros.h>
+#include <toolsa/LogStream.hh>
 #include <toolsa/str.h>
-
-#include "Input.hh"
-#include "Processor.hh"
-
-using namespace std;
-
+#include <cmath>
+#include <cstdlib>
+using std::string;
 
 // Globals
 
@@ -56,14 +58,13 @@ const double Input::SNR_NOISE_MAX = 0.25;
 const double Input::DM_NOISE = -114.4132;
 
 
-/*********************************************************************
- * Constructors
- */
-
+//------------------------------------------------------------------------
 Input::Input(const bool raw_iq_in_input,
-	     const string &raw_i_field_name, const string &raw_q_field_name,
-	     const string &niq_field_name, const string &aiq_field_name,
-	     const string &snr_field_name,
+	     const std::string &raw_i_field_name,
+	     const std::string &raw_q_field_name,
+	     const std::string &niq_field_name,
+	     const std::string &aiq_field_name,
+	     const std::string &snr_field_name,
 	     const double input_niq_scale,
 	     const bool invert_target_angle_sign,
 	     const int elevation_num,
@@ -88,10 +89,13 @@ Input::Input(const bool raw_iq_in_input,
 {
 }
 
+//------------------------------------------------------------------------
 Input::Input(const bool raw_iq_in_input,
-	     const string &raw_i_field_name, const string &raw_q_field_name,
-	     const string &niq_field_name, const string &aiq_field_name,
-	     const string &snr_field_name,
+	     const std::string &raw_i_field_name,
+	     const std::string &raw_q_field_name,
+	     const std::string &niq_field_name,
+	     const std::string &aiq_field_name,
+	     const std::string &snr_field_name,
 	     const double input_niq_scale,
 	     const bool invert_target_angle_sign,
 	     const double min_elevation_angle,
@@ -118,52 +122,32 @@ Input::Input(const bool raw_iq_in_input,
 }
 
   
-/*********************************************************************
- * Destructor
- */
-
+//------------------------------------------------------------------------
 Input::~Input()
 {
 }
 
-
-/*********************************************************************
- * getNextScan()
- */
-
-bool Input::getNextScan(const string &file_path,
+//------------------------------------------------------------------------
+bool Input::getNextScan(const std::string &file_path, const std::string &host,
 			DsMdvx &mdvx)
 {
-  static const string method_name = "Input::getNextScan()";
-  
   // Read the raw data from the file.  On return, the file contains the
   // following fields:  I, Q, SNR.
 
-  if (!_readInputFile(file_path, mdvx))
+  if (!_readInputFile(file_path, host, mdvx))
+  {
     return false;
+  }
   
   // Reposition the data so the gates will match up between scans
-
   _repositionData(mdvx);
-  
   return true;
 }
 
-
-/**********************************************************************
- *              Protected/Private Member Functions                    *
- **********************************************************************/
-
-/*********************************************************************
- * _calcIQ()
- */
-
-void Input::_calcIQ(MdvxField &niq_field,
-		    MdvxField &aiq_field,
+//------------------------------------------------------------------------
+void Input::_calcIQ(MdvxField &niq_field, MdvxField &aiq_field,
 		    const MdvxField &snr_field) const
 {
-  static const string method_name = "Input::_calcIQ()";
-  
   // Get pointers to the NIQ/AIQ fields.  Note that the order of the fields
   // in the file matches the order in the read request.
 
@@ -254,7 +238,7 @@ void Input::_calcIQ(MdvxField &niq_field,
   if (num_noise_values > 1)
     av_noise_niq = log10(noise_sum / (float)num_noise_values);
   else
-    av_noise_niq = -Processor::VERY_LARGE;
+    av_noise_niq = -refract::VERY_LARGE;
     
   // Get the best estimate on the average NIQ/AIQ vector introduced by PIRAQ
 
@@ -303,8 +287,8 @@ void Input::_calcIQ(MdvxField &niq_field,
 
   niq_field_hdr.min_value = 0.0;
   niq_field_hdr.max_value = 0.0;
-  niq_field_hdr.bad_data_value = Processor::INVALID;
-  niq_field_hdr.missing_data_value = Processor::INVALID;
+  niq_field_hdr.bad_data_value = refract::INVALID;
+  niq_field_hdr.missing_data_value = refract::INVALID;
   STRcopy(niq_field_hdr.field_name_long, _rawIFieldName.c_str(),
 	  MDV_LONG_FIELD_LEN);
   STRcopy(niq_field_hdr.field_name, _rawIFieldName.c_str(),
@@ -316,8 +300,8 @@ void Input::_calcIQ(MdvxField &niq_field,
 
   aiq_field_hdr.min_value = 0.0;
   aiq_field_hdr.max_value = 0.0;
-  aiq_field_hdr.bad_data_value = Processor::INVALID;
-  aiq_field_hdr.missing_data_value = Processor::INVALID;
+  aiq_field_hdr.bad_data_value = refract::INVALID;
+  aiq_field_hdr.missing_data_value = refract::INVALID;
   STRcopy(aiq_field_hdr.field_name_long, _rawQFieldName.c_str(),
 	  MDV_LONG_FIELD_LEN);
   STRcopy(aiq_field_hdr.field_name, _rawQFieldName.c_str(),
@@ -331,22 +315,21 @@ void Input::_calcIQ(MdvxField &niq_field,
   delete [] q_data;
 }
 
-
-/*********************************************************************
- * _readInputFile()
- */
-
-bool Input::_readInputFile(const string &file_path,
+//------------------------------------------------------------------------
+bool Input::_readInputFile(const std::string &file_path,
+			   const std::string &host,
 			   DsMdvx &mdvx) const
 {
-  static const string method_name = "Input::_readInputFile()";
-  
   // Set up the read request.  Note that if you change the order of the 
   // fields in the request, you will have to change code in other places.
 
   mdvx.clearRead();
   
-  mdvx.setReadPath(file_path);
+  string fpath = "mdvp:://";
+  fpath = fpath + host;
+  fpath = fpath + "::";
+  fpath = fpath + file_path;
+  mdvx.setReadPath(fpath);
   
   mdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
   mdvx.setReadCompressionType(Mdvx::COMPRESSION_NONE);
@@ -375,11 +358,15 @@ bool Input::_readInputFile(const string &file_path,
 
   if (mdvx.readVolume() != 0)
   {
-    cerr << "ERROR: " << method_name << endl;
-    cerr << "Error reading input file:" << endl;
-    cerr << "   path = " << file_path << endl;
-    cerr << mdvx.getErrStr() << endl;
-    
+    LOG(ERROR) << "reading input file: " << fpath;
+    LOG(ERROR) << mdvx.getErrStr();
+    return false;
+  }
+
+  if (mdvx.getNFields() != 3)
+  {
+    LOG(ERROR) << "File did not have requested fields";
+    LOG(ERROR) << "File:" << fpath;
     return false;
   }
   
@@ -396,25 +383,21 @@ bool Input::_readInputFile(const string &file_path,
   
   if (proj0 != proj1 || proj0 != proj2)
   {
-    cerr << "ERROR: " << method_name << endl;
-    cerr << "Input field projections don't match" << endl;
-    cerr << "Field 0 (NIQ or I) projection:" << endl;
+    LOG(ERROR) << "Input field projections don't match";
+    LOG(ERROR) << "Field 0 (NIQ or I) projection:";
     proj0.print(cerr);
-    cerr << "Field 1 (AIQ or Q) projection:" << endl;
+    LOG(ERROR) << "Field 1 (AIQ or Q) projection:";
     proj1.print(cerr);
-    cerr << "Field 2 (SNR or power) projection:" << endl;
+    LOG(ERROR) << "Field 2 (SNR or power) projection:";
     proj2.print(cerr);
-    
     return false;
   }
   
   if (proj0.getProjType() != Mdvx::PROJ_POLAR_RADAR)
   {
-    cerr << "ERROR: " << method_name << endl;
-    cerr << "Input file contains " << Mdvx::projType2Str(proj0.getProjType())
-	 << " projection data" << endl;
-    cerr << "The projection must be polar radar for this algorithm" << endl;
-    
+    LOG(ERROR) << "Input file contains " <<
+      Mdvx::projType2Str(proj0.getProjType()) << " projection data";
+    LOG(ERROR)<< "The projection must be polar radar for this algorithm";
     return false;
   }
   
@@ -422,23 +405,16 @@ bool Input::_readInputFile(const string &file_path,
 
   if (!_rawIQinInput)
   {
-    _calcIQ(*(mdvx.getField(0)),
-	    *(mdvx.getField(1)),
-	    *(mdvx.getField(2)));
+    _calcIQ(*(mdvx.getField(0)), *(mdvx.getField(1)), *(mdvx.getField(2)));
   }
   
   return true;
 }
 
 
-/*********************************************************************
- * _repositionData()
- */
-
+//------------------------------------------------------------------------
 void Input::_repositionData(DsMdvx &mdvx) const
 {
-  static const string method_name = "Input::_repositionData()";
-  
   // Handle each field individually
 
   for (int field_num = 0; field_num < mdvx.getNFields(); ++field_num)
@@ -470,10 +446,7 @@ void Input::_repositionData(DsMdvx &mdvx) const
       
       if (az_in < 0)
       {
-	cerr << "ERROR: " << method_name << endl;
-	cerr << "Error in az_in calculation" << endl;
-	cerr << "   az_in = " << az_in << endl;
-	
+	LOG(ERROR) << "Error in az_in calculation, az_in = " << az_in;
 	exit(0);
       }
       

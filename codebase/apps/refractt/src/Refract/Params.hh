@@ -1,11 +1,8 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c) 1992 - 2014
+// ** Copyright UCAR (c) 1992 - 2017
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
-// ** Research Applications Laboratory(RAL)
-// ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA
-// ** See LICENCE.TXT if applicable for licence details
-// ** 2014/09/21 17:21:40 UTC
+// ** Boulder, Colorado, USA
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 ////////////////////////////////////////////
 // Params.hh
@@ -54,28 +51,9 @@ public:
   // enum typedefs
 
   typedef enum {
-    DEBUG_OFF = 0,
-    DEBUG_NORM = 1,
-    DEBUG_EXTRA = 2,
-    DEBUG_VERBOSE = 3
-  } debug_level_t;
-
-  typedef enum {
-    LATEST_DATA = 0,
-    TIME_LIST = 1
-  } trigger_mode_t;
-
-  typedef enum {
     QUALITY_FROM_WIDTH = 0,
     QUALITY_FROM_CPA = 1
   } quality_source_t;
-
-  // struct typedefs
-
-  typedef struct {
-    double min_angle;
-    double max_angle;
-  } elevation_angle_t;
 
   ///////////////////////////
   // Member functions
@@ -362,49 +340,21 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  debug_level_t debug_level;
-
-  char* instance;
-
-  trigger_mode_t trigger_mode;
-
-  char* input_url;
-
-  char* output_url;
-
-  long max_valid_secs;
-
-  tdrp_bool_t raw_iq_in_input;
-
-  char* raw_i_field_name;
-
-  char* raw_q_field_name;
-
-  char* niq_field_name;
-
-  double input_niq_scale;
-
-  char* aiq_field_name;
-
-  tdrp_bool_t invert_target_angle_sign;
-
   quality_source_t quality_source;
 
   char* quality_field_name;
 
-  char* snr_field_name;
+  char* ref_file_name_day;
 
-  tdrp_bool_t specify_elevation_by_index;
+  char* ref_file_name_night;
 
-  long elevation_num;
+  int *_hms_night;
+  int hms_night_n;
 
-  elevation_angle_t elevation_angle;
+  int *_hms_day;
+  int hms_day_n;
 
-  char* ref_file_name;
-
-  long num_azim;
-
-  long num_range_bins;
+  int day_night_transition_delta_minutes;
 
   double frequency;
 
@@ -425,7 +375,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[35];
+  mutable TDRPtable _table[17];
 
   const char *_className;
 

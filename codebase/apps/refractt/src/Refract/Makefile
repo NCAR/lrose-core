@@ -39,7 +39,7 @@ TARGET_FILE = Refract
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lFmq -lSpdb -lMdv \
+LOC_LIBS = -lRefract -ldsdata -lFmq -lSpdb -lMdv \
 	-lRadx -ldsserver -ldidss -lrapformats \
 	-leuclid -lrapmath -ltoolsa -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz
@@ -51,24 +51,24 @@ LOC_CPPC_CFLAGS =
 
 HDRS = \
 	Params.hh \
-	Args.hh \
-	Input.hh \
+	Calib.hh \
+	CalibDayNight.hh \
 	PhaseFit.hh \
 	Processor.hh \
 	Refract.hh \
-	TargetData.hh \
-	TargetInfo.hh
+	TargetInfo.hh \
+	TargetVector.hh
 
 CPPC_SRCS = \
 	Params.cc \
+	Calib.cc \
+	CalibDayNight.cc \
 	Main.cc \
-	Args.cc \
-	Input.cc \
 	PhaseFit.cc \
 	Processor.cc \
 	Refract.cc \
-	TargetData.cc \
-	TargetInfo.cc
+	TargetInfo.cc \
+	TargetVector.cc
 
 #
 # tdrp macros

@@ -8,6 +8,7 @@ TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
 	CalcMoisture \
+	DataScanning \
 	MdvAddSnr \
 	PhaseDiff \
 	Refract \

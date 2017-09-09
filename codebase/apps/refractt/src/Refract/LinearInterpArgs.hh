@@ -23,9 +23,9 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
  *
- * @file TargetData.cc
+ * @file LinearInterpArgs.hh
  *
- * @class TargetData
+ * @class LinearInterpArgs
  *
  * Class representing a target data point.
  *  
@@ -33,31 +33,66 @@
  *
  */
 
-#include "TargetData.hh"
+#ifndef LinearInterpArgs_H
+#define LinearInterpArgs_H
 
-using namespace std;
-
-
-/*********************************************************************
- * Constructors
+/** 
+ * @class LinearInterpArgs
  */
 
-TargetData::TargetData(const float i, const float q) :
-  inphase(i),
-  quadrature(q)
+class LinearInterpArgs
 {
-}
-
   
-/*********************************************************************
- * Destructor
- */
+public:
 
-TargetData::~TargetData()
-{
-}
+  inline LinearInterpArgs(int r, int smoothSideLen, double azimSpacing,
+			  double gateSpacing, int numBeams,
+			  int twoSmoothRange, double minConsistency,
+			  double minAbsConsistency,
+			  float range_slope, float init_slope)
+  {
+    _r = r;
+    _smooth_azim = (int)(smoothSideLen*360.0/
+			 (azimSpacing*r*gateSpacing*4.0*M_PI));
+    if (_smooth_azim >= numBeams/8) _smooth_azim = numBeams/8 - 1;
+    if (_smooth_azim <= 0) _smooth_azim = 1;
+    _two_smooth_azim = 2*_smooth_azim;
+    _minconsistency = (twoSmoothRange+1)*(_two_smooth_azim+1)*minConsistency;
+    if (_minconsistency < minAbsConsistency)
+      _minconsistency = minAbsConsistency;
+    _range_slope = range_slope;
+    _init_slope = init_slope;
+  }
 
+  inline ~LinearInterpArgs(void) {}
 
-/**********************************************************************
- *              Protected/Private Member Functions                    *
- **********************************************************************/
+  inline void initForAz(int azn, int azjump, int rjump)
+  {
+    _azn = azn;
+    _azjump = azjump;
+    _rjump = rjump;
+  }
+
+  inline int offsetAzimuthIndex(int j) const
+  {
+    return _azn + j + _smooth_azim;
+  }
+  
+  inline int offsetAzimuthIndexNeg(int j) const
+  {
+    return _azn + j - _smooth_azim;
+  }
+  
+  int _r;
+  int _azn;
+  int _azjump;
+  int _smooth_azim;
+  int _two_smooth_azim;
+  float _minconsistency;
+  int _rjump;
+  float _range_slope;
+  float _init_slope;
+  
+};
+
+#endif

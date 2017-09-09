@@ -23,102 +23,96 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
  *
- * @file Args.cc
+ * @file Calib.hh
  *
- * @class Args
+ * @class Calib
  *
- * Class for processing the command line arguments.
+ * Calib program object.
  *  
- * @date 1/15/2009
+ * @date 12/1/2008
  *
  */
 
-#include <iostream>
-#include <string>
+#ifndef Calib_HH
+#define Calib_HH
 
-#include <string.h>
+#include <Refract/FieldDataPair.hh>
+#include <Refract/FieldWithData.hh>
+#include <Mdv/DsMdvx.hh>
 
-#include <toolsa/os_config.h>
-#include <tdrp/tdrp.h>
-#include <toolsa/DateTime.hh>
-#include <toolsa/str.h>
-#include <toolsa/umisc.h>
-
-#include "Args.hh"
-
-using namespace std;
-
-/**********************************************************************
- * Constructor
+/** 
+ * @class Calib
  */
 
-Args::Args (int argc, char **argv, char *prog_name) :
-  _progName(prog_name)
+class Calib
 {
-  string tmp_str;
+ public:
 
-  // Intialize
+  ////////////////////
+  // Public members //
+  ////////////////////
 
-  bool okay = true;
+  /**
+   * @brief Constructor
+   *
+   * @param[in] argc Number of command line arguments.
+   * @param[in] argv List of command line arguments.
+   *
+   * @note Private because this is a singleton object.
+   */
 
-  TDRP_init_override(&override);
+  Calib(void);
   
-  // search for command options
-  
-  for (int i =  1; i < argc; i++)
-  {
-    if (STRequal_exact(argv[i], "--") ||
-	STRequal_exact(argv[i], "-help") ||
-	STRequal_exact(argv[i], "-man"))
-    {
-      _usage(stdout);
-      exit(0);
-    }
-    else if (STRequal_exact(argv[i], "-debug"))
-    {
-      tmp_str = "debug = true;";
-      TDRP_add_override(&override, tmp_str.c_str());
-    }
-  } /* i */
 
-  if (!okay)
+  /**
+   * @brief Destructor
+   */
+
+  virtual ~Calib(void);
+  
+  bool initialize(const std::string &ref_file_name);
+
+  inline const FieldDataPair *avIqPtr(void) const
   {
-    _usage(stderr);
-    exit(-1);
+    return &_averageIQ;
   }
-    
-}
 
+  inline const FieldWithData *phaseErPtr(void) const
+  {
+    return &_phaseEr;
+  }
 
-/**********************************************************************
- * Destructor
- */
+  inline double refN(void) const {return _refN;}
 
-Args::~Args(void)
-{
-  TDRP_free_override(&override);
-}
+ private:
+
+  /**
+   * @brief The field name of the average I field in the calibration file.
+   */
+
+  static const std::string CALIB_AV_I_FIELD_NAME;
   
+  /**
+   * @brief The field name of the average Q field in the calibration file.
+   */
 
-/**********************************************************************
- *              Private Member Functions                              *
- **********************************************************************/
+  static const std::string CALIB_AV_Q_FIELD_NAME;
+  
+  /**
+   * @brief The field name of the phase error field in the calibration file.
+   */
 
-/**********************************************************************
- * _usage()
- */
+  static const std::string CALIB_PHASE_ER_FIELD_NAME;
 
-void Args::_usage(FILE *stream)
-{
-  fprintf(stream, "%s%s%s",
-	  "This program creates the calibration file used by Refract.\n"
-	  "\n"
-	  "Usage:\n\n", _progName.c_str(), " [options] as below:\n\n"
-	  "       [ --, -help, -man ] produce this list.\n"
-	  "       [ -debug ] debugging on\n"
-	  "\n"
-    );
+  /**
+   * @brief The calibration file for daytime.
+   */
+
+  DsMdvx _calibFile;
+  FieldDataPair _averageIQ;
+  FieldWithData _phaseEr;
+  double _refN;
+};
 
 
-  TDRP_usage(stream);
-}
+#endif

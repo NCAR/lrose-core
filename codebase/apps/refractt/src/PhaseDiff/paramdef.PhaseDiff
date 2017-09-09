@@ -39,176 +39,6 @@ commentdef
 };
 
 /***********************************************************************
- * Debugging
- */
-
-commentdef
-{
-  p_header = "DEBUGGING PARAMETERS";
-  p_text = "Parameters controlling debug outputs.";
-};
-
-paramdef boolean
-{
-  p_descr = "debug flag";
-  p_default = false;
-} debug;
-
-paramdef boolean
-{
-  p_descr = "verbose debug flag";
-  p_help = "If true, verbose debug messages will be printed.";
-  p_default = false;
-} verbose;
-
-
-/***********************************************************************
- * Process parameters
- */
-
-commentdef
-{
-  p_header = "PROCESS PARAMETERS";
-};
-
-paramdef string
-{
-  p_descr = "Process instance";
-  p_help = "Used for registration with procmap.";
-  p_default = "Test";
-} instance;
-
-
-/***********************************************************************
- * Process triggering.
- */
-
-commentdef
-{
-  p_header = "PROCESS TRIGGERING PARAMETERS";
-  p_text = "Parameters describing the process triggering.";
-};
-
-typedef enum
-{
-  TIME_LIST
-} trigger_mode_t;
-
-paramdef enum trigger_mode_t
-{
-  p_descr = "Input triggering mode";
-  p_help = "In TIME_LIST mode, the program operates on every input file "
-           "between the start and end times specified on the command line.\n";
-  p_default = TIME_LIST;
-} trigger_mode;
-
-
-/***********************************************************************
- * Process I/O.
- */
-
-commentdef
-{
-  p_header = "PROCESS I/O PARAMETERS";
-  p_text = "Parameters describing the input and output locations.";
-};
-
-paramdef string
-{
-  p_descr = "Input URL";
-  p_default = "mdvp:://localhost::mdv/radar";
-} input_url;
-
-paramdef boolean
-{
-  p_descr = "Flag indicating whether the raw I and Q values are included in "
-            "the input stream.";
-  p_help = "If true, the raw fields will be read from the input stream. "
-           "If false, the raw fields will be calculated from the NIQ/AIQ "
-           "values which must be inluded in the input stream instead.";
-  p_default = true;
-} raw_iq_in_input;
-
-paramdef string
-{
-  p_descr = "Raw I field name in the input stream.";
-  p_help = "Used only if raw_iq_in_input is set to TRUE.";
-  p_default = "MeanI";
-} raw_i_field_name;
-
-paramdef string
-{
-  p_descr = "Raw Q field name in the input stream.";
-  p_help = "Used only if raw_iq_in_input is set to TRUE.";
-  p_default = "MeanQ";
-} raw_q_field_name;
-
-paramdef string
-{
-  p_descr = "NIQ field name in the input stream.";
-  p_help = "Used only if raw_iq_in_input is set to FALSE.";
-  p_default = "NIQ";
-} niq_field_name;
-
-paramdef double
-{
-  p_descr = "Input NIQ scale value";
-  p_help = "The NIQ value from the input source is multiplied by this "
-           "value before the data is used. "
-           "For most radars this value should be 0.1. "
-           "For SPOL this value should be 0.025.";
-  p_default = 0.1;
-} input_niq_scale;
-
-paramdef boolean
-{
-  p_descr = "Flag indicating whether to invert the sign of the target angles.";
-  p_help = "This fix should be done upstream, but is added here "
-           "just in case.\n"
-           "Used only if raw_iq_in_input is set to FALSE.";
-  p_default = false;
-} invert_target_angle_sign;
-
-paramdef string
-{
-  p_descr = "AIQ field name in the input stream.";
-  p_help = "Used only if raw_iq_in_input is set to FALSE.";
-  p_default = "AIQ";
-} aiq_field_name;
-
-paramdef boolean
-{
-  p_descr = "Flag indicating whether the SNR field is included in "
-            "the input stream.";
-  p_help = "If true, the SNR field will be read from the input stream. "
-           "If false, the SNR field will be calculated from the "
-           "power field which must be inluded in the input stream.\n"
-           "The SNR field is only needed if the raw I/Q values are not "
-           "included in the input files and so must be calculated from the "
-           "NIQ/AIQ values.";
-  p_default = true;
-} snr_in_input;
-
-paramdef string
-{
-  p_descr = "Signal-to-noise ratio field name in the input stream.";
-  p_default = "SNR";
-} snr_field_name;
-
-paramdef string
-{
-  p_descr = "Power field name in the input stream.";
-  p_default = "DM";
-} power_field_name;
-
-paramdef string
-{
-  p_descr = "Output URL";
-  p_default = "mdvp:://localhost::apps/refract/src/PhaseDiff/TiMREX/output";
-} output_url;
-
-
-/***********************************************************************
  * Algorithm parameters.
  */
 
@@ -235,13 +65,18 @@ paramdef long
   p_default = 300;
 } lookback_search_margin;
 
-paramdef long
+typedef enum
 {
-  p_descr = "Index of the tilt we are processing in the radar volume";
-  p_min = 0;
-  p_default = 0;
-} elevation_num;
+  ALL_SCAN_STRATEGIES,
+  MULTIPLE_ELEV_ONLY,
+  SINGLE_ELEV_ONLY
+} scan_mode_t;
 
+paramdef enum scan_mode_t
+{
+  p_descr = "Input scan mode";
+  p_default = ALL_SCAN_STRATEGIES;
+} scan_mode;
 
 /***********************************************************************
  * Colorscale parameters.
@@ -286,3 +121,4 @@ paramdef string
   p_help = "Used only if create_niq_colorscale is set to true.";
   p_default = "colorscales/niq.colors";
 } niq_colorscale_path;
+

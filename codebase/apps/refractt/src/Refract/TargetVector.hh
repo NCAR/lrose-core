@@ -23,99 +23,115 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
  *
- * @file TargetInfo.hh
+ * @file TargetVector.hh
  *
- * @class TargetInfo
+ * @class TargetVector
  *
- * Class representing a target data point.
+ * Class representing a target data point for the entire scan.
  *  
- * @date 3/31/2010
- *
  */
 
-#ifndef TargetInfo_H
-#define TargetInfo_H
-#include <Refract/IQ.hh>
+#ifndef TargetVector_H
+#define TargetVector_H
+
+
+#include "TargetInfo.hh"
+#include <Refract/VectorData.hh>
+#include <Refract/VectorIQ.hh>
+
+#include <vector>
+
+class FieldDataPair;
+class FieldWithData;
+// class VectorData;
 
 /** 
- * @class TargetInfo
+ * @class TargetVector
  */
-
-class TargetInfo
+class TargetVector
 {
-  
+
 public:
 
-  ////////////////////
-  // Public members //
-  ////////////////////
+  // TargetVector(void);
+  TargetVector(int scanSize=0);
+  ~TargetVector();
+  void compute_phase_diff(const FieldDataPair &difPrevScan,
+			  const std::vector<double> &norm,
+			  const FieldDataPair &difFromRef);
+  void setIQ(const FieldDataPair &difFromRef);
+  void setStrengthAndPhaseErr(const FieldWithData &snr,
+			      const FieldDataPair &rawPhase,
+			      const std::vector<double> &phase_er);
+  void copyPhaseDiff(VectorData &p) const;
+  void copyPhase(VectorData &p) const;
+
+  
+  /**
+   * operator[]  
+   * @param[in] i  Index
+   * @return reference to i'th TargetInfo
+   */
+  // inline const TargetInfo& operator[](size_t i) const {return _target[i];}
+
+  /**
+   * operator[]  
+   * @param[in] i  Index
+   * @return reference to i'th TargetInfo
+   */
+  // inline TargetInfo& operator[](size_t i) {return _target[i];}
+
+  bool phase_dif_er_is_valid(int offset) const;
+  double iqNorm(int offset) const;
+
+  inline const VectorData & getPhaseDiffErr(void) const {return _phase_diff_er;}
+  inline const VectorIQ & getIQ(void) const {return _iq;}
+
+private:
+
+  int _scanSize;  /**< Shared by all */
+  // std::vector<TargetInfo> _target;
 
   /**
    * @brief Strength (SNR-based) of target.
    */
-  
-  float strength;
+  VectorData _strength;
 
   /**
    * @brief Scan-to-scan difference.
    */
-
-  float phase_diff;
+  VectorData _phase_diff;
 
   /**
    * @brief Expected error in the scan-to-scan difference (phase_diff).
    */
-
-  float phase_diff_er;
+  VectorData _phase_diff_er;
 
   /**
    * @brief scan-to-scan difference (phase_diff).
    */
-  IQ dif_iq;
+  VectorIQ _dif_iq;
 
   /**
    * @brief Scan-to-reference difference.
    */
-
-  float phase;
+  VectorData _phase;
 
   /**
    * @brief Expected error in the scan-to-reference difference (phase).
    */
-
-  float phase_er;
+  VectorData _phase_er;
 
   /**
    * @brief Scan-to-reference difference (phase) corrected for dN/dz,
    *        sub-range.
    */
-  float phase_cor;
+  VectorData _phase_cor;
 
   /**
    * @brief IQ phase_cor.
    */
-  IQ iq;
-
-
-  ////////////////////
-  // Public methods //
-  ////////////////////
-
-  /**
-   * @brief Constructor.
-   */
-
-  TargetInfo();
-  
-  /**
-   * @brief Destructor.
-   */
-
-  virtual ~TargetInfo();
-
-  void compute_phase_diff(const IQ &difPrevScan, double norm,
-			  const IQ &difFromRef);
-  void setStrength(float snr, bool snrIsBad);
+   VectorIQ _iq;
 };
 
 #endif

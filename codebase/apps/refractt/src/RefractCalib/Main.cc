@@ -33,14 +33,11 @@
  *
  */
 
-#include <stdio.h>
-
-#include <toolsa/port.h>
-#include <toolsa/umisc.h>
-
 #include "RefractCalib.hh"
 
-using namespace std;
+#include <cstdio>
+#include <toolsa/port.h>
+#include <toolsa/umisc.h>
 
 
 // Prototypes for static functions
@@ -53,49 +50,43 @@ static void tidy_and_exit(int sig);
 RefractCalib *Prog = (RefractCalib *)NULL;
 
 
-/*********************************************************************
- * main()
- */
-
+//---------------------------------------------------------------------------
 int main(int argc, char **argv)
 {
   // Create program object.
-
   Prog = RefractCalib::Inst(argc, argv);
   if (!Prog->okay)
+  {
     return -1;
-
+  }
+  
   if (!Prog->init())
+  {
     return -1;
+  }
   
   // Register function to trap termination and interrupts.
-
   PORTsignal(SIGQUIT, tidy_and_exit);
   PORTsignal(SIGTERM, tidy_and_exit);
   PORTsignal(SIGINT, tidy_and_exit);
 
   // Run the program.
-
   Prog->run();
 
   // clean up
-
   tidy_and_exit(0);
   return 0;
 }
 
-/*********************************************************************
- * tidy_and_exit()
- */
-
+//---------------------------------------------------------------------------
 static void tidy_and_exit(int sig)
 {
   // Delete the program object.
-
-  if (Prog != (RefractCalib *)NULL)
-    delete Prog;
-
+  // if (Prog != (RefractCalib *)NULL)
+  // {
+  //   delete Prog;
+  // }
+  
   // Now exit the program.
-
   exit(sig);
 }

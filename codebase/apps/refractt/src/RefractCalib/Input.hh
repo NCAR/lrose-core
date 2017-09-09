@@ -24,11 +24,8 @@
 /**
  *
  * @file Input.hh
- *
  * @class Input
- *
  * Base class for Refract input classes.
- *  
  * @date 12/1/2008
  *
  */
@@ -36,16 +33,9 @@
 #ifndef Input_H
 #define Input_H
 
-#include <iostream>
 #include <string>
-
-#include <Mdv/DsMdvx.hh>
-#include <Mdv/MdvxField.hh>
-#include <Refract/TargetData.hh>
-#include <toolsa/DateTime.hh>
-
-using namespace std;
-
+class DsMdvx;
+class MdvxField;
 
 /** 
  * @class Input
@@ -112,11 +102,11 @@ public:
    */
 
   Input(const bool raw_iq_in_input,
-	const string &raw_i_field_name,
-	const string &raw_q_field_name,
-	const string &niq_field_name,
-	const string &aiq_field_name,
-	const string &snr_field_name,
+	const std::string &raw_i_field_name,
+	const std::string &raw_q_field_name,
+	const std::string &niq_field_name,
+	const std::string &aiq_field_name,
+	const std::string &snr_field_name,
 	const double input_niq_scale,
 	const bool invert_target_angle_sign,
 	const int elevation_num,
@@ -156,11 +146,11 @@ public:
    */
 
   Input(const bool raw_iq_in_input,
-	const string &raw_i_field_name,
-	const string &raw_q_field_name,
-	const string &niq_field_name,
-	const string &aiq_field_name,
-	const string &snr_field_name,
+	const std::string &raw_i_field_name,
+	const std::string &raw_q_field_name,
+	const std::string &niq_field_name,
+	const std::string &aiq_field_name,
+	const std::string &snr_field_name,
 	const double input_niq_scale,
 	const bool invert_target_angle_sign,
 	const double min_elevation_angle,
@@ -187,8 +177,8 @@ public:
    * @return Returns true on success, false on failure.
    */
 
-  virtual bool getNextScan(const string &input_file_path,
-			   DsMdvx &mdvx);
+  virtual bool getNextScan(const std::string &input_file_path,
+			   const std::string &host, DsMdvx &mdvx);
 
 
 protected:
@@ -243,31 +233,31 @@ protected:
    * @brief The name of the raw I field in the input stream, if included.
    */
 
-  string _rawIFieldName;
+  std::string _rawIFieldName;
   
   /**
    * @brief The name of the raw ! field in the input stream, if included.
    */
 
-  string _rawQFieldName;
+  std::string _rawQFieldName;
   
   /**
    * @brief The name of the NIQ field in the input stream, if included.
    */
 
-  string _niqFieldName;
+  std::string _niqFieldName;
   
   /**
    * @brief The name of the AIQ field in the input stream, if included.
    */
 
-  string _aiqFieldName;
+  std::string _aiqFieldName;
   
   /**
    * @brief The name of the signal-to-noise ratio field in the input stream.
    */
 
-  string _snrFieldName;
+  std::string _snrFieldName;
   
   /**
    * @brief Scale value for input NIQ values.  The NIQ values from the
@@ -372,7 +362,8 @@ protected:
    * @return Returns true on success, false on failure.
    */
 
-  bool _readInputFile(const string &file_path,
+  bool _readInputFile(const std::string &file_path,
+		      const std::string &host,
 		      DsMdvx &mdvx) const;
   
 

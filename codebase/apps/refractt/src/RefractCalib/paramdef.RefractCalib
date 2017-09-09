@@ -35,30 +35,6 @@ commentdef
   p_text = "This program creates the calibration file used by Refract.";
 };
 
-/***********************************************************************
- * Debugging
- */
-
-commentdef
-{
-  p_header = "DEBUGGING PARAMETERS";
-  p_text = "Parameters controlling debug outputs.";
-};
-
-typedef enum
-{
-  DEBUG_OFF,
-  DEBUG_NORM,
-  DEBUG_EXTRA,
-  DEBUG_VERBOSE
-} debug_level_t;
-
-paramdef enum debug_level_t
-{
-  p_descr = "Debug level";
-  p_default = DEBUG_OFF;
-} debug_level;
-
 paramdef boolean
 {
   p_descr = "Flag indicating whether to write debug MDV files";
@@ -72,131 +48,28 @@ paramdef string
 } debug_mdv_url;
 
 
-/***********************************************************************
- * Process parameters
- */
-
-commentdef
-{
-  p_header = "PROCESS PARAMETERS";
-};
-
-paramdef string
-{
-  p_descr = "Process instance";
-  p_help = "Used for registration with procmap.";
-  p_default = "Test";
-} instance;
-
-
-/***********************************************************************
- * Input data information
- */
-
-commentdef
-{
-  p_header = "INPUT DATA PARAMETERS";
-};
-
 paramdef boolean
 {
-  p_descr = "Flag indicating whether the raw I and Q values are included in "
-            "the input stream.";
-  p_help = "If true, the raw fields will be read from the input stream. "
-           "If false, the raw fields will be calculated from the NIQ/AIQ "
-           "values which must be inluded in the input stream instead.";
+  p_descr = "Flag indicating whether to use a file list for input data, or a range of times";
+  p_help = "TRUE means use the file list, FALSE means use a range of times.";
   p_default = true;
-} raw_iq_in_input;
+} file_list_inputs;
 
 paramdef string
 {
-  p_descr = "Raw I field name in the input stream.";
-  p_help = "Used only if raw_iq_in_input is set to TRUE.";
-  p_default = "MeanI";
-} raw_i_field_name;
+  p_descr = "Host on which target files are found";
+  p_default = "localhost";
+} target_files_host;
 
 paramdef string
 {
-  p_descr = "Raw Q field name in the input stream.";
-  p_help = "Used only if raw_iq_in_input is set to TRUE.";
-  p_default = "MeanQ";
-} raw_q_field_name;
+  p_descr = "Host on which calibration files are found";
+  p_default = "localhost";
+} calibration_files_host;
 
 paramdef string
 {
-  p_descr = "NIQ field name in the input stream.";
-  p_help = "Used only if raw_iq_in_input is set to FALSE.";
-  p_default = "NIQ";
-} niq_field_name;
-
-paramdef double
-{
-  p_descr = "Input NIQ scale value";
-  p_help = "The NIQ value from the input source is multiplied by this "
-           "value before the data is used. "
-           "For most radars this value should be 0.1. "
-           "For SPOL this value should be 0.025.";
-  p_default = 0.1;
-} input_niq_scale;
-
-paramdef boolean
-{
-  p_descr = "Flag indicating whether to invert the sign of the target angles.";
-  p_help = "This fix should be done upstream, but is added here "
-           "just in case.\n"
-           "Used only if raw_iq_in_input is set to FALSE.";
-  p_default = false;
-} invert_target_angle_sign;
-
-paramdef string
-{
-  p_descr = "AIQ field name in the input stream.";
-  p_help = "Used only if raw_iq_in_input is set to FALSE.";
-  p_default = "AIQ";
-} aiq_field_name;
-
-paramdef string
-{
-  p_descr = "Signal-to-noise ratio field name in the input stream.";
-  p_default = "SNR";
-} snr_field_name;
-
-paramdef boolean
-{
-  p_descr = "Flag indicating whether to specify the desired elevation by "
-            "index or by angle limits.";
-  p_help = "If true, the elevation is specfied by index in the elevation_num "
-           "parameter.\n"
-           "If false, the elevation is specified by angle in the "
-           "elevation_angle parameter.\n";
-  p_default = true;
-} specify_elevation_by_index;
-
-paramdef long
-{
-  p_descr = "Elevation number to use from the MDV files.";
-  p_help = "Used only if specify_elevation_by_index is set to true.";
-  p_default = 0;
-} elevation_num;
-
-typedef struct
-{
-  double min_angle;
-  double max_angle;
-} elevation_angle_t;
-
-paramdef struct elevation_angle_t
-{
-  p_descr = "The angle limits for the desired elevation angle. "
-            "Only sweeps with elevation angles between these limits will "
-            "be used in the calibration.";
-  p_help = "Used only if specify_elevation_by_index is set to false.";
-  p_default = { 0.3, 0.5 };
-} elevation_angle;
-
-paramdef string
-{
-  p_descr = "List of files to use for target identification";
+  p_descr = "List of files to use for target identification, when file_list_inputs=true";
   p_default = { "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804183718.KFTG_RVP.0.0.4_SUR_v368",
                 "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804183832.KFTG_RVP.0.0.4_SUR_v370",
                 "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804184738.KFTG_RVP.0.0.4_SUR_v375",
@@ -226,7 +99,7 @@ paramdef string
 
 paramdef string
 {
-  p_descr = "List of files to use for calibration";
+  p_descr = "List of files to use for calibration, when file_list_inputs=true";
   p_default = { "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807000458.KFTG_RVP.0.0.5_SUR_v8",
                 "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807000602.KFTG_RVP.0.0.6_SUR_v10",
                 "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807001047.KFTG_RVP.0.0.5_SUR_v16",
@@ -238,6 +111,39 @@ paramdef string
                 "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807004539.KFTG_RVP.0.0.5_SUR_v64" };
 } calibration_file_list[];
 
+typedef struct
+{
+  int year;
+  int month;
+  int day;
+  int hour;
+  int min;
+  int sec;
+} Time_t;
+
+paramdef string
+{
+  p_descr = "Path with files to use for target identification when file_list_inputs = false, can be relative to $RAP_DATA_DIR";
+  p_default = "./data";
+} target_files_path;
+
+paramdef struct Time_t
+{
+  p_descr = "Starting/ending time for target identification data when file_list_inputs = false";
+  p_default = {{2017, 3, 21, 0, 0, 0}, {2017, 3, 22, 0, 0, 0}};
+} target_files_time_range[2];
+
+paramdef string
+{
+  p_descr = "Path with files to use for calibration when file_list_inputs = false, can be relative to $RAP_DATA_DIR";
+  p_default = "./data";
+} calibration_files_path;
+
+paramdef struct Time_t
+{
+  p_descr = "Starting/ending time for calibration data when file_list_inputs = false";
+  p_default = {{2017, 3, 21, 0, 0, 0}, {2017, 3, 22, 0, 0, 0}};
+} calibration_files_time_range[2];
 
 /***********************************************************************
  * Algorithm parameters.
@@ -257,19 +163,12 @@ paramdef string
   p_default = "";
 } ref_file_path;
 
-paramdef long
+paramdef string
 {
-  p_descr = "Number of azimuths used in data processing";
-  p_min = 1;
-  p_default = 360;
-} num_azim;
-
-paramdef long
-{
-  p_descr = "Number of range bins";
-  p_min = 1;
-  p_default = 450;
-} num_range_bins;
+  p_descr = "Reference file url";
+  p_help = "Second path in which time stamped MDV is written so as to be useful in display";
+  p_default = "";
+} ref_url;
 
 paramdef double
 {

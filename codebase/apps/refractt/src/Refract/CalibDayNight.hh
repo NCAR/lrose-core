@@ -23,125 +23,75 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
  *
- * @file Args.hh
+ * @file CalibDayNight.hh
  *
- * @class Args
+ * @class CalibDayNight
  *
- * Class controlling the command line arguments for the program.
+ * CalibDayNight program object.
  *  
- * @date 3/18/2010
+ * @date 12/1/2008
  *
  */
 
+#ifndef CalibDayNight_HH
+#define CalibDayNight_HH
 
-#ifndef Args_HH
-#define Args_HH
+#include "Calib.hh"
+#include <Mdv/DsMdvx.hh>
 
-#include <stdio.h>
-#include <string>
-#include <time.h>
-
-#include <tdrp/tdrp.h>
-
-using namespace std;
-
+class FieldDataPair;
+class FieldWithData;
 
 /** 
- * @class Args
+ * @class CalibDayNight
  */
 
-class Args
+class CalibDayNight
 {
  public:
-
-  ////////////////////
-  // Public methods //
-  ////////////////////
-
-  /**
-   * @brief Constructor
-   */
-
-  Args(int argc, char **argv, char *prog_name);
-  
-  /**
-   * @brief Destructor
-   */
-
-  ~Args(void);
-  
-  /**
-   * @brief Get the user-entered archive start time.
-   *
-   * @return Returns the user-entered archive start time, or 
-   *         DateTime::NEVER if the user didn't enter a start time.
-   */
-
-  DateTime getStartTime() const 
-  {
-    return _startTime;
-  }
-  
-  /**
-   * @brief Get the user-entered archive end time.
-   *
-   * @return Returns the user-entered archive end time, or 
-   *         DateTime::NEVER if the user didn't enter a end time.
-   */
-
-  DateTime getEndTime() const 
-  {
-    return _endTime;
-  }
-  
 
   ////////////////////
   // Public members //
   ////////////////////
 
   /**
-   * @brief TDRP overrides specified in the command line arguments.
+   * @brief Constructor
+   *
+   * @param[in] argc Number of command line arguments.
+   * @param[in] argv List of command line arguments.
+   *
+   * @note Private because this is a singleton object.
    */
 
-  tdrp_override_t override;
+  CalibDayNight(void);
   
+
+  /**
+   * @brief Destructor
+   */
+
+  virtual ~CalibDayNight(void);
+  
+  bool initialize(const std::string &ref_file_name_day,
+		  const std::string &ref_file_name_night,
+		  const int *hms_night, const int *hms_day,
+		  int day_night_transition_delta_seconds);
+
+  FieldDataPair avIqPtr(const time_t &t) const;
+  FieldWithData phaseErPtr(const time_t &t) const;
+  inline double refNDay(void) const {return _calibDay.refN();}
+
  private:
 
-  /////////////////////
-  // Private members //
-  /////////////////////
+  Calib _calibDay;
+  Calib _calibNight;
+  int _hms_day[3];
+  int _hms_night[3];
+  double _hourDay;
+  double _hourNight;
+  int _transition_delta_seconds;
 
-  /**
-   * @brief The program name for error messages
-   */
-
-  string _progName;
-  
-  /**
-   * @brief Archive start time.
-   */
-
-  DateTime _startTime;
-  
-  /**
-   * @brief Archive end time.
-   */
-
-  DateTime _endTime;
-  
-
-  /////////////////////
-  // Private methods //
-  /////////////////////
-
-  /**
-   * @brief Print the usage for this program.
-   *
-   * @param[in,out] stream The output stream to use.
-   */
-
-  void _usage(FILE *stream);
-  
+  void _weights(const time_t &t, double &wDay, double &wNight) const;
 };
 
 
