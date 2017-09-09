@@ -36,26 +36,16 @@
 /Line.hh/1.2/Thu Dec 29 22:57:37 2016//
 /LineList.hh/1.2/Thu Dec 29 22:57:37 2016//
 /MotionVector.hh/1.2/Thu Dec 29 22:57:37 2016//
-/Pjg.hh/1.26/Mon Sep  4 21:14:02 2017//
 /PjgAlbersMath.hh/1.8/Thu Dec 29 22:57:37 2016//
 /PjgAzimEquidistMath.hh/1.8/Thu Dec 29 22:57:37 2016//
-/PjgCalc.hh/1.21/Mon Sep  4 21:14:02 2017//
-/PjgFlatCalc.hh/1.10/Mon Sep  4 21:14:02 2017//
 /PjgGrib.hh/1.4/Thu Dec 29 22:57:37 2016//
 /PjgLambertAzimMath.hh/1.7/Thu Dec 29 22:57:37 2016//
 /PjgLambertConfMath.hh/1.8/Thu Dec 29 22:57:37 2016//
-/PjgLatlonCalc.hh/1.8/Mon Sep  4 21:14:02 2017//
 /PjgLatlonMath.hh/1.8/Thu Dec 29 22:57:37 2016//
-/PjgLc1Calc.hh/1.12/Mon Sep  4 21:14:02 2017//
-/PjgLc2Calc.hh/1.10/Mon Sep  4 21:14:02 2017//
 /PjgMath.hh/1.15/Mon Sep  4 21:14:02 2017//
-/PjgMercatorCalc.hh/1.4/Mon Sep  4 21:14:02 2017//
 /PjgMercatorMath.hh/1.7/Thu Dec 29 22:57:37 2016//
-/PjgObliqueStereoCalc.hh/1.5/Mon Sep  4 21:14:02 2017//
 /PjgObliqueStereoMath.hh/1.12/Thu Dec 29 22:57:37 2016//
-/PjgPolarRadarCalc.hh/1.11/Mon Sep  4 21:14:02 2017//
 /PjgPolarRadarMath.hh/1.9/Thu Dec 29 22:57:37 2016//
-/PjgPolarStereoCalc.hh/1.8/Mon Sep  4 21:14:02 2017//
 /PjgPolarStereoMath.hh/1.13/Mon Sep  4 21:14:02 2017//
 /PjgTransMercatorMath.hh/1.7/Thu Dec 29 22:57:37 2016//
 /PjgTypes.hh/1.10/Thu Dec 29 22:57:37 2016//
@@ -88,4 +78,14 @@
 /scan.h/1.3/Thu Dec 29 22:57:37 2016//
 /search.h/1.4/Thu Dec 29 22:57:37 2016//
 /sincos.h/1.2/Thu Dec 29 22:57:37 2016//
+/Pjg.hh/1.28/Result of merge//
+/PjgCalc.hh/1.21/Mon Sep  4 22:59:06 2017//
+/PjgFlatCalc.hh/1.10/Mon Sep  4 22:59:06 2017//
+/PjgLatlonCalc.hh/1.8/Mon Sep  4 22:59:06 2017//
+/PjgLc1Calc.hh/1.12/Mon Sep  4 22:59:06 2017//
+/PjgLc2Calc.hh/1.10/Mon Sep  4 22:59:06 2017//
+/PjgMercatorCalc.hh/1.4/Mon Sep  4 22:59:06 2017//
+/PjgObliqueStereoCalc.hh/1.5/Mon Sep  4 22:59:06 2017//
+/PjgPolarRadarCalc.hh/1.11/Mon Sep  4 22:59:06 2017//
+/PjgPolarStereoCalc.hh/1.8/Mon Sep  4 22:59:06 2017//
 D

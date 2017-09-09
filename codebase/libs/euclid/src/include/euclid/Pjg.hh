@@ -24,11 +24,11 @@
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
 /* RCS info
- *   $Author: dixon $
+ *   $Author: jcraig $
  *   $Locker:  $
- *   $Date: 2017/09/03 16:00:30 $
- *   $Id: Pjg.hh,v 1.26 2017/09/03 16:00:30 dixon Exp $
- *   $Revision: 1.26 $
+ *   $Date: 2017/09/07 18:30:50 $
+ *   $Id: Pjg.hh,v 1.28 2017/09/07 18:30:50 jcraig Exp $
+ *   $Revision: 1.28 $
  *   $State: Exp $
  */
  
@@ -98,7 +98,7 @@ public:
    * setEarthRadiusKm() - overrides the default earth radius in km
    */
   
-  void setEarthRadiusKm(double earthRadiusKm);
+  static void setEarthRadiusKm(double earthRadiusKm);
 
   /**********************************************************************
    * initFlat() - Initialize flat earth projection.
