@@ -63,6 +63,7 @@
 #include <rapformats/tstorm_spdb.h>
 #include <rapformats/Sndg.hh>
 #include <rapformats/Edr.hh>
+#include <rapformats/Edr_expanded.hh>
 #include <rapformats/GenPoly.hh>
 #include <rapformats/acPosVector.hh>
 #include <rapformats/UsgsData.hh>
@@ -825,11 +826,10 @@ void Print::sndg_plus(int data_len, void *data)
 }
 
 ///////////////////////////////////////////////////////////////
-// SNDG_PLUS : Print sounding plus
+// EDR_POINT : Print edr_t 
 //
 
 void Print::edr_point(int data_len, void *data)
-
 { 
 
   Edr edr;
@@ -839,6 +839,24 @@ void Print::edr_point(int data_len, void *data)
     return;
   }
   edr.print(_ostr);
+
+}
+
+///////////////////////////////////////////////////////////////
+// EDR_POINT : Print Edr_t  - this ia an expanded structure to
+// allow for east future expansion
+//
+void Print::EDR_point(int data_len, void *data)
+
+{ 
+
+  EDR Edr;
+  if (Edr.disassemble(data, data_len)) {
+    cerr << "ERROR - SpdbQuery::Print::EDR_point" << endl;
+    cerr << "  Cannot disassemble chunk" << endl;
+    return;
+  }
+  Edr.print(_ostr);
 
 }
 

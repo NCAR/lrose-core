@@ -559,6 +559,10 @@ void SpdbQuery::_printNormal(int dataType,
       doPrint.sndg_plus(data_len, chunk_data);
       break;
    
+    case SPDB_EDR_VER2_POINT_ID:
+      doPrint.EDR_point(data_len, chunk_data);
+      break;
+
     case SPDB_EDR_POINT_ID:
       doPrint.edr_point(data_len, chunk_data);
       break;
@@ -652,6 +656,7 @@ int SpdbQuery::_printAsXml(int dataType,
     case SPDB_VERGRID_REGION_ID:
     case SPDB_SNDG_ID:
     case SPDB_SNDG_PLUS_ID:
+    case SPDB_EDR_VER2_POINT_ID:
     case SPDB_EDR_POINT_ID:
     case SPDB_PIREP_ID:
     case SPDB_POSN_RPT_ID:

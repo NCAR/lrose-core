@@ -38,7 +38,7 @@ TARGET_FILE = Polygon2Xml
 LOC_INCLUDES = -I../include $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -ltdrp \
-	-ldataport -lrapformats -ltoolsa -leuclid \
+	-ldataport -lrapformats -leuclid -ltoolsa \
 	$(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = -L.. $(NETCDF4_LDFLAGS)

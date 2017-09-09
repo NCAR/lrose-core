@@ -38,7 +38,7 @@ TARGET_FILE = DeTectGenPoly2Symprod
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lDeTect -lSpdb -ldsserver -ldidss \
-	-lrapformats -ltoolsa -leuclid -ldataport \
+	-lrapformats -leuclid -ltoolsa -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz \
 	-lpthread -lm
 
