@@ -158,6 +158,11 @@ public:
   void setAllZero(void);
 
   /**
+   * Set to (0,0) in a range [i0,i1]
+   */
+  void setRangeZero(int i0, int i1);
+
+  /**
    * For all points where r >= rMin set data to input 
    * at all other points, don't change local data
    *
@@ -264,6 +269,8 @@ public:
 
 
   void shiftDown(int i0, int i1);
+
+  void setSlopes(int numBeams, int smoothRange);
 
 protected:
   std::vector<IQ> _iq;   /**< The vector of IQ */

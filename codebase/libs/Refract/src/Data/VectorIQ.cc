@@ -153,6 +153,15 @@ void VectorIQ::setAllZero(void)
 }
 
 //-----------------------------------------------------------------------
+void VectorIQ::setRangeZero(int i0, int i1)
+{
+  for (int i=i0; i<=i1; ++i)
+  {
+    _iq[i].set(0.0, 0.0);
+  }
+}
+
+//-----------------------------------------------------------------------
 void VectorIQ::normalize(void)
 {
   for (int index = 0; index < _scanSize; ++index)
@@ -396,3 +405,30 @@ void VectorIQ::shiftDown(int i0, int i1)
   _iq[i1].set(0.0, 0.0);
 }
 
+void VectorIQ::setSlopes(int numBeams, int smoothRange)
+{
+  if (numBeams*(2*smoothRange+1) != _scanSize)
+  {
+    LOG(ERROR) << "Mismatch";
+    return;
+  }
+  for (int az=0,index=0; az<numBeams; ++az)
+  {
+    for (int dr=0; dr<=2*smoothRange; ++dr, ++index)
+    {
+      _iq[index] = IQ((smoothRange-dr)*az);
+    }
+    // for (int r=-smoothRange; r<=smoothRange; ++r)
+    // {
+    //   int index = r + smoothRange;
+    //   if (index < 0 || index >= _scanSize)
+    //   {
+    // 	LOG(ERROR) << "Out of bounds";
+    //   }
+    //   else
+    //   {
+    // 	_iq[index] = IQ(r*az);
+    //   }
+    // }
+  }
+}

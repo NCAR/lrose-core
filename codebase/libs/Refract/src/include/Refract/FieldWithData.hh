@@ -387,6 +387,12 @@ class FieldWithData
   void setAbsValue(const FieldWithData &inp, double invalid);
   
   /**
+   * @return x (r) index for an input 2d index for local grid dimensions
+   * @param[in] index  Index into grid interpreted as 1d
+   */
+  int rIndex(int index) const;
+
+  /**
    * @return x (r) index for an input 2d index for particular grid dimensions
    * @param[in] index  Index into grid interpreted as 1d
    * @param[in] numAz  Number of azimuth (y) indices

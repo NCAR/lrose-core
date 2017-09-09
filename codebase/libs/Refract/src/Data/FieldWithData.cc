@@ -367,7 +367,7 @@ void FieldWithData::setNcp(const FieldDataPair &sumAB,
     }
     // double ncp = sumAB.sumSquares(i)/denom[i];
     double ncp = sumAB[i].normSquared()/denom[i];
-    int r = rIndex(i, _field_hdr.ny, _field_hdr.nx);
+    int r = rIndex(i);
     if (ncp != 0.0 && r >= rMin)
     {
       if (count[i] > 1)
@@ -400,7 +400,7 @@ void FieldWithData::setPhaseErr(const FieldWithData &ncp,
   int scan_size = _field_hdr.ny * _field_hdr.nx;
   for (int i=0; i< scan_size; ++i)
   {
-    int r = rIndex(i, _field_hdr.ny, _field_hdr.nx);
+    int r = rIndex(i);
     if (imask[i] == 0 || r < rMin)
     {
       continue;
@@ -675,7 +675,7 @@ FieldWithData::setPhaseErVector(std::vector<double> &quality,
   {
     if (ret[i] < _data[i] && ret[i] != refract::VERY_LARGE)
     {
-      int r = rIndex(i, _field_hdr.ny, _field_hdr.nx);
+      int r = rIndex(i);
       if (quality[i] > 0.5 && _data[i] > 2000.0 && r > minR)
       {
 	// Good-looking unknown distant targets (anoprop?) get minimum
@@ -704,6 +704,12 @@ void FieldWithData::setAbsValue(const FieldWithData &inp, double invalid)
       _data[index] = fabs(inp[index]);
     }      
   } /* endfor - az */
+}
+
+//-----------------------------------------------------------------------
+int FieldWithData::rIndex(int index) const
+{
+  return rIndex(index, _field_hdr.ny, _field_hdr.nx);
 }
 
 //-----------------------------------------------------------------------

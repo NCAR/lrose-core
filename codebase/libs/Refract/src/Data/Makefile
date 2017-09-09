@@ -40,6 +40,7 @@ CPPC_SRCS = \
 	MdvCreate.cc \
 	FieldDataPair.cc \
 	FieldWithData.cc \
+	VectorData.cc \
 	VectorIQ.cc
 
 #
