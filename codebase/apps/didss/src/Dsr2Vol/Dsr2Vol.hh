@@ -156,6 +156,7 @@ private:
 
   int _volNum;
   int _prevVolNum;
+  double _prevEl;
   bool _endOfVol;
 
   // functions
