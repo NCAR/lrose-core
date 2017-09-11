@@ -288,8 +288,11 @@ int NcOutput::writeNc( time_t genTime, long int leadSecs )
   }
 
   string outputDir = "";
-  string relDir = "";
+  char subDir[200];
+  char dayDir[100];
   char outputFile[1024];
+  subDir[0] = char(0);
+  dayDir[0] = char(0);
 
   if(_outputFile == NULL)
   {
@@ -309,12 +312,11 @@ int NcOutput::writeNc( time_t genTime, long int leadSecs )
 
     //
     // compute output filename and directories    
-    if (_params->write_to_day_dir || _params->output_filename == Params::RAP_FILENAME) {
-      char dayStr[128];
-      sprintf(dayStr, "%.4d%.2d%.2d", year, month, day);
-      relDir = dayStr;
-    }
        
+    if (_params->write_to_day_dir || _params->output_filename == Params::RAP_FILENAME) {
+      sprintf(dayDir, "%.4d%.2d%.2d", year, month, day);
+    }
+
     if(_params->output_filename == Params::ISO8601_FILENAME)
     {
       if (leadSecs > 0 || _params->force_lead_time_output) { 
@@ -344,10 +346,7 @@ int NcOutput::writeNc( time_t genTime, long int leadSecs )
     } else if(_params->output_filename == Params::RAP_FILENAME)
     {
       if (leadSecs > 0 || _params->force_lead_time_output) { 
-	char g_hhmmss[25];
-	sprintf(g_hhmmss, "g_%.2d%.2d%.2d", hour, minute, seconds);
-	relDir += PATH_DELIM;
-	relDir += g_hhmmss;
+	sprintf(subDir, "g_%.2d%.2d%.2d", hour, minute, seconds);
 	sprintf(outputFile, "%sf_%08li.nc", _params->output_basename, leadSecs);
 
       } else {
@@ -386,37 +385,55 @@ int NcOutput::writeNc( time_t genTime, long int leadSecs )
 	outputDir  = file.substr( 0, delimPos );
       }
 
-    relDir = "";
-
+    subDir[0] = char(0);
+    dayDir[0] = char(0);
   }
 
-  string fullPath = outputDir;
+  string fullPath = outputDir; // Full Path is the outputDir + any sub directories + file name
+  string relDir = "";          // relative Dir is any sub directories after the main outputDir
 
-  if(relDir != "") {
-    fullPath += PATH_DELIM;
-    fullPath += relDir;
-  }
-
-  //
-  // ensure output dir exists  
   struct stat stat_buf;
-  if (stat(fullPath.c_str(), &stat_buf) != 0) {
-    if (mkdir(fullPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
-      cerr << "ERROR - Cannot make output dir: " << fullPath << endl;
-      return -1;
+  if(dayDir[0] != char(0)) {
+    relDir = dayDir;
+    fullPath += PATH_DELIM;
+    fullPath += dayDir;
+    // ensure output dir exists  
+    if (stat(fullPath.c_str(), &stat_buf) != 0) {
+      if (mkdir(fullPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+	cerr << "ERROR - Cannot make output dir: " << fullPath << endl;
+	return -1;
+      }
+    }
+  }
+
+  if(subDir[0] != char(0)) {
+    if(relDir == "") {
+      relDir = subDir;
+    } else {
+      relDir += PATH_DELIM;
+      relDir += subDir;
+    }
+    fullPath += PATH_DELIM;
+    fullPath += subDir;
+    // ensure output dir exists  
+    if (stat(fullPath.c_str(), &stat_buf) != 0) {
+      if (mkdir(fullPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+	cerr << "ERROR - Cannot make output dir: " << fullPath << endl;
+	return -1;
+      }
     }
   }
 
   fullPath += PATH_DELIM;
   fullPath += outputFile;
 
-  if (_openNc3File(fullPath))
+  if (_openNcFile(fullPath))
     return -1;
 
-  if (_writeNc3File(genTime, leadSecs))
+  if (_writeNcFile(genTime, leadSecs))
     return -1;
 
-  _closeNc3File();
+  _closeNcFile();
   
   cout << "File written: " << fullPath << endl;
 
@@ -454,30 +471,14 @@ int NcOutput::writeNc( time_t genTime, long int leadSecs )
 //////////////////////////////////////////////
 // open netcdf file
 // create error object so we can handle errors
-int NcOutput::_openNc3File(const string &path)
+int NcOutput::_openNcFile(const string &path)
   
 {
 
-  _closeNc3File();
+  _closeNcFile();
 
-<<<<<<< NcOutput.cc
   Nc3File::FileFormat ncFormat = (Nc3File::FileFormat) _params->file_format;
   _ncFile = new Nc3File(path.c_str(), Nc3File::Replace, NULL, 0, ncFormat);
-=======
-  int cmode = 0;
-  int ncid;
-  if(_params->file_format == Params::NETCDF4 || _params->file_format == Params::NETCDF4_CLASSIC)
-    cmode = NC_NETCDF4;
-  int status = nc_create(path.c_str(), cmode, &ncid);
-  if(status != NC_NOERR) {
-    cerr << "ERROR - Cannot create netCDF file: " << path << endl;
-    return -1;
-  }
-  nc_close(ncid);
-
-  NcFile::FileFormat ncFormat = (NcFile::FileFormat) _params->file_format;
-  _ncFile = new NcFile(path.c_str(), NcFile::Write, NULL, 0, ncFormat);
->>>>>>> 1.8
   
   if (!_ncFile || !_ncFile->is_valid()) {
     cerr << "ERROR - Cannot open netCDF file: " << path << endl;
@@ -503,7 +504,7 @@ int NcOutput::_openNc3File(const string &path)
 
 //////////////////////////////////////
 // close netcdf file if open
-void NcOutput::_closeNc3File()
+void NcOutput::_closeNcFile()
   
 {
   
@@ -524,7 +525,7 @@ void NcOutput::_closeNc3File()
 
 //////////////////////////////////////
 // write all data to the open netcdf file
-int NcOutput::_writeNc3File(time_t genTime, long int leadSecs)
+int NcOutput::_writeNcFile(time_t genTime, long int leadSecs)
 {
   if(_ncFile == NULL)
     return -1;
@@ -773,7 +774,7 @@ int NcOutput::_addCoordinateVariables()
   int vlevelNum = 0;
   char zDimName[4];
   char zVarName[4];
-  NcVar* zVar;
+  Nc3Var* zVar;
   for (int i = 0; i <  (int) _uniqueVertical.size(); i++) 
   {
     if(_uniqueVertical[i] == i)
@@ -783,14 +784,14 @@ int NcOutput::_addCoordinateVariables()
       else
 	sprintf(zVarName, "z");
 
-      NcDim *zDim = _uniqueVerticalzDim[_uniqueVertical[i]];
+      Nc3Dim *zDim = _uniqueVerticalzDim[_uniqueVertical[i]];
 
       if(zDim == NULL) {
 	cerr << "ERROR - Cannot find unique netcdf dimensions matching variable " << zVarName << endl;
 	return -1;
       }  
 
-      if ((zVar = _ncFile->add_var(zVarName, ncFloat, zDim)) == NULL) {
+      if ((zVar = _ncFile->add_var(zVarName, nc3Float, zDim)) == NULL) {
 	cerr << "ERROR - Cannot add " << zVarName << " variable" << endl;
 	cerr << _ncErr->get_errmsg() << endl;
 	return -1;
@@ -832,40 +833,18 @@ int NcOutput::_addCoordinateVariables()
   // in method _addDimensions()
 
   int gridNum = 0;
-<<<<<<< NcOutput.cc
-  char xVarName[4],  yVarName[4];
+  //char xVarName[4],  yVarName[4];
   Nc3Var* xVar;
   Nc3Var* yVar;
-  Nc3Var* latVar;
-  Nc3Var* lonVar;
-=======
-  //char xVarName[4],  yVarName[4];
-  NcVar* xVar;
-  NcVar* yVar;
->>>>>>> 1.8
   for (int i = 0; i < (int) _uniqueGrid.size(); i++) 
   {
     if(_uniqueGrid[i] == i)
     {
-<<<<<<< NcOutput.cc
-      if(_numUniqueGrid > 1) {
-	sprintf(xVarName, "x%d", gridNum);
-	sprintf(yVarName, "y%d", gridNum);
-      } else {
-	sprintf(xVarName, "x");
-	sprintf(yVarName, "y");
-      }
-
       Nc3Dim *xDim = _uniqueGridxDim[_uniqueGrid[i]];
       Nc3Dim *yDim = _uniqueGridyDim[_uniqueGrid[i]];
-      
-=======
-      NcDim *xDim = _uniqueGridxDim[_uniqueGrid[i]];
-      NcDim *yDim = _uniqueGridyDim[_uniqueGrid[i]];
-      NcDim *dim1 = xDim;
-      NcDim *dim2 = yDim;
+      Nc3Dim *dim1 = xDim;
+      Nc3Dim *dim2 = yDim;
 
->>>>>>> 1.8
       if(xDim == NULL) {
 	cerr << "ERROR - Cannot find unique netcdf x dimension to create matching x variable " << endl;
 	return -1;
@@ -876,24 +855,14 @@ int NcOutput::_addCoordinateVariables()
 	return -1;
       }  
 
-<<<<<<< NcOutput.cc
-      if(!(xVar = _ncFile->add_var(xVarName, nc3Float, xDim))) {
-	cerr << "ERROR - Cannot add " << xVarName << " variable" << endl;
-=======
-      if(!(xVar = _ncFile->add_var(xDim->name(), ncFloat, xDim))) {
+      if(!(xVar = _ncFile->add_var(xDim->name(), nc3Float, xDim))) {
 	cerr << "ERROR - Cannot add " << xDim->name() << " variable" << endl;
->>>>>>> 1.8
 	cerr << _ncErr->get_errmsg() << endl;
 	return -1;
       }
 
-<<<<<<< NcOutput.cc
-      if(!(yVar = _ncFile->add_var(yVarName, nc3Float, yDim))) {
-	cerr << "ERROR - Cannot add " << yVarName << " variable" << endl;
-=======
-      if(!(yVar = _ncFile->add_var(yDim->name(), ncFloat, yDim))) {
+      if(!(yVar = _ncFile->add_var(yDim->name(), nc3Float, yDim))) {
 	cerr << "ERROR - Cannot add " << yDim->name() << " variable" << endl;
->>>>>>> 1.8
 	cerr << _ncErr->get_errmsg() << endl;
 	return -1;
       }
@@ -971,15 +940,10 @@ int NcOutput::_addCoordinateVariables()
 
 	}
 	
-<<<<<<< NcOutput.cc
 	// Add auxiliary variables to Nc3File if grids are not lat lon grids
-  
-=======
-	// Add auxiliary variables to NcFile if grids are not lat lon grids
->>>>>>> 1.8
 	char latVarName[7],  lonVarName[7];
-	NcVar* latVar;
-	NcVar* lonVar;
+	Nc3Var* latVar;
+	Nc3Var* lonVar;
 
 	if(_numUniqueGrid > 1) {
 	  sprintf(latVarName, "lat%d", gridNum);
@@ -989,24 +953,14 @@ int NcOutput::_addCoordinateVariables()
 	  sprintf(lonVarName, "lon");
 	}
 
-<<<<<<< NcOutput.cc
 	if ((latVar = _ncFile->add_var(latVarName, nc3Float,
-				       yDim, xDim)) == NULL) {
-=======
-	if ((latVar = _ncFile->add_var(latVarName, ncFloat,
 				       dim2, dim1)) == NULL) {
->>>>>>> 1.8
 	  cerr << "ERROR - Cannot add " << latVarName << " variable" << endl;
 	  cerr << _ncErr->get_errmsg() << endl;
 	  return -1;
 	}
-<<<<<<< NcOutput.cc
 	if ((lonVar = _ncFile->add_var(lonVarName, nc3Float,
-				       yDim, xDim)) == NULL) {
-=======
-	if ((lonVar = _ncFile->add_var(lonVarName, ncFloat,
 				       dim2, dim1)) == NULL) {
->>>>>>> 1.8
 	  cerr << "ERROR - Cannot add " << lonVarName << " variable" << endl;
 	  cerr << _ncErr->get_errmsg() << endl;
 	  return -1;
@@ -1059,67 +1013,6 @@ int NcOutput::_addCoordinateVariables()
     }
   } // end unique grids loop
 
-<<<<<<< NcOutput.cc
-  // Add vertical coordinate variables
-  int vlevelNum = 0;
-  // char zDimName[4];
-  char zVarName[4];
-  Nc3Var* zVar;
-  for (int i = 0; i <  (int) _uniqueVertical.size(); i++) 
-  {
-    if(_uniqueVertical[i] == i)
-    {
-      if(_numUniqueVertical > 1)
-	sprintf(zVarName, "z%d", vlevelNum);
-      else
-	sprintf(zVarName, "z");
-
-      Nc3Dim *zDim = _uniqueVerticalzDim[_uniqueVertical[i]];
-
-      if(zDim == NULL) {
-	cerr << "ERROR - Cannot find unique netcdf dimensions matching variable " << zVarName << endl;
-	return -1;
-      }  
-
-      if ((zVar = _ncFile->add_var(zVarName, nc3Float, zDim)) == NULL) {
-	cerr << "ERROR - Cannot add " << zVarName << " variable" << endl;
-	cerr << _ncErr->get_errmsg() << endl;
-	return -1;
-      }
-      
-      // Add Attributes
-      int iret = 0;      
-      if (_fieldInfo[i].vlevelInfo.standardName.size() > 0) {
-	iret |= !zVar->add_att(NcOutput::standard_name, _fieldInfo[i].vlevelInfo.standardName.c_str());
-      }
-      
-      iret |= !zVar->add_att(NcOutput::long_name, _fieldInfo[i].vlevelInfo.longName.c_str());
-      
-      if(_fieldInfo[i].vlevelInfo.units.compare(units_missing) != 0) {
-	iret |= !zVar->add_att(NcOutput::units, _fieldInfo[i].vlevelInfo.units.c_str());
-      }
-
-      if (_fieldInfo[i].vlevelInfo.positive.size() > 0) {
-	iret |= !zVar->add_att(NcOutput::positive, _fieldInfo[i].vlevelInfo.positive.c_str());
-      }
-      
-      iret |= !zVar->add_att(NcOutput::axis, "Z");
-
-      if(iret != 0) {
-	cerr << "ERROR - Failed to add a coordinate variable attribute for " << zVarName << endl;
-	cerr << _ncErr->get_errmsg() << endl;
-	return -1;
-      }
-      _uniqueVerticalzVar.push_back(zVar);
-      vlevelNum++;
-    } else {
-      _uniqueVerticalzVar.push_back(NULL);
-    }
-  } // end unique vertical info loop
-
-
-=======
->>>>>>> 1.8
   return 0;
 
 }
@@ -1298,19 +1191,15 @@ int NcOutput::_addFieldDataVariables()
     if(_fieldInfo[i].ncType == Params::DATA_PACK_SHORT)
       ncType = nc3Short;
 
-<<<<<<< NcOutput.cc
-    Nc3Var *fieldVar = _ncFile->add_var(fieldName.c_str(), ncType, _timeDim, zDim, yDim, xDim);
-=======
-    NcDim *dim1 = xDim;
-    NcDim *dim2 = yDim;
+    Nc3Dim *dim1 = xDim;
+    Nc3Dim *dim2 = yDim;
     if(_fieldInfo[i].gridInfo.ncfGridName.compare(NcOutput::rotated_latitude_longitude) == 0) {
       dim1 = yDim;
       dim2 = xDim;
     }
 
-    NcVar *fieldVar;
+    Nc3Var *fieldVar;
     fieldVar = _ncFile->add_var(fieldName.c_str(), ncType, _timeDim, zDim, dim2, dim1);
->>>>>>> 1.8
 
     if (fieldVar == NULL) {
       cerr << "ERROR - Cannot add variable '" << fieldName << "' to Nc file object" << endl;
@@ -1383,16 +1272,10 @@ int NcOutput::_addFieldDataVariables()
     {
 	
       char auxVarNames[1024];
-<<<<<<< NcOutput.cc
-      Nc3Var *latVar = _uniqueGridlatVar[_uniqueGrid[i]];
-      Nc3Var *lonVar = _uniqueGridlonVar[_uniqueGrid[i]];  
+      Nc3Var *latVar = _uniqueGridxVar[_uniqueGrid[i]];
+      Nc3Var *lonVar = _uniqueGridyVar[_uniqueGrid[i]];  
+      Nc3Var *zVar = _uniqueVerticalzVar[_uniqueGrid[i]];
       Nc3Var *projVar = _uniqueGridprojVar[_uniqueGrid[i]];  
-=======
-      NcVar *latVar = _uniqueGridxVar[_uniqueGrid[i]];
-      NcVar *lonVar = _uniqueGridyVar[_uniqueGrid[i]];  
-      NcVar *zVar = _uniqueVerticalzVar[_uniqueGrid[i]];
-      NcVar *projVar = _uniqueGridprojVar[_uniqueGrid[i]];  
->>>>>>> 1.8
       if(latVar == NULL || lonVar == NULL || projVar == NULL) {
 	cerr << "ERROR - Cannot find unique lat/lon proj variables matching variable " << _fieldInfo[i].name << endl;
 	return -1;
@@ -1706,13 +1589,9 @@ int NcOutput::_putFieldDataVariables()
 
   for (int i = 0; i <  (int) _fieldVar.size(); i++) 
   {
-<<<<<<< NcOutput.cc
     Nc3Var *fieldVar = _fieldVar[i];
-=======
-    NcVar *fieldVar = _fieldVar[i];
     int nDim1 = _fieldInfo[i].gridInfo.nx;
     int nDim2 = _fieldInfo[i].gridInfo.ny;
->>>>>>> 1.8
 
     if(fieldVar == NULL) {
       cerr << "ERROR - Cannot put data for variable '" << _fieldInfo[i].name << "' as it is NULL" << endl;

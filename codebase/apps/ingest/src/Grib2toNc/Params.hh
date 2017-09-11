@@ -465,6 +465,8 @@ public:
 
   int max_lead_time_secs;
 
+  tdrp_bool_t force_lead_time_output;
+
   char* output_dir;
 
   tdrp_bool_t write_to_day_dir;
@@ -514,7 +516,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[46];
+  mutable TDRPtable _table[47];
 
   const char *_className;
 

@@ -817,6 +817,18 @@ using namespace std;
     tt->single_val.i = 86400;
     tt++;
     
+    // Parameter 'force_lead_time_output'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("force_lead_time_output");
+    tt->descr = tdrpStrDup("Option to always output lead time variables.");
+    tt->help = tdrpStrDup("This forcess output of forecast_period and forecast_reference_time even when lead_time is 0. Used for model data to have output files all contain the same variables.");
+    tt->val_offset = (char *) &force_lead_time_output - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'output_dir'
     // ctype is 'char*'
     

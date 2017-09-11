@@ -626,7 +626,7 @@ int Grib2Nc::_setFieldInfo()
   _fieldInfo.gridInfo.tan_lon        = 0.0;
   _fieldInfo.gridInfo.central_scale  = 0.0;
   _fieldInfo.gridInfo.pole_type      = 0;
- 
+
   if(drsConstants.templateNumber == 2) {
     Grib2::Template5_pt_2 *Template5_2 = (Grib2::Template5_pt_2 *)drsTemplate;
 
@@ -1234,7 +1234,7 @@ fl32 *Grib2Nc::_calcMinMax(fl32 *dataPtr)
 fl32 *Grib2Nc::_encode(fl32 *dataPtr, Params::data_pack_t output_encoding)
 {
   dataPtr = _calcMinMax(dataPtr);
-  
+
   if (output_encoding != Params::DATA_PACK_NONE)
   {    
     if (output_encoding == Params::DATA_PACK_SHORT) {
@@ -1287,8 +1287,7 @@ void *Grib2Nc::_float32_to_int8(fl32 *inDataPtr)
   // allocate the output buffer
 
   size_t npoints = _fieldInfo.gridInfo.nx * _fieldInfo.gridInfo.ny * _fieldInfo.vlevelInfo.nz;
-  size_t output_size = npoints * sizeof(ui08);
-  void *outDataPtr = new ui08[output_size];
+  void *outDataPtr = new ui08[npoints];
 
   // convert data
   
@@ -1371,7 +1370,6 @@ void *Grib2Nc::_float32_to_int16(fl32 *inDataPtr)
   // allocate the output buffer
   
   size_t npoints = _fieldInfo.gridInfo.nx * _fieldInfo.gridInfo.ny * _fieldInfo.vlevelInfo.nz;
-  // size_t output_size = npoints * sizeof(ui16);
   void *outDataPtr = new ui16[npoints];
 
   // convert data

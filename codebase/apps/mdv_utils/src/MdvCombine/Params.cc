@@ -591,7 +591,7 @@ using namespace std;
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("fcast_lead_time");
     tt->descr = tdrpStrDup("Forecast lead time information for forecast files to be processed.");
-    tt->help = tdrpStrDup("Used only if mode is set to SPEC_FCAST_REALTIME.");
+    tt->help = tdrpStrDup("Used only if mode is set to SPEC_FCAST_REALTIME or if  write_forecast is set to TRUE.");
     tt->val_offset = (char *) &fcast_lead_time - &_start_;
     tt->struct_def.name = tdrpStrDup("fcast_lead_time_t");
     tt->struct_def.nfields = 2;
