@@ -39,7 +39,7 @@ TARGET_FILE = stratiform_filter
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -lrapformats \
+LOC_LIBS = -lMdv -lNcxx -lRadx -ldsserver -lrapformats \
 	-leuclid -ldidss -lrapmath -ltdrp \
 	-ltoolsa -ldataport $(NETCDF4_LIBS) -lbz2 \
 	-lz
