@@ -290,7 +290,7 @@ public:
 
   // well known value - used to check for swapping
 
-  static const Radx::si64 COOKIE = 1234567898754321;
+  static const Radx::si64 COOKIE = 1234567898754321L;
 
 protected:
 
