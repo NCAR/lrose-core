@@ -134,6 +134,7 @@ int Mdv2NcfTrans::translate(const DsMdvx &mdv, const string &ncFilePath)
   _mdv = &mdv;
   _ncFilePath = ncFilePath;
   _outputLatlonArrays = _mdv->_ncfOutputLatlonArrays;
+  _outputStartEndTimes = _mdv->_ncfOutputStartEndTimes;
   char *outputLatlonArraysStr = getenv("MDV2NETCDF_WRITE_LATLON_ARRAYS");
   if (outputLatlonArraysStr != NULL) {
     if (!strcasecmp(outputLatlonArraysStr, "FALSE")) {
@@ -926,38 +927,40 @@ int Mdv2NcfTrans::_addTimeVariables()
   DateTime stopTime(_timeEnd);
   string startTimeString(startTime.getW3cStr().c_str());
   string stopTimeString(stopTime.getW3cStr().c_str());
-  
-  if (_timeBegin != 0) {
-    if ((_startTimeVar = _ncFile->add_var(NcfMdv::start_time,
-                                          nc3Double, _timeDim)) == NULL) {
-      return -1;
-    }
-    iret |= !_startTimeVar->add_att(NcfMdv::long_name, "start_time");
-    iret |= !_startTimeVar->add_att(NcfMdv::units, NcfMdv::secs_since_jan1_1970);
-    iret |= !_startTimeVar->add_att(NcfMdv::comment, startTime.getW3cStr().c_str());
-  }
+ 
+  if ( _outputStartEndTimes ) {
 
-  if (_timeEnd != 0) {
-    if ((_stopTimeVar = _ncFile->add_var(NcfMdv::stop_time,
-                                         nc3Double, _timeDim)) == NULL) {
-      return -1;
-    }
-    iret |= !_stopTimeVar->add_att(NcfMdv::long_name, "stop_time");
-    iret |= !_stopTimeVar->add_att(NcfMdv::units, NcfMdv::secs_since_jan1_1970);
-    iret |= !_stopTimeVar->add_att(NcfMdv::comment, stopTime.getW3cStr().c_str());
-  }
+     if (_timeBegin != 0) {
+       if ((_startTimeVar = _ncFile->add_var(NcfMdv::start_time,
+                                             nc3Double, _timeDim)) == NULL) {
+         return -1;
+       }
+       iret |= !_startTimeVar->add_att(NcfMdv::long_name, "start_time");
+       iret |= !_startTimeVar->add_att(NcfMdv::units, NcfMdv::secs_since_jan1_1970);
+       iret |= !_startTimeVar->add_att(NcfMdv::comment, startTime.getW3cStr().c_str());
+     }
+
+     if (_timeEnd != 0) {
+       if ((_stopTimeVar = _ncFile->add_var(NcfMdv::stop_time,
+                                            nc3Double, _timeDim)) == NULL) {
+         return -1;
+       }
+       iret |= !_stopTimeVar->add_att(NcfMdv::long_name, "stop_time");
+       iret |= !_stopTimeVar->add_att(NcfMdv::units, NcfMdv::secs_since_jan1_1970);
+       iret |= !_stopTimeVar->add_att(NcfMdv::comment, stopTime.getW3cStr().c_str());
+     }
   
-  if (_timeBegin != _timeEnd &&
-      _timeBegin <= _timeCentroid &&
-      _timeEnd >= _timeCentroid) {
-    if ((_timeBoundsVar = _ncFile->add_var(NcfMdv::time_bounds, nc3Double,
-                                           _timeDim, _boundsDim)) == NULL) {
-      return -1;
-    }
-    iret |= !_timeBoundsVar->add_att(NcfMdv::comment, "time_bounds also stored the start and stop times, provided the time variable value lies within the start_time to stop_time interval");
-    iret |= !_timeBoundsVar->add_att(NcfMdv::units, NcfMdv::secs_since_jan1_1970);
-  }
-  
+     if (_timeBegin != _timeEnd &&
+         _timeBegin <= _timeCentroid &&
+         _timeEnd >= _timeCentroid) {
+       if ((_timeBoundsVar = _ncFile->add_var(NcfMdv::time_bounds, nc3Double,
+                                              _timeDim, _boundsDim)) == NULL) {
+         return -1;
+       }
+       iret |= !_timeBoundsVar->add_att(NcfMdv::comment, "time_bounds also stored the start and stop times, provided the time variable value lies within the start_time to stop_time interval");
+       iret |= !_timeBoundsVar->add_att(NcfMdv::units, NcfMdv::secs_since_jan1_1970);
+     }
+  } 
   return (iret? -1 : 0);
 
 }

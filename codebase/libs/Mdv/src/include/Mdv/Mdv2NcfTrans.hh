@@ -199,6 +199,7 @@ protected:
   vector<Nc3Var*> _chunkVars;
 
   bool _outputLatlonArrays;
+  bool _outputStartEndTimes;
 
   /// File type for polar radar and lidar
 

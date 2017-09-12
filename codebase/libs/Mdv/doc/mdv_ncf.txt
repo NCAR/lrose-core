@@ -231,7 +231,8 @@ from MDV to NCF.
   
   void setMdv2NcfOutput(bool outputLatlonArrays,
                         bool outputMdvAttr,
-                        bool outputMdvChunks);
+                        bool outputMdvChunks,
+                        bool outputStartEndTimes = true);
   
   // field-by-field translation
   // If none specified, default is to use the MDV names and 

@@ -1082,6 +1082,7 @@ void DsMdvxMsg::_addConvertMdv2NcfPart(const DsMdvx &mdvx)
   bool outputLatlonArrays = mdvx._ncfOutputLatlonArrays;
   bool outputMdvAttr = mdvx._ncfOutputMdvAttr;
   bool outputMdvChunks = mdvx._ncfOutputMdvChunks;
+  bool outputStartEndTimes =  mdvx._ncfOutputStartEndTimes;
   
   string xml;
   xml += TaXml::writeStartTag("mdv-to-ncf-conversion", 0);
@@ -1102,6 +1103,7 @@ void DsMdvxMsg::_addConvertMdv2NcfPart(const DsMdvx &mdvx)
   xml += TaXml::writeBoolean("outputLatlonArrays", 1, outputLatlonArrays);
   xml += TaXml::writeBoolean("outputMdvAttr", 1, outputMdvAttr);
   xml += TaXml::writeBoolean("outputMdvChunks", 1, outputMdvChunks);
+  xml += TaXml::writeBoolean("outputStartEndTimes", 1,  outputStartEndTimes);
 
   for (int ii = 0; ii < (int) fieldTrans.size(); ii++) {
 

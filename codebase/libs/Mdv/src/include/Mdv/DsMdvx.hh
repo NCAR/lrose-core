@@ -404,7 +404,8 @@ public:
   
   void setMdv2NcfOutput(bool outputLatlonArrays,
                         bool outputMdvAttr,
-                        bool outputMdvChunks);
+                        bool outputMdvChunks,
+                        bool outputStartEndTimes = true);
   
   // add field translation info for MDV to NetCDF CF conversion
   
@@ -549,6 +550,7 @@ protected:
   bool _ncfOutputLatlonArrays;
   bool _ncfOutputMdvAttr;
   bool _ncfOutputMdvChunks;
+  bool _ncfOutputStartEndTimes;
 
   ///////////////////
   // socket to server

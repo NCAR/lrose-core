@@ -2234,10 +2234,12 @@ int DsMdvxMsg::_getConvertMdv2Ncf(DsMdvx &mdvx)
   bool outputLatlonArrays;
   bool outputMdvAttr;
   bool outputMdvChunks;
+  bool outputStartEndTimes;
   TaXml::readBoolean(xml, "outputLatlonArrays", outputLatlonArrays);
   TaXml::readBoolean(xml, "outputMdvAttr", outputMdvAttr);
   TaXml::readBoolean(xml, "outputMdvChunks", outputMdvChunks);
-  mdvx.setMdv2NcfOutput(outputLatlonArrays, outputMdvAttr, outputMdvChunks);
+  TaXml::readBoolean(xml, "outputStartEndTimes", outputStartEndTimes); 
+  mdvx.setMdv2NcfOutput(outputLatlonArrays, outputMdvAttr, outputMdvChunks,outputStartEndTimes);
 
   // field translation
 
