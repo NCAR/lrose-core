@@ -220,7 +220,6 @@ bool RadxFile::_isSupportedNetCDF(const string &path)
     }
   }
  
-  cerr << "DEBUG - trying isCfarrNc file" << endl;   
   // try Cfarr netcdf
   {
     CfarrNcRadxFile file;
