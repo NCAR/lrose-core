@@ -1,0 +1,208 @@
+/*********************************************************
+ * parameter definitions for Radx2Esd
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Sept 2017
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Reads radial radar data in file supported by Radx, writes out file in ESD ASCII format.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory for searching for files.";
+  p_help = "Files will be searched for in this directory.";
+} input_dir;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file.  "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in ARCHIVE mode, at least) MUST contain a "
+           "day-directory above the data file -- ./data_file.ext will not "
+           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+} mode;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} max_realtime_data_age_secs;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name extension.";
+  p_help = "If set, only files with this extension will be processed.";
+} search_ext;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Set the radar number for the data output.";
+  p_help = "Each ray data starts with the radar number.";
+} radar_number;
+
+commentdef {
+  p_header = "OPTIONAL FIXED ANGLE OR SWEEP NUMBER LIMITS";
+  p_text = "Fixed angles are elevation in PPI mode and azimuth in RHI mode.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set fixed angle limits";
+  p_help = "Only use sweeps within the specified fixed angle limits.";
+  p_help = "If 'apply_strict_angle_limits' is set, only read sweeps within the specified fixed angle limits. If strict checking is false and no data lies within the limits, return the closest applicable sweep. NOTE - fixed angles are elevation in PPI mode and azimuth in RHI mode.";
+} set_fixed_angle_limits;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Lower fixed angle limit - degrees.";
+} lower_fixed_angle_limit;
+
+paramdef double {
+  p_default = 90;
+  p_descr = "Upper fixed angle limit - degrees.";
+} upper_fixed_angle_limit;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set sweep number limits";
+  p_help = "If 'apply_strict_angle_limits' is set, only read sweeps within the specified limits. If strict checking is false and no data lies within the limits, return the closest applicable sweep.";
+} set_sweep_num_limits;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Lower sweep number limit.";
+} lower_sweep_num;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Upper sweep number limit.";
+} upper_sweep_num;
+
+commentdef {
+  p_header = "RANGE GEOMETRY";
+}
+
+paramdef int {
+  p_default = 250;
+  p_descr = "Set the number of gates to be written out.";
+} n_gates;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Specified start range (km).";
+  p_help = "The start range will be converted to this value.";
+} start_range_km;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Specified gate spacing (km).";
+  p_help = "The gate spacing will be converted to this value.";
+} gate_spacing_km;
+
+commentdef {
+  p_header = "OPTION TO CORRECT TIME";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to apply an offset to the ray times.";
+  p_help = "If TRUE, this offset will be ADDED to the existing ray times. This is useful, for example, for correcting time errors, or converting from local time to UTC.";
+} apply_time_offset;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Time offset (secs).";
+  p_help = "See 'apply_time_offset'. This value will be ADDED to the existing ray times.";
+} time_offset_secs;
+
+commentdef {
+  p_header = "OPTION TO CORRECT ANTENNA ANGLES";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to apply an offset to the azimuth values.";
+  p_help = "If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north.";
+} apply_azimuth_offset;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Azimuth offset (degrees).";
+  p_help = "See 'apply_azimuth_offset'. This value will be ADDED to the measured azimuths.";
+} azimuth_offset;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to apply an offset to the elevation values.";
+  p_help = "If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles.";
+} apply_elevation_offset;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Elevation offset (degrees).";
+  p_help = "See 'apply_elevation_offset'. This value will be ADDED to the measured elevations.";
+} elevation_offset;
+
+commentdef {
+  p_header = "SPECIFY DBZ FIELD NAME";
+}
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Name of DBZ field.";
+  p_help = "ESD ASCII only accepts the reflectivity field in the data";
+} dbz_field_name;
+
+commentdef {
+  p_header = "OUTPUT DIRECTORY";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory path.";
+  p_help = "Files will be written to this directory.";
+} output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out _latest_data_info files.";
+  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
+} write_latest_data_info;
+
