@@ -759,7 +759,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Set the number of gates to be written out.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &n_gates - &_start_;
-    tt->single_val.i = 250;
+    tt->single_val.i = 200;
     tt++;
     
     // Parameter 'start_range_km'

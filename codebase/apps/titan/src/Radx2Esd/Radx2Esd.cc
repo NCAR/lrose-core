@@ -38,6 +38,7 @@
 #include "Radx2Esd.hh"
 #include <Radx/Radx.hh>
 #include <Radx/RadxVol.hh>
+#include <Radx/RadxFile.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
 #include <Mdv/GenericRadxFile.hh>
@@ -333,6 +334,10 @@ void Radx2Esd::_finalizeVol(RadxVol &vol)
   vol.remapRangeGeom(_params.start_range_km, _params.gate_spacing_km);
   vol.setNGates(_params.n_gates);
 
+  // trim sweeps to 360 deg
+
+  vol.trimSurveillanceSweepsTo360Deg();
+
   // apply time offset
 
   if (_params.apply_time_offset) {
@@ -406,42 +411,157 @@ void Radx2Esd::_setupRead(RadxFile &file)
 int Radx2Esd::_writeVol(RadxVol &vol)
 {
 
-  // output file
-
-  GenericRadxFile outFile;
-
-  string outputDir = _params.output_dir;
-
-  // write to dir
+  // output path
   
-  if (outFile.writeToDir(vol, outputDir, true, false)) {
+  RadxTime startTime(vol.getStartTimeSecs());
+  
+  string outDir(_params.output_dir);
+  char dayStr[BUFSIZ];
+  sprintf(dayStr, "%.4d%.2d%.2d",
+          startTime.getYear(), startTime.getMonth(), startTime.getDay());
+  outDir += RadxFile::PATH_SEPARATOR;
+  outDir += dayStr;
+
+  // make sure output subdir exists
+  
+  if (RadxFile::makeDirRecurse(outDir)) {
+    int errNum = errno;
     cerr << "ERROR - Radx2Esd::_writeVol" << endl;
-    cerr << "  Cannot write file to dir: " << outputDir << endl;
-    cerr << outFile.getErrStr() << endl;
+    cerr << "  Cannot make output dir: " << outDir << endl;
+    cerr << "  " << strerror(errNum) << endl;
     return -1;
   }
 
+  char timeStr[BUFSIZ];
+  sprintf(timeStr, "%.2d%.2d%.2d",
+          startTime.getHour(), startTime.getMin(), startTime.getSec());
+  
+  string outPath(outDir);
+  outPath += RadxFile::PATH_SEPARATOR;
+  outPath += "esd_ascii_";
+  outPath += dayStr;
+  outPath += "_";
+  outPath += timeStr;
+  outPath += ".txt";
+
+  // open the file
+
+  FILE *out;
+  if ((out = fopen(outPath.c_str(), "w")) == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - Radx2Esd::_writeVol" << endl;
+    cerr << "  Cannot open file for writing: " << outPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+
+  vector<RadxRay *> rays = vol.getRays();
+  for (size_t ii = 0; ii < rays.size(); ii++) {
+    _writeRay(out, rays[ii]);
+    if (ii >= 359) {
+      break;
+    }
+  }
+
+  // close the file
+
+  fclose(out);
+
+  if (_params.debug) {
+    cerr << "Wrote file: " << outPath << endl;
+  }
+  
   // write latest data info file if requested 
   
-  string outputPath = outFile.getPathInUse();
-
   if (_params.write_latest_data_info) {
-    DsLdataInfo ldata(outputDir);
+    DsLdataInfo ldata(outDir);
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       ldata.setDebug(true);
     }
     string relPath;
-    RadxPath::stripDir(outputDir, outputPath, relPath);
+    RadxPath::stripDir(outDir, outPath, relPath);
     ldata.setRelDataPath(relPath);
     ldata.setWriter(_progName);
     if (ldata.write(vol.getEndTimeSecs())) {
       cerr << "WARNING - Radx2Esd::_writeVol" << endl;
       cerr << "  Cannot write latest data info file to dir: "
-           << outputDir << endl;
+           << outDir << endl;
     }
   }
 
   return 0;
 
 }
+
+/////////////////////////////////////////////////////////////
+// write out a ray
+
+void Radx2Esd::_writeRay(FILE *out, RadxRay *ray)
+
+{
+
+  // get the DBZ field
+
+  RadxField *dbzField = ray->getField(_params.dbz_field_name);
+  if (dbzField == NULL) {
+    // no DBZ field found
+    cerr << "WARNING - no DBZ field found, name: " 
+         << _params.dbz_field_name << endl;
+    ray->print(cerr);
+    return;
+  }
+
+  // convert to floats
+
+  dbzField->convertToFl32();
+  Radx::fl32 *dbz = dbzField->getDataFl32();
+
+  // write out
+
+  // Each ray packet has an header stating with $,
+  // followed by 2 digit site number and azimuth,
+  // then followed by gate data in Hex.
+  // The data are all ASCII hex values from 0 to F.
+  // The data is terminated with a 16 bit check sum followed by a # and CR/LF.
+
+  // This is what the data looks like for beam azimuth 359.
+  // $003590123456789ABCDEF0123456789ABCDEF0123456789ABCDEF
+  //  0123456789ABCDEF0123456789ABCDEF01234567#89ABCDEF0123
+  //  456789ABCDEF0123456789ABCDEF0123456789ABCDEF012345678
+  //  9ABCDEF0123456789ABCDEF0123456789ABCDEF1234#
+  
+  // radar num
+
+  fprintf(out, "$%.2d", _params.radar_number);
+
+  // azimuth in whole deg
+
+  int iaz = (int) (ray->getAzimuthDeg() + 0.5);
+  if (iaz > 359) {
+    iaz -= 360;
+  } else if (iaz < 0) {
+    iaz += 360.0;
+  }
+  fprintf(out, "%.3d", iaz);
+
+  // dbz in HEX - in 5 dB increments starting from 0
+  
+  for (size_t igate = 0; igate < ray->getNGates(); igate++) {
+    double fdbz = dbz[igate];
+    if (fdbz < 0) {
+      fdbz = 0;
+    }
+    if (fdbz > 79) {
+      fdbz = 79;
+    }
+    int idbz = (int) (fdbz / 5.0);
+    if (idbz > 9) {
+      idbz += 7;
+    }
+    fprintf(out, "%c", idbz + 48);
+  }
+  fprintf(out, "#\r\n");
+
+}
+
 

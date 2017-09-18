@@ -90,6 +90,7 @@ private:
   void _setupRead(RadxFile &file);
   void _finalizeVol(RadxVol &vol);
   int _writeVol(RadxVol &vol);
+  void _writeRay(FILE *out, RadxRay *ray);
 
 };
 
