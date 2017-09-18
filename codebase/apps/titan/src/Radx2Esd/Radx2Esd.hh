@@ -43,6 +43,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <string>
+#include <Radx/Radx.hh>
 class RadxVol;
 class RadxFile;
 class RadxRay;
@@ -91,6 +92,7 @@ private:
   void _finalizeVol(RadxVol &vol);
   int _writeVol(RadxVol &vol);
   void _writeRay(FILE *out, RadxRay *ray);
+  int _calcCheckSum16(const char *pntr, size_t len);
 
 };
 

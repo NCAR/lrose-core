@@ -516,6 +516,7 @@ codebase/apps/titan/src/forecast_monitor/forecast_monitor
 codebase/apps/titan/src/suncal/suncal
 codebase/apps/titan/src/titan_print/titan_print
 codebase/apps/titan/src/tstorm_refl_fcst/tstorm_refl_fcst
+codebase/apps/titan/src/Radx2Esd/Radx2Esd
 
 codebase/apps/titan_analysis/src/CaseStats/CaseStats
 codebase/apps/titan_analysis/src/DistFit/DistFit

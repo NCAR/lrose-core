@@ -516,7 +516,7 @@ void Radx2Esd::_writeRay(FILE *out, RadxRay *ray)
   dbzField->convertToFl32();
   Radx::fl32 *dbz = dbzField->getDataFl32();
 
-  // write out
+  // create the output line
 
   // Each ray packet has an header stating with $,
   // followed by 2 digit site number and azimuth,
@@ -529,10 +529,14 @@ void Radx2Esd::_writeRay(FILE *out, RadxRay *ray)
   //  0123456789ABCDEF0123456789ABCDEF01234567#89ABCDEF0123
   //  456789ABCDEF0123456789ABCDEF0123456789ABCDEF012345678
   //  9ABCDEF0123456789ABCDEF0123456789ABCDEF1234#
+
+  string line;
+  char text[1024];
   
   // radar num
 
-  fprintf(out, "$%.2d", _params.radar_number);
+  sprintf(text, "$%.2d", _params.radar_number);
+  line += text;
 
   // azimuth in whole deg
 
@@ -542,7 +546,8 @@ void Radx2Esd::_writeRay(FILE *out, RadxRay *ray)
   } else if (iaz < 0) {
     iaz += 360.0;
   }
-  fprintf(out, "%.3d", iaz);
+  sprintf(text, "%.3d", iaz);
+  line += text;
 
   // dbz in HEX - in 5 dB increments starting from 0
   
@@ -558,10 +563,46 @@ void Radx2Esd::_writeRay(FILE *out, RadxRay *ray)
     if (idbz > 9) {
       idbz += 7;
     }
-    fprintf(out, "%c", idbz + 48);
+    sprintf(text, "%c", idbz + 48);
+    line += text;
   }
-  fprintf(out, "#\r\n");
 
+  // compute the check sum
+
+  int checkSum = _calcCheckSum16(line.c_str(), line.size());
+  cerr << "111111111111 checkSum: " << checkSum << endl;
+  fprintf(stderr, "2222222222 checkSum: %.2x\n", checkSum);
+
+  // write out line
+
+  fprintf(out, "%s", line.c_str());
+
+  // add check sum
+
+  fprintf(out, "%.2x#\r\n", checkSum);
+  
 }
 
+//------------------------------------------------------------------------
+// Calculate check sum  A and B,  16 bit
+//------------------------------------------------------------------------
 
+int Radx2Esd::_calcCheckSum16(const char *pntr, size_t len)
+{
+
+  Radx::ui08 a = 0, b = 0;
+  int chk_sum;
+
+  for(size_t i = 0; i < len; i++) {
+    a += pntr[i];
+    b += a;
+  }
+
+  a &= 0xFF;
+  b &= 0xFF;
+
+  chk_sum = (int) ((a << 8)| b );
+
+  return chk_sum;
+
+}
