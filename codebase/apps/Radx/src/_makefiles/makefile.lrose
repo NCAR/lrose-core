@@ -13,6 +13,7 @@ SUB_DIRS = \
 	Hsrl2Radx \
 	Radx2Dsr \
 	Radx2Grid \
+	RadxBeamBlock \
 	RadxCheck \
 	RadxClutMon \
 	RadxConvert \
