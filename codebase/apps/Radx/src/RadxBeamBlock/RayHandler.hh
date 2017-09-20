@@ -31,7 +31,7 @@
 #define RAYHANDLER_HH
 
 #include "GateHandler.hh"
-#include <BeamBlock/angle.h>
+#include "angle.h"
 #include <Radx/Radx.hh>
 #include <string>
 #include <vector>

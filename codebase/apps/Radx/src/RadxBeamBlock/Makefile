@@ -74,7 +74,19 @@ CPPC_SRCS = \
 	RadxBeamBlock.cc \
 	RadxBeamBlockMgr.cc \
 	Main.cc \
-	Parms.cc
+	Parms.cc \
+        angle.cc \
+	beam_power.cc \
+	beam_propagation.cc \
+	digital_elevation.cc \
+	field.cc \
+	latlon.cc \
+	metadata.cc \
+	spheroid.cc \
+	string_utils.cc  \
+	timestamp.cc \
+	trace.cc \
+	xml.cc
 
 #
 # tdrp macros

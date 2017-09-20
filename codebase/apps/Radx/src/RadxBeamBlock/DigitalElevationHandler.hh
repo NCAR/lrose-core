@@ -38,8 +38,8 @@
 #define DIGITALELEVATIONHANDLER_HH
 
 #include "Parms.hh"
-#include <BeamBlock/digital_elevation.h>
-#include <BeamBlock/spheroid.h>
+#include "digital_elevation.h"
+#include "spheroid.h"
 #include <vector>
 
 
