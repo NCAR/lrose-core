@@ -605,7 +605,7 @@ int NexradRadxFile::readFromPath(const string &path,
       }
 
     } else if (msgHdr.message_type == NexradData::VOLUME_COVERAGE_PATTERN) {
-
+      
       _handleVcpHdr(buf);
       
     } else if (msgHdr.message_type == NexradData::RDA_ADAPTATION_DATA) {
@@ -3632,6 +3632,7 @@ int NexradRadxFile::_unzipFile(const string &path)
   RadxBuf uncomp;
   uncomp.add(header, 24);
 
+  bool lastBlock = false;
   while (!feof(in)) {
 
     // read in sub-buffer length
@@ -3646,9 +3647,11 @@ int NexradRadxFile::_unzipFile(const string &path)
       _addErrStr("  Path: ", path);
     }
     length = ntohl(length);
+
     if(length < 0) {
+      // a negative length indicates this is the last block
       length = -length;
-      break;
+      lastBlock = true;
     }
 
     // read in sub-buffer
@@ -3696,6 +3699,10 @@ int NexradRadxFile::_unzipFile(const string &path)
     // add to uncomp buffer
     
     uncomp.add(outBuf, outLen);
+
+    if (lastBlock) {
+      break;
+    }
 
   } // while
 
