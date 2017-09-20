@@ -38,7 +38,7 @@ TARGET_FILE = RadxBeamBlock
 
 LOC_INCLUDES = $(NETCDF4_INCS) -I.
 
-LOC_LIBS = -lBeamBlock -lMdv -lFmq -leuclid \
+LOC_LIBS = -lMdv -lFmq -leuclid \
 	-lrapmath -ldsserver -lrapformats -ldidss \
 	-lRadx -ltoolsa -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz
