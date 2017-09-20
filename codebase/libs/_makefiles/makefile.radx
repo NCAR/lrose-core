@@ -9,6 +9,7 @@ TARGETS = $(GENERAL_TARGETS) $(LIB_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
 SUB_DIRS = \
 	Fmq \
 	Mdv \
+        Ncxx \
 	Radx \
 	Spdb \
 	dataport \
