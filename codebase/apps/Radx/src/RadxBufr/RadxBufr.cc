@@ -33,6 +33,7 @@
 #include "RadxBufr.hh"
 #include "VarTransform.hh"
 #include <Radx/Radx.hh>
+#include <Radx/BufrRadxFile.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
@@ -166,17 +167,17 @@ RadxBufr::~RadxBufr()
 int RadxBufr::Run()
 {
 
-  if (_params.mode == Params::ARCHIVE) {
-    return _runArchive();
-  } else if (_params.mode == Params::FILELIST) {
+  //  if (_params.mode == Params::ARCHIVE) {
+  //  return _runArchive();
+  //} else if (_params.mode == Params::FILELIST) {
     return _runFilelist();
-  } else {
-    if (_params.latest_data_info_avail) {
-      return _runRealtimeWithLdata();
-    } else {
-      return _runRealtimeNoLdata();
-    }
-  }
+    //} else {
+    //if (_params.latest_data_info_avail) {
+    //  return _runRealtimeWithLdata();
+    //} else {
+    //  return _runRealtimeNoLdata();
+    // }
+    //}
 }
 
 //////////////////////////////////////////////////
@@ -209,21 +210,21 @@ int RadxBufr::_runFilelist()
         _finalizeVol(vol);
         // write the volume out
         if (_writeVol(vol)) {
-          cerr << "ERROR - RadxBufr::_runFileList" << endl;
-          cerr << "  Cannot write volume to file" << endl;
-          iret = -1;
-          nError++;
-          if (_params.debug) {
-            cerr << "  ====>> n errors so far: " << nError << endl;
-          }
-        } else {
-          nGood++;
-          if (_params.debug) {
-            cerr << "  ====>> n good files so far: " << nGood << endl;
-            cerr << "  ====>> n errors     so far: " << nError << endl;
-            cerr << "  ====>> sum          so far: " << nGood + nError << endl;
-          }
-        }
+           cerr << "ERROR - RadxBufr::_runFileList" << endl;
+           cerr << "  Cannot write volume to file" << endl;
+           iret = -1;
+           nError++;
+           if (_params.debug) {
+             cerr << "  ====>> n errors so far: " << nError << endl;
+           }
+         } else {
+           nGood++;
+           if (_params.debug) {
+             cerr << "  ====>> n good files so far: " << nGood << endl;
+             cerr << "  ====>> n errors     so far: " << nError << endl;
+             cerr << "  ====>> sum          so far: " << nGood + nError << endl;
+           }
+         }
       } else if (jret < 0) {
         iret = -1;
         nError++;
@@ -236,11 +237,12 @@ int RadxBufr::_runFilelist()
     }
 
   } else {
-    
+    /*
     // aggregate the files into a single volume on read
     
     RadxVol vol;
-    GenericRadxFile inFile;
+    //GenericRadxFile inFile;
+    BufrRadxFile inFile;
     _setupRead(inFile);
     vector<string> paths = _args.inputFileList;
     if (inFile.aggregateFromPaths(paths, vol)) {
@@ -269,7 +271,8 @@ int RadxBufr::_runFilelist()
     }
 
     nGood++;
-    
+    */
+    ;
   } // if (!_params.aggregate_all_files_on_read) {
 
   if (_params.debug) {
@@ -283,7 +286,7 @@ int RadxBufr::_runFilelist()
 
 //////////////////////////////////////////////////
 // Run in archive mode
-
+/*
 int RadxBufr::_runArchive()
 {
 
@@ -457,10 +460,10 @@ int RadxBufr::_runRealtimeNoLdata()
   return iret;
 
 }
-
+*/
 //////////////////////////////////////////////////
 // Read in a file
-// accounting for special cases such as gematronik
+// Only Bufr format is recognized.
 // Returns 0 on success
 //         1 if already read,
 //         -1 on failure
@@ -497,7 +500,7 @@ int RadxBufr::_readFile(const string &readPath,
   
   // if we are reading gematronik files in realtime mode, we need to wait
   // for all fields to be written before proceeding
-  
+  /*
   if (_params.mode == Params::REALTIME && _params.gematronik_realtime_mode) {
     if (_params.debug) {
       cerr << "Waiting for all Gematronik fields, sleeping for secs: "
@@ -509,8 +512,9 @@ int RadxBufr::_readFile(const string &readPath,
     }
     PMU_force_register("Got Gematronik files");
   }
-  
-  GenericRadxFile inFile;
+  */
+  //GenericRadxFile inFile;
+  BufrRadxFile inFile;
   _setupRead(inFile);
   
   // read in file
@@ -531,6 +535,7 @@ int RadxBufr::_readFile(const string &readPath,
   return 0;
 
 }
+
 
 //////////////////////////////////////////////////
 // Finalize the volume based on parameters
@@ -1470,4 +1475,5 @@ void RadxBufr::_censorRay(RadxRay *ray)
   }
 
 }
+
 

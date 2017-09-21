@@ -22,81 +22,70 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// RadxBufr.hh
+// BufrFile.hh
 //
-// RadxBufr object
+// BUFR file wrapper
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Brenda Javornik, EOL, NCAR
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Jan 2010
+// Aug 2017
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef RadxBufr_HH
-#define RadxBufr_HH
+#ifndef TableMapElement_HH
+#define TableMapElement_HH
 
-#include "Args.hh"
-#include "Params.hh"
-#include <string>
-class RadxVol;
-class RadxFile;
-class RadxRay;
-class VarTransform;
+#include <map>
+#include <iostream>
+#include <cassert>
+#include <fstream>
+#include <vector>
+#include <iterator>
+#include <sstream>
+//#include <string.h>  // contains strtok
+#include <stdio.h>
+
 using namespace std;
 
-class RadxBufr {
-  
+class TableMapElement {
+
 public:
 
-  // constructor
+  /// Constructor
   
-  RadxBufr (int argc, char **argv);
+  TableMapElement();
+  TableMapElement(vector<unsigned short> keys);
+  TableMapElement(string fieldName, int scale, string units, int referenceValue,
+		  int dataWidthBits);
+  //(string fieldName, int scale);
 
-  // destructor
+  bool IsText();
   
-  ~RadxBufr();
+  /// Destructor
+  
+  ~TableMapElement();
 
-  // run 
+  typedef enum {
+    KEYS,
+    DESCRIPTOR
+  } TableMapElementType;
 
-  int Run();
 
-  // data members
+  
+  typedef struct {
+    string fieldName;
+    int scale;
+    string units;
+    int referenceValue;
+    int dataWidthBits;
+  } Descriptor;
 
-  int OK;
+  //private:
 
-protected:
-private:
-
-  string _progName;
-  char *_paramsPath;
-  Args _args;
-  Params _params;
-  vector<string> _readPaths;
-
-  vector<VarTransform *> _varTrans;
-
-  int _volNum;
-  int _nWarnCensorPrint;
-
-  int _runFilelist();
-  //  int _runArchive();
-  //int _runRealtimeWithLdata();
-  //int _runRealtimeNoLdata();
-  int _readFile(const string &filePath,
-                RadxVol &vol);
-  void _finalizeVol(RadxVol &vol);
-  void _setupRead(RadxFile &file);
-  void _applyLinearTransform(RadxVol &vol);
-  void _applyVariableTransform(RadxVol &vol);
-  void _convertFields(RadxVol &vol);
-  void _convertAllFields(RadxVol &vol);
-  void _setupWrite(RadxFile &file);
-  void _setGlobalAttr(RadxVol &vol);
-  int _writeVol(RadxVol &vol);
-  void _censorFields(RadxVol &vol);
-  void _censorRay(RadxRay *ray);
-
+  TableMapElementType _whichType;
+  vector<unsigned short> _listOfKeys;
+  Descriptor _descriptor;  
 
 };
-
 #endif
