@@ -49,6 +49,7 @@
 #include <cstring>
 #include <cstdio>
 #include <cmath>
+#include <float.h>
 using namespace std;
 
 //////////////
@@ -380,7 +381,7 @@ int BufrRadxFile::getTimeFromPath(const string &path, RadxTime &rtime)
   return -1;
   
 }
-/*
+
 /////////////////////////////////////////////////////////
 // print summary after read
 
@@ -435,7 +436,7 @@ int BufrRadxFile::printNative(const string &path, ostream &out,
   return -1;
 
 }
-*/
+
 ////////////////////////////////////////////////////////////
 // Read in data from specified path, load up volume object.
 //
@@ -1101,7 +1102,7 @@ int BufrRadxFile::_createRays(int sweepNumber)
     ray->setTime(rayUtimeSecs, rayNanoSecs);
     
     // sweep info
-    
+    ray->setSweepNumber(sweepNumber);
     ray->setAzimuthDeg(_azimuths[ii]);
     ray->setElevationDeg(_elevations[sweepNumber]);
     //ray->setPrtSec(1.0/_prfHz);
@@ -1449,6 +1450,7 @@ Nc3Var* BufrRadxFile::_getRayVar(const string &name, bool required)
 //////////////////////////////////////////////////////////////
 // Add fl64 fields to _raysFromFile
 // The _raysFromFile array has previously been set up by _createRays()
+// Add the single field to each ray of a sweep
 // Returns 0 on success, -1 on failure
 
 int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
@@ -1475,7 +1477,7 @@ int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
 
   // set missing value
 
-  Radx::fl64 missingVal = Radx::missingFl64;
+  Radx::fl64 missingVal = -DBL_MAX; // Radx::missingFl64;
   // Nc3Att *missingValueAtt = var->get_att("missing_value");
   // if (missingValueAtt != NULL) {
   //   missingVal = missingValueAtt->as_double(0);
@@ -1506,8 +1508,11 @@ int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
 
     cout << "adding ray " << ii << endl;    
 
+    // the rays for this sweep start at sweepNumber*_nTimesInFile
+    int rayIdx;
+    rayIdx = (sweepNumber * _nTimesInFile) + ii;
     RadxField *field =
-      _raysToRead[ii]->addField(name, units, nGates,
+      _raysToRead[rayIdx]->addField(name, units, nGates,
 				missingVal,
 				data + startIndex,
 				true);

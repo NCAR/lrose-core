@@ -191,7 +191,8 @@ void BufrProduct::createSweep() {
 }
 
 void BufrProduct::addData(unsigned char value) {
-  //printf("nData = %d\n", nData);
+  //if (value == 255)
+  //  printf("%u at nData = %d\n", value, nData);
   if (nData < maxData)
     dataBuffer[nData++] = value;
   else 

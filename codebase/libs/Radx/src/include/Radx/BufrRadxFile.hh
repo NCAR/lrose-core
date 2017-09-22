@@ -152,7 +152,7 @@ public:
   
   /// Print summary after read.
   
-  //virtual void print(ostream &out) const;
+  virtual void print(ostream &out) const;
   
   /// Print data in file, in native format.
   ///
@@ -164,8 +164,8 @@ public:
   /// Returns 0 on success, -1 on failure
   /// Use getErrStr() if error occurs
   
-  //virtual int printNative(const string &path, ostream &out,
-  //                        bool printRays, bool printData);
+  virtual int printNative(const string &path, ostream &out,
+                          bool printRays, bool printData);
 
   /// Get the date and time from a dorade file path.
   /// returns 0 on success, -1 on failure
