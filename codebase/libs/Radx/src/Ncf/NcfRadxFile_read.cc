@@ -97,6 +97,10 @@ int NcfRadxFile::readFromPath(const string &path,
 
   for (size_t ii = 0; ii < paths.size(); ii++) {
     if (_readPath(paths[ii], ii)) {
+      if (_verbose) {
+        cerr << "ERROR reading file, path: " << path << endl;
+        cerr << _errStr << endl;
+      }
       return -1;
     }
   }
@@ -162,12 +166,12 @@ int NcfRadxFile::_readPath(const string &path, size_t pathNum)
 
   if (_nTimesInFile < 1) {
     _addErrStr("ERROR - NcfRadxFile::_readPath");
-    _addErrStr("  No times in file");
+    _addErrStr("  ==========>> No times in file <<==========");
     return -1;
   }
   if (_nRangeInFile < 1) {
     _addErrStr("ERROR - NcfRadxFile::_readPath");
-    _addErrStr("  No ranges in file");
+    _addErrStr("  ==========>> No ranges in file <<==========");
     return -1;
   }
 
