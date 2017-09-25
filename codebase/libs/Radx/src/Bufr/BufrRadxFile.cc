@@ -914,20 +914,22 @@ int BufrRadxFile::_readPositionVariables()
 
   int iret = 0;
   _latitudeDeg = _file.latitude;
-  if (_latitudeDeg < 0) {
+  if ((_latitudeDeg < -90) || (_latitudeDeg > 90)) {
     _addErrStr("ERROR - BufrRadxFile::_readPositionVariables");
-    _addErrStr("  Cannot read latitude");
+    _addErrStr("  Latitude outside boundaries (-90 to 90): ");
+    _addErrStr(std::to_string(_latitudeDeg));
     iret = -1;
   }
 
   _longitudeDeg = _file.longitude;
-  if (_longitudeDeg < 0) {
+  if ((_longitudeDeg < -180) || (_longitudeDeg > 180)) {
     _addErrStr("ERROR - BufrRadxFile::_readPositionVariables");
-    _addErrStr("  Cannot read longitude");
+    _addErrStr("  Longitude outside boundaries (-180 to 180): ");
+    _addErrStr(std::to_string(_longitudeDeg));
     iret = -1;
   }
 
-  _heightKm = _file.height;
+  _heightKm = _file.height / 1000.0;  // convert to Km
   if (_heightKm < 0) {
     _addErrStr("ERROR - BufrRadxFile::_readPositionVariables");
     _addErrStr("  Cannot read height");
@@ -1094,8 +1096,8 @@ int BufrRadxFile::_createRays(int sweepNumber)
     
     // set time
     
-    double rayTimeDouble = _dTimes[ii];
-    time_t rayUtimeSecs = _refTimeSecsFile + (time_t) rayTimeDouble;
+    double rayTimeDouble = _dTimes[ii]; 
+    time_t rayUtimeSecs = (time_t) rayTimeDouble; // _refTimeSecsFile + (time_t) rayTimeDouble;
     double rayIntSecs;
     double rayFracSecs = modf(rayTimeDouble, &rayIntSecs);
     int rayNanoSecs = (int) (rayFracSecs * 1.0e9);
@@ -1251,7 +1253,7 @@ int BufrRadxFile::_readFieldVariables(int sweepNumber, bool metaOnly)
     int iret = 0;
     bool isDiscrete = false;
 
-    string name = "TH";
+    string name = _file.getTypeOfProductForSweep(sweepNumber);; // "TH";
     string units = "?";
     string standardName = "?";
     string longName = "?";

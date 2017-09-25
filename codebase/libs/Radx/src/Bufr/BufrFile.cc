@@ -1299,8 +1299,13 @@ Radx::si32 BufrFile::ApplyNumeric(TableMapElement f) {
     Radx::ui32 value;
     value = ExtractIt(f._descriptor.dataWidthBits);
     Radx::si32 svalue;
-    svalue = (value+f._descriptor.referenceValue)/fastPow10(f._descriptor.scale);
+    double temp;
+    //svalue = (value+f._descriptor.referenceValue)/fastPow10(f._descriptor.scale);
+    temp = f._descriptor.referenceValue;
+    temp = value + temp;
+    temp  = temp/fastPow10(f._descriptor.scale);
     //cout << "converted to " << svalue << endl;
+    svalue = (Radx::si32) temp;
     return svalue;
   }
 }
@@ -1349,14 +1354,37 @@ bool BufrFile::StuffIt(string fieldName, double value) {
   } else if (fieldName.find("type of product") != string::npos) {
     int code = (int) value;
     switch(code) {
-    case 90: // indicates ???
-      //currentProduct = product90_243;
-      //currentProduct.reset();
-      //currentProduct.
-    case 243: //  "CM"
-      // setup buffer data storage
+    case 0:
+      currentProduct.typeOfProduct = "DBZH";
       break;
+    case 40:
+      currentProduct.typeOfProduct = "VRAD";
+      break;
+    case 91: 
+    case 230:
+      currentProduct.typeOfProduct = "TH";
+      break;
+    case 92:
+    case 60:
+      currentProduct.typeOfProduct = "WRAD";
+      break;	  
+    case 243:
+      currentProduct.typeOfProduct = "CM";
+      break;
+    case 240:
+      currentProduct.typeOfProduct = "KDP";
+      break;
+    case 239:
+      currentProduct.typeOfProduct = "PHIDP";
+      break;
+    case 241:
+      currentProduct.typeOfProduct = "RHOHV";
+      break;
+    case 231:
+      currentProduct.typeOfProduct = "TV";
+      break; 
     default:
+      currentProduct.typeOfProduct = "XXXX";
       ok = false;
     } 
   } else {
@@ -1417,6 +1445,10 @@ double BufrFile::getEndTimeForSweep(int sweepNumber) {
 
 double *BufrFile::getDataForSweep(int sweepNumber) { 
   return currentProduct.sweepData.at(sweepNumber).parameterData[0].data;
+}
+
+string BufrFile::getTypeOfProductForSweep(int sweepNumber) { 
+  return currentProduct.sweepData.at(sweepNumber).parameterData[0].typeOfProduct;
 }
 
 /*

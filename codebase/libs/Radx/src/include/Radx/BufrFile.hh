@@ -125,6 +125,7 @@ public:
   double getEndTimeForSweep(int sweepNumber);
 
   double *getDataForSweep(int sweepNumber);
+  string getTypeOfProductForSweep(int sweepNumber);
 
 private:
 

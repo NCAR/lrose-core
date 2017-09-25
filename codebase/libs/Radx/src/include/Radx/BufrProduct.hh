@@ -90,8 +90,8 @@ public:
   */
 
   typedef enum {rawData, other} ProductType;
-  typedef enum {CM, TV, DBZH, VRAD, TH, WRAD,  KDP, PHIDP, RHOHV,
-    OTHER} DataType;
+  enum DataType {CM, TV, DBZH, VRAD, TH, WRAD,  KDP, PHIDP, RHOHV,
+    OTHER};
 
   typedef struct {
     int year;
@@ -112,6 +112,7 @@ public:
   unsigned int maxData;
   unsigned int totalData;
 
+  string typeOfProduct;
     TimeStamp startTime;
     TimeStamp endTime;
     double    antennaElevationDegrees;
@@ -122,7 +123,7 @@ public:
     double    antennaBeamAzimuthDegrees;
 
   typedef struct {
-    DataType typeOfProduct;
+    string typeOfProduct;
     double *data;
   } ParameterData;
 

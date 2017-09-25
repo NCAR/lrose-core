@@ -184,7 +184,7 @@ void BufrProduct::createSweep() {
       newSweep.nAzimuths = nAzimuths;
       newSweep.antennaBeamAzimuthDegrees = antennaBeamAzimuthDegrees;
       ParameterData parameterData;
-      parameterData.typeOfProduct = TH;
+      parameterData.typeOfProduct = typeOfProduct;
       parameterData.data = realData;
       newSweep.parameterData.push_back(parameterData);
       sweepData.push_back(newSweep);
