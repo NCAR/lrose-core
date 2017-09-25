@@ -164,8 +164,9 @@ void StatsMgr::addLayerData(double range,
 			    const MomentData &mdata)
 
 {
-  
-  int layer = (int) ((range - _startHt) / _deltaHt);
+
+  double sinEl = sin(_el * DEG_TO_RAD);
+  int layer = (int) (((range * sinEl) - _startHt) / _deltaHt);
   if (layer >= 0 && layer < _nLayers) {
     _layers[layer]->addData(mdata);
   }
