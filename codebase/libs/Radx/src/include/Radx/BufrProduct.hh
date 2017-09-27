@@ -160,6 +160,9 @@ public:
 
   ProductType productType;
   DataType    dataType;
+
+
+
 };
 #endif
 

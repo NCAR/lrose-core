@@ -109,6 +109,11 @@ public:
   int hour;
   int minute;
 
+  int WMOBlockNumber;
+  int WMOStationNumber;
+  string typeOfStationId;
+  string stationId;
+
   int getNumberOfSweeps();
   int getTimeDimension();
   int getRangeDimension();
@@ -139,7 +144,6 @@ private:
   //  int TraverseOriginal(vector<unsigned short> descriptors);
   int TraverseNew(vector<unsigned short> descriptors);
   //int Traverse(int start, int length); //vector<unsigned short> descriptors);
-  Radx::ui32 NextNBitsAsInt32(int nbits);
   int ReplenishBuffer();
   bool NextBit();
 

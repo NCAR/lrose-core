@@ -26,17 +26,17 @@
 //
 // BufrRadxFile object
 //
-// NetCDF data for radar radial data in CFAR netcdf format
-// CFARR = Chilbolton Facility for Atmospheric and Radio Research
+// Intermediate class between BUFR file and Radx Volume structure.
+// This class maps the BUFR information into a Radx Volume and Radx
+// file structure.
 //
-// Mike Dixon, EOL, NCAR
+// Brenda Javornik, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, 
-// July 2017
+// August 2017
 //
 ///////////////////////////////////////////////////////////////
 
 #include <Radx/BufrRadxFile.hh>
-//#include <Radx/BufrFile.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxField.hh>
@@ -735,20 +735,13 @@ int BufrRadxFile::_readGlobalAttributes()
    _year_attr = _file.year;
    _month_attr = _file.month;
    _day_attr = _file.day;
-   /*  TODO: maybe some more of this info is available??
-   _file.readGlobAttr("British_National_Grid_Reference", _British_National_Grid_Reference_attr);
-   _file.readGlobAttr("history", _history);
-   _file.readGlobAttr("source", _source);
-   _file.readGlobAttr("radar", _radar_attr);
-   _file.readGlobAttr("Conventions", _Conventions_attr);
-   _file.readGlobAttr("title", _title);
-   _file.readGlobAttr("comment", _comment);
-   _file.readGlobAttr("institution", _institution);
-   _file.readGlobAttr("references", _references);
-
-   _siteName = _radar_attr;
-   _instrumentName = _radar_attr;
-   */
+   // _file.readGlobAttr("institution", _institution);
+ 
+   _siteName = _file.typeOfStationId;
+   _instrumentName = _file.stationId;
+   //_platformType = // WMO block number
+     // WMO station number
+   
   return 0;
 
 }
@@ -1254,9 +1247,9 @@ int BufrRadxFile::_readFieldVariables(int sweepNumber, bool metaOnly)
     bool isDiscrete = false;
 
     string name = _file.getTypeOfProductForSweep(sweepNumber);; // "TH";
-    string units = "?";
-    string standardName = "?";
-    string longName = "?";
+    string units = "m/s";
+    string standardName = name;
+    string longName = name;
     bool fieldFolds = false;
     float foldLimitLower = 0.0;
     float foldLimitUpper = 0.0;
