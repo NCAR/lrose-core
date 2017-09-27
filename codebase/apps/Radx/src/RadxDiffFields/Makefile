@@ -37,7 +37,7 @@ TARGET_FILE = RadxDiffFields
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lradar -lSpdb \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lradar -lSpdb \
 	-ldsserver -lrapformats -lrapmath -ldidss \
 	-leuclid -ltoolsa -ltdrp -ldataport \
 	-lfftw3 $(NETCDF4_LIBS) -lbz2 -lz \

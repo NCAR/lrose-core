@@ -37,7 +37,7 @@ TARGET_FILE = RadxHca
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -leuclid -lradar -lRadx \
+LOC_LIBS = -lMdv -leuclid -lradar -lRadx -lNcxx \
 	-lSpdb -ldsserver -lrapformats -lrapmath \
 	-lphysics -ldidss -ltoolsa -ltdrp \
 	-ldataport -lfftw3 $(NETCDF4_LIBS) -lbz2 \
