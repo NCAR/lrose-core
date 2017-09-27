@@ -203,8 +203,8 @@ double *BufrProduct::decompressData() {
   int n;
   n = nBinsAlongTheRadial * nAzimuths * sizeof(double);
 
-  int i, j;
-  unsigned char str[sizeof(double)];
+  //int i, j;
+  //unsigned char str[sizeof(double)];
   unsigned char *UnCompDataBuff = (unsigned char *) malloc(n);
   unsigned long DestBuffSize = n;
   

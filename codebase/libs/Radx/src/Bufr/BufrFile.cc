@@ -1067,16 +1067,6 @@ string BufrFile::ExtractText(int nBits) {
     }
    
     // // advance the index
-    // currentBufferIndexBits += 1;
-    // if (currentBufferIndexBits >= currentBufferLengthBits) {
-    //   // replenish the buffer
-    //   currentBufferLengthBytes = ReplenishBuffer();
-    //   currentBufferLengthBits = currentBufferLengthBytes * 8;
-    //   currentBufferIndexBits = 0;
-    //   if (currentBufferLengthBits <= 0) {
-    //     endOfFile = true;
-    //   }
-    // }
     i += 1;
     // if we've completed a character, move it into string
     // and clear the value
@@ -1145,85 +1135,6 @@ void BufrFile::SkipIt(int nBits) {
 
   printf("entered non working code; exiting. \n");
   exit(1);
-  /*
-  int bitsNeeded;
-  bitsNeeded = nBits;
-  bool done = false;
-  bool endOfFile = false; /// TODO: maybe this should be a class variable?? 
-  while (!done && !endOfFile) {
-    if (bitsNeeded+currentBufferIndex < currentBufferLength) {
-      // too easy, we are done
-      currentBufferIndex += bitsNeeded;
-      done = true;
-    } else {
-      // a little more work ...
-      bitsNeeded = bitsNeeded - (currentBufferLength - currentBufferIndex);
-      // replenish the buffer
-      currentBufferLength = ReplenishBuffer();
-      currentBufferIndex = 0;
-      if (currentBufferLength <= 0) {
-        endOfFile = true;  // TODO: do something with this condition
-      }
-    }
-  }
-  */
-}
-
-  // val = 0;
-  // int i=0;
-  // bool endOfFile = false;
-  // int bitPosition;
-  // while ((i<nBits) && (!endOfFile)) {
-  //   bitPosition = 7 - currentBufferIndex % 8;
-  //   mask = 1 << bitPosition;
-  //   idx = currentBufferIndex / 8;
-  //   if (mask & _dataBuffer[idx]) {
-  //     // insert a 1
-  //     val = val * 2 + 1;
-  //   } else {
-  //     val = val * 2;
-  //   }
-
-  //   // advance the index
-  //   currentBufferIndex += 1;
-  //   if (currentBufferIndex > currentBufferIndex) {
-  //     // replenish the buffer
-  //     currentBufferLength = ReplenishBuffer();
-  //     currentBufferIndex = 0;
-  //     if (currentBufferLength <= 0) {
-  //       endOfFile = true;
-  //     }
-  //   }
-  //   i += 1;
-  // }
-
-  // if ((endOfFile) && (i < nBits)) {
-  //    return -1;  // ran out of data before completed the value
-  // }  else {
-  // }
-//}
-
-Radx::ui32 BufrFile::NextNBitsAsInt32(int nbits) {
-
-
-  string encasedBits;
-  int startIndex;
-  // TODO: what if the variable spans a block boundary??  Handled in NextNBitsEncased
-  // if (!NextNBitsEncased(nbits, encasedBits, &startIndex)) {
-  //    return -1;
-  // }
-  // make a variable big enough to span the buffer sections
-  // if (encasedBits.size() > 4) {
-  //}
-  
-  // move a bit mask into place
-
-  // AND to extract the bits
-  // shift right as needed
-  // convert to specified data type
-
-  // TODO:  can I make use of netCDF code? 
-  return 0; 
 }
 
 Radx::ui32 BufrFile::Apply(TableMapElement f) {
@@ -1245,16 +1156,27 @@ Radx::ui32 BufrFile::Apply(TableMapElement f) {
   if (f._descriptor.units.find("CCITT") != string::npos) {
     string  value;
     value = ExtractText(f._descriptor.dataWidthBits);
-    //cout << "extracted string = " << value << endl;
+    cout << " " << f._descriptor.dataWidthBits << endl;
+    cout << "extracted string = " << value << endl;
+    string fieldName;
+    fieldName = f._descriptor.fieldName;
+    std::transform(fieldName.begin(), fieldName.end(), fieldName.begin(), ::tolower);
+
+    if (fieldName.find("station identifier") != string::npos) {
+      if (fieldName.find("type of") != string::npos) {
+        typeOfStationId = value;
+      } else {
+        stationId = value;
+      }
+    }
     return 0;
   } else {
     Radx::ui32 value;
     value = ExtractIt(f._descriptor.dataWidthBits);
     return value;
   }
-
-    //return -1;
 }
+
 //
 // 10^(-10) to 10^10  ==> need 21 elements
 //  -3 -2 -1 0 1 2 3
@@ -1350,7 +1272,13 @@ bool BufrFile::StuffIt(string fieldName, double value) {
     currentProduct.putMinute(value);
   } else if (fieldName.find("second") != string::npos) {
     currentProduct.putSecond(value);
+    // TODO: should probably use key to identify these fields...
+  } else if (fieldName.find("wmo block") != string::npos) {
+    WMOBlockNumber = value;
+  } else if (fieldName.find("wmo station") != string::npos) {
+    WMOStationNumber = value;
 
+  
   } else if (fieldName.find("type of product") != string::npos) {
     int code = (int) value;
     switch(code) {
@@ -1932,7 +1860,7 @@ int BufrFile::_descend(DNode *tree) {
           // transition state; set location levels
           // the state determines which counters to increment & decrement
           // It's up to the product to deal with the space allocation as needed
-          for (int i=0; i<nRepeats; i++) {
+          for (unsigned int i=0; i<nRepeats; i++) {
             if ((i%1000)==0)  
               printf("%d out of %d repeats\n", i+1, nRepeats);
             _descend(p->children);
