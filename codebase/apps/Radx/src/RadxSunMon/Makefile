@@ -37,7 +37,7 @@ TARGET_FILE = RadxSunMon
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -lradar -lRadx -lMdv \
+LOC_LIBS = -lSpdb -lradar -lMdv -lRadx -lNcxx \
 	-ldsserver -ldidss -lrapformats -lrapmath \
 	-leuclid -ltoolsa -ltdrp -ldataport \
 	-lfftw3 $(NETCDF4_LIBS) -lbz2 -lz
