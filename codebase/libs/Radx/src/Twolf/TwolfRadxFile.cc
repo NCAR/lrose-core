@@ -200,7 +200,7 @@ int TwolfRadxFile::_getStartTimeFromPath(const string &path)
   const char *firstDigit = fileName.c_str();
   while (!isdigit(*firstDigit)) {
     firstDigit++;
-    if (firstDigit == '\0') {
+    if (*firstDigit == '\0') {
       // got null
       _addErrStr("ERROR - TwolfRadxFile::getStartTimeFromPath");
       _addErrStr("  Cannot get time from path: ", path);
