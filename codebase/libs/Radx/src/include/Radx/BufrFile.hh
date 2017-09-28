@@ -502,7 +502,7 @@ private:
   
   FILE *_file;
   string _pathInUse;
-
+  bool _firstBufferReplenish;
 
 
   //Nc3Error *_err;

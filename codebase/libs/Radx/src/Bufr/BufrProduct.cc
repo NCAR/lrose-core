@@ -65,9 +65,9 @@ void BufrProduct::reset() {
   nData = 0;
   maxData = 0;
   //totalData = 0;
-  //if (dataBuffer != NULL)
-  //  free(dataBuffer);
-  // dataBuffer = NULL;
+  if (dataBuffer != NULL)
+    free(dataBuffer);
+  dataBuffer = NULL;
   // TODO: reset the replictors vector
 }
 
@@ -159,6 +159,8 @@ void BufrProduct::trashReplicator() {
       size = nData; // ?? replicators.back(); 
       compressedData.add(dataBuffer, size);
       nData = 0;
+      free(dataBuffer);
+      dataBuffer = NULL;
     }
     break;
   default:

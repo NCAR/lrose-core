@@ -56,7 +56,7 @@ BufrFile::BufrFile()
   //_ncFormat = Nc3File::Classic;
 
   _file = NULL;
-  _errString.clear();
+  //_errString.clear();
 
   clear();
 
@@ -81,44 +81,10 @@ void BufrFile::clear()
   //clearErrStr();
   close();
   _pathInUse.clear();
+  _firstBufferReplenish = true;
+  _errString.clear();
 }
 
-/*
-//////////////////////////////////////
-// open netcdf file for reading
-4// Returns 0 on success, -1 on failure
-
-int BufrFile::openRead(const string &path)
-  
-{
-
-  close();
-  _pathInUse = path;
-  _file = new Nc3File(path.c_str(), Nc3File::ReadOnly);
-  
-  // Check that constructor succeeded
-  
-  if (!_ncFile || !_ncFile->is_valid()) {
-    _addErrStr("ERROR - BufrFile::openRead");
-    _addErrStr("  File is not NetCDF, path: ", path);
-    close();
-    return -1;
-  }
-  
-  // Change the error behavior of the netCDF C++ API by creating an
-  // Nc3Error object. Until it is destroyed, this Nc3Error object will
-  // ensure that the netCDF C++ API silently returns error codes
-  // on any failure, and leaves any other error handling to the
-  // calling program.
-
-  if (_err == NULL) {
-    _err = new Nc3Error(Nc3Error::silent_nonfatal);
-  }
-
-  return 0;
-
-}
-*/
 /*
 //////////////////////////////////////////////
 /// open netcdf file for writing
@@ -186,379 +152,6 @@ void BufrFile::close()
   */
 }
 
-/*
-///////////////////////////////////////////
-// add string global attribute
-// Returns 0 on success, -1 on failure
-
-int BufrFile::addGlobAttr(const string &name, const string &val)
-{
-  if (!_ncFile->add_att(name.c_str(), val.c_str())) {
-    _addErrStr("ERROR - BufrFile::addGlobalAttr");
-    _addErrStr("  Cannot add global attr name: ", name);
-    _addErrStr("  val: ", val);
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////
-// add int global attribute
-// Returns 0 on success, -1 on failure
-
-int BufrFile::addGlobAttr(const string &name, int val)
-{
-  if (!_ncFile->add_att(name.c_str(), val)) {
-    _addErrStr("ERROR - BufrFile::addGlobAttr");
-    _addErrStr("  Cannot add global attr name: ", name);
-    _addErrInt("  val: ", val);
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////
-// add float global attribute
-// Returns 0 on success, -1 on failure
-
-int BufrFile::addGlobAttr(const string &name, float val)
-{
-  if (!_ncFile->add_att(name.c_str(), val)) {
-    _addErrStr("ERROR - BufrFile::addGlobAttr");
-    _addErrStr("  Cannot add global attr name: ", name);
-    _addErrInt("  val: ", val);
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////
-// add double global attribute
-// Returns 0 on success, -1 on failure
-
-int BufrFile::addGlobAttr(const string &name, double val)
-{
-  if (!_ncFile->add_att(name.c_str(), val)) {
-    _addErrStr("ERROR - BufrFile::addGlobAttr");
-    _addErrStr("  Cannot add global attr name: ", name);
-    _addErrInt("  val: ", val);
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////
-// add int[] global attribute
-// Returns 0 on success, -1 on failure
-
-int BufrFile::addGlobAttr(const string &name, int len, int *vals)
-{
-  if (!_ncFile->add_att(name.c_str(), len, vals)) {
-    _addErrStr("ERROR - BufrFile::addGlobAttr");
-    _addErrStr("  Cannot add global attr name: ", name);
-    _addErrInt("  n ints: ", len);
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////
-// add float[] global attribute
-// Returns 0 on success, -1 on failure
-
-int BufrFile::addGlobAttr(const string &name, int len, float *vals)
-{
-  if (!_ncFile->add_att(name.c_str(), len, vals)) {
-    _addErrStr("ERROR - BufrFile::addGlobAttr");
-    _addErrStr("  Cannot add global attr name: ", name);
-    _addErrInt("  n floats: ", len);
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////
-// add double[] global attribute
-// Returns 0 on success, -1 on failure
-
-int BufrFile::addGlobAttr(const string &name, int len, double *vals)
-{
-  if (!_ncFile->add_att(name.c_str(), len, vals)) {
-    _addErrStr("ERROR - BufrFile::addGlobAttr");
-    _addErrStr("  Cannot add global attr name: ", name);
-    _addErrInt("  n doubles: ", len);
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////
-// read a global attribute
-// Returns 0 on success, -1 on failure
-
-int BufrFile::readGlobAttr(const string &name, string &val)
-{
-  Nc3Att *att = _ncFile->get_att(name.c_str());
-  if (att == NULL) {
-    _addErrStr("ERROR - BufrFile::readGlobAttr");
-    _addErrStr("  Cannot read global attr name: ", name);
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-  val = asString(att);
-  return 0;
-}
-
-int BufrFile::readGlobAttr(const string &name, int &val)
-{
-  Nc3Att *att = _ncFile->get_att(name.c_str());
-  if (att == NULL) {
-    _addErrStr("ERROR - BufrFile::readGlobAttr");
-    _addErrStr("  Cannot read global attr name: ", name);
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-  string sval = asString(att);
-  int ival;
-  if (sscanf(sval.c_str(), "%d", &ival) != 1) {
-    _addErrStr("ERROR - BufrFile::readGlobAttr");
-    _addErrStr("  Cannot interpret global attr as int");
-    _addErrStr("  name: ", name);
-    _addErrStr("  val: ", sval);
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-  val = ival;
-  return 0;
-}
-
-int BufrFile::readGlobAttr(const string &name, float &val)
-{
-  Nc3Att *att = _ncFile->get_att(name.c_str());
-  if (att == NULL) {
-    _addErrStr("ERROR - BufrFile::readGlobAttr");
-    _addErrStr("  Cannot read global attr name: ", name);
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-  string sval = asString(att);
-  float fval;
-  if (sscanf(sval.c_str(), "%g", &fval) != 1) {
-    _addErrStr("ERROR - BufrFile::readGlobAttr");
-    _addErrStr("  Cannot interpret global attr as float");
-    _addErrStr("  name: ", name);
-    _addErrStr("  val: ", sval);
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-  val = fval;
-  return 0;
-}
-
-int BufrFile::readGlobAttr(const string &name, double &val)
-{
-  Nc3Att *att = _ncFile->get_att(name.c_str());
-  if (att == NULL) {
-    _addErrStr("ERROR - BufrFile::readGlobAttr");
-    _addErrStr("  Cannot read global attr name: ", name);
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-  string sval = asString(att);
-  double dval;
-  if (sscanf(sval.c_str(), "%lg", &dval) != 1) {
-    _addErrStr("ERROR - BufrFile::readGlobAttr");
-    _addErrStr("  Cannot interpret global attr as double");
-    _addErrStr("  name: ", name);
-    _addErrStr("  val: ", sval);
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-  val = dval;
-  return 0;
-}
-
-///////////////////////////////////////////
-// add string attribute
-// Returns 0 on success, -1 on failure
-
-int BufrFile::addAttr(Nc3Var *var, const string &name, const string &val)
-{
-  if (!var->add_att(name.c_str(), val.c_str())) {
-    _addErrStr("ERROR - BufrFile::addAttr");
-    _addErrStr("  Cannot add string var attr, name: ", name);
-    _addErrStr("  val: ", val);
-    _addErrStr("  var name: ", var->name());
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////
-// add double attribute
-// Returns 0 on success, -1 on failure
-
-int BufrFile::addAttr(Nc3Var *var, const string &name, double val)
-{
-  if (!var->add_att(name.c_str(), val)) {
-    _addErrStr("ERROR - BufrFile::addAttr");
-    _addErrStr("  Cannot add double var attr, name: ", name);
-    _addErrDbl("  val: ", val, "%g");
-    _addErrStr("  var name: ", var->name());
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////
-// add float attribute
-// Returns 0 on success, -1 on failure
-
-int BufrFile::addAttr(Nc3Var *var, const string &name, float val)
-{
-  if (!var->add_att(name.c_str(), val)) {
-    _addErrStr("ERROR - BufrFile::addAttr");
-    _addErrStr("  Cannot add float var attr, name: ", name);
-    _addErrDbl("  val: ", val, "%g");
-    _addErrStr("  var name: ", var->name());
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////
-// add int attribute
-// Returns 0 on success, -1 on failure
-
-int BufrFile::addAttr(Nc3Var *var, const string &name, int val)
-{
-  if (!var->add_att(name.c_str(), val)) {
-    _addErrStr("ERROR - BufrFile::addAttr");
-    _addErrStr("  Cannot add int var attr, name: ", name);
-    _addErrInt("  val: ", val);
-    _addErrStr("  var name: ", var->name());
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////
-// add long attribute
-// Returns 0 on success, -1 on failure
-
-int BufrFile::addAttr(Nc3Var *var, const string &name, long val)
-{
-  if (!var->add_att(name.c_str(), val)) {
-    _addErrStr("ERROR - BufrFile::addAttr");
-    _addErrStr("  Cannot add long var attr, name: ", name);
-    _addErrInt("  val: ", val);
-    _addErrStr("  var name: ", var->name());
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////
-// add short attribute
-// Returns 0 on success, -1 on failure
-
-int BufrFile::addAttr(Nc3Var *var, const string &name, short val)
-{
-  if (!var->add_att(name.c_str(), val)) {
-    _addErrStr("ERROR - BufrFile::addAttr");
-    _addErrStr("  Cannot add short var attr, name: ", name);
-    _addErrInt("  val: ", val);
-    _addErrStr("  var name: ", var->name());
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////
-// add ncbyte attribute
-// Returns 0 on success, -1 on failure
-
-int BufrFile::addAttr(Nc3Var *var, const string &name, ncbyte val)
-{
-  if (!var->add_att(name.c_str(), val)) {
-    _addErrStr("ERROR - BufrFile::addAttr");
-    _addErrStr("  Cannot add ncbyte var attr, name: ", name);
-    _addErrInt("  val: ", val);
-    _addErrStr("  var name: ", var->name());
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////
-// add a dimension
-// Returns 0 on success, -1 on failure
-// Side effect: dim arg is updated
-
-int BufrFile::addDim(Nc3Dim* &dim, const char *name, int size)
-{
-  if (size < 1) {
-    dim = _ncFile->add_dim(name);
-  } else {
-    dim = _ncFile->add_dim(name, size);
-  }
-  if (dim == NULL) {
-    _addErrStr("ERROR - BufrFile::addDim");
-    _addErrStr("  Cannot add dimension: ", name);
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////
-// read a dimension
-// Returns 0 on success, -1 on failure
-// Side effect: dim arg is set
-
-int BufrFile::readDim(const string &name, Nc3Dim* &dim)
-
-{
-  dim = _ncFile->get_dim(name.c_str());
-  if (dim == NULL) {
-    _addErrStr("ERROR - BufrFile::readDim");
-    _addErrStr("  Cannot read dimension, name: ", name);
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  return 0;
-}
-*/
 //////////////////////////////////////
 // open netcdf file for reading
 // Returns 0 on success, -1 on failure
@@ -570,18 +163,16 @@ int BufrFile::openRead(const string &path)
   close();
   _file = fopen(path.c_str(), "r");
   
-  // Check that constructor succeeded
-  
   if (_file == NULL) {
-    // int errNum = errno;
-    // _addErrStr("ERROR - BufrFile::_openRead");
-    // _addErrStr("  Cannot open file for reading, path: ", path);
-    // _addErrStr("  ", strerror(errNum));
-    return -1;
+    int errNum = errno;
+    //string errStr;
+    Radx::addErrStr(_errString, "", "ERROR - BufrFile::_openRead", true);
+    Radx::addErrStr(_errString, "  Cannot open file for reading, path: ", path, true);
+    Radx::addErrStr(_errString, "  ", strerror(errNum), true);
+    throw _errString.c_str();
   }
-  
+  currentProduct.reset(); 
   return 0;
-
 }
 
 ///////////////////////////////////////////
@@ -973,13 +564,13 @@ int BufrFile::readData() {  // read section 4
 
 int BufrFile::ReplenishBuffer() {
 
-  static bool first = true;
+  //static bool first = true;
   static int nOctetsRead = 0;
   //bool _debug = false;
 
-  if (first) {
+  if (_firstBufferReplenish) { // (first) {
     fread(_dataBuffer, 1, 4, _file);
-    first = false;
+    _firstBufferReplenish = false;
   }
   int nBytesRead;
   nBytesRead = fread(_dataBuffer, 1, MAX_BUFFER_SIZE_BYTES, _file);

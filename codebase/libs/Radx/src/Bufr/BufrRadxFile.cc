@@ -464,14 +464,8 @@ int BufrRadxFile::readFromPath(const string &path,
   _raysValid.clear();
   _nRangeInFile = 0;
 
-  // open file
-
-  if (_file.openRead(path)) {
-    //_addErrStr(_file.getErrStr());
-    return -1;
-  }
-
   try {
+    _file.openRead(path);
     _file.readSection0();
     _file.readSection1();
     _file.readDataDescriptors();
@@ -483,8 +477,9 @@ int BufrRadxFile::readFromPath(const string &path,
                        // open source, the easier it is to understand, 
                        // the better.
   } catch (const char *msg) {
-    printf("Exception: %s\n", msg);
-    exit(1);
+    //printf("Exception: %s\n", msg);
+    _addErrStr(msg);
+    return -1;
   }
 
   if (_debug) {
