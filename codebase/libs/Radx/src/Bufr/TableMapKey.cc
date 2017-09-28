@@ -12,6 +12,7 @@
 using namespace std;
 
 TableMapKey::TableMapKey() {
+  _debug = false;
 }
 
 TableMapKey::TableMapKey(unsigned short key) {

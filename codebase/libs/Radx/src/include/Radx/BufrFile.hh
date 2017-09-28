@@ -141,6 +141,7 @@ private:
   double fastPow10(int n);
   Radx::ui32 Apply(TableMapElement f);
   Radx::si32 ApplyNumeric(TableMapElement f);
+  Radx::fl32 ApplyNumericFloat(TableMapElement f);
   //  int TraverseOriginal(vector<unsigned short> descriptors);
   int TraverseNew(vector<unsigned short> descriptors);
   //int Traverse(int start, int length); //vector<unsigned short> descriptors);

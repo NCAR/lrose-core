@@ -7,6 +7,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <Radx/TableMapElement.hh>
+#include <Radx/Radx.hh>
 
 
 class TableMap {

@@ -182,29 +182,12 @@ int BufrFile::openRead(const string &path)
 // Side effect: 
 
 int BufrFile::readSection0()
-
 {
-
-  //if (!bufr_read_file(&msg, argv[1])) {
-  //      fprintf (stderr, "FATAL: Unable to read the BUFR-message in %s!\n", argv[1]);
-  //      exit (EXIT_FAILURE);
-  //}
 
   /******* decode section 0 */
   fprintf (stderr, "Input file header:\n");
 
-
-  /*-----------------------------
-  // open file
-
-  if (_openRead(path)) {
-    _addErrStr("ERROR - BufrFile::_readSection0");
-    return -1;
-  }
-  */
   // read through file, finding data blocks
-  
-  //while (!feof(_file)) {
 
     // read ID
     
@@ -240,7 +223,7 @@ int BufrFile::readSection0()
     unsigned char id2[4];
     //id[0] = 0;
     if (fread(id2, 1, 3, _file) != 3) {
-      int errNum = errno;
+      //int errNum = errno;
       //      _addErrStr("ERROR - DoradeRadxFile::_readSection0()");
       //_addErrStr("  Cannot read data length");
       //_addErrStr("  ID: ", id);
@@ -263,7 +246,7 @@ int BufrFile::readSection0()
     Radx::ui08 bufr_edition;
 
     if (fread(&bufr_edition, 1, 1, _file) != 1) {
-      int errNum = errno;
+      //int errNum = errno;
       //      _addErrStr("ERROR - DoradeRadxFile::_readSection0()");
       //_addErrStr("  Cannot read data length");
       //_addErrStr("  ID: ", id);
@@ -318,7 +301,7 @@ int BufrFile::readSection1()
     // the length is 24 bits (3 bytes)
     Radx::ui32 nBytes;
     if (fread(id, 1, 3, _file) != 3) {
-      int errNum = errno;
+      //int errNum = errno;
       //      _addErrStr("ERROR - DoradeRadxFile::_readSection0()");
       //_addErrStr("  Cannot read data length");
       //_addErrStr("  ID: ", id);
@@ -341,7 +324,7 @@ int BufrFile::readSection1()
     memset(buffer, 0, sectionLen);
 
     if (fread(buffer, 1, sectionLen-3, _file) != sectionLen-3) {
-      int errNum = errno;
+      //int errNum = errno;
       //      _addErrStr("ERROR - DoradeRadxFile::_readSection0()");
       //_addErrStr("  Cannot read data length");
       //_addErrStr("  ID: ", id);
@@ -436,7 +419,7 @@ int BufrFile::readDataDescriptors() {  // read section 3
     // the length is 24 bits (3 bytes)
     Radx::ui32 nBytes;
     if (fread(id, 1, 3, _file) != 3) {
-      int errNum = errno;
+      //int errNum = errno;
       //      _addErrStr("ERROR - DoradeRadxFile::_readSection0()");
       //_addErrStr("  Cannot read data length");
       //_addErrStr("  ID: ", id);
@@ -460,7 +443,7 @@ int BufrFile::readDataDescriptors() {  // read section 3
     int nBytesToSectionEnd;
     nBytesToSectionEnd = sectionLen-3;
     if (fread(buffer, 1, nBytesToSectionEnd, _file) != sectionLen-3) {
-      int errNum = errno;
+      //int errNum = errno;
       //      _addErrStr("ERROR - DoradeRadxFile::_readSection0()");
       //_addErrStr("  Cannot read data length");
       //_addErrStr("  ID: ", id);
@@ -479,8 +462,8 @@ int BufrFile::readDataDescriptors() {  // read section 3
     printf("nDataSubsets = %d\n", nDataSubsets);
 
     // determine observed and compressed info
-    bool observedData = buffer[3] & 0x80;
-    bool compressedData = buffer[3] & 0x40;
+    //bool observedData = buffer[3] & 0x80;
+    //bool compressedData = buffer[3] & 0x40;
 
     // read the descriptors and keep them in a list for
     // traversal later 
@@ -524,24 +507,18 @@ int BufrFile::readData() {  // read section 4
     return -1;
   }
 
-  /*  // >>>>>>>>>> just for testing 
-  _dataBuffer[0] = 0x4d;
-
-  Radx::ui32 x;
-  x = ExtractIt(3);
-  x = ExtractIt(2); 
-  x = ExtractIt(17);
-  */
-
-  //  TableMap tableMap;
-  tableMap.ImportTables();
-
+  try {
+    tableMap.ImportTables();
+  } catch (const char *msg) {
+    Radx::addErrStr(_errString, "ERROR - ", msg, true);
+    throw _errString.c_str();
+  }
   TraverseNew(_descriptorsToProcess);
 
   //TODO:  read the last section 
-  int nbytesRead;
-  nbytesRead = ReplenishBuffer();
-
+  //int nbytesRead;
+  //nbytesRead = ReplenishBuffer();
+  
   return 0;
 }
 
@@ -819,6 +796,42 @@ Radx::si32 BufrFile::ApplyNumeric(TableMapElement f) {
     temp  = temp/fastPow10(f._descriptor.scale);
     //cout << "converted to " << svalue << endl;
     svalue = (Radx::si32) temp;
+    return svalue;
+  }
+}
+
+Radx::fl32 BufrFile::ApplyNumericFloat(TableMapElement f) {
+
+  if (f._whichType != TableMapElement::TableMapElementType::DESCRIPTOR) {
+    return -1;
+  } 
+  if (0) {
+    cout << "Applying " << endl;
+    cout << "  " << f._descriptor.fieldName << " ";
+
+    for (int i=0; i<50-f._descriptor.fieldName.size(); i++)
+      cout << "-";
+    cout << " " << f._descriptor.dataWidthBits << endl;
+    cout << " scale  " << f._descriptor.scale << endl;
+    cout << " units  " << f._descriptor.units << endl;;
+    cout << " reference value " << f._descriptor.referenceValue << endl;
+  }
+  if (f._descriptor.units.find("CCITT") != string::npos) {
+    string  value;
+    value = ExtractText(f._descriptor.dataWidthBits);
+    cout << "extracted string = " << value << endl;
+    return 0;
+  } else {
+    Radx::ui32 value;
+    value = ExtractIt(f._descriptor.dataWidthBits);
+    Radx::fl32 svalue;
+    double temp;
+    //svalue = (value+f._descriptor.referenceValue)/fastPow10(f._descriptor.scale);
+    temp = f._descriptor.referenceValue;
+    temp = value + temp;
+    temp  = temp/fastPow10(f._descriptor.scale);
+    //cout << "converted to " << svalue << endl;
+    svalue = (Radx::fl32) temp;
     return svalue;
   }
 }
@@ -1398,12 +1411,12 @@ int BufrFile::_descend(DNode *tree) {
         //  val1._descriptor.scale << endl;
 	;
       }
-      Radx::si32 valueFromData;
+      Radx::fl32 valueFromData;
       if (val1.IsText()) {
 	Radx::ui32 junk;
         junk = Apply(val1); // TODO: integrate a string type here  
       } else {
-        valueFromData = ApplyNumeric(val1);
+        valueFromData = ApplyNumericFloat(val1);
         if (!StuffIt(val1._descriptor.fieldName, valueFromData)) {
           // throw "Cannot associate value with BufrField";
           cout << "Cannot associate value with BufrField\n";

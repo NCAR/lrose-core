@@ -30,7 +30,7 @@ private:
   unsigned char _y;
   unsigned short _key;
 
-  bool _debug = false;
+  bool _debug;
 
 };
 

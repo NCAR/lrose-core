@@ -1027,7 +1027,9 @@ int BufrRadxFile::_getRayVariables(int sweepNumber)
 
   // get the starting offset 
   double startingAzimuth = _file.getStartingAzimuthForSweep(sweepNumber);
-
+// TODO:  **** testing only ****
+  startingAzimuth = 0.0;  // keep this! we don't offset by Azimuth
+// TODO: ***** end testing only ***
   // get the number of azimuths
   int nAzimuths = _file.getNAzimuthsForSweep(sweepNumber);
  
@@ -1094,7 +1096,7 @@ int BufrRadxFile::_createRays(int sweepNumber)
     // sweep info
     ray->setSweepNumber(sweepNumber);
     ray->setAzimuthDeg(_azimuths[ii]);
-    ray->setElevationDeg(_elevations[sweepNumber]);
+    ray->setElevationDeg(_elevations.back());
     //ray->setPrtSec(1.0/_prfHz);
     //ray->setTargetScanRateDegPerSec(_scan_velocity_attr);
     //ray->setNSamples(_pulses_per_ray_attr);

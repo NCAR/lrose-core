@@ -24,6 +24,12 @@ int TableMap::ReadTableB(string fileName) {
 
   std::ifstream filein(fileName);
 
+  if (!filein.is_open()) {
+    string _errString;
+    Radx::addErrStr(_errString, "ERROR: cannot read BUFR table ", fileName, true);
+    throw _errString.c_str();
+  }
+
   for (std::string line; std::getline(filein, line); ) {
 
     //std::cout << line << std::endl;
@@ -71,6 +77,10 @@ int TableMap::ReadTableD(string fileName) {
 
   std::ifstream fileind(fileName);
 
+  if (!fileind.is_open()) {
+    throw "ERROR: cannot read BUFR table " + fileName;
+  }
+
   for (std::string line; std::getline(fileind, line); ) {
 
     if (line[0] != '#') { // this is a comment skip it
@@ -109,13 +119,11 @@ int TableMap::ReadTableD(string fileName) {
 // files second, overwriting any duplicate values provided by the master
 // tables. 
 int TableMap::ImportTables() {
-  int result;
-  result = 0;
-  result = ReadTableB("/h/eol/brenda/bufr/src/bbufr/tables/bufrtabb_16.csv");
-  result = ReadTableD("/h/eol/brenda/bufr/src/bbufr/tables/bufrtabd_16.csv");
-  result = ReadTableB("/h/eol/brenda/bufr/src/bbufr/tables/localtabb_41_2.csv");
-  result = ReadTableD("/h/eol/brenda/bufr/src/bbufr/tables/localtabd_41_2.csv");
-  return result;
+  ReadTableB("../share/bbufr/tables/bufrtabb_16.csv");
+  ReadTableD("../share/bbufr/tables/bufrtabd_16.csv");
+  ReadTableB("../share/bbufr/tables/localtabb_41_2.csv");
+  ReadTableD("../share/bbufr/tables/localtabd_41_2.csv");
+  return 0;
 }
 
 // read the bufrtab_x.csv  (master) tables first, then the localtab_x_y.csv
