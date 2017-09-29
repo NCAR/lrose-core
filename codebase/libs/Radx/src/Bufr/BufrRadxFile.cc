@@ -904,16 +904,18 @@ int BufrRadxFile::_readPositionVariables()
   _latitudeDeg = _file.latitude;
   if ((_latitudeDeg < -90) || (_latitudeDeg > 90)) {
     _addErrStr("ERROR - BufrRadxFile::_readPositionVariables");
-    _addErrStr("  Latitude outside boundaries (-90 to 90): ");
-    _addErrStr(std::to_string(_latitudeDeg));
+    char temp[1024];
+    sprintf(temp, "%g", _latitudeDeg);
+    _addErrStr("  Latitude outside boundaries (-90 to 90): ", temp);
     iret = -1;
   }
 
   _longitudeDeg = _file.longitude;
   if ((_longitudeDeg < -180) || (_longitudeDeg > 180)) {
     _addErrStr("ERROR - BufrRadxFile::_readPositionVariables");
-    _addErrStr("  Longitude outside boundaries (-180 to 180): ");
-    _addErrStr(std::to_string(_longitudeDeg));
+    char temp[1024];
+    sprintf(temp, "%g", _longitudeDeg);
+    _addErrStr("  Longitude outside boundaries (-180 to 180): ", temp);
     iret = -1;
   }
 

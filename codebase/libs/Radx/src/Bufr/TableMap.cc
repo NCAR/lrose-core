@@ -6,7 +6,7 @@
 #include <iterator>
 #include <sstream>
 #include <stdio.h>
-
+#include <stdlib.h>
 #include <Radx/TableMap.hh>
 #include <Radx/TableMapKey.hh>
 
@@ -15,6 +15,7 @@ using namespace std;
 
 
 TableMap::TableMap() {
+  _debug = false;
 }
 
 TableMap::~TableMap() {
@@ -22,7 +23,8 @@ TableMap::~TableMap() {
 
 int TableMap::ReadTableB(string fileName) {
 
-  std::ifstream filein(fileName);
+  std::ifstream filein(fileName.c_str());
+  //std::fstream filein(fileName, ios::in);
 
   if (!filein.is_open()) {
     string _errString;
@@ -37,8 +39,9 @@ int TableMap::ReadTableB(string fileName) {
     tokens = split(line, ';');
 
     if (_debug) {
-      for (string s: tokens) {
-        cout << s << endl; 
+      for (vector<std::string>::const_iterator s = tokens.begin(); s!= tokens.end(); ++s) {
+	//for (string s: tokens) {
+        cout << *s << endl; 
       }
     }
 
@@ -75,7 +78,7 @@ int TableMap::ReadTableD(string fileName) {
 
   // read table d which has pointers
 
-  std::ifstream fileind(fileName);
+  std::ifstream fileind(fileName.c_str());
 
   if (!fileind.is_open()) {
     throw "ERROR: cannot read BUFR table " + fileName;
@@ -90,8 +93,9 @@ int TableMap::ReadTableD(string fileName) {
       tokens = split(line, ';');
 
       if (_debug) {
-        for (string s: tokens) {
-          cout << s << endl; 
+        for (vector<std::string>::const_iterator s = tokens.begin(); s!= tokens.end(); ++s) {
+	  //for (string s: tokens) {
+          cout << *s << endl; 
         }
       }
       if (tokens.size() >= 6) { // handle blank lines and lines with only ;;;;;; 
@@ -141,8 +145,9 @@ int TableMap::ImportTablesOld() {
     std::vector<std::string> tokens;
     tokens = split(line, ';');
 
-    for (string s: tokens) {
-      cout << s << endl; 
+    for (vector<std::string>::const_iterator s = tokens.begin(); s!= tokens.end(); ++s) {
+      //for (string s: tokens) {
+      cout << *s << endl; 
     }
 
     unsigned char f,x,y;
@@ -185,8 +190,9 @@ int TableMap::ImportTablesOld() {
       std::vector<std::string> tokens;
       tokens = split(line, ';');
 
-      for (string s: tokens) {
-        cout << s << endl; 
+      for (vector<std::string>::const_iterator s = tokens.begin(); s!= tokens.end(); ++s) {
+	//for (string s: tokens) {
+        cout << *s << endl; 
       }
 
       unsigned short subkey;      
@@ -241,11 +247,11 @@ TableMapElement TableMap::Retrieve(unsigned short key) {
   val1 = table.at(key);
 
   //cout << " Found " << endl;
-    if (val1._whichType == TableMapElement::TableMapElementType::DESCRIPTOR) {
+    if (val1._whichType == TableMapElement::DESCRIPTOR) {
       //cout << "value for key " << key << ":" << val1._descriptor.fieldName << "," << 
       //val1._descriptor.scale << endl;
       ;
-    } else if (val1._whichType == TableMapElement::TableMapElementType::KEYS) {
+    } else if (val1._whichType == TableMapElement::KEYS) {
       vector<unsigned short> theList;
       theList = val1._listOfKeys; 
       //cout << "value for key " << key << ": "; 

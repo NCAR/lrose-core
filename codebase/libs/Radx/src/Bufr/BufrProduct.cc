@@ -38,6 +38,7 @@
 #include <cstdio>
 #include <iostream>
 #include <zlib.h>
+#include <stdlib.h>
 
 using namespace std;
 

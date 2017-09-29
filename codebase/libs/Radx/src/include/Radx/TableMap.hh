@@ -27,6 +27,6 @@ private:
   int ReadTableD(string fileName);
   int ImportTablesOld();
 
-  bool _debug = false;
+  bool _debug;
 
 };
