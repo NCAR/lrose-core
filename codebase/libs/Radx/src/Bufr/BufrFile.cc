@@ -37,6 +37,8 @@
 #include <cstring>
 #include <cstdio>
 #include <iostream>
+#include <stdexcept>
+#include <errno.h>
 #include <cmath>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -707,7 +709,7 @@ void BufrFile::SkipIt(int nBits) {
 
 Radx::ui32 BufrFile::Apply(TableMapElement f) {
 
-  if (f._whichType != TableMapElement::TableMapElementType::DESCRIPTOR) {
+  if (f._whichType != TableMapElement::DESCRIPTOR) {
     return -1;
   }
   if (0) { 
@@ -766,7 +768,7 @@ double BufrFile::fastPow10(int n)
 
 Radx::si32 BufrFile::ApplyNumeric(TableMapElement f) {
 
-  if (f._whichType != TableMapElement::TableMapElementType::DESCRIPTOR) {
+  if (f._whichType != TableMapElement::DESCRIPTOR) {
     return -1;
   } 
   if (0) {
@@ -1020,7 +1022,7 @@ int BufrFile::TraverseOriginal(vector<unsigned short> descriptors) {
       //   insert into temporary structure for saving
       TableMapElement val1;
       val1 = tableMap.Retrieve(des);
-      if (val1._whichType == TableMapElement::TableMapElementType::DESCRIPTOR) {
+      if (val1._whichType == TableMapElement::DESCRIPTOR) {
         cout << "value for key " << des << ":" <<
           val1._descriptor.fieldName << "," << 
           val1._descriptor.scale << endl;
@@ -1159,7 +1161,7 @@ int BufrFile::Traverse(int start, int length) {
       //   insert into temporary structure for saving
       TableMapElement val1;
       val1 = tableMap.Retrieve(des);
-      if (val1._whichType == TableMapElement::TableMapElementType::DESCRIPTOR) {
+      if (val1._whichType == TableMapElement::DESCRIPTOR) {
         cout << "value for key " << des << ":" <<
           val1._descriptor.fieldName << "," << 
           val1._descriptor.scale << endl;
@@ -1405,7 +1407,7 @@ int BufrFile::_descend(DNode *tree) {
       //   insert into temporary structure for saving
       TableMapElement val1;
       val1 = tableMap.Retrieve(des);
-      if (val1._whichType == TableMapElement::TableMapElementType::DESCRIPTOR) {
+      if (val1._whichType == TableMapElement::DESCRIPTOR) {
         //cout << "value for key " << des << ":" <<
         //  val1._descriptor.fieldName << "," << 
         //  val1._descriptor.scale << endl;
@@ -1581,7 +1583,7 @@ int BufrFile::_descend(DNode *tree) {
       //   insert into temporary structure for saving
       TableMapElement val1;
       val1 = tableMap.Retrieve(des);
-      if (val1._whichType == TableMapElement::TableMapElementType::DESCRIPTOR) {
+      if (val1._whichType == TableMapElement::DESCRIPTOR) {
         cout << "value for key " << des << ":" <<
           val1._descriptor.fieldName << "," << 
           val1._descriptor.scale << endl;
