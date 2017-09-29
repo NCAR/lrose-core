@@ -804,7 +804,7 @@ Radx::si32 BufrFile::ApplyNumeric(TableMapElement f) {
 
 Radx::fl32 BufrFile::ApplyNumericFloat(TableMapElement f) {
 
-  if (f._whichType != TableMapElement::TableMapElementType::DESCRIPTOR) {
+  if (f._whichType != TableMapElement::DESCRIPTOR) {
     return -1;
   } 
   if (0) {
