@@ -200,7 +200,7 @@ void BscanManager::_setupWindows()
 
   // configure the BSCAN
 
-  _bscan = new BscanWidget(_bscanFrame, *this, _params, _fields.size());
+  _bscan = new BscanWidget(_bscanFrame, *this, _params, _fields, _haveFilteredFields);
   connect(this, SIGNAL(frameResized(const int, const int)),
 	  _bscan, SLOT(resize(const int, const int)));
   

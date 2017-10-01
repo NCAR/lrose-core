@@ -71,7 +71,8 @@ public:
   RhiWindow(PolarManager *manager,
             const Params &params,
             const RadxPlatform &platform,
-            const vector<DisplayField *> &fields);
+            const vector<DisplayField *> &fields,
+            bool haveFilteredFields);
             
 
   /**
@@ -175,6 +176,7 @@ protected:
   // data fields
             
   const vector<DisplayField *> &_fields;
+  bool _haveFilteredFields;
 
   /**
    * @brief The View menu.

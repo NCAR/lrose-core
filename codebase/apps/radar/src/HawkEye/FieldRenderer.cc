@@ -22,7 +22,6 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include "FieldRenderer.hh"
-
 using namespace std;
 
 
@@ -31,9 +30,11 @@ using namespace std;
  */
 
 FieldRenderer::FieldRenderer(const Params &params,
-                             const size_t field_num) :
+                             const size_t field_index,
+                             const DisplayField &field) :
         _params(params),
-        _fieldNum(field_num),
+        _fieldIndex(field_index),
+        _field(field),
         _image(NULL),
         _backgroundRender(false),
         _backgroundRenderTimer(NULL),
@@ -41,18 +42,8 @@ FieldRenderer::FieldRenderer(const Params &params,
         _drawInstHt(false)
 {
 
-  // check field num and set params
-
-  if (_fieldNum < 0) {
-    _fieldNum = 0;
-  }
-  if ((int) _fieldNum > (_params.fields_n - 1)) {
-    _fieldNum = _params.fields_n - 1;
-  }
-  _fieldParams = _params._fields[_fieldNum];
-  
   // set up background rendering timer
-
+  
   _backgroundRenderTimer = new QTimer(this);
   _backgroundRenderTimer->setSingleShot(true);
   _backgroundRenderTimer->setInterval
@@ -161,7 +152,7 @@ void FieldRenderer::run()
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Start of rendering for field: " 
-         << _params._fields[_fieldNum].label << endl;
+         << _field.getLabel() << endl;
   }
 
   if (_beams.size() == 0) {
@@ -181,11 +172,11 @@ void FieldRenderer::run()
     }
     if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "Rendering beam field:" 
-           << _params._fields[_fieldNum].label << endl;
+           << _field.getLabel() << endl;
       (*beam)->print(cerr);
     }
-    (*beam)->paint(_image, _transform, _fieldNum, _useHeight, _drawInstHt);
-    (*beam)->setBeingRendered(_fieldNum, false);
+    (*beam)->paint(_image, _transform, _fieldIndex, _useHeight, _drawInstHt);
+    (*beam)->setBeingRendered(_fieldIndex, false);
   }
   
   _beams.clear();

@@ -51,13 +51,15 @@ PolarWidget::PolarWidget(QWidget* parent,
                          const PolarManager &manager,
                          const Params &params,
                          const RadxPlatform &platform,
-                         size_t n_fields) :
+                         const vector<DisplayField *> &fields,
+                         bool haveFilteredFields) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
         _params(params),
         _platform(platform),
-        _nFields(n_fields),
+        _fields(fields),
+        _haveFilteredFields(haveFilteredFields),
         _selectedField(0),
         _backgroundBrush(QColor(_params.background_color)),
         _gridRingsColor(_params.grid_and_range_ring_color),
@@ -98,10 +100,11 @@ PolarWidget::PolarWidget(QWidget* parent,
 
   // create the field renderers
   
-  for (size_t i = 0; i < _nFields; ++i) {
-    FieldRenderer *field = new FieldRenderer(_params, i);
-    field->createImage(width(), height());
-    _fieldRenderers.push_back(field);
+  for (size_t ii = 0; ii < _fields.size(); ii++) {
+    FieldRenderer *fieldRenderer =
+      new FieldRenderer(_params, ii, *_fields[ii]);
+    fieldRenderer->createImage(width(), height());
+    _fieldRenderers.push_back(fieldRenderer);
   }
 
   // init other values

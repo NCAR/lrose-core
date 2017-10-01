@@ -58,7 +58,8 @@ class DLL_EXPORT RhiWidget : public PolarWidget
             const RhiWindow &rhiWindow,
             const Params &params,
             const RadxPlatform &platform,
-            size_t n_fields);
+            const vector<DisplayField *> &fields,
+            bool haveFilteredFields);
 
   /**
    * @brief Destructor.

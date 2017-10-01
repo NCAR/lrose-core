@@ -65,7 +65,8 @@ public:
    */
   
   FieldRenderer(const Params &params,
-                const size_t field_num);
+                const size_t field_index,
+                const DisplayField &field);
 
   /**
    * @brief Destructor
@@ -75,7 +76,7 @@ public:
 
   // parameters for this field
 
-  const Params::field_t &getParams() { return _fieldParams; }
+  const DisplayField &getField() { return _field; }
   
   // setting state
   
@@ -169,14 +170,14 @@ protected:
   const Params &_params;
 
   /**
-   * @brief The field number for this field.
+   * @brief The index for this field.
    */
 
-  size_t _fieldNum;
+  size_t _fieldIndex;
   
   // parameters for this field
   
-  Params::field_t _fieldParams;
+  const DisplayField &_field;
   
   /**
    * @brief Image used for background rendering of this field.

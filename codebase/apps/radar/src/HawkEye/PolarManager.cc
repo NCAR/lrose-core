@@ -486,14 +486,14 @@ void PolarManager::_setupWindows()
 
   // configure the PPI
 
-  _ppi = new PpiWidget(_ppiFrame, *this, _params, _platform, _fields.size());
+  _ppi = new PpiWidget(_ppiFrame, *this, _params, _platform, _fields, _haveFilteredFields);
 
   connect(this, SIGNAL(frameResized(const int, const int)),
 	  _ppi, SLOT(resize(const int, const int)));
   
   // Create the RHI window
 
-  _rhiWindow = new RhiWindow(this, _params, _platform, _fields);
+  _rhiWindow = new RhiWindow(this, _params, _platform, _fields, _haveFilteredFields);
   _rhiWindow->setRadarName(_params.radar_name);
 
   // set pointer to the rhiWidget

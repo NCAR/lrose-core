@@ -33,8 +33,10 @@ PpiWidget::PpiWidget(QWidget* parent,
                      const PolarManager &manager,
                      const Params &params,
                      const RadxPlatform &platform,
-                     size_t n_fields) :
-        PolarWidget(parent, manager, params, platform, n_fields)
+                     const vector<DisplayField *> &fields,
+                     bool haveFilteredFields) :
+        PolarWidget(parent, manager, params, platform,
+                    fields, haveFilteredFields)
         
 {
 
@@ -109,8 +111,8 @@ void PpiWidget::selectVar(const size_t index)
   }
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=========>> selectVar for field: "
-         << _params._fields[index].label << endl;
+    cerr << "=========>> PpiWidget::selectVar() for field index: " 
+         << index << endl;
   }
 
   // If this field isn't being rendered in the background, render all of
@@ -147,7 +149,7 @@ void PpiWidget::selectVar(const size_t index)
 void PpiWidget::clearVar(const size_t index)
 {
 
-  if (index >= _nFields) {
+  if (index >= _fields.size()) {
     return;
   }
 
@@ -208,7 +210,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
     // This beam does not cross the 0 degree angle.  Just add the beam to
     // the beam list.
 
-    PpiBeam* b = new PpiBeam(_params, ray, _nFields, n_start_angle, n_stop_angle);
+    PpiBeam* b = new PpiBeam(_params, ray, _fields.size(), n_start_angle, n_stop_angle);
     _cullBeams(b);
     _ppiBeams.push_back(b);
     newBeams.push_back(b);
@@ -218,14 +220,14 @@ void PpiWidget::addBeam(const RadxRay *ray,
     // The beam crosses the 0 degree angle.  First add the portion of the
     // beam to the left of the 0 degree point.
 
-    PpiBeam* b1 = new PpiBeam(_params, ray, _nFields, n_start_angle, 360.0);
+    PpiBeam* b1 = new PpiBeam(_params, ray, _fields.size(), n_start_angle, 360.0);
     _cullBeams(b1);
     _ppiBeams.push_back(b1);
     newBeams.push_back(b1);
 
     // Now add the portion of the beam to the right of the 0 degree point.
 
-    PpiBeam* b2 = new PpiBeam(_params, ray, _nFields, 0.0, n_stop_angle);
+    PpiBeam* b2 = new PpiBeam(_params, ray, _fields.size(), 0.0, n_stop_angle);
     _cullBeams(b2);
     _ppiBeams.push_back(b2);
     newBeams.push_back(b2);
@@ -648,8 +650,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
     // field name legend
 
-    string fieldName =
-      _fieldRenderers[_selectedField]->getParams().label;
+    string fieldName = _fieldRenderers[_selectedField]->getField().getLabel();
     sprintf(text, "Field: %s", fieldName.c_str());
     legends.push_back(text);
 

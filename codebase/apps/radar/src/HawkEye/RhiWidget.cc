@@ -34,8 +34,10 @@ RhiWidget::RhiWidget(QWidget* parent,
                      const RhiWindow &rhiWindow,
                      const Params &params,
                      const RadxPlatform &platform,
-                     size_t n_fields) :
-        PolarWidget(parent, manager, params, platform, n_fields),
+                     const vector<DisplayField *> &fields,
+                     bool haveFilteredFields) :
+        PolarWidget(parent, manager, params, platform,
+                    fields, haveFilteredFields),
         _rhiWindow(rhiWindow),
         _beamsProcessed(0)
 
@@ -120,7 +122,7 @@ void RhiWidget::addBeam(const RadxRay *ray,
 
   RhiBeam* beam = new RhiBeam(_params, ray,
                               _manager.getPlatform().getAltitudeKm(),
-                              _nFields, _startElev, _endElev);
+                              _fields.size(), _startElev, _endElev);
   _rhiBeams.push_back(beam);
 
   // compute angles and times in archive mode
@@ -535,8 +537,7 @@ void RhiWidget::_drawOverlays(QPainter &painter)
 
     // field name legend
 
-    string fieldName =
-      _fieldRenderers[_selectedField]->getParams().label;
+    string fieldName = _fieldRenderers[_selectedField]->getField().getLabel();
     sprintf(text, "Field: %s", fieldName.c_str());
     legends.push_back(text);
     
@@ -586,17 +587,17 @@ void RhiWidget::_computeAngleLimits(const RadxRay *ray)
   
 {
   
-  double beamWidth = _platform.getRadarBeamWidthDegV();
+  // double beamWidth = _platform.getRadarBeamWidthDegV();
   double elev = ray->getElevationDeg();
 
   // Determine the extent of this ray
   
-  double elevDiff = Radx::computeAngleDiff(elev, _prevElev);
+  // double elevDiff = Radx::computeAngleDiff(elev, _prevElev);
   // if (ray->getIsIndexed() || fabs(elevDiff) > beamWidth * 4.0) {
     
-    double halfAngle = ray->getAngleResDeg() / 2.0;
-    _startElev = elev - halfAngle;
-    _endElev = elev + halfAngle;
+  double halfAngle = ray->getAngleResDeg() / 2.0;
+  _startElev = elev - halfAngle;
+  _endElev = elev + halfAngle;
     
   // } else {
     
@@ -892,8 +893,8 @@ void RhiWidget::selectVar(const size_t index)
   }
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=========>> selectVar for field: "
-         << _params._fields[index].label << endl;
+    cerr << "=========>> RhiWidget::selectVar() for field index: " 
+         << index << endl;
   }
 
   // If this field isn't being rendered in the background, render all of
