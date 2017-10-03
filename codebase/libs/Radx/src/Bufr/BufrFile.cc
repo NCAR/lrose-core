@@ -58,6 +58,7 @@ BufrFile::BufrFile()
   //_ncFormat = Nc3File::Classic;
 
   _file = NULL;
+  _debug = false;
   //_errString.clear();
 
   clear();

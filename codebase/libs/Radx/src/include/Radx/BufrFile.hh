@@ -238,8 +238,7 @@ private:
 
   TableMap tableMap;
 
-  bool _debug = false;
-  
+  bool _debug;
 
   //pushToRadxVol(double *realData, BufrProduct currentProduct);
   

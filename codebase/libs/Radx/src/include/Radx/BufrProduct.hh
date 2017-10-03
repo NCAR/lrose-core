@@ -107,7 +107,7 @@ public:
   RadxBuf compressedData; // dataBuffer;
 
   unsigned char *dataBuffer; // *compressedData; // [2*65]; // TODO: fix this
-  unsigned int nData = 0;
+  unsigned int nData;
   int nDataSegments;
   unsigned int maxData;
   unsigned int totalData;
