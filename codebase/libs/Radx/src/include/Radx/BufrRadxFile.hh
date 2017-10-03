@@ -26,13 +26,12 @@
 //
 // BufrRadxFile object
 //
-// NetCDF data for radar radial data in CFAR netcdf format
-// CFARR = Chilbolton Facility for Atmospheric and Radio Research
+// BUFR format
 //
-// Mike Dixon, RAP, NCAR
+// Mike Dixon and Brenda Javornik, RAP, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// July 2017
+// August 2017
 //
 ///////////////////////////////////////////////////////////////
 
@@ -42,7 +41,6 @@
 #include <string>
 #include <vector>
 
-//#include <Radx/BufrRadxFile.hh>
 #include <Radx/Radx.hh>
 #include <Radx/RadxFile.hh>
 #include <Radx/RadxRangeGeom.hh>
@@ -179,22 +177,14 @@ private:
 
   // BUFR file
   
-  BufrFile _file;
+  // this is a temp pointer to the current BufrFile/field
+  // from which we are extracting data.
+  BufrFile *_file;
 
-  // udunits
-
-  // Udunits2 _udunits;
-  
-  
-  // dimensions
-
-  // Nc3Dim *_timeDim;
-  // Nc3Dim *_rangeDim;
-  // Nc3Dim *_sweepDim;
+  vector<BufrFile *>  _fields;
 
   // times
-  
-  //  Nc3Var *_timeVar;
+
   vector<double> _dTimes;
   time_t _refTimeSecsFile;
   bool _rayTimesIncrease;
@@ -202,7 +192,6 @@ private:
   
   // range
 
-  //  Nc3Var *_rangeVar;
   vector<double> _rangeKm;
   size_t _nRangeInFile;
   bool _gateSpacingIsConstant;
@@ -235,7 +224,7 @@ private:
   vector<RadxSweep *> _sweeps;
 
   // global attributes
-
+  
   int _ADC_bits_per_sample_attr;
   int _ADC_channels_attr;
   int _delay_clocks_attr;
@@ -287,11 +276,24 @@ private:
   Radx::PlatformType_t _platformType;
   Radx::PrimaryAxis_t _primaryAxis;
 
+  RadxTime _fileTime;
+
+  // error string
+
+  string _errStr; ///< Error string is set on error
+
   // rays to be added to volume
 
   vector<RadxRay *> _raysToRead;
   vector<RadxRay *> _raysValid;
 
+  void _getFieldPaths(const string &primaryPath,
+                                 vector<string> &fileNames,
+                                 vector<string> &filePaths,
+				  vector<string> &fieldNames);
+
+  int setTimeFromPath(const string &filePath,
+				  time_t &fileTime);
   int _readDimensions();
   int _readGlobalAttributes();
   // int _readTimes();
@@ -300,18 +302,13 @@ private:
   int _readPositionVariables();
   // int _readSweepVariables();
   //int _readScalarVariables();
+  void _clearFields();
   void _clearRayVariables();
   int _getRayVariables(int sweepNumber);
   int _createRays(int sweepNumber);
+  int _readFields(const string &path);
   int _readFieldVariables(int sweepNumber, bool metaOnly);
-  /*
-  int _readRayVar(Nc3Var* &var, const string &name, 
-                  vector<double> &vals, bool required = true);
-  int _readRayVar(Nc3Var* &var, const string &name, 
-                  vector<int> &vals, bool required = true);
-  */
-  //  Nc3Var* _getRayVar(const string &name, bool required);
-
+  void _addToRadxVol(BufrFile *file);
   int _addFl64FieldToRays(int sweepNumber,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,

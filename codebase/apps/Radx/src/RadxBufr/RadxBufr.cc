@@ -167,17 +167,17 @@ RadxBufr::~RadxBufr()
 int RadxBufr::Run()
 {
 
-  //  if (_params.mode == Params::ARCHIVE) {
-  //  return _runArchive();
-  //} else if (_params.mode == Params::FILELIST) {
+  if (_params.mode == Params::ARCHIVE) {
+    return _runArchive();
+  } else if (_params.mode == Params::FILELIST) {
     return _runFilelist();
-    //} else {
-    //if (_params.latest_data_info_avail) {
-    //  return _runRealtimeWithLdata();
-    //} else {
-    //  return _runRealtimeNoLdata();
-    // }
-    //}
+  } else {
+    if (_params.latest_data_info_avail) {
+      return _runRealtimeWithLdata();
+    } else {
+      return _runRealtimeNoLdata();
+    }
+  }
 }
 
 //////////////////////////////////////////////////
@@ -237,11 +237,10 @@ int RadxBufr::_runFilelist()
     }
 
   } else {
-    /*
+    
     // aggregate the files into a single volume on read
     
     RadxVol vol;
-    //GenericRadxFile inFile;
     BufrRadxFile inFile;
     _setupRead(inFile);
     vector<string> paths = _args.inputFileList;
@@ -257,22 +256,16 @@ int RadxBufr::_runFilelist()
       for (size_t ii = 0; ii < paths.size(); ii++) {
         cerr << "==>> read in file: " << paths[ii] << endl;
       }
-    }
-    
-    // finalize the volume
-    
-    _finalizeVol(vol);
-    
+    }  
+    // finalize the volume   
+    _finalizeVol(vol);   
     // write the volume out
     if (_writeVol(vol)) {
       cerr << "ERROR - RadxBufr::_runFileList" << endl;
       cerr << "  Cannot write aggregated volume to file" << endl;
       iret = -1;
     }
-
     nGood++;
-    */
-    ;
   } // if (!_params.aggregate_all_files_on_read) {
 
   if (_params.debug) {
@@ -286,7 +279,7 @@ int RadxBufr::_runFilelist()
 
 //////////////////////////////////////////////////
 // Run in archive mode
-/*
+
 int RadxBufr::_runArchive()
 {
 
@@ -460,7 +453,7 @@ int RadxBufr::_runRealtimeNoLdata()
   return iret;
 
 }
-*/
+
 //////////////////////////////////////////////////
 // Read in a file
 // Only Bufr format is recognized.
