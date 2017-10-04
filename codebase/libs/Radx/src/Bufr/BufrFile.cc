@@ -56,6 +56,12 @@ BufrFile::BufrFile()
 {
   _debug = false;
   _file = NULL;
+<<<<<<< HEAD
+=======
+  _debug = false;
+  //_errString.clear();
+
+>>>>>>> 73fc38089dde46bb753ffc4eda44ee7f3d9c1aa0
   clear();
 
 

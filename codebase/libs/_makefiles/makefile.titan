@@ -1,5 +1,5 @@
 #
-# Recursive make for TITAN libraries
+# Recursive make for LROSE libraries
 #
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
@@ -7,47 +7,38 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 TARGETS = $(GENERAL_TARGETS) $(LIB_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
-	perl5 \
-	tdrp \
-        dataport \
-        euclid \
-	forayRal \
-	rapmath \
-	physics \
-	rdi \
-	shapelib \
-	trmm_rsl \
-        radar \
-        toolsa \
-        cidd \
-        kd \
-        didss \
-	rapplot \
-	symprod \
+	FiltAlg \
+	Fmq \
+	Mdv \
+        Ncxx \
+	Radx \
+        Refract \
+	Spdb \
+	advect \
+	cidd \
+	contour \
+	dataport \
+	didss \
+	dsdata \
 	dsserver \
+        edge \
+	euclid \
+	forayRal \
 	grib \
 	grib2 \
-	rapformats \
-	mdv \
-	Mdv \
-	Fmq \
-	spdb \
-	Spdb \
-	spdbFormats \
-	SpdbServer \
-	titan \
 	hydro \
-	dsdata \
-	advect \
-        contour \
-        Radx
-
-#	apiTitan
+	kd \
+        mm5 \
+	perl5 \
+	physics \
+	radar \
+	rapformats \
+	rapmath \
+	rapplot \
+	shapelib \
+	tdrp \
+	titan \
+	toolsa \
+	trmm_rsl
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
-
-
-
-
-
-
