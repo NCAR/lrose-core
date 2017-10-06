@@ -55,27 +55,13 @@ BufrFile::BufrFile()
   
 {
   _debug = false;
+  _verbose = false;
   _file = NULL;
+  GTree = NULL;
   clear();
 }
 
-BufrFile::BufrFile(const string &fileName,
-             const string &filePath,
-             time_t fileTime,
-             const string &fieldName,
-             const string &standardName,
-             const string &longName,
-             const string &units,
-             bool debug,
-		   bool verbose) {
 
-  _pathInUse = filePath;
-  
-  _debug = debug;
-  _file = NULL;
-  clear();
-
-}
   
 /////////////
 // destructor
@@ -97,12 +83,28 @@ void BufrFile::clear()
   _pathInUse.clear();
   _firstBufferReplenish = true;
   _errString.clear();
+  _file = NULL;
+  freeTree(GTree);
+  //GTree = NULL;
+  _descriptorsToProcess.clear();
+  nOctetsRead = 0;
 }
 
 
 // go ahead and read all the data from the file
 // completely fill currentProduct with data
-void BufrFile::readThatField() {
+void BufrFile::readThatField(string fileName,
+             string filePath,
+             time_t fileTime,
+             string fieldName,
+             string standardName,
+             string longName,
+             string units,
+             bool debug,
+		   bool verbose) {
+
+  clear();
+  _pathInUse = filePath;
   try {
     openRead(_pathInUse); // path);
     readSection0();
@@ -350,7 +352,6 @@ int BufrFile::readSection1()
     sectionLen = nBytes;
 
     cerr << "sectionLen " << sectionLen << endl;
-
     Radx::ui08 *buffer;
     buffer = (Radx::ui08 *) calloc(sectionLen, sizeof(Radx::ui08));
     memset(buffer, 0, sectionLen);
@@ -423,6 +424,9 @@ int BufrFile::readSection1()
         seconds << endl;
       //}
 
+      hdr_year = yearOfCentury;
+      hdr_month = month;
+      hdr_day = day;
       printf("year-month-day hour:minute:sec\n%d-%d-%d %d:%d:%d\n",
 	     yearOfCentury, month, day, hour, minute, seconds); 
     
@@ -540,7 +544,8 @@ int BufrFile::readData() {  // read section 4
   }
 
   try {
-    tableMap.ImportTables();
+    if (!tableMap.filled())
+      tableMap.ImportTables();
   } catch (const char *msg) {
     Radx::addErrStr(_errString, "ERROR - ", msg, true);
     throw _errString.c_str();
@@ -573,10 +578,6 @@ int BufrFile::readData() {  // read section 4
 
 int BufrFile::ReplenishBuffer() {
 
-  //static bool first = true;
-  static int nOctetsRead = 0;
-  //bool _debug = false;
-
   if (_firstBufferReplenish) { // (first) {
     fread(_dataBuffer, 1, 4, _file);
     _firstBufferReplenish = false;
@@ -585,12 +586,12 @@ int BufrFile::ReplenishBuffer() {
   nBytesRead = fread(_dataBuffer, 1, MAX_BUFFER_SIZE_BYTES, _file);
 
   nOctetsRead += nBytesRead;
-  printf("nOctetsRead = %d\n", nOctetsRead);
+  if (_debug) printf("nOctetsRead = %d\n", nOctetsRead);
 
   _numBytesRead += nBytesRead;
-  printf("Read %d/%d bytes ", _numBytesRead, _s0.nBytes);
+  if (_debug) printf("Read %d/%d bytes ", _numBytesRead, _s0.nBytes);
 
-  if (_debug) {
+  if (_verbose) {
     printf("buffer: ");
     for (int i=0; i<MAX_BUFFER_SIZE_BYTES; i++) 
       printf("%0x ", _dataBuffer[i]);
@@ -735,7 +736,7 @@ Radx::ui32 BufrFile::Apply(TableMapElement f) {
   if (f._whichType != TableMapElement::DESCRIPTOR) {
     return -1;
   }
-  if (0) { 
+  if (_debug) {
     cout << "Applying " << endl;
     cout << "  " << f._descriptor.fieldName << " ";
 
@@ -794,7 +795,8 @@ Radx::si32 BufrFile::ApplyNumeric(TableMapElement f) {
   if (f._whichType != TableMapElement::DESCRIPTOR) {
     return -1;
   } 
-  if (0) {
+  if (_debug) {
+    if (f._descriptor.fieldName.find("Byte element") == string::npos) {
     cout << "Applying " << endl;
     cout << "  " << f._descriptor.fieldName << " ";
 
@@ -804,6 +806,7 @@ Radx::si32 BufrFile::ApplyNumeric(TableMapElement f) {
     cout << " scale  " << f._descriptor.scale << endl;
     cout << " units  " << f._descriptor.units << endl;;
     cout << " reference value " << f._descriptor.referenceValue << endl;
+    }
   }
   if (f._descriptor.units.find("CCITT") != string::npos) {
     string  value;
@@ -819,8 +822,9 @@ Radx::si32 BufrFile::ApplyNumeric(TableMapElement f) {
     temp = f._descriptor.referenceValue;
     temp = value + temp;
     temp  = temp/fastPow10(f._descriptor.scale);
-    //cout << "converted to " << svalue << endl;
+
     svalue = (Radx::si32) temp;
+    if (_debug) cout << "converted to " << svalue << endl;
     return svalue;
   }
 }
@@ -830,7 +834,8 @@ Radx::fl32 BufrFile::ApplyNumericFloat(TableMapElement f) {
   if (f._whichType != TableMapElement::DESCRIPTOR) {
     return -1;
   } 
-  if (0) {
+  if (_debug) {
+    if (f._descriptor.fieldName.find("Byte element") == string::npos) {
     cout << "Applying " << endl;
     cout << "  " << f._descriptor.fieldName << " ";
 
@@ -840,6 +845,7 @@ Radx::fl32 BufrFile::ApplyNumericFloat(TableMapElement f) {
     cout << " scale  " << f._descriptor.scale << endl;
     cout << " units  " << f._descriptor.units << endl;;
     cout << " reference value " << f._descriptor.referenceValue << endl;
+    }
   }
   if (f._descriptor.units.find("CCITT") != string::npos) {
     string  value;
@@ -855,8 +861,9 @@ Radx::fl32 BufrFile::ApplyNumericFloat(TableMapElement f) {
     temp = f._descriptor.referenceValue;
     temp = value + temp;
     temp  = temp/fastPow10(f._descriptor.scale);
-    //cout << "converted to " << svalue << endl;
+
     svalue = (Radx::fl32) temp;
+    if (_debug) cout << "converted to " << svalue << endl;
     return svalue;
   }
 }
@@ -951,19 +958,19 @@ bool BufrFile::StuffIt(string fieldName, double value) {
   return ok;
 }
 
-int BufrFile::getTimeDimension() {
+size_t BufrFile::getTimeDimension() {
   return currentProduct.nAzimuths;
 }
 
-int BufrFile::getRangeDimension() {
+size_t BufrFile::getRangeDimension() {
   return currentProduct.nBinsAlongTheRadial;
 }
 
-int BufrFile::getNumberOfSweeps() {
+size_t BufrFile::getNumberOfSweeps() {
   return currentProduct.sweepData.size();
 }
 
-int BufrFile::getNBinsAlongTheRadial() {
+size_t BufrFile::getNBinsAlongTheRadial() {
   return currentProduct.nBinsAlongTheRadial;
 }
 
@@ -1347,12 +1354,29 @@ void BufrFile::printTree(DNode *tree, int level) {
   if (level == 0) printf("tree: \n");
   while (p!=NULL) {
     for (int i=0; i<level; i++) printf(" ");
-    printf("+(%d) delayed_rep %d\n", p->des, p->delayed_repeater);
+    printf("+(%d) delayed_rep %u\n", p->des, p->delayed_repeater);
     q=p->children;
     if (q != NULL) {
       printTree(q, level+1);
     }
     p=p->next;
+  }
+}
+
+void BufrFile::freeTree(DNode *tree) {
+  DNode *p,*q;
+  p = tree;
+  while (p!=NULL) {
+    // free the children
+    q=p->children;
+    if (q != NULL) {
+      freeTree(q);
+    }
+    DNode *temp;
+    temp = p;
+    p=p->next;
+    if (_debug) printf("freeing %d\n", temp->des);
+    free(temp);
   }
 }
 
@@ -1439,9 +1463,12 @@ int BufrFile::_descend(DNode *tree) {
       }
       Radx::fl32 valueFromData;
       if (val1.IsText()) {
-	//Radx::ui32 junk;
-        //junk = Apply(val1); // TODO: integrate a string type here; or toss exception?  
-        ; //cerr << "Apply text value not implemented" << endl;
+	// THE NEXT TWO LINES ARE CRUCIAL!! DO NOT REMOVE IT!!!
+	//	Radx::ui32 junk;
+	// junk = Apply(val1); // TODO: integrate a string type here; or toss exception? 
+	// we don't care about the return value when the descriptor is text
+	Apply(val1); 
+        //; //cerr << "Apply text value not implemented" << endl;
       } else {
         valueFromData = ApplyNumericFloat(val1);
         if (!StuffIt(val1._descriptor.fieldName, valueFromData)) {

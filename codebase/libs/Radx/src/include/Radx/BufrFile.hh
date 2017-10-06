@@ -63,16 +63,7 @@ public:
   
   BufrFile();
 
-  // fieldName is also part of the file name
-  BufrFile(const string &fileName,
-             const string &filePath,
-             time_t fileTime,
-             const string &fieldName,
-             const string &standardName,
-             const string &longName,
-             const string &units,
-             bool debug,
-             bool verbose);
+
   
   /// Destructor
   
@@ -84,7 +75,15 @@ public:
 
   /// read the data for the field
   /// 
-  void readThatField();
+  void readThatField(string fileName,
+             string filePath,
+             time_t fileTime,
+             string fieldName,
+             string standardName,
+             string longName,
+             string units,
+             bool debug,
+             bool verbose);
 
   /// open for reading
   /// Returns 0 on success, -1 on failure
@@ -118,9 +117,9 @@ public:
   double latitude;
   double longitude;
   double height;
-  int year;
-  int month;
-  int day;
+  int hdr_year;
+  int hdr_month;
+  int hdr_day;
   int hour;
   int minute;
 
@@ -129,11 +128,11 @@ public:
   string typeOfStationId;
   string stationId;
 
-  int getNumberOfSweeps();
-  int getTimeDimension();
-  int getRangeDimension();
+  size_t getNumberOfSweeps();
+  size_t getTimeDimension();
+  size_t getRangeDimension();
 
-  int getNBinsAlongTheRadial();
+  size_t getNBinsAlongTheRadial();
   double getRangeBinOffsetMeters();
   double getRangeBinSizeMeters();
 
@@ -237,6 +236,7 @@ private:
   void _deleteAfter(DNode *p);
   int moveChildren(DNode *parent, int howManySiblings);
   void printTree(DNode *tree, int level);
+  void freeTree(DNode *tree);
 
 #define  MAX_BUFFER_SIZE_BYTES  2048
 
@@ -245,6 +245,7 @@ private:
   int currentBufferLengthBits;
   int currentBufferLengthBytes;
   int currentBufferIndexBits;
+  int nOctetsRead;
   //int currentBufferIndexBytes;
 
   std::vector<unsigned short> _descriptorsToProcess;
@@ -252,7 +253,7 @@ private:
   TableMap tableMap;
 
   bool _debug;
-  
+  bool _verbose;
   
 /*
   //////////////////////////////////////////////////////////////

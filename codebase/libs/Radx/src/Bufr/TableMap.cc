@@ -119,6 +119,10 @@ int TableMap::ReadTableD(string fileName) {
   return 0;
 }
 
+bool TableMap::filled() {
+  return table.size() > 0;
+}
+
 // read the bufrtab_x.csv  (master) tables first, then the localtab_x_y.csv
 // files second, overwriting any duplicate values provided by the master
 // tables. 

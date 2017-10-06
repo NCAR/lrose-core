@@ -165,12 +165,15 @@ public:
   virtual int printNative(const string &path, ostream &out,
                           bool printRays, bool printData);
 
-  /// Get the date and time from a dorade file path.
+  /// Get the date and time from a string.
   /// returns 0 on success, -1 on failure
 
-  int getTimeFromPath(const string &path, RadxTime &rtime);
+  time_t getTimeFromString(const char *dateTime);
   
   //@}
+
+  void lookupFieldName(string fieldName, string &units, 
+		     string &standardName, string &longName);
 
 protected:
 private:
@@ -179,7 +182,7 @@ private:
   
   // this is a temp pointer to the current BufrFile/field
   // from which we are extracting data.
-  BufrFile *_file;
+  BufrFile _file;
 
   vector<BufrFile *>  _fields;
 
@@ -277,10 +280,11 @@ private:
   Radx::PrimaryAxis_t _primaryAxis;
 
   RadxTime _fileTime;
+  string fileNameSuffix;
 
   // error string
 
-  string _errStr; ///< Error string is set on error
+  string _errString; ///< Error string is set on error
 
   // rays to be added to volume
 
@@ -298,17 +302,27 @@ private:
   int _readGlobalAttributes();
   // int _readTimes();
   int _getRayTimes(int sweepNumber);
-  int _readRangeVariable();
-  int _readPositionVariables();
+  int _setRangeVariable();
+  int _verifyRangeVariable();
+  int _setPositionVariables();
+  int _verifyPositionVariables();
   // int _readSweepVariables();
   //int _readScalarVariables();
-  void _clearFields();
+  //void _clearFields();
   void _clearRayVariables();
   int _getRayVariables(int sweepNumber);
   int _createRays(int sweepNumber);
   int _readFields(const string &path);
-  int _readFieldVariables(int sweepNumber, bool metaOnly);
-  void _addToRadxVol(BufrFile *file);
+  //int _readFieldVariables(int sweepNumber, bool metaOnly);
+  int _addFieldVariables(int sweepNumber,
+				      string name, string units,
+				      string standardName, string longName,
+			 bool metaOnly);
+  void _accumulateField(string fieldName, string units, string standardName, string longName);
+  void _accumulateFieldFirstTime(string fieldName, string units, string standardName, string longName);
+  void _errorMessage(string location, string msg, int foundValue, int expectedValue);
+  void _errorMessage(string location, string msg, string foundValue, string expectedValue);
+  void _qualityCheckRays();
   int _addFl64FieldToRays(int sweepNumber,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
