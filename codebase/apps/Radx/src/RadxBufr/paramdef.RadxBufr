@@ -620,20 +620,93 @@ typedef struct {
 
 paramdef struct output_field_t {
   p_default = {
-    { "DBZ",
+    { "TH",
       "DBZ",
       "reflectivity",
       "equivalent_reflectivity_factor",
       "dBZ",
-      OUTPUT_ENCODING_ASIS,
+      OUTPUT_ENCODING_INT16,
       SCALING_DYNAMIC, 0.01, 0.0
-    },
-    { "VEL", 
+    }
+    ,
+    { "TV",
+      "DBZV",
+      "vertical_reflectivity",
+      "equivalent_reflectivity_factor",
+      "dBZ",
+      OUTPUT_ENCODING_INT16,
+      SCALING_DYNAMIC, 0.01, 0.0
+    }
+    ,
+    { "VRAD", 
       "VEL", 
       "radial_velocity",
       "radial_velocity_of_scatterers_away_from_instrument",
       "m/s", 
+      OUTPUT_ENCODING_INT16,
+      SCALING_DYNAMIC, 0.01, 0.0
+    }
+    ,
+    { "WRAD", 
+      "WIDTH", 
+      "spectrum_width",
+      "doppler_spectrum_width",
+      "m/s", 
+      OUTPUT_ENCODING_INT16,
+      SCALING_DYNAMIC, 0.01, 0.0
+    }
+    ,
+    { "TDR", 
+      "ZDR", 
+      "differential_reflectivity",
+      "differential_reflectivity_hv",
+      "dB", 
       OUTPUT_ENCODING_ASIS,
+      SCALING_DYNAMIC, 0.01, 0.0
+    }
+    ,
+    { "PHIDP", 
+      "PHIDP", 
+      "differential_phase",
+      "differential_phase_hv",
+      "deg", 
+      OUTPUT_ENCODING_INT16,
+      SCALING_DYNAMIC, 0.01, 0.0
+    }
+    ,
+    { "RHOHV", 
+      "RHOHV", 
+      "correlation_coefficient",
+      "correlation_coefficient_hv",
+      "", 
+      OUTPUT_ENCODING_INT16,
+      SCALING_DYNAMIC, 0.01, 0.0
+    }
+    ,
+    { "KDP", 
+      "KDP", 
+      "specific_differential_phase",
+      "specific_differential_phase_hv",
+      "deg/km", 
+      OUTPUT_ENCODING_INT16,
+      SCALING_DYNAMIC, 0.01, 0.0
+    }
+    ,
+    { "CM", 
+      "CM", 
+      "what_is_this",
+      "what_is_this",
+      "??", 
+      OUTPUT_ENCODING_INT16,
+      SCALING_DYNAMIC, 0.01, 0.0
+    }
+    ,
+    { "VRAD", 
+      "VEL", 
+      "radial_velocity",
+      "radial_velocity_of_scatterers_away_from_instrument",
+      "m/s", 
+      OUTPUT_ENCODING_INT16,
       SCALING_DYNAMIC, 0.01, 0.0
     }
   };

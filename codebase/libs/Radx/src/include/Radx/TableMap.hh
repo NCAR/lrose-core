@@ -18,6 +18,7 @@ public:
   ~TableMap();
   int ImportTables();
   TableMapElement Retrieve(unsigned short key);
+  bool filled();
 
 private:
   std::map<unsigned short, TableMapElement> table;  // TODO: should be unordered_map

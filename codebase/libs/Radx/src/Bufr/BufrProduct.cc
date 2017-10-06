@@ -48,7 +48,7 @@ using namespace std;
 BufrProduct::BufrProduct()
 {
   //replicators.reserve(5);
-  //dataBuffer.
+  dataBuffer = NULL;
   reset();
 }
 
@@ -69,7 +69,8 @@ void BufrProduct::reset() {
   if (dataBuffer != NULL)
     free(dataBuffer);
   dataBuffer = NULL;
-  // TODO: reset the replictors vector
+  sweepData.clear(); // assume that the Rays are copied
+  // TODO: reset the replicators vector
 }
 
 void BufrProduct::allocateSpace(unsigned int n) {

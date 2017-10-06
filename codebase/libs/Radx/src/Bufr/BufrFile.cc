@@ -54,18 +54,15 @@ using namespace std;
 BufrFile::BufrFile()
   
 {
-
-  //_ncFormat = Nc3File::Classic;
-
-  _file = NULL;
   _debug = false;
-  //_errString.clear();
-
+  _verbose = false;
+  _file = NULL;
+  GTree = NULL;
   clear();
-
-
 }
 
+
+  
 /////////////
 // destructor
 
@@ -86,6 +83,40 @@ void BufrFile::clear()
   _pathInUse.clear();
   _firstBufferReplenish = true;
   _errString.clear();
+  _file = NULL;
+  freeTree(GTree);
+  //GTree = NULL;
+  _descriptorsToProcess.clear();
+  nOctetsRead = 0;
+}
+
+
+// go ahead and read all the data from the file
+// completely fill currentProduct with data
+void BufrFile::readThatField(string fileName,
+             string filePath,
+             time_t fileTime,
+             string fieldName,
+             string standardName,
+             string longName,
+             string units,
+             bool debug,
+		   bool verbose) {
+
+  clear();
+  _pathInUse = filePath;
+  try {
+    openRead(_pathInUse); // path);
+    readSection0();
+    readSection1();
+    readDataDescriptors();
+    readData(); 
+    close();
+  } catch (const char *msg) {
+    //_addErrStr(msg);
+    throw _errString.c_str();
+    //return -1;
+  }
 }
 
 /*
@@ -321,7 +352,6 @@ int BufrFile::readSection1()
     sectionLen = nBytes;
 
     cerr << "sectionLen " << sectionLen << endl;
-
     Radx::ui08 *buffer;
     buffer = (Radx::ui08 *) calloc(sectionLen, sizeof(Radx::ui08));
     memset(buffer, 0, sectionLen);
@@ -338,8 +368,8 @@ int BufrFile::readSection1()
     }
 
 
-    Radx::ui08 bufrMasterTable;
-    bufrMasterTable = buffer[0];
+    //Radx::ui08 bufrMasterTable;
+    //bufrMasterTable = buffer[0];  // not sure if this is needed??
     // check 1st bit of the octect for optional section 2
     bool section2 = buffer[6]; //  & 0x80; 
     _s1.hasSection2 = section2;
@@ -394,6 +424,9 @@ int BufrFile::readSection1()
         seconds << endl;
       //}
 
+      hdr_year = yearOfCentury;
+      hdr_month = month;
+      hdr_day = day;
       printf("year-month-day hour:minute:sec\n%d-%d-%d %d:%d:%d\n",
 	     yearOfCentury, month, day, hour, minute, seconds); 
     
@@ -511,7 +544,8 @@ int BufrFile::readData() {  // read section 4
   }
 
   try {
-    tableMap.ImportTables();
+    if (!tableMap.filled())
+      tableMap.ImportTables();
   } catch (const char *msg) {
     Radx::addErrStr(_errString, "ERROR - ", msg, true);
     throw _errString.c_str();
@@ -544,10 +578,6 @@ int BufrFile::readData() {  // read section 4
 
 int BufrFile::ReplenishBuffer() {
 
-  //static bool first = true;
-  static int nOctetsRead = 0;
-  //bool _debug = false;
-
   if (_firstBufferReplenish) { // (first) {
     fread(_dataBuffer, 1, 4, _file);
     _firstBufferReplenish = false;
@@ -556,12 +586,12 @@ int BufrFile::ReplenishBuffer() {
   nBytesRead = fread(_dataBuffer, 1, MAX_BUFFER_SIZE_BYTES, _file);
 
   nOctetsRead += nBytesRead;
-  printf("nOctetsRead = %d\n", nOctetsRead);
+  if (_debug) printf("nOctetsRead = %d\n", nOctetsRead);
 
   _numBytesRead += nBytesRead;
-  printf("Read %d/%d bytes ", _numBytesRead, _s0.nBytes);
+  if (_debug) printf("Read %d/%d bytes ", _numBytesRead, _s0.nBytes);
 
-  if (_debug) {
+  if (_verbose) {
     printf("buffer: ");
     for (int i=0; i<MAX_BUFFER_SIZE_BYTES; i++) 
       printf("%0x ", _dataBuffer[i]);
@@ -577,7 +607,6 @@ bool BufrFile::NextBit() {
   unsigned char mask;
   int bitPosition;
   bool bitValue;
-  static bool endOfFile = false;
 
     bitPosition = 7 - currentBufferIndexBits % 8;
     mask = 1 << bitPosition;
@@ -597,7 +626,7 @@ bool BufrFile::NextBit() {
       currentBufferLengthBits = currentBufferLengthBytes * 8;
       currentBufferIndexBits = 0;
       if (currentBufferLengthBits <= 0) {
-        endOfFile = true;  // TODO: throw an exception
+        throw "ERROR - End of file reached before end of descriptors.";
       }
     }
     return bitValue;
@@ -608,8 +637,7 @@ bool BufrFile::NextBit() {
 string BufrFile::ExtractText(int nBits) {
 
   string val;
-  int idx;
-  unsigned char mask;
+  // unsigned char mask;
   unsigned char character;
 
   val.clear();
@@ -623,13 +651,9 @@ string BufrFile::ExtractText(int nBits) {
 
   int i=0;
   bool endOfFile = false;
-  int bitPosition;
+  //int bitPosition;
   // move one bit at a time
   while ((i<nBits) && (!endOfFile)) {
-    // bitPosition = 7 - currentBufferIndexBits % 8;
-    // mask = 1 << bitPosition;
-    // idx = currentBufferIndexBits / 8;
-    // if (mask & _dataBuffer[idx]) {
     if (NextBit()) {
       // insert a 1
       character = character * 2 + 1;
@@ -661,9 +685,8 @@ string BufrFile::ExtractText(int nBits) {
 Radx::ui32 BufrFile::ExtractIt(int nBits) {
 
   Radx::ui32 val;
-  int idx;
-  unsigned char mask;
-  //bool _debug = true;
+  //int idx;
+  //unsigned char mask;
 
   if (_debug) {
     printf(" nBits=%d\n", nBits);
@@ -679,7 +702,7 @@ Radx::ui32 BufrFile::ExtractIt(int nBits) {
   val = 0;
   int i=0;
   bool endOfFile = false;
-  int bitPosition;
+  //int bitPosition;
   while ((i<nBits) && (!endOfFile)) {
     if (NextBit()) {
       // insert a 1
@@ -700,9 +723,9 @@ Radx::ui32 BufrFile::ExtractIt(int nBits) {
 
 // TODO: not working ... need to fix it
 void BufrFile::SkipIt(int nBits) {
-  int val;
-  int idx;
-  unsigned char mask;
+  //int val;
+  //int idx;
+  //unsigned char mask;
 
   printf("entered non working code; exiting. \n");
   exit(1);
@@ -713,11 +736,11 @@ Radx::ui32 BufrFile::Apply(TableMapElement f) {
   if (f._whichType != TableMapElement::DESCRIPTOR) {
     return -1;
   }
-  if (0) { 
+  if (_debug) {
     cout << "Applying " << endl;
     cout << "  " << f._descriptor.fieldName << " ";
 
-    for (int i=0; i<50-f._descriptor.fieldName.size(); i++)
+    for (unsigned int i=0; i<50-f._descriptor.fieldName.size(); i++)
       cout << "-";
     cout << " " << f._descriptor.dataWidthBits << endl;
     cout << " scale  " << f._descriptor.scale << endl;
@@ -753,7 +776,7 @@ Radx::ui32 BufrFile::Apply(TableMapElement f) {
 //  -3 -2 -1 0 1 2 3
 double BufrFile::fastPow10(int n)
 {
-  static double pow10[21] = {
+  double pow10[21] = {
     .0000000001, .000000001, .00000001, .0000001, .000001,
          .00001, .0001, .001, .01, .1,
         1, 10, 100, 1000, 10000, 
@@ -772,16 +795,18 @@ Radx::si32 BufrFile::ApplyNumeric(TableMapElement f) {
   if (f._whichType != TableMapElement::DESCRIPTOR) {
     return -1;
   } 
-  if (0) {
+  if (_debug) {
+    if (f._descriptor.fieldName.find("Byte element") == string::npos) {
     cout << "Applying " << endl;
     cout << "  " << f._descriptor.fieldName << " ";
 
-    for (int i=0; i<50-f._descriptor.fieldName.size(); i++)
+    for (unsigned int i=0; i<50-f._descriptor.fieldName.size(); i++)
       cout << "-";
     cout << " " << f._descriptor.dataWidthBits << endl;
     cout << " scale  " << f._descriptor.scale << endl;
     cout << " units  " << f._descriptor.units << endl;;
     cout << " reference value " << f._descriptor.referenceValue << endl;
+    }
   }
   if (f._descriptor.units.find("CCITT") != string::npos) {
     string  value;
@@ -797,8 +822,9 @@ Radx::si32 BufrFile::ApplyNumeric(TableMapElement f) {
     temp = f._descriptor.referenceValue;
     temp = value + temp;
     temp  = temp/fastPow10(f._descriptor.scale);
-    //cout << "converted to " << svalue << endl;
+
     svalue = (Radx::si32) temp;
+    if (_debug) cout << "converted to " << svalue << endl;
     return svalue;
   }
 }
@@ -808,16 +834,18 @@ Radx::fl32 BufrFile::ApplyNumericFloat(TableMapElement f) {
   if (f._whichType != TableMapElement::DESCRIPTOR) {
     return -1;
   } 
-  if (0) {
+  if (_debug) {
+    if (f._descriptor.fieldName.find("Byte element") == string::npos) {
     cout << "Applying " << endl;
     cout << "  " << f._descriptor.fieldName << " ";
 
-    for (int i=0; i<50-f._descriptor.fieldName.size(); i++)
+    for (unsigned int i=0; i<50-f._descriptor.fieldName.size(); i++)
       cout << "-";
     cout << " " << f._descriptor.dataWidthBits << endl;
     cout << " scale  " << f._descriptor.scale << endl;
     cout << " units  " << f._descriptor.units << endl;;
     cout << " reference value " << f._descriptor.referenceValue << endl;
+    }
   }
   if (f._descriptor.units.find("CCITT") != string::npos) {
     string  value;
@@ -833,8 +861,9 @@ Radx::fl32 BufrFile::ApplyNumericFloat(TableMapElement f) {
     temp = f._descriptor.referenceValue;
     temp = value + temp;
     temp  = temp/fastPow10(f._descriptor.scale);
-    //cout << "converted to " << svalue << endl;
+
     svalue = (Radx::fl32) temp;
+    if (_debug) cout << "converted to " << svalue << endl;
     return svalue;
   }
 }
@@ -888,6 +917,7 @@ bool BufrFile::StuffIt(string fieldName, double value) {
   
   } else if (fieldName.find("type of product") != string::npos) {
     int code = (int) value;
+    // TODO: make sure the type of product agrees with the field name
     switch(code) {
     case 0:
       currentProduct.typeOfProduct = "DBZH";
@@ -928,19 +958,19 @@ bool BufrFile::StuffIt(string fieldName, double value) {
   return ok;
 }
 
-int BufrFile::getTimeDimension() {
+size_t BufrFile::getTimeDimension() {
   return currentProduct.nAzimuths;
 }
 
-int BufrFile::getRangeDimension() {
+size_t BufrFile::getRangeDimension() {
   return currentProduct.nBinsAlongTheRadial;
 }
 
-int BufrFile::getNumberOfSweeps() {
+size_t BufrFile::getNumberOfSweeps() {
   return currentProduct.sweepData.size();
 }
 
-int BufrFile::getNBinsAlongTheRadial() {
+size_t BufrFile::getNBinsAlongTheRadial() {
   return currentProduct.nBinsAlongTheRadial;
 }
 
@@ -1324,12 +1354,29 @@ void BufrFile::printTree(DNode *tree, int level) {
   if (level == 0) printf("tree: \n");
   while (p!=NULL) {
     for (int i=0; i<level; i++) printf(" ");
-    printf("+(%d) delayed_rep %d\n", p->des, p->delayed_repeater);
+    printf("+(%d) delayed_rep %u\n", p->des, p->delayed_repeater);
     q=p->children;
     if (q != NULL) {
       printTree(q, level+1);
     }
     p=p->next;
+  }
+}
+
+void BufrFile::freeTree(DNode *tree) {
+  DNode *p,*q;
+  p = tree;
+  while (p!=NULL) {
+    // free the children
+    q=p->children;
+    if (q != NULL) {
+      freeTree(q);
+    }
+    DNode *temp;
+    temp = p;
+    p=p->next;
+    if (_debug) printf("freeing %d\n", temp->des);
+    free(temp);
   }
 }
 
@@ -1416,8 +1463,12 @@ int BufrFile::_descend(DNode *tree) {
       }
       Radx::fl32 valueFromData;
       if (val1.IsText()) {
-	Radx::ui32 junk;
-        junk = Apply(val1); // TODO: integrate a string type here  
+	// THE NEXT TWO LINES ARE CRUCIAL!! DO NOT REMOVE IT!!!
+	//	Radx::ui32 junk;
+	// junk = Apply(val1); // TODO: integrate a string type here; or toss exception? 
+	// we don't care about the return value when the descriptor is text
+	Apply(val1); 
+        //; //cerr << "Apply text value not implemented" << endl;
       } else {
         valueFromData = ApplyNumericFloat(val1);
         if (!StuffIt(val1._descriptor.fieldName, valueFromData)) {
@@ -1713,645 +1764,5 @@ int BufrFile::Print() {
 
   return 0;
 }
-/*
 
-
-/////////////////////////////////////
-// read int variable, set var and val
-// Returns 0 on success, -1 on failure
-
-int BufrFile::readIntVar(Nc3Var* &var, const string &name,
-                         int &val, int missingVal, bool required)
-  
-{
-  
-  var = _ncFile->get_var(name.c_str());
-  if (var == NULL) {
-    if (!required) {
-      val = missingVal;
-      return 0;
-    } else {
-      _addErrStr("ERROR - BufrFile::readIntVar");
-      _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr("  file: ", _pathInUse);
-      _addErrStr(_err->get_errmsg());
-      return -1;
-    }
-  }
-
-  // check size
-  
-  if (var->num_vals() < 1) {
-    _addErrStr("ERROR - BufrFile::readIntVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has no data");
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-
-  val = var->as_int(0);
-  
-  return 0;
-  
-}
-
-///////////////////////////////////
-// read int variable, set val
-
-int BufrFile::readIntVal(const string &name, 
-                         int &val, int missingVal,
-                         bool required)
-  
-{
-  
-  val = missingVal;
-
-  Nc3Var*var = _ncFile->get_var(name.c_str());
-  if (var == NULL) {
-    if (required) {
-      _addErrStr("ERROR - BufrFile::_readIntVal");
-      _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr("  file: ", _pathInUse);
-      _addErrStr(_err->get_errmsg());
-    }
-    return -1;
-  }
-  
-  // check size
-  
-  if (var->num_vals() < 1) {
-    if (required) {
-      _addErrStr("ERROR - BufrFile::_readIntVal");
-      _addErrStr("  variable name: ", name);
-      _addErrStr("  variable has no data");
-      _addErrStr("  file: ", _pathInUse);
-    }
-    return -1;
-  }
-
-  val = var->as_int(0);
-  
-  return 0;
-  
-}
-
-///////////////////////////////////
-// read float variable
-// Returns 0 on success, -1 on failure
-
-int BufrFile::readFloatVar(Nc3Var* &var, const string &name,
-                           float &val, 
-                           float missingVal, bool required)
-
-{
-  
-  var = _ncFile->get_var(name.c_str());
-  if (var == NULL) {
-    if (!required) {
-      val = missingVal;
-      return 0;
-    } else {
-      _addErrStr("ERROR - BufrFile::readFloatVar");
-      _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr("  file: ", _pathInUse);
-      _addErrStr(_err->get_errmsg());
-      return -1;
-    }
-  }
-
-  // check size
-  
-  if (var->num_vals() < 1) {
-    _addErrStr("ERROR - BufrFile::readFloatVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has no data");
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-
-  val = var->as_float(0);
-  
-  return 0;
-  
-}
-
-///////////////////////////////////
-// read float value
-
-int BufrFile::readFloatVal(const string &name,
-                           float &val,
-                           float missingVal,
-                           bool required)
-  
-{
-  
-  val = missingVal;
-  
-  Nc3Var* var = _ncFile->get_var(name.c_str());
-  if (var == NULL) {
-    if (required) {
-      _addErrStr("ERROR - BufrFile::readFloatVal");
-      _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr(_err->get_errmsg());
-    }
-    return -1;
-  }
-  
-  // check size
-  
-  if (var->num_vals() < 1) {
-    if (required) {
-      _addErrStr("ERROR - BufrFile::readFloatVal");
-      _addErrStr("  variable name: ", name);
-      _addErrStr("  variable has no data");
-    }
-    return -1;
-  }
-
-  val = var->as_float(0);
-  
-  return 0;
-  
-}
-
-///////////////////////////////////
-// read double variable
-// Returns 0 on success, -1 on failure
-
-int BufrFile::readDoubleVar(Nc3Var* &var, const string &name,
-                            double &val, 
-                            double missingVal, bool required)
-  
-{
-  
-  var = _ncFile->get_var(name.c_str());
-  if (var == NULL) {
-    if (!required) {
-      val = missingVal;
-      return 0;
-    } else {
-      _addErrStr("ERROR - BufrFile::readDoubleVar");
-      _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr("  file: ", _pathInUse);
-      _addErrStr(_err->get_errmsg());
-      return -1;
-    }
-  }
-
-  // check size
-  
-  if (var->num_vals() < 1) {
-    _addErrStr("ERROR - BufrFile::readDoubleVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has no data");
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-
-  val = var->as_double(0);
-  
-  return 0;
-  
-}
-*/
-/*
-///////////////////////////////////
-// read double value
-
-int BufrFile::readDoubleVal(const string &name,
-                            double &val,
-                            double missingVal,
-                            bool required)
-
-{
-  
-  val = missingVal;
-
-  Nc3Var* var = _ncFile->get_var(name.c_str());
-  if (var == NULL) {
-    if (required) {
-      _addErrStr("ERROR - BufrFile::readDoubleVal");
-      _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr(_err->get_errmsg());
-    }
-    return -1;
-  }
-
-  // check size
-  
-  if (var->num_vals() < 1) {
-    if (required) {
-      _addErrStr("ERROR - BufrFile::readDoubleVal");
-      _addErrStr("  variable name: ", name);
-      _addErrStr("  variable has no data");
-    }
-    return -1;
-  }
-
-  val = var->as_double(0);
-  
-  return 0;
-  
-}
-
-///////////////////////////////////
-// read a scalar string variable
-// Returns 0 on success, -1 on failure
-
-int BufrFile::readStringVar(Nc3Var* &var, const string &name, string &val)
-
-{
-
-  // get var
-  
-  var = _ncFile->get_var(name.c_str());
-  if (var == NULL) {
-    _addErrStr("ERROR - BufrFile::readStringVar");
-    _addErrStr("  Cannot read variable, name: ", name);
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-
-  // check dimension
-  
-  if (var->num_dims() != 1) {
-    _addErrStr("ERROR - BufrFile::readStringVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable does not have 1 dimension");
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-  Nc3Dim *stringLenDim = var->get_dim(0);
-  if (stringLenDim == NULL) {
-    _addErrStr("ERROR - BufrFile::readStringVar");
-    _addErrStr("  variable name: ", name);
-    _addErrStr("  variable has NULL 0th dimension");
-    _addErrStr("  should be a string length dimension");
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-  
-  Nc3Type ntype = var->type();
-  if (ntype != nc3Char) {
-    _addErrStr("ERROR - BufrFile::readStringVar");
-    _addErrStr("  Incorrect variable type");
-    _addErrStr("  expecting char");
-    _addErrStr("  found: ", ncTypeToStr(ntype));
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-
-  // load up data
-
-  int stringLen = stringLenDim->size();
-  char *cvalues = new char[stringLen+1];
-  if (var->get(cvalues, stringLen)) {
-    // ensure null termination
-    cvalues[stringLen] = '\0';
-    val = cvalues;
-  } else {
-    _addErrStr("ERROR - BufrFile::readStringVar");
-    _addErrStr("  Cannot read variable: ", name);
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  delete[] cvalues;
-
-  return 0;
-
-}
-
-
-///////////////////////////////////////////////////////////////////////////
-// write a scalar double variable
-// Returns 0 on success, -1 on failure
-
-int BufrFile::writeVar(Nc3Var *var, double val)
-  
-{
-  
-  if (var == NULL) {
-    _addErrStr("ERROR - BufrFile::writeVar");
-    _addErrStr("  var is NULL");
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-  
-  if (var->type() != nc3Double) {
-    _addErrStr("ERROR - BufrFile::writeVar");
-    _addErrStr("  var type should be double, name: ", var->name());
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-  
-  if (!var->put(&val, 1)) {
-    _addErrStr("ERROR - BufrFile::writeVar");
-    _addErrStr("  Cannot write scalar double var, name: ", var->name());
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  } else {
-    return 0;
-  }
-
-}
-
-///////////////////////////////////////////////////////////////////////////
-// write a scalar float variable
-// Returns 0 on success, -1 on failure
-
-int BufrFile::writeVar(Nc3Var *var, float val)
-  
-{
-  
-  if (var == NULL) {
-    _addErrStr("ERROR - BufrFile::writeVar");
-    _addErrStr("  var is NULL");
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-  
-  if (var->type() != nc3Float) {
-    _addErrStr("ERROR - BufrFile::writeVar");
-    _addErrStr("  var type should be float, name: ", var->name());
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-  
-  if (!var->put(&val, 1)) {
-    _addErrStr("ERROR - BufrFile::writeVar");
-    _addErrStr("  Cannot write scalar float var, name: ", var->name());
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  } else {
-    return 0;
-  }
-
-}
-
-///////////////////////////////////////////////////////////////////////////
-// write a scalar int variable
-// Returns 0 on success, -1 on failure
-
-int BufrFile::writeVar(Nc3Var *var, int val)
-  
-{
-  
-  if (var == NULL) {
-    _addErrStr("ERROR - BufrFile::writeVar");
-    _addErrStr("  var is NULL");
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-  
-  if (var->type() != nc3Int) {
-    _addErrStr("ERROR - BufrFile::writeVar");
-    _addErrStr("  var type should be int, name: ", var->name());
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-  
-  if (!var->put(&val, 1)) {
-    _addErrStr("ERROR - BufrFile::writeVar");
-    _addErrStr("  Cannot write scalar int var, name: ", var->name());
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  } else {
-    return 0;
-  }
-
-}
-
-///////////////////////////////////////////////////////////////////////////
-// write a 1-D vector variable
-// number of elements specified in dimension
-// Returns 0 on success, -1 on failure
-
-int BufrFile::writeVar(Nc3Var *var, const Nc3Dim *dim, const void *data)
-  
-{
-  return writeVar(var, dim, dim->size(), data);
-}
-
-///////////////////////////////////////////////////////////////////////////
-// write a 1-D vector variable
-// number of elements specified in arguments
-// Returns 0 on success, -1 on failure
-
-int BufrFile::writeVar(Nc3Var *var, 
-                       const Nc3Dim *dim, size_t count, 
-                       const void *data)
-  
-{
-  
-  if (var == NULL) {
-    _addErrStr("ERROR - BufrFile::_writeVar");
-    _addErrStr("  var is NULL");
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-
-  int iret = 0;
-  
-  switch (var->type()) {
-    case nc3Double: {
-      iret = !var->put((double *) data, count);
-      break;
-    }
-    case nc3Float:
-    default: {
-      iret = !var->put((float *) data, count);
-      break;
-    }
-    case nc3Int: {
-      iret = !var->put((int *) data, count);
-      break;
-    }
-    case nc3Short: {
-      iret = !var->put((short *) data, count);
-      break;
-    }
-    case nc3Byte: {
-      iret = !var->put((ncbyte *) data, count);
-      break;
-    }
-  } // switch
-
-  if (iret) {
-    _addErrStr("ERROR - BufrFile::writeVar");
-    _addErrStr("  Cannot write var, name: ", var->name());
-    _addErrStr("  Dim name: ", dim->name());
-    _addErrInt("  Count: ", count);
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  } else {
-    return 0;
-  }
-
-}
-
-
-///////////////////////////////////////////////////////////////////////////
-// write a string variable
-// Returns 0 on success, -1 on failure
-
-int BufrFile::writeStringVar(Nc3Var *var, const void *str)
-  
-{
-  
-  if (var == NULL) {
-    _addErrStr("ERROR - BufrFile::writeStringVar");
-    _addErrStr("  var is NULL");
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-  
-  int nDims = var->num_dims();
-  if (nDims < 1) {
-    _addErrStr("ERROR - BufrFile::writeStringVar");
-    _addErrStr("  var has no dimensions");
-    _addErrStr("  var name: ", var->name());
-    _addErrStr("  file: ", _pathInUse);
-    return -1;
-  }
-
-  if (nDims == 1) {
-
-    // single dimension
-
-    Nc3Dim *dim0 = var->get_dim(0);
-    if (dim0 == NULL) {
-      _addErrStr("ERROR - BufrFile::writeStringVar");
-      _addErrStr("  Canont write var, name: ", var->name());
-      _addErrStr("  dim 0 is NULL");
-      _addErrStr("  file: ", _pathInUse);
-      return -1;
-    }
-
-    int iret = !var->put((char *) str, dim0->size());
-  
-    if (iret) {
-      _addErrStr("ERROR - BufrFile::writeStringVar");
-      _addErrStr("  Canont write var, name: ", var->name());
-      _addErrStr(_err->get_errmsg());
-      _addErrStr("  file: ", _pathInUse);
-      return -1;
-    } else {
-      return 0;
-    }
-
-  }
-
-  if (nDims == 2) {
-
-    // two dimensions
-
-    Nc3Dim *dim0 = var->get_dim(0);
-    if (dim0 == NULL) {
-      _addErrStr("ERROR - BufrFile::writeStringVar");
-      _addErrStr("  Canont write var, name: ", var->name());
-      _addErrStr("  dim 0 is NULL");
-      _addErrStr("  file: ", _pathInUse);
-      return -1;
-    }
-
-    Nc3Dim *dim1 = var->get_dim(1);
-    if (dim1 == NULL) {
-      _addErrStr("ERROR - BufrFile::writeStringVar");
-      _addErrStr("  Canont write var, name: ", var->name());
-      _addErrStr("  dim 1 is NULL");
-      _addErrStr("  file: ", _pathInUse);
-      return -1;
-    }
-
-    int iret = !var->put((char *) str, dim0->size(), dim1->size());
-    
-    if (iret) {
-      _addErrStr("ERROR - BufrFile::writeStringVar");
-      _addErrStr("  Canont write var, name: ", var->name());
-      _addErrInt("                    type: ", var->type());
-      _addErrInt("                    is_valid: ", var->is_valid());
-      _addErrStr("  file: ", _pathInUse);
-      _addErrStr(_err->get_errmsg());
-      return -1;
-    } else {
-      return 0;
-    }
-
-  }
-
-  // more than 2 is an error
-  
-  _addErrStr("ERROR - BufrFile::writeStringVar");
-  _addErrStr("  Canont write var, name: ", var->name());
-  _addErrInt("  more than 2 dimensions: ", nDims);
-  _addErrStr("  file: ", _pathInUse);
-  return -1;
-
-}
-
-///////////////////////////////////////////////////////////////////////////
-// compress a variable
-
-int BufrFile::compressVar(Nc3Var *var, int compressionLevel)
-{
-  
-  if (_ncFormat == Nc3File::Netcdf4Classic ||
-      _ncFormat == Nc3File::Offset64Bits) {
-    // cannot compress
-    return 0;
-  }
-
-  if (var == NULL) {
-    _addErrStr("ERROR - BufrFile::setVarCompression");
-    _addErrStr("  var is NULL");
-    return -1;
-  }
-  
-  int fileId = _ncFile->id();
-  int varId = var->id();
-  int shuffle = 0;
-  
-  if (nc_def_var_deflate(fileId, varId, shuffle,
-                         true, compressionLevel)!= NC_NOERR) {
-    _addErrStr("ERROR: FieldData::setCompression");
-    _addErrStr("  Problem setting compression for var: ",
-               var->name());
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-
-  return 0;
-
-}
-
-////////////////////////////////////////
-// convert type enum to strings
-
-string BufrFile::ncTypeToStr(Nc3Type nctype)
-  
-{
-  
-  switch (nctype) {
-    case nc3Double:
-      return "nc3Double";
-    case nc3Float:
-      return "nc3Float";
-    case nc3Int:
-      return "nc3Int";
-    case nc3Short:
-      return "nc3Short";
-    case nc3Byte:
-    default:
-      return "nc3Byte";
-  }
-  
-}
-*/
 

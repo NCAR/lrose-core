@@ -116,10 +116,10 @@ public:
     TimeStamp startTime;
     TimeStamp endTime;
     double    antennaElevationDegrees;
-    int       nBinsAlongTheRadial;
+    size_t      nBinsAlongTheRadial;
     double    rangeBinSizeMeters;
     double    rangeBinOffsetMeters;
-    int       nAzimuths;
+    size_t       nAzimuths;
     double    antennaBeamAzimuthDegrees;
 
   typedef struct {
@@ -131,10 +131,10 @@ public:
     TimeStamp startTime;
     TimeStamp endTime;
     double    antennaElevationDegrees;
-    int       nBinsAlongTheRadial;
+    size_t       nBinsAlongTheRadial;
     double    rangeBinSizeMeters;
     double    rangeBinOffsetMeters;
-    int       nAzimuths;
+    size_t       nAzimuths;
     double    antennaBeamAzimuthDegrees;
     vector<ParameterData> parameterData;
 

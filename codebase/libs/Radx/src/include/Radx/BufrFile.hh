@@ -62,14 +62,38 @@ public:
   /// Constructor
   
   BufrFile();
+
+
   
   /// Destructor
   
   virtual ~BufrFile();
 
+
+  void setDebug(bool state) { _debug = state; }
+
+  /// Set verbose debugging on/off.
+  ///
+  void setVerbose(bool state) {
+    _verbose = state;
+    if (_verbose) _debug = true;
+  }
+
   //////////////////////////////////////////////////////////////
   /// \name File operations
   //@{
+
+  /// read the data for the field
+  /// 
+  void readThatField(string fileName,
+             string filePath,
+             time_t fileTime,
+             string fieldName,
+             string standardName,
+             string longName,
+             string units,
+             bool debug,
+             bool verbose);
 
   /// open for reading
   /// Returns 0 on success, -1 on failure
@@ -103,9 +127,9 @@ public:
   double latitude;
   double longitude;
   double height;
-  int year;
-  int month;
-  int day;
+  int hdr_year;
+  int hdr_month;
+  int hdr_day;
   int hour;
   int minute;
 
@@ -114,11 +138,11 @@ public:
   string typeOfStationId;
   string stationId;
 
-  int getNumberOfSweeps();
-  int getTimeDimension();
-  int getRangeDimension();
+  size_t getNumberOfSweeps();
+  size_t getTimeDimension();
+  size_t getRangeDimension();
 
-  int getNBinsAlongTheRadial();
+  size_t getNBinsAlongTheRadial();
   double getRangeBinOffsetMeters();
   double getRangeBinSizeMeters();
 
@@ -148,8 +172,6 @@ private:
   int ReplenishBuffer();
   bool NextBit();
 
-
-  // Product90_243 product90_243;
   BufrProduct currentProduct;
   //vector<int> repeaters;
 
@@ -224,6 +246,7 @@ private:
   void _deleteAfter(DNode *p);
   int moveChildren(DNode *parent, int howManySiblings);
   void printTree(DNode *tree, int level);
+  void freeTree(DNode *tree);
 
 #define  MAX_BUFFER_SIZE_BYTES  2048
 
@@ -232,6 +255,7 @@ private:
   int currentBufferLengthBits;
   int currentBufferLengthBytes;
   int currentBufferIndexBits;
+  int nOctetsRead;
   //int currentBufferIndexBytes;
 
   std::vector<unsigned short> _descriptorsToProcess;
@@ -239,51 +263,13 @@ private:
   TableMap tableMap;
 
   bool _debug;
-
-  //pushToRadxVol(double *realData, BufrProduct currentProduct);
+  bool _verbose;
   
 /*
   //////////////////////////////////////////////////////////////
   /// \name Attributes
   //@{
    
-  /// add string global attribute
-  /// Returns 0 on success, -1 on failure
-
-  int addGlobAttr(const string &name, const string &val);
-
-  /// add int, float or double global attribute
-  /// Returns 0 on success, -1 on failure
-  
-  int addGlobAttr(const string &name, int val);
-  int addGlobAttr(const string &name, float val);
-  int addGlobAttr(const string &name, double val);
-
-  /// add int[], float[] or double[] global attribute
-  /// Returns 0 on success, -1 on failure
-  
-  int addGlobAttr(const string &name, int len, int *vals);
-  int addGlobAttr(const string &name, int len, float *vals);
-  int addGlobAttr(const string &name, int len, double *vals);
-
-  // read a global attribute
-  // Returns 0 on success, -1 on failure
-  
-  int readGlobAttr(const string &name, string &val);
-  int readGlobAttr(const string &name, int &val);
-  int readGlobAttr(const string &name, float &val);
-  int readGlobAttr(const string &name, double &val);
-
-  /// add attribute of various types
-  /// Returns 0 on success, -1 on failure
-
-  int addAttr(Nc3Var *var, const string &name, const string &val);
-  int addAttr(Nc3Var *var, const string &name, ncbyte val);
-  int addAttr(Nc3Var *var, const string &name, short val);
-  int addAttr(Nc3Var *var, const string &name, int val);
-  int addAttr(Nc3Var *var, const string &name, long val);
-  int addAttr(Nc3Var *var, const string &name, float val);
-  int addAttr(Nc3Var *var, const string &name, double val);
 
   //@}
 
@@ -291,165 +277,19 @@ private:
   /// \name dimensions
   //@{
   
-  int addDim(Nc3Dim* &dim, const char *name, int size);
-  int readDim(const string &name, Nc3Dim* &dim);
-
   //@}
 
   //////////////////////////////////////////////////////////////
   /// \name variables
   //@{
   
-  /// Add scalar meta-data variable
-  /// Returns 0 on success, -1 on failure
-  
-  int addMetaVar(Nc3Var* &var, const string &name, 
-                 const string &standardName,
-                 const string &longName,
-                 Nc3Type ncType, 
-                 const string &units = "");
-  
-  // Add scalar meta-data variable
-  // Returns var on success, NULL on failure
-  
-  Nc3Var *addMetaVar(const string &name, 
-                    const string &standardName,
-                    const string &longName,
-                    Nc3Type ncType, 
-                    const string &units = "");
-  
-  /// Add 1-D array meta-data variable
-  /// Returns 0 on success, -1 on failure
-
-  int addMetaVar(Nc3Var* &var, const string &name, 
-                 const string &standardName,
-                 const string &longName,
-                 Nc3Type ncType, Nc3Dim *dim, 
-                 const string &units = "");
-  
-  // Add 1-D array meta-data variable
-  // Returns var on success, NULL on failure
-  
-  Nc3Var *addMetaVar(const string &name, 
-                    const string &standardName,
-                    const string &longName,
-                    Nc3Type ncType, 
-                    Nc3Dim *dim, 
-                    const string &units = "");
-
-  /// Add 2-D array meta-data variable
-  /// Returns 0 on success, -1 on failure
-  
-  int addMetaVar(Nc3Var* &var, const string &name, 
-                 const string &standardName,
-                 const string &longName,
-                 Nc3Type ncType, Nc3Dim *dim0, Nc3Dim *dim1, 
-                 const string &units = "");
-  
-  // Add 2-D array meta-data variable
-  // Returns var on success, NULL on failure
-  
-  Nc3Var *addMetaVar(const string &name,
-                    const string &standardName,
-                    const string &longName,
-                    Nc3Type ncType,
-                    Nc3Dim *dim0, Nc3Dim *dim1,
-                    const string &units = "");
-
-  /// read int variable, set var and val
-  /// Returns 0 on success, -1 on failure
-
-  int readIntVar(Nc3Var* &var, const string &name,
-                 int &val, int missingVal, bool required = true);
-  
-  /// read int variable, set val
-  /// Returns 0 on success, -1 on failure
-
-  int readIntVal(const string &name, int &val, 
-                 int missingVal, bool required = true);
-  
-  /// read float variable
-  /// Returns 0 on success, -1 on failure
-  
-  int readFloatVar(Nc3Var* &var, const string &name, float &val, 
-                   float missingVal, bool required = true);
-  
-  /// read float value
-  /// Returns 0 on success, -1 on failure
-  
-  int readFloatVal(const string &name, float &val,
-                   float missingVal, bool required = true);
-
-  /// read double variable
-  /// Returns 0 on success, -1 on failure
-  
-  int readDoubleVar(Nc3Var* &var, const string &name, double &val, 
-                    double missingVal, bool required = true);
-  
-  /// read double value
-  /// Returns 0 on success, -1 on failure
-  
-  int readDoubleVal(const string &name, double &val,
-                    double missingVal, bool required = true);
-
-  /// read a scalar string variable
-  /// Returns 0 on success, -1 on failure
-
-  int readStringVar(Nc3Var* &var, const string &name, string &val);
-  
-  /// write a scalar double variable
-  /// Returns 0 on success, -1 on failure
-
-  int writeVar(Nc3Var *var, double val);
-
-  /// write a scalar float variable
-  /// Returns 0 on success, -1 on failure
-  
-  int writeVar(Nc3Var *var, float val);
-
-  /// write a scalar int variable
-  /// Returns 0 on success, -1 on failure
-  
-  int writeVar(Nc3Var *var, int val);
-
-  /// write a 1-D vector variable
-  /// number of elements specified in dimension
-  /// Returns 0 on success, -1 on failure
-
-  int writeVar(Nc3Var *var, const Nc3Dim *dim, const void *data);
-
-  /// write a 1-D vector variable
-  /// number of elements specified in arguments
-  /// Returns 0 on success, -1 on failure
-  
-  int writeVar(Nc3Var *var, const Nc3Dim *dim, size_t count, 
-               const void *data);
-  
-  /// write a string variable
-  /// Returns 0 on success, -1 on failure
-
-  int writeStringVar(Nc3Var *var, const void *data);
-  
-  /// compress a variable
-
-  int compressVar(Nc3Var *var, int compressionLevel);
-
   //@}
 
   ///////////////////////////////
   /// \name Strings from nc items
   //@{
   
-  /// convert type enum to strings
-
-  static string ncTypeToStr(Nc3Type nctype);
-
-  /// get string representation of component
-
-  static string asString(const Nc3TypedComponent *component, int index = 0);
-  
-  //@}
-
+  */
   ////////////////////////
   /// \name Handles:
   //@{
@@ -458,18 +298,7 @@ private:
   
   string getPathInUse() const { return _pathInUse; }
   
-  /// Get the Nc format after a write
   
-  Nc3File::FileFormat getNc3FileFormat() const { return _ncFormat; }
-  
-  /// Get the Nc3File object
-  
-  Nc3File *getNc3File() { return _ncFile; }
-
-  /// Get the Nc3Error object
-  
-  Nc3Error *getNc3Error() { return _err; }
-
   //@}
 
   ////////////////////////
@@ -478,16 +307,16 @@ private:
   
   /// Clear error string.
   
-  void clearErrStr() { _errStr.clear(); }
+  void clearErrStr() { _errString.clear(); }
 
   /// Get the Error String.
   ///
   /// The contents are only meaningful if an error has returned.
   
-  string getErrStr() const { return _errStr; }
+  string getErrStr() const { return _errString; }
   
   //@}
-  */
+  
 protected:
 
 private:
@@ -504,10 +333,9 @@ private:
   string _pathInUse;
   bool _firstBufferReplenish;
 
-
-  //Nc3Error *_err;
-  //Nc3File::FileFormat _ncFormat;
-  /* 
+  // Error strings accumulate information and then 
+  // thrown as exceptions.
+  
   /// add integer value to error string, with label
   
   void _addErrInt(string label, int iarg,
@@ -522,11 +350,6 @@ private:
   
   void _addErrStr(string label, string strarg = "",
                   bool cr = true);
-  
-  // set fill value appropriately for the variable type
-  
-  void _setMetaFillvalue(Nc3Var *var);
-  */
 
 };
 #endif

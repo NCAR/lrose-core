@@ -79,9 +79,9 @@ private:
   int _nWarnCensorPrint;
 
   int _runFilelist();
-  //  int _runArchive();
-  //int _runRealtimeWithLdata();
-  //int _runRealtimeNoLdata();
+  int _runArchive();
+  int _runRealtimeWithLdata();
+  int _runRealtimeNoLdata();
   int _readFile(const string &filePath,
                 RadxVol &vol);
   void _finalizeVol(RadxVol &vol);
