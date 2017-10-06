@@ -1834,7 +1834,7 @@ int SunCal::_performAnalysis(bool force)
 
   // set the sun location
 
-  _sunPosn.setLocation(_radarLat, _radarLon, _radarAltKm / 1000.0);
+  _sunPosn.setLocation(_radarLat, _radarLon, _radarAltKm * 1000.0);
 
   // compute cal time as mean of start and end time
   
