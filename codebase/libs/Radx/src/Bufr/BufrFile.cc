@@ -776,7 +776,7 @@ Radx::ui32 BufrFile::Apply(TableMapElement f) {
 //  -3 -2 -1 0 1 2 3
 double BufrFile::fastPow10(int n)
 {
-  static double pow10[21] = {
+  double pow10[21] = {
     .0000000001, .000000001, .00000001, .0000001, .000001,
          .00001, .0001, .001, .01, .1,
         1, 10, 100, 1000, 10000, 

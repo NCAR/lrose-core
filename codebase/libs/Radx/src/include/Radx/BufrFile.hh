@@ -69,6 +69,16 @@ public:
   
   virtual ~BufrFile();
 
+
+  void setDebug(bool state) { _debug = state; }
+
+  /// Set verbose debugging on/off.
+  ///
+  void setVerbose(bool state) {
+    _verbose = state;
+    if (_verbose) _debug = true;
+  }
+
   //////////////////////////////////////////////////////////////
   /// \name File operations
   //@{

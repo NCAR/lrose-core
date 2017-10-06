@@ -60,7 +60,7 @@ BufrRadxFile::BufrRadxFile() : RadxFile()
   
 {
 
-  _debug = true;
+  //_debug = true;
   //_ncFormat = NETCDF_CLASSIC;
   _readVol = NULL;
   clear();
@@ -201,6 +201,9 @@ bool BufrRadxFile::isBufr(const string &path)
   }
   // open file
   BufrFile aFile;
+  aFile.setDebug(_debug);
+  aFile.setVerbose(_verbose);
+
   if (aFile.openRead(path)) {
     if (_debug) {
       cerr << "DEBUG openRead failed" << endl;
