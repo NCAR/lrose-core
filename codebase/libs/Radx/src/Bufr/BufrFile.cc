@@ -44,7 +44,7 @@
 #include <dirent.h>
 #include <algorithm>
 #include <Radx/TableMapKey.hh>
-//#include <Radx/TableMap.hh>
+#include <Radx/RadxStr.hh>
 
 using namespace std;
 
@@ -90,6 +90,16 @@ void BufrFile::clear()
   nOctetsRead = 0;
 }
 
+void BufrFile::setDebug(bool state) { 
+  _debug = state; 
+  currentProduct.setDebug(state);
+}
+
+void BufrFile::setVerbose(bool state) {
+    _verbose = state;
+    if (_verbose) _debug = true;
+    currentProduct.setVerbose(state);
+}
 
 // go ahead and read all the data from the file
 // completely fill currentProduct with data
@@ -99,9 +109,7 @@ void BufrFile::readThatField(string fileName,
              string fieldName,
              string standardName,
              string longName,
-             string units,
-             bool debug,
-		   bool verbose) {
+             string units) {
 
   clear();
   _pathInUse = filePath;
@@ -280,39 +288,26 @@ int BufrFile::readSection0()
     Radx::ui08 bufr_edition;
 
     if (fread(&bufr_edition, 1, 1, _file) != 1) {
-      //int errNum = errno;
-      //      _addErrStr("ERROR - DoradeRadxFile::_readSection0()");
-      //_addErrStr("  Cannot read data length");
-      //_addErrStr("  ID: ", id);
-      //_addErrStr("  File path: ", path);
-      //_addErrStr(strerror(errNum));
+      int errNum = errno;
+      bool cr = true;
+      RadxStr::addStr(_errString, "ERROR -", " BufrFile::_readSection0()",  cr);
+      RadxStr::addStr(_errString, "  Cannot read BUFR edition", strerror(errNum), cr);
       close();
-      return -1;
+      throw _errString.c_str();
     }
     _s0.edition = bufr_edition;   
     printf("BUFR edition number %d\n", bufr_edition); 
 
     _numBytesRead += 1;
-    // swap as needed
 
-    //-------------------
-
-    //}
-  /*
-  //dim = _ncFile->get_dim(name.c_str());
-  if (!_file->bufr_decode_sections01(&s1, &msg)) {
-    //fprintf (stderr, "FATAL: Unable to decode section 1\n");
-    //exit (EXIT_FAILURE);
-    _addErrStr("ERROR - BufrFile::readDim");
-    _addErrStr("  Cannot read dimension, name: ", name);
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  header_dump(&s1);
-  */
   return 0;
 }
+
+/*void BufrFile::printSection0() {
+
+  cout << "BUFR edition number: " << bufr_edition << endl; 
+}
+*/
 ///////////////////////////////////////////
 // read Section 1
 // which gives time and table info
@@ -397,7 +392,7 @@ int BufrFile::readSection1()
       _s1.masterTableVersionNumber = buffer[10];
 
       printf("master table: %d\n", _s1.masterTable);
-      printf("generatingc center: %d\n", _s1.generatingCenter);
+      printf("generating center: %d\n", _s1.generatingCenter);
       printf("originating subcenter: %d\n", _s1.originatingSubcenter);
       printf("update sequence number: %d\n", _s1.updateSequenceNumber);
       printf("data category type: %d\n", _s1.dataCategoryType);
@@ -1363,6 +1358,48 @@ void BufrFile::printTree(DNode *tree, int level) {
   }
 }
 
+void BufrFile::printHeader(TableMapElement f) {
+  cout << "tree: \n";
+  cout.width(40);
+  cout << " Descriptor ";
+  cout.width(5);
+  cout << " scale  " << f._descriptor.scale;
+  cout.width(7);
+  cout << " units  " << f._descriptor.units;
+  cout.width(7);
+  cout << " reference value " << f._descriptor.referenceValue;
+  cout.width(7);
+  cout << " value " << endl;
+}
+/*
+void BufrFile::prettyPrintLeaf(TableMapElement f, int level, string svalue,
+			       double fvalue, int ivalue) {
+  DNode *p,*q;
+  p = tree;
+  if (level == 0) {
+    printHeader(f);
+  }
+  while (p!=NULL) {
+    for (int i=0; i<level; i++) printf(" ");
+    printf("+(%d) delayed_rep %u\n", p->des, p->delayed_repeater);
+    cout << "  " << f._descriptor.fieldName << " ";
+    for (unsigned int i=0; i<50-f._descriptor.fieldName.size(); i++)
+      cout << "-";
+    cout << " " << f._descriptor.dataWidthBits;
+    cout << " scale  " << f._descriptor.scale;
+    cout << " units  " << f._descriptor.units;
+    cout << " reference value " << f._descriptor.referenceValue;
+    cout << " value " << endl;
+
+    q=p->children;
+    if (q != NULL) {
+      printTree(q, level+1);
+    }
+    p=p->next;
+  }
+}
+*/
+
 void BufrFile::freeTree(DNode *tree) {
   DNode *p,*q;
   p = tree;
@@ -1419,11 +1456,12 @@ int BufrFile::moveChildren(DNode *parent, int howManySiblings) {
 	  return 0;
 }
 
+// Print the tree while we are traversing, since this is 
+// the best way to display the values along with the the descriptors.
+// The values are stored in a separate structure.
 int BufrFile::_descend(DNode *tree) {
 
-  //bool _debug = true;  // TODO: make this more global
-
-  if (_debug) { 
+  if (_verbose) { 
     printf("\nTraversing ... \n");
     printTree(tree,0);
   }
@@ -1473,7 +1511,8 @@ int BufrFile::_descend(DNode *tree) {
         valueFromData = ApplyNumericFloat(val1);
         if (!StuffIt(val1._descriptor.fieldName, valueFromData)) {
           // throw "Cannot associate value with BufrField";
-          cout << "Cannot associate value with BufrField\n";
+          cout << "Cannot associate value with BufrField: " <<
+	    val1._descriptor.fieldName << endl;
 	}
         if (val1._descriptor.fieldName.find("Compression method") != string::npos) {
           compressionStart = true;
@@ -1519,7 +1558,7 @@ int BufrFile::_descend(DNode *tree) {
           // the state determines which counters to increment & decrement
           // It's up to the product to deal with the space allocation as needed
           for (unsigned int i=0; i<nRepeats; i++) {
-            if ((i%1000)==0)  
+            if (((i%1000)==0) && (_verbose)) 
               printf("%d out of %d repeats\n", i+1, nRepeats);
             _descend(p->children);
 	  }
@@ -1539,7 +1578,7 @@ int BufrFile::_descend(DNode *tree) {
           printf("-- end repeat\n");
           p=p->next;
 	} // end else fixed repeater
-        printTree(tree, 0);
+        if (_verbose) printTree(tree, 0);
     } else if (key.isAnotherNode()) {
 	if (_debug) 
 	  printf(" another node\n");
@@ -1572,7 +1611,7 @@ int BufrFile::_descend(DNode *tree) {
           }
           h->next = save;
 	}
-        printTree(tree, 0);
+        if (_verbose) printTree(tree, 0);
     } else {
 	if (_debug) 
 	  printf(" ERROR!!! unknown\n");  // TODO: this should be an exception thrown
@@ -1757,11 +1796,48 @@ int BufrFile::_descend(DNode *tree) {
 
 */
 
+
+
 /////////////////////////////////////
 // Print contents of Bufr file read
 // Returns 0 on success, -1 on failure
-int BufrFile::Print() {
+int BufrFile::print(ostream &out, bool printRays, bool printData) {
 
+  out << "=============== BufrFile ===============" << endl;
+  //RadxFile::print(out);
+  /*
+  out << "  Section 0: " << endl;
+  printSection0();
+  out << "  Section 1: " << endl;
+  printSection1();
+  out << "  Section 2: " << endl;
+  out << "  Section 3: " << endl;
+  printTree();
+  out << "  Section 4: " << endl;
+  if (printData) 
+    printSection4();
+  out << "  comment: " << _comment << endl;
+  out << "  statusXml: " << _statusXml << endl;
+  out << "  siteName: " << _siteName << endl;
+  out << "  scanName: " << _scanName << endl;
+  out << "  scanId: " << _scanId << endl;
+  out << "  instrumentName: " << _instrumentName << endl;
+  out << "  refTimeSecsFile: " << RadxTime::strm(_refTimeSecsFile) << endl;
+  out << "  volumeNumber: " << _volumeNumber << endl;
+  out << "  instrumentType: " 
+      << Radx::instrumentTypeToStr(_instrumentType) << endl;
+  out << "  platformType: " << Radx::platformTypeToStr(_platformType) << endl;
+  out << "  primaryAxis: " << Radx::primaryAxisToStr(_primaryAxis) << endl;
+  out << "  latitude: " << _latitudeDeg << endl;
+  out << "  longitude: " << _longitudeDeg << endl;
+  out << "  height: " << _heightKm << endl;
+  out << "  frequencyGhz: " << _frequencyGhz << endl;
+  
+  out << "  startRangeKm: " << _remap.getStartRangeKm() << endl;
+  out << "  gateSpacingKm: " << _remap.getGateSpacingKm() << endl;
+  out << "  gateSpacingIsConstant: " << _gateSpacingIsConstant << endl;
+  out << "===========================================" << endl;
+  */
   return 0;
 }
 

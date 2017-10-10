@@ -70,14 +70,11 @@ public:
   virtual ~BufrFile();
 
 
-  void setDebug(bool state) { _debug = state; }
+  void setDebug(bool state);
 
   /// Set verbose debugging on/off.
   ///
-  void setVerbose(bool state) {
-    _verbose = state;
-    if (_verbose) _debug = true;
-  }
+  void setVerbose(bool state); 
 
   //////////////////////////////////////////////////////////////
   /// \name File operations
@@ -91,9 +88,7 @@ public:
              string fieldName,
              string standardName,
              string longName,
-             string units,
-             bool debug,
-             bool verbose);
+             string units);
 
   /// open for reading
   /// Returns 0 on success, -1 on failure
@@ -118,7 +113,7 @@ public:
   int readDescriptorTables();
   int readData();
 
-  int Print();
+  int print(ostream &out, bool printRays, bool printData);
 
   /// close previously-opened file
 
@@ -246,6 +241,8 @@ private:
   void _deleteAfter(DNode *p);
   int moveChildren(DNode *parent, int howManySiblings);
   void printTree(DNode *tree, int level);
+  void prettyPrintTree(DNode *tree, int level);
+  void printHeader(TableMapElement f);
   void freeTree(DNode *tree);
 
 #define  MAX_BUFFER_SIZE_BYTES  2048

@@ -86,26 +86,6 @@ void BufrRadxFile::clear()
   clearErrStr();
 
   //_file.close();
-  /*
-  _timeDim = NULL;
-  _rangeDim = NULL;
-
-  _timeVar = NULL;
-  _rangeVar = NULL;
-  _latitudeVar = NULL;
-  _longitudeVar = NULL;
-  _heightVar = NULL;
-
-  _frequencyVar = NULL;
-  _prfVar = NULL;
-  _beamwidthHVar = NULL;
-  _beamwidthVVar = NULL;
-  _antennaDiameterVar = NULL;
-  _pulsePeriodVar = NULL;
-  _transmitPowerVar = NULL;
-  _sweepVar = NULL;
-  _azimuthVar = NULL;
-  _elevationVar = NULL;
 
   _dTimes.clear();
   _nTimesInFile = 0;
@@ -119,7 +99,7 @@ void BufrRadxFile::clear()
   _latitudeDeg = 0;
   _longitudeDeg = 0;
   _heightKm = 0;
-
+  
   _frequencyGhz = Radx::missingMetaDouble;
   _prfHz = Radx::missingMetaDouble;
   _beamwidthHDeg = Radx::missingMetaDouble;
@@ -127,7 +107,7 @@ void BufrRadxFile::clear()
   _antennaDiameterM = Radx::missingMetaDouble;
   _pulsePeriodUs = Radx::missingMetaDouble;
   _transmitPowerW = Radx::missingMetaDouble;  
-
+  
   _azimuths.clear();
   _elevations.clear();
   
@@ -150,7 +130,7 @@ void BufrRadxFile::clear()
   _siteName.clear();
   _scanName.clear();
   _instrumentName.clear();
-  */
+  //-----
 
   _scanId = 0;
   _volumeNumber = 0;
@@ -429,12 +409,8 @@ int BufrRadxFile::printNative(const string &path, ostream &out,
                                  bool printRays, bool printData)
   
 {
-
-  _addErrStr("ERROR - BufrRadxFile::printNative");
-  _addErrStr("  Native print does not apply to NetCDF file: ", path);
-  _addErrStr("  Use 'ncdump' instead");
-  return -1;
-
+  //return _file.print(out, printRays, printData);
+  return 0;
 }
 
 /////////////////////////////////////////////////////
@@ -579,7 +555,7 @@ int BufrRadxFile::_readFields(const string &path)
     try {
       if (_debug)  cerr << "reading field " << fieldName << endl;
       _file.readThatField(fileNames[ii], filePaths[ii], _fileTime.utime(),
-          fieldName, standardName, longName, units, _debug, _verbose);
+          fieldName, standardName, longName, units);
       // add to paths used on read  
       _readPaths.push_back(filePaths[ii]);
       if (_debug) cerr << "  .. accumulating field info " << endl;
@@ -890,6 +866,7 @@ void BufrRadxFile::_accumulateFieldFirstTime(string fieldName, string units, str
     // read required dimensions
     _nTimesInFile = _file.getTimeDimension();
     _nRangeInFile = _file.getRangeDimension();
+    _rangeBinSizeMeters = _file.getRangeBinSizeMeters();
 
     // _readGlobalAttributes();
     _year_attr = _file.hdr_year;
@@ -974,30 +951,40 @@ void BufrRadxFile::_accumulateField(string fieldName, string units, string stand
   const char *location = "ERROR - BufrRadxFile::_accumulateField";
   if (_file.getTimeDimension() != _nTimesInFile) {
     throw ;
-    _errorMessage(location, "Time dimension incompatible, found ", _file.getTimeDimension(),
-		 _nTimesInFile);
+    _errorMessage(location, "Time dimension incompatible, found ",
+ _file.getTimeDimension(),_nTimesInFile);
     throw "incompatible";
   }
-  if (_file.getRangeDimension() != _nRangeInFile) {
-    _errorMessage(location, "Range dimension incompatible, found ", _file.getRangeDimension(),
-		 _nRangeInFile);
+
+
+
+  if (_file.getRangeBinSizeMeters() != _rangeBinSizeMeters) {
+    // check the size of the range bins
+    _errorMessage(location, "Range bin size (meters) incompatible, found ",
+      _file.getRangeBinSizeMeters(), _rangeBinSizeMeters);
     throw "incompatible";
   }
+
   //_readGlobalAttributes();
   if ((_year_attr != _file.hdr_year) || (_month_attr != _file.hdr_month) ||
       (_day_attr != _file.hdr_day)) {
-    _errorMessage(location, "Date is incompatible, found ", _file.hdr_year, _year_attr);
-    _errorMessage(location, "Date is incompatible, found ", _file.hdr_month, _month_attr);
-    _errorMessage(location, "Date is incompatible, found ", _file.hdr_day, _day_attr);
+    _errorMessage(location, "Date is incompatible, found ",
+ _file.hdr_year, _year_attr);
+    _errorMessage(location, "Date is incompatible, found ", 
+_file.hdr_month, _month_attr);
+    _errorMessage(location, "Date is incompatible, found ",
+ _file.hdr_day, _day_attr);
     throw "incompatible";
   }
   if ((_siteName != _file.typeOfStationId) || 
       (_instrumentName != _file.stationId)) {
-    _errorMessage(location, "Global data are incompatible, found ", _file.typeOfStationId, _siteName);
-    _errorMessage(location, "Global data are incompatible, found ", _file.stationId, _instrumentName);
+    _errorMessage(location, "Global data are incompatible, found ",
+ _file.typeOfStationId, _siteName);
+    _errorMessage(location, "Global data are incompatible, found ",
+ _file.stationId, _instrumentName);
     throw "incompatible";
   }
-  _verifyRangeVariable();
+  //_verifyRangeVariable();
   
   // verify lat/lon/alt 
   _verifyPositionVariables();
@@ -1027,14 +1014,17 @@ void BufrRadxFile::_accumulateField(string fieldName, string units, string stand
       }
       //_getRayVariables(sn);  // fills in _azimuths & _elevations
       // TODO: compare the ray az and el; make sure they are compatible
-      if (_readMetadataOnly) {
-	// read field variables
-	_addFieldVariables(sn, fieldName, units, standardName, longName, true);
-      } else {
-	// add field variables to file rays
-	_addFieldVariables(sn, fieldName, units, standardName, longName, false);
-      }
-      //_sweeps.push_back(sweep);
+      // mind the range dimensions, i.e. make the number of gates compatible
+      if (nextFieldNRanges < 0) {
+	// fill with missing values
+      } else if (nextFieldNRanges > 0) {
+	// expand the current fields and fill with missing values
+      } // otherwise, everything is good, carry on ...
+
+      // add field variables
+      _addFieldVariables(sn, fieldName, units, standardName, longName,
+        _readMetadataOnly);
+
     } // end for each sweep
   } catch (const char *msg) {
     printf("Exception: %s\n", msg);
@@ -1043,6 +1033,7 @@ void BufrRadxFile::_accumulateField(string fieldName, string units, string stand
 }
 
   //  call after all files are read
+// Quality check
 void BufrRadxFile::_qualityCheckRays() {
 
   // add file rays to main rays
@@ -1578,11 +1569,6 @@ int BufrRadxFile::_addFieldVariables(int sweepNumber,
 {
     int iret = 0;
     bool isDiscrete = false;
-    // TODO: verify Type of Product???
-    //string name = _file.getTypeOfProductForSweep(sweepNumber);; // "TH";
-    //string units = "m/s";
-    // string standardName = name;
-    //string longName = name;
     bool fieldFolds = false;
     float foldLimitLower = 0.0;
     float foldLimitUpper = 0.0;
@@ -1806,44 +1792,28 @@ Nc3Var* BufrRadxFile::_getRayVar(const string &name, bool required)
 // Returns 0 on success, -1 on failure
 
 int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
-                                         const string &name,
-                                         const string &units,
-                                         const string &standardName,
-                                         const string &longName,
-                                         bool isDiscrete,
-                                         bool fieldFolds,
-                                         float foldLimitLower,
-                                         float foldLimitUpper)
+				      const string &name,
+				      const string &units,
+				      const string &standardName,
+				      const string &longName,
+				      bool isDiscrete,
+				      bool fieldFolds,
+				      float foldLimitLower,
+				      float foldLimitUpper)
   
 {
-
   // get data from array
 
-  Radx::fl64 *data; //  = new Radx::fl64[_nTimesInFile * _nRangeInFile];
-  //int iret = !var->get(data, _nTimesInFile, _nRangeInFile);
-  //if (iret) {
-  //  delete[] data;
-  //  return -1;
-  //}
+  Radx::fl64 *data; 
   data = _file.getDataForSweep(sweepNumber);
 
   // set missing value
 
   Radx::fl64 missingVal = -DBL_MAX; // Radx::missingFl64;
-  // Nc3Att *missingValueAtt = var->get_att("missing_value");
-  // if (missingValueAtt != NULL) {
-  //   missingVal = missingValueAtt->as_double(0);
-  //   delete missingValueAtt;
-  // }
 
   // look for fill value, if not present, then use missing value
 
-   Radx::fl64 fillVal = missingVal;
-  // Nc3Att *fillValueAtt = var->get_att("_FillValue");
-  // if (fillValueAtt != NULL) {
-  //   fillVal = fillValueAtt->as_double(0);
-  //   delete fillValueAtt;
-  // }
+  Radx::fl64 fillVal = missingVal;
 
   // replace any NaN's with fill value
   for (size_t jj = 0; jj < _nTimesInFile * _nRangeInFile; jj++) {
@@ -1851,41 +1821,64 @@ int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
       data[jj] = fillVal;
   }
 
-  // load field on rays
+  // load field into rays
+  RadxField *field;
+  size_t nextFileRangeDimension = _file.getRangeDimension();
 
   for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-    
-    int nGates = _nRangeInFile;
+    int nGates = _nRangeInFile; 
     int startIndex = ii * _nRangeInFile;
 
-    cout << "adding ray " << ii << endl;    
+    cout << "adding field " << name << " to ray " << ii << endl;    
 
     // the rays for this sweep start at sweepNumber*_nTimesInFile
     int rayIdx;
     rayIdx = (sweepNumber * _nTimesInFile) + ii;
-    bool pleaseCopyData = true;
-    RadxField *field =
-      _raysToRead[rayIdx]->addField(name, units, nGates,
-				missingVal,
-				data + startIndex,
-				pleaseCopyData);
 
+    // now we can check for the dimensions and resize as needed
+    // homogenize the number of gates (also known as nRangeInFile)
+    // The number of gates could be less
+    // than the current number of more than the current number
+    if (nextFileRangeDimension < _nRangeInFile) {
+      // fill in the data with missing values
+      field = new RadxField(name, units);
+      field->setTypeFl64(missingVal);
+      // NOTE: the startIndex will be different
+      startIndex = ii * nextFileRangeDimension;
+      field->addDataFl64(nextFileRangeDimension, data+startIndex);
+      field->setNGates(_nRangeInFile);
+      _raysToRead[rayIdx]->addField(field);
+    } else {
+      if (nextFileRangeDimension > _nRangeInFile) {
+	_raysToRead[rayIdx]->setNGates(nextFileRangeDimension);
+        nGates = nextFileRangeDimension;
+      }
+      bool pleaseCopyData = true;
+      field =
+	_raysToRead[rayIdx]->addField(name, units, nGates,
+				      missingVal,
+				      data + startIndex,
+				      pleaseCopyData);
+    }
     field->setMissingFl64(missingVal);
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
     
     if (fieldFolds &&
-        foldLimitLower != Radx::missingMetaFloat &&
-        foldLimitUpper != Radx::missingMetaFloat) {
+	foldLimitLower != Radx::missingMetaFloat &&
+	foldLimitUpper != Radx::missingMetaFloat) {
       field->setFieldFolds(foldLimitLower, foldLimitUpper);
     }
     if (isDiscrete) {
       field->setIsDiscrete(true);
     }
-
+  } // end for ii
+  if (nextFileRangeDimension > _nRangeInFile) {
+    // update the number of ranges in the file
+    _nRangeInFile = nextFileRangeDimension;
   }
-  
+
   delete[] data;
   return 0;
   

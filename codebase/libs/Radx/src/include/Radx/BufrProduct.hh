@@ -58,6 +58,29 @@ public:
 
   void reset();
 
+  //////////////////////////////////////////////////////////////
+  /// \name Debugging:
+  //@{
+  
+  /// Set normal debugging on/off.
+  ///
+  /// If set on, basic debugging messages will be printed to stderr
+  /// during file operations.
+
+  void setDebug(bool state) { _debug = state; }
+
+  /// Set verbose debugging on/off.
+  ///
+  /// If set on, verbose debugging messages will be printed to stderr
+  /// during file operations.
+
+  void setVerbose(bool state) {
+    _verbose = state;
+    if (_verbose) _debug = true;
+  }
+
+  //@}
+
   void allocateSpace(unsigned int n);
 
   void addData(unsigned char value);
@@ -75,19 +98,8 @@ public:
   void putMinute(double value);
   void putSecond(double value);
 
-  /*
-  setAntennaElevationDegrees(double value);
-
-  setNBinsAlongRadial(double value);
-
-  setRangeBinSizeMeters(double value);
-
-  setRangeBinOffsetMeters(double value);
-
-  setNAzimuths(double value);
-
-  setAntennaBeamAzimuthDegrees(double value);
-  */
+  bool _debug;
+  bool _verbose;
 
   typedef enum {rawData, other} ProductType;
   enum DataType {CM, TV, DBZH, VRAD, TH, WRAD,  KDP, PHIDP, RHOHV,

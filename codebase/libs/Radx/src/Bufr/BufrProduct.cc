@@ -50,6 +50,8 @@ BufrProduct::BufrProduct()
   //replicators.reserve(5);
   dataBuffer = NULL;
   reset();
+  _debug = false;
+  _verbose = false;
 }
 
 /////////////

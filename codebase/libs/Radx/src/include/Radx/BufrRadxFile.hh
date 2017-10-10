@@ -197,9 +197,15 @@ private:
 
   vector<double> _rangeKm;
   size_t _nRangeInFile;
+  double _rangeBinSizeMeters;
   bool _gateSpacingIsConstant;
   RadxRangeGeom _geom;
   RadxRemap _remap;
+  // if next field has  more ranges, then nextFieldNRanges > 0
+  // if next field has fewer ranges, then nextFieldNRanges < 0
+  // if next field has the same number of ranges, then nextFieldRanges = 0;
+  int nextFieldNRanges;
+
 
   // georef variables
   
