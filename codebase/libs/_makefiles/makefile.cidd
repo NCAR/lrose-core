@@ -27,6 +27,7 @@ SUB_DIRS = \
 	rapmath \
         titan \
 	Mdv \
+        Ncxx \
 	Fmq \
 	Spdb
 
