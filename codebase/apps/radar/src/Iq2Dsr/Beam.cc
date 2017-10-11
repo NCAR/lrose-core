@@ -194,9 +194,9 @@ void Beam::init(const MomentsMgr &mmgr,
   _mmgr = mmgr;
   _nSamples = nSamples;
   _nSamplesEffective = nSamplesEffective;
-  _nGates = nGates - 20;
-  _nGatesPrtShort = nGates - 20;
-  _nGatesPrtLong = nGatesPrtLong - 20;
+  _nGates = nGates;
+  _nGatesPrtShort = nGates;
+  _nGatesPrtLong = nGatesPrtLong;
   _beamIsIndexed = beamIsIndexed;
   _angularResolution = angularResolution;
   _meanPointingAngle = meanPointingAngle;
@@ -3862,9 +3862,6 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
   
   // Note - First pulse is a short-PRT pulse
 
-  int corr = 2;
-  cerr << "2222222222222222 corr: " << corr << endl;
-
   switch (_xmitRcvMode) {
     
     case IWRF_SIM_HV_FIXED_HV: {
@@ -3885,8 +3882,8 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
         for (int isamp = 0; isamp < _nSamples; isamp++, iqhcOrig++, iqvcOrig++) {
           iqhcOrig->re = iqChan0[isamp][ipos];
           iqhcOrig->im = iqChan0[isamp][ipos+1];
-          iqvcOrig->re = iqChan1[isamp][ipos+corr];
-          iqvcOrig->im = iqChan1[isamp][ipos+1+corr];
+          iqvcOrig->re = iqChan1[isamp][ipos];
+          iqvcOrig->im = iqChan1[isamp][ipos+1];
         }
        
         // short PRT from input sequence, which starts with short
@@ -3897,8 +3894,8 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
              isamp++, iqhcShort++, iqvcShort++) {
           iqhcShort->re = iqChan0[jsamp][ipos];
           iqhcShort->im = iqChan0[jsamp][ipos+1];
-          iqvcShort->re = iqChan1[jsamp][ipos+corr];
-          iqvcShort->im = iqChan1[jsamp][ipos+1+corr];
+          iqvcShort->re = iqChan1[jsamp][ipos];
+          iqvcShort->im = iqChan1[jsamp][ipos+1];
           jsamp++;
           jsamp++;
         }
@@ -3932,8 +3929,8 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
           jsamp++;
           iqhcLong->re = iqChan0[jsamp][ipos];
           iqhcLong->im = iqChan0[jsamp][ipos+1];
-          iqvcLong->re = iqChan1[jsamp][ipos+corr];
-          iqvcLong->im = iqChan1[jsamp][ipos+1+corr];
+          iqvcLong->re = iqChan1[jsamp][ipos];
+          iqvcLong->im = iqChan1[jsamp][ipos+1];
           jsamp++;
         }
         
