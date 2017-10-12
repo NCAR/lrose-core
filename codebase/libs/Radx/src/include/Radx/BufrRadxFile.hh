@@ -163,7 +163,7 @@ public:
   /// Use getErrStr() if error occurs
   
   virtual int printNative(const string &path, ostream &out,
-                          bool printRays, bool printData);
+     bool printRays, bool printData);
 
   /// Get the date and time from a string.
   /// returns 0 on success, -1 on failure

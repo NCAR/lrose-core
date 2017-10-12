@@ -21,10 +21,17 @@ TableMap::TableMap() {
 TableMap::~TableMap() {
 }
 
+void TableMap::setDebug(bool debug) {
+  if (debug) {
+    _debug = true;
+  } else {
+    _debug = false;
+  }
+}
+
 int TableMap::ReadTableB(string fileName) {
 
   std::ifstream filein(fileName.c_str());
-  //std::fstream filein(fileName, ios::in);
 
   if (!filein.is_open()) {
     string _errString;
@@ -34,20 +41,20 @@ int TableMap::ReadTableB(string fileName) {
 
   for (std::string line; std::getline(filein, line); ) {
 
-    //std::cout << line << std::endl;
+    if (_debug) std::cout << line << std::endl;
     std::vector<std::string> tokens;
     tokens = split(line, ';');
 
     if (_debug) {
-      for (vector<std::string>::const_iterator s = tokens.begin(); s!= tokens.end(); ++s) {
-	//for (string s: tokens) {
+      for (vector<std::string>::const_iterator s = tokens.begin();
+        s!= tokens.end(); ++s) {
         cout << *s << endl; 
       }
     }
 
     unsigned char f,x,y;
  
-    f = atoi(tokens[0].c_str());  // try tokens[0].stoui
+    f = atoi(tokens[0].c_str());
     x = atoi(tokens[1].c_str());
     y = atoi(tokens[2].c_str());
     unsigned short key;
@@ -57,8 +64,6 @@ int TableMap::ReadTableB(string fileName) {
     key = key << 8;
     key = key | y;
     if (_debug) printf("key = %d (x%x) for f;x;y %d;%d;%d %s \n", key, key, f,x,y, tokens[3].c_str()); 
-    //const char *fieldName;
-    //fieldName = tokens[3].c_str();
     int scale;
     int referenceValue;
     int dataWidthBits;
@@ -218,58 +223,29 @@ int TableMap::ImportTablesOld() {
   return 0;
 }
 
-// // TODO: handle exception ...
-// int  TableMap::Retrieve(unsigned short key, TableMapElement *tableMapElement) {
-
-//   int result = 0;
-//   TableMapElement val1;
-//   val1 = table.at(key);
-
-//     cout << " Found " << endl;
-//     val1 = result->second;
-//     *tableMapElement = val1;  // TODO: is this ok? or should I copy??
-
-//     if (val1._whichType == TableMapElement::TableMapElementType::DESCRIPTOR) {
-//       cout << "value for key " << key << ":" << val1._descriptor.fieldName << "," << 
-//         val1._descriptor.scale << endl;
-//     } else if (val1._whichType == TableMapElement::TableMapElementType::KEYS) {
-//       vector<unsigned short> theList;
-//       theList = val1._listOfKeys; 
-//       cout << "value for key " << key << ": " << theList.size() << endl; 
-//       for (vector<unsigned short>::const_iterator i = theList.begin(); i!= theList.end(); i++)
-//         cout << *i << ' ';
-//     } else {
-//       result = -1;
-//     }
-// }
-
-// TODO:  handle exception
-
 TableMapElement TableMap::Retrieve(unsigned short key) {
 
   TableMapElement val1;
   val1 = table.at(key);
-
-  //cout << " Found " << endl;
+  if (_debug) {
     if (val1._whichType == TableMapElement::DESCRIPTOR) {
-      //cout << "value for key " << key << ":" << val1._descriptor.fieldName << "," << 
-      //val1._descriptor.scale << endl;
-      ;
+      cout << "value for key " << key << ":" << val1._descriptor.fieldName
+	     << endl;
     } else if (val1._whichType == TableMapElement::KEYS) {
       vector<unsigned short> theList;
       theList = val1._listOfKeys; 
-      //cout << "value for key " << key << ": "; 
-      for (vector<unsigned short>::const_iterator i = theList.begin(); i!= theList.end(); i++) {
+ 
+      for (vector<unsigned short>::const_iterator i = theList.begin(); 
+        i!= theList.end(); i++) {
         unsigned char f, x, y;
 	TableMapKey().Decode(*i, &f, &x, &y);
-        //cout << *i << ' ';
-        //cout << f << ";" << x << ";" << y << "; ";
         printf("key(%d)=%d;%d;%d ",*i, f, x, y);
       }
-      //cout << endl;
     } else {
-      // TODO: do something
+      // ignore
+      ;
     }
+  }
   return val1;
 }
 

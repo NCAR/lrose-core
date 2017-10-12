@@ -114,6 +114,11 @@ public:
   int readData();
 
   int print(ostream &out, bool printRays, bool printData);
+  void printSection0(ostream &out);
+  void printSection1(ostream &out);
+  void printSection2(ostream &out);
+  void printSection3(ostream &out);
+  void printSection4(ostream &out);
 
   /// close previously-opened file
 
@@ -241,9 +246,10 @@ private:
   void _deleteAfter(DNode *p);
   int moveChildren(DNode *parent, int howManySiblings);
   void printTree(DNode *tree, int level);
-  void prettyPrintTree(DNode *tree, int level);
-  void printHeader(TableMapElement f);
+  void prettyPrintLeaf(ostream &out, unsigned short des, TableMapElement element, int level);
+  void printHeader();
   void freeTree(DNode *tree);
+  int prettyPrintLevel;
 
 #define  MAX_BUFFER_SIZE_BYTES  2048
 
@@ -261,35 +267,7 @@ private:
 
   bool _debug;
   bool _verbose;
-  
-/*
-  //////////////////////////////////////////////////////////////
-  /// \name Attributes
-  //@{
-   
-
-  //@}
-
-  //////////////////////////////////////////////////////////////
-  /// \name dimensions
-  //@{
-  
-  //@}
-
-  //////////////////////////////////////////////////////////////
-  /// \name variables
-  //@{
-  
-  //@}
-
-  ///////////////////////////////
-  /// \name Strings from nc items
-  //@{
-  
-  */
-  ////////////////////////
-  /// \name Handles:
-  //@{
+  string _fieldName;
   
   /// Get the path in use after read or write
   
