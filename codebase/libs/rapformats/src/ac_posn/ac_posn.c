@@ -180,6 +180,9 @@ void ac_posn_wmod_print(FILE *out,
   if (ac_posn->flare_flags & EJECTABLE_FLAG) {
     fprintf(out, "%s   ejectable: ON\n", spacer);
   }
+  if (ac_posn->flare_flags & DRY_ICE_FLAG) {
+    fprintf(out, "%s   dry_ice: ON\n", spacer);
+  }
   if (ac_posn->n_ejectable > 0) {
     fprintf(out, "%s   n_ejectable: %d\n", spacer, ac_posn->n_ejectable);
   }
