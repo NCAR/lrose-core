@@ -50,6 +50,8 @@ BufrProduct::BufrProduct()
   //replicators.reserve(5);
   dataBuffer = NULL;
   reset();
+  _debug = false;
+  _verbose = false;
 }
 
 /////////////
@@ -70,7 +72,9 @@ void BufrProduct::reset() {
     free(dataBuffer);
   dataBuffer = NULL;
   sweepData.clear(); // assume that the Rays are copied
-  // TODO: reset the replicators vector
+  // reset the replicators vector
+  while (!replicators.empty()) 
+    trashReplicator();
 }
 
 void BufrProduct::allocateSpace(unsigned int n) {
@@ -231,7 +235,7 @@ double *BufrProduct::decompressData() {
   compressedData.clear();
   double *temp;
   temp = (double *)UnCompDataBuff;
-  printf ("--> %g %g %g\n", temp[0], temp[1], temp[2]);
+  if (_debug) printf ("--> %g %g %g\n", temp[0], temp[1], temp[2]);
   return (double *)UnCompDataBuff;
 }
 

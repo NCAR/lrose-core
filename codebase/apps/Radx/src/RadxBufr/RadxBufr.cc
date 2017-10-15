@@ -257,6 +257,7 @@ int RadxBufr::_runFilelist()
         cerr << "==>> read in file: " << paths[ii] << endl;
       }
     }  
+    inFile.print(cout);
     // finalize the volume   
     _finalizeVol(vol);   
     // write the volume out
@@ -518,6 +519,7 @@ int RadxBufr::_readFile(const string &readPath,
     cerr << inFile.getErrStr() << endl;
     return -1;
   }
+  inFile.print(cout);
   _readPaths = inFile.getReadPaths();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     for (size_t ii = 0; ii < _readPaths.size(); ii++) {

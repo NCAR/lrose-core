@@ -18,7 +18,7 @@ static char     sccsid[] = "@(#)aux.c 50.34 93/06/28";
 #include <xview/panel.h>
 #include <xview/notice.h>
 #include <xview_private/panel_impl.h>
-#include <xview_private/aux.h>
+#include <xview_private/aux_data.h>
 
 #define GET_EVENT
 #define	ITERM_BUFSIZE	1024

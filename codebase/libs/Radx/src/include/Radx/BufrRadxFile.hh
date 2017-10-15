@@ -163,7 +163,7 @@ public:
   /// Use getErrStr() if error occurs
   
   virtual int printNative(const string &path, ostream &out,
-                          bool printRays, bool printData);
+     bool printRays, bool printData);
 
   /// Get the date and time from a string.
   /// returns 0 on success, -1 on failure
@@ -197,9 +197,15 @@ private:
 
   vector<double> _rangeKm;
   size_t _nRangeInFile;
+  double _rangeBinSizeMeters;
   bool _gateSpacingIsConstant;
   RadxRangeGeom _geom;
   RadxRemap _remap;
+  // if next field has  more ranges, then nextFieldNRanges > 0
+  // if next field has fewer ranges, then nextFieldNRanges < 0
+  // if next field has the same number of ranges, then nextFieldRanges = 0;
+  int nextFieldNRanges;
+
 
   // georef variables
   

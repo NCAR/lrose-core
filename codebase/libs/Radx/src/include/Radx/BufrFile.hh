@@ -70,14 +70,11 @@ public:
   virtual ~BufrFile();
 
 
-  void setDebug(bool state) { _debug = state; }
+  void setDebug(bool state);
 
   /// Set verbose debugging on/off.
   ///
-  void setVerbose(bool state) {
-    _verbose = state;
-    if (_verbose) _debug = true;
-  }
+  void setVerbose(bool state); 
 
   //////////////////////////////////////////////////////////////
   /// \name File operations
@@ -91,9 +88,7 @@ public:
              string fieldName,
              string standardName,
              string longName,
-             string units,
-             bool debug,
-             bool verbose);
+             string units);
 
   /// open for reading
   /// Returns 0 on success, -1 on failure
@@ -118,7 +113,12 @@ public:
   int readDescriptorTables();
   int readData();
 
-  int Print();
+  int print(ostream &out, bool printRays, bool printData);
+  void printSection0(ostream &out);
+  void printSection1(ostream &out);
+  void printSection2(ostream &out);
+  void printSection3(ostream &out);
+  void printSection4(ostream &out);
 
   /// close previously-opened file
 
@@ -246,7 +246,10 @@ private:
   void _deleteAfter(DNode *p);
   int moveChildren(DNode *parent, int howManySiblings);
   void printTree(DNode *tree, int level);
+  void prettyPrintLeaf(ostream &out, unsigned short des, TableMapElement element, int level);
+  void printHeader();
   void freeTree(DNode *tree);
+  int prettyPrintLevel;
 
 #define  MAX_BUFFER_SIZE_BYTES  2048
 
@@ -264,35 +267,7 @@ private:
 
   bool _debug;
   bool _verbose;
-  
-/*
-  //////////////////////////////////////////////////////////////
-  /// \name Attributes
-  //@{
-   
-
-  //@}
-
-  //////////////////////////////////////////////////////////////
-  /// \name dimensions
-  //@{
-  
-  //@}
-
-  //////////////////////////////////////////////////////////////
-  /// \name variables
-  //@{
-  
-  //@}
-
-  ///////////////////////////////
-  /// \name Strings from nc items
-  //@{
-  
-  */
-  ////////////////////////
-  /// \name Handles:
-  //@{
+  string _fieldName;
   
   /// Get the path in use after read or write
   

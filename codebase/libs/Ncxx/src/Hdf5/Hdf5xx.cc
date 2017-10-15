@@ -377,7 +377,7 @@ int Hdf5xx::loadCompVar(CompType compType,
 // load an attribute from an object, given the name
 // returns 0 on success, -1 on failure
 
-int Hdf5xx::loadAttribute(H5Location &obj,
+int Hdf5xx::loadAttribute(H5Object &obj,
                           const string &name,
                           const string &context,
                           DecodedAttr &decodedAttr)
@@ -607,7 +607,7 @@ int Hdf5xx::loadAttribute(H5Location &obj,
 // load an array attribute from an object, given the name
 // returns 0 on success, -1 on failure
 
-int Hdf5xx::loadArrayAttribute(H5Location &obj,
+int Hdf5xx::loadArrayAttribute(H5Object &obj,
                                const string &name,
                                const string &context,
                                ArrayAttr &arrayAttr)
@@ -848,24 +848,11 @@ int Hdf5xx::loadArrayAttribute(H5Location &obj,
 
 }
 
-///////////////////////////////////////////////////////////////////
-// append to vector of attribute names
-// called by obj.iterateAttrs()
-
-void Hdf5xx::appendAttrNames(H5Location &obj,
-                             const H5std_string attr_name,
-                             void *operator_data)
-  
-{
-  vector<string> *names = (vector<string> *) operator_data;
-  names->push_back(attr_name);
-}
-
 /////////////////////////////////////////
 // add a string attribute to an object
 // returns the attribute
 
-Attribute Hdf5xx::addAttr(H5Location &loc,
+Attribute Hdf5xx::addAttr(H5Object &obj,
                           const string &name,
                           const string &val)
 {
@@ -882,7 +869,7 @@ Attribute Hdf5xx::addAttr(H5Location &loc,
   const H5std_string strWritebuf(val);
   
   // Create attribute and write to it
-  Attribute att = loc.createAttribute(name, strDatatype, attrDataspace);
+  Attribute att = obj.createAttribute(name, strDatatype, attrDataspace);
   att.write(strDatatype, strWritebuf); 
 
   return att;
@@ -893,7 +880,7 @@ Attribute Hdf5xx::addAttr(H5Location &loc,
 // add a 64-bit int attribute to an object
 // returns the attribute
 
-Attribute Hdf5xx::addAttr(H5Location &loc,
+Attribute Hdf5xx::addAttr(H5Object &obj,
                           const string &name,
                           NcxxPort::si64 val)
 {
@@ -908,7 +895,7 @@ Attribute Hdf5xx::addAttr(H5Location &loc,
   }
 
   // Create attribute and write to it
-  Attribute att = loc.createAttribute(name, intDatatype, attrDataspace);
+  Attribute att = obj.createAttribute(name, intDatatype, attrDataspace);
   att.write(intDatatype, &val); 
 
   return att;
@@ -919,7 +906,7 @@ Attribute Hdf5xx::addAttr(H5Location &loc,
 // add a 64-bit float attribute to an object
 // returns the attribute
 
-Attribute Hdf5xx::addAttr(H5Location &loc,
+Attribute Hdf5xx::addAttr(H5Object &obj,
                           const string &name,
                           NcxxPort::fl64 val)
 {
@@ -934,7 +921,7 @@ Attribute Hdf5xx::addAttr(H5Location &loc,
   }
 
   // Create attribute and write to it
-  Attribute att = loc.createAttribute(name, floatDatatype, attrDataspace);
+  Attribute att = obj.createAttribute(name, floatDatatype, attrDataspace);
   att.write(floatDatatype, &val); 
 
   return att;
@@ -945,7 +932,7 @@ Attribute Hdf5xx::addAttr(H5Location &loc,
 // add a 64-bit float array attribute to an object
 // returns the attribute
 
-Attribute Hdf5xx::addAttr(H5Location &loc,
+Attribute Hdf5xx::addAttr(H5Object &obj,
                           const string &name,
                           const vector<NcxxPort::fl64> &vals)
 {
@@ -961,7 +948,7 @@ Attribute Hdf5xx::addAttr(H5Location &loc,
   }
 
   // Create attribute and write to it
-  Attribute att = loc.createAttribute(name, floatDatatype, attrDataspace);
+  Attribute att = obj.createAttribute(name, floatDatatype, attrDataspace);
   att.write(floatDatatype, &vals[0]); 
 
   return att;
@@ -1691,25 +1678,15 @@ void Hdf5xx::_printPacked(NcxxPort::si64 val,
 ///////////////////////////////////////////////////////////////////
 // print all attributes in an object
 
-void Hdf5xx::printAttributes(H5Location &obj, ostream &out)
+void Hdf5xx::printAttributes(H5Object &obj, ostream &out)
 
 {
-  
-  vector<string> attrNames;
-  obj.iterateAttrs(appendAttrNames, NULL, &attrNames);
-  for (size_t ii = 0; ii < attrNames.size(); ii++) {
-    Attribute *attr = NULL;
-    try {
-      attr = new Attribute(obj.openAttribute(attrNames[ii]));
-    }
-    catch (const H5::Exception &e) {
-      cerr << "ERROR - cannot find attribute: " << attrNames[ii] << endl;
-      if (attr) delete attr;
-      continue;
-    }
-    printAttribute(*attr, out);
-    delete attr;
-  }
+
+  for (int ii = 0; ii < obj.getNumAttrs(); ii++) {
+    hid_t attrId = H5Aopen_idx(obj.getId(), ii);
+    Attribute attr(attrId);
+    printAttribute(attr, out);
+  } // ii
 
 }
 

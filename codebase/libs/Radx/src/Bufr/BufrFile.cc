@@ -44,7 +44,7 @@
 #include <dirent.h>
 #include <algorithm>
 #include <Radx/TableMapKey.hh>
-//#include <Radx/TableMap.hh>
+#include <Radx/RadxStr.hh>
 
 using namespace std;
 
@@ -90,6 +90,19 @@ void BufrFile::clear()
   nOctetsRead = 0;
 }
 
+void BufrFile::setDebug(bool state) { 
+  _debug = state; 
+  currentProduct.setDebug(state);
+}
+
+void BufrFile::setVerbose(bool state) {
+  _verbose = state;
+  if (_verbose) _debug = true;
+  currentProduct.setVerbose(state);
+  // we only want debug information from the tables if the setting is verbose,
+  // because the information is very detailed.
+  tableMap.setDebug(state);
+}
 
 // go ahead and read all the data from the file
 // completely fill currentProduct with data
@@ -99,12 +112,11 @@ void BufrFile::readThatField(string fileName,
              string fieldName,
              string standardName,
              string longName,
-             string units,
-             bool debug,
-		   bool verbose) {
+             string units) {
 
   clear();
   _pathInUse = filePath;
+  _fieldName = fieldName;
   try {
     openRead(_pathInUse); // path);
     readSection0();
@@ -113,9 +125,7 @@ void BufrFile::readThatField(string fileName,
     readData(); 
     close();
   } catch (const char *msg) {
-    //_addErrStr(msg);
     throw _errString.c_str();
-    //return -1;
   }
 }
 
@@ -280,39 +290,26 @@ int BufrFile::readSection0()
     Radx::ui08 bufr_edition;
 
     if (fread(&bufr_edition, 1, 1, _file) != 1) {
-      //int errNum = errno;
-      //      _addErrStr("ERROR - DoradeRadxFile::_readSection0()");
-      //_addErrStr("  Cannot read data length");
-      //_addErrStr("  ID: ", id);
-      //_addErrStr("  File path: ", path);
-      //_addErrStr(strerror(errNum));
+      int errNum = errno;
+      bool cr = true;
+      RadxStr::addStr(_errString, "ERROR -", " BufrFile::_readSection0()",  cr);
+      RadxStr::addStr(_errString, "  Cannot read BUFR edition", strerror(errNum), cr);
       close();
-      return -1;
+      throw _errString.c_str();
     }
     _s0.edition = bufr_edition;   
     printf("BUFR edition number %d\n", bufr_edition); 
 
     _numBytesRead += 1;
-    // swap as needed
 
-    //-------------------
-
-    //}
-  /*
-  //dim = _ncFile->get_dim(name.c_str());
-  if (!_file->bufr_decode_sections01(&s1, &msg)) {
-    //fprintf (stderr, "FATAL: Unable to decode section 1\n");
-    //exit (EXIT_FAILURE);
-    _addErrStr("ERROR - BufrFile::readDim");
-    _addErrStr("  Cannot read dimension, name: ", name);
-    _addErrStr("  file: ", _pathInUse);
-    _addErrStr(_err->get_errmsg());
-    return -1;
-  }
-  header_dump(&s1);
-  */
   return 0;
 }
+
+void BufrFile::printSection0(ostream &out) {
+  out << "  BUFR edition number: " << (int) _s0.edition << endl;
+  out << "  number of bytes    : " << _s0.nBytes << endl; 
+}
+
 ///////////////////////////////////////////
 // read Section 1
 // which gives time and table info
@@ -397,7 +394,7 @@ int BufrFile::readSection1()
       _s1.masterTableVersionNumber = buffer[10];
 
       printf("master table: %d\n", _s1.masterTable);
-      printf("generatingc center: %d\n", _s1.generatingCenter);
+      printf("generating center: %d\n", _s1.generatingCenter);
       printf("originating subcenter: %d\n", _s1.originatingSubcenter);
       printf("update sequence number: %d\n", _s1.updateSequenceNumber);
       printf("data category type: %d\n", _s1.dataCategoryType);
@@ -412,7 +409,12 @@ int BufrFile::readSection1()
       hour = buffer[16] | 0;
       minute = buffer[17] | 0;
       seconds = buffer[18] | 0;
-
+      _s1.year = yearOfCentury;
+      _s1.month = month;
+      _s1.day = day;
+      _s1.hour = hour;
+      _s1.minute = minute;
+      _s1.seconds = seconds;
     }   
     // TODO: figure out _debug ... try RadxFile::copyReadDirectives .. if (_debug) {
       cerr << "year-month-day hour:minute:sec " <<
@@ -432,6 +434,42 @@ int BufrFile::readSection1()
     
       _numBytesRead += sectionLen;
   return 0;
+}
+
+void BufrFile::printSection1(ostream &out) {
+  out << "  master table          : " << (int) _s1.masterTable << endl;
+  out << "  generating center     : " << _s1.generatingCenter << endl; 
+  out << "  originating subcenter : " << _s1.originatingSubcenter << endl; 
+  out << "  update sequence number: " << _s1.updateSequenceNumber << endl; 
+  out << "  data category type    : " << _s1.dataCategoryType << endl; 
+  out << "  data category subtype : " << _s1.dataCategorySubtype << endl; 
+  out << "  master table version  : " << _s1.masterTableVersionNumber << endl; 
+  out << "  local table version   : " << _s1.localTableVersionNumber << endl; 
+  char buffer[50];
+  sprintf(buffer, "%4d-%02d-%02d %02d:%02d:%02d", _s1.year, _s1.month, _s1.day,
+	  _s1.hour, _s1.minute, _s1.seconds);
+  out << "  YY-MM-DD HH:MM:SS     : " << buffer << endl;  
+}
+
+void BufrFile::printSection2(ostream &out) {
+  if (_s1.hasSection2) {
+    out << "file has section 2, but it's not used" << endl;
+  } else {
+    out << " -- no section 2 --" << endl;
+  }
+}
+
+void BufrFile::printSection3(ostream &out) {
+  unsigned char f, x, y;
+  for (vector<unsigned short>::reverse_iterator i = _descriptorsToProcess.rbegin(); 
+       i!= _descriptorsToProcess.rend(); ++i) {
+    TableMapKey().Decode(*i, &f, &x, &y);
+    out << (unsigned int) f << ";" << (unsigned int) x << ";" << (unsigned int) y << endl;
+  }
+}
+
+void BufrFile::printSection4(ostream &out) {
+  //prettyPrintTree(out, GTree, 0);
 }
 
 // taken from bufr2hdf5.c -- read_tables(...)
@@ -586,10 +624,10 @@ int BufrFile::ReplenishBuffer() {
   nBytesRead = fread(_dataBuffer, 1, MAX_BUFFER_SIZE_BYTES, _file);
 
   nOctetsRead += nBytesRead;
-  if (_debug) printf("nOctetsRead = %d\n", nOctetsRead);
+  if (_verbose) printf("nOctetsRead = %d\n", nOctetsRead);
 
   _numBytesRead += nBytesRead;
-  if (_debug) printf("Read %d/%d bytes ", _numBytesRead, _s0.nBytes);
+  if (_verbose) printf("Read %d/%d bytes ", _numBytesRead, _s0.nBytes);
 
   if (_verbose) {
     printf("buffer: ");
@@ -688,7 +726,7 @@ Radx::ui32 BufrFile::ExtractIt(int nBits) {
   //int idx;
   //unsigned char mask;
 
-  if (_debug) {
+  if (_verbose) {
     printf(" nBits=%d\n", nBits);
   }
 
@@ -736,7 +774,7 @@ Radx::ui32 BufrFile::Apply(TableMapElement f) {
   if (f._whichType != TableMapElement::DESCRIPTOR) {
     return -1;
   }
-  if (_debug) {
+  if (_verbose) {
     cout << "Applying " << endl;
     cout << "  " << f._descriptor.fieldName << " ";
 
@@ -750,8 +788,10 @@ Radx::ui32 BufrFile::Apply(TableMapElement f) {
   if (f._descriptor.units.find("CCITT") != string::npos) {
     string  value;
     value = ExtractText(f._descriptor.dataWidthBits);
-    cout << " " << f._descriptor.dataWidthBits << endl;
-    cout << "extracted string = " << value << endl;
+    if (_verbose) {
+      cout << " " << f._descriptor.dataWidthBits << endl;
+      cout << "extracted string = " << value << endl;
+    }
     string fieldName;
     fieldName = f._descriptor.fieldName;
     std::transform(fieldName.begin(), fieldName.end(), fieldName.begin(), ::tolower);
@@ -795,7 +835,7 @@ Radx::si32 BufrFile::ApplyNumeric(TableMapElement f) {
   if (f._whichType != TableMapElement::DESCRIPTOR) {
     return -1;
   } 
-  if (_debug) {
+  if (_verbose) {
     if (f._descriptor.fieldName.find("Byte element") == string::npos) {
     cout << "Applying " << endl;
     cout << "  " << f._descriptor.fieldName << " ";
@@ -824,7 +864,7 @@ Radx::si32 BufrFile::ApplyNumeric(TableMapElement f) {
     temp  = temp/fastPow10(f._descriptor.scale);
 
     svalue = (Radx::si32) temp;
-    if (_debug) cout << "converted to " << svalue << endl;
+    if (_verbose) cout << "converted to " << svalue << endl;
     return svalue;
   }
 }
@@ -834,7 +874,7 @@ Radx::fl32 BufrFile::ApplyNumericFloat(TableMapElement f) {
   if (f._whichType != TableMapElement::DESCRIPTOR) {
     return -1;
   } 
-  if (_debug) {
+  if (_verbose) {
     if (f._descriptor.fieldName.find("Byte element") == string::npos) {
     cout << "Applying " << endl;
     cout << "  " << f._descriptor.fieldName << " ";
@@ -863,67 +903,69 @@ Radx::fl32 BufrFile::ApplyNumericFloat(TableMapElement f) {
     temp  = temp/fastPow10(f._descriptor.scale);
 
     svalue = (Radx::fl32) temp;
-    if (_debug) cout << "converted to " << svalue << endl;
+    if (_verbose) cout << "converted to " << svalue << endl;
     return svalue;
   }
 }
 
 // Put the info in the correct storage location
 // and take care of any setup that needs to happen
-bool BufrFile::StuffIt(string fieldName, double value) {
+bool BufrFile::StuffIt(string name, double value) {
   bool ok = true;
 
-  std::transform(fieldName.begin(), fieldName.end(), fieldName.begin(), ::tolower);
-  if (fieldName.find("byte element") != string::npos) {
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+  if (name.find("byte element") != string::npos) {
     // TODO: ugh!  It's not a double value, it's an unsigned char...
     currentProduct.addData((unsigned char) value);
-  } else if (fieldName.find("latitude") != string::npos) {
+  } else if (name.find("latitude") != string::npos) {
     latitude = value;
-  } else if (fieldName.find("longitude") != string::npos) {
+  } else if (name.find("longitude") != string::npos) {
     longitude = value;
-  } else if (fieldName.find("height") != string::npos) {
+  } else if (name.find("height") != string::npos) {
     height = value;
-  } else if (fieldName.find("antenna elevation") != string::npos) {
+  } else if (name.find("antenna elevation") != string::npos) {
     currentProduct.antennaElevationDegrees = value;
-  } else if (fieldName.find("number of bins along the radial") != string::npos) {
+  } else if (name.find("number of bins along the radial") != string::npos) {
     currentProduct.nBinsAlongTheRadial = value;
-  } else if (fieldName.find("range-bin size") != string::npos) {
+  } else if (name.find("range-bin size") != string::npos) {
     currentProduct.rangeBinSizeMeters = value;
-  } else if (fieldName.find("range-bin offset") != string::npos) {
+  } else if (name.find("range-bin offset") != string::npos) {
     currentProduct.rangeBinOffsetMeters = value;
-  } else if (fieldName.find("number of azimuths") != string::npos) {
+  } else if (name.find("number of azimuths") != string::npos) {
     currentProduct.nAzimuths = value;
-  } else if (fieldName.find("antenna beam azimuth") != string::npos) {
+  } else if (name.find("antenna beam azimuth") != string::npos) {
     currentProduct.antennaBeamAzimuthDegrees = value;
 
-  } else if (fieldName.find("year") != string::npos) {
+  } else if (name.find("year") != string::npos) {
     currentProduct.putYear(value);
-  } else if (fieldName.find("month") != string::npos) {
+  } else if (name.find("month") != string::npos) {
     currentProduct.putMonth(value);
-  } else if (fieldName.find("day") != string::npos) {
+  } else if (name.find("day") != string::npos) {
     currentProduct.putDay(value);
-  } else if (fieldName.find("hour") != string::npos) {
+  } else if (name.find("hour") != string::npos) {
     currentProduct.putHour(value);
-  } else if (fieldName.find("minute") != string::npos) {
+  } else if (name.find("minute") != string::npos) {
     currentProduct.putMinute(value);
-  } else if (fieldName.find("second") != string::npos) {
+  } else if (name.find("second") != string::npos) {
     currentProduct.putSecond(value);
     // TODO: should probably use key to identify these fields...
-  } else if (fieldName.find("wmo block") != string::npos) {
+  } else if (name.find("wmo block") != string::npos) {
     WMOBlockNumber = value;
-  } else if (fieldName.find("wmo station") != string::npos) {
+  } else if (name.find("wmo station") != string::npos) {
     WMOStationNumber = value;
-
-  
-  } else if (fieldName.find("type of product") != string::npos) {
+  } else if (name.find("compression method") != string::npos) {
+    ; // ignore it
+  } else if (name.find("type of product") != string::npos) {
     int code = (int) value;
-    // TODO: make sure the type of product agrees with the field name
+    // make sure the type of product agrees with the field name
     switch(code) {
     case 0:
       currentProduct.typeOfProduct = "DBZH";
       break;
     case 40:
       currentProduct.typeOfProduct = "VRAD";
+      break;
+    case 90:
       break;
     case 91: 
     case 230:
@@ -945,13 +987,31 @@ bool BufrFile::StuffIt(string fieldName, double value) {
     case 241:
       currentProduct.typeOfProduct = "RHOHV";
       break;
+    case 242:
+      currentProduct.typeOfProduct = "TDR";
+      break;
     case 231:
       currentProduct.typeOfProduct = "TV";
       break; 
     default:
-      currentProduct.typeOfProduct = "XXXX";
+      currentProduct.typeOfProduct = "UNKNOWN";
       ok = false;
     } 
+    // make sure the field name we are looking for agrees with
+    // the code in the data file
+    // skip this check if the type of product has code 90; 
+    // I don't know what product code 90 means.
+    if (code != 90) {
+      string temp = _fieldName;
+      std::transform(temp.begin(), temp.end(), temp.begin(), ::toupper);
+      if (currentProduct.typeOfProduct.compare(temp) != 0) {
+	Radx::addErrStr(_errString, "", "ERROR - BufrFile::StuffIt", true);
+	Radx::addErrStr(_errString, "  Expected Type of Product code for ", 
+			temp.c_str(), true);
+	Radx::addErrInt(_errString, "  Found code ", code, true);
+	throw _errString.c_str();
+      }
+    }
   } else {
     ok = false;
   }
@@ -1363,6 +1423,55 @@ void BufrFile::printTree(DNode *tree, int level) {
   }
 }
 
+void BufrFile::printHeader() {
+  cout << "tree: \n";
+  cout.width(40);
+  cout << " Descriptor ";
+  cout.width(25);
+  cout << " scale  ";
+  cout.width(5);
+  cout << " units  ";
+  cout.width(15);
+  cout << " reference value ";
+  cout.width(7);
+  cout << " value " << endl;
+}
+
+void BufrFile::prettyPrintLeaf(ostream &out, unsigned short des,
+			       TableMapElement element, int level) {
+  //TableMapElement f;
+  string svalue;
+  //double fvalue;
+  //int ivalue;
+  //DNode *p,*q;
+  //TableMapElement element;
+  unsigned char f, x, y;
+
+  //if (level == 0) {
+  //  printHeader();
+  //}
+
+  for (int i=0; i<level; i++) printf(" ");
+  //element = tableMap.Retrieve(p->des);
+  if (element._whichType == TableMapElement::DESCRIPTOR) {
+    TableMapKey().Decode(des, &f, &x, &y);
+    printf("+(%1d %02d %03d) ", (unsigned int) f, (unsigned int) x, (unsigned int) y);
+    cout << "  " << element._descriptor.fieldName << " ";
+    for (unsigned int i=0; i<50-element._descriptor.fieldName.size(); i++)
+      cout << "-";
+    cout << " ";
+    cout.width(5);
+    cout << element._descriptor.dataWidthBits;
+    cout.width(5);
+    cout << element._descriptor.scale;
+    cout.width(15);
+    cout << element._descriptor.units;
+    cout.width(15);
+    cout << element._descriptor.referenceValue << " ";
+  }
+}
+
+
 void BufrFile::freeTree(DNode *tree) {
   DNode *p,*q;
   p = tree;
@@ -1375,7 +1484,7 @@ void BufrFile::freeTree(DNode *tree) {
     DNode *temp;
     temp = p;
     p=p->next;
-    if (_debug) printf("freeing %d\n", temp->des);
+    if (_verbose) printf("freeing %d\n", temp->des);
     free(temp);
   }
 }
@@ -1388,7 +1497,8 @@ void BufrFile::freeTree(DNode *tree) {
 int BufrFile::TraverseNew(vector<unsigned short> descriptors) {
 
   GTree = buildTree(descriptors, false);
-
+  prettyPrintLevel = 1;
+  if (_debug) printHeader();
   int result =   _descend(GTree);
   return result;
 }
@@ -1419,11 +1529,12 @@ int BufrFile::moveChildren(DNode *parent, int howManySiblings) {
 	  return 0;
 }
 
+// Print the tree while we are traversing, since this is 
+// the best way to display the values along with the the descriptors.
+// The values are stored in a separate structure.
 int BufrFile::_descend(DNode *tree) {
 
-  //bool _debug = true;  // TODO: make this more global
-
-  if (_debug) { 
+  if (_verbose) { 
     printf("\nTraversing ... \n");
     printTree(tree,0);
   }
@@ -1443,19 +1554,20 @@ int BufrFile::_descend(DNode *tree) {
     TableMapKey key(des);
 
     // visit the node
-    if (_debug) {
+    if (_verbose) {
       TableMapKey().Decode(des, &f, &x, &y);
       printf("visiting f(x,y): %x(%x,%x) ", f, x, y);        
     }
 
     if (key.isTableBEntry()) {  // a leaf
-      if (_debug) 
+      if (_verbose) 
         printf(" leaf\n");
       // if the node is from table b, retrieve the data; apply any transformations;
       //   insert into temporary structure for saving
       TableMapElement val1;
       val1 = tableMap.Retrieve(des);
       if (val1._whichType == TableMapElement::DESCRIPTOR) {
+        if (_debug) prettyPrintLeaf(cout, des, val1, prettyPrintLevel);
         //cout << "value for key " << des << ":" <<
         //  val1._descriptor.fieldName << "," << 
         //  val1._descriptor.scale << endl;
@@ -1472,17 +1584,23 @@ int BufrFile::_descend(DNode *tree) {
       } else {
         valueFromData = ApplyNumericFloat(val1);
         if (!StuffIt(val1._descriptor.fieldName, valueFromData)) {
-          // throw "Cannot associate value with BufrField";
-          cout << "Cannot associate value with BufrField\n";
+          Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
+          Radx::addErrStr(_errString, "Unrecognized descriptor: ",
+			  val1._descriptor.fieldName, true);
+	  // since this is just a warning, just print the message, no need
+	  // to exit
+          cerr << _errString << endl;
 	}
         if (val1._descriptor.fieldName.find("Compression method") != string::npos) {
           compressionStart = true;
         }
+        if (_debug) cout << valueFromData;
       }
+      if (_debug) cout << endl;
       p = p->next;
 
     } else if (key.isReplicator()) {
-	if (_debug) 
+	if (_verbose) 
 	  printf(" replicator\n");
 
 	// if the node is a replicator, e.g. 1;2;0 or 1;3;5
@@ -1509,7 +1627,7 @@ int BufrFile::_descend(DNode *tree) {
           // get the number of repeats from section 4 data
 	  Radx::ui32 nRepeats; // actually read this from the data section
           nRepeats = Apply(tableMap.Retrieve(delayed_replication_descriptor));
-          printf("nrepeats from Data = %u\n", nRepeats);
+          if (_verbose) printf("nrepeats from Data = %u\n", nRepeats);
           //repeaters.push(nRepeats);
           currentProduct.storeReplicator(nRepeats);
           if (p->children == NULL) {
@@ -1519,11 +1637,11 @@ int BufrFile::_descend(DNode *tree) {
           // the state determines which counters to increment & decrement
           // It's up to the product to deal with the space allocation as needed
           for (unsigned int i=0; i<nRepeats; i++) {
-            if ((i%1000)==0)  
+            if (((i%1000)==0) && (_verbose)) 
               printf("%d out of %d repeats\n", i+1, nRepeats);
             _descend(p->children);
 	  }
-          printf("-- end repeat\n");
+          if (_verbose) printf("-- end repeat\n");
           // transition state; set location levels
           currentProduct.trashReplicator();
           p=p->next;
@@ -1532,16 +1650,16 @@ int BufrFile::_descend(DNode *tree) {
             moveChildren(p, x);
 	  }
           for (int i=0; i<y; i++) {
-            if ((i%1000)==0)
+            if (((i%1000)==0) && (_verbose))
               printf("%d out of %d repeats\n", i+1, y);
             _descend(p->children);
 	  }
-          printf("-- end repeat\n");
+          if (_verbose) printf("-- end repeat\n");
           p=p->next;
 	} // end else fixed repeater
-        printTree(tree, 0);
+        if (_verbose) printTree(tree, 0);
     } else if (key.isAnotherNode()) {
-	if (_debug) 
+	if (_verbose) 
 	  printf(" another node\n");
 	// pop/remove the element from the list; it is being replaced
 	// if the node is another node,
@@ -1572,9 +1690,9 @@ int BufrFile::_descend(DNode *tree) {
           }
           h->next = save;
 	}
-        printTree(tree, 0);
+        if (_verbose) printTree(tree, 0);
     } else {
-	if (_debug) 
+	if (_verbose) 
 	  printf(" ERROR!!! unknown\n");  // TODO: this should be an exception thrown
         return -1; // error occurred
     }
@@ -1757,11 +1875,27 @@ int BufrFile::_descend(DNode *tree) {
 
 */
 
+
+
 /////////////////////////////////////
 // Print contents of Bufr file read
 // Returns 0 on success, -1 on failure
-int BufrFile::Print() {
+int BufrFile::print(ostream &out, bool printRays, bool printData) {
 
+  out << "=============== BufrFile ===============" << endl;
+  //RadxFile::print(out);
+  out << "Section 0: " << endl;
+  printSection0(out);
+  out << "Section 1: " << endl;
+  printSection1(out);
+  out << "Section 2: " << endl;
+  printSection2(out);
+  out << "Section 3: " << endl;
+  printSection3(out);
+  //printTree();
+  out << "Section 4: " << endl;
+  if (printData) 
+    printSection4(out);
   return 0;
 }
 

@@ -86,26 +86,6 @@ void BufrRadxFile::clear()
   clearErrStr();
 
   //_file.close();
-  /*
-  _timeDim = NULL;
-  _rangeDim = NULL;
-
-  _timeVar = NULL;
-  _rangeVar = NULL;
-  _latitudeVar = NULL;
-  _longitudeVar = NULL;
-  _heightVar = NULL;
-
-  _frequencyVar = NULL;
-  _prfVar = NULL;
-  _beamwidthHVar = NULL;
-  _beamwidthVVar = NULL;
-  _antennaDiameterVar = NULL;
-  _pulsePeriodVar = NULL;
-  _transmitPowerVar = NULL;
-  _sweepVar = NULL;
-  _azimuthVar = NULL;
-  _elevationVar = NULL;
 
   _dTimes.clear();
   _nTimesInFile = 0;
@@ -119,7 +99,7 @@ void BufrRadxFile::clear()
   _latitudeDeg = 0;
   _longitudeDeg = 0;
   _heightKm = 0;
-
+  
   _frequencyGhz = Radx::missingMetaDouble;
   _prfHz = Radx::missingMetaDouble;
   _beamwidthHDeg = Radx::missingMetaDouble;
@@ -127,7 +107,7 @@ void BufrRadxFile::clear()
   _antennaDiameterM = Radx::missingMetaDouble;
   _pulsePeriodUs = Radx::missingMetaDouble;
   _transmitPowerW = Radx::missingMetaDouble;  
-
+  
   _azimuths.clear();
   _elevations.clear();
   
@@ -150,7 +130,7 @@ void BufrRadxFile::clear()
   _siteName.clear();
   _scanName.clear();
   _instrumentName.clear();
-  */
+  //-----
 
   _scanId = 0;
   _volumeNumber = 0;
@@ -338,48 +318,6 @@ time_t  BufrRadxFile::getTimeFromString(const char *dateTime)
     //return 0;
   }
   return 0;
- //-------
-
- /*
-
-  RadxPath rpath(path);
-  const string &fileName = rpath.getFile();
-  
-  // find first digit in entry name - if no digits, return now
-
-  const char *start = NULL;
-  for (size_t ii = 0; ii < fileName.size(); ii++) {
-    if (isdigit(fileName[ii])) {
-      start = fileName.c_str() + ii;
-      break;
-    }
-  }
-  if (!start) return -1;
-  const char *end = start + strlen(start);
-  
-  // iteratively try getting the date and time from the string
-  // moving along by one character at a time
-  
-  while (start < end - 6) {
-    int year, month, day, hour, min, sec;
-    char cc;
-    if (sscanf(start, "%4d%2d%2d%1c%2d%2d%2d",
-               &year, &month, &day, &cc, &hour, &min, &sec) == 7) {
-      if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
-        return -1;
-      }
-      if (hour < 0 || hour > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) {
-        return -1;
-      }
-      rtime.set(year, month, day, hour, min, sec);
-      return 0;
-    }
-    start++;
-  }
-  
-  return -1;
- */
-
 }
 
 /////////////////////////////////////////////////////////
@@ -426,15 +364,10 @@ void BufrRadxFile::print(ostream &out) const
 // Use getErrStr() if error occurs
 
 int BufrRadxFile::printNative(const string &path, ostream &out,
-                                 bool printRays, bool printData)
+   bool printRays, bool printData)
   
 {
-
-  _addErrStr("ERROR - BufrRadxFile::printNative");
-  _addErrStr("  Native print does not apply to NetCDF file: ", path);
-  _addErrStr("  Use 'ncdump' instead");
-  return -1;
-
+  return _file.print(out, printRays, printData);
 }
 
 /////////////////////////////////////////////////////
@@ -444,47 +377,7 @@ int BufrRadxFile::printNative(const string &path, ostream &out,
 int BufrRadxFile::setTimeFromPath(const string &filePath,
                                  time_t &fileTime)  
 {
-  /*
-  getTimeFromString(filePath, RadxTime &fTime);
-  
-  RadxPath rpath(filePath);
-  string fileName = rpath.getFile();
-  
-  // find first digit in entry name - if no digits, return now
-  
-  const char *start = NULL;
-  for (size_t ii = 0; ii < fileName.size(); ii++) {
-    if (isdigit(fileName[ii])) {
-      start = fileName.c_str() + ii;
-      break;
-    }
-  }
-  if (!start) return -1;
-  const char *end = start + strlen(start);
-  
-  // iteratively try getting the date and time from the string
-  // moving along by one character at a time
-  
-  while (start < end - 6) {
-    int year, month, day, hour, min, sec;
-    if (sscanf(start, "%4d%2d%2d%2d%2d%2d",
-               &year, &month, &day, &hour, &min, &sec) == 6) {
-      if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
-        return -1;
-      }
-      if (hour < 0 || hour > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) {
-        return -1;
-      }
-      //     rtime.set(year, month, day, hour, min, sec);  from getTimeFromString method
-      RadxTime ftime(year, month, day, hour, min, sec);
-      fileTime = ftime.utime();
-      return 0;
-    }
-    start++;
-  }
-  */
   return -1;
-
 }
 
 void BufrRadxFile::lookupFieldName(string fieldName, string &units, 
@@ -579,7 +472,7 @@ int BufrRadxFile::_readFields(const string &path)
     try {
       if (_debug)  cerr << "reading field " << fieldName << endl;
       _file.readThatField(fileNames[ii], filePaths[ii], _fileTime.utime(),
-          fieldName, standardName, longName, units, _debug, _verbose);
+          fieldName, standardName, longName, units);
       // add to paths used on read  
       _readPaths.push_back(filePaths[ii]);
       if (_debug) cerr << "  .. accumulating field info " << endl;
@@ -588,14 +481,15 @@ int BufrRadxFile::_readFields(const string &path)
       } else {
         _accumulateField(fieldName, units, standardName, longName);
       }
+      if (_debug) 
+        printNative(fileNames[ii], cout, true, true);
+        // const string &path, ostream &out, bool printRays, bool printData
     } catch (const char *msg) {
       // report error message and move to the next field
       _addErrStr("ERROR - BufrRadxFile::_readFields");
       _addErrStr("  Cannot read in field, path: ", filePaths[ii]);
       _addErrStr(msg);
-      cout << _errStr << endl;
-      //return -1;
-      //delete field;
+      cerr << _errStr << endl;
     }
   } // ii
 
@@ -730,57 +624,6 @@ void BufrRadxFile::_getFieldPaths(const string &primaryPath,
   */
 }
 
-
-/*
-void BufrRadxFile::readThatField() {
-
- // TODO: here ... I need to somehow read each file;
-  // each BufrFile == a field in one or more sweeps.
-  // each BufrFile/field then needs to be accumulated in
-  // the RadxVol structure.
-
-  // maybe move all of this read stuff to separate function,
-  // that _readFields can call???
-  // push the BufrProducts/fields into a vector,
-  // then when finished reading all the files for the same timestamp,
-  // load the RadxVol with the BufrProducts/fields.
-
-  // clear tmp rays
-
-  _nTimesInFile = 0;
-  _raysToRead.clear();
-  _raysValid.clear();
-  _nRangeInFile = 0;
-
-  try {
-    _file.openRead(path);
-    _file.readSection0();
-    _file.readSection1();
-    _file.readDataDescriptors();
-    _file.readData();  // TODO:  need to send vol object for streaming;
-                       // or need to completely fill _file.currentProduct
-                       // with data and load RadxVol in batch mode.
-                       // choose the route that is easier for someone
-                       // else to understand because the software will be
-                       // open source, the easier it is to understand, 
-                       // the better.
-		       
-  } catch (const char *msg) {
-    //printf("Exception: %s\n", msg);
-    _addErrStr(msg);
-    return -1;
-  }
-
-  if (_debug) {
-    cerr << " finished reading  " << endl; 
-  }
-
-  // close file
-
-  _file.close();
-
-}
-*/
 ////////////////////////////////////////////////////////////
 // Read in data from specified path, load up volume object.
 //
@@ -792,7 +635,9 @@ int BufrRadxFile::readFromPath(const string &path,
                                   RadxVol &vol)
   
 {
-
+  _file.setDebug(_debug);
+  _file.setVerbose(_verbose);
+  
   _initForRead(path, vol);  // TODO: may not need this; it causes a seg fault
   
   if (_debug) {
@@ -890,6 +735,7 @@ void BufrRadxFile::_accumulateFieldFirstTime(string fieldName, string units, str
     // read required dimensions
     _nTimesInFile = _file.getTimeDimension();
     _nRangeInFile = _file.getRangeDimension();
+    _rangeBinSizeMeters = _file.getRangeBinSizeMeters();
 
     // _readGlobalAttributes();
     _year_attr = _file.hdr_year;
@@ -917,13 +763,17 @@ void BufrRadxFile::_accumulateFieldFirstTime(string fieldName, string units, str
     // for each sweep
     for (size_t sn=0; sn<nSweeps; sn++) {
       RadxSweep *sweep = new RadxSweep();
-      // TODO: Ok How are the field variables added to the sweep???
+      // Ok How are the field variables added to the sweep?
+      // they are associated with a sweep number, which is kept
+      // by each ray, and each ray keeps track of its field
+      // variables.
       sweep->setSweepNumber(sn);
       // read time variable
       _getRayTimes(sn);
       // get ray variables
       if (_debug) {
-	cerr << " fetching ray  variable " << endl; 
+	cout << " fetching ray  variable " << fieldName << 
+	  " for sweep " << sn << endl; 
       }
       _getRayVariables(sn);  // fills in _azimuths & _elevations
       if (_readMetadataOnly) {
@@ -974,30 +824,40 @@ void BufrRadxFile::_accumulateField(string fieldName, string units, string stand
   const char *location = "ERROR - BufrRadxFile::_accumulateField";
   if (_file.getTimeDimension() != _nTimesInFile) {
     throw ;
-    _errorMessage(location, "Time dimension incompatible, found ", _file.getTimeDimension(),
-		 _nTimesInFile);
+    _errorMessage(location, "Time dimension incompatible, found ",
+ _file.getTimeDimension(),_nTimesInFile);
     throw "incompatible";
   }
-  if (_file.getRangeDimension() != _nRangeInFile) {
-    _errorMessage(location, "Range dimension incompatible, found ", _file.getRangeDimension(),
-		 _nRangeInFile);
+
+
+
+  if (_file.getRangeBinSizeMeters() != _rangeBinSizeMeters) {
+    // check the size of the range bins
+    _errorMessage(location, "Range bin size (meters) incompatible, found ",
+      _file.getRangeBinSizeMeters(), _rangeBinSizeMeters);
     throw "incompatible";
   }
+
   //_readGlobalAttributes();
   if ((_year_attr != _file.hdr_year) || (_month_attr != _file.hdr_month) ||
       (_day_attr != _file.hdr_day)) {
-    _errorMessage(location, "Date is incompatible, found ", _file.hdr_year, _year_attr);
-    _errorMessage(location, "Date is incompatible, found ", _file.hdr_month, _month_attr);
-    _errorMessage(location, "Date is incompatible, found ", _file.hdr_day, _day_attr);
+    _errorMessage(location, "Date is incompatible, found ",
+ _file.hdr_year, _year_attr);
+    _errorMessage(location, "Date is incompatible, found ", 
+_file.hdr_month, _month_attr);
+    _errorMessage(location, "Date is incompatible, found ",
+ _file.hdr_day, _day_attr);
     throw "incompatible";
   }
   if ((_siteName != _file.typeOfStationId) || 
       (_instrumentName != _file.stationId)) {
-    _errorMessage(location, "Global data are incompatible, found ", _file.typeOfStationId, _siteName);
-    _errorMessage(location, "Global data are incompatible, found ", _file.stationId, _instrumentName);
+    _errorMessage(location, "Global data are incompatible, found ",
+ _file.typeOfStationId, _siteName);
+    _errorMessage(location, "Global data are incompatible, found ",
+ _file.stationId, _instrumentName);
     throw "incompatible";
   }
-  _verifyRangeVariable();
+  //_verifyRangeVariable();
   
   // verify lat/lon/alt 
   _verifyPositionVariables();
@@ -1027,14 +887,17 @@ void BufrRadxFile::_accumulateField(string fieldName, string units, string stand
       }
       //_getRayVariables(sn);  // fills in _azimuths & _elevations
       // TODO: compare the ray az and el; make sure they are compatible
-      if (_readMetadataOnly) {
-	// read field variables
-	_addFieldVariables(sn, fieldName, units, standardName, longName, true);
-      } else {
-	// add field variables to file rays
-	_addFieldVariables(sn, fieldName, units, standardName, longName, false);
-      }
-      //_sweeps.push_back(sweep);
+      // mind the range dimensions, i.e. make the number of gates compatible
+      if (nextFieldNRanges < 0) {
+	// fill with missing values
+      } else if (nextFieldNRanges > 0) {
+	// expand the current fields and fill with missing values
+      } // otherwise, everything is good, carry on ...
+
+      // add field variables
+      _addFieldVariables(sn, fieldName, units, standardName, longName,
+        _readMetadataOnly);
+
     } // end for each sweep
   } catch (const char *msg) {
     printf("Exception: %s\n", msg);
@@ -1043,6 +906,7 @@ void BufrRadxFile::_accumulateField(string fieldName, string units, string stand
 }
 
   //  call after all files are read
+// Quality check
 void BufrRadxFile::_qualityCheckRays() {
 
   // add file rays to main rays
@@ -1132,99 +996,6 @@ int BufrRadxFile::_readGlobalAttributes()
   return 0;
 
 }
-
-/*
-///////////////////////////////////
-// read the times
-
-int BufrRadxFile::_readTimes()
-
-{
-
-  // read the time variable
-
-  _timeVar = _file.getNc3File()->get_var("time");
-  if (_timeVar == NULL) {
-    _addErrStr("ERROR - BufrRadxFile::_readTimes");
-    _addErrStr("  Cannot find time variable, name: ", "time");
-    _addErrStr(_file.getNc3Error()->get_errmsg());
-    return -1;
-  }
-  if (_timeVar->num_dims() < 1) {
-    _addErrStr("ERROR - BufrRadxFile::_readTimes");
-    _addErrStr("  time variable has no dimensions");
-    return -1;
-  }
-  Nc3Dim *timeDim = _timeVar->get_dim(0);
-  if (timeDim != _timeDim) {
-    _addErrStr("ERROR - BufrRadxFile::_readTimes");
-    _addErrStr("  Time has incorrect dimension, name: ", timeDim->name());
-    return -1;
-  }
-
-  // get units attribute
-  
-  Nc3Att* unitsAtt = _timeVar->get_att("units");
-  if (unitsAtt == NULL) {
-    _addErrStr("ERROR - BufrRadxFile::_readTimes");
-    _addErrStr("  Time has no units");
-    return -1;
-  }
-  string units = Nc3xFile::asString(unitsAtt);
-  delete unitsAtt;
-
-#ifdef NOTNOW
-
-  // check if this is a time variable, using udunits
-  
-  ut_unit *udUnit = ut_parse(_udunits.getSystem(), units.c_str(), UT_ASCII);
-  if (udUnit == NULL) {
-    _addErrStr("ERROR - BufrRadxFile::_readTimes");
-    _addErrStr("  Cannot parse time units: ", units);
-    _addErrInt("  udunits status: ", ut_get_status());
-    return -1;
-  }
-    
-  if (ut_are_convertible(udUnit, _udunits.getEpoch()) == 0) {
-    // not a time variable
-    _addErrStr("ERROR - BufrRadxFile::_readTimes");
-    _addErrStr("  Time does not have convertible units: ", units);
-    _addErrInt("  udunits status: ", ut_get_status());
-    ut_free(udUnit);
-    return -1;
-  }
-  
-  // get ref time as unix time using udunits
-  
-  cv_converter *conv = ut_get_converter(udUnit, _udunits.getEpoch());
-  double refTimeDouble = cv_convert_double(conv, 0);
-  _refTimeSecsFile = (time_t) refTimeDouble;
-
-#endif
-  
-  // parse the time units reference time
-
-  RadxTime stime(units);
-  _refTimeSecsFile = stime.utime();
-  
-  // set the time array
-  
-  RadxArray<double> dtimes_;
-  double *dtimes = dtimes_.alloc(_nTimesInFile);
-  if (_timeVar->get(dtimes, _nTimesInFile) == 0) {
-    _addErrStr("ERROR - BufrRadxFile::_readTimes");
-    _addErrStr("  Cannot read times variable");
-    return -1;
-  }
-  _dTimes.clear();
-  for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-    _dTimes.push_back(dtimes[ii]);
-  }
-
-  return 0;
-
-}
-*/
 
 int BufrRadxFile::_getRayTimes(int sweepNumber)
 
@@ -1578,11 +1349,6 @@ int BufrRadxFile::_addFieldVariables(int sweepNumber,
 {
     int iret = 0;
     bool isDiscrete = false;
-    // TODO: verify Type of Product???
-    //string name = _file.getTypeOfProductForSweep(sweepNumber);; // "TH";
-    //string units = "m/s";
-    // string standardName = name;
-    //string longName = name;
     bool fieldFolds = false;
     float foldLimitLower = 0.0;
     float foldLimitUpper = 0.0;
@@ -1806,44 +1572,28 @@ Nc3Var* BufrRadxFile::_getRayVar(const string &name, bool required)
 // Returns 0 on success, -1 on failure
 
 int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
-                                         const string &name,
-                                         const string &units,
-                                         const string &standardName,
-                                         const string &longName,
-                                         bool isDiscrete,
-                                         bool fieldFolds,
-                                         float foldLimitLower,
-                                         float foldLimitUpper)
+				      const string &name,
+				      const string &units,
+				      const string &standardName,
+				      const string &longName,
+				      bool isDiscrete,
+				      bool fieldFolds,
+				      float foldLimitLower,
+				      float foldLimitUpper)
   
 {
-
   // get data from array
 
-  Radx::fl64 *data; //  = new Radx::fl64[_nTimesInFile * _nRangeInFile];
-  //int iret = !var->get(data, _nTimesInFile, _nRangeInFile);
-  //if (iret) {
-  //  delete[] data;
-  //  return -1;
-  //}
+  Radx::fl64 *data; 
   data = _file.getDataForSweep(sweepNumber);
 
   // set missing value
 
   Radx::fl64 missingVal = -DBL_MAX; // Radx::missingFl64;
-  // Nc3Att *missingValueAtt = var->get_att("missing_value");
-  // if (missingValueAtt != NULL) {
-  //   missingVal = missingValueAtt->as_double(0);
-  //   delete missingValueAtt;
-  // }
 
   // look for fill value, if not present, then use missing value
 
-   Radx::fl64 fillVal = missingVal;
-  // Nc3Att *fillValueAtt = var->get_att("_FillValue");
-  // if (fillValueAtt != NULL) {
-  //   fillVal = fillValueAtt->as_double(0);
-  //   delete fillValueAtt;
-  // }
+  Radx::fl64 fillVal = missingVal;
 
   // replace any NaN's with fill value
   for (size_t jj = 0; jj < _nTimesInFile * _nRangeInFile; jj++) {
@@ -1851,41 +1601,70 @@ int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
       data[jj] = fillVal;
   }
 
-  // load field on rays
+  // load field into rays
+  RadxField *field;
+  size_t nextFileRangeDimension = _file.getRangeDimension();
 
   for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-    
-    int nGates = _nRangeInFile;
+    int nGates = _nRangeInFile; 
     int startIndex = ii * _nRangeInFile;
-
-    cout << "adding ray " << ii << endl;    
-
+    if (_verbose) {
+      if (ii == 0) 
+        cout << "adding field " << name << " to ray " << endl;    
+    }
     // the rays for this sweep start at sweepNumber*_nTimesInFile
     int rayIdx;
     rayIdx = (sweepNumber * _nTimesInFile) + ii;
-    bool pleaseCopyData = true;
-    RadxField *field =
-      _raysToRead[rayIdx]->addField(name, units, nGates,
-				missingVal,
-				data + startIndex,
-				pleaseCopyData);
 
+    // now we can check for the dimensions and resize as needed
+    // homogenize the number of gates (also known as nRangeInFile)
+    // The number of gates could be less
+    // than the current number of more than the current number
+    if (nextFileRangeDimension < _nRangeInFile) {
+      if (_verbose) {
+        if (ii == 0) 
+          cout << "Expanding field from " << nextFileRangeDimension << 
+            " to " << _nRangeInFile << endl;
+      }
+      // fill in the data with missing values
+      field = new RadxField(name, units);
+      field->setTypeFl64(missingVal);
+      // NOTE: the startIndex will be different
+      startIndex = ii * nextFileRangeDimension;
+      field->addDataFl64(nextFileRangeDimension, data+startIndex);
+      field->setNGates(_nRangeInFile);
+      _raysToRead[rayIdx]->addField(field);
+    } else {
+      if (nextFileRangeDimension > _nRangeInFile) {
+	_raysToRead[rayIdx]->setNGates(nextFileRangeDimension);
+        nGates = nextFileRangeDimension;
+      }
+      bool pleaseCopyData = true;
+      field =
+	_raysToRead[rayIdx]->addField(name, units, nGates,
+				      missingVal,
+				      data + startIndex,
+				      pleaseCopyData);
+    }
     field->setMissingFl64(missingVal);
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
     
     if (fieldFolds &&
-        foldLimitLower != Radx::missingMetaFloat &&
-        foldLimitUpper != Radx::missingMetaFloat) {
+	foldLimitLower != Radx::missingMetaFloat &&
+	foldLimitUpper != Radx::missingMetaFloat) {
       field->setFieldFolds(foldLimitLower, foldLimitUpper);
     }
     if (isDiscrete) {
       field->setIsDiscrete(true);
     }
-
+  } // end for ii
+  if (nextFileRangeDimension > _nRangeInFile) {
+    // update the number of ranges in the file
+    _nRangeInFile = nextFileRangeDimension;
   }
-  
+
   delete[] data;
   return 0;
   
