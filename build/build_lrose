@@ -149,7 +149,8 @@ make -k install-strip
 # Install perl lib modules
 #-------------------------
 
-if [ "$package" == "lrose" -o "$package" == "hcr" ]
+if [ "$package" == "lrose" -o "$package" == "hcr" \
+    -o "$package" == "hsrl" -o "$package" == "titan"  ]
 then
   cd $codebaseDir
   cd libs/perl5/src
@@ -160,7 +161,8 @@ fi
 # Install scripts
 #----------------
 
-if [ "$package" == "lrose" -o "$package" == "hcr" ]
+if [ "$package" == "lrose" -o "$package" == "hcr" \
+    -o "$package" == "hsrl" -o "$package" == "titan"  ]
 then
 
   cd $codebaseDir/apps/procmap/src/scripts
