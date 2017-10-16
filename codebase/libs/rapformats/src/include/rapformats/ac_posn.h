@@ -72,6 +72,7 @@ typedef struct {
 #define LEFT_BURN_FLAG       0x02
 #define BURN_IN_PLACE_FLAG   0x04
 #define EJECTABLE_FLAG       0x08
+#define DRY_ICE_FLAG         0x10
 
 typedef struct {
 

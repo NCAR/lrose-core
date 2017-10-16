@@ -7,6 +7,19 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
-	SurfInterp
+	Fmq2Fmq \
+	Fmq2MultMsgFmq \
+	FmqMon \
+	InputWatcher \
+	Janitor \
+	LdataInformer \
+	LdataWatcher \
+	LdataMultWatcher \
+	LdataWriter \
+	MultMsgFmq2Fmq \
+	RadMon \
+	Scout \
+	TimeCalc \
+	fmq_print
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

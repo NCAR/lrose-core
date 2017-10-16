@@ -1,0 +1,34 @@
+#
+# Recursive make for HCR
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS = $(GENERAL_TARGETS) $(LIB_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+	tdrp \
+        dataport \
+        euclid \
+	physics \
+        Radx \
+        radar \
+        toolsa \
+        didss \
+	dsserver \
+        dsdata \
+	rapformats \
+	rapplot \
+	rapmath \
+        titan \
+	Mdv \
+	Fmq \
+	Spdb
+
+include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+
+
+
+
+
+

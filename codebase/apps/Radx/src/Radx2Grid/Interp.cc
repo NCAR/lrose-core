@@ -1163,18 +1163,21 @@ Interp::Ray::Ray(RadxRay *ray,
     }
   }
 
-  int nFields = interpFields.size();
+  nFields = interpFields.size();
   fldData = new fl32*[nFields];
   missingVal = new fl32[nFields];
-
+  
   for (int ii = 0; ii < nFields; ii++) {
     string fieldName = interpFields[ii].radxName;
     RadxField *fld = inputRay->getField(fieldName);
     if (fld) {
-      fldData[ii] = (fl32 *) fld->getDataFl32();
+      fldData[ii] = new fl32[fld->getNPoints()];
+      memcpy(fldData[ii], fld->getDataFl32(), fld->getNPoints() * sizeof(fl32));
+      // fldData[ii] = (fl32 *) fld->getDataFl32();
       missingVal[ii] = fld->getMissingFl32();
     } else {
       fldData[ii] = NULL;
+      missingVal[ii] = Radx::missingFl32;
     }
   } // ii
 
@@ -1183,6 +1186,13 @@ Interp::Ray::Ray(RadxRay *ray,
 Interp::Ray::~Ray()
   
 {
+
+  for (int ii = 0; ii < nFields; ii++) {
+    if (fldData[ii] != NULL) {
+      delete[] fldData[ii];
+    }
+  } // ii
+
   delete[] fldData;
   delete[] missingVal;
 }

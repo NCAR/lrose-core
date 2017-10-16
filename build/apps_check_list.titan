@@ -1,5 +1,5 @@
 ############################
-# list of LROSE applications
+# list of TITAN applications
 ############################
 AcPosnAscii2Spdb
 AcTrack2Polygon
@@ -112,6 +112,11 @@ LogFilter
 Ltg2Spdb
 Ltg2Symprod
 LtgSpdb2Mdv
+MM52Spdb
+MM5Ingest
+MM5Print
+MM5Simulate
+MM5Split
 Mad2Symprod
 McidasNcf2Mdv
 Mdv2Ascii

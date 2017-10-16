@@ -99,6 +99,7 @@ public:
     double az;
     double elForLimits;
     double azForLimits;
+    int nFields;
     int nGates;
     fl32 **fldData;
     fl32 *missingVal;

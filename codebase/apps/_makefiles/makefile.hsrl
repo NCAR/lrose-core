@@ -1,5 +1,6 @@
 #
-# Recursive make - makes the subdirectory code
+# makefile as template for configure, for hcr
+# does not include scripts
 #
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
@@ -7,24 +8,11 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 TARGETS =  $(GENERAL_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
-	scripts \
 	tdrp \
 	procmap \
-	titan \
-	titan_analysis \
-	trec \
-	symprod \
 	didss \
-	ingest \
 	dsserver \
-	mdv_utils \
-        satApps \
-	spdb_utils \
-	filedist \
 	filters \
-        awc \
-	hydro \
-	interp \
 	radar \
         Radx
 

@@ -66,7 +66,7 @@ InputDir::InputDir(const string &dir_name,
 		   const string &file_substring,
 		   const bool process_old_files,
 		   const string &exclude_substring) :
-  _dirPtr(0)
+  _dirPtr(NULL)
 {
   _init(dir_name, file_substring, exclude_substring, process_old_files);
 }
@@ -76,7 +76,7 @@ InputDir::InputDir(const char *dir_name,
 		   const char *file_substring,
 		   const int process_old_files,
 		   const string &exclude_substring) :
-  _dirPtr(0)
+  _dirPtr(NULL)
 {
   _init(dir_name, file_substring, exclude_substring, process_old_files);
 }
@@ -90,11 +90,31 @@ InputDir::~InputDir(void)
 {
   // Close the directory
 
-  if (_dirPtr != 0)
+  if (_dirPtr != NULL) {
     closedir(_dirPtr);
+  }
 }
 
 
+/*********************************************************************
+ * setDirName() - Set the directory
+ */
+
+void InputDir::setDirName(const string &dir_name)
+{
+  _dirName = dir_name;
+  
+  if (_dirPtr != 0)
+    closedir(_dirPtr);
+  
+  _dirPtr = opendir(_dirName.c_str());
+  if (_dirPtr == NULL) {
+    cerr << "ERROR - InputDir::setDirName" << endl;
+    cerr << "  Cannot open dir: " << _dirName << endl;
+  }
+
+}
+  
 /*********************************************************************
  * getNextFilename() - Gets the next newly detected input filename.
  *                     When there are no new input files, returns
@@ -108,12 +128,19 @@ InputDir::~InputDir(void)
 char *InputDir::getNextFilename(int check_dir_flag,
 				int max_input_data_age)
 {
+
   static const string method_name = "InputDir::getNextFilename()";
 
   struct stat file_stat;
   struct dirent *dir_entry_ptr;
   char *next_file;
   int stat_return;
+
+  if (_dirPtr == NULL) {
+    cerr << "ERROR - InputDir::getNextFilename" << endl;
+    cerr << "  Input dir does not exist" << endl;
+    return NULL;
+  }
   
   // See if we need to rewind the directory.
 
@@ -230,7 +257,10 @@ void InputDir::_init(const string &dir_name,
   if (_dirName != "")
   {
     _dirPtr = opendir(_dirName.c_str());
-    assert(_dirPtr != 0);
+    if (_dirPtr == NULL) {
+      cerr << "ERROR - InputDir::_init" << endl;
+      cerr << "  Cannot open dir: " << _dirName << endl;
+    }
   }
 
   // Save the file substrings
@@ -302,7 +332,9 @@ bool InputDir::_rewindDir(const int check_dir_flag)
   
   // Rewind the directory to get the new entries
   
-  rewinddir(_dirPtr);
+  if (_dirPtr != NULL) {
+    rewinddir(_dirPtr);
+  }
 
   return true;
 }

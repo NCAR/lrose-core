@@ -12,6 +12,7 @@ SUB_DIRS = \
 	BasinPrecipSpdb2Xml \
 	PrecipAccum \
 	RainGage \
+	RateAccum \
 	Shape2Map
 
 $(TARGETS): FORCE

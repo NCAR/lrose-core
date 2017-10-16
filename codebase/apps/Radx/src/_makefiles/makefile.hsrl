@@ -7,10 +7,19 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
-	bdry2spdb \
-	load_spdb \
-	print_spdb \
-	print_spdb_index \
-	spdb2bdry 
+	Dsr2Radx \
+	FixCfradialPaths \
+	FixRadxPointing \
+	Hsrl2Radx \
+	Radx2Dsr \
+	RadxCheck \
+	RadxConvert \
+	RadxDiff \
+	RadxDwellCombine \
+	RadxFilter \
+	RadxMergeFields \
+	RadxMergeVols \
+	RadxMon \
+	RadxPrint
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
