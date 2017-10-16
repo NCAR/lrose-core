@@ -77,17 +77,8 @@ class InputDir
   // Access methods //
   ////////////////////
 
-  inline void setDirName(const string &dir_name)
-  {
-    _dirName = dir_name;
+  void setDirName(const string &dir_name);
 
-    if (_dirPtr != 0)
-      closedir(_dirPtr);
-
-    _dirPtr = opendir(_dirName.c_str());
-    assert(_dirPtr != 0);
-  }
-  
   inline void setFileSubstring(const string &file_substring)
   {
     _fileSubstring = file_substring;
