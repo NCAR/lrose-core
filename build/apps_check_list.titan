@@ -276,11 +276,6 @@ SimCpCompute
 Socket2File
 SpdbQuery
 SpectraPrint
-SpolAngles2Fmq
-SpolCal2Xml
-SpolSysconRelay
-SpolTs2Fmq
-SpolTsMonitor
 StaggeredLimits
 StormInit2Field
 StormInitBdry
