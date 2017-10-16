@@ -45,6 +45,12 @@ As an example, for the **radx** distribtion, run the following:
   ./make_bin/install_package_makefiles.py --package radx
 ```
 
+Available packages are:
+
+```
+  lrose radx titan hcr hsrl cidd
+```
+
 --->
 
 ### Perform the build

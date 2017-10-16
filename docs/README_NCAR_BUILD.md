@@ -91,11 +91,25 @@ For the **radx** distribtion, run the following:
   ./make_bin/install_package_makefiles.py --package radx
 ```
 
+For the **titan** distribtion, run the following:
+
+```
+  cd $LROSE_CORE_DIR/codebase
+  ./make_bin/install_package_makefiles.py --package titan
+```
+
 For the **hcr** package, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase
   ./make_bin/install_package_makefiles.py --package hcr
+```
+
+For the **hsrl** package, run the following:
+
+```
+  cd $LROSE_CORE_DIR/codebase
+  ./make_bin/install_package_makefiles.py --package hsrl
 ```
 
 ### Performing the build
