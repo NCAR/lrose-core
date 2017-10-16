@@ -2,7 +2,7 @@
 
 #===========================================================================
 #
-# Create makefile.am for a HCR package
+# Create makefile.am for a TITAN package
 #
 #===========================================================================
 
@@ -536,6 +536,7 @@ def getLoadLibList():
                    'hdf5',
                    'udunits2',
                    'expat',
+                   'jasper',
                    'fl',
                    'X11',
                    'Xext',
@@ -543,7 +544,8 @@ def getLoadLibList():
                    'png',
                    'z',
                    'bz2',
-                   'm' ]
+                   'm',
+                   'gfortran' ]
     
     for lib in extendLibs:
         if (lib not in loadLibList):
