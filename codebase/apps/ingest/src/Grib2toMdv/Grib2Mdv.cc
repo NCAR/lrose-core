@@ -136,14 +136,14 @@ int Grib2Mdv::init(int nFiles, char** fileList, bool printVarList,
        }
        _dataTrigger = data_trigger;
        _inputSuffix = _paramsPtr->input_suffix;
-       if (strlen(_paramsPtr->input_substring) > 0)
-       {
+       if (strlen(_paramsPtr->input_substring) > 0) {
          _inputSubstrings.push_back(_paramsPtr->input_substring);
-       }
-       else
-       {
-         for (int i = 0; i < _paramsPtr->input_substrings_n; ++i)
-           _inputSubstrings.push_back(_paramsPtr->_input_substrings[i]);
+       } else {
+         for (int i = 0; i < _paramsPtr->input_substrings_n; ++i) {
+           if (strlen(_paramsPtr->_input_substrings[i]) > 0) {
+             _inputSubstrings.push_back(_paramsPtr->_input_substrings[i]);
+           }
+         }
        }
      } else {
        DsInputDirTrigger *data_trigger = new DsInputDirTrigger();
@@ -160,14 +160,14 @@ int Grib2Mdv::init(int nFiles, char** fileList, bool printVarList,
        }
        _dataTrigger = data_trigger;
        _inputSuffix = _paramsPtr->input_suffix;
-       if (strlen(_paramsPtr->input_substring) > 0)
-       {
+       if (strlen(_paramsPtr->input_substring) > 0) {
          _inputSubstrings.push_back(_paramsPtr->input_substring);
-       }
-       else
-       {
-         for (int i = 0; i < _paramsPtr->input_substrings_n; ++i)
-           _inputSubstrings.push_back(_paramsPtr->_input_substrings[i]);
+       } else {
+         for (int i = 0; i < _paramsPtr->input_substrings_n; ++i) {
+           if (strlen(_paramsPtr->_input_substrings[i]) > 0) {
+             _inputSubstrings.push_back(_paramsPtr->_input_substrings[i]);
+           }
+         }
        }
      }
    }
@@ -231,7 +231,7 @@ int Grib2Mdv::getData()
           break;
         }
       }
-      if (!substring_found)
+      if (_inputSubstrings.size() > 0 && !substring_found)
         continue;
       
       if (!_inputSuffix.empty() &&
