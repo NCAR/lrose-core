@@ -93,15 +93,15 @@ public:
   // granularity to provide results of the desired accuracy.
 
   void initHtCache(size_t nElev, double startElevDeg, double deltaElevDeg,
-                   size_t nRange, double startRangeKm, double deltaRangeKm);
+                   size_t nRange, double startRangeKm, double deltaRangeKm) const;
 
   // initialize a previously allocated cache to missing
   
-  void setHtCacheToMissing();
+  void setHtCacheToMissing() const;
   
   // Free the cache, set cache pointer to NULL
   
-  void freeHtCache();
+  void freeHtCache() const;
 
 protected:
 private:

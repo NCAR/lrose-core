@@ -140,13 +140,11 @@ double BeamHeight::computeElevationDeg(double htKm, double gndRangeKm)
 double BeamHeight::computeHtKm(double elDeg, double slantRangeKm) const
 {
   
-  return _computeHtKm(elDeg, slantRangeKm);
-
   if (_htCache == NULL) {
     // no active cache, compute and return
     return _computeHtKm(elDeg, slantRangeKm);
   }
-
+  
   // find location in cache
 
   int iel = (int) ((elDeg - _htCacheStartElevDeg) / _htCacheDeltaElevDeg + 0.5);
@@ -247,7 +245,7 @@ void BeamHeight::initHtCache(size_t nElev,
                              double deltaElevDeg,
                              size_t nRange, 
                              double startRangeKm,
-                             double deltaRangeKm)
+                             double deltaRangeKm) const
 
 {
 
@@ -289,7 +287,7 @@ void BeamHeight::initHtCache(size_t nElev,
 //////////////////////////////////////////////////////
 // initialize a previously allocated cache to missing
 
-void BeamHeight::setHtCacheToMissing()
+void BeamHeight::setHtCacheToMissing() const
 
 {
 
@@ -310,7 +308,7 @@ void BeamHeight::setHtCacheToMissing()
 ////////////////////////////////////////////////////////////////////////
 // Free the cache, set cache pointer to NULL
 
-void BeamHeight::freeHtCache()
+void BeamHeight::freeHtCache() const
 {
   if (_htCache == NULL) {
     return;
