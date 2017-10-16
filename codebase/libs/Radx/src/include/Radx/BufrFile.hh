@@ -53,6 +53,27 @@ using namespace std;
 ///////////////////////////////////////////////////////////////
 /// CLASS FOR BUFR IO OPERATIONS
 
+
+class DNode {
+
+public: 
+  enum DNodeDataType {INT, FLOAT, STRING, OTHER};
+
+    unsigned short des;
+    DNode *children;
+    DNodeDataType dataType;    
+    string somejunksvalue;
+    int ivalue;  // currently storing the number of repeats here
+    float fvalue;
+    unsigned short delayed_repeater;
+    DNode *next;
+
+
+  DNode();
+
+  ~DNode();
+};
+
 class BufrFile
 
 {
@@ -231,14 +252,22 @@ private:
   Section0 _s0;
   Section1 _s1; 
   Radx::ui32 _numBytesRead;
+  /*
+  enum DNodeDataType {INT, FLOAT, STRING, OTHER};
 
   typedef struct node {
     unsigned short des;
     struct node *children;
-    //Radx::ui32 nRepeats;
+    DNodeDataType dataType;    
+    string somejunksvalue;
+    int ivalue;  // currently storing the number of repeats here
+    float fvalue;
     unsigned short delayed_repeater;
     struct node *next;
   } DNode;
+  */
+
+  string _tempStringValue;
 
   DNode *GTree;
   int _descend(DNode *tree);
@@ -246,7 +275,11 @@ private:
   void _deleteAfter(DNode *p);
   int moveChildren(DNode *parent, int howManySiblings);
   void printTree(DNode *tree, int level);
-  void prettyPrintLeaf(ostream &out, unsigned short des, TableMapElement element, int level);
+  void prettyPrint(ostream &out, DNode *p, int level);
+  void prettyPrintLeaf(ostream &out, DNode *p, TableMapElement &element, int level);
+  void prettyPrintNode(ostream &out, DNode *p, int level);
+  void prettyPrintReplicator(ostream &out, DNode *p, int level);
+  void prettyPrintTree(ostream &out, DNode *tree, int level);
   void printHeader();
   void freeTree(DNode *tree);
   int prettyPrintLevel;

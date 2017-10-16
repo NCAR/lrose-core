@@ -48,6 +48,14 @@
 
 using namespace std;
 
+DNode::DNode() {
+}
+
+DNode::~DNode() {
+  //somejunksvalue;
+}
+
+
 //////////////
 // Constructor
 
@@ -469,7 +477,7 @@ void BufrFile::printSection3(ostream &out) {
 }
 
 void BufrFile::printSection4(ostream &out) {
-  //prettyPrintTree(out, GTree, 0);
+  prettyPrintTree(out, GTree, 0);
 }
 
 // taken from bufr2hdf5.c -- read_tables(...)
@@ -768,6 +776,50 @@ void BufrFile::SkipIt(int nBits) {
   printf("entered non working code; exiting. \n");
   exit(1);
 }
+/*
+string BufrFile::ApplyString(TableMapElement f) {
+
+  if (f._whichType != TableMapElement::DESCRIPTOR) {
+    return -1;
+  }
+  if (_verbose) {
+    cout << "Applying " << endl;
+    cout << "  " << f._descriptor.fieldName << " ";
+
+    for (unsigned int i=0; i<50-f._descriptor.fieldName.size(); i++)
+      cout << "-";
+    cout << " " << f._descriptor.dataWidthBits << endl;
+    cout << " scale  " << f._descriptor.scale << endl;
+    cout << " units  " << f._descriptor.units << endl;;
+    cout << " reference value " << f._descriptor.referenceValue << endl;
+  }
+  if (f._descriptor.units.find("CCITT") != string::npos) {
+    string  value;
+    value = ExtractText(f._descriptor.dataWidthBits);
+    if (_verbose) {
+      cout << " " << f._descriptor.dataWidthBits << endl;
+      cout << "extracted string = " << value << endl;
+    }
+    _tempStringValue = value;
+    string fieldName;
+    fieldName = f._descriptor.fieldName;
+    std::transform(fieldName.begin(), fieldName.end(), fieldName.begin(), ::tolower);
+
+    if (fieldName.find("station identifier") != string::npos) {
+      if (fieldName.find("type of") != string::npos) {
+        typeOfStationId = value;
+      } else {
+        stationId = value;
+      }
+    }
+    return 0;
+  } else {
+    Radx::ui32 value;
+    value = ExtractIt(f._descriptor.dataWidthBits);
+    return value;
+  }
+}
+*/
 
 Radx::ui32 BufrFile::Apply(TableMapElement f) {
 
@@ -792,6 +844,7 @@ Radx::ui32 BufrFile::Apply(TableMapElement f) {
       cout << " " << f._descriptor.dataWidthBits << endl;
       cout << "extracted string = " << value << endl;
     }
+    _tempStringValue = value;
     string fieldName;
     fieldName = f._descriptor.fieldName;
     std::transform(fieldName.begin(), fieldName.end(), fieldName.begin(), ::tolower);
@@ -810,6 +863,7 @@ Radx::ui32 BufrFile::Apply(TableMapElement f) {
     return value;
   }
 }
+
 
 //
 // 10^(-10) to 10^10  ==> need 21 elements
@@ -1378,12 +1432,14 @@ void BufrFile::_deleteAfter(DNode *p) {
 }
 
 //  Node *      _buildTree(vector<unsigned short> descriptors);
-BufrFile::DNode* BufrFile::buildTree(vector<unsigned short> descriptors, bool reverse) {
+//BufrFile::DNode* BufrFile::buildTree(vector<unsigned short> descriptors, bool reverse) {
+DNode* BufrFile::buildTree(vector<unsigned short> descriptors, bool reverse) {
   DNode *t;
   t = NULL;
   if (reverse) {
   for (vector<unsigned short>::reverse_iterator i = descriptors.rbegin(); i!= descriptors.rend(); ++i) {
-    DNode *p = (DNode *) malloc(sizeof(DNode));
+    //DNode *p = (DNode *) malloc(sizeof(DNode));
+    DNode *p = new DNode();
     p->des = *i;
     //p->nRepeats = 0;
     unsigned short new_descriptor;
@@ -1391,11 +1447,13 @@ BufrFile::DNode* BufrFile::buildTree(vector<unsigned short> descriptors, bool re
     p->delayed_repeater = new_descriptor;
     p->children = NULL;
     p->next = t;
+    p->somejunksvalue = "";
     t = p;
   }
   } else {
   for (vector<unsigned short>::iterator i = descriptors.begin(); i!= descriptors.end(); ++i) {
-    DNode *p = (DNode *) malloc(sizeof(DNode));
+    //DNode *p = (DNode *) malloc(sizeof(DNode));
+    DNode *p = new DNode();
     p->des = *i;
     unsigned short new_descriptor;
     new_descriptor = TableMapKey().EncodeKey(0, 0, 0);
@@ -1424,53 +1482,126 @@ void BufrFile::printTree(DNode *tree, int level) {
 }
 
 void BufrFile::printHeader() {
-  cout << "tree: \n";
-  cout.width(40);
+  cout << "Tree: \n";
+  cout.width(55);
   cout << " Descriptor ";
-  cout.width(25);
-  cout << " scale  ";
-  cout.width(5);
-  cout << " units  ";
-  cout.width(15);
-  cout << " reference value ";
+  cout.width(18);
+  cout << " width(bits) ";
+  cout.width(7);
+  cout << "scale";
+  cout.width(12);
+  cout << " units ";
+  cout.width(11);
+  cout << " reference ";
   cout.width(7);
   cout << " value " << endl;
 }
 
-void BufrFile::prettyPrintLeaf(ostream &out, unsigned short des,
-			       TableMapElement element, int level) {
+void BufrFile::prettyPrintReplicator(ostream &out, DNode *p, int level) {
+  unsigned char f, x, y;
+  //unsigned short des;
+
+  for (int i=0; i<level; i++) printf(" ");
+  TableMapKey().Decode(p->des, &f, &x, &y);
+  printf("+(%1d %02d %03d) ", (unsigned int) f, (unsigned int) x, (unsigned int) y);
+  if (y == 0) { // variable repeater ....
+    printf(" repeats %d", p->ivalue);
+  }
+  printf("\n");
+}
+
+// TableMapElement gives us information about the data
+// des is the encoded key to find the TableMapElement
+void BufrFile::prettyPrintNode(ostream &out, DNode *p, int level) {
+  unsigned char f, x, y;
+  //unsigned short des;
+
+  for (int i=0; i<level; i++) printf(" ");
+  TableMapKey().Decode(p->des, &f, &x, &y);
+  printf("+(%1d %02d %03d) \n", (unsigned int) f, (unsigned int) x, (unsigned int) y);
+}
+
+// TableMapElement gives us information about the data
+// des is the encoded key to find the TableMapElement
+void BufrFile::prettyPrintLeaf(ostream &out, DNode *p,
+			       TableMapElement &element, int level) {
+  //string svalue;
+  //TableMapElement element;
+  unsigned char f, x, y;
+  // unsigned short des;
+
+  for (int i=0; i<level; i++) printf(" ");
+  //element = tableMap.Retrieve(p->des);
+  TableMapKey().Decode(p->des, &f, &x, &y);
+  printf("+(%1d %02d %03d) ", (unsigned int) f, (unsigned int) x, (unsigned int) y);
+  cout << "  " << element._descriptor.fieldName << " ";
+  for (unsigned int i=0; i<50-level - element._descriptor.fieldName.size(); i++)
+    cout << "-";
+  cout << " ";
+  cout.width(5);
+  cout << element._descriptor.dataWidthBits;
+  cout.width(5);
+  cout << element._descriptor.scale;
+  cout.width(15);
+  cout << element._descriptor.units;
+  cout.width(15);
+  cout << element._descriptor.referenceValue << " ";
+  //need to print the value ...
+  switch (p->dataType) {
+  case DNode::INT:
+    cout << p->ivalue << endl;
+    break;
+  case DNode::FLOAT:
+    cout << p->fvalue << endl;
+    break;
+  case DNode::STRING:
+    cout << p->somejunksvalue << endl;
+    break;
+  default:
+    cout << "undefined value" << endl;
+  }
+}
+
+void BufrFile::prettyPrint(ostream &out, DNode *p, int level) {
+  TableMapElement element;
+  unsigned short des;
+
+  des = p->des;
+  TableMapKey key(p->des);
+
+  if (key.isTableBEntry()) {  // a leaf
+    element = tableMap.Retrieve(des);
+    prettyPrintLeaf(out, p, element, level);
+  } else if (key.isReplicator()) {
+    prettyPrintReplicator(out, p, level);
+  } else {
+    prettyPrintNode(out, p, level);
+  }
+}
+
+void BufrFile::prettyPrintTree(ostream &out, DNode *tree, int level) {
   //TableMapElement f;
   string svalue;
   //double fvalue;
   //int ivalue;
-  //DNode *p,*q;
-  //TableMapElement element;
-  unsigned char f, x, y;
+  DNode *p,*q;
+  TableMapElement element;
+  //unsigned char f, x, y;
 
-  //if (level == 0) {
-  //  printHeader();
-  //}
-
-  for (int i=0; i<level; i++) printf(" ");
-  //element = tableMap.Retrieve(p->des);
-  if (element._whichType == TableMapElement::DESCRIPTOR) {
-    TableMapKey().Decode(des, &f, &x, &y);
-    printf("+(%1d %02d %03d) ", (unsigned int) f, (unsigned int) x, (unsigned int) y);
-    cout << "  " << element._descriptor.fieldName << " ";
-    for (unsigned int i=0; i<50-element._descriptor.fieldName.size(); i++)
-      cout << "-";
-    cout << " ";
-    cout.width(5);
-    cout << element._descriptor.dataWidthBits;
-    cout.width(5);
-    cout << element._descriptor.scale;
-    cout.width(15);
-    cout << element._descriptor.units;
-    cout.width(15);
-    cout << element._descriptor.referenceValue << " ";
+  if (level == 0) {
+    printHeader();
+  }
+  p = tree;
+  while (p != NULL) {
+    prettyPrint(out, p, level);
+    // print the children
+    q=p->children;
+    if (q != NULL) {
+      prettyPrintTree(out, q, level+1);
+    }
+    p = p->next;
   }
 }
-
 
 void BufrFile::freeTree(DNode *tree) {
   DNode *p,*q;
@@ -1479,13 +1610,15 @@ void BufrFile::freeTree(DNode *tree) {
     // free the children
     q=p->children;
     if (q != NULL) {
-      freeTree(q);
+      //freeTree(q);
+      delete q;
     }
     DNode *temp;
     temp = p;
     p=p->next;
     if (_verbose) printf("freeing %d\n", temp->des);
-    free(temp);
+    //free(temp);
+    delete temp;
   }
 }
 
@@ -1497,8 +1630,8 @@ void BufrFile::freeTree(DNode *tree) {
 int BufrFile::TraverseNew(vector<unsigned short> descriptors) {
 
   GTree = buildTree(descriptors, false);
-  prettyPrintLevel = 1;
-  if (_debug) printHeader();
+  //prettyPrintLevel = 1;
+  //if (_debug) printHeader();
   int result =   _descend(GTree);
   return result;
 }
@@ -1567,7 +1700,7 @@ int BufrFile::_descend(DNode *tree) {
       TableMapElement val1;
       val1 = tableMap.Retrieve(des);
       if (val1._whichType == TableMapElement::DESCRIPTOR) {
-        if (_debug) prettyPrintLeaf(cout, des, val1, prettyPrintLevel);
+        //if (_debug) prettyPrintLeaf(cout, des, val1, prettyPrintLevel);
         //cout << "value for key " << des << ":" <<
         //  val1._descriptor.fieldName << "," << 
         //  val1._descriptor.scale << endl;
@@ -1580,7 +1713,13 @@ int BufrFile::_descend(DNode *tree) {
 	// junk = Apply(val1); // TODO: integrate a string type here; or toss exception? 
 	// we don't care about the return value when the descriptor is text
 	Apply(val1); 
-        //; //cerr << "Apply text value not implemented" << endl;
+	// grab the text value
+        printf("%s; length=%lu\n", _tempStringValue.c_str(), _tempStringValue.length());
+        p->dataType = DNode::STRING;
+        //string temp3 = p->somejunksvalue;
+        //temp3 = _tempStringValue;
+        p->somejunksvalue = _tempStringValue;
+        //p->somejunksvalue = temp3;
       } else {
         valueFromData = ApplyNumericFloat(val1);
         if (!StuffIt(val1._descriptor.fieldName, valueFromData)) {
@@ -1594,9 +1733,11 @@ int BufrFile::_descend(DNode *tree) {
         if (val1._descriptor.fieldName.find("Compression method") != string::npos) {
           compressionStart = true;
         }
-        if (_debug) cout << valueFromData;
+	// store the value
+        p->dataType = DNode::FLOAT;
+        p->fvalue = valueFromData;
       }
-      if (_debug) cout << endl;
+      //if (_debug) cout << endl;
       p = p->next;
 
     } else if (key.isReplicator()) {
@@ -1630,6 +1771,7 @@ int BufrFile::_descend(DNode *tree) {
           if (_verbose) printf("nrepeats from Data = %u\n", nRepeats);
           //repeaters.push(nRepeats);
           currentProduct.storeReplicator(nRepeats);
+          p->ivalue = nRepeats;
           if (p->children == NULL) {
             moveChildren(p, x);
 	  }
@@ -1896,6 +2038,7 @@ int BufrFile::print(ostream &out, bool printRays, bool printData) {
   out << "Section 4: " << endl;
   if (printData) 
     printSection4(out);
+  out << "=============== end of BufrFile =========" << endl;
   return 0;
 }
 
