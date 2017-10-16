@@ -10,14 +10,15 @@ SUB_DIRS = \
 	Dsr2Radx \
 	FixCfradialPaths \
 	FixRadxPointing \
+	Hsrl2Radx \
 	Radx2Dsr \
 	RadxCheck \
 	RadxConvert \
-	RadxCov2Mom \
 	RadxDiff \
 	RadxDwellCombine \
 	RadxFilter \
 	RadxMergeFields \
+	RadxMergeVols \
 	RadxMon \
 	RadxPrint
 
