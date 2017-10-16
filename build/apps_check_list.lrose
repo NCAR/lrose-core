@@ -409,7 +409,6 @@ ipcrm_linux
 itar_header_prepend
 itar_header_remove
 job_queue.py
-junk
 kill_hung_spong_df.sh
 ldd_smart
 ldmMgr
