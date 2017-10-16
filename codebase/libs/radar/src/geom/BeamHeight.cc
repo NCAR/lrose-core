@@ -54,8 +54,8 @@ BeamHeight::BeamHeight()
   _htKm = 0.0;
   _gndRangeKm = 0.0;
   _slantRangeKm = 0.0;
-  setPseudoRadiusRatio(4.0 / 3.0); // standard ratio
   _htCache = NULL;
+  setPseudoRadiusRatio(4.0 / 3.0); // standard ratio
   
 }
 
@@ -74,9 +74,6 @@ void BeamHeight::setPseudoRadiusRatio(double ratio)
 
 {
   
-  if (_pseudoRadiusRatio == ratio) {
-    return;
-  }
   _pseudoRadiusRatio = ratio;
   _pseudoRadiusKm = _earthRadiusKm * _pseudoRadiusRatio;
   _pseudoRadiusKmSq = _pseudoRadiusKm * _pseudoRadiusKm;
@@ -97,7 +94,12 @@ double BeamHeight::computeElevationDeg(double htKm, double gndRangeKm)
 {
 
   _gndRangeKm = gndRangeKm;
-  _htKm = htKm;
+  if (htKm == 0.0) {
+    // prevent degenerative case
+    _htKm = 0.00001;
+  } else {
+    _htKm = htKm;
+  }
   
   // cannot solve directly, we use the secant gradient search
   // method
@@ -137,6 +139,8 @@ double BeamHeight::computeElevationDeg(double htKm, double gndRangeKm)
 
 double BeamHeight::computeHtKm(double elDeg, double slantRangeKm) const
 {
+  
+  return _computeHtKm(elDeg, slantRangeKm);
 
   if (_htCache == NULL) {
     // no active cache, compute and return
@@ -267,14 +271,6 @@ void BeamHeight::initHtCache(size_t nElev,
 
   _htCache = _htCache_.alloc(nElev, nRange);
 
-  // initialze to missing
-
-  for (size_t ielev = 0; ielev < nElev; ielev++) {
-    for (size_t irange = 0; irange < nRange; irange++) {
-      _htCache[ielev][irange] = _htMissing;
-    } // irange
-  } // ielev
-
   // save details
 
   _htCacheNElev = nElev;
@@ -284,6 +280,10 @@ void BeamHeight::initHtCache(size_t nElev,
   _htCacheStartRangeKm = startRangeKm;
   _htCacheDeltaRangeKm = deltaRangeKm;
 
+  // initialze to missing
+
+  setHtCacheToMissing();
+
 }
 
 //////////////////////////////////////////////////////
@@ -292,14 +292,18 @@ void BeamHeight::initHtCache(size_t nElev,
 void BeamHeight::setHtCacheToMissing()
 
 {
+
   if (_htCache == NULL) {
     return;
   }
-  int size1D = _htCache_.size1D();
-  double *dat1D = _htCache_.dat1D();
-  for (int ii = 0; ii < size1D; ii++, dat1D++) {
-    *dat1D = _htMissing;
-  }
+
+  // initialze to missing
+
+  for (size_t ielev = 0; ielev < _htCacheNElev; ielev++) {
+    for (size_t irange = 0; irange < _htCacheNRange; irange++) {
+      _htCache[ielev][irange] = _htMissing;
+    } // irange
+  } // ielev
 
 }
 
