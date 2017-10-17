@@ -532,15 +532,6 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("HsrlTcp2Fmq reads raw HSRL fields from the instrument server via TCP/IP. It saves the data out to a file message queue (FMQ), which can be read by multiple clients.");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 1'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 1");
     tt->comment_hdr = tdrpStrDup("DEBUGGING AND PROCESS CONTROL.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -605,11 +596,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 2'
+    // Parameter 'Comment 1'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 2");
+    tt->param_name = tdrpStrDup("Comment 1");
     tt->comment_hdr = tdrpStrDup("TCP DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -623,7 +614,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Host name on which HSRL raw server is running.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &hsrl_tcp_server_host - &_start_;
-    tt->single_val.s = tdrpStrDup("localhost");
+    tt->single_val.s = tdrpStrDup("192.168.84.201");
     tt++;
     
     // Parameter 'hsrl_tcp_server_port'
@@ -635,14 +626,14 @@ using namespace std;
     tt->descr = tdrpStrDup("TCP/IP port on which HSRL server is running.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &hsrl_tcp_server_port - &_start_;
-    tt->single_val.i = 12000;
+    tt->single_val.i = 40404;
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
+    tt->param_name = tdrpStrDup("Comment 2");
     tt->comment_hdr = tdrpStrDup("OUTPUT FMQ DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -683,11 +674,11 @@ using namespace std;
     tt->single_val.i = 500;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("DATA MAPPER REGISTRATION");
     tt->comment_text = tdrpStrDup("We let the data mapper know when we write a message.");
     tt++;
