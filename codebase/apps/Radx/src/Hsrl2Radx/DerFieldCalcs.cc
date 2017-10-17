@@ -24,6 +24,8 @@
 ///////////////////////////////////////////////////////////////
 // DerFieldCalcs.cc
 //
+// calculations of derived fields for HSRL 
+//
 // Brad Schoenrock, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // Mar 2017
@@ -39,6 +41,8 @@
 
 using namespace std;
 
+/////////////////////////////////////////////////////////////////
+// constructor
 
 DerFieldCalcs::DerFieldCalcs(FullCals fullCals_in,
 			     vector<Radx::fl32> hiData_in, 
@@ -75,6 +79,9 @@ DerFieldCalcs::DerFieldCalcs(FullCals fullCals_in,
     }
 }
 
+/////////////////////////////////////////////////////////////////
+// set cals
+
 void DerFieldCalcs::set_fullCals(FullCals fullCals_in)
 {
   fullCals=fullCals_in;
@@ -87,6 +94,10 @@ void DerFieldCalcs::set_fullCals(FullCals fullCals_in)
 	derive_quantities();
     }
 }
+
+/////////////////////////////////////////////////////////////////
+// set combined hi count data
+
 void DerFieldCalcs::set_hiData (vector<Radx::fl32> in)
 {
   hiData=in;
@@ -99,6 +110,10 @@ void DerFieldCalcs::set_hiData (vector<Radx::fl32> in)
 	derive_quantities();
     }
 }
+
+/////////////////////////////////////////////////////////////////
+// set combined lo count data
+
 void DerFieldCalcs::set_loData (vector<Radx::fl32> in)
 {
   loData=in;
@@ -111,6 +126,10 @@ void DerFieldCalcs::set_loData (vector<Radx::fl32> in)
 	derive_quantities();
     }
 }
+
+/////////////////////////////////////////////////////////////////
+// set cross channel count data
+
 void DerFieldCalcs::set_crossData (vector<Radx::fl32> in)
 {
   crossData=in;
@@ -123,6 +142,10 @@ void DerFieldCalcs::set_crossData (vector<Radx::fl32> in)
 	derive_quantities();
     }
 }
+
+/////////////////////////////////////////////////////////////////
+// set molecular count data
+
 void DerFieldCalcs::set_molData (vector<Radx::fl32> in)
 {
   molData=in;
@@ -137,6 +160,9 @@ void DerFieldCalcs::set_molData (vector<Radx::fl32> in)
 }
 
 
+/////////////////////////////////////////////////////////////////
+// set height
+
 void DerFieldCalcs::set_htKm (vector<Radx::fl32> in)
 {
   htKm=in;
@@ -150,6 +176,9 @@ void DerFieldCalcs::set_htKm (vector<Radx::fl32> in)
     }
 }
 
+/////////////////////////////////////////////////////////////////
+// set temperature
+
 void DerFieldCalcs::set_tempK (vector<Radx::fl32> in)
 {
   tempK=in;
@@ -162,6 +191,10 @@ void DerFieldCalcs::set_tempK (vector<Radx::fl32> in)
 	derive_quantities();
     }
 }
+
+/////////////////////////////////////////////////////////////////
+// set pressure
+
 void DerFieldCalcs::set_presHpa (vector<Radx::fl32> in)
 {
   presHpa=in;
@@ -175,6 +208,9 @@ void DerFieldCalcs::set_presHpa (vector<Radx::fl32> in)
     }
 }
 
+/////////////////////////////////////////////////////////////////
+// set number of pulses
+
 void DerFieldCalcs::set_shotCount(double in)
 {
   shotCount=in;
@@ -187,6 +223,10 @@ void DerFieldCalcs::set_shotCount(double in)
 	derive_quantities();
     }
 }
+
+/////////////////////////////////////////////////////////////////
+// set transmit power
+
 void DerFieldCalcs::set_power(double in)
 {
   power=in;
@@ -200,42 +240,8 @@ void DerFieldCalcs::set_power(double in)
     }
 }
 
-FullCals DerFieldCalcs::get_fullCals()
-{return fullCals;}
-
-vector<Radx::fl32> DerFieldCalcs::get_hiData()
-{return hiData;}
-vector<Radx::fl32> DerFieldCalcs::get_loData()
-{return loData;}
-vector<Radx::fl32> DerFieldCalcs::get_crossData()
-{return crossData;}
-vector<Radx::fl32> DerFieldCalcs::get_molData()
-{return molData;}
-
-vector<Radx::fl32> DerFieldCalcs::get_htKm()
-{return htKm;}
-vector<Radx::fl32> DerFieldCalcs::get_tempK()
-{return tempK;}
-vector<Radx::fl32> DerFieldCalcs::get_presHpa()
-{return presHpa;}
-
-double DerFieldCalcs::get_shotCount()
-{return shotCount;}
-double DerFieldCalcs::get_power()
-{return power;}
-
-vector<Radx::fl32> DerFieldCalcs::get_volDepol()
-{return volDepol;}
-vector<Radx::fl32> DerFieldCalcs::get_backscatRatio()
-{return backscatRatio;}
-vector<Radx::fl32> DerFieldCalcs::get_partDepol()
-{return partDepol;}
-vector<Radx::fl32> DerFieldCalcs::get_backscatCoeff()
-{return backscatCoeff;}
-vector<Radx::fl32> DerFieldCalcs::get_extinction()
-{return extinction;}
-
-
+/////////////////////////////////////////////////////////////////
+// apply corrections
 
 void DerFieldCalcs::applyCorr()
 {
@@ -517,7 +523,8 @@ void DerFieldCalcs::applyCorr()
   
 }
 
-//do calculations for derived fields
+/////////////////////////////////////////////////////////////////
+// do calculations for derived fields
 
 void DerFieldCalcs::derive_quantities()
 {
@@ -605,7 +612,9 @@ void DerFieldCalcs::derive_quantities()
 }
 
 
-//nonlinear count corrections
+/////////////////////////////////////////////////////////////////
+// nonlinear count corrections
+
 double DerFieldCalcs::_nonLinCountCor(Radx::fl32 count, double deadtime, 
 				      double binWid, double shotCount_in)
 {
@@ -619,7 +628,9 @@ double DerFieldCalcs::_nonLinCountCor(Radx::fl32 count, double deadtime,
 }
 
 
-//baseline subtraction
+/////////////////////////////////////////////////////////////////
+// baseline subtraction
+
 double DerFieldCalcs::_baselineSubtract(double arrivalRate, double profile, 
 					double polarization)
 {
@@ -628,7 +639,9 @@ double DerFieldCalcs::_baselineSubtract(double arrivalRate, double profile,
 }
 
 
-//background subtraction
+/////////////////////////////////////////////////////////////////
+// background subtraction
+
 double DerFieldCalcs::_backgroundSub(double arrivalRate, double backgroundBins)
 {
   //background bins is average of the last 100 bins, this can be negative
@@ -636,7 +649,9 @@ double DerFieldCalcs::_backgroundSub(double arrivalRate, double backgroundBins)
 }
 
 
-//energy normalization
+/////////////////////////////////////////////////////////////////
+// energy normalization
+
 double DerFieldCalcs::_energyNorm(double arrivalRate, double totalEnergy)
 {
   if(totalEnergy==0)
@@ -645,7 +660,10 @@ double DerFieldCalcs::_energyNorm(double arrivalRate, double totalEnergy)
 }
 
 
-//differential overlap correction the vector coresponds to hi, lo, cross, mol
+/////////////////////////////////////////////////////////////////
+// differential overlap correction the vector coresponds
+// to hi, lo, cross, mol
+
 vector<double> DerFieldCalcs::_diffOverlapCor(vector<double> arrivalRate, 
 					      vector<double> diffOverlap)
 {
@@ -659,7 +677,9 @@ vector<double> DerFieldCalcs::_diffOverlapCor(vector<double> arrivalRate,
   return arrivalRate;//note the passthrough functionality for now
 }
 
+/////////////////////////////////////////////////////////////////
 //process QWP rotation
+
 vector<double> DerFieldCalcs::_processQWPRotation(vector<double> arrivalRate, 
 						  vector<double> polCal)
 {
@@ -667,7 +687,9 @@ vector<double> DerFieldCalcs::_processQWPRotation(vector<double> arrivalRate,
 }
 
 
-//merge hi and lo profiles 
+/////////////////////////////////////////////////////////////////
+// merge hi and lo profiles 
+
 double DerFieldCalcs::_hiAndloMerge(double hiRate, double loRate)
 {  
   //pass through for now, not expected to significantly impact displays
@@ -675,14 +697,18 @@ double DerFieldCalcs::_hiAndloMerge(double hiRate, double loRate)
 }
 
 
-//geometric overlap correction
+/////////////////////////////////////////////////////////////////
+// geometric overlap correction
+
 double DerFieldCalcs::_geoOverlapCor(double arrivalRate, double geoOverlap)
 {
   return arrivalRate*geoOverlap;
 }
 
 
-//volume depolarization
+/////////////////////////////////////////////////////////////////
+// volume depolarization
+
 double DerFieldCalcs::_volDepol(double crossRate, double combineRate)
 {
   if(crossRate+combineRate == 0)
@@ -691,7 +717,9 @@ double DerFieldCalcs::_volDepol(double crossRate, double combineRate)
 }
 
 
-//backscatter ratio
+/////////////////////////////////////////////////////////////////
+// backscatter ratio
+
 double DerFieldCalcs::_backscatRatio(double combineRate, double molRate)
 {
   if(molRate==0)
@@ -700,7 +728,9 @@ double DerFieldCalcs::_backscatRatio(double combineRate, double molRate)
 }
 
 
-//particle depolarization
+/////////////////////////////////////////////////////////////////
+// particle depolarization
+
 double DerFieldCalcs::_partDepol(double volDepol, double backscatRatio)
 {
   double d_mol=2*0.000365/(1+0.000365);
@@ -714,6 +744,9 @@ double DerFieldCalcs::_partDepol(double volDepol, double backscatRatio)
 }
 
 
+/////////////////////////////////////////////////////////////////
+// beta M sonde
+
 double DerFieldCalcs::_BetaMSonde(double pressure, double temperature)
 {
   //If temp is 0 this causes errors but also there is a case where temp 
@@ -725,7 +758,9 @@ double DerFieldCalcs::_BetaMSonde(double pressure, double temperature)
 }
 
 
-//backscatter coefficient
+/////////////////////////////////////////////////////////////////
+// backscatter coefficient
+
 double DerFieldCalcs::_backscatCo(double pressure, double temperature, 
 				  double backscatRatio)
 {
@@ -740,6 +775,9 @@ double DerFieldCalcs::_backscatCo(double pressure, double temperature,
   return aer_beta_bs;
 }
 
+/////////////////////////////////////////////////////////////////
+// optical depth
+
 double DerFieldCalcs::_op_depth(double pressure, double temperature, 
 				double molRate, double scan)
 {
@@ -751,6 +789,9 @@ double DerFieldCalcs::_op_depth(double pressure, double temperature,
   return log( scan * molRate / beta_m_sonde );
 }
 
+
+/////////////////////////////////////////////////////////////////
+// extinction coefficient
 
 double DerFieldCalcs::_extinction(double opDepth1, double opDepth2,
 				  double alt1, double alt2)
