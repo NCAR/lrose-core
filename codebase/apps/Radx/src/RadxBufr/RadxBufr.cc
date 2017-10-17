@@ -220,9 +220,9 @@ int RadxBufr::_runFilelist()
          } else {
            nGood++;
            if (_params.debug) {
-             cerr << "  ====>> n good files so far: " << nGood << endl;
-             cerr << "  ====>> n errors     so far: " << nError << endl;
-             cerr << "  ====>> sum          so far: " << nGood + nError << endl;
+             cerr << "  ====>> n good volumes so far: " << nGood << endl;
+             cerr << "  ====>> n errors       so far: " << nError << endl;
+             cerr << "  ====>> sum            so far: " << nGood + nError << endl;
            }
          }
       } else if (jret < 0) {

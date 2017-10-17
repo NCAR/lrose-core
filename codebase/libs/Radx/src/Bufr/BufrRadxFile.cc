@@ -487,9 +487,10 @@ int BufrRadxFile::_readFields(const string &path)
     } catch (const char *msg) {
       // report error message and move to the next field
       _addErrStr("ERROR - BufrRadxFile::_readFields");
-      _addErrStr("  Cannot read in field, path: ", filePaths[ii]);
-      _addErrStr(msg);
-      cerr << _errStr << endl;
+      _addErrStr("  Cannot read in field from path: ", filePaths[ii]);
+      _addErrStr("  ", msg);
+      cerr << _errStr;
+      _errStr.clear();
     }
   } // ii
 

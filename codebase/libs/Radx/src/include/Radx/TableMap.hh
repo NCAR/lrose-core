@@ -57,6 +57,8 @@ public:
   ~TableMap();
   void setDebug(bool debug); 
   int ImportTables();
+  int ImportTables(unsigned int masterTableVersion, unsigned int generatingCenter,
+		   unsigned int localTableVersion);
   TableMapElement Retrieve(unsigned short key);
   bool filled();
 

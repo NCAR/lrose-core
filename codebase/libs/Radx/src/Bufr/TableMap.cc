@@ -139,6 +139,34 @@ int TableMap::ImportTables() {
   return 0;
 }
 
+int TableMap::ImportTables(unsigned int masterTableVersion, unsigned int generatingCenter,
+			   unsigned int localTableVersion) {
+  char fileName[1024];
+  sprintf(fileName, "../share/bbufr/tables/bufrtabb_%u.csv", masterTableVersion);
+  if (_debug)
+    cerr << "reading master Table B from " << fileName << endl;
+  ReadTableB(fileName);
+
+  sprintf(fileName, "../share/bbufr/tables/bufrtabd_%u.csv", masterTableVersion);
+  if (_debug)
+    cerr << "reading master Table D from " << fileName << endl;
+  ReadTableD(fileName);
+
+  sprintf(fileName, "../share/bbufr/tables/localtabb_%u_%u.csv", generatingCenter,
+	  localTableVersion);
+  if (_debug)
+    cerr << "reading local Table B from " << fileName << endl;
+  ReadTableB(fileName);
+
+  sprintf(fileName, "../share/bbufr/tables/localtabd_%u_%u.csv", generatingCenter,
+	  localTableVersion);
+  if (_debug)
+    cerr << "reading local Table D from " << fileName << endl;
+  ReadTableD(fileName); 
+
+  return 0;
+}
+
 // read the bufrtab_x.csv  (master) tables first, then the localtab_x_y.csv
 // files second, overwriting any duplicate values provided by the master
 // tables. 
