@@ -2984,6 +2984,7 @@ int RadxFile::_doReadRaysInInterval(const string &dir,
       _addErrStr(_readTimeList.getRequestString());
       return -1;
     }
+    vol.copyMeta(fileVol);
 
     const vector<RadxRay *> &fileRays = fileVol.getRays();
     for (size_t iray = 0; iray < fileRays.size(); iray++) {
