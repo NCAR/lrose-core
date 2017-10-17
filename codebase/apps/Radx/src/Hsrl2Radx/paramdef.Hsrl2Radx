@@ -215,25 +215,25 @@ paramdef double {
 paramdef string {
   p_default = "combined_hi";
   p_descr = "Name of combined_hi field in netCDF file.";
-  p_help = "";
+  p_help = "This name is also used for the field read in from the instrument raw FMQ in real-time";
 } combined_hi_field_name;
 
 paramdef string {
   p_default = "combined_lo";
   p_descr = "Name of combined_lo field in netCDF file.";
-  p_help = "";
+  p_help = "This name is also used for the field read in from the instrument raw FMQ in real-time";
 } combined_lo_field_name;
 
 paramdef string {
   p_default = "molecular";
   p_descr = "Name of molecular field in netCDF file.";
-  p_help = "";
+  p_help = "This name is also used for the field read in from the instrument raw FMQ in real-time";
 } molecular_field_name;
 
 paramdef string {
   p_default = "cross";
   p_descr = "Name of cross field in netCDF file.";
-  p_help = "";
+  p_help = "This name is also used for the field read in from the instrument raw FMQ in real-time";
 } cross_field_name;
 
 paramdef string {

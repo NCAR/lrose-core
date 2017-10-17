@@ -25,6 +25,7 @@ SUB_DIRS = \
 	hydro \
 	interp \
 	radar \
+	refractt \
         Radx \
         spol \
         xpol
