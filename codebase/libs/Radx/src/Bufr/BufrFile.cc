@@ -26,15 +26,15 @@
 //
 // BUFR file wrapper
 //
-// Mike Dixon, EOL, NCAR
+// Mike Dixon and Brenda Javornik, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Jan 2017
+// Aug 2017
 //
 ///////////////////////////////////////////////////////////////
 
 #include <Radx/BufrFile.hh>
-#include <cstring>
+#include <string>
 #include <cstdio>
 #include <iostream>
 #include <stdexcept>
@@ -52,7 +52,6 @@ DNode::DNode() {
 }
 
 DNode::~DNode() {
-  //somejunksvalue;
 }
 
 
@@ -131,6 +130,7 @@ void BufrFile::readThatField(string fileName,
     readSection1();
     readDataDescriptors();
     readData(); 
+    readSection5();
     close();
   } catch (const char *msg) {
     throw _errString.c_str();
@@ -411,7 +411,6 @@ int BufrFile::readSection1()
     _s1.minute = minute;
     _s1.seconds = seconds;
   }   
-  // TODO: figure out _debug ... try RadxFile::copyReadDirectives .. if (_debug) {
 
   hdr_year = yearOfCentury;
   hdr_month = month;
@@ -421,6 +420,30 @@ int BufrFile::readSection1()
     
   _numBytesRead += sectionLen;
   free(buffer);
+  return 0;
+}
+
+int BufrFile::readSection5() {
+  // read the last section 
+  // look for ending "7777" coded in CCITT International Alphabet No. 5
+  string value;
+  try {
+    MoveToNextByteBoundary();
+    do {
+      value = ExtractText(8);
+    } while (value.compare("7") != 0);
+    // read the last 7's
+    // skip the last 7, because we hit end of file reading it.
+    value = ExtractText(16);
+    if (value.compare("77") != 0) {
+      throw " Did not find ending code ";
+    }
+  } catch (const char *msg) {
+    Radx::addErrStr(_errString, "", "ERROR - BufrFile::readSection5", true);
+    Radx::addErrStr(_errString, " ", " Could not read ending code", true);
+    throw _errString.c_str();
+  }
+  
   return 0;
 }
 
@@ -466,14 +489,11 @@ int BufrFile::readDescriptorTables() {
   return 0;
 }
 
-
-
 int BufrFile::readDataDescriptors() {  // read section 3
   /******* decode section 3 */
   if (_verbose) cerr << "Reading section 3 ...\n";
 
-    // read 
-    // TODO: allocate this space based on the length of section read (octets 1 - 3)
+    // allocate this space based on the length of section read (octets 1 - 3)
     Radx::ui08 id[4];
     memset(id, 0, 4);
     
@@ -481,14 +501,12 @@ int BufrFile::readDataDescriptors() {  // read section 3
     // the length is 24 bits (3 bytes)
     Radx::ui32 nBytes;
     if (fread(id, 1, 3, _file) != 3) {
-      //int errNum = errno;
-      //      _addErrStr("ERROR - DoradeRadxFile::_readSection0()");
-      //_addErrStr("  Cannot read data length");
-      //_addErrStr("  ID: ", id);
-      //_addErrStr("  File path: ", path);
-      //_addErrStr(strerror(errNum));
+      int errNum = errno;
+      Radx::addErrStr(_errString, "", "ERROR - BufrFile::readDataDescriptors", true);
+      Radx::addErrStr(_errString, " ", " Cannot read length of section 3 in octets", true);
+      Radx::addErrStr(_errString, "  ", strerror(errNum), true);
       close();
-      return -1;
+      throw _errString.c_str();
     }
     nBytes = 0;
     nBytes = nBytes | id[2];
@@ -505,14 +523,12 @@ int BufrFile::readDataDescriptors() {  // read section 3
     int nBytesToSectionEnd;
     nBytesToSectionEnd = sectionLen-3;
     if (fread(buffer, 1, nBytesToSectionEnd, _file) != sectionLen-3) {
-      //int errNum = errno;
-      //      _addErrStr("ERROR - DoradeRadxFile::_readSection0()");
-      //_addErrStr("  Cannot read data length");
-      //_addErrStr("  ID: ", id);
-      //_addErrStr("  File path: ", path);
-      //_addErrStr(strerror(errNum));
+      int errNum = errno;
+      Radx::addErrStr(_errString, "", "ERROR - BufrFile::readDataDescriptors", true);
+      Radx::addErrStr(_errString, " ", " Cannot read section 3", true);
+      Radx::addErrStr(_errString, "  ", strerror(errNum), true);
       close();
-      return -1;
+      throw _errString.c_str();
     }
 
     // octet 4 is reserved and set to zero
@@ -530,9 +546,6 @@ int BufrFile::readDataDescriptors() {  // read section 3
     // read the descriptors and keep them in a list for
     // traversal later 
 
-    //_descriptorsToProcess.clear();
-    //int nDescriptors;
-    //nDescriptors = sectionLen 
     int i;
     int startOffset = 4;
     // remember, we need to have two bytes remaining
@@ -551,7 +564,7 @@ int BufrFile::readDataDescriptors() {  // read section 3
       key = TableMapKey().EncodeKey(d.f, d.x, d.y);
       _descriptorsToProcess.insert(_descriptorsToProcess.begin(), key);
     }
-
+    free(buffer);
     _numBytesRead += sectionLen;
   return 0;
 }
@@ -578,30 +591,9 @@ int BufrFile::readData() {  // read section 4
     throw _errString.c_str();
   }
   TraverseNew(_descriptorsToProcess);
-
-  //TODO:  read the last section 
-  //int nbytesRead;
-  //nbytesRead = ReplenishBuffer();
   
   return 0;
 }
-
-// return the next nbits in the read buffer encased in a string
-// there can be leading and trailing bits that are not needed
-// returns 0 on success; -1 on failure
-// int  BufrFile::NextNBitsEncased(int nbits, string ecasedBits, int *startIndex) {
-//   string s; 
-//   s = newString();
-
-//   return 0;
-// }
-
-// need to buffer the binary data, so that we can read in a block
-// of data and move a pointer within the block to retrieve bits
-//char *BufrFile::NextNBitsAsChar(int nbits) {
-  // remember, the character strings are encoded ins CCITT International Alphabet No. 5
-//  return NULL;
-//}
 
 int BufrFile::ReplenishBuffer() {
 
@@ -660,11 +652,27 @@ bool BufrFile::NextBit() {
 }
 
 
-// on error, return -1; otherwise, a positive integer will be returned
-string BufrFile::ExtractText(int nBits) {
+void BufrFile::MoveToNextByteBoundary() {
+
+  while ((currentBufferIndexBits % 8) != 0) {   
+    // advance the index
+    currentBufferIndexBits += 1;
+    if (currentBufferIndexBits >= currentBufferLengthBits) {
+      // replenish the buffer
+      currentBufferLengthBytes = ReplenishBuffer();
+      currentBufferLengthBits = currentBufferLengthBytes * 8;
+      currentBufferIndexBits = 0;
+      if (currentBufferLengthBits <= 0) {
+        throw "ERROR - End of file reached before end of descriptors.";
+      }
+    }
+  }
+}
+
+// on error, throw exception; otherwise, return a string
+string BufrFile::ExtractText(unsigned int nBits) {
 
   string val;
-  // unsigned char mask;
   unsigned char character;
 
   val.clear();
@@ -672,13 +680,14 @@ string BufrFile::ExtractText(int nBits) {
   // if the number of bits is not a multiple of 8, then
   // we cannot extract as text
   if ((nBits % 8) != 0)  {
-    cout << "ERROR: text width is not multiple of 8; cannot read in data" << endl;
-    return val;
+    Radx::addErrStr(_errString, "", "ERROR - BufrFile::ExtractText", true);
+    Radx::addErrStr(_errString, "  ",
+		    "Text width is not multiple of 8; cannot read in data.", true);
+    throw _errString.c_str();
   }
 
-  int i=0;
+  unsigned int i=0;
   bool endOfFile = false;
-  //int bitPosition;
   // move one bit at a time
   while ((i<nBits) && (!endOfFile)) {
     if (NextBit()) {
@@ -700,36 +709,34 @@ string BufrFile::ExtractText(int nBits) {
 
   if ((endOfFile) && (i < nBits)) {
     val.clear();
-    return val;  // ran out of data before completed the value
+    Radx::addErrStr(_errString, "", "ERROR - BufrFile::ExtractText", true);
+    Radx::addErrStr(_errString, "  ", 
+		    "Ran out of data before completing the value.", true);
+    throw _errString.c_str(); 
   }  else {
-    //cout << "extracted " << val << endl;
     return val;
   }
 }
 
 
-// on error, return -1; otherwise, a positive integer will be returned
-Radx::ui32 BufrFile::ExtractIt(int nBits) {
+// on error, throw exception; otherwise, a positive integer will be returned
+Radx::ui32 BufrFile::ExtractIt(unsigned int nBits) {
 
   Radx::ui32 val;
-  //int idx;
-  //unsigned char mask;
 
   if (_verbose) {
     printf(" nBits=%d\n", nBits);
   }
 
   if (nBits > 32) {
-    // TODO: for now ... just skip it
-    //return -1;
-    //SkipIt(nBits);
-    //return 0;
-    exit(1); // TODO throw exception
+    Radx::addErrStr(_errString, "", "ERROR - BufrFile::ExtractIt", true);
+    Radx::addErrInt(_errString, "  Request to extract > 32 bits: ", 
+		    nBits, true);
+    throw _errString.c_str();
   }
   val = 0;
-  int i=0;
+  unsigned int i=0;
   bool endOfFile = false;
-  //int bitPosition;
   while ((i<nBits) && (!endOfFile)) {
     if (NextBit()) {
       // insert a 1
@@ -741,66 +748,14 @@ Radx::ui32 BufrFile::ExtractIt(int nBits) {
   }
 
   if ((endOfFile) && (i < nBits)) {
-    return -1;  // ran out of data before completed the value
+    Radx::addErrStr(_errString, "", "ERROR - BufrFile::ExtractIt", true);
+    Radx::addErrStr(_errString, "  ", 
+		    "Ran out of data before completing the value.", true);
+    throw _errString.c_str(); 
   }  else {
-    //cout << "extracted " << val << endl;
     return val;
   }
 }
-
-// TODO: not working ... need to fix it
-void BufrFile::SkipIt(int nBits) {
-  //int val;
-  //int idx;
-  //unsigned char mask;
-
-  printf("entered non working code; exiting. \n");
-  exit(1);
-}
-/*
-string BufrFile::ApplyString(TableMapElement f) {
-
-  if (f._whichType != TableMapElement::DESCRIPTOR) {
-    return -1;
-  }
-  if (_verbose) {
-    cout << "Applying " << endl;
-    cout << "  " << f._descriptor.fieldName << " ";
-
-    for (unsigned int i=0; i<50-f._descriptor.fieldName.size(); i++)
-      cout << "-";
-    cout << " " << f._descriptor.dataWidthBits << endl;
-    cout << " scale  " << f._descriptor.scale << endl;
-    cout << " units  " << f._descriptor.units << endl;;
-    cout << " reference value " << f._descriptor.referenceValue << endl;
-  }
-  if (f._descriptor.units.find("CCITT") != string::npos) {
-    string  value;
-    value = ExtractText(f._descriptor.dataWidthBits);
-    if (_verbose) {
-      cout << " " << f._descriptor.dataWidthBits << endl;
-      cout << "extracted string = " << value << endl;
-    }
-    _tempStringValue = value;
-    string fieldName;
-    fieldName = f._descriptor.fieldName;
-    std::transform(fieldName.begin(), fieldName.end(), fieldName.begin(), ::tolower);
-
-    if (fieldName.find("station identifier") != string::npos) {
-      if (fieldName.find("type of") != string::npos) {
-        typeOfStationId = value;
-      } else {
-        stationId = value;
-      }
-    }
-    return 0;
-  } else {
-    Radx::ui32 value;
-    value = ExtractIt(f._descriptor.dataWidthBits);
-    return value;
-  }
-}
-*/
 
 Radx::ui32 BufrFile::Apply(TableMapElement f) {
 
@@ -950,7 +905,7 @@ bool BufrFile::StuffIt(string name, double value) {
 
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
   if (name.find("byte element") != string::npos) {
-    // TODO: ugh!  It's not a double value, it's an unsigned char...
+    // ugh!  It's not a double value, it's an unsigned char...
     currentProduct.addData((unsigned char) value);
   } else if (name.find("latitude") != string::npos) {
     latitude = value;
@@ -983,7 +938,8 @@ bool BufrFile::StuffIt(string name, double value) {
     currentProduct.putMinute(value);
   } else if (name.find("second") != string::npos) {
     currentProduct.putSecond(value);
-    // TODO: should probably use key to identify these fields...
+    // could probably use key to identify these fields...
+    // instead of a string search
   } else if (name.find("wmo block") != string::npos) {
     WMOBlockNumber = value;
   } else if (name.find("wmo station") != string::npos) {
@@ -1113,298 +1069,6 @@ string BufrFile::getTypeOfProductForSweep(int sweepNumber) {
   return currentProduct.sweepData.at(sweepNumber).parameterData[0].typeOfProduct;
 }
 
-/*
-// traverse the trees from section 3.  These are the decoders
-// of the data in section 4
-// need knowledge of BUFR tables, pointer to data file ( _file )
-int BufrFile::TraverseOriginal(vector<unsigned short> descriptors) {
-
-
-
-  bool _debug = true;  // TODO: make this more global
-
-  if (_debug) 
-    printf("\nTraversing ... \n");
-
-  unsigned short des;
-  try {
-  // for each descriptor in the list
-  while (!descriptors.empty()) {  // NOTE: the descriptor list is changing
-
-    unsigned char f, x, y;
-
-    des = descriptors.back();
-    TableMapKey key(des);
-    descriptors.pop_back();
-    
-    // visit the node
-    if (_debug) {
-      TableMapKey().Decode(des, &f, &x, &y);
-      printf("visiting f(x,y): %x(%x,%x) ", f, x, y);        
-    }
-
-    if (key.isTableBEntry()) {  // a leaf
-      if (_debug) 
-        printf(" leaf\n");
-      // if the node is from table b, retrieve the data; apply any transformations;
-      //   insert into temporary structure for saving
-      TableMapElement val1;
-      val1 = tableMap.Retrieve(des);
-      if (val1._whichType == TableMapElement::DESCRIPTOR) {
-        cout << "value for key " << des << ":" <<
-          val1._descriptor.fieldName << "," << 
-          val1._descriptor.scale << endl;
-      }
-      Radx::ui32 valueFromData; 
-      valueFromData = Apply(val1);
-      // cout << "value from Data = " << valueFromData << endl;
-
-    } else if (key.isReplicator()) {
-	if (_debug) 
-	  printf(" replicator\n");
-
-	// if the node is a replicator, e.g. 1;2;0 or 1;3;5
-	// decode the key into f(x,y) and check y for different action
-        unsigned char f,x,y;
-        TableMapKey().Decode(des, &f, &x, &y);
-	bool variable_repeater = false;
-        if (y == 0) variable_repeater = true;
-      
-        if (variable_repeater) {
-	  // there will be a special "delayed replication", y=0
-          unsigned short delayed_replication_descriptor;
-          delayed_replication_descriptor = descriptors.back();
-          descriptors.pop_back();
-          // get the number of repeats from section 4 data
-          unsigned char nrepeats; // actually read this from the data section
-          Radx::ui32 valueFromData; 
-          valueFromData = Apply(tableMap.Retrieve(delayed_replication_descriptor));
-          cout << "nrepeats from Data = " << valueFromData << endl;
-          nrepeats = (unsigned char) valueFromData; // TODO: check if value exceeds max for y values     
-          if (nrepeats > 0) {
-            // construct a new descriptor with the number of repeats
-            unsigned short new_descriptor;
-            new_descriptor = TableMapKey().EncodeKey(f, x, nrepeats);
-            // push the new fixed repeater back on the stack
-	    descriptors.push_back(new_descriptor);
-	  } else {
-	    // remove the items that would have been traversed, since there are no repeats
-            for (int i=0; i<x; i++)
-              descriptors.pop_back();
-          }
-	} else { 
-          // must be a fixed repeater
-          // pop the next x descriptors and apply them
-	  vector<unsigned short> theNextList;
-          for (int i=0; i<x; i++) {
-            unsigned short embedded_des;
-            embedded_des = descriptors.back();
-            //TableMapKey key(des);
-            descriptors.pop_back();
-	    theNextList.insert(theNextList.begin(), embedded_des);
-	  }
-	  // if there are more repeats, decrement the count and push 
-          // everything back on the stack with a decremented repeater
-          // 1st attempt, use recursion
-          for (int i=0; i<y; i++) {
-            printf("%d out of %d repeats\n", i+1, y);
-            printf("  working with list: "); 
-	    for (vector<unsigned short>::iterator i = descriptors.begin(); i!= descriptors.end(); ++i)
-	      cout << *i << ' ';
-            TraverseOriginal(theNextList);
-	  }
-	}
-        
-
-    } else if (key.isAnotherNode()) {
-	if (_debug) 
-	  printf(" another node\n");
-
-	// if the node is another node; recur
-	// look up the expansions and insert them...
-	//TableMapElement val1 = tableMap.Retrieve(des);
-        TableMapElement val1;
-        val1 = tableMap.Retrieve(des);
-	 
-      
-	//descriptors.push_back();
-	vector<unsigned short> theList;
-	theList = val1._listOfKeys; 
-	//cout << "value for key " << key << ": " << theList.size() << endl; 
-	for (vector<unsigned short>::reverse_iterator i = theList.rbegin(); i!= theList.rend(); ++i)
-	  descriptors.push_back(*i);
-	//cout << *i << ' ';
-
-    } else {
-	if (_debug) 
-	  printf(" unknown\n");
-        return -1; // error occurred
-    }
-  }
-  } catch (const std::out_of_range& e) {
-    cout << "Error: unknown descriptor: " << des << endl;
-    exit(1);
-  }
-  return 0;
-}
-*/
-
-/*
-// traverse the trees from section 3.  These are the decoders
-// of the data in section 4
-// need knowledge of BUFR tables, pointer to data file ( _file )
-// returns a list of any modifications to the repeat factors
-// we are going to access the global list of descriptors (_descriptorsToProcess)
-int BufrFile::Traverse(int start, int length) {
-
-  bool _debug = true;  // TODO: make this more global
-
-  if (_debug) 
-    printf("\nTraversing ... \n");
-
-  unsigned short des;
-  int pos, len;
-  pos = start;
-  len = length;
-  try {
-  // for each descriptor in the list
-    while (!_descriptorsToProcess.empty() ) {  // NOTE: the descriptor list is changing
-
-    unsigned char f, x, y;
-
-    des = _descriptorsToProcess.at(pos); // descriptors.back();
-    TableMapKey key(des);
-
-    
-    // visit the node
-    if (_debug) {
-      TableMapKey().Decode(des, &f, &x, &y);
-      printf("visiting f(x,y): %x(%x,%x) ", f, x, y);        
-    }
-
-    if (key.isTableBEntry()) {  // a leaf
-      if (_debug) 
-        printf(" leaf\n");
-      // if the node is from table b, retrieve the data; apply any transformations;
-      //   insert into temporary structure for saving
-      TableMapElement val1;
-      val1 = tableMap.Retrieve(des);
-      if (val1._whichType == TableMapElement::DESCRIPTOR) {
-        cout << "value for key " << des << ":" <<
-          val1._descriptor.fieldName << "," << 
-          val1._descriptor.scale << endl;
-      }
-      Radx::ui32 valueFromData; 
-      valueFromData = Apply(val1);
-      // cout << "value from Data = " << valueFromData << endl;
-      pos += 1;
-
-    } else if (key.isReplicator()) {
-	if (_debug) 
-	  printf(" replicator\n");
-
-	// if the node is a replicator, e.g. 1;2;0 or 1;3;5
-	// decode the key into f(x,y) and check y for different action
-        unsigned char f,x,y;
-        TableMapKey().Decode(des, &f, &x, &y);
-	bool variable_repeater = false;
-        if (y == 0) variable_repeater = true;
-      
-        if (variable_repeater) {
-	  // there will be a special "delayed replication", y=0
-          unsigned short delayed_replication_descriptor;
-          delayed_replication_descriptor = _descriptorsToProcess.back();
-          _descriptorsToProcess.pop_back();
-          // get the number of repeats from section 4 data
-          unsigned char nrepeats; // actually read this from the data section
-          Radx::ui32 valueFromData; 
-          valueFromData = Apply(tableMap.Retrieve(delayed_replication_descriptor));
-          cout << "nrepeats from Data = " << valueFromData << endl;
-          nrepeats = (unsigned char) valueFromData; // TODO: check if value exceeds max for y values     
-          if (nrepeats > 0) {
-            // construct a new descriptor with the number of repeats
-            unsigned short new_descriptor;
-            new_descriptor = TableMapKey().EncodeKey(f, x, nrepeats);
-            // push the new fixed repeater back on the stack
-	    _descriptorsToProcess.push_back(new_descriptor);
-	  } else {
-	    // remove the items that would have been traversed, since there are no repeats
-            for (int i=0; i<x; i++)
-              _descriptorsToProcess.pop_back();
-          }
-	} else { 
-          // must be a fixed repeater
-          // pop the next x descriptors and apply them -- NOPE!
-          // just record the length and setup a loop the start and end point
-	  //vector<unsigned short> theNextList;
-          //for (int i=0; i<x; i++) {
-          //  unsigned short embedded_des;
-          //  embedded_des = _descriptorsToProcess.back();
-          //  //TableMapKey key(des);
-          //  //descriptors.pop_back();
-	  //  //theNextList.insert(theNextList.begin(), embedded_des);
-	  //}
-	  // if there are more repeats, decrement the count and push 
-          // everything back on the stack with a decremented repeater
-          // 1st attempt, use recursion
-
-          //vector<unsigned short> anyMods;
-          //printf("1 out of %d repeats\n", y);
-          //anyMods = Traverse(start, length); // theNextList);
-          for (int i=0; i<y; i++) {
-            printf("%d out of %d repeats\n", i+1, y);
-            //printf("  anyMods: "); 
-	    //for (vector<unsigned short>::iterator i = anyMods.begin(); i!= anyMods.end(); ++i)
-	    //  cout << *i << ' ';
-            Traverse(pos, x); // (anyMods);
-	  }
-	}
-        
-
-    } else if (key.isAnotherNode()) {
-	if (_debug) 
-	  printf(" another node\n");
-	// pop/remove the element from the list; it is being replaced
-        //_descriptorsToProcess.pop_back();
-	// if the node is another node,
-	// look up the expansions and insert them...
-	//TableMapElement val1 = tableMap.Retrieve(des);
-        TableMapElement val1;
-        val1 = tableMap.Retrieve(des);
-	 
-      
-	//descriptors.push_back();
-	vector<unsigned short> theList;
-	theList = val1._listOfKeys;
-        int nProcessed;
-        nProcessed = pos - start; 
-        // insert after the pos
-        _descriptorsToProcess.insert(pos+1, theList);
-        // now, remove the node that was expanded
-        _descriptorsToProcess.erase(pos);
-	len += theList.size() - 1;
-        pos = start + nProcessed;
-	//cout << "value for key " << key << ": " << theList.size() << endl; 
-	//for (vector<unsigned short>::reverse_iterator i = theList.rbegin(); i!= theList.rend(); ++i)
-	// _descriptorsToProcess.push_back(*i);
-	//cout << *i << ' ';
-
-    } else {
-	if (_debug) 
-	  printf(" ERROR!!! unknown\n");  // TODO: this should be an exception thrown
-        return -1; // error occurred
-    }
-  }
-  } catch (const std::out_of_range& e) {
-    cout << "Error: unknown descriptor: " << des << endl;
-    exit(1);
-  }
-  return 0;
-}
-*/
-
-
-
 void BufrFile::_deleteAfter(DNode *p) {
   DNode *q;
   if (p!=NULL) {
@@ -1421,7 +1085,7 @@ DNode* BufrFile::buildTree(vector<unsigned short> descriptors, bool reverse) {
   t = NULL;
   if (reverse) {
   for (vector<unsigned short>::reverse_iterator i = descriptors.rbegin(); i!= descriptors.rend(); ++i) {
-    //DNode *p = (DNode *) malloc(sizeof(DNode));
+
     DNode *p = new DNode();
     p->des = *i;
     //p->nRepeats = 0;
@@ -1435,7 +1099,7 @@ DNode* BufrFile::buildTree(vector<unsigned short> descriptors, bool reverse) {
   }
   } else {
   for (vector<unsigned short>::iterator i = descriptors.begin(); i!= descriptors.end(); ++i) {
-    //DNode *p = (DNode *) malloc(sizeof(DNode));
+
     DNode *p = new DNode();
     p->des = *i;
     unsigned short new_descriptor;
@@ -1600,7 +1264,6 @@ void BufrFile::freeTree(DNode *tree) {
     temp = p;
     p=p->next;
     if (_verbose) printf("freeing %d\n", temp->des);
-    //free(temp);
     delete temp;
   }
 }
@@ -1613,9 +1276,7 @@ void BufrFile::freeTree(DNode *tree) {
 int BufrFile::TraverseNew(vector<unsigned short> descriptors) {
 
   GTree = buildTree(descriptors, false);
-  //prettyPrintLevel = 1;
-  //if (_debug) printHeader();
-  int result =   _descend(GTree);
+  int result =  _descend(GTree);
   return result;
 }
 
@@ -1661,69 +1322,63 @@ int BufrFile::_descend(DNode *tree) {
   bool compressionStart = false;
 
   try {
-  // for each descriptor in the list
+    // for each descriptor in the list
     while (p != NULL ) {
 
-    unsigned char f, x, y;
+      unsigned char f, x, y;
 
-    des = p->des;
-    TableMapKey key(des);
+      des = p->des;
+      TableMapKey key(des);
 
-    // visit the node
-    if (_verbose) {
-      TableMapKey().Decode(des, &f, &x, &y);
-      printf("visiting f(x,y): %x(%x,%x) ", f, x, y);        
-    }
-
-    if (key.isTableBEntry()) {  // a leaf
-      if (_verbose) 
-        printf(" leaf\n");
-      // if the node is from table b, retrieve the data; apply any transformations;
-      //   insert into temporary structure for saving
-      TableMapElement val1;
-      val1 = tableMap.Retrieve(des);
-      if (val1._whichType == TableMapElement::DESCRIPTOR) {
-        //if (_debug) prettyPrintLeaf(cout, des, val1, prettyPrintLevel);
-        //cout << "value for key " << des << ":" <<
-        //  val1._descriptor.fieldName << "," << 
-        //  val1._descriptor.scale << endl;
-	;
+      // visit the node
+      if (_verbose) {
+	TableMapKey().Decode(des, &f, &x, &y);
+	printf("visiting f(x,y): %x(%x,%x) ", f, x, y);        
       }
-      Radx::fl32 valueFromData;
-      if (val1.IsText()) {
-	// THE NEXT TWO LINES ARE CRUCIAL!! DO NOT REMOVE IT!!!
-	//	Radx::ui32 junk;
-	// junk = Apply(val1); // TODO: integrate a string type here; or toss exception? 
-	// we don't care about the return value when the descriptor is text
-	Apply(val1); 
-	// grab the text value
-        //printf("%s; length=%lu\n", _tempStringValue.c_str(), _tempStringValue.length());
-        p->dataType = DNode::STRING;
-        //string temp3 = p->somejunksvalue;
-        //temp3 = _tempStringValue;
-        p->somejunksvalue = _tempStringValue;
-        //p->somejunksvalue = temp3;
-      } else {
-        valueFromData = ApplyNumericFloat(val1);
-        if (!StuffIt(val1._descriptor.fieldName, valueFromData)) {
-          Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
-          Radx::addErrStr(_errString, "Unrecognized descriptor: ",
-			  val1._descriptor.fieldName, true);
-	  // since this is just a warning, just print the message, no need
-	  // to exit
-          cerr << _errString << endl;
+
+      if (key.isTableBEntry()) {  // a leaf
+	if (_verbose) 
+	  printf(" leaf\n");
+	// if the node is from table b, retrieve the data; apply any transformations;
+	//   insert into temporary structure for saving
+	TableMapElement val1;
+	val1 = tableMap.Retrieve(des);
+	if (val1._whichType == TableMapElement::DESCRIPTOR) {
+	  //if (_debug) prettyPrintLeaf(cout, des, val1, prettyPrintLevel);
+	  //cout << "value for key " << des << ":" <<
+	  //  val1._descriptor.fieldName << "," << 
+	  //  val1._descriptor.scale << endl;
+	  ;
 	}
-        if (val1._descriptor.fieldName.find("Compression method") != string::npos) {
-          compressionStart = true;
-        }
-	// store the value
-        p->dataType = DNode::FLOAT;
-        p->fvalue = valueFromData;
-      }
-      //if (_debug) cout << endl;
-      p = p->next;
+	Radx::fl32 valueFromData;
+	if (val1.IsText()) {
+	  // THE NEXT TWO LINES ARE CRUCIAL!! DO NOT REMOVE IT!!!
+	  // we don't care about the return value when the descriptor is text
+	  Apply(val1); 
+	  // grab the text value
+	  p->dataType = DNode::STRING;
+	  p->somejunksvalue = _tempStringValue;
+	} else {
+	  valueFromData = ApplyNumericFloat(val1);
+	  if (!StuffIt(val1._descriptor.fieldName, valueFromData)) {
+	    Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
+	    Radx::addErrStr(_errString, "Unrecognized descriptor: ",
+			    val1._descriptor.fieldName, true);
+	    // since this is just a warning, just print the message, no need
+	    // to exit
+	    cerr << _errString << endl;
+	  }
+	  if (val1._descriptor.fieldName.find("Compression method") != string::npos) {
+	    compressionStart = true;
+	  }
+	  // store the value
+	  p->dataType = DNode::FLOAT;
+	  p->fvalue = valueFromData;
+	}
+	//if (_debug) cout << endl;
+	p = p->next;
 
-    } else if (key.isReplicator()) {
+      } else if (key.isReplicator()) {
 	if (_verbose) 
 	  printf(" replicator\n");
 
@@ -1752,7 +1407,6 @@ int BufrFile::_descend(DNode *tree) {
 	  Radx::ui32 nRepeats; // actually read this from the data section
           nRepeats = Apply(tableMap.Retrieve(delayed_replication_descriptor));
           if (_verbose) printf("nrepeats from Data = %u\n", nRepeats);
-          //repeaters.push(nRepeats);
           currentProduct.storeReplicator(nRepeats);
           p->ivalue = nRepeats;
           if (p->children == NULL) {
@@ -1783,7 +1437,7 @@ int BufrFile::_descend(DNode *tree) {
           p=p->next;
 	} // end else fixed repeater
         if (_verbose) printTree(tree, 0);
-    } else if (key.isAnotherNode()) {
+      } else if (key.isAnotherNode()) {
 	if (_verbose) 
 	  printf(" another node\n");
 	// pop/remove the element from the list; it is being replaced
@@ -1796,7 +1450,7 @@ int BufrFile::_descend(DNode *tree) {
 	theList = val1._listOfKeys;
 
         // replace the contents of this node with the first element of the list
-        p->des = theList.front();  // TODO: this could be the wrong order
+        p->des = theList.front();
         // insert the remaining elements after this node
 
         theList.erase(theList.begin());
@@ -1816,191 +1470,23 @@ int BufrFile::_descend(DNode *tree) {
           h->next = save;
 	}
         if (_verbose) printTree(tree, 0);
-    } else {
-	if (_verbose) 
-	  printf(" ERROR!!! unknown\n");  // TODO: this should be an exception thrown
-        return -1; // error occurred
-    }
+      } else {
+        Radx::addErrStr(_errString, "", "ERROR - BufrFile::_descend", true);
+	Radx::addErrInt(_errString, "   unrecognized table map key: ", des, true);
+	throw _errString.c_str();
+      }
     } // end while p!= NULL
     if (compressionStart) {
-      //double *realData;
-      // realData = currentProduct.decompressData();
-      // push info to RadxVol
-      //pushToRadxVol(realData, currentProduct);
       currentProduct.createSweep();
       compressionStart = false;
     }
   } catch (const std::out_of_range& e) {
-    cout << "Error: unknown descriptor: " << des << endl;
-    exit(1);
+    Radx::addErrStr(_errString, "", "ERROR - BufrFile::_descend", true);
+    Radx::addErrInt(_errString, "   unknown descriptor: ", des, true);
+    throw _errString.c_str();
   }
   return 0;
 }
-
-// TODO: or are we going to pull the info after we are done?
-// If I can figure out when a sweep starts, then we can pull
-//BufrFile::pushToRadxVol(realData, currentProduct);
-
-/*
-
-int BufrFile::_descend(DNode *tree) {
-
-  bool _debug = true;  // TODO: make this more global
-
-  if (_debug) { 
-    printf("\nTraversing ... \n");
-    printTree(tree,0);
-  }
-
-  unsigned short des;
-  DNode *p;
-  p = tree;
-
-  try {
-  // for each descriptor in the list
-    while (p != NULL ) {
-
-    unsigned char f, x, y;
-
-    des = p->des;
-    TableMapKey key(des);
-
-    // visit the node
-    if (_debug) {
-      TableMapKey().Decode(des, &f, &x, &y);
-      printf("visiting f(x,y): %x(%x,%x) ", f, x, y);        
-    }
-
-    if (key.isTableBEntry()) {  // a leaf
-      if (_debug) 
-        printf(" leaf\n");
-      // if the node is from table b, retrieve the data; apply any transformations;
-      //   insert into temporary structure for saving
-      TableMapElement val1;
-      val1 = tableMap.Retrieve(des);
-      if (val1._whichType == TableMapElement::DESCRIPTOR) {
-        cout << "value for key " << des << ":" <<
-          val1._descriptor.fieldName << "," << 
-          val1._descriptor.scale << endl;
-      }
-      Radx::ui32 valueFromData; 
-      valueFromData = Apply(val1);
-      // cout << "value from Data = " << valueFromData << endl;
-      p = p->next;
-
-    } else if (key.isReplicator()) {
-	if (_debug) 
-	  printf(" replicator\n");
-
-	// if the node is a replicator, e.g. 1;2;0 or 1;3;5
-	// decode the key into f(x,y) and check y for different action
-        unsigned char f,x,y;
-        TableMapKey().Decode(des, &f, &x, &y);
-	bool variable_repeater = false;
-        if (y == 0) variable_repeater = true;
-      
-        if (variable_repeater) {
-	  // there will be a special "delayed replication", y=0
-          unsigned short delayed_replication_descriptor;
-          DNode *delayed_rep_node;
-          delayed_rep_node = p->next;
-          delayed_replication_descriptor = delayed_rep_node->des;
-          // get the number of repeats from section 4 data
-          unsigned char nrepeats; // actually read this from the data section
-          Radx::ui32 valueFromData; 
-          valueFromData = Apply(tableMap.Retrieve(delayed_replication_descriptor));
-          printf("nrepeats from Data = %u\n", valueFromData);
-	  //>>>>> bad conversion!!!      
-          nrepeats = (unsigned char) valueFromData; // TODO: check if value exceeds max for y values
-          p->nRepeats = valueFromData; 
-          // replace the contents of the replicator node with the number of repeats
-          // construct a new descriptor with the number of repeats
-          unsigned short new_descriptor;
-          new_descriptor = TableMapKey().EncodeKey(f, x, nrepeats);
-	  p->des = new_descriptor;
-          // remove the delayed replication descriptor node from the list
-          _deleteAfter(p);    
-	} else {           // must be a fixed repeater
-          // move the children if they aren't already there
-          if (p->children == NULL) {
-            // remove the next x descriptors and make them children
-            DNode *h, *t;
-            h = p->next;
-            t = h->next;
-            int i = 1;
-            while ((t!= NULL) && (i<x)) {
-              h = t;
-              t = t->next;
-              i += 1;
-            }
-            p->children = p->next;
-            // reconnect the list
-            p->next = t;
-	    h->next = NULL;
-	  }  // end moving children
-	  Radx::ui32 y32;
-          y32 = y;
-          if (p->nRepeats > 0) {
-            y32 = p->nRepeats;  // because some repeats are larger than 8 bits
-	  }
-          for (int i=0; i<y32; i++) {
-            printf("%d out of %d repeats\n", i+1, y32);
-            _descend(p->children);
-	  }
-          printf("-- end repeat\n");
-          p=p->next;
-	} // end else fixed repeater
-        printTree(tree, 0);
-    } else if (key.isAnotherNode()) {
-	if (_debug) 
-	  printf(" another node\n");
-	// pop/remove the element from the list; it is being replaced
-	// if the node is another node,
-	// look up the expansions and insert them...
-	//TableMapElement val1 = tableMap.Retrieve(des);
-        TableMapElement val1;
-        val1 = tableMap.Retrieve(des);
-	 
-	vector<unsigned short> theList;
-	theList = val1._listOfKeys;
-
-        // replace the contents of this node with the first element of the list
-        p->des = theList.front();  // TODO: this could be the wrong order
-        // insert the remaining elements after this node
-
-        theList.erase(theList.begin());
-	if (theList.size() > 0) {
-	  DNode *newList = buildTree(theList, true);
-          DNode *save;
-          save = p->next;
-          p->next = newList;
-  	  // find the end of the new list;
-          DNode *h, *t;
-          h = newList;
-          t = newList->next;
-          while (t != NULL) {
-            h = t;
-            t = t->next;
-          }
-          h->next = save;
-	}
-        printTree(tree, 0);
-    } else {
-	if (_debug) 
-	  printf(" ERROR!!! unknown\n");  // TODO: this should be an exception thrown
-        return -1; // error occurred
-    }
-  }
-  } catch (const std::out_of_range& e) {
-    cout << "Error: unknown descriptor: " << des << endl;
-    exit(1);
-  }
-  return 0;
-}
-
-*/
-
-
 
 /////////////////////////////////////
 // Print contents of Bufr file read
@@ -2008,7 +1494,6 @@ int BufrFile::_descend(DNode *tree) {
 int BufrFile::print(ostream &out, bool printRays, bool printData) {
 
   out << "=============== BufrFile ===============" << endl;
-  //RadxFile::print(out);
   out << "Section 0: " << endl;
   printSection0(out);
   out << "Section 1: " << endl;

@@ -133,6 +133,7 @@ public:
   int readDataDescriptors();
   int readDescriptorTables();
   int readData();
+  int readSection5();
 
   int print(ostream &out, bool printRays, bool printData);
   void printSection0(ostream &out);
@@ -180,9 +181,8 @@ public:
 private:
 
   bool StuffIt(string fieldName, double value);
-  Radx::ui32 ExtractIt(int nBits);
-  string ExtractText(int nBits);
-  void SkipIt(int nBits);
+  Radx::ui32 ExtractIt(unsigned int nBits);
+  string ExtractText(unsigned int nBits);
   double fastPow10(int n);
   Radx::ui32 Apply(TableMapElement f);
   Radx::si32 ApplyNumeric(TableMapElement f);
@@ -192,6 +192,7 @@ private:
   //int Traverse(int start, int length); //vector<unsigned short> descriptors);
   int ReplenishBuffer();
   bool NextBit();
+  void MoveToNextByteBoundary();
 
   BufrProduct currentProduct;
   //vector<int> repeaters;

@@ -85,8 +85,6 @@ public:
 
   void addData(unsigned char value);
 
-  void transitionState(int n);
-
   double *decompressData();
 
   void createSweep();

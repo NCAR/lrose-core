@@ -306,20 +306,15 @@ private:
 				  time_t &fileTime);
   int _readDimensions();
   int _readGlobalAttributes();
-  // int _readTimes();
   int _getRayTimes(int sweepNumber);
   int _setRangeVariable();
   int _verifyRangeVariable();
   int _setPositionVariables();
   int _verifyPositionVariables();
-  // int _readSweepVariables();
-  //int _readScalarVariables();
-  //void _clearFields();
   void _clearRayVariables();
   int _getRayVariables(int sweepNumber);
   int _createRays(int sweepNumber);
   int _readFields(const string &path);
-  //int _readFieldVariables(int sweepNumber, bool metaOnly);
   int _addFieldVariables(int sweepNumber,
 				      string name, string units,
 				      string standardName, string longName,

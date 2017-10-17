@@ -84,35 +84,6 @@ void BufrProduct::allocateSpace(unsigned int n) {
   }
 }
 
-void BufrProduct::transitionState(int n) {
-  /*
-  switch (currentState) {
-  case 0:
-    currentSweepNumber = 1;
-    break;
-  case 1:
-    break;
-  case 2:  //  parameters have been recorded
-    // n contains the number of data segments
-    // allocate space for data values;
-    nDataSegments = n;
-    break;
-  case 3:  // data segments have been recorded
-    // n contains the number of data values
-    //??   // TODO: what to do here???  allocate too much memory
-         // or combine separate buffers into one using memcpy?
-    break;
-  case 4:
-    // increase the size of the data buffer? or 
-    // create an additional one???
-    break;
-  default:
-    throw "BufrProduct in unreckognized state";
-  }
-  state += 1;
-  */
-}
-
 // OK, we are assuming a particular order to the replicators.
 // The order is:
 // - header repeats
@@ -126,21 +97,16 @@ void BufrProduct::storeReplicator(unsigned int value) {
   // ensuing data values.
   switch (replicators.size()) {
   case 1:  // we know the number of sweeps
-    //sweepData.
     break;
   case 2:  
     // reset dataBuffer
-    //totalData = 0;
     nData = 0;
-    // dataBuffer.clear();
     break;
   case 3:
     break;
   case 4:
-    allocateSpace(value); // TODO: this should be 65534 
+    allocateSpace(value); 
     break;
-    //  case 5:   
-    //    break;
   default:
     throw "Unexpected number of entries in Replicator store";
   }
@@ -152,7 +118,6 @@ void BufrProduct::trashReplicator() {
   case 1:
     break;
   case 2:  // we know the number of sweeps
-    //sweepData.
     break;
   case 3:
     break;
@@ -162,7 +127,7 @@ void BufrProduct::trashReplicator() {
     if (dataBuffer != NULL) {
       //combine data segments
       unsigned int size;
-      size = nData; // ?? replicators.back(); 
+      size = nData; 
       compressedData.add(dataBuffer, size);
       nData = 0;
       free(dataBuffer);
