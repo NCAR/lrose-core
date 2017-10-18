@@ -142,8 +142,13 @@ void BufrProduct::trashReplicator() {
 
 // Record all the information now that we have all the data values
 void BufrProduct::createSweep() {
-      double *realData;
-      realData = decompressData();
+  //double *realData;
+  float *realData;
+      
+      realData = decompressDataFl32();
+      if (realData == NULL) {
+	throw "ERROR - could not decompress data";
+      }
       SweepData newSweep;
       newSweep.endTime = timeStampStack.back();
       timeStampStack.pop_back();
@@ -200,8 +205,82 @@ double *BufrProduct::decompressData() {
   compressedData.clear();
   double *temp;
   temp = (double *)UnCompDataBuff;
-  if (_debug) printf ("--> %g %g %g\n", temp[0], temp[1], temp[2]);
+  if (_debug) { 
+    printf ("--> %g %g %g\n", temp[0], temp[1], temp[2]);
+    printf (" ... %g %g %g <--\n", temp[n-3], temp[n-2], temp[n-1]);
+  }
   return (double *)UnCompDataBuff;
+}
+
+float *BufrProduct::decompressDataFl32() {
+  unsigned long n;
+  n = nBinsAlongTheRadial * nAzimuths * sizeof(double);
+
+  //int i, j;
+  //unsigned char str[sizeof(double)];
+  unsigned char *UnCompDataBuff = (unsigned char *) malloc(n);
+  unsigned long DestBuffSize = n;
+  
+  int result;
+  result = uncompress(UnCompDataBuff, &DestBuffSize, 
+		 (unsigned char *) compressedData.getPtr(), 
+		      compressedData.getLen()); 
+
+  if (result != Z_OK) {
+    
+    switch(result) {
+    case Z_BUF_ERROR:	 	
+      throw "The buffer dest was not large enough to hold the uncompressed data.";
+      break;
+
+    case Z_MEM_ERROR:	 	
+      throw "Insufficient memory.";
+      break;
+
+    case Z_DATA_ERROR:	 	
+      throw "The compressed data (referenced by source) was corrupted.";
+      break;
+    default:
+      return NULL;
+    }
+  }
+
+#if __BYTE_ORDER == __BIG_ENDIAN
+  for (i = 0; i < *ndecomp/sizeof(double); ++i) {
+    for (j = 0; j < sizeof(double); ++j) {
+      str[j] = UnCompDataBuff[i*sizeof(double)+j];
+    }
+    for (j = 0; j < sizeof(double); ++j) {
+      UnCompDataBuff[i*sizeof(double)+j] = str[sizeof(double) - 1 - j];
+    }
+  }
+#endif
+  compressedData.clear();
+  double *temp;
+  temp = (double *)UnCompDataBuff;
+  if (_debug) {
+    printf ("--> %g %g %g\n", temp[0], temp[1], temp[2]);
+    printf (" ... %g %g %g <--\n", temp[n-3], temp[n-2], temp[n-1]);
+  }
+
+  // convert the data to float
+  unsigned long n32;
+  n32 = nBinsAlongTheRadial * nAzimuths * sizeof(float);
+  unsigned char *UnCompDataBuff32 = (unsigned char *) malloc(n32);
+  float *temp32;
+  temp32 = (float *) UnCompDataBuff32;
+  for (unsigned long i=0; i< nBinsAlongTheRadial * nAzimuths; i++) {
+    temp32[i] = (float) temp[i];
+  }
+
+  if (_debug) {
+    printf("after conversion to float ...\n");
+    printf ("--> %g %g %g\n", temp32[0], temp32[1], temp32[2]);
+    printf (" ... %g %g %g <--\n", temp32[n-3], temp32[n-2], temp32[n-1]);
+  }
+
+  free(UnCompDataBuff);
+  return temp32; //  (float *)UnCompDataBuff32;
 }
 
 // maintain the timestamps in a stack

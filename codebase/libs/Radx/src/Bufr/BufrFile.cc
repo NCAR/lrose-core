@@ -702,7 +702,8 @@ string BufrFile::ExtractText(unsigned int nBits) {
     // if we've completed a character, move it into string
     // and clear the value
     if ((i % 8) == 0) {
-      val.push_back(character);
+      if (isprint(character))
+        val+=character;
       character = 0;
     }
   }
@@ -1061,8 +1062,12 @@ double BufrFile::getEndTimeForSweep(int sweepNumber) {
   return rTime.asDouble();
 }
 
-double *BufrFile::getDataForSweep(int sweepNumber) { 
+float *BufrFile::getDataForSweepFl32(int sweepNumber) { 
   return currentProduct.sweepData.at(sweepNumber).parameterData[0].data;
+}
+
+double *BufrFile::getDataForSweepFl64(int sweepNumber) { 
+  return currentProduct.sweepData.at(sweepNumber).parameterDataFl64[0].data;
 }
 
 string BufrFile::getTypeOfProductForSweep(int sweepNumber) { 

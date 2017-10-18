@@ -1231,7 +1231,7 @@ int BufrRadxFile::_addFieldVariables(int sweepNumber,
     float foldLimitUpper = 0.0;
     //switch (var->type()) {
     //  case nc3Double: {
-        if (_addFl64FieldToRays(sweepNumber, name, units, standardName, longName,
+        if (_addFl32FieldToRays(sweepNumber, name, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
           iret = -1;
@@ -1253,7 +1253,7 @@ int BufrRadxFile::_addFieldVariables(int sweepNumber,
 
     // } // switch
     
-  /*
+	/*
     if (metaOnly) {
       bool fieldAlreadyAdded = false;
       for (size_t ii = 0; ii < _readVol->getNFields(); ii++) {
@@ -1275,7 +1275,7 @@ int BufrRadxFile::_addFieldVariables(int sweepNumber,
       }
       continue;
     }
-  */
+	*/  
 
     if (iret) {
       _addErrStr("ERROR - BufrRadxFile::_addFieldVariables");
@@ -1309,7 +1309,7 @@ int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
   // get data from array
 
   Radx::fl64 *data; 
-  data = _file.getDataForSweep(sweepNumber);
+  data = _file.getDataForSweepFl64(sweepNumber);
 
   // set missing value
 
@@ -1371,6 +1371,110 @@ int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
 				      pleaseCopyData);
     }
     field->setMissingFl64(missingVal);
+    field->setStandardName(standardName);
+    field->setLongName(longName);
+    field->copyRangeGeom(_geom);
+    
+    if (fieldFolds &&
+	foldLimitLower != Radx::missingMetaFloat &&
+	foldLimitUpper != Radx::missingMetaFloat) {
+      field->setFieldFolds(foldLimitLower, foldLimitUpper);
+    }
+    if (isDiscrete) {
+      field->setIsDiscrete(true);
+    }
+  } // end for ii
+  if (nextFileRangeDimension > _nRangeInFile) {
+    // update the number of ranges in the file
+    _nRangeInFile = nextFileRangeDimension;
+  }
+
+  delete[] data;
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////////////////
+// Add fl32 fields to _raysFromFile
+// The _raysFromFile array has previously been set up by _createRays()
+// Returns 0 on success, -1 on failure
+
+int BufrRadxFile::_addFl32FieldToRays(int sweepNumber,
+				      const string &name,
+				      const string &units,
+				      const string &standardName,
+				      const string &longName,
+				      bool isDiscrete,
+				      bool fieldFolds,
+				      float foldLimitLower,
+				      float foldLimitUpper)
+  
+{
+  // get data from array
+
+  Radx::fl32 *data; 
+  data = _file.getDataForSweepFl32(sweepNumber);
+
+  // set missing value
+
+  Radx::fl32 missingVal = -FLT_MAX; // Radx::missingFl64;
+
+  // look for fill value, if not present, then use missing value
+
+  Radx::fl32 fillVal = missingVal;
+
+  // replace any NaN's with fill value
+  for (size_t jj = 0; jj < _nTimesInFile * _nRangeInFile; jj++) {
+    if (std::isnan(data[jj]))
+      data[jj] = fillVal;
+  }
+
+  // load field into rays
+  RadxField *field;
+  size_t nextFileRangeDimension = _file.getRangeDimension();
+
+  for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+    int nGates = _nRangeInFile; 
+    int startIndex = ii * _nRangeInFile;
+    if (_verbose) {
+      if (ii == 0) 
+        cout << "adding field " << name << " to ray " << endl;    
+    }
+    // the rays for this sweep start at sweepNumber*_nTimesInFile
+    int rayIdx;
+    rayIdx = (sweepNumber * _nTimesInFile) + ii;
+
+    // now we can check for the dimensions and resize as needed
+    // homogenize the number of gates (also known as nRangeInFile)
+    // The number of gates could be less
+    // than the current number of more than the current number
+    if (nextFileRangeDimension < _nRangeInFile) {
+      if (_verbose) {
+        if (ii == 0) 
+          cout << "Expanding field from " << nextFileRangeDimension << 
+            " to " << _nRangeInFile << endl;
+      }
+      // fill in the data with missing values
+      field = new RadxField(name, units);
+      field->setTypeFl32(missingVal);
+      // NOTE: the startIndex will be different
+      startIndex = ii * nextFileRangeDimension;
+      field->addDataFl32(nextFileRangeDimension, data+startIndex);
+      field->setNGates(_nRangeInFile);
+      _raysToRead[rayIdx]->addField(field);
+    } else {
+      if (nextFileRangeDimension > _nRangeInFile) {
+	_raysToRead[rayIdx]->setNGates(nextFileRangeDimension);
+        nGates = nextFileRangeDimension;
+      }
+      bool pleaseCopyData = true;
+      field =
+	_raysToRead[rayIdx]->addField(name, units, nGates,
+				      missingVal,
+				      data + startIndex,
+				      pleaseCopyData);
+    }
+    field->setMissingFl32(missingVal);
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
