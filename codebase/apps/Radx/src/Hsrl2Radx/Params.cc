@@ -1207,149 +1207,6 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY FIELD NAMES FOR OUTPUT FILES");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'set_output_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_output_fields");
-    tt->descr = tdrpStrDup("Set the field names and output encoding");
-    tt->help = tdrpStrDup("If false, all fields will be used.");
-    tt->val_offset = (char *) &set_output_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_fields'
-    // ctype is '_output_field_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("output_fields");
-    tt->descr = tdrpStrDup("Output field details.");
-    tt->help = tdrpStrDup("Set the details for the output fields. The output_field_name is the ndtCDF variable name. Set the long name to a more descriptive name. Set the standard name to the CF standard name for this field. If the long name or standard name are empty, the existing names are used.");
-    tt->array_offset = (char *) &_output_fields - &_start_;
-    tt->array_n_offset = (char *) &output_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(output_field_t);
-    tt->array_n = 6;
-    tt->struct_def.name = tdrpStrDup("output_field_t");
-    tt->struct_def.nfields = 5;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("input_field_name");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_output_fields->input_field_name - (char *) _output_fields;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("output_field_name");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_output_fields->output_field_name - (char *) _output_fields;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("long_name");
-      tt->struct_def.fields[2].ptype = STRING_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_output_fields->long_name - (char *) _output_fields;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[3].fname = tdrpStrDup("standard_name");
-      tt->struct_def.fields[3].ptype = STRING_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &_output_fields->standard_name - (char *) _output_fields;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[4].fname = tdrpStrDup("output_units");
-      tt->struct_def.fields[4].ptype = STRING_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &_output_fields->output_units - (char *) _output_fields;
-    tt->n_struct_vals = 30;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("beta_a_backscat");
-      tt->struct_vals[1].s = tdrpStrDup("beta_a_backscat");
-      tt->struct_vals[2].s = tdrpStrDup("particulate_backscatter_cross_section_per_unit_volume");
-      tt->struct_vals[3].s = tdrpStrDup("beta_a_backscat");
-      tt->struct_vals[4].s = tdrpStrDup("1/m.st");
-      tt->struct_vals[5].s = tdrpStrDup("extinction");
-      tt->struct_vals[6].s = tdrpStrDup("extinction");
-      tt->struct_vals[7].s = tdrpStrDup("aerosol_plus_molecular_extinction_profile");
-      tt->struct_vals[8].s = tdrpStrDup("aerosol_plus_molecular_extinction_profile");
-      tt->struct_vals[9].s = tdrpStrDup("1/km");
-      tt->struct_vals[10].s = tdrpStrDup("od");
-      tt->struct_vals[11].s = tdrpStrDup("od");
-      tt->struct_vals[12].s = tdrpStrDup("optical_depth");
-      tt->struct_vals[13].s = tdrpStrDup("aerosol_plus_molecular_optical_depth");
-      tt->struct_vals[14].s = tdrpStrDup("");
-      tt->struct_vals[15].s = tdrpStrDup("linear_depol");
-      tt->struct_vals[16].s = tdrpStrDup("linear_depol");
-      tt->struct_vals[17].s = tdrpStrDup("linear_depolarization_ratio_for_particulate");
-      tt->struct_vals[18].s = tdrpStrDup("linear_depolarization_ratio");
-      tt->struct_vals[19].s = tdrpStrDup("");
-      tt->struct_vals[20].s = tdrpStrDup("temperature_profile");
-      tt->struct_vals[21].s = tdrpStrDup("temperature_profile");
-      tt->struct_vals[22].s = tdrpStrDup("temperature_profile");
-      tt->struct_vals[23].s = tdrpStrDup("temperature_profile");
-      tt->struct_vals[24].s = tdrpStrDup("K");
-      tt->struct_vals[25].s = tdrpStrDup("pressure_profile");
-      tt->struct_vals[26].s = tdrpStrDup("pressure_profile");
-      tt->struct_vals[27].s = tdrpStrDup("pressure_profile");
-      tt->struct_vals[28].s = tdrpStrDup("pressure_profile");
-      tt->struct_vals[29].s = tdrpStrDup("hpa");
-    tt++;
-    
-    // Parameter 'write_other_fields_unchanged'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_other_fields_unchanged");
-    tt->descr = tdrpStrDup("Option to write out the unspecified fields as they are.");
-    tt->help = tdrpStrDup("If false, only the fields listed in output_fields will be written. If this is true, all other fields will be written unchanged.");
-    tt->val_offset = (char *) &write_other_fields_unchanged - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'exclude_specified_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("exclude_specified_fields");
-    tt->descr = tdrpStrDup("Option to exclude fields in the specified list.");
-    tt->help = tdrpStrDup("If true, the specified fields will be excluded. This may be easier than specifiying all of the fields to be included, if that list is very long.");
-    tt->val_offset = (char *) &exclude_specified_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'excluded_fields'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("excluded_fields");
-    tt->descr = tdrpStrDup("List of fields to be excluded.");
-    tt->help = tdrpStrDup("List the names to be excluded");
-    tt->array_offset = (char *) &_excluded_fields - &_start_;
-    tt->array_n_offset = (char *) &excluded_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 2;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].s = tdrpStrDup("DBZ");
-      tt->array_vals[1].s = tdrpStrDup("VEL");
-    tt++;
-    
-    // Parameter 'Comment 9'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1450,44 +1307,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
-    tt->comment_text = tdrpStrDup("Files are written in CfRadial");
-    tt++;
-    
-    // Parameter 'netcdf_style'
-    // ctype is '_netcdf_style_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_style");
-    tt->descr = tdrpStrDup("NetCDF style - if output_format is CFRADIAL");
-    tt->help = tdrpStrDup("netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls");
-    tt->val_offset = (char *) &netcdf_style - &_start_;
-    tt->enum_def.name = tdrpStrDup("netcdf_style_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("CLASSIC");
-      tt->enum_def.fields[0].val = CLASSIC;
-      tt->enum_def.fields[1].name = tdrpStrDup("NC64BIT");
-      tt->enum_def.fields[1].val = NC64BIT;
-      tt->enum_def.fields[2].name = tdrpStrDup("NETCDF4");
-      tt->enum_def.fields[2].val = NETCDF4;
-      tt->enum_def.fields[3].name = tdrpStrDup("NETCDF4_CLASSIC");
-      tt->enum_def.fields[3].val = NETCDF4_CLASSIC;
-    tt->single_val.e = NETCDF4;
-    tt++;
-    
-    // Parameter 'Comment 11'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1552,11 +1376,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;

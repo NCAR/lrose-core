@@ -65,28 +65,11 @@ public:
   } mode_t;
 
   typedef enum {
-    CLASSIC = 0,
-    NC64BIT = 1,
-    NETCDF4 = 2,
-    NETCDF4_CLASSIC = 3
-  } netcdf_style_t;
-
-  typedef enum {
     START_AND_END_TIMES = 0,
     START_TIME_ONLY = 1,
     END_TIME_ONLY = 2,
     SPECIFY_FILE_NAME = 3
   } filename_mode_t;
-
-  // struct typedefs
-
-  typedef struct {
-    char* input_field_name;
-    char* output_field_name;
-    char* long_name;
-    char* standard_name;
-    char* output_units;
-  } output_field_t;
 
   ///////////////////////////
   // Member functions
@@ -469,18 +452,6 @@ public:
 
   int data_mapper_report_interval;
 
-  tdrp_bool_t set_output_fields;
-
-  output_field_t *_output_fields;
-  int output_fields_n;
-
-  tdrp_bool_t write_other_fields_unchanged;
-
-  tdrp_bool_t exclude_specified_fields;
-
-  char* *_excluded_fields;
-  int excluded_fields_n;
-
   char* version_override;
 
   char* title_override;
@@ -496,8 +467,6 @@ public:
   char* comment_override;
 
   char* author_override;
-
-  netcdf_style_t netcdf_style;
 
   int compression_level;
 
@@ -536,7 +505,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[91];
+  mutable TDRPtable _table[83];
 
   const char *_className;
 

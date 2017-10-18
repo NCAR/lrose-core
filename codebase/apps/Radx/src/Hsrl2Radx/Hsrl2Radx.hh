@@ -105,6 +105,7 @@ private:
                          const string &name,
                          const string &units,
                          const string &longName,
+                         const string &standardName,
                          int nGates,
                          const Radx::fl32 *fcounts);
   
@@ -114,7 +115,6 @@ private:
   void _overrideGateGeometry(RadxVol &vol);
   void _setRangeRelToInstrument(MslFile &file,
                                 RadxVol &vol);
-  void _convertFields(RadxVol &vol);
   void _setupWrite(RadxFile &file);
   void _setGlobalAttr(RadxVol &vol);
   int _writeVol(RadxVol &vol);

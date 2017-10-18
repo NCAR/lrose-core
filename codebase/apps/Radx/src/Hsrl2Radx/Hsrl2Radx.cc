@@ -587,6 +587,7 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
                     _params.combined_hi_field_name,
                     "counts",
                     "combined_hi_channel",
+                    "lidar_copolar_combined_backscatter_photon_count",
                     rawRay.getNGates(),
                     &rawRay.getCombinedHi()[0]);
 
@@ -594,6 +595,7 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
                     _params.combined_lo_field_name,
                     "counts",
                     "combined_lo_channel",
+                    "lidar_copolar_combined_backscatter_photon_count",
                     rawRay.getNGates(),
                     &rawRay.getCombinedLo()[0]);
 
@@ -601,6 +603,7 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
                     _params.molecular_field_name,
                     "counts",
                     "molecular_channel",
+                    "lidar_copolar_molecular_backscatter_photon_count",
                     rawRay.getNGates(),
                     &rawRay.getMolecular()[0]);
 
@@ -608,6 +611,7 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
                     _params.cross_field_name,
                     "counts",
                     "cross_channel",
+                    "lidar_crosspolar_combined_backscatter_photon_count",
                     rawRay.getNGates(),
                     &rawRay.getCross()[0]);
 
@@ -627,6 +631,7 @@ void Hsrl2Radx::_addRawFieldToRay(RadxRay *ray,
                                   const string &name,
                                   const string &units,
                                   const string &longName,
+                                  const string &standardName,
                                   int nGates,
                                   const Radx::fl32 *fcounts)
   
@@ -640,6 +645,7 @@ void Hsrl2Radx::_addRawFieldToRay(RadxRay *ray,
                   fcounts,
                   true);
   
+  field->setStandardName(standardName);
   field->setLongName(longName);
   field->setRangeGeom(startRangeKm, gateSpacingKm);
   
@@ -668,6 +674,7 @@ void Hsrl2Radx::_addRawFieldToRay(RadxRay *ray,
                   fcounts,
                   true);
   
+  dbField->setStandardName(standardName);
   dbField->setLongName(dbLongName);
   dbField->setRangeGeom(startRangeKm, gateSpacingKm);
   
@@ -731,17 +738,6 @@ int Hsrl2Radx::_processUwCfRadialFile(const string &readPath)
     }
   }
 
-  // remove unwanted fields
-
-  if (_params.exclude_specified_fields) {
-    for (int ii = 0; ii < _params.excluded_fields_n; ii++) {
-      if (_params.debug) {
-        cerr << "Removing field name: " << _params._excluded_fields[ii] << endl;
-      }
-      vol.removeField(_params._excluded_fields[ii]);
-    }
-  }
-
   // convert to floats
 
   vol.convertToFl32();
@@ -780,12 +776,6 @@ int Hsrl2Radx::_processUwCfRadialFile(const string &readPath)
   vol.loadSweepInfoFromRays();
   vol.loadVolumeInfoFromRays();
 
-  // vol.printWithRayMetaData(cerr);
-
-  // set field type, names, units etc
-  
-  _convertFields(vol);
-
   // set global attributes as needed
 
   _setGlobalAttr(vol);
@@ -813,16 +803,6 @@ void Hsrl2Radx::_setupRead(MslFile &file)
   }
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.setVerbose(true);
-  }
-
-  if (!_params.write_other_fields_unchanged) {
-
-    if (_params.set_output_fields) {
-      for (int ii = 0; ii < _params.output_fields_n; ii++) {
-        file.addReadField(_params._output_fields[ii].input_field_name);
-      }
-    }
-
   }
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
@@ -930,30 +910,6 @@ void Hsrl2Radx::_setRangeRelToInstrument(MslFile &file,
 }
   
 //////////////////////////////////////////////////
-// rename fields as required
-
-void Hsrl2Radx::_convertFields(RadxVol &vol)
-{
-
-  if (!_params.set_output_fields) {
-    return;
-  }
-
-  for (int ii = 0; ii < _params.output_fields_n; ii++) {
-
-    const Params::output_field_t &ofld = _params._output_fields[ii];
-    
-    string iname = ofld.input_field_name;
-    string oname = ofld.output_field_name;
-    string lname = ofld.long_name;
-    string sname = ofld.standard_name;
-    string ounits = ofld.output_units;
-    
-  }
-
-}
-
-//////////////////////////////////////////////////
 // set up write
 
 void Hsrl2Radx::_setupWrite(RadxFile &file)
@@ -980,22 +936,7 @@ void Hsrl2Radx::_setupWrite(RadxFile &file)
   // set output format
 
   file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL);
-
-  // set netcdf format - used for CfRadial
-
-  switch (_params.netcdf_style) {
-    case Params::NETCDF4_CLASSIC:
-      file.setNcFormat(RadxFile::NETCDF4_CLASSIC);
-      break;
-    case Params::NC64BIT:
-      file.setNcFormat(RadxFile::NETCDF_OFFSET_64BIT);
-      break;
-    case Params::NETCDF4:
-      file.setNcFormat(RadxFile::NETCDF4);
-      break;
-    default:
-      file.setNcFormat(RadxFile::NETCDF_CLASSIC);
-  }
+  file.setNcFormat(RadxFile::NETCDF4);
 
   if (strlen(_params.output_filename_prefix) > 0) {
     file.setWriteFileNamePrefix(_params.output_filename_prefix);
