@@ -38,314 +38,155 @@
 #include "FullCals.hh"
 #include <iostream>
 #include <cmath>
+#include <cassert>
 
 using namespace std;
 
 /////////////////////////////////////////////////////////////////
 // constructor
 
-DerFieldCalcs::DerFieldCalcs(FullCals fullCals_in,
-			     vector<Radx::fl32> hiData_in, 
-			     vector<Radx::fl32> loData_in, 
-			     vector<Radx::fl32> crossData_in, 
-			     vector<Radx::fl32> molData_in,
-			     vector<Radx::fl32> htKm_in,
-			     vector<Radx::fl32> tempK_in, 
-			     vector<Radx::fl32> presHpa_in,  
-			     double shotCount_in, double power_in)
+DerFieldCalcs::DerFieldCalcs(const Params &params,
+                             const FullCals &fullCals,
+                             size_t nGates,
+                             const vector<Radx::fl32> &hiData,
+                             const vector<Radx::fl32> &loData, 
+                             const vector<Radx::fl32> &crossData,
+                             const vector<Radx::fl32> &molData,
+                             const vector<Radx::fl32> &htM,
+                             const vector<Radx::fl32> &tempK, 
+                             const vector<Radx::fl32> &presHpa,
+                             double shotCount, 
+                             double power) :
+  _params(params),
+  _fullCals(fullCals),
+  _nGates(nGates),
+  _hiData(hiData),
+  _loData(loData),
+  _crossData(crossData),
+  _molData(molData),
+  _htM(htM),
+  _tempK(tempK),
+  _presHpa(presHpa),
+  _shotCount(shotCount),
+  _power(power)
+
 {
-  fullCals=fullCals_in;
-  
-  hiData=hiData_in;
-  loData=loData_in;
-  crossData=crossData_in;
-  molData=molData_in;
- 
-  htKm=htKm_in;
-  tempK=tempK_in;
-  presHpa=presHpa_in;
-  
-  shotCount=shotCount_in;
-  power=power_in;
-  
-  
-  if( hiData.size() == loData.size() &&
-      hiData.size() == crossData.size() &&
-      hiData.size() == molData.size() )
-    {
-      applyCorr();
-      if( hiData.size() == combData.size() )
-	derive_quantities();
-    }
-}
 
-/////////////////////////////////////////////////////////////////
-// set cals
+  // check sizes are correct
 
-void DerFieldCalcs::set_fullCals(FullCals fullCals_in)
-{
-  fullCals=fullCals_in;
-  if( hiData.size() == loData.size() &&
-      hiData.size() == crossData.size() &&
-      hiData.size() == molData.size() )
-    {
-      applyCorr();
-      if( hiData.size() == combData.size() )
-	derive_quantities();
-    }
-}
+  assert(hiData.size() == _nGates);
+  assert(loData.size() == _nGates);
+  assert(crossData.size() == _nGates);
+  assert(molData.size() == _nGates);
+  assert(htM.size() == _nGates);
+  assert(tempK.size() == _nGates);
+  assert(presHpa.size() == _nGates);
 
-/////////////////////////////////////////////////////////////////
-// set combined hi count data
-
-void DerFieldCalcs::set_hiData (vector<Radx::fl32> in)
-{
-  hiData=in;
-  if( hiData.size() == loData.size() &&
-      hiData.size() == crossData.size() &&
-      hiData.size() == molData.size() )
-    {
-      applyCorr();
-      if( hiData.size() == combData.size() )
-	derive_quantities();
-    }
-}
-
-/////////////////////////////////////////////////////////////////
-// set combined lo count data
-
-void DerFieldCalcs::set_loData (vector<Radx::fl32> in)
-{
-  loData=in;
-  if( hiData.size() == loData.size() &&
-      hiData.size() == crossData.size() &&
-      hiData.size() == molData.size() )
-    {
-      applyCorr();
-      if( hiData.size() == combData.size() )
-	derive_quantities();
-    }
-}
-
-/////////////////////////////////////////////////////////////////
-// set cross channel count data
-
-void DerFieldCalcs::set_crossData (vector<Radx::fl32> in)
-{
-  crossData=in;
-  if( hiData.size() == loData.size() &&
-      hiData.size() == crossData.size() &&
-      hiData.size() == molData.size() )
-    {
-      applyCorr();
-      if( hiData.size() == combData.size() )
-	derive_quantities();
-    }
-}
-
-/////////////////////////////////////////////////////////////////
-// set molecular count data
-
-void DerFieldCalcs::set_molData (vector<Radx::fl32> in)
-{
-  molData=in;
-  if( hiData.size() == loData.size() &&
-      hiData.size() == crossData.size() &&
-      hiData.size() == molData.size() )
-    {
-      applyCorr();
-      if( hiData.size() == combData.size() )
-	derive_quantities();
-    }
-}
-
-
-/////////////////////////////////////////////////////////////////
-// set height
-
-void DerFieldCalcs::set_htKm (vector<Radx::fl32> in)
-{
-  htKm=in;
-  if( hiData.size() == loData.size() &&
-      hiData.size() == crossData.size() &&
-      hiData.size() == molData.size() )
-    {
-      applyCorr();
-      if( hiData.size() == combData.size() )
-	derive_quantities();
-    }
-}
-
-/////////////////////////////////////////////////////////////////
-// set temperature
-
-void DerFieldCalcs::set_tempK (vector<Radx::fl32> in)
-{
-  tempK=in;
-  if( hiData.size() == loData.size() &&
-      hiData.size() == crossData.size() &&
-      hiData.size() == molData.size() )
-    {
-      applyCorr();
-      if( hiData.size() == combData.size() )
-	derive_quantities();
-    }
-}
-
-/////////////////////////////////////////////////////////////////
-// set pressure
-
-void DerFieldCalcs::set_presHpa (vector<Radx::fl32> in)
-{
-  presHpa=in;
-  if( hiData.size() == loData.size() &&
-      hiData.size() == crossData.size() &&
-      hiData.size() == molData.size() )
-    {
-      applyCorr();
-      if( hiData.size() == combData.size() )
-	derive_quantities();
-    }
-}
-
-/////////////////////////////////////////////////////////////////
-// set number of pulses
-
-void DerFieldCalcs::set_shotCount(double in)
-{
-  shotCount=in;
-  if( hiData.size() == loData.size() &&
-      hiData.size() == crossData.size() &&
-      hiData.size() == molData.size() )
-    {
-      applyCorr();
-      if( hiData.size() == combData.size() )
-	derive_quantities();
-    }
-}
-
-/////////////////////////////////////////////////////////////////
-// set transmit power
-
-void DerFieldCalcs::set_power(double in)
-{
-  power=in;
-  if( hiData.size() == loData.size() &&
-      hiData.size() == crossData.size() &&
-      hiData.size() == molData.size() )
-    {
-      applyCorr();
-      if( hiData.size() == combData.size() )
-	derive_quantities();
-    }
 }
 
 /////////////////////////////////////////////////////////////////
 // apply corrections
 
-void DerFieldCalcs::applyCorr()
+void DerFieldCalcs::_applyCorr()
 {
-  bool debug=false;
+
+  _hiDataRate.clear();
+  _loDataRate.clear();
+  _crossDataRate.clear();
+  _molDataRate.clear();
   
-  int nGates=hiData.size();
-  
-  vector<Radx::fl32> hiDataRate;
-  vector<Radx::fl32> loDataRate;
-  vector<Radx::fl32> crossDataRate;
-  vector<Radx::fl32> molDataRate;
-  
-  CalReader dt_hi=(fullCals.getDeadTimeHi());
-  CalReader dt_lo=(fullCals.getDeadTimeLo());
-  CalReader dt_cross=(fullCals.getDeadTimeCross());
-  CalReader dt_mol=(fullCals.getDeadTimeMol());
-  CalReader binwid=(fullCals.getBinWidth());
+  CalReader dt_hi=(_fullCals.getDeadTimeHi());
+  CalReader dt_lo=(_fullCals.getDeadTimeLo());
+  CalReader dt_cross=(_fullCals.getDeadTimeCross());
+  CalReader dt_mol=(_fullCals.getDeadTimeMol());
+  CalReader binwid=(_fullCals.getBinWidth());
    
-  for(int igate=0;igate<nGates;igate++)
+  for(size_t igate=0;igate<_nGates;igate++)
     {
       if(dt_hi.dataTypeisNum() && 
-	 ( ( dt_hi.getDataNum() ).at(fullCals.getHiPos()) ).size()==1 && 
+	 ( ( dt_hi.getDataNum() ).at(_fullCals.getHiPos()) ).size()==1 && 
 	 dt_lo.dataTypeisNum() && 
-	 ( ( dt_lo.getDataNum() ).at(fullCals.getLoPos()) ).size()==1 && 
+	 ( ( dt_lo.getDataNum() ).at(_fullCals.getLoPos()) ).size()==1 && 
 	 dt_cross.dataTypeisNum() && 
-	 ( ( dt_cross.getDataNum() ).at(fullCals.getCrossPos()) ).size()==1 && 
+	 ( ( dt_cross.getDataNum() ).at(_fullCals.getCrossPos()) ).size()==1 && 
 	 dt_mol.dataTypeisNum() &&   
-	 ( ( dt_mol.getDataNum() ).at(fullCals.getMolPos()) ).size()==1 &&
+	 ( ( dt_mol.getDataNum() ).at(_fullCals.getMolPos()) ).size()==1 &&
 	 binwid.dataTypeisNum() && 
-	 ( ( binwid.getDataNum() ).at(fullCals.getBinPos()) ).size()==1 )
+	 ( ( binwid.getDataNum() ).at(_fullCals.getBinPos()) ).size()==1 )
 	{
 	  
-	  double hiDeadTime=((dt_hi.getDataNum()).at(fullCals.getHiPos())).at(0);
-	  double loDeadTime=((dt_lo.getDataNum()).at(fullCals.getLoPos())).at(0);
-	  double crossDeadTime=((dt_cross.getDataNum()).at(fullCals.getCrossPos())).at(0);
-	  double molDeadTime=((dt_mol.getDataNum()).at(fullCals.getMolPos())).at(0);
-	  double binW= ((binwid.getDataNum()).at(fullCals.getBinPos())).at(0);
-	  hiDataRate.push_back(_nonLinCountCor(hiData[igate], 
-					       hiDeadTime, binW, shotCount)); 
-	  loDataRate.push_back(_nonLinCountCor(loData[igate], 
-					       loDeadTime, binW, shotCount)); 
-	  crossDataRate.push_back(_nonLinCountCor(crossData[igate], 
-					       crossDeadTime, binW, shotCount)); 
-	  molDataRate.push_back(_nonLinCountCor(molData[igate], 
-						molDeadTime, binW, shotCount)); 
+	  double hiDeadTime=((dt_hi.getDataNum()).at(_fullCals.getHiPos())).at(0);
+	  double loDeadTime=((dt_lo.getDataNum()).at(_fullCals.getLoPos())).at(0);
+	  double crossDeadTime=((dt_cross.getDataNum()).at(_fullCals.getCrossPos())).at(0);
+	  double molDeadTime=((dt_mol.getDataNum()).at(_fullCals.getMolPos())).at(0);
+	  double binW= ((binwid.getDataNum()).at(_fullCals.getBinPos())).at(0);
+	  _hiDataRate.push_back(_nonLinCountCor(_hiData[igate], 
+					       hiDeadTime, binW, _shotCount)); 
+	  _loDataRate.push_back(_nonLinCountCor(_loData[igate], 
+					       loDeadTime, binW, _shotCount)); 
+	  _crossDataRate.push_back(_nonLinCountCor(_crossData[igate], 
+					       crossDeadTime, binW, _shotCount)); 
+	  _molDataRate.push_back(_nonLinCountCor(_molData[igate], 
+						molDeadTime, binW, _shotCount)); 
 	}
       
     }
   
-  if(debug)
-    for(int igate=0;igate<1;igate++)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
+    for(size_t igate=0;igate<1;igate++)
       {
-	cout<<"hiDataRate["<<igate<<"]="<<hiDataRate[igate]<<'\n';
-	cout<<"loDataRate["<<igate<<"]="<<loDataRate[igate]<<'\n';
-	cout<<"crossDataRate["<<igate<<"]="<<crossDataRate[igate]<<'\n';
-	cout<<"molDataRate["<<igate<<"]="<<molDataRate[igate]<<'\n';
+	cout<<"hiDataRate["<<igate<<"]="<<_hiDataRate[igate]<<'\n';
+	cout<<"loDataRate["<<igate<<"]="<<_loDataRate[igate]<<'\n';
+	cout<<"crossDataRate["<<igate<<"]="<<_crossDataRate[igate]<<'\n';
+	cout<<"molDataRate["<<igate<<"]="<<_molDataRate[igate]<<'\n';
       }
-  if(debug)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
     cout<<"baselineSubtract^^^^^"<<'\n';
   
-  vector< vector<double> > blCor=(fullCals.getBLCor());
+  vector< vector<double> > blCor=(_fullCals.getBLCor());
   int blCorSize=(blCor.at(0)).size();
-  for(int igate=0;igate<nGates;igate++)
+  for(size_t igate=0;igate<_nGates;igate++)
     {
       //need pol baseline from file to replace 1.0
       //_baselineSubtract is a passthrough function for now anyway
       
-      int calGate= blCorSize/nGates * igate +  0.5 * blCorSize/nGates;
+      int calGate= blCorSize/_nGates * igate +  0.5 * blCorSize/_nGates;
       
-      hiDataRate.at(igate)=_baselineSubtract(hiDataRate.at(igate),
+      _hiDataRate.at(igate)=_baselineSubtract(_hiDataRate.at(igate),
 					     (blCor.at(1)).at(calGate),1.0);
-      loDataRate.at(igate)=_baselineSubtract(loDataRate.at(igate),
+      _loDataRate.at(igate)=_baselineSubtract(_loDataRate.at(igate),
 					     (blCor.at(2)).at(calGate),1.0);
-      crossDataRate.at(igate)=_baselineSubtract(crossDataRate.at(igate),
+      _crossDataRate.at(igate)=_baselineSubtract(_crossDataRate.at(igate),
 						(blCor.at(3)).at(calGate),1.0);
-      molDataRate.at(igate)=_baselineSubtract(molDataRate.at(igate),
+      _molDataRate.at(igate)=_baselineSubtract(_molDataRate.at(igate),
 					      (blCor.at(4)).at(calGate),1.0);
     }
   
-  if(debug)
-    for(int igate=0;igate<1;igate++)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
+    for(size_t igate=0;igate<1;igate++)
       {
-	cout<<"hiDataRate["<<igate<<"]="<<hiDataRate[igate]<<'\n';
-	cout<<"loDataRate["<<igate<<"]="<<loDataRate[igate]<<'\n';
-	cout<<"crossDataRate["<<igate<<"]="<<crossDataRate[igate]<<'\n';
-	cout<<"molDataRate["<<igate<<"]="<<molDataRate[igate]<<'\n';
+	cout<<"hiDataRate["<<igate<<"]="<<_hiDataRate[igate]<<'\n';
+	cout<<"loDataRate["<<igate<<"]="<<_loDataRate[igate]<<'\n';
+	cout<<"crossDataRate["<<igate<<"]="<<_crossDataRate[igate]<<'\n';
+	cout<<"molDataRate["<<igate<<"]="<<_molDataRate[igate]<<'\n';
       }
   
   double hibackgroundRate=0;
   double lobackgroundRate=0;
   double crossbackgroundRate=0;
   double molbackgroundRate=0;
-  if(debug)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
     cout<<"backgroundSub^^^^^"<<'\n';
   
   //grabs last 100 out of 4000 bins for background,
   //or fractionally adjusts for less bins
   int bgBinCount=0;
-  for(int cgate=nGates-1;cgate>=nGates*0.975;cgate--)
+  for(int cgate=_nGates-1;cgate>=_nGates*0.975;cgate--)
     {
-      hibackgroundRate=hibackgroundRate+hiDataRate.at(cgate);
-      lobackgroundRate=lobackgroundRate+loDataRate.at(cgate);
-      crossbackgroundRate=crossbackgroundRate+crossDataRate.at(cgate);
-      molbackgroundRate=molbackgroundRate+molDataRate.at(cgate);
+      hibackgroundRate=hibackgroundRate+_hiDataRate.at(cgate);
+      lobackgroundRate=lobackgroundRate+_loDataRate.at(cgate);
+      crossbackgroundRate=crossbackgroundRate+_crossDataRate.at(cgate);
+      molbackgroundRate=molbackgroundRate+_molDataRate.at(cgate);
       bgBinCount++;	    
     }
   hibackgroundRate/=bgBinCount;
@@ -353,261 +194,258 @@ void DerFieldCalcs::applyCorr()
   crossbackgroundRate/=bgBinCount;
   molbackgroundRate/=bgBinCount;
   
-  for(int igate=0;igate<nGates;igate++)
+  for(size_t igate=0;igate<_nGates;igate++)
     {
-      hiDataRate.at(igate)=_backgroundSub(hiDataRate.at(igate),hibackgroundRate);
-      loDataRate.at(igate)=_backgroundSub(loDataRate.at(igate),lobackgroundRate);
-      crossDataRate.at(igate)=_backgroundSub(crossDataRate.at(igate),crossbackgroundRate);
-      molDataRate.at(igate)=_backgroundSub(molDataRate.at(igate),molbackgroundRate);
+      _hiDataRate.at(igate)=_backgroundSub(_hiDataRate.at(igate),hibackgroundRate);
+      _loDataRate.at(igate)=_backgroundSub(_loDataRate.at(igate),lobackgroundRate);
+      _crossDataRate.at(igate)=_backgroundSub(_crossDataRate.at(igate),crossbackgroundRate);
+      _molDataRate.at(igate)=_backgroundSub(_molDataRate.at(igate),molbackgroundRate);
     }
-  if(debug)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
     {
       cout<<"hibackgroundRate="<<hibackgroundRate<<'\n';
       cout<<"lobackgroundRate="<<lobackgroundRate<<'\n';
       cout<<"crossbackgroundRate="<<crossbackgroundRate<<'\n';
       cout<<"molbackgroundRate="<<molbackgroundRate<<'\n';
       
-      for(int igate=0;igate<1;igate++)
+      for(size_t igate=0;igate<1;igate++)
 	{
-	  cout<<"hiDataRate["<<igate<<"]="<<hiDataRate[igate]<<'\n';
-	  cout<<"loDataRate["<<igate<<"]="<<loDataRate[igate]<<'\n';
-	  cout<<"crossDataRate["<<igate<<"]="<<crossDataRate[igate]<<'\n';
-	  cout<<"molDataRate["<<igate<<"]="<<molDataRate[igate]<<'\n';
+	  cout<<"hiDataRate["<<igate<<"]="<<_hiDataRate[igate]<<'\n';
+	  cout<<"loDataRate["<<igate<<"]="<<_loDataRate[igate]<<'\n';
+	  cout<<"crossDataRate["<<igate<<"]="<<_crossDataRate[igate]<<'\n';
+	  cout<<"molDataRate["<<igate<<"]="<<_molDataRate[igate]<<'\n';
 	}
       
       cout<<"energyNorm^^^^^"<<'\n';
     }
   
-  for(int igate=0;igate<nGates;igate++)
+  for(size_t igate=0;igate<_nGates;igate++)
     {
-      hiDataRate.at(igate)=_energyNorm(hiDataRate.at(igate), power);
-      loDataRate.at(igate)=_energyNorm(loDataRate.at(igate), power);
-      crossDataRate.at(igate)=_energyNorm(crossDataRate.at(igate), power);
-      molDataRate.at(igate)=_energyNorm(molDataRate.at(igate), power);
+      _hiDataRate.at(igate)=_energyNorm(_hiDataRate.at(igate), _power);
+      _loDataRate.at(igate)=_energyNorm(_loDataRate.at(igate), _power);
+      _crossDataRate.at(igate)=_energyNorm(_crossDataRate.at(igate), _power);
+      _molDataRate.at(igate)=_energyNorm(_molDataRate.at(igate), _power);
     }
   
-  if(debug)
-    for(int igate=0;igate<1;igate++)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
+    for(size_t igate=0;igate<1;igate++)
       {
-	cout<<"hiDataRate["<<igate<<"]="<<hiDataRate[igate]<<'\n';
-	cout<<"loDataRate["<<igate<<"]="<<loDataRate[igate]<<'\n';
-	cout<<"crossDataRate["<<igate<<"]="<<crossDataRate[igate]<<'\n';
-	cout<<"molDataRate["<<igate<<"]="<<molDataRate[igate]<<'\n';
+	cout<<"hiDataRate["<<igate<<"]="<<_hiDataRate[igate]<<'\n';
+	cout<<"loDataRate["<<igate<<"]="<<_loDataRate[igate]<<'\n';
+	cout<<"crossDataRate["<<igate<<"]="<<_crossDataRate[igate]<<'\n';
+	cout<<"molDataRate["<<igate<<"]="<<_molDataRate[igate]<<'\n';
       }
-  if(debug)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
     cout<<"diffOverlapCor^^^^^"<<'\n';
   
-  vector< vector<double> > diffDGeo=(fullCals.getDiffDGeoCor());
+  vector< vector<double> > diffDGeo=(_fullCals.getDiffDGeoCor());
   int diffDGeoSize=(diffDGeo.at(1)).size();	
   
-  for(int igate=0;igate<nGates;igate++)
+  for(size_t igate=0;igate<_nGates;igate++)
     {
       
-      int calGate= diffDGeoSize/nGates * igate + 0.5 * diffDGeoSize/nGates;
+      int calGate= diffDGeoSize/_nGates * igate + 0.5 * diffDGeoSize/_nGates;
       
       vector<double> rates;
       vector<double> diffOverlap;
       
-      rates.push_back(hiDataRate.at(igate));
+      rates.push_back(_hiDataRate.at(igate));
       diffOverlap.push_back( (diffDGeo.at(1)).at(calGate) );
-      rates.push_back(loDataRate.at(igate));
+      rates.push_back(_loDataRate.at(igate));
       diffOverlap.push_back( (diffDGeo.at(2)).at(calGate) );
-      rates.push_back(crossDataRate.at(igate));
+      rates.push_back(_crossDataRate.at(igate));
       diffOverlap.push_back( 1.0 ); 
       // ***** need cross overlap correction from another file
-      rates.push_back(molDataRate.at(igate));
+      rates.push_back(_molDataRate.at(igate));
       diffOverlap.push_back( 1.0 );
       
       rates=_diffOverlapCor(rates, diffOverlap);
       
-      hiDataRate.at(igate)=rates.at(0);
-      loDataRate.at(igate)=rates.at(1);
-      crossDataRate.at(igate)=rates.at(2);
-      molDataRate.at(igate)=rates.at(3);
+      _hiDataRate.at(igate)=rates.at(0);
+      _loDataRate.at(igate)=rates.at(1);
+      _crossDataRate.at(igate)=rates.at(2);
+      _molDataRate.at(igate)=rates.at(3);
     }
   
-  if(debug)
-    for(int igate=0;igate<1;igate++)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
+    for(size_t igate=0;igate<1;igate++)
       {
-	cout<<"hiDataRate["<<igate<<"]="<<hiDataRate[igate]<<'\n';
-	cout<<"loDataRate["<<igate<<"]="<<loDataRate[igate]<<'\n';
-	cout<<"crossDataRate["<<igate<<"]="<<crossDataRate[igate]<<'\n';
-	cout<<"molDataRate["<<igate<<"]="<<molDataRate[igate]<<'\n';
+	cout<<"hiDataRate["<<igate<<"]="<<_hiDataRate[igate]<<'\n';
+	cout<<"loDataRate["<<igate<<"]="<<_loDataRate[igate]<<'\n';
+	cout<<"crossDataRate["<<igate<<"]="<<_crossDataRate[igate]<<'\n';
+	cout<<"molDataRate["<<igate<<"]="<<_molDataRate[igate]<<'\n';
       }
-  if(debug)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
     cout<<"processQWPRotation^^^^^"<<'\n';
   
-  for(int igate=0;igate<nGates;igate++)
+  for(size_t igate=0;igate<_nGates;igate++)
     {
       vector<double> rates;
       vector<double> polCal;
-      rates.push_back(hiDataRate.at(igate));
+      rates.push_back(_hiDataRate.at(igate));
       polCal.push_back( 1.0 );
-      rates.push_back(loDataRate.at(igate));
+      rates.push_back(_loDataRate.at(igate));
       polCal.push_back( 1.0 );
-      rates.push_back(crossDataRate.at(igate));
+      rates.push_back(_crossDataRate.at(igate));
       polCal.push_back( 1.0 );
-      rates.push_back(molDataRate.at(igate));
+      rates.push_back(_molDataRate.at(igate));
       polCal.push_back( 1.0 );
       // need to replace 1.0 with polarization calibration info, 
       // _processQWPRotation is passthrough for now though 
       rates=_processQWPRotation(rates, polCal);
       
-      hiDataRate.at(igate)=rates.at(0);
-      loDataRate.at(igate)=rates.at(1);
-      crossDataRate.at(igate)=rates.at(2);
-      molDataRate.at(igate)=rates.at(3);
+      _hiDataRate.at(igate)=rates.at(0);
+      _loDataRate.at(igate)=rates.at(1);
+      _crossDataRate.at(igate)=rates.at(2);
+      _molDataRate.at(igate)=rates.at(3);
       
     }
   
-  if(debug)
-    for(int igate=0;igate<1;igate++)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
+    for(size_t igate=0;igate<1;igate++)
       {
-	cout<<"hiDataRate["<<igate<<"]="<<hiDataRate[igate]<<'\n';
-	cout<<"loDataRate["<<igate<<"]="<<loDataRate[igate]<<'\n';
-	cout<<"crossDataRate["<<igate<<"]="<<crossDataRate[igate]<<'\n';
-	cout<<"molDataRate["<<igate<<"]="<<molDataRate[igate]<<'\n';
+	cout<<"hiDataRate["<<igate<<"]="<<_hiDataRate[igate]<<'\n';
+	cout<<"loDataRate["<<igate<<"]="<<_loDataRate[igate]<<'\n';
+	cout<<"crossDataRate["<<igate<<"]="<<_crossDataRate[igate]<<'\n';
+	cout<<"molDataRate["<<igate<<"]="<<_molDataRate[igate]<<'\n';
       }
-  if(debug)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
     cout<<"hiAndloMerge^^^^^"<<'\n';
   
-  vector<Radx::fl32> combineRate;
+  _combineRate.clear();
   
-  for(int igate=0;igate<nGates;igate++)
+  for(size_t igate=0;igate<_nGates;igate++)
     {
-      combineRate.push_back(_hiAndloMerge(hiDataRate.at(igate), 
-					  loDataRate.at(igate)));
+      _combineRate.push_back(_hiAndloMerge(_hiDataRate.at(igate), 
+					  _loDataRate.at(igate)));
     }
   
-  if(debug)
-    for(int igate=0;igate<1;igate++)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
+    for(size_t igate=0;igate<1;igate++)
       {
-	cout<<"hiDataRate["<<igate<<"]="<<hiDataRate[igate]<<'\n';
-	cout<<"loDataRate["<<igate<<"]="<<loDataRate[igate]<<'\n';
-	cout<<"crossDataRate["<<igate<<"]="<<crossDataRate[igate]<<'\n';
-	cout<<"molDataRate["<<igate<<"]="<<molDataRate[igate]<<'\n';
-	cout<<"combineRate["<<igate<<"]="<<combineRate[igate]<<'\n';
+	cout<<"hiDataRate["<<igate<<"]="<<_hiDataRate[igate]<<'\n';
+	cout<<"loDataRate["<<igate<<"]="<<_loDataRate[igate]<<'\n';
+	cout<<"crossDataRate["<<igate<<"]="<<_crossDataRate[igate]<<'\n';
+	cout<<"molDataRate["<<igate<<"]="<<_molDataRate[igate]<<'\n';
+	cout<<"combineRate["<<igate<<"]="<<_combineRate[igate]<<'\n';
       }
-  if(debug)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
     cout<<"geoOverlapCor^^^^^"<<'\n';
   
-  vector< vector<double> > geoDef=(fullCals.getGeoDefCor());
+  vector< vector<double> > geoDef=(_fullCals.getGeoDefCor());
   int geoDefSize=(geoDef.at(1)).size();	
   
-  for(int igate=0;igate<nGates;igate++)
+  for(size_t igate=0;igate<_nGates;igate++)
     {
-      int calGate= geoDefSize/nGates * igate + 0.5*geoDefSize/nGates;
+      int calGate= geoDefSize/_nGates * igate + 0.5*geoDefSize/_nGates;
       
       double calibr=(geoDef.at(1)).at(calGate);
       
-      combineRate.at(igate)=_geoOverlapCor(combineRate.at(igate), calibr);
-      crossDataRate.at(igate)=_geoOverlapCor(crossDataRate.at(igate), calibr);
-      molDataRate.at(igate)=_geoOverlapCor(molDataRate.at(igate), calibr);
+      _combineRate.at(igate)=_geoOverlapCor(_combineRate.at(igate), calibr);
+      _crossDataRate.at(igate)=_geoOverlapCor(_crossDataRate.at(igate), calibr);
+      _molDataRate.at(igate)=_geoOverlapCor(_molDataRate.at(igate), calibr);
     }
   
-  if(debug)
-    for(int igate=0;igate<1;igate++)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
+    for(size_t igate=0;igate<1;igate++)
       {
-	cout<<"hiDataRate["<<igate<<"]="<<hiDataRate[igate]<<'\n';
-	cout<<"loDataRate["<<igate<<"]="<<loDataRate[igate]<<'\n';
-	cout<<"crossDataRate["<<igate<<"]="<<crossDataRate[igate]<<'\n';
-	cout<<"molDataRate["<<igate<<"]="<<molDataRate[igate]<<'\n';
-	cout<<"combineRate["<<igate<<"]="<<combineRate[igate]<<'\n';
+	cout<<"hiDataRate["<<igate<<"]="<<_hiDataRate[igate]<<'\n';
+	cout<<"loDataRate["<<igate<<"]="<<_loDataRate[igate]<<'\n';
+	cout<<"crossDataRate["<<igate<<"]="<<_crossDataRate[igate]<<'\n';
+	cout<<"molDataRate["<<igate<<"]="<<_molDataRate[igate]<<'\n';
+	cout<<"combineRate["<<igate<<"]="<<_combineRate[igate]<<'\n';
       }      
   
-  hiData=hiDataRate;
-  loData=loDataRate;
-  crossData=crossDataRate;
-  molData=molDataRate;
-  combData=combineRate;
+  // _hiData=_hiDataRate;
+  // _loData=_loDataRate;
+  // _crossData=_crossDataRate;
+  // _molData=_molDataRate;
+  // _combData=_combineRate;
   
 }
 
 /////////////////////////////////////////////////////////////////
 // do calculations for derived fields
 
-void DerFieldCalcs::derive_quantities()
+void DerFieldCalcs::computeDerived()
 {
    
-  bool debug=false;
-   
-  vector<Radx::fl32> crossDataRate=crossData;
-  vector<Radx::fl32> molDataRate=molData;
-  vector<Radx::fl32> combineRate=combData;
-     
-  CalReader scanAdjust=(fullCals.getScanAdj());
+  // apply corrections
+  
+  _applyCorr();
+
+  CalReader scanAdjust=(_fullCals.getScanAdj());
   double scan=1;
   
   if( scanAdjust.dataTypeisNum() && 
-      ( ( scanAdjust.getDataNum() ).at(fullCals.getBinPos()) ).size()==1 )
-    scan= ((scanAdjust.getDataNum()).at(fullCals.getBinPos())).at(0);
+      ( ( scanAdjust.getDataNum() ).at(_fullCals.getBinPos()) ).size()==1 )
+    scan= ((scanAdjust.getDataNum()).at(_fullCals.getBinPos())).at(0);
   
-  int nGates=crossDataRate.size();
-   
-  for(int igate=0;igate<nGates;igate++)
+  for(size_t igate=0;igate<_nGates;igate++)
     {
-      volDepol.push_back(_volDepol( crossDataRate.at(igate), 
-				    combineRate.at(igate)));
+      _volDepol.push_back(_computeVolDepol( _crossDataRate.at(igate), 
+                                            _combineRate.at(igate)));
     }
 
-  if(debug)
-    for(int igate=0;igate<1;igate++)
-      cout<<"volDepol["<<igate<<"]="<<volDepol[igate]<<'\n';
+  if(_params.debug >= Params::DEBUG_VERBOSE)
+    for(size_t igate=0;igate<1;igate++)
+      cout<<"volDepol["<<igate<<"]="<<_volDepol[igate]<<'\n';
   
-  if(debug)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
     cout<<"backscatRatio^^^^^"<<'\n';
     
-  for(int igate=0;igate<nGates;igate++)
+  for(size_t igate=0;igate<_nGates;igate++)
     {
-      backscatRatio.push_back(_backscatRatio(combineRate.at(igate), 
-					     molDataRate.at(igate) ));
+      _backscatRatio.push_back(_computeBackscatRatio(_combineRate.at(igate), 
+                                                     _molDataRate.at(igate) ));
     }
 
-  if(debug)
-    for(int igate=0;igate<1;igate++)
-      cout<<"backscatRatio["<<igate<<"]="<<backscatRatio[igate]<<'\n';
-  if(debug)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
+    for(size_t igate=0;igate<1;igate++)
+      cout<<"backscatRatio["<<igate<<"]="<< _backscatRatio[igate]<<'\n';
+  if(_params.debug >= Params::DEBUG_VERBOSE)
     cout<<"partDepol^^^^^"<<'\n';
   
-  for(int igate=0;igate<nGates;igate++)
+  for(size_t igate=0;igate<_nGates;igate++)
     {
-      partDepol.push_back(_partDepol(volDepol[igate], backscatRatio[igate] ));
+      _partDepol.push_back(_computePartDepol(_volDepol[igate], _backscatRatio[igate] ));
     }
   
-  if(debug)
-    for(int igate=0;igate<1;igate++)
-      cout<<"partDepol["<<igate<<"]="<<partDepol[igate]<<'\n';
-  if(debug)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
+    for(size_t igate=0;igate<1;igate++)
+      cout<<"partDepol["<<igate<<"]="<<_partDepol[igate]<<'\n';
+  if(_params.debug >= Params::DEBUG_VERBOSE)
     cout<<"backscatCo^^^^^"<<'\n';
   
-  for(int igate=0;igate<nGates;igate++)
+  for(size_t igate=0;igate<_nGates;igate++)
     {
-      backscatCoeff.push_back(_backscatCo(presHpa[igate], tempK[igate], 
-					  backscatRatio[igate]));
+      _backscatCoeff.push_back(_computeBackscatCo(_presHpa[igate],
+                                                  _tempK[igate], 
+                                                  _backscatRatio[igate]));
     }
   
-  if(debug)
-    for(int igate=0;igate<1;igate++)
-      cout<<"backscatCoeff["<<igate<<"]="<<backscatCoeff[igate]<<'\n';
-  if(debug)
+  if(_params.debug >= Params::DEBUG_VERBOSE)
+    for(size_t igate=0;igate<1;igate++)
+      cout<<"backscatCoeff["<<igate<<"]="<<_backscatCoeff[igate]<<'\n';
+  if(_params.debug >= Params::DEBUG_VERBOSE)
     cout<<"extinction^^^^^"<<'\n';
 
   double opDepth1, opDepth2, alt1, alt2;
-  opDepth2=_op_depth(presHpa[0],tempK[0],molDataRate.at(0),scan);
-  alt2=htKm[0];
+  opDepth2=_computeOptDepth(_presHpa[0],_tempK[0],_molDataRate.at(0),scan);
+  alt2=_htM[0];
  
-  for(int igate=0;igate<nGates-1;igate++)
+  for(size_t igate=0;igate<_nGates-1;igate++)
     {
       opDepth1=opDepth2;
-      opDepth2=_op_depth(presHpa[igate+1],tempK[igate+1],
-			 molDataRate.at(igate+1),scan);
+      opDepth2=_computeOptDepth(_presHpa[igate+1],_tempK[igate+1],
+                                _molDataRate.at(igate+1),scan);
       alt1=alt2;
-      alt2=htKm[igate+1];
-      extinction.push_back(_extinction(opDepth1, opDepth2, alt1, alt2));
+      alt2=_htM[igate+1];
+      _extinction.push_back(_computeExtinction(opDepth1, opDepth2, alt1, alt2));
     }
-  if(debug)
-    for(int igate=0;igate<1;igate++)
-      cout<<"extinction["<<igate<<"]="<<extinction[igate]<<'\n';
+  if(_params.debug >= Params::DEBUG_VERBOSE)
+    for(size_t igate=0;igate<1;igate++)
+      cout<<"extinction["<<igate<<"]="<<_extinction[igate]<<'\n';
     
 }
 
@@ -616,15 +454,17 @@ void DerFieldCalcs::derive_quantities()
 // nonlinear count corrections
 
 double DerFieldCalcs::_nonLinCountCor(Radx::fl32 count, double deadtime, 
-				      double binWid, double shotCount_in)
+                                             double binWid, double shotCount)
 {
-  if(shotCount_in==0)
+  if(shotCount == 0) {
     return count;
-  double photonRate=count/shotCount_in/binWid;
-  double corrFactor=photonRate*deadtime;
-  if(corrFactor > 0.99)
+  }
+  double photonRate = count/shotCount / binWid;
+  double corrFactor = photonRate * deadtime;
+  if(corrFactor > 0.99) {
     corrFactor=0.95;
-  return count/(1-corrFactor);
+  }
+  return count / (1 - corrFactor);
 }
 
 
@@ -709,7 +549,7 @@ double DerFieldCalcs::_geoOverlapCor(double arrivalRate, double geoOverlap)
 /////////////////////////////////////////////////////////////////
 // volume depolarization
 
-double DerFieldCalcs::_volDepol(double crossRate, double combineRate)
+double DerFieldCalcs::_computeVolDepol(double crossRate, double combineRate)
 {
   if(crossRate+combineRate == 0)
     return 0;
@@ -720,7 +560,7 @@ double DerFieldCalcs::_volDepol(double crossRate, double combineRate)
 /////////////////////////////////////////////////////////////////
 // backscatter ratio
 
-double DerFieldCalcs::_backscatRatio(double combineRate, double molRate)
+double DerFieldCalcs::_computeBackscatRatio(double combineRate, double molRate)
 {
   if(molRate==0)
     return 0;
@@ -731,7 +571,7 @@ double DerFieldCalcs::_backscatRatio(double combineRate, double molRate)
 /////////////////////////////////////////////////////////////////
 // particle depolarization
 
-double DerFieldCalcs::_partDepol(double volDepol, double backscatRatio)
+double DerFieldCalcs::_computePartDepol(double volDepol, double backscatRatio)
 {
   double d_mol=2*0.000365/(1+0.000365);
   double pDepol1=volDepol/(1-1/backscatRatio)-d_mol/(backscatRatio-1);
@@ -747,7 +587,7 @@ double DerFieldCalcs::_partDepol(double volDepol, double backscatRatio)
 /////////////////////////////////////////////////////////////////
 // beta M sonde
 
-double DerFieldCalcs::_BetaMSonde(double pressure, double temperature)
+double DerFieldCalcs::_computeBetaMSonde(double pressure, double temperature)
 {
   //If temp is 0 this causes errors but also there is a case where temp 
   //is -1.99384e+34
@@ -761,15 +601,15 @@ double DerFieldCalcs::_BetaMSonde(double pressure, double temperature)
 /////////////////////////////////////////////////////////////////
 // backscatter coefficient
 
-double DerFieldCalcs::_backscatCo(double pressure, double temperature, 
-				  double backscatRatio)
+double DerFieldCalcs::_computeBackscatCo(double pressure, double temperature, 
+                                         double backscatRatio)
 {
   //If temp is 0 this causes errors but also there is a case where temp 
   //is -1.99384e+34
   if(temperature<=0)
     return 0;
   
-  double beta_m_sonde =_BetaMSonde(pressure,temperature);
+  double beta_m_sonde =_computeBetaMSonde(pressure,temperature);
   double aer_beta_bs = (backscatRatio-1)*beta_m_sonde;
   
   return aer_beta_bs;
@@ -778,10 +618,10 @@ double DerFieldCalcs::_backscatCo(double pressure, double temperature,
 /////////////////////////////////////////////////////////////////
 // optical depth
 
-double DerFieldCalcs::_op_depth(double pressure, double temperature, 
-				double molRate, double scan)
+double DerFieldCalcs::_computeOptDepth(double pressure, double temperature, 
+                                       double molRate, double scan)
 {
-  double beta_m_sonde =_BetaMSonde(pressure,temperature);
+  double beta_m_sonde =_computeBetaMSonde(pressure,temperature);
   //cout << "scan=" << scan << '\n';
   //cout << "molRate=" << molRate << '\n';
   //cout << "beta_m_sonde=" << beta_m_sonde << '\n';
@@ -793,8 +633,8 @@ double DerFieldCalcs::_op_depth(double pressure, double temperature,
 /////////////////////////////////////////////////////////////////
 // extinction coefficient
 
-double DerFieldCalcs::_extinction(double opDepth1, double opDepth2,
-				  double alt1, double alt2)
+double DerFieldCalcs::_computeExtinction(double opDepth1, double opDepth2,
+                                         double alt1, double alt2)
 {
   //cout << "opDepth1=" << opDepth1 << '\n';
   //cout << "opDepth2=" << opDepth2 << '\n';

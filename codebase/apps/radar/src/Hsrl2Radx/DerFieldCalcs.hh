@@ -35,7 +35,7 @@
 #ifndef DerFieldCalcs_HH
 #define DerFieldCalcs_HH
 
-#include "CalReader.hh"
+#include "Params.hh"
 #include "FullCals.hh"
 #include <string>
 #include <Radx/RadxTime.hh>
@@ -48,88 +48,78 @@ class DerFieldCalcs{
   
 public:   
 
-  // constructors
+  // constructor
 
-  DerFieldCalcs();
-  
-  DerFieldCalcs( FullCals fullCals_in,
-		 vector<Radx::fl32> hiData_in, vector<Radx::fl32> loData_in, 
-		 vector<Radx::fl32> crossData_in, vector<Radx::fl32> molData_in,
-		 vector<Radx::fl32> htKm_in,vector<Radx::fl32> tempK_in, 
-		 vector<Radx::fl32> presHpa_in, double shotCount_in, 
-		 double power_in);
+  DerFieldCalcs(const Params &params,
+                const FullCals &fullCals,
+                size_t nGates,
+                const vector<Radx::fl32> &hiData,
+                const vector<Radx::fl32> &loData, 
+                const vector<Radx::fl32> &crossData,
+                const vector<Radx::fl32> &molData,
+                const vector<Radx::fl32> &htM,
+                const vector<Radx::fl32> &tempK, 
+                const vector<Radx::fl32> &presHpa,
+                double shotCount, 
+                double power);
     
-  // set methods
-  
-  void set_fullCals(FullCals fullCals_in);
-  void set_hiData (vector<Radx::fl32> in);
-  void set_loData (vector<Radx::fl32> in);
-  void set_crossData (vector<Radx::fl32> in);
-  void set_molData (vector<Radx::fl32> in);
-  
-  void set_htKm (vector<Radx::fl32> in);
-  void set_tempK (vector<Radx::fl32> in);
-  void set_presHpa (vector<Radx::fl32> in);
+  // compute derived quantities
 
-  void set_shotCount(double in);
-  void set_power(double in);
-
+  void computeDerived();
+  
   // get methods
   
-  FullCals get_fullCals() { return fullCals; }
+  const vector<Radx::fl32> &getVolDepol() const { return _volDepol; }
+  const vector<Radx::fl32> &getBackscatRatio() const { return _backscatRatio; }
+  const vector<Radx::fl32> &getPartDepol() const { return _partDepol; }
+  const vector<Radx::fl32> &getBackscatCoeff() const { return _backscatCoeff; }
+  const vector<Radx::fl32> &getExtinction() const { return _extinction; }
+  const vector<Radx::fl32> &getOpticalDepth() const { return _opticalDepth; }
 
-  vector<Radx::fl32> get_hiData() { return hiData; }
-
-  vector<Radx::fl32> get_loData() { return loData; }
-
-  vector<Radx::fl32> get_crossData() { return crossData; }
-
-  vector<Radx::fl32> get_molData() { return molData; }
-
-  vector<Radx::fl32> get_htKm() { return htKm; }
-
-  vector<Radx::fl32> get_tempK() { return tempK; }
-
-  vector<Radx::fl32> get_presHpa() { return presHpa; }
-
-  double get_shotCount() { return shotCount; }
-
-  double get_power() { return power; }
-
-  vector<Radx::fl32> get_volDepol() { return volDepol; }
-
-  vector<Radx::fl32> get_backscatRatio() { return backscatRatio; }
-
-  vector<Radx::fl32> get_partDepol() { return partDepol; }
-
-  vector<Radx::fl32> get_backscatCoeff() { return backscatCoeff; }
-
-  vector<Radx::fl32> get_extinction() { return extinction; }
-
-  // apply corrections
-  void applyCorr(); 
-
-  // compute derived quantities
-  void derive_quantities();
-  
 private:   
 
-  vector<Radx::fl32> hiData, loData, crossData, molData;
-  vector<Radx::fl32> htKm, tempK, presHpa;   
-  double shotCount, power;
-  FullCals fullCals;
+  const Params &_params;
+
+  // input data
+
+  const FullCals &_fullCals;
+  size_t _nGates;
+  const vector<Radx::fl32> &_hiData;
+  const vector<Radx::fl32> &_loData;
+  const vector<Radx::fl32> &_crossData;
+  const vector<Radx::fl32> &_molData;
+  const vector<Radx::fl32> &_htM;   
+  const vector<Radx::fl32> &_tempK;   
+  const vector<Radx::fl32> &_presHpa;   
+  double _shotCount, _power;
   
-  //derived quantities are not set, they are calculated. 
-  vector<Radx::fl32> volDepol, backscatRatio, partDepol, backscatCoeff, extinction;
-  vector<Radx::fl32> combData;
+  // derived quantities 
+
+  vector<Radx::fl32> _volDepol;
+  vector<Radx::fl32> _backscatRatio;
+  vector<Radx::fl32> _partDepol;
+  vector<Radx::fl32> _backscatCoeff;
+  vector<Radx::fl32> _extinction;
+  vector<Radx::fl32> _opticalDepth;
+  vector<Radx::fl32> _combData;
+
+  vector<Radx::fl32> _hiDataRate;
+  vector<Radx::fl32> _loDataRate;
+  vector<Radx::fl32> _crossDataRate;
+  vector<Radx::fl32> _molDataRate;
+  vector<Radx::fl32> _combineRate;
+  
+  // apply corrections
+
+  void _applyCorr(); 
 
   // nonlinear count corrections
   double _nonLinCountCor(Radx::fl32 count, double deadtime, 
-			 double binWid, double shotCount_in);
+                         double binWid, double shotCount);
   
   // baseline subtraction
   double _baselineSubtract(double arrivalRate, double profile, 
-			   double polarization);
+                                  double polarization);
   
   // background subtraction
   double _backgroundSub(double arrivalRate, double backgroundBins);
@@ -150,27 +140,27 @@ private:
   double _geoOverlapCor(double arrivalRate, double geoOverlap);
   
   // volume depolarization
-  double _volDepol(double crossRate, double combineRate);
+  double _computeVolDepol(double crossRate, double combineRate);
   
   // backscatter ratio
-  double _backscatRatio(double combineRate, double molRate);
+  double _computeBackscatRatio(double combineRate, double molRate);
   
   // particle depolarization
-  double _partDepol(double volDepol, double backscatRatio);
+  double _computePartDepol(double volDepol, double backscatRatio);
   
   // intermediate field for backscatter ratio and extinction
-  double _BetaMSonde(double pressure, double temperature);
+  double _computeBetaMSonde(double pressure, double temperature);
 
   // backscatter coefficient
-  double _backscatCo(double pressure, double temperature, 
-		     double backscatRatio);
+  double _computeBackscatCo(double pressure, double temperature, 
+                            double backscatRatio);
   
   // optical depth calculation for extinction;
-  double _op_depth(double pressure, double temperature, double molRate,double scan);
+  double _computeOptDepth(double pressure, double temperature, double molRate,double scan);
 
   // extinction
-  double _extinction(double opDepth1, double opDepth2,
-		     double alt1, double alt2);
+  double _computeExtinction(double opDepth1, double opDepth2,
+                            double alt1, double alt2);
   
 };
 #endif

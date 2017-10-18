@@ -111,32 +111,32 @@ void FullCals::setScanAdj(CalReader scanAdjust)
   scan_pos=scanAdjust.dateMatch(scanAdjust,ti);
 }
 
-void FullCals::setDeadTimeHi(const char* file, const char* variable)
+void FullCals::readDeadTimeHi(const char* file, const char* variable)
 {
   deadTimeHi=deadTimeHi.readCalVals(file,variable);  
   hi_pos=deadTimeHi.dateMatch(deadTimeHi, ti);
 }
-void FullCals::setDeadTimeLo(const char* file, const char* variable)
+void FullCals::readDeadTimeLo(const char* file, const char* variable)
 {
   deadTimeLo=deadTimeLo.readCalVals(file,variable);
   lo_pos=deadTimeLo.dateMatch(deadTimeLo, ti);
 }
-void FullCals::setDeadTimeCross(const char* file, const char* variable)
+void FullCals::readDeadTimeCross(const char* file, const char* variable)
 {
   deadTimeCross=deadTimeCross.readCalVals(file,variable);
   cross_pos=deadTimeCross.dateMatch(deadTimeCross, ti);
 }
-void FullCals::setDeadTimeMol(const char* file, const char* variable)
+void FullCals::readDeadTimeMol(const char* file, const char* variable)
 {
   deadTimeMol=deadTimeMol.readCalVals(file,variable);
   mol_pos=deadTimeMol.dateMatch(deadTimeMol, ti);
 }
-void FullCals::setBinWidth(const char* file, const char* variable) 
+void FullCals::readBinWidth(const char* file, const char* variable) 
 {
   binWidth=binWidth.readCalVals(file,variable);
   bin_pos=binWidth.dateMatch(binWidth, ti);
 }
-void FullCals::setScanAdj(const char* file, const char* variable) 
+void FullCals::readScanAdj(const char* file, const char* variable) 
 {
   scanAdj=scanAdj.readCalVals(file,variable);
   scan_pos=scanAdj.dateMatch(scanAdj, ti);
@@ -151,47 +151,14 @@ void FullCals::setGeoDefCor(vector< vector<double> > geoDefCorIn)
 void FullCals::setAfPulCor(vector< vector<double> > afPulCorIn)
 {afPulCor=afPulCorIn;}
 
-void FullCals::setBLCor(const char* file)
+void FullCals::readBLCor(const char* file)
 {blCor=readBaselineCorrection(file);}
-void FullCals::setDiffDGeoCor(const char* file)
+void FullCals::readDiffDGeoCor(const char* file)
 {diffDGeoCor=readDiffDefaultGeo(file);}
-void FullCals::setGeoDefCor(const char* file)
+void FullCals::readGeoDefCor(const char* file)
 {geoDefCor=readGeofileDefault(file);}
-void FullCals::setAfPulCor(const char* file)
+void FullCals::readAfPulCor(const char* file)
 {afPulCor=readAfterPulse(file);}
-
-CalReader FullCals::getDeadTimeHi()
-{return deadTimeHi;}
-CalReader FullCals::getDeadTimeLo()
-{return deadTimeLo;}
-CalReader FullCals::getDeadTimeCross()
-{return deadTimeCross;}
-CalReader FullCals::getDeadTimeMol()
-{return deadTimeMol;}
-CalReader FullCals::getBinWidth() 
-{return binWidth;}
-CalReader FullCals::getScanAdj() 
-{return scanAdj;}
-
-int FullCals::getHiPos() 
-{return hi_pos;}
-int FullCals::getLoPos() 
-{return lo_pos;}
-int FullCals::getCrossPos() 
-{return cross_pos;}
-int FullCals::getMolPos()
-{return mol_pos;}
-int FullCals::getBinPos()
-{return bin_pos;}
-
-vector< vector<double> > FullCals::getBLCor()
-{return blCor;}
-vector< vector<double> > FullCals::getDiffDGeoCor()
-{return diffDGeoCor;}
-vector< vector<double> > FullCals::getGeoDefCor()
-{return geoDefCor;}
-vector< vector<double> > FullCals::getAfPulCor()
-{return afPulCor;}
 
 //void FullCals::ReadCalvals(string pathToCalValsFile, timet time)
 vector <vector<double> > FullCals::readBaselineCorrection(const char* file)

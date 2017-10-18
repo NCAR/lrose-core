@@ -74,40 +74,40 @@ public:
   void setBinWidth(CalReader binWidth); 
   void setScanAdj(CalReader scanAdjust); 
 
-  void setDeadTimeHi(const char* file, const char* variable);
-  void setDeadTimeLo(const char* file, const char* variable);
-  void setDeadTimeCross(const char* file, const char* variable);
-  void setDeadTimeMol(const char* file, const char* variable);
-  void setBinWidth(const char* file, const char* variable); 
-  void setScanAdj(const char* file, const char* variable); 
+  void readDeadTimeHi(const char* file, const char* variable);
+  void readDeadTimeLo(const char* file, const char* variable);
+  void readDeadTimeCross(const char* file, const char* variable);
+  void readDeadTimeMol(const char* file, const char* variable);
+  void readBinWidth(const char* file, const char* variable); 
+  void readScanAdj(const char* file, const char* variable); 
 
   void setBLCor(vector< vector<double> > blCor);
   void setDiffDGeoCor(vector< vector<double> > diffDGeoCor);
   void setGeoDefCor(vector< vector<double> > geoDefCor);
   void setAfPulCor(vector< vector<double> > afPulCor);
 
-  void setBLCor(const char* file);
-  void setDiffDGeoCor(const char* file);
-  void setGeoDefCor(const char* file);
-  void setAfPulCor(const char* file);
+  void readBLCor(const char* file);
+  void readDiffDGeoCor(const char* file);
+  void readGeoDefCor(const char* file);
+  void readAfPulCor(const char* file);
   
-  CalReader getDeadTimeHi();
-  CalReader getDeadTimeLo();
-  CalReader getDeadTimeCross();
-  CalReader getDeadTimeMol();
-  CalReader getBinWidth(); 
-  CalReader getScanAdj(); 
+  const CalReader &getDeadTimeHi() const { return deadTimeHi; }
+  const CalReader &getDeadTimeLo() const { return deadTimeLo; }
+  const CalReader &getDeadTimeCross() const { return deadTimeCross; }
+  const CalReader &getDeadTimeMol() const { return deadTimeMol; }
+  const CalReader &getBinWidth() const { return binWidth; }
+  const CalReader &getScanAdj() const { return scanAdj; } 
 
-  int getHiPos(); 
-  int getLoPos(); 
-  int getCrossPos(); 
-  int getMolPos();
-  int getBinPos();
+  int getHiPos() const { return hi_pos; }
+  int getLoPos() const { return lo_pos; }
+  int getCrossPos() const { return cross_pos; }
+  int getMolPos() const { return mol_pos; }
+  int getBinPos() const { return bin_pos; }
   
-  vector< vector<double> > getBLCor();
-  vector< vector<double> > getDiffDGeoCor();
-  vector< vector<double> > getGeoDefCor();
-  vector< vector<double> > getAfPulCor();
+  const vector<vector<double>> &getBLCor() const { return blCor; }
+  const vector<vector<double>> &getDiffDGeoCor() const { return diffDGeoCor; }
+  const vector<vector<double>> &getGeoDefCor() const { return geoDefCor; }
+  const vector<vector<double>> &getAfPulCor() const { return afPulCor; }
   
   vector <vector<double> > readBaselineCorrection(const char* file);
   vector <vector<double> > readDiffDefaultGeo(const char* file);
