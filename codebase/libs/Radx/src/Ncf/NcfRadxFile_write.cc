@@ -3479,7 +3479,7 @@ int NcfRadxFile::_writeFieldVar(Nc3Var *var, RadxField *field)
 
   if (iret) {
     _addErrStr("ERROR - NcfRadxFile::_writeFieldVar");
-    _addErrStr("  Canont write var, name: ", var->name());
+    _addErrStr("  Cannot write var, name: ", var->name());
     _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   } else {
