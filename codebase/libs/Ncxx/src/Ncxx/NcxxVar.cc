@@ -3529,7 +3529,7 @@ void NcxxVar::writeStrings(const void *str)
     NcxxDim &dim0 = dims[0];
     if (dim0.isNull()) {
       addErrStr("ERROR - NcxxVar::writeStrings");
-      addErrStr("  Canont write var, name: ", getName());
+      addErrStr("  Cannot write var, name: ", getName());
       addErrStr("  dim 0 is NULL");
       throw NcxxException(getErrStr(), __FILE__, __LINE__);
     }
@@ -3542,7 +3542,7 @@ void NcxxVar::writeStrings(const void *str)
       return;
     } catch (NcxxException& e) {
       addErrStr("ERROR - NcxxVar::writeStrings");
-      addErrStr("  Canont write var, name: ", getName());
+      addErrStr("  Cannot write var, name: ", getName());
       addErrStr("  exception: ", e.what());
       throw NcxxException(getErrStr(), __FILE__, __LINE__);
     }
@@ -3556,7 +3556,7 @@ void NcxxVar::writeStrings(const void *str)
     NcxxDim &dim0 = dims[0];
     if (dim0.isNull()) {
       addErrStr("ERROR - NcxxVar::writeStrings");
-      addErrStr("  Canont write var, name: ", getName());
+      addErrStr("  Cannot write var, name: ", getName());
       addErrStr("  dim 0 is NULL");
       throw NcxxException(getErrStr(), __FILE__, __LINE__);
     }
@@ -3564,7 +3564,7 @@ void NcxxVar::writeStrings(const void *str)
     NcxxDim &dim1 = dims[1];
     if (dim1.isNull()) {
       addErrStr("ERROR - NcxxVar::writeStrings");
-      addErrStr("  Canont write var, name: ", getName());
+      addErrStr("  Cannot write var, name: ", getName());
       addErrStr("  dim 1 is NULL");
       throw NcxxException(getErrStr(), __FILE__, __LINE__);
     }
@@ -3577,7 +3577,7 @@ void NcxxVar::writeStrings(const void *str)
       return;
     } catch (NcxxException& e) {
       addErrStr("ERROR - NcxxVar::writeStrings");
-      addErrStr("  Canont write var, name: ", getName());
+      addErrStr("  Cannot write var, name: ", getName());
       addErrStr("  exception: ", e.what());
       throw NcxxException(getErrStr(), __FILE__, __LINE__);
     }
@@ -3587,7 +3587,7 @@ void NcxxVar::writeStrings(const void *str)
   // more than 2 is an error
   
   addErrStr("ERROR - NcxxVar::writeStrings");
-  addErrStr("  Canont write var, name: ", getName());
+  addErrStr("  Cannot write var, name: ", getName());
   addErrInt("  more than 2 dimensions: ", nDims);
   throw NcxxException(getErrStr(), __FILE__, __LINE__);
 
