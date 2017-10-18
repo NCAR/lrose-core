@@ -55,6 +55,7 @@ HDRS = \
 	CalReader.hh \
 	FullCals.hh \
 	DerFieldCalcs.hh \
+	Names.hh \
 	OutputFmq.hh
 
 CPPC_SRCS = \
@@ -67,6 +68,7 @@ CPPC_SRCS = \
 	CalReader.cc \
 	FullCals.cc \
 	DerFieldCalcs.cc \
+	Names.cc \
 	OutputFmq.cc
 
 #

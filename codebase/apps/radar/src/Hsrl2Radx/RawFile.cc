@@ -34,6 +34,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "RawFile.hh"
+#include "Names.hh"
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxField.hh>
@@ -1131,7 +1132,7 @@ int RawFile::_readFieldVariables()
 
     // load in the data
 
-    if (_addCountFieldToRays(var, name, units, longName)) {
+    if (_addCountFieldToRays(var, name, units)) {
       _addErrStr("ERROR - RawFile::_readFieldVariables");
       _addErrStr("  cannot read field name: ", name);
       _addErrStr(_file.getNc3Error()->get_errmsg());
@@ -1151,8 +1152,7 @@ int RawFile::_readFieldVariables()
 
 int RawFile::_addCountFieldToRays(Nc3Var* var,
                                   const string &name,
-                                  const string &units,
-                                  const string &longName)
+                                  const string &units)
   
 {
 
@@ -1164,14 +1164,34 @@ int RawFile::_addCountFieldToRays(Nc3Var* var,
   if (iret) {
     return -1;
   }
-  // for (size_t ii = 0; ii < _nPoints; ii++) {
-  //   idata[ii] = ii % 50;
-  // }
 
   // set up float array
 
   RadxArray<Radx::fl32> fcounts_;
   Radx::fl32 *fcounts = fcounts_.alloc(_nGates);
+
+  // set name
+
+  string outName(name);
+  string standardName;
+  string longName;
+  if (outName.find(_params.combined_hi_field_name) != string::npos) {
+    outName = Names::CombinedHighCounts;
+    standardName = Names::lidar_copolar_combined_backscatter_photon_count;
+    longName = "high_channel_combined_backscatter_photon_count";
+  } else if (outName.find(_params.combined_lo_field_name) != string::npos) {
+    outName = Names::CombinedLowCounts;
+    standardName = Names::lidar_copolar_combined_backscatter_photon_count;
+    longName = "low_channel_combined_backscatter_photon_count";
+  } else if (outName.find(_params.molecular_field_name) != string::npos) {
+    outName = Names::MolecularCounts;
+    standardName = Names::lidar_copolar_molecular_backscatter_photon_count;
+    longName = Names::lidar_copolar_molecular_backscatter_photon_count;
+  } else if (outName.find(_params.cross_field_name) != string::npos) {
+    outName = Names::CrossPolarCounts;
+    standardName = Names::lidar_crosspolar_combined_backscatter_photon_count;
+    longName = Names::lidar_crosspolar_combined_backscatter_photon_count;
+  }
   
   // loop through the rays
   
@@ -1182,7 +1202,7 @@ int RawFile::_addCountFieldToRays(Nc3Var* var,
     int startIndex = iray * _nBinsInFile;
     Radx::si32 *icounts = idata + startIndex;
 
-    // compute mean counts per gate
+    // sum counts per gate
 
     size_t ibin = 0;
     for (size_t igate = 0; igate < _nGates; igate++) {
@@ -1190,43 +1210,42 @@ int RawFile::_addCountFieldToRays(Nc3Var* var,
       for (size_t ii = 0; ii < _nBinsPerGate; ii++, ibin++) {
         fcounts[igate] += icounts[ibin];
       }
-      //fcounts[igate] /= (double) _nBinsPerGate;
-
     }
     
     RadxField *field =
-      _rays[iray]->addField(name, units, _nGates,
+      _rays[iray]->addField(outName, units, _nGates,
                             Radx::missingFl32,
                             fcounts,
                             true);
     
     field->setLongName(longName);
+    field->setStandardName(standardName);
     field->setRangeGeom(_startRangeKm, _gateSpacingKm);
     
-    // add db of same field
+    // // add db of same field
     
-    for (size_t igate = 0; igate < _nGates; igate++) {
-      if (fcounts[igate] > 0) {
-        fcounts[igate] = 10.0 * log10(fcounts[igate]);
-      } else {
-        fcounts[igate] = Radx::missingFl32;
-      }
-    }
+    // for (size_t igate = 0; igate < _nGates; igate++) {
+    //   if (fcounts[igate] > 0) {
+    //     fcounts[igate] = 10.0 * log10(fcounts[igate]);
+    //   } else {
+    //     fcounts[igate] = Radx::missingFl32;
+    //   }
+    // }
 
-    string dbName = "db_";
-    dbName += name;
-    string dbUnits = "db_counts";
-    string dbLongName = "db_";
-    dbLongName += longName;
+    // string dbName = "db_";
+    // dbName += name;
+    // string dbUnits = "db_counts";
+    // string dbLongName = "db_";
+    // dbLongName += longName;
     
-    RadxField *dbField =
-      _rays[iray]->addField(dbName, dbUnits, _nGates,
-                            Radx::missingFl32,
-                            fcounts,
-                            true);
+    // RadxField *dbField =
+    //   _rays[iray]->addField(dbName, dbUnits, _nGates,
+    //                         Radx::missingFl32,
+    //                         fcounts,
+    //                         true);
     
-    dbField->setLongName(dbLongName);
-    dbField->setRangeGeom(_startRangeKm, _gateSpacingKm);
+    // dbField->setLongName(dbLongName);
+    // dbField->setRangeGeom(_startRangeKm, _gateSpacingKm);
 
   }
   

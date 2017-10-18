@@ -250,8 +250,7 @@ private:
 
   int _addCountFieldToRays(Nc3Var* var,
                            const string &name,
-                           const string &units,
-                           const string &longName);
+                           const string &units);
   
   /// add integer value to error string, with label
 

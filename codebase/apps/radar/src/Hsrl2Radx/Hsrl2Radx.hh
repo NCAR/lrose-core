@@ -104,7 +104,6 @@ private:
                          double gateSpacingKm,
                          const string &name,
                          const string &units,
-                         const string &longName,
                          const string &standardName,
                          int nGates,
                          const Radx::fl32 *fcounts);
