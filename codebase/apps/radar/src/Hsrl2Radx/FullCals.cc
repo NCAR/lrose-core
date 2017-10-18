@@ -39,9 +39,15 @@
 
 using namespace std;
 
+// constructors
 
 FullCals::FullCals()
-{}
+{
+
+  RadxTime time(2015, 07, 14, 18 , 0 , 0 , 0.0);
+  _time = time;
+
+}
 
 FullCals::FullCals(CalReader dtHi, CalReader dtLo, 
 		   CalReader dtCross, CalReader dtMol, 
@@ -51,114 +57,97 @@ FullCals::FullCals(CalReader dtHi, CalReader dtLo,
 		   vector< vector<double> > geoDefCorIn, 
 		   vector< vector<double> > afPulCorIn)
 {
-  RadxTime time(2015, 07, 14, 18 , 0 , 0 , 0.0);
-  ti=time;
+
   
-  deadTimeHi=dtHi;
-  deadTimeLo=dtLo;
-  deadTimeCross=dtCross;
-  deadTimeMol=dtMol;
-  binWidth=binW;
-  scanAdj=scanAdjust;
+  _deadTimeHi=dtHi;
+  _deadTimeLo=dtLo;
+  _deadTimeCross=dtCross;
+  _deadTimeMol=dtMol;
+  _binWidth=binW;
+  _scanAdj=scanAdjust;
   
-  blCor=blCorIn;
-  diffDGeoCor=diffDGeoCorIn;
-  geoDefCor=geoDefCorIn;
-  afPulCor=afPulCorIn;
+  _blCor=blCorIn;
+  _diffDGeoCor=diffDGeoCorIn;
+  _geoDefCor=geoDefCorIn;
+  _afPulCor=afPulCorIn;
     
-  hi_pos=dtHi.dateMatch(dtHi, ti);
-  lo_pos=dtLo.dateMatch(dtLo, ti); 
-  cross_pos=dtCross.dateMatch(dtCross, ti);
-  mol_pos=dtMol.dateMatch(dtMol, ti);
-  bin_pos=binW.dateMatch(binW, ti);
+  _hiPos=dtHi.dateMatch(dtHi, _time);
+  _loPos=dtLo.dateMatch(dtLo, _time); 
+  _crossPos=dtCross.dateMatch(dtCross, _time);
+  _molPos=dtMol.dateMatch(dtMol, _time);
+  _binPos=binW.dateMatch(binW, _time);
   
-  deadTimeHi.setIsNum();
-  deadTimeLo.setIsNum();
-  deadTimeCross.setIsNum();
-  deadTimeMol.setIsNum();
-  binWidth.setIsNum();
+  _deadTimeHi.setIsNum();
+  _deadTimeLo.setIsNum();
+  _deadTimeCross.setIsNum();
+  _deadTimeMol.setIsNum();
+  _binWidth.setIsNum();
 
 }
 
-void FullCals::setDeadTimeHi(CalReader dtHi)
+// destructor
+
+FullCals::~FullCals() 
 {
-  deadTimeHi=dtHi;
-  hi_pos=dtHi.dateMatch(dtHi, ti);
 }
-void FullCals::setDeadTimeLo(CalReader dtLo)
-{
-  deadTimeLo=dtLo;  
-  lo_pos=dtLo.dateMatch(dtLo, ti); 
-}
-void FullCals::setDeadTimeCross(CalReader dtCross)
-{
-  deadTimeCross=dtCross;  
-  cross_pos=dtCross.dateMatch(dtCross, ti);
-}
-void FullCals::setDeadTimeMol(CalReader dtMol)
-{
-  deadTimeMol=dtMol;  
-  mol_pos=dtMol.dateMatch(dtMol, ti);
-}
-void FullCals::setBinWidth(CalReader binW) 
-{ 
-  binWidth=binW;  
-  bin_pos=binW.dateMatch(binW, ti);
-}
-void FullCals::setScanAdj(CalReader scanAdjust)
-{
-  scanAdj=scanAdjust;
-  scan_pos=scanAdjust.dateMatch(scanAdjust,ti);
-}
+
+// read methods
 
 void FullCals::readDeadTimeHi(const char* file, const char* variable)
 {
-  deadTimeHi=deadTimeHi.readCalVals(file,variable);  
-  hi_pos=deadTimeHi.dateMatch(deadTimeHi, ti);
+  _deadTimeHi=_deadTimeHi.readCalVals(file,variable);  
+  _hiPos=_deadTimeHi.dateMatch(_deadTimeHi, _time);
 }
+
 void FullCals::readDeadTimeLo(const char* file, const char* variable)
 {
-  deadTimeLo=deadTimeLo.readCalVals(file,variable);
-  lo_pos=deadTimeLo.dateMatch(deadTimeLo, ti);
+  _deadTimeLo=_deadTimeLo.readCalVals(file,variable);
+  _loPos=_deadTimeLo.dateMatch(_deadTimeLo, _time);
 }
+
 void FullCals::readDeadTimeCross(const char* file, const char* variable)
 {
-  deadTimeCross=deadTimeCross.readCalVals(file,variable);
-  cross_pos=deadTimeCross.dateMatch(deadTimeCross, ti);
+  _deadTimeCross=_deadTimeCross.readCalVals(file,variable);
+  _crossPos=_deadTimeCross.dateMatch(_deadTimeCross, _time);
 }
+
 void FullCals::readDeadTimeMol(const char* file, const char* variable)
 {
-  deadTimeMol=deadTimeMol.readCalVals(file,variable);
-  mol_pos=deadTimeMol.dateMatch(deadTimeMol, ti);
+  _deadTimeMol=_deadTimeMol.readCalVals(file,variable);
+  _molPos=_deadTimeMol.dateMatch(_deadTimeMol, _time);
 }
+
 void FullCals::readBinWidth(const char* file, const char* variable) 
 {
-  binWidth=binWidth.readCalVals(file,variable);
-  bin_pos=binWidth.dateMatch(binWidth, ti);
+  _binWidth=_binWidth.readCalVals(file,variable);
+  _binPos=_binWidth.dateMatch(_binWidth, _time);
 }
+
 void FullCals::readScanAdj(const char* file, const char* variable) 
 {
-  scanAdj=scanAdj.readCalVals(file,variable);
-  scan_pos=scanAdj.dateMatch(scanAdj, ti);
+  _scanAdj=_scanAdj.readCalVals(file,variable);
+  _scanPos=_scanAdj.dateMatch(_scanAdj, _time);
 }
 
-void FullCals::setBLCor(vector< vector<double> > blCorIn)
-{blCor=blCorIn;}
-void FullCals::setDiffDGeoCor(vector< vector<double> > diffDGeoCorIn)
-{diffDGeoCor=diffDGeoCorIn;}
-void FullCals::setGeoDefCor(vector< vector<double> > geoDefCorIn)
-{geoDefCor=geoDefCorIn;}
-void FullCals::setAfPulCor(vector< vector<double> > afPulCorIn)
-{afPulCor=afPulCorIn;}
-
 void FullCals::readBLCor(const char* file)
-{blCor=readBaselineCorrection(file);}
+{
+  _blCor = readBaselineCorrection(file);
+}
+
 void FullCals::readDiffDGeoCor(const char* file)
-{diffDGeoCor=readDiffDefaultGeo(file);}
+{
+  _diffDGeoCor=readDiffDefaultGeo(file);
+}
+
 void FullCals::readGeoDefCor(const char* file)
-{geoDefCor=readGeofileDefault(file);}
+{
+  _geoDefCor=readGeofileDefault(file);
+}
+
 void FullCals::readAfPulCor(const char* file)
-{afPulCor=readAfterPulse(file);}
+{
+  _afPulCor=readAfterPulse(file);
+}
 
 //void FullCals::ReadCalvals(string pathToCalValsFile, timet time)
 vector <vector<double> > FullCals::readBaselineCorrection(const char* file)
@@ -420,9 +409,6 @@ vector <vector<double> > FullCals::readAfterPulse(const char* file)
   return ans;
 
 } 
-
-FullCals::~FullCals()
-{}
 
 
 
