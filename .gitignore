@@ -395,6 +395,7 @@ codebase/apps/radar/src/HawkEye/moc_PpiWidget.cpp
 codebase/apps/radar/src/HawkEye/moc_RhiWidget.cpp
 codebase/apps/radar/src/HawkEye/moc_RhiWindow.cpp
 codebase/apps/radar/src/HcrVelCorrect/HcrVelCorrect
+codebase/apps/radar/src/Hsrl2Radx/Hsrl2Radx
 codebase/apps/radar/src/HsrlSim/HsrlSim
 codebase/apps/radar/src/HsrlTcp2Fmq/HsrlTcp2Fmq
 codebase/apps/radar/src/IntfRemove/IntfRemove
@@ -550,7 +551,6 @@ codebase/apps/Radx/src/Ascii2Radx/Ascii2Radx
 codebase/apps/Radx/src/Dsr2Radx/Dsr2Radx
 codebase/apps/Radx/src/FixCfradialPaths/FixCfradialPaths
 codebase/apps/Radx/src/FixRadxPointing/FixRadxPointing
-codebase/apps/Radx/src/Hsrl2Radx/Hsrl2Radx
 codebase/apps/Radx/src/Radx2Dsr/Radx2Dsr
 codebase/apps/Radx/src/Radx2Grid/Radx2Grid
 codebase/apps/Radx/src/RadxCheck/RadxCheck

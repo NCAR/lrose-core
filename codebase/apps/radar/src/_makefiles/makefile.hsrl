@@ -10,6 +10,7 @@ SUB_DIRS = \
 	AcGeoref2Spdb \
 	AcGeorefCompare \
 	HawkEye \
+	Hsrl2Radx \
 	HsrlSim \
 	HsrlTcp2Fmq
 
