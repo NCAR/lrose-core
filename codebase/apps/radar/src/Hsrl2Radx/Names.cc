@@ -67,13 +67,13 @@ const string Names::lidar_extinction_coefficient = "lidar_extinction_coefficient
 const string Names::OpticalDepth = "OpticalDepth";
 const string Names::lidar_optical_depth = "lidar_optical_depth";
 
-const string Names::height = "height";
+const string Names::Height = "Height";
 const string Names::height_above_mean_sea_level = "height_above_mean_sea_level";
 
-const string Names::temperature = "temperature";
+const string Names::Temperature = "Temperature";
 const string Names::air_temperature = "air_temperature";
 
-const string Names::pressure = "pressure";
+const string Names::Pressure = "Pressure";
 const string Names::air_pressure = "air_pressure";
 const string Names::pressure_from_std_atmos = "pressure_from_std_atmos";
 

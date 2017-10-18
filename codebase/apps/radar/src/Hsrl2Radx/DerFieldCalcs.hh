@@ -101,13 +101,12 @@ private:
   vector<Radx::fl32> _backscatCoeff;
   vector<Radx::fl32> _extinction;
   vector<Radx::fl32> _opticalDepth;
-  vector<Radx::fl32> _combData;
 
   vector<Radx::fl32> _hiDataRate;
   vector<Radx::fl32> _loDataRate;
   vector<Radx::fl32> _crossDataRate;
   vector<Radx::fl32> _molDataRate;
-  vector<Radx::fl32> _combineRate;
+  vector<Radx::fl32> _combinedRate;
   
   // apply corrections
 

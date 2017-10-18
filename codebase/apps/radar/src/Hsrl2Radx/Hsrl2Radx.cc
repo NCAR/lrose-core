@@ -1149,19 +1149,19 @@ void Hsrl2Radx::_addEnvFields(RadxRay *ray)
   }
 
   RadxField *htField =
-    ray->addField(Names::height, "m", nGates, Radx::missingFl32, htMeters, true);
+    ray->addField(Names::Height, "m", nGates, Radx::missingFl32, htMeters, true);
   htField->setStandardName(Names::height_above_mean_sea_level);
   htField->setLongName(Names::height_above_mean_sea_level);
   htField->setRangeGeom(startRangeKm, gateSpacingKm);
 
   RadxField *tempField =
-    ray->addField(Names::temperature, "K", nGates, Radx::missingFl32, tempK, true);
+    ray->addField(Names::Temperature, "K", nGates, Radx::missingFl32, tempK, true);
   tempField->setStandardName(Names::air_temperature);
   tempField->setLongName(Names::air_temperature);
   tempField->setRangeGeom(startRangeKm, gateSpacingKm);
 
   RadxField *presField =
-    ray->addField(Names::pressure, "HPa", nGates, Radx::missingFl32, presHpa, true);
+    ray->addField(Names::Pressure, "HPa", nGates, Radx::missingFl32, presHpa, true);
   presField->setStandardName(Names::air_pressure);
   presField->setLongName(Names::air_pressure);
   presField->setRangeGeom(startRangeKm, gateSpacingKm);
@@ -1185,9 +1185,9 @@ void Hsrl2Radx::_addDerivedFields(RadxRay *ray)
 
   // environmental fields
 
-  RadxField *htField = ray->getField("height");
-  RadxField *tempField = ray->getField("temperature");
-  RadxField *presField = ray->getField("pressure");
+  RadxField *htField = ray->getField(Names::Height);
+  RadxField *tempField = ray->getField(Names::Temperature);
+  RadxField *presField = ray->getField(Names::Pressure);
   assert(htField != NULL);
   assert(tempField != NULL);
   assert(presField != NULL);
@@ -1285,12 +1285,12 @@ void Hsrl2Radx::_addDerivedFields(RadxRay *ray)
   extinctionField->setStandardName(Names::lidar_extinction_coefficient);
   extinctionField->setLongName(Names::lidar_extinction_coefficient);
   extinctionField->setRangeGeom(startRangeKm, gateSpacingKm);
-       
-  // RadxField *optDepthField =
-  //   ray->addField(Names::OpticalDepth, "", nGates, Radx::missingFl32, 
-  //                 calcs.getOpticalDepth().data(), true);
-  // optDepthField->setStandardName(Names::lidar_optical_depth);
-  // optDepthField->setLongName(Names::lidar_optical_depth);
-  // optDepthField->setRangeGeom(startRangeKm, gateSpacingKm);
+
+  RadxField *optDepthField =
+    ray->addField(Names::OpticalDepth, "", nGates, Radx::missingFl32, 
+                  calcs.getOpticalDepth().data(), true);
+  optDepthField->setStandardName(Names::lidar_optical_depth);
+  optDepthField->setLongName(Names::lidar_optical_depth);
+  optDepthField->setRangeGeom(startRangeKm, gateSpacingKm);
        
 }

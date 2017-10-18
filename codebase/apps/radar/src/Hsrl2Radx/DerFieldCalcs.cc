@@ -94,6 +94,7 @@ void DerFieldCalcs::_applyCorr()
   _loDataRate.clear();
   _crossDataRate.clear();
   _molDataRate.clear();
+  _combinedRate.clear();
   
   CalReader dt_hi=(_fullCals.getDeadTimeHi());
   CalReader dt_lo=(_fullCals.getDeadTimeLo());
@@ -312,11 +313,9 @@ void DerFieldCalcs::_applyCorr()
   if(_params.debug >= Params::DEBUG_VERBOSE)
     cout<<"hiAndloMerge^^^^^"<<'\n';
   
-  _combineRate.clear();
-  
   for(size_t igate=0;igate<_nGates;igate++)
     {
-      _combineRate.push_back(_hiAndloMerge(_hiDataRate.at(igate), 
+      _combinedRate.push_back(_hiAndloMerge(_hiDataRate.at(igate), 
 					  _loDataRate.at(igate)));
     }
   
@@ -327,7 +326,7 @@ void DerFieldCalcs::_applyCorr()
 	cout<<"loDataRate["<<igate<<"]="<<_loDataRate[igate]<<'\n';
 	cout<<"crossDataRate["<<igate<<"]="<<_crossDataRate[igate]<<'\n';
 	cout<<"molDataRate["<<igate<<"]="<<_molDataRate[igate]<<'\n';
-	cout<<"combineRate["<<igate<<"]="<<_combineRate[igate]<<'\n';
+	cout<<"combineRate["<<igate<<"]="<<_combinedRate[igate]<<'\n';
       }
   if(_params.debug >= Params::DEBUG_VERBOSE)
     cout<<"geoOverlapCor^^^^^"<<'\n';
@@ -341,7 +340,7 @@ void DerFieldCalcs::_applyCorr()
       
       double calibr=(geoDef.at(1)).at(calGate);
       
-      _combineRate.at(igate)=_geoOverlapCor(_combineRate.at(igate), calibr);
+      _combinedRate.at(igate)=_geoOverlapCor(_combinedRate.at(igate), calibr);
       _crossDataRate.at(igate)=_geoOverlapCor(_crossDataRate.at(igate), calibr);
       _molDataRate.at(igate)=_geoOverlapCor(_molDataRate.at(igate), calibr);
     }
@@ -353,14 +352,14 @@ void DerFieldCalcs::_applyCorr()
 	cout<<"loDataRate["<<igate<<"]="<<_loDataRate[igate]<<'\n';
 	cout<<"crossDataRate["<<igate<<"]="<<_crossDataRate[igate]<<'\n';
 	cout<<"molDataRate["<<igate<<"]="<<_molDataRate[igate]<<'\n';
-	cout<<"combineRate["<<igate<<"]="<<_combineRate[igate]<<'\n';
+	cout<<"combineRate["<<igate<<"]="<<_combinedRate[igate]<<'\n';
       }      
   
   // _hiData=_hiDataRate;
   // _loData=_loDataRate;
   // _crossData=_crossDataRate;
   // _molData=_molDataRate;
-  // _combData=_combineRate;
+  // _combData=_combinedRate;
   
 }
 
@@ -376,7 +375,16 @@ void DerFieldCalcs::computeDerived()
 
   CalReader scanAdjust=(_fullCals.getScanAdj());
   double scan=1;
-  
+
+  // init arrays
+
+  _volDepol.clear();
+  _backscatRatio.clear();
+  _partDepol.clear();
+  _backscatCoeff.clear();
+  _extinction.clear();
+  _opticalDepth.clear();
+
   if( scanAdjust.dataTypeisNum() && 
       ( ( scanAdjust.getDataNum() ).at(_fullCals.getBinPos()) ).size()==1 )
     scan= ((scanAdjust.getDataNum()).at(_fullCals.getBinPos())).at(0);
@@ -384,7 +392,7 @@ void DerFieldCalcs::computeDerived()
   for(size_t igate=0;igate<_nGates;igate++)
     {
       _volDepol.push_back(_computeVolDepol( _crossDataRate.at(igate), 
-                                            _combineRate.at(igate)));
+                                            _combinedRate.at(igate)));
     }
 
   if(_params.debug >= Params::DEBUG_VERBOSE)
@@ -396,7 +404,7 @@ void DerFieldCalcs::computeDerived()
     
   for(size_t igate=0;igate<_nGates;igate++)
     {
-      _backscatRatio.push_back(_computeBackscatRatio(_combineRate.at(igate), 
+      _backscatRatio.push_back(_computeBackscatRatio(_combinedRate.at(igate), 
                                                      _molDataRate.at(igate) ));
     }
 
@@ -433,6 +441,7 @@ void DerFieldCalcs::computeDerived()
   double opDepth1, opDepth2, alt1, alt2;
   opDepth2=_computeOptDepth(_presHpa[0],_tempK[0],_molDataRate.at(0),scan);
   alt2=_htM[0];
+  _opticalDepth.push_back(opDepth2);
  
   for(size_t igate=0;igate<_nGates-1;igate++)
     {
@@ -442,6 +451,7 @@ void DerFieldCalcs::computeDerived()
       alt1=alt2;
       alt2=_htM[igate+1];
       _extinction.push_back(_computeExtinction(opDepth1, opDepth2, alt1, alt2));
+      _opticalDepth.push_back(opDepth2);
     }
   if(_params.debug >= Params::DEBUG_VERBOSE)
     for(size_t igate=0;igate<1;igate++)

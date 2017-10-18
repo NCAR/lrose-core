@@ -80,13 +80,13 @@ public:
   static const string OpticalDepth;
   static const string lidar_optical_depth;
 
-  static const string height;
+  static const string Height;
   static const string height_above_mean_sea_level;
   
-  static const string temperature;
+  static const string Temperature;
   static const string air_temperature;
   
-  static const string pressure;
+  static const string Pressure;
   static const string air_pressure;
   static const string pressure_from_std_atmos;
 
