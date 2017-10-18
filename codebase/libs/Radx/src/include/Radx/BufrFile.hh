@@ -175,7 +175,8 @@ public:
   double getStartTimeForSweep(int sweepNumber);
   double getEndTimeForSweep(int sweepNumber);
 
-  double *getDataForSweep(int sweepNumber);
+  float *getDataForSweepFl32(int sweepNumber);
+  double *getDataForSweepFl64(int sweepNumber);
   string getTypeOfProductForSweep(int sweepNumber);
 
 private:

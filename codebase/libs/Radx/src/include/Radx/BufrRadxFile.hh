@@ -324,6 +324,12 @@ private:
   void _errorMessage(string location, string msg, int foundValue, int expectedValue);
   void _errorMessage(string location, string msg, string foundValue, string expectedValue);
   void _qualityCheckRays();
+  int _addFl32FieldToRays(int sweepNumber,
+                          const string &name, const string &units,
+                          const string &standardName, const string &longName,
+                          bool isDiscrete, bool fieldFolds,
+                          float foldLimitLower, float foldLimitUpper);
+
   int _addFl64FieldToRays(int sweepNumber,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,

@@ -86,6 +86,7 @@ public:
   void addData(unsigned char value);
 
   double *decompressData();
+  float *decompressDataFl32();
 
   void createSweep();
 
@@ -134,8 +135,13 @@ public:
 
   typedef struct {
     string typeOfProduct;
-    double *data;
+    float *data;
   } ParameterData;
+
+  typedef struct {
+    string typeOfProduct;
+    double *data;
+  } ParameterDataFl64;
 
   typedef struct {
     TimeStamp startTime;
@@ -147,6 +153,7 @@ public:
     size_t       nAzimuths;
     double    antennaBeamAzimuthDegrees;
     vector<ParameterData> parameterData;
+    vector<ParameterDataFl64> parameterDataFl64;
 
   } SweepData;
 
