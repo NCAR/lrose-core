@@ -363,7 +363,12 @@ int AcGeoref2Spdb::_runRafIwg1UdpMode()
   
   while (true) {
 
-    if (udp.readPacket() < 0) {
+    bool timedOut = false;
+    if (udp.readPacket(timedOut) < 0) {
+      if (timedOut) {
+        _writeDefaultLocation();
+        continue;
+      }
       // close socket
       udp.closeUdp();
       // reopen socket
@@ -1568,8 +1573,91 @@ int AcGeoref2Spdb::_handleIwg1(const char *buf, int bufLen)
   
   string callSign(_params.aircraft_callsign);
   STRncopy(acGeoref.callsign, callSign.c_str(), AC_GEOREF_NBYTES_CALLSIGN);
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    ac_georef_print(stderr, " ", &acGeoref);
+  }
+
+  // add to spdb
   
-  ac_georef_print(stderr, " ", &acGeoref);
+  string callSignLast4(callSign.substr(callSign.size() - 4));
+  si32 dataType = Spdb::hash4CharsToInt32(callSignLast4.c_str());
+  si32 dataType2 = acGeoref.time_nano_secs;
+  time_t validTime = acGeoref.time_secs_utc;
+  ac_georef_t copy = acGeoref;
+  BE_from_ac_georef(&copy);
+  _spdb.addPutChunk(dataType,
+                    validTime,
+                    validTime,
+                    sizeof(ac_georef_t),
+                    &copy,
+                    dataType2);
+
+  // write it out
+
+  _doWrite();
+    
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Write out a default location, if UDP read fails
+
+int AcGeoref2Spdb::_writeDefaultLocation()
+
+{
+
+  if (_params.debug) {
+    cerr << "DEBUG - UDP timed out" << endl;
+    cerr << "  Writing default location" << endl;
+  }
+
+  // init struct
+  
+  ac_georef_t acGeoref;
+  ac_georef_init(&acGeoref);
+
+  // set current time
+
+  acGeoref.time_secs_utc = time(NULL);
+  acGeoref.time_nano_secs = 0;
+
+  // fill out location
+  
+  acGeoref.longitude = _params.default_location.longitude_deg;
+  acGeoref.latitude =  _params.default_location.latitude_deg;
+
+  acGeoref.altitude_msl_km = _params.default_location.altitude_m / 1000.0;
+  acGeoref.altitude_agl_km = acGeoref.altitude_msl_km;
+  
+  acGeoref.ew_velocity_mps = 0.0;
+  acGeoref.ns_velocity_mps = 0.0;
+  acGeoref.vert_velocity_mps = 0.0;
+  acGeoref.ew_horiz_wind_mps = 0.0;
+  acGeoref.ns_horiz_wind_mps = 0.0;
+  acGeoref.vert_wind_mps = 0.0;
+  acGeoref.heading_deg = 0.0;
+  acGeoref.drift_angle_deg = 0.0;
+  acGeoref.track_deg = 0.0;
+  acGeoref.roll_deg = 0.0;
+  acGeoref.pitch_deg = 0.0;
+  acGeoref.heading_rate_dps = 0.0;
+  acGeoref.pitch_rate_dps = 0.0;
+  acGeoref.roll_rate_dps = 0.0;
+  acGeoref.angle_of_attack_deg = 0.0;
+  acGeoref.ind_airspeed_mps = 0.0;
+  acGeoref.true_airspeed_mps = 0.0;
+  acGeoref.accel_normal = 0.0;
+  acGeoref.accel_latitudinal = 0.0;
+  acGeoref.accel_longitudinal = 0.0;
+  
+  string callSign(_params.aircraft_callsign);
+  STRncopy(acGeoref.callsign, callSign.c_str(), AC_GEOREF_NBYTES_CALLSIGN);
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    ac_georef_print(stderr, " ", &acGeoref);
+  }
 
   // add to spdb
   

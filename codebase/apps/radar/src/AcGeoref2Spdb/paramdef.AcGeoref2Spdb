@@ -42,19 +42,51 @@ commentdef {
 }
 
 typedef enum {
-  CFRADIAL,
   RADX_FMQ,
-  IWRF_FILE,
   IWRF_FMQ,
-  RAF_NETCDF,
-  RAF_IWG1_UDP
+  RAF_IWG1_UDP,
+  CFRADIAL,
+  IWRF_FILE,
+  RAF_NETCDF
 } input_mode_t;
   
 paramdef enum input_mode_t {
   p_default = IWRF_FILE;
   p_descr = "Reading the input data.";
-  p_help = "CFRADIAL: read CfRadial files.\n\nIWRF_FILE: read the georeference packets from files containing IWRF time series.\n\nIWRF_FMQ: read the georeference packets from an FMQ containing IWRF time series.\n\nRAF_NETCDF: read files produced by the NCAR EOL/RAF aircraft group.\n\nRAF_IWG1_UDP: read NCAR RAF IWG1 packets from UDP.";
+  p_help = "RADX_FMQ: realtime mode from FMQ in RADX moments format.\n\nIWRF_FMQ: read the georeference packets from an FMQ containing IWRF time series.\n\nRAF_IWG1_UDP: read NCAR RAF IWG1 packets from UDP.\n\nCFRADIAL: read CfRadial files.\n\nIWRF_FILE: read the georeference packets from files containing IWRF time series.\n\nRAF_NETCDF: read files produced by the NCAR EOL/RAF aircraft group.";
 } input_mode;
+
+commentdef {
+  p_header = "AIRCRAFT CALL SIGN";
+  p_text = "For IWRF, CFRADIAL and UDP data.";
+}
+
+paramdef string {
+  p_default = "";
+  p_descr = "Callsign of aircraft";
+  p_help = "Used for IWRF data. The RAF data includes the callsign in the file.";
+} aircraft_callsign;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "spdbp:://localhost::/tmp/spdb/ac_georef";
+  p_descr = "Output SPDB URL for georef data.";
+  p_help = "The format is spdbp::params//host:port:dir. Normally params is an empty string, and port is an empty string, so that the default behavior will occur.";
+} output_spdb_url;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Number of SPDB chunks per write.";
+  p_help = "We package up the SPDB data chunks, and write them together once the number of chunks reaches this threshold.";
+} spdb_nchunks_per_write;
+
+commentdef {
+  p_header = "INPUT MODE - RADX_FMQ and IWRF_FMQ";
+  p_text = "Read realtime data from FMQ";
+}
 
 paramdef string {
   p_default = "/tmp/fmq/ts";
@@ -69,7 +101,8 @@ paramdef boolean {
 } seek_to_end_of_input;
 
 commentdef {
-  p_header = "IWG1 UDP mode";
+  p_header = "INPUT MODE - RAF_IWG1_UDP";
+  p_header = "Read georeference data in IWG1 format from RAF UDP packets";
 }
 
 paramdef int {
@@ -90,89 +123,35 @@ paramdef string {
   p_help = "Multicast packets are sometimes required to get through a firewall.";
 } udp_multicast_group;
 
-commentdef {
-  p_header = "AIRCRAFT CALL SIGN";
-  p_text = "For IWRF, CFRADIAL and UDP data.";
-}
-
-paramdef string {
-  p_default = "";
-  p_descr = "Callsign of aircraft";
-  p_help = "Used for IWRF data. The RAF data includes the callsign in the file.";
-} aircraft_callsign;
-
-commentdef {
-  p_header = "CFRADIAL DATA FIELDS";
-  p_text = "Used for computing the surface velocity.";
-}
-
-paramdef string {
-  p_default = "DBZ";
-  p_descr = "Field name for DBZ in CfRadial file";
-  p_help = "We need to read in at least 1 field for a valid read operation.";
-} cfradial_dbz_field_name;
-
-paramdef string {
-  p_default = "VEL";
-  p_descr = "Field name for VEL in CfRadial file";
-  p_help = "We need to read in at least 1 field for a valid read operation.";
-} cfradial_vel_field_name;
-
 paramdef boolean {
-  p_default = false;
-  p_descr = "Option to get the HCR temperatures from the Cfradial files.";
-  p_help = "If true, we get the Cmigits and Tailcone temperatures for the HCR from the status XML block in the CfRadial files.";
-} get_hcr_temps_from_cfradial;
+  p_default = FALSE;
+  p_descr = "Option to store a default location if no UDP data is available.";
+  p_help = "If the system is not on the aircraft, no UDP data will be available. This option allows us to store out a known location for fixed operations on the ground.";
+} store_default_if_no_udp_data;
 
-commentdef {
-  p_header = "DETERMINE THE SURFACE VELOCITY FROM CFRADIAL DATA";
-  p_text = "This applies to HCR data.";
-}
+typedef struct {
+  double latitude_deg;
+  double longitude_deg;
+  double altitude_m;
+} default_location_t;
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to compute the surface velocity from the data.";
-  p_help = "We find the range to the peak in reflectivity, and then determine the radial velocity at that range.";
-} compute_surface_vel_in_cfradial;
-
-paramdef double {
-  p_default = 0.5;
-  p_descr = "Minumum range to the surface (km).";
-  p_help = "We will search for the surface echo in the gates beyound this range.";
-} min_range_to_surface_km;
-
-paramdef double {
-  p_default = 20.0;
-  p_descr = "Minumum dbz value for a valid surface return.";
-  p_help = "Gates with values below this will not be used.";
-} min_dbz_for_surface_echo;
-
-paramdef double {
-  p_default = 5;
-  p_descr = "Maximum error from nadir pointing for computing surface velocity (deg).";
-  p_help = "We only try to compute the surface velocity if the beam is pointing within this margin of nadir (vertically down).";
-} max_nadir_error_for_surface_vel;
+paramdef struct default_location_t {
+  p_default = {
+    latitude_deg = 40.0,
+    longitude_deg = -105.0,
+    altitude_m = 1750.0
+  };
+  p_descr = "Default location to be used for fixed operations.";
+  p_help = "This is the location to be set if the instrument is not on the aircraft.";
+} default_location;
 
 paramdef int {
-  p_default = 1;
-  p_descr = "Number of gates needed for identifying surface echo.";
-  p_help = "We require this number of gates to exceed min_dbz_for_surface_echo.";
-} ngates_for_surface_echo;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to print surface velocity information to stdout.";
-  p_help = "If true, the surface velocity estimates, as well as estimated antenna pointing angles, will be printed to stdout at regular intervals.";
-} print_surface_velocity_data;
-
-paramdef double {
-  p_default = 2.0;
-  p_descr = "Number of seconds between printing information on surface velocity.";
-  p_help = "The data will be averaged over this time period and then printed to stdout.";
-} surface_velocity_print_period_secs;
+  p_default = 5;
+  p_descr = "Time to wait for UDP data before writing out default location.";
+} udp_sleep_secs;
 
 commentdef {
-  p_header = "NETCDF DATA";
+  p_header = "INPUT MODE - RAF_NETCDF";
   p_text = "Set the NetCDF variable names for the fields to be read in. If a field is not available. set the name to an empty string.";
 }
 
@@ -299,20 +278,73 @@ paramdef string {
 } nc_varname_custom_fields[];
 
 commentdef {
-  p_header = "DATA OUTPUT";
+  p_header = "HCR TEMPERATURE from CFRADIAL FILES";
 }
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to get the HCR temperatures from the Cfradial files.";
+  p_help = "If true, we get the Cmigits and Tailcone temperatures for the HCR from the status XML block in the CfRadial files.";
+} get_hcr_temps_from_cfradial;
+
+commentdef {
+  p_header = "DETERMINE THE SURFACE VELOCITY FROM CFRADIAL DATA";
+  p_text = "This applies to HCR data.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute the surface velocity from the data.";
+  p_help = "We find the range to the peak in reflectivity, and then determine the radial velocity at that range.";
+} compute_surface_vel_in_cfradial;
+
 paramdef string {
-  p_default = "spdbp:://localhost::/tmp/spdb/ac_georef";
-  p_descr = "Output SPDB URL for georef data.";
-  p_help = "The format is spdbp::params//host:port:dir. Normally params is an empty string, and port is an empty string, so that the default behavior will occur.";
-} output_spdb_url;
+  p_default = "VEL";
+  p_descr = "Field name for VEL in CfRadial file";
+  p_help = "We need to read in at least 1 field for a valid read operation.";
+} cfradial_vel_field_name;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Minumum range to the surface (km).";
+  p_help = "We will search for the surface echo in the gates beyound this range.";
+} min_range_to_surface_km;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Minumum dbz value for a valid surface return.";
+  p_help = "Gates with values below this will not be used.";
+} min_dbz_for_surface_echo;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Field name for DBZ in CfRadial file";
+  p_help = "We need to read in at least 1 field for a valid read operation.";
+} cfradial_dbz_field_name;
+
+paramdef double {
+  p_default = 5;
+  p_descr = "Maximum error from nadir pointing for computing surface velocity (deg).";
+  p_help = "We only try to compute the surface velocity if the beam is pointing within this margin of nadir (vertically down).";
+} max_nadir_error_for_surface_vel;
 
 paramdef int {
-  p_default = 20;
-  p_descr = "Number of SPDB chunks per write.";
-  p_help = "We package up the SPDB data chunks, and write them together once the number of chunks reaches this threshold.";
-} spdb_nchunks_per_write;
+  p_default = 1;
+  p_descr = "Number of gates needed for identifying surface echo.";
+  p_help = "We require this number of gates to exceed min_dbz_for_surface_echo.";
+} ngates_for_surface_echo;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print surface velocity information to stdout.";
+  p_help = "If true, the surface velocity estimates, as well as estimated antenna pointing angles, will be printed to stdout at regular intervals.";
+} print_surface_velocity_data;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Number of seconds between printing information on surface velocity.";
+  p_help = "The data will be averaged over this time period and then printed to stdout.";
+} surface_velocity_print_period_secs;
 
 commentdef {
   p_header = "FIR FILTERING FOR SURFACE VELOCITY ESTIMATES";
