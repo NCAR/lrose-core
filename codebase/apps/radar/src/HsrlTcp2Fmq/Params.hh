@@ -369,7 +369,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[15];
+  mutable TDRPtable _table[16];
 
   const char *_className;
 
