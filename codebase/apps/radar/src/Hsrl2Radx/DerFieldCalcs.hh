@@ -118,7 +118,7 @@ private:
   
   // baseline subtraction
   double _baselineSubtract(double arrivalRate, double profile, 
-                                  double polarization);
+                           double polarization);
   
   // background subtraction
   double _backgroundSub(double arrivalRate, double backgroundBins);
@@ -126,11 +126,14 @@ private:
   // energy normalization
   double _energyNorm(double arrivalRate, double totalEnergy);
   
-  // differential overlap correction the vector coresponds to hi, lo, cross, mol
-  vector<double> _diffOverlapCor(vector<double> arrivalRate, vector<double> diffOverlap);
+  // differential overlap correction the vector coresponds
+  //  to hi, lo, cross, mol
+  vector<double> _diffOverlapCor(vector<double> arrivalRate,
+                                 vector<double> diffOverlap);
   
   // process QWP rotation
-  vector<double> _processQWPRotation(vector<double> arrivalRate, vector<double> polCal);
+  vector<double> _processQWPRotation(vector<double> arrivalRate,
+                                     vector<double> polCal);
   
   // merge hi and lo profiles 
   double _hiAndloMerge(double hiRate, double loRate);
@@ -155,11 +158,15 @@ private:
                             double backscatRatio);
   
   // optical depth calculation for extinction;
-  double _computeOptDepth(double pressure, double temperature, double molRate,double scan);
+  double _computeOptDepth(double pressure, double temperature,
+                          double molRate,double scan);
 
   // extinction
   double _computeExtinction(double opDepth1, double opDepth2,
                             double alt1, double alt2);
   
+  void _printRateDiagnostics(const string &label,
+                             bool includeCombined = false);
+
 };
 #endif

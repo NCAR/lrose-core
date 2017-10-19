@@ -167,46 +167,45 @@ vector <vector<double> > FullCals::readBaselineCorrection(const char* file)
   vector<double> vec_mol_I2A;
   vector<double> vec_comb_1064;
 
-  while (std::getline(infile, line))
-    {
-      std::stringstream ss;
-      ss << line;
+  while (std::getline(infile, line)) {
+    std::stringstream ss;
+    ss << line;
            
-      string test = "#";
+    string test = "#";
             
-      if(!(line.substr(0, test.length())==test))//comments at begining of file 
-	//begin with #, ignore those lines and process the rest. 
-	{
-	  double binnum; 
-	  ss>>binnum;
-	  vec_binnum.push_back(binnum);
+    if(!(line.substr(0, test.length())==test)) {
+      //comments at begining of file 
+      //begin with #, ignore those lines and process the rest. 
+      double binnum; 
+      ss>>binnum;
+      vec_binnum.push_back(binnum);
 	 
-	  double combined_hi; 
-	  ss>>combined_hi;
-	  vec_combined_hi.push_back(combined_hi);
+      double combined_hi; 
+      ss>>combined_hi;
+      vec_combined_hi.push_back(combined_hi);
 	 
-	  double combined_lo; 
-	  ss>>combined_lo;
-	  vec_combined_lo.push_back(combined_lo);
+      double combined_lo; 
+      ss>>combined_lo;
+      vec_combined_lo.push_back(combined_lo);
 	 
-	  double molecular; 
-	  ss>>molecular;
-	  vec_molecular.push_back(molecular);
+      double molecular; 
+      ss>>molecular;
+      vec_molecular.push_back(molecular);
 	 
-	  double crosspol; 
-	  ss>>crosspol;
-	  vec_crosspol.push_back(crosspol);
+      double crosspol; 
+      ss>>crosspol;
+      vec_crosspol.push_back(crosspol);
 	 
-	  double mol_I2A; 
-	  ss>>mol_I2A;
-	  vec_mol_I2A.push_back(mol_I2A);
+      double mol_I2A; 
+      ss>>mol_I2A;
+      vec_mol_I2A.push_back(mol_I2A);
 	 
-	  double comb_1064; 
-	  ss>>comb_1064;
-	  vec_comb_1064.push_back(comb_1064);
+      double comb_1064; 
+      ss>>comb_1064;
+      vec_comb_1064.push_back(comb_1064);
 	 
-	}
     }
+  }
  
   vector< vector<double> > ans;
   ans.push_back(vec_binnum);
@@ -236,38 +235,37 @@ vector <vector<double> > FullCals::readDiffDefaultGeo(const char* file)
   vector<double> vec_scomb_himol;
   vector<double> vec_scomb_lomol;
 
-  while (std::getline(infile, line))
-    {
-      std::stringstream ss;
-      ss << line;
+  while (std::getline(infile, line)) {
+    std::stringstream ss;
+    ss << line;
      
-      string test = "#";
+    string test = "#";
             
-      if(!(line.substr(0, test.length())==test))//comments at begining of file 
-	//begin with #, ignore those lines and process the rest. 
-	{
-	  double altitudes; 
-	  ss>>altitudes;
-	  vec_altitudes.push_back(altitudes);
+    if(!(line.substr(0, test.length())==test)) {
+      //comments at begining of file 
+      //begin with #, ignore those lines and process the rest. 
+      double altitudes; 
+      ss>>altitudes;
+      vec_altitudes.push_back(altitudes);
 	
-	  double comb_himol; 
-	  ss>>comb_himol;
-	  vec_comb_himol.push_back(comb_himol);
+      double comb_himol; 
+      ss>>comb_himol;
+      vec_comb_himol.push_back(comb_himol);
 	 
-	  double comb_lomol; 
-	  ss>>comb_lomol;
-	  vec_comb_lomol.push_back(comb_lomol);
+      double comb_lomol; 
+      ss>>comb_lomol;
+      vec_comb_lomol.push_back(comb_lomol);
 		  	  
-	  double scomb_himol; 
-	  ss>>scomb_himol;
-	  vec_scomb_himol.push_back(scomb_himol);
+      double scomb_himol; 
+      ss>>scomb_himol;
+      vec_scomb_himol.push_back(scomb_himol);
 	 
-	  double scomb_lomol; 
-	  ss>>scomb_lomol;
-	  vec_scomb_lomol.push_back(scomb_lomol);
+      double scomb_lomol; 
+      ss>>scomb_lomol;
+      vec_scomb_lomol.push_back(scomb_lomol);
 	
-	}
     }
+  }
 
   vector< vector<double> > ans;
   ans.push_back(vec_altitudes);
@@ -292,26 +290,25 @@ vector <vector<double> > FullCals::readGeofileDefault(const char* file)
   vector<double> vec_range;
   vector<double> vec_geo_corr;
 
-  while (std::getline(infile, line))
-    {
-      std::stringstream ss;
-      ss << line;
+  while (std::getline(infile, line)) {
+    std::stringstream ss;
+    ss << line;
     
-      string test = "#";
+    string test = "#";
             
-      if(!(line.substr(0, test.length())==test))//comments at begining of file 
-	//begin with #, ignore those lines and process the rest. 
-	{
-	  double range; 
-	  ss>>range;
-	  vec_range.push_back(range);
+    if(!(line.substr(0, test.length())==test)) {
+      //comments at begining of file 
+      //begin with #, ignore those lines and process the rest. 
+      double range; 
+      ss>>range;
+      vec_range.push_back(range);
 	 
-	  double geo_corr; 
-	  ss>>geo_corr;
-	  vec_geo_corr.push_back(geo_corr);
+      double geo_corr; 
+      ss>>geo_corr;
+      vec_geo_corr.push_back(geo_corr);
 	
-	}
     }
+  }
 
   vector< vector<double> > ans;
   ans.push_back(vec_range);
@@ -341,58 +338,57 @@ vector <vector<double> > FullCals::readAfterPulse(const char* file)
   vector<double> vec_refftCPol;
   vector<double> vec_imfftCPol;
 
-  while (std::getline(infile, line))
-    {
-      std::stringstream ss;
-      ss << line;
+  while (std::getline(infile, line)) {
+    std::stringstream ss;
+    ss << line;
     
-      string test = "#";
+    string test = "#";
             
-      if(!(line.substr(0, test.length())==test))//comments at begining of file 
-	//begin with #, ignore those lines and process the rest. 
-	{
-	  double bin; 
-	  ss>>bin;
-	  vec_bin.push_back(bin);
+    if(!(line.substr(0, test.length())==test)) {
+      //comments at begining of file 
+      //begin with #, ignore those lines and process the rest. 
+      double bin; 
+      ss>>bin;
+      vec_bin.push_back(bin);
 	
-	  double mol; 
-	  ss>>mol;
-	  vec_mol.push_back(mol);
+      double mol; 
+      ss>>mol;
+      vec_mol.push_back(mol);
 	 
-	  double comb; 
-	  ss>>comb;
-	  vec_comb.push_back(comb);
+      double comb; 
+      ss>>comb;
+      vec_comb.push_back(comb);
 	 
-	  double crossPol; 
-	  ss>>crossPol;
-	  vec_crossPol.push_back(crossPol);
+      double crossPol; 
+      ss>>crossPol;
+      vec_crossPol.push_back(crossPol);
 	
-	  double refftMol; 
-	  ss>>refftMol;
-	  vec_refftMol.push_back(refftMol);
+      double refftMol; 
+      ss>>refftMol;
+      vec_refftMol.push_back(refftMol);
 	
-	  double imfftMol; 
-	  ss>>imfftMol;
-	  vec_imfftMol.push_back(imfftMol);
+      double imfftMol; 
+      ss>>imfftMol;
+      vec_imfftMol.push_back(imfftMol);
 	 
-	  double refftComb; 
-	  ss>>refftComb;
-	  vec_refftComb.push_back(refftComb);
+      double refftComb; 
+      ss>>refftComb;
+      vec_refftComb.push_back(refftComb);
 	 
-	  double imfftComb; 
-	  ss>>imfftComb;
-	  vec_imfftComb.push_back(imfftComb);
+      double imfftComb; 
+      ss>>imfftComb;
+      vec_imfftComb.push_back(imfftComb);
 	 
-	  double refftCPol; 
-	  ss>>refftCPol;
-	  vec_refftCPol.push_back(refftCPol);
+      double refftCPol; 
+      ss>>refftCPol;
+      vec_refftCPol.push_back(refftCPol);
 	
-	  double imfftCPol; 
-	  ss>>imfftCPol;
-	  vec_imfftCPol.push_back(imfftCPol);
+      double imfftCPol; 
+      ss>>imfftCPol;
+      vec_imfftCPol.push_back(imfftCPol);
 	 
-	}
     }
+  }
 
   vector< vector<double> > ans;
   ans.push_back(vec_bin);
