@@ -969,7 +969,7 @@ int RawFile::_createRays(const string &path)
     // compute az/el from geo
     
     double azimuth, elevation;
-    _computeRadarAngles(geo, corr, azimuth, elevation);
+    computeRadarAngles(geo, corr, azimuth, elevation);
     ray->setAzimuthDeg(azimuth);
     ray->setElevationDeg(elevation);
 
@@ -1301,10 +1301,10 @@ void RawFile::_clearRays()
 // see Wen-Chau Lee's paper
 // "Mapping of the Airborne Doppler Radar Data"
 
-void RawFile::_computeRadarAngles(RadxGeoref &georef,
-                                  RadxCfactors &corr,
-                                  double &azimuthDeg,
-                                  double &elevationDeg)
+void RawFile::computeRadarAngles(RadxGeoref &georef,
+                                 RadxCfactors &corr,
+                                 double &azimuthDeg,
+                                 double &elevationDeg)
   
 {
   

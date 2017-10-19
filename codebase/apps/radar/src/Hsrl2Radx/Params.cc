@@ -787,7 +787,7 @@ using namespace std;
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("OPTION TO READ GEOREF DATA FROM AIRCRAFT SYSTEM");
-    tt->comment_text = tdrpStrDup("If not read from aircraft, need to set the instrument location from the config file.");
+    tt->comment_text = tdrpStrDup("If the georef data is available, it will be read in by AcGeoref2Spdb, and stored in an SPDB data base. We read it in from that location.");
     tt++;
     
     // Parameter 'read_georef_data_from_aircraft_system'
@@ -800,6 +800,39 @@ using namespace std;
     tt->help = tdrpStrDup("If true, the location in this file will be used. If not, the location in the time series data will be used.");
     tt->val_offset = (char *) &read_georef_data_from_aircraft_system - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'georef_data_spdb_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("georef_data_spdb_url");
+    tt->descr = tdrpStrDup("SPDB url for aircraft georef data.");
+    tt->help = tdrpStrDup("Can take the form of a local directory path, or a full url of the form:\n\n\t'spdbp:://hostname::dir_path'\n\nIf the dir_path starts with '.' or '/', it specifies a relative or absolute path respectively. If not, it specifies a path relative to '$DATA_DIR'.");
+    tt->val_offset = (char *) &georef_data_spdb_url - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/spdb/ac_georef/raf_1hz");
+    tt++;
+    
+    // Parameter 'georef_data_search_margin_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("georef_data_search_margin_secs");
+    tt->descr = tdrpStrDup("Search margin for finding georeference data (secs).");
+    tt->help = tdrpStrDup("If no data is found within this time margin, we do not set the location.");
+    tt->val_offset = (char *) &georef_data_search_margin_secs - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("FIXED LOCATION PARAMETERS");
+    tt->comment_text = tdrpStrDup("If not read from aircraft, need to set the instrument location from the config file.");
     tt++;
     
     // Parameter 'instrument_latitude_deg'
@@ -838,11 +871,11 @@ using namespace std;
     tt->single_val.d = -999;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OPTION TO SET RANGE RELATIVE TO INSTRUMENT - MSL CfRadial files only");
     tt->comment_text = tdrpStrDup("This applies to python-generated CfRadial files relative to MSL only");
     tt++;
@@ -871,11 +904,11 @@ using namespace std;
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("READING RAW NetCDF DATA FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1108,11 +1141,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("i2_scan_adjustment");
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("OUTPUT FMQ DETAILS");
     tt->comment_text = tdrpStrDup("REALTIME_FMQ mode only");
     tt++;
@@ -1202,11 +1235,11 @@ using namespace std;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1307,11 +1340,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1376,11 +1409,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;

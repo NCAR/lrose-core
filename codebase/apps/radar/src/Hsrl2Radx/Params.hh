@@ -390,6 +390,10 @@ public:
 
   tdrp_bool_t read_georef_data_from_aircraft_system;
 
+  char* georef_data_spdb_url;
+
+  int georef_data_search_margin_secs;
+
   double instrument_latitude_deg;
 
   double instrument_longitude_deg;
@@ -505,7 +509,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[83];
+  mutable TDRPtable _table[86];
 
   const char *_className;
 

@@ -97,7 +97,14 @@ public:
   /// returns 0 on success, -1 on failure
 
   int getTimeFromPath(const string &path, RadxTime &rtime);
+  
+  // compute angles from georef
 
+  static void computeRadarAngles(RadxGeoref &georef,
+                                 RadxCfactors &corr,
+                                 double &azimuthDeg,
+                                 double &elevationDeg);
+  
   ////////////////////////
   /// \name Error string:
   //@{
@@ -267,13 +274,6 @@ private:
   void _addErrStr(string label, string strarg = "",
                   bool cr = true);
 
-  // compute angles from georef
-
-  void _computeRadarAngles(RadxGeoref &georef,
-                           RadxCfactors &corr,
-                           double &azimuthDeg,
-                           double &elevationDeg);
-  
 };
 
 #endif

@@ -43,6 +43,7 @@
 #include "CalReader.hh"
 #include "FullCals.hh"
 #include <Radx/RadxTime.hh>
+#include <Radx/RadxGeoref.hh>
 #include <Radx/Radx.hh>
 #include <physics/IcaoStdAtmos.hh>
 
@@ -98,6 +99,9 @@ private:
                OutputFmq &outputFmq);
 
   RadxRay *_convertRawToRadx(HsrlRawRay &rawRay);
+
+  int _readGeorefFromSpdb(time_t searchTime,
+                          RadxGeoref &georef);
 
   void _addRawFieldToRay(RadxRay *ray,
                          double startRangeKm,

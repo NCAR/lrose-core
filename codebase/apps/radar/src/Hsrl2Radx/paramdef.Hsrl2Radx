@@ -140,7 +140,7 @@ paramdef double {
 
 commentdef {
   p_header = "OPTION TO READ GEOREF DATA FROM AIRCRAFT SYSTEM";
-  p_text = "If not read from aircraft, need to set the instrument location from the config file.";
+  p_text = "If the georef data is available, it will be read in by AcGeoref2Spdb, and stored in an SPDB data base. We read it in from that location.";
 }
 
 paramdef boolean {
@@ -148,6 +148,23 @@ paramdef boolean {
   p_descr = "Option to override the instrument location.";
   p_help = "If true, the location in this file will be used. If not, the location in the time series data will be used.";
 } read_georef_data_from_aircraft_system;
+
+paramdef string {
+  p_default = "/tmp/spdb/ac_georef/raf_1hz";
+  p_descr = "SPDB url for aircraft georef data.";
+  p_help = "Can take the form of a local directory path, or a full url of the form:\n\n\t'spdbp:://hostname::dir_path'\n\nIf the dir_path starts with '.' or '/', it specifies a relative or absolute path respectively. If not, it specifies a path relative to '$DATA_DIR'.";
+} georef_data_spdb_url;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Search margin for finding georeference data (secs).";
+  p_help = "If no data is found within this time margin, we do not set the location.";
+} georef_data_search_margin_secs;
+
+commentdef {
+  p_header = "FIXED LOCATION PARAMETERS";
+  p_text = "If not read from aircraft, need to set the instrument location from the config file.";
+}
 
 paramdef double {
   p_default = -999;
