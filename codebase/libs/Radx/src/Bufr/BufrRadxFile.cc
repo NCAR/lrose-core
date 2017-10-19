@@ -93,7 +93,7 @@ void BufrRadxFile::clear()
   _refTimeSecsFile = 0;
 
   _rangeKm.clear();
-  _nRangeInFile = 0;
+  //_nRangeInFile = 0;
   _gateSpacingIsConstant = true;
 
   _latitudeDeg = 0;
@@ -657,7 +657,7 @@ int BufrRadxFile::readFromPath(const string &path,
   _nTimesInFile = 0;
   _raysToRead.clear();
   _raysValid.clear();
-  _nRangeInFile = 0;
+  //_nRangeInFile = 0;
 
   try {
     if (_readFields(path)) {
@@ -724,8 +724,7 @@ void BufrRadxFile::_accumulateFieldFirstTime(string fieldName, string units, str
     // if 1st time through, establish the dimensions
     // read required dimensions
     _nTimesInFile = _file.getTimeDimension();
-    _nRangeInFile = _file.getRangeDimension();
-    _rangeBinSizeMeters = _file.getRangeBinSizeMeters();
+
 
     // _readGlobalAttributes();
     _year_attr = _file.hdr_year;
@@ -738,8 +737,6 @@ void BufrRadxFile::_accumulateFieldFirstTime(string fieldName, string units, str
 
     _siteName = _file.typeOfStationId;
     _instrumentName = _file.stationId;
-
-    _setRangeVariable();
   
     // read lat/lon/alt 
     _setPositionVariables();
@@ -765,6 +762,14 @@ void BufrRadxFile::_accumulateFieldFirstTime(string fieldName, string units, str
 	cout << " fetching ray  variable " << fieldName << 
 	  " for sweep " << sn << endl; 
       }
+      //size_t nRangeInFile = _file.getNBinsAlongTheRadial(sn);
+      //double rangeBinSizeMeters = _file.getRangeBinSizeMeters(sn);
+      //_setRangeVariable();
+      // TODO: can I just set these variables in the field directly? 
+      // No, they are private variables. So, what sets them?
+      //_setRangeGeometry(_file.getRangeBinSizeMeters,
+      //		_file.getRangeBinOffsetMeters,
+      //			_file.getNRanges(sn));
       _getRayVariables(sn);  // fills in _azimuths & _elevations
       if (_readMetadataOnly) {
 	// read field variables
@@ -818,12 +823,14 @@ void BufrRadxFile::_accumulateField(string fieldName, string units, string stand
     throw "incompatible";
   }
 
+  /*
   if (_file.getRangeBinSizeMeters() != _rangeBinSizeMeters) {
     // check the size of the range bins
     _errorMessage(location, "Range bin size (meters) incompatible, found ",
 		  _file.getRangeBinSizeMeters(), _rangeBinSizeMeters);
     throw "incompatible";
   }
+  */
 
   if ((_year_attr != _file.hdr_year) || (_month_attr != _file.hdr_month) ||
       (_day_attr != _file.hdr_day)) {
@@ -864,12 +871,18 @@ void BufrRadxFile::_accumulateField(string fieldName, string units, string stand
       if (_debug) {
 	cerr << " fetching ray  variable " << endl; 
       }
-      // mind the range dimensions, i.e. make the number of gates compatible
+      // mind the range dimensions, 
+      /* i.e. make the number of gates compatible
       if (nextFieldNRanges < 0) {
 	// fill with missing values
       } else if (nextFieldNRanges > 0) {
 	// expand the current fields and fill with missing values
       } // otherwise, everything is good, carry on ...
+      */
+      // set the range geometry ...
+      // this is a different field, the geometry could be different
+      // done lower down, in _addFl32...
+      // _setRangeVariable(); 
 
       // add field variables
       _addFieldVariables(sn, fieldName, units, standardName, longName,
@@ -919,16 +932,18 @@ void BufrRadxFile::_qualityCheckRays() {
 
 ///////////////////////////////////
 // read in the dimensions
-
+/*
 int BufrRadxFile::_readDimensions()
 
 {
+  
   // read required dimensions
   _nTimesInFile = _file.getTimeDimension();
-  _nRangeInFile = _file.getRangeDimension();
+  _nRangeInFile = _file.getMaxRangeDimension(); // getRangeDimension();
+
   return 0;
 }
-
+*/
 ///////////////////////////////////
 // read the global attributes
 
@@ -997,7 +1012,53 @@ int BufrRadxFile::_getRayTimes(int sweepNumber)
 
 ///////////////////////////////////
 // read the range variable
+// Q: What variables are used elsewhere? 
+//  _rangeKm?  No
+//  _nRangeInFile? Yes
+//  _remap? No
+//  _gateSpacingIsConstant ? No
+//  _geom? Yes
+// 
+int BufrRadxFile::_setRangeGeometry(double rangeBinSizeMeters,
+				    double rangeBinOffsetMeters,
+				    size_t nRanges)
+{
+  // set units
 
+  double kmPerUnit = 0.001; // default - units in km
+
+  double rangeBinSizeKm;
+  rangeBinSizeKm = rangeBinSizeMeters * kmPerUnit;
+  double rangeBinOffsetKm;
+  rangeBinOffsetKm = rangeBinOffsetMeters * kmPerUnit; 
+
+  // set range vector
+
+  _rangeKm.clear();
+  for (size_t ii = 0; ii < nRanges; ii++) {
+    _rangeKm.push_back(rangeBinOffsetKm + ii*rangeBinSizeKm);
+  }
+
+  // set the geometry from the range vector
+  
+  _remap.computeRangeLookup(_rangeKm);
+  _gateSpacingIsConstant = _remap.getGateSpacingIsConstant();
+  _geom.setRangeGeom(_remap.getStartRangeKm(), _remap.getGateSpacingKm());
+
+  return 0;
+}
+
+
+///////////////////////////////////
+// read the range variable
+// Q: What variables are used elsewhere? 
+//  _rangeKm?  No
+//  _nRangeInFile? Yes
+//  _remap? No
+//  _gateSpacingIsConstant ? No
+//  _geom? Yes
+// 
+/*
 int BufrRadxFile::_setRangeVariable()
 {
   // set units
@@ -1012,7 +1073,7 @@ int BufrRadxFile::_setRangeVariable()
   // set range vector
 
   _rangeKm.clear();
-  _nRangeInFile = _file.getNBinsAlongTheRadial(); //_rangeVar->num_vals();
+  _nRangeInFile = _file.getMaxRangeDimension(); // getNBinsAlongTheRadial(); //_rangeVar->num_vals();
   //  RadxArray<double> rangeVals_;
   //double *rangeVals = rangeVals_.alloc(_nRangeInFile);
   for (size_t ii = 0; ii < _nRangeInFile; ii++) {
@@ -1027,11 +1088,12 @@ int BufrRadxFile::_setRangeVariable()
 
   return 0;
 }
-
+*/
+/*
 int BufrRadxFile::_verifyRangeVariable()
 {
   // set units
-  /*
+  
   double kmPerUnit = 0.001; // default - units in km
   
   double rangeBinSizeKm;
@@ -1040,7 +1102,7 @@ int BufrRadxFile::_verifyRangeVariable()
   double rangeBinOffsetKm;
   if (rangeBinOffsetKm != _file.getRangeBinOffsetMeters() * kmPerUnit)
     throw "Range bin offset is incompatible";
-  */
+  
   // verify range vector
 
   if (_nRangeInFile != _file.getNBinsAlongTheRadial())
@@ -1048,7 +1110,7 @@ int BufrRadxFile::_verifyRangeVariable()
 
   return 0;
 }
-
+*/
 
 ///////////////////////////////////
 // read the position variables
@@ -1187,7 +1249,7 @@ int BufrRadxFile::_createRays(int sweepNumber)
     RadxRay *ray = new RadxRay;
     // rayInfo.ray = ray;
 
-    ray->copyRangeGeom(_geom);
+    //ray->copyRangeGeom(_geom);
     
     // set time
     
@@ -1294,7 +1356,7 @@ int BufrRadxFile::_addFieldVariables(int sweepNumber,
 // The _raysFromFile array has previously been set up by _createRays()
 // Add the single field to each ray of a sweep
 // Returns 0 on success, -1 on failure
-
+// 
 int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
 				      const string &name,
 				      const string &units,
@@ -1306,6 +1368,10 @@ int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
 				      float foldLimitUpper)
   
 {
+
+  throw "BufrRadxFile::_addFl64FieldToRays Not implemented";
+  return -1;
+  /*
   // get data from array
 
   Radx::fl64 *data; 
@@ -1327,10 +1393,10 @@ int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
 
   // load field into rays
   RadxField *field;
-  size_t nextFileRangeDimension = _file.getRangeDimension();
+  size_t nextFileRangeDimension = _file.getNBinsAlongTheRadial(sweepNumber); // _file.getRangeDimension();
 
   for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-    int nGates = _nRangeInFile; 
+    // int nGates = _nRangeInFile; 
     int startIndex = ii * _nRangeInFile;
     if (_verbose) {
       if (ii == 0) 
@@ -1359,6 +1425,7 @@ int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
       field->setNGates(_nRangeInFile);
       _raysToRead[rayIdx]->addField(field);
     } else {
+      throw "Expanded range dimension found; Not implemented.";      
       if (nextFileRangeDimension > _nRangeInFile) {
 	_raysToRead[rayIdx]->setNGates(nextFileRangeDimension);
         nGates = nextFileRangeDimension;
@@ -1369,6 +1436,7 @@ int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
 				      missingVal,
 				      data + startIndex,
 				      pleaseCopyData);
+      
     }
     field->setMissingFl64(missingVal);
     field->setStandardName(standardName);
@@ -1386,11 +1454,13 @@ int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
   } // end for ii
   if (nextFileRangeDimension > _nRangeInFile) {
     // update the number of ranges in the file
-    _nRangeInFile = nextFileRangeDimension;
+    //_nRangeInFile = nextFileRangeDimension;
+    throw "Cannot expand the range dimension after it is set.";
   }
 
   delete[] data;
   return 0;
+*/
   
 }
 
@@ -1423,27 +1493,29 @@ int BufrRadxFile::_addFl32FieldToRays(int sweepNumber,
 
   Radx::fl32 fillVal = missingVal;
 
+  size_t nGates = _file.getNBinsAlongTheRadial(sweepNumber);
+
   // replace any NaN's with fill value
-  for (size_t jj = 0; jj < _nTimesInFile * _nRangeInFile; jj++) {
+  for (size_t jj = 0; jj < _nTimesInFile * nGates; jj++) {
     if (std::isnan(data[jj]))
       data[jj] = fillVal;
   }
 
   // load field into rays
   RadxField *field;
-  size_t nextFileRangeDimension = _file.getRangeDimension();
-
+  //  size_t nextFileRangeDimension = nRangeInSweep; // _file.getRangeDimension();
+  // for each ray
   for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-    int nGates = _nRangeInFile; 
-    int startIndex = ii * _nRangeInFile;
+    //int nGates = _nRangeInFile; 
+    int startIndex = ii * nGates; // _nRangeInFile;
     if (_verbose) {
       if (ii == 0) 
-        cout << "adding field " << name << " to ray " << endl;    
+        cout << "adding field " << name << " to ray " << ii <<  endl;    
     }
     // the rays for this sweep start at sweepNumber*_nTimesInFile
     int rayIdx;
     rayIdx = (sweepNumber * _nTimesInFile) + ii;
-
+    /*
     // now we can check for the dimensions and resize as needed
     // homogenize the number of gates (also known as nRangeInFile)
     // The number of gates could be less
@@ -1474,10 +1546,21 @@ int BufrRadxFile::_addFl32FieldToRays(int sweepNumber,
 				      data + startIndex,
 				      pleaseCopyData);
     }
+    */
+    bool pleaseCopyData = true;
+    field =_raysToRead[rayIdx]->addField(name, units, nGates,
+	            missingVal, data + startIndex, pleaseCopyData);
     field->setMissingFl32(missingVal);
     field->setStandardName(standardName);
     field->setLongName(longName);
+    _setRangeGeometry(_file.getRangeBinSizeMeters(sweepNumber),
+		      _file.getRangeBinOffsetMeters(),
+		        nGates);
     field->copyRangeGeom(_geom);
+
+    //   double gateSizeKm = _file.getRangeBinSizeMeters(sweepNumber) / 1000.0);  // convert to Km;
+    // double startRangeKm = _file.getRangeBinOffsetMeters() / 1000.0); // convert to Km
+    // field->setRangeGeom(startRangeKm, gateSizeKm);
     
     if (fieldFolds &&
 	foldLimitLower != Radx::missingMetaFloat &&
@@ -1488,10 +1571,10 @@ int BufrRadxFile::_addFl32FieldToRays(int sweepNumber,
       field->setIsDiscrete(true);
     }
   } // end for ii
-  if (nextFileRangeDimension > _nRangeInFile) {
-    // update the number of ranges in the file
-    _nRangeInFile = nextFileRangeDimension;
-  }
+  //  if (nextFileRangeDimension > _nRangeInFile) {
+  //  // update the number of ranges in the file
+  //  _nRangeInFile = nextFileRangeDimension;
+  //}
 
   delete[] data;
   return 0;
@@ -1617,7 +1700,9 @@ int BufrRadxFile::_loadReadVolume()
   _readVol->setLongitudeDeg(_longitudeDeg);
   _readVol->setAltitudeKm(_heightKm);
 
-  _readVol->copyRangeGeom(_geom);
+  // TODO: instead of copyRangeGeom, we need to remapRangeGeom, or similar
+  //_readVol->copyRangeGeom(_geom);
+  _readVol->remapToFinestGeom();
 
   _readVol->setRadarBeamWidthDegH(_beamwidthHDeg);
   _readVol->setRadarBeamWidthDegV(_beamwidthVDeg);

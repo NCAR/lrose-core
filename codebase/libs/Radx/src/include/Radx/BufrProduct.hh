@@ -126,12 +126,7 @@ public:
   string typeOfProduct;
     TimeStamp startTime;
     TimeStamp endTime;
-    double    antennaElevationDegrees;
-    size_t      nBinsAlongTheRadial;
-    double    rangeBinSizeMeters;
-    double    rangeBinOffsetMeters;
-    size_t       nAzimuths;
-    double    antennaBeamAzimuthDegrees;
+
 
   typedef struct {
     string typeOfProduct;
@@ -178,7 +173,37 @@ public:
   ProductType productType;
   DataType    dataType;
 
+  //size_t getMaxBinsAlongTheRadial();
 
+  void setNBinsAlongTheRadial(size_t nBins);
+  size_t getNBinsAlongTheRadial(int sweepNumber);
+
+  void setAntennaElevationDegrees(double value);
+  double getAntennaElevationDegrees(int sweepNumber);
+
+  void setRangeBinSizeMeters(double value);
+  double getRangeBinSizeMeters(int sweepNumber);
+
+  void setRangeBinOffsetMeters(double value);
+  double getRangeBinOffsetMeters();
+
+  void setNAzimuths(size_t value);
+  size_t getNAzimuths();
+
+  void setAntennaBeamAzimuthDegrees(double value);
+  double getAntennaBeamAzimuthDegrees(int sweepNumber);
+
+private:
+
+  // all of these could potentially change, so lock them down
+  size_t nBinsAlongTheRadial;
+  double antennaElevationDegrees;
+  double rangeBinSizeMeters;
+  double rangeBinOffsetMeters;
+  size_t nAzimuths;
+  double antennaBeamAzimuthDegrees;
+
+  size_t _maxBinsAlongTheRadial;
 
 };
 #endif

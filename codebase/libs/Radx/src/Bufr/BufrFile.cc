@@ -915,17 +915,17 @@ bool BufrFile::StuffIt(string name, double value) {
   } else if (name.find("height") != string::npos) {
     height = value;
   } else if (name.find("antenna elevation") != string::npos) {
-    currentProduct.antennaElevationDegrees = value;
+    currentProduct.setAntennaElevationDegrees(value);
   } else if (name.find("number of bins along the radial") != string::npos) {
-    currentProduct.nBinsAlongTheRadial = value;
+    currentProduct.setNBinsAlongTheRadial((size_t) value);
   } else if (name.find("range-bin size") != string::npos) {
-    currentProduct.rangeBinSizeMeters = value;
+    currentProduct.setRangeBinSizeMeters(value);
   } else if (name.find("range-bin offset") != string::npos) {
-    currentProduct.rangeBinOffsetMeters = value;
+    currentProduct.setRangeBinOffsetMeters(value);
   } else if (name.find("number of azimuths") != string::npos) {
-    currentProduct.nAzimuths = value;
+    currentProduct.setNAzimuths((size_t) value);
   } else if (name.find("antenna beam azimuth") != string::npos) {
-    currentProduct.antennaBeamAzimuthDegrees = value;
+    currentProduct.setAntennaBeamAzimuthDegrees(value);
 
   } else if (name.find("year") != string::npos) {
     currentProduct.putYear(value);
@@ -1013,27 +1013,27 @@ bool BufrFile::StuffIt(string name, double value) {
 }
 
 size_t BufrFile::getTimeDimension() {
-  return currentProduct.nAzimuths;
+  return currentProduct.getNAzimuths();
 }
 
-size_t BufrFile::getRangeDimension() {
-  return currentProduct.nBinsAlongTheRadial;
-}
+//size_t BufrFile::getMaxRangeDimension() {
+//  return currentProduct.getMaxBinsAlongTheRadial();
+//}
 
 size_t BufrFile::getNumberOfSweeps() {
   return currentProduct.sweepData.size();
 }
 
-size_t BufrFile::getNBinsAlongTheRadial() {
-  return currentProduct.nBinsAlongTheRadial;
+size_t BufrFile::getNBinsAlongTheRadial(int sweepNumber) {
+  return currentProduct.getNBinsAlongTheRadial(sweepNumber);
 }
 
 double BufrFile::getRangeBinOffsetMeters() {
-  return currentProduct.rangeBinOffsetMeters;
+  return currentProduct.getRangeBinOffsetMeters();
 }
 
-double BufrFile::getRangeBinSizeMeters() {
-  return currentProduct.rangeBinSizeMeters;
+double BufrFile::getRangeBinSizeMeters(int sweepNumber) {
+  return currentProduct.getRangeBinSizeMeters(sweepNumber);
 }
 
 double BufrFile::getElevationForSweep(int sweepNumber) {
@@ -1488,6 +1488,10 @@ int BufrFile::_descend(DNode *tree) {
   } catch (const std::out_of_range& e) {
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::_descend", true);
     Radx::addErrInt(_errString, "   unknown descriptor: ", des, true);
+    throw _errString.c_str();
+  } catch (const char *msg) {
+    Radx::addErrStr(_errString, "", "ERROR - BufrFile::_descend", true);
+    Radx::addErrStr(_errString, "  ", msg, true);
     throw _errString.c_str();
   }
   return 0;

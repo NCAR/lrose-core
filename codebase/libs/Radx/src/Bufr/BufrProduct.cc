@@ -67,6 +67,7 @@ void BufrProduct::reset() {
   currentState = 0;  // initial state
   nData = 0;
   maxData = 0;
+  _maxBinsAlongTheRadial = 0;
   //totalData = 0;
   if (dataBuffer != NULL)
     free(dataBuffer);
@@ -82,6 +83,84 @@ void BufrProduct::allocateSpace(unsigned int n) {
     dataBuffer = (unsigned char *) malloc(n);
     maxData = n;
   }
+}
+
+//size_t BufrProduct::getMaxBinsAlongTheRadial() {
+//  return _maxBinsAlongTheRadial;
+//}
+
+void BufrProduct::setNBinsAlongTheRadial(size_t nBins) {
+  if (sweepData.size() > 0) {
+    if ((nBins != sweepData[0].nBinsAlongTheRadial) && _debug) {
+      cerr << "Changing the number of bins along the radial from " <<
+	sweepData[0].nBinsAlongTheRadial << " to " << nBins << endl;
+    // don't resize here, just request everything by sweep number
+    }
+  }
+  nBinsAlongTheRadial = nBins;
+  if (nBins > _maxBinsAlongTheRadial)
+    _maxBinsAlongTheRadial = nBins;
+}
+
+size_t BufrProduct::getNBinsAlongTheRadial(int sweepNumber) {
+  return sweepData[sweepNumber].nBinsAlongTheRadial;
+}
+
+void BufrProduct::setAntennaElevationDegrees(double value) {
+  // if (sweepData.size() > 0) {
+  //  if (value!= sweepData[0].antennaElevationDegrees)
+  //    throw "Cannot change the antenna elevation.";
+  // }
+  antennaElevationDegrees = value;
+}
+double BufrProduct::getAntennaElevationDegrees(int sweepNumber) {
+  return sweepData[sweepNumber].antennaElevationDegrees;
+}
+
+void BufrProduct::setRangeBinSizeMeters(double value) {
+  if (sweepData.size() > 0) {
+    if ((value != sweepData[0].rangeBinSizeMeters) && _debug) {
+      cerr << "Changing the range bin size from  " <<
+	sweepData[0].rangeBinSizeMeters << " to " << value << endl;
+    }
+  }
+  rangeBinSizeMeters = value;
+}
+double BufrProduct::getRangeBinSizeMeters(int sweepNumber) {
+  return sweepData[sweepNumber].rangeBinSizeMeters;
+}
+
+void BufrProduct::setRangeBinOffsetMeters(double value) {
+  if (sweepData.size() > 0) {
+    if (value != sweepData[0].rangeBinOffsetMeters)
+      throw "Cannot change the range bin offset.";
+  }
+  rangeBinOffsetMeters = value;
+}
+double BufrProduct::getRangeBinOffsetMeters() {
+  return rangeBinOffsetMeters;
+}
+
+void BufrProduct::setNAzimuths(size_t value) {
+  if (sweepData.size() > 0) {
+    if (value != sweepData[0].nAzimuths)
+      throw "Cannot change the number of azimuths.";
+  }
+  nAzimuths = value;
+}
+size_t BufrProduct::getNAzimuths() {
+  return nAzimuths;
+}
+
+void BufrProduct::setAntennaBeamAzimuthDegrees(double value) {
+  //if (sweepData.size() > 0) {
+  //  if (value != sweepData[0].antennaBeamAzimuthDegrees)
+  //    throw "Cannot change the antenna beam azimuth.";
+  //}
+  antennaBeamAzimuthDegrees = value;
+}
+double BufrProduct::getAntennaBeamAzimuthDegrees(int sweepNumber) {
+  return sweepData[sweepNumber].antennaBeamAzimuthDegrees;
 }
 
 // OK, we are assuming a particular order to the replicators.
@@ -207,7 +286,7 @@ double *BufrProduct::decompressData() {
   temp = (double *)UnCompDataBuff;
   if (_debug) { 
     printf ("--> %g %g %g\n", temp[0], temp[1], temp[2]);
-    printf (" ... %g %g %g <--\n", temp[n-3], temp[n-2], temp[n-1]);
+    //printf (" ... %g %g %g <--\n", temp[n-3], temp[n-2], temp[n-1]);
   }
   return (double *)UnCompDataBuff;
 }
@@ -260,7 +339,7 @@ float *BufrProduct::decompressDataFl32() {
   temp = (double *)UnCompDataBuff;
   if (_debug) {
     printf ("--> %g %g %g\n", temp[0], temp[1], temp[2]);
-    printf (" ... %g %g %g <--\n", temp[n-3], temp[n-2], temp[n-1]);
+    //printf (" ... %g %g %g <--\n", temp[n-3], temp[n-2], temp[n-1]);
   }
 
   // convert the data to float
@@ -276,7 +355,10 @@ float *BufrProduct::decompressDataFl32() {
   if (_debug) {
     printf("after conversion to float ...\n");
     printf ("--> %g %g %g\n", temp32[0], temp32[1], temp32[2]);
-    printf (" ... %g %g %g <--\n", temp32[n-3], temp32[n-2], temp32[n-1]);
+    //unsigned long nFloats;
+    //nFloats = nBinsAlongTheRadial * nAzimuths;
+    //printf (" ... %g %g %g <--\n", temp32[200], 
+    //	    temp32[201], temp32[202]);
   }
 
   free(UnCompDataBuff);

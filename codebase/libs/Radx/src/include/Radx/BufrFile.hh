@@ -162,11 +162,11 @@ public:
 
   size_t getNumberOfSweeps();
   size_t getTimeDimension();
-  size_t getRangeDimension();
+  // size_t getMaxRangeDimension();
 
-  size_t getNBinsAlongTheRadial();
+  size_t getNBinsAlongTheRadial(int sweepNumber);
   double getRangeBinOffsetMeters();
-  double getRangeBinSizeMeters();
+  double getRangeBinSizeMeters(int sweepNumber);
 
   double getElevationForSweep(int sweepNumber);
   int getNAzimuthsForSweep(int sweepNumber);

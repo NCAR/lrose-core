@@ -196,8 +196,8 @@ private:
   // range
 
   vector<double> _rangeKm;
-  size_t _nRangeInFile;
-  double _rangeBinSizeMeters;
+  // size_t _nRangeInFile;
+  // double _rangeBinSizeMeters;
   bool _gateSpacingIsConstant;
   RadxRangeGeom _geom;
   RadxRemap _remap;
@@ -304,11 +304,14 @@ private:
 
   int setTimeFromPath(const string &filePath,
 				  time_t &fileTime);
-  int _readDimensions();
+  //int _readDimensions();
   int _readGlobalAttributes();
   int _getRayTimes(int sweepNumber);
-  int _setRangeVariable();
-  int _verifyRangeVariable();
+  // int _setRangeVariable();
+  int _setRangeGeometry(double rangeBinSizeMeters,
+				    double rangeBinOffsetMeters,
+				    size_t nRanges);
+  //int _verifyRangeVariable();
   int _setPositionVariables();
   int _verifyPositionVariables();
   void _clearRayVariables();
