@@ -232,7 +232,7 @@ RadarConst
 RadarMdvCompare
 Radx2Dsr
 Radx2Grid
-#RadxBeamBlock
+RadxBeamBlock
 RadxCheck
 RadxClutMon
 RadxConvert
