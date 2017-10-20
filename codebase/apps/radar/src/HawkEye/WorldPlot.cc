@@ -1581,15 +1581,32 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   
   // add labels
 
+  // compute text height
+  // we space the labels vertically by at least 2 * text height
+
   painter.setBrush(Qt::black);
   painter.setBackgroundMode(Qt::OpaqueMode);
+  QRect tRect(painter.fontMetrics().tightBoundingRect("1.0"));
+  int textHt = tRect.height();
+
   double yy = pltHt - (patchHt * 1.0) + _topMargin;
+  double prevIyy = -1;
   for (size_t ii = 0; ii < cmap.size(); ii++) {
     const ColorMap::CmapEntry &entry = cmap[ii];
     QString label = QString("%1").arg(entry.minVal,0,format,ndecimals);
-    painter.drawText(xStart, (int)yy, width, iPatchHt, 
-                     Qt::AlignCenter | Qt::AlignHCenter, 
-                     label);
+    int iyy = (int) yy;
+    bool doText = false;
+    if (prevIyy < 0) {
+      doText = true;
+    } else if ((prevIyy - iyy) > textHt * 2) {
+      doText = true;
+    }
+    if (doText) {
+      painter.drawText(xStart, iyy, width, iPatchHt, 
+                       Qt::AlignCenter | Qt::AlignHCenter, 
+                       label);
+      prevIyy = iyy;
+    }
     yy -= patchHt;
   }
 
@@ -1597,9 +1614,12 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 
   const ColorMap::CmapEntry &entry = cmap[cmap.size()-1];
   QString label = QString("%1").arg(entry.maxVal,0,format,ndecimals);
-  painter.drawText(xStart, (int)yy, width, iPatchHt, 
-                   Qt::AlignVCenter | Qt::AlignHCenter, 
-                   label);
+  int iyy = (int) yy;
+  if ((prevIyy - iyy) > textHt * 2) {
+    painter.drawText(xStart, (int)yy, width, iPatchHt, 
+                     Qt::AlignVCenter | Qt::AlignHCenter, 
+                     label);
+  }
   yy -= patchHt * 0.5;
 
   // add Units header
