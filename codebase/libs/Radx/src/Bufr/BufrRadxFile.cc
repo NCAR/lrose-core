@@ -916,6 +916,9 @@ void BufrRadxFile::_qualityCheckRays() {
       }
     }
 
+    // remap the range geometry
+    ray->remapRangeGeomToFinest();
+
     // add to main vector if we are keeping it
 
     if (keep) {
@@ -1503,10 +1506,9 @@ int BufrRadxFile::_addFl32FieldToRays(int sweepNumber,
 
   // load field into rays
   RadxField *field;
-  //  size_t nextFileRangeDimension = nRangeInSweep; // _file.getRangeDimension();
+
   // for each ray
   for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-    //int nGates = _nRangeInFile; 
     int startIndex = ii * nGates; // _nRangeInFile;
     if (_verbose) {
       if (ii == 0) 
@@ -1515,41 +1517,49 @@ int BufrRadxFile::_addFl32FieldToRays(int sweepNumber,
     // the rays for this sweep start at sweepNumber*_nTimesInFile
     int rayIdx;
     rayIdx = (sweepNumber * _nTimesInFile) + ii;
-    /*
+    
+    
     // now we can check for the dimensions and resize as needed
     // homogenize the number of gates (also known as nRangeInFile)
     // The number of gates could be less
     // than the current number of more than the current number
-    if (nextFileRangeDimension < _nRangeInFile) {
+    size_t nGatesAlreadyInRay = _raysToRead[rayIdx]->getNGates();
+
+    if (nGates < nGatesAlreadyInRay) {
       if (_verbose) {
         if (ii == 0) 
-          cout << "Expanding field from " << nextFileRangeDimension << 
-            " to " << _nRangeInFile << endl;
+          cout << "Expanding field from " << nGates << 
+            " to " << nGatesAlreadyInRay << endl;
       }
       // fill in the data with missing values
       field = new RadxField(name, units);
       field->setTypeFl32(missingVal);
       // NOTE: the startIndex will be different
-      startIndex = ii * nextFileRangeDimension;
-      field->addDataFl32(nextFileRangeDimension, data+startIndex);
-      field->setNGates(_nRangeInFile);
+      startIndex = ii * nGates;
+      field->addDataFl32(nGates, data+startIndex);
+      field->setNGates(nGatesAlreadyInRay);
+       // ***** addField to ray *****
       _raysToRead[rayIdx]->addField(field);
+      nGates = nGatesAlreadyInRay;
     } else {
-      if (nextFileRangeDimension > _nRangeInFile) {
-	_raysToRead[rayIdx]->setNGates(nextFileRangeDimension);
-        nGates = nextFileRangeDimension;
+      if (nGates > nGatesAlreadyInRay) {
+        // expand the fields already in the ray
+	_raysToRead[rayIdx]->setNGates(nGates);
       }
       bool pleaseCopyData = true;
+      // ***** addField to ray *****
       field =
 	_raysToRead[rayIdx]->addField(name, units, nGates,
 				      missingVal,
 				      data + startIndex,
 				      pleaseCopyData);
     }
-    */
-    bool pleaseCopyData = true;
-    field =_raysToRead[rayIdx]->addField(name, units, nGates,
-	            missingVal, data + startIndex, pleaseCopyData);
+    //-------
+    
+    //bool pleaseCopyData = true;
+    // ***** addField to ray *****
+    //field =_raysToRead[rayIdx]->addField(name, units, nGates,
+    //	            missingVal, data + startIndex, pleaseCopyData);
     field->setMissingFl32(missingVal);
     field->setStandardName(standardName);
     field->setLongName(longName);
