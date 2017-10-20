@@ -74,7 +74,7 @@ public:
   static const string BackScatterCoeff;
   static const string lidar_backscatter_coefficient;
 
-  static const string Extinction;
+  static const string ExtinctionCoeff;
   static const string lidar_extinction_coefficient;
 
   static const string OpticalDepth;

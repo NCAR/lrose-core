@@ -1334,8 +1334,8 @@ void Hsrl2Radx::_addDerivedFields(RadxRay *ray)
   backscatCoeffField->setRangeGeom(startRangeKm, gateSpacingKm);
    
   RadxField *extinctionField =
-    ray->addField(Names::Extinction, "m-1", nGates, Radx::missingFl32, 
-                  calcs.getExtinction().data(), true);
+    ray->addField(Names::ExtinctionCoeff, "m-1", nGates, Radx::missingFl32, 
+                  calcs.getExtinctionCoeff().data(), true);
   extinctionField->setStandardName(Names::lidar_extinction_coefficient);
   extinctionField->setLongName(Names::lidar_extinction_coefficient);
   extinctionField->setRangeGeom(startRangeKm, gateSpacingKm);

@@ -402,7 +402,7 @@ void DerFieldCalcs::computeDerived()
                               _molDataRate.at(igate+1),scan);
     alt1=alt2;
     alt2=_htM[igate+1];
-    _extinction.push_back(_computeExtinction(opDepth1, opDepth2, alt1, alt2));
+    _extinction.push_back(_computeExtinctionCoeff(opDepth1, opDepth2, alt1, alt2));
     _opticalDepth.push_back(opDepth2);
   }
 
@@ -599,7 +599,7 @@ double DerFieldCalcs::_computeOptDepth(double pressure, double temperature,
 /////////////////////////////////////////////////////////////////
 // extinction coefficient
 
-double DerFieldCalcs::_computeExtinction(double opDepth1, double opDepth2,
+double DerFieldCalcs::_computeExtinctionCoeff(double opDepth1, double opDepth2,
                                          double alt1, double alt2)
 {
 

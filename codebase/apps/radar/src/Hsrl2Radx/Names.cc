@@ -61,7 +61,7 @@ const string Names::lidar_particle_depolarization_ratio =
 const string Names::BackScatterCoeff = "BackScatterCoeff";
 const string Names::lidar_backscatter_coefficient = "lidar_backscatter_coefficient";
 
-const string Names::Extinction = "Extinction";
+const string Names::ExtinctionCoeff = "ExtinctionCoeff";
 const string Names::lidar_extinction_coefficient = "lidar_extinction_coefficient";
 
 const string Names::OpticalDepth = "OpticalDepth";

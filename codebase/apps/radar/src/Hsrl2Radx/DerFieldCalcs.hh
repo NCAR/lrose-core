@@ -73,7 +73,7 @@ public:
   const vector<Radx::fl32> &getBackscatRatio() const { return _backscatRatio; }
   const vector<Radx::fl32> &getPartDepol() const { return _partDepol; }
   const vector<Radx::fl32> &getBackscatCoeff() const { return _backscatCoeff; }
-  const vector<Radx::fl32> &getExtinction() const { return _extinction; }
+  const vector<Radx::fl32> &getExtinctionCoeff() const { return _extinction; }
   const vector<Radx::fl32> &getOpticalDepth() const { return _opticalDepth; }
 
 private:   
@@ -162,8 +162,8 @@ private:
                           double molRate,double scan);
 
   // extinction
-  double _computeExtinction(double opDepth1, double opDepth2,
-                            double alt1, double alt2);
+  double _computeExtinctionCoeff(double opDepth1, double opDepth2,
+                                 double alt1, double alt2);
   
   void _printRateDiagnostics(const string &label,
                              bool includeCombined = false);
