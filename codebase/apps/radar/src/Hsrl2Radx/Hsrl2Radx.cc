@@ -622,7 +622,7 @@ int Hsrl2Radx::_readGeorefFromSpdb(time_t searchTime,
   
   const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
   size_t nChunks = chunks.size();
-  if (nChunks < 0) {
+  if (nChunks <= 0) {
     cerr << "ERROR - Hsrl2Radx::_readGeorefFromSpdb" << endl;
     cerr << "  Cannot read georef data from URL: "
          << _params.georef_data_spdb_url << endl;
