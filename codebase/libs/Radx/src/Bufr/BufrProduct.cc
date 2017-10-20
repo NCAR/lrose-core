@@ -391,34 +391,26 @@ void BufrProduct::putSecond(double value)  {
   timeStampStack.back().second = (int) value;
 }
 
-/*
-BufrProduct::setAntennaElevationDegrees(double value) {
-  MetaData sweep = metaData.at(currentSweepNumber);
-  sweep.antennaElevationDegrees = value;
+void BufrProduct::printSweepData(ostream &out) {
+  int i;
+  i = 0;
+  for (vector<SweepData>::iterator sw = sweepData.begin();
+       sw != sweepData.end(); ++sw) {
+    out << "sweep: " << i << endl;
+    out << "     antenna elevation (deg): " << sw->antennaElevationDegrees << endl; 
+    out << "     n bins along the radial: " << sw->nBinsAlongTheRadial << endl; 
+    out << "          range bin size (m): " << sw->rangeBinSizeMeters << endl; 
+    out << "        range bin offset (m): " << sw->rangeBinOffsetMeters << endl; 
+    out << "          number of azimuths: " << sw->nAzimuths << endl; 
+    out << "  antenna beam azimuth (deg): " << sw->antennaBeamAzimuthDegrees << endl; 
+    for (vector<ParameterData>::iterator dd=sw->parameterData.begin();
+	 dd != sw->parameterData.end(); ++dd) {
+      out << dd->typeOfProduct << endl;
+      // cannot print the data values, because they have been moved and deleted.
+      //out << dd->data[0] << ";" << dd->data[1] << ";" << dd->data[2] << ";" <<
+      //	dd->data[3] << ";" << endl; 
+    }
+      i+=1;
+  }
 }
 
-BufrProduct::setNBinsAlongRadial(double value) {
-  MetaData sweep = metaData.at(currentSweepNumber);
-  sweep.setNBinsAlongRadial = value;
-}
-
-BufrProduct::setRangeBinSizeMeters(double value) {
-  MetaData sweep = metaData.at(currentSweepNumber);
-  sweep.setRangeBinSizeMeters = value;
-}
-
-BufrProduct::setRangeBinOffsetMeters(double value) {
-  MetaData sweep = metaData.at(currentSweepNumber);
-  sweep.setRangeBinOffsetMeters = value;
-}
-
-BufrProduct::setNAzimuths(double value) {
-  MetaData sweep = metaData.at(currentSweepNumber);
-  sweep.setNAzimuths = value;
-}
-
-BufrProduct::setAntennaBeamAzimuthDegrees(double value) {
-  MetaData sweep = metaData.at(currentSweepNumber);
-  sweep.antennaBeamAzimuthDegrees = value;
-}
-*/

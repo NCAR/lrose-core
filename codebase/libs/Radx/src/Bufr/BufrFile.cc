@@ -481,7 +481,14 @@ void BufrFile::printSection3(ostream &out) {
 
 void BufrFile::printSection4(ostream &out) {
   prettyPrintTree(out, GTree, 0);
+  currentProduct.printSweepData(out);
 }
+
+/*
+void BufrFile::printSweepData(ostream &out) {
+  currentProduct.printSweepData(out);
+}
+*/
 
 // taken from bufr2hdf5.c -- read_tables(...)
 int BufrFile::readDescriptorTables() {

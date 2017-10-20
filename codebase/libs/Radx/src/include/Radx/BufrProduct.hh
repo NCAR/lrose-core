@@ -97,6 +97,8 @@ public:
   void putMinute(double value);
   void putSecond(double value);
 
+  void printSweepData(ostream &out);
+
   bool _debug;
   bool _verbose;
 
