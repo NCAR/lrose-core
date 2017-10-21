@@ -450,110 +450,6 @@ void
   
 }
 
-/////////////////////////////////////////////////////
-// compute the lookup table given the entry list
-
-void ColorMap::_computeLut()
-
-{
-
-  assert(_entries.size() > 0);
-
-  // should we use a log transform?
-
-  if (!_useLogTransform) {
-
-    double minDelta = 1.0e99;
-    double maxDelta = 0;
-    bool allPos = true;
-    
-    for (size_t ii = 0; ii < _entries.size(); ii++) {
-      if (_entries[ii].maxVal <= 0.0 || _entries[ii].minVal <= 0) {
-        allPos = false;
-      }
-      double delta = fabs(_entries[ii].maxVal - _entries[ii].minVal);
-      if ((delta > 0) && (delta < minDelta)) {
-        minDelta = delta;
-      } else if (delta > maxDelta) {
-        maxDelta = delta;
-      }
-    }
-    
-    if (allPos) {
-      double ratio = maxDelta / minDelta;
-      if (ratio > 1000) {
-        _useLogTransform = true;
-      }
-    }
-
-    if (_useLogTransform) {
-      ColorMap::setRange(log10(_rangeMin), log10(_rangeMax));
-    }
-  
-  }
-
-  // compute the beakpoints between the colors
-  
-  vector<int> breaks;
-  for (size_t ii = 0; ii < _entries.size(); ii++) {
-    double fraction = (_entries[ii].maxVal - _rangeMin) / _range;
-    if (_useLogTransform) {
-      fraction = (log10(_entries[ii].maxVal) - _rangeMin) / _range;
-    }
-    int bval = (int) ((fraction * LUT_SIZE) + 0.5);
-    if (bval < 0) bval = 0;
-    if (bval > LUT_SIZE) bval = LUT_SIZE;
-    breaks.push_back(bval);
-  }
-  breaks[breaks.size()-1] = LUT_SIZE;
-
-  int start = 0;
-  _lut.clear();
-  for (size_t ii = 0; ii < _entries.size(); ii++) {
-    int red = _entries[ii].red;
-    int green = _entries[ii].green;
-    int blue = _entries[ii].blue;
-    QBrush *brush = _entries[ii].brush;
-    double redNorm = _entries[ii].red / 255.0;
-    double greenNorm = _entries[ii].green / 255.0;
-    double blueNorm = _entries[ii].blue / 255.0;
-    for (int jj = start; jj < breaks[ii]; jj++) {
-      _lut.push_back(LutEntry(red, green, blue, brush,
-			      redNorm, greenNorm, blueNorm));
-    }
-    start = breaks[ii];
-  }
-
-}
-  
-////////////////////
-// get lut index
-
-int ColorMap::_getLutIndex(double data) const
-
-{
-
-  int index = 0;
-  if (_useLogTransform) {
-    if (data > 0) {
-      index = (int) (LUT_SIZE * (log10(data) - _rangeMin)/(_range));
-    } else {
-      index = 0;
-    }
-  } else {
-    index = (int) (LUT_SIZE * (data - _rangeMin)/(_range));
-  }
-  
-  if (index < 0) {
-    index = 0;
-  } else if (index > (LUT_SIZE-1)) {
-    index = LUT_SIZE - 1;
-  }
-
-  return index;
-
-}
-
 /**********************************************************/
 void
   ColorMap::setRange(double rangeMin, double rangeMax) {
@@ -677,16 +573,17 @@ int ColorMap::readMap(const std::string &file_path)
 int ColorMap::readRalMap(const std::string &file_path)
   
 {
-  
+
+  _path = file_path;
   _entries.clear();
   
   // open color_scale file
 
   FILE *file;
-  if ((file = fopen(file_path.c_str(), "r")) == NULL) {
+  if ((file = fopen(_path.c_str(), "r")) == NULL) {
     int errNum = errno;
     cerr << "ERROR - ColorMap::readRalMap" << endl;
-    cerr << "  Cannot open color map file: " << file_path << endl;
+    cerr << "  Cannot open color map file: " << _path << endl;
     cerr << strerror(errNum) << endl;
     return -1;
   }
@@ -698,7 +595,7 @@ int ColorMap::readRalMap(const std::string &file_path)
     
     string colorname;
     double start_val, end_val;
-    if (_parseColorScaleLine(line, start_val, end_val, colorname) == 0) {
+    if (_parseRalColorScaleLine(line, start_val, end_val, colorname) == 0) {
       CmapEntry entry;
       entry.colorName = colorname;
       entry.minVal = start_val;
@@ -714,7 +611,7 @@ int ColorMap::readRalMap(const std::string &file_path)
 
   if (_entries.size() < 1) {
     cerr << "ERROR - ColorMap::readRalMap" << endl;
-    cerr << "  No valid entries found in file: " << file_path << endl;
+    cerr << "  No valid entries found in file: " << _path << endl;
     return -1;
   }
 
@@ -777,8 +674,8 @@ int ColorMap::readRalMap(const std::string &file_path)
 
 
 /////////////////////////////////////////////////////////////////////
-// parses line in color scale file, and fills the start, end and
-// colorname fields.
+// parses line in RAL color scale file, and fills the start,
+// end and colorname fields.
 //
 // Expected line format is:
 //
@@ -786,10 +683,10 @@ int ColorMap::readRalMap(const std::string &file_path)
 //
 // Returns 0 on success, 1 on failure
 
-int ColorMap::_parseColorScaleLine(const char *line, 
-                                   double &start_val, 
-                                   double &end_val, 
-                                   string &colorname)
+int ColorMap::_parseRalColorScaleLine(const char *line, 
+                                      double &start_val, 
+                                      double &end_val, 
+                                      string &colorname)
   
 {
 
@@ -932,22 +829,23 @@ int ColorMap::readXmlMap(const std::string &file_path)
   
 {
 
+  _path = file_path;
   _entries.clear();
 
   // open color_scale file
 
   TaFile colFile;
-  if (colFile.fopen(file_path.c_str(), "r") == NULL) {
+  if (colFile.fopen(_path.c_str(), "r") == NULL) {
     int errNum = errno;
     cerr << "ERROR - ColorMap::readXmlMap" << endl;
-    cerr << "  Cannot open color map file: " << file_path << endl;
+    cerr << "  Cannot open color map file: " << _path << endl;
     cerr << strerror(errNum) << endl;
     return -1;
   }
   if (colFile.fstat()) {
     int errNum = errno;
     cerr << "ERROR - ColorMap::readXmlMap" << endl;
-    cerr << "  Cannot stat color map file: " << file_path << endl;
+    cerr << "  Cannot stat color map file: " << _path << endl;
     cerr << strerror(errNum) << endl;
     return -1;
   }
@@ -961,7 +859,7 @@ int ColorMap::readXmlMap(const std::string &file_path)
   if (colFile.fread(buf.data(), 1, fileSize) != fileSize) {
     int errNum = errno;
     cerr << "ERROR - ColorMap::readXmlMap" << endl;
-    cerr << "  Cannot read color map file: " << file_path << endl;
+    cerr << "  Cannot read color map file: " << _path << endl;
     cerr << strerror(errNum) << endl;
     return -1;
   }
@@ -978,13 +876,13 @@ int ColorMap::readXmlMap(const std::string &file_path)
   if (TaXml::readString(xmlBuf, "ColorScale", body, attrs)) {
     if (_debug) {
       cerr << "WARNING - cannot find <ColorScale> in color map file" << endl;
-      cerr << "  file not XML: " << file_path << endl;
+      cerr << "  file not XML: " << _path << endl;
     }
     return -1;
   }
   
   if (_debug) {
-    cerr << "Reading in color scale file: " << file_path << endl;
+    cerr << "Reading in color scale file: " << _path << endl;
     cerr << "Contents:" << endl;
     cerr << xmlBuf;
   }
@@ -992,17 +890,21 @@ int ColorMap::readXmlMap(const std::string &file_path)
   string id;
   if (TaXml::readStringAttr(attrs, "id", id)) {
     cerr << "ERROR - no 'id' attribute in XML colorscale" << endl;
-    cerr << "  file: " << file_path << endl;
+    cerr << "  file: " << _path << endl;
+    id = "NotSet";
   }
+  _name = id;
 
   string gradation = "linear";
+  _useLogTransform = false;
   if (TaXml::readStringAttr(attrs, "gradation", gradation) == 0) {
     if (gradation == "log") {
-      cerr << "LLLLLLLLLLLLL is log" << endl;
+      _useLogTransform = true;
     }
   }
 
   if (_debug) {
+    cerr << "DEBUG - reading colorScale name: " << _name << endl;
     cerr << "=====>> id: " << id << endl;
     cerr << "=====>> gradation: " << gradation << endl;
   }
@@ -1012,13 +914,15 @@ int ColorMap::readXmlMap(const std::string &file_path)
   vector<string> rangeBufArray;
   if (TaXml::readTagBufArray(body, "Range", rangeBufArray)) {
     cerr << "ERROR - no <Range> tags in XML colorscale" << endl;
-    cerr << "  file: " << file_path << endl;
+    cerr << "  file: " << _path << endl;
+    cerr << "  name: " << _name << endl;
     return -1;
   }
 
   if (rangeBufArray.size() < 2) {
     cerr << "ERROR - not enough <Range> tags in XML colorscale" << endl;
-    cerr << "  file: " << file_path << endl;
+    cerr << "  file: " << _path << endl;
+    cerr << "  name: " << _name << endl;
     return -1;
   }
   
@@ -1028,7 +932,8 @@ int ColorMap::readXmlMap(const std::string &file_path)
     if (TaXml::readString(rangeBufArray[ii], "Range", val, attrs)) {
       cerr << "ERROR - bad <Range> tag in XML colorscale" << endl;
       cerr << "  entry: " << rangeBufArray[ii] << endl;
-      cerr << "  file: " << file_path << endl;
+      cerr << "  file: " << _path << endl;
+      cerr << "  name: " << _name << endl;
       return -1;
     }
     
@@ -1036,7 +941,8 @@ int ColorMap::readXmlMap(const std::string &file_path)
     if (TaXml::readStringAttr(attrs, "min", minStr)) {
       cerr << "ERROR - no 'min' attribute in Range entry" << endl;
       cerr << "  entry: " << rangeBufArray[ii] << endl;
-      cerr << "  file: " << file_path << endl;
+      cerr << "  file: " << _path << endl;
+      cerr << "  name: " << _name << endl;
       return -1;
     }
 
@@ -1049,7 +955,8 @@ int ColorMap::readXmlMap(const std::string &file_path)
     if (TaXml::readStringAttr(attrs, "max", maxStr)) {
       cerr << "ERROR - no 'max' attribute in Range entry" << endl;
       cerr << "  entry: " << rangeBufArray[ii] << endl;
-      cerr << "  file: " << file_path << endl;
+      cerr << "  file: " << _path << endl;
+      cerr << "  name: " << _name << endl;
       return -1;
     }
     double maxVal;
@@ -1061,7 +968,8 @@ int ColorMap::readXmlMap(const std::string &file_path)
     if (TaXml::readStringAttr(attrs, "color", colorStr)) {
       cerr << "ERROR - no 'color' attribute in Range entry" << endl;
       cerr << "  entry: " << rangeBufArray[ii] << endl;
-      cerr << "  file: " << file_path << endl;
+      cerr << "  file: " << _path << endl;
+      cerr << "  name: " << _name << endl;
       return -1;
     }
 
@@ -1085,12 +993,12 @@ int ColorMap::readXmlMap(const std::string &file_path)
       if (sscanf(colorStr.c_str(), "%lg,%lg,%lg",
                  &fred, &fgreen, &fblue) == 3) {
         if (fred >= 1 || fgreen >= 1 || fblue >= 1) {
-          // ints from 0 to 255
+          // assume ints from 0 to 255
           red = (int) floor(fred + 0.5);
           green = (int) floor(fgreen + 0.5);
           blue = (int) floor(fblue + 0.5);
         } else {
-          // scale up
+          // floats from 0 to 1, scale up to 255
           red = (int) floor(fred * 255.0 + 0.5);
           green = (int) floor(fgreen * 255.0 + 0.5);
           blue = (int) floor(fblue * 255.0 + 0.5);
@@ -1117,13 +1025,13 @@ int ColorMap::readXmlMap(const std::string &file_path)
 
   if (std::isnan(_entries[0].minVal)) {
     cerr << "ERROR - min val for first color must be specified" << endl;
-    cerr << "  file: " << file_path << endl;
+    cerr << "  file: " << _path << endl;
     return -1;
   }
 
   if (std::isnan(_entries[_entries.size()-1].maxVal)) {
     cerr << "ERROR - max val for last color must be specified" << endl;
-    cerr << "  file: " << file_path << endl;
+    cerr << "  file: " << _path << endl;
     return -1;
   }
 
@@ -1148,47 +1056,12 @@ int ColorMap::readXmlMap(const std::string &file_path)
 
   // have missing values, we must interpolate
 
-  // load up vector of unique vals
-  
-  vector<double> vals;
-  vals.push_back(_entries[0].minVal);
-  for (size_t ii = 0; ii < _entries.size() - 1; ii++) {
-    if (!std::isnan(_entries[ii].maxVal)) {
-      vals.push_back(_entries[ii].maxVal);
-    } else {
-      vals.push_back(_entries[ii+1].minVal);
-    }
-  }
-  vals.push_back(_entries[_entries.size()-1].maxVal);
-  
+  _loadTransitions();
+
   // interpolate
 
-  bool done = false;
-  while (!done) {
-    int lower = -1;
-    int upper = -1;
-    for (size_t ii = 1; ii < vals.size(); ii++) {
-      if (lower < 0 && std::isnan(vals[ii])) {
-        lower = ii - 1;
-      } else if (lower >= 0 && !std::isnan(vals[ii])) {
-        upper = ii;
-        break;
-      }
-    } // ii
-    if (lower < 0 && upper < 0) {
-      done = true;
-    } else {
-      _interpolate(vals, lower, upper);
-    }
-  } // while
+  _interpForNans();
 
-  // set the values back into the entries
-
-  for (size_t ii = 1; ii < vals.size(); ii++) {
-    _entries[ii-1].maxVal = vals[ii];
-    _entries[ii].minVal = vals[ii];
-  }
-  
   // compute the lookup table
 
   _computeLut();
@@ -1198,25 +1071,206 @@ int ColorMap::readXmlMap(const std::string &file_path)
 }
 
 ////////////////////////////////////////////////////////
+// Interpolate missing vals
+
+void ColorMap::_interpForNans()
+
+{
+
+  // interpolate between valid transition vals
+  // i.e. replace nans
+
+  bool done = false;
+  while (!done) {
+    int lower = -1;
+    int upper = -1;
+    for (size_t ii = 1; ii < _transitionVals.size(); ii++) {
+      if (lower < 0 && std::isnan(_transitionVals[ii])) {
+        lower = ii - 1;
+      } else if (lower >= 0 && !std::isnan(_transitionVals[ii])) {
+        upper = ii;
+        break;
+      }
+    } // ii
+    if (lower < 0 && upper < 0) {
+      done = true;
+    } else {
+      _doInterp(_transitionVals, lower, upper);
+    }
+  } // while
+
+  // set the values back into the entries
+
+  for (size_t ii = 1; ii < _transitionVals.size(); ii++) {
+    _entries[ii-1].maxVal = _transitionVals[ii];
+    _entries[ii].minVal = _transitionVals[ii];
+  }
+
+}
+  
+////////////////////////////////////////////////////////
 // Interpolate values to fill in missing ranges
 
-void ColorMap::_interpolate(vector<double> &vals,
-                            size_t lower, size_t upper)
+void ColorMap::_doInterp(vector<double> &vals,
+                         size_t lower, size_t upper)
 {
 
   double lowerVal = vals[lower];
   double upperVal = vals[upper];
+
+  bool useLog = false;
+  if (_useLogTransform) {
+    if (lowerVal > 0 && upperVal > 0) {
+      lowerVal = log10(lowerVal);
+      upperVal = log10(upperVal);
+      useLog = true;
+    } else { 
+      cerr << "WARNING - non-positive value in log color scale" << endl;
+      cerr << "  file: " << _path << endl;
+      cerr << "  name: " << _name << endl;
+      cerr << "  lower index, val: " << lower << ", " << lowerVal << endl;
+      cerr << "  upper index, val: " << upper << ", " << upperVal << endl;
+      cerr << "  Using linear interpolation instead of log" << endl;
+    }
+  }
+
   double range = upperVal - lowerVal;
   double nn = upper - lower; 
-  double linearDelta = range / nn;
-  double diff = linearDelta;
+  double delta = range / nn;
+  double diff = delta;
 
   for (size_t ii = lower + 1; ii < upper; ii++) {
-    vals[ii] = lowerVal + diff;
-    diff += linearDelta;
+    double interpVal = lowerVal + diff;
+    if (useLog) {
+      vals[ii] = pow(10.0, interpVal);
+    } else {
+      vals[ii] = interpVal;
+    }
+    diff += delta;
   }
 
 }
 
+////////////////////////////////////////////////////////
+// Load up the transition vals vector
+
+void ColorMap::_loadTransitions()
+{
+
+  _transitionVals.clear();
+  _transitionVals.push_back(_entries[0].minVal);
+  for (size_t ii = 0; ii < _entries.size() - 1; ii++) {
+    if (!std::isnan(_entries[ii].maxVal)) {
+      _transitionVals.push_back(_entries[ii].maxVal);
+    } else {
+      _transitionVals.push_back(_entries[ii+1].minVal);
+    }
+  }
+  _transitionVals.push_back(_entries[_entries.size()-1].maxVal);
+
+}
+
+/////////////////////////////////////////////////////
+// compute the lookup table given the entry list
+
+void ColorMap::_computeLut()
+
+{
+
+  assert(_entries.size() > 0);
+
+  // should we use a log transform?
+
+  if (!_useLogTransform) {
+
+    double minDelta = 1.0e99;
+    double maxDelta = 0;
+    bool allPos = true;
+    
+    for (size_t ii = 0; ii < _entries.size(); ii++) {
+      if (_entries[ii].maxVal <= 0.0 || _entries[ii].minVal <= 0) {
+        allPos = false;
+      }
+      double delta = fabs(_entries[ii].maxVal - _entries[ii].minVal);
+      if ((delta > 0) && (delta < minDelta)) {
+        minDelta = delta;
+      } else if (delta > maxDelta) {
+        maxDelta = delta;
+      }
+    }
+    
+    if (allPos) {
+      double ratio = maxDelta / minDelta;
+      if (ratio > 1000) {
+        _useLogTransform = true;
+      }
+    }
+
+    if (_useLogTransform) {
+      ColorMap::setRange(log10(_rangeMin), log10(_rangeMax));
+    }
   
+  }
+
+  // compute the beakpoints between the colors
+  
+  vector<int> breaks;
+  for (size_t ii = 0; ii < _entries.size(); ii++) {
+    double fraction = (_entries[ii].maxVal - _rangeMin) / _range;
+    if (_useLogTransform) {
+      fraction = (log10(_entries[ii].maxVal) - _rangeMin) / _range;
+    }
+    int bval = (int) ((fraction * LUT_SIZE) + 0.5);
+    if (bval < 0) bval = 0;
+    if (bval > LUT_SIZE) bval = LUT_SIZE;
+    breaks.push_back(bval);
+  }
+  breaks[breaks.size()-1] = LUT_SIZE;
+
+  int start = 0;
+  _lut.clear();
+  for (size_t ii = 0; ii < _entries.size(); ii++) {
+    int red = _entries[ii].red;
+    int green = _entries[ii].green;
+    int blue = _entries[ii].blue;
+    QBrush *brush = _entries[ii].brush;
+    double redNorm = _entries[ii].red / 255.0;
+    double greenNorm = _entries[ii].green / 255.0;
+    double blueNorm = _entries[ii].blue / 255.0;
+    for (int jj = start; jj < breaks[ii]; jj++) {
+      _lut.push_back(LutEntry(red, green, blue, brush,
+			      redNorm, greenNorm, blueNorm));
+    }
+    start = breaks[ii];
+  }
+
+}
+  
+////////////////////
+// get lut index
+
+int ColorMap::_getLutIndex(double data) const
+
+{
+
+  int index = 0;
+  if (_useLogTransform) {
+    if (data > 0) {
+      index = (int) (LUT_SIZE * (log10(data) - _rangeMin)/(_range));
+    } else {
+      index = 0;
+    }
+  } else {
+    index = (int) (LUT_SIZE * (data - _rangeMin)/(_range));
+  }
+  
+  if (index < 0) {
+    index = 0;
+  } else if (index > (LUT_SIZE-1)) {
+    index = LUT_SIZE - 1;
+  }
+
+  return index;
+
+}
 

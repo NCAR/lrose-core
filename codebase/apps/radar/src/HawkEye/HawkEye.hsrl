@@ -382,7 +382,7 @@ fields = {
     raw_name = "CombinedHighCounts",
     filtered_name = "",
     units = "counts",
-    color_map = "number_log.colors",
+    color_map = "log.colors",
     shortcut = "7"
   }
   ,

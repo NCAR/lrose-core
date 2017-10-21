@@ -109,11 +109,14 @@ class DLL_EXPORT ColorMap {
 
   /// Default constructor for a ColorMap
   /// Will create a map with the standard colors
+
   ColorMap();
+
   /// Create a color map using the built-in
   /// color table.
   /// @param rangeMin The minimum value for the color map.
   /// @param rangeMax The maximum value for the color map.
+
   ColorMap(double rangeMin, double rangeMax);
 
   /// Create a color map using the provided colors.
@@ -121,6 +124,7 @@ class DLL_EXPORT ColorMap {
   /// vectors, using the number of entries found in
   /// the shortest of the three color vectors. (They 
   /// really should all be the same length).
+
   ColorMap
     (double rangeMin,        ///< The minimum map range
      double rangeMax,        ///< The maximum map range
@@ -143,6 +147,7 @@ class DLL_EXPORT ColorMap {
   /// the outer vector. The inner vectors must be of
   /// length three. If they are not, a color map using
   /// the default color table will be constructed.
+
   ColorMap
     (double rangeMin, ///< The minimum map range
      double rangeMax, ///< The maximum map range
@@ -154,6 +159,7 @@ class DLL_EXPORT ColorMap {
   /// the outer vector. The inner vectors must be of
   /// length three. If they are not, a color map using
   /// the default color table will be constructed.
+
   ColorMap
     (double rangeMin, ///< The minimum map range
      double rangeMax, ///< The maximum map range
@@ -179,9 +185,11 @@ class DLL_EXPORT ColorMap {
   }
 
   /// Destructor
+
   virtual ~ColorMap();
 
   /// set debugging
+
   void setDebug(bool state) { _debug = state; }
 
   /// Change the color map using the provided colors.
@@ -189,6 +197,7 @@ class DLL_EXPORT ColorMap {
   /// vectors, using the number of entries found in
   /// the shortest of the three color vectors. (They 
   /// really should all be the same length).
+
   void setMap
     (double rangeMin,        ///< The minimum map range
      double rangeMax,        ///< The maximum map range
@@ -201,6 +210,7 @@ class DLL_EXPORT ColorMap {
   /// vectors, using the number of entries found in
   /// the shortest of the three color vectors. (They 
   /// really should all be the same length).
+
   void setMap
     (double rangeMin,           ///< The minimum map range
      double rangeMax,          ///< The maximum map range
@@ -209,6 +219,7 @@ class DLL_EXPORT ColorMap {
      std::vector<float> blue); ///< vector of blue hues, between 0 and 1
 
   /// Change the range of an existing map.
+
   void setRange(double rangeMin,  ///< The minimum map range
                 double rangeMax); ///< The maximum map range
 
@@ -311,11 +322,21 @@ class DLL_EXPORT ColorMap {
  protected:
 
   bool _debug;
-  string _name;
-  string _units;
   bool _isDefault;
 
+  string _path;
+  string _name;
+  string _units;
+
+  // map entries
+  // size is number of colors
+
   vector<CmapEntry> _entries;
+
+  // values at color transitions
+  // size will be number of colors + 1
+
+  vector<double> _transitionVals;
 
   // color scale range
   // lookup table is computed for this range
@@ -353,17 +374,12 @@ class DLL_EXPORT ColorMap {
   vector<LutEntry> _lut;
   static const int LUT_SIZE = 10000;
 
-  // compute the lookup table from the entries
-
-  void _computeLut();
-  int _getLutIndex(double data) const;
-
   // parse a line from a color table
 
-  int _parseColorScaleLine(const char *line, 
-                           double &start_val, 
-                           double &end_val, 
-                           string &colorname);
+  int _parseRalColorScaleLine(const char *line, 
+                              double &start_val, 
+                              double &end_val, 
+                              string &colorname);
 
   // split a line into tokens
 
@@ -371,8 +387,20 @@ class DLL_EXPORT ColorMap {
                  const string &spacer,
                  vector<string> &toks);
 
-  void _interpolate(vector<double> &vals,
-                    size_t lower, size_t upper);
+  // interpolate missing vals (nans)
+
+  void _interpForNans();
+  void _doInterp(vector<double> &vals,
+                 size_t lower, size_t upper);
+
+  // load up transitions
+
+  void _loadTransitions();
+
+  // compute the lookup table from the entries
+
+  void _computeLut();
+  int _getLutIndex(double data) const;
 
  private:
 
