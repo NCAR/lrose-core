@@ -1039,11 +1039,10 @@ int ColorMap::readXmlMap(const std::string &file_path)
       cerr << "  file: " << file_path << endl;
       return -1;
     }
-    cerr << "RRRRRR minStr: " << minStr << endl;
 
     double minVal;
     if (sscanf(minStr.c_str(), "%lg", &minVal) != 1) {
-      minVal = -9999.0;
+      minVal = NAN;
     }
     
     string maxStr;
@@ -1053,10 +1052,9 @@ int ColorMap::readXmlMap(const std::string &file_path)
       cerr << "  file: " << file_path << endl;
       return -1;
     }
-    cerr << "RRRRRR maxStr: " << maxStr << endl;
     double maxVal;
     if (sscanf(maxStr.c_str(), "%lg", &maxVal) != 1) {
-      maxVal = -9999.0;
+      maxVal = NAN;
     }
     
     string colorStr;
@@ -1066,7 +1064,6 @@ int ColorMap::readXmlMap(const std::string &file_path)
       cerr << "  file: " << file_path << endl;
       return -1;
     }
-    cerr << "RRRRRR colorStr: " << colorStr << endl;
 
     unsigned int red = 0, green = 0, blue = 0;
     string xcolor;
@@ -1084,8 +1081,24 @@ int ColorMap::readXmlMap(const std::string &file_path)
       } // jj
     } else {
       // read in RGB
-      if (sscanf(colorStr.c_str(), "%d,%d,%d",
-                 &red, &green, &blue) != 3) {
+      double fred, fgreen, fblue;
+      if (sscanf(colorStr.c_str(), "%lg,%lg,%lg",
+                 &fred, &fgreen, &fblue) == 3) {
+        if (fred >= 1 || fgreen >= 1 || fblue >= 1) {
+          // ints from 0 to 255
+          red = (int) floor(fred + 0.5);
+          green = (int) floor(fgreen + 0.5);
+          blue = (int) floor(fblue + 0.5);
+        } else {
+          // scale up
+          red = (int) floor(fred * 255.0 + 0.5);
+          green = (int) floor(fgreen * 255.0 + 0.5);
+          blue = (int) floor(fblue * 255.0 + 0.5);
+        }
+        if (red > 255) red = 255;
+        if (green > 255) green = 255;
+        if (blue > 255) blue = 255;
+      } else {
         red = green = blue = 0;
       }
 
@@ -1100,9 +1113,81 @@ int ColorMap::readXmlMap(const std::string &file_path)
     
   }
 
+  // check that min and max vals are not NAN
+
+  if (std::isnan(_entries[0].minVal)) {
+    cerr << "ERROR - min val for first color must be specified" << endl;
+    cerr << "  file: " << file_path << endl;
+    return -1;
+  }
+
+  if (std::isnan(_entries[_entries.size()-1].maxVal)) {
+    cerr << "ERROR - max val for last color must be specified" << endl;
+    cerr << "  file: " << file_path << endl;
+    return -1;
+  }
+
   // set range
   
   setRange(_entries[0].minVal, _entries[_entries.size()-1].maxVal);
+
+  // check for missing values
+
+  bool missFound = false;
+  for (size_t ii = 0; ii < _entries.size(); ii++) {
+    if (std::isnan(_entries[ii].minVal) || std::isnan(_entries[ii].maxVal)) {
+      missFound = true;
+      break;
+    }
+  }
+  if (!missFound) {
+    // all good, return now
+    _computeLut();
+    return 0;
+  }
+
+  // have missing values, we must interpolate
+
+  // load up vector of unique vals
+  
+  vector<double> vals;
+  vals.push_back(_entries[0].minVal);
+  for (size_t ii = 0; ii < _entries.size() - 1; ii++) {
+    if (!std::isnan(_entries[ii].maxVal)) {
+      vals.push_back(_entries[ii].maxVal);
+    } else {
+      vals.push_back(_entries[ii+1].minVal);
+    }
+  }
+  vals.push_back(_entries[_entries.size()-1].maxVal);
+  
+  // interpolate
+
+  bool done = false;
+  while (!done) {
+    int lower = -1;
+    int upper = -1;
+    for (size_t ii = 1; ii < vals.size(); ii++) {
+      if (lower < 0 && std::isnan(vals[ii])) {
+        lower = ii - 1;
+      } else if (lower >= 0 && !std::isnan(vals[ii])) {
+        upper = ii;
+        break;
+      }
+    } // ii
+    if (lower < 0 && upper < 0) {
+      done = true;
+    } else {
+      _interpolate(vals, lower, upper);
+    }
+  } // while
+
+  // set the values back into the entries
+
+  for (size_t ii = 1; ii < vals.size(); ii++) {
+    _entries[ii-1].maxVal = vals[ii];
+    _entries[ii].minVal = vals[ii];
+  }
   
   // compute the lookup table
 
@@ -1112,4 +1197,26 @@ int ColorMap::readXmlMap(const std::string &file_path)
   
 }
 
+////////////////////////////////////////////////////////
+// Interpolate values to fill in missing ranges
+
+void ColorMap::_interpolate(vector<double> &vals,
+                            size_t lower, size_t upper)
+{
+
+  double lowerVal = vals[lower];
+  double upperVal = vals[upper];
+  double range = upperVal - lowerVal;
+  double nn = upper - lower; 
+  double linearDelta = range / nn;
+  double diff = linearDelta;
+
+  for (size_t ii = lower + 1; ii < upper; ii++) {
+    vals[ii] = lowerVal + diff;
+    diff += linearDelta;
+  }
+
+}
+
+  
 

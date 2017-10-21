@@ -371,6 +371,9 @@ class DLL_EXPORT ColorMap {
                  const string &spacer,
                  vector<string> &toks);
 
+  void _interpolate(vector<double> &vals,
+                    size_t lower, size_t upper);
+
  private:
 
   ColorMap &_copy(const ColorMap &rhs);
