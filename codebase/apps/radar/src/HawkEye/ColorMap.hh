@@ -163,7 +163,8 @@ class DLL_EXPORT ColorMap {
   // On failure, uses the default constructor, which
   // uses rainbow colors and a range of 0.0 to 1.0.
   
-  ColorMap(const std::string &file_path);
+  ColorMap(const std::string &file_path,
+           bool debug = false);
   
   // copy constructor
   
@@ -179,6 +180,9 @@ class DLL_EXPORT ColorMap {
 
   /// Destructor
   virtual ~ColorMap();
+
+  /// set debugging
+  void setDebug(bool state) { _debug = state; }
 
   /// Change the color map using the provided colors.
   /// The color table will be constructed from the color
@@ -208,10 +212,20 @@ class DLL_EXPORT ColorMap {
   void setRange(double rangeMin,  ///< The minimum map range
                 double rangeMax); ///< The maximum map range
 
+  // set map by reading color map file
+  // Returns 0 on success, -1 on failure
+        
+  int readMap(const std::string &file_path);
+
   // set map by reading RAL-style color map file
   // Returns 0 on success, -1 on failure
         
   int readRalMap(const std::string &file_path);
+
+  // set map by reading XML-style color map file
+  // Returns 0 on success, -1 on failure
+        
+  int readXmlMap(const std::string &file_path);
 
   // set/get name and units
 
@@ -296,6 +310,7 @@ class DLL_EXPORT ColorMap {
 
  protected:
 
+  bool _debug;
   string _name;
   string _units;
   bool _isDefault;

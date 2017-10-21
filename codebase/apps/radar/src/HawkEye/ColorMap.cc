@@ -23,6 +23,9 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include "ColorMap.hh"
 #include "rgb.hh"
+#include <toolsa/TaXml.hh>
+#include <toolsa/TaFile.hh>
+#include <toolsa/MemBuf.hh>
 #include <cmath>
 #include <cstring>
 #include <cstdlib>
@@ -166,6 +169,36 @@ ColorMap::CmapEntry::CmapEntry(int red,
 
 }
 
+//////////////////////////////////////////////////
+// Copy object
+
+ColorMap &ColorMap::_copy(const ColorMap &rhs)
+{
+
+  if (this != &rhs) {
+
+    // copy members
+
+    _name = rhs._name;
+    _units = rhs._units;
+    _isDefault = rhs._isDefault;
+    _entries = rhs._entries;
+    _rangeMin = rhs._rangeMin;
+    _rangeMax = rhs._rangeMax;
+    _range = rhs._range;
+    _useLogTransform = rhs._useLogTransform;
+
+    // compute the lookup table
+    
+    _computeLut();
+
+  }
+
+  return *this;
+
+}
+
+////////////////////////////////////////////////////
 // Copy entry
 
 ColorMap::CmapEntry &ColorMap::CmapEntry::_copy(const CmapEntry &rhs)
@@ -206,6 +239,7 @@ void ColorMap::CmapEntry::setColor(const int r, const int g, const int b)
 
 ColorMap::ColorMap()
 {
+  _debug = false;
   _useLogTransform = false;
   *this = ColorMap(0.0, 1.0);
   _isDefault = true;
@@ -219,6 +253,7 @@ ColorMap::ColorMap(double rangeMin,
         _rangeMax(rangeMax),
         _range(rangeMax-rangeMin)
 { 
+  _debug = false;
   _useLogTransform = false;
   int s = sizeof(rainbowRGB)/(sizeof(rainbowRGB[0])/sizeof(rainbowRGB[0].r));
   vector<int> red, green, blue;
@@ -238,6 +273,7 @@ ColorMap::ColorMap
    std::vector<int> green, ///< vector of green hues, ranging between 0 and 255
    std::vector<int> blue)  ///< vector of blue hues, ranging between 0 and 255
 {
+  _debug = false;
   _useLogTransform = false;
   setMap(rangeMin, rangeMax, red, blue, green);
 }
@@ -248,6 +284,8 @@ ColorMap::ColorMap
    double rangeMax,         ///< The maximum map range
    std::vector<std::vector<int> >colors)
 {
+
+  _debug = false;
   _useLogTransform = false;
 
   for (unsigned int i = 0; i < colors.size(); i++) {
@@ -268,6 +306,7 @@ ColorMap::ColorMap
    double rangeMax,         ///< The maximum map range
    std::vector<std::vector<float> >colors)
 {
+  _debug = false;
   _useLogTransform = false;
   for (unsigned int i = 0; i < colors.size(); i++) {
     assert(colors[i].size() == 3);
@@ -289,6 +328,7 @@ ColorMap::ColorMap(
 
 {
 
+  _debug = false;
   _useLogTransform = false;
 
   RGB* colors;
@@ -332,14 +372,22 @@ ColorMap::ColorMap(
 // On failure, uses the default constructor, which
 // uses rainbow colors and a range of 0.0 to 1.0.
 
-ColorMap::ColorMap(const std::string &file_path)
+ColorMap::ColorMap(const std::string &file_path,
+                   bool debug /* = false */)
   
 {
 
+  _debug = debug;
   _useLogTransform = false;
-  if (readRalMap(file_path)) {
+
+  // first try XML style map
+
+  if (readMap(file_path)) {
+    
+    // failure 0 set to default
     *this = ColorMap(0.0, 1.0);
     _isDefault = true;
+    
   }
 
 }
@@ -595,6 +643,33 @@ void ColorMap::dataColor
 }
 
 ////////////////////////////////////////////////////////
+// set color map
+//
+// Returns 0 on success, -1 on failure
+
+int ColorMap::readMap(const std::string &file_path)
+  
+{
+
+  // first try XML style map
+  
+  if (readXmlMap(file_path) == 0) {
+    return 0;
+  }
+
+  // then try RAL stype map
+  
+  if (readRalMap(file_path) == 0) {
+    return 0;
+  }
+      
+  // failure
+
+  return -1;
+
+}
+  
+////////////////////////////////////////////////////////
 // set map by reading RAL-style color map file
 //
 // Returns 0 on success, -1 on failure
@@ -848,33 +923,193 @@ void ColorMap::printLut(ostream &out) const
   out << "================================" << endl;
 }
 
-//////////////////////////////////////////////////
-// Copy object
+////////////////////////////////////////////////////////
+// set map by reading XML-style color map file
+//
+// Returns 0 on success, -1 on failure
 
-ColorMap &ColorMap::_copy(const ColorMap &rhs)
+int ColorMap::readXmlMap(const std::string &file_path)
+  
 {
 
-  if (this != &rhs) {
+  _entries.clear();
 
-    // copy members
+  // open color_scale file
 
-    _name = rhs._name;
-    _units = rhs._units;
-    _isDefault = rhs._isDefault;
-    _entries = rhs._entries;
-    _rangeMin = rhs._rangeMin;
-    _rangeMax = rhs._rangeMax;
-    _range = rhs._range;
-    _useLogTransform = rhs._useLogTransform;
+  TaFile colFile;
+  if (colFile.fopen(file_path.c_str(), "r") == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - ColorMap::readXmlMap" << endl;
+    cerr << "  Cannot open color map file: " << file_path << endl;
+    cerr << strerror(errNum) << endl;
+    return -1;
+  }
+  if (colFile.fstat()) {
+    int errNum = errno;
+    cerr << "ERROR - ColorMap::readXmlMap" << endl;
+    cerr << "  Cannot stat color map file: " << file_path << endl;
+    cerr << strerror(errNum) << endl;
+    return -1;
+  }
+  off_t fileSize = colFile.getStat().st_size;
 
-    // compute the lookup table
-    
-    _computeLut();
+  // read into buffer
 
+  vector<char> buf;
+  buf.reserve(fileSize + 1);
+  memset(buf.data(), 0, fileSize + 1);
+  if (colFile.fread(buf.data(), 1, fileSize) != fileSize) {
+    int errNum = errno;
+    cerr << "ERROR - ColorMap::readXmlMap" << endl;
+    cerr << "  Cannot read color map file: " << file_path << endl;
+    cerr << strerror(errNum) << endl;
+    return -1;
+  }
+  colFile.fclose();
+
+  // create XML string
+
+  string xmlBuf(buf.data());
+
+  // read in main tag and value
+
+  string body;
+  vector<TaXml::attribute> attrs;
+  if (TaXml::readString(xmlBuf, "ColorScale", body, attrs)) {
+    if (_debug) {
+      cerr << "WARNING - cannot find <ColorScale> in color map file" << endl;
+      cerr << "  file not XML: " << file_path << endl;
+    }
+    return -1;
+  }
+  
+  if (_debug) {
+    cerr << "Reading in color scale file: " << file_path << endl;
+    cerr << "Contents:" << endl;
+    cerr << xmlBuf;
   }
 
-  return *this;
+  string id;
+  if (TaXml::readStringAttr(attrs, "id", id)) {
+    cerr << "ERROR - no 'id' attribute in XML colorscale" << endl;
+    cerr << "  file: " << file_path << endl;
+  }
 
+  string gradation = "linear";
+  if (TaXml::readStringAttr(attrs, "gradation", gradation) == 0) {
+    if (gradation == "log") {
+      cerr << "LLLLLLLLLLLLL is log" << endl;
+    }
+  }
+
+  if (_debug) {
+    cerr << "=====>> id: " << id << endl;
+    cerr << "=====>> gradation: " << gradation << endl;
+  }
+
+  // read in range tags
+  
+  vector<string> rangeBufArray;
+  if (TaXml::readTagBufArray(body, "Range", rangeBufArray)) {
+    cerr << "ERROR - no <Range> tags in XML colorscale" << endl;
+    cerr << "  file: " << file_path << endl;
+    return -1;
+  }
+
+  if (rangeBufArray.size() < 2) {
+    cerr << "ERROR - not enough <Range> tags in XML colorscale" << endl;
+    cerr << "  file: " << file_path << endl;
+    return -1;
+  }
+  
+  for (size_t ii = 0; ii < rangeBufArray.size(); ii++) {
+
+    string val;
+    if (TaXml::readString(rangeBufArray[ii], "Range", val, attrs)) {
+      cerr << "ERROR - bad <Range> tag in XML colorscale" << endl;
+      cerr << "  entry: " << rangeBufArray[ii] << endl;
+      cerr << "  file: " << file_path << endl;
+      return -1;
+    }
+    
+    string minStr;
+    if (TaXml::readStringAttr(attrs, "min", minStr)) {
+      cerr << "ERROR - no 'min' attribute in Range entry" << endl;
+      cerr << "  entry: " << rangeBufArray[ii] << endl;
+      cerr << "  file: " << file_path << endl;
+      return -1;
+    }
+    cerr << "RRRRRR minStr: " << minStr << endl;
+
+    double minVal;
+    if (sscanf(minStr.c_str(), "%lg", &minVal) != 1) {
+      minVal = -9999.0;
+    }
+    
+    string maxStr;
+    if (TaXml::readStringAttr(attrs, "max", maxStr)) {
+      cerr << "ERROR - no 'max' attribute in Range entry" << endl;
+      cerr << "  entry: " << rangeBufArray[ii] << endl;
+      cerr << "  file: " << file_path << endl;
+      return -1;
+    }
+    cerr << "RRRRRR maxStr: " << maxStr << endl;
+    double maxVal;
+    if (sscanf(maxStr.c_str(), "%lg", &maxVal) != 1) {
+      maxVal = -9999.0;
+    }
+    
+    string colorStr;
+    if (TaXml::readStringAttr(attrs, "color", colorStr)) {
+      cerr << "ERROR - no 'color' attribute in Range entry" << endl;
+      cerr << "  entry: " << rangeBufArray[ii] << endl;
+      cerr << "  file: " << file_path << endl;
+      return -1;
+    }
+    cerr << "RRRRRR colorStr: " << colorStr << endl;
+
+    unsigned int red = 0, green = 0, blue = 0;
+    string xcolor;
+    if (colorStr.find(",") == string::npos) {
+      // no commas, must be xcolor
+      xcolor = colorStr;
+      for (int jj = 0; jj < N_X_COLORS; jj++) {
+        if (strcasecmp(xColors[jj].name, xcolor.c_str()) == 0) {
+          // found a match
+	  red = xColors[jj].red;
+          green = xColors[jj].green;
+          blue = xColors[jj].blue;
+          break;
+        }
+      } // jj
+    } else {
+      // read in RGB
+      if (sscanf(colorStr.c_str(), "%d,%d,%d",
+                 &red, &green, &blue) != 3) {
+        red = green = blue = 0;
+      }
+
+    }
+
+    CmapEntry entry;
+    entry.colorName = colorStr;
+    entry.minVal = minVal;
+    entry.maxVal = maxVal;
+    entry.setColor(red, green, blue);
+    _entries.push_back(entry);
+    
+  }
+
+  // set range
+  
+  setRange(_entries[0].minVal, _entries[_entries.size()-1].maxVal);
+  
+  // compute the lookup table
+
+  _computeLut();
+
+  return 0;
+  
 }
 
 
