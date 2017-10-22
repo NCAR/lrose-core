@@ -107,6 +107,13 @@ class DLL_EXPORT ColorMap {
 
   };
 
+  class CmapLabel {
+  public:
+    double value;    // value for label
+    double position; // fractional position relative to min/max
+    string text;     // label text
+  };
+
   /// Default constructor for a ColorMap
   /// Will create a map with the standard colors
 
@@ -251,6 +258,7 @@ class DLL_EXPORT ColorMap {
    */
 
   const std::vector<CmapEntry> &getEntries() const { return _entries; }
+  const std::vector<double> &getTransitions() const { return _transitionVals; }
 
   /// Map the data value to a color. Return values will be luminances
   /// from the supplied color tables.
@@ -307,6 +315,14 @@ class DLL_EXPORT ColorMap {
   /// @return The name of the builtin color maps.
   static std::vector<std::string> builtinMaps();
 
+  /// Get specified labels
+
+  bool useSpecifiedLabels() const { return _useSpecifiedLabels; }
+  const vector<CmapLabel> &getSpecifiedLabels() const
+  {
+    return _specifiedLabels;
+  }
+  
   // print map
 
   void print(ostream &out) const;
@@ -328,6 +344,11 @@ class DLL_EXPORT ColorMap {
   string _name;
   string _units;
 
+  // transform using log() for lut with large dynamic range
+
+  bool _useLog10Transform;
+  bool _useLog10ForLut;
+
   // map entries
   // size is number of colors
 
@@ -344,10 +365,12 @@ class DLL_EXPORT ColorMap {
   double _rangeMin;
   double _rangeMax;
   double _range;
-  
-  // transform using log() for intervals with large dynamic range
-  bool _useLogTransform;
 
+  // specified labels and their values
+
+  bool _useSpecifiedLabels;
+  vector<CmapLabel> _specifiedLabels;
+  
   // lookup table of RGB colors, evenly distributed
   // through the range
 
@@ -374,6 +397,10 @@ class DLL_EXPORT ColorMap {
   vector<LutEntry> _lut;
   static const int LUT_SIZE = 10000;
 
+  // initialize for construction
+
+  void _init();
+
   // parse a line from a color table
 
   int _parseRalColorScaleLine(const char *line, 
@@ -386,6 +413,11 @@ class DLL_EXPORT ColorMap {
   void _tokenize(const string &str,
                  const string &spacer,
                  vector<string> &toks);
+
+  // reading in XML file
+
+  int _readRangeTag(const string &rangeTag);
+  int _readLabelTag(const string &labelTag);
 
   // interpolate missing vals (nans)
 

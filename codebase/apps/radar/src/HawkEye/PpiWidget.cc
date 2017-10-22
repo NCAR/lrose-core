@@ -617,7 +617,8 @@ void PpiWidget::_drawOverlays(QPainter &painter)
   // draw the color scale
 
   const DisplayField &field = _manager.getSelectedField();
-  _zoomWorld.drawColorScale(field.getColorMap(), painter);
+  _zoomWorld.drawColorScale(field.getColorMap(), painter,
+                            _params.label_font_size);
 
   if (_archiveMode) {
 
