@@ -42,6 +42,8 @@ using namespace std;
 Args::Args ()
 {
   TDRP_init_override(&override);
+  startTime = 0;
+  endTime = 0;
 }
 
 // Destructor
@@ -65,6 +67,7 @@ int Args::parse (int argc, char **argv, string &prog_name)
   char tmp_str[BUFSIZ];
   bool OK = true;
   vector<string> fields;
+  bool isFilelist = false;
   
   // loop through args
   
@@ -103,7 +106,42 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	TDRP_add_override(&override, tmp_str);
       }
 	
-    } else if (!strcmp(argv[i], "-path") || !strcmp(argv[i], "-f")) {
+    } else if (!strcmp(argv[i], "-mode")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "mode = %s;", argv[i+1]);
+	TDRP_add_override(&override, tmp_str);
+      }
+	
+    } else if (!strcmp(argv[i], "-start")) {
+      
+      if (i < argc - 1) {
+	startTime = RadxTime::parseDateTime(argv[++i]);
+	if (startTime == RadxTime::NEVER) {
+	  OK = false;
+	} else {
+	  sprintf(tmp_str, "mode = ARCHIVE;");
+	  TDRP_add_override(&override, tmp_str);
+	}
+      } else {
+	OK = false;
+      }
+	
+    } else if (!strcmp(argv[i], "-end")) {
+      
+      if (i < argc - 1) {
+	endTime = RadxTime::parseDateTime(argv[++i]);
+	if (endTime == RadxTime::NEVER) {
+	  OK = false;
+	} else {
+	  sprintf(tmp_str, "mode = ARCHIVE;");
+	  TDRP_add_override(&override, tmp_str);
+	}
+      } else {
+	OK = false;
+      }
+	
+    } else if (!strcmp(argv[i], "-f")) {
       
       if (i < argc - 1) {
 	// load up file list vector. Break at next arg which
@@ -117,6 +155,7 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	}
 	sprintf(tmp_str, "mode = FILELIST;");
 	TDRP_add_override(&override, tmp_str);
+        isFilelist = true;
       } else {
 	OK = false;
       }
@@ -143,6 +182,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
     
   } // i
 
+  if (startTime != 0 && endTime != 0 && !isFilelist) {
+    sprintf(tmp_str, "mode = ARCHIVE;");
+    TDRP_add_override(&override, tmp_str);
+  }
+
   if (!OK) {
     _usage(cerr);
     return -1;
@@ -162,14 +206,22 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -d, -debug ] print debug messages\n"
       << "\n"
-      << "  [ -f, -paths ? ] set file paths\n"
+      << "  [ -end \"yyyy mm dd hh mm ss\"] end time\n"
+      << "           Sets mode to ARCHIVE\n"
+      << "\n"
+      << "  [ -f ? ] set file paths\n"
       << "           Sets mode to FILELIST\n"
       << "\n"
       << "  [ -indir ? ] set input directory\n"
       << "\n"
-      << "  [ -instance ?] specify the instance\n"
+      << "  [ -instance ?] specify the instance for procmap\n"
+      << "\n"
+      << "  [ -mode ?] input mode - REALTIME, ARCHIVE or FILELIST\n"
       << "\n"
       << "  [ -outdir ? ] set output directory\n"
+      << "\n"
+      << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"
+      << "           Sets mode to ARCHIVE\n"
       << "\n"
       << "  [ -v, -verbose ] print verbose debug messages\n"
       << "\n"

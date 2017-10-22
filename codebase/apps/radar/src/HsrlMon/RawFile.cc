@@ -217,6 +217,58 @@ int RawFile::getTimeFromPath(const string &path, RadxTime &rtime)
 }
 
 ////////////////////////////////////////////////////////////
+/// get start and end times for data in file
+/// returns 0 on success, -1 on failure
+
+int RawFile::getStartAndEndTimes(const string &filePath,
+                                 time_t &dataStartTime,
+                                 time_t &dataEndTime)
+
+{
+  
+  // open file
+  
+  if (_file.openRead(filePath)) {
+    cerr << "ERROR - RawFile::getStartAndEndTimes" << endl;
+    cerr << _file.getErrStr() << endl;
+    return -1;
+  }
+  
+  // read dimensions
+  
+  if (_readDimensions()) {
+    cerr << "ERROR - RawFile::getStartAndEndTimes" << endl;
+    cerr << _errStr << endl;
+    return -1;
+  }
+  
+  // read time variable
+  
+  if (_readTimes()) {
+    cerr << "ERROR - RawFile::getStartAndEndTimes" << endl;
+    cerr << _errStr << endl;
+    return -1;
+  }
+  if (_nTimesInFile < 1) {
+    cerr << "ERROR - RawFile::getStartAndEndTimes" << endl;
+    cerr << "  No times found in file: " << filePath << endl;
+    return -1;
+  }
+  
+  // close file
+  
+  _file.close();
+
+  // set times
+  
+  dataStartTime = _dataTimes[0].utime();
+  dataEndTime = _dataTimes[_nTimesInFile - 1].utime();
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////////////////
 // Read in data from specified path
 // Returns 0 on success, -1 on failure
 // Use getErrStr() if error occurs

@@ -80,10 +80,22 @@ private:
   Params _params;
   vector<string> _readPaths;
 
+  RadxTime _realtimeScheduledTime;
+
   int _runFilelist();
-  int _runRealtimeWithLdata();
-  int _runRealtimeNoLdata();
+  int _runArchive();
+  int _runRealtime();
+
   int _processFile(const string &filePath);
+
+  int _processFileFromList(const string &filePath);
+  int _performMonitoring(time_t startTime, time_t endTime);
+  int _performMonitoring(const string &filePath,
+                         time_t startTime,
+                         time_t endTime);
+  int _findFiles(time_t startTime,
+                 time_t endTime,
+                 vector<string> &filePaths);
 
 };
 

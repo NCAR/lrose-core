@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for HsrlMon
+ * TDRP params for ./HsrlMon
  **********************************************************************/
 
 //======================================================================
@@ -58,7 +58,11 @@ instance = "test";
 // Operating mode.
 //
 
-// In REALTIME mode, the program waits for a new input file.
+// In REALTIME mode, the program wakes up at regular intervals, and 
+//   processes the latest data files.
+//
+// In ARCHIVE mode, the program selects the file(s) appropriately for 
+//   the start and end times.
 //
 // In FILELIST mode, it moves through the list of file names specified 
 //   on the command line. .
@@ -67,6 +71,7 @@ instance = "test";
 // Type: enum
 // Options:
 //     REALTIME
+//     ARCHIVE
 //     FILELIST
 //
 
@@ -76,111 +81,79 @@ mode = REALTIME;
 //
 // Input directory for searching for files.
 //
-// REALTIME mode only. Files will be searched for in this directory.
+// REALTIME and ARCHIVE modes only. Files will be searched for in this 
+//   directory, base on the times selected.
 //
 //
 // Type: string
 //
 
-input_dir = ".";
+input_dir = "/scr/eldora1/rsfdata/cset/hsrl/raw";
 
-///////////// max_realtime_data_age_secs //////////////
+///////////// monitoring_interval_secs ////////////////
 //
-// Maximum age of realtime data (secs).
+// Interval period over which the monitoring is performed (secs).
 //
-// REALTIME mode only. Only data less old than this will be used.
+// This is the interval over which the monitoring statistics are 
+//   computed.
 //
 //
 // Type: int
 //
 
-max_realtime_data_age_secs = 300;
+monitoring_interval_secs = 300;
 
-///////////// latest_data_info_avail //////////////////
+///////////// realtime_interval_secs //////////////////
 //
-// Is _latest_data_info file available?.
+// Interval between processing latest data (secs).
 //
-// REALTIME mode only. If TRUE, will watch the latest_data_info file. If 
-//   FALSE, will scan the input directory for new files.
-//
-//
-// Type: boolean
-//
-
-latest_data_info_avail = TRUE;
-
-///////////// search_recursively //////////////////////
-//
-// Option to recurse to subdirectories while looking for new files.
-//
-// REALTIME mode only. If TRUE, all subdirectories with ages less than 
-//   max_dir_age will be searched. This may take considerable CPU, so be 
-//   careful in its use. Only applies if latest_data_info_avail is FALSE.
-//
-//
-// Type: boolean
-//
-
-search_recursively = TRUE;
-
-///////////// max_recursion_depth /////////////////////
-//
-// Maximum depth for recursive directory scan.
-//
-// REALTIME mode only. Only applies search_recursively is TRUE. This is 
-//   the max depth, below input_dir, to which the recursive directory 
-//   search will be carried out. A depth of 0 will search the top-level 
-//   directory only. A depth of 1 will search the level below the top 
-//   directory, etc.
+// REALTIME mode only. The program wakes up at this interval, and 
+//   processes the latest available data.
 //
 //
 // Type: int
 //
 
-max_recursion_depth = 5;
+realtime_interval_secs = 30;
 
-///////////// wait_between_checks /////////////////////
+///////////// realtime_delay_secs /////////////////////
 //
-// Sleep time between checking directory for input - secs.
+// Delay in processing latest data (secs).
 //
-// REALTIME mode only. If a directory is large and files do not arrive 
-//   frequently, set this to a higher value to reduce the CPU load from 
-//   checking the directory. Only applies if latest_data_info_avail is 
-//   FALSE.
-//
-// Minimum val: 1
-//
-// Type: int
-//
-
-wait_between_checks = 2;
-
-///////////// file_quiescence /////////////////////////
-//
-// File quiescence when checking for files - secs.
-//
-// REALTIME mode only. This allows you to make sure that a file coming 
-//   from a remote machine is complete before reading it. Only applies if 
-//   latest_data_info_avail is FALSE.
+// REALTIME mode only. We wait by this period to give the latest data 
+//   time to be written to the disk files.
 //
 //
 // Type: int
 //
 
-file_quiescence = 5;
+realtime_delay_secs = 10;
 
-///////////// search_ext //////////////////////////////
+///////////// file_prefix /////////////////////////////
+//
+// File name prefix.
+//
+// We use this prefix to find the files to be processed. The filename 
+//   will be prefix_yyyymmddThhmmss*.nc.
+//
+//
+// Type: string
+//
+
+file_prefix = "gvhsrl";
+
+///////////// file_ext ////////////////////////////////
 //
 // File name extension.
 //
-// REALTIME mode only. If set, only files with this extension will be 
-//   processed.
+// The input files will have this extension, since they are netcdf 
+//   files.
 //
 //
 // Type: string
 //
 
-search_ext = "";
+file_ext = "nc";
 
 //======================================================================
 //

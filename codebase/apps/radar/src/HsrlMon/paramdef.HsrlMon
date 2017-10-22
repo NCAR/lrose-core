@@ -37,64 +37,51 @@ commentdef {
 }
 
 typedef enum {
-  REALTIME, FILELIST
+  REALTIME, ARCHIVE, FILELIST
 } mode_t;
 
 paramdef enum mode_t {
   p_default = REALTIME;
   p_descr = "Operating mode";
   p_help = 
-  "\nIn REALTIME mode, the program waits for a new input file.\n\nIn FILELIST mode, it moves through the list of file names specified on the command line. ";
+  "\nIn REALTIME mode, the program wakes up at regular intervals, and processes the latest data files.\n\nIn ARCHIVE mode, the program selects the file(s) appropriately for the start and end times.\n\nIn FILELIST mode, it moves through the list of file names specified on the command line. ";
 } mode;
 
 paramdef string {
   p_default = ".";
   p_descr = "Input directory for searching for files.";
-  p_help = "REALTIME mode only. Files will be searched for in this directory.";
+  p_help = "REALTIME and ARCHIVE modes only. Files will be searched for in this directory, base on the times selected.";
 } input_dir;
 
 paramdef int {
   p_default = 300;
-  p_descr = "Maximum age of realtime data (secs)";
-  p_help =  "REALTIME mode only. Only data less old than this will be used.";
-} max_realtime_data_age_secs;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Is _latest_data_info file available?";
-  p_help = "REALTIME mode only. If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.";
-} latest_data_info_avail;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to recurse to subdirectories while looking for new files.";
-  p_help = "REALTIME mode only. If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use. Only applies if latest_data_info_avail is FALSE."; 
-} search_recursively;
+  p_descr = "Interval period over which the monitoring is performed (secs).";
+  p_help =  "This is the interval over which the monitoring statistics are computed.";
+} monitoring_interval_secs;
 
 paramdef int {
-  p_default = 5;
-  p_descr = "Maximum depth for recursive directory scan.";
-  p_help = "REALTIME mode only. Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.";
-} max_recursion_depth;
+  p_default = 300;
+  p_descr = "Interval between processing latest data (secs)";
+  p_help =  "REALTIME mode only. The program wakes up at this interval, and processes the latest available data.";
+} realtime_interval_secs;
 
 paramdef int {
-  p_default = 2;
-  p_min = 1;
-  p_descr = "Sleep time between checking directory for input - secs.";
-  p_help = "REALTIME mode only. If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory. Only applies if latest_data_info_avail is FALSE.";
-} wait_between_checks;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "File quiescence when checking for files - secs.";
-  p_help = "REALTIME mode only. This allows you to make sure that a file coming from a remote machine is complete before reading it. Only applies if latest_data_info_avail is FALSE.";
-} file_quiescence;
+  p_default = 60;
+  p_descr = "Delay in processing latest data (secs)";
+  p_help =  "REALTIME mode only. We wait by this period to give the latest data time to be written to the disk files.";
+} realtime_delay_secs;
 
 paramdef string {
-  p_default = "";
+  p_default = "gvhsrl";
+  p_descr = "File name prefix.";
+  p_help = "We use this prefix to find the files to be processed. The filename will be prefix_yyyymmddThhmmss*.nc.";
+} file_prefix;
+
+paramdef string {
+  p_default = "nc";
   p_descr = "File name extension.";
-  p_help = "REALTIME mode only. If set, only files with this extension will be processed.";
-} search_ext;
+  p_help = "The input files will have this extension, since they are netcdf files.";
+} file_ext;
 
 commentdef {
   p_header = "READING RAW NetCDF DATA FILES";

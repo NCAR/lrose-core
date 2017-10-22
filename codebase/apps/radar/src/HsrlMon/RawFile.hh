@@ -90,7 +90,14 @@ public:
   /// returns 0 on success, -1 on failure
 
   int getTimeFromPath(const string &path, RadxTime &rtime);
+
+  /// get start and end times for data in file
+  /// returns 0 on success, -1 on failure
   
+  int getStartAndEndTimes(const string &filePath,
+                          time_t &dataStartTime,
+                          time_t &dataEndTime);
+
   ////////////////////////
   /// \name Error string:
   //@{

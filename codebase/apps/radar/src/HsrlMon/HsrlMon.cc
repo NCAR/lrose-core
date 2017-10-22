@@ -107,15 +107,10 @@ int HsrlMon::Run()
   if (_params.mode == Params::FILELIST) {
     return _runFilelist();
   } else if (_params.mode == Params::REALTIME) {
-    if (_params.latest_data_info_avail) {
-      return _runRealtimeWithLdata();
-    } else {
-      return _runRealtimeNoLdata();
-    }
+    return _runRealtime();
+  } else {
+    return _runArchive();
   }
-
-  // will not reach here
-  return -1;
 
 }
 
@@ -126,13 +121,13 @@ int HsrlMon::_runFilelist()
 {
 
   // loop through the input file list
-
+  
   int iret = 0;
-
+  
   for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
-
+    
     string inputPath = _args.inputFileList[ii];
-    if (_processFile(inputPath)) {
+    if (_processFileFromList(inputPath)) {
       iret = -1;
     }
 
@@ -143,91 +138,66 @@ int HsrlMon::_runFilelist()
 }
 
 //////////////////////////////////////////////////
-// Run in realtime mode with latest data info
+// Run in realtime mode
 
-int HsrlMon::_runRealtimeWithLdata()
+int HsrlMon::_runRealtime()
 {
+  
+  if (_params.debug) {
+    cerr << "INFO - HsrlMon" << endl;
+    cerr << "  Running in REALTIME mode" << endl;
+  }
 
   // init process mapper registration
-
+  
   PMU_auto_init(_progName.c_str(), _params.instance,
                 PROCMAP_REGISTER_INTERVAL);
 
-  // watch for new data to arrive
-
-  LdataInfo ldata(_params.input_dir,
-                  _params.debug >= Params::DEBUG_VERBOSE);
-  if (strlen(_params.search_ext) > 0) {
-    ldata.setDataFileExt(_params.search_ext);
-  }
+  int interval = _params.realtime_interval_secs;
+  int delay = _params.realtime_delay_secs;
+  time_t latestTime = time(NULL);
   
+  // initialize the schedule if required
+  
+  RadxTime _realtimeScheduledTime;
+
+  if (_realtimeScheduledTime.utime() == 0) {
+    time_t nextUtime = ((latestTime / interval) + 1) * interval;
+    _realtimeScheduledTime.set(nextUtime + delay);
+    if (_params.debug) {
+      cerr << "Next scheduled time for realtime mode: " 
+           << _realtimeScheduledTime.asString() << endl;
+    }
+  }
+
   int iret = 0;
-  int msecsWait = _params.wait_between_checks * 1000;
   while (true) {
-    ldata.readBlocking(_params.max_realtime_data_age_secs,
-                       msecsWait, PMU_auto_register);
-    const string path = ldata.getDataPath();
-    if (_processFile(path)) {
-      iret = -1;
-    }
-  }
 
-  return iret;
-
-}
-
-//////////////////////////////////////////////////
-// Run in realtime mode without latest data info
-
-int HsrlMon::_runRealtimeNoLdata()
-{
-
-  // init process mapper registration
-
-  PMU_auto_init(_progName.c_str(), _params.instance,
-                PROCMAP_REGISTER_INTERVAL);
-  
-  // Set up input path
-
-  DsInputPath input(_progName,
-		    _params.debug >= Params::DEBUG_VERBOSE,
-		    _params.input_dir,
-		    _params.max_realtime_data_age_secs,
-		    PMU_auto_register,
-		    _params.latest_data_info_avail,
-		    false);
-
-  input.setFileQuiescence(_params.file_quiescence);
-  input.setSearchExt(_params.search_ext);
-  input.setRecursion(_params.search_recursively);
-  input.setMaxRecursionDepth(_params.max_recursion_depth);
-  input.setMaxDirAge(_params.max_realtime_data_age_secs);
-
-  int iret = 0;
-
-  while(true) { // how does this loop end? --Brad
-
-    // check for new data
+    PMU_auto_register("zzzzzzzzzz");
+    time_t now = time(NULL);
     
-    char *path = input.next(false);
-    
-    if (path == NULL) {
+    // check if we are at scheduled time
+
+    if (now > _realtimeScheduledTime.utime()) {
       
-      // sleep a bit
+      time_t monitorStartTime = now - delay - _params.monitoring_interval_secs;
+      time_t monitorEndTime = monitorStartTime + _params.monitoring_interval_secs - 1;
       
-      PMU_auto_register("Waiting for data");
-      umsleep(_params.wait_between_checks * 1000);
-
-    } else {
-
-      // process the file
-
-      if (_processFile(path)) {
+      if (_performMonitoring(monitorStartTime, monitorEndTime)) {
         iret = -1;
       }
       
-    }
+      // set next scheduled time
+      
+      time_t nextUtime = ((now / interval) + 1) * interval;
+      _realtimeScheduledTime.set(nextUtime + delay);
+      if (_params.debug) {
+        cerr << "Next scheduled time: "
+             << _realtimeScheduledTime.asString() << endl;
+      }
 
+    } // if (now > _realtimeScheduledTime)
+      
   } // while
 
   return iret;
@@ -235,35 +205,163 @@ int HsrlMon::_runRealtimeNoLdata()
 }
 
 //////////////////////////////////////////////////
-// Process a file
-// Returns 0 on success, -1 on failure
+// Run in archive mode
 
-int HsrlMon::_processFile(const string &readPath)
+int HsrlMon::_runArchive()
 {
-
-
-  PMU_auto_register("Processing file");
   
   if (_params.debug) {
-    cerr << "INFO - HsrlMon::_processFile" << endl;
-    cerr << "  Input path: " << readPath << endl;
+    cerr << "INFO - HsrlMon" << endl;
+    cerr << "  Running in ARCHIVE mode" << endl;
   }
 
-  RawFile inFile(_params);
-  if (!inFile.isRawHsrlFile(readPath)) {
-    cerr << "ERROR - HsrlMon::_processFile" << endl;
-    cerr << "  Not an HSRL file: " << readPath << endl;
-    return -1;
+  int iret = 0;
+
+  time_t monitorStartTime = _args.startTime;
+  while (monitorStartTime < _args.endTime) {
+
+    time_t monitorEndTime = monitorStartTime + _params.monitoring_interval_secs;
+    if (monitorEndTime > _args.endTime) {
+      monitorEndTime = _args.endTime;
+    }
+
+    if (_performMonitoring(monitorStartTime, monitorEndTime)) {
+      iret = -1;
+    }
+    
+    monitorStartTime += _params.monitoring_interval_secs;
+
+  } // while
+
+  return iret;
+      
+}
+
+//////////////////////////////////////////////////
+// Process a file from the input list
+// Returns 0 on success, -1 on failure
+
+int HsrlMon::_processFileFromList(const string &filePath)
+{
+
+  if (_params.debug) {
+    cerr << "INFO - HsrlMon::_processFileFromList" << endl;
+    cerr << "  File path: " << filePath << endl;
   }
   
-  if (inFile.readFromPath(readPath)) {
+  // check we have an HSRL file
+
+  RawFile inFile(_params);
+  if (!inFile.isRawHsrlFile(filePath)) {
     cerr << "ERROR - HsrlMon::_processFile" << endl;
-    cerr << "  Cannot read HSRL file: " << readPath << endl;
+    cerr << "  Not an HSRL file: " << filePath << endl;
     return -1;
+  }
+
+  // get the start and end time of the data in the file
+
+  time_t dataStartTime = 0, dataEndTime = 0;
+  if (!inFile.getStartAndEndTimes(filePath, dataStartTime, dataEndTime)) {
+    cerr << "ERROR - HsrlMon::_processFile" << endl;
+    cerr << "  Cannot read times from file: " << filePath << endl;
+    return -1;
+  }
+
+  // loop through time periods in the file
+
+  time_t monitorStartTime = dataStartTime;
+  
+  while (monitorStartTime < dataEndTime) {
+    
+    time_t monitorEndTime = monitorStartTime + _params.monitoring_interval_secs;
+    if (monitorEndTime > dataEndTime) {
+      monitorEndTime = dataEndTime;
+    }
+    
+    if (_performMonitoring(filePath,
+                           monitorStartTime,
+                           monitorEndTime)) {
+      return -1;
+    }
+    
+    monitorStartTime += _params.monitoring_interval_secs;
+    
+  } // while
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Perform monitoring for a specified time
+// Returns 0 on success, -1 on failure
+
+int HsrlMon::_performMonitoring(time_t startTime,
+                                time_t endTime)
+{
+
+  if (_params.debug) {
+    cerr << "HsrlMon::_performMonitoring" << endl;
+    cerr << "  Input dir: " << _params.input_dir << endl;
+    cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
+    cerr << "  End time: " << RadxTime::strm(endTime) << endl;
+  }
+
+  // find the appropriate files
+
+  vector<string> filePaths;
+  _findFiles(startTime, endTime, filePaths);
+  if (filePaths.size() == 0) {
+    cerr << "ERROR - HsrlMon::_performMonitoring" << endl;
+    cerr << "  No files found" << endl;
+    cerr << "  Input dir: " << _params.input_dir << endl;
+    cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
+    cerr << "  End time: " << RadxTime::strm(endTime) << endl;
+    return -1;
+  }
+
+  int iret = 0;
+  for (size_t ii = 0; ii < filePaths.size(); ii++) {
+    if (_performMonitoring(filePaths[ii], startTime, endTime)) {
+      iret = -1;
+    }
+  }
+
+  return iret;
+
+}
+
+////////////////////////////////////////////////////////
+// Perform monitoring for specified file and times
+// Returns 0 on success, -1 on failure
+
+int HsrlMon::_performMonitoring(const string &filePath,
+                                time_t startTime,
+                                time_t endTime)
+{
+
+  if (_params.debug) {
+    cerr << "HsrlMon::_performMonitoring" << endl;
+    cerr << "  filePath: " << filePath << endl;
+    cerr << "  start time: " << RadxTime::strm(startTime) << endl;
+    cerr << "  end time: " << RadxTime::strm(endTime) << endl;
   }
 
   return 0;
 
 }
 
+////////////////////////////////////////////////////////
+// Find appropriate files for selected times
+// Returns 0 on success, -1 on failure
+
+int HsrlMon::_findFiles(time_t startTime,
+                        time_t endTime,
+                        vector<string> &filePaths)
+
+{
+
+  return 0;
+
+}
 

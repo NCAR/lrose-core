@@ -597,16 +597,18 @@ using namespace std;
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode");
-    tt->help = tdrpStrDup("\nIn REALTIME mode, the program waits for a new input file.\n\nIn FILELIST mode, it moves through the list of file names specified on the command line. ");
+    tt->help = tdrpStrDup("\nIn REALTIME mode, the program wakes up at regular intervals, and processes the latest data files.\n\nIn ARCHIVE mode, the program selects the file(s) appropriately for the start and end times.\n\nIn FILELIST mode, it moves through the list of file names specified on the command line. ");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
-    tt->enum_def.nfields = 2;
+    tt->enum_def.nfields = 3;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("REALTIME");
       tt->enum_def.fields[0].val = REALTIME;
-      tt->enum_def.fields[1].name = tdrpStrDup("FILELIST");
-      tt->enum_def.fields[1].val = FILELIST;
+      tt->enum_def.fields[1].name = tdrpStrDup("ARCHIVE");
+      tt->enum_def.fields[1].val = ARCHIVE;
+      tt->enum_def.fields[2].name = tdrpStrDup("FILELIST");
+      tt->enum_def.fields[2].val = FILELIST;
     tt->single_val.e = REALTIME;
     tt++;
     
@@ -617,95 +619,69 @@ using namespace std;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("input_dir");
     tt->descr = tdrpStrDup("Input directory for searching for files.");
-    tt->help = tdrpStrDup("REALTIME mode only. Files will be searched for in this directory.");
+    tt->help = tdrpStrDup("REALTIME and ARCHIVE modes only. Files will be searched for in this directory, base on the times selected.");
     tt->val_offset = (char *) &input_dir - &_start_;
     tt->single_val.s = tdrpStrDup(".");
     tt++;
     
-    // Parameter 'max_realtime_data_age_secs'
+    // Parameter 'monitoring_interval_secs'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("max_realtime_data_age_secs");
-    tt->descr = tdrpStrDup("Maximum age of realtime data (secs)");
-    tt->help = tdrpStrDup("REALTIME mode only. Only data less old than this will be used.");
-    tt->val_offset = (char *) &max_realtime_data_age_secs - &_start_;
+    tt->param_name = tdrpStrDup("monitoring_interval_secs");
+    tt->descr = tdrpStrDup("Interval period over which the monitoring is performed (secs).");
+    tt->help = tdrpStrDup("This is the interval over which the monitoring statistics are computed.");
+    tt->val_offset = (char *) &monitoring_interval_secs - &_start_;
     tt->single_val.i = 300;
     tt++;
     
-    // Parameter 'latest_data_info_avail'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("latest_data_info_avail");
-    tt->descr = tdrpStrDup("Is _latest_data_info file available?");
-    tt->help = tdrpStrDup("REALTIME mode only. If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.");
-    tt->val_offset = (char *) &latest_data_info_avail - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'search_recursively'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("search_recursively");
-    tt->descr = tdrpStrDup("Option to recurse to subdirectories while looking for new files.");
-    tt->help = tdrpStrDup("REALTIME mode only. If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use. Only applies if latest_data_info_avail is FALSE.");
-    tt->val_offset = (char *) &search_recursively - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'max_recursion_depth'
+    // Parameter 'realtime_interval_secs'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("max_recursion_depth");
-    tt->descr = tdrpStrDup("Maximum depth for recursive directory scan.");
-    tt->help = tdrpStrDup("REALTIME mode only. Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.");
-    tt->val_offset = (char *) &max_recursion_depth - &_start_;
-    tt->single_val.i = 5;
+    tt->param_name = tdrpStrDup("realtime_interval_secs");
+    tt->descr = tdrpStrDup("Interval between processing latest data (secs)");
+    tt->help = tdrpStrDup("REALTIME mode only. The program wakes up at this interval, and processes the latest available data.");
+    tt->val_offset = (char *) &realtime_interval_secs - &_start_;
+    tt->single_val.i = 300;
     tt++;
     
-    // Parameter 'wait_between_checks'
+    // Parameter 'realtime_delay_secs'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("wait_between_checks");
-    tt->descr = tdrpStrDup("Sleep time between checking directory for input - secs.");
-    tt->help = tdrpStrDup("REALTIME mode only. If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory. Only applies if latest_data_info_avail is FALSE.");
-    tt->val_offset = (char *) &wait_between_checks - &_start_;
-    tt->has_min = TRUE;
-    tt->min_val.i = 1;
-    tt->single_val.i = 2;
+    tt->param_name = tdrpStrDup("realtime_delay_secs");
+    tt->descr = tdrpStrDup("Delay in processing latest data (secs)");
+    tt->help = tdrpStrDup("REALTIME mode only. We wait by this period to give the latest data time to be written to the disk files.");
+    tt->val_offset = (char *) &realtime_delay_secs - &_start_;
+    tt->single_val.i = 60;
     tt++;
     
-    // Parameter 'file_quiescence'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("file_quiescence");
-    tt->descr = tdrpStrDup("File quiescence when checking for files - secs.");
-    tt->help = tdrpStrDup("REALTIME mode only. This allows you to make sure that a file coming from a remote machine is complete before reading it. Only applies if latest_data_info_avail is FALSE.");
-    tt->val_offset = (char *) &file_quiescence - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'search_ext'
+    // Parameter 'file_prefix'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("search_ext");
+    tt->param_name = tdrpStrDup("file_prefix");
+    tt->descr = tdrpStrDup("File name prefix.");
+    tt->help = tdrpStrDup("We use this prefix to find the files to be processed. The filename will be prefix_yyyymmddThhmmss*.nc.");
+    tt->val_offset = (char *) &file_prefix - &_start_;
+    tt->single_val.s = tdrpStrDup("gvhsrl");
+    tt++;
+    
+    // Parameter 'file_ext'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("file_ext");
     tt->descr = tdrpStrDup("File name extension.");
-    tt->help = tdrpStrDup("REALTIME mode only. If set, only files with this extension will be processed.");
-    tt->val_offset = (char *) &search_ext - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->help = tdrpStrDup("The input files will have this extension, since they are netcdf files.");
+    tt->val_offset = (char *) &file_ext - &_start_;
+    tt->single_val.s = tdrpStrDup("nc");
     tt++;
     
     // Parameter 'Comment 3'
