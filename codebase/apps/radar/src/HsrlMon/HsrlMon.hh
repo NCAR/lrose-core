@@ -81,7 +81,6 @@ private:
   vector<string> _readPaths;
 
   int _runFilelist();
-  int _runArchive();
   int _runRealtimeWithLdata();
   int _runRealtimeNoLdata();
   int _processFile(const string &filePath);

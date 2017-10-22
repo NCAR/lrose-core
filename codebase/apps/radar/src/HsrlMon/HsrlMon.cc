@@ -104,9 +104,7 @@ HsrlMon::~HsrlMon()
 int HsrlMon::Run()
 {
 
-  if (_params.mode == Params::ARCHIVE) {
-    return _runArchive();
-  } else if (_params.mode == Params::FILELIST) {
+  if (_params.mode == Params::FILELIST) {
     return _runFilelist();
   } else if (_params.mode == Params::REALTIME) {
     if (_params.latest_data_info_avail) {
@@ -141,48 +139,6 @@ int HsrlMon::_runFilelist()
   }
 
   return iret;
-
-}
-
-//////////////////////////////////////////////////
-// Run in archive mode
-
-int HsrlMon::_runArchive()
-{
-
-#ifdef NOTYET
-  // get the files to be processed
-
-  RadxTimeList tlist;
-  tlist.setDir(_params.input_dir);
-  tlist.setModeInterval(_args.startTime, _args.endTime);
-  if (tlist.compile()) {
-    cerr << "ERROR - HsrlMon::_runArchive()" << endl;
-    cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
-    cerr << "  Start time: " << RadxTime::strm(_args.startTime) << endl;
-    cerr << "  End time: " << RadxTime::strm(_args.endTime) << endl;
-    cerr << tlist.getErrStr() << endl;
-    return -1;
-  }
-
-  const vector<string> &paths = tlist.getPathList();
-  if (paths.size() < 1) {
-    cerr << "ERROR - HsrlMon::_runArchive()" << endl;
-    cerr << "  No files found, dir: " << _params.input_dir << endl;
-    return -1;
-  }
-  
-  // loop through the input file list
-  
-  int iret = 0;
-  for (size_t ii = 0; ii < paths.size(); ii++) {
-    if (_processFile(paths[ii])) {
-      iret = -1;
-    }
-  }
-#endif
-
-  return 0;
 
 }
 
@@ -294,7 +250,18 @@ int HsrlMon::_processFile(const string &readPath)
   }
 
   RawFile inFile(_params);
+  if (!inFile.isRawHsrlFile(readPath)) {
+    cerr << "ERROR - HsrlMon::_processFile" << endl;
+    cerr << "  Not an HSRL file: " << readPath << endl;
+    return -1;
+  }
   
+  if (inFile.readFromPath(readPath)) {
+    cerr << "ERROR - HsrlMon::_processFile" << endl;
+    cerr << "  Cannot read HSRL file: " << readPath << endl;
+    return -1;
+  }
+
   return 0;
 
 }

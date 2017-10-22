@@ -42,8 +42,6 @@ using namespace std;
 Args::Args ()
 {
   TDRP_init_override(&override);
-  startTime = 0;
-  endTime = 0;
 }
 
 // Destructor
@@ -105,34 +103,6 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	TDRP_add_override(&override, tmp_str);
       }
 	
-    } else if (!strcmp(argv[i], "-start")) {
-      
-      if (i < argc - 1) {
-	startTime = RadxTime::parseDateTime(argv[++i]);
-	if (startTime == RadxTime::NEVER) {
-	  OK = false;
-	} else {
-	  sprintf(tmp_str, "mode = ARCHIVE;");
-	  TDRP_add_override(&override, tmp_str);
-	}
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-end")) {
-      
-      if (i < argc - 1) {
-	endTime = RadxTime::parseDateTime(argv[++i]);
-	if (endTime == RadxTime::NEVER) {
-	  OK = false;
-	} else {
-	  sprintf(tmp_str, "mode = ARCHIVE;");
-	  TDRP_add_override(&override, tmp_str);
-	}
-      } else {
-	OK = false;
-      }
-	
     } else if (!strcmp(argv[i], "-path") || !strcmp(argv[i], "-f")) {
       
       if (i < argc - 1) {
@@ -192,9 +162,6 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -d, -debug ] print debug messages\n"
       << "\n"
-      << "  [ -end \"yyyy mm dd hh mm ss\"] end time\n"
-      << "           Sets mode to ARCHIVE\n"
-      << "\n"
       << "  [ -f, -paths ? ] set file paths\n"
       << "           Sets mode to FILELIST\n"
       << "\n"
@@ -203,9 +170,6 @@ void Args::_usage(ostream &out)
       << "  [ -instance ?] specify the instance\n"
       << "\n"
       << "  [ -outdir ? ] set output directory\n"
-      << "\n"
-      << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"
-      << "           Sets mode to ARCHIVE\n"
       << "\n"
       << "  [ -v, -verbose ] print verbose debug messages\n"
       << "\n"

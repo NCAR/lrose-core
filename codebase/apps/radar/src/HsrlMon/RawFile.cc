@@ -130,12 +130,6 @@ void RawFile::clear()
   _pitch.clear();
   _roll.clear();
 
-  _instrumentType = Radx::INSTRUMENT_TYPE_LIDAR;
-  _platformType = Radx::PLATFORM_TYPE_AIRCRAFT;
-  _primaryAxis = Radx::PRIMARY_AXIS_Y_PRIME;
-
-  _rays.clear();
-  
 }
 
 ////////////////////////////////////////////////////////////
@@ -223,14 +217,11 @@ int RawFile::getTimeFromPath(const string &path, RadxTime &rtime)
 }
 
 ////////////////////////////////////////////////////////////
-// Read in data from specified path, load up volume object.
-//
+// Read in data from specified path
 // Returns 0 on success, -1 on failure
-//
 // Use getErrStr() if error occurs
 
-int RawFile::readFromPath(const string &path,
-                          RadxVol &vol)
+int RawFile::readFromPath(const string &path)
   
 {
   
@@ -240,13 +231,10 @@ int RawFile::readFromPath(const string &path,
 
   string errStr("ERROR - RawFile::readFromPath");
 
-  _readVol = &vol;
-
   // clear tmp rays
   
   _nTimesInFile = 0;
   _nBinsInFile = 0;
-  _rays.clear();
 
   // open file
 
@@ -276,38 +264,12 @@ int RawFile::readFromPath(const string &path,
     return -1;
   }
   
-  // read in ray metadata variables
-  
-  if (_readRayVariables()) {
-    _addErrStr(errStr);
-    return -1;
-  }
-  
-  // create the rays, filling out the metadata
-  
-  if (_createRays(path)) {
-    _addErrStr(errStr);
-    return -1;
-  }
-  
-  // add field variables to file rays
-  
-  if (_readFieldVariables()) {
-    _addErrStr(errStr);
-    return -1;
-  }
-
-  // load the data into the read volume
-
-  _loadReadVolume();
-
   // close file
   
   _file.close();
 
   // clean up
 
-  _rays.clear();
   _dataTimes.clear();
   _dTimes.clear();
 
@@ -352,6 +314,10 @@ int RawFile::_readDimensions()
   _nPoints = _nTimesInFile * _nBinsInFile;
   _nBinsPerGate = 1;
   _nGates = _nBinsInFile / _nBinsPerGate;
+
+  if (_params.debug) {
+    cerr << "_nTimesInFile: " << _nTimesInFile << endl;
+  }
   
   return 0;
 
@@ -496,25 +462,39 @@ int RawFile::_readTimes()
 
 }
 
-///////////////////////////////////
-// clear the ray variables
 
-void RawFile::_clearRayVariables()
+///////////////////////////////////////////////
+// add labelled integer value to error string,
+// with optional following carriage return.
+
+void RawFile::_addErrInt(string label, int iarg, bool cr)
+{
+  Radx::addErrInt(_errStr, label, iarg, cr);
+}
+
+///////////////////////////////////////////////
+// add labelled double value to error string,
+// with optional following carriage return.
+// Default format is %g.
+
+void RawFile::_addErrDbl(string label, double darg,
+                          string format, bool cr)
+  
+{
+  Radx::addErrDbl(_errStr, label, darg, format, cr);
+}
+
+////////////////////////////////////////
+// add labelled string to error string
+// with optional following carriage return.
+
+void RawFile::_addErrStr(string label, string strarg, bool cr)
 
 {
-
-  _telescopeLocked.clear();
-  _telescopeDirection.clear();
-  _latitude.clear();
-  _longitude.clear();
-  _altitude.clear();
-  _heading.clear();
-  _gndSpeed.clear();
-  _vertVel.clear();
-  _pitch.clear();
-  _roll.clear();
-
+  Radx::addErrStr(_errStr, label, strarg, cr);
 }
+
+#ifdef JUNK
 
 ///////////////////////////////////
 // read in ray variables
@@ -881,462 +861,4 @@ Nc3Var* RawFile::_getRayVar(const string &name, bool required)
 
 }
 
-///////////////////////////////////
-// create the rays to be read in
-// and set meta data
-
-int RawFile::_createRays(const string &path)
-
-{
-
-  // compile a list of the rays to be read in
-  
-  _rays.clear();
-  RadxCfactors corr;
-
-  for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-
-    // new ray
-
-    RadxRay *ray = new RadxRay;
-    ray->setRangeGeom(_startRangeKm, _gateSpacingKm);
-    ray->setTime(_dataTimes[ii]);
-    
-    // sweep info
-
-    ray->setVolumeNumber(-9999);
-    ray->setSweepNumber(0);
-    ray->setSweepMode(Radx::SWEEP_MODE_POINTING);
-    ray->setPrtMode(Radx::PRT_MODE_FIXED);
-    ray->setTargetScanRateDegPerSec(0.0);
-    ray->setIsIndexed(false);
-
-    // georeference
-    
-    RadxGeoref geo;
-
-    if (_telescopeDirection[ii] == 1) {
-
-      // pointing up
-
-      geo.setRotation(-4.0);
-      geo.setTilt(0.0);
-      ray->setAzimuthDeg(0.0);
-      ray->setElevationDeg(90.0);
-      ray->setFixedAngleDeg(90.0);
-      
-    } else {
-      
-      // pointing down
-      
-      geo.setRotation(184.0);
-      geo.setTilt(0.0);
-      ray->setAzimuthDeg(0.0);
-      ray->setElevationDeg(-90.0);
-      ray->setFixedAngleDeg(-90.0);
-      
-    }
-    
-    geo.setRoll(_roll[ii]);
-    geo.setPitch(_pitch[ii]);
-    geo.setHeading(_heading[ii]);
-    geo.setDrift(0.0); // do not have drift in the file
-    
-    geo.setLatitude(_latitude[ii]);
-    geo.setLongitude(_longitude[ii]);
-    geo.setAltitudeKmMsl(_altitude[ii] / 1000.0);
-
-    geo.setVertVelocity(_vertVel[ii]);
-
-    double sinVal, cosVal;
-    sincos(_heading[ii] * Radx::DegToRad, &sinVal, &cosVal);
-    geo.setEwVelocity(_gndSpeed[ii] * sinVal);
-    geo.setNsVelocity(_gndSpeed[ii] * cosVal);
-    
-    ray->setGeoref(geo);
-
-    // compute az/el from geo
-    
-    double azimuth, elevation;
-    computeRadarAngles(geo, corr, azimuth, elevation);
-    ray->setAzimuthDeg(azimuth);
-    ray->setElevationDeg(elevation);
-
-    // other metadata - overloading
-    
-    ray->setMeasXmitPowerDbmH(_totalEnergy[ii]);
-    ray->setEstimatedNoiseDbmHc(_polAngle[ii]);
-    
-    ray->setNSamples(2000);
-    // hard coded 2000 as replacement for DATA_shot_count from raw file
-    
-    // add to ray vector
-    
-    _rays.push_back(ray);
-
-  } // ii
-
-  return 0;
-
-}
-
-/////////////////////////////////////////////////////////
-// load up the read volume with the data from this object
-
-void RawFile::_loadReadVolume()
-{
-
-  _readVol->clear();
-
-  _readVol->setOrigFormat("HSRL-RAW");
-  _readVol->setVolumeNumber(-9999);
-  _readVol->setInstrumentType(_instrumentType);
-  _readVol->setInstrumentName("HSRL");
-  _readVol->setSiteName("GV");
-  _readVol->setPlatformType(_platformType);
-  _readVol->setPrimaryAxis(_primaryAxis);
-  
-  _readVol->addFrequencyHz(Radx::LIGHT_SPEED / 538.0e-9);
-  _readVol->addFrequencyHz(Radx::LIGHT_SPEED / 1064.0e-9);
-  
-  _readVol->setLidarConstant(-9999.0);
-  _readVol->setLidarPulseEnergyJ(-9999.0);
-  _readVol->setLidarPeakPowerW(-9999.0);
-  _readVol->setLidarApertureDiamCm(-9999.0);
-  _readVol->setLidarApertureEfficiency(-9999.0);
-  _readVol->setLidarFieldOfViewMrad(-9999.0);
-  _readVol->setLidarBeamDivergenceMrad(-9999.0);
-
-  _readVol->setTitle("NCAR HSRL");
-  _readVol->setSource("HSRL realtime software");
-  _readVol->setHistory("Converted from RAW NetCDF files");
-  _readVol->setInstitution("NCAR");
-  _readVol->setReferences("University of Wisconsin");
-  _readVol->setComment("");
-  _readVol->setDriver("HsrlMon");
-  _readVol->setCreated(_dataAdded);
-  _readVol->setStatusXml("");
-  
-  _readVol->setScanName("Vert");
-  _readVol->setScanId(0);
-
-  if (_latitude.size() > 0) {
-    for (size_t ii = 0; ii < _latitude.size(); ii++) {
-      if (_latitude[ii] > -9990) {
-        _readVol->setLatitudeDeg(_latitude[ii]);
-        break;
-      }
-    }
-  }
-  if (_longitude.size() > 0) {
-    for (size_t ii = 0; ii < _longitude.size(); ii++) {
-      if (_longitude[ii] > -9990) {
-        _readVol->setLongitudeDeg(_longitude[ii]);
-        break;
-      }
-    }
-  }
-  if (_altitude.size() > 0) {
-    for (size_t ii = 0; ii < _altitude.size(); ii++) {
-      if (_altitude[ii] > -9990) {
-        _readVol->setAltitudeKm(_altitude[ii] / 1000.0);
-        break;
-      }
-    }
-  }
-
-  _readVol->setRangeGeom(_startRangeKm, _gateSpacingKm);
-
-  for (size_t ii = 0; ii < _rays.size(); ii++) {
-    _readVol->addRay(_rays[ii]);
-  }
-
-  // memory responsibility has passed to the volume object, so clear
-  // the vectors without deleting the objects to which they point
-
-  _rays.clear();
-
-  // load the sweep information from the rays
-
-  _readVol->loadSweepInfoFromRays();
-  
-  // load the volume information from the rays
-
-  _readVol->loadVolumeInfoFromRays();
-  
-}
-
-////////////////////////////////////////////
-// read the field variables
-
-int RawFile::_readFieldVariables()
-
-{
-
-  // loop through the variables, adding data fields as appropriate
-  
-  for (int ivar = 0; ivar < _file.getNc3File()->num_vars(); ivar++) {
-    
-    Nc3Var* var = _file.getNc3File()->get_var(ivar);
-    if (var == NULL) {
-      continue;
-    }
-    
-    int numDims = var->num_dims();
-    // we need fields with 2 dimensions
-    if (numDims != 2) {
-      continue;
-    }
-
-    // check that we have the correct dimensions
-    Nc3Dim* timeDim = var->get_dim(0);
-    Nc3Dim* bincountDim = var->get_dim(1);
-    if (timeDim != _timeDim || bincountDim != _binCountDim) {
-      continue;
-    }
-    
-    // check the type
-    Nc3Type ftype = var->type();
-    if (ftype != nc3Int) {
-      // not a valid type for field data
-      continue;
-    }
-
-    // set names, units, etc
-
-    string name = var->name();
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "DEBUG - RawFile::_readFieldVariables" << endl;
-      cerr << "  -->> adding field: " << name << endl;
-    }
-
-    string longName;
-    Nc3Att *longNameAtt = var->get_att("long_name");
-    if (longNameAtt != NULL) {
-      longName = Nc3xFile::asString(longNameAtt);
-      delete longNameAtt;
-    }
-    
-    string units = "counts";
-
-    // load in the data
-
-    if (_addCountFieldToRays(var, name, units)) {
-      _addErrStr("ERROR - RawFile::_readFieldVariables");
-      _addErrStr("  cannot read field name: ", name);
-      _addErrStr(_file.getNc3Error()->get_errmsg());
-      return -1;
-    }
-
-  } // ivar
-
-  return 0;
-
-}
-
-//////////////////////////////////////////////////////////////
-// Add si32 field to rays
-// The _rays array has previously been set up by _createRays()
-// Returns 0 on success, -1 on failure
-
-int RawFile::_addCountFieldToRays(Nc3Var* var,
-                                  const string &name,
-                                  const string &units)
-  
-{
-
-  // get int data from array
-  
-  RadxArray<Radx::si32> idata_;
-  Radx::si32 *idata = idata_.alloc(_nPoints);
-  int iret = !var->get(idata, _nTimesInFile, _nBinsInFile);
-  if (iret) {
-    return -1;
-  }
-
-  // set up float array
-
-  RadxArray<Radx::fl32> fcounts_;
-  Radx::fl32 *fcounts = fcounts_.alloc(_nGates);
-
-  // set name
-
-  string outName(name);
-  string standardName;
-  string longName;
-  if (outName.find(_params.combined_hi_field_name) != string::npos) {
-    outName = Names::CombinedHighCounts;
-    standardName = Names::lidar_copolar_combined_backscatter_photon_count;
-    longName = "high_channel_combined_backscatter_photon_count";
-  } else if (outName.find(_params.combined_lo_field_name) != string::npos) {
-    outName = Names::CombinedLowCounts;
-    standardName = Names::lidar_copolar_combined_backscatter_photon_count;
-    longName = "low_channel_combined_backscatter_photon_count";
-  } else if (outName.find(_params.molecular_field_name) != string::npos) {
-    outName = Names::MolecularCounts;
-    standardName = Names::lidar_copolar_molecular_backscatter_photon_count;
-    longName = Names::lidar_copolar_molecular_backscatter_photon_count;
-  } else if (outName.find(_params.cross_field_name) != string::npos) {
-    outName = Names::CrossPolarCounts;
-    standardName = Names::lidar_crosspolar_combined_backscatter_photon_count;
-    longName = Names::lidar_crosspolar_combined_backscatter_photon_count;
-  }
-  
-  // loop through the rays
-  
-  for (size_t iray = 0; iray < _rays.size(); iray++) {
-
-    // get int counts for ray
-    
-    int startIndex = iray * _nBinsInFile;
-    Radx::si32 *icounts = idata + startIndex;
-
-    // sum counts per gate
-
-    size_t ibin = 0;
-    for (size_t igate = 0; igate < _nGates; igate++) {
-      fcounts[igate] = 0.0;
-      for (size_t ii = 0; ii < _nBinsPerGate; ii++, ibin++) {
-        fcounts[igate] += icounts[ibin];
-      }
-    }
-    
-    RadxField *field =
-      _rays[iray]->addField(outName, units, _nGates,
-                            Radx::missingFl32,
-                            fcounts,
-                            true);
-    
-    field->setLongName(longName);
-    field->setStandardName(standardName);
-    field->setRangeGeom(_startRangeKm, _gateSpacingKm);
-    
-    // // add db of same field
-    
-    // for (size_t igate = 0; igate < _nGates; igate++) {
-    //   if (fcounts[igate] > 0) {
-    //     fcounts[igate] = 10.0 * log10(fcounts[igate]);
-    //   } else {
-    //     fcounts[igate] = Radx::missingFl32;
-    //   }
-    // }
-
-    // string dbName = "db_";
-    // dbName += name;
-    // string dbUnits = "db_counts";
-    // string dbLongName = "db_";
-    // dbLongName += longName;
-    
-    // RadxField *dbField =
-    //   _rays[iray]->addField(dbName, dbUnits, _nGates,
-    //                         Radx::missingFl32,
-    //                         fcounts,
-    //                         true);
-    
-    // dbField->setLongName(dbLongName);
-    // dbField->setRangeGeom(_startRangeKm, _gateSpacingKm);
-
-  }
-  
-  return 0;
-  
-}
-
-
-///////////////////////////////////////////////
-// add labelled integer value to error string,
-// with optional following carriage return.
-
-void RawFile::_addErrInt(string label, int iarg, bool cr)
-{
-  Radx::addErrInt(_errStr, label, iarg, cr);
-}
-
-///////////////////////////////////////////////
-// add labelled double value to error string,
-// with optional following carriage return.
-// Default format is %g.
-
-void RawFile::_addErrDbl(string label, double darg,
-                          string format, bool cr)
-  
-{
-  Radx::addErrDbl(_errStr, label, darg, format, cr);
-}
-
-////////////////////////////////////////
-// add labelled string to error string
-// with optional following carriage return.
-
-void RawFile::_addErrStr(string label, string strarg, bool cr)
-
-{
-  Radx::addErrStr(_errStr, label, strarg, cr);
-}
-
-void RawFile::_clearRays()
-{
-  for (int ii = 0; ii < (int) _rays.size(); ii++) {
-    delete _rays[ii];
-  }
-  _rays.clear();
-}
-
-///////////////////////////////////////////////////////////////////
-// compute the true azimuth, elevation, etc. from platform
-// parameters using Testud's equations with their different
-// definitions of rotation angle, etc.
-//
-// see Wen-Chau Lee's paper
-// "Mapping of the Airborne Doppler Radar Data"
-
-void RawFile::computeRadarAngles(RadxGeoref &georef,
-                                 RadxCfactors &corr,
-                                 double &azimuthDeg,
-                                 double &elevationDeg)
-  
-{
-  
-  double R = (georef.getRoll() + corr.getRollCorr()) * Radx::DegToRad;
-  double P = (georef.getPitch() + corr.getPitchCorr()) * Radx::DegToRad;
-  double H = (georef.getHeading() + corr.getHeadingCorr()) * Radx::DegToRad;
-  double D = (georef.getDrift() + corr.getDriftCorr()) * Radx::DegToRad;
-  double T = H + D;
-  
-  double sinP = sin(P);
-  double cosP = cos(P);
-  double sinD = sin(D);
-  double cosD = cos(D);
-  
-  double theta_a = 
-    (georef.getRotation() + corr.getRotationCorr()) * Radx::DegToRad;
-  double tau_a =
-    (georef.getTilt() + corr.getTiltCorr()) * Radx::DegToRad;
-  double sin_tau_a = sin(tau_a);
-  double cos_tau_a = cos(tau_a);
-  double sin_theta_rc = sin(theta_a + R); /* roll corrected rotation angle */
-  double cos_theta_rc = cos(theta_a + R); /* roll corrected rotation angle */
-  
-  double xsubt = (cos_theta_rc * sinD * cos_tau_a * sinP
-                  + cosD * sin_theta_rc * cos_tau_a
-                  -sinD * cosP * sin_tau_a);
-  
-  double ysubt = (-cos_theta_rc * cosD * cos_tau_a * sinP
-                  + sinD * sin_theta_rc * cos_tau_a
-                  + cosP * cosD * sin_tau_a);
-  
-  double zsubt = (cosP * cos_tau_a * cos_theta_rc
-                  + sinP * sin_tau_a);
-  
-  double lambda_t = atan2(xsubt, ysubt);
-  double azimuthRad = fmod(lambda_t + T, M_PI * 2.0);
-  double elevationRad = asin(zsubt);
-  
-  elevationDeg = elevationRad * Radx::RadToDeg;
-  azimuthDeg = azimuthRad * Radx::RadToDeg;
-  if (azimuthDeg < 0) {
-    azimuthDeg += 360.0;
-  }
-  
-}
-
+#endif

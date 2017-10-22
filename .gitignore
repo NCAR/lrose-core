@@ -395,6 +395,7 @@ codebase/apps/radar/src/HawkEye/moc_PpiWidget.cpp
 codebase/apps/radar/src/HawkEye/moc_RhiWidget.cpp
 codebase/apps/radar/src/HawkEye/moc_RhiWindow.cpp
 codebase/apps/radar/src/HcrVelCorrect/HcrVelCorrect
+codebase/apps/radar/src/HsrlMon/HsrlMon
 codebase/apps/radar/src/Hsrl2Radx/Hsrl2Radx
 codebase/apps/radar/src/HsrlSim/HsrlSim
 codebase/apps/radar/src/HsrlTcp2Fmq/HsrlTcp2Fmq

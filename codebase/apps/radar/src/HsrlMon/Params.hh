@@ -59,8 +59,7 @@ public:
 
   typedef enum {
     REALTIME = 0,
-    ARCHIVE = 1,
-    FILELIST = 2
+    FILELIST = 1
   } mode_t;
 
   ///////////////////////////

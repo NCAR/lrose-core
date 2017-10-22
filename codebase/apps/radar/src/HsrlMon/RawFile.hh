@@ -40,10 +40,7 @@
 #include <vector>
 
 #include <Radx/Radx.hh>
-#include <Radx/RadxFile.hh>
-#include <Radx/RadxVol.hh>
 #include <Radx/RadxTime.hh>
-#include <Radx/RadxGeoref.hh>
 #include <Ncxx/Nc3xFile.hh>
 class RadxField;
 class RadxVol;
@@ -55,9 +52,7 @@ using namespace std;
 #include "Params.hh"
 
 ///////////////////////////////////////////////////////////////
-/// FILE IO CLASS FOR NETCDF CF/RADIAL FILE FORMAT
-///
-/// This subclass of RadxFile handles I/O for netcdf files.
+/// FILE IO CLASS FOR RAW HSRL NETCDF FILE FORMAT
 
 class RawFile
 
@@ -86,24 +81,15 @@ public:
   /// Perform the read:
   
   /// Read in data file from specified path,
-  /// load up volume object.
   /// Returns 0 on success, -1 on failure
   /// Use getErrStr() if error occurs
   
-  int readFromPath(const string &path,
-                   RadxVol &vol);
+  int readFromPath(const string &path);
   
   /// Get the date and time from a dorade file path.
   /// returns 0 on success, -1 on failure
 
   int getTimeFromPath(const string &path, RadxTime &rtime);
-  
-  // compute angles from georef
-
-  static void computeRadarAngles(RadxGeoref &georef,
-                                 RadxCfactors &corr,
-                                 double &azimuthDeg,
-                                 double &elevationDeg);
   
   ////////////////////////
   /// \name Error string:
@@ -136,10 +122,6 @@ private:
   
   Nc3xFile _file;
 
-  // output volume
-
-  RadxVol *_readVol;
-  
   // dimensions
 
   Nc3Dim *_timeDim;
@@ -202,35 +184,15 @@ private:
   vector<float> _polAngle;
   vector<int> _totalEnergy;
 
-  Radx::InstrumentType_t _instrumentType;
-  Radx::PlatformType_t _platformType;
-  Radx::PrimaryAxis_t _primaryAxis;
-
-  // range geometry
-
-  double _rawGateSpacingKm;
-  double _startRangeKm;
-  double _gateSpacingKm;
-  
-  vector<RadxRay *> _rays;
-
-  // field variables
-
-
-  
   // private methods for NcfRadial.cc
-  
-  void _clearRays();
-  void _clearFields();
   
   int _readPath(const string &path, size_t pathNum);
 
   int _readDimensions();
   int _readGlobalAttributes();
   int _readTimes();
-  void _clearRayVariables();
-  int _readRayVariables();
 
+#ifdef JUNK
   int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<double> &vals, bool required = true);
   int _readRayVar(Nc3Var* &var, const string &name, 
@@ -249,16 +211,13 @@ private:
   
   Nc3Var* _getRayVar(const string &name, bool required);
 
-  int _createRays(const string &path);
-
-  void _loadReadVolume();
-
   int _readFieldVariables();
 
   int _addCountFieldToRays(Nc3Var* var,
                            const string &name,
                            const string &units);
-  
+#endif  
+
   /// add integer value to error string, with label
 
   void _addErrInt(string label, int iarg,
