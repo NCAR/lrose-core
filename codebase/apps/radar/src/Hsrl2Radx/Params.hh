@@ -442,6 +442,8 @@ public:
 
   char* scan_adjustment_name;
 
+  int optical_depth_median_filter_len;
+
   char* output_fmq_url;
 
   int output_fmq_size;
@@ -509,7 +511,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[86];
+  mutable TDRPtable _table[87];
 
   const char *_className;
 

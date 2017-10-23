@@ -1141,6 +1141,18 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("i2_scan_adjustment");
     tt++;
     
+    // Parameter 'optical_depth_median_filter_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("optical_depth_median_filter_len");
+    tt->descr = tdrpStrDup("The optical depth field is filtered using a median filter.");
+    tt->help = tdrpStrDup("This is done prior to computing the extinction coefficient. Set the length to 1 for no filtering.");
+    tt->val_offset = (char *) &optical_depth_median_filter_len - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
     // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));

@@ -175,5 +175,7 @@ private:
 
   void _printDerivedFields(ostream &out);
 
+  void _filterOpticalDepth();
+
 };
 #endif

@@ -33,12 +33,14 @@
 ///////////////////////////////////////////////////////////////
 
 #include "DerFieldCalcs.hh"
+#include "FullCals.hh"
+#include <Radx/RadxArray.hh>
 #include <assert.h>
 #include <math.h>  
-#include "FullCals.hh"
 #include <iostream>
 #include <cmath>
 #include <cassert>
+#include <algorithm>
 
 using namespace std;
 
@@ -380,7 +382,8 @@ void DerFieldCalcs::computeDerived()
     _opticalDepth[igate] = 
       _computeOptDepth(_presHpa[igate], _tempK[igate], _molDataRate.at(igate), scan);
   }
-  
+  _filterOpticalDepth();
+
   // extinction
 
   int filterHalf = 2;
@@ -501,12 +504,12 @@ double DerFieldCalcs::_geoOverlapCor(double arrivalRate, double geoOverlap)
 void DerFieldCalcs::_initDerivedArrays()
 
 {
-  _volDepol.reserve(_nGates);
-  _backscatRatio.reserve(_nGates);
-  _partDepol.reserve(_nGates);
-  _backscatCoeff.reserve(_nGates);
-  _extinction.reserve(_nGates);
-  _opticalDepth.reserve(_nGates);
+  _volDepol.resize(_nGates);
+  _backscatRatio.resize(_nGates);
+  _partDepol.resize(_nGates);
+  _backscatCoeff.resize(_nGates);
+  _extinction.resize(_nGates);
+  _opticalDepth.resize(_nGates);
   for (size_t ii = 0; ii < _nGates; ii++) {
     _volDepol[ii] = Radx::missingFl32;
     _backscatRatio[ii] = Radx::missingFl32;
@@ -670,7 +673,8 @@ Radx::fl32 DerFieldCalcs::_computeOptDepth(double pressure, double temperature,
 /////////////////////////////////////////////////////////////////
 // extinction coefficient
 
-Radx::fl32 DerFieldCalcs::_computeExtinctionCoeff(Radx::fl32 optDepth1, Radx::fl32 optDepth2,
+Radx::fl32 DerFieldCalcs::_computeExtinctionCoeff(Radx::fl32 optDepth1, 
+                                                  Radx::fl32 optDepth2,
                                                   double alt1, double alt2)
 {
 
@@ -694,3 +698,78 @@ Radx::fl32 DerFieldCalcs::_computeExtinctionCoeff(Radx::fl32 optDepth1, Radx::fl
   return extinction;
 
 }
+
+/////////////////////////////////////////////////////////////////
+// Apply median filter to optical depth
+
+void DerFieldCalcs::_filterOpticalDepth()
+
+{
+
+  // make sure filter len is odd
+
+  size_t halfFilt = _params.optical_depth_median_filter_len / 2;
+  size_t len = halfFilt * 2 + 1;
+  if (len < 3) {
+    return;
+  }
+
+  // make copy
+  
+  vector<Radx::fl32> copy = _opticalDepth;
+
+  // remove isolated points, up to 2 in length
+
+  int maxRun = 2;
+  int ngood = 0;
+  for (size_t ii = 0; ii < _nGates; ii++) {
+    if (copy[ii] == Radx::missingFl32) {
+      if (ngood > 0 && ngood <= maxRun) {
+        for (int jj = (int) ii - ngood; jj < (int) ii; jj++) {
+          copy[jj] = Radx::missingFl32;
+        }
+      }
+      ngood = 0;
+    } else {
+      ngood++;
+    }
+  }
+  
+  // fill in gaps up to 2 in length
+
+  int nmiss = 0;
+  for (size_t ii = 0; ii < _nGates; ii++) {
+    if (copy[ii] != Radx::missingFl32) {
+      if (nmiss > 0 && nmiss <= maxRun && (ii - nmiss) > 0) {
+        for (int jj = (int) ii - nmiss; jj < (int) ii; jj++) {
+          copy[jj] = copy[ii - nmiss];
+        }
+      }
+      nmiss = 0;
+    } else {
+      nmiss++;
+    }
+  }
+
+  // apply median filter
+  
+  for (size_t ii = halfFilt; ii < _nGates - halfFilt; ii++) {
+
+    vector<Radx::fl32> vals;
+    for (size_t jj = ii - halfFilt; jj <= ii + halfFilt; jj++) {
+      if (copy[jj] != Radx::missingFl32) {
+        vals.push_back(copy[jj]);
+      }
+    } // jj
+
+    if (vals.size() == len) {
+      sort(vals.begin(), vals.end());
+      _opticalDepth[ii] = vals[vals.size() / 2];
+    } else {
+      _opticalDepth[ii] = Radx::missingFl32;
+    }
+    
+  } // ii
+
+}
+
