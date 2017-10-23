@@ -89,7 +89,7 @@ public:
   /// Get the date and time from a dorade file path.
   /// returns 0 on success, -1 on failure
 
-  int getTimeFromPath(const string &path, RadxTime &rtime);
+  static int getTimeFromPath(const string &path, RadxTime &rtime);
 
   /// get start and end times for data in file
   /// returns 0 on success, -1 on failure

@@ -624,6 +624,30 @@ using namespace std;
     tt->single_val.s = tdrpStrDup(".");
     tt++;
     
+    // Parameter 'files_sub_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("files_sub_dir");
+    tt->descr = tdrpStrDup("Name of directory immediately above the files.");
+    tt->help = tdrpStrDup("Typical path would be: /data/2015/07/11/raw/gvhsrl_20150711T150000_data_fl1.nc. This is the name of the subdir between the day-dir and the data files.");
+    tt->val_offset = (char *) &files_sub_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("raw");
+    tt++;
+    
+    // Parameter 'max_file_time_span_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("max_file_time_span_secs");
+    tt->descr = tdrpStrDup("Max time span in file (secs).");
+    tt->help = tdrpStrDup("A new file is always started after this period.");
+    tt->val_offset = (char *) &max_file_time_span_secs - &_start_;
+    tt->single_val.i = 3600;
+    tt++;
+    
     // Parameter 'monitoring_interval_secs'
     // ctype is 'int'
     
