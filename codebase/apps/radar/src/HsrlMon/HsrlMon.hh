@@ -97,6 +97,11 @@ private:
                  time_t endTime,
                  vector<string> &filePaths);
 
+  int _findFilesForDay(time_t startTime,
+                       time_t endTime,
+                       string dayDir,
+                       vector<string> &filePaths);
+
 };
 
 #endif

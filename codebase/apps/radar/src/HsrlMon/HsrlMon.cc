@@ -44,11 +44,16 @@
 #include <dsserver/DsLdataInfo.hh>
 #include <didss/DsInputPath.hh>
 #include <toolsa/pmu.h>
+#include <toolsa/file_io.h>
 
 #include <cmath>  
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <algorithm>
+
+#include <sys/types.h>
+#include <dirent.h>
 
 using namespace std;
 
@@ -220,7 +225,7 @@ int HsrlMon::_runArchive()
   time_t monitorStartTime = _args.startTime;
   while (monitorStartTime < _args.endTime) {
 
-    time_t monitorEndTime = monitorStartTime + _params.monitoring_interval_secs;
+    time_t monitorEndTime = monitorStartTime + _params.monitoring_interval_secs - 1;
     if (monitorEndTime > _args.endTime) {
       monitorEndTime = _args.endTime;
     }
@@ -341,10 +346,11 @@ int HsrlMon::_performMonitoring(const string &filePath,
 {
 
   if (_params.debug) {
-    cerr << "HsrlMon::_performMonitoring" << endl;
+    cerr << "================>> HsrlMon::_performMonitoring" << endl;
     cerr << "  filePath: " << filePath << endl;
     cerr << "  start time: " << RadxTime::strm(startTime) << endl;
     cerr << "  end time: " << RadxTime::strm(endTime) << endl;
+    cerr << "======================================================" << endl;
   }
 
   return 0;
@@ -361,7 +367,140 @@ int HsrlMon::_findFiles(time_t startTime,
 
 {
 
+  filePaths.clear();
+  
+  RadxTime stime(startTime);
+  char startDir[1024];
+  sprintf(startDir, "%s%s%.4d%s%.2d%s%.2d%s%s",
+          _params.input_dir, PATH_DELIM,
+          stime.getYear(), PATH_DELIM,
+          stime.getMonth(), PATH_DELIM,
+          stime.getDay(), PATH_DELIM,
+          _params.files_sub_dir);
+
+  RadxTime etime(endTime);
+  char endDir[1024];
+  sprintf(endDir, "%s%s%.4d%s%.2d%s%.2d%s%s",
+          _params.input_dir, PATH_DELIM,
+          etime.getYear(), PATH_DELIM,
+          etime.getMonth(), PATH_DELIM,
+          etime.getDay(), PATH_DELIM,
+          _params.files_sub_dir);
+
+  if (_params.debug) {
+    cerr << "Searching for files:" << endl;
+    cerr << "==> startDir: " << startDir << endl;
+    cerr << "==> endDir: " << endDir << endl;
+  }
+
+  _findFilesForDay(startTime, endTime, startDir, filePaths);
+  if (strcmp(startDir, endDir)) {
+    // ends on different date
+    _findFilesForDay(startTime, endTime, endDir, filePaths);
+  }
+
   return 0;
+
+}
+
+////////////////////////////////////////////////////////
+// Find appropriate files for specified day
+// Returns 0 on success, -1 on failure
+
+int HsrlMon::_findFilesForDay(time_t startTime,
+                              time_t endTime,
+                              string dayDir,
+                              vector<string> &filePaths)
+  
+{
+
+  if (_params.debug) {
+    cerr << "Searching for files in dir: " << dayDir << endl;
+  }
+
+  DIR *dirp;
+  if ((dirp = opendir(dayDir.c_str())) == NULL) {
+    cerr << "ERROR - HsrlMon::_findFilesForDay" << endl;
+    cerr << "  Cannot open dir: " << dayDir << endl;
+    return -1;
+  }
+
+  vector<string> filesFound;
+
+  struct dirent *dp;
+  for (dp = readdir(dirp); dp != NULL; dp = readdir(dirp)) {
+    
+    // exclude dir entries and files beginning with '.'
+    
+    if (dp->d_name[0] == '.')
+      continue;
+    
+    // compute path
+    
+    string path = dayDir;
+    path += PATH_DELIM;
+    path += dp->d_name;
+    
+    if (ta_stat_is_file(path.c_str())) {
+      
+      // file - check time
+      
+      RadxTime fileStartTime;
+      if (RawFile::getTimeFromPath(path, fileStartTime)) {
+        // date/time not in file name
+        continue;
+      }
+      filesFound.push_back(path);
+
+    } // if (ta_stat_is_dir ...
+    
+  } // endfor - dp
+  
+  closedir(dirp);
+
+  // sort the file paths
+
+  sort(filesFound.begin(), filesFound.end());
+
+  // compute the files start and end times
+
+  vector<time_t> filesStartTime;
+  vector<time_t> filesEndTime;
+
+  for (size_t ii = 0; ii < filesFound.size(); ii++) {
+    RadxTime fileStartTime;
+    RawFile::getTimeFromPath(filesFound[ii], fileStartTime);
+    RadxTime fileEndTime = fileStartTime + _params.max_file_time_span_secs;
+    if (ii != filesFound.size() - 1) {
+      RawFile::getTimeFromPath(filesFound[ii+1], fileEndTime);
+    }
+    filesStartTime.push_back(fileStartTime.utime());
+    filesEndTime.push_back(fileEndTime.utime() - 1);
+  }
+      
+  for (size_t ii = 0; ii < filesFound.size(); ii++) {
+    cerr << "1111111111111 path, start, end: "
+         << filesFound[ii] << ", "
+         << RadxTime::strm(filesStartTime[ii]) << ", "
+         << RadxTime::strm(filesEndTime[ii]) << endl;
+  }
+
+  // select appropriate files
+  
+  for (size_t ii = 0; ii < filesFound.size(); ii++) {
+    if (filesStartTime[ii] < endTime &&
+        filesEndTime[ii] >= startTime) {
+      filePaths.push_back(filesFound[ii]);
+      cerr << "----------------------------------------------" << endl;
+      cerr << "2222222222 using path, start, end: "
+           << filesFound[ii] << ", "
+           << RadxTime::strm(filesStartTime[ii]) << ", "
+           << RadxTime::strm(filesEndTime[ii]) << endl;
+    }
+  } // ii
+
+  return 0;
+  
 
 }
 

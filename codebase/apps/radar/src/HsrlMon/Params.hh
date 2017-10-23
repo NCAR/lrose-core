@@ -356,6 +356,10 @@ public:
 
   char* input_dir;
 
+  char* files_sub_dir;
+
+  int max_file_time_span_secs;
+
   int monitoring_interval_secs;
 
   int realtime_interval_secs;
@@ -391,7 +395,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[24];
+  mutable TDRPtable _table[26];
 
   const char *_className;
 

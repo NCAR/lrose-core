@@ -198,8 +198,9 @@ int RawFile::getTimeFromPath(const string &path, RadxTime &rtime)
   
   while (start < end - 6) {
     int year, month, day, hour, min, sec;
-    if (sscanf(start, "%4d%2d%2d_%2d%2d%2d",
-               &year, &month, &day, &hour, &min, &sec) == 6) {
+    char sep;
+    if (sscanf(start, "%4d%2d%2d%1c%2d%2d%2d",
+               &year, &month, &day, &sep, &hour, &min, &sec) == 7) {
       if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
         return -1;
       }
