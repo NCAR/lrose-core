@@ -661,9 +661,9 @@ Radx::fl32 DerFieldCalcs::_computeOptDepth(double pressure, double temperature,
    
   double optDepth = 28.0 - log( scan * molRate / beta_m_sonde );
 
-  if (optDepth > 10.0) {
-    return Radx::missingFl32;
-  }
+  // if (optDepth > 10.0) {
+  //   return Radx::missingFl32;
+  // }
 
   return optDepth;
 
