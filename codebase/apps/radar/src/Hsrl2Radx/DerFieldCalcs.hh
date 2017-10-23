@@ -140,33 +140,40 @@ private:
   
   // geometric overlap correction
   double _geoOverlapCor(double arrivalRate, double geoOverlap);
-  
+
+  // initialize the arrays for derived fields
+  void _initDerivedArrays();
+
   // volume depolarization
-  double _computeVolDepol(double crossRate, double combineRate);
+  Radx::fl32 _computeVolDepol(double crossRate, double combineRate);
   
   // backscatter ratio
-  double _computeBackscatRatio(double combineRate, double molRate);
+  Radx::fl32 _computeBackscatRatio(double combineRate, double molRate);
   
   // particle depolarization
-  double _computePartDepol(double volDepol, double backscatRatio);
+  Radx::fl32 _computePartDepol(Radx::fl32 volDepol, 
+                               Radx::fl32 backscatRatio);
   
   // intermediate field for backscatter ratio and extinction
   double _computeBetaMSonde(double pressure, double temperature);
 
   // backscatter coefficient
-  double _computeBackscatCo(double pressure, double temperature, 
-                            double backscatRatio);
+  Radx::fl32 _computeBackscatCo(double pressure, double temperature, 
+                                Radx::fl32 backscatRatio);
   
   // optical depth calculation for extinction;
-  double _computeOptDepth(double pressure, double temperature,
-                          double molRate,double scan);
+  Radx::fl32 _computeOptDepth(double pressure, double temperature,
+                              double molRate,double scan);
 
   // extinction
-  double _computeExtinctionCoeff(double opDepth1, double opDepth2,
-                                 double alt1, double alt2);
+  Radx::fl32 _computeExtinctionCoeff(Radx::fl32 optDepth1, 
+                                     Radx::fl32 optDepth2,
+                                     double alt1, double alt2);
   
   void _printRateDiagnostics(const string &label,
                              bool includeCombined = false);
+
+  void _printDerivedFields(ostream &out);
 
 };
 #endif

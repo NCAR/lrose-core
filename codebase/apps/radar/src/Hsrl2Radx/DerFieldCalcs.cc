@@ -96,14 +96,14 @@ void DerFieldCalcs::_applyCorr()
   _molDataRate.clear();
   _combinedRate.clear();
   
-  CalReader dt_hi=(_fullCals.getDeadTimeHi());
-  CalReader dt_lo=(_fullCals.getDeadTimeLo());
-  CalReader dt_cross=(_fullCals.getDeadTimeCross());
-  CalReader dt_mol=(_fullCals.getDeadTimeMol());
-  CalReader binwid=(_fullCals.getBinWidth());
+  CalReader dt_hi = _fullCals.getDeadTimeHi();
+  CalReader dt_lo = _fullCals.getDeadTimeLo();
+  CalReader dt_cross = _fullCals.getDeadTimeCross();
+  CalReader dt_mol = _fullCals.getDeadTimeMol();
+  CalReader binwid = _fullCals.getBinWidth();
    
   for(size_t igate=0;igate<_nGates;igate++) {
-
+    
     if(dt_hi.dataTypeisNum() && 
        ( ( dt_hi.getDataNum() ).at(_fullCals.getHiPos()) ).size()==1 && 
        dt_lo.dataTypeisNum() && 
@@ -125,7 +125,7 @@ void DerFieldCalcs::_applyCorr()
 
       _hiDataRate.push_back(_nonLinCountCor(_hiData[igate], 
                                             hiDeadTime, binW, _shotCount)); 
-
+      
       _loDataRate.push_back(_nonLinCountCor(_loData[igate], 
                                             loDeadTime, binW, _shotCount)); 
 
@@ -146,7 +146,7 @@ void DerFieldCalcs::_applyCorr()
     //need pol baseline from file to replace 1.0
     //_baselineSubtract is a passthrough function for now anyway
     
-    int calGate= blCorSize/_nGates * igate +  0.5 * blCorSize/_nGates;
+    int calGate = blCorSize/_nGates * igate +  0.5 * blCorSize/_nGates;
     
     _hiDataRate.at(igate)=_baselineSubtract(_hiDataRate.at(igate),
                                             (blCor.at(1)).at(calGate),1.0);
@@ -160,50 +160,52 @@ void DerFieldCalcs::_applyCorr()
   
   _printRateDiagnostics("baselineSubtract");
   
-  double hibackgroundRate=0;
-  double lobackgroundRate=0;
-  double crossbackgroundRate=0;
-  double molbackgroundRate=0;
+  double hibackgroundRate = 0.0;
+  double lobackgroundRate = 0.0;
+  double crossbackgroundRate = 0.0;
+  double molbackgroundRate = 0.0;
   
   // grabs last 100 out of 4000 bins for background,
   // or fractionally adjusts for less bins
-  int bgBinCount=0;
-  for(int cgate=_nGates-1;cgate>=_nGates*0.975;cgate--) {
-    hibackgroundRate=hibackgroundRate+_hiDataRate.at(cgate);
-    lobackgroundRate=lobackgroundRate+_loDataRate.at(cgate);
-    crossbackgroundRate=crossbackgroundRate+_crossDataRate.at(cgate);
-    molbackgroundRate=molbackgroundRate+_molDataRate.at(cgate);
+  double bgBinCount = 0.0;
+  int startBackgroundGate = (int) ((double) _nGates * 0.975);
+  for(int cgate = startBackgroundGate; cgate < (int) _nGates; cgate++) {
+    hibackgroundRate += _hiDataRate.at(cgate);
+    lobackgroundRate += _loDataRate.at(cgate);
+    crossbackgroundRate += _crossDataRate.at(cgate);
+    molbackgroundRate += _molDataRate.at(cgate);
     bgBinCount++;	    
   }
-  hibackgroundRate/=bgBinCount;
-  lobackgroundRate/=bgBinCount;
-  crossbackgroundRate/=bgBinCount;
-  molbackgroundRate/=bgBinCount;
+
+  hibackgroundRate /= bgBinCount;
+  lobackgroundRate /= bgBinCount;
+  crossbackgroundRate /= bgBinCount;
+  molbackgroundRate /= bgBinCount;
   
-  for(size_t igate=0;igate<_nGates;igate++) {
-    _hiDataRate.at(igate)=_backgroundSub(_hiDataRate.at(igate),
-                                         hibackgroundRate);
-    _loDataRate.at(igate)=_backgroundSub(_loDataRate.at(igate),
-                                         lobackgroundRate);
-    _crossDataRate.at(igate)=_backgroundSub(_crossDataRate.at(igate),
-                                            crossbackgroundRate);
-    _molDataRate.at(igate)=_backgroundSub(_molDataRate.at(igate),
-                                          molbackgroundRate);
+  for(size_t igate = 0; igate < _nGates; igate++) {
+    _hiDataRate.at(igate) =
+      _backgroundSub(_hiDataRate.at(igate), hibackgroundRate);
+    _loDataRate.at(igate) =
+      _backgroundSub(_loDataRate.at(igate), lobackgroundRate);
+    _crossDataRate.at(igate) =
+      _backgroundSub(_crossDataRate.at(igate), crossbackgroundRate);
+    _molDataRate.at(igate) =
+      _backgroundSub(_molDataRate.at(igate), molbackgroundRate);
   }
 
   if(_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr<<"hibackgroundRate="<<hibackgroundRate<<'\n';
-    cerr<<"lobackgroundRate="<<lobackgroundRate<<'\n';
-    cerr<<"crossbackgroundRate="<<crossbackgroundRate<<'\n';
-    cerr<<"molbackgroundRate="<<molbackgroundRate<<'\n';
+    cerr<<"hibackgroundRate="<<hibackgroundRate<<endl;
+    cerr<<"lobackgroundRate="<<lobackgroundRate<<endl;
+    cerr<<"crossbackgroundRate="<<crossbackgroundRate<<endl;
+    cerr<<"molbackgroundRate="<<molbackgroundRate<<endl;
     _printRateDiagnostics("backgroundSub");
   }
   
-  for(size_t igate=0;igate<_nGates;igate++) {
-    _hiDataRate.at(igate)=_energyNorm(_hiDataRate.at(igate), _power);
-    _loDataRate.at(igate)=_energyNorm(_loDataRate.at(igate), _power);
-    _crossDataRate.at(igate)=_energyNorm(_crossDataRate.at(igate), _power);
-    _molDataRate.at(igate)=_energyNorm(_molDataRate.at(igate), _power);
+  for(size_t igate = 0; igate < _nGates; igate++) {
+    _hiDataRate.at(igate) = _energyNorm(_hiDataRate.at(igate), _power);
+    _loDataRate.at(igate) = _energyNorm(_loDataRate.at(igate), _power);
+    _crossDataRate.at(igate) = _energyNorm(_crossDataRate.at(igate), _power);
+    _molDataRate.at(igate) = _energyNorm(_molDataRate.at(igate), _power);
   }
   
   _printRateDiagnostics("energyNorm");
@@ -306,6 +308,23 @@ void DerFieldCalcs::_printRateDiagnostics(const string &label,
 }
   
 /////////////////////////////////////////////////////////////////
+// print derived fields
+
+void DerFieldCalcs::_printDerivedFields(ostream &out)
+{
+  for(size_t igate = 0; igate < _nGates; igate++) {
+    out << "gate, backScatRatio, backScatCoeff, volDepol, partDepol, optDepth, exctint: "
+        << igate << ", "
+        << _backscatRatio[igate] << ", "
+        << _backscatCoeff[igate] << ", "
+        << _volDepol[igate] << ", "
+        << _partDepol[igate] << ", "
+        << _opticalDepth[igate] << ", "
+        << _extinction[igate] << endl;
+  }
+}
+  
+/////////////////////////////////////////////////////////////////
 // do calculations for derived fields
 
 void DerFieldCalcs::computeDerived()
@@ -315,112 +334,75 @@ void DerFieldCalcs::computeDerived()
   
   _applyCorr();
 
-  CalReader scanAdjust=(_fullCals.getScanAdj());
-  double scan=1;
-
   // init arrays
 
-  _volDepol.clear();
-  _backscatRatio.clear();
-  _partDepol.clear();
-  _backscatCoeff.clear();
-  _extinction.clear();
-  _opticalDepth.clear();
+  _initDerivedArrays();
   
+  CalReader scanAdjust = _fullCals.getScanAdj();
+  double scan = 1;
   if(scanAdjust.dataTypeisNum() && 
      ((scanAdjust.getDataNum()).at(_fullCals.getBinPos()) ).size() == 1) {
-    scan= ((scanAdjust.getDataNum()).at(_fullCals.getBinPos())).at(0);
+    scan = ((scanAdjust.getDataNum()).at(_fullCals.getBinPos())).at(0);
   }
 
   // vol depol
 
   for(size_t igate=0;igate<_nGates;igate++) {
-    _volDepol.push_back(_computeVolDepol( _crossDataRate.at(igate), 
-                                          _combinedRate.at(igate)));
+    _volDepol[igate] = _computeVolDepol(_crossDataRate.at(igate), 
+                                        _combinedRate.at(igate));
   }
-
-  if(_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr<<"volDepol^^^^^"<<'\n';
-    for(size_t igate=0;igate<1;igate++) {
-      cerr<<"volDepol["<<igate<<"]="<<_volDepol[igate]<<'\n';
-    }
-  }
-
+  
   // backscatter ratio
-
+  
   for(size_t igate=0;igate<_nGates;igate++) {
-    _backscatRatio.push_back(_computeBackscatRatio(_combinedRate.at(igate), 
-                                                   _molDataRate.at(igate) ));
+    _backscatRatio[igate] = _computeBackscatRatio(_combinedRate.at(igate), 
+                                                  _molDataRate.at(igate));
   }
-
-  if(_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr<<"backscatRatio^^^^^"<<'\n';
-    for(size_t igate=0;igate<1;igate++) {
-      cerr<<"backscatRatio["<<igate<<"]="<< _backscatRatio[igate]<<'\n';
-    }
-  }
-
+  
   // particle depol
-
+  
   for(size_t igate=0;igate<_nGates;igate++) {
-    _partDepol.push_back(_computePartDepol(_volDepol[igate],
-                                           _backscatRatio[igate] ));
+    _partDepol[igate] = _computePartDepol(_volDepol[igate],
+                                          _backscatRatio[igate]);
   }
   
-  if(_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr<<"partDepol^^^^^"<<'\n';
-    for(size_t igate=0;igate<1;igate++) {
-      cerr<<"partDepol["<<igate<<"]="<<_partDepol[igate]<<'\n';
-    }
-  }
-
   // backscatter coefficient
-
+  
   for(size_t igate=0;igate<_nGates;igate++) {
-    _backscatCoeff.push_back(_computeBackscatCo(_presHpa[igate],
-                                                _tempK[igate], 
-                                                _backscatRatio[igate]));
+    _backscatCoeff[igate] = _computeBackscatCo(_presHpa[igate],
+                                               _tempK[igate], 
+                                               _backscatRatio[igate]);
   }
   
-  if(_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr<<"backscatCo^^^^^"<<'\n';
-    for(size_t igate=0;igate<1;igate++) {
-      cerr<<"backscatCoeff["<<igate<<"]="<<_backscatCoeff[igate]<<'\n';
-    }
+  // optical depth
+  
+  for(size_t igate = 0; igate < _nGates; igate++) {
+    _opticalDepth[igate] = 
+      _computeOptDepth(_presHpa[igate], _tempK[igate], _molDataRate.at(igate), scan);
+  }
+  
+  // extinction
+
+  int filterHalf = 2;
+  for(size_t igate = filterHalf; igate < _nGates - filterHalf; igate++) {
+    _extinction[igate] = 
+      _computeExtinctionCoeff(_opticalDepth[igate - filterHalf],
+                              _opticalDepth[igate + filterHalf],
+                              _htM[igate - filterHalf],
+                              _htM[igate + filterHalf]);
+  }
+                              
+  if(_params.debug >= Params::DEBUG_EXTRA) {
+    _printDerivedFields(cerr);
   }
 
-  // optical depth and extinction
-
-  double opDepth1, opDepth2, alt1, alt2;
-  opDepth2=_computeOptDepth(_presHpa[0],_tempK[0],_molDataRate.at(0),scan);
-  alt2=_htM[0];
-  _opticalDepth.push_back(opDepth2);
- 
-  for(size_t igate=0;igate<_nGates-1;igate++) {
-    opDepth1=opDepth2;
-    opDepth2=_computeOptDepth(_presHpa[igate+1],_tempK[igate+1],
-                              _molDataRate.at(igate+1),scan);
-    alt1=alt2;
-    alt2=_htM[igate+1];
-    _extinction.push_back(_computeExtinctionCoeff(opDepth1, opDepth2, alt1, alt2));
-    _opticalDepth.push_back(opDepth2);
-  }
-
-  if(_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr<<"extinction^^^^^"<<'\n';
-    for(size_t igate=0;igate<1;igate++) {
-      cerr<<"extinction["<<igate<<"]="<<_extinction[igate]<<'\n';
-    }
-  }
-    
 }
-
 
 /////////////////////////////////////////////////////////////////
 // nonlinear count corrections
 
 double DerFieldCalcs::_nonLinCountCor(Radx::fl32 count, double deadtime, 
-                                             double binWid, double shotCount)
+                                      double binWid, double shotCount)
 {
   if(shotCount == 0) {
     return count;
@@ -480,7 +462,8 @@ vector<double> DerFieldCalcs::_diffOverlapCor(vector<double> arrivalRate,
   arrivalRate.at(2) = arrivalRate.at(2)/(diffOverlap.at(3)*diffOverlap.at(0));
   // arrivalRate.at(3) is unchanged
 
-  return arrivalRate;//note the passthrough functionality for now
+  return arrivalRate;
+
 }
 
 /////////////////////////////////////////////////////////////////
@@ -508,45 +491,98 @@ double DerFieldCalcs::_hiAndloMerge(double hiRate, double loRate)
 
 double DerFieldCalcs::_geoOverlapCor(double arrivalRate, double geoOverlap)
 {
-  return arrivalRate*geoOverlap;
+  return arrivalRate * geoOverlap;
 }
 
+
+///////////////////////////////////////////////////////////////////
+// init arrays for derived fields
+
+void DerFieldCalcs::_initDerivedArrays()
+
+{
+  _volDepol.reserve(_nGates);
+  _backscatRatio.reserve(_nGates);
+  _partDepol.reserve(_nGates);
+  _backscatCoeff.reserve(_nGates);
+  _extinction.reserve(_nGates);
+  _opticalDepth.reserve(_nGates);
+  for (size_t ii = 0; ii < _nGates; ii++) {
+    _volDepol[ii] = Radx::missingFl32;
+    _backscatRatio[ii] = Radx::missingFl32;
+    _partDepol[ii] = Radx::missingFl32;
+    _backscatCoeff[ii] = Radx::missingFl32;
+    _extinction[ii] = Radx::missingFl32;
+    _opticalDepth[ii] = Radx::missingFl32;
+  }
+}
 
 /////////////////////////////////////////////////////////////////
 // volume depolarization
 
-double DerFieldCalcs::_computeVolDepol(double crossRate, double combineRate)
+Radx::fl32 DerFieldCalcs::_computeVolDepol(double crossRate, double combineRate)
 {
-  if(crossRate+combineRate == 0)
-    return 0;
-  return crossRate/(crossRate+combineRate);
+
+  if ((crossRate + combineRate) == 0.0) {
+    return Radx::missingFl32;
+  }
+
+  double depol = crossRate / (crossRate + combineRate);
+  if (depol < 0.0 || depol > 1.0) {
+    return Radx::missingFl32;
+  }
+
+  return depol;
+
 }
 
 
 /////////////////////////////////////////////////////////////////
 // backscatter ratio
 
-double DerFieldCalcs::_computeBackscatRatio(double combineRate, double molRate)
+Radx::fl32 DerFieldCalcs::_computeBackscatRatio(double combineRate, double molRate)
 {
-  if(molRate==0)
-    return 0;
-  return combineRate/molRate;
+
+  if(molRate == 0.0) {
+    return Radx::missingFl32;
+  }
+
+  double ratio = combineRate / molRate;
+  if (ratio < 1.0) {
+    return Radx::missingFl32;
+  }
+
+  return ratio;
+
 }
 
 
 /////////////////////////////////////////////////////////////////
 // particle depolarization
 
-double DerFieldCalcs::_computePartDepol(double volDepol, double backscatRatio)
+Radx::fl32 DerFieldCalcs::_computePartDepol(Radx::fl32 volDepol, 
+                                            Radx::fl32 backscatRatio)
 {
-  double d_mol=2*0.000365/(1+0.000365);
-  double pDepol1=volDepol/(1-1/backscatRatio)-d_mol/(backscatRatio-1);
+
+  if (volDepol == Radx::missingFl32 ||
+      backscatRatio == Radx::missingFl32) {
+    return Radx::missingFl32;
+  }
+  
+  double d_mol = 2.0 * 0.000365 / (1.0 + 0.000365);
+  double pDepol = ((volDepol / (1.0 - (1.0 / backscatRatio))) -
+                   (d_mol / (backscatRatio - 1.0)));
+  
+  if (pDepol < 0.0 || pDepol > 1.0) {
+    return Radx::missingFl32;
+  }
+  
   //double pDepol2=(-d_mol+backscatRatio*volDepol)/(backscatRatio-1);
+  //cerr<<"pDepol1="<<pDepol1<<endl;
+  //cerr<<"pDepol2="<<pDepol2<<endl;
   
-  //cerr<<"pDepol1="<<pDepol1<<'\n';
-  //cerr<<"pDepol2="<<pDepol2<<'\n';
-  
-  return pDepol1;
+  return pDepol;
+
 }
 
 
@@ -555,64 +591,106 @@ double DerFieldCalcs::_computePartDepol(double volDepol, double backscatRatio)
 
 double DerFieldCalcs::_computeBetaMSonde(double pressure, double temperature)
 {
-  //If temp is 0 this causes errors but also there is a case where temp 
-  //is -1.99384e+34
-  if(temperature<=0)
-    return 0;
-  return 5.45*(550/532)*4 * pow(10,-32) * pressure /
-    (temperature*1.3805604 * pow(10,-23));
+
+  // If temp is 0 this causes errors but also there is a case where temp 
+  // is -1.99384e+34
+
+  double minVal = 0.0;
+
+  if(temperature <= 0.0) {
+    return minVal;
+  }
+  
+  double val = ((5.45 * (550.0 / 532.0) * 4.0 * pow(10.0, -32.0) * pressure) /
+                (temperature * 1.3805604 * pow(10.0,-23.0)));
+
+  if (val < minVal) {
+    val = minVal;
+  }
+  
+  return val;
+
 }
 
 
 /////////////////////////////////////////////////////////////////
 // backscatter coefficient
 
-double DerFieldCalcs::_computeBackscatCo(double pressure, double temperature, 
-                                         double backscatRatio)
+Radx::fl32 DerFieldCalcs::_computeBackscatCo(double pressure, 
+                                             double temperature, 
+                                             Radx::fl32 backscatRatio)
 {
+
+  if (backscatRatio == Radx::missingFl32) {
+    return Radx::missingFl32;
+  }
+
   //If temp is 0 this causes errors but also there is a case where temp 
   //is -1.99384e+34
-  if(temperature<=0)
-    return 0;
+
+  double minCoeff = 0.0;
+
+  if(temperature <= 0.0) {
+    return Radx::missingFl32;
+  }
   
-  double beta_m_sonde =_computeBetaMSonde(pressure,temperature);
-  double aer_beta_bs = (backscatRatio-1)*beta_m_sonde;
-  
+  double beta_m_sonde = _computeBetaMSonde(pressure, temperature);
+  double aer_beta_bs = (backscatRatio - 1.0) * beta_m_sonde;
+
+  if (aer_beta_bs < minCoeff) {
+    return Radx::missingFl32;
+  }
+
   return aer_beta_bs;
+
 }
 
 /////////////////////////////////////////////////////////////////
 // optical depth
 
-double DerFieldCalcs::_computeOptDepth(double pressure, double temperature, 
-                                       double molRate, double scan)
+Radx::fl32 DerFieldCalcs::_computeOptDepth(double pressure, double temperature, 
+                                           double molRate, double scan)
 {
   double beta_m_sonde =_computeBetaMSonde(pressure,temperature);
-  //cerr << "scan=" << scan << '\n';
-  //cerr << "molRate=" << molRate << '\n';
-  //cerr << "beta_m_sonde=" << beta_m_sonde << '\n';
+  //cerr << "scan=" << scan << endl;
+  //cerr << "molRate=" << molRate << endl;
+  //cerr << "beta_m_sonde=" << beta_m_sonde << endl;
    
-  return log( scan * molRate / beta_m_sonde );
+  double optDepth = 28.0 - log( scan * molRate / beta_m_sonde );
+
+  if (optDepth > 10.0) {
+    return Radx::missingFl32;
+  }
+
+  return optDepth;
+
 }
 
 
 /////////////////////////////////////////////////////////////////
 // extinction coefficient
 
-double DerFieldCalcs::_computeExtinctionCoeff(double opDepth1, double opDepth2,
-                                         double alt1, double alt2)
+Radx::fl32 DerFieldCalcs::_computeExtinctionCoeff(Radx::fl32 optDepth1, Radx::fl32 optDepth2,
+                                                  double alt1, double alt2)
 {
 
-  //cerr << "opDepth1=" << opDepth1 << '\n';
-  //cerr << "opDepth2=" << opDepth2 << '\n';
-  //cerr << "alt1=" << alt1 << '\n';
-  //cerr << "alt2=" << alt2 << '\n';
-  //cerr << "extinction=" << (opDepth1-opDepth2)/(alt1-alt2) << '\n';
-    
-  if(!std::isnan(opDepth1) && !std::isnan(opDepth2) && alt1!=alt2)
-    {
-      //cerr << "extinction=" << (opDepth1-opDepth2)/(alt1-alt2)<<'\n';
-      return (opDepth1-opDepth2)/(alt1-alt2);
-    }
-  return 0;
+  if (optDepth1 == Radx::missingFl32 || optDepth2 == Radx::missingFl32) {
+    return Radx::missingFl32;
+  }
+
+  double minExtinction = 1.0e-10;
+  double extinction = minExtinction;
+  
+  if(std::isnan(optDepth1) || std::isnan(optDepth2) || alt1 == alt2) {
+    return Radx::missingFl32;
+  }
+  
+  extinction = (optDepth1 - optDepth2) / (alt1 - alt2);
+
+  if (extinction < minExtinction) {
+    return Radx::missingFl32;
+  }
+  
+  return extinction;
+
 }
