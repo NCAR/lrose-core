@@ -196,7 +196,7 @@ ColorMap &ColorMap::_copy(const ColorMap &rhs)
     _rangeMax = rhs._rangeMax;
     _range = rhs._range;
 
-    _useSpecifiedLabels = rhs._useSpecifiedLabels;
+    _labelsSetByValue = rhs._labelsSetByValue;
     _specifiedLabels = rhs._specifiedLabels;
 
     // compute the lookup table
@@ -408,7 +408,7 @@ void ColorMap::_init()
   _isDefault = false;
   _useLog10Transform = false;
   _useLog10ForLut = false;
-  _useSpecifiedLabels = false;
+  _labelsSetByValue = false;
 
   _rangeMin = 0.0;
   _rangeMax = 0.0;
@@ -926,13 +926,31 @@ int ColorMap::readXmlMap(const std::string &file_path)
     }
   }
 
+  _saturation = 1.0;
+  string satStr;
+  if (TaXml::readStringAttr(attrs, "saturation", satStr) == 0) {
+    double satVal;
+    if (sscanf(satStr.c_str(), "%lg", &satVal) != 1) {
+      _saturation = satVal;
+    }
+  }
+
+  string labelsSetByValue = "false";
+  if (TaXml::readStringAttr(attrs, "labelsSetByValue", labelsSetByValue) == 0) {
+    if (labelsSetByValue == "true") {
+      _labelsSetByValue = true;
+    }
+  }
+
   if (_debug) {
     cerr << "DEBUG - reading colorScale name: " << _name << endl;
     cerr << "=====>> id: " << id << endl;
     cerr << "=====>> gradation: " << gradation << endl;
+    cerr << "=====>> saturation: " << _saturation << endl;
+    cerr << "=====>> labelsSetByValue: " << labelsSetByValue << endl;
   }
 
-  // read in range tags
+  // read in color range tags
   
   vector<string> rangeTags;
   if (TaXml::readTagBufArray(body, "Range", rangeTags)) {
@@ -1005,24 +1023,22 @@ int ColorMap::readXmlMap(const std::string &file_path)
     
   // read in labels if present
 
-  bool specifyLabels = false;
   _specifiedLabels.clear();
-  TaXml::readBoolean(body, "SpecifyLabels", specifyLabels);
-  if (specifyLabels) {
+  if (_labelsSetByValue) {
     vector<string> labelTags;
     if (TaXml::readTagBufArray(body, "Label", labelTags)) {
       cerr << "ERROR - no <Label> tags in XML colorscale," << endl;
-      cerr << "  but SpecifyLabels is set true" << endl;
+      cerr << "  but labelsSetByValue is set true" << endl;
       cerr << "  file: " << _path << endl;
       cerr << "  name: " << _name << endl;
-      specifyLabels = false;
+      return -1;
     }
-    if (specifyLabels && labelTags.size() < 1) {
+    if (labelTags.size() < 1) {
       cerr << "ERROR - no <Label> tags in XML colorscale," << endl;
-      cerr << "  but SpecifyLabels is set true" << endl;
+      cerr << "  but labelsSetByValue is set true" << endl;
       cerr << "  file: " << _path << endl;
       cerr << "  name: " << _name << endl;
-      specifyLabels = false;
+      return -1;
     }
     for (size_t ii = 0; ii < labelTags.size(); ii++) {
       if (_readLabelTag(labelTags[ii])) {
@@ -1112,17 +1128,22 @@ int ColorMap::_readRangeTag(const string &rangeTag)
     double fred, fgreen, fblue;
     if (sscanf(colorStr.c_str(), "%lg,%lg,%lg",
                &fred, &fgreen, &fblue) == 3) {
-      if (fred >= 1 || fgreen >= 1 || fblue >= 1) {
-        // assume ints from 0 to 255
-        red = (int) floor(fred + 0.5);
-        green = (int) floor(fgreen + 0.5);
-        blue = (int) floor(fblue + 0.5);
-      } else {
-        // floats from 0 to 1, scale up to 255
-        red = (int) floor(fred * 255.0 + 0.5);
-        green = (int) floor(fgreen * 255.0 + 0.5);
-        blue = (int) floor(fblue * 255.0 + 0.5);
-      }
+      // scale for saturation
+      double mult = 255.0 / _saturation;
+      red = (int) floor(fred * mult + 0.5);
+      green = (int) floor(fgreen * mult + 0.5);
+      blue = (int) floor(fblue * mult + 0.5);
+      // if (fred >= 1 || fgreen >= 1 || fblue >= 1) {
+      //   // assume ints from 0 to 255
+      //   red = (int) floor(fred + 0.5);
+      //   green = (int) floor(fgreen + 0.5);
+      //   blue = (int) floor(fblue + 0.5);
+      // } else {
+      //   // floats from 0 to 1, scale up to 255
+      //   red = (int) floor(fred * 255.0 + 0.5);
+      //   green = (int) floor(fgreen * 255.0 + 0.5);
+      //   blue = (int) floor(fblue * 255.0 + 0.5);
+      // }
       if (red > 255) red = 255;
       if (green > 255) green = 255;
       if (blue > 255) blue = 255;
@@ -1216,7 +1237,6 @@ int ColorMap::_readLabelTag(const string &labelTag)
   label.text = textStr;
   label.position = fractionPos;
   _specifiedLabels.push_back(label);
-  _useSpecifiedLabels = true;
 
   return 0;
   

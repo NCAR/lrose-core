@@ -1593,7 +1593,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   QRect tRect(painter.fontMetrics().tightBoundingRect("1.0"));
   int textHt = tRect.height();
   
-  if (colorMap.useSpecifiedLabels()) {
+  if (colorMap.labelsSetByValue()) {
   
     // label values specified in the color scale file
 
@@ -1603,7 +1603,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
       const ColorMap::CmapLabel &label = labels[ii];
       double yy = scaleYBot - scaleHeight * label.position;
       painter.drawText(xStart, (int) yy - textHt / 2, 
-                       width, iPatchHt, 
+                       width + 4, textHt + 4, 
                        Qt::AlignCenter | Qt::AlignHCenter, 
                        label.text.c_str());
     } // ii

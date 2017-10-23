@@ -317,7 +317,7 @@ class DLL_EXPORT ColorMap {
 
   /// Get specified labels
 
-  bool useSpecifiedLabels() const { return _useSpecifiedLabels; }
+  bool labelsSetByValue() const { return _labelsSetByValue; }
   const vector<CmapLabel> &getSpecifiedLabels() const
   {
     return _specifiedLabels;
@@ -349,6 +349,10 @@ class DLL_EXPORT ColorMap {
   bool _useLog10Transform;
   bool _useLog10ForLut;
 
+  // value for saturated color
+
+  double _saturation;
+
   // map entries
   // size is number of colors
 
@@ -368,7 +372,7 @@ class DLL_EXPORT ColorMap {
 
   // specified labels and their values
 
-  bool _useSpecifiedLabels;
+  bool _labelsSetByValue;
   vector<CmapLabel> _specifiedLabels;
   
   // lookup table of RGB colors, evenly distributed
