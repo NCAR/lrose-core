@@ -283,9 +283,9 @@ int HsrlMon::_processFileFromList(const string &filePath)
       monitorEndTime = dataEndTime;
     }
     
-    if (_performMonitoring(filePath,
-                           monitorStartTime,
-                           monitorEndTime)) {
+    if (_addToMonitoring(filePath,
+                         monitorStartTime,
+                         monitorEndTime)) {
       return -1;
     }
     
@@ -306,6 +306,7 @@ int HsrlMon::_performMonitoring(time_t startTime,
 {
 
   if (_params.debug) {
+    cerr << "==================================================" << endl;
     cerr << "HsrlMon::_performMonitoring" << endl;
     cerr << "  Input dir: " << _params.input_dir << endl;
     cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
@@ -327,33 +328,16 @@ int HsrlMon::_performMonitoring(time_t startTime,
 
   int iret = 0;
   for (size_t ii = 0; ii < filePaths.size(); ii++) {
-    if (_performMonitoring(filePaths[ii], startTime, endTime)) {
+    if (_addToMonitoring(filePaths[ii], startTime, endTime)) {
       iret = -1;
     }
   }
 
-  return iret;
-
-}
-
-////////////////////////////////////////////////////////
-// Perform monitoring for specified file and times
-// Returns 0 on success, -1 on failure
-
-int HsrlMon::_performMonitoring(const string &filePath,
-                                time_t startTime,
-                                time_t endTime)
-{
-
   if (_params.debug) {
-    cerr << "================>> HsrlMon::_performMonitoring" << endl;
-    cerr << "  filePath: " << filePath << endl;
-    cerr << "  start time: " << RadxTime::strm(startTime) << endl;
-    cerr << "  end time: " << RadxTime::strm(endTime) << endl;
-    cerr << "======================================================" << endl;
+    cerr << "==================================================" << endl;
   }
 
-  return 0;
+  return iret;
 
 }
 
@@ -388,9 +372,9 @@ int HsrlMon::_findFiles(time_t startTime,
           _params.files_sub_dir);
 
   if (_params.debug) {
-    cerr << "Searching for files:" << endl;
-    cerr << "==> startDir: " << startDir << endl;
-    cerr << "==> endDir: " << endDir << endl;
+    cerr << "  Searching for files:" << endl;
+    cerr << "    startDir: " << startDir << endl;
+    cerr << "    endDir: " << endDir << endl;
   }
 
   _findFilesForDay(startTime, endTime, startDir, filePaths);
@@ -413,10 +397,6 @@ int HsrlMon::_findFilesForDay(time_t startTime,
                               vector<string> &filePaths)
   
 {
-
-  if (_params.debug) {
-    cerr << "Searching for files in dir: " << dayDir << endl;
-  }
 
   DIR *dirp;
   if ((dirp = opendir(dayDir.c_str())) == NULL) {
@@ -478,29 +458,34 @@ int HsrlMon::_findFilesForDay(time_t startTime,
     filesEndTime.push_back(fileEndTime.utime() - 1);
   }
       
-  // for (size_t ii = 0; ii < filesFound.size(); ii++) {
-  //   cerr << "1111111111111 path, start, end: "
-  //        << filesFound[ii] << ", "
-  //        << RadxTime::strm(filesStartTime[ii]) << ", "
-  //        << RadxTime::strm(filesEndTime[ii]) << endl;
-  // }
-
   // select appropriate files
   
   for (size_t ii = 0; ii < filesFound.size(); ii++) {
     if (filesStartTime[ii] < endTime &&
         filesEndTime[ii] >= startTime) {
       filePaths.push_back(filesFound[ii]);
-      // cerr << "----------------------------------------------" << endl;
-      // cerr << "2222222222 using path, start, end: "
-      //      << filesFound[ii] << ", "
-      //      << RadxTime::strm(filesStartTime[ii]) << ", "
-      //      << RadxTime::strm(filesEndTime[ii]) << endl;
     }
   } // ii
 
   return 0;
   
+
+}
+
+////////////////////////////////////////////////////////
+// Add to monitoring stats for specified file and times
+// Returns 0 on success, -1 on failure
+
+int HsrlMon::_addToMonitoring(const string &filePath,
+                              time_t startTime,
+                              time_t endTime)
+{
+
+  if (_params.debug) {
+    cerr << "    adding file: " << filePath << endl;
+  }
+
+  return 0;
 
 }
 

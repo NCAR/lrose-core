@@ -89,10 +89,9 @@ private:
   int _processFile(const string &filePath);
 
   int _processFileFromList(const string &filePath);
+
   int _performMonitoring(time_t startTime, time_t endTime);
-  int _performMonitoring(const string &filePath,
-                         time_t startTime,
-                         time_t endTime);
+
   int _findFiles(time_t startTime,
                  time_t endTime,
                  vector<string> &filePaths);
@@ -101,6 +100,10 @@ private:
                        time_t endTime,
                        string dayDir,
                        vector<string> &filePaths);
+
+  int _addToMonitoring(const string &filePath,
+                       time_t startTime,
+                       time_t endTime);
 
 };
 
