@@ -478,12 +478,12 @@ int HsrlMon::_findFilesForDay(time_t startTime,
     filesEndTime.push_back(fileEndTime.utime() - 1);
   }
       
-  for (size_t ii = 0; ii < filesFound.size(); ii++) {
-    cerr << "1111111111111 path, start, end: "
-         << filesFound[ii] << ", "
-         << RadxTime::strm(filesStartTime[ii]) << ", "
-         << RadxTime::strm(filesEndTime[ii]) << endl;
-  }
+  // for (size_t ii = 0; ii < filesFound.size(); ii++) {
+  //   cerr << "1111111111111 path, start, end: "
+  //        << filesFound[ii] << ", "
+  //        << RadxTime::strm(filesStartTime[ii]) << ", "
+  //        << RadxTime::strm(filesEndTime[ii]) << endl;
+  // }
 
   // select appropriate files
   
@@ -491,11 +491,11 @@ int HsrlMon::_findFilesForDay(time_t startTime,
     if (filesStartTime[ii] < endTime &&
         filesEndTime[ii] >= startTime) {
       filePaths.push_back(filesFound[ii]);
-      cerr << "----------------------------------------------" << endl;
-      cerr << "2222222222 using path, start, end: "
-           << filesFound[ii] << ", "
-           << RadxTime::strm(filesStartTime[ii]) << ", "
-           << RadxTime::strm(filesEndTime[ii]) << endl;
+      // cerr << "----------------------------------------------" << endl;
+      // cerr << "2222222222 using path, start, end: "
+      //      << filesFound[ii] << ", "
+      //      << RadxTime::strm(filesStartTime[ii]) << ", "
+      //      << RadxTime::strm(filesEndTime[ii]) << endl;
     }
   } // ii
 
