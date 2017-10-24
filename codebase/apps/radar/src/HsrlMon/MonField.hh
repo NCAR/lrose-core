@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// Names.hh
+// MonField.hh
 //
-// Strings for names in NetCDF
+// Class for monitoring a given metadata field
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,66 +32,40 @@
 //
 /////////////////////////////////////////////////////////////
 
-#ifndef _NAMES_HH
-#define _NAMES_HH
+#ifndef _MON_FIELD_HH
+#define _MON_FIELD_HH
 
 #include <string>
 using namespace std;
 
-class Names {
+// class for monitoring data
+
+class MonField {
   
 public:
-  
+
   // constructor
-
-  Names ();
-
-  // Destructor
-
-  ~Names();
-
-  // strings for names
-
-  static const string CombinedHighCounts;
-  static const string CombinedLowCounts;
-  static const string lidar_copolar_combined_backscatter_photon_count;
-
-  static const string MolecularCounts;
-  static const string lidar_copolar_molecular_backscatter_photon_count;
-
-  static const string CrossPolarCounts;
-  static const string lidar_crosspolar_combined_backscatter_photon_count;
-
-  static const string VolumeDepolRatio;
-  static const string lidar_volume_depolarization_ratio;
-
-  static const string BackScatterRatio;
-  static const string lidar_backscatter_ratio;
-
-  static const string ParticleDepolRatio;
-  static const string lidar_particle_depolarization_ratio;
-
-  static const string BackScatterCoeff;
-  static const string lidar_backscatter_coefficient;
-
-  static const string ExtinctionCoeff;
-  static const string lidar_extinction_coefficient;
-
-  static const string OpticalDepth;
-  static const string lidar_optical_depth;
-
-  static const string Height;
-  static const string height_above_mean_sea_level;
   
-  static const string Temperature;
-  static const string air_temperature;
-  
-  static const string Pressure;
-  static const string air_pressure;
-  static const string pressure_from_std_atmos;
+  MonField(const string &name,
+           const string &qualifier);
 
-protected:
+  // initialize
+
+  void clear();
+
+  // add a value to the stats
+  
+  void addValue(double val);
+
 private:
+
+  string _name;
+  string _qualifier;
+
+  double _sum;
+  double _sumSq;
+  double _nn;
+
 
 };
 

@@ -51,7 +51,7 @@ HDRS = \
 	Args.hh \
 	HsrlMon.hh \
 	RawFile.hh \
-	Names.hh
+	MonField.hh
 
 CPPC_SRCS = \
 	Params.cc \
@@ -59,7 +59,7 @@ CPPC_SRCS = \
 	Main.cc \
 	HsrlMon.cc \
 	RawFile.cc \
-	Names.cc
+	MonField.cc
 
 #
 # tdrp macros

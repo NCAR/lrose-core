@@ -39,7 +39,6 @@
 ////////////////////////////////////////////////////////////////
 
 #include "HsrlMon.hh"
-#include "Names.hh"
 #include "RawFile.hh"
 #include <dsserver/DsLdataInfo.hh>
 #include <didss/DsInputPath.hh>
@@ -513,7 +512,7 @@ void HsrlMon::_initMonFields()
 {
 
   for (size_t ii = 0; ii < _monFields.size(); ii++) {
-    _monFields[ii].init();
+    _monFields[ii].clear();
   }
 
 }

@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 //////////////////////////////////////////////////////////
-// Names.cc
+// MonField.cc
 //
-// Strings for names in NetCDF files
+// Class for monitoring a given metadata field
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,48 +32,37 @@
 //
 /////////////////////////////////////////////////////////////
 
-#include "Names.hh"
+#include "MonField.hh"
 
-const string Names::CombinedHighCounts = "CombinedHighCounts";
-const string Names::CombinedLowCounts = "CombinedLowCounts";
-const string Names::lidar_copolar_combined_backscatter_photon_count =
-  "lidar_copolar_combined_backscatter_photon_count";
+//////////////////////////////////////////
+// constructor
 
-const string Names::MolecularCounts = "MolecularCounts";
-const string Names::lidar_copolar_molecular_backscatter_photon_count =
-  "lidar_copolar_molecular_backscatter_photon_count";
+MonField::MonField(const string &name,
+                   const string &qualifier) :
+        _name(name),
+        _qualifier(qualifier)
+{
+  clear();
+}
 
-const string Names::CrossPolarCounts = "CrossPolarCounts";
-const string Names::lidar_crosspolar_combined_backscatter_photon_count =
-  "lidar_crosspolar_combined_backscatter_photon_count";
+////////////////
+// initialize
 
-const string Names::VolumeDepolRatio = "VolumeDepolRatio";
-const string Names::lidar_volume_depolarization_ratio =
-  "lidar_volume_depolarization_ratio";
+void MonField::clear()
+{
+  _sum = 0.0;
+  _sumSq = 0.0;
+  _nn = 0.0;
+}
 
-const string Names::BackScatterRatio = "BackScatterRatio";
-const string Names::lidar_backscatter_ratio = "lidar_backscatter_ratio";
+////////////////////////////
+// add a value to the stats
 
-const string Names::ParticleDepolRatio = "ParticleDepolRatio";
-const string Names::lidar_particle_depolarization_ratio =
-  "lidar_particle_depolarization_ratio";
+void MonField::addValue(double val)
 
-const string Names::BackScatterCoeff = "BackScatterCoeff";
-const string Names::lidar_backscatter_coefficient = "lidar_backscatter_coefficient";
-
-const string Names::ExtinctionCoeff = "ExtinctionCoeff";
-const string Names::lidar_extinction_coefficient = "lidar_extinction_coefficient";
-
-const string Names::OpticalDepth = "OpticalDepth";
-const string Names::lidar_optical_depth = "lidar_optical_depth";
-
-const string Names::Height = "Height";
-const string Names::height_above_mean_sea_level = "height_above_mean_sea_level";
-
-const string Names::Temperature = "Temperature";
-const string Names::air_temperature = "air_temperature";
-
-const string Names::Pressure = "Pressure";
-const string Names::air_pressure = "air_pressure";
-const string Names::pressure_from_std_atmos = "pressure_from_std_atmos";
+{
+  _sum += val;
+  _sumSq += val * val;
+  _nn++;
+}
 
