@@ -203,6 +203,20 @@ file_ext = "nc";
 
 monitoring_fields = {
   {
+    name = "TelescopeLocked",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "TelescopeDirection",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
     name = "tcsaft_temp1",
     qualifier = "",
     minValidValue = -100,
@@ -319,6 +333,244 @@ monitoring_fields = {
     qualifier = "",
     minValidValue = -100,
     maxValidValue = 100000
+  }
+  ,
+  {
+    name = "shortcell_target",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "l3stats_shotcount",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "l3stats_goodshotcount",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "builduptime_threshhold",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "attenuator",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "etalonposition",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "REGISTERPROTO_test_seedvoltage",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "seedvoltage",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "SlowTuningSeedVoltage",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "opticalbenchairpressure",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "LIDARCTL_mode",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "raw_analog_interferometertemperature",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "raw_analog_etalontemperature",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "pressure",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "CalibrationPowerFilter",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "CrossChannelBlock",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "IodineLongFilter",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "ReceivedSignalFilter",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "RemoveLongI2Cell",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "DetectorShutter",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "OutgoingShutter",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "OutgoingShutterValue",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "OperatorOutgoingShutterValue",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "iwg1_Lat",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "iwg1_Lon",
+    qualifier = "",
+    minValidValue = -100000,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "iwg1_GPS_MSL_Alt",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 10000000
+  }
+  ,
+  {
+    name = "iwg1_Grnd_Spd",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "iwg1_True_Hdg",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "iwg1_Pitch",
+    qualifier = "",
+    minValidValue = -10000,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "iwg1_Roll",
+    qualifier = "",
+    minValidValue = -10000,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "iwg1_Cabin_Pressure",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "iwg1_Solar_Zenith",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "polarization",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "total_energy",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 1.0e10
   }
 };
 

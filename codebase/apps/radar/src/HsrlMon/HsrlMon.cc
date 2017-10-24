@@ -541,19 +541,29 @@ void HsrlMon::_printStats(FILE *out)
 
 {
 
-  fprintf(out, "==================== HSRL MONITORING ======================\n");
-  fprintf(out, "Monitor start time: %s\n", RadxTime::strm(_monitorStartTime).c_str());
-  fprintf(out, "Monitor end   time: %s\n", RadxTime::strm(_monitorEndTime).c_str());
+  fprintf(out,
+          "================================= HSRL MONITORING "
+          "========================================\n");
 
+  fprintf(out, "%45s:   %s - %s\n",
+          "Monitor start time - end time",
+          RadxTime::strm(_monitorStartTime).c_str(), 
+          RadxTime::strm(_monitorEndTime).c_str());
+
+  fprintf(out, "%45s  %10s %10s %10s %10s\n",
+          "", "Min", "Max", "Mean", "Sdev");
+          
   for (size_t ii = 0; ii < _monFields.size(); ii++) {
     _monFields[ii].computeStats();
     _monFields[ii].printStats(out);
-    if (_params.debug) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       _monFields[ii].printStatsDebug(out);
     }
   }
 
-  fprintf(out, "===========================================================\n");
+  fprintf(out,
+          "==================================================="
+          "=======================================\n");
   
 }
 

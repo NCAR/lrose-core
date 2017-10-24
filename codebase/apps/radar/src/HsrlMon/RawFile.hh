@@ -231,13 +231,8 @@ private:
   int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<int> &vals);
   int _readRayVar(Nc3Var* &var, const string &name, 
-                  vector<bool> &vals);
-  
-  int _readRayVar(const string &name, 
-                  vector<double> &vals);
-  int _readRayVar(const string &name, 
-                  vector<int> &vals);
-  int _readRayVar(const string &name, 
+                  vector<short> &vals);
+  int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<bool> &vals);
   
   Nc3Var* _getRayVar(const string &name);

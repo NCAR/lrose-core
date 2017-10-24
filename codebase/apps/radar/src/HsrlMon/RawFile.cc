@@ -654,6 +654,17 @@ int RawFile::_readRayVar2Doubles(const string &name,
       }
       break;
     }
+    case nc3Short: {
+      vector<short> svals;
+      if (_readRayVar(var, name, svals)) {
+        iret = -1;
+      } else {
+        for (size_t ii = 0; ii < svals.size(); ii++) {
+          dvals.push_back(svals[ii]);
+        }
+      }
+      break;
+    }
     default: {
       cerr << "ERROR - RawFile::_readRayVar2Doubles" << endl;
       cerr << "  Bad type for var: " << name << endl;
@@ -665,12 +676,27 @@ int RawFile::_readRayVar2Doubles(const string &name,
   if (iret == 0) {
     Nc3Att *longNameAtt = var->get_att("long_name");
     if (longNameAtt) {
-      longName = Nc3xFile::asString(longNameAtt);
+      string sval = Nc3xFile::asString(longNameAtt);
+      if (sval.size() > 0) {
+        longName = sval;
+      }
       delete longNameAtt;
+    } else {
+      Nc3Att *descAtt = var->get_att("description");
+      if (descAtt) {
+        string sval = Nc3xFile::asString(descAtt);
+        if (sval.size() > 0) {
+          longName = sval;
+        }
+        delete descAtt;
+      }
     }
     Nc3Att *unitsAtt = var->get_att("units");
     if (unitsAtt) {
-      units = Nc3xFile::asString(unitsAtt);
+      string sval = Nc3xFile::asString(unitsAtt);
+      if (sval.size() > 0) {
+        units = sval;
+      }
       delete unitsAtt;
     }
   }
@@ -756,17 +782,6 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
 }
 
 ///////////////////////////////////
-// read a ray variable - double
-// side effects: set vals only
-
-int RawFile::_readRayVar(const string &name,
-                         vector<double> &vals)
-{
-  Nc3Var *var;
-  return _readRayVar(var, name, vals);
-}
-
-///////////////////////////////////
 // read a ray variable - integer
 // side effects: set var, vals
 
@@ -805,14 +820,41 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
 }
 
 ///////////////////////////////////
-// read a ray variable - integer
-// side effects: set vals only
+// read a ray variable - short
+// side effects: set var, vals
 
-int RawFile::_readRayVar(const string &name,
-                         vector<int> &vals)
+int RawFile::_readRayVar(Nc3Var* &var, const string &name,
+                         vector<short> &vals)
+  
 {
-  Nc3Var *var;
-  return _readRayVar(var, name, vals);
+
+  vals.clear();
+
+  // get var
+  
+  var = _getRayVar(name);
+  if (var == NULL) {
+    return -1;
+  }
+
+  // load up data
+
+  short *data = new short[_nTimesInFile];
+  short *dd = data;
+  int iret = 0;
+  if (var->get(data, _nTimesInFile)) {
+    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
+      vals.push_back(*dd);
+    }
+  } else {
+    cerr << "ERROR - RawFile::_readRayVar" << endl;
+    cerr << "  Cannot read variable: " << name << endl;
+    cerr << _file.getNc3Error()->get_errmsg() << endl;
+    iret = -1;
+  }
+  delete[] data;
+  return iret;
+
 }
 
 ///////////////////////////////////////////
@@ -855,17 +897,6 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
   delete[] data;
   return iret;
 
-}
-
-///////////////////////////////////
-// read a ray variable - boolean
-// side effects: set vals only
-
-int RawFile::_readRayVar(const string &name,
-                         vector<bool> &vals)
-{
-  Nc3Var *var;
-  return _readRayVar(var, name, vals);
 }
 
 ///////////////////////////////////
