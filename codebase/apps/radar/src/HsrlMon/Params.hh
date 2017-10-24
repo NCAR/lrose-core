@@ -63,6 +63,13 @@ public:
     FILELIST = 2
   } mode_t;
 
+  // struct typedefs
+
+  typedef struct {
+    char* name;
+    char* qualifier;
+  } monitoring_field_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -370,13 +377,8 @@ public:
 
   char* file_ext;
 
-  char* combined_hi_field_name;
-
-  char* combined_lo_field_name;
-
-  char* molecular_field_name;
-
-  char* cross_field_name;
+  monitoring_field_t *_monitoring_fields;
+  int monitoring_fields_n;
 
   char* output_dir;
 
@@ -395,7 +397,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[26];
+  mutable TDRPtable _table[23];
 
   const char *_className;
 

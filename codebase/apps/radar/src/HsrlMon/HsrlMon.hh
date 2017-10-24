@@ -44,6 +44,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <string>
+#include <cstdio>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Radx/Radx.hh>
@@ -79,8 +80,35 @@ private:
   Args _args;
   Params _params;
   vector<string> _readPaths;
-
   RadxTime _realtimeScheduledTime;
+
+  // class for monitoring data
+
+  class MonField {
+  public:
+    const string name;
+    const string qualifier;
+    double sum;
+    double sumSq;
+    double nn;
+    MonField(const string &name,
+             const string &qualifier) :
+            name(name),
+            qualifier(qualifier)
+    {
+      init();
+    }
+    void init() {
+      sum = 0.0;
+      sumSq = 0.0;
+      nn = 0.0;
+    }
+  };
+  vector<MonField> _monFields;
+  time_t _monitorStartTime;
+  time_t _monitorEndTime;
+
+  // times for monitoring
 
   int _runFilelist();
   int _runArchive();
@@ -104,6 +132,10 @@ private:
   int _addToMonitoring(const string &filePath,
                        time_t startTime,
                        time_t endTime);
+
+  void _initMonFields();
+
+  void _printStats(FILE *out);
 
 };
 

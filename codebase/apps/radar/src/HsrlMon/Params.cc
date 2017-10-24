@@ -713,56 +713,49 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("READING RAW NetCDF DATA FILES");
+    tt->comment_hdr = tdrpStrDup("FIELDS FOR MONITORING");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'combined_hi_field_name'
-    // ctype is 'char*'
+    // Parameter 'monitoring_fields'
+    // ctype is '_monitoring_field_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("combined_hi_field_name");
-    tt->descr = tdrpStrDup("Name of combined_hi field in netCDF file.");
-    tt->help = tdrpStrDup("This name is also used for the field read in from the instrument raw FMQ in real-time");
-    tt->val_offset = (char *) &combined_hi_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("combined_hi");
-    tt++;
-    
-    // Parameter 'combined_lo_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("combined_lo_field_name");
-    tt->descr = tdrpStrDup("Name of combined_lo field in netCDF file.");
-    tt->help = tdrpStrDup("This name is also used for the field read in from the instrument raw FMQ in real-time");
-    tt->val_offset = (char *) &combined_lo_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("combined_lo");
-    tt++;
-    
-    // Parameter 'molecular_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("molecular_field_name");
-    tt->descr = tdrpStrDup("Name of molecular field in netCDF file.");
-    tt->help = tdrpStrDup("This name is also used for the field read in from the instrument raw FMQ in real-time");
-    tt->val_offset = (char *) &molecular_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("molecular");
-    tt++;
-    
-    // Parameter 'cross_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("cross_field_name");
-    tt->descr = tdrpStrDup("Name of cross field in netCDF file.");
-    tt->help = tdrpStrDup("This name is also used for the field read in from the instrument raw FMQ in real-time");
-    tt->val_offset = (char *) &cross_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("cross");
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("monitoring_fields");
+    tt->descr = tdrpStrDup("");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_monitoring_fields - &_start_;
+    tt->array_n_offset = (char *) &monitoring_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(monitoring_field_t);
+    tt->array_n = 4;
+    tt->struct_def.name = tdrpStrDup("monitoring_field_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_monitoring_fields->name - (char *) _monitoring_fields;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("qualifier");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_monitoring_fields->qualifier - (char *) _monitoring_fields;
+    tt->n_struct_vals = 8;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("tcsaft_temp1");
+      tt->struct_vals[1].s = tdrpStrDup("");
+      tt->struct_vals[2].s = tdrpStrDup("tcsaft_temp2");
+      tt->struct_vals[3].s = tdrpStrDup("");
+      tt->struct_vals[4].s = tdrpStrDup("tcsaft_temp3");
+      tt->struct_vals[5].s = tdrpStrDup("");
+      tt->struct_vals[6].s = tdrpStrDup("tcsaft_temp4");
+      tt->struct_vals[7].s = tdrpStrDup("");
     tt++;
     
     // Parameter 'Comment 4'

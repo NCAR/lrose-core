@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for HsrlMon
+ * TDRP params for ./HsrlMon
  **********************************************************************/
 
 //======================================================================
@@ -75,7 +75,6 @@ instance = "test";
 //     FILELIST
 //
 
-// mode = REALTIME;
 mode = ARCHIVE;
 
 ///////////// input_dir ///////////////////////////////
@@ -90,6 +89,32 @@ mode = ARCHIVE;
 //
 
 input_dir = "/scr/eldora1/rsfdata/cset/hsrl/raw";
+
+///////////// files_sub_dir ///////////////////////////
+//
+// Name of directory immediately above the files.
+//
+// Typical path would be: 
+//   /data/2015/07/11/raw/gvhsrl_20150711T150000_data_fl1.nc. This is the 
+//   name of the subdir between the day-dir and the data files.
+//
+//
+// Type: string
+//
+
+files_sub_dir = "raw";
+
+///////////// max_file_time_span_secs /////////////////
+//
+// Max time span in file (secs).
+//
+// A new file is always started after this period.
+//
+//
+// Type: int
+//
+
+max_file_time_span_secs = 3600;
 
 ///////////// monitoring_interval_secs ////////////////
 //
@@ -158,61 +183,43 @@ file_ext = "nc";
 
 //======================================================================
 //
-// READING RAW NetCDF DATA FILES.
+// FIELDS FOR MONITORING.
 //
 //======================================================================
  
-///////////// combined_hi_field_name //////////////////
-//
-// Name of combined_hi field in netCDF file.
-//
-// This name is also used for the field read in from the instrument raw 
-//   FMQ in real-time.
+///////////// monitoring_fields ///////////////////////
 //
 //
-// Type: string
+// Type: struct
+//   typedef struct {
+//      string name;
+//      string qualifier;
+//   }
 //
-
-combined_hi_field_name = "combined_hi";
-
-///////////// combined_lo_field_name //////////////////
-//
-// Name of combined_lo field in netCDF file.
-//
-// This name is also used for the field read in from the instrument raw 
-//   FMQ in real-time.
-//
-//
-// Type: string
+// 1D array - variable length.
 //
 
-combined_lo_field_name = "combined_lo";
-
-///////////// molecular_field_name ////////////////////
-//
-// Name of molecular field in netCDF file.
-//
-// This name is also used for the field read in from the instrument raw 
-//   FMQ in real-time.
-//
-//
-// Type: string
-//
-
-molecular_field_name = "molecular";
-
-///////////// cross_field_name ////////////////////////
-//
-// Name of cross field in netCDF file.
-//
-// This name is also used for the field read in from the instrument raw 
-//   FMQ in real-time.
-//
-//
-// Type: string
-//
-
-cross_field_name = "cross";
+monitoring_fields = {
+  {
+    name = "tcsaft_temp1",
+    qualifier = ""
+  }
+  ,
+  {
+    name = "tcsaft_temp2",
+    qualifier = ""
+  }
+  ,
+  {
+    name = "tcsaft_temp3",
+    qualifier = ""
+  }
+  ,
+  {
+    name = "tcsaft_temp4",
+    qualifier = ""
+  }
+};
 
 //======================================================================
 //

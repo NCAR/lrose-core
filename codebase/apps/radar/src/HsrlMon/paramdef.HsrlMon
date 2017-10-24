@@ -96,32 +96,39 @@ paramdef string {
 } file_ext;
 
 commentdef {
-  p_header = "READING RAW NetCDF DATA FILES";
+  p_header = "FIELDS FOR MONITORING";
 }
 
-paramdef string {
-  p_default = "combined_hi";
-  p_descr = "Name of combined_hi field in netCDF file.";
-  p_help = "This name is also used for the field read in from the instrument raw FMQ in real-time";
-} combined_hi_field_name;
+typedef struct {
+  string name;
+  string qualifier;
+} monitoring_field_t;
 
-paramdef string {
-  p_default = "combined_lo";
-  p_descr = "Name of combined_lo field in netCDF file.";
-  p_help = "This name is also used for the field read in from the instrument raw FMQ in real-time";
-} combined_lo_field_name;
+paramdef struct monitoring_field_t {
+  
+  p_default ={
+    {
+      name = "tcsaft_temp1",
+      qualifier = ""
+    }
+    ,
+    {
+      name = "tcsaft_temp2",
+      qualifier = ""
+    }
+    ,
+    {
+      name = "tcsaft_temp3",
+      qualifier = ""
+    }
+    ,
+    {
+      name = "tcsaft_temp4",
+      qualifier = ""
+    }
+  }
 
-paramdef string {
-  p_default = "molecular";
-  p_descr = "Name of molecular field in netCDF file.";
-  p_help = "This name is also used for the field read in from the instrument raw FMQ in real-time";
-} molecular_field_name;
-
-paramdef string {
-  p_default = "cross";
-  p_descr = "Name of cross field in netCDF file.";
-  p_help = "This name is also used for the field read in from the instrument raw FMQ in real-time";
-} cross_field_name;
+} monitoring_fields[];
 
 commentdef {
   p_header = "OUTPUT DIRECTORY";

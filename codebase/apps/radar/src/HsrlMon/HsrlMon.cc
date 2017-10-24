@@ -89,6 +89,14 @@ HsrlMon::HsrlMon(int argc, char **argv)
     return;
   }
 
+  // create monitoring fields
+
+  for (int ii = 0; ii < _params.monitoring_fields_n; ii++) {
+    const Params::monitoring_field_t &pfield = _params._monitoring_fields[ii];
+    MonField field(pfield.name, pfield.qualifier);
+    _monFields.push_back(field);
+  }
+
 }
 
 // destructor
@@ -128,14 +136,11 @@ int HsrlMon::_runFilelist()
   // loop through the input file list
   
   int iret = 0;
-  
   for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
-    
     string inputPath = _args.inputFileList[ii];
     if (_processFileFromList(inputPath)) {
       iret = -1;
     }
-
   }
 
   return iret;
@@ -185,10 +190,10 @@ int HsrlMon::_runRealtime()
 
     if (now > _realtimeScheduledTime.utime()) {
       
-      time_t monitorStartTime = now - delay - _params.monitoring_interval_secs;
-      time_t monitorEndTime = monitorStartTime + _params.monitoring_interval_secs - 1;
+      _monitorStartTime = now - delay - _params.monitoring_interval_secs;
+      _monitorEndTime = _monitorStartTime + _params.monitoring_interval_secs - 1;
       
-      if (_performMonitoring(monitorStartTime, monitorEndTime)) {
+      if (_performMonitoring(_monitorStartTime, _monitorEndTime)) {
         iret = -1;
       }
       
@@ -222,19 +227,19 @@ int HsrlMon::_runArchive()
 
   int iret = 0;
 
-  time_t monitorStartTime = _args.startTime;
-  while (monitorStartTime < _args.endTime) {
+  _monitorStartTime = _args.startTime;
+  while (_monitorStartTime < _args.endTime) {
 
-    time_t monitorEndTime = monitorStartTime + _params.monitoring_interval_secs - 1;
-    if (monitorEndTime > _args.endTime) {
-      monitorEndTime = _args.endTime;
+    _monitorEndTime = _monitorStartTime + _params.monitoring_interval_secs - 1;
+    if (_monitorEndTime > _args.endTime) {
+      _monitorEndTime = _args.endTime;
     }
 
-    if (_performMonitoring(monitorStartTime, monitorEndTime)) {
+    if (_performMonitoring(_monitorStartTime, _monitorEndTime)) {
       iret = -1;
     }
     
-    monitorStartTime += _params.monitoring_interval_secs;
+    _monitorStartTime += _params.monitoring_interval_secs;
 
   } // while
 
@@ -274,22 +279,31 @@ int HsrlMon::_processFileFromList(const string &filePath)
 
   // loop through time periods in the file
 
-  time_t monitorStartTime = dataStartTime;
-  
-  while (monitorStartTime < dataEndTime) {
+  _monitorStartTime = dataStartTime;
+  while (_monitorStartTime < dataEndTime) {
     
-    time_t monitorEndTime = monitorStartTime + _params.monitoring_interval_secs;
-    if (monitorEndTime > dataEndTime) {
-      monitorEndTime = dataEndTime;
+    _monitorEndTime = _monitorStartTime + _params.monitoring_interval_secs;
+    if (_monitorEndTime > dataEndTime) {
+      _monitorEndTime = dataEndTime;
     }
     
+    // initialize
+    
+    _initMonFields();
+
+    // add to stats
+
     if (_addToMonitoring(filePath,
-                         monitorStartTime,
-                         monitorEndTime)) {
+                         _monitorStartTime,
+                         _monitorEndTime)) {
       return -1;
     }
+
+    // print out
+
+    _printStats(stderr);
     
-    monitorStartTime += _params.monitoring_interval_secs;
+    _monitorStartTime += _params.monitoring_interval_secs;
     
   } // while
 
@@ -326,12 +340,15 @@ int HsrlMon::_performMonitoring(time_t startTime,
     return -1;
   }
 
+  _initMonFields();
   int iret = 0;
   for (size_t ii = 0; ii < filePaths.size(); ii++) {
     if (_addToMonitoring(filePaths[ii], startTime, endTime)) {
       iret = -1;
     }
   }
+
+  _printStats(stdout);
 
   if (_params.debug) {
     cerr << "==================================================" << endl;
@@ -486,6 +503,32 @@ int HsrlMon::_addToMonitoring(const string &filePath,
   }
 
   return 0;
+
+}
+
+////////////////////////////////////////////////////////
+// Initialize the monitoring fields
+
+void HsrlMon::_initMonFields()
+{
+
+  for (size_t ii = 0; ii < _monFields.size(); ii++) {
+    _monFields[ii].init();
+  }
+
+}
+
+////////////////////////////////////////////////////////
+// Print the stats
+
+void HsrlMon::_printStats(FILE *out)
+
+{
+
+  fprintf(out, "==================== HSRL MONITORING ======================\n");
+  fprintf(out, "Monitor start time: %s\n", RadxTime::strm(_monitorStartTime).c_str());
+  fprintf(out, "Monitor end   time: %s\n", RadxTime::strm(_monitorEndTime).c_str());
+  fprintf(out, "===========================================================\n");
 
 }
 
