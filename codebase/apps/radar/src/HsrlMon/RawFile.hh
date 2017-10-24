@@ -39,6 +39,7 @@
 #include <string>
 #include <vector>
 
+#include "MonField.hh"
 #include <Radx/Radx.hh>
 #include <Radx/RadxTime.hh>
 #include <Ncxx/Nc3xFile.hh>
@@ -72,20 +73,20 @@ public:
   
   virtual void clear();
   
+  // Open file
+  // Returns true on success, false on failure
+  
+  int openFile(const string &path);
+  
+  // Close file
+
+  void closeFile();
+  
   /// Check if specified file is a raw HSRL file.
   /// Returns true on success, false on failure
   
   bool isRawHsrlFile(const string &path);
     
-  //////////////////////////////////////////////////////////////
-  /// Perform the read:
-  
-  /// Read in data file from specified path,
-  /// Returns 0 on success, -1 on failure
-  /// Use getErrStr() if error occurs
-  
-  int readFromPath(const string &path);
-  
   /// Get the date and time from a dorade file path.
   /// returns 0 on success, -1 on failure
 
@@ -97,6 +98,25 @@ public:
   int getStartAndEndTimes(const string &filePath,
                           time_t &dataStartTime,
                           time_t &dataEndTime);
+
+  // Opens specified path
+  // Reads times
+  // Remains open, ready for use
+  // Returns 0 on success, -1 on failure
+  
+  int openAndReadTimes(const string &path);
+  
+  // get the index for a given time
+  // returns -1 on error
+  
+  int getTimeIndex(time_t timeVal);
+
+  // append to monitoring stats
+  // returns 0 on success, -1 on failure
+  
+  int appendMonStats(MonField &monField,
+                     int startTimeIndex,
+                     int endTimeIndex);
 
   ////////////////////////
   /// \name Error string:
@@ -199,31 +219,26 @@ private:
   int _readGlobalAttributes();
   int _readTimes();
 
-#ifdef JUNK
+  int _readRayVar2Doubles(const string &name,
+                          vector<double> &vals);
+
   int _readRayVar(Nc3Var* &var, const string &name, 
-                  vector<double> &vals, bool required = true);
+                  vector<double> &vals);
   int _readRayVar(Nc3Var* &var, const string &name, 
-                  vector<float> &vals, bool required = true);
+                  vector<float> &vals);
   int _readRayVar(Nc3Var* &var, const string &name, 
-                  vector<int> &vals, bool required = true);
+                  vector<int> &vals);
   int _readRayVar(Nc3Var* &var, const string &name, 
-                  vector<bool> &vals, bool required = true);
+                  vector<bool> &vals);
   
   int _readRayVar(const string &name, 
-                  vector<double> &vals, bool required = true);
+                  vector<double> &vals);
   int _readRayVar(const string &name, 
-                  vector<int> &vals, bool required = true);
+                  vector<int> &vals);
   int _readRayVar(const string &name, 
-                  vector<bool> &vals, bool required = true);
+                  vector<bool> &vals);
   
-  Nc3Var* _getRayVar(const string &name, bool required);
-
-  int _readFieldVariables();
-
-  int _addCountFieldToRays(Nc3Var* var,
-                           const string &name,
-                           const string &units);
-#endif  
+  Nc3Var* _getRayVar(const string &name);
 
   /// add integer value to error string, with label
 

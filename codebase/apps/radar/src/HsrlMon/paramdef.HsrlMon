@@ -102,6 +102,8 @@ commentdef {
 typedef struct {
   string name;
   string qualifier;
+  double minValidValue;
+  double maxValidValue;
 } monitoring_field_t;
 
 paramdef struct monitoring_field_t {
@@ -109,22 +111,30 @@ paramdef struct monitoring_field_t {
   p_default ={
     {
       name = "tcsaft_temp1",
-      qualifier = ""
+      qualifier = "",
+      minValidValue = -100.0,
+      maxValidValue = 100.0
     }
     ,
     {
       name = "tcsaft_temp2",
-      qualifier = ""
+      qualifier = "",
+      minValidValue = -100.0,
+      maxValidValue = 100.0
     }
     ,
     {
       name = "tcsaft_temp3",
-      qualifier = ""
+      qualifier = "",
+      minValidValue = -100.0,
+      maxValidValue = 100.0
     }
     ,
     {
       name = "tcsaft_temp4",
-      qualifier = ""
+      qualifier = "",
+      minValidValue = -100.0,
+      maxValidValue = 100.0
     }
   }
 

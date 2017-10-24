@@ -36,6 +36,7 @@
 #define _MON_FIELD_HH
 
 #include <string>
+#include <cstdio>
 using namespace std;
 
 // class for monitoring data
@@ -47,8 +48,10 @@ public:
   // constructor
   
   MonField(const string &name,
-           const string &qualifier);
-
+           const string &qualifier,
+           double minValidValue,
+           double maxValidValue);
+  
   // initialize
 
   void clear();
@@ -57,14 +60,43 @@ public:
   
   void addValue(double val);
 
+  // compute stats
+  
+  void computeStats();
+
+  // print stats
+  
+  void printStats(FILE *out);
+
+  // get methods
+
+  const string &getName() const { return _name; }
+  const string &getQualifier() const { return _qualifier; }
+
+  double getMinValidValue() const { return _minValidValue; }
+  double getMaxValidValue() const { return _maxValidValue; }
+
+  double getMean() const { return _mean; }
+  double getSdev() const { return _sdev; }
+  double getMin() const { return _min; }
+  double getMax() const { return _max; }
+
 private:
 
   string _name;
   string _qualifier;
 
+  double _minValidValue;
+  double _maxValidValue;
+
   double _sum;
   double _sumSq;
   double _nn;
+
+  double _mean;
+  double _sdev;
+  double _min;
+  double _max;
 
 
 };

@@ -194,6 +194,8 @@ file_ext = "nc";
 //   typedef struct {
 //      string name;
 //      string qualifier;
+//      double minValidValue;
+//      double maxValidValue;
 //   }
 //
 // 1D array - variable length.
@@ -202,22 +204,30 @@ file_ext = "nc";
 monitoring_fields = {
   {
     name = "tcsaft_temp1",
-    qualifier = ""
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100
   }
   ,
   {
     name = "tcsaft_temp2",
-    qualifier = ""
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100
   }
   ,
   {
     name = "tcsaft_temp3",
-    qualifier = ""
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100
   }
   ,
   {
     name = "tcsaft_temp4",
-    qualifier = ""
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100
   }
 };
 

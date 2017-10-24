@@ -92,7 +92,8 @@ HsrlMon::HsrlMon(int argc, char **argv)
 
   for (int ii = 0; ii < _params.monitoring_fields_n; ii++) {
     const Params::monitoring_field_t &pfield = _params._monitoring_fields[ii];
-    MonField field(pfield.name, pfield.qualifier);
+    MonField field(pfield.name, pfield.qualifier, 
+                   pfield.minValidValue, pfield.maxValidValue);
     _monFields.push_back(field);
   }
 
@@ -260,8 +261,8 @@ int HsrlMon::_processFileFromList(const string &filePath)
   
   // check we have an HSRL file
 
-  RawFile inFile(_params);
-  if (!inFile.isRawHsrlFile(filePath)) {
+  RawFile rawFile(_params);
+  if (!rawFile.isRawHsrlFile(filePath)) {
     cerr << "ERROR - HsrlMon::_processFile" << endl;
     cerr << "  Not an HSRL file: " << filePath << endl;
     return -1;
@@ -270,7 +271,7 @@ int HsrlMon::_processFileFromList(const string &filePath)
   // get the start and end time of the data in the file
 
   time_t dataStartTime = 0, dataEndTime = 0;
-  if (!inFile.getStartAndEndTimes(filePath, dataStartTime, dataEndTime)) {
+  if (!rawFile.getStartAndEndTimes(filePath, dataStartTime, dataEndTime)) {
     cerr << "ERROR - HsrlMon::_processFile" << endl;
     cerr << "  Cannot read times from file: " << filePath << endl;
     return -1;
@@ -496,9 +497,25 @@ int HsrlMon::_addToMonitoring(const string &filePath,
                               time_t startTime,
                               time_t endTime)
 {
-
+  
   if (_params.debug) {
-    cerr << "    adding file: " << filePath << endl;
+    cerr << "    adding monitoring stats from file: " << filePath << endl;
+  }
+
+  // open file
+
+  RawFile rawFile(_params);
+  if (rawFile.openAndReadTimes(filePath)) {
+    cerr << "ERROR - HsrlMon::_addToMonitoring" << endl;
+    cerr << rawFile.getErrStr() << endl;
+    return -1;
+  }
+
+  int startTimeIndex = rawFile.getTimeIndex(startTime);
+  int endTimeIndex = rawFile.getTimeIndex(endTime);
+  
+  for (size_t ii = 0; ii < _monFields.size(); ii++) {
+    rawFile.appendMonStats(_monFields[ii], startTimeIndex, endTimeIndex);
   }
 
   return 0;
@@ -528,6 +545,11 @@ void HsrlMon::_printStats(FILE *out)
   fprintf(out, "Monitor start time: %s\n", RadxTime::strm(_monitorStartTime).c_str());
   fprintf(out, "Monitor end   time: %s\n", RadxTime::strm(_monitorEndTime).c_str());
   fprintf(out, "===========================================================\n");
+
+  for (size_t ii = 0; ii < _monFields.size(); ii++) {
+    _monFields[ii].computeStats();
+    _monFields[ii].printStats(out);
+  }
 
 }
 

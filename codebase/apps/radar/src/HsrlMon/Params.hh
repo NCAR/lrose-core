@@ -68,6 +68,8 @@ public:
   typedef struct {
     char* name;
     char* qualifier;
+    double minValidValue;
+    double maxValidValue;
   } monitoring_field_t;
 
   ///////////////////////////

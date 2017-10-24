@@ -34,7 +34,6 @@
 ///////////////////////////////////////////////////////////////
 
 #include "RawFile.hh"
-#include "MonField.hh"
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxField.hh>
@@ -130,6 +129,38 @@ void RawFile::clear()
   _pitch.clear();
   _roll.clear();
 
+}
+
+////////////////////////////////////////////////////////////
+// Open file
+// Returns true on success, false on failure
+
+int RawFile::openFile(const string &path)
+  
+{
+  
+  _file.close();
+
+  // open file
+  
+  if (_file.openRead(path)) {
+    cerr << "ERROR - RawFile::openFile()" << endl;
+    cerr << "  Cannot open file: " << path << endl;
+    cerr << _file.getErrStr() << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////////////////
+// Close file
+
+void RawFile::closeFile()
+  
+{
+  _file.close();
 }
 
 ////////////////////////////////////////////////////////////
@@ -270,63 +301,89 @@ int RawFile::getStartAndEndTimes(const string &filePath,
 }
 
 ////////////////////////////////////////////////////////////
-// Read in data from specified path
+// Opens specified path
+// Reads times
+// Remains open, ready for use
 // Returns 0 on success, -1 on failure
-// Use getErrStr() if error occurs
 
-int RawFile::readFromPath(const string &path)
+int RawFile::openAndReadTimes(const string &path)
   
 {
   
   if (_params.debug) {
-    cerr << "Reading file: " << path << endl;
+    cerr << "Open file: " << path << endl;
   }
-
-  string errStr("ERROR - RawFile::readFromPath");
-
+  
   // clear tmp rays
   
   _nTimesInFile = 0;
   _nBinsInFile = 0;
-
+  
   // open file
 
   if (_file.openRead(path)) {
-    _addErrStr(_file.getErrStr());
+    cerr << "ERROR - RawFile::openAndReadTimes()" << endl;
+    cerr << "  Cannot open file: " << path << endl;
+    cerr << _file.getErrStr() << endl;
     return -1;
   }
   
   // read dimensions
   
   if (_readDimensions()) {
-    _addErrStr(errStr);
+    cerr << "ERROR - RawFile::openAndReadTimes()" << endl;
+    cerr << "  Cannot read dimensions: " << path << endl;
+    cerr << _file.getErrStr() << endl;
     return -1;
   }
 
   // read global attributes
   
   if (_readGlobalAttributes()) {
-    _addErrStr(errStr);
+    cerr << "ERROR - RawFile::openAndReadTimes()" << endl;
+    cerr << "  Cannot read global attributes: " << path << endl;
+    cerr << _file.getErrStr() << endl;
     return -1;
   }
 
   // read time variable
   
   if (_readTimes()) {
-    _addErrStr(errStr);
+    cerr << "ERROR - RawFile::openAndReadTimes()" << endl;
+    cerr << "  Cannot read times: " << path << endl;
+    cerr << _file.getErrStr() << endl;
     return -1;
   }
   
-  // close file
-  
-  _file.close();
-
-  // clean up
-
-  _dataTimes.clear();
-  _dTimes.clear();
-
   return 0;
+
+}
+
+////////////////////////////////////////
+// get the index for a given time
+// returns -1 on error
+
+int RawFile::getTimeIndex(time_t timeVal)
+{
+
+  if (_dataTimes.size() < 1) {
+    return -1;
+  }
+
+  // get closest time
+
+  RadxTime vtime(timeVal);
+  double minDiff = 1.0e99;
+  int minIndex = -1;
+  for (size_t ii = 0; ii < _dataTimes.size(); ii++) {
+    double diff = fabs(vtime - _dataTimes[ii]);
+    if (diff < minDiff) {
+      minDiff = diff;
+      minIndex = ii;
+    }
+  }
+
+  return minIndex;
 
 }
 
@@ -515,40 +572,41 @@ int RawFile::_readTimes()
 
 }
 
-
-///////////////////////////////////////////////
-// add labelled integer value to error string,
-// with optional following carriage return.
-
-void RawFile::_addErrInt(string label, int iarg, bool cr)
-{
-  Radx::addErrInt(_errStr, label, iarg, cr);
-}
-
-///////////////////////////////////////////////
-// add labelled double value to error string,
-// with optional following carriage return.
-// Default format is %g.
-
-void RawFile::_addErrDbl(string label, double darg,
-                          string format, bool cr)
-  
-{
-  Radx::addErrDbl(_errStr, label, darg, format, cr);
-}
-
 ////////////////////////////////////////
-// add labelled string to error string
-// with optional following carriage return.
+// append to monitoring stats
+// returns 0 on success, -1 on failure
 
-void RawFile::_addErrStr(string label, string strarg, bool cr)
-
+int RawFile::appendMonStats(MonField &monField,
+                            int startTimeIndex,
+                            int endTimeIndex)
 {
-  Radx::addErrStr(_errStr, label, strarg, cr);
+  
+  cerr << "111111111 Appending mon stats, name: " << monField.getName() << endl;
+  cerr << "111111111 startTimeIndex: " << startTimeIndex << endl;
+  cerr << "111111111 endTimeIndex: " << endTimeIndex << endl;
+
+  int iret = 0;
+  if (monField.getQualifier().size() == 0) {
+
+    vector<double> dvals;
+    if (_readRayVar2Doubles(monField.getName(), dvals) == 0) {
+      for (int itime = startTimeIndex; itime <= endTimeIndex; itime++) {
+        double dval = dvals[itime];
+        if (dval >= monField.getMinValidValue() &&
+            dval <= monField.getMaxValidValue()) {
+          monField.addValue(dvals[itime]);
+        }
+      }
+    }
+
+  }
+
+  return iret;
+
 }
+
 
 #ifdef JUNK
-
 ///////////////////////////////////
 // read in ray variables
 
@@ -621,36 +679,87 @@ int RawFile::_readRayVariables()
   return 0;
 
 }
+#endif
+
+////////////////////////////////////////
+// read a ray variable, put into doubles
+// side effects: set var, vals
+
+int RawFile::_readRayVar2Doubles(const string &name,
+                                 vector<double> &dvals)
+{
+  
+  Nc3Var *var = _getRayVar(name);
+  
+  if (var == NULL) {
+    cerr << "ERROR - RawFile::_readRayVar2Doubles" << endl;
+    cerr << "  Cannot find var: " << name << endl;
+    return -1;
+  }
+
+  int iret = 0;
+  Nc3Type varType = var->type();
+  switch (varType) {
+    case nc3Double: {
+      if (_readRayVar(var, name, dvals)) {
+        iret = -1;
+      }
+      break;
+    }
+    case nc3Float: {
+      vector<float> fvals;
+      if (_readRayVar(var, name, fvals)) {
+        iret = -1;
+      } else {
+        for (size_t ii = 0; ii < fvals.size(); ii++) {
+          dvals.push_back(fvals[ii]);
+        }
+      }
+      break;
+    }
+    case nc3Int: {
+      vector<int> ivals;
+      if (_readRayVar(var, name, ivals)) {
+        iret = -1;
+      } else {
+        for (size_t ii = 0; ii < ivals.size(); ii++) {
+          dvals.push_back(ivals[ii]);
+        }
+      }
+      break;
+    }
+    default: {
+      cerr << "ERROR - RawFile::_readRayVar2Doubles" << endl;
+      cerr << "  Bad type for var: " << name << endl;
+      cerr << "  type: " << varType << endl;
+      return -1;
+    }
+  } // switch
+
+  return iret;
+  
+}
 
 ///////////////////////////////////
 // read a ray variable - double
 // side effects: set var, vals
 
 int RawFile::_readRayVar(Nc3Var* &var, const string &name,
-                         vector<double> &vals, bool required)
+                         vector<double> &vals)
   
 {
 
   vals.clear();
 
   // get var
-
-  var = _getRayVar(name, required);
+  
+  var = _getRayVar(name);
   if (var == NULL) {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaDouble);
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      return -1;
-    }
+    return -1;
   }
 
   // load up data
-
+  
   double *data = new double[_nTimesInFile];
   double *dd = data;
   int iret = 0;
@@ -659,17 +768,10 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
       vals.push_back(*dd);
     }
   } else {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaDouble);
-      }
-      clearErrStr();
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNc3Error()->get_errmsg());
-      iret = -1;
-    }
+    cerr << "ERROR - RawFile::_readRayVar" << endl;
+    cerr << "  Cannot read variable: " << name << endl;
+    cerr << _file.getNc3Error()->get_errmsg() << endl;
+    iret = -1;
   }
   delete[] data;
   return iret;
@@ -681,7 +783,7 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
 // side effects: set var, vals
 
 int RawFile::_readRayVar(Nc3Var* &var, const string &name,
-                         vector<float> &vals, bool required)
+                         vector<float> &vals)
   
 {
 
@@ -689,22 +791,13 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
 
   // get var
 
-  var = _getRayVar(name, required);
+  var = _getRayVar(name);
   if (var == NULL) {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaFloat);
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      return -1;
-    }
+    return -1;
   }
 
   // load up data
-
+  
   float *data = new float[_nTimesInFile];
   float *dd = data;
   int iret = 0;
@@ -713,17 +806,10 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
       vals.push_back(*dd);
     }
   } else {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaFloat);
-      }
-      clearErrStr();
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNc3Error()->get_errmsg());
-      iret = -1;
-    }
+    cerr << "ERROR - RawFile::_readRayVar" << endl;
+    cerr << "  Cannot read variable: " << name << endl;
+    cerr << _file.getNc3Error()->get_errmsg() << endl;
+    iret = -1;
   }
   delete[] data;
   return iret;
@@ -735,10 +821,10 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
 // side effects: set vals only
 
 int RawFile::_readRayVar(const string &name,
-                         vector<double> &vals, bool required)
+                         vector<double> &vals)
 {
   Nc3Var *var;
-  return _readRayVar(var, name, vals, required);
+  return _readRayVar(var, name, vals);
 }
 
 ///////////////////////////////////
@@ -746,7 +832,7 @@ int RawFile::_readRayVar(const string &name,
 // side effects: set var, vals
 
 int RawFile::_readRayVar(Nc3Var* &var, const string &name,
-                         vector<int> &vals, bool required)
+                         vector<int> &vals)
   
 {
 
@@ -754,18 +840,9 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
 
   // get var
   
-  var = _getRayVar(name, required);
+  var = _getRayVar(name);
   if (var == NULL) {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaInt);
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      return -1;
-    }
+    return -1;
   }
 
   // load up data
@@ -778,17 +855,10 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
       vals.push_back(*dd);
     }
   } else {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaInt);
-      }
-      clearErrStr();
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNc3Error()->get_errmsg());
-      iret = -1;
-    }
+    cerr << "ERROR - RawFile::_readRayVar" << endl;
+    cerr << "  Cannot read variable: " << name << endl;
+    cerr << _file.getNc3Error()->get_errmsg() << endl;
+    iret = -1;
   }
   delete[] data;
   return iret;
@@ -800,10 +870,10 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
 // side effects: set vals only
 
 int RawFile::_readRayVar(const string &name,
-                         vector<int> &vals, bool required)
+                         vector<int> &vals)
 {
   Nc3Var *var;
-  return _readRayVar(var, name, vals, required);
+  return _readRayVar(var, name, vals);
 }
 
 ///////////////////////////////////////////
@@ -811,7 +881,7 @@ int RawFile::_readRayVar(const string &name,
 // side effects: set var, vals
 
 int RawFile::_readRayVar(Nc3Var* &var, const string &name,
-                         vector<bool> &vals, bool required)
+                         vector<bool> &vals)
   
 {
   
@@ -819,20 +889,11 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
   
   // get var
   
-  var = _getRayVar(name, false);
+  var = _getRayVar(name);
   if (var == NULL) {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(false);
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - RawFile::_readRayVar");
-      return -1;
-    }
+    return -1;
   }
-
+  
   // load up data
   
   int *data = new int[_nTimesInFile];
@@ -862,17 +923,17 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
 // side effects: set vals only
 
 int RawFile::_readRayVar(const string &name,
-                         vector<bool> &vals, bool required)
+                         vector<bool> &vals)
 {
   Nc3Var *var;
-  return _readRayVar(var, name, vals, required);
+  return _readRayVar(var, name, vals);
 }
 
 ///////////////////////////////////
 // get a ray variable by name
 // returns NULL on failure
 
-Nc3Var* RawFile::_getRayVar(const string &name, bool required)
+Nc3Var* RawFile::_getRayVar(const string &name)
 
 {
 
@@ -880,33 +941,28 @@ Nc3Var* RawFile::_getRayVar(const string &name, bool required)
   
   Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
-    if (required) {
-      _addErrStr("ERROR - RawFile::_getRayVar");
-      _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr(_file.getNc3Error()->get_errmsg());
-    }
+    cerr << "ERROR - RawFile::_getRayVar" << endl;
+    cerr << "  Cannot read variable, name: " << name << endl;
+    cerr << _file.getNc3Error()->get_errmsg() << endl;
     return NULL;
   }
 
   // check time dimension
   
   if (var->num_dims() < 1) {
-    if (required) {
-      _addErrStr("ERROR - RawFile::_getRayVar");
-      _addErrStr("  variable name: ", name);
-      _addErrStr("  variable has no dimensions");
-    }
+    cerr << "ERROR - RawFile::_getRayVar" << endl;
+    cerr << "  variable name: " << name << endl;
+    cerr << "  variable has no dimensions" << endl;
     return NULL;
   }
   Nc3Dim *timeDim = var->get_dim(0);
   if (timeDim != _timeDim) {
-    if (required) {
-      _addErrStr("ERROR - RawFile::_getRayVar");
-      _addErrStr("  variable name: ", name);
-      _addErrStr("  variable has incorrect dimension, dim name: ", 
-                 timeDim->name());
-      _addErrStr("  should be: ", "time");
-    }
+    cerr << "ERROR - RawFile::_getRayVar" << endl;
+    cerr << "  variable name: " << name << endl;
+    cerr << "  variable has no dimensions" << endl;
+    cerr << "  variable has incorrect dimension, dim name: "
+         << timeDim->name() << endl;
+    cerr << "  should be: " << "time" << endl;
     return NULL;
   }
 
@@ -914,4 +970,34 @@ Nc3Var* RawFile::_getRayVar(const string &name, bool required)
 
 }
 
-#endif
+///////////////////////////////////////////////
+// add labelled integer value to error string,
+// with optional following carriage return.
+
+void RawFile::_addErrInt(string label, int iarg, bool cr)
+{
+  Radx::addErrInt(_errStr, label, iarg, cr);
+}
+
+///////////////////////////////////////////////
+// add labelled double value to error string,
+// with optional following carriage return.
+// Default format is %g.
+
+void RawFile::_addErrDbl(string label, double darg,
+                          string format, bool cr)
+  
+{
+  Radx::addErrDbl(_errStr, label, darg, format, cr);
+}
+
+////////////////////////////////////////
+// add labelled string to error string
+// with optional following carriage return.
+
+void RawFile::_addErrStr(string label, string strarg, bool cr)
+
+{
+  Radx::addErrStr(_errStr, label, strarg, cr);
+}
+
