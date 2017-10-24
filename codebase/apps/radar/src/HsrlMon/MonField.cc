@@ -120,9 +120,16 @@ void MonField::printStats(FILE *out)
 
 {
 
-  int combinedLen = _longName.size() + _units.size();
-  int extra = combinedLen - 42;
-  string longName(_longName.substr(0,_longName.size()-extra));
+  string longName(_longName);
+  if (_name.find("tcsaft") != string::npos) {
+    longName += " aft";
+  }
+  if (_name.find("tcsfore") != string::npos) {
+    longName += " fore";
+  }
+  int combinedLen = longName.size() + _units.size();
+  int ntrim = combinedLen - 42;
+  longName = longName.substr(0, longName.size() - ntrim);
 
   char label[1024];
   if (_units.size() == 0) {
