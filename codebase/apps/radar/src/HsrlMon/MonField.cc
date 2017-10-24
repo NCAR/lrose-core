@@ -38,10 +38,12 @@
 //////////////////////////////////////////
 // constructor
 
-MonField::MonField(const string &name,
+MonField::MonField(const Params &params,
+                   const string &name,
                    const string &qualifier,
                    double minValidValue,
                    double maxValidValue) :
+        _params(params),
         _name(name),
         _qualifier(qualifier),
         _minValidValue(minValidValue),
@@ -120,6 +122,14 @@ void MonField::printStats(FILE *out)
 
 {
 
+  // in normal mode, do not print nan data
+
+  if (!_params.debug) {
+    if (std::isnan(_min)) {
+      return;
+    }
+  }
+
   string longName(_longName);
   if (_name.find("tcsaft") != string::npos) {
     longName += " aft";
@@ -138,8 +148,19 @@ void MonField::printStats(FILE *out)
     sprintf(label, "%s (%s)", longName.c_str(), _units.c_str());
   }
   label[45] = '\0';
-  fprintf(out, "%45s: %10.3f %10.3f %10.3f %10.3f\n",
-          label, _min, _max, _mean, _sdev);
+  if (fabs(_max) > 9999) {
+    fprintf(out, "%45s: %10.0f %10.0f %10.0f %10.0f",
+            label, _min, _max, _mean, _sdev);
+  } else {
+    fprintf(out, "%45s: %10.3f %10.3f %10.3f %10.3f",
+            label, _min, _max, _mean, _sdev);
+  }
+
+  if (_params.debug) {
+    fprintf(out, "  :%s\n", _name.c_str());
+  } else {
+    fprintf(out, "\n");
+  }
           
 }
 

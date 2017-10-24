@@ -92,8 +92,8 @@ HsrlMon::HsrlMon(int argc, char **argv)
 
   for (int ii = 0; ii < _params.monitoring_fields_n; ii++) {
     const Params::monitoring_field_t &pfield = _params._monitoring_fields[ii];
-    MonField field(pfield.name, pfield.qualifier, 
-                   pfield.minValidValue, pfield.maxValidValue);
+    MonField *field = new MonField(_params, pfield.name, pfield.qualifier, 
+                                   pfield.minValidValue, pfield.maxValidValue);
     _monFields.push_back(field);
   }
 
@@ -105,6 +105,10 @@ HsrlMon::~HsrlMon()
 
 {
 
+  for (size_t ii = 0; ii < _monFields.size(); ii++) {
+    delete _monFields[ii];
+  }
+  
   // unregister process
 
   PMU_auto_unregister();
@@ -515,7 +519,7 @@ int HsrlMon::_addToMonitoring(const string &filePath,
   int endTimeIndex = rawFile.getTimeIndex(endTime);
   
   for (size_t ii = 0; ii < _monFields.size(); ii++) {
-    rawFile.appendMonStats(_monFields[ii], startTimeIndex, endTimeIndex);
+    rawFile.appendMonStats(*_monFields[ii], startTimeIndex, endTimeIndex);
   }
 
   return 0;
@@ -529,7 +533,7 @@ void HsrlMon::_initMonFields()
 {
 
   for (size_t ii = 0; ii < _monFields.size(); ii++) {
-    _monFields[ii].clear();
+    _monFields[ii]->clear();
   }
 
 }
@@ -554,10 +558,10 @@ void HsrlMon::_printStats(FILE *out)
           "", "Min", "Max", "Mean", "Sdev");
           
   for (size_t ii = 0; ii < _monFields.size(); ii++) {
-    _monFields[ii].computeStats();
-    _monFields[ii].printStats(out);
+    _monFields[ii]->computeStats();
+    _monFields[ii]->printStats(out);
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      _monFields[ii].printStatsDebug(out);
+      _monFields[ii]->printStatsDebug(out);
     }
   }
 

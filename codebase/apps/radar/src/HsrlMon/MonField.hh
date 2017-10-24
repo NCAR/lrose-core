@@ -35,6 +35,7 @@
 #ifndef _MON_FIELD_HH
 #define _MON_FIELD_HH
 
+#include "Params.hh"
 #include <string>
 #include <cstdio>
 using namespace std;
@@ -47,7 +48,8 @@ public:
 
   // constructor
   
-  MonField(const string &name,
+  MonField(const Params &params,
+           const string &name,
            const string &qualifier,
            double minValidValue,
            double maxValidValue);
@@ -90,6 +92,8 @@ public:
   double getMax() const { return _max; }
 
 private:
+
+  const Params &_params;
 
   string _name;
   string _qualifier;

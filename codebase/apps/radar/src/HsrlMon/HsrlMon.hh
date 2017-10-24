@@ -85,7 +85,7 @@ private:
 
   // monitoring stats
 
-  vector<MonField> _monFields;
+  vector<MonField *> _monFields;
   time_t _monitorStartTime;
   time_t _monitorEndTime;
 
