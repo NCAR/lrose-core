@@ -51,7 +51,7 @@ public:
            const string &qualifier,
            double minValidValue,
            double maxValidValue);
-  
+
   // initialize
 
   void clear();
@@ -67,12 +67,20 @@ public:
   // print stats
   
   void printStats(FILE *out);
+  void printStatsDebug(FILE *out);
+
+  // set methods
+  
+  void setLongName(const string &val) { _longName = val; }
+  void setUnits(const string &val) { _units = val; }
 
   // get methods
 
   const string &getName() const { return _name; }
   const string &getQualifier() const { return _qualifier; }
-
+  const string &getLongName() const { return _longName; }
+  const string &getUnits() const { return _units; }
+  
   double getMinValidValue() const { return _minValidValue; }
   double getMaxValidValue() const { return _maxValidValue; }
 
@@ -85,6 +93,9 @@ private:
 
   string _name;
   string _qualifier;
+
+  string _longName;
+  string _units;
 
   double _minValidValue;
   double _maxValidValue;

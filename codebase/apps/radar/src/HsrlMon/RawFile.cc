@@ -581,20 +581,19 @@ int RawFile::appendMonStats(MonField &monField,
                             int endTimeIndex)
 {
   
-  cerr << "111111111 Appending mon stats, name: " << monField.getName() << endl;
-  cerr << "111111111 startTimeIndex: " << startTimeIndex << endl;
-  cerr << "111111111 endTimeIndex: " << endTimeIndex << endl;
-
   int iret = 0;
   if (monField.getQualifier().size() == 0) {
 
     vector<double> dvals;
-    if (_readRayVar2Doubles(monField.getName(), dvals) == 0) {
+    string longName, units;
+    if (_readRayVar2Doubles(monField.getName(), dvals, longName, units) == 0) {
       for (int itime = startTimeIndex; itime <= endTimeIndex; itime++) {
         double dval = dvals[itime];
         if (dval >= monField.getMinValidValue() &&
             dval <= monField.getMaxValidValue()) {
           monField.addValue(dvals[itime]);
+          monField.setLongName(longName);
+          monField.setUnits(units);
         }
       }
     }
@@ -606,87 +605,14 @@ int RawFile::appendMonStats(MonField &monField,
 }
 
 
-#ifdef JUNK
-///////////////////////////////////
-// read in ray variables
-
-int RawFile::_readRayVariables()
-
-{
-
-  _clearRayVariables();
-  int iret = 0;
-
-  _readRayVar(_telescopeLockedVar, "TelescopeLocked", _telescopeLocked);
-  if (_telescopeLocked.size() < _nTimesInFile) {
-    _addErrStr("ERROR - TelescopeLocked variable required");
-    iret = -1;
-  }
-
-  _readRayVar(_telescopeDirectionVar, "TelescopeDirection", _telescopeDirection);
-  if (_telescopeDirection.size() < _nTimesInFile) {
-    _addErrStr("ERROR - TelescopeDirection variable required");
-    iret = -1;
-  }
-
-  _readRayVar(_latitudeVar, "iwg1_Lat", _latitude);
-  if (_latitude.size() < _nTimesInFile) {
-    _addErrStr("ERROR - iwg1_Lat variable required");
-    iret = -1;
-  }
-
-  _readRayVar(_longitudeVar, "iwg1_Lon", _longitude);
-  if (_longitude.size() < _nTimesInFile) {
-    _addErrStr("ERROR - iwg1_Lon variable required");
-    iret = -1;
-  }
-
-  _readRayVar(_altitudeVar, "iwg1_GPS_MSL_Alt", _altitude);
-  if (_altitude.size() < _nTimesInFile) {
-    _addErrStr("ERROR - iwg1_GPS_MSL_Alt variable required");
-    iret = -1;
-  }
-
-  _readRayVar(_altitudeVar, "iwg1_True_Hdg", _heading);
-  if (_heading.size() < _nTimesInFile) {
-    _addErrStr("ERROR - iwg1_True_Hdg variable required");
-    iret = -1;
-  }
-
-  _readRayVar(_gndSpeedVar, "iwg1_Grnd_Spd", _gndSpeed, false);
-  _readRayVar(_vertVelVar, "iwg1_Vert_Velocity", _vertVel, false);
-
-  _readRayVar(_pitchVar, "iwg1_Pitch", _pitch);
-  if (_pitch.size() < _nTimesInFile) {
-    _addErrStr("ERROR - iwg1_Pitch variable required");
-    iret = -1;
-  }
-
-  _readRayVar(_rollVar, "iwg1_Roll", _roll);
-  if (_roll.size() < _nTimesInFile) {
-    _addErrStr("ERROR - iwg1_Roll variable required");
-    iret = -1;
-  }
-
-  _readRayVar(_pollAngleVar, "polarization", _polAngle);
-  _readRayVar(_totalEnergyVar, "total_energy", _totalEnergy);
-
-  if (iret) {
-    _addErrStr("ERROR - RawFile::_readRayVariables");
-    return -1;
-  }
-
-  return 0;
-
-}
-#endif
-
 ////////////////////////////////////////
 // read a ray variable, put into doubles
 // side effects: set var, vals
 
 int RawFile::_readRayVar2Doubles(const string &name,
-                                 vector<double> &dvals)
+                                 vector<double> &dvals,
+                                 string &longName,
+                                 string &units)
 {
   
   Nc3Var *var = _getRayVar(name);
@@ -735,6 +661,19 @@ int RawFile::_readRayVar2Doubles(const string &name,
       return -1;
     }
   } // switch
+
+  if (iret == 0) {
+    Nc3Att *longNameAtt = var->get_att("long_name");
+    if (longNameAtt) {
+      longName = Nc3xFile::asString(longNameAtt);
+      delete longNameAtt;
+    }
+    Nc3Att *unitsAtt = var->get_att("units");
+    if (unitsAtt) {
+      units = Nc3xFile::asString(unitsAtt);
+      delete unitsAtt;
+    }
+  }
 
   return iret;
   

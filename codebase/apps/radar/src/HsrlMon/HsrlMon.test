@@ -229,6 +229,97 @@ monitoring_fields = {
     minValidValue = -100,
     maxValidValue = 100
   }
+  ,
+  {
+    name = "tcsaft_tc_main",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100
+  }
+  // ,
+  // {
+  //   name = "tcsaft_fan1_main",
+  //   qualifier = "",
+  //   minValidValue = -100,
+  //   maxValidValue = 100
+  // }
+  // ,
+  // {
+  //   name = "tcsaft_fan2_main",
+  //   qualifier = "",
+  //   minValidValue = -100,
+  //   maxValidValue = 100
+  // }
+  ,
+  {
+    name = "tcsaft_main_current",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100
+  }
+  ,
+  {
+    name = "tcsaft_fan1_current",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100
+  }
+  ,
+  {
+    name = "tcsaft_fan2_current",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100
+  }
+  // ,
+  // {
+  //   name = "tcsfore_fan1_main",
+  //   qualifier = "",
+  //   minValidValue = -100,
+  //   maxValidValue = 100
+  // }
+  // ,
+  // {
+  //   name = "tcsfore_fan2_main",
+  //   qualifier = "",
+  //   minValidValue = -100,
+  //   maxValidValue = 100
+  // }
+  ,
+  {
+    name = "tcsfore_main_current",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100
+  }
+  ,
+  {
+    name = "tcsfore_fan1_current",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100
+  }
+  ,
+  {
+    name = "tcsfore_fan2_current",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100
+  }
+  ,
+  {
+    name = "tcsfore_goodrecords",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
+  ,
+  {
+    name = "tcsfore_errorCount",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000
+  }
 };
 
 //======================================================================

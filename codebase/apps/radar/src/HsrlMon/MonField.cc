@@ -48,6 +48,8 @@ MonField::MonField(const string &name,
         _maxValidValue(maxValidValue)
 {
   clear();
+  _longName = name;
+  _units = "notset";
 }
 
 ////////////////
@@ -90,6 +92,12 @@ void MonField::addValue(double val)
 void MonField::computeStats()
 
 {
+
+  if (_nn == 0) {
+    _min = NAN;
+    _max = NAN;
+  }
+
   if (_nn > 0) {
     _mean = _sum / _nn;
   }
@@ -112,10 +120,27 @@ void MonField::printStats(FILE *out)
 
 {
   
+  char label[1024];
+  if (_units.size() == 0) {
+    sprintf(label, "%s", _longName.c_str());
+  } else {
+    sprintf(label, "%s (%s)", _longName.c_str(), _units.c_str());
+  }
+  fprintf(out, "%40s: %10.3f %10.3f %10.3f %10.3f\n",
+          label, _min, _max, _mean, _sdev);
+          
+}
+
+void MonField::printStatsDebug(FILE *out)
+
+{
+  
   fprintf(out, "Stats field name: %s\n", _name.c_str());
   if (_qualifier.size() > 0) {
     fprintf(out, "  qualitfier: %s\n", _qualifier.c_str());
   }
+  fprintf(out, "  longName: %s\n", _longName.c_str());
+  fprintf(out, "  units: %s\n", _units.c_str());
   fprintf(out, "  mean: %g\n", _mean);
   fprintf(out, "  sdev: %g\n", _sdev);
   fprintf(out, "  min: %g\n", _min);

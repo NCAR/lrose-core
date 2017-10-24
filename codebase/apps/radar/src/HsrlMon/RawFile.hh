@@ -220,7 +220,9 @@ private:
   int _readTimes();
 
   int _readRayVar2Doubles(const string &name,
-                          vector<double> &vals);
+                          vector<double> &vals,
+                          string &longName,
+                          string &units);
 
   int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<double> &vals);
