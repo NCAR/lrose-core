@@ -382,15 +382,29 @@ public:
   monitoring_field_t *_monitoring_fields;
   int monitoring_fields_n;
 
-  char* output_dir;
+  tdrp_bool_t write_stats_files;
 
-  char* output_filename_prefix;
+  char* stats_output_dir;
 
-  tdrp_bool_t append_day_dir_to_output_dir;
+  tdrp_bool_t stats_write_to_day_dir;
 
-  tdrp_bool_t append_year_dir_to_output_dir;
+  char* stats_file_name_category;
 
-  tdrp_bool_t write_latest_data_info;
+  char* stats_file_name_platform;
+
+  char* stats_file_name_extension;
+
+  char* stats_file_name_delimiter;
+
+  tdrp_bool_t stats_include_time_part_in_file_name;
+
+  tdrp_bool_t stats_include_seconds_in_time_part;
+
+  tdrp_bool_t stats_include_field_label_in_file_name;
+
+  char* stats_file_field_label;
+
+  tdrp_bool_t stats_write_latest_data_info;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -399,7 +413,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[23];
+  mutable TDRPtable _table[30];
 
   const char *_className;
 

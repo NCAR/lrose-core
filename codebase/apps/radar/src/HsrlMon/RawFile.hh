@@ -153,16 +153,10 @@ private:
 
   Nc3Dim *_timeDim;
   Nc3Dim *_timeVecDim;
-  Nc3Dim *_binCountDim;
 
   size_t _nTimesInFile;
   size_t _timeVecSize;
-  size_t _nBinsInFile;
   
-  size_t _nPoints;
-  size_t _nBinsPerGate;
-  size_t _nGates;
-
   // global attributes
 
   string _machType;
@@ -178,38 +172,6 @@ private:
   Nc3Var *_timeVar;
   vector<RadxTime> _dataTimes;
   vector<double> _dTimes;
-
-  // georeference variables
-
-  Nc3Var *_telescopeLockedVar;
-  Nc3Var *_telescopeDirectionVar;
-
-  Nc3Var *_latitudeVar;
-  Nc3Var *_longitudeVar;
-  Nc3Var *_altitudeVar;
-  Nc3Var *_headingVar;
-  Nc3Var *_gndSpeedVar;
-  Nc3Var *_vertVelVar;
-  Nc3Var *_pitchVar;
-  Nc3Var *_rollVar;
-
-  vector<int> _telescopeLocked;
-  vector<int> _telescopeDirection;
-  
-  vector<double> _latitude;
-  vector<double> _longitude;
-  vector<double> _altitude;
-  vector<double> _heading;
-  vector<double> _gndSpeed;
-  vector<double> _vertVel;
-  vector<double> _pitch;
-  vector<double> _roll;
-
-  Nc3Var *_pollAngleVar;
-  Nc3Var *_totalEnergyVar;
-
-  vector<float> _polAngle;
-  vector<int> _totalEnergy;
 
   // private methods for NcfRadial.cc
   

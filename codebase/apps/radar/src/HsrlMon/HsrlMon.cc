@@ -44,8 +44,10 @@
 #include <didss/DsInputPath.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/file_io.h>
+#include <toolsa/Path.hh>
 
-#include <cmath>  
+#include <cmath>
+#include <cerrno>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -89,6 +91,13 @@ HsrlMon::HsrlMon(int argc, char **argv)
   }
 
   // create monitoring fields
+
+  if (_params.monitoring_fields_n < 1) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "  No monitoring_fields specified." << endl;
+    OK = FALSE;
+    return;
+  }
 
   for (int ii = 0; ii < _params.monitoring_fields_n; ii++) {
     const Params::monitoring_field_t &pfield = _params._monitoring_fields[ii];
@@ -305,8 +314,14 @@ int HsrlMon::_processFileFromList(const string &filePath)
 
     // print out
 
-    _printStats(stderr);
+    if (_params.debug) {
+      _printStats(stderr);
+    }
     
+    if (_params.write_stats_files) {
+      _writeStatsFile();
+    }
+
     _monitorStartTime += _params.monitoring_interval_secs;
     
   } // while
@@ -351,9 +366,15 @@ int HsrlMon::_performMonitoring(time_t startTime,
       iret = -1;
     }
   }
-
-  _printStats(stdout);
-
+  
+  if (_params.debug) {
+    _printStats(stderr);
+  }
+  
+  if (_params.write_stats_files) {
+    _writeStatsFile();
+  }
+  
   if (_params.debug) {
     cerr << "==================================================" << endl;
   }
@@ -544,6 +565,13 @@ void HsrlMon::_initMonFields()
 void HsrlMon::_printStats(FILE *out)
 
 {
+  
+  if (_monFields[0]->getNn() < 1) {
+    cerr << "WARNING - HsrlMon::_printStats" << endl;
+    cerr << "  No data found" << endl;
+    cerr << "  monitorStartTime: " << RadxTime::strm(_monitorStartTime) << endl;
+    cerr << "  monitorEndTime: " << RadxTime::strm(_monitorEndTime) << endl;
+  }
 
   fprintf(out,
           "================================= HSRL MONITORING "
@@ -568,6 +596,157 @@ void HsrlMon::_printStats(FILE *out)
   fprintf(out,
           "==================================================="
           "=======================================\n");
+  
+}
+
+////////////////////////////////////////////////////////
+// Write out the stats files
+
+void HsrlMon::_writeStatsFile()
+
+{
+
+  if (_monFields[0]->getNn() < 1) {
+    if (_params.debug) {
+      cerr << "WARNING - HsrlMon::_writeStatsFiles" << endl;
+      cerr << "  No data found" << endl;
+      cerr << "  monitorStartTime: " << RadxTime::strm(_monitorStartTime) << endl;
+      cerr << "  monitorEndTime: " << RadxTime::strm(_monitorEndTime) << endl;
+    }
+    return;
+  }
+
+  //////////////////////
+  // compute output dir
+  
+  string outputDir(_params.stats_output_dir);
+  RadxTime fileTime(_monitorEndTime);
+  char dayStr[1024];
+  if (_params.stats_write_to_day_dir) {
+    sprintf(dayStr, "%.4d%.2d%.2d",
+            fileTime.getYear(),
+            fileTime.getMonth(),
+            fileTime.getDay());
+    outputDir += PATH_DELIM;
+    outputDir += dayStr;
+  }
+  
+  // make sure output dir exists
+
+  if (ta_makedir_recurse(outputDir.c_str())) {
+    int errNum = errno;
+    cerr << "ERROR - HsrlMon::_writeStatsFile()" << endl;
+    cerr << "  Cannot create output dir: " << outputDir << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return;
+  }
+
+  /////////////////////
+  // compute file name
+
+  string fileName;
+  
+  // category
+  
+  if (strlen(_params.stats_file_name_category) > 0) {
+    fileName += _params.stats_file_name_category;
+  }
+  
+  // platform
+
+  if (strlen(_params.stats_file_name_platform) > 0) {
+    fileName += _params.stats_file_name_delimiter;
+    fileName += _params.stats_file_name_platform;
+  }
+
+  // time
+  
+  if (_params.stats_include_time_part_in_file_name) {
+    fileName += _params.stats_file_name_delimiter;
+    char timeStr[1024];
+    if (_params.stats_include_seconds_in_time_part) {
+      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d%.2d",
+              fileTime.getYear(),
+              fileTime.getMonth(),
+              fileTime.getDay(),
+              fileTime.getHour(),
+              fileTime.getMin(),
+              fileTime.getSec());
+    } else {
+      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d",
+              fileTime.getYear(),
+              fileTime.getMonth(),
+              fileTime.getDay(),
+              fileTime.getHour(),
+              fileTime.getMin());
+    }
+    fileName += timeStr;
+  }
+
+  // field label
+
+  if (_params.stats_include_field_label_in_file_name) {
+    fileName += _params.stats_file_name_delimiter;
+    fileName += _params.stats_file_field_label;
+  }
+
+  // extension
+
+  fileName += ".";
+  fileName += _params.stats_file_name_extension;
+
+  // compute output path
+
+  string outputPath(outputDir);
+  outputPath += PATH_DELIM;
+  outputPath += fileName;
+
+  // open the file
+
+  FILE *out = fopen(outputPath.c_str(), "w");
+  if (out == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - HsrlMon::_writeStatsFile()" << endl;
+    cerr << "  Cannot open file: " << outputPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return;
+  }
+
+  // write the file
+
+  _printStats(out);
+
+  fclose(out);
+  
+  if (_params.debug) {
+    cerr << "==>> saved stats to file: " << outputPath << endl;
+  }
+
+  // write latest data info
+  
+  if (_params.stats_write_latest_data_info) {
+    
+    DsLdataInfo ldataInfo(_params.stats_output_dir);
+    
+    string relPath;
+    Path::stripDir(_params.stats_output_dir, outputPath, relPath);
+    
+    if(_params.debug) {
+      ldataInfo.setDebug();
+    }
+    ldataInfo.setLatestTime(fileTime.utime());
+    ldataInfo.setWriter("HsrlMon");
+    ldataInfo.setDataFileExt(_params.stats_file_name_extension);
+    ldataInfo.setDataType(_params.stats_file_name_extension);
+    ldataInfo.setRelDataPath(relPath);
+    
+    if(ldataInfo.write(fileTime.utime())) {
+      cerr << "ERROR - HsrlMon::_writeStatsFile()" << endl;
+      cerr << "  Cannot write _latest_data_info to dir: " << outputDir << endl;
+      return;
+    }
+    
+  } // if (_params.stats_write_latest_data_info)
   
 }
 

@@ -141,36 +141,78 @@ paramdef struct monitoring_field_t {
 } monitoring_fields[];
 
 commentdef {
-  p_header = "OUTPUT DIRECTORY";
+  p_header = "OUTPUT DIRECTORY for STATS files";
+  p_text = "The text output files will be named category.platform.yyyymmddhhmmss.fieldname.txt.";
 }
 
-paramdef string {
-  p_default = "/tmp/hsrl_mon";
-  p_descr = "Output directory path.";
-  p_help = "Files will be written to this directory.";
-} output_dir;
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write statistics text files.";
+  p_descr = "Generally these are used by the catalog.";
+} write_stats_files;
 
 paramdef string {
-  p_default = "";
-  p_descr = "Optional prefix for output filename.";
-  p_help = "If empty, the standard prefix will be used.";
-} output_filename_prefix;
+  p_default = "/tmp/hsrl_mon/stats";
+  p_descr = "Output directory path.";
+  p_help = "Monitoring statistics files will be written to this directory.";
+} stats_output_dir;
 
 paramdef boolean {
   p_default = true;
-  p_descr = "Add the day directory to the output directory.";
-  p_help = "Path will be output_dir/yyyymmdd/filename.";
-} append_day_dir_to_output_dir;
+  p_descr = "Option to create a subdirectory for each day.";
+  p_descr = "If true, a subdirectory named YYYYMMDD will be appended to stats_output_dir.";
+} stats_write_to_day_dir;
+
+paramdef string {
+  p_default = "lidar";
+  p_descr = "Set the category string.";
+  p_help = "If empty, no category will be included.";
+} stats_file_name_category;
+
+paramdef string {
+  p_default = "NSF_NCAR_GV_HSRL";
+  p_descr = "Set the platform string.";
+  p_help = "If empty, no platform will be included.";
+} stats_file_name_platform;
+
+paramdef string {
+  p_default = "txt";
+  p_descr = "These are text files, so normally .txt is used.";
+  p_help = "An extension is always required";
+} stats_file_name_extension;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Set the delimiter between the parts of the file name.";
+  p_help = "NOTE: the extension the delimited is always a period: '.'.";
+} stats_file_name_delimiter;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Normally the file name includes a time part: YYYYMMDDHHMMSS.";
+  p_help = "If FALSE, the time part will be omitted.";
+} stats_include_time_part_in_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Normally the time part include the seconds: YYYYMMDDHHMMSS.";
+  p_help = "If FALSE, the SS will be excluuded from the time part.";
+} stats_include_seconds_in_time_part;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Normally the file name includes the field label (product type).";
+  p_help = "If FALSE, the field label will be omitted.";
+} stats_include_field_label_in_file_name;
+
+paramdef string {
+  p_default = "MonitorStats";
+  p_descr = "Field label for stats files.";
+} stats_file_field_label;
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Add the year directory to the output directory.";
-  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
-} append_year_dir_to_output_dir;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write out _latest_data_info files.";
-  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
-} write_latest_data_info;
+  p_descr = "Option to write latest_data_info files when an image is created.";
+  p_descr = "If true, _latest_data_info files will be written to the output directory, and the file write will be registered with the DataMapper.";
+} stats_write_latest_data_info;
 

@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./HsrlMon
+ * TDRP params for HsrlMon
  **********************************************************************/
 
 //======================================================================
@@ -76,7 +76,6 @@ instance = "test";
 //
 
 mode = REALTIME;
-// mode = ARCHIVE;
 
 ///////////// input_dir ///////////////////////////////
 //
@@ -89,7 +88,6 @@ mode = REALTIME;
 // Type: string
 //
 
-// input_dir = "/scr/eldora1/rsfdata/cset/hsrl/raw";
 input_dir = "$(DATA_DIR)/hsrl/raw";
 
 ///////////// files_sub_dir ///////////////////////////
@@ -257,7 +255,7 @@ monitoring_fields = {
     name = "total_energy",
     qualifier = "",
     minValidValue = -100,
-    maxValidValue = 1.0e10
+    maxValidValue = 1e+10
   }
   ,
   {
@@ -481,14 +479,14 @@ monitoring_fields = {
     name = "attenuator",
     qualifier = "",
     minValidValue = -100,
-    maxValidValue = 1.0e6
+    maxValidValue = 1e+06
   }
   ,
   {
     name = "etalonposition",
     qualifier = "",
     minValidValue = -100,
-    maxValidValue = 1.0e10
+    maxValidValue = 1e+10
   }
   ,
   {
@@ -558,7 +556,7 @@ monitoring_fields = {
     name = "iwg1_GPS_MSL_Alt",
     qualifier = "",
     minValidValue = -100,
-    maxValidValue = 10000000
+    maxValidValue = 1e+07
   }
   ,
   {
@@ -606,68 +604,146 @@ monitoring_fields = {
 
 //======================================================================
 //
-// OUTPUT DIRECTORY.
+// OUTPUT DIRECTORY for STATS files.
+//
+// The text output files will be named 
+//   category.platform.yyyymmddhhmmss.fieldname.txt.
 //
 //======================================================================
  
-///////////// output_dir //////////////////////////////
+///////////// write_stats_files ///////////////////////
+//
+// Option to write statistics text files.
+//
+//
+// Type: boolean
+//
+
+write_stats_files = TRUE;
+
+///////////// stats_output_dir ////////////////////////
 //
 // Output directory path.
 //
-// Files will be written to this directory.
+// Monitoring statistics files will be written to this directory.
 //
 //
 // Type: string
 //
 
-output_dir = "/tmp/hsrl_mon";
+stats_output_dir = "$(DATA_DIR)/monitoring/catalog";
 
-///////////// output_filename_prefix //////////////////
+///////////// stats_write_to_day_dir //////////////////
 //
-// Optional prefix for output filename.
+// Option to create a subdirectory for each day.
 //
-// If empty, the standard prefix will be used.
+//
+// Type: boolean
+//
+
+stats_write_to_day_dir = TRUE;
+
+///////////// stats_file_name_category ////////////////
+//
+// Set the category string.
+//
+// If empty, no category will be included.
 //
 //
 // Type: string
 //
 
-output_filename_prefix = "";
+stats_file_name_category = "lidar";
 
-///////////// append_day_dir_to_output_dir ////////////
+///////////// stats_file_name_platform ////////////////
 //
-// Add the day directory to the output directory.
+// Set the platform string.
 //
-// Path will be output_dir/yyyymmdd/filename.
+// If empty, no platform will be included.
+//
+//
+// Type: string
+//
+
+stats_file_name_platform = "NSF_NCAR_GV_HSRL";
+
+///////////// stats_file_name_extension ///////////////
+//
+// These are text files, so normally .txt is used.
+//
+// An extension is always required.
+//
+//
+// Type: string
+//
+
+stats_file_name_extension = "txt";
+
+///////////// stats_file_name_delimiter ///////////////
+//
+// Set the delimiter between the parts of the file name.
+//
+// NOTE: the extension the delimited is always a period: '.'.
+//
+//
+// Type: string
+//
+
+stats_file_name_delimiter = ".";
+
+///////////// stats_include_time_part_in_file_name ////
+//
+// Normally the file name includes a time part: YYYYMMDDHHMMSS.
+//
+// If FALSE, the time part will be omitted.
 //
 //
 // Type: boolean
 //
 
-append_day_dir_to_output_dir = TRUE;
+stats_include_time_part_in_file_name = TRUE;
 
-///////////// append_year_dir_to_output_dir ///////////
+///////////// stats_include_seconds_in_time_part //////
 //
-// Add the year directory to the output directory.
+// Normally the time part include the seconds: YYYYMMDDHHMMSS.
 //
-// Path will be output_dir/yyyy/yyyymmdd/filename.
+// If FALSE, the SS will be excluuded from the time part.
 //
 //
 // Type: boolean
 //
 
-append_year_dir_to_output_dir = FALSE;
+stats_include_seconds_in_time_part = FALSE;
 
-///////////// write_latest_data_info //////////////////
+///////////// stats_include_field_label_in_file_name //
 //
-// Option to write out _latest_data_info files.
+// Normally the file name includes the field label (product type).
 //
-// If true, the _latest_data_info files will be written after the 
-//   converted file is written.
+// If FALSE, the field label will be omitted.
 //
 //
 // Type: boolean
 //
 
-write_latest_data_info = FALSE;
+stats_include_field_label_in_file_name = TRUE;
+
+///////////// stats_file_field_label //////////////////
+//
+// Field label for stats files.
+//
+//
+// Type: string
+//
+
+stats_file_field_label = "MonitorStats";
+
+///////////// stats_write_latest_data_info ////////////
+//
+// Option to write latest_data_info files when an image is created.
+//
+//
+// Type: boolean
+//
+
+stats_write_latest_data_info = TRUE;
 

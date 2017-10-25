@@ -118,6 +118,8 @@ private:
 
   void _printStats(FILE *out);
 
+  void _writeStatsFile();
+
 };
 
 #endif

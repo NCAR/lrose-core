@@ -87,11 +87,9 @@ void RawFile::clear()
 
   _timeDim = NULL;
   _timeVecDim = NULL;
-  _binCountDim = NULL;
 
   _nTimesInFile = 0;
   _timeVecSize = 0;
-  _nBinsInFile = 0;
 
   _machType.clear();
   _hostName.clear();
@@ -105,30 +103,6 @@ void RawFile::clear()
   _dataTimes.clear();
   _dTimes.clear();
   
-  _telescopeLockedVar = NULL;
-  _telescopeDirectionVar = NULL;
-
-  _latitudeVar = NULL;
-  _longitudeVar = NULL;
-  _altitudeVar = NULL;
-  _headingVar = NULL;
-  _gndSpeedVar = NULL;
-  _vertVelVar = NULL;
-  _pitchVar = NULL;
-  _rollVar = NULL;
-
-  _telescopeLocked.clear();
-  _telescopeDirection.clear();
-
-  _latitude.clear();
-  _longitude.clear();
-  _altitude.clear();
-  _heading.clear();
-  _gndSpeed.clear();
-  _vertVel.clear();
-  _pitch.clear();
-  _roll.clear();
-
 }
 
 ////////////////////////////////////////////////////////////
@@ -317,7 +291,6 @@ int RawFile::openAndReadTimes(const string &path)
   // clear tmp rays
   
   _nTimesInFile = 0;
-  _nBinsInFile = 0;
   
   // open file
 
@@ -413,18 +386,6 @@ int RawFile::_readDimensions()
     return -1;
   }
   
-  if (_file.readDim("bincount", _binCountDim) == 0) {
-    _nBinsInFile = _binCountDim->size();
-  } else {
-    _addErrStr("ERROR - RawFile::_readDimensions()");
-    _addErrStr("  Cannot find 'bincount' dimension");
-    return -1;
-  }
-
-  _nPoints = _nTimesInFile * _nBinsInFile;
-  _nBinsPerGate = 1;
-  _nGates = _nBinsInFile / _nBinsPerGate;
-
   if (_params.debug) {
     cerr << "_nTimesInFile: " << _nTimesInFile << endl;
   }
@@ -618,8 +579,10 @@ int RawFile::_readRayVar2Doubles(const string &name,
   Nc3Var *var = _getRayVar(name);
   
   if (var == NULL) {
-    cerr << "ERROR - RawFile::_readRayVar2Doubles" << endl;
-    cerr << "  Cannot find var: " << name << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "ERROR - RawFile::_readRayVar2Doubles" << endl;
+      cerr << "  Cannot find var: " << name << endl;
+    }
     return -1;
   }
 
@@ -733,9 +696,11 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
       vals.push_back(*dd);
     }
   } else {
-    cerr << "ERROR - RawFile::_readRayVar" << endl;
-    cerr << "  Cannot read variable: " << name << endl;
-    cerr << _file.getNc3Error()->get_errmsg() << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "ERROR - RawFile::_readRayVar" << endl;
+      cerr << "  Cannot read variable: " << name << endl;
+      cerr << _file.getNc3Error()->get_errmsg() << endl;
+    }
     iret = -1;
   }
   delete[] data;
@@ -771,9 +736,11 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
       vals.push_back(*dd);
     }
   } else {
-    cerr << "ERROR - RawFile::_readRayVar" << endl;
-    cerr << "  Cannot read variable: " << name << endl;
-    cerr << _file.getNc3Error()->get_errmsg() << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "ERROR - RawFile::_readRayVar" << endl;
+      cerr << "  Cannot read variable: " << name << endl;
+      cerr << _file.getNc3Error()->get_errmsg() << endl;
+    }
     iret = -1;
   }
   delete[] data;
@@ -809,9 +776,11 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
       vals.push_back(*dd);
     }
   } else {
-    cerr << "ERROR - RawFile::_readRayVar" << endl;
-    cerr << "  Cannot read variable: " << name << endl;
-    cerr << _file.getNc3Error()->get_errmsg() << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "ERROR - RawFile::_readRayVar" << endl;
+      cerr << "  Cannot read variable: " << name << endl;
+      cerr << _file.getNc3Error()->get_errmsg() << endl;
+    }
     iret = -1;
   }
   delete[] data;
@@ -847,9 +816,11 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
       vals.push_back(*dd);
     }
   } else {
-    cerr << "ERROR - RawFile::_readRayVar" << endl;
-    cerr << "  Cannot read variable: " << name << endl;
-    cerr << _file.getNc3Error()->get_errmsg() << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "ERROR - RawFile::_readRayVar" << endl;
+      cerr << "  Cannot read variable: " << name << endl;
+      cerr << _file.getNc3Error()->get_errmsg() << endl;
+    }
     iret = -1;
   }
   delete[] data;
@@ -911,9 +882,11 @@ Nc3Var* RawFile::_getRayVar(const string &name)
   
   Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
-    cerr << "ERROR - RawFile::_getRayVar" << endl;
-    cerr << "  Cannot read variable, name: " << name << endl;
-    cerr << _file.getNc3Error()->get_errmsg() << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "ERROR - RawFile::_getRayVar" << endl;
+      cerr << "  Cannot read variable, name: " << name << endl;
+      cerr << _file.getNc3Error()->get_errmsg() << endl;
+    }
     return NULL;
   }
 

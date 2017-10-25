@@ -91,6 +91,10 @@ public:
   double getMin() const { return _min; }
   double getMax() const { return _max; }
 
+  double getSum() const { return _sum; }
+  double getSumSq() const { return _sumSq; }
+  double getNn() const { return _nn; }
+
 private:
 
   const Params &_params;

@@ -781,67 +781,151 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY for STATS files");
+    tt->comment_text = tdrpStrDup("The text output files will be named category.platform.yyyymmddhhmmss.fieldname.txt.");
     tt++;
     
-    // Parameter 'output_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_dir");
-    tt->descr = tdrpStrDup("Output directory path.");
-    tt->help = tdrpStrDup("Files will be written to this directory.");
-    tt->val_offset = (char *) &output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/hsrl_mon");
-    tt++;
-    
-    // Parameter 'output_filename_prefix'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_filename_prefix");
-    tt->descr = tdrpStrDup("Optional prefix for output filename.");
-    tt->help = tdrpStrDup("If empty, the standard prefix will be used.");
-    tt->val_offset = (char *) &output_filename_prefix - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'append_day_dir_to_output_dir'
+    // Parameter 'write_stats_files'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("append_day_dir_to_output_dir");
-    tt->descr = tdrpStrDup("Add the day directory to the output directory.");
-    tt->help = tdrpStrDup("Path will be output_dir/yyyymmdd/filename.");
-    tt->val_offset = (char *) &append_day_dir_to_output_dir - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'append_year_dir_to_output_dir'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("append_year_dir_to_output_dir");
-    tt->descr = tdrpStrDup("Add the year directory to the output directory.");
-    tt->help = tdrpStrDup("Path will be output_dir/yyyy/yyyymmdd/filename.");
-    tt->val_offset = (char *) &append_year_dir_to_output_dir - &_start_;
+    tt->param_name = tdrpStrDup("write_stats_files");
+    tt->descr = tdrpStrDup("Option to write statistics text files.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &write_stats_files - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'write_latest_data_info'
+    // Parameter 'stats_output_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("stats_output_dir");
+    tt->descr = tdrpStrDup("Output directory path.");
+    tt->help = tdrpStrDup("Monitoring statistics files will be written to this directory.");
+    tt->val_offset = (char *) &stats_output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/hsrl_mon/stats");
+    tt++;
+    
+    // Parameter 'stats_write_to_day_dir'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_latest_data_info");
-    tt->descr = tdrpStrDup("Option to write out _latest_data_info files.");
-    tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
-    tt->val_offset = (char *) &write_latest_data_info - &_start_;
+    tt->param_name = tdrpStrDup("stats_write_to_day_dir");
+    tt->descr = tdrpStrDup("Option to create a subdirectory for each day.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &stats_write_to_day_dir - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'stats_file_name_category'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("stats_file_name_category");
+    tt->descr = tdrpStrDup("Set the category string.");
+    tt->help = tdrpStrDup("If empty, no category will be included.");
+    tt->val_offset = (char *) &stats_file_name_category - &_start_;
+    tt->single_val.s = tdrpStrDup("lidar");
+    tt++;
+    
+    // Parameter 'stats_file_name_platform'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("stats_file_name_platform");
+    tt->descr = tdrpStrDup("Set the platform string.");
+    tt->help = tdrpStrDup("If empty, no platform will be included.");
+    tt->val_offset = (char *) &stats_file_name_platform - &_start_;
+    tt->single_val.s = tdrpStrDup("NSF_NCAR_GV_HSRL");
+    tt++;
+    
+    // Parameter 'stats_file_name_extension'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("stats_file_name_extension");
+    tt->descr = tdrpStrDup("These are text files, so normally .txt is used.");
+    tt->help = tdrpStrDup("An extension is always required");
+    tt->val_offset = (char *) &stats_file_name_extension - &_start_;
+    tt->single_val.s = tdrpStrDup("txt");
+    tt++;
+    
+    // Parameter 'stats_file_name_delimiter'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("stats_file_name_delimiter");
+    tt->descr = tdrpStrDup("Set the delimiter between the parts of the file name.");
+    tt->help = tdrpStrDup("NOTE: the extension the delimited is always a period: '.'.");
+    tt->val_offset = (char *) &stats_file_name_delimiter - &_start_;
+    tt->single_val.s = tdrpStrDup(".");
+    tt++;
+    
+    // Parameter 'stats_include_time_part_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("stats_include_time_part_in_file_name");
+    tt->descr = tdrpStrDup("Normally the file name includes a time part: YYYYMMDDHHMMSS.");
+    tt->help = tdrpStrDup("If FALSE, the time part will be omitted.");
+    tt->val_offset = (char *) &stats_include_time_part_in_file_name - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'stats_include_seconds_in_time_part'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("stats_include_seconds_in_time_part");
+    tt->descr = tdrpStrDup("Normally the time part include the seconds: YYYYMMDDHHMMSS.");
+    tt->help = tdrpStrDup("If FALSE, the SS will be excluuded from the time part.");
+    tt->val_offset = (char *) &stats_include_seconds_in_time_part - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'stats_include_field_label_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("stats_include_field_label_in_file_name");
+    tt->descr = tdrpStrDup("Normally the file name includes the field label (product type).");
+    tt->help = tdrpStrDup("If FALSE, the field label will be omitted.");
+    tt->val_offset = (char *) &stats_include_field_label_in_file_name - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'stats_file_field_label'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("stats_file_field_label");
+    tt->descr = tdrpStrDup("Field label for stats files.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &stats_file_field_label - &_start_;
+    tt->single_val.s = tdrpStrDup("MonitorStats");
+    tt++;
+    
+    // Parameter 'stats_write_latest_data_info'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("stats_write_latest_data_info");
+    tt->descr = tdrpStrDup("Option to write latest_data_info files when an image is created.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &stats_write_latest_data_info - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
