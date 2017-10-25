@@ -47,9 +47,9 @@ MonField::MonField(const Params &params,
         _params(params),
         _name(name),
         _qualifier(qualifier),
+        _note(note),
         _minValidValue(minValidValue),
-        _maxValidValue(maxValidValue),
-        _note(note)
+        _maxValidValue(maxValidValue)
 {
   _longName = name;
   _units = "notset";
@@ -144,18 +144,19 @@ void MonField::printStats(FILE *out)
   longName = longName.substr(0, longName.size() - ntrim);
 
   char label[1024];
-  if (_units.size() == 0) {
+  if (_units.size() == 0 || _units.find("unknown") == 0) {
     sprintf(label, "%s", longName.c_str());
   } else {
     sprintf(label, "%s (%s)", longName.c_str(), _units.c_str());
   }
   label[45] = '\0';
+  double range = _max - _min;
   if (fabs(_max) > 9999) {
     fprintf(out, "%45s: %10.0f %10.0f %10.0f %10.0f",
-            label, _min, _max, _mean, _sdev);
+            label, _min, _max, _mean, range);
   } else {
     fprintf(out, "%45s: %10.3f %10.3f %10.3f %10.3f",
-            label, _min, _max, _mean, _sdev);
+            label, _min, _max, _mean, range);
   }
 
   if (_note.size() > 0) {

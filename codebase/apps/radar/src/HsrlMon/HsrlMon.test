@@ -208,7 +208,7 @@ monitoring_fields = {
     qualifier = "",
     minValidValue = -100,
     maxValidValue = 100000,
-    note = "0 indicates locked"
+    note = "(0 indicates locked)"
   }
   ,
   {
@@ -216,7 +216,7 @@ monitoring_fields = {
     qualifier = "",
     minValidValue = -100,
     maxValidValue = 100000,
-    note = "1 is UP, 0 is DOWN"
+    note = "(1 is UP, 0 is DOWN)"
   }
   ,
   {
@@ -224,7 +224,7 @@ monitoring_fields = {
     qualifier = "",
     minValidValue = -100,
     maxValidValue = 100000,
-    note = "0 is CLOSED, 1 is OPEN"
+    note = "(1 is CLOSED, 0 is OPEN)"
   }
   ,
   {
@@ -232,7 +232,7 @@ monitoring_fields = {
     qualifier = "",
     minValidValue = -100,
     maxValidValue = 100000,
-    note = "0 is CLOSED, 1 is OPEN"
+    note = "(1 is CLOSED, 0 is OPEN)"
   }
   ,
   {
@@ -245,6 +245,22 @@ monitoring_fields = {
   ,
   {
     name = "OperatorOutgoingShutterValue",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "etalonposition",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 1e+10,
+    note = ""
+  }
+  ,
+  {
+    name = "pressure",
     qualifier = "",
     minValidValue = -100,
     maxValidValue = 100000,
@@ -356,22 +372,6 @@ monitoring_fields = {
   }
   ,
   {
-    name = "tcsfore_fan1_main",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 100,
-    note = ""
-  }
-  ,
-  {
-    name = "tcsfore_fan2_main",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 100,
-    note = ""
-  }
-  ,
-  {
     name = "tcsfore_main_current",
     qualifier = "",
     minValidValue = -100,
@@ -436,22 +436,6 @@ monitoring_fields = {
   }
   ,
   {
-    name = "tcsaft_fan1_main",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 100,
-    note = ""
-  }
-  ,
-  {
-    name = "tcsaft_fan2_main",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 100,
-    note = ""
-  }
-  ,
-  {
     name = "tcsaft_main_current",
     qualifier = "",
     minValidValue = -100,
@@ -472,78 +456,6 @@ monitoring_fields = {
     qualifier = "",
     minValidValue = -100,
     maxValidValue = 100,
-    note = ""
-  }
-  ,
-  {
-    name = "shortcell_target",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 100000,
-    note = ""
-  }
-  ,
-  {
-    name = "shortcell",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 100000,
-    note = ""
-  }
-  ,
-  {
-    name = "l3stats_shotcount",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 100000,
-    note = ""
-  }
-  ,
-  {
-    name = "l3stats_goodshotcount",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 100000,
-    note = ""
-  }
-  ,
-  {
-    name = "builduptime_threshhold",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 100000,
-    note = ""
-  }
-  ,
-  {
-    name = "attenuator",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 1e+06,
-    note = ""
-  }
-  ,
-  {
-    name = "etalonposition",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 1e+10,
-    note = ""
-  }
-  ,
-  {
-    name = "LIDARCTL_mode",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 100000,
-    note = ""
-  }
-  ,
-  {
-    name = "pressure",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 100000,
     note = ""
   }
   ,

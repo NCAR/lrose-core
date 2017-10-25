@@ -567,7 +567,7 @@ void HsrlMon::_printStats(FILE *out)
 
 {
   
-  if (_monFields[0]->getNn() < 1) {
+  if (_monFields[0]->getNn() < 3) {
     cerr << "WARNING - HsrlMon::_printStats" << endl;
     cerr << "  No data found" << endl;
     cerr << "  monitorStartTime: " << RadxTime::strm(_monitorStartTime) << endl;
@@ -575,16 +575,21 @@ void HsrlMon::_printStats(FILE *out)
   }
 
   fprintf(out,
-          "================================= HSRL MONITORING "
+          "========================================"
+          " HSRL MONITORING "
           "========================================\n");
 
+  char label[128];
+  sprintf(label, "Monitor start time - end time, N = %d",
+          (int) (_monFields[0]->getNn()));
+
   fprintf(out, "%45s:   %s - %s\n",
-          "Monitor start time - end time",
+          label,
           RadxTime::strm(_monitorStartTime).c_str(), 
           RadxTime::strm(_monitorEndTime).c_str());
 
   fprintf(out, "%45s  %10s %10s %10s %10s  %s\n",
-          "", "Min", "Max", "Mean", "Sdev", "Notes");
+          "", "Min", "Max", "Mean", "Range", "Notes");
           
   for (size_t ii = 0; ii < _monFields.size(); ii++) {
     _monFields[ii]->computeStats();
@@ -595,8 +600,9 @@ void HsrlMon::_printStats(FILE *out)
   }
 
   fprintf(out,
-          "==================================================="
-          "=======================================\n");
+          "========================================"
+          "================="
+          "========================================\n");
   
 }
 
@@ -607,7 +613,7 @@ void HsrlMon::_writeStatsFile()
 
 {
 
-  if (_monFields[0]->getNn() < 1) {
+  if (_monFields[0]->getNn() < 3) {
     if (_params.debug) {
       cerr << "WARNING - HsrlMon::_writeStatsFiles" << endl;
       cerr << "  No data found" << endl;
