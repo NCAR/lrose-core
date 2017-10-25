@@ -42,12 +42,14 @@ MonField::MonField(const Params &params,
                    const string &name,
                    const string &qualifier,
                    double minValidValue,
-                   double maxValidValue) :
+                   double maxValidValue,
+                   const string &note) :
         _params(params),
         _name(name),
         _qualifier(qualifier),
         _minValidValue(minValidValue),
-        _maxValidValue(maxValidValue)
+        _maxValidValue(maxValidValue),
+        _note(note)
 {
   _longName = name;
   _units = "notset";
@@ -154,6 +156,10 @@ void MonField::printStats(FILE *out)
   } else {
     fprintf(out, "%45s: %10.3f %10.3f %10.3f %10.3f",
             label, _min, _max, _mean, _sdev);
+  }
+
+  if (_note.size() > 0) {
+    fprintf(out, "  %s", _note.c_str());
   }
 
   if (_params.debug) {

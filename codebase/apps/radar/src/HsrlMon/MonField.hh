@@ -52,7 +52,8 @@ public:
            const string &name,
            const string &qualifier,
            double minValidValue,
-           double maxValidValue);
+           double maxValidValue,
+           const string &note);
 
   // initialize
 
@@ -82,6 +83,7 @@ public:
   const string &getQualifier() const { return _qualifier; }
   const string &getLongName() const { return _longName; }
   const string &getUnits() const { return _units; }
+  const string &getNote() const { return _note; }
   
   double getMinValidValue() const { return _minValidValue; }
   double getMaxValidValue() const { return _maxValidValue; }
@@ -104,6 +106,8 @@ private:
 
   string _longName;
   string _units;
+
+  string _note;
 
   double _minValidValue;
   double _maxValidValue;

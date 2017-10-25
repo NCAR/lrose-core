@@ -732,7 +732,7 @@ using namespace std;
     tt->array_elem_size = sizeof(monitoring_field_t);
     tt->array_n = 4;
     tt->struct_def.name = tdrpStrDup("monitoring_field_t");
-    tt->struct_def.nfields = 4;
+    tt->struct_def.nfields = 5;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -755,25 +755,34 @@ using namespace std;
       tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[3].rel_offset = 
         (char *) &_monitoring_fields->maxValidValue - (char *) _monitoring_fields;
-    tt->n_struct_vals = 16;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[4].fname = tdrpStrDup("note");
+      tt->struct_def.fields[4].ptype = STRING_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_monitoring_fields->note - (char *) _monitoring_fields;
+    tt->n_struct_vals = 20;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("tcsaft_temp1");
       tt->struct_vals[1].s = tdrpStrDup("");
       tt->struct_vals[2].d = -100;
       tt->struct_vals[3].d = 100;
-      tt->struct_vals[4].s = tdrpStrDup("tcsaft_temp2");
-      tt->struct_vals[5].s = tdrpStrDup("");
-      tt->struct_vals[6].d = -100;
-      tt->struct_vals[7].d = 100;
-      tt->struct_vals[8].s = tdrpStrDup("tcsaft_temp3");
+      tt->struct_vals[4].s = tdrpStrDup("");
+      tt->struct_vals[5].s = tdrpStrDup("tcsaft_temp2");
+      tt->struct_vals[6].s = tdrpStrDup("");
+      tt->struct_vals[7].d = -100;
+      tt->struct_vals[8].d = 100;
       tt->struct_vals[9].s = tdrpStrDup("");
-      tt->struct_vals[10].d = -100;
-      tt->struct_vals[11].d = 100;
-      tt->struct_vals[12].s = tdrpStrDup("tcsaft_temp4");
-      tt->struct_vals[13].s = tdrpStrDup("");
-      tt->struct_vals[14].d = -100;
-      tt->struct_vals[15].d = 100;
+      tt->struct_vals[10].s = tdrpStrDup("tcsaft_temp3");
+      tt->struct_vals[11].s = tdrpStrDup("");
+      tt->struct_vals[12].d = -100;
+      tt->struct_vals[13].d = 100;
+      tt->struct_vals[14].s = tdrpStrDup("");
+      tt->struct_vals[15].s = tdrpStrDup("tcsaft_temp4");
+      tt->struct_vals[16].s = tdrpStrDup("");
+      tt->struct_vals[17].d = -100;
+      tt->struct_vals[18].d = 100;
+      tt->struct_vals[19].s = tdrpStrDup("");
     tt++;
     
     // Parameter 'Comment 4'

@@ -70,6 +70,7 @@ public:
     char* qualifier;
     double minValidValue;
     double maxValidValue;
+    char* note;
   } monitoring_field_t;
 
   ///////////////////////////

@@ -102,7 +102,8 @@ HsrlMon::HsrlMon(int argc, char **argv)
   for (int ii = 0; ii < _params.monitoring_fields_n; ii++) {
     const Params::monitoring_field_t &pfield = _params._monitoring_fields[ii];
     MonField *field = new MonField(_params, pfield.name, pfield.qualifier, 
-                                   pfield.minValidValue, pfield.maxValidValue);
+                                   pfield.minValidValue, pfield.maxValidValue,
+                                   pfield.note);
     _monFields.push_back(field);
   }
 
@@ -582,8 +583,8 @@ void HsrlMon::_printStats(FILE *out)
           RadxTime::strm(_monitorStartTime).c_str(), 
           RadxTime::strm(_monitorEndTime).c_str());
 
-  fprintf(out, "%45s  %10s %10s %10s %10s\n",
-          "", "Min", "Max", "Mean", "Sdev");
+  fprintf(out, "%45s  %10s %10s %10s %10s  %s\n",
+          "", "Min", "Max", "Mean", "Sdev", "Notes");
           
   for (size_t ii = 0; ii < _monFields.size(); ii++) {
     _monFields[ii]->computeStats();
