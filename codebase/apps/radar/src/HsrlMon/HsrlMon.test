@@ -619,7 +619,7 @@ monitoring_fields = {
 // Type: boolean
 //
 
-write_stats_files = TRUE;
+write_stats_files = FALSE;
 
 ///////////// stats_output_dir ////////////////////////
 //
