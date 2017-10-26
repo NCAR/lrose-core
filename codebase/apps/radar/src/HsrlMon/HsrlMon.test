@@ -500,79 +500,39 @@ monitoring_fields = {
   }
   ,
   {
-    name = "iwg1_Lat",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 100000,
-    note = ""
-  }
-  ,
-  {
-    name = "iwg1_Lon",
-    qualifier = "",
-    minValidValue = -100000,
-    maxValidValue = 100000,
-    note = ""
-  }
-  ,
-  {
-    name = "iwg1_GPS_MSL_Alt",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 1e+07,
-    note = ""
-  }
-  ,
-  {
-    name = "iwg1_Grnd_Spd",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 100000,
-    note = ""
-  }
-  ,
-  {
-    name = "iwg1_True_Hdg",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 100000,
-    note = ""
-  }
-  ,
-  {
-    name = "iwg1_Pitch",
-    qualifier = "",
-    minValidValue = -10000,
-    maxValidValue = 100000,
-    note = ""
-  }
-  ,
-  {
-    name = "iwg1_Roll",
-    qualifier = "",
-    minValidValue = -10000,
-    maxValidValue = 100000,
-    note = ""
-  }
-  ,
-  {
-    name = "iwg1_Cabin_Pressure",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 100000,
-    note = ""
-  }
-  ,
-  {
-    name = "iwg1_Solar_Zenith",
-    qualifier = "",
-    minValidValue = -100,
-    maxValidValue = 100000,
-    note = ""
-  }
-  ,
-  {
     name = "brillouinfiltered_energy_stats",
+    qualifier = "field0",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "nonfiltered_energy_stats",
+    qualifier = "field0",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "builduptime",
+    qualifier = "field0",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "l3cavityvoltage",
+    qualifier = "field0",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "l3locking_stats",
     qualifier = "field0",
     minValidValue = -100,
     maxValidValue = 100000,
@@ -694,6 +654,142 @@ monitoring_fields = {
   {
     name = "system_temperatures",
     qualifier = "field18_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "humidity",
+    qualifier = "field1_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "laserpowervalues",
+    qualifier = "field0_name",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "laserpowervalues",
+    qualifier = "field1_name",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "laserpowervalues",
+    qualifier = "field2_name",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "laserpowervalues",
+    qualifier = "field3_name",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "laserpowervalues",
+    qualifier = "field4_name",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "laserpowervalues",
+    qualifier = "field5_name",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "laserpowervalues",
+    qualifier = "field6_name",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_Lat",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_Lon",
+    qualifier = "",
+    minValidValue = -100000,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_GPS_MSL_Alt",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 1e+07,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_Grnd_Spd",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_True_Hdg",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_Pitch",
+    qualifier = "",
+    minValidValue = -10000,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_Roll",
+    qualifier = "",
+    minValidValue = -10000,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_Cabin_Pressure",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_Solar_Zenith",
+    qualifier = "",
     minValidValue = -100,
     maxValidValue = 100000,
     note = ""

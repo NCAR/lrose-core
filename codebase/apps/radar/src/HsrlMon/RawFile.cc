@@ -684,41 +684,73 @@ int RawFile::_readTimeVar2Doubles(const string &name,
     }
   } // switch
 
-  if (iret == 0) {
-    Nc3Att *longNameAtt = var->get_att("long_name");
-    if (longNameAtt) {
-      string sval = Nc3xFile::asString(longNameAtt);
+  if (iret) {
+    return -1;
+  }
+
+  // name
+
+  Nc3Att *longNameAtt = var->get_att("long_name");
+  if (longNameAtt) {
+    string sval = Nc3xFile::asString(longNameAtt);
+    if (sval.size() > 0) {
+      longName = sval;
+    }
+    if (longName.find("Temperature Readings") == 0) {
+      longName = "Temps";
+    }
+    if (longName.find("Humidity Readings") == 0) {
+      longName = "Humidity";
+    }
+    if (longName.find("Laser Power Supply Values") == 0) {
+      longName = "Pwr Supply";
+    }
+    delete longNameAtt;
+  } else {
+    Nc3Att *descAtt = var->get_att("description");
+    if (descAtt) {
+      string sval = Nc3xFile::asString(descAtt);
       if (sval.size() > 0) {
         longName = sval;
       }
-      if (longName.find("Temperature Readings") == 0) {
-        longName = "Temperatures";
-      }
-      delete longNameAtt;
-    } else {
-      Nc3Att *descAtt = var->get_att("description");
-      if (descAtt) {
-        string sval = Nc3xFile::asString(descAtt);
-        if (sval.size() > 0) {
-          longName = sval;
-        }
-        delete descAtt;
-      }
-    }
-    Nc3Att *unitsAtt = var->get_att("units");
-    if (unitsAtt) {
-      string sval = Nc3xFile::asString(unitsAtt);
-      if (sval.size() > 0) {
-        units = sval;
-      }
-      if (units.find("Centigrade") != string::npos) {
-        units = "degC";
-      }
-      delete unitsAtt;
+      delete descAtt;
     }
   }
 
-  return iret;
+  // units
+
+  Nc3Att *unitsAtt = var->get_att("units");
+  string uval;
+  if (unitsAtt) {
+    uval = Nc3xFile::asString(unitsAtt);
+    delete unitsAtt;
+  } else {
+    char fieldUnits[128];
+    sprintf(fieldUnits, "units%d", fieldNum);
+    unitsAtt = var->get_att(fieldUnits);
+    if (unitsAtt) {
+      uval = Nc3xFile::asString(unitsAtt);
+      delete unitsAtt;
+    } else {
+      sprintf(fieldUnits, "field%d_units", fieldNum);
+      unitsAtt = var->get_att(fieldUnits);
+      if (unitsAtt) {
+        uval = Nc3xFile::asString(unitsAtt);
+        delete unitsAtt;
+      }
+    }
+  }
+  if (uval.size() > 0) {
+    units = uval;
+  }
+  if (units.find("Centigrade") != string::npos) {
+    units = "degC";
+  }
+  if (units.find("percent") != string::npos) {
+    units = "%";
+  }
+  
+  return 0;
   
 }
 
