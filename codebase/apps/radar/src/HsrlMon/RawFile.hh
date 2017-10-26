@@ -181,23 +181,38 @@ private:
   int _readGlobalAttributes();
   int _readTimes();
 
-  int _readRayVar2Doubles(const string &name,
-                          vector<double> &vals,
-                          string &longName,
-                          string &units);
-
-  int _readRayVar(Nc3Var* &var, const string &name, 
-                  vector<double> &vals);
-  int _readRayVar(Nc3Var* &var, const string &name, 
-                  vector<float> &vals);
-  int _readRayVar(Nc3Var* &var, const string &name, 
-                  vector<int> &vals);
-  int _readRayVar(Nc3Var* &var, const string &name, 
-                  vector<short> &vals);
-  int _readRayVar(Nc3Var* &var, const string &name, 
-                  vector<bool> &vals);
+  int _readTimeVar2Doubles(const string &name,
+                           const string &qualifier,
+                           vector<double> &vals,
+                           string &longName,
+                           string &units,
+                           string &qualStr);
   
-  Nc3Var* _getRayVar(const string &name);
+  int _readTimeVar(Nc3Var* &var, 
+                   const string &name,
+                   int dim1Size,
+                   int fieldNum,
+                   vector<double> &vals);
+  
+  int _readTimeVar(Nc3Var* &var, 
+                   const string &name, 
+                   int dim1Size,
+                   int fieldNum,
+                   vector<float> &vals);
+  
+  int _readTimeVar(Nc3Var* &var, 
+                   const string &name, 
+                   int dim1Size,
+                   int fieldNum,
+                   vector<int> &vals);
+  
+  int _readTimeVar(Nc3Var* &var,
+                   const string &name, 
+                   int dim1Size,
+                   int fieldNum,
+                   vector<short> &vals);
+  
+  Nc3Var* _getTimeVar(const string &name);
 
   /// add integer value to error string, with label
 

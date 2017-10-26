@@ -543,22 +543,19 @@ int RawFile::appendMonStats(MonField &monField,
 {
   
   int iret = 0;
-  if (monField.getQualifier().size() == 0) {
-
-    vector<double> dvals;
-    string longName, units;
-    if (_readRayVar2Doubles(monField.getName(), dvals, longName, units) == 0) {
-      for (int itime = startTimeIndex; itime <= endTimeIndex; itime++) {
-        double dval = dvals[itime];
-        if (dval >= monField.getMinValidValue() &&
-            dval <= monField.getMaxValidValue()) {
-          monField.addValue(dvals[itime]);
-          monField.setLongName(longName);
-          monField.setUnits(units);
-        }
+  vector<double> dvals;
+  string longName, units, qualStr;
+  if (_readTimeVar2Doubles(monField.getName(), monField.getQualifier(),
+                           dvals, longName, units, qualStr) == 0) {
+    for (int itime = startTimeIndex; itime <= endTimeIndex; itime++) {
+      double dval = dvals[itime];
+      if (dval >= monField.getMinValidValue() &&
+          dval <= monField.getMaxValidValue()) {
+        monField.addValue(dvals[itime]);
+        monField.setLongName(longName + " " + qualStr);
+        monField.setUnits(units);
       }
     }
-
   }
 
   return iret;
@@ -567,37 +564,88 @@ int RawFile::appendMonStats(MonField &monField,
 
 
 ////////////////////////////////////////
-// read a ray variable, put into doubles
+// read a time variable, put into doubles
 // side effects: set var, vals
 
-int RawFile::_readRayVar2Doubles(const string &name,
-                                 vector<double> &dvals,
-                                 string &longName,
-                                 string &units)
+int RawFile::_readTimeVar2Doubles(const string &name,
+                                  const string &qualifier,
+                                  vector<double> &dvals,
+                                  string &longName,
+                                  string &units,
+                                  string &qualStr)
 {
   
-  Nc3Var *var = _getRayVar(name);
-  
+  // get variable
+
+  Nc3Var *var = _getTimeVar(name);
   if (var == NULL) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "ERROR - RawFile::_readRayVar2Doubles" << endl;
+      cerr << "ERROR - RawFile::_readTimeVar2Doubles" << endl;
       cerr << "  Cannot find var: " << name << endl;
     }
     return -1;
+  }
+
+  // first dimension is time
+  // get second dimensions
+
+  int nDims = var->num_dims();
+  int arraySize = _nTimesInFile;
+  int dim1Size = 1;
+  if (nDims == 2) {
+    Nc3Dim *dim1 = var->get_dim(1);
+    if (dim1 != NULL) {
+      dim1Size = dim1->size();
+    }
+  }
+  arraySize *= dim1Size;
+  
+  // from qualifier, compute field number
+
+  int fieldNum = 0;
+  const char *firstDigit = NULL;
+  for (size_t ii = 0; ii < qualifier.size(); ii++) {
+    if (isdigit(qualifier[ii])) {
+      firstDigit = qualifier.c_str() + ii;
+      break;
+    }
+  }
+  if (firstDigit) {
+    int val;
+    if (sscanf(firstDigit, "%d", &val) == 1) {
+      fieldNum = val;
+    }
+  }
+  if (fieldNum >= dim1Size) {
+    cerr << "ERROR - RawFile::_readTimeVar2Doubles" << endl;
+    cerr << "  bad qualifier field number: " << fieldNum << endl;
+    cerr << "  valid max is: " << dim1Size - 1 << endl;
+    return -1;
+  }
+
+  // from qualifier, get qualifier string
+
+  Nc3Att *qualAtt = var->get_att(qualifier.c_str());
+  if (qualAtt) {
+    string qval = Nc3xFile::asString(qualAtt);
+    if (qval.size() > 0) {
+      qualStr = qval;
+    }
+    delete qualAtt;
   }
 
   int iret = 0;
   Nc3Type varType = var->type();
   switch (varType) {
     case nc3Double: {
-      if (_readRayVar(var, name, dvals)) {
+      if (_readTimeVar(var, name, dim1Size, fieldNum, dvals)) {
         iret = -1;
       }
       break;
     }
     case nc3Float: {
       vector<float> fvals;
-      if (_readRayVar(var, name, fvals)) {
+      if (_readTimeVar(var, name, dim1Size, fieldNum, fvals)) {
         iret = -1;
       } else {
         for (size_t ii = 0; ii < fvals.size(); ii++) {
@@ -608,7 +656,7 @@ int RawFile::_readRayVar2Doubles(const string &name,
     }
     case nc3Int: {
       vector<int> ivals;
-      if (_readRayVar(var, name, ivals)) {
+      if (_readTimeVar(var, name, dim1Size, fieldNum, ivals)) {
         iret = -1;
       } else {
         for (size_t ii = 0; ii < ivals.size(); ii++) {
@@ -619,7 +667,7 @@ int RawFile::_readRayVar2Doubles(const string &name,
     }
     case nc3Short: {
       vector<short> svals;
-      if (_readRayVar(var, name, svals)) {
+      if (_readTimeVar(var, name, dim1Size, fieldNum, svals)) {
         iret = -1;
       } else {
         for (size_t ii = 0; ii < svals.size(); ii++) {
@@ -629,7 +677,7 @@ int RawFile::_readRayVar2Doubles(const string &name,
       break;
     }
     default: {
-      cerr << "ERROR - RawFile::_readRayVar2Doubles" << endl;
+      cerr << "ERROR - RawFile::_readTimeVar2Doubles" << endl;
       cerr << "  Bad type for var: " << name << endl;
       cerr << "  type: " << varType << endl;
       return -1;
@@ -642,6 +690,9 @@ int RawFile::_readRayVar2Doubles(const string &name,
       string sval = Nc3xFile::asString(longNameAtt);
       if (sval.size() > 0) {
         longName = sval;
+      }
+      if (longName.find("Temperature Readings") == 0) {
+        longName = "Temperatures";
       }
       delete longNameAtt;
     } else {
@@ -660,6 +711,9 @@ int RawFile::_readRayVar2Doubles(const string &name,
       if (sval.size() > 0) {
         units = sval;
       }
+      if (units.find("Centigrade") != string::npos) {
+        units = "degC";
+      }
       delete unitsAtt;
     }
   }
@@ -669,35 +723,38 @@ int RawFile::_readRayVar2Doubles(const string &name,
 }
 
 ///////////////////////////////////
-// read a ray variable - double
+// read a time variable - double
 // side effects: set var, vals
 
-int RawFile::_readRayVar(Nc3Var* &var, const string &name,
-                         vector<double> &vals)
+int RawFile::_readTimeVar(Nc3Var* &var, 
+                          const string &name,
+                          int dim1Size,
+                          int fieldNum,
+                          vector<double> &vals)
   
 {
 
   vals.clear();
-
-  // get var
   
-  var = _getRayVar(name);
-  if (var == NULL) {
-    return -1;
-  }
-
   // load up data
   
-  double *data = new double[_nTimesInFile];
-  double *dd = data;
+  long nVals = _nTimesInFile * dim1Size;
+  double *data = new double[nVals];
   int iret = 0;
-  if (var->get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
-      vals.push_back(*dd);
+  Nc3Bool bret;
+  if (dim1Size == 1) {
+    bret = var->get(data, _nTimesInFile);
+  } else {
+    bret = var->get(data, _nTimesInFile, dim1Size);
+  }
+  if (bret) {
+    int index = fieldNum;
+    for (size_t ii = 0; ii < _nTimesInFile; ii++, index += dim1Size) {
+      vals.push_back(data[index]);
     }
   } else {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "ERROR - RawFile::_readRayVar" << endl;
+      cerr << "ERROR - RawFile::_readTimeVar" << endl;
       cerr << "  Cannot read variable: " << name << endl;
       cerr << _file.getNc3Error()->get_errmsg() << endl;
     }
@@ -709,35 +766,39 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
 }
 
 ///////////////////////////////////
-// read a ray variable - float
+// read a time variable - float
 // side effects: set var, vals
+// if fieldNum > 0, this is a 2D data set
 
-int RawFile::_readRayVar(Nc3Var* &var, const string &name,
-                         vector<float> &vals)
+int RawFile::_readTimeVar(Nc3Var* &var,
+                          const string &name,
+                          int dim1Size,
+                          int fieldNum,
+                          vector<float> &vals)
   
 {
 
   vals.clear();
 
-  // get var
-
-  var = _getRayVar(name);
-  if (var == NULL) {
-    return -1;
-  }
-
   // load up data
-  
-  float *data = new float[_nTimesInFile];
-  float *dd = data;
+
+  size_t nVals = _nTimesInFile * dim1Size;
+  float *data = new float[nVals];
   int iret = 0;
-  if (var->get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
-      vals.push_back(*dd);
+  Nc3Bool bret;
+  if (dim1Size == 1) {
+    bret = var->get(data, _nTimesInFile);
+  } else {
+    bret = var->get(data, _nTimesInFile, dim1Size);
+  }
+  if (bret) {
+    int index = fieldNum;
+    for (size_t ii = 0; ii < _nTimesInFile; ii++, index += dim1Size) {
+      vals.push_back(data[index]);
     }
   } else {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "ERROR - RawFile::_readRayVar" << endl;
+      cerr << "ERROR - RawFile::_readTimeVar" << endl;
       cerr << "  Cannot read variable: " << name << endl;
       cerr << _file.getNc3Error()->get_errmsg() << endl;
     }
@@ -749,35 +810,39 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
 }
 
 ///////////////////////////////////
-// read a ray variable - integer
+// read a time variable - integer
 // side effects: set var, vals
+// if fieldNum > 0, this is a 2D data set
 
-int RawFile::_readRayVar(Nc3Var* &var, const string &name,
-                         vector<int> &vals)
+int RawFile::_readTimeVar(Nc3Var* &var, 
+                          const string &name,
+                          int dim1Size,
+                          int fieldNum,
+                          vector<int> &vals)
   
 {
 
   vals.clear();
 
-  // get var
-  
-  var = _getRayVar(name);
-  if (var == NULL) {
-    return -1;
-  }
-
   // load up data
 
-  int *data = new int[_nTimesInFile];
-  int *dd = data;
+  size_t nVals = _nTimesInFile * (fieldNum + 1);
+  int *data = new int[nVals];
   int iret = 0;
-  if (var->get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
-      vals.push_back(*dd);
+  Nc3Bool bret;
+  if (dim1Size == 1) {
+    bret = var->get(data, _nTimesInFile);
+  } else {
+    bret = var->get(data, _nTimesInFile, dim1Size);
+  }
+  if (bret) {
+    int index = fieldNum;
+    for (size_t ii = 0; ii < _nTimesInFile; ii++, index += dim1Size) {
+      vals.push_back(data[index]);
     }
   } else {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "ERROR - RawFile::_readRayVar" << endl;
+      cerr << "ERROR - RawFile::_readTimeVar" << endl;
       cerr << "  Cannot read variable: " << name << endl;
       cerr << _file.getNc3Error()->get_errmsg() << endl;
     }
@@ -789,81 +854,43 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
 }
 
 ///////////////////////////////////
-// read a ray variable - short
+// read a time variable - short
 // side effects: set var, vals
+// if fieldNum > 0, this is a 2D data set
 
-int RawFile::_readRayVar(Nc3Var* &var, const string &name,
-                         vector<short> &vals)
+int RawFile::_readTimeVar(Nc3Var* &var,
+                          const string &name,
+                          int dim1Size,
+                          int fieldNum,
+                          vector<short> &vals)
   
 {
 
   vals.clear();
 
-  // get var
-  
-  var = _getRayVar(name);
-  if (var == NULL) {
-    return -1;
-  }
-
   // load up data
 
-  short *data = new short[_nTimesInFile];
-  short *dd = data;
+  size_t nVals = _nTimesInFile * (fieldNum + 1);
+  short *data = new short[nVals];
   int iret = 0;
-  if (var->get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
-      vals.push_back(*dd);
+  Nc3Bool bret;
+  if (dim1Size == 1) {
+    bret = var->get(data, _nTimesInFile);
+  } else {
+    bret = var->get(data, _nTimesInFile, dim1Size);
+  }
+  if (bret) {
+    int index = fieldNum;
+    for (size_t ii = 0; ii < _nTimesInFile; ii++, index += dim1Size) {
+      vals.push_back(data[index]);
     }
   } else {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "ERROR - RawFile::_readRayVar" << endl;
+      cerr << "ERROR - RawFile::_readTimeVar" << endl;
       cerr << "  Cannot read variable: " << name << endl;
       cerr << _file.getNc3Error()->get_errmsg() << endl;
     }
     iret = -1;
-  }
-  delete[] data;
-  return iret;
-
-}
-
-///////////////////////////////////////////
-// read a ray variable - boolean
-// side effects: set var, vals
-
-int RawFile::_readRayVar(Nc3Var* &var, const string &name,
-                         vector<bool> &vals)
-  
-{
-  
-  vals.clear();
-  
-  // get var
-  
-  var = _getRayVar(name);
-  if (var == NULL) {
-    return -1;
-  }
-  
-  // load up data
-  
-  int *data = new int[_nTimesInFile];
-  int *dd = data;
-  int iret = 0;
-  if (var->get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
-      if (*dd == 0) {
-        vals.push_back(false);
-      } else {
-        vals.push_back(true);
-      }
-    }
-  } else {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-      vals.push_back(false);
-    }
-    clearErrStr();
   }
   delete[] data;
   return iret;
@@ -874,7 +901,7 @@ int RawFile::_readRayVar(Nc3Var* &var, const string &name,
 // get a ray variable by name
 // returns NULL on failure
 
-Nc3Var* RawFile::_getRayVar(const string &name)
+Nc3Var* RawFile::_getTimeVar(const string &name)
 
 {
 
@@ -883,7 +910,7 @@ Nc3Var* RawFile::_getRayVar(const string &name)
   Nc3Var *var = _file.getNc3File()->get_var(name.c_str());
   if (var == NULL) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "ERROR - RawFile::_getRayVar" << endl;
+      cerr << "ERROR - RawFile::_getTimeVar" << endl;
       cerr << "  Cannot read variable, name: " << name << endl;
       cerr << _file.getNc3Error()->get_errmsg() << endl;
     }
@@ -893,14 +920,14 @@ Nc3Var* RawFile::_getRayVar(const string &name)
   // check time dimension
   
   if (var->num_dims() < 1) {
-    cerr << "ERROR - RawFile::_getRayVar" << endl;
+    cerr << "ERROR - RawFile::_getTimeVar" << endl;
     cerr << "  variable name: " << name << endl;
     cerr << "  variable has no dimensions" << endl;
     return NULL;
   }
   Nc3Dim *timeDim = var->get_dim(0);
   if (timeDim != _timeDim) {
-    cerr << "ERROR - RawFile::_getRayVar" << endl;
+    cerr << "ERROR - RawFile::_getTimeVar" << endl;
     cerr << "  variable name: " << name << endl;
     cerr << "  variable has no dimensions" << endl;
     cerr << "  variable has incorrect dimension, dim name: "
@@ -928,7 +955,7 @@ void RawFile::_addErrInt(string label, int iarg, bool cr)
 // Default format is %g.
 
 void RawFile::_addErrDbl(string label, double darg,
-                          string format, bool cr)
+                         string format, bool cr)
   
 {
   Radx::addErrDbl(_errStr, label, darg, format, cr);

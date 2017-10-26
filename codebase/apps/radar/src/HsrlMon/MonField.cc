@@ -164,7 +164,7 @@ void MonField::printStats(FILE *out)
   }
 
   if (_params.debug) {
-    fprintf(out, "  :%s\n", _name.c_str());
+    fprintf(out, "  :%s %s\n", _name.c_str(), _qualifier.c_str());
   } else {
     fprintf(out, "\n");
   }

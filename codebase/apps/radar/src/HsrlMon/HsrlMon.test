@@ -88,7 +88,7 @@ mode = REALTIME;
 // Type: string
 //
 
-input_dir = "$(DATA_DIR)/hsrl/raw";
+input_dir = "$(DATA_DIR)/raw";
 
 ///////////// files_sub_dir ///////////////////////////
 //
@@ -127,7 +127,7 @@ max_file_time_span_secs = 3600;
 // Type: int
 //
 
-monitoring_interval_secs = 60;
+monitoring_interval_secs = 300;
 
 ///////////// realtime_interval_secs //////////////////
 //
@@ -208,7 +208,7 @@ monitoring_fields = {
     qualifier = "",
     minValidValue = -100,
     maxValidValue = 100000,
-    note = "(0 indicates locked)"
+    note = "(0 is LOCKED, 1 is FREE)"
   }
   ,
   {
@@ -216,7 +216,7 @@ monitoring_fields = {
     qualifier = "",
     minValidValue = -100,
     maxValidValue = 100000,
-    note = "(1 is UP, 0 is DOWN)"
+    note = "(0 is DOWN,   1 is UP)"
   }
   ,
   {
@@ -224,7 +224,7 @@ monitoring_fields = {
     qualifier = "",
     minValidValue = -100,
     maxValidValue = 100000,
-    note = "(1 is CLOSED, 0 is OPEN)"
+    note = "(0 is OPEN,   1 is CLOSED)"
   }
   ,
   {
@@ -232,7 +232,7 @@ monitoring_fields = {
     qualifier = "",
     minValidValue = -100,
     maxValidValue = 100000,
-    note = "(1 is CLOSED, 0 is OPEN)"
+    note = "(0 is OPEN,   1 is CLOSED)"
   }
   ,
   {
@@ -240,7 +240,7 @@ monitoring_fields = {
     qualifier = "",
     minValidValue = -100,
     maxValidValue = 100000,
-    note = ""
+    note = "(0 is OPEN,   1 is CLOSED)"
   }
   ,
   {
@@ -248,7 +248,7 @@ monitoring_fields = {
     qualifier = "",
     minValidValue = -100,
     maxValidValue = 100000,
-    note = ""
+    note = "(0 is OPEN,   1 is CLOSED)"
   }
   ,
   {
@@ -566,6 +566,134 @@ monitoring_fields = {
   {
     name = "iwg1_Solar_Zenith",
     qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "brillouinfiltered_energy_stats",
+    qualifier = "field0",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field2_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field3_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field4_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field5_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field7_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field8_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field9_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field11_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field12_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field13_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field14_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field15_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field16_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field17_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field18_description",
     minValidValue = -100,
     maxValidValue = 100000,
     note = ""
