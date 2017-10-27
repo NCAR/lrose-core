@@ -59,7 +59,7 @@ public:
    */
 
   Delete (const string &progName,
-          const Params &params);
+          const Params *params);
     
   // Destructor
     
@@ -76,7 +76,7 @@ private:
   // members
 
   string _progName;
-  const Params &_params;
+  const Params *_params;
   activeMap_t _active;  /**< active children from delete scripts */
 
   // methods

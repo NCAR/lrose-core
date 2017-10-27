@@ -201,7 +201,7 @@ private:
 
   string _progName;		/**< program name.				*/
   Params *_params;		/**< processing parameters.			*/
-  Delete _delete;
+  Delete *_delete;
   string _topDir;		/**< top of directory tree.			*/
   string _dirPath;		/**< current directory path.			*/
   bool _paramsAreLocal;		/**< flag local parameters for directory.	*/
