@@ -371,16 +371,16 @@ void DerFieldCalcs::computeDerived()
   // backscatter coefficient
   
   for(size_t igate=0;igate<_nGates;igate++) {
-    _backscatCoeff[igate] = _computeBackscatCo(_presHpa[igate],
-                                               _tempK[igate], 
-                                               _backscatRatio[igate]);
+    _backscatCoeff[igate] = _computeBackscatCoeff(_presHpa[igate],
+                                                  _tempK[igate], 
+                                                  _backscatRatio[igate]);
   }
   
   // optical depth
   
   for(size_t igate = 0; igate < _nGates; igate++) {
     _opticalDepth[igate] = 
-      _computeOptDepth(_presHpa[igate], _tempK[igate], _molDataRate.at(igate), scan);
+      _computeOpticalDepth(_presHpa[igate], _tempK[igate], _molDataRate.at(igate), scan);
   }
   _filterOpticalDepth();
 
@@ -407,15 +407,15 @@ void DerFieldCalcs::computeDerived()
 double DerFieldCalcs::_nonLinCountCor(Radx::fl32 count, double deadtime, 
                                       double binWid, double shotCount)
 {
-  if(shotCount == 0) {
-    return count;
+  if(count < 1.0) {
+    return 0;
   }
-  double photonRate = count/shotCount / binWid;
+  double photonRate = (count / shotCount) / binWid;
   double corrFactor = photonRate * deadtime;
   if(corrFactor > 0.99) {
     corrFactor=0.95;
   }
-  return count / (1 - corrFactor);
+  return count / (1.0 - corrFactor);
 }
 
 
@@ -436,7 +436,7 @@ double DerFieldCalcs::_baselineSubtract(double arrivalRate, double profile,
 double DerFieldCalcs::_backgroundSub(double arrivalRate, double backgroundBins)
 {
   //background bins is average of the last 100 bins, this can be negative
-  return arrivalRate-backgroundBins;
+  return arrivalRate - backgroundBins;
 }
 
 
@@ -445,9 +445,10 @@ double DerFieldCalcs::_backgroundSub(double arrivalRate, double backgroundBins)
 
 double DerFieldCalcs::_energyNorm(double arrivalRate, double totalEnergy)
 {
-  if(totalEnergy==0)
+  if(totalEnergy==0) {
     return arrivalRate;
-  return arrivalRate/totalEnergy * pow(10,6);
+  }
+  return (arrivalRate / totalEnergy) * pow(10.0, 6.0);
 }
 
 
@@ -526,7 +527,7 @@ void DerFieldCalcs::_initDerivedArrays()
 Radx::fl32 DerFieldCalcs::_computeVolDepol(double crossRate, double combineRate)
 {
 
-  if ((crossRate + combineRate) == 0.0) {
+  if (crossRate < 1.0 || (crossRate + combineRate) < 1.0) {
     return Radx::missingFl32;
   }
 
@@ -546,7 +547,7 @@ Radx::fl32 DerFieldCalcs::_computeVolDepol(double crossRate, double combineRate)
 Radx::fl32 DerFieldCalcs::_computeBackscatRatio(double combineRate, double molRate)
 {
 
-  if(molRate == 0.0) {
+  if(combineRate < 1.0 || molRate < 1.0) {
     return Radx::missingFl32;
   }
 
@@ -619,9 +620,9 @@ double DerFieldCalcs::_computeBetaMSonde(double pressure, double temperature)
 /////////////////////////////////////////////////////////////////
 // backscatter coefficient
 
-Radx::fl32 DerFieldCalcs::_computeBackscatCo(double pressure, 
-                                             double temperature, 
-                                             Radx::fl32 backscatRatio)
+Radx::fl32 DerFieldCalcs::_computeBackscatCoeff(double pressure, 
+                                                double temperature, 
+                                                Radx::fl32 backscatRatio)
 {
 
   if (backscatRatio == Radx::missingFl32) {
@@ -651,9 +652,13 @@ Radx::fl32 DerFieldCalcs::_computeBackscatCo(double pressure,
 /////////////////////////////////////////////////////////////////
 // optical depth
 
-Radx::fl32 DerFieldCalcs::_computeOptDepth(double pressure, double temperature, 
-                                           double molRate, double scan)
+Radx::fl32 DerFieldCalcs::_computeOpticalDepth(double pressure, double temperature, 
+                                               double molRate, double scan)
 {
+  if (molRate < 1) {
+    return Radx::missingFl32;
+  }
+
   double beta_m_sonde =_computeBetaMSonde(pressure,temperature);
   //cerr << "scan=" << scan << endl;
   //cerr << "molRate=" << molRate << endl;

@@ -687,46 +687,37 @@ void Hsrl2Radx::_addRawFieldToRay(RadxRay *ray,
   
 {
 
+  RadxArray<Radx::fl32> counts_;
+  Radx::fl32 *counts = counts_.alloc(nGates);
+  memcpy(counts, fcounts, nGates * sizeof(Radx::fl32));
+
+  // censor counts as required
+
+  if (_params.counts_censoring_threshold > 0) {
+    for (int ii = 0; ii < nGates; ii++) {
+      if (counts[ii] < _params.counts_censoring_threshold) {
+        counts[ii] = 0;
+      }
+    }
+  }
+
+  // despeckle
+
+  if (_params.apply_speckle_filter) {
+    _applyZeroSpeckleFilter(nGates, _params.speckle_filter_len, counts);
+  }
+
   // create the field
   
   RadxField *field =
     ray->addField(name, units, nGates,
                   Radx::missingFl32,
-                  fcounts,
+                  counts,
                   true);
   
   field->setStandardName(standardName);
   field->setLongName(standardName);
   field->setRangeGeom(startRangeKm, gateSpacingKm);
-  
-  // // add db of same field
-  
-  // RadxArray<Radx::fl32> dbcounts_;
-  // Radx::fl32 *dbcounts = dbcounts_.alloc(nGates);
-
-  // for (int igate = 0; igate < nGates; igate++) {
-  //   if (fcounts[igate] > 0) {
-  //     dbcounts[igate] = 10.0 * log10(fcounts[igate]);
-  //   } else {
-  //     dbcounts[igate] = Radx::missingFl32;
-  //   }
-  // }
-
-  // string dbName = "db_";
-  // dbName += name;
-  // string dbUnits = "db_counts";
-  // string dbLongName = "db_";
-  // dbLongName += longName;
-  
-  // RadxField *dbField =
-  //   ray->addField(dbName, dbUnits, nGates,
-  //                 Radx::missingFl32,
-  //                 fcounts,
-  //                 true);
-  
-  // dbField->setStandardName(standardName);
-  // dbField->setLongName(dbLongName);
-  // dbField->setRangeGeom(startRangeKm, gateSpacingKm);
   
 }
 
@@ -1303,6 +1294,23 @@ void Hsrl2Radx::_addDerivedFields(RadxRay *ray)
 
   calcs.computeDerived();
 
+  // apply speckle filter on results
+
+  if (_params.apply_speckle_filter) {
+    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len, 
+                               calcs.getVolDepol().data());
+    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
+                               calcs.getPartDepol().data());
+    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
+                               calcs.getBackscatRatio().data());
+    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
+                               calcs.getBackscatCoeff().data());
+    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
+                               calcs.getExtinctionCoeff().data());
+    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
+                               calcs.getOpticalDepth().data());
+  }
+
   // load fields with the results
 
   RadxField *volDepolField =
@@ -1348,3 +1356,72 @@ void Hsrl2Radx::_addDerivedFields(RadxRay *ray)
   optDepthField->setRangeGeom(startRangeKm, gateSpacingKm);
        
 }
+
+///////////////////////////////////////////////////////
+// run speckle filter for a given length
+// checks for missing data
+//
+// minRunLen: length of run being tested for
+
+void Hsrl2Radx::_applyMissingSpeckleFilter(int nGates,
+                                           int minRunLen,
+                                           Radx::fl32 *data)
+  
+{
+
+  int count = 0;
+  // loop through all gates
+  for (int ii = 0; ii < nGates; ii++) {
+    // check for non-missing
+    if (data[ii] != Radx::missingFl32) {
+      // set, so count up length of run
+      count++;
+    } else {
+      // not set, end of run
+      if (count <= minRunLen) {
+        // run too short, indicates possible speckle
+        for (int jj = ii - count; jj < ii; jj++) {
+          // remove speckle gates
+          data[jj] = Radx::missingFl32;
+        }
+      }
+      count = 0;
+    }
+  } // ii
+
+}
+
+///////////////////////////////////////////////////////
+// run speckle filter for a given length
+// checks for zero data
+//
+// minRunLen: length of run being tested for
+
+void Hsrl2Radx::_applyZeroSpeckleFilter(int nGates,
+                                           int minRunLen,
+                                           Radx::fl32 *data)
+  
+{
+
+  int count = 0;
+  // loop through all gates
+  for (int ii = 0; ii < nGates; ii++) {
+    // check for non-zero
+    if (data[ii] != 0.0) {
+      // set, so count up length of run
+      count++;
+    } else {
+      // not set, end of run
+      if (count <= minRunLen) {
+        // run too short, indicates possible speckle
+        for (int jj = ii - count; jj < ii; jj++) {
+          // remove speckle gates
+          data[jj] = 0.0;
+        }
+      }
+      count = 0;
+    }
+  } // ii
+
+}
+

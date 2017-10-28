@@ -69,12 +69,12 @@ public:
   
   // get methods
   
-  const vector<Radx::fl32> &getVolDepol() const { return _volDepol; }
-  const vector<Radx::fl32> &getBackscatRatio() const { return _backscatRatio; }
-  const vector<Radx::fl32> &getPartDepol() const { return _partDepol; }
-  const vector<Radx::fl32> &getBackscatCoeff() const { return _backscatCoeff; }
-  const vector<Radx::fl32> &getExtinctionCoeff() const { return _extinction; }
-  const vector<Radx::fl32> &getOpticalDepth() const { return _opticalDepth; }
+  vector<Radx::fl32> &getVolDepol() { return _volDepol; }
+  vector<Radx::fl32> &getBackscatRatio() { return _backscatRatio; }
+  vector<Radx::fl32> &getPartDepol() { return _partDepol; }
+  vector<Radx::fl32> &getBackscatCoeff() { return _backscatCoeff; }
+  vector<Radx::fl32> &getExtinctionCoeff() { return _extinction; }
+  vector<Radx::fl32> &getOpticalDepth() { return _opticalDepth; }
 
 private:   
 
@@ -158,12 +158,12 @@ private:
   double _computeBetaMSonde(double pressure, double temperature);
 
   // backscatter coefficient
-  Radx::fl32 _computeBackscatCo(double pressure, double temperature, 
-                                Radx::fl32 backscatRatio);
+  Radx::fl32 _computeBackscatCoeff(double pressure, double temperature, 
+                                   Radx::fl32 backscatRatio);
   
   // optical depth calculation for extinction;
-  Radx::fl32 _computeOptDepth(double pressure, double temperature,
-                              double molRate,double scan);
+  Radx::fl32 _computeOpticalDepth(double pressure, double temperature,
+                                  double molRate,double scan);
 
   // extinction
   Radx::fl32 _computeExtinctionCoeff(Radx::fl32 optDepth1, 

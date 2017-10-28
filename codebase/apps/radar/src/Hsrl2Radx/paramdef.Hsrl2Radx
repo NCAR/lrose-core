@@ -212,7 +212,7 @@ paramdef boolean {
 } combine_bins_on_read;
 
 paramdef int {
-  p_default = 1;
+  p_default = 4;
   p_descr = "Number of bins to combine into a single gate.";
   p_help = "In range, we will combine this number of gates to produce a data set with lower spatial resolution but less noiry data.";
 } n_bins_per_gate;
@@ -320,10 +320,28 @@ paramdef string {
 } scan_adjustment_name;
 
 paramdef int {
+  p_default = 0;
+  p_descr = "Threshold the count fields below this value.";
+  p_help = "This helps to remove the noise from the system.";
+} counts_censoring_threshold;
+
+paramdef int {
   p_default = 5;
   p_descr = "The optical depth field is filtered using a median filter.";
   p_help = "This is done prior to computing the extinction coefficient. Set the length to 1 for no filtering.";
 } optical_depth_median_filter_len;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to apply a speckle filter to the output data.";
+  p_help = "If the length of the good data, between gates with missing values, is less than this, the data in between is set to missing.";
+} apply_speckle_filter;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "The length of the speckle filter.";
+  p_help = "If the length of the good data, between missing values, is less than this, the data is set to missing.";
+} speckle_filter_len;
 
 commentdef {
   p_header = "OUTPUT FMQ DETAILS";

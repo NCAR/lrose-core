@@ -934,7 +934,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Number of bins to combine into a single gate.");
     tt->help = tdrpStrDup("In range, we will combine this number of gates to produce a data set with lower spatial resolution but less noiry data.");
     tt->val_offset = (char *) &n_bins_per_gate - &_start_;
-    tt->single_val.i = 1;
+    tt->single_val.i = 4;
     tt++;
     
     // Parameter 'raw_bin_start_range_km'
@@ -1141,6 +1141,18 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("i2_scan_adjustment");
     tt++;
     
+    // Parameter 'counts_censoring_threshold'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("counts_censoring_threshold");
+    tt->descr = tdrpStrDup("Threshold the count fields below this value.");
+    tt->help = tdrpStrDup("This helps to remove the noise from the system.");
+    tt->val_offset = (char *) &counts_censoring_threshold - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
     // Parameter 'optical_depth_median_filter_len'
     // ctype is 'int'
     
@@ -1150,6 +1162,30 @@ using namespace std;
     tt->descr = tdrpStrDup("The optical depth field is filtered using a median filter.");
     tt->help = tdrpStrDup("This is done prior to computing the extinction coefficient. Set the length to 1 for no filtering.");
     tt->val_offset = (char *) &optical_depth_median_filter_len - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'apply_speckle_filter'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("apply_speckle_filter");
+    tt->descr = tdrpStrDup("Option to apply a speckle filter to the output data.");
+    tt->help = tdrpStrDup("If the length of the good data, between gates with missing values, is less than this, the data in between is set to missing.");
+    tt->val_offset = (char *) &apply_speckle_filter - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'speckle_filter_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("speckle_filter_len");
+    tt->descr = tdrpStrDup("The length of the speckle filter.");
+    tt->help = tdrpStrDup("If the length of the good data, between missing values, is less than this, the data is set to missing.");
+    tt->val_offset = (char *) &speckle_filter_len - &_start_;
     tt->single_val.i = 5;
     tt++;
     

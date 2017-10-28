@@ -124,8 +124,6 @@ private:
 
   int _processUwRawFile(const string &filePath);
   void _addEnvFields(RadxRay *ray);
-  void _addDerivedFields(RadxRay *ray);
-
   
   double _nonLinCountCor(Radx::fl32 count, double deadtime, 
 			     double binWid, double shotCount);
@@ -142,6 +140,11 @@ private:
   double _partDepol(double volDepol, double backscatRatio);
   double _backscatCo(double pressure, double temp, 
 			 double backscatRatio);
+
+  void _addDerivedFields(RadxRay *ray);
+
+  void _applyMissingSpeckleFilter(int nGates, int minRunLen, Radx::fl32 *data);
+  void _applyZeroSpeckleFilter(int nGates, int minRunLen, Radx::fl32 *data);
   
 };
 

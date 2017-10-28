@@ -442,7 +442,13 @@ public:
 
   char* scan_adjustment_name;
 
+  int counts_censoring_threshold;
+
   int optical_depth_median_filter_len;
+
+  tdrp_bool_t apply_speckle_filter;
+
+  int speckle_filter_len;
 
   char* output_fmq_url;
 
@@ -511,7 +517,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[87];
+  mutable TDRPtable _table[90];
 
   const char *_className;
 
