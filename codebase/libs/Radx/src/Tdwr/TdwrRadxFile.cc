@@ -670,7 +670,7 @@ int TdwrRadxFile::_setVolMetaData(const string &path)
   _readVol->setFrequencyHz(_frequency);
 
   _readVol->loadSweepInfoFromRays();
-  _readVol->computeFixedAngleFromRays();
+  _readVol->computeFixedAnglesFromRays();
 
   // constrain the sweep data as appropriate
   

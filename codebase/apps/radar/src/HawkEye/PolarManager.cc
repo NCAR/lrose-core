@@ -860,7 +860,7 @@ int PolarManager::_getArchiveData()
   // compute the fixed angles from the rays
   // so that we reflect reality
   
-  _vol.computeFixedAngleFromRays();
+  _vol.computeFixedAnglesFromRays();
 
   // for first retrieval, start with sweepIndex of 0
 

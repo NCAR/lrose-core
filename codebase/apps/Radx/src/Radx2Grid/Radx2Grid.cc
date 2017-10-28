@@ -479,7 +479,7 @@ int Radx2Grid::_readFile(const string &filePath)
   // override fixed angle if required
 
   if (_params.override_fixed_angle_with_mean_measured_angle) {
-    _readVol.computeFixedAngleFromRays();
+    _readVol.computeFixedAnglesFromRays();
   }
 
   // reorder sweeps into ascending order if requested

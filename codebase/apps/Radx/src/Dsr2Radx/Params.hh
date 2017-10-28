@@ -522,6 +522,8 @@ public:
 
   tdrp_bool_t compute_rhi_fixed_angles_from_measured_azimuth;
 
+  tdrp_bool_t use_mean_to_compute_fixed_angles;
+
   tdrp_bool_t increment_sweep_num_when_pol_mode_changes;
 
   tdrp_bool_t increment_sweep_num_when_prt_mode_changes;
@@ -685,7 +687,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[161];
+  mutable TDRPtable _table[162];
 
   const char *_className;
 

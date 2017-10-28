@@ -3823,7 +3823,7 @@ int OdimHdf5RadxFile::_writeSweep(RadxVol &sweepVol,
   // if it is not already set.
 
   bool force = false;
-  sweepVol.computeFixedAngleFromRays(force);
+  sweepVol.computeFixedAnglesFromRays(force);
 
   // ensure all rays on sweep have a constant number of rays
   

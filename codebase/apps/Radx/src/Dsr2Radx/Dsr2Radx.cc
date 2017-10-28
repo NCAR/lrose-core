@@ -728,11 +728,13 @@ int Dsr2Radx::_processVol()
 
   if (isRhi) {
     if (_params.compute_rhi_fixed_angles_from_measured_azimuth) {
-      _vol.computeSweepFixedAnglesFromRays();
+      _vol.computeFixedAnglesFromRays
+        (true, _params.use_mean_to_compute_fixed_angles);
     }
   } else{
     if (_params.compute_ppi_fixed_angles_from_measured_elevation) {
-      _vol.computeSweepFixedAnglesFromRays();
+      _vol.computeFixedAnglesFromRays
+        (true, _params.use_mean_to_compute_fixed_angles);
     }
   }
 
