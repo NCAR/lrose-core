@@ -119,12 +119,12 @@ void RawFile::clear()
   _primaryAxis = Radx::PRIMARY_AXIS_Y_PRIME;
 
   _rawGateSpacingKm = _params.raw_bin_spacing_km;
-  // _gateSpacingKm = _rawGateSpacingKm * cos(4.0 * Radx::DegToRad);
   _gateSpacingKm = _rawGateSpacingKm;
+  _startRangeKm = _params.raw_bin_start_range_km;
   if (_params.combine_bins_on_read) {
     _gateSpacingKm *= _params.n_bins_per_gate;
+    _startRangeKm += (_gateSpacingKm - _rawGateSpacingKm) / 2.0;
   }
-  _startRangeKm = _params.raw_bin_start_range_km;
 
   _rays.clear();
   

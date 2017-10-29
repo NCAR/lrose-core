@@ -488,10 +488,6 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
 
   // range geom & ngates
 
-  double gateSpacingKm = _params.raw_bin_spacing_km;
-  double startRangeKm = _params.raw_bin_start_range_km;
-  ray->setRangeGeom(startRangeKm, gateSpacingKm);
-
   _nBinsInRay = rawRay.getNGates();
   _nBinsPerGate = 1;
   if (_params.combine_bins_on_read) {
@@ -499,6 +495,17 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
   }
   _nGates = _nBinsInRay / _nBinsPerGate;
   ray->setNGates(_nGates);
+
+  double rawGateSpacingKm = _params.raw_bin_spacing_km;
+  double gateSpacingKm = rawGateSpacingKm;
+  double startRangeKm = _params.raw_bin_start_range_km;
+  
+  if (_params.combine_bins_on_read) {
+    gateSpacingKm *= _nBinsPerGate;
+    startRangeKm += (gateSpacingKm - rawGateSpacingKm) / 2.0;
+  }
+
+  ray->setRangeGeom(startRangeKm, gateSpacingKm);
 
   // time
   
