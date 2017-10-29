@@ -89,6 +89,10 @@ private:
 
   IcaoStdAtmos _stdAtmos;
 
+  int _nBinsInRay;
+  int _nBinsPerGate;
+  int _nGates;
+
   int _runFilelist();
   int _runArchive();
   int _runRealtimeWithLdata();
@@ -106,7 +110,6 @@ private:
                          const string &name,
                          const string &units,
                          const string &standardName,
-                         int nGates,
                          const Radx::fl32 *fcounts);
   
   int _processFile(const string &filePath);

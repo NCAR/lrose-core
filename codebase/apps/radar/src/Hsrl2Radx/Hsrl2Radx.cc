@@ -112,6 +112,10 @@ Hsrl2Radx::Hsrl2Radx(int argc, char **argv)
     }
   }
 
+  _nBinsInRay = 0;
+  _nBinsPerGate = 0;
+  _nGates = 0;
+
 }
 
 // destructor
@@ -487,7 +491,14 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
   double gateSpacingKm = _params.raw_bin_spacing_km;
   double startRangeKm = _params.raw_bin_start_range_km;
   ray->setRangeGeom(startRangeKm, gateSpacingKm);
-  ray->setNGates(rawRay.getNGates());
+
+  _nBinsInRay = rawRay.getNGates();
+  _nBinsPerGate = 1;
+  if (_params.combine_bins_on_read) {
+    _nBinsPerGate = _params.n_bins_per_gate;
+  }
+  _nGates = _nBinsInRay / _nBinsPerGate;
+  ray->setNGates(_nGates);
 
   // time
   
@@ -560,28 +571,24 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
                     Names::CombinedHighCounts,
                     "counts",
                     Names::lidar_copolar_combined_backscatter_photon_count,
-                    rawRay.getNGates(),
                     &rawRay.getCombinedHi()[0]);
 
   _addRawFieldToRay(ray, startRangeKm, gateSpacingKm,
                     Names::CombinedLowCounts,
                     "counts",
                     Names::lidar_copolar_combined_backscatter_photon_count,
-                    rawRay.getNGates(),
                     &rawRay.getCombinedLo()[0]);
 
   _addRawFieldToRay(ray, startRangeKm, gateSpacingKm,
                     Names::MolecularCounts,
                     "counts",
                     Names::lidar_copolar_molecular_backscatter_photon_count,
-                    rawRay.getNGates(),
                     &rawRay.getMolecular()[0]);
 
   _addRawFieldToRay(ray, startRangeKm, gateSpacingKm,
                     Names::CrossPolarCounts,
                     "counts",
                     Names::lidar_crosspolar_combined_backscatter_photon_count,
-                    rawRay.getNGates(),
                     &rawRay.getCross()[0]);
   
 
@@ -600,21 +607,30 @@ void Hsrl2Radx::_addRawFieldToRay(RadxRay *ray,
                                   const string &name,
                                   const string &units,
                                   const string &standardName,
-                                  int nGates,
-                                  const Radx::fl32 *fcounts)
+                                  const Radx::fl32 *rcounts)
   
 {
 
-  RadxArray<Radx::fl32> counts_;
-  Radx::fl32 *counts = counts_.alloc(nGates);
-  memcpy(counts, fcounts, nGates * sizeof(Radx::fl32));
-
+  RadxArray<Radx::fl32> fcounts_;
+  Radx::fl32 *fcounts = fcounts_.alloc(_nGates);
+  
+  // sum counts per gate
+  
+  size_t ibin = 0;
+  for (int igate = 0; igate < _nGates; igate++) {
+    fcounts[igate] = 0.0;
+    for (int ii = 0; ii < _nBinsPerGate; ii++, ibin++) {
+      fcounts[igate] += rcounts[ibin];
+    }
+    fcounts[igate] /= (double) _nBinsPerGate;
+  }
+  
   // censor counts as required
 
   if (_params.counts_censoring_threshold > 0) {
-    for (int ii = 0; ii < nGates; ii++) {
-      if (counts[ii] < _params.counts_censoring_threshold) {
-        counts[ii] = 0;
+    for (int ii = 0; ii < _nGates; ii++) {
+      if (fcounts[ii] < _params.counts_censoring_threshold) {
+        fcounts[ii] = 0;
       }
     }
   }
@@ -622,15 +638,15 @@ void Hsrl2Radx::_addRawFieldToRay(RadxRay *ray,
   // despeckle
 
   if (_params.apply_speckle_filter) {
-    _applyZeroSpeckleFilter(nGates, _params.speckle_filter_len, counts);
+    _applyZeroSpeckleFilter(_nGates, _params.speckle_filter_len, fcounts);
   }
 
   // create the field
   
   RadxField *field =
-    ray->addField(name, units, nGates,
+    ray->addField(name, units, _nGates,
                   Radx::missingFl32,
-                  counts,
+                  fcounts,
                   true);
   
   field->setStandardName(standardName);
