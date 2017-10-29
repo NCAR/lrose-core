@@ -556,7 +556,6 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
 
   // add the fields
 
-  cerr << "1111111 Adding field to ray, name: " << Names::CombinedHighCounts << endl;
   _addRawFieldToRay(ray, startRangeKm, gateSpacingKm,
                     Names::CombinedHighCounts,
                     "counts",

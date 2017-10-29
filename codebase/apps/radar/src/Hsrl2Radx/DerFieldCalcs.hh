@@ -80,6 +80,10 @@ private:
 
   const Params &_params;
 
+  static const double _BmsFactor;
+  static const double _BoltzmannConst;
+  static const double _depolFactor;
+
   // input data
 
   const FullCals &_fullCals;
@@ -155,15 +159,15 @@ private:
                                Radx::fl32 backscatRatio);
   
   // intermediate field for backscatter ratio and extinction
-  double _computeBetaMSonde(double pressure, double temperature);
+  double _computeBetaMSonde(double pressHpa, double tempK);
 
   // backscatter coefficient
-  Radx::fl32 _computeBackscatCoeff(double pressure, double temperature, 
+  Radx::fl32 _computeBackscatCoeff(double pressHpa, double tempK, 
                                    Radx::fl32 backscatRatio);
   
   // optical depth calculation for extinction;
-  Radx::fl32 _computeOpticalDepth(double pressure, double temperature,
-                                  double molRate,double scan);
+  Radx::fl32 _computeOpticalDepth(double pressHpa, double tempK,
+                                  double molRate, double scanAdj);
 
   // extinction
   Radx::fl32 _computeExtinctionCoeff(Radx::fl32 optDepth1, 

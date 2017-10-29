@@ -44,6 +44,13 @@
 
 using namespace std;
 
+const double DerFieldCalcs::_BmsFactor =
+  (5.45 * pow((550.0 / 532.0), 4.0) * 1.0e-32);
+
+const double DerFieldCalcs::_BoltzmannConst = 1.38064852e-23; 
+
+const double DerFieldCalcs::_depolFactor = 0.000365;
+
 /////////////////////////////////////////////////////////////////
 // constructor
 
@@ -124,6 +131,13 @@ void DerFieldCalcs::_applyCorr()
       double molDeadTime=
         ((dt_mol.getDataNum()).at(_fullCals.getMolPos())).at(0);
       double binW= ((binwid.getDataNum()).at(_fullCals.getBinPos())).at(0);
+
+      // cerr << "11111 hiDead, loDead, crossDead, molDead, binW: "
+      //      << hiDeadTime << ", "
+      //      << loDeadTime << ", "
+      //      << crossDeadTime << ", "
+      //      << molDeadTime << ", "
+      //      << binW << endl;
 
       _hiDataRate.push_back(_nonLinCountCor(_hiData[igate], 
                                             hiDeadTime, binW, _shotCount)); 
@@ -341,10 +355,10 @@ void DerFieldCalcs::computeDerived()
   _initDerivedArrays();
   
   CalReader scanAdjust = _fullCals.getScanAdj();
-  double scan = 1;
+  double scanAdj = 1;
   if(scanAdjust.dataTypeisNum() && 
      ((scanAdjust.getDataNum()).at(_fullCals.getBinPos()) ).size() == 1) {
-    scan = ((scanAdjust.getDataNum()).at(_fullCals.getBinPos())).at(0);
+    scanAdj = ((scanAdjust.getDataNum()).at(_fullCals.getBinPos())).at(0);
   }
 
   // vol depol
@@ -380,7 +394,7 @@ void DerFieldCalcs::computeDerived()
   
   for(size_t igate = 0; igate < _nGates; igate++) {
     _opticalDepth[igate] = 
-      _computeOpticalDepth(_presHpa[igate], _tempK[igate], _molDataRate.at(igate), scan);
+      _computeOpticalDepth(_presHpa[igate], _tempK[igate], _molDataRate.at(igate), scanAdj);
   }
   _filterOpticalDepth();
 
@@ -532,7 +546,7 @@ Radx::fl32 DerFieldCalcs::_computeVolDepol(double crossRate, double combineRate)
   }
 
   double depol = crossRate / (crossRate + combineRate);
-  if (depol < 0.0 || depol > 1.0) {
+  if (depol > 1.0) {
     return Radx::missingFl32;
   }
 
@@ -573,7 +587,8 @@ Radx::fl32 DerFieldCalcs::_computePartDepol(Radx::fl32 volDepol,
     return Radx::missingFl32;
   }
   
-  double d_mol = 2.0 * 0.000365 / (1.0 + 0.000365);
+  double d_mol = 2.0 * _depolFactor / (1.0 + _depolFactor);
+
   double pDepol = ((volDepol / (1.0 - (1.0 / backscatRatio))) -
                    (d_mol / (backscatRatio - 1.0)));
   
@@ -593,23 +608,16 @@ Radx::fl32 DerFieldCalcs::_computePartDepol(Radx::fl32 volDepol,
 /////////////////////////////////////////////////////////////////
 // beta M sonde
 
-double DerFieldCalcs::_computeBetaMSonde(double pressure, double temperature)
+double DerFieldCalcs::_computeBetaMSonde(double pressHpa, double tempK)
 {
 
-  // If temp is 0 this causes errors but also there is a case where temp 
-  // is -1.99384e+34
-
-  double minVal = 0.0;
-
-  if(temperature <= 0.0) {
-    return minVal;
+  if(tempK <= 0.0) {
+    return NAN;
   }
-  
-  double val = ((5.45 * (550.0 / 532.0) * 4.0 * pow(10.0, -32.0) * pressure) /
-                (temperature * 1.3805604 * pow(10.0,-23.0)));
 
-  if (val < minVal) {
-    val = minVal;
+  double val = _BmsFactor * (pressHpa / (tempK * _BoltzmannConst));
+  if (!finite(val)) {
+    return NAN;
   }
   
   return val;
@@ -620,8 +628,8 @@ double DerFieldCalcs::_computeBetaMSonde(double pressure, double temperature)
 /////////////////////////////////////////////////////////////////
 // backscatter coefficient
 
-Radx::fl32 DerFieldCalcs::_computeBackscatCoeff(double pressure, 
-                                                double temperature, 
+Radx::fl32 DerFieldCalcs::_computeBackscatCoeff(double pressHpa, 
+                                                double tempK, 
                                                 Radx::fl32 backscatRatio)
 {
 
@@ -629,47 +637,48 @@ Radx::fl32 DerFieldCalcs::_computeBackscatCoeff(double pressure,
     return Radx::missingFl32;
   }
 
-  //If temp is 0 this causes errors but also there is a case where temp 
-  //is -1.99384e+34
-
-  double minCoeff = 0.0;
-
-  if(temperature <= 0.0) {
-    return Radx::missingFl32;
-  }
-  
-  double beta_m_sonde = _computeBetaMSonde(pressure, temperature);
-  double aer_beta_bs = (backscatRatio - 1.0) * beta_m_sonde;
-
-  if (aer_beta_bs < minCoeff) {
+  double betaMSonde = _computeBetaMSonde(pressHpa, tempK);
+  if (betaMSonde == NAN) {
     return Radx::missingFl32;
   }
 
-  return aer_beta_bs;
+  double aerosolBscat = (backscatRatio - 1.0) * betaMSonde;
+  if (aerosolBscat < 0.0) {
+    return Radx::missingFl32;
+  }
+
+  return aerosolBscat;
 
 }
 
 /////////////////////////////////////////////////////////////////
 // optical depth
 
-Radx::fl32 DerFieldCalcs::_computeOpticalDepth(double pressure, double temperature, 
-                                               double molRate, double scan)
+Radx::fl32 DerFieldCalcs::_computeOpticalDepth(double pressHpa, double tempK, 
+                                               double molRate, double scanAdj)
 {
+
   if (molRate < 1) {
     return Radx::missingFl32;
   }
 
-  double beta_m_sonde =_computeBetaMSonde(pressure,temperature);
-  //cerr << "scan=" << scan << endl;
+  double betaMSonde =_computeBetaMSonde(pressHpa, tempK);
+  if (betaMSonde == NAN) {
+    return Radx::missingFl32;
+  }
+
+  //cerr << "scanAdj=" << scanAdj << endl;
   //cerr << "molRate=" << molRate << endl;
-  //cerr << "beta_m_sonde=" << beta_m_sonde << endl;
+  //cerr << "betaMSonde=" << betaMSonde << endl;
    
-  double optDepth = 28.0 - log( scan * molRate / beta_m_sonde );
+  // double optDepth = 28.0 - log( scanAdj * molRate / betaMSonde );
 
-  // if (optDepth > 10.0) {
-  //   return Radx::missingFl32;
-  // }
-
+  double xx = (scanAdj * molRate) / betaMSonde;
+  if (xx <= 0.0) {
+    return Radx::missingFl32;
+  }
+  double optDepth = 16.0 - 0.5 * log(xx);
+  
   return optDepth;
 
 }
