@@ -105,6 +105,15 @@ public:
                                  double &azimuthDeg,
                                  double &elevationDeg);
   
+  // Read georeference from SPDB
+  // Returns 0 on success, -1 on error
+  
+  static int readGeorefFromSpdb(string georefUrl,
+                                time_t searchTime,
+                                int searchMarginSecs,
+                                bool debug,
+                                RadxGeoref &radxGeoref);
+
   ////////////////////////
   /// \name Error string:
   //@{
@@ -175,27 +184,9 @@ private:
   Nc3Var *_telescopeLockedVar;
   Nc3Var *_telescopeDirectionVar;
 
-  Nc3Var *_latitudeVar;
-  Nc3Var *_longitudeVar;
-  Nc3Var *_altitudeVar;
-  Nc3Var *_headingVar;
-  Nc3Var *_gndSpeedVar;
-  Nc3Var *_vertVelVar;
-  Nc3Var *_pitchVar;
-  Nc3Var *_rollVar;
-
   vector<int> _telescopeLocked;
   vector<int> _telescopeDirection;
   
-  vector<double> _latitude;
-  vector<double> _longitude;
-  vector<double> _altitude;
-  vector<double> _heading;
-  vector<double> _gndSpeed;
-  vector<double> _vertVel;
-  vector<double> _pitch;
-  vector<double> _roll;
-
   Nc3Var *_pollAngleVar;
   Nc3Var *_totalEnergyVar;
 

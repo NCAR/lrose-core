@@ -49,9 +49,7 @@
 #include <toolsa/TaXml.hh>
 #include <toolsa/pmu.h>
 #include <radar/HsrlRawRay.hh>
-#include <rapformats/ac_georef.hh>
 #include <Fmq/DsFmq.hh>
-#include <Spdb/DsSpdb.hh>
 
 #include <cmath>  
 #include <fstream>
@@ -522,7 +520,11 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
   
   if (_params.read_georef_data_from_aircraft_system) {
     RadxGeoref geo;
-    if (_readGeorefFromSpdb(secs, geo) == 0) {
+    if (RawFile::readGeorefFromSpdb(_params.georef_data_spdb_url,
+                                    secs,
+                                    _params.georef_data_search_margin_secs,
+                                    _params.debug >= Params::DEBUG_VERBOSE,
+                                    geo) == 0) {
       if (rawRay.getTelescopeDirn() == 1) {
         // pointing up
         geo.setRotation(-4.0);
@@ -553,7 +555,8 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
   ray->setNSamples(2000);
 
   // add the fields
-  
+
+  cerr << "1111111 Adding field to ray, name: " << Names::CombinedHighCounts << endl;
   _addRawFieldToRay(ray, startRangeKm, gateSpacingKm,
                     Names::CombinedHighCounts,
                     "counts",
@@ -588,90 +591,6 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
   return ray;
 
 }
-
-//////////////////////////////////////////////////////////////
-// Read georeference from SPDB
-// Returns 0 on success, -1 on error
-
-int Hsrl2Radx::_readGeorefFromSpdb(time_t searchTime,
-                                   RadxGeoref &radxGeoref)
-  
-{
-
-  DsSpdb spdb;
-  
-  if(spdb.getClosest(_params.georef_data_spdb_url,
-                     searchTime,
-                     _params.georef_data_search_margin_secs)) {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "ERROR - Hsrl2Radx::_readGeorefFromSpdb" << endl;
-      cerr << "  Cannot read georef data from URL: "
-           << _params.georef_data_spdb_url << endl;
-      cerr << spdb.getErrStr() << endl;
-    }
-    return -1;
-  }
-
-  if (spdb.getProdId() != SPDB_AC_GEOREF_ID) {
-    cerr << "ERROR - Hsrl2Radx::_readGeorefFromSpdb" << endl;
-    cerr << "  URL does not hold ac_georef data: "
-         << _params.georef_data_spdb_url << endl;
-    cerr << "  Product found: " << spdb.getProdLabel() << endl;
-    return -1;
-  }
-  
-  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
-  size_t nChunks = chunks.size();
-  if (nChunks <= 0) {
-    cerr << "ERROR - Hsrl2Radx::_readGeorefFromSpdb" << endl;
-    cerr << "  Cannot read georef data from URL: "
-         << _params.georef_data_spdb_url << endl;
-    cerr << "No chunks returned" << endl;
-    return -1;
-  }
-  
-  const Spdb::chunk_t &chunk = chunks[0];
-  if (chunk.len != sizeof(ac_georef_t)) {
-    cerr << "ERROR - Hsrl2Radx::_readGeorefFromSpdb" << endl;
-    cerr << "  Bad chunk length found: " << chunk.len << endl;
-    cerr << "  Should be: " << sizeof(ac_georef_t) << endl;
-    cerr << "  Ignoring chunk" << endl;
-    return -1;
-  }
-
-  // decode chunk data
-  
-  ac_georef_t georef;
-  memcpy(&georef, chunk.data, sizeof(georef));
-  BE_to_ac_georef(&georef);
-
-  radxGeoref.setTimeSecs(georef.time_secs_utc);
-  radxGeoref.setNanoSecs(georef.time_nano_secs);
-  radxGeoref.setLongitude(georef.longitude);
-  radxGeoref.setLatitude(georef.latitude);
-  radxGeoref.setAltitudeKmMsl(georef.altitude_msl_km);
-  radxGeoref.setAltitudeKmAgl(georef.altitude_agl_km);
-  radxGeoref.setEwVelocity(georef.ew_velocity_mps);
-  radxGeoref.setNsVelocity(georef.ns_velocity_mps);
-  radxGeoref.setVertVelocity(georef.vert_velocity_mps);
-  radxGeoref.setHeading(georef.heading_deg);
-  radxGeoref.setTrack(georef.track_deg);
-  radxGeoref.setRoll(georef.roll_deg);
-  radxGeoref.setPitch(georef.pitch_deg);
-  radxGeoref.setDrift(georef.drift_angle_deg);
-  radxGeoref.setEwWind(georef.ew_horiz_wind_mps);
-  radxGeoref.setNsWind(georef.ns_horiz_wind_mps);
-  radxGeoref.setVertWind(georef.vert_wind_mps);
-  radxGeoref.setHeadingRate(georef.heading_rate_dps);
-  radxGeoref.setPitchRate(georef.pitch_rate_dps);
-  radxGeoref.setRollRate(georef.roll_rate_dps);
-  radxGeoref.setDriveAngle1(georef.drive_angle_1_deg);
-  radxGeoref.setDriveAngle2(georef.drive_angle_2_deg);
-
-  return 0;
-
-}
-
 
 //////////////////////////////////////////////////////////////
 // Add fl32 field to rays

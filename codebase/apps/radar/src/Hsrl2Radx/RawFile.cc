@@ -46,6 +46,8 @@
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxCfactors.hh>
+#include <Spdb/DsSpdb.hh>
+#include <rapformats/ac_georef.hh>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
@@ -109,26 +111,8 @@ void RawFile::clear()
   _telescopeLockedVar = NULL;
   _telescopeDirectionVar = NULL;
 
-  _latitudeVar = NULL;
-  _longitudeVar = NULL;
-  _altitudeVar = NULL;
-  _headingVar = NULL;
-  _gndSpeedVar = NULL;
-  _vertVelVar = NULL;
-  _pitchVar = NULL;
-  _rollVar = NULL;
-
   _telescopeLocked.clear();
   _telescopeDirection.clear();
-
-  _latitude.clear();
-  _longitude.clear();
-  _altitude.clear();
-  _heading.clear();
-  _gndSpeed.clear();
-  _vertVel.clear();
-  _pitch.clear();
-  _roll.clear();
 
   _instrumentType = Radx::INSTRUMENT_TYPE_LIDAR;
   _platformType = Radx::PLATFORM_TYPE_AIRCRAFT;
@@ -516,14 +500,6 @@ void RawFile::_clearRayVariables()
 
   _telescopeLocked.clear();
   _telescopeDirection.clear();
-  _latitude.clear();
-  _longitude.clear();
-  _altitude.clear();
-  _heading.clear();
-  _gndSpeed.clear();
-  _vertVel.clear();
-  _pitch.clear();
-  _roll.clear();
 
 }
 
@@ -546,45 +522,6 @@ int RawFile::_readRayVariables()
   _readRayVar(_telescopeDirectionVar, "TelescopeDirection", _telescopeDirection);
   if (_telescopeDirection.size() < _nTimesInFile) {
     _addErrStr("ERROR - TelescopeDirection variable required");
-    iret = -1;
-  }
-
-  _readRayVar(_latitudeVar, "iwg1_Lat", _latitude);
-  if (_latitude.size() < _nTimesInFile) {
-    _addErrStr("ERROR - iwg1_Lat variable required");
-    iret = -1;
-  }
-
-  _readRayVar(_longitudeVar, "iwg1_Lon", _longitude);
-  if (_longitude.size() < _nTimesInFile) {
-    _addErrStr("ERROR - iwg1_Lon variable required");
-    iret = -1;
-  }
-
-  _readRayVar(_altitudeVar, "iwg1_GPS_MSL_Alt", _altitude);
-  if (_altitude.size() < _nTimesInFile) {
-    _addErrStr("ERROR - iwg1_GPS_MSL_Alt variable required");
-    iret = -1;
-  }
-
-  _readRayVar(_altitudeVar, "iwg1_True_Hdg", _heading);
-  if (_heading.size() < _nTimesInFile) {
-    _addErrStr("ERROR - iwg1_True_Hdg variable required");
-    iret = -1;
-  }
-
-  _readRayVar(_gndSpeedVar, "iwg1_Grnd_Spd", _gndSpeed, false);
-  _readRayVar(_vertVelVar, "iwg1_Vert_Velocity", _vertVel, false);
-
-  _readRayVar(_pitchVar, "iwg1_Pitch", _pitch);
-  if (_pitch.size() < _nTimesInFile) {
-    _addErrStr("ERROR - iwg1_Pitch variable required");
-    iret = -1;
-  }
-
-  _readRayVar(_rollVar, "iwg1_Roll", _roll);
-  if (_roll.size() < _nTimesInFile) {
-    _addErrStr("ERROR - iwg1_Roll variable required");
     iret = -1;
   }
 
@@ -948,31 +885,26 @@ int RawFile::_createRays(const string &path)
       
     }
     
-    geo.setRoll(_roll[ii]);
-    geo.setPitch(_pitch[ii]);
-    geo.setHeading(_heading[ii]);
-    geo.setDrift(0.0); // do not have drift in the file
+    if (_params.read_georef_data_from_aircraft_system) {
+      RadxGeoref geo;
+      if (readGeorefFromSpdb(_params.georef_data_spdb_url,
+                             _dataTimes[ii].utime(),
+                             _params.georef_data_search_margin_secs,
+                             _params.debug >= Params::DEBUG_VERBOSE,
+                             geo) == 0) {
+        ray->setGeoref(geo);
+      }
+      
+      // compute az/el from geo
+      
+      // double azimuth, elevation;
+      // RadxCfactors corr;
+      // computeRadarAngles(geo, corr, azimuth, elevation);
+      // ray->setAzimuthDeg(azimuth);
+      // ray->setElevationDeg(elevation);
+      
+    } // if (_params.read_georef_data_from_aircraft_system)
     
-    geo.setLatitude(_latitude[ii]);
-    geo.setLongitude(_longitude[ii]);
-    geo.setAltitudeKmMsl(_altitude[ii] / 1000.0);
-
-    geo.setVertVelocity(_vertVel[ii]);
-
-    double sinVal, cosVal;
-    sincos(_heading[ii] * Radx::DegToRad, &sinVal, &cosVal);
-    geo.setEwVelocity(_gndSpeed[ii] * sinVal);
-    geo.setNsVelocity(_gndSpeed[ii] * cosVal);
-    
-    ray->setGeoref(geo);
-
-    // compute az/el from geo
-    
-    double azimuth, elevation;
-    computeRadarAngles(geo, corr, azimuth, elevation);
-    ray->setAzimuthDeg(azimuth);
-    ray->setElevationDeg(elevation);
-
     // other metadata - overloading
     
     ray->setMeasXmitPowerDbmH(_totalEnergy[ii]);
@@ -1031,28 +963,12 @@ void RawFile::_loadReadVolume()
   _readVol->setScanName("Vert");
   _readVol->setScanId(0);
 
-  if (_latitude.size() > 0) {
-    for (size_t ii = 0; ii < _latitude.size(); ii++) {
-      if (_latitude[ii] > -9990) {
-        _readVol->setLatitudeDeg(_latitude[ii]);
-        break;
-      }
-    }
-  }
-  if (_longitude.size() > 0) {
-    for (size_t ii = 0; ii < _longitude.size(); ii++) {
-      if (_longitude[ii] > -9990) {
-        _readVol->setLongitudeDeg(_longitude[ii]);
-        break;
-      }
-    }
-  }
-  if (_altitude.size() > 0) {
-    for (size_t ii = 0; ii < _altitude.size(); ii++) {
-      if (_altitude[ii] > -9990) {
-        _readVol->setAltitudeKm(_altitude[ii] / 1000.0);
-        break;
-      }
+  if (_rays.size() > 0) {
+    const RadxGeoref *georef = _rays[0]->getGeoreference();
+    if (georef) {
+      _readVol->setLatitudeDeg(georef->getLatitude());
+      _readVol->setLongitudeDeg(georef->getLongitude());
+      _readVol->setAltitudeKm(georef->getAltitudeKmMsl());
     }
   }
 
@@ -1222,31 +1138,6 @@ int RawFile::_addCountFieldToRays(Nc3Var* var,
     field->setStandardName(standardName);
     field->setRangeGeom(_startRangeKm, _gateSpacingKm);
     
-    // // add db of same field
-    
-    // for (size_t igate = 0; igate < _nGates; igate++) {
-    //   if (fcounts[igate] > 0) {
-    //     fcounts[igate] = 10.0 * log10(fcounts[igate]);
-    //   } else {
-    //     fcounts[igate] = Radx::missingFl32;
-    //   }
-    // }
-
-    // string dbName = "db_";
-    // dbName += name;
-    // string dbUnits = "db_counts";
-    // string dbLongName = "db_";
-    // dbLongName += longName;
-    
-    // RadxField *dbField =
-    //   _rays[iray]->addField(dbName, dbUnits, _nGates,
-    //                         Radx::missingFl32,
-    //                         fcounts,
-    //                         true);
-    
-    // dbField->setLongName(dbLongName);
-    // dbField->setRangeGeom(_startRangeKm, _gateSpacingKm);
-
   }
   
   return 0;
@@ -1350,4 +1241,89 @@ void RawFile::computeRadarAngles(RadxGeoref &georef,
   }
   
 }
+
+//////////////////////////////////////////////////////////////
+// Read georeference from SPDB
+// Returns 0 on success, -1 on error
+
+int RawFile::readGeorefFromSpdb(string georefUrl,
+                                time_t searchTime,
+                                int searchMarginSecs,
+                                bool debug,
+                                RadxGeoref &radxGeoref)
+  
+{
+
+  DsSpdb spdb;
+  
+  if(spdb.getClosest(georefUrl, searchTime, searchMarginSecs)) {
+    if (debug >= Params::DEBUG_VERBOSE) {
+      cerr << "ERROR - Hsrl2Radx::_readGeorefFromSpdb" << endl;
+      cerr << "  Cannot read georef data from URL: "
+           << georefUrl << endl;
+      cerr << spdb.getErrStr() << endl;
+    }
+    return -1;
+  }
+
+  if (spdb.getProdId() != SPDB_AC_GEOREF_ID) {
+    cerr << "ERROR - Hsrl2Radx::_readGeorefFromSpdb" << endl;
+    cerr << "  URL does not hold ac_georef data: "
+         << georefUrl << endl;
+    cerr << "  Product found: " << spdb.getProdLabel() << endl;
+    return -1;
+  }
+  
+  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
+  size_t nChunks = chunks.size();
+  if (nChunks <= 0) {
+    cerr << "ERROR - Hsrl2Radx::_readGeorefFromSpdb" << endl;
+    cerr << "  Cannot read georef data from URL: "
+         << georefUrl << endl;
+    cerr << "No chunks returned" << endl;
+    return -1;
+  }
+  
+  const Spdb::chunk_t &chunk = chunks[0];
+  if (chunk.len != sizeof(ac_georef_t)) {
+    cerr << "ERROR - Hsrl2Radx::_readGeorefFromSpdb" << endl;
+    cerr << "  Bad chunk length found: " << chunk.len << endl;
+    cerr << "  Should be: " << sizeof(ac_georef_t) << endl;
+    cerr << "  Ignoring chunk" << endl;
+    return -1;
+  }
+
+  // decode chunk data
+  
+  ac_georef_t georef;
+  memcpy(&georef, chunk.data, sizeof(georef));
+  BE_to_ac_georef(&georef);
+
+  radxGeoref.setTimeSecs(georef.time_secs_utc);
+  radxGeoref.setNanoSecs(georef.time_nano_secs);
+  radxGeoref.setLongitude(georef.longitude);
+  radxGeoref.setLatitude(georef.latitude);
+  radxGeoref.setAltitudeKmMsl(georef.altitude_msl_km);
+  radxGeoref.setAltitudeKmAgl(georef.altitude_agl_km);
+  radxGeoref.setEwVelocity(georef.ew_velocity_mps);
+  radxGeoref.setNsVelocity(georef.ns_velocity_mps);
+  radxGeoref.setVertVelocity(georef.vert_velocity_mps);
+  radxGeoref.setHeading(georef.heading_deg);
+  radxGeoref.setTrack(georef.track_deg);
+  radxGeoref.setRoll(georef.roll_deg);
+  radxGeoref.setPitch(georef.pitch_deg);
+  radxGeoref.setDrift(georef.drift_angle_deg);
+  radxGeoref.setEwWind(georef.ew_horiz_wind_mps);
+  radxGeoref.setNsWind(georef.ns_horiz_wind_mps);
+  radxGeoref.setVertWind(georef.vert_wind_mps);
+  radxGeoref.setHeadingRate(georef.heading_rate_dps);
+  radxGeoref.setPitchRate(georef.pitch_rate_dps);
+  radxGeoref.setRollRate(georef.roll_rate_dps);
+  radxGeoref.setDriveAngle1(georef.drive_angle_1_deg);
+  radxGeoref.setDriveAngle2(georef.drive_angle_2_deg);
+
+  return 0;
+
+}
+
 

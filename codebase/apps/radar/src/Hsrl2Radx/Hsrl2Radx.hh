@@ -100,9 +100,6 @@ private:
 
   RadxRay *_convertRawToRadx(HsrlRawRay &rawRay);
 
-  int _readGeorefFromSpdb(time_t searchTime,
-                          RadxGeoref &georef);
-
   void _addRawFieldToRay(RadxRay *ray,
                          double startRangeKm,
                          double gateSpacingKm,
