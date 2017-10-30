@@ -116,64 +116,88 @@ private:
   // apply corrections
 
   void _applyCorr(); 
+  void _applyNonLinearCountCorr();
+  void _applyBaselineCorr();
+  void _applyBackgroundCorr();
+  void _applyEnergyNorm();
+  void _applyDiffGeoCorr();
+  void _applyGeoCorr();
 
   // nonlinear count corrections
+
   double _nonLinCountCor(Radx::fl32 count, double deadtime, 
                          double binWid, double shotCount);
   
   // baseline subtraction
+
   double _baselineSubtract(double arrivalRate, double profile, 
                            double polarization);
   
   // background subtraction
-  double _backgroundSub(double arrivalRate, double backgroundBins);
+
+  double _backgroundSubtract(double arrivalRate, double backgroundBins);
   
   // energy normalization
+
   double _energyNorm(double arrivalRate, double totalEnergy);
   
   // process QWP rotation
+
   vector<double> _processQWPRotation(vector<double> arrivalRate,
                                      vector<double> polCal);
   
   // merge hi and lo profiles 
+
   double _hiAndloMerge(double hiRate, double loRate);
   
   // geometric overlap correction
+
   double _geoOverlapCor(double arrivalRate, double geoOverlap);
 
   // initialize the arrays for derived fields
-  void _initDerivedArrays();
 
-  // volume depolarization
+  void _initDerivedArrays();
+  
+  // compute volume depolarization
+
   Radx::fl32 _computeVolDepol(double crossRate, double combineRate);
   
-  // backscatter ratio
+  // compute backscatter ratio
+
   Radx::fl32 _computeBackscatRatio(double combineRate, double molRate);
   
-  // particle depolarization
+  // compute particle depolarization
   Radx::fl32 _computePartDepol(Radx::fl32 volDepol, 
                                Radx::fl32 backscatRatio);
   
-  // intermediate field for backscatter ratio and extinction
+  // compute intermediate field for backscatter ratio and extinction
+
   double _computeBetaMSonde(double pressHpa, double tempK);
 
-  // backscatter coefficient
+  // compute backscatter coefficient
+
   Radx::fl32 _computeBackscatCoeff(double pressHpa, double tempK, 
                                    Radx::fl32 backscatRatio);
   
-  // optical depth calculation for extinction;
+  // compute optical depth calculation for extinction;
+
   Radx::fl32 _computeOpticalDepth(double pressHpa, double tempK,
                                   double molRate, double scanAdj);
 
-  // extinction
+  // compute extinction
+
   Radx::fl32 _computeExtinctionCoeff(Radx::fl32 optDepth1, 
                                      Radx::fl32 optDepth2,
                                      double alt1, double alt2);
+
+  // printing
   
   void _printRateDiagnostics(const string &label,
                              bool includeCombined = false);
 
   void _printDerivedFields(ostream &out);
+
+  // filtering
 
   void _filterOpticalDepth();
 

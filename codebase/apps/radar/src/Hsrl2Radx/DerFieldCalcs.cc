@@ -113,7 +113,48 @@ void DerFieldCalcs::_applyCorr()
   _combinedRate.resize(_nGates);
 
   // non-linear count correction
+
+  _applyNonLinearCountCorr();
+
+  // subtract baseline
+  // this is a pass-through for now
   
+  _applyBaselineCorr();
+
+  // subtract the background signal
+
+  _applyBackgroundCorr();
+
+  // apply energy normalization
+
+  _applyEnergyNorm();
+
+  // correct for differential overlap
+
+  _applyDiffGeoCorr();
+  
+  // for now we ignore QWP rotation correction
+
+  // merge hi and lo channels into combined rate
+  
+  for(size_t igate = 0; igate < _nGates; igate++) {
+    _combinedRate[igate] = _hiAndloMerge(_hiDataRate[igate], 
+                                         _loDataRate[igate]);
+  }
+  _printRateDiagnostics("hiAndloMerge", true);
+
+  // apply geo correction
+
+  _applyGeoCorr();
+
+}
+
+/////////////////////////////////////////////////////////////////
+// non-linear count correction
+
+void DerFieldCalcs::_applyNonLinearCountCorr()
+{
+
   CalReader dt_hi = _fullCals.getDeadTimeHi();
   CalReader dt_lo = _fullCals.getDeadTimeLo();
   CalReader dt_cross = _fullCals.getDeadTimeCross();
@@ -148,8 +189,14 @@ void DerFieldCalcs::_applyCorr()
 
   _printRateDiagnostics("countCorrection");
 
-  // subtract baseline
-  // this is a pass-through
+}
+
+/////////////////////////////////////////////////////////////////
+// subtract baseline
+// this is a pass-through for now
+
+void DerFieldCalcs::_applyBaselineCorr()
+{
   
   const vector<double> &blCorCombinedHi = _fullCals.getBlCorCombinedHi();
   const vector<double> &blCorCombinedLo = _fullCals.getBlCorCombinedLo();
@@ -172,6 +219,15 @@ void DerFieldCalcs::_applyCorr()
   
   _printRateDiagnostics("baselineSubtract");
 
+}
+
+/////////////////////////////////////////////////////////////////
+// subtract background
+// as computed from last n gates
+
+void DerFieldCalcs::_applyBackgroundCorr()
+{
+  
   // compute background rates from last 'n' gates
   
   double hibackgroundRate = 0.0;
@@ -202,15 +258,15 @@ void DerFieldCalcs::_applyCorr()
   
   for(size_t igate = 0; igate < _nGates; igate++) {
     _hiDataRate[igate] =
-      _backgroundSub(_hiDataRate[igate], hibackgroundRate);
+      _backgroundSubtract(_hiDataRate[igate], hibackgroundRate);
     _loDataRate[igate] =
-      _backgroundSub(_loDataRate[igate], lobackgroundRate);
+      _backgroundSubtract(_loDataRate[igate], lobackgroundRate);
     _crossDataRate[igate] =
-      _backgroundSub(_crossDataRate[igate], crossbackgroundRate);
+      _backgroundSubtract(_crossDataRate[igate], crossbackgroundRate);
     _molDataRate[igate] =
-      _backgroundSub(_molDataRate[igate], molbackgroundRate);
+      _backgroundSubtract(_molDataRate[igate], molbackgroundRate);
   }
-
+  
   if(_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "hibackgroundRate = " << hibackgroundRate<<endl;
     cerr << "lobackgroundRate = " << lobackgroundRate<<endl;
@@ -219,8 +275,17 @@ void DerFieldCalcs::_applyCorr()
     _printRateDiagnostics("backgroundSub");
   }
 
-  // normalize with respect to transmit energy
+}
 
+////////////////////////////////////////////
+// apply energy normalization
+
+void DerFieldCalcs::_applyEnergyNorm()
+
+{
+
+  // normalize with respect to transmit energy
+  
   for(size_t igate = 0; igate < _nGates; igate++) {
     _hiDataRate[igate] = _energyNorm(_hiDataRate[igate], _power);
     _loDataRate[igate] = _energyNorm(_loDataRate[igate], _power);
@@ -230,11 +295,18 @@ void DerFieldCalcs::_applyCorr()
   
   _printRateDiagnostics("energyNorm");
 
-  // correct for differential overlap
+}
+
+////////////////////////////////////////////
+// correct for differential overlap
+
+void DerFieldCalcs::_applyDiffGeoCorr()
+
+{
   
   const vector<double> &diffGeoCombHiMol = _fullCals.getDiffGeoCombHiMol();
   const vector<double> &diffGeoCombLoMol = _fullCals.getDiffGeoCombLoMol();
-  calBin = _nBinsPerGate / 2;
+  size_t calBin = _nBinsPerGate / 2;
   for(size_t igate = 0; igate < _nGates; igate++, calBin += _nBinsPerGate) {
     _hiDataRate[igate] /= diffGeoCombHiMol[calBin];
     _loDataRate[igate] /= diffGeoCombLoMol[calBin];
@@ -242,20 +314,17 @@ void DerFieldCalcs::_applyCorr()
   }
   _printRateDiagnostics("diffOverlapCor");
 
-  // for now we ignore QWP rotation correction
+}
 
-  // merge hi and lo channels into combined rate
-  
-  for(size_t igate = 0; igate < _nGates; igate++) {
-    _combinedRate[igate] = _hiAndloMerge(_hiDataRate[igate], 
-                                         _loDataRate[igate]);
-  }
-  _printRateDiagnostics("hiAndloMerge", true);
+///////////////////////////////////////////
+// apply geo correction
 
-  // geo correction
+void DerFieldCalcs::_applyGeoCorr()
+
+{
 
   const vector<double> &geoCorr = _fullCals.getGeoCorr();
-  calBin = _nBinsPerGate / 2;
+  size_t  calBin = _nBinsPerGate / 2;
   for(size_t igate = 0; igate < _nGates; igate++, calBin += _nBinsPerGate) {
     double corr = geoCorr[calBin];
     _combinedRate[igate] *= corr;
@@ -264,9 +333,9 @@ void DerFieldCalcs::_applyCorr()
   }
   
   _printRateDiagnostics("geoOverlapCor", true);
-  
-}
 
+}
+  
 /////////////////////////////////////////////////////////////////
 // print diagnostics
 
@@ -411,7 +480,7 @@ double DerFieldCalcs::_baselineSubtract(double arrivalRate, double profile,
 /////////////////////////////////////////////////////////////////
 // background subtraction
 
-double DerFieldCalcs::_backgroundSub(double arrivalRate, double backgroundBins)
+double DerFieldCalcs::_backgroundSubtract(double arrivalRate, double backgroundBins)
 {
   //background bins is average of the last 100 bins, this can be negative
   return arrivalRate - backgroundBins;
