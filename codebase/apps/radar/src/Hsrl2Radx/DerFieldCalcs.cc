@@ -553,7 +553,7 @@ void DerFieldCalcs::_initDerivedArrays()
 Radx::fl32 DerFieldCalcs::_computeVolDepol(double crossRate, double combineRate)
 {
 
-  if (crossRate < 1.0 || (crossRate + combineRate) < 1.0) {
+  if (crossRate <= 0.0 || (crossRate + combineRate) <= 0.0) {
     return Radx::missingFl32;
   }
 
@@ -573,7 +573,7 @@ Radx::fl32 DerFieldCalcs::_computeVolDepol(double crossRate, double combineRate)
 Radx::fl32 DerFieldCalcs::_computeBackscatRatio(double combineRate, double molRate)
 {
 
-  if(combineRate < 1.0 || molRate < 1.0) {
+  if(combineRate <= 0.0 || molRate <= 0.0) {
     return Radx::missingFl32;
   }
 
@@ -670,7 +670,7 @@ Radx::fl32 DerFieldCalcs::_computeOpticalDepth(double pressHpa, double tempK,
                                                double molRate, double scanAdj)
 {
 
-  if (molRate < 1) {
+  if (molRate <= 0) {
     return Radx::missingFl32;
   }
 
@@ -687,6 +687,7 @@ Radx::fl32 DerFieldCalcs::_computeOpticalDepth(double pressHpa, double tempK,
 
   double xx = (scanAdj * molRate) / betaMSonde;
   if (xx <= 0.0) {
+    cerr << "xx: " << xx << endl;
     return Radx::missingFl32;
   }
   double optDepth = 16.0 - 0.5 * log(xx);

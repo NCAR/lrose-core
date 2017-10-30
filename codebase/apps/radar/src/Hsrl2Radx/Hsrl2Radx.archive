@@ -421,7 +421,7 @@ combine_bins_on_read = TRUE;
 // Type: int
 //
 
-n_bins_per_gate = 2;
+n_bins_per_gate = 4;
 
 ///////////// raw_bin_start_range_km //////////////////
 //

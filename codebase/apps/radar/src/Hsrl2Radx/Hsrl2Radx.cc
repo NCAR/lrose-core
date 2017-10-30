@@ -467,22 +467,8 @@ int Hsrl2Radx::_readFmq(DsFmq &inputFmq,
 
     // add filtered count fields
 
-    _addFilteredFieldToRay(radxRay, 
-                           Names::CombinedHighCounts,
-                           Names::CombinedHighCounts_F);
+    _addFilteredCountsToRay(radxRay);
 
-    _addFilteredFieldToRay(radxRay, 
-                           Names::CombinedLowCounts,
-                           Names::CombinedLowCounts_F);
-
-    _addFilteredFieldToRay(radxRay, 
-                           Names::MolecularCounts,
-                           Names::MolecularCounts_F);
-
-    _addFilteredFieldToRay(radxRay, 
-                           Names::CrossPolarCounts,
-                           Names::CrossPolarCounts_F);
-    
     // add environment fields
     
     _addEnvFields(radxRay);
@@ -491,6 +477,10 @@ int Hsrl2Radx::_readFmq(DsFmq &inputFmq,
 
     _addDerivedMoments(radxRay);
     _addFilteredMoments(radxRay);
+
+    // set 0 counts to missing
+
+    _setZeroCountsToMissing(radxRay);
 
     // write params to FMQ every n rays
 
@@ -685,11 +675,36 @@ void Hsrl2Radx::_addRawFieldToRay(RadxRay *ray,
 }
 
 //////////////////////////////////////////////////////////////
-// Add fl32 field to rays
+// Add filtered counts to ray
 
-void Hsrl2Radx::_addFilteredFieldToRay(RadxRay *ray,
-                                       const string &name,
-                                       const string &filteredName)
+void Hsrl2Radx::_addFilteredCountsToRay(RadxRay *ray)
+  
+{
+
+  _addFilteredCountsToRay(ray, 
+                          Names::CombinedHighCounts,
+                          Names::CombinedHighCounts_F);
+  
+  _addFilteredCountsToRay(ray, 
+                          Names::CombinedLowCounts,
+                          Names::CombinedLowCounts_F);
+  
+  _addFilteredCountsToRay(ray, 
+                          Names::MolecularCounts,
+                          Names::MolecularCounts_F);
+  
+  _addFilteredCountsToRay(ray, 
+                          Names::CrossPolarCounts,
+                          Names::CrossPolarCounts_F);
+
+}
+    
+//////////////////////////////////////////////////////////////
+// Add filtered counts to ray
+
+void Hsrl2Radx::_addFilteredCountsToRay(RadxRay *ray,
+                                        const string &name,
+                                        const string &filteredName)
   
 {
 
@@ -709,7 +724,7 @@ void Hsrl2Radx::_addFilteredFieldToRay(RadxRay *ray,
   // censor counts as required
   
   if (_params.counts_censoring_threshold > 0) {
-    for (int ii = 0; ii < _nGates; ii++) {
+    for (size_t ii = 0; ii < ray->getNGates(); ii++) {
       if (fcounts[ii] < _params.counts_censoring_threshold) {
         fcounts[ii] = 0;
       }
@@ -717,7 +732,7 @@ void Hsrl2Radx::_addFilteredFieldToRay(RadxRay *ray,
   }
 
   // despeckle
-
+  
   if (_params.apply_speckle_filter) {
     _applyZeroSpeckleFilter(_nGates, _params.speckle_filter_len, fcounts);
   }
@@ -729,6 +744,45 @@ void Hsrl2Radx::_addFilteredFieldToRay(RadxRay *ray,
   // add the modified field
 
   ray->addField(copy);
+
+}
+
+//////////////////////////////////////////////////////////////
+// Set zero counts to missing
+
+void Hsrl2Radx::_setZeroCountsToMissing(RadxRay *ray)
+{
+  _setZeroCountsToMissing(ray, Names::CombinedHighCounts);
+  _setZeroCountsToMissing(ray, Names::CombinedHighCounts_F);
+  _setZeroCountsToMissing(ray, Names::CombinedLowCounts);
+  _setZeroCountsToMissing(ray, Names::CombinedLowCounts_F);
+  _setZeroCountsToMissing(ray, Names::MolecularCounts);
+  _setZeroCountsToMissing(ray, Names::MolecularCounts_F);
+  _setZeroCountsToMissing(ray, Names::CrossPolarCounts);
+  _setZeroCountsToMissing(ray, Names::CrossPolarCounts_F);
+}
+
+void Hsrl2Radx::_setZeroCountsToMissing(RadxRay *ray,
+                                        const string &name)
+  
+{
+
+  // get the field
+  
+  RadxField *fld = ray->getField(name);
+  assert(fld);
+
+  // get the count data
+  
+  Radx::fl32 *fcounts = fld->getDataFl32();
+  
+  // censor counts as required
+  
+  for (size_t ii = 0; ii < ray->getNGates(); ii++) {
+    if (fcounts[ii] <= 0.0) {
+      fcounts[ii] = Radx::missingFl32;
+    }
+  }
 
 }
 
@@ -1149,25 +1203,7 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
   // add filtered count fields
   
   for(size_t iray = 0; iray < rays.size(); iray++) {
-
-    RadxRay *ray = rays[iray];
-  
-    _addFilteredFieldToRay(ray, 
-                           Names::CombinedHighCounts,
-                           Names::CombinedHighCounts_F);
-    
-    _addFilteredFieldToRay(ray, 
-                           Names::CombinedLowCounts,
-                           Names::CombinedLowCounts_F);
-    
-    _addFilteredFieldToRay(ray, 
-                           Names::MolecularCounts,
-                           Names::MolecularCounts_F);
-    
-    _addFilteredFieldToRay(ray, 
-                           Names::CrossPolarCounts,
-                           Names::CrossPolarCounts_F);
-
+    _addFilteredCountsToRay(rays[iray]);
   }
 
   // add in height, temperature and pressure fields
@@ -1182,6 +1218,8 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
   for(size_t iray = 0; iray < rays.size(); iray++) {
     _addDerivedMoments(rays[iray]);
     _addFilteredMoments(rays[iray]);
+    // set 0 counts to missing
+    _setZeroCountsToMissing(rays[iray]);
   }
     
   // write the file

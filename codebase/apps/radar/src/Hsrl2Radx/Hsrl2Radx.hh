@@ -113,9 +113,14 @@ private:
                          const string &standardName,
                          const Radx::fl32 *fcounts);
   
-  void _addFilteredFieldToRay(RadxRay *ray,
-                              const string &name,
-                              const string &filteredName);
+  void _addFilteredCountsToRay(RadxRay *ray);
+  
+  void _addFilteredCountsToRay(RadxRay *ray,
+                               const string &name,
+                               const string &filteredName);
+  
+  void _setZeroCountsToMissing(RadxRay *ray);
+  void _setZeroCountsToMissing(RadxRay *ray, const string &name);
   
   int _processFile(const string &filePath);
   int _processUwCfRadialFile(const string &filePath);
