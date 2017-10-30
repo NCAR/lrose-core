@@ -43,45 +43,9 @@ using namespace std;
 
 FullCals::FullCals()
 {
-
-  RadxTime time(2015, 07, 14, 18 , 0 , 0 , 0.0);
+  
+  RadxTime time(RadxTime::NOW);
   _time = time;
-
-}
-
-FullCals::FullCals(CalReader dtHi, CalReader dtLo, 
-		   CalReader dtCross, CalReader dtMol, 
-		   CalReader binW, CalReader scanAdjust, 
-		   vector< vector<double> > blCorIn, 
-		   vector< vector<double> > diffDGeoCorIn,
-		   vector< vector<double> > geoDefCorIn, 
-		   vector< vector<double> > afPulCorIn)
-{
-
-  
-  _deadTimeHi=dtHi;
-  _deadTimeLo=dtLo;
-  _deadTimeCross=dtCross;
-  _deadTimeMol=dtMol;
-  _binWidth=binW;
-  _scanAdj=scanAdjust;
-  
-  _blCor=blCorIn;
-  _diffDGeoCor=diffDGeoCorIn;
-  _geoDefCor=geoDefCorIn;
-  _afPulCor=afPulCorIn;
-    
-  _hiPos=dtHi.dateMatch(dtHi, _time);
-  _loPos=dtLo.dateMatch(dtLo, _time); 
-  _crossPos=dtCross.dateMatch(dtCross, _time);
-  _molPos=dtMol.dateMatch(dtMol, _time);
-  _binPos=binW.dateMatch(binW, _time);
-  
-  _deadTimeHi.setIsNum();
-  _deadTimeLo.setIsNum();
-  _deadTimeCross.setIsNum();
-  _deadTimeMol.setIsNum();
-  _binWidth.setIsNum();
 
 }
 
@@ -129,28 +93,24 @@ void FullCals::readScanAdj(const char* file, const char* variable)
   _scanPos=_scanAdj.dateMatch(_scanAdj, _time);
 }
 
-void FullCals::readBLCor(const char* file)
+// set the time
+// this also updates the time-bases positions
+
+void FullCals::setTime(time_t rtime)
 {
-  _blCor = readBaselineCorrection(file);
+  _time = rtime;
+  _hiPos=_deadTimeHi.dateMatch(_deadTimeHi, _time);
+  _loPos=_deadTimeLo.dateMatch(_deadTimeLo, _time);
+  _crossPos=_deadTimeCross.dateMatch(_deadTimeCross, _time);
+  _molPos=_deadTimeMol.dateMatch(_deadTimeMol, _time);
+  _binPos=_binWidth.dateMatch(_binWidth, _time);
+  _scanPos=_scanAdj.dateMatch(_scanAdj, _time);
 }
 
-void FullCals::readDiffDGeoCor(const char* file)
-{
-  _diffDGeoCor=readDiffDefaultGeo(file);
-}
+///////////////////////////////////////////////////////
+// read baseline correction
 
-void FullCals::readGeoDefCor(const char* file)
-{
-  _geoDefCor=readGeofileDefault(file);
-}
-
-void FullCals::readAfPulCor(const char* file)
-{
-  _afPulCor=readAfterPulse(file);
-}
-
-//void FullCals::ReadCalvals(string pathToCalValsFile, timet time)
-vector <vector<double> > FullCals::readBaselineCorrection(const char* file)
+int FullCals::readBaselineCor(const char* file)
 {
  
   std::ifstream infile(file);
@@ -158,6 +118,7 @@ vector <vector<double> > FullCals::readBaselineCorrection(const char* file)
     cerr << "INFO - FullCals::readBaselineCorrection" << endl;
     cerr << "  Baseline Correction file: " << file << endl;
   }   
+
   std::string line;
   vector<double> vec_binnum;
   vector<double> vec_combined_hi;
@@ -207,20 +168,19 @@ vector <vector<double> > FullCals::readBaselineCorrection(const char* file)
     }
   }
  
-  vector< vector<double> > ans;
-  ans.push_back(vec_binnum);
-  ans.push_back(vec_combined_hi);
-  ans.push_back(vec_combined_lo);
-  ans.push_back(vec_molecular);
-  ans.push_back(vec_crosspol);
-  ans.push_back(vec_mol_I2A);
-  ans.push_back(vec_comb_1064);
-
-  return ans;
+  _blCorCombinedHi = vec_combined_hi;
+  _blCorCombinedLo = vec_combined_lo;
+  _blCorMolecular = vec_molecular;
+  _blCorCrossPol = vec_crosspol;
+  
+  return 0;
 
 }
 
-vector <vector<double> > FullCals::readDiffDefaultGeo(const char* file)
+///////////////////////////////////////////////////////
+// read diff geo correction
+
+int FullCals::readDiffGeoCor(const char* file)
 {
 
   std::ifstream infile(file);
@@ -228,6 +188,7 @@ vector <vector<double> > FullCals::readDiffDefaultGeo(const char* file)
     cerr << "INFO - FullCals::readDiffDefaultGeo" << endl;
     cerr << "  DiffDefaultGeo file: " << file << endl;
   }  
+
   std::string line;
   vector<double> vec_altitudes;
   vector<double> vec_comb_himol;
@@ -267,18 +228,19 @@ vector <vector<double> > FullCals::readDiffDefaultGeo(const char* file)
     }
   }
 
-  vector< vector<double> > ans;
-  ans.push_back(vec_altitudes);
-  ans.push_back(vec_comb_himol);
-  ans.push_back(vec_comb_lomol);
-  ans.push_back(vec_scomb_himol);
-  ans.push_back(vec_scomb_lomol);
+  _diffGeoCombHiMol = vec_comb_himol;
+  _diffGeoCombLoMol = vec_comb_lomol;
+  _diffGeoSCombHiMol = vec_scomb_himol;
+  _diffGeoSCombLoMol = vec_scomb_lomol;
 
-  return ans;
+  return 0;
 
 } 
 
-vector <vector<double> > FullCals::readGeofileDefault(const char* file)
+//////////////////////////////////////////////////////////////////
+// read geo correction
+
+int FullCals::readGeoCor(const char* file)
 {
 
   std::ifstream infile(file);
@@ -310,22 +272,24 @@ vector <vector<double> > FullCals::readGeofileDefault(const char* file)
     }
   }
 
-  vector< vector<double> > ans;
-  ans.push_back(vec_range);
-  ans.push_back(vec_geo_corr);
+  _geoCorr = vec_geo_corr;
 
-  return ans;
+  return 0;
 
 } 
 
-vector <vector<double> > FullCals::readAfterPulse(const char* file)
+///////////////////////////////////////////////////////////////
+// read afterpulse correction
+
+int FullCals::readAfterPulseCor(const char* file)
 {
 
   std::ifstream infile(file);
   if (!infile) {
-    cerr << "INFO - FullCals::readAfterPulse" << endl;
-    cerr << "  readAfterPulse file: " << file << endl;
+    cerr << "INFO - FullCals::readAfterPulseCor" << endl;
+    cerr << "  readAfterPulseCor file: " << file << endl;
   }  
+
   std::string line;
   vector<double> vec_bin;
   vector<double> vec_mol;
@@ -390,19 +354,11 @@ vector <vector<double> > FullCals::readAfterPulse(const char* file)
     }
   }
 
-  vector< vector<double> > ans;
-  ans.push_back(vec_bin);
-  ans.push_back(vec_mol);
-  ans.push_back(vec_comb);
-  ans.push_back(vec_crossPol);
-  ans.push_back(vec_refftMol);
-  ans.push_back(vec_imfftMol);
-  ans.push_back(vec_refftComb);
-  ans.push_back(vec_imfftComb);
-  ans.push_back(vec_refftCPol);
-  ans.push_back(vec_imfftCPol);
+  _afterPulseMol = vec_mol;
+  _afterPulseComb = vec_comb;
+  _afterPulseCross = vec_crossPol;
 
-  return ans;
+  return 0;
 
 } 
 

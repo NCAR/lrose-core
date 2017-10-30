@@ -50,30 +50,35 @@ private:
   CalReader _deadTimeHi, _deadTimeLo, _deadTimeCross;
   CalReader _deadTimeMol, _binWidth, _scanAdj;
 
-  // hold other calibration file data
-
-  vector< vector<double> > _blCor, _diffDGeoCor, _geoDefCor, _afPulCor;
+  // calibration corrections
+  
+  vector<double> _blCorCombinedHi;
+  vector<double> _blCorCombinedLo;
+  vector<double> _blCorMolecular;
+  vector<double> _blCorCrossPol;
     
-  // hold which spot in the vectors are the correct calibration point. 
+  vector<double> _diffGeoCombHiMol;
+  vector<double> _diffGeoCombLoMol;
+  vector<double> _diffGeoSCombHiMol;
+  vector<double> _diffGeoSCombLoMol;
+
+  vector<double> _geoCorr;
+
+  vector<double> _afterPulseMol;
+  vector<double> _afterPulseComb;
+  vector<double> _afterPulseCross;
+
+  // hold which position in the vectors for the data time
 
   int _hiPos, _loPos, _crossPos, _molPos, _binPos, _scanPos;
-  
   RadxTime _time;
-
+  
 public:   
 
-  // constructors
+  // constructor
 
   FullCals();
   
-  FullCals(CalReader dtHi, CalReader dtLo, 
-	   CalReader dtCross, CalReader dtMol, 
-	   CalReader binW, CalReader scanAdjust, 
-	   vector< vector<double> > blCorIn, 
-	   vector< vector<double> > diffDGeoCorIn,
-	   vector< vector<double> > geoDefCorIn, 
-	   vector< vector<double> > afPulCorIn);
-
   // destructor
 
   ~FullCals();
@@ -87,15 +92,15 @@ public:
   void readBinWidth(const char* file, const char* variable); 
   void readScanAdj(const char* file, const char* variable); 
 
-  void readBLCor(const char* file);
-  void readDiffDGeoCor(const char* file);
-  void readGeoDefCor(const char* file);
-  void readAfPulCor(const char* file);
+  int readBaselineCor(const char* file);
+  int readDiffGeoCor(const char* file);
+  int readGeoCor(const char* file);
+  int readAfterPulseCor(const char* file);
   
-  vector <vector<double> > readBaselineCorrection(const char* file);
-  vector <vector<double> > readDiffDefaultGeo(const char* file);
-  vector <vector<double> > readGeofileDefault(const char* file);
-  vector <vector<double> > readAfterPulse(const char* file);
+  // set the time
+  // this also updates the time-bases positions
+
+  void setTime(time_t rtime);
 
   // get methods
 
@@ -112,11 +117,23 @@ public:
   int getMolPos() const { return _molPos; }
   int getBinPos() const { return _binPos; }
   
-  const vector<vector<double>> &getBLCor() const { return _blCor; }
-  const vector<vector<double>> &getDiffDGeoCor() const { return _diffDGeoCor; }
-  const vector<vector<double>> &getGeoDefCor() const { return _geoDefCor; }
-  const vector<vector<double>> &getAfPulCor() const { return _afPulCor; }
-  
+  const vector<double> &getBlCorCombinedHi() const { return _blCorCombinedHi; }
+  const vector<double> &getBlCorCombinedLo() const { return _blCorCombinedLo; }
+  const vector<double> &getBlCorMolecular() const { return _blCorMolecular; }
+  const vector<double> &getBlCorCrossPol() const { return _blCorCrossPol; }
+
+  const vector<double> &getDiffGeoCombHiMol() const { return _diffGeoCombHiMol; }
+  const vector<double> &getDiffGeoCombLoMol() const { return _diffGeoCombLoMol; }
+  const vector<double> &getDiffGeoSCombHiMol() const { return _diffGeoSCombHiMol; }
+  const vector<double> &getDiffGeoSCombLoMol() const { return _diffGeoSCombLoMol; }
+
+  const vector<double> &getGeoCorr() const { return _geoCorr; }
+
+  const vector<double> &getAfterPulseMol() const { return _afterPulseMol; }
+  const vector<double> &getAfterPulseComb() const { return _afterPulseComb; }
+  const vector<double> &getAfterPulseCross() const { return _afterPulseCross; }
+
+
 };
 #endif
 

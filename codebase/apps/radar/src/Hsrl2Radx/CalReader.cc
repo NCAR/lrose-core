@@ -212,10 +212,10 @@ CalReader CalReader::readCalVals(const char* file, const char* variable)
         //if length is 0 there is no numerical data and is string data. 
 	
         if(strData==-1 && numData==-1) {
-          cerr<<"WARNING: calvals_gvhsrl has an improperly formmated line with a date but no data."<<'\n';
+          cerr<<"WARNING: calvals_gvhsrl has an improperly formmated line with a date but no data."<<endl;
           strValue="";//don't want errors it just gives an empty result
         } else if(strData > -1 && numData > -1) {
-          cerr<<"WARNING: calvals_gvhsrl has an improperly formmated line with a date and numerical data and string typed data."<<'\n';
+          cerr<<"WARNING: calvals_gvhsrl has an improperly formmated line with a date and numerical data and string typed data."<<endl;
           strValue="";//don't want errors it just gives an empty result
         } else if(strData > -1) {
           strValue=line.substr(strData+1,line.length()-strData-2);
@@ -273,7 +273,7 @@ CalReader CalReader::readCalVals(const char* file, const char* variable)
             } else {
               cerr << "WARNING: calvals_gvhsrl has an improperly formatted "
                    << "line with non-modifier text after numerical data." 
-                   << '\n';
+                   << endl;
             }
           } // if(numStrTemp.length()>0)
 		  		 
@@ -450,7 +450,7 @@ vector<string> CalReader::getDataStr()
   return dataStr;
 }
 
-vector< vector<double> > CalReader::getDataNum()
+const vector< vector<double> > &CalReader::getDataNum() const
 {
   return dataNum;
 }
@@ -469,42 +469,47 @@ bool CalReader::dataTypeisStr()
   return isStr;    
 }
 
-void CalReader::printBlock()
+void CalReader::printBlock(ostream &out)
 {
 
-  cout<<"Printing out block of CalReader data."<<'\n';
-  cout<<varName<<'\n';
-  cout<<varUnits<<'\n';
+  out << "============================================" << endl;
+  out << "CalReader:" << endl;
+
+  out << "  name: " << varName << endl;
+  out << "  units: " << varUnits <<endl;
   
-  cout<<"time.size()="<<time.size()<<'\n';
-  cout<<"dataNum.size()="<<dataNum.size()<<'\n';
-  cout<<"dataStr.size()="<<dataStr.size()<<'\n';
+  out << "  time.size()=" << time.size() << endl;
+  out << "  dataNum.size()=" << dataNum.size() << endl;
+  out << "  dataStr.size()=" << dataStr.size() << endl;
 
   
   if(isNum) {
-    cout<<"numerical type data"<<'\n'; 
+    out << "  numerical type data" << endl; 
     assert(time.size()==dataNum.size());
   }
   if(isStr) {
-    cout<<"string type data"<<'\n'; 
+    out << "  string type data" << endl; 
     assert(time.size()==dataStr.size());
   }
 
-  for(unsigned int i=0;i<time.size();i++) {
-    cout<<time.at(i)<<'\n';
+  for(size_t i = 0; i < time.size(); i++) {
+
+    out << time[i] << endl;
     
     if(isStr) {
-      cout<<dataStr.at(i)<<'\n';
+      out << dataStr[i] << endl;
     }
       
     if(isNum) {
-      for(unsigned int j=0;j<(dataNum.at(i)).size();j++) {
-        cout<<(dataNum.at(i)).at(j)<<" ";
+      for(unsigned int j = 0; j < dataNum[i].size(); j++) {
+        out << dataNum[i][j] << " ";
       }
-      cout<<'\n';
+      out << endl;
     }
     
   } // i
+
+  out << "============================================" << endl;
 
 }
   
@@ -546,12 +551,14 @@ CalReader CalReader::sortTime(CalReader toSort)
 }
 
 
-int CalReader::dateMatch(CalReader calIn, RadxTime check)
+int CalReader::dateMatch(const CalReader &calIn, const RadxTime &check) const
 {
   
-  for(unsigned int i=0;i<(calIn.time).size();i++) {
-    if(check > (calIn.time).at(i)) {
-      return i;
+  const vector<RadxTime> &times =  calIn.time;
+  
+  for(size_t ii = 0; ii < times.size(); ii++) {
+    if (check > times[ii]) {
+      return ii;
     }
   }
   return 0;

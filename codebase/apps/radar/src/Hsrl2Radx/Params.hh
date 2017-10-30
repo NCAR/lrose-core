@@ -442,6 +442,8 @@ public:
 
   char* scan_adjustment_name;
 
+  int ngates_for_background_correction;
+
   int counts_censoring_threshold;
 
   int optical_depth_median_filter_len;
@@ -517,7 +519,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[90];
+  mutable TDRPtable _table[91];
 
   const char *_className;
 

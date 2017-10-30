@@ -79,15 +79,16 @@ public:
 private:   
 
   const Params &_params;
+  const FullCals &_fullCals;
 
   static const double _BmsFactor;
   static const double _BoltzmannConst;
   static const double _depolFactor;
 
   // input data
-
-  const FullCals &_fullCals;
+  
   size_t _nGates;
+  size_t _nBinsPerGate;
   const vector<Radx::fl32> &_hiData;
   const vector<Radx::fl32> &_loData;
   const vector<Radx::fl32> &_crossData;
@@ -129,11 +130,6 @@ private:
   
   // energy normalization
   double _energyNorm(double arrivalRate, double totalEnergy);
-  
-  // differential overlap correction the vector coresponds
-  //  to hi, lo, cross, mol
-  vector<double> _diffOverlapCor(vector<double> arrivalRate,
-                                 vector<double> diffOverlap);
   
   // process QWP rotation
   vector<double> _processQWPRotation(vector<double> arrivalRate,

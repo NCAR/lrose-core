@@ -91,6 +91,11 @@ DerFieldCalcs::DerFieldCalcs(const Params &params,
   assert(tempK.size() == _nGates);
   assert(presHpa.size() == _nGates);
 
+  _nBinsPerGate = 1;
+  if (_params.combine_bins_on_read) {
+    _nBinsPerGate = _params.n_bins_per_gate;
+  }
+
 }
 
 /////////////////////////////////////////////////////////////////
@@ -98,205 +103,164 @@ DerFieldCalcs::DerFieldCalcs(const Params &params,
 
 void DerFieldCalcs::_applyCorr()
 {
+  
+  // allocate the rate vectors
 
-  _hiDataRate.clear();
-  _loDataRate.clear();
-  _crossDataRate.clear();
-  _molDataRate.clear();
-  _combinedRate.clear();
+  _hiDataRate.resize(_nGates);
+  _loDataRate.resize(_nGates);
+  _crossDataRate.resize(_nGates);
+  _molDataRate.resize(_nGates);
+  _combinedRate.resize(_nGates);
+
+  // non-linear count correction
   
   CalReader dt_hi = _fullCals.getDeadTimeHi();
   CalReader dt_lo = _fullCals.getDeadTimeLo();
   CalReader dt_cross = _fullCals.getDeadTimeCross();
   CalReader dt_mol = _fullCals.getDeadTimeMol();
   CalReader binwid = _fullCals.getBinWidth();
-   
-  for(size_t igate=0;igate<_nGates;igate++) {
-    
-    if(dt_hi.dataTypeisNum() && 
-       ( ( dt_hi.getDataNum() ).at(_fullCals.getHiPos()) ).size()==1 && 
-       dt_lo.dataTypeisNum() && 
-       ( ( dt_lo.getDataNum() ).at(_fullCals.getLoPos()) ).size()==1 && 
-       dt_cross.dataTypeisNum() && 
-       ( ( dt_cross.getDataNum() ).at(_fullCals.getCrossPos()) ).size()==1 && 
-       dt_mol.dataTypeisNum() &&   
-       ( ( dt_mol.getDataNum() ).at(_fullCals.getMolPos()) ).size()==1 &&
-       binwid.dataTypeisNum() && 
-       ( ( binwid.getDataNum() ).at(_fullCals.getBinPos()) ).size()==1 ) {
-      
-      double hiDeadTime=((dt_hi.getDataNum()).at(_fullCals.getHiPos())).at(0);
-      double loDeadTime=((dt_lo.getDataNum()).at(_fullCals.getLoPos())).at(0);
-      double crossDeadTime=
-        ((dt_cross.getDataNum()).at(_fullCals.getCrossPos())).at(0);
-      double molDeadTime=
-        ((dt_mol.getDataNum()).at(_fullCals.getMolPos())).at(0);
-      double binW= ((binwid.getDataNum()).at(_fullCals.getBinPos())).at(0);
+  
+  double hiDeadTime = dt_hi.getDataNum()[_fullCals.getHiPos()][0];
+  double loDeadTime = dt_lo.getDataNum()[_fullCals.getLoPos()][0];
+  double crossDeadTime = dt_cross.getDataNum()[_fullCals.getCrossPos()][0];
+  double molDeadTime = dt_mol.getDataNum()[_fullCals.getMolPos()][0];
+  double binW = binwid.getDataNum()[_fullCals.getBinPos()][0];
 
-      // cerr << "11111 hiDead, loDead, crossDead, molDead, binW: "
-      //      << hiDeadTime << ", "
-      //      << loDeadTime << ", "
-      //      << crossDeadTime << ", "
-      //      << molDeadTime << ", "
-      //      << binW << endl;
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "==>> hiDead, loDead, crossDead, molDead, binW: "
+         << hiDeadTime << ", "
+         << loDeadTime << ", "
+         << crossDeadTime << ", "
+         << molDeadTime << ", "
+         << binW << endl;
+  }
 
-      _hiDataRate.push_back(_nonLinCountCor(_hiData[igate], 
-                                            hiDeadTime, binW, _shotCount)); 
-      
-      _loDataRate.push_back(_nonLinCountCor(_loData[igate], 
-                                            loDeadTime, binW, _shotCount)); 
-
-      _crossDataRate.push_back(_nonLinCountCor(_crossData[igate], 
-					       crossDeadTime, binW, _shotCount)); 
-
-      _molDataRate.push_back(_nonLinCountCor(_molData[igate], 
-                                             molDeadTime, binW, _shotCount)); 
-    }
-    
+  for(size_t igate = 0; igate < _nGates; igate++) {
+    _hiDataRate[igate] =
+      _nonLinCountCor(_hiData[igate], hiDeadTime, binW, _shotCount); 
+    _loDataRate[igate] = 
+      _nonLinCountCor(_loData[igate], loDeadTime, binW, _shotCount); 
+    _crossDataRate[igate] =
+      _nonLinCountCor(_crossData[igate], crossDeadTime, binW, _shotCount); 
+    _molDataRate[igate] =
+      _nonLinCountCor(_molData[igate], molDeadTime, binW, _shotCount); 
   } // igate
 
   _printRateDiagnostics("countCorrection");
+
+  // subtract baseline
+  // this is a pass-through
   
-  vector< vector<double> > blCor=(_fullCals.getBLCor());
-  int blCorSize=(blCor.at(0)).size();
-  for(size_t igate=0;igate<_nGates;igate++) {
-    //need pol baseline from file to replace 1.0
-    //_baselineSubtract is a passthrough function for now anyway
-    
-    int calGate = blCorSize/_nGates * igate +  0.5 * blCorSize/_nGates;
-    
-    _hiDataRate.at(igate)=_baselineSubtract(_hiDataRate.at(igate),
-                                            (blCor.at(1)).at(calGate),1.0);
-    _loDataRate.at(igate)=_baselineSubtract(_loDataRate.at(igate),
-                                            (blCor.at(2)).at(calGate),1.0);
-    _crossDataRate.at(igate)=_baselineSubtract(_crossDataRate.at(igate),
-                                               (blCor.at(3)).at(calGate),1.0);
-    _molDataRate.at(igate)=_baselineSubtract(_molDataRate.at(igate),
-                                             (blCor.at(4)).at(calGate),1.0);
-  }
+  const vector<double> &blCorCombinedHi = _fullCals.getBlCorCombinedHi();
+  const vector<double> &blCorCombinedLo = _fullCals.getBlCorCombinedLo();
+  const vector<double> &blCorMolecular = _fullCals.getBlCorMolecular();
+  const vector<double> &blCorCrossPol = _fullCals.getBlCorCrossPol();
+  
+  size_t calBin = _nBinsPerGate / 2;
+  double polPosn = 1.0;
+
+  for(size_t igate = 0; igate < _nGates; igate++, calBin += _nBinsPerGate) {
+    _hiDataRate[igate] = _baselineSubtract(_hiDataRate[igate],
+                                           blCorCombinedHi[calBin], polPosn);
+    _loDataRate[igate] = _baselineSubtract(_loDataRate[igate],
+                                           blCorCombinedLo[calBin], polPosn);
+    _crossDataRate[igate] = _baselineSubtract(_crossDataRate[igate],
+                                              blCorCrossPol[calBin], polPosn);
+    _molDataRate[igate] = _baselineSubtract(_molDataRate[igate],
+                                            blCorMolecular[calBin], polPosn);
+  } // igate
   
   _printRateDiagnostics("baselineSubtract");
+
+  // compute background rates from last 'n' gates
   
   double hibackgroundRate = 0.0;
   double lobackgroundRate = 0.0;
   double crossbackgroundRate = 0.0;
   double molbackgroundRate = 0.0;
   
-  // grabs last 100 out of 4000 bins for background,
-  // or fractionally adjusts for less bins
+  int nGatesBackground = _params.ngates_for_background_correction;
+  int startBackgroundGate = _nGates - nGatesBackground;
+  if (startBackgroundGate < 1) {
+    startBackgroundGate = 1;
+  }
   double bgBinCount = 0.0;
-  int startBackgroundGate = (int) ((double) _nGates * 0.975);
-  for(int cgate = startBackgroundGate; cgate < (int) _nGates; cgate++) {
+  for(int cgate = startBackgroundGate - 1; cgate < (int) _nGates; cgate++) {
     hibackgroundRate += _hiDataRate.at(cgate);
     lobackgroundRate += _loDataRate.at(cgate);
     crossbackgroundRate += _crossDataRate.at(cgate);
     molbackgroundRate += _molDataRate.at(cgate);
     bgBinCount++;	    
   }
-
+  
   hibackgroundRate /= bgBinCount;
   lobackgroundRate /= bgBinCount;
   crossbackgroundRate /= bgBinCount;
   molbackgroundRate /= bgBinCount;
+
+  // adjust for background rate
   
   for(size_t igate = 0; igate < _nGates; igate++) {
-    _hiDataRate.at(igate) =
-      _backgroundSub(_hiDataRate.at(igate), hibackgroundRate);
-    _loDataRate.at(igate) =
-      _backgroundSub(_loDataRate.at(igate), lobackgroundRate);
-    _crossDataRate.at(igate) =
-      _backgroundSub(_crossDataRate.at(igate), crossbackgroundRate);
-    _molDataRate.at(igate) =
-      _backgroundSub(_molDataRate.at(igate), molbackgroundRate);
+    _hiDataRate[igate] =
+      _backgroundSub(_hiDataRate[igate], hibackgroundRate);
+    _loDataRate[igate] =
+      _backgroundSub(_loDataRate[igate], lobackgroundRate);
+    _crossDataRate[igate] =
+      _backgroundSub(_crossDataRate[igate], crossbackgroundRate);
+    _molDataRate[igate] =
+      _backgroundSub(_molDataRate[igate], molbackgroundRate);
   }
 
   if(_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr<<"hibackgroundRate="<<hibackgroundRate<<endl;
-    cerr<<"lobackgroundRate="<<lobackgroundRate<<endl;
-    cerr<<"crossbackgroundRate="<<crossbackgroundRate<<endl;
-    cerr<<"molbackgroundRate="<<molbackgroundRate<<endl;
+    cerr << "hibackgroundRate = " << hibackgroundRate<<endl;
+    cerr << "lobackgroundRate = " << lobackgroundRate<<endl;
+    cerr << "crossbackgroundRate = " << crossbackgroundRate<<endl;
+    cerr << "molbackgroundRate = " << molbackgroundRate<<endl;
     _printRateDiagnostics("backgroundSub");
   }
-  
+
+  // normalize with respect to transmit energy
+
   for(size_t igate = 0; igate < _nGates; igate++) {
-    _hiDataRate.at(igate) = _energyNorm(_hiDataRate.at(igate), _power);
-    _loDataRate.at(igate) = _energyNorm(_loDataRate.at(igate), _power);
-    _crossDataRate.at(igate) = _energyNorm(_crossDataRate.at(igate), _power);
-    _molDataRate.at(igate) = _energyNorm(_molDataRate.at(igate), _power);
+    _hiDataRate[igate] = _energyNorm(_hiDataRate[igate], _power);
+    _loDataRate[igate] = _energyNorm(_loDataRate[igate], _power);
+    _crossDataRate[igate] = _energyNorm(_crossDataRate[igate], _power);
+    _molDataRate[igate] = _energyNorm(_molDataRate[igate], _power);
   }
   
   _printRateDiagnostics("energyNorm");
-  
-  vector< vector<double> > diffDGeo=(_fullCals.getDiffDGeoCor());
-  int diffDGeoSize=(diffDGeo.at(1)).size();	
-  
-  for(size_t igate=0;igate<_nGates;igate++) {
-      
-    int calGate= diffDGeoSize/_nGates * igate + 0.5 * diffDGeoSize/_nGates;
-    
-    vector<double> rates;
-    vector<double> diffOverlap;
-    
-    rates.push_back(_hiDataRate.at(igate));
-    diffOverlap.push_back( (diffDGeo.at(1)).at(calGate) );
-    rates.push_back(_loDataRate.at(igate));
-    diffOverlap.push_back( (diffDGeo.at(2)).at(calGate) );
-    rates.push_back(_crossDataRate.at(igate));
-    diffOverlap.push_back( 1.0 ); 
-    // ***** need cross overlap correction from another file
-    rates.push_back(_molDataRate.at(igate));
-    diffOverlap.push_back( 1.0 );
-    
-    rates=_diffOverlapCor(rates, diffOverlap);
-    
-    _hiDataRate.at(igate)=rates.at(0);
-    _loDataRate.at(igate)=rates.at(1);
-    _crossDataRate.at(igate)=rates.at(2);
-    _molDataRate.at(igate)=rates.at(3);
 
-  }
+  // correct for differential overlap
   
+  const vector<double> &diffGeoCombHiMol = _fullCals.getDiffGeoCombHiMol();
+  const vector<double> &diffGeoCombLoMol = _fullCals.getDiffGeoCombLoMol();
+  calBin = _nBinsPerGate / 2;
+  for(size_t igate = 0; igate < _nGates; igate++, calBin += _nBinsPerGate) {
+    _hiDataRate[igate] /= diffGeoCombHiMol[calBin];
+    _loDataRate[igate] /= diffGeoCombLoMol[calBin];
+    // _crossDataRate[igate] /= diffGeoCombHiMol[calBin];
+  }
   _printRateDiagnostics("diffOverlapCor");
 
-  for(size_t igate=0;igate<_nGates;igate++) {
-    vector<double> rates;
-    vector<double> polCal;
-    rates.push_back(_hiDataRate.at(igate));
-    polCal.push_back( 1.0 );
-    rates.push_back(_loDataRate.at(igate));
-    polCal.push_back( 1.0 );
-    rates.push_back(_crossDataRate.at(igate));
-    polCal.push_back( 1.0 );
-    rates.push_back(_molDataRate.at(igate));
-    polCal.push_back( 1.0 );
-    // need to replace 1.0 with polarization calibration info, 
-    // _processQWPRotation is passthrough for now though 
-    rates=_processQWPRotation(rates, polCal);
-    
-    _hiDataRate.at(igate)=rates.at(0);
-    _loDataRate.at(igate)=rates.at(1);
-    _crossDataRate.at(igate)=rates.at(2);
-    _molDataRate.at(igate)=rates.at(3);
-    
-  }
-  
-  _printRateDiagnostics("processQWPRotation");
+  // for now we ignore QWP rotation correction
 
-  for(size_t igate=0;igate<_nGates;igate++) {
-    _combinedRate.push_back(_hiAndloMerge(_hiDataRate.at(igate), 
-					  _loDataRate.at(igate)));
-  }
+  // merge hi and lo channels into combined rate
   
+  for(size_t igate = 0; igate < _nGates; igate++) {
+    _combinedRate[igate] = _hiAndloMerge(_hiDataRate[igate], 
+                                         _loDataRate[igate]);
+  }
   _printRateDiagnostics("hiAndloMerge", true);
 
-  vector< vector<double> > geoDef=(_fullCals.getGeoDefCor());
-  int geoDefSize=(geoDef.at(1)).size();	
-  
-  for(size_t igate=0;igate<_nGates;igate++) {
-    int calGate= geoDefSize/_nGates * igate + 0.5*geoDefSize/_nGates;
-    double calibr=(geoDef.at(1)).at(calGate);
-    _combinedRate.at(igate)=_geoOverlapCor(_combinedRate.at(igate), calibr);
-    _crossDataRate.at(igate)=_geoOverlapCor(_crossDataRate.at(igate), calibr);
-    _molDataRate.at(igate)=_geoOverlapCor(_molDataRate.at(igate), calibr);
+  // geo correction
+
+  const vector<double> &geoCorr = _fullCals.getGeoCorr();
+  calBin = _nBinsPerGate / 2;
+  for(size_t igate = 0; igate < _nGates; igate++, calBin += _nBinsPerGate) {
+    double corr = geoCorr[calBin];
+    _combinedRate[igate] *= corr;
+    _crossDataRate[igate] *= corr;
+    _molDataRate[igate] *= corr;
   }
   
   _printRateDiagnostics("geoOverlapCor", true);
@@ -364,15 +328,15 @@ void DerFieldCalcs::computeDerived()
   // vol depol
 
   for(size_t igate=0;igate<_nGates;igate++) {
-    _volDepol[igate] = _computeVolDepol(_crossDataRate.at(igate), 
-                                        _combinedRate.at(igate));
+    _volDepol[igate] = _computeVolDepol(_crossDataRate[igate], 
+                                        _combinedRate[igate]);
   }
   
   // backscatter ratio
   
   for(size_t igate=0;igate<_nGates;igate++) {
-    _backscatRatio[igate] = _computeBackscatRatio(_combinedRate.at(igate), 
-                                                  _molDataRate.at(igate));
+    _backscatRatio[igate] = _computeBackscatRatio(_combinedRate[igate], 
+                                                  _molDataRate[igate]);
   }
   
   // particle depol
@@ -394,7 +358,7 @@ void DerFieldCalcs::computeDerived()
   
   for(size_t igate = 0; igate < _nGates; igate++) {
     _opticalDepth[igate] = 
-      _computeOpticalDepth(_presHpa[igate], _tempK[igate], _molDataRate.at(igate), scanAdj);
+      _computeOpticalDepth(_presHpa[igate], _tempK[igate], _molDataRate[igate], scanAdj);
   }
   _filterOpticalDepth();
 
@@ -409,9 +373,9 @@ void DerFieldCalcs::computeDerived()
                               _htM[igate + filterHalf]);
   }
                               
-  if(_params.debug >= Params::DEBUG_EXTRA) {
-    _printDerivedFields(cerr);
-  }
+  // if(_params.debug >= Params::DEBUG_EXTRA) {
+  //   _printDerivedFields(cerr);
+  // }
 
 }
 
@@ -465,24 +429,6 @@ double DerFieldCalcs::_energyNorm(double arrivalRate, double totalEnergy)
   return (arrivalRate / totalEnergy) * pow(10.0, 6.0);
 }
 
-
-/////////////////////////////////////////////////////////////////
-// differential overlap correction the vector coresponds
-// to hi, lo, cross, mol
-
-vector<double> DerFieldCalcs::_diffOverlapCor(vector<double> arrivalRate, 
-					      vector<double> diffOverlap)
-{
-  assert(arrivalRate.size()==4);
-  assert(diffOverlap.size()==4);
-  arrivalRate.at(0) = arrivalRate.at(0)/diffOverlap.at(0);
-  arrivalRate.at(1) = arrivalRate.at(1)/diffOverlap.at(1);
-  arrivalRate.at(2) = arrivalRate.at(2)/(diffOverlap.at(3)*diffOverlap.at(0));
-  // arrivalRate.at(3) is unchanged
-
-  return arrivalRate;
-
-}
 
 /////////////////////////////////////////////////////////////////
 //process QWP rotation

@@ -320,6 +320,12 @@ paramdef string {
 } scan_adjustment_name;
 
 paramdef int {
+  p_default = 100;
+  p_descr = "The background correction used data from the end of each ray.";
+  p_help = "This is the number of gates used to compute the background value.";
+} ngates_for_background_correction;
+
+paramdef int {
   p_default = 0;
   p_descr = "Threshold the count fields below this value.";
   p_help = "This helps to remove the noise from the system.";

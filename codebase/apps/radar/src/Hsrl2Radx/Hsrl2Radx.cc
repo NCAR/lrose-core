@@ -135,6 +135,7 @@ Hsrl2Radx::~Hsrl2Radx()
 
 int Hsrl2Radx::Run()
 {
+
   // reading in calibration files here ----- 
   
   _cals.readDeadTimeHi(_params.calvals_gvhsrl_path, 
@@ -150,30 +151,29 @@ int Hsrl2Radx::Run()
   _cals.readScanAdj(_params.calvals_gvhsrl_path, 
                     _params.scan_adjustment_name); 
 
-
-  _cals.readBLCor(_params.baseline_calibration_path);
-  _cals.readDiffDGeoCor(_params.diff_default_geofile_path);
-  _cals.readGeoDefCor(_params.geofile_default_path);
-  _cals.readAfPulCor(_params.afterpulse_default_path);
+  _cals.readBaselineCor(_params.baseline_calibration_path);
+  _cals.readDiffGeoCor(_params.diff_default_geofile_path);
+  _cals.readGeoCor(_params.geofile_default_path);
+  _cals.readAfterPulseCor(_params.afterpulse_default_path);
     
-  //done reading calibration files. 
+  // now run
 
+  int iret = 0;
   if (_params.mode == Params::ARCHIVE) {
-    return _runArchive();
+    iret = _runArchive();
   } else if (_params.mode == Params::FILELIST) {
-    return _runFilelist();
+    iret = _runFilelist();
   } else if (_params.mode == Params::REALTIME_FMQ) {
-    return _runRealtimeFmq();
+    iret = _runRealtimeFmq();
   } else if (_params.mode == Params::REALTIME_FILE) {
     if (_params.latest_data_info_avail) {
-      return _runRealtimeWithLdata();
+      iret = _runRealtimeWithLdata();
     } else {
-      return _runRealtimeNoLdata();
+      iret = _runRealtimeNoLdata();
     }
   }
-
-  // will not reach here
-  return -1;
+  
+  return iret;
 
 }
 
@@ -1161,13 +1161,18 @@ void Hsrl2Radx::_addDerivedFields(RadxRay *ray)
 {
 
   // ray info
-    
+
+  time_t rayTime = ray->getTimeSecs();
   size_t nGates = ray->getNGates();
   double startRangeKm = ray->getStartRangeKm();
   double gateSpacingKm = ray->getGateSpacingKm();
 
   double power = ray->getMeasXmitPowerDbmH();
   double shotCount = ray->getNSamples();
+
+  // set the cals for this time
+
+  _cals.setTime(rayTime);
 
   // environmental fields
 
@@ -1226,9 +1231,10 @@ void Hsrl2Radx::_addDerivedFields(RadxRay *ray)
   
 	
   // create object for derived fields
-
-  DerFieldCalcs calcs(_params, _cals, nGates, hiDataVec, loDataVec, crossDataVec, 
-                      molDataVec, htMVec, tempKVec, presHpaVec, 
+  
+  DerFieldCalcs calcs(_params, _cals, nGates,
+                      hiDataVec, loDataVec, crossDataVec, molDataVec,
+                      htMVec, tempKVec, presHpaVec, 
                       shotCount, power);
 
   // calculate the fields

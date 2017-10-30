@@ -1141,6 +1141,18 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("i2_scan_adjustment");
     tt++;
     
+    // Parameter 'ngates_for_background_correction'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ngates_for_background_correction");
+    tt->descr = tdrpStrDup("The background correction used data from the end of each ray.");
+    tt->help = tdrpStrDup("This is the number of gates used to compute the background value.");
+    tt->val_offset = (char *) &ngates_for_background_correction - &_start_;
+    tt->single_val.i = 100;
+    tt++;
+    
     // Parameter 'counts_censoring_threshold'
     // ctype is 'int'
     

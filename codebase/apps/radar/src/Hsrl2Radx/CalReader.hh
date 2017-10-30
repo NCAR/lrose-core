@@ -37,6 +37,7 @@
 
 #include <Radx/RadxTime.hh>
 #include <vector>
+#include <ostream>
 
 using namespace std;
 
@@ -72,10 +73,10 @@ public:
   string getVarUnits();
   vector<RadxTime> getTime();
   vector<string> getDataStr();
-  vector< vector<double> > getDataNum();
-  void printBlock();
+  const vector< vector<double> > &getDataNum() const;
+  void printBlock(ostream &out);
   CalReader sortTime(CalReader toSort);
-  int dateMatch(CalReader calIn, RadxTime check);
+  int dateMatch(const CalReader &calIn, const RadxTime &check) const;
 
   CalReader readCalVals(const char* file, const char* variable);
   string removeWhitespace(string s);
