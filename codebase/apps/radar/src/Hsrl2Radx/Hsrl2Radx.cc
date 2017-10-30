@@ -136,26 +136,12 @@ Hsrl2Radx::~Hsrl2Radx()
 int Hsrl2Radx::Run()
 {
 
-  // reading in calibration files here ----- 
-  
-  _cals.readDeadTimeHi(_params.calvals_gvhsrl_path, 
-                       _params.combined_hi_dead_time_name);
-  _cals.readDeadTimeLo(_params.calvals_gvhsrl_path, 
-                       _params.combined_lo_dead_time_name);
-  _cals.readDeadTimeCross(_params.calvals_gvhsrl_path, 
-                          _params.cross_pol_dead_time_name);
-  _cals.readDeadTimeMol(_params.calvals_gvhsrl_path, 
-                        _params.molecular_dead_time_name);
-  _cals.readBinWidth(_params.calvals_gvhsrl_path, 
-                     _params.bin_width_name); 
-  _cals.readScanAdj(_params.calvals_gvhsrl_path, 
-                    _params.scan_adjustment_name); 
+  // read in calibration files
 
-  _cals.readBaselineCor(_params.baseline_calibration_path);
-  _cals.readDiffGeoCor(_params.diff_default_geofile_path);
-  _cals.readGeoCor(_params.geofile_default_path);
-  _cals.readAfterPulseCor(_params.afterpulse_default_path);
-    
+  if (_readCals()) {
+    return -1;
+  }
+
   // now run
 
   int iret = 0;
@@ -177,6 +163,39 @@ int Hsrl2Radx::Run()
 
 }
 
+//////////////////////////////////////////////////
+// Read in cals
+
+int Hsrl2Radx::_readCals()
+{
+
+  _cals.readDeadTimeHi(_params.calvals_gvhsrl_path, 
+                       _params.combined_hi_dead_time_name);
+
+  _cals.readDeadTimeLo(_params.calvals_gvhsrl_path, 
+                       _params.combined_lo_dead_time_name);
+
+  _cals.readDeadTimeCross(_params.calvals_gvhsrl_path, 
+                          _params.cross_pol_dead_time_name);
+
+  _cals.readDeadTimeMol(_params.calvals_gvhsrl_path, 
+                        _params.molecular_dead_time_name);
+
+  _cals.readBinWidth(_params.calvals_gvhsrl_path, 
+                     _params.bin_width_name); 
+
+  _cals.readScanAdj(_params.calvals_gvhsrl_path, 
+                    _params.scan_adjustment_name); 
+
+  _cals.readBaselineCor(_params.baseline_calibration_path);
+  _cals.readDiffGeoCor(_params.diff_default_geofile_path);
+  _cals.readGeoCor(_params.geofile_default_path);
+  _cals.readAfterPulseCor(_params.afterpulse_default_path);
+
+  return 0;
+
+}
+    
 //////////////////////////////////////////////////
 // Run in filelist mode
 
@@ -446,13 +465,32 @@ int Hsrl2Radx::_readFmq(DsFmq &inputFmq,
     
     RadxRay *radxRay = _convertRawToRadx(rawRay);
 
+    // add filtered count fields
+
+    _addFilteredFieldToRay(radxRay, 
+                           Names::CombinedHighCounts,
+                           Names::CombinedHighCounts_F);
+
+    _addFilteredFieldToRay(radxRay, 
+                           Names::CombinedLowCounts,
+                           Names::CombinedLowCounts_F);
+
+    _addFilteredFieldToRay(radxRay, 
+                           Names::MolecularCounts,
+                           Names::MolecularCounts_F);
+
+    _addFilteredFieldToRay(radxRay, 
+                           Names::CrossPolarCounts,
+                           Names::CrossPolarCounts_F);
+    
     // add environment fields
     
     _addEnvFields(radxRay);
 
     // add moments
 
-    _addDerivedFields(radxRay);
+    _addDerivedMoments(radxRay);
+    _addFilteredMoments(radxRay);
 
     // write params to FMQ every n rays
 
@@ -572,7 +610,7 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
   // hard coded 2000 as replacement for DATA_shot_count from raw file
   ray->setNSamples(2000);
 
-  // add the fields
+  // add the raw fields
 
   _addRawFieldToRay(ray, startRangeKm, gateSpacingKm,
                     Names::CombinedHighCounts,
@@ -632,8 +670,44 @@ void Hsrl2Radx::_addRawFieldToRay(RadxRay *ray,
     fcounts[igate] /= (double) _nBinsPerGate;
   }
   
-  // censor counts as required
+  // create the field
+  
+  RadxField *field =
+    ray->addField(name, units, _nGates,
+                  Radx::missingFl32,
+                  fcounts,
+                  true);
+  
+  field->setStandardName(standardName);
+  field->setLongName(standardName);
+  field->setRangeGeom(startRangeKm, gateSpacingKm);
+  
+}
 
+//////////////////////////////////////////////////////////////
+// Add fl32 field to rays
+
+void Hsrl2Radx::_addFilteredFieldToRay(RadxRay *ray,
+                                       const string &name,
+                                       const string &filteredName)
+  
+{
+
+  // get the field
+
+  RadxField *raw = ray->getField(name);
+  assert(raw);
+
+  // make a copy
+
+  RadxField *copy = new RadxField(*raw);
+
+  // get the count data
+  
+  Radx::fl32 *fcounts = copy->getDataFl32();
+  
+  // censor counts as required
+  
   if (_params.counts_censoring_threshold > 0) {
     for (int ii = 0; ii < _nGates; ii++) {
       if (fcounts[ii] < _params.counts_censoring_threshold) {
@@ -648,18 +722,14 @@ void Hsrl2Radx::_addRawFieldToRay(RadxRay *ray,
     _applyZeroSpeckleFilter(_nGates, _params.speckle_filter_len, fcounts);
   }
 
-  // create the field
+  // change the name
   
-  RadxField *field =
-    ray->addField(name, units, _nGates,
-                  Radx::missingFl32,
-                  fcounts,
-                  true);
-  
-  field->setStandardName(standardName);
-  field->setLongName(standardName);
-  field->setRangeGeom(startRangeKm, gateSpacingKm);
-  
+  copy->setName(filteredName);
+
+  // add the modified field
+
+  ray->addField(copy);
+
 }
 
 //////////////////////////////////////////////////
@@ -1076,6 +1146,30 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
 
   _setGlobalAttr(vol);
 
+  // add filtered count fields
+  
+  for(size_t iray = 0; iray < rays.size(); iray++) {
+
+    RadxRay *ray = rays[iray];
+  
+    _addFilteredFieldToRay(ray, 
+                           Names::CombinedHighCounts,
+                           Names::CombinedHighCounts_F);
+    
+    _addFilteredFieldToRay(ray, 
+                           Names::CombinedLowCounts,
+                           Names::CombinedLowCounts_F);
+    
+    _addFilteredFieldToRay(ray, 
+                           Names::MolecularCounts,
+                           Names::MolecularCounts_F);
+    
+    _addFilteredFieldToRay(ray, 
+                           Names::CrossPolarCounts,
+                           Names::CrossPolarCounts_F);
+
+  }
+
   // add in height, temperature and pressure fields
 
   for(size_t iray = 0; iray < rays.size(); iray++) {
@@ -1086,7 +1180,8 @@ int Hsrl2Radx::_processUwRawFile(const string &readPath)
   // loop through the rays
   
   for(size_t iray = 0; iray < rays.size(); iray++) {
-    _addDerivedFields(rays[iray]);
+    _addDerivedMoments(rays[iray]);
+    _addFilteredMoments(rays[iray]);
   }
     
   // write the file
@@ -1155,9 +1250,9 @@ void Hsrl2Radx::_addEnvFields(RadxRay *ray)
 }
 
 //////////////////////////////////////////////////
-// Add in the HSRL moments
+// Add in the derived HSRL moments
 
-void Hsrl2Radx::_addDerivedFields(RadxRay *ray)
+void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
 {
 
   // ray info
@@ -1183,14 +1278,6 @@ void Hsrl2Radx::_addDerivedFields(RadxRay *ray)
   assert(tempField != NULL);
   assert(presField != NULL);
 
-  const Radx::fl32 *htMeters = htField->getDataFl32();
-  const Radx::fl32 *tempK = tempField->getDataFl32();
-  const Radx::fl32 *presHpa = presField->getDataFl32();
-
-  // for (size_t ii = 0; ii < ray->getNFields(); ii++) {
-  //   cerr << "1111111111 name: " << ray->getFields()[ii]->getName() << endl;
-  // }
-
   // get raw data fields
 
   const RadxField *hiField = ray->getField(Names::CombinedHighCounts);
@@ -1205,58 +1292,22 @@ void Hsrl2Radx::_addDerivedFields(RadxRay *ray)
   const RadxField *crossField = ray->getField(Names::CrossPolarCounts);
   assert(crossField != NULL);
 
-  //holds derived data fields
-    
-  const Radx::fl32 *hiData = hiField->getDataFl32();
-  const Radx::fl32 *loData = loField->getDataFl32();
-  const Radx::fl32 *crossData = crossField->getDataFl32();
-  const Radx::fl32 *molData = molField->getDataFl32();
-  vector< Radx::fl32> hiDataVec;
-  vector< Radx::fl32> loDataVec;
-  vector< Radx::fl32> crossDataVec;
-  vector< Radx::fl32> molDataVec;
-  vector< Radx::fl32> htMVec;
-  vector< Radx::fl32> tempKVec;
-  vector< Radx::fl32> presHpaVec;
-  
-  for(size_t igate = 0; igate < nGates; igate++) {
-    hiDataVec.push_back(hiData[igate]);
-    loDataVec.push_back(loData[igate]);
-    crossDataVec.push_back(crossData[igate]);
-    molDataVec.push_back(molData[igate]);
-    htMVec.push_back(htMeters[igate]* 1000.0);
-    tempKVec.push_back(tempK[igate]);
-    presHpaVec.push_back(presHpa[igate]);
-  }
-  
-	
   // create object for derived fields
   
   DerFieldCalcs calcs(_params, _cals, nGates,
-                      hiDataVec, loDataVec, crossDataVec, molDataVec,
-                      htMVec, tempKVec, presHpaVec, 
-                      shotCount, power);
+                      hiField->getDataFl32(),
+                      loField->getDataFl32(),
+                      crossField->getDataFl32(),
+                      molField->getDataFl32(),
+                      htField->getDataFl32(),
+                      tempField->getDataFl32(),
+                      presField->getDataFl32(), 
+                      shotCount,
+                      power);
 
   // calculate the fields
 
   calcs.computeDerived();
-
-  // apply speckle filter on results
-
-  if (_params.apply_speckle_filter) {
-    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len, 
-                               calcs.getVolDepol().data());
-    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
-                               calcs.getPartDepol().data());
-    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
-                               calcs.getBackscatRatio().data());
-    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
-                               calcs.getBackscatCoeff().data());
-    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
-                               calcs.getExtinctionCoeff().data());
-    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
-                               calcs.getOpticalDepth().data());
-  }
 
   // load fields with the results
 
@@ -1297,6 +1348,129 @@ void Hsrl2Radx::_addDerivedFields(RadxRay *ray)
 
   RadxField *optDepthField =
     ray->addField(Names::OpticalDepth, "", nGates, Radx::missingFl32, 
+                  calcs.getOpticalDepth().data(), true);
+  optDepthField->setStandardName(Names::lidar_optical_depth);
+  optDepthField->setLongName(Names::lidar_optical_depth);
+  optDepthField->setRangeGeom(startRangeKm, gateSpacingKm);
+       
+}
+
+//////////////////////////////////////////////////
+// Add in the filtered derived HSRL moments
+
+void Hsrl2Radx::_addFilteredMoments(RadxRay *ray)
+{
+
+  // ray info
+  
+  time_t rayTime = ray->getTimeSecs();
+  size_t nGates = ray->getNGates();
+  double startRangeKm = ray->getStartRangeKm();
+  double gateSpacingKm = ray->getGateSpacingKm();
+
+  double power = ray->getMeasXmitPowerDbmH();
+  double shotCount = ray->getNSamples();
+
+  // set the cals for this time
+
+  _cals.setTime(rayTime);
+
+  // environmental fields
+
+  RadxField *htField = ray->getField(Names::Height);
+  RadxField *tempField = ray->getField(Names::Temperature);
+  RadxField *presField = ray->getField(Names::Pressure);
+  assert(htField != NULL);
+  assert(tempField != NULL);
+  assert(presField != NULL);
+
+  // get count fields
+
+  const RadxField *hiField = ray->getField(Names::CombinedHighCounts_F);
+  assert(hiField != NULL);
+
+  const RadxField *loField = ray->getField(Names::CombinedLowCounts_F);
+  assert(loField != NULL);
+
+  const RadxField *molField = ray->getField(Names::MolecularCounts_F);
+  assert(molField != NULL);
+
+  const RadxField *crossField = ray->getField(Names::CrossPolarCounts_F);
+  assert(crossField != NULL);
+
+  // create object for derived fields
+  
+  DerFieldCalcs calcs(_params, _cals, nGates,
+                      hiField->getDataFl32(),
+                      loField->getDataFl32(),
+                      crossField->getDataFl32(),
+                      molField->getDataFl32(),
+                      htField->getDataFl32(),
+                      tempField->getDataFl32(),
+                      presField->getDataFl32(), 
+                      shotCount,
+                      power);
+
+  // calculate the fields
+
+  calcs.computeDerived();
+
+  // apply speckle filter on results
+
+  if (_params.apply_speckle_filter) {
+    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len, 
+                               calcs.getVolDepol().data());
+    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
+                               calcs.getPartDepol().data());
+    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
+                               calcs.getBackscatRatio().data());
+    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
+                               calcs.getBackscatCoeff().data());
+    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
+                               calcs.getExtinctionCoeff().data());
+    _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
+                               calcs.getOpticalDepth().data());
+  }
+
+  // load fields with the results
+
+  RadxField *volDepolField =
+    ray->addField(Names::VolumeDepolRatio_F, "", nGates, Radx::missingFl32, 
+                  calcs.getVolDepol().data(), true);
+  volDepolField->setStandardName(Names::lidar_volume_depolarization_ratio);
+  volDepolField->setLongName(Names::lidar_volume_depolarization_ratio);
+  volDepolField->setRangeGeom(startRangeKm, gateSpacingKm);
+        
+  RadxField *backscatRatioField =
+    ray->addField(Names::BackScatterRatio_F, "", nGates, Radx::missingFl32, 
+                  calcs.getBackscatRatio().data(), true);
+  backscatRatioField->setStandardName(Names::lidar_backscatter_ratio);
+  backscatRatioField->setLongName(Names::lidar_backscatter_ratio);
+  backscatRatioField->setRangeGeom(startRangeKm, gateSpacingKm);
+    
+  RadxField *partDepolField =
+    ray->addField(Names::ParticleDepolRatio_F, "", nGates, Radx::missingFl32,
+                  calcs.getPartDepol().data(), true);
+  partDepolField->setLongName(Names::lidar_particle_depolarization_ratio);
+  partDepolField->setStandardName(Names::lidar_particle_depolarization_ratio);
+  partDepolField->setRangeGeom(startRangeKm, gateSpacingKm);
+    
+  RadxField *backscatCoeffField =
+    ray->addField(Names::BackScatterCoeff_F, "m-1.sr-1", nGates, Radx::missingFl32,
+                  calcs.getBackscatCoeff().data(), true);
+  backscatCoeffField->setStandardName(Names::lidar_backscatter_coefficient);
+  backscatCoeffField->setLongName(Names::lidar_backscatter_coefficient);
+  backscatCoeffField->setRangeGeom(startRangeKm, gateSpacingKm);
+   
+  RadxField *extinctionField =
+    ray->addField(Names::ExtinctionCoeff_F, "m-1", nGates, Radx::missingFl32, 
+                  calcs.getExtinctionCoeff().data(), true);
+  extinctionField->setStandardName(Names::lidar_extinction_coefficient);
+  extinctionField->setLongName(Names::lidar_extinction_coefficient);
+  extinctionField->setRangeGeom(startRangeKm, gateSpacingKm);
+
+  RadxField *optDepthField =
+    ray->addField(Names::OpticalDepth_F, "", nGates, Radx::missingFl32, 
                   calcs.getOpticalDepth().data(), true);
   optDepthField->setStandardName(Names::lidar_optical_depth);
   optDepthField->setLongName(Names::lidar_optical_depth);

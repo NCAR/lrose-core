@@ -53,13 +53,13 @@ public:
   DerFieldCalcs(const Params &params,
                 const FullCals &fullCals,
                 size_t nGates,
-                const vector<Radx::fl32> &hiData,
-                const vector<Radx::fl32> &loData, 
-                const vector<Radx::fl32> &crossData,
-                const vector<Radx::fl32> &molData,
-                const vector<Radx::fl32> &htM,
-                const vector<Radx::fl32> &tempK, 
-                const vector<Radx::fl32> &presHpa,
+                const Radx::fl32 *hiData,
+                const Radx::fl32 *loData, 
+                const Radx::fl32 *crossData,
+                const Radx::fl32 *molData,
+                const Radx::fl32 *htM,
+                const Radx::fl32 *tempK, 
+                const Radx::fl32 *presHpa,
                 double shotCount, 
                 double power);
     
@@ -89,13 +89,13 @@ private:
   
   size_t _nGates;
   size_t _nBinsPerGate;
-  const vector<Radx::fl32> &_hiData;
-  const vector<Radx::fl32> &_loData;
-  const vector<Radx::fl32> &_crossData;
-  const vector<Radx::fl32> &_molData;
-  const vector<Radx::fl32> &_htM;   
-  const vector<Radx::fl32> &_tempK;   
-  const vector<Radx::fl32> &_presHpa;   
+  vector<Radx::fl32> _hiData;
+  vector<Radx::fl32> _loData;
+  vector<Radx::fl32> _crossData;
+  vector<Radx::fl32> _molData;
+  vector<Radx::fl32> _htM;   
+  vector<Radx::fl32> _tempK;   
+  vector<Radx::fl32> _presHpa;   
   double _shotCount, _power;
   
   // derived quantities 

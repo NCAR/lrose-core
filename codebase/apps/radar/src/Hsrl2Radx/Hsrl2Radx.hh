@@ -93,6 +93,7 @@ private:
   int _nBinsPerGate;
   int _nGates;
 
+  int _readCals();
   int _runFilelist();
   int _runArchive();
   int _runRealtimeWithLdata();
@@ -111,6 +112,10 @@ private:
                          const string &units,
                          const string &standardName,
                          const Radx::fl32 *fcounts);
+  
+  void _addFilteredFieldToRay(RadxRay *ray,
+                              const string &name,
+                              const string &filteredName);
   
   int _processFile(const string &filePath);
   int _processUwCfRadialFile(const string &filePath);
@@ -141,7 +146,8 @@ private:
   double _backscatCo(double pressure, double temp, 
 			 double backscatRatio);
 
-  void _addDerivedFields(RadxRay *ray);
+  void _addDerivedMoments(RadxRay *ray);
+  void _addFilteredMoments(RadxRay *ray);
 
   void _applyMissingSpeckleFilter(int nGates, int minRunLen, Radx::fl32 *data);
   void _applyZeroSpeckleFilter(int nGates, int minRunLen, Radx::fl32 *data);

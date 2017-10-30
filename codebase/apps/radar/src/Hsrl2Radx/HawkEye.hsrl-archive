@@ -317,7 +317,7 @@ fields = {
   {
     label = "BackScatterRatio",
     raw_name = "BackScatterRatio",
-    filtered_name = "",
+    filtered_name = "BackScatterRatio_F",
     units = "",
     color_map = "backscatter_ratio.colors",
     shortcut = "1"
@@ -326,7 +326,7 @@ fields = {
   {
     label = "BackScatterCoeff",
     raw_name = "BackScatterCoeff",
-    filtered_name = "",
+    filtered_name = "BackScatterCoeff_F",
     units = "m-1.sr-1",
     color_map = "backscatter_coeff.colors",
     shortcut = "2"
@@ -335,7 +335,7 @@ fields = {
   {
     label = "VolumeDepolRatio",
     raw_name = "VolumeDepolRatio",
-    filtered_name = "",
+    filtered_name = "VolumeDepolRatio_F",
     units = "",
     color_map = "volume_depol_ratio.colors",
     shortcut = "3"
@@ -344,7 +344,7 @@ fields = {
   {
     label = "ParticleDepolRatio",
     raw_name = "ParticleDepolRatio",
-    filtered_name = "",
+    filtered_name = "ParticleDepolRatio_F",
     units = "",
     color_map = "particle_depol_ratio.colors",
     shortcut = "4"
@@ -353,7 +353,7 @@ fields = {
   {
     label = "ExtinctionCoeff",
     raw_name = "ExtinctionCoeff",
-    filtered_name = "",
+    filtered_name = "ExtinctionCoeff_F",
     units = "m-1",
     color_map = "extinction_coeff.colors",
     shortcut = "5"
@@ -362,7 +362,7 @@ fields = {
   {
     label = "OpticalDepth",
     raw_name = "OpticalDepth",
-    filtered_name = "",
+    filtered_name = "OpticalDepth_F",
     units = "",
     color_map = "optical_depth.colors",
     shortcut = "6"
@@ -371,7 +371,7 @@ fields = {
   {
     label = "CombinedHighCounts",
     raw_name = "CombinedHighCounts",
-    filtered_name = "",
+    filtered_name = "CombinedHighCounts_F",
     units = "counts",
     color_map = "hsrl_combined_high.colors",
     shortcut = "7"
@@ -380,7 +380,7 @@ fields = {
   {
     label = "CombinedLowCounts",
     raw_name = "CombinedLowCounts",
-    filtered_name = "",
+    filtered_name = "CombinedLowCounts_F",
     units = "counts",
     color_map = "hsrl_combined_low.colors",
     shortcut = "8"
@@ -389,7 +389,7 @@ fields = {
   {
     label = "CrossPolarCounts",
     raw_name = "CrossPolarCounts",
-    filtered_name = "",
+    filtered_name = "CrossPolarCounts_F",
     units = "counts",
     color_map = "hsrl_cross_polar.colors",
     shortcut = "9"
@@ -398,7 +398,7 @@ fields = {
   {
     label = "MolecularCounts",
     raw_name = "MolecularCounts",
-    filtered_name = "",
+    filtered_name = "MolecularCounts_F",
     units = "counts",
     color_map = "hsrl_molecular.colors",
     shortcut = "a"

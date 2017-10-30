@@ -57,39 +57,36 @@ const double DerFieldCalcs::_depolFactor = 0.000365;
 DerFieldCalcs::DerFieldCalcs(const Params &params,
                              const FullCals &fullCals,
                              size_t nGates,
-                             const vector<Radx::fl32> &hiData,
-                             const vector<Radx::fl32> &loData, 
-                             const vector<Radx::fl32> &crossData,
-                             const vector<Radx::fl32> &molData,
-                             const vector<Radx::fl32> &htM,
-                             const vector<Radx::fl32> &tempK, 
-                             const vector<Radx::fl32> &presHpa,
+                             const Radx::fl32 *hiData,
+                             const Radx::fl32 *loData, 
+                             const Radx::fl32 *crossData,
+                             const Radx::fl32 *molData,
+                             const Radx::fl32 *htM,
+                             const Radx::fl32 *tempK, 
+                             const Radx::fl32 *presHpa,
                              double shotCount, 
                              double power) :
   _params(params),
   _fullCals(fullCals),
   _nGates(nGates),
-  _hiData(hiData),
-  _loData(loData),
-  _crossData(crossData),
-  _molData(molData),
-  _htM(htM),
-  _tempK(tempK),
-  _presHpa(presHpa),
   _shotCount(shotCount),
   _power(power)
 
 {
 
-  // check sizes are correct
+  // load vectors
 
-  assert(hiData.size() == _nGates);
-  assert(loData.size() == _nGates);
-  assert(crossData.size() == _nGates);
-  assert(molData.size() == _nGates);
-  assert(htM.size() == _nGates);
-  assert(tempK.size() == _nGates);
-  assert(presHpa.size() == _nGates);
+  for(size_t igate = 0; igate < nGates; igate++) {
+    _hiData.push_back(hiData[igate]);
+    _loData.push_back(loData[igate]);
+    _crossData.push_back(crossData[igate]);
+    _molData.push_back(molData[igate]);
+    _htM.push_back(htM[igate]);
+    _tempK.push_back(tempK[igate]);
+    _presHpa.push_back(presHpa[igate]);
+  }
+  
+  // set bins per gate
 
   _nBinsPerGate = 1;
   if (_params.combine_bins_on_read) {
