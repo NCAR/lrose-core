@@ -3142,7 +3142,7 @@ int OdimHdf5RadxFile::_finalizeReadVolume()
 
   // load the sweep information from the rays
 
-  _readVol->loadSweepInfoFromRays();
+  // _readVol->loadSweepInfoFromRays();
   
   // constrain the sweep data as appropriate
   
@@ -3189,6 +3189,10 @@ int OdimHdf5RadxFile::_finalizeReadVolume()
     rays[iray]->setSweepMode(sweepMode);
   }
 
+  // load the sweep information from the rays
+
+  _readVol->loadSweepInfoFromRays();
+  
   return 0;
 
 }
