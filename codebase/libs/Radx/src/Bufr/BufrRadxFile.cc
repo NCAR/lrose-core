@@ -51,6 +51,8 @@
 #include <cstdio>
 #include <cmath>
 #include <float.h>
+#include <stdexcept>      // std::out_of_range
+
 using namespace std;
 
 //////////////
@@ -465,21 +467,21 @@ int BufrRadxFile::_readFields(const string &path)
     string units;
     string standardName;
     string longName;
-    lookupFieldName(fieldName, units, standardName, longName);
-
-    // read in the data
     try {
+      // read in the data
+      lookupFieldName(fieldName, units, standardName, longName);
+
       if (_debug)  cerr << "reading field " << fieldName << endl;
       _file.readThatField(fileNames[ii], filePaths[ii], _fileTime.utime(),
           fieldName, standardName, longName, units);
       // add to paths used on read  
       _readPaths.push_back(filePaths[ii]);
       if (_debug) cerr << "  .. accumulating field info " << endl;
-      if (ii == 0) {
+      //if (ii == 0) {
 	_accumulateFieldFirstTime(fieldName, units, standardName, longName);
-      } else {
-        _accumulateField(fieldName, units, standardName, longName);
-      }
+	//} else {
+        //_accumulateField(fieldName, units, standardName, longName);
+	//}
       if (_debug) 
         printNative(fileNames[ii], cout, true, true);
         // const string &path, ostream &out, bool printRays, bool printData
@@ -516,7 +518,8 @@ void BufrRadxFile::_getFieldPaths(const string &primaryPath,
   fileNames.clear();
   filePaths.clear();
   fieldNames.clear();
-
+  
+  try {
   // decompose the path to get the date/time prefix for the primary path
   
   RadxPath rpath(primaryPath);
@@ -622,7 +625,60 @@ void BufrRadxFile::_getFieldPaths(const string &primaryPath,
 
   } // ii
   */
+
+  } catch (const std::out_of_range& e) {
+    cerr << "file name does not match pattern for Argentina data" << endl;
+  }
 }
+
+
+// go ahead and read all the data from the file
+// completely fill currentProduct with data
+void BufrRadxFile::_justReadFile(const string &path) {
+
+  //_file.clear();
+  _pathInUse = path;
+  try {
+    _file.openRead(_pathInUse); // path);
+    _file.readSection0();
+    _file.readSection1();
+    _file.readDataDescriptors();
+    _file.readData(); 
+    _file.readSection5();
+    _file.close();
+
+
+    // the field names are now put into currentProduct.typeOfProduct ...
+    // hmmm, may not be the best place to keep info ...
+    string fieldName = "unknown";
+    string units = "unknown";
+    string standardName = "unknown";
+    string longName = "unknown";
+
+    // set file time
+    _readGlobalAttributes();
+    _fileTime.setYear(_year_attr);
+    _fileTime.setMonth(_month_attr);
+    _fileTime.setDay(_day_attr);
+
+    // go through the "sweeps" and determine if they are
+    // separate sweeps, or the same sweep with multiple fields
+    // make the distinction based on time???
+    if (_debug) cerr << "  .. accumulating field info " << endl;
+    _accumulateFieldFirstTime(fieldName, units, standardName, longName);
+
+  } catch (const char *msg) {
+      // report error message
+      _addErrStr("ERROR - BufrRadxFile::_justReadFile");
+      _addErrStr("  Cannot read from path: ", path);
+      _addErrStr("  ", msg);
+      cerr << _errStr;
+      _errStr.clear();
+  }
+    if (_debug) 
+      printNative(path, cout, true, true);
+}
+
 
 ////////////////////////////////////////////////////////////
 // Read in data from specified path, load up volume object.
@@ -660,13 +716,27 @@ int BufrRadxFile::readFromPath(const string &path,
   //_nRangeInFile = 0;
 
   try {
+    //_readFields(path)
     if (_readFields(path)) {
-      return -1;
+      _justReadFile(path); 
     }
   } catch (const char *msg) {
     _addErrStr(msg);
     return -1;
+  } 
+  //catch (const std::out_of_range& e) {
+  //   cerr << "file name does not match pattern for Argentina data" << endl;
+  //   cerr << "trying to simply read file ..." << endl;
+  //  }
+
+  /*
+  try {
+    _justReadFile(path);
+  } catch (const char *msg) {
+    _addErrStr(msg);
+    return -1;
   }
+  */
 
   //  here ... I need to somehow read each file;
   // each BufrFile == a field in one or more sweeps.
@@ -716,6 +786,40 @@ int BufrRadxFile::readFromPath(const string &path,
   return 0;
 }
 
+int BufrRadxFile::findItsSweep(size_t dataSegmentNumber) {
+  // for each sweep time
+  // use an integer to interate over the times because we'll use
+  // the same index for the start time and the end time.
+  bool done = false;
+  time_t targetStartTime;
+  time_t targetEndTime;
+  unsigned int i = 0;
+  targetEndTime = _file.getEndUTime(dataSegmentNumber);
+  targetStartTime = _file.getStartUTime(dataSegmentNumber);
+
+  // go through the rays in this sweep and find the start and end times
+  while (i < _sweepStartTimes.size() && !done) {
+    //for (vector<time_t>::iterator sw = _sweepStartTimes.begin(); 
+    //   sw != _sweepStartTimes.end(); ++sw) {
+    // if the time stamps are the same then
+    if ((_sweepStartTimes.at(i) == targetStartTime) && 
+	(_sweepEndTimes.at(i) == targetEndTime)) {
+      //   this is a field within that sweep
+      done = true;
+    } else {
+      i+= 1;
+    }
+  } //  end for
+  if (done) {
+  //   return the sweep it belongs to
+    return i;
+  } else {  
+    // did not find a sweep that has the same time
+    // must really be a sweep; return null
+    return -1;
+  }
+}
+
 void BufrRadxFile::_accumulateFieldFirstTime(string fieldName, string units, string standardName, string longName) {
 
   // all of these functions work on the current BufrFile 
@@ -740,15 +844,66 @@ void BufrRadxFile::_accumulateFieldFirstTime(string fieldName, string units, str
   
     // read lat/lon/alt 
     _setPositionVariables();
+
+    // TODO: verify this??? 
+  // verify lat/lon/alt 
+  //_verifyPositionVariables();
  
     // create the rays array
-    _raysToRead.clear();
+    //_raysToRead.clear();
 
-    // get the number of sweeps
-    size_t nSweeps = _file.getNumberOfSweeps();
+    // get the number of data segments
+    size_t nDataSegments = _file.getNumberOfSweeps();
 
-    // for each sweep
-    for (size_t sn=0; sn<nSweeps; sn++) {
+    int nextSweepNumber = 0;
+    // for each data section in the input file
+    for (size_t sn=0; sn<nDataSegments; sn++) {
+
+      // when reading the BUFR file, separate segments of compressed data
+      // are considered separate sweeps, but, sometimes, this is not
+      // a correct assumption.  Sometimes, a segment is really a
+      // different field of the same sweep.  So, check it out.
+      // maybe return the sweep it belongs to, if null, then it is
+      // a new sweep.
+      //int trueSweep = isItReallyASweep(sn);
+      int whichSweep = findItsSweep(sn);
+      if (whichSweep < 0) {
+        RadxSweep *sweep = new RadxSweep();
+	// Ok How are the field variables added to the sweep?
+	// they are associated with a sweep number, which is kept
+	// by each ray, and each ray keeps track of its field
+	// variables.
+	sweep->setSweepNumber(nextSweepNumber);
+
+	// calculate time for each ray
+	_getRayTimes(sn);
+	// get ray variables
+	if (_debug) {
+	  cout << " fetching ray  variable " << fieldName << 
+	    " for sweep " << nextSweepNumber << endl; 
+	}
+	_getRayVariables(sn);  // fills in _azimuths & _elevations
+	if (_readMetadataOnly) {
+	  // read field variables
+	  _addFieldVariables(sweep, sn, fieldName, units, standardName, longName, true);
+	} else {
+	  // create the rays to be read in, filling out the metadata
+	  _createRays(sweep, nextSweepNumber);  // stuffs rays into _raysToRead vector
+	  // add field variables to file rays
+	  _addFieldVariables(sweep, sn, fieldName, units, standardName, longName, false);
+	}
+	_sweeps.push_back(sweep);
+	_sweepStartTimes.push_back(_file.getStartUTime(sn));
+	_sweepEndTimes.push_back(_file.getEndUTime(sn));
+        nextSweepNumber += 1;
+      }
+    else {  // this is a field variable, add it to the appropriate sweep
+      RadxSweep *sweep;
+      sweep = _sweeps.at(whichSweep);
+      _addFieldVariables(sweep, sn, fieldName, units, standardName, longName,
+    			   false);
+    }
+	/*------
       RadxSweep *sweep = new RadxSweep();
       // Ok How are the field variables added to the sweep?
       // they are associated with a sweep number, which is kept
@@ -781,6 +936,7 @@ void BufrRadxFile::_accumulateFieldFirstTime(string fieldName, string units, str
 	_addFieldVariables(sn, fieldName, units, standardName, longName, false);
       }
       _sweeps.push_back(sweep);
+    ------------ */
     } // end for each sweep
   } catch (const char *msg) {
     _addErrStr(msg);
@@ -801,6 +957,7 @@ string expectedValue) {
   _addErrStr(msg, foundValue); 
   _addErrStr(" expected ", expectedValue); 
 }
+
 
 // call _accumulateFieldFirstTime prior to calling
 // this method.  This method assumes all the 
@@ -855,17 +1012,17 @@ void BufrRadxFile::_accumulateField(string fieldName, string units, string stand
   _verifyPositionVariables();
 
   // get the number of sweeps
-  size_t nSweeps = _file.getNumberOfSweeps();
-  if (nSweeps != _sweeps.size()) {
+  size_t nDataSegments = _file.getNumberOfSweeps();
+  if (nDataSegments != _sweeps.size()) {
     _addErrStr("ERROR - BufrRadxFile::_accumulateField");
-    _addErrInt("Number of sweeps incompatible: found ", nSweeps);
+    _addErrInt("Number of sweeps incompatible: found ", nDataSegments);
     _addErrInt(" expected ",  _sweeps.size());
     throw _errString.c_str();
   }
 
   try {
-    // for each sweep
-    for (size_t sn=0; sn<nSweeps; sn++) {
+    // for each data segment in file
+    for (size_t sn=0; sn<nDataSegments; sn++) {
 
       // get ray variables
       if (_debug) {
@@ -885,8 +1042,8 @@ void BufrRadxFile::_accumulateField(string fieldName, string units, string stand
       // _setRangeVariable(); 
 
       // add field variables
-      _addFieldVariables(sn, fieldName, units, standardName, longName,
-        _readMetadataOnly);
+      //_addFieldVariables(sn, fieldName, units, standardName, longName,
+      //  _readMetadataOnly);
 
     } // end for each sweep
   } catch (const char *msg) {
@@ -1241,9 +1398,10 @@ int BufrRadxFile::_getRayVariables(int sweepNumber)
 // create the rays to be read in
 // and set meta data
 
-int BufrRadxFile::_createRays(int sweepNumber)
+int BufrRadxFile::_createRays(RadxSweep *sweep, int sweepNumber)
 
 {
+  sweep->setStartRayIndex(_raysToRead.size());
   // remember, _nTimesInFile is set to nAzimuths for this sweep
   for (size_t ii = 0; ii < _nTimesInFile; ii++) {
 
@@ -1276,7 +1434,7 @@ int BufrRadxFile::_createRays(int sweepNumber)
     _raysToRead.push_back(ray);
 
   } // ii
-
+  sweep->setEndRayIndex(_raysToRead.size());
   return 0;
 
 }
@@ -1284,7 +1442,7 @@ int BufrRadxFile::_createRays(int sweepNumber)
 ////////////////////////////////////////////
 // read the field variables
 // 
-int BufrRadxFile::_addFieldVariables(int sweepNumber,
+int BufrRadxFile::_addFieldVariables(RadxSweep *sweep, int dataSection,
 				      string name, string units,
 				      string standardName, string longName,
                                       bool metaOnly)
@@ -1296,8 +1454,8 @@ int BufrRadxFile::_addFieldVariables(int sweepNumber,
     float foldLimitUpper = 0.0;
     //switch (var->type()) {
     //  case nc3Double: {
-        if (_addFl32FieldToRays(sweepNumber, name, units, standardName, longName,
-                                isDiscrete, fieldFolds,
+    if (_addFl32FieldToRays(sweep, dataSection, name, units, standardName,
+                                longName, isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
           iret = -1;
         }
@@ -1360,7 +1518,7 @@ int BufrRadxFile::_addFieldVariables(int sweepNumber,
 // Add the single field to each ray of a sweep
 // Returns 0 on success, -1 on failure
 // 
-int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
+int BufrRadxFile::_addFl64FieldToRays(int dataSection,    // Nc3Var* var,
 				      const string &name,
 				      const string &units,
 				      const string &standardName,
@@ -1378,7 +1536,7 @@ int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
   // get data from array
 
   Radx::fl64 *data; 
-  data = _file.getDataForSweepFl64(sweepNumber);
+  data = _file.getDataForSweepFl64(dataSection);
 
   // set missing value
 
@@ -1472,8 +1630,8 @@ int BufrRadxFile::_addFl64FieldToRays(int sweepNumber,    // Nc3Var* var,
 // The _raysFromFile array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int BufrRadxFile::_addFl32FieldToRays(int sweepNumber,
-				      const string &name,
+int BufrRadxFile::_addFl32FieldToRays(RadxSweep *sweep, int dataSection,
+				      const string &someName,
 				      const string &units,
 				      const string &standardName,
 				      const string &longName,
@@ -1486,8 +1644,11 @@ int BufrRadxFile::_addFl32FieldToRays(int sweepNumber,
   // get data from array
 
   Radx::fl32 *data; 
-  data = _file.getDataForSweepFl32(sweepNumber);
-
+  data = _file.getDataForSweepFl32(dataSection);
+  // TODO: fix this... we are assigning a value to a parameter 
+  string name = _file.getTypeOfProductForSweep(dataSection);
+  if (name.find("KDP") != string::npos)
+    printf("here\n");
   // set missing value
 
   Radx::fl32 missingVal = -FLT_MAX; // Radx::missingFl64;
@@ -1496,7 +1657,7 @@ int BufrRadxFile::_addFl32FieldToRays(int sweepNumber,
 
   Radx::fl32 fillVal = missingVal;
 
-  size_t nGates = _file.getNBinsAlongTheRadial(sweepNumber);
+  size_t nGates = _file.getNBinsAlongTheRadial(dataSection);
 
   // replace any NaN's with fill value
   for (size_t jj = 0; jj < _nTimesInFile * nGates; jj++) {
@@ -1507,17 +1668,20 @@ int BufrRadxFile::_addFl32FieldToRays(int sweepNumber,
   // load field into rays
   RadxField *field;
 
-  // for each ray
-  for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-    int startIndex = ii * nGates; // _nRangeInFile;
+  int nAz = 0;
+  // for each ray in the sweep
+  for (size_t ii = sweep->getStartRayIndex(); 
+       ii < sweep->getEndRayIndex(); ii++) {
+  //for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+    int startIndex = nAz * nGates; // _nRangeInFile;
     if (_verbose) {
-      if (ii == 0) 
-        cout << "adding field " << name << " to ray " << ii <<  endl;    
+      if (nAz == 0) 
+        cout << "adding field " << name << " to ray " << nAz <<  endl;    
     }
-    // the rays for this sweep start at sweepNumber*_nTimesInFile
+
     int rayIdx;
-    rayIdx = (sweepNumber * _nTimesInFile) + ii;
-    
+    //rayIdx = (sweepNum * _nTimesInFile) + ii;
+    rayIdx = ii;
     
     // now we can check for the dimensions and resize as needed
     // homogenize the number of gates (also known as nRangeInFile)
@@ -1527,7 +1691,7 @@ int BufrRadxFile::_addFl32FieldToRays(int sweepNumber,
 
     if (nGates < nGatesAlreadyInRay) {
       if (_verbose) {
-        if (ii == 0) 
+        if (nAz == 0) 
           cout << "Expanding field from " << nGates << 
             " to " << nGatesAlreadyInRay << endl;
       }
@@ -1535,12 +1699,12 @@ int BufrRadxFile::_addFl32FieldToRays(int sweepNumber,
       field = new RadxField(name, units);
       field->setTypeFl32(missingVal);
       // NOTE: the startIndex will be different
-      startIndex = ii * nGates;
+      startIndex = nAz * nGates;
       field->addDataFl32(nGates, data+startIndex);
       field->setNGates(nGatesAlreadyInRay);
        // ***** addField to ray *****
       _raysToRead[rayIdx]->addField(field);
-      nGates = nGatesAlreadyInRay;
+      //nGates = nGatesAlreadyInRay;
     } else {
       if (nGates > nGatesAlreadyInRay) {
         // expand the fields already in the ray
@@ -1563,12 +1727,12 @@ int BufrRadxFile::_addFl32FieldToRays(int sweepNumber,
     field->setMissingFl32(missingVal);
     field->setStandardName(standardName);
     field->setLongName(longName);
-    _setRangeGeometry(_file.getRangeBinSizeMeters(sweepNumber),
+    _setRangeGeometry(_file.getRangeBinSizeMeters(dataSection),
 		      _file.getRangeBinOffsetMeters(),
 		        nGates);
     field->copyRangeGeom(_geom);
 
-    //   double gateSizeKm = _file.getRangeBinSizeMeters(sweepNumber) / 1000.0);  // convert to Km;
+    //   double gateSizeKm = _file.getRangeBinSizeMeters(dataSection) / 1000.0);  // convert to Km;
     // double startRangeKm = _file.getRangeBinOffsetMeters() / 1000.0); // convert to Km
     // field->setRangeGeom(startRangeKm, gateSizeKm);
     
@@ -1580,6 +1744,7 @@ int BufrRadxFile::_addFl32FieldToRays(int sweepNumber,
     if (isDiscrete) {
       field->setIsDiscrete(true);
     }
+    nAz += 1;
   } // end for ii
   //  if (nextFileRangeDimension > _nRangeInFile) {
   //  // update the number of ranges in the file
@@ -1737,8 +1902,10 @@ int BufrRadxFile::_loadReadVolume()
     _readVol->setMaxRangeKm(_readMaxRangeKm);
   }
   
-  if (_raysValid.size() <= 0) 
+  if (_raysValid.size() <= 0) { 
     cerr << "Warning: there are no valid rays" << endl;
+    return -1;
+  } 
   for (int ii = 0; ii < (int) _raysValid.size(); ii++) {
     _raysValid[ii]->setVolumeNumber(_volumeNumber);
   }

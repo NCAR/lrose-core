@@ -231,6 +231,8 @@ private:
   // sweep variables
 
   vector<RadxSweep *> _sweeps;
+  vector<time_t> _sweepStartTimes;
+  vector<time_t> _sweepEndTimes;
 
   // global attributes
   
@@ -316,9 +318,10 @@ private:
   int _verifyPositionVariables();
   void _clearRayVariables();
   int _getRayVariables(int sweepNumber);
-  int _createRays(int sweepNumber);
+  int _createRays(RadxSweep *sweep, int sweepNumber);
   int _readFields(const string &path);
-  int _addFieldVariables(int sweepNumber,
+  void _justReadFile(const string &path);
+  int _addFieldVariables(RadxSweep *sweep, int dataSection,
 				      string name, string units,
 				      string standardName, string longName,
 			 bool metaOnly);
@@ -326,14 +329,16 @@ private:
   void _accumulateFieldFirstTime(string fieldName, string units, string standardName, string longName);
   void _errorMessage(string location, string msg, int foundValue, int expectedValue);
   void _errorMessage(string location, string msg, string foundValue, string expectedValue);
+
+  int findItsSweep(size_t dataSegmentNumber);
   void _qualityCheckRays();
-  int _addFl32FieldToRays(int sweepNumber,
-                          const string &name, const string &units,
+  int _addFl32FieldToRays(RadxSweep *sweep, int dataSection,
+                          const string &someName, const string &units,
                           const string &standardName, const string &longName,
                           bool isDiscrete, bool fieldFolds,
                           float foldLimitLower, float foldLimitUpper);
 
-  int _addFl64FieldToRays(int sweepNumber,
+  int _addFl64FieldToRays(int dataSection,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           bool isDiscrete, bool fieldFolds,

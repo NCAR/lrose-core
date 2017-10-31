@@ -38,6 +38,7 @@
 
 
 #include <Radx/RadxBuf.hh>
+#include <Radx/RadxTime.hh>
 #include <vector>
 
 ///////////////////////////////////////////////////////////////
@@ -105,7 +106,7 @@ public:
   typedef enum {rawData, other} ProductType;
   enum DataType {CM, TV, DBZH, VRAD, TH, WRAD,  KDP, PHIDP, RHOHV,
     OTHER};
-
+  /*
   typedef struct {
     int year;
     int month;
@@ -114,8 +115,8 @@ public:
     int minute;
     int second;
   } TimeStamp;
-
-  vector<TimeStamp> timeStampStack;
+  */
+  vector<RadxTime *> timeStampStack;
 
   RadxBuf compressedData; // dataBuffer;
 
@@ -126,8 +127,8 @@ public:
   unsigned int totalData;
 
   string typeOfProduct;
-    TimeStamp startTime;
-    TimeStamp endTime;
+  RadxTime startTime;
+  RadxTime endTime;
 
 
   typedef struct {
@@ -141,8 +142,8 @@ public:
   } ParameterDataFl64;
 
   typedef struct {
-    TimeStamp startTime;
-    TimeStamp endTime;
+    RadxTime *startTime;
+    RadxTime *endTime;
     double    antennaElevationDegrees;
     size_t       nBinsAlongTheRadial;
     double    rangeBinSizeMeters;

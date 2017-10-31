@@ -130,6 +130,8 @@ public:
 
   int readSection0();
   int readSection1();
+  int readSection1_edition2();
+  int readSection1_edition4();
   int readDataDescriptors();
   int readDescriptorTables();
   int readData();
@@ -175,6 +177,9 @@ public:
   double getStartTimeForSweep(int sweepNumber);
   double getEndTimeForSweep(int sweepNumber);
 
+  time_t getEndUTime(int sweepNumber);
+  time_t getStartUTime(int sweepNumber);
+
   float *getDataForSweepFl32(int sweepNumber);
   double *getDataForSweepFl64(int sweepNumber);
   string getTypeOfProductForSweep(int sweepNumber);
@@ -185,6 +190,8 @@ private:
   Radx::ui32 ExtractIt(unsigned int nBits);
   string ExtractText(unsigned int nBits);
   double fastPow10(int n);
+  string _trim(const std::string& str,
+	       const std::string& whitespace = " \t");
   Radx::ui32 Apply(TableMapElement f);
   Radx::si32 ApplyNumeric(TableMapElement f);
   Radx::fl32 ApplyNumericFloat(TableMapElement f);

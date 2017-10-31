@@ -45,7 +45,7 @@ int TableMap::ReadTableB(string fileName) {
     std::vector<std::string> tokens;
     tokens = split(line, ';');
 
-    if (_debug) {
+    if (0) {
       for (vector<std::string>::const_iterator s = tokens.begin();
         s!= tokens.end(); ++s) {
         cout << *s << endl; 
@@ -53,25 +53,29 @@ int TableMap::ReadTableB(string fileName) {
     }
 
     unsigned char f,x,y;
- 
-    f = atoi(tokens[0].c_str());
-    x = atoi(tokens[1].c_str());
-    y = atoi(tokens[2].c_str());
-    unsigned short key;
-    //f = 1; x = 8;
-    key = f << 6;
-    key = key | x;
-    key = key << 8;
-    key = key | y;
-    if (_debug) printf("key = %d (x%x) for f;x;y %d;%d;%d %s \n", key, key, f,x,y, tokens[3].c_str()); 
-    int scale;
-    int referenceValue;
-    int dataWidthBits;
-    scale = atoi(tokens[5].c_str());
-    referenceValue = atoi(tokens[6].c_str());
-    dataWidthBits = atoi(tokens[7].c_str());
-    table[key] = TableMapElement(tokens[3], scale, tokens[4], referenceValue,
-			dataWidthBits);
+    if (tokens.size() >= 8) {
+      f = atoi(tokens[0].c_str());
+      x = atoi(tokens[1].c_str());
+      y = atoi(tokens[2].c_str());
+      unsigned short key;
+      //f = 1; x = 8;
+      key = f << 6;
+      key = key | x;
+      key = key << 8;
+      key = key | y;
+      if (_debug) printf("key = %d (x%x) for f;x;y %d;%d;%d %s \n", key, key, f,x,y, tokens[3].c_str()); 
+      int scale;
+      int referenceValue;
+      int dataWidthBits;
+      scale = atoi(tokens[5].c_str());
+      referenceValue = atoi(tokens[6].c_str());
+      dataWidthBits = atoi(tokens[7].c_str());
+      table[key] = TableMapElement(tokens[3], scale, tokens[4], referenceValue,
+				   dataWidthBits);
+    } else {
+      cerr << " discarding line: " << line << " from file: " <<
+	fileName <<  endl;
+    }
   }
   return 0;
 }
@@ -93,11 +97,11 @@ int TableMap::ReadTableD(string fileName) {
 
     if (line[0] != '#') { // this is a comment skip it
      
-      //std::cout << line << std::endl;
+      if (_debug) std::cout << line << std::endl;
       std::vector<std::string> tokens;
       tokens = split(line, ';');
 
-      if (_debug) {
+      if (0) {
         for (vector<std::string>::const_iterator s = tokens.begin(); s!= tokens.end(); ++s) {
 	  //for (string s: tokens) {
           cout << *s << endl; 
@@ -118,9 +122,16 @@ int TableMap::ReadTableD(string fileName) {
 	  subkey = TableMapKey().EncodeKey(tokens[3], tokens[4], tokens[5]);
 	  currentList.push_back(subkey);
 	}
-      }  // end if more than 6 tokens
+      } else { // end if more than 6 tokens
+	cerr << " discarding line: " << line << " from file: " <<
+	fileName <<  endl;
+      }
     } // end if comment line
   }  // end for each line
+  // hanlde the end case; check if we have one more key,value to insert
+  if (!currentList.empty()) {
+    table[key] = TableMapElement(currentList);
+  }
   return 0;
 }
 
@@ -256,23 +267,25 @@ TableMapElement TableMap::Retrieve(unsigned short key) {
   TableMapElement val1;
   val1 = table.at(key);
   if (_debug) {
-    if (val1._whichType == TableMapElement::DESCRIPTOR) {
-      cout << "value for key " << key << ":" << val1._descriptor.fieldName
+    if (key != 7878) {
+      if (val1._whichType == TableMapElement::DESCRIPTOR) {
+	cout << "value for key " << key << ":" << val1._descriptor.fieldName
 	     << endl;
-    } else if (val1._whichType == TableMapElement::KEYS) {
-      vector<unsigned short> theList;
-      theList = val1._listOfKeys; 
+      } else if (val1._whichType == TableMapElement::KEYS) {
+	vector<unsigned short> theList;
+	theList = val1._listOfKeys; 
  
-      for (vector<unsigned short>::const_iterator i = theList.begin(); 
-        i!= theList.end(); i++) {
-        unsigned char f, x, y;
-	TableMapKey().Decode(*i, &f, &x, &y);
-        printf("key(%d)=%d;%d;%d ",*i, f, x, y);
+	for (vector<unsigned short>::const_iterator i = theList.begin(); 
+	     i!= theList.end(); i++) {
+	  unsigned char f, x, y;
+	  TableMapKey().Decode(*i, &f, &x, &y);
+	  printf("key(%d)=%d;%d;%d ",*i, f, x, y);
+	}
+      } else {
+	// ignore
+	;
       }
-    } else {
-      // ignore
-      ;
-    }
+    } // end if key != byte element of compressed array
   }
   return val1;
 }

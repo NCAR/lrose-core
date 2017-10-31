@@ -229,11 +229,22 @@ void BufrProduct::createSweep() {
 	throw "ERROR - could not decompress data";
       }
       SweepData newSweep;
+      int nTimeStamps = timeStampStack.size();
+      if (nTimeStamps < 2) 
+        throw "Missing start or end time stamp for sweep.";
       newSweep.endTime = timeStampStack.back();
-      timeStampStack.pop_back();
-      newSweep.startTime = timeStampStack.back();
-      timeStampStack.pop_back();
+      // Ok, don't remove the time stamps, just pick the last two
+      // values
+      // timeStampStack.pop_back();
 
+      newSweep.startTime = timeStampStack.at(nTimeStamps-2); // back(); 
+      //timeStampStack.pop_back();
+      if (_debug) {
+        RadxTime *time = newSweep.startTime;
+        cerr << "startTime " << time->asString() << endl; 
+        time = newSweep.endTime;
+        cerr << "endTime " << time->asString() << endl; 
+      }
       newSweep.antennaElevationDegrees = antennaElevationDegrees;
       newSweep.nBinsAlongTheRadial = nBinsAlongTheRadial;
       newSweep.rangeBinSizeMeters = rangeBinSizeMeters;
@@ -369,26 +380,27 @@ float *BufrProduct::decompressDataFl32() {
 // start a new timestamp with Year,
 // always update the top timestamp with day, hour, etc.
 void BufrProduct::putYear(double value) {
-  TimeStamp timeStamp;
-  timeStamp.year = (int) value;
+  RadxTime *timeStamp = new RadxTime();
+  timeStamp->setYear((int) value);
+  if (_debug) cerr << "timeStamp " << timeStamp->asString() << endl;
   timeStampStack.push_back(timeStamp);
 }
 
 void BufrProduct::putMonth(double value) {
-  timeStampStack.back().month = (int) value;
+  timeStampStack.back()->setMonth((int) value);
 }
 
 void BufrProduct::putDay(double value)  {
-  timeStampStack.back().day = (int) value;
+  timeStampStack.back()->setDay((int) value);
 }
 void BufrProduct::putHour(double value)  {
-  timeStampStack.back().hour = (int) value;
+  timeStampStack.back()->setHour((int) value);
 }
 void BufrProduct::putMinute(double value)  {
-  timeStampStack.back().minute = (int) value;
+  timeStampStack.back()->setMin((int) value);
 }
 void BufrProduct::putSecond(double value)  {
-  timeStampStack.back().second = (int) value;
+  timeStampStack.back()->setSec((int) value);
 }
 
 void BufrProduct::printSweepData(ostream &out) {
@@ -397,6 +409,20 @@ void BufrProduct::printSweepData(ostream &out) {
   for (vector<SweepData>::iterator sw = sweepData.begin();
        sw != sweepData.end(); ++sw) {
     out << "sweep: " << i << endl;
+    RadxTime *time;
+    time = sw->startTime;
+    out << "   start time: " << time->asString() << endl;
+    time = sw->endTime;
+    out << "     end time: " << time->asString() << endl;
+
+    // TimeStamp time = sw->startTime;
+    // out << "   start time: " << time.year << "/" << time.month << "/" <<
+    //   time.day << " " << time.hour << ":" << time.minute << ":" <<
+    //   time.second << endl;
+    // time = sw->endTime;
+    // out << "     end time: " << time.year << "/" << time.month << "/" <<
+    //   time.day << " " << time.hour << ":" << time.minute << ":" <<
+    //   time.second << endl;
     out << "     antenna elevation (deg): " << sw->antennaElevationDegrees << endl; 
     out << "     n bins along the radial: " << sw->nBinsAlongTheRadial << endl; 
     out << "          range bin size (m): " << sw->rangeBinSizeMeters << endl; 
