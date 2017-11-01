@@ -619,6 +619,8 @@ codebase/apps/cidd/src/view_colormap/view_colormap
 codebase/apps/radar/src/SpectraPlot/SpectraPlot
 codebase/apps/radar/src/SpectraScope/SpectraScope
 
+codebase/apps/xpol/src/ProSensing2Dsr/ProSensing2Dsr
+
 codebase/Makefile
 codebase/libs/Fmq/src/.libs/
 codebase/libtool
