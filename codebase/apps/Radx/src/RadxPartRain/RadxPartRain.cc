@@ -1083,6 +1083,14 @@ int RadxPartRain::_retrieveTempProfile()
   if (_params.sounding_use_wet_bulb_temp) {
     _tempProfile.setUseWetBulbTemp(true);
   }
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _tempProfile.setDebug();
+  }
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    _tempProfile.setVerbose();
+  }
+
   
   time_t retrievedTime;
   vector<TempProfile::PointVal> retrievedProfile;
