@@ -205,7 +205,8 @@ int TempProfile::_getTempProfile(time_t searchTime)
   int nChunks = (int) chunks.size();
   if (nChunks < 1) {
     cerr << "ERROR - getTempProfile()" << endl;
-    cerr << "  Bad sounding" << endl;
+    cerr << "  No sounding, time: " << DateTime::strm(searchTime) << endl;
+    cerr << "               name: " << _soundingLocationName << endl;
     return -1;
   }
 
