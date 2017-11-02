@@ -1,4 +1,4 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+/// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 // ** Copyright UCAR (c) 1990 - 2016                                         
 // ** University Corporation for Atmospheric Research (UCAR)                 
 // ** National Center for Atmospheric Research (NCAR)                        
@@ -421,7 +421,7 @@ string &standardName, string &longName) {
       standardName = "width";
       longName = "width";
     } else {
-      _addErrStr("ERROR - BufrRadxFile::_readFields");
+      _addErrStr("ERROR - BufrRadxFile::lookupFieldName");
       _addErrStr("  Unrecognized field: ", fieldName);
       throw _errStr.c_str();
     }
@@ -442,7 +442,7 @@ int BufrRadxFile::_readFields(const string &path)
   _getFieldPaths(path, fileNames, filePaths, fieldNames);
 
   if (filePaths.size() < 1) {
-    _addErrStr("ERROR - BufrRadxFile::_readFields");
+    _addErrStr("WARNING - BufrRadxFile::_readFields");
     _addErrStr("  No field files found, path: ", path);
     return -1;
   }
@@ -718,6 +718,12 @@ int BufrRadxFile::readFromPath(const string &path,
   try {
     //_readFields(path)
     if (_readFields(path)) {
+      if (_verbose) {
+	cerr << _errStr << endl;
+        _errStr.clear();
+	cerr << " ... just reading file" << endl;
+      } 
+      _errStr.clear();
       _justReadFile(path); 
     }
   } catch (const char *msg) {
@@ -940,7 +946,7 @@ void BufrRadxFile::_accumulateFieldFirstTime(string fieldName, string units, str
     } // end for each sweep
   } catch (const char *msg) {
     _addErrStr(msg);
-    throw _errString.c_str();
+    throw _errStr.c_str();
   }
 }
 
@@ -1017,7 +1023,7 @@ void BufrRadxFile::_accumulateField(string fieldName, string units, string stand
     _addErrStr("ERROR - BufrRadxFile::_accumulateField");
     _addErrInt("Number of sweeps incompatible: found ", nDataSegments);
     _addErrInt(" expected ",  _sweeps.size());
-    throw _errString.c_str();
+    throw _errStr.c_str();
   }
 
   try {
@@ -1048,7 +1054,7 @@ void BufrRadxFile::_accumulateField(string fieldName, string units, string stand
     } // end for each sweep
   } catch (const char *msg) {
     _addErrStr(msg);
-    throw _errString.c_str();
+    throw _errStr.c_str();
   }
 }
 
@@ -1452,30 +1458,34 @@ int BufrRadxFile::_addFieldVariables(RadxSweep *sweep, int dataSection,
     bool fieldFolds = false;
     float foldLimitLower = 0.0;
     float foldLimitUpper = 0.0;
-    //switch (var->type()) {
-    //  case nc3Double: {
-    if (_addFl32FieldToRays(sweep, dataSection, name, units, standardName,
-                                longName, isDiscrete, fieldFolds,
+    bool attempted = false;
+
+    string name2, standardName2, longName2, units2;
+    // if the variable name is unknown, then get the info from the
+    // content of the BUFR file data section
+    if (name.find("unknown") != string::npos) {
+      name2 = _file.getTypeOfProductForSweep(dataSection);
+      try {
+        lookupFieldName(name2, units2, standardName2, longName2);
+        if (_addFl32FieldToRays(sweep, dataSection, name2, units2, standardName2,
+                                longName2, isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
           iret = -1;
         }
-    //     break;
-    //   }
-    //   case nc3Float: {
-    //     if (_addFl32FieldToRays(var, name, units, standardName, longName,
-    //                             isDiscrete, fieldFolds,
-    //                             foldLimitLower, foldLimitUpper)) {
-    //       iret = -1;
-    //     }
-    //     break;
-    //   }
-    //   default: {
-    //     iret = -1;
-    //     // will not reach here because of earlier check on type
-    //   }
-
-    // } // switch
-    
+        attempted = true;
+      } catch(const char *msg) {
+        cerr << msg << endl;
+	// just use the unknowns
+      }
+    }
+    if (!attempted) {
+      // the variable name has been set
+      if (_addFl32FieldToRays(sweep, dataSection, name, units, standardName,
+			      longName, isDiscrete, fieldFolds,
+			      foldLimitLower, foldLimitUpper)) {
+          iret = -1;
+      }
+    }    
 	/*
     if (metaOnly) {
       bool fieldAlreadyAdded = false;
@@ -1505,8 +1515,6 @@ int BufrRadxFile::_addFieldVariables(RadxSweep *sweep, int dataSection,
       _addErrStr("  cannot add field name: ", name);
       return -1;
     }
-
-    //} // ivar
 
   return 0;
 
@@ -1645,10 +1653,9 @@ int BufrRadxFile::_addFl32FieldToRays(RadxSweep *sweep, int dataSection,
 
   Radx::fl32 *data; 
   data = _file.getDataForSweepFl32(dataSection);
-  // TODO: fix this... we are assigning a value to a parameter 
+  // get the name from the dataSection 
   string name = _file.getTypeOfProductForSweep(dataSection);
-  if (name.find("KDP") != string::npos)
-    printf("here\n");
+
   // set missing value
 
   Radx::fl32 missingVal = -FLT_MAX; // Radx::missingFl64;

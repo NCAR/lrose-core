@@ -63,6 +63,7 @@ BufrFile::BufrFile()
 {
   _debug = false;
   _verbose = false;
+  _very_verbose = false;
   _file = NULL;
   GTree = NULL;
   clear();
@@ -735,12 +736,12 @@ int BufrFile::ReplenishBuffer() {
   nBytesRead = fread(_dataBuffer, 1, MAX_BUFFER_SIZE_BYTES, _file);
 
   nOctetsRead += nBytesRead;
-  if (_verbose) printf("nOctetsRead = %d\n", nOctetsRead);
+  if (_very_verbose) printf("nOctetsRead = %d\n", nOctetsRead);
 
   _numBytesRead += nBytesRead;
-  if (_verbose) printf("Read %d/%d bytes ", _numBytesRead, _s0.nBytes);
+  if (_very_verbose) printf("Read %d/%d bytes ", _numBytesRead, _s0.nBytes);
 
-  if (_verbose) {
+  if (_very_verbose) {
     printf("buffer: ");
     for (int i=0; i<MAX_BUFFER_SIZE_BYTES; i++) 
       printf("%0x ", _dataBuffer[i]);
@@ -867,9 +868,9 @@ Radx::ui32 BufrFile::ExtractIt(unsigned int nBits) {
 
   Radx::ui32 val;
 
-  if (_verbose) {
-    printf(" nBits=%d\n", nBits);
-  }
+  //if (_verbose) {
+  //  printf(" nBits=%d\n", nBits);
+  //}
 
   if (nBits > 32) {
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::ExtractIt", true);
@@ -1004,7 +1005,8 @@ Radx::si32 BufrFile::ApplyNumeric(TableMapElement f) {
     temp  = temp/fastPow10(f._descriptor.scale);
 
     svalue = (Radx::si32) temp;
-    if (_verbose) cout << "converted to " << svalue << endl;
+    //if ((_verbose) && (des != 7878)) 
+    //  cout << "converted to " << svalue << endl;
     return svalue;
   }
 }
@@ -1044,7 +1046,7 @@ Radx::fl32 BufrFile::ApplyNumericFloat(TableMapElement f) {
     temp  = temp/fastPow10(f._descriptor.scale);
 
     svalue = (Radx::fl32) temp;
-    if (_verbose) cout << "converted to " << svalue << endl;
+    //if (_verbose) cout << "converted to " << svalue << endl;
     return svalue;
   }
 }

@@ -292,7 +292,7 @@ private:
 
   // error string
 
-  string _errString; ///< Error string is set on error
+  //string _errString; ///< Error string is set on error
 
   // rays to be added to volume
 

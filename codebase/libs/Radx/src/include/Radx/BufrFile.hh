@@ -309,6 +309,7 @@ private:
 
   bool _debug;
   bool _verbose;
+  bool _very_verbose;
   string _fieldName;
   
   /// Get the path in use after read or write
