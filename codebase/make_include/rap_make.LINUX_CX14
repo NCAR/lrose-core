@@ -1,11 +1,11 @@
-# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-# Copyright UCAR (c) 1992 - 2015 
-# University Corporation for Atmospheric Research(UCAR)  
-# National Center for Atmospheric Research(NCAR)  
-# Research Applications Laboratory(RAL)  
-# P.O.Box 3000, Boulder, Colorado, 80307-3000, USA  
-#  
-# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 16:53:3 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################
 #
 # Macros for DEBIAN LINUX 64 bit machines
@@ -87,8 +87,7 @@ INTEL_SYS_CFLAGS = -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 $(MY_INTEL_CFLAGS)
 # cc
 #
 
-SYS_CPPC_CFLAGS = $(SYS_CFLAGS) $(MY_CPPC_CFLAGS) -std=c++11
-
+SYS_CPPC_CFLAGS = $(SYS_CFLAGS) $(MY_CPPC_CFLAGS) -std=c++14
 CPPC = g++
 SYS_CPPC_INCLUDES =
 ACC = $(CC)
@@ -236,8 +235,8 @@ NCAR_CPPC=ncarg++
 #	INTEL_NETCDF4_INCS defines location of ifort netCDF 4 include files
 #	INTEL_NETCDF4_LDFLAGS defines location of ifort-compiled netCDF 4 libraries
 
-HDF_INCLUDES = -I$(RAP_INC_DIR)
-HDF_LDFLAGS = -L$(RAP_LIB_DIR)
+HDF_INCLUDES = -I/opt/HDF4.2r1/include
+HDF_LDFLAGS = -L/opt/HDF4.2r1/lib
 HDF_LIBS = -lmfhdf -ldf -ljpeg -lz
 
 ZLIB_INCLUDES=$(MY_ZLIB_INCS) -I/opt/zlib/include -I/usr/local/zlib/include
@@ -248,15 +247,15 @@ SZIP_INCLUDES=$(MY_SZIP_INCS) -I/opt/szip/include -I/usr/local/szip/include
 SZIP_LDFLAGS=$(MY_SZIP_LDFLAGS) -Wl,-rpath,/usr/local/szip/lib -L/opt/szip/lib -L/usr/local/szip/lib
 SZIP_LIBS=$(MY_SZIP_LIBS) -lsz
 
-UDUNITS_INCS=$(MY_UDUNITS_INCS) -I$(RAP_INC_DIR) 
-UDUNITS_LDFLAGS=$(MY_UDUNITS_LDFLAGS) -Wl,-rpath,$(RAP_LIB_DIR) -L$(RAP_LIB_DIR)
+UDUNITS_INCS=$(MY_UDUNITS_INCS) -I/opt/udunits2/include -I/usr/local/udunits2/include -I/usr/local/include
+UDUNITS_LDFLAGS=$(MY_UDUNITS_LDFLAGS) -Wl,-rpath,/usr/local/udunits2/lib -L/opt/udunits2/lib -L/usr/local/udunits2/lib
 
-HDF5_INCLUDES =$(MY_HDF5_INCS) -I$(RAP_INC_DIR) $(SZIP_INCLUDES) $(ZLIB_INCLUDES)
-HDF5_LDFLAGS =$(MY_HDF5_LDFLAGS) -Wl,-rpath,$(RAP_LIB_DIR) -L$(RAP_LIB_DIR) $(SZIP_LDFLAGS) $(ZLIB_LDFLAGS)
+HDF5_INCLUDES =$(MY_HDF5_INCS) -I/opt/hdf5/include -I/usr/local/hdf5/include $(SZIP_INCLUDES) $(ZLIB_INCLUDES)
+HDF5_LDFLAGS =$(MY_HDF5_LDFLAGS) -Wl,-rpath,/usr/local/hdf5/lib -L/opt/hdf5/lib -L/usr/local/hdf5/lib $(SZIP_LDFLAGS) $(ZLIB_LDFLAGS)
 HDF5_LIBS = $(MY_HDF5_LIBS) -lhdf5_cpp -lhdf5 -lhdf5_hl $(SZIP_LIBS) $(ZLIB_LIBS)
 
-NETCDF4_INCS=$(MY_NETCDF4_INCS) -I$(RAP_LIB_DIR) -L/usr/local/include $(HDF5_INCLUDES) $(ZLIB_INCLUDES) $(UDUNITS_INCS)
-NETCDF4_LDFLAGS=$(MY_NETCDF4_LDFLAGS) -Wl,-rpath,$(RAP_LIB_DIR) -L$(RAP_LIB_DIR) -L/usr/local/lib $(HDF5_LDFLAGS) $(UDUNITS_LDFLAGS) $(ZLIB_LDFLAGS)
+NETCDF4_INCS=$(MY_NETCDF4_INCS) -I/opt/netcdf4/include -I/usr/local/netcdf4/include -I/usr/local/include $(HDF5_INCLUDES) $(ZLIB_INCLUDES) $(UDUNITS_INCS)
+NETCDF4_LDFLAGS=$(MY_NETCDF4_LDFLAGS) -Wl,-rpath,/usr/local/netcdf4/lib -L/opt/netcdf4/lib -L/usr/local/netcdf4/lib -L/usr/local/lib $(HDF5_LDFLAGS) $(UDUNITS_LDFLAGS) $(ZLIB_LDFLAGS)
 
 PGI_NETCDF4_INCS=$(MY_PGI_NETCDF4_INCS) -I/usr/local/netcdf4-pgi/include
 PGI_NETCDF4_LDFLAGS=$(MY_PGI_NETCDF4_LDFLAGS) -L/usr/local/netcdf4-pgi/lib
@@ -319,14 +318,6 @@ QT4_LDFLAGS = \
             -L/usr/local/qt4/lib
 
 QT4_LIBS = -lQtCore
-
-#
-# Jasper
-#
-
-JASPER_INCLUDES = -I/usr/local/jasper/include
-JASPER_LDFLAGS = -L/usr/local/jasper/lib
-JASPER_LIBS = -ljasper
 
 # MADIS
 # These have the MY_MADIS_LIBS first intentionally.
