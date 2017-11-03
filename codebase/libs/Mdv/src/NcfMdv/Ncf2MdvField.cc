@@ -625,11 +625,20 @@ void Ncf2MdvField::_setNamesAndUnits()
   string name = _dataVar->name();
   STRncopy(_fhdr.field_name, name.c_str(), MDV_SHORT_FIELD_LEN);
 
-  Nc3Att* longNameAtt = _dataVar->get_att(NcfMdv::long_name);
-  if (longNameAtt != NULL) {
-    STRncopy(_fhdr.field_name_long, _asString(longNameAtt).c_str(), MDV_LONG_FIELD_LEN);
-    delete longNameAtt;
-  }
+   //
+   // TODO:  Check that this is a proper default action for long field name
+   //
+   if (  name.length() > MDV_SHORT_FIELD_LEN -1 ) {
+      // long name is set to untruncated variable name
+      STRncopy(_fhdr.field_name_long, name.c_str(), MDV_LONG_FIELD_LEN); 
+   } else {
+      // long name is set to netcdf long name attribute
+      Nc3Att* longNameAtt = _dataVar->get_att(NcfMdv::long_name);
+      if (longNameAtt != NULL) {
+         STRncopy(_fhdr.field_name_long, _asString(longNameAtt).c_str(), MDV_LONG_FIELD_LEN);
+        delete longNameAtt;
+     }
+   }
 
   Nc3Att* unitsAtt = _dataVar->get_att(NcfMdv::units);
   if (unitsAtt != NULL) {
