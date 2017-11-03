@@ -1542,6 +1542,35 @@ paramdef double {
 } phidp_sdev_interest_weight;
 
 commentdef {
+  p_header = "RHOHV TEST to AUGMENT CMD";
+  p_text = "If clutter is present the RHOHV value should increase after application of the clutter filter. We can use a RHOHV test to locate gates at which CMD fails to identify weak clutter. This allows us to improve clutter identification in cases with low CSR.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Apply the RHOHV test after filtering based on CMD.";
+  p_help = "This allows us to identify areas of weak clutter contamination that CMD missed.";
+} apply_rhohv_test_after_cmd;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Min RHOHV for application of the RHOHV test.";
+  p_help = "If RHOHV is less than this, no weather is likely to be present. Therefore do not apply the test to this gate.";
+} rhohv_test_min_rhohv;
+
+paramdef double {
+  p_default = 0.98;
+  p_descr = "Max RHOHV for application of the RHOHV test.";
+  p_help = "If RHOHV is greater than this, the weather return is highly coherent, so clutter contamination is unlikely.";
+} rhohv_test_max_rhohv;
+
+paramdef double {
+  p_default = 4.0;
+  p_descr = "The RHOHV improvment factor is a measure of the change in RHOHV towards 1.0.";
+  p_help = "The RHOHV test identifies clutter if the improvement factor exceeds this value.";
+} rhohv_improvement_factor_threshold;
+
+commentdef {
   p_header = "OUTPUT TO DSRADAR FMQ";
 };
 
