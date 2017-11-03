@@ -1,5 +1,4 @@
 /ByteOrder.hh/1.1/Sat Sep  2 22:55:02 2017//
-/Hdf5xx.hh/1.1/Sat Sep  2 22:55:02 2017//
 /Nc3File.hh/1.1/Sat Sep  2 22:55:02 2017//
 /Nc3Values.hh/1.1/Sat Sep  2 22:55:02 2017//
 /Nc3xFile.hh/1.1/Sat Sep  2 22:55:02 2017//
@@ -33,4 +32,5 @@
 /NcxxVarAtt.hh/1.1/Sat Sep  2 22:55:02 2017//
 /NcxxVlenType.hh/1.1/Sat Sep  2 22:55:02 2017//
 /Udunits2.hh/1.1/Sat Sep  2 22:55:02 2017//
+/Hdf5xx.hh/1.2/Tue Oct 10 22:39:52 2017//
 D
