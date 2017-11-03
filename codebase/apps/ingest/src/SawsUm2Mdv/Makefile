@@ -39,7 +39,7 @@ TARGET_FILE = SawsUm2Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -ldidss \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -ldidss \
 	-lrapformats -leuclid -lgrib -lphysics \
 	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
 	-lbz2 -lz

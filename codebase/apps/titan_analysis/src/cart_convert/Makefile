@@ -38,7 +38,7 @@ TARGET_FILE = cart_convert
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -ltitan -lcidd -lrapmath -lMdv \
-	-lRadx -lrapformats -ltoolsa -ldataport \
+	-lRadx -lNcxx-lrapformats -ltoolsa -ldataport \
 	$(NETCDF4_LIBS) -lbz2 -lz -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)

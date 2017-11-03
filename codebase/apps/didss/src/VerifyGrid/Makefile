@@ -37,7 +37,7 @@ TARGET_FILE = VerifyGrid
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lrapmath -lMdv -lRadx -lSpdb \
+LOC_LIBS = -lrapmath -lMdv -lRadx -lNcxx -lSpdb \
 	-ldsserver -lrapformats -ldidss \
 	-ldataport -leuclid -ltoolsa -ltdrp $(NETCDF4_LIBS) \
 	-lbz2 -lz

@@ -37,7 +37,7 @@ TARGET_FILE = Test2Dsr
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lrapmath -lMdv -lRadx -leuclid \
+LOC_LIBS = -lrapmath -lMdv -lRadx -lNcxx -leuclid \
 	-lFmq -ldsserver -ldidss -lrapformats \
 	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm

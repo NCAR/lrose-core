@@ -1,11 +1,6 @@
 /.cvsignore/1.1/Thu Dec 29 22:57:33 2016//
 /Args.cc/1.21/Thu Dec 29 22:57:33 2016//
 /Args.hh/1.9/Thu Dec 29 22:57:33 2016//
-/Delete.cc/1.3/Thu Dec 29 22:57:33 2016//
-/Delete.hh/1.2/Thu Dec 29 22:57:33 2016//
-/Directory.cc/1.89/Thu Dec 29 22:57:33 2016//
-/Directory.hh/1.17/Thu Dec 29 22:57:33 2016//
-/DiskFullDeleteList.cc/1.7/Thu Dec 29 22:57:33 2016//
 /DiskFullDeleteList.hh/1.7/Thu Dec 29 22:57:33 2016//
 /EventList.cc/1.14/Thu Dec 29 22:57:33 2016//
 /EventList.hh/1.9/Thu Dec 29 22:57:33 2016//
@@ -20,4 +15,9 @@
 /run_janitor/1.1/Thu Dec 29 22:57:33 2016//
 /Params.cc/1.45/Sat Jan  7 22:23:58 2017//
 /Params.hh/1.38/Sat Jan  7 22:23:58 2017//
+/Delete.cc/1.4/Sat Oct 21 03:12:30 2017//
+/Delete.hh/1.3/Sat Oct 21 03:11:48 2017//
+/Directory.cc/1.90/Sat Oct 21 03:15:07 2017//
+/Directory.hh/1.18/Fri Nov  3 22:04:28 2017//
+/DiskFullDeleteList.cc/1.8/Sat Oct 21 03:16:01 2017//
 D

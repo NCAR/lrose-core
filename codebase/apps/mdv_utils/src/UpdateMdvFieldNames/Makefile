@@ -37,7 +37,7 @@ TARGET_FILE = UpdateMdvFieldNames
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lrapformats -ldidss -lrapmath \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lrapformats -ldidss -lrapmath \
 	-ltdrp -ldataport -leuclid -ltoolsa $(NETCDF4_LIBS) \
 	-lbz2 -lz
 

@@ -34,7 +34,7 @@ TARGET_FILE = WDTncdf2Mdv
 
 LOC_INCLUDES = -I../include $(NETCDF4_INCS)
 
-LOC_LIBS = -lnetcdf -lMdv -lRadx -ldsserver \
+LOC_LIBS = -lnetcdf -lMdv -lRadx -lNcxx -ldsserver \
 	-lrapformats -ldidss -ltoolsa -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz \
 	-lpthread

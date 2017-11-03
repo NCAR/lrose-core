@@ -39,7 +39,7 @@ TARGET_FILE = CWB_FortranBinary2Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsdata -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsdata -ldsserver \
 	-ldidss -leuclid -lrapformats -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz

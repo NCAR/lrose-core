@@ -32,7 +32,7 @@ TARGET_FILE = MdvFindValue
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -leuclid -lrapformats \
+LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -lrapformats \
 	-ldsserver -ldidss -ltoolsa -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz \
 	-lpthread

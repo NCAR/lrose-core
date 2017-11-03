@@ -11,7 +11,6 @@
 /Makefile/1.16/Thu Dec 29 22:57:36 2016//
 /MomentData.cc/1.11/Thu Dec 29 22:57:36 2016//
 /MomentData.hh/1.11/Thu Dec 29 22:57:36 2016//
-/StatsMgr.cc/1.11/Thu Dec 29 22:57:36 2016//
 /StatsMgr.hh/1.7/Thu Dec 29 22:57:36 2016//
 /TsDataMgr.cc/1.22/Thu Dec 29 22:57:36 2016//
 /TsDataMgr.hh/1.9/Thu Dec 29 22:57:36 2016//
@@ -23,4 +22,5 @@
 /run_test/1.4/Thu Dec 29 22:57:36 2016//
 /Params.cc/1.37/Mon Jan  2 00:24:26 2017//
 /Params.hh/1.33/Mon Jan  2 00:24:26 2017//
+/StatsMgr.cc/1.12/Mon Sep 25 23:52:17 2017//
 D

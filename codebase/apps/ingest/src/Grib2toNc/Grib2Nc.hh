@@ -219,8 +219,8 @@ private:
 
   fl32 *_calcMinMax(fl32 *dataPtr);
   fl32 *_encode(fl32 *dataPtr, Params::data_pack_t output_encoding);
-  void *_float32_to_int8(fl32 *inDataPtr);
-  void *_float32_to_int16(fl32 *inDataPtr); 
+  void *_float32_to_int8(fl32 *inDataPtr, fl32 scaleFactor = 0.0);
+  void *_float32_to_int16(fl32 *inDataPtr, fl32 scaleFactor = 0.0); 
 
 };
 

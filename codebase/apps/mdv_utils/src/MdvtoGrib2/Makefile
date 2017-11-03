@@ -22,9 +22,9 @@
 # ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 # RCS info
-#   $Author: dixon $
-#   $Date: 2016/03/04 03:08:24 $
-#   $Revision: 1.9 $
+#   $Author: jcraig $
+#   $Date: 2017/09/12 16:02:46 $
+#   $Revision: 1.11 $
 ###########################################################################
 #
 # Makefile for MdvtoGrib2.
@@ -43,7 +43,7 @@ TARGET_FILE = MdvtoGrib2
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx \
+LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx -lNcxx \
 	-ldsserver -ldidss -lrapformats -lgrib2 \
 	-leuclid -ltoolsa -ljasper -lpng \
 	-ldataport -ltdrp -lrapmath -lz \

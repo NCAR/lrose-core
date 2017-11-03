@@ -18,7 +18,6 @@
 /Makefile/1.18/Mon Sep  4 23:24:45 2017//
 /Params.cc/1.67/Fri Apr 21 21:20:53 2017//
 /Params.hh/1.66/Fri Apr 21 21:20:53 2017//
-/SunCal.cc/1.189/Sat Apr 22 22:29:59 2017//
 /SunCal.hh/1.93/Sat Apr 22 21:30:25 2017//
 /paramdef.SunCal/1.64/Fri Apr 21 21:20:46 2017//
 D/testing////
@@ -26,3 +25,4 @@ D/testing////
 /sunscan_ael_v1.1_20161201.pdf/1.1/Fri Aug 25 23:00:41 2017//
 /sunscan_nexrad.c/1.1/Sat Apr 22 22:34:30 2017//
 /sunscan_nexrad.h/1.1/Sat Apr 22 22:29:48 2017//
+/SunCal.cc/1.190/Fri Oct  6 22:55:00 2017//

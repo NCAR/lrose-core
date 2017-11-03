@@ -37,7 +37,7 @@ TARGET_FILE = MdvSigmaP2P
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lmm5 -leuclid \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lmm5 -leuclid \
 	-ldsserver -ldidss -lrapformats -ltoolsa \
 	-ldataport -ltdrp -lphysics $(NETCDF4_LIBS) \
 	-lbz2 -lz

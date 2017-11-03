@@ -22,8 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /*********************************************************************
- * file_repeat_day.cc: Program to convert Kavouras lightning data into
- *                 SPDB format.
+ * file_repeat_day.cc: A program that simulates a realtime data source.
  *
  * RAP, NCAR, Boulder CO
  *
@@ -35,18 +34,20 @@
 
 #include <cstdio>
 #include <cerrno>
-#include <toolsa/os_config.h>
+//#include <signal.h>
+#include <csignal>
+#include <sys/wait.h>
+#include <cstring>
 #include <algorithm>
 #include <functional>
 
 #include "file_repeat_day.hh"
 
 #include <dsserver/DsLdataInfo.hh>
+#include <toolsa/TaArray.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/umisc.h>
-#include <toolsa/file_io.h>
 #include <toolsa/Path.hh>
-#include <toolsa/DateTime.hh>
 using namespace std;
 
 //////////////////////////////////////////////////
@@ -850,6 +851,39 @@ int file_repeat_day::_computeFileTime(const string &filePath,
       break;
     }
 
+    case Params::PRE_YYYYMMDDhh_POST: {
+      
+      // Files are named <prefix>YYYYMMDDhh<suffix>.ext
+      // Separate the prefix from the rest of the filename
+
+      size_t name_len = fname.size();
+      size_t prefix_len = strlen(_params.FilePrefix);
+      
+      if (name_len > prefix_len) {
+        string prefix_str = fname.substr(0, prefix_len);
+        string after_prefix = fname.substr(prefix_len, name_len-prefix_len);
+        
+        if (5==sscanf(after_prefix.c_str(),"%4d%2d%2d%2d%s",
+                      &tmpTime.year, &tmpTime.month, &tmpTime.day,
+                      &tmpTime.hour, ext)) {
+          if (!strcmp(prefix_str.c_str(), _params.FilePrefix) &&
+              (tmpTime.month == _params.InMonth) &&
+              (tmpTime.year == _params.InYear)){
+
+            ftime.year = 1970;
+            ftime.month = 1;
+            ftime.day = 1;
+            ftime.hour = tmpTime.hour;
+            ftime.min = 0;
+            ftime.sec = 0;
+            uconvert_to_utime(&ftime);
+            return 0;
+          }
+        }
+      }
+      break;
+    }
+
     case Params::PRE_hh_YYYYMMDDhhmmss_POST: {
       
       // Files are named <prefix>hh-YYYYMMDDhhmmss<suffix>.ext
@@ -1274,6 +1308,21 @@ int file_repeat_day::_computeOutputPath(int itime,
     }
     break;
 
+  case Params::PRE_YYYYMMDDhh_POST:
+    {
+      Path inPath(inputPath);
+      string fname = inPath.getFile();
+      size_t prefix_len = strlen(_params.FilePrefix) + YYYYMMDDHH_LEN; 
+      string suffix = fname.substr(prefix_len);
+
+      sprintf(outputPath, "%s%s%s%.4d%.2d%.2d%.2d%s",
+	      _params.OutDir, PATH_DELIM,
+	      _params.FilePrefix, 
+	      outTime.year, outTime.month, outTime.day,
+	      outTime.hour, suffix.c_str());
+    }
+    break;
+
 
   case Params::PRE_hh_YYYYMMDDhhmmss_POST:
     {
@@ -1327,7 +1376,7 @@ int file_repeat_day::_computeOutputPath(int itime,
     {
       Path inPath(inputPath);
       string fname = inPath.getFile();
-      size_t prefix_len = strlen(_params.FilePrefix) + YYYYMMDDHHMMSS_LEN; 
+      size_t prefix_len = strlen(_params.FilePrefix) + YYYYMMDDHH_LEN; 
       string suffix = fname.substr(prefix_len);
 
       sprintf(outputDir, "%s%s%.4d%.2d%.2d",
@@ -1383,79 +1432,146 @@ int file_repeat_day::_copyFile(const char *inputPath,
 			       time_t outputTime)
   
 {
-  
-  FILE *ifp;
-  if ((ifp=fopen(inputPath, "rb")) == NULL) {
-    int errNum = errno;
+
+  if((_params.FileType != Params::ASCII) && (_params.FileType != Params::NETCDF)) {
     cerr << "ERROR - file_repeat_day::_copyFile" << endl;
-    cerr << "   Cannot open input file: " << inputPath << endl;
-    cerr << "  " << strerror(errNum) << endl;
+    cerr << "   Unknown file type." << endl;
     return -1;
   }
+ 
+  int retVal = 0;
 
-  FILE *ofp;
-  if ((ofp=fopen(outputPath, "wb")) == NULL) {
-    int errNum = errno;
-    cerr << "ERROR - file_repeat_day::_copyFile" << endl;
-    cerr << "   Cannot open output file: " << outputPath << endl;
-    cerr << "  " << strerror(errNum) << endl;
-    fclose(ifp);
-    return -1;
+  if((_params.FileType == Params::NETCDF) && _params.OverwriteDay) {
+
+    retVal =  _copyNetcdfFile(inputPath, outputPath, outputTime);
+
   }
-
-  if (_params.OverwriteDay) {
-
-    // copy while overwriting date/time fields as appropriate
-
-    char line[4096];
-
-    while (fgets(line, 4096, ifp) != NULL) {
-
-      //
-      // As odd as it may seem, instances of raw files with lines that
-      // begin with '\0'. To get cstdio to write these lines the null
-      // character has to be replaced.
-      //
-      if(line[0] == '\0') {
-	line[0] = ' ';
-      }
-
-      _substituteTime(line, outputTime);
-      _substituteStartExpire(line, outputTime);
-      if (fputs(line, ofp) == EOF) {
-	int errNum = errno;
-	cerr << "ERROR - file_repeat_day::_copyFile" << endl;
-	cerr << "   Cannot write to file: " << outputPath << endl;
-	cerr << "  " << strerror(errNum) << endl;
-	fclose(ifp);
-	fclose(ofp);
-	return -1;
-      }
+  else {
+	
+    FILE *ifp;
+    if ((ifp=fopen(inputPath, "rb")) == NULL) {
+      int errNum = errno;
+      cerr << "ERROR - file_repeat_day::_copyFile" << endl;
+      cerr << "   Cannot open input file: " << inputPath << endl;
+      cerr << "  " << strerror(errNum) << endl;
+      return -1;
+    }
+    
+    FILE *ofp;
+    if ((ofp=fopen(outputPath, "wb")) == NULL) {
+      int errNum = errno;
+      cerr << "ERROR - file_repeat_day::_copyFile" << endl;
+      cerr << "   Cannot open output file: " << outputPath << endl;
+      cerr << "  " << strerror(errNum) << endl;
+      fclose(ifp);
+      return -1;
     }
 
-  } else {
+    if (_params.OverwriteDay) {
+      
+	retVal = _copyAsciiFile(ifp, ofp, outputTime);
+    }
+    else {
 
-    // straight copy
+      retVal = _straightCopy(ifp, ofp, outputTime);
 
-    int c;
-    while ((c = fgetc(ifp)) != EOF) {
-      if (fputc(c, ofp) == EOF) {
-	int errNum = errno;
-	cerr << "ERROR - file_repeat_day::_copyFile" << endl;
-	cerr << "   Cannot write to file: " << outputPath << endl;
-	cerr << "  " << strerror(errNum) << endl;
-	fclose(ifp);
-	fclose(ofp);
-	return -1;
-      }
-    } // while
 
+    }
+
+    fclose(ifp);
+    fclose(ofp);
   }
 
-  fclose(ifp);
-  fclose(ofp);
-  return 0;
+  return retVal;
+}
 
+  
+////////////////////////////////////////////////////
+// copy ASCII file from the input to the output
+//
+// Returns 0 on success, -1 on failure
+
+int file_repeat_day::_copyAsciiFile(FILE *ifp,
+				    FILE *ofp,
+				    time_t outputTime)
+  
+{
+  // copy while overwriting date/time fields as appropriate
+  
+  char line[4096];
+  
+  while (fgets(line, 4096, ifp) != NULL) {
+    
+    //
+    // As odd as it may seem, instances of raw files with lines that
+    // begin with '\0'. To get cstdio to write these lines the null
+    // character has to be replaced.
+    //
+    if(line[0] == '\0') {
+      line[0] = ' ';
+    }
+    
+    _substituteTime(line, outputTime);
+    _substituteStartExpire(line, outputTime);
+    if (fputs(line, ofp) == EOF) {
+      int errNum = errno;
+      cerr << "ERROR - file_repeat_day::_copyFile" << endl;
+      cerr << "   Cannot write to file" << endl;
+      cerr << "  " << strerror(errNum) << endl;
+      return -1;
+    }
+  }
+  return 0;
+}
+
+////////////////////////////////////////////////////
+// straight copy from the input to the output
+//
+// Returns 0 on success, -1 on failure
+
+int file_repeat_day::_straightCopy(FILE *ifp,
+				   FILE *ofp,
+				   time_t outputTime)
+  
+{
+  int c;
+  while ((c = fgetc(ifp)) != EOF) {
+    if (fputc(c, ofp) == EOF) {
+      int errNum = errno;
+      cerr << "ERROR - file_repeat_day::_copyFile" << endl;
+      cerr << "   Cannot write to file " << endl;
+      cerr << "  " << strerror(errNum) << endl;
+      return -1;
+    }
+  } // while
+  return 0;
+}
+
+////////////////////////////////////////////////////
+// copy NetCDF file from the input to the output
+//
+// Returns 0 on success, -1 on failure
+
+int file_repeat_day::_copyNetcdfFile(const char *inputPath,
+				     const char *outputPath,
+				     time_t outputTime)
+  
+{
+  // build the command list for ncap2
+  string command;
+  _buildCmdList(outputTime, command);
+  
+  cerr << "ncap2 command -- " <<  command << endl;
+
+  // build argument list
+  vector< string > args;
+  args.push_back(string("-s"));
+  args.push_back(command);
+  args.push_back(string(inputPath));
+  args.push_back(string(outputPath));
+  _callNcap2(args);
+  
+  return 0;
 }
 
 /////////////////////////////////
@@ -1697,3 +1813,232 @@ void file_repeat_day::_tokenize(const string &str,
   }
 }
 
+//////////////////////////////////////////////
+// tokenize a string into a vector of strings
+
+void file_repeat_day::_callNcap2(const vector<string> &args)  
+{
+  string pmuStr = "Starting ncap2: " + string(_params.ncap2Path);
+  PMU_force_register(pmuStr.c_str());
+
+  if (_params.debug != Params::DEBUG_OFF) {
+    cerr << pmuStr << endl;
+  }
+  
+  // Fork a child to run the script
+  
+  time_t start_time = time(NULL);
+  time_t terminate_time = start_time + 30;
+  pid_t childPid = fork();
+  
+  if (childPid == 0) {
+    
+    // this is the child process, so exec the script
+    
+    _execScript(args, _params.ncap2Path);
+    
+    // exit
+    
+    if (_params.debug != Params::DEBUG_OFF) {
+      cerr << "Child process exiting ..." << endl;
+    }
+
+    _exit(0);
+
+  }
+
+  // this is the parent
+
+  if (_params.debug != Params::DEBUG_OFF) {
+    cerr << endl;
+    cerr << "Ncap2 started, child pid: " << childPid << endl;
+  }
+  
+    
+  // script in the foreground - so we must wait for it
+  // to complete
+    
+  while (true) {
+      
+    int status;
+    if (waitpid(childPid, &status,
+		(int) (WNOHANG | WUNTRACED)) == childPid) {
+      // child exited
+      time_t end_time = time(NULL);
+      int runtime = (int) (end_time - start_time);
+      pmuStr = _params.ncap2Path + string(" took ") + to_string(runtime) + string("secs");
+      PMU_force_register(pmuStr.c_str());
+      if (_params.debug != Params::DEBUG_OFF) {
+	cerr << "Child exited, pid: " << childPid << endl;
+	cerr << "  Runtime in secs: " << runtime << endl;
+      }
+      return;
+    }
+      
+    // script is still running
+      
+    pmuStr = _params.ncap2Path + string(" running");
+    PMU_auto_register(pmuStr.c_str());
+      
+    // child still running - kill it as required
+
+    _killAsRequired(childPid, terminate_time);
+
+    // sleep for a bit
+      
+    umsleep(50);
+      
+  } // while
+    
+}
+
+//////////////////////
+// execute the script
+
+void file_repeat_day::_execScript(const vector<string> &args,
+				  const char *script_to_call)  
+{
+
+  // set up execvp args - this is a null-terminated array of strings
+  
+  int narray = (int) args.size() + 2;
+  TaArray<const char *> argArray_;
+  const char **argArray = argArray_.alloc(narray);
+  argArray[0] = script_to_call;
+  for (int ii = 0; ii < (int) args.size(); ii++) {
+    argArray[ii+1] = args[ii].c_str();
+  }
+  argArray[narray-1] = NULL;
+  
+  if (_params.debug != Params::DEBUG_OFF) {
+    cerr << "Calling execvp with following args:" << endl;
+    for (int i = 0; i < narray; i++) {
+      cerr << "  " << argArray[i] << endl;
+    }
+  }
+    
+  // execute the command
+  
+  execvp(argArray[0], (char **) argArray);
+  
+}
+
+//////////////////////////
+// kill child as required
+//
+
+void file_repeat_day::_killAsRequired(pid_t pid,
+				      time_t terminate_time)
+{
+  
+  time_t now = time(NULL);
+
+  if (now < terminate_time) {
+    return;
+  }
+
+  // Time to terminate script, will be reaped elsewhere
+  
+  if (_params.debug != Params::DEBUG_OFF) {
+    cerr << "Child has run too long, pid: " << pid << endl;
+    cerr << "  Sending child kill signal" << endl;
+  }
+  
+  char pmuStr[4096];
+  sprintf(pmuStr, "Killing pid %d", pid);
+  PMU_force_register(pmuStr);
+  
+  if(kill(pid,SIGKILL)) {
+    perror("kill: ");
+  }
+
+}
+
+int file_repeat_day::_buildCmdList(time_t output_time,
+				   string& cmd_list)
+{
+  date_time_t outTime;
+  outTime.unix_time = output_time;
+  uconvert_from_utime(&outTime);
+  char ncValue[128];
+
+  // example of running ncap2 in this instance is
+  //    ncap2 -s "base_date=20170925;base_time=210000;" in.nc out.nc
+  cmd_list = "\"";
+  
+  for(int i = 0; i < _params.NetVars_n;  i++) {
+
+    switch(_params._NetVars[i].format) {
+
+    case Params::NC_HHmmss:
+      sprintf(ncValue, "%s=%.2d%.2d%.2d;", _params._NetVars[i].name, outTime.hour,
+	      outTime.min, outTime.sec);
+      break;
+      
+    case Params::NC_HHmm:
+      sprintf(ncValue, "%s=%.2d%.2d;", _params._NetVars[i].name,outTime.hour,
+	      outTime.min);
+      break;
+      
+    case Params::NC_HH:
+      sprintf(ncValue, "%s=%.2d;", _params._NetVars[i].name, outTime.hour);
+      break;
+      
+    case Params::NC_mm:
+      sprintf(ncValue, "%s=%.2d;", _params._NetVars[i].name, outTime.min);
+      break;
+      
+    case Params::NC_ss:
+      sprintf(ncValue, "%s=%.2d;", _params._NetVars[i].name, outTime.sec);
+      break;
+      
+    case Params::NC_YYYYMMDD:
+      sprintf(ncValue, "%s=%.4d%.2d%.2d;", _params._NetVars[i].name, outTime.year,
+	      outTime.month, outTime.day);
+      break;
+      
+    case Params::NC_YYYYMMDDhh:
+      sprintf(ncValue, "%s=%.4d%.2d%.2d%.2d;", _params._NetVars[i].name, outTime.year,
+	      outTime.month, outTime.day, outTime.hour);
+      break;
+      
+    case Params::NC_YYYYMMDDhhmm:
+      sprintf(ncValue, "%s=%.4d%.2d%.2d%.2d%.2d;", _params._NetVars[i].name, outTime.year,
+	      outTime.month, outTime.day, outTime.hour, outTime.min);
+      break;
+      
+    case Params::NC_YYYYMMDDHHmmss:
+      sprintf(ncValue, "%s=%.4d%.2d%.2d%.2d%.2d%.2d;", _params._NetVars[i].name,
+	      outTime.year, outTime.month, outTime.day, outTime.hour, outTime.min,
+	      outTime.sec);
+      break;
+      
+    case Params::NC_YYYY:
+      sprintf(ncValue, "%s=%.4d;", _params._NetVars[i].name, outTime.year);
+      break;
+      
+    case Params::NC_MM:
+      sprintf(ncValue, "%s=%.2d;", _params._NetVars[i].name, outTime.month);
+      break;
+      
+    case Params::NC_DD:
+      sprintf(ncValue, "%s=%.2d;", _params._NetVars[i].name, outTime.day);
+      break;
+      
+    case Params::NC_UTIME:
+      sprintf(ncValue, "%s=%ld;", _params._NetVars[i].name, outTime.unix_time);
+      break;
+      
+    default:
+      cerr << "ERROR - file_repeat_day::_copyNetcdfFile" << endl;
+      cerr << " Unknown TimeDateFormat_t in  NetVars" << endl;      
+      return -1;
+    }
+
+    cmd_list += string(ncValue);
+  }
+  
+  cmd_list += "\"";
+
+    return 0;
+}

@@ -37,7 +37,7 @@ TARGET_FILE = EuMetSat2Mdv
 
 LOC_INCLUDES = -I./include $(NETCDF4_INCS)
 
-LOC_LIBS = -leumetsat -lMdv -lRadx -leuclid \
+LOC_LIBS = -leumetsat -lMdv -lRadx -lNcxx -leuclid \
 	-ldsserver -lrapformats -ldidss -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm

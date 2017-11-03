@@ -43,7 +43,7 @@ TARGET_FILE = JmaMtSatHRIT2Mdv
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lhrit -ldsdata -lFmq -lSpdb \
-	-lMdv -lRadx -ldsserver -lrapformats \
+	-lMdv -lRadx -lNcxx -ldsserver -lrapformats \
 	-ldidss -leuclid -ltoolsa -ldataport \
 	-ltdrp -lrapmath $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm

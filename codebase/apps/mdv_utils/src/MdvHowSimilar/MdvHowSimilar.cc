@@ -67,6 +67,10 @@ MdvHowSimilar *MdvHowSimilar::_instance = 0;
 const float EPSILON = 1e-6;  // used for comparing floats
 
 
+const float MdvHowSimilar::MISSING_DATA_VALUE = -9999;
+const float MdvHowSimilar::SIG_DIFF_DEFAULT = 0.01;
+const float MdvHowSimilar::RMS_SIG_DIFF_DEFAULT = 0.1;
+
 MdvHowSimilar::MdvHowSimilar() : 
   _isOK(true)
 {
@@ -276,7 +280,7 @@ void MdvHowSimilar::_cleanupOutputData() {
 
 void MdvHowSimilar::_addFieldToOutput(string name) {
 
-  string fname = name + "_DIFF";
+  string fname = name;
   Mdvx::encoding_type_t encodingType =
     static_cast<Mdvx::encoding_type_t>(_params->encoding_type);
 
@@ -343,7 +347,7 @@ void MdvHowSimilar::_setFieldHeader(Mdvx::field_header_t& hdr, const string& nam
   hdr.bias = 0.0;
   hdr.bad_data_value = MISSING_DATA_VALUE;
   hdr.missing_data_value = MISSING_DATA_VALUE;
-  STRcopy(hdr.field_name_long, name.c_str(), MDV_LONG_FIELD_LEN);
+  STRcopy(hdr.field_name_long, (name+string(" Difference")).c_str(), MDV_LONG_FIELD_LEN);
   STRcopy(hdr.field_name, name.c_str(), MDV_SHORT_FIELD_LEN);
   STRcopy(hdr.units, _outFieldHdr.units, MDV_UNITS_LEN);
   STRcopy(hdr.transform, "none", MDV_TRANSFORM_LEN);

@@ -37,7 +37,7 @@ TARGET_FILE = Wrf2Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -lrapformats \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -lrapformats \
 	-ldidss -lphysics -leuclid -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread -lm
@@ -52,7 +52,7 @@ LOC_CFLAGS =
 #
 ##LOC_INCLUDES = -I/opt/netcdf/include
 ##LOC_LDFLAGS = -L/opt/netcdf/lib  -fPIC
-##LOC_LIBS = -lMdv -ldsserver -lrapformats -ldidss -lphysics \
+##LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -lrapformats -ldidss -lphysics \
 ##		-ltoolsa -ldataport -ltdrp -lm /opt/netcdf/lib/libnetcdf_c++.a  -lnetcdf -lpthread
 
 

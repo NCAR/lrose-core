@@ -511,6 +511,8 @@ private:
 				size_t &usedStartIdx,
 				size_t &usedEndIdx);
 
+  void _handleSfcWindAndVis(int start_pos, string &wx_type);
+
 };
 
 #endif

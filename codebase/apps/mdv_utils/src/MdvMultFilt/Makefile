@@ -32,7 +32,7 @@ TARGET_FILE = MdvMultFilt
 
 LOC_INCLUDES = -I. $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -leuclid \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -leuclid \
 	-ldidss -lrapformats -ltoolsa -ldataport \
 	-ltdrp -lrapmath $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm

@@ -37,7 +37,7 @@ TARGET_FILE = Mdv2SoundingSpdb
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -lMdv -lRadx -ldsserver \
+LOC_LIBS = -lSpdb -lMdv -lRadx -lNcxx -ldsserver \
 	-lrapmath -lrapformats -ldidss \
 	-ldataport -leuclid -lphysics -ltoolsa -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz

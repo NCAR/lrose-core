@@ -21,67 +21,40 @@
 # ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 # ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-###########################################################################
+#---------------------------------------------------------------------
 #
-# Makefile for VerifyTracks program
+# Makefile for script files
 #
-# Mike Dixon, RAP, NCAR, Boulder, CO, 80307, USA
-#
-# Sept 2005
-#
-###########################################################################
+#---------------------------------------------------------------------
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+#	Default INSTALL_DIR, should be overridden on command line
 
-TARGET_FILE = VerifyTracks
+INSTALL_DIR=$(RAP_BIN_DIR)
 
-LOC_INCLUDES = $(NETCDF4_INCS)
+#	Script files to be installed
 
-LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ltitan \
-	-lrapmath -ldidss -lrapformats -ltoolsa \
-	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
-	-lz -lm
+SCRIPTS = \
+	auto_restart \
+	auto_restart_stats \
+	procmap_auto_restart \
+	procmap_list_kill \
+	procmap_list_start \
+	start_inst
 
-LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
+#	Targets
 
-LOC_CFLAGS =
+include $(RAP_MAKE_INC_DIR)/rap_make_script_targets
 
-MODULE_TYPE = progcpp
+# Need to override specific targets because this is a mixed case of 
+# scripts and perl libs in one directory
 
-HDRS = \
-	$(PARAMS_HH) \
-	Args.hh \
-	DoVerify.hh \
-	VerifyTracks.hh
+install_shared:
+	$(MAKE) RAP_BIN_DIR=$(RAP_SHARED_BIN_DIR) RAP_LIB_DIR=$(RAP_SHARED_LIB_DIR) install
 
-CPPC_SRCS = \
-	$(PARAMS_CC) \
-	Args.cc \
-	DoVerify.cc \
-	Main.cc \
-	VerifyTracks.cc
+install: create_subdir
+	if test $(INSTALL_DIR) != . ;\
+	then \
+		cp $(SCRIPTS) $(INSTALL_DIR) ;\
+	fi ;\
 
-#
-# tdrp macros
-#
-
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
-
-#
-# standard C++ targets
-#
-
-include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
-
-#
-# tdrp targets
-#
-
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
-
-#
-# local targets
-#
-
-# DO NOT DELETE THIS LINE -- make depend depends on it.
-
+copy_bin: install

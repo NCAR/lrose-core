@@ -37,7 +37,7 @@ TARGET_FILE = Mdv2Csv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lMdv -lRadx -leuclid \
+LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -leuclid \
 	-lSpdb -ldsserver -ldidss -lrapformats \
 	-ltoolsa -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz -lm

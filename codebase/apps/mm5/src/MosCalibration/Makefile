@@ -38,7 +38,7 @@ TARGET_FILE = MosCalibration
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lSpdb -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lSpdb -ldsserver \
 	-ldidss -leuclid -lrapformats -ltoolsa \
 	-ldataport -lphysics -ltdrp -lrapmath \
 	-lclapack -lgfortran $(NETCDF4_LIBS) -lbz2 \

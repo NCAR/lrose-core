@@ -28,7 +28,7 @@ TARGET_FILE = Indicator
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lSpdb -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lSpdb -ldsserver \
 	-leuclid -ldidss -lrapformats -ltoolsa \
 	-ldataport -ltdrp -lrapmath -lc \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread \

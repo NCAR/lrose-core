@@ -37,7 +37,7 @@ TARGET_FILE = Mdv2Image
 
 LOC_INCLUDES = -I../include $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -leuclid -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
 	-ldidss -lrapformats -ltoolsa -ltdrp \
 	-ldataport -lImlib2 $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread

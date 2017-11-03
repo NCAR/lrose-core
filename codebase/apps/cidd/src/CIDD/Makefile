@@ -37,7 +37,7 @@ LAST_INCLUDES = $(SYS_X_INCLUDES) $(SYS_XVIEW_INCLUDES)
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lFmq -lSpdb -lMdv -lRadx \
+LOC_LIBS = -lFmq -lSpdb -lMdv -lRadx -lNcxx \
 	-leuclid -ldsserver -ldidss -lrapplot \
 	-lrapformats -ltoolsa -ldataport -ltdrp \
 	-lshapelib -ldevguide -lxview -lolgx \
@@ -55,7 +55,7 @@ LOC_LDFLAGS = $(SYS_XVIEW_LDFLAGS) $(SYS_X_LDFLAGS) $(NETCDF4_LDFLAGS)
 # and comment out the LOC_LIBS above.
 #
 #LOC_CPPC_CFLAGS = -DUSE_IMLIB2
-#LOC_LIBS = -lFmq -lSpdb -lMdv -leuclid -ldsserver -ldidss -lrapplot \
+#LOC_LIBS = -lFmq -lSpdb -lMdv -lRadx -lNcxx -leuclid -ldsserver -ldidss -lrapplot \
 #	-lrapformats -ltoolsa -ldataport -ltdrp \
 #	-lshapelib -lImlib2 -lpthread -ldevguide -lxview -lolgx -lX11 -lXext
 

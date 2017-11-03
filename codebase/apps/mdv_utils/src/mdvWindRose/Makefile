@@ -32,7 +32,7 @@ TARGET_FILE = mdvWindRose
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -lphysics \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -lphysics \
 	-leuclid -ldidss -lcidd -lrapformats \
 	-ltoolsa -ldataport -ltdrp -lrapmath \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread \

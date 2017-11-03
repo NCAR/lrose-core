@@ -249,6 +249,7 @@ paramdef string {
 } data_set_source;
 
 typedef enum {
+  DATA_PACK_AUTO = 0,
   DATA_PACK_NONE = 5,
   DATA_PACK_BYTE = 1,
   DATA_PACK_SHORT = 3
@@ -382,6 +383,12 @@ paramdef int {
   p_descr = "Compression level from 1 to 9 with 9 being the greatest compression. Default is 9.";
   p_help = "Only applies to NETCDF4 and NETCDF4_CLASSIC files.";
 } compression_level;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include latitutde and longitude auxillary variables.";
+  p_help = "Only applies to non lat/lon grids as those already have lat/lon.";
+} include_lat_lon;
 
 paramdef boolean {
   p_default = FALSE;

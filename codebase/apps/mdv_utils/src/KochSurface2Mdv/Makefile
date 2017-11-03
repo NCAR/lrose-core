@@ -38,7 +38,7 @@ TARGET_FILE = KochSurface2Mdv
 
 LOC_INCLUDES = $(NETCDF_INCS) $(NETCDF4_INCS)
 
-LOC_LIBS = -lnetcdf -lMdv -lRadx -leuclid \
+LOC_LIBS = -lnetcdf -lMdv -lRadx -lNcxx -leuclid \
 	-ldsserver -lrapformats -ldidss -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread

@@ -567,6 +567,8 @@ public:
 
   tdrp_bool_t ncf_output_latlon_arrays;
 
+  tdrp_bool_t ncf_output_start_end_times;
+
   tdrp_bool_t ncf_output_mdv_attributes;
 
   tdrp_bool_t ncf_output_mdv_chunks;
@@ -578,7 +580,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[68];
+  mutable TDRPtable _table[69];
 
   const char *_className;
 

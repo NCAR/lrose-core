@@ -33,7 +33,7 @@
  * 
  *  @date September 2015
  *
- *  @version $Id: MdvHowSimilar.hh,v 1.8 2016/08/04 20:32:47 mccabe Exp $
+ *  @version $Id: MdvHowSimilar.hh,v 1.9 2017/09/13 19:42:57 mccabe Exp $
  */
 
 
@@ -82,9 +82,9 @@ public:
   static bool isValid(const Mdvx::field_header_t& fh, float value);
   static bool isEqual(float a, float b);
 	
-  static const float MISSING_DATA_VALUE = -9999;
-  static const float SIG_DIFF_DEFAULT = 0.01;
-  static const float RMS_SIG_DIFF_DEFAULT = 0.1;
+  static const float MISSING_DATA_VALUE;
+  static const float SIG_DIFF_DEFAULT;
+  static const float RMS_SIG_DIFF_DEFAULT;
 
 	//similar to the Params one, but with a string
   typedef struct {

@@ -40,7 +40,7 @@ TARGET_FILE = BrightBand
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -ldsdata -lSpdb -ldsserver -ldidss \
-	-lMdv -lNcxx -lRadx -lrapformats -leuclid \
+	-lMdv -lRadx -lNcxx -lrapformats -leuclid \
 	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm
 
