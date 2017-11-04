@@ -67,9 +67,9 @@ public:
   void setEl(double el) { _el = el; }
   void setAz(double az);
 
-  // add data to layer
+  // add data for a point
   
-  void addLayerData(double range,
+  void addDataPoint(double range,
 		    const MomentData &mdata);
 
   // check and compute when ready
@@ -90,6 +90,8 @@ public:
 
   int writeGlobalResults();
   void printGlobalResults(FILE *out);
+
+  int writeZdrPoints();
 
 protected:
   
@@ -135,6 +137,11 @@ private:
   double _globalMeanZdrm;
   double _globalSdevZdrm;
   double _globalMeanOfSdevZdrm;
+
+  // values to write to text file
+
+  vector<double> _zdrm;
+  vector<double> _height;
 
 };
 

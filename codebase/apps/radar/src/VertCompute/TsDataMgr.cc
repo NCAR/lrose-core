@@ -389,7 +389,7 @@ void TsDataMgr::_computeMoments()
     mdata.ldrv = flds.ldrv;
     mdata.phidp = flds.phidp;
     mdata.rhohv = flds.rhohv;
-    _statsMgr.addLayerData(range, mdata);
+    _statsMgr.addDataPoint(range, mdata);
   } // igate
 
 }

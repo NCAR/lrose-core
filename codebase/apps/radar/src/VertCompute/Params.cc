@@ -1066,6 +1066,18 @@ using namespace std;
     tt->single_val.i = 4;
     tt++;
     
+    // Parameter 'write_zdr_point_values_to_text_file'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_zdr_point_values_to_text_file");
+    tt->descr = tdrpStrDup("Option to write individual ZDR values to a text file.");
+    tt->help = tdrpStrDup("If true, the individual zdrm values, plus metadata such as height, is written to a text file.");
+    tt->val_offset = (char *) &write_zdr_point_values_to_text_file - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'write_results_to_spdb'
     // ctype is 'tdrp_bool_t'
     

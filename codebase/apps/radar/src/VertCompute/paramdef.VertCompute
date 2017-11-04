@@ -291,6 +291,12 @@ paramdef int {
 
 paramdef boolean {
   p_default = false;
+  p_descr = "Option to write individual ZDR values to a text file.";
+  p_help = "If true, the individual zdrm values, plus metadata such as height, is written to a text file.";
+} write_zdr_point_values_to_text_file;
+
+paramdef boolean {
+  p_default = false;
   p_descr = "Option to write out results to SPDB.";
   p_help = "The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.";
 } write_results_to_spdb;

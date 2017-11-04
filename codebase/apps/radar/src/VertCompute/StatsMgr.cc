@@ -160,17 +160,19 @@ void StatsMgr::checkCompute() {
 /////////////////////////////////
 // add data to layer
 
-void StatsMgr::addLayerData(double range,
+void StatsMgr::addDataPoint(double range,
 			    const MomentData &mdata)
 
 {
 
   double sinEl = sin(_el * DEG_TO_RAD);
-  int layer = (int) (((range * sinEl) - _startHt) / _deltaHt);
+  double ht = (range * sinEl) - _startHt;
+  int layer = (int) (ht  / _deltaHt);
   if (layer >= 0 && layer < _nLayers) {
     _layers[layer]->addData(mdata);
   }
-  
+  _zdrm.push_back(mdata.zdrm);
+  _height.push_back(ht);
 }
  
 ////////////////////////////////////////////
@@ -568,6 +570,69 @@ void StatsMgr::printGlobalResults(FILE *out)
               layer.getGlobalMean().rhohv);
     }
   }
+
+}
+
+////////////////////////////////////////////////////////
+// write out zdr and height data for individual points
+
+int StatsMgr::writeZdrPoints()
+
+{
+  
+  // compute output file path
+
+  time_t startTime = (time_t) _startTime;
+  time_t endTime = (time_t) _endTime;
+  DateTime ftime(startTime);
+  char outPath[1024];
+  sprintf(outPath, "%s/zdr_points_%.4d%.2d%.2d_%.2d%.2d%.2d.txt",
+          _params.output_dir,
+          ftime.getYear(),
+          ftime.getMonth(),
+          ftime.getDay(),
+          ftime.getHour(),
+          ftime.getMin(),
+          ftime.getSec());
+  
+  // open file
+  
+  FILE *out;
+  if ((out = fopen(outPath, "w")) == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - StatsMgr::_writeFile";
+    cerr << "  Cannot create file: " << outPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+
+  // write header
+
+  fprintf(out, "# zdrm height\n");
+  fprintf(out, "#============================================\n");
+  fprintf(out, "# Table produced by VertCompute\n");
+  fprintf(out, "# Start time: %s\n", DateTime::strm(startTime).c_str());
+  fprintf(out, "# End time  : %s\n", DateTime::strm(endTime).c_str());
+  fprintf(out, "#------------ Table column list -------------\n");
+  fprintf(out, "#    col 000: zdrm\n");
+  fprintf(out, "#    col 001: height\n");
+  fprintf(out, "#--------------------------------------------\n");
+  fprintf(out, "#============================================\n");
+
+  // print to file
+
+  for (size_t ii = 0; ii < _zdrm.size(); ii++) {
+    fprintf(out, "%g %g\n", _zdrm[ii], _height[ii]);
+  }
+
+  if (_params.debug) {
+    cerr << "-->> Wrote zdr points file: " << outPath << endl;
+  }
+
+  // close file
+
+  fclose(out);
+  return 0;
 
 }
 

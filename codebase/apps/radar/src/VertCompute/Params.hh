@@ -440,6 +440,8 @@ public:
 
   int nrevs_for_global_stats;
 
+  tdrp_bool_t write_zdr_point_values_to_text_file;
+
   tdrp_bool_t write_results_to_spdb;
 
   char* spdb_output_url;
@@ -453,7 +455,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[40];
+  mutable TDRPtable _table[41];
 
   const char *_className;
 
