@@ -283,11 +283,17 @@ paramdef string {
   p_help = "The results will be written to sub-directories named from the data time.";
 } output_dir;
 
-paramdef int {
-  p_default = 4;
-  p_descr = "Number of revolutions for global stats.";
-  p_help = "A global stats file will be output each time the number of revolutions reaches this value.";
-} nrevs_for_global_stats;
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to write global statistics to a text file.";
+  p_help = "If true, stats for the entire run will be writted to a text file.";
+} write_global_stats_to_text_file;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write statistics for each rotation to a text file.";
+  p_help = "If true, stats for each rotation will be writted to a text file.";
+} write_360deg_stats_to_text_file;
 
 paramdef boolean {
   p_default = false;

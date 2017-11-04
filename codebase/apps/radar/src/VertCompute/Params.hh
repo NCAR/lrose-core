@@ -438,7 +438,9 @@ public:
 
   char* output_dir;
 
-  int nrevs_for_global_stats;
+  tdrp_bool_t write_global_stats_to_text_file;
+
+  tdrp_bool_t write_360deg_stats_to_text_file;
 
   tdrp_bool_t write_zdr_point_values_to_text_file;
 
@@ -455,7 +457,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[41];
+  mutable TDRPtable _table[42];
 
   const char *_className;
 

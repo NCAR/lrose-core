@@ -77,6 +77,8 @@ public:
 
   // public data
 
+  double height;
+
   double snr;
   double snrhc;
   double snrhx;

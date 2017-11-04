@@ -141,7 +141,9 @@ int VertCompute::Run ()
   }
   
   _statsMgr->computeGlobalStats();
-  _statsMgr->writeGlobalResults();
+  if (_params.write_global_stats_to_text_file) {
+    _statsMgr->writeGlobalResults();
+  }
   if (_params.write_zdr_point_values_to_text_file) {
     _statsMgr->writeZdrPoints();
   }

@@ -70,7 +70,7 @@ public:
   // add data for a point
   
   void addDataPoint(double range,
-		    const MomentData &mdata);
+		    MomentData mdata);
 
   // check and compute when ready
   
@@ -137,11 +137,6 @@ private:
   double _globalMeanZdrm;
   double _globalSdevZdrm;
   double _globalMeanOfSdevZdrm;
-
-  // values to write to text file
-
-  vector<double> _zdrm;
-  vector<double> _height;
 
 };
 

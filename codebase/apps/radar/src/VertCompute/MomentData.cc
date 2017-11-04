@@ -53,6 +53,8 @@ void MomentData::initialize()
 
 {
   
+  height = missingVal;
+
   snr = missingVal;
   snrhc = missingVal;
   snrhx = missingVal;
