@@ -18,6 +18,8 @@ SUB_DIRS = \
 	ingest \
 	dsserver \
 	mdv_utils \
+        mm5 \
+        physics \
         satApps \
 	spdb_utils \
 	filedist \
@@ -26,8 +28,7 @@ SUB_DIRS = \
 	hydro \
 	interp \
 	radar \
-        Radx \
-	spdb_server
+        Radx
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
 

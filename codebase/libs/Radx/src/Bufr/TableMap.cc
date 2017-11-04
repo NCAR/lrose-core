@@ -21,10 +21,17 @@ TableMap::TableMap() {
 TableMap::~TableMap() {
 }
 
+void TableMap::setDebug(bool debug) {
+  if (debug) {
+    _debug = true;
+  } else {
+    _debug = false;
+  }
+}
+
 int TableMap::ReadTableB(string fileName) {
 
   std::ifstream filein(fileName.c_str());
-  //std::fstream filein(fileName, ios::in);
 
   if (!filein.is_open()) {
     string _errString;
@@ -34,39 +41,41 @@ int TableMap::ReadTableB(string fileName) {
 
   for (std::string line; std::getline(filein, line); ) {
 
-    //std::cout << line << std::endl;
+    if (_debug) std::cout << line << std::endl;
     std::vector<std::string> tokens;
     tokens = split(line, ';');
 
-    if (_debug) {
-      for (vector<std::string>::const_iterator s = tokens.begin(); s!= tokens.end(); ++s) {
-	//for (string s: tokens) {
+    if (0) {
+      for (vector<std::string>::const_iterator s = tokens.begin();
+        s!= tokens.end(); ++s) {
         cout << *s << endl; 
       }
     }
 
     unsigned char f,x,y;
- 
-    f = atoi(tokens[0].c_str());  // try tokens[0].stoui
-    x = atoi(tokens[1].c_str());
-    y = atoi(tokens[2].c_str());
-    unsigned short key;
-    //f = 1; x = 8;
-    key = f << 6;
-    key = key | x;
-    key = key << 8;
-    key = key | y;
-    if (_debug) printf("key = %d (x%x) for f;x;y %d;%d;%d %s \n", key, key, f,x,y, tokens[3].c_str()); 
-    //const char *fieldName;
-    //fieldName = tokens[3].c_str();
-    int scale;
-    int referenceValue;
-    int dataWidthBits;
-    scale = atoi(tokens[5].c_str());
-    referenceValue = atoi(tokens[6].c_str());
-    dataWidthBits = atoi(tokens[7].c_str());
-    table[key] = TableMapElement(tokens[3], scale, tokens[4], referenceValue,
-			dataWidthBits);
+    if (tokens.size() >= 8) {
+      f = atoi(tokens[0].c_str());
+      x = atoi(tokens[1].c_str());
+      y = atoi(tokens[2].c_str());
+      unsigned short key;
+      //f = 1; x = 8;
+      key = f << 6;
+      key = key | x;
+      key = key << 8;
+      key = key | y;
+      if (_debug) printf("key = %d (x%x) for f;x;y %d;%d;%d %s \n", key, key, f,x,y, tokens[3].c_str()); 
+      int scale;
+      int referenceValue;
+      int dataWidthBits;
+      scale = atoi(tokens[5].c_str());
+      referenceValue = atoi(tokens[6].c_str());
+      dataWidthBits = atoi(tokens[7].c_str());
+      table[key] = TableMapElement(tokens[3], scale, tokens[4], referenceValue,
+				   dataWidthBits);
+    } else {
+      cerr << " discarding line: " << line << " from file: " <<
+	fileName <<  endl;
+    }
   }
   return 0;
 }
@@ -88,11 +97,11 @@ int TableMap::ReadTableD(string fileName) {
 
     if (line[0] != '#') { // this is a comment skip it
      
-      //std::cout << line << std::endl;
+      if (_debug) std::cout << line << std::endl;
       std::vector<std::string> tokens;
       tokens = split(line, ';');
 
-      if (_debug) {
+      if (0) {
         for (vector<std::string>::const_iterator s = tokens.begin(); s!= tokens.end(); ++s) {
 	  //for (string s: tokens) {
           cout << *s << endl; 
@@ -113,10 +122,21 @@ int TableMap::ReadTableD(string fileName) {
 	  subkey = TableMapKey().EncodeKey(tokens[3], tokens[4], tokens[5]);
 	  currentList.push_back(subkey);
 	}
-      }  // end if more than 6 tokens
+      } else { // end if more than 6 tokens
+	cerr << " discarding line: " << line << " from file: " <<
+	fileName <<  endl;
+      }
     } // end if comment line
   }  // end for each line
+  // hanlde the end case; check if we have one more key,value to insert
+  if (!currentList.empty()) {
+    table[key] = TableMapElement(currentList);
+  }
   return 0;
+}
+
+bool TableMap::filled() {
+  return table.size() > 0;
 }
 
 // read the bufrtab_x.csv  (master) tables first, then the localtab_x_y.csv
@@ -127,6 +147,34 @@ int TableMap::ImportTables() {
   ReadTableD("../share/bbufr/tables/bufrtabd_16.csv");
   ReadTableB("../share/bbufr/tables/localtabb_41_2.csv");
   ReadTableD("../share/bbufr/tables/localtabd_41_2.csv");
+  return 0;
+}
+
+int TableMap::ImportTables(unsigned int masterTableVersion, unsigned int generatingCenter,
+			   unsigned int localTableVersion) {
+  char fileName[1024];
+  sprintf(fileName, "../share/bbufr/tables/bufrtabb_%u.csv", masterTableVersion);
+  if (_debug)
+    cerr << "reading master Table B from " << fileName << endl;
+  ReadTableB(fileName);
+
+  sprintf(fileName, "../share/bbufr/tables/bufrtabd_%u.csv", masterTableVersion);
+  if (_debug)
+    cerr << "reading master Table D from " << fileName << endl;
+  ReadTableD(fileName);
+
+  sprintf(fileName, "../share/bbufr/tables/localtabb_%u_%u.csv", generatingCenter,
+	  localTableVersion);
+  if (_debug)
+    cerr << "reading local Table B from " << fileName << endl;
+  ReadTableB(fileName);
+
+  sprintf(fileName, "../share/bbufr/tables/localtabd_%u_%u.csv", generatingCenter,
+	  localTableVersion);
+  if (_debug)
+    cerr << "reading local Table D from " << fileName << endl;
+  ReadTableD(fileName); 
+
   return 0;
 }
 
@@ -214,58 +262,31 @@ int TableMap::ImportTablesOld() {
   return 0;
 }
 
-// // TODO: handle exception ...
-// int  TableMap::Retrieve(unsigned short key, TableMapElement *tableMapElement) {
-
-//   int result = 0;
-//   TableMapElement val1;
-//   val1 = table.at(key);
-
-//     cout << " Found " << endl;
-//     val1 = result->second;
-//     *tableMapElement = val1;  // TODO: is this ok? or should I copy??
-
-//     if (val1._whichType == TableMapElement::TableMapElementType::DESCRIPTOR) {
-//       cout << "value for key " << key << ":" << val1._descriptor.fieldName << "," << 
-//         val1._descriptor.scale << endl;
-//     } else if (val1._whichType == TableMapElement::TableMapElementType::KEYS) {
-//       vector<unsigned short> theList;
-//       theList = val1._listOfKeys; 
-//       cout << "value for key " << key << ": " << theList.size() << endl; 
-//       for (vector<unsigned short>::const_iterator i = theList.begin(); i!= theList.end(); i++)
-//         cout << *i << ' ';
-//     } else {
-//       result = -1;
-//     }
-// }
-
-// TODO:  handle exception
-
 TableMapElement TableMap::Retrieve(unsigned short key) {
 
   TableMapElement val1;
   val1 = table.at(key);
-
-  //cout << " Found " << endl;
-    if (val1._whichType == TableMapElement::DESCRIPTOR) {
-      //cout << "value for key " << key << ":" << val1._descriptor.fieldName << "," << 
-      //val1._descriptor.scale << endl;
-      ;
-    } else if (val1._whichType == TableMapElement::KEYS) {
-      vector<unsigned short> theList;
-      theList = val1._listOfKeys; 
-      //cout << "value for key " << key << ": "; 
-      for (vector<unsigned short>::const_iterator i = theList.begin(); i!= theList.end(); i++) {
-        unsigned char f, x, y;
-	TableMapKey().Decode(*i, &f, &x, &y);
-        //cout << *i << ' ';
-        //cout << f << ";" << x << ";" << y << "; ";
-        printf("key(%d)=%d;%d;%d ",*i, f, x, y);
+  if (_debug) {
+    if (key != 7878) {
+      if (val1._whichType == TableMapElement::DESCRIPTOR) {
+	cout << "value for key " << key << ":" << val1._descriptor.fieldName
+	     << endl;
+      } else if (val1._whichType == TableMapElement::KEYS) {
+	vector<unsigned short> theList;
+	theList = val1._listOfKeys; 
+ 
+	for (vector<unsigned short>::const_iterator i = theList.begin(); 
+	     i!= theList.end(); i++) {
+	  unsigned char f, x, y;
+	  TableMapKey().Decode(*i, &f, &x, &y);
+	  printf("key(%d)=%d;%d;%d ",*i, f, x, y);
+	}
+      } else {
+	// ignore
+	;
       }
-      //cout << endl;
-    } else {
-      // TODO: do something
-    }
+    } // end if key != byte element of compressed array
+  }
   return val1;
 }
 

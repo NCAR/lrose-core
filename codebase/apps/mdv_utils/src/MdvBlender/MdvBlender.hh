@@ -33,7 +33,7 @@
  * 
  *  @date July 2014
  *
- *  @version $Id: MdvBlender.hh,v 1.14 2017/08/15 18:29:19 mccabe Exp $
+ *  @version $Id: MdvBlender.hh,v 1.15 2017/10/17 19:16:04 mccabe Exp $
  */
 
 
@@ -131,7 +131,7 @@ private:
   DsMdvx* _out;
   unsigned int _numX;
   unsigned int _numY;
-  unsigned int _numZ;
+  int _maxZ;
   unsigned int _numElem;
 
   float * _useInputs;
@@ -182,6 +182,7 @@ private:
   void _setFieldHeader(Mdvx::field_header_t& hdr, const string& name,
                        const string& longName, const string& unit,
 		       int fCode, int nx, int ny, int nz);
+	bool _verifyAllDimensions();	
   bool _verifyDimensions(MdvxField* input1Field, MdvxField* input2Field);
   float* _ditherFields(vector<const float*> dataVols, vector<float> miss, vector<float> bad);
   float* _averageFields(vector<const float*> dataVols, vector<float> constants, vector<const float*> weightVols, vector<float> miss, vector<float> bad);  

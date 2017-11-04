@@ -24,6 +24,7 @@ use Env qw(ADDSHOME);
 use NavAids;
 use StationUtils;
 use Monitor;
+#use IO::Null;
 no locale;
 
 (my $prog = $0) =~ s%.*/%%;            #...Determine program basename
@@ -89,6 +90,7 @@ my ($icaoId1, $pirep, @pireps, $status);
 my ($midPointAssumedFlag, $noTimestampFlag, $flightLevelRangeFlag, $aglFlag, $noFlightLevelFlag, $badLocationFlag);
 my $icingFlag;
 my $handle;       #either a db handle or file handle
+my $DOWARN = 0; # turn off warnings
 #initialize qc field flags
 $midPointAssumedFlag = 0;
 $noTimestampFlag = 0;
@@ -109,12 +111,13 @@ Usage: $prog [-hv] [-i] [-t yyyymmddhh] [-L log_dir]
   -i  Icing:    Set icing flag to true, to apply assumptions specifically for icing.
   -t  yyyymmddhh: adjust the year, month, day, and hour otherwise current date.
   -L  log file dir: Specify where the log file lives.
+    
   expects standard input to be parsed so redirect a file to STDIN if need be.
 EOF
 
 #...------------...Sanity check the options...------------------
 
-&getopts('hvt:L:i') || die $usage;
+&getopts('hvqt:L:i') || die $usage;
 die $usage if $opt_h;
 $verbose = 1 if $opt_v;
 
@@ -128,7 +131,12 @@ if ($opt_t) {
     }
 }
 if ($opt_L) {
-    if ($opt_t){
+    if ($opt_L == "/dev/null"){
+	open (LOG, ">/dev/null") or die "Can't open /dev/null: $!";
+	open (STDERR, ">&LOG" ) or die "could not dup stdout: $!\n";
+	BEGIN { $SIG{'__WARN__'} = sub { warn $_[0] if $DOWARN } }
+    }
+    elsif ($opt_t){
         open (LOG, ">>$opt_L/pirepLog_$yyyy$mm$dd$hh.log" ) or die "could not open $opt_L/pirepLog_$$.log: $!\n";
         open (STDERR, ">&LOG" ) or die "could not dup stdout: $!\n";
     }else{

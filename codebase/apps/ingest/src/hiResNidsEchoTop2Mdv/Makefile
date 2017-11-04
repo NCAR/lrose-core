@@ -38,7 +38,7 @@ TARGET_FILE = hiResNidsEchoTop2Mdv
 
 LOC_INCLUDES = $(NETCDF_INCS) $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -leuclid -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
 	-lrapformats -ldidss -ltoolsa -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz \
 	-lpthread

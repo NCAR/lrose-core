@@ -1021,6 +1021,18 @@ using namespace std;
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'output_start_end_times'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("output_start_end_times");
+    tt->descr = tdrpStrDup("If true start_time and end_time are are output");
+    tt->help = tdrpStrDup("Start and end times may provide redundant information in the Mdv file or may not be relevant to the output data");
+    tt->val_offset = (char *) &output_start_end_times - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'output_mdv_attributes'
     // ctype is 'tdrp_bool_t'
     

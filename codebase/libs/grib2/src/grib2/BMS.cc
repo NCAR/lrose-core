@@ -27,7 +27,7 @@
 // Used wgrib by Wesley Ebisuzaki at NOAA as
 // reference (http://wesley.wwb.noaa.gov/wgrib.html)
 //
-// $Id: BMS.cc,v 1.11 2016/06/21 22:01:59 jcraig Exp $
+// $Id: BMS.cc,v 1.12 2017/09/20 22:16:10 jcraig Exp $
 //
 /////////////////////////////////////////////////
 
@@ -180,10 +180,15 @@ int BMS::pack(ui08 *bmsPtr)
        num = _gridSz % 8;
        if(num > 0) 
        {
+	 int rem[8];
 	 int val = 0;
 	 for(int i = 0; i < num; i++)
-	   val = _bitMap[ind + i] * (128 / (int)pow((float)2,i));
-	 bmsPtr[index++] = val;
+	   rem[i] = _bitMap[ind + i];
+	 for(int i = num; i < 8; i++)
+	   rem[i] = 0;
+	 bmsPtr[index++] = (rem[0] * 128) + (rem[1] * 64) + (rem[2] * 32) + 
+	   (rem[3] * 16) + (rem[4] * 8) + (rem[5] * 4) + 
+	   (rem[6] * 2) + rem[7];
        }
        if(index != _sectionLen) {
 	 cerr << "WARNING: BMS::pack()" << endl;

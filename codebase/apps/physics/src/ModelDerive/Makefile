@@ -38,7 +38,7 @@ TARGET_FILE = ModelDerive
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx \
+LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx -lNcxx \
 	-leuclid -ldsserver -ldidss -lrapformats \
 	-ltoolsa -lgrib2 -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz

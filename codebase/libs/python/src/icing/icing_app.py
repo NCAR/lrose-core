@@ -38,48 +38,48 @@ def run_app(app_name, instance, check_outdir=True, start_time='',
     icing_message.debug('start_time = ' + start_time)
     icing_message.debug('stop_time = ' + stop_time)
     icing_message.debug('out_dir = ' + out_dir)
-    command = 'run_' + app_name + '.%s \'%s\' \'%s\' %s' % \
+    command = 'run_' + app_name + '.%s.sh \'%s\' \'%s\' %s' % \
               (instance, start_time, stop_time, instance)
   elif len(in_file) > 0 and len(out_dir) > 0 and len(diag_dir) > 0 and len(opt_in_file) == 0:
     icing_message.debug('in_file = ' + in_file)
     icing_message.debug('out_dir = ' + out_dir)
     icing_message.debug('diag_dir = ' + diag_dir)
-    command = 'run_' + app_name + '.%s %s %s %s %s' % \
+    command = 'run_' + app_name + '.%s.sh %s %s %s %s' % \
               (instance, in_file, out_dir, diag_dir, instance) 
   elif len(in_file) > 0 and len(out_dir) > 0 and len(opt_in_file) == 0 and len(diag_dir) == 0:
     icing_message.debug('in_file = ' + in_file)
     icing_message.debug('out_dir = ' + out_dir)
-    command = 'run_' + app_name + '.%s %s %s %s' % \
+    command = 'run_' + app_name + '.%s.sh %s %s %s' % \
               (instance, in_file, out_dir, instance) 
   elif len(start_time) > 0 and  len(out_dir) > 0:
     icing_message.debug('start_time = ' + start_time)
     icing_message.debug('out_dir = ' + out_dir)
-    command = 'run_' + app_name + '.%s \'%s\' %s' % \
+    command = 'run_' + app_name + '.%s.sh \'%s\' %s' % \
               (instance, start_time, instance) 
   elif len(in_file) > 0 and len(opt_in_file) > 0 and len(out_dir) > 0 and len(rt) == 0:
     icing_message.debug('in_file = ' + in_file)
     icing_message.debug('opt_in_file = ' + opt_in_file)
     icing_message.debug('out_dir = ' + out_dir)
-    command = 'run_' + app_name + '.%s %s %s %s %s' % \
+    command = 'run_' + app_name + '.%s.sh %s %s %s %s' % \
               (instance, in_file, opt_in_file, out_dir, instance) 
   elif len(in_file) > 0 and len(opt_in_file) > 0 and len(out_dir) > 0 and len(rt) > 0:
     icing_message.debug('run_time = ' + rt)
     icing_message.debug('in_file = ' + in_file)
     icing_message.debug('opt_in_file = ' + opt_in_file)
     icing_message.debug('out_dir = ' + out_dir)
-    command = 'run_' + app_name + '.%s %s %s %s %s %s' % \
+    command = 'run_' + app_name + '.%s.sh %s %s %s %s %s' % \
               (instance, rt, in_file, opt_in_file, out_dir, instance) 
   elif len(in_file) == 0 and len(opt_in_file) == 0 and len(out_dir) > 0 and len(rt) > 0:
     icing_message.debug('run_time = ' + rt)
     icing_message.debug('out_dir = ' + out_dir)
-    command = 'run_' + app_name + '.%s %s %s \'%s\'' % (instance, out_dir, instance, rt)
+    command = 'run_' + app_name + '.%s.sh %s %s \'%s\'' % (instance, out_dir, instance, rt)
   elif len(in_file) > 0:
 		icing_message.debug('in_file = ' + in_file)
-		command = 'run_' + app_name + '.%s %s %s' % (instance, in_file, instance)
+		command = 'run_' + app_name + '.%s.sh %s %s' % (instance, in_file, instance)
   elif len(in_file) == 0 and len(opt_in_file) == 0 and len(out_dir) > 0 and \
        len(start_time) == 0 and len(stop_time) == 0:
     icing_message.debug('out_dir = ' + out_dir)
-    command = 'run_' + app_name + '.%s %s' % (instance, instance) 
+    command = 'run_' + app_name + '.%s.sh %s' % (instance, instance) 
   else:
     icing_message.error('command not set ... exiting.')
     return ''

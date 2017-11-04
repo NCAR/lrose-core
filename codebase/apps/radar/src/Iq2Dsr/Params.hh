@@ -1088,6 +1088,14 @@ public:
 
   double phidp_sdev_interest_weight;
 
+  tdrp_bool_t apply_rhohv_test_after_cmd;
+
+  double rhohv_test_min_rhohv;
+
+  double rhohv_test_max_rhohv;
+
+  double rhohv_improvement_factor_threshold;
+
   char* output_fmq_url;
 
   int output_fmq_size;
@@ -1160,7 +1168,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[249];
+  mutable TDRPtable _table[254];
 
   const char *_className;
 

@@ -33,7 +33,7 @@
  * 
  *  @date August, 2014
  *
- *  @version $Id: MdvBlender.cc,v 1.28 2017/08/15 18:29:19 mccabe Exp $
+ *  @version $Id: MdvBlender.cc,v 1.30 2017/10/17 19:16:03 mccabe Exp $
  *
  */
 
@@ -212,10 +212,14 @@ int MdvBlender::run()
       //      return -1;
     }
 
+    if(!_verifyAllDimensions()) {
+	    continue;
+    }
+    
     if(!_initializeOutputs()) {
       continue;
     }
-    
+    // TODO: re add verifyDimensions to compare fields across files 
     if(!_doBlend()) {
       //      _cleanUp();
       _cleanupOutputData();
@@ -372,6 +376,9 @@ bool MdvBlender::_initialize(int argc, char **argv)
     srand(_params->random_seed);
   }
 
+  // to check if grid information has not been set
+  _maxZ = -1; 
+  
   //parse the param strings & store in more sensible data structures
   return _parseParams();
 }
@@ -618,13 +625,20 @@ bool MdvBlender::_initializeOutputs()
   switch (_params->output_projection) {
     case Params::OUTPUT_PROJ_INPUT1: {
       unsigned int i = *_indices.begin();
-      string name = _blenderFieldNames->inputFieldNames[i][0];
-      _outMasterHdr = _mdvs[i]->getMasterHeader();
-      _outFieldHdr = _mdvs[i]->getFieldByName(name)->getFieldHeader();
-      _outVlevelHdr = _mdvs[i]->getFieldByName(name)->getVlevelHeader();
-      _numX = _outFieldHdr.nx;
-      _numY = _outFieldHdr.ny;
-      _numZ = _outFieldHdr.nz;
+      _outMasterHdr = _mdvs[i]->getMasterHeader();      
+      // loop fields and save a 3D field's info if available
+      for(unsigned int j = 0; j < _blenderFieldNames->inputFieldNames[i].size(); j++) {
+        string name = _blenderFieldNames->inputFieldNames[i][j];
+        Mdvx::field_header_t fhdr = _mdvs[i]->getFieldByName(name)->getFieldHeader();
+
+        if(_maxZ == -1 || fhdr.nz > _maxZ) {
+          _outFieldHdr = _mdvs[i]->getFieldByName(name)->getFieldHeader();
+          _outVlevelHdr = _mdvs[i]->getFieldByName(name)->getVlevelHeader();
+          _numX = _outFieldHdr.nx;
+          _numY = _outFieldHdr.ny;
+          _maxZ = _outFieldHdr.nz;
+        }
+      }
       break;
     }
 
@@ -646,12 +660,11 @@ bool MdvBlender::_allocateOutputData(int fix) {
   unsigned int numY = fh.ny;
   unsigned int numZ = fh.nz;
   if(numX != _numX ||
-     numY != _numY ||
-     numZ != _numZ) {
-	  cerr << "ERROR: Field " << inName << " dimensions do not match first grid" << endl;
+     numY != _numY) {
+	  cerr << "ERROR: Field " << inName << " dimensions do not match first grid " << numX << " " << _numX << " and " << numY << " " << _numY << endl;
 	  return false;
   }
-  _numElem = _numX*_numY*_numZ;
+  _numElem = _numX*_numY*numZ;
   float* vol = new float[_numElem];
   for(unsigned int i = 0; i < _numElem; ++i) {
     vol[i] = Constants::MISSING_DATA_VALUE;
@@ -660,6 +673,7 @@ bool MdvBlender::_allocateOutputData(int fix) {
   map<string, float*>::iterator it = _vols.find(outName);
   if(it == _vols.end()) {
     _vols[outName] = vol;
+    delete [] vol;
   }
   else { // check this in another place?
     cerr << "ERROR: Field " << outName << " already read." << endl;
@@ -702,8 +716,14 @@ void MdvBlender::_addFieldToOutput(string name, string longName, string units) {
   Mdvx::compression_type_t compressionType =
     static_cast<Mdvx::compression_type_t>(_params->compression_type);
 
+  int numZ;
+  if(name == "decision") {
+	  numZ = _maxZ;
+  } else {
+    numZ = _mdvs[0]->getFieldByName(name)->getFieldHeader().nz;
+  }
   Mdvx::field_header_t header;
-  _setFieldHeader(header, name, longName, units, 0, _numX, _numY, _numZ);
+  _setFieldHeader(header, name, longName, units, 0, _numX, _numY, numZ);
 
   MdvxField* field = new MdvxField(header, _outVlevelHdr, 
                                    static_cast<const void*>(_vols[name]));
@@ -831,9 +851,7 @@ float* MdvBlender::_averageFields(vector<const float*> dataVols, vector<float> c
     float denominator = 0.0;
     vector<unsigned int>::iterator it;
     int count = 0;
-    for(it=_indices.begin(); it < _indices.end(); it++, count++) {
-      unsigned int i = *it;
-      
+    for(it=_indices.begin(); it < _indices.end(); it++, count++) {      
       if( dataVols[count][j] != miss[count] && dataVols[count][j] != bad[count]) {
         if(constants[count] == 0) {
           numerator += dataVols[count][j] * weightVols[count][j];
@@ -868,7 +886,7 @@ bool MdvBlender::_doBlend() {
 
   PMU_force_register("Blending data");
 
-  _numElem = _numX*_numY*_numZ;
+  _numElem = _numX*_numY*_maxZ;
   // loop over indices
   //   check if any dithering is done, set bool
   bool doDither = false;
@@ -1211,6 +1229,26 @@ void MdvBlender::_setMasterHeader(Mdvx::master_header_t& hdr)
           "MdvBlender", MDV_NAME_LEN);
 }
 
+bool MdvBlender::_verifyAllDimensions()
+{
+  // loop over fields
+  for(unsigned int fix=0; fix<_blenderFieldNames->inputFieldNames[0].size(); fix++) {
+	  // loop each file and verify dimensions are the same
+	  unsigned int first = *_indices.begin();
+    string name1 = _blenderFieldNames->inputFieldNames[first][fix];
+	  MdvxField* field1 = _mdvs[first]->getFieldByName(name1);
+    
+	  for(vector<unsigned int>::iterator it = _indices.begin()+1; it < _indices.end(); it++) {
+      unsigned int i = *it;
+      string name2 = _blenderFieldNames->inputFieldNames[i][fix];      
+      MdvxField* field2 = _mdvs[i]->getFieldByName(name2);
+  	  if(!_verifyDimensions(field1, field2)) {
+  		  return false;
+	    }
+	  }
+  }
+  return true;
+}
 
 bool MdvBlender::_verifyDimensions(MdvxField* input1Field, MdvxField* input2Field)
 {
@@ -1219,7 +1257,7 @@ bool MdvBlender::_verifyDimensions(MdvxField* input1Field, MdvxField* input2Fiel
 
   double delta = _params->grid_delta_tol;
 
-  if(fh1.nz != 1 || fh2.nz != 1) {
+  if(fh1.nz != 1 && fh2.nz != 1) {
     if( fh1.nz != fh2.nz ||
         fabs(fh1.grid_dz - fh2.grid_dz) > delta ||
         fabs(fh1.grid_minz - fh2.grid_minz) > delta ) {
@@ -1229,8 +1267,9 @@ bool MdvBlender::_verifyDimensions(MdvxField* input1Field, MdvxField* input2Fiel
   }
 
   if(fh1.nx != fh2.nx ||
-     fh1.ny != fh2.ny) {
-    cerr << "ERROR: Grid dimenions (nx/ny) differ between fields" << endl;
+     fh1.ny != fh2.ny || 
+     fh1.nz != fh2.nz) {	  
+    cerr << "ERROR: Grid dimenions (nx/ny/nz) differ between fields" << endl;
     return false;
   }
 

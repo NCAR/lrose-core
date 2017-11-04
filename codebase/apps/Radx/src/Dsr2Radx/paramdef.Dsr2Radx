@@ -413,6 +413,12 @@ paramdef boolean {
   p_help = "See NOTE above.";
 } compute_rhi_fixed_angles_from_measured_azimuth;
 
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to use mean to compute the fixed angles. This is the default.";
+  p_help = "If false, uses the median.";
+} use_mean_to_compute_fixed_angles;
+
 commentdef {
   p_header = "INCREMENTING SWEEP NUMBERS BASED ON MODE CHANGES";
 };

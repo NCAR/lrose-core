@@ -38,7 +38,7 @@ TARGET_FILE = rttcLma2Mdv
 
 LOC_INCLUDES = -I../include -I/opt/netcdf/include $(NETCDF4_INCS)
 
-LOC_LIBS = -lnetcdf -lpgc -lMdv -lRadx \
+LOC_LIBS = -lnetcdf -lpgc -lMdv -lRadx -lNcxx \
 	-ldsserver -lrapformats -ldidss -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread

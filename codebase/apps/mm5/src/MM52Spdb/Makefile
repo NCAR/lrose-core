@@ -38,7 +38,7 @@ TARGET_FILE = MM52Spdb
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -lmm5 -lMdv \
-	-lRadx -leuclid -lrapformats -ldidss \
+	-lRadx -lNcxx -leuclid -lrapformats -ldidss \
 	-lphysics -ltoolsa -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread \
 	-lm

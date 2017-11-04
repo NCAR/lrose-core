@@ -1111,6 +1111,18 @@ int SigAirMet2Spdb::_setWx()
 
     string wxType;
     if (_getWxType(ii, wxType) == 0) {
+
+      // if there was any structure to this program, this wouldn't be such a
+      // hack. We are just stuck with it.
+
+      // Amendment 77 has added surface winds and surface visiblity to the AIRMET.
+      // This token can include details about the observed weather, so more
+      // token parsing is needed to capture the full weather type.
+
+      if ((wxType == "SFC WIND") || (wxType == "SFC VIS")) {
+	_handleSfcWindAndVis(ii, wxType);
+      }
+      
       _decoded.setWx(wxType);
       if (wxType.find("TC", 0) != string::npos) {
         _tcFound = true;
@@ -1209,6 +1221,7 @@ void SigAirMet2Spdb::_setSource()
   string possibleSource, confirmedSource;
   for (size_t ii = 0; ii < _startTokNum; ii++) {
     const string &tok = _msgToks[ii];
+
     if ((tok.size() == 4) && (tok != "CNCL")) {
       // possible ICAO identifier - check if it is in the list
       double lat, lon, alt;
@@ -3238,3 +3251,24 @@ bool SigAirMet2Spdb::_setCentroidFromFir()
 
   return true;
 }
+
+///////////////////////////////////////////////////////
+// 
+//
+
+void SigAirMet2Spdb::_handleSfcWindAndVis(int start_pos, string &wx_type)
+
+{
+  // search for end of weather component by looking forward to a 'OBS' token
+  // offset start_pos by two token, because it points to 'SFC' in _msgToks
+  for (int i = start_pos+2; i < _msgToks.size(); i++) {
+    if ( _msgToks[i] == "OBS") {
+      break;
+    }
+    wx_type += " " + _msgToks[i];
+    _used[i]=true;
+
+  }
+}
+
+

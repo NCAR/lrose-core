@@ -1502,6 +1502,8 @@ int BscanManager::_getArchiveData()
     return -1;
   }
 
+  _platform = _vol.getPlatform();
+
   return 0;
 
 }

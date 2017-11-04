@@ -33,7 +33,7 @@ TARGET_FILE = RMSE_plot
 
 LOC_INCLUDES = $(SYS_XVIEW_INCLUDES) $(SYS_X_INCLUDES) $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lSpdb -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lSpdb -ldsserver \
 	-ldidss -lrapformats -lrapplot -ltoolsa \
 	-ldataport -lphysics -lrapmath -ltdrp \
 	-lImlib2 -ldevguide -lxview -lolgx \

@@ -35,7 +35,7 @@ TARGET_FILE = print_mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -ldidss \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -ldidss \
 	-lrapformats -ltoolsa -ldataport $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm
 

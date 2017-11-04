@@ -118,7 +118,8 @@ codebaseDir=${runDir}/codebase
 
 # for lrose and hcr, create the 'moc'-able files for Qt apps
 echo "package = $package"
-if [ "$package" == "lrose"  -o "$package" == "hcr" ]
+if [ "$package" == "lrose" -o "$package" == "hcr" \
+    -o "$package" == "hsrl" -o "$package" == "titan"  ]
 then
   cd $codebaseDir/apps/radar/src/HawkEye
   rm -f moc_*   # remove any old moc_* files before we (re)generate them
@@ -149,7 +150,8 @@ make -k install-strip
 # Install perl lib modules
 #-------------------------
 
-if [ "$package" == "lrose" -o "$package" == "hcr" ]
+if [ "$package" == "lrose" -o "$package" == "hcr" \
+    -o "$package" == "hsrl" -o "$package" == "titan"  ]
 then
   cd $codebaseDir
   cd libs/perl5/src
@@ -160,7 +162,8 @@ fi
 # Install scripts
 #----------------
 
-if [ "$package" == "lrose" -o "$package" == "hcr" ]
+if [ "$package" == "lrose" -o "$package" == "hcr" \
+    -o "$package" == "hsrl" -o "$package" == "titan"  ]
 then
 
   cd $codebaseDir/apps/procmap/src/scripts

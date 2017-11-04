@@ -289,7 +289,7 @@ int HawkEye::_setupDisplayFields()
     ColorMap map;
     map.setName(pfld.label);
     map.setUnits(pfld.units);
-    if (map.readRalMap(colorMapPath)) {
+    if (map.readMap(colorMapPath)) {
       cerr << "ERROR - HawkEye::_setupDisplayFields()" << endl;
       cerr << "  Cannot read in color map file: " << colorMapPath << endl;
       return -1;

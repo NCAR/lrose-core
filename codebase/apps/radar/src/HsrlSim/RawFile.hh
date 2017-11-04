@@ -44,7 +44,7 @@
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxGeoref.hh>
-#include <Radx/NetcdfClassic.hh>
+#include <Ncxx/Nc3xFile.hh>
 class RadxField;
 class RadxVol;
 class RadxRay;
@@ -127,7 +127,7 @@ private:
   
   // netcdf file
   
-  NetcdfClassic _file;
+  Nc3xFile _file;
 
   // output volume
 

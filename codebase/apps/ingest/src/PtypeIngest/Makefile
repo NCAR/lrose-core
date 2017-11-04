@@ -37,7 +37,7 @@ TARGET_FILE = PtypeIngest
 
 LOC_INCLUDES = $(NETCDF_INCS) $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lMdv -lRadx -lSpdb \
+LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -lSpdb \
 	-ldsserver -ldidss -lrapformats -leuclid \
 	-lphysics -ltoolsa -ldataport -ltdrp \
 	-lnetcdf_c++ -lnetcdf $(NETCDF4_LIBS) -lbz2 \

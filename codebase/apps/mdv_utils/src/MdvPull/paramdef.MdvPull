@@ -527,6 +527,12 @@ paramdef boolean {
 
 paramdef boolean {
   p_default = true;
+  p_descr = "If true Mdv start and end times are outout in NetCDF file";
+  p_help = "If the information in the Mdv start_time and end_time is redundant or irrelenvant the user can choose not to output these variables in the NetCDF file";
+} ncf_output_start_end_times;
+
+paramdef boolean {
+  p_default = true;
   p_descr = "Option to output non-CF compliant MDV attributes.";
   p_help = "If true, MDV attributes which are not CF compliant will be output. This will facilitate the translation of the data back into MDV with the minimal loss of information.";
 } ncf_output_mdv_attributes;

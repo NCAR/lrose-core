@@ -101,15 +101,10 @@ export LROSE_INSTALL_DIR=${prefix}
 # Set up build environment
 # ------------------------
 
-export HOST_OS=LINUX_64
+export HOST_OS=LINUX_NCXX
 if [ "$package" == "cidd" ]
 then
   export HOST_OS=LINUX_64_CIDD32
-fi
-uname -a | grep x86_64
-if [ "$?" = 1 ]
-then
-    export HOST_OS=LINUX
 fi
 
 export RAP_MAKE_INC_DIR=$LROSE_CORE_DIR/codebase/make_include
@@ -166,7 +161,8 @@ make install
 # Install perl lib modules
 #-------------------------
 
-if [ "$package" == "lrose" -o "$package" == "hcr" ]
+if [ "$package" == "lrose" -o "$package" == "hcr" \
+    -o "$package" == "hsrl" -o "$package" == "titan" ]
 then
   cd $codebaseDir
   cd libs/perl5/src
@@ -177,7 +173,8 @@ fi
 # Install scripts
 #----------------
 
-if [ "$package" == "lrose" -o "$package" == "hcr" ]
+if [ "$package" == "lrose" -o "$package" == "hcr" \
+    -o "$package" == "hsrl" -o "$package" == "titan" ]
 then
 
   cd $codebaseDir/apps/procmap/src/scripts

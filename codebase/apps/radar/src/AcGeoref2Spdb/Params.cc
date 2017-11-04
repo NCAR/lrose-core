@@ -609,25 +609,88 @@ using namespace std;
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("input_mode");
     tt->descr = tdrpStrDup("Reading the input data.");
-    tt->help = tdrpStrDup("CFRADIAL: read CfRadial files.\n\nIWRF_FILE: read the georeference packets from files containing IWRF time series.\n\nIWRF_FMQ: read the georeference packets from an FMQ containing IWRF time series.\n\nRAF_NETCDF: read files produced by the NCAR EOL/RAF aircraft group.\n\nRAF_IWG1_UDP: read NCAR RAF IWG1 packets from UDP.");
+    tt->help = tdrpStrDup("RADX_FMQ: realtime mode from FMQ in RADX moments format.\n\nIWRF_FMQ: read the georeference packets from an FMQ containing IWRF time series.\n\nRAF_IWG1_UDP: read NCAR RAF IWG1 packets from UDP.\n\nCFRADIAL: read CfRadial files.\n\nIWRF_FILE: read the georeference packets from files containing IWRF time series.\n\nRAF_NETCDF: read files produced by the NCAR EOL/RAF aircraft group.");
     tt->val_offset = (char *) &input_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("input_mode_t");
     tt->enum_def.nfields = 6;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("CFRADIAL");
-      tt->enum_def.fields[0].val = CFRADIAL;
-      tt->enum_def.fields[1].name = tdrpStrDup("RADX_FMQ");
-      tt->enum_def.fields[1].val = RADX_FMQ;
-      tt->enum_def.fields[2].name = tdrpStrDup("IWRF_FILE");
-      tt->enum_def.fields[2].val = IWRF_FILE;
-      tt->enum_def.fields[3].name = tdrpStrDup("IWRF_FMQ");
-      tt->enum_def.fields[3].val = IWRF_FMQ;
-      tt->enum_def.fields[4].name = tdrpStrDup("RAF_NETCDF");
-      tt->enum_def.fields[4].val = RAF_NETCDF;
-      tt->enum_def.fields[5].name = tdrpStrDup("RAF_IWG1_UDP");
-      tt->enum_def.fields[5].val = RAF_IWG1_UDP;
+      tt->enum_def.fields[0].name = tdrpStrDup("RADX_FMQ");
+      tt->enum_def.fields[0].val = RADX_FMQ;
+      tt->enum_def.fields[1].name = tdrpStrDup("IWRF_FMQ");
+      tt->enum_def.fields[1].val = IWRF_FMQ;
+      tt->enum_def.fields[2].name = tdrpStrDup("RAF_IWG1_UDP");
+      tt->enum_def.fields[2].val = RAF_IWG1_UDP;
+      tt->enum_def.fields[3].name = tdrpStrDup("CFRADIAL");
+      tt->enum_def.fields[3].val = CFRADIAL;
+      tt->enum_def.fields[4].name = tdrpStrDup("IWRF_FILE");
+      tt->enum_def.fields[4].val = IWRF_FILE;
+      tt->enum_def.fields[5].name = tdrpStrDup("RAF_NETCDF");
+      tt->enum_def.fields[5].val = RAF_NETCDF;
     tt->single_val.e = IWRF_FILE;
+    tt++;
+    
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("AIRCRAFT CALL SIGN");
+    tt->comment_text = tdrpStrDup("For IWRF, CFRADIAL and UDP data.");
+    tt++;
+    
+    // Parameter 'aircraft_callsign'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("aircraft_callsign");
+    tt->descr = tdrpStrDup("Callsign of aircraft");
+    tt->help = tdrpStrDup("Used for IWRF data. The RAF data includes the callsign in the file.");
+    tt->val_offset = (char *) &aircraft_callsign - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'output_spdb_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_spdb_url");
+    tt->descr = tdrpStrDup("Output SPDB URL for georef data.");
+    tt->help = tdrpStrDup("The format is spdbp::params//host:port:dir. Normally params is an empty string, and port is an empty string, so that the default behavior will occur.");
+    tt->val_offset = (char *) &output_spdb_url - &_start_;
+    tt->single_val.s = tdrpStrDup("spdbp:://localhost::/tmp/spdb/ac_georef");
+    tt++;
+    
+    // Parameter 'spdb_nchunks_per_write'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spdb_nchunks_per_write");
+    tt->descr = tdrpStrDup("Number of SPDB chunks per write.");
+    tt->help = tdrpStrDup("We package up the SPDB data chunks, and write them together once the number of chunks reaches this threshold.");
+    tt->val_offset = (char *) &spdb_nchunks_per_write - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("INPUT MODE - RADX_FMQ and IWRF_FMQ");
+    tt->comment_text = tdrpStrDup("Read realtime data from FMQ");
     tt++;
     
     // Parameter 'input_fmq_name'
@@ -654,12 +717,12 @@ using namespace std;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("IWG1 UDP mode");
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("INPUT MODE - RAF_IWG1_UDP");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -699,163 +762,64 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("239.0.0.10");
     tt++;
     
-    // Parameter 'Comment 4'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("AIRCRAFT CALL SIGN");
-    tt->comment_text = tdrpStrDup("For IWRF, CFRADIAL and UDP data.");
-    tt++;
-    
-    // Parameter 'aircraft_callsign'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("aircraft_callsign");
-    tt->descr = tdrpStrDup("Callsign of aircraft");
-    tt->help = tdrpStrDup("Used for IWRF data. The RAF data includes the callsign in the file.");
-    tt->val_offset = (char *) &aircraft_callsign - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("CFRADIAL DATA FIELDS");
-    tt->comment_text = tdrpStrDup("Used for computing the surface velocity.");
-    tt++;
-    
-    // Parameter 'cfradial_dbz_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("cfradial_dbz_field_name");
-    tt->descr = tdrpStrDup("Field name for DBZ in CfRadial file");
-    tt->help = tdrpStrDup("We need to read in at least 1 field for a valid read operation.");
-    tt->val_offset = (char *) &cfradial_dbz_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("DBZ");
-    tt++;
-    
-    // Parameter 'cfradial_vel_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("cfradial_vel_field_name");
-    tt->descr = tdrpStrDup("Field name for VEL in CfRadial file");
-    tt->help = tdrpStrDup("We need to read in at least 1 field for a valid read operation.");
-    tt->val_offset = (char *) &cfradial_vel_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL");
-    tt++;
-    
-    // Parameter 'get_hcr_temps_from_cfradial'
+    // Parameter 'store_default_if_no_udp_data'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("get_hcr_temps_from_cfradial");
-    tt->descr = tdrpStrDup("Option to get the HCR temperatures from the Cfradial files.");
-    tt->help = tdrpStrDup("If true, we get the Cmigits and Tailcone temperatures for the HCR from the status XML block in the CfRadial files.");
-    tt->val_offset = (char *) &get_hcr_temps_from_cfradial - &_start_;
+    tt->param_name = tdrpStrDup("store_default_if_no_udp_data");
+    tt->descr = tdrpStrDup("Option to store a default location if no UDP data is available.");
+    tt->help = tdrpStrDup("If the system is not on the aircraft, no UDP data will be available. This option allows us to store out a known location for fixed operations on the ground.");
+    tt->val_offset = (char *) &store_default_if_no_udp_data - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'default_location'
+    // ctype is '_default_location_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("DETERMINE THE SURFACE VELOCITY FROM CFRADIAL DATA");
-    tt->comment_text = tdrpStrDup("This applies to HCR data.");
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("default_location");
+    tt->descr = tdrpStrDup("Default location to be used for fixed operations.");
+    tt->help = tdrpStrDup("This is the location to be set if the instrument is not on the aircraft.");
+    tt->val_offset = (char *) &default_location - &_start_;
+    tt->struct_def.name = tdrpStrDup("default_location_t");
+    tt->struct_def.nfields = 3;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("latitude_deg");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &default_location.latitude_deg - (char *) &default_location;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("longitude_deg");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &default_location.longitude_deg - (char *) &default_location;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("altitude_m");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &default_location.altitude_m - (char *) &default_location;
+    tt->n_struct_vals = 3;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 40;
+      tt->struct_vals[1].d = -105;
+      tt->struct_vals[2].d = 1750;
     tt++;
     
-    // Parameter 'compute_surface_vel_in_cfradial'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("compute_surface_vel_in_cfradial");
-    tt->descr = tdrpStrDup("Option to compute the surface velocity from the data.");
-    tt->help = tdrpStrDup("We find the range to the peak in reflectivity, and then determine the radial velocity at that range.");
-    tt->val_offset = (char *) &compute_surface_vel_in_cfradial - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'min_range_to_surface_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_range_to_surface_km");
-    tt->descr = tdrpStrDup("Minumum range to the surface (km).");
-    tt->help = tdrpStrDup("We will search for the surface echo in the gates beyound this range.");
-    tt->val_offset = (char *) &min_range_to_surface_km - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'min_dbz_for_surface_echo'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_dbz_for_surface_echo");
-    tt->descr = tdrpStrDup("Minumum dbz value for a valid surface return.");
-    tt->help = tdrpStrDup("Gates with values below this will not be used.");
-    tt->val_offset = (char *) &min_dbz_for_surface_echo - &_start_;
-    tt->single_val.d = 20;
-    tt++;
-    
-    // Parameter 'max_nadir_error_for_surface_vel'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_nadir_error_for_surface_vel");
-    tt->descr = tdrpStrDup("Maximum error from nadir pointing for computing surface velocity (deg).");
-    tt->help = tdrpStrDup("We only try to compute the surface velocity if the beam is pointing within this margin of nadir (vertically down).");
-    tt->val_offset = (char *) &max_nadir_error_for_surface_vel - &_start_;
-    tt->single_val.d = 5;
-    tt++;
-    
-    // Parameter 'ngates_for_surface_echo'
+    // Parameter 'udp_sleep_secs'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ngates_for_surface_echo");
-    tt->descr = tdrpStrDup("Number of gates needed for identifying surface echo.");
-    tt->help = tdrpStrDup("We require this number of gates to exceed min_dbz_for_surface_echo.");
-    tt->val_offset = (char *) &ngates_for_surface_echo - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
-    // Parameter 'print_surface_velocity_data'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("print_surface_velocity_data");
-    tt->descr = tdrpStrDup("Option to print surface velocity information to stdout.");
-    tt->help = tdrpStrDup("If true, the surface velocity estimates, as well as estimated antenna pointing angles, will be printed to stdout at regular intervals.");
-    tt->val_offset = (char *) &print_surface_velocity_data - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'surface_velocity_print_period_secs'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("surface_velocity_print_period_secs");
-    tt->descr = tdrpStrDup("Number of seconds between printing information on surface velocity.");
-    tt->help = tdrpStrDup("The data will be averaged over this time period and then printed to stdout.");
-    tt->val_offset = (char *) &surface_velocity_print_period_secs - &_start_;
-    tt->single_val.d = 2;
+    tt->param_name = tdrpStrDup("udp_sleep_secs");
+    tt->descr = tdrpStrDup("Time to wait for UDP data before writing out default location.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &udp_sleep_secs - &_start_;
+    tt->single_val.i = 5;
     tt++;
     
     // Parameter 'Comment 7'
@@ -863,7 +827,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("NETCDF DATA");
+    tt->comment_hdr = tdrpStrDup("INPUT MODE - RAF_NETCDF");
     tt->comment_text = tdrpStrDup("Set the NetCDF variable names for the fields to be read in. If a field is not available. set the name to an empty string.");
     tt++;
     
@@ -1168,32 +1132,20 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
+    tt->comment_hdr = tdrpStrDup("HCR TEMPERATURE from CFRADIAL FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'output_spdb_url'
-    // ctype is 'char*'
+    // Parameter 'get_hcr_temps_from_cfradial'
+    // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_spdb_url");
-    tt->descr = tdrpStrDup("Output SPDB URL for georef data.");
-    tt->help = tdrpStrDup("The format is spdbp::params//host:port:dir. Normally params is an empty string, and port is an empty string, so that the default behavior will occur.");
-    tt->val_offset = (char *) &output_spdb_url - &_start_;
-    tt->single_val.s = tdrpStrDup("spdbp:://localhost::/tmp/spdb/ac_georef");
-    tt++;
-    
-    // Parameter 'spdb_nchunks_per_write'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("spdb_nchunks_per_write");
-    tt->descr = tdrpStrDup("Number of SPDB chunks per write.");
-    tt->help = tdrpStrDup("We package up the SPDB data chunks, and write them together once the number of chunks reaches this threshold.");
-    tt->val_offset = (char *) &spdb_nchunks_per_write - &_start_;
-    tt->single_val.i = 20;
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("get_hcr_temps_from_cfradial");
+    tt->descr = tdrpStrDup("Option to get the HCR temperatures from the Cfradial files.");
+    tt->help = tdrpStrDup("If true, we get the Cmigits and Tailcone temperatures for the HCR from the status XML block in the CfRadial files.");
+    tt->val_offset = (char *) &get_hcr_temps_from_cfradial - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 9'
@@ -1201,6 +1153,123 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 9");
+    tt->comment_hdr = tdrpStrDup("DETERMINE THE SURFACE VELOCITY FROM CFRADIAL DATA");
+    tt->comment_text = tdrpStrDup("This applies to HCR data.");
+    tt++;
+    
+    // Parameter 'compute_surface_vel_in_cfradial'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("compute_surface_vel_in_cfradial");
+    tt->descr = tdrpStrDup("Option to compute the surface velocity from the data.");
+    tt->help = tdrpStrDup("We find the range to the peak in reflectivity, and then determine the radial velocity at that range.");
+    tt->val_offset = (char *) &compute_surface_vel_in_cfradial - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'cfradial_vel_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("cfradial_vel_field_name");
+    tt->descr = tdrpStrDup("Field name for VEL in CfRadial file");
+    tt->help = tdrpStrDup("We need to read in at least 1 field for a valid read operation.");
+    tt->val_offset = (char *) &cfradial_vel_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL");
+    tt++;
+    
+    // Parameter 'min_range_to_surface_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_range_to_surface_km");
+    tt->descr = tdrpStrDup("Minumum range to the surface (km).");
+    tt->help = tdrpStrDup("We will search for the surface echo in the gates beyound this range.");
+    tt->val_offset = (char *) &min_range_to_surface_km - &_start_;
+    tt->single_val.d = 0.5;
+    tt++;
+    
+    // Parameter 'min_dbz_for_surface_echo'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_dbz_for_surface_echo");
+    tt->descr = tdrpStrDup("Minumum dbz value for a valid surface return.");
+    tt->help = tdrpStrDup("Gates with values below this will not be used.");
+    tt->val_offset = (char *) &min_dbz_for_surface_echo - &_start_;
+    tt->single_val.d = 20;
+    tt++;
+    
+    // Parameter 'cfradial_dbz_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("cfradial_dbz_field_name");
+    tt->descr = tdrpStrDup("Field name for DBZ in CfRadial file");
+    tt->help = tdrpStrDup("We need to read in at least 1 field for a valid read operation.");
+    tt->val_offset = (char *) &cfradial_dbz_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("DBZ");
+    tt++;
+    
+    // Parameter 'max_nadir_error_for_surface_vel'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_nadir_error_for_surface_vel");
+    tt->descr = tdrpStrDup("Maximum error from nadir pointing for computing surface velocity (deg).");
+    tt->help = tdrpStrDup("We only try to compute the surface velocity if the beam is pointing within this margin of nadir (vertically down).");
+    tt->val_offset = (char *) &max_nadir_error_for_surface_vel - &_start_;
+    tt->single_val.d = 5;
+    tt++;
+    
+    // Parameter 'ngates_for_surface_echo'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ngates_for_surface_echo");
+    tt->descr = tdrpStrDup("Number of gates needed for identifying surface echo.");
+    tt->help = tdrpStrDup("We require this number of gates to exceed min_dbz_for_surface_echo.");
+    tt->val_offset = (char *) &ngates_for_surface_echo - &_start_;
+    tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'print_surface_velocity_data'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_surface_velocity_data");
+    tt->descr = tdrpStrDup("Option to print surface velocity information to stdout.");
+    tt->help = tdrpStrDup("If true, the surface velocity estimates, as well as estimated antenna pointing angles, will be printed to stdout at regular intervals.");
+    tt->val_offset = (char *) &print_surface_velocity_data - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'surface_velocity_print_period_secs'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("surface_velocity_print_period_secs");
+    tt->descr = tdrpStrDup("Number of seconds between printing information on surface velocity.");
+    tt->help = tdrpStrDup("The data will be averaged over this time period and then printed to stdout.");
+    tt->val_offset = (char *) &surface_velocity_print_period_secs - &_start_;
+    tt->single_val.d = 2;
+    tt++;
+    
+    // Parameter 'Comment 10'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("FIR FILTERING FOR SURFACE VELOCITY ESTIMATES");
     tt->comment_text = tdrpStrDup("");
     tt++;

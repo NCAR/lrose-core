@@ -390,19 +390,19 @@ int RawFile::_readGlobalAttributes()
     }
 
     if (!strcmp(att->name(), "NCUTIL_Machtype")) {
-      _machType = NetcdfClassic::asString(att);
+      _machType = Nc3xFile::asString(att);
     }
 
     if (!strcmp(att->name(), "NCUTIL_Hostname")) {
-      _hostName = NetcdfClassic::asString(att);
+      _hostName = Nc3xFile::asString(att);
     }
 
     if (!strcmp(att->name(), "NCUTIL_Username")) {
-      _userName = NetcdfClassic::asString(att);
+      _userName = Nc3xFile::asString(att);
     }
 
     if (!strcmp(att->name(), "NCUTIL_HSRL_GIT_COMMIT")) {
-      _gitCommit = NetcdfClassic::asString(att);
+      _gitCommit = Nc3xFile::asString(att);
     }
 
     if (!strcmp(att->name(), "DATA_HSRLVersion")) {
@@ -410,11 +410,11 @@ int RawFile::_readGlobalAttributes()
     }
 
     if (!strcmp(att->name(), "DATA_Added")) {
-      _dataAdded = NetcdfClassic::asString(att);
+      _dataAdded = Nc3xFile::asString(att);
     }
 
     if (!strcmp(att->name(), "DATA_SourceSoftware")) {
-      _sourceSoftware = NetcdfClassic::asString(att);
+      _sourceSoftware = Nc3xFile::asString(att);
     }
 
     // Caller must delete attribute
@@ -1123,7 +1123,7 @@ int RawFile::_readFieldVariables()
     string longName;
     Nc3Att *longNameAtt = var->get_att("long_name");
     if (longNameAtt != NULL) {
-      longName = NetcdfClassic::asString(longNameAtt);
+      longName = Nc3xFile::asString(longNameAtt);
       delete longNameAtt;
     }
     

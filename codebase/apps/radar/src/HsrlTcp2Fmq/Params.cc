@@ -623,7 +623,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Host name on which HSRL raw server is running.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &hsrl_tcp_server_host - &_start_;
-    tt->single_val.s = tdrpStrDup("localhost");
+    tt->single_val.s = tdrpStrDup("192.168.84.201");
     tt++;
     
     // Parameter 'hsrl_tcp_server_port'
@@ -635,7 +635,7 @@ using namespace std;
     tt->descr = tdrpStrDup("TCP/IP port on which HSRL server is running.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &hsrl_tcp_server_port - &_start_;
-    tt->single_val.i = 12000;
+    tt->single_val.i = 40404;
     tt++;
     
     // Parameter 'Comment 3'

@@ -37,7 +37,7 @@ TARGET_FILE = Mdv2ZebraNetCDF
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -lrapmath \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -lrapmath \
 	-lrapformats -ldidss -ldataport \
 	-leuclid -ltoolsa -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz

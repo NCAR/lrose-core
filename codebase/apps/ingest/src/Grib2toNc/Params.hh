@@ -58,6 +58,7 @@ public:
   } filename_t;
 
   typedef enum {
+    DATA_PACK_AUTO = 0,
     DATA_PACK_NONE = 5,
     DATA_PACK_BYTE = 1,
     DATA_PACK_SHORT = 3
@@ -496,6 +497,8 @@ public:
 
   int compression_level;
 
+  tdrp_bool_t include_lat_lon;
+
   tdrp_bool_t remap_output;
 
   projection_info_t out_projection_info;
@@ -516,7 +519,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[47];
+  mutable TDRPtable _table[48];
 
   const char *_className;
 

@@ -37,7 +37,7 @@ TARGET_FILE = Mdv2Kavm
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -ldidss \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -ldidss \
 	-leuclid -lrapformats -ltoolsa -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz
 

@@ -1,5 +1,4 @@
 /.cvsignore/1.1/Thu Dec 29 22:57:37 2016//
-/Makefile/1.18/Thu Dec 29 22:57:37 2016//
 /entry_comps.c/1.12/Thu Dec 29 22:57:37 2016//
 /init_indices.c/1.5/Thu Dec 29 22:57:37 2016//
 /open_files.c/1.5/Thu Dec 29 22:57:37 2016//
@@ -13,4 +12,5 @@
 /tracks_to_ascii.h/1.11/Thu Dec 29 22:57:37 2016//
 /tracks_to_ascii.test/1.2/Thu Dec 29 22:57:37 2016//
 /trend_analysis.c/1.10/Thu Dec 29 22:57:37 2016//
+/Makefile/1.20/Fri Nov  3 21:10:59 2017//
 D

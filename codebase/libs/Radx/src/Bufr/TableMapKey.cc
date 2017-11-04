@@ -30,8 +30,7 @@ unsigned short TableMapKey::EncodeKey(string fs, string xs, string ys) {
          f = atoi(fs.c_str());  // try tokens[0].stoui
          x = atoi(xs.c_str());
          y = atoi(ys.c_str());
-         if ((f==3) && (x==21) && (y==204)) 
- 	  printf("here\n");
+
          unsigned short key;
          //f = 1; x = 8;
          key = f << 6;

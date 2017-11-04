@@ -51,7 +51,7 @@ def main():
                       action="store_true",
                       help='Create shared lib objects')
     parser.add_option('--pkg',
-                      dest='pkg', default="radx",
+                      dest='pkg', default="lrose",
                       help='Name of package being built')
 
     (options, args) = parser.parse_args()

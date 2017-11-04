@@ -41,16 +41,7 @@
 #include <iostream>
 #include <Ncxx/NcxxPort.hh>
 
-// fix for HDF5 before version 1.8.12
 #include <H5public.h>
-// #if H5_VERSION_LE(1,8,11)
-// H5_VERSION_LE macro does not work, use folling instead
-#if (((H5_VERS_MAJOR==1) && (H5_VERS_MINOR==8) && (H5_VERS_RELEASE<=11)) || \
-     ((H5_VERS_MAJOR==1) && (H5_VERS_MINOR<8)) ||                       \
-     (H5_VERS_MAJOR<1))
-#define H5Location H5Object
-#endif
-
 #include <H5Fpublic.h>
 #include <H5Epublic.h>
 #include <H5Gpublic.h>
@@ -130,20 +121,16 @@ public:
 
   // HDF5 access
   
-  int loadAttribute(H5Location &obj,
+  int loadAttribute(H5Object &obj,
                     const string &name,
                     const string &context,
                     DecodedAttr &decodedAttr);
   
-  int loadArrayAttribute(H5Location &obj,
+  int loadArrayAttribute(H5Object &obj,
                          const string &name,
                          const string &context,
                          ArrayAttr &arrayAttr);
   
-  static void appendAttrNames(H5Location &obj,
-                              const H5std_string attr_name,
-                              void *operator_data);
-
   int loadFloatVar(CompType compType,
                    char *buf,
                    const string &varName,
@@ -173,28 +160,28 @@ public:
   // add a string attribute to an object on write
   // returns the attribute
   
-  static Attribute addAttr(H5Location &loc,
+  static Attribute addAttr(H5Object &loc,
                            const string &name,
                            const string &val);
   
   // add a 64-bit int attribute to an object
   // returns the attribute
   
-  static Attribute addAttr(H5Location &loc,
+  static Attribute addAttr(H5Object &loc,
                            const string &name,
                            NcxxPort::si64 val);
 
   // add a 64-bit float attribute to an object
   // returns the attribute
   
-  static Attribute addAttr(H5Location &loc,
+  static Attribute addAttr(H5Object &loc,
                            const string &name,
                            NcxxPort::fl64 val);
   
   // add a 64-bit float array attribute to an object
   // returns the attribute
   
-  static Attribute addAttr(H5Location &loc,
+  static Attribute addAttr(H5Object &loc,
                            const string &name,
                            const vector<NcxxPort::fl64> &vals);
   
@@ -214,7 +201,7 @@ public:
                          char *buf,
                          ostream &out);
   
-  void printAttributes(H5Location &obj, ostream &out);
+  void printAttributes(H5Object &obj, ostream &out);
   
   void printAttribute(Attribute &attr, ostream &out);
   

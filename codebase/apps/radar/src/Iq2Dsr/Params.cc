@@ -3822,6 +3822,63 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 22");
+    tt->comment_hdr = tdrpStrDup("RHOHV TEST to AUGMENT CMD");
+    tt->comment_text = tdrpStrDup("If clutter is present the RHOHV value should increase after application of the clutter filter. We can use a RHOHV test to locate gates at which CMD fails to identify weak clutter. This allows us to improve clutter identification in cases with low CSR.");
+    tt++;
+    
+    // Parameter 'apply_rhohv_test_after_cmd'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("apply_rhohv_test_after_cmd");
+    tt->descr = tdrpStrDup("Apply the RHOHV test after filtering based on CMD.");
+    tt->help = tdrpStrDup("This allows us to identify areas of weak clutter contamination that CMD missed.");
+    tt->val_offset = (char *) &apply_rhohv_test_after_cmd - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'rhohv_test_min_rhohv'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("rhohv_test_min_rhohv");
+    tt->descr = tdrpStrDup("Min RHOHV for application of the RHOHV test.");
+    tt->help = tdrpStrDup("If RHOHV is less than this, no weather is likely to be present. Therefore do not apply the test to this gate.");
+    tt->val_offset = (char *) &rhohv_test_min_rhohv - &_start_;
+    tt->single_val.d = 0.5;
+    tt++;
+    
+    // Parameter 'rhohv_test_max_rhohv'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("rhohv_test_max_rhohv");
+    tt->descr = tdrpStrDup("Max RHOHV for application of the RHOHV test.");
+    tt->help = tdrpStrDup("If RHOHV is greater than this, the weather return is highly coherent, so clutter contamination is unlikely.");
+    tt->val_offset = (char *) &rhohv_test_max_rhohv - &_start_;
+    tt->single_val.d = 0.98;
+    tt++;
+    
+    // Parameter 'rhohv_improvement_factor_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("rhohv_improvement_factor_threshold");
+    tt->descr = tdrpStrDup("The RHOHV improvment factor is a measure of the change in RHOHV towards 1.0.");
+    tt->help = tdrpStrDup("The RHOHV test identifies clutter if the improvement factor exceeds this value.");
+    tt->val_offset = (char *) &rhohv_improvement_factor_threshold - &_start_;
+    tt->single_val.d = 4;
+    tt++;
+    
+    // Parameter 'Comment 23'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("OUTPUT TO DSRADAR FMQ");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4889,11 +4946,11 @@ using namespace std;
       tt->struct_vals[566].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("SWEEP TRANSITIONS");
     tt->comment_text = tdrpStrDup("We can modify the end-of-sweep and start-of-sweep conditions found in the time series.");
     tt++;
@@ -4970,11 +5027,11 @@ using namespace std;
     tt->single_val.i = 32;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("VOLUME TRANSITIONS");
     tt->comment_text = tdrpStrDup("We can modify the end-of-volume conditions found in the time series. This section only applies if 'use_volume_info_from_time_series' is set to FALSE.");
     tt++;
@@ -5065,11 +5122,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("TRANSITION FLAG");
     tt->comment_text = tdrpStrDup("");
     tt++;

@@ -655,10 +655,10 @@ using namespace std;
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("FilenameType");
     tt->descr = tdrpStrDup("Naming convention for input files.");
-    tt->help = tdrpStrDup("File are named as follows:\n\tHHMMSS: hhmmss.ext\n\tYYYYMMDDHHMM: YYYYMMDDhhmm.ext\n\tYYYYMMDDHHMMSS: <FilePrefix>YYYYMMDDhhmmss.ext\n\tMMDD_HHMM: MMDD_hhmm.ext\n\tXMMDDHH_MM: <FilePrefix>MMDDhh.mm\n\tNNNYYYYMMDDHHMM: nnnYYYYMMDDhhmm.ext\n\tYYYY_MM_DD_HHMM: YYYY-MM-DD_HHMM\n\tXYYYYMMDD_HHMMSS: <FilePrefix>YYYYMMDD_hhmmss.ext\n\tXYYYYMMDD_HHMMSSZ: <FilePrefix>YYYYMMDD_hhmmss...\n\tPRE_YYYYMMDDhhmmss_POST: <FilePrefix>YYYYMMDDhhmmss...\n\tPRE_hh_YYYYMMDDhhmmss_POST: <FilePrefix>hh-YYYYMMDDhhmmss...\n\tSDIR_PRE_YYYYMMDDHHMMSS: YYYYMMDD/<FilePrefix>YYYYMMDDHHMMSS.ext\n\tSDIR_PRE_YYYYMMDDhhmmss_POST: YYYYMMDD/<FilePrefix>YYYYMMDDhhmmss...\n\tSDIR_PRE_YYYYMMDD_HHMM_POST: YYYYMMDD/<FilePrefix>YYYYMMDD_hhmm...\n\tRENAME_NO_TIME: <FilePrefix>YYYYMMDDHHMMSS.ext rename to OutFile\n\tMOD_TIME: use input file names, trigger based on modify time\n");
+    tt->help = tdrpStrDup("File are named as follows:\n\tHHMMSS: hhmmss.ext\n\tYYYYMMDDHHMM: YYYYMMDDhhmm.ext\n\tYYYYMMDDHHMMSS: <FilePrefix>YYYYMMDDhhmmss.ext\n\tMMDD_HHMM: MMDD_hhmm.ext\n\tXMMDDHH_MM: <FilePrefix>MMDDhh.mm\n\tNNNYYYYMMDDHHMM: nnnYYYYMMDDhhmm.ext\n\tYYYY_MM_DD_HHMM: YYYY-MM-DD_HHMM\n\tXYYYYMMDD_HHMMSS: <FilePrefix>YYYYMMDD_hhmmss.ext\n\tXYYYYMMDD_HHMMSSZ: <FilePrefix>YYYYMMDD_hhmmss...\n\tPRE_YYYYMMDDhhmmss_POST: <FilePrefix>YYYYMMDDhhmmss...\n\tPRE_YYYYMMDDhh_POST: <FilePrefix>YYYYMMDDhh...\n\tPRE_hh_YYYYMMDDhhmmss_POST: <FilePrefix>hh-YYYYMMDDhhmmss...\n\tSDIR_PRE_YYYYMMDDHHMMSS: YYYYMMDD/<FilePrefix>YYYYMMDDHHMMSS.ext\n\tSDIR_PRE_YYYYMMDDhhmmss_POST: YYYYMMDD/<FilePrefix>YYYYMMDDhhmmss...\n\tSDIR_PRE_YYYYMMDD_HHMM_POST: YYYYMMDD/<FilePrefix>YYYYMMDD_hhmm...\n\tRENAME_NO_TIME: <FilePrefix>YYYYMMDDHHMMSS.ext rename to OutFile\n\tMOD_TIME: use input file names, trigger based on modify time\n");
     tt->val_offset = (char *) &FilenameType - &_start_;
     tt->enum_def.name = tdrpStrDup("FilenameType_t");
-    tt->enum_def.nfields = 16;
+    tt->enum_def.nfields = 17;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("HHMMSS");
@@ -681,18 +681,20 @@ using namespace std;
       tt->enum_def.fields[8].val = XYYYYMMDD_HHMMSSZ;
       tt->enum_def.fields[9].name = tdrpStrDup("PRE_YYYYMMDDhhmmss_POST");
       tt->enum_def.fields[9].val = PRE_YYYYMMDDhhmmss_POST;
-      tt->enum_def.fields[10].name = tdrpStrDup("PRE_hh_YYYYMMDDhhmmss_POST");
-      tt->enum_def.fields[10].val = PRE_hh_YYYYMMDDhhmmss_POST;
-      tt->enum_def.fields[11].name = tdrpStrDup("SDIR_PRE_YYYYMMDDHHMMSS");
-      tt->enum_def.fields[11].val = SDIR_PRE_YYYYMMDDHHMMSS;
-      tt->enum_def.fields[12].name = tdrpStrDup("SDIR_PRE_YYYYMMDDhhmmss_POST");
-      tt->enum_def.fields[12].val = SDIR_PRE_YYYYMMDDhhmmss_POST;
-      tt->enum_def.fields[13].name = tdrpStrDup("SDIR_PRE_YYYYMMDD_HHMM_POST");
-      tt->enum_def.fields[13].val = SDIR_PRE_YYYYMMDD_HHMM_POST;
-      tt->enum_def.fields[14].name = tdrpStrDup("RENAME_NO_TIME");
-      tt->enum_def.fields[14].val = RENAME_NO_TIME;
-      tt->enum_def.fields[15].name = tdrpStrDup("MOD_TIME");
-      tt->enum_def.fields[15].val = MOD_TIME;
+      tt->enum_def.fields[10].name = tdrpStrDup("PRE_YYYYMMDDhh_POST");
+      tt->enum_def.fields[10].val = PRE_YYYYMMDDhh_POST;
+      tt->enum_def.fields[11].name = tdrpStrDup("PRE_hh_YYYYMMDDhhmmss_POST");
+      tt->enum_def.fields[11].val = PRE_hh_YYYYMMDDhhmmss_POST;
+      tt->enum_def.fields[12].name = tdrpStrDup("SDIR_PRE_YYYYMMDDHHMMSS");
+      tt->enum_def.fields[12].val = SDIR_PRE_YYYYMMDDHHMMSS;
+      tt->enum_def.fields[13].name = tdrpStrDup("SDIR_PRE_YYYYMMDDhhmmss_POST");
+      tt->enum_def.fields[13].val = SDIR_PRE_YYYYMMDDhhmmss_POST;
+      tt->enum_def.fields[14].name = tdrpStrDup("SDIR_PRE_YYYYMMDD_HHMM_POST");
+      tt->enum_def.fields[14].val = SDIR_PRE_YYYYMMDD_HHMM_POST;
+      tt->enum_def.fields[15].name = tdrpStrDup("RENAME_NO_TIME");
+      tt->enum_def.fields[15].val = RENAME_NO_TIME;
+      tt->enum_def.fields[16].name = tdrpStrDup("MOD_TIME");
+      tt->enum_def.fields[16].val = MOD_TIME;
     tt->single_val.e = HHMMSS;
     tt++;
     
@@ -749,6 +751,35 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("FILE TYPE");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'FileType'
+    // ctype is '_FileType_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("FileType");
+    tt->descr = tdrpStrDup("Naming convention for input files.");
+    tt->help = tdrpStrDup("File types are as follows:\n\tASCII: ASCII files\n\tNETCDF: netCDF files\n");
+    tt->val_offset = (char *) &FileType - &_start_;
+    tt->enum_def.name = tdrpStrDup("FileType_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("ASCII");
+      tt->enum_def.fields[0].val = ASCII;
+      tt->enum_def.fields[1].name = tdrpStrDup("NETCDF");
+      tt->enum_def.fields[1].val = NETCDF;
+    tt->single_val.e = ASCII;
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("DATA TIMING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -777,11 +808,11 @@ using namespace std;
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -832,6 +863,92 @@ using namespace std;
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &WriteLData - &_start_;
     tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("NETCDF PARAMETERS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'NetVars'
+    // ctype is '_NetVar_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("NetVars");
+    tt->descr = tdrpStrDup("Time date representations.");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_NetVars - &_start_;
+    tt->array_n_offset = (char *) &NetVars_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(NetVar_t);
+    tt->array_n = 1;
+    tt->struct_def.name = tdrpStrDup("NetVar_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_NetVars->name - (char *) _NetVars;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("TimeDateFormat_t");
+      tt->struct_def.fields[1].fname = tdrpStrDup("format");
+      tt->struct_def.fields[1].ptype = ENUM_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_NetVars->format - (char *) _NetVars;
+        tt->struct_def.fields[1].enum_def.name = tdrpStrDup("TimeDateFormat_t");
+        tt->struct_def.fields[1].enum_def.nfields = 13;
+        tt->struct_def.fields[1].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[1].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[1].enum_def.fields[0].name = tdrpStrDup("NC_HHmmss");
+        tt->struct_def.fields[1].enum_def.fields[0].val = NC_HHmmss;
+        tt->struct_def.fields[1].enum_def.fields[1].name = tdrpStrDup("NC_HHmm");
+        tt->struct_def.fields[1].enum_def.fields[1].val = NC_HHmm;
+        tt->struct_def.fields[1].enum_def.fields[2].name = tdrpStrDup("NC_HH");
+        tt->struct_def.fields[1].enum_def.fields[2].val = NC_HH;
+        tt->struct_def.fields[1].enum_def.fields[3].name = tdrpStrDup("NC_mm");
+        tt->struct_def.fields[1].enum_def.fields[3].val = NC_mm;
+        tt->struct_def.fields[1].enum_def.fields[4].name = tdrpStrDup("NC_ss");
+        tt->struct_def.fields[1].enum_def.fields[4].val = NC_ss;
+        tt->struct_def.fields[1].enum_def.fields[5].name = tdrpStrDup("NC_YYYYMMDD");
+        tt->struct_def.fields[1].enum_def.fields[5].val = NC_YYYYMMDD;
+        tt->struct_def.fields[1].enum_def.fields[6].name = tdrpStrDup("NC_YYYYMMDDhh");
+        tt->struct_def.fields[1].enum_def.fields[6].val = NC_YYYYMMDDhh;
+        tt->struct_def.fields[1].enum_def.fields[7].name = tdrpStrDup("NC_YYYYMMDDhhmm");
+        tt->struct_def.fields[1].enum_def.fields[7].val = NC_YYYYMMDDhhmm;
+        tt->struct_def.fields[1].enum_def.fields[8].name = tdrpStrDup("NC_YYYYMMDDHHmmss");
+        tt->struct_def.fields[1].enum_def.fields[8].val = NC_YYYYMMDDHHmmss;
+        tt->struct_def.fields[1].enum_def.fields[9].name = tdrpStrDup("NC_YYYY");
+        tt->struct_def.fields[1].enum_def.fields[9].val = NC_YYYY;
+        tt->struct_def.fields[1].enum_def.fields[10].name = tdrpStrDup("NC_MM");
+        tt->struct_def.fields[1].enum_def.fields[10].val = NC_MM;
+        tt->struct_def.fields[1].enum_def.fields[11].name = tdrpStrDup("NC_DD");
+        tt->struct_def.fields[1].enum_def.fields[11].val = NC_DD;
+        tt->struct_def.fields[1].enum_def.fields[12].name = tdrpStrDup("NC_UTIME");
+        tt->struct_def.fields[1].enum_def.fields[12].val = NC_UTIME;
+    tt->n_struct_vals = 2;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("datetime");
+      tt->struct_vals[1].e = NC_YYYYMMDDHHmmss;
+    tt++;
+    
+    // Parameter 'ncap2Path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ncap2Path");
+    tt->descr = tdrpStrDup("Path to NCO utility ncap2 -- Netcdf Arithemtic Processor 2. The purpose of using ncap2 is to change time and date stamps in netCDF files. ncap2 makes it easy ");
+    tt->help = tdrpStrDup("See http://nco.sourceforge.net/nco.html for usage and examples. ");
+    tt->val_offset = (char *) &ncap2Path - &_start_;
+    tt->single_val.s = tdrpStrDup("/usr/local/nco/bin/ncap2");
     tt++;
     
     // trailing entry has param_name set to NULL

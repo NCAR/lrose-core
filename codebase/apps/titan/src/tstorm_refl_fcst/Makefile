@@ -37,7 +37,7 @@ TARGET_FILE = tstorm_refl_fcst
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lSpdb -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lSpdb -ldsserver \
 	-ltitan -lrapformats -ldidss -leuclid \
 	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm

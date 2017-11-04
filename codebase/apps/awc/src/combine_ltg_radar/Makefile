@@ -37,7 +37,7 @@ TARGET_FILE = combine_ltg_radar
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lMdv -lRadx -lSpdb \
+LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -lSpdb \
 	-ldsserver -ldidss -leuclid -lrapformats \
 	-ltdrp -ltoolsa -ldataport $(NETCDF4_LIBS) \
 	-lbz2 -lz

@@ -12,6 +12,8 @@ INSTALL_DIR=$(RAP_BIN_DIR)
 
 SCRIPTS = \
 	IngestSatMdv \
+        RUNtests.sh \
+	TimeCmd.py \
 	check_Janitor_files.pl \
 	check_backup.pl \
 	check_build_status.pl \
@@ -40,6 +42,7 @@ SCRIPTS = \
 	not_running \
 	nuke_ipcs.linux \
         process_maps.csh \
+        psinfo2 \
 	pull_files \
 	pull_files_ftp.py \
 	pull_kavltg \
@@ -52,6 +55,8 @@ SCRIPTS = \
 	rm_core \
 	rm_junk \
 	rm_ldata_fmq_files \
+	rm_makefile \
+	rm_makefile.am \
 	rm_objs \
 	rm_wspace \
 	rm_wspace_all \

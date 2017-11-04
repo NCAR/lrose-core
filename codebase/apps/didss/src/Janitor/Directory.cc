@@ -71,7 +71,7 @@ Directory::Directory (const string prog_name,
 		      const string dir_path,
 		      DiskFullDeleteList *delete_list) :
         _progName(prog_name),
-        _delete(prog_name, *global_params),
+        _delete(NULL),
         _topDir(top_dir),
         _dirPath(dir_path),
         _paramsAreLocal(false),
@@ -93,13 +93,17 @@ Directory::Directory (const string prog_name,
   }
   
   //
-  // If no parameters found, copy existing ones.
+  // If no parameters found, use existing ones.
   //
-  if (!(found_params))
+  if (!found_params)
   {
     _params = global_params;
     _paramsAreLocal = false;
   }
+
+  // create deletion object
+
+  _delete = new Delete(prog_name, _params);
 
   // set age in secs for file tests
 
@@ -135,8 +139,12 @@ Directory::Directory (const string prog_name,
 
 Directory::~Directory ()
 {
-  if (_paramsAreLocal && _params)
+  if (_paramsAreLocal && _params) {
     delete (_params);
+  }
+  if (_delete) {
+    delete _delete;
+  }
 }
   
 
@@ -469,7 +477,7 @@ int Directory::process()
 	if (tsfCount > _params->MaxNumFilesInDir)
 	  {
 	    string current_path = _dirPath + PATH_DELIM + tsfIx->second->d_name;
-	    if (_delete.removeFile(current_path) == 0) {
+	    if (_delete->removeFile(current_path) == 0) {
               if (_params->debug >=Params::DEBUG_VERBOSE) {
 		cerr << "Deleted file (" << tsfCount << "): " << current_path << endl;
               } else if (_params->debug) {
@@ -816,7 +824,7 @@ void Directory::_processFile(const string current_path,
         cerr << " File too old - WILL delete" << endl;
       }
 
-      if (_delete.removeFile(current_path) == 0) {
+      if (_delete->removeFile(current_path) == 0) {
         if (_params->debug >=Params::DEBUG_VERBOSE) {
 	  cerr << "Deleted file: " << current_path << endl;
         } else if (_params->debug) {

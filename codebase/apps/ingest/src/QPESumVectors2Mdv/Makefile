@@ -37,7 +37,7 @@ TARGET_FILE = QPESumVectors2Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS) $(HDF5_INCLUDES)
 
-LOC_LIBS = -lMdv -lRadx -lrapformats -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lrapformats -ldsserver \
 	-ldidss -ltdrp -ldataport \
 	-leuclid -ltoolsa -lRadx $(NETCDF4_LIBS) -lbz2 \
 	-lz

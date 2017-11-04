@@ -33,7 +33,7 @@ TARGET_FILE = mdvForecastStatistics
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lFmq -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lFmq -ldsserver \
 	-lrapformats -ldidss -ltdrp \
 	-leuclid -ltoolsa -ldataport $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread -lm

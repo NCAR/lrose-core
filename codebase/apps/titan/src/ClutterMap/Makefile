@@ -37,7 +37,7 @@ TARGET_FILE = ClutterMap
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -lrapformats \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -lrapformats \
 	-ldidss -leuclid -ltoolsa -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz \
 	-lm

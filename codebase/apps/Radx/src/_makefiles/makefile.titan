@@ -10,7 +10,6 @@ SUB_DIRS = \
 	Dsr2Radx \
 	FixCfradialPaths \
 	FixRadxPointing \
-	Hsrl2Radx \
 	Radx2Dsr \
 	Radx2Grid \
 	RadxBeamBlock \

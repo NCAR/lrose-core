@@ -646,16 +646,6 @@ public:
   
   void adjustSurSweepLimitsToFixedAzimuth(double azimuth);
   
-  /// Compute sweep fixed angles from ray data.
-  /// Also sets the fixed angle on the sweeps and rays.
-  ///
-  /// Normally the sweep angles are set using the scan strategy angles -
-  /// i.e., the theoretically perfect angles. This option allows you to
-  /// recompute the sweep angles using the measured elevation angles (in
-  /// PPI mode) or azimuth angles (in RHI mode).
-  
-  void computeSweepFixedAnglesFromRays();
-
   /// compute the geometry limits from rays
 
   void computeGeomLimitsFromRays(double &minElev,
@@ -663,6 +653,19 @@ public:
                                  double &minRange,
                                  double &maxRange);
   
+  /// Compute the fixed angle for each sweep from the rays.
+  /// Also sets the fixed angle on rays and sweeps.
+  ///
+  /// If useMean is true, computes using the mean
+  /// If useMean is false, uses the median
+  ///
+  /// If force is true, the angles will be computed for all sweeps.
+  /// If force is false, the angles will only be computed for
+  /// sweeps with a missing fixed angle.
+
+  void computeFixedAnglesFromRays(bool force = true, 
+                                  bool useMean = true);
+
   /// Compute sweep scan rates from ray data - in deg/sec.
   ///
   /// This is done using the angle information on the rays.
@@ -907,16 +910,6 @@ public:
   /// Also sets the fixed angle for the rays in the sweep
   
   void setFixedAngleDeg(int sweepNum, double fixedAngle);
-
-  /// Compute the fixed angle from the rays
-  /// Also sets the fixed angle on rays and sweeps
-  /// Uses the mean pointing angle to estimate the fixed angle
-  ///
-  /// If force is true, the angles will be computed for all sweeps.
-  /// If force is false, the angles will only be computed for
-  /// sweeps with a missing fixed angle.
-
-  void computeFixedAngleFromRays(bool force = true);
 
   /// combine rays from sweeps with common fixed angle and
   /// gate geometry, but with different fields

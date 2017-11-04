@@ -237,6 +237,13 @@ paramdef boolean {
 } output_latlon_arrays;
 
 paramdef boolean {
+  p_default = true;
+  p_descr = "If true start_time and end_time are are output";
+  p_help = "Start and end times may provide redundant information in the Mdv file or may not be relevant to the output data";
+} output_start_end_times;
+
+
+paramdef boolean {
   p_default = false;
   p_descr = "Option to output non-CF compliant MDV attributes.";
   p_help = "If true, MDV attributes which are not CF compliant will be output. This will facilitate the translation of the data back into MDV with the minimal loss of information.";

@@ -37,7 +37,7 @@ TARGET_FILE = Mdv2NetCDF
 
 LOC_INCLUDES = $(NETCDF4_INCS) -I/usr/local/udunits2/include
 
-LOC_LIBS = -ldsdata -lMdv -lRadx -leuclid \
+LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -leuclid \
 	-lSpdb -ldsserver -ldidss -lrapformats \
 	-ltoolsa -ldataport -lRadx -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz

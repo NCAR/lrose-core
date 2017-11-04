@@ -2775,81 +2775,6 @@ void RadxVol::setFixedAngleDeg(int sweepNum, double fixedAngle)
 }
 
 //////////////////////////////////////////////////////////  
-/// Compute the fixed angle from the rays
-/// Also sets the fixed angle on rays and sweeps
-/// Uses the mean pointing angle to estimate the fixed angle
-///
-/// If force is true, the angles will be computed for all sweeps.
-/// If force is false, the angles will only be computed for
-/// sweeps with a missing fixed angle.
-
-void RadxVol::computeFixedAngleFromRays(bool force /* = true */)
-
-{
-
-  // load sweep info if needed
-  
-  if (_sweeps.size() < 1) {
-    loadSweepInfoFromRays();
-  }
-
-  // loop through sweeps
-
-  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
-    
-    RadxSweep *sweep = _sweeps[isweep];
-    Radx::SweepMode_t sweepMode = sweep->getSweepMode();
-
-    // if force false, check to see if we have a fixed angle
-    
-    if (!force) {
-      if (sweep->getFixedAngleDeg() != Radx::missingMetaDouble) {
-        continue;
-      }
-    }
-    
-    // sum up (x,y) coords of measured angles
-
-    double sumx = 0.0;
-    double sumy = 0.0;
-    
-    for (size_t iray = sweep->getStartRayIndex();
-         iray <= sweep->getEndRayIndex(); iray++) {
-      
-      const RadxRay *ray = _rays[iray];
-      double angle;
-      if (sweepMode == Radx::SWEEP_MODE_RHI ||
-          sweepMode == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
-        angle = ray->getAzimuthDeg();
-      } else {
-        angle = ray->getElevationDeg();
-      }
-      
-      double sinVal, cosVal;
-      Radx::sincos(angle * Radx::DegToRad, sinVal, cosVal);
-      sumy += sinVal;
-      sumx += cosVal;
-      
-    } // iray
-
-    // compute mean angle, to use as fixed angle
-
-    double meanAngleDeg = atan2(sumy, sumx) * Radx::RadToDeg;
-    sweep->setFixedAngleDeg(meanAngleDeg);
-
-    // set on rays in this sweep
-
-    for (size_t iray = sweep->getStartRayIndex();
-         iray <= sweep->getEndRayIndex(); iray++) {
-      RadxRay *ray = _rays[iray];
-      ray->setFixedAngleDeg(meanAngleDeg);
-    }
-    
-  } // isweep
-
-}
-
-//////////////////////////////////////////////////////////  
 /// Set the sweep scan modes from ray angles
 ///
 /// Deduce the antenna scan mode from the ray angles in each
@@ -3570,47 +3495,97 @@ void RadxVol::adjustSurSweepLimitsToFixedAzimuth(double azimuth)
 
 }
 
-///////////////////////////////////////////////////////////////
-/// Compute sweep fixed angles from ray data
+//////////////////////////////////////////////////////////  
+/// Compute the fixed angle for each sweep from the rays.
+/// Also sets the fixed angle on rays and sweeps.
 ///
-/// Normally the sweep angles are set using the scan strategy angles -
-/// i.e., the theoretically perfect angles. This option allows you to
-/// recompute the sweep angles using the measured elevation angles (in
-/// PPI mode) or azimuth angles (in RHI mode).
+/// If useMean is true, computes using the mean
+/// If useMean is false, uses the median
+///
+/// If force is true, the angles will be computed for all sweeps.
+/// If force is false, the angles will only be computed for
+/// sweeps with a missing fixed angle.
 
-void RadxVol::computeSweepFixedAnglesFromRays()
-  
+void RadxVol::computeFixedAnglesFromRays(bool force /* = true */,
+                                         bool useMean /* = true */)
+
 {
 
-  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+  // load sweep info if needed
+  
+  if (_sweeps.size() < 1) {
+    loadSweepInfoFromRays();
+  }
 
+  // sweep mode
+  
+  bool isRhi = checkIsRhi();
+
+  // loop through sweeps
+
+  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+    
     RadxSweep *sweep = _sweeps[isweep];
     size_t startIndex = sweep->getStartRayIndex();
     size_t endIndex = sweep->getEndRayIndex();
 
-    // sweep mode
-
-    bool isRhi = checkIsRhi();
-
-    // compute median angle
-
-    vector<double> angles;
-    for (size_t iray = startIndex; iray <= endIndex; iray++) {
-      const RadxRay &ray = *_rays[iray];
-      if (isRhi) {
-        angles.push_back(ray.getAzimuthDeg());
-      } else {
-        angles.push_back(ray.getElevationDeg());
+    // if force false, check to see if we have a fixed angle
+    
+    if (!force) {
+      if (sweep->getFixedAngleDeg() != Radx::missingMetaDouble) {
+        continue;
       }
+    }
+    
+    // sum up (x,y) coords of measured angles
+
+    double sumx = 0.0;
+    double sumy = 0.0;
+    vector<double> angles;
+    double fixedAngle = 0.0;
+
+    for (size_t iray = startIndex; iray <= endIndex; iray++) {
+      
+      const RadxRay *ray = _rays[iray];
+      double angle;
+      if (isRhi) {
+        angle = ray->getAzimuthDeg();
+      } else {
+        angle = ray->getElevationDeg();
+      }
+      
+      angles.push_back(angle);
+      
+      if (useMean) {
+        double sinVal, cosVal;
+        Radx::sincos(angle * Radx::DegToRad, sinVal, cosVal);
+        sumy += sinVal;
+        sumx += cosVal;
+      }
+      
     } // iray
-    if (angles.size() > 2) {
-      sort(angles.begin(), angles.end());
-      double medianAngle = angles[angles.size() / 2];
-      sweep->setFixedAngleDeg(medianAngle);
-      for (size_t iray = startIndex; iray <= endIndex; iray++) {
-        RadxRay &ray = *_rays[iray];
-        ray.setFixedAngleDeg(medianAngle);
-      } // iray
+
+    if (angles.size() > 0) {
+      if (useMean) {
+        // compute mean angle
+        double meanAngleDeg = atan2(sumy, sumx) * Radx::RadToDeg;
+        fixedAngle = meanAngleDeg;
+      } else {
+        // compute median
+        sort(angles.begin(), angles.end());
+        double medianAngleDeg = angles[angles.size() / 2];
+        fixedAngle = medianAngleDeg;
+      }
+    }
+
+    // set fixed angle on sweep
+
+    sweep->setFixedAngleDeg(fixedAngle);
+
+    // set on rays in this sweep
+    
+    for (size_t iray = startIndex; iray <= endIndex; iray++) {
+      _rays[iray]->setFixedAngleDeg(fixedAngle);
     }
     
   } // isweep

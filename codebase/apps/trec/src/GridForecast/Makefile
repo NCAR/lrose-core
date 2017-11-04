@@ -37,7 +37,7 @@ TARGET_FILE = GridForecast
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lMdv -lRadx -lSpdb \
+LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -lSpdb \
 	-ladvect -ldsserver -ltitan -leuclid \
 	-lrapmath -ldidss -lrapformats -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \

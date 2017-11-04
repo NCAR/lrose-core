@@ -205,7 +205,8 @@ int TempProfile::_getTempProfile(time_t searchTime)
   int nChunks = (int) chunks.size();
   if (nChunks < 1) {
     cerr << "ERROR - getTempProfile()" << endl;
-    cerr << "  Bad sounding" << endl;
+    cerr << "  No sounding, time: " << DateTime::strm(searchTime) << endl;
+    cerr << "               name: " << _soundingLocationName << endl;
     return -1;
   }
 
@@ -234,6 +235,7 @@ int TempProfile::_getTempProfile(time_t searchTime)
     SNDG_spdb_point_t *dataPtr = 
       (SNDG_spdb_point_t *) ((char *) sounding + dataOffset);
     for(int ipoint = 0; ipoint < sounding->nPoints; ipoint++ ) {
+        
       if (dataPtr->pressure > -999 &&
           dataPtr->altitude > -999 &&
           dataPtr->temp > -999) {
@@ -310,9 +312,13 @@ int TempProfile::_checkTempProfile()
 
 {
 
-  // should have at least 20 points
+  // should have at least 5 points
 
-  if (_tmpProfile.size() < 20) {
+  if (_tmpProfile.size() < 5) {
+    if (_debug) {
+      cerr << "WARNING - checkTempProfile()" << endl;
+      cerr << "  Too few points in profile: " << _tmpProfile.size() << endl;
+    }
     return -1;
   }
 

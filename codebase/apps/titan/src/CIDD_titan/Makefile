@@ -40,7 +40,7 @@ LOC_CPPC_CFLAGS =
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -lMdv -lRadx -leuclid \
+LOC_LIBS = -lSpdb -lMdv -lRadx -lNcxx -leuclid \
 	-ldsserver -ldidss -lrapplot -lrapformats \
 	-lFmq -ltoolsa -ldataport -ltdrp \
 	-lshapelib -ldevguide -lxview -lolgx \
@@ -50,7 +50,7 @@ LOC_LIBS = -lSpdb -lMdv -lRadx -leuclid \
 LOC_LDFLAGS = $(SYS_XVIEW_LDFLAGS) $(SYS_X_LDFLAGS) $(NETCDF4_LDFLAGS)
 
 
-#IMLIB_LIBS =  -lSpdb -lMdv -lRadx -leuclid -ldsserver -ldidss -lrapplot \
+#IMLIB_LIBS =  -lSpdb -lMdv -lRadx -lNcxx -leuclid -ldsserver -ldidss -lrapplot \
 #	-lrapformats -lFmq -ltoolsa -ldataport -ltdrp \
 #	-lshapelib -lpthread -ldevguide -lxview -lolgx -lX11 -lXext \
 #	-lImlib2 -lpng -ltiff -ljpeg -lgif -lz

@@ -194,9 +194,9 @@ void Beam::init(const MomentsMgr &mmgr,
   _mmgr = mmgr;
   _nSamples = nSamples;
   _nSamplesEffective = nSamplesEffective;
-  _nGates = nGates - 20;
-  _nGatesPrtShort = nGates - 20;
-  _nGatesPrtLong = nGatesPrtLong - 20;
+  _nGates = nGates;
+  _nGatesPrtShort = nGates;
+  _nGatesPrtLong = nGatesPrtLong;
   _beamIsIndexed = beamIsIndexed;
   _angularResolution = angularResolution;
   _meanPointingAngle = meanPointingAngle;
@@ -2034,10 +2034,30 @@ void Beam::_filterDpAltHvCoCross()
     MomentsFields &fields = gate->fields;
     MomentsFields &fieldsF = _momFieldsF[igate];
     
-    // check if we have clutter at this gate
+    // initialize rhohv test
+
+    if (_params.apply_rhohv_test_after_cmd) {
+      fields.test2 = 0;
+      fields.test3 = 0;
+    }
+    
+    // check if CMD identified clutter at this gate
     
     if (!fields.cmd_flag) {
-      continue;
+
+      // should we apply the RHOHV improvement test?
+
+      if (!_params.apply_rhohv_test_after_cmd) {
+        continue;
+      }
+
+      // are we within the RHOHV limits for the test?
+
+      if (fields.rhohv < _params.rhohv_test_min_rhohv ||
+          fields.rhohv > _params.rhohv_test_max_rhohv) {
+        continue;
+      }
+
     }
       
     // filter the HC time series, save the filter ratio
@@ -2107,6 +2127,38 @@ void Beam::_filterDpAltHvCoCross()
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
+
+    if (_params.apply_rhohv_test_after_cmd) {
+
+      // compute rhohv improvement
+      double factorUnfilt = 1.0 - fields.rhohv;
+      double factorFilt = 1.0 - fieldsF.rhohv;
+      if (factorFilt < 0.001) {
+        factorFilt = 0.001;
+      }
+      double rhohvImprov = factorUnfilt / factorFilt;
+      fields.test2 = rhohvImprov;
+
+      if (!fields.cmd_flag) {
+        // CMD did not indicate clutter
+        // check if RHOHV improvement indicates clutter
+        if (rhohvImprov >= _params.rhohv_improvement_factor_threshold) {
+          // yes, so use filtered data for dual pol fields
+          fields.test3 = 1;
+          MomentsFields filt = fieldsF;
+          fieldsF = fields;
+          fieldsF.zdrm = filt.zdrm;
+          fieldsF.zdr = filt.zdr;
+          fieldsF.ldr = filt.ldr;
+          fieldsF.rhohv = filt.rhohv;
+          fieldsF.phidp = filt.phidp;
+        } else {
+          // no clutter, so revert to unfiltered data
+          fieldsF = fields;
+        }
+      } // if (!fields.cmd_flag)
+
+    } // if (_params.apply_rhohv_test_after_cmd)
     
   } // igate
   
@@ -3862,9 +3914,6 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
   
   // Note - First pulse is a short-PRT pulse
 
-  int corr = 2;
-  cerr << "2222222222222222 corr: " << corr << endl;
-
   switch (_xmitRcvMode) {
     
     case IWRF_SIM_HV_FIXED_HV: {
@@ -3885,8 +3934,8 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
         for (int isamp = 0; isamp < _nSamples; isamp++, iqhcOrig++, iqvcOrig++) {
           iqhcOrig->re = iqChan0[isamp][ipos];
           iqhcOrig->im = iqChan0[isamp][ipos+1];
-          iqvcOrig->re = iqChan1[isamp][ipos+corr];
-          iqvcOrig->im = iqChan1[isamp][ipos+1+corr];
+          iqvcOrig->re = iqChan1[isamp][ipos];
+          iqvcOrig->im = iqChan1[isamp][ipos+1];
         }
        
         // short PRT from input sequence, which starts with short
@@ -3897,8 +3946,8 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
              isamp++, iqhcShort++, iqvcShort++) {
           iqhcShort->re = iqChan0[jsamp][ipos];
           iqhcShort->im = iqChan0[jsamp][ipos+1];
-          iqvcShort->re = iqChan1[jsamp][ipos+corr];
-          iqvcShort->im = iqChan1[jsamp][ipos+1+corr];
+          iqvcShort->re = iqChan1[jsamp][ipos];
+          iqvcShort->im = iqChan1[jsamp][ipos+1];
           jsamp++;
           jsamp++;
         }
@@ -3932,8 +3981,8 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
           jsamp++;
           iqhcLong->re = iqChan0[jsamp][ipos];
           iqhcLong->im = iqChan0[jsamp][ipos+1];
-          iqvcLong->re = iqChan1[jsamp][ipos+corr];
-          iqvcLong->im = iqChan1[jsamp][ipos+1+corr];
+          iqvcLong->re = iqChan1[jsamp][ipos];
+          iqvcLong->im = iqChan1[jsamp][ipos+1];
           jsamp++;
         }
         

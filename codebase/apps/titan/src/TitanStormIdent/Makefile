@@ -38,7 +38,7 @@ TARGET_FILE = TitanStormIdent
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -ldsdata -lradar -lSpdb -lMdv \
-	-lRadx -ldsserver -ldidss -ltitan \
+	-lRadx -lNcxx -ldsserver -ldidss -ltitan \
 	-lrapmath -leuclid -lrapformats -lphysics \
 	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
 	-lbz2 -lz -lpthread

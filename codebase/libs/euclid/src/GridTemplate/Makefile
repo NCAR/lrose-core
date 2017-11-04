@@ -39,6 +39,7 @@ HDRS = \
 	$(RAP_INC_DIR)/euclid/GlobalCircularTemplate.hh \
 	$(RAP_INC_DIR)/euclid/GlobalGridTemplate.hh \
 	$(RAP_INC_DIR)/euclid/RectangularTemplate.hh \
+	$(RAP_INC_DIR)/euclid/CenteredRectangularTemplate.hh
 
 CPPC_SRCS = \
 	CircularTemplate.cc \
@@ -50,7 +51,8 @@ CPPC_SRCS = \
 	GridTemplateList.cc \
 	GlobalCircularTemplate.cc \
 	GlobalGridTemplate.cc \
-	RectangularTemplate.cc
+	RectangularTemplate.cc \
+	CenteredRectangularTemplate.cc 
 
 #
 # general targets

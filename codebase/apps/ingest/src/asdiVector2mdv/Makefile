@@ -35,7 +35,7 @@ TARGET_FILE =  asdiVector2mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -leuclid -lSpdb \
+LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -lSpdb \
 	-ldsserver -ldidss -lrapformats -lphysics \
 	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
 	-lbz2 -lz -lpthread -lm

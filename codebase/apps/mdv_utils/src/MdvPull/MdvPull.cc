@@ -1021,7 +1021,8 @@ void MdvPull::_setupWrite(DsMdvx &mdvx)
     
     mdvx.setMdv2NcfOutput(_params.ncf_output_latlon_arrays,
                           _params.ncf_output_mdv_attributes,
-                          _params.ncf_output_mdv_chunks);
+                          _params.ncf_output_mdv_chunks,
+                          _params.ncf_output_start_end_times);
     
     mdvx.setNcfFileSuffix(_params.ncf_file_suffix);
     

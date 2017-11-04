@@ -8,12 +8,16 @@ You can create an LROSE release for the following packages:
 | ------------- |:-------------:|
 | lrose         | standard full package - the default |
 | radx          | Radx apps only |
+| titan         | Titan distribution |
 | hcr           | HCR (HIAPER Cloud Radar) package |
+| hsrl          | HSRL (High Spectral Resolition Lidar) package |
 | cidd          | CIDD display apps only, 32-bit build |
 
 `lrose` is the standard build, which includes all of the libraries and applications in lrose, except for the `cidd` display and its related applications.
 
 `radx` is a sub package that only includes the `Radx` applications.
+
+`titan` is a sub package that supercedes the old Titan distribution for applications.
 
 `hcr` is a sub package that only includes the applications required for the HIAPER Cloud Radar.
 
@@ -41,8 +45,8 @@ Options:
   -h, --help            show this help message and exit
   --debug               Set debugging on
   --verbose             Set verbose debugging on
-  --package=PACKAGE     Package name. Options are lrose (default), radx, cidd,
-                        hcr
+  --package=PACKAGE     Package name. Options are lrose (default), radx, titan,
+                        cidd, hcr, hsrl
   --releaseDir=RELEASETOPDIR
                         Top-level release dir
   --force               force, do not request user to check it is OK to

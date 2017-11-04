@@ -40,7 +40,7 @@ TARGET_FILE = DeTect2Dsr
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lDeTect -lFmq -lSpdb -lMdv \
-	-lRadx -ldsdata -ldsserver -lrapformats \
+	-lRadx -lNcxx -ldsdata -ldsserver -lrapformats \
 	-ldidss -ltoolsa -ldataport -ltdrp \
 	-lrapmath $(NETCDF4_LIBS) -lbz2 -lz \
 	-lm

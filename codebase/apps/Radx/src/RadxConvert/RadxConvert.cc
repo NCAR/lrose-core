@@ -633,7 +633,7 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
     if (_params.debug) {
       cerr << "DEBUG - recomputing sweep fixed angles from ray data" << endl;
     }
-    vol.computeSweepFixedAnglesFromRays();
+    vol.computeFixedAnglesFromRays();
   }
 
   // sweep limits

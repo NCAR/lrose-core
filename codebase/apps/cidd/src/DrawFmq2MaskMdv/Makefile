@@ -34,7 +34,7 @@ TARGET_FILE = DrawFmq2MaskMdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lFmq -lMdv -lRadx -ldsserver \
+LOC_LIBS = -lFmq -lMdv -lRadx -lNcxx -ldsserver \
 	-ldidss -lrapformats -leuclid -ltoolsa \
 	-ltdrp -ldataport $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread -lm
