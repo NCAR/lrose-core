@@ -435,6 +435,7 @@ int RadxPartRain::_processFile(const string &filePath)
 
   // initialize for ZDR bias and self consistency results
 
+  _zdrInIceElev.clear();
   _zdrInIceResults.clear();
   _zdrInBraggResults.clear();
   _zdrmInIceResults.clear();
@@ -1007,6 +1008,12 @@ int RadxPartRain::_storeDerivedRay(ComputeThread *thread)
   
   // load ZDR bias results
 
+  const vector<double> &threadZdrInIceElev =
+    thread->getComputeEngine()->getZdrInIceElev();
+  for (size_t ii = 0; ii < threadZdrInIceElev.size(); ii++) {
+    _zdrInIceElev.push_back(threadZdrInIceElev[ii]);
+  }
+
   const vector<double> &threadZdrInIceResults =
     thread->getComputeEngine()->getZdrInIceResults();
   for (size_t ii = 0; ii < threadZdrInIceResults.size(); ii++) {
@@ -1451,6 +1458,7 @@ void RadxPartRain::_saveZdrInIceToFile()
     cerr << "  " << strerror(errNum) << endl;
     return;
   }
+  _writeHeaderZdrInIce(appendFile);
   
   TaFile appendm; // closes when goes out of scope
   FILE *appendmFile;
@@ -1461,6 +1469,7 @@ void RadxPartRain::_saveZdrInIceToFile()
     cerr << "  " << strerror(errNum) << endl;
     return;
   }
+  _writeHeaderZdrInIce(appendmFile);
   
   TaFile vol; // closes when goes out of scope
   FILE *volFile;
@@ -1471,6 +1480,7 @@ void RadxPartRain::_saveZdrInIceToFile()
     cerr << "  " << strerror(errNum) << endl;
     return;
   }
+  _writeHeaderZdrInIce(volFile);
   
   TaFile volm; // closes when goes out of scope
   FILE *volmFile;
@@ -1481,23 +1491,58 @@ void RadxPartRain::_saveZdrInIceToFile()
     cerr << "  " << strerror(errNum) << endl;
     return;
   }
+  _writeHeaderZdrInIce(volmFile);
   
   // write to files
 
   for (size_t ii = 0; ii < _zdrInIceResults.size(); ii++) {
-    fprintf(appendFile, "%.4f\n", _zdrInIceResults[ii]);
-    fprintf(volFile, "%.4f\n", _zdrInIceResults[ii]);
+    fprintf(appendFile, "%.3f %.4f\n", _zdrInIceElev[ii], _zdrInIceResults[ii]);
+    fprintf(volFile, "%.3f %.4f\n", _zdrInIceElev[ii], _zdrInIceResults[ii]);
   }
 
   for (size_t ii = 0; ii < _zdrmInIceResults.size(); ii++) {
-    fprintf(appendmFile, "%.4f\n", _zdrmInIceResults[ii]);
-    fprintf(volmFile, "%.4f\n", _zdrmInIceResults[ii]);
+    fprintf(appendmFile, "%.3f %.4f\n", _zdrInIceElev[ii], _zdrmInIceResults[ii]);
+    fprintf(volmFile, "%.3f %.4f\n", _zdrInIceElev[ii], _zdrmInIceResults[ii]);
   }
 
   fflush(appendFile);
   fflush(appendmFile);
   fflush(volFile);
   fflush(volmFile);
+  
+}
+
+/////////////////////////////////////////////////////////////
+// write header to zdr in ice file
+// if the file is zero length
+
+void RadxPartRain::_writeHeaderZdrInIce(FILE *out)
+
+{
+
+  // is the file 0-length?
+
+  struct stat fstat;
+  bool fileIsNew = false;
+  if (ta_fstat(fileno(out), &fstat) == 0) {
+    if (fstat.st_size == 0) {
+      fileIsNew = true;
+    }
+  }
+
+  if (!fileIsNew) {
+    // file is not new, no need to add header
+    return;
+  }
+
+  fprintf(out, "# elev zdr\n");
+  fprintf(out, "#============================================\n");
+  fprintf(out, "# Table produced by RadxPartRain\n");
+  fprintf(out, "#------------ Table column list -------------\n");
+  fprintf(out, "#    col 000: elev\n");
+  fprintf(out, "#    col 001: zdr\n");
+  fprintf(out, "#--------------------------------------------\n");
+  fprintf(out, "#============================================\n");
   
 }
 

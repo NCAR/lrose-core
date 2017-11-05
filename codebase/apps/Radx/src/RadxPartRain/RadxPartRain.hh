@@ -152,6 +152,7 @@ private:
   ZdrStats _zdrStatsIce;
   ZdrStats _zdrStatsBragg;
   
+  vector<double> _zdrInIceElev;
   vector<double> _zdrInIceResults;
   vector<double> _zdrInBraggResults;
   vector<double> _zdrmInIceResults;
@@ -239,6 +240,8 @@ private:
                        ZdrStats &stats,
                        int nPercentiles,
                        double *percentiles);
+
+  void _writeHeaderZdrInIce(FILE *out);
 
   double _computeZdrPerc(const vector<double> &zdrmResults,
                          double percent);

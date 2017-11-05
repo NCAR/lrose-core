@@ -97,6 +97,7 @@ public:
 
   // after calling compute, retrieve the zdrm bias array
   
+  const vector<double> &getZdrInIceElev() const { return _zdrInIceElev; }
   const vector<double> &getZdrInIceResults() const { return _zdrInIceResults; }
   const vector<double> &getZdrInBraggResults() const { return _zdrInBraggResults; }
   const vector<double> &getZdrmInIceResults() const { return _zdrmInIceResults; }
@@ -238,6 +239,7 @@ private:
   RadxArray<int> _zdrFlagInBragg_;
   int *_zdrFlagInBragg;
 
+  vector<double> _zdrInIceElev;
   vector<double> _zdrInIceResults;
   vector<double> _zdrInBraggResults;
   vector<double> _zdrmInIceResults;
