@@ -103,11 +103,11 @@ void DerFieldCalcs::_applyCorr()
   
   // allocate the rate vectors
 
-  _hiDataRate.resize(_nGates);
-  _loDataRate.resize(_nGates);
-  _crossDataRate.resize(_nGates);
-  _molDataRate.resize(_nGates);
-  _combinedRate.resize(_nGates);
+  _hiRate.resize(_nGates);
+  _loRate.resize(_nGates);
+  _crossRate.resize(_nGates);
+  _molRate.resize(_nGates);
+  _combRate.resize(_nGates);
 
   // non-linear count correction
 
@@ -135,8 +135,8 @@ void DerFieldCalcs::_applyCorr()
   // merge hi and lo channels into combined rate
   
   for(size_t igate = 0; igate < _nGates; igate++) {
-    _combinedRate[igate] = _hiAndloMerge(_hiDataRate[igate], 
-                                         _loDataRate[igate]);
+    _combRate[igate] = _hiAndloMerge(_hiRate[igate], 
+                                         _loRate[igate]);
   }
   _printRateDiagnostics("hiAndloMerge", true);
 
@@ -164,7 +164,7 @@ void DerFieldCalcs::_applyNonLinearCountCorr()
   double molDeadTime = dt_mol.getDataNum()[_fullCals.getMolPos()][0];
   double binW = binwid.getDataNum()[_fullCals.getBinPos()][0];
 
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> hiDead, loDead, crossDead, molDead, binW: "
          << hiDeadTime << ", "
          << loDeadTime << ", "
@@ -174,13 +174,13 @@ void DerFieldCalcs::_applyNonLinearCountCorr()
   }
 
   for(size_t igate = 0; igate < _nGates; igate++) {
-    _hiDataRate[igate] =
+    _hiRate[igate] =
       _nonLinCountCor(_hiData[igate], hiDeadTime, binW, _shotCount); 
-    _loDataRate[igate] = 
+    _loRate[igate] = 
       _nonLinCountCor(_loData[igate], loDeadTime, binW, _shotCount); 
-    _crossDataRate[igate] =
+    _crossRate[igate] =
       _nonLinCountCor(_crossData[igate], crossDeadTime, binW, _shotCount); 
-    _molDataRate[igate] =
+    _molRate[igate] =
       _nonLinCountCor(_molData[igate], molDeadTime, binW, _shotCount); 
   } // igate
 
@@ -204,14 +204,14 @@ void DerFieldCalcs::_applyBaselineCorr()
   double polPosn = 1.0;
 
   for(size_t igate = 0; igate < _nGates; igate++, calBin += _nBinsPerGate) {
-    _hiDataRate[igate] = _baselineSubtract(_hiDataRate[igate],
-                                           blCorCombinedHi[calBin], polPosn);
-    _loDataRate[igate] = _baselineSubtract(_loDataRate[igate],
-                                           blCorCombinedLo[calBin], polPosn);
-    _crossDataRate[igate] = _baselineSubtract(_crossDataRate[igate],
-                                              blCorCrossPol[calBin], polPosn);
-    _molDataRate[igate] = _baselineSubtract(_molDataRate[igate],
-                                            blCorMolecular[calBin], polPosn);
+    _hiRate[igate] = _baselineSubtract(_hiRate[igate],
+                                       blCorCombinedHi[calBin], polPosn);
+    _loRate[igate] = _baselineSubtract(_loRate[igate],
+                                       blCorCombinedLo[calBin], polPosn);
+    _crossRate[igate] = _baselineSubtract(_crossRate[igate],
+                                          blCorCrossPol[calBin], polPosn);
+    _molRate[igate] = _baselineSubtract(_molRate[igate],
+                                        blCorMolecular[calBin], polPosn);
   } // igate
   
   _printRateDiagnostics("baselineSubtract");
@@ -239,10 +239,10 @@ void DerFieldCalcs::_applyBackgroundCorr()
   }
   double bgBinCount = 0.0;
   for(int cgate = startBackgroundGate - 1; cgate < (int) _nGates; cgate++) {
-    hibackgroundRate += _hiDataRate.at(cgate);
-    lobackgroundRate += _loDataRate.at(cgate);
-    crossbackgroundRate += _crossDataRate.at(cgate);
-    molbackgroundRate += _molDataRate.at(cgate);
+    hibackgroundRate += _hiRate.at(cgate);
+    lobackgroundRate += _loRate.at(cgate);
+    crossbackgroundRate += _crossRate.at(cgate);
+    molbackgroundRate += _molRate.at(cgate);
     bgBinCount++;	    
   }
   
@@ -254,14 +254,14 @@ void DerFieldCalcs::_applyBackgroundCorr()
   // adjust for background rate
   
   for(size_t igate = 0; igate < _nGates; igate++) {
-    _hiDataRate[igate] =
-      _backgroundSubtract(_hiDataRate[igate], hibackgroundRate);
-    _loDataRate[igate] =
-      _backgroundSubtract(_loDataRate[igate], lobackgroundRate);
-    _crossDataRate[igate] =
-      _backgroundSubtract(_crossDataRate[igate], crossbackgroundRate);
-    _molDataRate[igate] =
-      _backgroundSubtract(_molDataRate[igate], molbackgroundRate);
+    _hiRate[igate] =
+      _backgroundSubtract(_hiRate[igate], hibackgroundRate);
+    _loRate[igate] =
+      _backgroundSubtract(_loRate[igate], lobackgroundRate);
+    _crossRate[igate] =
+      _backgroundSubtract(_crossRate[igate], crossbackgroundRate);
+    _molRate[igate] =
+      _backgroundSubtract(_molRate[igate], molbackgroundRate);
   }
   
   if(_params.debug >= Params::DEBUG_VERBOSE) {
@@ -282,12 +282,16 @@ void DerFieldCalcs::_applyEnergyNorm()
 {
 
   // normalize with respect to transmit energy
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "=========== _power: " << _power << endl;
+  }
   
   for(size_t igate = 0; igate < _nGates; igate++) {
-    _hiDataRate[igate] = _energyNorm(_hiDataRate[igate], _power);
-    _loDataRate[igate] = _energyNorm(_loDataRate[igate], _power);
-    _crossDataRate[igate] = _energyNorm(_crossDataRate[igate], _power);
-    _molDataRate[igate] = _energyNorm(_molDataRate[igate], _power);
+    _hiRate[igate] = _energyNorm(_hiRate[igate], _power);
+    _loRate[igate] = _energyNorm(_loRate[igate], _power);
+    _crossRate[igate] = _energyNorm(_crossRate[igate], _power);
+    _molRate[igate] = _energyNorm(_molRate[igate], _power);
   }
   
   _printRateDiagnostics("energyNorm");
@@ -305,9 +309,9 @@ void DerFieldCalcs::_applyDiffGeoCorr()
   const vector<double> &diffGeoCombLoMol = _fullCals.getDiffGeoCombLoMol();
   size_t calBin = _nBinsPerGate / 2;
   for(size_t igate = 0; igate < _nGates; igate++, calBin += _nBinsPerGate) {
-    _hiDataRate[igate] /= diffGeoCombHiMol[calBin];
-    _loDataRate[igate] /= diffGeoCombLoMol[calBin];
-    // _crossDataRate[igate] /= diffGeoCombHiMol[calBin];
+    _hiRate[igate] /= diffGeoCombHiMol[calBin];
+    _loRate[igate] /= diffGeoCombLoMol[calBin];
+    // _crossRate[igate] /= diffGeoCombHiMol[calBin];
   }
   _printRateDiagnostics("diffOverlapCor");
 
@@ -324,9 +328,9 @@ void DerFieldCalcs::_applyGeoCorr()
   size_t  calBin = _nBinsPerGate / 2;
   for(size_t igate = 0; igate < _nGates; igate++, calBin += _nBinsPerGate) {
     double corr = geoCorr[calBin];
-    _combinedRate[igate] *= corr;
-    _crossDataRate[igate] *= corr;
-    _molDataRate[igate] *= corr;
+    _combRate[igate] *= corr;
+    _crossRate[igate] *= corr;
+    _molRate[igate] *= corr;
   }
   
   _printRateDiagnostics("geoOverlapCor", true);
@@ -340,16 +344,16 @@ void DerFieldCalcs::_printRateDiagnostics(const string &label,
                                           bool includeCombined /* = false */)
 {
   if(_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << label << "^^^^^" << endl;
-    for(size_t igate=0;igate<1;igate++) {
-      cerr<<"hiDataRate["<<igate<<"]="<<_hiDataRate[igate]<<endl;
-      cerr<<"loDataRate["<<igate<<"]="<<_loDataRate[igate]<<endl;
-      cerr<<"crossDataRate["<<igate<<"]="<<_crossDataRate[igate]<<endl;
-      cerr<<"molDataRate["<<igate<<"]="<<_molDataRate[igate]<<endl;
-      if (includeCombined) {
-        cerr<<"combineRate["<<igate<<"]="<<_combinedRate[igate]<<endl;
-      }
-    }
+    cerr << "===== RATES FOR: " << label << "=====" << endl;
+    for(size_t igate = 350; igate < 360; igate++) {
+      cerr << "igate, hiRate, loRate, crossRate, molRate, combRate: "
+           << igate << ", "
+           << _hiRate[igate] << ", "
+           << _loRate[igate] << ", "
+           << _crossRate[igate] << ", "
+           << _molRate[igate] << ", "
+           << _combRate[igate] << endl;
+    } // igate
   }
 }
   
@@ -394,15 +398,15 @@ void DerFieldCalcs::computeDerived()
   // vol depol
 
   for(size_t igate=0;igate<_nGates;igate++) {
-    _volDepol[igate] = _computeVolDepol(_crossDataRate[igate], 
-                                        _combinedRate[igate]);
+    _volDepol[igate] = _computeVolDepol(_crossRate[igate], 
+                                        _combRate[igate]);
   }
   
   // backscatter ratio
   
   for(size_t igate=0;igate<_nGates;igate++) {
-    _backscatRatio[igate] = _computeBackscatRatio(_combinedRate[igate], 
-                                                  _molDataRate[igate]);
+    _backscatRatio[igate] = _computeBackscatRatio(_combRate[igate], 
+                                                  _molRate[igate]);
   }
   
   // particle depol
@@ -424,7 +428,7 @@ void DerFieldCalcs::computeDerived()
   
   for(size_t igate = 0; igate < _nGates; igate++) {
     _opticalDepth[igate] = 
-      _computeOpticalDepth(_presHpa[igate], _tempK[igate], _molDataRate[igate], scanAdj);
+      _computeOpticalDepth(_presHpa[igate], _tempK[igate], _molRate[igate], scanAdj);
   }
   _filterOpticalDepth();
 
@@ -451,13 +455,13 @@ void DerFieldCalcs::computeDerived()
 double DerFieldCalcs::_nonLinCountCor(Radx::fl32 count, double deadtime, 
                                       double binWid, double shotCount)
 {
-  if(count < 1.0) {
+  if(count < 0.0) {
     return 0;
   }
   double photonRate = (count / shotCount) / binWid;
   double corrFactor = photonRate * deadtime;
-  if(corrFactor > 0.99) {
-    corrFactor=0.95;
+  if(corrFactor > 0.95) {
+    corrFactor = 0.95;
   }
   return count / (1.0 - corrFactor);
 }
@@ -480,7 +484,11 @@ double DerFieldCalcs::_baselineSubtract(double arrivalRate, double profile,
 double DerFieldCalcs::_backgroundSubtract(double arrivalRate, double backgroundBins)
 {
   //background bins is average of the last 100 bins, this can be negative
-  return arrivalRate - backgroundBins;
+  double rate = arrivalRate - backgroundBins;
+  if (rate < 0.0) {
+    rate = 0.0;
+  }
+  return rate;
 }
 
 
@@ -489,10 +497,10 @@ double DerFieldCalcs::_backgroundSubtract(double arrivalRate, double backgroundB
 
 double DerFieldCalcs::_energyNorm(double arrivalRate, double totalEnergy)
 {
-  if(totalEnergy==0) {
-    return arrivalRate;
+  if (totalEnergy == 0) {
+    totalEnergy = 1.5e6;
   }
-  return (arrivalRate / totalEnergy) * pow(10.0, 6.0);
+  return (arrivalRate / totalEnergy) * 1.0e6;
 }
 
 
@@ -553,13 +561,14 @@ void DerFieldCalcs::_initDerivedArrays()
 Radx::fl32 DerFieldCalcs::_computeVolDepol(double crossRate, double combineRate)
 {
 
-  if (crossRate <= 0.0 || (crossRate + combineRate) <= 0.0) {
+  if (crossRate < 0.0 || (crossRate + combineRate) <= 0.0) {
     return Radx::missingFl32;
   }
 
   double depol = crossRate / (crossRate + combineRate);
   if (depol > 1.0) {
-    return Radx::missingFl32;
+    return 1.0;
+    // return Radx::missingFl32;
   }
 
   return depol;
@@ -573,7 +582,7 @@ Radx::fl32 DerFieldCalcs::_computeVolDepol(double crossRate, double combineRate)
 Radx::fl32 DerFieldCalcs::_computeBackscatRatio(double combineRate, double molRate)
 {
 
-  if(combineRate <= 0.0 || molRate <= 0.0) {
+  if(combineRate < 0.0 || molRate <= 0.0) {
     return Radx::missingFl32;
   }
 
@@ -687,10 +696,21 @@ Radx::fl32 DerFieldCalcs::_computeOpticalDepth(double pressHpa, double tempK,
 
   double xx = (scanAdj * molRate) / betaMSonde;
   if (xx <= 0.0) {
-    cerr << "xx: " << xx << endl;
     return Radx::missingFl32;
   }
   double optDepth = 16.0 - 0.5 * log(xx);
+  // double optDepth = - 0.5 * log(xx);
+
+  // if (pressHpa > 820) {
+  //   cerr << "press, tempK, scanAdj, molRate, betaMSonde, .5*log(xx), optDepth: "
+  //        << pressHpa << ", "
+  //        << tempK << ", "
+  //        << scanAdj << ", "
+  //        << molRate << ", "
+  //        << betaMSonde << ", "
+  //        << 0.5*log(xx) << ", "
+  //        << optDepth << endl;
+  // }
   
   return optDepth;
 

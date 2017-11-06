@@ -107,11 +107,11 @@ private:
   vector<Radx::fl32> _extinction;
   vector<Radx::fl32> _opticalDepth;
 
-  vector<Radx::fl32> _hiDataRate;
-  vector<Radx::fl32> _loDataRate;
-  vector<Radx::fl32> _crossDataRate;
-  vector<Radx::fl32> _molDataRate;
-  vector<Radx::fl32> _combinedRate;
+  vector<Radx::fl32> _hiRate;
+  vector<Radx::fl32> _loRate;
+  vector<Radx::fl32> _crossRate;
+  vector<Radx::fl32> _molRate;
+  vector<Radx::fl32> _combRate;
   
   // apply corrections
 
