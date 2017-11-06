@@ -195,6 +195,8 @@ public:
                    bool addToMetaQueue = true);
   void setPlatformGeoref(const iwrf_platform_georef_t &georef,
                          bool addToMetaQueue = true);
+  void setPlatformGeoref2(const iwrf_platform_georef_t &georef,
+                          bool addToMetaQueue = true);
   
   ////////////////////////////////////////////////////////////
   // set sequence number for each packet
@@ -212,6 +214,7 @@ public:
   void setXmitInfoPktSeqNum(si64 pkt_seq_num);
   void setRvp8InfoPktSeqNum(si64 pkt_seq_num);
   void setPlatformGeorefPktSeqNum(si64 pkt_seq_num);
+  void setPlatformGeoref2PktSeqNum(si64 pkt_seq_num);
 
   ////////////////////////////////////////////////////////////
   // set time on all packets
@@ -237,6 +240,7 @@ public:
   void setXmitInfoTime(time_t secs, int nano_secs);
   void setRvp8InfoTime(time_t secs, int nano_secs);
   void setPlatformGeorefTime(time_t secs, int nano_secs);
+  void setPlatformGeoref2Time(time_t secs, int nano_secs);
 
   // set time for each packet to now
 
@@ -253,6 +257,7 @@ public:
   void setXmitInfoTimeToNow();
   void setRvp8InfoTimeToNow();
   void setPlatformGeorefTimeToNow();
+  void setPlatformGeoref2TimeToNow();
 
   ////////////////////////////////////////////////////////////
   // activate structs individually
@@ -270,6 +275,7 @@ public:
   void setXmitInfoActive(bool state);
   void setRvp8InfoActive(bool state);
   void setPlatformGeorefActive(bool state);
+  void setPlatformGeoref2Active(bool state);
 
   ////////////////////////////////////////////////////////////
   // set radar id on all structs
@@ -321,6 +327,9 @@ public:
   inline const iwrf_platform_georef_t &getPlatformGeoref() const { 
     return _platform_georef; 
   }
+  inline const iwrf_platform_georef_t &getPlatformGeoref2() const { 
+    return _platform_georef2; 
+  }
 
   ////////////////////////////////////////////////////////////
   // check which structs are active
@@ -338,6 +347,7 @@ public:
   bool isXmitInfoActive() const { return _xmit_info_active; }
   bool isRvp8InfoActive() const { return _rvp8_active; }
   bool isPlatformGeorefActive() const { return _platform_georef_active; }
+  bool isPlatformGeoref2Active() const { return _platform_georef2_active; }
 
   ////////////////////////////////////////////////////////////
   // is essential info ready to be used?
@@ -362,6 +372,7 @@ public:
   double getXmitInfoTime() const;
   double getRvp8InfoTime() const;
   double getPlatformGeorefTime() const;
+  double getPlatformGeoref2Time() const;
 
   // get packet sequence numbers
 
@@ -379,6 +390,9 @@ public:
   si64 getRvp8InfoPktSeqNum() const { return _rvp8.packet.seq_num; }
   si64 getPlatformGeorefPktSeqNum() const { 
     return _platform_georef.packet.seq_num; 
+  }
+  si64 getPlatformGeoref2PktSeqNum() const { 
+    return _platform_georef2.packet.seq_num; 
   }
 
   // is id for an info packet? Check the id
@@ -894,6 +908,7 @@ private:
   iwrf_xmit_info_t _xmit_info;
   iwrf_rvp8_ops_info_t _rvp8;
   iwrf_platform_georef_t _platform_georef;
+  iwrf_platform_georef_t _platform_georef2;
 
   bool _radar_info_active;
   bool _scan_seg_active;
@@ -908,6 +923,7 @@ private:
   bool _xmit_info_active;
   bool _rvp8_active;
   bool _platform_georef_active;
+  bool _platform_georef2_active;
 
   // metadataqueue - so writes occur in the correct order
 
