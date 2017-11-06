@@ -162,6 +162,30 @@ TsStatusMonitor::TsStatusMonitor(int argc, char **argv)
     _g0IqHc = new RadarComplex_t[_params.g0_velocity_n_samples];
   }
 
+  // create monitoring fields for catalog
+
+  if (_params.write_stats_files_to_catalog) {
+  
+    if (_params.stats_fields_n < 1) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "  No stats_fields specified." << endl;
+      isOK = FALSE;
+      return;
+    }
+    
+    for (int ii = 0; ii < _params.stats_fields_n; ii++) {
+      const Params::stats_field_t &pfield = _params._stats_fields[ii];
+      StatsField *field = new StatsField(_params, 
+                                         pfield.xml_inner_tag,
+                                         pfield.xml_outer_tag, 
+                                         pfield.minValidValue,
+                                         pfield.maxValidValue,
+                                         pfield.comment);
+      _catFields.push_back(field);
+    }
+
+  }
+
   return;
   
 }
@@ -1282,3 +1306,212 @@ TsStatusMonitor::_removeNagiosStatusFile() {
   }
 
 }
+////////////////////////////////////////////////////////
+// Initialize the monitoring fields
+
+void TsStatusMonitor::_initStatsFields()
+{
+
+  for (size_t ii = 0; ii < _catFields.size(); ii++) {
+    _catFields[ii]->clear();
+  }
+
+}
+
+////////////////////////////////////////////////////////
+// Print the stats
+
+void TsStatusMonitor::_printStats(FILE *out)
+
+{
+  
+  if (_catFields[0]->getNn() < 3) {
+    cerr << "WARNING - TsStatusMonitor::_printStats" << endl;
+    cerr << "  No data found" << endl;
+    cerr << "  monitorStartTime: " << DateTime::strm(_statsStartTime) << endl;
+    cerr << "  monitorEndTime: " << DateTime::strm(_statsEndTime) << endl;
+  }
+
+  fprintf(out,
+          "========================================"
+          " HSRL MONITORING "
+          "========================================\n");
+
+  char label[128];
+  sprintf(label, "Monitor start time - end time, N = %d",
+          (int) (_catFields[0]->getNn()));
+
+  fprintf(out, "%45s:   %s - %s\n",
+          label,
+          DateTime::strm(_statsStartTime).c_str(), 
+          DateTime::strm(_statsEndTime).c_str());
+
+  fprintf(out, "%45s  %10s %10s %10s %10s  %s\n",
+          "", "Min", "Max", "Mean", "Range", "Notes");
+          
+  for (size_t ii = 0; ii < _catFields.size(); ii++) {
+    _catFields[ii]->computeStats();
+    _catFields[ii]->printStats(out);
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      _catFields[ii]->printStatsDebug(out);
+    }
+  }
+
+  fprintf(out,
+          "========================================"
+          "================="
+          "========================================\n");
+  
+}
+
+////////////////////////////////////////////////////////
+// Write out the stats files
+
+void TsStatusMonitor::_writeStatsFile()
+
+{
+
+  if (_catFields[0]->getNn() < 3) {
+    if (_params.debug) {
+      cerr << "WARNING - TsStatusMonitor::_writeStatsFiles" << endl;
+      cerr << "  No data found" << endl;
+      cerr << "  statsStartTime: " << DateTime::strm(_statsStartTime) << endl;
+      cerr << "  statsEndTime: " << DateTime::strm(_statsEndTime) << endl;
+    }
+    return;
+  }
+
+  //////////////////////
+  // compute output dir
+  
+  string outputDir(_params.stats_output_dir);
+  DateTime fileTime(_statsEndTime);
+  char dayStr[1024];
+  if (_params.stats_write_to_day_dir) {
+    sprintf(dayStr, "%.4d%.2d%.2d",
+            fileTime.getYear(),
+            fileTime.getMonth(),
+            fileTime.getDay());
+    outputDir += PATH_DELIM;
+    outputDir += dayStr;
+  }
+  
+  // make sure output dir exists
+
+  if (ta_makedir_recurse(outputDir.c_str())) {
+    int errNum = errno;
+    cerr << "ERROR - TsStatusMonitor::_writeStatsFile()" << endl;
+    cerr << "  Cannot create output dir: " << outputDir << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return;
+  }
+
+  /////////////////////
+  // compute file name
+
+  string fileName;
+  
+  // category
+  
+  if (strlen(_params.stats_file_name_category) > 0) {
+    fileName += _params.stats_file_name_category;
+  }
+  
+  // platform
+
+  if (strlen(_params.stats_file_name_platform) > 0) {
+    fileName += _params.stats_file_name_delimiter;
+    fileName += _params.stats_file_name_platform;
+  }
+
+  // time
+  
+  if (_params.stats_include_time_part_in_file_name) {
+    fileName += _params.stats_file_name_delimiter;
+    char timeStr[1024];
+    if (_params.stats_include_seconds_in_time_part) {
+      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d%.2d",
+              fileTime.getYear(),
+              fileTime.getMonth(),
+              fileTime.getDay(),
+              fileTime.getHour(),
+              fileTime.getMin(),
+              fileTime.getSec());
+    } else {
+      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d",
+              fileTime.getYear(),
+              fileTime.getMonth(),
+              fileTime.getDay(),
+              fileTime.getHour(),
+              fileTime.getMin());
+    }
+    fileName += timeStr;
+  }
+
+  // field label
+
+  if (_params.stats_include_field_label_in_file_name) {
+    fileName += _params.stats_file_name_delimiter;
+    fileName += _params.stats_file_field_label;
+  }
+
+  // extension
+
+  fileName += ".";
+  fileName += _params.stats_file_name_extension;
+
+  // compute output path
+
+  string outputPath(outputDir);
+  outputPath += PATH_DELIM;
+  outputPath += fileName;
+
+  // open the file
+
+  FILE *out = fopen(outputPath.c_str(), "w");
+  if (out == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - TsStatusMonitor::_writeStatsFile()" << endl;
+    cerr << "  Cannot open file: " << outputPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return;
+  }
+
+  // write the file
+
+  _printStats(out);
+
+  fclose(out);
+  
+  if (_params.debug) {
+    cerr << "==>> saved stats to file: " << outputPath << endl;
+  }
+
+  // write latest data info
+  
+  if (_params.stats_write_latest_data_info) {
+    
+    DsLdataInfo ldataInfo(_params.stats_output_dir);
+    
+    string relPath;
+    Path::stripDir(_params.stats_output_dir, outputPath, relPath);
+    
+    if(_params.debug) {
+      ldataInfo.setDebug();
+    }
+    ldataInfo.setLatestTime(fileTime.utime());
+    ldataInfo.setWriter("TsStatusMonitor");
+    ldataInfo.setDataFileExt(_params.stats_file_name_extension);
+    ldataInfo.setDataType(_params.stats_file_name_extension);
+    ldataInfo.setRelDataPath(relPath);
+    
+    if(ldataInfo.write(fileTime.utime())) {
+      cerr << "ERROR - TsStatusMonitor::_writeStatsFile()" << endl;
+      cerr << "  Cannot write _latest_data_info to dir: " << outputDir << endl;
+      return;
+    }
+    
+  } // if (_params.stats_write_latest_data_info)
+  
+}
+
