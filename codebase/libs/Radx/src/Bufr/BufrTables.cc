@@ -933,7 +933,7 @@ const char *BufrTables::bufrtabb_11[] = {
 "0;35;35;Reason for termination;Code table;0;0;5",
 ""};
 const size_t BufrTables::N_bufrtabb_11 = 920;
-const char *bufrtabb_12[] = {
+const char *BufrTables::bufrtabb_12[] = {
 "0;00;001;Table A:  entry;CCITT IA5;0;0;24",
 "0;00;002;Table A:  data category description, line 1;CCITT IA5;0;0;256",
 "0;00;003;Table A:  data category description, line 2;CCITT IA5;0;0;256",
