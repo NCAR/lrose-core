@@ -1064,10 +1064,10 @@ bool BufrFile::StuffIt(string name, double value) {
   } else if (name.find("latitude") != string::npos) {
     latitude = value;
     // ******* TEST  *******
-    double latitudeTest;
-    latitudeTest = value;
-    ByteOrder::swap64(&latitudeTest, sizeof(double), true);
-    cerr << "latitude test = " << latitudeTest << endl;
+    //double latitudeTest;
+    //latitudeTest = value;
+    //ByteOrder::swap64(&latitudeTest, sizeof(double), true);
+    //cerr << "latitude test = " << latitudeTest << endl;
   } else if (name.find("longitude") != string::npos) {
     longitude = value;
   } else if (name.find("height") != string::npos) {
