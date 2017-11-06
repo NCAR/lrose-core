@@ -83,6 +83,14 @@ public:
     char* comment;
   } xml_entry_t;
 
+  typedef struct {
+    char* name;
+    char* qualifier;
+    double minValidValue;
+    double maxValidValue;
+    char* note;
+  } catalog_field_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -433,6 +441,33 @@ public:
 
   tdrp_bool_t compress_spdb;
 
+  tdrp_bool_t write_stats_files_to_catalog;
+
+  char* stats_output_dir;
+
+  tdrp_bool_t stats_write_to_day_dir;
+
+  char* stats_file_name_category;
+
+  char* stats_file_name_platform;
+
+  char* stats_file_name_extension;
+
+  char* stats_file_name_delimiter;
+
+  tdrp_bool_t stats_include_time_part_in_file_name;
+
+  tdrp_bool_t stats_include_seconds_in_time_part;
+
+  tdrp_bool_t stats_include_field_label_in_file_name;
+
+  char* stats_file_field_label;
+
+  tdrp_bool_t stats_write_latest_data_info;
+
+  catalog_field_t *_catalog_fields;
+  int catalog_fields_n;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -440,7 +475,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[42];
+  mutable TDRPtable _table[57];
 
   const char *_className;
 

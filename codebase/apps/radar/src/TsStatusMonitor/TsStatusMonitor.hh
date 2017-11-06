@@ -48,6 +48,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
+#include "StatsField.hh"
 #include <toolsa/MemBuf.hh>
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfTsPulse.hh>
@@ -149,6 +150,12 @@ private:
 
   DsSpdb _spdb;
   
+  // catalog stats
+
+  vector<StatsField *> _catFields;
+  time_t _statsStartTime;
+  time_t _statsEndTime;
+
   // functions
 
   void _clearStatus();
@@ -202,6 +209,13 @@ private:
   int _addMovementToNagios(FILE *nagiosFile);
 
   void _removeNagiosStatusFile();
+
+  void _initStatsFields();
+
+  void _printStats(FILE *out);
+
+  void _writeStatsFile();
+
 };
 
 #endif

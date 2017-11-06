@@ -50,11 +50,13 @@ LOC_CPPC_CFLAGS =
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
+	StatsField.hh \
 	TsStatusMonitor.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
+	StatsField.cc \
 	TsStatusMonitor.cc \
 	Main.cc
 
