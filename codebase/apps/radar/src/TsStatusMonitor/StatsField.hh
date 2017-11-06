@@ -50,11 +50,11 @@ public:
   // constructor
   
   StatsField(const Params &params,
-           const string &name,
-           const string &qualifier,
-           double minValidValue,
-           double maxValidValue,
-           const string &note);
+             const string &xmlOuterTag,
+             const string &xmlInnerTag,
+             double minValidValue,
+             double maxValidValue,
+             const string &comment);
 
   // initialize
 
@@ -80,11 +80,11 @@ public:
 
   // get methods
 
-  const string &getName() const { return _name; }
-  const string &getQualifier() const { return _qualifier; }
+  const string &getXmlOuterTag() const { return _xmlOuterTag; }
+  const string &getXmlInnerTag() const { return _xmlInnerTag; }
   const string &getLongName() const { return _longName; }
   const string &getUnits() const { return _units; }
-  const string &getNote() const { return _note; }
+  const string &getComment() const { return _comment; }
   
   double getMinValidValue() const { return _minValidValue; }
   double getMaxValidValue() const { return _maxValidValue; }
@@ -102,13 +102,13 @@ private:
 
   const Params &_params;
 
-  string _name;
-  string _qualifier;
+  string _xmlOuterTag;
+  string _xmlInnerTag;
 
   string _longName;
   string _units;
 
-  string _note;
+  string _comment;
 
   double _minValidValue;
   double _maxValidValue;

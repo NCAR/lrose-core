@@ -84,12 +84,14 @@ public:
   } xml_entry_t;
 
   typedef struct {
-    char* name;
-    char* qualifier;
+    char* xml_outer_tag;
+    char* xml_inner_tag;
+    xml_entry_type_t entry_type;
+    tdrp_bool_t ok_boolean;
     double minValidValue;
     double maxValidValue;
-    char* note;
-  } catalog_field_t;
+    char* comment;
+  } stats_field_t;
 
   ///////////////////////////
   // Member functions
@@ -443,6 +445,8 @@ public:
 
   tdrp_bool_t write_stats_files_to_catalog;
 
+  int stats_interval_secs;
+
   char* stats_output_dir;
 
   tdrp_bool_t stats_write_to_day_dir;
@@ -465,8 +469,8 @@ public:
 
   tdrp_bool_t stats_write_latest_data_info;
 
-  catalog_field_t *_catalog_fields;
-  int catalog_fields_n;
+  stats_field_t *_stats_fields;
+  int stats_fields_n;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -475,7 +479,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[57];
+  mutable TDRPtable _table[58];
 
   const char *_className;
 

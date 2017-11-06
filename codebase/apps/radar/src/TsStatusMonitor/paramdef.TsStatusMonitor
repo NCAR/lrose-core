@@ -311,7 +311,7 @@ paramdef boolean {
 } compress_spdb;
 
 commentdef {
-  p_header = "CATALOG OUTPUT";
+  p_header = "STATISTICS OUTPUT TO CATALOG";
 };
 
 paramdef boolean {
@@ -319,6 +319,12 @@ paramdef boolean {
   p_descr = "If true, create text files to send to catalog.";
   p_help = "A tabular style text file is created and sent to the field catalog. This is run on a schedule. The file summarizes the statistics of specified variables over the selected time period.";
 } write_stats_files_to_catalog;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Interval period over which the stats monitoring is performed (secs).";
+  p_help =  "This is the interval over which the monitoring statistics are computed.";
+} stats_interval_secs;
 
 paramdef string {
   p_default = "/tmp/hsrl_mon/stats";
@@ -390,48 +396,48 @@ commentdef {
 }
 
 typedef struct {
-  string name;
-  string qualifier;
+  string xml_outer_tag;
+  string xml_inner_tag;
+  xml_entry_type_t entry_type;
+  boolean ok_boolean;
   double minValidValue;
   double maxValidValue;
-  string note;
-} catalog_field_t;
+  string comment;
+} stats_field_t;
 
-paramdef struct catalog_field_t {
+paramdef struct stats_field_t {
   
-  p_default ={
+  p_default = {
     {
-      name = "tcsaft_temp1",
-      qualifier = "",
+      xml_outer_tag = "HcrTransmitterStatus",
+      xml_inner_tag = "SerialConnected",
+      entry_type = XML_ENTRY_BOOLEAN,
+      ok_boolean = true,
       minValidValue = -100.0,
       maxValidValue = 100.0,
-      note = ""
+      comment = ""
     }
     ,
     {
-      name = "tcsaft_temp2",
-      qualifier = "",
+      xml_outer_tag = "HcrTransmitterStatus",
+      xml_inner_tag = "CathodeVoltage",
+      entry_type = XML_ENTRY_DOUBLE,
+      ok_boolean = true,
       minValidValue = -100.0,
       maxValidValue = 100.0,
-      note = ""
+      comment = ""
     }
     ,
     {
-      name = "tcsaft_temp3",
-      qualifier = "",
+      xml_outer_tag = "HcrReceiverStatus",
+      xml_inner_tag = "PvAftPressure",
+      entry_type = XML_ENTRY_DOUBLE,
+      ok_boolean = true,
       minValidValue = -100.0,
       maxValidValue = 100.0,
-      note = ""
+      comment = ""
     }
-    ,
-    {
-      name = "tcsaft_temp4",
-      qualifier = "",
-      minValidValue = -100.0,
-      maxValidValue = 100.0,
-      note = ""
-    }
-  }
+  };
 
-} catalog_fields[];
+} stats_fields[];
 

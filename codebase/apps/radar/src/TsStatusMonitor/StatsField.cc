@@ -39,19 +39,19 @@
 // constructor
 
 StatsField::StatsField(const Params &params,
-                   const string &name,
-                   const string &qualifier,
+                   const string &xmlOuterTag,
+                   const string &xmlInnerTag,
                    double minValidValue,
                    double maxValidValue,
-                   const string &note) :
+                   const string &comment) :
         _params(params),
-        _name(name),
-        _qualifier(qualifier),
-        _note(note),
+        _xmlOuterTag(xmlOuterTag),
+        _xmlInnerTag(xmlInnerTag),
+        _comment(comment),
         _minValidValue(minValidValue),
         _maxValidValue(maxValidValue)
 {
-  _longName = name;
+  _longName = xmlOuterTag + "-" + xmlInnerTag;
   _units = "notset";
   clear();
 }
@@ -133,10 +133,10 @@ void StatsField::printStats(FILE *out)
   }
 
   string longName(_longName);
-  if (_name.find("tcsaft") != string::npos) {
+  if (_xmlInnerTag.find("tcsaft") != string::npos) {
     longName += " aft";
   }
-  if (_name.find("tcsfore") != string::npos) {
+  if (_xmlInnerTag.find("tcsfore") != string::npos) {
     longName += " fore";
   }
   int combinedLen = longName.size() + _units.size();
@@ -159,12 +159,12 @@ void StatsField::printStats(FILE *out)
             label, _min, _max, _mean, range);
   }
 
-  if (_note.size() > 0) {
-    fprintf(out, "  %s", _note.c_str());
+  if (_comment.size() > 0) {
+    fprintf(out, "  %s", _comment.c_str());
   }
 
   if (_params.debug) {
-    fprintf(out, "  :%s %s\n", _name.c_str(), _qualifier.c_str());
+    fprintf(out, "  :%s %s\n", _xmlOuterTag.c_str(), _xmlInnerTag.c_str());
   } else {
     fprintf(out, "\n");
   }
@@ -175,9 +175,9 @@ void StatsField::printStatsDebug(FILE *out)
 
 {
   
-  fprintf(out, "Stats field name: %s\n", _name.c_str());
-  if (_qualifier.size() > 0) {
-    fprintf(out, "  qualitfier: %s\n", _qualifier.c_str());
+  fprintf(out, "Stats field xmlOuterTag: %s\n", _xmlOuterTag.c_str());
+  if (_xmlInnerTag.size() > 0) {
+    fprintf(out, "  qualitfier: %s\n", _xmlInnerTag.c_str());
   }
   fprintf(out, "  longName: %s\n", _longName.c_str());
   fprintf(out, "  units: %s\n", _units.c_str());

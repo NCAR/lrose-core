@@ -166,18 +166,21 @@ TsStatusMonitor::TsStatusMonitor(int argc, char **argv)
 
   if (_params.write_stats_files_to_catalog) {
   
-    if (_params.catalog_fields_n < 1) {
+    if (_params.stats_fields_n < 1) {
       cerr << "ERROR: " << _progName << endl;
-      cerr << "  No catalog_fields specified." << endl;
+      cerr << "  No stats_fields specified." << endl;
       isOK = FALSE;
       return;
     }
     
-    for (int ii = 0; ii < _params.catalog_fields_n; ii++) {
-      const Params::catalog_field_t &pfield = _params._catalog_fields[ii];
-      StatsField *field = new StatsField(_params, pfield.name, pfield.qualifier, 
-                                     pfield.minValidValue, pfield.maxValidValue,
-                                     pfield.note);
+    for (int ii = 0; ii < _params.stats_fields_n; ii++) {
+      const Params::stats_field_t &pfield = _params._stats_fields[ii];
+      StatsField *field = new StatsField(_params, 
+                                         pfield.xml_inner_tag,
+                                         pfield.xml_outer_tag, 
+                                         pfield.minValidValue,
+                                         pfield.maxValidValue,
+                                         pfield.comment);
       _catFields.push_back(field);
     }
 
