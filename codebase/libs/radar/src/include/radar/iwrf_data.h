@@ -1677,8 +1677,11 @@ typedef struct iwrf_platform_georef {
     
   iwrf_packet_info_t packet; /*< packet_id = IWRF_PLATFORM_GEOREF_ID */
   
-  fl32 spare1;              /** previously longitude, may be reused */
-  fl32 spare2;              /** previously latitude, may be reused */
+  si32 unit_num;            /** number of the unit providing the data
+                             *  set to 0 if only 1 unit in operatiion
+                             *  set to 1 or 2 if 2 units are  in operation */
+
+  si32 spare2;              /** previously latitude, may be reused */
 
   fl32 altitude_msl_km;     /**< Antenna Altitude above mean sea
                              * level (MSL) in km */
