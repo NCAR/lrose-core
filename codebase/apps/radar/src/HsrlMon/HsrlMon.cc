@@ -221,6 +221,8 @@ int HsrlMon::_runRealtime()
       }
 
     } // if (now > _realtimeScheduledTime)
+    
+    umsleep(1000);
       
   } // while
 
