@@ -59,13 +59,34 @@ public:
   int ImportTables();
   int ImportTables(unsigned int masterTableVersion, unsigned int generatingCenter,
 		   unsigned int localTableVersion);
+  int ImportTables2(unsigned int masterTableVersion, unsigned int generatingCenter,
+		   unsigned int localTableVersion);
   TableMapElement Retrieve(unsigned short key);
   bool filled();
 
 private:
   std::map<unsigned short, TableMapElement> table;  // TODO: should be unordered_map
+  /*
+  std::map<int, const char* []> masterBTables;
+  std::map<unsigned int, const char* []> masterDTables;
+  std::map<pair<unsigned int, unsigned int>, const char* []> localBTables;
+  std::map<pair<unsigned int, unsigned int>,  const char* []> localDTables;
 
+  std::map<unsigned int, unsigned int> masterBTablesSize;
+  std::map<unsigned int, unsigned int> masterDTablesSize;
+  std::map<pair<unsigned int, unsigned int>, unsigned int> localBTablesSize;
+  std::map<pair<unsigned int, unsigned int>, unsigned int> localDTablesSize;
+  */
   vector<string> split(const std::string &s, char delim);
+  int ReadInternalTableB(const char **internalBufrTable,
+			 size_t n);
+  int ReadInternalTableD(const char **internalBufrTable,
+			 size_t n);
+  /*
+  int ReadInternalTableD(unsigned int masterTableVersion,
+				 unsigned int generatingCenter,
+				 unsigned int localTableVersion);
+  */
   int ReadTableB(string fileName);
   int ReadTableD(string fileName);
   int ImportTablesOld();

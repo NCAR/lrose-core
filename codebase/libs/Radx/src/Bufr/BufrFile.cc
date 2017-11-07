@@ -43,6 +43,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <algorithm>
+#include <Radx/ByteOrder.hh>
 #include <Radx/TableMapKey.hh>
 #include <Radx/RadxStr.hh>
 
@@ -1062,6 +1063,11 @@ bool BufrFile::StuffIt(string name, double value) {
     currentProduct.addData((unsigned char) value);
   } else if (name.find("latitude") != string::npos) {
     latitude = value;
+    // ******* TEST  *******
+    //double latitudeTest;
+    //latitudeTest = value;
+    //ByteOrder::swap64(&latitudeTest, sizeof(double), true);
+    //cerr << "latitude test = " << latitudeTest << endl;
   } else if (name.find("longitude") != string::npos) {
     longitude = value;
   } else if (name.find("height") != string::npos) {

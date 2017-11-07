@@ -29,8 +29,8 @@ HDRS = \
 	../include/Radx/BufrProduct.hh \
 	../include/Radx/TableMapKey.hh \
 	../include/Radx/TableMapElement.hh \
-	../include/Radx/TableMap.hh
-
+	../include/Radx/TableMap.hh \
+	BufrTables.hh
 
 CPPC_SRCS = \
 	BufrFile.cc \
@@ -38,7 +38,8 @@ CPPC_SRCS = \
 	BufrProduct.cc \
 	TableMapKey.cc \
 	TableMapElement.cc \
-	TableMap.cc
+	TableMap.cc \
+	BufrTables.cc
 
 #
 # general targets

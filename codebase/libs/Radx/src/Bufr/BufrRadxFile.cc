@@ -37,6 +37,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <Radx/BufrRadxFile.hh>
+#include <Radx/ByteOrder.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxField.hh>
@@ -1293,6 +1294,7 @@ int BufrRadxFile::_setPositionVariables()
     char temp[1024];
     sprintf(temp, "%g", _latitudeDeg);
     _addErrStr("  Latitude outside boundaries (-90 to 90): ", temp);
+
     iret = -1;
   }
 
