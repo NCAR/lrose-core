@@ -7,6 +7,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <Radx/TableMap.hh>
 #include <Radx/TableMapKey.hh>
 #include "BufrTables.hh"
@@ -232,7 +233,11 @@ int TableMap::ReadTableD(string fileName) {
       }
       if (tokens.size() >= 6) { // handle blank lines and lines with only ;;;;;; 
 	unsigned short subkey;      
-	if (tokens[0].compare("  ") == 0) { // this is a continuation of the list
+	//	if ((tokens[0].compare("  ") == 0) ||
+	//   (tokens[0].length() == 0)) { // this is a continuation of the list
+	// handle " ; ;  ; f;x;y" && ";;;f;x;y" as useful
+	// and    " ; ;  ;  ; ; ; comment" && ";;;;;;comment" as useless
+	if (isWhiteSpace(tokens[0]) && !isWhiteSpace(tokens[3])) {
 	  subkey = TableMapKey().EncodeKey(tokens[3], tokens[4], tokens[5]);
 	  currentList.push_back(subkey);
 	} else { // we have a new list starting
@@ -258,6 +263,12 @@ int TableMap::ReadTableD(string fileName) {
   return 0;
 }
 
+bool TableMap::isWhiteSpace(string &str) {
+  if ((str.compare("  ") == 0) ||
+      (str.length() == 0)) return true;
+  else return false;
+}
+
 bool TableMap::filled() {
   return table.size() > 0;
 }
@@ -275,7 +286,19 @@ int TableMap::ImportTables() {
 
 int TableMap::ImportTables(unsigned int masterTableVersion,
 			   unsigned int generatingCenter,
-			   unsigned int localTableVersion) {
+			   unsigned int localTableVersion,
+			   char *tablePath) {
+
+  if ((tablePath != NULL) && (strlen(tablePath) > 0)) {
+    // try to read the tables from the files in the tablePath directory
+    try {    
+      ImportTablesFromPath(masterTableVersion, generatingCenter,
+			   localTableVersion, tablePath);
+    } catch (const char *msg) {
+      cerr << msg << endl;
+      cerr << "  Attempting to use internal table definitions ..." << endl;
+    }
+  }
   /*
   if (masterBTables.size() <= 0) {
     // fill with the internal tables
@@ -299,6 +322,7 @@ int TableMap::ImportTables(unsigned int masterTableVersion,
   */
   // BufrTables bufrTables;
 
+  if (!filled()) {
   const char **internalBufrTable;
   size_t n;
 
@@ -569,9 +593,41 @@ of entries?? and put this switch in the calling function???
 		    generatingCenter , true);
     Radx::addErrInt(_errString, "  local table version ", localTableVersion , true);
     throw _errString.c_str();
-    } 
+    }
+  } // end if !filled() 
   return 0;
       
+}
+
+int TableMap::ImportTablesFromPath(unsigned int masterTableVersion,
+				   unsigned int generatingCenter,
+				   unsigned int localTableVersion,
+				   char *path) {
+  char fileName[2048];
+
+  sprintf(fileName, "%s/bufrtabb_%u.csv", path, masterTableVersion);
+  if (_debug)
+    cerr << "reading master Table B from " << fileName << endl;
+  ReadTableB(fileName);
+
+  sprintf(fileName, "%s/bufrtabd_%u.csv", path, masterTableVersion);
+  if (_debug)
+    cerr << "reading master Table D from " << fileName << endl;
+  ReadTableD(fileName);
+
+  sprintf(fileName, "%s/localtabb_%u_%u.csv", path, generatingCenter,
+	  localTableVersion);
+  if (_debug)
+    cerr << "reading local Table B from " << fileName << endl;
+  ReadTableB(fileName);
+
+  sprintf(fileName, "%s/localtabd_%u_%u.csv", path, generatingCenter,
+	  localTableVersion);
+  if (_debug)
+    cerr << "reading local Table D from " << fileName << endl;
+  ReadTableD(fileName); 
+
+  return 0;
 }
 
 
