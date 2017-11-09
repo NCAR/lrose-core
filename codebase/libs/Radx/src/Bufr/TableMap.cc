@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <algorithm>
 #include <Radx/TableMap.hh>
 #include <Radx/TableMapKey.hh>
 #include "BufrTables.hh"
@@ -105,6 +106,7 @@ int TableMap::ReadTableB(string fileName) {
   }
 
   for (std::string line; std::getline(filein, line); ) {
+    std::replace(line.begin(), line.end(), '\r', ' ');
 
     if (_debug) std::cout << line << std::endl;
     std::vector<std::string> tokens;
@@ -138,6 +140,7 @@ int TableMap::ReadTableB(string fileName) {
       table[key] = TableMapElement(tokens[3], scale, tokens[4], referenceValue,
 				   dataWidthBits);
     } else {
+      //      std::replace(line.begin(), line.end(), '\r', ' ');
       cerr << " discarding line: " << line << " from file: " <<
 	fileName <<  endl;
     }
@@ -161,7 +164,7 @@ int TableMap::ReadInternalTableD(const char **internalBufrTable,
   for (size_t i=0; i<n; i++) { 
     std::string line(internalBufrTable[i]);
 
-    if (line[0] != '#') { // this is a comment skip it
+    if ((line[0] != '#') && (line[0] != '\r')) { // this is a comment skip it
      
       if (_debug) std::cout << line << std::endl;
       std::vector<std::string> tokens;
@@ -189,10 +192,10 @@ int TableMap::ReadInternalTableD(const char **internalBufrTable,
 	  currentList.push_back(subkey);
 	}
       } else { // end if more than 6 tokens
-	cerr << " discarding line: " << line 
+	cerr << " discarding line: " << line << endl;
 	  // << " from file: " <<
 	  //fileName 
-	     <<  endl;
+	  //   <<  endl;
       }
     } // end if comment line
   }  // end for each line
@@ -219,7 +222,9 @@ int TableMap::ReadTableD(string fileName) {
 
   for (std::string line; std::getline(fileind, line); ) {
 
-    if (line[0] != '#') { // this is a comment skip it
+      std::replace(line.begin(), line.end(), '\r', ' ');
+
+    if ((line[0] != '#') && (line[0] != '\r')) { // this is a comment skip it
      
       if (_debug) std::cout << line << std::endl;
       std::vector<std::string> tokens;
@@ -716,7 +721,7 @@ int TableMap::ImportTablesOld() {
 
   for (std::string line; std::getline(fileind, line); ) {
 
-    if (line[0] != '#') { // this is a comment skip it
+    if ((line[0] != '#') && (line[0] != '\r')) { // this is a comment skip it
      
       //std::cout << line << std::endl;
       std::vector<std::string> tokens;
