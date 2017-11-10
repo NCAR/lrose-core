@@ -1495,7 +1495,7 @@ void TsStatusMonitor::_printStats(FILE *out)
 
   fprintf(out,
           "========================================"
-          " HSRL MONITORING "
+          " HCR MONITORING "
           "========================================\n");
 
   char label[128];
@@ -1520,7 +1520,7 @@ void TsStatusMonitor::_printStats(FILE *out)
 
   fprintf(out,
           "========================================"
-          "================="
+          "================"
           "========================================\n");
   
 }
