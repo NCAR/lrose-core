@@ -1678,8 +1678,9 @@ typedef struct iwrf_platform_georef {
   iwrf_packet_info_t packet; /*< packet_id = IWRF_PLATFORM_GEOREF_ID */
   
   si32 unit_num;            /** number of the unit providing the data
-                             *  set to 0 if only 1 unit in operatiion
-                             *  set to 0 or 1 if 2 units are  in operation */
+                             *  0 indicates primary, 1 indicates secondary
+                             *  set to 0 if only 1 unit is in operation
+                             *  set to 0 or 1 if 2 units are in operation */
 
   si32 unit_id;             /** optional - used for serial number etc. of
                              *  the GPS/INS unit */

@@ -28,6 +28,7 @@ SUB_DIRS = \
 	DualDopplerLobes \
 	HawkEye \
 	HcrVelCorrect \
+	Hsrl2Radx \
 	IntfRemove \
 	Iq2Dsr \
 	JamesDealias \
