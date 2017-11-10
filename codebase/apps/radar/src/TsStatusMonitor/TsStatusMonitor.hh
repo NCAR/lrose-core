@@ -54,6 +54,7 @@
 #include <radar/IwrfTsPulse.hh>
 #include <radar/IwrfTsReader.hh>
 #include <radar/RadarComplex.hh>
+#include <Radx/RadxTime.hh>
 #include <Fmq/Fmq.hh>
 #include <Spdb/DsSpdb.hh>
 
@@ -142,7 +143,7 @@ private:
 
   // IWRF xml string if available
 
-  si64 _iwrfStatusXmlSeqNum;
+  si64 _iwrfStatusXmlPktSeqNum;
   string _iwrfStatusXml;
   time_t _iwrfStatusLatestTime;
   
@@ -153,6 +154,7 @@ private:
   // catalog stats
 
   vector<StatsField *> _catFields;
+  RadxTime _statsScheduledTime;
   time_t _statsStartTime;
   time_t _statsEndTime;
 
@@ -211,6 +213,8 @@ private:
   void _removeNagiosStatusFile();
 
   void _initStatsFields();
+
+  int _updateCatalogStats(time_t now);
 
   void _printStats(FILE *out);
 

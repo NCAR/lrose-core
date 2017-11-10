@@ -74,6 +74,7 @@ typedef struct {
   double graph_min_val;
   double graph_max_val;
   string comment;
+  boolean add_to_catalog_stats;
 } xml_entry_t;
 
 paramdef struct xml_entry_t {
@@ -92,7 +93,8 @@ paramdef struct xml_entry_t {
       units = "",
       graph_min_val = 0,
       graph_max_val = 1,
-      comment = ""
+      comment = "",
+      add_to_catalog_stats = true
     }
     ,
     {
@@ -109,7 +111,8 @@ paramdef struct xml_entry_t {
       units = "V",
       graph_min_val = 0,
       graph_max_val = 30,
-      comment = ""
+      comment = "",
+      add_to_catalog_stats = true
     }
     ,
     {
@@ -126,7 +129,8 @@ paramdef struct xml_entry_t {
       units = "psi",
       graph_min_val = 0,
       graph_max_val = 30,
-      comment = ""
+      comment = "",
+      add_to_catalog_stats = true
     }
   };
   p_descr = "Details of XML entries to process.";
@@ -143,6 +147,7 @@ paramdef struct xml_entry_t {
     "\tgraph_min_val: minimum value for history graph\n"
     "\tgraph_max_val: maximim value for history graph\n"
     "\tcomment: if set, appears at end of status line\n"
+    "\tadd_to_catalog_stats: add this entry to the catalog stats\n"
     ".";
 } xml_entries[];
 
@@ -390,54 +395,4 @@ paramdef boolean {
   p_descr = "Option to write latest_data_info files when an image is created.";
   p_descr = "If true, _latest_data_info files will be written to the output directory, and the file write will be registered with the DataMapper.";
 } stats_write_latest_data_info;
-
-commentdef {
-  p_header = "FIELDS FOR CATALOG MONITORING";
-}
-
-typedef struct {
-  string xml_outer_tag;
-  string xml_inner_tag;
-  xml_entry_type_t entry_type;
-  boolean ok_boolean;
-  double minValidValue;
-  double maxValidValue;
-  string comment;
-} stats_field_t;
-
-paramdef struct stats_field_t {
-  
-  p_default = {
-    {
-      xml_outer_tag = "HcrTransmitterStatus",
-      xml_inner_tag = "SerialConnected",
-      entry_type = XML_ENTRY_BOOLEAN,
-      ok_boolean = true,
-      minValidValue = -100.0,
-      maxValidValue = 100.0,
-      comment = ""
-    }
-    ,
-    {
-      xml_outer_tag = "HcrTransmitterStatus",
-      xml_inner_tag = "CathodeVoltage",
-      entry_type = XML_ENTRY_DOUBLE,
-      ok_boolean = true,
-      minValidValue = -100.0,
-      maxValidValue = 100.0,
-      comment = ""
-    }
-    ,
-    {
-      xml_outer_tag = "HcrReceiverStatus",
-      xml_inner_tag = "PvAftPressure",
-      entry_type = XML_ENTRY_DOUBLE,
-      ok_boolean = true,
-      minValidValue = -100.0,
-      maxValidValue = 100.0,
-      comment = ""
-    }
-  };
-
-} stats_fields[];
 

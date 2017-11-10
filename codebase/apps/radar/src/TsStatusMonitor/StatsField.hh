@@ -52,8 +52,7 @@ public:
   StatsField(const Params &params,
              const string &xmlOuterTag,
              const string &xmlInnerTag,
-             double minValidValue,
-             double maxValidValue,
+             bool isBoolean,
              const string &comment);
 
   // initialize
@@ -85,9 +84,8 @@ public:
   const string &getLongName() const { return _longName; }
   const string &getUnits() const { return _units; }
   const string &getComment() const { return _comment; }
-  
-  double getMinValidValue() const { return _minValidValue; }
-  double getMaxValidValue() const { return _maxValidValue; }
+
+  bool getIsBoolean() const { return _isBoolean; }
 
   double getMean() const { return _mean; }
   double getSdev() const { return _sdev; }
@@ -104,14 +102,12 @@ private:
 
   string _xmlOuterTag;
   string _xmlInnerTag;
+  bool _isBoolean;
 
   string _longName;
   string _units;
 
   string _comment;
-
-  double _minValidValue;
-  double _maxValidValue;
 
   double _sum;
   double _sumSq;

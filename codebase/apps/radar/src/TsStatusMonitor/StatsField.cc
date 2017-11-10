@@ -39,17 +39,15 @@
 // constructor
 
 StatsField::StatsField(const Params &params,
-                   const string &xmlOuterTag,
-                   const string &xmlInnerTag,
-                   double minValidValue,
-                   double maxValidValue,
-                   const string &comment) :
+                       const string &xmlOuterTag,
+                       const string &xmlInnerTag,
+                       bool isBoolean,
+                       const string &comment) :
         _params(params),
         _xmlOuterTag(xmlOuterTag),
         _xmlInnerTag(xmlInnerTag),
-        _comment(comment),
-        _minValidValue(minValidValue),
-        _maxValidValue(maxValidValue)
+        _isBoolean(isBoolean),
+        _comment(comment)
 {
   _longName = xmlOuterTag + "-" + xmlInnerTag;
   _units = "notset";
