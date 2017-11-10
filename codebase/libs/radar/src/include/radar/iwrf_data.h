@@ -1681,7 +1681,8 @@ typedef struct iwrf_platform_georef {
                              *  set to 0 if only 1 unit in operatiion
                              *  set to 0 or 1 if 2 units are  in operation */
 
-  si32 spare2;              /** previously latitude, may be reused */
+  si32 unit_id;             /** optional - used for serial number etc. of
+                             *  the GPS/INS unit */
 
   fl32 altitude_msl_km;     /**< Antenna Altitude above mean sea
                              * level (MSL) in km */
