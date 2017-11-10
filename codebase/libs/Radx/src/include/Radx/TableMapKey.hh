@@ -22,6 +22,8 @@ public:
  
   bool isReplicator();
 
+  bool isTableCEntry();
+
   bool isAnotherNode();
 
 private:

@@ -243,6 +243,10 @@ int RadxBufr::_runFilelist()
     RadxVol vol;
     BufrRadxFile inFile;
     _setupRead(inFile);
+
+    if (strlen(_params.tables) > 0) {
+      inFile.setTablePath(_params.tables);
+    }
     vector<string> paths = _args.inputFileList;
     if (inFile.aggregateFromPaths(paths, vol)) {
       cerr << "ERROR - RadxBufr::_runFileList" << endl;
@@ -510,6 +514,9 @@ int RadxBufr::_readFile(const string &readPath,
   //GenericRadxFile inFile;
   BufrRadxFile inFile;
   _setupRead(inFile);
+  if (strlen(_params.tables) > 0) {
+    inFile.setTablePath(_params.tables);
+  }
   
   // read in file
 

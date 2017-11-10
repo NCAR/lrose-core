@@ -111,6 +111,13 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	sprintf(tmp_str, "version_override = \"%s\";", argv[++i]);
 	TDRP_add_override(&override, tmp_str);
       }
+
+    } else if (!strcmp(argv[i], "-tables")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "tables = \"%s\";", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+      }
 	
     } else if (!strcmp(argv[i], "-title")) {
       
@@ -928,6 +935,8 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -sweep_max ? ] set max sweep number\n"
       << "     use '-sweep' for setting minimum\n"
+      << "\n"
+      << "  [ -tables ? ] path to BUFR tables\n"
       << "\n"
       << "  [ -time_offset ? ] set time offset (secs)\n"
       << "\n"

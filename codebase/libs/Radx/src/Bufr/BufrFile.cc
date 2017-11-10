@@ -67,6 +67,7 @@ BufrFile::BufrFile()
   _very_verbose = false;
   _file = NULL;
   GTree = NULL;
+  _tablePath = NULL;
   clear();
 }
 
@@ -97,6 +98,7 @@ void BufrFile::clear()
   //GTree = NULL;
   _descriptorsToProcess.clear();
   nOctetsRead = 0;
+  _addBitsToDataWidth = 0;
 }
 
 void BufrFile::setDebug(bool state) { 
@@ -111,6 +113,10 @@ void BufrFile::setVerbose(bool state) {
   // we only want debug information from the tables if the setting is verbose,
   // because the information is very detailed.
   tableMap.setDebug(state);
+}
+
+void BufrFile::setTablePath(char *path) {
+  _tablePath = path;  
 }
 
 // go ahead and read all the data from the file
@@ -717,7 +723,8 @@ int BufrFile::readData() {  // read section 4
   try {
     if (!tableMap.filled())
       tableMap.ImportTables(_s1.masterTableVersionNumber,
-			    _s1.generatingCenter, _s1.localTableVersionNumber);
+			    _s1.generatingCenter, _s1.localTableVersionNumber,
+			    _tablePath);
   } catch (const char *msg) {
     Radx::addErrStr(_errString, "", msg, true);
     throw _errString.c_str();
@@ -946,7 +953,7 @@ Radx::ui32 BufrFile::Apply(TableMapElement f) {
     return 0;
   } else {
     Radx::ui32 value;
-    value = ExtractIt(f._descriptor.dataWidthBits);
+    value = ExtractIt(f._descriptor.dataWidthBits + _addBitsToDataWidth);
     return value;
   }
 }
@@ -997,7 +1004,7 @@ Radx::si32 BufrFile::ApplyNumeric(TableMapElement f) {
     return 0;
   } else {
     Radx::ui32 value;
-    value = ExtractIt(f._descriptor.dataWidthBits);
+    value = ExtractIt(f._descriptor.dataWidthBits + _addBitsToDataWidth);
     Radx::si32 svalue;
     double temp;
     //svalue = (value+f._descriptor.referenceValue)/fastPow10(f._descriptor.scale);
@@ -1038,7 +1045,7 @@ Radx::fl32 BufrFile::ApplyNumericFloat(TableMapElement f) {
     return 0;
   } else {
     Radx::ui32 value;
-    value = ExtractIt(f._descriptor.dataWidthBits);
+    value = ExtractIt(f._descriptor.dataWidthBits + _addBitsToDataWidth);
     Radx::fl32 svalue;
     double temp;
     //svalue = (value+f._descriptor.referenceValue)/fastPow10(f._descriptor.scale);
@@ -1326,8 +1333,9 @@ void BufrFile::printTree(DNode *tree, int level) {
   p = tree;
   if (level == 0) printf("tree: \n");
   while (p!=NULL) {
-    for (int i=0; i<level; i++) printf(" ");
-    printf("+(%d) delayed_rep %u\n", p->des, p->delayed_repeater);
+    for (int i=0; i<level; i++) printf(" "); 
+    // printf("+(%d) delayed_rep %u\n", p->des, p->delayed_repeater);
+    prettyPrintNode(cout, p, level);
     q=p->children;
     if (q != NULL) {
       printTree(q, level+1);
@@ -1525,8 +1533,9 @@ int BufrFile::moveChildren(DNode *parent, int howManySiblings) {
 int BufrFile::_descend(DNode *tree) {
 
   if (_verbose) {
-    if (tree->des != 7878) { 
-    // don't print Byte element of compressed array
+    if ((tree->des != 7878) && (tree->des !=7681)) { 
+      // don't print Byte element of compressed array
+      // don't print Pixel value (4 bits)
       printf("\nTraversing ... \n");
       printTree(tree,0);
     }
@@ -1548,15 +1557,16 @@ int BufrFile::_descend(DNode *tree) {
 
       // visit the node
       if (_verbose) {
-        if (des != 7878) {
+        if ((des != 7878)  && (tree->des !=7681)) {
 	  TableMapKey().Decode(des, &f, &x, &y);
-	  printf("visiting f(x,y): %x(%x,%x) ", f, x, y);  
+	  printf("visiting f(x,y): %1d(%02d,%03d) ", (unsigned int) f,
+		 (unsigned int) x, (unsigned int) y);  
 	}     
       }
 
       if (key.isTableBEntry()) {  // a leaf
 	if (_verbose) { 
-          if (des != 7878)
+          if ((des != 7878) && (tree->des !=7681))
   	    printf(" leaf\n");
 	}
 	// if the node is from table b, retrieve the data; apply any transformations;
@@ -1581,12 +1591,14 @@ int BufrFile::_descend(DNode *tree) {
 	} else {
 	  valueFromData = ApplyNumericFloat(val1);
 	  if (!StuffIt(val1._descriptor.fieldName, valueFromData)) {
-	    Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
-	    Radx::addErrStr(_errString, "Unrecognized descriptor: ",
-			    val1._descriptor.fieldName, true);
-	    // since this is just a warning, just print the message, no need
-	    // to exit
-	    cerr << _errString << endl;
+            if (des != 7681) {
+	      Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
+	      Radx::addErrStr(_errString, "Unrecognized descriptor: ",
+			      val1._descriptor.fieldName, true);
+	      // since this is just a warning, just print the message, no need
+	      // to exit
+	      cerr << _errString << endl;
+	    }
 	  }
 	  if (val1._descriptor.fieldName.find("Compression method") != string::npos) {
 	    compressionStart = true;
@@ -1596,6 +1608,24 @@ int BufrFile::_descend(DNode *tree) {
 	  p->fvalue = valueFromData;
 	}
 	//if (_debug) cout << endl;
+	p = p->next;
+      } else if (key.isTableCEntry()) {  // a leaf
+	if (_verbose) { 
+  	    printf(" leaf\n");
+	}
+	// if the node is from table c, 
+	// we are only handling one descriptor from table c ...
+	// decode the key into f(x,y) and check y for different action
+        unsigned char f,x,y;
+        TableMapKey().Decode(des, &f, &x, &y);
+        if (x == 1) {
+	  // apply the modifications
+	  _addBitsToDataWidth = max(0, y - 128);
+          if (_verbose) printf(" increasing dataWith by %d\n", _addBitsToDataWidth);
+	} else {
+	  // TODO: fix up this error message
+          throw "Table C descriptor is not implemented ";
+	}
 	p = p->next;
 
       } else if (key.isReplicator()) {

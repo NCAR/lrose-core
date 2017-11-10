@@ -7,6 +7,8 @@
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <algorithm>
 #include <Radx/TableMap.hh>
 #include <Radx/TableMapKey.hh>
 #include "BufrTables.hh"
@@ -104,6 +106,7 @@ int TableMap::ReadTableB(string fileName) {
   }
 
   for (std::string line; std::getline(filein, line); ) {
+    std::replace(line.begin(), line.end(), '\r', ' ');
 
     if (_debug) std::cout << line << std::endl;
     std::vector<std::string> tokens;
@@ -137,6 +140,7 @@ int TableMap::ReadTableB(string fileName) {
       table[key] = TableMapElement(tokens[3], scale, tokens[4], referenceValue,
 				   dataWidthBits);
     } else {
+      //      std::replace(line.begin(), line.end(), '\r', ' ');
       cerr << " discarding line: " << line << " from file: " <<
 	fileName <<  endl;
     }
@@ -160,7 +164,7 @@ int TableMap::ReadInternalTableD(const char **internalBufrTable,
   for (size_t i=0; i<n; i++) { 
     std::string line(internalBufrTable[i]);
 
-    if (line[0] != '#') { // this is a comment skip it
+    if ((line[0] != '#') && (line[0] != '\r')) { // this is a comment skip it
      
       if (_debug) std::cout << line << std::endl;
       std::vector<std::string> tokens;
@@ -188,10 +192,10 @@ int TableMap::ReadInternalTableD(const char **internalBufrTable,
 	  currentList.push_back(subkey);
 	}
       } else { // end if more than 6 tokens
-	cerr << " discarding line: " << line 
+	cerr << " discarding line: " << line << endl;
 	  // << " from file: " <<
 	  //fileName 
-	     <<  endl;
+	  //   <<  endl;
       }
     } // end if comment line
   }  // end for each line
@@ -218,7 +222,9 @@ int TableMap::ReadTableD(string fileName) {
 
   for (std::string line; std::getline(fileind, line); ) {
 
-    if (line[0] != '#') { // this is a comment skip it
+      std::replace(line.begin(), line.end(), '\r', ' ');
+
+    if ((line[0] != '#') && (line[0] != '\r')) { // this is a comment skip it
      
       if (_debug) std::cout << line << std::endl;
       std::vector<std::string> tokens;
@@ -232,7 +238,11 @@ int TableMap::ReadTableD(string fileName) {
       }
       if (tokens.size() >= 6) { // handle blank lines and lines with only ;;;;;; 
 	unsigned short subkey;      
-	if (tokens[0].compare("  ") == 0) { // this is a continuation of the list
+	//	if ((tokens[0].compare("  ") == 0) ||
+	//   (tokens[0].length() == 0)) { // this is a continuation of the list
+	// handle " ; ;  ; f;x;y" && ";;;f;x;y" as useful
+	// and    " ; ;  ;  ; ; ; comment" && ";;;;;;comment" as useless
+	if (isWhiteSpace(tokens[0]) && !isWhiteSpace(tokens[3])) {
 	  subkey = TableMapKey().EncodeKey(tokens[3], tokens[4], tokens[5]);
 	  currentList.push_back(subkey);
 	} else { // we have a new list starting
@@ -258,6 +268,12 @@ int TableMap::ReadTableD(string fileName) {
   return 0;
 }
 
+bool TableMap::isWhiteSpace(string &str) {
+  if ((str.compare("  ") == 0) ||
+      (str.length() == 0)) return true;
+  else return false;
+}
+
 bool TableMap::filled() {
   return table.size() > 0;
 }
@@ -275,7 +291,19 @@ int TableMap::ImportTables() {
 
 int TableMap::ImportTables(unsigned int masterTableVersion,
 			   unsigned int generatingCenter,
-			   unsigned int localTableVersion) {
+			   unsigned int localTableVersion,
+			   char *tablePath) {
+
+  if ((tablePath != NULL) && (strlen(tablePath) > 0)) {
+    // try to read the tables from the files in the tablePath directory
+    try {    
+      ImportTablesFromPath(masterTableVersion, generatingCenter,
+			   localTableVersion, tablePath);
+    } catch (const char *msg) {
+      cerr << msg << endl;
+      cerr << "  Attempting to use internal table definitions ..." << endl;
+    }
+  }
   /*
   if (masterBTables.size() <= 0) {
     // fill with the internal tables
@@ -299,6 +327,7 @@ int TableMap::ImportTables(unsigned int masterTableVersion,
   */
   // BufrTables bufrTables;
 
+  if (!filled()) {
   const char **internalBufrTable;
   size_t n;
 
@@ -345,11 +374,11 @@ of entries?? and put this switch in the calling function???
       
       
   switch (masterTableVersion) {
-    /*
   case 2:
     //                  bufrtabb_2
     internalBufrTable = BufrTables::bufrtabb_2;
     n = BufrTables::N_bufrtabb_2;
+    ReadInternalTableB(internalBufrTable, n);
     internalBufrTable = BufrTables::bufrtabd_2;
     n = BufrTables::N_bufrtabd_2;
     ReadInternalTableD(internalBufrTable, n);
@@ -358,6 +387,7 @@ of entries?? and put this switch in the calling function???
     //                  bufrtabb_6
     internalBufrTable = BufrTables::bufrtabb_6;
     n = BufrTables::N_bufrtabb_6;
+    ReadInternalTableB(internalBufrTable, n);
     internalBufrTable = BufrTables::bufrtabd_6;
     n = BufrTables::N_bufrtabd_6;
     ReadInternalTableD(internalBufrTable, n);
@@ -375,6 +405,7 @@ of entries?? and put this switch in the calling function???
     //                  bufrtabb_12
     internalBufrTable = BufrTables::bufrtabb_12;
     n = BufrTables::N_bufrtabb_12;
+    ReadInternalTableB(internalBufrTable, n);
     internalBufrTable = BufrTables::bufrtabd_12;
     n = BufrTables::N_bufrtabd_12;
     ReadInternalTableD(internalBufrTable, n);
@@ -383,6 +414,7 @@ of entries?? and put this switch in the calling function???
     //                  bufrtabb_13
     internalBufrTable = BufrTables::bufrtabb_13;
     n = BufrTables::N_bufrtabb_13;
+    ReadInternalTableB(internalBufrTable, n);
     internalBufrTable = BufrTables::bufrtabd_13;
     n = BufrTables::N_bufrtabd_13;
     ReadInternalTableD(internalBufrTable, n);
@@ -391,6 +423,7 @@ of entries?? and put this switch in the calling function???
     //                  bufrtabb_14
     internalBufrTable = BufrTables::bufrtabb_14;
     n = BufrTables::N_bufrtabb_14;
+    ReadInternalTableB(internalBufrTable, n);
     internalBufrTable = BufrTables::bufrtabd_14;
     n = BufrTables::N_bufrtabd_14;
     ReadInternalTableD(internalBufrTable, n);
@@ -399,11 +432,12 @@ of entries?? and put this switch in the calling function???
     //                  bufrtabb_15
     internalBufrTable = BufrTables::bufrtabb_15;
     n = BufrTables::N_bufrtabb_15;
+    ReadInternalTableB(internalBufrTable, n);
     internalBufrTable = BufrTables::bufrtabd_15;
     n = BufrTables::N_bufrtabd_15;
     ReadInternalTableD(internalBufrTable, n);
     break;
-    */
+    
   case 16:
     /// works!
     /*
@@ -413,8 +447,8 @@ of entries?? and put this switch in the calling function???
     */
     //                  bufrtabb_16
     
-  internalBufrTable = BufrTables::bufrtabb_16;
-  n = BufrTables::N_bufrtabb_16;
+    internalBufrTable = BufrTables::bufrtabb_16;
+    n = BufrTables::N_bufrtabb_16;
     ReadInternalTableB(internalBufrTable, n);
     internalBufrTable = BufrTables::bufrtabd_16;
     n = BufrTables::N_bufrtabd_16;
@@ -446,39 +480,159 @@ of entries?? and put this switch in the calling function???
     ReadInternalTableD(internalBufrTable, n);
     
     break;
-    /*
   case 85:
-    //                  bufrtabb_85
-    internalBufrTable = BufrTables::bufrtabb_85;
-    n = BufrTables::N_bufrtabb_85;
-    internalBufrTable = BufrTables::bufrtabd_85;
-    n = BufrTables::N_bufrtabd_85;
-    ReadInternalTableD(internalBufrTable, n);
+    //                  localtabb_85
+    switch (localTableVersion) {
+    case 0:
+      internalBufrTable = BufrTables::localtabb_85_0;
+      n = BufrTables::N_localtabb_85_0;
+      ReadInternalTableB(internalBufrTable, n);
+      internalBufrTable = BufrTables::localtabd_85_0;
+      n = BufrTables::N_localtabd_85_0;
+      ReadInternalTableD(internalBufrTable, n);
+      break;
+    case 1:
+      internalBufrTable = BufrTables::localtabb_85_1;
+      n = BufrTables::N_localtabb_85_1;
+      ReadInternalTableB(internalBufrTable, n);
+      internalBufrTable = BufrTables::localtabd_85_1;
+      n = BufrTables::N_localtabd_85_1;
+      ReadInternalTableD(internalBufrTable, n);
+      break;
+    case 2:
+      internalBufrTable = BufrTables::localtabb_85_2;
+      n = BufrTables::N_localtabb_85_2;
+      ReadInternalTableB(internalBufrTable, n);
+      internalBufrTable = BufrTables::localtabd_85_2;
+      n = BufrTables::N_localtabd_85_2;
+      ReadInternalTableD(internalBufrTable, n);
+      break;
+    case 10:
+      internalBufrTable = BufrTables::localtabb_85_10;
+      n = BufrTables::N_localtabb_85_10;
+      ReadInternalTableB(internalBufrTable, n);
+      internalBufrTable = BufrTables::localtabd_85_10;
+      n = BufrTables::N_localtabd_85_10;
+      ReadInternalTableD(internalBufrTable, n);
+      break;
+    case 12:
+      internalBufrTable = BufrTables::localtabb_85_12;
+      n = BufrTables::N_localtabb_85_12;
+      ReadInternalTableB(internalBufrTable, n);
+      internalBufrTable = BufrTables::localtabd_85_12;
+      n = BufrTables::N_localtabd_85_12;
+      ReadInternalTableD(internalBufrTable, n);
+      break;
+    case 14:
+      internalBufrTable = BufrTables::localtabb_85_14;
+      n = BufrTables::N_localtabb_85_14;
+      ReadInternalTableB(internalBufrTable, n);
+      internalBufrTable = BufrTables::localtabd_85_14;
+      n = BufrTables::N_localtabd_85_14;
+      ReadInternalTableD(internalBufrTable, n);
+      break;
+    default:
+      string _errString;
+      Radx::addErrInt(_errString, "ERROR: unrecognized BUFR local table generating center ",
+		      generatingCenter , true);
+      Radx::addErrInt(_errString, "  local table version ", localTableVersion , true);
+      throw _errString.c_str();
+    }
     break;
-    // sprintf(fileName, "../share/bbufr/tables/localtabb_%u_%u.csv", generatingCenter,
-    //	  localTableVersion);
-    */
-
   case 247:
     //                  localtabb_247
-    internalBufrTable = BufrTables::localtabb_247_9;
-    n = BufrTables::N_localtabb_247_9;
-    ReadInternalTableB(internalBufrTable, n);
-    internalBufrTable = BufrTables::localtabd_247_9;
-    n = BufrTables::N_localtabd_247_9;
-    ReadInternalTableD(internalBufrTable, n);
-    
+    switch (localTableVersion) {
+    case 7:
+      internalBufrTable = BufrTables::localtabb_247_7;
+      n = BufrTables::N_localtabb_247_7;
+      ReadInternalTableB(internalBufrTable, n);
+      internalBufrTable = BufrTables::localtabd_247_7;
+      n = BufrTables::N_localtabd_247_7;
+      ReadInternalTableD(internalBufrTable, n);
+      break;
+    case 8:
+      internalBufrTable = BufrTables::localtabb_247_8;
+      n = BufrTables::N_localtabb_247_8;
+      ReadInternalTableB(internalBufrTable, n);
+      internalBufrTable = BufrTables::localtabd_247_8;
+      n = BufrTables::N_localtabd_247_8;
+      ReadInternalTableD(internalBufrTable, n);
+      break;
+    case 9:
+      internalBufrTable = BufrTables::localtabb_247_9;
+      n = BufrTables::N_localtabb_247_9;
+      ReadInternalTableB(internalBufrTable, n);
+      internalBufrTable = BufrTables::localtabd_247_9;
+      n = BufrTables::N_localtabd_247_9;
+      ReadInternalTableD(internalBufrTable, n);
+      break;
+    default:
+      string _errString;
+      Radx::addErrInt(_errString, "ERROR: unrecognized BUFR local table generating center ",
+		      generatingCenter , true);
+      Radx::addErrInt(_errString, "  local table version ", localTableVersion , true);
+      throw _errString.c_str();
+    }
     break;
-
+  case 255:
+    //                  localtabb_255
+    internalBufrTable = BufrTables::localtabb_255_1;
+    n = BufrTables::N_localtabb_255_1;
+   ReadInternalTableB(internalBufrTable, n);
+    internalBufrTable = BufrTables::localtabd_255_1;
+    n = BufrTables::N_localtabd_255_1;
+    ReadInternalTableD(internalBufrTable, n);    
+    break;
+  case 65535:
+    //                  localtabb_65535
+    internalBufrTable = BufrTables::localtabb_65535_6;
+    n = BufrTables::N_localtabb_65535_6;
+   ReadInternalTableB(internalBufrTable, n);
+    internalBufrTable = BufrTables::localtabd_65535_6;
+    n = BufrTables::N_localtabd_65535_6;
+    ReadInternalTableD(internalBufrTable, n);    
+    break;
   default:
     string _errString;
     Radx::addErrInt(_errString, "ERROR: unrecognized BUFR local table generating center ",
 		    generatingCenter , true);
     Radx::addErrInt(_errString, "  local table version ", localTableVersion , true);
     throw _errString.c_str();
-    } 
+    }
+  } // end if !filled() 
   return 0;
       
+}
+
+int TableMap::ImportTablesFromPath(unsigned int masterTableVersion,
+				   unsigned int generatingCenter,
+				   unsigned int localTableVersion,
+				   char *path) {
+  char fileName[2048];
+
+  sprintf(fileName, "%s/bufrtabb_%u.csv", path, masterTableVersion);
+  if (_debug)
+    cerr << "reading master Table B from " << fileName << endl;
+  ReadTableB(fileName);
+
+  sprintf(fileName, "%s/bufrtabd_%u.csv", path, masterTableVersion);
+  if (_debug)
+    cerr << "reading master Table D from " << fileName << endl;
+  ReadTableD(fileName);
+
+  sprintf(fileName, "%s/localtabb_%u_%u.csv", path, generatingCenter,
+	  localTableVersion);
+  if (_debug)
+    cerr << "reading local Table B from " << fileName << endl;
+  ReadTableB(fileName);
+
+  sprintf(fileName, "%s/localtabd_%u_%u.csv", path, generatingCenter,
+	  localTableVersion);
+  if (_debug)
+    cerr << "reading local Table D from " << fileName << endl;
+  ReadTableD(fileName); 
+
+  return 0;
 }
 
 
@@ -567,7 +721,7 @@ int TableMap::ImportTablesOld() {
 
   for (std::string line; std::getline(fileind, line); ) {
 
-    if (line[0] != '#') { // this is a comment skip it
+    if ((line[0] != '#') && (line[0] != '\r')) { // this is a comment skip it
      
       //std::cout << line << std::endl;
       std::vector<std::string> tokens;

@@ -97,6 +97,8 @@ public:
   ///
   void setVerbose(bool state); 
 
+  void setTablePath(char *path);
+
   //////////////////////////////////////////////////////////////
   /// \name File operations
   //@{
@@ -203,8 +205,8 @@ private:
   void MoveToNextByteBoundary();
 
   BufrProduct currentProduct;
-  //vector<int> repeaters;
-
+  char *_tablePath;
+  int _addBitsToDataWidth;
 
   //@}
 

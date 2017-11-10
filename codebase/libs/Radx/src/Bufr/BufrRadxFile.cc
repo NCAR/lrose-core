@@ -65,6 +65,7 @@ BufrRadxFile::BufrRadxFile() : RadxFile()
 
   //_debug = true;
   //_ncFormat = NETCDF_CLASSIC;
+  _tablePath.clear();
   _readVol = NULL;
   clear();
 
@@ -383,6 +384,11 @@ int BufrRadxFile::setTimeFromPath(const string &filePath,
   return -1;
 }
 
+void BufrRadxFile::setTablePath(char *path) {
+  //_tablePath = path;
+  _file.setTablePath(path);
+}
+
 void BufrRadxFile::lookupFieldName(string fieldName, string &units, 
 string &standardName, string &longName) {
     if (fieldName.find("TH") != string::npos) {
@@ -694,7 +700,7 @@ int BufrRadxFile::readFromPath(const string &path,
 {
   _file.setDebug(_debug);
   _file.setVerbose(_verbose);
-  
+ 
   _initForRead(path, vol);
   
   if (_debug) {
