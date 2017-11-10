@@ -1866,8 +1866,9 @@ void file_repeat_day::_callNcap2(const vector<string> &args)
       // child exited
       time_t end_time = time(NULL);
       int runtime = (int) (end_time - start_time);
-      pmuStr = _params.ncap2Path + string(" took ") + to_string(runtime) + string("secs");
-      PMU_force_register(pmuStr.c_str());
+      char pmuStr[1024];
+      sprintf(pmuStr, "%s took %d secs", _params.ncap2Path, runtime);
+      PMU_force_register(pmuStr);
       if (_params.debug != Params::DEBUG_OFF) {
 	cerr << "Child exited, pid: " << childPid << endl;
 	cerr << "  Runtime in secs: " << runtime << endl;
