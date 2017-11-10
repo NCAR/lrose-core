@@ -178,9 +178,10 @@ TsStatusMonitor::TsStatusMonitor(int argc, char **argv)
       if (entry.add_to_catalog_stats) {
         if (entry.entry_type == Params::XML_ENTRY_BOOLEAN) {
           StatsField *field = new StatsField(_params, 
-                                             entry.xml_inner_tag,
-                                             entry.xml_outer_tag, 
+                                             entry.xml_outer_tag,
+                                             entry.xml_inner_tag, 
                                              true,
+                                             entry.units,
                                              entry.comment);
           _catFields.push_back(field);
         } else if (entry.entry_type == Params::XML_ENTRY_STRING) {
@@ -191,9 +192,10 @@ TsStatusMonitor::TsStatusMonitor(int argc, char **argv)
           isOK = FALSE;
         } else {
           StatsField *field = new StatsField(_params, 
-                                             entry.xml_inner_tag,
-                                             entry.xml_outer_tag, 
+                                             entry.xml_outer_tag,
+                                             entry.xml_inner_tag, 
                                              false,
+                                             entry.units,
                                              entry.comment);
           _catFields.push_back(field);
         }
@@ -220,6 +222,7 @@ TsStatusMonitor::TsStatusMonitor(int argc, char **argv)
     }
     _statsStartTime = 0;
     _statsEndTime = 0;
+    _initStatsFields();
 
   }
 
@@ -357,6 +360,7 @@ int TsStatusMonitor::_handlePulse(IwrfTsPulse &pulse)
   si64 statusXmlPktSeqNum = info.getStatusXmlPktSeqNum();
   if (statusXmlPktSeqNum != _iwrfStatusXmlPktSeqNum) {
 
+
     // handle new status xml packet
 
     const iwrf_status_xml_t &xmlHdr = info.getStatusXmlHdr();
@@ -375,6 +379,7 @@ int TsStatusMonitor::_handlePulse(IwrfTsPulse &pulse)
     }
     
     _iwrfStatusXmlPktSeqNum = statusXmlPktSeqNum;
+
     if (_params.write_stats_files_to_catalog) {
       _updateCatalogStats(now);
     }
@@ -1372,7 +1377,7 @@ int TsStatusMonitor::_updateCatalogStats(time_t now)
 {
 
   if (_params.debug) {
-    cerr << "==>> updating Nagios" << endl;
+    cerr << "==>> updating catalog stats" << endl;
   }
 
   // get the concatenated xml string
@@ -1466,9 +1471,7 @@ int TsStatusMonitor::_updateCatalogStats(time_t now)
     _statsStartTime = 0;
     _statsEndTime = 0;
     _statsScheduledTime += _params.stats_interval_secs;
-    for (size_t ii = 0; ii < _catFields.size(); ii++) {
-      _catFields[ii]->clear();
-    }
+    _initStatsFields();
 
   } // if (now >= .....
 
@@ -1505,7 +1508,7 @@ void TsStatusMonitor::_printStats(FILE *out)
           DateTime::strm(_statsEndTime).c_str());
 
   fprintf(out, "%45s  %10s %10s %10s %10s  %s\n",
-          "", "Min", "Max", "Mean", "Range", "Notes");
+          "", "Min", "Max", "Mean", "Range", "Comment");
           
   for (size_t ii = 0; ii < _catFields.size(); ii++) {
     _catFields[ii]->computeStats();

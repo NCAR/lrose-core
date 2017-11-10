@@ -53,6 +53,7 @@ public:
              const string &xmlOuterTag,
              const string &xmlInnerTag,
              bool isBoolean,
+             const string &units,
              const string &comment);
 
   // initialize

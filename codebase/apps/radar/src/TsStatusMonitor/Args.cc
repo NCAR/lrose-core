@@ -74,7 +74,8 @@ int Args::parse(int argc, char **argv, string &prog_name)
       usage(prog_name, cout);
       exit (0);
       
-    } else if (!strcmp(argv[i], "-debug")) {
+    } else if (!strcmp(argv[i], "-debug") ||
+	       !strcmp(argv[i], "-d")) {
 
       sprintf(tmp_str, "debug = DEBUG_NORM;");
       TDRP_add_override(&override, tmp_str);

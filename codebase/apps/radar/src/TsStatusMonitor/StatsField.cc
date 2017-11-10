@@ -42,15 +42,16 @@ StatsField::StatsField(const Params &params,
                        const string &xmlOuterTag,
                        const string &xmlInnerTag,
                        bool isBoolean,
+                       const string &units,
                        const string &comment) :
         _params(params),
         _xmlOuterTag(xmlOuterTag),
         _xmlInnerTag(xmlInnerTag),
         _isBoolean(isBoolean),
+        _units(units),
         _comment(comment)
 {
   _longName = xmlOuterTag + "-" + xmlInnerTag;
-  _units = "notset";
   clear();
 }
 
@@ -161,11 +162,7 @@ void StatsField::printStats(FILE *out)
     fprintf(out, "  %s", _comment.c_str());
   }
 
-  if (_params.debug) {
-    fprintf(out, "  :%s %s\n", _xmlOuterTag.c_str(), _xmlInnerTag.c_str());
-  } else {
-    fprintf(out, "\n");
-  }
+  fprintf(out, "\n");
           
 }
 
@@ -183,9 +180,6 @@ void StatsField::printStatsDebug(FILE *out)
   fprintf(out, "  sdev: %g\n", _sdev);
   fprintf(out, "  min: %g\n", _min);
   fprintf(out, "  max: %g\n", _max);
-  // fprintf(out, "  nn: %g\n", _nn);
-  // fprintf(out, "  sum: %g\n", _sum);
-  // fprintf(out, "  sumSq: %g\n", _sumSq);
 
 }
 
