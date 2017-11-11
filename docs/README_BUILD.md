@@ -39,7 +39,7 @@ See [README_DOWNLOAD_BUILD.md](./README_DOWNLOAD_BUILD.md) for details
 ### Building CIDD on LINUX
 
 To build CIDD, see:
-[README_CIDD_BUILD.md](./README_CIDD_BUILD.md).
+[README_CIDD.md](./README_CIDD.md).
 
 ### Building LROSE on MAC OSX
 
@@ -136,88 +136,7 @@ gnuplot ImageMagick-devel ImageMagick-c++-devel
 
 ### Required LINUX packages for the CIDD build
 
-For a full CIDD build under LINUX, you need the following packages:
-
-```
-  tcsh
-  perl
-  perl-Env
-
-  ftp
-  git
-
-  gcc
-  g++
-  gfortran
-
-  glibc-devel.i686
-  libX11-devel.i686
-  libXext-devel.i686 (if available)
-  libtiff-devel.i686
-  libpng-devel.i686
-  libstdc++-devel.i686
-  libtiff-devel.i686
-  zlib-devel.i686
-  expat-devel.i686
-  flex-devel.i686
-  fftw-devel.i686
-  bzip2-devel.i686
-
-  gnuplot
-  ImageMagick-devel
-  ImageMagick-c++-devel
-
-  xrdb
-  Xvfb (virtual X server), specifically xorg-x11-server-Xvfb
-  sshd (ssh logins)
-
-  xorg-x11-fonts-misc
-  xorg-x11-fonts-75dpi
-  xorg-x11-fonts-100dpi
-  xorg-x11-fonts-ISO8859-1-100dpi
-  xorg-x11-fonts-ISO8859-1-75dpi
-```
-
-On Redhat-based hosts you can achieve this by running:
-
-```
-yum install -y tcsh perl perl-Env ftp git svn cvs tkcvs emacs \
-gcc gcc-c++ gcc-gfortran \
-glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 \
-libtiff-devel.i686 libpng-devel.i686 \
-libstdc++-devel.i686 libtiff-devel.i686 \
-zlib-devel.i686 expat-devel.i686 flex-devel.i686 \
-fftw-devel.i686 bzip2-devel.i686 xrdb Xvfb \
-gnuplot ImageMagick-devel ImageMagick-c++-devel \
-xorg-x11-fonts-100dpi xorg-x11-fonts-ISO8859-1-100dpi \
-xorg-x11-fonts-75dpi xorg-x11-fonts-ISO8859-1-75dpi \
-xorg-x11-fonts-misc
-```
-
-On Debian, you need to run the following:
-
-```
-  /usr/bin/dpkg --add-architecture i386
-  aptitude update
-```
-
-and use apt-get to install the following:
-
-```
-  aptitude install libx11-6:i386 \
-                   libstdc++-4.9-dev:i386 \
-                   libpng12-dev:i386 \
-                   libx11-dev:i386 \
-                   libxext-dev:i386 \
-                   lib32stdc++-4.9-dev \
-                   xviewg:i386 xviewg-dev:i386 \
-                   libstdc++5:i386 \
-                   libstdc++6:i386 \
-                   libxml2:i386 \
-                   libgtk2.0-0:i386 \
-                   libgdk-pixbuf2.0-0:i386 \
-                   libbz2-dev:i386
-```
+See: [README_CIDD.md](./README_CIDD.md).
 
 ### Running LROSE server-based applications
 
