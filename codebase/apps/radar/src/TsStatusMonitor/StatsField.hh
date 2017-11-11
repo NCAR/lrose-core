@@ -50,11 +50,14 @@ public:
   // constructor
   
   StatsField(const Params &params,
+             Params::xml_entry_type_t entryType,
              const string &xmlOuterTag,
              const string &xmlInnerTag,
-             bool isBoolean,
              const string &units,
-             const string &comment);
+             const string &comment,
+             bool okBoolean,
+             bool omitIfZero,
+             bool interpretAsTime);
 
   // initialize
 
@@ -63,6 +66,7 @@ public:
   // add a value to the stats
   
   void addValue(double val);
+  void addValue(const string &val);
 
   // compute stats
   
@@ -73,20 +77,16 @@ public:
   void printStats(FILE *out);
   void printStatsDebug(FILE *out);
 
-  // set methods
-  
-  void setLongName(const string &val) { _longName = val; }
-  void setUnits(const string &val) { _units = val; }
-
   // get methods
 
+  Params::xml_entry_type_t getEntryType() const { return _entryType; }
   const string &getXmlOuterTag() const { return _xmlOuterTag; }
   const string &getXmlInnerTag() const { return _xmlInnerTag; }
-  const string &getLongName() const { return _longName; }
   const string &getUnits() const { return _units; }
   const string &getComment() const { return _comment; }
+  bool getOkBoolean() const { return _okBoolean; }
+  const string &getStringVal() const { return _stringVal; }
 
-  bool getIsBoolean() const { return _isBoolean; }
 
   double getMean() const { return _mean; }
   double getSdev() const { return _sdev; }
@@ -101,14 +101,19 @@ private:
 
   const Params &_params;
 
+  Params::xml_entry_type_t _entryType;
+
   string _xmlOuterTag;
   string _xmlInnerTag;
-  bool _isBoolean;
 
-  string _longName;
   string _units;
-
   string _comment;
+
+  bool _okBoolean;
+  bool _omitIfZero;
+  bool _interpretAsTime;
+
+  string _stringVal;
 
   double _sum;
   double _sumSq;
@@ -119,6 +124,8 @@ private:
   double _min;
   double _max;
 
+  void _printStringVal(FILE *out);
+  string _formatVal(double val);
 
 };
 

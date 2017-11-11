@@ -175,37 +175,24 @@ TsStatusMonitor::TsStatusMonitor(int argc, char **argv)
     
     for (int ii = 0; ii < _params.xml_entries_n; ii++) {
       const Params::xml_entry_t &entry = _params._xml_entries[ii];
-      if (entry.add_to_catalog_stats) {
-        if (entry.entry_type == Params::XML_ENTRY_BOOLEAN) {
-          StatsField *field = new StatsField(_params, 
-                                             entry.xml_outer_tag,
-                                             entry.xml_inner_tag, 
-                                             true,
-                                             entry.units,
-                                             entry.comment);
-          _catFields.push_back(field);
-        } else if (entry.entry_type == Params::XML_ENTRY_STRING) {
-          cerr << "ERROR: " << _progName << endl;
-          cerr << "  xml entry, outer tag:  " << entry.xml_outer_tag << endl;
-          cerr << "             inner tag:  " << entry.xml_inner_tag << endl;
-          cerr << "  add_to_catalog_stats == true, but is string type" << endl;
-          isOK = FALSE;
-        } else {
-          StatsField *field = new StatsField(_params, 
-                                             entry.xml_outer_tag,
-                                             entry.xml_inner_tag, 
-                                             false,
-                                             entry.units,
-                                             entry.comment);
-          _catFields.push_back(field);
-        }
+      if (entry.include_in_catalog_stats) {
+        StatsField *field = new StatsField(_params,
+                                           entry.entry_type,
+                                           entry.xml_outer_tag,
+                                           entry.xml_inner_tag, 
+                                           entry.units,
+                                           entry.comment,
+                                           entry.ok_boolean,
+                                           entry.catalog_omit_if_zero,
+                                           entry.catalog_interpret_as_time);
+        _catFields.push_back(field);
       }
     }
 
     if (_catFields.size() < 1) {
       cerr << "ERROR: " << _progName << endl;
       cerr << "  Param 'write_stats_files_to_catalog' is true." << endl;
-      cerr << "  But no xml_entries are have 'add_to_catalog_stats = true'" << endl;
+      cerr << "  But no xml_entries are have 'include_in_catalog_stats = true'" << endl;
       isOK = FALSE;
       return;
     }
@@ -1407,7 +1394,7 @@ int TsStatusMonitor::_updateCatalogStats(time_t now)
       continue;
     }
 
-    if (field->getIsBoolean()) {
+    if (field->getEntryType() == Params::XML_ENTRY_BOOLEAN) {
 
       // get the boolean value
       
@@ -1428,6 +1415,21 @@ int TsStatusMonitor::_updateCatalogStats(time_t now)
         field->addValue(0.0);
       }
 
+    } else if (field->getEntryType() == Params::XML_ENTRY_STRING) {
+
+      string sval;
+      if (TaXml::readString(outerStr, field->getXmlInnerTag(), sval)) {
+        // not available
+        if (_params.debug >= Params::DEBUG_EXTRA) { 
+          cerr << "WARNING - TsStatusMonitor::_updateCatalogStats" << endl;
+          cerr << " Outer tag: " << field->getXmlOuterTag() << endl;
+          cerr << " Cannot find inner tag: " << field->getXmlInnerTag() << endl;
+        }
+        continue;
+      }
+
+      field->addValue(sval);
+      
     } else {
       
       // get as double
@@ -1499,16 +1501,16 @@ void TsStatusMonitor::_printStats(FILE *out)
           "========================================\n");
 
   char label[128];
-  sprintf(label, "Monitor start time - end time, N = %d",
-          (int) (_catFields[0]->getNn()));
+  sprintf(label, "Monitor start time - end time");
 
-  fprintf(out, "%45s:   %s - %s\n",
+  fprintf(out, "%30s   %s - %s  N = %d\n",
           label,
           DateTime::strm(_statsStartTime).c_str(), 
-          DateTime::strm(_statsEndTime).c_str());
+          DateTime::strm(_statsEndTime).c_str(),
+          (int) (_catFields[0]->getNn()));
 
-  fprintf(out, "%45s  %10s %10s %10s %10s  %s\n",
-          "", "Min", "Max", "Mean", "Range", "Comment");
+  fprintf(out, "%30s %10s %10s %10s %10s  %s\n",
+          "", "MIN", "MAX", "RANGE", "MEAN", "COMMENT");
           
   for (size_t ii = 0; ii < _catFields.size(); ii++) {
     _catFields[ii]->computeStats();

@@ -81,7 +81,9 @@ public:
     double graph_min_val;
     double graph_max_val;
     char* comment;
-    tdrp_bool_t add_to_catalog_stats;
+    tdrp_bool_t include_in_catalog_stats;
+    tdrp_bool_t catalog_omit_if_zero;
+    tdrp_bool_t catalog_interpret_as_time;
   } xml_entry_t;
 
   ///////////////////////////
