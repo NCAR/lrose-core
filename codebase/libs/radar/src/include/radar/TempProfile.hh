@@ -113,6 +113,13 @@ public:
                      time_t &soundingTime,
                      vector<PointVal> &tmpProfile);
 
+  // Get a temperature profile from a PID thresholds file
+  // returns 0 on success, -1 on failure
+  // on failure, tmpProfile will be empty
+  
+  int getProfileForPid(const string &pidThresholdsPath,
+                       vector<PointVal> &tmpProfile);
+
   // optionally get access to the profile
   // If getTempProfile() returned failure, tmpProfile will be empty
 
@@ -283,6 +290,7 @@ private:
 
   // methods
 
+  int _setTempProfileFromPidLine(const char *line);
   int _getTempProfile(time_t searchTime);
   int _checkTempProfile();
   void _computeFreezingLevel();
