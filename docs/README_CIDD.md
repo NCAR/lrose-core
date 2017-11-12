@@ -156,13 +156,13 @@ Use rsync to copy the binaries to the final location.
 For example:
 
 ```
-  rsync -av /tmp/cidd_m32/bin /usr/local/lrose
+  rsync -av /tmp/cidd_m32/bin ${HOME}/lrose
 ```
 
 The final install will be in:
 
 ```
-  /usr/local/lrose/bin
+  ${HOME}/lrose/bin
 ```
 
 

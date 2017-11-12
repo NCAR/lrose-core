@@ -54,7 +54,7 @@ function usage() {
     echo "  -p ? :  set package"
     echo "           default is 'lrose'"
     echo "  -x ? :  set prefix"
-    echo "           default is '/usr/local/lrose'"
+    echo "           default is '${LROSE_INSTALL_DIR}'"
     echo
 }
 
