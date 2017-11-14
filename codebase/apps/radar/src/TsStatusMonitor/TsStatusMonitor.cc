@@ -68,7 +68,7 @@ TsStatusMonitor::TsStatusMonitor(int argc, char **argv)
   _prevSpdbTime = time(NULL);
   _prevNagiosTime = time(NULL);
   _iwrfStatusLatestTime = time(NULL);
-  _iwrfStatusXmlSeqNum = 0;
+  _iwrfStatusXmlPktSeqNum = 0;
 
   _movementMonitorTime = time(NULL);
   _moveCheckAz = -999;
@@ -166,23 +166,50 @@ TsStatusMonitor::TsStatusMonitor(int argc, char **argv)
 
   if (_params.write_stats_files_to_catalog) {
   
-    if (_params.stats_fields_n < 1) {
+    if (_params.xml_entries_n < 1) {
       cerr << "ERROR: " << _progName << endl;
-      cerr << "  No stats_fields specified." << endl;
+      cerr << "  No xml_entries specified." << endl;
       isOK = FALSE;
       return;
     }
     
-    for (int ii = 0; ii < _params.stats_fields_n; ii++) {
-      const Params::stats_field_t &pfield = _params._stats_fields[ii];
-      StatsField *field = new StatsField(_params, 
-                                         pfield.xml_inner_tag,
-                                         pfield.xml_outer_tag, 
-                                         pfield.minValidValue,
-                                         pfield.maxValidValue,
-                                         pfield.comment);
-      _catFields.push_back(field);
+    for (int ii = 0; ii < _params.xml_entries_n; ii++) {
+      const Params::xml_entry_t &entry = _params._xml_entries[ii];
+      if (entry.include_in_catalog_stats) {
+        StatsField *field = new StatsField(_params,
+                                           entry.entry_type,
+                                           entry.xml_outer_tag,
+                                           entry.xml_inner_tag, 
+                                           entry.units,
+                                           entry.comment,
+                                           entry.ok_boolean,
+                                           entry.catalog_omit_if_zero,
+                                           entry.catalog_interpret_as_time);
+        _catFields.push_back(field);
+      }
     }
+
+    if (_catFields.size() < 1) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "  Param 'write_stats_files_to_catalog' is true." << endl;
+      cerr << "  But no xml_entries are have 'include_in_catalog_stats = true'" << endl;
+      isOK = FALSE;
+      return;
+    }
+    
+    // initialize the schedule if required
+
+    int interval = _params.stats_interval_secs;
+    time_t latestTime = time(NULL);
+    time_t nextUtime = ((latestTime / interval) + 1) * interval;
+    _statsScheduledTime.set(nextUtime);
+    if (_params.debug) {
+      cerr << "Setting up stats schedule, next scheduled time: " 
+           << _statsScheduledTime.asString() << endl;
+    }
+    _statsStartTime = 0;
+    _statsEndTime = 0;
+    _initStatsFields();
 
   }
 
@@ -314,25 +341,36 @@ int TsStatusMonitor::_handlePulse(IwrfTsPulse &pulse)
 
   _pulseLatestTime = pulse.getTime();
 
-  // write ops info to file, if info has changed since last write
+  // get ops info
   
   const IwrfTsInfo &info = pulse.getTsInfo();
+  si64 statusXmlPktSeqNum = info.getStatusXmlPktSeqNum();
+  if (statusXmlPktSeqNum != _iwrfStatusXmlPktSeqNum) {
 
-  // check for new status xml packet
 
-  const iwrf_status_xml_t &xmlHdr = info.getStatusXmlHdr();
-  time_t xmlPktTime = xmlHdr.packet.time_secs_utc;
-  time_t now = time(NULL);
-  double secsSinceXml = (double) now - (double) xmlPktTime;
-  if (secsSinceXml < _params.data_valid_interval_secs) {
-    _iwrfStatusXmlSeqNum = info.getStatusXmlPktSeqNum();
-    _iwrfStatusXml = info.getStatusXmlStr();
-    _iwrfStatusLatestTime = time(NULL);
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "==============================================" << endl;
-      cerr << _iwrfStatusXml << endl;
-      cerr << "==============================================" << endl;
+    // handle new status xml packet
+
+    const iwrf_status_xml_t &xmlHdr = info.getStatusXmlHdr();
+    time_t xmlPktTime = xmlHdr.packet.time_secs_utc;
+    time_t now = time(NULL);
+    double secsSinceXml = (double) now - (double) xmlPktTime;
+
+    if (secsSinceXml < _params.data_valid_interval_secs) {
+      _iwrfStatusXml = info.getStatusXmlStr();
+      _iwrfStatusLatestTime = time(NULL);
+      if (_params.debug >= Params::DEBUG_EXTRA) {
+        cerr << "==============================================" << endl;
+        cerr << _iwrfStatusXml << endl;
+        cerr << "==============================================" << endl;
+      }
     }
+    
+    _iwrfStatusXmlPktSeqNum = statusXmlPktSeqNum;
+
+    if (_params.write_stats_files_to_catalog) {
+      _updateCatalogStats(now);
+    }
+
   }
 
   // test pulse
@@ -402,7 +440,7 @@ void TsStatusMonitor::_monitorAntennaMovement(IwrfTsPulse &pulse)
 // monitor the test pulse
 
 void TsStatusMonitor::_monitorTestPulse(IwrfTsPulse &pulse,
-                                      const IwrfTsInfo &info)
+                                        const IwrfTsInfo &info)
 
 {
 
@@ -564,9 +602,9 @@ void TsStatusMonitor::_monitorTestPulse(IwrfTsPulse &pulse,
 // load test pulse IQ
 
 void TsStatusMonitor::_loadTestPulseIq(IwrfTsPulse &pulse,
-                                     int channelNum,
-                                     int gateNum,
-                                     RadarComplex_t *iq)
+                                       int channelNum,
+                                       int gateNum,
+                                       RadarComplex_t *iq)
   
 {
   fl32 ival, qval;
@@ -583,7 +621,7 @@ void TsStatusMonitor::_loadTestPulseIq(IwrfTsPulse &pulse,
 // monitor g0
 
 void TsStatusMonitor::_monitorG0(IwrfTsPulse &pulse,
-                               const IwrfTsInfo &info)
+                                 const IwrfTsInfo &info)
   
 {
   
@@ -655,9 +693,9 @@ void TsStatusMonitor::_monitorG0(IwrfTsPulse &pulse,
 // load G0 IQ
 
 void TsStatusMonitor::_loadG0Iq(IwrfTsPulse &pulse,
-                              int channelNum,
-                              int gateNum,
-                              RadarComplex_t *iq)
+                                int channelNum,
+                                int gateNum,
+                                RadarComplex_t *iq)
   
 {
   fl32 ival, qval;
@@ -875,8 +913,8 @@ int TsStatusMonitor::_updateNagios(time_t now)
 // handle a boolean entry in the status xml
 
 int TsStatusMonitor::_handleBooleanNagios(const string &xml,
-                                        const Params::xml_entry_t &entry,
-                                        FILE *nagiosFile)
+                                          const Params::xml_entry_t &entry,
+                                          FILE *nagiosFile)
   
 {
   
@@ -960,8 +998,8 @@ int TsStatusMonitor::_handleBooleanNagios(const string &xml,
 // handle a int entry in the status xml
 
 int TsStatusMonitor::_handleIntNagios(const string &xml,
-                                    const Params::xml_entry_t &entry,
-                                    FILE *nagiosFile)
+                                      const Params::xml_entry_t &entry,
+                                      FILE *nagiosFile)
   
 {
 
@@ -1047,8 +1085,8 @@ int TsStatusMonitor::_handleIntNagios(const string &xml,
 // handle a double entry in the status xml
 
 int TsStatusMonitor::_handleDoubleNagios(const string &xml,
-                                       const Params::xml_entry_t &entry,
-                                       FILE *nagiosFile)
+                                         const Params::xml_entry_t &entry,
+                                         FILE *nagiosFile)
   
 {
 
@@ -1134,8 +1172,8 @@ int TsStatusMonitor::_handleDoubleNagios(const string &xml,
 // handle a string entry in the status xml
 
 int TsStatusMonitor::_handleStringNagios(const string &xml,
-                                       const Params::xml_entry_t &entry,
-                                       FILE *nagiosFile)
+                                         const Params::xml_entry_t &entry,
+                                         FILE *nagiosFile)
   
 {
   
@@ -1186,8 +1224,8 @@ int TsStatusMonitor::_handleStringNagios(const string &xml,
 // handle a missing entry
 
 int TsStatusMonitor::_handleMissingEntry(const string &xml,
-                                       const Params::xml_entry_t &entry,
-                                       FILE *nagiosFile)
+                                         const Params::xml_entry_t &entry,
+                                         FILE *nagiosFile)
   
 {
 
@@ -1293,7 +1331,7 @@ int TsStatusMonitor::_addMovementToNagios(FILE *nagiosFile)
 }
 
 void
-TsStatusMonitor::_removeNagiosStatusFile() {
+  TsStatusMonitor::_removeNagiosStatusFile() {
 
   // Get rid of our Nagios status file; we don't want it hanging around to
   // imply that status is still current...
@@ -1318,6 +1356,131 @@ void TsStatusMonitor::_initStatsFields()
 
 }
 
+/////////////////////////////
+// update the catalog stats
+
+int TsStatusMonitor::_updateCatalogStats(time_t now)
+
+{
+
+  if (_params.debug) {
+    cerr << "==>> updating catalog stats" << endl;
+  }
+
+  // get the concatenated xml string
+
+  string xml = _getCombinedXml(now);
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "statusXml for stats: " << endl;
+    cerr << xml << endl;
+  }
+
+  // loop through the catalog fields
+
+  for (size_t ifield = 0; ifield < _catFields.size(); ifield++) {
+
+    StatsField *field = _catFields[ifield];
+
+    // get outer XML string
+
+    string outerStr;
+    if (TaXml::readString(xml, field->getXmlOuterTag(), outerStr)) {
+      // not available
+      if (_params.debug >= Params::DEBUG_EXTRA) { 
+        cerr << "WARNING - TsStatusMonitor::_updateCatalogStats" << endl;
+        cerr << " Cannot find outer tag: " << field->getXmlOuterTag() << endl;
+      }
+      continue;
+    }
+
+    if (field->getEntryType() == Params::XML_ENTRY_BOOLEAN) {
+
+      // get the boolean value
+      
+      bool bval;
+      if (TaXml::readBoolean(outerStr, field->getXmlInnerTag(), bval)) {
+        // not available
+        if (_params.debug >= Params::DEBUG_EXTRA) { 
+          cerr << "WARNING - TsStatusMonitor::_updateCatalogStats" << endl;
+          cerr << " Outer tag: " << field->getXmlOuterTag() << endl;
+          cerr << " Cannot find inner tag: " << field->getXmlInnerTag() << endl;
+        }
+        continue;
+      }
+
+      if (bval) {
+        field->addValue(1.0);
+      } else {
+        field->addValue(0.0);
+      }
+
+    } else if (field->getEntryType() == Params::XML_ENTRY_STRING) {
+
+      string sval;
+      if (TaXml::readString(outerStr, field->getXmlInnerTag(), sval)) {
+        // not available
+        if (_params.debug >= Params::DEBUG_EXTRA) { 
+          cerr << "WARNING - TsStatusMonitor::_updateCatalogStats" << endl;
+          cerr << " Outer tag: " << field->getXmlOuterTag() << endl;
+          cerr << " Cannot find inner tag: " << field->getXmlInnerTag() << endl;
+        }
+        continue;
+      }
+
+      field->addValue(sval);
+      
+    } else {
+      
+      // get as double
+
+      double dval;
+      if (TaXml::readDouble(outerStr, field->getXmlInnerTag(), dval)) {
+        // not available
+        if (_params.debug >= Params::DEBUG_EXTRA) { 
+          cerr << "WARNING - TsStatusMonitor::_updateCatalogStats" << endl;
+          cerr << " Outer tag: " << field->getXmlOuterTag() << endl;
+          cerr << " Cannot find inner tag: " << field->getXmlInnerTag() << endl;
+        }
+        continue;
+      }
+      field->addValue(dval);
+      
+    } // if (field->getIsBoolean())
+    
+  } // ifield
+
+  // set times
+
+  if (_statsStartTime == 0) {
+    _statsStartTime = now;
+  }
+  _statsEndTime = now;
+
+  // ready to write out?
+
+  if (now >= _statsScheduledTime.utime()) {
+
+    // write stats
+
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      _printStats(stderr);
+    }
+    _writeStatsFile();
+
+    // reset
+
+    _statsStartTime = 0;
+    _statsEndTime = 0;
+    _statsScheduledTime += _params.stats_interval_secs;
+    _initStatsFields();
+
+  } // if (now >= .....
+
+  return 0;
+
+}
+
 ////////////////////////////////////////////////////////
 // Print the stats
 
@@ -1334,20 +1497,20 @@ void TsStatusMonitor::_printStats(FILE *out)
 
   fprintf(out,
           "========================================"
-          " HSRL MONITORING "
+          " HCR MONITORING "
           "========================================\n");
 
   char label[128];
-  sprintf(label, "Monitor start time - end time, N = %d",
-          (int) (_catFields[0]->getNn()));
+  sprintf(label, "Monitor start time - end time");
 
-  fprintf(out, "%45s:   %s - %s\n",
+  fprintf(out, "%30s   %s - %s  N = %d\n",
           label,
           DateTime::strm(_statsStartTime).c_str(), 
-          DateTime::strm(_statsEndTime).c_str());
+          DateTime::strm(_statsEndTime).c_str(),
+          (int) (_catFields[0]->getNn()));
 
-  fprintf(out, "%45s  %10s %10s %10s %10s  %s\n",
-          "", "Min", "Max", "Mean", "Range", "Notes");
+  fprintf(out, "%30s %10s %10s %10s %10s  %s\n",
+          "", "MIN", "MAX", "RANGE", "MEAN", "COMMENT");
           
   for (size_t ii = 0; ii < _catFields.size(); ii++) {
     _catFields[ii]->computeStats();
@@ -1359,7 +1522,7 @@ void TsStatusMonitor::_printStats(FILE *out)
 
   fprintf(out,
           "========================================"
-          "================="
+          "================"
           "========================================\n");
   
 }

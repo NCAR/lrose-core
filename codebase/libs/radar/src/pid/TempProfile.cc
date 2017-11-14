@@ -36,6 +36,8 @@
 
 #include <radar/TempProfile.hh>
 #include <toolsa/DateTime.hh>
+#include <toolsa/TaFile.hh>
+#include <toolsa/TaStr.hh>
 #include <Spdb/DsSpdb.hh>
 #include <Spdb/SoundingGet.hh>
 #include <rapformats/Sndg.hh>
@@ -46,6 +48,7 @@ using namespace std;
 
 TempProfile::TempProfile()
 {
+
   _debug = false;
   _verbose = false;
 
@@ -69,6 +72,7 @@ TempProfile::TempProfile()
   _checkPressureMonotonicallyDecreasing = false;
   _useWetBulbTemp = false;
 
+  _lutByMeterHt.clear();
   _tmpProfile.clear();
 
 }
@@ -161,6 +165,119 @@ int TempProfile::getTempProfile(const string &url,
 
   return -1;
   
+}
+
+////////////////////////////////////////////////////////////////////////
+// Get a temperature profile from a PID thresholds file
+// returns 0 on success, -1 on failure
+// on failure, tmpProfile will be empty
+
+int TempProfile::getProfileForPid(const string &pidThresholdsPath,
+                                  vector<PointVal> &tmpProfile)
+
+{
+
+  _lutByMeterHt.clear();
+  _tmpProfile.clear();
+  tmpProfile = _tmpProfile;
+  _soundingSpdbUrl = pidThresholdsPath;
+
+  if (_debug) {
+    cerr << "Reading temperatures from threshold file: "
+         << pidThresholdsPath << endl;
+  }
+
+  TaFile inFile;
+  FILE *in = inFile.fopen(pidThresholdsPath.c_str(), "r");
+  if (in == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - TempProfile::getProfileForPid" << endl;
+    cerr << "  Cannot open PID thresholds file for reading" << endl;
+    cerr << "  File path: " << pidThresholdsPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+  
+  // in file, look for 'tpf' line and decode it
+
+  char line[8192];
+  while (!feof(in)) {
+    if (fgets(line, 8192, in) == NULL) {
+      break;
+    }
+    // ignore comments
+    if (line[0] == '#') {
+      continue;
+    }
+    if (strlen(line) < 2) {
+      continue;
+    }
+    if (_verbose) {
+      cerr << line;
+    }
+    // force lower case
+    for (int ii = 0; ii < (int) strlen(line); ii++) {
+      line[ii] = tolower(line[ii]);
+    }
+    // check for temperature line
+    if (strncmp(line, "tpf", 3) == 0) {
+      if (_setTempProfileFromPidLine(line)) {
+        cerr << "ERROR - TempProfile::getProfileForPid" << endl;
+        cerr << "  Cannot set profile from tpf line" << endl;
+        cerr << "  Path: " << pidThresholdsPath << endl;
+        cerr << "  Line: " << line << endl;
+        return -1;
+      }
+    }
+  } // while (!feof(in) ...
+  inFile.fclose();
+
+  // compute the freezing level
+
+  _computeFreezingLevel();
+
+  return 0;
+  
+}
+
+/////////////////////////////////////////////////////
+// set the temperature profile from PID line
+
+int TempProfile::_setTempProfileFromPidLine(const char *line)
+  
+{
+
+  // find the first and last paren
+
+  const char *firstOpenParen = strchr(line, '(');
+  const char *lastCloseParen = strrchr(line, ')');
+
+  if (firstOpenParen == NULL || lastCloseParen == NULL) {
+    return -1;
+  }
+  
+  string sdata(firstOpenParen, lastCloseParen - firstOpenParen + 1);
+
+  // tokenize the line on '.'
+
+  vector<string> toks;
+  TaStr::tokenize(sdata, "()", toks);
+  if (toks.size() < 2) {
+    return -1;
+  }
+
+  // scan in profile data
+
+  for (int ii = 0; ii < (int) toks.size(); ii++) {
+    double ht, tmp;
+    if (sscanf(toks[ii].c_str(), "%lg,%lg", &ht, &tmp) == 2) {
+      PointVal tmpPt(ht, tmp);
+      _tmpProfile.push_back(tmpPt); 
+    }
+  }
+
+  return 0;
+
 }
 
 ////////////////////////////////////////////////////////////////////////

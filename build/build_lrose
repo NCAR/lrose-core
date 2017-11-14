@@ -9,22 +9,22 @@
 # 
 # By default the libraries and applications will be installed in:
 #
-#   /usr/local/lrose/include
-#   /usr/local/lrose/lib
-#   /usr/local/lrose/bin
+#   ${HOME}/lrose/include
+#   ${HOME}/lrose/lib
+#   ${HOME}/lrose/bin
 #
 # You can change the install location by specifying it as
 # a single argument to this script.
 #
 # For example:
 #
-#   build_lrose /tmp/lrose
+#   build_lrose /usr/local/lrose
 #
 # will install in:
 #
-#   /tmp/lrose/include
-#   /tmp/lrose/lib
-#   /tmp/lrose/bin
+#   /usr/local/lrose/include
+#   /usr/local/lrose/lib
+#   /usr/local/lrose/bin
 
 # Depends on HDF5, NETCDF and UDUNITS
 # -----------------------------------
@@ -45,7 +45,7 @@ scriptName=$(basename $0)
 
 # defaults
 
-prefix=/usr/local/lrose
+prefix=${HOME}/lrose
 package=lrose
 debug=true
 
@@ -61,7 +61,7 @@ function usage() {
     echo "  -p ? :  set package"
     echo "           default is 'lrose'"
     echo "  -x ? :  set prefix"
-    echo "           default is '/usr/local/lrose'"
+    echo "           default is '${HOME}/lrose'"
     echo
 }
 

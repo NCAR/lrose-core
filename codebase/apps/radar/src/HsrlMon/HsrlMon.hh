@@ -81,7 +81,6 @@ private:
   Args _args;
   Params _params;
   vector<string> _readPaths;
-  RadxTime _realtimeScheduledTime;
 
   // monitoring stats
 

@@ -183,14 +183,14 @@ int HsrlMon::_runRealtime()
   
   // initialize the schedule if required
   
-  RadxTime _realtimeScheduledTime;
+  RadxTime realtimeScheduledTime;
 
-  if (_realtimeScheduledTime.utime() == 0) {
+  if (realtimeScheduledTime.utime() == 0) {
     time_t nextUtime = ((latestTime / interval) + 1) * interval;
-    _realtimeScheduledTime.set(nextUtime + delay);
+    realtimeScheduledTime.set(nextUtime + delay);
     if (_params.debug) {
       cerr << "Next scheduled time for realtime mode: " 
-           << _realtimeScheduledTime.asString() << endl;
+           << realtimeScheduledTime.asString() << endl;
     }
   }
 
@@ -202,7 +202,7 @@ int HsrlMon::_runRealtime()
     
     // check if we are at scheduled time
 
-    if (now > _realtimeScheduledTime.utime()) {
+    if (now > realtimeScheduledTime.utime()) {
       
       _monitorStartTime = now - delay - _params.monitoring_interval_secs;
       _monitorEndTime = _monitorStartTime + _params.monitoring_interval_secs - 1;
@@ -214,13 +214,13 @@ int HsrlMon::_runRealtime()
       // set next scheduled time
       
       time_t nextUtime = ((now / interval) + 1) * interval;
-      _realtimeScheduledTime.set(nextUtime + delay);
+      realtimeScheduledTime.set(nextUtime + delay);
       if (_params.debug) {
         cerr << "Next scheduled time: "
-             << _realtimeScheduledTime.asString() << endl;
+             << realtimeScheduledTime.asString() << endl;
       }
 
-    } // if (now > _realtimeScheduledTime)
+    } // if (now > realtimeScheduledTime)
     
     umsleep(1000);
       

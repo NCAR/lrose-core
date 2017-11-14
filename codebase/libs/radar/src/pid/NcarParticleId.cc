@@ -741,6 +741,15 @@ int NcarParticleId::_setTempProfile(const char *line)
 
   _computeTempHtLookup();
 
+  // cerr << "11111111111111111111111" << endl;
+  // for (size_t ii = 0; ii < _tmpProfile.size(); ii++) {
+  //   cerr << "1111111 press, htKm, tmpC: " 
+  //        << _tmpProfile[ii].pressHpa << ", "
+  //        << _tmpProfile[ii].htKm << ", "
+  //        << _tmpProfile[ii].tmpC << endl;
+  // }
+  // cerr << "11111111111111111111111" << endl;
+
   return 0;
 
 }
@@ -783,6 +792,7 @@ void NcarParticleId::_computeTempHtLookup()
     for (int jj = minHtMeters; jj <= maxHtMeters; jj++, kk++, tmp += gradient) {
       if (kk >= 0 && kk < nHt) {
 	_tmpHtArray[kk] = tmp;
+        // cerr << "111111111 kk, tmp: " << kk << ", " << tmp << endl;
       }
     }
 

@@ -3052,7 +3052,7 @@ void iwrf_platform_georef_print(FILE *out,
   fprintf(out, "============== iwrf_platform_georef =====================\n");
   iwrf_packet_info_print(out, copy.packet);
   fprintf(out, "  unit_num: %d\n", copy.unit_num);
-  fprintf(out, "  spare2: %d\n", copy.spare2);
+  fprintf(out, "  unit_id: %d\n", copy.unit_id);
   fprintf(out, "  longitude: %g\n", copy.longitude);
   fprintf(out, "  latitude: %g\n", copy.latitude);
   fprintf(out, "  altitude_msl_km: %g\n", copy.altitude_msl_km);
@@ -4284,8 +4284,8 @@ void iwrf_platform_georef_print_format(FILE *out, const iwrf_platform_georef_t &
 
   fprintf(out, _dform, "si32", "unit_num",
           sizeof(val.unit_num), (char *) &val.unit_num - start);
-  fprintf(out, _dform, "si32", "spare2",
-          sizeof(val.spare2), (char *) &val.spare2 - start);
+  fprintf(out, _dform, "si32", "id",
+          sizeof(val.unit_id), (char *) &val.unit_id - start);
   fprintf(out, _dform, "fl32", "altitude_msl_km",
           sizeof(val.altitude_msl_km), (char *) &val.altitude_msl_km - start);
   fprintf(out, _dform, "fl32", "altitude_agl_km",

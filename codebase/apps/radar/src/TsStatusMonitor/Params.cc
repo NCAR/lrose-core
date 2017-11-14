@@ -630,7 +630,7 @@ using namespace std;
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("xml_entries");
     tt->descr = tdrpStrDup("Details of XML entries to process.");
-    tt->help = tdrpStrDup("\txml_outer_tag: the main tag for the entry\n\txml_inner_tag: the sub tag for the entry\n\tentry_type: the type of data stored\n\tok_boolean: BOOLEAN only: the value for an OK state\n\tboolean_failure_is_critical: true if FAILURE is critical, false if failure indicates IMPAIRED\n\tok_value_lower_limit: INT or DOUBLE: the lower limit for an OK state\n\tok_value_upper_limit: INT or DOUBLE: the upper limit for an OK state\n\timpaired_value_lower_limit: INT or DOUBLE: the lower limit for an IMPAIRED state\n\timpaired_value_upper_limit: INT or DOUBLE: the upper limit for an IMPAIRED state\n\tgraph_min_val: minimum value for history graph\n\tgraph_max_val: maximim value for history graph\n\tcomment: if set, appears at end of status line\n.");
+    tt->help = tdrpStrDup("\txml_outer_tag: the main tag for the entry\n\txml_inner_tag: the sub tag for the entry\n\tentry_type: the type of data stored\n\tok_boolean: BOOLEAN only: the value for an OK state\n\tboolean_failure_is_critical: true if FAILURE is critical, false if failure indicates IMPAIRED\n\tok_value_lower_limit: INT or DOUBLE: the lower limit for an OK state\n\tok_value_upper_limit: INT or DOUBLE: the upper limit for an OK state\n\timpaired_value_lower_limit: INT or DOUBLE: the lower limit for an IMPAIRED state\n\timpaired_value_upper_limit: INT or DOUBLE: the upper limit for an IMPAIRED state\n\tgraph_min_val: minimum value for history graph\n\tgraph_max_val: maximim value for history graph\n\tcomment: if set, appears at end of status line\n\tinclude_in_catalog_stats: add this entry to the catalog stats\n\tcatalog_omit_if_zero: do not report in catalog if all values are zero or false\n\tcatalog_interpret_as_time: treat this value as a time or time string\n.");
     tt->array_offset = (char *) &_xml_entries - &_start_;
     tt->array_n_offset = (char *) &xml_entries_n - &_start_;
     tt->is_array = TRUE;
@@ -638,7 +638,7 @@ using namespace std;
     tt->array_elem_size = sizeof(xml_entry_t);
     tt->array_n = 3;
     tt->struct_def.name = tdrpStrDup("xml_entry_t");
-    tt->struct_def.nfields = 14;
+    tt->struct_def.nfields = 17;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -723,7 +723,22 @@ using namespace std;
       tt->struct_def.fields[13].ptype = STRING_TYPE;
       tt->struct_def.fields[13].rel_offset = 
         (char *) &_xml_entries->comment - (char *) _xml_entries;
-    tt->n_struct_vals = 42;
+      tt->struct_def.fields[14].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[14].fname = tdrpStrDup("include_in_catalog_stats");
+      tt->struct_def.fields[14].ptype = BOOL_TYPE;
+      tt->struct_def.fields[14].rel_offset = 
+        (char *) &_xml_entries->include_in_catalog_stats - (char *) _xml_entries;
+      tt->struct_def.fields[15].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[15].fname = tdrpStrDup("catalog_omit_if_zero");
+      tt->struct_def.fields[15].ptype = BOOL_TYPE;
+      tt->struct_def.fields[15].rel_offset = 
+        (char *) &_xml_entries->catalog_omit_if_zero - (char *) _xml_entries;
+      tt->struct_def.fields[16].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[16].fname = tdrpStrDup("catalog_interpret_as_time");
+      tt->struct_def.fields[16].ptype = BOOL_TYPE;
+      tt->struct_def.fields[16].rel_offset = 
+        (char *) &_xml_entries->catalog_interpret_as_time - (char *) _xml_entries;
+    tt->n_struct_vals = 51;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("HcrTransmitterStatus");
@@ -740,34 +755,43 @@ using namespace std;
       tt->struct_vals[11].d = 0;
       tt->struct_vals[12].d = 1;
       tt->struct_vals[13].s = tdrpStrDup("");
-      tt->struct_vals[14].s = tdrpStrDup("HcrTransmitterStatus");
-      tt->struct_vals[15].s = tdrpStrDup("CathodeVoltage");
-      tt->struct_vals[16].e = XML_ENTRY_DOUBLE;
-      tt->struct_vals[17].b = pTRUE;
-      tt->struct_vals[18].b = pTRUE;
-      tt->struct_vals[19].d = 0;
-      tt->struct_vals[20].d = 10;
-      tt->struct_vals[21].d = 11;
-      tt->struct_vals[22].d = 20;
-      tt->struct_vals[23].s = tdrpStrDup("");
-      tt->struct_vals[24].s = tdrpStrDup("V");
-      tt->struct_vals[25].d = 0;
-      tt->struct_vals[26].d = 30;
-      tt->struct_vals[27].s = tdrpStrDup("");
-      tt->struct_vals[28].s = tdrpStrDup("HcrReceiverStatus");
-      tt->struct_vals[29].s = tdrpStrDup("PvAftPressure");
-      tt->struct_vals[30].e = XML_ENTRY_DOUBLE;
+      tt->struct_vals[14].b = pTRUE;
+      tt->struct_vals[15].b = pTRUE;
+      tt->struct_vals[16].b = pFALSE;
+      tt->struct_vals[17].s = tdrpStrDup("HcrTransmitterStatus");
+      tt->struct_vals[18].s = tdrpStrDup("CathodeVoltage");
+      tt->struct_vals[19].e = XML_ENTRY_DOUBLE;
+      tt->struct_vals[20].b = pTRUE;
+      tt->struct_vals[21].b = pTRUE;
+      tt->struct_vals[22].d = 0;
+      tt->struct_vals[23].d = 10;
+      tt->struct_vals[24].d = 11;
+      tt->struct_vals[25].d = 20;
+      tt->struct_vals[26].s = tdrpStrDup("");
+      tt->struct_vals[27].s = tdrpStrDup("V");
+      tt->struct_vals[28].d = 0;
+      tt->struct_vals[29].d = 30;
+      tt->struct_vals[30].s = tdrpStrDup("");
       tt->struct_vals[31].b = pTRUE;
       tt->struct_vals[32].b = pTRUE;
-      tt->struct_vals[33].d = 10;
-      tt->struct_vals[34].d = 20;
-      tt->struct_vals[35].d = 5;
-      tt->struct_vals[36].d = 10;
-      tt->struct_vals[37].s = tdrpStrDup("");
-      tt->struct_vals[38].s = tdrpStrDup("psi");
-      tt->struct_vals[39].d = 0;
-      tt->struct_vals[40].d = 30;
-      tt->struct_vals[41].s = tdrpStrDup("");
+      tt->struct_vals[33].b = pFALSE;
+      tt->struct_vals[34].s = tdrpStrDup("HcrReceiverStatus");
+      tt->struct_vals[35].s = tdrpStrDup("PvAftPressure");
+      tt->struct_vals[36].e = XML_ENTRY_DOUBLE;
+      tt->struct_vals[37].b = pTRUE;
+      tt->struct_vals[38].b = pTRUE;
+      tt->struct_vals[39].d = 10;
+      tt->struct_vals[40].d = 20;
+      tt->struct_vals[41].d = 5;
+      tt->struct_vals[42].d = 10;
+      tt->struct_vals[43].s = tdrpStrDup("");
+      tt->struct_vals[44].s = tdrpStrDup("psi");
+      tt->struct_vals[45].d = 0;
+      tt->struct_vals[46].d = 30;
+      tt->struct_vals[47].s = tdrpStrDup("");
+      tt->struct_vals[48].b = pTRUE;
+      tt->struct_vals[49].b = pTRUE;
+      tt->struct_vals[50].b = pFALSE;
     tt++;
     
     // Parameter 'Comment 4'
@@ -1302,106 +1326,6 @@ using namespace std;
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &stats_write_latest_data_info - &_start_;
     tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 10'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("FIELDS FOR CATALOG MONITORING");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'stats_fields'
-    // ctype is '_stats_field_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("stats_fields");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_stats_fields - &_start_;
-    tt->array_n_offset = (char *) &stats_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(stats_field_t);
-    tt->array_n = 3;
-    tt->struct_def.name = tdrpStrDup("stats_field_t");
-    tt->struct_def.nfields = 7;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("xml_outer_tag");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_stats_fields->xml_outer_tag - (char *) _stats_fields;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("xml_inner_tag");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_stats_fields->xml_inner_tag - (char *) _stats_fields;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("xml_entry_type_t");
-      tt->struct_def.fields[2].fname = tdrpStrDup("entry_type");
-      tt->struct_def.fields[2].ptype = ENUM_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_stats_fields->entry_type - (char *) _stats_fields;
-        tt->struct_def.fields[2].enum_def.name = tdrpStrDup("xml_entry_type_t");
-        tt->struct_def.fields[2].enum_def.nfields = 4;
-        tt->struct_def.fields[2].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[2].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[2].enum_def.fields[0].name = tdrpStrDup("XML_ENTRY_BOOLEAN");
-        tt->struct_def.fields[2].enum_def.fields[0].val = XML_ENTRY_BOOLEAN;
-        tt->struct_def.fields[2].enum_def.fields[1].name = tdrpStrDup("XML_ENTRY_INT");
-        tt->struct_def.fields[2].enum_def.fields[1].val = XML_ENTRY_INT;
-        tt->struct_def.fields[2].enum_def.fields[2].name = tdrpStrDup("XML_ENTRY_DOUBLE");
-        tt->struct_def.fields[2].enum_def.fields[2].val = XML_ENTRY_DOUBLE;
-        tt->struct_def.fields[2].enum_def.fields[3].name = tdrpStrDup("XML_ENTRY_STRING");
-        tt->struct_def.fields[2].enum_def.fields[3].val = XML_ENTRY_STRING;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[3].fname = tdrpStrDup("ok_boolean");
-      tt->struct_def.fields[3].ptype = BOOL_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &_stats_fields->ok_boolean - (char *) _stats_fields;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[4].fname = tdrpStrDup("minValidValue");
-      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &_stats_fields->minValidValue - (char *) _stats_fields;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[5].fname = tdrpStrDup("maxValidValue");
-      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &_stats_fields->maxValidValue - (char *) _stats_fields;
-      tt->struct_def.fields[6].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[6].fname = tdrpStrDup("comment");
-      tt->struct_def.fields[6].ptype = STRING_TYPE;
-      tt->struct_def.fields[6].rel_offset = 
-        (char *) &_stats_fields->comment - (char *) _stats_fields;
-    tt->n_struct_vals = 21;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("HcrTransmitterStatus");
-      tt->struct_vals[1].s = tdrpStrDup("SerialConnected");
-      tt->struct_vals[2].e = XML_ENTRY_BOOLEAN;
-      tt->struct_vals[3].b = pTRUE;
-      tt->struct_vals[4].d = -100;
-      tt->struct_vals[5].d = 100;
-      tt->struct_vals[6].s = tdrpStrDup("");
-      tt->struct_vals[7].s = tdrpStrDup("HcrTransmitterStatus");
-      tt->struct_vals[8].s = tdrpStrDup("CathodeVoltage");
-      tt->struct_vals[9].e = XML_ENTRY_DOUBLE;
-      tt->struct_vals[10].b = pTRUE;
-      tt->struct_vals[11].d = -100;
-      tt->struct_vals[12].d = 100;
-      tt->struct_vals[13].s = tdrpStrDup("");
-      tt->struct_vals[14].s = tdrpStrDup("HcrReceiverStatus");
-      tt->struct_vals[15].s = tdrpStrDup("PvAftPressure");
-      tt->struct_vals[16].e = XML_ENTRY_DOUBLE;
-      tt->struct_vals[17].b = pTRUE;
-      tt->struct_vals[18].d = -100;
-      tt->struct_vals[19].d = 100;
-      tt->struct_vals[20].s = tdrpStrDup("");
     tt++;
     
     // trailing entry has param_name set to NULL

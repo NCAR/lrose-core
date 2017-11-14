@@ -195,8 +195,6 @@ public:
                    bool addToMetaQueue = true);
   void setPlatformGeoref(const iwrf_platform_georef_t &georef,
                          bool addToMetaQueue = true);
-  void setPlatformGeoref2(const iwrf_platform_georef_t &georef,
-                          bool addToMetaQueue = true);
   
   ////////////////////////////////////////////////////////////
   // set sequence number for each packet
