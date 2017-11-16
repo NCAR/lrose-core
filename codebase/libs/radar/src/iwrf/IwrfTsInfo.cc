@@ -185,13 +185,8 @@ int IwrfTsInfo::setFromBuffer(const void *buf, int len)
       iwrf_platform_georef_t georef;
       memcpy(&georef, copy, sizeof(iwrf_platform_georef_t));
       iwrf_platform_georef_swap(georef);
-      if (georef.unit_num == 1) {
-        setPlatformGeoref2(georef);
-        setPlatformGeoref2Active(true);
-      } else {
-        setPlatformGeoref(georef);
-        setPlatformGeorefActive(true);
-      }
+      setPlatformGeoref(georef);
+      setPlatformGeorefActive(true);
     } break;
     case IWRF_SYNC_ID:
     case IWRF_PULSE_HEADER_ID:

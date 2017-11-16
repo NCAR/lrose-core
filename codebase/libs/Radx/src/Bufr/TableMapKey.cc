@@ -79,6 +79,14 @@ void TableMapKey::Decode(unsigned short key, unsigned char *f, unsigned char *x,
   }
 }
 
+ bool TableMapKey::isTableCEntry() {
+  if ((_key >= 0x8000) && (_key < 0xC000)) { // 10 XX
+    return true;
+  } else { 
+      return false;
+  }
+}
+
  bool TableMapKey::isAnotherNode() {
   if (_key >= 0xC000) { // 11 XX
     return true;

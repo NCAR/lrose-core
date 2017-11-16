@@ -13,7 +13,7 @@ function usage() {
     echo "  -h:  produce this usage list"
     echo "  -d:  turn debugging on"
     echo "  -p:  set package name (default is lrose)"
-    echo "  -x:  set prefix (default is /usr/local)"
+    echo "  -x:  set prefix (default is ${HOME})"
     echo
 }
 
@@ -21,7 +21,7 @@ function usage() {
 # check args
 
 package=lrose
-prefix=/usr/local
+prefix=${HOME}
 debug=false
 
 # Parse command line options.

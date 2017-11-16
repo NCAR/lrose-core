@@ -175,6 +175,8 @@ public:
   void lookupFieldName(string fieldName, string &units, 
 		     string &standardName, string &longName);
 
+  void setTablePath(char *path);
+
 protected:
 private:
 
@@ -353,6 +355,7 @@ private:
   int _loadReadVolume();
   void _computeFixedAngles();
 
+  string _tablePath;
 };
 
 #endif

@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "Converts files between CfRadial and other radial formats";
+  p_header = "Converts files from BUFR to Cfradial formats";
 }
 
 commentdef {
@@ -41,6 +41,16 @@ paramdef string {
   p_descr = "Input directory for searching for files.";
   p_help = "Files will be searched for in this directory.";
 } input_dir;
+
+commentdef {
+  p_header = "TABLE PATH";
+}
+
+paramdef string {
+  p_default = "";
+  p_descr = "Directory containing BUFR tables.";
+  p_help = "Files with .csv extension.";
+} tables;
 
 typedef enum {
   REALTIME, ARCHIVE, FILELIST

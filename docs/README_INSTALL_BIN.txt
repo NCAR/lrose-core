@@ -82,16 +82,16 @@ Installing
 You will probably need to be root for this step, unless you install
 in your user area.
 
-By default, the binaries will be installed in /usr/local/bin. You can specify an
+By default, the binaries will be installed in ${HOME}/lrose/bin. You can specify an
 alternative.
 
   install_bin_release 
 
-will install in /usr/local/bin.
+will install in ${HOME}/lrose/bin.
 
-  install_bin_release /opt/local
+  install_bin_release /usr/local/lrose
 
-will install in /opt/local/bin.
+will install in /usr/local/lrose/bin.
 
 The support dynamic libraries will be found in:
 
@@ -110,10 +110,10 @@ To do this, use
 
   install_devel_release
 
-will install in /usr/local/bin, /usr/local/lib and /usr/local/include.
+will install in ${HOME}/lrose/bin, ${HOME}/lrose/lib and ${HOME}/lrose/include.
 
 Or, for example, 
-  install_devel_release /opt/local
+  install_devel_release /usr/local/lrose
 
-will install in /opt/local/bin, /opt/local/lib and /opt/local/include.
+will install in /usr/local/lrose/bin, /usr/local/lrose/lib and /usr/local/lrose/include.
 

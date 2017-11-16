@@ -2,7 +2,7 @@
 
 ### Choose your install directory (prefix location)
 
-The default is: `/usr/local/lrose`
+The default is: `${HOME}/lrose`
 
 ### Download the LROSE binary release
 
@@ -53,19 +53,19 @@ in your user area.
 will install into
 
 ```
-  /usr/local/bin
+  ${HOME}/lrose/bin
 ```
 
 You can specify an alternative, for example:
 
 ```
-  ./install_bin_release /opt/local
+  ./install_bin_release /usr/local/lrose
 ```
 
 will install into
 
 ```
-  /opt/local/bin
+  /usr/local/lrose/bin
 ```
 
 The run-time dynamic libraries will be found in:
@@ -92,23 +92,23 @@ To do this, use
 This will install in:
 
 ```
-  /usr/local/bin
-  /usr/local/lib
-  /usr/local/include
+  ${HOME}/lrose/bin
+  ${HOME}/lrose/lib
+  ${HOME}/lrose/include
 ```
 
 Or, for example:
 
 ```
-  ./install_devel_release /opt/local
+  ./install_devel_release /usr/local/lrose
 ```
 
 will install in:
 
 ```
-  /opt/local/bin
-  /opt/local/lib
-  /opt/local/include
+  /usr/local/lrose/bin
+  /usr/local/lrose/lib
+  /usr/local/lrose/include
 ```
 
 

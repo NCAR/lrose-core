@@ -34,25 +34,30 @@
 
 #include "StatsField.hh"
 #include <cmath>
+#include <Radx/RadxTime.hh>
 
 //////////////////////////////////////////
 // constructor
 
 StatsField::StatsField(const Params &params,
-                   const string &xmlOuterTag,
-                   const string &xmlInnerTag,
-                   double minValidValue,
-                   double maxValidValue,
-                   const string &comment) :
+                       Params::xml_entry_type_t entryType,
+                       const string &xmlOuterTag,
+                       const string &xmlInnerTag,
+                       const string &units,
+                       const string &comment,
+                       bool okBoolean,
+                       bool omitIfZero,
+                       bool interpretAsTime) :
         _params(params),
+        _entryType(entryType),
         _xmlOuterTag(xmlOuterTag),
         _xmlInnerTag(xmlInnerTag),
+        _units(units),
         _comment(comment),
-        _minValidValue(minValidValue),
-        _maxValidValue(maxValidValue)
+        _okBoolean(okBoolean),
+        _omitIfZero(omitIfZero),
+        _interpretAsTime(interpretAsTime)
 {
-  _longName = xmlOuterTag + "-" + xmlInnerTag;
-  _units = "notset";
   clear();
 }
 
@@ -61,6 +66,8 @@ StatsField::StatsField(const Params &params,
 
 void StatsField::clear()
 {
+
+  _stringVal.clear();
 
   _sum = 0.0;
   _sumSq = 0.0;
@@ -77,7 +84,6 @@ void StatsField::clear()
 // add a value to the stats
 
 void StatsField::addValue(double val)
-
 {
   _sum += val;
   _sumSq += val * val;
@@ -88,6 +94,11 @@ void StatsField::addValue(double val)
   if (val > _max) {
     _max = val;
   }
+}
+
+void StatsField::addValue(const string &val)
+{
+  _stringVal = val;
 }
 
 ////////////////////////////
@@ -124,6 +135,11 @@ void StatsField::printStats(FILE *out)
 
 {
 
+  if (_entryType == Params::XML_ENTRY_STRING) {
+    _printStringVal(out);
+    return;
+  }
+
   // in normal mode, do not print nan data
 
   if (!_params.debug) {
@@ -132,42 +148,116 @@ void StatsField::printStats(FILE *out)
     }
   }
 
-  string longName(_longName);
-  if (_xmlInnerTag.find("tcsaft") != string::npos) {
-    longName += " aft";
+  // do not print all zeros
+
+  if (_omitIfZero) {
+    if (_min == 0.0 && _max == 0.0 && _mean == 0.0) {
+      return;
+    }
   }
-  if (_xmlInnerTag.find("tcsfore") != string::npos) {
-    longName += " fore";
-  }
-  int combinedLen = longName.size() + _units.size();
-  int ntrim = combinedLen - 42;
-  longName = longName.substr(0, longName.size() - ntrim);
+
+  string name(_xmlInnerTag);
+  int combinedLen = name.size() + _units.size();
+  int ntrim = combinedLen - 30;
+  name = name.substr(0, name.size() - ntrim);
 
   char label[1024];
   if (_units.size() == 0 || _units.find("unknown") == 0) {
-    sprintf(label, "%s", longName.c_str());
+    sprintf(label, "%s", name.c_str());
   } else {
-    sprintf(label, "%s (%s)", longName.c_str(), _units.c_str());
+    sprintf(label, "%s (%s)", name.c_str(), _units.c_str());
   }
   label[45] = '\0';
   double range = _max - _min;
-  if (fabs(_max) > 9999) {
-    fprintf(out, "%45s: %10.0f %10.0f %10.0f %10.0f",
-            label, _min, _max, _mean, range);
-  } else {
-    fprintf(out, "%45s: %10.3f %10.3f %10.3f %10.3f",
-            label, _min, _max, _mean, range);
-  }
-
+  fprintf(out, "%30s %10s %10s %10.3f %10s",
+          label,
+          _formatVal(_min).c_str(),
+          _formatVal(_max).c_str(),
+          range,
+          _formatVal(_mean).c_str());
+  
   if (_comment.size() > 0) {
     fprintf(out, "  %s", _comment.c_str());
+  } else {
+    fprintf(out, "  %s", _xmlOuterTag.c_str());
+  }
+  
+  fprintf(out, "\n");
+          
+}
+
+////////////////////////////
+// print string val
+  
+void StatsField::_printStringVal(FILE *out)
+
+{
+
+  if (_interpretAsTime) {
+    RadxTime when(_stringVal);
+    if (when.utime() == RadxTime::NEVER) {
+      // not a valid time
+      return;
+    }
+    if (when.getYear() < 1971) {
+      // time not set
+      return;
+    }
   }
 
-  if (_params.debug) {
-    fprintf(out, "  :%s %s\n", _xmlOuterTag.c_str(), _xmlInnerTag.c_str());
+  string name(_xmlInnerTag);
+  int combinedLen = name.size() + _units.size();
+  int ntrim = combinedLen - 30;
+  name = name.substr(0, name.size() - ntrim);
+
+  char label[1024];
+  if (_units.size() == 0 || _units.find("unknown") == 0) {
+    sprintf(label, "%s", name.c_str());
   } else {
-    fprintf(out, "\n");
+    sprintf(label, "%s (%s)", name.c_str(), _units.c_str());
   }
+  label[30] = '\0';
+  fprintf(out, "%30s %43s", label, _stringVal.c_str());
+  
+  if (_comment.size() > 0) {
+    fprintf(out, "  %s", _comment.c_str());
+  } else {
+    fprintf(out, "  %s", _xmlOuterTag.c_str());
+  }
+  
+  fprintf(out, "\n");
+          
+}
+
+////////////////////////////////
+// format value appropriately
+  
+string StatsField::_formatVal(double val)
+  
+{
+
+  char text[1024];
+  
+  if (fabs(val) > 9999) {
+    sprintf(text, "%10.0f", val);
+    return text;
+  }
+
+  // boolean type
+
+  if (_entryType == Params::XML_ENTRY_BOOLEAN) {
+    if (val == 0.0) {
+      sprintf(text, "%10s", "false");
+      return text;
+    }
+    if (val == 1.0) {
+      sprintf(text, "%10s", "true");
+      return text;
+    }
+  }
+
+  sprintf(text, "%10.3f", val);
+  return text;
           
 }
 
@@ -177,17 +267,16 @@ void StatsField::printStatsDebug(FILE *out)
   
   fprintf(out, "Stats field xmlOuterTag: %s\n", _xmlOuterTag.c_str());
   if (_xmlInnerTag.size() > 0) {
-    fprintf(out, "  qualitfier: %s\n", _xmlInnerTag.c_str());
+    fprintf(out, "  innerTag: %s\n", _xmlInnerTag.c_str());
   }
-  fprintf(out, "  longName: %s\n", _longName.c_str());
   fprintf(out, "  units: %s\n", _units.c_str());
+  fprintf(out, "  comment: %s\n", _comment.c_str());
+  fprintf(out, "  okBoolean: %s\n", (_okBoolean?"Y":"N"));
+  fprintf(out, "  stringVal: %s\n", _stringVal.c_str());
   fprintf(out, "  mean: %g\n", _mean);
   fprintf(out, "  sdev: %g\n", _sdev);
   fprintf(out, "  min: %g\n", _min);
   fprintf(out, "  max: %g\n", _max);
-  // fprintf(out, "  nn: %g\n", _nn);
-  // fprintf(out, "  sum: %g\n", _sum);
-  // fprintf(out, "  sumSq: %g\n", _sumSq);
 
 }
 

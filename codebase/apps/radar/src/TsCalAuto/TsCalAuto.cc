@@ -1306,9 +1306,10 @@ void TsCalAuto::_setSiggenPower(double powerDbm)
 {
   char input[1024];
 
+  double delta = powerDbm - _params.siggen_max_power;
 
   if (_params.use_manual_siggen_control) {
-    cerr << "Set siggen power  to " << powerDbm  << " (dBm) " << endl;
+    cerr << "Set siggen power  to " << powerDbm  << " (dBm), delta: " << delta << " (dB)" << endl;
     fprintf(stdout, "Manual control - hit return when ready ...");
     fgets(input,1023,stdin);
     // const char *notused = fgets(input,1023,stdin);

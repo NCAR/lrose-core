@@ -81,17 +81,10 @@ public:
     double graph_min_val;
     double graph_max_val;
     char* comment;
+    tdrp_bool_t include_in_catalog_stats;
+    tdrp_bool_t catalog_omit_if_zero;
+    tdrp_bool_t catalog_interpret_as_time;
   } xml_entry_t;
-
-  typedef struct {
-    char* xml_outer_tag;
-    char* xml_inner_tag;
-    xml_entry_type_t entry_type;
-    tdrp_bool_t ok_boolean;
-    double minValidValue;
-    double maxValidValue;
-    char* comment;
-  } stats_field_t;
 
   ///////////////////////////
   // Member functions
@@ -469,9 +462,6 @@ public:
 
   tdrp_bool_t stats_write_latest_data_info;
 
-  stats_field_t *_stats_fields;
-  int stats_fields_n;
-
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -479,7 +469,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[58];
+  mutable TDRPtable _table[56];
 
   const char *_className;
 

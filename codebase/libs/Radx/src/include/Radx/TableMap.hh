@@ -56,13 +56,18 @@ public:
   TableMap();
   ~TableMap();
   void setDebug(bool debug); 
+
   int ImportTables();
   int ImportTables(unsigned int masterTableVersion, unsigned int generatingCenter,
-		   unsigned int localTableVersion);
+		   unsigned int localTableVersion, char *tablePath);
   int ImportTables2(unsigned int masterTableVersion, unsigned int generatingCenter,
 		   unsigned int localTableVersion);
+  int ImportTablesFromPath(unsigned int masterTableVersion, unsigned int generatingCenter,
+			   unsigned int localTableVersion, char *tablePath);
+
   TableMapElement Retrieve(unsigned short key);
   bool filled();
+  bool isWhiteSpace(string &str);
 
 private:
   std::map<unsigned short, TableMapElement> table;  // TODO: should be unordered_map
@@ -87,11 +92,12 @@ private:
 				 unsigned int generatingCenter,
 				 unsigned int localTableVersion);
   */
+
   int ReadTableB(string fileName);
   int ReadTableD(string fileName);
   int ImportTablesOld();
 
   bool _debug;
-
+  string _tablePath;
 };
 #endif
