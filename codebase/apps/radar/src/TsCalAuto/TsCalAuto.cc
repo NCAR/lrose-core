@@ -224,22 +224,43 @@ int TsCalAuto::_runFmqMode()
   _setSiggenRF(true);
   if(_params.set_sig_freq) _setSiggenFreq(_params.siggen_frequency);
 
-  double powerDbm = _params.siggen_max_power;
-  while (powerDbm >= _params.siggen_min_power) {
+  double powerDbm = 0.0;
+
+  if (_params.siggen_specify_power_sequence) {
     
-    _setSiggenPower(powerDbm);
+    // use specified power sequence
 
-    // get received powers
+    for (int jj = 0; jj < _params.siggen_power_sequence_n; jj++) {
+      powerDbm = _params._siggen_power_sequence[jj];
+      _setSiggenPower(powerDbm);
+      // get received powers
+      if (_sampleReceivedPowers(powerDbm)) {
+        return -1;
+      }
+    } // jj
 
-    if (_sampleReceivedPowers(powerDbm)) {
-      return -1;
-    }
+  } else {
 
-    // reduce power
+    // create power sequence
 
-    powerDbm -= _params.siggen_delta_power;
+    powerDbm = _params.siggen_max_power;
+    while (powerDbm >= _params.siggen_min_power) {
+    
+      _setSiggenPower(powerDbm);
+      
+      // get received powers
+      
+      if (_sampleReceivedPowers(powerDbm)) {
+        return -1;
+      }
+      
+      // reduce power
+      
+      powerDbm -= _params.siggen_delta_power;
+      
+    } // while
 
-  } // while
+  }
 
   // Turn off the siggen and get 4 more data points
 
