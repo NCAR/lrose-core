@@ -395,6 +395,7 @@ int Ncf2MdvTrans::_parseNc()
   _addGlobalAttrXmlChunk();
 
   // for forecast data, set the forecast_time
+  // and set data collection type to forecast data.
   
   if (_forecast_reference_time_found && _validTimes.size() == 1) {
     _mhdr.forecast_time = _mhdr.time_centroid;
