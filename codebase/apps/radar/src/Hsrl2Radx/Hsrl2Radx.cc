@@ -73,6 +73,13 @@ Hsrl2Radx::Hsrl2Radx(int argc, char **argv)
 
   OK = TRUE;
 
+  _calcs = NULL;
+  _calcsFilt = NULL;
+
+  _nBinsInRay = 0;
+  _nBinsPerGate = 0;
+  _nGates = 0;
+
   // set programe name
 
   _progName = "Hsrl2Radx";
@@ -112,10 +119,6 @@ Hsrl2Radx::Hsrl2Radx(int argc, char **argv)
     }
   }
 
-  _nBinsInRay = 0;
-  _nBinsPerGate = 0;
-  _nGates = 0;
-
 }
 
 // destructor
@@ -123,6 +126,14 @@ Hsrl2Radx::Hsrl2Radx(int argc, char **argv)
 Hsrl2Radx::~Hsrl2Radx()
 
 {
+
+  if (_calcs) {
+    delete _calcs;
+  }
+
+  if (_calcsFilt) {
+    delete _calcsFilt;
+  }
 
   // unregister process
 
@@ -141,6 +152,11 @@ int Hsrl2Radx::Run()
   if (_readCals()) {
     return -1;
   }
+
+  // create objects to calculate derived fields
+
+  _calcs = new DerFieldCalcs(_params, _cals);
+  _calcsFilt = new DerFieldCalcs(_params, _cals);
 
   // now run
 
@@ -525,15 +541,15 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
   ray->setNGates(_nGates);
 
   double rawGateSpacingKm = _params.raw_bin_spacing_km;
-  double gateSpacingKm = rawGateSpacingKm;
-  double startRangeKm = _params.raw_bin_start_range_km;
+  _gateSpacingKm = rawGateSpacingKm;
+  _startRangeKm = _params.raw_bin_start_range_km;
   
   if (_params.combine_bins_on_read) {
-    gateSpacingKm *= _nBinsPerGate;
-    startRangeKm += (gateSpacingKm - rawGateSpacingKm) / 2.0;
+    _gateSpacingKm *= _nBinsPerGate;
+    _startRangeKm += (_gateSpacingKm - rawGateSpacingKm) / 2.0;
   }
 
-  ray->setRangeGeom(startRangeKm, gateSpacingKm);
+  ray->setRangeGeom(_startRangeKm, _gateSpacingKm);
 
   // time
   
@@ -602,25 +618,25 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
 
   // add the raw fields
 
-  _addRawFieldToRay(ray, startRangeKm, gateSpacingKm,
+  _addRawFieldToRay(ray,
                     Names::CombinedHighCounts,
                     "counts",
                     Names::lidar_copolar_combined_backscatter_photon_count,
                     &rawRay.getCombinedHi()[0]);
 
-  _addRawFieldToRay(ray, startRangeKm, gateSpacingKm,
+  _addRawFieldToRay(ray,
                     Names::CombinedLowCounts,
                     "counts",
                     Names::lidar_copolar_combined_backscatter_photon_count,
                     &rawRay.getCombinedLo()[0]);
 
-  _addRawFieldToRay(ray, startRangeKm, gateSpacingKm,
+  _addRawFieldToRay(ray,
                     Names::MolecularCounts,
                     "counts",
                     Names::lidar_copolar_molecular_backscatter_photon_count,
                     &rawRay.getMolecular()[0]);
 
-  _addRawFieldToRay(ray, startRangeKm, gateSpacingKm,
+  _addRawFieldToRay(ray,
                     Names::CrossPolarCounts,
                     "counts",
                     Names::lidar_crosspolar_combined_backscatter_photon_count,
@@ -637,8 +653,6 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
 // Add fl32 field to rays
 
 void Hsrl2Radx::_addRawFieldToRay(RadxRay *ray,
-                                  double startRangeKm,
-                                  double gateSpacingKm,
                                   const string &name,
                                   const string &units,
                                   const string &standardName,
@@ -670,7 +684,7 @@ void Hsrl2Radx::_addRawFieldToRay(RadxRay *ray,
   
   field->setStandardName(standardName);
   field->setLongName(standardName);
-  field->setRangeGeom(startRangeKm, gateSpacingKm);
+  field->setRangeGeom(_startRangeKm, _gateSpacingKm);
   
 }
 
@@ -1330,63 +1344,60 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
   const RadxField *crossField = ray->getField(Names::CrossPolarCounts);
   assert(crossField != NULL);
 
-  // create object for derived fields
-  
-  DerFieldCalcs calcs(_params, _cals, nGates,
-                      hiField->getDataFl32(),
-                      loField->getDataFl32(),
-                      crossField->getDataFl32(),
-                      molField->getDataFl32(),
-                      htField->getDataFl32(),
-                      tempField->getDataFl32(),
-                      presField->getDataFl32(), 
-                      shotCount,
-                      power);
+  // calculate the derived fields
 
-  // calculate the fields
-
-  calcs.computeDerived();
+  _calcs->computeDerived(nGates,
+                         startRangeKm, gateSpacingKm,
+                         hiField->getDataFl32(),
+                         loField->getDataFl32(),
+                         crossField->getDataFl32(),
+                         molField->getDataFl32(),
+                         htField->getDataFl32(),
+                         tempField->getDataFl32(),
+                         presField->getDataFl32(), 
+                         shotCount,
+                         power);
 
   // load fields with the results
 
   RadxField *volDepolField =
     ray->addField(Names::VolumeDepolRatio, "", nGates, Radx::missingFl32, 
-                  calcs.getVolDepol().data(), true);
+                  _calcs->getVolDepol().data(), true);
   volDepolField->setStandardName(Names::lidar_volume_depolarization_ratio);
   volDepolField->setLongName(Names::lidar_volume_depolarization_ratio);
   volDepolField->setRangeGeom(startRangeKm, gateSpacingKm);
         
   RadxField *backscatRatioField =
     ray->addField(Names::BackScatterRatio, "", nGates, Radx::missingFl32, 
-                  calcs.getBackscatRatio().data(), true);
+                  _calcs->getBackscatRatio().data(), true);
   backscatRatioField->setStandardName(Names::lidar_backscatter_ratio);
   backscatRatioField->setLongName(Names::lidar_backscatter_ratio);
   backscatRatioField->setRangeGeom(startRangeKm, gateSpacingKm);
     
   RadxField *partDepolField =
     ray->addField(Names::ParticleDepolRatio, "", nGates, Radx::missingFl32,
-                  calcs.getPartDepol().data(), true);
+                  _calcs->getPartDepol().data(), true);
   partDepolField->setLongName(Names::lidar_particle_depolarization_ratio);
   partDepolField->setStandardName(Names::lidar_particle_depolarization_ratio);
   partDepolField->setRangeGeom(startRangeKm, gateSpacingKm);
     
   RadxField *backscatCoeffField =
     ray->addField(Names::BackScatterCoeff, "m-1.sr-1", nGates, Radx::missingFl32,
-                  calcs.getBackscatCoeff().data(), true);
+                  _calcs->getBackscatCoeff().data(), true);
   backscatCoeffField->setStandardName(Names::lidar_backscatter_coefficient);
   backscatCoeffField->setLongName(Names::lidar_backscatter_coefficient);
   backscatCoeffField->setRangeGeom(startRangeKm, gateSpacingKm);
    
   RadxField *extinctionField =
     ray->addField(Names::ExtinctionCoeff, "m-1", nGates, Radx::missingFl32, 
-                  calcs.getExtinctionCoeff().data(), true);
+                  _calcs->getExtinctionCoeff().data(), true);
   extinctionField->setStandardName(Names::lidar_extinction_coefficient);
   extinctionField->setLongName(Names::lidar_extinction_coefficient);
   extinctionField->setRangeGeom(startRangeKm, gateSpacingKm);
 
   RadxField *optDepthField =
     ray->addField(Names::OpticalDepth, "", nGates, Radx::missingFl32, 
-                  calcs.getOpticalDepth().data(), true);
+                  _calcs->getOpticalDepth().data(), true);
   optDepthField->setStandardName(Names::lidar_optical_depth);
   optDepthField->setLongName(Names::lidar_optical_depth);
   optDepthField->setRangeGeom(startRangeKm, gateSpacingKm);
@@ -1436,80 +1447,77 @@ void Hsrl2Radx::_addFilteredMoments(RadxRay *ray)
   const RadxField *crossField = ray->getField(Names::CrossPolarCounts_F);
   assert(crossField != NULL);
 
-  // create object for derived fields
+  // calculate the derived fields
   
-  DerFieldCalcs calcs(_params, _cals, nGates,
-                      hiField->getDataFl32(),
-                      loField->getDataFl32(),
-                      crossField->getDataFl32(),
-                      molField->getDataFl32(),
-                      htField->getDataFl32(),
-                      tempField->getDataFl32(),
-                      presField->getDataFl32(), 
-                      shotCount,
-                      power);
-
-  // calculate the fields
-
-  calcs.computeDerived();
+  _calcsFilt->computeDerived(nGates,
+                             startRangeKm, gateSpacingKm,
+                             hiField->getDataFl32(),
+                             loField->getDataFl32(),
+                             crossField->getDataFl32(),
+                             molField->getDataFl32(),
+                             htField->getDataFl32(),
+                             tempField->getDataFl32(),
+                             presField->getDataFl32(), 
+                             shotCount,
+                             power);
 
   // apply speckle filter on results
 
   if (_params.apply_speckle_filter) {
     _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len, 
-                               calcs.getVolDepol().data());
+                               _calcsFilt->getVolDepol().data());
     _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
-                               calcs.getPartDepol().data());
+                               _calcsFilt->getPartDepol().data());
     _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
-                               calcs.getBackscatRatio().data());
+                               _calcsFilt->getBackscatRatio().data());
     _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
-                               calcs.getBackscatCoeff().data());
+                               _calcsFilt->getBackscatCoeff().data());
     _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
-                               calcs.getExtinctionCoeff().data());
+                               _calcsFilt->getExtinctionCoeff().data());
     _applyMissingSpeckleFilter(nGates, _params.speckle_filter_len,
-                               calcs.getOpticalDepth().data());
+                               _calcsFilt->getOpticalDepth().data());
   }
 
   // load fields with the results
 
   RadxField *volDepolField =
     ray->addField(Names::VolumeDepolRatio_F, "", nGates, Radx::missingFl32, 
-                  calcs.getVolDepol().data(), true);
+                  _calcsFilt->getVolDepol().data(), true);
   volDepolField->setStandardName(Names::lidar_volume_depolarization_ratio);
   volDepolField->setLongName(Names::lidar_volume_depolarization_ratio);
   volDepolField->setRangeGeom(startRangeKm, gateSpacingKm);
         
   RadxField *backscatRatioField =
     ray->addField(Names::BackScatterRatio_F, "", nGates, Radx::missingFl32, 
-                  calcs.getBackscatRatio().data(), true);
+                  _calcsFilt->getBackscatRatio().data(), true);
   backscatRatioField->setStandardName(Names::lidar_backscatter_ratio);
   backscatRatioField->setLongName(Names::lidar_backscatter_ratio);
   backscatRatioField->setRangeGeom(startRangeKm, gateSpacingKm);
     
   RadxField *partDepolField =
     ray->addField(Names::ParticleDepolRatio_F, "", nGates, Radx::missingFl32,
-                  calcs.getPartDepol().data(), true);
+                  _calcsFilt->getPartDepol().data(), true);
   partDepolField->setLongName(Names::lidar_particle_depolarization_ratio);
   partDepolField->setStandardName(Names::lidar_particle_depolarization_ratio);
   partDepolField->setRangeGeom(startRangeKm, gateSpacingKm);
     
   RadxField *backscatCoeffField =
     ray->addField(Names::BackScatterCoeff_F, "m-1.sr-1", nGates, Radx::missingFl32,
-                  calcs.getBackscatCoeff().data(), true);
+                  _calcsFilt->getBackscatCoeff().data(), true);
   backscatCoeffField->setStandardName(Names::lidar_backscatter_coefficient);
   backscatCoeffField->setLongName(Names::lidar_backscatter_coefficient);
   backscatCoeffField->setRangeGeom(startRangeKm, gateSpacingKm);
    
   RadxField *extinctionField =
     ray->addField(Names::ExtinctionCoeff_F, "m-1", nGates, Radx::missingFl32, 
-                  calcs.getExtinctionCoeff().data(), true);
+                  _calcsFilt->getExtinctionCoeff().data(), true);
   extinctionField->setStandardName(Names::lidar_extinction_coefficient);
   extinctionField->setLongName(Names::lidar_extinction_coefficient);
   extinctionField->setRangeGeom(startRangeKm, gateSpacingKm);
 
   RadxField *optDepthField =
     ray->addField(Names::OpticalDepth_F, "", nGates, Radx::missingFl32, 
-                  calcs.getOpticalDepth().data(), true);
+                  _calcsFilt->getOpticalDepth().data(), true);
   optDepthField->setStandardName(Names::lidar_optical_depth);
   optDepthField->setLongName(Names::lidar_optical_depth);
   optDepthField->setRangeGeom(startRangeKm, gateSpacingKm);

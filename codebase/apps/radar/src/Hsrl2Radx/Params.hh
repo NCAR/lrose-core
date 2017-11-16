@@ -446,6 +446,12 @@ public:
 
   int counts_censoring_threshold;
 
+  double optical_depth_reference_range_m;
+
+  int optical_depth_n_reference_obs;
+
+  double optical_depth_reference_value;
+
   int optical_depth_median_filter_len;
 
   tdrp_bool_t apply_speckle_filter;
@@ -519,7 +525,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[91];
+  mutable TDRPtable _table[94];
 
   const char *_className;
 

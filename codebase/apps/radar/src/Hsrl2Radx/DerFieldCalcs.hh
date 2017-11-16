@@ -40,6 +40,7 @@
 #include <string>
 #include <Radx/RadxTime.hh>
 #include <vector>
+#include <deque>
 #include <Radx/Radx.hh>
 
 using namespace std;
@@ -51,21 +52,22 @@ public:
   // constructor
 
   DerFieldCalcs(const Params &params,
-                const FullCals &fullCals,
-                size_t nGates,
-                const Radx::fl32 *hiData,
-                const Radx::fl32 *loData, 
-                const Radx::fl32 *crossData,
-                const Radx::fl32 *molData,
-                const Radx::fl32 *htM,
-                const Radx::fl32 *tempK, 
-                const Radx::fl32 *presHpa,
-                double shotCount, 
-                double power);
+                const FullCals &fullCals);
     
   // compute derived quantities
 
-  void computeDerived();
+  void computeDerived(size_t nGates,
+                      double startRangeKm,
+                      double gateSpacingKm,
+                      const Radx::fl32 *hiData,
+                      const Radx::fl32 *loData, 
+                      const Radx::fl32 *crossData,
+                      const Radx::fl32 *molData,
+                      const Radx::fl32 *htM,
+                      const Radx::fl32 *tempK, 
+                      const Radx::fl32 *presHpa,
+                      double shotCount, 
+                      double power);
   
   // get methods
   
@@ -88,7 +90,10 @@ private:
   // input data
   
   size_t _nGates;
+  double _startRangeKm;
+  double _gateSpacingKm;
   size_t _nBinsPerGate;
+
   vector<Radx::fl32> _hiData;
   vector<Radx::fl32> _loData;
   vector<Radx::fl32> _crossData;
@@ -112,6 +117,10 @@ private:
   vector<Radx::fl32> _crossRate;
   vector<Radx::fl32> _molRate;
   vector<Radx::fl32> _combRate;
+
+  // computing the optical depth at the calibration range
+
+  deque<Radx::fl32> _refOptDepth;
   
   // apply corrections
 
@@ -183,6 +192,8 @@ private:
 
   Radx::fl32 _computeOpticalDepth(double pressHpa, double tempK,
                                   double molRate, double scanAdj);
+  void _filterOpticalDepth();
+  double _computeOptDepthRefOffset(double scanAdj);
 
   // compute extinction
 
@@ -196,10 +207,6 @@ private:
                              bool includeCombined = false);
 
   void _printDerivedFields(ostream &out);
-
-  // filtering
-
-  void _filterOpticalDepth();
 
 };
 #endif

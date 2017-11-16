@@ -44,7 +44,7 @@ debug = DEBUG_OFF;
 // Type: string
 //
 
-instance = "raw";
+instance = "test";
 
 //======================================================================
 //
@@ -260,8 +260,8 @@ gate_spacing_km = 0.0075;
 //
 // OPTION TO READ GEOREF DATA FROM AIRCRAFT SYSTEM.
 //
-// If not read from aircraft, need to set the instrument location from 
-//   the config file.
+// If the georef data is available, it will be read in by AcGeoref2Spdb, 
+//   and stored in an SPDB data base. We read it in from that location.
 //
 //======================================================================
  
@@ -276,8 +276,49 @@ gate_spacing_km = 0.0075;
 // Type: boolean
 //
 
-read_georef_data_from_aircraft_system = FALSE;
+read_georef_data_from_aircraft_system = TRUE;
 
+///////////// georef_data_spdb_url ////////////////////
+//
+// SPDB url for aircraft georef data.
+//
+// Can take the form of a local directory path, or a full url of the 
+//   form:
+//
+// 	'spdbp:://hostname::dir_path'
+//
+// If the dir_path starts with '.' or '/', it specifies a relative or 
+//   absolute path respectively. If not, it specifies a path relative to 
+//   '$DATA_DIR'.
+//
+//
+// Type: string
+//
+
+georef_data_spdb_url = "$(DATA_DIR)/spdb/ac_georef/iwg1";
+
+///////////// georef_data_search_margin_secs //////////
+//
+// Search margin for finding georeference data (secs).
+//
+// If no data is found within this time margin, we do not set the 
+//   location.
+//
+//
+// Type: int
+//
+
+georef_data_search_margin_secs = 10;
+
+//======================================================================
+//
+// FIXED LOCATION PARAMETERS.
+//
+// If not read from aircraft, need to set the instrument location from 
+//   the config file.
+//
+//======================================================================
+ 
 ///////////// instrument_latitude_deg /////////////////
 //
 // Instrument latitude (deg).
@@ -288,7 +329,7 @@ read_georef_data_from_aircraft_system = FALSE;
 // Type: double
 //
 
-instrument_latitude_deg = 40.0;
+instrument_latitude_deg = 40;
 
 ///////////// instrument_longitude_deg ////////////////
 //
@@ -380,7 +421,7 @@ combine_bins_on_read = TRUE;
 // Type: int
 //
 
-n_bins_per_gate = 4;
+n_bins_per_gate = 2;
 
 ///////////// raw_bin_start_range_km //////////////////
 //
@@ -411,41 +452,53 @@ raw_bin_spacing_km = 0.0075;
 //
 // Name of combined_hi field in netCDF file.
 //
+// This name is also used for the field read in from the instrument raw 
+//   FMQ in real-time.
+//
 //
 // Type: string
 //
 
-combined_hi_field_name = "combined_hi";
+combined_hi_field_name = "CombinedHiCount";
 
 ///////////// combined_lo_field_name //////////////////
 //
 // Name of combined_lo field in netCDF file.
 //
+// This name is also used for the field read in from the instrument raw 
+//   FMQ in real-time.
+//
 //
 // Type: string
 //
 
-combined_lo_field_name = "combined_lo";
+combined_lo_field_name = "CombinedLoCount";
 
 ///////////// molecular_field_name ////////////////////
 //
 // Name of molecular field in netCDF file.
 //
+// This name is also used for the field read in from the instrument raw 
+//   FMQ in real-time.
+//
 //
 // Type: string
 //
 
-molecular_field_name = "molecular";
+molecular_field_name = "MolecularCount";
 
 ///////////// cross_field_name ////////////////////////
 //
 // Name of cross field in netCDF file.
 //
+// This name is also used for the field read in from the instrument raw 
+//   FMQ in real-time.
+//
 //
 // Type: string
 //
 
-cross_field_name = "cross";
+cross_field_name = "CrossCount";
 
 ///////////// baseline_calibration_path ///////////////
 //
@@ -455,7 +508,7 @@ cross_field_name = "cross";
 // Type: string
 //
 
-baseline_calibration_path = "./cals/baseline_correction_20150601T0000.blc";
+baseline_calibration_path = "$(PROJ_DIR)/calfiles/baseline_correction_20171019T2000.blc";
 
 ///////////// diff_default_geofile_path ///////////////
 //
@@ -465,7 +518,7 @@ baseline_calibration_path = "./cals/baseline_correction_20150601T0000.blc";
 // Type: string
 //
 
-diff_default_geofile_path = "./cals/diff_default_geofile_20120201T0000.geo";
+diff_default_geofile_path = "$(PROJ_DIR)/calfiles/diff_default_geofile_20171018T0000.geo";
 
 ///////////// geofile_default_path ////////////////////
 //
@@ -475,7 +528,7 @@ diff_default_geofile_path = "./cals/diff_default_geofile_20120201T0000.geo";
 // Type: string
 //
 
-geofile_default_path = "./cals/geofile_default_20150601T0000.geo";
+geofile_default_path = "$(PROJ_DIR)/calfiles/geofile_default_20150601T0000.geo";
 
 ///////////// afterpulse_default_path /////////////////
 //
@@ -485,7 +538,7 @@ geofile_default_path = "./cals/geofile_default_20150601T0000.geo";
 // Type: string
 //
 
-afterpulse_default_path = "./cals/afterpulse_default_20061001T0000.ap";
+afterpulse_default_path = "$(PROJ_DIR)/calfiles/afterpulse_default_20061001T0000.ap";
 
 ///////////// calvals_gvhsrl_path /////////////////////
 //
@@ -495,7 +548,7 @@ afterpulse_default_path = "./cals/afterpulse_default_20061001T0000.ap";
 // Type: string
 //
 
-calvals_gvhsrl_path = "./cals/calvals_gvhsrl.txt";
+calvals_gvhsrl_path = "$(PROJ_DIR)/calfiles/calvals_gvhsrl.txt";
 
 ///////////// combined_hi_dead_time_name //////////////
 //
@@ -557,6 +610,69 @@ bin_width_name = "binwidth";
 
 scan_adjustment_name = "i2_scan_adjustment";
 
+///////////// ngates_for_background_correction ////////
+//
+// The background correction used data from the end of each ray.
+//
+// This is the number of gates used to compute the background value.
+//
+//
+// Type: int
+//
+
+ngates_for_background_correction = 100;
+
+///////////// counts_censoring_threshold //////////////
+//
+// Threshold the count fields below this value.
+//
+// This helps to remove the noise from the system.
+//
+//
+// Type: int
+//
+
+counts_censoring_threshold = 4;
+
+///////////// optical_depth_median_filter_len /////////
+//
+// The optical depth field is filtered using a median filter.
+//
+// This is done prior to computing the extinction coefficient. Set the 
+//   length to 1 for no filtering.
+//
+//
+// Type: int
+//
+
+optical_depth_median_filter_len = 3;
+
+///////////// apply_speckle_filter ////////////////////
+//
+// Option to apply a speckle filter to the output data.
+//
+// If the length of the good data, between gates with missing values, is 
+//   less than this, the data in between is set to missing.
+//
+//
+// Type: boolean
+//
+
+apply_speckle_filter = TRUE;
+
+///////////// speckle_filter_len //////////////////////
+//
+// The length of the speckle filter.
+//
+// If the length of the good data, between missing values, is less than 
+//   this, the data is set to missing.
+//
+//
+// Type: int
+//
+
+speckle_filter_len = 2;
+
 //======================================================================
 //
 // OUTPUT FMQ DETAILS.
@@ -575,7 +691,7 @@ scan_adjustment_name = "i2_scan_adjustment";
 // Type: string
 //
 
-output_fmq_url = "fmqp:://localhost::/tmp/fmq/hsrl_moments";
+output_fmq_url = "/tmp/fmq/hsrl_moments_test";
 
 ///////////// output_fmq_size /////////////////////////
 //
@@ -641,139 +757,6 @@ nrays_for_params = 10;
 //
 
 write_blocking = FALSE;
-
-//======================================================================
-//
-// OPTION TO SPECIFY FIELD NAMES FOR OUTPUT FILES.
-//
-//======================================================================
- 
-///////////// set_output_fields ///////////////////////
-//
-// Set the field names and output encoding.
-//
-// If false, all fields will be used.
-//
-//
-// Type: boolean
-//
-
-set_output_fields = TRUE;
-
-///////////// output_fields ///////////////////////////
-//
-// Output field details.
-//
-// Set the details for the output fields. The output_field_name is the 
-//   ndtCDF variable name. Set the long name to a more descriptive name. 
-//   Set the standard name to the CF standard name for this field. If the 
-//   long name or standard name are empty, the existing names are used.
-//
-//
-// Type: struct
-//   typedef struct {
-//      string input_field_name;
-//      string output_field_name;
-//      string long_name;
-//      string standard_name;
-//      string output_units;
-//   }
-//
-// 1D array - variable length.
-//
-
-output_fields = {
-  {
-    input_field_name = "beta_a_backscat",
-    output_field_name = "beta_a_backscat",
-    long_name = "particulate_backscatter_cross_section_per_unit_volume",
-    standard_name = "beta_a_backscat",
-    output_units = "1/m.st"
-  }
-  ,
-  {
-    input_field_name = "extinction",
-    output_field_name = "extinction",
-    long_name = "aerosol_plus_molecular_extinction_profile",
-    standard_name = "aerosol_plus_molecular_extinction_profile",
-    output_units = "1/km"
-  }
-  ,
-  {
-    input_field_name = "od",
-    output_field_name = "od",
-    long_name = "optical_depth",
-    standard_name = "aerosol_plus_molecular_optical_depth",
-    output_units = ""
-  }
-  ,
-  {
-    input_field_name = "linear_depol",
-    output_field_name = "linear_depol",
-    long_name = "linear_depolarization_ratio_for_particulate",
-    standard_name = "linear_depolarization_ratio",
-    output_units = ""
-  }
-  ,
-  {
-    input_field_name = "temperature_profile",
-    output_field_name = "temperature_profile",
-    long_name = "temperature_profile",
-    standard_name = "temperature_profile",
-    output_units = "K"
-  }
-  ,
-  {
-    input_field_name = "pressure_profile",
-    output_field_name = "pressure_profile",
-    long_name = "pressure_profile",
-    standard_name = "pressure_profile",
-    output_units = "hpa"
-  }
-};
-
-///////////// write_other_fields_unchanged ////////////
-//
-// Option to write out the unspecified fields as they are.
-//
-// If false, only the fields listed in output_fields will be written. If 
-//   this is true, all other fields will be written unchanged.
-//
-//
-// Type: boolean
-//
-
-write_other_fields_unchanged = FALSE;
-
-///////////// exclude_specified_fields ////////////////
-//
-// Option to exclude fields in the specified list.
-//
-// If true, the specified fields will be excluded. This may be easier 
-//   than specifiying all of the fields to be included, if that list is 
-//   very long.
-//
-//
-// Type: boolean
-//
-
-exclude_specified_fields = FALSE;
-
-///////////// excluded_fields /////////////////////////
-//
-// List of fields to be excluded.
-//
-// List the names to be excluded.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-excluded_fields = {
- "DBZ",
- "VEL"
-};
 
 //======================================================================
 //
@@ -884,32 +867,6 @@ comment_override = "";
 //
 
 author_override = "";
-
-//======================================================================
-//
-// OUTPUT FORMAT.
-//
-// Files are written in CfRadial.
-//
-//======================================================================
- 
-///////////// netcdf_style ////////////////////////////
-//
-// NetCDF style - if output_format is CFRADIAL.
-//
-// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
-//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
-//
-//
-// Type: enum
-// Options:
-//     CLASSIC
-//     NC64BIT
-//     NETCDF4
-//     NETCDF4_CLASSIC
-//
-
-netcdf_style = NETCDF4;
 
 //======================================================================
 //
