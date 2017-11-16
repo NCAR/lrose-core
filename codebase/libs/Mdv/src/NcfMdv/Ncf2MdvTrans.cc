@@ -398,6 +398,7 @@ int Ncf2MdvTrans::_parseNc()
   
   if (_forecast_reference_time_found && _validTimes.size() == 1) {
     _mhdr.forecast_time = _mhdr.time_centroid;
+    _mhdr.data_collection_type = Mdvx::DATA_FORECAST;
     if (_mhdr.forecast_time != _mhdr.time_gen + _mhdr.forecast_delta) {
       cerr << "WARNING - Ncf2MdvTrans::_parseNc" << endl;
       cerr << "  Times mismatch" << endl;
