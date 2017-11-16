@@ -1165,6 +1165,42 @@ using namespace std;
     tt->single_val.i = 0;
     tt++;
     
+    // Parameter 'optical_depth_reference_range_m'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("optical_depth_reference_range_m");
+    tt->descr = tdrpStrDup("Range to gate for the reference optical depth.");
+    tt->help = tdrpStrDup("We use this to calibrate the optical depth. We compute a running mean of the measured optical depth for this range, and then adjust the measured values relative to the reference value.");
+    tt->val_offset = (char *) &optical_depth_reference_range_m - &_start_;
+    tt->single_val.d = 100;
+    tt++;
+    
+    // Parameter 'optical_depth_n_reference_obs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("optical_depth_n_reference_obs");
+    tt->descr = tdrpStrDup("Number of observations for computing the reference optical depth.");
+    tt->help = tdrpStrDup("We compute a running mean to determine the reference optical depth.");
+    tt->val_offset = (char *) &optical_depth_n_reference_obs - &_start_;
+    tt->single_val.i = 50;
+    tt++;
+    
+    // Parameter 'optical_depth_reference_value'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("optical_depth_reference_value");
+    tt->descr = tdrpStrDup("Optical depth at the reference range.");
+    tt->help = tdrpStrDup("See optical_depth_reference_range_m.");
+    tt->val_offset = (char *) &optical_depth_reference_value - &_start_;
+    tt->single_val.d = 0.1;
+    tt++;
+    
     // Parameter 'optical_depth_median_filter_len'
     // ctype is 'int'
     

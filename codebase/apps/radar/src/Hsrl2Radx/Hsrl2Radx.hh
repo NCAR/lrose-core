@@ -47,6 +47,8 @@
 #include <Radx/Radx.hh>
 #include <physics/IcaoStdAtmos.hh>
 
+class DerFieldCalcs;
+
 class RadxVol;
 class RadxRay;
 class RadxFile;
@@ -93,6 +95,12 @@ private:
   int _nBinsPerGate;
   int _nGates;
 
+  double _gateSpacingKm;
+  double _startRangeKm;
+
+  DerFieldCalcs *_calcs;
+  DerFieldCalcs *_calcsFilt;
+
   int _readCals();
   int _runFilelist();
   int _runArchive();
@@ -106,8 +114,6 @@ private:
   RadxRay *_convertRawToRadx(HsrlRawRay &rawRay);
 
   void _addRawFieldToRay(RadxRay *ray,
-                         double startRangeKm,
-                         double gateSpacingKm,
                          const string &name,
                          const string &units,
                          const string &standardName,

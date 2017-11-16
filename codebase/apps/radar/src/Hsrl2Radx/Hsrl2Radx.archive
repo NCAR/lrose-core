@@ -421,7 +421,7 @@ combine_bins_on_read = TRUE;
 // Type: int
 //
 
-n_bins_per_gate = 4;
+n_bins_per_gate = 2;
 
 ///////////// raw_bin_start_range_km //////////////////
 //
@@ -610,6 +610,18 @@ bin_width_name = "binwidth";
 
 scan_adjustment_name = "i2_scan_adjustment";
 
+///////////// ngates_for_background_correction ////////
+//
+// The background correction used data from the end of each ray.
+//
+// This is the number of gates used to compute the background value.
+//
+//
+// Type: int
+//
+
+ngates_for_background_correction = 100;
+
 ///////////// counts_censoring_threshold //////////////
 //
 // Threshold the count fields below this value.
@@ -621,6 +633,44 @@ scan_adjustment_name = "i2_scan_adjustment";
 //
 
 counts_censoring_threshold = 3;
+
+///////////// optical_depth_reference_range_m /////////
+//
+// Range to gate for the reference optical depth.
+//
+// We use this to calibrate the optical depth. We compute a running mean 
+//   of the measured optical depth for this range, and then adjust the 
+//   measured values relative to the reference value.
+//
+//
+// Type: double
+//
+
+optical_depth_reference_range_m = 100;
+
+///////////// optical_depth_n_reference_obs ///////////
+//
+// Number of observations for computing the reference optical depth.
+//
+// We compute a running mean to determine the reference optical depth.
+//
+//
+// Type: int
+//
+
+optical_depth_n_reference_obs = 20;
+
+///////////// optical_depth_reference_value ///////////
+//
+// Optical depth at the reference range.
+//
+// See optical_depth_reference_range_m.
+//
+//
+// Type: double
+//
+
+optical_depth_reference_value = 0.4;
 
 ///////////// optical_depth_median_filter_len /////////
 //
@@ -939,7 +989,7 @@ site_name = "unknown";
 // Type: string
 //
 
-output_dir = "$(DATA_DIR)/cfradial/hsrl_moments";
+output_dir = "$(DATA_DIR)/cfradial/hsrl_moments2";
 
 ///////////// output_filename_mode ////////////////////
 //

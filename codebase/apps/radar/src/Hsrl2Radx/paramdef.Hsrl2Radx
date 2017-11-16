@@ -331,6 +331,24 @@ paramdef int {
   p_help = "This helps to remove the noise from the system.";
 } counts_censoring_threshold;
 
+paramdef double {
+  p_default = 100.0;
+  p_descr = "Range to gate for the reference optical depth.";
+  p_help = "We use this to calibrate the optical depth. We compute a running mean of the measured optical depth for this range, and then adjust the measured values relative to the reference value.";
+} optical_depth_reference_range_m;
+
+paramdef int {
+  p_default = 50;
+  p_descr = "Number of observations for computing the reference optical depth.";
+  p_help = "We compute a running mean to determine the reference optical depth.";
+} optical_depth_n_reference_obs;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Optical depth at the reference range.";
+  p_help = "See optical_depth_reference_range_m.";
+} optical_depth_reference_value;
+
 paramdef int {
   p_default = 5;
   p_descr = "The optical depth field is filtered using a median filter.";

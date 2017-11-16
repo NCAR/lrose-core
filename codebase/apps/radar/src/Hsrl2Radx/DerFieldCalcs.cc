@@ -36,7 +36,7 @@
 #include "FullCals.hh"
 #include <Radx/RadxArray.hh>
 #include <assert.h>
-#include <math.h>  
+#include <math.h>
 #include <iostream>
 #include <cmath>
 #include <cassert>
@@ -55,35 +55,58 @@ const double DerFieldCalcs::_depolFactor = 0.000365;
 // constructor
 
 DerFieldCalcs::DerFieldCalcs(const Params &params,
-                             const FullCals &fullCals,
-                             size_t nGates,
-                             const Radx::fl32 *hiData,
-                             const Radx::fl32 *loData, 
-                             const Radx::fl32 *crossData,
-                             const Radx::fl32 *molData,
-                             const Radx::fl32 *htM,
-                             const Radx::fl32 *tempK, 
-                             const Radx::fl32 *presHpa,
-                             double shotCount, 
-                             double power) :
+                             const FullCals &fullCals) :
   _params(params),
-  _fullCals(fullCals),
-  _nGates(nGates),
-  _shotCount(shotCount),
-  _power(power)
+  _fullCals(fullCals)
 
 {
 
+}
+
+/////////////////////////////////////////////////////////////////
+// do calculations for derived fields
+
+void DerFieldCalcs::computeDerived(size_t nGates,
+                                   double startRangeKm,
+                                   double gateSpacingKm,
+                                   const Radx::fl32 *hiData,
+                                   const Radx::fl32 *loData, 
+                                   const Radx::fl32 *crossData,
+                                   const Radx::fl32 *molData,
+                                   const Radx::fl32 *htM,
+                                   const Radx::fl32 *tempK, 
+                                   const Radx::fl32 *presHpa,
+                                   double shotCount, 
+                                   double power)
+
+{
+
+  // init
+
+  _nGates = nGates;
+  _startRangeKm = startRangeKm;
+  _gateSpacingKm = gateSpacingKm;
+  _shotCount = shotCount;
+  _power = power;
+  
   // load vectors
 
+  _hiData.resize(nGates);
+  _loData.resize(nGates);
+  _crossData.resize(nGates);
+  _molData.resize(nGates);
+  _htM.resize(nGates);
+  _tempK.resize(nGates);
+  _presHpa.resize(nGates);
+
   for(size_t igate = 0; igate < nGates; igate++) {
-    _hiData.push_back(hiData[igate]);
-    _loData.push_back(loData[igate]);
-    _crossData.push_back(crossData[igate]);
-    _molData.push_back(molData[igate]);
-    _htM.push_back(htM[igate]);
-    _tempK.push_back(tempK[igate]);
-    _presHpa.push_back(presHpa[igate]);
+    _hiData[igate] = hiData[igate];
+    _loData[igate] = loData[igate];
+    _crossData[igate] = crossData[igate];
+    _molData[igate] = molData[igate];
+    _htM[igate] = htM[igate];
+    _tempK[igate] = tempK[igate];
+    _presHpa[igate] = presHpa[igate];
   }
   
   // set bins per gate
@@ -92,6 +115,83 @@ DerFieldCalcs::DerFieldCalcs(const Params &params,
   if (_params.combine_bins_on_read) {
     _nBinsPerGate = _params.n_bins_per_gate;
   }
+  
+  // apply corrections
+  
+  _applyCorr();
+
+  // init arrays
+
+  _initDerivedArrays();
+  
+  // vol depol
+
+  for(size_t igate=0;igate<_nGates;igate++) {
+    _volDepol[igate] = _computeVolDepol(_crossRate[igate], 
+                                        _combRate[igate]);
+  }
+  
+  // backscatter ratio
+  
+  for(size_t igate=0;igate<_nGates;igate++) {
+    _backscatRatio[igate] = _computeBackscatRatio(_combRate[igate], 
+                                                  _molRate[igate]);
+  }
+  
+  // particle depol
+  
+  for(size_t igate=0;igate<_nGates;igate++) {
+    _partDepol[igate] = _computePartDepol(_volDepol[igate],
+                                          _backscatRatio[igate]);
+  }
+  
+  // backscatter coefficient
+  
+  for(size_t igate=0;igate<_nGates;igate++) {
+    _backscatCoeff[igate] = _computeBackscatCoeff(_presHpa[igate],
+                                                  _tempK[igate], 
+                                                  _backscatRatio[igate]);
+  }
+
+  // optical depth
+
+  // get cal adjustment
+  
+  double scanAdj = 1;
+  CalReader scanAdjustCal = _fullCals.getScanAdj();
+  if (scanAdjustCal.dataTypeisNum()) {
+    int binPos = _fullCals.getBinPos();
+    const vector<vector<double> > &dataNum = scanAdjustCal.getDataNum();
+    if(dataNum[binPos].size() == 1) {
+      scanAdj = dataNum[binPos][0];
+    }
+  }
+
+  double optDepthOffset = _computeOptDepthRefOffset(scanAdj);
+  for(size_t igate = 0; igate < _nGates; igate++) {
+    double optDepth = _computeOpticalDepth(_presHpa[igate], _tempK[igate],
+                                           _molRate[igate], scanAdj);
+    _opticalDepth[igate] = optDepth + optDepthOffset;
+  }
+
+  // filter the optical depth
+
+  _filterOpticalDepth();
+
+  // extinction
+
+  int filterHalf = 2;
+  for(size_t igate = filterHalf; igate < _nGates - filterHalf; igate++) {
+    _extinction[igate] = 
+      _computeExtinctionCoeff(_opticalDepth[igate - filterHalf],
+                              _opticalDepth[igate + filterHalf],
+                              _htM[igate - filterHalf],
+                              _htM[igate + filterHalf]);
+  }
+                              
+  // if(_params.debug >= Params::DEBUG_EXTRA) {
+  //   _printDerivedFields(cerr);
+  // }
 
 }
 
@@ -338,118 +438,6 @@ void DerFieldCalcs::_applyGeoCorr()
 }
   
 /////////////////////////////////////////////////////////////////
-// print diagnostics
-
-void DerFieldCalcs::_printRateDiagnostics(const string &label,
-                                          bool includeCombined /* = false */)
-{
-  if(_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "===== RATES FOR: " << label << "=====" << endl;
-    for(size_t igate = 350; igate < 360; igate++) {
-      cerr << "igate, hiRate, loRate, crossRate, molRate, combRate: "
-           << igate << ", "
-           << _hiRate[igate] << ", "
-           << _loRate[igate] << ", "
-           << _crossRate[igate] << ", "
-           << _molRate[igate] << ", "
-           << _combRate[igate] << endl;
-    } // igate
-  }
-}
-  
-/////////////////////////////////////////////////////////////////
-// print derived fields
-
-void DerFieldCalcs::_printDerivedFields(ostream &out)
-{
-  for(size_t igate = 0; igate < _nGates; igate++) {
-    out << "gate, backScatRatio, backScatCoeff, volDepol, partDepol, optDepth, exctint: "
-        << igate << ", "
-        << _backscatRatio[igate] << ", "
-        << _backscatCoeff[igate] << ", "
-        << _volDepol[igate] << ", "
-        << _partDepol[igate] << ", "
-        << _opticalDepth[igate] << ", "
-        << _extinction[igate] << endl;
-  }
-}
-  
-/////////////////////////////////////////////////////////////////
-// do calculations for derived fields
-
-void DerFieldCalcs::computeDerived()
-{
-  
-  // apply corrections
-  
-  _applyCorr();
-
-  // init arrays
-
-  _initDerivedArrays();
-  
-  CalReader scanAdjust = _fullCals.getScanAdj();
-  double scanAdj = 1;
-  if(scanAdjust.dataTypeisNum() && 
-     ((scanAdjust.getDataNum()).at(_fullCals.getBinPos()) ).size() == 1) {
-    scanAdj = ((scanAdjust.getDataNum()).at(_fullCals.getBinPos())).at(0);
-  }
-
-  // vol depol
-
-  for(size_t igate=0;igate<_nGates;igate++) {
-    _volDepol[igate] = _computeVolDepol(_crossRate[igate], 
-                                        _combRate[igate]);
-  }
-  
-  // backscatter ratio
-  
-  for(size_t igate=0;igate<_nGates;igate++) {
-    _backscatRatio[igate] = _computeBackscatRatio(_combRate[igate], 
-                                                  _molRate[igate]);
-  }
-  
-  // particle depol
-  
-  for(size_t igate=0;igate<_nGates;igate++) {
-    _partDepol[igate] = _computePartDepol(_volDepol[igate],
-                                          _backscatRatio[igate]);
-  }
-  
-  // backscatter coefficient
-  
-  for(size_t igate=0;igate<_nGates;igate++) {
-    _backscatCoeff[igate] = _computeBackscatCoeff(_presHpa[igate],
-                                                  _tempK[igate], 
-                                                  _backscatRatio[igate]);
-  }
-  
-  // optical depth
-  
-  for(size_t igate = 0; igate < _nGates; igate++) {
-    _opticalDepth[igate] = 
-      _computeOpticalDepth(_presHpa[igate], _tempK[igate], _molRate[igate], scanAdj);
-  }
-  _filterOpticalDepth();
-
-  // extinction
-
-  int filterHalf = 2;
-  for(size_t igate = filterHalf; igate < _nGates - filterHalf; igate++) {
-    _extinction[igate] = 
-      _computeExtinctionCoeff(_opticalDepth[igate - filterHalf],
-                              _opticalDepth[igate + filterHalf],
-                              _htM[igate - filterHalf],
-                              _htM[igate + filterHalf]);
-  }
-                              
-  // if(_params.debug >= Params::DEBUG_EXTRA) {
-  //   _printDerivedFields(cerr);
-  // }
-
-}
-
-/////////////////////////////////////////////////////////////////
 // nonlinear count corrections
 
 double DerFieldCalcs::_nonLinCountCor(Radx::fl32 count, double deadtime, 
@@ -688,18 +676,12 @@ Radx::fl32 DerFieldCalcs::_computeOpticalDepth(double pressHpa, double tempK,
     return Radx::missingFl32;
   }
 
-  //cerr << "scanAdj=" << scanAdj << endl;
-  //cerr << "molRate=" << molRate << endl;
-  //cerr << "betaMSonde=" << betaMSonde << endl;
-   
-  // double optDepth = 28.0 - log( scanAdj * molRate / betaMSonde );
-
   double xx = (scanAdj * molRate) / betaMSonde;
   if (xx <= 0.0) {
     return Radx::missingFl32;
   }
-  double optDepth = 16.0 - 0.5 * log(xx);
-  // double optDepth = - 0.5 * log(xx);
+
+  double optDepth = - 0.5 * log(xx);
 
   // if (pressHpa > 820) {
   //   cerr << "press, tempK, scanAdj, molRate, betaMSonde, .5*log(xx), optDepth: "
@@ -716,35 +698,6 @@ Radx::fl32 DerFieldCalcs::_computeOpticalDepth(double pressHpa, double tempK,
 
 }
 
-
-/////////////////////////////////////////////////////////////////
-// extinction coefficient
-
-Radx::fl32 DerFieldCalcs::_computeExtinctionCoeff(Radx::fl32 optDepth1, 
-                                                  Radx::fl32 optDepth2,
-                                                  double alt1, double alt2)
-{
-
-  if (optDepth1 == Radx::missingFl32 || optDepth2 == Radx::missingFl32) {
-    return Radx::missingFl32;
-  }
-
-  double minExtinction = 1.0e-10;
-  double extinction = minExtinction;
-  
-  if(std::isnan(optDepth1) || std::isnan(optDepth2) || alt1 == alt2) {
-    return Radx::missingFl32;
-  }
-  
-  extinction = (optDepth1 - optDepth2) / (alt1 - alt2);
-
-  if (extinction < minExtinction) {
-    return Radx::missingFl32;
-  }
-  
-  return extinction;
-
-}
 
 /////////////////////////////////////////////////////////////////
 // Apply median filter to optical depth
@@ -820,3 +773,115 @@ void DerFieldCalcs::_filterOpticalDepth()
 
 }
 
+/////////////////////////////////////////////////////////////////
+// Compute the reference offset for optical depth
+
+double DerFieldCalcs::_computeOptDepthRefOffset(double scanAdj)
+
+{
+
+  // compute the reference range gate
+  
+  double refRangeKm = _params.optical_depth_reference_range_m / 1000.0;
+  int refGate = (int) ((refRangeKm - _startRangeKm) / _gateSpacingKm + 0.5);
+  if (refGate < 0) {
+    refGate = 0;
+  } else if (refGate > (int) _nGates - 1) {
+    refGate = _nGates - 1;
+  }
+
+  // get optical depth at reference range
+  // and save to queue
+  
+  double refDepth =
+    _computeOpticalDepth(_presHpa[refGate], _tempK[refGate],
+                         _molRate[refGate], scanAdj);
+  if (refDepth != Radx::missingFl32) {
+    if ((int) _refOptDepth.size() >= _params.optical_depth_n_reference_obs) {
+      _refOptDepth.pop_front();
+    }
+    _refOptDepth.push_back(refDepth);
+  }
+
+  // compute the reference value
+
+  double refVal = 16.0;
+  if (_refOptDepth.size() > 0) {
+    double sum = 0.0;
+    for (size_t ii = 0; ii < _refOptDepth.size(); ii++) {
+      sum += _refOptDepth[ii];
+    }
+    refVal = sum / (double) _refOptDepth.size();
+  }
+  double refOffset = _params.optical_depth_reference_value - refVal;
+  
+  return refOffset;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// extinction coefficient
+
+Radx::fl32 DerFieldCalcs::_computeExtinctionCoeff(Radx::fl32 optDepth1, 
+                                                  Radx::fl32 optDepth2,
+                                                  double alt1, double alt2)
+{
+
+  if (optDepth1 == Radx::missingFl32 || optDepth2 == Radx::missingFl32) {
+    return Radx::missingFl32;
+  }
+
+  double minExtinction = 1.0e-10;
+  double extinction = minExtinction;
+  
+  if(std::isnan(optDepth1) || std::isnan(optDepth2) || alt1 == alt2) {
+    return Radx::missingFl32;
+  }
+  
+  extinction = (optDepth1 - optDepth2) / (alt1 - alt2);
+
+  if (extinction < minExtinction) {
+    return Radx::missingFl32;
+  }
+  
+  return extinction;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// print diagnostics
+
+void DerFieldCalcs::_printRateDiagnostics(const string &label,
+                                          bool includeCombined /* = false */)
+{
+  if(_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "===== RATES FOR: " << label << "=====" << endl;
+    for(size_t igate = 350; igate < 360; igate++) {
+      cerr << "igate, hiRate, loRate, crossRate, molRate, combRate: "
+           << igate << ", "
+           << _hiRate[igate] << ", "
+           << _loRate[igate] << ", "
+           << _crossRate[igate] << ", "
+           << _molRate[igate] << ", "
+           << _combRate[igate] << endl;
+    } // igate
+  }
+}
+  
+/////////////////////////////////////////////////////////////////
+// print derived fields
+
+void DerFieldCalcs::_printDerivedFields(ostream &out)
+{
+  for(size_t igate = 0; igate < _nGates; igate++) {
+    out << "gate, backScatRatio, backScatCoeff, volDepol, partDepol, optDepth, exctint: "
+        << igate << ", "
+        << _backscatRatio[igate] << ", "
+        << _backscatCoeff[igate] << ", "
+        << _volDepol[igate] << ", "
+        << _partDepol[igate] << ", "
+        << _opticalDepth[igate] << ", "
+        << _extinction[igate] << endl;
+  }
+}
+  
