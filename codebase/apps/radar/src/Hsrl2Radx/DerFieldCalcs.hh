@@ -45,7 +45,7 @@
 
 using namespace std;
 
-class DerFieldCalcs{
+class DerFieldCalcs {
   
 public:   
 
@@ -53,6 +53,10 @@ public:
 
   DerFieldCalcs(const Params &params,
                 const FullCals &fullCals);
+    
+  // destructor
+
+  virtual ~DerFieldCalcs();
     
   // compute derived quantities
 
@@ -106,6 +110,13 @@ private:
   static const double _BoltzmannConst;
   static const double _depolFactor;
 
+  // FIR filter options - lengths 20 and 10
+
+  typedef enum {
+    FIR_LENGTH_20,
+    FIR_LENGTH_10
+  } fir_filter_len_t;
+
   // input data
   
   size_t _nGates;
@@ -147,7 +158,19 @@ private:
   // computing the optical depth at the calibration range
 
   deque<Radx::fl32> _refOptDepth;
-  
+
+  // FIR filtering for extinction coeff
+
+  static const int FIR_LEN_20 = 20;   /**< FIR filter len 20 */
+  static const int FIR_LEN_10 = 10;   /**< FIR filter len 10 */
+
+  static const double firCoeff_20[FIR_LEN_20+1];   /**< FIR len 20 */
+  static const double firCoeff_10[FIR_LEN_10+1];   /**< FIR len 10 */
+
+  int _firLength;          /**< The length of the current FIR array */
+  int _firLenHalf;         /**< Half the length of the current FIR array */
+  const double *_firCoeff; /**< The length of the current FIR array */
+
   // apply corrections
 
   void _applyCorr(); 
@@ -254,6 +277,11 @@ private:
                              bool includeCombined = false);
 
   void _printDerivedFields(ostream &out);
+
+  // FIR filtering for optical depth
+
+  void _setFIRFilterLen(fir_filter_len_t len);
+  void _applyFirFilter(vector<Radx::fl32> &data);
 
 };
 #endif

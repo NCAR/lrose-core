@@ -684,7 +684,7 @@ optical_depth_reference_value = 0.4;
 // Type: int
 //
 
-optical_depth_median_filter_len = 5;
+optical_depth_median_filter_len = 3;
 
 ///////////// rate_censoring_threshold ////////////////
 //

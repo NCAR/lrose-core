@@ -51,6 +51,21 @@ const double DerFieldCalcs::_BoltzmannConst = 1.38064852e-23;
 
 const double DerFieldCalcs::_depolFactor = 0.000365;
 
+const double DerFieldCalcs::firCoeff_20[FIR_LEN_20+1] = {
+  0.016976991942, 0.023294989742, 0.030244475217,
+  0.037550056394, 0.044888313214, 0.051908191403,
+  0.058254532798, 0.063592862330, 0.067633391375,
+  0.070152221980, 0.071007947209, 0.070152221980,
+  0.067633391375, 0.063592862330, 0.058254532798,
+  0.051908191403, 0.044888313214, 0.037550056394,
+  0.030244475217, 0.023294989742, 0.016976991942
+};
+
+const double DerFieldCalcs::firCoeff_10[FIR_LEN_10+1] = {
+  0.03064579383,0.0603038422,0.09022859603,0.1159074511,
+  0.1332367851,0.1393550634,0.1332367851,0.1159074511,
+  0.09022859603,0.0603038422,0.03064579383 };
+
 /////////////////////////////////////////////////////////////////
 // constructor
 
@@ -61,6 +76,18 @@ DerFieldCalcs::DerFieldCalcs(const Params &params,
 
 {
 
+  // set up FIR filter for optical depth
+
+  _setFIRFilterLen(FIR_LENGTH_10);
+
+}
+
+/////////////////////////////////////////////////////////////////
+// destructor
+
+DerFieldCalcs::~DerFieldCalcs()
+{
+  
 }
 
 /////////////////////////////////////////////////////////////////
@@ -192,12 +219,16 @@ void DerFieldCalcs::computeDerived(size_t nGates,
 
   // filter the optical depth
   
-  _filterOpticalDepth(_opticalDepth);
+  // _filterOpticalDepth(_opticalDepth);
+  _applyFirFilter(_opticalDepth);
   _filterOpticalDepth(_opticalDepthF);
 
   // extinction
 
-  int filterHalf = 2;
+  int filterHalf = _params.optical_depth_median_filter_len / 2;
+  if (filterHalf < 1) {
+    filterHalf = 1;
+  }
   for(size_t igate = filterHalf; igate < _nGates - filterHalf; igate++) {
     _extinction[igate] = 
       _computeExtinctionCoeff(_opticalDepth[igate - filterHalf],
@@ -893,7 +924,7 @@ Radx::fl32 DerFieldCalcs::_computeOpticalDepth(double pressHpa, double tempK,
   if (molRate <= 0) {
     return Radx::missingFl32;
   }
-
+  
   double betaMSonde =_computeBetaMSonde(pressHpa, tempK);
   if (betaMSonde == NAN) {
     return Radx::missingFl32;
@@ -994,6 +1025,18 @@ void DerFieldCalcs::_filterOpticalDepth(vector<Radx::fl32> &optDepth)
     
   } // ii
 
+  // ensure that the value does not decrease with range
+  
+  double minVal = 0;
+  for (int ii = 1; ii < (int) _nGates; ii++) {
+    if (optDepth[ii] < minVal) {
+      optDepth[ii] = minVal;
+    } else {
+      minVal = optDepth[ii];
+    }
+  }
+
+
 }
 
 /////////////////////////////////////////////////////////////////
@@ -1054,7 +1097,7 @@ Radx::fl32 DerFieldCalcs::_computeExtinctionCoeff(Radx::fl32 optDepth1,
     return Radx::missingFl32;
   }
 
-  double minExtinction = 1.0e-10;
+  double minExtinction = 0.00005;
   double extinction = minExtinction;
   
   if(std::isnan(optDepth1) || std::isnan(optDepth2) || alt1 == alt2) {
@@ -1064,6 +1107,7 @@ Radx::fl32 DerFieldCalcs::_computeExtinctionCoeff(Radx::fl32 optDepth1,
   extinction = (optDepth1 - optDepth2) / (alt1 - alt2);
 
   if (extinction < minExtinction) {
+    // return minExtinction;
     return Radx::missingFl32;
   }
   
@@ -1108,3 +1152,95 @@ void DerFieldCalcs::_printDerivedFields(ostream &out)
   }
 }
   
+/////////////////////////////////////
+// set FIR filter length
+
+void DerFieldCalcs::_setFIRFilterLen(fir_filter_len_t len)
+
+{
+  
+  switch (len) {
+    case FIR_LENGTH_20:
+      _firLength = FIR_LEN_20 + 1;
+      _firCoeff = firCoeff_20;
+      break;
+    case FIR_LENGTH_10:
+    default:
+      _firLength = FIR_LEN_10 + 1;
+      _firCoeff = firCoeff_10;
+  }
+
+  _firLenHalf = _firLength / 2;
+
+}
+
+/////////////////////////////////////////////
+// Apply FIR filter
+
+void DerFieldCalcs::_applyFirFilter(vector<Radx::fl32> &data)
+  
+{
+
+  // compute required array size, given that we need to
+  // have space for the FIR filter on each side
+  
+  int arrayOffset = _firLength + 1;
+  int arrayLen = _nGates + 2 * arrayOffset;
+  
+  // allocate working array
+  
+  RadxArray<double> xxx_;
+  double *xxx = xxx_.alloc(arrayLen) + arrayOffset;
+
+  // copy data into array
+
+  for (int ii = 0; ii < (int) _nGates; ii++) {
+    xxx[ii] = data[ii];
+  }
+
+  // pad array at each end
+
+  for (int ii = -_firLength; ii < 0; ii++) {
+    xxx[ii] = xxx[0];
+  }
+  for (int ii = _nGates; ii < (int) _nGates + _firLength; ii++) {
+    xxx[ii] = xxx[_nGates - 1];
+  }
+
+  // fill any holes in the data
+
+  if (xxx[-_firLenHalf] < 0) {
+    xxx[-_firLenHalf] = 0;
+  }
+  for (int ii = -_firLenHalf + 1; ii < (int) _nGates + _firLenHalf; ii++) {
+    if (xxx[ii] < 0) {
+      xxx[ii] = xxx[ii-1];
+    }
+  }
+
+  // apply FIR
+
+  for (int ii = -_firLenHalf; ii < (int) _nGates + _firLenHalf; ii++) {
+    double acc = 0.0;
+    int kk = ii - _firLenHalf;
+    for (int jj = 0; jj < _firLength; jj++, kk++) {
+      acc = acc + _firCoeff[jj] * xxx[kk];
+    }
+    if (ii >= 0 && ii < (int) _nGates) {
+      data[ii] = acc;
+    }
+  } // ii
+
+  // ensure that the value does not decrease with range
+
+  // double minVal = data[0];
+  // for (int ii = 1; ii < (int) _nGates; ii++) {
+  //   if (data[ii] < minVal) {
+  //     data[ii] = minVal;
+  //   } else {
+  //     minVal = data[ii];
+  //   }
+  // }
+
+}
+    
