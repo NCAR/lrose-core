@@ -137,6 +137,13 @@ private:
   vector<Radx::fl32> _extinction, _extinctionF;
   vector<Radx::fl32> _opticalDepth, _opticalDepthF;
 
+  // computing the background rates
+
+  deque<Radx::fl32> _hiRateBackground;
+  deque<Radx::fl32> _loRateBackground;
+  deque<Radx::fl32> _molRateBackground;
+  deque<Radx::fl32> _crossRateBackground;
+  
   // computing the optical depth at the calibration range
 
   deque<Radx::fl32> _refOptDepth;
@@ -150,6 +157,11 @@ private:
   void _applyEnergyNorm();
   void _applyDiffGeoCorr();
   void _applyGeoCorr();
+
+  // computing background rate for specified channel
+
+  double _computeBackgroundRate(vector<Radx::fl32> &rate,
+                                deque<Radx::fl32> &background);
 
   // nonlinear count corrections
 

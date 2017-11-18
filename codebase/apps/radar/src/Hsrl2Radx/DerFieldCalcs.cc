@@ -143,7 +143,7 @@ void DerFieldCalcs::computeDerived(size_t nGates,
     _backscatRatio[igate] = _computeBackscatRatio(_combRate[igate], 
                                                   _molRate[igate]);
     _backscatRatioF[igate] = _computeBackscatRatio(_combRateF[igate], 
-                                                   _molRateF[igate]);
+                                                   _molRate[igate]);
   }
   
   // particle depol
@@ -186,7 +186,7 @@ void DerFieldCalcs::computeDerived(size_t nGates,
                                            _molRate[igate], scanAdj);
     _opticalDepth[igate] = optDepth + optDepthOffset;
     double optDepthF = _computeOpticalDepth(_presHpa[igate], _tempK[igate],
-                                            _molRateF[igate], scanAdj);
+                                            _molRate[igate], scanAdj);
     _opticalDepthF[igate] = optDepthF + optDepthOffset;
   }
 
@@ -291,12 +291,13 @@ void DerFieldCalcs::_applyNonLinearCountCorr()
   double binW = binwid.getDataNum()[_fullCals.getBinPos()][0];
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "==>> hiDead, loDead, crossDead, molDead, binW: "
+    cerr << "==>> hiDead, loDead, crossDead, molDead, binW, shotCount: "
          << hiDeadTime << ", "
          << loDeadTime << ", "
          << crossDeadTime << ", "
          << molDeadTime << ", "
-         << binW << endl;
+         << binW << ", "
+         << _shotCount << endl;
   }
 
   for(size_t igate = 0; igate < _nGates; igate++) {
@@ -353,37 +354,18 @@ void DerFieldCalcs::_applyBackgroundCorr()
   
   // compute background rates from last 'n' gates
   
-  double hibackgroundRate = 0.0;
-  double lobackgroundRate = 0.0;
-  double crossbackgroundRate = 0.0;
-  double molbackgroundRate = 0.0;
+  double hibackgroundRate = _computeBackgroundRate(_hiRate,
+                                                   _hiRateBackground);
   
-  int nGatesBackground = _params.ngates_for_background_correction;
-  int startBackgroundGate = _nGates - nGatesBackground;
-  if (startBackgroundGate < 1) {
-    startBackgroundGate = 1;
-  }
-  double bgBinCount = 0.0;
-  // cerr << "==================================" << endl;
-  for(int cgate = startBackgroundGate - 1; cgate < (int) _nGates; cgate++) {
-    hibackgroundRate += _hiRate[cgate];
-    lobackgroundRate += _loRate[cgate];
-    crossbackgroundRate += _crossRate[cgate];
-    molbackgroundRate += _molRate[cgate];
-    bgBinCount++;	    
-    // cerr << "11111111111 ii, hi, lo, cross, mol: "
-    //      << cgate << ", "
-    //      << _hiRate[cgate] << ", "
-    //      << _loRate[cgate] << ", "
-    //      << _crossRate[cgate] << ", "
-    //      << _molRate[cgate] << endl;
-  }
+  double lobackgroundRate = _computeBackgroundRate(_loRate,
+                                                   _loRateBackground);
   
-  hibackgroundRate /= bgBinCount;
-  lobackgroundRate /= bgBinCount;
-  crossbackgroundRate /= bgBinCount;
-  molbackgroundRate /= bgBinCount;
-
+  double molbackgroundRate = _computeBackgroundRate(_molRate,
+                                                    _molRateBackground);
+  
+  double crossbackgroundRate = _computeBackgroundRate(_crossRate,
+                                                      _crossRateBackground);
+  
   // adjust for background rate
   
   for(size_t igate = 0; igate < _nGates; igate++) {
@@ -393,8 +375,8 @@ void DerFieldCalcs::_applyBackgroundCorr()
       _backgroundSubtract(_loRate[igate], lobackgroundRate);
     _crossRate[igate] =
       _backgroundSubtract(_crossRate[igate], crossbackgroundRate);
-    _molRate[igate] =
-      _backgroundSubtract(_molRate[igate], molbackgroundRate);
+    // _molRate[igate] =
+    //   _backgroundSubtract(_molRate[igate], molbackgroundRate);
   }
   
   if(_params.debug >= Params::DEBUG_VERBOSE) {
@@ -473,20 +455,74 @@ void DerFieldCalcs::_applyGeoCorr()
 }
   
 /////////////////////////////////////////////////////////////////
+// compute background rate for a given channel
+
+double DerFieldCalcs::_computeBackgroundRate(vector<Radx::fl32> &rate,
+                                             deque<Radx::fl32> &background)
+{
+  
+  // compute median background rate from last 'n' gates
+  
+  int nGatesBackground = _params.ngates_for_background_correction;
+  int startBackgroundGate = _nGates - nGatesBackground;
+  if (startBackgroundGate < 1) {
+    startBackgroundGate = 1;
+  }
+
+  vector<double> endRates;
+  for(int cgate = startBackgroundGate - 1; cgate < (int) _nGates; cgate++) {
+    endRates.push_back(rate[cgate]);
+  }
+  sort(endRates.begin(), endRates.end());
+  double medianRate = endRates[endRates.size() / 2];
+
+  if ((int) background.size() >= _params.nrays_for_background_correction) {
+    background.pop_front();
+  }
+  background.push_back(medianRate);
+
+  double minVal = 1.0e99;
+  for (size_t ii = 0; ii < background.size(); ii++) {
+    if (background[ii] < minVal) {
+      minVal = background[ii];
+    }
+  }
+
+  return minVal;
+
+}
+
+/////////////////////////////////////////////////////////////////
 // nonlinear count corrections
 
 double DerFieldCalcs::_nonLinCountCor(Radx::fl32 count, double deadtime, 
                                       double binWid, double shotCount)
 {
+
   if(count < 0.0) {
     return 0;
   }
+
   double photonRate = (count / shotCount) / binWid;
   double corrFactor = photonRate * deadtime;
+
   if(corrFactor > 0.95) {
     corrFactor = 0.95;
   }
-  return count / (1.0 - corrFactor);
+
+  double corrRate = count / (1.0 - corrFactor);
+
+  // cerr << "11111111 count, dead, binWid, shot, prate, corr, rate: "
+  //      << count << ", "
+  //      << deadtime << ", "
+  //      << binWid << ", "
+  //      << shotCount << ", "
+  //      << photonRate << ", "
+  //      << corrFactor << ", "
+  //      << corrRate << endl;
+    
+  return corrRate;
+
 }
 
 

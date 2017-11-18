@@ -321,9 +321,15 @@ paramdef string {
 
 paramdef int {
   p_default = 100;
-  p_descr = "The background correction used data from the end of each ray.";
-  p_help = "This is the number of gates used to compute the background value.";
+  p_descr = "The background correction uses data from the end of each ray.";
+  p_help = "This is the number of gates used to compute the background value. We compute the median value for these gates.";
 } ngates_for_background_correction;
+
+paramdef int {
+  p_default = 20;
+  p_descr = "The number of rays for computing the background correction.";
+  p_help = "We compute the minimum of the median values from the last n gates.";
+} nrays_for_background_correction;
 
 paramdef double {
   p_default = 100.0;

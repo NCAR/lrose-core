@@ -1147,10 +1147,22 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("ngates_for_background_correction");
-    tt->descr = tdrpStrDup("The background correction used data from the end of each ray.");
-    tt->help = tdrpStrDup("This is the number of gates used to compute the background value.");
+    tt->descr = tdrpStrDup("The background correction uses data from the end of each ray.");
+    tt->help = tdrpStrDup("This is the number of gates used to compute the background value. We compute the median value for these gates.");
     tt->val_offset = (char *) &ngates_for_background_correction - &_start_;
     tt->single_val.i = 100;
+    tt++;
+    
+    // Parameter 'nrays_for_background_correction'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("nrays_for_background_correction");
+    tt->descr = tdrpStrDup("The number of rays for computing the background correction.");
+    tt->help = tdrpStrDup("We compute the minimum of the median values from the last n gates.");
+    tt->val_offset = (char *) &nrays_for_background_correction - &_start_;
+    tt->single_val.i = 20;
     tt++;
     
     // Parameter 'optical_depth_reference_range_m'

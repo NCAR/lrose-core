@@ -444,6 +444,8 @@ public:
 
   int ngates_for_background_correction;
 
+  int nrays_for_background_correction;
+
   double optical_depth_reference_range_m;
 
   int optical_depth_n_reference_obs;
@@ -525,7 +527,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[94];
+  mutable TDRPtable _table[95];
 
   const char *_className;
 
