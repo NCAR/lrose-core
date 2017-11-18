@@ -116,6 +116,17 @@ paramdef double {
 } siggen_delta_power;
 
 paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify the power sequence to use in the cal.";
+  p_help = "If true, the siggen_power_sequence will be used. If false, the power will start at siggen_max_power and decrease to siggen_min_power, in steps of siggen_delta_power.";
+} siggen_specify_power_sequence;
+
+paramdef double {
+  p_default = { 0, -5, -10, -15,-20, -25, -30, -35, -40, -45, -50, -55, -60, -65, -70, -75, -80, -85, -90, -95, -100, -105, -110, -115, -120, -125, -130 };
+  p_descr = "Min power for siggen signal (dBm)";
+} siggen_power_sequence[];
+
+paramdef boolean {
   p_default = TRUE;
   p_descr = "Switch to set the Frequency on the sig gen before starting.";
   p_help = "If the Test Pulse Manager is on, you probably don't want to reset it.";
