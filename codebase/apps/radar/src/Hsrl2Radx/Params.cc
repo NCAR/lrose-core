@@ -1153,18 +1153,6 @@ using namespace std;
     tt->single_val.i = 100;
     tt++;
     
-    // Parameter 'counts_censoring_threshold'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("counts_censoring_threshold");
-    tt->descr = tdrpStrDup("Threshold the count fields below this value.");
-    tt->help = tdrpStrDup("This helps to remove the noise from the system.");
-    tt->val_offset = (char *) &counts_censoring_threshold - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
     // Parameter 'optical_depth_reference_range_m'
     // ctype is 'double'
     
@@ -1211,6 +1199,18 @@ using namespace std;
     tt->help = tdrpStrDup("This is done prior to computing the extinction coefficient. Set the length to 1 for no filtering.");
     tt->val_offset = (char *) &optical_depth_median_filter_len - &_start_;
     tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'rate_censoring_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("rate_censoring_threshold");
+    tt->descr = tdrpStrDup("Threshold the rate fields below this value.");
+    tt->help = tdrpStrDup("This helps to remove the noise from the system.");
+    tt->val_offset = (char *) &rate_censoring_threshold - &_start_;
+    tt->single_val.d = 0;
     tt++;
     
     // Parameter 'apply_speckle_filter'

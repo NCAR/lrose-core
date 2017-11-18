@@ -36,46 +36,81 @@
 
 const string Names::CombinedHighCounts = "CombinedHighCounts";
 const string Names::CombinedLowCounts = "CombinedLowCounts";
-const string Names::CombinedHighCounts_F = "CombinedHighCounts_F";
-const string Names::CombinedLowCounts_F = "CombinedLowCounts_F";
 const string Names::lidar_copolar_combined_backscatter_photon_count =
   "lidar_copolar_combined_backscatter_photon_count";
 
 const string Names::MolecularCounts = "MolecularCounts";
-const string Names::MolecularCounts_F = "MolecularCounts_F";
 const string Names::lidar_copolar_molecular_backscatter_photon_count =
   "lidar_copolar_molecular_backscatter_photon_count";
 
 const string Names::CrossPolarCounts = "CrossPolarCounts";
-const string Names::CrossPolarCounts_F = "CrossPolarCounts_F";
 const string Names::lidar_crosspolar_combined_backscatter_photon_count =
   "lidar_crosspolar_combined_backscatter_photon_count";
+
+const string Names::CombinedHighRate = "CombinedHighRate";
+const string Names::CombinedHighRate_F = "CombinedHighRate_F";
+const string Names::CombinedLowRate = "CombinedLowRate";
+const string Names::CombinedLowRate_F = "CombinedLowRate_F";
+const string Names::lidar_copolar_combined_backscatter_photon_rate =
+  "lidar_copolar_combined_backscatter_photon_rate";
+const string Names::lidar_copolar_combined_backscatter_photon_rate_filtered =
+  "lidar_copolar_combined_backscatter_photon_rate_filtered";
+
+const string Names::MolecularRate = "MolecularRate";
+const string Names::MolecularRate_F = "MolecularRate_F";
+const string Names::lidar_copolar_molecular_backscatter_photon_rate =
+  "lidar_copolar_molecular_backscatter_photon_rate";
+const string Names::lidar_copolar_molecular_backscatter_photon_rate_filtered =
+  "lidar_copolar_molecular_backscatter_photon_rate_filtered";
+
+const string Names::CrossPolarRate = "CrossPolarRate";
+const string Names::CrossPolarRate_F = "CrossPolarRate_F";
+const string Names::lidar_crosspolar_combined_backscatter_photon_rate =
+  "lidar_crosspolar_combined_backscatter_photon_rate";
+const string Names::lidar_crosspolar_combined_backscatter_photon_rate_filtered =
+  "lidar_crosspolar_combined_backscatter_photon_rate_filtered";
 
 const string Names::VolumeDepolRatio = "VolumeDepolRatio";
 const string Names::VolumeDepolRatio_F = "VolumeDepolRatio_F";
 const string Names::lidar_volume_depolarization_ratio =
   "lidar_volume_depolarization_ratio";
+const string Names::lidar_volume_depolarization_ratio_filtered =
+  "lidar_volume_depolarization_ratio_filtered";
 
 const string Names::BackScatterRatio = "BackScatterRatio";
 const string Names::BackScatterRatio_F = "BackScatterRatio_F";
-const string Names::lidar_backscatter_ratio = "lidar_backscatter_ratio";
+const string Names::lidar_backscatter_ratio =
+  "lidar_backscatter_ratio";
+const string Names::lidar_backscatter_ratio_filtered =
+  "lidar_backscatter_ratio_filtered";
 
 const string Names::ParticleDepolRatio = "ParticleDepolRatio";
 const string Names::ParticleDepolRatio_F = "ParticleDepolRatio_F";
 const string Names::lidar_particle_depolarization_ratio =
   "lidar_particle_depolarization_ratio";
+const string Names::lidar_particle_depolarization_ratio_filtered =
+  "lidar_particle_depolarization_ratio_filtered";
 
 const string Names::BackScatterCoeff = "BackScatterCoeff";
 const string Names::BackScatterCoeff_F = "BackScatterCoeff_F";
-const string Names::lidar_backscatter_coefficient = "lidar_backscatter_coefficient";
+const string Names::lidar_backscatter_coefficient =
+  "lidar_backscatter_coefficient";
+const string Names::lidar_backscatter_coefficient_filtered =
+  "lidar_backscatter_coefficient_filtered";
 
 const string Names::ExtinctionCoeff = "ExtinctionCoeff";
 const string Names::ExtinctionCoeff_F = "ExtinctionCoeff_F";
-const string Names::lidar_extinction_coefficient = "lidar_extinction_coefficient";
+const string Names::lidar_extinction_coefficient = 
+  "lidar_extinction_coefficient";
+const string Names::lidar_extinction_coefficient_filtered = 
+  "lidar_extinction_coefficient_filtered";
 
 const string Names::OpticalDepth = "OpticalDepth";
 const string Names::OpticalDepth_F = "OpticalDepth_F";
-const string Names::lidar_optical_depth = "lidar_optical_depth";
+const string Names::lidar_optical_depth =
+  "lidar_optical_depth";
+const string Names::lidar_optical_depth_filtered = 
+  "lidar_optical_depth_filtered";
 
 const string Names::Height = "Height";
 const string Names::height_above_mean_sea_level = "height_above_mean_sea_level";

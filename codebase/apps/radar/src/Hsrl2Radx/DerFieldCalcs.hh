@@ -71,12 +71,31 @@ public:
   
   // get methods
   
+  vector<Radx::fl32> &getHiRate() { return _hiRate; }
+  vector<Radx::fl32> &getLoRate() { return _loRate; }
+  vector<Radx::fl32> &getCrossRate() { return _crossRate; }
+  vector<Radx::fl32> &getMolRate() { return _molRate; }
+  vector<Radx::fl32> &getCombRate() { return _combRate; }
+
+  vector<Radx::fl32> &getHiRateF() { return _hiRateF; }
+  vector<Radx::fl32> &getLoRateF() { return _loRateF; }
+  vector<Radx::fl32> &getCrossRateF() { return _crossRateF; }
+  vector<Radx::fl32> &getMolRateF() { return _molRateF; }
+  vector<Radx::fl32> &getCombRateF() { return _combRateF; }
+
   vector<Radx::fl32> &getVolDepol() { return _volDepol; }
   vector<Radx::fl32> &getBackscatRatio() { return _backscatRatio; }
   vector<Radx::fl32> &getPartDepol() { return _partDepol; }
   vector<Radx::fl32> &getBackscatCoeff() { return _backscatCoeff; }
   vector<Radx::fl32> &getExtinctionCoeff() { return _extinction; }
   vector<Radx::fl32> &getOpticalDepth() { return _opticalDepth; }
+
+  vector<Radx::fl32> &getVolDepolF() { return _volDepolF; }
+  vector<Radx::fl32> &getBackscatRatioF() { return _backscatRatioF; }
+  vector<Radx::fl32> &getPartDepolF() { return _partDepolF; }
+  vector<Radx::fl32> &getBackscatCoeffF() { return _backscatCoeffF; }
+  vector<Radx::fl32> &getExtinctionCoeffF() { return _extinctionF; }
+  vector<Radx::fl32> &getOpticalDepthF() { return _opticalDepthF; }
 
 private:   
 
@@ -105,18 +124,18 @@ private:
   
   // derived quantities 
 
-  vector<Radx::fl32> _volDepol;
-  vector<Radx::fl32> _backscatRatio;
-  vector<Radx::fl32> _partDepol;
-  vector<Radx::fl32> _backscatCoeff;
-  vector<Radx::fl32> _extinction;
-  vector<Radx::fl32> _opticalDepth;
+  vector<Radx::fl32> _hiRate, _hiRateF;
+  vector<Radx::fl32> _loRate, _loRateF;
+  vector<Radx::fl32> _crossRate, _crossRateF;
+  vector<Radx::fl32> _molRate, _molRateF;
+  vector<Radx::fl32> _combRate, _combRateF;
 
-  vector<Radx::fl32> _hiRate;
-  vector<Radx::fl32> _loRate;
-  vector<Radx::fl32> _crossRate;
-  vector<Radx::fl32> _molRate;
-  vector<Radx::fl32> _combRate;
+  vector<Radx::fl32> _volDepol, _volDepolF;
+  vector<Radx::fl32> _backscatRatio, _backscatRatioF;
+  vector<Radx::fl32> _partDepol, _partDepolF;
+  vector<Radx::fl32> _backscatCoeff, _backscatCoeffF;
+  vector<Radx::fl32> _extinction, _extinctionF;
+  vector<Radx::fl32> _opticalDepth, _opticalDepthF;
 
   // computing the optical depth at the calibration range
 
@@ -163,6 +182,20 @@ private:
 
   double _geoOverlapCor(double arrivalRate, double geoOverlap);
 
+  // filtering
+
+  void _computeFilteredRates();
+
+  void _filterRate(const vector<Radx::fl32> &rate,
+                   vector<Radx::fl32> &rateF);
+
+  void _applySpeckleFilter(int minRunLen,
+                           Radx::fl32 missingVal,
+                           vector<Radx::fl32> &data);
+
+  void _setZeroValsToMissing();
+  void _setZeroValsToMissing(vector<Radx::fl32> &data);
+
   // initialize the arrays for derived fields
 
   void _initDerivedArrays();
@@ -192,7 +225,9 @@ private:
 
   Radx::fl32 _computeOpticalDepth(double pressHpa, double tempK,
                                   double molRate, double scanAdj);
-  void _filterOpticalDepth();
+
+  void _filterOpticalDepth(vector<Radx::fl32> &optDepth);
+
   double _computeOptDepthRefOffset(double scanAdj);
 
   // compute extinction

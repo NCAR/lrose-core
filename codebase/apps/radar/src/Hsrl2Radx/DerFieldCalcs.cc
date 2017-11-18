@@ -120,6 +120,10 @@ void DerFieldCalcs::computeDerived(size_t nGates,
   
   _applyCorr();
 
+  // compute the filtered rates
+
+  _computeFilteredRates();
+
   // init arrays
 
   _initDerivedArrays();
@@ -129,6 +133,8 @@ void DerFieldCalcs::computeDerived(size_t nGates,
   for(size_t igate=0;igate<_nGates;igate++) {
     _volDepol[igate] = _computeVolDepol(_crossRate[igate], 
                                         _combRate[igate]);
+    _volDepolF[igate] = _computeVolDepol(_crossRateF[igate], 
+                                         _combRateF[igate]);
   }
   
   // backscatter ratio
@@ -136,6 +142,8 @@ void DerFieldCalcs::computeDerived(size_t nGates,
   for(size_t igate=0;igate<_nGates;igate++) {
     _backscatRatio[igate] = _computeBackscatRatio(_combRate[igate], 
                                                   _molRate[igate]);
+    _backscatRatioF[igate] = _computeBackscatRatio(_combRateF[igate], 
+                                                   _molRateF[igate]);
   }
   
   // particle depol
@@ -143,6 +151,8 @@ void DerFieldCalcs::computeDerived(size_t nGates,
   for(size_t igate=0;igate<_nGates;igate++) {
     _partDepol[igate] = _computePartDepol(_volDepol[igate],
                                           _backscatRatio[igate]);
+    _partDepolF[igate] = _computePartDepol(_volDepolF[igate],
+                                           _backscatRatioF[igate]);
   }
   
   // backscatter coefficient
@@ -151,6 +161,9 @@ void DerFieldCalcs::computeDerived(size_t nGates,
     _backscatCoeff[igate] = _computeBackscatCoeff(_presHpa[igate],
                                                   _tempK[igate], 
                                                   _backscatRatio[igate]);
+    _backscatCoeffF[igate] = _computeBackscatCoeff(_presHpa[igate],
+                                                   _tempK[igate], 
+                                                   _backscatRatioF[igate]);
   }
 
   // optical depth
@@ -172,11 +185,15 @@ void DerFieldCalcs::computeDerived(size_t nGates,
     double optDepth = _computeOpticalDepth(_presHpa[igate], _tempK[igate],
                                            _molRate[igate], scanAdj);
     _opticalDepth[igate] = optDepth + optDepthOffset;
+    double optDepthF = _computeOpticalDepth(_presHpa[igate], _tempK[igate],
+                                            _molRateF[igate], scanAdj);
+    _opticalDepthF[igate] = optDepthF + optDepthOffset;
   }
 
   // filter the optical depth
-
-  _filterOpticalDepth();
+  
+  _filterOpticalDepth(_opticalDepth);
+  _filterOpticalDepth(_opticalDepthF);
 
   // extinction
 
@@ -187,8 +204,17 @@ void DerFieldCalcs::computeDerived(size_t nGates,
                               _opticalDepth[igate + filterHalf],
                               _htM[igate - filterHalf],
                               _htM[igate + filterHalf]);
+    _extinctionF[igate] = 
+      _computeExtinctionCoeff(_opticalDepthF[igate - filterHalf],
+                              _opticalDepthF[igate + filterHalf],
+                              _htM[igate - filterHalf],
+                              _htM[igate + filterHalf]);
   }
-                              
+
+  // set all zero vals to missing
+
+  _setZeroValsToMissing();
+
   // if(_params.debug >= Params::DEBUG_EXTRA) {
   //   _printDerivedFields(cerr);
   // }
@@ -221,7 +247,7 @@ void DerFieldCalcs::_applyCorr()
   // subtract the background signal
 
   _applyBackgroundCorr();
-
+  
   // apply energy normalization
 
   _applyEnergyNorm();
@@ -338,12 +364,19 @@ void DerFieldCalcs::_applyBackgroundCorr()
     startBackgroundGate = 1;
   }
   double bgBinCount = 0.0;
+  // cerr << "==================================" << endl;
   for(int cgate = startBackgroundGate - 1; cgate < (int) _nGates; cgate++) {
-    hibackgroundRate += _hiRate.at(cgate);
-    lobackgroundRate += _loRate.at(cgate);
-    crossbackgroundRate += _crossRate.at(cgate);
-    molbackgroundRate += _molRate.at(cgate);
+    hibackgroundRate += _hiRate[cgate];
+    lobackgroundRate += _loRate[cgate];
+    crossbackgroundRate += _crossRate[cgate];
+    molbackgroundRate += _molRate[cgate];
     bgBinCount++;	    
+    // cerr << "11111111111 ii, hi, lo, cross, mol: "
+    //      << cgate << ", "
+    //      << _hiRate[cgate] << ", "
+    //      << _loRate[cgate] << ", "
+    //      << _crossRate[cgate] << ", "
+    //      << _molRate[cgate] << endl;
   }
   
   hibackgroundRate /= bgBinCount;
@@ -371,6 +404,8 @@ void DerFieldCalcs::_applyBackgroundCorr()
     cerr << "molbackgroundRate = " << molbackgroundRate<<endl;
     _printRateDiagnostics("backgroundSub");
   }
+
+  // cerr << "==================================" << endl;
 
 }
 
@@ -521,32 +556,182 @@ double DerFieldCalcs::_geoOverlapCor(double arrivalRate, double geoOverlap)
 }
 
 
+/////////////////////////////////////////////////////////////////
+// compute filtered rates
+
+void DerFieldCalcs::_computeFilteredRates()
+{
+  
+  // allocate the rate vectors
+
+  _hiRateF.resize(_nGates);
+  _loRateF.resize(_nGates);
+  _crossRateF.resize(_nGates);
+  _molRateF.resize(_nGates);
+  _combRateF.resize(_nGates);
+
+  _filterRate(_hiRate, _hiRateF);
+  _filterRate(_loRate, _loRateF);
+  _filterRate(_crossRate, _crossRateF);
+  _filterRate(_molRate, _molRateF);
+  _filterRate(_combRate, _combRateF);
+
+}
+
+//////////////////////////////////////////////////////////////
+// Filter rate field
+
+void DerFieldCalcs::_filterRate(const vector<Radx::fl32> &rate,
+                                vector<Radx::fl32> &rateF)
+  
+{
+  
+  // make copy
+
+  rateF = rate;
+
+  if (_params.rate_censoring_threshold > 0) {
+    for (size_t ii = 0; ii < _nGates; ii++) {
+      if (rateF[ii] < _params.rate_censoring_threshold) {
+        rateF[ii] = 0.0;
+      }
+    }
+  }
+
+  // despeckle
+  
+  if (_params.apply_speckle_filter) {
+    _applySpeckleFilter(_params.speckle_filter_len, 0.0, rateF);
+  }
+
+}
+
+///////////////////////////////////////////////////////
+// run speckle filter for a given length
+// checks for missing data
+//
+// minRunLen: length of run being tested for
+
+void DerFieldCalcs::_applySpeckleFilter(int minRunLen,
+                                        Radx::fl32 missingVal,
+                                        vector<Radx::fl32> &data)
+  
+{
+
+  int count = 0;
+  // loop through all gates
+  for (int ii = 0; ii < (int) data.size(); ii++) {
+    // check for non-missing
+    if (data[ii] != missingVal) {
+      // set, so count up length of run
+      count++;
+    } else {
+      // not set, end of run
+      if (count <= minRunLen) {
+        // run too short, indicates possible speckle
+        for (int jj = ii - count; jj < ii; jj++) {
+          // remove speckle gates
+          data[jj] = Radx::missingFl32;
+        }
+      }
+      count = 0;
+    }
+  } // ii
+
+}
+
+//////////////////////////////////////////////////////////////
+// Set zero vals to missing
+
+void DerFieldCalcs::_setZeroValsToMissing()
+{
+
+  _setZeroValsToMissing(_hiRate);
+  _setZeroValsToMissing(_loRate);
+  _setZeroValsToMissing(_crossRate);
+  _setZeroValsToMissing(_molRate);
+  _setZeroValsToMissing(_combRate);
+
+  _setZeroValsToMissing(_hiRateF);
+  _setZeroValsToMissing(_loRateF);
+  _setZeroValsToMissing(_crossRateF);
+  _setZeroValsToMissing(_molRateF);
+  _setZeroValsToMissing(_combRateF);
+
+  _setZeroValsToMissing(_volDepol);
+  _setZeroValsToMissing(_partDepol);
+  _setZeroValsToMissing(_backscatRatio);
+  _setZeroValsToMissing(_backscatCoeff);
+  _setZeroValsToMissing(_opticalDepth);
+  _setZeroValsToMissing(_extinction);
+
+  _setZeroValsToMissing(_volDepolF);
+  _setZeroValsToMissing(_partDepolF);
+  _setZeroValsToMissing(_backscatRatioF);
+  _setZeroValsToMissing(_backscatCoeffF);
+  _setZeroValsToMissing(_opticalDepthF);
+  _setZeroValsToMissing(_extinctionF);
+
+}
+
+void DerFieldCalcs::_setZeroValsToMissing(vector<Radx::fl32> &data)
+  
+{
+
+  for (size_t ii = 0; ii < _nGates; ii++) {
+    if (data[ii] <= 0.0) {
+      data[ii] = Radx::missingFl32;
+    }
+  }
+
+}
+
 ///////////////////////////////////////////////////////////////////
 // init arrays for derived fields
 
 void DerFieldCalcs::_initDerivedArrays()
 
 {
+
   _volDepol.resize(_nGates);
   _backscatRatio.resize(_nGates);
   _partDepol.resize(_nGates);
   _backscatCoeff.resize(_nGates);
   _extinction.resize(_nGates);
   _opticalDepth.resize(_nGates);
+
+  _volDepolF.resize(_nGates);
+  _backscatRatioF.resize(_nGates);
+  _partDepolF.resize(_nGates);
+  _backscatCoeffF.resize(_nGates);
+  _extinctionF.resize(_nGates);
+  _opticalDepthF.resize(_nGates);
+
   for (size_t ii = 0; ii < _nGates; ii++) {
+
     _volDepol[ii] = Radx::missingFl32;
     _backscatRatio[ii] = Radx::missingFl32;
     _partDepol[ii] = Radx::missingFl32;
     _backscatCoeff[ii] = Radx::missingFl32;
     _extinction[ii] = Radx::missingFl32;
     _opticalDepth[ii] = Radx::missingFl32;
+
+    _volDepolF[ii] = Radx::missingFl32;
+    _backscatRatioF[ii] = Radx::missingFl32;
+    _partDepolF[ii] = Radx::missingFl32;
+    _backscatCoeffF[ii] = Radx::missingFl32;
+    _extinctionF[ii] = Radx::missingFl32;
+    _opticalDepthF[ii] = Radx::missingFl32;
+
   }
+
 }
 
 /////////////////////////////////////////////////////////////////
 // volume depolarization
 
-Radx::fl32 DerFieldCalcs::_computeVolDepol(double crossRate, double combineRate)
+Radx::fl32 DerFieldCalcs::_computeVolDepol(double crossRate,
+                                           double combineRate)
 {
 
   if (crossRate < 0.0 || (crossRate + combineRate) <= 0.0) {
@@ -567,7 +752,8 @@ Radx::fl32 DerFieldCalcs::_computeVolDepol(double crossRate, double combineRate)
 /////////////////////////////////////////////////////////////////
 // backscatter ratio
 
-Radx::fl32 DerFieldCalcs::_computeBackscatRatio(double combineRate, double molRate)
+Radx::fl32 DerFieldCalcs::_computeBackscatRatio(double combineRate,
+                                                double molRate)
 {
 
   if(combineRate < 0.0 || molRate <= 0.0) {
@@ -576,7 +762,8 @@ Radx::fl32 DerFieldCalcs::_computeBackscatRatio(double combineRate, double molRa
 
   double ratio = combineRate / molRate;
   if (ratio < 1.0) {
-    return Radx::missingFl32;
+    // return Radx::missingFl32;
+    return 1.0;
   }
 
   return ratio;
@@ -702,7 +889,7 @@ Radx::fl32 DerFieldCalcs::_computeOpticalDepth(double pressHpa, double tempK,
 /////////////////////////////////////////////////////////////////
 // Apply median filter to optical depth
 
-void DerFieldCalcs::_filterOpticalDepth()
+void DerFieldCalcs::_filterOpticalDepth(vector<Radx::fl32> &optDepth)
 
 {
 
@@ -716,7 +903,7 @@ void DerFieldCalcs::_filterOpticalDepth()
 
   // make copy
   
-  vector<Radx::fl32> copy = _opticalDepth;
+  vector<Radx::fl32> copy = optDepth;
 
   // remove isolated points, up to 2 in length
 
@@ -764,9 +951,9 @@ void DerFieldCalcs::_filterOpticalDepth()
 
     if (vals.size() == len) {
       sort(vals.begin(), vals.end());
-      _opticalDepth[ii] = vals[vals.size() / 2];
+      optDepth[ii] = vals[vals.size() / 2];
     } else {
-      _opticalDepth[ii] = Radx::missingFl32;
+      optDepth[ii] = Radx::missingFl32;
     }
     
   } // ii

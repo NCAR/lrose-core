@@ -119,15 +119,6 @@ private:
                          const string &standardName,
                          const Radx::fl32 *fcounts);
   
-  void _addFilteredCountsToRay(RadxRay *ray);
-  
-  void _addFilteredCountsToRay(RadxRay *ray,
-                               const string &name,
-                               const string &filteredName);
-  
-  void _setZeroCountsToMissing(RadxRay *ray);
-  void _setZeroCountsToMissing(RadxRay *ray, const string &name);
-  
   int _processFile(const string &filePath);
   int _processUwCfRadialFile(const string &filePath);
   void _setupRead(MslFile &file);
@@ -149,20 +140,31 @@ private:
   double _energyNorm(double arrivalRate, double totalEnergy);
   vector<double> _diffOverlapCor(vector<double> arrivalRate, vector<double> diffOverlap);
   vector<double> _processQWPRotation(vector<double>arrivalRate, vector<double> polCal);
-  double _hiAndloMerge(double hiRate, double loRate);
-  double _geoOverlapCor(double arrivalRate, double geoOverlap);
-  double _volDepol(double crossRate, double combineRate);
-  double _backscatRatio(double combineRate, double molRate);
-  double _partDepol(double volDepol, double backscatRatio);
-  double _backscatCo(double pressure, double temp, 
-			 double backscatRatio);
 
   void _addDerivedMoments(RadxRay *ray);
-  void _addFilteredMoments(RadxRay *ray);
 
-  void _applyMissingSpeckleFilter(int nGates, int minRunLen, Radx::fl32 *data);
-  void _applyZeroSpeckleFilter(int nGates, int minRunLen, Radx::fl32 *data);
+  // void _addFilteredCountsToRay(RadxRay *ray);
   
+  // void _addFilteredCountsToRay(RadxRay *ray,
+  //                              const string &name,
+  //                              const string &filteredName);
+  
+  // void _setZeroCountsToMissing(RadxRay *ray);
+  // void _setZeroCountsToMissing(RadxRay *ray, const string &name);
+  
+  // void _addFilteredMoments(RadxRay *ray);
+
+  // void _applyMissingSpeckleFilter(int nGates, int minRunLen, Radx::fl32 *data);
+  // void _applyZeroSpeckleFilter(int nGates, int minRunLen, Radx::fl32 *data);
+  
+  // double _hiAndloMerge(double hiRate, double loRate);
+  // double _geoOverlapCor(double arrivalRate, double geoOverlap);
+  // double _volDepol(double crossRate, double combineRate);
+  // double _backscatRatio(double combineRate, double molRate);
+  // double _partDepol(double volDepol, double backscatRatio);
+  // double _backscatCo(double pressure, double temp, 
+  //       		 double backscatRatio);
+
 };
 
 #endif

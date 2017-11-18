@@ -54,41 +54,60 @@ public:
 
   static const string CombinedHighCounts;
   static const string CombinedLowCounts;
-  static const string CombinedHighCounts_F;
-  static const string CombinedLowCounts_F;
   static const string lidar_copolar_combined_backscatter_photon_count;
 
   static const string MolecularCounts;
-  static const string MolecularCounts_F;
   static const string lidar_copolar_molecular_backscatter_photon_count;
 
   static const string CrossPolarCounts;
-  static const string CrossPolarCounts_F;
   static const string lidar_crosspolar_combined_backscatter_photon_count;
+
+  static const string CombinedHighRate;
+  static const string CombinedHighRate_F;
+  static const string CombinedLowRate;
+  static const string CombinedLowRate_F;
+  static const string lidar_copolar_combined_backscatter_photon_rate;
+  static const string lidar_copolar_combined_backscatter_photon_rate_filtered;
+
+  static const string MolecularRate;
+  static const string MolecularRate_F;
+  static const string lidar_copolar_molecular_backscatter_photon_rate;
+  static const string lidar_copolar_molecular_backscatter_photon_rate_filtered;
+
+  static const string CrossPolarRate;
+  static const string CrossPolarRate_F;
+  static const string lidar_crosspolar_combined_backscatter_photon_rate;
+  static const string lidar_crosspolar_combined_backscatter_photon_rate_filtered;
 
   static const string VolumeDepolRatio;
   static const string VolumeDepolRatio_F;
   static const string lidar_volume_depolarization_ratio;
+  static const string lidar_volume_depolarization_ratio_filtered;
 
   static const string BackScatterRatio;
   static const string BackScatterRatio_F;
   static const string lidar_backscatter_ratio;
+  static const string lidar_backscatter_ratio_filtered;
 
   static const string ParticleDepolRatio;
   static const string ParticleDepolRatio_F;
   static const string lidar_particle_depolarization_ratio;
+  static const string lidar_particle_depolarization_ratio_filtered;
 
   static const string BackScatterCoeff;
   static const string BackScatterCoeff_F;
   static const string lidar_backscatter_coefficient;
+  static const string lidar_backscatter_coefficient_filtered;
 
   static const string ExtinctionCoeff;
   static const string ExtinctionCoeff_F;
   static const string lidar_extinction_coefficient;
+  static const string lidar_extinction_coefficient_filtered;
 
   static const string OpticalDepth;
   static const string OpticalDepth_F;
   static const string lidar_optical_depth;
+  static const string lidar_optical_depth_filtered;
 
   static const string Height;
   static const string height_above_mean_sea_level;

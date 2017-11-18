@@ -325,12 +325,6 @@ paramdef int {
   p_help = "This is the number of gates used to compute the background value.";
 } ngates_for_background_correction;
 
-paramdef int {
-  p_default = 0;
-  p_descr = "Threshold the count fields below this value.";
-  p_help = "This helps to remove the noise from the system.";
-} counts_censoring_threshold;
-
 paramdef double {
   p_default = 100.0;
   p_descr = "Range to gate for the reference optical depth.";
@@ -354,6 +348,12 @@ paramdef int {
   p_descr = "The optical depth field is filtered using a median filter.";
   p_help = "This is done prior to computing the extinction coefficient. Set the length to 1 for no filtering.";
 } optical_depth_median_filter_len;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Threshold the rate fields below this value.";
+  p_help = "This helps to remove the noise from the system.";
+} rate_censoring_threshold;
 
 paramdef boolean {
   p_default = false;

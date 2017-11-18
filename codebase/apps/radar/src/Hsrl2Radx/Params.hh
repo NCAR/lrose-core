@@ -444,8 +444,6 @@ public:
 
   int ngates_for_background_correction;
 
-  int counts_censoring_threshold;
-
   double optical_depth_reference_range_m;
 
   int optical_depth_n_reference_obs;
@@ -453,6 +451,8 @@ public:
   double optical_depth_reference_value;
 
   int optical_depth_median_filter_len;
+
+  double rate_censoring_threshold;
 
   tdrp_bool_t apply_speckle_filter;
 
