@@ -1162,7 +1162,7 @@ using namespace std;
     tt->descr = tdrpStrDup("The number of rays for computing the background correction.");
     tt->help = tdrpStrDup("We compute the minimum of the median values from the last n gates.");
     tt->val_offset = (char *) &nrays_for_background_correction - &_start_;
-    tt->single_val.i = 20;
+    tt->single_val.i = 10;
     tt++;
     
     // Parameter 'optical_depth_reference_range_m'
@@ -1222,7 +1222,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Threshold the rate fields below this value.");
     tt->help = tdrpStrDup("This helps to remove the noise from the system.");
     tt->val_offset = (char *) &rate_censoring_threshold - &_start_;
-    tt->single_val.d = 0;
+    tt->single_val.d = 1;
     tt++;
     
     // Parameter 'apply_speckle_filter'

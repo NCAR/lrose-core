@@ -326,7 +326,7 @@ paramdef int {
 } ngates_for_background_correction;
 
 paramdef int {
-  p_default = 20;
+  p_default = 10;
   p_descr = "The number of rays for computing the background correction.";
   p_help = "We compute the minimum of the median values from the last n gates.";
 } nrays_for_background_correction;
@@ -356,7 +356,7 @@ paramdef int {
 } optical_depth_median_filter_len;
 
 paramdef double {
-  p_default = 0;
+  p_default = 1;
   p_descr = "Threshold the rate fields below this value.";
   p_help = "This helps to remove the noise from the system.";
 } rate_censoring_threshold;
