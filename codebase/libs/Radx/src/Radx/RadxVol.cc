@@ -45,6 +45,8 @@
 #include <Radx/RadxAngleHist.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Radx/PseudoRhi.hh>
+#include <Radx/RadxXml.hh>
+#include <Radx/ByteOrder.hh>
 #include <cstring>
 #include <cmath>
 #include <algorithm>
@@ -6206,3 +6208,369 @@ int RadxVol::_getTransIndex(const RadxSweep *sweep, double azimuth)
 
 }
 
+/////////////////////////////////////////////////////////
+// serialize into a RadxMsg
+
+void RadxVol::serialize(RadxMsg &msg)
+  
+{
+
+  // init
+  
+  msg.clearAll();
+  msg.setMsgType(RadxMsg::RadxVolMsgType);
+
+  // add metadata strings as xml part
+  // include null at string end
+  
+  string xml;
+  _loadMetaStringsToXml(xml);
+  msg.addPart(_metaStringsPartId, xml.c_str(), xml.size() + 1);
+
+  // add metadata numbers
+
+  _loadMetaNumbersToMsg();
+  msg.addPart(_metaNumbersPartId, &_metaNumbers, sizeof(msgMetaNumbers_t));
+
+  // add sweep parts if needed
+
+  // if (_georef != NULL) {
+  //   RadxMsg georefMsg;
+  //   _georef->serialize(georefMsg);
+  //   msg.addPart(_georefPartId,
+  //               georefMsg.assembledMsg(), 
+  //               georefMsg.lengthAssembled());
+  // }
+
+  // add correction factors part if needed
+  
+  if (_cfactors != NULL) {
+    RadxMsg cfactorsMsg;
+    _cfactors->serialize(cfactorsMsg);
+    msg.addPart(_cfactorsPartId,
+                cfactorsMsg.assembledMsg(), 
+                cfactorsMsg.lengthAssembled());
+  }
+
+  // // add field data
+
+  // for (size_t ii = 0; ii < _fields.size(); ii++) {
+
+  //   // get field
+
+  //   RadxField *field = _fields[ii];
+
+  //   // serialize
+
+  //   RadxMsg fieldMsg(RadxMsg::RadxFieldMsgType);
+  //   field->serialize(fieldMsg);
+  //   fieldMsg.assemble();
+  //   msg.addPart(_fieldPartId,
+  //               fieldMsg.assembledMsg(), 
+  //               fieldMsg.lengthAssembled());
+
+  // } // ifield
+
+}
+
+/////////////////////////////////////////////////////////
+// deserialize from a RadxMsg
+// return 0 on success, -1 on failure
+
+int RadxVol::deserialize(const RadxMsg &msg)
+  
+{
+  
+  // initialize object
+
+  _init();
+
+  // check type
+
+  if (msg.getMsgType() != RadxMsg::RadxRayMsgType) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxVol::deserialize" << endl;
+    cerr << "  incorrect message type" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // get the metadata strings
+
+  const RadxMsg::Part *metaStringPart = msg.getPartByType(_metaStringsPartId);
+  if (metaStringPart == NULL) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxVol::deserialize" << endl;
+    cerr << "  No metadata string part in message" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+  if (_setMetaStringsFromXml((char *) metaStringPart->getBuf(),
+                             metaStringPart->getLength())) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxVol::deserialize" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "  Bad string XML for metadata: " << endl;
+    string bufStr((char *) metaStringPart->getBuf(),
+                  metaStringPart->getLength());
+    cerr << "  " << bufStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // get the metadata numbers
+  
+  const RadxMsg::Part *metaNumsPart = msg.getPartByType(_metaNumbersPartId);
+  if (metaNumsPart == NULL) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxVol::deserialize" << endl;
+    cerr << "  No metadata numbers part in message" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+  if (_setMetaNumbersFromMsg((msgMetaNumbers_t *) metaNumsPart->getBuf(),
+                             metaNumsPart->getLength(),
+                             msg.getSwap())) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxVol::deserialize" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // get georefs if available
+  
+  // const RadxMsg::Part *georefPart = msg.getPartByType(_georefPartId);
+  // if (georefPart != NULL) {
+  //   RadxMsg georefMsg;
+  //   georefMsg.disassemble(georefPart->getBuf(), georefPart->getLength());
+  //   if (_georef) {
+  //     delete _georef;
+  //   }
+  //   _georef = new RadxGeoref;
+  //   if (_georef->deserialize(georefMsg)) {
+  //     cerr << "=======================================" << endl;
+  //     cerr << "ERROR - RadxVol::deserialize" << endl;
+  //     cerr << "  Cannot dserialize georef" << endl;
+  //     georefMsg.printHeader(cerr, "  ");
+  //     cerr << "=======================================" << endl;
+  //     delete _georef;
+  //     _georef = NULL;
+  //     return -1;
+  //   }
+  // }
+  
+  // get cfactors if available
+  
+  const RadxMsg::Part *cfactorsPart = msg.getPartByType(_cfactorsPartId);
+  if (cfactorsPart != NULL) {
+    RadxMsg cfactorsMsg;
+    cfactorsMsg.disassemble(cfactorsPart->getBuf(), cfactorsPart->getLength());
+    if (_cfactors) {
+      delete _cfactors;
+    }
+    _cfactors = new RadxCfactors;
+    if (_cfactors->deserialize(cfactorsMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxVol::deserialize" << endl;
+      cerr << "  Cannot dserialize cfactors" << endl;
+      cfactorsMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      delete _cfactors;
+      _cfactors = NULL;
+      return -1;
+    }
+  }
+  
+  // add fields
+
+  // size_t nFields = msg.partExists(_fieldPartId);
+  // for (size_t ifield = 0; ifield < nFields; ifield++) {
+    
+  //   // get field part
+
+  //   const RadxMsg::Part *fieldPart =
+  //     msg.getPartByType(_fieldPartId, ifield);
+
+  //   // create a message from the field part
+
+  //   RadxMsg fieldMsg;
+  //   fieldMsg.disassemble(fieldPart->getBuf(), fieldPart->getLength());
+    
+  //   // create a field, dserialize from the message
+    
+  //   RadxField *field = new RadxField;
+  //   if (field->deserialize(fieldMsg)) {
+  //     cerr << "=======================================" << endl;
+  //     cerr << "ERROR - RadxVol::deserialize" << endl;
+  //     cerr << "  Adding field num: " << ifield << endl;
+  //     fieldMsg.printHeader(cerr, "  ");
+  //     cerr << "=======================================" << endl;
+  //     delete field;
+  //     return -1;
+  //   }
+
+  //   // add the field
+
+  //   addField(field);
+
+  // } // ifield
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// convert string metadata to XML
+
+void RadxVol::_loadMetaStringsToXml(string &xml, int level /* = 0 */)  const
+  
+{
+  xml.clear();
+  xml += RadxXml::writeStartTag("RadxVol", level);
+  xml += RadxXml::writeString("version", level + 1, _version);
+  xml += RadxXml::writeString("title", level + 1, _title);
+  xml += RadxXml::writeString("institution", level + 1, _institution);
+  xml += RadxXml::writeString("references", level + 1, _references);
+  xml += RadxXml::writeString("source", level + 1, _source);
+  xml += RadxXml::writeString("history", level + 1, _history);
+  xml += RadxXml::writeString("comment", level + 1, _comment);
+  xml += RadxXml::writeString("author", level + 1, _author);
+  xml += RadxXml::writeString("driver", level + 1, _driver);
+  xml += RadxXml::writeString("created", level + 1, _created);
+  xml += RadxXml::writeString("origFormat", level + 1, _origFormat);
+  xml += RadxXml::writeString("statusXml", level + 1, _statusXml);
+  xml += RadxXml::writeEndTag("RadxVol", level);
+}
+
+/////////////////////////////////////////////////////////
+// set metadata strings from XML
+// returns 0 on success, -1 on failure
+
+int RadxVol::_setMetaStringsFromXml(const char *xml,
+                                    size_t bufLen)
+
+{
+
+  // check for NULL
+  
+  if (xml[bufLen - 1] != '\0') {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxVol::_setMetaStringsFromXml" << endl;
+    cerr << "  XML string not null terminated" << endl;
+    string xmlStr(xml, bufLen);
+    cerr << "  " << xmlStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;    
+  }
+
+  string xmlStr(xml);
+  string contents;
+
+  if (RadxXml::readString(xmlStr, "RadxVol", contents)) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxVol::_setMetaStringsFromXml" << endl;
+    cerr << "  XML not delimited by 'RadxVol' tags" << endl;
+    cerr << "  " << xmlStr << endl;
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  RadxXml::readString(contents, "version", _version);
+  RadxXml::readString(contents, "title", _title);
+  RadxXml::readString(contents, "institution", _institution);
+  RadxXml::readString(contents, "references", _references);
+  RadxXml::readString(contents, "source", _source);
+  RadxXml::readString(contents, "history", _history);
+  RadxXml::readString(contents, "comment", _comment);
+  RadxXml::readString(contents, "author", _author);
+  RadxXml::readString(contents, "driver", _driver);
+  RadxXml::readString(contents, "created", _created);
+  RadxXml::readString(contents, "origFormat", _origFormat);
+  RadxXml::readString(contents, "statusXml", _statusXml);
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// load the meta number to the message struct
+
+void RadxVol::_loadMetaNumbersToMsg()
+  
+{
+
+  // clear
+
+  memset(&_metaNumbers, 0, sizeof(_metaNumbers));
+  
+  // set 64 bit values
+
+  _metaNumbers.startTimeSecs = _startTimeSecs;
+  _metaNumbers.endTimeSecs = _endTimeSecs;
+  _metaNumbers.startNanoSecs = _startNanoSecs;
+  _metaNumbers.endNanoSecs = _endNanoSecs;
+
+  // set 32-bit values
+
+  _metaNumbers.scanId = _scanId;
+  _metaNumbers.volNum = _volNum;
+
+}
+
+/////////////////////////////////////////////////////////
+// set the meta number data from the message struct
+
+int RadxVol::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                                    size_t bufLen,
+                                    bool swap)
+  
+{
+
+  // check size
+
+  if (bufLen != sizeof(msgMetaNumbers_t)) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxVol::_setMetaNumbersFromMsg" << endl;
+    cerr << "  Incorrect message size: " << bufLen << endl;
+    cerr << "  Should be: " << sizeof(msgMetaNumbers_t) << endl;
+    return -1;
+  }
+
+  // copy into local struct
+  
+  _metaNumbers = *metaNumbers;
+
+  // swap as needed
+
+  if (swap) {
+    _swapMetaNumbers(_metaNumbers); 
+  }
+
+  // set 64 bit values
+
+  _startTimeSecs = _metaNumbers.startTimeSecs;
+  _endTimeSecs = _metaNumbers.endTimeSecs;
+  _startNanoSecs = _metaNumbers.startNanoSecs;
+  _endNanoSecs = _metaNumbers.endNanoSecs;
+
+  // set 32-bit values
+
+  _scanId = _metaNumbers.scanId;
+  _volNum = _metaNumbers.volNum;
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// swap meta numbers
+
+void RadxVol::_swapMetaNumbers(msgMetaNumbers_t &meta)
+{
+  ByteOrder::swap64(&meta.startTimeSecs, 4 * sizeof(Radx::si64));
+  ByteOrder::swap32(&meta.scanId, 2 * sizeof(Radx::si32));
+}

@@ -1635,6 +1635,20 @@ public:
 
   //@}
 
+  /// \name Serialization:
+  //@{
+
+  // serialize into a RadxMsg
+  
+  void serialize(RadxMsg &msg);
+  
+  // deserialize from a RadxMsg
+  // return 0 on success, -1 on failure
+
+  int deserialize(const RadxMsg &msg);
+
+  //@}
+  
 protected:
   
 private:
@@ -1808,6 +1822,64 @@ private:
 
   int _getTransIndex(const RadxSweep *sweep, double azimuth);
 
+  /////////////////////////////////////////////////
+  // serialization
+  /////////////////////////////////////////////////
+  
+  static const int _metaStringsPartId = 1;
+  static const int _metaNumbersPartId = 2;
+  static const int _sweepPartId = 3;
+  static const int _sweepsAsInFilePartId = 4;
+  static const int _raysPartId = 5;
+  static const int _rcalibPartId = 6;
+  static const int _cfactorsPartId = 7;
+  
+  // struct for metadata numbers in messages
+  // strings not included - they are passed as XML
+  
+  typedef struct {
+    
+    Radx::si64 startTimeSecs;
+    Radx::si64 endTimeSecs;
+    Radx::si64 startNanoSecs;
+    Radx::si64 endNanoSecs;
+    
+    Radx::fl64 spareFl64[12];
+  
+    Radx::si32 scanId;
+    Radx::si32 volNum;
+
+    Radx::si32 spareSi32[14];
+    
+  } msgMetaNumbers_t;
+
+  msgMetaNumbers_t _metaNumbers;
+  
+  /// convert metadata to XML
+  
+  void _loadMetaStringsToXml(string &xml, int level = 0) const;
+  
+  /// set metadata from XML
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaStringsFromXml(const char *xml, 
+                             size_t bufLen);
+
+  /// load meta numbers to message struct
+  
+  void _loadMetaNumbersToMsg();
+  
+  /// set the meta number data from the message struct
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                             size_t bufLen,
+                             bool swap);
+  
+  /// swap meta numbers
+  
+  static void _swapMetaNumbers(msgMetaNumbers_t &msgMetaNumbers);
+          
 };
 
 #endif

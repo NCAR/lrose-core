@@ -254,8 +254,8 @@ void RadxCfactors::_loadMetaNumbersToMsg()
 // set the meta number data from the message struct
 
 int RadxCfactors::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
-                                       size_t bufLen,
-                                       bool swap)
+                                         size_t bufLen,
+                                         bool swap)
   
 {
   
