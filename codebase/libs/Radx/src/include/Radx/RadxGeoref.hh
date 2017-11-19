@@ -241,8 +241,8 @@ private:
   
   typedef struct {
     
-    Radx::si32 timeSecs;
-    Radx::fl64 nanoSecs;
+    Radx::si64 timeSecs;
+    Radx::si64 nanoSecs;
     Radx::fl64 longitude;
     Radx::fl64 latitude;
     Radx::fl64 altitudeKmMsl;

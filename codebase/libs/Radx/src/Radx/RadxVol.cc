@@ -6234,14 +6234,14 @@ void RadxVol::serialize(RadxMsg &msg)
 
   // add sweep parts if needed
 
-  // if (_georef != NULL) {
-  //   RadxMsg georefMsg;
-  //   _georef->serialize(georefMsg);
-  //   msg.addPart(_georefPartId,
-  //               georefMsg.assembledMsg(), 
-  //               georefMsg.lengthAssembled());
-  // }
-
+  for (size_t ii = 0; ii < _sweeps.size(); ii++) {
+    RadxMsg sweepMsg;
+    _sweeps[ii]->serialize(sweepMsg);
+    msg.addPart(_sweepPartId,
+                sweepMsg.assembledMsg(), 
+                sweepMsg.lengthAssembled());
+  }
+  
   // add correction factors part if needed
   
   if (_cfactors != NULL) {
@@ -6340,6 +6340,41 @@ int RadxVol::deserialize(const RadxMsg &msg)
     cerr << "=======================================" << endl;
     return -1;
   }
+
+  // add sweeps
+  
+  clearSweeps();
+  size_t nSweeps = msg.partExists(_sweepPartId);
+  for (size_t isweep = 0; isweep < nSweeps; isweep++) {
+    
+    // get sweep part
+    
+    const RadxMsg::Part *sweepPart =
+      msg.getPartByType(_sweepPartId, isweep);
+
+    // create a message from the sweep part
+    
+    RadxMsg sweepMsg;
+    sweepMsg.disassemble(sweepPart->getBuf(), sweepPart->getLength());
+    
+    // create a sweep, dserialize from the message
+    
+    RadxSweep *sweep = new RadxSweep;
+    if (sweep->deserialize(sweepMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxRay::deserialize" << endl;
+      cerr << "  Adding sweep num: " << isweep << endl;
+      sweepMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      delete sweep;
+      return -1;
+    }
+
+    // add the sweep
+
+    addSweep(sweep);
+
+  } // isweep
 
   // get georefs if available
   
@@ -6443,6 +6478,8 @@ void RadxVol::_loadMetaStringsToXml(string &xml, int level /* = 0 */)  const
   xml += RadxXml::writeString("created", level + 1, _created);
   xml += RadxXml::writeString("origFormat", level + 1, _origFormat);
   xml += RadxXml::writeString("statusXml", level + 1, _statusXml);
+  xml += RadxXml::writeString("scanName", level + 1, _scanName);
+  xml += RadxXml::writeString("pathInUse", level + 1, _pathInUse);
   xml += RadxXml::writeEndTag("RadxVol", level);
 }
 
@@ -6491,6 +6528,8 @@ int RadxVol::_setMetaStringsFromXml(const char *xml,
   RadxXml::readString(contents, "created", _created);
   RadxXml::readString(contents, "origFormat", _origFormat);
   RadxXml::readString(contents, "statusXml", _statusXml);
+  RadxXml::readString(contents, "scanName", _scanName);
+  RadxXml::readString(contents, "pathInUse", _pathInUse);
 
   return 0;
 
