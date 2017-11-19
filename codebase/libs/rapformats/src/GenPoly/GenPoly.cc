@@ -594,7 +594,7 @@ void GenPoly::print(FILE *out) const
   
   for (size_t i = 0; i < _vertices.size(); ++i)
     fprintf(out, "    Vertex %d: %g  %g\n",
-	    i, _vertices[i].lat, _vertices[i].lon);
+	    (int) i, _vertices[i].lat, _vertices[i].lon);
   
   fprintf(out, "  name: %s\n", _name.c_str());
 

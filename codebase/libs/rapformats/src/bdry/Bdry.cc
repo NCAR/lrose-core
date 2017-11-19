@@ -407,7 +407,7 @@ void Bdry::print(FILE *stream, const bool print_points) const
   fprintf(stream, "   expire_time = %s\n", _expireTime.dtime());
   fprintf(stream, "   line_type = %d\n", _lineType);
   fprintf(stream, "   bdry_id = %d\n", _bdryId);
-  fprintf(stream, "   num_polylines = %d\n", _polylines.size());
+  fprintf(stream, "   num_polylines = %d\n", (int) _polylines.size());
   fprintf(stream, "   motion_direction = %f\n", _motionDirection);
   fprintf(stream, "   motion_speed = %f\n", _motionSpeed);
   fprintf(stream, "   line_quality_value = %f\n", _lineQualityValue);

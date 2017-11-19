@@ -90,7 +90,7 @@ bool ComboPt::check() const
 	ret = false;
   }
 
-  return true;
+  return ret;
 }
 ///////////////////////////////////////////
 // assemble()

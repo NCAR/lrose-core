@@ -95,8 +95,9 @@ void ChecktimeReport::addFluid(const checktime_fluid_t &fluid)
 /////////////////////////
 ChecktimeReport::checktime_fluid_t *ChecktimeReport::getFluid(int fluid_id, int dilution)
 {
-  for (int i=0;i<_fluids.size();i++) {
-    if (_fluids.at(i).fluid_id == fluid_id && _fluids.at(i).fluid_dilution == dilution) {
+  for (size_t i=0;i<_fluids.size();i++) {
+    if ((int) _fluids.at(i).fluid_id == fluid_id &&
+        (int) _fluids.at(i).fluid_dilution == dilution) {
       return &_fluids.at(i);
     }
   }
@@ -127,7 +128,7 @@ bool ChecktimeReport::assemble()
   _memBuf.add(&hdr, sizeof(checktime_hdr_t));
 
   // load the fluids
-  for (int i=0;i<_fluids.size(); i++) {
+  for (size_t i=0;i<_fluids.size(); i++) {
     checktime_fluid_t out = _fluids.at(i);
     BE_from_array_32(&out, sizeof(checktime_fluid_t));
     _memBuf.add(&out, sizeof(checktime_fluid_t));
@@ -161,14 +162,14 @@ bool ChecktimeReport::disassemble(const void *buf, int len)
   _time = hdr->time;
   
   // buffer length is wrong
-  if (len != hdr->buf_len) {
+  if (len != (int) hdr->buf_len) {
     return false;
   }
 
   checktime_fluid_t *ptr =
     (checktime_fluid_t *)((char *)_memBuf.getPtr() + sizeof(checktime_hdr_t));
 
-  for (int i = 0; i < hdr->num_fluids; i++) {
+  for (size_t i = 0; i < hdr->num_fluids; i++) {
     BE_to_array_32(ptr, sizeof(checktime_fluid_t));
     _fluids.push_back(*ptr);
     ptr++;
@@ -194,11 +195,11 @@ void ChecktimeReport::print( FILE *fptr)
     fprintf(fptr, "   Lat: %.3f \n", _lat);
     fprintf(fptr, "   Lon: %.3f \n", _lon);
     fprintf(fptr, "   Alt: %.3f \n", _alt);
-    fprintf(fptr, "   Num fluids: %d \n", _fluids.size());
+    fprintf(fptr, "   Num fluids: %d \n", (int) _fluids.size());
     fprintf(fptr, "  ===============================\n");
     fprintf(fptr, "\n");
 
-    for (int i=0; i<_fluids.size();i++) {
+    for (size_t i=0; i<_fluids.size();i++) {
         string name = get_fluid_name(_fluids.at(i).fluid_id);
         int dilution = _fluids.at(i).fluid_dilution;
 
@@ -270,7 +271,7 @@ void ChecktimeReport::print(ostream &out) const
     out << "  ===============================" << endl;
     out << endl;
 
-    for (int i=0; i<_fluids.size();i++) {
+    for (size_t i=0; i<_fluids.size();i++) {
         string name = get_fluid_name(_fluids.at(i).fluid_id);
         int dilution = _fluids.at(i).fluid_dilution;
 
