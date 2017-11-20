@@ -1251,14 +1251,14 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
   // combined high rate
 
   RadxField *hiRate =
-    ray->addField(Names::CombinedHighRate, "m-1", nGates, Radx::missingFl32, 
+    ray->addField(Names::CombinedHighRate, "s-1", nGates, Radx::missingFl32, 
                   _calcs->getHiRate().data(), true);
   hiRate->setStandardName(Names::lidar_copolar_combined_backscatter_photon_rate);
   hiRate->setLongName(Names::lidar_copolar_combined_backscatter_photon_rate);
   hiRate->setRangeGeom(startRangeKm, gateSpacingKm);
         
   RadxField *hiRateF =
-    ray->addField(Names::CombinedHighRate_F, "m-1", nGates, Radx::missingFl32, 
+    ray->addField(Names::CombinedHighRate_F, "s-1", nGates, Radx::missingFl32, 
                   _calcs->getHiRateF().data(), true);
   hiRate->setStandardName(Names::lidar_copolar_combined_backscatter_photon_rate);
   hiRate->setLongName(Names::lidar_copolar_combined_backscatter_photon_rate_filtered);
@@ -1267,14 +1267,14 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
   // combined low rate
 
   RadxField *loRate =
-    ray->addField(Names::CombinedLowRate, "m-1", nGates, Radx::missingFl32, 
+    ray->addField(Names::CombinedLowRate, "s-1", nGates, Radx::missingFl32, 
                   _calcs->getLoRate().data(), true);
   loRate->setStandardName(Names::lidar_copolar_combined_backscatter_photon_rate);
   loRate->setLongName(Names::lidar_copolar_combined_backscatter_photon_rate);
   loRate->setRangeGeom(startRangeKm, gateSpacingKm);
   
   RadxField *loRateF =
-    ray->addField(Names::CombinedLowRate_F, "m-1", nGates, Radx::missingFl32, 
+    ray->addField(Names::CombinedLowRate_F, "s-1", nGates, Radx::missingFl32, 
                   _calcs->getLoRateF().data(), true);
   loRate->setStandardName(Names::lidar_copolar_combined_backscatter_photon_rate);
   loRate->setLongName(Names::lidar_copolar_combined_backscatter_photon_rate_filtered);
@@ -1283,14 +1283,14 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
   // molecular rate
 
   RadxField *molRate =
-    ray->addField(Names::MolecularRate, "m-1", nGates, Radx::missingFl32, 
+    ray->addField(Names::MolecularRate, "s-1", nGates, Radx::missingFl32, 
                   _calcs->getMolRate().data(), true);
   molRate->setStandardName(Names::lidar_copolar_molecular_backscatter_photon_rate);
   molRate->setLongName(Names::lidar_copolar_molecular_backscatter_photon_rate);
   molRate->setRangeGeom(startRangeKm, gateSpacingKm);
   
   RadxField *molRateF =
-    ray->addField(Names::MolecularRate_F, "m-1", nGates, Radx::missingFl32, 
+    ray->addField(Names::MolecularRate_F, "s-1", nGates, Radx::missingFl32, 
                   _calcs->getMolRateF().data(), true);
   molRate->setStandardName(Names::lidar_copolar_molecular_backscatter_photon_rate);
   molRate->setLongName(Names::lidar_copolar_molecular_backscatter_photon_rate_filtered);
@@ -1299,14 +1299,14 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
   // cross rate
 
   RadxField *crossRate =
-    ray->addField(Names::CrossPolarRate, "m-1", nGates, Radx::missingFl32, 
+    ray->addField(Names::CrossPolarRate, "s-1", nGates, Radx::missingFl32, 
                   _calcs->getCrossRate().data(), true);
   crossRate->setStandardName(Names::lidar_crosspolar_combined_backscatter_photon_rate);
   crossRate->setLongName(Names::lidar_crosspolar_combined_backscatter_photon_rate);
   crossRate->setRangeGeom(startRangeKm, gateSpacingKm);
   
   RadxField *crossRateF =
-    ray->addField(Names::CrossPolarRate_F, "m-1", nGates, Radx::missingFl32, 
+    ray->addField(Names::CrossPolarRate_F, "s-1", nGates, Radx::missingFl32, 
                   _calcs->getCrossRateF().data(), true);
   crossRate->setStandardName(Names::lidar_crosspolar_combined_backscatter_photon_rate);
   crossRate->setLongName(Names::lidar_crosspolar_combined_backscatter_photon_rate_filtered);
