@@ -51,7 +51,7 @@ const double DerFieldCalcs::_BoltzmannConst = 1.38064852e-23;
 
 const double DerFieldCalcs::_depolFactor = 0.000365;
 
-const double DerFieldCalcs::firCoeff_20[FIR_LEN_20+1] = {
+const double DerFieldCalcs::firCoeff_21[FIR_LEN_21] = {
   0.016976991942, 0.023294989742, 0.030244475217,
   0.037550056394, 0.044888313214, 0.051908191403,
   0.058254532798, 0.063592862330, 0.067633391375,
@@ -61,10 +61,15 @@ const double DerFieldCalcs::firCoeff_20[FIR_LEN_20+1] = {
   0.030244475217, 0.023294989742, 0.016976991942
 };
 
-const double DerFieldCalcs::firCoeff_10[FIR_LEN_10+1] = {
+const double DerFieldCalcs::firCoeff_11[FIR_LEN_11] = {
   0.03064579383,0.0603038422,0.09022859603,0.1159074511,
   0.1332367851,0.1393550634,0.1332367851,0.1159074511,
-  0.09022859603,0.0603038422,0.03064579383 };
+  0.09022859603,0.0603038422,0.03064579383
+};
+
+const double DerFieldCalcs::firCoeff_7[FIR_LEN_7] = {
+  0.0264, 0.1261, 0.2190, 0.2569, 0.2190, 0.1261, 0.0264
+};
 
 /////////////////////////////////////////////////////////////////
 // constructor
@@ -78,7 +83,7 @@ DerFieldCalcs::DerFieldCalcs(const Params &params,
 
   // set up FIR filter for optical depth
 
-  _setFIRFilterLen(FIR_LENGTH_10);
+  _setFIRFilterLen(FIR_LENGTH_7);
 
 }
 
@@ -213,15 +218,16 @@ void DerFieldCalcs::computeDerived(size_t nGates,
                                            _molRate[igate], scanAdj);
     _opticalDepth[igate] = optDepth + optDepthOffset;
     double optDepthF = _computeOpticalDepth(_presHpa[igate], _tempK[igate],
-                                            _molRate[igate], scanAdj);
+                                            _molRateF[igate], scanAdj);
     _opticalDepthF[igate] = optDepthF + optDepthOffset;
   }
 
   // filter the optical depth
   
   // _filterOpticalDepth(_opticalDepth);
+  // _filterOpticalDepth(_opticalDepthF);
   _applyFirFilter(_opticalDepth);
-  _filterOpticalDepth(_opticalDepthF);
+  _applyFirFilter(_opticalDepthF);
 
   // extinction
 
@@ -258,6 +264,10 @@ void DerFieldCalcs::computeDerived(size_t nGates,
 void DerFieldCalcs::_applyCorr()
 {
   
+  // filter the molecular counts
+
+  _applyMedianFilter(_params.molecular_count_median_filter_len, _molData);
+
   // allocate the rate vectors
 
   _hiRate.resize(_nGates);
@@ -406,8 +416,8 @@ void DerFieldCalcs::_applyBackgroundCorr()
       _backgroundSubtract(_loRate[igate], lobackgroundRate);
     _crossRate[igate] =
       _backgroundSubtract(_crossRate[igate], crossbackgroundRate);
-    // _molRate[igate] =
-    //   _backgroundSubtract(_molRate[igate], molbackgroundRate);
+    _molRate[igate] =
+      _backgroundSubtract(_molRate[igate], molbackgroundRate);
   }
   
   if(_params.debug >= Params::DEBUG_VERBOSE) {
@@ -415,10 +425,25 @@ void DerFieldCalcs::_applyBackgroundCorr()
     cerr << "lobackgroundRate = " << lobackgroundRate<<endl;
     cerr << "crossbackgroundRate = " << crossbackgroundRate<<endl;
     cerr << "molbackgroundRate = " << molbackgroundRate<<endl;
+    cerr << "==================================" << endl;
     _printRateDiagnostics("backgroundSub");
   }
 
-  // cerr << "==================================" << endl;
+  // for the molecular channel fill missing with the min value
+
+  double minVal = 1.e99;
+  for(size_t igate = 0; igate < _nGates; igate++) {
+    double rate = _molRate[igate];
+    if (rate > 0 && rate < minVal) {
+      minVal = rate;
+    }
+  }
+  for(size_t igate = 0; igate < _nGates; igate++) {
+    if (_molRate[igate] == 0.0) {
+      _molRate[igate] = minVal;
+    }
+  }
+  
 
 }
 
@@ -520,6 +545,7 @@ double DerFieldCalcs::_computeBackgroundRate(vector<Radx::fl32> &rate,
   }
 
   return minVal;
+  // return medianRate;
 
 }
 
@@ -543,14 +569,16 @@ double DerFieldCalcs::_nonLinCountCor(Radx::fl32 count, double deadtime,
 
   double corrRate = count / (1.0 - corrFactor);
 
-  // cerr << "11111111 count, dead, binWid, shot, prate, corr, rate: "
-  //      << count << ", "
-  //      << deadtime << ", "
-  //      << binWid << ", "
-  //      << shotCount << ", "
-  //      << photonRate << ", "
-  //      << corrFactor << ", "
-  //      << corrRate << endl;
+  if(_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "11111111 count, dead, binWid, shot, prate, corr, rate: "
+         << count << ", "
+         << deadtime << ", "
+         << binWid << ", "
+         << shotCount << ", "
+         << photonRate << ", "
+         << corrFactor << ", "
+         << corrRate << endl;
+  }
     
   return corrRate;
 
@@ -563,7 +591,7 @@ double DerFieldCalcs::_nonLinCountCor(Radx::fl32 count, double deadtime,
 double DerFieldCalcs::_baselineSubtract(double arrivalRate, double profile, 
 					double polarization)
 {
-  //pass through for now, not expected to significantly impact displays
+  // pass through for now, not expected to significantly impact displays
   return arrivalRate;
 }
 
@@ -573,7 +601,7 @@ double DerFieldCalcs::_baselineSubtract(double arrivalRate, double profile,
 
 double DerFieldCalcs::_backgroundSubtract(double arrivalRate, double backgroundBins)
 {
-  //background bins is average of the last 100 bins, this can be negative
+  // background bins is average of the last n bins
   double rate = arrivalRate - backgroundBins;
   if (rate < 0.0) {
     rate = 0.0;
@@ -609,7 +637,7 @@ vector<double> DerFieldCalcs::_processQWPRotation(vector<double> arrivalRate,
 
 double DerFieldCalcs::_hiAndloMerge(double hiRate, double loRate)
 {  
-  //pass through for now, not expected to significantly impact displays
+  // pass through for now, not expected to significantly impact displays
   return hiRate;
 }
 
@@ -829,8 +857,7 @@ Radx::fl32 DerFieldCalcs::_computeBackscatRatio(double combineRate,
 
   double ratio = combineRate / molRate;
   if (ratio < 1.0) {
-    // return Radx::missingFl32;
-    return 1.0;
+    return Radx::missingFl32;
   }
 
   return ratio;
@@ -858,10 +885,6 @@ Radx::fl32 DerFieldCalcs::_computePartDepol(Radx::fl32 volDepol,
   if (pDepol < 0.0 || pDepol > 1.0) {
     return Radx::missingFl32;
   }
-  
-  //double pDepol2=(-d_mol+backscatRatio*volDepol)/(backscatRatio-1);
-  //cerr<<"pDepol1="<<pDepol1<<endl;
-  //cerr<<"pDepol2="<<pDepol2<<endl;
   
   return pDepol;
 
@@ -937,16 +960,18 @@ Radx::fl32 DerFieldCalcs::_computeOpticalDepth(double pressHpa, double tempK,
 
   double optDepth = - 0.5 * log(xx);
 
-  // if (pressHpa > 820) {
-  //   cerr << "press, tempK, scanAdj, molRate, betaMSonde, .5*log(xx), optDepth: "
-  //        << pressHpa << ", "
-  //        << tempK << ", "
-  //        << scanAdj << ", "
-  //        << molRate << ", "
-  //        << betaMSonde << ", "
-  //        << 0.5*log(xx) << ", "
-  //        << optDepth << endl;
-  // }
+  if(_params.debug >= Params::DEBUG_EXTRA) {
+    if (pressHpa > 820) {
+      cerr << "press, tempK, scanAdj, molRate, betaMSonde, .5*log(xx), optDepth: "
+           << pressHpa << ", "
+           << tempK << ", "
+           << scanAdj << ", "
+           << molRate << ", "
+           << betaMSonde << ", "
+           << 0.5*log(xx) << ", "
+           << optDepth << endl;
+    }
+  }
   
   return optDepth;
 
@@ -1016,7 +1041,7 @@ void DerFieldCalcs::_filterOpticalDepth(vector<Radx::fl32> &optDepth)
       }
     } // jj
 
-    if (vals.size() == len) {
+    if (vals.size() > 0) {
       sort(vals.begin(), vals.end());
       optDepth[ii] = vals[vals.size() / 2];
     } else {
@@ -1024,18 +1049,6 @@ void DerFieldCalcs::_filterOpticalDepth(vector<Radx::fl32> &optDepth)
     }
     
   } // ii
-
-  // ensure that the value does not decrease with range
-  
-  double minVal = 0;
-  for (int ii = 1; ii < (int) _nGates; ii++) {
-    if (optDepth[ii] < minVal) {
-      optDepth[ii] = minVal;
-    } else {
-      minVal = optDepth[ii];
-    }
-  }
-
 
 }
 
@@ -1106,10 +1119,10 @@ Radx::fl32 DerFieldCalcs::_computeExtinctionCoeff(Radx::fl32 optDepth1,
   
   extinction = (optDepth1 - optDepth2) / (alt1 - alt2);
 
-  if (extinction < minExtinction) {
-    // return minExtinction;
-    return Radx::missingFl32;
-  }
+  // if (extinction < minExtinction) {
+  //   return minExtinction;
+  //   // return Radx::missingFl32;
+  // }
   
   return extinction;
 
@@ -1160,14 +1173,17 @@ void DerFieldCalcs::_setFIRFilterLen(fir_filter_len_t len)
 {
   
   switch (len) {
-    case FIR_LENGTH_20:
-      _firLength = FIR_LEN_20 + 1;
-      _firCoeff = firCoeff_20;
+    case FIR_LENGTH_21:
+      _firLength = FIR_LEN_21;
+      _firCoeff = firCoeff_21;
       break;
-    case FIR_LENGTH_10:
+    case FIR_LENGTH_11:
+      _firLength = FIR_LEN_11;
+      _firCoeff = firCoeff_11;
+    case FIR_LENGTH_7:
     default:
-      _firLength = FIR_LEN_10 + 1;
-      _firCoeff = firCoeff_10;
+      _firLength = FIR_LEN_7;
+      _firCoeff = firCoeff_7;
   }
 
   _firLenHalf = _firLength / 2;
@@ -1244,3 +1260,40 @@ void DerFieldCalcs::_applyFirFilter(vector<Radx::fl32> &data)
 
 }
     
+/////////////////////////////////////////////////////////////////
+// Apply median filter
+
+void DerFieldCalcs::_applyMedianFilter(int filtLen,
+                                       vector<Radx::fl32> &data)
+
+{
+
+  // make sure filter len is odd
+
+  size_t halfFilt = filtLen / 2;
+  size_t len = halfFilt * 2 + 1;
+  if (len < 3) {
+    // too short
+    return;
+  }
+
+  // make copy of data
+  
+  vector<Radx::fl32> copy = data;
+  
+  // apply median filter
+  
+  for (size_t ii = halfFilt; ii < _nGates - halfFilt; ii++) {
+    
+    vector<Radx::fl32> vals;
+    for (size_t jj = ii - halfFilt; jj <= ii + halfFilt; jj++) {
+      vals.push_back(copy[jj]);
+    } // jj
+
+    sort(vals.begin(), vals.end());
+    data[ii] = vals[vals.size() / 2];
+    
+  } // ii
+
+}
+

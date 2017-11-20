@@ -1117,6 +1117,18 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("molecular_dead_time");
     tt++;
     
+    // Parameter 'molecular_count_median_filter_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("molecular_count_median_filter_len");
+    tt->descr = tdrpStrDup("The molecular counts field is filtered using a median filter.");
+    tt->help = tdrpStrDup("This is done prior to computing the background subtraction. Set the length to 1 for no filtering.");
+    tt->val_offset = (char *) &molecular_count_median_filter_len - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
     // Parameter 'bin_width_name'
     // ctype is 'char*'
     
