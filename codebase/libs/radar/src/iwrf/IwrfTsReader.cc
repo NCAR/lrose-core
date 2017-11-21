@@ -98,7 +98,7 @@ bool IwrfTsReader::isOpsInfoNew() const
       _opsInfo.getStatusXmlPktSeqNum() > _pktSeqNumPrevPulse ||      
       _opsInfo.getCalibrationPktSeqNum() > _pktSeqNumPrevPulse ||      
       _opsInfo.getPlatformGeorefPktSeqNum() > _pktSeqNumPrevPulse ||      
-      _opsInfo.getPlatformGeoref2PktSeqNum() > _pktSeqNumPrevPulse ||      
+      _opsInfo.getPlatformGeoref1PktSeqNum() > _pktSeqNumPrevPulse ||      
       _opsInfo.getPhasecodePktSeqNum() > _pktSeqNumPrevPulse ||      
       _opsInfo.getXmitInfoPktSeqNum() > _pktSeqNumPrevPulse) {
     return true;
@@ -181,18 +181,18 @@ void IwrfTsReader::_setPlatformGeoref(IwrfTsPulse &pulse)
 
   bool trySecondary = false;
   if (_georefUseSecondary) {
-    if (_opsInfo.isPlatformGeoref2Active()) {
+    if (_opsInfo.isPlatformGeoref1Active()) {
       trySecondary = true;
     }
   }
 
   if (trySecondary) {
-    const iwrf_platform_georef_t &georef = _opsInfo.getPlatformGeoref2();
-    double gtime = iwrf_get_packet_time_as_double(georef.packet);
+    const iwrf_platform_georef_t &georef1 = _opsInfo.getPlatformGeoref1();
+    double gtime = iwrf_get_packet_time_as_double(georef1.packet);
     double ptime = pulse.getFTime();
     double dtime = fabs(gtime - ptime);
     if (dtime <= _georefTimeMarginSecs) {
-      pulse.setPlatformGeoref(georef);
+      pulse.setPlatformGeoref(georef1);
       return;
     }
   }

@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// IwrfTsPrint.cc
+// TsPrint.cc
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,7 +30,7 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// IwrfTsPrint reads time-series data from an FMQ
+// TsPrint reads time-series data from an FMQ
 // and processes it in various ways
 //
 ////////////////////////////////////////////////////////////////

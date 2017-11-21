@@ -84,8 +84,8 @@ void IwrfTsInfo::clear()
   iwrf_phasecode_init(_phasecode);
   iwrf_xmit_info_init(_xmit_info);
   iwrf_rvp8_ops_info_init(_rvp8);
-  iwrf_platform_georef_init(_platform_georef);
-  iwrf_platform_georef_init(_platform_georef2);
+  iwrf_platform_georef_init(_platform_georef0);
+  iwrf_platform_georef_init(_platform_georef1);
 
   _radar_info_active = false;
   _scan_seg_active = false;
@@ -98,8 +98,8 @@ void IwrfTsInfo::clear()
   _enotice_active = false;
   _phasecode_active = false;
   _xmit_info_active = false;
-  _platform_georef_active = false;
-  _platform_georef2_active = false;
+  _platform_georef0_active = false;
+  _platform_georef1_active = false;
 
   clearEventFlags();
 
@@ -488,19 +488,21 @@ void IwrfTsInfo::setPlatformGeoref
   (const iwrf_platform_georef_t &platform_georef,
    bool addToMetaQueue /* = true */) {
   if (platform_georef.unit_num == 1) {
-    _platform_georef2 = platform_georef;
-    _platform_georef2.packet.id = IWRF_PLATFORM_GEOREF_ID;
-    _platform_georef2.packet.len_bytes = sizeof(iwrf_platform_georef_t);
-    _platform_georef2.packet.version_num = 1;
+    _platform_georef1 = platform_georef;
+    _platform_georef1.packet.id = IWRF_PLATFORM_GEOREF_ID;
+    _platform_georef1.packet.len_bytes = sizeof(iwrf_platform_georef_t);
+    _platform_georef1.packet.version_num = 1;
+    if (addToMetaQueue) {
+      _addMetaToQueue(sizeof(_platform_georef1), &_platform_georef1);
+    }
   } else {
-    _platform_georef = platform_georef;
-    _platform_georef.packet.id = IWRF_PLATFORM_GEOREF_ID;
-    _platform_georef.packet.len_bytes = sizeof(iwrf_platform_georef_t);
-    _platform_georef.packet.version_num = 1;
-  }
-  if (addToMetaQueue) {
-    // _addIdToQueue(IWRF_PLATFORM_GEOREF_ID);
-    _addMetaToQueue(sizeof(_platform_georef), &_platform_georef);
+    _platform_georef0 = platform_georef;
+    _platform_georef0.packet.id = IWRF_PLATFORM_GEOREF_ID;
+    _platform_georef0.packet.len_bytes = sizeof(iwrf_platform_georef_t);
+    _platform_georef0.packet.version_num = 1;
+    if (addToMetaQueue) {
+      _addMetaToQueue(sizeof(_platform_georef0), &_platform_georef0);
+    }
   }
 }
 
@@ -556,11 +558,11 @@ void IwrfTsInfo::setRvp8InfoActive(bool state) {
 }
 
 void IwrfTsInfo::setPlatformGeorefActive(bool state) {
-  _platform_georef_active = state;
+  _platform_georef0_active = state;
 }
 
-void IwrfTsInfo::setPlatformGeoref2Active(bool state) {
-  _platform_georef2_active = state;
+void IwrfTsInfo::setPlatformGeoref1Active(bool state) {
+  _platform_georef1_active = state;
 }
 
 ////////////////////////////////////////////////////////////
@@ -615,11 +617,11 @@ void IwrfTsInfo::setRvp8InfoPktSeqNum(si64 pkt_seq_num) {
 }
 
 void IwrfTsInfo::setPlatformGeorefPktSeqNum(si64 pkt_seq_num) {
-  _platform_georef.packet.seq_num = pkt_seq_num;
+  _platform_georef0.packet.seq_num = pkt_seq_num;
 }
 
-void IwrfTsInfo::setPlatformGeoref2PktSeqNum(si64 pkt_seq_num) {
-  _platform_georef2.packet.seq_num = pkt_seq_num;
+void IwrfTsInfo::setPlatformGeoref1PktSeqNum(si64 pkt_seq_num) {
+  _platform_georef1.packet.seq_num = pkt_seq_num;
 }
 
 ////////////////////////////////////////////////////////////
@@ -638,8 +640,8 @@ void IwrfTsInfo::setTime(time_t secs, int nano_secs) {
   iwrf_set_packet_time(_phasecode.packet, secs, nano_secs);
   iwrf_set_packet_time(_xmit_info.packet, secs, nano_secs);
   iwrf_set_packet_time(_rvp8.packet, secs, nano_secs);
-  iwrf_set_packet_time(_platform_georef.packet, secs, nano_secs);
-  iwrf_set_packet_time(_platform_georef2.packet, secs, nano_secs);
+  iwrf_set_packet_time(_platform_georef0.packet, secs, nano_secs);
+  iwrf_set_packet_time(_platform_georef1.packet, secs, nano_secs);
 }
 
 ////////////////////////////////////////////////////////////
@@ -703,11 +705,11 @@ void IwrfTsInfo::setRvp8InfoTime(time_t secs, int nano_secs) {
 }
 
 void IwrfTsInfo::setPlatformGeorefTime(time_t secs, int nano_secs) {
-  iwrf_set_packet_time(_platform_georef.packet, secs, nano_secs);
+  iwrf_set_packet_time(_platform_georef0.packet, secs, nano_secs);
 }
 
-void IwrfTsInfo::setPlatformGeoref2Time(time_t secs, int nano_secs) {
-  iwrf_set_packet_time(_platform_georef2.packet, secs, nano_secs);
+void IwrfTsInfo::setPlatformGeoref1Time(time_t secs, int nano_secs) {
+  iwrf_set_packet_time(_platform_georef1.packet, secs, nano_secs);
 }
 
 ////////////////////////////////////////////////////////////
@@ -762,11 +764,11 @@ void IwrfTsInfo::setRvp8InfoTimeToNow() {
 }
 
 void IwrfTsInfo::setPlatformGeorefTimeToNow() {
-  iwrf_set_packet_time_to_now(_platform_georef.packet);
+  iwrf_set_packet_time_to_now(_platform_georef0.packet);
 }
 
-void IwrfTsInfo::setPlatformGeoref2TimeToNow() {
-  iwrf_set_packet_time_to_now(_platform_georef2.packet);
+void IwrfTsInfo::setPlatformGeoref1TimeToNow() {
+  iwrf_set_packet_time_to_now(_platform_georef1.packet);
 }
 
 ////////////////////////////////////////////////////////////
@@ -821,11 +823,11 @@ double IwrfTsInfo::getRvp8InfoTime() const {
 }
 
 double IwrfTsInfo::getPlatformGeorefTime() const {
-  return iwrf_get_packet_time_as_double(_platform_georef.packet);
+  return iwrf_get_packet_time_as_double(_platform_georef0.packet);
 }
 
-double IwrfTsInfo::getPlatformGeoref2Time() const {
-  return iwrf_get_packet_time_as_double(_platform_georef2.packet);
+double IwrfTsInfo::getPlatformGeoref1Time() const {
+  return iwrf_get_packet_time_as_double(_platform_georef1.packet);
 }
 
 ////////////////////////////////////////////////////////////
@@ -845,8 +847,8 @@ void IwrfTsInfo::setRadarId(int id) {
   _phasecode.packet.radar_id = id;
   _xmit_info.packet.radar_id = id;
   _rvp8.packet.radar_id = id;
-  _platform_georef.packet.radar_id = id;
-  _platform_georef2.packet.radar_id = id;
+  _platform_georef0.packet.radar_id = id;
+  _platform_georef1.packet.radar_id = id;
 
 }
 
@@ -1265,11 +1267,11 @@ void IwrfTsInfo::print(FILE *out) const
   if (_rvp8_active) {
     iwrf_rvp8_ops_info_print(out, _rvp8);
   }
-  if (_platform_georef_active) {
-    iwrf_platform_georef_print(out, _platform_georef);
+  if (_platform_georef0_active) {
+    iwrf_platform_georef_print(out, _platform_georef0);
   }
-  if (_platform_georef2_active) {
-    iwrf_platform_georef_print(out, _platform_georef2);
+  if (_platform_georef1_active) {
+    iwrf_platform_georef_print(out, _platform_georef1);
   }
 
   fprintf(out, "********************* End IwrfTsInfo ****************************\n");
@@ -1489,23 +1491,23 @@ int IwrfTsInfo::writeMetaToFile(FILE *out, si64 prevPulseSeqNum) const
     }
   }
 
-  if (_platform_georef_active &&
-      _platform_georef.packet.seq_num > prevPulseSeqNum) {
-    if (fwrite(&_platform_georef, sizeof(_platform_georef), 1, out) != 1) {
+  if (_platform_georef0_active &&
+      _platform_georef0.packet.seq_num > prevPulseSeqNum) {
+    if (fwrite(&_platform_georef0, sizeof(_platform_georef0), 1, out) != 1) {
       int errNum = errno;
       cerr << "ERROR - IwrfTsInfo::write2File" << endl;
-      cerr << "  Cannot write _platform_georef packet" << endl;
+      cerr << "  Cannot write _platform_georef0 packet" << endl;
       cerr << "  " << strerror(errNum) << endl;
       return -1;
     }
   }
 
-  if (_platform_georef2_active &&
-      _platform_georef2.packet.seq_num > prevPulseSeqNum) {
-    if (fwrite(&_platform_georef2, sizeof(_platform_georef), 1, out) != 1) {
+  if (_platform_georef1_active &&
+      _platform_georef1.packet.seq_num > prevPulseSeqNum) {
+    if (fwrite(&_platform_georef1, sizeof(_platform_georef1), 1, out) != 1) {
       int errNum = errno;
       cerr << "ERROR - IwrfTsInfo::write2File" << endl;
-      cerr << "  Cannot write _platform_georef2 packet" << endl;
+      cerr << "  Cannot write _platform_georef1 packet" << endl;
       cerr << "  " << strerror(errNum) << endl;
       return -1;
     }
