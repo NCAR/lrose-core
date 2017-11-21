@@ -113,8 +113,9 @@ private:
   // FIR filter options - lengths 20 and 10
 
   typedef enum {
-    FIR_LENGTH_20,
-    FIR_LENGTH_10
+    FIR_LENGTH_21,
+    FIR_LENGTH_11,
+    FIR_LENGTH_7
   } fir_filter_len_t;
 
   // input data
@@ -161,11 +162,13 @@ private:
 
   // FIR filtering for extinction coeff
 
-  static const int FIR_LEN_20 = 20;   /**< FIR filter len 20 */
-  static const int FIR_LEN_10 = 10;   /**< FIR filter len 10 */
+  static const int FIR_LEN_21 = 21;   /**< FIR filter len 21 */
+  static const int FIR_LEN_11 = 11;   /**< FIR filter len 11 */
+  static const int FIR_LEN_7 = 7;     /**< FIR filter len 7 */
 
-  static const double firCoeff_20[FIR_LEN_20+1];   /**< FIR len 20 */
-  static const double firCoeff_10[FIR_LEN_10+1];   /**< FIR len 10 */
+  static const double firCoeff_21[FIR_LEN_21];
+  static const double firCoeff_11[FIR_LEN_11];
+  static const double firCoeff_7[FIR_LEN_7];
 
   int _firLength;          /**< The length of the current FIR array */
   int _firLenHalf;         /**< Half the length of the current FIR array */
@@ -282,6 +285,11 @@ private:
 
   void _setFIRFilterLen(fir_filter_len_t len);
   void _applyFirFilter(vector<Radx::fl32> &data);
+
+  // median filter
+
+  void _applyMedianFilter(int filtLen,
+                          vector<Radx::fl32> &data);
 
 };
 #endif

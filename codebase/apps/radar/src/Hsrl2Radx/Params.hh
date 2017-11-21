@@ -438,6 +438,8 @@ public:
 
   char* molecular_dead_time_name;
 
+  int molecular_count_median_filter_len;
+
   char* bin_width_name;
 
   char* scan_adjustment_name;
@@ -527,7 +529,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[95];
+  mutable TDRPtable _table[96];
 
   const char *_className;
 

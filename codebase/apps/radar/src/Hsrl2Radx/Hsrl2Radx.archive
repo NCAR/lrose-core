@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./Hsrl2Radx
+ * TDRP params for Hsrl2Radx
  **********************************************************************/
 
 //======================================================================
@@ -508,7 +508,7 @@ cross_field_name = "cross";
 // Type: string
 //
 
-baseline_calibration_path = "$(PROJ_DIR)/calfiles/baseline_correction_20150601T0000.blc";
+baseline_calibration_path = "$(PROJ_DIR)/calfiles/baseline_correction_20171019T2000.blc";
 
 ///////////// diff_default_geofile_path ///////////////
 //
@@ -518,7 +518,7 @@ baseline_calibration_path = "$(PROJ_DIR)/calfiles/baseline_correction_20150601T0
 // Type: string
 //
 
-diff_default_geofile_path = "$(PROJ_DIR)/calfiles/diff_default_geofile_20120201T0000.geo";
+diff_default_geofile_path = "$(PROJ_DIR)/calfiles/diff_default_geofile_20171018T0000.geo";
 
 ///////////// geofile_default_path ////////////////////
 //
@@ -590,6 +590,19 @@ cross_pol_dead_time_name = "cross_pol_dead_time";
 
 molecular_dead_time_name = "molecular_dead_time";
 
+///////////// molecular_count_median_filter_len ///////
+//
+// The molecular counts field is filtered using a median filter.
+//
+// This is done prior to computing the background subtraction. Set the 
+//   length to 1 for no filtering.
+//
+//
+// Type: int
+//
+
+molecular_count_median_filter_len = 1;
+
 ///////////// bin_width_name //////////////////////////
 //
 // Name of binWidth field in CalVals file.
@@ -621,7 +634,7 @@ scan_adjustment_name = "i2_scan_adjustment";
 // Type: int
 //
 
-ngates_for_background_correction = 50;
+ngates_for_background_correction = 100;
 
 ///////////// nrays_for_background_correction /////////
 //
@@ -633,7 +646,7 @@ ngates_for_background_correction = 50;
 // Type: int
 //
 
-nrays_for_background_correction = 10;
+nrays_for_background_correction = 20;
 
 ///////////// optical_depth_reference_range_m /////////
 //
@@ -659,7 +672,7 @@ optical_depth_reference_range_m = 100;
 // Type: int
 //
 
-optical_depth_n_reference_obs = 20;
+optical_depth_n_reference_obs = 10;
 
 ///////////// optical_depth_reference_value ///////////
 //
@@ -684,7 +697,7 @@ optical_depth_reference_value = 0.4;
 // Type: int
 //
 
-optical_depth_median_filter_len = 3;
+optical_depth_median_filter_len = 5;
 
 ///////////// rate_censoring_threshold ////////////////
 //

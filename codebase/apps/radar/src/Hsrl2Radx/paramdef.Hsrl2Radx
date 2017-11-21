@@ -307,6 +307,12 @@ paramdef string {
   p_help = "";
 } molecular_dead_time_name;
 
+paramdef int {
+  p_default = 5;
+  p_descr = "The molecular counts field is filtered using a median filter.";
+  p_help = "This is done prior to computing the background subtraction. Set the length to 1 for no filtering.";
+} molecular_count_median_filter_len;
+
 paramdef string {
   p_default = "binwidth";
   p_descr = "Name of binWidth field in CalVals file.";
