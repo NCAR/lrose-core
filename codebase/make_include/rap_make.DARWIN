@@ -60,7 +60,6 @@ SYS_LD_LIBRARY_PATH =
 #
 CC = gcc
 SYS_CFLAGS = $(GCC_WARNINGS) -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 $(MY_CFLAGS)
-#SYS_CFLAGS = $(GCC_WARNINGS) -DDARWIN1 -D_BSD_TYPES -DF_UNDERSCORE2
 PROFILE_FLAG = -pg
 DEBUG_FLAG = -g
 OPT_FLAG = -O2
@@ -73,6 +72,7 @@ PGI_SYS_CFLAGS = -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 -Minform,severe -sile
 #
 # cc
 #
+
 SYS_CPPC_CFLAGS = $(SYS_CFLAGS) $(MY_CPPC_CFLAGS) 
 CPPC = g++
 SYS_CPPC_INCLUDES =
@@ -81,10 +81,9 @@ ACC = $(CC)
 PGI_CPPC = pgCC
 PGI_SYS_CPPC_CFLAGS = -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 -Minform=severe -silent -fPIC $(MY_PGI_CPPC_CFLAGS)
 
-# fortran -- g77 is available through fink
-# see fink project home page at fink.sourceforge.net
-#
-FC = /sw/bin/g77
+# fortran
+
+FC = gfortran
 F90C = gfortran
 F95C = gfortran
 
@@ -99,12 +98,11 @@ SYS_PGI_FFLAGS=-DLITENDIAN $(MY_PGI_FFLAGS)
 # the USE_GNU_F2C must be set to "-DUSE_GNU_F2C" (no quotes).
 
 NATIVE_CC = gcc
-NATIVE_FC = /sw/bin/g77
+NATIVE_FC = gfortran
 NATIVE_LIB_DIR = 
 F_TO_C_LIBS = -lf2c
 USE_GNU_F2C = -DUSE_GNU_F2C
-#SYS_FFLAGS = -fno-globals -DLITENDIAN
-SYS_FFLAGS = -fno-globals -DLITENDIAN
+SYS_FFLAGS = -DLITENDIAN
 
 #
 # link
@@ -163,14 +161,6 @@ HAVE_RANLIB=TRUE
 YACC = yacc
 LEX = lex
 
-#
-# purify
-#
-
-PURE = pure
-SYS_PURE_FLAGS = 
-
-
 # NCAR Graphics
 #	NCG_INC_DIR	defines location of NCAR Graphics include files
 #	NCG_LIB_DIR	defines location of NCAR Graphics libraries
@@ -209,7 +199,7 @@ NETCDF_C++_LIB=-lnetcdf_c++
 NETCDF_FF_LIB=-lnetcdff
 NETCDF_C_AND_C++_LIBS=-lnetcdf -lnetcdf_c++
 NETCDF_C_AND_F_LIBS=-lnetcdff -lnetcdf
-NETCDF4_LIBS=-lnetcdf_c++ -lnetcdf -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -ludunits2 -lbz2 -lexpat
+NETCDF4_LIBS=-lNcxx -lnetcdf_c++ -lnetcdf -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -ludunits2 -lbz2 -lexpat
 
 #
 # Java
@@ -218,8 +208,6 @@ NETCDF4_LIBS=-lnetcdf_c++ -lnetcdf -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -ludunits2 -l
 JAVAC = javac
 SYS_JAVA_FLAGS =
 SYS_JAVA_CLASSPATH = /usr/lib/jdk1.1/bin/../classes:/usr/lib/jdk1.1/bin/../lib/classes.jar:/usr/lib/jdk1.1/bin/../lib/rt.jar:/usr/lib/jdk1.1/bin/../lib/i18n.jar:/usr/lib/jdk1.1/bin/../lib/classes.zip:/opt/java/jdk/lib/classes.zip
-JAVA_MAKE_JAR = $(RAP_BIN_DIR)/make_jar
-
 JAVA_MAKE_JAR = $(RAP_BIN_DIR)/make_jar
 
 #
