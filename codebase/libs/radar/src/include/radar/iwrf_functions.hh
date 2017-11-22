@@ -389,7 +389,8 @@ extern void iwrf_xmit_info_print
 // print pulse_header
 
 extern void iwrf_pulse_header_print
-  (FILE *out, const iwrf_pulse_header_t &pulse);
+  (FILE *out, const iwrf_pulse_header_t &pulse,
+   const iwrf_platform_georef_t *georef = NULL);
 
 // print rvp8_pulse_header
 

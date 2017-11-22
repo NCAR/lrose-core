@@ -437,6 +437,8 @@ public:
 
   int radar_id;
 
+  tdrp_bool_t use_secondary_georeference;
+
   int n_samples;
 
   int start_gate;
@@ -466,7 +468,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[58];
+  mutable TDRPtable _table[59];
 
   const char *_className;
 

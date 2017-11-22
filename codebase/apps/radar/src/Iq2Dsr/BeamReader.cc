@@ -204,6 +204,10 @@ BeamReader::BeamReader(const string &prog_name,
     _pulseReader->setRadarId(_params.radar_id);
   }
 
+  if (_params.use_secondary_georeference) {
+    _pulseReader->setGeorefUseSecondary(true);
+  }
+
   _pulseReader->setGeorefTimeMarginSecs(_params.georef_time_margin_secs);
   
 }

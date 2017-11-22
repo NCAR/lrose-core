@@ -234,6 +234,12 @@ paramdef int {
   p_help = "See 'check_radar_id' above.";
 } radar_id;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If true, use the secondary georeference packet.";
+  p_help = "By default, we use the primary georeference packet. And most mobile radars only have one georeference. For those radars that have 2 georef devices, set this to true to use the secondary reference.";
+} use_secondary_georeference;
+
 commentdef {
   p_header = "SAMPLING";
 };

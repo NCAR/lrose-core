@@ -1353,6 +1353,8 @@ RadxRay *Dsr2Radx::_createInputRay(const DsRadarMsg &radarMsg,
     RadxGeoref georef;
     georef.setTimeSecs(dsGeoref.packet.time_secs_utc);
     georef.setNanoSecs(dsGeoref.packet.time_nano_secs);
+    georef.setUnitNum(dsGeoref.unit_num);
+    georef.setUnitId(dsGeoref.unit_id);
     georef.setLongitude(dsGeoref.longitude);
     georef.setLatitude(dsGeoref.latitude);
     georef.setAltitudeKmMsl(dsGeoref.altitude_msl_km);
