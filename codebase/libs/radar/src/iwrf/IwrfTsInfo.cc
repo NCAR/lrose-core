@@ -1294,14 +1294,14 @@ void IwrfTsInfo::printMetaQueue(FILE *out, bool clearQueue) const
     cerr << "  _metaQueue.size(): " << _metaQueue.size() << endl;
   }
 
-  fprintf(out, "****************** Start IwrfTsInfo *************************\n");
+  fprintf(out, "******************** Start IwrfTsInfo ***************************\n");
   
   for (size_t ii = 0; ii < _metaQueue.size(); ii++) {
     MemBuf *buf = _metaQueue[ii];
     iwrf_packet_print(out, buf->getPtr(), buf->getLen());
   } // ii
 
-  fprintf(out, "******************* End IwrfTsInfo **************************\n");
+  fprintf(out, "********************* End IwrfTsInfo ****************************\n");
   
   if (clearQueue) {
     _clearMetaQueue();
