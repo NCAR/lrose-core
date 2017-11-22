@@ -736,6 +736,8 @@ public:
 
   double georef_time_margin_secs;
 
+  tdrp_bool_t use_secondary_georeference;
+
   tdrp_bool_t check_radar_id;
 
   int radar_id;
@@ -1168,7 +1170,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[254];
+  mutable TDRPtable _table[255];
 
   const char *_className;
 

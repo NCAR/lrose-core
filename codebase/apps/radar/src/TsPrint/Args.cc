@@ -283,7 +283,7 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	iret = -1;
       }
 
-    } else if (!strcmp(argv[i], "-georef_sec")) {
+    } else if (!strcmp(argv[i], "-georef_secondary")) {
       
       sprintf(tmp_str, "use_secondary_georeference = true;");
       TDRP_add_override(&override, tmp_str);
@@ -440,7 +440,7 @@ void Args::_usage(string &prog_name, ostream &out)
       << "       [ -fmq ? ] name of input fmq.\n"
       << "       [ -format ] print format of the IWRF time series structs\n"
       << "       [ -gate ?] specify start gate number for averaging\n"
-      << "       [ -georef_sec ] use secondary georef\n"
+      << "       [ -georef_secondary ] use secondary georef\n"
       << "       [ -hv ] prints HV flag in Ascope mode\n"
       << "       [ -info ] prints full info when something changes\n"
       << "       [ -instance ?] instance for registering with procmap\n"
