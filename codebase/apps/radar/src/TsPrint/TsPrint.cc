@@ -136,6 +136,9 @@ TsPrint::TsPrint(int argc, char **argv)
   if (_params.check_radar_id) {
     _pulseReader->setRadarId(_params.radar_id);
   }
+  if (_params.use_secondary_georeference) {
+    _pulseReader->setGeorefUseSecondary(true);
+  }
 
   // calibration
 
@@ -2450,6 +2453,24 @@ double TsPrint::_computeVel(const vector<RadarComplex_t> &iq)
 
   // correct for platform motion
   
+  if (_params.use_secondary_georeference) {
+    if (info.isPlatformGeoref1Active()) {
+      const iwrf_platform_georef_t &georef1 = info.getPlatformGeoref1();
+      if (georef1.vert_velocity_mps > -9990) {
+        double correction = georef1.vert_velocity_mps * sin(_midEl * DEG_TO_RAD);
+        vel += correction;
+        // check nyquist interval
+        while (vel > nyquist) {
+          vel -= 2.0 * nyquist;
+        }
+        while (vel < -nyquist) {
+          vel += 2.0 * nyquist;
+        }
+        return vel;
+      }
+    }
+  }
+
   if (info.isPlatformGeorefActive()) {
     const iwrf_platform_georef_t &georef = info.getPlatformGeoref();
     if (georef.vert_velocity_mps > -9990) {
@@ -2505,12 +2526,19 @@ void TsPrint::_printMaxPowerData(FILE *out)
   double lat = info.get_radar_latitude_deg();
   double lon = info.get_radar_longitude_deg();
   double alt = info.get_radar_altitude_m();
-  if (info.isPlatformGeorefActive()) {
+  if (_params.use_secondary_georeference &&
+      info.isPlatformGeoref1Active()) {
+    const iwrf_platform_georef_t &georef1 = info.getPlatformGeoref();
+      lat = georef1.latitude;
+      lon = georef1.longitude;
+      alt = georef1.altitude_msl_km * 1000.0;
+  } else if (info.isPlatformGeorefActive()) {
     const iwrf_platform_georef_t &georef = info.getPlatformGeoref();
     lat = georef.latitude;
     lon = georef.longitude;
     alt = georef.altitude_msl_km * 1000.0;
   }
+
   if (_params.distance_units == Params::DISTANCE_IN_FEET) {
     alt /= M_PER_FT;
   }

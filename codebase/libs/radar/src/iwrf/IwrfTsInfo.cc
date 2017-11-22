@@ -186,7 +186,6 @@ int IwrfTsInfo::setFromBuffer(const void *buf, int len)
       memcpy(&georef, copy, sizeof(iwrf_platform_georef_t));
       iwrf_platform_georef_swap(georef);
       setPlatformGeoref(georef);
-      setPlatformGeorefActive(true);
     } break;
     case IWRF_SYNC_ID:
     case IWRF_PULSE_HEADER_ID:
@@ -492,6 +491,7 @@ void IwrfTsInfo::setPlatformGeoref
     _platform_georef1.packet.id = IWRF_PLATFORM_GEOREF_ID;
     _platform_georef1.packet.len_bytes = sizeof(iwrf_platform_georef_t);
     _platform_georef1.packet.version_num = 1;
+    setPlatformGeoref1Active(true);
     if (addToMetaQueue) {
       _addMetaToQueue(sizeof(_platform_georef1), &_platform_georef1);
     }
@@ -500,6 +500,7 @@ void IwrfTsInfo::setPlatformGeoref
     _platform_georef0.packet.id = IWRF_PLATFORM_GEOREF_ID;
     _platform_georef0.packet.len_bytes = sizeof(iwrf_platform_georef_t);
     _platform_georef0.packet.version_num = 1;
+    setPlatformGeorefActive(true);
     if (addToMetaQueue) {
       _addMetaToQueue(sizeof(_platform_georef0), &_platform_georef0);
     }
