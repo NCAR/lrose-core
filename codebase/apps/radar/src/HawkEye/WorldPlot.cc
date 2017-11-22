@@ -1334,8 +1334,13 @@ void WorldPlot::drawDistanceTicks(QPainter &painter,
   for (size_t i = 0; i < tickDists.size(); i++) {
     
     const RadxTime &tickTime = tickTimes[i];
-    double timeVal = tickTime - startTime;
     double distVal = tickDists[i];
+
+    if (!isfinite(distVal)) {
+      continue;
+    }
+
+    double timeVal = tickTime - startTime;
     double pix = getXPixel(timeVal);
 
     // label

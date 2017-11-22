@@ -709,7 +709,7 @@ void BscanManager::_createRangeAxisDialog()
     QLabel *surfaceRangeMarginLabel;
     _surfaceRangeMarginEdit =
       _addInputRow(_censorDataBelowSurfaceBox, censorBelowSurfaceLayout,
-                   "Surafce range margin (km)", text, 0, &surfaceRangeMarginLabel);
+                   "Surface range margin (km)", text, 0, &surfaceRangeMarginLabel);
     
     QFrame *acceptCancel = new QFrame;
     QHBoxLayout *horiz = new QHBoxLayout;
