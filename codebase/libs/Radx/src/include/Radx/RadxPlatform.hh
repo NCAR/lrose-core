@@ -41,6 +41,7 @@
 #include <string>
 #include <vector>
 #include <Radx/Radx.hh>
+class RadxMsg;
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////
@@ -321,6 +322,20 @@ public:
   
   //@}
 
+  /// \name Serialization:
+  //@{
+
+  // serialize into a RadxMsg
+  
+  void serialize(RadxMsg &msg);
+  
+  // deserialize from a RadxMsg
+  // return 0 on success, -1 on failure
+
+  int deserialize(const RadxMsg &msg);
+
+  //@}
+  
 protected:
   
 private:
@@ -343,7 +358,7 @@ private:
   // Frequency list - normally there is only one entry
 
   vector<double> _frequencyHz;
-
+  
   // radar parameters
 
   double _radarBeamWidthDegH;
@@ -361,12 +376,81 @@ private:
   double _lidarApertureEfficiency; // percent
   double _lidarFieldOfViewMrad; // milliradians
   double _lidarBeamDivergenceMrad; // milliradians
-
+  
   // private methods
   
   void _init();
   RadxPlatform & _copy(const RadxPlatform &rhs);
 
+  /////////////////////////////////////////////////
+  // serialization
+  /////////////////////////////////////////////////
+  
+  static const int _metaStringsPartId = 1;
+  static const int _metaNumbersPartId = 2;
+  static const int _frequencyPartId = 3;
+  
+  // struct for metadata numbers in messages
+  // strings not included - they are passed as XML
+  
+  typedef struct {
+    
+    Radx::fl64 latitudeDeg;
+    Radx::fl64 longitudeDeg;
+    Radx::fl64 altitudeKm;
+    Radx::fl64 sensorHtAglM;
+    
+    Radx::fl64 radarBeamWidthDegH;
+    Radx::fl64 radarBeamWidthDegV;
+    Radx::fl64 radarAntGainDbH;
+    Radx::fl64 radarAntGainDbV;
+    Radx::fl64 radarReceiverBandwidthMhz;
+
+    Radx::fl64 lidarConstant;
+    Radx::fl64 lidarPulseEnergyJ;
+    Radx::fl64 lidarPeakPowerW;
+    Radx::fl64 lidarApertureDiamCm;
+    Radx::fl64 lidarApertureEfficiency;
+    Radx::fl64 lidarFieldOfViewMrad;
+    Radx::fl64 lidarBeamDivergenceMrad;
+
+    Radx::fl64 spareFl64[8];
+
+    Radx::si32 instrumentType;
+    Radx::si32 platformType;
+    Radx::si32 primaryAxis;
+
+    Radx::si32 spareSi64[13];
+    
+  } msgMetaNumbers_t;
+  
+  msgMetaNumbers_t _metaNumbers;
+    
+  /// convert metadata to XML
+  
+  void _loadMetaStringsToXml(string &xml, int level = 0) const;
+  
+  /// set metadata from XML
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaStringsFromXml(const char *xml, 
+                             size_t bufLen);
+  
+  /// load meta numbers to message struct
+  
+  void _loadMetaNumbersToMsg();
+  
+  /// set the meta number data from the message struct
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                             size_t bufLen,
+                             bool swap);
+  
+  /// swap meta numbers
+  
+  static void _swapMetaNumbers(msgMetaNumbers_t &msgMetaNumbers);
+          
 };
 
 #endif
