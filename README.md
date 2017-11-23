@@ -1,7 +1,9 @@
 # lrose-core
 
-<img align="left" width="200" height="200" src="./docs/images/spol_dynamo.jpg">
-<img align="right" width="200" height="200" src="./docs/images/LROSE_logo.png">
+<img align="left" width="175" height="175" src="./docs/images/LROSE_logo.png">
+<img align="right" width="175" height="175" src="./docs/images/spol_dynamo.jpg">
+
+--------------------------------------------
 
 ## **LROSE** - The Lidar Radar Open Software Environment
 
