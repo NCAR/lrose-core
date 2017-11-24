@@ -149,6 +149,8 @@ void RadxGeoref::incrementIfNotMissing(RadxGeoref &count)
 {
 
   if (_timeSecs != Radx::missingMetaInt) count._timeSecs++;
+  if (_unitNum != 0) count._unitNum++;
+  if (_unitId != 0) count._unitId++;
   if (_nanoSecs != Radx::missingMetaInt) count._nanoSecs++;
   if (_longitude != Radx::missingMetaDouble) count._longitude++;
   if (_latitude != Radx::missingMetaDouble) count._latitude++;

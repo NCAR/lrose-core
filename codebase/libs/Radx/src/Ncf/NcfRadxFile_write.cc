@@ -1675,6 +1675,14 @@ int NcfRadxFile::_addGeorefVariables()
                            "", GEOREF_TIME_LONG, nc3Double,
                            _timeDim, SECONDS);
 
+  iret |= _file.addMetaVar(_georefUnitNumVar, GEOREF_UNIT_NUM,
+                           "", GEOREF_UNIT_NUM_LONG, nc3Int,
+                           _timeDim);
+
+  iret |= _file.addMetaVar(_georefUnitIdVar, GEOREF_UNIT_ID,
+                           "", GEOREF_UNIT_ID_LONG, nc3Int,
+                           _timeDim);
+
   iret |= _file.addMetaVar(_latitudeVar, LATITUDE,
                            "", LATITUDE_LONG, nc3Double,
                            _timeDim, DEGREES_NORTH);
@@ -2381,6 +2389,9 @@ int NcfRadxFile::_writeGeorefVariables()
   int nRays = _writeVol->getNRays();
   const vector<RadxRay *> &rays = _writeVol->getRays();
 
+  RadxArray<int> ivals_;
+  int *ivals = ivals_.alloc(nRays);
+
   RadxArray<float> fvals_;
   float *fvals = fvals_.alloc(nRays);
 
@@ -2466,11 +2477,40 @@ int NcfRadxFile::_writeGeorefVariables()
 
   // we conditionally add the other georef variables
 
-  // ewVelocity
-
+  Nc3Var *var;
   Nc3File *ncFile = _file.getNc3File();
 
-  Nc3Var *var;
+  // unit num
+
+  if ((var = ncFile->get_var(GEOREF_UNIT_NUM)) != NULL) {
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      const RadxGeoref *geo = rays[ii]->getGeoreference();
+      if (geo) {
+        ivals[ii] = (int) geo->getUnitNum();
+      } else {
+        ivals[ii] = 0;
+      }
+    }
+    iret |= _file.writeVar(var, _timeDim, ivals);
+  }
+
+  // unit id
+
+  if ((var = ncFile->get_var(GEOREF_UNIT_ID)) != NULL) {
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      const RadxGeoref *geo = rays[ii]->getGeoreference();
+      if (geo) {
+        ivals[ii] = (int) geo->getUnitId();
+      } else {
+        ivals[ii] = 0;
+      }
+    }
+    iret |= _file.writeVar(var, _timeDim, ivals);
+  }
+
+  // ewVelocity
+
+
   if ((var = ncFile->get_var(EASTWARD_VELOCITY)) != NULL) {
     for (size_t ii = 0; ii < rays.size(); ii++) {
       const RadxGeoref *geo = rays[ii]->getGeoreference();

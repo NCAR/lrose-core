@@ -1562,6 +1562,8 @@ void NcfRadxFile::_clearGeorefVariables()
 
   _geoTime.clear();
   _geoLatitude.clear();
+  _geoUnitNum.clear();
+  _geoUnitId.clear();
   _geoLongitude.clear();
   _geoAltitudeMsl.clear();
   _geoAltitudeAgl.clear();
@@ -1601,6 +1603,16 @@ int NcfRadxFile::_readGeorefVariables()
 
   _readRayVar(_latitudeVar, LATITUDE, _geoLatitude);
   if (_geoLatitude.size() < _raysFromFile.size()) {
+    iret = -1;
+  }
+
+  _readRayVar(_latitudeVar, GEOREF_UNIT_NUM, _geoUnitNum);
+  if (_geoUnitNum.size() < _raysFromFile.size()) {
+    iret = -1;
+  }
+
+  _readRayVar(_latitudeVar, GEOREF_UNIT_ID, _geoUnitId);
+  if (_geoUnitId.size() < _raysFromFile.size()) {
     iret = -1;
   }
 
@@ -1896,6 +1908,12 @@ int NcfRadxFile::_createRays(const string &path)
       }
       if (_geoLatitude.size() > rayIndex) {
         geo.setLatitude(_geoLatitude[rayIndex]);
+      }
+      if (_geoUnitNum.size() > rayIndex) {
+        geo.setLatitude(_geoUnitNum[rayIndex]);
+      }
+      if (_geoUnitId.size() > rayIndex) {
+        geo.setLatitude(_geoUnitId[rayIndex]);
       }
       if (_geoLongitude.size() > rayIndex) {
         geo.setLongitude(_geoLongitude[rayIndex]);
