@@ -184,6 +184,10 @@ private:
   void _applyDiffGeoCorr();
   void _applyGeoCorr();
 
+  // fill missing vals with min in ray
+
+  void _fillMissingWithMinVal(vector<Radx::fl32> &vals);
+
   // computing background rate for specified channel
 
   double _computeBackgroundRate(vector<Radx::fl32> &rate,

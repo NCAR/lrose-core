@@ -429,21 +429,12 @@ void DerFieldCalcs::_applyBackgroundCorr()
     _printRateDiagnostics("backgroundSub");
   }
 
-  // for the molecular channel fill missing with the min value
+  // fill missing with the min value
 
-  double minVal = 1.e99;
-  for(size_t igate = 0; igate < _nGates; igate++) {
-    double rate = _molRate[igate];
-    if (rate > 0 && rate < minVal) {
-      minVal = rate;
-    }
-  }
-  for(size_t igate = 0; igate < _nGates; igate++) {
-    if (_molRate[igate] == 0.0) {
-      _molRate[igate] = minVal;
-    }
-  }
-  
+  _fillMissingWithMinVal(_hiRate);
+  _fillMissingWithMinVal(_loRate);
+  _fillMissingWithMinVal(_crossRate);
+  _fillMissingWithMinVal(_molRate);
 
 }
 
@@ -510,6 +501,28 @@ void DerFieldCalcs::_applyGeoCorr()
 
 }
   
+////////////////////////////////////////////
+// Fill missing values with min val in ray
+
+void DerFieldCalcs::_fillMissingWithMinVal(vector<Radx::fl32> &vals)
+
+{
+
+  double minVal = 1.e99;
+  for(size_t igate = 0; igate < _nGates; igate++) {
+    double val = vals[igate];
+    if (val > 0 && val < minVal) {
+      minVal = val;
+    }
+  }
+  for(size_t igate = 0; igate < _nGates; igate++) {
+    if (vals[igate] == 0.0) {
+      vals[igate] = minVal;
+    }
+  }
+
+}
+
 /////////////////////////////////////////////////////////////////
 // compute background rate for a given channel
 
