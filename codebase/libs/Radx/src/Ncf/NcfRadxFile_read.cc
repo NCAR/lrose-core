@@ -1600,19 +1600,8 @@ int NcfRadxFile::_readGeorefVariables()
   if (_geoTime.size() < _raysFromFile.size()) {
     // iret = -1;
   }
-
   _readRayVar(_latitudeVar, LATITUDE, _geoLatitude);
   if (_geoLatitude.size() < _raysFromFile.size()) {
-    iret = -1;
-  }
-
-  _readRayVar(_latitudeVar, GEOREF_UNIT_NUM, _geoUnitNum);
-  if (_geoUnitNum.size() < _raysFromFile.size()) {
-    iret = -1;
-  }
-
-  _readRayVar(_latitudeVar, GEOREF_UNIT_ID, _geoUnitId);
-  if (_geoUnitId.size() < _raysFromFile.size()) {
     iret = -1;
   }
 
@@ -1627,6 +1616,9 @@ int NcfRadxFile::_readGeorefVariables()
   }
 
   _readRayVar(_altitudeAglVar, ALTITUDE_AGL, _geoAltitudeAgl, false); // meters
+
+  _readRayVar(GEOREF_UNIT_NUM, _geoUnitNum, false);
+  _readRayVar(GEOREF_UNIT_ID, _geoUnitId, false);
 
   _readRayVar(EASTWARD_VELOCITY, _geoEwVelocity, false);
   _readRayVar(NORTHWARD_VELOCITY, _geoNsVelocity, false);
