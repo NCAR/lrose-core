@@ -11,6 +11,7 @@ SUB_DIRS = \
         dataport \
         euclid \
 	physics \
+        Ncxx \
         Radx \
         radar \
         toolsa \
