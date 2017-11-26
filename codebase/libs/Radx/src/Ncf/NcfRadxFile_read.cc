@@ -1898,14 +1898,16 @@ int NcfRadxFile::_createRays(const string &path)
         geo.setTimeSecs(tSecs);
         geo.setNanoSecs(nanoSecs);
       }
-      if (_geoLatitude.size() > rayIndex) {
-        geo.setLatitude(_geoLatitude[rayIndex]);
-      }
+
       if (_geoUnitNum.size() > rayIndex) {
-        geo.setLatitude(_geoUnitNum[rayIndex]);
+        geo.setUnitNum(_geoUnitNum[rayIndex]);
       }
       if (_geoUnitId.size() > rayIndex) {
-        geo.setLatitude(_geoUnitId[rayIndex]);
+        geo.setUnitId(_geoUnitId[rayIndex]);
+      }
+
+      if (_geoLatitude.size() > rayIndex) {
+        geo.setLatitude(_geoLatitude[rayIndex]);
       }
       if (_geoLongitude.size() > rayIndex) {
         geo.setLongitude(_geoLongitude[rayIndex]);
