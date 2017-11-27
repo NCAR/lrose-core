@@ -449,7 +449,7 @@ typedef enum iwrf_iq_encoding {
   IWRF_IQ_ENCODING_SIGMET_FL16 = 4,  /**< SIGMET 16-bit floats */
 
   IWRF_IQ_ENCODING_SCALED_SI32 = 5, /**< voltages scaled as signed 32-bit ints,<br>
-				     * volts = (si16 * scale) + offset */
+				     * volts = (si32 * scale) + offset */
   
   IWRF_IQ_ENCODING_LAST /**< not used */
 
