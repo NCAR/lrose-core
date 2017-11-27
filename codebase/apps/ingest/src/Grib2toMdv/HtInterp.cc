@@ -108,9 +108,9 @@ int HtInterp::interpVlevelsToHeight(DsMdvx *mdvObj)
   }
 
   if (_paramsPtr->debug) {
-    cerr << "Converting to following height levels" << endl;
+    cerr << "Converting to following height levels:" << endl;
     for (size_t ii = 0; ii < htsOut.size(); ii++) {
-      cerr << "  " << htsOut[ii] << endl;
+      cerr << " " << htsOut[ii];
     }
     cerr << endl;
   }

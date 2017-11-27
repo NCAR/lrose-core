@@ -77,9 +77,16 @@ Args::Args (int argc, char **argv, char *prog_name)
       _usage(prog_name, stdout);
       exit(0);
     }
-    else if (STRequal_exact(argv[i], "-debug"))
+    else if (STRequal_exact(argv[i], "-d") ||
+             STRequal_exact(argv[i], "-debug"))
     {
       sprintf(tmp_str, "debug = 1;");
+      TDRP_add_override(&override, tmp_str);
+    }
+    else if (STRequal_exact(argv[i], "-v") ||
+             STRequal_exact(argv[i], "-verbose"))
+    {
+      sprintf(tmp_str, "debug = 2;");
       TDRP_add_override(&override, tmp_str);
     }
     else if (STRequal_exact(argv[i], "-printSummary"))
@@ -219,14 +226,15 @@ void Args::_usage(char *prog_name, FILE *stream)
   fprintf(stream, "%s%s%s",
           "Usage:\n\n", prog_name, " [options] as below:\n\n"
           "       [ --, -help, -h, -man ] produce this list.\n"
+          "       [ -d, -debug ] debugging on\n"
           "       [ -printVarList ] file - print a list of variables in the grib file \n"
           "       [ -printSummary ] file - print a summary of fields in the grib file \n"
           "       [ -printSections ] file - print the sections in the grib file (can be large)\n"
-          "       [ -debug ] debugging on\n"
           "       [ -file | -f ] filelist - for processing particular Grib files\n"
           "       [ -writeLdataInfo ? ] write LdataInfo files for output data\n"
-          "       [-o_f url] forecast output url\n"
-          "       [-o_n url] non-forecast output url\n"
+          "       [ -o_f url] forecast output url\n"
+          "       [ -o_n url] non-forecast output url\n"
+          "       [ -v, -verbose ] verbose debugging on\n"
           "\n");
 
 
