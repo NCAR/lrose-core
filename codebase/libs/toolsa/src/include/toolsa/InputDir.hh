@@ -49,36 +49,56 @@ using namespace std;
 
 class InputDir
 {
-  public :
-    
-    // Constructors
 
-    InputDir(const string &dir_name = "",
-	     const string &file_substring = "",
-	     const bool process_old_files = false,
-	     const string &exclude_substring = "");
-
-    InputDir(const char *dir_name,
-	     const char *file_substring,
-	     const int process_old_files,  // Set to 1 to force scan of old files
-	     const string &exclude_substring = "");
-
-    // Destructor
-
-    virtual ~InputDir(void);
+public :
   
-    // Get the next input filename.  Call this in a tight loop until
-    // NULL is returned (indicating no more new files).
+  // Constructors
+  
+  InputDir(const string &dir_name = "",
+           const string &file_substring = "",
+           bool process_old_files = false,
+           const string &exclude_substring = "",
+           bool debug = false,
+           bool verbose = false);
+  
+  InputDir(const char *dir_name,
+           const char *file_substring,
+           int process_old_files,  // Set to 1 to force scan of old files
+           const string &exclude_substring = "",
+           bool debug = false,
+           bool verbose = false);
+  
+  // Destructor
+  
+  virtual ~InputDir(void);
+  
+  // Setting debugging
+  
+  void setDebug(bool val) { _debug = val; }
+  
+  void setVerbose(bool val) { 
+    _verbose = val;
+    if (_verbose) {
+      _debug = true;
+    }
+  }
 
-    virtual char *getNextFilename(int check_dir_flag, // Set flag to 1 to check for new/updated files
-				  int max_input_file_age = -1);
-    
-  ////////////////////
-  // Access methods //
-  ////////////////////
+  // Get the next input filename.  Call this in a tight loop until
+  // NULL is returned (indicating no more new files).
+  
+  virtual char *getNextFilename(int check_dir_flag, // Set flag to 1 to check for new/updated files
+                                int max_input_file_age = -1);
+  
+  // get latest time of any file in the dir
 
+  time_t getLatestFileTime();
+
+  ////////////////////
+  // set methods    //
+  ////////////////////
+  
   void setDirName(const string &dir_name);
-
+  
   inline void setFileSubstring(const string &file_substring)
   {
     _fileSubstring = file_substring;
@@ -91,12 +111,13 @@ class InputDir
   
   inline void setProcessOldFiles(const bool process_old_files)
   {
-    if (process_old_files)
+    if (process_old_files) {
       _lastDirUpdateTime = -1;
-    else
+    } else {
       _lastDirUpdateTime = time((time_t *)0);
+    }
   }
-
+  
   // Create public access to private method _rewindDir()
   inline bool rewindDir(const int check_dir_flag)
   {
@@ -106,27 +127,40 @@ class InputDir
     return(returnBool);
   }
   
-  protected :
+  ////////////////////
+  // get methods    //
+  ////////////////////
+  
+  const string &getDirName() const { return _dirName; }
+  const string &getFileSubstring() const { return _fileSubstring; }
+  const string &getExcludeSubstring() const { return _excludeSubstring; }
 
-    string _dirName;
-    DIR *_dirPtr;
-    string _fileSubstring;
-    string _excludeSubstring;
-    char _errorMsg[1024];
+  time_t getLastDirUpdateTime() const { return _lastDirUpdateTime; }
+  time_t getLastDirRewindTime() const { return _lastDirRewindTime; }
+  time_t getLastDataFileTime() const { return _lastDataFileTime; }
   
-    time_t _lastDirUpdateTime;
-    time_t _lastDirRewindTime;
-    time_t _lastDataFileTime;
-    bool _rewindDirFlag;
+protected :
+
+  string _dirName;
+  DIR *_dirPtr;
+  string _fileSubstring;
+  string _excludeSubstring;
+  // char _errorMsg[1024];
   
+  time_t _lastDirUpdateTime;
+  time_t _lastDirRewindTime;
+  time_t _lastDataFileTime;
+  bool _rewindDirFlag;
+  
+  bool _debug;
+  bool _verbose;
+
   void _init(const string &dir_name,
 	     const string &file_substring,
 	     const string &exclude_substring,
 	     const bool process_old_files);
   
-
   bool _rewindDir(const int check_dir_flag);
-  
 
 };
 
