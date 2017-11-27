@@ -109,6 +109,18 @@ public:
 
   virtual ~DsTrigger();
 
+  ////////////////////
+  // Setting debugging
+  ////////////////////
+
+  void setDebug(bool val) { _debug = val; }
+
+  void setVerbose(bool val) { 
+    _verbose = val;
+    if (_verbose) {
+      _debug = true;
+    }
+  }
 
   ////////////////////
   // Access methods //
@@ -194,7 +206,9 @@ protected:
   TriggerInfo _triggerInfo;
 
   trigger_type_t _type;
-  
+
+  bool _debug;
+  bool _verbose;
 
   ///////////////////////
   // Protected methods //

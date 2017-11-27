@@ -189,7 +189,7 @@ int DsMultipleTrigger::next()
   
   // Get the next trigger time
 
-  time_t trigger_time;
+  time_t trigger_time = 0;
   TriggerInfo trigger_info;
   
   switch (__trigger_type)
