@@ -53,6 +53,8 @@ class InputDir
 public :
   
   // Constructors
+  //
+  // Note: if process_old_files is false, only the latest file will be processed.
   
   InputDir(const string &dir_name = "",
            const string &file_substring = "",
@@ -114,7 +116,7 @@ public :
     if (process_old_files) {
       _lastDirUpdateTime = -1;
     } else {
-      _lastDirUpdateTime = time((time_t *)0);
+      _lastDirUpdateTime = getLatestFileTime() - 1;
     }
   }
   
