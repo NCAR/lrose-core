@@ -57,6 +57,13 @@ public:
   } debug_t;
 
   typedef enum {
+    ENCODING_ASIS = 0,
+    ENCODING_INT8 = 1,
+    ENCODING_INT16 = 2,
+    ENCODING_FLOAT32 = 5
+  } encoding_type_t;
+
+  typedef enum {
     HEIGHT_KM = 0,
     PRESSURE_MB = 1,
     FLIGHT_LEVEL = 2
@@ -492,6 +499,10 @@ public:
 
   tdrp_bool_t auto_fail_over;
 
+  tdrp_bool_t override_encoding_type_on_read;
+
+  encoding_type_t encoding_type_on_read;
+
   tdrp_bool_t override_data_set_name_on_read;
 
   char* data_set_name_read_xml;
@@ -594,7 +605,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[91];
+  mutable TDRPtable _table[95];
 
   const char *_className;
 

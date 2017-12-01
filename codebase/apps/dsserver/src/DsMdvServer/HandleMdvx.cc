@@ -123,6 +123,12 @@ int DsMdvServer::handleMdvxCommand(Socket *socket,
        _params.forecast_constraints.request_by_gen_time);
   }
 
+  // set encoding type if appropriate
+
+  if (_params.override_encoding_type_on_read) {
+    mdvx.setReadEncodingType((Mdvx::encoding_type_t) _params.encoding_type_on_read);
+  }
+
   // override client settings, using local params and env vars
 
   _overrideClientSettings(mdvx);
