@@ -684,6 +684,7 @@ int SigmetRadxFile::_readHeaders(bool doPrint, ostream &out)
     } else if (_isHrdLfRadar) {
       out << "  HRD LF Radar: true" << endl;
     }
+    out << "  sigmetIsSwapped: " << (_sigmetIsSwapped?"Y":"N") << endl;
     out << "=============================================" << endl;
   }
 
@@ -725,7 +726,7 @@ int SigmetRadxFile::_readSweepData(bool doPrint, ostream &out)
   _nRaysSweep = 0;
   _inDatHdrs.clear();
   _nBytesData = 0;
-  for (int ifield = 0; ifield < 16; ifield++) {
+  while (ptr < (Radx::ui08 *) _record + RAW_RECORD_LEN) {
     ingest_data_header_t inDatHdr;
     memcpy(&inDatHdr, ptr, sizeof(inDatHdr));
     _swap(inDatHdr);
@@ -752,7 +753,7 @@ int SigmetRadxFile::_readSweepData(bool doPrint, ostream &out)
     if (_inDatHdrs.size() == 1) {
       _inDatHdr0 = inDatHdr;
     }
-  }
+  } // while
 
   // compute the number of fields,
   // i.e. those headers with non-zero data_codes
