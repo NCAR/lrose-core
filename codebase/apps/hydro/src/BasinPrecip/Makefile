@@ -37,7 +37,7 @@ TARGET_FILE = BasinPrecip
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -leuclid -lrapformats \
+LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -lrapformats \
 	-lSpdb -lhydro -lshapelib -ldsserver \
 	-ldidss -leuclid -ltoolsa -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz \

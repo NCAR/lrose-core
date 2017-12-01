@@ -30,7 +30,7 @@ TARGET_FILE = mdvFindGaps
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -leuclid \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -leuclid \
 	-ldidss -lcidd -lrapformats -ltoolsa \
 	-ldataport -ltdrp -lrapmath $(NETCDF4_LIBS) \
 	-lbz2 -lz -lpthread -lm

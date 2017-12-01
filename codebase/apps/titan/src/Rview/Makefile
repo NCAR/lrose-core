@@ -37,7 +37,7 @@ TARGET_FILE = Rview
 
 LOC_INCLUDES = $(SYS_X_INCLUDES) $(NETCDF4_INCS)
 
-LOC_LIBS = -lrapplot -lSpdb -lMdv -lRadx \
+LOC_LIBS = -lrapplot -lSpdb -lMdv -lRadx -lNcxx \
 	-ltitan -ldsserver -ldidss -lrapformats \
 	-leuclid -lrapmath -ltoolsa -ldataport \
 	-ltdrp -lX11 $(NETCDF4_LIBS) -lbz2 \

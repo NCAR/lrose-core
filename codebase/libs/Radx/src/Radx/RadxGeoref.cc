@@ -66,6 +66,8 @@ void RadxGeoref::_init()
 
   _timeSecs = 0;
   _nanoSecs = 0;
+  _unitNum = 0;
+  _unitId = 0;
   _longitude = Radx::missingMetaDouble;
   _latitude = Radx::missingMetaDouble;
   _altitudeKmMsl = Radx::missingMetaDouble;
@@ -109,6 +111,8 @@ void RadxGeoref::setToZero()
 
   _timeSecs = 0;
   _nanoSecs = 0;
+  _unitNum = 0;
+  _unitId = 0;
   _longitude = 0.0;
   _latitude = 0.0;
   _altitudeKmMsl = 0.0;
@@ -145,6 +149,8 @@ void RadxGeoref::incrementIfNotMissing(RadxGeoref &count)
 {
 
   if (_timeSecs != Radx::missingMetaInt) count._timeSecs++;
+  if (_unitNum != 0) count._unitNum++;
+  if (_unitId != 0) count._unitId++;
   if (_nanoSecs != Radx::missingMetaInt) count._nanoSecs++;
   if (_longitude != Radx::missingMetaDouble) count._longitude++;
   if (_latitude != Radx::missingMetaDouble) count._latitude++;
@@ -184,6 +190,8 @@ void RadxGeoref::print(ostream &out) const
     RadxTime gtime(_timeSecs, _nanoSecs / 1.0e9);
     out << "  time: " << gtime.getStr(6) << endl;
   }
+  out << "  unitNum: " << _unitNum << endl;
+  out << "  unitId: " << _unitId << endl;
   out << "  longitude: " << _longitude << endl;
   out << "  latitude: " << _latitude << endl;
   out << "  altitudeKmMsl: " << _altitudeKmMsl << endl;
@@ -222,6 +230,9 @@ void RadxGeoref::convert2Xml(string &xml, int level /* = 0 */)  const
 
   xml += RadxXml::writeTime("timeSecs", level + 1, _timeSecs);
   xml += RadxXml::writeDouble("nanoSecs", level + 1, _nanoSecs);
+
+  xml += RadxXml::writeLong("unitNum", level + 1, (long) _unitNum);
+  xml += RadxXml::writeLong("unitId", level + 1, (long) _unitId);
 
   xml += RadxXml::writeDouble("longitude", level + 1, _longitude);
   xml += RadxXml::writeDouble("latitude", level + 1, _latitude);
@@ -332,6 +343,8 @@ void RadxGeoref::_loadMetaNumbersToMsg()
 
   _metaNumbers.timeSecs = _timeSecs;
   _metaNumbers.nanoSecs = _nanoSecs;
+  _metaNumbers.unitNum = _unitNum;
+  _metaNumbers.unitId = _unitId;
   _metaNumbers.longitude = _longitude;
   _metaNumbers.latitude = _latitude;
   _metaNumbers.altitudeKmMsl = _altitudeKmMsl;
@@ -390,6 +403,8 @@ int RadxGeoref::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
   
   _timeSecs = _metaNumbers.timeSecs;
   _nanoSecs = _metaNumbers.nanoSecs;
+  _unitNum = _metaNumbers.unitNum;
+  _unitId = _metaNumbers.unitId;
   _longitude = _metaNumbers.longitude;
   _latitude = _metaNumbers.latitude;
   _altitudeKmMsl = _metaNumbers.altitudeKmMsl;

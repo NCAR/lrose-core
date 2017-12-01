@@ -1,0 +1,943 @@
+/**********************************************************************
+ * TDRP params for HsrlMon
+ **********************************************************************/
+
+//======================================================================
+//
+// HsrlMon read UW HSRL raw data files in NetCDF format, extracts data 
+//   for monitoring, and then writes out text files summarizing the 
+//   monitoring information. This is intended for transmission to the 
+//   field catalog.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+
+// In REALTIME mode, the program wakes up at regular intervals, and 
+//   processes the latest data files.
+//
+// In ARCHIVE mode, the program selects the file(s) appropriately for 
+//   the start and end times.
+//
+// In FILELIST mode, it moves through the list of file names specified 
+//   on the command line. .
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = REALTIME;
+
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+//
+// REALTIME and ARCHIVE modes only. Files will be searched for in this 
+//   directory, base on the times selected.
+//
+//
+// Type: string
+//
+
+input_dir = "$(DATA_DIR)/raw";
+
+///////////// files_sub_dir ///////////////////////////
+//
+// Name of directory immediately above the files.
+//
+// Typical path would be: 
+//   /data/2015/07/11/raw/gvhsrl_20150711T150000_data_fl1.nc. This is the 
+//   name of the subdir between the day-dir and the data files.
+//
+//
+// Type: string
+//
+
+files_sub_dir = "raw";
+
+///////////// max_file_time_span_secs /////////////////
+//
+// Max time span in file (secs).
+//
+// A new file is always started after this period.
+//
+//
+// Type: int
+//
+
+max_file_time_span_secs = 3600;
+
+///////////// monitoring_interval_secs ////////////////
+//
+// Interval period over which the monitoring is performed (secs).
+//
+// This is the interval over which the monitoring statistics are 
+//   computed.
+//
+//
+// Type: int
+//
+
+monitoring_interval_secs = 300;
+
+///////////// realtime_interval_secs //////////////////
+//
+// Interval between processing latest data (secs).
+//
+// REALTIME mode only. The program wakes up at this interval, and 
+//   processes the latest available data.
+//
+//
+// Type: int
+//
+
+realtime_interval_secs = 15;
+
+///////////// realtime_delay_secs /////////////////////
+//
+// Delay in processing latest data (secs).
+//
+// REALTIME mode only. We wait by this period to give the latest data 
+//   time to be written to the disk files.
+//
+//
+// Type: int
+//
+
+realtime_delay_secs = 0;
+
+///////////// file_prefix /////////////////////////////
+//
+// File name prefix.
+//
+// We use this prefix to find the files to be processed. The filename 
+//   will be prefix_yyyymmddThhmmss*.nc.
+//
+//
+// Type: string
+//
+
+file_prefix = "gvhsrl";
+
+///////////// file_ext ////////////////////////////////
+//
+// File name extension.
+//
+// The input files will have this extension, since they are netcdf 
+//   files.
+//
+//
+// Type: string
+//
+
+file_ext = "nc";
+
+//======================================================================
+//
+// FIELDS FOR MONITORING.
+//
+//======================================================================
+ 
+///////////// monitoring_fields ///////////////////////
+//
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      string qualifier;
+//      double minValidValue;
+//      double maxValidValue;
+//      string note;
+//   }
+//
+// 1D array - variable length.
+//
+
+monitoring_fields = {
+  {
+    name = "TelescopeLocked",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = "(0 is LOCKED, 1 is FREE)"
+  }
+  ,
+  {
+    name = "TelescopeDirection",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = "(0 is DOWN,   1 is UP)"
+  }
+  ,
+  {
+    name = "DetectorShutter",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = "(0 is OPEN,   1 is CLOSED)"
+  }
+  ,
+  {
+    name = "OutgoingShutter",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = "(0 is OPEN,   1 is CLOSED)"
+  }
+  ,
+  {
+    name = "OutgoingShutterValue",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = "(0 is OPEN,   1 is CLOSED)"
+  }
+  ,
+  {
+    name = "OperatorOutgoingShutterValue",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = "(0 is OPEN,   1 is CLOSED)"
+  }
+  ,
+  {
+    name = "etalonposition",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 1e+10,
+    note = ""
+  }
+  ,
+  {
+    name = "pressure",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "polarization",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "total_energy",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 1e+10,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsfore_records",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsfore_goodrecords",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsfore_errorCount",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsaft_records",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsaft_goodrecords",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsaft_errorCount",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsfore_control_temp",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsfore_in_temp",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsfore_out_temp",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsfore_elect",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsfore_tc_main",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsfore_main_current",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsfore_fan1_current",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsfore_fan2_current",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsaft_control_temp",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsaft_in_temp",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsaft_out_temp",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsaft_elect",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsaft_tc_main",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsaft_main_current",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsaft_fan1_current",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100,
+    note = ""
+  }
+  ,
+  {
+    name = "tcsaft_fan2_current",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100,
+    note = ""
+  }
+  ,
+  {
+    name = "CalibrationPowerFilter",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "CrossChannelBlock",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "IodineLongFilter",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "ReceivedSignalFilter",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "RemoveLongI2Cell",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "brillouinfiltered_energy_stats",
+    qualifier = "field0",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "nonfiltered_energy_stats",
+    qualifier = "field0",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "builduptime",
+    qualifier = "field0",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "l3cavityvoltage",
+    qualifier = "field0",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "l3locking_stats",
+    qualifier = "field0",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field2_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field3_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field4_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field5_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field7_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field8_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field9_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field11_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field12_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field13_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field14_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field15_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field16_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field17_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "system_temperatures",
+    qualifier = "field18_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "humidity",
+    qualifier = "field1_description",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "laserpowervalues",
+    qualifier = "field0_name",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "laserpowervalues",
+    qualifier = "field1_name",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "laserpowervalues",
+    qualifier = "field2_name",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "laserpowervalues",
+    qualifier = "field3_name",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "laserpowervalues",
+    qualifier = "field4_name",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "laserpowervalues",
+    qualifier = "field5_name",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "laserpowervalues",
+    qualifier = "field6_name",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_Lat",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_Lon",
+    qualifier = "",
+    minValidValue = -100000,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_GPS_MSL_Alt",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 1e+07,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_Grnd_Spd",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_True_Hdg",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_Pitch",
+    qualifier = "",
+    minValidValue = -10000,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_Roll",
+    qualifier = "",
+    minValidValue = -10000,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_Cabin_Pressure",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+  ,
+  {
+    name = "iwg1_Solar_Zenith",
+    qualifier = "",
+    minValidValue = -100,
+    maxValidValue = 100000,
+    note = ""
+  }
+};
+
+//======================================================================
+//
+// OUTPUT DIRECTORY for STATS files.
+//
+// The text output files will be named 
+//   category.platform.yyyymmddhhmmss.fieldname.txt.
+//
+//======================================================================
+ 
+///////////// write_stats_files ///////////////////////
+//
+// Option to write statistics text files.
+//
+//
+// Type: boolean
+//
+
+write_stats_files = FALSE;
+
+///////////// stats_output_dir ////////////////////////
+//
+// Output directory path.
+//
+// Monitoring statistics files will be written to this directory.
+//
+//
+// Type: string
+//
+
+stats_output_dir = "$(DATA_DIR)/monitoring/catalog";
+
+///////////// stats_write_to_day_dir //////////////////
+//
+// Option to create a subdirectory for each day.
+//
+//
+// Type: boolean
+//
+
+stats_write_to_day_dir = TRUE;
+
+///////////// stats_file_name_category ////////////////
+//
+// Set the category string.
+//
+// If empty, no category will be included.
+//
+//
+// Type: string
+//
+
+stats_file_name_category = "lidar";
+
+///////////// stats_file_name_platform ////////////////
+//
+// Set the platform string.
+//
+// If empty, no platform will be included.
+//
+//
+// Type: string
+//
+
+stats_file_name_platform = "NSF_NCAR_GV_HSRL";
+
+///////////// stats_file_name_extension ///////////////
+//
+// These are text files, so normally .txt is used.
+//
+// An extension is always required.
+//
+//
+// Type: string
+//
+
+stats_file_name_extension = "txt";
+
+///////////// stats_file_name_delimiter ///////////////
+//
+// Set the delimiter between the parts of the file name.
+//
+// NOTE: the extension the delimited is always a period: '.'.
+//
+//
+// Type: string
+//
+
+stats_file_name_delimiter = ".";
+
+///////////// stats_include_time_part_in_file_name ////
+//
+// Normally the file name includes a time part: YYYYMMDDHHMMSS.
+//
+// If FALSE, the time part will be omitted.
+//
+//
+// Type: boolean
+//
+
+stats_include_time_part_in_file_name = TRUE;
+
+///////////// stats_include_seconds_in_time_part //////
+//
+// Normally the time part include the seconds: YYYYMMDDHHMMSS.
+//
+// If FALSE, the SS will be excluuded from the time part.
+//
+//
+// Type: boolean
+//
+
+stats_include_seconds_in_time_part = FALSE;
+
+///////////// stats_include_field_label_in_file_name //
+//
+// Normally the file name includes the field label (product type).
+//
+// If FALSE, the field label will be omitted.
+//
+//
+// Type: boolean
+//
+
+stats_include_field_label_in_file_name = TRUE;
+
+///////////// stats_file_field_label //////////////////
+//
+// Field label for stats files.
+//
+//
+// Type: string
+//
+
+stats_file_field_label = "MonitorStats";
+
+///////////// stats_write_latest_data_info ////////////
+//
+// Option to write latest_data_info files when an image is created.
+//
+//
+// Type: boolean
+//
+
+stats_write_latest_data_info = TRUE;
+

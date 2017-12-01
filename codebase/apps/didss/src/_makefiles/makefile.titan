@@ -37,9 +37,7 @@ SUB_DIRS = \
 	Test2Dsr \
 	TimeCalc \
 	VerifyGrid \
-	copy_mh_tape \
 	didss_compress \
-        dsr2mmq \
 	edge2dsr \
 	fmq2tape \
 	fmq_print \

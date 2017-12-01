@@ -67,10 +67,10 @@ public:
   void setEl(double el) { _el = el; }
   void setAz(double az);
 
-  // add data to layer
+  // add data for a point
   
-  void addLayerData(double range,
-		    const MomentData &mdata);
+  void addDataPoint(double range,
+		    MomentData mdata);
 
   // check and compute when ready
   
@@ -90,6 +90,8 @@ public:
 
   int writeGlobalResults();
   void printGlobalResults(FILE *out);
+
+  int writeZdrPoints();
 
 protected:
   

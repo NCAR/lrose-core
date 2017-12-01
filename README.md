@@ -1,8 +1,11 @@
 # lrose-core
 
-![SPOL](./docs/images/spol_dynamo.jpg)
+<img align="left" width="175" height="175" src="./docs/images/LROSE_logo.png">
+<img align="right" width="175" height="175" src="./docs/images/spol_dynamo.jpg">
 
-## **L**:rose: - The Lidar Radar Open Software Environment
+--------------------------------------------
+
+## **LROSE** - The Lidar Radar Open Software Environment
 
 LROSE is a co-operative project between:
 
@@ -74,11 +77,7 @@ See [README_INSTALL_BIN.md](./docs/README_INSTALL_BIN.md)
 
 See [README_CREATE_RELEASE.md](./docs/README_CREATE_RELEASE.md)
 
+This page is published at:
 
-
-
-
-
-
-
+  [https://ncar.github.io/lrose-core](https://ncar.github.io/lrose-core)
 

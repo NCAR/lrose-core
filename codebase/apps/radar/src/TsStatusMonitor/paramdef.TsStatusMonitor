@@ -74,6 +74,9 @@ typedef struct {
   double graph_min_val;
   double graph_max_val;
   string comment;
+  boolean include_in_catalog_stats;
+  boolean catalog_omit_if_zero;
+  boolean catalog_interpret_as_time;
 } xml_entry_t;
 
 paramdef struct xml_entry_t {
@@ -92,7 +95,10 @@ paramdef struct xml_entry_t {
       units = "",
       graph_min_val = 0,
       graph_max_val = 1,
-      comment = ""
+      comment = "",
+      include_in_catalog_stats = true,
+      catalog_omit_if_zero = true,
+      catalog_interpret_as_time = false
     }
     ,
     {
@@ -109,7 +115,10 @@ paramdef struct xml_entry_t {
       units = "V",
       graph_min_val = 0,
       graph_max_val = 30,
-      comment = ""
+      comment = "",
+      include_in_catalog_stats = true,
+      catalog_omit_if_zero = true,
+      catalog_interpret_as_time = false
     }
     ,
     {
@@ -126,7 +135,10 @@ paramdef struct xml_entry_t {
       units = "psi",
       graph_min_val = 0,
       graph_max_val = 30,
-      comment = ""
+      comment = "",
+      include_in_catalog_stats = true,
+      catalog_omit_if_zero = true,
+      catalog_interpret_as_time = false
     }
   };
   p_descr = "Details of XML entries to process.";
@@ -143,6 +155,9 @@ paramdef struct xml_entry_t {
     "\tgraph_min_val: minimum value for history graph\n"
     "\tgraph_max_val: maximim value for history graph\n"
     "\tcomment: if set, appears at end of status line\n"
+    "\tinclude_in_catalog_stats: add this entry to the catalog stats\n"
+    "\tcatalog_omit_if_zero: do not report in catalog if all values are zero or false\n"
+    "\tcatalog_interpret_as_time: treat this value as a time or time string\n"
     ".";
 } xml_entries[];
 
@@ -309,4 +324,85 @@ paramdef boolean {
   p_default = true;
   p_descr = "If true, compress the SPDB chunks on write.";
 } compress_spdb;
+
+commentdef {
+  p_header = "STATISTICS OUTPUT TO CATALOG";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, create text files to send to catalog.";
+  p_help = "A tabular style text file is created and sent to the field catalog. This is run on a schedule. The file summarizes the statistics of specified variables over the selected time period.";
+} write_stats_files_to_catalog;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Interval period over which the stats monitoring is performed (secs).";
+  p_help =  "This is the interval over which the monitoring statistics are computed.";
+} stats_interval_secs;
+
+paramdef string {
+  p_default = "/tmp/hsrl_mon/stats";
+  p_descr = "Output directory path.";
+  p_help = "Monitoring statistics files will be written to this directory.";
+} stats_output_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to create a subdirectory for each day.";
+  p_descr = "If true, a subdirectory named YYYYMMDD will be appended to stats_output_dir.";
+} stats_write_to_day_dir;
+
+paramdef string {
+  p_default = "lidar";
+  p_descr = "Set the category string.";
+  p_help = "If empty, no category will be included.";
+} stats_file_name_category;
+
+paramdef string {
+  p_default = "NSF_NCAR_GV_HSRL";
+  p_descr = "Set the platform string.";
+  p_help = "If empty, no platform will be included.";
+} stats_file_name_platform;
+
+paramdef string {
+  p_default = "txt";
+  p_descr = "These are text files, so normally .txt is used.";
+  p_help = "An extension is always required";
+} stats_file_name_extension;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Set the delimiter between the parts of the file name.";
+  p_help = "NOTE: the extension the delimited is always a period: '.'.";
+} stats_file_name_delimiter;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Normally the file name includes a time part: YYYYMMDDHHMMSS.";
+  p_help = "If FALSE, the time part will be omitted.";
+} stats_include_time_part_in_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Normally the time part include the seconds: YYYYMMDDHHMMSS.";
+  p_help = "If FALSE, the SS will be excluuded from the time part.";
+} stats_include_seconds_in_time_part;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Normally the file name includes the field label (product type).";
+  p_help = "If FALSE, the field label will be omitted.";
+} stats_include_field_label_in_file_name;
+
+paramdef string {
+  p_default = "MonitorStats";
+  p_descr = "Field label for stats files.";
+} stats_file_field_label;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write latest_data_info files when an image is created.";
+  p_descr = "If true, _latest_data_info files will be written to the output directory, and the file write will be registered with the DataMapper.";
+} stats_write_latest_data_info;
 

@@ -10,7 +10,7 @@
 # to the top dir for installation.
 #
 
-export HOST_OS=LINUX_64
+export HOST_OS=LINUX_CX11
 uname -a | grep x86_64
 if [ "$?" = 1 ]
 then

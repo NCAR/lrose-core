@@ -36,7 +36,7 @@ TARGET_FILE = Gini2Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -leuclid \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -leuclid \
 	-ldidss -ltdrp -lrapformats -ltoolsa \
 	-lrapmath -ldataport $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm

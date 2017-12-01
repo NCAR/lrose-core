@@ -1054,16 +1054,40 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("./output");
     tt++;
     
-    // Parameter 'nrevs_for_global_stats'
-    // ctype is 'int'
+    // Parameter 'write_global_stats_to_text_file'
+    // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("nrevs_for_global_stats");
-    tt->descr = tdrpStrDup("Number of revolutions for global stats.");
-    tt->help = tdrpStrDup("A global stats file will be output each time the number of revolutions reaches this value.");
-    tt->val_offset = (char *) &nrevs_for_global_stats - &_start_;
-    tt->single_val.i = 4;
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_global_stats_to_text_file");
+    tt->descr = tdrpStrDup("Option to write global statistics to a text file.");
+    tt->help = tdrpStrDup("If true, stats for the entire run will be writted to a text file.");
+    tt->val_offset = (char *) &write_global_stats_to_text_file - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'write_360deg_stats_to_text_file'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_360deg_stats_to_text_file");
+    tt->descr = tdrpStrDup("Option to write statistics for each rotation to a text file.");
+    tt->help = tdrpStrDup("If true, stats for each rotation will be writted to a text file.");
+    tt->val_offset = (char *) &write_360deg_stats_to_text_file - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'write_zdr_point_values_to_text_file'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_zdr_point_values_to_text_file");
+    tt->descr = tdrpStrDup("Option to write individual ZDR values to a text file.");
+    tt->help = tdrpStrDup("If true, the individual zdrm values, plus metadata such as height, is written to a text file.");
+    tt->val_offset = (char *) &write_zdr_point_values_to_text_file - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'write_results_to_spdb'

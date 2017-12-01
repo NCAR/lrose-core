@@ -57,7 +57,7 @@ echo
 
 # set the install prefix
 
-prefix=/usr/local
+prefix=${HOME}
 
 if [ $# -gt 0 ]
 then

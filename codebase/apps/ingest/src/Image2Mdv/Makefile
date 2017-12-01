@@ -34,7 +34,7 @@ TARGET_FILE = Image2Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -leuclid -lrapformats \
+LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -lrapformats \
 	-lFmq -ldsserver -ldidss -ltoolsa \
 	-ldataport -ltdrp -lImlib2 $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm

@@ -31,6 +31,7 @@
 #define GET_CCM    1
 
 #include <stdio.h>
+#include <unistd.h>
 #include <errno.h>
 #include <time.h>
 #include <string.h>

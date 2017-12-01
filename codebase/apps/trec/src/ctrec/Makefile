@@ -39,7 +39,7 @@ TARGET_FILE = ctrec
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx \
+LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx -lNcxx \
 	-ldsserver -lrapformats -ldidss -leuclid \
 	-lrapmath -ltdrp -ltoolsa -ldataport \
 	$(NETCDF4_LIBS) -lbz2 -lz

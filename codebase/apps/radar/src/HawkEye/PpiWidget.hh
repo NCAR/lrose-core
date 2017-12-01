@@ -52,7 +52,8 @@ class DLL_EXPORT PpiWidget : public PolarWidget
             const PolarManager &manager,
             const Params &params,
             const RadxPlatform &platform,
-            size_t n_fields);
+            const vector<DisplayField *> &fields,
+            bool haveFilteredFields);
 
   /**
    * @brief Destructor.

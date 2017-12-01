@@ -1258,7 +1258,7 @@ int Nc3xFile::writeStringVar(Nc3Var *var, const void *str)
     Nc3Dim *dim0 = var->get_dim(0);
     if (dim0 == NULL) {
       _addErrStr("ERROR - Nc3xFile::writeStringVar");
-      _addErrStr("  Canont write var, name: ", var->name());
+      _addErrStr("  Cannot write var, name: ", var->name());
       _addErrStr("  dim 0 is NULL");
       _addErrStr("  file: ", _pathInUse);
       return -1;
@@ -1268,7 +1268,7 @@ int Nc3xFile::writeStringVar(Nc3Var *var, const void *str)
   
     if (iret) {
       _addErrStr("ERROR - Nc3xFile::writeStringVar");
-      _addErrStr("  Canont write var, name: ", var->name());
+      _addErrStr("  Cannot write var, name: ", var->name());
       _addErrStr(_err->get_errmsg());
       _addErrStr("  file: ", _pathInUse);
       return -1;
@@ -1285,7 +1285,7 @@ int Nc3xFile::writeStringVar(Nc3Var *var, const void *str)
     Nc3Dim *dim0 = var->get_dim(0);
     if (dim0 == NULL) {
       _addErrStr("ERROR - Nc3xFile::writeStringVar");
-      _addErrStr("  Canont write var, name: ", var->name());
+      _addErrStr("  Cannot write var, name: ", var->name());
       _addErrStr("  dim 0 is NULL");
       _addErrStr("  file: ", _pathInUse);
       return -1;
@@ -1294,7 +1294,7 @@ int Nc3xFile::writeStringVar(Nc3Var *var, const void *str)
     Nc3Dim *dim1 = var->get_dim(1);
     if (dim1 == NULL) {
       _addErrStr("ERROR - Nc3xFile::writeStringVar");
-      _addErrStr("  Canont write var, name: ", var->name());
+      _addErrStr("  Cannot write var, name: ", var->name());
       _addErrStr("  dim 1 is NULL");
       _addErrStr("  file: ", _pathInUse);
       return -1;
@@ -1304,7 +1304,7 @@ int Nc3xFile::writeStringVar(Nc3Var *var, const void *str)
     
     if (iret) {
       _addErrStr("ERROR - Nc3xFile::writeStringVar");
-      _addErrStr("  Canont write var, name: ", var->name());
+      _addErrStr("  Cannot write var, name: ", var->name());
       _addErrInt("                    type: ", var->type());
       _addErrInt("                    is_valid: ", var->is_valid());
       _addErrStr("  file: ", _pathInUse);
@@ -1319,7 +1319,7 @@ int Nc3xFile::writeStringVar(Nc3Var *var, const void *str)
   // more than 2 is an error
   
   _addErrStr("ERROR - Nc3xFile::writeStringVar");
-  _addErrStr("  Canont write var, name: ", var->name());
+  _addErrStr("  Cannot write var, name: ", var->name());
   _addErrInt("  more than 2 dimensions: ", nDims);
   _addErrStr("  file: ", _pathInUse);
   return -1;

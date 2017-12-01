@@ -56,7 +56,9 @@ using namespace std;
  */
 
 DsTrigger::DsTrigger(const trigger_type_t type) :
-  _type(type)
+        _type(type),
+        _debug(false),
+        _verbose(false)
 {
   // Do nothing
 }

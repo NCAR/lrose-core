@@ -38,7 +38,7 @@ TARGET_FILE = Mdv2AsciiContour
 
 LOC_INCLUDES = -I../include $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lSpdb -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lSpdb -ldsserver \
 	-leuclid -lrapformats -ldidss -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread

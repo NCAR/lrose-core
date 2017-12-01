@@ -32,7 +32,6 @@ SUB_DIRS = \
          toneDownColorScale \
 	 cscale_edit \
          get_url \
-	 mdv_server \
 	 view_colormap
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

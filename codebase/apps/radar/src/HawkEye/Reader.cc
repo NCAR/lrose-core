@@ -537,9 +537,7 @@ void IwrfReader::run()
     // add ray to queue
     
     if (ray) {
-      if (count == 0) {
-        _platform = reader->getPlatform();
-      }
+      _platform = reader->getPlatform();
       addRay(ray);
     } else {
       cerr << "ERROR - IwrfReader::run" << endl;

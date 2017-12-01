@@ -95,7 +95,7 @@ StatsMgr::StatsMgr(const string &prog_name,
     _layers.push_back(layer);
     _maxHt = maxHt;    
   }
-  
+
 }
 
 // destructor
@@ -139,7 +139,12 @@ void StatsMgr::checkCompute() {
     }
 
     computeStats360();
-    writeResults360();
+    if (_params.write_360deg_stats_to_text_file) {
+      writeResults360();
+    }
+    if (_params.debug) {
+      printResults360(stderr);
+    }
     if (_params.write_results_to_spdb) {
       writeResults360ToSpdb();
     }
@@ -148,10 +153,10 @@ void StatsMgr::checkCompute() {
     _nRotations++;
     _startTime360 = _endTime;
 
-    if (_nRotations % _params.nrevs_for_global_stats == 0) {
-      computeGlobalStats();
-      writeGlobalResults();
-    }
+    // if (_nRotations % _params.nrevs_for_global_stats == 0) {
+    //   computeGlobalStats();
+    //   writeGlobalResults();
+    // }
 
   }
   
@@ -160,16 +165,18 @@ void StatsMgr::checkCompute() {
 /////////////////////////////////
 // add data to layer
 
-void StatsMgr::addLayerData(double range,
-			    const MomentData &mdata)
+void StatsMgr::addDataPoint(double range,
+			    MomentData mdata)
 
 {
   
-  int layer = (int) ((range - _startHt) / _deltaHt);
+  double sinEl = sin(_el * DEG_TO_RAD);
+  double ht = (range * sinEl);
+  int layer = (int) ((ht - _startHt) / _deltaHt);
+  mdata.height = ht;
   if (layer >= 0 && layer < _nLayers) {
     _layers[layer]->addData(mdata);
   }
-  
 }
  
 ////////////////////////////////////////////
@@ -423,7 +430,7 @@ int StatsMgr::writeResults360ToSpdb()
 
   for (int ii = 0; ii < (int) _layers.size(); ii++) {
     const LayerStats &layer = *(_layers[ii]);
-    if (layer.getMean().snr > -9990) {
+    // if (layer.getMean().snr > -9990) {
 
       xml += TaXml::writeStartTag("LayerStats", 1);
       xml += TaXml::writeDouble("meanHt", 2, layer.getMeanHt());
@@ -437,7 +444,7 @@ int StatsMgr::writeResults360ToSpdb()
       xml += TaXml::writeDouble("meanRhohv", 2, layer.getMean().rhohv);
       xml += TaXml::writeEndTag("LayerStats", 1);
 
-    }
+      // }
   }
   
   xml += TaXml::writeEndTag("VertPointingResults", 0);
@@ -566,7 +573,90 @@ void StatsMgr::printGlobalResults(FILE *out)
               layer.getGlobalMean().ldrv,
               layer.getGlobalMean().rhohv);
     }
+  } // ii
+
+}
+
+////////////////////////////////////////////////////////
+// write out zdr and height data for individual points
+
+int StatsMgr::writeZdrPoints()
+
+{
+  
+  // compute output file path
+
+  time_t startTime = (time_t) _startTime;
+  time_t endTime = (time_t) _endTime;
+  DateTime ftime(startTime);
+  char outPath[1024];
+  sprintf(outPath, "%s/zdr_points_%.4d%.2d%.2d_%.2d%.2d%.2d.txt",
+          _params.output_dir,
+          ftime.getYear(),
+          ftime.getMonth(),
+          ftime.getDay(),
+          ftime.getHour(),
+          ftime.getMin(),
+          ftime.getSec());
+  
+  // open file
+  
+  FILE *out;
+  if ((out = fopen(outPath, "w")) == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - StatsMgr::_writeFile";
+    cerr << "  Cannot create file: " << outPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
   }
+
+  // write header
+
+  fprintf(out, "# height snr dbz vel zdrm ldr rhohv\n");
+  fprintf(out, "#============================================\n");
+  fprintf(out, "# Table produced by VertCompute\n");
+  fprintf(out, "# Start time: %s\n", DateTime::strm(startTime).c_str());
+  fprintf(out, "# End time  : %s\n", DateTime::strm(endTime).c_str());
+  fprintf(out, "#------------ Table column list -------------\n");
+  fprintf(out, "#    col 000: height\n");
+  fprintf(out, "#    col 001: snr\n");
+  fprintf(out, "#    col 002: dbz\n");
+  fprintf(out, "#    col 003: vel\n");
+  fprintf(out, "#    col 004: zdrm\n");
+  fprintf(out, "#    col 005: ldr\n");
+  fprintf(out, "#    col 006: rhohv\n");
+  fprintf(out, "#--------------------------------------------\n");
+  fprintf(out, "#============================================\n");
+
+  // write 
+
+  for (int ii = 0; ii < (int) _layers.size(); ii++) {
+    const LayerStats &layer = *(_layers[ii]);
+    const vector<MomentData> &momentData = layer.getMomentData();
+    for (size_t jj = 0; jj < momentData.size(); jj++) {
+      const MomentData &mdata = momentData[jj];
+      if (mdata.snr > -9990) {
+        fprintf(out,
+                "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
+                mdata.height,
+                mdata.snr,
+                mdata.dbz,
+                mdata.vel,
+                mdata.zdrm,
+                (mdata.ldrh + mdata.ldrv) / 2.0,
+                mdata.rhohv);
+      }
+    } // jj
+  } // ii
+
+  if (_params.debug) {
+    cerr << "-->> Wrote zdr points file: " << outPath << endl;
+  }
+
+  // close file
+
+  fclose(out);
+  return 0;
 
 }
 

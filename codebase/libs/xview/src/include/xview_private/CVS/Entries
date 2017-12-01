@@ -1,5 +1,4 @@
 /attr_impl.h/1.2/Thu Dec 29 22:57:39 2016//
-/aux.h/1.2/Thu Dec 29 22:57:39 2016//
 /bitmask.h/1.2/Thu Dec 29 22:57:39 2016//
 /charimage.h/1.1.1.1/Thu Dec 29 22:57:39 2016//
 /charscreen.h/1.1.1.1/Thu Dec 29 22:57:39 2016//
@@ -72,4 +71,5 @@
 /xv_debug.h/1.4/Thu Dec 29 22:57:39 2016//
 /xv_list.h/1.2/Thu Dec 29 22:57:39 2016//
 /xv_path_util.h/1.1.1.1/Thu Dec 29 22:57:39 2016//
+/aux_data.h/1.1/Thu Dec 29 22:57:39 2016//
 D

@@ -1562,6 +1562,8 @@ void NcfRadxFile::_clearGeorefVariables()
 
   _geoTime.clear();
   _geoLatitude.clear();
+  _geoUnitNum.clear();
+  _geoUnitId.clear();
   _geoLongitude.clear();
   _geoAltitudeMsl.clear();
   _geoAltitudeAgl.clear();
@@ -1598,7 +1600,6 @@ int NcfRadxFile::_readGeorefVariables()
   if (_geoTime.size() < _raysFromFile.size()) {
     // iret = -1;
   }
-
   _readRayVar(_latitudeVar, LATITUDE, _geoLatitude);
   if (_geoLatitude.size() < _raysFromFile.size()) {
     iret = -1;
@@ -1615,6 +1616,9 @@ int NcfRadxFile::_readGeorefVariables()
   }
 
   _readRayVar(_altitudeAglVar, ALTITUDE_AGL, _geoAltitudeAgl, false); // meters
+
+  _readRayVar(GEOREF_UNIT_NUM, _geoUnitNum, false);
+  _readRayVar(GEOREF_UNIT_ID, _geoUnitId, false);
 
   _readRayVar(EASTWARD_VELOCITY, _geoEwVelocity, false);
   _readRayVar(NORTHWARD_VELOCITY, _geoNsVelocity, false);
@@ -1894,6 +1898,14 @@ int NcfRadxFile::_createRays(const string &path)
         geo.setTimeSecs(tSecs);
         geo.setNanoSecs(nanoSecs);
       }
+
+      if (_geoUnitNum.size() > rayIndex) {
+        geo.setUnitNum(_geoUnitNum[rayIndex]);
+      }
+      if (_geoUnitId.size() > rayIndex) {
+        geo.setUnitId(_geoUnitId[rayIndex]);
+      }
+
       if (_geoLatitude.size() > rayIndex) {
         geo.setLatitude(_geoLatitude[rayIndex]);
       }

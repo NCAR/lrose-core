@@ -32,7 +32,7 @@ TARGET_FILE = MdvMask
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lMdv -lRadx -lSpdb \
+LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -lSpdb \
 	-ldsserver -leuclid -ldidss -lrapformats \
 	-ltoolsa -ldataport -ltdrp -lrapmath \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread \

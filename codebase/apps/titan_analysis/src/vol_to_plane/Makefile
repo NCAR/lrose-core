@@ -37,7 +37,7 @@ TARGET_FILE = vol_to_plane
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ltitan -lrapmath -lMdv -lRadx -ldidss \
+LOC_LIBS = -ltitan -lrapmath -lMdv -lRadx -lNcxx -ldidss \
 	-lrapformats -leuclid -ltoolsa -ldataport $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm
 

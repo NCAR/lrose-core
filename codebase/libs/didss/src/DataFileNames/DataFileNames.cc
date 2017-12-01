@@ -482,7 +482,7 @@ int DataFileNames::getDataTime(const string& file_path,
   // find the number of digits before the second non-digit
 
   int digitsLen2 = 0;
-  if (ccc != '\0') {
+  if (*ccc != '\0') {
     ccc++;
     while (isdigit(*ccc)) {
       ccc++;

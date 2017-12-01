@@ -381,7 +381,7 @@ int RadxCov2Mom::_processFile(const string &filePath)
   // optinally override the sweep fixed angles
 
   if (_params.compute_sweep_fixed_angles_from_rays) {
-    vol.computeSweepFixedAnglesFromRays();
+    vol.computeFixedAnglesFromRays();
   }
   
   // convert all data to floats

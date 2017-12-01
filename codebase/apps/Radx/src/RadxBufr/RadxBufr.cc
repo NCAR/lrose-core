@@ -167,17 +167,17 @@ RadxBufr::~RadxBufr()
 int RadxBufr::Run()
 {
 
-  //  if (_params.mode == Params::ARCHIVE) {
-  //  return _runArchive();
-  //} else if (_params.mode == Params::FILELIST) {
+  if (_params.mode == Params::ARCHIVE) {
+    return _runArchive();
+  } else if (_params.mode == Params::FILELIST) {
     return _runFilelist();
-    //} else {
-    //if (_params.latest_data_info_avail) {
-    //  return _runRealtimeWithLdata();
-    //} else {
-    //  return _runRealtimeNoLdata();
-    // }
-    //}
+  } else {
+    if (_params.latest_data_info_avail) {
+      return _runRealtimeWithLdata();
+    } else {
+      return _runRealtimeNoLdata();
+    }
+  }
 }
 
 //////////////////////////////////////////////////
@@ -220,9 +220,9 @@ int RadxBufr::_runFilelist()
          } else {
            nGood++;
            if (_params.debug) {
-             cerr << "  ====>> n good files so far: " << nGood << endl;
-             cerr << "  ====>> n errors     so far: " << nError << endl;
-             cerr << "  ====>> sum          so far: " << nGood + nError << endl;
+             cerr << "  ====>> n good volumes so far: " << nGood << endl;
+             cerr << "  ====>> n errors       so far: " << nError << endl;
+             cerr << "  ====>> sum            so far: " << nGood + nError << endl;
            }
          }
       } else if (jret < 0) {
@@ -237,13 +237,16 @@ int RadxBufr::_runFilelist()
     }
 
   } else {
-    /*
+    
     // aggregate the files into a single volume on read
     
     RadxVol vol;
-    //GenericRadxFile inFile;
     BufrRadxFile inFile;
     _setupRead(inFile);
+
+    if (strlen(_params.tables) > 0) {
+      inFile.setTablePath(_params.tables);
+    }
     vector<string> paths = _args.inputFileList;
     if (inFile.aggregateFromPaths(paths, vol)) {
       cerr << "ERROR - RadxBufr::_runFileList" << endl;
@@ -257,22 +260,17 @@ int RadxBufr::_runFilelist()
       for (size_t ii = 0; ii < paths.size(); ii++) {
         cerr << "==>> read in file: " << paths[ii] << endl;
       }
-    }
-    
-    // finalize the volume
-    
-    _finalizeVol(vol);
-    
+    }  
+    inFile.print(cout);
+    // finalize the volume   
+    _finalizeVol(vol);   
     // write the volume out
     if (_writeVol(vol)) {
       cerr << "ERROR - RadxBufr::_runFileList" << endl;
       cerr << "  Cannot write aggregated volume to file" << endl;
       iret = -1;
     }
-
     nGood++;
-    */
-    ;
   } // if (!_params.aggregate_all_files_on_read) {
 
   if (_params.debug) {
@@ -286,7 +284,7 @@ int RadxBufr::_runFilelist()
 
 //////////////////////////////////////////////////
 // Run in archive mode
-/*
+
 int RadxBufr::_runArchive()
 {
 
@@ -460,7 +458,7 @@ int RadxBufr::_runRealtimeNoLdata()
   return iret;
 
 }
-*/
+
 //////////////////////////////////////////////////
 // Read in a file
 // Only Bufr format is recognized.
@@ -516,6 +514,9 @@ int RadxBufr::_readFile(const string &readPath,
   //GenericRadxFile inFile;
   BufrRadxFile inFile;
   _setupRead(inFile);
+  if (strlen(_params.tables) > 0) {
+    inFile.setTablePath(_params.tables);
+  }
   
   // read in file
 
@@ -525,6 +526,7 @@ int RadxBufr::_readFile(const string &readPath,
     cerr << inFile.getErrStr() << endl;
     return -1;
   }
+  inFile.print(cout);
   _readPaths = inFile.getReadPaths();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     for (size_t ii = 0; ii < _readPaths.size(); ii++) {
@@ -638,7 +640,7 @@ void RadxBufr::_finalizeVol(RadxVol &vol)
     if (_params.debug) {
       cerr << "DEBUG - recomputing sweep fixed angles from ray data" << endl;
     }
-    vol.computeSweepFixedAnglesFromRays();
+    vol.computeFixedAnglesFromRays();
   }
 
   // sweep limits

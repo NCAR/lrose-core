@@ -2694,7 +2694,8 @@ void iwrf_phasecode_print(FILE *out,
 // print pulse_header
 
 void iwrf_pulse_header_print(FILE *out,
-			     const iwrf_pulse_header_t &pulse)
+			     const iwrf_pulse_header_t &pulse,
+                             const iwrf_platform_georef_t *georef /* = NULL*/)
 
 {
   
@@ -2776,6 +2777,16 @@ void iwrf_pulse_header_print(FILE *out,
     fprintf(out, "  txrx state: short PRT\n");
   }
 
+  if (georef != NULL) {
+    iwrf_platform_georef_t gcopy = *georef;
+    iwrf_platform_georef_swap(gcopy);
+    fprintf(out, "  Pulse is using georef:\n");
+    fprintf(out, "    georef time_secs_utc: %ld\n", gcopy.packet.time_secs_utc);
+    fprintf(out, "    georef time_nano_secs: %d\n", gcopy.packet.time_nano_secs);
+    fprintf(out, "    georef unit_num: %d\n", gcopy.unit_num);
+    fprintf(out, "    georef unit_id: %d\n", gcopy.unit_id);
+  }
+  
   fprintf(out, "=================================================================\n");
 
 }
@@ -3049,10 +3060,10 @@ void iwrf_platform_georef_print(FILE *out,
   
   iwrf_platform_georef_t copy = val;
   iwrf_platform_georef_swap(copy);
-  fprintf(out, "============== iwrf_platform_georef =====================\n");
+  fprintf(out, "====================== iwrf_platform_georef =====================\n");
   iwrf_packet_info_print(out, copy.packet);
-  fprintf(out, "  spare1: %g\n", copy.spare1);
-  fprintf(out, "  spare2: %g\n", copy.spare2);
+  fprintf(out, "  unit_num: %d\n", copy.unit_num);
+  fprintf(out, "  unit_id: %d\n", copy.unit_id);
   fprintf(out, "  longitude: %g\n", copy.longitude);
   fprintf(out, "  latitude: %g\n", copy.latitude);
   fprintf(out, "  altitude_msl_km: %g\n", copy.altitude_msl_km);
@@ -3075,7 +3086,7 @@ void iwrf_platform_georef_print(FILE *out,
   fprintf(out, "  roll_rate_dps: %g\n", copy.roll_rate_dps);
   fprintf(out, "  drive_angle_1_deg: %g\n", copy.drive_angle_1_deg);
   fprintf(out, "  drive_angle_2_deg: %g\n", copy.drive_angle_2_deg);
-  fprintf(out, "=========================================================\n");
+  fprintf(out, "=================================================================\n");
 
 }
 
@@ -3089,7 +3100,7 @@ void iwrf_georef_correction_print(FILE *out,
 
   iwrf_georef_correction_t copy = val;
   iwrf_georef_correction_swap(copy);
-  fprintf(out, "================ iwrf_georef_correction ===================\n");
+  fprintf(out, "==================== iwrf_georef_correction =====================\n");
   fprintf(out, "  azimuth_corr_deg: %g\n", copy.azimuth_corr_deg);
   fprintf(out, "  elevation_corr_deg: %g\n", copy.elevation_corr_deg);
   fprintf(out, "  range_delay_corr_mps: %g\n", copy.range_delay_corr_mps);
@@ -3106,7 +3117,7 @@ void iwrf_georef_correction_print(FILE *out,
   fprintf(out, "  drift_corr_deg: %g\n", copy.drift_corr_deg);
   fprintf(out, "  rot_angle_corr_deg: %g\n", copy.rot_angle_corr_deg);
   fprintf(out, "  tilt_corr_deg: %g\n", copy.tilt_corr_deg);
-  fprintf(out, "===========================================================\n");
+  fprintf(out, "=================================================================\n");
 
 }
 
@@ -4280,12 +4291,12 @@ void iwrf_platform_georef_print_format(FILE *out, const iwrf_platform_georef_t &
   fprintf(out, "  meta-data:\n");
   _print_format_header(out);
 
-  const char *start = (char *) &val.spare1;
+  const char *start = (char *) &val.unit_num;
 
-  fprintf(out, _dform, "fl32", "spare1",
-          sizeof(val.spare1), (char *) &val.spare1 - start);
-  fprintf(out, _dform, "fl32", "spare2",
-          sizeof(val.spare2), (char *) &val.spare2 - start);
+  fprintf(out, _dform, "si32", "unit_num",
+          sizeof(val.unit_num), (char *) &val.unit_num - start);
+  fprintf(out, _dform, "si32", "id",
+          sizeof(val.unit_id), (char *) &val.unit_id - start);
   fprintf(out, _dform, "fl32", "altitude_msl_km",
           sizeof(val.altitude_msl_km), (char *) &val.altitude_msl_km - start);
   fprintf(out, _dform, "fl32", "altitude_agl_km",

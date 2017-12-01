@@ -180,7 +180,7 @@ begin_in_archive_mode = TRUE;
 // Type: string
 //
 
-archive_start_time = "2015 06 26 00 30 00";
+archive_start_time = "2011 12 08 00 50 27";
 
 ///////////// archive_scan_interval_secs //////////////
 //
@@ -192,7 +192,7 @@ archive_start_time = "2015 06 26 00 30 00";
 // Type: int
 //
 
-archive_scan_interval_secs = 600;
+archive_scan_interval_secs = 900;
 
 ///////////// archive_n_scans /////////////////////////
 //
@@ -216,7 +216,7 @@ archive_n_scans = 12;
 // Type: string
 //
 
-archive_data_url = "$(HOME)/data/spol_data/sur";
+archive_data_url = "$(HOME)/data/cfradial/moments/sband/sur";
 
 ///////////// archive_search_margin_secs //////////////
 //
@@ -1758,6 +1758,36 @@ images_archive_start_time = "1970 01 01 00 00 00";
 //
 
 images_archive_end_time = "1970 01 01 00 00 00";
+
+///////////// images_set_sweep_index_list /////////////
+//
+// Option to specify the sweep indexes for the image generation.
+//
+// If TRUE, only the specified sweeps will be processed.
+//
+//
+// Type: boolean
+//
+
+images_set_sweep_index_list = FALSE;
+
+///////////// images_sweep_index_list /////////////////
+//
+// List of valid sweep indexes for image generation.
+//
+// See 'images_set_sweep_index_list'. Images will only be generated for 
+//   the specified sweep indexes.
+//
+//
+// Type: int
+// 1D array - variable length.
+//
+
+images_sweep_index_list = {
+ 0,
+ 1,
+ 2
+};
 
 //======================================================================
 //

@@ -110,6 +110,12 @@ public:
   // suitable for use with a pulse
 
   void setGeorefTimeMarginSecs(double val) { _georefTimeMarginSecs = val; }
+  
+  // set/get the georef unit number to use on read
+  // defaults to 0
+
+  void setGeorefUseSecondary(bool val) { _georefUseSecondary = val; }
+  bool getGeorefUseSecondary() const { return _georefUseSecondary; }
 
   // Get next pulse.
   // Converts IQ data to floats if requested.
@@ -201,6 +207,12 @@ protected:
   // with a pulse
 
   double _georefTimeMarginSecs; 
+
+  // use georef secondary unit?
+
+  int _georefUseSecondary;
+
+  // end of data conditions
 
   bool _timedOut; // applies to non-blocking ops only
   bool _endOfFile; /* applies for file-based classes only

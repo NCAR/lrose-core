@@ -20,7 +20,7 @@ SUB_DIRS = \
          Mdv2Plain \
          Mdv2SweepNetCDF \
 	 Mdv2SoundingSpdb \
-	 Mdv2TextHdr \
+         Mdv2TextHdr \
          Mdv2Vil \
          Mdv3Dto2D \
          MdvAccumulate \

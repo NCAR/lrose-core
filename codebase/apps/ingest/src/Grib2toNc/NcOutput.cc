@@ -455,7 +455,7 @@ int NcOutput::writeNc( time_t genTime, long int leadSecs )
     ldata.setDataFileExt("nc");
     ldata.setDataType("netCDF");
     ldata.setRelDataPath(relPath);
-    if (leadSecs > 0)
+    if (leadSecs > 0 || _params->force_lead_time_output)
       ldata.setIsFcast(true);
     ldata.setLeadTime(leadSecs);
     ldata.write(genTime);
@@ -602,7 +602,7 @@ int NcOutput::_addDimensions()
   //
   // Add dimensions of the unique gridInfos
   int gridNum = 0;
-  char xDimName[4],  yDimName[4];  
+  char xDimName[10],  yDimName[10];  
   for (int i = 0; i < (int) _uniqueGrid.size(); i++) 
   {
     if(_uniqueGrid[i] == i)
@@ -940,52 +940,55 @@ int NcOutput::_addCoordinateVariables()
 
 	}
 	
-	// Add auxiliary variables to Nc3File if grids are not lat lon grids
-	char latVarName[7],  lonVarName[7];
-	Nc3Var* latVar;
-	Nc3Var* lonVar;
-
-	if(_numUniqueGrid > 1) {
-	  sprintf(latVarName, "lat%d", gridNum);
-	  sprintf(lonVarName, "lon%d", gridNum);
-	} else {
-	  sprintf(latVarName, "lat");
-	  sprintf(lonVarName, "lon");
+	if(_params->include_lat_lon)
+	{
+	  // Add auxiliary variables to Nc3File if grids are not lat lon grids
+	  char latVarName[7],  lonVarName[7];
+	  Nc3Var* latVar;
+	  Nc3Var* lonVar;
+	  
+	  if(_numUniqueGrid > 1) {
+	    sprintf(latVarName, "lat%d", gridNum);
+	    sprintf(lonVarName, "lon%d", gridNum);
+	  } else {
+	    sprintf(latVarName, "lat");
+	    sprintf(lonVarName, "lon");
+	  }
+	  
+	  if ((latVar = _ncFile->add_var(latVarName, nc3Float,
+					 dim2, dim1)) == NULL) {
+	    cerr << "ERROR - Cannot add " << latVarName << " variable" << endl;
+	    cerr << _ncErr->get_errmsg() << endl;
+	    return -1;
+	  }
+	  if ((lonVar = _ncFile->add_var(lonVarName, nc3Float,
+					 dim2, dim1)) == NULL) {
+	    cerr << "ERROR - Cannot add " << lonVarName << " variable" << endl;
+	    cerr << _ncErr->get_errmsg() << endl;
+	    return -1;
+	  }
+	  
+	  iret |= !latVar->add_att(NcOutput::standard_name, NcOutput::latitude);
+	  iret |= !latVar->add_att(NcOutput::units, NcOutput::degrees_north);
+	  
+	  
+	  if(iret != 0) {
+	    cerr << "ERROR - Failed to add a coordinate variable attribute for " << latVarName << endl;
+	    cerr << _ncErr->get_errmsg() << endl;
+	    return -1;
+	  }
+	  iret |= !lonVar->add_att(NcOutput::standard_name, NcOutput::longitude);
+	  iret |= !lonVar->add_att(NcOutput::units, NcOutput::degrees_east);
+	  
+	  if(iret != 0) {
+	    cerr << "ERROR - Failed to add a coordinate variable attribute for " << lonVarName << endl;
+	    cerr << _ncErr->get_errmsg() << endl;
+	    return -1;
+	  }
+	  
+	  _uniqueGridlatVar.push_back(latVar);
+	  _uniqueGridlonVar.push_back(lonVar);
 	}
-
-	if ((latVar = _ncFile->add_var(latVarName, nc3Float,
-				       dim2, dim1)) == NULL) {
-	  cerr << "ERROR - Cannot add " << latVarName << " variable" << endl;
-	  cerr << _ncErr->get_errmsg() << endl;
-	  return -1;
-	}
-	if ((lonVar = _ncFile->add_var(lonVarName, nc3Float,
-				       dim2, dim1)) == NULL) {
-	  cerr << "ERROR - Cannot add " << lonVarName << " variable" << endl;
-	  cerr << _ncErr->get_errmsg() << endl;
-	  return -1;
-	}
-
-	iret |= !latVar->add_att(NcOutput::standard_name, NcOutput::latitude);
-	iret |= !latVar->add_att(NcOutput::units, NcOutput::degrees_north);
-
-
-	if(iret != 0) {
-	  cerr << "ERROR - Failed to add a coordinate variable attribute for " << latVarName << endl;
-	  cerr << _ncErr->get_errmsg() << endl;
-	  return -1;
-	}
-	iret |= !lonVar->add_att(NcOutput::standard_name, NcOutput::longitude);
-	iret |= !lonVar->add_att(NcOutput::units, NcOutput::degrees_east);
-
-	if(iret != 0) {
-	  cerr << "ERROR - Failed to add a coordinate variable attribute for " << lonVarName << endl;
-	  cerr << _ncErr->get_errmsg() << endl;
-	  return -1;
-	}
-
-	_uniqueGridlatVar.push_back(latVar);
-	_uniqueGridlonVar.push_back(lonVar);
 
       } // end else (not a PROJ_LATLON)
       
@@ -1401,17 +1404,25 @@ int NcOutput::_putCoordinateVariables()
 
       if (_fieldInfo[i].gridInfo.ncfGridName.compare(NcOutput::latitude_longitude) != 0) {
 
-	Nc3Var *latVar = _uniqueGridlatVar[i];
-	Nc3Var *lonVar = _uniqueGridlonVar[i];
-
-	if(latVar == NULL || lonVar == NULL) {
-	  cerr << "ERROR - Cannot put data for coordinate lat/lon variable as it is NULL" << endl;
-	  return -1;
-	}
-
+	Nc3Var *latVar = NULL;
+	Nc3Var *lonVar = NULL;
 	Pjg *pjg = NULL;
-	float *lonData = new float[_fieldInfo[i].gridInfo.nx * _fieldInfo[i].gridInfo.ny];
-	float *latData = new float[_fieldInfo[i].gridInfo.nx * _fieldInfo[i].gridInfo.ny];
+	float *lonData = NULL;
+	float *latData = NULL;
+
+	if(_params->include_lat_lon)
+	{
+	  latVar = _uniqueGridlatVar[i];
+	  lonVar = _uniqueGridlonVar[i];
+	  
+	  if(latVar == NULL || lonVar == NULL) {
+	    cerr << "ERROR - Cannot put data for coordinate lat/lon variable as it is NULL" << endl;
+	    return -1;
+	  }
+	  
+	  lonData = new float[_fieldInfo[i].gridInfo.nx * _fieldInfo[i].gridInfo.ny];
+	  latData = new float[_fieldInfo[i].gridInfo.nx * _fieldInfo[i].gridInfo.ny];
+	}
 
 	if(_fieldInfo[i].gridInfo.ncfGridName.compare(NcOutput::lambert_conformal_conic) == 0) {
 
@@ -1493,7 +1504,7 @@ int NcOutput::_putCoordinateVariables()
 	  yData[y] = miny + y * dy;
 	}
 
-	if(pjg != NULL) {
+	if(pjg != NULL && latData != NULL) {
 	  for (int y = 0; y < _fieldInfo[i].gridInfo.ny; y++)  {
 	    for (int x = 0; x < _fieldInfo[i].gridInfo.nx; x++) {
 	      double lat, lon;
@@ -1505,23 +1516,26 @@ int NcOutput::_putCoordinateVariables()
 	  delete pjg;
 	}
 
-	if (!latVar->put(latData, nDim2, nDim1)) {
-	  cerr << "ERROR - Cannot put data for variable " << latVar->name() << endl;
-	  cerr << _ncErr->get_errmsg() << endl;
-	  delete [] latData;
-	  delete [] lonData;
-	  return -1;
-	}
-	if (!lonVar->put(lonData, nDim2, nDim1)) {
-	  cerr << "ERROR - Cannot put data for variable " << lonVar->name() << endl;
-	  cerr << _ncErr->get_errmsg() << endl;
-	  delete [] latData;
-	  delete [] lonData;
-	  return -1;
-	}
+	if(latData != NULL)
+	{ 
+	  if (!latVar->put(latData, nDim2, nDim1)) {
+	    cerr << "ERROR - Cannot put data for variable " << latVar->name() << endl;
+	    cerr << _ncErr->get_errmsg() << endl;
+	    delete [] latData;
+	    delete [] lonData;
+	    return -1;
+	  }
+	  if (!lonVar->put(lonData, nDim2, nDim1)) {
+	    cerr << "ERROR - Cannot put data for variable " << lonVar->name() << endl;
+	    cerr << _ncErr->get_errmsg() << endl;
+	    delete [] latData;
+	    delete [] lonData;
+	    return -1;
+	  }
 
-	delete [] latData;
-	delete [] lonData;
+	  delete [] latData;
+	  delete [] lonData;
+	}
 
       } else { // end if not lat/lon grid
 
@@ -1612,7 +1626,7 @@ int NcOutput::_putFieldDataVariables()
       iret = fieldVar->put((ncbyte*)_fieldData[i], 1, _fieldInfo[i].vlevelInfo.nz, nDim2, nDim1);
     else
       if(_fieldInfo[i].ncType == Params::DATA_PACK_SHORT)
-	iret = fieldVar->put((si16*)_fieldData[i], 1, _fieldInfo[i].vlevelInfo.nz, nDim2, nDim1);
+	iret = fieldVar->put((short*)_fieldData[i], 1, _fieldInfo[i].vlevelInfo.nz, nDim2, nDim1);
       else
 	iret = fieldVar->put(_fieldData[i], 1, _fieldInfo[i].vlevelInfo.nz, nDim2, nDim1);
 

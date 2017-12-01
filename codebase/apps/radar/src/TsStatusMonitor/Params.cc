@@ -630,7 +630,7 @@ using namespace std;
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("xml_entries");
     tt->descr = tdrpStrDup("Details of XML entries to process.");
-    tt->help = tdrpStrDup("\txml_outer_tag: the main tag for the entry\n\txml_inner_tag: the sub tag for the entry\n\tentry_type: the type of data stored\n\tok_boolean: BOOLEAN only: the value for an OK state\n\tboolean_failure_is_critical: true if FAILURE is critical, false if failure indicates IMPAIRED\n\tok_value_lower_limit: INT or DOUBLE: the lower limit for an OK state\n\tok_value_upper_limit: INT or DOUBLE: the upper limit for an OK state\n\timpaired_value_lower_limit: INT or DOUBLE: the lower limit for an IMPAIRED state\n\timpaired_value_upper_limit: INT or DOUBLE: the upper limit for an IMPAIRED state\n\tgraph_min_val: minimum value for history graph\n\tgraph_max_val: maximim value for history graph\n\tcomment: if set, appears at end of status line\n.");
+    tt->help = tdrpStrDup("\txml_outer_tag: the main tag for the entry\n\txml_inner_tag: the sub tag for the entry\n\tentry_type: the type of data stored\n\tok_boolean: BOOLEAN only: the value for an OK state\n\tboolean_failure_is_critical: true if FAILURE is critical, false if failure indicates IMPAIRED\n\tok_value_lower_limit: INT or DOUBLE: the lower limit for an OK state\n\tok_value_upper_limit: INT or DOUBLE: the upper limit for an OK state\n\timpaired_value_lower_limit: INT or DOUBLE: the lower limit for an IMPAIRED state\n\timpaired_value_upper_limit: INT or DOUBLE: the upper limit for an IMPAIRED state\n\tgraph_min_val: minimum value for history graph\n\tgraph_max_val: maximim value for history graph\n\tcomment: if set, appears at end of status line\n\tinclude_in_catalog_stats: add this entry to the catalog stats\n\tcatalog_omit_if_zero: do not report in catalog if all values are zero or false\n\tcatalog_interpret_as_time: treat this value as a time or time string\n.");
     tt->array_offset = (char *) &_xml_entries - &_start_;
     tt->array_n_offset = (char *) &xml_entries_n - &_start_;
     tt->is_array = TRUE;
@@ -638,7 +638,7 @@ using namespace std;
     tt->array_elem_size = sizeof(xml_entry_t);
     tt->array_n = 3;
     tt->struct_def.name = tdrpStrDup("xml_entry_t");
-    tt->struct_def.nfields = 14;
+    tt->struct_def.nfields = 17;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -723,7 +723,22 @@ using namespace std;
       tt->struct_def.fields[13].ptype = STRING_TYPE;
       tt->struct_def.fields[13].rel_offset = 
         (char *) &_xml_entries->comment - (char *) _xml_entries;
-    tt->n_struct_vals = 42;
+      tt->struct_def.fields[14].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[14].fname = tdrpStrDup("include_in_catalog_stats");
+      tt->struct_def.fields[14].ptype = BOOL_TYPE;
+      tt->struct_def.fields[14].rel_offset = 
+        (char *) &_xml_entries->include_in_catalog_stats - (char *) _xml_entries;
+      tt->struct_def.fields[15].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[15].fname = tdrpStrDup("catalog_omit_if_zero");
+      tt->struct_def.fields[15].ptype = BOOL_TYPE;
+      tt->struct_def.fields[15].rel_offset = 
+        (char *) &_xml_entries->catalog_omit_if_zero - (char *) _xml_entries;
+      tt->struct_def.fields[16].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[16].fname = tdrpStrDup("catalog_interpret_as_time");
+      tt->struct_def.fields[16].ptype = BOOL_TYPE;
+      tt->struct_def.fields[16].rel_offset = 
+        (char *) &_xml_entries->catalog_interpret_as_time - (char *) _xml_entries;
+    tt->n_struct_vals = 51;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("HcrTransmitterStatus");
@@ -740,34 +755,43 @@ using namespace std;
       tt->struct_vals[11].d = 0;
       tt->struct_vals[12].d = 1;
       tt->struct_vals[13].s = tdrpStrDup("");
-      tt->struct_vals[14].s = tdrpStrDup("HcrTransmitterStatus");
-      tt->struct_vals[15].s = tdrpStrDup("CathodeVoltage");
-      tt->struct_vals[16].e = XML_ENTRY_DOUBLE;
-      tt->struct_vals[17].b = pTRUE;
-      tt->struct_vals[18].b = pTRUE;
-      tt->struct_vals[19].d = 0;
-      tt->struct_vals[20].d = 10;
-      tt->struct_vals[21].d = 11;
-      tt->struct_vals[22].d = 20;
-      tt->struct_vals[23].s = tdrpStrDup("");
-      tt->struct_vals[24].s = tdrpStrDup("V");
-      tt->struct_vals[25].d = 0;
-      tt->struct_vals[26].d = 30;
-      tt->struct_vals[27].s = tdrpStrDup("");
-      tt->struct_vals[28].s = tdrpStrDup("HcrReceiverStatus");
-      tt->struct_vals[29].s = tdrpStrDup("PvAftPressure");
-      tt->struct_vals[30].e = XML_ENTRY_DOUBLE;
+      tt->struct_vals[14].b = pTRUE;
+      tt->struct_vals[15].b = pTRUE;
+      tt->struct_vals[16].b = pFALSE;
+      tt->struct_vals[17].s = tdrpStrDup("HcrTransmitterStatus");
+      tt->struct_vals[18].s = tdrpStrDup("CathodeVoltage");
+      tt->struct_vals[19].e = XML_ENTRY_DOUBLE;
+      tt->struct_vals[20].b = pTRUE;
+      tt->struct_vals[21].b = pTRUE;
+      tt->struct_vals[22].d = 0;
+      tt->struct_vals[23].d = 10;
+      tt->struct_vals[24].d = 11;
+      tt->struct_vals[25].d = 20;
+      tt->struct_vals[26].s = tdrpStrDup("");
+      tt->struct_vals[27].s = tdrpStrDup("V");
+      tt->struct_vals[28].d = 0;
+      tt->struct_vals[29].d = 30;
+      tt->struct_vals[30].s = tdrpStrDup("");
       tt->struct_vals[31].b = pTRUE;
       tt->struct_vals[32].b = pTRUE;
-      tt->struct_vals[33].d = 10;
-      tt->struct_vals[34].d = 20;
-      tt->struct_vals[35].d = 5;
-      tt->struct_vals[36].d = 10;
-      tt->struct_vals[37].s = tdrpStrDup("");
-      tt->struct_vals[38].s = tdrpStrDup("psi");
-      tt->struct_vals[39].d = 0;
-      tt->struct_vals[40].d = 30;
-      tt->struct_vals[41].s = tdrpStrDup("");
+      tt->struct_vals[33].b = pFALSE;
+      tt->struct_vals[34].s = tdrpStrDup("HcrReceiverStatus");
+      tt->struct_vals[35].s = tdrpStrDup("PvAftPressure");
+      tt->struct_vals[36].e = XML_ENTRY_DOUBLE;
+      tt->struct_vals[37].b = pTRUE;
+      tt->struct_vals[38].b = pTRUE;
+      tt->struct_vals[39].d = 10;
+      tt->struct_vals[40].d = 20;
+      tt->struct_vals[41].d = 5;
+      tt->struct_vals[42].d = 10;
+      tt->struct_vals[43].s = tdrpStrDup("");
+      tt->struct_vals[44].s = tdrpStrDup("psi");
+      tt->struct_vals[45].d = 0;
+      tt->struct_vals[46].d = 30;
+      tt->struct_vals[47].s = tdrpStrDup("");
+      tt->struct_vals[48].b = pTRUE;
+      tt->struct_vals[49].b = pTRUE;
+      tt->struct_vals[50].b = pFALSE;
     tt++;
     
     // Parameter 'Comment 4'
@@ -1137,6 +1161,171 @@ using namespace std;
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &compress_spdb - &_start_;
     tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
+    tt->comment_hdr = tdrpStrDup("STATISTICS OUTPUT TO CATALOG");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'write_stats_files_to_catalog'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_stats_files_to_catalog");
+    tt->descr = tdrpStrDup("If true, create text files to send to catalog.");
+    tt->help = tdrpStrDup("A tabular style text file is created and sent to the field catalog. This is run on a schedule. The file summarizes the statistics of specified variables over the selected time period.");
+    tt->val_offset = (char *) &write_stats_files_to_catalog - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'stats_interval_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("stats_interval_secs");
+    tt->descr = tdrpStrDup("Interval period over which the stats monitoring is performed (secs).");
+    tt->help = tdrpStrDup("This is the interval over which the monitoring statistics are computed.");
+    tt->val_offset = (char *) &stats_interval_secs - &_start_;
+    tt->single_val.i = 300;
+    tt++;
+    
+    // Parameter 'stats_output_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("stats_output_dir");
+    tt->descr = tdrpStrDup("Output directory path.");
+    tt->help = tdrpStrDup("Monitoring statistics files will be written to this directory.");
+    tt->val_offset = (char *) &stats_output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/hsrl_mon/stats");
+    tt++;
+    
+    // Parameter 'stats_write_to_day_dir'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("stats_write_to_day_dir");
+    tt->descr = tdrpStrDup("Option to create a subdirectory for each day.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &stats_write_to_day_dir - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'stats_file_name_category'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("stats_file_name_category");
+    tt->descr = tdrpStrDup("Set the category string.");
+    tt->help = tdrpStrDup("If empty, no category will be included.");
+    tt->val_offset = (char *) &stats_file_name_category - &_start_;
+    tt->single_val.s = tdrpStrDup("lidar");
+    tt++;
+    
+    // Parameter 'stats_file_name_platform'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("stats_file_name_platform");
+    tt->descr = tdrpStrDup("Set the platform string.");
+    tt->help = tdrpStrDup("If empty, no platform will be included.");
+    tt->val_offset = (char *) &stats_file_name_platform - &_start_;
+    tt->single_val.s = tdrpStrDup("NSF_NCAR_GV_HSRL");
+    tt++;
+    
+    // Parameter 'stats_file_name_extension'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("stats_file_name_extension");
+    tt->descr = tdrpStrDup("These are text files, so normally .txt is used.");
+    tt->help = tdrpStrDup("An extension is always required");
+    tt->val_offset = (char *) &stats_file_name_extension - &_start_;
+    tt->single_val.s = tdrpStrDup("txt");
+    tt++;
+    
+    // Parameter 'stats_file_name_delimiter'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("stats_file_name_delimiter");
+    tt->descr = tdrpStrDup("Set the delimiter between the parts of the file name.");
+    tt->help = tdrpStrDup("NOTE: the extension the delimited is always a period: '.'.");
+    tt->val_offset = (char *) &stats_file_name_delimiter - &_start_;
+    tt->single_val.s = tdrpStrDup(".");
+    tt++;
+    
+    // Parameter 'stats_include_time_part_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("stats_include_time_part_in_file_name");
+    tt->descr = tdrpStrDup("Normally the file name includes a time part: YYYYMMDDHHMMSS.");
+    tt->help = tdrpStrDup("If FALSE, the time part will be omitted.");
+    tt->val_offset = (char *) &stats_include_time_part_in_file_name - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'stats_include_seconds_in_time_part'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("stats_include_seconds_in_time_part");
+    tt->descr = tdrpStrDup("Normally the time part include the seconds: YYYYMMDDHHMMSS.");
+    tt->help = tdrpStrDup("If FALSE, the SS will be excluuded from the time part.");
+    tt->val_offset = (char *) &stats_include_seconds_in_time_part - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'stats_include_field_label_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("stats_include_field_label_in_file_name");
+    tt->descr = tdrpStrDup("Normally the file name includes the field label (product type).");
+    tt->help = tdrpStrDup("If FALSE, the field label will be omitted.");
+    tt->val_offset = (char *) &stats_include_field_label_in_file_name - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'stats_file_field_label'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("stats_file_field_label");
+    tt->descr = tdrpStrDup("Field label for stats files.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &stats_file_field_label - &_start_;
+    tt->single_val.s = tdrpStrDup("MonitorStats");
+    tt++;
+    
+    // Parameter 'stats_write_latest_data_info'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("stats_write_latest_data_info");
+    tt->descr = tdrpStrDup("Option to write latest_data_info files when an image is created.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &stats_write_latest_data_info - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // trailing entry has param_name set to NULL

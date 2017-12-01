@@ -1180,7 +1180,13 @@ int IwrfTsPulse::computePhaseDiffs
 
 void IwrfTsPulse::printHeader(FILE *out) const
 {
-  iwrf_pulse_header_print(out, _hdr);
+  if (_georefActive) {
+    // fprintf(out, "====>>> this georef applies to following pulse <<<====\n");
+    // iwrf_platform_georef_print(out, _georef);
+    iwrf_pulse_header_print(out, _hdr, &_georef);
+  } else {
+    iwrf_pulse_header_print(out, _hdr);
+  }
   if (_rvp8_hdr.i_version != 0) {
     iwrf_rvp8_pulse_header_print(out, _rvp8_hdr);
   }

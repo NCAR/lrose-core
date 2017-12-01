@@ -48,11 +48,13 @@
 
 #include "Args.hh"
 #include "Params.hh"
+#include "StatsField.hh"
 #include <toolsa/MemBuf.hh>
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfTsPulse.hh>
 #include <radar/IwrfTsReader.hh>
 #include <radar/RadarComplex.hh>
+#include <Radx/RadxTime.hh>
 #include <Fmq/Fmq.hh>
 #include <Spdb/DsSpdb.hh>
 
@@ -141,7 +143,7 @@ private:
 
   // IWRF xml string if available
 
-  si64 _iwrfStatusXmlSeqNum;
+  si64 _iwrfStatusXmlPktSeqNum;
   string _iwrfStatusXml;
   time_t _iwrfStatusLatestTime;
   
@@ -149,6 +151,13 @@ private:
 
   DsSpdb _spdb;
   
+  // catalog stats
+
+  vector<StatsField *> _catFields;
+  RadxTime _statsScheduledTime;
+  time_t _statsStartTime;
+  time_t _statsEndTime;
+
   // functions
 
   void _clearStatus();
@@ -202,6 +211,15 @@ private:
   int _addMovementToNagios(FILE *nagiosFile);
 
   void _removeNagiosStatusFile();
+
+  void _initStatsFields();
+
+  int _updateCatalogStats(time_t now);
+
+  void _printStats(FILE *out);
+
+  void _writeStatsFile();
+
 };
 
 #endif

@@ -101,7 +101,7 @@ void DsPlatformGeoref::toBe(ds_iwrf_platform_georef_t &val)
   BE_from_array_32(&val.packet.version_num, 2 * sizeof(si32));
   BE_from_array_64(&val.packet.time_secs_utc, sizeof(si64));
   BE_from_array_32(&val.packet.time_nano_secs, 6 * sizeof(si32));
-  BE_from_array_32(&val.spare1, 20 * sizeof(fl32));
+  BE_from_array_32(&val.unit_num, 20 * sizeof(fl32));
   BE_from_array_64(&val.longitude, 2 * sizeof(fl64));
   BE_from_array_32(&val.track_deg, 2 * sizeof(fl32));
 }
@@ -116,7 +116,7 @@ void DsPlatformGeoref::fromBe(ds_iwrf_platform_georef_t &val)
   BE_to_array_32(&val.packet.version_num, 2 * sizeof(si32));
   BE_to_array_64(&val.packet.time_secs_utc, sizeof(si64));
   BE_to_array_32(&val.packet.time_nano_secs, 6 * sizeof(si32));
-  BE_to_array_32(&val.spare1, 20 * sizeof(fl32));
+  BE_to_array_32(&val.unit_num, 20 * sizeof(fl32));
   BE_to_array_64(&val.longitude, 2 * sizeof(fl64));
   BE_to_array_32(&val.track_deg, 2 * sizeof(fl32));
 }
@@ -158,6 +158,8 @@ void
   fprintf(out, "  time UTC: %s.%.9d\n",
 	  DateTime::strm(ptime).c_str(), _georef.packet.time_nano_secs);
 
+  fprintf(out, "  unit_num: %d\n", _georef.unit_num);
+  fprintf(out, "  unit_id: %d\n", _georef.unit_id);
   fprintf(out, "  longitude: %g\n", _georef.longitude);
   fprintf(out, "  latitude: %g\n", _georef.latitude);
   fprintf(out, "  altitude_msl_km: %g\n", _georef.altitude_msl_km);
@@ -202,6 +204,8 @@ void
 	  DateTime::strm(ptime).c_str(), _georef.packet.time_nano_secs);
   out << "  packet_t time UTC: " << timestr << endl;
 
+  out << "  unit_num: " << _georef.unit_num << endl;
+  out << "  unit_id: " << _georef.unit_id << endl;
   out << "  longitude: " << _georef.longitude << endl;
   out << "  latitude: " << _georef.latitude << endl;
   out << "  altitude_msl_km: " << _georef.altitude_msl_km << endl;

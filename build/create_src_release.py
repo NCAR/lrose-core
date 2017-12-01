@@ -51,7 +51,7 @@ def main():
                       help='Set verbose debugging on')
     parser.add_option('--package',
                       dest='package', default='lrose',
-                      help='Package name. Options are lrose (default), radx, cidd, hcr')
+                      help='Package name. Options are lrose (default), radx, cidd, hcr, hsrl, titan')
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')
@@ -142,6 +142,9 @@ def main():
     # create the release information file
     
     createReleaseInfoFile()
+
+    # prune any empty directories
+    prune(codebaseDir)
 
     # create the tar file
 
@@ -476,6 +479,36 @@ def shellCmd(cmd):
     if (options.debug):
         print >>sys.stderr, ".... done"
     
+########################################################################
+# prune empty dirs
+
+def prune(tree):
+
+    # walk the tree
+    if (os.path.isdir(tree)):
+        contents = os.listdir(tree)
+
+        if (len(contents) == 0):
+            print >> sys.stderr, "pruning empty dir: " + tree
+            shutil.rmtree(tree)
+        else:
+            for l in contents:
+                # remove CVS directories
+                if (l == "CVS") or (l == ".git"): 
+                    thepath = os.path.join(tree,l)
+                    print >> sys.stderr, "pruning dir: " + thepath
+                    shutil.rmtree(thepath)
+                else:
+                    thepath = os.path.join(tree,l)
+                    if (os.path.isdir(thepath)):
+                        prune(thepath)
+            # check if this tree is now empty
+            newcontents = os.listdir(tree)
+            if (len(newcontents) == 0):
+                print >> sys.stderr, "pruning empty dir: " + tree
+                shutil.rmtree(tree)
+
+
 ########################################################################
 # Run - entry point
 

@@ -37,7 +37,7 @@ TARGET_FILE = Titan
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lradar -lMdv -lRadx -ldsserver \
+LOC_LIBS = -lradar -lMdv -lRadx -lNcxx -ldsserver \
 	-ldidss -ltitan -lrapmath -leuclid \
 	-lrapformats -lphysics -ltoolsa -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz \

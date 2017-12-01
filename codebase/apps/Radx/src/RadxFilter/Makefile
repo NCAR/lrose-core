@@ -37,7 +37,7 @@ TARGET_FILE = RadxFilter
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -leuclid -lRadx -lradar \
+LOC_LIBS = -lMdv -leuclid -lRadx -lNcxx -lradar \
 	-lSpdb -ldsserver -lrapformats -lrapmath \
 	-ldidss -ltoolsa -ltdrp -ldataport \
 	-lfftw3 $(NETCDF4_LIBS) -lbz2 -lz \

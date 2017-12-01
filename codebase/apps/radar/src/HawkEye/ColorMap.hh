@@ -107,13 +107,23 @@ class DLL_EXPORT ColorMap {
 
   };
 
+  class CmapLabel {
+  public:
+    double value;    // value for label
+    double position; // fractional position relative to min/max
+    string text;     // label text
+  };
+
   /// Default constructor for a ColorMap
   /// Will create a map with the standard colors
+
   ColorMap();
+
   /// Create a color map using the built-in
   /// color table.
   /// @param rangeMin The minimum value for the color map.
   /// @param rangeMax The maximum value for the color map.
+
   ColorMap(double rangeMin, double rangeMax);
 
   /// Create a color map using the provided colors.
@@ -121,6 +131,7 @@ class DLL_EXPORT ColorMap {
   /// vectors, using the number of entries found in
   /// the shortest of the three color vectors. (They 
   /// really should all be the same length).
+
   ColorMap
     (double rangeMin,        ///< The minimum map range
      double rangeMax,        ///< The maximum map range
@@ -143,6 +154,7 @@ class DLL_EXPORT ColorMap {
   /// the outer vector. The inner vectors must be of
   /// length three. If they are not, a color map using
   /// the default color table will be constructed.
+
   ColorMap
     (double rangeMin, ///< The minimum map range
      double rangeMax, ///< The maximum map range
@@ -154,6 +166,7 @@ class DLL_EXPORT ColorMap {
   /// the outer vector. The inner vectors must be of
   /// length three. If they are not, a color map using
   /// the default color table will be constructed.
+
   ColorMap
     (double rangeMin, ///< The minimum map range
      double rangeMax, ///< The maximum map range
@@ -163,7 +176,8 @@ class DLL_EXPORT ColorMap {
   // On failure, uses the default constructor, which
   // uses rainbow colors and a range of 0.0 to 1.0.
   
-  ColorMap(const std::string &file_path);
+  ColorMap(const std::string &file_path,
+           bool debug = false);
   
   // copy constructor
   
@@ -178,13 +192,19 @@ class DLL_EXPORT ColorMap {
   }
 
   /// Destructor
+
   virtual ~ColorMap();
+
+  /// set debugging
+
+  void setDebug(bool state) { _debug = state; }
 
   /// Change the color map using the provided colors.
   /// The color table will be constructed from the color
   /// vectors, using the number of entries found in
   /// the shortest of the three color vectors. (They 
   /// really should all be the same length).
+
   void setMap
     (double rangeMin,        ///< The minimum map range
      double rangeMax,        ///< The maximum map range
@@ -197,6 +217,7 @@ class DLL_EXPORT ColorMap {
   /// vectors, using the number of entries found in
   /// the shortest of the three color vectors. (They 
   /// really should all be the same length).
+
   void setMap
     (double rangeMin,           ///< The minimum map range
      double rangeMax,          ///< The maximum map range
@@ -205,13 +226,24 @@ class DLL_EXPORT ColorMap {
      std::vector<float> blue); ///< vector of blue hues, between 0 and 1
 
   /// Change the range of an existing map.
+
   void setRange(double rangeMin,  ///< The minimum map range
                 double rangeMax); ///< The maximum map range
+
+  // set map by reading color map file
+  // Returns 0 on success, -1 on failure
+        
+  int readMap(const std::string &file_path);
 
   // set map by reading RAL-style color map file
   // Returns 0 on success, -1 on failure
         
   int readRalMap(const std::string &file_path);
+
+  // set map by reading XML-style color map file
+  // Returns 0 on success, -1 on failure
+        
+  int readXmlMap(const std::string &file_path);
 
   // set/get name and units
 
@@ -226,6 +258,7 @@ class DLL_EXPORT ColorMap {
    */
 
   const std::vector<CmapEntry> &getEntries() const { return _entries; }
+  const std::vector<double> &getTransitions() const { return _transitionVals; }
 
   /// Map the data value to a color. Return values will be luminances
   /// from the supplied color tables.
@@ -282,6 +315,14 @@ class DLL_EXPORT ColorMap {
   /// @return The name of the builtin color maps.
   static std::vector<std::string> builtinMaps();
 
+  /// Get specified labels
+
+  bool labelsSetByValue() const { return _labelsSetByValue; }
+  const vector<CmapLabel> &getSpecifiedLabels() const
+  {
+    return _specifiedLabels;
+  }
+  
   // print map
 
   void print(ostream &out) const;
@@ -296,11 +337,31 @@ class DLL_EXPORT ColorMap {
 
  protected:
 
-  string _name;
-  string _units;
+  bool _debug;
   bool _isDefault;
 
+  string _path;
+  string _name;
+  string _units;
+
+  // transform using log() for lut with large dynamic range
+
+  bool _useLog10Transform;
+  bool _useLog10ForLut;
+
+  // value for saturated color
+
+  double _saturation;
+
+  // map entries
+  // size is number of colors
+
   vector<CmapEntry> _entries;
+
+  // values at color transitions
+  // size will be number of colors + 1
+
+  vector<double> _transitionVals;
 
   // color scale range
   // lookup table is computed for this range
@@ -308,10 +369,12 @@ class DLL_EXPORT ColorMap {
   double _rangeMin;
   double _rangeMax;
   double _range;
-  
-  // transform using log() for intervals with large dynamic range
-  bool _useLogTransform;
 
+  // specified labels and their values
+
+  bool _labelsSetByValue;
+  vector<CmapLabel> _specifiedLabels;
+  
   // lookup table of RGB colors, evenly distributed
   // through the range
 
@@ -338,23 +401,42 @@ class DLL_EXPORT ColorMap {
   vector<LutEntry> _lut;
   static const int LUT_SIZE = 10000;
 
-  // compute the lookup table from the entries
+  // initialize for construction
 
-  void _computeLut();
-  int _getLutIndex(double data) const;
+  void _init();
 
   // parse a line from a color table
 
-  int _parseColorScaleLine(const char *line, 
-                           double &start_val, 
-                           double &end_val, 
-                           string &colorname);
+  int _parseRalColorScaleLine(const char *line, 
+                              double &start_val, 
+                              double &end_val, 
+                              string &colorname);
 
   // split a line into tokens
 
   void _tokenize(const string &str,
                  const string &spacer,
                  vector<string> &toks);
+
+  // reading in XML file
+
+  int _readRangeTag(const string &rangeTag);
+  int _readLabelTag(const string &labelTag);
+
+  // interpolate missing vals (nans)
+
+  void _interpForNans();
+  void _doInterp(vector<double> &vals,
+                 size_t lower, size_t upper);
+
+  // load up transitions
+
+  void _loadTransitions();
+
+  // compute the lookup table from the entries
+
+  void _computeLut();
+  int _getLutIndex(double data) const;
 
  private:
 

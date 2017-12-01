@@ -89,7 +89,7 @@ do_not_register_on_read = FALSE;
 // Type: string
 //
 
-hsrl_tcp_server_host = "localhost";
+hsrl_tcp_server_host = "192.168.84.201";
 
 ///////////// hsrl_tcp_server_port ////////////////////
 //
@@ -99,7 +99,7 @@ hsrl_tcp_server_host = "localhost";
 // Type: int
 //
 
-hsrl_tcp_server_port = 12000;
+hsrl_tcp_server_port = 40404;
 
 //======================================================================
 //

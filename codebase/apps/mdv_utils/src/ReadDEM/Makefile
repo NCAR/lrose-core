@@ -37,7 +37,7 @@ TARGET_FILE = ReadDEM
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lrapformats -ldidss \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lrapformats -ldidss \
 	-ltoolsa -ltdrp -ldataport $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm
 

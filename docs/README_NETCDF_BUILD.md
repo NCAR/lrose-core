@@ -5,7 +5,7 @@
 The default install location for LROSE is:
 
 ```
-    /usr/local/lrose
+    ${HOME}/lrose
 ```
 
 ### Check out, build and install **netcdf** support
@@ -18,11 +18,11 @@ The following default:
   ./build_and_install_netcdf
 ```
 
-will build and install netcdf in `/usr/local/lrose`
+will build and install netcdf in `${HOME}/lrose`
 
-For, say, installing in `/tmp/mybuild`:
+For, say, installing in `/usr/local/lrose`:
 
 ```
-  ./build_and_install_netcdf -x /tmp/mybuild
+  ./build_and_install_netcdf -x /usr/local/lrose
 ```
 

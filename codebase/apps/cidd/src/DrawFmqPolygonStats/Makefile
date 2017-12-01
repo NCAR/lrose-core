@@ -39,7 +39,7 @@ TARGET_FILE = DrawFmqPolygonStats
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lFmq -lMdv -lRadx -lSpdb \
+LOC_LIBS = -lFmq -lMdv -lRadx -lNcxx -lSpdb \
 	-ldsserver -ldidss -lrapformats -lrapmath \
 	-leuclid -ltoolsa -ltdrp -ldataport \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread \

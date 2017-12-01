@@ -32,7 +32,7 @@ TARGET_FILE = shapefile2Mapfile
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lshapelib -lMdv -lRadx -ldsserver \
+LOC_LIBS = -lshapelib -lMdv -lRadx -lNcxx -ldsserver \
 	-leuclid -ldidss -lcidd -lrapformats \
 	-ltoolsa -ldataport -ltdrp -lrapmath \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread \

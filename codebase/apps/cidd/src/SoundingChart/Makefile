@@ -37,7 +37,7 @@ TARGET_FILE = SoundingChart
 
 LOC_INCLUDES = $(SYS_XVIEW_INCLUDES) $(SYS_X_INCLUDES) $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lSpdb -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lSpdb -ldsserver \
 	-ldidss -lrapformats -lrapplot \
 	-ldataport -lphysics -leuclid -ltoolsa -lrapmath \
 	-ltdrp -ldevguide -lxview -lolgx \

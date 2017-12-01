@@ -38,6 +38,7 @@
 #include <cstdio>
 #include <iostream>
 #include <zlib.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -47,8 +48,10 @@ using namespace std;
 BufrProduct::BufrProduct()
 {
   //replicators.reserve(5);
-  //dataBuffer.
+  dataBuffer = NULL;
   reset();
+  _debug = false;
+  _verbose = false;
 }
 
 /////////////
@@ -64,11 +67,15 @@ void BufrProduct::reset() {
   currentState = 0;  // initial state
   nData = 0;
   maxData = 0;
+  _maxBinsAlongTheRadial = 0;
   //totalData = 0;
-  //if (dataBuffer != NULL)
-  //  free(dataBuffer);
-  // dataBuffer = NULL;
-  // TODO: reset the replictors vector
+  if (dataBuffer != NULL)
+    free(dataBuffer);
+  dataBuffer = NULL;
+  sweepData.clear(); // assume that the Rays are copied
+  // reset the replicators vector
+  while (!replicators.empty()) 
+    trashReplicator();
 }
 
 void BufrProduct::allocateSpace(unsigned int n) {
@@ -78,33 +85,82 @@ void BufrProduct::allocateSpace(unsigned int n) {
   }
 }
 
-void BufrProduct::transitionState(int n) {
-  /*
-  switch (currentState) {
-  case 0:
-    currentSweepNumber = 1;
-    break;
-  case 1:
-    break;
-  case 2:  //  parameters have been recorded
-    // n contains the number of data segments
-    // allocate space for data values;
-    nDataSegments = n;
-    break;
-  case 3:  // data segments have been recorded
-    // n contains the number of data values
-    //??   // TODO: what to do here???  allocate too much memory
-         // or combine separate buffers into one using memcpy?
-    break;
-  case 4:
-    // increase the size of the data buffer? or 
-    // create an additional one???
-    break;
-  default:
-    throw "BufrProduct in unreckognized state";
+//size_t BufrProduct::getMaxBinsAlongTheRadial() {
+//  return _maxBinsAlongTheRadial;
+//}
+
+void BufrProduct::setNBinsAlongTheRadial(size_t nBins) {
+  if (sweepData.size() > 0) {
+    if ((nBins != sweepData[0].nBinsAlongTheRadial) && _debug) {
+      cerr << "Changing the number of bins along the radial from " <<
+	sweepData[0].nBinsAlongTheRadial << " to " << nBins << endl;
+    // don't resize here, just request everything by sweep number
+    }
   }
-  state += 1;
-  */
+  nBinsAlongTheRadial = nBins;
+  if (nBins > _maxBinsAlongTheRadial)
+    _maxBinsAlongTheRadial = nBins;
+}
+
+size_t BufrProduct::getNBinsAlongTheRadial(int sweepNumber) {
+  return sweepData[sweepNumber].nBinsAlongTheRadial;
+}
+
+void BufrProduct::setAntennaElevationDegrees(double value) {
+  // if (sweepData.size() > 0) {
+  //  if (value!= sweepData[0].antennaElevationDegrees)
+  //    throw "Cannot change the antenna elevation.";
+  // }
+  antennaElevationDegrees = value;
+}
+double BufrProduct::getAntennaElevationDegrees(int sweepNumber) {
+  return sweepData[sweepNumber].antennaElevationDegrees;
+}
+
+void BufrProduct::setRangeBinSizeMeters(double value) {
+  if (sweepData.size() > 0) {
+    if ((value != sweepData[0].rangeBinSizeMeters) && _debug) {
+      cerr << "Changing the range bin size from  " <<
+	sweepData[0].rangeBinSizeMeters << " to " << value << endl;
+    }
+  }
+  rangeBinSizeMeters = value;
+}
+double BufrProduct::getRangeBinSizeMeters(int sweepNumber) {
+  return sweepData[sweepNumber].rangeBinSizeMeters;
+}
+
+void BufrProduct::setRangeBinOffsetMeters(double value) {
+  if (sweepData.size() > 0) {
+    if (value != sweepData[0].rangeBinOffsetMeters)
+      throw "Cannot change the range bin offset.";
+  }
+  rangeBinOffsetMeters = value;
+}
+double BufrProduct::getRangeBinOffsetMeters() {
+  return rangeBinOffsetMeters;
+}
+
+void BufrProduct::setNAzimuths(size_t value) {
+  if (sweepData.size() > 0) {
+    if (value != sweepData[0].nAzimuths)
+      throw "Cannot change the number of azimuths.";
+  }
+  nAzimuths = value;
+}
+size_t BufrProduct::getNAzimuths() {
+  return nAzimuths;
+}
+
+void BufrProduct::setAntennaBeamAzimuthDegrees(double value) {
+  //if (sweepData.size() > 0) {
+  //  if (value != sweepData[0].antennaBeamAzimuthDegrees)
+  //    throw "Cannot change the antenna beam azimuth.";
+  //}
+  antennaBeamAzimuthDegrees = value;
+}
+double BufrProduct::getAntennaBeamAzimuthDegrees(int sweepNumber) {
+  return sweepData[sweepNumber].antennaBeamAzimuthDegrees;
 }
 
 // OK, we are assuming a particular order to the replicators.
@@ -120,21 +176,16 @@ void BufrProduct::storeReplicator(unsigned int value) {
   // ensuing data values.
   switch (replicators.size()) {
   case 1:  // we know the number of sweeps
-    //sweepData.
     break;
   case 2:  
     // reset dataBuffer
-    //totalData = 0;
     nData = 0;
-    // dataBuffer.clear();
     break;
   case 3:
     break;
   case 4:
-    allocateSpace(value); // TODO: this should be 65534 
+    allocateSpace(value); 
     break;
-    //  case 5:   
-    //    break;
   default:
     throw "Unexpected number of entries in Replicator store";
   }
@@ -146,7 +197,6 @@ void BufrProduct::trashReplicator() {
   case 1:
     break;
   case 2:  // we know the number of sweeps
-    //sweepData.
     break;
   case 3:
     break;
@@ -156,9 +206,11 @@ void BufrProduct::trashReplicator() {
     if (dataBuffer != NULL) {
       //combine data segments
       unsigned int size;
-      size = nData; // ?? replicators.back(); 
+      size = nData; 
       compressedData.add(dataBuffer, size);
       nData = 0;
+      free(dataBuffer);
+      dataBuffer = NULL;
     }
     break;
   default:
@@ -169,14 +221,30 @@ void BufrProduct::trashReplicator() {
 
 // Record all the information now that we have all the data values
 void BufrProduct::createSweep() {
-      double *realData;
-      realData = decompressData();
+  //double *realData;
+  float *realData;
+      
+      realData = decompressDataFl32();
+      if (realData == NULL) {
+	throw "ERROR - could not decompress data";
+      }
       SweepData newSweep;
+      int nTimeStamps = timeStampStack.size();
+      if (nTimeStamps < 2) 
+        throw "Missing start or end time stamp for sweep.";
       newSweep.endTime = timeStampStack.back();
-      timeStampStack.pop_back();
-      newSweep.startTime = timeStampStack.back();
-      timeStampStack.pop_back();
+      // Ok, don't remove the time stamps, just pick the last two
+      // values
+      // timeStampStack.pop_back();
 
+      newSweep.startTime = timeStampStack.at(nTimeStamps-2); // back(); 
+      //timeStampStack.pop_back();
+      if (_debug) {
+        RadxTime *time = newSweep.startTime;
+        cerr << "startTime " << time->asString() << endl; 
+        time = newSweep.endTime;
+        cerr << "endTime " << time->asString() << endl; 
+      }
       newSweep.antennaElevationDegrees = antennaElevationDegrees;
       newSweep.nBinsAlongTheRadial = nBinsAlongTheRadial;
       newSweep.rangeBinSizeMeters = rangeBinSizeMeters;
@@ -184,7 +252,7 @@ void BufrProduct::createSweep() {
       newSweep.nAzimuths = nAzimuths;
       newSweep.antennaBeamAzimuthDegrees = antennaBeamAzimuthDegrees;
       ParameterData parameterData;
-      parameterData.typeOfProduct = TH;
+      parameterData.typeOfProduct = typeOfProduct;
       parameterData.data = realData;
       newSweep.parameterData.push_back(parameterData);
       sweepData.push_back(newSweep);
@@ -203,8 +271,8 @@ double *BufrProduct::decompressData() {
   int n;
   n = nBinsAlongTheRadial * nAzimuths * sizeof(double);
 
-  int i, j;
-  unsigned char str[sizeof(double)];
+  //int i, j;
+  //unsigned char str[sizeof(double)];
   unsigned char *UnCompDataBuff = (unsigned char *) malloc(n);
   unsigned long DestBuffSize = n;
   
@@ -227,64 +295,148 @@ double *BufrProduct::decompressData() {
   compressedData.clear();
   double *temp;
   temp = (double *)UnCompDataBuff;
-  printf ("--> %g %g %g\n", temp[0], temp[1], temp[2]);
+  if (_debug) { 
+    printf ("--> %g %g %g\n", temp[0], temp[1], temp[2]);
+    //printf (" ... %g %g %g <--\n", temp[n-3], temp[n-2], temp[n-1]);
+  }
   return (double *)UnCompDataBuff;
+}
+
+float *BufrProduct::decompressDataFl32() {
+  unsigned long n;
+  n = nBinsAlongTheRadial * nAzimuths * sizeof(double);
+
+  //int i, j;
+  //unsigned char str[sizeof(double)];
+  unsigned char *UnCompDataBuff = (unsigned char *) malloc(n);
+  unsigned long DestBuffSize = n;
+  
+  int result;
+  result = uncompress(UnCompDataBuff, &DestBuffSize, 
+		 (unsigned char *) compressedData.getPtr(), 
+		      compressedData.getLen()); 
+
+  if (result != Z_OK) {
+    
+    switch(result) {
+    case Z_BUF_ERROR:	 	
+      throw "The buffer dest was not large enough to hold the uncompressed data.";
+      break;
+
+    case Z_MEM_ERROR:	 	
+      throw "Insufficient memory.";
+      break;
+
+    case Z_DATA_ERROR:	 	
+      throw "The compressed data (referenced by source) was corrupted.";
+      break;
+    default:
+      return NULL;
+    }
+  }
+
+#if __BYTE_ORDER == __BIG_ENDIAN
+  for (i = 0; i < *ndecomp/sizeof(double); ++i) {
+    for (j = 0; j < sizeof(double); ++j) {
+      str[j] = UnCompDataBuff[i*sizeof(double)+j];
+    }
+    for (j = 0; j < sizeof(double); ++j) {
+      UnCompDataBuff[i*sizeof(double)+j] = str[sizeof(double) - 1 - j];
+    }
+  }
+#endif
+  compressedData.clear();
+  double *temp;
+  temp = (double *)UnCompDataBuff;
+  if (_debug) {
+    printf ("--> %g %g %g\n", temp[0], temp[1], temp[2]);
+    //printf (" ... %g %g %g <--\n", temp[n-3], temp[n-2], temp[n-1]);
+  }
+
+  // convert the data to float
+  unsigned long n32;
+  n32 = nBinsAlongTheRadial * nAzimuths * sizeof(float);
+  unsigned char *UnCompDataBuff32 = (unsigned char *) malloc(n32);
+  float *temp32;
+  temp32 = (float *) UnCompDataBuff32;
+  for (unsigned long i=0; i< nBinsAlongTheRadial * nAzimuths; i++) {
+    temp32[i] = (float) temp[i];
+  }
+
+  if (_debug) {
+    printf("after conversion to float ...\n");
+    printf ("--> %g %g %g\n", temp32[0], temp32[1], temp32[2]);
+    //unsigned long nFloats;
+    //nFloats = nBinsAlongTheRadial * nAzimuths;
+    //printf (" ... %g %g %g <--\n", temp32[200], 
+    //	    temp32[201], temp32[202]);
+  }
+
+  free(UnCompDataBuff);
+  return temp32; //  (float *)UnCompDataBuff32;
 }
 
 // maintain the timestamps in a stack
 // start a new timestamp with Year,
 // always update the top timestamp with day, hour, etc.
 void BufrProduct::putYear(double value) {
-  TimeStamp timeStamp;
-  timeStamp.year = (int) value;
+  RadxTime *timeStamp = new RadxTime();
+  timeStamp->setYear((int) value);
+  if (_debug) cerr << "timeStamp " << timeStamp->asString() << endl;
   timeStampStack.push_back(timeStamp);
 }
 
 void BufrProduct::putMonth(double value) {
-  timeStampStack.back().month = (int) value;
+  timeStampStack.back()->setMonth((int) value);
 }
 
 void BufrProduct::putDay(double value)  {
-  timeStampStack.back().day = (int) value;
+  timeStampStack.back()->setDay((int) value);
 }
 void BufrProduct::putHour(double value)  {
-  timeStampStack.back().hour = (int) value;
+  timeStampStack.back()->setHour((int) value);
 }
 void BufrProduct::putMinute(double value)  {
-  timeStampStack.back().minute = (int) value;
+  timeStampStack.back()->setMin((int) value);
 }
 void BufrProduct::putSecond(double value)  {
-  timeStampStack.back().second = (int) value;
+  timeStampStack.back()->setSec((int) value);
 }
 
-/*
-BufrProduct::setAntennaElevationDegrees(double value) {
-  MetaData sweep = metaData.at(currentSweepNumber);
-  sweep.antennaElevationDegrees = value;
+void BufrProduct::printSweepData(ostream &out) {
+  int i;
+  i = 0;
+  for (vector<SweepData>::iterator sw = sweepData.begin();
+       sw != sweepData.end(); ++sw) {
+    out << "sweep: " << i << endl;
+    RadxTime *time;
+    time = sw->startTime;
+    out << "   start time: " << time->asString() << endl;
+    time = sw->endTime;
+    out << "     end time: " << time->asString() << endl;
+
+    // TimeStamp time = sw->startTime;
+    // out << "   start time: " << time.year << "/" << time.month << "/" <<
+    //   time.day << " " << time.hour << ":" << time.minute << ":" <<
+    //   time.second << endl;
+    // time = sw->endTime;
+    // out << "     end time: " << time.year << "/" << time.month << "/" <<
+    //   time.day << " " << time.hour << ":" << time.minute << ":" <<
+    //   time.second << endl;
+    out << "     antenna elevation (deg): " << sw->antennaElevationDegrees << endl; 
+    out << "     n bins along the radial: " << sw->nBinsAlongTheRadial << endl; 
+    out << "          range bin size (m): " << sw->rangeBinSizeMeters << endl; 
+    out << "        range bin offset (m): " << sw->rangeBinOffsetMeters << endl; 
+    out << "          number of azimuths: " << sw->nAzimuths << endl; 
+    out << "  antenna beam azimuth (deg): " << sw->antennaBeamAzimuthDegrees << endl; 
+    for (vector<ParameterData>::iterator dd=sw->parameterData.begin();
+	 dd != sw->parameterData.end(); ++dd) {
+      out << dd->typeOfProduct << endl;
+      // cannot print the data values, because they have been moved and deleted.
+      //out << dd->data[0] << ";" << dd->data[1] << ";" << dd->data[2] << ";" <<
+      //	dd->data[3] << ";" << endl; 
+    }
+      i+=1;
+  }
 }
 
-BufrProduct::setNBinsAlongRadial(double value) {
-  MetaData sweep = metaData.at(currentSweepNumber);
-  sweep.setNBinsAlongRadial = value;
-}
-
-BufrProduct::setRangeBinSizeMeters(double value) {
-  MetaData sweep = metaData.at(currentSweepNumber);
-  sweep.setRangeBinSizeMeters = value;
-}
-
-BufrProduct::setRangeBinOffsetMeters(double value) {
-  MetaData sweep = metaData.at(currentSweepNumber);
-  sweep.setRangeBinOffsetMeters = value;
-}
-
-BufrProduct::setNAzimuths(double value) {
-  MetaData sweep = metaData.at(currentSweepNumber);
-  sweep.setNAzimuths = value;
-}
-
-BufrProduct::setAntennaBeamAzimuthDegrees(double value) {
-  MetaData sweep = metaData.at(currentSweepNumber);
-  sweep.antennaBeamAzimuthDegrees = value;
-}
-*/

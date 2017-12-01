@@ -39,7 +39,7 @@ TARGET_FILE = Hrrr15minNcf2Mdv
 
 LOC_INCLUDES = $(NETCDF_INCS) $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lMdv -lRadx -lSpdb \
+LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -lSpdb \
 	-ldsserver -ldidss -lrapformats -leuclid \
 	-ltoolsa -ldataport -ltdrp -lnetcdf_c++ \
 	-lnetcdf -lhdf5 -lhdf5_hl $(NETCDF4_LIBS) \

@@ -40,7 +40,7 @@ TARGET_FILE = CfRadial2DeTect
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lDeTect -lRadx -lFmq -lSpdb \
-	-lMdv -ldsdata -ldsserver -lrapformats \
+	-lMdv -lNcxx -ldsdata -ldsserver -lrapformats \
 	-ldidss -ltoolsa -ldataport -ltdrp \
 	-lnetcdf_c++ -lnetcdf -lhdf5_hl -lhdf5 \
 	-ludunits2 -lexpat $(NETCDF4_LIBS) -lbz2 \

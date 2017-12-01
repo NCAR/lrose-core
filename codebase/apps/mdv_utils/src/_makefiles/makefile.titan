@@ -19,6 +19,7 @@ SUB_DIRS = \
          Mdv2NetCDF \
          Mdv2Plain \
          Mdv2SweepNetCDF \
+	 Mdv2SoundingSpdb \
          Mdv2TextHdr \
          Mdv2Vil \
          Mdv3Dto2D \
@@ -54,6 +55,7 @@ SUB_DIRS = \
          MdvMultFilt \
          MdvOffsetField \
          MdvPatch \
+         MdvPull \
          MdvPointExtract \
          MdvScatterPlot \
          MdvSmooth \
@@ -68,7 +70,8 @@ SUB_DIRS = \
          MdvtoGrib2 \
          Mdvx2Vil \
          MdvxHowBad \
-         NetCDF2Mdv \
+	 NcGeneric2Mdv \
+	 NetCDF2Mdv \
          Plain2Mdv \
          PrintMdv \
          ReadDEM \

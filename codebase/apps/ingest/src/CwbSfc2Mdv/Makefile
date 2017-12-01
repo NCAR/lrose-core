@@ -36,7 +36,7 @@ TARGET_FILE = CwbSfc2Mdv
 
 LOC_INCLUDES = $(NETCDF_INCS) $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -leuclid -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
 	-ldidss -lrapformats -lphysics -ltoolsa \
 	-ldataport -ltdrp $(NETCDF_C_LIB) $(NETCDF_C++_LIB) \
 	$(NETCDF_LIB_LIST) $(NETCDF4_LIBS) -lbz2 -lz \

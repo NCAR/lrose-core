@@ -2,7 +2,7 @@
 
 ### Choose your install directory (prefix)
 
-The default is: `/usr/local/lrose`
+The default is: `${HOME}/lrose`
 
 ### Check out, build and install **netcdf** support
 
@@ -45,6 +45,12 @@ As an example, for the **radx** distribtion, run the following:
   ./make_bin/install_package_makefiles.py --package radx
 ```
 
+Available packages are:
+
+```
+  lrose radx titan hcr hsrl cidd
+```
+
 --->
 
 ### Perform the build
@@ -60,7 +66,7 @@ where `prefix` is the location into which you are building.
 
 `package` defaults to `lrose`
 
-`prefix` defaults to `/usr/local/lrose`
+`prefix` defaults to `${HOME}/lrose`
 
 
 

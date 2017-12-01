@@ -196,7 +196,7 @@ int DsIntervalTrigger::next()
 
   // Get the next trigger time depending on the mode
 
-  int status;
+  int status = 0;
   
   switch (_mode)
   {

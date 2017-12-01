@@ -37,7 +37,7 @@ TARGET_FILE = MM5Parachute
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -lmm5 \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -lmm5 \
 	-lrapformats -ldidss -lphysics -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm

@@ -28,7 +28,11 @@
 
 commentdef {
   p_header = "Program file_repeat_day";
-  p_text = "This program provides a mechanism to simulate the arrival of files which are named by time and in a dated directory. As as example, you can copy the GTS files from an archived day into a simulated realtime directory. The files are placed in a directory for the current day. As an option you can modify date information in the files.";
+  p_text = "This program provides a mechanism to simulate the arrival of files "
+  "which are named by time and in a dated directory. As as example, you can copy "
+  "the GTS files from an archived day into a simulated realtime directory. The "
+  "files are placed in a directory for the current day. As an option you can "
+  "modify date information in the files.";
 }
 
 commentdef {
@@ -95,6 +99,7 @@ typedef enum {
   XYYYYMMDD_HHMMSS,
   XYYYYMMDD_HHMMSSZ,
   PRE_YYYYMMDDhhmmss_POST,
+  PRE_YYYYMMDDhh_POST,
   PRE_hh_YYYYMMDDhhmmss_POST,
   SDIR_PRE_YYYYMMDDHHMMSS,
   SDIR_PRE_YYYYMMDDhhmmss_POST,
@@ -117,6 +122,7 @@ paramdef enum FilenameType_t {
            "\tXYYYYMMDD_HHMMSS: <FilePrefix>YYYYMMDD_hhmmss.ext\n"
            "\tXYYYYMMDD_HHMMSSZ: <FilePrefix>YYYYMMDD_hhmmss...\n"
            "\tPRE_YYYYMMDDhhmmss_POST: <FilePrefix>YYYYMMDDhhmmss...\n"
+           "\tPRE_YYYYMMDDhh_POST: <FilePrefix>YYYYMMDDhh...\n"
            "\tPRE_hh_YYYYMMDDhhmmss_POST: <FilePrefix>hh-YYYYMMDDhhmmss...\n"
            "\tSDIR_PRE_YYYYMMDDHHMMSS: YYYYMMDD/<FilePrefix>YYYYMMDDHHMMSS.ext\n"
            "\tSDIR_PRE_YYYYMMDDhhmmss_POST: YYYYMMDD/<FilePrefix>YYYYMMDDhhmmss...\n"
@@ -157,6 +163,24 @@ paramdef string {
 } FileSuffix;
 
 commentdef {
+  p_header = "FILE TYPE";
+};
+
+typedef enum {
+  ASCII,
+  NETCDF
+} FileType_t;
+
+paramdef enum FileType_t {
+  p_default = ASCII;
+  p_descr = "Naming convention for input files.";
+  p_help = "File types are as follows:\n"
+           "\tASCII: ASCII files\n"
+           "\tNETCDF: netCDF files\n";
+} FileType;
+
+
+commentdef {
   p_header = "DATA TIMING";
 };
 
@@ -194,3 +218,42 @@ paramdef boolean {
   p_default = true;
   p_descr = "Option to write _latest_data_info or not";
 } WriteLData;
+
+
+commentdef {
+  p_header = "NETCDF PARAMETERS";
+};
+
+typedef enum {
+  NC_HHmmss,
+  NC_HHmm,
+  NC_HH,
+  NC_mm,
+  NC_ss,
+  NC_YYYYMMDD,
+  NC_YYYYMMDDhh,
+  NC_YYYYMMDDhhmm,
+  NC_YYYYMMDDHHmmss,
+  NC_YYYY,
+  NC_MM,
+  NC_DD,
+  NC_UTIME
+} TimeDateFormat_t;
+
+typedef struct {
+  string name;
+  TimeDateFormat_t format;
+} NetVar_t;
+
+paramdef struct NetVar_t {
+  p_default = {{"datetime", NC_YYYYMMDDHHmmss}};
+  p_descr = "Time date representations.";
+} NetVars[];
+
+paramdef string {
+  p_default = "/usr/local/nco/bin/ncap2";
+  p_descr = "Path to NCO utility ncap2 -- Netcdf Arithemtic Processor 2. The "
+    "purpose of using ncap2 is to change time and date stamps in netCDF files. "
+    "ncap2 makes it easy ";
+  p_help = "See http://nco.sourceforge.net/nco.html for usage and examples. ";
+} ncap2Path;

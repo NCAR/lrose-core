@@ -373,6 +373,8 @@ private:
   Nc3Var *_antennaTransitionVar;
   Nc3Var *_georefsAppliedVar;
   Nc3Var *_georefTimeVar;
+  Nc3Var *_georefUnitNumVar;
+  Nc3Var *_georefUnitIdVar;
   Nc3Var *_nSamplesVar;
   Nc3Var *_calIndexVar;
   Nc3Var *_xmitPowerHVar;
@@ -535,6 +537,8 @@ private:
   RadxGeoref _geoCount;
 
   vector<double> _geoTime;
+  vector<int> _geoUnitNum;
+  vector<int> _geoUnitId;
   vector<double> _geoLatitude;
   vector<double> _geoLongitude;
   vector<double> _geoAltitudeMsl;
@@ -617,6 +621,8 @@ private:
   const static char* GEOMETRY_CORRECTION;
   const static char* GEOREFS_APPLIED;
   const static char* GEOREF_TIME;
+  const static char* GEOREF_UNIT_ID;
+  const static char* GEOREF_UNIT_NUM;
   const static char* GREGORIAN;
   const static char* GRID_MAPPING;
   const static char* GRID_MAPPING_NAME;
@@ -853,6 +859,8 @@ private:
   const static char* FOLLOW_MODE_LONG;
   const static char* FREQUENCY_LONG;
   const static char* GEOREF_TIME_LONG;
+  const static char* GEOREF_UNIT_NUM_LONG;
+  const static char* GEOREF_UNIT_ID_LONG;
   const static char* HEADING_CHANGE_RATE_LONG;
   const static char* HEADING_CORRECTION_LONG;
   const static char* HEADING_LONG;

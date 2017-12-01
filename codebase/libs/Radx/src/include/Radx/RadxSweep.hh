@@ -38,6 +38,7 @@
 
 #include <iostream>
 #include <Radx/Radx.hh>
+#include <Radx/RadxMsg.hh>
 using namespace std;
 
 ///////////////////////////////////////////////////////////////
@@ -265,6 +266,20 @@ public:
   
   //@}
   
+  /// \name Serialization:
+  //@{
+
+  // serialize into a RadxMsg
+  
+  void serialize(RadxMsg &msg);
+  
+  // deserialize from a RadxMsg
+  // return 0 on success, -1 on failure
+
+  int deserialize(const RadxMsg &msg);
+
+  //@}
+
 protected:
 private:
 
@@ -299,6 +314,60 @@ private:
   void _init();
   RadxSweep & _copy(const RadxSweep &rhs);
 
+  /////////////////////////////////////////////////
+  // serialization
+  /////////////////////////////////////////////////
+
+  static const int _metaNumbersPartId = 2;
+  
+  // struct for metadata numbers in messages
+  // strings not included - they are passed as XML
+  
+  typedef struct {
+    
+    Radx::fl64 fixedAngle;
+    Radx::fl64 targetScanRate;
+    Radx::fl64 measuredScanRate;
+    Radx::fl64 angleRes;
+    Radx::fl64 intermedFreqHz;
+
+    Radx::si64 startRayIndex;
+    Radx::si64 endRayIndex;
+
+    Radx::si64 spareSi64[9];
+
+    Radx::si32 volNum;
+    Radx::si32 sweepNum;
+
+    Radx::si32 sweepMode;
+    Radx::si32 polarizationMode;
+    Radx::si32 prtMode;
+    Radx::si32 followMode;
+
+    Radx::si32 raysAreIndexed;
+    Radx::si32 isLongRange;
+
+    Radx::si32 spareSi32[8];
+
+  } msgMetaNumbers_t;
+
+  msgMetaNumbers_t _metaNumbers;
+  
+  /// load meta numbers to message struct
+  
+  void _loadMetaNumbersToMsg();
+  
+  /// set the meta number data from the message struct
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                             size_t bufLen,
+                             bool swap);
+  
+  /// swap meta numbers
+  
+  static void _swapMetaNumbers(msgMetaNumbers_t &msgMetaNumbers);
+          
 };
 
 #endif

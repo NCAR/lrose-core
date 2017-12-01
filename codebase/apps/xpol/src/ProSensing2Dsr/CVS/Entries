@@ -3,8 +3,6 @@
 /HawkEye.xpol/1.2/Thu Dec 29 22:57:37 2016//
 /Main.cc/1.4/Thu Dec 29 22:57:37 2016//
 /Makefile/1.7/Thu Dec 29 22:57:37 2016//
-/Params.cc/1.8/Thu Dec 29 22:57:37 2016//
-/Params.hh/1.8/Thu Dec 29 22:57:37 2016//
 /ProSensing2Dsr.cc/1.37/Thu Dec 29 22:57:37 2016//
 /ProSensing2Dsr.hh/1.15/Thu Dec 29 22:57:37 2016//
 /ProSensing2Dsr.xpol/1.5/Thu Dec 29 22:57:37 2016//
@@ -12,4 +10,6 @@
 /XpolComms.hh/1.20/Thu Dec 29 22:57:37 2016//
 /paramdef.ProSensing2Dsr/1.9/Thu Dec 29 22:57:37 2016//
 /xpol_cal.xml/1.8/Thu Dec 29 22:57:37 2016//
+/Params.cc/1.9/Fri Nov  3 15:36:12 2017//
+/Params.hh/1.9/Fri Nov  3 15:36:12 2017//
 D

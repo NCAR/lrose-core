@@ -38,12 +38,14 @@ using namespace std;
 RhiWindow::RhiWindow(PolarManager *manager,
                      const Params &params,
                      const RadxPlatform &platform,
-                     const vector<DisplayField *> &fields):
+                     const vector<DisplayField *> &fields,
+                     bool haveFilteredFields):
         QMainWindow(manager),
         _manager(manager),
         _params(params),
         _platform(platform),
-        _fields(fields)
+        _fields(fields),
+        _haveFilteredFields(haveFilteredFields)
         
 {
   // Create the main frame which contains everything in this window
@@ -59,7 +61,7 @@ RhiWindow::RhiWindow(PolarManager *manager,
   // create RHI widget
   
   _rhiWidget = new RhiWidget(_main, *manager, *this,
-                             _params, _platform, _fields.size());
+                             _params, _platform, _fields, _haveFilteredFields);
   _rhiWidget->setGrids(_params.rhi_grids_on_at_startup);
   _rhiWidget->setRings(_params.rhi_range_rings_on_at_startup);
   _rhiWidget->setAngleLines(_params.rhi_elevation_lines_on_at_startup);

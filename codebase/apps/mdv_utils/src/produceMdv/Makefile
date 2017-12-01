@@ -38,7 +38,7 @@ TARGET_FILE = produce_Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -lMdv -lRadx -leuclid \
+LOC_LIBS = -lSpdb -lMdv -lRadx -lNcxx -leuclid \
 	-ldsserver -ldidss -leispack -lrapformats \
 	-ltoolsa -lrapmath -ldataport -lg2c \
 	-ltdrp -Wl,-Bstatic $(NETCDF4_LIBS) -lbz2 \

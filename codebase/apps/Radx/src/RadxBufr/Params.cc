@@ -532,7 +532,7 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("Converts files between CfRadial and other radial formats");
+    tt->comment_hdr = tdrpStrDup("Converts files from BUFR to Cfradial formats");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -600,6 +600,27 @@ using namespace std;
     tt->help = tdrpStrDup("Files will be searched for in this directory.");
     tt->val_offset = (char *) &input_dir - &_start_;
     tt->single_val.s = tdrpStrDup(".");
+    tt++;
+    
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("TABLE PATH");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'tables'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("tables");
+    tt->descr = tdrpStrDup("Directory containing BUFR tables.");
+    tt->help = tdrpStrDup("Files with .csv extension.");
+    tt->val_offset = (char *) &tables - &_start_;
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
     // Parameter 'mode'
@@ -734,11 +755,11 @@ using namespace std;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("OPTIONAL FIXED ANGLE OR SWEEP NUMBER LIMITS");
     tt->comment_text = tdrpStrDup("Fixed angles are elevation in PPI mode and azimuth in RHI mode.");
     tt++;
@@ -827,11 +848,11 @@ using namespace std;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("READ OPTIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1052,11 +1073,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE GATE GEOMETRY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1109,11 +1130,11 @@ using namespace std;
     tt->single_val.d = 0.0075;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE INSTRUMENT AND/OR SITE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1166,11 +1187,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE VOLUME NUMBER, OR AUTOINCREMENT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1211,11 +1232,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE RADAR LOCATION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1292,11 +1313,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OPTION TO CORRECT TIME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1325,11 +1346,11 @@ using namespace std;
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("OPTION TO CORRECT ANTENNA ANGLES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1382,11 +1403,11 @@ using namespace std;
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("OPTION TO FORCE RELOAD OF SWEEP AND/OR VOLUME INFO, or RECOMPUTE SWEEP FIXED ANGLE.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1451,11 +1472,11 @@ using namespace std;
     tt->single_val.d = 0.25;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("OPTION TO ADJUST SWEEP LIMITS USING FIXED AND MEASURED ANGLES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1472,11 +1493,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1577,11 +1598,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("OPTION TO ADD USER-SPECIFIED GLOBAL ATTRIBUTES to output file");
     tt->comment_text = tdrpStrDup("Only applies to CfRadial output format.");
     tt++;
@@ -1665,11 +1686,11 @@ using namespace std;
       tt->struct_vals[14].s = tdrpStrDup("1.1,2.2,3.3,4.4,5.5");
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY FIELD NAMES AND OUTPUT ENCODING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1699,7 +1720,7 @@ using namespace std;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(output_field_t);
-    tt->array_n = 2;
+    tt->array_n = 10;
     tt->struct_def.name = tdrpStrDup("output_field_t");
     tt->struct_def.nfields = 9;
     tt->struct_def.fields = (struct_field_t *)
@@ -1771,27 +1792,99 @@ using namespace std;
       tt->struct_def.fields[8].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[8].rel_offset = 
         (char *) &_output_fields->output_offset - (char *) _output_fields;
-    tt->n_struct_vals = 18;
+    tt->n_struct_vals = 90;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("DBZ");
+      tt->struct_vals[0].s = tdrpStrDup("TH");
       tt->struct_vals[1].s = tdrpStrDup("DBZ");
       tt->struct_vals[2].s = tdrpStrDup("reflectivity");
       tt->struct_vals[3].s = tdrpStrDup("equivalent_reflectivity_factor");
       tt->struct_vals[4].s = tdrpStrDup("dBZ");
-      tt->struct_vals[5].e = OUTPUT_ENCODING_ASIS;
+      tt->struct_vals[5].e = OUTPUT_ENCODING_INT16;
       tt->struct_vals[6].e = SCALING_DYNAMIC;
       tt->struct_vals[7].d = 0.01;
       tt->struct_vals[8].d = 0;
-      tt->struct_vals[9].s = tdrpStrDup("VEL");
-      tt->struct_vals[10].s = tdrpStrDup("VEL");
-      tt->struct_vals[11].s = tdrpStrDup("radial_velocity");
-      tt->struct_vals[12].s = tdrpStrDup("radial_velocity_of_scatterers_away_from_instrument");
-      tt->struct_vals[13].s = tdrpStrDup("m/s");
-      tt->struct_vals[14].e = OUTPUT_ENCODING_ASIS;
+      tt->struct_vals[9].s = tdrpStrDup("TV");
+      tt->struct_vals[10].s = tdrpStrDup("DBZV");
+      tt->struct_vals[11].s = tdrpStrDup("vertical_reflectivity");
+      tt->struct_vals[12].s = tdrpStrDup("equivalent_reflectivity_factor");
+      tt->struct_vals[13].s = tdrpStrDup("dBZ");
+      tt->struct_vals[14].e = OUTPUT_ENCODING_INT16;
       tt->struct_vals[15].e = SCALING_DYNAMIC;
       tt->struct_vals[16].d = 0.01;
       tt->struct_vals[17].d = 0;
+      tt->struct_vals[18].s = tdrpStrDup("VRAD");
+      tt->struct_vals[19].s = tdrpStrDup("VEL");
+      tt->struct_vals[20].s = tdrpStrDup("radial_velocity");
+      tt->struct_vals[21].s = tdrpStrDup("radial_velocity_of_scatterers_away_from_instrument");
+      tt->struct_vals[22].s = tdrpStrDup("m/s");
+      tt->struct_vals[23].e = OUTPUT_ENCODING_INT16;
+      tt->struct_vals[24].e = SCALING_DYNAMIC;
+      tt->struct_vals[25].d = 0.01;
+      tt->struct_vals[26].d = 0;
+      tt->struct_vals[27].s = tdrpStrDup("WRAD");
+      tt->struct_vals[28].s = tdrpStrDup("WIDTH");
+      tt->struct_vals[29].s = tdrpStrDup("spectrum_width");
+      tt->struct_vals[30].s = tdrpStrDup("doppler_spectrum_width");
+      tt->struct_vals[31].s = tdrpStrDup("m/s");
+      tt->struct_vals[32].e = OUTPUT_ENCODING_INT16;
+      tt->struct_vals[33].e = SCALING_DYNAMIC;
+      tt->struct_vals[34].d = 0.01;
+      tt->struct_vals[35].d = 0;
+      tt->struct_vals[36].s = tdrpStrDup("TDR");
+      tt->struct_vals[37].s = tdrpStrDup("ZDR");
+      tt->struct_vals[38].s = tdrpStrDup("differential_reflectivity");
+      tt->struct_vals[39].s = tdrpStrDup("differential_reflectivity_hv");
+      tt->struct_vals[40].s = tdrpStrDup("dB");
+      tt->struct_vals[41].e = OUTPUT_ENCODING_ASIS;
+      tt->struct_vals[42].e = SCALING_DYNAMIC;
+      tt->struct_vals[43].d = 0.01;
+      tt->struct_vals[44].d = 0;
+      tt->struct_vals[45].s = tdrpStrDup("PHIDP");
+      tt->struct_vals[46].s = tdrpStrDup("PHIDP");
+      tt->struct_vals[47].s = tdrpStrDup("differential_phase");
+      tt->struct_vals[48].s = tdrpStrDup("differential_phase_hv");
+      tt->struct_vals[49].s = tdrpStrDup("deg");
+      tt->struct_vals[50].e = OUTPUT_ENCODING_INT16;
+      tt->struct_vals[51].e = SCALING_DYNAMIC;
+      tt->struct_vals[52].d = 0.01;
+      tt->struct_vals[53].d = 0;
+      tt->struct_vals[54].s = tdrpStrDup("RHOHV");
+      tt->struct_vals[55].s = tdrpStrDup("RHOHV");
+      tt->struct_vals[56].s = tdrpStrDup("correlation_coefficient");
+      tt->struct_vals[57].s = tdrpStrDup("correlation_coefficient_hv");
+      tt->struct_vals[58].s = tdrpStrDup("");
+      tt->struct_vals[59].e = OUTPUT_ENCODING_INT16;
+      tt->struct_vals[60].e = SCALING_DYNAMIC;
+      tt->struct_vals[61].d = 0.01;
+      tt->struct_vals[62].d = 0;
+      tt->struct_vals[63].s = tdrpStrDup("KDP");
+      tt->struct_vals[64].s = tdrpStrDup("KDP");
+      tt->struct_vals[65].s = tdrpStrDup("specific_differential_phase");
+      tt->struct_vals[66].s = tdrpStrDup("specific_differential_phase_hv");
+      tt->struct_vals[67].s = tdrpStrDup("deg/km");
+      tt->struct_vals[68].e = OUTPUT_ENCODING_INT16;
+      tt->struct_vals[69].e = SCALING_DYNAMIC;
+      tt->struct_vals[70].d = 0.01;
+      tt->struct_vals[71].d = 0;
+      tt->struct_vals[72].s = tdrpStrDup("CM");
+      tt->struct_vals[73].s = tdrpStrDup("CM");
+      tt->struct_vals[74].s = tdrpStrDup("what_is_this");
+      tt->struct_vals[75].s = tdrpStrDup("what_is_this");
+      tt->struct_vals[76].s = tdrpStrDup("??");
+      tt->struct_vals[77].e = OUTPUT_ENCODING_INT16;
+      tt->struct_vals[78].e = SCALING_DYNAMIC;
+      tt->struct_vals[79].d = 0.01;
+      tt->struct_vals[80].d = 0;
+      tt->struct_vals[81].s = tdrpStrDup("VRAD");
+      tt->struct_vals[82].s = tdrpStrDup("VEL");
+      tt->struct_vals[83].s = tdrpStrDup("radial_velocity");
+      tt->struct_vals[84].s = tdrpStrDup("radial_velocity_of_scatterers_away_from_instrument");
+      tt->struct_vals[85].s = tdrpStrDup("m/s");
+      tt->struct_vals[86].e = OUTPUT_ENCODING_INT16;
+      tt->struct_vals[87].e = SCALING_DYNAMIC;
+      tt->struct_vals[88].d = 0.01;
+      tt->struct_vals[89].d = 0;
     tt++;
     
     // Parameter 'write_other_fields_unchanged'
@@ -1838,11 +1931,11 @@ using namespace std;
       tt->array_vals[1].s = tdrpStrDup("VEL");
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1885,11 +1978,11 @@ using namespace std;
     tt->single_val.e = OUTPUT_ENCODING_ASIS;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("CENSORING");
     tt->comment_text = tdrpStrDup("You have the option of censoring the data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression.");
     tt++;
@@ -1977,11 +2070,11 @@ using namespace std;
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.");
     tt->comment_text = tdrpStrDup("These transforms are fixed. The same transform is applied to all files.");
     tt++;
@@ -2042,11 +2135,11 @@ using namespace std;
       tt->struct_vals[5].d = 0;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("OPTION TO APPLY VARIABLE LINEAR TRANSFORM TO SPECIFIED FIELDS.");
     tt->comment_text = tdrpStrDup("These transforms vary from file to file, controlled by specific metadata.");
     tt++;
@@ -2128,11 +2221,11 @@ using namespace std;
       tt->struct_vals[11].s = tdrpStrDup("(56.0, 1.0, -0.75), (58.0, 1.0, -0.75), (61.0, 1.0, 0.1), (63.5, 1.0, 0.2), (64.0, 1.0, 0.6), (69.0, 1.0, 0.6)");
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2197,11 +2290,11 @@ using namespace std;
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 21'
+    // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2230,11 +2323,11 @@ using namespace std;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2263,11 +2356,11 @@ using namespace std;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2476,11 +2569,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("SEPARATING VOLUMES BY TYPE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2557,11 +2650,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("sun");
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE MISSING VALUES");
     tt->comment_text = tdrpStrDup("Missing values are applicable to both metadata and field data. The default values should be satisfactory for most purposes. However, you can choose to override these if you are careful with the selected values.\n\nThe default values for metadata are:\n\tmissingMetaDouble = -9999.0\n\tmissingMetaFloat = -9999.0\n\tmissingMetaInt = -9999\n\tmissingMetaChar = -128\n\nThe default values for field data are:\n\tmissingFl64 = -9.0e33\n\tmissingFl32 = -9.0e33\n\tmissingSi32 = -2147483647\n\tmissingSi16 = -32768\n\tmissingSi08 = -128\n\n");
     tt++;

@@ -6,12 +6,13 @@
 #include <iterator>
 #include <sstream>
 #include <stdio.h>
-
+#include <stdlib.h>
 #include <Radx/TableMapKey.hh>
 
 using namespace std;
 
 TableMapKey::TableMapKey() {
+  _debug = false;
 }
 
 TableMapKey::TableMapKey(unsigned short key) {
@@ -29,8 +30,7 @@ unsigned short TableMapKey::EncodeKey(string fs, string xs, string ys) {
          f = atoi(fs.c_str());  // try tokens[0].stoui
          x = atoi(xs.c_str());
          y = atoi(ys.c_str());
-         if ((f==3) && (x==21) && (y==204)) 
- 	  printf("here\n");
+
          unsigned short key;
          //f = 1; x = 8;
          key = f << 6;
@@ -73,6 +73,14 @@ void TableMapKey::Decode(unsigned short key, unsigned char *f, unsigned char *x,
 
  bool TableMapKey::isReplicator() {
   if ((_key >= 0x4000) && (_key < 0x8000)) { // 01 XX
+    return true;
+  } else { 
+      return false;
+  }
+}
+
+ bool TableMapKey::isTableCEntry() {
+  if ((_key >= 0x8000) && (_key < 0xC000)) { // 10 XX
     return true;
   } else { 
       return false;

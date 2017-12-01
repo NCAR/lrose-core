@@ -1,0 +1,1142 @@
+/**********************************************************************
+ * TDRP params for Hsrl2Radx
+ **********************************************************************/
+
+//======================================================================
+//
+// Reads UW HSRL data files in CfRadial format, with range in ht MSL, 
+//   and converts to a standard CfRadial, with range measured from the 
+//   instrument instead of MSL.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "archive";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+//
+// Files will be searched for in this directory.
+//
+//
+// Type: string
+//
+
+input_dir = "$(DATA_DIR)/raw";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME_FMQ, the program reads raw rays from an FMQ and writes 
+//   output to an FMQ.  In REALTIME_FILE mode, the program waits for a new 
+//   input file.  In ARCHIVE mode, it moves through the data between the 
+//   start and end times set on the command line. In FILELIST mode, it 
+//   moves through the list of file names specified on the command line. 
+//   Paths (in ARCHIVE mode, at least) MUST contain a day-directory above 
+//   the data file -- ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME_FMQ
+//     REALTIME_FILE
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+///////////// input_fmq_path //////////////////////////
+//
+// Path to input FMQ.
+//
+// REATIME_FMQ mode only. The FMQ consists of 2 files, ??.buf and 
+//   ??.stat. Specify only the root, not the extensions.
+//
+//
+// Type: string
+//
+
+input_fmq_path = "/tmp/fmq/hsrl_raw";
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// REALTIME_FILE mode only. Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 1800;
+
+///////////// latest_data_info_avail //////////////////
+//
+// Is _latest_data_info file available?.
+//
+// REALTIME_FILE mode only. If TRUE, will watch the latest_data_info 
+//   file. If FALSE, will scan the input directory for new files.
+//
+//
+// Type: boolean
+//
+
+latest_data_info_avail = TRUE;
+
+///////////// search_recursively //////////////////////
+//
+// Option to recurse to subdirectories while looking for new files.
+//
+// REALTIME_FILE mode only. If TRUE, all subdirectories with ages less 
+//   than max_dir_age will be searched. This may take considerable CPU, so 
+//   be careful in its use. Only applies if latest_data_info_avail is 
+//   FALSE.
+//
+//
+// Type: boolean
+//
+
+search_recursively = TRUE;
+
+///////////// max_recursion_depth /////////////////////
+//
+// Maximum depth for recursive directory scan.
+//
+// REALTIME_FILE mode only. Only applies search_recursively is TRUE. 
+//   This is the max depth, below input_dir, to which the recursive 
+//   directory search will be carried out. A depth of 0 will search the 
+//   top-level directory only. A depth of 1 will search the level below 
+//   the top directory, etc.
+//
+//
+// Type: int
+//
+
+max_recursion_depth = 3;
+
+///////////// wait_between_checks /////////////////////
+//
+// Sleep time between checking directory for input - secs.
+//
+// REALTIME_FILE mode only. If a directory is large and files do not 
+//   arrive frequently, set this to a higher value to reduce the CPU load 
+//   from checking the directory. Only applies if latest_data_info_avail 
+//   is FALSE.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+wait_between_checks = 5;
+
+///////////// file_quiescence /////////////////////////
+//
+// File quiescence when checking for files - secs.
+//
+// REALTIME_FILE mode only. This allows you to make sure that a file 
+//   coming from a remote machine is complete before reading it. Only 
+//   applies if latest_data_info_avail is FALSE.
+//
+//
+// Type: int
+//
+
+file_quiescence = 5;
+
+///////////// search_ext //////////////////////////////
+//
+// File name extension.
+//
+// REALTIME_FILE mode only. If set, only files with this extension will 
+//   be processed.
+//
+//
+// Type: string
+//
+
+search_ext = "nc";
+
+//======================================================================
+//
+// OPTION TO OVERRIDE GATE GEOMETRY.
+//
+//======================================================================
+ 
+///////////// override_start_range ////////////////////
+//
+// Option to override the start range.
+//
+// If true, the specified start range in this file will be used. If not, 
+//   the start range in the data file will be used.
+//
+//
+// Type: boolean
+//
+
+override_start_range = FALSE;
+
+///////////// start_range_km //////////////////////////
+//
+// Specified start range (km).
+//
+// See override_start_range.
+//
+//
+// Type: double
+//
+
+start_range_km = 0;
+
+///////////// override_gate_spacing ///////////////////
+//
+// Option to override the gate spacing.
+//
+// If true, the specified gate spacing in this file will be used. If 
+//   not, the gate spacing in the data file will be used.
+//
+//
+// Type: boolean
+//
+
+override_gate_spacing = FALSE;
+
+///////////// gate_spacing_km /////////////////////////
+//
+// Specified gate spacing (km).
+//
+// See override_gate_spacing.
+//
+//
+// Type: double
+//
+
+gate_spacing_km = 0.0075;
+
+//======================================================================
+//
+// OPTION TO READ GEOREF DATA FROM AIRCRAFT SYSTEM.
+//
+// If the georef data is available, it will be read in by AcGeoref2Spdb, 
+//   and stored in an SPDB data base. We read it in from that location.
+//
+//======================================================================
+ 
+///////////// read_georef_data_from_aircraft_system ///
+//
+// Option to override the instrument location.
+//
+// If true, the location in this file will be used. If not, the location 
+//   in the time series data will be used.
+//
+//
+// Type: boolean
+//
+
+read_georef_data_from_aircraft_system = TRUE;
+
+///////////// georef_data_spdb_url ////////////////////
+//
+// SPDB url for aircraft georef data.
+//
+// Can take the form of a local directory path, or a full url of the 
+//   form:
+//
+// 	'spdbp:://hostname::dir_path'
+//
+// If the dir_path starts with '.' or '/', it specifies a relative or 
+//   absolute path respectively. If not, it specifies a path relative to 
+//   '$DATA_DIR'.
+//
+//
+// Type: string
+//
+
+georef_data_spdb_url = "$(DATA_DIR)/spdb/ac_georef/iwg1";
+
+///////////// georef_data_search_margin_secs //////////
+//
+// Search margin for finding georeference data (secs).
+//
+// If no data is found within this time margin, we do not set the 
+//   location.
+//
+//
+// Type: int
+//
+
+georef_data_search_margin_secs = 10;
+
+//======================================================================
+//
+// FIXED LOCATION PARAMETERS.
+//
+// If not read from aircraft, need to set the instrument location from 
+//   the config file.
+//
+//======================================================================
+ 
+///////////// instrument_latitude_deg /////////////////
+//
+// Instrument latitude (deg).
+//
+// Applies if read_georef_data_from_aircraft_system is false.
+//
+//
+// Type: double
+//
+
+instrument_latitude_deg = 40;
+
+///////////// instrument_longitude_deg ////////////////
+//
+// Instrument longitude (deg).
+//
+// Applies if read_georef_data_from_aircraft_system is false.
+//
+//
+// Type: double
+//
+
+instrument_longitude_deg = -105.4;
+
+///////////// instrument_altitude_meters //////////////
+//
+// Instrument altitude (meters).
+//
+// Applies if read_georef_data_from_aircraft_system is false.
+//
+//
+// Type: double
+//
+
+instrument_altitude_meters = 1650;
+
+//======================================================================
+//
+// OPTION TO SET RANGE RELATIVE TO INSTRUMENT - MSL CfRadial files only.
+//
+// This applies to python-generated CfRadial files relative to MSL only.
+//
+//======================================================================
+ 
+///////////// set_range_relative_to_instrument ////////
+//
+// Option to convert from ht in MSL to range relative to instrument.
+//
+// The HSRL CfRadial files have range stored in height MSL rather than 
+//   range from the instrument. This option allows you to convert to 
+//   distance from the instrument.
+//
+//
+// Type: boolean
+//
+
+set_range_relative_to_instrument = TRUE;
+
+///////////// telescope_direction_is_up ///////////////
+//
+// Integer value for telescope direction is up.
+//
+// This value indicates the telescope is pointing up. If the 
+//   telescope_direction value is not equal to this value it is pointing 
+//   down.
+//
+//
+// Type: int
+//
+
+telescope_direction_is_up = 1;
+
+//======================================================================
+//
+// READING RAW NetCDF DATA FILES.
+//
+//======================================================================
+ 
+///////////// combine_bins_on_read ////////////////////
+//
+// Option to combine range gates on read.
+//
+// If true, the specified number of range gates will be combined on read 
+//   to create mean values with lower noisiness.
+//
+//
+// Type: boolean
+//
+
+combine_bins_on_read = TRUE;
+
+///////////// n_bins_per_gate /////////////////////////
+//
+// Number of bins to combine into a single gate.
+//
+// In range, we will combine this number of gates to produce a data set 
+//   with lower spatial resolution but less noiry data.
+//
+//
+// Type: int
+//
+
+n_bins_per_gate = 2;
+
+///////////// raw_bin_start_range_km //////////////////
+//
+// Start range to first bin (km).
+//
+// Takes into account dead zone caused by digitizer starting before the 
+//   pulse.
+//
+//
+// Type: double
+//
+
+raw_bin_start_range_km = -0.3;
+
+///////////// raw_bin_spacing_km //////////////////////
+//
+// Spacing of raw bins (km).
+//
+// The distance between the ray bins in km.
+//
+//
+// Type: double
+//
+
+raw_bin_spacing_km = 0.0075;
+
+///////////// combined_hi_field_name //////////////////
+//
+// Name of combined_hi field in netCDF file.
+//
+// This name is also used for the field read in from the instrument raw 
+//   FMQ in real-time.
+//
+//
+// Type: string
+//
+
+combined_hi_field_name = "combined_hi";
+
+///////////// combined_lo_field_name //////////////////
+//
+// Name of combined_lo field in netCDF file.
+//
+// This name is also used for the field read in from the instrument raw 
+//   FMQ in real-time.
+//
+//
+// Type: string
+//
+
+combined_lo_field_name = "combined_lo";
+
+///////////// molecular_field_name ////////////////////
+//
+// Name of molecular field in netCDF file.
+//
+// This name is also used for the field read in from the instrument raw 
+//   FMQ in real-time.
+//
+//
+// Type: string
+//
+
+molecular_field_name = "molecular";
+
+///////////// cross_field_name ////////////////////////
+//
+// Name of cross field in netCDF file.
+//
+// This name is also used for the field read in from the instrument raw 
+//   FMQ in real-time.
+//
+//
+// Type: string
+//
+
+cross_field_name = "cross";
+
+///////////// baseline_calibration_path ///////////////
+//
+// location of baseline calibration file.
+//
+//
+// Type: string
+//
+
+baseline_calibration_path = "$(PROJ_DIR)/calfiles/baseline_correction_20171019T2000.blc";
+
+///////////// diff_default_geofile_path ///////////////
+//
+// location of diff_default_geofile calibration file.
+//
+//
+// Type: string
+//
+
+diff_default_geofile_path = "$(PROJ_DIR)/calfiles/diff_default_geofile_20171018T0000.geo";
+
+///////////// geofile_default_path ////////////////////
+//
+// location of geofile_default calibration file.
+//
+//
+// Type: string
+//
+
+geofile_default_path = "$(PROJ_DIR)/calfiles/geofile_default_20150601T0000.geo";
+
+///////////// afterpulse_default_path /////////////////
+//
+// location of afterpulse_default calibration file.
+//
+//
+// Type: string
+//
+
+afterpulse_default_path = "$(PROJ_DIR)/calfiles/afterpulse_default_20061001T0000.ap";
+
+///////////// calvals_gvhsrl_path /////////////////////
+//
+// location of calvals_gvhsrl calibration file.
+//
+//
+// Type: string
+//
+
+calvals_gvhsrl_path = "$(PROJ_DIR)/calfiles/calvals_gvhsrl.txt";
+
+///////////// combined_hi_dead_time_name //////////////
+//
+// Name of combined_hi_dead_time field in CalVals file.
+//
+//
+// Type: string
+//
+
+combined_hi_dead_time_name = "combined_hi_dead_time";
+
+///////////// combined_lo_dead_time_name //////////////
+//
+// Name of combined_lo_dead_time field in CalVals file.
+//
+//
+// Type: string
+//
+
+combined_lo_dead_time_name = "combined_lo_dead_time";
+
+///////////// cross_pol_dead_time_name ////////////////
+//
+// Name of cross_pol_dead_time field in CalVals file.
+//
+//
+// Type: string
+//
+
+cross_pol_dead_time_name = "cross_pol_dead_time";
+
+///////////// molecular_dead_time_name ////////////////
+//
+// Name of molecular_dead_time field in CalVals file.
+//
+//
+// Type: string
+//
+
+molecular_dead_time_name = "molecular_dead_time";
+
+///////////// molecular_count_median_filter_len ///////
+//
+// The molecular counts field is filtered using a median filter.
+//
+// This is done prior to computing the background subtraction. Set the 
+//   length to 1 for no filtering.
+//
+//
+// Type: int
+//
+
+molecular_count_median_filter_len = 1;
+
+///////////// bin_width_name //////////////////////////
+//
+// Name of binWidth field in CalVals file.
+//
+//
+// Type: string
+//
+
+bin_width_name = "binwidth";
+
+///////////// scan_adjustment_name ////////////////////
+//
+// Name of coefficient field in CalVals file.
+//
+//
+// Type: string
+//
+
+scan_adjustment_name = "i2_scan_adjustment";
+
+///////////// ngates_for_background_correction ////////
+//
+// The background correction uses data from the end of each ray.
+//
+// This is the number of gates used to compute the background value. We 
+//   compute the median value for these gates.
+//
+//
+// Type: int
+//
+
+ngates_for_background_correction = 100;
+
+///////////// nrays_for_background_correction /////////
+//
+// The number of rays for computing the background correction.
+//
+// We compute the minimum of the median values from the last n gates.
+//
+//
+// Type: int
+//
+
+nrays_for_background_correction = 20;
+
+///////////// optical_depth_reference_range_m /////////
+//
+// Range to gate for the reference optical depth.
+//
+// We use this to calibrate the optical depth. We compute a running mean 
+//   of the measured optical depth for this range, and then adjust the 
+//   measured values relative to the reference value.
+//
+//
+// Type: double
+//
+
+optical_depth_reference_range_m = 100;
+
+///////////// optical_depth_n_reference_obs ///////////
+//
+// Number of observations for computing the reference optical depth.
+//
+// We compute a running mean to determine the reference optical depth.
+//
+//
+// Type: int
+//
+
+optical_depth_n_reference_obs = 10;
+
+///////////// optical_depth_reference_value ///////////
+//
+// Optical depth at the reference range.
+//
+// See optical_depth_reference_range_m.
+//
+//
+// Type: double
+//
+
+optical_depth_reference_value = 0.4;
+
+///////////// optical_depth_median_filter_len /////////
+//
+// The optical depth field is filtered using a median filter.
+//
+// This is done prior to computing the extinction coefficient. Set the 
+//   length to 1 for no filtering.
+//
+//
+// Type: int
+//
+
+optical_depth_median_filter_len = 5;
+
+///////////// rate_censoring_threshold ////////////////
+//
+// Threshold the rate fields below this value.
+//
+// This helps to remove the noise from the system.
+//
+//
+// Type: double
+//
+
+rate_censoring_threshold = 1;
+
+///////////// apply_speckle_filter ////////////////////
+//
+// Option to apply a speckle filter to the output data.
+//
+// If the length of the good data, between gates with missing values, is 
+//   less than this, the data in between is set to missing.
+//
+//
+// Type: boolean
+//
+
+apply_speckle_filter = TRUE;
+
+///////////// speckle_filter_len //////////////////////
+//
+// The length of the speckle filter.
+//
+// If the length of the good data, between missing values, is less than 
+//   this, the data is set to missing.
+//
+//
+// Type: int
+//
+
+speckle_filter_len = 2;
+
+//======================================================================
+//
+// OUTPUT FMQ DETAILS.
+//
+// REALTIME_FMQ mode only.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// URL for output FMQ.
+//
+// The FMQ consists of 2 files, ??.buf and ??.stat.
+//
+//
+// Type: string
+//
+
+output_fmq_url = "/tmp/fmq/hsrl_moments";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+//
+// This is the total size of the output FMQ buffer.
+//
+//
+// Type: int
+//
+
+output_fmq_size = 10000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in the output FMQ.
+//
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+//
+//
+// Type: int
+//
+
+output_fmq_nslots = 500;
+
+///////////// output_fmq_compress /////////////////////
+//
+// Option to compress the FMQ data on write.
+//
+// This helps to keep the size of the queue entries small. Should only 
+//   be used for remote FMQs over slow networks.
+//
+//
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+///////////// nrays_for_params ////////////////////////
+//
+// Number of rays between sending params.
+//
+// The params will be sent when this number of rays have been written.
+//
+//
+// Type: int
+//
+
+nrays_for_params = 10;
+
+///////////// write_blocking //////////////////////////
+//
+// Option to set up the FMQ as blocking.
+//
+// If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ 
+//   becomes full, Test2Dsr will then block until there is space for more 
+//   data.
+//
+//
+// Type: boolean
+//
+
+write_blocking = FALSE;
+
+//======================================================================
+//
+// OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES.
+//
+//======================================================================
+ 
+///////////// version_override ////////////////////////
+//
+// Option to override the version global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the version attribute.
+//
+//
+// Type: string
+//
+
+version_override = "";
+
+///////////// title_override //////////////////////////
+//
+// Option to override the title global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the title attribute.
+//
+//
+// Type: string
+//
+
+title_override = "";
+
+///////////// institution_override ////////////////////
+//
+// Option to override the institution global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the institution attribute.
+//
+//
+// Type: string
+//
+
+institution_override = "";
+
+///////////// references_override /////////////////////
+//
+// Option to override the references global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the references attribute.
+//
+//
+// Type: string
+//
+
+references_override = "";
+
+///////////// source_override /////////////////////////
+//
+// Option to override the source global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the source attribute.
+//
+//
+// Type: string
+//
+
+source_override = "";
+
+///////////// history_override ////////////////////////
+//
+// Option to override the history global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the history attribute.
+//
+//
+// Type: string
+//
+
+history_override = "";
+
+///////////// comment_override ////////////////////////
+//
+// Option to override the comment global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the comment attribute.
+//
+//
+// Type: string
+//
+
+comment_override = "";
+
+///////////// author_override /////////////////////////
+//
+// Option to override the author global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the author attribute.
+//
+//
+// Type: string
+//
+
+author_override = "";
+
+//======================================================================
+//
+// OUTPUT OPTIONS FOR CfRadial FILES.
+//
+//======================================================================
+ 
+///////////// compression_level ///////////////////////
+//
+// Compression level for output, if compressed.
+//
+// Applies to netCDF only. Dorade compression is run-length encoding, 
+//   and has not options..
+//
+//
+// Type: int
+//
+
+compression_level = 4;
+
+///////////// override_instrument_name ////////////////
+//
+// Option to override the instrument name.
+//
+// If true, the name provided will be used.
+//
+//
+// Type: boolean
+//
+
+override_instrument_name = FALSE;
+
+///////////// instrument_name /////////////////////////
+//
+// Instrument name.
+//
+// See override_instrument_name.
+//
+//
+// Type: string
+//
+
+instrument_name = "unknown";
+
+///////////// override_site_name //////////////////////
+//
+// Option to override the site name.
+//
+// If true, the name provided will be used.
+//
+//
+// Type: boolean
+//
+
+override_site_name = FALSE;
+
+///////////// site_name ///////////////////////////////
+//
+// Site name.
+//
+// See override_site_name.
+//
+//
+// Type: string
+//
+
+site_name = "unknown";
+
+//======================================================================
+//
+// OUTPUT DIRECTORY AND FILE NAME.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+//
+// Files will be written to this directory.
+//
+//
+// Type: string
+//
+
+output_dir = "$(DATA_DIR)/cfradial/hsrl_moments2";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+//
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name. SPECIFY_FILE_NAME: file of this 
+//   name will be written to output_dir.
+//
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//     SPECIFY_FILE_NAME
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// output_filename_prefix //////////////////
+//
+// Optional prefix for output filename.
+//
+// If empty, the standard prefix will be used.
+//
+//
+// Type: string
+//
+
+output_filename_prefix = "";
+
+///////////// include_instrument_name_in_file_name ////
+//
+// Option to include the instrument name in the file name.
+//
+// Default is true. Only applies to CfRadial files. If true, the 
+//   instrument name will be included just before the volume number in the 
+//   output file name.
+//
+//
+// Type: boolean
+//
+
+include_instrument_name_in_file_name = TRUE;
+
+///////////// include_subsecs_in_file_name ////////////
+//
+// Option to include sub-seconds in date-time part of file name.
+//
+// Default is true. Only applies to CfRadial files. If true, the 
+//   millisecs of the start and end time will be included in the file 
+//   name.
+//
+//
+// Type: boolean
+//
+
+include_subsecs_in_file_name = TRUE;
+
+///////////// use_hyphen_in_file_name_datetime_part ///
+//
+// Option to use a hyphen between date and time in filename.
+//
+// Default is false. Only applies to CfRadial files. Normally an 
+//   underscore is used.
+//
+//
+// Type: boolean
+//
+
+use_hyphen_in_file_name_datetime_part = FALSE;
+
+///////////// output_filename /////////////////////////
+//
+// Name of output file.
+//
+// Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of 
+//   this name will be written to output_dir.
+//
+//
+// Type: string
+//
+
+output_filename = "cfradial.test.nc";
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+//
+// Path will be output_dir/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+//
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// write_latest_data_info //////////////////
+//
+// Option to write out _latest_data_info files.
+//
+// If true, the _latest_data_info files will be written after the 
+//   converted file is written.
+//
+//
+// Type: boolean
+//
+
+write_latest_data_info = TRUE;
+

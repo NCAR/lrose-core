@@ -327,6 +327,8 @@ private:
 
   RadxGeoref _geoCount;
   vector<double> _geoTime;
+  vector<Radx::si64> _geoUnitNum;
+  vector<Radx::si64> _geoUnitId;
   vector<double> _geoLatitude;
   vector<double> _geoLongitude;
   vector<double> _geoAltitudeMsl;
@@ -421,6 +423,8 @@ private:
                       vector<double> &vals, bool required = true);
   NcxxVar _readRayVar(NcxxGroup &group, NcxxDim &dim, const string &name, 
                       vector<int> &vals, bool required = true);
+  NcxxVar _readRayVar(NcxxGroup &group, NcxxDim &dim, const string &name, 
+                      vector<Radx::si64> &vals, bool required = true);
   NcxxVar _readRayVar(NcxxGroup &group, NcxxDim &dim, const string &name, 
                       vector<bool> &vals, bool required = true);
   
@@ -624,6 +628,8 @@ private:
   const static char* GEOREFS_APPLIED;
   const static char* GEOREF_CORRECTION;
   const static char* GEOREF_TIME;
+  const static char* GEOREF_UNIT_NUM;
+  const static char* GEOREF_UNIT_ID;
   const static char* GREGORIAN;
   const static char* GRID_MAPPING;
   const static char* GRID_MAPPING_NAME;
@@ -868,6 +874,8 @@ private:
   const static char* FOLLOW_MODE_LONG;
   const static char* FREQUENCY_LONG;
   const static char* GEOREF_TIME_LONG;
+  const static char* GEOREF_UNIT_NUM_LONG;
+  const static char* GEOREF_UNIT_ID_LONG;
   const static char* HEADING_CHANGE_RATE_LONG;
   const static char* HEADING_CORRECTION_LONG;
   const static char* HEADING_LONG;

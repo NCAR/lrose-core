@@ -190,6 +190,7 @@ private:
   double _computeSurfaceVel(const RadxRay &ray);
 
   int _handleIwg1(const char *buf, int bufLen);
+  int _writeDefaultLocation();
 
   double _decodeIwg1Field(const vector<string> &toks,
                           int tokNum);

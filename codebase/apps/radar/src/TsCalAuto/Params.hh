@@ -374,6 +374,11 @@ public:
 
   double siggen_delta_power;
 
+  tdrp_bool_t siggen_specify_power_sequence;
+
+  double *_siggen_power_sequence;
+  int siggen_power_sequence_n;
+
   tdrp_bool_t set_sig_freq;
 
   double siggen_frequency;
@@ -453,7 +458,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[61];
+  mutable TDRPtable _table[63];
 
   const char *_className;
 

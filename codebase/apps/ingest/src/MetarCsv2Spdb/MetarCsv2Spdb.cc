@@ -1037,6 +1037,9 @@ int MetarCsv2Spdb::fillMetarObject(const vector<string>& in, WxObs& out)
 		  if(temp[0] == '-') {
 			  temp[0] = 'M';
 		  }
+		  else if(temp[0] == '+') {
+			  temp[0] = 'P';
+		  }		  
 		  out.addWeatherType(WxObs::str2WxType(temp));
     }
 	  out.setMetarWx(in[_iPresentWeather]);

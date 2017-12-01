@@ -2,7 +2,7 @@
 
 ### Choose your install directory (prefix location)
 
-The default is: `/usr/local/lrose`
+The default is: `${HOME}/lrose`
 
 ### Check out, build and install **netcdf** support
 

@@ -719,6 +719,7 @@ int EdgeVol2Dsr::_processSweep()
   
   // initialize pointer to start of data buf
 
+  int iret = 0;
   int rayFieldNum = 0;
   for (size_t iray = 0; iray < _rayInfo.size(); iray++) {
     
@@ -834,7 +835,6 @@ int EdgeVol2Dsr::_processSweep()
     
     // write the message
     
-    int iret = 0;
     if (_rQueue.putDsMsg(msg, DsRadarMsg::RADAR_BEAM)) {
       iret = -1;
     }
@@ -849,7 +849,7 @@ int EdgeVol2Dsr::_processSweep()
   
   _rQueue.putEndOfTilt(_tiltNum, (time_t) _latestRayTime);
 
-  return 0;
+  return iret;
 
 }
 

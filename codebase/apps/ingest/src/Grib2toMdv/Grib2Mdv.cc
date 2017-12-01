@@ -108,69 +108,93 @@ Grib2Mdv::~Grib2Mdv()
 int Grib2Mdv::init(int nFiles, char** fileList, bool printVarList, 
 		   bool printsummary , bool printsections)
 {
-   if( nFiles > 0 ) {
-     vector< string > file_list;
-     for (int i = 0; i < nFiles; ++i)
-       file_list.push_back(fileList[i]);
-     
-     DsFileListTrigger *data_trigger = new DsFileListTrigger();
-     if (data_trigger->init(file_list) != 0)
-     {
-       cerr << "ERROR: Error initializing file list trigger" << endl;
-       return RI_FAILURE;
-     }
-     
-     _dataTrigger = data_trigger;
 
-     _inputSuffix = "";
-   }
-   else {
-     if (_paramsPtr->latest_data_info_avail) {
-       DsLdataTrigger *data_trigger = new DsLdataTrigger();
-       if (data_trigger->init(_paramsPtr->input_dir,
-                              _paramsPtr->max_input_data_age,
-                              PMU_auto_register) != 0)
-       {
-         cerr << "ERROR: Error initializing realtime trigger" << endl;
-         return RI_FAILURE;
-       }
-       _dataTrigger = data_trigger;
-       _inputSuffix = _paramsPtr->input_suffix;
-       if (strlen(_paramsPtr->input_substring) > 0)
-       {
-         _inputSubstrings.push_back(_paramsPtr->input_substring);
-       }
-       else
-       {
-         for (int i = 0; i < _paramsPtr->input_substrings_n; ++i)
-           _inputSubstrings.push_back(_paramsPtr->_input_substrings[i]);
-       }
-     } else {
-       DsInputDirTrigger *data_trigger = new DsInputDirTrigger();
-       if (data_trigger->init(_paramsPtr->input_dir,
-                              _paramsPtr->input_substring,
-                              !_paramsPtr->latest_file_only,
-                              PMU_auto_register,
-                              _paramsPtr->recursive_search,
-                              "",
-                              _paramsPtr->data_check_interval_secs) != 0)
-       {
-         cerr << "ERROR: Error initializing realtime trigger" << endl;
-         return RI_FAILURE;
-       }
-       _dataTrigger = data_trigger;
-       _inputSuffix = _paramsPtr->input_suffix;
-       if (strlen(_paramsPtr->input_substring) > 0)
-       {
-         _inputSubstrings.push_back(_paramsPtr->input_substring);
-       }
-       else
-       {
-         for (int i = 0; i < _paramsPtr->input_substrings_n; ++i)
-           _inputSubstrings.push_back(_paramsPtr->_input_substrings[i]);
-       }
-     }
-   }
+  if (nFiles > 0) {
+
+    // filelist mode
+    
+    vector< string > file_list;
+    for (int i = 0; i < nFiles; ++i)
+      file_list.push_back(fileList[i]);
+    
+    DsFileListTrigger *data_trigger = new DsFileListTrigger();
+    if (_paramsPtr->debug >= 2) {
+      data_trigger->setVerbose(true);
+    } else if (_paramsPtr->debug) {
+      data_trigger->setDebug(true);
+    }
+    if (data_trigger->init(file_list) != 0) {
+      cerr << "ERROR: Error initializing file list trigger" << endl;
+      return RI_FAILURE;
+    }
+    _dataTrigger = data_trigger;
+    _inputSuffix = "";
+    
+   } else {
+
+    if (_paramsPtr->latest_data_info_avail) {
+
+      // realtime with latest data info available
+
+      DsLdataTrigger *data_trigger = new DsLdataTrigger();
+      if (_paramsPtr->debug >= 2) {
+        data_trigger->setVerbose(true);
+      } else if (_paramsPtr->debug) {
+        data_trigger->setDebug(true);
+      }
+      if (data_trigger->init(_paramsPtr->input_dir,
+                             _paramsPtr->max_input_data_age,
+                             PMU_auto_register) != 0) {
+        cerr << "ERROR: Error initializing realtime trigger" << endl;
+        return RI_FAILURE;
+      }
+      _dataTrigger = data_trigger;
+      _inputSuffix = _paramsPtr->input_suffix;
+      if (strlen(_paramsPtr->input_substring) > 0) {
+        _inputSubstrings.push_back(_paramsPtr->input_substring);
+      } else {
+        for (int i = 0; i < _paramsPtr->input_substrings_n; ++i) {
+          if (strlen(_paramsPtr->_input_substrings[i]) > 0) {
+            _inputSubstrings.push_back(_paramsPtr->_input_substrings[i]);
+          }
+        }
+      }
+      
+    } else {
+
+      // realtime with no latest data info
+
+      DsInputDirTrigger *data_trigger = new DsInputDirTrigger();
+      if (_paramsPtr->debug >= 2) {
+        data_trigger->setVerbose(true);
+      } else if (_paramsPtr->debug) {
+        data_trigger->setDebug(true);
+      }
+      if (data_trigger->init(_paramsPtr->input_dir,
+                             _paramsPtr->input_substring,
+                             !_paramsPtr->latest_file_only,
+                             PMU_auto_register,
+                             _paramsPtr->recursive_search,
+                             "",
+                             _paramsPtr->data_check_interval_secs) != 0) {
+        cerr << "ERROR: Error initializing realtime trigger" << endl;
+        return RI_FAILURE;
+      }
+      _dataTrigger = data_trigger;
+      _inputSuffix = _paramsPtr->input_suffix;
+      if (strlen(_paramsPtr->input_substring) > 0) {
+        _inputSubstrings.push_back(_paramsPtr->input_substring);
+      } else {
+        for (int i = 0; i < _paramsPtr->input_substrings_n; ++i) {
+          if (strlen(_paramsPtr->_input_substrings[i]) > 0) {
+            _inputSubstrings.push_back(_paramsPtr->_input_substrings[i]);
+          }
+        }
+      }
+      
+    } // if (_paramsPtr->latest_data_info_avail) {
+   
+   } // if( nFiles > 0 ) {
 
    _Grib2File   = new Grib2::Grib2File ();
    _printVarList = printVarList;
@@ -231,7 +255,7 @@ int Grib2Mdv::getData()
           break;
         }
       }
-      if (!substring_found)
+      if (_inputSubstrings.size() > 0 && !substring_found)
         continue;
       
       if (!_inputSuffix.empty() &&

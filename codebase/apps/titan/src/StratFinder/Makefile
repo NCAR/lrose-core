@@ -38,7 +38,7 @@ TARGET_FILE = StratFinder
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lradar -lMdv -lRadx -leuclid \
+LOC_LIBS = -lradar -lMdv -lRadx -lNcxx -leuclid \
 	-ldsserver -ldidss -lrapformats -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread

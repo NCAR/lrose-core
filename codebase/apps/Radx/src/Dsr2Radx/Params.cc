@@ -1386,6 +1386,18 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'use_mean_to_compute_fixed_angles'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_mean_to_compute_fixed_angles");
+    tt->descr = tdrpStrDup("Option to use mean to compute the fixed angles. This is the default.");
+    tt->help = tdrpStrDup("If false, uses the median.");
+    tt->val_offset = (char *) &use_mean_to_compute_fixed_angles - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));

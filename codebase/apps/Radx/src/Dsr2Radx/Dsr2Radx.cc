@@ -728,11 +728,13 @@ int Dsr2Radx::_processVol()
 
   if (isRhi) {
     if (_params.compute_rhi_fixed_angles_from_measured_azimuth) {
-      _vol.computeSweepFixedAnglesFromRays();
+      _vol.computeFixedAnglesFromRays
+        (true, _params.use_mean_to_compute_fixed_angles);
     }
   } else{
     if (_params.compute_ppi_fixed_angles_from_measured_elevation) {
-      _vol.computeSweepFixedAnglesFromRays();
+      _vol.computeFixedAnglesFromRays
+        (true, _params.use_mean_to_compute_fixed_angles);
     }
   }
 
@@ -1351,6 +1353,8 @@ RadxRay *Dsr2Radx::_createInputRay(const DsRadarMsg &radarMsg,
     RadxGeoref georef;
     georef.setTimeSecs(dsGeoref.packet.time_secs_utc);
     georef.setNanoSecs(dsGeoref.packet.time_nano_secs);
+    georef.setUnitNum(dsGeoref.unit_num);
+    georef.setUnitId(dsGeoref.unit_id);
     georef.setLongitude(dsGeoref.longitude);
     georef.setLatitude(dsGeoref.latitude);
     georef.setAltitudeKmMsl(dsGeoref.altitude_msl_km);

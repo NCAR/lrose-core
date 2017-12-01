@@ -435,6 +435,7 @@ int RadxPartRain::_processFile(const string &filePath)
 
   // initialize for ZDR bias and self consistency results
 
+  _zdrInIceElev.clear();
   _zdrInIceResults.clear();
   _zdrInBraggResults.clear();
   _zdrmInIceResults.clear();
@@ -1007,6 +1008,12 @@ int RadxPartRain::_storeDerivedRay(ComputeThread *thread)
   
   // load ZDR bias results
 
+  const vector<double> &threadZdrInIceElev =
+    thread->getComputeEngine()->getZdrInIceElev();
+  for (size_t ii = 0; ii < threadZdrInIceElev.size(); ii++) {
+    _zdrInIceElev.push_back(threadZdrInIceElev[ii]);
+  }
+
   const vector<double> &threadZdrInIceResults =
     thread->getComputeEngine()->getZdrInIceResults();
   for (size_t ii = 0; ii < threadZdrInIceResults.size(); ii++) {
@@ -1050,55 +1057,72 @@ int RadxPartRain::_retrieveTempProfile()
   
 {
 
-  if (!_params.use_soundings_from_spdb) {
-    _tempProfile.clear();
-    return 0;
-  }
-
-  _tempProfile.setSoundingLocationName
-    (_params.sounding_location_name);
-  _tempProfile.setSoundingSearchTimeMarginSecs
-    (_params.sounding_search_time_margin_secs);
-  
-  _tempProfile.setCheckPressureRange
-    (_params.sounding_check_pressure_range);
-  _tempProfile.setSoundingRequiredMinPressureHpa
-    (_params.sounding_required_pressure_range_hpa.min_val);
-  _tempProfile.setSoundingRequiredMaxPressureHpa
-    (_params.sounding_required_pressure_range_hpa.max_val);
-  
-  _tempProfile.setCheckHeightRange
-    (_params.sounding_check_height_range);
-  _tempProfile.setSoundingRequiredMinHeightM
-    (_params.sounding_required_height_range_m.min_val);
-  _tempProfile.setSoundingRequiredMaxHeightM
-    (_params.sounding_required_height_range_m.max_val);
-  
-  _tempProfile.setCheckPressureMonotonicallyDecreasing
-    (_params.sounding_check_pressure_monotonically_decreasing);
-
-  _tempProfile.setHeightCorrectionKm
-    (_params.sounding_height_correction_km);
-
-  if (_params.sounding_use_wet_bulb_temp) {
-    _tempProfile.setUseWetBulbTemp(true);
-  }
-  
-  time_t retrievedTime;
+  time_t retrievedTime = time(NULL);
   vector<TempProfile::PointVal> retrievedProfile;
-  if (_tempProfile.getTempProfile(_params.sounding_spdb_url,
-                                  _vol.getStartTimeSecs(),
-                                  retrievedTime,
-                                  retrievedProfile)) {
-    cerr << "ERROR - RadxPartRain::_tempProfileInit" << endl;
-    cerr << "  Cannot retrive profile for time: "
-         << RadxTime::strm(_vol.getStartTimeSecs()) << endl;
-    cerr << "  url: " << _params.sounding_spdb_url << endl;
-    cerr << "  station name: " << _params.sounding_location_name << endl;
-    cerr << "  time margin secs: " << _params.sounding_search_time_margin_secs << endl;
-    return -1;
-  }
+  _tempProfile.clear();
+
+  if (_params.use_soundings_from_spdb) {
+    
+    _tempProfile.setSoundingLocationName
+      (_params.sounding_location_name);
+    _tempProfile.setSoundingSearchTimeMarginSecs
+      (_params.sounding_search_time_margin_secs);
+    
+    _tempProfile.setCheckPressureRange
+      (_params.sounding_check_pressure_range);
+    _tempProfile.setSoundingRequiredMinPressureHpa
+      (_params.sounding_required_pressure_range_hpa.min_val);
+    _tempProfile.setSoundingRequiredMaxPressureHpa
+      (_params.sounding_required_pressure_range_hpa.max_val);
+    
+    _tempProfile.setCheckHeightRange
+      (_params.sounding_check_height_range);
+    _tempProfile.setSoundingRequiredMinHeightM
+      (_params.sounding_required_height_range_m.min_val);
+    _tempProfile.setSoundingRequiredMaxHeightM
+      (_params.sounding_required_height_range_m.max_val);
+    
+    _tempProfile.setCheckPressureMonotonicallyDecreasing
+      (_params.sounding_check_pressure_monotonically_decreasing);
+    
+    _tempProfile.setHeightCorrectionKm
+      (_params.sounding_height_correction_km);
+    
+    if (_params.sounding_use_wet_bulb_temp) {
+      _tempProfile.setUseWetBulbTemp(true);
+    }
+    
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      _tempProfile.setDebug();
+    }
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      _tempProfile.setVerbose();
+    }
   
+    if (_tempProfile.getTempProfile(_params.sounding_spdb_url,
+                                    _vol.getStartTimeSecs(),
+                                    retrievedTime,
+                                    retrievedProfile)) {
+      cerr << "ERROR - RadxPartRain::_tempProfileInit" << endl;
+      cerr << "  Cannot retrive profile for time: "
+           << RadxTime::strm(_vol.getStartTimeSecs()) << endl;
+      cerr << "  url: " << _params.sounding_spdb_url << endl;
+      cerr << "  station name: " << _params.sounding_location_name << endl;
+      cerr << "  time margin secs: " << _params.sounding_search_time_margin_secs << endl;
+      return -1;
+    }
+
+  } else {
+    
+    // get profile from PID file
+
+    if (_tempProfile.getProfileForPid(_params.pid_thresholds_file_path,
+                                      retrievedProfile)) {
+      return -1;
+    }
+
+  }
+
   if (_params.debug) {
     cerr << "=====================================" << endl;
     cerr << "Got temp profile, URL: " << _params.sounding_spdb_url << endl;
@@ -1443,6 +1467,7 @@ void RadxPartRain::_saveZdrInIceToFile()
     cerr << "  " << strerror(errNum) << endl;
     return;
   }
+  _writeHeaderZdrInIce(appendFile);
   
   TaFile appendm; // closes when goes out of scope
   FILE *appendmFile;
@@ -1453,6 +1478,7 @@ void RadxPartRain::_saveZdrInIceToFile()
     cerr << "  " << strerror(errNum) << endl;
     return;
   }
+  _writeHeaderZdrInIce(appendmFile);
   
   TaFile vol; // closes when goes out of scope
   FILE *volFile;
@@ -1463,6 +1489,7 @@ void RadxPartRain::_saveZdrInIceToFile()
     cerr << "  " << strerror(errNum) << endl;
     return;
   }
+  _writeHeaderZdrInIce(volFile);
   
   TaFile volm; // closes when goes out of scope
   FILE *volmFile;
@@ -1473,23 +1500,58 @@ void RadxPartRain::_saveZdrInIceToFile()
     cerr << "  " << strerror(errNum) << endl;
     return;
   }
+  _writeHeaderZdrInIce(volmFile);
   
   // write to files
 
   for (size_t ii = 0; ii < _zdrInIceResults.size(); ii++) {
-    fprintf(appendFile, "%.4f\n", _zdrInIceResults[ii]);
-    fprintf(volFile, "%.4f\n", _zdrInIceResults[ii]);
+    fprintf(appendFile, "%.3f %.4f\n", _zdrInIceElev[ii], _zdrInIceResults[ii]);
+    fprintf(volFile, "%.3f %.4f\n", _zdrInIceElev[ii], _zdrInIceResults[ii]);
   }
 
   for (size_t ii = 0; ii < _zdrmInIceResults.size(); ii++) {
-    fprintf(appendmFile, "%.4f\n", _zdrmInIceResults[ii]);
-    fprintf(volmFile, "%.4f\n", _zdrmInIceResults[ii]);
+    fprintf(appendmFile, "%.3f %.4f\n", _zdrInIceElev[ii], _zdrmInIceResults[ii]);
+    fprintf(volmFile, "%.3f %.4f\n", _zdrInIceElev[ii], _zdrmInIceResults[ii]);
   }
 
   fflush(appendFile);
   fflush(appendmFile);
   fflush(volFile);
   fflush(volmFile);
+  
+}
+
+/////////////////////////////////////////////////////////////
+// write header to zdr in ice file
+// if the file is zero length
+
+void RadxPartRain::_writeHeaderZdrInIce(FILE *out)
+
+{
+
+  // is the file 0-length?
+
+  struct stat fstat;
+  bool fileIsNew = false;
+  if (ta_fstat(fileno(out), &fstat) == 0) {
+    if (fstat.st_size == 0) {
+      fileIsNew = true;
+    }
+  }
+
+  if (!fileIsNew) {
+    // file is not new, no need to add header
+    return;
+  }
+
+  fprintf(out, "# elev zdr\n");
+  fprintf(out, "#============================================\n");
+  fprintf(out, "# Table produced by RadxPartRain\n");
+  fprintf(out, "#------------ Table column list -------------\n");
+  fprintf(out, "#    col 000: elev\n");
+  fprintf(out, "#    col 001: zdr\n");
+  fprintf(out, "#--------------------------------------------\n");
+  fprintf(out, "#============================================\n");
   
 }
 

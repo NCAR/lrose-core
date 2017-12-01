@@ -38,6 +38,7 @@
 
 
 #include <Radx/RadxBuf.hh>
+#include <Radx/RadxTime.hh>
 #include <vector>
 
 ///////////////////////////////////////////////////////////////
@@ -58,13 +59,35 @@ public:
 
   void reset();
 
+  //////////////////////////////////////////////////////////////
+  /// \name Debugging:
+  //@{
+  
+  /// Set normal debugging on/off.
+  ///
+  /// If set on, basic debugging messages will be printed to stderr
+  /// during file operations.
+
+  void setDebug(bool state) { _debug = state; }
+
+  /// Set verbose debugging on/off.
+  ///
+  /// If set on, verbose debugging messages will be printed to stderr
+  /// during file operations.
+
+  void setVerbose(bool state) {
+    _verbose = state;
+    if (_verbose) _debug = true;
+  }
+
+  //@}
+
   void allocateSpace(unsigned int n);
 
   void addData(unsigned char value);
 
-  void transitionState(int n);
-
   double *decompressData();
+  float *decompressDataFl32();
 
   void createSweep();
 
@@ -75,24 +98,15 @@ public:
   void putMinute(double value);
   void putSecond(double value);
 
-  /*
-  setAntennaElevationDegrees(double value);
+  void printSweepData(ostream &out);
 
-  setNBinsAlongRadial(double value);
-
-  setRangeBinSizeMeters(double value);
-
-  setRangeBinOffsetMeters(double value);
-
-  setNAzimuths(double value);
-
-  setAntennaBeamAzimuthDegrees(double value);
-  */
+  bool _debug;
+  bool _verbose;
 
   typedef enum {rawData, other} ProductType;
-  typedef enum {CM, TV, DBZH, VRAD, TH, WRAD,  KDP, PHIDP, RHOHV,
-    OTHER} DataType;
-
+  enum DataType {CM, TV, DBZH, VRAD, TH, WRAD,  KDP, PHIDP, RHOHV,
+    OTHER};
+  /*
   typedef struct {
     int year;
     int month;
@@ -101,41 +115,43 @@ public:
     int minute;
     int second;
   } TimeStamp;
-
-  vector<TimeStamp> timeStampStack;
+  */
+  vector<RadxTime *> timeStampStack;
 
   RadxBuf compressedData; // dataBuffer;
 
   unsigned char *dataBuffer; // *compressedData; // [2*65]; // TODO: fix this
-  unsigned int nData = 0;
+  unsigned int nData;
   int nDataSegments;
   unsigned int maxData;
   unsigned int totalData;
 
-    TimeStamp startTime;
-    TimeStamp endTime;
-    double    antennaElevationDegrees;
-    int       nBinsAlongTheRadial;
-    double    rangeBinSizeMeters;
-    double    rangeBinOffsetMeters;
-    int       nAzimuths;
-    double    antennaBeamAzimuthDegrees;
+  string typeOfProduct;
+  RadxTime startTime;
+  RadxTime endTime;
+
 
   typedef struct {
-    DataType typeOfProduct;
-    double *data;
+    string typeOfProduct;
+    float *data;
   } ParameterData;
 
   typedef struct {
-    TimeStamp startTime;
-    TimeStamp endTime;
+    string typeOfProduct;
+    double *data;
+  } ParameterDataFl64;
+
+  typedef struct {
+    RadxTime *startTime;
+    RadxTime *endTime;
     double    antennaElevationDegrees;
-    int       nBinsAlongTheRadial;
+    size_t       nBinsAlongTheRadial;
     double    rangeBinSizeMeters;
     double    rangeBinOffsetMeters;
-    int       nAzimuths;
+    size_t       nAzimuths;
     double    antennaBeamAzimuthDegrees;
     vector<ParameterData> parameterData;
+    vector<ParameterDataFl64> parameterDataFl64;
 
   } SweepData;
 
@@ -159,6 +175,39 @@ public:
 
   ProductType productType;
   DataType    dataType;
+
+  //size_t getMaxBinsAlongTheRadial();
+
+  void setNBinsAlongTheRadial(size_t nBins);
+  size_t getNBinsAlongTheRadial(int sweepNumber);
+
+  void setAntennaElevationDegrees(double value);
+  double getAntennaElevationDegrees(int sweepNumber);
+
+  void setRangeBinSizeMeters(double value);
+  double getRangeBinSizeMeters(int sweepNumber);
+
+  void setRangeBinOffsetMeters(double value);
+  double getRangeBinOffsetMeters();
+
+  void setNAzimuths(size_t value);
+  size_t getNAzimuths();
+
+  void setAntennaBeamAzimuthDegrees(double value);
+  double getAntennaBeamAzimuthDegrees(int sweepNumber);
+
+private:
+
+  // all of these could potentially change, so lock them down
+  size_t nBinsAlongTheRadial;
+  double antennaElevationDegrees;
+  double rangeBinSizeMeters;
+  double rangeBinOffsetMeters;
+  size_t nAzimuths;
+  double antennaBeamAzimuthDegrees;
+
+  size_t _maxBinsAlongTheRadial;
+
 };
 #endif
 

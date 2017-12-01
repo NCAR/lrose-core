@@ -31,6 +31,8 @@ double sign(double a, double b)
 
 int rotated_grid_get_lat_lons(Grib2Nc::GridInfo gridInfo, float *rlon, float *rlat)
 {
+  if(rlat == NULL || rlon == NULL)
+    return 0;
   double rlat1 = gridInfo.minx;
   double rlon1 = gridInfo.miny;
   double rlat0 = gridInfo.proj_origin_lat;

@@ -53,6 +53,27 @@ using namespace std;
 ///////////////////////////////////////////////////////////////
 /// CLASS FOR BUFR IO OPERATIONS
 
+
+class DNode {
+
+public: 
+  enum DNodeDataType {INT, FLOAT, STRING, OTHER};
+
+    unsigned short des;
+    DNode *children;
+    DNodeDataType dataType;    
+    string somejunksvalue;
+    int ivalue;  // currently storing the number of repeats here
+    float fvalue;
+    unsigned short delayed_repeater;
+    DNode *next;
+
+
+  DNode();
+
+  ~DNode();
+};
+
 class BufrFile
 
 {
@@ -62,14 +83,35 @@ public:
   /// Constructor
   
   BufrFile();
+
+
   
   /// Destructor
   
   virtual ~BufrFile();
 
+
+  void setDebug(bool state);
+
+  /// Set verbose debugging on/off.
+  ///
+  void setVerbose(bool state); 
+
+  void setTablePath(char *path);
+
   //////////////////////////////////////////////////////////////
   /// \name File operations
   //@{
+
+  /// read the data for the field
+  /// 
+  void readThatField(string fileName,
+             string filePath,
+             time_t fileTime,
+             string fieldName,
+             string standardName,
+             string longName,
+             string units);
 
   /// open for reading
   /// Returns 0 on success, -1 on failure
@@ -90,11 +132,19 @@ public:
 
   int readSection0();
   int readSection1();
+  int readSection1_edition2();
+  int readSection1_edition4();
   int readDataDescriptors();
   int readDescriptorTables();
   int readData();
+  int readSection5();
 
-  int Print();
+  int print(ostream &out, bool printRays, bool printData);
+  void printSection0(ostream &out);
+  void printSection1(ostream &out);
+  void printSection2(ostream &out);
+  void printSection3(ostream &out);
+  void printSection4(ostream &out);
 
   /// close previously-opened file
 
@@ -103,19 +153,24 @@ public:
   double latitude;
   double longitude;
   double height;
-  int year;
-  int month;
-  int day;
+  int hdr_year;
+  int hdr_month;
+  int hdr_day;
   int hour;
   int minute;
 
-  int getNumberOfSweeps();
-  int getTimeDimension();
-  int getRangeDimension();
+  int WMOBlockNumber;
+  int WMOStationNumber;
+  string typeOfStationId;
+  string stationId;
 
-  int getNBinsAlongTheRadial();
+  size_t getNumberOfSweeps();
+  size_t getTimeDimension();
+  // size_t getMaxRangeDimension();
+
+  size_t getNBinsAlongTheRadial(int sweepNumber);
   double getRangeBinOffsetMeters();
-  double getRangeBinSizeMeters();
+  double getRangeBinSizeMeters(int sweepNumber);
 
   double getElevationForSweep(int sweepNumber);
   int getNAzimuthsForSweep(int sweepNumber);
@@ -124,29 +179,34 @@ public:
   double getStartTimeForSweep(int sweepNumber);
   double getEndTimeForSweep(int sweepNumber);
 
-  double *getDataForSweep(int sweepNumber);
+  time_t getEndUTime(int sweepNumber);
+  time_t getStartUTime(int sweepNumber);
+
+  float *getDataForSweepFl32(int sweepNumber);
+  double *getDataForSweepFl64(int sweepNumber);
+  string getTypeOfProductForSweep(int sweepNumber);
 
 private:
 
   bool StuffIt(string fieldName, double value);
-  Radx::ui32 ExtractIt(int nBits);
-  string ExtractText(int nBits);
-  void SkipIt(int nBits);
+  Radx::ui32 ExtractIt(unsigned int nBits);
+  string ExtractText(unsigned int nBits);
   double fastPow10(int n);
+  string _trim(const std::string& str,
+	       const std::string& whitespace = " \t");
   Radx::ui32 Apply(TableMapElement f);
   Radx::si32 ApplyNumeric(TableMapElement f);
+  Radx::fl32 ApplyNumericFloat(TableMapElement f);
   //  int TraverseOriginal(vector<unsigned short> descriptors);
   int TraverseNew(vector<unsigned short> descriptors);
   //int Traverse(int start, int length); //vector<unsigned short> descriptors);
-  Radx::ui32 NextNBitsAsInt32(int nbits);
   int ReplenishBuffer();
   bool NextBit();
+  void MoveToNextByteBoundary();
 
-
-  // Product90_243 product90_243;
   BufrProduct currentProduct;
-  //vector<int> repeaters;
-
+  char *_tablePath;
+  int _addBitsToDataWidth;
 
   //@}
 
@@ -203,14 +263,22 @@ private:
   Section0 _s0;
   Section1 _s1; 
   Radx::ui32 _numBytesRead;
+  /*
+  enum DNodeDataType {INT, FLOAT, STRING, OTHER};
 
   typedef struct node {
     unsigned short des;
     struct node *children;
-    //Radx::ui32 nRepeats;
+    DNodeDataType dataType;    
+    string somejunksvalue;
+    int ivalue;  // currently storing the number of repeats here
+    float fvalue;
     unsigned short delayed_repeater;
     struct node *next;
   } DNode;
+  */
+
+  string _tempStringValue;
 
   DNode *GTree;
   int _descend(DNode *tree);
@@ -218,6 +286,14 @@ private:
   void _deleteAfter(DNode *p);
   int moveChildren(DNode *parent, int howManySiblings);
   void printTree(DNode *tree, int level);
+  void prettyPrint(ostream &out, DNode *p, int level);
+  void prettyPrintLeaf(ostream &out, DNode *p, TableMapElement &element, int level);
+  void prettyPrintNode(ostream &out, DNode *p, int level);
+  void prettyPrintReplicator(ostream &out, DNode *p, int level);
+  void prettyPrintTree(ostream &out, DNode *tree, int level);
+  void printHeader();
+  void freeTree(DNode *tree);
+  int prettyPrintLevel;
 
 #define  MAX_BUFFER_SIZE_BYTES  2048
 
@@ -226,245 +302,23 @@ private:
   int currentBufferLengthBits;
   int currentBufferLengthBytes;
   int currentBufferIndexBits;
+  int nOctetsRead;
   //int currentBufferIndexBytes;
 
   std::vector<unsigned short> _descriptorsToProcess;
 
   TableMap tableMap;
 
-  bool _debug = false;
-  
-
-  //pushToRadxVol(double *realData, BufrProduct currentProduct);
-  
-/*
-  //////////////////////////////////////////////////////////////
-  /// \name Attributes
-  //@{
-   
-  /// add string global attribute
-  /// Returns 0 on success, -1 on failure
-
-  int addGlobAttr(const string &name, const string &val);
-
-  /// add int, float or double global attribute
-  /// Returns 0 on success, -1 on failure
-  
-  int addGlobAttr(const string &name, int val);
-  int addGlobAttr(const string &name, float val);
-  int addGlobAttr(const string &name, double val);
-
-  /// add int[], float[] or double[] global attribute
-  /// Returns 0 on success, -1 on failure
-  
-  int addGlobAttr(const string &name, int len, int *vals);
-  int addGlobAttr(const string &name, int len, float *vals);
-  int addGlobAttr(const string &name, int len, double *vals);
-
-  // read a global attribute
-  // Returns 0 on success, -1 on failure
-  
-  int readGlobAttr(const string &name, string &val);
-  int readGlobAttr(const string &name, int &val);
-  int readGlobAttr(const string &name, float &val);
-  int readGlobAttr(const string &name, double &val);
-
-  /// add attribute of various types
-  /// Returns 0 on success, -1 on failure
-
-  int addAttr(Nc3Var *var, const string &name, const string &val);
-  int addAttr(Nc3Var *var, const string &name, ncbyte val);
-  int addAttr(Nc3Var *var, const string &name, short val);
-  int addAttr(Nc3Var *var, const string &name, int val);
-  int addAttr(Nc3Var *var, const string &name, long val);
-  int addAttr(Nc3Var *var, const string &name, float val);
-  int addAttr(Nc3Var *var, const string &name, double val);
-
-  //@}
-
-  //////////////////////////////////////////////////////////////
-  /// \name dimensions
-  //@{
-  
-  int addDim(Nc3Dim* &dim, const char *name, int size);
-  int readDim(const string &name, Nc3Dim* &dim);
-
-  //@}
-
-  //////////////////////////////////////////////////////////////
-  /// \name variables
-  //@{
-  
-  /// Add scalar meta-data variable
-  /// Returns 0 on success, -1 on failure
-  
-  int addMetaVar(Nc3Var* &var, const string &name, 
-                 const string &standardName,
-                 const string &longName,
-                 Nc3Type ncType, 
-                 const string &units = "");
-  
-  // Add scalar meta-data variable
-  // Returns var on success, NULL on failure
-  
-  Nc3Var *addMetaVar(const string &name, 
-                    const string &standardName,
-                    const string &longName,
-                    Nc3Type ncType, 
-                    const string &units = "");
-  
-  /// Add 1-D array meta-data variable
-  /// Returns 0 on success, -1 on failure
-
-  int addMetaVar(Nc3Var* &var, const string &name, 
-                 const string &standardName,
-                 const string &longName,
-                 Nc3Type ncType, Nc3Dim *dim, 
-                 const string &units = "");
-  
-  // Add 1-D array meta-data variable
-  // Returns var on success, NULL on failure
-  
-  Nc3Var *addMetaVar(const string &name, 
-                    const string &standardName,
-                    const string &longName,
-                    Nc3Type ncType, 
-                    Nc3Dim *dim, 
-                    const string &units = "");
-
-  /// Add 2-D array meta-data variable
-  /// Returns 0 on success, -1 on failure
-  
-  int addMetaVar(Nc3Var* &var, const string &name, 
-                 const string &standardName,
-                 const string &longName,
-                 Nc3Type ncType, Nc3Dim *dim0, Nc3Dim *dim1, 
-                 const string &units = "");
-  
-  // Add 2-D array meta-data variable
-  // Returns var on success, NULL on failure
-  
-  Nc3Var *addMetaVar(const string &name,
-                    const string &standardName,
-                    const string &longName,
-                    Nc3Type ncType,
-                    Nc3Dim *dim0, Nc3Dim *dim1,
-                    const string &units = "");
-
-  /// read int variable, set var and val
-  /// Returns 0 on success, -1 on failure
-
-  int readIntVar(Nc3Var* &var, const string &name,
-                 int &val, int missingVal, bool required = true);
-  
-  /// read int variable, set val
-  /// Returns 0 on success, -1 on failure
-
-  int readIntVal(const string &name, int &val, 
-                 int missingVal, bool required = true);
-  
-  /// read float variable
-  /// Returns 0 on success, -1 on failure
-  
-  int readFloatVar(Nc3Var* &var, const string &name, float &val, 
-                   float missingVal, bool required = true);
-  
-  /// read float value
-  /// Returns 0 on success, -1 on failure
-  
-  int readFloatVal(const string &name, float &val,
-                   float missingVal, bool required = true);
-
-  /// read double variable
-  /// Returns 0 on success, -1 on failure
-  
-  int readDoubleVar(Nc3Var* &var, const string &name, double &val, 
-                    double missingVal, bool required = true);
-  
-  /// read double value
-  /// Returns 0 on success, -1 on failure
-  
-  int readDoubleVal(const string &name, double &val,
-                    double missingVal, bool required = true);
-
-  /// read a scalar string variable
-  /// Returns 0 on success, -1 on failure
-
-  int readStringVar(Nc3Var* &var, const string &name, string &val);
-  
-  /// write a scalar double variable
-  /// Returns 0 on success, -1 on failure
-
-  int writeVar(Nc3Var *var, double val);
-
-  /// write a scalar float variable
-  /// Returns 0 on success, -1 on failure
-  
-  int writeVar(Nc3Var *var, float val);
-
-  /// write a scalar int variable
-  /// Returns 0 on success, -1 on failure
-  
-  int writeVar(Nc3Var *var, int val);
-
-  /// write a 1-D vector variable
-  /// number of elements specified in dimension
-  /// Returns 0 on success, -1 on failure
-
-  int writeVar(Nc3Var *var, const Nc3Dim *dim, const void *data);
-
-  /// write a 1-D vector variable
-  /// number of elements specified in arguments
-  /// Returns 0 on success, -1 on failure
-  
-  int writeVar(Nc3Var *var, const Nc3Dim *dim, size_t count, 
-               const void *data);
-  
-  /// write a string variable
-  /// Returns 0 on success, -1 on failure
-
-  int writeStringVar(Nc3Var *var, const void *data);
-  
-  /// compress a variable
-
-  int compressVar(Nc3Var *var, int compressionLevel);
-
-  //@}
-
-  ///////////////////////////////
-  /// \name Strings from nc items
-  //@{
-  
-  /// convert type enum to strings
-
-  static string ncTypeToStr(Nc3Type nctype);
-
-  /// get string representation of component
-
-  static string asString(const Nc3TypedComponent *component, int index = 0);
-  
-  //@}
-
-  ////////////////////////
-  /// \name Handles:
-  //@{
+  bool _debug;
+  bool _verbose;
+  bool _very_verbose;
+  string _fieldName;
   
   /// Get the path in use after read or write
   
   string getPathInUse() const { return _pathInUse; }
   
-  /// Get the Nc format after a write
   
-  Nc3File::FileFormat getNc3FileFormat() const { return _ncFormat; }
-  
-  /// Get the Nc3File object
-  
-  Nc3File *getNc3File() { return _ncFile; }
-
-  /// Get the Nc3Error object
-  
-  Nc3Error *getNc3Error() { return _err; }
-
   //@}
 
   ////////////////////////
@@ -473,16 +327,16 @@ private:
   
   /// Clear error string.
   
-  void clearErrStr() { _errStr.clear(); }
+  void clearErrStr() { _errString.clear(); }
 
   /// Get the Error String.
   ///
   /// The contents are only meaningful if an error has returned.
   
-  string getErrStr() const { return _errStr; }
+  string getErrStr() const { return _errString; }
   
   //@}
-  */
+  
 protected:
 
 private:
@@ -497,12 +351,11 @@ private:
   
   FILE *_file;
   string _pathInUse;
+  bool _firstBufferReplenish;
 
-
-
-  //Nc3Error *_err;
-  //Nc3File::FileFormat _ncFormat;
-  /* 
+  // Error strings accumulate information and then 
+  // thrown as exceptions.
+  
   /// add integer value to error string, with label
   
   void _addErrInt(string label, int iarg,
@@ -517,11 +370,6 @@ private:
   
   void _addErrStr(string label, string strarg = "",
                   bool cr = true);
-  
-  // set fill value appropriately for the variable type
-  
-  void _setMetaFillvalue(Nc3Var *var);
-  */
 
 };
 #endif

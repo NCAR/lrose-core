@@ -646,16 +646,6 @@ public:
   
   void adjustSurSweepLimitsToFixedAzimuth(double azimuth);
   
-  /// Compute sweep fixed angles from ray data.
-  /// Also sets the fixed angle on the sweeps and rays.
-  ///
-  /// Normally the sweep angles are set using the scan strategy angles -
-  /// i.e., the theoretically perfect angles. This option allows you to
-  /// recompute the sweep angles using the measured elevation angles (in
-  /// PPI mode) or azimuth angles (in RHI mode).
-  
-  void computeSweepFixedAnglesFromRays();
-
   /// compute the geometry limits from rays
 
   void computeGeomLimitsFromRays(double &minElev,
@@ -663,6 +653,19 @@ public:
                                  double &minRange,
                                  double &maxRange);
   
+  /// Compute the fixed angle for each sweep from the rays.
+  /// Also sets the fixed angle on rays and sweeps.
+  ///
+  /// If useMean is true, computes using the mean
+  /// If useMean is false, uses the median
+  ///
+  /// If force is true, the angles will be computed for all sweeps.
+  /// If force is false, the angles will only be computed for
+  /// sweeps with a missing fixed angle.
+
+  void computeFixedAnglesFromRays(bool force = true, 
+                                  bool useMean = true);
+
   /// Compute sweep scan rates from ray data - in deg/sec.
   ///
   /// This is done using the angle information on the rays.
@@ -907,16 +910,6 @@ public:
   /// Also sets the fixed angle for the rays in the sweep
   
   void setFixedAngleDeg(int sweepNum, double fixedAngle);
-
-  /// Compute the fixed angle from the rays
-  /// Also sets the fixed angle on rays and sweeps
-  /// Uses the mean pointing angle to estimate the fixed angle
-  ///
-  /// If force is true, the angles will be computed for all sweeps.
-  /// If force is false, the angles will only be computed for
-  /// sweeps with a missing fixed angle.
-
-  void computeFixedAngleFromRays(bool force = true);
 
   /// combine rays from sweeps with common fixed angle and
   /// gate geometry, but with different fields
@@ -1642,6 +1635,20 @@ public:
 
   //@}
 
+  /// \name Serialization:
+  //@{
+
+  // serialize into a RadxMsg
+  
+  void serialize(RadxMsg &msg);
+  
+  // deserialize from a RadxMsg
+  // return 0 on success, -1 on failure
+
+  int deserialize(const RadxMsg &msg);
+
+  //@}
+  
 protected:
   
 private:
@@ -1815,6 +1822,64 @@ private:
 
   int _getTransIndex(const RadxSweep *sweep, double azimuth);
 
+  /////////////////////////////////////////////////
+  // serialization
+  /////////////////////////////////////////////////
+  
+  static const int _metaStringsPartId = 1;
+  static const int _metaNumbersPartId = 2;
+  static const int _sweepPartId = 3;
+  static const int _sweepsAsInFilePartId = 4;
+  static const int _raysPartId = 5;
+  static const int _rcalibPartId = 6;
+  static const int _cfactorsPartId = 7;
+  
+  // struct for metadata numbers in messages
+  // strings not included - they are passed as XML
+  
+  typedef struct {
+    
+    Radx::si64 startTimeSecs;
+    Radx::si64 endTimeSecs;
+    Radx::si64 startNanoSecs;
+    Radx::si64 endNanoSecs;
+    
+    Radx::fl64 spareFl64[12];
+  
+    Radx::si32 scanId;
+    Radx::si32 volNum;
+
+    Radx::si32 spareSi32[14];
+    
+  } msgMetaNumbers_t;
+
+  msgMetaNumbers_t _metaNumbers;
+  
+  /// convert metadata to XML
+  
+  void _loadMetaStringsToXml(string &xml, int level = 0) const;
+  
+  /// set metadata from XML
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaStringsFromXml(const char *xml, 
+                             size_t bufLen);
+
+  /// load meta numbers to message struct
+  
+  void _loadMetaNumbersToMsg();
+  
+  /// set the meta number data from the message struct
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                             size_t bufLen,
+                             bool swap);
+  
+  /// swap meta numbers
+  
+  static void _swapMetaNumbers(msgMetaNumbers_t &msgMetaNumbers);
+          
 };
 
 #endif

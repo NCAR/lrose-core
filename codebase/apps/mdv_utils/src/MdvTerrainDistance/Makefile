@@ -33,7 +33,7 @@ TARGET_FILE = MdvTerrainDistance
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -leuclid -ldsserver \
+LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
 	-ldidss -lrapformats -ltoolsa -ldataport \
 	$(NETCDF4_LIBS) -lbz2 -lz
 

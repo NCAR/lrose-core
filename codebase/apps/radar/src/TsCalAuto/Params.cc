@@ -767,6 +767,63 @@ using namespace std;
     tt->single_val.d = 5;
     tt++;
     
+    // Parameter 'siggen_specify_power_sequence'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("siggen_specify_power_sequence");
+    tt->descr = tdrpStrDup("Option to specify the power sequence to use in the cal.");
+    tt->help = tdrpStrDup("If true, the siggen_power_sequence will be used. If false, the power will start at siggen_max_power and decrease to siggen_min_power, in steps of siggen_delta_power.");
+    tt->val_offset = (char *) &siggen_specify_power_sequence - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'siggen_power_sequence'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("siggen_power_sequence");
+    tt->descr = tdrpStrDup("Min power for siggen signal (dBm)");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_siggen_power_sequence - &_start_;
+    tt->array_n_offset = (char *) &siggen_power_sequence_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(double);
+    tt->array_n = 27;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].d = 0;
+      tt->array_vals[1].d = -5;
+      tt->array_vals[2].d = -10;
+      tt->array_vals[3].d = -15;
+      tt->array_vals[4].d = -20;
+      tt->array_vals[5].d = -25;
+      tt->array_vals[6].d = -30;
+      tt->array_vals[7].d = -35;
+      tt->array_vals[8].d = -40;
+      tt->array_vals[9].d = -45;
+      tt->array_vals[10].d = -50;
+      tt->array_vals[11].d = -55;
+      tt->array_vals[12].d = -60;
+      tt->array_vals[13].d = -65;
+      tt->array_vals[14].d = -70;
+      tt->array_vals[15].d = -75;
+      tt->array_vals[16].d = -80;
+      tt->array_vals[17].d = -85;
+      tt->array_vals[18].d = -90;
+      tt->array_vals[19].d = -95;
+      tt->array_vals[20].d = -100;
+      tt->array_vals[21].d = -105;
+      tt->array_vals[22].d = -110;
+      tt->array_vals[23].d = -115;
+      tt->array_vals[24].d = -120;
+      tt->array_vals[25].d = -125;
+      tt->array_vals[26].d = -130;
+    tt++;
+    
     // Parameter 'set_sig_freq'
     // ctype is 'tdrp_bool_t'
     

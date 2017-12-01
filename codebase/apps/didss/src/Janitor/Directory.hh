@@ -39,7 +39,7 @@
  * \#include "Directory.hh" <BR>
  *
  * @author Niles Oien and Mike Dixon
- * @version $Id: Directory.hh,v 1.17 2016/04/01 22:01:53 dixon Exp $
+ * @version $Id: Directory.hh,v 1.18 2017/11/03 22:04:28 dixon Exp $
  * @see something
  */
 
@@ -201,7 +201,7 @@ private:
 
   string _progName;		/**< program name.				*/
   Params *_params;		/**< processing parameters.			*/
-  Delete _delete;
+  Delete *_delete;
   string _topDir;		/**< top of directory tree.			*/
   string _dirPath;		/**< current directory path.			*/
   bool _paramsAreLocal;		/**< flag local parameters for directory.	*/

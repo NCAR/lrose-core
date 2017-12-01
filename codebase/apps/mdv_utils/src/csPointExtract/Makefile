@@ -32,7 +32,7 @@ TARGET_FILE = csPointExtract
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lSpdb -lphysics \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lSpdb -lphysics \
 	-ldsserver -leuclid -ldidss -lcidd \
 	-lrapformats -ltoolsa -ldataport -ltdrp \
 	-lrapmath $(NETCDF4_LIBS) -lbz2 -lz \

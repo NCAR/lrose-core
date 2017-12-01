@@ -35,7 +35,7 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lrapmath -lMdv -lRadx -lrapformats \
+LOC_LIBS = -lrapmath -lMdv -lRadx -lNcxx -lrapformats \
 	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
 	-lbz2 -lz -lm
 

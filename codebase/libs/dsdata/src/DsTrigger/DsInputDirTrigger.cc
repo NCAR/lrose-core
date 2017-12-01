@@ -46,6 +46,7 @@
 
 #include <sys/types.h>
 #include <toolsa/file_io.h>
+#include <toolsa/uusleep.h>
 #include <unistd.h>
 
 #include <dsdata/DsInputDirTrigger.hh>
@@ -105,6 +106,7 @@ int DsInputDirTrigger::init(const string &input_dir,
 			    const string &exclude_substring,
                             const int check_interval_secs)
 {
+
   const string method_name = "DsInputDirTrigger::init()";
   
   _clearErrStr();
@@ -114,16 +116,20 @@ int DsInputDirTrigger::init(const string &input_dir,
 
   // Initialize the InputDir object
 
-  if (recurse)
-    _inputDir = new InputDirRecurse();
-  else
-    _inputDir = new InputDir();
+  if (recurse) {
+    _inputDir = new InputDirRecurse(input_dir,
+                                    file_substring,
+                                    exclude_substring,
+                                    process_old_files,
+                                    _debug, _verbose);
+  } else {
+    _inputDir = new InputDir(input_dir,
+                             file_substring,
+                             process_old_files,
+                             exclude_substring,
+                             _debug, _verbose);
+  }
   
-  _inputDir->setDirName(input_dir);
-  _inputDir->setFileSubstring(file_substring);
-  _inputDir->setExcludeSubstring(exclude_substring);
-  _inputDir->setProcessOldFiles(process_old_files);
-
   _heartbeatFunc = heartbeat_func;
   _checkIntervalSecs = check_interval_secs;
   
@@ -152,51 +158,67 @@ int DsInputDirTrigger::next()
 
   // Check for end of trigger data
 
-  if (endOfData())
-      return -1;
+  if (endOfData()) {
+    if (_debug) {
+      cerr << "DsInputDirTrigger, dir: " << _inputDir->getDirName() << endl;
+      cerr << "  end of data" << endl;
+    }
+    return -1;
+  }
 
   // Wait for the next available input file
 
   char *next_filename;
   
-  while ((next_filename = _inputDir->getNextFilename(0, -1)) == 0)
-  {
+  while ((next_filename = _inputDir->getNextFilename(0, -1)) == 0) {
 
-    //
     // if there isn't an assigned heartbeat function
     // and processing old files, assume user is
     // processing all files in "archive" mode,
     // so break out of loop and signal end of data
-    //
+
     if (_heartbeatFunc == 0 && _processOldFiles) {
       _endOfData = true;
+      if (_debug) {
+        cerr << "DsInputDirTrigger, dir: " << _inputDir->getDirName() << endl;
+        cerr << "  end of data" << endl;
+      }
       return -1;
-    }
-    else {
+    } else {
       _heartbeatFunc("Waiting for data");
     }
 
-    sleep(_checkIntervalSecs);
+    if (_debug) {
+      cerr << "DsInputDirTrigger, dir: " << _inputDir->getDirName() << endl;
+      cerr << "  sleeping secs: " << _checkIntervalSecs << endl;
+    }
+
+    umsleep(_checkIntervalSecs * 1000);
     
-    if ((next_filename = _inputDir->getNextFilename(1, -1)) != 0)
+    if ((next_filename = _inputDir->getNextFilename(1, -1)) != 0) {
       break;
-  }
+    }
+
+  } // while
   
   // Set the trigger info
 
   struct stat file_stat;
   
-  if (ta_stat(next_filename, &file_stat) != 0)
-  {
+  if (ta_stat(next_filename, &file_stat) != 0) {
     _errStr = "ERROR - " + method_name + "\n";
     _errStr += string("Unable to stat new data file: ") + next_filename + "\n";
-    
     return -1;
   }
   
   _triggerInfo.setFilePath(next_filename);
   _triggerInfo.setIssueTime(file_stat.st_mtime);
   
+  if (_debug) {
+    cerr << "DsInputDirTrigger, dir: " << _inputDir->getDirName() << endl;
+    cerr << "  found file: " << next_filename << endl;
+  }
+
   return 0;
 }
 

@@ -44,12 +44,14 @@ using namespace std;
 BscanWidget::BscanWidget(QWidget* parent,
                          const BscanManager &manager,
                          const Params &params,
-                         size_t n_fields) :
+                         const vector<DisplayField *> &fields,
+                         bool haveFilteredFields) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
         _params(params),
-        _nFields(n_fields),
+        _fields(fields),
+        _haveFilteredFields(haveFilteredFields),
         _selectedField(0),
         _backgroundBrush(QColor(_params.background_color)),
         _scaledLabel(ScaledLabel::DistanceEng),
@@ -96,10 +98,11 @@ BscanWidget::BscanWidget(QWidget* parent,
 
   // create the field renderers
   
-  for (size_t i = 0; i < _nFields; ++i) {
-    FieldRenderer *field = new FieldRenderer(_params, i);
-    field->createImage(width(), height());
-    _fieldRenderers.push_back(field);
+  for (size_t ii = 0; ii < _fields.size(); ii++) {
+    FieldRenderer *fieldRenderer = 
+      new FieldRenderer(_params, ii, *_fields[ii]);
+    fieldRenderer->createImage(width(), height());
+    _fieldRenderers.push_back(fieldRenderer);
   }
   
   // set up world views
@@ -348,6 +351,11 @@ void BscanWidget::selectVar(size_t index)
     return;
   }
   
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "=========>> BscanWidget::selectVar() for field index: " 
+         << index << endl;
+  }
+
   // If this field isn't being rendered in the background, render all of
   // the beams for it
 
@@ -930,7 +938,8 @@ void BscanWidget::_drawOverlays(QPainter &painter)
   // draw the color scale
 
   const DisplayField &field = _manager.getSelectedField();
-  _zoomWorld.drawColorScale(field.getColorMap(), painter);
+  _zoomWorld.drawColorScale(field.getColorMap(), painter,
+                            _params.bscan_axis_label_font_size);
   
   return;
   

@@ -32,7 +32,7 @@ TARGET_FILE = lassenNetcdf2Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -lnetcdf \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -lnetcdf \
 	-leuclid -ldidss -lcidd -lrapformats \
 	-ltoolsa -ldataport -ltdrp -lrapmath \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread \

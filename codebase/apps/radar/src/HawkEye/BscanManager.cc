@@ -200,7 +200,7 @@ void BscanManager::_setupWindows()
 
   // configure the BSCAN
 
-  _bscan = new BscanWidget(_bscanFrame, *this, _params, _fields.size());
+  _bscan = new BscanWidget(_bscanFrame, *this, _params, _fields, _haveFilteredFields);
   connect(this, SIGNAL(frameResized(const int, const int)),
 	  _bscan, SLOT(resize(const int, const int)));
   
@@ -709,7 +709,7 @@ void BscanManager::_createRangeAxisDialog()
     QLabel *surfaceRangeMarginLabel;
     _surfaceRangeMarginEdit =
       _addInputRow(_censorDataBelowSurfaceBox, censorBelowSurfaceLayout,
-                   "Surafce range margin (km)", text, 0, &surfaceRangeMarginLabel);
+                   "Surface range margin (km)", text, 0, &surfaceRangeMarginLabel);
     
     QFrame *acceptCancel = new QFrame;
     QHBoxLayout *horiz = new QHBoxLayout;
@@ -1501,6 +1501,8 @@ int BscanManager::_getArchiveData()
     }
     return -1;
   }
+
+  _platform = _vol.getPlatform();
 
   return 0;
 

@@ -1944,6 +1944,9 @@ void Cf2RadxFile::_addSweepGeorefs(RadxVol &sweepVol,
   RadxArray<float> fvals_;
   float *fvals = fvals_.alloc(nRays);
 
+  RadxArray<Radx::si64> lvals_;
+  Radx::si64 *lvals = lvals_.alloc(nRays);
+
   // create georeference subgroup
 
   NcxxGroup georefGroup = sweepGroup.addGroup(GEOREFERENCE);
@@ -2043,6 +2046,40 @@ void Cf2RadxFile::_addSweepGeorefs(RadxVol &sweepVol,
     altitudeAglVar.putVal(dvals);
 
     // conditionally add the georeference variables
+
+    // unit num
+
+    if (_geoCount.getUnitNum() > 0) {
+      NcxxVar var = 
+        georefGroup.addVar(GEOREF_UNIT_NUM, "", GEOREF_UNIT_NUM_LONG,
+                           ncxxInt64, timeDim, "", true);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          lvals[iray] = geo->getUnitNum();
+        } else {
+          lvals[iray] = 0;
+        }
+      }
+      var.putVal(lvals);
+    }
+
+    // unit id
+
+    if (_geoCount.getUnitId() > 0) {
+      NcxxVar var = 
+        georefGroup.addVar(GEOREF_UNIT_ID, "", GEOREF_UNIT_ID_LONG,
+                           ncxxInt64, timeDim, "", true);
+      for (size_t iray = 0; iray < rays.size(); iray++) {
+        const RadxGeoref *geo = rays[iray]->getGeoreference();
+        if (geo) {
+          lvals[iray] = geo->getUnitId();
+        } else {
+          lvals[iray] = 0;
+        }
+      }
+      var.putVal(lvals);
+    }
 
     // heading
 

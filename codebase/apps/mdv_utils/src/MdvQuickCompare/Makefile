@@ -32,7 +32,7 @@ TARGET_FILE = MdvQuickCompare
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -ldsserver -leuclid \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -leuclid \
 	-ldidss -lrapformats -ltoolsa -ldataport \
 	$(NETCDF4_LIBS) -lbz2 -lz
 
