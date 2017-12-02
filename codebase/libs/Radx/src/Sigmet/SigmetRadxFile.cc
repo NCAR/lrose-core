@@ -1059,16 +1059,19 @@ int SigmetRadxFile::_processSweep(bool doPrint, bool printData, ostream &out)
           for (int ii = 0; ii < nGates; ii++, sptr++, uptr++) {
             double ival = *uptr;
             double kdpVal = 0.0;
-            if (ival > 128) {
-              kdpVal = (0.25 * pow(600.0, ((ival - 129.0) / 126.0))) / _wavelengthCm;
-            } else if (ival < 128) {
-              kdpVal = (-0.25 * pow(600.0, ((127.0 - ival) / 126.0))) / _wavelengthCm;
-            }
-            int oval = (int) floor((kdpVal - bias) / scale + 0.5);
-            if (oval < 0) {
-              oval = 0;
-            } else if (oval > 65535) {
-              oval = 65535;
+            int oval = 0;
+            if (ival > 0) {
+              if (ival > 128) {
+                kdpVal = (0.25 * pow(600.0, ((ival - 129.0) / 126.0))) / _wavelengthCm;
+              } else if (ival < 128) {
+                kdpVal = (-0.25 * pow(600.0, ((127.0 - ival) / 126.0))) / _wavelengthCm;
+              }
+              oval = (int) floor((kdpVal - bias) / scale + 0.5);
+              if (oval < 0) {
+                oval = 0;
+              } else if (oval > 65535) {
+                oval = 65535;
+              }
             }
             *sptr = (Radx::si16) oval;
           }
@@ -1093,15 +1096,15 @@ int SigmetRadxFile::_processSweep(bool doPrint, bool printData, ostream &out)
           Radx::ui08 *uptr = (Radx::ui08 *) dataPtr;
           for (int ii = 0; ii < nGates; ii++, sptr++, uptr++) {
             double ival = *uptr;
-            if (ival < 1.0) {
-              ival = 1.0;
-            }
-            double dval = sqrt((ival - 1.0) / 253.0);
-            int oval = (int) floor((dval - bias) / scale + 0.5);
-            if (oval < 0) {
-              oval = 0;
-            } else if (oval > 65535) {
-              oval = 65535;
+            int oval = 0;
+            if (ival >= 1.0) {
+              double dval = sqrt((ival - 1.0) / 253.0);
+              oval = (int) floor((dval - bias) / scale + 0.5);
+              if (oval < 0) {
+                oval = 0;
+              } else if (oval > 65535) {
+                oval = 65535;
+              }
             }
             *sptr = (Radx::si16) oval;
           }
