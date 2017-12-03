@@ -75,16 +75,17 @@ public:
   // message types
 
   typedef enum {
-    RadxVolMsgType = 222001,
-    RadxPlatformMsgType = 222002,
-    RadxSweepMsgType = 222003,
-    RadxRayMsgType = 222004,
-    RadxGeorefMsgType = 222005,
-    RadxCfactorsMsgType = 222006,
-    RadxFieldMsgType = 222007,
-    RadxEventMsgType = 222008,
-    RadxRcalibMsgType = 222009
-  } RadxMsgType_t;
+    RadxVolMsg = 222001,
+    RadxPlatformMsg = 222002,
+    RadxSweepMsg = 222003,
+    RadxSweepAsInFileMsg = 222004,
+    RadxRayMsg = 222005,
+    RadxGeorefMsg = 222006,
+    RadxCfactorsMsg = 222007,
+    RadxFieldMsg = 222008,
+    RadxEventMsg = 222009,
+    RadxRcalibMsg = 222010
+  } RadxMsg_t;
   
   // forward declaration
 

@@ -398,7 +398,7 @@ void RadxPlatform::serialize(RadxMsg &msg)
   // init
 
   msg.clearAll();
-  msg.setMsgType(RadxMsg::RadxPlatformMsgType);
+  msg.setMsgType(RadxMsg::RadxPlatformMsg);
 
   // add metadata strings as xml part
   // include null at string end
@@ -442,7 +442,7 @@ int RadxPlatform::deserialize(const RadxMsg &msg)
 
   // check type
 
-  if (msg.getMsgType() != RadxMsg::RadxPlatformMsgType) {
+  if (msg.getMsgType() != RadxMsg::RadxPlatformMsg) {
     cerr << "=======================================" << endl;
     cerr << "ERROR - RadxPlatform::deserialize" << endl;
     cerr << "  incorrect message type" << endl;

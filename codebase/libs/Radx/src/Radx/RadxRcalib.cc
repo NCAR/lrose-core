@@ -840,7 +840,7 @@ void RadxRcalib::serialize(RadxMsg &msg)
   // init
   
   msg.clearAll();
-  msg.setMsgType(RadxMsg::RadxRcalibMsgType);
+  msg.setMsgType(RadxMsg::RadxRcalibMsg);
 
   // add metadata strings as xml part
   // include null at string end
@@ -870,7 +870,7 @@ int RadxRcalib::deserialize(const RadxMsg &msg)
 
   // check type
 
-  if (msg.getMsgType() != RadxMsg::RadxRcalibMsgType) {
+  if (msg.getMsgType() != RadxMsg::RadxRcalibMsg) {
     cerr << "=======================================" << endl;
     cerr << "ERROR - RadxRcalib::deserialize" << endl;
     cerr << "  incorrect message type" << endl;

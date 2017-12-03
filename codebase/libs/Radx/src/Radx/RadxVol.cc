@@ -250,12 +250,12 @@ void RadxVol::copyMeta(const RadxVol &rhs)
   _comment = rhs._comment;
   _statusXml = rhs._statusXml;
   
+  _volNum = rhs._volNum;
+
   _scanName = rhs._scanName;
   _scanId = rhs._scanId;
 
   _platform = rhs._platform;
-
-  _volNum = rhs._volNum;
 
   _sweepModeFromAnglesChecked = rhs._sweepModeFromAnglesChecked;
   _predomSweepModeFromAngles = rhs._predomSweepModeFromAngles;
@@ -396,13 +396,13 @@ void RadxVol::clear()
   _statusXml.clear();
   _userGlobAttr.clear();
 
+  _volNum = Radx::missingMetaInt;
+  
   _scanName.clear();
   _scanId = 0;
 
   _platform.clear();
 
-  _volNum = Radx::missingMetaInt;
-  
   _startTimeSecs = 0;
   _endTimeSecs = 0;
   _startNanoSecs = 0;
@@ -1555,12 +1555,12 @@ void RadxVol::print(ostream &out) const
   out << "  source: " << _source << endl;
   out << "  history: " << _history << endl;
   out << "  comment: " << _comment << endl;
+  out << "  volNum: " << _volNum << endl;
   out << "  scanName: " << _scanName << endl;
   out << "  scanId(VCP): " << _scanId << endl;
 
   _platform.print(out);
 
-  out << "  volNum: " << _volNum << endl;
   if (checkIsRhi()) {
     out << "  rhiMode? Y" << endl;
   } else {
@@ -6218,7 +6218,7 @@ void RadxVol::serialize(RadxMsg &msg)
   // init
   
   msg.clearAll();
-  msg.setMsgType(RadxMsg::RadxVolMsgType);
+  msg.setMsgType(RadxMsg::RadxVolMsg);
 
   // add metadata strings as xml part
   // include null at string end
@@ -6232,12 +6232,30 @@ void RadxVol::serialize(RadxMsg &msg)
   _loadMetaNumbersToMsg();
   msg.addPart(_metaNumbersPartId, &_metaNumbers, sizeof(msgMetaNumbers_t));
 
-  // add sweep parts if needed
+  // add platform
+  
+  RadxMsg platformMsg;
+  _platform.serialize(platformMsg);
+  msg.addPart(_platformPartId,
+              platformMsg.assembledMsg(), 
+              platformMsg.lengthAssembled());
+
+  // add sweeps
 
   for (size_t ii = 0; ii < _sweeps.size(); ii++) {
     RadxMsg sweepMsg;
     _sweeps[ii]->serialize(sweepMsg);
-    msg.addPart(_sweepPartId,
+    msg.addPart(_sweepsPartId,
+                sweepMsg.assembledMsg(), 
+                sweepMsg.lengthAssembled());
+  }
+  
+  // add sweeps as in file, if they exist
+
+  for (size_t ii = 0; ii < _sweepsAsInFile.size(); ii++) {
+    RadxMsg sweepMsg;
+    _sweepsAsInFile[ii]->serialize(sweepMsg, RadxMsg::RadxSweepAsInFileMsg);
+    msg.addPart(_sweepsPartId,
                 sweepMsg.assembledMsg(), 
                 sweepMsg.lengthAssembled());
   }
@@ -6262,7 +6280,7 @@ void RadxVol::serialize(RadxMsg &msg)
 
   //   // serialize
 
-  //   RadxMsg fieldMsg(RadxMsg::RadxFieldMsgType);
+  //   RadxMsg fieldMsg(RadxMsg::RadxFieldMsg);
   //   field->serialize(fieldMsg);
   //   fieldMsg.assemble();
   //   msg.addPart(_fieldPartId,
@@ -6287,7 +6305,7 @@ int RadxVol::deserialize(const RadxMsg &msg)
 
   // check type
 
-  if (msg.getMsgType() != RadxMsg::RadxRayMsgType) {
+  if (msg.getMsgType() != RadxMsg::RadxRayMsg) {
     cerr << "=======================================" << endl;
     cerr << "ERROR - RadxVol::deserialize" << endl;
     cerr << "  incorrect message type" << endl;
@@ -6344,13 +6362,13 @@ int RadxVol::deserialize(const RadxMsg &msg)
   // add sweeps
   
   clearSweeps();
-  size_t nSweeps = msg.partExists(_sweepPartId);
+  size_t nSweeps = msg.partExists(_sweepsPartId);
   for (size_t isweep = 0; isweep < nSweeps; isweep++) {
     
     // get sweep part
     
     const RadxMsg::Part *sweepPart =
-      msg.getPartByType(_sweepPartId, isweep);
+      msg.getPartByType(_sweepsPartId, isweep);
 
     // create a message from the sweep part
     
@@ -6373,6 +6391,41 @@ int RadxVol::deserialize(const RadxMsg &msg)
     // add the sweep
 
     addSweep(sweep);
+
+  } // isweep
+  
+  // add sweeps as in file
+  
+  clearSweepsAsInFile();
+  size_t nSweepsAsInFile = msg.partExists(_sweepsAsInFilePartId);
+  for (size_t isweep = 0; isweep < nSweepsAsInFile; isweep++) {
+    
+    // get sweep part
+    
+    const RadxMsg::Part *sweepPart =
+      msg.getPartByType(_sweepsAsInFilePartId, isweep);
+    
+    // create a message from the sweep part
+    
+    RadxMsg sweepMsg;
+    sweepMsg.disassemble(sweepPart->getBuf(), sweepPart->getLength());
+    
+    // create a sweep, dserialize from the message
+    
+    RadxSweep *sweep = new RadxSweep;
+    if (sweep->deserialize(sweepMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxRay::deserialize" << endl;
+      cerr << "  Adding sweep num: " << isweep << endl;
+      sweepMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      delete sweep;
+      return -1;
+    }
+
+    // add the sweep
+
+    addSweepAsInFile(sweep);
 
   } // isweep
 
@@ -6480,6 +6533,29 @@ void RadxVol::_loadMetaStringsToXml(string &xml, int level /* = 0 */)  const
   xml += RadxXml::writeString("statusXml", level + 1, _statusXml);
   xml += RadxXml::writeString("scanName", level + 1, _scanName);
   xml += RadxXml::writeString("pathInUse", level + 1, _pathInUse);
+  for (size_t ii = 0; ii < _userGlobAttr.size(); ii++) {
+    xml += RadxXml::writeStartTag("UserGlobAttr", level + 1);
+    xml += RadxXml::writeString("attrName", level + 2, _userGlobAttr[ii].name);
+    switch (_userGlobAttr[ii].attrType) {
+      case UserGlobAttr::ATTR_STRING:
+        xml += RadxXml::writeString("attrType", level + 2, "ATTR_STRING");
+        break;
+      case UserGlobAttr::ATTR_INT:
+        xml += RadxXml::writeString("attrType", level + 2, "ATTR_INT");
+        break;
+      case UserGlobAttr::ATTR_DOUBLE:
+        xml += RadxXml::writeString("attrType", level + 2, "ATTR_DOUBLE");
+        break;
+      case UserGlobAttr::ATTR_INT_ARRAY:
+        xml += RadxXml::writeString("attrType", level + 2, "ATTR_INT_ARRAY");
+        break;
+      case UserGlobAttr::ATTR_DOUBLE_ARRAY:
+        xml += RadxXml::writeString("attrType", level + 2, "ATTR_DOUBLE_ARRAY");
+        break;
+    }
+    xml += RadxXml::writeString("attrVal", level + 2, _userGlobAttr[ii].val);
+    xml += RadxXml::writeEndTag("UserGlobAttr", level + 1);
+  }
   xml += RadxXml::writeEndTag("RadxVol", level);
 }
 
@@ -6531,6 +6607,28 @@ int RadxVol::_setMetaStringsFromXml(const char *xml,
   RadxXml::readString(contents, "scanName", _scanName);
   RadxXml::readString(contents, "pathInUse", _pathInUse);
 
+  clearUserGlobAttr();
+  vector<string> userAttrXml;
+  if (RadxXml::readStringArray(contents, "UserGlobAttr", userAttrXml) == 0) {
+    for (size_t ii = 0; ii < userAttrXml.size(); ii++) {
+      string attrName, attrType, attrVal;
+      RadxXml::readString(userAttrXml[ii], "attrName", attrName);
+      RadxXml::readString(userAttrXml[ii], "attrType", attrType);
+      RadxXml::readString(userAttrXml[ii], "attrVal", attrVal);
+      if (attrType == "ATTR_INT") {
+        addUserGlobAttr(attrName, UserGlobAttr::ATTR_INT, attrVal);
+      } else if (attrType == "ATTR_DOUBLE") {
+        addUserGlobAttr(attrName, UserGlobAttr::ATTR_DOUBLE, attrVal);
+      } else if (attrType == "ATTR_INT_ARRAY") {
+        addUserGlobAttr(attrName, UserGlobAttr::ATTR_INT_ARRAY, attrVal);
+      } else if (attrType == "ATTR_DOUBLE_ARRAY") {
+        addUserGlobAttr(attrName, UserGlobAttr::ATTR_DOUBLE_ARRAY, attrVal);
+      } else {
+        addUserGlobAttr(attrName, UserGlobAttr::ATTR_STRING, attrVal);
+      }
+    }
+  }
+
   return 0;
 
 }
@@ -6555,8 +6653,8 @@ void RadxVol::_loadMetaNumbersToMsg()
 
   // set 32-bit values
 
-  _metaNumbers.scanId = _scanId;
   _metaNumbers.volNum = _volNum;
+  _metaNumbers.scanId = _scanId;
 
 }
 
@@ -6598,8 +6696,8 @@ int RadxVol::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
 
   // set 32-bit values
 
-  _scanId = _metaNumbers.scanId;
   _volNum = _metaNumbers.volNum;
+  _scanId = _metaNumbers.scanId;
 
   return 0;
 

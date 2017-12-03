@@ -271,7 +271,7 @@ void RadxGeoref::serialize(RadxMsg &msg)
   // init
 
   msg.clearAll();
-  msg.setMsgType(RadxMsg::RadxGeorefMsgType);
+  msg.setMsgType(RadxMsg::RadxGeorefMsg);
 
   // add metadata numbers
   
@@ -294,7 +294,7 @@ int RadxGeoref::deserialize(const RadxMsg &msg)
 
   // check type
 
-  if (msg.getMsgType() != RadxMsg::RadxGeorefMsgType) {
+  if (msg.getMsgType() != RadxMsg::RadxGeorefMsg) {
     cerr << "=======================================" << endl;
     cerr << "ERROR - RadxGeoref::deserialize" << endl;
     cerr << "  incorrect message type" << endl;

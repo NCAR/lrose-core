@@ -197,14 +197,15 @@ void RadxSweep::print(ostream &out) const
 /////////////////////////////////////////////////////////
 // serialize into a RadxMsg
 
-void RadxSweep::serialize(RadxMsg &msg)
+void RadxSweep::serialize(RadxMsg &msg,
+                          RadxMsg::RadxMsg_t msgType /* = RadxMsg::RadxSweepMsg */) 
   
 {
-
+  
   // init
 
   msg.clearAll();
-  msg.setMsgType(RadxMsg::RadxSweepMsgType);
+  msg.setMsgType(msgType);
 
   // add metadata numbers
   
@@ -227,7 +228,8 @@ int RadxSweep::deserialize(const RadxMsg &msg)
 
   // check type
 
-  if (msg.getMsgType() != RadxMsg::RadxSweepMsgType) {
+  if (msg.getMsgType() != RadxMsg::RadxSweepMsg &&
+      msg.getMsgType() != RadxMsg::RadxSweepAsInFileMsg) {
     cerr << "=======================================" << endl;
     cerr << "ERROR - RadxSweep::deserialize" << endl;
     cerr << "  incorrect message type" << endl;

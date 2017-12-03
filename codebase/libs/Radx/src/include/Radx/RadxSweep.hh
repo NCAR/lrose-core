@@ -271,8 +271,9 @@ public:
 
   // serialize into a RadxMsg
   
-  void serialize(RadxMsg &msg);
-  
+  void serialize(RadxMsg &msg,
+                 RadxMsg::RadxMsg_t msgType = RadxMsg::RadxSweepMsg);
+
   // deserialize from a RadxMsg
   // return 0 on success, -1 on failure
 
