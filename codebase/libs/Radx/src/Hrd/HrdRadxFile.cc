@@ -551,7 +551,7 @@ int HrdRadxFile::printNative(const string &path, ostream &out,
 
       // print main header
       
-      _print(_hdr, cout);
+      _print(_hdr, out);
 
     } else if (recType == 1) {
 
@@ -561,12 +561,12 @@ int HrdRadxFile::printNative(const string &path, ostream &out,
 
       // print data record header
       
-      _print(_dataRecHdr, cout);
+      _print(_dataRecHdr, out);
 
       // print the ray data
 
       if (printRays) {
-        _printRays(printData, cout);
+        _printRays(printData, out);
       }
 
     } else {

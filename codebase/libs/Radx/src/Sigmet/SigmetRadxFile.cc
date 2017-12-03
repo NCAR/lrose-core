@@ -511,7 +511,7 @@ int SigmetRadxFile::printNative(const string &path, ostream &out,
 
   // read in product and ingest headers
   
-  if (_readHeaders(true, cout)) {
+  if (_readHeaders(true, out)) {
     _addErrStr("ERROR - SigmetRadxFile::printNative");
     _addErrStr("  Reading header, file: ", _pathInUse);
     return -1;
@@ -526,8 +526,8 @@ int SigmetRadxFile::printNative(const string &path, ostream &out,
   int iret = 0;
   while (!feof(_file)) {
 
-    if (_readSweepData(true, cout) == 0) {
-      if (_processSweep(true, printData, cout)) {
+    if (_readSweepData(true, out) == 0) {
+      if (_processSweep(true, printData, out)) {
         _addErrStr("ERROR - SigmetRadxFile::printNative");
         _addErrStr("  Processing sweep, file: ", _pathInUse);
         iret = -1;

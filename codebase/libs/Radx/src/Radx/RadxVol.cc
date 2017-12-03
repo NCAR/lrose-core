@@ -1610,7 +1610,7 @@ void RadxVol::print(ostream &out) const
 
   if (_fields.size() > 0) {
     for (size_t ii = 0; ii < _fields.size(); ii++) {
-      _fields[ii]->print(cout);
+      _fields[ii]->print(out);
     }
   } else {
     for (size_t ifield = 0; ifield < fieldNames.size(); ifield++) {
@@ -1650,7 +1650,7 @@ void RadxVol::printWithRayMetaData(ostream &out) const
   // print rays
   
   for (size_t ii = 0; ii < _rays.size(); ii++) {
-    _rays[ii]->print(cout);
+    _rays[ii]->print(out);
   }
 
 }
@@ -1668,7 +1668,7 @@ void RadxVol::printRaySummary(ostream &out) const
 
   out << "================ RAY SUMMARY =================" << endl;
   for (size_t ii = 0; ii < _rays.size(); ii++) {
-    _rays[ii]->printSummary(cout);
+    _rays[ii]->printSummary(out);
   }
 
 }
@@ -1696,11 +1696,11 @@ void RadxVol::printWithFieldData(ostream &out) const
 
   if (raysHaveFields) {
     for (size_t ii = 0; ii < _rays.size(); ii++) {
-      _rays[ii]->printWithFieldData(cout);
+      _rays[ii]->printWithFieldData(out);
     }
   } else {
     for (size_t ii = 0; ii < _rays.size(); ii++) {
-      _rays[ii]->print(cout);
+      _rays[ii]->print(out);
     }
   }
 
