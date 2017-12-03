@@ -6236,6 +6236,7 @@ void RadxVol::serialize(RadxMsg &msg)
   
   RadxMsg platformMsg;
   _platform.serialize(platformMsg);
+  platformMsg.assemble();
   msg.addPart(_platformPartId,
               platformMsg.assembledMsg(), 
               platformMsg.lengthAssembled());
@@ -6257,6 +6258,7 @@ void RadxVol::serialize(RadxMsg &msg)
   for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
     RadxMsg sweepMsg;
     _sweeps[isweep]->serialize(sweepMsg);
+    sweepMsg.assemble();
     msg.addPart(_sweepPartId,
                 sweepMsg.assembledMsg(), 
                 sweepMsg.lengthAssembled());
@@ -6267,6 +6269,7 @@ void RadxVol::serialize(RadxMsg &msg)
   for (size_t isweep = 0; isweep < _sweepsAsInFile.size(); isweep++) {
     RadxMsg sweepMsg;
     _sweepsAsInFile[isweep]->serialize(sweepMsg, RadxMsg::RadxSweepAsInFileMsg);
+    sweepMsg.assemble();
     msg.addPart(_sweepAsInFilePartId,
                 sweepMsg.assembledMsg(), 
                 sweepMsg.lengthAssembled());
@@ -6289,6 +6292,7 @@ void RadxVol::serialize(RadxMsg &msg)
   if (_cfactors != NULL) {
     RadxMsg cfactorsMsg;
     _cfactors->serialize(cfactorsMsg);
+    cfactorsMsg.assemble();
     msg.addPart(_cfactorsPartId,
                 cfactorsMsg.assembledMsg(), 
                 cfactorsMsg.lengthAssembled());

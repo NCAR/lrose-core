@@ -425,10 +425,8 @@ int TestRadxMsg::_testRadxVol()
   ofstream afterFile(_params.text_path_after);
 
   if (_params.debug) {
-    cerr << "Writing 'before' fields to file: " << _params.text_path_before << endl;
-  }
-  if (_params.debug) {
-    cerr << "Writing 'after' fields to file: " << _params.text_path_after << endl;
+    cerr << "Writing 'before' volume to text file: "
+         << _params.text_path_before << " ....." << endl;
   }
   
   // print the contents of the before vol for comparison
@@ -437,11 +435,19 @@ int TestRadxMsg::_testRadxVol()
   
   // serialize the vol into a RadxMsg
   
+  if (_params.debug) {
+    cerr << "Serializing volume into msg ..... " << endl;
+  }
+  
   RadxMsg msg(RadxMsg::RadxVolMsg);
   _vol.serialize(msg);
     
   // deserialize from the RadxMsg
     
+  if (_params.debug) {
+    cerr << "Deserializing volume from msg ..... " << endl;
+  }
+  
   RadxVol copy;
   if (copy.deserialize(msg)) {
     cerr << "ERROR - TestRadxMsg::_testRadxVol()" << endl;
@@ -452,7 +458,12 @@ int TestRadxMsg::_testRadxVol()
     
   // print the contents of the after field for comparison
   
-  _vol.printWithFieldData(afterFile);
+  if (_params.debug) {
+    cerr << "Writing 'after' volume to text file: "
+         << _params.text_path_after << " ....." << endl;
+  }
+
+  copy.printWithFieldData(afterFile);
     
   return 0;
 
