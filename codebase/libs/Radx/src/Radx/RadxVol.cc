@@ -6323,7 +6323,7 @@ int RadxVol::deserialize(const RadxMsg &msg)
 
   // check type
 
-  if (msg.getMsgType() != RadxMsg::RadxRayMsg) {
+  if (msg.getMsgType() != RadxMsg::RadxVolMsg) {
     cerr << "=======================================" << endl;
     cerr << "ERROR - RadxVol::deserialize" << endl;
     cerr << "  incorrect message type" << endl;
