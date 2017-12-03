@@ -287,7 +287,7 @@ int TestRadxMsg::_testRadxFields()
       
       // serialize the field into a RadxMsg
       
-      RadxMsg msg(RadxMsg::RadxFieldMsgType);
+      RadxMsg msg(RadxMsg::RadxFieldMsg);
       field->serialize(msg);
       
       // deserialize the field from the RadxMsg
@@ -371,7 +371,7 @@ int TestRadxMsg::_testRadxRays()
       
     // serialize the ray into a RadxMsg
       
-    RadxMsg msg(RadxMsg::RadxRayMsgType);
+    RadxMsg msg(RadxMsg::RadxRayMsg);
     ray->serialize(msg);
     
     // deserialize the field from the RadxMsg
@@ -405,6 +405,55 @@ int TestRadxMsg::_testRadxRays()
 int TestRadxMsg::_testRadxVol()
 {
 
+  // open output files
+
+  if (ta_makedir_for_file(_params.text_path_before)) {
+    cerr << "ERROR - TestRadxMsg::_testRadxRays()" << endl;
+    cerr << "  Cannot make dir for before file: " 
+         << _params.text_path_before << endl;
+    return -1;
+  }
+  
+  if (ta_makedir_for_file(_params.text_path_after)) {
+    cerr << "ERROR - TestRadxMsg::_testRadxRays()" << endl;
+    cerr << "  Cannot make dir for after file: " 
+         << _params.text_path_after << endl;
+    return -1;
+  }
+
+  ofstream beforeFile(_params.text_path_before);
+  ofstream afterFile(_params.text_path_after);
+
+  if (_params.debug) {
+    cerr << "Writing 'before' fields to file: " << _params.text_path_before << endl;
+  }
+  if (_params.debug) {
+    cerr << "Writing 'after' fields to file: " << _params.text_path_after << endl;
+  }
+  
+  // print the contents of the before vol for comparison
+  
+  _vol.printWithFieldData(beforeFile);
+  
+  // serialize the vol into a RadxMsg
+  
+  RadxMsg msg(RadxMsg::RadxVolMsg);
+  _vol.serialize(msg);
+    
+  // deserialize from the RadxMsg
+    
+  RadxVol copy;
+  if (copy.deserialize(msg)) {
+    cerr << "ERROR - TestRadxMsg::_testRadxVol()" << endl;
+    cerr << "  Cannot deserialize vol from msg" << endl;
+    msg.printHeader(cerr, "  ");
+    return -1;
+  }
+    
+  // print the contents of the after field for comparison
+  
+  _vol.printWithFieldData(afterFile);
+    
   return 0;
 
 }
