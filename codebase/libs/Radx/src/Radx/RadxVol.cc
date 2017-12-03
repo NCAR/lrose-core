@@ -6240,26 +6240,50 @@ void RadxVol::serialize(RadxMsg &msg)
               platformMsg.assembledMsg(), 
               platformMsg.lengthAssembled());
 
+  // add calibrations
+  
+  for (size_t icalib = 0; icalib < _rcalibs.size(); icalib++) {
+    RadxRcalib *rcalib = _rcalibs[icalib];
+    RadxMsg rcalibMsg(RadxMsg::RadxRcalibMsg);
+    rcalib->serialize(rcalibMsg);
+    rcalibMsg.assemble();
+    msg.addPart(_rcalibPartId,
+                rcalibMsg.assembledMsg(), 
+                rcalibMsg.lengthAssembled());
+  }
+
   // add sweeps
 
-  for (size_t ii = 0; ii < _sweeps.size(); ii++) {
+  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
     RadxMsg sweepMsg;
-    _sweeps[ii]->serialize(sweepMsg);
-    msg.addPart(_sweepsPartId,
+    _sweeps[isweep]->serialize(sweepMsg);
+    msg.addPart(_sweepPartId,
                 sweepMsg.assembledMsg(), 
                 sweepMsg.lengthAssembled());
   }
   
   // add sweeps as in file, if they exist
-
-  for (size_t ii = 0; ii < _sweepsAsInFile.size(); ii++) {
+  
+  for (size_t isweep = 0; isweep < _sweepsAsInFile.size(); isweep++) {
     RadxMsg sweepMsg;
-    _sweepsAsInFile[ii]->serialize(sweepMsg, RadxMsg::RadxSweepAsInFileMsg);
-    msg.addPart(_sweepsPartId,
+    _sweepsAsInFile[isweep]->serialize(sweepMsg, RadxMsg::RadxSweepAsInFileMsg);
+    msg.addPart(_sweepAsInFilePartId,
                 sweepMsg.assembledMsg(), 
                 sweepMsg.lengthAssembled());
   }
   
+  // add rays
+  
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    RadxRay *ray = _rays[iray];
+    RadxMsg rayMsg(RadxMsg::RadxRayMsg);
+    ray->serialize(rayMsg);
+    rayMsg.assemble();
+    msg.addPart(_rayPartId,
+                rayMsg.assembledMsg(), 
+                rayMsg.lengthAssembled());
+  }
+
   // add correction factors part if needed
   
   if (_cfactors != NULL) {
@@ -6270,24 +6294,18 @@ void RadxVol::serialize(RadxMsg &msg)
                 cfactorsMsg.lengthAssembled());
   }
 
-  // // add field data
-
-  // for (size_t ii = 0; ii < _fields.size(); ii++) {
-
-  //   // get field
-
-  //   RadxField *field = _fields[ii];
-
-  //   // serialize
-
-  //   RadxMsg fieldMsg(RadxMsg::RadxFieldMsg);
-  //   field->serialize(fieldMsg);
-  //   fieldMsg.assemble();
-  //   msg.addPart(_fieldPartId,
-  //               fieldMsg.assembledMsg(), 
-  //               fieldMsg.lengthAssembled());
-
-  // } // ifield
+  // add fields if set
+  // normally the fields will be attached to the rays instead of the volume
+  
+  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
+    RadxField *field = _fields[ifield];
+    RadxMsg fieldMsg(RadxMsg::RadxFieldMsg);
+    field->serialize(fieldMsg);
+    fieldMsg.assemble();
+    msg.addPart(_fieldPartId,
+                fieldMsg.assembledMsg(), 
+                fieldMsg.lengthAssembled());
+  }
 
 }
 
@@ -6359,98 +6377,100 @@ int RadxVol::deserialize(const RadxMsg &msg)
     return -1;
   }
 
-  // add sweeps
+  // get platform
+  
+  const RadxMsg::Part *platformPart = msg.getPartByType(_platformPartId);
+  if (platformPart != NULL) {
+    RadxMsg platformMsg;
+    platformMsg.disassemble(platformPart->getBuf(), platformPart->getLength());
+    if (_platform.deserialize(platformMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxVol::deserialize" << endl;
+      cerr << "  Cannot dserialize platform" << endl;
+      platformMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      return -1;
+    }
+  }
+  
+  // get rcalibs if available
+  
+  clearRcalibs();
+  size_t nRcalibs = msg.partExists(_rcalibPartId);
+  for (size_t ircalib = 0; ircalib < nRcalibs; ircalib++) {
+    // get rcalib part
+    const RadxMsg::Part *rcalibPart =
+      msg.getPartByType(_rcalibPartId, ircalib);
+    // create a message from the rcalib part
+    RadxMsg rcalibMsg;
+    rcalibMsg.disassemble(rcalibPart->getBuf(), rcalibPart->getLength());
+    // create a rcalib, dserialize from the message
+    RadxRcalib *rcalib = new RadxRcalib;
+    if (rcalib->deserialize(rcalibMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxRay::deserialize" << endl;
+      cerr << "  Adding rcalib num: " << ircalib << endl;
+      rcalibMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      delete rcalib;
+      return -1;
+    }
+    // add the rcalib
+    _rcalibs.push_back(rcalib);
+  } // isweep
+  
+  // get sweeps
   
   clearSweeps();
-  size_t nSweeps = msg.partExists(_sweepsPartId);
+  size_t nSweeps = msg.partExists(_sweepPartId);
   for (size_t isweep = 0; isweep < nSweeps; isweep++) {
-    
     // get sweep part
-    
     const RadxMsg::Part *sweepPart =
-      msg.getPartByType(_sweepsPartId, isweep);
-
+      msg.getPartByType(_sweepPartId, isweep);
     // create a message from the sweep part
-    
     RadxMsg sweepMsg;
     sweepMsg.disassemble(sweepPart->getBuf(), sweepPart->getLength());
-    
     // create a sweep, dserialize from the message
-    
     RadxSweep *sweep = new RadxSweep;
     if (sweep->deserialize(sweepMsg)) {
       cerr << "=======================================" << endl;
       cerr << "ERROR - RadxRay::deserialize" << endl;
-      cerr << "  Adding sweep num: " << isweep << endl;
+      cerr << "  Adding sweep, num: " << isweep << endl;
       sweepMsg.printHeader(cerr, "  ");
       cerr << "=======================================" << endl;
       delete sweep;
       return -1;
     }
-
     // add the sweep
-
     addSweep(sweep);
-
   } // isweep
   
-  // add sweeps as in file
+  // get sweeps as in file
   
   clearSweepsAsInFile();
-  size_t nSweepsAsInFile = msg.partExists(_sweepsAsInFilePartId);
+  size_t nSweepsAsInFile = msg.partExists(_sweepAsInFilePartId);
   for (size_t isweep = 0; isweep < nSweepsAsInFile; isweep++) {
-    
     // get sweep part
-    
     const RadxMsg::Part *sweepPart =
-      msg.getPartByType(_sweepsAsInFilePartId, isweep);
-    
+      msg.getPartByType(_sweepAsInFilePartId, isweep);
     // create a message from the sweep part
-    
     RadxMsg sweepMsg;
     sweepMsg.disassemble(sweepPart->getBuf(), sweepPart->getLength());
-    
     // create a sweep, dserialize from the message
-    
     RadxSweep *sweep = new RadxSweep;
     if (sweep->deserialize(sweepMsg)) {
       cerr << "=======================================" << endl;
       cerr << "ERROR - RadxRay::deserialize" << endl;
-      cerr << "  Adding sweep num: " << isweep << endl;
+      cerr << "  Adding sweep as in file, num: " << isweep << endl;
       sweepMsg.printHeader(cerr, "  ");
       cerr << "=======================================" << endl;
       delete sweep;
       return -1;
     }
-
     // add the sweep
-
     addSweepAsInFile(sweep);
-
   } // isweep
 
-  // get georefs if available
-  
-  // const RadxMsg::Part *georefPart = msg.getPartByType(_georefPartId);
-  // if (georefPart != NULL) {
-  //   RadxMsg georefMsg;
-  //   georefMsg.disassemble(georefPart->getBuf(), georefPart->getLength());
-  //   if (_georef) {
-  //     delete _georef;
-  //   }
-  //   _georef = new RadxGeoref;
-  //   if (_georef->deserialize(georefMsg)) {
-  //     cerr << "=======================================" << endl;
-  //     cerr << "ERROR - RadxVol::deserialize" << endl;
-  //     cerr << "  Cannot dserialize georef" << endl;
-  //     georefMsg.printHeader(cerr, "  ");
-  //     cerr << "=======================================" << endl;
-  //     delete _georef;
-  //     _georef = NULL;
-  //     return -1;
-  //   }
-  // }
-  
   // get cfactors if available
   
   const RadxMsg::Part *cfactorsPart = msg.getPartByType(_cfactorsPartId);
@@ -6473,40 +6493,60 @@ int RadxVol::deserialize(const RadxMsg &msg)
     }
   }
   
-  // add fields
-
-  // size_t nFields = msg.partExists(_fieldPartId);
-  // for (size_t ifield = 0; ifield < nFields; ifield++) {
-    
-  //   // get field part
-
-  //   const RadxMsg::Part *fieldPart =
-  //     msg.getPartByType(_fieldPartId, ifield);
-
-  //   // create a message from the field part
-
-  //   RadxMsg fieldMsg;
-  //   fieldMsg.disassemble(fieldPart->getBuf(), fieldPart->getLength());
-    
-  //   // create a field, dserialize from the message
-    
-  //   RadxField *field = new RadxField;
-  //   if (field->deserialize(fieldMsg)) {
-  //     cerr << "=======================================" << endl;
-  //     cerr << "ERROR - RadxVol::deserialize" << endl;
-  //     cerr << "  Adding field num: " << ifield << endl;
-  //     fieldMsg.printHeader(cerr, "  ");
-  //     cerr << "=======================================" << endl;
-  //     delete field;
-  //     return -1;
-  //   }
-
-  //   // add the field
-
-  //   addField(field);
-
-  // } // ifield
-
+  // get rays
+  
+  clearRays();
+  size_t nRays = msg.partExists(_rayPartId);
+  for (size_t iray = 0; iray < nRays; iray++) {
+    // get ray part
+    const RadxMsg::Part *rayPart =
+      msg.getPartByType(_rayPartId, iray);
+    // create a message from the ray part
+    RadxMsg rayMsg;
+    rayMsg.disassemble(rayPart->getBuf(), rayPart->getLength());
+    // create a ray, dserialize from the message
+    RadxRay *ray = new RadxRay;
+    if (ray->deserialize(rayMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxRay::deserialize" << endl;
+      cerr << "  Adding ray, num: " << iray << endl;
+      rayMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      delete ray;
+      return -1;
+    }
+    // add the ray
+    addRay(ray);
+  } // iray
+  
+  // get fields
+  // normally this will not be active
+  // since the fields are normally included in the rays
+  
+  clearFields();
+  size_t nFields = msg.partExists(_fieldPartId);
+  for (size_t ifield = 0; ifield < nFields; ifield++) {
+    // get field part
+    const RadxMsg::Part *fieldPart =
+      msg.getPartByType(_fieldPartId, ifield);
+    // create a message from the field part
+    RadxMsg fieldMsg;
+    fieldMsg.disassemble(fieldPart->getBuf(), fieldPart->getLength());
+    // create a field, dserialize from the message
+    RadxField *field = new RadxField;
+    if (field->deserialize(fieldMsg)) {
+      cerr << "=======================================" << endl;
+      cerr << "ERROR - RadxField::deserialize" << endl;
+      cerr << "  Adding field, num: " << ifield << endl;
+      fieldMsg.printHeader(cerr, "  ");
+      cerr << "=======================================" << endl;
+      delete field;
+      return -1;
+    }
+    // add the field
+    addField(field);
+  } // ifield
+  
   return 0;
 
 }
@@ -6533,10 +6573,10 @@ void RadxVol::_loadMetaStringsToXml(string &xml, int level /* = 0 */)  const
   xml += RadxXml::writeString("statusXml", level + 1, _statusXml);
   xml += RadxXml::writeString("scanName", level + 1, _scanName);
   xml += RadxXml::writeString("pathInUse", level + 1, _pathInUse);
-  for (size_t ii = 0; ii < _userGlobAttr.size(); ii++) {
+  for (size_t iattr = 0; iattr < _userGlobAttr.size(); iattr++) {
     xml += RadxXml::writeStartTag("UserGlobAttr", level + 1);
-    xml += RadxXml::writeString("attrName", level + 2, _userGlobAttr[ii].name);
-    switch (_userGlobAttr[ii].attrType) {
+    xml += RadxXml::writeString("attrName", level + 2, _userGlobAttr[iattr].name);
+    switch (_userGlobAttr[iattr].attrType) {
       case UserGlobAttr::ATTR_STRING:
         xml += RadxXml::writeString("attrType", level + 2, "ATTR_STRING");
         break;
@@ -6553,7 +6593,7 @@ void RadxVol::_loadMetaStringsToXml(string &xml, int level /* = 0 */)  const
         xml += RadxXml::writeString("attrType", level + 2, "ATTR_DOUBLE_ARRAY");
         break;
     }
-    xml += RadxXml::writeString("attrVal", level + 2, _userGlobAttr[ii].val);
+    xml += RadxXml::writeString("attrVal", level + 2, _userGlobAttr[iattr].val);
     xml += RadxXml::writeEndTag("UserGlobAttr", level + 1);
   }
   xml += RadxXml::writeEndTag("RadxVol", level);
@@ -6610,11 +6650,11 @@ int RadxVol::_setMetaStringsFromXml(const char *xml,
   clearUserGlobAttr();
   vector<string> userAttrXml;
   if (RadxXml::readStringArray(contents, "UserGlobAttr", userAttrXml) == 0) {
-    for (size_t ii = 0; ii < userAttrXml.size(); ii++) {
+    for (size_t iattr = 0; iattr < userAttrXml.size(); iattr++) {
       string attrName, attrType, attrVal;
-      RadxXml::readString(userAttrXml[ii], "attrName", attrName);
-      RadxXml::readString(userAttrXml[ii], "attrType", attrType);
-      RadxXml::readString(userAttrXml[ii], "attrVal", attrVal);
+      RadxXml::readString(userAttrXml[iattr], "attrName", attrName);
+      RadxXml::readString(userAttrXml[iattr], "attrType", attrType);
+      RadxXml::readString(userAttrXml[iattr], "attrVal", attrVal);
       if (attrType == "ATTR_INT") {
         addUserGlobAttr(attrName, UserGlobAttr::ATTR_INT, attrVal);
       } else if (attrType == "ATTR_DOUBLE") {
@@ -6655,6 +6695,7 @@ void RadxVol::_loadMetaNumbersToMsg()
 
   _metaNumbers.volNum = _volNum;
   _metaNumbers.scanId = _scanId;
+  _metaNumbers.rayTimesIncrease = _rayTimesIncrease;
 
 }
 
@@ -6698,6 +6739,7 @@ int RadxVol::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
 
   _volNum = _metaNumbers.volNum;
   _scanId = _metaNumbers.scanId;
+  _rayTimesIncrease = _metaNumbers.rayTimesIncrease;
 
   return 0;
 
@@ -6709,5 +6751,5 @@ int RadxVol::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
 void RadxVol::_swapMetaNumbers(msgMetaNumbers_t &meta)
 {
   ByteOrder::swap64(&meta.startTimeSecs, 4 * sizeof(Radx::si64));
-  ByteOrder::swap32(&meta.scanId, 2 * sizeof(Radx::si32));
+  ByteOrder::swap32(&meta.scanId, 3 * sizeof(Radx::si32));
 }
