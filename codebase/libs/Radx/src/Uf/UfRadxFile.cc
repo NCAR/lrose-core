@@ -2502,7 +2502,7 @@ int UfRadxFile::printNative(const string &path, ostream &out,
     
     // print
     
-    _printRecord(cout, true, printData);
+    _printRecord(out, true, printData);
 
   } // while
   

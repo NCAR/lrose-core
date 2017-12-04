@@ -239,6 +239,10 @@ public:
     _userGlobAttr.push_back(attr);
   }
 
+  void clearUserGlobAttr() {
+    _userGlobAttr.clear();
+  }
+
   /// Set the scan strategy name, if available.
 
   inline void setScanName(const string &val) { _scanName = val; }
@@ -1718,18 +1722,14 @@ private:
 
   vector<UserGlobAttr> _userGlobAttr;
   
+  // volume number
+
+  int _volNum;
+
   // scan details
 
   string _scanName;
   int _scanId; // VCP
-
-  // platform parameters
-
-  RadxPlatform _platform;
-
-  // volume number
-
-  int _volNum;
 
   // predominant sweep mode for volume, by checking angles
   // surveillance, sector or rhi
@@ -1749,13 +1749,13 @@ private:
 
   bool _rayTimesIncrease;
 
-  // transitions
-
-  vector<bool> _transitionFlags;
-  
   // path in use - for reading/writing
   
   mutable string _pathInUse; ///< path in use
+
+  // platform parameters
+
+  RadxPlatform _platform;
 
   // sweeps
   
@@ -1765,27 +1765,34 @@ private:
   
   vector<RadxSweep *> _sweepsAsInFile;
 
-  // rays
-
-  vector<RadxRay *> _rays;
-
   // calibrations
 
   vector<RadxRcalib *> _rcalibs;
 
-  // fields
-  
-  vector<RadxField *> _fields;
+  // rays
+
+  vector<RadxRay *> _rays;
 
   // correction factors
 
   RadxCfactors *_cfactors;
 
+  // fields
+  
+  vector<RadxField *> _fields;
+
+  // transitions array used in removeTransitionRays()
+  // not required in serialization
+
+  vector<bool> _transitionFlags;
+  
   // pseudo RHIs
+  // not required in serialization
 
   vector<PseudoRhi *> _pseudoRhis;
 
   // searching for angle match between sweeps
+  // not required in serialization
 
   static const int _searchAngleN = 36000;
   static const double _searchAngleRes;
@@ -1828,11 +1835,13 @@ private:
   
   static const int _metaStringsPartId = 1;
   static const int _metaNumbersPartId = 2;
-  static const int _sweepPartId = 3;
-  static const int _sweepsAsInFilePartId = 4;
-  static const int _raysPartId = 5;
-  static const int _rcalibPartId = 6;
-  static const int _cfactorsPartId = 7;
+  static const int _platformPartId = 3;
+  static const int _sweepPartId = 4;
+  static const int _sweepAsInFilePartId = 5;
+  static const int _cfactorsPartId = 6;
+  static const int _rcalibPartId = 7;
+  static const int _rayPartId = 8;
+  static const int _fieldPartId = 9;
   
   // struct for metadata numbers in messages
   // strings not included - they are passed as XML
@@ -1846,10 +1855,11 @@ private:
     
     Radx::fl64 spareFl64[12];
   
-    Radx::si32 scanId;
     Radx::si32 volNum;
+    Radx::si32 scanId;
+    Radx::si32 rayTimesIncrease;
 
-    Radx::si32 spareSi32[14];
+    Radx::si32 spareSi32[13];
     
   } msgMetaNumbers_t;
 

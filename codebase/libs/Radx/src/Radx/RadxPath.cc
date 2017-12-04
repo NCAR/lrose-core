@@ -422,12 +422,12 @@ void RadxPath::compose()
 void RadxPath::print(ostream &out) const
 {
 
-  cout << "path: " << getPath() << endl;
-  cout << "delimiter: " << getDelimiter() << endl;
-  cout << "directory: " << getDirectory() << endl;
-  cout << "file: " << getFile() << endl;
-  cout << "base: " << getBase() << endl;
-  cout << "ext: " << getExt() << endl;
+  out << "path: " << getPath() << endl;
+  out << "delimiter: " << getDelimiter() << endl;
+  out << "directory: " << getDirectory() << endl;
+  out << "file: " << getFile() << endl;
+  out << "base: " << getBase() << endl;
+  out << "ext: " << getExt() << endl;
 
 }
 

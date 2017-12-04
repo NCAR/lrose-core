@@ -3269,7 +3269,7 @@ void RadxField::serialize(RadxMsg &msg)
   // init
 
   msg.clearAll();
-  msg.setMsgType(RadxMsg::RadxFieldMsgType);
+  msg.setMsgType(RadxMsg::RadxFieldMsg);
 
   // add metadata strings as xml part
   // include null at string end
@@ -3303,7 +3303,7 @@ int RadxField::deserialize(const RadxMsg &msg)
 
   // check type
 
-  if (msg.getMsgType() != RadxMsg::RadxFieldMsgType) {
+  if (msg.getMsgType() != RadxMsg::RadxFieldMsg) {
     cerr << "=======================================" << endl;
     cerr << "ERROR - RadxField::deserialize" << endl;
     cerr << "  incorrect message type" << endl;

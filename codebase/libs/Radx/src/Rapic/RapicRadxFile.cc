@@ -476,7 +476,7 @@ int RapicRadxFile::printNative(const string &path, ostream &out,
 
   // read in product and ingest headers
   
-  if (_printHeaders(cout)) {
+  if (_printHeaders(out)) {
     _addErrStr("ERROR - RapicRadxFile::printNative");
     _addErrStr("  Reading header, file: ", _pathInUse);
     return -1;
@@ -490,9 +490,9 @@ int RapicRadxFile::printNative(const string &path, ostream &out,
   
   while (!feof(_file)) {
 
-    if (_printSweepHeaders(cout) == 0) {
+    if (_printSweepHeaders(out) == 0) {
       if (_nFieldsRead > 0 && printData) {
-        if (_printSweepData(cout)) {
+        if (_printSweepData(out)) {
           _addErrStr("ERROR - RapicRadxFile::printNative");
           _addErrStr("  Processing sweep, file: ", _pathInUse);
           iret = -1;

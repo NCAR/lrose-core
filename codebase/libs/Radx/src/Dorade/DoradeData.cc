@@ -1362,11 +1362,11 @@ void DoradeData::print(const DoradeData::field_lidar_t &val, ostream &out)
   out << "  apd_gain: " << val.apd_gain << endl;
   out << "  transect: " << val.transect << endl;
   for (int ii = 0; ii < 10; ii++) {
-    cout << "derived_names[" << ii << "]: "
+    out << "derived_names[" << ii << "]: "
          << Radx::makeString(val.derived_names[ii], 12) << endl;
-    cout << "derived_units[" << ii << "]: "
+    out << "derived_units[" << ii << "]: "
          << Radx::makeString(val.derived_units[ii], 8) << endl;
-    cout << "temp_names[" << ii << "]: "
+    out << "temp_names[" << ii << "]: "
          << Radx::makeString(val.temp_names[ii], 12) << endl;
   }
   out << "===================================================" << endl;

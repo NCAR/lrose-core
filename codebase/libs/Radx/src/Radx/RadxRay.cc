@@ -1773,7 +1773,7 @@ void RadxRay::serialize(RadxMsg &msg)
   // init
 
   msg.clearAll();
-  msg.setMsgType(RadxMsg::RadxRayMsgType);
+  msg.setMsgType(RadxMsg::RadxRayMsg);
 
   // add metadata strings as xml part
   // include null at string end
@@ -1817,7 +1817,7 @@ void RadxRay::serialize(RadxMsg &msg)
 
     // serialize
 
-    RadxMsg fieldMsg(RadxMsg::RadxFieldMsgType);
+    RadxMsg fieldMsg(RadxMsg::RadxFieldMsg);
     field->serialize(fieldMsg);
     fieldMsg.assemble();
     msg.addPart(_fieldPartId,
@@ -1842,7 +1842,7 @@ int RadxRay::deserialize(const RadxMsg &msg)
 
   // check type
 
-  if (msg.getMsgType() != RadxMsg::RadxRayMsgType) {
+  if (msg.getMsgType() != RadxMsg::RadxRayMsg) {
     cerr << "=======================================" << endl;
     cerr << "ERROR - RadxRay::deserialize" << endl;
     cerr << "  incorrect message type" << endl;
