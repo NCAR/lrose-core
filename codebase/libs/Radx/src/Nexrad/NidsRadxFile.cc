@@ -58,7 +58,6 @@
 #include <algorithm>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <arpa/inet.h>
 #include <bzlib.h>
 using namespace std;
 

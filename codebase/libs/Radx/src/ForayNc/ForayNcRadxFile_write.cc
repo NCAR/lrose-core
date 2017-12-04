@@ -44,7 +44,13 @@
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxSweep.hh>
 #include <Radx/RadxPath.hh>
+#ifdef _MSC_VER
+#include <io.h>
+#include <process.h>
+#include <direct.h>
+#else
 #include <unistd.h>
+#endif
 #include <cstring>
 #include <cstdio>
 #include <cmath>

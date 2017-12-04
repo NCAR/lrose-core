@@ -257,7 +257,7 @@ public:
   ////////////////////////////////////////////////////
   /// Comment block - COMM
 
-  typedef struct comment {
+  typedef struct comment_t {
 
     char id[4];  /**< Comment descriptor identifier: ASCII
                   * characters "COMM" stand for Comment

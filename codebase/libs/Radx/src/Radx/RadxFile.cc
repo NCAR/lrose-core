@@ -63,12 +63,28 @@
 #include <Radx/RadxVol.hh>
 #include <Ncxx/Hdf5xx.hh>
 #include <Radx/RadxSweep.hh>
+#ifdef _MSC_VER
+#include <io.h>
+#include <process.h>
+#include <direct.h>
+#else
 #include <unistd.h>
+#endif
 #include <cstring>
 #include <cstdio>
 #include <sys/stat.h>
 #include <sys/time.h>
 using namespace std;
+
+#ifdef _MSC_VER
+// Replacement for POSIX mkdir. Ignore mode argument.
+#define S_IRWXU 0
+#define S_IRWXG 0
+#define S_IROTH 0
+#define S_IXOTH 0
+#define mkdir(D, M) _mkdir(D)
+#define getpid() _getpid()
+#endif
 
 const char *RadxFile::PATH_SEPARATOR = "/";
 

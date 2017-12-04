@@ -50,17 +50,27 @@
 #include <Radx/RadxRcalib.hh>
 #include <Radx/RadxStr.hh>
 #include <Radx/RadxReadDir.hh>
+#ifdef _WIN32
+#include <winsock2.h>
+#else
+#include <arpa/inet.h>
+#endif
 #include <cstring>
 #include <cstdio>
 #include <cmath>
 #include <cerrno>
+#ifdef _MSC_VER
+#include <io.h>
+#include <process.h>
+#include <direct.h>
+#else
 #include <unistd.h>
+#endif
 #include <dirent.h>
 #include <algorithm>
 #include <bzlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <arpa/inet.h>
 using namespace std;
 
 const double NexradRadxFile::_prtTable[5][8] =
