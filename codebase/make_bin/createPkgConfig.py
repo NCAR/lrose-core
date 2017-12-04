@@ -5,6 +5,8 @@ import sys
 import glob
 import re
 
+# TODO: need to write to lrose-config.ARCHITECTURE
+#       need to write to lrose-config.flags
 
 def write_dictionary(info):
     for key, value in info.iteritems():
@@ -17,13 +19,19 @@ def write_dictionary(info):
 
 def write_variables(variable_defs):
     for key_arch, value_defs in variable_defs.iteritems():
+        filename = 'lrose-config.' + key_arch
+        f = open(filename, 'w')
         print >> sys.stdout, "# architecture-" + key_arch
         for key, value2 in value_defs.iteritems():
             result = key + "="
             if (len(value2) > 0):
                 result += formatted(value2)                                     
-                print >> sys.stdout, result
-        print >> sys.stdout, " "
+                # print >> sys.stdout, result
+                f.write(result+'\n')
+        # print >> sys.stdout, " "
+        f.write('\nsource lrose-config.flags')
+        f.write('\nsource lrose-config.template')
+        f.close()
 
 
 def write_the_script(variables,idict_libs, idict_apps):

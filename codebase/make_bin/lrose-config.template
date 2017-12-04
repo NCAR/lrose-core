@@ -1,0 +1,127 @@
+#! /bin/sh
+#
+# This forms the basis for the nc-config utility, which tells you
+# various things about the netCDF installation. This code was
+# contributed by netCDF user Arlindo DaSilva. Thanks Arlindo!
+
+# --- insert variable definitions above ^ ---
+usage()
+{
+    cat <<EOF
+Usage: lrose-config [OPTION]
+
+Available values for OPTION include:
+
+  --help        display this help message and exit
+  --all         display all options
+  --cc          C compiler
+  --cflags      pre-processor and compiler flags
+  --has-logging whether logging is enabled with --enable-logging.
+  --libs        library linking information for lrose
+  --prefix      Install prefix
+  --includedir  Include directory
+  --libdir      Library directory
+  --version     Library version
+
+EOF
+
+all()
+{
+        echo
+        echo "This $version has been built with the following features: "
+        echo
+        echo "  --cc        -> $cc"
+        echo "  --cflags    -> $cflags"
+        echo "  --libs      -> $libs"
+        echo
+        echo "  --cxx       -> $cxx"
+
+        echo "  --cxxflags  -> $cxxflags"
+        echo "  --cxxlibs   -> $cxxlibs"
+        echo
+
+        echo "  --has-logging-> $has_logging"
+	echo
+        echo "  --prefix    -> $prefix"
+        echo "  --includedir-> $includedir"
+        echo "  --libdir    -> $libdir"
+        echo "  --version   -> $version"
+        echo
+}
+
+if test $# -eq 0; then
+    usage 1
+fi
+
+while test $# -gt 0; do
+    case "$1" in
+    # this deals with options in the style
+    # --option=value and extracts the value part
+    # [not currently used]
+    -*=*) value=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+    *) value= ;;
+    esac
+
+    case "$1" in
+
+    --help)
+	usage 0
+	;;
+
+    --all)
+	all
+	;;
+
+    --cc)
+	echo $cc
+	;;
+
+    --cflags)
+	echo $cflags
+	;;
+
+    --has-logging)
+        echo $has_logging
+        ;;
+
+     --libs)
+       	echo $libs
+       	;;
+
+    --prefix)
+       	echo "${prefix}"
+       	;;
+
+    --includedir)
+       	echo "${includedir}"
+       	;;
+
+    --libdir)
+       	echo "${libdir}"
+       	;;
+
+    --version)
+	echo $version
+	;;
+
+    --cxx)
+	echo $cxx
+	;;
+
+    --cxxflags)
+	echo $cxxflags
+	;;
+
+    --cxxlibs)
+	echo $cxxlibs
+	;;
+
+    *)
+        echo "unknown option: $1"
+	    usage 1
+	    ;;
+    esac
+    shift
+done
+
+exit 0
