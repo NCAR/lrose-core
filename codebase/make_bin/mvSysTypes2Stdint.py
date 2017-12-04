@@ -11,6 +11,8 @@ import sys
 import subprocess
 from optparse import OptionParser
 from datetime import datetime
+import time
+import math
 
 def main():
 
@@ -89,7 +91,7 @@ def processDir(topDir):
         
             # Print file attributes
             
-            print('\t{:15.15s}{:8d} {:2s} {:18s}'.format(file, fsize, unit, mtime))
+            print('\t{:15.15s}{:8d} {:2s} {:18s}'.format(file, int(fsize), unit, mtime))
             file_count += 1
 
     # Print total files and directory count
