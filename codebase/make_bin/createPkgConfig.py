@@ -1,26 +1,49 @@
+#!/usr/bin/env python
 
+#===========================================================================
+#
+# create and install pkg-config file
+#
+#===========================================================================
 
 import os
 import sys
 import glob
 import re
 
-# TODO: need to write to lrose-config.ARCHITECTURE
-#       need to write to lrose-config.flags
 
-def write_dictionary(info):
+# write to lrose-config.flags 
+def write_dictionary(info, mode):
+    filename = 'lrose-config.flags'
+    f = open(filename, mode)
     for key, value in info.iteritems():
-        print >> sys.stdout, "#" + key 
+        f.write("#" + key + "\n") 
         for key2, value2 in value.iteritems():
             result = "   " + key + '_' + key2 + '='
             if (len(value2) > 0):
                 result += formatted(value2)
-            print >> sys.stdout, result
+            f.write(result + "\n")
+    f.close()
 
+# write to lrose-config.ARCHITECTURE
 def write_variables(variable_defs):
     for key_arch, value_defs in variable_defs.iteritems():
         filename = 'lrose-config.' + key_arch
         f = open(filename, 'w')
+        f.write("#! /bin/sh\n")
+        install_dir = os.environ['LROSE_INSTALL_DIR']
+        core_dir = os.environ['LROSE_CORE_DIR']
+        f.write("prefix=" + prefix)
+
+#prefix=/h/eol/brenda/lrose
+#exec_prefix=${prefix}
+#libdir=${exec_prefix}/lib
+#includedir=${prefix}/include
+
+#cc="gcc"
+#cflags="-I${includedir} -I/h/eol/brenda/lrose/include"
+#libs="-L${libdir} -lnetcdf"
+
         print >> sys.stdout, "# architecture-" + key_arch
         for key, value2 in value_defs.iteritems():
             result = key + "="
@@ -35,13 +58,11 @@ def write_variables(variable_defs):
 
 
 def write_the_script(variables,idict_libs, idict_apps):
-# how to do this?
-# write output to files that are "included" in the shell script framwork?
-# write the entire file and keep the template as strings in python file?
-    print >> sys.stdout, "#! /bin/sh"
+# write output to files that are "included" in the shell script framwork
+# write the entire file and keep the template as strings in python file? No.
     write_variables(variable_defs)  # write to separate files based on architecture
-    write_dictionary(idict_libs)    # write to one output file
-    write_dictionary(idict_apps)
+    write_dictionary(idict_libs, "w")    # write to one output file
+    write_dictionary(idict_apps, "a")
 
 # create a dictionary with keys of target architecture and
 #                          values that are dictionaries with keys that are variable names
