@@ -105,7 +105,7 @@ public:
 	    _nTiles == t._nTiles &&
 	    _nTilesX == t._nTilesX &&
 	    _nTilesY == t._nTilesY &&
-	    _motherSubset == _motherSubset &&
+	    _motherSubset == t._motherSubset &&
 	    _motherMinX == t._motherMinX &&
 	    _motherMaxX == t._motherMaxX &&
 	    _motherMinY == t._motherMinY &&
