@@ -203,6 +203,7 @@ fi
 
 cd $codebaseDir
 ./make_bin/createPkgConfig.py ${prefix}
+cp $codebaseDir/make_bin/lrose-config.template ${prefix}/bin
 
 # Checking the build
 # ------------------

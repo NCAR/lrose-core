@@ -1,4 +1,3 @@
-#! /bin/sh
 #
 # This forms the basis for the nc-config utility, which tells you
 # various things about the netCDF installation. This code was
@@ -24,6 +23,7 @@ Available values for OPTION include:
   --version     Library version
 
 EOF
+}
 
 all()
 {
@@ -53,14 +53,9 @@ if test $# -eq 0; then
     usage 1
 fi
 
+
+
 while test $# -gt 0; do
-    case "$1" in
-    # this deals with options in the style
-    # --option=value and extracts the value part
-    # [not currently used]
-    -*=*) value=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
-    *) value= ;;
-    esac
 
     case "$1" in
 
@@ -72,54 +67,18 @@ while test $# -gt 0; do
 	all
 	;;
 
-    --cc)
-	echo $cc
-	;;
-
-    --cflags)
-	echo $cflags
-	;;
-
-    --has-logging)
-        echo $has_logging
-        ;;
-
-     --libs)
-       	echo $libs
-       	;;
-
-    --prefix)
-       	echo "${prefix}"
-       	;;
-
-    --includedir)
-       	echo "${includedir}"
-       	;;
-
-    --libdir)
-       	echo "${libdir}"
-       	;;
-
-    --version)
-	echo $version
-	;;
-
-    --cxx)
-	echo $cxx
-	;;
-
-    --cxxflags)
-	echo $cxxflags
-	;;
-
-    --cxxlibs)
-	echo $cxxlibs
-	;;
-
     *)
-        echo "unknown option: $1"
-	    usage 1
-	    ;;
+        jkl=$1
+        request="${jkl/--/}"
+        value=${!request}
+        if [ -z "$value" ] 
+        then
+            echo "unknown option: $1"
+            usage 1
+        else
+            echo $value
+        fi
+	;;
     esac
     shift
 done

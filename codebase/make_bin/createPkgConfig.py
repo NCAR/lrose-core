@@ -13,8 +13,33 @@ import re
 
 
 # write to lrose-config.flags 
+def write_common_flags(lib_info, app_info):
+    install_dir = os.environ['LROSE_INSTALL_DIR']
+    core_dir = os.environ['LROSE_CORE_DIR']
+
+    filename = os.path.join(install_dir, 'bin', 'lrose-config.flags')
+    f = open(filename, 'a')
+    # get the all_<flags> for the apps and the libs and merge them
+    libs_flags = lib_info['all']
+    apps_flags = app_info['all']
+    for key in ['includes', 'libs', 'ldflags', 'cflags']:
+#     info['all'] =  {"includes":all_includes, "libs":all_libs, "ldflags":all_ldflags, "cflags":all_cflags}
+        combined_set = libs_flags[key]
+        all_together = combined_set.union(apps_flags[key])
+
+        result = key + '='
+        if (len(all_together) > 0):
+            result += formatted(all_together)
+        f.write(result + "\n")
+    f.close()
+
+
+# write to lrose-config.flags 
 def write_dictionary(info, mode):
-    filename = 'lrose-config.flags'
+    install_dir = os.environ['LROSE_INSTALL_DIR']
+    core_dir = os.environ['LROSE_CORE_DIR']
+
+    filename = os.path.join(install_dir, 'bin', 'lrose-config.flags')
     f = open(filename, mode)
     for key, value in info.iteritems():
         f.write("#" + key + "\n") 
@@ -27,24 +52,44 @@ def write_dictionary(info, mode):
 
 # write to lrose-config.ARCHITECTURE
 def write_variables(variable_defs):
+    install_dir = os.environ['LROSE_INSTALL_DIR']
+    core_dir = os.environ['LROSE_CORE_DIR']
+
     for key_arch, value_defs in variable_defs.iteritems():
-        filename = 'lrose-config.' + key_arch
+        filename = os.path.join(install_dir, 'bin', 'lrose-config.' + key_arch)
         f = open(filename, 'w')
         f.write("#! /bin/sh\n")
-        install_dir = os.environ['LROSE_INSTALL_DIR']
-        core_dir = os.environ['LROSE_CORE_DIR']
-        f.write("prefix=" + prefix)
+        f.write("prefix=" + install_dir + "\n")
+
+        tmp = os.path.join("includedir=${prefix}", "include")
+        f.write(tmp + "\n")
+
+# TODO: need to capture CC and CXX compilers
+#       f.write("cc=" + install_dir + "\n")
+
+#       f.write("cflags=" + install_dir + "\n")
+
+#       f.write("libs=" + install_dir + "\n")
+
+#       f.write("version=" + install_dir + "\n")
+
+#       f.write("cxx=" + install_dir + "\n")
+
+#       f.write("cxxflags=" + install_dir + "\n")
+
+#       f.write("cxxlibs=" + install_dir + "\n")
 
 #prefix=/h/eol/brenda/lrose
 #exec_prefix=${prefix}
-#libdir=${exec_prefix}/lib
-#includedir=${prefix}/include
+        tmp = os.path.join("libdir=${exec_prefix}", "lib")
+        f.write(tmp + "\n")
+
 
 #cc="gcc"
 #cflags="-I${includedir} -I/h/eol/brenda/lrose/include"
 #libs="-L${libdir} -lnetcdf"
 
-        print >> sys.stdout, "# architecture-" + key_arch
+        # print >> sys.stdout, "# architecture-" + key_arch
         for key, value2 in value_defs.iteritems():
             result = key + "="
             if (len(value2) > 0):
@@ -63,6 +108,7 @@ def write_the_script(variables,idict_libs, idict_apps):
     write_variables(variable_defs)  # write to separate files based on architecture
     write_dictionary(idict_libs, "w")    # write to one output file
     write_dictionary(idict_apps, "a")
+    write_common_flags(idict_libs, idict_apps)
 
 # create a dictionary with keys of target architecture and
 #                          values that are dictionaries with keys that are variable names
@@ -78,15 +124,15 @@ def get_variables(variables_to_find, path):
             var_defs_for_architecture[var] = valList
         variable_defs[file_extension.replace(".","")] = var_defs_for_architecture
 
-    for key_arch, value_defs in variable_defs.iteritems():
-        print >> sys.stdout, "architecture-" + key_arch
-        for key, value2 in value_defs.iteritems():
-            result = key + "="
-            if (len(value2) > 0):
-                result += formatted(value2)
+#    for key_arch, value_defs in variable_defs.iteritems():
+#        print >> sys.stdout, "architecture-" + key_arch
+#        for key, value2 in value_defs.iteritems():
+#            result = key + "="
+#            if (len(value2) > 0):
+#                result += formatted(value2)
 #                formatted = '\"' + " ".join(value2) + '\"'
-                print >> sys.stdout, result
-        print >> sys.stdout, " "
+#                print >> sys.stdout, result
+#        print >> sys.stdout, " "
     return variable_defs
 
 def detect_variable(astring):
@@ -104,6 +150,12 @@ def main(path, module_keyword):
     loc_libs = set()
     loc_ldflags = set()
     loc_cflags = set()
+
+    all_includes = set()
+    all_libs = set()
+    all_ldflags = set()
+    all_cflags = set()
+
     current_module = ""
     variables_to_retrieve = set()
     makefileNames = ["makefile", "Makefile", "_makefile"]
@@ -159,6 +211,7 @@ def main(path, module_keyword):
                         # stuff it into the variable list to retrieve later
                         variables_to_retrieve.add(potential_variable)
                     loc_libs.add(item)
+                    all_libs.add(item)
 
                 valList = getValueListForKey(makefileName, "LOC_INCLUDES")                   
                 # print >> sys.stdout, "valList "                         
@@ -169,6 +222,7 @@ def main(path, module_keyword):
                         # stuff it into the variable list to retrieve later 
                         variables_to_retrieve.add(potential_variable)
                     loc_includes.add(item)
+                    all_includes.add(item)
 
                 valList = getValueListForKey(makefileName, "LOC_LDFLAGS")                  
                 # print >> sys.stdout, "valList "                                                     
@@ -179,6 +233,7 @@ def main(path, module_keyword):
                         # stuff it into the variable list to retrieve later 
                         variables_to_retrieve.add(potential_variable)          
                     loc_ldflags.add(item)
+                    all_ldflags.add(item)
 
                 valList = getValueListForKey(makefileName, "LOC_CFLAGS")                
                 # print >> sys.stdout, "valList "                                                       
@@ -189,11 +244,17 @@ def main(path, module_keyword):
                         # stuff it into the variable list to retrieve later            
                         variables_to_retrieve.add(potential_variable)                                 
                     loc_cflags.add(item)
+                    all_cflags.add(item)
 
 
     # store the current loc sets with the current module                                  
     if (current_module != ""):
         info[current_module] = {"includes":loc_includes, "libs":loc_libs, "ldflags":loc_ldflags,"cflags":loc_cflags}
+
+    # store the loc_sets for both apps and libs as "all"
+    info['all'] =  {"includes":all_includes, "libs":all_libs, "ldflags":all_ldflags, "cflags":all_cflags}
+
+
 #    print >> sys.stdout, "at the end: "
 #    print >> sys.stdout, "variables found: ", variables_to_retrieve
 #    print >> sys.stdout, "loc_libs = "
