@@ -17,7 +17,7 @@
 
 /* #include <X11/Xmu/WinUtil.h> */
 typedef unsigned long Pixel;
-#include "X11/XWDFile.h"
+#include <X11/XWDFile.h>
 
 #include <rapplot/xutils.h>
 
