@@ -3086,7 +3086,7 @@ using namespace std;
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("netcdf_output_mdv_chunks");
     tt->descr = tdrpStrDup("Option to output non-CF compliant MDV chunks.");
-    tt->help = tdrpStrDup("If true, MDV chunks will be included as byte binary variables.");
+    tt->help = tdrpStrDup("If true, MDV chunks will be included as byte binary variables. This will also write the radar parameters, e.g. location, gate spacing, etc. - to the global attributes.");
     tt->val_offset = (char *) &netcdf_output_mdv_chunks - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
