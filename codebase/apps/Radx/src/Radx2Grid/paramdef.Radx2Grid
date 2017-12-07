@@ -1242,7 +1242,7 @@ paramdef boolean {
 paramdef boolean {
   p_default = false;
   p_descr = "Option to output non-CF compliant MDV chunks.";
-  p_help = "If true, MDV chunks will be included as byte binary variables.";
+  p_help = "If true, MDV chunks will be included as byte binary variables. This will also write the radar parameters, e.g. location, gate spacing, etc. - to the global attributes.";
 } netcdf_output_mdv_chunks;
 
 paramdef string {
