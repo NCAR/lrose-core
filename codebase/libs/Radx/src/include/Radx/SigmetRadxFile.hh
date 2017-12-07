@@ -223,6 +223,8 @@ private:
   double _prf;
   double _prtSec;
   double _nyquist;
+  bool _dualPrt;
+  double _prtRatio;
   double _unambigRangeKm;
 
   // input data buffer

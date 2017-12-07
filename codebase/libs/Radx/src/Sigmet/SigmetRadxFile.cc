@@ -160,6 +160,8 @@ void SigmetRadxFile::clear()
   _nGates = 0;
   _sigmetIsSwapped = false;
   _nyquist = 0.0;
+  _dualPrt = false;
+  _prtRatio = 1.0;
 
   _sweepStartTime = 0;
   _startTimeSecs = 0;
@@ -637,15 +639,23 @@ int SigmetRadxFile::_readHeaders(bool doPrint, ostream &out)
   _nyquist = _wavelengthM / (4.0 * _prtSec);
   switch (_prodHdr.end.trig_rate_scheme) {
     case PRF_DUAL_4_5:
+      _prtRatio = 5.0 / 4.0;
       _nyquist *= 4.0;
+      _dualPrt = true;
+      _prtRatio = 5.0 / 4.0;
       break;
     case PRF_DUAL_3_4:
       _nyquist *= 3.0;
+      _dualPrt = true;
+      _prtRatio = 4.0 / 3.0;
       break;
     case PRF_DUAL_2_3:
       _nyquist *= 2.0;
+      _dualPrt = true;
+      _prtRatio = 3.0 / 2.0;
       break;
-    default: {}
+    default:
+      _dualPrt = false;
   }
 
   // NOAA HRD radar?
@@ -1845,7 +1855,11 @@ void SigmetRadxFile::_setRayMetadata(RadxRay &ray,
     ray.setPolarizationMode(Radx::POL_MODE_VERTICAL);
   }
 
-  ray.setPrtMode(Radx::PRT_MODE_FIXED);
+  if (_dualPrt) {
+    ray.setPrtMode(Radx::PRT_MODE_DUAL);
+  } else {
+    ray.setPrtMode(Radx::PRT_MODE_FIXED);
+  }
 
   double startEl = _binAngleToDouble(rayHdr.start_el);
   double endEl = _binAngleToDouble(rayHdr.end_el);
@@ -1873,7 +1887,7 @@ void SigmetRadxFile::_setRayMetadata(RadxRay &ray,
   ray.setNSamples(_prodHdr.end.nsamples);
   ray.setPulseWidthUsec(_pulseWidthUs);
   ray.setPrtSec(1.0 / _prf);
-  ray.setPrtRatio(1.0);
+  ray.setPrtRatio(_prtRatio);
   ray.setNyquistMps(_nyquist);
   ray.setUnambigRangeKm(_unambigRangeKm);
   ray.setMeasXmitPowerDbmH(Radx::missingMetaDouble);
