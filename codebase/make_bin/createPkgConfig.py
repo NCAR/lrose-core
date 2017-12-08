@@ -13,31 +13,60 @@ import re
 
 global thisScriptName
 
+
+def write_pkgconfig_file(prefix, version, cc, cpp, libs):
+    filename = os.path.join(prefix, 'lib', 'pkgconfig',  'lrose.pc')
+    with open(filename, 'w') as f:
+
+        f.write("prefix=${" + prefix + "}\n")
+        f.write("exec_prefix=${prefix}\n")
+        f.write("libdir=${exec_prefix}/lib\n")
+        f.write("includedir=${prefix}/include\n")
+        f.write("ccompiler=" + cc + "\n")
+        f.write("cppcompiler=" + cpp + "\n")
+        f.write("\n")
+        f.write("Name: lrose-core\n")
+        f.write("Description: LROSE Core Library for C++\n")
+        f.write("URL: https://github.com/NCAR/lrose-core\n")
+        f.write("Version: " + version + "\n")
+        # What should libs be?  Because there are so many lrose libs.
+        # Do we list them all here?
+        f.write("Libs:  -L${libdir} " + libs + "\n") # -lnetcdf\n")
+        f.write("Cflags: -I${includedir}\n")
+        f.write("\n")
+
 # write to lrose-config.flags 
-def write_common_flags(lib_info, app_info):
-    install_dir = os.environ['LROSE_INSTALL_DIR']
+def write_common_flags(prefix, lib_info, app_info, combining_apps_libs):
+    install_dir = prefix  # os.environ['LROSE_INSTALL_DIR']
     core_dir = os.environ['LROSE_CORE_DIR']
 
     filename = os.path.join(install_dir, 'bin', 'lrose-config.flags')
     f = open(filename, 'a')
     # get the all_<flags> for the apps and the libs and merge them
     libs_flags = lib_info['libs']
-    apps_flags = app_info['apps']
+    if combining_apps_libs:
+        apps_flags = app_info['apps']
     for key in ['includes', 'libs', 'ldflags', 'cflags']:
 #     info['all'] =  {"includes":all_includes, "libs":all_libs, "ldflags":all_ldflags, "cflags":all_cflags}
         combined_set = libs_flags[key]
-        all_together = combined_set.union(apps_flags[key])
-
+        if combining_apps_libs:
+            # use the following if combining apps with libs
+            all_together = combined_set.union(apps_flags[key])
+        else:
+            all_together = combined_set
         result = key + '='
         if (len(all_together) > 0):
-            result += formatted(all_together)
+            if (key.find('lib') > -1):
+                result += formatted(ordered(all_together))
+            else:
+                result += formatted(all_together)
         f.write(result + "\n")
     f.close()
 
 
 # write to lrose-config.flags 
-def write_dictionary(info, mode):
-    install_dir = os.environ['LROSE_INSTALL_DIR']
+def write_dictionary(prefix, info, mode):
+    install_dir = prefix # os.environ['LROSE_INSTALL_DIR']
     core_dir = os.environ['LROSE_CORE_DIR']
 
     filename = os.path.join(install_dir, 'bin', 'lrose-config.flags')
@@ -48,15 +77,66 @@ def write_dictionary(info, mode):
             result = "   " + key + '_' + key2 + '='
             if (len(value2) > 0):
                 if (key2.find('lib') > -1):
+                    # print >> sys.stderr, "unordered: ", value2
                     result += formatted(ordered(value2))
+                    # print >> sys.stderr, "  ordered: ", result
                 else:
                     result += formatted(value2)
             f.write(result + "\n")
     f.close()
 
+# write to lrose-config
+def write_variables_one_architecture(prefix, host_architecture, variable_defs):
+    install_dir = prefix 
+    core_dir = os.environ['LROSE_CORE_DIR']
+    key_arch = host_architecture
+
+    # for key_arch, value_defs in variable_defs.iteritems():
+    filename = os.path.join(install_dir, 'bin', 'lrose-config')
+    f = open(filename, 'w')
+    f.write("#! /bin/sh\n")
+    f.write("prefix=" + install_dir + "\n")
+
+    tmp = os.path.join("includedir=${prefix}", "include")
+    f.write(tmp + "\n")
+
+
+    f.write("exec_prefix=${prefix}\n")
+    tmp = os.path.join("libdir=${exec_prefix}", "lib")
+    f.write(tmp + "\n")
+
+
+#cc="gcc"
+#cflags="-I${includedir} -I/h/eol/brenda/lrose/include"
+#libs="-L${libdir} -lnetcdf"
+
+    value_defs = variable_defs[key_arch]
+        # print >> sys.stdout, "# architecture-" + key_arch
+    for key, value2 in value_defs.iteritems():
+        result = key + "="
+        if (len(value2) > 0):
+            result += formatted(value2)                                     
+            # print >> sys.stdout, result
+            f.write(result+'\n')
+
+    f.write("cc=" + "${CC}\n")
+#       f.write("cflags=" + install_dir + "\n")
+    f.write("fc=" + "${FC}\n")
+    f.write("cpp=" + "${CPPC}\n")
+#       f.write("cppflags=" + install_dir + "\n")
+#       f.write("cpplibs=" + install_dir + "\n")
+    f.write("version=version\n")
+#    f.write("debug=notImplementedYet\n")
+
+
+    # print >> sys.stdout, " "
+    f.write('\nsource lrose-config.flags')
+    f.write('\nsource lrose-config.template')
+    f.close()
+
 # write to lrose-config.ARCHITECTURE
-def write_variables(variable_defs):
-    install_dir = os.environ['LROSE_INSTALL_DIR']
+def write_variables_all_architectures(prefix, variable_defs):
+    install_dir = prefix  # os.environ['LROSE_INSTALL_DIR']
     core_dir = os.environ['LROSE_CORE_DIR']
 
     for key_arch, value_defs in variable_defs.iteritems():
@@ -68,20 +148,15 @@ def write_variables(variable_defs):
         tmp = os.path.join("includedir=${prefix}", "include")
         f.write(tmp + "\n")
 
-# TODO: need to capture CC and CXX compilers
 #       f.write("cc=" + install_dir + "\n")
-
 #       f.write("cflags=" + install_dir + "\n")
-
 #       f.write("libs=" + install_dir + "\n")
 
-        f.write("version=notImplementedYet\n")
-        f.write("debug=notImplementedYet\n")
-#       f.write("cxx=" + install_dir + "\n")
-
-#       f.write("cxxflags=" + install_dir + "\n")
-
-#       f.write("cxxlibs=" + install_dir + "\n")
+        f.write("version=\n")
+#        f.write("debug=notImplementedYet\n")
+#       f.write("cppc=" + install_dir + "\n")
+#       f.write("cppflags=" + install_dir + "\n")
+#       f.write("cpplibs=" + install_dir + "\n")
 
 #prefix=/h/eol/brenda/lrose
 #exec_prefix=${prefix}
@@ -106,14 +181,16 @@ def write_variables(variable_defs):
         f.close()
 
 
-def write_the_script(variables,idict_libs, idict_apps):
-# write output to files that are "included" in the shell script framwork
-# write the entire file and keep the template as strings in python file? No.
-    write_variables(variable_defs)  # write to separate files based on architecture
-    write_dictionary(idict_libs, "w")    # write to one output file
-#    write_dictionary(idict_apps, "a")
-# TODO: need to put these through ordered; may not need these at all, since we aren't using apps; I can just rename them to libs, cflags, i.e. the common ones
-    write_common_flags(idict_libs, idict_apps)
+def write_the_script(prefix, host_architecture, variables,idict_libs, idict_apps, using_apps):
+    # write output to files that are "included" in the shell script framwork
+    # write the entire file and keep the template as strings in python file? No.
+    write_variables_one_architecture(prefix, host_architecture, variable_defs)  # write to separate files based on architecture
+    write_dictionary(prefix, idict_libs, "w")    # write to one output file
+    if (using_apps):
+        write_dictionary(prefix, idict_apps, "a")
+    # need to put these through ordered
+    # ???  may not need these at all, since we aren't using apps; I can just rename them to libs, cflags, i.e. the common ones
+    write_common_flags(prefix, idict_libs, idict_apps, using_apps)
 
 # create a dictionary with keys of target architecture and
 #                          values that are dictionaries with keys that are variable names
@@ -513,7 +590,7 @@ if __name__ == "__main__":
     # idict = main(apps_path, module_keyword)
 
     thisScriptName = os.path.basename(__file__)
-
+    using_apps = False
 
     libs_path = './libs'
     module_keyword = 'MODULE_NAME'
@@ -521,9 +598,13 @@ if __name__ == "__main__":
     # path = './make_include'
     # get_variables(variables, path)
 
-    apps_path = './apps'                                                                               
-    module_keyword = 'TARGET_FILE'                                                                     
-    variables_apps, idict_apps = main(apps_path, module_keyword)  
+    if (using_apps):
+        apps_path = './apps'                                                                               
+        module_keyword = 'TARGET_FILE'                                                                     
+        variables_apps, idict_apps = main(apps_path, module_keyword)  
+    else:
+        variables_apps = set()
+        idict_apps = {}
 
     path = './make_include'
     variables = variables_libs.union(variables_apps)
@@ -534,4 +615,14 @@ if __name__ == "__main__":
     variables = variables.union(addtnl_vars)
     variable_defs = get_variables(variables, path)
 
-    write_the_script(variable_defs, idict_libs, idict_apps)
+    prefix  = os.environ['LROSE_INSTALL_DIR']
+    version = "version"
+    libs = ""
+    host_architecture = os.environ['HOST_OS']
+    host_vars = variable_defs[host_architecture]
+    cc_list = host_vars['CC']
+    cpp_list = host_vars['CPPC']
+    cc = " ".join(cc_list)
+    cpp = " ".join(cpp_list)
+    write_the_script(prefix, host_architecture, variable_defs, idict_libs, idict_apps, using_apps)
+    write_pkgconfig_file(prefix, version, cc, cpp, libs)
