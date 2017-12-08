@@ -204,6 +204,7 @@ fi
 cd $codebaseDir
 ./make_bin/createPkgConfig.py ${prefix}
 cp $codebaseDir/make_bin/lrose-config.template ${prefix}/bin
+chmod u+x ${prefix}/bin/lrose-config
 
 # Checking the build
 # ------------------

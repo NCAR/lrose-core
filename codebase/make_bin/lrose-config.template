@@ -15,8 +15,9 @@ Available values for OPTION include:
   --all         display all options
   --cc          C compiler
   --cflags      pre-processor and compiler flags
-  --has-logging whether logging is enabled with --enable-logging.
   --libs        library linking information for lrose
+  --cpp         C++ compiler
+
   --prefix      Install prefix
   --includedir  Include directory
   --libdir      Library directory
@@ -33,14 +34,7 @@ all()
         echo "  --cc        -> $cc"
         echo "  --cflags    -> $cflags"
         echo "  --libs      -> $libs"
-        echo
-        echo "  --cxx       -> $cxx"
-
-        echo "  --cxxflags  -> $cxxflags"
-        echo "  --cxxlibs   -> $cxxlibs"
-        echo
-
-        echo "  --has-logging-> $has_logging"
+        echo "  --cpp       -> $cppc"
 	echo
         echo "  --prefix    -> $prefix"
         echo "  --includedir-> $includedir"
