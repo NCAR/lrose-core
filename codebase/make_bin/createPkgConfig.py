@@ -11,6 +11,7 @@ import sys
 import glob
 import re
 
+global thisScriptName
 
 # write to lrose-config.flags 
 def write_common_flags(lib_info, app_info):
@@ -20,8 +21,8 @@ def write_common_flags(lib_info, app_info):
     filename = os.path.join(install_dir, 'bin', 'lrose-config.flags')
     f = open(filename, 'a')
     # get the all_<flags> for the apps and the libs and merge them
-    libs_flags = lib_info['all']
-    apps_flags = app_info['all']
+    libs_flags = lib_info['libs']
+    apps_flags = app_info['apps']
     for key in ['includes', 'libs', 'ldflags', 'cflags']:
 #     info['all'] =  {"includes":all_includes, "libs":all_libs, "ldflags":all_ldflags, "cflags":all_cflags}
         combined_set = libs_flags[key]
@@ -46,7 +47,10 @@ def write_dictionary(info, mode):
         for key2, value2 in value.iteritems():
             result = "   " + key + '_' + key2 + '='
             if (len(value2) > 0):
-                result += formatted(value2)
+                if (key2.find('lib') > -1):
+                    result += formatted(ordered(value2))
+                else:
+                    result += formatted(value2)
             f.write(result + "\n")
     f.close()
 
@@ -71,8 +75,8 @@ def write_variables(variable_defs):
 
 #       f.write("libs=" + install_dir + "\n")
 
-#       f.write("version=" + install_dir + "\n")
-
+        f.write("version=notImplementedYet\n")
+        f.write("debug=notImplementedYet\n")
 #       f.write("cxx=" + install_dir + "\n")
 
 #       f.write("cxxflags=" + install_dir + "\n")
@@ -107,7 +111,8 @@ def write_the_script(variables,idict_libs, idict_apps):
 # write the entire file and keep the template as strings in python file? No.
     write_variables(variable_defs)  # write to separate files based on architecture
     write_dictionary(idict_libs, "w")    # write to one output file
-    write_dictionary(idict_apps, "a")
+#    write_dictionary(idict_apps, "a")
+# TODO: need to put these through ordered; may not need these at all, since we aren't using apps; I can just rename them to libs, cflags, i.e. the common ones
     write_common_flags(idict_libs, idict_apps)
 
 # create a dictionary with keys of target architecture and
@@ -119,9 +124,11 @@ def get_variables(variables_to_find, path):
     for file in filelist:
         filename, file_extension = os.path.splitext(file)
         var_defs_for_architecture = {}
-        for var in variables_to_find:
-            valList = getValueListForKey(file, var) # "NETCDF4_LIBS")   
-            var_defs_for_architecture[var] = valList
+        var_defs_for_architecture = getKeyValuesFromFile(file, variables_to_find)
+        #for var in variables_to_find:
+        #    print >> sys.stdout, "looking for var " + var
+        #    valList = getValueListForKey(file, var) # "NETCDF4_LIBS")   
+        #    var_defs_for_architecture[var] = valList
         variable_defs[file_extension.replace(".","")] = var_defs_for_architecture
 
 #    for key_arch, value_defs in variable_defs.iteritems():
@@ -251,8 +258,9 @@ def main(path, module_keyword):
     if (current_module != ""):
         info[current_module] = {"includes":loc_includes, "libs":loc_libs, "ldflags":loc_ldflags,"cflags":loc_cflags}
 
-    # store the loc_sets for both apps and libs as "all"
-    info['all'] =  {"includes":all_includes, "libs":all_libs, "ldflags":all_ldflags, "cflags":all_cflags}
+    # store the sets for all apps or all libs as 'apps' or 'libs' key; extract from the path
+    libapp_key = os.path.basename(path)
+    info[libapp_key] =  {"includes":all_includes, "libs":all_libs, "ldflags":all_ldflags, "cflags":all_cflags}
 
 
 #    print >> sys.stdout, "at the end: "
@@ -291,9 +299,51 @@ def formatted(set_or_list):
     else:
         return
 
-# def prettyPrint(dictionary):
+#
+# order the libraries based on the file defining the order
+# ..... lrose-core/docs/lrose_libs_order.txt
+# return the list of libraries in the correct order
+def ordered(set_or_list):
+    orderedList = []
 
+    # read the prescribed order for the libraries
+    # and create a dictionary of them, with the number of votes as their value
+    order = []
+    try:
+        fp = open('../docs/lrose_libs_order.txt', 'r')
+    except IOError as e:
+        print >>sys.stdout, "ERROR - ", thisScriptName
+        print >>sys.stdout, "  Cannot open file:", path
+        print >>sys.stdout, "  dir: ", options.dir
+        return orderedList
+
+    lines = fp.readlines()
+    fp.close()
+
+    for line in lines:
+        tokens = line.split()
+        if (len(tokens) > 0):
+            order.append(tokens[0])
+
+    votes = [0] * len(order)
+
+    for lib in set_or_list:
+        try:
+            idx = order.index(lib)
+            votes[idx] = 1
+        except ValueError as e:        
+            print >> sys.stderr, "WARNING - ", thisScriptName
+            print >> sys.stderr, "  Library not found in expected list:" , lib
+
+    for idx, val in enumerate(votes):
+#    print(idx, val)
+        if (val > 0):
+            orderedList.append(order[idx])
+
+#    print >> sys.stderr, "original: ", set_or_list
+#    print >> sys.stderr, " ordered: ", orderedList
     
+    return orderedList
 
 # get string value based on search key
 # the string may span multiple lines
@@ -357,6 +407,101 @@ def getValueListForKey(path, key):
 
 
 ########################################################################
+
+# parse each line of the file, if the variable is a key in the list
+# stuff the key, value pair into a dictionary
+# return the dictionary
+
+def parseLine(line, keys):
+    found = False
+    tokens = line.split()
+    ikey = ''
+    value = []
+    if (len(tokens) >= 2) and (tokens[0] in keys) and (tokens[1] == '='): 
+        # then we have at least '<var> =' and it's a variable we want
+        ikey = tokens[0]
+        # the remainder of the list is the value of the variable 
+        value = tokens[2:]
+        # valueList[ikey] = value
+        found = True
+    return found, ikey, value
+
+
+def getKeyValuesFromFile(path, keys):
+
+    valueList = {} # []
+
+    try:
+        fp = open(path, 'r')
+    except IOError as e:
+        print >>sys.stdout, "ERROR - ", thisScriptName
+        print >>sys.stdout, "  Cannot open file:", path
+        print >>sys.stdout, "  dir: ", options.dir
+        return valueList
+
+    lines = fp.readlines()
+    fp.close()
+
+    foundKey = False
+    multiLine = ""
+    linesForReal = []
+
+    for line in lines:
+        # first of all, accumulate multiple lines, then parse
+        if (line[0] != '#'):  # only consider lines that aren't comments
+        
+            multiLine = multiLine + line
+
+            if (line.find("\\") < 0):  # not a continuation
+                linesForReal.append(multiLine)
+                multiLine = ""
+
+#  -----------
+#        if (foundKey == False):
+#            if (line[0] == '#'):
+#                continue
+#        if (line.find(key) >= 0):
+#            foundKey = True
+#            multiLine = multiLine + line
+#            if (line.find("\\") < 0):
+#                break;
+#        elif (foundKey == True):
+#            if (line[0] == '#'):
+#                break
+#            if (len(line) < 2):
+#                break
+#            multiLine = multiLine + line;
+#            if (line.find("\\") < 0):
+#                break;
+
+    for line in linesForReal:
+        found, key, value = parseLine(line, keys)
+        if (found):
+            valueList[key] = value
+
+    return valueList
+
+    # all the white space characters should have been removed by
+    # the tokenizer, split
+    #multiLine = multiLine.replace(key, " ",1)
+    #multiLine = multiLine.replace("=", " ")
+    #multiLine = multiLine.replace("\t", " ")
+    #multiLine = multiLine.replace("\\", " ")
+    #multiLine = multiLine.replace("\r", " ")
+    #multiLine = multiLine.replace("\n", " ")
+
+    #toks = multiLine.split(' ')
+    #for tok in toks:
+    #    if (len(tok) > 0):
+    #        valueList.append(tok)
+
+    #return valueList
+
+
+
+########################################################################
+
+
                                                                           
 # Run - entry point
 
@@ -366,6 +511,10 @@ if __name__ == "__main__":
     # apps_path = './apps'
     # module_keyword = 'TARGET_FILE'
     # idict = main(apps_path, module_keyword)
+
+    thisScriptName = os.path.basename(__file__)
+
+
     libs_path = './libs'
     module_keyword = 'MODULE_NAME'
     variables_libs, idict_libs = main(libs_path, module_keyword)
@@ -378,6 +527,11 @@ if __name__ == "__main__":
 
     path = './make_include'
     variables = variables_libs.union(variables_apps)
+    # 'variables' contains a list of variables ($(var)) that we need expansion
+    # their values should be in the make_include/rap_make.$(ARCH) files
+    #  but, let's add our own set of variables to expand ...
+    addtnl_vars = set(['CC', 'CPPC', 'FC', 'F90C'])
+    variables = variables.union(addtnl_vars)
     variable_defs = get_variables(variables, path)
 
     write_the_script(variable_defs, idict_libs, idict_apps)
