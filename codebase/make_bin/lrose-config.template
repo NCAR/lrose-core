@@ -34,7 +34,7 @@ all()
         echo "  --cc        -> $cc"
         echo "  --cflags    -> $cflags"
         echo "  --libs      -> $libs"
-        echo "  --cpp       -> $cppc"
+        echo "  --cpp       -> $cpp"
 	echo
         echo "  --prefix    -> $prefix"
         echo "  --includedir-> $includedir"
