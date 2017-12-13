@@ -48,7 +48,6 @@ HDRS = \
 
 SRCS = \
 	bzip_compress.c \
-	bziplib.c \
 	gzip_compress.c \
 	lzo_compress.c \
 	minilzo.c \
