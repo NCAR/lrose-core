@@ -85,7 +85,8 @@ LogMsg *LogMsg::getPointer(void)
 //----------------------------------------------------------------
 LogMsg::LogMsg() :
   pLogRealTime(true),
-  pLogClassAndMethod(true)
+  pLogClassAndMethod(true),
+  pLogShowAllKeys(true)
 {
   for (int i=0; i<NUM; ++i)
   {
@@ -116,8 +117,19 @@ void LogMsg::log(const std::string &fname, const int line,
   {
     return;
   }
-  string lmsg = pHeader(fname, line, method, severity);
-  lmsg += pSeverityString(severity);
+
+  string lmsg;
+  
+  if (pLogShowAllKeys)
+  {
+    lmsg = pSeverityStringAll(severity);
+  }
+  else
+  {
+    lmsg = pSeverityString(severity);
+  }
+
+  lmsg += pHeader(fname, line, method, severity);
   lmsg += msg;
   pLog(lmsg);
 }
@@ -131,8 +143,20 @@ void LogMsg::logf(const std::string &fname, const int line,
   {
     return;
   }
-  string msg = pHeader(fname, line, method, severity);
-  msg += pSeverityString(severity);
+
+  string msg;
+  
+  if (pLogShowAllKeys)
+  {
+    msg = pSeverityStringAll(severity);
+  }
+  else
+  {
+    msg = pSeverityString(severity);
+  }
+
+  msg += pHeader(fname, line, method, severity);
+
   va_list args;
   va_start( args, format );
   char buf[ARRAY_LEN_LONG];
@@ -175,6 +199,11 @@ void LogMsg::setLoggingClassAndMethod(const bool state)
   pLogClassAndMethod = state;
 }
 
+void LogMsg::setLoggingShowAllSeverityKeys(const bool state)
+{
+  pLogShowAllKeys = state;
+}
+
 //----------------------------------------------------------------
 bool LogMsg::isEnabled(const Severity_t severity) const
 {
@@ -207,8 +236,17 @@ void LogMsg::logAccum(const std::string &fname, const int line,
     sAccum.clear();
     return;
   }
-  string msg = pHeader(fname, line, method, severity);
-  msg += pSeverityString(severity);
+
+  string msg;
+  if (pLogShowAllKeys)
+  {
+    msg = pSeverityStringAll(severity);
+  }
+  else
+  {
+    msg = pSeverityString(severity);
+  }
+  msg += pHeader(fname, line, method, severity);
   msg += sAccum;
   sAccum.clear();
   pLog(msg);
@@ -284,7 +322,7 @@ void LogMsg::unsetTempSeverityLogging(const Severity_t severity)
   if (!done)
   {
     printf("ERROR in unset_temp_severity_logging, state not found for %s\n",
-	   pSeverityString(severity).c_str());
+	   pSeverityStringAll(severity).c_str());
   }
 }
 
@@ -345,6 +383,45 @@ string LogMsg::pSeverityString(const Severity_t severity) const
     break;
   case LogMsg::FATAL:
     ret = "FATAL ";
+    break;
+  default:
+    // all other cases have no output
+    break;
+  }
+  return ret;
+}
+//----------------------------------------------------------------
+string LogMsg::pSeverityStringAll(const Severity_t severity) const
+{
+  string ret = "";
+  switch (severity)
+  {
+  case DEBUG:
+    ret = "DEBUG   ";
+    break;
+  case DEBUG_VERBOSE:
+    ret = "VERBOSE ";
+    break;
+  case TRIGGER:
+    ret = "TRIGGER ";
+    break;
+  case THREAD:
+    ret = "THREAD  ";
+    break;
+  case SPECIAL:
+    ret = "SPECIAL ";
+    break;
+  case LogMsg::WARNING:
+    ret = "WARNING ";
+    break;
+  case LogMsg::ERROR:
+    ret = "ERROR   ";
+    break;
+  case LogMsg::SEVERE:
+    ret = "SEVERE  ";
+    break;
+  case LogMsg::FATAL:
+    ret = "FATAL   ";
     break;
   default:
     // all other cases have no output

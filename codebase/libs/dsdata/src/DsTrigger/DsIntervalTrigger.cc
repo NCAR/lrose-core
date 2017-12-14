@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: dixon $
 //   $Locker:  $
-//   $Date: 2016/03/03 18:06:33 $
-//   $Id: DsIntervalTrigger.cc,v 1.11 2016/03/03 18:06:33 dixon Exp $
-//   $Revision: 1.11 $
+//   $Date: 2017/12/14 15:47:01 $
+//   $Id: DsIntervalTrigger.cc,v 1.12 2017/12/14 15:47:01 dixon Exp $
+//   $Revision: 1.12 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/

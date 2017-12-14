@@ -8,20 +8,16 @@
 /DsFcstTimeListTrigger.cc/1.5/Thu Dec 29 22:57:37 2016//
 /DsFileListTrigger.cc/1.8/Thu Dec 29 22:57:37 2016//
 /DsFmqTrigger.cc/1.5/Thu Dec 29 22:57:37 2016//
-/DsInputDirTrigger.cc/1.10/Thu Dec 29 22:57:37 2016//
 /DsInputPathTrigger.cc/1.4/Thu Dec 29 22:57:37 2016//
-/DsIntervalTrigger.cc/1.11/Thu Dec 29 22:57:37 2016//
 /DsLdataIntTrigger.cc/1.4/Thu Dec 29 22:57:37 2016//
 /DsLdataTrigger.cc/1.12/Thu Dec 29 22:57:37 2016//
 /DsMultFcstTrigger.cc/1.4/Thu Dec 29 22:57:37 2016//
 /DsMultTrigElem.cc/1.11/Thu Dec 29 22:57:37 2016//
-/DsMultipleTrigger.cc/1.17/Thu Dec 29 22:57:37 2016//
 /DsOneFileTrigger.cc/1.4/Thu Dec 29 22:57:37 2016//
 /DsOneTimeTrigger.cc/1.5/Thu Dec 29 22:57:37 2016//
 /DsSpecificFcstLdataTrigger.cc/1.5/Thu Dec 29 22:57:37 2016//
 /DsSpecificGenLdataTrigger.cc/1.3/Thu Dec 29 22:57:37 2016//
 /DsTimeListTrigger.cc/1.9/Thu Dec 29 22:57:37 2016//
-/DsTrigger.cc/1.12/Thu Dec 29 22:57:37 2016//
 /DsUrlTrigger.cc/1.5/Thu Dec 29 22:57:37 2016//
 /DsUrlTriggerArchive.cc/1.6/Mon Sep  4 22:15:38 2017//
 /DsUrlTriggerObject.cc/1.3/Thu Dec 29 22:57:37 2016//
@@ -33,4 +29,8 @@
 /SpdbTimeListHandler.cc/1.4/Thu Dec 29 22:57:37 2016//
 /TimeListHandler.cc/1.4/Thu Dec 29 22:57:37 2016//
 /TriggerInfo.cc/1.11/Thu Dec 29 22:57:37 2016//
+/DsInputDirTrigger.cc/1.11/Thu Dec 14 15:47:01 2017//
+/DsIntervalTrigger.cc/1.12/Thu Dec 14 15:47:01 2017//
+/DsMultipleTrigger.cc/1.18/Thu Dec 14 15:47:01 2017//
+/DsTrigger.cc/1.13/Thu Dec 14 15:47:01 2017//
 D

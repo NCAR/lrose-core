@@ -44,24 +44,8 @@ LogStream::LogStream(const std::string &fname, const int line,
   _active = LOG_STREAM_IS_ENABLED(logT);
   if (_active)
   {
-    _setHeader(fname, line, method, logT);
-    switch (logT)
-    {
-    case ERROR:
-      _buf << "ERROR ";
-      break;
-    case WARNING:
-      _buf << "WARNING ";
-      break;
-    case FATAL:
-      _buf << "FATAL ";
-      break;
-    case SEVERE:
-      _buf << "SEVERE ";
-      break;
-    default:
-      break;
-    }
+    string severityString = _setSeverityString(logT);
+    _setHeader(severityString, fname, line, method, logT);
   }
 }
 
@@ -74,7 +58,7 @@ LogStream::LogStream(const std::string &fname, const int line,
   _active = LOG_STREAM_IS_ENABLED(name);
   if (_active)
   {
-    _setHeader(fname, line, method);
+    _setHeader(name, fname, line, method);
   }
 }
 
@@ -86,7 +70,8 @@ LogStream::LogStream(const std::string &fname, const int line,
   _active = true;
   if (_active)
   {
-    _setHeader(fname, line, method, FORCE);
+    string severityString = _setSeverityString(FORCE);
+    _setHeader(severityString, fname, line, method, FORCE);
   }
 }
 
@@ -110,7 +95,8 @@ LogStream::~LogStream()
 }
 
 //----------------------------------------------------------------
-void LogStream::_setHeader(const std::string &fname, 
+void LogStream::_setHeader(const std::string &severityString,
+			   const std::string &fname, 
 			   const int line, const std::string &method,
 			   Log_t logT)
 {
@@ -119,6 +105,7 @@ void LogStream::_setHeader(const std::string &fname,
     DateTime dt(time(0));
     _buf << dt.getTimeStr(false) << " ";
   }
+  _buf << severityString;
   if (LOG_STREAM_CLASSMETHOD_ENABLED() && logT != PRINT)
   {
     _buf << fname << "[" << line << "]:" << method << "()::";
@@ -126,7 +113,8 @@ void LogStream::_setHeader(const std::string &fname,
 }
 	     
 //----------------------------------------------------------------
-void LogStream::_setHeader(const std::string &fname, 
+void LogStream::_setHeader(const std::string &severityString,
+			   const std::string &fname, 
 			   const int line, const std::string &method)
 {
   if (LOG_STREAM_TIMESTAMP_ENABLED())
@@ -134,12 +122,69 @@ void LogStream::_setHeader(const std::string &fname,
     DateTime dt(time(0));
     _buf << dt.getTimeStr(false) << " ";
   }
+  _buf << severityString;
   if (LOG_STREAM_CLASSMETHOD_ENABLED())
   {
     _buf << fname << "[" << line << "]:" << method << "()::";
   }
 }
 	     
+//-----------------------------------------------------------------
+std::string LogStream::_setSeverityString(Log_t logT)
+{
+  string ret = "         ";
+  if (LOG_STREAM_SHOW_ALL_SEVERITY_KEYS_ENABLED())
+  {
+    switch (logT)
+    {
+    case DEBUG:
+      ret =   " DEBUG    ";
+      break;
+    case DEBUG_VERBOSE:
+      ret =   " VERBOSE  ";
+      break;
+    case ERROR:
+      ret =   " ERROR    ";
+      break;
+    case WARNING:
+      ret =   " WARNING  ";
+      break;
+    case FATAL:
+      ret =   " FATAL    ";
+      break;
+    case SEVERE:
+      ret =   " SEVERE   ";
+      break;
+    default:
+      break;
+    }
+  }
+  else
+  {
+    switch (logT)
+    {
+    case DEBUG:
+      break;
+    case DEBUG_VERBOSE:
+      break;
+    case ERROR:
+      ret =    " ERROR   ";
+      break;
+    case WARNING:
+      ret =    " WARNING ";
+      break;
+    case FATAL:
+      ret =    " FATAL   ";
+      break;
+    case SEVERE:
+      ret =    " SEVERE  ";
+      break;
+    default:
+      break;
+    }
+  }
+  return ret;
+}
 
 //----------------------------------------------------------------
 void LogState::initPointer(void)
@@ -171,6 +216,7 @@ LogState *LogState::getPointer(void)
 LogState::LogState() :
   _logRealTime(true),
   _logClassAndMethod(true),
+  _logShowAllSeverityKeys(true),
   _logToCout(true)
 {
   _enabled[LogStream::DEBUG] = true;
@@ -178,6 +224,7 @@ LogState::LogState() :
   _enabled[LogStream::ERROR] = true;
   _enabled[LogStream::WARNING] = true;
   _enabled[LogStream::FATAL] = true;
+  _enabled[LogStream::SEVERE] = true;
   _enabled[LogStream::PRINT] = true;
   pthread_mutex_init(&_printMutex, NULL);
 }
@@ -226,6 +273,12 @@ void LogState::setLoggingTimestamp(const bool state)
 void LogState::setLoggingClassAndMethod(const bool state)
 {
   _logClassAndMethod = state;
+}
+
+//----------------------------------------------------------------
+void LogState::setLoggingShowAllSeverityKeys(const bool state)
+{
+  _logShowAllSeverityKeys = state;
 }
 
 //----------------------------------------------------------------

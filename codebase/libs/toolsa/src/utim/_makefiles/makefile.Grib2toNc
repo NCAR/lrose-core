@@ -1,0 +1,62 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+# (c) Copyright 2015 University Corporation for Atmospheric Research 
+# (UCAR). All Rights Reserved. For U.S.A. Government Use Only 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+###########################################################################
+#
+# Makefile for time utilities module
+#
+# Mike Dixon, RAP, NCAR, Boulder, Co, USA, 80307
+#
+# Nov 1994
+#
+###########################################################################
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+LOC_INCLUDES = -I../include
+LOC_CFLAGS =
+
+TARGET_FILE = ../libtoolsa.a
+
+#
+# file lists
+#
+
+HDRS = \
+	../include/toolsa/utim.h \
+
+SRCS = \
+	utim.c \
+
+#
+# general targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+
+#
+# testing
+#
+
+test: test_DateTime_p
+
+test_DateTime_p:
+	$(MAKE) DBUG_OPT_FLAGS="$(DEBUG_FLAG)" test_DateTime
+
+test_DateTime: TEST_toolsa_DateTime.o
+	$(CPPC) $(DBUG_OPT_FLAGS) TEST_toolsa_DateTime.o \
+	$(LDFLAGS) -o test_DateTime -ltoolsa -lm
+
+clean_test:
+	$(RM) test_DateTime TEST_toolsa_DateTime.o
+	$(RM) *errlog
+
+
+#
+# local targets
+#
+
+depend: depend_generic
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

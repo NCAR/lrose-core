@@ -26,9 +26,9 @@
 // RCS info
 //   $Author: dixon $
 //   $Locker:  $
-//   $Date: 2016/03/03 18:06:33 $
-//   $Id: DsInputDirTrigger.cc,v 1.10 2016/03/03 18:06:33 dixon Exp $
-//   $Revision: 1.10 $
+//   $Date: 2017/12/14 15:47:01 $
+//   $Id: DsInputDirTrigger.cc,v 1.11 2017/12/14 15:47:01 dixon Exp $
+//   $Revision: 1.11 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
