@@ -429,6 +429,16 @@ int SunCal::_runForTimeSeries()
       break;
     }
 
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      if (pulse->getPulseSeqNum() % 10000 == 0) {
+        cerr << "==>> Reading pulses, latest seq num, el, az: " 
+             << pulse->getPulseSeqNum() << ", "
+             << pulse->getEl() << ", "
+             << pulse->getAz() << ", "
+             << endl;
+      }
+    }
+
     if (_params.invert_hv_flag) {
       pulse->setInvertHvFlag();
     }
