@@ -33,13 +33,12 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef BufrProduct_HH
-#define BufrProduct_HH
+#ifndef BufrProduct_204_31_X_HH
+#define BufrProduct_204_31_X_HH
 
-
+#include <Radx/BufrProduct.hh>
 #include <Radx/RadxBuf.hh>
 #include <Radx/RadxTime.hh>
-#include <Radx/Radx.hh>
 #include <cstdlib>
 #include <vector>
 #include <map>
@@ -47,21 +46,22 @@
 ///////////////////////////////////////////////////////////////
 /// BASE CLASS FOR BUFR DATA ACCESS
 
-class BufrProduct
+class BufrProduct_204_31_X : public BufrProduct
 {
   
 public:
 
   /// Constructor
   
-  BufrProduct();
+  BufrProduct_204_31_X();
   
   /// Destructor
   
-  virtual ~BufrProduct();
+  virtual ~BufrProduct_204_31_X();
 
   void reset();
 
+  /*
   //////////////////////////////////////////////////////////////
   /// \name Debugging:
   //@{
@@ -87,14 +87,12 @@ public:
 
   void allocateSpace(unsigned int n);
 
-  virtual void addData(unsigned char value);
+  void addData(unsigned char value);
 
-  virtual bool StuffIt(unsigned short, string fieldName, double value);
+  double *decompressData();
+  float *decompressDataFl32();
 
-  virtual double *decompressData();
-  virtual float *decompressDataFl32();
-
-  virtual void createSweep();
+  void createSweep();
 
   void putYear(double value);
   void putMonth(double value);
@@ -157,8 +155,8 @@ public:
   // dump it into a RadxVol structure
 
   vector<unsigned int> replicators;
-  virtual void trashReplicator();
-  virtual void storeReplicator(unsigned int value);
+  void trashReplicator();
+  void storeReplicator(unsigned int value);
 
 
   // current position information
@@ -192,13 +190,7 @@ public:
   void setAntennaBeamAzimuthDegrees(double value);
   double getAntennaBeamAzimuthDegrees(int sweepNumber);
 
-  double getLatitude() { return latitude; }
-  double getLongitude() { return longitude; }
-  double getHeight() { return height; }
-  int getWMOBlockNumber() { return WMOBlockNumber; }
-  int getWMOStationNumber() { return WMOStationNumber; }
-
-protected:
+private:
 
   // all of these could potentially change, so lock them down
   size_t nBinsAlongTheRadial;
@@ -209,25 +201,7 @@ protected:
   double antennaBeamAzimuthDegrees;
 
   size_t _maxBinsAlongTheRadial;
-
-  //  vector<vector<unsigned char>> genericStore;  
-  //vector<unsigned char> currentAccumulator;
-
-  // unsigned int duration; // TODO: need getters and setters
-
-  double latitude;
-  double longitude;
-  double height;
-  //int hour;
-  //int minute;
-
-  int WMOBlockNumber;
-  int WMOStationNumber;
-  ///string typeOfStationId;
-  //string stationId;
-  string _fieldName;  // TODO:  resolve this with _fieldName in BufrFile; I just put this here to get by the compiler
-  string _errString;
-
+  */
 };
 #endif
 

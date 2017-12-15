@@ -33,12 +33,11 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include <Radx/BufrProduct.hh>
+#include "BufrProduct_204_31_X.hh"
 #include <cstring>
 #include <cstdio>
 #include <iostream>
 #include <zlib.h>
-#include <algorithm>
 #include <stdlib.h>
 
 using namespace std;
@@ -46,25 +45,28 @@ using namespace std;
 //////////////
 // Constructor
 
-BufrProduct::BufrProduct()
+BufrProduct_204_31_X::BufrProduct_204_31_X()
 {
+  /*
   //replicators.reserve(5);
   dataBuffer = NULL;
   reset();
   _debug = false;
   _verbose = false;
+  */
 }
 
 /////////////
 // destructor
 
-BufrProduct::~BufrProduct()
+BufrProduct_204_31_X::~BufrProduct_204_31_X()
 {
   if (dataBuffer != NULL)
     free(dataBuffer);
 }
 
-void BufrProduct::reset() {
+/*
+void BufrProduct_204_31_X::reset() {
   currentState = 0;  // initial state
   nData = 0;
   maxData = 0;
@@ -79,18 +81,18 @@ void BufrProduct::reset() {
     trashReplicator();
 }
 
-void BufrProduct::allocateSpace(unsigned int n) {
+void BufrProduct_204_31_X::allocateSpace(unsigned int n) {
   if (dataBuffer == NULL) {
     dataBuffer = (unsigned char *) malloc(n);
     maxData = n;
   }
 }
 
-//size_t BufrProduct::getMaxBinsAlongTheRadial() {
+//size_t BufrProduct_204_31_X::getMaxBinsAlongTheRadial() {
 //  return _maxBinsAlongTheRadial;
 //}
 
-void BufrProduct::setNBinsAlongTheRadial(size_t nBins) {
+void BufrProduct_204_31_X::setNBinsAlongTheRadial(size_t nBins) {
   if (sweepData.size() > 0) {
     if ((nBins != sweepData[0].nBinsAlongTheRadial) && _debug) {
       cerr << "Changing the number of bins along the radial from " <<
@@ -103,22 +105,22 @@ void BufrProduct::setNBinsAlongTheRadial(size_t nBins) {
     _maxBinsAlongTheRadial = nBins;
 }
 
-size_t BufrProduct::getNBinsAlongTheRadial(int sweepNumber) {
+size_t BufrProduct_204_31_X::getNBinsAlongTheRadial(int sweepNumber) {
   return sweepData[sweepNumber].nBinsAlongTheRadial;
 }
 
-void BufrProduct::setAntennaElevationDegrees(double value) {
+void BufrProduct_204_31_X::setAntennaElevationDegrees(double value) {
   // if (sweepData.size() > 0) {
   //  if (value!= sweepData[0].antennaElevationDegrees)
   //    throw "Cannot change the antenna elevation.";
   // }
   antennaElevationDegrees = value;
 }
-double BufrProduct::getAntennaElevationDegrees(int sweepNumber) {
+double BufrProduct_204_31_X::getAntennaElevationDegrees(int sweepNumber) {
   return sweepData[sweepNumber].antennaElevationDegrees;
 }
 
-void BufrProduct::setRangeBinSizeMeters(double value) {
+void BufrProduct_204_31_X::setRangeBinSizeMeters(double value) {
   if (sweepData.size() > 0) {
     if ((value != sweepData[0].rangeBinSizeMeters) && _debug) {
       cerr << "Changing the range bin size from  " <<
@@ -127,40 +129,40 @@ void BufrProduct::setRangeBinSizeMeters(double value) {
   }
   rangeBinSizeMeters = value;
 }
-double BufrProduct::getRangeBinSizeMeters(int sweepNumber) {
+double BufrProduct_204_31_X::getRangeBinSizeMeters(int sweepNumber) {
   return sweepData[sweepNumber].rangeBinSizeMeters;
 }
 
-void BufrProduct::setRangeBinOffsetMeters(double value) {
+void BufrProduct_204_31_X::setRangeBinOffsetMeters(double value) {
   if (sweepData.size() > 0) {
     if (value != sweepData[0].rangeBinOffsetMeters)
       throw "Cannot change the range bin offset.";
   }
   rangeBinOffsetMeters = value;
 }
-double BufrProduct::getRangeBinOffsetMeters() {
+double BufrProduct_204_31_X::getRangeBinOffsetMeters() {
   return rangeBinOffsetMeters;
 }
 
-void BufrProduct::setNAzimuths(size_t value) {
+void BufrProduct_204_31_X::setNAzimuths(size_t value) {
   if (sweepData.size() > 0) {
     if (value != sweepData[0].nAzimuths)
       throw "Cannot change the number of azimuths.";
   }
   nAzimuths = value;
 }
-size_t BufrProduct::getNAzimuths() {
+size_t BufrProduct_204_31_X::getNAzimuths() {
   return nAzimuths;
 }
 
-void BufrProduct::setAntennaBeamAzimuthDegrees(double value) {
+void BufrProduct_204_31_X::setAntennaBeamAzimuthDegrees(double value) {
   //if (sweepData.size() > 0) {
   //  if (value != sweepData[0].antennaBeamAzimuthDegrees)
   //    throw "Cannot change the antenna beam azimuth.";
   //}
   antennaBeamAzimuthDegrees = value;
 }
-double BufrProduct::getAntennaBeamAzimuthDegrees(int sweepNumber) {
+double BufrProduct_204_31_X::getAntennaBeamAzimuthDegrees(int sweepNumber) {
   return sweepData[sweepNumber].antennaBeamAzimuthDegrees;
 }
 
@@ -171,7 +173,7 @@ double BufrProduct::getAntennaBeamAzimuthDegrees(int sweepNumber) {
 // - number of parameters
 // - number of data sections
 // - number of byte elements in data section 
-void BufrProduct::storeReplicator(unsigned int value) {
+void BufrProduct_204_31_X::storeReplicator(unsigned int value) {
 
   replicators.push_back(value);
   // once we have the number of byte elements, allocate space for the
@@ -193,8 +195,7 @@ void BufrProduct::storeReplicator(unsigned int value) {
   }
 }
 
-void BufrProduct::trashReplicator() {
-
+void BufrProduct_204_31_X::trashReplicator() {
   switch (replicators.size()) {
   case 1:
     break;
@@ -219,10 +220,11 @@ void BufrProduct::trashReplicator() {
     throw "Unexpected number of replicators in store";
   }
   replicators.pop_back();
+
 }
 
 // Record all the information now that we have all the data values
-void BufrProduct::createSweep() {
+void BufrProduct_204_31_X::createSweep() {
   //double *realData;
   float *realData;
       
@@ -260,160 +262,17 @@ void BufrProduct::createSweep() {
       sweepData.push_back(newSweep);
 }
 
-void BufrProduct::addData(unsigned char value) {
+void BufrProduct_204_31_X::addData(unsigned char value) {
   //if (value == 255)
   //  printf("%u at nData = %d\n", value, nData);
+
   if (nData < maxData)
     dataBuffer[nData++] = value;
   else 
     throw "out of space in dataBuffer";
 }
 
-// Put the info in the correct storage location
-// and take care of any setup that needs to happen
-bool BufrProduct::StuffIt(unsigned short des, string name, double value) {
-  bool ok = true;
-
-  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-  if (name.find("byte element") != string::npos) {
-    // ugh!  It's not a double value, it's an unsigned char...
-    addData((unsigned char) value);
-  } else if (name.find("latitude") != string::npos) {
-    latitude = value;
-    // ******* TEST  *******
-    //double latitudeTest;
-    //latitudeTest = value;
-    //ByteOrder::swap64(&latitudeTest, sizeof(double), true);
-    //cerr << "latitude test = " << latitudeTest << endl;
-  } else if (name.find("longitude") != string::npos) {
-    longitude = value;
-  } else if (name.find("height") != string::npos) {
-    height = value;
-  } else if (name.find("antenna elevation") != string::npos) {
-    setAntennaElevationDegrees(value);
-  } else if (name.find("number of bins along the radial") != string::npos) {
-    setNBinsAlongTheRadial((size_t) value);
-  } else if ((name.find("range-bin size") != string::npos) ||
-    (name.find("range bin size") != string::npos)) {
-    setRangeBinSizeMeters(value);
-  } else if ((name.find("range-bin offset") != string::npos) ||
-    (name.find("range bin offset") != string::npos)) {
-    setRangeBinOffsetMeters(value);
-  } else if (name.find("number of azimuths") != string::npos) {
-    setNAzimuths((size_t) value);
-  } else if (name.find("antenna beam azimuth") != string::npos) {
-    setAntennaBeamAzimuthDegrees(value);
-
-  } else if (name.find("year") != string::npos) {
-    putYear((int) value);
-  } else if (name.find("month") != string::npos) {
-    putMonth((int) value);
-  } else if (name.find("day") != string::npos) {
-    putDay((int) value);
-  } else if (name.find("hour") != string::npos) {
-    putHour((int) value);
-  } else if (name.find("minute") != string::npos) {
-    putMinute((int) value);
-  } else if (name.find("second") != string::npos) {
-    putSecond((int) value);
-    // could probably use key to identify these fields...
-    // instead of a string search
-  } else if (name.find("wmo block") != string::npos) {
-    WMOBlockNumber = value;
-  } else if (name.find("wmo station") != string::npos) {
-    WMOStationNumber = value;
-  } else if (name.find("compression method") != string::npos) {
-    ; // ignore it
-  } else if (name.find("type of station") != string::npos) {
-    ; // ignore it
-  } else if (name.find("type of product") != string::npos) {
-    int code = (int) value;
-    // make sure the type of product agrees with the field name
-    switch(code) {
-    case 0:
-      typeOfProduct = "DBZH";
-      break;
-    case 40:
-      typeOfProduct = "VRAD";
-      break;
-    case 80:
-      typeOfProduct = "ZDR";
-      break;
-    case 90:
-      break;
-    case 91: 
-    case 230:
-      typeOfProduct = "TH";
-      break;
-    case 92:
-    case 60:
-      typeOfProduct = "WRAD";
-      break;	  
-    case 243:
-      typeOfProduct = "CM";
-      break;
-    case 240:
-      typeOfProduct = "KDP";
-      break;
-    case 239:
-      typeOfProduct = "PHIDP";
-      break;
-    case 241:
-      typeOfProduct = "RHOHV";
-      break;
-    case 242:
-      // TODO: move _fieldName comparison with typeOfProduct into BufrFile
-      // ugh! allow for different name for this variable
-      // fieldName == "TDR"  ==> use "TDR"
-      // fieldName == ""     ==> use "ZDR"
-      // fieldName == "ZDR"  ==> use "ZDR"
-      if (_fieldName.size() < 0) {
-          typeOfProduct = "ZDR";
-      } else {
-        string temp = _fieldName;
-        std::transform(temp.begin(), temp.end(), temp.begin(), ::toupper);
-        if (temp.compare("ZDR") == 0) {
-          typeOfProduct = "ZDR";
-	} else {
-	  typeOfProduct = "TDR";
-	}
-      }
-      break;
-    case 231:
-      typeOfProduct = "TV";
-      break; 
-    default:
-      typeOfProduct = "UNKNOWN";
-      ok = false;
-    } 
-    // make sure the field name we are looking for agrees with
-    // the code in the data file
-    // skip this check if the type of product has code 90; 
-    // I don't know what product code 90 means.
-    if (code != 90) {
-      if (_fieldName.size() > 0) {
-        string temp = _fieldName;
-        std::transform(temp.begin(), temp.end(), temp.begin(), ::toupper);
-        if (typeOfProduct.compare(temp) != 0) {
-	  Radx::addErrStr(_errString, "", "ERROR - BufrFile::StuffIt", true);
-	  Radx::addErrStr(_errString, "  Expected Type of Product code for ", 
-			  temp.c_str(), true);
-	  Radx::addErrInt(_errString, "  Found code ", code, true);
-	  throw _errString.c_str();
-	}
-      } else {
-        //  TODO: we'll need to use the typeOfProduct as the field name
-	;
-      }
-    }
-  } else {
-    ok = false;
-  }
-  return ok;
-}
-
-
-double *BufrProduct::decompressData() {
+double *BufrProduct_204_31_X::decompressData() {
   int n;
   n = nBinsAlongTheRadial * nAzimuths * sizeof(double);
 
@@ -448,7 +307,7 @@ double *BufrProduct::decompressData() {
   return (double *)UnCompDataBuff;
 }
 
-float *BufrProduct::decompressDataFl32() {
+float *BufrProduct_204_31_X::decompressDataFl32() {
   unsigned long n;
   n = nBinsAlongTheRadial * nAzimuths * sizeof(double);
 
@@ -525,31 +384,31 @@ float *BufrProduct::decompressDataFl32() {
 // maintain the timestamps in a stack
 // start a new timestamp with Year,
 // always update the top timestamp with day, hour, etc.
-void BufrProduct::putYear(double value) {
+void BufrProduct_204_31_X::putYear(double value) {
   RadxTime *timeStamp = new RadxTime();
   timeStamp->setYear((int) value);
   if (_debug) cerr << "timeStamp " << timeStamp->asString() << endl;
   timeStampStack.push_back(timeStamp);
 }
 
-void BufrProduct::putMonth(double value) {
+void BufrProduct_204_31_X::putMonth(double value) {
   timeStampStack.back()->setMonth((int) value);
 }
 
-void BufrProduct::putDay(double value)  {
+void BufrProduct_204_31_X::putDay(double value)  {
   timeStampStack.back()->setDay((int) value);
 }
-void BufrProduct::putHour(double value)  {
+void BufrProduct_204_31_X::putHour(double value)  {
   timeStampStack.back()->setHour((int) value);
 }
-void BufrProduct::putMinute(double value)  {
+void BufrProduct_204_31_X::putMinute(double value)  {
   timeStampStack.back()->setMin((int) value);
 }
-void BufrProduct::putSecond(double value)  {
+void BufrProduct_204_31_X::putSecond(double value)  {
   timeStampStack.back()->setSec((int) value);
 }
 
-void BufrProduct::printSweepData(ostream &out) {
+void BufrProduct_204_31_X::printSweepData(ostream &out) {
   int i;
   i = 0;
   for (vector<SweepData>::iterator sw = sweepData.begin();
@@ -585,4 +444,4 @@ void BufrProduct::printSweepData(ostream &out) {
       i+=1;
   }
 }
-
+*/

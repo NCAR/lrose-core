@@ -139,6 +139,8 @@ public:
   int readData();
   int readSection5();
 
+  bool matches_204_31_X(vector<unsigned short> &descriptors);
+
   int print(ostream &out, bool printRays, bool printData);
   void printSection0(ostream &out);
   void printSection1(ostream &out);
@@ -150,19 +152,6 @@ public:
 
   void close();
 
-  double latitude;
-  double longitude;
-  double height;
-  int hdr_year;
-  int hdr_month;
-  int hdr_day;
-  int hour;
-  int minute;
-
-  int WMOBlockNumber;
-  int WMOStationNumber;
-  string typeOfStationId;
-  string stationId;
 
   size_t getNumberOfSweeps();
   size_t getTimeDimension();
@@ -186,9 +175,39 @@ public:
   double *getDataForSweepFl64(int sweepNumber);
   string getTypeOfProductForSweep(int sweepNumber);
 
+  double getLatitude() { return currentTemplate->getLatitude(); }
+  double getLongitude() { return currentTemplate->getLongitude(); }
+  double getHeight() { return currentTemplate->getHeight(); }
+  int getWMOBlockNumber() { return currentTemplate->getWMOBlockNumber(); }
+  int getWMOStationNumber() { return currentTemplate->getWMOStationNumber(); }
+
+  int getHdrYear() { return hdr_year; }
+  int getHdrMonth() { return hdr_month; }
+  int getHdrDay() { return hdr_day; }
+  int getHour() { return hour; }
+  int getMinute() { return minute; }
+
+  string getTypeOfStationId() { return typeOfStationId; }
+  string getStationId() { return stationId; }
+
 private:
 
-  bool StuffIt(string fieldName, double value);
+  //double latitude;
+  //double longitude;
+  //double height;
+  int hdr_year;
+  int hdr_month;
+  int hdr_day;
+  int hour;
+  int minute;
+
+  //int WMOBlockNumber;
+  //int WMOStationNumber;
+  string typeOfStationId;
+  string stationId;
+
+
+  //bool StuffIt(string fieldName, double value);
   Radx::ui32 ExtractIt(unsigned int nBits);
   string ExtractText(unsigned int nBits);
   double fastPow10(int n);
@@ -204,7 +223,7 @@ private:
   bool NextBit();
   void MoveToNextByteBoundary();
 
-  BufrProduct currentProduct;
+  BufrProduct *currentTemplate;
   char *_tablePath;
   int _addBitsToDataWidth;
 
