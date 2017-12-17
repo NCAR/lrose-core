@@ -363,10 +363,13 @@ int OutputFmq::writeBeam(const Beam &beam)
   }
   if (printBeamDebug) {
     DateTime beamTime(beam.getTimeSecs(), true, beam.getNanoSecs() / 1.0e9);
+    time_t now = time(NULL);
+    int lateSecs = now - beam.getTimeSecs();
     fprintf(stderr,
-            "-->> OutputFmq::writeBeam %s - %s, vol: %.3d, sweep: %.3d, "
+            "-->> OutputFmq::writeBeam %s (late %d) - %s, vol: %.3d, "
+            "sweep: %.3d, "
             "az: %6.3f, el %5.3f, nSamples: %3d\n",
-            beamTime.asString(3).c_str(), 
+            beamTime.asString(3).c_str(), lateSecs, 
             iwrf_scan_mode_to_short_str(beam.getScanMode()).c_str(), 
             beam.getVolNum(), beam.getSweepNum(),
             beam.getAz(), beam.getEl(),
@@ -559,6 +562,7 @@ int OutputFmq::_openFmq()
   if (_params.data_mapper_report_interval > 0) {
     _rQueue->setRegisterWithDmap(true, _params.data_mapper_report_interval);
   }
+  _rQueue->setSingleWriter();
 
   return 0;
 

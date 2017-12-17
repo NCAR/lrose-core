@@ -274,7 +274,7 @@ int TsFile2Fmq::_runSim()
 
     IwrfTsPulse *pulse;
     while ((pulse = _reader->getNextPulse()) != NULL) {
-
+      
       PMU_auto_register("Simulate mode");
       nPulses++;
 
@@ -686,8 +686,10 @@ void TsFile2Fmq::_setPulseTime(IwrfTsPulse *pulse)
 
   if (_params.set_time_to_now) {
     // optionally set the time to the current time
-    if (_timeOffset == 0 || _reader->endOfFile()) {
-      time_t now = time(NULL);
+    time_t now = time(NULL);
+    time_t modPulseTime = pulse->getTime() + _timeOffset;
+    double deltaTime = fabs((double) now - (double) modPulseTime);
+    if (deltaTime > 1 || _timeOffset == 0) {
       time_t pulseTime = pulse->getTime();
       _timeOffset = now - pulseTime;
     }
