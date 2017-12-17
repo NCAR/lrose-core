@@ -12,9 +12,9 @@
 // RCS info
 //   $Author: mccabe $
 //   $Locker:  $
-//   $Date: 2017/10/30 18:56:20 $
-//   $Id: CenteredRectangularTemplate.cc,v 1.1 2017/10/30 18:56:20 mccabe Exp $
-//   $Revision: 1.1 $
+//   $Date: 2017/11/08 20:59:03 $
+//   $Id: CenteredRectangularTemplate.cc,v 1.2 2017/11/08 20:59:03 mccabe Exp $
+//   $Revision: 1.2 $
 //   $State: Exp $
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
@@ -44,17 +44,25 @@ using namespace std;
  * Constructor
  */
 
-CenteredRectangularTemplate::CenteredRectangularTemplate(double length, double width) :
+CenteredRectangularTemplate::CenteredRectangularTemplate(double length, double height) :
   GridTemplate()
 {
-  // Save the radius
-
   _length = length;
-  _width = width;
+  _height = height;
+
+  if(int(length) % 2 == 0) {
+    cerr << "WARNING: Using even value for length (" << length
+	 << ") will actually use length = " << length+1 << endl;
+  }
+
+  if(int(height) % 2 == 0) {
+    cerr << "WARNING: Using even value for height (" << height
+	 << ") will actually use height = " << height+1 << endl;
+  }  
   
   // Create the offsets list
 
-  for (int y = 0; y <= (int)(_width * 0.5); y++)
+  for (int y = 0; y <= (int)(_height * 0.5); y++)
   {
     for (int x = 0; x <= (int)(_length * 0.5); x++)
     {
@@ -96,7 +104,7 @@ void CenteredRectangularTemplate::printOffsetList(FILE *stream)
   fprintf(stream, "\n\n");
   fprintf(stream, "Centered Rectangular template:");
   fprintf(stream, "    length = %f\n", _length);
-  fprintf(stream, "    width = %f\n", _width);
+  fprintf(stream, "    height = %f\n", _height);
   
   fprintf(stream, " grid points:\n");
 

@@ -75,7 +75,7 @@ class CenteredRectangularTemplate : public GridTemplate
 
   // Constructor
 
-  CenteredRectangularTemplate(double length, double width);
+  CenteredRectangularTemplate(double length, double height);
   
   // Destructor
 
@@ -92,9 +92,9 @@ class CenteredRectangularTemplate : public GridTemplate
     return _length;
   }
 
-  double getWidth(void)
+  double getHeight(void)
   {
-    return _width;
+    return _height;
   }
   
  private:
@@ -102,7 +102,7 @@ class CenteredRectangularTemplate : public GridTemplate
   // The box dimensions
 
   double _length;
-  double _width;
+  double _height;
   
   // Return the class name for error messages.
 

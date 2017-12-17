@@ -26,7 +26,7 @@
 //  RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 //      File: $RCSfile: ChecktimeReport.cc,v $
-//      Version: $Revision: 1.4 $  Dated: $Date: 2016/03/03 18:45:40 $
+//      Version: $Revision: 1.5 $  Dated: $Date: 2017/12/14 15:59:24 $
 //
 //=============================================================================
 //
