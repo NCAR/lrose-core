@@ -33,13 +33,12 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef BufrProduct_HH
-#define BufrProduct_HH
+#ifndef BufrProductGeneric_HH
+#define BufrProductGeneric_HH
 
-
+#include <Radx/BufrProduct.hh>
 #include <Radx/RadxBuf.hh>
 #include <Radx/RadxTime.hh>
-#include <Radx/Radx.hh>
 #include <cstdlib>
 #include <vector>
 #include <map>
@@ -47,20 +46,20 @@
 ///////////////////////////////////////////////////////////////
 /// BASE CLASS FOR BUFR DATA ACCESS
 
-class BufrProduct
+class BufrProductGeneric : public BufrProduct
 {
   
 public:
 
   /// Constructor
   
-  BufrProduct();
+  BufrProductGeneric();
   
   /// Destructor
   
-  virtual ~BufrProduct();
+  virtual ~BufrProductGeneric();
 
-  void reset();
+  /*  void reset();
 
   //////////////////////////////////////////////////////////////
   /// \name Debugging:
@@ -86,16 +85,17 @@ public:
   //@}
 
   void allocateSpace(unsigned int n);
+  */
+  void addData(unsigned char value);
 
-  virtual void addData(unsigned char value);
 
-  virtual bool StuffIt(unsigned short, string fieldName, double value);
+  bool StuffIt(unsigned short, string fieldName, double value);
 
-  virtual double *decompressData();
-  virtual float *decompressDataFl32();
+  double *decompressData();
+  float *decompressDataFl32();
 
-  virtual void createSweep();
-
+  void createSweep();
+  /*
   void putYear(double value);
   void putMonth(double value);
   void putDay(double value);
@@ -157,10 +157,11 @@ public:
   // dump it into a RadxVol structure
 
   vector<unsigned int> replicators;
+  */
   virtual void trashReplicator();
   virtual void storeReplicator(unsigned int value);
 
-
+  /*
   // current position information
   int currentSweepNumber;  // set at 3;21;203 -> 1;12;0 -> 0;31;1
   int currentParamNumber;
@@ -192,13 +193,7 @@ public:
   void setAntennaBeamAzimuthDegrees(double value);
   double getAntennaBeamAzimuthDegrees(int sweepNumber);
 
-  double getLatitude() { return latitude; }
-  double getLongitude() { return longitude; }
-  double getHeight() { return height; }
-  int getWMOBlockNumber() { return WMOBlockNumber; }
-  int getWMOStationNumber() { return WMOStationNumber; }
-
-protected:
+private:
 
   // all of these could potentially change, so lock them down
   size_t nBinsAlongTheRadial;
@@ -209,24 +204,12 @@ protected:
   double antennaBeamAzimuthDegrees;
 
   size_t _maxBinsAlongTheRadial;
+  */
+  // a vector of pointers to vectors
+  vector< vector<unsigned char> *> genericStore;  
+  vector<unsigned char> *currentAccumulator;
 
-  //  vector<vector<unsigned char>> genericStore;  
-  //vector<unsigned char> currentAccumulator;
-
-  // unsigned int duration; // TODO: need getters and setters
-
-  double latitude;
-  double longitude;
-  double height;
-  //int hour;
-  //int minute;
-
-  int WMOBlockNumber;
-  int WMOStationNumber;
-  ///string typeOfStationId;
-  //string stationId;
-  string _fieldName;  // TODO:  resolve this with _fieldName in BufrFile; I just put this here to get by the compiler
-  string _errString;
+  unsigned int duration; // TODO: need getters and setters
 
 };
 #endif

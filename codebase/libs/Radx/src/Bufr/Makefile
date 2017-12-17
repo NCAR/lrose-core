@@ -26,7 +26,9 @@ LOC_CFLAGS =
 HDRS = \
 	../include/Radx/BufrFile.hh \
 	../include/Radx/BufrRadxFile.hh \
-	../include/Radx/BufrProduct.hh \
+	../include/BufrProduct.hh \
+	BufrProductGeneric.hh \
+	BufrProduct_204_31_X.hh \
 	../include/Radx/TableMapKey.hh \
 	../include/Radx/TableMapElement.hh \
 	../include/Radx/TableMap.hh \
@@ -36,6 +38,8 @@ CPPC_SRCS = \
 	BufrFile.cc \
 	BufrRadxFile.cc \
 	BufrProduct.cc \
+	BufrProductGeneric.cc \
+	BufrProduct_204_31_X.cc \
 	TableMapKey.cc \
 	TableMapElement.cc \
 	TableMap.cc \

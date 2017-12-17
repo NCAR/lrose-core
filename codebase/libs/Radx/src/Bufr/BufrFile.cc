@@ -46,6 +46,8 @@
 #include <Radx/ByteOrder.hh>
 #include <Radx/TableMapKey.hh>
 #include <Radx/RadxStr.hh>
+#include "BufrProductGeneric.hh"
+#include "BufrProduct_204_31_X.hh"
 
 using namespace std;
 
@@ -62,6 +64,7 @@ DNode::~DNode() {
 BufrFile::BufrFile()
   
 {
+  currentTemplate = NULL;
   _debug = false;
   _verbose = false;
   _very_verbose = false;
@@ -99,17 +102,21 @@ void BufrFile::clear()
   _descriptorsToProcess.clear();
   nOctetsRead = 0;
   _addBitsToDataWidth = 0;
+  if (currentTemplate != NULL) 
+    delete currentTemplate;
+  currentTemplate = NULL;
+
 }
 
 void BufrFile::setDebug(bool state) { 
   _debug = state; 
-  currentProduct.setDebug(state);
+  //currentTemplate->setDebug(state);
 }
 
 void BufrFile::setVerbose(bool state) {
   _verbose = state;
   if (_verbose) _debug = true;
-  currentProduct.setVerbose(state);
+  //currentTemplate->setVerbose(state);
   // we only want debug information from the tables if the setting is verbose,
   // because the information is very detailed.
   tableMap.setDebug(state);
@@ -120,7 +127,7 @@ void BufrFile::setTablePath(char *path) {
 }
 
 // go ahead and read all the data from the file
-// completely fill currentProduct with data
+// completely fill currentTemplate with data
 void BufrFile::readThatField(string fileName,
              string filePath,
              time_t fileTime,
@@ -137,6 +144,12 @@ void BufrFile::readThatField(string fileName,
     readSection0();
     readSection1();
     readDataDescriptors();
+    // TODO: determine which type of product to instaniate based
+    // on the data descriptors of section 3
+    //currentTemplate = new BufrProductGeneric();  // TODO: set this to 204_13_203
+    //currentTemplate->setVerbose(_verbose);
+    //currentTemplate->setDebug(_debug);
+    //currentTemplate->reset(); 
     readData(); 
     readSection5();
     close();
@@ -230,7 +243,7 @@ int BufrFile::openRead(const string &path)
     Radx::addErrStr(_errString, "  ", strerror(errNum), true);
     throw _errString.c_str();
   }
-  currentProduct.reset(); 
+  //currentTemplate->reset(); 
   return 0;
 }
 
@@ -612,12 +625,12 @@ void BufrFile::printSection3(ostream &out) {
 
 void BufrFile::printSection4(ostream &out) {
   prettyPrintTree(out, GTree, 0);
-  currentProduct.printSweepData(out);
+  currentTemplate->printSweepData(out);
 }
 
 /*
 void BufrFile::printSweepData(ostream &out) {
-  currentProduct.printSweepData(out);
+  currentTemplate->printSweepData(out);
 }
 */
 
@@ -704,7 +717,37 @@ int BufrFile::readDataDescriptors() {  // read section 3
     }
     free(buffer);
     _numBytesRead += sectionLen;
+
+    // TODO: determine which type of product to instaniate based
+    // on the data descriptors of section 3
+    if (matches_204_31_X(_descriptorsToProcess)) {
+      currentTemplate = new BufrProduct_204_31_X();
+    } else { 
+      currentTemplate = new BufrProductGeneric();
+    }
+    currentTemplate->setVerbose(_verbose);
+    currentTemplate->setDebug(_debug);
+    currentTemplate->reset(); 
+
   return 0;
+}
+
+
+bool BufrFile::matches_204_31_X(vector<unsigned short> &descriptors) {
+  // UGH! the descriptors are in reverse order.  Blah!  Need to
+  // access the last ones.
+  int n = descriptors.size();
+  if (n >= 3) { 
+    if ((descriptors[n-1] == 54732) && (descriptors[n-2] == 49439) &&
+	((descriptors[n-3] == 54731) || (descriptors[n-3] == 54735))) {
+      // 3;21;204 3;1;31 (3;21;203 or 3;21;207)
+      return true; 
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
 }
 
 // necessary for entry into this function:
@@ -948,7 +991,7 @@ Radx::ui32 BufrFile::Apply(TableMapElement f) {
         stationId = value;
       }
     } else if (fieldName.find("odim quantity") != string::npos) {
-      currentProduct.typeOfProduct = value;
+      currentTemplate->typeOfProduct = value;
     }
     return 0;
   } else {
@@ -1059,15 +1102,17 @@ Radx::fl32 BufrFile::ApplyNumericFloat(TableMapElement f) {
   }
 }
 
+/*
 // Put the info in the correct storage location
 // and take care of any setup that needs to happen
 bool BufrFile::StuffIt(string name, double value) {
   bool ok = true;
 
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-  if (name.find("byte element") != string::npos) {
+  if ((name.find("byte element") != string::npos) ||
+      (name.find("pixel value") != string::npos)) {
     // ugh!  It's not a double value, it's an unsigned char...
-    currentProduct.addData((unsigned char) value);
+    currentTemplate->addData((unsigned char) value);
   } else if (name.find("latitude") != string::npos) {
     latitude = value;
     // ******* TEST  *******
@@ -1080,32 +1125,34 @@ bool BufrFile::StuffIt(string name, double value) {
   } else if (name.find("height") != string::npos) {
     height = value;
   } else if (name.find("antenna elevation") != string::npos) {
-    currentProduct.setAntennaElevationDegrees(value);
-  } else if (name.find("number of bins along the radial") != string::npos) {
-    currentProduct.setNBinsAlongTheRadial((size_t) value);
+    currentTemplate->setAntennaElevationDegrees(value);
+  } else if ((name.find("number of bins along the radial") != string::npos)
+	     || (name.find("number of pixels per row") != string::npos)) {
+    currentTemplate->setNBinsAlongTheRadial((size_t) value);
   } else if ((name.find("range-bin size") != string::npos) ||
-    (name.find("range bin size") != string::npos)) {
-    currentProduct.setRangeBinSizeMeters(value);
+    (name.find("range bin size") != string::npos) || 
+    (name.find("range-bin size") != string::npos)) {
+    currentTemplate->setRangeBinSizeMeters(value);
   } else if ((name.find("range-bin offset") != string::npos) ||
     (name.find("range bin offset") != string::npos)) {
-    currentProduct.setRangeBinOffsetMeters(value);
+    currentTemplate->setRangeBinOffsetMeters(value);
   } else if (name.find("number of azimuths") != string::npos) {
-    currentProduct.setNAzimuths((size_t) value);
+    currentTemplate->setNAzimuths((size_t) value);
   } else if (name.find("antenna beam azimuth") != string::npos) {
-    currentProduct.setAntennaBeamAzimuthDegrees(value);
+    currentTemplate->setAntennaBeamAzimuthDegrees(value);
 
   } else if (name.find("year") != string::npos) {
-    currentProduct.putYear((int) value);
+    currentTemplate->putYear((int) value);
   } else if (name.find("month") != string::npos) {
-    currentProduct.putMonth((int) value);
+    currentTemplate->putMonth((int) value);
   } else if (name.find("day") != string::npos) {
-    currentProduct.putDay((int) value);
+    currentTemplate->putDay((int) value);
   } else if (name.find("hour") != string::npos) {
-    currentProduct.putHour((int) value);
+    currentTemplate->putHour((int) value);
   } else if (name.find("minute") != string::npos) {
-    currentProduct.putMinute((int) value);
+    currentTemplate->putMinute((int) value);
   } else if (name.find("second") != string::npos) {
-    currentProduct.putSecond((int) value);
+    currentTemplate->putSecond((int) value);
     // could probably use key to identify these fields...
     // instead of a string search
   } else if (name.find("wmo block") != string::npos) {
@@ -1121,35 +1168,35 @@ bool BufrFile::StuffIt(string name, double value) {
     // make sure the type of product agrees with the field name
     switch(code) {
     case 0:
-      currentProduct.typeOfProduct = "DBZH";
+      currentTemplate->typeOfProduct = "DBZH";
       break;
     case 40:
-      currentProduct.typeOfProduct = "VRAD";
+      currentTemplate->typeOfProduct = "VRAD";
       break;
     case 80:
-      currentProduct.typeOfProduct = "ZDR";
+      currentTemplate->typeOfProduct = "ZDR";
       break;
     case 90:
       break;
     case 91: 
     case 230:
-      currentProduct.typeOfProduct = "TH";
+      currentTemplate->typeOfProduct = "TH";
       break;
     case 92:
     case 60:
-      currentProduct.typeOfProduct = "WRAD";
+      currentTemplate->typeOfProduct = "WRAD";
       break;	  
     case 243:
-      currentProduct.typeOfProduct = "CM";
+      currentTemplate->typeOfProduct = "CM";
       break;
     case 240:
-      currentProduct.typeOfProduct = "KDP";
+      currentTemplate->typeOfProduct = "KDP";
       break;
     case 239:
-      currentProduct.typeOfProduct = "PHIDP";
+      currentTemplate->typeOfProduct = "PHIDP";
       break;
     case 241:
-      currentProduct.typeOfProduct = "RHOHV";
+      currentTemplate->typeOfProduct = "RHOHV";
       break;
     case 242:
       // ugh! allow for different name for this variable
@@ -1157,22 +1204,22 @@ bool BufrFile::StuffIt(string name, double value) {
       // fieldName == ""     ==> use "ZDR"
       // fieldName == "ZDR"  ==> use "ZDR"
       if (_fieldName.size() < 0) {
-          currentProduct.typeOfProduct = "ZDR";
+          currentTemplate->typeOfProduct = "ZDR";
       } else {
         string temp = _fieldName;
         std::transform(temp.begin(), temp.end(), temp.begin(), ::toupper);
         if (temp.compare("ZDR") == 0) {
-          currentProduct.typeOfProduct = "ZDR";
+          currentTemplate->typeOfProduct = "ZDR";
 	} else {
-	  currentProduct.typeOfProduct = "TDR";
+	  currentTemplate->typeOfProduct = "TDR";
 	}
       }
       break;
     case 231:
-      currentProduct.typeOfProduct = "TV";
+      currentTemplate->typeOfProduct = "TV";
       break; 
     default:
-      currentProduct.typeOfProduct = "UNKNOWN";
+      currentTemplate->typeOfProduct = "UNKNOWN";
       ok = false;
     } 
     // make sure the field name we are looking for agrees with
@@ -1183,7 +1230,7 @@ bool BufrFile::StuffIt(string name, double value) {
       if (_fieldName.size() > 0) {
         string temp = _fieldName;
         std::transform(temp.begin(), temp.end(), temp.begin(), ::toupper);
-        if (currentProduct.typeOfProduct.compare(temp) != 0) {
+        if (currentTemplate->typeOfProduct.compare(temp) != 0) {
 	  Radx::addErrStr(_errString, "", "ERROR - BufrFile::StuffIt", true);
 	  Radx::addErrStr(_errString, "  Expected Type of Product code for ", 
 			  temp.c_str(), true);
@@ -1191,7 +1238,7 @@ bool BufrFile::StuffIt(string name, double value) {
 	  throw _errString.c_str();
 	}
       } else {
-        //  TODO: we'll need to use the currentProduct.typeOfProduct as the field name
+        //  TODO: we'll need to use the currentTemplate->typeOfProduct as the field name
 	;
       }
     }
@@ -1200,88 +1247,90 @@ bool BufrFile::StuffIt(string name, double value) {
   }
   return ok;
 }
+*/
+
 
 size_t BufrFile::getTimeDimension() {
-  return currentProduct.getNAzimuths();
+  return currentTemplate->getNAzimuths();
 }
 
 //size_t BufrFile::getMaxRangeDimension() {
-//  return currentProduct.getMaxBinsAlongTheRadial();
+//  return currentTemplate->getMaxBinsAlongTheRadial();
 //}
 
 size_t BufrFile::getNumberOfSweeps() {
-  return currentProduct.sweepData.size();
+  return currentTemplate->sweepData.size();
 }
 
 size_t BufrFile::getNBinsAlongTheRadial(int sweepNumber) {
-  return currentProduct.getNBinsAlongTheRadial(sweepNumber);
+  return currentTemplate->getNBinsAlongTheRadial(sweepNumber);
 }
 
 double BufrFile::getRangeBinOffsetMeters() {
-  return currentProduct.getRangeBinOffsetMeters();
+  return currentTemplate->getRangeBinOffsetMeters();
 }
 
 double BufrFile::getRangeBinSizeMeters(int sweepNumber) {
-  return currentProduct.getRangeBinSizeMeters(sweepNumber);
+  return currentTemplate->getRangeBinSizeMeters(sweepNumber);
 }
 
 double BufrFile::getElevationForSweep(int sweepNumber) {
-  return currentProduct.sweepData.at(sweepNumber).antennaElevationDegrees;
+  return currentTemplate->sweepData.at(sweepNumber).antennaElevationDegrees;
 }
 
 int BufrFile::getNAzimuthsForSweep(int sweepNumber) {
-  return currentProduct.sweepData.at(sweepNumber).nAzimuths;
+  return currentTemplate->sweepData.at(sweepNumber).nAzimuths;
 }
 
 double BufrFile::getStartingAzimuthForSweep(int sweepNumber) {
-  return currentProduct.sweepData.at(sweepNumber).antennaBeamAzimuthDegrees;
+  return currentTemplate->sweepData.at(sweepNumber).antennaBeamAzimuthDegrees;
 }
 
 double BufrFile::getStartTimeForSweep(int sweepNumber) {
   // BufrProduct::TimeStamp t;
-  // t = currentProduct.sweepData.at(sweepNumber).startTime;
+  // t = currentTemplate->sweepData.at(sweepNumber).startTime;
   // RadxTime rTime(t.year, t.month, t.day, t.hour, t.minute, t.second); 
   // return rTime.asDouble();
-  //return currentProduct.sweepData.at(sweepNumber).startTime.asDouble();
+  //return currentTemplate->sweepData.at(sweepNumber).startTime.asDouble();
   RadxTime *time;
-  time = currentProduct.sweepData.at(sweepNumber).startTime;
+  time = currentTemplate->sweepData.at(sweepNumber).startTime;
   return time->asDouble();
 }
 
 double BufrFile::getEndTimeForSweep(int sweepNumber) {
   // BufrProduct::TimeStamp t;
-  // t = currentProduct.sweepData.at(sweepNumber).endTime;
+  // t = currentTemplate->sweepData.at(sweepNumber).endTime;
   // RadxTime rTime(t.year, t.month, t.day, t.hour, t.minute, t.second); 
   // return rTime.asDouble();
-  //return currentProduct.sweepData.at(sweepNumber).endTime.asDouble();
+  //return currentTemplate->sweepData.at(sweepNumber).endTime.asDouble();
   // TODO: shouldn't this be a time_t value?? instead of a double??
   RadxTime *time;
-  time = currentProduct.sweepData.at(sweepNumber).endTime;
+  time = currentTemplate->sweepData.at(sweepNumber).endTime;
   return time->asDouble();
 }
 
 time_t BufrFile::getStartUTime(int sweepNumber) {
   RadxTime *time;
-  time = currentProduct.sweepData.at(sweepNumber).startTime;
+  time = currentTemplate->sweepData.at(sweepNumber).startTime;
   return time->utime();
 }
 
 time_t BufrFile::getEndUTime(int sweepNumber) {
   RadxTime *time;
-  time = currentProduct.sweepData.at(sweepNumber).endTime;
+  time = currentTemplate->sweepData.at(sweepNumber).endTime;
   return time->utime();
 }
 
 float *BufrFile::getDataForSweepFl32(int sweepNumber) { 
-  return currentProduct.sweepData.at(sweepNumber).parameterData[0].data;
+  return currentTemplate->sweepData.at(sweepNumber).parameterData[0].data;
 }
 
 double *BufrFile::getDataForSweepFl64(int sweepNumber) { 
-  return currentProduct.sweepData.at(sweepNumber).parameterDataFl64[0].data;
+  return currentTemplate->sweepData.at(sweepNumber).parameterDataFl64[0].data;
 }
 
 string BufrFile::getTypeOfProductForSweep(int sweepNumber) { 
-  return currentProduct.sweepData.at(sweepNumber).parameterData[0].typeOfProduct;
+  return currentTemplate->sweepData.at(sweepNumber).parameterData[0].typeOfProduct;
 }
 
 void BufrFile::_deleteAfter(DNode *p) {
@@ -1590,7 +1639,7 @@ int BufrFile::_descend(DNode *tree) {
 	  p->somejunksvalue = _tempStringValue;
 	} else {
 	  valueFromData = ApplyNumericFloat(val1);
-	  if (!StuffIt(val1._descriptor.fieldName, valueFromData)) {
+	  if (!currentTemplate->StuffIt(des, val1._descriptor.fieldName, valueFromData)) {
             if (des != 7681) {
 	      Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
 	      Radx::addErrStr(_errString, "Unrecognized descriptor: ",
@@ -1657,7 +1706,7 @@ int BufrFile::_descend(DNode *tree) {
 	  Radx::ui32 nRepeats; // actually read this from the data section
           nRepeats = Apply(tableMap.Retrieve(delayed_replication_descriptor));
           if (_verbose) printf("nrepeats from Data = %u\n", nRepeats);
-          currentProduct.storeReplicator(nRepeats);
+          currentTemplate->storeReplicator(nRepeats);
           p->ivalue = nRepeats;
           if (p->children == NULL) {
             moveChildren(p, x);
@@ -1672,7 +1721,7 @@ int BufrFile::_descend(DNode *tree) {
 	  }
           if (_verbose) printf("-- end repeat\n");
           // transition state; set location levels
-          currentProduct.trashReplicator();
+          currentTemplate->trashReplicator();
           p=p->next;
 	} else {           // must be a fixed repeater
           if (p->children == NULL) {
@@ -1727,7 +1776,7 @@ int BufrFile::_descend(DNode *tree) {
       }
     } // end while p!= NULL
     if (compressionStart) {
-      currentProduct.createSweep();
+      currentTemplate->createSweep();
       compressionStart = false;
     }
   } catch (const std::out_of_range& e) {

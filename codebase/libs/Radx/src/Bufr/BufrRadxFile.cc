@@ -844,16 +844,16 @@ void BufrRadxFile::_accumulateFieldFirstTime(string fieldName, string units, str
 
 
     // _readGlobalAttributes();
-    _year_attr = _file.hdr_year;
-    _month_attr = _file.hdr_month;
-    _day_attr = _file.hdr_day;
+    _year_attr = _file.getHdrYear();
+    _month_attr = _file.getHdrMonth();
+    _day_attr = _file.getHdrDay();
     if ((_year_attr != _fileTime.getYear()) ||
        (_month_attr != _fileTime.getMonth()) ||
        (_day_attr != _fileTime.getDay()))
     throw "Time in file name does not match time in file";
 
-    _siteName = _file.typeOfStationId;
-    _instrumentName = _file.stationId;
+    _siteName = _file.getTypeOfStationId();
+    _instrumentName = _file.getStationId();
   
     // read lat/lon/alt 
     _setPositionVariables();
@@ -1002,22 +1002,22 @@ void BufrRadxFile::_accumulateField(string fieldName, string units, string stand
   }
   */
 
-  if ((_year_attr != _file.hdr_year) || (_month_attr != _file.hdr_month) ||
-      (_day_attr != _file.hdr_day)) {
+  if ((_year_attr != _file.getHdrYear()) || (_month_attr != _file.getHdrMonth()) ||
+      (_day_attr != _file.getHdrDay())) {
     _errorMessage(location, "Date is incompatible, found ",
-		  _file.hdr_year, _year_attr);
+		  _file.getHdrYear(), _year_attr);
     _errorMessage(location, "Date is incompatible, found ", 
-		  _file.hdr_month, _month_attr);
+		  _file.getHdrMonth(), _month_attr);
     _errorMessage(location, "Date is incompatible, found ",
-		  _file.hdr_day, _day_attr);
+		  _file.getHdrDay(), _day_attr);
     throw "incompatible";
   }
-  if ((_siteName != _file.typeOfStationId) || 
-      (_instrumentName != _file.stationId)) {
+  if ((_siteName != _file.getTypeOfStationId()) || 
+      (_instrumentName != _file.getStationId())) {
     _errorMessage(location, "Global data are incompatible, found ",
-		  _file.typeOfStationId, _siteName);
+		  _file.getTypeOfStationId(), _siteName);
     _errorMessage(location, "Global data are incompatible, found ",
-		  _file.stationId, _instrumentName);
+		  _file.getStationId(), _instrumentName);
     throw "incompatible";
   }
   
@@ -1148,13 +1148,13 @@ int BufrRadxFile::_readGlobalAttributes()
    _file.readGlobAttr("receiver_gain", _receiver_gain_attr);
    _file.readGlobAttr("cable_losses", _cable_losses_attr);
   */
-   _year_attr = _file.hdr_year;
-   _month_attr = _file.hdr_month;
-   _day_attr = _file.hdr_day;
+  _year_attr = _file.getHdrYear();
+   _month_attr = _file.getHdrMonth();
+   _day_attr = _file.getHdrDay();
    // _file.readGlobAttr("institution", _institution);
  
-   _siteName = _file.typeOfStationId;
-   _instrumentName = _file.stationId;
+   _siteName = _file.getTypeOfStationId();
+   _instrumentName = _file.getStationId();
    //_platformType = // WMO block number
      // WMO station number
    
@@ -1294,7 +1294,7 @@ int BufrRadxFile::_setPositionVariables()
   // find latitude, longitude, height
 
   int iret = 0;
-  _latitudeDeg = _file.latitude;
+  _latitudeDeg = _file.getLatitude();
   if ((_latitudeDeg < -90) || (_latitudeDeg > 90)) {
     _addErrStr("ERROR - BufrRadxFile::_setPositionVariables");
     char temp[1024];
@@ -1304,7 +1304,7 @@ int BufrRadxFile::_setPositionVariables()
     iret = -1;
   }
 
-  _longitudeDeg = _file.longitude;
+  _longitudeDeg = _file.getLongitude();
   if ((_longitudeDeg < -180) || (_longitudeDeg > 180)) {
     _addErrStr("ERROR - BufrRadxFile::_setPositionVariables");
     char temp[1024];
@@ -1313,7 +1313,7 @@ int BufrRadxFile::_setPositionVariables()
     iret = -1;
   }
 
-  _heightKm = _file.height / 1000.0;  // convert to Km
+  _heightKm = _file.getHeight() / 1000.0;  // convert to Km
   if (_heightKm < 0) {
     _addErrStr("ERROR - BufrRadxFile::_setPositionVariables");
     _addErrStr("  Cannot read height");
@@ -1329,7 +1329,7 @@ int BufrRadxFile::_verifyPositionVariables()
   // find latitude, longitude, height
 
   int iret = 0;
-  if (_latitudeDeg != _file.latitude) {
+  if (_latitudeDeg != _file.getLatitude()) {
     _addErrStr("ERROR - BufrRadxFile::_verifyPositionVariables");
     char temp[1024];
     sprintf(temp, "%g", _latitudeDeg);
@@ -1337,7 +1337,7 @@ int BufrRadxFile::_verifyPositionVariables()
     iret = -1;
   }
 
-  if(_longitudeDeg != _file.longitude) {
+  if(_longitudeDeg != _file.getLongitude()) {
     _addErrStr("ERROR - BufrRadxFile::_verifyPositionVariables");
     char temp[1024];
     sprintf(temp, "%g", _longitudeDeg);
@@ -1345,10 +1345,10 @@ int BufrRadxFile::_verifyPositionVariables()
     iret = -1;
   }
 
-  if (_heightKm != _file.height / 1000.0) {  // convert to Km
+  if (_heightKm != _file.getHeight() / 1000.0) {  // convert to Km
     _addErrStr("ERROR - BufrRadxFile::_verifyPositionVariables");
     char temp[1024];
-    sprintf(temp, "%g", _file.height);
+    sprintf(temp, "%g", _file.getHeight());
     _addErrStr("  Height incompatible, found height (Km): ", temp);
     iret = -1;
   }
