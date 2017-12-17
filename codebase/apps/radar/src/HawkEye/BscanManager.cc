@@ -1668,6 +1668,9 @@ void BscanManager::_addRay(const RadxRay *ray)
   RadxTime rayStartTime(rayTime - halfDwellTime);
   RadxTime rayEndTime(rayTime + halfDwellTime);
   _prevRayTime = rayTime;
+  if (halfDwellTime <= 0) {
+    return;
+  }
 
   // create 2D field data vector
 
