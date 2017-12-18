@@ -142,6 +142,7 @@ int tdrpInitFileForTokens(token_handle_t *handle,
       fprintf(stderr, "Cannot read file for parsing\n");
       perror(file_path);
       fclose(parse_file);
+      tdrpFree(filebuf);
       return (-1);
     }
     fclose(parse_file);
@@ -253,7 +254,7 @@ int tdrpTokenize(token_handle_t *handle)
      * for character strings ...
      */
     
-    if (handle->string_in_progress) {
+    if (handle->string_in_progress != FALSE) {
 
       /*
        * we are in a string
@@ -320,7 +321,7 @@ int tdrpTokenize(token_handle_t *handle)
 
       } /* if (!string_divide_found) */
 
-    } else { /* if (handle->string_in_progress) */
+    } else { /* if (handle->string_in_progress != FALSE) */
 
       /*
        * no string in progress
@@ -350,7 +351,7 @@ int tdrpTokenize(token_handle_t *handle)
 
       }
       
-    } /* if (handle->string_in_progress) */
+    } /* if (handle->string_in_progress != FALSE) */
 
   } /* while */
 
@@ -368,7 +369,7 @@ int tdrpTokenize(token_handle_t *handle)
     }
   }
 
-  if (handle->string_in_progress) {
+  if (handle->string_in_progress != FALSE) {
     fprintf(stderr, "ERROR - string in progress at end of file\n");
     fprintf(stderr, "  Check for missing quote\n");
     return -1;
@@ -493,7 +494,7 @@ static void store_current_tok(token_handle_t *handle)
 
 {
 
-  if (handle->string_in_progress) {
+  if (handle->string_in_progress != FALSE) {
     store_tok(handle);
   } else if (handle->nbuf > 0) {
     store_tok(handle);
@@ -524,7 +525,7 @@ static void store_tok(token_handle_t *handle)
   
   handle->tokens[handle->ntok].used = FALSE;
   handle->tokens[handle->ntok].line_num = handle->line_num;
-  if (handle->string_in_progress) {
+  if (handle->string_in_progress != FALSE) {
     handle->tokens[handle->ntok].is_string = TRUE;
   } else {
     handle->tokens[handle->ntok].is_string = FALSE;
