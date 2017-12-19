@@ -695,6 +695,7 @@ ui08 *uRLEncode(const ui08 *full_data, ui32 nbytes_full,
 
   } else {
 
+    ufree(coded_data);
     return ((ui08 *) NULL);
 
   } /* if (full_data != NULL) */
