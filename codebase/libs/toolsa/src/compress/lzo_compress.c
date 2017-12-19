@@ -287,6 +287,7 @@ void *lzo_decompress(const void *compressed_buffer,
       fprintf(stderr, "LZO decompress: failure\n");
 #endif
       *nbytes_uncompressed_p = 0;
+      ufree(uncompressed_data);
       return (NULL);
     }
 
