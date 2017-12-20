@@ -2278,10 +2278,7 @@ int Fmq::_load_read_msg(int msg_type,
     _slot.msg_len = uncompressed_len;
     _slot.stored_len = stored_len;
     _msgBuf.free();
-    if (_add_read_msg(dmsg, uncompressed_len)) {
-      cerr << "ERROR - _load_read_msg" << endl;
-      return -1;
-    }
+    _msgBuf.add(dmsg, uncompressed_len);
     ta_compress_free(dmsg);
     
   } else {
@@ -2289,11 +2286,8 @@ int Fmq::_load_read_msg(int msg_type,
     _slot.msg_len = stored_len;
     _slot.stored_len = stored_len;
     _msgBuf.free();
-    if (_add_read_msg(msg, stored_len)) {
-      cerr << "ERROR - _load_read_msg" << endl;
-      return -1;
-    }
-    
+    _msgBuf.add(msg, stored_len);
+
   }
   
   return 0;
@@ -2312,6 +2306,7 @@ int Fmq::_add_read_msg(void *msg, int msg_size)
     cerr << "ERROR - Fmq::_add_to_msg" << endl;
     cerr << "  fmq path: " << _fmqPath << endl;
     cerr << "  bad message size on read: " << msg_size << endl;
+    cerr << "  max message size: " << _bufSize << endl;
     return -1;
   }
   _msgBuf.add(msg, msg_size);
@@ -2870,6 +2865,8 @@ int Fmq::_open_device(const char *mode)
     _print_error("_open_device", _dev->getErrStr().c_str());
     return -1;
   }
+
+  _bufSize = _dev->get_size(FmqDevice::BUF_IDENT);
 
   return 0;
 

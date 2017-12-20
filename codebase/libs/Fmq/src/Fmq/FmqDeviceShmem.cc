@@ -514,6 +514,15 @@ int FmqDeviceShmem::check_size(ident_t id, size_t expectedSize)
   
 }
 
+////////////////////////////////////////////////////
+//  Get device buffer size
+
+int FmqDeviceShmem::get_size(ident_t id)
+
+{
+  return _nbytes[id];
+}
+
 ////////////////////////////////////////////////////////////
 //  Update the last_id_read in the status struct if the
 //  write mode is blocking.

@@ -95,7 +95,11 @@ public:
   // Check that the device is the valid size.
   // Returns 0 on success, -1 on failure
   
-  int check_size(ident_t id, size_t expectedSize);
+  virtual int check_size(ident_t id, size_t expectedSize);
+  
+  // Get size of device buffer
+
+  virtual int get_size(ident_t id);
   
 protected:
 
