@@ -68,6 +68,7 @@ public:
   TableMapElement Retrieve(unsigned short key);
   bool filled();
   bool isWhiteSpace(string &str);
+  string trim(string &str);
 
 private:
   std::map<unsigned short, TableMapElement> table;  // TODO: should be unordered_map
