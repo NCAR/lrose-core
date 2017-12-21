@@ -293,14 +293,64 @@ int BufrRadxFile::writeToPath(const RadxVol &vol,
 }
 
 ////////////////////////////////////////////////
-// get the date and time from a dorade file path
+// get the date and time from a string
 // returns 0 on success, -1 on failure
 
 time_t  BufrRadxFile::getTimeFromString(const char *dateTime)
 {
   struct tm tm;
   int year, month, day, hour, min, sec;
+
+ 
+  if (strptime(dateTime, "%d%H%M", &tm) != NULL) {
+    //    return getTimeFromTm(tm);
+    day = tm.tm_mday;
+    //month = tm.tm_mon + 1;
+    //year = tm.tm_year + 1900;
+    hour = tm.tm_hour;
+    min = tm.tm_min;
+    //sec = tm.tm_sec;
+
+    if ( day < 1 || day > 31) {
+      return -1;
+    }
+    if (hour < 0 || hour > 23 || min < 0 || min > 59) {
+      return -1;
+    }
+    RadxTime theTime;
+    time_t t;
+    t = theTime.setTime(hour, min);
+    t = theTime.setDay(day);
+    return t;
+  }
   if (strptime(dateTime, "%Y%m%dT%H%M%S", &tm) != NULL) {
+    //return getTimeFromTm(tm);
+    day = tm.tm_mday;
+    month = tm.tm_mon + 1;
+    year = tm.tm_year + 1900;
+    hour = tm.tm_hour;
+    min = tm.tm_min;
+    sec = tm.tm_sec;
+
+    if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
+      return -1;
+    }
+    if (hour < 0 || hour > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) {
+      return -1;
+    }
+    RadxTime theTime;
+    time_t t;
+    t = theTime.set(year, month, day, hour, min, sec);
+    return t;
+  }
+  return -1;
+}
+
+time_t BufrRadxFile::getTimeFromTm(const struct tm &tm)
+{
+  //struct tm tm;
+  int year, month, day, hour, min, sec;
+
     day = tm.tm_mday;
     month = tm.tm_mon + 1;
     year = tm.tm_year + 1900;
@@ -319,9 +369,8 @@ time_t  BufrRadxFile::getTimeFromString(const char *dateTime)
     t = theTime.set(year, month, day, hour, min, sec);
 
     return t;
-    //return 0;
-  }
-  return 0;
+  
+ 
 }
 
 /////////////////////////////////////////////////////////
@@ -428,9 +477,30 @@ string &standardName, string &longName) {
       standardName = "width";
       longName = "width";
     } else {
-      _addErrStr("ERROR - BufrRadxFile::lookupFieldName");
-      _addErrStr("  Unrecognized field: ", fieldName);
-      throw _errStr.c_str();
+      // check for "[A|B|C|D]9[0|1]" pattern
+      bool matches = false;
+      if (fieldName.size() == 3) {
+	if ( (fieldName[0] >= 'A') && (fieldName[1] <= 'D') &&
+	     (fieldName[1] == '9') && 
+	     ((fieldName[2] == '0') || (fieldName[2] == '1')) ) {
+	      matches = true;
+	      units = "1";
+	      standardName = fieldName;
+	      longName = fieldName;
+	    }
+      }
+      if (!matches) {
+	_addErrStr("WARNING - BufrRadxFile::lookupFieldName");
+	_addErrStr("  Unrecognized field: ", fieldName);
+      //      _addErrStr("  Attempting to continue using default values");
+      // cout >> _errStr >> endl;
+      //units = "1";
+      //standardName = "unknown";
+      //longName = "unknown";
+      //_addErrStr("ERROR - BufrRadxFile::lookupFieldName");
+      //_addErrStr("  Unrecognized field: ", fieldName);
+	throw _errStr.c_str();
+      }
     }
 }
 
@@ -438,7 +508,7 @@ string &standardName, string &longName) {
 // Read in all fields for specified path.
 // Returns 0 on success, -1 on failure
 
-int BufrRadxFile::_readFields(const string &path)
+bool BufrRadxFile::fieldNamesWithinFileName(const string &path)
   
 {
   // get the list of all files, one field in each, that match this time
@@ -449,9 +519,9 @@ int BufrRadxFile::_readFields(const string &path)
   _getFieldPaths(path, fileNames, filePaths, fieldNames);
 
   if (filePaths.size() < 1) {
-    _addErrStr("WARNING - BufrRadxFile::_readFields");
+    _addErrStr("WARNING - BufrRadxFile::fieldNamesWithinFileName");
     _addErrStr("  No field files found, path: ", path);
-    return -1;
+    return false;
   }
 
   // set file time
@@ -460,9 +530,9 @@ int BufrRadxFile::_readFields(const string &path)
   fileTime = getTimeFromString(fileNameSuffix.c_str());
   if (fileTime == 0) {
   // if (setTimeFromPath(fileNameSuffix, fileTime)) {
-    _addErrStr("ERROR - BufrRadxFile::_readFields");
+    _addErrStr("ERROR - BufrRadxFile::fieldNamesWithinFileName");
     _addErrStr("  Cannot get time from file: ", fileNames[0]);
-    return -1;
+    return false;
   }
 
   _fileTime.set(fileTime);
@@ -494,7 +564,7 @@ int BufrRadxFile::_readFields(const string &path)
         // const string &path, ostream &out, bool printRays, bool printData
     } catch (const char *msg) {
       // report error message and move to the next field
-      _addErrStr("ERROR - BufrRadxFile::_readFields");
+      _addErrStr("ERROR - BufrRadxFile::fieldNamesWithinFileName");
       _addErrStr("  Cannot read in field from path: ", filePaths[ii]);
       _addErrStr("  ", msg);
       cerr << _errStr;
@@ -503,17 +573,147 @@ int BufrRadxFile::_readFields(const string &path)
   } // ii
 
   if (_readPaths.size() == 0) {
-    _addErrStr("ERROR - BufrRadxFile::_readFields");
+    _addErrStr("ERROR - BufrRadxFile::fieldNamesWithinFileName");
     _addErrStr("  No fields read in");
-    return -1;
+    return false;
   }
-  return 0;
+  return true;
 }
 
 /////////////////////////////////////////////////////////////////
 // get list of field paths for the volume for the specified path
-
+// send primaryPath 
+// returns fileNames, filePaths, and fieldNames
 void BufrRadxFile::_getFieldPaths(const string &primaryPath,
+                                 vector<string> &fileNames,
+                                 vector<string> &filePaths,
+                                 vector<string> &fieldNames)
+  
+{
+
+  // init
+
+  fileNames.clear();
+  filePaths.clear();
+  fieldNames.clear();
+ 
+  //try {
+  bool ok = true;
+  // decompose the path to get the date/time prefix for the primary path
+  
+  RadxPath rpath(primaryPath);
+  //const string &dir = rpath.getDirectory();
+  const string &fileName = rpath.getFile();
+  //const string &ext = rpath.getExt();
+  if (fileName.size() >= 3) {
+   
+    string start = fileName.substr(0,3);
+    // TODO: convert string to lowercase
+    if (start.compare("RMA") == 0) 
+      _getFieldPathsRMA(primaryPath, fileNames, filePaths, fieldNames);
+    else if (start.compare("PAG") == 0)
+       _getFieldPathsPAG(primaryPath, fileNames, filePaths, fieldNames);
+    else {
+      ok = false;
+    }
+  }
+  if (!ok) {
+    // it's ok to just return because an error is indicated by
+    // fileNames list being empty.
+    return; 
+  }
+}
+  
+  /*
+  // example fileName:  RMA1_0117_02_TH_20170430T070516Z.BUFR
+  //                    01234567890123456789012345678901
+  //                              1         2         3
+  // AH! this won't work, because the embedded field name has variable length.
+  // fixed length for the prefix is ok, but use string.find 
+  // to locate the suffix.
+  int prefix_start = 0;
+  int prefix_len = 12;
+  int suffix_start = 16;
+  int suffix_len = 16;
+  string prefix(fileName.substr(prefix_start, prefix_len));
+  size_t pos = fileName.find('.', prefix_len);
+  if (pos != string::npos) {
+    suffix_start = pos - suffix_len;
+  } else {
+    suffix_start = fileName.length() - suffix_len;
+  }
+  string suffix(fileName.substr(suffix_start, suffix_len));
+  // set the class variable for the suffix
+  fileNameSuffix = suffix;
+
+  
+  // load up array of file names that match the prefix and suffix
+  
+  RadxReadDir rdir;
+  if (rdir.open(dir.c_str()) == 0) {
+    
+    // Loop thru directory looking for the data file names
+    // or forecast directories
+    
+    struct dirent *dp;
+    for (dp = rdir.read(); dp != NULL; dp = rdir.read()) {
+      
+      string dName(dp->d_name);
+      
+      // exclude dir entries beginning with '.'
+      
+      if (dName[0] == '.') {
+	continue;
+      }
+
+      // make sure we have .vol files
+      
+      if (dName.find(ext) == string::npos) {
+	continue;
+      }
+
+      string dStr(dName.substr(prefix_start, prefix_len));
+      // to get the suffix, we need to find the end of the file name,
+      // then subtract the suffix length, to get the start of the suffix
+      // really, strip the extension off, then use the end of the string or string length
+      // size_t pos = fileName.find('.', prefix_len);
+	  // just find the suffix
+      size_t suffix_start2 = dName.rfind(suffix);
+      
+      if ((dStr == prefix) && (suffix_start2 != string::npos)) {
+        // get field name from file name
+	//    size_t pos = dName.find('_', prefix_len);
+        //if (pos != string::npos) {
+          fileNames.push_back(dName);
+	  // +/- 1 to skip the '_' characters
+          int fieldNameLength = suffix_start2 - prefix_len - 2;
+          string fieldName = dName.substr(prefix_len+1, fieldNameLength);
+          fieldNames.push_back(fieldName);
+          string dPath(dir);
+          dPath += RadxPath::RADX_PATH_DELIM;
+          dPath += dName;
+          filePaths.push_back(dPath);
+          
+	  //} // if (pos ...
+      } // if (dStr ...
+      
+    } // dp
+    
+    rdir.close();
+
+  } // if (rdir ...
+
+  } catch (const std::out_of_range& e) {
+    cerr << "file name does not match pattern for Argentina data" << endl;
+  }
+}
+  */
+
+/////////////////////////////////////////////////////////////////
+// get list of field paths for the volume for the specified path
+// send primaryPath 
+// returns fileNames, filePaths, and fieldNames
+void BufrRadxFile::_getFieldPathsRMA(const string &primaryPath,
                                  vector<string> &fileNames,
                                  vector<string> &filePaths,
                                  vector<string> &fieldNames)
@@ -610,38 +810,75 @@ void BufrRadxFile::_getFieldPaths(const string &primaryPath,
     rdir.close();
 
   } // if (rdir ...
-  /*
-  // sort the file names
-
-  sort(fileNames.begin(), fileNames.end());
-
-  // load up the paths and field names
-
-  for (size_t ii = 0; ii < fileNames.size(); ii++) {
-
-    const string &fileName = fileNames[ii];
-
-    size_t pos = fileName.find('.', 16);
-    string fieldName = fileName.substr(16, pos - 16);
-    fieldNames.push_back(fieldName);
-    
-    string dPath(dir);
-    dPath += RadxPath::RADX_PATH_DELIM;
-    dPath += fileName;
-    filePaths.push_back(dPath);
-
-  } // ii
-  */
 
   } catch (const std::out_of_range& e) {
     cerr << "file name does not match pattern for Argentina data" << endl;
   }
 }
 
+/////////////////////////////////////////////////////////////////
+// get list of field paths for the volume for the specified path
+// Find all files that match the pattern PAGXNNEODCddhhmm
+//                                          ---    ------
+// send primaryPath 
+// returns fileNames, filePaths, and fieldNames
+ void BufrRadxFile::_getFieldPathsPAG(const string &primaryPath,
+				      vector<string> &fileNames,
+				      vector<string> &filePaths,
+				      vector<string> &fieldNames)
+  
+ {
+  
+   // init
+
+   fileNames.clear();
+   filePaths.clear();
+   fieldNames.clear();
+  
+   try {
+     // decompose the path to get the date/time prefix for the primary path
+  
+     RadxPath rpath(primaryPath);
+     const string &dir = rpath.getDirectory();
+     const string &fileName = rpath.getFile();
+     //const string &ext = rpath.getExt();
+     // example fileName:  PAGXNNEODCddhhmm
+     //                    01234567890123456
+     //                              1     
+     // XNN is the prefix
+     // ddhhmm is the suffix
+     //
+     int prefix_start = 3;
+     int prefix_len = 3;
+     int suffix_start = 10;
+     int suffix_len = 6;
+     string prefix(fileName.substr(prefix_start, prefix_len));
+     string suffix(fileName.substr(suffix_start, suffix_len));
+     // set the class variable for the suffix
+     // TODO: the filename only provides ddhhmm, get the month & year
+     // from the directory
+     fileNameSuffix = suffix;
+  
+     // load the arrays of file names
+     string dStr(fileName.substr(prefix_start, prefix_len));
+     fileNames.push_back(fileName);
+
+     string dPath(dir);
+     dPath += RadxPath::RADX_PATH_DELIM;
+     dPath += fileName;
+     filePaths.push_back(dPath);
+
+     fieldNames.push_back(dStr);
+   } catch (const std::out_of_range& e) {
+     cerr << "file name does not match pattern for PAGXNNEODCddhhmm data" << endl;
+   }
+ }
+
 
 // go ahead and read all the data from the file
-// completely fill currentProduct with data
-void BufrRadxFile::_justReadFile(const string &path) {
+// completely fill currentTemplate with data
+// Pull field name from file content
+void BufrRadxFile::getFieldNamesWithData(const string &path) {
 
   //_file.clear();
   _pathInUse = path;
@@ -655,7 +892,7 @@ void BufrRadxFile::_justReadFile(const string &path) {
     _file.close();
 
 
-    // the field names are now put into currentProduct.typeOfProduct ...
+    // the field names are now put into currentTemplate.typeOfProduct ...
     // hmmm, may not be the best place to keep info ...
     string fieldName = "unknown";
     string units = "unknown";
@@ -676,7 +913,7 @@ void BufrRadxFile::_justReadFile(const string &path) {
 
   } catch (const char *msg) {
       // report error message
-      _addErrStr("ERROR - BufrRadxFile::_justReadFile");
+      _addErrStr("ERROR - BufrRadxFile::getFieldNamesWithData");
       _addErrStr("  Cannot read from path: ", path);
       _addErrStr("  ", msg);
       cerr << _errStr;
@@ -723,15 +960,14 @@ int BufrRadxFile::readFromPath(const string &path,
   //_nRangeInFile = 0;
 
   try {
-    //_readFields(path)
-    if (_readFields(path)) {
+    if (!fieldNamesWithinFileName(path)) {
       if (_verbose) {
 	cerr << _errStr << endl;
         _errStr.clear();
-	cerr << " ... just reading file" << endl;
+	cerr << " ... getting field names from file data" << endl;
       } 
       _errStr.clear();
-      _justReadFile(path); 
+      getFieldNamesWithData(path); 
     }
   } catch (const char *msg) {
     _addErrStr(msg);
@@ -744,7 +980,7 @@ int BufrRadxFile::readFromPath(const string &path,
 
   /*
   try {
-    _justReadFile(path);
+    getFieldNamesWithData(path);
   } catch (const char *msg) {
     _addErrStr(msg);
     return -1;
@@ -757,7 +993,7 @@ int BufrRadxFile::readFromPath(const string &path,
   // the RadxVol structure.
 
   // maybe move all of this read stuff to separate function,
-  // that _readFields can call???
+  // that fieldNamesWithinFileName can call???
   // push the BufrProducts/fields into a vector,
   // then when finished reading all the files for the same timestamp,
   // load the RadxVol with the BufrProducts/fields.
@@ -847,11 +1083,26 @@ void BufrRadxFile::_accumulateFieldFirstTime(string fieldName, string units, str
     _year_attr = _file.getHdrYear();
     _month_attr = _file.getHdrMonth();
     _day_attr = _file.getHdrDay();
+    /*
     if ((_year_attr != _fileTime.getYear()) ||
        (_month_attr != _fileTime.getMonth()) ||
-       (_day_attr != _fileTime.getDay()))
-    throw "Time in file name does not match time in file";
+       (_day_attr != _fileTime.getDay())) */
 
+    //int year = _fileTime.getYear();
+    //int month = _fileTime.getMonth();
+    /*    if (year > 1970) { 
+      // year and month have been set
+      if ((_year_attr != year) ||
+	  (_month_attr != month) ||
+	  (_day_attr != _fileTime.getDay())) 
+	throw "Time in file name does not match time in file";
+    } else {
+      // year and month probably have not been set, so don't
+      // compare them to the values from the file
+      if  (_day_attr != _fileTime.getDay()) 
+	throw "Day in file name does not match day in file";
+    }
+    */
     _siteName = _file.getTypeOfStationId();
     _instrumentName = _file.getStationId();
   
@@ -1663,7 +1914,10 @@ int BufrRadxFile::_addFl32FieldToRays(RadxSweep *sweep, int dataSection,
   data = _file.getDataForSweepFl32(dataSection);
   // get the name from the dataSection 
   string name = _file.getTypeOfProductForSweep(dataSection);
-
+  // if the name didn't come from the data section, then
+  // use the field name extracted from the file name
+  if (name.size() < 0)
+    name = someName;
   // set missing value
 
   Radx::fl32 missingVal = -FLT_MAX; // Radx::missingFl64;

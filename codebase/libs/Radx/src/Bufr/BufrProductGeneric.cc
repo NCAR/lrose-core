@@ -65,7 +65,8 @@ bool BufrProductGeneric::StuffIt(unsigned short, string name, double value) {
   bool ok = true;
 
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-  if (name.find("pixel value") != string::npos) {
+  if ((name.find("pixel value") != string::npos) ||
+    (name.find("reflectivite pour la valeur du pixel") != string::npos)) {
     // ugh!  It's not a double value, it's an unsigned char...
     addData((unsigned char) value);
   } else if (name.find("latitude") != string::npos) {
@@ -78,7 +79,7 @@ bool BufrProductGeneric::StuffIt(unsigned short, string name, double value) {
     setAntennaElevationDegrees(value);
   } else if (name.find("number of pixels per row") != string::npos) {
     setNBinsAlongTheRadial((size_t) value);
-  } else if (name.find("range-gate length") != string::npos) {
+  } else if (name.find("longueur de la porte distance apres integration") != string::npos) {
     setRangeBinSizeMeters(value);
   } else if ((name.find("range-bin offset") != string::npos) ||
     (name.find("range bin offset") != string::npos)) {
@@ -136,12 +137,13 @@ void BufrProductGeneric::storeReplicator(unsigned int value) {
 
 void BufrProductGeneric::trashReplicator() {
 
-  //if (_verbose) {
-  printf("currentAccumulator: \n"); 
-  for (std::vector<unsigned char>::const_iterator i = currentAccumulator->begin(); 
+  if (_verbose) {
+    printf("currentAccumulator: \n"); 
+    for (std::vector<unsigned char>::const_iterator i = currentAccumulator->begin(); 
        i != currentAccumulator->end(); ++i)
     printf(" %x ", *i);
-  printf("\n");
+    printf("\n");
+  }
     //std::cout << *i << ' ';
   //}
   // do generic data storage into dictionary
@@ -150,8 +152,12 @@ void BufrProductGeneric::trashReplicator() {
   //  int nDataValues;
   //  nDataValues = currentAccumulator->size();
   n = genericStore.size();
-  if (n >= 6) 
+  if (n >= 6) {
+    if (_verbose) {
+      printGenericStore();
+    }
     createSweep();
+  }
   
 }
 
@@ -160,41 +166,50 @@ void BufrProductGeneric::createSweep() {
   //double *realData;
   float *realData;
       
-      realData = decompressDataFl32();
-      if (realData == NULL) {
-  	throw "ERROR - could not decompress data";
-      }
-      SweepData newSweep;
-      // there will only be one time stamp and a duration
-      int nTimeStamps = timeStampStack.size();
-      if (nTimeStamps < 1) 
-        throw "Missing start time stamp for sweep.";
-      newSweep.startTime = timeStampStack.back();
-      // convert RadxTime to time_t
-      RadxTime *endTime = new RadxTime();
-      endTime->copy(*(timeStampStack.back()));
-      // add the duration
-      *endTime += duration;
-      // convert back to RadxTime object
-      newSweep.endTime = endTime; 
-      //timeStampStack.pop_back();
-      if (_debug) {
-        RadxTime *time = newSweep.startTime;
-        cerr << "startTime " << time->asString() << endl; 
-        time = newSweep.endTime;
-        cerr << "endTime " << time->asString() << endl; 
-      }
-      newSweep.antennaElevationDegrees = antennaElevationDegrees;
-      newSweep.nBinsAlongTheRadial = nBinsAlongTheRadial;
-      newSweep.rangeBinSizeMeters = rangeBinSizeMeters;
-      newSweep.rangeBinOffsetMeters = rangeBinOffsetMeters;
-      newSweep.nAzimuths = nAzimuths;
-      newSweep.antennaBeamAzimuthDegrees = antennaBeamAzimuthDegrees;
-      ParameterData parameterData;
-      parameterData.typeOfProduct = "TH"; // TODO: fix this ... typeOfProduct;
-      parameterData.data = realData;
-      newSweep.parameterData.push_back(parameterData);
-      sweepData.push_back(newSweep);
+  realData = decompressDataFl32();
+  if (realData == NULL) {
+    throw "ERROR - could not decompress data";
+  }
+  SweepData newSweep;
+  // there will only be one time stamp and a duration
+  int nTimeStamps = timeStampStack.size();
+  if (nTimeStamps < 2) 
+    throw "Missing start time stamp for sweep.";
+  // grab the first time stamp, because the second one
+  // is for the last calibration
+  timeStampStack.pop_back();
+  newSweep.startTime = timeStampStack.back();
+  // convert RadxTime to time_t
+  RadxTime *endTime = new RadxTime();
+  endTime->copy(*(timeStampStack.back()));
+  // add the duration
+  *endTime += duration;
+  // convert back to RadxTime object
+  newSweep.endTime = endTime; 
+
+  cerr << endTime->getW3cStr() << endl;
+  cerr << newSweep.startTime->getW3cStr() << endl;
+  cerr << "------------" << endl;
+
+  timeStampStack.pop_back();
+
+  if (_debug) {
+    RadxTime *time = newSweep.startTime;
+    cerr << "startTime " << time->asString() << endl; 
+    time = newSweep.endTime;
+    cerr << "endTime " << time->asString() << endl; 
+  }
+  newSweep.antennaElevationDegrees = antennaElevationDegrees;
+  newSweep.nBinsAlongTheRadial = nBinsAlongTheRadial;
+  newSweep.rangeBinSizeMeters = rangeBinSizeMeters;
+  newSweep.rangeBinOffsetMeters = rangeBinOffsetMeters;
+  newSweep.nAzimuths = nAzimuths;
+  newSweep.antennaBeamAzimuthDegrees = antennaBeamAzimuthDegrees;
+  ParameterData parameterData;
+  parameterData.typeOfProduct = _fieldName; // "TH"; // TODO: fix this ... typeOfProduct;
+  parameterData.data = realData;
+  newSweep.parameterData.push_back(parameterData);
+  sweepData.push_back(newSweep);
 }
 
 
@@ -271,6 +286,33 @@ float *BufrProductGeneric::decompressDataFl32() {
 
   return temp32;
 }
+
+
+void BufrProductGeneric::printGenericStore() {
+
+
+  //vector< vector<unsigned char> *> genericStore;  
+  // 
+
+  for (vector< vector<unsigned char> *>::iterator s = genericStore.begin();
+       s != genericStore.end(); ++s) {
+    vector<unsigned char> *store;
+    store = *s;
+    int ncolumns = 256;
+    if (store->size() == 240) ncolumns = 3;
+    printf(" Store ...\n");
+    int count = 0;
+    for (vector<unsigned char>::iterator i = store->begin();
+       i != store->end(); ++i) {
+      printf("%g ", (float) *i);
+      count += 1;
+      if ((count % ncolumns) == 0) printf("\n");
+    }
+    printf("\n\n");
+  }
+
+}
+
 
 /*
 

@@ -172,12 +172,25 @@ public:
   
   //@}
 
+  time_t getTimeFromTm(const struct tm &tm);
+
   void lookupFieldName(string fieldName, string &units, 
 		     string &standardName, string &longName);
 
   void setTablePath(char *path);
 
 protected:
+
+void _getFieldPathsRMA(const string &primaryPath,
+                                 vector<string> &fileNames,
+                                 vector<string> &filePaths,
+				     vector<string> &fieldNames);
+
+void _getFieldPathsPAG(const string &primaryPath,
+                                 vector<string> &fileNames,
+                                 vector<string> &filePaths,
+				     vector<string> &fieldNames);
+
 private:
 
   // BUFR file
@@ -321,8 +334,8 @@ private:
   void _clearRayVariables();
   int _getRayVariables(int sweepNumber);
   int _createRays(RadxSweep *sweep, int sweepNumber);
-  int _readFields(const string &path);
-  void _justReadFile(const string &path);
+  bool fieldNamesWithinFileName(const string &path);
+  void getFieldNamesWithData(const string &path);
   int _addFieldVariables(RadxSweep *sweep, int dataSection,
 				      string name, string units,
 				      string standardName, string longName,
