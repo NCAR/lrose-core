@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <algorithm>
+#include <stdexcept>
 #include <Radx/TableMap.hh>
 #include <Radx/TableMapKey.hh>
 #include "BufrTables.hh"
@@ -86,9 +87,11 @@ of entries?? and put this switch in the calling function???
       table[key] = TableMapElement(tokens[3], scale, tokens[4], referenceValue,
 				   dataWidthBits);
     } else {
-      cerr << " discarding line: " << line << " from Table B "
+      if (!isWhiteSpace(line)) {
+        cerr << " discarding line: " << line << " from Table B "
 	// << masterTableVersion 
 	   << endl;
+      }
     }
   }
   return 0;
@@ -141,8 +144,10 @@ int TableMap::ReadTableB(string fileName) {
 				   dataWidthBits);
     } else {
       //      std::replace(line.begin(), line.end(), '\r', ' ');
-      cerr << " discarding line: " << line << " from file: " <<
-	fileName <<  endl;
+      if (!isWhiteSpace(line)) {
+	cerr << " discarding line: " << line << " from file: " <<
+	  fileName <<  endl;
+      }
     }
   }
   return 0;
@@ -192,10 +197,12 @@ int TableMap::ReadInternalTableD(const char **internalBufrTable,
 	  currentList.push_back(subkey);
 	}
       } else { // end if more than 6 tokens
-	cerr << " discarding line: " << line << endl;
+	if (!isWhiteSpace(line)) {
+	  cerr << " discarding line: " << line << endl;
 	  // << " from file: " <<
 	  //fileName 
 	  //   <<  endl;
+	}
       }
     } // end if comment line
   }  // end for each line
@@ -256,8 +263,10 @@ int TableMap::ReadTableD(string fileName) {
 	  currentList.push_back(subkey);
 	}
       } else { // end if more than 6 tokens
-	cerr << " discarding line: " << line << " from file: " <<
-	fileName <<  endl;
+	if (!isWhiteSpace(line)) {
+	  cerr << " discarding line: " << line << " from file: " <<
+	    fileName <<  endl;
+	}
       }
     } // end if comment line
   }  // end for each line
@@ -268,10 +277,27 @@ int TableMap::ReadTableD(string fileName) {
   return 0;
 }
 
-bool TableMap::isWhiteSpace(string &str) {
-  if ((str.compare("  ") == 0) ||
-      (str.length() == 0)) return true;
-  else return false;
+bool TableMap::isWhiteSpace(string &ostr) {
+  string str = trim(ostr);
+  //if ((str.compare("  ") == 0) ||
+  if (str.length() == 0) return true;
+  else 
+    return false;
+}
+
+string TableMap::trim(string &str) {
+  if (str.length() == 0) return str;
+  try {
+  int start = str.find_first_not_of(" ");
+  int end = str.find_last_not_of(" ");
+  int length = end-start+1;
+  if ((start < 0) || (length < 1) || (length > (int) str.size()))
+      return "";
+  return str.substr(start, length);
+  } catch (const std::out_of_range& ex) {
+    cerr << "index out of range on string |" << str << "|" << endl;
+  }
+  return str;
 }
 
 bool TableMap::filled() {

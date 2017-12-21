@@ -139,6 +139,7 @@ void BufrFile::readThatField(string fileName,
   clear();
   _pathInUse = filePath;
   _fieldName = fieldName;
+
   try {
     openRead(_pathInUse); // path);
     readSection0();
@@ -234,6 +235,7 @@ int BufrFile::openRead(const string &path)
 {
 
   close();
+
   _file = fopen(path.c_str(), "r");
   
   if (_file == NULL) {
@@ -728,7 +730,7 @@ int BufrFile::readDataDescriptors() {  // read section 3
     currentTemplate->setVerbose(_verbose);
     currentTemplate->setDebug(_debug);
     currentTemplate->reset(); 
-
+    // currentTemplate->setFieldName(_fieldName);
   return 0;
 }
 
@@ -1330,7 +1332,10 @@ double *BufrFile::getDataForSweepFl64(int sweepNumber) {
 }
 
 string BufrFile::getTypeOfProductForSweep(int sweepNumber) { 
-  return currentTemplate->sweepData.at(sweepNumber).parameterData[0].typeOfProduct;
+  if (_fieldName.size() > 0) 
+    return _fieldName;
+  else 
+    return currentTemplate->sweepData.at(sweepNumber).parameterData[0].typeOfProduct;
 }
 
 void BufrFile::_deleteAfter(DNode *p) {
@@ -1640,7 +1645,7 @@ int BufrFile::_descend(DNode *tree) {
 	} else {
 	  valueFromData = ApplyNumericFloat(val1);
 	  if (!currentTemplate->StuffIt(des, val1._descriptor.fieldName, valueFromData)) {
-            if (des != 7681) {
+            if ((des != 7681) && 0) {
 	      Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
 	      Radx::addErrStr(_errString, "Unrecognized descriptor: ",
 			      val1._descriptor.fieldName, true);

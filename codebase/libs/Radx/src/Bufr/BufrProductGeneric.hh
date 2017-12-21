@@ -206,6 +206,8 @@ private:
   size_t _maxBinsAlongTheRadial;
   */
   // a vector of pointers to vectors
+
+  void printGenericStore();
   vector< vector<unsigned char> *> genericStore;  
   vector<unsigned char> *currentAccumulator;
 
