@@ -117,6 +117,7 @@ SimReader::SimReader(const Params &params) :
   _longitude = -105.0;
   _altitude = 1.6;
 
+  TaThread::LockForScope locker;
   _platform.setInstrumentName("SPOL");
   _platform.setSiteName("Marshall");
   _platform.setLatitudeDeg(_latitude);
@@ -371,6 +372,7 @@ SimRhiReader::SimRhiReader(const Params &params) :
 
 {
 
+  TaThread::LockForScope locker;
   _platform.setInstrumentName("SPOL");
   _platform.setSiteName("Marshall");
   _platform.setLatitudeDeg(40.0);
@@ -529,24 +531,34 @@ void IwrfReader::run()
 
     // get new ray
 
-    RadxRay *ray = reader->readNextRay();
-    if (ray == NULL) {
-      continue;
-    }
+    try {
 
-    // add ray to queue
-    
-    if (ray) {
-      _platform = reader->getPlatform();
-      addRay(ray);
-    } else {
-      cerr << "ERROR - IwrfReader::run" << endl;
-      cerr << "  Cannot read ray" << endl;
-      return;
+      RadxRay *ray = reader->readNextRay();
+
+      if (ray == NULL) {
+        continue;
+      }
+      
+      // add ray to queue
+      
+      if (ray) {
+        {
+          TaThread::LockForScope locker;
+          _platform = reader->getPlatform();
+        }
+        addRay(ray);
+      } else {
+        cerr << "ERROR - IwrfReader::run" << endl;
+        cerr << "  Cannot read ray" << endl;
+        return;
+      }
+      
+    } catch (std::bad_alloc &a) {
+      cerr << "AAAAAAA bad alloc: " << a.what() << endl;
     }
 
     count++;
-
+    
   }
   
 }
