@@ -37,6 +37,7 @@
 
 #include "Beam.hh"
 #include "ColorMap.hh"
+#include "AllocCheck.hh"
 
 using namespace std;
 
@@ -88,6 +89,7 @@ Beam::~Beam()
 
   if (_ray->removeClient() == 0) {
     delete _ray;
+    AllocCheck::inst().addFree();
   }
 
 }

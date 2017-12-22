@@ -87,7 +87,8 @@ NORM_SRCS = \
 	Reader.cc \
 	RhiBeam.cc \
 	ScaledLabel.cc \
-	WorldPlot.cc
+	WorldPlot.cc \
+	AllocCheck.cc
 
 MOC_SRCS = \
 	BscanManager.cc \

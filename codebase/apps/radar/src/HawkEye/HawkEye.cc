@@ -43,6 +43,7 @@
 #include "ColorMap.hh"
 #include "Params.hh"
 #include "Reader.hh"
+#include "AllocCheck.hh"
 
 #include <string>
 #include <iostream>
@@ -105,6 +106,10 @@ HawkEye::HawkEye(int argc, char **argv) :
       _haveFilteredFields = true;
     }
   }
+
+  // set params on alloc checker
+
+  AllocCheck::inst().setParams(&_params);
 
   // set up display fields
 

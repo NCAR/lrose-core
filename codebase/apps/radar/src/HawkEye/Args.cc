@@ -188,17 +188,6 @@ int Args::parse (const int argc, const char **argv)
 	iret = -1;
       }
       
-    } else if (!strcmp(argv[i], "-end_time")) {
-      
-      if (i < argc - 1) {
-        sprintf(tmp_str, "archive_end_time = \"%s\";", argv[++i]);
-        TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "begin_in_archive_mode = TRUE;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-      
     } else if (!strcmp(argv[i], "-image_interval")) {
       
       if (i < argc - 1) {
@@ -273,8 +262,6 @@ void Args::_usage(ostream &out)
       << "       [ -archive_url ?] URL for data in archive mode\n"
       << "       [ -bscan ] run in BSCAN mode\n"
       << "       [ -debug, -d ] print debug messages\n"
-      << "       [ -end_time \"yyyy mm dd hh mm ss\"]\n"
-      << "            set end time for archive image-generation mode\n"
       << "       [ -f ? ?] list of files to process in archive mode\n"
       << "       [ -fmq_mode] set forces DSR_FMQ_INPUT mode\n"
       << "       [ -fmq_url ?] set input fmq URL\n"

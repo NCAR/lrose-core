@@ -150,7 +150,7 @@ void FieldRenderer::setBackgroundRenderingOn()
 void FieldRenderer::run()
 {
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Start of rendering for field: " 
          << _field.getLabel() << endl;
   }

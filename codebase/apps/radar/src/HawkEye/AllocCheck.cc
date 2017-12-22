@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 //////////////////////////////////////////////////////////////////////////
-// Helpers.cc: helper objects for moments computations
+// AllocCheck.cc: helper objects for moments computations
 //
 // RAP, NCAR, Boulder CO
 //
@@ -37,7 +37,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#include "Helpers.hh"
+#include "AllocCheck.hh"
 #include <cstdio>
 #include <iostream>
 
@@ -45,13 +45,14 @@ using namespace std;
 
 // Global variables - instance
 
-Helpers *Helpers::_instance = NULL;
+AllocCheck *AllocCheck::_instance = NULL;
 
 //////////////////////////////////////////////////////////////////////////
 // Constructor - private, called by inst()
 
-Helpers::Helpers()
+AllocCheck::AllocCheck()
 {
+  _params = NULL;
   _nAlloc = 0;
   _nFree = 0;
   _prevWasFree = false;
@@ -60,7 +61,7 @@ Helpers::Helpers()
 //////////////////////////////////////////////////////////////////////////
 // Destructor
 
-Helpers::~Helpers()
+AllocCheck::~AllocCheck()
 {
 
 }
@@ -68,11 +69,11 @@ Helpers::~Helpers()
 //////////////////////////////////////////////////////////////////////////
 // Inst() - Retrieve the singleton instance of this class.
 
-Helpers &Helpers::inst()
+AllocCheck &AllocCheck::inst()
 {
 
-  if (_instance == (Helpers *)NULL) {
-    _instance = new Helpers();
+  if (_instance == (AllocCheck *)NULL) {
+    _instance = new AllocCheck();
   }
 
   return *_instance;
@@ -81,7 +82,7 @@ Helpers &Helpers::inst()
 //////////////////////////////////////////////////////////////////////////
 // add to stats
 
-void Helpers::addAlloc()        
+void AllocCheck::addAlloc()        
 {
 
   _nAlloc++;
@@ -90,7 +91,7 @@ void Helpers::addAlloc()
 
 }
 
-void Helpers::addFree()        
+void AllocCheck::addFree()        
 {
 
   _nFree++;
@@ -102,14 +103,19 @@ void Helpers::addFree()
 //////////////////////////////////////////////////////////////////////////
 // do the print if needed
 
-void Helpers::doPrint(bool force)        
+void AllocCheck::doPrint(bool force)        
 {
+  
+  if (_params != NULL &&
+      _params->debug < Params::DEBUG_VERBOSE) {
+    return;
+  }
 
   if (force || ((_nAlloc + _nFree) % 200 == 0)) {
     if (force) {
       cerr << "=================================" << endl;
     }
-    cerr << "====>>>> Ray allocation: ";
+    cerr << "====>>>> Ray allocation check: ";
     cerr << " nAlloc: " << _nAlloc;
     cerr << " nFree: " << _nFree;
     cerr << " delta: " << _nAlloc - _nFree;

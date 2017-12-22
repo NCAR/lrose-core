@@ -42,6 +42,7 @@
 #include "ColorMap.hh"
 #include "Params.hh"
 #include "Reader.hh"
+#include "AllocCheck.hh"
 #include <radar/RadarComplex.hh>
 #include <toolsa/file_io.h>
 
@@ -1362,6 +1363,7 @@ void BscanManager::_handleRealtimeData()
     if (ray == NULL) {
       return; // no pending rays
     }
+    AllocCheck::inst().addAlloc();
     
     if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "  Got a ray, time, el, az: "
@@ -1723,7 +1725,8 @@ void BscanManager::_addRay(const RadxRay *ray)
       const Radx::fl32 missingVal = rfld->getMissingFl32();
       double range = ray->getStartRangeKm();
       double drange = ray->getGateSpacingKm();
-      for (size_t igate = 0; igate < ray->getNGates(); igate++, fdata++, range += drange) {
+      for (size_t igate = 0; igate < ray->getNGates();
+           igate++, fdata++, range += drange) {
         Radx::fl32 val = *fdata;
         if (doCensoring &&
             (range < censorMinRange || range > censorMaxRange)) {

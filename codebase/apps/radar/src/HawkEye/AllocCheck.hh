@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 //////////////////////////////////////////////////////////////////////////
-// Helpers.hh: helper objects for moments computations
+// AllocCheck.hh: helper objects for moments computations
 //
 // RAP, NCAR, Boulder CO
 //
@@ -36,26 +36,28 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef Helpers_HH
-#define Helpers_HH
+#ifndef AllocCheck_HH
+#define AllocCheck_HH
 
+#include "Params.hh"
 using namespace std;
 
-class Helpers
+class AllocCheck
 
 {
 
 public:
 
-  ~Helpers();
+  ~AllocCheck();
   
   ///////////////////////////////////////////////////////////
   // Inst() - Retrieve the singleton instance of this class.
   
-  static Helpers &inst();
+  static AllocCheck &inst();
   
-  // inner classes
+  // public classes
 
+  void setParams(const Params *params) { _params = params; }
   void addAlloc();
   void addFree();
   void doPrint(bool force);
@@ -64,13 +66,14 @@ private:
 
   // Singleton instance pointer
 
-  static Helpers *_instance;
+  static AllocCheck *_instance;
   
   //////////////////////////////////////////////////////////////////
   // Constructor -- private because this is a singleton object
 
-  Helpers();
+  AllocCheck();
 
+  const Params *_params;
   int _nAlloc;
   int _nFree;
   bool _prevWasFree;
