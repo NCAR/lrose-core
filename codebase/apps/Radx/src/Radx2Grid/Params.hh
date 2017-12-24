@@ -58,10 +58,17 @@ public:
   } debug_t;
 
   typedef enum {
-    REALTIME = 0,
+    FILELIST = 0,
     ARCHIVE = 1,
-    FILELIST = 2
+    REALTIME = 2
   } mode_t;
+
+  typedef enum {
+    CF_NETCDF = 0,
+    ZEBRA_NETCDF = 1,
+    MDV = 2,
+    CEDRIC = 3
+  } output_format_t;
 
   typedef enum {
     INTERP_MODE_CART = 0,
@@ -95,13 +102,6 @@ public:
     LOGICAL_AND = 0,
     LOGICAL_OR = 1
   } logical_t;
-
-  typedef enum {
-    CF_NETCDF = 0,
-    ZEBRA_NETCDF = 1,
-    MDV = 2,
-    CEDRIC = 3
-  } output_format_t;
 
   typedef enum {
     CLASSIC = 0,
@@ -154,12 +154,6 @@ public:
 
   typedef struct {
     char* input_name;
-    double min_value;
-    double max_value;
-  } bound_field_t;
-
-  typedef struct {
-    char* input_name;
     char* output_name;
   } rename_field_t;
 
@@ -169,6 +163,12 @@ public:
     double max_valid_value;
     logical_t combination_method;
   } censoring_field_t;
+
+  typedef struct {
+    char* input_name;
+    double min_value;
+    double max_value;
+  } bound_field_t;
 
   ///////////////////////////
   // Member functions
@@ -457,23 +457,134 @@ public:
 
   debug_t debug;
 
-  char* instance;
-
-  tdrp_bool_t register_with_procmap;
-
-  int procmap_register_interval;
-
-  tdrp_bool_t use_multiple_threads;
-
-  int n_compute_threads;
-
   char* input_dir;
 
   mode_t mode;
 
   int max_realtime_data_age_secs;
 
-  tdrp_bool_t free_memory_between_files;
+  char* output_dir;
+
+  output_format_t output_format;
+
+  interp_mode_t interp_mode;
+
+  tdrp_bool_t use_nearest_neighbor;
+
+  int min_nvalid_for_interp;
+
+  tdrp_bool_t use_fixed_angle_for_interpolation;
+
+  tdrp_bool_t use_fixed_angle_for_data_limits;
+
+  double beam_width_fraction_for_data_limit_extension;
+
+  grid_z_geom_t grid_z_geom;
+
+  tdrp_bool_t specify_individual_z_levels;
+
+  double *_z_level_array;
+  int z_level_array_n;
+
+  grid_xy_geom_t grid_xy_geom;
+
+  tdrp_bool_t center_grid_on_radar;
+
+  projection_t grid_projection;
+
+  double grid_rotation;
+
+  double grid_origin_lat;
+
+  double grid_origin_lon;
+
+  tdrp_bool_t auto_remap_flat_to_latlon;
+
+  double grid_lat1;
+
+  double grid_lat2;
+
+  double grid_central_scale;
+
+  double grid_tangent_lat;
+
+  double grid_tangent_lon;
+
+  tdrp_bool_t grid_pole_is_north;
+
+  double grid_persp_radius;
+
+  double grid_false_northing;
+
+  double grid_false_easting;
+
+  tdrp_bool_t grid_set_offset_origin;
+
+  double grid_offset_origin_latitude;
+
+  double grid_offset_origin_longitude;
+
+  tdrp_bool_t select_fields;
+
+  select_field_t *_selected_fields;
+  int selected_fields_n;
+
+  tdrp_bool_t transform_fields_for_interpolation;
+
+  transform_field_t *_transform_fields;
+  int transform_fields_n;
+
+  tdrp_bool_t set_fold_limits;
+
+  fold_field_t *_folded_fields;
+  int folded_fields_n;
+
+  tdrp_bool_t override_nyquist;
+
+  double nyquist_velocity;
+
+  tdrp_bool_t set_discrete_fields;
+
+  discrete_field_t *_discrete_fields;
+  int discrete_fields_n;
+
+  tdrp_bool_t rename_fields;
+
+  rename_field_t *_renamed_fields;
+  int renamed_fields_n;
+
+  tdrp_bool_t output_coverage_field;
+
+  char* coverage_field_name;
+
+  tdrp_bool_t output_time_field;
+
+  tdrp_bool_t interp_time_field;
+
+  tdrp_bool_t output_test_fields;
+
+  tdrp_bool_t interp_test_fields;
+
+  tdrp_bool_t output_range_field;
+
+  tdrp_bool_t interp_range_field;
+
+  double modulus_for_elevation;
+
+  double modulus_for_azimuth;
+
+  double modulus_for_range;
+
+  tdrp_bool_t apply_censoring;
+
+  censoring_field_t *_censoring_fields;
+  int censoring_fields_n;
+
+  int censoring_min_valid_run;
+
+  tdrp_bool_t override_standard_pseudo_earth_radius;
+
+  double pseudo_earth_radius_ratio;
 
   tdrp_bool_t aggregate_sweep_files_on_read;
 
@@ -557,197 +668,13 @@ public:
 
   double gate_spacing_km;
 
-  tdrp_bool_t override_nyquist;
-
-  double nyquist_velocity;
-
   double azimuth_correction_deg;
 
   double elevation_correction_deg;
 
-  tdrp_bool_t override_standard_pseudo_earth_radius;
-
-  double pseudo_earth_radius_ratio;
-
-  interp_mode_t interp_mode;
-
-  tdrp_bool_t use_nearest_neighbor;
-
-  int min_nvalid_for_interp;
-
-  tdrp_bool_t use_fixed_angle_for_interpolation;
-
-  tdrp_bool_t use_fixed_angle_for_data_limits;
-
-  double beam_width_fraction_for_data_limit_extension;
-
-  int reorder_npoints_search;
-
-  double reorder_search_radius_km;
-
-  tdrp_bool_t reorder_scale_search_radius_with_range;
-
-  double reorder_nominal_range_for_search_radius_km;
-
-  double reorder_z_search_ratio;
-
-  tdrp_bool_t reorder_bound_grid_point_vertically;
-
-  double reorder_min_valid_wt_ratio;
-
-  int reorder_blocks_nrows;
-
-  int reorder_blocks_ncols;
-
-  int reorder_min_nvalid_for_interp;
-
-  tdrp_bool_t reorder_weighted_interpolation;
-
-  tdrp_bool_t sat_data_invert_in_range;
-
-  tdrp_bool_t sat_data_set_range_geom_from_fields;
-
-  tdrp_bool_t specify_individual_z_levels;
-
-  double *_z_level_array;
-  int z_level_array_n;
-
-  grid_z_geom_t grid_z_geom;
-
-  projection_t grid_projection;
-
-  grid_xy_geom_t grid_xy_geom;
-
-  double grid_rotation;
-
-  tdrp_bool_t center_grid_on_radar;
-
-  double grid_origin_lat;
-
-  double grid_origin_lon;
-
-  tdrp_bool_t auto_remap_flat_to_latlon;
-
-  double grid_lat1;
-
-  double grid_lat2;
-
-  double grid_central_scale;
-
-  double grid_tangent_lat;
-
-  double grid_tangent_lon;
-
-  tdrp_bool_t grid_pole_is_north;
-
-  double grid_persp_radius;
-
-  double grid_false_northing;
-
-  double grid_false_easting;
-
-  tdrp_bool_t grid_set_offset_origin;
-
-  double grid_offset_origin_latitude;
-
-  double grid_offset_origin_longitude;
-
-  tdrp_bool_t select_fields;
-
-  select_field_t *_selected_fields;
-  int selected_fields_n;
-
-  tdrp_bool_t transform_fields_for_interpolation;
-
-  transform_field_t *_transform_fields;
-  int transform_fields_n;
-
-  tdrp_bool_t set_fold_limits;
-
-  fold_field_t *_folded_fields;
-  int folded_fields_n;
-
-  tdrp_bool_t set_discrete_fields;
-
-  discrete_field_t *_discrete_fields;
-  int discrete_fields_n;
-
-  tdrp_bool_t bound_fields;
-
-  bound_field_t *_bounded_fields;
-  int bounded_fields_n;
-
-  tdrp_bool_t rename_fields;
-
-  rename_field_t *_renamed_fields;
-  int renamed_fields_n;
-
-  tdrp_bool_t output_coverage_field;
-
-  char* coverage_field_name;
-
-  tdrp_bool_t output_time_field;
-
-  tdrp_bool_t interp_time_field;
-
-  tdrp_bool_t output_test_fields;
-
-  tdrp_bool_t interp_test_fields;
-
-  tdrp_bool_t output_range_field;
-
-  tdrp_bool_t interp_range_field;
-
-  double modulus_for_elevation;
-
-  double modulus_for_azimuth;
-
-  double modulus_for_range;
-
-  tdrp_bool_t write_search_matrix_files;
-
-  char* search_matrix_dir;
-
-  tdrp_bool_t apply_censoring;
-
-  censoring_field_t *_censoring_fields;
-  int censoring_fields_n;
-
-  int censoring_min_valid_run;
-
-  tdrp_bool_t identify_convective_stratiform_split;
-
-  char* conv_strat_dbz_field_name;
-
-  double conv_strat_texture_radius_km;
-
-  double conv_strat_texture_depth_km;
-
-  double conv_strat_min_valid_fraction_for_texture;
-
-  double conv_strat_min_valid_height;
-
-  double conv_strat_max_valid_height;
-
-  double conv_strat_min_valid_dbz;
-
-  double conv_strat_dbz_threshold_for_definite_convection;
-
-  double conv_strat_convective_radius_km;
-
-  double conv_strat_min_texture_for_convection;
-
-  tdrp_bool_t conv_strat_write_partition;
-
-  tdrp_bool_t conv_strat_write_debug_fields;
-
-  char* output_dir;
-
   tdrp_bool_t specify_output_filename;
 
   char* output_filename;
-
-  output_format_t output_format;
 
   tdrp_bool_t name_file_from_start_time;
 
@@ -781,6 +708,79 @@ public:
 
   char* ncf_comment;
 
+  char* instance;
+
+  tdrp_bool_t register_with_procmap;
+
+  int procmap_register_interval;
+
+  tdrp_bool_t free_memory_between_files;
+
+  tdrp_bool_t use_multiple_threads;
+
+  int n_compute_threads;
+
+  tdrp_bool_t sat_data_invert_in_range;
+
+  tdrp_bool_t sat_data_set_range_geom_from_fields;
+
+  tdrp_bool_t write_search_matrix_files;
+
+  char* search_matrix_dir;
+
+  tdrp_bool_t identify_convective_stratiform_split;
+
+  char* conv_strat_dbz_field_name;
+
+  double conv_strat_texture_radius_km;
+
+  double conv_strat_texture_depth_km;
+
+  double conv_strat_min_valid_fraction_for_texture;
+
+  double conv_strat_min_valid_height;
+
+  double conv_strat_max_valid_height;
+
+  double conv_strat_min_valid_dbz;
+
+  double conv_strat_dbz_threshold_for_definite_convection;
+
+  double conv_strat_convective_radius_km;
+
+  double conv_strat_min_texture_for_convection;
+
+  tdrp_bool_t conv_strat_write_partition;
+
+  tdrp_bool_t conv_strat_write_debug_fields;
+
+  int reorder_npoints_search;
+
+  double reorder_search_radius_km;
+
+  tdrp_bool_t reorder_scale_search_radius_with_range;
+
+  double reorder_nominal_range_for_search_radius_km;
+
+  double reorder_z_search_ratio;
+
+  tdrp_bool_t reorder_bound_grid_point_vertically;
+
+  double reorder_min_valid_wt_ratio;
+
+  int reorder_blocks_nrows;
+
+  int reorder_blocks_ncols;
+
+  int reorder_min_nvalid_for_interp;
+
+  tdrp_bool_t reorder_weighted_interpolation;
+
+  tdrp_bool_t bound_fields;
+
+  bound_field_t *_bounded_fields;
+  int bounded_fields_n;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -788,7 +788,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[195];
+  mutable TDRPtable _table[199];
 
   const char *_className;
 
