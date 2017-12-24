@@ -103,11 +103,15 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	TDRP_add_override(&override, tmp_str);
       }
 	
-    } else if (!strcmp(argv[i], "-name_start")) {
+    } else if (!strcmp(argv[i], "-grid_z_geom")) {
       
-      sprintf(tmp_str, "name_file_from_start_time = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "grid_z_geom = { %s };", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+	
     } else if (!strcmp(argv[i], "-start")) {
       
       if (i < argc - 1) {
@@ -132,18 +136,6 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	  sprintf(tmp_str, "mode = ARCHIVE;");
 	  TDRP_add_override(&override, tmp_str);
 	}
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-time_offset")) {
-      
-      if (i < argc - 1) {
-        i++;
-	sprintf(tmp_str, "time_offset_secs = %s;", argv[i]);
-	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "apply_time_offset = true;");
-        TDRP_add_override(&override, tmp_str);
       } else {
 	OK = false;
       }
@@ -186,30 +178,6 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
-    } else if (!strcmp(argv[i], "-vol_num")) {
-      
-      if (i < argc - 1) {
-        i++;
-	sprintf(tmp_str, "starting_volume_number = %s;", argv[i]);
-	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "override_volume_number = true;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
-    } else if (!strcmp(argv[i], "-vol_num_auto")) {
-      
-      if (i < argc - 1) {
-        i++;
-	sprintf(tmp_str, "starting_volume_number = %s;", argv[i]);
-	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "autoincrement_volume_number = true;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = false;
-      }
-	
     }
     
   } // i
@@ -235,36 +203,33 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -d, -debug ] print debug messages\n"
       << "\n"
-      << "  [ -end \"yyyy mm dd hh mm ss\"] end time\n"
-      << "           Sets mode to ARCHIVE\n"
+      << "  [ -end \"yyyy mm dd hh mm ss\"]\n"
+      << "    Set the end time\n"
+      << "    Also sets mode to ARCHIVE\n"
       << "\n"
       << "  [ -f, -paths ? ] set file paths\n"
-      << "           Sets mode to FILELIST\n"
+      << "    Sets mode to FILELIST\n"
+      << "\n"
+      << "  [ -grid_z_geom \"nz, minz, dz\"] end time\n"
+      << "    Set the cart geometry for constant spacing in the Z dimension\n"
+      << "    nz: number of z levels\n"
+      << "    minz: lowest Z level (km MSL)\n"
+      << "    dz: spacing between Z levels (km)\n"
       << "\n"
       << "  [ -instance ?] specify the instance\n"
-      << "\n"
-      << "  [ -name_start ] name file using start time\n"
       << "\n"
       << "  [ -outdir ? ] set output directory\n"
       << "\n"
       << "  [ -outname ? ] specify output file name\n"
       << "                 file of this name will be written to outdir\n"
       << "\n"
-      << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"
-      << "           Sets mode to ARCHIVE\n"
-      << "\n"
-      << "  [ -time_offset ? ] set time offset (secs)\n"
+      << "  [ -start \"yyyy mm dd hh mm ss\"] set start time\n"
+      << "    Set the start time\n"
+      << "    Also sets mode to ARCHIVE\n"
       << "\n"
       << "  [ -v, -verbose ] print verbose debug messages\n"
       << "\n"
       << "  [ -vv, -extra ] print extra verbose debug messages\n"
-      << "\n"
-      << "  [ -vol_num ? ] specify volume number\n"
-      << "     Overrides the volume number in the data\n"
-      << "\n"
-      << "  [ -vol_num_auto ? ] specify incrementing volume numbers,\n"
-      << "     starting at the number specified.\n"
-      << "     Overrides the volume number in the data\n"
       << "\n"
       << endl;
   
