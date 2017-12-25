@@ -1709,13 +1709,13 @@ void CartInterp::_interpRow(int iz, int iy)
     const GridLoc *loc = _gridLoc[iz][iy][ix];
     
     if (_gridAzDebug) {
-      _gridAzDebug->data[ptIndex] = fmod(loc->az, _params.modulus_for_azimuth);
+      _gridAzDebug->data[ptIndex] = loc->az;
     }
     if (_gridElDebug) {
-      _gridElDebug->data[ptIndex] = fmod(loc->el, _params.modulus_for_elevation);
+      _gridElDebug->data[ptIndex] = loc->el;
     }
     if (_gridRangeDebug) {
-      _gridRangeDebug->data[ptIndex] = fmod(loc->slantRange, _params.modulus_for_range);
+      _gridRangeDebug->data[ptIndex] = loc->slantRange;
     }
 
     // find starting location in search matrix
@@ -1870,37 +1870,37 @@ void CartInterp::_interpRow(int iz, int iy)
     
     if (ll.ray) {
       if (_llElDebug) {
-        _llElDebug->data[ptIndex] = fmod(ll.rayEl, _params.modulus_for_elevation);
+        _llElDebug->data[ptIndex] = ll.rayEl;
       }
       if (_llAzDebug) {
-        _llAzDebug->data[ptIndex] = fmod(ll.rayAz, _params.modulus_for_azimuth);
+        _llAzDebug->data[ptIndex] = ll.rayAz;
       }
     }
 
     if (ul.ray) {
       if (_ulElDebug) {
-        _ulElDebug->data[ptIndex] = fmod(ul.rayEl, _params.modulus_for_elevation);
+        _ulElDebug->data[ptIndex] = ul.rayEl;
       }
       if (_ulAzDebug) {
-        _ulAzDebug->data[ptIndex] = fmod(ul.rayAz, _params.modulus_for_azimuth);
+        _ulAzDebug->data[ptIndex] = ul.rayAz;
       }
     }
 
     if (lr.ray) {
       if (_lrElDebug) {
-        _lrElDebug->data[ptIndex] = fmod(lr.rayEl, _params.modulus_for_elevation);
+        _lrElDebug->data[ptIndex] = lr.rayEl;
       }
       if (_lrAzDebug) {
-        _lrAzDebug->data[ptIndex] = fmod(lr.rayAz, _params.modulus_for_azimuth);
+        _lrAzDebug->data[ptIndex] = lr.rayAz;
       }
     }
 
     if (ur.ray) {
       if (_urElDebug) {
-        _urElDebug->data[ptIndex] = fmod(ur.rayEl, _params.modulus_for_elevation);
+        _urElDebug->data[ptIndex] = ur.rayEl;
       }
       if (_urAzDebug) {
-        _urAzDebug->data[ptIndex] = fmod(ur.rayAz, _params.modulus_for_azimuth);
+        _urAzDebug->data[ptIndex] = ur.rayAz;
       }
     }
 

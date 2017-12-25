@@ -65,6 +65,7 @@ int Args::parse (int argc, char **argv, string &prog_name)
   _progName = prog_name;
   char tmp_str[BUFSIZ];
   bool OK = true;
+  vector<string> fields;
 
   // loop through args
   
@@ -103,6 +104,14 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	TDRP_add_override(&override, tmp_str);
       }
 	
+    } else if (!strcmp(argv[i], "-field")) {
+      
+      if (i < argc - 1) {
+	fields.push_back(argv[++i]);
+      } else {
+	OK = false;
+      }
+	
     } else if (!strcmp(argv[i], "-grid_z_geom")) {
       
       if (i < argc - 1) {
@@ -116,6 +125,8 @@ int Args::parse (int argc, char **argv, string &prog_name)
       
       if (i < argc - 1) {
         sprintf(tmp_str, "z_level_array = { %s };", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "specify_individual_z_levels = TRUE;");
         TDRP_add_override(&override, tmp_str);
       } else {
 	OK = false;
@@ -208,6 +219,28 @@ int Args::parse (int argc, char **argv, string &prog_name)
 
   // set fields if specified
 
+  if (fields.size() > 0) {
+    
+    sprintf(tmp_str, "select_fields = true;");
+    TDRP_add_override(&override, tmp_str);
+    
+    string selStr = "selected_fields = { ";
+    for (size_t ii = 0; ii < fields.size(); ii++) {
+      selStr += "{ ";
+      selStr += "\"";
+      selStr += fields[ii];
+      selStr += "\", TRUE }";
+      if (ii != fields.size() - 1) {
+        selStr += ", ";
+      } else {
+        selStr += " ";
+      }
+    }
+    selStr += "};";
+    TDRP_add_override(&override, selStr.c_str());
+    
+  } // if (fields.size() ...
+
   if (!OK) {
     _usage(cerr);
     return -1;
@@ -233,6 +266,10 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -f, -paths ? ] set file paths\n"
       << "    Sets mode to FILELIST\n"
+      << "\n"
+      << "  [ -field ? ] Specify field name\n"
+      << "     Use multiple -field args for multiple fields\n"
+      << "     If no fields specified, all fields will be included\n"
       << "\n"
       << "  [ -grid_xy_geom \"nx, ny, minx, miny, dx, dy\"]\n"
       << "    Set the geometry for constant spacing in (X,Y)\n"
@@ -268,6 +305,9 @@ void Args::_usage(ostream &out)
       << "  [ -v, -verbose ] print verbose debug messages\n"
       << "\n"
       << "  [ -vv, -extra ] print extra verbose debug messages\n"
+      << "\n"
+      << "  [ -z_level_array \"z0, z1, .... , zn-1\" ] specify z levels\n"
+      << "    Use this instead of -grid_z_geom for non-constant z spacing\n"
       << "\n"
       << endl;
   

@@ -511,9 +511,65 @@ paramdef struct rename_field_t {
 } renamed_fields[];
 
 commentdef {
-  p_header = "OPTION TO ADD ANCILLARY DERIVED FIELDS";
-  p_text = "These fields are derived from the input volume and then added as input fields, in native radial coordinates. They are then transformed into Cartesian coordinates, using interpolation or nearest neighnbor as appropriate.";
+  p_header = "OPTION TO ADD GEOMETRY AND TIME FIELDS";
+  p_text = "These fields are computed from the geometry of the radar rays, and then added as input fields in native radial coordinates.";
 }
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output angle fields.";
+  p_descr = "These are the fields used for multi-Doppler analsysis, as well as the range from the radar.";
+} output_angle_fields;
+
+typedef struct {
+  string azimuth_field_name;
+  string elevation_field_name;
+  string alpha_field_name;
+  string beta_field_name;
+  string gamma_field_name;
+} angle_fields_t;
+
+paramdef struct angle_fields_t {
+  p_default = {
+    azimuth_field_name = "azimuth",
+    elevation_field_name = "elevation",
+    alpha_field_name = "alpha",
+    beta_field_name = "beta",
+    gamma_field_name = "gamma"
+  };
+  p_descr = "Specify the output names of the angle fields. If set to empty, that field will not be created.";
+  p_help =
+    "\tazimuth: the azimuth of the ray (deg)\n"
+    "\televation: the elevation of the ray (deg)\n"
+    "\talpha: sin(az) * cos(el)\n"
+    "\tbeta: cos(az) * cos(el)\n"
+    "\tgamma: sin(el)\n"
+    "\trange: the range to the center of a gate (km)";
+} angle_fields;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to add range field to the output.";
+  p_help = "This is the range, in km, from the radar to each gate.";
+} output_range_field;
+
+paramdef string {
+  p_default = "range";
+  p_descr = "Name of range field, if written.";
+  p_help = "See 'output_range_field'.";
+} range_field_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to add height field to the output.";
+  p_help = "This is the height, in km msl, of the center of each gate.";
+} output_height_field;
+
+paramdef string {
+  p_default = "height";
+  p_descr = "Name of height field, if written.";
+  p_help = "See 'output_height_field'.";
+} height_field_name;
 
 paramdef boolean {
   p_default = false;
@@ -545,53 +601,16 @@ paramdef boolean {
   p_help = "If false, nearest neighbor will be used for the time field.";
 } interp_time_field;
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to add a range to the output.";
-  p_help = "This is the range, in km, from the radar to the gate.";
-} output_range_field;
-
-paramdef string {
-  p_default = "range";
-  p_descr = "Name of range field, if written.";
-  p_help = "See 'output_range_field'.";
-} range_field_name;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to perform interpolation on the range field.";
-  p_help = "If false, nearest neighbor will be used for transforming the range field.";
-} interp_range_field;
+commentdef {
+  p_header = "OPTION TO ADD DEBUG FIELDS";
+  p_text = "The debug fields are added to the output grid. These are geometry fields, and can be used to ensure the interpolation is working as expectede.";
+}
 
 paramdef boolean {
   p_default = false;
   p_descr = "Option to add test fields for checking the interpolation.";
-  p_help = "The test fields allow us to ensure that the interpolation is working correctly.\n\nThe debug fields are:\n\n\tnContrib - number of points used in interpolation\n\tgridAz: azimuth deg (mod 45)\n\tgridEl: elevation deg\n\tgridRange: range km (mod 50)\n\tllEl: lower left elevation deg\n\tllAz: lower left azimuth deg (mod 45)\n\tlrEl: lower right elevation deg\n\tlrAz: lower right azimuth deg (mod 45)\n\tulEl: upper left elevation deg\n\tulAz: upper left azimuth deg (mod 45)\n\turEl: upper right elevation deg\n\turAz: upper right azimuth deg (mod 45)";
+  p_help = "The test fields allow us to ensure that the interpolation is working correctly.\n\nThe debug fields are:\n\n\tnContrib - number of points used in interpolation\n\tgridAz: azimuth deg\n\tgridEl: elevation deg\n\tgridRange: range km\n\tllEl: lower left elevation deg\n\tllAz: lower left azimuth deg\n\tlrEl: lower right elevation deg\n\tlrAz: lower right azimuth deg\n\tulEl: upper left elevation deg\n\tulAz: upper left azimuth deg\n\turEl: upper right elevation deg\n\turAz: upper right azimuth deg";
 } output_test_fields;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to perform interpolation on test fields.";
-  p_help = "If false, nearest neighbor will be used for the test fields.";
-} interp_test_fields;
-
-paramdef double {
-  p_default = 9999;
-  p_descr = "Modulus argument for elevation field.";
-  p_help = "We can optionally use the fmod() function to keep the elevation field within limits, so that color sales will work well while preserving sufficient detail on gradients. The default is 9999, which will leave the elevation unchanged. If set to 30, for example, the data will be constrained between -30 and 30.";
-} modulus_for_elevation;
-
-paramdef double {
-  p_default = 9999;
-  p_descr = "Modulus argument for azimuth field.";
-  p_help = "We can optionally use the fmod() function to keep the azimuth field within limits, so that color sales will work well while preserving sufficient detail on gradients. The default is 9999, which will leave the elevation unchanged. If set to 30, for example, the data will be constrained between -30 and 30.";
-} modulus_for_azimuth;
-
-paramdef double {
-  p_default = 9999;
-  p_descr = "Modulus argument for range field.";
-  p_help = "We can optionally use the fmod() function to keep the range field within limits, so that color sales will work well while preserving sufficient detail on gradients. The default is 9999, which will leave the elevation unchanged. If set to 30, for example, the data will be constrained between -30 and 30.";
-} modulus_for_range;
 
 commentdef {
   p_header = "CENSORING OUTPUT FIELDS";

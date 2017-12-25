@@ -158,6 +158,14 @@ public:
   } rename_field_t;
 
   typedef struct {
+    char* azimuth_field_name;
+    char* elevation_field_name;
+    char* alpha_field_name;
+    char* beta_field_name;
+    char* gamma_field_name;
+  } angle_fields_t;
+
+  typedef struct {
     char* name;
     double min_valid_value;
     double max_valid_value;
@@ -557,6 +565,18 @@ public:
   rename_field_t *_renamed_fields;
   int renamed_fields_n;
 
+  tdrp_bool_t output_angle_fields;
+
+  angle_fields_t angle_fields;
+
+  tdrp_bool_t output_range_field;
+
+  char* range_field_name;
+
+  tdrp_bool_t output_height_field;
+
+  char* height_field_name;
+
   tdrp_bool_t output_coverage_field;
 
   char* coverage_field_name;
@@ -567,21 +587,7 @@ public:
 
   tdrp_bool_t interp_time_field;
 
-  tdrp_bool_t output_range_field;
-
-  char* range_field_name;
-
-  tdrp_bool_t interp_range_field;
-
   tdrp_bool_t output_test_fields;
-
-  tdrp_bool_t interp_test_fields;
-
-  double modulus_for_elevation;
-
-  double modulus_for_azimuth;
-
-  double modulus_for_range;
 
   tdrp_bool_t apply_censoring;
 

@@ -536,9 +536,10 @@ int Radx2Grid::_readFile(const string &filePath)
 
   _setupTransformFields();
 
-  // add test and coverage fields to input rays as required
+  // add extra fields fields
   
-  _addTestAndCoverageInputFields();
+  _addGeometryFields();
+  _addTimeField();
   
   // for reorder, add in extra sweep at start and end
   // so that we can require boundedness
@@ -916,30 +917,104 @@ void Radx2Grid::_censorInterpRay(Interp::Ray *interpRay)
 }
 
 //////////////////////////////////////////////////
-// add test and coverage fields as required
-// to the input data, so that they are available
-// for interpolation as needed.
+// add geometry fields
 
-void Radx2Grid::_addTestAndCoverageInputFields()
+void Radx2Grid::_addGeometryFields()
 {
+  
+  if (_params.output_angle_fields) {
 
-  if (!_params.output_test_fields &&
-      !_params.output_coverage_field &&
-      !_params.output_range_field &&
-      !_params.output_time_field) {
-    return;
-  }
+    // loop through rays
+    
+    vector<RadxRay *> &rays = _readVol.getRays();
+    for (size_t iray = 0; iray < rays.size(); iray++) {
+      
+      RadxRay *ray = rays[iray];
+      int nGates = ray->getNGates();
+      TaArray<Radx::fl32> data_;
+      Radx::fl32 *data = data_.alloc(nGates);
+      
+      double az = ray->getAzimuthDeg();
+      double el = ray->getAzimuthDeg();
+      double cosAz = cos(az * Radx::DegToRad);
+      double cosEl = cos(el * Radx::DegToRad);
+      double sinAz = sin(az * Radx::DegToRad);
+      double sinEl = sin(el * Radx::DegToRad);
+      
+      // add azimuth field
+      if (strlen(_params.angle_fields.azimuth_field_name) > 0) {
+        RadxField *azimuthField = 
+          new RadxField(_params.angle_fields.azimuth_field_name, "deg");
+        azimuthField->setLongName("azimuth_angle");
+        azimuthField->setStandardName("sensor_to_target_azimuth_angle");
+        azimuthField->setTypeFl32(-9999.0);
+        for (int ii = 0; ii < nGates; ii++) {
+          data[ii] = az;
+        }
+        azimuthField->addDataFl32(nGates, data);
+        ray->addField(azimuthField);
+      }
+      
+      // add elevation field
+      if (strlen(_params.angle_fields.elevation_field_name) > 0) {
+        RadxField *elevationField = 
+          new RadxField(_params.angle_fields.elevation_field_name, "deg");
+        elevationField->setLongName("elevation_angle");
+        elevationField->setStandardName("sensor_to_target_elevation_angle");
+        elevationField->setTypeFl32(-9999.0);
+        for (int ii = 0; ii < nGates; ii++) {
+          data[ii] = el;
+        }
+        elevationField->addDataFl32(nGates, data);
+        ray->addField(elevationField);
+      }
+      
+      // add alpha field - sin(az) * cos(el)
+      if (strlen(_params.angle_fields.alpha_field_name) > 0) {
+        RadxField *alphaField = 
+          new RadxField(_params.angle_fields.alpha_field_name, "");
+        alphaField->setLongName("alpha_for_doppler_analysis");
+        alphaField->setStandardName("alpha_for_doppler_analysis");
+        alphaField->setTypeFl32(-9999.0);
+        for (int ii = 0; ii < nGates; ii++) {
+          data[ii] = sinAz * cosEl;
+        }
+        alphaField->addDataFl32(nGates, data);
+        ray->addField(alphaField);
+      }
+      
+      // add beta field - cos(az) * cos(el)
+      if (strlen(_params.angle_fields.beta_field_name) > 0) {
+        RadxField *betaField = 
+          new RadxField(_params.angle_fields.beta_field_name, "");
+        betaField->setLongName("beta_for_doppler_analysis");
+        betaField->setStandardName("beta_for_doppler_analysis");
+        betaField->setTypeFl32(-9999.0);
+        for (int ii = 0; ii < nGates; ii++) {
+          data[ii] = cosAz * cosEl;
+        }
+        betaField->addDataFl32(nGates, data);
+        ray->addField(betaField);
+      }
+      
+      // add gamma field - sin(el)
+      if (strlen(_params.angle_fields.gamma_field_name) > 0) {
+        RadxField *gammaField = 
+          new RadxField(_params.angle_fields.gamma_field_name, "");
+        gammaField->setLongName("gamma_for_doppler_analysis");
+        gammaField->setStandardName("gamma_for_doppler_analysis");
+        gammaField->setTypeFl32(-9999.0);
+        for (int ii = 0; ii < nGates; ii++) {
+          data[ii] = sinEl;
+        }
+        gammaField->addDataFl32(nGates, data);
+        ray->addField(gammaField);
+      }
 
-  string interpModeStr = "_nearest";
-  if (_params.interp_test_fields) {
-    interpModeStr = "_interp";
-  }
+    } // iray
 
-  // start times
-
-  time_t startTimeSecs = _readVol.getStartTimeSecs();
-  double startNanoSecs = _readVol.getStartNanoSecs();
-
+  } // if(_params.output_angle_fields)
+  
   // beamHeight
 
   BeamHeight beamHt;
@@ -948,56 +1023,39 @@ void Radx2Grid::_addTestAndCoverageInputFields()
     beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
   }
 
-  // loop through rays
-
+  // other geom fields
+  
   vector<RadxRay *> &rays = _readVol.getRays();
   for (size_t iray = 0; iray < rays.size(); iray++) {
-
+    
     RadxRay *ray = rays[iray];
     int nGates = ray->getNGates();
     TaArray<Radx::fl32> data_;
     Radx::fl32 *data = data_.alloc(nGates);
-
-    if (_params.output_test_fields) {
       
-      // add elevation field
-      
-      RadxField *elevFld = new RadxField("el" + interpModeStr, "deg");
-      elevFld->setLongName("diagnostic_field_elevation_angle" + interpModeStr);
-      elevFld->setStandardName("elevation_angle" + interpModeStr);
-      elevFld->setTypeFl32(-9999.0);
-      double elev = fmod(ray->getElevationDeg(), _params.modulus_for_elevation);
+    // range field
+    
+    if (_params.output_range_field) {
+      RadxField *rangeField = new RadxField(_params.range_field_name, "km");
+      rangeField->setLongName("range_from_radar");
+      rangeField->setStandardName("slant_range");
+      rangeField->setTypeFl32(-9999.0);
+      double range = ray->getStartRangeKm();
       for (int ii = 0; ii < nGates; ii++) {
-        data[ii] = elev;
+        data[ii] = range;
+        range += ray->getGateSpacingKm();
       }
-      elevFld->addDataFl32(nGates, data);
-      if (!_params.interp_test_fields) {
-        elevFld->setIsDiscrete(true);
-      }
-      ray->addField(elevFld);
-      
-      // add azimuth field
-
-      RadxField *azFld = new RadxField("az" + interpModeStr, "deg");
-      azFld->setLongName("diagnostic_field_azimuth_angle" + interpModeStr);
-      azFld->setStandardName("azimuth_angle" + interpModeStr);
-      azFld->setTypeFl32(-9999.0);
-      double az = fmod(ray->getAzimuthDeg(), _params.modulus_for_azimuth);
-      for (int ii = 0; ii < nGates; ii++) {
-        data[ii] = az;
-      }
-      azFld->addDataFl32(nGates, data);
-      if (!_params.interp_test_fields) {
-        azFld->setIsDiscrete(true);
-      }
-      ray->addField(azFld);
-
-      // add ht field
-
-      RadxField *htFld = new RadxField("hgt" + interpModeStr, "km");
-      htFld->setLongName("diagnostic_field_height_MSL" + interpModeStr);
-      htFld->setStandardName("height_MSL" + interpModeStr);
-      htFld->setTypeFl32(-9999.0);
+      rangeField->addDataFl32(nGates, data);
+      ray->addField(rangeField);
+    }
+    
+    // height field
+    
+    if (_params.output_height_field) {
+      RadxField *heightField = new RadxField(_params.height_field_name, "km");
+      heightField->setLongName("height_msl");
+      heightField->setStandardName("height_msl");
+      heightField->setTypeFl32(-9999.0);
       double elevDeg = ray->getElevationDeg();
       double range = ray->getStartRangeKm();
       for (int ii = 0; ii < nGates; ii++) {
@@ -1005,59 +1063,14 @@ void Radx2Grid::_addTestAndCoverageInputFields()
         data[ii] = ht;
         range += ray->getGateSpacingKm();
       }
-      htFld->addDataFl32(nGates, data);
-      if (!_params.interp_test_fields) {
-        htFld->setIsDiscrete(true);
-      }
-      ray->addField(htFld);
-
-    } // if (_params.output_test_fields)
-
-    // range field
-
-    if (_params.output_range_field) {
-      RadxField *rangeFld = new RadxField(_params.range_field_name, "km");
-      rangeFld->setLongName("diagnostic_field_range_from_radar" + interpModeStr);
-      rangeFld->setStandardName("slant_range" + interpModeStr);
-      rangeFld->setTypeFl32(-9999.0);
-      double range = ray->getStartRangeKm();
-      for (int ii = 0; ii < nGates; ii++) {
-        data[ii] = fmod(range, _params.modulus_for_range);
-        range += ray->getGateSpacingKm();
-      }
-      rangeFld->addDataFl32(nGates, data);
-      if (!_params.interp_range_field) {
-        rangeFld->setIsDiscrete(true);
-      }
-      ray->addField(rangeFld);
-    }
-
-    // time field
-
-    if (_params.output_time_field) {
-      RadxField *timeFld = new RadxField(_params.time_field_name, "seconds");
-      timeFld->setLongName("diagnostic_field_time_since_volume_start");
-      timeFld->setStandardName("time_since_volume_start");
-      timeFld->setTypeFl32(-9999.0);
-      time_t timeSecs = ray->getTimeSecs();
-      double nanoSecs = ray->getNanoSecs();
-      double secsSinceStart = 
-        (double) (timeSecs - startTimeSecs) - ((nanoSecs - startNanoSecs) * 1.0e-9);
-      for (int ii = 0; ii < nGates; ii++) {
-        data[ii] = secsSinceStart;
-      }
-      timeFld->addDataFl32(nGates, data);
-      if (!_params.interp_time_field) {
-        timeFld->setIsDiscrete(true);
-      }
-      ray->addField(timeFld);
+      heightField->addDataFl32(nGates, data);
+      ray->addField(heightField);
     }
 
     // coverage field
-
     if (_params.output_coverage_field) {
       RadxField *covFld = new RadxField(_params.coverage_field_name, "");
-      covFld->setLongName("diagnostic_field_radar_coverage_flag");
+      covFld->setLongName("radar_coverage_flag");
       covFld->setStandardName("radar_coverage_flag");
       covFld->setTypeFl32(-9999.0);
       for (int ii = 0; ii < nGates; ii++) {
@@ -1067,6 +1080,54 @@ void Radx2Grid::_addTestAndCoverageInputFields()
       covFld->setIsDiscrete(true);
       ray->addField(covFld);
     }
+    
+  } // iray
+
+}
+
+//////////////////////////////////////////////////
+// add time field
+
+void Radx2Grid::_addTimeField()
+{
+
+  if (!_params.output_time_field) {
+    return;
+  }
+  
+  // start times
+
+  time_t startTimeSecs = _readVol.getStartTimeSecs();
+  double startNanoSecs = _readVol.getStartNanoSecs();
+
+  // loop through rays
+
+  vector<RadxRay *> &rays = _readVol.getRays();
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+    
+    RadxRay *ray = rays[iray];
+    int nGates = ray->getNGates();
+    TaArray<Radx::fl32> data_;
+    Radx::fl32 *data = data_.alloc(nGates);
+
+    // time field
+
+    RadxField *timeFld = new RadxField(_params.time_field_name, "seconds");
+    timeFld->setLongName("time_since_volume_start");
+    timeFld->setStandardName("time_since_volume_start");
+    timeFld->setTypeFl32(-9999.0);
+    time_t timeSecs = ray->getTimeSecs();
+    double nanoSecs = ray->getNanoSecs();
+    double secsSinceStart = 
+      (double) (timeSecs - startTimeSecs) - ((nanoSecs - startNanoSecs) * 1.0e-9);
+    for (int ii = 0; ii < nGates; ii++) {
+      data[ii] = secsSinceStart;
+    }
+    timeFld->addDataFl32(nGates, data);
+    if (!_params.interp_time_field) {
+      timeFld->setIsDiscrete(true);
+    }
+    ray->addField(timeFld);
 
   } // iray
 

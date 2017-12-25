@@ -1578,8 +1578,116 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 16");
-    tt->comment_hdr = tdrpStrDup("OPTION TO ADD ANCILLARY DERIVED FIELDS");
-    tt->comment_text = tdrpStrDup("These fields are derived from the input volume and then added as input fields, in native radial coordinates. They are then transformed into Cartesian coordinates, using interpolation or nearest neighnbor as appropriate.");
+    tt->comment_hdr = tdrpStrDup("OPTION TO ADD GEOMETRY AND TIME FIELDS");
+    tt->comment_text = tdrpStrDup("These fields are computed from the geometry of the radar rays, and then added as input fields in native radial coordinates.");
+    tt++;
+    
+    // Parameter 'output_angle_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("output_angle_fields");
+    tt->descr = tdrpStrDup("Option to output angle fields.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &output_angle_fields - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'angle_fields'
+    // ctype is '_angle_fields_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("angle_fields");
+    tt->descr = tdrpStrDup("Specify the output names of the angle fields. If set to empty, that field will not be created.");
+    tt->help = tdrpStrDup("\tazimuth: the azimuth of the ray (deg)\n\televation: the elevation of the ray (deg)\n\talpha: sin(az) * cos(el)\n\tbeta: cos(az) * cos(el)\n\tgamma: sin(el)\n\trange: the range to the center of a gate (km)");
+    tt->val_offset = (char *) &angle_fields - &_start_;
+    tt->struct_def.name = tdrpStrDup("angle_fields_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("azimuth_field_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &angle_fields.azimuth_field_name - (char *) &angle_fields;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("elevation_field_name");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &angle_fields.elevation_field_name - (char *) &angle_fields;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("alpha_field_name");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &angle_fields.alpha_field_name - (char *) &angle_fields;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[3].fname = tdrpStrDup("beta_field_name");
+      tt->struct_def.fields[3].ptype = STRING_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &angle_fields.beta_field_name - (char *) &angle_fields;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[4].fname = tdrpStrDup("gamma_field_name");
+      tt->struct_def.fields[4].ptype = STRING_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &angle_fields.gamma_field_name - (char *) &angle_fields;
+    tt->n_struct_vals = 5;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("azimuth");
+      tt->struct_vals[1].s = tdrpStrDup("elevation");
+      tt->struct_vals[2].s = tdrpStrDup("alpha");
+      tt->struct_vals[3].s = tdrpStrDup("beta");
+      tt->struct_vals[4].s = tdrpStrDup("gamma");
+    tt++;
+    
+    // Parameter 'output_range_field'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("output_range_field");
+    tt->descr = tdrpStrDup("Option to add range field to the output.");
+    tt->help = tdrpStrDup("This is the range, in km, from the radar to each gate.");
+    tt->val_offset = (char *) &output_range_field - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'range_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("range_field_name");
+    tt->descr = tdrpStrDup("Name of range field, if written.");
+    tt->help = tdrpStrDup("See 'output_range_field'.");
+    tt->val_offset = (char *) &range_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("range");
+    tt++;
+    
+    // Parameter 'output_height_field'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("output_height_field");
+    tt->descr = tdrpStrDup("Option to add height field to the output.");
+    tt->help = tdrpStrDup("This is the height, in km msl, of the center of each gate.");
+    tt->val_offset = (char *) &output_height_field - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'height_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("height_field_name");
+    tt->descr = tdrpStrDup("Name of height field, if written.");
+    tt->help = tdrpStrDup("See 'output_height_field'.");
+    tt->val_offset = (char *) &height_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("height");
     tt++;
     
     // Parameter 'output_coverage_field'
@@ -1642,40 +1750,13 @@ using namespace std;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'output_range_field'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_range_field");
-    tt->descr = tdrpStrDup("Option to add a range to the output.");
-    tt->help = tdrpStrDup("This is the range, in km, from the radar to the gate.");
-    tt->val_offset = (char *) &output_range_field - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'range_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("range_field_name");
-    tt->descr = tdrpStrDup("Name of range field, if written.");
-    tt->help = tdrpStrDup("See 'output_range_field'.");
-    tt->val_offset = (char *) &range_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("range");
-    tt++;
-    
-    // Parameter 'interp_range_field'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("interp_range_field");
-    tt->descr = tdrpStrDup("Option to perform interpolation on the range field.");
-    tt->help = tdrpStrDup("If false, nearest neighbor will be used for transforming the range field.");
-    tt->val_offset = (char *) &interp_range_field - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 17");
+    tt->comment_hdr = tdrpStrDup("OPTION TO ADD DEBUG FIELDS");
+    tt->comment_text = tdrpStrDup("The debug fields are added to the output grid. These are geometry fields, and can be used to ensure the interpolation is working as expectede.");
     tt++;
     
     // Parameter 'output_test_fields'
@@ -1685,64 +1766,16 @@ using namespace std;
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("output_test_fields");
     tt->descr = tdrpStrDup("Option to add test fields for checking the interpolation.");
-    tt->help = tdrpStrDup("The test fields allow us to ensure that the interpolation is working correctly.\n\nThe debug fields are:\n\n\tnContrib - number of points used in interpolation\n\tgridAz: azimuth deg (mod 45)\n\tgridEl: elevation deg\n\tgridRange: range km (mod 50)\n\tllEl: lower left elevation deg\n\tllAz: lower left azimuth deg (mod 45)\n\tlrEl: lower right elevation deg\n\tlrAz: lower right azimuth deg (mod 45)\n\tulEl: upper left elevation deg\n\tulAz: upper left azimuth deg (mod 45)\n\turEl: upper right elevation deg\n\turAz: upper right azimuth deg (mod 45)");
+    tt->help = tdrpStrDup("The test fields allow us to ensure that the interpolation is working correctly.\n\nThe debug fields are:\n\n\tnContrib - number of points used in interpolation\n\tgridAz: azimuth deg\n\tgridEl: elevation deg\n\tgridRange: range km\n\tllEl: lower left elevation deg\n\tllAz: lower left azimuth deg\n\tlrEl: lower right elevation deg\n\tlrAz: lower right azimuth deg\n\tulEl: upper left elevation deg\n\tulAz: upper left azimuth deg\n\turEl: upper right elevation deg\n\turAz: upper right azimuth deg");
     tt->val_offset = (char *) &output_test_fields - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'interp_test_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("interp_test_fields");
-    tt->descr = tdrpStrDup("Option to perform interpolation on test fields.");
-    tt->help = tdrpStrDup("If false, nearest neighbor will be used for the test fields.");
-    tt->val_offset = (char *) &interp_test_fields - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'modulus_for_elevation'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("modulus_for_elevation");
-    tt->descr = tdrpStrDup("Modulus argument for elevation field.");
-    tt->help = tdrpStrDup("We can optionally use the fmod() function to keep the elevation field within limits, so that color sales will work well while preserving sufficient detail on gradients. The default is 9999, which will leave the elevation unchanged. If set to 30, for example, the data will be constrained between -30 and 30.");
-    tt->val_offset = (char *) &modulus_for_elevation - &_start_;
-    tt->single_val.d = 9999;
-    tt++;
-    
-    // Parameter 'modulus_for_azimuth'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("modulus_for_azimuth");
-    tt->descr = tdrpStrDup("Modulus argument for azimuth field.");
-    tt->help = tdrpStrDup("We can optionally use the fmod() function to keep the azimuth field within limits, so that color sales will work well while preserving sufficient detail on gradients. The default is 9999, which will leave the elevation unchanged. If set to 30, for example, the data will be constrained between -30 and 30.");
-    tt->val_offset = (char *) &modulus_for_azimuth - &_start_;
-    tt->single_val.d = 9999;
-    tt++;
-    
-    // Parameter 'modulus_for_range'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("modulus_for_range");
-    tt->descr = tdrpStrDup("Modulus argument for range field.");
-    tt->help = tdrpStrDup("We can optionally use the fmod() function to keep the range field within limits, so that color sales will work well while preserving sufficient detail on gradients. The default is 9999, which will leave the elevation unchanged. If set to 30, for example, the data will be constrained between -30 and 30.");
-    tt->val_offset = (char *) &modulus_for_range - &_start_;
-    tt->single_val.d = 9999;
-    tt++;
-    
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("CENSORING OUTPUT FIELDS");
     tt->comment_text = tdrpStrDup("You have the option of censoring the output data fields - i.e. setting the fields to missing values - at gates which meet certain criteria based on the values in the input fields.\n\nIf this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression. This leads to smaller data files.");
     tt++;
@@ -1830,11 +1863,11 @@ using namespace std;
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("SETTING THE PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1863,11 +1896,11 @@ using namespace std;
     tt->single_val.d = 1.33333;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("FILE READ OPTIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1992,11 +2025,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("OPTION TO CORRECT TIME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2025,11 +2058,11 @@ using namespace std;
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 21'
+    // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("SETTING LIMITS ON THE VALID DATA");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2178,11 +2211,11 @@ using namespace std;
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE VOLUME NUMBER, OR AUTOINCREMENT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2223,11 +2256,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE RADAR LOCATION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2280,11 +2313,11 @@ using namespace std;
     tt->single_val.d = -999;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE INSTRUMENT AND/OR SITE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2337,11 +2370,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE RADAR BEAM WIDTH");
     tt->comment_text = tdrpStrDup("The beam width is used to decide how far to extend the interpolated data beyond the observed data. The data is extended below the lowest tilt and above the highest tilt, and in the case of sector scans it is extended slightly beyond the sector limits.");
     tt++;
@@ -2382,11 +2415,11 @@ using namespace std;
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE RADAR GATE GEOMETRY");
     tt->comment_text = tdrpStrDup("If the start range and/or gate spacing is not correct in the data, you can override it using the parameters below.");
     tt++;
@@ -2427,11 +2460,11 @@ using namespace std;
     tt->single_val.d = 0.25;
     tt++;
     
-    // Parameter 'Comment 27'
+    // Parameter 'Comment 28'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 27");
+    tt->param_name = tdrpStrDup("Comment 28");
     tt->comment_hdr = tdrpStrDup("OPTION TO APPLY ANGLE CORRECTIONS");
     tt->comment_text = tdrpStrDup("This section allows you to correct the azimuth and/or elevation angles for a known error.");
     tt++;
@@ -2460,11 +2493,11 @@ using namespace std;
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 28'
+    // Parameter 'Comment 29'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
+    tt->param_name = tdrpStrDup("Comment 29");
     tt->comment_hdr = tdrpStrDup("CF NetCDF OUTPUT DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2541,11 +2574,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 29'
+    // Parameter 'Comment 30'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 29");
+    tt->param_name = tdrpStrDup("Comment 30");
     tt->comment_hdr = tdrpStrDup("NETCDF COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2578,11 +2611,11 @@ using namespace std;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 30'
+    // Parameter 'Comment 31'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 30");
+    tt->param_name = tdrpStrDup("Comment 31");
     tt->comment_hdr = tdrpStrDup("NETCDF STYLE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2719,11 +2752,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 31'
+    // Parameter 'Comment 32'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 31");
+    tt->param_name = tdrpStrDup("Comment 32");
     tt->comment_hdr = tdrpStrDup("PROCESS CONTROL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2764,11 +2797,11 @@ using namespace std;
     tt->single_val.i = 60;
     tt++;
     
-    // Parameter 'Comment 32'
+    // Parameter 'Comment 33'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 32");
+    tt->param_name = tdrpStrDup("Comment 33");
     tt->comment_hdr = tdrpStrDup("MEMORY HANDLING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2785,11 +2818,11 @@ using namespace std;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 33'
+    // Parameter 'Comment 34'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 33");
+    tt->param_name = tdrpStrDup("Comment 34");
     tt->comment_hdr = tdrpStrDup("THREADING FOR SPEED.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2820,11 +2853,11 @@ using namespace std;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 34'
+    // Parameter 'Comment 35'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 34");
+    tt->param_name = tdrpStrDup("Comment 35");
     tt->comment_hdr = tdrpStrDup("INTERPOLATION FOR SATELLITE DATA");
     tt->comment_text = tdrpStrDup("Satellite interpolation uses the reorder params above, plus those in this section.");
     tt++;
@@ -2853,11 +2886,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 35'
+    // Parameter 'Comment 36'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 35");
+    tt->param_name = tdrpStrDup("Comment 36");
     tt->comment_hdr = tdrpStrDup("OPTION TO WRITE SEARCH MATRIX FILES");
     tt->comment_text = tdrpStrDup("This is for debugging purposes only. The search matrix data will be written to MDV files that can then be viewed in CIDD or JAZZ.");
     tt++;
@@ -2886,11 +2919,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("./mdv/search_matrix");
     tt++;
     
-    // Parameter 'Comment 36'
+    // Parameter 'Comment 37'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 36");
+    tt->param_name = tdrpStrDup("Comment 37");
     tt->comment_hdr = tdrpStrDup("OPTION TO IDENTIFY THE CONVECTIVE/STRATIFORM SPLIT");
     tt->comment_text = tdrpStrDup("Applies only to INTERP_MODE_CART.");
     tt++;
@@ -3051,11 +3084,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 37'
+    // Parameter 'Comment 38'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 37");
+    tt->param_name = tdrpStrDup("Comment 38");
     tt->comment_hdr = tdrpStrDup("INTERPOLATION USING REORDER METHOD");
     tt->comment_text = tdrpStrDup("!!!!!! WARNING - IMPORTANT NOTE - this mode should only be used for mobile platforms. Use INTERP_MODE_CART for all fixed platforms - it is much more robust and gives much better results !!!!!!!");
     tt++;
@@ -3192,11 +3225,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 38'
+    // Parameter 'Comment 39'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 38");
+    tt->param_name = tdrpStrDup("Comment 39");
     tt->comment_hdr = tdrpStrDup("OPTION TO SET BOUNDS ON SELECTED FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
