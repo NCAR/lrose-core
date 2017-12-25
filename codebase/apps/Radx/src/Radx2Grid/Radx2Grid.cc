@@ -935,7 +935,7 @@ void Radx2Grid::_addGeometryFields()
       Radx::fl32 *data = data_.alloc(nGates);
       
       double az = ray->getAzimuthDeg();
-      double el = ray->getAzimuthDeg();
+      double el = ray->getElevationDeg();
       double cosAz = cos(az * Radx::DegToRad);
       double cosEl = cos(el * Radx::DegToRad);
       double sinAz = sin(az * Radx::DegToRad);
