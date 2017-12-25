@@ -105,7 +105,12 @@ typedef enum {
 paramdef enum interp_mode_t {
   p_default = INTERP_MODE_CART;
   p_descr = "Mode for interpolation";
-  p_help = "\nINTERP_MODE_CART: interpolate onto a regular 3-D Cartesian grid. This is the most common option and is equivalent to the legacy SPRINT application.\n\nINTERP_MODE_PPI: interpolate onto a regular 2-D Cartesian grid in (x,y), preserving the original radar elevation angles for each sweep in the vertical. The result is a volume of Cartesian PPIs, with the (x,y) dimensions in km and the vertical dimension in degrees.\n\nINTERP_MODE_POLAR: interpolate onto a regular azimuth grid, preserving the elevation angles for each sweep. The azimuths are remapped onto a regular grid. The elevation angle attached to each vertical level is derived from the sweep information in the input file.\n\nINTERP_MODE_CART_REORDER: interpolate onto a regular 3-D Cartesian grid using the reorder strategy. This should only be used for MOVING platforms only. DO NOT USE this method for FIXED platform, use INTERP_MODE_CART instead.\n\nINTERP_MODE_SAT: interpolate satellite-based lidar or radar data onto a grid, with a specified swath width along the satellite track. The remapped data can then be visualized using a Cartesian data display, such as Jazz.";
+  p_help =
+  "\nINTERP_MODE_CART: interpolate onto a regular 3-D Cartesian grid. This is the most common option and is equivalent to the legacy SPRINT application.\n"
+  "\nINTERP_MODE_PPI: interpolate onto a regular 2-D Cartesian grid in (x,y), preserving the original radar elevation angles for each sweep in the vertical. The result is a volume of Cartesian PPIs, with the (x,y) dimensions in km and the vertical dimension in degrees.\n"
+  "\nINTERP_MODE_POLAR: interpolate onto a regular azimuth grid, preserving the elevation angles for each sweep. The azimuths are remapped onto a regular grid. The elevation angle attached to each vertical level is derived from the sweep information in the input file.\n"
+  "\nINTERP_MODE_CART_REORDER: interpolate onto a regular 3-D Cartesian grid using the reorder strategy. This should only be used for MOVING platforms only. DO NOT USE this method for FIXED platform, use INTERP_MODE_CART instead.\n"
+  "\nINTERP_MODE_SAT: interpolate satellite-based lidar or radar data onto a grid, with a specified swath width along the satellite track. The remapped data can then be visualized using a Cartesian data display, such as Jazz.";
 } interp_mode;
 
 commentdef {
@@ -146,7 +151,11 @@ paramdef double {
 
 commentdef {
   p_header = "CARTESIAN GRID VERTICAL LEVELS";
-  p_text = "Set the vertical levels for the Cartesian grid.\n\nThis applies to INTERP_MODE_CART, INTERP_MODE_SAT and INTERP_MODE_REORDER.\n\nFor INTERP_MODE_PPI and INTERP_MODE_POLAR, the vertical levels are governed by the elevation angle for each sweep in the input volume.\n\nYou can either specify a grid with constant vertial spacing, or you can provide an array of heights. The latter allows you to specify a grid with irregular vertical spacing.";
+  p_text = 
+    "\nSet the vertical levels for the Cartesian grid.\n"
+    "\nThis applies to INTERP_MODE_CART, INTERP_MODE_SAT and INTERP_MODE_REORDER.\n"
+    "\nFor INTERP_MODE_PPI and INTERP_MODE_POLAR, the vertical levels are governed by the elevation angle for each sweep in the input volume.\n"
+    "\nYou can either specify a grid with constant vertial spacing, or you can provide an array of heights. The latter allows you to specify a grid with irregular vertical spacing.";
 }
 
 typedef struct {
@@ -158,7 +167,11 @@ typedef struct {
 paramdef struct grid_z_geom_t {
   p_default = {20, 0.5, 1.0};
   p_descr = "Specifying regular vertical grid levels.";
-  p_help = "dz is in km. minz is in km MSL. Not used if interp_mode is set to INTERP_MODE_PPI. Applies if specify_individual_z_levels is false.";
+  p_help =
+    "\tnz is the number of levels.\n"
+    "\tdz is constant spacing of the Z levels, in km.\n"
+    "\tminz is the lowest level, in km MSL.\n"
+    "\nNOTE: Applies if specify_individual_z_levels is false. Does not apply to INTERP_MODE_PPI.";
 } grid_z_geom;
 
 paramdef boolean {
@@ -190,7 +203,14 @@ typedef struct {
 paramdef struct grid_xy_geom_t {
   p_default = {400, 400, -199.5, -199.5, 1.0, 1.0};
   p_descr = "Specify the grid parameters in x,y.";
-  p_help = "nx: the number of grid points in the X dimension.\n\nny: the number of grid points in the Y dimension.\n\nminx: the X coordinate of the center of the SW grid cell.\n\nminy: the Y coordinate of the center of the SW grid cell.\n\ndx: the grid spacing in the X dimension.\n\ndy: the grid spacing in the Y dimension.\n\nUnits are in km, except for LATLON, which has units in degrees.";
+  p_help =
+    "\tnx: the number of grid points in the X dimension.\n"
+    "\tny: the number of grid points in the Y dimension.\n"
+    "\tminx: the X coordinate of the center of the SW grid cell.\n"
+    "\tminy: the Y coordinate of the center of the SW grid cell.\n"
+    "\tdx: the grid spacing in the X dimension.\n"
+    "\tdy: the grid spacing in the Y dimension.\n"
+    "\nUnits are in km, except for PROJ_LATLON, which has units in degrees.";
 } grid_xy_geom;
 
 paramdef boolean {

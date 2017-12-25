@@ -816,7 +816,7 @@ using namespace std;
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("CARTESIAN GRID VERTICAL LEVELS");
-    tt->comment_text = tdrpStrDup("Set the vertical levels for the Cartesian grid.\n\nThis applies to INTERP_MODE_CART, INTERP_MODE_SAT and INTERP_MODE_REORDER.\n\nFor INTERP_MODE_PPI and INTERP_MODE_POLAR, the vertical levels are governed by the elevation angle for each sweep in the input volume.\n\nYou can either specify a grid with constant vertial spacing, or you can provide an array of heights. The latter allows you to specify a grid with irregular vertical spacing.");
+    tt->comment_text = tdrpStrDup("\nSet the vertical levels for the Cartesian grid.\n\nThis applies to INTERP_MODE_CART, INTERP_MODE_SAT and INTERP_MODE_REORDER.\n\nFor INTERP_MODE_PPI and INTERP_MODE_POLAR, the vertical levels are governed by the elevation angle for each sweep in the input volume.\n\nYou can either specify a grid with constant vertial spacing, or you can provide an array of heights. The latter allows you to specify a grid with irregular vertical spacing.");
     tt++;
     
     // Parameter 'grid_z_geom'
@@ -826,7 +826,7 @@ using namespace std;
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("grid_z_geom");
     tt->descr = tdrpStrDup("Specifying regular vertical grid levels.");
-    tt->help = tdrpStrDup("dz is in km. minz is in km MSL. Not used if interp_mode is set to INTERP_MODE_PPI. Applies if specify_individual_z_levels is false.");
+    tt->help = tdrpStrDup("\tnz is the number of levels.\n\tdz is constant spacing of the Z levels, in km.\n\tminz is the lowest level, in km MSL.\n\nNOTE: Applies if specify_individual_z_levels is false. Does not apply to INTERP_MODE_PPI.");
     tt->val_offset = (char *) &grid_z_geom - &_start_;
     tt->struct_def.name = tdrpStrDup("grid_z_geom_t");
     tt->struct_def.nfields = 3;
@@ -914,7 +914,7 @@ using namespace std;
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("grid_xy_geom");
     tt->descr = tdrpStrDup("Specify the grid parameters in x,y.");
-    tt->help = tdrpStrDup("nx: the number of grid points in the X dimension.\n\nny: the number of grid points in the Y dimension.\n\nminx: the X coordinate of the center of the SW grid cell.\n\nminy: the Y coordinate of the center of the SW grid cell.\n\ndx: the grid spacing in the X dimension.\n\ndy: the grid spacing in the Y dimension.\n\nUnits are in km, except for LATLON, which has units in degrees.");
+    tt->help = tdrpStrDup("\tnx: the number of grid points in the X dimension.\n\tny: the number of grid points in the Y dimension.\n\tminx: the X coordinate of the center of the SW grid cell.\n\tminy: the Y coordinate of the center of the SW grid cell.\n\tdx: the grid spacing in the X dimension.\n\tdy: the grid spacing in the Y dimension.\n\nUnits are in km, except for PROJ_LATLON, which has units in degrees.");
     tt->val_offset = (char *) &grid_xy_geom - &_start_;
     tt->struct_def.name = tdrpStrDup("grid_xy_geom_t");
     tt->struct_def.nfields = 6;
