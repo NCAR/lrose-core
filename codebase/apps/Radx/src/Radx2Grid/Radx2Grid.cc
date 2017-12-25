@@ -212,26 +212,59 @@ int Radx2Grid::_runArchive()
     PMU_auto_register("Init archive mode");
   }
 
-  // get the files to be processed
+  // get start and end times
 
+  time_t startTime = RadxTime::parseDateTime(_params.start_time);
+  if (startTime == RadxTime::NEVER) {
+    cerr << "ERROR - Radx2Grid::_runArchive()" << endl;
+    cerr << "  Start time format incorrect: " << _params.start_time << endl;
+    if (_args.startTimeSet) {
+      cerr << "  Check command line" << endl;
+    } else {
+      cerr << "  Check params file: " << _paramsPath << endl;
+    }
+    return -1;
+  }
+
+  time_t endTime = RadxTime::parseDateTime(_params.end_time);
+  if (endTime == RadxTime::NEVER) {
+    cerr << "ERROR - Radx2Grid::_runArchive()" << endl;
+    cerr << "  End time format incorrect: " << _params.end_time << endl;
+    if (_args.endTimeSet) {
+      cerr << "  Check command line" << endl;
+    } else {
+      cerr << "  Check params file: " << _paramsPath << endl;
+    }
+    return -1;
+  }
+
+  if (_params.debug) {
+    cerr << "Running Radx2Grid in ARCHIVE mode" << endl;
+    cerr << "  Input dir: " << _params.input_dir << endl;
+    cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
+    cerr << "  End time: " << RadxTime::strm(endTime) << endl;
+  }
+
+  // get the files to be processed
+  
   RadxTimeList tlist;
   tlist.setDir(_params.input_dir);
-  tlist.setModeInterval(_args.startTime, _args.endTime);
+  tlist.setModeInterval(startTime, endTime);
   if (_params.aggregate_sweep_files_on_read) {
     tlist.setReadAggregateSweeps(true);
   }
   if (tlist.compile()) {
-    cerr << "ERROR - Radx2Grid::_runFilelist()" << endl;
+    cerr << "ERROR - Radx2Grid::_runArchive()" << endl;
     cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
-    cerr << "  Start time: " << RadxTime::strm(_args.startTime) << endl;
-    cerr << "  End time: " << RadxTime::strm(_args.endTime) << endl;
+    cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
+    cerr << "  End time: " << RadxTime::strm(endTime) << endl;
     cerr << tlist.getErrStr() << endl;
     return -1;
   }
 
   const vector<string> &paths = tlist.getPathList();
   if (paths.size() < 1) {
-    cerr << "ERROR - Radx2Grid::_runFilelist()" << endl;
+    cerr << "ERROR - Radx2Grid::_runArchive()" << endl;
     cerr << "  No files found, dir: " << _params.input_dir << endl;
     return -1;
   }

@@ -633,6 +633,30 @@ using namespace std;
     tt->single_val.i = 300;
     tt++;
     
+    // Parameter 'start_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("start_time");
+    tt->descr = tdrpStrDup("Set the start time for ARCHIVE mode analysis.");
+    tt->help = tdrpStrDup("Format is 'yyyy mm dd hh mm ss'.");
+    tt->val_offset = (char *) &start_time - &_start_;
+    tt->single_val.s = tdrpStrDup("2015 06 26 00 00 00");
+    tt++;
+    
+    // Parameter 'end_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("end_time");
+    tt->descr = tdrpStrDup("Set the end time for ARCHIVE mode analysis.");
+    tt->help = tdrpStrDup("Format is 'yyyy mm dd hh mm ss'.");
+    tt->val_offset = (char *) &end_time - &_start_;
+    tt->single_val.s = tdrpStrDup("2015 06 26 12 00 00");
+    tt++;
+    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));

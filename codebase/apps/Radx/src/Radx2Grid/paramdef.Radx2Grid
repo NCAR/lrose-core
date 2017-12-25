@@ -58,6 +58,18 @@ paramdef int {
   p_help =  "REALTIME mode only. Only data files less old than this will be processed.";
 } max_realtime_data_age_secs;
 
+paramdef string {
+  p_default = "2015 06 26 00 00 00";
+  p_descr = "Set the start time for ARCHIVE mode analysis.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'.";
+} start_time;
+
+paramdef string {
+  p_default = "2015 06 26 12 00 00";
+  p_descr = "Set the end time for ARCHIVE mode analysis.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'.";
+} end_time;
+
 commentdef {
   p_header = "DATA OUTPUT DIRECTORY AND FILE NAMES";
 }

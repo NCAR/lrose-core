@@ -463,6 +463,10 @@ public:
 
   int max_realtime_data_age_secs;
 
+  char* start_time;
+
+  char* end_time;
+
   char* output_dir;
 
   output_format_t output_format;
@@ -788,7 +792,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[199];
+  mutable TDRPtable _table[201];
 
   const char *_className;
 

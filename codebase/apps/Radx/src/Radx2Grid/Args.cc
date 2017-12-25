@@ -42,8 +42,8 @@ using namespace std;
 Args::Args ()
 {
   TDRP_init_override(&override);
-  startTime = 0;
-  endTime = 0;
+  startTimeSet = false;
+  endTimeSet = false;
 }
 
 // Destructor
@@ -112,16 +112,42 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
+    } else if (!strcmp(argv[i], "-z_level_array")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "z_level_array = { %s };", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+	
+    } else if (!strcmp(argv[i], "-grid_xy_geom")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "grid_xy_geom = { %s };", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+	
+    } else if (!strcmp(argv[i], "-latlon")) {
+      
+      sprintf(tmp_str, "grid_projection = PROJ_LATLON;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-remap_to_latlon")) {
+      
+      sprintf(tmp_str, "auto_remap_flat_to_latlon = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-start")) {
       
       if (i < argc - 1) {
-	startTime = RadxTime::parseDateTime(argv[++i]);
-	if (startTime == RadxTime::NEVER) {
-	  OK = false;
-	} else {
-	  sprintf(tmp_str, "mode = ARCHIVE;");
-	  TDRP_add_override(&override, tmp_str);
-	}
+        sprintf(tmp_str, "start_time = \"%s\";", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "mode = ARCHIVE;");
+        TDRP_add_override(&override, tmp_str);
+        startTimeSet = true;
       } else {
 	OK = false;
       }
@@ -129,13 +155,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
     } else if (!strcmp(argv[i], "-end")) {
       
       if (i < argc - 1) {
-	endTime = RadxTime::parseDateTime(argv[++i]);
-	if (endTime == RadxTime::NEVER) {
-	  OK = false;
-	} else {
-	  sprintf(tmp_str, "mode = ARCHIVE;");
-	  TDRP_add_override(&override, tmp_str);
-	}
+        sprintf(tmp_str, "end_time = \"%s\";", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "mode = ARCHIVE;");
+        TDRP_add_override(&override, tmp_str);
+        endTimeSet = true;
       } else {
 	OK = false;
       }
@@ -210,20 +234,34 @@ void Args::_usage(ostream &out)
       << "  [ -f, -paths ? ] set file paths\n"
       << "    Sets mode to FILELIST\n"
       << "\n"
-      << "  [ -grid_z_geom \"nz, minz, dz\"] end time\n"
-      << "    Set the cart geometry for constant spacing in the Z dimension\n"
+      << "  [ -grid_xy_geom \"nx, ny, minx, miny, dx, dy\"]\n"
+      << "    Set the geometry for constant spacing in (X,Y)\n"
+      << "    nx, ny: number of cells in (x,y)\n"
+      << "    minx, miny: coords of center of SW grid cell (km or deg)\n"
+      << "    dx, xy: spacing between cells in (km or deg) (km)\n"
+      << "    Units are deg for LATLON projection, km for all other projections\n"
+      << "\n"
+      << "  [ -grid_z_geom \"nz, minz, dz\"]\n"
+      << "    Set the geometry for constant spacing in Z\n"
       << "    nz: number of z levels\n"
       << "    minz: lowest Z level (km MSL)\n"
       << "    dz: spacing between Z levels (km)\n"
       << "\n"
       << "  [ -instance ?] specify the instance\n"
       << "\n"
+      << "  [ -latlon] set the output projection to latlon\n"
+      << "    Default projection is FLAT - azimuthal_equidistant\n"
+      << "    Grid xy units specified in degrees\n"
+      << "\n"
       << "  [ -outdir ? ] set output directory\n"
       << "\n"
       << "  [ -outname ? ] specify output file name\n"
       << "                 file of this name will be written to outdir\n"
       << "\n"
-      << "  [ -start \"yyyy mm dd hh mm ss\"] set start time\n"
+      << "  [ -remap_to_latlon] remap to latlon after interpolation\n"
+      << "    Grid xy units specified in km\n"
+      << "\n"
+      << "  [ -start \"yyyy mm dd hh mm ss\"]\n"
       << "    Set the start time\n"
       << "    Also sets mode to ARCHIVE\n"
       << "\n"
