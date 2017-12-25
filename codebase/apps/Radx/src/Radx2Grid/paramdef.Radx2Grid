@@ -511,14 +511,14 @@ paramdef struct rename_field_t {
 } renamed_fields[];
 
 commentdef {
-  p_header = "OPTION TO CREATE DERIVED FIELDS";
-  p_text = "These fields are added to the output gridded files.";
+  p_header = "OPTION TO ADD ANCILLARY DERIVED FIELDS";
+  p_text = "These fields are derived from the input volume and then added as input fields, in native radial coordinates. They are then transformed into Cartesian coordinates, using interpolation or nearest neighnbor as appropriate.";
 }
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to output a field depicting radar coverage.";
-  p_help = "If true, a derived field, with the name 'Coverage', is included in the output. This is a simple flag field, with a 1 indicating that the radar covers that pixel, and a 0 indicating that is does not.";
+  p_descr = "Option to output a field indicating radar coverage.";
+  p_help = "This is a flag field, with a 1 indicating that the radar covers that location, and a 0 indicating that is does not. See also 'coverage_field_name'. This field is always transformed using nearest neighbor.";
 } output_coverage_field;
 
 paramdef string {
@@ -529,15 +529,39 @@ paramdef string {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to output a field of time since start of volume, in seconds.";
-  p_help = "If true, a derived field, with the name 'time_elapsed', is included in the output. This is the time, in seconds, since the start of the volume.";
+  p_descr = "Option to output a field of time since start of volume (secs)";
+  p_help = "If true, time time elapsed field is included in the output file. See also 'time_field_name' and 'interp_time_field'.";
 } output_time_field;
+
+paramdef string {
+  p_default = "time_elapsed";
+  p_descr = "Name of time field, if written.";
+  p_help = "See 'output_time_field'.";
+} time_field_name;
 
 paramdef boolean {
   p_default = true;
   p_descr = "Option to perform interpolation on the time field.";
   p_help = "If false, nearest neighbor will be used for the time field.";
 } interp_time_field;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to add a range to the output.";
+  p_help = "This is the range, in km, from the radar to the gate.";
+} output_range_field;
+
+paramdef string {
+  p_default = "range";
+  p_descr = "Name of range field, if written.";
+  p_help = "See 'output_range_field'.";
+} range_field_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to perform interpolation on the range field.";
+  p_help = "If false, nearest neighbor will be used for transforming the range field.";
+} interp_range_field;
 
 paramdef boolean {
   p_default = false;
@@ -550,18 +574,6 @@ paramdef boolean {
   p_descr = "Option to perform interpolation on test fields.";
   p_help = "If false, nearest neighbor will be used for the test fields.";
 } interp_test_fields;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to add range field (km).";
-  p_help = "Write out a field with range from the radar. This will be called 'range'.";
-} output_range_field;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to perform interpolation on range field.";
-  p_help = "If false, nearest neighbor will be used for the range field.";
-} interp_range_field;
 
 paramdef double {
   p_default = 9999;

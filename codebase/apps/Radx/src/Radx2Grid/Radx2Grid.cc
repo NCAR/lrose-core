@@ -930,9 +930,9 @@ void Radx2Grid::_addTestAndCoverageInputFields()
     return;
   }
 
-  string mode = "_nearest";
+  string interpModeStr = "_nearest";
   if (_params.interp_test_fields) {
-    mode = "_interp";
+    interpModeStr = "_interp";
   }
 
   // start times
@@ -962,9 +962,9 @@ void Radx2Grid::_addTestAndCoverageInputFields()
       
       // add elevation field
       
-      RadxField *elevFld = new RadxField("el" + mode, "deg");
-      elevFld->setLongName("diagnostic_field_elevation_angle" + mode);
-      elevFld->setStandardName("elevation_angle" + mode);
+      RadxField *elevFld = new RadxField("el" + interpModeStr, "deg");
+      elevFld->setLongName("diagnostic_field_elevation_angle" + interpModeStr);
+      elevFld->setStandardName("elevation_angle" + interpModeStr);
       elevFld->setTypeFl32(-9999.0);
       double elev = fmod(ray->getElevationDeg(), _params.modulus_for_elevation);
       for (int ii = 0; ii < nGates; ii++) {
@@ -978,9 +978,9 @@ void Radx2Grid::_addTestAndCoverageInputFields()
       
       // add azimuth field
 
-      RadxField *azFld = new RadxField("az" + mode, "deg");
-      azFld->setLongName("diagnostic_field_azimuth_angle" + mode);
-      azFld->setStandardName("azimuth_angle" + mode);
+      RadxField *azFld = new RadxField("az" + interpModeStr, "deg");
+      azFld->setLongName("diagnostic_field_azimuth_angle" + interpModeStr);
+      azFld->setStandardName("azimuth_angle" + interpModeStr);
       azFld->setTypeFl32(-9999.0);
       double az = fmod(ray->getAzimuthDeg(), _params.modulus_for_azimuth);
       for (int ii = 0; ii < nGates; ii++) {
@@ -994,9 +994,9 @@ void Radx2Grid::_addTestAndCoverageInputFields()
 
       // add ht field
 
-      RadxField *htFld = new RadxField("hgt" + mode, "km");
-      htFld->setLongName("diagnostic_field_height_MSL" + mode);
-      htFld->setStandardName("height_MSL" + mode);
+      RadxField *htFld = new RadxField("hgt" + interpModeStr, "km");
+      htFld->setLongName("diagnostic_field_height_MSL" + interpModeStr);
+      htFld->setStandardName("height_MSL" + interpModeStr);
       htFld->setTypeFl32(-9999.0);
       double elevDeg = ray->getElevationDeg();
       double range = ray->getStartRangeKm();
@@ -1015,25 +1015,27 @@ void Radx2Grid::_addTestAndCoverageInputFields()
 
     // range field
 
-    RadxField *rangeFld = new RadxField("range", "km");
-    rangeFld->setLongName("diagnostic_field_range_from_radar" + mode);
-    rangeFld->setStandardName("slant_range" + mode);
-    rangeFld->setTypeFl32(-9999.0);
-    double range = ray->getStartRangeKm();
-    for (int ii = 0; ii < nGates; ii++) {
-      data[ii] = fmod(range, _params.modulus_for_range);
-      range += ray->getGateSpacingKm();
-    }
-    rangeFld->addDataFl32(nGates, data);
-    if (!_params.interp_range_field) {
+    if (_params.output_range_field) {
+      RadxField *rangeFld = new RadxField(_params.range_field_name, "km");
+      rangeFld->setLongName("diagnostic_field_range_from_radar" + interpModeStr);
+      rangeFld->setStandardName("slant_range" + interpModeStr);
+      rangeFld->setTypeFl32(-9999.0);
+      double range = ray->getStartRangeKm();
+      for (int ii = 0; ii < nGates; ii++) {
+        data[ii] = fmod(range, _params.modulus_for_range);
+        range += ray->getGateSpacingKm();
+      }
+      rangeFld->addDataFl32(nGates, data);
+      if (!_params.interp_range_field) {
         rangeFld->setIsDiscrete(true);
+      }
+      ray->addField(rangeFld);
     }
-    ray->addField(rangeFld);
 
     // time field
 
     if (_params.output_time_field) {
-      RadxField *timeFld = new RadxField("time_elapsed", "secs");
+      RadxField *timeFld = new RadxField(_params.time_field_name, "seconds");
       timeFld->setLongName("diagnostic_field_time_since_volume_start");
       timeFld->setStandardName("time_since_volume_start");
       timeFld->setTypeFl32(-9999.0);
@@ -1062,6 +1064,7 @@ void Radx2Grid::_addTestAndCoverageInputFields()
         data[ii] = 1.0;
       }
       covFld->addDataFl32(nGates, data);
+      covFld->setIsDiscrete(true);
       ray->addField(covFld);
     }
 

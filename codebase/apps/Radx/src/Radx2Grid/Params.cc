@@ -1578,8 +1578,8 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 16");
-    tt->comment_hdr = tdrpStrDup("OPTION TO CREATE DERIVED FIELDS");
-    tt->comment_text = tdrpStrDup("These fields are added to the output gridded files.");
+    tt->comment_hdr = tdrpStrDup("OPTION TO ADD ANCILLARY DERIVED FIELDS");
+    tt->comment_text = tdrpStrDup("These fields are derived from the input volume and then added as input fields, in native radial coordinates. They are then transformed into Cartesian coordinates, using interpolation or nearest neighnbor as appropriate.");
     tt++;
     
     // Parameter 'output_coverage_field'
@@ -1588,8 +1588,8 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("output_coverage_field");
-    tt->descr = tdrpStrDup("Option to output a field depicting radar coverage.");
-    tt->help = tdrpStrDup("If true, a derived field, with the name 'Coverage', is included in the output. This is a simple flag field, with a 1 indicating that the radar covers that pixel, and a 0 indicating that is does not.");
+    tt->descr = tdrpStrDup("Option to output a field indicating radar coverage.");
+    tt->help = tdrpStrDup("This is a flag field, with a 1 indicating that the radar covers that location, and a 0 indicating that is does not. See also 'coverage_field_name'. This field is always transformed using nearest neighbor.");
     tt->val_offset = (char *) &output_coverage_field - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -1612,10 +1612,22 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("output_time_field");
-    tt->descr = tdrpStrDup("Option to output a field of time since start of volume, in seconds.");
-    tt->help = tdrpStrDup("If true, a derived field, with the name 'time_elapsed', is included in the output. This is the time, in seconds, since the start of the volume.");
+    tt->descr = tdrpStrDup("Option to output a field of time since start of volume (secs)");
+    tt->help = tdrpStrDup("If true, time time elapsed field is included in the output file. See also 'time_field_name' and 'interp_time_field'.");
     tt->val_offset = (char *) &output_time_field - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'time_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("time_field_name");
+    tt->descr = tdrpStrDup("Name of time field, if written.");
+    tt->help = tdrpStrDup("See 'output_time_field'.");
+    tt->val_offset = (char *) &time_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("time_elapsed");
     tt++;
     
     // Parameter 'interp_time_field'
@@ -1627,6 +1639,42 @@ using namespace std;
     tt->descr = tdrpStrDup("Option to perform interpolation on the time field.");
     tt->help = tdrpStrDup("If false, nearest neighbor will be used for the time field.");
     tt->val_offset = (char *) &interp_time_field - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'output_range_field'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("output_range_field");
+    tt->descr = tdrpStrDup("Option to add a range to the output.");
+    tt->help = tdrpStrDup("This is the range, in km, from the radar to the gate.");
+    tt->val_offset = (char *) &output_range_field - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'range_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("range_field_name");
+    tt->descr = tdrpStrDup("Name of range field, if written.");
+    tt->help = tdrpStrDup("See 'output_range_field'.");
+    tt->val_offset = (char *) &range_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("range");
+    tt++;
+    
+    // Parameter 'interp_range_field'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("interp_range_field");
+    tt->descr = tdrpStrDup("Option to perform interpolation on the range field.");
+    tt->help = tdrpStrDup("If false, nearest neighbor will be used for transforming the range field.");
+    tt->val_offset = (char *) &interp_range_field - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
@@ -1651,30 +1699,6 @@ using namespace std;
     tt->descr = tdrpStrDup("Option to perform interpolation on test fields.");
     tt->help = tdrpStrDup("If false, nearest neighbor will be used for the test fields.");
     tt->val_offset = (char *) &interp_test_fields - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'output_range_field'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_range_field");
-    tt->descr = tdrpStrDup("Option to add range field (km).");
-    tt->help = tdrpStrDup("Write out a field with range from the radar. This will be called 'range'.");
-    tt->val_offset = (char *) &output_range_field - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'interp_range_field'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("interp_range_field");
-    tt->descr = tdrpStrDup("Option to perform interpolation on range field.");
-    tt->help = tdrpStrDup("If false, nearest neighbor will be used for the range field.");
-    tt->val_offset = (char *) &interp_range_field - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     

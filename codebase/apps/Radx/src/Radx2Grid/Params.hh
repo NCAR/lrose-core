@@ -563,15 +563,19 @@ public:
 
   tdrp_bool_t output_time_field;
 
+  char* time_field_name;
+
   tdrp_bool_t interp_time_field;
+
+  tdrp_bool_t output_range_field;
+
+  char* range_field_name;
+
+  tdrp_bool_t interp_range_field;
 
   tdrp_bool_t output_test_fields;
 
   tdrp_bool_t interp_test_fields;
-
-  tdrp_bool_t output_range_field;
-
-  tdrp_bool_t interp_range_field;
 
   double modulus_for_elevation;
 
@@ -792,7 +796,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[201];
+  mutable TDRPtable _table[203];
 
   const char *_className;
 
