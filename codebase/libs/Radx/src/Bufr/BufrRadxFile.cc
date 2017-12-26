@@ -1920,7 +1920,7 @@ int BufrRadxFile::_addFl32FieldToRays(RadxSweep *sweep, int dataSection,
     name = someName;
   // set missing value
 
-  Radx::fl32 missingVal = -FLT_MAX; // Radx::missingFl64;
+  Radx::fl32 missingVal =  Radx::missingFl32; // -FLT_MAX; //;
 
   // look for fill value, if not present, then use missing value
 

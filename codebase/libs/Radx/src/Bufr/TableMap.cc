@@ -169,7 +169,8 @@ int TableMap::ReadInternalTableD(const char **internalBufrTable,
   for (size_t i=0; i<n; i++) { 
     std::string line(internalBufrTable[i]);
 
-    if ((line[0] != '#') && (line[0] != '\r')) { // this is a comment skip it
+    if ((line[0] != '#') && (line[0] != '\r')) {  // this is a comment skip it
+    //if (!isComment(line)) { 
      
       if (_debug) std::cout << line << std::endl;
       std::vector<std::string> tokens;
@@ -183,7 +184,11 @@ int TableMap::ReadInternalTableD(const char **internalBufrTable,
       }
       if (tokens.size() >= 6) { // handle blank lines and lines with only ;;;;;; 
 	unsigned short subkey;      
-	if (tokens[0].compare("  ") == 0) { // this is a continuation of the list
+	//if ((tokens[0].compare("  ") == 0) || 
+	//  (tokens[0].size() == 0)) { // this is a continuation of the list
+	// handle " ; ;  ; f;x;y" && ";;;f;x;y" as useful
+	// and    " ; ;  ;  ; ; ; comment" && ";;;;;;comment" as useless
+	if (isWhiteSpace(tokens[0]) && !isWhiteSpace(tokens[3])) {
 	  subkey = TableMapKey().EncodeKey(tokens[3], tokens[4], tokens[5]);
 	  currentList.push_back(subkey);
 	} else { // we have a new list starting

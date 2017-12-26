@@ -67,6 +67,7 @@ public:
 
   TableMapElement Retrieve(unsigned short key);
   bool filled();
+  //  bool isComment(string &line);
   bool isWhiteSpace(string &str);
   string trim(string &str);
 
