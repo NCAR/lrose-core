@@ -20,6 +20,7 @@ MODULE_NAME = Radx
 LIBNAME = lib$(MODULE_NAME).a
 
 SUB_DIRS = \
+	Bufr \
 	Cf2 \
 	Cfarr \
 	DOE \

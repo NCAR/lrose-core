@@ -177,6 +177,9 @@ int HawkEye::Run(QApplication &app)
 
     if (_args.inputFileList.size() > 0) {
       _polarManager->setInputFileList(_args.inputFileList);
+      // override archive data url from input file
+      string url = _getArchiveUrl(_args.inputFileList[0]);
+      TDRP_str_replace(&_params.archive_data_url, url.c_str());
     }
 
     return _polarManager->run(app);
@@ -330,4 +333,45 @@ int HawkEye::_setupDisplayFields()
 
 }
 
+
+///////////////////////////////////////////////////
+// get the archive url
+
+string HawkEye::_getArchiveUrl(const string &filePath)
+  
+{
+
+  // find first digit in path - if no digits, return now
+  
+  const char *start = NULL;
+  for (size_t ii = 0; ii < filePath.size(); ii++) {
+    if (isdigit(filePath[ii])) {
+      start = filePath.c_str() + ii;
+      break;
+    }
+  }
+  if (!start) {
+    return "";
+  }
+
+  const char *end = start + strlen(start);
+
+  // get day dir
+  
+  int year, month, day;
+  while (start < end - 6) {
+    if (sscanf(start, "%4d%2d%2d/", &year, &month, &day) == 3) {
+      int urlLen = start - filePath.c_str() - 1;
+      string url(filePath.substr(0, urlLen));
+      if (_params.debug) {
+        cerr << "===>> Setting archive url to: " << url << endl;
+      }
+      return url;
+    }
+    start++;
+  }
+
+  return "";
+
+}
 

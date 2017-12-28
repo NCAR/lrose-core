@@ -102,6 +102,7 @@ private:
 
   int _setupDisplayFields();
   int _setupReader();
+  string _getArchiveUrl(const string &filePath);
 
 };
 
