@@ -34,6 +34,7 @@
 //
 ////////////////////////////////////////////////////////////////
 
+#include <cerrno>
 #include <radar/TempProfile.hh>
 #include <toolsa/DateTime.hh>
 #include <toolsa/TaFile.hh>
