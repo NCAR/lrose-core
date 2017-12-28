@@ -911,6 +911,9 @@ void BufrRadxFile::getFieldNamesWithData(const string &path) {
     if (_debug) cerr << "  .. accumulating field info " << endl;
     _accumulateFieldFirstTime(fieldName, units, standardName, longName);
 
+    if (_debug) 
+      printNative(path, cout, true, true);
+
   } catch (const char *msg) {
       // report error message
       _addErrStr("ERROR - BufrRadxFile::getFieldNamesWithData");
@@ -919,8 +922,7 @@ void BufrRadxFile::getFieldNamesWithData(const string &path) {
       cerr << _errStr;
       _errStr.clear();
   }
-    if (_debug) 
-      printNative(path, cout, true, true);
+
 }
 
 
