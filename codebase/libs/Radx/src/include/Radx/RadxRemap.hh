@@ -88,8 +88,10 @@ public:
   ///     getStartRangeKm() and getGateSpacingKm() if spacing is constant.
   ///     getRangeArray() for saved range array.
   ///     getLookupNearest() for lookup table.
+  ///
+  /// Returns 0 on success, -1 on error
 
-  void computeRangeLookup(const vector<double> &rangeArray);
+  int computeRangeLookup(const vector<double> &rangeArray);
 
   /////////////////////////////////////////////////////////////////
   /// check if gate spacing is constant

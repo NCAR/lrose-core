@@ -1047,7 +1047,9 @@ int NcfRadxFile::_readRangeVariable()
   
   // set the geometry from the range vector
 
-  _remap.computeRangeLookup(_rangeKm);
+  if (_remap.computeRangeLookup(_rangeKm)) {
+    return -1;
+  }
   _gateSpacingIsConstant = _remap.getGateSpacingIsConstant();
   _geom.setRangeGeom(_remap.getStartRangeKm(), _remap.getGateSpacingKm());
   
