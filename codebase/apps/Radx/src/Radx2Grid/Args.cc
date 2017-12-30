@@ -269,6 +269,16 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "output_time_field = TRUE;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-ppi")) {
+      
+      sprintf(tmp_str, "interp_mode = INTERP_MODE_PPI;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-polar")) {
+      
+      sprintf(tmp_str, "interp_mode = INTERP_MODE_POLAR;");
+      TDRP_add_override(&override, tmp_str);
+      
     }
     
   } // i
@@ -401,6 +411,15 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -outname ? ] specify output file name\n"
       << "     file of this name will be written to outdir\n"
+      << "\n"
+      << "  [ -ppi ] interp in PPI mode\n"
+      << "     interp onto Cart (x,y) grid (km) in the horizontal\n"
+      << "     preserve sweep elevation angles (deg) in the vertical\n"
+      << "\n"
+      << "  [ -polar ] interp in POLAR mode\n"
+      << "     maintain in polar coordinates\n"
+      << "     interp onto a regular grid in azimuth (deg)\n"
+      << "     preserve sweep elevation angles (deg) in the vertical\n"
       << "\n"
       << "  [ -remap_to_latlon] remap to latlon after interpolation\n"
       << "     Grid xy units specified in km\n"
