@@ -222,6 +222,19 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
+    } else if (!strcmp(argv[i], "-beam_width")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "beam_width_deg_h = %s;", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+	sprintf(tmp_str, "beam_width_deg_v = %s;", argv[i]);
+	TDRP_add_override(&override, tmp_str);
+	sprintf(tmp_str, "override_beam_width = TRUE;");
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+
     } else if (!strcmp(argv[i], "-add_angle_fields")) {
       
       sprintf(tmp_str, "output_angle_fields = TRUE;");
@@ -295,12 +308,12 @@ void Args::_usage(ostream &out)
       << "  [ -d, -debug ] print debug messages\n"
       << "\n"
       << "  [ -add_angle_fields ]\n"
-      << "     Create fields azimuth, elevation, alpha, beta, gamma\n"
+      << "     Create fields azimuth & elevation (deg), alpha, beta, gamma\n"
       << "     and include in output file\n"
       << "\n"
       << "  [ -add_range_field ]\n"
       << "     Create 'range' field and include in output file\n"
-      << "     This is slant range from the radar in km\n"
+      << "     This is slant range from the radar (km)\n"
       << "\n"
       << "  [ -add_height_field ]\n"
       << "     Create 'height' field and include in output file\n"
@@ -313,6 +326,8 @@ void Args::_usage(ostream &out)
       << "  [ -add_time_field ]\n"
       << "     Create 'time' field and include in output file\n"
       << "     This is time since start of volume (secs)\n"
+      << "\n"
+      << "  [ -beam_width ? ] override beam width (deg)\n"
       << "\n"
       << "  [ -end \"yyyy mm dd hh mm ss\"]\n"
       << "     Set the end time\n"

@@ -107,22 +107,61 @@ field_list = {
 
 DBZ         DBZ       /tmp/pecan/cart/spol&DBZ_F         dbz.colors        dBZ     -5   80  5  cart   1 0
 VEL         VEL       /tmp/pecan/cart/spol&VEL_F         vel.colors        m/s     -5   80  5  cart   1 0
-azimuth     azimuth   /tmp/pecan/cart/spol&azimuth     angle.colors      deg     -5   80  5  cart   1 0
-elevation   elevation /tmp/pecan/cart/spol&elevation   elevation.colors  deg     -5   80  5  cart   1 0
-alpha       alpha     /tmp/pecan/cart/spol&alpha       sincos.colors     -       -5   80  5  cart   1 0
-beta        beta      /tmp/pecan/cart/spol&beta        sincos.colors     -       -5   80  5  cart   1 0
-gamma       gamma     /tmp/pecan/cart/spol&gamma       sincos.colors     -       -5   80  5  cart   1 0
-
+azimuth     azimuth   /tmp/pecan/cart/spol&azimuth     angle.colors        deg     -5   80  5  cart   1 0
+elevation   elevation /tmp/pecan/cart/spol&elevation   elevation.colors    deg     -5   80  5  cart   1 0
+alpha       alpha     /tmp/pecan/cart/spol&alpha       sincos.colors       -       -5   80  5  cart   1 0
+beta        beta      /tmp/pecan/cart/spol&beta        sincos.colors       -       -5   80  5  cart   1 0
+gamma       gamma     /tmp/pecan/cart/spol&gamma       sincos.colors       -       -5   80  5  cart   1 0
 range       range     /tmp/pecan/cart/spol&range       number_1000.colors  -     -5   80  5  cart   1 0
-
-height      height    /tmp/pecan/cart/spol&height      number50.colors  -       -5   80  5  cart   1 0
-
-Coverage    Coverage  /tmp/pecan/cart/spol&Coverage    cmd_flag.colors    -       -5   80  5  cart   1 0
-
+height      height    /tmp/pecan/cart/spol&height      number50.colors     -       -5   80  5  cart   1 0
+Coverage    Coverage  /tmp/pecan/cart/spol&Coverage    cmd_flag.colors     -       -5   80  5  cart   1 0
 time        time      /tmp/pecan/cart/spol&time_elapsed number_250.colors  -       -5   80  5  cart   1 0
 
-DBZR         DBZR       /scr/rain2/rsfdata/projects/pecan/cfradial/spol/qc_moments/sband/sur&DBZ_F         dbz.colors        dBZ     -5   80  5  cart   1 0
-VELR         VELR       /scr/rain2/rsfdata/projects/pecan/cfradial/spol/qc_moments/sband/sur&VEL_F         vel.colors        m/s     -5   80  5  cart   1 0
+spol_nContrib    spol_nContrib  /tmp/pecan/cart/spol&nContrib     number.colors      -       -5   80  5  cart   1 0
+
+spol_llEl        spol_llEl      /tmp/pecan/cart/spol&llEl        number.colors      -       -5   80  5  cart   1 0
+spol_llAz        spol_llAz      /tmp/pecan/cart/spol&llAz        angle.colors      -       -5   80  5  cart   1 0
+spol_lrEl        spol_lrEl      /tmp/pecan/cart/spol&lrEl        number.colors      -       -5   80  5  cart   1 0
+spol_lrAz        spol_lrAz      /tmp/pecan/cart/spol&lrAz        angle.colors      -       -5   80  5  cart   1 0
+
+spol_ulEl        spol_ulEl      /tmp/pecan/cart/spol&ulEl        number.colors      -       -5   80  5  cart   1 0
+spol_ulAz        spol_ulAz      /tmp/pecan/cart/spol&ulAz        angle.colors      -       -5   80  5  cart   1 0
+spol_urEl        spol_urEl      /tmp/pecan/cart/spol&urEl        number.colors      -       -5   80  5  cart   1 0
+spol_urAz        spol_urAz      /tmp/pecan/cart/spol&urAz        angle.colors      -       -5   80  5  cart   1 0
+
+DBZR   DBZR   /scr/rain2/rsfdata/projects/pecan/cfradial/spol/qc_moments/sband/sur&DBZ_F         dbz.colors        dBZ     -5   80  5  cart   1 0
+VELR   VELR   /scr/rain2/rsfdata/projects/pecan/cfradial/spol/qc_moments/sband/sur&VEL_F         vel.colors        m/s     -5   80  5  cart   1 0
+
+=====   =====     /tmp/pecan/cart/spol&DBZ_F         dbz.colors        dBZ     -5   80  5  cart   1 0
+=====   =====     /tmp/pecan/cart/spol&DBZ_F         dbz.colors        dBZ     -5   80  5  cart   1 0
+
+kddc_DBZ         kddc_DBZ       /tmp/pecan/cart/kddc&DBZ         dbz.colors        dBZ     -5   80  5  cart   1 0
+kddc_VEL         kddc_VEL       /tmp/pecan/cart/kddc&VEL         vel.colors        m/s     -5   80  5  cart   1 0
+kddc_azimuth     kddc_azimuth   /tmp/pecan/cart/kddc&azimuth     angle.colors      deg     -5   80  5  cart   1 0
+kddc_elevation   kddc_elevation /tmp/pecan/cart/kddc&elevation   elevation.colors  deg     -5   80  5  cart   1 0
+kddc_alpha       kddc_alpha     /tmp/pecan/cart/kddc&alpha       sincos.colors     -       -5   80  5  cart   1 0
+kddc_beta        kddc_beta      /tmp/pecan/cart/kddc&beta        sincos.colors     -       -5   80  5  cart   1 0
+kddc_gamma       kddc_gamma     /tmp/pecan/cart/kddc&gamma       sincos.colors     -       -5   80  5  cart   1 0
+kddc_range       kddc_range     /tmp/pecan/cart/kddc&range       number_1000.colors  -     -5   80  5  cart   1 0
+kddc_height      kddc_height    /tmp/pecan/cart/kddc&height      number50.colors  -       -5   80  5  cart   1 0
+kddc_Coverage    kddc_Coverage  /tmp/pecan/cart/kddc&Coverage    cmd_flag.colors    -       -5   80  5  cart   1 0
+kddc_time        kddc_time      /tmp/pecan/cart/kddc&time_elapsed number_250.colors  -       -5   80  5  cart   1 0
+
+kddc_nContrib    kddc_nContrib  /tmp/pecan/cart/kddc&nContrib     number.colors      -       -5   80  5  cart   1 0
+
+kddc_llEl        kddc_llEl      /tmp/pecan/cart/kddc&llEl        number.colors      -       -5   80  5  cart   1 0
+kddc_llAz        kddc_llAz      /tmp/pecan/cart/kddc&llAz        angle.colors      -       -5   80  5  cart   1 0
+kddc_lrEl        kddc_lrEl      /tmp/pecan/cart/kddc&lrEl        number.colors      -       -5   80  5  cart   1 0
+kddc_lrAz        kddc_lrAz      /tmp/pecan/cart/kddc&lrAz        angle.colors      -       -5   80  5  cart   1 0
+
+kddc_ulEl        kddc_ulEl      /tmp/pecan/cart/kddc&ulEl        number.colors      -       -5   80  5  cart   1 0
+kddc_ulAz        kddc_ulAz      /tmp/pecan/cart/kddc&ulAz        angle.colors      -       -5   80  5  cart   1 0
+kddc_urEl        kddc_urEl      /tmp/pecan/cart/kddc&urEl        number.colors      -       -5   80  5  cart   1 0
+kddc_urAz        kddc_urAz      /tmp/pecan/cart/kddc&urAz        angle.colors      -       -5   80  5  cart   1 0
+
+kddc_gridEl      kddc_gridEl    /tmp/pecan/cart/kddc&gridEl      number.colors      -       -5   80  5  cart   1 0
+kddc_gridAz      kddc_gridAz    /tmp/pecan/cart/kddc&gridAz      angle.colors      -       -5   80  5  cart   1 0
+kddc_gridRng     kddc_gridRng   /tmp/pecan/cart/kddc&gridRange   number_1000.colors      -       -5   80  5  cart   1 0
 
 </GRIDS>
 
@@ -562,10 +601,10 @@ cidd.domain_limit_max_y:         2900
  
 # The Lat, Long of the center of the display. Internal range rings
 # are relative to this point.
-#cidd.origin_longitude:       -99.98
-#cidd.origin_latitude:        37.76
-cidd.origin_longitude:       -99.5361
-cidd.origin_latitude:        38.554
+cidd.origin_longitude:       -99.98
+cidd.origin_latitude:        37.76
+#cidd.origin_longitude:       -99.5361
+#cidd.origin_latitude:        38.554
 #
 #
 # Select the data fields/page to start on.
@@ -1054,7 +1093,7 @@ cidd.use_local_timestamps: 0
 # Set this parameter to force the field menu pop-up to this many columns
 # If set <= 0, then cidd sets this dynamically, allowing at most 30 in each
 # column.
-cidd.num_field_menu_cols: 1
+cidd.num_field_menu_cols: 4
 
 # This parameter sets WSDDM specific behavior On -
 # - Go to end of loop when movie stops.

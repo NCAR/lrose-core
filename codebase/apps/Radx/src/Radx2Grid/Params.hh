@@ -587,7 +587,7 @@ public:
 
   tdrp_bool_t interp_time_field;
 
-  tdrp_bool_t output_test_fields;
+  tdrp_bool_t output_debug_fields;
 
   tdrp_bool_t apply_censoring;
 

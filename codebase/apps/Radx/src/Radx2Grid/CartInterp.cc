@@ -96,8 +96,8 @@ CartInterp::CartInterp(const string &progName,
 
   // create debug fields if needed
 
-  if (_params.output_test_fields) {
-    _createTestFields();
+  if (_params.output_debug_fields) {
+    _createDebugFields();
   }
   
   // create convective/stratiform fields if needed
@@ -320,9 +320,9 @@ void CartInterp::_freeThreads()
 }
 
 //////////////////////////////////////////////////
-// create the test fields
+// create the debug Cart fields
 
-void CartInterp::_createTestFields()
+void CartInterp::_createDebugFields()
 
 {
   
@@ -1920,22 +1920,22 @@ void CartInterp::_interpRow(int iz, int iy)
       double beamWidth = 1.0;
       if (ll.ray && ul.ray) {
         // data is to the left
-        angleError = MAX(fabs(az - _conditionAz(ll.ray->azForLimits)),
+        angleError = MIN(fabs(az - _conditionAz(ll.ray->azForLimits)),
                          fabs(az - _conditionAz(ul.ray->azForLimits)));
         beamWidth = _beamWidthDegH;
       } else if (lr.ray && ur.ray) {
         // data is to the right
-        angleError = MAX(fabs(az - _conditionAz(lr.ray->azForLimits)),
+        angleError = MIN(fabs(az - _conditionAz(lr.ray->azForLimits)),
                          fabs(az - _conditionAz(ur.ray->azForLimits)));
         beamWidth = _beamWidthDegH;
       } else if (ll.ray && lr.ray) {
         // data is below
-        angleError = MAX(fabs(loc->el - ll.ray->elForLimits),
+        angleError = MIN(fabs(loc->el - ll.ray->elForLimits),
                          fabs(loc->el - lr.ray->elForLimits));
         beamWidth = _beamWidthDegV;
       } else if (ul.ray && ur.ray) {
         // data is above
-        angleError = MAX(fabs(loc->el - ul.ray->elForLimits),
+        angleError = MIN(fabs(loc->el - ul.ray->elForLimits),
                          fabs(loc->el - ur.ray->elForLimits));
         beamWidth = _beamWidthDegV;
       }
