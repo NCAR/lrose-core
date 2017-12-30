@@ -300,6 +300,23 @@ int Args::parse (int argc, char **argv, string &prog_name)
 void Args::_usage(ostream &out)
 {
 
+  Params defaults;
+
+  char gridXyGeomStr[1024];
+  snprintf(gridXyGeomStr, 1024, "%d, %d, %g, %g, %g, %g",
+           defaults.grid_xy_geom.nx,
+           defaults.grid_xy_geom.ny,
+           defaults.grid_xy_geom.minx,
+           defaults.grid_xy_geom.miny,
+           defaults.grid_xy_geom.dx,
+           defaults.grid_xy_geom.dy);
+  
+  char gridZGeomStr[1024];
+  snprintf(gridZGeomStr, 1024, "%d, %g, %g",
+           defaults.grid_z_geom.nz,
+           defaults.grid_z_geom.minz,
+           defaults.grid_z_geom.dz);
+  
   out << "Usage: " << _progName << " [args as below]\n"
       << "Options:\n"
       << "\n"
@@ -330,7 +347,7 @@ void Args::_usage(ostream &out)
       << "  [ -beam_width ? ] override beam width (deg)\n"
       << "\n"
       << "  [ -end \"yyyy mm dd hh mm ss\"]\n"
-      << "     Set the end time\n"
+      << "     Set the end time in archive mode\n"
       << "     Sets mode to ARCHIVE\n"
       << "\n"
       << "  [ -f, -paths ? ] set input file paths\n"
@@ -345,13 +362,15 @@ void Args::_usage(ostream &out)
       << "     nx, ny: number of cells in (x,y)\n"
       << "     minx, miny: coords of center of SW grid cell (km or deg)\n"
       << "     dx, xy: spacing between cells in (km or deg) (km)\n"
-      << "     Units are deg for LATLON projection, km for all other projections\n"
+      << "     Units are deg for LATLON, km for all other projections\n"
+      << "     Default is: \"" << gridXyGeomStr << "\"\n"
       << "\n"
       << "  [ -grid_z_geom \"nz, minz, dz\"]\n"
       << "     Set the geometry for constant spacing in Z\n"
       << "     nz: number of z levels\n"
       << "     minz: lowest Z level (km MSL)\n"
       << "     dz: spacing between Z levels (km)\n"
+      << "     Default is: \"" << gridZGeomStr << "\"\n"
       << "\n"
       << "  [ -indir ? ] set input directory\n"
       << "     for ARCHIVE mode\n"
@@ -372,7 +391,7 @@ void Args::_usage(ostream &out)
       << "     Grid xy units specified in km\n"
       << "\n"
       << "  [ -start \"yyyy mm dd hh mm ss\"]\n"
-      << "     Set the start time\n"
+      << "     Set the start time in archive mode\n"
       << "     Sets mode to ARCHIVE\n"
       << "\n"
       << "  [ -v, -verbose ] print verbose debug messages\n"
