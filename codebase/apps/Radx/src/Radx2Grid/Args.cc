@@ -112,6 +112,15 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
+    } else if (!strcmp(argv[i], "-format")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "output_format = %s;", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+
     } else if (!strcmp(argv[i], "-grid_z_geom")) {
       
       if (i < argc - 1) {
@@ -356,6 +365,12 @@ void Args::_usage(ostream &out)
       << "  [ -field ? ] Specify field name\n"
       << "     Use multiple -field args for multiple fields\n"
       << "     If no fields specified, all fields will be included\n"
+      << "\n"
+      << "  [ -format ? ] Specify format for output file:\n"
+      << "       CF_NETCDF: the default, NetCDF with CF conventions\n"
+      << "       ZEBRA_NETCDF: legacy, NetCDF for ZEBRA\n"
+      << "       MDV: NCAR Meteorological Data Volume binary format\n"
+      << "       CEDRIC: NCAR CEDRIC binary format\n"
       << "\n"
       << "  [ -grid_xy_geom \"nx, ny, minx, miny, dx, dy\"]\n"
       << "     Set the geometry for constant spacing in (X,Y)\n"
