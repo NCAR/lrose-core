@@ -105,21 +105,24 @@ field_list = {
 #Label    Label       URL           Colorscale Units Cont-lo-hi-interv Format Display_in_menu Bkgnd_Render
 #----------------------------------------------------------------------------------------------------------
 
-DBZ         DBZ       /tmp/pecan/cart&DBZ         dbz.colors        dBZ     -5   80  5  cart   1 0
-VEL         VEL       /tmp/pecan/cart&VEL         vel.colors        m/s     -5   80  5  cart   1 0
-azimuth     azimuth   /tmp/pecan/cart&azimuth     angle.colors      deg     -5   80  5  cart   1 0
-elevation   elevation /tmp/pecan/cart&elevation   elevation.colors  deg     -5   80  5  cart   1 0
-alpha       alpha     /tmp/pecan/cart&alpha       sincos.colors     -       -5   80  5  cart   1 0
-beta        beta      /tmp/pecan/cart&beta        sincos.colors     -       -5   80  5  cart   1 0
-gamma       gamma     /tmp/pecan/cart&gamma       sincos.colors     -       -5   80  5  cart   1 0
+DBZ         DBZ       /tmp/pecan/cart/spol&DBZ_F         dbz.colors        dBZ     -5   80  5  cart   1 0
+VEL         VEL       /tmp/pecan/cart/spol&VEL_F         vel.colors        m/s     -5   80  5  cart   1 0
+azimuth     azimuth   /tmp/pecan/cart/spol&azimuth     angle.colors      deg     -5   80  5  cart   1 0
+elevation   elevation /tmp/pecan/cart/spol&elevation   elevation.colors  deg     -5   80  5  cart   1 0
+alpha       alpha     /tmp/pecan/cart/spol&alpha       sincos.colors     -       -5   80  5  cart   1 0
+beta        beta      /tmp/pecan/cart/spol&beta        sincos.colors     -       -5   80  5  cart   1 0
+gamma       gamma     /tmp/pecan/cart/spol&gamma       sincos.colors     -       -5   80  5  cart   1 0
 
-range       range     /tmp/pecan/cart&range       number_1000.colors  -     -5   80  5  cart   1 0
+range       range     /tmp/pecan/cart/spol&range       number_1000.colors  -     -5   80  5  cart   1 0
 
-height      height    /tmp/pecan/cart&height      number50.colors  -       -5   80  5  cart   1 0
+height      height    /tmp/pecan/cart/spol&height      number50.colors  -       -5   80  5  cart   1 0
 
-Coverage    Coverage  /tmp/pecan/cart&Coverage    cmd_flag.colors    -       -5   80  5  cart   1 0
+Coverage    Coverage  /tmp/pecan/cart/spol&Coverage    cmd_flag.colors    -       -5   80  5  cart   1 0
 
-time        time      /tmp/pecan/cart&time_elapsed number_250.colors  -       -5   80  5  cart   1 0
+time        time      /tmp/pecan/cart/spol&time_elapsed number_250.colors  -       -5   80  5  cart   1 0
+
+DBZR         DBZR       /scr/rain2/rsfdata/projects/pecan/cfradial/spol/qc_moments/sband/sur&DBZ_F         dbz.colors        dBZ     -5   80  5  cart   1 0
+VELR         VELR       /scr/rain2/rsfdata/projects/pecan/cfradial/spol/qc_moments/sband/sur&VEL_F         vel.colors        m/s     -5   80  5  cart   1 0
 
 </GRIDS>
 
@@ -559,8 +562,10 @@ cidd.domain_limit_max_y:         2900
  
 # The Lat, Long of the center of the display. Internal range rings
 # are relative to this point.
-cidd.origin_longitude:       -99.98
-cidd.origin_latitude:        37.76
+#cidd.origin_longitude:       -99.98
+#cidd.origin_latitude:        37.76
+cidd.origin_longitude:       -99.5361
+cidd.origin_latitude:        38.554
 #
 #
 # Select the data fields/page to start on.
