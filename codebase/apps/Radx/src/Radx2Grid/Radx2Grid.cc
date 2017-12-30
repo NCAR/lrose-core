@@ -951,6 +951,7 @@ void Radx2Grid::_addGeometryFields()
         for (int ii = 0; ii < nGates; ii++) {
           data[ii] = az;
         }
+        azimuthField->setFieldFolds(0.0, 360.0);
         azimuthField->addDataFl32(nGates, data);
         ray->addField(azimuthField);
       }

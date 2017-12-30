@@ -105,13 +105,21 @@ field_list = {
 #Label    Label       URL           Colorscale Units Cont-lo-hi-interv Format Display_in_menu Bkgnd_Render
 #----------------------------------------------------------------------------------------------------------
 
-DBZ         DBZ       $(HOME)/data/cartTest&DBZ         dbz.colors        dBZ     -5   80  5  cart   1 0
-VEL         VEL       $(HOME)/data/cartTest&VEL         vel.colors        m/s     -5   80  5  cart   1 0
-azimuth     azimuth   $(HOME)/data/cartTest&azimuth     angle.colors      deg     -5   80  5  cart   1 0
-elevation   elevation $(HOME)/data/cartTest&elevation   elevation.colors  deg     -5   80  5  cart   1 0
-alpha       alpha     $(HOME)/data/cartTest&alpha       sincos.colors     -       -5   80  5  cart   1 0
-beta        beta      $(HOME)/data/cartTest&beta        sincos.colors     -       -5   80  5  cart   1 0
-gamma       gamma     $(HOME)/data/cartTest&gamma       sincos.colors     -       -5   80  5  cart   1 0
+DBZ         DBZ       /tmp/pecan/cart&DBZ         dbz.colors        dBZ     -5   80  5  cart   1 0
+VEL         VEL       /tmp/pecan/cart&VEL         vel.colors        m/s     -5   80  5  cart   1 0
+azimuth     azimuth   /tmp/pecan/cart&azimuth     angle.colors      deg     -5   80  5  cart   1 0
+elevation   elevation /tmp/pecan/cart&elevation   elevation.colors  deg     -5   80  5  cart   1 0
+alpha       alpha     /tmp/pecan/cart&alpha       sincos.colors     -       -5   80  5  cart   1 0
+beta        beta      /tmp/pecan/cart&beta        sincos.colors     -       -5   80  5  cart   1 0
+gamma       gamma     /tmp/pecan/cart&gamma       sincos.colors     -       -5   80  5  cart   1 0
+
+range       range     /tmp/pecan/cart&range       number_1000.colors  -     -5   80  5  cart   1 0
+
+height      height    /tmp/pecan/cart&height      number50.colors  -       -5   80  5  cart   1 0
+
+Coverage    Coverage  /tmp/pecan/cart&Coverage    cmd_flag.colors    -       -5   80  5  cart   1 0
+
+time        time      /tmp/pecan/cart&time_elapsed number_250.colors  -       -5   80  5  cart   1 0
 
 </GRIDS>
 
@@ -213,7 +221,7 @@ cidd.debug2_flag:           0
 #  System will startup using field 0, requesting data closest to the
 # demo time. The movie frame will be centered on the time after applying
 # temporal rounding. 
-cidd.demo_time:  00:00 12/08/2011
+cidd.demo_time:  00:12 06/26/2015
 
 # Set times to the nearest value divisible by the number of seconds
 cidd.temporal_rounding:    300
@@ -551,8 +559,8 @@ cidd.domain_limit_max_y:         2900
  
 # The Lat, Long of the center of the display. Internal range rings
 # are relative to this point.
-cidd.origin_longitude:       73.1028
-cidd.origin_latitude:        -0.630447
+cidd.origin_longitude:       -99.98
+cidd.origin_latitude:        37.76
 #
 #
 # Select the data fields/page to start on.
@@ -620,7 +628,7 @@ cidd.level5_max_ykm:                1000.0
 cidd.min_ht:               0.25
 cidd.max_ht:               22.25
 cidd.ht_interval           0.5
-cidd.start_ht:             0.5
+cidd.start_ht:             4.0
 
 # Radial data Limits
 cidd.min_rkm:                0.0

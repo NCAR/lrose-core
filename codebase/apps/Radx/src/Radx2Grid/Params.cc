@@ -771,7 +771,7 @@ using namespace std;
     tt->has_max = TRUE;
     tt->min_val.i = 1;
     tt->max_val.i = 8;
-    tt->single_val.i = 3;
+    tt->single_val.i = 1;
     tt++;
     
     // Parameter 'use_fixed_angle_for_interpolation'
@@ -1601,7 +1601,7 @@ using namespace std;
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("angle_fields");
     tt->descr = tdrpStrDup("Specify the output names of the angle fields. If set to empty, that field will not be created.");
-    tt->help = tdrpStrDup("\tazimuth: the azimuth of the ray (deg)\n\televation: the elevation of the ray (deg)\n\talpha: sin(az) * cos(el)\n\tbeta: cos(az) * cos(el)\n\tgamma: sin(el)\n\trange: the range to the center of a gate (km)");
+    tt->help = tdrpStrDup("\tazimuth: the azimuth of the ray (deg)\n\televation: the elevation of the ray (deg)\n\talpha: sin(az) * cos(el)\n\tbeta: cos(az) * cos(el)\n\tgamma: sin(el)\n");
     tt->val_offset = (char *) &angle_fields - &_start_;
     tt->struct_def.name = tdrpStrDup("angle_fields_t");
     tt->struct_def.nfields = 5;
@@ -2400,7 +2400,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Horizontal beam width if override is set true (deg).");
     tt->help = tdrpStrDup("Used for extending the data to the left or right of sector limits, if applicable. This is only used if 'override_beam_width' is set true. Otherwise the metadata in the input data stream is used.");
     tt->val_offset = (char *) &beam_width_deg_h - &_start_;
-    tt->single_val.d = 1;
+    tt->single_val.d = 1.25;
     tt++;
     
     // Parameter 'beam_width_deg_v'
@@ -2412,7 +2412,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Vertical beam width if override is set true (deg).");
     tt->help = tdrpStrDup("Used for extending data above or below the observed region. This only used if 'override_beam_width' is set true. Otherwise the metadata in the input data stream is used.");
     tt->val_offset = (char *) &beam_width_deg_v - &_start_;
-    tt->single_val.d = 1;
+    tt->single_val.d = 1.25;
     tt++;
     
     // Parameter 'Comment 27'

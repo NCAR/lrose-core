@@ -124,7 +124,7 @@ paramdef boolean {
 } use_nearest_neighbor;
 
 paramdef int {	
-  p_default = 3;
+  p_default = 1;
   p_min = 1;
   p_max = 8;
   p_descr = "Minimum number of valid data points for theinterpolation.";
@@ -543,8 +543,7 @@ paramdef struct angle_fields_t {
     "\televation: the elevation of the ray (deg)\n"
     "\talpha: sin(az) * cos(el)\n"
     "\tbeta: cos(az) * cos(el)\n"
-    "\tgamma: sin(el)\n"
-    "\trange: the range to the center of a gate (km)";
+    "\tgamma: sin(el)\n";
 } angle_fields;
 
 paramdef boolean {
@@ -908,13 +907,13 @@ paramdef boolean {
 } override_beam_width;
 
 paramdef double {
-  p_default = 1.0;
+  p_default = 1.25;
   p_descr = "Horizontal beam width if override is set true (deg).";
   p_help = "Used for extending the data to the left or right of sector limits, if applicable. This is only used if 'override_beam_width' is set true. Otherwise the metadata in the input data stream is used.";
 } beam_width_deg_h;
 
 paramdef double {
-  p_default = 1.0;
+  p_default = 1.25;
   p_descr = "Vertical beam width if override is set true (deg).";
   p_help = "Used for extending data above or below the observed region. This only used if 'override_beam_width' is set true. Otherwise the metadata in the input data stream is used.";
 } beam_width_deg_v;
