@@ -772,6 +772,12 @@ public:
   void sortRaysByTime();
 
   /////////////////////////////////////////////////////////////////
+  /// Sort rays by number
+
+  void setRayNumbersInOrder();
+  void sortRaysByNumber();
+
+  /////////////////////////////////////////////////////////////////
   /// Sort sweep rays by azimuth
 
   void sortSweepRaysByAzimuth();
@@ -1697,6 +1703,10 @@ private:
     RayPtr(RadxRay *p) : ptr(p) {}
   };
   class SortByRayTime {
+  public:
+    bool operator()(const RayPtr &lhs, const RayPtr &rhs) const;
+  };
+  class SortByRayNumber {
   public:
     bool operator()(const RayPtr &lhs, const RayPtr &rhs) const;
   };

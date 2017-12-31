@@ -97,6 +97,7 @@ void RadxRay::_init()
   
 {
 
+  _rayNum = Radx::missingMetaInt;
   _volNum = Radx::missingMetaInt;
   _sweepNum = Radx::missingMetaInt;
   _calibIndex = -1;
@@ -199,6 +200,7 @@ void RadxRay::copyMetaData(const RadxRay &rhs)
     return;
   }
   
+  _rayNum = rhs._rayNum;
   _volNum = rhs._volNum;
   _sweepNum = rhs._sweepNum;
   _calibIndex = rhs._calibIndex;
@@ -1335,6 +1337,9 @@ void RadxRay::print(ostream &out) const
 {
   
   out << "=============== RadxRay ===============" << endl;
+  if (_rayNum != Radx::missingMetaInt) {
+    out << "  rayNum: " << _rayNum << endl;
+  }
   out << "  volNum: " << _volNum << endl;
   out << "  sweepNum: " << _sweepNum << endl;
   out << "  calibIndex: " << _calibIndex << endl;
@@ -2074,6 +2079,7 @@ void RadxRay::_loadMetaNumbersToMsg()
 
   // set 32-bit values
 
+  _metaNumbers.rayNum = _rayNum;
   _metaNumbers.volNum = _volNum;
   _metaNumbers.sweepNum = _sweepNum;
   _metaNumbers.calibIndex = _calibIndex;
@@ -2154,6 +2160,7 @@ int RadxRay::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
 
   // set 32-bit values
 
+  _rayNum = _metaNumbers.rayNum;
   _volNum = _metaNumbers.volNum;
   _sweepNum = _metaNumbers.sweepNum;
   _calibIndex = _metaNumbers.calibIndex;
@@ -2183,5 +2190,5 @@ int RadxRay::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
 void RadxRay::_swapMetaNumbers(msgMetaNumbers_t &meta)
 {
   ByteOrder::swap64(&meta.startRangeKm, 32 * sizeof(Radx::si64));
-  ByteOrder::swap32(&meta.volNum, 32 * sizeof(Radx::si32));
+  ByteOrder::swap32(&meta.rayNum, 32 * sizeof(Radx::si32));
 }

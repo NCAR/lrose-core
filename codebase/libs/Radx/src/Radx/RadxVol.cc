@@ -4031,6 +4031,54 @@ void RadxVol::sortRaysByTime()
 }
 
 /////////////////////////////////////////////////////////////////
+// Set ray numbers in order in the volume
+
+void RadxVol::setRayNumbersInOrder()
+
+{
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    _rays[iray]->setRayNumber(iray);
+  }
+}
+
+/////////////////////////////////////////////////////////////////
+// Sort rays by number
+
+bool RadxVol::SortByRayNumber::operator()
+  (const RayPtr &lhs, const RayPtr &rhs) const
+{
+  return lhs.ptr->getRayNumber() < rhs.ptr->getRayNumber();
+}
+
+void RadxVol::sortRaysByNumber()
+
+{
+
+  // sanity check
+  
+  if (_rays.size() < 2) {
+    return;
+  }
+
+  // create set with sorted ray pointers
+
+  multiset<RayPtr, SortByRayNumber> sortedRayPtrs;
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    RayPtr rptr(_rays[iray]);
+    sortedRayPtrs.insert(rptr);
+  }
+
+  // reload _rays array in time-sorted order
+
+  _rays.clear();
+  for (multiset<RayPtr, SortByRayNumber>::iterator ii = sortedRayPtrs.begin();
+       ii != sortedRayPtrs.end(); ii++) {
+    _rays.push_back(ii->ptr);
+  }
+    
+}
+
+/////////////////////////////////////////////////////////////////
 // Sort rays in each sweep by azimuth
 // Assumes sweep info is already set
 
