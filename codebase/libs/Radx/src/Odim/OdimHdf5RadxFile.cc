@@ -767,7 +767,7 @@ int OdimHdf5RadxFile::_readFromPath(const string &path,
   
   // set format as read
 
-  _fileFormat = FILE_FORMAT_DOE_NC;
+  _fileFormat = FILE_FORMAT_ODIM_HDF5;
 
   return 0;
 
