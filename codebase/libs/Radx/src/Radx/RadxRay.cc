@@ -34,6 +34,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <Radx/RadxRay.hh>
+#include <Radx/RadxSweep.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxCfactors.hh>
@@ -267,6 +268,34 @@ void RadxRay::copyMetaData(const RadxRay &rhs)
   
   clearFields();
 
+}
+
+//////////////////////////////////////////////////
+/// copy meta data from sweep
+///
+
+void RadxRay::setMetadataFromSweep(const RadxSweep &sweep)
+
+{
+  _sweepNum = sweep.getSweepNumber();
+  _volNum = sweep.getVolumeNumber();
+  if (_sweepMode == Radx::SWEEP_MODE_NOT_SET) {
+    _sweepMode = sweep.getSweepMode();
+  }
+  if (_polarizationMode == Radx::POL_MODE_NOT_SET) {
+    _polarizationMode = sweep.getPolarizationMode();
+  }
+  if (_prtMode == Radx::PRT_MODE_NOT_SET) {
+    _prtMode = sweep.getPrtMode();
+  }
+  if (_followMode == Radx::FOLLOW_MODE_NOT_SET) {
+    _followMode = sweep.getFollowMode();
+  }
+  _isIndexed = sweep.getRaysAreIndexed();
+  _angleRes = sweep.getAngleResDeg();
+  _targetScanRate = sweep.getTargetScanRateDegPerSec();
+  _trueScanRate = sweep.getMeasuredScanRateDegPerSec();
+  _isLongRange = sweep.getIsLongRange();
 }
 
 /////////////////////////////////////////////////////////////////

@@ -45,6 +45,7 @@
 #include <Radx/RadxField.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxMsg.hh>
+class RadxSweep;
 class RadxGeoref;
 class RadxCfactors;
 using namespace std;
@@ -95,6 +96,10 @@ public:
   /// Copy the meta data, but not the fields
 
   void copyMetaData(const RadxRay &rhs);
+
+  /// copy meta data from sweep
+  
+  void setMetadataFromSweep(const RadxSweep &sweep);
 
   /// Delete the field objects, as well as the field vector itself.
   

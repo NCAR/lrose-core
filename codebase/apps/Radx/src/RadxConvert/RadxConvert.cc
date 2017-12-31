@@ -686,6 +686,17 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
     }
     vol.removeTransitionRays(_params.transition_nrays_margin);
   }
+
+  // reorder sweeps if requested
+
+  if (_params.sort_sweeps_by_fixed_angle) {
+    if (_params.debug) {
+      cerr << "DEBUG - sorting sweeps by fixed angle" << endl;
+    }
+    vol.sortSweepsByFixedAngle();
+  }
+
+
   
   // censor as needed
 

@@ -581,6 +581,8 @@ public:
 
   tdrp_bool_t adjust_sweep_limits_using_angles;
 
+  tdrp_bool_t sort_sweeps_by_fixed_angle;
+
   char* version_override;
 
   char* title_override;
@@ -720,7 +722,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[157];
+  mutable TDRPtable _table[159];
 
   const char *_className;
 
