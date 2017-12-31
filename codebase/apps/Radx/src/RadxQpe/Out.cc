@@ -35,6 +35,7 @@
 //----------------------------------------------------------------
 Out::Out(const VertData &vert, const Parms &parms) :
         _index(-1),
+        _elevDeg(BadValue::value()),
         _heightKm(BadValue::value()),
         _rangeKm(BadValue::value()),
         _pid(BadValue::value()),
@@ -66,6 +67,10 @@ void Out::store(int igt, int iaz, const Parms &parms, Sweep &out) const
   if (parms.matchingOutput(Params::HEIGHT, name))
   {
     out.setValue(name, igt, iaz, _heightKm);
+  }
+  if (parms.matchingOutput(Params::ELEVATION, name))
+  {
+    out.setValue(name, igt, iaz, _elevDeg);
   }
   if (parms.matchingOutput(Params::RANGE, name))
   {
@@ -171,7 +176,7 @@ bool Out::_evaluate(const VertData1 &v, const Parms &parms)
   case Irreg_Ice_Crystals:
   case Supercooled_Liquid_Droplets:
     _heightKm = v._heightKm;
-    // _rangeKm = v._rangeKm;
+    _elevDeg = v._elevDeg;
     _pid = v._pid;
     return true;
   default:

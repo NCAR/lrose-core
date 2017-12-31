@@ -69,6 +69,7 @@ protected:
 private:
 
   int _index;  /**< Index to height at which precip can be used */
+  double _elevDeg;
   double _heightKm;
   double _rangeKm;
   double _pid;

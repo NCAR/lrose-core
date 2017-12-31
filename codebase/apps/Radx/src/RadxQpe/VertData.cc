@@ -67,6 +67,7 @@ VertData::VertData(const Data &data, const BeamBlock &block,
 #endif
     double rangeKm;
     double htKm = sweep.getBeamHtKmMsl(igt, data, rangeKm);
+    double elevDeg = sweep.elev();
 
     double blockage;
     if (blockOk)
@@ -83,13 +84,13 @@ VertData::VertData(const Data &data, const BeamBlock &block,
     if (params.hasSnr())
     {
       _data.push_back(VertData1(_setValue(igt, iaz, params.pid_field, sweep),
-				blockage, htKm, rangeKm,
+				blockage, elevDeg, htKm, rangeKm,
 				_setValue(igt, iaz, params.snr_field, sweep)));
     }
     else
     {
       _data.push_back(VertData1(_setValue(igt, iaz, params.pid_field, sweep),
-				blockage, htKm, rangeKm));
+				blockage, elevDeg, htKm, rangeKm));
     }
   }
 }

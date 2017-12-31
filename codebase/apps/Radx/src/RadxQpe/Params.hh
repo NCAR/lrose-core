@@ -58,12 +58,13 @@ public:
 
   typedef enum {
     PID = 0,
-    HEIGHT = 1,
-    RANGE = 2,
-    NUM_BLOCKED = 3,
-    NUM_LOW_SNR = 4,
-    NUM_CLUTTER = 5,
-    MASK = 6
+    ELEVATION = 1,
+    HEIGHT = 2,
+    RANGE = 3,
+    NUM_BLOCKED = 4,
+    NUM_LOW_SNR = 5,
+    NUM_CLUTTER = 6,
+    MASK = 7
   } output_data_t;
 
   typedef enum {
