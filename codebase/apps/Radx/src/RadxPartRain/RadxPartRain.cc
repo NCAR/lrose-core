@@ -704,6 +704,7 @@ int RadxPartRain::_writeVol()
     _vol.addRay(_derivedRays[iray]);
   }
   
+  _vol.sortRaysByNumber();
   _vol.loadVolumeInfoFromRays();
   _vol.loadSweepInfoFromRays();
   _vol.setPackingFromRays();
@@ -884,8 +885,14 @@ void RadxPartRain::_addExtraFieldsToOutput()
 int RadxPartRain::_compute()
 {
 
-  _derivedRays.clear();
+  // initialize the volume with ray numbers
+  
+  _vol.setRayNumbersInOrder();
 
+  // initialize derived
+
+  _derivedRays.clear();
+  
   if (_params.use_multiple_threads) {
     if (_computeMultiThreaded()) {
       return -1;
@@ -2561,9 +2568,14 @@ RadxPartRain::ComputeThread::ComputeThread(RadxPartRain *obj,
   // create compute engine object
   
   _engine = new ComputeEngine(_params, _threadNum);
-  if (!_engine->OK) {
-    delete _engine;
+  if (_engine == NULL) {
     OK = FALSE;
+    return;
+  }
+  if (!_engine->OK) {
+    OK = FALSE;
+    _engine = NULL;
+    return;
   }
 
 }  
