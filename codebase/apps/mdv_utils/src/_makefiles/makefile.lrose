@@ -8,6 +8,7 @@ TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
          Binary2Mdv \
+         CwbRadar2Mdv \
          GribNc2Mdv \
          McidasNcf2Mdv \
          Mdv2Ascii \
