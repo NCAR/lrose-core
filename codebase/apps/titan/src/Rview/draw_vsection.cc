@@ -978,8 +978,6 @@ static void vsection_calc(int dev,
   double plot_min_y, plot_max_y;
   double xaxismargin, yaxismargin, topmargin;
 
-  vsection_t *vsection = NULL;
-
   if (Glob->debug) {
     fprintf(stderr, "** vsection_calc **\n");
   }
@@ -988,7 +986,8 @@ static void vsection_calc(int dev,
    * set local pointers
    */
 
-  vsection = &Glob->vsection;
+  // vsection_t *vsection = NULL;
+  // vsection = &Glob->vsection;
 
   /*
    * get margins from the parameters resources

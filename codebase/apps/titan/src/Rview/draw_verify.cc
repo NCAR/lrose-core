@@ -64,7 +64,7 @@ void draw_verify(int dev,
   static int first_call = TRUE;
   static char *verify_file_path;
   static char *plot_verify;
-  static char *past_storm_color;
+  // static char *past_storm_color;
   static si32 verify_time_margin;
   static GC verify_gc;
   static psgc_t *verify_psgc;
@@ -100,10 +100,10 @@ void draw_verify(int dev,
       uGetParamLong(Glob->prog_name,
 		  "verify_time_margin", 180);
     
-    past_storm_color =
-      uGetParamString(Glob->prog_name,
-		    "x_past_storm_color",
-		    X_PAST_STORM_COLOR);
+    // past_storm_color =
+    //   uGetParamString(Glob->prog_name,
+    //     	    "x_past_storm_color",
+    //     	    X_PAST_STORM_COLOR);
     
     verify_psgc = &Glob->past_storm_psgc[0];
     
