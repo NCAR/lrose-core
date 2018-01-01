@@ -86,6 +86,7 @@ AcSim::AcSim (const string &callsign,
   _ejectable = 0;
   _nBurnInPlace = 0;
   _nEjectable = 0;
+  _dryIce = 0;
   _lastEjectableTime = time(NULL);
   _lastBipTime = time(NULL);
 
@@ -247,13 +248,22 @@ void AcSim::_computeNext()
     int tdiff = now - _lastBipTime;
     if (tdiff >= _burnInPlaceInterval) {
       _burnInPlace = 1;
-       _nBurnInPlace += _nBipAtaTime;
+      _nBurnInPlace += _nBipAtaTime;
       _lastBipTime = now;
     } else {
       _burnInPlace = 0;
     }
   }
 
+  if (_dryIceInterval >= 0) {
+    int nint = now / (int) _dryIceInterval;
+    if (nint % 2 == 0) {
+      _dryIce = 1;
+    } else {
+      _dryIce = 0;
+    }
+  }
+  
 }
 
 
