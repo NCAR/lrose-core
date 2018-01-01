@@ -718,6 +718,9 @@ int AcData2Spdb::_decodeWmiLongString(const char *line,
   if (ejectable) {
     posn.flare_flags |= EJECTABLE_FLAG;
   }
+  if (ice_hopper) {
+    posn.flare_flags |= DRY_ICE_FLAG;
+  }
   posn.n_ejectable = n_ejectable;
   posn.n_burn_in_place = n_burn_in_place;
   
