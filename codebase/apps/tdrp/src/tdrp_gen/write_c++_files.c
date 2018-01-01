@@ -1840,19 +1840,15 @@ static void write_copyright(FILE *out)
      
 {
 
-  time_t now = time(NULL);
-  struct tm *utc = gmtime(&now);
-  
   fprintf(out,
           "// *=*=*=*=*=*=" "*=*=*=*=*=*=" "*=*=*=*=*=*=" 
           "*=*=*=*=*=*=" "*=*=*=*=*=*=" "*=*=*=*=*=*=*\n" 
-          "// ** Copyright UCAR (c) 1992 - %.4d\n"
+          "// ** Copyright UCAR (c)\n"
           "// ** University Corporation for Atmospheric Research(UCAR)\n"
           "// ** National Center for Atmospheric Research(NCAR)\n"
           "// ** Boulder, Colorado, USA\n"
           "// *=*=*=*=*=*=" "*=*=*=*=*=*=" "*=*=*=*=*=*="
-          "*=*=*=*=*=*=" "*=*=*=*=*=*=" "*=*=*=*=*=*" "=*\n",
-          utc->tm_year + 1900);
+          "*=*=*=*=*=*=" "*=*=*=*=*=*=" "*=*=*=*=*=*" "=*\n");
 
 }
 
