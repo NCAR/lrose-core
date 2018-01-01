@@ -476,6 +476,16 @@ paramdef boolean {
 } adjust_sweep_limits_using_angles;
 
 commentdef {
+  p_header = "OPTION TO SORT SWEEPS BY FIXED ANGLE";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Sort the sweeps by fixed angle.";
+  p_help = "For some volumes, the sweep fixed angles may not be in increasing order. This option allows you to reorder the sweeps, and rays, into the correct order.";
+} sort_sweeps_by_fixed_angle;
+
+commentdef {
   p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";
 }
 

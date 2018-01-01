@@ -1,0 +1,5 @@
+#! /bin/csh
+#
+
+./Radx2Grid -indir /scr/rain2/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur -start "2015 06 26 00 00 00" -end "2015 06 26 01 00 00" -outdir /tmp/pecan/cart -debug -field DBZ -field VEL
+

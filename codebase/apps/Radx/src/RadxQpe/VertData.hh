@@ -94,11 +94,12 @@ public:
    * @param[in] snr  Signal to noise ratio
    */
   inline VertData1(double pid, double beamBlockage,
-                   double height, double range, double snr) :
+                   double elev, double height, double range, double snr) :
           _pid(pid),
           _hasSnr(true),
           _snr(snr),
           _beamb(beamBlockage),
+          _elevDeg(elev),
           _heightKm(height),
           _rangeKm(range)
   {
@@ -112,11 +113,12 @@ public:
    * @param[in] height  Height above radar meters
    */
   inline VertData1(double pid, double beamBlockage,
-                   double height, double range) :
+                   double elev, double height, double range) :
           _pid(pid),
           _hasSnr(false),
           _snr(0.0),
           _beamb(beamBlockage),
+          _elevDeg(elev),
           _heightKm(height),
           _rangeKm(range)
   {
@@ -126,7 +128,8 @@ public:
   bool   _hasSnr;     /**< True if has signal to noise ratio */
   double _snr;        /**< SNR when _hasSnr */
   double _beamb;      /**< Beam blockage percent */
-  double _heightKm;    /**< height above radar (km) */
+  double _elevDeg;       /**< elevation angle (deg) */
+  double _heightKm;   /**< height above radar (km) */
   double _rangeKm;    /**< range from radar (km) */
 
 protected:

@@ -455,6 +455,10 @@ int Radx2Grid::_readFile(const string &filePath)
   
   _readVol.applyAzimuthOffset(_params.azimuth_correction_deg);
   _readVol.applyElevationOffset(_params.elevation_correction_deg);
+
+  // pad out the gates to the longest range
+
+  _readVol.setNGatesConstant();
   
   //  check for rhi
   
@@ -951,6 +955,7 @@ void Radx2Grid::_addGeometryFields()
         for (int ii = 0; ii < nGates; ii++) {
           data[ii] = az;
         }
+        azimuthField->setFieldFolds(0.0, 360.0);
         azimuthField->addDataFl32(nGates, data);
         ray->addField(azimuthField);
       }

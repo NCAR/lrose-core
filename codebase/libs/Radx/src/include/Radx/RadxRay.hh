@@ -45,6 +45,7 @@
 #include <Radx/RadxField.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxMsg.hh>
+class RadxSweep;
 class RadxGeoref;
 class RadxCfactors;
 using namespace std;
@@ -96,6 +97,10 @@ public:
 
   void copyMetaData(const RadxRay &rhs);
 
+  /// copy meta data from sweep
+  
+  void setMetadataFromSweep(const RadxSweep &sweep);
+
   /// Delete the field objects, as well as the field vector itself.
   
   void clearFields();
@@ -111,6 +116,10 @@ public:
   /////////////////////////////////////////////////////////////
   /// \name Set methods:
   //@{
+
+  /// Set the ray number in the volume
+
+  inline void setRayNumber(int val) { _rayNum = val; }
 
   /// Set the volume number.
 
@@ -748,6 +757,10 @@ public:
   /// \name Get methods:
   //@{
   
+  /// Get the ray number in the volume for this ray.
+
+  inline int getRayNumber() const { return _rayNum; }
+
   /// Get the volume number for this ray.
 
   inline int getVolumeNumber() const { return _volNum; }
@@ -1097,6 +1110,7 @@ private:
 
   // data
   
+  int _rayNum;     // optional ray number in the volume
   int _volNum;
   int _sweepNum;
   int _calibIndex; // which calibration is relevant to this ray
@@ -1237,6 +1251,7 @@ private:
 
     Radx::fl64 spareFl64[10];
   
+    Radx::si32 rayNum;
     Radx::si32 volNum;
     Radx::si32 sweepNum;
     Radx::si32 calibIndex;
@@ -1260,7 +1275,7 @@ private:
     Radx::si32 isLongRange;
     Radx::si32 georefApplied;
 
-    Radx::si32 spareSi32[14];
+    Radx::si32 spareSi32[13];
 
   } msgMetaNumbers_t;
 

@@ -216,7 +216,7 @@ private:
   void _createThreads();
   void _freeThreads();
 
-  void _createTestFields();
+  void _createDebugFields();
   void _createConvStratFields();
   void _freeDerivedFields();
 

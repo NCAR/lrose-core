@@ -1601,7 +1601,7 @@ using namespace std;
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("angle_fields");
     tt->descr = tdrpStrDup("Specify the output names of the angle fields. If set to empty, that field will not be created.");
-    tt->help = tdrpStrDup("\tazimuth: the azimuth of the ray (deg)\n\televation: the elevation of the ray (deg)\n\talpha: sin(az) * cos(el)\n\tbeta: cos(az) * cos(el)\n\tgamma: sin(el)\n\trange: the range to the center of a gate (km)");
+    tt->help = tdrpStrDup("\tazimuth: the azimuth of the ray (deg)\n\televation: the elevation of the ray (deg)\n\talpha: sin(az) * cos(el)\n\tbeta: cos(az) * cos(el)\n\tgamma: sin(el)\n");
     tt->val_offset = (char *) &angle_fields - &_start_;
     tt->struct_def.name = tdrpStrDup("angle_fields_t");
     tt->struct_def.nfields = 5;
@@ -1756,18 +1756,18 @@ using namespace std;
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("OPTION TO ADD DEBUG FIELDS");
-    tt->comment_text = tdrpStrDup("The debug fields are added to the output grid. These are geometry fields, and can be used to ensure the interpolation is working as expectede.");
+    tt->comment_text = tdrpStrDup("The debug fields are added to the output Cartesian grid. These are geometry fields, and can be used to ensure the interpolation is working as expected.");
     tt++;
     
-    // Parameter 'output_test_fields'
+    // Parameter 'output_debug_fields'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_test_fields");
-    tt->descr = tdrpStrDup("Option to add test fields for checking the interpolation.");
+    tt->param_name = tdrpStrDup("output_debug_fields");
+    tt->descr = tdrpStrDup("Option to add debug fields for checking the interpolation.");
     tt->help = tdrpStrDup("The test fields allow us to ensure that the interpolation is working correctly.\n\nThe debug fields are:\n\n\tnContrib - number of points used in interpolation\n\tgridAz: azimuth deg\n\tgridEl: elevation deg\n\tgridRange: range km\n\tllEl: lower left elevation deg\n\tllAz: lower left azimuth deg\n\tlrEl: lower right elevation deg\n\tlrAz: lower right azimuth deg\n\tulEl: upper left elevation deg\n\tulAz: upper left azimuth deg\n\turEl: upper right elevation deg\n\turAz: upper right azimuth deg");
-    tt->val_offset = (char *) &output_test_fields - &_start_;
+    tt->val_offset = (char *) &output_debug_fields - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

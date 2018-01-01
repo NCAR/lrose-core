@@ -538,7 +538,7 @@ int NoxpNcRadxFile::readFromPath(const string &path,
   
   // set format as read
 
-  _fileFormat = FILE_FORMAT_DOE_NC;
+  _fileFormat = FILE_FORMAT_NOXP_NC;
 
   // clean up
 

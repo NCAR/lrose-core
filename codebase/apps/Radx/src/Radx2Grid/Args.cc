@@ -112,6 +112,15 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
+    } else if (!strcmp(argv[i], "-format")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "output_format = %s;", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+
     } else if (!strcmp(argv[i], "-grid_z_geom")) {
       
       if (i < argc - 1) {
@@ -193,6 +202,15 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
       
+    } else if (!strcmp(argv[i], "-indir")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "input_dir = \"%s\";", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+	
     } else if (!strcmp(argv[i], "-outdir")) {
       
       if (i < argc - 1) {
@@ -213,6 +231,54 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
+    } else if (!strcmp(argv[i], "-beam_width")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "beam_width_deg_h = %s;", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+	sprintf(tmp_str, "beam_width_deg_v = %s;", argv[i]);
+	TDRP_add_override(&override, tmp_str);
+	sprintf(tmp_str, "override_beam_width = TRUE;");
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+
+    } else if (!strcmp(argv[i], "-add_angle_fields")) {
+      
+      sprintf(tmp_str, "output_angle_fields = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-add_range_field")) {
+      
+      sprintf(tmp_str, "output_range_field = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-add_height_field")) {
+      
+      sprintf(tmp_str, "output_height_field = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-add_coverage_field")) {
+      
+      sprintf(tmp_str, "output_coverage_field = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-add_time_field")) {
+      
+      sprintf(tmp_str, "output_time_field = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-ppi")) {
+      
+      sprintf(tmp_str, "interp_mode = INTERP_MODE_PPI;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-polar")) {
+      
+      sprintf(tmp_str, "interp_mode = INTERP_MODE_POLAR;");
+      TDRP_add_override(&override, tmp_str);
+      
     }
     
   } // i
@@ -253,6 +319,23 @@ int Args::parse (int argc, char **argv, string &prog_name)
 void Args::_usage(ostream &out)
 {
 
+  Params defaults;
+
+  char gridXyGeomStr[1024];
+  snprintf(gridXyGeomStr, 1024, "%d, %d, %g, %g, %g, %g",
+           defaults.grid_xy_geom.nx,
+           defaults.grid_xy_geom.ny,
+           defaults.grid_xy_geom.minx,
+           defaults.grid_xy_geom.miny,
+           defaults.grid_xy_geom.dx,
+           defaults.grid_xy_geom.dy);
+  
+  char gridZGeomStr[1024];
+  snprintf(gridZGeomStr, 1024, "%d, %g, %g",
+           defaults.grid_z_geom.nz,
+           defaults.grid_z_geom.minz,
+           defaults.grid_z_geom.dz);
+  
   out << "Usage: " << _progName << " [args as below]\n"
       << "Options:\n"
       << "\n"
@@ -260,54 +343,97 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -d, -debug ] print debug messages\n"
       << "\n"
-      << "  [ -end \"yyyy mm dd hh mm ss\"]\n"
-      << "    Set the end time\n"
-      << "    Also sets mode to ARCHIVE\n"
+      << "  [ -add_angle_fields ]\n"
+      << "     Create fields azimuth & elevation (deg), alpha, beta, gamma\n"
+      << "     and include in output file\n"
       << "\n"
-      << "  [ -f, -paths ? ] set file paths\n"
-      << "    Sets mode to FILELIST\n"
+      << "  [ -add_range_field ]\n"
+      << "     Create 'range' field and include in output file\n"
+      << "     This is slant range from the radar (km)\n"
+      << "\n"
+      << "  [ -add_height_field ]\n"
+      << "     Create 'height' field and include in output file\n"
+      << "     This is height of the beam in km MSL\n"
+      << "\n"
+      << "  [ -add_coverage_field ]\n"
+      << "     Create 'coverage' field and include in output file\n"
+      << "     This is a 0/1 flag to indicate the extent of radar coverage\n"
+      << "\n"
+      << "  [ -add_time_field ]\n"
+      << "     Create 'time' field and include in output file\n"
+      << "     This is time since start of volume (secs)\n"
+      << "\n"
+      << "  [ -beam_width ? ] override beam width (deg)\n"
+      << "\n"
+      << "  [ -end \"yyyy mm dd hh mm ss\"]\n"
+      << "     Set the end time in archive mode\n"
+      << "     Sets mode to ARCHIVE\n"
+      << "\n"
+      << "  [ -f, -paths ? ] set input file paths\n"
+      << "     Sets mode to FILELIST\n"
       << "\n"
       << "  [ -field ? ] Specify field name\n"
       << "     Use multiple -field args for multiple fields\n"
       << "     If no fields specified, all fields will be included\n"
       << "\n"
+      << "  [ -format ? ] Specify format for output file:\n"
+      << "       CF_NETCDF: the default, NetCDF with CF conventions\n"
+      << "       ZEBRA_NETCDF: legacy, NetCDF for ZEBRA\n"
+      << "       MDV: NCAR Meteorological Data Volume binary format\n"
+      << "       CEDRIC: NCAR CEDRIC binary format\n"
+      << "\n"
       << "  [ -grid_xy_geom \"nx, ny, minx, miny, dx, dy\"]\n"
-      << "    Set the geometry for constant spacing in (X,Y)\n"
-      << "    nx, ny: number of cells in (x,y)\n"
-      << "    minx, miny: coords of center of SW grid cell (km or deg)\n"
-      << "    dx, xy: spacing between cells in (km or deg) (km)\n"
-      << "    Units are deg for LATLON projection, km for all other projections\n"
+      << "     Set the geometry for constant spacing in (X,Y)\n"
+      << "     nx, ny: number of cells in (x,y)\n"
+      << "     minx, miny: coords of center of SW grid cell (km or deg)\n"
+      << "     dx, xy: spacing between cells in (km or deg) (km)\n"
+      << "     Units are deg for LATLON, km for all other projections\n"
+      << "     Default is: \"" << gridXyGeomStr << "\"\n"
       << "\n"
       << "  [ -grid_z_geom \"nz, minz, dz\"]\n"
-      << "    Set the geometry for constant spacing in Z\n"
-      << "    nz: number of z levels\n"
-      << "    minz: lowest Z level (km MSL)\n"
-      << "    dz: spacing between Z levels (km)\n"
+      << "     Set the geometry for constant spacing in Z\n"
+      << "     nz: number of z levels\n"
+      << "     minz: lowest Z level (km MSL)\n"
+      << "     dz: spacing between Z levels (km)\n"
+      << "     Default is: \"" << gridZGeomStr << "\"\n"
+      << "\n"
+      << "  [ -indir ? ] set input directory\n"
+      << "     for ARCHIVE mode\n"
+      << "     see also -start and -end\n"
       << "\n"
       << "  [ -instance ?] specify the instance\n"
       << "\n"
       << "  [ -latlon] set the output projection to latlon\n"
-      << "    Default projection is FLAT - azimuthal_equidistant\n"
-      << "    Grid xy units specified in degrees\n"
+      << "     Default projection is FLAT - azimuthal_equidistant\n"
+      << "     Grid xy units specified in degrees\n"
       << "\n"
       << "  [ -outdir ? ] set output directory\n"
       << "\n"
       << "  [ -outname ? ] specify output file name\n"
-      << "                 file of this name will be written to outdir\n"
+      << "     file of this name will be written to outdir\n"
+      << "\n"
+      << "  [ -ppi ] interp in PPI mode\n"
+      << "     interp onto Cart (x,y) grid (km) in the horizontal\n"
+      << "     preserve sweep elevation angles (deg) in the vertical\n"
+      << "\n"
+      << "  [ -polar ] interp in POLAR mode\n"
+      << "     maintain in polar coordinates\n"
+      << "     interp onto a regular grid in azimuth (deg)\n"
+      << "     preserve sweep elevation angles (deg) in the vertical\n"
       << "\n"
       << "  [ -remap_to_latlon] remap to latlon after interpolation\n"
-      << "    Grid xy units specified in km\n"
+      << "     Grid xy units specified in km\n"
       << "\n"
       << "  [ -start \"yyyy mm dd hh mm ss\"]\n"
-      << "    Set the start time\n"
-      << "    Also sets mode to ARCHIVE\n"
+      << "     Set the start time in archive mode\n"
+      << "     Sets mode to ARCHIVE\n"
       << "\n"
       << "  [ -v, -verbose ] print verbose debug messages\n"
       << "\n"
       << "  [ -vv, -extra ] print extra verbose debug messages\n"
       << "\n"
       << "  [ -z_level_array \"z0, z1, .... , zn-1\" ] specify z levels\n"
-      << "    Use this instead of -grid_z_geom for non-constant z spacing\n"
+      << "     Use this instead of -grid_z_geom for non-constant z spacing\n"
       << "\n"
       << endl;
   

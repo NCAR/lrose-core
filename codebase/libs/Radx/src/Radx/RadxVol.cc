@@ -1344,22 +1344,16 @@ void RadxVol::loadModesFromSweepsToRays()
   }
 
   for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
-
     const RadxSweep *sweep = _sweeps[isweep];
-
     for (size_t iray = sweep->getStartRayIndex();
          iray <= sweep->getEndRayIndex(); iray++) {
-
       RadxRay &ray = *_rays[iray];
-      
       ray.setSweepNumber(sweep->getSweepNumber());
       ray.setSweepMode(sweep->getSweepMode());
       ray.setPolarizationMode(sweep->getPolarizationMode());
       ray.setPrtMode(sweep->getPrtMode());
       ray.setFollowMode(sweep->getFollowMode());
-
     } // iray
-
   } // isweep
 
 }
@@ -1378,18 +1372,38 @@ void RadxVol::loadFixedAnglesFromSweepsToRays()
   }
 
   for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
-
     const RadxSweep *sweep = _sweeps[isweep];
+    for (size_t iray = sweep->getStartRayIndex();
+         iray <= sweep->getEndRayIndex(); iray++) {
+      RadxRay &ray = *_rays[iray];
+      ray.setFixedAngleDeg(sweep->getFixedAngleDeg());
+    } // iray
+  } // isweep
 
+}
+
+///////////////////////////////////////////////////////////////
+/// Load the ray metadata from sweep information.
+///
+/// This loops through all of the sweeps, setting the
+/// sweep-related info on the rays
+
+void RadxVol::loadMetadataFromSweepsToRays()
+  
+{
+  
+  if (_rays.size() < 1) {
+    return;
+  }
+  
+  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+    const RadxSweep *sweep = _sweeps[isweep];
     for (size_t iray = sweep->getStartRayIndex();
          iray <= sweep->getEndRayIndex(); iray++) {
 
       RadxRay &ray = *_rays[iray];
-      
-      ray.setFixedAngleDeg(sweep->getFixedAngleDeg());
-
+      ray.setMetadataFromSweep(*sweep);
     } // iray
-
   } // isweep
 
 }
@@ -4027,7 +4041,115 @@ void RadxVol::sortRaysByTime()
        ii != sortedRayPtrs.end(); ii++) {
     _rays.push_back(ii->ptr);
   }
+
+  // set sweep info from rays
+
+  loadSweepInfoFromRays();
     
+}
+
+/////////////////////////////////////////////////////////////////
+// Set ray numbers in order in the volume
+
+void RadxVol::setRayNumbersInOrder()
+
+{
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    _rays[iray]->setRayNumber(iray);
+  }
+}
+
+/////////////////////////////////////////////////////////////////
+// Sort rays by number
+
+bool RadxVol::SortByRayNumber::operator()
+  (const RayPtr &lhs, const RayPtr &rhs) const
+{
+  return lhs.ptr->getRayNumber() < rhs.ptr->getRayNumber();
+}
+
+void RadxVol::sortRaysByNumber()
+
+{
+
+  // sanity check
+  
+  if (_rays.size() < 2) {
+    return;
+  }
+
+  // create set with sorted ray pointers
+
+  multiset<RayPtr, SortByRayNumber> sortedRayPtrs;
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    RayPtr rptr(_rays[iray]);
+    sortedRayPtrs.insert(rptr);
+  }
+
+  // reload _rays array in time-sorted order
+
+  _rays.clear();
+  for (multiset<RayPtr, SortByRayNumber>::iterator ii = sortedRayPtrs.begin();
+       ii != sortedRayPtrs.end(); ii++) {
+    _rays.push_back(ii->ptr);
+  }
+    
+  // set sweep info from rays
+
+  loadSweepInfoFromRays();
+    
+}
+
+/////////////////////////////////////////////////////////////////
+// Sort sweeps by fixed angle, reordering the rays accordingly
+
+bool RadxVol::SortByFixedAngle::operator()
+  (const SweepPtr &lhs, const SweepPtr &rhs) const
+{
+  return lhs.ptr->getFixedAngleDeg() < rhs.ptr->getFixedAngleDeg();
+}
+
+void RadxVol::sortSweepsByFixedAngle()
+  
+{
+
+  // sanity check
+  
+  if (_sweeps.size() < 2) {
+    return;
+  }
+
+  // create set with sweep pointers sorted by fixed angle
+
+  multiset<SweepPtr, SortByFixedAngle> sortedSweepPtrs;
+  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+    SweepPtr sptr(_sweeps[isweep]);
+    sortedSweepPtrs.insert(sptr);
+  }
+
+  // create ray vector reordered by the sorted sweeps
+
+  vector<RadxSweep *> sortedSweeps;
+  vector<RadxRay *> sortedRays;
+  for (multiset<SweepPtr, SortByFixedAngle>::iterator ii = sortedSweepPtrs.begin();
+       ii != sortedSweepPtrs.end(); ii++) {
+    RadxSweep *sweep = ii->ptr;
+    sortedSweeps.push_back(sweep);
+    for (size_t iray = sweep->getStartRayIndex(); 
+         iray <= sweep->getEndRayIndex(); iray++) {
+      sortedRays.push_back(_rays[iray]);
+    }
+  }
+  
+  // replace original with sorted
+
+  _rays = sortedRays;
+
+  // load sweep info from rays
+
+  checkForIndexedRays();
+  loadSweepInfoFromRays();
+  
 }
 
 /////////////////////////////////////////////////////////////////

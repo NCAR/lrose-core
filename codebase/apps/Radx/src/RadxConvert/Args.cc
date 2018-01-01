@@ -645,6 +645,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "apply_strict_angle_limits = false;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-sort_sweeps")) {
+      
+      sprintf(tmp_str, "sort_sweeps_by_fixed_angle = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-radar_num")) {
       
       if (i < argc - 1) {
@@ -915,6 +920,9 @@ void Args::_usage(ostream &out)
       << "     Remove NEXRAD short-range Doppler sweeps\n"
       << "\n"
       << "  [ -rem_trans ] remove rays with antenna transitions\n"
+      << "\n"
+      << "  [ -sort_sweeps ] sort sweeps by fixed angle\n"
+      << "     Sorts in ascending order. Rays are reordered accordingly\n"
       << "\n"
       << "  [ -source ? ] override the source string\n"
       << "\n"

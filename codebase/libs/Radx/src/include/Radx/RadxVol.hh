@@ -716,6 +716,13 @@ public:
   
   void loadFixedAnglesFromSweepsToRays();
 
+  /// Load the ray metadata from sweep information.
+  ///
+  /// This loops through all of the sweeps, setting the
+  /// sweep-related info on the rays
+  
+  void loadMetadataFromSweepsToRays();
+  
   /// load the calbration index on the rays, using the pulse width to
   /// determine which calibration is relevant.
   ///
@@ -768,8 +775,19 @@ public:
 
   /////////////////////////////////////////////////////////////////
   /// Sort rays by time
-
+  
   void sortRaysByTime();
+
+  /////////////////////////////////////////////////////////////////
+  // Sort sweeps by fixed angle, reordering the rays accordingly
+
+  void sortSweepsByFixedAngle();
+  
+  /////////////////////////////////////////////////////////////////
+  /// Sort rays by number
+
+  void setRayNumbersInOrder();
+  void sortRaysByNumber();
 
   /////////////////////////////////////////////////////////////////
   /// Sort sweep rays by azimuth
@@ -1689,20 +1707,40 @@ private:
     }
   };
   
-  /// sorting rays by time or azimuth
+  /// sorting rays
 
   class RayPtr {
   public:
     RadxRay *ptr;
     RayPtr(RadxRay *p) : ptr(p) {}
   };
+
   class SortByRayTime {
   public:
     bool operator()(const RayPtr &lhs, const RayPtr &rhs) const;
   };
+
+  class SortByRayNumber {
+  public:
+    bool operator()(const RayPtr &lhs, const RayPtr &rhs) const;
+  };
+
   class SortByRayAzimuth {
   public:
     bool operator()(const RayPtr &lhs, const RayPtr &rhs) const;
+  };
+
+  /// sorting sweeps
+
+  class SweepPtr {
+  public:
+    RadxSweep *ptr;
+    SweepPtr(RadxSweep *p) : ptr(p) {}
+  };
+
+  class SortByFixedAngle {
+  public:
+    bool operator() (const SweepPtr &lhs, const SweepPtr &rhs) const;
   };
 
   // meta strings

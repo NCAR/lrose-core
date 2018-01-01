@@ -1034,6 +1034,10 @@ const IwrfCalib &RadxCov2Mom::_getBestCal(double pulseWidthUs)
 int RadxCov2Mom::_computeMoments(RadxVol &vol)
 {
 
+  // initialize the volume with ray numbers
+  
+  vol.setRayNumbersInOrder();
+
   // compute the moments
   
   const vector<RadxRay *> &covRays = vol.getRays();
@@ -1081,6 +1085,7 @@ int RadxCov2Mom::_computeMoments(RadxVol &vol)
     vol.setMaxRangeKm(_params.max_range_km);
   }
 
+  vol.sortRaysByNumber();
   vol.loadVolumeInfoFromRays();
   vol.loadSweepInfoFromRays();
   vol.setPackingFromRays();
