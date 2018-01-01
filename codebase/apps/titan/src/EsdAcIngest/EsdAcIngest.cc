@@ -75,7 +75,7 @@ EsdAcIngest::EsdAcIngest(int argc, char **argv)
 
   // get TDRP params
   
-  _paramsPath = "unknown";
+  _paramsPath = (char *) "unknown";
   if (_params.loadFromArgs(argc, argv, _args.override.list,
 			   &_paramsPath)) {
     cerr << "ERROR: " << _progName << endl;
@@ -746,6 +746,9 @@ int EsdAcIngest::_decodeWmiLongString(const char *line,
   }
   if (ejectable) {
     posn.flare_flags |= EJECTABLE_FLAG;
+  }
+  if (ice_hopper) {
+    posn.flare_flags |= DRY_ICE_FLAG;
   }
   posn.n_ejectable = n_ejectable;
   posn.n_burn_in_place = n_burn_in_place;
