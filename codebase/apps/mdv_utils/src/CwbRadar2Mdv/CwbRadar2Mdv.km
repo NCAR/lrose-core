@@ -1,0 +1,250 @@
+/**********************************************************************
+ * TDRP params for CwbRadar2Mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_WARNINGS
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+// Used for registration with procmap.
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+// Program may be run in two modes, archive and realtime. In realtime 
+//   mode, the analysis is performed for each volume scan as it becomes 
+//   available. In archive mode, the file list is obtained from the 
+//   command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// realtime_input_dir //////////////////////
+//
+// Directory for input radar data - REALTIME mode.
+// The latest_data_info file in this directory is updated each time the 
+//   model adds a forecast time step to the output file.
+// Type: string
+//
+
+realtime_input_dir = "./input";
+
+///////////// use_latest_data_info_file ///////////////
+//
+// Option to use latest_data_info file.
+// It true, the program will use the _latest_data_info file for 
+//   identifying the incoming data file name. If false, it will scan the 
+//   input directory.
+// Type: boolean
+//
+
+use_latest_data_info_file = FALSE;
+
+///////////// max_realtime_valid_age //////////////////
+//
+// Max age of input data - REALTIME mode.
+// For realtime only - max age of input data for it to be valid. If the 
+//   latest_data_info file is older than this, the program waits for new 
+//   data.
+// Minimum val: 0
+// Type: int
+//
+
+max_realtime_valid_age = 300;
+
+//======================================================================
+//
+// OUTPUT DATA.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+// The radar data is output to URL in MDV format.
+// Type: string
+//
+
+output_url = "./output";
+
+///////////// output_short_field_name /////////////////
+//
+// Short field name for MDV field header.
+// The long field name is taken from the input file. The short field 
+//   name is set from this parameter. This is done so that it can be 
+//   backward compatible with previous CWB radar products.
+// Type: string
+//
+
+output_short_field_name = "MOSA";
+
+///////////// output_encoding /////////////////////////
+//
+// Encoding for data in output file.
+//
+// Type: enum
+// Options:
+//     OUT_INT8
+//     OUT_INT16
+//     OUT_FLOAT32
+//
+
+output_encoding = OUT_INT8;
+
+///////////// output_projection ///////////////////////
+//
+// Projection of output grid.
+// FLAT - (x,y) Cartesian data in km from a given origin. LATLON - 
+//   lat/lon grid with constant grid spacing. LAMBERT - Lambert conformal 
+//   projection. NATIVE - use the native data grid, copy to output.
+//
+// Type: enum
+// Options:
+//     OUTPUT_PROJ_FLAT
+//     OUTPUT_PROJ_LATLON
+//     OUTPUT_PROJ_LAMBERT
+//     OUTPUT_PROJ_NATIVE
+//
+
+output_projection = OUTPUT_PROJ_NATIVE;
+
+///////////// vlevel_units ////////////////////////////
+//
+// Units for vertical levels.
+// The input file contains data with vertical levels in km. If  
+//   VLEVEL_FL is chose, these will be converted to flight levels.
+//
+// Type: enum
+// Options:
+//     VLEVEL_KM
+//     VLEVEL_FL
+//
+
+vlevel_units = VLEVEL_KM;
+
+///////////// output_origin ///////////////////////////
+//
+// Origin of output grid.
+// Used with OUTPUT_PROJ_FLAT only.
+//
+// Type: struct
+//   typedef struct {
+//      double lat;
+//      double lon;
+//   }
+//
+//
+
+output_origin = {
+    lat = 40,
+    lon = -104
+};
+
+///////////// lambert_lat1 ////////////////////////////
+//
+// lat 1 value for Lambert conformal projection.
+// Type: double
+//
+
+lambert_lat1 = 10;
+
+///////////// lambert_lat2 ////////////////////////////
+//
+// lat 2 value for Lambert conformal projection.
+// Type: double
+//
+
+lambert_lat2 = 60;
+
+///////////// output_grid /////////////////////////////
+//
+// Output grid parameters.
+// The grid params for the output grid.
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+//
+
+output_grid = {
+    nx = 300,
+    ny = 300,
+    minx = -149.5,
+    miny = -149.5,
+    dx = 1,
+    dy = 1
+};
+
+//======================================================================
+//
+// FILE HEADER INFO.
+//
+//======================================================================
+ 
+///////////// data_set_info ///////////////////////////
+//
+// Data set info.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_info = "This MDV file was created by CwbRadar2Mdv.";
+
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+// This is placed in the MDV master header for documentation purposes.
+// Type: string
+//
+
+data_set_name = "Radar data mosaic from Taiwan CWB.";
+
