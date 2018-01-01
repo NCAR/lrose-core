@@ -37,6 +37,7 @@ public:
   bool setDone;
   int country_id;
   char radar_name[128];
+  char radar_type[128];
   int station_id;
   int station_num;
   int wmo_number;
@@ -76,6 +77,20 @@ public:
   string product_str;
   string copyright_str;
   string hiprf_str;
+  string polarization_str;
+
+  double hbeamwidth;
+  double vbeamwidth;
+  double antdiam;
+
+  double peakpowerh;
+  double peakpowerv;
+
+  double rxnoise_h;
+  double rxnoise_v;
+
+  double rxgain_h;
+  double rxgain_v;
 
   // constructor
 

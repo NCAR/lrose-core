@@ -43,6 +43,7 @@
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxSweep.hh>
 #include <Radx/RadxArray.hh>
+#include <Radx/RadxRcalib.hh>
 #include <cmath>
 #include "PPIField.hh"
 #include "RapicRay.hh"
@@ -561,7 +562,19 @@ void RapicRadxFile::_setVolMetaData()
   // _readVol->setSensorHtAglM(0);
 
   _readVol->setFrequencyHz(_scanParams->freq_mhz * 1.0e6);
+
+  _readVol->setRadarBeamWidthDegH(_scanParams->hbeamwidth);
+  _readVol->setRadarBeamWidthDegV(_scanParams->vbeamwidth);
   
+  RadxRcalib *cal = new RadxRcalib;
+  cal->setXmitPowerDbmH(_scanParams->peakpowerh);
+  cal->setXmitPowerDbmV(_scanParams->peakpowerv);
+  cal->setNoiseDbmHc(_scanParams->rxnoise_h);
+  cal->setNoiseDbmVc(_scanParams->rxnoise_v);
+  cal->setReceiverGainDbHc(_scanParams->rxgain_h);
+  cal->setReceiverGainDbVc(_scanParams->rxgain_v);
+  _readVol->addCalib(cal);
+
 }
 
 //////////////////////////////////////////////////
