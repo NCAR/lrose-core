@@ -330,6 +330,7 @@ TestInput::TestInput(const string &prog_name, const Params &params) :
 			     ac->ejectable_interval,
 			     ac->burn_in_place_interval,
 			     ac->n_bip_at_a_time,
+			     ac->dry_ice_interval,
 			     _params.optional_field_names_n,
 			     _params._optional_field_names);
     _acs.push_back(acSim);

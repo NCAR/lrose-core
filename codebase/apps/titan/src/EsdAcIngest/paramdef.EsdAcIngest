@@ -212,7 +212,8 @@ typedef enum {
   BURN_IN_PLACE,
   EJECTABLE,
   N_BURN_IN_PLACE,
-  N_EJECTABLE
+  N_EJECTABLE,
+  DRY_ICE
 } field_name_t;
 
 paramdef enum field_name_t {
@@ -387,17 +388,19 @@ typedef struct {
   boolean right_burn;
   boolean left_burn;
   double ejectable_interval;
-  int burn_in_place_interval;
+  double burn_in_place_interval;
   int n_bip_at_a_time;
+  double dry_ice_interval;
 } test_aircraft_t;
 
 paramdef struct test_aircraft_t {
 
   p_default =
   {
-    { "JRA", -27.43, 28.87, 9500, 150, TRUE, TRUE, -1, -1, 0},
-    { "JRB", -28.57, 28.86, 10500, 250, FALSE, FALSE, 10, -1, 0},
-    { "CAN", -28.19, 27.76, 11500, 150, FALSE, FALSE, -1, 60, 2}
+    { "JRA", -27.43, 28.87, 9500, 150, TRUE, TRUE, -1, -1, 0, -1},
+    { "JRB", -28.57, 28.86, 10500, 250, FALSE, FALSE, 10, -1, 0, -1},
+    { "CAN", -28.19, 27.76, 11500, 150, FALSE, FALSE, -1, 60, 2, -1},
+    { "LTK", -28.0, 28.0, 20500, 200, FALSE, FALSE, -1, -1, 0, 20}
   };
 
   p_descr = "Details of aircraft for TEST mode.";
