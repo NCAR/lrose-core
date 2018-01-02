@@ -354,6 +354,7 @@ static const char *ParamsText =
   "# If width_per_flare is 0, line widths will always be 1.\n"
   "\n"
   "Rview.line_width_per_flare: 2\n"
+  "Rview.dry_ice_line_width: 3\n"
   "\n"
   "# linestyles not yet implemeted\n"
   "\n"

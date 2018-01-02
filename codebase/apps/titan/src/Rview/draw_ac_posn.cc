@@ -96,6 +96,7 @@ static double ejectable_icon_size;
 static int Plot_ejectables_as_cross = TRUE;
 static int Plot_ejectables_as_plus = TRUE;
 static int LineWidthPerFlare = 1;
+static int DryIceLineWidth = 2;
 
 GC End_burn_gc;
 GC Bip_gc;
@@ -668,7 +669,7 @@ static void draw_spdb_posn(int dev,
 	  
 	  if (dry_ice) {
 	    XSetLineAttributes(Glob->rdisplay, Dry_ice_gc,
-			       2 * LineWidthPerFlare,
+			       DryIceLineWidth,
 			       LineSolid, CapButt, JoinMiter);
 	    gc = Dry_ice_gc;
           } else if (n_end_burn && n_bip) {
@@ -1035,6 +1036,10 @@ static void init_setup()
   LineWidthPerFlare =
     uGetParamLong(Glob->prog_name,
 		  "line_width_per_flare", 1);
+
+  DryIceLineWidth =
+    uGetParamLong(Glob->prog_name,
+		  "dry_ice_line_width", 3);
 
   /*
    * flare colors
