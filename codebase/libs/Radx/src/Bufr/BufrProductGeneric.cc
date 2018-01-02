@@ -221,6 +221,10 @@ void BufrProductGeneric::addData(unsigned char value) {
   //  dataBuffer[nData++] = value;
   //else 
   //  throw "out of space in dataBuffer";
+
+  //  set 255 to zero, so that both 255 and zero are marked as missing
+  if (value == 255)
+    value = 0;   
   currentAccumulator->push_back(value);
 }
 
