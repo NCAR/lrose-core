@@ -6,8 +6,8 @@ import os
 template = """
 require 'formula'
 
-class lroseBlaze < Formula
-  homepage 'http://www.ral.ucar.edu/projects/titan/docs/radial_formats/radx.html'
+class Blaze < Formula
+  homepage 'https://ncar.github.io/lrose-core'
 
   url '{0}'
   version '{1}'
