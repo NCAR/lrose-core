@@ -51,7 +51,7 @@ def main():
                       help='Set verbose debugging on')
     parser.add_option('--package',
                       dest='package', default='lrose',
-                      help='Package name. Options are lrose (default), radx, cidd, hcr, hsrl, titan')
+                      help='Package name. Options are lrose (default), radx, cidd, hcr, hsrl, titan, blaze')
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')
