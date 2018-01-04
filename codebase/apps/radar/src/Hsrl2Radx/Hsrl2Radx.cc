@@ -569,18 +569,19 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
   if (rawRay.getTelescopeDirn() == 1) {
       // pointing up
     ray->setAzimuthDeg(0.0);
-    ray->setElevationDeg(90.0);
-    ray->setFixedAngleDeg(90.0);
+    ray->setElevationDeg(94.0);
+    ray->setFixedAngleDeg(94.0);
   } else {
     // pointing down
     ray->setAzimuthDeg(0.0);
-    ray->setElevationDeg(-90.0);
-    ray->setFixedAngleDeg(-90.0);
+    ray->setElevationDeg(-94.0);
+    ray->setFixedAngleDeg(-94.0);
   }
   
   // read aircraft georeference from SPDB
   
   if (_params.read_georef_data_from_aircraft_system) {
+
     RadxGeoref geo;
     if (RawFile::readGeorefFromSpdb(_params.georef_data_spdb_url,
                                     secs,
@@ -591,21 +592,32 @@ RadxRay *Hsrl2Radx::_convertRawToRadx(HsrlRawRay &rawRay)
         // pointing up
         geo.setRotation(-4.0);
         geo.setTilt(0.0);
+        if (_params.correct_elevation_angle_for_roll) {
+          ray->setElevationDeg(94.0 - geo.getRoll());
+        } else {
+          ray->setElevationDeg(94.0);
+        }
       } else {
         // pointing down
         geo.setRotation(184.0);
         geo.setTilt(0.0);
+        if (_params.correct_elevation_angle_for_roll) {
+          ray->setElevationDeg(-94.0 - geo.getRoll());
+        } else {
+          ray->setElevationDeg(-94.0);
+        }
       }
       ray->setGeoref(geo);
-    }
+
+      // compute az/el from geo
+      
+      // double azimuth, elevation;
+      // RadxCfactors corr;
+      // RawFile::computeRadarAngles(geo, corr, azimuth, elevation);
+      // ray->setAzimuthDeg(azimuth);
+      // ray->setElevationDeg(elevation);
     
-    // compute az/el from geo
-    
-    double azimuth, elevation;
-    RadxCfactors corr;
-    RawFile::computeRadarAngles(geo, corr, azimuth, elevation);
-    ray->setAzimuthDeg(azimuth);
-    ray->setElevationDeg(elevation);
+    } // if (RawFile::readGeorefFromSpdb ...
     
   } // if (_params.read_georef_data_from_aircraft_system)
 

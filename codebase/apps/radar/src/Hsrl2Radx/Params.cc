@@ -826,6 +826,18 @@ using namespace std;
     tt->single_val.i = 5;
     tt++;
     
+    // Parameter 'correct_elevation_angle_for_roll'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("correct_elevation_angle_for_roll");
+    tt->descr = tdrpStrDup("Option to correct the elevation angle for the aircraft roll angle.");
+    tt->help = tdrpStrDup("If true, we adjust the elevation angle by subtracting the roll angle.");
+    tt->val_offset = (char *) &correct_elevation_angle_for_roll - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));

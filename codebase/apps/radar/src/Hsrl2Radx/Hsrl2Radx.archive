@@ -295,7 +295,7 @@ read_georef_data_from_aircraft_system = TRUE;
 // Type: string
 //
 
-georef_data_spdb_url = "$(DATA_DIR)/spdb/ac_georef/iwg1";
+georef_data_spdb_url = "$(HOME)/data/socrates/spdb/ac_georef/raf_1hz";
 
 ///////////// georef_data_search_margin_secs //////////
 //
@@ -309,6 +309,18 @@ georef_data_spdb_url = "$(DATA_DIR)/spdb/ac_georef/iwg1";
 //
 
 georef_data_search_margin_secs = 10;
+
+///////////// correct_elevation_angle_for_roll ////////
+//
+// Option to correct the elevation angle for the aircraft roll angle.
+//
+// If true, we adjust the elevation angle by subtracting the roll angle.
+//
+//
+// Type: boolean
+//
+
+correct_elevation_angle_for_roll = TRUE;
 
 //======================================================================
 //
@@ -508,7 +520,7 @@ cross_field_name = "cross";
 // Type: string
 //
 
-baseline_calibration_path = "$(PROJ_DIR)/calfiles/baseline_correction_20171019T2000.blc";
+baseline_calibration_path = "$(HOME)/git/hsrl_configuration/projDir/calfiles/baseline_correction_20171019T2000.blc";
 
 ///////////// diff_default_geofile_path ///////////////
 //
@@ -518,7 +530,7 @@ baseline_calibration_path = "$(PROJ_DIR)/calfiles/baseline_correction_20171019T2
 // Type: string
 //
 
-diff_default_geofile_path = "$(PROJ_DIR)/calfiles/diff_default_geofile_20171018T0000.geo";
+diff_default_geofile_path = "$(HOME)/git/hsrl_configuration/projDir/calfiles/diff_default_geofile_20171018T0000.geo";
 
 ///////////// geofile_default_path ////////////////////
 //
@@ -528,7 +540,7 @@ diff_default_geofile_path = "$(PROJ_DIR)/calfiles/diff_default_geofile_20171018T
 // Type: string
 //
 
-geofile_default_path = "$(PROJ_DIR)/calfiles/geofile_default_20150601T0000.geo";
+geofile_default_path = "$(HOME)/git/hsrl_configuration/projDir/calfiles/geofile_default_20150601T0000.geo";
 
 ///////////// afterpulse_default_path /////////////////
 //
@@ -538,7 +550,7 @@ geofile_default_path = "$(PROJ_DIR)/calfiles/geofile_default_20150601T0000.geo";
 // Type: string
 //
 
-afterpulse_default_path = "$(PROJ_DIR)/calfiles/afterpulse_default_20061001T0000.ap";
+afterpulse_default_path = "$(HOME)/git/hsrl_configuration/projDir/calfiles/afterpulse_default_20061001T0000.ap";
 
 ///////////// calvals_gvhsrl_path /////////////////////
 //
@@ -548,7 +560,7 @@ afterpulse_default_path = "$(PROJ_DIR)/calfiles/afterpulse_default_20061001T0000
 // Type: string
 //
 
-calvals_gvhsrl_path = "$(PROJ_DIR)/calfiles/calvals_gvhsrl.txt";
+calvals_gvhsrl_path = "$(HOME)/git/hsrl_configuration/projDir/calfiles/calvals_gvhsrl.txt";
 
 ///////////// combined_hi_dead_time_name //////////////
 //
@@ -1015,7 +1027,7 @@ site_name = "unknown";
 // Type: string
 //
 
-output_dir = "$(DATA_DIR)/cfradial/hsrl_moments2";
+output_dir = "$(HOME)/data/socrates/cfradial/hsrl_moments";
 
 ///////////// output_filename_mode ////////////////////
 //

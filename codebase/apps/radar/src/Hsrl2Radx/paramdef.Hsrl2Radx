@@ -161,6 +161,12 @@ paramdef int {
   p_help = "If no data is found within this time margin, we do not set the location.";
 } georef_data_search_margin_secs;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to correct the elevation angle for the aircraft roll angle.";
+  p_help = "If true, we adjust the elevation angle by subtracting the roll angle.";
+} correct_elevation_angle_for_roll;
+
 commentdef {
   p_header = "FIXED LOCATION PARAMETERS";
   p_text = "If not read from aircraft, need to set the instrument location from the config file.";
