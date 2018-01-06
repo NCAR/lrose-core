@@ -154,6 +154,9 @@ void MonField::printStats(FILE *out)
   if (fabs(_max) > 9999) {
     fprintf(out, "%45s: %10.0f %10.0f %10.0f %10.0f",
             label, _min, _max, _mean, range);
+  } else if (fabs(_max) < 1) {
+    fprintf(out, "%45s: %10g %10g %10g %10g",
+            label, _min, _max, _mean, range);
   } else {
     fprintf(out, "%45s: %10.3f %10.3f %10.3f %10.3f",
             label, _min, _max, _mean, range);
