@@ -6,7 +6,7 @@ import os
 template = """
 require 'formula'
 
-class Blaze < Formula
+class LroseBlaze < Formula
   homepage 'https://ncar.github.io/lrose-core'
 
   url '{0}'
@@ -44,8 +44,8 @@ if "check_output" not in dir( subprocess ): # duck punch it in!
         return output
     subprocess.check_output = f
 
-def build_radx_formula(tar_url, tar_name, formula_name):
-    """ build a Homebrew forumula file for radx """	
+def build_blaze_formula(tar_url, tar_name, formula_name):
+    """ build a Homebrew forumula file for blaze """	
     dash = tar_name.find('-')
     period = tar_name.find('.', dash)
     version = tar_name[dash+1:period]
@@ -58,6 +58,6 @@ def build_radx_formula(tar_url, tar_name, formula_name):
 
 if __name__ == '__main__':
     if len(sys.argv) == 4:
-	build_radx_formula(sys.argv[1], sys.argv[2], sys.argv[3])
+	build_blaze_formula(sys.argv[1], sys.argv[2], sys.argv[3])
     else:
 	print "usage: {0} ftp_dir tar_name formula_name".format(sys.argv[0])
