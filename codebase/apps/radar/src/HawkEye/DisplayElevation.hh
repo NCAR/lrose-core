@@ -48,10 +48,7 @@ public:
   DisplayElevation(const string &label,
                const string &name,
                const string &units,
-               const string &shortcut,
-               const ColorMap &colorMap,
-               int buttonRow,
-               bool isFilt);
+               const string &shortcut);
 
   ~DisplayElevation();
 
@@ -59,10 +56,6 @@ public:
   const string &getName() const { return _name; }
   const string &getUnits() const { return _units; }
   const string &getShortcut() const { return _shortcut; }
-  const ColorMap &getColorMap() const { return _colorMap; }
-
-  int getButtonRow() const { return _buttonRow; }
-  bool getIsFilt() const { return _isFilt; }
 
   void setSelectValue(double value) { _selectValue = value; }
   double getSelectValue() const { return _selectValue; }
@@ -82,10 +75,6 @@ private:
   string _name;
   string _units;
   string _shortcut;
-  ColorMap _colorMap;
-
-  int _buttonRow;
-  bool _isFilt;
 
   double _selectValue;
   QLabel *_dialog;

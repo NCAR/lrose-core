@@ -519,14 +519,43 @@ void PolarManager::_setupWindows()
   
   // _colorBar = new ColorBar(_params.color_scale_width,
   //                          &_fields[0]->getColorMap(), _main);
+
+  _createElevationPanel();
+
+  _createTimePanel();
+
   
   // main window layout
   
+  QGridLayout *mainLayout = new QGridLayout(_main);
+  mainLayout->setMargin(3);
+  int row = 0;
+  int column = 0;
+  int rowSpan = 1;
+  int columnSpan = 2;
+
+  mainLayout->addWidget(_statusPanel, row, column);
+  column++;
+  mainLayout->addWidget(_fieldPanel, row, column);
+  column++;
+  mainLayout->addWidget(_ppiFrame, row, column);
+  column++;
+  mainLayout->addWidget(_elevationPanel, row, column);
+  column++;
+  row++;
+  column = 2;
+  int fromColumn;
+  mainLayout->addWidget(_timePanel, row, column, rowSpan, columnSpan); // , rowSpan, columnSpan);
+  
+  /*
   QHBoxLayout *mainLayout = new QHBoxLayout(_main);
   mainLayout->setMargin(3);
   mainLayout->addWidget(_statusPanel);
   mainLayout->addWidget(_fieldPanel);
   mainLayout->addWidget(_ppiFrame);
+  mainLayout->addWidget(_elevationPanel);
+  mainLayout->addWidget(_timePanel);
+  */
   // mainLayout->addWidget(_colorBar);
 
   _createActions();
@@ -991,6 +1020,8 @@ void PolarManager::_plotArchiveData()
     _handleRay(_platform, ray);
   }
 
+  // signal an update of elevations
+  //  emit elevationsChanged(sweeps); 
   // update the status panel
   
   _updateStatusPanel(rays[sweeps[_sweepIndex]->getStartRayIndex()]);

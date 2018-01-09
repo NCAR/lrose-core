@@ -67,6 +67,7 @@ class QWidget;
 
 class ColorBar;
 class DisplayField;
+class DisplayElevation;
 class Reader;
 
 class DisplayManager : public QMainWindow {
@@ -143,10 +144,14 @@ protected:
   int _beamTimerId;
   bool _frozen;
 
+
   // data fields
 
   const vector<DisplayField *> &_fields;
   bool _haveFilteredFields;
+
+  // elevations
+  vector<float> *_elevations;
 
   // colors
   
@@ -239,6 +244,36 @@ protected:
   int _fieldNum;
   int _prevFieldNum;
 
+  // elevation panel
+  
+  QGroupBox *_elevationPanel;
+  QGridLayout *_elevationsLayout;
+  QLabel *_selectedElevationLabelWidget;
+  QButtonGroup *_elevationGroup;
+  vector<QRadioButton *> _elevationButtons;
+  DisplayElevation *_selectedElevation;
+  string _selectedElevationName;
+  string _selectedElevationLabel;
+  //string _selectedElevationUnits;
+  QLabel *_elevationValueLabel;
+  int _elevationNum;
+  int _prevElevationNum;
+
+  // time panel
+  
+  QGroupBox *_timePanel;
+  QGridLayout *_timesLayout;
+  QLabel *_selectedTimeLabelWidget;
+  QButtonGroup *_timeGroup;
+  vector<QRadioButton *> _timeButtons;
+  //DisplayTime *_selectedTime;
+  string _selectedTimeName;
+  string _selectedTimeLabel;
+  //string _selectedTimeUnits;
+  QLabel *_timeValueLabel;
+  int _timeNum;
+  int _prevTimeNum;
+
   // click location report dialog
 
   QDialog *_clickReportDialog;
@@ -264,6 +299,8 @@ protected:
   
   void _createStatusPanel();
   void _createFieldPanel();
+  void _createElevationPanel();
+  void _createTimePanel();
   void _createClickReportDialog();
   void _updateStatusPanel(const RadxRay *ray);
   double _getInstHtKm(const RadxRay *ray);

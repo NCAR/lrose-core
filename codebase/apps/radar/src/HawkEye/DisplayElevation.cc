@@ -33,22 +33,17 @@
 #include "DisplayElevation.hh"
 
 // constructor
-
-DisplayElevation::DisplayElevation(const string &label,
-                           const string &name,
-                           const string &units,
-                           const string &shortcut,
-                           const ColorMap &colorMap,
-                           int buttonRow,
-                           bool isFilt) :
-        _label(label),
-        _name(name),
-        _units(units),
-        _shortcut(shortcut),
-        _colorMap(colorMap),
-        _buttonRow(buttonRow),
-        _isFilt(isFilt),
-        _selectValue(0),
+// take a list of sweeps, elevtion values??
+DisplayElevation::DisplayElevation(const vector<RadxSweep *> &sweeps) {
+  //const string &label,
+  //                         const string &name,
+  //                         const string &units,
+  //                         const string &shortcut) :
+  //      _label(label),
+  //      _name(name),
+  //      _units(units),
+  //      _shortcut(shortcut),
+  //      _selectValue(0),
         _dialog(NULL)
 
 {
@@ -65,11 +60,11 @@ DisplayElevation::~DisplayElevation()
   }
 }
 
-///////////////////////////////////////////////////////
-// create the dialog
+// ///////////////////////////////////////////////////////
+// // create the dialog
 
 void DisplayElevation::createDialog(QDialog *mentor,
-                                const string &initText)
+                                 const string &initText)
   
 {
 
@@ -106,9 +101,7 @@ void DisplayElevation::print(ostream &out)
   out << "  name: " << _name << endl;
   out << "  units: " << _units << endl;
   out << "  shortcut: " << _shortcut << endl;
-  out << "  colorMap: " << _colorMap.getName() << endl;
   out << "  buttonRow: " << _buttonRow << endl;
-  out << "  isFilt: " << _isFilt << endl;
   out << "  selectValue: " << _selectValue << endl;
   out << "===============================" << endl;
 

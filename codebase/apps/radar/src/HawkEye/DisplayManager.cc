@@ -38,6 +38,7 @@
 
 #include "DisplayManager.hh"
 #include "DisplayField.hh"
+#include "DisplayElevation.hh"
 #include "ColorMap.hh"
 #include "ColorBar.hh"
 #include "Params.hh"
@@ -61,6 +62,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QRadioButton>
+#include <QScrollBar>
 #include <QStatusBar>
 #include <QVBoxLayout>
 #include <QLineEdit>
@@ -497,6 +499,227 @@ void DisplayManager::_createFieldPanel()
           this, SLOT(_changeField(int)));
 
 }
+
+
+//////////////////////////////////////////////
+// create the elevation panel
+
+void DisplayManager::_createElevationPanel()
+{
+  
+  Qt::Alignment alignCenter(Qt::AlignCenter);
+  Qt::Alignment alignRight(Qt::AlignRight);
+  
+  int fsize = _params.label_font_size;
+  int fsize2 = _params.label_font_size + 2;
+  int fsize4 = _params.label_font_size + 4;
+  int fsize6 = _params.label_font_size + 6;
+
+  _elevationPanel = new QGroupBox(_main);
+  // _elevationGroup = new QButtonGroup;
+  _elevationsLayout = new QGridLayout(_elevationPanel);
+  // _elevationsLayout->setVerticalSpacing(5);
+
+  int row = 0;
+  int nCols = 1;
+
+  //_selectedElevation = _elevations[0];
+  //_selectedElevationLabel = _elevations[0]->getLabel();
+  //_selectedElevationName = _elevations[0]->getName();
+  //_selectedElevationLabelWidget = new QLabel(_selectedElevationLabel.c_str(),
+  //                                           _elevationPanel);
+  //QFont font6 = _selectedElevationLabelWidget->font();
+  //font6.setPixelSize(fsize6);
+  //_selectedElevationLabelWidget->setFont(font6);
+  //_elevationsLayout->addWidget(_selectedElevationLabelWidget, row, 0, 1, nCols, alignCenter);
+  //row++;
+
+  //QFont font4 = _selectedElevationLabelWidget->font();
+  //font4.setPixelSize(fsize4);
+  //QFont font2 = _selectedElevationLabelWidget->font();
+  //font2.setPixelSize(fsize2);
+  //QFont font = _selectedElevationLabelWidget->font();
+  //font.setPixelSize(fsize);
+
+  //_elevationValueLabel = new QLabel("ELEV", _elevationPanel);
+  //_elevationValueLabel->setFont(font);
+  //_elevationsLayout->addWidget(_elevationValueLabel, row, 0, 1, nCols, alignCenter);
+  //row++;
+
+  QLabel *elevationHeader = new QLabel("ELEV", _elevationPanel);
+  //elevationHeader->setFont(font);
+  _elevationsLayout->addWidget(elevationHeader, row, 0, 1, nCols, alignCenter);
+  row++;
+  /*
+  QLabel *nameHeader = new QLabel("Name", _fieldPanel);
+  nameHeader->setFont(font);
+  _fieldsLayout->addWidget(nameHeader, row, 0, alignCenter);
+  QLabel *keyHeader = new QLabel("HotKey", _fieldPanel);
+  keyHeader->setFont(font);
+  _fieldsLayout->addWidget(keyHeader, row, 1, alignCenter);
+  if (_haveFilteredFields) {
+    QLabel *rawHeader = new QLabel("Raw", _fieldPanel);
+    rawHeader->setFont(font);
+    _fieldsLayout->addWidget(rawHeader, row, 2, alignCenter);
+    QLabel *filtHeader = new QLabel("Filt", _fieldPanel);
+    filtHeader->setFont(font);
+    _fieldsLayout->addWidget(filtHeader, row, 3, alignCenter);
+  }
+  row++;
+  */
+  // add elevations, one row at a time
+  _elevations = new vector<float>();
+  _elevations->push_back(3.5);
+  _elevations->push_back(5.5);
+  _elevations->push_back(7.5);
+
+
+  QVBoxLayout *vbox = new QVBoxLayout;
+  char buf[50];
+
+  for (size_t ielevation = 0; ielevation < _elevations->size(); ielevation++) {
+
+  // this is our _elevationPanel
+  //    QGroupBox *groupBox = new QGroupBox(tr("Exclusive Radio Buttons"));
+    std::sprintf(buf, "%7.2f", _elevations->at(ielevation));
+  //string x = to_string(_elevations->at(0));
+    QRadioButton *radio1 = new QRadioButton(buf); // tr("&Radio button 1"));
+    //QRadioButton *radio2 = new QRadioButton(tr("R&adio button 2"));
+    //QRadioButton *radio3 = new QRadioButton(tr("Ra&dio button 3"));
+
+    if (ielevation == 0)
+      radio1->setChecked(true);
+
+    _elevationsLayout->addWidget(radio1, row, 0, 1, nCols, alignCenter);
+
+    //vbox->addWidget(radio1);
+    //vbox->addWidget(radio2);
+    //vbox->addWidget(radio3);
+    row++;
+  }
+  vbox->addStretch(1);
+  //_elevationsLayout->addWidget(vbox, row, 0, 1, nCols, alignCenter);
+
+  //_elevationPanel->setLayout(vbox);
+
+  // connect slot for elevation change
+
+  //connect(_elevationGroup, SIGNAL(buttonClicked(int)),
+  //         this, SLOT(_changeElevation(int)));
+
+  //connect(_polarManager, SIGNAL(elevationsChanged(const vector<RadxSweep *> &)),
+  //          this, SLOT(_setupDisplayFields(const vector<RadxSweep *> &)));
+
+}
+
+//////////////////////////////////////////////
+// create the elevation panel
+
+void DisplayManager::_createTimePanel()
+{
+  
+  Qt::Alignment alignCenter(Qt::AlignCenter);
+  Qt::Alignment alignRight(Qt::AlignRight);
+  
+  int fsize = _params.label_font_size;
+  int fsize2 = _params.label_font_size + 2;
+  int fsize4 = _params.label_font_size + 4;
+  int fsize6 = _params.label_font_size + 6;
+
+  _timePanel = new QGroupBox(_main);
+  // _timeGroup = new QButtonGroup;
+  _timesLayout = new QGridLayout(_timePanel);
+  // _timesLayout->setVerticalSpacing(5);
+
+  int row = 0;
+  int nCols = 1;
+
+  //_selectedTime = _times[0];
+  //_selectedTimeLabel = _times[0]->getLabel();
+  //_selectedTimeName = _times[0]->getName();
+  //_selectedTimeLabelWidget = new QLabel(_selectedTimeLabel.c_str(),
+  //                                           _timePanel);
+  //QFont font6 = _selectedTimeLabelWidget->font();
+  //font6.setPixelSize(fsize6);
+  //_selectedTimeLabelWidget->setFont(font6);
+  //_timesLayout->addWidget(_selectedTimeLabelWidget, row, 0, 1, nCols, alignCenter);
+  //row++;
+
+  //QFont font4 = _selectedTimeLabelWidget->font();
+  //font4.setPixelSize(fsize4);
+  //QFont font2 = _selectedTimeLabelWidget->font();
+  //font2.setPixelSize(fsize2);
+  //QFont font = _selectedTimeLabelWidget->font();
+  //font.setPixelSize(fsize);
+
+  //_timeValueLabel = new QLabel("ELEV", _timePanel);
+  //_timeValueLabel->setFont(font);
+  //_timesLayout->addWidget(_timeValueLabel, row, 0, 1, nCols, alignCenter);
+  //row++;
+
+  QLabel *timeHeader = new QLabel("TIME", _timePanel);
+  //timeHeader->setFont(font);
+  _timesLayout->addWidget(timeHeader, row, 0, 1, nCols, alignCenter);
+  row++;
+  /*
+  QLabel *nameHeader = new QLabel("Name", _fieldPanel);
+  nameHeader->setFont(font);
+  _fieldsLayout->addWidget(nameHeader, row, 0, alignCenter);
+  QLabel *keyHeader = new QLabel("HotKey", _fieldPanel);
+  keyHeader->setFont(font);
+  _fieldsLayout->addWidget(keyHeader, row, 1, alignCenter);
+  if (_haveFilteredFields) {
+    QLabel *rawHeader = new QLabel("Raw", _fieldPanel);
+    rawHeader->setFont(font);
+    _fieldsLayout->addWidget(rawHeader, row, 2, alignCenter);
+    QLabel *filtHeader = new QLabel("Filt", _fieldPanel);
+    filtHeader->setFont(font);
+    _fieldsLayout->addWidget(filtHeader, row, 3, alignCenter);
+  }
+  row++;
+  */
+  /*   As a Slider ...
+  QSlider *slider;
+  // horizontalSliders = new SlidersGroup(Qt::Horizontal, tr("Horizontal"));
+
+    slider = new QSlider(Qt::Horizontal);
+    slider->setFocusPolicy(Qt::StrongFocus);
+    slider->setTickPosition(QSlider::TicksBothSides);
+    slider->setTickInterval(10);
+    slider->setSingleStep(1);
+
+  _timesLayout->addWidget(slider, row, 0, 1, nCols, alignCenter);
+  */
+
+  // consider using this ... it's pretty nice ...
+  // http://tutorialcoding.com/qt/basic/unit012/index.html
+
+  //  As a ScrollBar ...
+  QScrollBar *scrollBar;
+
+    scrollBar = new QScrollBar(Qt::Horizontal);
+    scrollBar->setMinimum(0);
+    scrollBar->setMaximum(100);
+    //slider->setFocusPolicy(Qt::StrongFocus);
+    //slider->setTickPosition(QSlider::TicksBothSides);
+    //slider->setTickInterval(10);
+    //slider->setSingleStep(1);
+
+  _timesLayout->addWidget(scrollBar, row, 0, 1, nCols, alignCenter);
+
+
+  //_timePanel->setLayout(vbox);
+
+  // connect slot for time change
+
+  //connect(_timeGroup, SIGNAL(buttonClicked(int)),
+    //       this, SLOT(_changeTime(int)));
+
+  //connect(_polarManager, SIGNAL(timesChanged(const vector<RadxSweep *> &)),
+  //          this, SLOT(_setupDisplayFields(const vector<RadxSweep *> &)));
+
+}
+
  
 ///////////////////////////////////////////////////////
 // create the click report dialog
