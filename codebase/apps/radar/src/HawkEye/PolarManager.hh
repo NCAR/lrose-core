@@ -228,6 +228,8 @@ private:
   void _plotArchiveData();
   void _setupVolRead(RadxFile &file);
 
+
+
   void _setSweepIndex(double fixedAngle);
   void _setFixedAngle(int sweepIndex);
 
@@ -264,6 +266,9 @@ private slots:
   virtual void _unzoom();
   virtual void _refresh();
   virtual void _changeField(int fieldId, bool guiMode = true);
+  
+
+  //void _changeElevation(bool value);
 
   // local
 
@@ -292,6 +297,9 @@ private slots:
   void _goFwdNScans();
 
   void _setArchiveRetrievalPending();
+
+
+
 
   // time controller
 

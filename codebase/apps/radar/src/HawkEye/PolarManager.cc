@@ -808,6 +808,23 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
     _timeControllerDialog->setCursor(Qt::ArrowCursor);
     return;
   }
+
+  //----------
+  
+  const vector<RadxSweep *> &sweeps = _vol.getSweeps();
+  //if (sweeps.size() < 1) {
+  //  _fixedAngleDeg = -8888.0;
+  //  return;
+  //}
+
+  vector<float> *newElevations =  new vector<float>();
+  for (size_t i=0; i<sweeps.size(); i++) {
+    const RadxSweep *sweep = sweeps[i];
+    _fixedAngleDeg = sweep->getFixedAngleDeg();
+    newElevations->push_back(_fixedAngleDeg);
+  }
+  _updateElevationPanel(newElevations);
+  //----------
   
   _activateArchiveRendering();
   
@@ -1027,6 +1044,14 @@ void PolarManager::_plotArchiveData()
   _updateStatusPanel(rays[sweeps[_sweepIndex]->getStartRayIndex()]);
     
 }
+
+/*
+void PolarManager::_changeElevation(bool value) {
+
+  int x;
+  cout << "the elevation was changed " << endl;
+}
+*/
 
 //////////////////////////////////////////////////
 // set up read

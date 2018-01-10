@@ -246,18 +246,25 @@ protected:
 
   // elevation panel
   
+  QVBoxLayout *_elevationVBoxLayout;
   QGroupBox *_elevationPanel;
+  QGroupBox *_elevationSubPanel;
   QGridLayout *_elevationsLayout;
   QLabel *_selectedElevationLabelWidget;
   QButtonGroup *_elevationGroup;
-  vector<QRadioButton *> _elevationButtons;
+  vector<QRadioButton *> *_elevationRButtons;
   DisplayElevation *_selectedElevation;
-  string _selectedElevationName;
-  string _selectedElevationLabel;
+  int _selectedElevationIndex;
+  //string _selectedElevationLabel;
   //string _selectedElevationUnits;
   QLabel *_elevationValueLabel;
   int _elevationNum;
   int _prevElevationNum;
+  void _createNewRadioButtons(vector<float> *newElevations);
+  void _resetElevationText(vector<float> *newElevations);
+  void _updateElevationPanel(vector<float> *newElevations);
+  void _clearRadioButtons();
+  //  virtual void _changeElevation();
 
   // time panel
   
@@ -354,6 +361,9 @@ protected slots:
   virtual void _unzoom() = 0;
   virtual void _refresh() = 0;
   virtual void _changeField(int fieldId, bool guiMode = true) = 0;
+
+ 
+  void _changeElevation(bool value);
   
 };
 

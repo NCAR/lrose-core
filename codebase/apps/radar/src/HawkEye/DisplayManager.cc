@@ -104,6 +104,7 @@ DisplayManager::DisplayManager(const Params &params,
   _radarLat = -9999.0;
   _radarLon = -9999.0;
   _radarAltKm = -9999.0;
+  _elevations = NULL;
 
 }
 
@@ -510,10 +511,10 @@ void DisplayManager::_createElevationPanel()
   Qt::Alignment alignCenter(Qt::AlignCenter);
   Qt::Alignment alignRight(Qt::AlignRight);
   
-  int fsize = _params.label_font_size;
-  int fsize2 = _params.label_font_size + 2;
-  int fsize4 = _params.label_font_size + 4;
-  int fsize6 = _params.label_font_size + 6;
+  //  int fsize = _params.label_font_size;
+  //int fsize2 = _params.label_font_size + 2;
+  //int fsize4 = _params.label_font_size + 4;
+  //int fsize6 = _params.label_font_size + 6;
 
   _elevationPanel = new QGroupBox(_main);
   // _elevationGroup = new QButtonGroup;
@@ -523,94 +524,68 @@ void DisplayManager::_createElevationPanel()
   int row = 0;
   int nCols = 1;
 
-  //_selectedElevation = _elevations[0];
-  //_selectedElevationLabel = _elevations[0]->getLabel();
-  //_selectedElevationName = _elevations[0]->getName();
-  //_selectedElevationLabelWidget = new QLabel(_selectedElevationLabel.c_str(),
-  //                                           _elevationPanel);
-  //QFont font6 = _selectedElevationLabelWidget->font();
-  //font6.setPixelSize(fsize6);
-  //_selectedElevationLabelWidget->setFont(font6);
-  //_elevationsLayout->addWidget(_selectedElevationLabelWidget, row, 0, 1, nCols, alignCenter);
-  //row++;
-
-  //QFont font4 = _selectedElevationLabelWidget->font();
-  //font4.setPixelSize(fsize4);
-  //QFont font2 = _selectedElevationLabelWidget->font();
-  //font2.setPixelSize(fsize2);
-  //QFont font = _selectedElevationLabelWidget->font();
-  //font.setPixelSize(fsize);
-
-  //_elevationValueLabel = new QLabel("ELEV", _elevationPanel);
-  //_elevationValueLabel->setFont(font);
-  //_elevationsLayout->addWidget(_elevationValueLabel, row, 0, 1, nCols, alignCenter);
-  //row++;
-
-  QLabel *elevationHeader = new QLabel("ELEV", _elevationPanel);
+  QLabel *elevationHeader = new QLabel("ELEVATION", _elevationPanel);
   //elevationHeader->setFont(font);
   _elevationsLayout->addWidget(elevationHeader, row, 0, 1, nCols, alignCenter);
   row++;
-  /*
-  QLabel *nameHeader = new QLabel("Name", _fieldPanel);
-  nameHeader->setFont(font);
-  _fieldsLayout->addWidget(nameHeader, row, 0, alignCenter);
-  QLabel *keyHeader = new QLabel("HotKey", _fieldPanel);
-  keyHeader->setFont(font);
-  _fieldsLayout->addWidget(keyHeader, row, 1, alignCenter);
-  if (_haveFilteredFields) {
-    QLabel *rawHeader = new QLabel("Raw", _fieldPanel);
-    rawHeader->setFont(font);
-    _fieldsLayout->addWidget(rawHeader, row, 2, alignCenter);
-    QLabel *filtHeader = new QLabel("Filt", _fieldPanel);
-    filtHeader->setFont(font);
-    _fieldsLayout->addWidget(filtHeader, row, 3, alignCenter);
-  }
-  row++;
-  */
-  // add elevations, one row at a time
-  _elevations = new vector<float>();
-  _elevations->push_back(3.5);
-  _elevations->push_back(5.5);
-  _elevations->push_back(7.5);
 
 
-  QVBoxLayout *vbox = new QVBoxLayout;
-  char buf[50];
+    //QGroupBox *groupBox = new QGroupBox(tr("Elevations"));
+    _elevationSubPanel = new QGroupBox(tr("Angles"));
+    _elevationVBoxLayout = new QVBoxLayout;
+    char buf[50];
 
-  for (size_t ielevation = 0; ielevation < _elevations->size(); ielevation++) {
+    _elevationRButtons = new vector<QRadioButton *>(); // _elevations->size());
+  if (_elevations != NULL) {
+    for (size_t ielevation = 0; ielevation < _elevations->size(); ielevation++) {
 
-  // this is our _elevationPanel
-  //    QGroupBox *groupBox = new QGroupBox(tr("Exclusive Radio Buttons"));
-    std::sprintf(buf, "%7.2f", _elevations->at(ielevation));
-  //string x = to_string(_elevations->at(0));
-    QRadioButton *radio1 = new QRadioButton(buf); // tr("&Radio button 1"));
-    //QRadioButton *radio2 = new QRadioButton(tr("R&adio button 2"));
-    //QRadioButton *radio3 = new QRadioButton(tr("Ra&dio button 3"));
+      // this is our _elevationPanel
+      //    QGroupBox *groupBox = new QGroupBox(tr("Exclusive Radio Buttons"));
+      std::sprintf(buf, "%7.2f", _elevations->at(ielevation));
+      //string x = to_string(_elevations->at(0));
+      QRadioButton *radio1 = new QRadioButton(buf); 
 
-    if (ielevation == 0)
-      radio1->setChecked(true);
+      if (ielevation == 0) {
+        radio1->setChecked(true);
+        _selectedElevationIndex = 0;
+      }
 
-    _elevationsLayout->addWidget(radio1, row, 0, 1, nCols, alignCenter);
+      _elevationRButtons->push_back(radio1);
+      //_elevationsLayout->addWidget(radio1, row, 0, 1, nCols, alignCenter);
 
-    //vbox->addWidget(radio1);
-    //vbox->addWidget(radio2);
-    //vbox->addWidget(radio3);
-    row++;
-  }
-  vbox->addStretch(1);
-  //_elevationsLayout->addWidget(vbox, row, 0, 1, nCols, alignCenter);
+      _elevationVBoxLayout->addWidget(radio1);
 
-  //_elevationPanel->setLayout(vbox);
+      // connect slot for elevation change
 
-  // connect slot for elevation change
+      connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeElevation(bool)));
+      row++;
+    }
+    } // _elevations != NULL
+    _elevationVBoxLayout->addStretch(1);
+    _elevationSubPanel->setLayout(_elevationVBoxLayout);
+    _elevationsLayout->addWidget(_elevationSubPanel, row, 0, 1, nCols, alignCenter);
 
-  //connect(_elevationGroup, SIGNAL(buttonClicked(int)),
-  //         this, SLOT(_changeElevation(int)));
-
-  //connect(_polarManager, SIGNAL(elevationsChanged(const vector<RadxSweep *> &)),
-  //          this, SLOT(_setupDisplayFields(const vector<RadxSweep *> &)));
 
 }
+
+
+void DisplayManager::_changeElevation(bool value) {
+
+  int diff = 0;
+  cout << "the elevation was changed " << endl;
+  if (value) {
+    for (size_t i = 0; i < _elevationRButtons->size(); i++) {
+      if (_elevationRButtons->at(i)->isChecked()) {
+          cout << "elevationRButton " << i << " is checked" << endl;
+          diff = i - _selectedElevationIndex;
+          _selectedElevationIndex = i;
+      }
+    }
+  }
+
+}
+
+
 
 //////////////////////////////////////////////
 // create the elevation panel
@@ -621,10 +596,10 @@ void DisplayManager::_createTimePanel()
   Qt::Alignment alignCenter(Qt::AlignCenter);
   Qt::Alignment alignRight(Qt::AlignRight);
   
-  int fsize = _params.label_font_size;
-  int fsize2 = _params.label_font_size + 2;
-  int fsize4 = _params.label_font_size + 4;
-  int fsize6 = _params.label_font_size + 6;
+  //int fsize = _params.label_font_size;
+  //int fsize2 = _params.label_font_size + 2;
+  //int fsize4 = _params.label_font_size + 4;
+  //int fsize6 = _params.label_font_size + 6;
 
   _timePanel = new QGroupBox(_main);
   // _timeGroup = new QButtonGroup;
@@ -1300,6 +1275,105 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
     _sunAzVal->setText(text);
   }
 
+}
+
+//////////////////////////////////////////////
+// update the elevation panel
+
+void DisplayManager::_updateElevationPanel(vector<float> *newElevations)
+{
+
+  // old elevations              new elevations
+  // -------------               -------------
+  // 1) NULL                      1) NULL
+  // 2) not NULL                  2) not NULL
+  //
+  // 1 -> 1 nothing tho do
+  // 1 -> 2 create new radio buttons
+  // 2 -> 2 && # of elevations stay the same;
+  //            just update text for the buttons
+  // 2 -> 2 && # not the same; 
+  //           delete existing buttons;
+  //           create new radio buttons
+  // 2 -> 1    delete existing buttons
+  // 
+  if (_elevations == NULL) {
+     if (newElevations != NULL) {
+       _createNewRadioButtons(newElevations);
+     }
+  } else {
+    if (newElevations == NULL) {
+    // delete the radio buttons
+      _clearRadioButtons();
+    } else {
+    // if the number of elevations is the same, we can reuse the QGroupBox
+    // otherwise, we need to add or remove radio buttons
+      if (newElevations->size() == _elevations->size()) {
+        // reset the text on existing buttons
+        ;
+      } else {
+        _clearRadioButtons();
+        _createNewRadioButtons(newElevations);
+        _elevations->clear();
+        _elevations = newElevations;
+      }
+    }
+  }
+}
+
+
+// TODO: need to keep around the pointer/handle to the _elevationVBoxLayout
+void DisplayManager::_createNewRadioButtons(vector<float> *newElevations) {
+  //QGroupBox *groupBox = new QGroupBox(tr("Elevations"));
+  //QVBoxLayout *vbox = new QVBoxLayout;
+  char buf[50];
+  _elevationRButtons = new vector<QRadioButton *>(); // _elevations->size());
+  for (size_t ielevation = 0; ielevation < newElevations->size(); ielevation++) {
+
+    // TODO: this should be set text
+    std::sprintf(buf, "%7.2f", newElevations->at(ielevation));
+    QRadioButton *radio1 = new QRadioButton(buf); 
+
+    if (ielevation == 0) {
+      radio1->setChecked(true);
+      _selectedElevationIndex = 0;
+    }
+
+    _elevationRButtons->push_back(radio1);
+
+    _elevationVBoxLayout->addWidget(radio1);
+
+    // connect slot for elevation change
+
+    connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeElevation(bool)));
+  }
+  //_elevationVBoxLayout->addStretch(1);
+  //_elevationPanel->setLayout(vbox);
+  //int row = 1;
+  //_elevationsLayout->addWidget(groupBox, row, 0, 1, nCols, alignCenter);
+}
+
+void DisplayManager::_resetElevationText(vector<float> *newElevations) {
+
+  char buf[50];
+  for (size_t i = 0; i < newElevations->size(); i++) {
+    std::sprintf(buf, "%7.2f", _elevations->at(i));
+    QRadioButton *rbutton = _elevationRButtons->at(i);
+    rbutton->setText(buf);
+  }
+}
+
+void DisplayManager::_clearRadioButtons() {
+
+  QLayoutItem* child;
+  while (_elevationVBoxLayout->count() !=0) {
+    child = _elevationVBoxLayout->takeAt(0);
+    if (child->widget() !=0) {
+      delete child->widget();
+    }
+    delete child;
+  }
+ 
 }
 
 ///////////////////////////////////////////
