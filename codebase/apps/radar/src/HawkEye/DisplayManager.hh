@@ -363,7 +363,7 @@ protected slots:
   virtual void _changeField(int fieldId, bool guiMode = true) = 0;
 
  
-  void _changeElevation(bool value);
+  virtual void _changeElevation(bool value);
   
 };
 

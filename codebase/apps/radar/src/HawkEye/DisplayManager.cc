@@ -579,6 +579,16 @@ void DisplayManager::_changeElevation(bool value) {
           cout << "elevationRButton " << i << " is checked" << endl;
           diff = i - _selectedElevationIndex;
           _selectedElevationIndex = i;
+
+          /*------
+      _sweepIndex += diff;
+      if (_debug) cerr << "moving to sweep " << _sweepIndex << endl;
+      _keepFixedAngle = false;
+      _setFixedAngle(_sweepIndex);
+      moveUpDown = true;
+      _ppi->setStartOfSweep(true);
+      _rhi->setStartOfSweep(true);
+      //--------- */
       }
     }
   }

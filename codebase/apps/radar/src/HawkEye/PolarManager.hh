@@ -209,6 +209,8 @@ private:
 
   RadxTime _imagesScheduledTime;
 
+  void _moveUpDown();
+
   // set top bar
 
   virtual void _setTitleBar(const string &radarName);
@@ -268,7 +270,7 @@ private slots:
   virtual void _changeField(int fieldId, bool guiMode = true);
   
 
-  //void _changeElevation(bool value);
+  void _changeElevation(bool value);
 
   // local
 

@@ -445,6 +445,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
   }
 
   if (moveUpDown) {
+    /*
     if (_params.debug) {
       cerr << "Clicked up/down arrow, change to sweep num: " 
            << _sweepIndex << endl;
@@ -454,10 +455,23 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
     _plotArchiveData();
     this->setCursor(Qt::ArrowCursor);
     _timeControllerDialog->setCursor(Qt::ArrowCursor);
+    */
+    _moveUpDown();
   }
-
+  
 }
 
+void PolarManager::_moveUpDown() {
+    if (_params.debug) {
+      cerr << "Clicked up/down arrow, change to sweep num: " 
+           << _sweepIndex << endl;
+    }
+    this->setCursor(Qt::WaitCursor);
+    _timeControllerDialog->setCursor(Qt::WaitCursor);
+    _plotArchiveData();
+    this->setCursor(Qt::ArrowCursor);
+    _timeControllerDialog->setCursor(Qt::ArrowCursor);
+}
 
 //////////////////////////////////////////////////
 // Set radar name in title bar
@@ -1045,13 +1059,34 @@ void PolarManager::_plotArchiveData()
     
 }
 
-/*
+
 void PolarManager::_changeElevation(bool value) {
 
-  int x;
-  cout << "the elevation was changed " << endl;
+  //int x;
+  int diff = 0;
+  cout << "From PolarManager: the elevation was changed " << endl;
+  if (value) {
+    for (size_t i = 0; i < _elevationRButtons->size(); i++) {
+      if (_elevationRButtons->at(i)->isChecked()) {
+          cout << "elevationRButton " << i << " is checked" << endl;
+          diff = i - _selectedElevationIndex;
+          _selectedElevationIndex = i;
+
+          //------
+      _sweepIndex += diff;
+      cerr << "moving to sweep " << _sweepIndex << endl;
+      _keepFixedAngle = false;
+      _setFixedAngle(_sweepIndex);
+      //moveUpDown = true;
+      _ppi->setStartOfSweep(true);
+      _rhi->setStartOfSweep(true);
+      //--------- 
+      _moveUpDown();
+      }
+    }
+  }
 }
-*/
+
 
 //////////////////////////////////////////////////
 // set up read
