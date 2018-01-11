@@ -362,8 +362,8 @@ protected slots:
   virtual void _refresh() = 0;
   virtual void _changeField(int fieldId, bool guiMode = true) = 0;
 
- 
   virtual void _changeElevation(bool value);
+  void _changeElevationRadioButton(int value);
   
 };
 

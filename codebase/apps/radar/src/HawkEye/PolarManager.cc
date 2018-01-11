@@ -367,6 +367,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
   bool moveUpDown = false;
   _keepFixedAngle = false;
+  int sweepMovement = 0;
   
   if (key == Qt::Key_Left) {
 
@@ -394,10 +395,11 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
     if (_sweepIndex < (int) _vol.getNSweeps() - 1) {
 
-      _sweepIndex++;
+      //_sweepIndex++;
+      sweepMovement = 1;
       moveUpDown = true;
       _keepFixedAngle = false;
-      _setFixedAngle(_sweepIndex);
+      _setFixedAngle(_sweepIndex+1); // (_sweepIndex);
       _ppi->setStartOfSweep(true);
       _rhi->setStartOfSweep(true);
 
@@ -420,9 +422,10 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
     if (_sweepIndex > 0) {
 
-      _sweepIndex--;
+      //_sweepIndex--;
+      sweepMovement = -1;
       _keepFixedAngle = false;
-      _setFixedAngle(_sweepIndex);
+      _setFixedAngle(_sweepIndex-1); // (_sweepIndex);
       moveUpDown = true;
       _ppi->setStartOfSweep(true);
       _rhi->setStartOfSweep(true);
@@ -445,27 +448,25 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
   }
 
   if (moveUpDown) {
-    /*
     if (_params.debug) {
       cerr << "Clicked up/down arrow, change to sweep num: " 
            << _sweepIndex << endl;
     }
+    /*
     this->setCursor(Qt::WaitCursor);
     _timeControllerDialog->setCursor(Qt::WaitCursor);
     _plotArchiveData();
     this->setCursor(Qt::ArrowCursor);
     _timeControllerDialog->setCursor(Qt::ArrowCursor);
     */
-    _moveUpDown();
+    //_moveUpDown();
+    //bool fromHotKey = true;
+    _changeElevationRadioButton(sweepMovement); // _sweepIndex);
   }
   
 }
 
 void PolarManager::_moveUpDown() {
-    if (_params.debug) {
-      cerr << "Clicked up/down arrow, change to sweep num: " 
-           << _sweepIndex << endl;
-    }
     this->setCursor(Qt::WaitCursor);
     _timeControllerDialog->setCursor(Qt::WaitCursor);
     _plotArchiveData();
@@ -1062,29 +1063,40 @@ void PolarManager::_plotArchiveData()
 
 void PolarManager::_changeElevation(bool value) {
 
+  if (_params.debug) {
+    cerr << "From PolarManager: the elevation was changed ";
+    cerr << endl;
+  }
+
   //int x;
   int diff = 0;
-  cout << "From PolarManager: the elevation was changed " << endl;
   if (value) {
-    for (size_t i = 0; i < _elevationRButtons->size(); i++) {
+    size_t i = 0;
+    bool found = false;
+    while (( i < _elevationRButtons->size() ) && (!found)) {
       if (_elevationRButtons->at(i)->isChecked()) {
-          cout << "elevationRButton " << i << " is checked" << endl;
-          diff = i - _selectedElevationIndex;
-          _selectedElevationIndex = i;
+        cout << "elevationRButton " << i << " is checked" << endl;
+        diff = i - _selectedElevationIndex;
+        _selectedElevationIndex = i;
 
-          //------
-      _sweepIndex += diff;
-      cerr << "moving to sweep " << _sweepIndex << endl;
-      _keepFixedAngle = false;
-      _setFixedAngle(_sweepIndex);
-      //moveUpDown = true;
-      _ppi->setStartOfSweep(true);
-      _rhi->setStartOfSweep(true);
-      //--------- 
-      _moveUpDown();
+        //------
+
+        _sweepIndex += diff;
+        cerr << "moving to sweep " << _sweepIndex << endl;
+        _keepFixedAngle = false;
+        _setFixedAngle(_sweepIndex);
+        //moveUpDown = true;
+        _ppi->setStartOfSweep(true);
+        _rhi->setStartOfSweep(true);
+     
+        //--------- 
+        _moveUpDown();
+        found = true;
       }
-    }
+      i++;
+    } // end while
   }
+
 }
 
 

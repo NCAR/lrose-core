@@ -556,8 +556,8 @@ void DisplayManager::_createElevationPanel()
       _elevationVBoxLayout->addWidget(radio1);
 
       // connect slot for elevation change
-
-      connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeElevation(bool)));
+      connect(radio1, SIGNAL(toggled(bool)), this,
+              SLOT(_changeElevation(bool)));
       row++;
     }
     } // _elevations != NULL
@@ -572,27 +572,54 @@ void DisplayManager::_createElevationPanel()
 void DisplayManager::_changeElevation(bool value) {
 
   int diff = 0;
-  cout << "the elevation was changed " << endl;
+  if (_params.debug) {
+    cerr << "the elevation was changed ";
+    cerr << endl;
+  }
   if (value) {
     for (size_t i = 0; i < _elevationRButtons->size(); i++) {
       if (_elevationRButtons->at(i)->isChecked()) {
           cout << "elevationRButton " << i << " is checked" << endl;
           diff = i - _selectedElevationIndex;
           _selectedElevationIndex = i;
-
-          /*------
-      _sweepIndex += diff;
-      if (_debug) cerr << "moving to sweep " << _sweepIndex << endl;
-      _keepFixedAngle = false;
-      _setFixedAngle(_sweepIndex);
-      moveUpDown = true;
-      _ppi->setStartOfSweep(true);
-      _rhi->setStartOfSweep(true);
-      //--------- */
       }
     }
   }
 
+}
+
+// only set the sweepIndex in one place;
+// here, just move the radio button forward or backward one step
+// when the radio button is changed, a signal is emitted and
+// the slot that receives the signal will increase the sweepIndex
+// value = +1 move forward
+// value = -1 move backward in sweeps
+void DisplayManager::_changeElevationRadioButton(int value) {
+  
+  if (_params.debug) {
+    cerr << "changing radio button to " << value;
+    cerr << endl;
+  }
+
+  if (value != 0) {
+    size_t i = 0;
+    bool found = false;
+    int  newlySelectedEI = _selectedElevationIndex + value;
+    size_t max = _elevationRButtons->size();
+    if (newlySelectedEI < 0)
+      newlySelectedEI = max - 1;
+    if (newlySelectedEI >= max)
+      newlySelectedEI = 0;
+
+    _elevationRButtons->at(_selectedElevationIndex)->setChecked(false);
+    _elevationRButtons->at(newlySelectedEI)->setChecked(true);
+    _selectedElevationIndex = newlySelectedEI;
+
+  } else {
+
+    cerr << "Elevation radio button value not changed" << endl; 
+
+  }
 }
 
 
@@ -1324,11 +1351,11 @@ void DisplayManager::_updateElevationPanel(vector<float> *newElevations)
       } else {
         _clearRadioButtons();
         _createNewRadioButtons(newElevations);
-        _elevations->clear();
-        _elevations = newElevations;
       }
     }
+    _elevations->clear();
   }
+  _elevations = newElevations;
 }
 
 
@@ -1354,7 +1381,6 @@ void DisplayManager::_createNewRadioButtons(vector<float> *newElevations) {
     _elevationVBoxLayout->addWidget(radio1);
 
     // connect slot for elevation change
-
     connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeElevation(bool)));
   }
   //_elevationVBoxLayout->addStretch(1);
