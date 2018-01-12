@@ -61,6 +61,7 @@ class QDialog;
 class QLabel;
 class QGroupBox;
 class QGridLayout;
+class QHBoxLayout;
 class QVBoxLayout;
 class QLineEdit;
 class QWidget;
@@ -269,7 +270,7 @@ protected:
   // time panel
   
   QGroupBox *_timePanel;
-  QGridLayout *_timesLayout;
+  QHBoxLayout *_timesLayout;
   QLabel *_selectedTimeLabelWidget;
   QButtonGroup *_timeGroup;
   vector<QRadioButton *> _timeButtons;

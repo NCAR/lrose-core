@@ -1750,7 +1750,7 @@ void PolarManager::_createTimeControllerDialog()
   
   {  // set archival time retrieval
 
-    // box for setting start timew
+    // box for setting start time
 
     _archiveTimeBox = new QGroupBox(_timeControllerDialog);
     QVBoxLayout *archiveTimeLayout = new QVBoxLayout;

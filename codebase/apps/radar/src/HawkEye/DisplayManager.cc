@@ -519,14 +519,14 @@ void DisplayManager::_createElevationPanel()
   _elevationPanel = new QGroupBox(_main);
   // _elevationGroup = new QButtonGroup;
   _elevationsLayout = new QGridLayout(_elevationPanel);
-  // _elevationsLayout->setVerticalSpacing(5);
+  _elevationsLayout->setVerticalSpacing(1);
 
   int row = 0;
   int nCols = 1;
 
   QLabel *elevationHeader = new QLabel("ELEVATION", _elevationPanel);
   //elevationHeader->setFont(font);
-  _elevationsLayout->addWidget(elevationHeader, row, 0, 1, nCols, alignCenter);
+  _elevationsLayout->addWidget(elevationHeader, row, 0); // , 0, nCols, alignCenter);
   row++;
 
 
@@ -561,11 +561,13 @@ void DisplayManager::_createElevationPanel()
       row++;
     }
     } // _elevations != NULL
-    _elevationVBoxLayout->addStretch(1);
+  //_elevationVBoxLayout->addStretch(1);
     _elevationSubPanel->setLayout(_elevationVBoxLayout);
-    _elevationsLayout->addWidget(_elevationSubPanel, row, 0, 1, nCols, alignCenter);
+    _elevationsLayout->addWidget(_elevationSubPanel, row, 0); //, 1, nCols, alignCenter);
 
-
+  QLabel *spacerRow = new QLabel("", _elevationPanel);
+  _elevationsLayout->addWidget(spacerRow, row, 0);
+  _elevationsLayout->setRowStretch(row, 1);
 }
 
 
@@ -625,7 +627,7 @@ void DisplayManager::_changeElevationRadioButton(int value) {
 
 
 //////////////////////////////////////////////
-// create the elevation panel
+// create the time panel
 
 void DisplayManager::_createTimePanel()
 {
@@ -640,7 +642,7 @@ void DisplayManager::_createTimePanel()
 
   _timePanel = new QGroupBox(_main);
   // _timeGroup = new QButtonGroup;
-  _timesLayout = new QGridLayout(_timePanel);
+  _timesLayout = new QHBoxLayout(_timePanel); //QGridLayout(_timePanel);
   // _timesLayout->setVerticalSpacing(5);
 
   int row = 0;
@@ -669,9 +671,9 @@ void DisplayManager::_createTimePanel()
   //_timesLayout->addWidget(_timeValueLabel, row, 0, 1, nCols, alignCenter);
   //row++;
 
-  QLabel *timeHeader = new QLabel("TIME", _timePanel);
+  //QLabel *timeHeader = new QLabel("TIME", _timePanel);
   //timeHeader->setFont(font);
-  _timesLayout->addWidget(timeHeader, row, 0, 1, nCols, alignCenter);
+  // _timesLayout->addWidget(timeHeader); // , row, 0, 1, nCols, alignCenter);
   row++;
   /*
   QLabel *nameHeader = new QLabel("Name", _fieldPanel);
@@ -690,23 +692,93 @@ void DisplayManager::_createTimePanel()
   }
   row++;
   */
-  /*   As a Slider ...
+
+  // add the start time
+  
+  QLabel *startTimeLabel = new QLabel("hh:mm:ss", _timePanel);
+  //timeHeader->setFont(font);
+  _timesLayout->addWidget(startTimeLabel);
+
+  /*   As a Slider ... */
   QSlider *slider;
   // horizontalSliders = new SlidersGroup(Qt::Horizontal, tr("Horizontal"));
 
     slider = new QSlider(Qt::Horizontal);
     slider->setFocusPolicy(Qt::StrongFocus);
-    slider->setTickPosition(QSlider::TicksBothSides);
+    //slider->setTickPosition(QSlider::TicksBothSides);
     slider->setTickInterval(10);
     slider->setSingleStep(1);
+    //QSize qSize(500,50);
+    slider->setFixedWidth(300); // works
+    //slider->sizeHint(qSize);
+    // use Dave Smith's fancy qslider
+    slider->setStyleSheet("QSlider::groove:horizontal {\
+border: 1px solid #bbb;\
+background: white;\
+height: 10px;\
+border-radius: 4px;\
+}\
+QSlider::sub-page:horizontal {\
+background: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,\
+    stop: 0 #66e, stop: 1 #bbf);\
+background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,\
+    stop: 0 #bbf, stop: 1 #55f);\
+border: 1px solid #777;\
+height: 10px;\
+border-radius: 4px;\
+}\
+\
+QSlider::add-page:horizontal {\
+background: #fff;\
+border: 1px solid #777;\
+height: 10px;\
+border-radius: 4px;\
+}\
+\
+QSlider::handle:horizontal {\
+background: qlineargradient(x1:0, y1:0, x2:1, y2:1,\
+    stop:0 #eee, stop:1 #ccc);\
+border: 1px solid #777;\
+width: 13px;\
+margin-top: -2px;\
+margin-bottom: -2px;\
+border-radius: 4px;\
+}\
+\
+QSlider::handle:horizontal:hover {\
+background: qlineargradient(x1:0, y1:0, x2:1, y2:1,\
+    stop:0 #fff, stop:1 #ddd);\
+border: 1px solid #444;\
+border-radius: 4px;\
+}\
+\
+QSlider::sub-page:horizontal:disabled {\
+background: #bbb;\
+border-color: #999;\
+}\
+\
+QSlider::add-page:horizontal:disabled {\
+background: #eee;\
+border-color: #999;\
+}\
+\
+QSlider::handle:horizontal:disabled {\
+background: #eee;\
+border: 1px solid #aaa;\
+border-radius: 4px;\
+}\
+");
 
-  _timesLayout->addWidget(slider, row, 0, 1, nCols, alignCenter);
-  */
+    int stretch = 0;
+    _timesLayout->addWidget(slider, stretch,  alignCenter);
+  //_timesLayout->addWidget(slider, row, 0, 1, nCols, alignCenter);
+    
+/* */
 
   // consider using this ... it's pretty nice ...
   // http://tutorialcoding.com/qt/basic/unit012/index.html
 
-  //  As a ScrollBar ...
+  /*  As a ScrollBar ...
   QScrollBar *scrollBar;
 
     scrollBar = new QScrollBar(Qt::Horizontal);
@@ -718,8 +790,13 @@ void DisplayManager::_createTimePanel()
     //slider->setSingleStep(1);
 
   _timesLayout->addWidget(scrollBar, row, 0, 1, nCols, alignCenter);
+  */
 
-
+  // add the end time
+  
+  QLabel *endTimeLabel = new QLabel("hh:mm:ss", _timePanel);
+  //timeHeader->setFont(font);
+  _timesLayout->addWidget(endTimeLabel);
   //_timePanel->setLayout(vbox);
 
   // connect slot for time change
