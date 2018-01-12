@@ -64,6 +64,7 @@ class QGridLayout;
 class QHBoxLayout;
 class QVBoxLayout;
 class QLineEdit;
+class QSlider;
 class QWidget;
 
 class ColorBar;
@@ -271,7 +272,9 @@ protected:
   
   QGroupBox *_timePanel;
   QHBoxLayout *_timesLayout;
-  QLabel *_selectedTimeLabelWidget;
+  QLabel *_startTimeLabel;
+  QLabel *_stopTimeLabel;
+  QSlider *_timeSlider;
   QButtonGroup *_timeGroup;
   vector<QRadioButton *> _timeButtons;
   //DisplayTime *_selectedTime;
@@ -309,6 +312,7 @@ protected:
   void _createFieldPanel();
   void _createElevationPanel();
   void _createTimePanel();
+  void _updateTimePanel();
   void _createClickReportDialog();
   void _updateStatusPanel(const RadxRay *ray);
   double _getInstHtKm(const RadxRay *ray);
@@ -365,6 +369,9 @@ protected slots:
 
   virtual void _changeElevation(bool value);
   void _changeElevationRadioButton(int value);
+
+  void _timeSliderActionTriggered(int action);
+  void _timeSliderValueChanged(int value);
   
 };
 

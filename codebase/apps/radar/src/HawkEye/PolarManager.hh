@@ -200,6 +200,8 @@ private:
   QLabel *_archiveStopTimeEcho;
   RadxTime _archiveStopTime;
   
+  RadxTime _archiveIntervalTime;
+
   RadxTime _imagesArchiveStartTime;
   RadxTime _imagesArchiveEndTime;
 
@@ -293,6 +295,7 @@ private slots:
   void _setArchiveStartTimeToDefault();
   void _setArchiveStartTime(const RadxTime &rtime);
   void _computeArchiveStopTime();
+  void _computeArchiveIntervalTime(int value);
   void _goBack1();
   void _goFwd1();
   void _goBackNScans();
@@ -301,7 +304,11 @@ private slots:
   void _setArchiveRetrievalPending();
 
 
-
+  // time slider
+  //void _createTimePanel();
+  void _updateTimePanel();
+  void _timeSliderActionTriggered(int action);
+  void _timeSliderValueChanged(int value);
 
   // time controller
 

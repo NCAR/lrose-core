@@ -69,6 +69,7 @@
 #include <QDateTimeEdit>
 #include <QLineEdit>
 #include <QErrorMessage>
+#include <QSlider>
 
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pmu.h>
@@ -547,7 +548,7 @@ void PolarManager::_setupWindows()
   int row = 0;
   int column = 0;
   int rowSpan = 1;
-  int columnSpan = 2;
+  int columnSpan = 1;
 
   mainLayout->addWidget(_statusPanel, row, column);
   column++;
@@ -1919,6 +1920,85 @@ void PolarManager::_showTimeControllerDialog()
   }
 }
 
+
+//----------
+void PolarManager::_updateTimePanel()
+{
+  char text[1024];
+  
+  // add the start time
+  sprintf(text, "%.2d:%.2d:%.2d",
+          _archiveStartTime.getHour(), _archiveStartTime.getMin(),
+          _archiveStartTime.getSec());
+          // ((int) _archiveStartTime.getSubSec() / 1000));
+    _startTimeLabel->setText(text);
+
+  // consider using this ... it's pretty nice ...
+  // http://tutorialcoding.com/qt/basic/unit012/index.html
+
+  // add the end time
+  sprintf(text, "%.2d:%.2d:%.2d",
+          _archiveStopTime.getHour(), _archiveStopTime.getMin(),
+          _archiveStopTime.getSec());
+  // ((int) _archiveStopTime.getSubSec() / 1000));
+    _stopTimeLabel->setText(text);
+    int max;
+    max = _nArchiveScans-1;
+    if (max < 0) max = 0;
+    _timeSlider->setMaximum(max);
+}
+
+void PolarManager::_timeSliderActionTriggered(int action) {
+  switch (action) {
+    case QAbstractSlider::SliderNoAction:
+      cerr << "SliderNoAction action in _timeSliderActionTriggered" << endl;
+      break;
+    case QAbstractSlider::SliderSingleStepAdd: 
+      cerr << "SliderSingleStepAdd action in _timeSliderActionTriggered" << endl;
+      break; 
+    case QAbstractSlider::SliderSingleStepSub:	
+      cerr << "SliderSingleStepSub action in _timeSliderActionTriggered" << endl;
+      break;
+    case QAbstractSlider::SliderPageStepAdd:
+      cerr << "SliderPageStepAdd action in _timeSliderActionTriggered" << endl;
+      break;	
+    case QAbstractSlider::SliderPageStepSub:
+      cerr << "SliderPageStepSub action in _timeSliderActionTriggered" << endl;
+      break;	
+    case QAbstractSlider::SliderToMinimum:
+      cerr << "SliderToMinimum action in _timeSliderActionTriggered" << endl;
+      break;	
+    case QAbstractSlider::SliderToMaximum:
+      cerr << "SliderToMaximum action in _timeSliderActionTriggered" << endl;
+      break;	
+    case QAbstractSlider::SliderMove:
+      cerr << "SliderMove action in _timeSliderActionTriggered" << endl;
+      break;
+    default: 
+      cerr << "unknown action in _timeSliderActionTriggered" << endl;
+    }
+} 
+
+
+//--------
+
+
+void PolarManager::_timeSliderValueChanged(int value) {
+  cerr << "_timeSliderValueChanged to " << value << endl;
+  //QString text;
+  //text.setNum(value);
+  // add as many QLabel's as you like with QSlider as a parent, install eventHandler() on QSlider to catch resize event to proper position them, and obviously handle scroll events, so you can update them... So labels will just float on top of QSlider
+
+  _computeArchiveIntervalTime(value);
+  char text[1024];
+  sprintf(text, "%.2d:%.2d:%.2d.%.6d",
+          _archiveIntervalTime.getHour(), _archiveIntervalTime.getMin(),
+          _archiveIntervalTime.getSec(),
+          ((int) _archiveIntervalTime.getSubSec() / 1000));
+  _timeSlider->setToolTip(text);
+
+}
+
 ////////////////////////////////////////////////////////
 // change modes for retrieving the data
 
@@ -2037,6 +2117,7 @@ void PolarManager::_setGuiFromStartTime()
              _archiveStartTime.getSec());
   QDateTime datetime(date, time);
   _archiveStartTimeEdit->setDateTime(datetime);
+  _updateTimePanel();
 }
 
 ////////////////////////////////////////////////////////
@@ -2087,6 +2168,18 @@ void PolarManager::_computeArchiveStopTime()
   if (_archiveStopTimeEcho) {
     _archiveStopTimeEcho->setText(_archiveStopTime.asString(0).c_str());
   }
+
+}
+
+////////////////////////////////////////////////////////
+// set end time from start time, nscans and interval
+
+void PolarManager::_computeArchiveIntervalTime(int value)
+
+{
+
+  _archiveIntervalTime =
+    _archiveStartTime + _archiveScanIntervalSecs * value;
 
 }
 

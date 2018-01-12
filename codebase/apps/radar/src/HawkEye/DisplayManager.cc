@@ -63,6 +63,7 @@
 #include <QPushButton>
 #include <QRadioButton>
 #include <QScrollBar>
+#include <QAbstractSlider>
 #include <QStatusBar>
 #include <QVBoxLayout>
 #include <QLineEdit>
@@ -693,26 +694,28 @@ void DisplayManager::_createTimePanel()
   row++;
   */
 
+    int stretch = 0;
+
   // add the start time
   
-  QLabel *startTimeLabel = new QLabel("hh:mm:ss", _timePanel);
+  _startTimeLabel = new QLabel("hh:mm:ss", _timePanel);
   //timeHeader->setFont(font);
-  _timesLayout->addWidget(startTimeLabel);
+  _timesLayout->addWidget(_startTimeLabel, stretch, alignRight);
 
   /*   As a Slider ... */
-  QSlider *slider;
+  //QSlider *slider;
   // horizontalSliders = new SlidersGroup(Qt::Horizontal, tr("Horizontal"));
 
-    slider = new QSlider(Qt::Horizontal);
-    slider->setFocusPolicy(Qt::StrongFocus);
-    //slider->setTickPosition(QSlider::TicksBothSides);
-    slider->setTickInterval(10);
-    slider->setSingleStep(1);
+    _timeSlider = new QSlider(Qt::Horizontal);
+    _timeSlider->setFocusPolicy(Qt::StrongFocus);
+    //_timeSlider->setTickPosition(QSlider::TicksBothSides);
+    _timeSlider->setTickInterval(10);
+    _timeSlider->setSingleStep(1);
     //QSize qSize(500,50);
-    slider->setFixedWidth(300); // works
-    //slider->sizeHint(qSize);
+    _timeSlider->setFixedWidth(300); // works
+    //_timeSlider->sizeHint(qSize);
     // use Dave Smith's fancy qslider
-    slider->setStyleSheet("QSlider::groove:horizontal {\
+    _timeSlider->setStyleSheet("QSlider::groove:horizontal {\
 border: 1px solid #bbb;\
 background: white;\
 height: 10px;\
@@ -769,9 +772,9 @@ border-radius: 4px;\
 }\
 ");
 
-    int stretch = 0;
-    _timesLayout->addWidget(slider, stretch,  alignCenter);
-  //_timesLayout->addWidget(slider, row, 0, 1, nCols, alignCenter);
+
+    _timesLayout->addWidget(_timeSlider, stretch,  alignCenter);
+  //_timesLayout->addWidget(_timeSlider, row, 0, 1, nCols, alignCenter);
     
 /* */
 
@@ -784,32 +787,75 @@ border-radius: 4px;\
     scrollBar = new QScrollBar(Qt::Horizontal);
     scrollBar->setMinimum(0);
     scrollBar->setMaximum(100);
-    //slider->setFocusPolicy(Qt::StrongFocus);
-    //slider->setTickPosition(QSlider::TicksBothSides);
-    //slider->setTickInterval(10);
-    //slider->setSingleStep(1);
+    //_timeSlider->setFocusPolicy(Qt::StrongFocus);
+    //_timeSlider->setTickPosition(QSlider::TicksBothSides);
+    //_timeSlider->setTickInterval(10);
+    //_timeSlider->setSingleStep(1);
 
   _timesLayout->addWidget(scrollBar, row, 0, 1, nCols, alignCenter);
   */
 
   // add the end time
   
-  QLabel *endTimeLabel = new QLabel("hh:mm:ss", _timePanel);
+  _stopTimeLabel = new QLabel("hh:mm:ss", _timePanel);
   //timeHeader->setFont(font);
-  _timesLayout->addWidget(endTimeLabel);
+  _timesLayout->addWidget(_stopTimeLabel);
   //_timePanel->setLayout(vbox);
+
+
+  //_timeSlider->setStatusTip("this is status tip");
 
   // connect slot for time change
 
-  //connect(_timeGroup, SIGNAL(buttonClicked(int)),
-    //       this, SLOT(_changeTime(int)));
+  connect(_timeSlider, SIGNAL(actionTriggered(int)),
+           this, SLOT(_timeSliderActionTriggered(int)));
 
-  //connect(_polarManager, SIGNAL(timesChanged(const vector<RadxSweep *> &)),
-  //          this, SLOT(_setupDisplayFields(const vector<RadxSweep *> &)));
+  connect(_timeSlider, SIGNAL(valueChanged(int)),
+            this, SLOT(_timeSliderValueChanged(int)));
 
 }
 
- 
+void DisplayManager::_updateTimePanel() {
+  cerr << "in DisplayManager, updateTimePanel called" << endl;
+}
+
+void DisplayManager::_timeSliderActionTriggered(int action) {
+  /*
+  switch (action) {
+    case QAbstractSlider::SliderNoAction:
+      cerr << "SliderNoAction action in _timeSliderActionTriggered" << endl;
+      break;
+    case QAbstractSlider::SliderSingleStepAdd: 
+      cerr << "SliderSingleStepAdd action in _timeSliderActionTriggered" << endl;
+      break; 
+    case QAbstractSlider::SliderSingleStepSub:	
+      cerr << "SliderSingleStepSub action in _timeSliderActionTriggered" << endl;
+      break;
+    case QAbstractSlider::SliderPageStepAdd:
+      cerr << "SliderPageStepAdd action in _timeSliderActionTriggered" << endl;
+      break;	
+    case QAbstractSlider::SliderPageStepSub:
+      cerr << "SliderPageStepSub action in _timeSliderActionTriggered" << endl;
+      break;	
+    case QAbstractSlider::SliderToMinimum:
+      cerr << "SliderToMinimum action in _timeSliderActionTriggered" << endl;
+      break;	
+    case QAbstractSlider::SliderToMaximum:
+      cerr << "SliderToMaximum action in _timeSliderActionTriggered" << endl;
+      break;	
+    case QAbstractSlider::SliderMove:
+      cerr << "SliderMove action in _timeSliderActionTriggered" << endl;
+      break;
+    default: 
+      cerr << "unknown action in _timeSliderActionTriggered" << endl;
+    }
+  */
+} 
+
+void DisplayManager::_timeSliderValueChanged(int value) {
+  cerr << " from DisplayManager::_timeSliderValueChanged " << endl;
+}
+
 ///////////////////////////////////////////////////////
 // create the click report dialog
 //
