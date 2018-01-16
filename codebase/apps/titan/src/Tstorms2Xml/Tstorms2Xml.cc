@@ -1020,8 +1020,10 @@ void Tstorms2Xml::_addWxmlObs(const storm_file_params_t &stormParams,
   TaXml::setStringAttr("units", "km3", attrs);
   xml += TaXml::writeDouble("cell_volume", 4, attrs, Volume);
 
-  TaXml::setStringAttr("units", "m3/s", attrs);
-  xml += TaXml::writeDouble("precipitation_flux", 4, attrs, Prec_flux);
+  if (_params.include_prec_flux_xml) {
+	  TaXml::setStringAttr("units", "m3/s", attrs);
+	  xml += TaXml::writeDouble("precipitation_flux", 4, attrs, Prec_flux);
+  }
 
   TaXml::setStringAttr("units", "km", attrs);
   xml += TaXml::writeDouble("cell_top", 4, attrs, Top);
@@ -1201,8 +1203,10 @@ void Tstorms2Xml::_addWxmlForecast(int leadTime,
   TaXml::setStringAttr("units", "km3", attrs);
   xml += TaXml::writeDouble("cell_volume", 4, attrs, Volume);
 
-  TaXml::setStringAttr("units", "m3/s", attrs);
-  xml += TaXml::writeDouble("precipitation_flux", 4, attrs, Prec_flux);
+  if (_params.include_prec_flux_xml) {
+	  TaXml::setStringAttr("units", "m3/s", attrs);
+	  xml += TaXml::writeDouble("precipitation_flux", 4, attrs, Prec_flux);
+  }
 
   TaXml::setStringAttr("units", "km", attrs);
   xml += TaXml::writeDouble("cell_top", 4, attrs, Top);

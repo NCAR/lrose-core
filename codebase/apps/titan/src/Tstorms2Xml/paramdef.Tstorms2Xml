@@ -270,3 +270,8 @@ paramdef string {
   p_help = "The XML will be stored in SPDB in exactly the same format as is written to XML files.";
 } spdb_url;
 
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to publish precipitation flux to otuput Xml";
+} include_prec_flux_xml;
+

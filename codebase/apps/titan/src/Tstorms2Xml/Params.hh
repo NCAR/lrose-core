@@ -428,6 +428,8 @@ public:
 
   char* spdb_url;
 
+  tdrp_bool_t include_prec_flux_xml;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -435,7 +437,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[47];
+  mutable TDRPtable _table[48];
 
   const char *_className;
 
