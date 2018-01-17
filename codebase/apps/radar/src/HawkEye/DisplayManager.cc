@@ -564,10 +564,11 @@ void DisplayManager::_createElevationPanel()
   //_elevationVBoxLayout->addStretch(1);
     _elevationSubPanel->setLayout(_elevationVBoxLayout);
     _elevationsLayout->addWidget(_elevationSubPanel, row, 0); //, 1, nCols, alignCenter);
-
-  QLabel *spacerRow = new QLabel("", _elevationPanel);
-  _elevationsLayout->addWidget(spacerRow, row, 0);
-  _elevationsLayout->setRowStretch(row, 1);
+    
+    //QLabel *spacerRow = new QLabel("", _elevationPanel);
+    //_elevationsLayout->addWidget(spacerRow, row, 0);
+    //_elevationsLayout->setRowStretch(row, 1);
+  
 }
 
 
