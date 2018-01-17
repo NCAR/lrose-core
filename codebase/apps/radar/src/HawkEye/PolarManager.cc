@@ -69,6 +69,7 @@
 #include <QDateTimeEdit>
 #include <QLineEdit>
 #include <QErrorMessage>
+#include <QFileDialog>
 #include <QSlider>
 
 #include <toolsa/toolsa_macros.h>
@@ -123,6 +124,7 @@ PolarManager::PolarManager(const Params &params,
 
   _setArchiveMode(_params.begin_in_archive_mode);
   _archiveStartTime.set(_params.archive_start_time);
+  _currentArchiveScanIdx = 0;
   _archiveMarginSecs = _params.archive_search_margin_secs;
 
   _imagesArchiveStartTime.set(_params.images_archive_start_time);
@@ -560,7 +562,7 @@ void PolarManager::_setupWindows()
   column++;
   row++;
   column = 2;
-  int fromColumn;
+
   mainLayout->addWidget(_timePanel, row, column, rowSpan, columnSpan); // , rowSpan, columnSpan);
   
   /*
@@ -652,6 +654,13 @@ void PolarManager::_createActions()
   _exitAct->setStatusTip(tr("Exit the application"));
   connect(_exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
+  // file chooser
+
+  _openFileAct = new QAction(tr("O&pen"), this);
+  _openFileAct->setShortcut(tr("Ctrl+F"));
+  _openFileAct->setStatusTip(tr("Open File"));
+  connect(_openFileAct, SIGNAL(triggered()), this, SLOT(_openFile()));
+
   // show range rings
 
   _ringsAct = new QAction(tr("Range Rings"), this);
@@ -715,6 +724,7 @@ void PolarManager::_createMenus()
 
   _fileMenu = menuBar()->addMenu(tr("&File"));
   _fileMenu->addSeparator();
+  _fileMenu->addAction(_openFileAct);
   _fileMenu->addAction(_saveImageAct);
   _fileMenu->addAction(_exitAct);
 
@@ -857,6 +867,9 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
   _timeControllerDialog->setCursor(Qt::ArrowCursor);
 
 }
+
+
+
 
 /////////////////////////////
 // get data in archive mode
@@ -1061,7 +1074,6 @@ void PolarManager::_plotArchiveData()
     
 }
 
-
 void PolarManager::_changeElevation(bool value) {
 
   if (_params.debug) {
@@ -1099,7 +1111,6 @@ void PolarManager::_changeElevation(bool value) {
   }
 
 }
-
 
 //////////////////////////////////////////////////
 // set up read
@@ -1946,6 +1957,17 @@ void PolarManager::_updateTimePanel()
     max = _nArchiveScans-1;
     if (max < 0) max = 0;
     _timeSlider->setMaximum(max);
+    /*
+    int sliderPosition;
+   
+    _currentArchiveScanIdx = (_currentArchiveScanIdx + _nArchiveScans) % 
+      _nArchiveScans;
+    sliderPosition = _currentArchiveScanIdx;
+      if (sliderPosition < 0) sliderPosition = 0;
+      if (sliderPosition > max) sliderPosition = max;
+      //sliderPosition = (int) (_archiveStartTime / _archiveScanIntervalSecs);
+    _timeSlider->setSliderPosition(sliderPosition);
+    */
 }
 
 void PolarManager::_timeSliderActionTriggered(int action) {
@@ -1998,6 +2020,77 @@ void PolarManager::_timeSliderValueChanged(int value) {
   _timeSlider->setToolTip(text);
 
 }
+
+//--------
+///////////////////////////////////////////////////////
+// create the file chooser dialog
+//
+// This allows the user to choose an archive file to open
+
+void PolarManager::_openFile()
+{
+  // TODO: seed with files for the day currently in view
+  // How to generate this??? *yyyymmdd*?
+  string pattern = _archiveStartTime.getDateStrPlain();
+  QString finalPattern = "All files (*";
+  finalPattern.append(pattern.c_str());
+  finalPattern.append("*)");
+
+  QString inputPath = QDir::currentPath();
+  // get the path of the current file, if available 
+  if (_inputFileList.size() > 0) {
+    QDir temp(_inputFileList[0].c_str());
+    inputPath = temp.absolutePath();
+  } 
+
+  QString filename =  QFileDialog::getOpenFileName(
+          this,
+          "Open Document",
+          inputPath, finalPattern);  //QDir::currentPath(),
+  //"All files (*.*)");
+ 
+    if( !filename.isNull() )
+    {
+      QByteArray qb = filename.toUtf8();
+      const char *name = qb.constData();
+      cerr << "selected file path : " << name << endl;
+
+      // trying this ...  TODO: put into separate method
+      _setArchiveRetrievalPending();
+      vector<string> list;
+      list.push_back(name);
+      setInputFileList(list);
+      _getArchiveData();
+    }
+}
+
+
+void PolarManager::_createFileChooserDialog()
+{
+  _refreshFileChooserDialog();
+  
+}
+
+///////////////////////////////////////////////////////
+// set the state on the time controller dialog
+
+void PolarManager::_refreshFileChooserDialog()
+{
+  
+
+}
+
+/////////////////////////////////////
+// show the time controller dialog
+
+void PolarManager::_showFileChooserDialog()
+{
+
+}
+
+
+//-------
+
 
 ////////////////////////////////////////////////////////
 // change modes for retrieving the data
@@ -2397,24 +2490,28 @@ void PolarManager::_howto()
 void PolarManager::_goBack1()
 {
   _archiveStartTime -= 1 * _archiveScanIntervalSecs;
+  _currentArchiveScanIdx -= 1;
   _setGuiFromStartTime();
 }
 
 void PolarManager::_goBackNScans()
 {
   _archiveStartTime -= _nArchiveScans * _archiveScanIntervalSecs;
+  _currentArchiveScanIdx -= _nArchiveScans;
   _setGuiFromStartTime();
 }
 
 void PolarManager::_goFwd1()
 {
   _archiveStartTime += 1 * _archiveScanIntervalSecs;
+  _currentArchiveScanIdx += 1;
   _setGuiFromStartTime();
 }
 
 void PolarManager::_goFwdNScans()
 {
   _archiveStartTime += _nArchiveScans * _archiveScanIntervalSecs;
+  _currentArchiveScanIdx += _nArchiveScans;
   _setGuiFromStartTime();
 }
 

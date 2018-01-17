@@ -523,7 +523,6 @@ void DisplayManager::_createElevationPanel()
   _elevationsLayout->setVerticalSpacing(1);
 
   int row = 0;
-  int nCols = 1;
 
   QLabel *elevationHeader = new QLabel("ELEVATION", _elevationPanel);
   //elevationHeader->setFont(font);
@@ -574,16 +573,14 @@ void DisplayManager::_createElevationPanel()
 
 void DisplayManager::_changeElevation(bool value) {
 
-  int diff = 0;
   if (_params.debug) {
-    cerr << "the elevation was changed ";
+    cerr << "DisplayManager:: the elevation was changed ";
     cerr << endl;
   }
   if (value) {
     for (size_t i = 0; i < _elevationRButtons->size(); i++) {
       if (_elevationRButtons->at(i)->isChecked()) {
           cout << "elevationRButton " << i << " is checked" << endl;
-          diff = i - _selectedElevationIndex;
           _selectedElevationIndex = i;
       }
     }
@@ -605,10 +602,8 @@ void DisplayManager::_changeElevationRadioButton(int value) {
   }
 
   if (value != 0) {
-    size_t i = 0;
-    bool found = false;
     int  newlySelectedEI = _selectedElevationIndex + value;
-    size_t max = _elevationRButtons->size();
+    int max = _elevationRButtons->size();
     if (newlySelectedEI < 0)
       newlySelectedEI = max - 1;
     if (newlySelectedEI >= max)
@@ -647,7 +642,6 @@ void DisplayManager::_createTimePanel()
   // _timesLayout->setVerticalSpacing(5);
 
   int row = 0;
-  int nCols = 1;
 
   //_selectedTime = _times[0];
   //_selectedTimeLabel = _times[0]->getLabel();
@@ -854,6 +848,10 @@ void DisplayManager::_timeSliderActionTriggered(int action) {
 
 void DisplayManager::_timeSliderValueChanged(int value) {
   cerr << " from DisplayManager::_timeSliderValueChanged " << endl;
+}
+
+
+void DisplayManager::_openFile() {
 }
 
 ///////////////////////////////////////////////////////

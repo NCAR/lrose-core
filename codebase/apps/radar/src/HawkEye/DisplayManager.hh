@@ -174,6 +174,7 @@ protected:
   QAction *_howtoAct;
   QAction *_aboutAct;
   QAction *_aboutQtAct;
+  QAction *_openFileAct;
 
   // status panel
 
@@ -366,6 +367,7 @@ protected slots:
   virtual void _unzoom() = 0;
   virtual void _refresh() = 0;
   virtual void _changeField(int fieldId, bool guiMode = true) = 0;
+  virtual void _openFile();
 
   virtual void _changeElevation(bool value);
   void _changeElevationRadioButton(int value);

@@ -65,6 +65,7 @@ class QGridLayout;
 class QDateTime;
 class QDateTimeEdit;
 class ColorBar;
+class QFileDialog;
 class DisplayField;
 class PpiWidget;
 class RhiWidget;
@@ -172,6 +173,7 @@ private:
   QAction *_showRhiAct;
   
   QAction *_timeControllerAct;
+  QAction *_openFileAct;
   QAction *_saveImageAct;
 
   // time controller settings dialog
@@ -184,6 +186,7 @@ private:
 
   QLineEdit *_nArchiveScansEdit;
   int _nArchiveScans;
+  int _currentArchiveScanIdx;
 
   // archive mode
 
@@ -210,6 +213,11 @@ private:
   // saving images in real time mode
 
   RadxTime _imagesScheduledTime;
+
+  // open File 
+
+  QFileDialog *_openFileDialog;
+  void _openFile();
 
   void _moveUpDown();
 
@@ -323,6 +331,13 @@ private slots:
   void _createArchiveImageFiles();
   void _createImageFilesAllSweeps();
   void _createImageFiles();
+
+  // open file 
+
+  void _createFileChooserDialog();
+  void _refreshFileChooserDialog();
+  void _showFileChooserDialog();
+
 
 };
 
