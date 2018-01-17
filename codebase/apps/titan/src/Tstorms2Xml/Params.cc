@@ -1103,7 +1103,7 @@ using namespace std;
     tt->descr = tdrpStrDup("Option to publish precipitation flux to otuput Xml");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &include_prec_flux_xml - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // trailing entry has param_name set to NULL

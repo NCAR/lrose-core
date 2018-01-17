@@ -271,7 +271,7 @@ paramdef string {
 } spdb_url;
 
 paramdef boolean {
-  p_default = TRUE;
+  p_default = FALSE;
   p_descr = "Option to publish precipitation flux to otuput Xml";
 } include_prec_flux_xml;
 
