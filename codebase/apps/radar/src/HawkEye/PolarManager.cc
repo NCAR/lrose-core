@@ -810,6 +810,10 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
 
 {
 
+  if (_params.debug) {
+    cerr << "handling archive data ..." << endl;
+  }
+
   _ppi->setArchiveMode(true);
   _ppi->setStartOfSweep(true);
 
@@ -850,6 +854,7 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
     newElevations->push_back(_fixedAngleDeg);
   }
   _updateElevationPanel(newElevations);
+  _changeElevationRadioButton(10000); // essentially setting it to 0
   //----------
   
   _activateArchiveRendering();
@@ -1074,6 +1079,17 @@ void PolarManager::_plotArchiveData()
     
 }
 
+void PolarManager::_setSweepIndex(size_t i) {
+  const vector<RadxSweep *> &sweeps = _vol.getSweeps();
+  size_t max = sweeps.size();
+  size_t newIdx = i;
+  if (newIdx > max)
+    newIdx = max -1;
+  else if (newIdx < 0)
+    newIdx = 0;
+  _sweepIndex = newIdx;
+}
+
 void PolarManager::_changeElevation(bool value) {
 
   if (_params.debug) {
@@ -1082,19 +1098,20 @@ void PolarManager::_changeElevation(bool value) {
   }
 
   //int x;
-  int diff = 0;
+  //int diff = 0;
   if (value) {
     size_t i = 0;
     bool found = false;
     while (( i < _elevationRButtons->size() ) && (!found)) {
       if (_elevationRButtons->at(i)->isChecked()) {
         cout << "elevationRButton " << i << " is checked" << endl;
-        diff = i - _selectedElevationIndex;
+        //diff = i - _selectedElevationIndex;
         _selectedElevationIndex = i;
 
         //------
 
-        _sweepIndex += diff;
+        //_sweepIndex += diff;
+        _setSweepIndex(i);
         cerr << "moving to sweep " << _sweepIndex << endl;
         _keepFixedAngle = false;
         _setFixedAngle(_sweepIndex);

@@ -1456,6 +1456,11 @@ void DisplayManager::_updateElevationPanel(vector<float> *newElevations)
   //           create new radio buttons
   // 2 -> 1    delete existing buttons
   // 
+
+  if (_params.debug) {
+    cerr << "updating elevations" << endl;
+  }
+
   if (_elevations == NULL) {
      if (newElevations != NULL) {
        _createNewRadioButtons(newElevations);
@@ -1469,7 +1474,7 @@ void DisplayManager::_updateElevationPanel(vector<float> *newElevations)
     // otherwise, we need to add or remove radio buttons
       if (newElevations->size() == _elevations->size()) {
         // reset the text on existing buttons
-        ;
+        _resetElevationText(newElevations);
       } else {
         _clearRadioButtons();
         _createNewRadioButtons(newElevations);
@@ -1481,6 +1486,7 @@ void DisplayManager::_updateElevationPanel(vector<float> *newElevations)
 }
 
 
+
 // TODO: need to keep around the pointer/handle to the _elevationVBoxLayout
 void DisplayManager::_createNewRadioButtons(vector<float> *newElevations) {
   //QGroupBox *groupBox = new QGroupBox(tr("Elevations"));
@@ -1490,7 +1496,7 @@ void DisplayManager::_createNewRadioButtons(vector<float> *newElevations) {
   for (size_t ielevation = 0; ielevation < newElevations->size(); ielevation++) {
 
     // TODO: this should be set text
-    std::sprintf(buf, "%7.2f", newElevations->at(ielevation));
+    std::sprintf(buf, "%.2f", newElevations->at(ielevation));
     QRadioButton *radio1 = new QRadioButton(buf); 
 
     if (ielevation == 0) {
@@ -1515,7 +1521,8 @@ void DisplayManager::_resetElevationText(vector<float> *newElevations) {
 
   char buf[50];
   for (size_t i = 0; i < newElevations->size(); i++) {
-    std::sprintf(buf, "%7.2f", _elevations->at(i));
+    //std::sprintf(buf, "%.2f", _elevations->at(i));
+    _setText(buf, "%6.2f", _elevations->at(i));
     QRadioButton *rbutton = _elevationRButtons->at(i);
     rbutton->setText(buf);
   }

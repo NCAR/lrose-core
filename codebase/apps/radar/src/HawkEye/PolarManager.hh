@@ -244,6 +244,7 @@ private:
 
   void _setSweepIndex(double fixedAngle);
   void _setFixedAngle(int sweepIndex);
+  void _setSweepIndex(size_t i);
 
   // draw beam
 
