@@ -129,16 +129,6 @@ TstormReflFcst::TstormReflFcst(int argc, char **argv) :
     return;
   }
   
-  if (_params->file_time_stamp == Params::FORECAST_TIME)
-  {
-    fprintf(stderr,
-	    "ERROR: %s\n", _programName);
-    fprintf(stderr,
-	    "FORECAST_TIME file time stamping not yet implemented\n");
-    okay = FALSE;
-    return;
-  }
-  
   // Initialize process registration
   
   if (_params->mode == Params::REALTIME)
@@ -528,20 +518,18 @@ int TstormReflFcst::_retrieveStormData(time_t data_time)
  *                       and write the output file.
  */
 
-void TstormReflFcst::_generateForecast(void)
+bool TstormReflFcst::_generateForecast(void)
 {
   const string method_name = "TstormReflFcst::_generateForecast()";
-  
-  DsMdvx forecast_file;
   
   // Generate the map for each forecast duration
 
   int num_forecasts;
   
-  if (_params->file_time_stamp == Params::FORECAST_TIME)
-    num_forecasts = _params->forecast_durations_n;
-  else
+  if (_params->file_time_stamp == Params::GENERATE_TIME)
     num_forecasts = 1;
+  else
+    num_forecasts = _params->forecast_durations_n;
   
   time_t scan_time = _stormChunks[0].valid_time;
 
@@ -554,7 +542,10 @@ void TstormReflFcst::_generateForecast(void)
   for (int i = 0; i < num_forecasts; i++)
   {
     long   forecast_secs = _params->_forecast_durations[i];
-    
+
+    if (_params->debug_level >= Params::DEBUG_NORM)
+      cerr << "Calculating " << forecast_secs << " second forecast...." << endl;
+
     // Compute the forecast time
 
     time_t forecast_time = scan_time + forecast_secs;
@@ -569,19 +560,33 @@ void TstormReflFcst::_generateForecast(void)
     
     // Initialize the output objects
 
+    DsMdvx forecast_file;
     MdvxField *forecast_field;
-    
-    if (_params->file_time_stamp == Params::GENERATE_TIME)
+
+    switch (_params->file_time_stamp)
     {
-      _setMasterHeader(forecast_file, scan_time);
-      forecast_field = _createOutputField(scan_time, forecast_secs);
-    }
-    else
-    {
-      _setMasterHeader(forecast_file, forecast_time);
-      forecast_field = _createOutputField(forecast_time, 0);
-    }
-    
+      case Params::GENERATE_TIME :
+        _setMasterHeader(forecast_file, scan_time, forecast_time, false);
+        forecast_field = _createOutputField(scan_time, forecast_secs, false);
+        break;
+
+      case Params::FORECAST_TIME :
+        _setMasterHeader(forecast_file, forecast_time, forecast_time, false);
+        forecast_field = _createOutputField(forecast_time, 0, false);
+        break;
+
+      case Params::FORECAST_DIR :
+        forecast_file.setWriteAsForecast();
+        _setMasterHeader(forecast_file, scan_time, forecast_time, true);
+        forecast_field = _createOutputField(scan_time, forecast_secs, true);
+        break;
+        
+      default:
+        cerr << "ERROR: " << method_name << endl;
+        cerr << "Invalid file_time_stamp value encountered" << endl;
+        return false;
+    } /* endswitch - _params->file_time_stamp */
+
     // Compute the appropriate forecast
 
     bool forecast_return;
@@ -602,7 +607,7 @@ void TstormReflFcst::_generateForecast(void)
     
     // Write the output file
 
-    forecast_field->convertType(Mdvx::ENCODING_INT8,
+    forecast_field->convertType(Mdvx::ENCODING_INT16,
 				Mdvx::COMPRESSION_RLE,
 				Mdvx::SCALING_DYNAMIC);
     
@@ -613,7 +618,7 @@ void TstormReflFcst::_generateForecast(void)
     
   } /* endfor - i */
   
-  return;
+  return true;
 }
 
 
@@ -637,7 +642,12 @@ bool TstormReflFcst::_thresholdedForecast(MdvxField &output_field,
 
   MdvxField *gridded_field = _griddedMdvx.getField(0);
   fl32 *gridded_data = (fl32 *)gridded_field->getVol();
+
+  // Convert the lead time from seconds to hours since that's what we need
+  // for our calculations
   
+  double lead_time_hr = (double)forecast_secs/3600.0;
+      
   // Forecast each storm entry
 
   bool valid_forecast_found = false;
@@ -649,7 +659,7 @@ bool TstormReflFcst::_thresholdedForecast(MdvxField &output_field,
     if(_params->valid_forecasts_only &&
        !entries[entry].forecast_valid)
     {
-      if (_params->debug_level >= Params::DEBUG_NORM)
+      if (_params->debug_level >= Params::DEBUG_EXTRA)
 	fprintf(stderr,
 		"*** Skipping invalid storm\n");
       
@@ -657,8 +667,6 @@ bool TstormReflFcst::_thresholdedForecast(MdvxField &output_field,
     }
     
     valid_forecast_found = true;
-    
-    double lead_time_hr = (double)forecast_secs/3600.0;
     
     // Calculate rate of growth/decay of the storm
 
@@ -699,7 +707,7 @@ bool TstormReflFcst::_thresholdedForecast(MdvxField &output_field,
     
     if (forecast_area <= 0.0)
     {
-      if (_params->debug_level >= Params::DEBUG_NORM)
+      if (_params->debug_level >= Params::DEBUG_EXTRA)
 	fprintf(stderr,
 		"*** Skipping storm: forecast_area <= 0.0\n");
       
@@ -1074,7 +1082,9 @@ bool TstormReflFcst::_unthresholdedForecast(MdvxField &output_field,
  */
 
 void TstormReflFcst::_setMasterHeader(DsMdvx &output_file,
-				      const time_t file_time)
+				      const time_t gen_time,
+                                      const time_t valid_time,
+                                      const bool forecast_file)
 {
   // Get the master header from the input file so we can set
   // the output field values based on the input field values.
@@ -1086,21 +1096,30 @@ void TstormReflFcst::_setMasterHeader(DsMdvx &output_file,
   Mdvx::master_header_t fcst_master_hdr;
   
   memset(&fcst_master_hdr, 0, sizeof(fcst_master_hdr));
+
+  if (forecast_file)
+  {
+    fcst_master_hdr.time_gen = gen_time;
+    fcst_master_hdr.time_centroid = valid_time;
+    fcst_master_hdr.data_collection_type = Mdvx::DATA_FORECAST;
+  }
+  else
+  {
+    fcst_master_hdr.time_gen = time((time_t *)NULL);
+    fcst_master_hdr.time_centroid = gen_time;
+    fcst_master_hdr.data_collection_type = Mdvx::DATA_EXTRAPOLATED;
+  }
   
-  fcst_master_hdr.time_gen = time((time_t *)NULL);
-  fcst_master_hdr.time_begin = file_time +
+  fcst_master_hdr.time_begin = gen_time +
     _params->output_time_offsets.begin_time_offset;
-  fcst_master_hdr.time_end = file_time +
+  fcst_master_hdr.time_end = gen_time +
     _params->output_time_offsets.end_time_offset;
-  fcst_master_hdr.time_centroid = file_time;
   fcst_master_hdr.time_expire = fcst_master_hdr.time_end;
   fcst_master_hdr.num_data_times = 0;
   fcst_master_hdr.index_number = 0;
   fcst_master_hdr.data_dimension = 2;
-  fcst_master_hdr.data_collection_type = Mdvx::DATA_EXTRAPOLATED;
   fcst_master_hdr.user_data = 0;
   fcst_master_hdr.native_vlevel_type = gridded_master_hdr.native_vlevel_type;
-//  fcst_master_hdr.vlevel_type = Mdvx::VERT_TYPE_Z;
   fcst_master_hdr.vlevel_type = gridded_master_hdr.vlevel_type;
   fcst_master_hdr.vlevel_included = FALSE;
   fcst_master_hdr.grid_orientation = gridded_master_hdr.grid_orientation;
@@ -1136,7 +1155,8 @@ void TstormReflFcst::_setMasterHeader(DsMdvx &output_file,
  */
 
 MdvxField *TstormReflFcst::_createOutputField(const time_t field_time,
-					      const int forecast_duration)
+					      const int forecast_duration,
+                                              const bool forecast_file)
 {
   // Get the field header for the input field to use for filling
   // in some of the output field values.
@@ -1151,8 +1171,16 @@ MdvxField *TstormReflFcst::_createOutputField(const time_t field_time,
   memset(&fcst_field_hdr, 0, sizeof(fcst_field_hdr));
   
   fcst_field_hdr.field_code = 0;
-  fcst_field_hdr.forecast_delta = forecast_duration;
-  fcst_field_hdr.forecast_time = field_time + forecast_duration;
+  if (forecast_file)
+  {
+    fcst_field_hdr.forecast_delta = forecast_duration;
+    fcst_field_hdr.forecast_time = field_time + forecast_duration;
+  }
+  else
+  {
+    fcst_field_hdr.forecast_delta = 0;
+    fcst_field_hdr.forecast_time = 0;
+  }
   fcst_field_hdr.nx = gridded_field_hdr.nx;
   fcst_field_hdr.ny = gridded_field_hdr.ny;
   fcst_field_hdr.nz = 1;

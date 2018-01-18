@@ -107,7 +107,7 @@ private:
   
   int _retrieveStormData(time_t data_time);
   
-  void _generateForecast(void);
+  bool _generateForecast(void);
   
   bool _thresholdedForecast(MdvxField &output_field,
 			    const tstorm_spdb_header_t *header,
@@ -119,10 +119,13 @@ private:
 			      const int forecast_secs);
   
   void _setMasterHeader(DsMdvx &output_file,
-			const time_t file_time);
+			const time_t gen_time,
+                        const time_t valid_time,
+                        const bool forecast_file);
   
   MdvxField *_createOutputField(const time_t field_time,
-				const int forecast_duration);
+				const int forecast_duration,
+                                const bool forecast_file);
   
 };
 
