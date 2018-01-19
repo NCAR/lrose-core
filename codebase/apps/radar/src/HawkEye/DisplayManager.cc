@@ -1522,7 +1522,7 @@ void DisplayManager::_resetElevationText(vector<float> *newElevations) {
   char buf[50];
   for (size_t i = 0; i < newElevations->size(); i++) {
     //std::sprintf(buf, "%.2f", _elevations->at(i));
-    _setText(buf, "%6.2f", _elevations->at(i));
+    _setText(buf, "%6.2f", newElevations->at(i));
     QRadioButton *rbutton = _elevationRButtons->at(i);
     rbutton->setText(buf);
   }

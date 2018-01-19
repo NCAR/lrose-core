@@ -854,7 +854,8 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
     newElevations->push_back(_fixedAngleDeg);
   }
   _updateElevationPanel(newElevations);
-  _changeElevationRadioButton(10000); // essentially setting it to 0
+  if (!_keepFixedAngle)
+    _changeElevationRadioButton(10000); // essentially setting it to 0
   //----------
   
   _activateArchiveRendering();
@@ -2046,8 +2047,8 @@ void PolarManager::_timeSliderValueChanged(int value) {
 
 void PolarManager::_openFile()
 {
-  // TODO: seed with files for the day currently in view
-  // How to generate this??? *yyyymmdd*?
+  // seed with files for the day currently in view
+  // generate like this: *yyyymmdd*
   string pattern = _archiveStartTime.getDateStrPlain();
   QString finalPattern = "All files (*";
   finalPattern.append(pattern.c_str());
@@ -2077,6 +2078,7 @@ void PolarManager::_openFile()
       vector<string> list;
       list.push_back(name);
       setInputFileList(list);
+      _keepFixedAngle = true;
       _getArchiveData();
     }
 }
