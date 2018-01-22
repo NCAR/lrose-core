@@ -71,6 +71,7 @@
 #include <QErrorMessage>
 #include <QFileDialog>
 #include <QSlider>
+#include <QToolTip>
 
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pmu.h>
@@ -1988,6 +1989,17 @@ void PolarManager::_updateTimePanel()
     */
 }
 
+//  TODO: this may not be needed
+bool PolarManager::_timeSliderEvent(QEvent *event) {
+  /*    if (event->type() == QEvent::ToolTip) {
+        QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
+        QToolTip::showText(helpEvent->globalPos(), "johhny");
+        return true;
+    }
+  */
+    return QWidget::event(event);
+}
+
 void PolarManager::_timeSliderActionTriggered(int action) {
   switch (action) {
     case QAbstractSlider::SliderNoAction:
@@ -2019,10 +2031,6 @@ void PolarManager::_timeSliderActionTriggered(int action) {
     }
 } 
 
-
-//--------
-
-
 void PolarManager::_timeSliderValueChanged(int value) {
   cerr << "_timeSliderValueChanged to " << value << endl;
   //QString text;
@@ -2037,9 +2045,15 @@ void PolarManager::_timeSliderValueChanged(int value) {
           ((int) _archiveIntervalTime.getSubSec() / 1000));
   _timeSlider->setToolTip(text);
 
+  // show the time associated with the current handle position
+  QPoint p = _timeSlider->pos();
+  QToolTip::showText(_timeSlider->mapToGlobal(p), text);
 }
 
-//--------
+void PolarManager::_timeSliderReleased() {
+  _setArchiveRetrievalPending();
+}
+
 ///////////////////////////////////////////////////////
 // create the file chooser dialog
 //

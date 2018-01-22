@@ -374,6 +374,8 @@ protected slots:
 
   void _timeSliderActionTriggered(int action);
   void _timeSliderValueChanged(int value);
+  bool _timeSliderEvent(QEvent *event);
+  void _timeSliderReleased();
   
 };
 

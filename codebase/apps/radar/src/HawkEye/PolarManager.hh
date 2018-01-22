@@ -318,6 +318,8 @@ private slots:
   void _updateTimePanel();
   void _timeSliderActionTriggered(int action);
   void _timeSliderValueChanged(int value);
+  bool _timeSliderEvent(QEvent *event);
+  void _timeSliderReleased();
 
   // time controller
 

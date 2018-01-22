@@ -808,7 +808,19 @@ border-radius: 4px;\
   connect(_timeSlider, SIGNAL(valueChanged(int)),
             this, SLOT(_timeSliderValueChanged(int)));
 
+  connect(_timeSlider, SIGNAL(event(QEvent)sliderReleased()),
+          this, SLOT(_timeSliderReleased()));
+
 }
+
+bool DisplayManager::_timeSliderEvent(QEvent *event) {
+  return true;
+}
+
+void DisplayManager::_timeSliderReleased() {
+
+}
+
 
 void DisplayManager::_updateTimePanel() {
   cerr << "in DisplayManager, updateTimePanel called" << endl;
