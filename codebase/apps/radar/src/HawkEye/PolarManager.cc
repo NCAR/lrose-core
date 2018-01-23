@@ -1865,7 +1865,8 @@ void PolarManager::_createTimeControllerDialog()
     // pal.setColor( QPalette::Inactive, QPalette::Button, color );
     goButton->setPalette(goPalette);
     layout2->addWidget(goButton);
-    connect(goButton, SIGNAL(clicked()), this, SLOT(_setArchiveRetrievalPending()));
+    //connect(goButton, SIGNAL(clicked()), this, SLOT(_setArchiveRetrievalPending()));
+    connect(goButton, SIGNAL(clicked()), this, SLOT(_commitToTime()));
     
     QPushButton *cancelButton = new QPushButton(goCancelReset);
     cancelButton->setText("Cancel");
@@ -1957,9 +1958,10 @@ void PolarManager::_updateTimePanel()
   char text[1024];
   
   // add the start time
+  _startDisplayTime = _archiveStartTime - _nArchiveScans * _archiveScanIntervalSecs;
   sprintf(text, "%.2d:%.2d:%.2d",
-          _archiveStartTime.getHour(), _archiveStartTime.getMin(),
-          _archiveStartTime.getSec());
+          _startDisplayTime.getHour(), _startDisplayTime.getMin(),
+          _startDisplayTime.getSec());
           // ((int) _archiveStartTime.getSubSec() / 1000));
     _startTimeLabel->setText(text);
 
@@ -1972,21 +1974,27 @@ void PolarManager::_updateTimePanel()
           _archiveStopTime.getSec());
   // ((int) _archiveStopTime.getSubSec() / 1000));
     _stopTimeLabel->setText(text);
+
+    // establish the size of the slider
     int max;
-    max = _nArchiveScans-1;
+    max = 2 * _nArchiveScans;
     if (max < 0) max = 0;
     _timeSlider->setMaximum(max);
-    /*
+    
     int sliderPosition;
-   
-    _currentArchiveScanIdx = (_currentArchiveScanIdx + _nArchiveScans) % 
-      _nArchiveScans;
-    sliderPosition = _currentArchiveScanIdx;
-      if (sliderPosition < 0) sliderPosition = 0;
-      if (sliderPosition > max) sliderPosition = max;
+
+    // keep the handle centered; just change the tooltip value
+    
+    //_currentArchiveScanIdx = (_currentArchiveScanIdx + _nArchiveScans) % 
+    //  _nArchiveScans;
+    sliderPosition = _nArchiveScans;
+    if (sliderPosition < 0) sliderPosition = 0;
+    if (sliderPosition > max) sliderPosition = max;
       //sliderPosition = (int) (_archiveStartTime / _archiveScanIntervalSecs);
+     
     _timeSlider->setSliderPosition(sliderPosition);
-    */
+    
+    _setTimeSliderToolTip(sliderPosition);    
 }
 
 //  TODO: this may not be needed
@@ -2031,27 +2039,96 @@ void PolarManager::_timeSliderActionTriggered(int action) {
     }
 } 
 
+void PolarManager::_setTimeSliderToolTip(int value) {
+  _computeArchiveIntervalTime(value);
+  char text[1024];
+  sprintf(text, "%.2d:%.2d:%.2d", // .%.6d",
+          _archiveIntermediateTime.getHour(), _archiveIntermediateTime.getMin(),
+          _archiveIntermediateTime.getSec());
+  // ((int) _archiveIntermediateTime.getSubSec() / 1000));
+  _timeSlider->setToolTip(text);
+}
+
 void PolarManager::_timeSliderValueChanged(int value) {
   cerr << "_timeSliderValueChanged to " << value << endl;
   //QString text;
   //text.setNum(value);
   // add as many QLabel's as you like with QSlider as a parent, install eventHandler() on QSlider to catch resize event to proper position them, and obviously handle scroll events, so you can update them... So labels will just float on top of QSlider
 
+  //_setTimeSliderToolTip(value);
+  
   _computeArchiveIntervalTime(value);
   char text[1024];
-  sprintf(text, "%.2d:%.2d:%.2d.%.6d",
-          _archiveIntervalTime.getHour(), _archiveIntervalTime.getMin(),
-          _archiveIntervalTime.getSec(),
-          ((int) _archiveIntervalTime.getSubSec() / 1000));
+  sprintf(text, "%.2d:%.2d:%.2d",
+          _archiveIntermediateTime.getHour(), _archiveIntermediateTime.getMin(),
+          _archiveIntermediateTime.getSec());
   _timeSlider->setToolTip(text);
+  
 
+  //char text[1024];
   // show the time associated with the current handle position
   QPoint p = _timeSlider->pos();
   QToolTip::showText(_timeSlider->mapToGlobal(p), text);
+  _timeSliderCurrentValue = value;
 }
 
 void PolarManager::_timeSliderReleased() {
+
+  _keepFixedAngle = true;
+  //_ppi->setStartOfSweep(true);
+  //_rhi->setStartOfSweep(true);
+    //_goBack1();
+  _archiveStartTime = _archiveIntermediateTime; // -= 1 * _archiveScanIntervalSecs;
+  _currentArchiveScanIdx = _timeSliderCurrentValue - _nArchiveScans; // -= 1;
+
+  //_setArchiveRetrievalPending();
+  // set the event to NULL ???
+  //_handleArchiveData(NULL);
+  _commitToTime();
+
+
+  _currentArchiveScanIdx = 0;
+  // center the slider handle
+  _timeSliderCurrentValue = _nArchiveScans;
+  _setGuiFromStartTime();
+
+
+}
+
+// update the GUI, as needed, but don't change the data displayed in plot
+// Actions that should use this ...
+// hot-keys (left and right arrow)
+// handle moving on time slider
+// start time editor
+// "> 1", "< 1", "> NScans", "< NScans" buttons
+//
+// maybe this is just _setGuiFromStartTime????
+void PolarManager::_speculateOnTime() { // int newValue) {
+  // update class variables
+  //_setStartTimeFromGui(const QDateTime &datetime1);
+  // update time slider
+  //_updateTimePanel();
+  // update TimeControllerDialog
+  //_setGuiFromStartTime();
+
+}
+
+// go ahead and change the data displayed in the plot
+// and update the GUI as needed
+// Actions that should use this ..
+// "Go" button clicked
+// mouse released on time slider
+void PolarManager::_commitToTime() { // int newValue) {
+  // use class variables to retrieve new data 
+  //_getArchiveData();
+  // plot new data
+  //_plotArchiveData();
+
   _setArchiveRetrievalPending();
+  // set the event to NULL ???
+  _handleArchiveData(NULL);
+  // update the GUI as needed
+
 }
 
 ///////////////////////////////////////////////////////
@@ -2186,6 +2263,8 @@ void PolarManager::_setArchiveScanConfig()
   _nArchiveScans = nArchiveScans;
 
   _computeArchiveStopTime();
+  //_updateTimePanel();
+  _speculateOnTime();
   
   if (_archiveMode) {
     _setArchiveRetrievalPending();
@@ -2228,6 +2307,7 @@ void PolarManager::_setStartTimeFromGui(const QDateTime &datetime1)
   _archiveStartTime.set(date.year(), date.month(), date.day(),
                         time.hour(), time.minute(), time.second());
   _computeArchiveStopTime();
+  _updateTimePanel();
 }
 
 ////////////////////////////////////////////////////////
@@ -2298,14 +2378,21 @@ void PolarManager::_computeArchiveStopTime()
 }
 
 ////////////////////////////////////////////////////////
-// set end time from start time, nscans and interval
+// set intermediate time displayed on time slider tool tips
+// use class variables for start time, nscans and interval
 
 void PolarManager::_computeArchiveIntervalTime(int value)
 
 {
+  // value goes from 0 ... 2*_nArchiveScans
 
-  _archiveIntervalTime =
-    _archiveStartTime + _archiveScanIntervalSecs * value;
+  _archiveIntermediateTime =
+    _archiveStartTime + _archiveScanIntervalSecs * (value - _nArchiveScans);
+  if (_params.debug) {
+    cerr << "computeArchiveIntervalTime: value= " << value <<
+      " converted to " << value - _nArchiveScans << endl;
+    cerr << "corresponds to " << _archiveIntermediateTime << endl;
+  } 
 
 }
 

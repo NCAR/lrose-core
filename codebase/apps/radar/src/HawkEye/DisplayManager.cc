@@ -40,7 +40,7 @@
 #include "DisplayField.hh"
 #include "DisplayElevation.hh"
 #include "ColorMap.hh"
-#include "ColorBar.hh"
+#include "ColorBar.hh" 
 #include "Params.hh"
 #include "Reader.hh"
 
@@ -808,7 +808,7 @@ border-radius: 4px;\
   connect(_timeSlider, SIGNAL(valueChanged(int)),
             this, SLOT(_timeSliderValueChanged(int)));
 
-  connect(_timeSlider, SIGNAL(event(QEvent)sliderReleased()),
+  connect(_timeSlider, SIGNAL(sliderReleased()),
           this, SLOT(_timeSliderReleased()));
 
 }
