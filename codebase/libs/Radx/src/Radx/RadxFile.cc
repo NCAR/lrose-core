@@ -2004,7 +2004,8 @@ string RadxFile::tmpPathFromDir(const string &dir,
     tmpPath += tmpFileName;
   } else {
     char tmpName[1024];
-    sprintf(tmpName, "tmp.%d.%ld.%ld.tmp", getpid(), now.tv_sec, now.tv_usec);
+    sprintf(tmpName, "tmp.%d.%ld.%ld.tmp", getpid(),
+            (long) now.tv_sec, (long) now.tv_usec);
     tmpPath += tmpName;
   }
 
