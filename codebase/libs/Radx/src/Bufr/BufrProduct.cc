@@ -367,7 +367,7 @@ bool BufrProduct::StuffIt(unsigned short des, string name, double value) {
       // fieldName == "TDR"  ==> use "TDR"
       // fieldName == ""     ==> use "ZDR"
       // fieldName == "ZDR"  ==> use "ZDR"
-      if (_fieldName.size() < 0) {
+      if (_fieldName.size() <= 0) {
           typeOfProduct = "ZDR";
       } else {
         string temp = _fieldName;
@@ -414,13 +414,10 @@ bool BufrProduct::StuffIt(unsigned short des, string name, double value) {
 
 
 double *BufrProduct::decompressData() {
-  int n;
-  n = nBinsAlongTheRadial * nAzimuths * sizeof(double);
+  unsigned long nn = nBinsAlongTheRadial * nAzimuths * sizeof(double);
 
-  //int i, j;
-  //unsigned char str[sizeof(double)];
-  unsigned char *UnCompDataBuff = (unsigned char *) malloc(n);
-  unsigned long DestBuffSize = n;
+  unsigned char *UnCompDataBuff = (unsigned char *) malloc(nn);
+  unsigned long DestBuffSize = nn;
   
   if (uncompress(UnCompDataBuff, &DestBuffSize, 
 		 (unsigned char *) compressedData.getPtr(), 
@@ -429,11 +426,12 @@ double *BufrProduct::decompressData() {
     return NULL;
   }
 #if __BYTE_ORDER == __BIG_ENDIAN
-  for (i = 0; i < *ndecomp/sizeof(double); ++i) {
-    for (j = 0; j < sizeof(double); ++j) {
+  unsigned char str[sizeof(double)];
+  for(int i = 0; i < nn/sizeof(double); ++i) {
+    for (int j = 0; j < sizeof(double); ++j) {
       str[j] = UnCompDataBuff[i*sizeof(double)+j];
     }
-    for (j = 0; j < sizeof(double); ++j) {
+    for (int j = 0; j < sizeof(double); ++j) {
       UnCompDataBuff[i*sizeof(double)+j] = str[sizeof(double) - 1 - j];
     }
   }
@@ -449,13 +447,10 @@ double *BufrProduct::decompressData() {
 }
 
 float *BufrProduct::decompressDataFl32() {
-  unsigned long n;
-  n = nBinsAlongTheRadial * nAzimuths * sizeof(double);
+  unsigned long nn = nBinsAlongTheRadial * nAzimuths * sizeof(double);
 
-  //int i, j;
-  //unsigned char str[sizeof(double)];
-  unsigned char *UnCompDataBuff = (unsigned char *) malloc(n);
-  unsigned long DestBuffSize = n;
+  unsigned char *UnCompDataBuff = (unsigned char *) malloc(nn);
+  unsigned long DestBuffSize = nn;
   
   int result;
   result = uncompress(UnCompDataBuff, &DestBuffSize, 
@@ -482,11 +477,12 @@ float *BufrProduct::decompressDataFl32() {
   }
 
 #if __BYTE_ORDER == __BIG_ENDIAN
-  for (i = 0; i < *ndecomp/sizeof(double); ++i) {
-    for (j = 0; j < sizeof(double); ++j) {
+  unsigned char str[sizeof(double)];
+  for(int i = 0; i < nn/sizeof(double); ++i) {
+    for (int j = 0; j < sizeof(double); ++j) {
       str[j] = UnCompDataBuff[i*sizeof(double)+j];
     }
-    for (j = 0; j < sizeof(double); ++j) {
+    for (int j = 0; j < sizeof(double); ++j) {
       UnCompDataBuff[i*sizeof(double)+j] = str[sizeof(double) - 1 - j];
     }
   }
