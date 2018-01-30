@@ -21,18 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2016/03/06 23:53:39 $
-//   $Id: UdpReader.cc,v 1.5 2016/03/06 23:53:39 dixon Exp $
-//   $Revision: 1.5 $
-//   $State: Exp $
-//
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
  * UdpReader: Class for objects used to read beam data from a UDP port.
  *
@@ -48,6 +36,7 @@
 #include <cerrno>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <toolsa/pmu.h>
@@ -181,11 +170,7 @@ int UdpReader::_readBytes(char *buffer, const int buffer_size)
   struct sockaddr_in from_address;
   int status;
 
-#if defined(__linux)
   socklen_t addrLen = sizeof(struct sockaddr_in);
-#else
-  int addrLen = sizeof(struct sockaddr_in);
-#endif
 
   // Wait on socket for up to 10 secs at a time
 
