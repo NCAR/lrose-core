@@ -27,8 +27,8 @@
 // Data managment class
 /////////////////////////////////////////////////////////////////////
 #include <vector>
-#include <values.h>
-#include <math.h>
+#include <climits>
+#include <cmath>
 #include <unistd.h>
 #include <toolsa/file_io.h>
 #include <toolsa/udatetime.h>
