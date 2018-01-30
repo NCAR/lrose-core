@@ -35,7 +35,7 @@
 #include "EdgeRead.hh"
 using namespace std;
 
-main( int argc, char **argv )
+int main( int argc, char **argv )
 {
    //
    // set signal handling
