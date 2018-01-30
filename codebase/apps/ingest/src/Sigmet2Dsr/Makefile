@@ -38,7 +38,7 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-lFmq -ltrmm_rsl -lfl -ldsserver \
+	-lFmq -ltrmm_rsl $(LEX_LIB) -ldsserver \
 	-ldidss -lrapformats -ltoolsa -ldataport \
 	-ltdrp -lbz2 -lz
 
