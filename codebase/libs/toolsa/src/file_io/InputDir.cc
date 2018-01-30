@@ -77,18 +77,18 @@ InputDir::InputDir(const string &dir_name,
 }
 
 
-InputDir::InputDir(const char *dir_name,
-		   const char *file_substring,
-		   int process_old_files,
-		   const string &exclude_substring,
-                   bool debug,
-                   bool verbose) :
-        _dirPtr(NULL),
-        _debug(debug),
-        _verbose(verbose)
-{
-  _init(dir_name, file_substring, exclude_substring, process_old_files);
-}
+// InputDir::InputDir(const char *dir_name,
+// 		   const char *file_substring,
+// 		   int process_old_files,
+// 		   const string &exclude_substring,
+//                    bool debug,
+//                    bool verbose) :
+//         _dirPtr(NULL),
+//         _debug(debug),
+//         _verbose(verbose)
+// {
+//   _init(dir_name, file_substring, exclude_substring, process_old_files);
+// }
 
 
 /*********************************************************************

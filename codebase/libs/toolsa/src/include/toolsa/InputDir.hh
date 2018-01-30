@@ -63,12 +63,12 @@ public :
            bool debug = false,
            bool verbose = false);
   
-  InputDir(const char *dir_name,
-           const char *file_substring,
-           int process_old_files,  // Set to 1 to force scan of old files
-           const string &exclude_substring = "",
-           bool debug = false,
-           bool verbose = false);
+  // InputDir(const char *dir_name,
+  //          const char *file_substring,
+  //          int process_old_files,  // Set to 1 to force scan of old files
+  //          const string &exclude_substring = "",
+  //          bool debug = false,
+  //          bool verbose = false);
   
   // Destructor
   
