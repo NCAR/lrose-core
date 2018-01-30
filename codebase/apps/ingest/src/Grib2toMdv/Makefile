@@ -36,8 +36,7 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 TARGET_FILE = Grib2toMdv
 MODULE_TYPE = progcpp
 
-
-LOC_INCLUDES = $(NETCDF4_INCS)
+LOC_INCLUDES = $(NETCDF4_INCS) $(SYS_X_INCLUDES)
 
 LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -ldsserver \
 	-ldidss -lrapformats -lgrib2 -leuclid \
