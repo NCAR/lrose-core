@@ -34,7 +34,7 @@
  */
 
 // Include files 
-#include <values.h>
+#include <cfloat>
 //#include <rapmath/math_macros.h>
 #include "Dsr2Radar.hh"
 #include "Params.hh"
@@ -794,7 +794,7 @@ void Dsr2Radar::initParams(DsRadarMsg &radarMsg, int &contents)
 
       DsBeamDataFieldParms fp((*j)->scale, (*j)->bias,
 			      DsBeamData::is_floating_data((*j)->byteWidth),
-			      (*j)->missingDataValue, MAXFLOAT);
+			      (*j)->missingDataValue, FLT_MAX);
       beamParams.push_back(fp);
 
       j++;
