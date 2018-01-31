@@ -101,7 +101,8 @@ codebase/libs/makefile
 codebase/apps/awc/src/LtgSpdb2Mdv/LtgSpdb2Mdv
 codebase/apps/awc/src/combine_ltg_radar/combine_ltg_radar
 
-codebase/apps/didss/src/DsFmq2Tape/DsFmq2Tape
+codebase/apps/didss/src/Binet2Dsr/Binet2Dsr
+codebase/apps/didss/src/DsFmq2Tape/DsFmq2Tape  
 codebase/apps/didss/src/Dsr2File/Dsr2File
 codebase/apps/didss/src/Dsr2Mdv/Dsr2Mdv
 codebase/apps/didss/src/Dsr2MdvLookup/Dsr2MdvLookup
@@ -128,10 +129,13 @@ codebase/apps/didss/src/RadMon/RadMon
 codebase/apps/didss/src/Rapic2Dsr/Rapic2Dsr
 codebase/apps/didss/src/Scout/Scout
 codebase/apps/didss/src/Socket2File/Socket2File
-codebase/apps/didss/src/Test2Dsr/Test2Dsr
+codebase/apps/didss/src/Tdwr2Dsr/Tdwr2Dsr  
+codebase/apps/didss/src/Test2Dsr/Test2Dsr  
 codebase/apps/didss/src/TimeCalc/TimeCalc
-codebase/apps/didss/src/VerifyGrid/VerifyGrid
-codebase/apps/didss/src/edge2dsr/edge2dsr
+codebase/apps/didss/src/Udp2Tcp/Udp2Tcp  
+codebase/apps/didss/src/VerifyGrid/VerifyGrid  
+codebase/apps/didss/src/edge2dsr/edge2dsr  
+codebase/apps/didss/src/edgeRead/edgeRead  
 codebase/apps/didss/src/fmq_print/fmq_print
 codebase/apps/didss/src/kavltg2spdb/kavltg2spdb
 codebase/apps/didss/src/ltgSpdb2GenPt/ltgSpdb2GenPt
@@ -249,6 +253,7 @@ codebase/apps/ingest/src/WsiNidsIngest/WsiNidsIngest
 codebase/apps/ingest/src/file_repeat_day/file_repeat_day
 codebase/apps/ingest/src/nexrad2dsr/nexrad2dsr
 codebase/apps/ingest/src/noaaportLtg2Spdb/noaaportLtg2Spdb
+codebase/apps/ingest/src/radar2Dsr/radar2Dsr  
 codebase/apps/ingest/src/sndgIngest/sndgIngest
 codebase/apps/ingest/src/superResNexradII2Dsr/superResNexradII2Dsr
 codebase/apps/ingest/src/superResNexradLdmUnzip/superResNexradLdmUnzip
