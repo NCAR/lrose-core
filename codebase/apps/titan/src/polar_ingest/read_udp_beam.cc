@@ -577,7 +577,7 @@ static int get_udp_pkt(char *inbuf)
 
 {
 
-  int addrlen = sizeof (struct sockaddr_in);
+  socklen_t addrlen = sizeof (struct sockaddr_in);
   int packet_len;
   int iret;
   struct sockaddr_in from;   /* address where packet came from */
@@ -620,7 +620,7 @@ static int get_udp_pkt(char *inbuf)
       errno = 0;
       packet_len =
 	recvfrom (Udp_fd, inbuf, MAX_UDP_PACKET_BYTES, 0, 
-		  (struct sockaddr *)&from, (socklen_t *) &addrlen);
+		  (struct sockaddr *)&from, &addrlen);
 
       if (errno == EINTR) {
 	PMU_auto_register("Reading udp data - EINTR");
