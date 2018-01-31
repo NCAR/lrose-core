@@ -198,9 +198,9 @@ int InputUdp::readPacket(bool &timedOut)
   }
 
   struct sockaddr_in from_name;
-  int fromlen = sizeof(from_name);
+  socklen_t fromlen = sizeof(from_name);
   _len = recvfrom(_udpFd, _buf, maxUdpBytes, 0,
-                  (struct sockaddr *) &from_name, (socklen_t*)&fromlen);
+                  (struct sockaddr *) &from_name, &fromlen);
   if (_len < 0) {
     int errNum = errno;
     cerr << "ERROR - InputUdp::readPacket()" << endl;
