@@ -1,0 +1,46 @@
+#
+# Recursive make - makes the subdirectory code
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+         GribNc2Mdv \
+         McidasNcf2Mdv \
+         Mdv2Ascii \
+         Mdv2AsciiContour \
+         Mdv2Axf \
+         Mdv2AxfCont \
+         Mdv2Grib \
+         Mdv2Medoc \
+         Mdv2NetCDF \
+         Mdv2Plain \
+         Mdv2SweepNetCDF \
+	 Mdv2SoundingSpdb \
+         Mdv2Vil \
+         MdvComp \
+         MdvCompare \
+         MdvConvert \
+         MdvGrad \
+         MdvHist \
+         MdvLinearComb \
+         MdvMask \
+         MdvMatch \
+         MdvMedian \
+         MdvMerge2 \
+         MdvSmooth \
+         MdvTSmooth \
+         MdvThresh \
+         MdvVerify \
+         MdvtoGrib2 \
+         Mdvx2Vil \
+	 NcGeneric2Mdv \
+	 NetCDF2Mdv \
+         Plain2Mdv \
+         PrintMdv \
+         ReadDEM \
+         WorldTerrain
+
+include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

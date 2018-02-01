@@ -49,6 +49,8 @@
 #if defined(__linux)
 #include <asm/ioctls.h>
 #include <sys/ioctl.h>
+#elif defined (__APPLE__)
+#include <sys/ioctl.h>
 #else
 #include <sys/filio.h>
 using namespace std;
@@ -260,11 +262,7 @@ int Input::_getUdpPkt()
 
 {
 
-#if defined(__linux)
   socklen_t addrlen = sizeof (struct sockaddr_in);
-#else
-  int addrlen = sizeof (struct sockaddr_in);
-#endif
 
   int iret;
   struct sockaddr_in from;   // address from which packet came

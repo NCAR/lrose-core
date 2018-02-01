@@ -1,0 +1,24 @@
+#
+# Recursive make - makes the subdirectory code
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
+
+TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+	CalCompute \
+	DsrGrabber \
+	DsrMerge \
+	DualDopplerLobes \
+	HawkEye \
+	IntfRemove \
+	JamesDealias \
+	Mdv2Vad \
+	MdvFold \
+	RadarCal \
+	RadarConst \
+	SweepInfo2Spdb \
+	VertCompute
+        
+include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets

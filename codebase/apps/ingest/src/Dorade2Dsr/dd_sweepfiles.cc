@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <sys/types.h>
+#include <arpa/inet.h>
 #include <ctime>
 #include <sys/time.h>
 #include <signal.h>
@@ -40,12 +41,7 @@ using namespace std;
 const int dd_sweepfile::angle_ndx_size = 360;
 const int dd_mem_sweepfile::angle_ndx_size = 360;
 
-extern "C" unsigned long ntohl(unsigned long);
-
-
-
 static const int MAX_FILE_SIZE = 10*1024*1024;
-
 
 int parameter_info( char *, PARAMETER * );
 

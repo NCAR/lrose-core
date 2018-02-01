@@ -42,7 +42,7 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/Path.hh>
 
-#include "NetcdfClassic.hh"
+#include <Ncxx/Nc3xFile.hh>
 
 using namespace std;
 
@@ -50,7 +50,7 @@ using namespace std;
  * @class FeatureNcFile
  */
 
-class FeatureNcFile : public NetcdfClassic
+class FeatureNcFile : public Nc3xFile
 {
  public:
 
@@ -134,8 +134,8 @@ class FeatureNcFile : public NetcdfClassic
   {
     NcVar *nc_var = new NcVar();
     
-    if (NetcdfClassic::addVar(*nc_var, name, standardName, longName,
-			      ncType, _recordDim, units) != 0)
+    if (Nc3xFile::addVar(*nc_var, name, standardName, longName,
+			 ncType, _recordDim, units) != 0)
       return false;
     
     if (coordinates.length() > 0)
@@ -168,8 +168,8 @@ class FeatureNcFile : public NetcdfClassic
   {
     NcVar *nc_var = new NcVar();
     
-    if (NetcdfClassic::addVar(*nc_var, name, standardName, longName,
-			      ncType, _recordDim, units) != 0)
+    if (Nc3xFile::addVar(*nc_var, name, standardName, longName,
+			 ncType, _recordDim, units) != 0)
       return false;
     
     addAttr(*nc_var, "positive", "up");

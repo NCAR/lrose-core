@@ -156,7 +156,7 @@ public:
       
 private:
       
-  int myOffset;
+  // int myOffset;
       
 };
   

@@ -31,7 +31,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <dirent.h>
-#include <values.h>
+#include <climits>
 #include <sys/stat.h>
 #include <toolsa/pmu.h>
 #include <toolsa/str.h>

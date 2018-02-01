@@ -532,8 +532,8 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("Tstorms2Symprod program");
-    tt->comment_text = tdrpStrDup("Tstorms2Symprod reads native TITAN data files, converts the data into XML format, and writes the data out to XML files or SPDB.");
+    tt->comment_hdr = tdrpStrDup("Tstorms2Xml program");
+    tt->comment_text = tdrpStrDup("Tstorms2Xml reads native TITAN data files, converts the data into XML format, and writes the data out to XML files or SPDB.");
     tt++;
     
     // Parameter 'Comment 1'

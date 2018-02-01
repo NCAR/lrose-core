@@ -1,0 +1,86 @@
+#---------------------------------------------------------------------
+#
+# Makefile for script files - titan
+#
+#---------------------------------------------------------------------
+
+#	Default INSTALL_DIR, should be overridden on command line
+
+INSTALL_DIR=$(RAP_BIN_DIR)
+
+#	Script files to be installed
+
+SCRIPTS = \
+	check_Janitor_files.pl \
+	ipcrm_linux \
+	ldd_smart \
+	make_cdrom \
+	make_cdrom2 \
+	make_dvd+rw \
+	monitor_disk.pl \
+	not_running \
+	nuke_ipcs.linux \
+        process_maps.csh \
+	rm_baks \
+	rm_core \
+	rm_junk \
+	rm_ldata_fmq_files \
+	rm_makefile \
+	rm_makefile.am \
+	rm_objs \
+	rm_wspace \
+	rm_wspace_all \
+	running \
+	scrub \
+        set_font_path \
+	snuff \
+	snuff_slow \
+	snuff_inst \
+	snuff_usr1 \
+	toggle_proc_in_auto_restart.pl \
+	utime_decode
+        
+#	Targets
+
+all: install
+
+install_shared:
+	$(MAKE) RAP_BIN_DIR=$(RAP_SHARED_BIN_DIR) install
+
+install: create_subdir
+	if test $(INSTALL_DIR) != . ;\
+	then \
+		cp $(SCRIPTS) $(INSTALL_DIR) ;\
+	fi
+
+create_subdir:
+	if test -d $(INSTALL_DIR) ;\
+	then \
+		cd . ;\
+	else \
+		mkdir $(INSTALL_DIR) ;\
+	fi
+
+install_bin: install
+install_shared_bin: install_shared
+
+# unused targets - needed to prevent make failures
+
+clean:
+debug:
+dbgopt:
+profile:
+opt:
+optopt:
+opt4:
+lint:
+depend:
+pure:
+insure:
+clean_bin:
+clean_tdrp:
+clean_insure:
+clean_depend:
+clean_all:
+
+

@@ -454,7 +454,7 @@ Nc3Type MslFile::_getNc3Type(Radx::DataType_t dtype)
 }
 
 //////////////////////////////////////////////////////////
-// convert RadxFile::netcdf_format_t to NcFile::FileFormat
+// convert RadxFile::netcdf_format_t to Nc3File::FileFormat
 
 Nc3File::FileFormat 
   MslFile::_getFileFormat(RadxFile::netcdf_format_t format)

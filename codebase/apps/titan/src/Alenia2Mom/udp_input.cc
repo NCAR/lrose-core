@@ -353,11 +353,8 @@ static int get_udp_frame(ui08 **buf_p, int *len_p)
 {
 
   static ui08 buffer[UDP_MAX_INPUT];
-#if defined(__linux)
+
   socklen_t addrlen = sizeof (struct sockaddr_in);
-#else  
-  int addrlen = sizeof (struct sockaddr_in);
-#endif
   int packet_len;
   int iret;
   struct sockaddr_in from;   /* address where packet came from */

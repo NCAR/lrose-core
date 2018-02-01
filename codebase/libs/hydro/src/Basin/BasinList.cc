@@ -46,7 +46,7 @@ using namespace std;
 BasinList::BasinList(const bool debug_flag) :
   _debugFlag(debug_flag)
 {
-  _basinListIter = (vector< Basin* >::iterator) 0;
+  _basinListIter = _basinList.end();
 }
 
 
@@ -195,8 +195,7 @@ Basin *BasinList::getFirstBasin(void)
 
 Basin *BasinList::getNextBasin(void)
 {
-  if (_basinListIter == (vector< Basin* >::iterator) 0 ||
-      _basinListIter == _basinList.end())
+  if (_basinListIter == _basinList.end())
     return 0;
   
   ++_basinListIter;

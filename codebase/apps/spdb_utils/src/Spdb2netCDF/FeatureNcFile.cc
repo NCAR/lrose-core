@@ -54,7 +54,7 @@ using namespace std;
 
 FeatureNcFile::FeatureNcFile(const string &file_format_string,
 			     const bool debug_flag) :
-  NetcdfClassic(),
+  Nc3xFile(),
   _debug(debug_flag),
   _fileFormat(file_format_string),
   _varListInitialized(false)
@@ -99,7 +99,7 @@ bool FeatureNcFile::openWrite(const string &output_dir,
   // to cause a "NcInDefineMode" exception when we try to add data.  I think that's
   // a bug in this netCDF interface, but I haven't tracked it down.
 
-  if (NetcdfClassic::openWrite(_filePath.getPath(), NcFile::nc4) != 0)
+  if (Nc3xFile::openWrite(_filePath.getPath(), NcFile::nc4) != 0)
   {
     cerr << getErrStr() << endl;
     return false;

@@ -37,8 +37,8 @@
 ////////////////////////////////////////////////////////////////
 
 #include <new>
-#include <signal.h>
-#include <wait.h>
+#include <csignal>
+#include <sys/wait.h>
 #include <toolsa/port.h>
 #include "MdvBlend.hh"
 

@@ -1,5 +1,5 @@
 /*********************************************************
- * parameter definitions for Tstorms2Symprod
+ * parameter definitions for Tstorms2Xml
  *
  * Mike Dixon, RAP, NCAR
  * P.O.Box 3000, Boulder, CO, USA, 80307-3000
@@ -8,8 +8,8 @@
  */
 
 commentdef {
-  p_header = "Tstorms2Symprod program";
-  p_text = "Tstorms2Symprod reads native TITAN data files, converts the data into XML format, and writes the data out to XML files or SPDB.";
+  p_header = "Tstorms2Xml program";
+  p_text = "Tstorms2Xml reads native TITAN data files, converts the data into XML format, and writes the data out to XML files or SPDB.";
 }
 
 commentdef {

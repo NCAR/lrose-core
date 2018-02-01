@@ -55,7 +55,6 @@ HDRS = \
 	Args.hh \
 	Feature.hh \
 	FeatureNcFile.hh \
-	NetcdfClassic.hh \
 	Spdb2netCDF.hh \
 	TaiwanAwos.hh \
 	WxObs.hh
@@ -66,7 +65,6 @@ CPPC_SRCS = \
 	Args.cc \
 	Feature.cc \
 	FeatureNcFile.cc \
-	NetcdfClassic.cc \
 	Spdb2netCDF.cc \
 	TaiwanAwos.cc \
 	WxObs.cc

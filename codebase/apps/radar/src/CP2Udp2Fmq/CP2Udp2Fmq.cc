@@ -1143,9 +1143,9 @@ void *CP2Udp2Fmq::_readUdpInThread(void *thread_data)
     }
 
     struct sockaddr_in from_name;
-    int fromlen = sizeof(from_name);
+    socklen_t fromlen = sizeof(from_name);
     int len = recvfrom(parent->_udpFd, rxBuf, bufSize, 0,
-		       (struct sockaddr *) &from_name, (socklen_t*) &fromlen);
+		       (struct sockaddr *) &from_name, &fromlen);
 
     if (verbose) {
       cerr << "CP2Udp2Fmq::_readUdpInThread - Packet read bytes = " 
