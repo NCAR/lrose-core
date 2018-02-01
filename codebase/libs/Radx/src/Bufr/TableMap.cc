@@ -33,6 +33,35 @@ void TableMap::setDebug(bool debug) {
   }
 }
 
+void TableMap::AddDescriptorFromBufrFile(unsigned char f, unsigned char x,
+                                         unsigned char y, const string fieldName,  
+                                         int scale, const string units,
+                                         int referenceValue, int dataWidthBits) {
+
+  //f = atoi(tokens[0].c_str());
+  //x = atoi(tokens[1].c_str());
+  // y = atoi(tokens[2].c_str());
+      unsigned short key;
+      //f = 1; x = 8;
+      key = f << 6;
+      key = key | x;
+      key = key << 8;
+      key = key | y;
+      if (_debug) printf("key = %d (x%x) for f;x;y %d;%d;%d %s \n", key, key, f,x,y,
+                         fieldName.c_str()); 
+      //int scale;
+      //int referenceValue;
+      // int dataWidthBits;
+      //scale = atoi(tokens[5].c_str());
+      //referenceValue = atoi(tokens[6].c_str());
+      //dataWidthBits = atoi(tokens[7].c_str());
+      //   TableMapElement(string fieldName, int scale, string units, int referenceValue,
+      //		  int dataWidthBits);
+      table[key] = TableMapElement(fieldName, scale, units, referenceValue,
+				   dataWidthBits);
+
+}
+
 //int TableMap::ReadInternalTableB(unsigned int masterTableVersion,
 //				 unsigned int generatingCenter,
 //				 unsigned int localTableVersion) {
@@ -335,75 +364,17 @@ int TableMap::ImportTables(unsigned int masterTableVersion,
       cerr << "  Attempting to use internal table definitions ..." << endl;
     }
   }
-  /*
-  if (masterBTables.size() <= 0) {
-    // fill with the internal tables
-
-    masterBTables.clear();
-    masterBTables[16] =  BufrTables::bufrtabb_16;
-    //	    table[key] = TableMapElement(currentList);
-
-    masterBTablesSize[16] = BufrTables::N_bufrtabb_16;
-    masterDTables[16] = BufrTables::bufrtabd_16;
-    masterDTablesSize[16] = BufrTables::N_bufrtabd_16;
-
-    
-    localBTables.insert(make_pair(41,2), BufrTables::localtabb_41_2);
-    localBTablesSize.insert(make_pair(41,2), BufrTables::N_localtabb_41_2);
-    localDTables.insert(make_pair(41,2), BufrTables::localtabd_41_2);
-    localDTablesSize.insert(make_pair(41,2), BufrTables::N_localtabd_41_2);
-    
-
-  }
-  */
-  // BufrTables bufrTables;
 
   if (!filled()) {
   const char **internalBufrTable;
   size_t n;
 
+  /*
   internalBufrTable = BufrTables::bufrtabb_16;
   n = BufrTables::N_bufrtabb_16;
   ReadInternalTableB(internalBufrTable, n);
-
-  // TODO: need to call the same function with the local tables using
-  /*   sprintf(fileName, "../share/bbufr/tables/localtabb_%u_%u.csv", generatingCenter,
-	  localTableVersion);
-      maybe send a switch to use either masterTable, or localTable???
-   Hmm ... maybe just send the pointer to the table to traverse and the number
-of entries?? and put this switch in the calling function???
   */
-      /*
-      try {
-	internalBufrTable = masterBTables[masterTableVersion];
-	n = masterBTablesSize[masterTableVersion];
-	ReadInternalTableB(internalBufrTable, n);
-
-	internalBufrTable = masterDTables[masterTableVersion];
-	n = masterDTablesSize[masterTableVersion];
-	ReadInternalTableD(internalBufrTable, n);
-
-	pair<unsigned int, unsigned int> key;
-        key = make_pair(generatingCenter, localTableVersion);
-	internalBufrTable = localBTables[key];
-	n = localBTablesSize[key];
-	ReadInternalTableB(internalBufrTable, n);
-
-
-	internalBufrTable = localDTables[key];
-	n = localDTablesSize[key];
-	ReadInternalTableD(internalBufrTable, n);
-
-
-      } catch (const std::out_of_range& e) {
-	Radx::addErrStr(_errString, "", "ERROR - TableMap::", true);
-	Radx::addErrInt(_errString, "   unknown BUFR table: ", generatingCenter , true);
-	cerr << _errString;
-	throw _errString.c_str();
-      }
-      */
-      
-      
+  
   switch (masterTableVersion) {
   case 2:
     //                  bufrtabb_2
@@ -470,14 +441,7 @@ of entries?? and put this switch in the calling function???
     break;
     
   case 16:
-    /// works!
-    /*
-    internalBufrTable = BufrTables::bufrtabb_16;
-    n = BufrTables::N_bufrtabb_16;
-    ReadInternalTableB(internalBufrTable, n);
-    */
     //                  bufrtabb_16
-    
     internalBufrTable = BufrTables::bufrtabb_16;
     n = BufrTables::N_bufrtabb_16;
     ReadInternalTableB(internalBufrTable, n);
@@ -495,17 +459,19 @@ of entries?? and put this switch in the calling function???
 
 
   switch (generatingCenter) {
+  case 7:
+    internalBufrTable = BufrTables::localtabb_7_1;
+    n = BufrTables::N_localtabb_7_1;
+    ReadInternalTableB(internalBufrTable, n);
+    internalBufrTable = BufrTables::localtabd_7_1;
+    n = BufrTables::N_localtabd_7_1;
+    ReadInternalTableD(internalBufrTable, n);
+    break;
   case 41:
     //                  localtabb_41
-    /*
-    internalBufrTable = BufrTables::localtabb_41_2; // localtabb_41_2;
-    n = BufrTables::N_localtabb_41_2; // N_localtabb_41_2;
-    ReadInternalTableB(internalBufrTable, n);
-    */
-
     internalBufrTable = BufrTables::localtabb_41_2;
     n = BufrTables::N_localtabb_41_2;
-   ReadInternalTableB(internalBufrTable, n);
+    ReadInternalTableB(internalBufrTable, n);
     internalBufrTable = BufrTables::localtabd_41_2;
     n = BufrTables::N_localtabd_41_2;
     ReadInternalTableD(internalBufrTable, n);
@@ -628,7 +594,9 @@ of entries?? and put this switch in the calling function???
     Radx::addErrInt(_errString, "ERROR: unrecognized BUFR local table generating center ",
 		    generatingCenter , true);
     Radx::addErrInt(_errString, "  local table version ", localTableVersion , true);
-    throw _errString.c_str();
+    cerr << _errString << endl;
+    cerr << " continuing with master table only " << endl;
+    // throw _errString.c_str();
     }
   } // end if !filled() 
   return 0;

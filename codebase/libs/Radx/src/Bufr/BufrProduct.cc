@@ -86,6 +86,10 @@ void BufrProduct::allocateSpace(unsigned int n) {
   }
 }
 
+void BufrProduct::haveTheTable(TableMap *tableMap) {
+  _bufrTable = tableMap;
+}
+
 //size_t BufrProduct::getMaxBinsAlongTheRadial() {
 //  return _maxBinsAlongTheRadial;
 //}
@@ -267,6 +271,13 @@ void BufrProduct::addData(unsigned char value) {
     dataBuffer[nData++] = value;
   else 
     throw "out of space in dataBuffer";
+}
+
+bool BufrProduct::StuffIt(unsigned short, string fieldName, string &value) {
+  Radx::addErrStr(_errString, "", "ERROR - BufrFile::StuffIt", true);
+  Radx::addErrStr(_errString, "", "  calling base function ", true);
+  throw _errString.c_str();
+  return false;
 }
 
 // Put the info in the correct storage location

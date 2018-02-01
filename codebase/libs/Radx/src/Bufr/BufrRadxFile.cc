@@ -883,12 +883,16 @@ void BufrRadxFile::getFieldNamesWithData(const string &path) {
   //_file.clear();
   _pathInUse = path;
   try {
+    // try reading multiple BUFR files in one physical file???
+
     _file.openRead(_pathInUse); // path);
+    while (!_file.eof()) {
     _file.readSection0();
     _file.readSection1();
     _file.readDataDescriptors();
     _file.readData(); 
     _file.readSection5();
+    }
     _file.close();
 
 

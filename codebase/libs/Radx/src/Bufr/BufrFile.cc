@@ -48,6 +48,7 @@
 #include <Radx/RadxStr.hh>
 #include "BufrProductGeneric.hh"
 #include "BufrProduct_204_31_X.hh"
+#include "BufrProduct_gsi.hh"
 
 using namespace std;
 
@@ -203,6 +204,13 @@ int BufrFile::openWrite(const string &path,
 }
 */
 
+
+bool BufrFile::eof() {
+  return feof(_file);
+}
+
+
+
 //////////////////////////////////////
 // close netcdf file if open
 // remove error object if it exists
@@ -245,6 +253,15 @@ int BufrFile::openRead(const string &path)
     Radx::addErrStr(_errString, "  ", strerror(errNum), true);
     throw _errString.c_str();
   }
+
+  // prime the pump
+  currentBufferLengthBytes = ReplenishBuffer();
+  currentBufferLengthBits = currentBufferLengthBytes * 8;
+  currentBufferIndexBits = 0;
+  if (currentBufferLengthBits <= 0) {
+    return -1;
+  }
+
   //currentTemplate->reset(); 
   return 0;
 }
@@ -260,30 +277,44 @@ int BufrFile::readSection0()
 
   /******* decode section 0 */
   if (_verbose) fprintf (stderr, "Input file header:\n");
-  char temp[250];
+  //char temp[250];
   // read through file, finding data blocks
 
   // read ID
     
-  char id[8];
-  memset(id, 0, 8);
+  //  char id[8];
+  //memset(id, 0, 8);
+
   try {
+    /*
     if (fread(id, 1, 4, _file) != 4) {
       int errNum = errno;
       sprintf(temp, "  Cannot read BUFR starting code: %s", strerror(errNum));
       throw temp;
     }
+    */
+    string value;
+    do {
+      value = ExtractText(8);
+    } while (value.find("B") == string::npos);
  
-    _numBytesRead += 4;
-
+    value = ExtractText(8*3);
+    if (value.find("UFR") == string::npos)
+      throw "Not a BUFR file"; // "  Cannot read BUFR starting code";
+    //_numBytesRead += 4;
+    /*
     string idStr(id);
     if ((id[0] != 'B') || (id[1] != 'U') || (id[2] != 'F') || (id[3] != 'R')) {
       throw "Not a BUFR file";
     }
-    
+    */
+
     // read length of message in octets
     // the length is 24 bits (3 bytes)
     Radx::ui32 nBytes;
+    nBytes = ExtractIt(24);
+    
+    /*
     unsigned char id2[4];
     if (fread(id2, 1, 3, _file) != 3) {
       int errNum = errno;
@@ -297,26 +328,28 @@ int BufrFile::readSection0()
     nBytes = nBytes | id2[2];
     nBytes = nBytes | (id2[1] << 8);
     nBytes = nBytes | (id2[0] << 16);
-
+    */
     if (_verbose) cerr << "nBytes " << nBytes << endl;
     _s0.nBytes = nBytes;
 
     Radx::ui08 bufr_edition;
-
+    bufr_edition = ExtractIt(8);
+    /*
     if (fread(&bufr_edition, 1, 1, _file) != 1) {
       int errNum = errno;
       sprintf(temp, "  Cannot read BUFR edition: %s", strerror(errNum));
       throw temp;
-    }
+      }*/
+
     _s0.edition = bufr_edition;   
     if (_verbose) printf("BUFR edition number %d\n", bufr_edition); 
 
-    _numBytesRead += 1;
+    //_numBytesRead += 1;
     
   } catch (const char *msg) {
     close();
     Radx::addErrStr(_errString, "ERROR - ", "BufrFile::_readSection0()", true);
-    Radx::addErrStr(_errString, "  File path: ", _pathInUse, true);
+    //    Radx::addErrStr(_errString, "  File path: ", _pathInUse, true);
     Radx::addErrStr(_errString, "", msg, true);
     throw _errString.c_str();
   }
@@ -337,8 +370,10 @@ void BufrFile::printSection0(ostream &out) {
 int BufrFile::readSection1() {
   if (_s0.edition >= 4) 
     readSection1_edition4();
-  else if (_s0.edition == 2)
+  else if (_s0.edition == 2) 
     readSection1_edition2();
+  else if (_s0.edition == 3)
+    readSection1_edition3();
   else {
     close();
     Radx::addErrStr(_errString, "ERROR - ", "BufrFile::_readSection1()", true);
@@ -354,14 +389,18 @@ int BufrFile::readSection1_edition4()
   /******* decode section 1 */
   if (_verbose) fprintf (stderr, "Input file header:\n");
 
+  try {
   // read ID
   // allocate this space based on the length of section read (octets 1 - 3)
-  Radx::ui08 id[4];
-  memset(id, 0, 4);
+  //Radx::ui08 id[4];
+  //memset(id, 0, 4);
     
   // read length of message in octets
   // the length is 24 bits (3 bytes)
   Radx::ui32 nBytes;
+  nBytes = ExtractIt(24);
+
+  /*
   if (fread(id, 1, 3, _file) != 3) {
     int errNum = errno;
     Radx::addErrStr(_errString, "ERROR - ", "BufrFile::_readSection1()", true);
@@ -374,11 +413,12 @@ int BufrFile::readSection1_edition4()
   nBytes = nBytes | id[2];
   nBytes = nBytes | (id[1] << 8);
   nBytes = nBytes | (id[0] << 16);
+  */
   Radx::ui32 sectionLen;
   sectionLen = nBytes;
 
   if (_verbose) cerr << "sectionLen " << sectionLen << endl;
-
+  /*
   Radx::ui08 *buffer;
   buffer = (Radx::ui08 *) calloc(sectionLen, sizeof(Radx::ui08));
   memset(buffer, 0, sectionLen);
@@ -392,21 +432,14 @@ int BufrFile::readSection1_edition4()
     close();
     return -1;
   }
-
+  */
 
   //Radx::ui08 bufrMasterTable;
   //bufrMasterTable = buffer[0];  // not sure if this is needed??
   // check 1st bit of the octect for optional section 2
-  bool section2 = buffer[6]; //  & 0x80; 
-  _s1.hasSection2 = section2;
-  if (_verbose) {
-    cerr << "section 2? " ;
-    if (section2) {
-      cerr << "yes" << endl;
-    } else {
-      cerr << "no" << endl;
-    }
-  }
+  //bool section2 = buffer[6]; //  & 0x80; 
+  //_s1.hasSection2 = section2;
+
   Radx::ui16 yearOfCentury;
   Radx::ui08 month;
   Radx::ui08 day;
@@ -414,17 +447,26 @@ int BufrFile::readSection1_edition4()
   Radx::ui08 minute;
   Radx::ui08 seconds;
 
+  if (_s0.edition != 4)
+    throw "ERROR - Wrong version of section1 called ";
 
-  if (_s0.edition >= 4) {
-    _s1.masterTable = buffer[0];
-    _s1.generatingCenter = buffer[1] << 8 | (buffer[2]);
-    _s1.originatingSubcenter = buffer[3] << 8 | (buffer[4]);
-    _s1.updateSequenceNumber = buffer[5]; // original BUFR message
-    _s1.dataCategoryType = buffer[7];
-    _s1.localTableVersionNumber = buffer[11];
-    _s1.masterTableVersionNumber = buffer[10];
+    _s1.masterTable = ExtractIt(8); //  buffer[0];
+    _s1.generatingCenter =  ExtractIt(16); // buffer[1] << 8 | (buffer[2]);
+    _s1.originatingSubcenter =  ExtractIt(16); // buffer[3] << 8 | (buffer[4]);
+    _s1.updateSequenceNumber =  ExtractIt(8); // buffer[5]; // original BUFR message
+    _s1.hasSection2 = ExtractIt(1); ExtractIt(7);
+    _s1.dataCategoryType = ExtractIt(8); //  buffer[7];
+    _s1.localTableVersionNumber =  ExtractIt(8); // buffer[11];
+    _s1.masterTableVersionNumber =  ExtractIt(8); // buffer[10];
 
     if (_verbose) {
+      cerr << "section 2? " ;
+      if (_s1.hasSection2) {
+        cerr << "yes" << endl;
+      } else {
+        cerr << "no" << endl;
+      }
+ 
       printf("master table: %d\n", _s1.masterTable);
       printf("generating center: %d\n", _s1.generatingCenter);
       printf("originating subcenter: %d\n", _s1.originatingSubcenter);
@@ -433,21 +475,21 @@ int BufrFile::readSection1_edition4()
       printf("local table version: %d\n", _s1.localTableVersionNumber);
       printf("master table version: %d\n", _s1.masterTableVersionNumber);
     }
-    yearOfCentury = 0;
-    yearOfCentury = yearOfCentury |  buffer[13];
-    yearOfCentury = yearOfCentury | (buffer[12] << 8);
-    month = buffer[14] | 0;
-    day = buffer[15] | 0;
-    hour = buffer[16] | 0;
-    minute = buffer[17] | 0;
-    seconds = buffer[18] | 0;
+    yearOfCentury =  ExtractIt(16); // 0;
+    //yearOfCentury = yearOfCentury |  buffer[13];
+    //yearOfCentury = yearOfCentury | (buffer[12] << 8);
+    month =  ExtractIt(8); // buffer[14] | 0;
+    day =  ExtractIt(8); // buffer[15] | 0;
+    hour =  ExtractIt(8); // buffer[16] | 0;
+    minute =  ExtractIt(8); // buffer[17] | 0;
+    seconds =  ExtractIt(8); // buffer[18] | 0;
     _s1.year = yearOfCentury;
     _s1.month = month;
     _s1.day = day;
     _s1.hour = hour;
     _s1.minute = minute;
     _s1.seconds = seconds;
-  }   
+     
 
   hdr_year = yearOfCentury;
   hdr_month = month;
@@ -455,9 +497,18 @@ int BufrFile::readSection1_edition4()
   if (_verbose) printf("year-month-day hour:minute:sec\n%d-%d-%d %d:%d:%d\n",
 		       yearOfCentury, month, day, hour, minute, seconds); 
     
-  _numBytesRead += sectionLen;
-  free(buffer);
+  //_numBytesRead += sectionLen;
+  //free(buffer);
   return 0;
+  } catch (char *msg) {
+    int errNum = errno;
+    Radx::addErrStr(_errString, "ERROR - ", "BufrFile::_readSection1()", true);
+    Radx::addErrStr(_errString, "  Cannot read data", strerror(errNum), true);
+    Radx::addErrStr(_errString, "  File path: ", _pathInUse, true);
+    // free(buffer);
+    // close();
+    throw _errString;
+  }
 }
 
 int BufrFile::readSection1_edition2()
@@ -468,6 +519,127 @@ int BufrFile::readSection1_edition2()
 
   // read ID
   // allocate this space based on the length of section read (octets 1 - 3)
+  //Radx::ui08 id[4];
+  // memset(id, 0, 4);
+    
+  // read length of message in octets
+  // the length is 24 bits (3 bytes)
+/*
+  Radx::ui32 nBytes;
+  if (fread(id, 1, 3, _file) != 3) {
+    int errNum = errno;
+    Radx::addErrStr(_errString, "ERROR - ", "BufrFile::_readSection1()", true);
+    Radx::addErrStr(_errString, "  Cannot read length of message in octets", strerror(errNum), true);
+    Radx::addErrStr(_errString, "  File path: ", _pathInUse, true);
+    close();
+    return -1;
+  }
+  nBytes = 0;
+  nBytes = nBytes | id[2];
+  nBytes = nBytes | (id[1] << 8);
+  nBytes = nBytes | (id[0] << 16);
+  */
+  Radx::ui32 sectionLen;
+  sectionLen = ExtractIt(24);
+  if (_verbose) cerr << "sectionLen " << sectionLen << endl;
+
+  /*
+  Radx::ui08 *buffer;
+  buffer = (Radx::ui08 *) calloc(sectionLen, sizeof(Radx::ui08));
+  memset(buffer, 0, sectionLen);
+
+  if (fread(buffer, 1, sectionLen-3, _file) != sectionLen-3) {
+    int errNum = errno;
+    Radx::addErrStr(_errString, "ERROR - ", "BufrFile::_readSection1()", true);
+    Radx::addErrStr(_errString, "  Cannot read data", strerror(errNum), true);
+    Radx::addErrStr(_errString, "  File path: ", _pathInUse, true);
+    free(buffer);
+    close();
+    return -1;
+  }
+  */
+  // check 1st bit of the octect for optional section 2
+  /*
+  bool section2 = buffer[4]; //  & 0x80; 
+  _s1.hasSection2 = section2;
+  if (_verbose) {
+    cerr << "section 2? " ;
+    if (section2) {
+      cerr << "yes" << endl;
+    } else {
+      cerr << "no" << endl;
+    }
+  }
+  */
+  Radx::ui16 yearOfCentury;
+  Radx::ui08 month;
+  Radx::ui08 day;
+  Radx::ui08 hour;
+  Radx::ui08 minute;
+  Radx::ui08 seconds;
+
+
+  if (_s0.edition != 2) 
+    throw "ERROR - Wrong version of section1 called ";
+  _s1.masterTable = ExtractIt(8); //  buffer[0];
+  _s1.generatingCenter =  ExtractIt(16); // buffer[1] << 8 | (buffer[2]);
+  _s1.originatingSubcenter = 0; // buffer[1] << 8 | (buffer[2]);
+  _s1.updateSequenceNumber =  ExtractIt(8); // buffer[3]; // original BUFR message
+  _s1.hasSection2 = ExtractIt(1); ExtractIt(7);
+  _s1.dataCategoryType =  ExtractIt(8); //buffer[5];
+  _s1.localTableVersionNumber =  ExtractIt(8); //buffer[8];
+  _s1.masterTableVersionNumber =  ExtractIt(8); //buffer[7];
+
+  if (_verbose) {
+    cerr << "section 2? " ;
+    if (_s1.hasSection2) {
+      cerr << "yes" << endl;
+    } else {
+      cerr << "no" << endl;
+    }
+    printf("master table: %d\n", _s1.masterTable);
+    printf("generating center: %d\n", _s1.generatingCenter);
+    printf("originating subcenter: %d\n", _s1.originatingSubcenter);
+    printf("update sequence number: %d\n", _s1.updateSequenceNumber);
+    printf("data category type: %d\n", _s1.dataCategoryType);
+    printf("local table version: %d\n", _s1.localTableVersionNumber);
+    printf("master table version: %d\n", _s1.masterTableVersionNumber);
+  }
+  // yearOfCentury = 0;
+  yearOfCentury = ExtractIt(8); // yearOfCentury |  buffer[9];
+  //  yearOfCentury = yearOfCentury | (buffer[12] << 8);
+  month =  ExtractIt(8); // buffer[10] | 0;
+  day =  ExtractIt(8); // buffer[11] | 0;
+  hour =  ExtractIt(8); // buffer[12] | 0;
+  minute =  ExtractIt(8); // buffer[13] | 0;
+  seconds = 0; // buffer[18] | 0;
+  _s1.year = yearOfCentury;
+  _s1.month = month;
+  _s1.day = day;
+  _s1.hour = hour;
+  _s1.minute = minute;
+  _s1.seconds = seconds;  
+
+  hdr_year = yearOfCentury;
+  hdr_month = month;
+  hdr_day = day;
+  if (_verbose) printf("year-month-day hour:minute:sec\n%d-%d-%d %d:%d:%d\n",
+		       yearOfCentury, month, day, hour, minute, seconds); 
+    
+  //_numBytesRead += sectionLen;
+  //free(buffer);
+  return 0;
+}
+
+int BufrFile::readSection1_edition3()
+{
+
+  /******* decode section 1 */
+  if (_verbose) fprintf (stderr, "Input file header:\n");
+
+  // read ID
+  // allocate this space based on the length of section read (octets 1 - 3)
+  /*
   Radx::ui08 id[4];
   memset(id, 0, 4);
     
@@ -486,11 +658,12 @@ int BufrFile::readSection1_edition2()
   nBytes = nBytes | id[2];
   nBytes = nBytes | (id[1] << 8);
   nBytes = nBytes | (id[0] << 16);
+  */
   Radx::ui32 sectionLen;
-  sectionLen = nBytes;
+  sectionLen = ExtractIt(24); //nBytes;
 
   if (_verbose) cerr << "sectionLen " << sectionLen << endl;
-
+  /*
   Radx::ui08 *buffer;
   buffer = (Radx::ui08 *) calloc(sectionLen, sizeof(Radx::ui08));
   memset(buffer, 0, sectionLen);
@@ -504,8 +677,9 @@ int BufrFile::readSection1_edition2()
     close();
     return -1;
   }
-
+  */
   // check 1st bit of the octect for optional section 2
+  /*
   bool section2 = buffer[4]; //  & 0x80; 
   _s1.hasSection2 = section2;
   if (_verbose) {
@@ -516,6 +690,7 @@ int BufrFile::readSection1_edition2()
       cerr << "no" << endl;
     }
   }
+  */
   Radx::ui16 yearOfCentury;
   Radx::ui08 month;
   Radx::ui08 day;
@@ -524,16 +699,25 @@ int BufrFile::readSection1_edition2()
   Radx::ui08 seconds;
 
 
-  if (_s0.edition == 2) {
-    _s1.masterTable = buffer[0];
-    _s1.generatingCenter = buffer[1] << 8 | (buffer[2]);
-    _s1.originatingSubcenter = 0; // buffer[1] << 8 | (buffer[2]);
-    _s1.updateSequenceNumber = buffer[3]; // original BUFR message
-    _s1.dataCategoryType = buffer[5];
-    _s1.localTableVersionNumber = buffer[8];
-    _s1.masterTableVersionNumber = buffer[7];
+  // if (_s0.edition == 2) {
+    _s1.masterTable = ExtractIt(8); //buffer[0];
+    _s1.originatingSubcenter = ExtractIt(8); // 0; // buffer[1] << 8 | (buffer
+    _s1.generatingCenter = ExtractIt(8); // buffer[1] << 8 | (buffer[2]);
+    _s1.updateSequenceNumber = ExtractIt(8); // buffer[3]; // original BUFR message
+    _s1.hasSection2 = ExtractIt(1); ExtractIt(7); 
+    _s1.dataCategoryType = ExtractIt(8); // buffer[5];
+ExtractIt(8);  // data sub-category
+    _s1.masterTableVersionNumber = ExtractIt(8); // buffer[7];
+    _s1.localTableVersionNumber = ExtractIt(8); // buffer[8];
+
 
     if (_verbose) {
+      cerr << "section 2? " ;
+      if (_s1.hasSection2) {
+        cerr << "yes" << endl;
+      } else {
+        cerr << "no" << endl;
+      }
       printf("master table: %d\n", _s1.masterTable);
       printf("generating center: %d\n", _s1.generatingCenter);
       printf("originating subcenter: %d\n", _s1.originatingSubcenter);
@@ -542,21 +726,23 @@ int BufrFile::readSection1_edition2()
       printf("local table version: %d\n", _s1.localTableVersionNumber);
       printf("master table version: %d\n", _s1.masterTableVersionNumber);
     }
-    yearOfCentury = 0;
-    yearOfCentury = yearOfCentury |  buffer[9];
+    //yearOfCentury = 0;
+    yearOfCentury = ExtractIt(8); // yearOfCentury |  buffer[9];
     //  yearOfCentury = yearOfCentury | (buffer[12] << 8);
-    month = buffer[10] | 0;
-    day = buffer[11] | 0;
-    hour = buffer[12] | 0;
-    minute = buffer[13] | 0;
+    month = ExtractIt(8); // buffer[10] | 0;
+    day = ExtractIt(8); // buffer[11] | 0;
+    hour = ExtractIt(8); // buffer[12] | 0;
+    minute = ExtractIt(8); // buffer[13] | 0;
     seconds = 0; // buffer[18] | 0;
+    ExtractIt(8); // Reserved for local use by ADP centers
+
     _s1.year = yearOfCentury;
     _s1.month = month;
     _s1.day = day;
     _s1.hour = hour;
     _s1.minute = minute;
     _s1.seconds = seconds;
-  }   
+    //}   
 
   hdr_year = yearOfCentury;
   hdr_month = month;
@@ -564,10 +750,11 @@ int BufrFile::readSection1_edition2()
   if (_verbose) printf("year-month-day hour:minute:sec\n%d-%d-%d %d:%d:%d\n",
 		       yearOfCentury, month, day, hour, minute, seconds); 
     
-  _numBytesRead += sectionLen;
-  free(buffer);
+  //_numBytesRead += sectionLen;
+  //free(buffer);
   return 0;
 }
+
 
 int BufrFile::readSection5() {
   // read the last section 
@@ -647,6 +834,7 @@ int BufrFile::readDataDescriptors() {  // read section 3
   if (_verbose) cerr << "Reading section 3 ...\n";
 
     // allocate this space based on the length of section read (octets 1 - 3)
+  /*
     Radx::ui08 id[4];
     memset(id, 0, 4);
     
@@ -665,11 +853,12 @@ int BufrFile::readDataDescriptors() {  // read section 3
     nBytes = nBytes | id[2];
     nBytes = nBytes | (id[1] << 8);
     nBytes = nBytes | (id[0] << 16);
-    Radx::ui32 sectionLen;
-    sectionLen = nBytes;
+  */
+    Radx::ui32 sectionLenOctets;
+    sectionLenOctets = ExtractIt(24); // nBytes;
 
-    if (_verbose) cerr << "sectionLen " << sectionLen << endl;
-
+    if (_verbose) cerr << "sectionLen in octets " << sectionLenOctets << endl;
+    /*
     Radx::ui08 *buffer;
     buffer = (Radx::ui08 *) calloc(sectionLen, sizeof(Radx::ui08));
     memset(buffer, 0, sectionLen);
@@ -683,22 +872,68 @@ int BufrFile::readDataDescriptors() {  // read section 3
       close();
       throw _errString.c_str();
     }
+    */
 
     // octet 4 is reserved and set to zero
+    //Radx::ui32 dummy;
+    //dummy = 
+    ExtractIt(8);
+
+    // octets 5-6 contain the number of data subsets
     // get the number of data subsets/descriptors
     Radx::ui16 nDataSubsets;
+    nDataSubsets = ExtractIt(16);
+    /*
     nDataSubsets = 0;
     nDataSubsets = nDataSubsets | buffer[2];
     nDataSubsets = nDataSubsets | (buffer[1] << 8);
-    if (_verbose) printf("nDataSubsets = %d\n", nDataSubsets);
+    */
+    // sometimes the number of data subsets does not agree
+    // with the length of the section, so go with the
+    // length of the section over the number of data subsets
+    Radx::ui16 nDataSubsetsCalc = (sectionLenOctets - 7) /2;
+    if (_verbose) printf("nDataSubsets = %d\n", nDataSubsetsCalc);
+    if (nDataSubsets != nDataSubsetsCalc) {
+      if (_verbose) {
+        printf("WARNING - The number of data subsets: %u\n", (unsigned int) nDataSubsets);
+        printf(" does not agree with the number calculated from the section length: %u\n", (unsigned int) nDataSubsetsCalc);
+        printf("  Using the number calculated from the section length.\n");
+      }
+      nDataSubsets = nDataSubsetsCalc;
+    }
 
-    // determine observed and compressed info
+    // octet 7: determine observed and compressed info
     //bool observedData = buffer[3] & 0x80;
     //bool compressedData = buffer[3] & 0x40;
-
+    ExtractIt(8);
     // read the descriptors and keep them in a list for
     // traversal later 
 
+    int i;
+    //int startOffset = 4;
+    // remember, we need to have two bytes remaining
+    // in the buffer in order to grab another descriptor
+
+    for (i=0; i<nDataSubsets; i++) {
+      // get and decode the descriptors
+      DescriptorKey d;
+      // f is the first 2 bits
+      Radx::ui08 f;
+      f =  ExtractIt(2); //buffer[i] >> 6;  // 1100 0000
+      d.f = f;
+      d.x = ExtractIt(6); // buffer[i] & 0x3f; // 0011 1111
+      d.y = ExtractIt(8); //  buffer[i + 1];
+      if (_verbose) printf("f x y: %d %d %d\n", d.f, d.x, d.y);
+      unsigned short key;
+      key = TableMapKey().EncodeKey(d.f, d.x, d.y);
+      _descriptorsToProcess.insert(_descriptorsToProcess.begin(), key);
+    }
+
+    // read any extra octets
+    unsigned int extraOctets;
+    extraOctets = sectionLenOctets - (nDataSubsets*2 + 7);
+    ExtractIt(8*extraOctets);
+    /*
     int i;
     int startOffset = 4;
     // remember, we need to have two bytes remaining
@@ -719,11 +954,15 @@ int BufrFile::readDataDescriptors() {  // read section 3
     }
     free(buffer);
     _numBytesRead += sectionLen;
+    */
 
     // TODO: determine which type of product to instaniate based
     // on the data descriptors of section 3
     if (matches_204_31_X(_descriptorsToProcess)) {
       currentTemplate = new BufrProduct_204_31_X();
+    } else if (matches_gsi(_descriptorsToProcess)) {
+      currentTemplate = new BufrProduct_gsi();
+      currentTemplate->haveTheTable(&tableMap);
     } else { 
       currentTemplate = new BufrProductGeneric();
     }
@@ -752,11 +991,31 @@ bool BufrFile::matches_204_31_X(vector<unsigned short> &descriptors) {
   }
 }
 
+bool BufrFile::matches_gsi(vector<unsigned short> &descriptors) {
+  // UGH! the descriptors are in reverse order.  Blah!  Need to
+  // access the last ones.
+  int n = descriptors.size();
+  if (n >= 3) { 
+    // $1 = std::vector of length 15, capacity 16 = {30, 7937, 16640, 34112, 49155, 7937, 17664, 49156, 7937, 16640, 3, 2, 1, 
+    //  7937, 17152}
+
+    if ((descriptors[n-1] == 17152) && (descriptors[n-2] == 7937) &&
+	((descriptors[n-3] == 1) || (descriptors[n-3] == 2))) {
+      return true; 
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}
+
 // necessary for entry into this function:
 // the file pointer must be positioned at the start of 
 // section 4.
 int BufrFile::readData() {  // read section 4
 
+  /*
   // prime the pump
   currentBufferLengthBytes = ReplenishBuffer();
   currentBufferLengthBits = currentBufferLengthBytes * 8;
@@ -764,6 +1023,11 @@ int BufrFile::readData() {  // read section 4
   if (currentBufferLengthBits <= 0) {
     return -1;
   }
+  */
+  // read and discard the 4 bytes of data
+  // length of section in octets (octets 1-3)
+  // set to zero (reserved) (octet 4)
+  ExtractIt(8*4);
 
   try {
     if (!tableMap.filled())
@@ -780,11 +1044,12 @@ int BufrFile::readData() {  // read section 4
 }
 
 int BufrFile::ReplenishBuffer() {
-
+  /*
   if (_firstBufferReplenish) { // (first) {
     fread(_dataBuffer, 1, 4, _file);
     _firstBufferReplenish = false;
   }
+  */
   int nBytesRead;
   nBytesRead = fread(_dataBuffer, 1, MAX_BUFFER_SIZE_BYTES, _file);
 
@@ -1642,6 +1907,15 @@ int BufrFile::_descend(DNode *tree) {
 	  // grab the text value
 	  p->dataType = DNode::STRING;
 	  p->somejunksvalue = _tempStringValue;
+	  if (!currentTemplate->StuffIt(des, val1._descriptor.fieldName,
+                                        _tempStringValue )) {
+	      Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
+	      Radx::addErrStr(_errString, "Unrecognized descriptor: ",
+			      val1._descriptor.fieldName, true);
+	      // since this is just a warning, just print the message, no need
+	      // to exit
+	      cerr << _errString << endl;
+          }
 	} else {
 	  valueFromData = ApplyNumericFloat(val1);
 	  if (!currentTemplate->StuffIt(des, val1._descriptor.fieldName, valueFromData)) {
@@ -1672,13 +1946,28 @@ int BufrFile::_descend(DNode *tree) {
 	// decode the key into f(x,y) and check y for different action
         unsigned char f,x,y;
         TableMapKey().Decode(des, &f, &x, &y);
-        if (x == 1) {
-	  // apply the modifications
-	  _addBitsToDataWidth = max(0, y - 128);
-          if (_verbose) printf(" increasing dataWith by %d\n", _addBitsToDataWidth);
-	} else {
+        switch(x) {
+          case 1:
+            // apply the modifications
+            _addBitsToDataWidth = max(0, y - 128);
+            if (_verbose) printf(" increasing dataWith by %d\n", _addBitsToDataWidth);
+            break;
+          case 5:
+            // YYY characters (CCITT International Alphabet No. 5) are
+            // inserted as a data field of YYY x 8 bits in length.
+            // read the bytes ... 
+            //string whatIsThis;
+            //whatIsThis = ExtractIt(y*8);
+            TableMapElement *dummy;
+            int dataWidth;
+            dataWidth = y * 8;
+            dummy = new TableMapElement("DUMMY", 0, "CCITT IA5", 0, dataWidth);
+            Apply(*dummy);
+            delete dummy;
+            break;
+	  default:
 	  // TODO: fix up this error message
-          throw "Table C descriptor is not implemented ";
+          cerr << "Table C descriptor is not implemented " << endl;
 	}
 	p = p->next;
 

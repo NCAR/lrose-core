@@ -26,8 +26,15 @@ def onlyDashes(x):
     return not bool(re.match('^-+$', x))
 
 def addToTable(key, dictionary, value):
+#    dictionary.setdefault(key,[]) + value
     if key in dictionary:
-        print "OH NO! key ", key, " is already in dictionary"
+        currentvalue = dictionary[key]
+        if (isinstance(currentvalue[0], basestring)):
+            dictionary[key] = [currentvalue[0] + ' ' +  value[0]]
+        else:
+            dictionary[key] = currentvalue.append(value)
+        print "OH NO! key ", key, ",", dictionary[key], " is already in dictionary"
+        print "   ... adding value ", value
     else:
         dictionary[key] = value
 
@@ -36,6 +43,8 @@ def main():
     # print command line arguments
     for arg in sys.argv[1:]:
         print arg
+
+    decorate = False
 
 
     inputFile = sys.argv[1]
@@ -48,7 +57,8 @@ def main():
     # for line in open("/scr/sci/dixon/data/bufr/src/reflectivity/prepobs_prep.bufrtable",'r'):
     for line in open(inputFile):    #  "/scr/sci/dixon/data/bufr/src/radialwind/bufr_radar.table",'r'):
         if (line[0]  == "*"):
-            print "skipping comment ", line
+            if decorate:
+                print "skipping comment ", line
         else:
             tokens = line.split("|")
             # remove empty items in list and remove leading and trailing whitespace
@@ -73,16 +83,18 @@ def main():
                     addToTable(cleanLine[0], tableF, cleanLine[1:])
                     # tableF[cleanLine[0]] = cleanLine[1:]
             else:
-                print "not key, value pair: ", cleanLine
+                if decorate:
+                    print "not key, value pair: ", cleanLine
 
 
 
 
     # print the dictionary
-    print "Table A"
-    print "{:<8} {:<15}".format('Key','Value')
-    for k, v in tableA.iteritems():
-        print "{:<8} {:<15}".format(k, v)
+    if True: # decorate:
+        print "Table A"
+        print "{:<8} {:<15}".format('Key','Value')
+        for k, v in tableA.iteritems():
+            print "{:<8} {:<15}".format(k, v)
 
     print "Table B"
     print "{:<8} {:<15}".format('Key','Value')
@@ -95,33 +107,39 @@ def main():
             something = ";".join(scaleBaseU)
         else:
             something = "MISSING"
-        print k, ":"
-        print "{:<8};{:<15};{:<15}".format(formatThis(v[0]), str.strip(v[1]), something)
+        if (something != "MISSING"):
+            if decorate:
+                print k, ":"
+            print "\"{:<8};{:<15};{:<8}\",".format(formatThis(v[0]), str.strip(v[1]), something)
 
     print "Table D"
     print "{:<8} {:<15}".format('Key','Value')
     for k, v in tableD.iteritems():
+        description = ""
         if k in tableB:
             num = tableB[k][0]
+            description = tableB[k][1]
         elif k in tableA:
-            num = tableA[k][0]
+            num = tableA[k][0].replace('A', '3')
+            description = tableA[k][1]
         else:
             num = k
         # decode each element of list
         v1 = v[0].split()
         v2 = filter(None, map(mystrip, v1))
         v3 = map(decode, v2)
-        print k, ":"
-        print "{:<8}; {:<15}".format(formatThis(num), formatThis(v3[0]))  # map(formatThis,v3)
+        # print k, ":"
+        print "\"{:<8}; {:<8}; {:<15}\",".format(formatThis(num), formatThis(v3[0]), description)  # map(formatThis,v3)
         for n in v3[1:]:
-            print "{:<8}; {:<15}".format(" ;  ;   ", formatThis(n))
+            print "\"{:<8}; {:<8}\",".format(" ;  ;   ", formatThis(n))
             #    print "{:<8} ; {:<15}".format(num, v3)
             #    print "{:<8} {:<15}".format(k, v)
-
-    print "Table F"
-    print "{:<8} {:<15}".format('Key','Value')
-    for k, v in tableF.iteritems():
-        print "{:<8} {:<15}".format(k, v)
+    
+    if decorate:
+        print "Table F"
+        print "{:<8} {:<15}".format('Key','Value')
+        for k, v in tableF.iteritems():
+            print "{:<8} {:<15}".format(k, v)
 
 
 if __name__ == "__main__":

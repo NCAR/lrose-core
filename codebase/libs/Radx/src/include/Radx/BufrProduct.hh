@@ -40,6 +40,7 @@
 #include <Radx/RadxBuf.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/Radx.hh>
+#include <Radx/TableMap.hh>
 #include <cstdlib>
 #include <vector>
 #include <map>
@@ -87,9 +88,12 @@ public:
 
   void allocateSpace(unsigned int n);
 
+  void haveTheTable(TableMap *tableMap);
+
   virtual void addData(unsigned char value);
 
   virtual bool StuffIt(unsigned short, string fieldName, double value);
+  virtual bool StuffIt(unsigned short, string fieldName, string &value);
 
   virtual double *decompressData();
   virtual float *decompressDataFl32();
@@ -227,6 +231,8 @@ protected:
   //string stationId;
   string _fieldName;  // TODO:  resolve this with _fieldName in BufrFile; I just put this here to get by the compiler
   string _errString;
+
+  TableMap *_bufrTable;
 
 };
 #endif

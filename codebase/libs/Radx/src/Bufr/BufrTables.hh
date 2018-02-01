@@ -102,6 +102,9 @@ public:
 
   // local table B
 
+  static const char *localtabb_7_1[];
+  static const size_t N_localtabb_7_1;
+
   static const char *localtabb_41_2[];
   static const size_t N_localtabb_41_2;
   
@@ -140,6 +143,9 @@ public:
   static const size_t N_localtabb_65535_6;
 
   // local table D
+
+  static const char *localtabd_7_1[];
+  static const size_t N_localtabd_7_1;
 
   static const char *localtabd_41_2[];
   static const size_t N_localtabd_41_2;

@@ -29,6 +29,7 @@ HDRS = \
 	../include/BufrProduct.hh \
 	BufrProductGeneric.hh \
 	BufrProduct_204_31_X.hh \
+	BufrProduct_gsi.hh \
 	../include/Radx/TableMapKey.hh \
 	../include/Radx/TableMapElement.hh \
 	../include/Radx/TableMap.hh \
@@ -40,6 +41,7 @@ CPPC_SRCS = \
 	BufrProduct.cc \
 	BufrProductGeneric.cc \
 	BufrProduct_204_31_X.cc \
+	BufrProduct_gsi.cc \
 	TableMapKey.cc \
 	TableMapElement.cc \
 	TableMap.cc \

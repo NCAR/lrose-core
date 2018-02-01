@@ -61,7 +61,7 @@ BufrProductGeneric::~BufrProductGeneric()
 
 // Put the info in the correct storage location
 // and take care of any setup that needs to happen
-bool BufrProductGeneric::StuffIt(unsigned short, string name, double value) {
+bool BufrProductGeneric::StuffIt(unsigned short des, string name, double value) {
   bool ok = true;
 
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);

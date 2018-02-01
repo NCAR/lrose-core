@@ -89,7 +89,7 @@ public:
   void addData(unsigned char value);
 
 
-  bool StuffIt(unsigned short, string fieldName, double value);
+  bool StuffIt(unsigned short des, string fieldName, double value);
 
   double *decompressData();
   float *decompressDataFl32();

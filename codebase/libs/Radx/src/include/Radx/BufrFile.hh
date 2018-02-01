@@ -133,6 +133,7 @@ public:
   int readSection0();
   int readSection1();
   int readSection1_edition2();
+  int readSection1_edition3();
   int readSection1_edition4();
   int readDataDescriptors();
   int readDescriptorTables();
@@ -140,6 +141,7 @@ public:
   int readSection5();
 
   bool matches_204_31_X(vector<unsigned short> &descriptors);
+  bool matches_gsi(vector<unsigned short> &descriptors);
 
   int print(ostream &out, bool printRays, bool printData);
   void printSection0(ostream &out);
@@ -152,6 +154,7 @@ public:
 
   void close();
 
+  bool eof();
 
   size_t getNumberOfSweeps();
   size_t getTimeDimension();

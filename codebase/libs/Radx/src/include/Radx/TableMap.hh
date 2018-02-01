@@ -65,6 +65,11 @@ public:
   int ImportTablesFromPath(unsigned int masterTableVersion, unsigned int generatingCenter,
 			   unsigned int localTableVersion, char *tablePath);
 
+  void AddDescriptorFromBufrFile(unsigned char f, unsigned char x,
+                                         unsigned char y, const string fieldName,  
+                                         int scale, const string units,
+                                         int referenceValue, int dataWidthBits);
+
   TableMapElement Retrieve(unsigned short key);
   bool filled();
   //  bool isComment(string &line);
