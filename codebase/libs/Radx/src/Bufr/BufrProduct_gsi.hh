@@ -36,7 +36,7 @@
 #ifndef BufrProduct_gsi_HH
 #define BufrProduct_gsi_HH
 
-#include <Radx/BufrProductGeneric.hh>
+#include "BufrProductGeneric.hh"
 #include <Radx/RadxBuf.hh>
 #include <Radx/RadxTime.hh>
 #include <cstdlib>
