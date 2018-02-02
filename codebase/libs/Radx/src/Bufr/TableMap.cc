@@ -47,7 +47,8 @@ void TableMap::AddDescriptorFromBufrFile(unsigned char f, unsigned char x,
       key = key | x;
       key = key << 8;
       key = key | y;
-      if (_debug) printf("key = %d (x%x) for f;x;y %d;%d;%d %s \n", key, key, f,x,y,
+      //if (_debug) 
+        printf("Adding key = %d (x%x) for f;x;y %d;%d;%d %s \n", key, key, f,x,y,
                          fieldName.c_str()); 
       //int scale;
       //int referenceValue;
@@ -194,12 +195,10 @@ int TableMap::ReadInternalTableD(const char **internalBufrTable,
     throw "ERROR: cannot read BUFR table ";
   }
 
-  //for (std::string line; std::getline(fileind, line); ) {
   for (size_t i=0; i<n; i++) { 
     std::string line(internalBufrTable[i]);
 
     if ((line[0] != '#') && (line[0] != '\r')) {  // this is a comment skip it
-    //if (!isComment(line)) { 
      
       if (_debug) std::cout << line << std::endl;
       std::vector<std::string> tokens;
@@ -207,7 +206,6 @@ int TableMap::ReadInternalTableD(const char **internalBufrTable,
 
       if (0) {
         for (vector<std::string>::const_iterator s = tokens.begin(); s!= tokens.end(); ++s) {
-	  //for (string s: tokens) {
           cout << *s << endl; 
         }
       }

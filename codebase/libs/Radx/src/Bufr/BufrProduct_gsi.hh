@@ -59,6 +59,9 @@ public:
   
   virtual ~BufrProduct_gsi();
 
+  void ConstructDescriptor(string &desF, string &desX, 
+       string &desY, string &value, string &des_fieldName, char *line);
+
   void addData(unsigned char value);
 
   //bool StuffIt(unsigned short des, string fieldName, double value);
@@ -82,6 +85,9 @@ public:
   unsigned char des_f; 
   unsigned char des_x;
   unsigned char des_y;
+  string desF;
+  string desX;
+  string desY;
   string des_fieldName; 
   int des_scale;
   string des_units;

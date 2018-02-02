@@ -315,6 +315,19 @@ private:
   void prettyPrintTree(ostream &out, DNode *tree, int level);
   void printHeader();
   void freeTree(DNode *tree);
+
+  // subfunctions of _descend 
+
+  void _visitTableBNode(DNode *p, bool *compressionStart);
+  void _visitTableCNode(DNode *p);
+  void _visitVariableRepeater(DNode *p, unsigned char x);
+  void _visitFixedRepeater(DNode *p,  unsigned char x, unsigned char y);
+  void _visitTableDNode(DNode *p);
+  void _visitReplicatorNode(DNode *p);
+  void _verbosePrintTree(DNode *tree);
+  void _verbosePrintNode(unsigned short des);
+
+
   int prettyPrintLevel;
 
 #define  MAX_BUFFER_SIZE_BYTES  2048
@@ -326,6 +339,8 @@ private:
   int currentBufferIndexBits;
   int nOctetsRead;
   //int currentBufferIndexBytes;
+
+  int _bufrMessageCount;
 
   std::vector<unsigned short> _descriptorsToProcess;
 
@@ -364,6 +379,7 @@ protected:
 private:
 
   void clear();
+  void clearForNextMessage();
 
   // error string
 

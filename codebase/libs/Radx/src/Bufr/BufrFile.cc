@@ -109,6 +109,20 @@ void BufrFile::clear()
 
 }
 
+// clear and reset things for the next BUFR message
+// in the same file.
+void BufrFile::clearForNextMessage()
+{
+  _errString.clear();
+  freeTree(GTree);
+  _descriptorsToProcess.clear();
+  //nOctetsRead = 0;
+  _addBitsToDataWidth = 0;
+  if (currentTemplate != NULL) 
+    delete currentTemplate;
+  currentTemplate = NULL;
+}
+
 void BufrFile::setDebug(bool state) { 
   _debug = state; 
   //currentTemplate->setDebug(state);
@@ -243,6 +257,7 @@ int BufrFile::openRead(const string &path)
 {
 
   close();
+  _bufrMessageCount = 0;
 
   _file = fopen(path.c_str(), "r");
   
@@ -274,7 +289,8 @@ int BufrFile::openRead(const string &path)
 
 int BufrFile::readSection0()
 {
-
+ 
+  clearForNextMessage();
   /******* decode section 0 */
   if (_verbose) fprintf (stderr, "Input file header:\n");
   //char temp[250];
@@ -344,7 +360,8 @@ int BufrFile::readSection0()
     _s0.edition = bufr_edition;   
     if (_verbose) printf("BUFR edition number %d\n", bufr_edition); 
 
-    //_numBytesRead += 1;
+    _bufrMessageCount += 1;
+    printf("Processing BUFR message %d\n", _bufrMessageCount);
     
   } catch (const char *msg) {
     close();
@@ -1652,7 +1669,7 @@ void BufrFile::printTree(DNode *tree, int level) {
   p = tree;
   if (level == 0) printf("tree: \n");
   while (p!=NULL) {
-    for (int i=0; i<level; i++) printf(" "); 
+    for (int i=0; i<level; i++) printf("  "); 
     // printf("+(%d) delayed_rep %u\n", p->des, p->delayed_repeater);
     prettyPrintNode(cout, p, level);
     q=p->children;
@@ -1700,7 +1717,9 @@ void BufrFile::prettyPrintNode(ostream &out, DNode *p, int level) {
 
   for (int i=0; i<level; i++) printf(" ");
   TableMapKey().Decode(p->des, &f, &x, &y);
-  printf("+(%1d %02d %03d) \n", (unsigned int) f, (unsigned int) x, (unsigned int) y);
+  printf("+(%1d %02d %03d) ", (unsigned int) f, (unsigned int) x, (unsigned int) y);
+  printf(" self=%zu ",(size_t) p);
+  if (p!=NULL) printf(" next->%zu children->%zu \n", (size_t) p->next, (size_t) p->children); 
 }
 
 // TableMapElement gives us information about the data
@@ -1846,6 +1865,7 @@ int BufrFile::moveChildren(DNode *parent, int howManySiblings) {
 	  return 0;
 }
 
+/*
 // Print the tree while we are traversing, since this is 
 // the best way to display the values along with the the descriptors.
 // The values are stored in a separate structure.
@@ -1964,6 +1984,13 @@ int BufrFile::_descend(DNode *tree) {
             dummy = new TableMapElement("DUMMY", 0, "CCITT IA5", 0, dataWidth);
             Apply(*dummy);
             delete dummy;
+            if (!currentTemplate->StuffIt(des, "", _tempStringValue )) {
+	      Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
+	      Radx::addErrStr(_errString, "Unrecognized descriptor: ", "DUMMY", true);
+	      // since this is just a warning, just print the message, no need
+	      // to exit
+	      cerr << _errString << endl;
+            }
             break;
 	  default:
 	  // TODO: fix up this error message
@@ -1999,7 +2026,8 @@ int BufrFile::_descend(DNode *tree) {
           // get the number of repeats from section 4 data
 	  Radx::ui32 nRepeats; // actually read this from the data section
           nRepeats = Apply(tableMap.Retrieve(delayed_replication_descriptor));
-          if (_verbose) printf("nrepeats from Data = %u\n", nRepeats);
+          //if (_verbose) 
+            printf("nrepeats from Data = %u\n", nRepeats);
           currentTemplate->storeReplicator(nRepeats);
           p->ivalue = nRepeats;
           if (p->children == NULL) {
@@ -2009,7 +2037,7 @@ int BufrFile::_descend(DNode *tree) {
           // the state determines which counters to increment & decrement
           // It's up to the product to deal with the space allocation as needed
           for (unsigned int i=0; i<nRepeats; i++) {
-            if (((i%1000)==0) && (_verbose)) 
+            //if (((i%1000)==0) && (_verbose)) 
               printf("%d out of %d repeats\n", i+1, nRepeats);
             _descend(p->children);
 	  }
@@ -2086,6 +2114,321 @@ int BufrFile::_descend(DNode *tree) {
   }
   return 0;
 }
+*/
+
+void BufrFile::_verbosePrintTree(DNode *tree) {
+  if (_verbose) {
+    if ((tree->des != 7878) && (tree->des !=7681)) { 
+      // don't print Byte element of compressed array
+      // don't print Pixel value (4 bits)
+      printf("\nTraversing ... \n");
+      printTree(tree,0);
+    }
+  }
+}
+
+void BufrFile::_visitTableBNode(DNode *p, bool *compressionStart) {
+
+  // if the node is from table b, retrieve the data; apply any transformations;
+  //   insert into temporary structure for saving
+
+  //unsigned char f, x, y;
+  unsigned short des;
+  des = p->des;
+
+  TableMapElement val1;
+  val1 = tableMap.Retrieve(des);
+
+  Radx::fl32 valueFromData;
+  if (val1.IsText()) {
+    // THE NEXT TWO LINES ARE CRUCIAL!! DO NOT REMOVE IT!!!
+    // we don't care about the return value when the descriptor is text
+    Apply(val1); 
+    // grab the text value
+    p->dataType = DNode::STRING;
+    p->somejunksvalue = _tempStringValue;
+    if (!currentTemplate->StuffIt(des, val1._descriptor.fieldName,
+                                  _tempStringValue )) {
+      Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
+      Radx::addErrStr(_errString, "Unrecognized descriptor: ",
+                      val1._descriptor.fieldName, true);
+      // since this is just a warning, just print the message, no need
+      // to exit
+      cerr << _errString << endl;
+    }
+  } else {
+    valueFromData = ApplyNumericFloat(val1);
+    if (!currentTemplate->StuffIt(des, val1._descriptor.fieldName, valueFromData)) {
+      if ((des != 7681) && 0) {
+        Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
+        Radx::addErrStr(_errString, "Unrecognized descriptor: ",
+                        val1._descriptor.fieldName, true);
+        // since this is just a warning, just print the message, no need
+        // to exit
+        cerr << _errString << endl;
+      }
+    }
+    if (val1._descriptor.fieldName.find("Compression method") != string::npos) {
+      *compressionStart = true;
+    }
+    // store the value
+    p->dataType = DNode::FLOAT;
+    p->fvalue = valueFromData;
+  }
+}
+
+void BufrFile::_visitTableCNode(DNode *p) {
+
+  // if the node is from table c, 
+  // we are only handling one descriptor from table c ...
+  // decode the key into f(x,y) and check y for different action
+  unsigned char f,x,y;
+  unsigned short des;
+  des = p->des;
+  TableMapKey().Decode(des, &f, &x, &y);
+  switch(x) {
+    case 1:
+      // apply the modifications
+      _addBitsToDataWidth = max(0, y - 128);
+      if (_verbose) printf(" increasing dataWith by %d\n", _addBitsToDataWidth);
+      break;
+    case 5:
+      // YYY characters (CCITT International Alphabet No. 5) are
+      // inserted as a data field of YYY x 8 bits in length.
+      // read the bytes ... 
+      //string whatIsThis;
+      //whatIsThis = ExtractIt(y*8);
+      TableMapElement *dummy;
+      int dataWidth;
+      dataWidth = y * 8;
+      dummy = new TableMapElement("DUMMY", 0, "CCITT IA5", 0, dataWidth);
+      Apply(*dummy);
+      delete dummy;
+      if (!currentTemplate->StuffIt(des, "", _tempStringValue )) {
+        Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
+        Radx::addErrStr(_errString, "Unrecognized descriptor: ", "DUMMY", true);
+        // since this is just a warning, just print the message, no need
+        // to exit
+        cerr << _errString << endl;
+      }
+      break;
+    default:
+      // TODO: fix up this error message
+      cerr << "Table C descriptor is not implemented " << endl;
+  }
+}
+
+void BufrFile::_visitVariableRepeater(DNode *p, unsigned char x) {
+
+  // there will be a special "delayed replication", y=0
+  unsigned short delayed_replication_descriptor;
+  if (p->children == NULL) { // if we haven't been here before ...
+    DNode *delayed_rep_node;
+    delayed_rep_node = p->next;
+    delayed_replication_descriptor = delayed_rep_node->des;
+    // remove the delayed replication descriptor node from the list
+    _deleteAfter(p);   
+    // and save it in the node itself
+    p->delayed_repeater = delayed_replication_descriptor;
+  } else {
+    delayed_replication_descriptor = p->delayed_repeater;
+  }
+  // get the number of repeats from section 4 data
+  Radx::ui32 nRepeats; // actually read this from the data section
+  nRepeats = Apply(tableMap.Retrieve(delayed_replication_descriptor));
+  //if (_verbose) 
+  printf("nrepeats from Data = %u\n", nRepeats);
+  if (nRepeats == 0)
+    printf("HERE<<<<< \n");
+  currentTemplate->storeReplicator(nRepeats);
+  p->ivalue = nRepeats;
+  if (p->children == NULL) {
+    moveChildren(p, x);
+  }
+  if (0) {
+        // for debugging
+    printf(" after moving children: current state of tree; p = %zu\n", (size_t) p);
+        printTree(p,0);
+        printf(" after moving children: end current state of tree\n");
+        // end for debugging
+  }
+
+  // transition state; set location levels
+  // the state determines which counters to increment & decrement
+  // It's up to the product to deal with the space allocation as needed
+  for (unsigned int i=0; i<nRepeats; i++) {
+    //if (((i%1000)==0) && (_verbose)) 
+    printf("%d out of %d repeats\n", i+1, nRepeats);
+    _descend(p->children);
+  }
+  //if (_verbose) 
+  printf("-- end repeat %d\n", nRepeats);
+  // transition state; set location levels
+  currentTemplate->trashReplicator();
+
+}
+
+
+void BufrFile::_visitFixedRepeater(DNode *p, unsigned char x, unsigned char y) {
+  if (p->children == NULL) {
+    moveChildren(p, x);
+  }
+  for (int i=0; i<y; i++) {
+    if (((i%1000)==0) && (_verbose))
+      printf("%d out of %d repeats\n", i+1, y);
+    _descend(p->children);
+  }
+  if (_verbose) printf("-- end repeat\n");
+
+}
+
+void BufrFile::_visitTableDNode(DNode *p) {
+
+  unsigned short des;
+  des = p->des;
+
+  if (_verbose) 
+    printf(" another node\n");
+  // pop/remove the element from the list; it is being replaced
+  // if the node is another node,
+  // look up the expansions and insert them...
+  TableMapElement val1;
+  val1 = tableMap.Retrieve(des);
+	 
+  vector<unsigned short> theList;
+  theList = val1._listOfKeys;
+
+  // replace the contents of this node with the first element of the list
+  p->des = theList.front();
+  // insert the remaining elements after this node
+
+  theList.erase(theList.begin());
+  if (theList.size() > 0) {
+    DNode *newList = buildTree(theList, true);
+    DNode *save;
+    save = p->next;
+    p->next = newList;
+    // find the end of the new list;
+    DNode *h, *t;
+    h = newList;
+    t = newList->next;
+    while (t != NULL) {
+      h = t;
+      t = t->next;
+    }
+    h->next = save;
+  }
+  if (_verbose) printTree(p, 0);
+}
+
+
+void BufrFile::_visitReplicatorNode(DNode *p) {
+
+  unsigned short des;
+  des = p->des;
+
+  if (_verbose) 
+    printf(" replicator\n");
+
+  // if the node is a replicator, e.g. 1;2;0 or 1;3;5
+  // decode the key into f(x,y) and check y for different action
+  unsigned char f,x,y;
+  TableMapKey().Decode(des, &f, &x, &y);
+  bool variable_repeater = false;
+  if (y == 0) variable_repeater = true;
+      
+  if (variable_repeater) {
+    _visitVariableRepeater(p, x);
+  } else {           // must be a fixed repeater
+    _visitFixedRepeater(p, x, y);
+  } // end else fixed repeater
+  if (_verbose) printTree(p, 0);
+}
+
+void BufrFile::_verbosePrintNode(unsigned short des) {
+  unsigned char f, x, y;
+  if (_verbose) {
+    if ((des != 7878)  && (des !=7681)) {
+      TableMapKey().Decode(des, &f, &x, &y);
+      printf("visiting f(x,y): %1d(%02d,%03d) ", (unsigned int) f,
+             (unsigned int) x, (unsigned int) y);  
+    }     
+  }
+}
+
+// Print the tree while we are traversing, since this is 
+// the best way to display the values along with the the descriptors.
+// The values are stored in a separate structure.
+int BufrFile::_descend(DNode *tree) {
+
+  _verbosePrintTree(tree);
+
+  unsigned short des;
+  DNode *p;
+  p = tree;
+  bool compressionStart = false;
+
+  unsigned char f,x,y;
+
+  try {
+    // for each descriptor in the list
+    while (p != NULL ) {
+
+      printf("\np != NULL ... \n");
+      printTree(p,0);
+
+      des = p->des;
+      TableMapKey key(des);
+      TableMapKey().Decode(des, &f, &x, &y);
+      // visit the node
+
+      //_verbosePrintNode(des);
+
+      if (key.isTableBEntry()) {  // a leaf
+        _visitTableBNode(p, &compressionStart);
+	p = p->next;
+      } else if (key.isTableCEntry()) {  // a leaf
+        _visitTableCNode(p);
+	p = p->next;
+      } else if (key.isReplicator()) {
+        _visitReplicatorNode(p);
+        if (0) {
+        // for debugging
+          printf(" current state of tree; p = %zu\n", (size_t) p);
+        printTree(p,0);
+        printf(" end current state of tree\n");
+        // end for debugging
+        }
+        p=p->next;
+      } else if (key.isAnotherNode()) {
+        _visitTableDNode(p);
+      } else {
+        Radx::addErrStr(_errString, "", "ERROR - BufrFile::_descend", true);
+	Radx::addErrInt(_errString, "   unrecognized table map key: ", des, true);
+	throw _errString.c_str();
+      }
+    } // end while p!= NULL
+    if (compressionStart) {
+      currentTemplate->createSweep();
+      compressionStart = false;
+    }
+  } catch (const std::out_of_range& e) {
+    Radx::addErrStr(_errString, "", "ERROR - BufrFile::_descend", true);
+    char desString[200];
+    sprintf(desString, "unknown descriptor: (%u;%u;%u) ", f,x,y);
+    Radx::addErrInt(_errString, desString, des, true);
+    cerr << _errString;
+    throw _errString.c_str();
+  } catch (const char *msg) {
+    Radx::addErrStr(_errString, "", "ERROR - BufrFile::_descend", true);
+    Radx::addErrStr(_errString, "  ", msg, true);
+    cerr << _errString;
+    throw _errString.c_str();
+  }
+  printf("Leaving _descend\n");
+  return 0;
+}
+
 
 /////////////////////////////////////
 // Print contents of Bufr file read

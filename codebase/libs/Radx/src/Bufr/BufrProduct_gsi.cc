@@ -58,6 +58,27 @@ BufrProduct_gsi::~BufrProduct_gsi()
 {
 }
 
+
+void BufrProduct_gsi::ConstructDescriptor(string &desF,
+  string &desX, string &desY, string &value,
+  string &des_fieldName, char *line) {
+
+  //char line[2048];
+  char f; string x; string y;
+  if (value.size() >=6) {
+    f = value.at(0);
+    x = value.substr(1,2);
+    y = value.substr(3,3);
+    //x[0] = value.at(1); x[1] = value.at(2);
+    //y[0] = value.at(3); y[1] = value.at(4); y[2] = value.at(5);
+
+  }
+          
+  sprintf(line, "%1s;%2s;%3s; %1c;%2s;%3s; %s",
+          desF.c_str(), desX.c_str(), desY.c_str(), f,x.c_str(),y.c_str(),
+          des_fieldName.c_str());
+
+}
 /*
                                   Descriptor       width(bits)   scale      units  reference  value
 +(1 03 000)  repeats 15
@@ -99,12 +120,15 @@ bool BufrProduct_gsi::StuffIt(unsigned short des, string name, string &value) {
       break;
     case 10:
       des_f = atoi(value.c_str());
+      desF = value;
       break;
     case 11:
       des_x = atoi(value.c_str());
+      desX = value;
       break;
     case 12:
       des_y = atoi(value.c_str());
+      desY = value;
       break;
     case 13:
       des_fieldName = value;
@@ -133,8 +157,57 @@ bool BufrProduct_gsi::StuffIt(unsigned short des, string name, string &value) {
       break;
     case 20:
       des_dataWidthBits = atoi(value.c_str());
-      _bufrTable->AddDescriptorFromBufrFile(des_f, des_x, des_y, des_fieldName, des_scale,
-                                         des_units, des_referenceValue, des_dataWidthBits);
+      _bufrTable->AddDescriptorFromBufrFile(des_f, des_x, des_y, des_fieldName,
+           des_scale, des_units, des_referenceValue, des_dataWidthBits);
+      break;
+    case 34112: // 2;5;64 insert as data field
+      // 1;5;0 0;31;1 3;0;3 2;5;64 1;1;0 0;31;1 0;0;30 
+      // are grouped together because they define new descriptors
+      // and expansions (Table D entries) that need to be 
+      // added or defined.
+      // 1;5;0 0;31;1 3;0;3 specifies f,x,y
+      // 2;5;64 specifies the descriptor name
+      // 1;1;0 0;31;1 0;0;30 specifies the expansion descriptors
+      // add the descriptor to the tables after each expansion descriptor
+      // Follow the format of the BUFR tables:
+      // f;x;y f2;x2;y2  for the first element 
+      //  ; ;  f3;x3;y3  for subsequent elements
+      // 
+      des_fieldName = value;
+      break;
+    case 30: // 0;0;30
+      // could accumulate info into a string and then pass string
+      // to ReadInternalTableD(const char **table, size=1) ?? <-- try this
+      // or write a special function to take individual f,x,y, f2,x2,y2?
+      char line[2048];
+      ConstructDescriptor(desF, desX, desY, value, des_fieldName, line);
+      /*
+        char line[2048];
+        char f[1]; char x[2]; char y[3];
+        if (value.size() >=6) {
+          f = value.at(0);
+          x[0] = value.at(1); x[1] = value.at(2);
+          y[0] = value.at(3); y[1] = value.at(4); y[2] = value.at(5);
+        }
+          
+        sprintf(line, "%1u;%2u;%3u; %1c;%2s;%3s; %s",
+                des_f, des_x, des_y, f,x,y, des_fieldName.c_str());
+      */
+      printf("adding new descriptor %s\n", line);
+      // TODO: accumulate lines in a vector until we have all of the
+      // expanded descriptors; then add to the table
+      /*
+      lines.push_back(line);
+// when we are at the end of the list; or the beginning of a new list
+// convert the lines vector to a const char ** and add to table D
+// or just write a new function that takes a vector and adds the 
+// lines in it to table D
+       */ 
+      desF = "" ;
+      desX = "";
+      desY = "";
+      
+      // TODO: add the descriptor to the table!!
       break;
     default:
       ok = false;
@@ -152,9 +225,19 @@ bool BufrProduct_gsi::StuffIt(unsigned short des, string name, string &value) {
 // - number of byte elements in data section 
 void BufrProduct_gsi::storeReplicator(unsigned int value) {
     // do generic data storage into dictionary
-  currentAccumulator = new vector<unsigned char>(); // (value);
+  // NULL => create
+  // not NULL:
+  //   empty ==> reuse
+  //   full  ==> create
+  bool okToCreate = false;
+  if (currentAccumulator == NULL) okToCreate = true;
+  else if (currentAccumulator->size() > 0) okToCreate = true;
+  else okToCreate = false;
+
+  if (okToCreate) {
+    currentAccumulator = new vector<unsigned char>();
+  }
     // TODO: how to handle repeaters that have multiple descriptors in them???
- 
 }
 
 void BufrProduct_gsi::trashReplicator() {
@@ -166,13 +249,13 @@ void BufrProduct_gsi::trashReplicator() {
     printf(" %x ", *i);
     printf("\n");
   }
-    //std::cout << *i << ' ';
-  //}
+  
   // do generic data storage into dictionary
-  genericStore.push_back(currentAccumulator);
+  if (currentAccumulator->size() > 0) {
+    genericStore.push_back(currentAccumulator);
+  }
+
   int n;
-  //  int nDataValues;
-  //  nDataValues = currentAccumulator->size();
   n = genericStore.size();
   if (n >= 6) {
     if (_verbose) {
@@ -249,22 +332,26 @@ double *BufrProduct_gsi::decompressData() {
 
 float *BufrProduct_gsi::decompressDataFl32() {
 
-  // convert the data to float
+  float *temp32 = NULL;
+  // if there are data ...
+  if (genericStore.size() > 0) {
+    // convert the data to float
 
-  std::vector<unsigned char> *uCharVec;
-  uCharVec = genericStore.back();
-  int n = uCharVec->size();
-  float *temp32 = (float *) malloc(n*sizeof(float));
-  for (int i = 0; i < n; ++i)
-    temp32[i] = (float) uCharVec->at(i);
+    std::vector<unsigned char> *uCharVec;
+    uCharVec = genericStore.back();
+    int n = uCharVec->size();
+    temp32 = (float *) malloc(n*sizeof(float));
+    for (int i = 0; i < n; ++i)
+      temp32[i] = (float) uCharVec->at(i);
 
-  if (_debug) {
-    printf("after conversion to float ...\n");
-    printf ("--> %g %g %g\n", temp32[0], temp32[1], temp32[2]);
-    //unsigned long nFloats;
-    //nFloats = nBinsAlongTheRadial * nAzimuths;
-    //printf (" ... %g %g %g <--\n", temp32[200], 
-    //	    temp32[201], temp32[202]);
+    if (_debug) {
+      printf("after conversion to float ...\n");
+      printf ("--> %g %g %g\n", temp32[0], temp32[1], temp32[2]);
+      //unsigned long nFloats;
+      //nFloats = nBinsAlongTheRadial * nAzimuths;
+      //printf (" ... %g %g %g <--\n", temp32[200], 
+      //	    temp32[201], temp32[202]);
+    }
   }
 
   return temp32;
