@@ -705,6 +705,18 @@ paramdef double {
 
 paramdef boolean {
   p_default = false;
+  p_descr = "Option to threshold ZDR using SNR.";
+  p_help = "If true, we will only compute ZDR if the SNR in both the H and V co-polar channels exceeds this value. See 'min_snr_db_for_zdr'.";
+} threshold_zdr_using_snr;
+
+paramdef double {
+  p_default = -7.0;
+  p_descr = "Min SNR for computing ZDR (dB).";
+  p_help = "If the SNR is below this threshold for either the H or V co-polar channels, ZDR will be set to missing. See 'threshold_zdr_using_snr'.";
+} min_snr_db_for_zdr;
+
+paramdef boolean {
+  p_default = false;
   p_descr = "Option to override the LDR corrections in the calibration data.";
   p_help = "If true, the parameters 'ldrh_correction_db' and 'ldrv_correction_db' will override the ldr corrections in the calibration data.";
 } override_cal_ldr_corrections;
@@ -720,6 +732,18 @@ paramdef double {
   p_descr = "LDRV correction to be applied to all calibrations (dB).";
   p_help = "See 'override_cal_ldr_corrections'.";
 } ldr_correction_db_v;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to threshold LDR using SNR.";
+  p_help = "If true, we will only compute LDR if the SNR in both the co- and cross-polar channels exceeds this value. Since the cross-polar channel is generally the weaker channel, it is the SNR on the cross-polar channel that will be limiting. See 'min_snr_db_for_ldr'.";
+} threshold_ldr_using_snr;
+
+paramdef double {
+  p_default = -7.0;
+  p_descr = "Min SNR for computing LDR (dB).";
+  p_help = "For LDR, the cross polar channel is the weaker return. Therefore effectively this threshold will be applied to the cross channel. If the SNR is below this threshold for either the co- or cross-polar channels, LDR will be set to missing. See 'threshold_ldr_using_snr'.";
+} min_snr_db_for_ldr;
 
 paramdef boolean {
   p_default = false;

@@ -552,6 +552,13 @@ void Beam::_prepareForComputeMoments()
     _mom->setSpectrumWidthMethod(RadarMoments::WIDTH_METHOD_HYBRID);
   }
 
+  if (_params.threshold_zdr_using_snr) {
+    _mom->setMinSnrDbForZdr(_params.min_snr_db_for_zdr);
+  }
+  if (_params.threshold_ldr_using_snr) {
+    _mom->setMinSnrDbForLdr(_params.min_snr_db_for_ldr);
+  }
+
   // compute windows for FFTs
 
   _computeWindows();
