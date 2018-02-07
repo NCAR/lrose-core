@@ -140,7 +140,7 @@ void DerFieldCalcs::computeDerived(size_t nGates,
     _tempK[igate] = tempK[igate];
     _presHpa[igate] = presHpa[igate];
   }
-  
+
   // set bins per gate
 
   _nBinsPerGate = 1;
@@ -163,18 +163,20 @@ void DerFieldCalcs::computeDerived(size_t nGates,
   // vol depol
 
   for(size_t igate=0;igate<_nGates;igate++) {
-    _volDepol[igate] = _computeVolDepol(_crossRate[igate], 
-                                        _combRate[igate]);
-    _volDepolF[igate] = _computeVolDepol(_crossRateF[igate], 
-                                         _combRateF[igate]);
+    _volDepol[igate] = _computeVolDepol(_combRate[igate],
+                                        _crossRate[igate]);
+    _volDepolF[igate] = _computeVolDepol(_combRateF[igate],
+                                         _crossRateF[igate]);
   }
   
   // backscatter ratio
   
   for(size_t igate=0;igate<_nGates;igate++) {
     _backscatRatio[igate] = _computeBackscatRatio(_combRate[igate], 
+                                                  _crossRate[igate],
                                                   _molRate[igate]);
     _backscatRatioF[igate] = _computeBackscatRatio(_combRateF[igate], 
+                                                   _crossRateF[igate],
                                                    _molRate[igate]);
   }
   
@@ -838,8 +840,8 @@ void DerFieldCalcs::_initDerivedArrays()
 /////////////////////////////////////////////////////////////////
 // volume depolarization
 
-Radx::fl32 DerFieldCalcs::_computeVolDepol(double crossRate,
-                                           double combineRate)
+Radx::fl32 DerFieldCalcs::_computeVolDepol(double combineRate,
+                                           double crossRate)
 {
 
   if (crossRate < 0.0 || (crossRate + combineRate) <= 0.0) {
@@ -861,6 +863,7 @@ Radx::fl32 DerFieldCalcs::_computeVolDepol(double crossRate,
 // backscatter ratio
 
 Radx::fl32 DerFieldCalcs::_computeBackscatRatio(double combineRate,
+                                                double crossRate,
                                                 double molRate)
 {
 
@@ -868,7 +871,7 @@ Radx::fl32 DerFieldCalcs::_computeBackscatRatio(double combineRate,
     return Radx::missingFl32;
   }
 
-  double ratio = combineRate / molRate;
+  double ratio = (combineRate + crossRate) / (molRate * 1.0);
   if (ratio < 1.0) {
     return Radx::missingFl32;
   }
@@ -914,7 +917,7 @@ double DerFieldCalcs::_computeBetaMSonde(double pressHpa, double tempK)
     return NAN;
   }
 
-  double val = _BmsFactor * (pressHpa / (tempK * _BoltzmannConst));
+  double val = _BmsFactor * ((pressHpa * 100.0) / (tempK * _BoltzmannConst));
   if (!finite(val)) {
     return NAN;
   }

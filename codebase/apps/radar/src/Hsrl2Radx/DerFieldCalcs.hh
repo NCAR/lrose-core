@@ -244,11 +244,13 @@ private:
   
   // compute volume depolarization
 
-  Radx::fl32 _computeVolDepol(double crossRate, double combineRate);
+  Radx::fl32 _computeVolDepol(double combineRate, double crossRate);
   
   // compute backscatter ratio
 
-  Radx::fl32 _computeBackscatRatio(double combineRate, double molRate);
+  Radx::fl32 _computeBackscatRatio(double combineRate,
+                                   double crossRate,
+                                   double molRate);
   
   // compute particle depolarization
   Radx::fl32 _computePartDepol(Radx::fl32 volDepol, 
