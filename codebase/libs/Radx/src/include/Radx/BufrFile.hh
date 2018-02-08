@@ -96,6 +96,7 @@ public:
   /// Set verbose debugging on/off.
   ///
   void setVerbose(bool state); 
+  void setVeryVerbose(bool state); 
 
   void setTablePath(char *path);
 
@@ -142,6 +143,7 @@ public:
 
   bool matches_204_31_X(vector<unsigned short> &descriptors);
   bool matches_gsi(vector<unsigned short> &descriptors);
+  bool _isGsi;
 
   int print(ostream &out, bool printRays, bool printData);
   void printSection0(ostream &out);
@@ -217,7 +219,7 @@ private:
   string _trim(const std::string& str,
 	       const std::string& whitespace = " \t");
   Radx::ui32 Apply(TableMapElement f);
-  Radx::si32 ApplyNumeric(TableMapElement f);
+  //Radx::si32 ApplyNumeric(TableMapElement f);
   Radx::fl32 ApplyNumericFloat(TableMapElement f);
   //  int TraverseOriginal(vector<unsigned short> descriptors);
   int TraverseNew(vector<unsigned short> descriptors);
@@ -229,6 +231,8 @@ private:
   BufrProduct *currentTemplate;
   char *_tablePath;
   int _addBitsToDataWidth;
+  int _addBitsToDataScale;
+  int _multiplyFactorForReferenceValue;
 
   //@}
 
@@ -285,6 +289,8 @@ private:
   Section0 _s0;
   Section1 _s1; 
   Radx::ui32 _numBytesRead;
+  Radx::ui32 _nBitsRead;
+  bool inSection5;
   /*
   enum DNodeDataType {INT, FLOAT, STRING, OTHER};
 

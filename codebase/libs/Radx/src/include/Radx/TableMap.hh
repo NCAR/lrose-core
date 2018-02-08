@@ -70,6 +70,7 @@ public:
                                          int scale, const string units,
                                          int referenceValue, int dataWidthBits);
 
+  void AddToTableD(std::vector <string>  descriptors);
   TableMapElement Retrieve(unsigned short key);
   bool filled();
   //  bool isComment(string &line);

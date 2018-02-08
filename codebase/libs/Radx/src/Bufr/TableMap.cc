@@ -245,6 +245,63 @@ int TableMap::ReadInternalTableD(const char **internalBufrTable,
   return 0;
 
 }
+void TableMap::AddToTableD(std::vector <string>  descriptors) {
+
+  unsigned short key;
+  vector<unsigned short> currentList(0);
+
+  // read table d which has pointers
+
+  for (std::vector<string>::iterator line = descriptors.begin();
+       line != descriptors.end(); line++) {
+
+    char firstChar = line->at(0);
+    if ((firstChar != '#') && (firstChar != '\r')) {  // this is a comment skip it
+     
+      if (_debug) std::cout << *line << std::endl;
+      std::vector<std::string> tokens;
+      tokens = split(*line, ';');
+
+      if (0) {
+        for (vector<std::string>::const_iterator s = tokens.begin(); s!= tokens.end(); ++s) {
+          cout << *s << endl; 
+        }
+      }
+      if (tokens.size() >= 6) { // handle blank lines and lines with only ;;;;;; 
+	unsigned short subkey;      
+	//if ((tokens[0].compare("  ") == 0) || 
+	//  (tokens[0].size() == 0)) { // this is a continuation of the list
+	// handle " ; ;  ; f;x;y" && ";;;f;x;y" as useful
+	// and    " ; ;  ;  ; ; ; comment" && ";;;;;;comment" as useless
+	if (isWhiteSpace(tokens[0]) && !isWhiteSpace(tokens[3])) {
+	  subkey = TableMapKey().EncodeKey(tokens[3], tokens[4], tokens[5]);
+	  currentList.push_back(subkey);
+	} else { // we have a new list starting
+	  if (!currentList.empty()) {
+	    table[key] = TableMapElement(currentList);
+	  }
+	  key = TableMapKey().EncodeKey(tokens[0], tokens[1], tokens[2]);
+	  currentList.clear();
+
+	  subkey = TableMapKey().EncodeKey(tokens[3], tokens[4], tokens[5]);
+	  currentList.push_back(subkey);
+	}
+      } else { // end if more than 6 tokens
+	if (!isWhiteSpace(*line)) {
+	  cerr << " discarding line: " << *line << endl;
+	  // << " from file: " <<
+	  //fileName 
+	  //   <<  endl;
+	}
+      }
+    } // end if comment line
+  }  // end for each line
+  // hanlde the end case; check if we have one more key,value to insert
+  if (!currentList.empty()) {
+    table[key] = TableMapElement(currentList);
+  }
+
+}
 
 int TableMap::ReadTableD(string fileName) {
 

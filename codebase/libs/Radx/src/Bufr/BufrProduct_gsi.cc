@@ -34,6 +34,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "BufrProduct_gsi.hh"
+#include "Radx/TableMapKey.hh"
 #include <cstring>
 #include <cstdio>
 #include <iostream>
@@ -49,6 +50,8 @@ using namespace std;
 BufrProduct_gsi::BufrProduct_gsi()
 {
   duration = 0;
+  descriptorsToDefine.clear();
+  //_verbose = true;
 }
 
 /////////////
@@ -107,7 +110,7 @@ void BufrProduct_gsi::ConstructDescriptor(string &desF,
 
 // Put the info in the correct storage location
 // and take care of any setup that needs to happen
-// TODO: all of the values will be text!  AGH!
+//  all of the values will be text!  AGH!
 bool BufrProduct_gsi::StuffIt(unsigned short des, string name, string &value) {
   bool ok = true;
 
@@ -116,7 +119,7 @@ bool BufrProduct_gsi::StuffIt(unsigned short des, string name, string &value) {
       break;
     case 2:
       break;
-    case 3:
+    case 3: 
       break;
     case 10:
       des_f = atoi(value.c_str());
@@ -193,28 +196,96 @@ bool BufrProduct_gsi::StuffIt(unsigned short des, string name, string &value) {
         sprintf(line, "%1u;%2u;%3u; %1c;%2s;%3s; %s",
                 des_f, des_x, des_y, f,x,y, des_fieldName.c_str());
       */
-      printf("adding new descriptor %s\n", line);
+      if (_verbose) printf("queuing new descriptor: %s\n", line);
       // TODO: accumulate lines in a vector until we have all of the
       // expanded descriptors; then add to the table
-      /*
-      lines.push_back(line);
+      
+      descriptorsToDefine.push_back(line);
 // when we are at the end of the list; or the beginning of a new list
-// convert the lines vector to a const char ** and add to table D
-// or just write a new function that takes a vector and adds the 
-// lines in it to table D
-       */ 
+//  add the lines to table D
       desF = "" ;
       desX = "";
       desY = "";
       
-      // TODO: add the descriptor to the table!!
       break;
     default:
+      unsigned char f, x, y;
+      TableMapKey().Decode(des, &f, &x, &y);
+      printf("ERROR - don't know what to do with ");
+      printf("descriptor %1u;%2u;%3u (%d) value %s\n", f,x,y, des, value.c_str()); 
       ok = false;
   }
   return ok;
 }
 
+// Put the info in the correct storage location
+// and take care of any setup that needs to happen
+//  all of the values will be text!  AGH!
+bool BufrProduct_gsi::StuffIt(unsigned short des, string name, double value) {
+  bool ok = true;
+
+  switch (des) {
+    case 274:
+      break;
+
+    case 1025:
+      // year
+      putYear((int) value);
+      break;
+    case 1026:
+      // month
+      putMonth((int) value);
+      break;
+    case 1027:
+      // day
+      putDay((int) value);
+      break;
+    case 1028:
+      // hour
+      putHour((int) value);
+      break;
+    case 1029:
+      // minute
+      putMinute((int) value);
+      break;
+    case 1030:
+      // second
+      putSecond((int) value);
+      break;
+    case 1282:
+      // latitude
+      latitude = value;
+      break;
+    case 1538:
+      // longitude
+      longitude = value;
+      break;
+      //case 1025:
+      // radar volume id (DDHHMM)
+      // break;
+      // radar scan id (range 1 - 21)
+
+    case 1746: 
+      // Distance from antenna to gate center in units of 125M
+      distanceFromAntennaUnitsOf125M.push_back(value);
+      break;
+    case 5390: 
+      // Doppler Mean Radial Velocity
+      dopplerMeanRadialVelocity.push_back(value);
+      break;
+    case 5393:
+      // Doppler Velocity Spectral Width 
+      dopplerVelocitySpectralWidth.push_back(value);
+      break;
+    default:
+      unsigned char f, x, y;
+      TableMapKey().Decode(des, &f, &x, &y);
+      printf("ERROR - don't know what to do with ");
+      printf("descriptor %1u;%2u;%3u (%d) value %g\n", f,x,y, des, value);
+      ok = false;
+  }
+  return ok;
+}
 
 // OK, we are assuming a particular order to the replicators.
 // The order is:
@@ -262,6 +333,18 @@ void BufrProduct_gsi::trashReplicator() {
       printGenericStore();
     }
     createSweep();
+  }
+
+  if (descriptorsToDefine.size() > 0) {
+    if (_debug) {
+      printf("adding new table D descriptor ");
+      for (std::vector<string>::const_iterator line = descriptorsToDefine.begin();
+           line != descriptorsToDefine.end(); line++) { 
+          cout << *line << endl; 
+      }
+    }
+    _bufrTable->AddToTableD(descriptorsToDefine);
+    descriptorsToDefine.clear();
   }
   
 }

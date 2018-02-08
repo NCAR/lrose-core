@@ -64,7 +64,7 @@ public:
 
   void addData(unsigned char value);
 
-  //bool StuffIt(unsigned short des, string fieldName, double value);
+  bool StuffIt(unsigned short des, string fieldName, double value);
   bool StuffIt(unsigned short des, string name, string &value);
 
   double *decompressData();
@@ -79,6 +79,14 @@ public:
   void printGenericStore();
   vector< vector<unsigned char> *> genericStore;  
   vector<unsigned char> *currentAccumulator;
+
+  // local 
+  vector<double> distanceFromAntennaUnitsOf125M;
+  vector<double> dopplerMeanRadialVelocity;
+  vector<double> dopplerVelocitySpectralWidth;
+
+  // vector to accumulate new descriptors to add or define in table D format
+  vector<string> descriptorsToDefine;
 
   unsigned int duration; // TODO: need getters and setters
 

@@ -99,10 +99,12 @@ void BufrFile::clear()
   _errString.clear();
   _file = NULL;
   freeTree(GTree);
-  //GTree = NULL;
+  GTree = NULL;
   _descriptorsToProcess.clear();
   nOctetsRead = 0;
   _addBitsToDataWidth = 0;
+  _addBitsToDataScale = 0;
+  _multiplyFactorForReferenceValue = 1;
   if (currentTemplate != NULL) 
     delete currentTemplate;
   currentTemplate = NULL;
@@ -115,12 +117,18 @@ void BufrFile::clearForNextMessage()
 {
   _errString.clear();
   freeTree(GTree);
+  GTree = NULL;
   _descriptorsToProcess.clear();
   //nOctetsRead = 0;
   _addBitsToDataWidth = 0;
+  _addBitsToDataScale = 0;
+  _multiplyFactorForReferenceValue = 1;
   if (currentTemplate != NULL) 
     delete currentTemplate;
   currentTemplate = NULL;
+  _nBitsRead = 0;
+ // set this value to be able to read initial BUFR + size (3 bytes) + ending (7777)
+  _s0.nBytes = 12;
 }
 
 void BufrFile::setDebug(bool state) { 
@@ -131,6 +139,18 @@ void BufrFile::setDebug(bool state) {
 void BufrFile::setVerbose(bool state) {
   _verbose = state;
   if (_verbose) _debug = true;
+  //currentTemplate->setVerbose(state);
+  // we only want debug information from the tables if the setting is verbose,
+  // because the information is very detailed.
+  tableMap.setDebug(state);
+}
+
+void BufrFile::setVeryVerbose(bool state) {
+  _very_verbose = state;
+  if (_very_verbose) {
+    _debug = true;
+    _verbose = true;
+  }
   //currentTemplate->setVerbose(state);
   // we only want debug information from the tables if the setting is verbose,
   // because the information is very detailed.
@@ -291,6 +311,7 @@ int BufrFile::readSection0()
 {
  
   clearForNextMessage();
+  inSection5 = false;
   /******* decode section 0 */
   if (_verbose) fprintf (stderr, "Input file header:\n");
   //char temp[250];
@@ -313,7 +334,7 @@ int BufrFile::readSection0()
     do {
       value = ExtractText(8);
     } while (value.find("B") == string::npos);
- 
+    _nBitsRead = 8; // reset this count after finding "B"
     value = ExtractText(8*3);
     if (value.find("UFR") == string::npos)
       throw "Not a BUFR file"; // "  Cannot read BUFR starting code";
@@ -345,7 +366,7 @@ int BufrFile::readSection0()
     nBytes = nBytes | (id2[1] << 8);
     nBytes = nBytes | (id2[0] << 16);
     */
-    if (_verbose) cerr << "nBytes " << nBytes << endl;
+    if (_debug) cerr << "nBytes in total message " << nBytes << endl;
     _s0.nBytes = nBytes;
 
     Radx::ui08 bufr_edition;
@@ -361,7 +382,8 @@ int BufrFile::readSection0()
     if (_verbose) printf("BUFR edition number %d\n", bufr_edition); 
 
     _bufrMessageCount += 1;
-    printf("Processing BUFR message %d\n", _bufrMessageCount);
+    printf("Processing BUFR message %d at nBytesRead %d\n", _bufrMessageCount,
+           _numBytesRead);
     
   } catch (const char *msg) {
     close();
@@ -777,7 +799,9 @@ int BufrFile::readSection5() {
   // read the last section 
   // look for ending "7777" coded in CCITT International Alphabet No. 5
   string value;
+  inSection5 = true;
   try {
+    if (_debug) printf("looking for 7777 at %d bytes\n", _numBytesRead);
     MoveToNextByteBoundary();
     do {
       value = ExtractText(8);
@@ -940,7 +964,7 @@ int BufrFile::readDataDescriptors() {  // read section 3
       d.f = f;
       d.x = ExtractIt(6); // buffer[i] & 0x3f; // 0011 1111
       d.y = ExtractIt(8); //  buffer[i + 1];
-      if (_verbose) printf("f x y: %d %d %d\n", d.f, d.x, d.y);
+      if (_debug) printf("f x y: %d %d %d\n", d.f, d.x, d.y);
       unsigned short key;
       key = TableMapKey().EncodeKey(d.f, d.x, d.y);
       _descriptorsToProcess.insert(_descriptorsToProcess.begin(), key);
@@ -975,6 +999,7 @@ int BufrFile::readDataDescriptors() {  // read section 3
 
     // TODO: determine which type of product to instaniate based
     // on the data descriptors of section 3
+    _isGsi = false;
     if (matches_204_31_X(_descriptorsToProcess)) {
       currentTemplate = new BufrProduct_204_31_X();
     } else if (matches_gsi(_descriptorsToProcess)) {
@@ -983,8 +1008,8 @@ int BufrFile::readDataDescriptors() {  // read section 3
     } else { 
       currentTemplate = new BufrProductGeneric();
     }
-    currentTemplate->setVerbose(_verbose);
     currentTemplate->setDebug(_debug);
+    currentTemplate->setVerbose(_verbose);
     currentTemplate->reset(); 
     // currentTemplate->setFieldName(_fieldName);
   return 0;
@@ -1019,6 +1044,18 @@ bool BufrFile::matches_gsi(vector<unsigned short> &descriptors) {
     if ((descriptors[n-1] == 17152) && (descriptors[n-2] == 7937) &&
 	((descriptors[n-3] == 1) || (descriptors[n-3] == 2))) {
       return true; 
+    } else if ((descriptors[n-3] == 16896) &&
+               (descriptors[n-2] == 64021) && (descriptors[n-1] == 16128)) {
+      // vector of length 6 {16383, 34305, 7937,   16896, 64021,   16128}
+      //                  0;63;255, 2;6;1, 0;31;1, 1;2;0, 3;10;61, 0;63;0  
+      _isGsi = true;
+      return true;
+      //} else if ((descriptors[n-3] == 16896) &&
+      //         (descriptors[n-2] == ) && (descriptors[n-1] == 16128)) {
+      // vector of length 6 {16383, 34305, 7937,   16896, ,   16128}
+      //                  0;63;255, 2;6;1, 0;31;1, 1;2;0, 3;58;021, 0;63;0  
+      // 
+      //return true;
     } else {
       return false;
     }
@@ -1032,15 +1069,6 @@ bool BufrFile::matches_gsi(vector<unsigned short> &descriptors) {
 // section 4.
 int BufrFile::readData() {  // read section 4
 
-  /*
-  // prime the pump
-  currentBufferLengthBytes = ReplenishBuffer();
-  currentBufferLengthBits = currentBufferLengthBytes * 8;
-  currentBufferIndexBits = 0;
-  if (currentBufferLengthBits <= 0) {
-    return -1;
-  }
-  */
   // read and discard the 4 bytes of data
   // length of section in octets (octets 1-3)
   // set to zero (reserved) (octet 4)
@@ -1055,7 +1083,12 @@ int BufrFile::readData() {  // read section 4
     Radx::addErrStr(_errString, "", msg, true);
     throw _errString.c_str();
   }
-  TraverseNew(_descriptorsToProcess);
+  try {
+    TraverseNew(_descriptorsToProcess);
+  } catch (const char *msg) {
+    // try to recover by continuing to next message
+    cerr << "Attempting recovery ... \n";
+  }
   
   return 0;
 }
@@ -1074,7 +1107,7 @@ int BufrFile::ReplenishBuffer() {
   if (_very_verbose) printf("nOctetsRead = %d\n", nOctetsRead);
 
   _numBytesRead += nBytesRead;
-  if (_very_verbose) printf("Read %d/%d bytes ", _numBytesRead, _s0.nBytes);
+  if (_debug) printf("Read %d/%d bytes ", _numBytesRead, _s0.nBytes);
 
   if (_very_verbose) {
     printf("buffer: ");
@@ -1153,9 +1186,11 @@ string BufrFile::ExtractText(unsigned int nBits) {
   }
 
   unsigned int i=0;
-  bool endOfFile = false;
+  bool endOfMessage = false;
+  if ((_nBitsRead + nBits > (_s0.nBytes-4)*8) && !inSection5)
+    endOfMessage = true;
   // move one bit at a time
-  while ((i<nBits) && (!endOfFile)) {
+  while ((i<nBits) && (!endOfMessage)) {
     if (NextBit()) {
       // insert a 1
       character = character * 2 + 1;
@@ -1174,13 +1209,14 @@ string BufrFile::ExtractText(unsigned int nBits) {
     }
   }
 
-  if ((endOfFile) && (i < nBits)) {
+  if ((endOfMessage) && (i < nBits)) {
     val.clear();
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::ExtractText", true);
     Radx::addErrStr(_errString, "  ", 
 		    "Ran out of data before completing the value.", true);
     throw _errString.c_str(); 
   }  else {
+    _nBitsRead += nBits;
     return _trim(val);
   }
 }
@@ -1213,10 +1249,13 @@ Radx::ui32 BufrFile::ExtractIt(unsigned int nBits) {
 		    nBits, true);
     throw _errString.c_str();
   }
+
   val = 0;
   unsigned int i=0;
-  bool endOfFile = false;
-  while ((i<nBits) && (!endOfFile)) {
+  bool endOfMessage = false;
+  if ((_nBitsRead + nBits > (_s0.nBytes-4)*8) && !inSection5)
+    endOfMessage = true;
+  while ((i<nBits) && (!endOfMessage)) {
     if (NextBit()) {
       // insert a 1
       val = val * 2 + 1;
@@ -1226,12 +1265,15 @@ Radx::ui32 BufrFile::ExtractIt(unsigned int nBits) {
     i += 1;
   }
 
-  if ((endOfFile) && (i < nBits)) {
+  if ((endOfMessage) && (i < nBits)) {
+    if (_debug) printf("%d/(%d including 7777) bits read; needed %d bits\n",
+                       _nBitsRead, _s0.nBytes*8, nBits);
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::ExtractIt", true);
     Radx::addErrStr(_errString, "  ", 
 		    "Ran out of data before completing the value.", true);
     throw _errString.c_str(); 
   }  else {
+    _nBitsRead += nBits;
     return val;
   }
 }
@@ -1281,6 +1323,7 @@ Radx::ui32 BufrFile::Apply(TableMapElement f) {
   } else {
     Radx::ui32 value;
     value = ExtractIt(f._descriptor.dataWidthBits + _addBitsToDataWidth);
+    if (_debug) cout << "returning unmodified " << value << endl;
     return value;
   }
 }
@@ -1304,7 +1347,7 @@ double BufrFile::fastPow10(int n)
   else
     return pow10[n+10]; 
 }
-
+/*
 Radx::si32 BufrFile::ApplyNumeric(TableMapElement f) {
 
   if (f._whichType != TableMapElement::DESCRIPTOR) {
@@ -1335,9 +1378,9 @@ Radx::si32 BufrFile::ApplyNumeric(TableMapElement f) {
     Radx::si32 svalue;
     double temp;
     //svalue = (value+f._descriptor.referenceValue)/fastPow10(f._descriptor.scale);
-    temp = f._descriptor.referenceValue;
+    temp = f._descriptor.referenceValue * _multiplyFactorForReferenceValue;
     temp = value + temp;
-    temp  = temp/fastPow10(f._descriptor.scale);
+    temp  = temp/fastPow10(f._descriptor.scale + _addBitsToDataScale);
 
     svalue = (Radx::si32) temp;
     //if ((_verbose) && (des != 7878)) 
@@ -1345,6 +1388,7 @@ Radx::si32 BufrFile::ApplyNumeric(TableMapElement f) {
     return svalue;
   }
 }
+*/
 
 Radx::fl32 BufrFile::ApplyNumericFloat(TableMapElement f) {
 
@@ -1376,12 +1420,12 @@ Radx::fl32 BufrFile::ApplyNumericFloat(TableMapElement f) {
     Radx::fl32 svalue;
     double temp;
     //svalue = (value+f._descriptor.referenceValue)/fastPow10(f._descriptor.scale);
-    temp = f._descriptor.referenceValue;
+    temp = f._descriptor.referenceValue * _multiplyFactorForReferenceValue;
     temp = value + temp;
-    temp  = temp/fastPow10(f._descriptor.scale);
+    temp  = temp/fastPow10(f._descriptor.scale + _addBitsToDataScale);
 
     svalue = (Radx::fl32) temp;
-    //if (_verbose) cout << "converted to " << svalue << endl;
+    if (_verbose) cout << "returning " << svalue << endl;
     return svalue;
   }
 }
@@ -1835,7 +1879,12 @@ void BufrFile::freeTree(DNode *tree) {
 int BufrFile::TraverseNew(vector<unsigned short> descriptors) {
 
   GTree = buildTree(descriptors, false);
-  int result =  _descend(GTree);
+  bool continuousRepeat = false;
+  if (_isGsi) continuousRepeat = true;
+  int result = -1;
+  do {
+    result = _descend(GTree);
+  } while (continuousRepeat);
   return result;
 }
 
@@ -2158,6 +2207,7 @@ void BufrFile::_visitTableBNode(DNode *p, bool *compressionStart) {
     }
   } else {
     valueFromData = ApplyNumericFloat(val1);
+    if (_verbose) printf(" valueFromData = %f\n", valueFromData);
     if (!currentTemplate->StuffIt(des, val1._descriptor.fieldName, valueFromData)) {
       if ((des != 7681) && 0) {
         Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
@@ -2189,8 +2239,15 @@ void BufrFile::_visitTableCNode(DNode *p) {
   switch(x) {
     case 1:
       // apply the modifications
-      _addBitsToDataWidth = max(0, y - 128);
-      if (_verbose) printf(" increasing dataWith by %d\n", _addBitsToDataWidth);
+      if (y == 0) _addBitsToDataWidth = 0;
+      else _addBitsToDataWidth = (unsigned int) y - 128;
+      if (_debug) printf(" changing dataWith by %d\n", _addBitsToDataWidth);
+      break;
+    case 2:
+      // apply the modifications
+      if (y == 0) _addBitsToDataScale = 0;
+      else _addBitsToDataScale = (unsigned int) y - 128;
+      if (_debug) printf(" changing Scale by %d\n", _addBitsToDataScale);
       break;
     case 5:
       // YYY characters (CCITT International Alphabet No. 5) are
@@ -2212,9 +2269,34 @@ void BufrFile::_visitTableCNode(DNode *p) {
         cerr << _errString << endl;
       }
       break;
+    case 6: 
+      // YYY bits of data are described by the immediately following descriptor
+      //Radx::ui32 value;
+      //value = ExtractIt((unsigned) y);
+      //printf("HERE 2 6 YYY = %d _nBitsRead=%d\n", value, _nBitsRead);
+      printf("HERE 2 6 YYY =  _nBitsRead=%d\n",_nBitsRead);
+      break;
+    case 7:
+      // Add YYY to the existing scale factor
+      // multiply the existing reference value by 10^(YYY)
+      // calculate ((10 * YYY) + 2) / 3,  disregard any fractional remainder
+      // and add the result to the existing bit width.
+      if (_debug) printf(" table C: 2 7 YYY where YYY = %u\n", y);
+      unsigned int yValue;
+      yValue = y;
+      _addBitsToDataWidth = ((10 * yValue) + 2) / 3;
+      if (_debug) printf(" changing dataWith by %d\n", _addBitsToDataWidth);
+      _addBitsToDataScale = yValue;
+      if (_debug) printf(" changing Scale by %d\n", _addBitsToDataScale);
+                             _multiplyFactorForReferenceValue = fastPow10(yValue);
+      if (_debug) printf(" changing Reference by factor of %d\n",
+                          _multiplyFactorForReferenceValue);
+      break;
     default:
-      // TODO: fix up this error message
-      cerr << "Table C descriptor is not implemented " << endl;
+      // report an error message
+      cerr << "Table C descriptor is not implemented " 
+           << (unsigned) f << ";" << (unsigned) x << ";" << (unsigned) y << ";"        
+           << endl;
   }
 }
 
@@ -2257,8 +2339,8 @@ void BufrFile::_visitVariableRepeater(DNode *p, unsigned char x) {
   // the state determines which counters to increment & decrement
   // It's up to the product to deal with the space allocation as needed
   for (unsigned int i=0; i<nRepeats; i++) {
-    //if (((i%1000)==0) && (_verbose)) 
-    printf("%d out of %d repeats\n", i+1, nRepeats);
+    if (((i%1000)==0) && (_verbose)) 
+      printf("%d out of %d repeats\n", i+1, nRepeats);
     _descend(p->children);
   }
   //if (_verbose) 
@@ -2361,7 +2443,7 @@ void BufrFile::_verbosePrintNode(unsigned short des) {
 // The values are stored in a separate structure.
 int BufrFile::_descend(DNode *tree) {
 
-  _verbosePrintTree(tree);
+  if (_very_verbose) _verbosePrintTree(tree);
 
   unsigned short des;
   DNode *p;
@@ -2374,8 +2456,10 @@ int BufrFile::_descend(DNode *tree) {
     // for each descriptor in the list
     while (p != NULL ) {
 
-      printf("\np != NULL ... \n");
-      printTree(p,0);
+      if (_very_verbose) { 
+        printf("\np != NULL ... \n");
+        printTree(p,0);
+      }
 
       des = p->des;
       TableMapKey key(des);
@@ -2425,7 +2509,7 @@ int BufrFile::_descend(DNode *tree) {
     cerr << _errString;
     throw _errString.c_str();
   }
-  printf("Leaving _descend\n");
+  // printf("Leaving _descend\n");
   return 0;
 }
 
