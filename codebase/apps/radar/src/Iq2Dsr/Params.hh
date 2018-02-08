@@ -842,11 +842,19 @@ public:
 
   double zdr_correction_db;
 
+  tdrp_bool_t threshold_zdr_using_snr;
+
+  double min_snr_db_for_zdr;
+
   tdrp_bool_t override_cal_ldr_corrections;
 
   double ldr_correction_db_h;
 
   double ldr_correction_db_v;
+
+  tdrp_bool_t threshold_ldr_using_snr;
+
+  double min_snr_db_for_ldr;
 
   tdrp_bool_t override_cal_system_phidp;
 
@@ -1170,7 +1178,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[255];
+  mutable TDRPtable _table[259];
 
   const char *_className;
 

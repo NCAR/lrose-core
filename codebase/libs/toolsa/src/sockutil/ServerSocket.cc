@@ -118,7 +118,7 @@ int ServerSocket::openServer(const int port)
   // bind to a local port
 
   errno = 0;
-  if(bind(_protoSd,
+  if(::bind(_protoSd,
 	  (struct sockaddr *) &loc_soc,
 	  sizeof(loc_soc)) < 0) {
     addState(STATE_ERROR);

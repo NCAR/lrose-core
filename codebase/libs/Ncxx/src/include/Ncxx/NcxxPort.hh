@@ -38,7 +38,12 @@
 
 #if __cplusplus >= 201103L
 #include <cstdint>
+#include <climits>
 #else
+#include <sys/types.h>
+#endif
+
+#if defined __clang__
 #include <sys/types.h>
 #endif
 

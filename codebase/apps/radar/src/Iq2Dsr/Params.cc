@@ -1893,6 +1893,30 @@ using namespace std;
     tt->single_val.d = 0;
     tt++;
     
+    // Parameter 'threshold_zdr_using_snr'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("threshold_zdr_using_snr");
+    tt->descr = tdrpStrDup("Option to threshold ZDR using SNR.");
+    tt->help = tdrpStrDup("If true, we will only compute ZDR if the SNR in both the H and V co-polar channels exceeds this value. See 'min_snr_db_for_zdr'.");
+    tt->val_offset = (char *) &threshold_zdr_using_snr - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'min_snr_db_for_zdr'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_snr_db_for_zdr");
+    tt->descr = tdrpStrDup("Min SNR for computing ZDR (dB).");
+    tt->help = tdrpStrDup("If the SNR is below this threshold for either the H or V co-polar channels, ZDR will be set to missing. See 'threshold_zdr_using_snr'.");
+    tt->val_offset = (char *) &min_snr_db_for_zdr - &_start_;
+    tt->single_val.d = -7;
+    tt++;
+    
     // Parameter 'override_cal_ldr_corrections'
     // ctype is 'tdrp_bool_t'
     
@@ -1927,6 +1951,30 @@ using namespace std;
     tt->help = tdrpStrDup("See 'override_cal_ldr_corrections'.");
     tt->val_offset = (char *) &ldr_correction_db_v - &_start_;
     tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'threshold_ldr_using_snr'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("threshold_ldr_using_snr");
+    tt->descr = tdrpStrDup("Option to threshold LDR using SNR.");
+    tt->help = tdrpStrDup("If true, we will only compute LDR if the SNR in both the co- and cross-polar channels exceeds this value. Since the cross-polar channel is generally the weaker channel, it is the SNR on the cross-polar channel that will be limiting. See 'min_snr_db_for_ldr'.");
+    tt->val_offset = (char *) &threshold_ldr_using_snr - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'min_snr_db_for_ldr'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_snr_db_for_ldr");
+    tt->descr = tdrpStrDup("Min SNR for computing LDR (dB).");
+    tt->help = tdrpStrDup("For LDR, the cross polar channel is the weaker return. Therefore effectively this threshold will be applied to the cross channel. If the SNR is below this threshold for either the co- or cross-polar channels, LDR will be set to missing. See 'threshold_ldr_using_snr'.");
+    tt->val_offset = (char *) &min_snr_db_for_ldr - &_start_;
+    tt->single_val.d = -7;
     tt++;
     
     // Parameter 'override_cal_system_phidp'

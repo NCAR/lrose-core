@@ -44,6 +44,7 @@
 #include <memory.h>
 #include <math.h>
 #include <signal.h>
+#include <sys/msg.h>
 
 #define SEM_IS_SET 1
 #define SEM_IS_NOT_SET 0
