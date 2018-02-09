@@ -47,6 +47,7 @@
 #include <toolsa/umisc.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/TaArray.hh>
+#include <toolsa/sincos.h>
 #include "Args.hh"
 #include "Params.hh"
 #include "ChillSdbServer.hh"
@@ -1494,7 +1495,7 @@ void ChillSdbServer::_loadVector(void *fieldsIn,
     float mag = *fpMag;
     float phase = *fpPhase;
     double sinPhase, cosPhase;
-    sincos(phase * DEG_TO_RAD, &sinPhase, &cosPhase);
+    ta_sincos(phase * DEG_TO_RAD, &sinPhase, &cosPhase);
     float re = mag * cosPhase;
     float im = mag * sinPhase;
     *((float *) outpRe) = re;

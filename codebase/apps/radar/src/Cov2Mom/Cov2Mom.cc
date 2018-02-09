@@ -48,6 +48,7 @@
 #include <toolsa/TaArray.hh>
 #include <toolsa/TaStr.hh>
 #include <toolsa/toolsa_macros.h>
+#include <toolsa/sincos.h>
 #include <radar/FilterUtils.hh>
 #include <radar/MomentsFields.hh>
 #include <iomanip>
@@ -784,7 +785,7 @@ void Cov2Mom::_loadComplex(const double *db,
 
     double mag = pow(10.0, db[ii] / 20.0);
     double sinval, cosval;
-    sincos(phase[ii] * DEG_TO_RAD, &sinval, &cosval);
+    ta_sincos(phase[ii] * DEG_TO_RAD, &sinval, &cosval);
 
     complex[ii].re = mag * cosval;
     complex[ii].im = mag * sinval;
