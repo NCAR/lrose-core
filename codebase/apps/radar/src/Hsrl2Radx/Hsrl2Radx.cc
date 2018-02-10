@@ -1269,12 +1269,12 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
   hiRate->setLongName(Names::lidar_copolar_combined_backscatter_photon_rate);
   hiRate->setRangeGeom(startRangeKm, gateSpacingKm);
         
-  RadxField *hiRateF =
-    ray->addField(Names::CombinedHighRate_F, "s-1", nGates, Radx::missingFl32, 
-                  _calcs->getHiRateF().data(), true);
-  hiRate->setStandardName(Names::lidar_copolar_combined_backscatter_photon_rate);
-  hiRate->setLongName(Names::lidar_copolar_combined_backscatter_photon_rate_filtered);
-  hiRateF->setRangeGeom(startRangeKm, gateSpacingKm);
+  // RadxField *hiRateF =
+  //   ray->addField(Names::CombinedHighRate_F, "s-1", nGates, Radx::missingFl32, 
+  //                 _calcs->getHiRateF().data(), true);
+  // hiRate->setStandardName(Names::lidar_copolar_combined_backscatter_photon_rate);
+  // hiRate->setLongName(Names::lidar_copolar_combined_backscatter_photon_rate_filtered);
+  // hiRateF->setRangeGeom(startRangeKm, gateSpacingKm);
 
   // combined low rate
 
@@ -1285,12 +1285,12 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
   loRate->setLongName(Names::lidar_copolar_combined_backscatter_photon_rate);
   loRate->setRangeGeom(startRangeKm, gateSpacingKm);
   
-  RadxField *loRateF =
-    ray->addField(Names::CombinedLowRate_F, "s-1", nGates, Radx::missingFl32, 
-                  _calcs->getLoRateF().data(), true);
-  loRate->setStandardName(Names::lidar_copolar_combined_backscatter_photon_rate);
-  loRate->setLongName(Names::lidar_copolar_combined_backscatter_photon_rate_filtered);
-  loRateF->setRangeGeom(startRangeKm, gateSpacingKm);
+  // RadxField *loRateF =
+  //   ray->addField(Names::CombinedLowRate_F, "s-1", nGates, Radx::missingFl32, 
+  //                 _calcs->getLoRateF().data(), true);
+  // loRate->setStandardName(Names::lidar_copolar_combined_backscatter_photon_rate);
+  // loRate->setLongName(Names::lidar_copolar_combined_backscatter_photon_rate_filtered);
+  // loRateF->setRangeGeom(startRangeKm, gateSpacingKm);
 
   // molecular rate
 
@@ -1301,12 +1301,12 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
   molRate->setLongName(Names::lidar_copolar_molecular_backscatter_photon_rate);
   molRate->setRangeGeom(startRangeKm, gateSpacingKm);
   
-  RadxField *molRateF =
-    ray->addField(Names::MolecularRate_F, "s-1", nGates, Radx::missingFl32, 
-                  _calcs->getMolRateF().data(), true);
-  molRate->setStandardName(Names::lidar_copolar_molecular_backscatter_photon_rate);
-  molRate->setLongName(Names::lidar_copolar_molecular_backscatter_photon_rate_filtered);
-  molRateF->setRangeGeom(startRangeKm, gateSpacingKm);
+  // RadxField *molRateF =
+  //   ray->addField(Names::MolecularRate_F, "s-1", nGates, Radx::missingFl32, 
+  //                 _calcs->getMolRateF().data(), true);
+  // molRate->setStandardName(Names::lidar_copolar_molecular_backscatter_photon_rate);
+  // molRate->setLongName(Names::lidar_copolar_molecular_backscatter_photon_rate_filtered);
+  // molRateF->setRangeGeom(startRangeKm, gateSpacingKm);
 
   // cross rate
 
@@ -1317,12 +1317,12 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
   crossRate->setLongName(Names::lidar_crosspolar_combined_backscatter_photon_rate);
   crossRate->setRangeGeom(startRangeKm, gateSpacingKm);
   
-  RadxField *crossRateF =
-    ray->addField(Names::CrossPolarRate_F, "s-1", nGates, Radx::missingFl32, 
-                  _calcs->getCrossRateF().data(), true);
-  crossRate->setStandardName(Names::lidar_crosspolar_combined_backscatter_photon_rate);
-  crossRate->setLongName(Names::lidar_crosspolar_combined_backscatter_photon_rate_filtered);
-  crossRateF->setRangeGeom(startRangeKm, gateSpacingKm);
+  // RadxField *crossRateF =
+  //   ray->addField(Names::CrossPolarRate_F, "s-1", nGates, Radx::missingFl32, 
+  //                 _calcs->getCrossRateF().data(), true);
+  // crossRate->setStandardName(Names::lidar_crosspolar_combined_backscatter_photon_rate);
+  // crossRate->setLongName(Names::lidar_crosspolar_combined_backscatter_photon_rate_filtered);
+  // crossRateF->setRangeGeom(startRangeKm, gateSpacingKm);
 
   // vol depol ratio
 
@@ -1333,12 +1333,12 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
   volDepol->setLongName(Names::lidar_volume_depolarization_ratio);
   volDepol->setRangeGeom(startRangeKm, gateSpacingKm);
         
-  RadxField *volDepolF =
-    ray->addField(Names::VolumeDepolRatio_F, "", nGates, Radx::missingFl32, 
-                  _calcs->getVolDepolF().data(), true);
-  volDepolF->setStandardName(Names::lidar_volume_depolarization_ratio);
-  volDepolF->setLongName(Names::lidar_volume_depolarization_ratio_filtered);
-  volDepolF->setRangeGeom(startRangeKm, gateSpacingKm);
+  // RadxField *volDepolF =
+  //   ray->addField(Names::VolumeDepolRatio_F, "", nGates, Radx::missingFl32, 
+  //                 _calcs->getVolDepolF().data(), true);
+  // volDepolF->setStandardName(Names::lidar_volume_depolarization_ratio);
+  // volDepolF->setLongName(Names::lidar_volume_depolarization_ratio_filtered);
+  // volDepolF->setRangeGeom(startRangeKm, gateSpacingKm);
 
   // particle depol ratio
 
@@ -1349,12 +1349,12 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
   partDepol->setStandardName(Names::lidar_particle_depolarization_ratio);
   partDepol->setRangeGeom(startRangeKm, gateSpacingKm);
     
-  RadxField *partDepolF =
-    ray->addField(Names::ParticleDepolRatio_F, "", nGates, Radx::missingFl32,
-                  _calcs->getPartDepolF().data(), true);
-  partDepolF->setLongName(Names::lidar_particle_depolarization_ratio_filtered);
-  partDepolF->setStandardName(Names::lidar_particle_depolarization_ratio);
-  partDepolF->setRangeGeom(startRangeKm, gateSpacingKm);
+  // RadxField *partDepolF =
+  //   ray->addField(Names::ParticleDepolRatio_F, "", nGates, Radx::missingFl32,
+  //                 _calcs->getPartDepolF().data(), true);
+  // partDepolF->setLongName(Names::lidar_particle_depolarization_ratio_filtered);
+  // partDepolF->setStandardName(Names::lidar_particle_depolarization_ratio);
+  // partDepolF->setRangeGeom(startRangeKm, gateSpacingKm);
     
   // backscatter ratio
 
@@ -1365,12 +1365,12 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
   backscatRatio->setLongName(Names::lidar_backscatter_ratio);
   backscatRatio->setRangeGeom(startRangeKm, gateSpacingKm);
     
-  RadxField *backscatRatioF =
-    ray->addField(Names::BackScatterRatio_F, "", nGates, Radx::missingFl32, 
-                  _calcs->getBackscatRatioF().data(), true);
-  backscatRatioF->setStandardName(Names::lidar_backscatter_ratio);
-  backscatRatioF->setLongName(Names::lidar_backscatter_ratio_filtered);
-  backscatRatioF->setRangeGeom(startRangeKm, gateSpacingKm);
+  // RadxField *backscatRatioF =
+  //   ray->addField(Names::BackScatterRatio_F, "", nGates, Radx::missingFl32, 
+  //                 _calcs->getBackscatRatioF().data(), true);
+  // backscatRatioF->setStandardName(Names::lidar_backscatter_ratio);
+  // backscatRatioF->setLongName(Names::lidar_backscatter_ratio_filtered);
+  // backscatRatioF->setRangeGeom(startRangeKm, gateSpacingKm);
 
   // backscatter coefficient
 
@@ -1381,12 +1381,12 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
   backscatCoeff->setLongName(Names::lidar_backscatter_coefficient);
   backscatCoeff->setRangeGeom(startRangeKm, gateSpacingKm);
 
-  RadxField *backscatCoeffF =
-    ray->addField(Names::BackScatterCoeff_F, "m-1.sr-1", nGates, Radx::missingFl32,
-                  _calcs->getBackscatCoeffF().data(), true);
-  backscatCoeffF->setStandardName(Names::lidar_backscatter_coefficient);
-  backscatCoeffF->setLongName(Names::lidar_backscatter_coefficient_filtered);
-  backscatCoeffF->setRangeGeom(startRangeKm, gateSpacingKm);
+  // RadxField *backscatCoeffF =
+  //   ray->addField(Names::BackScatterCoeff_F, "m-1.sr-1", nGates, Radx::missingFl32,
+  //                 _calcs->getBackscatCoeffF().data(), true);
+  // backscatCoeffF->setStandardName(Names::lidar_backscatter_coefficient);
+  // backscatCoeffF->setLongName(Names::lidar_backscatter_coefficient_filtered);
+  // backscatCoeffF->setRangeGeom(startRangeKm, gateSpacingKm);
   
   // extinction coeff
   
@@ -1397,12 +1397,12 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
   extinction->setLongName(Names::lidar_extinction_coefficient);
   extinction->setRangeGeom(startRangeKm, gateSpacingKm);
 
-  RadxField *extinctionF =
-    ray->addField(Names::ExtinctionCoeff_F, "m-1", nGates, Radx::missingFl32, 
-                  _calcs->getExtinctionCoeffF().data(), true);
-  extinctionF->setStandardName(Names::lidar_extinction_coefficient);
-  extinctionF->setLongName(Names::lidar_extinction_coefficient_filtered);
-  extinctionF->setRangeGeom(startRangeKm, gateSpacingKm);
+  // RadxField *extinctionF =
+  //   ray->addField(Names::ExtinctionCoeff_F, "m-1", nGates, Radx::missingFl32, 
+  //                 _calcs->getExtinctionCoeffF().data(), true);
+  // extinctionF->setStandardName(Names::lidar_extinction_coefficient);
+  // extinctionF->setLongName(Names::lidar_extinction_coefficient_filtered);
+  // extinctionF->setRangeGeom(startRangeKm, gateSpacingKm);
 
   // optical depth
 
@@ -1413,12 +1413,12 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
   optDepth->setLongName(Names::lidar_optical_depth);
   optDepth->setRangeGeom(startRangeKm, gateSpacingKm);
        
-  RadxField *optDepthF =
-    ray->addField(Names::OpticalDepth_F, "", nGates, Radx::missingFl32, 
-                  _calcs->getOpticalDepthF().data(), true);
-  optDepthF->setStandardName(Names::lidar_optical_depth);
-  optDepthF->setLongName(Names::lidar_optical_depth_filtered);
-  optDepthF->setRangeGeom(startRangeKm, gateSpacingKm);
+  // RadxField *optDepthF =
+  //   ray->addField(Names::OpticalDepth_F, "", nGates, Radx::missingFl32, 
+  //                 _calcs->getOpticalDepthF().data(), true);
+  // optDepthF->setStandardName(Names::lidar_optical_depth);
+  // optDepthF->setLongName(Names::lidar_optical_depth_filtered);
+  // optDepthF->setRangeGeom(startRangeKm, gateSpacingKm);
        
 }
 
