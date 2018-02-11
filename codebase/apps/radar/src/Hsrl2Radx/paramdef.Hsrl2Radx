@@ -331,6 +331,12 @@ paramdef string {
   p_help = "";
 } scan_adjustment_name;
 
+paramdef string {
+  p_default = "molecular_gain";
+  p_descr = "Name of molecular gain in CalVals file.";
+  p_help = "";
+} molecular_gain_name;
+
 paramdef int {
   p_default = 100;
   p_descr = "The background correction uses data from the end of each ray.";

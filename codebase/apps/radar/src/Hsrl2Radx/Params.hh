@@ -446,6 +446,8 @@ public:
 
   char* scan_adjustment_name;
 
+  char* molecular_gain_name;
+
   int ngates_for_background_correction;
 
   int nrays_for_background_correction;
@@ -531,7 +533,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[97];
+  mutable TDRPtable _table[98];
 
   const char *_className;
 

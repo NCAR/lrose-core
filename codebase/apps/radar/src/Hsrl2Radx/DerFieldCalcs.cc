@@ -872,9 +872,9 @@ Radx::fl32 DerFieldCalcs::_computeBackscatRatio(double combineRate,
     return Radx::missingFl32;
   }
 
-  double ratio = (combineRate + crossRate) / (molRate * 1.0);
+  double ratio = (combineRate + crossRate) / molRate;
   if (ratio < 1.0) {
-    return Radx::missingFl32;
+    ratio = 1.0;
   }
 
   return ratio;
@@ -940,13 +940,29 @@ Radx::fl32 DerFieldCalcs::_computeBackscatCoeff(double pressHpa,
     return Radx::missingFl32;
   }
 
+  // compute betaM sonde
+
   double betaMSonde = _computeBetaMSonde(pressHpa, tempK);
   if (betaMSonde == NAN) {
     return Radx::missingFl32;
   }
 
-  double aerosolBscat = (backscatRatio - 1.0) * betaMSonde;
-  if (aerosolBscat < 0.0) {
+  // get cal gain adjustment
+  
+  double molGain = 1.0;
+  CalReader molGainCal = _fullCals.getMolGain();
+  if (molGainCal.dataTypeisNum()) {
+    int binPos = _fullCals.getBinPos();
+    const vector<vector<double> > &dataNum = molGainCal.getDataNum();
+    if(dataNum[binPos].size() == 1) {
+      molGain = dataNum[binPos][0];
+    }
+  }
+
+  // compute coefficient
+
+  double aerosolBscat = (backscatRatio / molGain - 1.0) * betaMSonde;
+  if (aerosolBscat <= 0.0) {
     return Radx::missingFl32;
   }
 

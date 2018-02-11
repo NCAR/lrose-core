@@ -1165,6 +1165,18 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("i2_scan_adjustment");
     tt++;
     
+    // Parameter 'molecular_gain_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("molecular_gain_name");
+    tt->descr = tdrpStrDup("Name of molecular gain in CalVals file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &molecular_gain_name - &_start_;
+    tt->single_val.s = tdrpStrDup("molecular_gain");
+    tt++;
+    
     // Parameter 'ngates_for_background_correction'
     // ctype is 'int'
     

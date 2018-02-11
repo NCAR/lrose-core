@@ -203,6 +203,9 @@ int Hsrl2Radx::_readCals()
   _cals.readScanAdj(_params.calvals_gvhsrl_path, 
                     _params.scan_adjustment_name); 
 
+  _cals.readMolGain(_params.calvals_gvhsrl_path, 
+                    _params.molecular_gain_name);
+
   _cals.readBaselineCor(_params.baseline_calibration_path);
   _cals.readDiffGeoCor(_params.diff_default_geofile_path);
   _cals.readGeoCor(_params.geofile_default_path);

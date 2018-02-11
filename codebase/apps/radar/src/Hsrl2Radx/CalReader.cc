@@ -212,10 +212,16 @@ CalReader CalReader::readCalVals(const char* file, const char* variable)
         //if length is 0 there is no numerical data and is string data. 
 	
         if(strData==-1 && numData==-1) {
-          cerr<<"WARNING: calvals_gvhsrl has an improperly formmated line with a date but no data."<<endl;
+          cerr << "WARNING: calvals_gvhsrl has an improperly formatted line "
+               << "with a date but no data." << endl;
+          cerr << "  filename: " << file << endl;
+          cerr << "  variable: " << variable << endl;
           strValue="";//don't want errors it just gives an empty result
         } else if(strData > -1 && numData > -1) {
-          cerr<<"WARNING: calvals_gvhsrl has an improperly formmated line with a date and numerical data and string typed data."<<endl;
+          cerr<< "WARNING: calvals_gvhsrl has an improperly formatted line "
+              << "with a date and numerical data and string typed data." << endl;
+          cerr << "  filename: " << file << endl;
+          cerr << "  variable: " << variable << endl;
           strValue="";//don't want errors it just gives an empty result
         } else if(strData > -1) {
           strValue=line.substr(strData+1,line.length()-strData-2);
