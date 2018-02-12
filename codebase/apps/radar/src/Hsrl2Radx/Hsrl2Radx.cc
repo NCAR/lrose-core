@@ -50,6 +50,8 @@
 #include <toolsa/pmu.h>
 #include <radar/HsrlRawRay.hh>
 #include <Fmq/DsFmq.hh>
+#include <Mdv/MdvxField.hh>
+#include <Mdv/MdvxProj.hh>
 
 #include <cmath>  
 #include <fstream>
@@ -1184,6 +1186,12 @@ void Hsrl2Radx::_addEnvFields(RadxRay *ray)
     presHpa[igate] = _stdAtmos.ht2pres(htm);
   }
 
+  if (_params.read_temp_and_pressure_profile_from_model_files) {
+    if (_getModelData(ray->getTimeSecs()) == 0) {
+      _setProfileFromModel(ray, htMeters, tempK, presHpa);
+    }
+  }
+    
   RadxField *htField =
     ray->addField(Names::Height, "m", nGates, Radx::missingFl32, htMeters, true);
   htField->setStandardName(Names::height_above_mean_sea_level);
@@ -1202,11 +1210,6 @@ void Hsrl2Radx::_addEnvFields(RadxRay *ray)
   presField->setLongName(Names::air_pressure);
   presField->setRangeGeom(startRangeKm, gateSpacingKm);
 
-  if (_params.read_temp_and_pressure_profile_from_model_files) {
-    if (_getModelData(ray->getTimeSecs()) == 0) {
-    }
-  }
-    
 }
 
 //////////////////////////////////////////////////
@@ -1428,6 +1431,129 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
   // optDepthF->setLongName(Names::lidar_optical_depth_filtered);
   // optDepthF->setRangeGeom(startRangeKm, gateSpacingKm);
        
+}
+
+///////////////////////////////////////////////////////
+// read in temp and pressure profile from model
+
+int Hsrl2Radx::_getModelData(time_t rayTime)
+
+{
+
+  // check if the previously read file will suffice
+
+  time_t prevValidTime = _mdvx.getValidTime();
+  double tdiff = fabs((double) prevValidTime - (double) rayTime);
+  if (tdiff <= _params.model_profile_search_margin_secs) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "Reusing previously read MDV file for profile" << endl;
+      cerr << "  file: " << _mdvx.getPathInUse() << endl;
+    }
+    return 0;
+  }
+
+  // set up the read
+
+  _mdvx.clear();
+  _mdvx.setReadTime(Mdvx::READ_CLOSEST,
+                    _params.model_profile_mdv_data_url,
+                    _params.model_profile_search_margin_secs,
+                    rayTime);
+  _mdvx.addReadField(_params.model_temperature_field_name);
+  _mdvx.addReadField(_params.model_pressure_field_name);
+  _mdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
+
+  // perform the read
+
+  if (_mdvx.readVolume()) {
+    cerr << "ERROR - Hsrl2Radx::_getModelData()" << endl;
+    cerr << "  Cannot read model data for time: "
+         << RadxTime::strm(rayTime) << endl;
+    cerr << _mdvx.getErrStr() << endl;
+    return -1;
+  }
+
+  if (_params.debug) {
+    cerr << "====>> read model data for temp and pressure profiles" << endl;
+    cerr << "  ray time: "
+         << RadxTime::strm(rayTime) << endl;
+    cerr << "  model valid time: " 
+         << RadxTime::strm(_mdvx.getValidTime()) << endl;
+    cerr << "  file: " << _mdvx.getPathInUse() << endl;
+    cerr << "=====================================================" << endl;
+  }
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////
+// set the profile from the model data
+
+int Hsrl2Radx::_setProfileFromModel(RadxRay *ray,
+                                    Radx::fl32 *htMeters,
+                                    Radx::fl32 *tempK,
+                                    Radx::fl32 *presHpa)
+
+{
+
+  // get lat and lon
+
+  double lat = 0.0, lon = 0.0;
+  const RadxGeoref *geo = ray->getGeoreference();
+  if (geo == NULL) {
+    lat = _params.instrument_latitude_deg;
+    lon = _params.instrument_longitude_deg;
+  } else {
+    lat = geo->getLatitude();
+    lon = geo->getLongitude();
+  }
+
+  // if (geo != NULL) {
+  //   geo->print(cerr);
+  // }
+
+  // get fields
+
+  MdvxField *tempField = _mdvx.getField(_params.model_temperature_field_name);
+  if (tempField == NULL) {
+    cerr << "ERROR - Hsrl2Radx::_setProfileFromModel()" << endl;
+    cerr << "  No temperaure field found" << endl;
+    return -1;
+  }
+
+  MdvxField *presField = _mdvx.getField(_params.model_pressure_field_name);
+  if (presField == NULL) {
+    cerr << "ERROR - Hsrl2Radx::_setProfileFromModel()" << endl;
+    cerr << "  No pressure field found" << endl;
+    return -1;
+  }
+
+  // set projection
+
+  MdvxProj proj(tempField->getFieldHeader());
+  
+  // get grid location index
+
+  int xIndex, yIndex;
+  if (proj.latlon2xyIndex(lat, lon, xIndex, yIndex, true)) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "ERROR - Hsrl2Radx::_setProfileFromModel()" << endl;
+      cerr << "  lat,lon outside model domain: " << lat << ", " << lon << endl;
+    }
+    return -1;
+  }
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "lat, lon, xIndex, yIndex: "
+         << lat << ", "
+         << lon << ", "
+         << xIndex << ", "
+         << yIndex << endl;
+  }
+
+  return 0;
+  
 }
 
 //////////////////////////////////////////////////////////////
@@ -1734,56 +1860,3 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
 
 // }
 
-///////////////////////////////////////////////////////
-// read in temp and pressure profile from model
-
-int Hsrl2Radx::_getModelData(time_t rayTime)
-
-{
-
-  // check if the previously read file will suffice
-
-  time_t prevValidTime = _mdvx.getValidTime();
-  double tdiff = fabs((double) prevValidTime - (double) rayTime);
-  if (tdiff <= _params.model_profile_search_margin_secs) {
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "Reusing previously read MDV file for profile" << endl;
-      cerr << "  file: " << _mdvx.getPathInUse() << endl;
-    }
-    return 0;
-  }
-
-  // set up the read
-
-  _mdvx.clear();
-  _mdvx.setReadTime(Mdvx::READ_CLOSEST,
-                    _params.model_profile_mdv_data_url,
-                    _params.model_profile_search_margin_secs,
-                    rayTime);
-  _mdvx.addReadField(_params.model_temperature_field_name);
-  _mdvx.addReadField(_params.model_pressure_field_name);
-  _mdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
-
-  // perform the read
-
-  if (_mdvx.readVolume()) {
-    cerr << "ERROR - Hsrl2Radx::_getModelData()" << endl;
-    cerr << "  Cannot read model data for time: "
-         << RadxTime::strm(rayTime) << endl;
-    cerr << _mdvx.getErrStr() << endl;
-    return -1;
-  }
-
-  if (_params.debug) {
-    cerr << "====>> read model data for temp and pressure profiles" << endl;
-    cerr << "  ray time: "
-         << RadxTime::strm(rayTime) << endl;
-    cerr << "  model valid time: " 
-         << RadxTime::strm(_mdvx.getValidTime()) << endl;
-    cerr << "  file: " << _mdvx.getPathInUse() << endl;
-    cerr << "=====================================================" << endl;
-  }
-
-  return 0;
-
-}

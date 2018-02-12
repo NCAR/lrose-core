@@ -147,6 +147,11 @@ private:
 
   int _getModelData(time_t rayTime);
 
+  int _setProfileFromModel(RadxRay *ray,
+                           Radx::fl32 *htMeters,
+                           Radx::fl32 *tempK,
+                           Radx::fl32 *presHpa);
+
   // void _addFilteredCountsToRay(RadxRay *ray);
   
   // void _addFilteredCountsToRay(RadxRay *ray,
