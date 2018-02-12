@@ -1201,6 +1201,11 @@ void Hsrl2Radx::_addEnvFields(RadxRay *ray)
   presField->setStandardName(Names::air_pressure);
   presField->setLongName(Names::air_pressure);
   presField->setRangeGeom(startRangeKm, gateSpacingKm);
+
+  if (_params.read_temp_and_pressure_profile_from_model_files) {
+    if (_getModelData(ray->getTimeSecs()) == 0) {
+    }
+  }
     
 }
 
@@ -1729,3 +1734,56 @@ void Hsrl2Radx::_addDerivedMoments(RadxRay *ray)
 
 // }
 
+///////////////////////////////////////////////////////
+// read in temp and pressure profile from model
+
+int Hsrl2Radx::_getModelData(time_t rayTime)
+
+{
+
+  // check if the previously read file will suffice
+
+  time_t prevValidTime = _mdvx.getValidTime();
+  double tdiff = fabs((double) prevValidTime - (double) rayTime);
+  if (tdiff <= _params.model_profile_search_margin_secs) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "Reusing previously read MDV file for profile" << endl;
+      cerr << "  file: " << _mdvx.getPathInUse() << endl;
+    }
+    return 0;
+  }
+
+  // set up the read
+
+  _mdvx.clear();
+  _mdvx.setReadTime(Mdvx::READ_CLOSEST,
+                    _params.model_profile_mdv_data_url,
+                    _params.model_profile_search_margin_secs,
+                    rayTime);
+  _mdvx.addReadField(_params.model_temperature_field_name);
+  _mdvx.addReadField(_params.model_pressure_field_name);
+  _mdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
+
+  // perform the read
+
+  if (_mdvx.readVolume()) {
+    cerr << "ERROR - Hsrl2Radx::_getModelData()" << endl;
+    cerr << "  Cannot read model data for time: "
+         << RadxTime::strm(rayTime) << endl;
+    cerr << _mdvx.getErrStr() << endl;
+    return -1;
+  }
+
+  if (_params.debug) {
+    cerr << "====>> read model data for temp and pressure profiles" << endl;
+    cerr << "  ray time: "
+         << RadxTime::strm(rayTime) << endl;
+    cerr << "  model valid time: " 
+         << RadxTime::strm(_mdvx.getValidTime()) << endl;
+    cerr << "  file: " << _mdvx.getPathInUse() << endl;
+    cerr << "=====================================================" << endl;
+  }
+
+  return 0;
+
+}

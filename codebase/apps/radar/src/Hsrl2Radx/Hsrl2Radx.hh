@@ -46,6 +46,7 @@
 #include <Radx/RadxGeoref.hh>
 #include <Radx/Radx.hh>
 #include <physics/IcaoStdAtmos.hh>
+#include <Mdv/DsMdvx.hh>
 
 class DerFieldCalcs;
 
@@ -90,6 +91,7 @@ private:
   FullCals _cals;
 
   IcaoStdAtmos _stdAtmos;
+  DsMdvx _mdvx;
 
   int _nBinsInRay;
   int _nBinsPerGate;
@@ -142,6 +144,8 @@ private:
   vector<double> _processQWPRotation(vector<double>arrivalRate, vector<double> polCal);
 
   void _addDerivedMoments(RadxRay *ray);
+
+  int _getModelData(time_t rayTime);
 
   // void _addFilteredCountsToRay(RadxRay *ray);
   

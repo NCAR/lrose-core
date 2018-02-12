@@ -65,6 +65,16 @@ public:
   } mode_t;
 
   typedef enum {
+    DEGREES_CELCIUS = 0,
+    DEGREES_KELVIN = 1
+  } temperature_units_t;
+
+  typedef enum {
+    PA = 0,
+    HPA = 1
+  } pressure_units_t;
+
+  typedef enum {
     START_AND_END_TIMES = 0,
     START_TIME_ONLY = 1,
     END_TIME_ONLY = 2,
@@ -466,6 +476,20 @@ public:
 
   int speckle_filter_len;
 
+  tdrp_bool_t read_temp_and_pressure_profile_from_model_files;
+
+  char* model_temperature_field_name;
+
+  temperature_units_t temperature_profile_units;
+
+  char* model_pressure_field_name;
+
+  pressure_units_t pressure_profile_units;
+
+  char* model_profile_mdv_data_url;
+
+  int model_profile_search_margin_secs;
+
   char* output_fmq_url;
 
   int output_fmq_size;
@@ -533,7 +557,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[98];
+  mutable TDRPtable _table[106];
 
   const char *_className;
 
