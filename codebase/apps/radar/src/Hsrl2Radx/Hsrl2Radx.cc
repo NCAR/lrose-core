@@ -1463,6 +1463,7 @@
    _mdvx.addReadField(_params.model_temperature_field_name);
    _mdvx.addReadField(_params.model_pressure_field_name);
    _mdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
+   _mdvx.setReadCompressionType(Mdvx::COMPRESSION_NONE);
 
    // perform the read
 
@@ -1577,6 +1578,12 @@
      } else {
        modelPresHpa[iz] = presData[dataOffset];
      }
+     // cerr << "11111111 iz, ht, temp0, temp, pres0, pres: " << iz << ", "
+     //      << vhdr.level[iz] << ", "
+     //      << tempData[iz * nPointsPlane] << ", "
+     //      << modelTempK[iz] << ", "
+     //      << presData[iz * nPointsPlane] << ", "
+     //      << modelPresHpa[iz] << endl;
    } // iz
 
    // loop through the gates
