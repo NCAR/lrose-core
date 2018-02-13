@@ -222,17 +222,11 @@ void DerFieldCalcs::computeDerived(size_t nGates,
                                            _molRate[igate], scanAdj);
     // _opticalDepth[igate] = optDepth + optDepthOffset;
     _opticalDepth[igate] = optDepth - _params.optical_depth_reference_value;
-    // double optDepthF = _computeOpticalDepth(_presHpa[igate], _tempK[igate],
-    //                                         _molRateF[igate], scanAdj);
-    // _opticalDepthF[igate] = optDepthF + optDepthOffset;
   }
 
   // filter the optical depth
   
-  // _filterOpticalDepth(_opticalDepth);
-  // _filterOpticalDepth(_opticalDepthF);
   _applyFirFilter(_opticalDepth);
-  // _applyFirFilter(_opticalDepthF);
 
   // extinction
 
@@ -246,20 +240,11 @@ void DerFieldCalcs::computeDerived(size_t nGates,
                               _opticalDepth[igate + filterHalf],
                               _htM[igate - filterHalf],
                               _htM[igate + filterHalf]);
-    // _extinctionF[igate] = 
-    //   _computeExtinctionCoeff(_opticalDepthF[igate - filterHalf],
-    //                           _opticalDepthF[igate + filterHalf],
-    //                           _htM[igate - filterHalf],
-    //                           _htM[igate + filterHalf]);
   }
 
   // set all zero vals to missing
 
   _setZeroValsToMissing();
-
-  // if(_params.debug >= Params::DEBUG_EXTRA) {
-  //   _printDerivedFields(cerr);
-  // }
 
 }
 
@@ -930,7 +915,6 @@ double DerFieldCalcs::_computeBetaMSonde(double pressHpa, double tempK)
   return val;
 
 }
-
 
 /////////////////////////////////////////////////////////////////
 // backscatter coefficient
