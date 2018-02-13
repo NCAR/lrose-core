@@ -159,10 +159,16 @@ void DerFieldCalcs::computeDerived(size_t nGates,
   // init arrays
 
   _initDerivedArrays();
+
+  // betaMSonde
   
+  for(size_t igate = 0; igate < _nGates; igate++) {
+    _betaMSonde[igate] = _computeBetaMSonde(_presHpa[igate], _tempK[igate]);
+  }
+
   // vol depol
 
-  for(size_t igate=0;igate<_nGates;igate++) {
+  for(size_t igate = 0; igate < _nGates; igate++) {
     _volDepol[igate] = _computeVolDepol(_combRate[igate],
                                         _crossRate[igate]);
     // _volDepolF[igate] = _computeVolDepol(_combRateF[igate],
@@ -171,7 +177,7 @@ void DerFieldCalcs::computeDerived(size_t nGates,
   
   // backscatter ratio
   
-  for(size_t igate=0;igate<_nGates;igate++) {
+  for(size_t igate = 0; igate < _nGates; igate++) {
     _backscatRatio[igate] = _computeBackscatRatio(_combRate[igate], 
                                                   _crossRate[igate],
                                                   _molRate[igate]);
@@ -182,7 +188,7 @@ void DerFieldCalcs::computeDerived(size_t nGates,
   
   // particle depol
   
-  for(size_t igate=0;igate<_nGates;igate++) {
+  for(size_t igate = 0; igate < _nGates; igate++) {
     _partDepol[igate] = _computePartDepol(_volDepol[igate],
                                           _backscatRatio[igate]);
     // _partDepolF[igate] = _computePartDepol(_volDepolF[igate],
@@ -191,13 +197,9 @@ void DerFieldCalcs::computeDerived(size_t nGates,
   
   // backscatter coefficient
   
-  for(size_t igate=0;igate<_nGates;igate++) {
-    _backscatCoeff[igate] = _computeBackscatCoeff(_presHpa[igate],
-                                                  _tempK[igate], 
+  for(size_t igate = 0; igate < _nGates; igate++) {
+    _backscatCoeff[igate] = _computeBackscatCoeff(_betaMSonde[igate],
                                                   _backscatRatio[igate]);
-    // _backscatCoeffF[igate] = _computeBackscatCoeff(_presHpa[igate],
-    //                                                _tempK[igate], 
-    //                                                _backscatRatioF[igate]);
   }
 
   // optical depth
@@ -216,7 +218,7 @@ void DerFieldCalcs::computeDerived(size_t nGates,
 
   // double optDepthOffset = _computeOptDepthRefOffset(scanAdj);
   for(size_t igate = 0; igate < _nGates; igate++) {
-    double optDepth = _computeOpticalDepth(_presHpa[igate], _tempK[igate],
+    double optDepth = _computeOpticalDepth(_betaMSonde[igate],
                                            _molRate[igate], scanAdj);
     // _opticalDepth[igate] = optDepth + optDepthOffset;
     _opticalDepth[igate] = optDepth - _params.optical_depth_reference_value;
@@ -803,7 +805,8 @@ void DerFieldCalcs::_setZeroValsToMissing(vector<Radx::fl32> &data)
 void DerFieldCalcs::_initDerivedArrays()
 
 {
-\
+
+  _betaMSonde.resize(_nGates);
   _volDepol.resize(_nGates);
   _backscatRatio.resize(_nGates);
   _partDepol.resize(_nGates);
@@ -820,6 +823,7 @@ void DerFieldCalcs::_initDerivedArrays()
 
   for (size_t ii = 0; ii < _nGates; ii++) {
 
+    _betaMSonde[ii] = Radx::missingFl32;
     _volDepol[ii] = Radx::missingFl32;
     _backscatRatio[ii] = Radx::missingFl32;
     _partDepol[ii] = Radx::missingFl32;
@@ -931,8 +935,7 @@ double DerFieldCalcs::_computeBetaMSonde(double pressHpa, double tempK)
 /////////////////////////////////////////////////////////////////
 // backscatter coefficient
 
-Radx::fl32 DerFieldCalcs::_computeBackscatCoeff(double pressHpa, 
-                                                double tempK, 
+Radx::fl32 DerFieldCalcs::_computeBackscatCoeff(double betaMSonde,
                                                 Radx::fl32 backscatRatio)
 {
 
@@ -942,7 +945,6 @@ Radx::fl32 DerFieldCalcs::_computeBackscatCoeff(double pressHpa,
 
   // compute betaM sonde
 
-  double betaMSonde = _computeBetaMSonde(pressHpa, tempK);
   if (betaMSonde == NAN) {
     return Radx::missingFl32;
   }
@@ -973,7 +975,7 @@ Radx::fl32 DerFieldCalcs::_computeBackscatCoeff(double pressHpa,
 /////////////////////////////////////////////////////////////////
 // optical depth
 
-Radx::fl32 DerFieldCalcs::_computeOpticalDepth(double pressHpa, double tempK, 
+Radx::fl32 DerFieldCalcs::_computeOpticalDepth(double betaMSonde,
                                                double molRate, double scanAdj)
 {
 
@@ -981,7 +983,6 @@ Radx::fl32 DerFieldCalcs::_computeOpticalDepth(double pressHpa, double tempK,
     return Radx::missingFl32;
   }
   
-  double betaMSonde =_computeBetaMSonde(pressHpa, tempK);
   if (betaMSonde == NAN) {
     return Radx::missingFl32;
   }
@@ -993,18 +994,18 @@ Radx::fl32 DerFieldCalcs::_computeOpticalDepth(double pressHpa, double tempK,
 
   double optDepth = - 0.5 * log(xx);
 
-  if(_params.debug >= Params::DEBUG_EXTRA) {
-    if (pressHpa > 820) {
-      cerr << "press, tempK, scanAdj, molRate, betaMSonde, .5*log(xx), optDepth: "
-           << pressHpa << ", "
-           << tempK << ", "
-           << scanAdj << ", "
-           << molRate << ", "
-           << betaMSonde << ", "
-           << 0.5*log(xx) << ", "
-           << optDepth << endl;
-    }
-  }
+  // if(_params.debug >= Params::DEBUG_EXTRA) {
+  //   if (pressHpa > 820) {
+  //     cerr << "press, tempK, scanAdj, molRate, betaMSonde, .5*log(xx), optDepth: "
+  //          << pressHpa << ", "
+  //          << tempK << ", "
+  //          << scanAdj << ", "
+  //          << molRate << ", "
+  //          << betaMSonde << ", "
+  //          << 0.5*log(xx) << ", "
+  //          << optDepth << endl;
+  //   }
+  // }
   
   return optDepth;
 
@@ -1106,8 +1107,7 @@ double DerFieldCalcs::_computeOptDepthRefOffset(double scanAdj)
   // and save to queue
   
   double refDepth =
-    _computeOpticalDepth(_presHpa[refGate], _tempK[refGate],
-                         _molRate[refGate], scanAdj);
+    _computeOpticalDepth(_betaMSonde[refGate], _molRate[refGate], scanAdj);
   if (refDepth != Radx::missingFl32) {
     if ((int) _refOptDepth.size() >= _params.optical_depth_n_reference_obs) {
       _refOptDepth.pop_front();

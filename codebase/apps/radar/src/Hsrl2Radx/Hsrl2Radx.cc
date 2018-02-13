@@ -47,24 +47,22 @@
 #include <dsserver/DsLdataInfo.hh>
 #include <didss/DsInputPath.hh>
 #include <toolsa/TaXml.hh>
- #include <toolsa/toolsa_macros.h>
- #include <toolsa/pmu.h>
- #include <radar/HsrlRawRay.hh>
- #include <Fmq/DsFmq.hh>
- #include <Mdv/MdvxField.hh>
- #include <Mdv/MdvxProj.hh>
+#include <toolsa/toolsa_macros.h>
+#include <toolsa/pmu.h>
+#include <radar/HsrlRawRay.hh>
+#include <Fmq/DsFmq.hh>
 
- #include <cmath>  
- #include <fstream>
- #include <sstream>
- #include <string>
+#include <cmath>  
+#include <fstream>
+#include <sstream>
+#include <string>
 
- #include "MslFile.hh"
- #include "RawFile.hh"
- #include "CalReader.hh"
- #include "FullCals.hh"
- #include "DerFieldCalcs.hh"
- #include "OutputFmq.hh"
+#include "MslFile.hh"
+#include "RawFile.hh"
+#include "CalReader.hh"
+#include "FullCals.hh"
+#include "DerFieldCalcs.hh"
+#include "OutputFmq.hh"
 
  using namespace std;
 
@@ -78,6 +76,11 @@
 
    _calcs = NULL;
    _calcsFilt = NULL;
+
+   _modelTempField = NULL;
+   _modelPresField = NULL;
+   _modelTempData = NULL;
+   _modelPresData = NULL;
 
    _nBinsInRay = 0;
    _nBinsPerGate = 0;
@@ -1336,6 +1339,15 @@
    // crossRate->setLongName(Names::lidar_crosspolar_combined_backscatter_photon_rate_filtered);
    // crossRateF->setRangeGeom(startRangeKm, gateSpacingKm);
 
+   // beta m sonde
+
+   RadxField *betaMSonde =
+     ray->addField(Names::BetaMSonde, "", nGates, Radx::missingFl32, 
+                   _calcs->getBetaMSonde().data(), true);
+   betaMSonde->setStandardName(Names::lidar_beta_m_sonde);
+   betaMSonde->setLongName(Names::lidar_beta_m_sonde);
+   betaMSonde->setRangeGeom(startRangeKm, gateSpacingKm);
+
    // vol depol ratio
 
    RadxField *volDepol =
@@ -1485,6 +1497,30 @@
      cerr << "=====================================================" << endl;
    }
 
+   // get fields
+
+   _modelTempField = _mdvx.getField(_params.model_temperature_field_name);
+   if (_modelTempField == NULL) {
+     cerr << "ERROR - Hsrl2Radx::_getModelData()" << endl;
+     cerr << "  No temperaure field found" << endl;
+     return -1;
+   }
+   _modelTempFhdr = _modelTempField->getFieldHeader();
+   _modelTempVhdr = _modelTempField->getVlevelHeader();
+   _modelTempData = (fl32 *) _modelTempField->getVol();
+
+   _modelPresField = _mdvx.getField(_params.model_pressure_field_name);
+   if (_modelPresField == NULL) {
+     cerr << "ERROR - Hsrl2Radx::_getModelData()" << endl;
+     cerr << "  No pressure field found" << endl;
+     return -1;
+   }
+   _modelPresData = (fl32 *) _modelPresField->getVol();
+
+   // set projection
+
+   _modelProj.init(_modelTempFhdr);
+
    return 0;
 
  }
@@ -1511,45 +1547,21 @@
      lon = geo->getLongitude();
    }
 
-   // if (geo != NULL) {
-   //   geo->print(cerr);
-   // }
-
-   // get fields
-
-   MdvxField *tempField = _mdvx.getField(_params.model_temperature_field_name);
-   if (tempField == NULL) {
-     cerr << "ERROR - Hsrl2Radx::_setProfileFromModel()" << endl;
-     cerr << "  No temperaure field found" << endl;
-     return -1;
-   }
-   Mdvx::field_header_t fhdr = tempField->getFieldHeader();
-   fl32 *tempData = (fl32 *) tempField->getVol();
-
-   MdvxField *presField = _mdvx.getField(_params.model_pressure_field_name);
-   if (presField == NULL) {
-     cerr << "ERROR - Hsrl2Radx::_setProfileFromModel()" << endl;
-     cerr << "  No pressure field found" << endl;
-     return -1;
-   }
-   fl32 *presData = (fl32 *) presField->getVol();
-
-   // set projection
-
-   MdvxProj proj(fhdr);
-
    // get grid location index
 
    int xIndex, yIndex;
-   if (proj.latlon2xyIndex(lat, lon, xIndex, yIndex, true)) {
+   if (_modelProj.latlon2xyIndex(lat, lon, xIndex, yIndex, true)) {
      if (_params.debug >= Params::DEBUG_VERBOSE) {
        cerr << "ERROR - Hsrl2Radx::_setProfileFromModel()" << endl;
        cerr << "  lat,lon outside model domain: " << lat << ", " << lon << endl;
      }
      return -1;
    }
-   int planeOffset = yIndex * fhdr.nx + xIndex;
-   int nPointsPlane = fhdr.ny * fhdr.nx;
+   int nx = _modelTempFhdr.nx;
+   int ny = _modelTempFhdr.ny;
+   int nz = _modelTempFhdr.nz;
+   int planeOffset = yIndex * nx + xIndex;
+   int nPointsPlane = ny * nx;
 
    if (_params.debug >= Params::DEBUG_VERBOSE) {
      cerr << "lat, lon, xIndex, yIndex: "
@@ -1561,22 +1573,21 @@
 
    // load up temp and pressure column arrays from model
 
-   const Mdvx::vlevel_header_t &vhdr = tempField->getVlevelHeader();
    RadxArray<Radx::fl32> modelTempK_, modelPresHpa_;
-   Radx::fl32 *modelTempK = modelTempK_.alloc(fhdr.nz);
-   Radx::fl32 *modelPresHpa = modelPresHpa_.alloc(fhdr.nz);
+   Radx::fl32 *modelTempK = modelTempK_.alloc(nz);
+   Radx::fl32 *modelPresHpa = modelPresHpa_.alloc(nz);
 
-   for (int iz = 0; iz < fhdr.nz; iz++) {
+   for (int iz = 0; iz < nz; iz++) {
      long int dataOffset = iz * nPointsPlane + planeOffset;
      if (_params.temperature_profile_units == Params::DEGREES_CELCIUS) {
-       modelTempK[iz] = TEMP_C_TO_K(tempData[dataOffset]);
+       modelTempK[iz] = TEMP_C_TO_K(_modelTempData[dataOffset]);
      } else {
-       modelTempK[iz] = tempData[dataOffset];
+       modelTempK[iz] = _modelTempData[dataOffset];
      }
      if (_params.pressure_profile_units == Params::PA) {
-       modelPresHpa[iz] = presData[dataOffset] / 100.0;
+       modelPresHpa[iz] = _modelPresData[dataOffset] / 100.0;
      } else {
-       modelPresHpa[iz] = presData[dataOffset];
+       modelPresHpa[iz] = _modelPresData[dataOffset];
      }
      // cerr << "11111111 iz, ht, temp0, temp, pres0, pres: " << iz << ", "
      //      << vhdr.level[iz] << ", "
@@ -1586,37 +1597,72 @@
      //      << modelPresHpa[iz] << endl;
    } // iz
 
-   // loop through the gates
+   // interpolate temp and pressure from model onto ray
 
    size_t nGates = ray->getNGates();
-   for (size_t igate = 0; igate < nGates; igate++) {
 
-     // interpolate temp and pressure from model onto ray
+   if (ray->getElevationDeg() > 0) {
 
-     double htKm = htMeters[igate] / 1000.0;
+     // pointing up
 
-     if (htKm <= vhdr.level[0]) {
-       tempK[igate] = modelTempK[0];
-       presHpa[igate] = modelPresHpa[0];
-     } else if (htKm >= vhdr.level[fhdr.nz - 1]) {
-       tempK[igate] = modelTempK[fhdr.nz - 1];
-       presHpa[igate] = modelPresHpa[fhdr.nz - 1];
-     } else {
-       for (int iz = 1; iz < fhdr.nz; iz++) {
-         if (htKm > vhdr.level[iz - 1] &&
-             htKm <= vhdr.level[iz]) {
-           double wt1 =
-             (htKm - vhdr.level[iz - 1]) / (vhdr.level[iz] - vhdr.level[iz - 1]);
-           double wt0 = 1.0 - wt1;
-           tempK[igate] = modelTempK[iz - 1] * wt0 + modelTempK[iz] * wt1;
-           presHpa[igate] = modelPresHpa[iz - 1] * wt0 + modelPresHpa[iz] * wt1;
-           break;
-         } // if (htKm > ...
-       } // iz
-     } // if (htKm <= ...
+     int startIz = 1;
+     for (size_t igate = 0; igate < nGates; igate++) {
+       double htKm = htMeters[igate] / 1000.0;
+       if (htKm <= _modelTempVhdr.level[0]) {
+         tempK[igate] = modelTempK[0];
+         presHpa[igate] = modelPresHpa[0];
+       } else if (htKm >= _modelTempVhdr.level[nz - 1]) {
+         tempK[igate] = modelTempK[nz - 1];
+         presHpa[igate] = modelPresHpa[nz - 1];
+       } else {
+         for (int iz = startIz; iz < nz; iz++) {
+           if (htKm > _modelTempVhdr.level[iz - 1] &&
+               htKm <= _modelTempVhdr.level[iz]) {
+             double wt1 =
+               (htKm - _modelTempVhdr.level[iz - 1]) / 
+               (_modelTempVhdr.level[iz] - _modelTempVhdr.level[iz - 1]);
+             double wt0 = 1.0 - wt1;
+             tempK[igate] = modelTempK[iz - 1] * wt0 + modelTempK[iz] * wt1;
+             presHpa[igate] = modelPresHpa[iz - 1] * wt0 + modelPresHpa[iz] * wt1;
+             startIz = iz;
+             break;
+           } // if (htKm > ...
+         } // iz
+       } // if (htKm <= ...
+     } // igate
+
+   } else {
+
+     // pointing down
+
+     int startIz = nz - 1;
+     for (size_t igate = 0; igate < nGates; igate++) {
+       double htKm = htMeters[igate] / 1000.0;
+       if (htKm <= _modelTempVhdr.level[0]) {
+         tempK[igate] = modelTempK[0];
+         presHpa[igate] = modelPresHpa[0];
+       } else if (htKm >= _modelTempVhdr.level[nz - 1]) {
+         tempK[igate] = modelTempK[nz - 1];
+         presHpa[igate] = modelPresHpa[nz - 1];
+       } else {
+         for (int iz = startIz; iz > 0; iz--) {
+           if (htKm > _modelTempVhdr.level[iz - 1] &&
+               htKm <= _modelTempVhdr.level[iz]) {
+             double wt1 =
+               (htKm - _modelTempVhdr.level[iz - 1]) / 
+               (_modelTempVhdr.level[iz] - _modelTempVhdr.level[iz - 1]);
+             double wt0 = 1.0 - wt1;
+             tempK[igate] = modelTempK[iz - 1] * wt0 + modelTempK[iz] * wt1;
+             presHpa[igate] = modelPresHpa[iz - 1] * wt0 + modelPresHpa[iz] * wt1;
+             startIz = iz;
+             break;
+           } // if (htKm > ...
+         } // iz
+       } // if (htKm <= ...
+     } // igate
+
+   } // if (ray->getElevationDeg() > 0) 
      
-   } // igate
-
   return 0;
   
 }

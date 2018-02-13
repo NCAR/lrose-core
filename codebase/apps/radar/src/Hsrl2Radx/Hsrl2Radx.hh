@@ -47,6 +47,8 @@
 #include <Radx/Radx.hh>
 #include <physics/IcaoStdAtmos.hh>
 #include <Mdv/DsMdvx.hh>
+#include <Mdv/MdvxField.hh>
+#include <Mdv/MdvxProj.hh>
 
 class DerFieldCalcs;
 
@@ -91,7 +93,13 @@ private:
   FullCals _cals;
 
   IcaoStdAtmos _stdAtmos;
+
   DsMdvx _mdvx;
+  MdvxField *_modelTempField, *_modelPresField;
+  fl32 *_modelTempData, *_modelPresData;
+  Mdvx::field_header_t _modelTempFhdr;
+  Mdvx::vlevel_header_t _modelTempVhdr;
+  MdvxProj _modelProj;
 
   int _nBinsInRay;
   int _nBinsPerGate;

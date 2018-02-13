@@ -87,6 +87,7 @@ public:
   // vector<Radx::fl32> &getMolRateF() { return _molRateF; }
   // vector<Radx::fl32> &getCombRateF() { return _combRateF; }
 
+  vector<Radx::fl32> &getBetaMSonde() { return _betaMSonde; }
   vector<Radx::fl32> &getVolDepol() { return _volDepol; }
   vector<Radx::fl32> &getBackscatRatio() { return _backscatRatio; }
   vector<Radx::fl32> &getPartDepol() { return _partDepol; }
@@ -142,6 +143,7 @@ private:
   vector<Radx::fl32> _molRate;
   vector<Radx::fl32> _combRate;
 
+  vector<Radx::fl32> _betaMSonde;
   vector<Radx::fl32> _volDepol;
   vector<Radx::fl32> _backscatRatio;
   vector<Radx::fl32> _partDepol;
@@ -275,12 +277,12 @@ private:
 
   // compute backscatter coefficient
 
-  Radx::fl32 _computeBackscatCoeff(double pressHpa, double tempK, 
+  Radx::fl32 _computeBackscatCoeff(double betaMSonde,
                                    Radx::fl32 backscatRatio);
   
   // compute optical depth calculation for extinction;
 
-  Radx::fl32 _computeOpticalDepth(double pressHpa, double tempK,
+  Radx::fl32 _computeOpticalDepth(double betaMSonde,
                                   double molRate, double scanAdj);
 
   void _filterOpticalDepth(vector<Radx::fl32> &optDepth);
