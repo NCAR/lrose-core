@@ -417,6 +417,10 @@ void RfPrintStormParams(FILE *out,
     case UNION_HAIL:
          fprintf(out, "%s  Storm properties union type : HAIL\n", spacer );
          break;
+    case UNION_NEXRAD_HDA:
+         fprintf(out, "%s  Storm properties union type : NEXRAD HDAL\n",
+                 spacer );
+         break;
     default:
          fprintf(out, "%s  Storm properties union type : NONE\n", spacer );
          break;
@@ -531,6 +535,11 @@ void RfPrintStormProps(FILE *out,
   	    gprops->add_on.hail_metrics.waldvogelProbability);
     fprintf(out, "%s  FOKR storm category          : %d\n", spacer,
   	    gprops->add_on.hail_metrics.FOKRcategory);
+  } else if ( params->gprops_union_type == UNION_NEXRAD_HDA ) {
+    fprintf(out, "%s  POH       (%%) : %g\n", spacer, gprops->add_on.hda.POH);
+    fprintf(out, "%s  SHI (Jm-1s-1) : %g\n", spacer, gprops->add_on.hda.SHI);
+    fprintf(out, "%s  POSH      (%%) : %g\n", spacer, gprops->add_on.hda.POSH);
+    fprintf(out, "%s  MEHS     (mm) : %g\n", spacer, gprops->add_on.hda.MEHS);
   }
   
   fprintf(out, "%s  tilt angle (deg)                : %g\n", spacer,
