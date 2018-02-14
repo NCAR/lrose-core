@@ -14,6 +14,7 @@
 #include "StormIdent.hh"
 #include "StormTrack.hh"
 #include "DataTimes.hh"
+#include "Sounding.hh"
 #include <toolsa/pmu.h>
 #include <titan/track.h>
 #include <didss/DsInputPath.hh>
@@ -95,6 +96,11 @@ TitanDriver::TitanDriver(int argc, char **argv) :
     cerr << "  Resetting dbz_hist_interval in params to: "
          << _params.dbz_hist_interval << endl;
   }
+
+  // initialize the sounding profile
+
+  Sounding &sndg = Sounding::inst();
+  sndg.setParams(&_params);
   
   // init process mapper registration
 

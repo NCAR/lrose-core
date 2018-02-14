@@ -456,6 +456,126 @@ paramdef double {
 } dbz_hist_interval;
 
 commentdef {
+  p_header = "VERTICAL PROFILE - SOUNDING";
+  p_text = "You can: \n\t(a) specify a vertical profile sounding in this param file or\n\t(b) read in a profile from soundings in SPDB.\n\nThe default sounding obtained using -print_params is the ICAO standard atmosphere.";
+}
+
+typedef enum {
+  SPECIFY_SOUNDING, READ_SOUNDING_FROM_SPDB
+} sounding_mode_t;
+
+paramdef enum sounding_mode_t
+{
+  p_default = SPECIFY_SOUNDING;
+  p_descr = "Mode for setting the vertical profile sounding.";
+  p_help = "SPECIFY_SOUNDING: if you do not have access to a measured or model sounding, specify the sounding in this parameter file.\n\nREAD_SOUNDING_FROM_SPDB: read in the closest sounding from SPDB. This assumes you have arranged to have the sounding(s) read in and stored in SPDB.";
+} sounding_mode;
+
+typedef struct {
+  double height_m;
+  double temp_c;
+  double pressure_hpa;
+  double rh_percent;
+  double wspeed_mps;
+  double wdirn_deg;
+} sounding_entry_t;
+
+paramdef struct sounding_entry_t {
+  p_default = {
+    {
+      height_m = -610,
+      temp_c = 19.0,
+      pressure_hpa = 1089.0,
+      rh_percent = -9999.0,
+      wspeed_mps = -9999.0,
+      wdirn_deg = -9999.0
+    }
+    ,
+    {
+      height_m = 11000,
+      temp_c = -56.5,
+      pressure_hpa = 226.32,
+      rh_percent = -9999.0,
+      wspeed_mps = -9999.0,
+      wdirn_deg = -9999.0
+    }
+    ,
+    {
+      height_m = 20000,
+      temp_c = -56.5,
+      pressure_hpa = 54.75,
+      rh_percent = -9999.0,
+      wspeed_mps = -9999.0,
+      wdirn_deg = -9999.0
+    }
+    ,
+    {
+      height_m = 32000,
+      temp_c = -44.5,
+      pressure_hpa = 8.68,
+      rh_percent = -9999.0,
+      wspeed_mps = -9999.0,
+      wdirn_deg = -9999.0
+    }
+  };
+  p_descr = "Enter the sounding you want to use";
+  p_help = "Applies to SPECIFY_SOUNDING mode.\n\nheight_m and temp_c are required.\n\nThe other values are optional, set them to -9999.0 if they are missing.\n\nThe default compiled in is the ICAO standard atmosphere. Use -print_params to see the ICAO default.";
+} specified_sounding[];
+
+paramdef string {
+  p_descr = "SPDB URL for sounding data.";
+  p_default = "$(HOME)/data/spdb/soundings";
+  p_help = "Applies to READ_SOUNDING_FROM_SPDB mode.";
+} sounding_spdb_url;
+
+paramdef int {
+  p_default = 86400;
+  p_descr = "Time margin for retrieving sounding, in secs.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message).";
+} sounding_search_time_margin_secs;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Name of sounding location.";
+  p_help = "If set, we request a profile just for that sounding. If empty, all soundings in the data base are considered valid.";
+} sounding_location_name;
+
+typedef struct {
+  double min_val;
+  double max_val;
+} sounding_data_range_t;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check that pressure covers the required range.";
+  p_help = "If TRUE, we will check that pressure range in the sounding meets or exceeds the min and max specified."; 
+} sounding_check_pressure_range;
+
+paramdef struct sounding_data_range_t {
+  p_default = { min_val = 300, max_val = 950 };
+  p_descr = "Required pressure range for sounding to be valid (hPa)";
+  p_help = "This is used to provide a quality check on the sounding. If the pressure data does not fully cover this range, the sounding is rejected and we look back for the next available one.";
+} sounding_required_pressure_range_hpa;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check that height covers the required range.";
+  p_help = "If TRUE, we will check that height range in the sounding meets or exceeds the min and max specified."; 
+} sounding_check_height_range;
+
+paramdef struct sounding_data_range_t {
+  p_default = { min_val = 500, max_val = 15000 };
+  p_descr = "Required height range for sounding to be valid (m)";
+  p_help = "This is used to provide a quality check on the sounding. If the height data does not fully cover this range, the sounding is rejected and we look back for the next available one.";
+} sounding_required_height_range_m;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check that pressure decreases monotonically.";
+  p_help = "If TRUE, we will check that pressure decreases monotonically. If not, the sounding is rejected and we look back for the next available one."; 
+} sounding_check_pressure_monotonically_decreasing;
+
+commentdef {
   p_header = "OPTION FOR CALCULATING HAIL METRICS.";
 }
 
@@ -482,7 +602,6 @@ paramdef double {
   p_descr = "Reflectivity threshold (dBZ) for hail mass";
   p_help = "This value is used for calculating VIHM (vertically integrated hail mass) and Hail Mass Aloft";
 } hail_mass_dbz_threshold;
-
 
 commentdef {
   p_header = "The Foote-Krauss Category (FOKR)";

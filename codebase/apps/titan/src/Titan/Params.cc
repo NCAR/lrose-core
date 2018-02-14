@@ -1530,6 +1530,244 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 14");
+    tt->comment_hdr = tdrpStrDup("VERTICAL PROFILE - SOUNDING");
+    tt->comment_text = tdrpStrDup("You can: \n\t(a) specify a vertical profile sounding in this param file or\n\t(b) read in a profile from soundings in SPDB.\n\nThe default sounding obtained using -print_params is the ICAO standard atmosphere.");
+    tt++;
+    
+    // Parameter 'sounding_mode'
+    // ctype is '_sounding_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("sounding_mode");
+    tt->descr = tdrpStrDup("Mode for setting the vertical profile sounding.");
+    tt->help = tdrpStrDup("SPECIFY_SOUNDING: if you do not have access to a measured or model sounding, specify the sounding in this parameter file.\n\nREAD_SOUNDING_FROM_SPDB: read in the closest sounding from SPDB. This assumes you have arranged to have the sounding(s) read in and stored in SPDB.");
+    tt->val_offset = (char *) &sounding_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("sounding_mode_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("SPECIFY_SOUNDING");
+      tt->enum_def.fields[0].val = SPECIFY_SOUNDING;
+      tt->enum_def.fields[1].name = tdrpStrDup("READ_SOUNDING_FROM_SPDB");
+      tt->enum_def.fields[1].val = READ_SOUNDING_FROM_SPDB;
+    tt->single_val.e = SPECIFY_SOUNDING;
+    tt++;
+    
+    // Parameter 'specified_sounding'
+    // ctype is '_sounding_entry_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("specified_sounding");
+    tt->descr = tdrpStrDup("Enter the sounding you want to use");
+    tt->help = tdrpStrDup("Applies to SPECIFY_SOUNDING mode.\n\nheight_m and temp_c are required.\n\nThe other values are optional, set them to -9999.0 if they are missing.\n\nThe default compiled in is the ICAO standard atmosphere. Use -print_params to see the ICAO default.");
+    tt->array_offset = (char *) &_specified_sounding - &_start_;
+    tt->array_n_offset = (char *) &specified_sounding_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(sounding_entry_t);
+    tt->array_n = 4;
+    tt->struct_def.name = tdrpStrDup("sounding_entry_t");
+    tt->struct_def.nfields = 6;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("height_m");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_specified_sounding->height_m - (char *) _specified_sounding;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("temp_c");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_specified_sounding->temp_c - (char *) _specified_sounding;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("pressure_hpa");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_specified_sounding->pressure_hpa - (char *) _specified_sounding;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("rh_percent");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_specified_sounding->rh_percent - (char *) _specified_sounding;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("wspeed_mps");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_specified_sounding->wspeed_mps - (char *) _specified_sounding;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[5].fname = tdrpStrDup("wdirn_deg");
+      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &_specified_sounding->wdirn_deg - (char *) _specified_sounding;
+    tt->n_struct_vals = 24;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = -610;
+      tt->struct_vals[1].d = 19;
+      tt->struct_vals[2].d = 1089;
+      tt->struct_vals[3].d = -9999;
+      tt->struct_vals[4].d = -9999;
+      tt->struct_vals[5].d = -9999;
+      tt->struct_vals[6].d = 11000;
+      tt->struct_vals[7].d = -56.5;
+      tt->struct_vals[8].d = 226.32;
+      tt->struct_vals[9].d = -9999;
+      tt->struct_vals[10].d = -9999;
+      tt->struct_vals[11].d = -9999;
+      tt->struct_vals[12].d = 20000;
+      tt->struct_vals[13].d = -56.5;
+      tt->struct_vals[14].d = 54.75;
+      tt->struct_vals[15].d = -9999;
+      tt->struct_vals[16].d = -9999;
+      tt->struct_vals[17].d = -9999;
+      tt->struct_vals[18].d = 32000;
+      tt->struct_vals[19].d = -44.5;
+      tt->struct_vals[20].d = 8.68;
+      tt->struct_vals[21].d = -9999;
+      tt->struct_vals[22].d = -9999;
+      tt->struct_vals[23].d = -9999;
+    tt++;
+    
+    // Parameter 'sounding_spdb_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("sounding_spdb_url");
+    tt->descr = tdrpStrDup("SPDB URL for sounding data.");
+    tt->help = tdrpStrDup("Applies to READ_SOUNDING_FROM_SPDB mode.");
+    tt->val_offset = (char *) &sounding_spdb_url - &_start_;
+    tt->single_val.s = tdrpStrDup("$(HOME)/data/spdb/soundings");
+    tt++;
+    
+    // Parameter 'sounding_search_time_margin_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("sounding_search_time_margin_secs");
+    tt->descr = tdrpStrDup("Time margin for retrieving sounding, in secs.");
+    tt->help = tdrpStrDup("This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message).");
+    tt->val_offset = (char *) &sounding_search_time_margin_secs - &_start_;
+    tt->single_val.i = 86400;
+    tt++;
+    
+    // Parameter 'sounding_location_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("sounding_location_name");
+    tt->descr = tdrpStrDup("Name of sounding location.");
+    tt->help = tdrpStrDup("If set, we request a profile just for that sounding. If empty, all soundings in the data base are considered valid.");
+    tt->val_offset = (char *) &sounding_location_name - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'sounding_check_pressure_range'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("sounding_check_pressure_range");
+    tt->descr = tdrpStrDup("Option to check that pressure covers the required range.");
+    tt->help = tdrpStrDup("If TRUE, we will check that pressure range in the sounding meets or exceeds the min and max specified.");
+    tt->val_offset = (char *) &sounding_check_pressure_range - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'sounding_required_pressure_range_hpa'
+    // ctype is '_sounding_data_range_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("sounding_required_pressure_range_hpa");
+    tt->descr = tdrpStrDup("Required pressure range for sounding to be valid (hPa)");
+    tt->help = tdrpStrDup("This is used to provide a quality check on the sounding. If the pressure data does not fully cover this range, the sounding is rejected and we look back for the next available one.");
+    tt->val_offset = (char *) &sounding_required_pressure_range_hpa - &_start_;
+    tt->struct_def.name = tdrpStrDup("sounding_data_range_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("min_val");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &sounding_required_pressure_range_hpa.min_val - (char *) &sounding_required_pressure_range_hpa;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("max_val");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &sounding_required_pressure_range_hpa.max_val - (char *) &sounding_required_pressure_range_hpa;
+    tt->n_struct_vals = 2;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 300;
+      tt->struct_vals[1].d = 950;
+    tt++;
+    
+    // Parameter 'sounding_check_height_range'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("sounding_check_height_range");
+    tt->descr = tdrpStrDup("Option to check that height covers the required range.");
+    tt->help = tdrpStrDup("If TRUE, we will check that height range in the sounding meets or exceeds the min and max specified.");
+    tt->val_offset = (char *) &sounding_check_height_range - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'sounding_required_height_range_m'
+    // ctype is '_sounding_data_range_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("sounding_required_height_range_m");
+    tt->descr = tdrpStrDup("Required height range for sounding to be valid (m)");
+    tt->help = tdrpStrDup("This is used to provide a quality check on the sounding. If the height data does not fully cover this range, the sounding is rejected and we look back for the next available one.");
+    tt->val_offset = (char *) &sounding_required_height_range_m - &_start_;
+    tt->struct_def.name = tdrpStrDup("sounding_data_range_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("min_val");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &sounding_required_height_range_m.min_val - (char *) &sounding_required_height_range_m;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("max_val");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &sounding_required_height_range_m.max_val - (char *) &sounding_required_height_range_m;
+    tt->n_struct_vals = 2;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 500;
+      tt->struct_vals[1].d = 15000;
+    tt++;
+    
+    // Parameter 'sounding_check_pressure_monotonically_decreasing'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("sounding_check_pressure_monotonically_decreasing");
+    tt->descr = tdrpStrDup("Option to check that pressure decreases monotonically.");
+    tt->help = tdrpStrDup("If TRUE, we will check that pressure decreases monotonically. If not, the sounding is rejected and we look back for the next available one.");
+    tt->val_offset = (char *) &sounding_check_pressure_monotonically_decreasing - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'Comment 15'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("OPTION FOR CALCULATING HAIL METRICS.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1600,11 +1838,11 @@ using namespace std;
     tt->single_val.d = 45;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("The Foote-Krauss Category (FOKR)");
     tt->comment_text = tdrpStrDup("The FOKR Category is intended to separate non-hailstorms (Category 0 and 1) from potentially developing hailers (Cat. 2), likely hailstorms (Cat. 3) and severe hailstorms (Cat. 4)");
     tt++;
@@ -1657,11 +1895,11 @@ using namespace std;
     tt->single_val.d = 65;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1690,11 +1928,11 @@ using namespace std;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("OPTION TO CREATE VERIFICATION FILES.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1723,11 +1961,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("mdv/verify");
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("TRACKING PARAMETERS.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1822,11 +2060,11 @@ using namespace std;
     tt->single_val.d = 0.6;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("FORECAST PARAMETERS.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2006,20 +2244,20 @@ using namespace std;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'Comment 20'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
-    tt->comment_hdr = tdrpStrDup("SMOOTHING THE MOTION FORECAST.");
-    tt->comment_text = tdrpStrDup("Options for smoothing motion forecasts. The smoothed motion is computed using the motion of surrounding storms. The storms included are out to a given radius from the storm undergoing smoothing. NOTE: this will not be performed if the field tracker option is used to override the speed/dirn forecast.");
-    tt++;
-    
     // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 21");
+    tt->comment_hdr = tdrpStrDup("SMOOTHING THE MOTION FORECAST.");
+    tt->comment_text = tdrpStrDup("Options for smoothing motion forecasts. The smoothed motion is computed using the motion of surrounding storms. The storms included are out to a given radius from the storm undergoing smoothing. NOTE: this will not be performed if the field tracker option is used to override the speed/dirn forecast.");
+    tt++;
+    
+    // Parameter 'Comment 22'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("SMOOTHING CATEGORIES.");
     tt->comment_text = tdrpStrDup("For smoothing, you can turn on the following options separately or together: (a) tracking_smooth_invalid_forecasts: smooth motion for storms without a valid forecast; (b) tracking_spatial_smoothing: smooth motion for storms with a valid forecast; (c) tracking_smooth_fast_growth_decay: smooth the forecast for storms which have a rapid growth or decay. In addition to these main categories, you can set other parameters to control the way the smoothing is done.");
     tt++;
@@ -2048,11 +2286,11 @@ using namespace std;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("SMOOTHING RADIUS OF INFLUENCE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2083,11 +2321,11 @@ using namespace std;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("SMOOTHING WEIGHTS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2128,11 +2366,11 @@ using namespace std;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("SMOOTHING THRESHOLDS FOR FAST GROWTH AND DECAY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2173,11 +2411,11 @@ using namespace std;
     tt->single_val.d = -0.5;
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("SMOOTHING - DETECTING ERRATIC FORECASTS");
     tt->comment_text = tdrpStrDup("To determine whether a forecast is eratic, the error of the speed and direction is computed for a storm as compared with the mean motion for the storms within the radius of influence.");
     tt++;
@@ -2218,11 +2456,11 @@ using namespace std;
     tt->single_val.d = 50;
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("OVERRIDE EARLY STORM MOTION FROM FIELD TRACKER");
     tt->comment_text = tdrpStrDup("If this is activated, all other spatial smoothing will be turned off.");
     tt++;
