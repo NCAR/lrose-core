@@ -111,7 +111,7 @@ void BufrProduct_gsi::ConstructDescriptor(string &desF,
 // Put the info in the correct storage location
 // and take care of any setup that needs to happen
 //  all of the values will be text!  AGH!
-bool BufrProduct_gsi::StuffIt(unsigned short des, string name, string &value) {
+bool BufrProduct_gsi::StuffIt(unsigned short des, string fieldName, string &value) {
   bool ok = true;
 
   switch (des) {
@@ -162,6 +162,9 @@ bool BufrProduct_gsi::StuffIt(unsigned short des, string name, string &value) {
       des_dataWidthBits = atoi(value.c_str());
       _bufrTable->AddDescriptorFromBufrFile(des_f, des_x, des_y, des_fieldName,
            des_scale, des_units, des_referenceValue, des_dataWidthBits);
+      break;
+    case 448:
+      // station Id
       break;
     case 34112: // 2;5;64 insert as data field
       // 1;5;0 0;31;1 3;0;3 2;5;64 1;1;0 0;31;1 0;0;30 
@@ -221,13 +224,20 @@ bool BufrProduct_gsi::StuffIt(unsigned short des, string name, string &value) {
 // Put the info in the correct storage location
 // and take care of any setup that needs to happen
 //  all of the values will be text!  AGH!
-bool BufrProduct_gsi::StuffIt(unsigned short des, string name, double value) {
+bool BufrProduct_gsi::StuffIt(unsigned short des, string fieldName, double value) {
   bool ok = true;
 
   switch (des) {
     case 274:
-      break;
 
+      // TODO: record the name of the radar  KABR
+      break;
+    case 646: // antenna azimuth   0;02;134
+      antennaBeamAzimuthDegrees = value;
+      break;
+    case 647: // antenna elevation 0;02;135
+      antennaElevationDegrees = value;
+      break;
     case 1025:
       // year
       putYear((int) value);
@@ -264,18 +274,37 @@ bool BufrProduct_gsi::StuffIt(unsigned short des, string name, double value) {
       // radar volume id (DDHHMM)
       // break;
       // radar scan id (range 1 - 21)
-
     case 1746: 
       // Distance from antenna to gate center in units of 125M
-      distanceFromAntennaUnitsOf125M.push_back(value);
+      distanceFromAntennaUnitsOf125M.push_back((float) value);
+      break;
+    case 3264:
+    case 3267:
+    case 3268:
+    case 3269:
+    case 3265:
+    case 450: 
+      // ignore these; mostly temperatures
+      break;
+
+    case 5377:
+      horizontalReflectivityDb.push_back((float) value);
       break;
     case 5390: 
       // Doppler Mean Radial Velocity
-      dopplerMeanRadialVelocity.push_back(value);
+      dopplerMeanRadialVelocity.push_back((float) value);
       break;
     case 5393:
       // Doppler Velocity Spectral Width 
-      dopplerVelocitySpectralWidth.push_back(value);
+      dopplerVelocitySpectralWidth.push_back((float) value);
+      break;
+    case 16383:
+      // 0;63;255  end of the descriptors
+      createSweep();
+      distanceFromAntennaUnitsOf125M.clear(); // resize(0);
+      dopplerMeanRadialVelocity.clear(); // resize(0);
+      dopplerVelocitySpectralWidth.clear(); // resize(0);
+      horizontalReflectivityDb.clear(); // resize(0);
       break;
     default:
       unsigned char f, x, y;
@@ -295,6 +324,7 @@ bool BufrProduct_gsi::StuffIt(unsigned short des, string name, double value) {
 // - number of data sections
 // - number of byte elements in data section 
 void BufrProduct_gsi::storeReplicator(unsigned int value) {
+  /*
     // do generic data storage into dictionary
   // NULL => create
   // not NULL:
@@ -309,10 +339,11 @@ void BufrProduct_gsi::storeReplicator(unsigned int value) {
     currentAccumulator = new vector<unsigned char>();
   }
     // TODO: how to handle repeaters that have multiple descriptors in them???
+    */
 }
 
 void BufrProduct_gsi::trashReplicator() {
-
+  /*
   if (_verbose) {
     printf("currentAccumulator: \n"); 
     for (std::vector<unsigned char>::const_iterator i = currentAccumulator->begin(); 
@@ -332,8 +363,9 @@ void BufrProduct_gsi::trashReplicator() {
     if (_verbose) {
       printGenericStore();
     }
-    createSweep();
+    //createSweep();
   }
+  */
 
   if (descriptorsToDefine.size() > 0) {
     if (_debug) {
@@ -354,32 +386,51 @@ void BufrProduct_gsi::createSweep() {
   //double *realData;
   float *realData;
       
+  _isVelocity = false;
+  _isReflectivity = false;
+  if (dopplerVelocitySpectralWidth.size() > 0) {
+    _isVelocity = true;
+    //dataForDecompress = &dopplerMeanRadialVelocity;
+  } else if (horizontalReflectivityDb.size() > 0) {
+    _isReflectivity = true;
+    //dataForDecompress = &horizontalReflectivityDb;
+  } else {
+    printf("We have no data for GSI\n");
+    return;
+  }
+
+  // decompressDataFl32 uses dataForDecompress pointer
   realData = decompressDataFl32();
   if (realData == NULL) {
     throw "ERROR - could not decompress data";
   }
+
   SweepData newSweep;
   // there will only be one time stamp and a duration
   int nTimeStamps = timeStampStack.size();
-  if (nTimeStamps < 2) 
-    throw "Missing start time stamp for sweep.";
-  // grab the first time stamp, because the second one
-  // is for the last calibration
-  timeStampStack.pop_back();
-  newSweep.startTime = timeStampStack.back();
-  // convert RadxTime to time_t
-  RadxTime *endTime = new RadxTime();
-  endTime->copy(*(timeStampStack.back()));
-  // add the duration
-  *endTime += duration;
-  // convert back to RadxTime object
-  newSweep.endTime = endTime; 
+  if (nTimeStamps < 1) {
+    printf("WARNING - Missing start time stamp for sweep. Setting to default.\n");
+    newSweep.startTime = new RadxTime();
+    newSweep.endTime = new RadxTime();
+  } else {
+    // grab the first time stamp, because the second one
+    // is for the last calibration
 
-  cerr << endTime->getW3cStr() << endl;
+    newSweep.startTime = timeStampStack.back();
+
+    // convert RadxTime to time_t
+    RadxTime *endTime = new RadxTime();
+    endTime->copy(*(timeStampStack.back()));
+    // add the duration
+    *endTime += 5; // TODO: I don't know what the duration is //  duration;
+    // convert back to RadxTime object
+    newSweep.endTime = endTime; 
+    timeStampStack.pop_back();  // remove the time stamp
+  }
+
+  cerr << newSweep.endTime->getW3cStr() << endl;
   cerr << newSweep.startTime->getW3cStr() << endl;
   cerr << "------------" << endl;
-
-  timeStampStack.pop_back();
 
   if (_debug) {
     RadxTime *time = newSweep.startTime;
@@ -388,24 +439,33 @@ void BufrProduct_gsi::createSweep() {
     cerr << "endTime " << time->asString() << endl; 
   }
   newSweep.antennaElevationDegrees = antennaElevationDegrees;
-  newSweep.nBinsAlongTheRadial = nBinsAlongTheRadial;
   newSweep.rangeBinSizeMeters = rangeBinSizeMeters;
   newSweep.rangeBinOffsetMeters = rangeBinOffsetMeters;
-  newSweep.nAzimuths = nAzimuths;
+  newSweep.nAzimuths = 1; // nAzimuths;
   newSweep.antennaBeamAzimuthDegrees = antennaBeamAzimuthDegrees;
   ParameterData parameterData;
-  parameterData.typeOfProduct = _fieldName; 
+  if (_isReflectivity) {
+    parameterData.typeOfProduct = "HREF"; // _fieldName; 
+    newSweep.nBinsAlongTheRadial = horizontalReflectivityDb.size();
+  }
+  if (_isVelocity) {
+    parameterData.typeOfProduct = "VR";
+    newSweep.nBinsAlongTheRadial = dopplerMeanRadialVelocity.size();
+  }
   parameterData.data = realData;
   newSweep.parameterData.push_back(parameterData);
   sweepData.push_back(newSweep);
+  nAzimuths = sweepData.size();
 }
 
 
 void BufrProduct_gsi::addData(unsigned char value) {
+  /*
   //  set 255 to zero, so that both 255 and zero are marked as missing
   if (value == 255)
     value = 0;   
   currentAccumulator->push_back(value);
+  */
 }
 
 
@@ -414,30 +474,36 @@ double *BufrProduct_gsi::decompressData() {
 }
 
 float *BufrProduct_gsi::decompressDataFl32() {
-
+  
   float *temp32 = NULL;
-  // if there are data ...
-  if (genericStore.size() > 0) {
-    // convert the data to float
-
-    std::vector<unsigned char> *uCharVec;
-    uCharVec = genericStore.back();
-    int n = uCharVec->size();
-    temp32 = (float *) malloc(n*sizeof(float));
-    for (int i = 0; i < n; ++i)
-      temp32[i] = (float) uCharVec->at(i);
-
-    if (_debug) {
-      printf("after conversion to float ...\n");
-      printf ("--> %g %g %g\n", temp32[0], temp32[1], temp32[2]);
-      //unsigned long nFloats;
-      //nFloats = nBinsAlongTheRadial * nAzimuths;
-      //printf (" ... %g %g %g <--\n", temp32[200], 
-      //	    temp32[201], temp32[202]);
+  int n = 0;
+  if (_isVelocity) {
+    n = dopplerVelocitySpectralWidth.size();
+    // if there are data ...
+    if (n > 0) {
+      // copy the data
+      temp32 = (float *) malloc(n*sizeof(float));
+      memcpy(temp32, &dopplerVelocitySpectralWidth[0], n*sizeof(float));
+    }
+  }
+  if (_isReflectivity) {
+    n = horizontalReflectivityDb.size();
+    // if there are data ...
+    if (n > 0) {
+      // copy the data
+      temp32 = (float *) malloc(n*sizeof(float));
+      memcpy(temp32, &horizontalReflectivityDb[0], n*sizeof(float));
     }
   }
 
+  if ((temp32 != NULL) && (_debug)) {
+     printf("after conversion to float ...\n");
+     printf ("--> %g %g %g\n", temp32[0], temp32[1], temp32[2]);
+  }
+
   return temp32;
+  
+  //return NULL;
 }
 
 

@@ -440,7 +440,8 @@ void BufrRadxFile::setTablePath(char *path) {
 
 void BufrRadxFile::lookupFieldName(string fieldName, string &units, 
 string &standardName, string &longName) {
-    if (fieldName.find("TH") != string::npos) {
+  if ((fieldName.find("TH") != string::npos) ||
+      (fieldName.find("HREF") != string::npos)) {
       units = "dBz";
       standardName = "horizontal_reflectivity";
       longName = "horizontal_reflectivity";
@@ -468,7 +469,8 @@ string &standardName, string &longName) {
       units = "dBz";
       standardName = "vertical reflectivity";
       longName = "vertical reflectivity";
-    } else if (fieldName.find("VRAD") != string::npos) {
+    } else if ((fieldName.find("VRAD") != string::npos) || 
+      (fieldName.find("VR") != string::npos)) {
       units = "m/s";
       standardName = "radial_velocity";
       longName = "radial_velocity";
@@ -887,37 +889,38 @@ void BufrRadxFile::getFieldNamesWithData(const string &path) {
 
     _file.openRead(_pathInUse); // path);
     while (!_file.eof()) {
-    _file.readSection0();
-    _file.readSection1();
-    _file.readDataDescriptors();
-    _file.readData(); 
-    _file.readSection5();
+      _file.readSection0();
+      _file.readSection1();
+      _file.readDataDescriptors();
+      _file.readData(); 
+      _file.readSection5();
+      if (_debug) 
+        printNative(path, cout, true, true);
+
+      size_t nDataSegments = _file.getNumberOfSweeps();
+      if (nDataSegments > 0) {
+
+        // the field names are now put into currentTemplate.typeOfProduct ...
+        // hmmm, may not be the best place to keep info ...
+        string fieldName = "unknown";
+        string units = "unknown";
+        string standardName = "unknown";
+        string longName = "unknown";
+
+        // set file time
+        _readGlobalAttributes();
+        _fileTime.setYear(_year_attr);
+        _fileTime.setMonth(_month_attr);
+        _fileTime.setDay(_day_attr);
+
+        // go through the "sweeps" and determine if they are
+        // separate sweeps, or the same sweep with multiple fields
+        // make the distinction based on time???
+        if (_debug) cerr << "  .. accumulating field info " << endl;
+        _accumulateFieldFirstTime(fieldName, units, standardName, longName);
+      }
     }
     _file.close();
-
-
-    // the field names are now put into currentTemplate.typeOfProduct ...
-    // hmmm, may not be the best place to keep info ...
-    string fieldName = "unknown";
-    string units = "unknown";
-    string standardName = "unknown";
-    string longName = "unknown";
-
-    // set file time
-    _readGlobalAttributes();
-    _fileTime.setYear(_year_attr);
-    _fileTime.setMonth(_month_attr);
-    _fileTime.setDay(_day_attr);
-
-    // go through the "sweeps" and determine if they are
-    // separate sweeps, or the same sweep with multiple fields
-    // make the distinction based on time???
-    if (_debug) cerr << "  .. accumulating field info " << endl;
-    _accumulateFieldFirstTime(fieldName, units, standardName, longName);
-
-    if (_debug) 
-      printNative(path, cout, true, true);
-
   } catch (const char *msg) {
       // report error message
       _addErrStr("ERROR - BufrRadxFile::getFieldNamesWithData");
