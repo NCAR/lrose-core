@@ -34,6 +34,7 @@
 
 #include "StormIdent.hh"
 #include "DataTimes.hh"
+#include "Sounding.hh"
 
 #include <toolsa/umisc.h>
 #include <toolsa/file_io.h>
@@ -479,6 +480,14 @@ int StormIdent::_processScan(int scan_num, time_t scan_time,
     cerr << "ERROR - StormIdent::_identAndTrack" << endl;
     cerr << "  Cannot read data for time: " << utimstr(scan_time) << endl;
     return -1;
+  }
+
+  // read in sounding
+
+  Sounding &sndg = Sounding::inst();
+  sndg.retrieveTempProfile(scan_time);
+  if (_params.debug >= _params.DEBUG_VERBOSE) {
+    sndg.getProfile().print(cerr);
   }
 
   // identify storms

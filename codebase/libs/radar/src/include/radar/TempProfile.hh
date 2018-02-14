@@ -131,13 +131,19 @@ public:
   
   double getTempForHtKm(double htKm) const;
 
-  // clear the profile
-
-  void clear() { _tmpProfile.clear(); }
+  // get the freezing level height
 
   double getFreezingLevel() const {
     return _freezingLevel;
   }
+
+  // clear the profile
+
+  void clear() { _tmpProfile.clear(); }
+
+  // add a profile point
+
+  void addPoint(PointVal &val) { _tmpProfile.push_back(val); }
 
   // set and get methods for private members
 
