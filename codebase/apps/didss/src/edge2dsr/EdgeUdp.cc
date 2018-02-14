@@ -104,7 +104,7 @@ EdgeUdp::init()
    
    POSTMSG( INFO, "Binding address to socket" );
    PMU_auto_register( "Binding address to socket" );
-   if( bind( udpFd, (struct sockaddr *) &udpAddress, 
+   if( ::bind( udpFd, (struct sockaddr *) &udpAddress, 
              sizeof( udpAddress ) ) < 0 ) {
       POSTMSG( ERROR, "Could not bind UDP socket, port %d", port );
       return( FAILURE );

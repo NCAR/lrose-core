@@ -79,6 +79,9 @@ public:
   static const string lidar_crosspolar_combined_backscatter_photon_rate;
   static const string lidar_crosspolar_combined_backscatter_photon_rate_filtered;
 
+  static const string BetaMSonde;
+  static const string lidar_beta_m_sonde;
+
   static const string VolumeDepolRatio;
   static const string VolumeDepolRatio_F;
   static const string lidar_volume_depolarization_ratio;

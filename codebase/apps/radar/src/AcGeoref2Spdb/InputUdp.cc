@@ -121,7 +121,7 @@ int InputUdp::openUdp()
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = htonl(INADDR_ANY);
   
-  if (bind (_udpFd, (struct sockaddr *) &addr, sizeof (addr)) < 0) {
+  if (::bind (_udpFd, (struct sockaddr *) &addr, sizeof (addr)) < 0) {
     int errNum = errno;
     cerr << "ERROR - InputUdp::open" << endl;
     cerr << "  Bind error, udp port: " << port << endl;
