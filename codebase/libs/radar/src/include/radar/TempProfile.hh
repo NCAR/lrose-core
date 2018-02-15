@@ -154,6 +154,10 @@ public:
     return _freezingLevel;
   }
 
+  // get height for specified temp
+  
+  double getHtKmForTempC(double tempC) const;
+
   // clear the profile
 
   void clear() { _tmpProfile.clear(); }
