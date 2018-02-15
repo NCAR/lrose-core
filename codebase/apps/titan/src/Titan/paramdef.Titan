@@ -20,7 +20,7 @@ typedef enum {
 
 paramdef enum debug_t
 {
-  p_default = {DEBUG_OFF};
+  p_default = DEBUG_OFF;
   p_descr = "Debug option";
   p_help = "If set, debug messages will be printed appropriately";
 } debug;
@@ -230,7 +230,7 @@ typedef struct {
 } dual_threshold_t;
 
 paramdef struct dual_threshold_t {
-  p_default = {45.0, 0.5, 0.05, 20.0};
+  p_default = { 45.0, 0.5, 0.05, 20.0 };
   p_descr = "Parameters for dual threshold identification.";
   p_help = "See 'use_dual_threshold'. dbz_threshold: threshold for this stage. A number of regions may be identified at the higher threshold. min_fraction_all_parts: we sum the sizes of the parts at the higher threshold, and the sum divided by the original size of the envelope must exceed this fraction. If it does not the original envelope is used. min_fraction_each_part: for any part to be valid its size as a fraction of all of the parts must exceed this value. min_area_each_part: for any part to be valid its area must exceed this value. If it does not the part is ignored. If only 1 part is valid, the entire envelope is used.";
 } dual_threshold;
@@ -404,13 +404,13 @@ typedef struct {
 paramdef struct zr_t {
   p_descr = "Z-R parameters for rainfall";
   p_help = "Parameters in Z-R relationship for rainfall.";
-  p_default = {200.0, 1.6};
+  p_default = { 200.0, 1.6 };
 } ZR;
 
 paramdef struct zr_t {
   p_descr = "Z-M parameters for rain";
   p_help = "Parameters in Z-M relationship for rain.";
-  p_default = {20465.0, 1.75};
+  p_default = { 20465.0, 1.75 };
 } ZM;
 
 typedef enum {
@@ -457,7 +457,7 @@ paramdef double {
 
 commentdef {
   p_header = "VERTICAL PROFILE - SOUNDING";
-  p_text = "You can: \n\t(a) specify a vertical profile sounding in this param file or\n\t(b) read in a profile from soundings in SPDB.\n\nThe default sounding obtained using -print_params is the ICAO standard atmosphere.";
+  p_text = "You can: \n\t(a) specify a vertical profile sounding in this param file or\n\t(b) read in a profile from soundings in SPDB.\n\nThe default sounding obtained using -print_params is the ICAO standard atmosphere.\n\nNOTE: the 'ht_of_freezing' parameter has been deprecated. Use this section instead.";
 }
 
 typedef enum {
@@ -577,25 +577,25 @@ paramdef boolean {
 
 commentdef {
   p_header = "OPTION FOR CALCULATING HAIL METRICS.";
+  p_text = "NOTE: the 'ht_of_freezing' parameter has been deprecated. Use the 'specified_sounding' parameter instead - see section above.";
 }
 
-paramdef string {
-  p_default = "hail";
-  p_descr = "Option for calculating additional special features.";
-  p_help = "Currently, 'hail' is the only special feature available. More features may be available to choose from in the future.";
-} special_feature;
+typedef enum {
+  HAIL_METRICS, NEXRAD_HDA
+} hail_detection_mode_t;
+
+paramdef enum hail_detection_mode_t
+{
+  p_default = HAIL_METRICS;
+  p_descr = "Mode for detecting hail.";
+  p_help = "\n\nHAIL_METRICS: compute the hail metrics: Foot-Krauss category (FOKR), Waldvogel-probability-of-hail, hail-mass-aloft and vertically-integrated-hail-mass (VIHM). This is the legacy mode in Titan. \n\nNEXRAD_HDA: run the NEXRAD Hail Detection Algorithm. This computes POH - the probability of hail (Waldvogel), SHI - the Severe Hail Index, POSH - the Probability Of Severe Hail, and MESM - the Maximum Estimated Hail Size (mm).\n\nThe NEXRAD HDA is described in: Arthur Witt, Michael D. Eilts, Gregory J. Stumph, J. T. Johnson, E DeWayne Mitchell and Kevin W Thomas: An Enhanced Hail Detection Algorithm for the WSR-88D. Weather and Forecasting, Volume 13, June 1998.";
+} hail_detection_mode;
 
 paramdef struct zr_t {
   p_descr = "Z-M parameters for hail";
   p_help = "Parameters in Z-M relationship for hail.";
-  p_default = {3668298, 1.416};
+  p_default = { 3668298, 1.416 };
 } hail_ZM;
-
-paramdef double {
-  p_default = 6.0;
-  p_descr = "Height of the 0C isotherm (km)";
-  p_help = "This value may be dynamically set in the future.";
-} ht_of_freezing;
 
 paramdef double {
   p_default = 45.0;
@@ -745,7 +745,7 @@ paramdef boolean {
 paramdef double {
   p_min = 0.0;
   p_max = 1.0;
-  p_default = {1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4};
+  p_default = { 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4 };
   p_descr = "Weights for making the trend forecast.";
   p_help = "A trend forecast is made using a weighted linear fit to the storm history. These are the weights used. The first applies to the most recent scan, and the last to the earliest scan used.";
 } tracking_forecast_weights[];

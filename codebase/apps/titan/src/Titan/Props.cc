@@ -36,6 +36,7 @@
 #include "InputMdv.hh"
 #include "GridClump.hh"
 #include "Verify.hh"
+#include "Sounding.hh"
 
 #include <toolsa/umisc.h>
 #include <toolsa/str.h>
@@ -55,16 +56,16 @@ using namespace std;
 Props::Props(const string &prog_name, const Params &params,
 	     const InputMdv &input_mdv, TitanStormFile &storm_file,
 	     Verify *verify) :
-  Worker(prog_name, params),
-  _inputMdv(input_mdv),
-  _sfile(storm_file),
-  _verify(verify),
-  _area(_progName, _params, _inputMdv, _sfile)
+        Worker(prog_name, params),
+        _inputMdv(input_mdv),
+        _sfile(storm_file),
+        _verify(verify),
+        _area(_progName, _params, _inputMdv, _sfile)
 
 {
-
+  
   // alloc arrays to initial sizes
-
+  
   _nZAlloc = 1;
   _nHistAlloc = 1;
   
@@ -91,8 +92,8 @@ Props::Props(const string &prog_name, const Params &params,
   
   // hail mass parameters
 
-  _hailZM.setRelationship( params.hail_ZM.coeff, params.hail_ZM.expon,
-                           params.hail_mass_dbz_threshold );
+  _hailZM.setRelationship(params.hail_ZM.coeff, params.hail_ZM.expon,
+                          params.hail_mass_dbz_threshold);
 }
 
 /////////////
@@ -143,7 +144,7 @@ void Props::init()
 
   // min valid ht and number of valid planes
   
-  minValidZ = _inputMdv.grid.minz +
+  _minValidZ = _inputMdv.grid.minz +
     _inputMdv.minValidLayer * _inputMdv.grid.dz;
   _nzValid = _inputMdv.grid.nz - _inputMdv.minValidLayer;
   
@@ -256,8 +257,12 @@ int Props::compute(const GridClump &grid_clump, int storm_num)
   
   // now that we have the necessary first pass info, compute hail metrics.
 
-  _computeHailMetrics(grid_clump);
-  
+  if (_params.hail_detection_mode == Params::HAIL_METRICS) {
+    _computeHailMetrics(grid_clump);
+  } else if (_params.hail_detection_mode == Params::NEXRAD_HDA) {
+    _computeNexradHda(grid_clump);
+  }
+
   // perform the areal computations for precip and projected
   // areas, including dbz histogram for area
 
@@ -382,7 +387,6 @@ int Props::_computeFirstPass(const GridClump &grid_clump)
 
   // initialize
 
-  _hailZM.initIntegration();
   double highDbzThreshold = _params.high_dbz_threshold;
   double lowDbzThreshold = _params.low_dbz_threshold;
   double histInterval = _params.dbz_hist_interval;
@@ -421,10 +425,8 @@ int Props::_computeFirstPass(const GridClump &grid_clump)
       double r_dbz;
 
       if (dbz > _params.hail_dbz_threshold) {
-
 	r_dbz = _params.hail_dbz_threshold;
 	_hailPresent = TRUE;
-
       } else {
 	r_dbz = dbz;
       }
@@ -471,13 +473,6 @@ int Props::_computeFirstPass(const GridClump &grid_clump)
       
       _layer[iz].sum_mass += mass_factor;
       
-      // hail mass aloft (2km above freezing)
-
-      double dbzHeight = minValidZ + (double) iz * grid.dz;
-      if ( dbzHeight > _params.ht_of_freezing + 2.0 ) {
-          _hailZM.addDbz( dbz );
-      }
-
       // velocity
       
       if (_params.vel_available) {
@@ -540,7 +535,7 @@ int Props::_computeFirstPass(const GridClump &grid_clump)
   _gprops.vol_centroid_y =
     grid_clump.startY + ((double) _sum.y / dn) * grid.dy; // km
   _gprops.vol_centroid_z =
-    minValidZ + ((double) _sum.z / dn) * grid.dz; // km
+    _minValidZ + ((double) _sum.z / dn) * grid.dz; // km
   
   _gprops.refl_centroid_x =
     grid_clump.startX + (_sum.refl_x / _sum.refl) * grid.dx; // km
@@ -549,20 +544,20 @@ int Props::_computeFirstPass(const GridClump &grid_clump)
     grid_clump.startY + (_sum.refl_y / _sum.refl) * grid.dy; // km
   
   _gprops.refl_centroid_z =
-    minValidZ + (_sum.refl_z / _sum.refl) * grid.dz; // km
+    _minValidZ + (_sum.refl_z / _sum.refl) * grid.dz; // km
   
   _gprops.volume = grid_clump.stormSize; // km3 or km2
   
   _gprops.area_mean =
     (dn / (double) _nLayers) * grid_clump.dAreaAtCentroid; // km2
   
-  _gprops.top = minValidZ +
+  _gprops.top = _minValidZ +
     ((double) _topLayer + 0.5) * grid.dz; // km
     
-  _gprops.base = minValidZ +
+  _gprops.base = _minValidZ +
     ((double) _baseLayer - 0.5) * grid.dz; // km
     
-  _gprops.ht_of_dbz_max = minValidZ +
+  _gprops.ht_of_dbz_max = _minValidZ +
     (double) dbz_max_layer * grid.dz; // km
     
   _gprops.dbz_mean = log10(_sum.refl / dn) * 10.0; // dbz
@@ -571,13 +566,9 @@ int Props::_computeFirstPass(const GridClump &grid_clump)
   
   _gprops.rad_vel_sd = usdev(_sum.vel, _sum.vel2, dn);
 
-  _gprops.mass = (_sum.mass * grid_clump.dVolAtCentroid
-		  * pow(_ZMInverseCoeff,
-			_ZMInverseExpon)); // ktons
+  _gprops.mass = (_sum.mass * grid_clump.dVolAtCentroid *
+                  pow(_ZMInverseCoeff, _ZMInverseExpon)); // ktons
     
-  _gprops.add_on.hail_metrics.hailMassAloft 
-               = (float) _hailZM.integralOfX( grid_clump.dVolAtCentroid );
-
   // layer properties
 
   for (int iz = 0; iz < _nzValid; iz++) {
@@ -615,22 +606,15 @@ int Props::_computeFirstPass(const GridClump &grid_clump)
     
   } // iz
 
-  // vil and VIHM (vertically integrated hail mass)
+  // vil - computed from maz dbz in each layer
 
   vil_init();
-  _hailZM.initIntegration();
-
   for (int iz = 0; iz < _nzValid; iz++) {
     if (_layer[iz].n > 0) {
-
       vil_add(_layer[iz].dbz_max, grid.dz);
-      _hailZM.addDbz( _layer[iz].dbz_max );
-
-    } /* if (_layer[iz].n ....... */
-  } /* iz */
-
+    }
+  } // iz
   _gprops.vil_from_maxz = vil_compute();
-  _gprops.add_on.hail_metrics.vihm = (float)_hailZM.integralOfX( grid.dz ); 
   
   // dbz histograms
   
@@ -926,7 +910,7 @@ void Props::_tiltCompute()
   for (int iz = _baseLayer; iz <= _topLayer; iz++) {
     _tiltData[iz][0] = _layer[iz].vol_centroid_x;
     _tiltData[iz][1] = _layer[iz].vol_centroid_y;
-    _tiltData[iz][2] = minValidZ +
+    _tiltData[iz][2] = _minValidZ +
       (double) iz * _inputMdv.grid.dz * 10.0;
   }
       
@@ -990,7 +974,7 @@ void Props::_dbzGradientCompute()
       
   for (int iz = _baseLayer; iz <= _topLayer; iz++) {
     _dbzGradientData[iz][0] = _layer[iz].dbz_max;
-    _dbzGradientData[iz][1] = minValidZ +
+    _dbzGradientData[iz][1] = _minValidZ +
       (double) iz * _inputMdv.grid.dz * 1000.0;
   }
       
@@ -1015,7 +999,7 @@ void Props::_dbzGradientCompute()
       
   for (int iz = _baseLayer; iz <= _topLayer; iz++) {
     _dbzGradientData[iz][0] = _layer[iz].dbz_mean;
-    _dbzGradientData[iz][1] = minValidZ +
+    _dbzGradientData[iz][1] = _minValidZ +
       (double) iz * _inputMdv.grid.dz * 1000.0;
   }
       
@@ -1194,7 +1178,6 @@ void Props::_loadLprops(layer_stats_t *layer,
 // _loadDbzHist()
 //
 // Load dbz histogram props
-//
 
 void Props::_loadDbzHist(dbz_hist_entry_t *dbz_hist,
 			 storm_file_dbz_hist_t *hist)
@@ -1206,145 +1189,209 @@ void Props::_loadDbzHist(dbz_hist_entry_t *dbz_hist,
 
 }
 
-float
-Props::_topOfDbz( float dbz, const GridClump &grid_clump )
+//////////////////////////////////////////////////////////////
+// get top of dbz contour in clump
+
+double Props::_topOfDbz(double dbz, const GridClump &grid_clump)
 {
-  //
+
   // Returns the top, i.e. max height in km, of a dbz contour
   // If no values are found which exceed the dbz value, 
   // a height of 0.0km is returned
-  // 
-  int   maxLayer = -1;
-  float maxHeight;
+
+  int maxLayer = -1;
+  double maxHeight;
   const titan_grid_t &grid = grid_clump.grid;
 
   for (int iz = _topLayer; iz >= _baseLayer; iz--) {
-    if ( _layer[iz].dbz_max >= dbz ) {
+    if (_layer[iz].dbz_max >= dbz) {
       maxLayer = iz;
       break;
     }
   }
 
-  if ( maxLayer == -1 ) {
-    //
+  if (maxLayer == -1) {
     // specified dbz not found
-    //
     maxHeight = 0.0;
-  }
-  else if ( maxLayer == _topLayer ) {
-    //
+  } else if ( maxLayer == _topLayer ) {
     // specified dbz at the top layer
-    //
-    maxHeight = minValidZ + (double) maxLayer * grid.dz;
-  }
-  else {
-    //
+    maxHeight = _minValidZ + (double) maxLayer * grid.dz;
+  } else {
     // interpolate between two layers
-    //
-    int   lowerLayer  = maxLayer;
-    int   upperLayer  = maxLayer + 1;
-    float lowerDbzMax = _layer[lowerLayer].dbz_max;
-    float upperDbzMax = _layer[upperLayer].dbz_max;
-    float lowerHeight = minValidZ + (double) lowerLayer * grid.dz;
-    float upperHeight = minValidZ + (double) upperLayer * grid.dz;
-
+    int lowerLayer = maxLayer;
+    int upperLayer = maxLayer + 1;
+    double lowerDbzMax = _layer[lowerLayer].dbz_max;
+    double upperDbzMax = _layer[upperLayer].dbz_max;
+    double lowerHeight = _minValidZ + (double) lowerLayer * grid.dz;
+    double upperHeight = _minValidZ + (double) upperLayer * grid.dz;
     maxHeight = ((upperHeight-lowerHeight)/(upperDbzMax-lowerDbzMax)*
                  (dbz-lowerDbzMax)) + lowerHeight;
   }
-
-  return( maxHeight );
+  return maxHeight;
 }
 
-void
-Props::_computeHailMetrics( const GridClump &grid_clump )
+//////////////////////////////////////////////////////////////
+// compute hail metrics for the clump
+
+void Props::_computeHailMetrics(const GridClump &grid_clump)
 {
-  //
-  // All heights are in km
-  //
-  float ht45AboveFreezing = _topOfDbz( 45.0, grid_clump ) - _params.ht_of_freezing;
 
-  _FOKRcategories( grid_clump, ht45AboveFreezing );
-  _waldvogelProbability( grid_clump, ht45AboveFreezing );
+  // initialize - all heights are in km
+  
+  Sounding &sndg = Sounding::inst();
+  double freezingLevel = sndg.getProfile().getFreezingLevel();
+  double ht45AboveFreezing = _topOfDbz(45.0, grid_clump) - freezingLevel;
+
+  const titan_grid_t &grid = grid_clump.grid;
+  int nptsPlane = grid.nx * grid.ny;
+
+  // hail mass aloft (2km above freezing)
+  // sums up hail mass over clump
+  
+  _hailZM.initIntegration();
+  for (int intv = 0; intv < grid_clump.nIntervals; intv++) {
+    const Interval &intvl = grid_clump.intervals[intv];
+    int iz = intvl.plane;
+    double ht = _minValidZ + (double) iz * grid.dz;
+    if (ht > freezingLevel + 2.0) {
+      int jz = iz + _inputMdv.minValidLayer;
+      int iy = intvl.row_in_plane;
+      int index = ((iy + grid_clump.startIy) * grid.nx +
+                   intvl.begin + grid_clump.startIx);
+      fl32 *dbz_ptr = _inputMdv.dbzVol + jz * nptsPlane + index;
+      for (int ix = intvl.begin; ix <= intvl.end; ix++, dbz_ptr++) {
+        double dbz = *dbz_ptr;
+        _hailZM.addDbz(dbz);
+      }
+    } // if (ht ...
+  } // intv
+  _gprops.add_on.hail_metrics.hailMassAloft =
+    _hailZM.integralOfX(grid_clump.dVolAtCentroid);
+
+  // VIHM - vertically integrated hail mass
+  // uses the max dbz for each layer
+  
+  _hailZM.initIntegration();
+  for (int iz = 0; iz < _nzValid; iz++) {
+    if (_layer[iz].n > 0) {
+      _hailZM.addDbz(_layer[iz].dbz_max);
+    }
+  } // iz
+  _gprops.add_on.hail_metrics.vihm =
+    _hailZM.integralOfX(grid.dz); 
+
+  // FOKR category
+
+  _gprops.add_on.hail_metrics.FOKRcategory =
+    _getFokrCategory(grid_clump, ht45AboveFreezing);
+  
+  // probability of hail
+
+  _gprops.add_on.hail_metrics.waldvogelProbability =
+    _getWaldvogelProbability(grid_clump, ht45AboveFreezing);
+
 }
 
 
-//
+/////////////////////////////////////////////////////////////////////////
 // Foote Krauss (FOKR) storm classification: FOKR is intended to separate 
 // non-hailstorms (Category 0 and 1) from potentially developing hailers 
 // (Cat. 2), likely hailstorms (Cat. 3) and severe hailstorms (Cat. 4)
-//
-void
-Props::_FOKRcategories( const GridClump &grid_clump, 
-                           float ht45AboveFreezing )
+
+int Props::_getFokrCategory(const GridClump &grid_clump, 
+                            double ht45AboveFreezing)
 {
-  //
+
   // Check for degenerate case
-  //
-  if ( ht45AboveFreezing <= 0.0 ) {
-    _gprops.add_on.hail_metrics.FOKRcategory = 0;
-    return;
+
+  if (ht45AboveFreezing <= 0.0) {
+    return 0;
   }
 
-  if ( ht45AboveFreezing >= 4.0  &&  _gprops.dbz_max >= _params.FOKR_cat4_zmax_thresh ) {
-    _gprops.add_on.hail_metrics.FOKRcategory = 4;
+  if (ht45AboveFreezing >= 4.0 &&
+      _gprops.dbz_max >= _params.FOKR_cat4_zmax_thresh) {
+    return 4;
+  } else if (ht45AboveFreezing >= 3.0 &&
+             _gprops.dbz_max >= _params.FOKR_cat3_zmax_thresh) {
+    return 3;
+  } else if (_gprops.dbz_max >= _params.FOKR_cat2_zmax_thresh) {
+    return 2;
+  } else if (_gprops.dbz_max >= _params.FOKR_cat1_zmax_thresh) {
+    return 1;
+  } else {
+    return 0;
   }
-  else if ( ht45AboveFreezing >= 3.0  &&  _gprops.dbz_max >= _params.FOKR_cat3_zmax_thresh  ) {
-    _gprops.add_on.hail_metrics.FOKRcategory = 3;
-  }
-  else if ( _gprops.dbz_max >= _params.FOKR_cat2_zmax_thresh ) {
-    _gprops.add_on.hail_metrics.FOKRcategory = 2;
-  }
-  else if ( _gprops.dbz_max >= _params.FOKR_cat1_zmax_thresh ) {
-    _gprops.add_on.hail_metrics.FOKRcategory = 1;
-  }
-  else {
-    _gprops.add_on.hail_metrics.FOKRcategory = 0;
-  }
+
 }
 
-//
+//////////////////////////////////////////////////////////////
 // Waldvogel and Federer probability of hail as a function of 
 // height of 45 dBZ above freezing
 //
-const Props::heightProb_t Props::HEIGHT_PROB[] =
-{{ 5.80, 1.0 },
- { 5.00, 0.9 },
- { 4.20, 0.8 },
- { 3.55, 0.7 },
- { 3.07, 0.6 },
- { 2.70, 0.5 },
- { 2.40, 0.4 },
- { 2.17, 0.3 },
- { 1.97, 0.2 },
- { 1.80, 0.1 },
- { 1.65, 0.0 }};
 
-void
-Props::_waldvogelProbability( const GridClump &grid_clump, 
-                              float ht45AboveFreezing )
+const Props::heightProb_t Props::HEIGHT_PROB[] =
 {
-  //
+  { 5.80, 1.0 },
+  { 5.00, 0.9 },
+  { 4.20, 0.8 },
+  { 3.55, 0.7 },
+  { 3.07, 0.6 },
+  { 2.70, 0.5 },
+  { 2.40, 0.4 },
+  { 2.17, 0.3 },
+  { 1.97, 0.2 },
+  { 1.80, 0.1 },
+  { 1.65, 0.0 }
+};
+
+double Props::_getWaldvogelProbability(const GridClump &grid_clump, 
+                                       double ht45AboveFreezing)
+{
+
   // Check for degenerate case
-  //
+  
   if ( ht45AboveFreezing <= 0.0 ) {
-    _gprops.add_on.hail_metrics.waldvogelProbability = 0.0;
-    return;
+    return 0.0;
   }
 
-  //
   // Move down the height-probability curve until we find our spot
-  //
-  size_t i = 0;
-  float  curveHeight = HEIGHT_PROB[i].height;
-  float  curveProb   = HEIGHT_PROB[i].probability;
 
-  while( curveProb > 0.0 ) {
+  size_t ii = 0;
+  double curveHeight = HEIGHT_PROB[ii].height;
+  double curveProb = HEIGHT_PROB[ii].probability;
+  
+  while(curveProb > 0.0) {
     if ( ht45AboveFreezing >= curveHeight ) {
       break;
     }
-    i++;
-    curveHeight = HEIGHT_PROB[i].height;
-    curveProb   = HEIGHT_PROB[i].probability;
-  }
-  _gprops.add_on.hail_metrics.waldvogelProbability = curveProb;
+    ii++;
+    curveHeight = HEIGHT_PROB[ii].height;
+    curveProb   = HEIGHT_PROB[ii].probability;
+  } // while
+  
+  return curveProb;
+
 }
+
+//////////////////////////////////////////////////////////////
+// compute NEXRAD Hail Detection Algorithm for the clump
+
+void Props::_computeNexradHda(const GridClump &grid_clump)
+{
+
+  // initialize - all heights are in km
+  
+  Sounding &sndg = Sounding::inst();
+  double freezingLevel = sndg.getProfile().getFreezingLevel();
+  double ht45AboveFreezing = _topOfDbz(45.0, grid_clump) - freezingLevel;
+
+  // const titan_grid_t &grid = grid_clump.grid;
+  // int nptsPlane = grid.nx * grid.ny;
+  
+  _gprops.add_on.hda.poh =
+    _getWaldvogelProbability(grid_clump, ht45AboveFreezing);
+
+
+}
+
+

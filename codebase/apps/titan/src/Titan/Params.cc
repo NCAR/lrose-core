@@ -1531,7 +1531,7 @@ using namespace std;
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("VERTICAL PROFILE - SOUNDING");
-    tt->comment_text = tdrpStrDup("You can: \n\t(a) specify a vertical profile sounding in this param file or\n\t(b) read in a profile from soundings in SPDB.\n\nThe default sounding obtained using -print_params is the ICAO standard atmosphere.");
+    tt->comment_text = tdrpStrDup("You can: \n\t(a) specify a vertical profile sounding in this param file or\n\t(b) read in a profile from soundings in SPDB.\n\nThe default sounding obtained using -print_params is the ICAO standard atmosphere.\n\nNOTE: the 'ht_of_freezing' parameter has been deprecated. Use this section instead.");
     tt++;
     
     // Parameter 'sounding_mode'
@@ -1769,19 +1769,27 @@ using namespace std;
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("OPTION FOR CALCULATING HAIL METRICS.");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("NOTE: the 'ht_of_freezing' parameter has been deprecated. Use the 'specified_sounding' parameter instead - see section above.");
     tt++;
     
-    // Parameter 'special_feature'
-    // ctype is 'char*'
+    // Parameter 'hail_detection_mode'
+    // ctype is '_hail_detection_mode_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("special_feature");
-    tt->descr = tdrpStrDup("Option for calculating additional special features.");
-    tt->help = tdrpStrDup("Currently, 'hail' is the only special feature available. More features may be available to choose from in the future.");
-    tt->val_offset = (char *) &special_feature - &_start_;
-    tt->single_val.s = tdrpStrDup("hail");
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("hail_detection_mode");
+    tt->descr = tdrpStrDup("Mode for detecting hail.");
+    tt->help = tdrpStrDup("\n\nHAIL_METRICS: compute the hail metrics: Foot-Krauss category (FOKR), Waldvogel-probability-of-hail, hail-mass-aloft and vertically-integrated-hail-mass (VIHM). This is the legacy mode in Titan. \n\nNEXRAD_HDA: run the NEXRAD Hail Detection Algorithm. This computes POH - the probability of hail (Waldvogel), SHI - the Severe Hail Index, POSH - the Probability Of Severe Hail, and MESM - the Maximum Estimated Hail Size (mm).\n\nThe NEXRAD HDA is described in: Arthur Witt, Michael D. Eilts, Gregory J. Stumph, J. T. Johnson, E DeWayne Mitchell and Kevin W Thomas: An Enhanced Hail Detection Algorithm for the WSR-88D. Weather and Forecasting, Volume 13, June 1998.");
+    tt->val_offset = (char *) &hail_detection_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("hail_detection_mode_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("HAIL_METRICS");
+      tt->enum_def.fields[0].val = HAIL_METRICS;
+      tt->enum_def.fields[1].name = tdrpStrDup("NEXRAD_HDA");
+      tt->enum_def.fields[1].val = NEXRAD_HDA;
+    tt->single_val.e = HAIL_METRICS;
     tt++;
     
     // Parameter 'hail_ZM'
@@ -1812,18 +1820,6 @@ using namespace std;
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].d = 3.6683e+06;
       tt->struct_vals[1].d = 1.416;
-    tt++;
-    
-    // Parameter 'ht_of_freezing'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("ht_of_freezing");
-    tt->descr = tdrpStrDup("Height of the 0C isotherm (km)");
-    tt->help = tdrpStrDup("This value may be dynamically set in the future.");
-    tt->val_offset = (char *) &ht_of_freezing - &_start_;
-    tt->single_val.d = 6;
     tt++;
     
     // Parameter 'hail_mass_dbz_threshold'

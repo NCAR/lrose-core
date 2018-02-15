@@ -109,14 +109,14 @@ public:
   
   virtual ~Props();
 
-  // ht of min valid layer in storm
-  double minValidZ;
-
   // initialize for latest MDV input file
   void init();
 
   // compute properties for clump
   int compute(const GridClump &grid_clump, int storm_num);
+
+  // get methods
+  double getMinValidZ() const { return _minValidZ; }
 
 protected:
   
@@ -133,6 +133,8 @@ private:
   int _secondTrip;
 
   int _nzValid;
+  double _minValidZ;
+
   int _topLayer, _baseLayer;
   int _nDbzIntvls;
   int _nLayers;
@@ -181,28 +183,33 @@ private:
   void _loadDbzHist(dbz_hist_entry_t *dbz_hist,
 		    storm_file_dbz_hist_t *hist);
 
-  //
-  // New hail metrics
-  //
+  // hail mass relationship
+
   ZxRelation  _hailZM;
 
-  //
   // Waldvogel and Federer probability of hail as a function of
   // the height of the 45 dBZ contour above the 0C isotherm
-  //
-  typedef struct { float  height;
-                   float  probability;
-                 } heightProb_t;
+
+  typedef struct {
+    double height;
+    double probability;
+  } heightProb_t;
 
   static const heightProb_t HEIGHT_PROB[];
 
-  void  _computeHailMetrics( const GridClump &grid_clump );
-  float _topOfDbz( float dbz, const GridClump &grid_clump );
-  void  _FOKRcategories( const GridClump &grid_clump, 
-                            float ht45AboveFreezing );
-  void  _waldvogelProbability( const GridClump &grid_clump,
-                               float ht45AboveFreezing );
-  void  _hailMassAloft();
+  // hail metrics
+
+  void  _computeHailMetrics(const GridClump &grid_clump);
+  double _topOfDbz(double dbz, const GridClump &grid_clump);
+  int  _getFokrCategory(const GridClump &grid_clump, 
+                        double ht45AboveFreezing);
+  double _getWaldvogelProbability(const GridClump &grid_clump,
+                                  double ht45AboveFreezing);
+
+  // nexrad hail detection algorithm
+
+  void  _computeNexradHda(const GridClump &grid_clump);
+  
 };
 
 #endif

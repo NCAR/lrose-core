@@ -77,6 +77,11 @@ public:
   } sounding_mode_t;
 
   typedef enum {
+    HAIL_METRICS = 0,
+    NEXRAD_HDA = 1
+  } hail_detection_mode_t;
+
+  typedef enum {
     TREND = 0,
     PARABOLIC = 1,
     REGRESSION = 2
@@ -544,11 +549,9 @@ public:
 
   tdrp_bool_t sounding_check_pressure_monotonically_decreasing;
 
-  char* special_feature;
+  hail_detection_mode_t hail_detection_mode;
 
   zr_t hail_ZM;
-
-  double ht_of_freezing;
 
   double hail_mass_dbz_threshold;
 
@@ -658,7 +661,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[148];
+  mutable TDRPtable _table[147];
 
   const char *_className;
 
