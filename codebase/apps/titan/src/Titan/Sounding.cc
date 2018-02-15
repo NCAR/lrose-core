@@ -156,16 +156,16 @@ int Sounding::retrieveTempProfile(time_t profileTime)
     for (int ii = 0; ii < _params->specified_sounding_n; ii++) {
       const Params::sounding_entry_t &entry = 
         _params->_specified_sounding[ii];
+      TempProfile::PointVal point;
+      point.setHtKm(entry.height_m / 1000.0);
+      point.setTmpC(entry.temp_c);
       if (entry.pressure_hpa >= 0) {
-        TempProfile::PointVal val(entry.pressure_hpa,
-                                  entry.height_m,
-                                  entry.temp_c);
-        _tempProfile.addPoint(val);
-      } else {
-        TempProfile::PointVal val(entry.height_m,
-                                  entry.temp_c);
-        _tempProfile.addPoint(val);
+        point.setPressHpa(entry.pressure_hpa);
       }
+      if (entry.rh_percent >= 0) {
+        point.setRhPercent(entry.rh_percent);
+      }
+      _tempProfile.addPoint(point);
     } // ii
     
   }
