@@ -536,10 +536,10 @@ void RfPrintStormProps(FILE *out,
     fprintf(out, "%s  FOKR storm category          : %d\n", spacer,
   	    gprops->add_on.hail_metrics.FOKRcategory);
   } else if ( params->gprops_union_type == UNION_NEXRAD_HDA ) {
-    fprintf(out, "%s  POH       (%%) : %g\n", spacer, gprops->add_on.hda.POH);
-    fprintf(out, "%s  SHI (Jm-1s-1) : %g\n", spacer, gprops->add_on.hda.SHI);
-    fprintf(out, "%s  POSH      (%%) : %g\n", spacer, gprops->add_on.hda.POSH);
-    fprintf(out, "%s  MEHS     (mm) : %g\n", spacer, gprops->add_on.hda.MEHS);
+    fprintf(out, "%s  POH       (%%) : %g\n", spacer, gprops->add_on.hda.poh);
+    fprintf(out, "%s  SHI (Jm-1s-1) : %g\n", spacer, gprops->add_on.hda.shi);
+    fprintf(out, "%s  POSH      (%%) : %g\n", spacer, gprops->add_on.hda.posh);
+    fprintf(out, "%s  MEHS     (mm) : %g\n", spacer, gprops->add_on.hda.mehs);
   }
   
   fprintf(out, "%s  tilt angle (deg)                : %g\n", spacer,
