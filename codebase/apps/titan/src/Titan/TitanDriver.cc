@@ -286,7 +286,7 @@ int TitanDriver::_runRetrack ()
   // create input path object
 
   DsInputPath input(_progName,
-		    _params.debug >= Params::DEBUG_VERBOSE,
+		    _params.debug >= Params::DEBUG_EXTRA,
 		    _params.storm_data_dir,
 		    _args.startTime, _args.endTime);
 

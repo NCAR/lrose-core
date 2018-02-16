@@ -37,6 +37,7 @@
 #include "Verify.hh"
 #include "GridClump.hh"
 #include "DualThresh.hh"
+#include "Sounding.hh"
 
 #include <toolsa/umisc.h>
 #include <toolsa/str.h>
@@ -132,7 +133,7 @@ int Identify::run(int scan_num)
                                        _params.min_grid_overlap,
                                        _params.low_dbz_threshold);
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     fprintf(stderr, "Number of clumps  =  %d\n", _nClumps);
   }
 
@@ -254,14 +255,15 @@ int Identify::_processClumps(int scan_num)
   scan_hdr.scan_num = scan_num;
   scan_hdr.nstorms = _nStorms;
   scan_hdr.time = _inputMdv.mdvx.getMasterHeader().time_centroid;
-  scan_hdr.min_z = _props->minValidZ;
+  scan_hdr.min_z = _props->getMinValidZ();
   scan_hdr.delta_z = _inputMdv.grid.dz;
   scan_hdr.grid = _inputMdv.grid;
 
   // for now height of freezing is a static user parameter
   // eventually it may be derived dynamically from a sounding
 
-  scan_hdr.ht_of_freezing = _params.ht_of_freezing;
+  Sounding &sndg = Sounding::inst();
+  scan_hdr.ht_of_freezing = sndg.getProfile().getFreezingLevel();
   
   // read in storm file header
 
@@ -329,7 +331,7 @@ int Identify::_processThisClump(const GridClump &grid_clump)
     return(0);
   }
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     fprintf(stderr,
 	    "Clump: size, startIx, startIy, nx, ny, offsetx, offsety: "
 	    "%g, %d, %d, %d, %d, %g, %g\n",

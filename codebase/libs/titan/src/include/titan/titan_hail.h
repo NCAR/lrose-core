@@ -69,10 +69,10 @@ typedef struct {
 
 typedef struct {
 
-  fl32 POH; /* Waldvogel Probability (%) */
-  fl32 SHI; /* Severe Hail Index (J.m-1.s-1) */
-  fl32 POSH; /* probability of severe hail (%) */
-  fl32 MEHS; /* Maximum Expected Hail Size (mm) */
+  fl32 poh; /* Waldvogel Probability (%) */
+  fl32 shi; /* Severe Hail Index (J.m-1.s-1) */
+  fl32 posh; /* probability of severe hail (%) */
+  fl32 mehs; /* Maximum Expected Hail Size (mm) */
   
 } nexrad_hda_t;
 

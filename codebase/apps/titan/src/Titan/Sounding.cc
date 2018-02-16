@@ -88,6 +88,11 @@ int Sounding::retrieveTempProfile(time_t profileTime)
   
 {
 
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Getting temp profile for time: " 
+         << DateTime::strm(profileTime) << endl;
+  }
+
   assert(_params != NULL);
   
   time_t retrievedTime = profileTime;
@@ -118,11 +123,11 @@ int Sounding::retrieveTempProfile(time_t profileTime)
     _tempProfile.setCheckPressureMonotonicallyDecreasing
       (_params->sounding_check_pressure_monotonically_decreasing);
     
-    if (_params->debug >= Params::DEBUG_VERBOSE) {
-      _tempProfile.setDebug();
-    }
     if (_params->debug >= Params::DEBUG_EXTRA) {
       _tempProfile.setVerbose();
+    }
+    if (_params->debug >= Params::DEBUG_VERBOSE) {
+      _tempProfile.setDebug();
     }
   
     if (_tempProfile.getTempProfile(_params->sounding_spdb_url,
@@ -156,52 +161,23 @@ int Sounding::retrieveTempProfile(time_t profileTime)
     for (int ii = 0; ii < _params->specified_sounding_n; ii++) {
       const Params::sounding_entry_t &entry = 
         _params->_specified_sounding[ii];
+      TempProfile::PointVal point;
+      point.setHtKm(entry.height_m / 1000.0);
+      point.setTmpC(entry.temp_c);
       if (entry.pressure_hpa >= 0) {
-        TempProfile::PointVal val(entry.pressure_hpa,
-                                  entry.height_m,
-                                  entry.temp_c);
-        _tempProfile.addPoint(val);
-      } else {
-        TempProfile::PointVal val(entry.height_m,
-                                  entry.temp_c);
-        _tempProfile.addPoint(val);
+        point.setPressHpa(entry.pressure_hpa);
       }
+      if (entry.rh_percent >= 0) {
+        point.setRhPercent(entry.rh_percent);
+      }
+      _tempProfile.addPoint(point);
     } // ii
-    
+    _tempProfile.prepareForUse();
+
   }
 
   if (_params->debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=====================================" << endl;
-    cerr << "Temp  profile" << endl;
-    int nLevels = (int) retrievedProfile.size();
-    int nPrint = 50;
-    int printInterval = nLevels / nPrint;
-    if (nLevels < nPrint) {
-      printInterval = 1;
-    }
-    for (size_t ii = 0; ii < retrievedProfile.size(); ii++) {
-      bool doPrint = false;
-      if (ii % printInterval == 0) {
-        doPrint = true;
-      }
-      if (ii < retrievedProfile.size() - 1) {
-        if (retrievedProfile[ii].tmpC * retrievedProfile[ii+1].tmpC <= 0) {
-          doPrint = true;
-        }
-      }
-      if (ii > 0) {
-        if (retrievedProfile[ii-1].tmpC * retrievedProfile[ii].tmpC <= 0) {
-          doPrint = true;
-        }
-      }
-      if (doPrint) {
-        cerr << "  ilevel, press(Hpa), alt(km), temp(C): " << ii << ", "
-             << retrievedProfile[ii].pressHpa << ", "
-             << retrievedProfile[ii].htKm << ", "
-             << retrievedProfile[ii].tmpC << endl;
-      }
-    }
-    cerr << "=====================================" << endl;
+    _tempProfile.print(cerr);
   }
   
   return 0;

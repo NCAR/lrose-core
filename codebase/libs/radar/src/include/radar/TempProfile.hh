@@ -59,19 +59,23 @@ public:
   public:
     
     // constructor
+
+    // default
+
+    PointVal();
     
     /**
      * Constructor
-     * @param[in] press The pressure at this gate (Hpa)
-     * @param[in] ht The height of this gate (km)
-     * @param[in] temp The temperature at this gate (C)
+     * @param[in] press The pressure at this point (Hpa)
+     * @param[in] ht The height of this point (km)
+     * @param[in] temp The temperature at this point (C)
      */
     PointVal(double press, double ht, double tmp);
 
     /**
      * Constructor
-     * @param[in] ht The height of this gate (km)
-     * @param[in] temp The temperature at this gate (C)
+     * @param[in] ht The height of this point (km)
+     * @param[in] temp The temperature at this point (C)
      */
     PointVal(double ht, double tmp);
     
@@ -80,7 +84,19 @@ public:
      */
     ~PointVal();
 
-    // print tmpPoint
+    // set methods
+
+    void setPressHpa(double val) { pressHpa = val; }
+    void setHtKm(double val) { htKm = val; }
+    void setTmpC(double val) { tmpC = val; }
+    void setRhPercent(double val) { rhPercent = val; }
+
+    // sget methods
+
+    double getPressHpa() const { return pressHpa; }
+    double getHtKm() const { return htKm; }
+    double getTmpC() const { return tmpC; }
+    double getRhPercent() const { return rhPercent; }
 
     /**
      * Print the contents of this TmpPoint
@@ -90,9 +106,10 @@ public:
     
     // data
 
-    double pressHpa;   /**< The pressure at this gate (Hpa), or -9999 if unavailable */
-    double htKm;       /**< The height of this gate (km) */
-    double tmpC;       /**< The temperature at this gate (C) */
+    double pressHpa;   /**< The pressure at this point (Hpa), or -9999 if unavailable */
+    double htKm;       /**< The height of this point (km) */
+    double tmpC;       /**< The temperature at this point (C) */
+    double rhPercent;  /**< relative humidity (%) */
     
   };
 
@@ -133,9 +150,11 @@ public:
 
   // get the freezing level height
 
-  double getFreezingLevel() const {
-    return _freezingLevel;
-  }
+  double getFreezingLevel() const;
+
+  // get height for specified temp
+  
+  double getHtKmForTempC(double tempC) const;
 
   // clear the profile
 
@@ -144,6 +163,11 @@ public:
   // add a profile point
 
   void addPoint(PointVal &val) { _tmpProfile.push_back(val); }
+
+  // if you use addPoint, you need to call prepareForUse()
+  // after all points have been added
+
+  void prepareForUse();
 
   // set and get methods for private members
 
@@ -252,6 +276,10 @@ public:
 
   void setDebug() { _debug = true; }
   void setVerbose() { _verbose = true; }
+
+  // missing value
+
+  static const double missingValue;
 
 protected:
 private:

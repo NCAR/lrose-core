@@ -124,7 +124,7 @@ void StormTrack::_matchStorms(double d_hours)
    * load up storm coordinates
    */
 
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     fprintf(stderr, "Storms at time 1:\n");
   }
 
@@ -135,14 +135,14 @@ void StormTrack::_matchStorms(double d_hours)
     xx1[i] = _storms1[i]->current.proj_area_centroid_x;
     yy1[i] = _storms1[i]->current.proj_area_centroid_y;
     
-    if (_params.debug >= Params::DEBUG_EXTRA) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       fprintf(stderr,
 	      "i, x1, y1 = %4d, %10g, %10g\n", (int) i, xx1[i], yy1[i]);
     }
     
   } /* i */
 
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     fprintf(stderr, "Storms at time 2:\n");
   }
 
@@ -151,7 +151,7 @@ void StormTrack::_matchStorms(double d_hours)
     xx2[j] = gprops[j].proj_area_centroid_x;
     yy2[j] = gprops[j].proj_area_centroid_y;
     
-    if (_params.debug >= Params::DEBUG_EXTRA) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       fprintf(stderr,
 	      "j, x2, y2 = %4d, %10g, %10g\n", (int) j, xx2[j], yy2[j]);
     }
@@ -177,7 +177,7 @@ void StormTrack::_matchStorms(double d_hours)
 
 	dcost[i][j] = -1.0;
 
-	if (_params.debug >= Params::DEBUG_VERBOSE) {
+	if (_params.debug >= Params::DEBUG_EXTRA) {
 	  fprintf(stderr, "Already matched using overlaps\n");
 	  fprintf(stderr, "Storm i - %d to storm j - %d\n", (int) i, (int) j);
 	  fprintf(stderr, "xx1[i], yy1[i]: (%g, %g)\n", xx1[i], yy1[i]);
@@ -245,7 +245,7 @@ void StormTrack::_matchStorms(double d_hours)
 	  
 	} /* if (speed <= _params.tracking_max_speed ... */
 
-	if (_params.debug >= Params::DEBUG_VERBOSE) {
+	if (_params.debug >= Params::DEBUG_EXTRA) {
 	  fprintf(stderr, "Storm i - %d to storm j - %d\n", (int) i, (int) j);
 	  fprintf(stderr, "xx1[i], yy1[i]: (%g, %g)\n", xx1[i], yy1[i]);
 	  fprintf(stderr, "xx2[j], yy2[j]: (%g, %g)\n", xx2[j], yy2[j]);
@@ -272,7 +272,7 @@ void StormTrack::_matchStorms(double d_hours)
 
     cost_scale = (double) MAX_ELT / (max_cost * (double) (max_storms + 1));
 
-    if (_params.debug >= Params::DEBUG_EXTRA) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       fprintf(stderr, "max_cost = %g\n", max_cost);
       fprintf(stderr, "cost_scale = %g\n", cost_scale);
     }
@@ -316,7 +316,7 @@ void StormTrack::_matchStorms(double d_hours)
      * print out icost matrix
      */
     
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
       
       fprintf(stderr, "\nICOST MATRIX\n\n");
       
@@ -353,7 +353,7 @@ void StormTrack::_matchStorms(double d_hours)
 
     if (transpose) {
 
-      if (_params.debug >= Params::DEBUG_EXTRA)
+      if (_params.debug >= Params::DEBUG_VERBOSE)
 	fprintf(stderr, "\nCost matrix transposed.\n\n");
 
       for (size_t i = 0; i < _storms2.size(); i++) {
@@ -386,7 +386,7 @@ void StormTrack::_matchStorms(double d_hours)
      * print out the match
      */
 
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
       
       fprintf(stderr, "Match array\n");
       
@@ -415,7 +415,7 @@ void StormTrack::_matchStorms(double d_hours)
 
   } else {
 
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
       fprintf(stderr, "No valid tracks for match_storms()\n");
     }
     
@@ -512,7 +512,7 @@ bool StormTrack::_matchFeasible(TrStorm &storm1, TrStorm &storm2,
   error_dist = sqrt(dx * dx + dy * dy);
 
   if (error_dist >= forecast_dist) {
-    if (_params.debug >= Params::DEBUG_EXTRA) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       fprintf(stderr, "=========================>>>>\a\n");
       fprintf(stderr, "Track %d/%d, invalid match\n",
 	      storm1.track.status.complex_track_num,
@@ -686,7 +686,7 @@ void StormTrack::_checkMatches()
 
     while (storm.status.n_match > MAX_CHILDREN) {
 
-      if (_params.debug >= Params::DEBUG_EXTRA) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
 	fprintf(stderr,
 		"MAX_CHILDREN limit - deleting smallest from storm1 %d\n",
 		(int) istorm);
@@ -708,7 +708,7 @@ void StormTrack::_checkMatches()
 
     while (storm.status.n_match > MAX_PARENTS) {
 
-      if (_params.debug >= Params::DEBUG_EXTRA) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
 	fprintf(stderr,
 		"MAX_PARENTS limit - deleting smallest from storm2 %d\n",
 		(int) jstorm);
