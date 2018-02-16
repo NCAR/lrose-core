@@ -159,6 +159,28 @@ private:
   int _nZAlloc;
   int _nHistAlloc;
 
+  // hail mass relationship
+
+  ZxRelation  _hailZM;
+
+  // Waldvogel and Federer probability of hail as a function of
+  // the height of the 45 dBZ contour above the 0C isotherm
+
+  typedef struct {
+    double height;
+    double probability;
+  } heightProb_t;
+
+  static const heightProb_t HEIGHT_PROB[];
+
+  // temperature profile
+
+  double _freezingLevel;
+  double _htMinus20;
+  double _ht45AboveFreezing;
+
+  // methods
+
   void _alloc(int nz, int nhist);
   int _computeFirstPass(const GridClump &grid_clump);
   void _computeSecondPass(const GridClump &grid_clump);
@@ -183,28 +205,12 @@ private:
   void _loadDbzHist(dbz_hist_entry_t *dbz_hist,
 		    storm_file_dbz_hist_t *hist);
 
-  // hail mass relationship
-
-  ZxRelation  _hailZM;
-
-  // Waldvogel and Federer probability of hail as a function of
-  // the height of the 45 dBZ contour above the 0C isotherm
-
-  typedef struct {
-    double height;
-    double probability;
-  } heightProb_t;
-
-  static const heightProb_t HEIGHT_PROB[];
-
   // hail metrics
-
+  
   void  _computeHailMetrics(const GridClump &grid_clump);
   double _topOfDbz(double dbz, const GridClump &grid_clump);
-  int  _getFokrCategory(const GridClump &grid_clump, 
-                        double ht45AboveFreezing);
-  double _getWaldvogelProbability(const GridClump &grid_clump,
-                                  double ht45AboveFreezing);
+  int  _getFokrCategory(const GridClump &grid_clump);
+  double _getWaldvogelProbability(const GridClump &grid_clump);
 
   // nexrad hail detection algorithm
 

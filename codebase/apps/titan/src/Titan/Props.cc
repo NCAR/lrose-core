@@ -212,6 +212,12 @@ void Props::init()
   _minVortDist = 2.0 * sqrt(_inputMdv.grid.dx * _inputMdv.grid.dx +
 			    _inputMdv.grid.dy * _inputMdv.grid.dy);
 
+  // heights of various temperatures
+  
+  Sounding &sndg = Sounding::inst();
+  _freezingLevel = sndg.getProfile().getFreezingLevel();
+  _htMinus20 = sndg.getProfile().getHtKmForTempC(-20.0);
+
 }
 
 ////////////////////////////////////////////////
@@ -247,6 +253,8 @@ int Props::compute(const GridClump &grid_clump, int storm_num)
 	  _nDbzHistIntervals * sizeof(dbz_hist_entry_t));
   memset (&_sum, 0, sizeof(sum_stats_t));
     
+  _ht45AboveFreezing = _topOfDbz(45.0, grid_clump) - _freezingLevel;
+
   // first pass through the clumps, computing the relevant things
   // from which to compute the storm properties.
   // Also, count the number of data runs for this storm.
@@ -1236,12 +1244,6 @@ double Props::_topOfDbz(double dbz, const GridClump &grid_clump)
 void Props::_computeHailMetrics(const GridClump &grid_clump)
 {
 
-  // initialize - all heights are in km
-  
-  Sounding &sndg = Sounding::inst();
-  double freezingLevel = sndg.getProfile().getFreezingLevel();
-  double ht45AboveFreezing = _topOfDbz(45.0, grid_clump) - freezingLevel;
-
   const titan_grid_t &grid = grid_clump.grid;
   int nptsPlane = grid.nx * grid.ny;
 
@@ -1253,7 +1255,7 @@ void Props::_computeHailMetrics(const GridClump &grid_clump)
     const Interval &intvl = grid_clump.intervals[intv];
     int iz = intvl.plane;
     double ht = _minValidZ + (double) iz * grid.dz;
-    if (ht > freezingLevel + 2.0) {
+    if (ht > _freezingLevel + 2.0) {
       int jz = iz + _inputMdv.minValidLayer;
       int iy = intvl.row_in_plane;
       int index = ((iy + grid_clump.startIy) * grid.nx +
@@ -1283,12 +1285,12 @@ void Props::_computeHailMetrics(const GridClump &grid_clump)
   // FOKR category
 
   _gprops.add_on.hail_metrics.FOKRcategory =
-    _getFokrCategory(grid_clump, ht45AboveFreezing);
+    _getFokrCategory(grid_clump);
   
   // probability of hail
 
   _gprops.add_on.hail_metrics.waldvogelProbability =
-    _getWaldvogelProbability(grid_clump, ht45AboveFreezing);
+    _getWaldvogelProbability(grid_clump);
 
 }
 
@@ -1298,20 +1300,19 @@ void Props::_computeHailMetrics(const GridClump &grid_clump)
 // non-hailstorms (Category 0 and 1) from potentially developing hailers 
 // (Cat. 2), likely hailstorms (Cat. 3) and severe hailstorms (Cat. 4)
 
-int Props::_getFokrCategory(const GridClump &grid_clump, 
-                            double ht45AboveFreezing)
+int Props::_getFokrCategory(const GridClump &grid_clump)
 {
 
   // Check for degenerate case
 
-  if (ht45AboveFreezing <= 0.0) {
+  if (_ht45AboveFreezing <= 0.0) {
     return 0;
   }
-
-  if (ht45AboveFreezing >= 4.0 &&
+  
+  if (_ht45AboveFreezing >= 4.0 &&
       _gprops.dbz_max >= _params.FOKR_cat4_zmax_thresh) {
     return 4;
-  } else if (ht45AboveFreezing >= 3.0 &&
+  } else if (_ht45AboveFreezing >= 3.0 &&
              _gprops.dbz_max >= _params.FOKR_cat3_zmax_thresh) {
     return 3;
   } else if (_gprops.dbz_max >= _params.FOKR_cat2_zmax_thresh) {
@@ -1344,16 +1345,15 @@ const Props::heightProb_t Props::HEIGHT_PROB[] =
   { 1.65, 0.0 }
 };
 
-double Props::_getWaldvogelProbability(const GridClump &grid_clump, 
-                                       double ht45AboveFreezing)
+double Props::_getWaldvogelProbability(const GridClump &grid_clump)
 {
 
   // Check for degenerate case
   
-  if ( ht45AboveFreezing <= 0.0 ) {
+  if (_ht45AboveFreezing <= 0.0) {
     return 0.0;
   }
-
+  
   // Move down the height-probability curve until we find our spot
 
   size_t ii = 0;
@@ -1361,7 +1361,7 @@ double Props::_getWaldvogelProbability(const GridClump &grid_clump,
   double curveProb = HEIGHT_PROB[ii].probability;
   
   while(curveProb > 0.0) {
-    if ( ht45AboveFreezing >= curveHeight ) {
+    if (_ht45AboveFreezing >= curveHeight) {
       break;
     }
     ii++;
@@ -1379,19 +1379,93 @@ double Props::_getWaldvogelProbability(const GridClump &grid_clump,
 void Props::_computeNexradHda(const GridClump &grid_clump)
 {
 
-  // initialize - all heights are in km
+  const titan_grid_t &grid = grid_clump.grid;
+
+  // probability of hail (POH) is from Waldvogel et al
+  // we comvert probability from fraction to percent
+
+  _gprops.add_on.hda.poh = _getWaldvogelProbability(grid_clump) * 100.0;
+
+  // compute Severe Hail Index (SHI)
   
-  Sounding &sndg = Sounding::inst();
-  double freezingLevel = sndg.getProfile().getFreezingLevel();
-  double ht45AboveFreezing = _topOfDbz(45.0, grid_clump) - freezingLevel;
+  double dbzLower = 40.0;
+  double dbzUpper = 50.0;
+  double dbzDelta = dbzUpper - dbzLower;
 
-  // const titan_grid_t &grid = grid_clump.grid;
-  // int nptsPlane = grid.nx * grid.ny;
+  double keCoeff = 5.0e-6;
+  double keExpon = 0.084;
+  double shiSum = 0.0;
+
+  // loop through layers
+
+  for (int iz = 0; iz < _nzValid; iz++) {
+
+    // check this layer is active for this storm
+
+    if (_layer[iz].n == 0) {
+      continue;
+    }
+
+    // get height
+    
+    double ht = _minValidZ + (double) iz * grid.dz;
+
+    // compute weight based on height
+
+    double wtHt = 0.0;
+    if (ht >= _freezingLevel && ht <= _htMinus20) {
+      wtHt = (ht - _freezingLevel) / (_htMinus20 - _freezingLevel);
+    } else if (ht > _htMinus20) {
+      wtHt = 1.0;
+    }
+
+    // get max dbz in layer
+    
+    double dbzMax = _layer[iz].dbz_max;
+
+    // compute weight based on Z
+
+    double wtZ = 0.0;
+    if (dbzMax >= dbzLower && dbzMax <= dbzUpper) {
+      wtZ = (dbzMax - dbzLower) / dbzDelta;
+    } else if (dbzMax > dbzUpper) {
+      wtZ = 1.0;
+    }
+
+    // compute hail kinetic energy
+    
+    double ke = keCoeff * pow(10.0, keExpon * dbzMax) * wtZ;
+
+    // add to shi sum
+    
+    shiSum += wtHt * ke;
+    
+  } // iz
+
+  double shi = 0.1 * shiSum * (grid.dz * 1000.0);
+  _gprops.add_on.hda.shi = shi;
+
+  // compute Probability Of Severe Hail (POSH)
+  // and maximum expected hail size
   
-  _gprops.add_on.hda.poh =
-    _getWaldvogelProbability(grid_clump, ht45AboveFreezing);
+  double posh = 0.0;
+  double mehs = 0.0;
+  
+  if (shi > 0.0) {
+    
+    double warningThreshold = 57.5 * _freezingLevel - 121.0;
+    if (warningThreshold < 20.0) {
+      warningThreshold = 20.0;
+    }
+    
+    posh = 29.0 * log(shi / warningThreshold) + 50.0;
+    mehs = 2.54 * sqrt(shi);
+    
+  }
 
-
+  _gprops.add_on.hda.posh = posh;
+  _gprops.add_on.hda.mehs = mehs;
+  
 }
 
 
