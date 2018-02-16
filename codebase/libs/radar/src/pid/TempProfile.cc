@@ -791,12 +791,22 @@ void TempProfile::print(ostream &out) const
 
   out << "======= Temperature Profile =========" << endl;
 
-  out << "  soundingTime: " << DateTime::strm(_soundingTime) << endl;
-  out << "  soundingUrl: " << _soundingSpdbUrl << endl;
-  out << "  soundingLocationName: " << _soundingLocationName << endl;
+  if (_soundingTime != 0) {
+    out << "  soundingTime: " << DateTime::strm(_soundingTime) << endl;
+  }
+  if (_soundingSpdbUrl.size() > 0) {
+    out << "  soundingUrl: " << _soundingSpdbUrl << endl;
+  }
+  if (_soundingLocationName.size() > 0) {
+    out << "  soundingLocationName: " << _soundingLocationName << endl;
+  }
   out << "  freezingLevel? " << _freezingLevel << endl;
-  out << "  useWetBulbTemp? " << (_useWetBulbTemp?"Y":"N") << endl;
-  out << "  heightCorrectionKm: " << _heightCorrectionKm << endl;
+  if (_useWetBulbTemp) {
+    out << "  using wet bulb temp" << endl;
+  }
+  if (_heightCorrectionKm != 0) {
+    out << "  heightCorrectionKm: " << _heightCorrectionKm << endl;
+  }
 
   int nLevels = (int) _tmpProfile.size();
   int nPrint = 50;
