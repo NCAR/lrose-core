@@ -77,6 +77,8 @@ typedef struct {
   double vol_centroid_az;
   double vol_centroid_range;
   double vorticity;
+
+  double htKm;
   
 } layer_stats_t;
 
@@ -205,16 +207,19 @@ private:
   void _loadDbzHist(dbz_hist_entry_t *dbz_hist,
 		    storm_file_dbz_hist_t *hist);
 
+  double _topOfDbz(double dbz, const GridClump &grid_clump);
+
   // hail metrics
   
   void  _computeHailMetrics(const GridClump &grid_clump);
-  double _topOfDbz(double dbz, const GridClump &grid_clump);
   int  _getFokrCategory(const GridClump &grid_clump);
   double _getWaldvogelProbability(const GridClump &grid_clump);
 
   // nexrad hail detection algorithm
 
-  void  _computeNexradHda(const GridClump &grid_clump);
+  void _computeNexradHda(const GridClump &grid_clump,
+                         double &poh, double &shi,
+                         double &posh, double &mehs);
   
 };
 

@@ -486,9 +486,6 @@ int StormIdent::_processScan(int scan_num, time_t scan_time,
 
   Sounding &sndg = Sounding::inst();
   sndg.retrieveTempProfile(scan_time);
-  if (_params.debug >= _params.DEBUG_VERBOSE) {
-    sndg.getProfile().print(cerr);
-  }
 
   // identify storms
   
