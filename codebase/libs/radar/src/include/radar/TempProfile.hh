@@ -150,9 +150,7 @@ public:
 
   // get the freezing level height
 
-  double getFreezingLevel() const {
-    return _freezingLevel;
-  }
+  double getFreezingLevel() const;
 
   // get height for specified temp
   
@@ -165,6 +163,11 @@ public:
   // add a profile point
 
   void addPoint(PointVal &val) { _tmpProfile.push_back(val); }
+
+  // if you use addPoint, you need to call prepareForUse()
+  // after all points have been added
+
+  void prepareForUse();
 
   // set and get methods for private members
 

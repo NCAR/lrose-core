@@ -243,6 +243,26 @@ int TempProfile::getProfileForPid(const string &pidThresholdsPath,
   
 }
 
+/////////////////////////////////////
+// prepare profile for use
+
+void TempProfile::prepareForUse() {
+
+  // compute the freezing level
+
+  _computeFreezingLevel();
+
+}
+
+/////////////////////////////////////
+// get the freezing level height
+
+double TempProfile::getFreezingLevel() const {
+
+  return _freezingLevel;
+
+}
+
 /////////////////////////////////////////////////////
 // set the temperature profile from PID line
 
@@ -590,19 +610,20 @@ double TempProfile::getHtKmForTempC(double tempC) const
 
   for (size_t ii = 1; ii < _tmpProfile.size(); ii++) {
 
+    double ht1 = _tmpProfile[ii-1].getHtKm();
+    double ht2 = _tmpProfile[ii].getHtKm();
     double tmp1 = _tmpProfile[ii-1].getTmpC();
     double tmp2 = _tmpProfile[ii].getTmpC();
     double dtmp1 = tmp1 - tempC;
     double dtmp2 = tmp2 - tempC;
-    double ht1 = _tmpProfile[ii-1].getHtKm();
-    double ht2 = _tmpProfile[ii].getHtKm();
-
+    
     if (dtmp1 * dtmp2 <= 0) {
       
       // change in sign, so straddles desired temperature level
       
-      double fraction = tmp1 / (tmp1 - tmp2);
+      double fraction = dtmp1 / (dtmp1 - dtmp2);
       double dht = fraction * (ht2 - ht1);
+
       return (ht1 + dht);
       
     }
