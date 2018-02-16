@@ -106,6 +106,8 @@ public:
   int des_referenceValue;
   int des_dataWidthBits;
 
+  void _addRayToSweep();
+
 };
 #endif
 
