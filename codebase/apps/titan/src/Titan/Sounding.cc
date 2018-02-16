@@ -123,11 +123,11 @@ int Sounding::retrieveTempProfile(time_t profileTime)
     _tempProfile.setCheckPressureMonotonicallyDecreasing
       (_params->sounding_check_pressure_monotonically_decreasing);
     
-    if (_params->debug >= Params::DEBUG_VERBOSE) {
-      _tempProfile.setDebug();
-    }
     if (_params->debug >= Params::DEBUG_EXTRA) {
       _tempProfile.setVerbose();
+    }
+    if (_params->debug >= Params::DEBUG_VERBOSE) {
+      _tempProfile.setDebug();
     }
   
     if (_tempProfile.getTempProfile(_params->sounding_spdb_url,

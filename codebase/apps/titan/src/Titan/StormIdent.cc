@@ -954,7 +954,7 @@ int StormIdent::_writeLdataInfo()
     cerr << "  Writing _latest_data_info to: " << outputDir << endl;
   }
   DsLdataInfo ldata(outputDir,
-		    _params.debug >= Params::DEBUG_VERBOSE);
+		    _params.debug >= Params::DEBUG_EXTRA);
   
   ldata.setDataFileExt(STORM_HEADER_FILE_EXT);
   ldata.setWriter(_progName.c_str());

@@ -15,7 +15,7 @@ commentdef {
 }
 
 typedef enum {
-  DEBUG_OFF, DEBUG_NORM, DEBUG_EXTRA, DEBUG_VERBOSE
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
 } debug_t;
 
 paramdef enum debug_t
@@ -590,6 +590,19 @@ paramdef enum hail_detection_mode_t
   p_descr = "Mode for detecting hail.";
   p_help = "\n\nHAIL_METRICS: compute the hail metrics: Foot-Krauss category (FOKR), Waldvogel-probability-of-hail, hail-mass-aloft and vertically-integrated-hail-mass (VIHM). This is the legacy mode in Titan. \n\nNEXRAD_HDA: run the NEXRAD Hail Detection Algorithm. This computes POH - the probability of hail (Waldvogel), SHI - the Severe Hail Index, POSH - the Probability Of Severe Hail, and MESM - the Maximum Estimated Hail Size (mm).\n\nThe NEXRAD HDA is described in: Arthur Witt, Michael D. Eilts, Gregory J. Stumph, J. T. Johnson, E DeWayne Mitchell and Kevin W Thomas: An Enhanced Hail Detection Algorithm for the WSR-88D. Weather and Forecasting, Volume 13, June 1998.";
 } hail_detection_mode;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option for hail metrics.";
+  p_help = "Print out details of hail metric calculations.";
+} debug_hail_metrics;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to check that height covers the required range.";
+  p_help = "If TRUE, we will check that height range in the sounding meets or exceeds the min and max specified."; 
+} debsounding_check_height_range;
 
 paramdef struct zr_t {
   p_descr = "Z-M parameters for hail";

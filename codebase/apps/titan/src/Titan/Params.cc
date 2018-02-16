@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c)
+// ** Copyright UCAR (c) 1992 - 2018
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -562,10 +562,10 @@ using namespace std;
       tt->enum_def.fields[0].val = DEBUG_OFF;
       tt->enum_def.fields[1].name = tdrpStrDup("DEBUG_NORM");
       tt->enum_def.fields[1].val = DEBUG_NORM;
-      tt->enum_def.fields[2].name = tdrpStrDup("DEBUG_EXTRA");
-      tt->enum_def.fields[2].val = DEBUG_EXTRA;
-      tt->enum_def.fields[3].name = tdrpStrDup("DEBUG_VERBOSE");
-      tt->enum_def.fields[3].val = DEBUG_VERBOSE;
+      tt->enum_def.fields[2].name = tdrpStrDup("DEBUG_VERBOSE");
+      tt->enum_def.fields[2].val = DEBUG_VERBOSE;
+      tt->enum_def.fields[3].name = tdrpStrDup("DEBUG_EXTRA");
+      tt->enum_def.fields[3].val = DEBUG_EXTRA;
     tt->single_val.e = DEBUG_OFF;
     tt++;
     
@@ -1790,6 +1790,42 @@ using namespace std;
       tt->enum_def.fields[1].name = tdrpStrDup("NEXRAD_HDA");
       tt->enum_def.fields[1].val = NEXRAD_HDA;
     tt->single_val.e = HAIL_METRICS;
+    tt++;
+    
+    // Parameter 'debug_hail_metrics'
+    // ctype is '_debug_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("debug_hail_metrics");
+    tt->descr = tdrpStrDup("Debug option for hail metrics.");
+    tt->help = tdrpStrDup("Print out details of hail metric calculations.");
+    tt->val_offset = (char *) &debug_hail_metrics - &_start_;
+    tt->enum_def.name = tdrpStrDup("debug_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("DEBUG_OFF");
+      tt->enum_def.fields[0].val = DEBUG_OFF;
+      tt->enum_def.fields[1].name = tdrpStrDup("DEBUG_NORM");
+      tt->enum_def.fields[1].val = DEBUG_NORM;
+      tt->enum_def.fields[2].name = tdrpStrDup("DEBUG_VERBOSE");
+      tt->enum_def.fields[2].val = DEBUG_VERBOSE;
+      tt->enum_def.fields[3].name = tdrpStrDup("DEBUG_EXTRA");
+      tt->enum_def.fields[3].val = DEBUG_EXTRA;
+    tt->single_val.e = DEBUG_OFF;
+    tt++;
+    
+    // Parameter 'debsounding_check_height_range'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("debsounding_check_height_range");
+    tt->descr = tdrpStrDup("Option to check that height covers the required range.");
+    tt->help = tdrpStrDup("If TRUE, we will check that height range in the sounding meets or exceeds the min and max specified.");
+    tt->val_offset = (char *) &debsounding_check_height_range - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'hail_ZM'

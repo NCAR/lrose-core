@@ -133,7 +133,7 @@ int Identify::run(int scan_num)
                                        _params.min_grid_overlap,
                                        _params.low_dbz_threshold);
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     fprintf(stderr, "Number of clumps  =  %d\n", _nClumps);
   }
 
@@ -331,7 +331,7 @@ int Identify::_processThisClump(const GridClump &grid_clump)
     return(0);
   }
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     fprintf(stderr,
 	    "Clump: size, startIx, startIy, nx, ny, offsetx, offsety: "
 	    "%g, %d, %d, %d, %d, %g, %g\n",

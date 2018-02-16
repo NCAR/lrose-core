@@ -741,7 +741,7 @@ void Props::_computeSecondPass(const GridClump &grid_clump)
 	      _rangeLimited = TRUE;
             }
 	    
-	    if (_params.debug >= Params::DEBUG_VERBOSE && _rangeLimited) {
+	    if (_params.debug >= Params::DEBUG_EXTRA && _rangeLimited) {
 	      fprintf(stderr,
 		      "***** Range limited, x, y, range = "
 		      "%g, %g, %g\n",
@@ -763,7 +763,7 @@ void Props::_computeSecondPass(const GridClump &grid_clump)
               
 	      _topMissing = TRUE;
               
-	      if (_params.debug >= Params::DEBUG_VERBOSE) {
+	      if (_params.debug >= Params::DEBUG_EXTRA) {
 		fprintf(stderr,
 			"** Top missing,x,y,z, elev = "
 			"%g,%g,%g,%g\n",
@@ -1085,7 +1085,7 @@ int Props::_checkSecondTrip()
     horiz_aspect_OK = FALSE;
   }
 
-  if (_params.debug >= Params::DEBUG_VERBOSE &&
+  if (_params.debug >= Params::DEBUG_EXTRA &&
       orientation_OK && vert_aspect_OK && horiz_aspect_OK) {
 
     fprintf(stderr, "\n++++++++++ SECOND_TRIP ++++++++++++++\n");
@@ -1250,18 +1250,15 @@ void Props::_computeHailMetrics(const GridClump &grid_clump)
   const titan_grid_t &grid = grid_clump.grid;
   int nptsPlane = grid.nx * grid.ny;
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug_hail_metrics >= Params::DEBUG_VERBOSE) {
     cerr << "=====>> Layer temp/dbz profile for hail <<=====" << endl;
     for (int iz = 0; iz < _nzValid; iz++) {
       if (_layer[iz].n > 0) {
         double ht = _layer[iz].htKm;
         Sounding &sndg = Sounding::inst();
         double temp = sndg.getProfile().getTempForHtKm(ht);
-        cerr << "  iz, ht, temp, dbzmax: "
-             << iz << ", "
-             << ht << ", "
-             << temp << ", "
-             << _layer[iz].dbz_max << endl;
+        fprintf(stderr, "  iz, ht, temp, dbzmax: %3d, %8.3f %7.2f %7.2f\n",
+                iz, ht, temp, _layer[iz].dbz_max);
       }
     } // iz
   }
@@ -1311,19 +1308,13 @@ void Props::_computeHailMetrics(const GridClump &grid_clump)
   
   double poh, shi, posh, mehs;
   _computeNexradHda(grid_clump, poh, shi, posh, mehs);
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Hail metrics for storm:" << endl;
-    cerr << " dHt45, HMA, VIHM, FOKR, WPOH, POH, SHI, POSH, MEHS: "
-         << _ht45AboveFreezing << ", "
-         << hma << ", "
-         << vihm << ", "
-         << fokr << ", "
-         << wpoh << ", "
-         << poh << ", "
-         << shi << ", "
-         << posh << ", "
-         << mehs << endl;
+
+  if ((_params.debug_hail_metrics >= Params::DEBUG_VERBOSE) ||
+      (_params.debug_hail_metrics && poh > 0)) {
+    fprintf(stderr, 
+            "Hail metrics: dHt45, HMA, VIHM, FOKR, POH, SHI, POSH, MEHS: "
+            "%6.2f %7.2f %6.2f %2d %6.2f %7.2f %6.2f %6.2f\n",
+            _ht45AboveFreezing, hma, vihm, fokr, poh, shi, posh, mehs);
   }
   
   if (_params.hail_detection_mode == Params::HAIL_METRICS) {
@@ -1448,7 +1439,6 @@ void Props::_computeNexradHda(const GridClump &grid_clump,
   // we comvert probability from fraction to percent
 
   poh = _getWaldvogelProbability(grid_clump) * 100.0;
-  _gprops.add_on.hda.poh = poh;
 
   // compute Severe Hail Index (SHI)
   
@@ -1507,7 +1497,6 @@ void Props::_computeNexradHda(const GridClump &grid_clump,
   } // iz
 
   shi = 0.1 * shiSum * (grid.dz * 1000.0);
-  _gprops.add_on.hda.shi = shi;
 
   // compute Probability Of Severe Hail (POSH)
   // and maximum expected hail size
@@ -1515,7 +1504,7 @@ void Props::_computeNexradHda(const GridClump &grid_clump,
   posh = 0.0;
   mehs = 0.0;
   
-  if (shi > 0.0) {
+  if (poh > 0.0 && shi > 0.0) {
     
     double warningThreshold = 57.5 * _freezingLevel - 121.0;
     if (warningThreshold < 20.0) {
@@ -1530,9 +1519,6 @@ void Props::_computeNexradHda(const GridClump &grid_clump,
     
   }
 
-  _gprops.add_on.hda.posh = posh;
-  _gprops.add_on.hda.mehs = mehs;
-  
 }
 
 

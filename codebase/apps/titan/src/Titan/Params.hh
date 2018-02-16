@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c)
+// ** Copyright UCAR (c) 1992 - 2018
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -53,8 +53,8 @@ public:
   typedef enum {
     DEBUG_OFF = 0,
     DEBUG_NORM = 1,
-    DEBUG_EXTRA = 2,
-    DEBUG_VERBOSE = 3
+    DEBUG_VERBOSE = 2,
+    DEBUG_EXTRA = 3
   } debug_t;
 
   typedef enum {
@@ -551,6 +551,10 @@ public:
 
   hail_detection_mode_t hail_detection_mode;
 
+  debug_t debug_hail_metrics;
+
+  tdrp_bool_t debsounding_check_height_range;
+
   zr_t hail_ZM;
 
   double hail_mass_dbz_threshold;
@@ -661,7 +665,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[147];
+  mutable TDRPtable _table[149];
 
   const char *_className;
 
