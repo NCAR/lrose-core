@@ -128,7 +128,7 @@ void BufrFile::clearForNextMessage()
   currentTemplate = NULL;
   _nBitsRead = 0;
  // set this value to be able to read initial BUFR + size (3 bytes) + ending (7777)
-  _s0.nBytes = 12;
+  _s0.nBytes = 20;  //12;
 }
 
 void BufrFile::setDebug(bool state) { 
@@ -805,6 +805,21 @@ int BufrFile::readSection5() {
   try {
     if (_debug) printf("looking for 7777 at %d bytes\n", _numBytesRead);
     MoveToNextByteBoundary();
+    unsigned int found = 0;
+    size_t endOfMessage;
+    endOfMessage = _s0.nBytes*8;
+    while ((found <= 3) && !eof() && (_nBitsRead < endOfMessage)) {
+      value = ExtractText(8);
+      //if (_debug) printf("value = %s\n", value.c_str());
+      if (value[0] == '7')
+        found += 1;
+      else 
+        found = 0;
+    }
+    if (found < 4) 
+      printf(" Did not find ending code.");
+
+    /*
     do {
       value = ExtractText(8);
     } while (value.compare("7") != 0);
@@ -814,6 +829,7 @@ int BufrFile::readSection5() {
     if (value.compare("77") != 0) {
       throw " Did not find ending code ";
     }
+    */
   } catch (const char *msg) {
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::readSection5", true);
     Radx::addErrStr(_errString, " ", " Could not read ending code", true);
@@ -856,8 +872,10 @@ void BufrFile::printSection3(ostream &out) {
 }
 
 void BufrFile::printSection4(ostream &out) {
-  prettyPrintTree(out, GTree, 0);
-  currentTemplate->printSweepData(out);
+  if (GTree != NULL) {
+    prettyPrintTree(out, GTree, 0);
+    currentTemplate->printSweepData(out);
+  }
 }
 
 /*
@@ -877,60 +895,29 @@ int BufrFile::readDataDescriptors() {  // read section 3
   if (_verbose) cerr << "Reading section 3 ...\n";
 
     // allocate this space based on the length of section read (octets 1 - 3)
-  /*
-    Radx::ui08 id[4];
-    memset(id, 0, 4);
-    
-    // read length of message in octets
-    // the length is 24 bits (3 bytes)
-    Radx::ui32 nBytes;
-    if (fread(id, 1, 3, _file) != 3) {
-      int errNum = errno;
-      Radx::addErrStr(_errString, "", "ERROR - BufrFile::readDataDescriptors", true);
-      Radx::addErrStr(_errString, " ", " Cannot read length of section 3 in octets", true);
-      Radx::addErrStr(_errString, "  ", strerror(errNum), true);
-      close();
-      throw _errString.c_str();
-    }
-    nBytes = 0;
-    nBytes = nBytes | id[2];
-    nBytes = nBytes | (id[1] << 8);
-    nBytes = nBytes | (id[0] << 16);
-  */
+
     Radx::ui32 sectionLenOctets;
     sectionLenOctets = ExtractIt(24); // nBytes;
 
     if (_verbose) cerr << "sectionLen in octets " << sectionLenOctets << endl;
-    /*
-    Radx::ui08 *buffer;
-    buffer = (Radx::ui08 *) calloc(sectionLen, sizeof(Radx::ui08));
-    memset(buffer, 0, sectionLen);
-    int nBytesToSectionEnd;
-    nBytesToSectionEnd = sectionLen-3;
-    if (fread(buffer, 1, nBytesToSectionEnd, _file) != sectionLen-3) {
-      int errNum = errno;
-      Radx::addErrStr(_errString, "", "ERROR - BufrFile::readDataDescriptors", true);
-      Radx::addErrStr(_errString, " ", " Cannot read section 3", true);
-      Radx::addErrStr(_errString, "  ", strerror(errNum), true);
-      close();
-      throw _errString.c_str();
-    }
-    */
 
     // octet 4 is reserved and set to zero
-    //Radx::ui32 dummy;
-    //dummy = 
     ExtractIt(8);
 
     // octets 5-6 contain the number of data subsets
     // get the number of data subsets/descriptors
     Radx::ui16 nDataSubsets;
     nDataSubsets = ExtractIt(16);
-    /*
-    nDataSubsets = 0;
-    nDataSubsets = nDataSubsets | buffer[2];
-    nDataSubsets = nDataSubsets | (buffer[1] << 8);
-    */
+
+    // perform some sanity checks on the data 
+    // each descriptor takes two bytes
+    if (sectionLenOctets > _s0.nBytes) {
+      printf("This is garbage ... section 3 length %d exceeds the total number of bytes in the BUFR message %d\n", sectionLenOctets, _s0.nBytes);
+      // attempt to recover by moving to the ending 7777
+      throw "exiting garbage message, attempting recovery";
+ 
+    }
+
     // sometimes the number of data subsets does not agree
     // with the length of the section, so go with the
     // length of the section over the number of data subsets
@@ -1054,25 +1041,21 @@ bool BufrFile::matches_gsi(vector<unsigned short> &descriptors) {
 
       unsigned short determiningDes;
       determiningDes = descriptors[n-2];
-      if ((determiningDes == 64021) || (determiningDes == 64752)) {
-        // vector of length 6 {16383, 34305, 7937,   16896, 64021,   16128}
+      if ((determiningDes == 64021) || (determiningDes == 64752)
+          || (determiningDes == 64022) || (determiningDes == 51773)) {
+        // vector of length 6 {16383, 34305, 7937,   16896,   51773,   16128}
         //                  0;63;255, 2;6;1, 0;31;1, 1;2;0, 3;10;61, 0;63;0  
-        //  ; // _isGsiVelocity = true;
-        //} else if (descriptors[n-2] == 64752) { // 3;60;240
-        //; // _isGsiReflectivity = true;
+        // vector of length 6 {16383, 34305, 7937,   16896,    64022,   16128}
+        //                  0;63;255, 2;6;1, 0;31;1, 1;2;0, 3;58;022, 0;63;0 
+        // vector of length 6 {16383, 34305, 7937,   16896,    64021,   16128}
+        //                  0;63;255, 2;6;1, 0;31;1, 1;2;0, 3;58;021, 0;63;0 
+        // also need 3;60;240 for 64752
         _isGsi = true;
         return true;
       } else {
         // some other variable?
         throw "must be some other variable in GSI BUFR file";
       }
-
-      //} else if ((descriptors[n-3] == 16896) &&
-      //         (descriptors[n-2] == ) && (descriptors[n-1] == 16128)) {
-      // vector of length 6 {16383, 34305, 7937,   16896,      ,   16128}
-      //                  0;63;255, 2;6;1, 0;31;1, 1;2;0, 3;58;021, 0;63;0  
-      // 
-      //return true;
     } else {
       return false;
     }
@@ -1456,7 +1439,11 @@ size_t BufrFile::getTimeDimension() {
 //}
 
 size_t BufrFile::getNumberOfSweeps() {
-  return currentTemplate->sweepData.size();
+  if (currentTemplate != NULL) {
+    return currentTemplate->sweepData.size();
+  } else {
+    return 0;
+  }
 }
 
 size_t BufrFile::getNBinsAlongTheRadial(int sweepNumber) {
@@ -1692,7 +1679,7 @@ void BufrFile::prettyPrint(ostream &out, DNode *p, int level) {
 
   des = p->des;
   TableMapKey key(p->des);
-
+  try {
   if (key.isTableBEntry()) {  // a leaf
     element = tableMap.Retrieve(des);
     prettyPrintLeaf(out, p, element, level);
@@ -1700,6 +1687,9 @@ void BufrFile::prettyPrint(ostream &out, DNode *p, int level) {
     prettyPrintReplicator(out, p, level);
   } else {
     prettyPrintNode(out, p, level);
+  }
+  } catch (const std::out_of_range& e) {
+    printf("ERROR - Unrecognized descriptor %d\n", des);
   }
 }
 
