@@ -1312,8 +1312,9 @@ void Props::_computeHailMetrics(const GridClump &grid_clump)
   if ((_params.debug_hail_metrics >= Params::DEBUG_VERBOSE) ||
       (_params.debug_hail_metrics && poh > 0)) {
     fprintf(stderr, 
-            "Hail metrics: dHt45, HMA, VIHM, FOKR, POH, SHI, POSH, MEHS: "
-            "%6.2f %7.2f %6.2f %2d %6.2f %7.2f %6.2f %6.2f\n",
+            "Hail metrics - "
+            "%5.1f:dHt45 %6.1f:HMA %6.2f:VIHM %2d:FOKR "
+            "%4.0f:POH %8.1f:SHI %4.0f:POSH %5.1f:MEHS\n",
             _ht45AboveFreezing, hma, vihm, fokr, poh, shi, posh, mehs);
   }
   
@@ -1514,7 +1515,10 @@ void Props::_computeNexradHda(const GridClump &grid_clump,
     posh = 29.0 * log(shi / warningThreshold) + 50.0;
     if (posh < 0.0) {
       posh = 0.0;
+    } else if (posh > 100.0) {
+      posh = 100.0;
     }
+
     mehs = 2.54 * sqrt(shi);
     
   }
