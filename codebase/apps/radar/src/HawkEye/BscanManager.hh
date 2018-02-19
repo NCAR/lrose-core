@@ -270,6 +270,7 @@ private:
   // retrieve data
   
   void _handleRealtimeData();
+  void _handleRealtimeDataForImages();
   void _handleArchiveData();
   int _getArchiveData();
   void _plotArchiveData();

@@ -170,7 +170,7 @@ void BscanWidget::configureAxes(Params::range_axis_mode_t range_axis_mode,
   // set bottom margin - increase this if we are plotting the distance labels and ticks
 
   int bottomMargin = _params.bscan_bottom_margin;
-  if (_distScaleEnabled && _archiveMode) {
+  if (_distScaleEnabled /* && _archiveMode */) {
     bottomMargin += (int) (_params.bscan_axis_values_font_size * 3.0 / 2.0 + 0.5);
   }
 
@@ -815,7 +815,7 @@ void BscanWidget::_drawOverlays(QPainter &painter)
                           _timeGridEnabled,
                           lineColor, gridColor, textColor,
                           labelFont, valuesFont,
-                          _distScaleEnabled && _archiveMode);
+                          _distScaleEnabled /* && _archiveMode */);
   
   // y label
 
@@ -840,7 +840,7 @@ void BscanWidget::_drawOverlays(QPainter &painter)
 
   // legends
 
-  if (_latlonLegendEnabled && _archiveMode) {
+  if (_latlonLegendEnabled /* && _archiveMode */) {
     if (_distLocs.size() > 1) {
       vector<string> legends;
       char text[1024];
@@ -867,7 +867,7 @@ void BscanWidget::_drawOverlays(QPainter &painter)
     }
   } // if (_latlonLegendEnabled ...
     
-  if (_speedTrackLegendEnabled && _archiveMode) {
+  if (_speedTrackLegendEnabled /* && _archiveMode */) {
     if (_distLocs.size() > 1) {
       vector<string> legends;
       char text[1024];
@@ -894,7 +894,7 @@ void BscanWidget::_drawOverlays(QPainter &painter)
     }
   } // if (_speedTrackLegendEnabled ....
 
-  if (_distScaleEnabled && _archiveMode) {
+  if (_distScaleEnabled /* && _archiveMode */) {
     _plotDistanceOnTimeAxis(painter);
   }
     
