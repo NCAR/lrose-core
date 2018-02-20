@@ -479,8 +479,7 @@ void BscanManager::_configureAxes()
                         _maxPlotRangeKm,
                         _minPlotAltitudeKm,
                         _maxPlotAltitudeKm,
-                        _timeSpanSecs,
-                        _archiveMode);
+                        _timeSpanSecs);
 
 }
 
@@ -1196,10 +1195,10 @@ void BscanManager::timerEvent(QTimerEvent *event)
     // if we are just creating files in archive mode and then exiting,
     // do that now
     
-    if (_params.images_creation_mode ==
-        Params::CREATE_IMAGES_THEN_EXIT ||
-        _params.images_creation_mode ==
-        Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
+    if ((_params.images_creation_mode ==
+         Params::CREATE_IMAGES_THEN_EXIT) ||
+        (_params.images_creation_mode ==
+         Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE)) {
       _createImageFilesArchiveMode();
       close();
       return;
@@ -2474,10 +2473,6 @@ void BscanManager::_setTimeSpan()
   _setArchiveEndTime();
   _setDwellAutoVal();
   _configureAxes();
-
-  // if (_archiveMode) {
-  //   _performArchiveRetrieval();
-  // }
 
 }
 
