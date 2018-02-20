@@ -358,8 +358,8 @@ private slots:
   /// name for the saved image or to note errors
   void _saveImageToFile(bool interactive = true);
   
-  void _createArchiveImageFiles();
-  void _createRealtimeImageFiles();
+  void _createImageFilesArchiveMode();
+  void _checkCreateImagesRealtimeMode();
   void _createImageFiles();
 
   // override howto

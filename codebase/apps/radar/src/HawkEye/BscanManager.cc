@@ -1200,7 +1200,7 @@ void BscanManager::timerEvent(QTimerEvent *event)
         Params::CREATE_IMAGES_THEN_EXIT ||
         _params.images_creation_mode ==
         Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
-      _createArchiveImageFiles();
+      _createImageFilesArchiveMode();
       close();
       return;
     }
@@ -1210,7 +1210,7 @@ void BscanManager::timerEvent(QTimerEvent *event)
     if (_params.images_creation_mode ==
         Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
       _handleRealtimeDataForImages();
-      _createRealtimeImageFiles();
+      _checkCreateImagesRealtimeMode();
       return;
     }
 
@@ -1600,7 +1600,7 @@ void BscanManager::_plotArchiveData()
   // update the status panel
   
   _updateStatusPanel(rays[0]);
-    
+
 }
 
 //////////////////////////////////////////////////
@@ -1665,7 +1665,7 @@ void BscanManager::_handleRay(const RadxRay *ray)
   _rays.push_back(ray);
 
   // in realtime mode, set up initial plot time window
-  
+
   if (!_archiveMode) {
     if (_plotStart || (rayTime < _plotStartTime)) {
       if (_params.bscan_truncate_start_time) {
@@ -3003,9 +3003,9 @@ void BscanManager::_saveImageToFile(bool interactive)
 }
 
 /////////////////////////////////////////////////////
-// creating image files in realtime mode
+// check whether to create realtime images
 
-void BscanManager::_createRealtimeImageFiles()
+void BscanManager::_checkCreateImagesRealtimeMode()
 {
 
   int interval = _params.images_schedule_interval_secs;
@@ -3029,11 +3029,21 @@ void BscanManager::_createRealtimeImageFiles()
   
   if (_readerRayTime > _imagesScheduledTime) {
 
+    // temporarily put in archive mode
+    // since data retrieval uses archive mode
+
+    bool prevMode = _archiveMode;
+    _archiveMode = true;
+
     // create images
 
     _archiveEndTime = _imagesScheduledTime - delay;
     _archiveStartTime = _archiveEndTime - _timeSpanSecs;
     _createImageFiles();
+
+    // restore archive mode to previous value
+
+    _archiveMode = prevMode;
 
     // set next scheduled time
     
@@ -3051,7 +3061,7 @@ void BscanManager::_createRealtimeImageFiles()
 /////////////////////////////////////////////////////
 // creating image files in archive mode
 
-void BscanManager::_createArchiveImageFiles()
+void BscanManager::_createImageFilesArchiveMode()
 {
 
   if (_params.images_creation_mode ==
@@ -3085,6 +3095,8 @@ void BscanManager::_createImageFiles()
 
   if (_params.debug) {
     cerr << "BscanManager::_createImageFiles()" << endl;
+    cerr << "  _archiveStartTime: " << RadxTime::strm(_archiveStartTime.utime()) << endl;
+    cerr << "  _archiveEndTime: " << RadxTime::strm(_archiveEndTime.utime()) << endl;
   }
 
   PMU_auto_register("createImageFiles");
