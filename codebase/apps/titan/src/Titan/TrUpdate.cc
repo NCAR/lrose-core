@@ -78,7 +78,7 @@ int StormTrack::_updateTracks(date_time_t *dtime,
 
       storm2.track.init_new(_tfile, dtime, _trackUtime, scan_num,
 			    true, -1, 0, scan_num, dtime,
-			    _params.debug >= Params::DEBUG_EXTRA);
+			    _params.debug >= Params::DEBUG_VERBOSE);
       
     } else {
 
@@ -186,7 +186,7 @@ int StormTrack::_handleCombined(date_time_t *dtime,
   if (storm2.track.init_new(_tfile, dtime, _trackUtime, scan_num,
 			    false, complex_track, history_in_scans,
 			    scan_origin, time_origin,
-			    _params.debug >= Params::DEBUG_EXTRA)) {
+			    _params.debug >= Params::DEBUG_VERBOSE)) {
     fprintf(stderr, "\aERROR - %s:TrUpdate\n", _progName.c_str());
     fprintf(stderr, "_handleCombined() failed.\n");
     fprintf(stderr, "Cannot init_new()\n");
@@ -196,7 +196,7 @@ int StormTrack::_handleCombined(date_time_t *dtime,
 
   new_simple_track = storm2.track.status.simple_track_num;
   
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     fprintf(stderr, "\ncombined simple track number %d\n",
 	    (int) new_simple_track);
   }
@@ -248,7 +248,7 @@ int StormTrack::_handleCombined(date_time_t *dtime,
     _tfile._simple_params.parent[kstorm] =
       storm1.track.status.simple_track_num;
     
-    if (_params.debug >= Params::DEBUG_EXTRA) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       fprintf(stderr, "parent of new track %d\n",
 	      storm1.track.status.simple_track_num);
     }

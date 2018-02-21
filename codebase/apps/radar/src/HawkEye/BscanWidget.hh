@@ -115,8 +115,7 @@ class DLL_EXPORT BscanWidget : public QWidget
                      double max_range,
                      double min_altitude,
                      double max_altitude,
-                     double time_span_secs,
-                     bool archive_mode);
+                     double time_span_secs);
 
   /**
    * @brief Select the field to display.
@@ -374,7 +373,6 @@ class DLL_EXPORT BscanWidget : public QWidget
   RadxTime _plotStartTime;
   RadxTime _plotEndTime;
   double _timeSpanSecs;
-  bool _archiveMode;
 
   /**
    * @brief Last X,Y location of the mouse during mouse move events; used for

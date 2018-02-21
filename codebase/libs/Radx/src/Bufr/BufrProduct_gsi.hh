@@ -64,8 +64,8 @@ public:
 
   void addData(unsigned char value);
 
-  bool StuffIt(unsigned short des, string fieldName, double value);
-  bool StuffIt(unsigned short des, string name, string &value);
+  bool StuffIt(unsigned short des, string fieldName, double value) override;
+  bool StuffIt(unsigned short des, string fieldName, string &value) override ;
 
   double *decompressData();
   float *decompressDataFl32();
@@ -81,9 +81,13 @@ public:
   vector<unsigned char> *currentAccumulator;
 
   // local 
-  vector<double> distanceFromAntennaUnitsOf125M;
-  vector<double> dopplerMeanRadialVelocity;
-  vector<double> dopplerVelocitySpectralWidth;
+  //vector<float> *dataForDecompress;
+  bool _isVelocity;
+  bool _isReflectivity;
+  vector<float> distanceFromAntennaUnitsOf125M;
+  vector<float> dopplerMeanRadialVelocity;
+  vector<float> dopplerVelocitySpectralWidth;
+  vector<float> horizontalReflectivityDb;
 
   // vector to accumulate new descriptors to add or define in table D format
   vector<string> descriptorsToDefine;
@@ -101,6 +105,8 @@ public:
   string des_units;
   int des_referenceValue;
   int des_dataWidthBits;
+
+  void _addRayToSweep();
 
 };
 #endif

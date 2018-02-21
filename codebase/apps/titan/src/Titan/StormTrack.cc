@@ -579,7 +579,7 @@ int StormTrack::_prepareTrackFile()
 				     scan_num,
 				     true, -1, 0, 0,
 				     &_time1,
-				     _params.debug >= Params::DEBUG_VERBOSE);
+				     _params.debug >= Params::DEBUG_EXTRA);
     
     _storms1[istorm]->update_times(&_time1,
 				   _trackUtime,
@@ -693,7 +693,7 @@ int StormTrack::_track(int scan_num)
       return -1;
     }
     
-    if (_params.debug >= Params::DEBUG_EXTRA) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       _printMatches();
     }
     

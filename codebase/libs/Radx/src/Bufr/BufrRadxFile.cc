@@ -440,7 +440,8 @@ void BufrRadxFile::setTablePath(char *path) {
 
 void BufrRadxFile::lookupFieldName(string fieldName, string &units, 
 string &standardName, string &longName) {
-    if (fieldName.find("TH") != string::npos) {
+  if ((fieldName.find("TH") != string::npos) ||
+      (fieldName.find("HREF") != string::npos)) {
       units = "dBz";
       standardName = "horizontal_reflectivity";
       longName = "horizontal_reflectivity";
@@ -468,7 +469,8 @@ string &standardName, string &longName) {
       units = "dBz";
       standardName = "vertical reflectivity";
       longName = "vertical reflectivity";
-    } else if (fieldName.find("VRAD") != string::npos) {
+    } else if ((fieldName.find("VRAD") != string::npos) || 
+      (fieldName.find("VR") != string::npos)) {
       units = "m/s";
       standardName = "radial_velocity";
       longName = "radial_velocity";
@@ -874,6 +876,17 @@ void BufrRadxFile::_getFieldPathsRMA(const string &primaryPath,
    }
  }
 
+void BufrRadxFile::_readMessageContent() {
+      try {
+      _file.readSection0();
+      _file.readSection1();
+      _file.readDataDescriptors();
+      _file.readData();
+      } catch (const char *msg) {
+        cerr << msg << endl;
+      } 
+      _file.readSection5();
+}
 
 // go ahead and read all the data from the file
 // completely fill currentTemplate with data
@@ -883,40 +896,50 @@ void BufrRadxFile::getFieldNamesWithData(const string &path) {
   //_file.clear();
   _pathInUse = path;
   try {
-    // try reading multiple BUFR files in one physical file???
+    // try reading multiple BUFR files in one physical file
 
     _file.openRead(_pathInUse); // path);
     while (!_file.eof()) {
-    _file.readSection0();
-    _file.readSection1();
-    _file.readDataDescriptors();
-    _file.readData(); 
-    _file.readSection5();
+      _readMessageContent();
+      /*
+      try {
+      _file.readSection0();
+      _file.readSection1();
+      _file.readDataDescriptors();
+      _file.readData();
+      } catch (char *msg) {
+        cerr << msg << endl;
+      } 
+      _file.readSection5();
+        */
+
+      if (_debug) 
+        printNative(path, cout, true, true);
+
+      size_t nDataSegments = _file.getNumberOfSweeps();
+      if (nDataSegments > 0) {
+
+        // the field names are now put into currentTemplate.typeOfProduct ...
+        // hmmm, may not be the best place to keep info ...
+        string fieldName = "unknown";
+        string units = "unknown";
+        string standardName = "unknown";
+        string longName = "unknown";
+
+        // set file time
+        _readGlobalAttributes();
+        _fileTime.setYear(_year_attr);
+        _fileTime.setMonth(_month_attr);
+        _fileTime.setDay(_day_attr);
+
+        // go through the "sweeps" and determine if they are
+        // separate sweeps, or the same sweep with multiple fields
+        // make the distinction based on time???
+        if (_debug) cerr << "  .. accumulating field info " << endl;
+        _accumulateFieldFirstTime(fieldName, units, standardName, longName);
+      }
     }
     _file.close();
-
-
-    // the field names are now put into currentTemplate.typeOfProduct ...
-    // hmmm, may not be the best place to keep info ...
-    string fieldName = "unknown";
-    string units = "unknown";
-    string standardName = "unknown";
-    string longName = "unknown";
-
-    // set file time
-    _readGlobalAttributes();
-    _fileTime.setYear(_year_attr);
-    _fileTime.setMonth(_month_attr);
-    _fileTime.setDay(_day_attr);
-
-    // go through the "sweeps" and determine if they are
-    // separate sweeps, or the same sweep with multiple fields
-    // make the distinction based on time???
-    if (_debug) cerr << "  .. accumulating field info " << endl;
-    _accumulateFieldFirstTime(fieldName, units, standardName, longName);
-
-    if (_debug) 
-      printNative(path, cout, true, true);
 
   } catch (const char *msg) {
       // report error message
@@ -1089,39 +1112,13 @@ void BufrRadxFile::_accumulateFieldFirstTime(string fieldName, string units, str
     _year_attr = _file.getHdrYear();
     _month_attr = _file.getHdrMonth();
     _day_attr = _file.getHdrDay();
-    /*
-    if ((_year_attr != _fileTime.getYear()) ||
-       (_month_attr != _fileTime.getMonth()) ||
-       (_day_attr != _fileTime.getDay())) */
 
-    //int year = _fileTime.getYear();
-    //int month = _fileTime.getMonth();
-    /*    if (year > 1970) { 
-      // year and month have been set
-      if ((_year_attr != year) ||
-	  (_month_attr != month) ||
-	  (_day_attr != _fileTime.getDay())) 
-	throw "Time in file name does not match time in file";
-    } else {
-      // year and month probably have not been set, so don't
-      // compare them to the values from the file
-      if  (_day_attr != _fileTime.getDay()) 
-	throw "Day in file name does not match day in file";
-    }
-    */
     _siteName = _file.getTypeOfStationId();
     _instrumentName = _file.getStationId();
   
     // read lat/lon/alt 
     _setPositionVariables();
-
-    // TODO: verify this??? 
-  // verify lat/lon/alt 
-  //_verifyPositionVariables();
  
-    // create the rays array
-    //_raysToRead.clear();
-
     // get the number of data segments
     size_t nDataSegments = _file.getNumberOfSweeps();
 
@@ -1167,46 +1164,12 @@ void BufrRadxFile::_accumulateFieldFirstTime(string fieldName, string units, str
 	_sweepEndTimes.push_back(_file.getEndUTime(sn));
         nextSweepNumber += 1;
       }
-    else {  // this is a field variable, add it to the appropriate sweep
-      RadxSweep *sweep;
-      sweep = _sweeps.at(whichSweep);
-      _addFieldVariables(sweep, sn, fieldName, units, standardName, longName,
+      else {  // this is a field variable, add it to the appropriate sweep
+        RadxSweep *sweep;
+        sweep = _sweeps.at(whichSweep);
+        _addFieldVariables(sweep, sn, fieldName, units, standardName, longName,
     			   false);
-    }
-	/*------
-      RadxSweep *sweep = new RadxSweep();
-      // Ok How are the field variables added to the sweep?
-      // they are associated with a sweep number, which is kept
-      // by each ray, and each ray keeps track of its field
-      // variables.
-      sweep->setSweepNumber(sn);
-      // read time variable
-      _getRayTimes(sn);
-      // get ray variables
-      if (_debug) {
-	cout << " fetching ray  variable " << fieldName << 
-	  " for sweep " << sn << endl; 
       }
-      //size_t nRangeInFile = _file.getNBinsAlongTheRadial(sn);
-      //double rangeBinSizeMeters = _file.getRangeBinSizeMeters(sn);
-      //_setRangeVariable();
-      // TODO: can I just set these variables in the field directly? 
-      // No, they are private variables. So, what sets them?
-      //_setRangeGeometry(_file.getRangeBinSizeMeters,
-      //		_file.getRangeBinOffsetMeters,
-      //			_file.getNRanges(sn));
-      _getRayVariables(sn);  // fills in _azimuths & _elevations
-      if (_readMetadataOnly) {
-	// read field variables
-	_addFieldVariables(sn, fieldName, units, standardName, longName, true);
-      } else {
-	// create the rays to be read in, filling out the metadata
-	_createRays(sn);  // stuffs rays into _raysToRead vector
-	// add field variables to file rays
-	_addFieldVariables(sn, fieldName, units, standardName, longName, false);
-      }
-      _sweeps.push_back(sweep);
-    ------------ */
     } // end for each sweep
   } catch (const char *msg) {
     _addErrStr(msg);
@@ -1624,7 +1587,7 @@ void BufrRadxFile::_clearRayVariables()
 }
 
 ///////////////////////////////////
-// read in ray variables
+// get azimuth and elevation
 
 int BufrRadxFile::_getRayVariables(int sweepNumber)
 {

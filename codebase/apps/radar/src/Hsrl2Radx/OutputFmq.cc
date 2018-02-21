@@ -195,8 +195,8 @@ int OutputFmq::writeParams(const RadxRay *ray)
   // rp.pulseRepFreq = 1.0 / ray->getPrt();
   // rp.prt = ray->getPrt();
 
-  // rp.wavelength = 538.0e-9 * 100.0; // cm
-  rp.wavelength = 1064.0e-9 * 100.0; // cm
+  rp.wavelength = 532.0e-9 * 100.0; // cm
+  // rp.wavelength = 1064.0e-9 * 100.0; // cm
 
   rp.measXmitPowerDbmH = ray->getMeasXmitPowerDbmH();
   rp.measXmitPowerDbmV = ray->getMeasXmitPowerDbmV();

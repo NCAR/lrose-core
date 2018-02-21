@@ -369,6 +369,8 @@ private:
   void _computeFixedAngles();
 
   string _tablePath;
+
+  void _readMessageContent();
 };
 
 #endif

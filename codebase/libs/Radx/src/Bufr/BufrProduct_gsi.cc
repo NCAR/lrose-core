@@ -51,6 +51,8 @@ BufrProduct_gsi::BufrProduct_gsi()
 {
   duration = 0;
   descriptorsToDefine.clear();
+  // set default values
+  rangeBinOffsetMeters = 0;
   //_verbose = true;
 }
 
@@ -83,6 +85,7 @@ void BufrProduct_gsi::ConstructDescriptor(string &desF,
 
 }
 /*
+For Reflectivity:
                                   Descriptor       width(bits)   scale      units  reference  value
 +(1 03 000)  repeats 15
  +(0 00 001)   Table A:  entry ----------------------------------    24    0 CCITT IA5 0 254
@@ -106,12 +109,51 @@ void BufrProduct_gsi::ConstructDescriptor(string &desF,
  +(1 01 000)  repeats 319294248
  +(0 31 001)   Delayed descriptor replication factor ------------     8    0   Numeric 0 undefined value
  +(0 00 030)   Descriptor defining sequence ---------------------    48    0 CCITT IA5 0 undefined value
+
+For Velocity:
+
+                                            Descriptor       width(bits)   scale      units  reference  value
++(0 63 000)   BYTCNT --------------------------------------------    16    0          BYTES              0 564
++(0 01 018)   SSTN     RADAR STATION IDENTIFIER (SHORT) ---------    40    0      CCITT IA5              0 KABR
++(0 04 001)   YEAR     YEAR -------------------------------------    12    0           YEAR              0 2017
++(0 04 002)   MNTH     MONTH ------------------------------------     4    0          MONTH              0 5
++(0 04 003)   DAYS     DAY --------------------------------------     6    0            DAY              0 13
++(0 04 004)   HOUR     HOUR -------------------------------------     5    0           HOUR              0 11
++(0 04 005)   MINU     MINUTE -----------------------------------     6    0         MINUTE              0 30
++(0 04 006)   SECO     SECOND -----------------------------------     6    0         SECOND              0 4
++(0 05 002)   CLAT     LATITUDE (COARSE ACCURACY) ---------------    15    2        DEGREES          -9000 45.46
++(0 06 002)   CLON     LONGITUDE (COARSE ACCURACY) --------------    16    2        DEGREES         -18000 -98.41
++(0 07 030)   HSMSL    HEIGHT OF STATION GROUND ABOVE MSL -------    17    1         METERS          -4000 397
++(2 02 126)
++(2 01 118)
++(0 07 032)   HSALG    HEIGHT OF ANTENNA ABOVEGROUND ------------    16    2         METERS              0 20
++(2 01 000)
++(2 02 000)
++(0 02 134)   ANAZ     ANTENNA AZIMUTH ANGLE --------------------    16    2        DEGREES              0 137.51
++(0 02 135)   ANEL     ANTENNA ELEVATION ANGLE ------------------    15    2        DEGREES          -9000 3.45
++(0 33 251)   QCRW     QUALITY MARK FOR WINDSALONG RADIAL LINE --     3    0     CODE TABLE              0 1
++(1 01 000)  repeats 129 << varies from 78 .. 129  << create Accumulator here
+ +(0 06 210)   DIST125M DISTANCE (FROM ANTENNATO GATE CENTER) IN UNITS OF 125M     12    0EIGHTHS OF A KM              0 358
+ +(0 21 014)   DMVR     DOPPLER MEAN RADIAL VELOCITY ------------    13    1     METERS/SEC          -4096 409.5
+ +(0 21 017)   DVSW     DOPPLER VELOCITY SPECTRAL WIDTH ---------     8    1     METERS/SEC              0 25.5
++(0 01 212)   VOID     RADAR VOLUME ID (IN THEFORM DDHHMM) ------    19    0        NUMERIC              0 131122
++(0 01 213)   SCID     RADAR SCAN ID (RANGE 1-21) ---------------     5    0        NUMERIC              0 4
++(2 01 129)
++(0 21 019)   HNQV     HIGH NYQUIST VELOCITY --------------------    10    1     METERS/SEC              0 26.4
++(2 01 000)
++(0 21 197)   VOCP     VOLUME COVERAGE PATTERN ------------------    10    0        NUMERIC              0 32
++(1 02 000)  repeats 3  << varies 
+ +(2 06 001)
+ +(0 63 255)   BITPAD -------------------------------------------     1    0           NONE              0 0
+
+ *** create sweep at end of file  (sweep is from about 119.51 degrees to 208.51 degrees
+ *** accumulate ray data at each repeater  (rays vary in the number of gates)
 */
 
 // Put the info in the correct storage location
 // and take care of any setup that needs to happen
 //  all of the values will be text!  AGH!
-bool BufrProduct_gsi::StuffIt(unsigned short des, string name, string &value) {
+bool BufrProduct_gsi::StuffIt(unsigned short des, string fieldName, string &value) {
   bool ok = true;
 
   switch (des) {
@@ -162,6 +204,9 @@ bool BufrProduct_gsi::StuffIt(unsigned short des, string name, string &value) {
       des_dataWidthBits = atoi(value.c_str());
       _bufrTable->AddDescriptorFromBufrFile(des_f, des_x, des_y, des_fieldName,
            des_scale, des_units, des_referenceValue, des_dataWidthBits);
+      break;
+    case 448:
+      // station Id
       break;
     case 34112: // 2;5;64 insert as data field
       // 1;5;0 0;31;1 3;0;3 2;5;64 1;1;0 0;31;1 0;0;30 
@@ -221,13 +266,29 @@ bool BufrProduct_gsi::StuffIt(unsigned short des, string name, string &value) {
 // Put the info in the correct storage location
 // and take care of any setup that needs to happen
 //  all of the values will be text!  AGH!
-bool BufrProduct_gsi::StuffIt(unsigned short des, string name, double value) {
+// ok, we are going to get data like this ...
+//  date, time, lat, long, height, az, elev
+//  repeat x ... so, this is ray data for a fixed az, elev, date and time
+//     distance from antenna to gate
+//     doppler mean radial velocity
+bool BufrProduct_gsi::StuffIt(unsigned short des, string fieldName, double value) {
   bool ok = true;
 
   switch (des) {
     case 274:
-      break;
 
+      // TODO: record the name of the radar  KABR
+      break;
+    case 646: // antenna azimuth   0;02;134
+      //antennaBeamAzimuthDegrees = 360; // we need to use 360 so that when
+      // azimuths are calculated, in BufrRadxFile, the azimuth steps come out
+      // to be 1 degree which is what the velocity data files have; 
+      // value;
+      antennaBeamAzimuthDegrees = value;
+      break;
+    case 647: // antenna elevation 0;02;135
+      antennaElevationDegrees = value;
+      break;
     case 1025:
       // year
       putYear((int) value);
@@ -264,18 +325,45 @@ bool BufrProduct_gsi::StuffIt(unsigned short des, string name, double value) {
       // radar volume id (DDHHMM)
       // break;
       // radar scan id (range 1 - 21)
-
     case 1746: 
       // Distance from antenna to gate center in units of 125M
-      distanceFromAntennaUnitsOf125M.push_back(value);
+      distanceFromAntennaUnitsOf125M.push_back((float) value);
+      if (distanceFromAntennaUnitsOf125M.size() > 0) {
+        float diff;
+        diff = (value - distanceFromAntennaUnitsOf125M.back()) * 125.0;
+        if (diff != rangeBinSizeMeters) 
+          cout << "Warning: gate size changed from " << rangeBinSizeMeters 
+               << " to " << diff << endl;
+        rangeBinSizeMeters = diff;
+      }
+      break;
+    case 3264:
+    case 3267:
+    case 3268:
+    case 3269:
+    case 3265:
+    case 450: 
+      // ignore these; mostly temperatures
+      break;
+
+    case 5377:
+      horizontalReflectivityDb.push_back((float) value);
       break;
     case 5390: 
       // Doppler Mean Radial Velocity
-      dopplerMeanRadialVelocity.push_back(value);
+      dopplerMeanRadialVelocity.push_back((float) value);
       break;
     case 5393:
       // Doppler Velocity Spectral Width 
-      dopplerVelocitySpectralWidth.push_back(value);
+      dopplerVelocitySpectralWidth.push_back((float) value);
+      break;
+    case 16383:
+      // 0;63;255  end of the descriptors
+      _addRayToSweep();
+      distanceFromAntennaUnitsOf125M.clear(); // resize(0);
+      dopplerMeanRadialVelocity.clear(); // resize(0);
+      dopplerVelocitySpectralWidth.clear(); // resize(0);
+      horizontalReflectivityDb.clear(); // resize(0);
       break;
     default:
       unsigned char f, x, y;
@@ -295,6 +383,8 @@ bool BufrProduct_gsi::StuffIt(unsigned short des, string name, double value) {
 // - number of data sections
 // - number of byte elements in data section 
 void BufrProduct_gsi::storeReplicator(unsigned int value) {
+  
+  /*
     // do generic data storage into dictionary
   // NULL => create
   // not NULL:
@@ -308,11 +398,13 @@ void BufrProduct_gsi::storeReplicator(unsigned int value) {
   if (okToCreate) {
     currentAccumulator = new vector<unsigned char>();
   }
-    // TODO: how to handle repeaters that have multiple descriptors in them???
+    // to handle repeaters that have multiple descriptors in them ...
+  // just stripe the data in the vector
+  */
 }
 
 void BufrProduct_gsi::trashReplicator() {
-
+  /*
   if (_verbose) {
     printf("currentAccumulator: \n"); 
     for (std::vector<unsigned char>::const_iterator i = currentAccumulator->begin(); 
@@ -325,15 +417,17 @@ void BufrProduct_gsi::trashReplicator() {
   if (currentAccumulator->size() > 0) {
     genericStore.push_back(currentAccumulator);
   }
-
+  */
+  /*
   int n;
   n = genericStore.size();
   if (n >= 6) {
     if (_verbose) {
       printGenericStore();
     }
-    createSweep();
+    //createSweep();
   }
+  */
 
   if (descriptorsToDefine.size() > 0) {
     if (_debug) {
@@ -351,61 +445,124 @@ void BufrProduct_gsi::trashReplicator() {
 
 // Record all the information now that we have all the data values
 void BufrProduct_gsi::createSweep() {
+}
+
+
+/*
+There will be multiple rays (typically four) with the same start and end time.
+  typedef struct {
+    RadxTime *startTime;               << default = epoch
+    RadxTime *endTime;                 << default = epoch + 1 sec.
+    double    antennaElevationDegrees; << default = 0
+    size_t    nBinsAlongTheRadial;  << this will vary
+    double    rangeBinSizeMeters;   << default = 1
+    double    rangeBinOffsetMeters; << default = 0
+    size_t    nAzimuths;            << default = 360 to get downstream calc to 1 deg
+    double    antennaBeamAzimuthDegrees;
+    vector<ParameterData> parameterData;
+    vector<ParameterDataFl64> parameterDataFl64;  << not used
+
+    } SweepData;  << in this case, better known as ray data
+*/
+// add data in current accumulator to the sweep
+void BufrProduct_gsi::_addRayToSweep() {
+
   //double *realData;
   float *realData;
-      
+       
+  _isVelocity = false;
+  _isReflectivity = false;
+  if (dopplerMeanRadialVelocity.size() > 0) {
+    _isVelocity = true;
+  } else if (horizontalReflectivityDb.size() > 0) {
+    _isReflectivity = true;
+  } else {
+    printf("We have no data for GSI\n");
+    return;
+  }
+  
+  // decompressDataFl32 uses dataForDecompress pointer
   realData = decompressDataFl32();
   if (realData == NULL) {
     throw "ERROR - could not decompress data";
   }
-  SweepData newSweep;
+
+  SweepData newRay;  // ok, in this case, SweepData is really info about a ray  
   // there will only be one time stamp and a duration
   int nTimeStamps = timeStampStack.size();
-  if (nTimeStamps < 2) 
-    throw "Missing start time stamp for sweep.";
-  // grab the first time stamp, because the second one
-  // is for the last calibration
-  timeStampStack.pop_back();
-  newSweep.startTime = timeStampStack.back();
-  // convert RadxTime to time_t
-  RadxTime *endTime = new RadxTime();
-  endTime->copy(*(timeStampStack.back()));
-  // add the duration
-  *endTime += duration;
-  // convert back to RadxTime object
-  newSweep.endTime = endTime; 
+  if (nTimeStamps < 1) {
+    printf("WARNING - Missing start time stamp for sweep. Setting to default.\n");
+    newRay.startTime = new RadxTime();
+    RadxTime *endTime = new RadxTime();
+    *endTime += 1;
+    newRay.endTime = endTime;
+  } else {
+    // grab the first time stamp, because the second one
+    // is for the last calibration
 
-  cerr << endTime->getW3cStr() << endl;
-  cerr << newSweep.startTime->getW3cStr() << endl;
+    newRay.startTime = timeStampStack.back();
+
+    // convert RadxTime to time_t
+    RadxTime *endTime = new RadxTime();
+    endTime->copy(*(timeStampStack.back()));
+    // add the duration
+    *endTime += 1; // TODO: I don't know what the duration is //  duration;
+    // convert back to RadxTime object
+    newRay.endTime = endTime; 
+    timeStampStack.pop_back();  // remove the time stamp
+  }
+
+  cerr << newRay.endTime->getW3cStr() << endl;
+  cerr << newRay.startTime->getW3cStr() << endl;
   cerr << "------------" << endl;
 
-  timeStampStack.pop_back();
-
   if (_debug) {
-    RadxTime *time = newSweep.startTime;
+    RadxTime *time = newRay.startTime;
     cerr << "startTime " << time->asString() << endl; 
-    time = newSweep.endTime;
+    time = newRay.endTime;
     cerr << "endTime " << time->asString() << endl; 
+    cout << "azimuth " << antennaBeamAzimuthDegrees << endl;
   }
-  newSweep.antennaElevationDegrees = antennaElevationDegrees;
-  newSweep.nBinsAlongTheRadial = nBinsAlongTheRadial;
-  newSweep.rangeBinSizeMeters = rangeBinSizeMeters;
-  newSweep.rangeBinOffsetMeters = rangeBinOffsetMeters;
-  newSweep.nAzimuths = nAzimuths;
-  newSweep.antennaBeamAzimuthDegrees = antennaBeamAzimuthDegrees;
+  if (_very_verbose) {
+    cout << "i   vel, dist to gate center" << endl;
+    for (size_t i = 0; i < dopplerMeanRadialVelocity.size(); i++) {
+      printf(" %zu: %g, %g\n", i, dopplerMeanRadialVelocity[i],
+             distanceFromAntennaUnitsOf125M[i]);
+    }
+  }
+  newRay.antennaElevationDegrees = antennaElevationDegrees;
+  if (distanceFromAntennaUnitsOf125M.size() > 0) 
+    rangeBinSizeMeters = distanceFromAntennaUnitsOf125M[0] * 125.0;
+  else 
+    rangeBinSizeMeters = 0.0;
+  newRay.rangeBinSizeMeters = rangeBinSizeMeters;
+  newRay.rangeBinOffsetMeters = rangeBinOffsetMeters;
+  newRay.nAzimuths = 360;
+  newRay.antennaBeamAzimuthDegrees = antennaBeamAzimuthDegrees;
   ParameterData parameterData;
-  parameterData.typeOfProduct = _fieldName; 
+  if (_isReflectivity) {
+    parameterData.typeOfProduct = "HREF"; // _fieldName; 
+    newRay.nBinsAlongTheRadial = horizontalReflectivityDb.size();
+  }
+  if (_isVelocity) {
+    parameterData.typeOfProduct = "VR";
+    newRay.nBinsAlongTheRadial = dopplerMeanRadialVelocity.size();
+  }
   parameterData.data = realData;
-  newSweep.parameterData.push_back(parameterData);
-  sweepData.push_back(newSweep);
+  // if there were multiple data fields, we'd add them here, or stripe the data
+  newRay.parameterData.push_back(parameterData);
+  sweepData.push_back(newRay);
+  nAzimuths = 1; //360; // so that in the end, we will have 1 degree steps in azimuth // sweepData.size();
 }
 
 
 void BufrProduct_gsi::addData(unsigned char value) {
+  
   //  set 255 to zero, so that both 255 and zero are marked as missing
-  if (value == 255)
-    value = 0;   
-  currentAccumulator->push_back(value);
+  //if (value == 255)
+  //  value = 0;   
+  //currentAccumulator->push_back(value);
+  
 }
 
 
@@ -414,30 +571,39 @@ double *BufrProduct_gsi::decompressData() {
 }
 
 float *BufrProduct_gsi::decompressDataFl32() {
-
+  
   float *temp32 = NULL;
-  // if there are data ...
-  if (genericStore.size() > 0) {
-    // convert the data to float
-
-    std::vector<unsigned char> *uCharVec;
-    uCharVec = genericStore.back();
-    int n = uCharVec->size();
-    temp32 = (float *) malloc(n*sizeof(float));
-    for (int i = 0; i < n; ++i)
-      temp32[i] = (float) uCharVec->at(i);
-
-    if (_debug) {
-      printf("after conversion to float ...\n");
-      printf ("--> %g %g %g\n", temp32[0], temp32[1], temp32[2]);
-      //unsigned long nFloats;
-      //nFloats = nBinsAlongTheRadial * nAzimuths;
-      //printf (" ... %g %g %g <--\n", temp32[200], 
-      //	    temp32[201], temp32[202]);
+  int n = 0;
+  if (_isVelocity) {
+    n = dopplerMeanRadialVelocity.size();
+    // if there are data ...
+    if (n > 0) {
+      // copy the data
+      printf("before memcpy ...\n");
+       printf ("--> %g %g %g\n", dopplerMeanRadialVelocity[0],
+               dopplerMeanRadialVelocity[1], dopplerMeanRadialVelocity[2]);
+      temp32 = (float *) malloc(n*sizeof(float));
+      memcpy(temp32, &dopplerMeanRadialVelocity[0], n*sizeof(float));
+    }
+  }
+  if (_isReflectivity) {
+    n = horizontalReflectivityDb.size();
+    // if there are data ...
+    if (n > 0) {
+      // copy the data
+      temp32 = (float *) malloc(n*sizeof(float));
+      memcpy(temp32, &horizontalReflectivityDb[0], n*sizeof(float));
     }
   }
 
+  if ((temp32 != NULL) && (_debug)) {
+     printf("after conversion to float ...\n");
+     printf ("--> %g %g %g\n", temp32[0], temp32[1], temp32[2]);
+  }
+
   return temp32;
+  
+  //return NULL;
 }
 
 
