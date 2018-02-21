@@ -128,7 +128,7 @@ void TrOverlaps::find(const TitanStormFile &sfile,
 
       if (bounds_overlap) {
 	
-	if (_params.debug >= Params::DEBUG_EXTRA) {
+	if (_params.debug >= Params::DEBUG_VERBOSE) {
 
 	  fprintf(stderr, "bounding_boxes - time1:storm %d "
 		  "overlaps with time2:storm %d\n",
@@ -168,7 +168,7 @@ void TrOverlaps::find(const TitanStormFile &sfile,
 		  storm1.track.status.forecast_area,
 		  storm1.track.status.forecast_length_ratio);
 	  
-	} /* if (_params.debug >= Params::DEBUG_EXTRA) */
+	} /* if (_params.debug >= Params::DEBUG_VERBOSE) */
 
 	load_overlaps(sfile, storm1, storm2,
 		      istorm, jstorm,
@@ -577,7 +577,7 @@ void TrOverlaps::load_overlaps(const TitanStormFile &sfile,
   ny = both.max_iy - both.min_iy + 1;
   npoints_grid = nx * ny;
   
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
 
     fprintf(stderr, "BOTH:\n");
     fprintf(stderr, "min_ix, min_iy: %d, %d\n",
@@ -647,7 +647,7 @@ void TrOverlaps::load_overlaps(const TitanStormFile &sfile,
   
   if (sum_fraction > _params.tracking_min_sum_fraction_overlap) {
 
-    if (_params.debug >= Params::DEBUG_EXTRA) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       
       fprintf(stderr, "-------------------------\n");
       fprintf(stderr, "area_1, area_2, area_overlap: "

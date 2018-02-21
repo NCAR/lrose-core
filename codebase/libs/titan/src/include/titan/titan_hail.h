@@ -58,24 +58,6 @@ typedef struct {
 
 } titan_hail_t;
 
-/**************************************************************************
- * Results of NEXRAD Hail Detection Algorithm (HDA)
- * Reference:
- *   Arthur Witt, Michael D. Eilts, Gregory J. Stumph, J. T. Johnson,
- *   E DeWayne Mitchell and Kevin W Thomas:
- *   An Enhanced Hail Detection Algorithm for the WSR-88D.
- *   Weather and Forecasting, Volume 13, June 1998.
- **************************************************************************/
-
-typedef struct {
-
-  fl32 poh; /* Waldvogel Probability (%) */
-  fl32 shi; /* Severe Hail Index (J.m-1.s-1) */
-  fl32 posh; /* probability of severe hail (%) */
-  fl32 mehs; /* Maximum Expected Hail Size (mm) */
-  
-} nexrad_hda_t;
-
 
 #ifdef __cplusplus
 }

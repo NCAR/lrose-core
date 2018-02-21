@@ -109,7 +109,7 @@ int TrConsolidate::run(TitanTrackFile &tfile,
 	 * merger / split
 	 */
 	
-	if (_params.debug >= Params::DEBUG_VERBOSE) {
+	if (_params.debug >= Params::DEBUG_EXTRA) {
 	  fprintf(stderr, "STARTING_SEARCH ....\n");
 	}
 
@@ -117,7 +117,7 @@ int TrConsolidate::run(TitanTrackFile &tfile,
 			       storm.match_array[kstorm].storm_num, jstorm);
       } /* kstorm */
       
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
+      if (_params.debug >= Params::DEBUG_EXTRA) {
 	fprintf(stderr, "#### COMMON COMPLEX NUMS - Storm2 array %ld ####\n",
 		(long) jstorm);
 	for (size_t i = 0; i < _complexNums.size(); i++) {
@@ -193,7 +193,7 @@ int TrConsolidate::_consolidate(TitanTrackFile &tfile,
   int *simples1, *simples2;
   complex_track_params_t ctparams1, ctparams2;
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     fprintf(stderr, "\nConsolidating complex tracks %d and %d\n",
 	    lower_track_num, higher_track_num);
   }
@@ -507,7 +507,7 @@ void TrConsolidate::_process_storms1_entry(vector<TrStorm*> &storms1,
 
 {
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     fprintf(stderr,
 	    "PROCESS_STORMS1_ENTRY: storm1_num, storm2_num: %d, %d\n",
 	    storm1_num, storm2_num);
@@ -552,7 +552,7 @@ void TrConsolidate::_process_storms2_entry(vector<TrStorm*> &storms1,
 
 {
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     fprintf(stderr,
 	    "PROCESS_STORMS2_ENTRY: storm1_num, storm2_num: %d, %d\n",
 	    storm1_num, storm2_num);

@@ -273,9 +273,7 @@ void BufrProduct::addData(unsigned char value) {
     throw "out of space in dataBuffer";
 }
 
-bool BufrProduct::StuffIt(unsigned short des, string fieldName, string &value) {
-  printf("in BufrProduct::StuffIt (%d) %s %s\n", des, fieldName.c_str(), 
-         value.c_str()); 
+bool BufrProduct::StuffIt(unsigned short, string fieldName, string &value) {
   Radx::addErrStr(_errString, "", "ERROR - BufrFile::StuffIt", true);
   Radx::addErrStr(_errString, "", "  calling base function ", true);
   throw _errString.c_str();

@@ -60,43 +60,37 @@ FullCals::~FullCals()
 void FullCals::readDeadTimeHi(const char* file, const char* variable)
 {
   _deadTimeHi=_deadTimeHi.readCalVals(file,variable);  
-  _deadTimeHiPos=_deadTimeHi.dateMatch(_deadTimeHi, _time);
+  _hiPos=_deadTimeHi.dateMatch(_deadTimeHi, _time);
 }
 
 void FullCals::readDeadTimeLo(const char* file, const char* variable)
 {
   _deadTimeLo=_deadTimeLo.readCalVals(file,variable);
-  _deadTimeLoPos=_deadTimeLo.dateMatch(_deadTimeLo, _time);
+  _loPos=_deadTimeLo.dateMatch(_deadTimeLo, _time);
 }
 
 void FullCals::readDeadTimeCross(const char* file, const char* variable)
 {
   _deadTimeCross=_deadTimeCross.readCalVals(file,variable);
-  _deadTimeCrossPos=_deadTimeCross.dateMatch(_deadTimeCross, _time);
+  _crossPos=_deadTimeCross.dateMatch(_deadTimeCross, _time);
 }
 
 void FullCals::readDeadTimeMol(const char* file, const char* variable)
 {
   _deadTimeMol=_deadTimeMol.readCalVals(file,variable);
-  _deadTimeMolPos=_deadTimeMol.dateMatch(_deadTimeMol, _time);
+  _molPos=_deadTimeMol.dateMatch(_deadTimeMol, _time);
 }
 
 void FullCals::readBinWidth(const char* file, const char* variable) 
 {
   _binWidth=_binWidth.readCalVals(file,variable);
-  _binWidthPos=_binWidth.dateMatch(_binWidth, _time);
+  _binPos=_binWidth.dateMatch(_binWidth, _time);
 }
 
 void FullCals::readScanAdj(const char* file, const char* variable) 
 {
   _scanAdj=_scanAdj.readCalVals(file,variable);
-  _scanAdjPos=_scanAdj.dateMatch(_scanAdj, _time);
-}
-
-void FullCals::readMolGain(const char* file, const char* variable) 
-{
-  _molGain=_molGain.readCalVals(file,variable);
-  _molGainPos=_molGain.dateMatch(_molGain, _time);
+  _scanPos=_scanAdj.dateMatch(_scanAdj, _time);
 }
 
 // set the time
@@ -105,13 +99,12 @@ void FullCals::readMolGain(const char* file, const char* variable)
 void FullCals::setTime(time_t rtime)
 {
   _time = rtime;
-  _deadTimeHiPos=_deadTimeHi.dateMatch(_deadTimeHi, _time);
-  _deadTimeLoPos=_deadTimeLo.dateMatch(_deadTimeLo, _time);
-  _deadTimeCrossPos=_deadTimeCross.dateMatch(_deadTimeCross, _time);
-  _deadTimeMolPos=_deadTimeMol.dateMatch(_deadTimeMol, _time);
-  _binWidthPos=_binWidth.dateMatch(_binWidth, _time);
-  _scanAdjPos=_scanAdj.dateMatch(_scanAdj, _time);
-  _molGainPos=_molGain.dateMatch(_molGain, _time);
+  _hiPos=_deadTimeHi.dateMatch(_deadTimeHi, _time);
+  _loPos=_deadTimeLo.dateMatch(_deadTimeLo, _time);
+  _crossPos=_deadTimeCross.dateMatch(_deadTimeCross, _time);
+  _molPos=_deadTimeMol.dateMatch(_deadTimeMol, _time);
+  _binPos=_binWidth.dateMatch(_binWidth, _time);
+  _scanPos=_scanAdj.dateMatch(_scanAdj, _time);
 }
 
 ///////////////////////////////////////////////////////

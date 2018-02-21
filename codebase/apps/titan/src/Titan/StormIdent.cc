@@ -34,7 +34,6 @@
 
 #include "StormIdent.hh"
 #include "DataTimes.hh"
-#include "Sounding.hh"
 
 #include <toolsa/umisc.h>
 #include <toolsa/file_io.h>
@@ -482,11 +481,6 @@ int StormIdent::_processScan(int scan_num, time_t scan_time,
     return -1;
   }
 
-  // read in sounding
-
-  Sounding &sndg = Sounding::inst();
-  sndg.retrieveTempProfile(scan_time);
-
   // identify storms
   
   if (_identify.run(scan_num)) {
@@ -600,11 +594,10 @@ void StormIdent::_loadStormParams(storm_file_params_t *sparams)
 
   // Indication of how to interpret the add_on union in gprops
 
-  if (_params.hail_detection_mode == Params::HAIL_METRICS) {
+  if ( !strcmp(_params.special_feature, "hail") ) {
     sparams->gprops_union_type = UNION_HAIL;
-  } else if (_params.hail_detection_mode == Params::NEXRAD_HDA) {
-    sparams->gprops_union_type = UNION_NEXRAD_HDA;
-  } else {
+  }
+  else {
     sparams->gprops_union_type = UNION_NONE;
   }
 
@@ -614,20 +607,16 @@ void StormIdent::_loadStormParams(storm_file_params_t *sparams)
     sparams->tops_dbz_threshold = _params.low_dbz_threshold;
   }
   
-  if (_params.precip_computation_mode ==
-      Params::PRECIP_FROM_COLUMN_MAX) {
+  if (_params.precip_computation_mode == Params::PRECIP_FROM_COLUMN_MAX) {
     sparams->precip_computation_mode = TITAN_PRECIP_FROM_COLUMN_MAX;
     sparams->precip_plane_ht = -9999;
-  } else if (_params.precip_computation_mode ==
-             Params::PRECIP_AT_SPECIFIED_HT) {
+  } else if (_params.precip_computation_mode == Params::PRECIP_AT_SPECIFIED_HT) {
     sparams->precip_computation_mode = TITAN_PRECIP_AT_SPECIFIED_HT;
     sparams->precip_plane_ht = _params.precip_plane_ht;
-  } else if (_params.precip_computation_mode ==
-             Params::PRECIP_AT_LOWEST_VALID_HT) {
+  } else if (_params.precip_computation_mode == Params::PRECIP_AT_LOWEST_VALID_HT) {
     sparams->precip_computation_mode = TITAN_PRECIP_AT_LOWEST_VALID_HT;
     sparams->precip_plane_ht = _params.base_threshold;
-  } else if (_params.precip_computation_mode ==
-             Params::PRECIP_FROM_LOWEST_AVAILABLE_REFL) {
+  } else if (_params.precip_computation_mode == Params::PRECIP_FROM_LOWEST_AVAILABLE_REFL) {
     sparams->precip_computation_mode = TITAN_PRECIP_FROM_LOWEST_AVAILABLE_REFL;
     sparams->precip_plane_ht = _params.base_threshold;
   }
@@ -954,7 +943,7 @@ int StormIdent::_writeLdataInfo()
     cerr << "  Writing _latest_data_info to: " << outputDir << endl;
   }
   DsLdataInfo ldata(outputDir,
-		    _params.debug >= Params::DEBUG_EXTRA);
+		    _params.debug >= Params::DEBUG_VERBOSE);
   
   ldata.setDataFileExt(STORM_HEADER_FILE_EXT);
   ldata.setWriter(_progName.c_str());

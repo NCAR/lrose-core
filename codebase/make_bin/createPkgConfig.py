@@ -16,7 +16,7 @@ global thisScriptName
 
 def write_pkgconfig_file(prefix, version, cc, cpp, libs):
     filename = os.path.join(prefix, 'lib', 'pkgconfig',  'lrose.pc')
-    with open(filename, 'w+') as f:
+    with open(filename, 'w') as f:
 
         f.write("prefix=${" + prefix + "}\n")
         f.write("exec_prefix=${prefix}\n")

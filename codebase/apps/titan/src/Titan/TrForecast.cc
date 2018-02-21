@@ -250,8 +250,8 @@ void TrForecast::_smooth_spatial_forecasts(TitanStormFile &sfile,
     
     TrTrack &this_track = storms[istorm]->track;
 
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "SMOOTH_SPATIAL_FORECASTS" << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "SMOOTH_SPATAIL_FORECASTS" << endl;
       cerr << "  complex_track_num: "
 	   << this_track.status.complex_track_num << endl;
       cerr << "  simple_track_num: "
@@ -270,7 +270,7 @@ void TrForecast::_smooth_spatial_forecasts(TitanStormFile &sfile,
       if (this_track.status.area_change_ratio >= growth_threshold ||
 	  this_track.status.area_change_ratio <= decay_threshold) {
 
-	if (_params.debug >= Params::DEBUG_EXTRA) {
+	if (_params.debug >= Params::DEBUG_VERBOSE) {
 	  cerr << "******************************************" << endl;
 	  cerr << "  smooth fast growth/decay" << endl;
 	  cerr << "  area_change_ratio: "
@@ -1071,7 +1071,7 @@ void TrForecast::_smooth_motion(vector<TrStorm*> &storms,
      
     nClose++;
     
-    if (_params.debug >= Params::DEBUG_EXTRA) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       fprintf(stderr,
 	      "----> Complex, simple, distance, speed, dirn: "
 	      "%4d %4d %8g %8g %8g\n",
@@ -1111,7 +1111,7 @@ void TrForecast::_smooth_motion(vector<TrStorm*> &storms,
   // check we have enough storms within the radius of influence
   
   if (nClose < _params.tracking_smoothing_min_nstorms || sum_weights == 0.0) {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
       fprintf(stderr, "-------> too few storms within radius %d\n", nClose);
     }
     return;
@@ -1321,7 +1321,7 @@ void TrForecast::_limit_rel_speed_change(const TitanStormFile &sfile,
     return;
   }
 
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
 
     cerr << "=============== limitRelSpeedChange ==============" << endl;
 
@@ -1403,7 +1403,7 @@ void TrForecast::_limit_rel_speed_change(const TitanStormFile &sfile,
     
   } // ii
 
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     
     cerr << "---> storm positions after adjustment" << endl;
     for (int ii = 0; ii < nHistory; ii++) {

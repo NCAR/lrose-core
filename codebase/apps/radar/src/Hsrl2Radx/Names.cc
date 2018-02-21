@@ -77,9 +77,6 @@ const string Names::lidar_volume_depolarization_ratio =
 const string Names::lidar_volume_depolarization_ratio_filtered =
   "lidar_volume_depolarization_ratio_filtered";
 
-const string Names::BetaMSonde = "BetaMSonde";
-const string Names::lidar_beta_m_sonde = "lidar_beta_m_sonde";
-
 const string Names::BackScatterRatio = "BackScatterRatio";
 const string Names::BackScatterRatio_F = "BackScatterRatio_F";
 const string Names::lidar_backscatter_ratio =

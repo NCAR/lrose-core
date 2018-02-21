@@ -1331,21 +1331,17 @@ void WorldPlot::drawDistanceTicks(QPainter &painter,
   
   // loop through ticks, ignoring the first one
 
-  double prevPix = -9999;
-
   for (size_t i = 0; i < tickDists.size(); i++) {
     
     const RadxTime &tickTime = tickTimes[i];
     double distVal = tickDists[i];
-    
+
     if (!isfinite(distVal)) {
       continue;
     }
 
     double timeVal = tickTime - startTime;
     double pix = getXPixel(timeVal);
-    double deltaPix = pix - prevPix;
-    prevPix = pix;
 
     // label
 
@@ -1355,11 +1351,6 @@ void WorldPlot::drawDistanceTicks(QPainter &painter,
     char distLabel[1024];
     sprintf(distLabel, "%gkm", distVal);
     QRect labelRect(painter.fontMetrics().tightBoundingRect(distLabel));
-    
-    if (fabs(deltaPix) < labelRect.width() + 2) {
-      continue;
-    }
-
     // qreal maxX = (qreal) (_xMaxPixel - labelRect.width() / 2);
 
     // if (((pix + labelRect.width() / 2 + 2) < maxX) &&

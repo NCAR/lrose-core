@@ -36,7 +36,6 @@
 ///////////////////////////////////////////////////////////////
 
 #include "Reader.hh"
-#include "AllocCheck.hh"
 #include <cmath>
 #include <iostream>
 #include <toolsa/uusleep.h>
@@ -97,7 +96,6 @@ void Reader::addRay(RadxRay *ray)
   if ((int) _rayQueue.size() >= _maxQueueSize) {
     RadxRay *ray = _rayQueue.back();
     delete ray;
-    AllocCheck::inst().addFree();
     _rayQueue.pop_back();
   }
 

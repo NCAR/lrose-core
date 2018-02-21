@@ -47,8 +47,8 @@ private:
 
   // hold the deadtime calibration blocks from calvals file   
 
-  CalReader _deadTimeHi, _deadTimeLo, _deadTimeCross, _deadTimeMol;
-  CalReader _binWidth, _scanAdj, _molGain;
+  CalReader _deadTimeHi, _deadTimeLo, _deadTimeCross;
+  CalReader _deadTimeMol, _binWidth, _scanAdj;
 
   // calibration corrections
   
@@ -70,8 +70,7 @@ private:
 
   // hold which position in the vectors for the data time
 
-  int _deadTimeHiPos, _deadTimeLoPos, _deadTimeCrossPos, _deadTimeMolPos;
-  int _binWidthPos, _scanAdjPos, _molGainPos;
+  int _hiPos, _loPos, _crossPos, _molPos, _binPos, _scanPos;
   RadxTime _time;
   
 public:   
@@ -92,7 +91,6 @@ public:
   void readDeadTimeMol(const char* file, const char* variable);
   void readBinWidth(const char* file, const char* variable); 
   void readScanAdj(const char* file, const char* variable); 
-  void readMolGain(const char* file, const char* variable); 
 
   int readBaselineCor(const char* file);
   int readDiffGeoCor(const char* file);
@@ -112,13 +110,12 @@ public:
   const CalReader &getDeadTimeMol() const { return _deadTimeMol; }
   const CalReader &getBinWidth() const { return _binWidth; }
   const CalReader &getScanAdj() const { return _scanAdj; } 
-  const CalReader &getMolGain() const { return _molGain; } 
 
-  int getHiPos() const { return _deadTimeHiPos; }
-  int getLoPos() const { return _deadTimeLoPos; }
-  int getCrossPos() const { return _deadTimeCrossPos; }
-  int getMolPos() const { return _deadTimeMolPos; }
-  int getBinPos() const { return _binWidthPos; }
+  int getHiPos() const { return _hiPos; }
+  int getLoPos() const { return _loPos; }
+  int getCrossPos() const { return _crossPos; }
+  int getMolPos() const { return _molPos; }
+  int getBinPos() const { return _binPos; }
   
   const vector<double> &getBlCorCombinedHi() const { return _blCorCombinedHi; }
   const vector<double> &getBlCorCombinedLo() const { return _blCorCombinedLo; }

@@ -46,9 +46,6 @@
 #include <Radx/RadxGeoref.hh>
 #include <Radx/Radx.hh>
 #include <physics/IcaoStdAtmos.hh>
-#include <Mdv/DsMdvx.hh>
-#include <Mdv/MdvxField.hh>
-#include <Mdv/MdvxProj.hh>
 
 class DerFieldCalcs;
 
@@ -93,13 +90,6 @@ private:
   FullCals _cals;
 
   IcaoStdAtmos _stdAtmos;
-
-  DsMdvx _mdvx;
-  MdvxField *_modelTempField, *_modelPresField;
-  fl32 *_modelTempData, *_modelPresData;
-  Mdvx::field_header_t _modelTempFhdr;
-  Mdvx::vlevel_header_t _modelTempVhdr;
-  MdvxProj _modelProj;
 
   int _nBinsInRay;
   int _nBinsPerGate;
@@ -152,13 +142,6 @@ private:
   vector<double> _processQWPRotation(vector<double>arrivalRate, vector<double> polCal);
 
   void _addDerivedMoments(RadxRay *ray);
-
-  int _getModelData(time_t rayTime);
-
-  int _setProfileFromModel(RadxRay *ray,
-                           Radx::fl32 *htMeters,
-                           Radx::fl32 *tempK,
-                           Radx::fl32 *presHpa);
 
   // void _addFilteredCountsToRay(RadxRay *ray);
   

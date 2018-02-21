@@ -128,7 +128,7 @@ void BufrFile::clearForNextMessage()
   currentTemplate = NULL;
   _nBitsRead = 0;
  // set this value to be able to read initial BUFR + size (3 bytes) + ending (7777)
-  _s0.nBytes = 20;  //12;
+  _s0.nBytes = 12;
 }
 
 void BufrFile::setDebug(bool state) { 
@@ -311,7 +311,7 @@ int BufrFile::readSection0()
 {
  
   clearForNextMessage();
-  inSection5 = true;
+  inSection5 = false;
   /******* decode section 0 */
   if (_verbose) fprintf (stderr, "Input file header:\n");
   //char temp[250];
@@ -384,8 +384,6 @@ int BufrFile::readSection0()
     _bufrMessageCount += 1;
     printf("Processing BUFR message %d at nBytesRead %d\n", _bufrMessageCount,
            _numBytesRead);
-
-    inSection5 = false;
     
   } catch (const char *msg) {
     close();
@@ -805,21 +803,6 @@ int BufrFile::readSection5() {
   try {
     if (_debug) printf("looking for 7777 at %d bytes\n", _numBytesRead);
     MoveToNextByteBoundary();
-    unsigned int found = 0;
-    size_t endOfMessage;
-    endOfMessage = _s0.nBytes*8;
-    while ((found <= 3) && !eof() && (_nBitsRead < endOfMessage)) {
-      value = ExtractText(8);
-      //if (_debug) printf("value = %s\n", value.c_str());
-      if (value[0] == '7')
-        found += 1;
-      else 
-        found = 0;
-    }
-    if (found < 4) 
-      printf(" Did not find ending code.");
-
-    /*
     do {
       value = ExtractText(8);
     } while (value.compare("7") != 0);
@@ -829,7 +812,6 @@ int BufrFile::readSection5() {
     if (value.compare("77") != 0) {
       throw " Did not find ending code ";
     }
-    */
   } catch (const char *msg) {
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::readSection5", true);
     Radx::addErrStr(_errString, " ", " Could not read ending code", true);
@@ -872,10 +854,8 @@ void BufrFile::printSection3(ostream &out) {
 }
 
 void BufrFile::printSection4(ostream &out) {
-  if (GTree != NULL) {
-    prettyPrintTree(out, GTree, 0);
-    currentTemplate->printSweepData(out);
-  }
+  prettyPrintTree(out, GTree, 0);
+  currentTemplate->printSweepData(out);
 }
 
 /*
@@ -895,29 +875,60 @@ int BufrFile::readDataDescriptors() {  // read section 3
   if (_verbose) cerr << "Reading section 3 ...\n";
 
     // allocate this space based on the length of section read (octets 1 - 3)
-
+  /*
+    Radx::ui08 id[4];
+    memset(id, 0, 4);
+    
+    // read length of message in octets
+    // the length is 24 bits (3 bytes)
+    Radx::ui32 nBytes;
+    if (fread(id, 1, 3, _file) != 3) {
+      int errNum = errno;
+      Radx::addErrStr(_errString, "", "ERROR - BufrFile::readDataDescriptors", true);
+      Radx::addErrStr(_errString, " ", " Cannot read length of section 3 in octets", true);
+      Radx::addErrStr(_errString, "  ", strerror(errNum), true);
+      close();
+      throw _errString.c_str();
+    }
+    nBytes = 0;
+    nBytes = nBytes | id[2];
+    nBytes = nBytes | (id[1] << 8);
+    nBytes = nBytes | (id[0] << 16);
+  */
     Radx::ui32 sectionLenOctets;
     sectionLenOctets = ExtractIt(24); // nBytes;
 
     if (_verbose) cerr << "sectionLen in octets " << sectionLenOctets << endl;
+    /*
+    Radx::ui08 *buffer;
+    buffer = (Radx::ui08 *) calloc(sectionLen, sizeof(Radx::ui08));
+    memset(buffer, 0, sectionLen);
+    int nBytesToSectionEnd;
+    nBytesToSectionEnd = sectionLen-3;
+    if (fread(buffer, 1, nBytesToSectionEnd, _file) != sectionLen-3) {
+      int errNum = errno;
+      Radx::addErrStr(_errString, "", "ERROR - BufrFile::readDataDescriptors", true);
+      Radx::addErrStr(_errString, " ", " Cannot read section 3", true);
+      Radx::addErrStr(_errString, "  ", strerror(errNum), true);
+      close();
+      throw _errString.c_str();
+    }
+    */
 
     // octet 4 is reserved and set to zero
+    //Radx::ui32 dummy;
+    //dummy = 
     ExtractIt(8);
 
     // octets 5-6 contain the number of data subsets
     // get the number of data subsets/descriptors
     Radx::ui16 nDataSubsets;
     nDataSubsets = ExtractIt(16);
-
-    // perform some sanity checks on the data 
-    // each descriptor takes two bytes
-    if (sectionLenOctets > _s0.nBytes) {
-      printf("This is garbage ... section 3 length %d exceeds the total number of bytes in the BUFR message %d\n", sectionLenOctets, _s0.nBytes);
-      // attempt to recover by moving to the ending 7777
-      throw "exiting garbage message, attempting recovery";
- 
-    }
-
+    /*
+    nDataSubsets = 0;
+    nDataSubsets = nDataSubsets | buffer[2];
+    nDataSubsets = nDataSubsets | (buffer[1] << 8);
+    */
     // sometimes the number of data subsets does not agree
     // with the length of the section, so go with the
     // length of the section over the number of data subsets
@@ -989,15 +1000,11 @@ int BufrFile::readDataDescriptors() {  // read section 3
     // TODO: determine which type of product to instaniate based
     // on the data descriptors of section 3
     _isGsi = false;
-    // TODO: these GSI variables should go into the BufrProduct_gsi???
-    //_isGsiVelocity = false;
-    //_isGsiReflectivity = false;
     if (matches_204_31_X(_descriptorsToProcess)) {
       currentTemplate = new BufrProduct_204_31_X();
     } else if (matches_gsi(_descriptorsToProcess)) {
       currentTemplate = new BufrProduct_gsi();
       currentTemplate->haveTheTable(&tableMap);
-      //currentTemplate->determineVa(_descriptorsToProcess);
     } else { 
       currentTemplate = new BufrProductGeneric();
     }
@@ -1037,25 +1044,18 @@ bool BufrFile::matches_gsi(vector<unsigned short> &descriptors) {
     if ((descriptors[n-1] == 17152) && (descriptors[n-2] == 7937) &&
 	((descriptors[n-3] == 1) || (descriptors[n-3] == 2))) {
       return true; 
-    } else if ((descriptors[n-3] == 16896) && (descriptors[n-1] == 16128)) {
-
-      unsigned short determiningDes;
-      determiningDes = descriptors[n-2];
-      if ((determiningDes == 64021) || (determiningDes == 64752)
-          || (determiningDes == 64022) || (determiningDes == 51773)) {
-        // vector of length 6 {16383, 34305, 7937,   16896,   51773,   16128}
-        //                  0;63;255, 2;6;1, 0;31;1, 1;2;0, 3;10;61, 0;63;0  
-        // vector of length 6 {16383, 34305, 7937,   16896,    64022,   16128}
-        //                  0;63;255, 2;6;1, 0;31;1, 1;2;0, 3;58;022, 0;63;0 
-        // vector of length 6 {16383, 34305, 7937,   16896,    64021,   16128}
-        //                  0;63;255, 2;6;1, 0;31;1, 1;2;0, 3;58;021, 0;63;0 
-        // also need 3;60;240 for 64752
-        _isGsi = true;
-        return true;
-      } else {
-        // some other variable?
-        throw "must be some other variable in GSI BUFR file";
-      }
+    } else if ((descriptors[n-3] == 16896) &&
+               (descriptors[n-2] == 64021) && (descriptors[n-1] == 16128)) {
+      // vector of length 6 {16383, 34305, 7937,   16896, 64021,   16128}
+      //                  0;63;255, 2;6;1, 0;31;1, 1;2;0, 3;10;61, 0;63;0  
+      _isGsi = true;
+      return true;
+      //} else if ((descriptors[n-3] == 16896) &&
+      //         (descriptors[n-2] == ) && (descriptors[n-1] == 16128)) {
+      // vector of length 6 {16383, 34305, 7937,   16896, ,   16128}
+      //                  0;63;255, 2;6;1, 0;31;1, 1;2;0, 3;58;021, 0;63;0  
+      // 
+      //return true;
     } else {
       return false;
     }
@@ -1213,7 +1213,7 @@ string BufrFile::ExtractText(unsigned int nBits) {
     val.clear();
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::ExtractText", true);
     Radx::addErrStr(_errString, "  ", 
-		    "Ran out of data before completing the value (1).", true);
+		    "Ran out of data before completing the value.", true);
     throw _errString.c_str(); 
   }  else {
     _nBitsRead += nBits;
@@ -1270,7 +1270,7 @@ Radx::ui32 BufrFile::ExtractIt(unsigned int nBits) {
                        _nBitsRead, _s0.nBytes*8, nBits);
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::ExtractIt", true);
     Radx::addErrStr(_errString, "  ", 
-		    "Ran out of data before completing the value (2).", true);
+		    "Ran out of data before completing the value.", true);
     throw _errString.c_str(); 
   }  else {
     _nBitsRead += nBits;
@@ -1323,7 +1323,7 @@ Radx::ui32 BufrFile::Apply(TableMapElement f) {
   } else {
     Radx::ui32 value;
     value = ExtractIt(f._descriptor.dataWidthBits + _addBitsToDataWidth);
-    if (_verbose) cout << "returning unmodified " << value << endl;
+    if (_debug) cout << "returning unmodified " << value << endl;
     return value;
   }
 }
@@ -1430,6 +1430,154 @@ Radx::fl32 BufrFile::ApplyNumericFloat(TableMapElement f) {
   }
 }
 
+/*
+// Put the info in the correct storage location
+// and take care of any setup that needs to happen
+bool BufrFile::StuffIt(string name, double value) {
+  bool ok = true;
+
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+  if ((name.find("byte element") != string::npos) ||
+      (name.find("pixel value") != string::npos)) {
+    // ugh!  It's not a double value, it's an unsigned char...
+    currentTemplate->addData((unsigned char) value);
+  } else if (name.find("latitude") != string::npos) {
+    latitude = value;
+    // ******* TEST  *******
+    //double latitudeTest;
+    //latitudeTest = value;
+    //ByteOrder::swap64(&latitudeTest, sizeof(double), true);
+    //cerr << "latitude test = " << latitudeTest << endl;
+  } else if (name.find("longitude") != string::npos) {
+    longitude = value;
+  } else if (name.find("height") != string::npos) {
+    height = value;
+  } else if (name.find("antenna elevation") != string::npos) {
+    currentTemplate->setAntennaElevationDegrees(value);
+  } else if ((name.find("number of bins along the radial") != string::npos)
+	     || (name.find("number of pixels per row") != string::npos)) {
+    currentTemplate->setNBinsAlongTheRadial((size_t) value);
+  } else if ((name.find("range-bin size") != string::npos) ||
+    (name.find("range bin size") != string::npos) || 
+    (name.find("range-bin size") != string::npos)) {
+    currentTemplate->setRangeBinSizeMeters(value);
+  } else if ((name.find("range-bin offset") != string::npos) ||
+    (name.find("range bin offset") != string::npos)) {
+    currentTemplate->setRangeBinOffsetMeters(value);
+  } else if (name.find("number of azimuths") != string::npos) {
+    currentTemplate->setNAzimuths((size_t) value);
+  } else if (name.find("antenna beam azimuth") != string::npos) {
+    currentTemplate->setAntennaBeamAzimuthDegrees(value);
+
+  } else if (name.find("year") != string::npos) {
+    currentTemplate->putYear((int) value);
+  } else if (name.find("month") != string::npos) {
+    currentTemplate->putMonth((int) value);
+  } else if (name.find("day") != string::npos) {
+    currentTemplate->putDay((int) value);
+  } else if (name.find("hour") != string::npos) {
+    currentTemplate->putHour((int) value);
+  } else if (name.find("minute") != string::npos) {
+    currentTemplate->putMinute((int) value);
+  } else if (name.find("second") != string::npos) {
+    currentTemplate->putSecond((int) value);
+    // could probably use key to identify these fields...
+    // instead of a string search
+  } else if (name.find("wmo block") != string::npos) {
+    WMOBlockNumber = value;
+  } else if (name.find("wmo station") != string::npos) {
+    WMOStationNumber = value;
+  } else if (name.find("compression method") != string::npos) {
+    ; // ignore it
+  } else if (name.find("type of station") != string::npos) {
+    ; // ignore it
+  } else if (name.find("type of product") != string::npos) {
+    int code = (int) value;
+    // make sure the type of product agrees with the field name
+    switch(code) {
+    case 0:
+      currentTemplate->typeOfProduct = "DBZH";
+      break;
+    case 40:
+      currentTemplate->typeOfProduct = "VRAD";
+      break;
+    case 80:
+      currentTemplate->typeOfProduct = "ZDR";
+      break;
+    case 90:
+      break;
+    case 91: 
+    case 230:
+      currentTemplate->typeOfProduct = "TH";
+      break;
+    case 92:
+    case 60:
+      currentTemplate->typeOfProduct = "WRAD";
+      break;	  
+    case 243:
+      currentTemplate->typeOfProduct = "CM";
+      break;
+    case 240:
+      currentTemplate->typeOfProduct = "KDP";
+      break;
+    case 239:
+      currentTemplate->typeOfProduct = "PHIDP";
+      break;
+    case 241:
+      currentTemplate->typeOfProduct = "RHOHV";
+      break;
+    case 242:
+      // ugh! allow for different name for this variable
+      // fieldName == "TDR"  ==> use "TDR"
+      // fieldName == ""     ==> use "ZDR"
+      // fieldName == "ZDR"  ==> use "ZDR"
+      if (_fieldName.size() < 0) {
+          currentTemplate->typeOfProduct = "ZDR";
+      } else {
+        string temp = _fieldName;
+        std::transform(temp.begin(), temp.end(), temp.begin(), ::toupper);
+        if (temp.compare("ZDR") == 0) {
+          currentTemplate->typeOfProduct = "ZDR";
+	} else {
+	  currentTemplate->typeOfProduct = "TDR";
+	}
+      }
+      break;
+    case 231:
+      currentTemplate->typeOfProduct = "TV";
+      break; 
+    default:
+      currentTemplate->typeOfProduct = "UNKNOWN";
+      ok = false;
+    } 
+    // make sure the field name we are looking for agrees with
+    // the code in the data file
+    // skip this check if the type of product has code 90; 
+    // I don't know what product code 90 means.
+    if (code != 90) {
+      if (_fieldName.size() > 0) {
+        string temp = _fieldName;
+        std::transform(temp.begin(), temp.end(), temp.begin(), ::toupper);
+        if (currentTemplate->typeOfProduct.compare(temp) != 0) {
+	  Radx::addErrStr(_errString, "", "ERROR - BufrFile::StuffIt", true);
+	  Radx::addErrStr(_errString, "  Expected Type of Product code for ", 
+			  temp.c_str(), true);
+	  Radx::addErrInt(_errString, "  Found code ", code, true);
+	  throw _errString.c_str();
+	}
+      } else {
+        //  TODO: we'll need to use the currentTemplate->typeOfProduct as the field name
+	;
+      }
+    }
+  } else {
+    ok = false;
+  }
+  return ok;
+}
+*/
+
+
 size_t BufrFile::getTimeDimension() {
   return currentTemplate->getNAzimuths();
 }
@@ -1439,11 +1587,7 @@ size_t BufrFile::getTimeDimension() {
 //}
 
 size_t BufrFile::getNumberOfSweeps() {
-  if (currentTemplate != NULL) {
-    return currentTemplate->sweepData.size();
-  } else {
-    return 0;
-  }
+  return currentTemplate->sweepData.size();
 }
 
 size_t BufrFile::getNBinsAlongTheRadial(int sweepNumber) {
@@ -1618,13 +1762,8 @@ void BufrFile::prettyPrintNode(ostream &out, DNode *p, int level) {
   for (int i=0; i<level; i++) printf(" ");
   TableMapKey().Decode(p->des, &f, &x, &y);
   printf("+(%1d %02d %03d) ", (unsigned int) f, (unsigned int) x, (unsigned int) y);
-  if (_verbose) {
-    printf(" self=%zu ",(size_t) p);
-    if (p!=NULL) 
-      printf(" next->%zu children->%zu \n", (size_t) p->next, (size_t) p->children);
-  } else {
-    printf("\n");
-  }
+  printf(" self=%zu ",(size_t) p);
+  if (p!=NULL) printf(" next->%zu children->%zu \n", (size_t) p->next, (size_t) p->children); 
 }
 
 // TableMapElement gives us information about the data
@@ -1679,7 +1818,7 @@ void BufrFile::prettyPrint(ostream &out, DNode *p, int level) {
 
   des = p->des;
   TableMapKey key(p->des);
-  try {
+
   if (key.isTableBEntry()) {  // a leaf
     element = tableMap.Retrieve(des);
     prettyPrintLeaf(out, p, element, level);
@@ -1688,16 +1827,16 @@ void BufrFile::prettyPrint(ostream &out, DNode *p, int level) {
   } else {
     prettyPrintNode(out, p, level);
   }
-  } catch (const std::out_of_range& e) {
-    printf("ERROR - Unrecognized descriptor %d\n", des);
-  }
 }
 
 void BufrFile::prettyPrintTree(ostream &out, DNode *tree, int level) {
-
+  //TableMapElement f;
   string svalue;
+  //double fvalue;
+  //int ivalue;
   DNode *p,*q;
   TableMapElement element;
+  //unsigned char f, x, y;
 
   if (level == 0) {
     printHeader();
@@ -1721,6 +1860,7 @@ void BufrFile::freeTree(DNode *tree) {
     // free the children
     q=p->children;
     if (q != NULL) {
+      //freeTree(q);
       delete q;
     }
     DNode *temp;
@@ -1773,6 +1913,257 @@ int BufrFile::moveChildren(DNode *parent, int howManySiblings) {
 	  }  // end moving children
 	  return 0;
 }
+
+/*
+// Print the tree while we are traversing, since this is 
+// the best way to display the values along with the the descriptors.
+// The values are stored in a separate structure.
+int BufrFile::_descend(DNode *tree) {
+
+  if (_verbose) {
+    if ((tree->des != 7878) && (tree->des !=7681)) { 
+      // don't print Byte element of compressed array
+      // don't print Pixel value (4 bits)
+      printf("\nTraversing ... \n");
+      printTree(tree,0);
+    }
+  }
+
+  unsigned short des;
+  DNode *p;
+  p = tree;
+  bool compressionStart = false;
+
+  try {
+    // for each descriptor in the list
+    while (p != NULL ) {
+
+      unsigned char f, x, y;
+
+      des = p->des;
+      TableMapKey key(des);
+
+      // visit the node
+      if (_verbose) {
+        if ((des != 7878)  && (tree->des !=7681)) {
+	  TableMapKey().Decode(des, &f, &x, &y);
+	  printf("visiting f(x,y): %1d(%02d,%03d) ", (unsigned int) f,
+		 (unsigned int) x, (unsigned int) y);  
+	}     
+      }
+
+      if (key.isTableBEntry()) {  // a leaf
+	if (_verbose) { 
+          if ((des != 7878) && (tree->des !=7681))
+  	    printf(" leaf\n");
+	}
+	// if the node is from table b, retrieve the data; apply any transformations;
+	//   insert into temporary structure for saving
+	TableMapElement val1;
+	val1 = tableMap.Retrieve(des);
+	if (val1._whichType == TableMapElement::DESCRIPTOR) {
+	  //if (_debug) prettyPrintLeaf(cout, des, val1, prettyPrintLevel);
+	  //cout << "value for key " << des << ":" <<
+	  //  val1._descriptor.fieldName << "," << 
+	  //  val1._descriptor.scale << endl;
+	  ;
+	}
+	Radx::fl32 valueFromData;
+	if (val1.IsText()) {
+	  // THE NEXT TWO LINES ARE CRUCIAL!! DO NOT REMOVE IT!!!
+	  // we don't care about the return value when the descriptor is text
+	  Apply(val1); 
+	  // grab the text value
+	  p->dataType = DNode::STRING;
+	  p->somejunksvalue = _tempStringValue;
+	  if (!currentTemplate->StuffIt(des, val1._descriptor.fieldName,
+                                        _tempStringValue )) {
+	      Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
+	      Radx::addErrStr(_errString, "Unrecognized descriptor: ",
+			      val1._descriptor.fieldName, true);
+	      // since this is just a warning, just print the message, no need
+	      // to exit
+	      cerr << _errString << endl;
+          }
+	} else {
+	  valueFromData = ApplyNumericFloat(val1);
+	  if (!currentTemplate->StuffIt(des, val1._descriptor.fieldName, valueFromData)) {
+            if ((des != 7681) && 0) {
+	      Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
+	      Radx::addErrStr(_errString, "Unrecognized descriptor: ",
+			      val1._descriptor.fieldName, true);
+	      // since this is just a warning, just print the message, no need
+	      // to exit
+	      cerr << _errString << endl;
+	    }
+	  }
+	  if (val1._descriptor.fieldName.find("Compression method") != string::npos) {
+	    compressionStart = true;
+	  }
+	  // store the value
+	  p->dataType = DNode::FLOAT;
+	  p->fvalue = valueFromData;
+	}
+	//if (_debug) cout << endl;
+	p = p->next;
+      } else if (key.isTableCEntry()) {  // a leaf
+	if (_verbose) { 
+  	    printf(" leaf\n");
+	}
+	// if the node is from table c, 
+	// we are only handling one descriptor from table c ...
+	// decode the key into f(x,y) and check y for different action
+        unsigned char f,x,y;
+        TableMapKey().Decode(des, &f, &x, &y);
+        switch(x) {
+          case 1:
+            // apply the modifications
+            _addBitsToDataWidth = max(0, y - 128);
+            if (_verbose) printf(" increasing dataWith by %d\n", _addBitsToDataWidth);
+            break;
+          case 5:
+            // YYY characters (CCITT International Alphabet No. 5) are
+            // inserted as a data field of YYY x 8 bits in length.
+            // read the bytes ... 
+            //string whatIsThis;
+            //whatIsThis = ExtractIt(y*8);
+            TableMapElement *dummy;
+            int dataWidth;
+            dataWidth = y * 8;
+            dummy = new TableMapElement("DUMMY", 0, "CCITT IA5", 0, dataWidth);
+            Apply(*dummy);
+            delete dummy;
+            if (!currentTemplate->StuffIt(des, "", _tempStringValue )) {
+	      Radx::addErrStr(_errString, "", "WARNING - BufrFile::_descend", true);
+	      Radx::addErrStr(_errString, "Unrecognized descriptor: ", "DUMMY", true);
+	      // since this is just a warning, just print the message, no need
+	      // to exit
+	      cerr << _errString << endl;
+            }
+            break;
+	  default:
+	  // TODO: fix up this error message
+          cerr << "Table C descriptor is not implemented " << endl;
+	}
+	p = p->next;
+
+      } else if (key.isReplicator()) {
+	if (_verbose) 
+	  printf(" replicator\n");
+
+	// if the node is a replicator, e.g. 1;2;0 or 1;3;5
+	// decode the key into f(x,y) and check y for different action
+        unsigned char f,x,y;
+        TableMapKey().Decode(des, &f, &x, &y);
+	bool variable_repeater = false;
+        if (y == 0) variable_repeater = true;
+      
+        if (variable_repeater) {
+	  // there will be a special "delayed replication", y=0
+          unsigned short delayed_replication_descriptor;
+          if (p->children == NULL) { // if we haven't been here before ...
+            DNode *delayed_rep_node;
+            delayed_rep_node = p->next;
+            delayed_replication_descriptor = delayed_rep_node->des;
+            // remove the delayed replication descriptor node from the list
+            _deleteAfter(p);   
+            // and save it in the node itself
+            p->delayed_repeater = delayed_replication_descriptor;
+          } else {
+            delayed_replication_descriptor = p->delayed_repeater;
+	  }
+          // get the number of repeats from section 4 data
+	  Radx::ui32 nRepeats; // actually read this from the data section
+          nRepeats = Apply(tableMap.Retrieve(delayed_replication_descriptor));
+          //if (_verbose) 
+            printf("nrepeats from Data = %u\n", nRepeats);
+          currentTemplate->storeReplicator(nRepeats);
+          p->ivalue = nRepeats;
+          if (p->children == NULL) {
+            moveChildren(p, x);
+	  }
+          // transition state; set location levels
+          // the state determines which counters to increment & decrement
+          // It's up to the product to deal with the space allocation as needed
+          for (unsigned int i=0; i<nRepeats; i++) {
+            //if (((i%1000)==0) && (_verbose)) 
+              printf("%d out of %d repeats\n", i+1, nRepeats);
+            _descend(p->children);
+	  }
+          if (_verbose) printf("-- end repeat\n");
+          // transition state; set location levels
+          currentTemplate->trashReplicator();
+          p=p->next;
+	} else {           // must be a fixed repeater
+          if (p->children == NULL) {
+            moveChildren(p, x);
+	  }
+          for (int i=0; i<y; i++) {
+            if (((i%1000)==0) && (_verbose))
+              printf("%d out of %d repeats\n", i+1, y);
+            _descend(p->children);
+	  }
+          if (_verbose) printf("-- end repeat\n");
+          p=p->next;
+	} // end else fixed repeater
+        if (_verbose) printTree(tree, 0);
+      } else if (key.isAnotherNode()) {
+	if (_verbose) 
+	  printf(" another node\n");
+	// pop/remove the element from the list; it is being replaced
+	// if the node is another node,
+	// look up the expansions and insert them...
+        TableMapElement val1;
+        val1 = tableMap.Retrieve(des);
+	 
+	vector<unsigned short> theList;
+	theList = val1._listOfKeys;
+
+        // replace the contents of this node with the first element of the list
+        p->des = theList.front();
+        // insert the remaining elements after this node
+
+        theList.erase(theList.begin());
+	if (theList.size() > 0) {
+	  DNode *newList = buildTree(theList, true);
+          DNode *save;
+          save = p->next;
+          p->next = newList;
+  	  // find the end of the new list;
+          DNode *h, *t;
+          h = newList;
+          t = newList->next;
+          while (t != NULL) {
+            h = t;
+            t = t->next;
+          }
+          h->next = save;
+	}
+        if (_verbose) printTree(tree, 0);
+      } else {
+        Radx::addErrStr(_errString, "", "ERROR - BufrFile::_descend", true);
+	Radx::addErrInt(_errString, "   unrecognized table map key: ", des, true);
+	throw _errString.c_str();
+      }
+    } // end while p!= NULL
+    if (compressionStart) {
+      currentTemplate->createSweep();
+      compressionStart = false;
+    }
+  } catch (const std::out_of_range& e) {
+    Radx::addErrStr(_errString, "", "ERROR - BufrFile::_descend", true);
+    Radx::addErrInt(_errString, "   unknown descriptor: ", des, true);
+    cerr << _errString;
+    throw _errString.c_str();
+  } catch (const char *msg) {
+    Radx::addErrStr(_errString, "", "ERROR - BufrFile::_descend", true);
+    Radx::addErrStr(_errString, "  ", msg, true);
+    cerr << _errString;
+    throw _errString.c_str();
+  }
+  return 0;
+}
+*/
 
 void BufrFile::_verbosePrintTree(DNode *tree) {
   if (_verbose) {
@@ -1927,10 +2318,10 @@ void BufrFile::_visitVariableRepeater(DNode *p, unsigned char x) {
   // get the number of repeats from section 4 data
   Radx::ui32 nRepeats; // actually read this from the data section
   nRepeats = Apply(tableMap.Retrieve(delayed_replication_descriptor));
-  if (_verbose) 
-    printf("nrepeats from Data = %u\n", nRepeats);
-  //if (nRepeats == 0)
-  //  printf("HERE<<<<< \n");
+  //if (_verbose) 
+  printf("nrepeats from Data = %u\n", nRepeats);
+  if (nRepeats == 0)
+    printf("HERE<<<<< \n");
   currentTemplate->storeReplicator(nRepeats);
   p->ivalue = nRepeats;
   if (p->children == NULL) {
@@ -1952,8 +2343,8 @@ void BufrFile::_visitVariableRepeater(DNode *p, unsigned char x) {
       printf("%d out of %d repeats\n", i+1, nRepeats);
     _descend(p->children);
   }
-  if (_verbose) 
-    printf("-- end repeat %d\n", nRepeats);
+  //if (_verbose) 
+  printf("-- end repeat %d\n", nRepeats);
   // transition state; set location levels
   currentTemplate->trashReplicator();
 

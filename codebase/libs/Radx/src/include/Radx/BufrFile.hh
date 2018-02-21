@@ -144,8 +144,6 @@ public:
   bool matches_204_31_X(vector<unsigned short> &descriptors);
   bool matches_gsi(vector<unsigned short> &descriptors);
   bool _isGsi;
-  //bool _isGsiReflectivity;
-  //bool _isGsiVelocity;
 
   int print(ostream &out, bool printRays, bool printData);
   void printSection0(ostream &out);
