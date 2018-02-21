@@ -216,5 +216,8 @@ JAVA_MAKE_JAR = $(RAP_BIN_DIR)/make_jar
 
 QT_INCLUDES = -I/usr/include/qt
 QT_LDFLAGS = -L/usr/lib
+
+QT5_INCLUDES = -I/usr/local/opt/qt/include
+QT5_LDFLAGS = -L/usr/local/opt/qt/lib
 QT_LIBS = -lqt
 
