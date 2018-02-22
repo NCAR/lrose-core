@@ -36,17 +36,17 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = HawkEye
 
-LOC_INCLUDES = $(QT4_INCLUDES) $(NETCDF4_INCS)
+LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
 LOC_LIBS = -lradar -lrapformats -lFmq -lRadx \
 	-ldsserver -ldidss -leuclid -ltoolsa \
 	-ldataport -ltdrp -lQtGui -lQtCore \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread
 
-LOC_LDFLAGS = $(QT4_LDFLAGS) $(NETCDF4_LDFLAGS)
+LOC_LDFLAGS = $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
 
 
-LOC_CPPC_CFLAGS =
+LOC_CPPC_CFLAGS = -std=c++11
 
 
 HDRS = \

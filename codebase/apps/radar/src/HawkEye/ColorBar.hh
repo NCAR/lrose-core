@@ -28,11 +28,11 @@
 
 #include <qwidget.h>
 #include <qlayout.h>
-#include <QVBoxLayout>
+#include <QtWidgets/QVBoxLayout>
 #include <vector>
 #include <string>
-#include <QImage>
-#include <QPixmap>
+#include <QtWidgets/QImage>
+#include <QtWidgets/QPixmap>
 
 #ifndef DLL_EXPORT
 #ifdef WIN32

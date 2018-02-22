@@ -41,11 +41,11 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <QPainter>
-#include <QRect>
-#include <QTransform>
-#include <QColor>
-#include <QFont>
+#include <QtWidgets/QPainter>
+#include <QtWidgets/QRect>
+#include <QtWidgets/QTransform>
+#include <QtGui/QColor>
+#include <QtGui/QFont>
 #include <Radx/RadxTime.hh>
 class ColorMap;
 

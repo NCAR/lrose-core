@@ -28,7 +28,7 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pjg.h>
 
-#include <qtimer.h>
+#include <QtCore/qtimer.h>
 #include <QBrush>
 #include <QPalette>
 #include <QPaintEngine>

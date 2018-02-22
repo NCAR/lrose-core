@@ -49,7 +49,7 @@
 #include "Params.hh"
 #include "DisplayManager.hh"
 #include "RayLoc.hh"
-#include <QMainWindow>
+#include <QtWidgets/QMainWindow>
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxRay.hh>
 

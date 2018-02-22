@@ -32,7 +32,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "HawkEye.hh"
-#include <QApplication>
+#include <QtWidgets/QApplication>
 
 // file scope
 

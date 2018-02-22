@@ -46,7 +46,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include "DisplayManager.hh"
-#include <QMainWindow>
+#include <QtWidgets/QMainWindow>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxVol.hh>

@@ -40,10 +40,10 @@
 #include <string>
 #include <vector>
 
-#include <QImage>
-#include <QRect>
-#include <QTimer>
-#include <QTransform>
+#include <QtWidgets/QImage>
+#include <QtWidgets/QRect>
+#include <QtCore/QTimer>
+#include <QtCore/QTransform>
 
 #include <toolsa/TaThread.hh>
 #include "Params.hh"
