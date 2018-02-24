@@ -187,7 +187,7 @@ int DualThresh::compute(const GridClump &grid_clump)
 
 {
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     fprintf(stderr, "Computing using secondary threshold\n");
   }
 
@@ -282,7 +282,7 @@ int DualThresh::compute(const GridClump &grid_clump)
 
   // for each valid clump, copy the clump ids to the valid grid
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     fprintf(stderr,
 	    "nSecondary, fractionAllParts, nLargeEnough: %d, %g, %d\n",
 	    nSecondary, fractionAllParts, nLargeEnough);

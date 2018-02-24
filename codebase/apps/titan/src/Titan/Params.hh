@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c)
+// ** Copyright UCAR (c) 1992 - 2018
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -53,8 +53,8 @@ public:
   typedef enum {
     DEBUG_OFF = 0,
     DEBUG_NORM = 1,
-    DEBUG_EXTRA = 2,
-    DEBUG_VERBOSE = 3
+    DEBUG_VERBOSE = 2,
+    DEBUG_EXTRA = 3
   } debug_t;
 
   typedef enum {
@@ -70,6 +70,16 @@ public:
     PRECIP_AT_LOWEST_VALID_HT = 2,
     PRECIP_FROM_LOWEST_AVAILABLE_REFL = 3
   } precip_mode_t;
+
+  typedef enum {
+    SPECIFY_SOUNDING = 0,
+    READ_SOUNDING_FROM_SPDB = 1
+  } sounding_mode_t;
+
+  typedef enum {
+    HAIL_METRICS = 0,
+    NEXRAD_HDA = 1
+  } hail_detection_mode_t;
 
   typedef enum {
     TREND = 0,
@@ -106,6 +116,20 @@ public:
     double coeff;
     double expon;
   } zr_t;
+
+  typedef struct {
+    double height_m;
+    double temp_c;
+    double pressure_hpa;
+    double rh_percent;
+    double wspeed_mps;
+    double wdirn_deg;
+  } sounding_entry_t;
+
+  typedef struct {
+    double min_val;
+    double max_val;
+  } sounding_data_range_t;
 
   ///////////////////////////
   // Member functions
@@ -504,11 +528,34 @@ public:
 
   double dbz_hist_interval;
 
-  char* special_feature;
+  sounding_mode_t sounding_mode;
+
+  sounding_entry_t *_specified_sounding;
+  int specified_sounding_n;
+
+  char* sounding_spdb_url;
+
+  int sounding_search_time_margin_secs;
+
+  char* sounding_location_name;
+
+  tdrp_bool_t sounding_check_pressure_range;
+
+  sounding_data_range_t sounding_required_pressure_range_hpa;
+
+  tdrp_bool_t sounding_check_height_range;
+
+  sounding_data_range_t sounding_required_height_range_m;
+
+  tdrp_bool_t sounding_check_pressure_monotonically_decreasing;
+
+  hail_detection_mode_t hail_detection_mode;
+
+  debug_t debug_hail_metrics;
+
+  tdrp_bool_t debsounding_check_height_range;
 
   zr_t hail_ZM;
-
-  double ht_of_freezing;
 
   double hail_mass_dbz_threshold;
 
@@ -618,7 +665,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[137];
+  mutable TDRPtable _table[149];
 
   const char *_className;
 

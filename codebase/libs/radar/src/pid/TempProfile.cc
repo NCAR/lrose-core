@@ -45,6 +45,8 @@
 #include <physics/thermo.h>
 using namespace std;
 
+const double TempProfile::missingValue = -9999.0;
+
 // Constructor
 
 TempProfile::TempProfile()
@@ -68,7 +70,7 @@ TempProfile::TempProfile()
   _soundingRequiredMaxTempC = 5;
 
   _heightCorrectionKm = 0.0;
-  _freezingLevel = -9999.0;
+  _freezingLevel = TempProfile::missingValue;
 
   _checkPressureMonotonicallyDecreasing = false;
   _useWetBulbTemp = false;
@@ -239,6 +241,26 @@ int TempProfile::getProfileForPid(const string &pidThresholdsPath,
 
   return 0;
   
+}
+
+/////////////////////////////////////
+// prepare profile for use
+
+void TempProfile::prepareForUse() {
+
+  // compute the freezing level
+
+  _computeFreezingLevel();
+
+}
+
+/////////////////////////////////////
+// get the freezing level height
+
+double TempProfile::getFreezingLevel() const {
+
+  return _freezingLevel;
+
 }
 
 /////////////////////////////////////////////////////
@@ -444,7 +466,7 @@ int TempProfile::_checkTempProfile()
 
   if (_checkPressureMonotonicallyDecreasing) {
     
-    double prevPressure = _tmpProfile[0].pressHpa;
+    double prevPressure = _tmpProfile[0].getPressHpa();
     size_t nSteps = 20;
     size_t intv = _tmpProfile.size() / nSteps;
     for (size_t ii = 1; ii < nSteps; ii++) {
@@ -452,7 +474,7 @@ int TempProfile::_checkTempProfile()
       if (jj > _tmpProfile.size() - 1) {
         jj = _tmpProfile.size() - 1;
       }
-      double pressure = _tmpProfile[jj].pressHpa;
+      double pressure = _tmpProfile[jj].getPressHpa();
       if (pressure > prevPressure) {
         if (_debug) {
           cerr << "WARNING - checkTempProfile()" << endl;
@@ -482,15 +504,15 @@ int TempProfile::_checkTempProfile()
 
   for (size_t ii = 1; ii < _tmpProfile.size(); ii++) {
 
-    double press = _tmpProfile[ii].pressHpa;
+    double press = _tmpProfile[ii].getPressHpa();
     if (press < minPress) minPress = press;
     if (press > maxPress) maxPress = press;
       
-    double htM = _tmpProfile[ii].htKm * 1000.0;
+    double htM = _tmpProfile[ii].getHtKm() * 1000.0;
     if (htM < minHt) minHt = htM;
     if (htM > maxHt) maxHt = htM;
     
-    double tempC = _tmpProfile[ii].tmpC;
+    double tempC = _tmpProfile[ii].getTmpC();
     if (tempC < minTemp) minTemp = tempC;
     if (tempC > maxTemp) maxTemp = tempC;
     
@@ -570,40 +592,51 @@ int TempProfile::_checkTempProfile()
 }
 
 ////////////////////////////////////////////////////////////////////////
-// compute the freezing level
+// compute the freezing level in km
 
 void TempProfile::_computeFreezingLevel()
 
 {
+  _freezingLevel = getHtKmForTempC(0.0);
+}
 
-  _freezingLevel = -9999.0;
+///////////////////////////////////////////////
+// get height for a given temp
+// returns missingVal if no temp profile available
+
+double TempProfile::getHtKmForTempC(double tempC) const
+
+{
 
   for (size_t ii = 1; ii < _tmpProfile.size(); ii++) {
 
-    double tmp1 = _tmpProfile[ii-1].tmpC;
-    double tmp2 = _tmpProfile[ii].tmpC;
-    double ht1 = _tmpProfile[ii-1].htKm;
-    double ht2 = _tmpProfile[ii].htKm;
-
-    if (tmp1 * tmp2 <= 0) {
+    double ht1 = _tmpProfile[ii-1].getHtKm();
+    double ht2 = _tmpProfile[ii].getHtKm();
+    double tmp1 = _tmpProfile[ii-1].getTmpC();
+    double tmp2 = _tmpProfile[ii].getTmpC();
+    double dtmp1 = tmp1 - tempC;
+    double dtmp2 = tmp2 - tempC;
+    
+    if (dtmp1 * dtmp2 <= 0) {
       
-      // change in sign, so straddles freezing level
+      // change in sign, so straddles desired temperature level
       
-      double fraction = tmp1 / (tmp1 - tmp2);
+      double fraction = dtmp1 / (dtmp1 - dtmp2);
       double dht = fraction * (ht2 - ht1);
-      _freezingLevel = ht1 + dht;
 
-      return;
-
+      return (ht1 + dht);
+      
     }
 
   } // ii
+
+  return TempProfile::missingValue;
 
 }
 
 ///////////////////////////////////////////////
 // get temperature at a given height
-// returns -9999 if no temp profile available
+// returns missingValue if no temp profile available
 
 double TempProfile::getTempForHtKm(double htKm) const
 
@@ -618,7 +651,7 @@ double TempProfile::getTempForHtKm(double htKm) const
   // check LUT - if zero size then return missing
 
   if (_lutByMeterHt.size() < 1) {
-    return -9999.0;
+    return TempProfile::missingValue;
   }
 
   // get temp for requested height
@@ -650,12 +683,12 @@ void TempProfile::_createLutByMeterHt() const
   }
   
   _tmpMinHtMeters =
-    (int) (_tmpProfile[0].htKm * 1000.0 + 0.5);
+    (int) (_tmpProfile[0].getHtKm() * 1000.0 + 0.5);
   _tmpMaxHtMeters =
-    (int) (_tmpProfile[_tmpProfile.size()-1].htKm * 1000.0 + 0.5);
+    (int) (_tmpProfile[_tmpProfile.size()-1].getHtKm() * 1000.0 + 0.5);
 
-  _tmpBottomC = _tmpProfile[0].tmpC;
-  _tmpTopC = _tmpProfile[_tmpProfile.size()-1].tmpC;
+  _tmpBottomC = _tmpProfile[0].getTmpC();
+  _tmpTopC = _tmpProfile[_tmpProfile.size()-1].getTmpC();
 
   // fill out temp array, every meter
 
@@ -664,11 +697,11 @@ void TempProfile::_createLutByMeterHt() const
   
   for (int ii = 1; ii < (int) _tmpProfile.size(); ii++) {
 
-    int minHtMeters = (int) (_tmpProfile[ii-1].htKm * 1000.0 + 0.5);
-    double minTmp = _tmpProfile[ii-1].tmpC;
+    int minHtMeters = (int) (_tmpProfile[ii-1].getHtKm() * 1000.0 + 0.5);
+    double minTmp = _tmpProfile[ii-1].getTmpC();
 
-    int maxHtMeters = (int) (_tmpProfile[ii].htKm * 1000.0 + 0.5);
-    double maxTmp = _tmpProfile[ii].tmpC;
+    int maxHtMeters = (int) (_tmpProfile[ii].getHtKm() * 1000.0 + 0.5);
+    double maxTmp = _tmpProfile[ii].getTmpC();
 
     double deltaMeters = maxHtMeters - minHtMeters;
     double deltaTmp = maxTmp - minTmp;
@@ -689,15 +722,27 @@ void TempProfile::_createLutByMeterHt() const
 //////////////////////////////////////////////////////////////
 // PointVal interior class
 
-// Constructor
+// Constructors
+
+TempProfile::PointVal::PointVal()
+
+{
+
+  pressHpa = TempProfile::missingValue;
+  htKm = TempProfile::missingValue;
+  tmpC = TempProfile::missingValue;
+  rhPercent = TempProfile::missingValue;
+
+}
 
 TempProfile::PointVal::PointVal(double ht, double tmp)
 
 {
 
-  pressHpa = -9999;
+  pressHpa = TempProfile::missingValue;
   htKm = ht;
   tmpC = tmp;
+  rhPercent = TempProfile::missingValue;
 
 }
 
@@ -708,6 +753,7 @@ TempProfile::PointVal::PointVal(double press, double ht, double tmp)
   pressHpa = press;
   htKm = ht;
   tmpC = tmp;
+  rhPercent = TempProfile::missingValue;
 
 }
 
@@ -728,9 +774,10 @@ void TempProfile::PointVal::print(ostream &out) const
 {
 
   out << "---- Temp point ----" << endl;
-  out << "  Pressure Hpa: " << pressHpa << endl;
-  out << "  Height Km: " << htKm << endl;
-  out << "  Temp    C: " << tmpC << endl;
+  out << "  Pressure Hpa: " << getPressHpa() << endl;
+  out << "  Height Km: " << getHtKm() << endl;
+  out << "  Temp    C: " << getTmpC() << endl;
+  out << "  RH      %: " << getRhPercent() << endl;
   out << "------------------" << endl;
 
 }
@@ -744,12 +791,22 @@ void TempProfile::print(ostream &out) const
 
   out << "======= Temperature Profile =========" << endl;
 
-  out << "  soundingTime: " << DateTime::strm(_soundingTime) << endl;
-  out << "  soundingUrl: " << _soundingSpdbUrl << endl;
-  out << "  soundingLocationName: " << _soundingLocationName << endl;
+  if (_soundingTime != 0) {
+    out << "  soundingTime: " << DateTime::strm(_soundingTime) << endl;
+  }
+  if (_soundingSpdbUrl.size() > 0) {
+    out << "  soundingUrl: " << _soundingSpdbUrl << endl;
+  }
+  if (_soundingLocationName.size() > 0) {
+    out << "  soundingLocationName: " << _soundingLocationName << endl;
+  }
   out << "  freezingLevel? " << _freezingLevel << endl;
-  out << "  useWetBulbTemp? " << (_useWetBulbTemp?"Y":"N") << endl;
-  out << "  heightCorrectionKm: " << _heightCorrectionKm << endl;
+  if (_useWetBulbTemp) {
+    out << "  using wet bulb temp" << endl;
+  }
+  if (_heightCorrectionKm != 0) {
+    out << "  heightCorrectionKm: " << _heightCorrectionKm << endl;
+  }
 
   int nLevels = (int) _tmpProfile.size();
   int nPrint = 50;
@@ -763,21 +820,22 @@ void TempProfile::print(ostream &out) const
       doPrint = true;
     }
     if (ii < _tmpProfile.size() - 1) {
-      if (_tmpProfile[ii].tmpC * _tmpProfile[ii].tmpC <= 0) {
+      if (_tmpProfile[ii].getTmpC() * _tmpProfile[ii].getTmpC() <= 0) {
         // always print freezing level
         doPrint = true;
       }
     }
     if (ii > 0) {
-      if (_tmpProfile[ii-1].tmpC * _tmpProfile[ii].tmpC <= 0) {
+      if (_tmpProfile[ii-1].getTmpC() * _tmpProfile[ii].getTmpC() <= 0) {
         doPrint = true;
       }
     }
     if (doPrint) {
-      out << "  ilevel, press(Hpa), alt(km), temp(C): " << ii << ", "
-          << _tmpProfile[ii].pressHpa << ", "
-          << _tmpProfile[ii].htKm << ", "
-          << _tmpProfile[ii].tmpC << endl;
+      out << "  ilevel, press(Hpa), alt(km), temp(C), RH(%): " << ii << ", "
+          << _tmpProfile[ii].getPressHpa() << ", "
+          << _tmpProfile[ii].getHtKm() << ", "
+          << _tmpProfile[ii].getTmpC() << ", "
+          << _tmpProfile[ii].getRhPercent() << endl;
     }
   }
   out << "=====================================" << endl;

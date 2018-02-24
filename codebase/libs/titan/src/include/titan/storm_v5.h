@@ -54,6 +54,7 @@ extern "C" {
    */
 #define UNION_NONE 0
 #define UNION_HAIL 1
+#define UNION_NEXRAD_HDA 2
 
   /*
    * Storm file formats.
@@ -441,6 +442,7 @@ extern "C" {
       si32 spare[4];              /* add your union here */
       fl32 float_data[4];         /* user data */
       titan_hail_t hail_metrics;  /* hail indicies from titan/titan_hail.h */
+      nexrad_hda_t hda;           /* NEXRAD hail detection algorithm */
     } add_on;
 
   } storm_file_global_props_v5_t;
