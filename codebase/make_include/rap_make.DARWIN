@@ -213,9 +213,12 @@ JAVA_MAKE_JAR = $(RAP_BIN_DIR)/make_jar
 #
 # Qt
 #
+QT5_PKG_CONFIG_PATH = /usr/local/opt/qt/lib/pkgconfig
 
-QT_BASE_DIR = /usr/local/opt/qt
-QT_INCLUDES = -I$(QT_BASE_DIR)/include -I$(QT_BASE_DIR)/include/QtWidgets -I$(QT_BASE_DIR)/include/QtCore -I$(QT_BASE_DIR)/include/QtGui
-QT_LDFLAGS = -L/usr/local/opt/qt/lib
-QT_LIBS = -F/usr/local/Cellar/qt/5.10.1/lib -framework QtGui -framework QtCore  -framework QtWidgets 
+QT5_INCLUDES = $(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui)
 
+QT5_LDFLAGS = -L$(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --variable=libdir Qt5Gui)
+
+QT5_LIBS = $(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --libs Qt5Core Qt5Widgets Qt5Gui)
+
+QT5_CPPC_CFLAGS = -std=c++11
