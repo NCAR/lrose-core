@@ -34,8 +34,8 @@
 #define DisplayField_HH
 
 #include <string>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QDialog>
+#include <QLabel>
+#include <QDialog>
 #include <iostream>
 #include "ColorMap.hh"
 

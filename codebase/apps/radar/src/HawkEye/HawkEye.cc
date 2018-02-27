@@ -47,7 +47,7 @@
 
 #include <string>
 #include <iostream>
-#include <QtWidgets/QApplication>
+#include <QApplication>
 
 using namespace std;
 

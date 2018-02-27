@@ -27,13 +27,13 @@
 #include <fstream>
 #include <toolsa/toolsa_macros.h>
 
-#include <QtCore/qtimer.h>
-#include <QtGui/QBrush>
-#include <QtGui/QPalette>
-#include <QtGui/QPaintEngine>
-#include <QtGui/QPen>
-#include <QtGui/QResizeEvent>
-#include <QtWidgets/QStylePainter>
+#include <qtimer.h>
+#include <QBrush>
+#include <QPalette>
+#include <QPaintEngine>
+#include <QPen>
+#include <QResizeEvent>
+#include <QStylePainter>
 
 #include "Beam.hh"
 #include "ColorMap.hh"

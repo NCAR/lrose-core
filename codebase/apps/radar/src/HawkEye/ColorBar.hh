@@ -26,13 +26,13 @@
 
 #include "ColorMap.hh"
 
-#include <qwidget.h>
-#include <qlayout.h>
-#include <QtWidgets/QVBoxLayout>
+#include <QWidget>
+#include <QLayout>
+#include <QVBoxLayout>
 #include <vector>
 #include <string>
-#include <QtWidgets/QImage>
-#include <QtWidgets/QPixmap>
+#include <QImage>
+#include <QPixmap>
 
 #ifndef DLL_EXPORT
 #ifdef WIN32

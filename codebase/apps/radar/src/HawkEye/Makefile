@@ -40,13 +40,12 @@ LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
 LOC_LIBS = -lradar -lrapformats -lFmq -lRadx \
 	-ldsserver -ldidss -leuclid -ltoolsa \
-	-ldataport -ltdrp -lQtGui -lQtCore \
-	$(NETCDF4_LIBS) -lbz2 -lz -lpthread
+	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 -lz -lpthread \
+	$(QT_LIBS)
 
-LOC_LDFLAGS = $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
+LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
 
-
-LOC_CPPC_CFLAGS = -std=c++11
+LOC_CPPC_CFLAGS = -std=c++11 -DQT_GUI_LIB  -DQT_CORE_LIB -DQT_WIDGETS_LIB
 
 
 HDRS = \

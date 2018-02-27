@@ -38,14 +38,14 @@
 
 #include <string>
 #include <vector>
-#include <QtWidgets/QDialog>
-#include <QtWidgets/QWidget>
-#include <QtGui/QResizeEvent>
-#include <QtGui/QImage>
-#include <QtCore/QTimer>
-#include <QtWidgets/QRubberBand>
-#include <QtCore/QPoint>
-#include <QtGui/QTransform>
+#include <QDialog>
+#include <QWidget>
+#include <QResizeEvent>
+#include <QImage>
+#include <QTimer>
+#include <QRubberBand>
+#include <QPoint>
+#include <QTransform>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxRay.hh>
 

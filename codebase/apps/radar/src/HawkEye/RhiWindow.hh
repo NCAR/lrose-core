@@ -36,12 +36,12 @@
 #endif
 #endif
 
-#include <QtWidgets/QAction>
-#include <QtWidgets/QFrame>
-#include <QtWidgets/QGroupBox>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QMainWindow>
-#include <QtWidgets/QMenuBar>
+#include <QAction>
+#include <QFrame>
+#include <QGroupBox>
+#include <QLabel>
+#include <QMainWindow>
+#include <QMenuBar>
 #include <vector>
 
 #include "Params.hh"

@@ -44,7 +44,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include <QtWidgets/QMainWindow>
+#include <QMainWindow>
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxRay.hh>

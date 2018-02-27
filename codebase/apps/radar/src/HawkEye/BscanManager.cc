@@ -1246,7 +1246,7 @@ void BscanManager::keyPressEvent(QKeyEvent * e)
   // get key pressed
 
   Qt::KeyboardModifiers mods = e->modifiers();
-  char keychar = e->text().toAscii().data()[0];
+  char keychar = e->text().toLatin1().data()[0];
   int key = e->key();
   
   if (_params.debug) {

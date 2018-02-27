@@ -214,10 +214,8 @@ JAVA_MAKE_JAR = $(RAP_BIN_DIR)/make_jar
 # Qt
 #
 
-# QT_INCLUDES = -I/usr/include/qt
-# QT_LDFLAGS = -L/usr/lib
-
-QT_INCLUDES = -I/usr/local/opt/qt/include
+QT_BASE_DIR = /usr/local/opt/qt
+QT_INCLUDES = -I$(QT_BASE_DIR)/include -I$(QT_BASE_DIR)/include/QtWidgets -I$(QT_BASE_DIR)/include/QtCore -I$(QT_BASE_DIR)/include/QtGui
 QT_LDFLAGS = -L/usr/local/opt/qt/lib
-QT_LIBS = -lqt
+QT_LIBS = -F/usr/local/Cellar/qt/5.10.1/lib -framework QtGui -framework QtCore  -framework QtWidgets 
 
