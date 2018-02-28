@@ -342,25 +342,6 @@ QT4_LIBS = -lQtCore
 # QT5
 #
 
-# QT5_INCLUDES = \
-	# -I/usr/include/qt5 \
-	# -I/usr/include/qt5/QtCore \
-	# -I/usr/include/qt5/QtGui \
-	# -I/usr/include/qt5/QtDesigner \
-	# -I/usr/lib/qt5/include \
-	# -I/usr/lib/qt5/include/QtCore \
-	# -I/usr/lib/qt5/include/QtGui \
-	# -I/usr/lib/qt5/include/QtDesigner \
-	# -I/usr/include/QtCore \
-	# -I/usr/include/QtGui \
-	# -I/usr/include/QtDesigner
-
-# QT5_LDFLAGS = -L/usr/lib/qt5/lib
-# QT5_LIBS = -lQtCore
-#
-# QT5_PKG_CONFIG_PATH = /usr/local/opt/qt/lib/pkgconfig
-# QT5_PKG_CONFIG = /usr/local/opt/qt/lib/pkgconfig pkg-config
-
 QT5_INCLUDES = $(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui)
 
 QT5_LDFLAGS = -L$(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --variable=libdir Qt5Gui)
@@ -370,18 +351,6 @@ QT5_LIBS = $(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --libs Qt5C
 QT5_CPPC_CFLAGS = -fPIC
 
 QT5_EXEC_PATH=$(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --variable=exec_prefix Qt5Core)
-
-# from DARWIN we needed ...
-# QT5_BASE_DIR = /usr/include/qt5
-#QT5_INCLUDES = $(pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui) 
-# -I$(QT5_BASE_DIR)/include -I$(QT5_BASE_DIR)/include/QtWidgets -I$(QT5_BASE_DIR)/include/QtCore -I$(QT5_BASE_DIR)/include/QtGui
-#
-#QT5_LDFLAGS = $(pkg-config --variable=libdir Qt5Core Qt5Widgets Qt5Gui) 
-# -L/usr/lib/qt5/lib
-#
-#QT5_LIBS = $(pkg-config --libs Qt5Core Qt5Widgets Qt5Gui) 
-# -F/usr/local/Cellar/qt/5.10.1/lib -framework QtGui -framework QtCore  -framework QtWidgets 
-#
 
 #
 # Jasper
