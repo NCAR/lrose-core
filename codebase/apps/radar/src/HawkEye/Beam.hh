@@ -36,6 +36,7 @@
 #endif
 #endif
 
+#include <cmath>
 #include <string>
 #include <vector>
 #include <QDialog>
@@ -52,6 +53,12 @@
 #include "ScaledLabel.hh"
 #include "DisplayField.hh"
 #include "Params.hh"
+
+#if defined(DARWIN) && !defined(SINCOS_DEFN)
+#define SINCOS_DEFN
+#define sincosf(x, s, c) __sincosf(x, s, c)
+#define sincos(x, s, c) __sincos(x, s, c)
+#endif
 
 /////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////

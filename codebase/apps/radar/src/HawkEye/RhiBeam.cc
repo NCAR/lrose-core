@@ -22,7 +22,6 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include <cmath>
-#include <math.h>
 #include <iostream>
 #include <fstream>
 #include <toolsa/toolsa_macros.h>
@@ -70,8 +69,8 @@ RhiBeam::RhiBeam(const Params &params,
   double sin1, cos1;
   double sin2, cos2;
   
-  __sincos(startAngle * DEG_TO_RAD, &sin1, &cos1);
-  __sincos(stopAngle * DEG_TO_RAD, &sin2, &cos2);
+  sincos(startAngle * DEG_TO_RAD, &sin1, &cos1);
+  sincos(stopAngle * DEG_TO_RAD, &sin2, &cos2);
   
   // Now calculate the vertex values to be used for all fields.  We negate
   // the y values because the display coordinate system has y increasing down.
