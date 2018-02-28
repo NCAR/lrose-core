@@ -41,7 +41,7 @@ LOC_INCLUDES = $(QT5_INCLUDES) $(NETCDF4_INCS)
 LOC_LIBS = -lradar -lrapformats -lFmq -lRadx \
 	-ldsserver -ldidss -leuclid -ltoolsa \
 	-ldataport -ltdrp $(QT5_LIBS) \
-	$(NETCDF4_LIBS) -lbz2 -lz -lpthread
+	$(NETCDF4_LIBS) -lbz2 -lz -lpthread -lm
 
 LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT5_LDFLAGS) $(NETCDF4_LDFLAGS)
 

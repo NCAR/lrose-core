@@ -31,7 +31,7 @@ include $(RAP_MAKE_INC_DIR)/rap_make_cf_recursive_targets
 #
 
 moc: $(MOC_SRCS)
-	qmake -o Makefile.qmake
+	$(QT5_EXEC_PATH)/bin/qmake -o Makefile.qmake
 	make -f Makefile.qmake $(MOC_OUTPUT)
 
 #
