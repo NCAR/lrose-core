@@ -1602,6 +1602,21 @@ void PolarManager::_locationClicked(double xkm, double ykm,
     }
   }
 
+  //**** testing ****
+  //  QToolTip::showText(this->mapToGlobal(QPoint(xkm, ykm)), "cindy");
+  //QToolTip::showText(mapToGlobal(QPoint(xkm, ykm)), "cindy");
+  //QToolTip::showText(mapToGlobal(QPoint(xkm, ykm)), "louise");
+  //QToolTip::showText(QPoint(xkm, ykm), "jay");
+  //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
+  //int yp = _ppi->_zoomWorld.getIyPixel(ykm);
+  //QToolTip::showText(_ppi->mapToGlobal(QPoint(xp, yp)), "louigi");
+
+  //_ppi->smartBrush(xkm, ykm);
+  //qImage->convertToFormat(QImage::Format_RGB32);
+  //qImage->invertPixels()
+
+  // ****** end testing *****
+
   DateTime rayTime(ray->getTimeSecs());
   char text[256];
   sprintf(text, "%.4d/%.2d/%.2d",

@@ -1825,6 +1825,11 @@ void BscanManager::_locationClicked(double xsecs, double ykm, const RadxRay *ray
 
 {
 
+
+  if (_params.debug) {
+    cerr << "*** Entering BscanManager::_locationClicked()" << endl;
+  }
+
   // check the ray
 
   if (ray == NULL) {

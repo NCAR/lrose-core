@@ -36,6 +36,7 @@
 #include <QPen>
 #include <QResizeEvent>
 #include <QStylePainter>
+#include <QToolTip>
 
 #include "PolarWidget.hh"
 #include "PolarManager.hh"
@@ -382,6 +383,15 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
     double y_km = _worldReleaseY;
     _pointClicked = true;
 
+
+    // ***** testing ******
+    // QToolTip::showText(mapToGlobal(QPoint(_mouseReleaseX, _mouseReleaseY)), "louigi")  
+    QToolTip::showText(QPoint(0,0), "louigi");
+
+    smartBrush(_mouseReleaseX, _mouseReleaseY);
+
+    // ***** end testing ****
+
     // get ray closest to click point
 
     const RadxRay *closestRay = _getClosestRay(x_km, y_km);
@@ -422,6 +432,23 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
   update();
 
 }
+
+/**************   testing ******/
+void PolarWidget::smartBrush(int xPixel, int yPixel) {
+  //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
+  //int yp = _ppi->_zoomWorld.getIyPixel(ykm);
+
+  QImage qImage;
+  qImage.load("/h/eol/brenda/octopus.jpg");
+  // get the Image from somewhere ...   
+  //qImage->convertToFormat(QImage::Format_RGB32);
+  //qImage->invertPixels();
+  QPainter painter(this);
+  painter.drawImage(0, 0, qImage);
+  _drawOverlays(painter);
+
+}
+
 
 
 /*************************************************************************
