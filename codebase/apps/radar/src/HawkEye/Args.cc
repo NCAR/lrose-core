@@ -188,6 +188,24 @@ int Args::parse (const int argc, const char **argv)
 	iret = -1;
       }
       
+    } else if (!strcmp(argv[i], "-images_start_time")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "images_archive_start_time = \"%s\";", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
+    } else if (!strcmp(argv[i], "-images_end_time")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "images_archive_end_time = \"%s\";", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
     } else if (!strcmp(argv[i], "-image_interval")) {
       
       if (i < argc - 1) {
@@ -265,14 +283,17 @@ void Args::_usage(ostream &out)
       << "       [ -f ? ?] list of files to process in archive mode\n"
       << "       [ -fmq_mode] set forces DSR_FMQ_INPUT mode\n"
       << "       [ -fmq_url ?] set input fmq URL\n"
+      << "       [ -images_end_time \"yyyy mm dd hh mm ss\"]\n"
+      << "            set end time for image generation mode\n"
       << "       [ -image_interval ?]\n"
       << "            set image generation interval (secs)\n"
+      << "       [ -images_start_time \"yyyy mm dd hh mm ss\"]\n"
+      << "            set start time for image generation mode\n"
       << "       [ -instance ?] set instance for procmap\n"
       << "       [ -polar ] run in POLAR (PPI/RHI) mode\n"
       << "       [ -sim_mode] SIMULATED_INPUT mode\n"
       << "       [ -start_time \"yyyy mm dd hh mm ss\"]\n"
       << "            set start time for archive mode\n"
-      << "            or archive image generation mode\n"
       << "       [ -start_x ? ] start x location of main window\n"
       << "       [ -start_y ? ] start y location of main window\n"
       << "       [ -tcp_mode] IWRF_TCP_INPUT mode\n"
