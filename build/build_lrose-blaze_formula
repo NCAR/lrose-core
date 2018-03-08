@@ -45,7 +45,7 @@ if "check_output" not in dir( subprocess ): # duck punch it in!
     subprocess.check_output = f
 
 def build_blaze_formula(tar_url, tar_name, formula_name):
-    """ build a Homebrew forumula file for blaze """	
+    """ build a Homebrew forumula file for lrose-blaze """	
     dash = tar_name.find('-')
     period = tar_name.find('.', dash)
     version = tar_name[dash+1:period]

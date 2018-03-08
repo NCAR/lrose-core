@@ -51,7 +51,7 @@ def main():
                       help='Set verbose debugging on')
     parser.add_option('--package',
                       dest='package', default='lrose',
-                      help='Package name. Options are lrose (default), radx, cidd, hcr, hsrl, titan, blaze')
+                      help='Package name. Options are lrose (default), radx, cidd, hcr, hsrl, titan, lrose-blaze')
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')
@@ -384,7 +384,7 @@ def getValueListForKey(path, key):
     except IOError as e:
         print >>sys.stderr, "ERROR - ", thisScriptName
         print >>sys.stderr, "  Cannot open file:", path
-        print >>sys.stderr, "  dir: ", options.dir
+#        print >>sys.stderr, "  dir: ", options.dir
         return valueList
 
     lines = fp.readlines()
