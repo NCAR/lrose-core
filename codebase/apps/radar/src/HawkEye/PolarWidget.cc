@@ -384,13 +384,13 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
     _pointClicked = true;
 
 
-    // ***** testing ******
+    /***** testing ******
     // QToolTip::showText(mapToGlobal(QPoint(_mouseReleaseX, _mouseReleaseY)), "louigi")  
     QToolTip::showText(QPoint(0,0), "louigi");
 
     smartBrush(_mouseReleaseX, _mouseReleaseY);
 
-    // ***** end testing ****
+    // ***** end testing ****/
 
     // get ray closest to click point
 

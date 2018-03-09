@@ -608,7 +608,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
     painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
     painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
 
-    /****** testing ******/
+    /****** testing ******
     // do smart brush ...
   QImage qImage;
   qImage = *(_fieldRenderers[_selectedField]->getImage());
@@ -649,7 +649,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
   pixelsToConsider.clear();
   QPainter painter(this);
   painter.drawImage(0, 0, qImage);
-    /****** end testing *****/
+    ****** end testing *****/
 
   }
 

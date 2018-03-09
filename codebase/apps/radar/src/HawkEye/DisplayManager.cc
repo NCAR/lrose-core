@@ -581,7 +581,7 @@ void DisplayManager::_changeElevation(bool value) {
   if (value) {
     for (size_t i = 0; i < _elevationRButtons->size(); i++) {
       if (_elevationRButtons->at(i)->isChecked()) {
-          cout << "elevationRButton " << i << " is checked" << endl;
+	if (_params.debug) cout << "elevationRButton " << i << " is checked" << endl;
           _selectedElevationIndex = i;
       }
     }
@@ -823,44 +823,15 @@ void DisplayManager::_timeSliderReleased() {
 
 
 void DisplayManager::_updateTimePanel() {
-  cerr << "in DisplayManager, updateTimePanel called" << endl;
+  // cerr << "in DisplayManager, updateTimePanel called" << endl;
 }
 
 void DisplayManager::_timeSliderActionTriggered(int action) {
-  /*
-  switch (action) {
-    case QAbstractSlider::SliderNoAction:
-      cerr << "SliderNoAction action in _timeSliderActionTriggered" << endl;
-      break;
-    case QAbstractSlider::SliderSingleStepAdd: 
-      cerr << "SliderSingleStepAdd action in _timeSliderActionTriggered" << endl;
-      break; 
-    case QAbstractSlider::SliderSingleStepSub:	
-      cerr << "SliderSingleStepSub action in _timeSliderActionTriggered" << endl;
-      break;
-    case QAbstractSlider::SliderPageStepAdd:
-      cerr << "SliderPageStepAdd action in _timeSliderActionTriggered" << endl;
-      break;	
-    case QAbstractSlider::SliderPageStepSub:
-      cerr << "SliderPageStepSub action in _timeSliderActionTriggered" << endl;
-      break;	
-    case QAbstractSlider::SliderToMinimum:
-      cerr << "SliderToMinimum action in _timeSliderActionTriggered" << endl;
-      break;	
-    case QAbstractSlider::SliderToMaximum:
-      cerr << "SliderToMaximum action in _timeSliderActionTriggered" << endl;
-      break;	
-    case QAbstractSlider::SliderMove:
-      cerr << "SliderMove action in _timeSliderActionTriggered" << endl;
-      break;
-    default: 
-      cerr << "unknown action in _timeSliderActionTriggered" << endl;
-    }
-  */
+
 } 
 
 void DisplayManager::_timeSliderValueChanged(int value) {
-  cerr << " from DisplayManager::_timeSliderValueChanged " << endl;
+  // cerr << " from DisplayManager::_timeSliderValueChanged " << endl;
 }
 
 

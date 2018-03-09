@@ -1099,29 +1099,19 @@ void PolarManager::_changeElevation(bool value) {
     cerr << endl;
   }
 
-  //int x;
-  //int diff = 0;
   if (value) {
     size_t i = 0;
     bool found = false;
     while (( i < _elevationRButtons->size() ) && (!found)) {
       if (_elevationRButtons->at(i)->isChecked()) {
-        cout << "elevationRButton " << i << " is checked" << endl;
-        //diff = i - _selectedElevationIndex;
+        if (_params.debug) cout << "elevationRButton " << i << " is checked" << endl;
         _selectedElevationIndex = i;
-
-        //------
-
-        //_sweepIndex += diff;
         _setSweepIndex(i);
-        cerr << "moving to sweep " << _sweepIndex << endl;
+        if (_params.debug) cerr << "moving to sweep " << _sweepIndex << endl;
         _keepFixedAngle = false;
         _setFixedAngle(_sweepIndex);
-        //moveUpDown = true;
         _ppi->setStartOfSweep(true);
         _rhi->setStartOfSweep(true);
-     
-        //--------- 
         _moveUpDown();
         found = true;
       }
@@ -2024,6 +2014,7 @@ bool PolarManager::_timeSliderEvent(QEvent *event) {
 }
 
 void PolarManager::_timeSliderActionTriggered(int action) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
   switch (action) {
     case QAbstractSlider::SliderNoAction:
       cerr << "SliderNoAction action in _timeSliderActionTriggered" << endl;
@@ -2052,6 +2043,7 @@ void PolarManager::_timeSliderActionTriggered(int action) {
     default: 
       cerr << "unknown action in _timeSliderActionTriggered" << endl;
     }
+  }
 } 
 
 void PolarManager::_setTimeSliderToolTip(int value) {
@@ -2065,7 +2057,7 @@ void PolarManager::_setTimeSliderToolTip(int value) {
 }
 
 void PolarManager::_timeSliderValueChanged(int value) {
-  cerr << "_timeSliderValueChanged to " << value << endl;
+  if (_params.debug >= Params::DEBUG_VERBOSE) cerr << "_timeSliderValueChanged to " << value << endl;
   //QString text;
   //text.setNum(value);
   // add as many QLabel's as you like with QSlider as a parent, install eventHandler() on QSlider to catch resize event to proper position them, and obviously handle scroll events, so you can update them... So labels will just float on top of QSlider
