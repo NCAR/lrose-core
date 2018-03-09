@@ -476,7 +476,7 @@ def decodeLibLine(line):
             libs.append("hdf5_cpp")
             libs.append("hdf5_hl")
             libs.append("hdf5")
-            libs.append("udunits2")
+            # libs.append("udunits2")
             libs.append("z")
             libs.append("bz2")
         elif (thisTok.find("NETCDF_C_AND_C++_LIBS") >= 0):
@@ -518,6 +518,7 @@ def getLoadLibList():
                    'hdf5',
                    'udunits2',
                    'expat',
+                   'X11',
                    'z',
                    'bz2',
                    'pthread',
