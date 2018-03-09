@@ -1254,7 +1254,7 @@ void BscanManager::keyPressEvent(QKeyEvent * e)
   // get key pressed
 
   Qt::KeyboardModifiers mods = e->modifiers();
-  char keychar = e->text().toAscii().data()[0];
+  char keychar = e->text().toLatin1().data()[0];
   int key = e->key();
   
   if (_params.debug) {
@@ -1880,6 +1880,11 @@ void BscanManager::_bscanLocationClicked(double xsecs, double ykm,
 void BscanManager::_locationClicked(double xsecs, double ykm, const RadxRay *ray)
 
 {
+
+
+  if (_params.debug) {
+    cerr << "*** Entering BscanManager::_locationClicked()" << endl;
+  }
 
   // check the ray
 

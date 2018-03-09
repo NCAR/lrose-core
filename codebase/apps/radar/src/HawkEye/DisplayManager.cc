@@ -38,8 +38,9 @@
 
 #include "DisplayManager.hh"
 #include "DisplayField.hh"
+#include "DisplayElevation.hh"
 #include "ColorMap.hh"
-#include "ColorBar.hh"
+#include "ColorBar.hh" 
 #include "Params.hh"
 #include "Reader.hh"
 
@@ -61,6 +62,8 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QRadioButton>
+#include <QScrollBar>
+#include <QAbstractSlider>
 #include <QStatusBar>
 #include <QVBoxLayout>
 #include <QLineEdit>
@@ -102,6 +105,7 @@ DisplayManager::DisplayManager(const Params &params,
   _radarLat = -9999.0;
   _radarLon = -9999.0;
   _radarAltKm = -9999.0;
+  _elevations = NULL;
 
 }
 
@@ -497,7 +501,343 @@ void DisplayManager::_createFieldPanel()
           this, SLOT(_changeField(int)));
 
 }
- 
+
+
+//////////////////////////////////////////////
+// create the elevation panel
+
+void DisplayManager::_createElevationPanel()
+{
+  
+  Qt::Alignment alignCenter(Qt::AlignCenter);
+  Qt::Alignment alignRight(Qt::AlignRight);
+  
+  //  int fsize = _params.label_font_size;
+  //int fsize2 = _params.label_font_size + 2;
+  //int fsize4 = _params.label_font_size + 4;
+  //int fsize6 = _params.label_font_size + 6;
+
+  _elevationPanel = new QGroupBox(_main);
+  // _elevationGroup = new QButtonGroup;
+  _elevationsLayout = new QGridLayout(_elevationPanel);
+  _elevationsLayout->setVerticalSpacing(1);
+
+  int row = 0;
+
+  QLabel *elevationHeader = new QLabel("ELEVATION", _elevationPanel);
+  //elevationHeader->setFont(font);
+  _elevationsLayout->addWidget(elevationHeader, row, 0); // , 0, nCols, alignCenter);
+  row++;
+
+
+    //QGroupBox *groupBox = new QGroupBox(tr("Elevations"));
+    _elevationSubPanel = new QGroupBox(tr("Angles"));
+    _elevationVBoxLayout = new QVBoxLayout;
+    char buf[50];
+
+    _elevationRButtons = new vector<QRadioButton *>(); // _elevations->size());
+  if (_elevations != NULL) {
+    for (size_t ielevation = 0; ielevation < _elevations->size(); ielevation++) {
+
+      // this is our _elevationPanel
+      //    QGroupBox *groupBox = new QGroupBox(tr("Exclusive Radio Buttons"));
+      std::sprintf(buf, "%7.2f", _elevations->at(ielevation));
+      //string x = to_string(_elevations->at(0));
+      QRadioButton *radio1 = new QRadioButton(buf); 
+
+      if (ielevation == 0) {
+        radio1->setChecked(true);
+        _selectedElevationIndex = 0;
+      }
+
+      _elevationRButtons->push_back(radio1);
+      //_elevationsLayout->addWidget(radio1, row, 0, 1, nCols, alignCenter);
+
+      _elevationVBoxLayout->addWidget(radio1);
+
+      // connect slot for elevation change
+      connect(radio1, SIGNAL(toggled(bool)), this,
+              SLOT(_changeElevation(bool)));
+      row++;
+    }
+    } // _elevations != NULL
+  //_elevationVBoxLayout->addStretch(1);
+    _elevationSubPanel->setLayout(_elevationVBoxLayout);
+    _elevationsLayout->addWidget(_elevationSubPanel, row, 0); //, 1, nCols, alignCenter);
+    row++;
+    QLabel *spacerRow = new QLabel("", _elevationPanel);
+    _elevationsLayout->addWidget(spacerRow, row, 0);
+    _elevationsLayout->setRowStretch(row, 1);
+  
+}
+
+
+void DisplayManager::_changeElevation(bool value) {
+
+  if (_params.debug) {
+    cerr << "DisplayManager:: the elevation was changed ";
+    cerr << endl;
+  }
+  if (value) {
+    for (size_t i = 0; i < _elevationRButtons->size(); i++) {
+      if (_elevationRButtons->at(i)->isChecked()) {
+	if (_params.debug) cout << "elevationRButton " << i << " is checked" << endl;
+          _selectedElevationIndex = i;
+      }
+    }
+  }
+
+}
+
+// only set the sweepIndex in one place;
+// here, just move the radio button forward or backward one step
+// when the radio button is changed, a signal is emitted and
+// the slot that receives the signal will increase the sweepIndex
+// value = +1 move forward
+// value = -1 move backward in sweeps
+void DisplayManager::_changeElevationRadioButton(int value) {
+  
+  if (_params.debug) {
+    cerr << "changing radio button to " << value;
+    cerr << endl;
+  }
+
+  if (value != 0) {
+    int  newlySelectedEI = _selectedElevationIndex + value;
+    int max = _elevationRButtons->size();
+    if (newlySelectedEI < 0)
+      newlySelectedEI = max - 1;
+    if (newlySelectedEI >= max)
+      newlySelectedEI = 0;
+
+    _elevationRButtons->at(_selectedElevationIndex)->setChecked(false);
+    _elevationRButtons->at(newlySelectedEI)->setChecked(true);
+    _selectedElevationIndex = newlySelectedEI;
+
+  } else {
+
+    cerr << "Elevation radio button value not changed" << endl; 
+
+  }
+}
+
+
+
+//////////////////////////////////////////////
+// create the time panel
+
+void DisplayManager::_createTimePanel()
+{
+  
+  Qt::Alignment alignCenter(Qt::AlignCenter);
+  Qt::Alignment alignRight(Qt::AlignRight);
+  
+  //int fsize = _params.label_font_size;
+  //int fsize2 = _params.label_font_size + 2;
+  //int fsize4 = _params.label_font_size + 4;
+  //int fsize6 = _params.label_font_size + 6;
+
+  _timePanel = new QGroupBox(_main);
+  // _timeGroup = new QButtonGroup;
+  _timesLayout = new QHBoxLayout(_timePanel); //QGridLayout(_timePanel);
+  // _timesLayout->setVerticalSpacing(5);
+
+  int row = 0;
+
+  //_selectedTime = _times[0];
+  //_selectedTimeLabel = _times[0]->getLabel();
+  //_selectedTimeName = _times[0]->getName();
+  //_selectedTimeLabelWidget = new QLabel(_selectedTimeLabel.c_str(),
+  //                                           _timePanel);
+  //QFont font6 = _selectedTimeLabelWidget->font();
+  //font6.setPixelSize(fsize6);
+  //_selectedTimeLabelWidget->setFont(font6);
+  //_timesLayout->addWidget(_selectedTimeLabelWidget, row, 0, 1, nCols, alignCenter);
+  //row++;
+
+  //QFont font4 = _selectedTimeLabelWidget->font();
+  //font4.setPixelSize(fsize4);
+  //QFont font2 = _selectedTimeLabelWidget->font();
+  //font2.setPixelSize(fsize2);
+  //QFont font = _selectedTimeLabelWidget->font();
+  //font.setPixelSize(fsize);
+
+  //_timeValueLabel = new QLabel("ELEV", _timePanel);
+  //_timeValueLabel->setFont(font);
+  //_timesLayout->addWidget(_timeValueLabel, row, 0, 1, nCols, alignCenter);
+  //row++;
+
+  //QLabel *timeHeader = new QLabel("TIME", _timePanel);
+  //timeHeader->setFont(font);
+  // _timesLayout->addWidget(timeHeader); // , row, 0, 1, nCols, alignCenter);
+  row++;
+  /*
+  QLabel *nameHeader = new QLabel("Name", _fieldPanel);
+  nameHeader->setFont(font);
+  _fieldsLayout->addWidget(nameHeader, row, 0, alignCenter);
+  QLabel *keyHeader = new QLabel("HotKey", _fieldPanel);
+  keyHeader->setFont(font);
+  _fieldsLayout->addWidget(keyHeader, row, 1, alignCenter);
+  if (_haveFilteredFields) {
+    QLabel *rawHeader = new QLabel("Raw", _fieldPanel);
+    rawHeader->setFont(font);
+    _fieldsLayout->addWidget(rawHeader, row, 2, alignCenter);
+    QLabel *filtHeader = new QLabel("Filt", _fieldPanel);
+    filtHeader->setFont(font);
+    _fieldsLayout->addWidget(filtHeader, row, 3, alignCenter);
+  }
+  row++;
+  */
+
+    int stretch = 0;
+
+  // add the start time
+  
+  _startTimeLabel = new QLabel("hh:mm:ss", _timePanel);
+  //timeHeader->setFont(font);
+  _timesLayout->addWidget(_startTimeLabel, stretch, alignRight);
+
+  /*   As a Slider ... */
+  //QSlider *slider;
+  // horizontalSliders = new SlidersGroup(Qt::Horizontal, tr("Horizontal"));
+
+    _timeSlider = new QSlider(Qt::Horizontal);
+    _timeSlider->setFocusPolicy(Qt::StrongFocus);
+    //_timeSlider->setTickPosition(QSlider::TicksBothSides);
+    _timeSlider->setTickInterval(10);
+    _timeSlider->setSingleStep(1);
+    //QSize qSize(500,50);
+    _timeSlider->setFixedWidth(300); // works
+    //_timeSlider->sizeHint(qSize);
+    // use Dave Smith's fancy qslider
+    _timeSlider->setStyleSheet("QSlider::groove:horizontal {\
+border: 1px solid #bbb;\
+background: white;\
+height: 10px;\
+border-radius: 4px;\
+}\
+QSlider::sub-page:horizontal {\
+background: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,\
+    stop: 0 #66e, stop: 1 #bbf);\
+background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,\
+    stop: 0 #bbf, stop: 1 #55f);\
+border: 1px solid #777;\
+height: 10px;\
+border-radius: 4px;\
+}\
+\
+QSlider::add-page:horizontal {\
+background: #fff;\
+border: 1px solid #777;\
+height: 10px;\
+border-radius: 4px;\
+}\
+\
+QSlider::handle:horizontal {\
+background: qlineargradient(x1:0, y1:0, x2:1, y2:1,\
+    stop:0 #eee, stop:1 #ccc);\
+border: 1px solid #777;\
+width: 13px;\
+margin-top: -2px;\
+margin-bottom: -2px;\
+border-radius: 4px;\
+}\
+\
+QSlider::handle:horizontal:hover {\
+background: qlineargradient(x1:0, y1:0, x2:1, y2:1,\
+    stop:0 #fff, stop:1 #ddd);\
+border: 1px solid #444;\
+border-radius: 4px;\
+}\
+\
+QSlider::sub-page:horizontal:disabled {\
+background: #bbb;\
+border-color: #999;\
+}\
+\
+QSlider::add-page:horizontal:disabled {\
+background: #eee;\
+border-color: #999;\
+}\
+\
+QSlider::handle:horizontal:disabled {\
+background: #eee;\
+border: 1px solid #aaa;\
+border-radius: 4px;\
+}\
+");
+
+
+    _timesLayout->addWidget(_timeSlider, stretch,  alignCenter);
+  //_timesLayout->addWidget(_timeSlider, row, 0, 1, nCols, alignCenter);
+    
+/* */
+
+  // consider using this ... it's pretty nice ...
+  // http://tutorialcoding.com/qt/basic/unit012/index.html
+
+  /*  As a ScrollBar ...
+  QScrollBar *scrollBar;
+
+    scrollBar = new QScrollBar(Qt::Horizontal);
+    scrollBar->setMinimum(0);
+    scrollBar->setMaximum(100);
+    //_timeSlider->setFocusPolicy(Qt::StrongFocus);
+    //_timeSlider->setTickPosition(QSlider::TicksBothSides);
+    //_timeSlider->setTickInterval(10);
+    //_timeSlider->setSingleStep(1);
+
+  _timesLayout->addWidget(scrollBar, row, 0, 1, nCols, alignCenter);
+  */
+
+  // add the end time
+  
+  _stopTimeLabel = new QLabel("hh:mm:ss", _timePanel);
+  //timeHeader->setFont(font);
+  _timesLayout->addWidget(_stopTimeLabel);
+  //_timePanel->setLayout(vbox);
+
+
+  //_timeSlider->setStatusTip("this is status tip");
+
+  // connect slot for time change
+
+  connect(_timeSlider, SIGNAL(actionTriggered(int)),
+           this, SLOT(_timeSliderActionTriggered(int)));
+
+  connect(_timeSlider, SIGNAL(valueChanged(int)),
+            this, SLOT(_timeSliderValueChanged(int)));
+
+  connect(_timeSlider, SIGNAL(sliderReleased()),
+          this, SLOT(_timeSliderReleased()));
+
+}
+
+bool DisplayManager::_timeSliderEvent(QEvent *event) {
+  return true;
+}
+
+void DisplayManager::_timeSliderReleased() {
+
+}
+
+
+void DisplayManager::_updateTimePanel() {
+  // cerr << "in DisplayManager, updateTimePanel called" << endl;
+}
+
+void DisplayManager::_timeSliderActionTriggered(int action) {
+
+} 
+
+void DisplayManager::_timeSliderValueChanged(int value) {
+  // cerr << " from DisplayManager::_timeSliderValueChanged " << endl;
+}
+
+
+void DisplayManager::_openFile() {
+}
+
 ///////////////////////////////////////////////////////
 // create the click report dialog
 //
@@ -1077,6 +1417,111 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
     _sunAzVal->setText(text);
   }
 
+}
+
+//////////////////////////////////////////////
+// update the elevation panel
+
+void DisplayManager::_updateElevationPanel(vector<float> *newElevations)
+{
+
+  // old elevations              new elevations
+  // -------------               -------------
+  // 1) NULL                      1) NULL
+  // 2) not NULL                  2) not NULL
+  //
+  // 1 -> 1 nothing tho do
+  // 1 -> 2 create new radio buttons
+  // 2 -> 2 && # of elevations stay the same;
+  //            just update text for the buttons
+  // 2 -> 2 && # not the same; 
+  //           delete existing buttons;
+  //           create new radio buttons
+  // 2 -> 1    delete existing buttons
+  // 
+
+  if (_params.debug) {
+    cerr << "updating elevations" << endl;
+  }
+
+  if (_elevations == NULL) {
+     if (newElevations != NULL) {
+       _createNewRadioButtons(newElevations);
+     }
+  } else {
+    if (newElevations == NULL) {
+    // delete the radio buttons
+      _clearRadioButtons();
+    } else {
+    // if the number of elevations is the same, we can reuse the QGroupBox
+    // otherwise, we need to add or remove radio buttons
+      if (newElevations->size() == _elevations->size()) {
+        // reset the text on existing buttons
+        _resetElevationText(newElevations);
+      } else {
+        _clearRadioButtons();
+        _createNewRadioButtons(newElevations);
+      }
+    }
+    _elevations->clear();
+  }
+  _elevations = newElevations;
+}
+
+
+
+// TODO: need to keep around the pointer/handle to the _elevationVBoxLayout
+void DisplayManager::_createNewRadioButtons(vector<float> *newElevations) {
+  //QGroupBox *groupBox = new QGroupBox(tr("Elevations"));
+  //QVBoxLayout *vbox = new QVBoxLayout;
+  char buf[50];
+  _elevationRButtons = new vector<QRadioButton *>(); // _elevations->size());
+  for (size_t ielevation = 0; ielevation < newElevations->size(); ielevation++) {
+
+    // TODO: this should be set text
+    std::sprintf(buf, "%.2f", newElevations->at(ielevation));
+    QRadioButton *radio1 = new QRadioButton(buf); 
+
+    if (ielevation == 0) {
+      radio1->setChecked(true);
+      _selectedElevationIndex = 0;
+    }
+
+    _elevationRButtons->push_back(radio1);
+
+    _elevationVBoxLayout->addWidget(radio1);
+
+    // connect slot for elevation change
+    connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeElevation(bool)));
+  }
+  //_elevationVBoxLayout->addStretch(1);
+  //_elevationPanel->setLayout(vbox);
+  //int row = 1;
+  //_elevationsLayout->addWidget(groupBox, row, 0, 1, nCols, alignCenter);
+}
+
+void DisplayManager::_resetElevationText(vector<float> *newElevations) {
+
+  char buf[50];
+  for (size_t i = 0; i < newElevations->size(); i++) {
+    //std::sprintf(buf, "%.2f", _elevations->at(i));
+    _setText(buf, "%6.2f", newElevations->at(i));
+    QRadioButton *rbutton = _elevationRButtons->at(i);
+    rbutton->setText(buf);
+  }
+}
+
+void DisplayManager::_clearRadioButtons() {
+
+  QLayoutItem* child;
+  while (_elevationVBoxLayout->count() !=0) {
+    child = _elevationVBoxLayout->takeAt(0);
+    if (child->widget() !=0) {
+      delete child->widget();
+    }
+    delete child;
+  }
+ 
 }
 
 ///////////////////////////////////////////

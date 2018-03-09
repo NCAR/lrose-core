@@ -37,7 +37,7 @@
 #include <sstream>
 #include <iostream>
 #include <cstdio>
-#include <QLineF>
+#include <QtCore/QLineF>
 
 #include <toolsa/toolsa_macros.h>
 #include "WorldPlot.hh"

@@ -535,6 +535,8 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @brief event   The resize event.
    */
 
+  void smartBrush(int xPixel, int yPixel);
+
   virtual void resizeEvent(QResizeEvent * event);
 
   // reset the world coords

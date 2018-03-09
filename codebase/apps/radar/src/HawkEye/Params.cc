@@ -33,10 +33,11 @@
  * @author Automatically generated
  *
  */
-using namespace std;
 
 #include "Params.hh"
 #include <cstring>
+
+using namespace std;
 
   ////////////////////////////////////////////
   // Default constructor

@@ -21,74 +21,89 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#ifndef COLORBAR_HH
-#define COLORBAR_HH
+/////////////////////////////////////////////////////////////
+// DisplayElevation.cc
+//
+// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Oct 2014
+//
+///////////////////////////////////////////////////////////////
 
-#include "ColorMap.hh"
+#include "DisplayElevation.hh"
 
-#include <QWidget>
-#include <QLayout>
-#include <QVBoxLayout>
-#include <vector>
-#include <string>
-#include <QImage>
-#include <QPixmap>
+// constructor
+// take a list of sweeps, elevtion values??
+DisplayElevation::DisplayElevation(const vector<RadxSweep *> &sweeps) {
+  //const string &label,
+  //                         const string &name,
+  //                         const string &units,
+  //                         const string &shortcut) :
+  //      _label(label),
+  //      _name(name),
+  //      _units(units),
+  //      _shortcut(shortcut),
+  //      _selectValue(0),
+        _dialog(NULL)
 
-#ifndef DLL_EXPORT
-#ifdef WIN32
-#ifdef QT_PLUGIN
-#define DLL_EXPORT __declspec(dllexport)
-#else
-#define DLL_EXPORT __declspec(dllimport)
-#endif
-#else
-#define DLL_EXPORT
-#endif
-#endif
-
-/// A widget that displays a representation of ColorMap.
-/// Swatches are displayed in a vertical column, with text labels
-/// indicating the value of the swatch.
-class DLL_EXPORT ColorBar: public QWidget
 {
-  Q_OBJECT
 
-public:
+}
 
-  ColorBar(int width,
-           const ColorMap *cmap,
-           QWidget* parent = 0);
+// destructor
 
-  virtual ~ColorBar(void);
+DisplayElevation::~DisplayElevation()
+
+{
+  if (_dialog) {
+    delete _dialog;
+  }
+}
+
+// ///////////////////////////////////////////////////////
+// // create the dialog
+
+void DisplayElevation::createDialog(QDialog *mentor,
+                                 const string &initText)
   
-  /// Set the color map, update the view
-  /// @param map The corresponding color map.
-  void setColorMap(const ColorMap *map);
-  
-  /// @returns An image of the color bar. The caller must delte
-  /// it when finished.
-  QImage* getImage();
-  
-  /// @returns A pixmap of the color bar. The caller must delete it 
-  /// when finished.
-  QPixmap* getPixmap();
-  
- signals:
+{
 
-  void released();
-  
- protected:
+  if (_dialog) {
+    delete _dialog;
+    _dialog = NULL;
+  }
 
-  /// Capture a mouse release and emit a released() signal.
-  virtual void mouseReleaseEvent(QMouseEvent* e);
+  _dialog = new QLabel(mentor);
+  _dialog->setText(initText.c_str());
 
-  /// The paint event is where we will draw the color bar.
-  virtual void paintEvent(QPaintEvent* e);
+}
 
-  /// A default color map, so that the plugin can
-  /// display something.
-  const ColorMap *_colorMap;
+// set the dialog text
 
-};
+void DisplayElevation::setDialogText(const string &text)
 
-#endif
+{
+
+  if (_dialog) {
+    _dialog->setText(text.c_str());
+  }
+
+}
+
+// print the object
+
+void DisplayElevation::print(ostream &out)
+
+{
+
+  out << "========= DisplayElevation ========" << endl;
+  out << "  label: " << _label << endl;
+  out << "  name: " << _name << endl;
+  out << "  units: " << _units << endl;
+  out << "  shortcut: " << _shortcut << endl;
+  out << "  buttonRow: " << _buttonRow << endl;
+  out << "  selectValue: " << _selectValue << endl;
+  out << "===============================" << endl;
+
+}
+
