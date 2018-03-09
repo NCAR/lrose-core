@@ -339,6 +339,20 @@ QT4_LDFLAGS = \
 QT4_LIBS = -lQtCore
 
 #
+# QT5
+#
+
+QT5_INCLUDES = $(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui)
+
+QT5_LDFLAGS = -L$(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --variable=libdir Qt5Gui)
+
+QT5_LIBS = $(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --libs Qt5Core Qt5Widgets Qt5Gui)
+
+QT5_CPPC_CFLAGS = -fPIC
+
+QT5_EXEC_PATH=$(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --variable=exec_prefix Qt5Core)
+
+#
 # Jasper
 #
 
