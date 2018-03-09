@@ -111,7 +111,7 @@ cd $runDir/codebase
 cd $runDir
 if [ "$package" == "cidd" ]
 then
-  ./build/run_autoconf.cidd
+  ./build/run_autoconf.cidd --verbose
 else
   ./build/run_autoconf -p $package
 fi
