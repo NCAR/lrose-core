@@ -103,7 +103,7 @@ shift `expr $OPTIND - 1`
 
 # set RPATH to be locatable relative to $ORIGIN, via LDFLAGS
 
-export "LDFLAGS=-L${prefix}/lib -Wl,-rpath,'\$\$ORIGIN'/lrose_runtime_libs:${prefix}/lib"
+export "LDFLAGS=-L${prefix}/lib -Wl,-rpath,'\$\$ORIGIN'/${package}_runtime_libs:${prefix}/lib"
 
 # check we are in the correct place - i.e. have codebase below us
 
