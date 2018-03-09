@@ -239,7 +239,9 @@ def searchDir(dir):
         if (options.shared == True):
             createScript = "createMakefile.am.app." + options.pkg + ".py"
         else:
-            createScript = "createMakefile.am.app.py"
+            # TO DO - check if this works
+            createScript = "createMakefile.am.app." + options.pkg + ".py"
+            # createScript = "createMakefile.am.app.py"
         cmd = os.path.join(thisScriptDir, createScript) + \
                            " --dir " + absDir + debugStr
         cmd += " --libList " + libList
