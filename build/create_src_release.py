@@ -162,7 +162,7 @@ def main():
               
     # delete the tmp dir
 
-    shutil.rmtree(tmpDir)
+    # shutil.rmtree(tmpDir)
 
     sys.exit(0)
 
