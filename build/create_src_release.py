@@ -438,7 +438,12 @@ def trimToMakefiles(subDir):
 
     dirPath = os.path.join(codebaseDir, subDir)
     os.chdir(dirPath)
+    try: 
+# need to allow upper and lower case Makefile (makefile or Makefile)
     subNameList = getValueListForKey("makefile", "SUB_DIRS")
+    if (subNameList.empty()):
+        print >>sys.stderr, "Trying uppercase Makefile ... "
+        subNameList = getValueListForKey("Makefile", "SUB_DIRS")
     
     for subName in subNameList:
         if (os.path.isdir(subName)):
