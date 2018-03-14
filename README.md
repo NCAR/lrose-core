@@ -1,6 +1,6 @@
 # lrose-core
 
-<img align="left" width="175" height="175" src="./docs/images/LROSE_logo.png">
+<img align="left" width="175" height="175" src="./docs/images/LROSE_logo.small.png">
 <img align="right" width="175" height="175" src="./docs/images/spol_dynamo.jpg">
 
 --------------------------------------------
