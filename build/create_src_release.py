@@ -455,6 +455,11 @@ def trimToMakefiles(subDir):
             if (entry not in subNameList):
                 print >>sys.stderr, "discarding unneeded dir: " + entry
                 shutil.rmtree(entry)
+            else:
+                # check this child's required subdirectories ( recurse )
+                nextLevel = os.path.join(dirPath, entry)
+                print >> sys.stderr, "trim to makefile on subdirectory: " + nextLevel
+                trimToMakefiles(nextLevel)
 
 ########################################################################
 # Run a command in a shell, wait for it to complete
