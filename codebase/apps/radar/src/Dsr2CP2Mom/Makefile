@@ -36,12 +36,12 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 TARGET_FILE = Dsr2CP2Mom
 
-LOC_INCLUDES = $(QT5_INCLUDES)
-LOC_CPPC_CFLAGS = $(QT5_CPPC_CFLAGS)
-LOC_LDFLAGS = $(QT5_LDFLAGS)
+LOC_INCLUDES = $(QT_INCLUDES)
+LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
+LOC_LDFLAGS = $(QT_LDFLAGS)
 LOC_LIBS = \
 	-lFmq -ldsserver -lrapformats -ldidss \
-	-ltoolsa -ldataport -ltdrp $(QT5_LIBS) \
+	-ltoolsa -ldataport -ltdrp $(QT_LIBS) \
 	-lbz2 -lz
 
 HDRS = \

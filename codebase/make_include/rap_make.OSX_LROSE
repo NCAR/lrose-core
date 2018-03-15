@@ -213,14 +213,14 @@ JAVA_MAKE_JAR = $(RAP_BIN_DIR)/make_jar
 #
 # Qt
 #
-QT5_PKG_CONFIG_PATH = /usr/local/opt/qt/lib/pkgconfig
+QT_PKG_CONFIG_PATH = /usr/local/opt/qt/lib/pkgconfig
 
-QT5_INCLUDES = $(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui)
+QT_INCLUDES = $(shell PKG_CONFIG_PATH=$(QT_PKG_CONFIG_PATH) pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui)
 
-QT5_LDFLAGS = -L$(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --variable=libdir Qt5Gui)
+QT_LDFLAGS = -L$(shell PKG_CONFIG_PATH=$(QT_PKG_CONFIG_PATH) pkg-config --variable=libdir Qt5Gui)
 
-QT5_LIBS = $(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --libs Qt5Core Qt5Widgets Qt5Gui)
+QT_LIBS = $(shell PKG_CONFIG_PATH=$(QT_PKG_CONFIG_PATH) pkg-config --libs Qt5Core Qt5Widgets Qt5Gui)
 
-QT5_CPPC_CFLAGS = -std=c++11
+QT_CPPC_CFLAGS = -std=c++11
 
-QT5_EXEC_PATH=$(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --variable=exec_prefix Qt5Core)
+QT_EXEC_PATH=$(shell PKG_CONFIG_PATH=$(QT_PKG_CONFIG_PATH) pkg-config --variable=exec_prefix Qt5Core)

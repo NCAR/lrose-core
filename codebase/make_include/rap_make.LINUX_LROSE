@@ -342,15 +342,15 @@ QT4_LIBS = -lQtCore
 # QT5
 #
 
-QT5_INCLUDES = $(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui Qt5Network)
+QT_INCLUDES = $(shell PKG_CONFIG_PATH=$(QT_PKG_CONFIG_PATH) pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui Qt5Network)
 
-QT5_LDFLAGS = -L$(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --variable=libdir Qt5Gui)
+QT_LDFLAGS = -L$(shell PKG_CONFIG_PATH=$(QT_PKG_CONFIG_PATH) pkg-config --variable=libdir Qt5Gui)
 
-QT5_LIBS = $(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --libs Qt5Core Qt5Widgets Qt5Gui Qt5Network)
+QT_LIBS = $(shell PKG_CONFIG_PATH=$(QT_PKG_CONFIG_PATH) pkg-config --libs Qt5Core Qt5Widgets Qt5Gui Qt5Network)
 
-QT5_CPPC_CFLAGS = -fPIC
+QT_CPPC_CFLAGS = -fPIC
 
-QT5_EXEC_PATH=$(shell PKG_CONFIG_PATH=$(QT5_PKG_CONFIG_PATH) pkg-config --variable=exec_prefix Qt5Core)
+QT_EXEC_PATH=$(shell PKG_CONFIG_PATH=$(QT_PKG_CONFIG_PATH) pkg-config --variable=exec_prefix Qt5Core)
 
 #
 # Jasper
