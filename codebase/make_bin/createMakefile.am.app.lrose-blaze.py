@@ -283,7 +283,7 @@ def setCompileList():
         handleSrcType(lines, srcType)
     
 ########################################################################
-# check for dependence on QT4
+# check for dependence on QT
 
 def checkForQt4():
                     
@@ -298,7 +298,7 @@ def checkForQt4():
     fp.close()
 
     for line in lines:
-        if (line.find("QT4") >= 0):
+        if (line.find("QT") >= 0):
             return True
         if (line.find("-lQtCore") >= 0):
             return True
@@ -577,7 +577,7 @@ def writeMakefileAm():
     for lib in compiledLibList:
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
     if (needQt4 == True):
-        fo.write("AM_CFLAGS += $(QT4_CFLAGS)\n")
+        fo.write("AM_CFLAGS += $(QT_CFLAGS)\n")
     fo.write("\n")
     fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
     fo.write("\n")
@@ -588,7 +588,7 @@ def writeMakefileAm():
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
     if (needQt4 == True):
-        fo.write("AM_LDFLAGS += $(QT4_LIBS)\n")
+        fo.write("AM_LDFLAGS += $(QT_LIBS)\n")
     fo.write("\n")
 
     if (len(loadLibList) > 0):

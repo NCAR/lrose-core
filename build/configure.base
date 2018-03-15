@@ -98,5 +98,5 @@ AC_CHECK_FUNCS([floor gettimeofday memset modf pow strerror])
 
 # QT options
 
-PKG_CHECK_MODULES([QT4], [QtCore QtGui], [HAVE_QT4="yes"], [HAVE_QT4="no"])
+PKG_CHECK_MODULES([QT], [Qt5Core Qt5Gui], [HAVE_QT="yes"], [HAVE_QT="no"])
 
