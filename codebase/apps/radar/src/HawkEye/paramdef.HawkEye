@@ -10,7 +10,7 @@
 
 commentdef {
   p_header = "HawkEye is the engineering display for the HAWK moments data";
-  p_text = "This is a C++ application using the QT4 GUI toolkit.";
+  p_text = "This is a C++ application using the QT GUI toolkit.";
 }
 
 commentdef {
