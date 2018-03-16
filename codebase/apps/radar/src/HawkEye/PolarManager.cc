@@ -541,7 +541,8 @@ void PolarManager::_setupWindows()
 
   _createElevationPanel();
 
-  _createTimePanel();
+  //if (_archiveMode) 
+    _createTimePanel();
 
   
   // main window layout
@@ -564,7 +565,8 @@ void PolarManager::_setupWindows()
   row++;
   column = 2;
 
-  mainLayout->addWidget(_timePanel, row, column, rowSpan, columnSpan); // , rowSpan, columnSpan);
+  if (_archiveMode)
+    mainLayout->addWidget(_timePanel, row, column, rowSpan, columnSpan); // , rowSpan, columnSpan);
   
   /*
   QHBoxLayout *mainLayout = new QHBoxLayout(_main);
