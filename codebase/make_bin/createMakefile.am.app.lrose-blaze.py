@@ -591,7 +591,6 @@ def writeMakefileAm():
     if (needQt4 == True):
         fo.write("AM_LDFLAGS += $(QT_LDFLAGS)\n")
         fo.write("AM_LDFLAGS += $(QT_LIBS)\n")
-        fo.write("$(top_builddir)/make_include/rap_make_qt_targets\n")
     fo.write("\n")
 
     if (len(loadLibList) > 0):
