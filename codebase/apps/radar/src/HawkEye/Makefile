@@ -113,7 +113,7 @@ MOC_OUTPUT = \
 	moc_RhiWindow.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
-CPP_SRCS = $(MOC_OUTPUT)
+CPP_SRCS = # $(MOC_OUTPUT)
 
 #
 # tdrp macros
