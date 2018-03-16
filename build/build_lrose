@@ -118,9 +118,8 @@ codebaseDir=${runDir}/codebase
 
 # for lrose and hcr, create the 'moc'-able files for Qt apps
 echo "package = $package"
-if [ "$package" == "lrose" -o "$package" == "hcr" \
-    -o "$package" == "hsrl" -o "$package" == "titan"  ]
-then
+if [ -d "$codebaseDir/apps/radar/src/HawkEye" ]
+then 
   cd $codebaseDir/apps/radar/src/HawkEye
   rm -f moc_*   # remove any old moc_* files before we (re)generate them
   qmake-qt5 -o Makefile.qmake
