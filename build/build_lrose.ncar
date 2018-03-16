@@ -38,7 +38,7 @@ codebaseDir=${runDir}/codebase
 
 # defaults
 
-prefix=${LROSE_INSTALL_DIR}
+prefix=${HOME}/lrose
 package=lrose
 debug=true
 
@@ -101,7 +101,7 @@ export LROSE_INSTALL_DIR=${prefix}
 # Set up build environment
 # ------------------------
 
-export HOST_OS=LINUX_NCXX
+export HOST_OS=LINUX_LROSE
 if [ "$package" == "cidd" ]
 then
   export HOST_OS=LINUX_64_CIDD32
