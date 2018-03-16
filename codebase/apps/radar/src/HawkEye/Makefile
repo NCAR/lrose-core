@@ -100,20 +100,20 @@ MOC_SRCS = \
 	RhiWidget.cc \
 	RhiWindow.cc
 
-#MOC_OUTPUT = \
-#	moc_BscanManager.cpp \
-#	moc_BscanWidget.cpp \
-#	moc_ColorBar.cpp \
-#	moc_DisplayManager.cpp \
-#	moc_FieldRenderer.cpp \
-#	moc_PolarManager.cpp \
-#	moc_PolarWidget.cpp \
-#	moc_PpiWidget.cpp \
-#	moc_RhiWidget.cpp \
-#	moc_RhiWindow.cpp
+MOC_OUTPUT = \
+	moc_BscanManager.cpp \
+	moc_BscanWidget.cpp \
+	moc_ColorBar.cpp \
+	moc_DisplayManager.cpp \
+	moc_FieldRenderer.cpp \
+	moc_PolarManager.cpp \
+	moc_PolarWidget.cpp \
+	moc_PpiWidget.cpp \
+	moc_RhiWidget.cpp \
+	moc_RhiWindow.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
-CPP_SRCS = # $(MOC_OUTPUT)
+CPP_SRCS = $(MOC_OUTPUT)
 
 #
 # tdrp macros
