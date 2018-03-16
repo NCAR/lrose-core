@@ -578,6 +578,7 @@ def writeMakefileAm():
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
     if (needQt4 == True):
         fo.write("AM_CFLAGS += $(QT_CPPC_CFLAGS)\n")
+        fo.write("AM_CFLAGS += $(QT_INCLUDES)\n")
     fo.write("\n")
     fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
     fo.write("\n")
@@ -588,6 +589,7 @@ def writeMakefileAm():
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
     if (needQt4 == True):
+        fo.write("AM_LDFLAGS += $(QT_LDFLAGS)\n")
         fo.write("AM_LDFLAGS += $(QT_LIBS)\n")
     fo.write("\n")
 
