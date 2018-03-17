@@ -48,6 +48,7 @@ scriptName=$(basename $0)
 prefix=${HOME}/lrose
 package=lrose
 debug=true
+scripts=false
 
 #--------------------------------------------------------------------
 # usage function
@@ -60,6 +61,8 @@ function usage() {
     echo "  -d   :  turn debugging on"
     echo "  -p ? :  set package"
     echo "           default is 'lrose'"
+    echo "  -s   :  install scripts and perl support, default is false"
+    echo "          by default only compiled binaries are installed"
     echo "  -x ? :  set prefix"
     echo "           default is '${HOME}/lrose'"
     echo
@@ -74,6 +77,9 @@ while getopts hdp:x: OPT; do
             ;;
         d)
             debug=true
+            ;;
+        s)
+            scripts=true
             ;;
         p)
             package=$OPTARG
@@ -96,6 +102,10 @@ then
   echo "  package: $package"
   echo "  prefix: $prefix"
   echo "  runDir: $runDir"
+  if [ "$scripts" == "true" ]
+  then
+    echo "  installing scripts and perl support"
+  fi
 fi
 
 # Remove the switches we parsed above.
@@ -119,7 +129,12 @@ fi
 # perform the build
 
 cd $runDir
-./build/build_lrose -p $package -x $prefix
+if [ "$scripts" == "true" ]
+then
+  ./build/build_lrose -p $package -x $prefix -s
+else
+  ./build/build_lrose -p $package -x $prefix
+fi
 
 # detect which dynamic libs are needed
 # copy the dynamic libraries into runtime area:
