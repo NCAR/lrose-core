@@ -31,7 +31,7 @@ def main():
     global orderedLibList
     global makefileLibList
     global loadLibList
-    global needQt4
+    global needQt
 
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
@@ -167,9 +167,9 @@ def main():
             print >>sys.stderr, "  load lib: -l%s" % lib
         print >>sys.stderr, "======================================"
 
-    # check if we need Qt4 support
+    # check if we need Qt support
 
-    needQt4 = checkForQt4()
+    needQt = checkForQt()
 
     # write out makefile.am
             
@@ -285,7 +285,7 @@ def setCompileList():
 ########################################################################
 # check for dependence on QT
 
-def checkForQt4():
+def checkForQt():
                     
     try:
         fp = open(makefileName, 'r')
@@ -576,7 +576,7 @@ def writeMakefileAm():
     fo.write("AM_CFLAGS = -I.\n")
     for lib in compiledLibList:
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
-    if (needQt4 == True):
+    if (needQt == True):
         fo.write("AM_CFLAGS += -fPIC $(QT_CFLAGS)\n")
         fo.write("AM_CFLAGS += $(QT_INCLUDES)\n")
     fo.write("\n")
@@ -588,7 +588,7 @@ def writeMakefileAm():
     fo.write("AM_LDFLAGS = -L.\n")
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
-    if (needQt4 == True):
+    if (needQt == True):
         fo.write("AM_LDFLAGS += $(QT_LDFLAGS)\n")
         fo.write("AM_LDFLAGS += $(QT_LIBS)\n")
     fo.write("\n")
