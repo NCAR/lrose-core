@@ -7,13 +7,11 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 TARGETS =  $(GENERAL_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
-	scripts \
 	tdrp \
 	procmap \
 	titan \
 	titan_analysis \
 	trec \
-	symprod \
 	didss \
 	ingest \
 	dsserver \
@@ -28,6 +26,7 @@ SUB_DIRS = \
 	hydro \
 	interp \
 	radar \
+	refractt \
         Radx
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
