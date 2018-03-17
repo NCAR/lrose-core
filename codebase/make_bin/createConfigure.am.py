@@ -237,7 +237,7 @@ def searchDir(dir):
         # app directory
         # create makefile.am for app
         createScript = "createMakefile.am.app." + options.pkg + ".py"
-        if (os.path.exists(createScript) == FALSE):
+        if (os.path.exists(createScript) == False):
             createScript = "createMakefile.am.app.lrose.py"
         # if (options.shared == True):
         #    createScript = "createMakefile.am.app." + options.pkg + ".py"
