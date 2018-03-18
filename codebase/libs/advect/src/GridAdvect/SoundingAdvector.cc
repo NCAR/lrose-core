@@ -44,7 +44,9 @@
 SoundingAdvector::SoundingAdvector(const bool debug_flag) :
   _debugFlag(debug_flag)
 {
-  // Do nothing
+  if (_debugFlag) {
+    cerr << "In debug mode" << endl;
+  }
 }
 
 /////////////

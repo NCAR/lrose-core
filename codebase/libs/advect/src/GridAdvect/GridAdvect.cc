@@ -56,7 +56,9 @@ GridAdvect::GridAdvect(const double image_val_min,
         _replaceValueWithMax(replace_value_with_max),
         _forecastData(0)
 {
-  // Do nothing
+  if (_debugFlag) {
+    cerr << "In debug mode" << endl;
+  }
 }
 
 /////////////
