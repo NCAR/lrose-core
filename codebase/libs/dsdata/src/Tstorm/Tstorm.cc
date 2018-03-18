@@ -306,7 +306,7 @@ void Tstorm::setDetectionPoly(const Polyline &polygon)
   
   // Free temporary memory
 
-  delete orig_polygon;
+  delete[] orig_polygon;
 }
 
 
@@ -338,7 +338,7 @@ void Tstorm::setDetectionPoly(const WorldPolygon2D &polygon)
   
   // Free temporary memory
 
-  delete orig_polygon;
+  delete[] orig_polygon;
 }
 
 
@@ -383,7 +383,7 @@ void Tstorm::setDetectionPoly(const Point_d *polygon,
    xy_polygon[i].y = r*sin(theta*DEG_TO_RAD);
   }
   _area = EG_polygon_area_d((Point_d *)xy_polygon, num_polygon_pts);
-  delete xy_polygon;
+  delete[] xy_polygon;
 
   _clearRadials();
   
@@ -399,8 +399,8 @@ void Tstorm::setDetectionPoly(const Point_d *polygon,
   
   // Free temporary memory
 
-  delete rays;
-  delete star_pts;
+  delete[] rays;
+  delete[] star_pts;
 }
 
 
