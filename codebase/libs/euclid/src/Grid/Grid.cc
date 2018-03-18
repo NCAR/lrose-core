@@ -485,7 +485,7 @@ Grid::getZLevel( float height ) const
    //
    // Otherwise, calculate z from height/minz/dz
    //
-   size_t zIndex = (size_t) ( ((height - geometry.minz) / geometry.dz) + 0.5 );
+   ssize_t zIndex = (ssize_t) ( ((height - geometry.minz) / geometry.dz) + 0.5 );
 
    if ( zIndex < 0 || zIndex >= geometry.nz ) {
       return -1;

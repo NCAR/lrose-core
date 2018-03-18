@@ -96,7 +96,7 @@ void MotionVector::print(void) const
 /*----------------------------------------------------------------*/
 void MotionVector::print(FILE *fp) const
 {
-  fprintf(fp, sprint().c_str());
+  fprintf(fp, "%s", sprint().c_str());
 }
 
 /*----------------------------------------------------------------*/
