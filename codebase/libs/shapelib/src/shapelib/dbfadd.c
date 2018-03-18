@@ -51,9 +51,6 @@
  *
  */
 
-static char rcsid[] = 
-  "$Id: dbfadd.c,v 1.1 2000/06/28 13:36:58 rehak Exp $";
-
 #include "shapefil.h"
 #include <math.h>
 #include <stdlib.h>

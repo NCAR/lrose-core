@@ -125,9 +125,6 @@
  *
  */
 
-static char rcsid[] = 
-  "$Id: shpopen.c,v 1.2 2003/01/26 01:18:39 dixon Exp $";
-
 #include "shapefil.h"
 
 #include <math.h>
