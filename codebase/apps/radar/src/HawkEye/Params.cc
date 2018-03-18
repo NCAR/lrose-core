@@ -533,7 +533,7 @@ using namespace std;
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
     tt->comment_hdr = tdrpStrDup("HawkEye is the engineering display for the HAWK moments data");
-    tt->comment_text = tdrpStrDup("This is a C++ application using the QT4 GUI toolkit.");
+    tt->comment_text = tdrpStrDup("This is a C++ application using the QT GUI toolkit.");
     tt++;
     
     // Parameter 'Comment 1'

@@ -67,10 +67,14 @@ def main():
                       dest='force', default=False,
                       action="store_true",
                       help='force, do not request user to check if it is OK to proceed')
+    parser.add_option('--scripts',
+                      dest='installScripts', default=False,
+                      action="store_true",
+                      help='Install scripts as well as binaries')
 
     (options, args) = parser.parse_args()
 
-    if (options.verbose == True):
+    if (options.verbose):
         options.debug = True
         
     debugStr = " "
@@ -140,6 +144,7 @@ def main():
     print >>sys.stderr, "  releaseName: ", releaseName
     print >>sys.stderr, "  tarName: ", tarName
     print >>sys.stderr, "  tarDir: ", tarDir
+    print >>sys.stderr, "  installScripts: ", options.installScripts
     print >>sys.stderr, "*********************************************************************"
 
     # create tmp dir for staging area
@@ -368,7 +373,10 @@ def buildNetcdf():
 def buildPackage():
 
     os.chdir(runDir)
-    shellCmd("./build/build_lrose -x " + tmpDir + " -p " + package)
+    if (options.installScripts):
+        shellCmd("./build/build_lrose -s -x " + tmpDir + " -p " + package)
+    else:
+        shellCmd("./build/build_lrose -x " + tmpDir + " -p " + package)
 
 ########################################################################
 # create the tar file

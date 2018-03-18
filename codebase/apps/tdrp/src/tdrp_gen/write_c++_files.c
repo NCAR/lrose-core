@@ -1841,14 +1841,29 @@ static void write_copyright(FILE *out)
 {
 
   fprintf(out,
-          "// *=*=*=*=*=*=" "*=*=*=*=*=*=" "*=*=*=*=*=*=" 
-          "*=*=*=*=*=*=" "*=*=*=*=*=*=" "*=*=*=*=*=*=*\n" 
-          "// ** Copyright UCAR (c)\n"
-          "// ** University Corporation for Atmospheric Research(UCAR)\n"
-          "// ** National Center for Atmospheric Research(NCAR)\n"
-          "// ** Boulder, Colorado, USA\n"
-          "// *=*=*=*=*=*=" "*=*=*=*=*=*=" "*=*=*=*=*=*="
-          "*=*=*=*=*=*=" "*=*=*=*=*=*=" "*=*=*=*=*=*" "=*\n");
+          "/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */\n"
+          "/* ** Copyright UCAR                                                         */\n"
+          "/* ** University Corporation for Atmospheric Research (UCAR)                 */\n"
+          "/* ** National Center for Atmospheric Research (NCAR)                        */\n"
+          "/* ** Boulder, Colorado, USA                                                 */\n"
+          "/* ** BSD licence applies - redistribution and use in source and binary      */\n"
+          "/* ** forms, with or without modification, are permitted provided that       */\n"
+          "/* ** the following conditions are met:                                      */\n"
+          "/* ** 1) If the software is modified to produce derivative works,            */\n"
+          "/* ** such modified software should be clearly marked, so as not             */\n"
+          "/* ** to confuse it with the version available from UCAR.                    */\n"
+          "/* ** 2) Redistributions of source code must retain the above copyright      */\n"
+          "/* ** notice, this list of conditions and the following disclaimer.          */\n"
+          "/* ** 3) Redistributions in binary form must reproduce the above copyright   */\n"
+          "/* ** notice, this list of conditions and the following disclaimer in the    */\n"
+          "/* ** documentation and/or other materials provided with the distribution.   */\n"
+          "/* ** 4) Neither the name of UCAR nor the names of its contributors,         */\n"
+          "/* ** if any, may be used to endorse or promote products derived from        */\n"
+          "/* ** this software without specific prior written permission.               */\n"
+          "/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */\n"
+          "/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */\n"
+          "/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */\n"
+          "/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */\n");
 
 }
 

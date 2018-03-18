@@ -162,7 +162,7 @@ def main():
               
     # delete the tmp dir
 
-    shutil.rmtree(tmpDir)
+    # shutil.rmtree(tmpDir)
 
     sys.exit(0)
 
@@ -438,7 +438,12 @@ def trimToMakefiles(subDir):
 
     dirPath = os.path.join(codebaseDir, subDir)
     os.chdir(dirPath)
+
+    # need to allow upper and lower case Makefile (makefile or Makefile)
     subNameList = getValueListForKey("makefile", "SUB_DIRS")
+    if not subNameList:
+        print >>sys.stderr, "Trying uppercase Makefile ... "
+        subNameList = getValueListForKey("Makefile", "SUB_DIRS")
     
     for subName in subNameList:
         if (os.path.isdir(subName)):
@@ -448,13 +453,21 @@ def trimToMakefiles(subDir):
 
     entries = os.listdir(dirPath)
     for entry in entries:
-        if (entry == "scripts"):
+        theName = os.path.join(dirPath, entry)
+        print >>sys.stderr, "considering: " + theName
+        if (entry == "scripts") or (entry == "include"):
             # always keep scripts directories
             continue
-        if (os.path.isdir(entry)):
+        if (os.path.isdir(theName)):
             if (entry not in subNameList):
-                print >>sys.stderr, "discarding unneeded dir: " + entry
-                shutil.rmtree(entry)
+                print >>sys.stderr, "discarding it"
+                shutil.rmtree(theName)
+            else:
+                print >>sys.stderr, "keeping it and recurring"
+                # check this child's required subdirectories ( recurse )
+                # nextLevel = os.path.join(dirPath, entry)
+                # print >> sys.stderr, "trim to makefile on subdirectory: "
+                trimToMakefiles(os.path.join(subDir, entry))
 
 ########################################################################
 # Run a command in a shell, wait for it to complete

@@ -69,6 +69,9 @@
 #include <QDateTimeEdit>
 #include <QLineEdit>
 #include <QErrorMessage>
+#include <QFileDialog>
+#include <QSlider>
+#include <QToolTip>
 
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pmu.h>
@@ -122,6 +125,7 @@ PolarManager::PolarManager(const Params &params,
 
   _setArchiveMode(_params.begin_in_archive_mode);
   _archiveStartTime.set(_params.archive_start_time);
+  _currentArchiveScanIdx = 0;
   _archiveMarginSecs = _params.archive_search_margin_secs;
 
   _imagesArchiveStartTime.set(_params.images_archive_start_time);
@@ -302,7 +306,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
   // get key pressed
 
   Qt::KeyboardModifiers mods = e->modifiers();
-  char keychar = e->text().toAscii().data()[0];
+  char keychar = e->text().toLatin1().data()[0];
   int key = e->key();
 
   if (_params.debug) {
@@ -367,6 +371,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
   bool moveUpDown = false;
   _keepFixedAngle = false;
+  int sweepMovement = 0;
   
   if (key == Qt::Key_Left) {
 
@@ -394,10 +399,11 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
     if (_sweepIndex < (int) _vol.getNSweeps() - 1) {
 
-      _sweepIndex++;
+      //_sweepIndex++;
+      sweepMovement = 1;
       moveUpDown = true;
       _keepFixedAngle = false;
-      _setFixedAngle(_sweepIndex);
+      _setFixedAngle(_sweepIndex+1); // (_sweepIndex);
       _ppi->setStartOfSweep(true);
       _rhi->setStartOfSweep(true);
 
@@ -420,9 +426,10 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
     if (_sweepIndex > 0) {
 
-      _sweepIndex--;
+      //_sweepIndex--;
+      sweepMovement = -1;
       _keepFixedAngle = false;
-      _setFixedAngle(_sweepIndex);
+      _setFixedAngle(_sweepIndex-1); // (_sweepIndex);
       moveUpDown = true;
       _ppi->setStartOfSweep(true);
       _rhi->setStartOfSweep(true);
@@ -449,15 +456,27 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       cerr << "Clicked up/down arrow, change to sweep num: " 
            << _sweepIndex << endl;
     }
+    /*
     this->setCursor(Qt::WaitCursor);
     _timeControllerDialog->setCursor(Qt::WaitCursor);
     _plotArchiveData();
     this->setCursor(Qt::ArrowCursor);
     _timeControllerDialog->setCursor(Qt::ArrowCursor);
+    */
+    //_moveUpDown();
+    //bool fromHotKey = true;
+    _changeElevationRadioButton(sweepMovement); // _sweepIndex);
   }
-
+  
 }
 
+void PolarManager::_moveUpDown() {
+    this->setCursor(Qt::WaitCursor);
+    _timeControllerDialog->setCursor(Qt::WaitCursor);
+    _plotArchiveData();
+    this->setCursor(Qt::ArrowCursor);
+    _timeControllerDialog->setCursor(Qt::ArrowCursor);
+}
 
 //////////////////////////////////////////////////
 // Set radar name in title bar
@@ -519,14 +538,45 @@ void PolarManager::_setupWindows()
   
   // _colorBar = new ColorBar(_params.color_scale_width,
   //                          &_fields[0]->getColorMap(), _main);
+
+  _createElevationPanel();
+
+  //if (_archiveMode) 
+    _createTimePanel();
+
   
   // main window layout
   
+  QGridLayout *mainLayout = new QGridLayout(_main);
+  mainLayout->setMargin(3);
+  int row = 0;
+  int column = 0;
+  int rowSpan = 1;
+  int columnSpan = 1;
+
+  mainLayout->addWidget(_statusPanel, row, column);
+  column++;
+  mainLayout->addWidget(_fieldPanel, row, column);
+  column++;
+  mainLayout->addWidget(_ppiFrame, row, column);
+  column++;
+  mainLayout->addWidget(_elevationPanel, row, column);
+  column++;
+  row++;
+  column = 2;
+
+  if (_archiveMode)
+    mainLayout->addWidget(_timePanel, row, column, rowSpan, columnSpan); // , rowSpan, columnSpan);
+  
+  /*
   QHBoxLayout *mainLayout = new QHBoxLayout(_main);
   mainLayout->setMargin(3);
   mainLayout->addWidget(_statusPanel);
   mainLayout->addWidget(_fieldPanel);
   mainLayout->addWidget(_ppiFrame);
+  mainLayout->addWidget(_elevationPanel);
+  mainLayout->addWidget(_timePanel);
+  */
   // mainLayout->addWidget(_colorBar);
 
   _createActions();
@@ -607,6 +657,13 @@ void PolarManager::_createActions()
   _exitAct->setStatusTip(tr("Exit the application"));
   connect(_exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
+  // file chooser
+
+  _openFileAct = new QAction(tr("O&pen"), this);
+  _openFileAct->setShortcut(tr("Ctrl+F"));
+  _openFileAct->setStatusTip(tr("Open File"));
+  connect(_openFileAct, SIGNAL(triggered()), this, SLOT(_openFile()));
+
   // show range rings
 
   _ringsAct = new QAction(tr("Range Rings"), this);
@@ -670,6 +727,7 @@ void PolarManager::_createMenus()
 
   _fileMenu = menuBar()->addMenu(tr("&File"));
   _fileMenu->addSeparator();
+  _fileMenu->addAction(_openFileAct);
   _fileMenu->addAction(_saveImageAct);
   _fileMenu->addAction(_exitAct);
 
@@ -755,6 +813,10 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
 
 {
 
+  if (_params.debug) {
+    cerr << "handling archive data ..." << endl;
+  }
+
   _ppi->setArchiveMode(true);
   _ppi->setStartOfSweep(true);
 
@@ -779,6 +841,25 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
     _timeControllerDialog->setCursor(Qt::ArrowCursor);
     return;
   }
+
+  //----------
+  
+  const vector<RadxSweep *> &sweeps = _vol.getSweeps();
+  //if (sweeps.size() < 1) {
+  //  _fixedAngleDeg = -8888.0;
+  //  return;
+  //}
+
+  vector<float> *newElevations =  new vector<float>();
+  for (size_t i=0; i<sweeps.size(); i++) {
+    const RadxSweep *sweep = sweeps[i];
+    _fixedAngleDeg = sweep->getFixedAngleDeg();
+    newElevations->push_back(_fixedAngleDeg);
+  }
+  _updateElevationPanel(newElevations);
+  if (!_keepFixedAngle)
+    _changeElevationRadioButton(10000); // essentially setting it to 0
+  //----------
   
   _activateArchiveRendering();
   
@@ -795,6 +876,9 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
   _timeControllerDialog->setCursor(Qt::ArrowCursor);
 
 }
+
+
+
 
 /////////////////////////////
 // get data in archive mode
@@ -991,10 +1075,52 @@ void PolarManager::_plotArchiveData()
     _handleRay(_platform, ray);
   }
 
+  // signal an update of elevations
+  //  emit elevationsChanged(sweeps); 
   // update the status panel
   
   _updateStatusPanel(rays[sweeps[_sweepIndex]->getStartRayIndex()]);
     
+}
+
+void PolarManager::_setSweepIndex(size_t i) {
+  const vector<RadxSweep *> &sweeps = _vol.getSweeps();
+  size_t max = sweeps.size();
+  size_t newIdx = i;
+  if (newIdx > max)
+    newIdx = max -1;
+  else if (newIdx < 0)
+    newIdx = 0;
+  _sweepIndex = newIdx;
+}
+
+void PolarManager::_changeElevation(bool value) {
+
+  if (_params.debug) {
+    cerr << "From PolarManager: the elevation was changed ";
+    cerr << endl;
+  }
+
+  if (value) {
+    size_t i = 0;
+    bool found = false;
+    while (( i < _elevationRButtons->size() ) && (!found)) {
+      if (_elevationRButtons->at(i)->isChecked()) {
+        if (_params.debug) cout << "elevationRButton " << i << " is checked" << endl;
+        _selectedElevationIndex = i;
+        _setSweepIndex(i);
+        if (_params.debug) cerr << "moving to sweep " << _sweepIndex << endl;
+        _keepFixedAngle = false;
+        _setFixedAngle(_sweepIndex);
+        _ppi->setStartOfSweep(true);
+        _rhi->setStartOfSweep(true);
+        _moveUpDown();
+        found = true;
+      }
+      i++;
+    } // end while
+  }
+
 }
 
 //////////////////////////////////////////////////
@@ -1468,6 +1594,21 @@ void PolarManager::_locationClicked(double xkm, double ykm,
     }
   }
 
+  //**** testing ****
+  //  QToolTip::showText(this->mapToGlobal(QPoint(xkm, ykm)), "cindy");
+  //QToolTip::showText(mapToGlobal(QPoint(xkm, ykm)), "cindy");
+  //QToolTip::showText(mapToGlobal(QPoint(xkm, ykm)), "louise");
+  //QToolTip::showText(QPoint(xkm, ykm), "jay");
+  //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
+  //int yp = _ppi->_zoomWorld.getIyPixel(ykm);
+  //QToolTip::showText(_ppi->mapToGlobal(QPoint(xp, yp)), "louigi");
+
+  //_ppi->smartBrush(xkm, ykm);
+  //qImage->convertToFormat(QImage::Format_RGB32);
+  //qImage->invertPixels()
+
+  // ****** end testing *****
+
   DateTime rayTime(ray->getTimeSecs());
   char text[256];
   sprintf(text, "%.4d/%.2d/%.2d",
@@ -1647,7 +1788,7 @@ void PolarManager::_createTimeControllerDialog()
   
   {  // set archival time retrieval
 
-    // box for setting start timew
+    // box for setting start time
 
     _archiveTimeBox = new QGroupBox(_timeControllerDialog);
     QVBoxLayout *archiveTimeLayout = new QVBoxLayout;
@@ -1731,7 +1872,8 @@ void PolarManager::_createTimeControllerDialog()
     // pal.setColor( QPalette::Inactive, QPalette::Button, color );
     goButton->setPalette(goPalette);
     layout2->addWidget(goButton);
-    connect(goButton, SIGNAL(clicked()), this, SLOT(_setArchiveRetrievalPending()));
+    //connect(goButton, SIGNAL(clicked()), this, SLOT(_setArchiveRetrievalPending()));
+    connect(goButton, SIGNAL(clicked()), this, SLOT(_commitToTime()));
     
     QPushButton *cancelButton = new QPushButton(goCancelReset);
     cancelButton->setText("Cancel");
@@ -1816,6 +1958,259 @@ void PolarManager::_showTimeControllerDialog()
   }
 }
 
+
+//----------
+void PolarManager::_updateTimePanel()
+{
+  char text[1024];
+  
+  // add the start time
+  _startDisplayTime = _archiveStartTime - _nArchiveScans * _archiveScanIntervalSecs;
+  sprintf(text, "%.2d:%.2d:%.2d",
+          _startDisplayTime.getHour(), _startDisplayTime.getMin(),
+          _startDisplayTime.getSec());
+          // ((int) _archiveStartTime.getSubSec() / 1000));
+    _startTimeLabel->setText(text);
+
+  // consider using this ... it's pretty nice ...
+  // http://tutorialcoding.com/qt/basic/unit012/index.html
+
+  // add the end time
+  sprintf(text, "%.2d:%.2d:%.2d",
+          _archiveStopTime.getHour(), _archiveStopTime.getMin(),
+          _archiveStopTime.getSec());
+  // ((int) _archiveStopTime.getSubSec() / 1000));
+    _stopTimeLabel->setText(text);
+
+    // establish the size of the slider
+    int max;
+    max = 2 * _nArchiveScans;
+    if (max < 0) max = 0;
+    _timeSlider->setMaximum(max);
+    
+    int sliderPosition;
+
+    // keep the handle centered; just change the tooltip value
+    
+    //_currentArchiveScanIdx = (_currentArchiveScanIdx + _nArchiveScans) % 
+    //  _nArchiveScans;
+    sliderPosition = _nArchiveScans;
+    if (sliderPosition < 0) sliderPosition = 0;
+    if (sliderPosition > max) sliderPosition = max;
+      //sliderPosition = (int) (_archiveStartTime / _archiveScanIntervalSecs);
+     
+    _timeSlider->setSliderPosition(sliderPosition);
+    
+    _setTimeSliderToolTip(sliderPosition);    
+}
+
+//  TODO: this may not be needed
+bool PolarManager::_timeSliderEvent(QEvent *event) {
+  /*    if (event->type() == QEvent::ToolTip) {
+        QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
+        QToolTip::showText(helpEvent->globalPos(), "johhny");
+        return true;
+    }
+  */
+    return QWidget::event(event);
+}
+
+void PolarManager::_timeSliderActionTriggered(int action) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  switch (action) {
+    case QAbstractSlider::SliderNoAction:
+      cerr << "SliderNoAction action in _timeSliderActionTriggered" << endl;
+      break;
+    case QAbstractSlider::SliderSingleStepAdd: 
+      cerr << "SliderSingleStepAdd action in _timeSliderActionTriggered" << endl;
+      break; 
+    case QAbstractSlider::SliderSingleStepSub:	
+      cerr << "SliderSingleStepSub action in _timeSliderActionTriggered" << endl;
+      break;
+    case QAbstractSlider::SliderPageStepAdd:
+      cerr << "SliderPageStepAdd action in _timeSliderActionTriggered" << endl;
+      break;	
+    case QAbstractSlider::SliderPageStepSub:
+      cerr << "SliderPageStepSub action in _timeSliderActionTriggered" << endl;
+      break;	
+    case QAbstractSlider::SliderToMinimum:
+      cerr << "SliderToMinimum action in _timeSliderActionTriggered" << endl;
+      break;	
+    case QAbstractSlider::SliderToMaximum:
+      cerr << "SliderToMaximum action in _timeSliderActionTriggered" << endl;
+      break;	
+    case QAbstractSlider::SliderMove:
+      cerr << "SliderMove action in _timeSliderActionTriggered" << endl;
+      break;
+    default: 
+      cerr << "unknown action in _timeSliderActionTriggered" << endl;
+    }
+  }
+} 
+
+void PolarManager::_setTimeSliderToolTip(int value) {
+  _computeArchiveIntervalTime(value);
+  char text[1024];
+  sprintf(text, "%.2d:%.2d:%.2d", // .%.6d",
+          _archiveIntermediateTime.getHour(), _archiveIntermediateTime.getMin(),
+          _archiveIntermediateTime.getSec());
+  // ((int) _archiveIntermediateTime.getSubSec() / 1000));
+  _timeSlider->setToolTip(text);
+}
+
+void PolarManager::_timeSliderValueChanged(int value) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) cerr << "_timeSliderValueChanged to " << value << endl;
+  //QString text;
+  //text.setNum(value);
+  // add as many QLabel's as you like with QSlider as a parent, install eventHandler() on QSlider to catch resize event to proper position them, and obviously handle scroll events, so you can update them... So labels will just float on top of QSlider
+
+  //_setTimeSliderToolTip(value);
+  
+  _computeArchiveIntervalTime(value);
+  char text[1024];
+  sprintf(text, "%.2d:%.2d:%.2d",
+          _archiveIntermediateTime.getHour(), _archiveIntermediateTime.getMin(),
+          _archiveIntermediateTime.getSec());
+  _timeSlider->setToolTip(text);
+  
+
+  //char text[1024];
+  // show the time associated with the current handle position
+  QPoint p = _timeSlider->pos();
+  QToolTip::showText(_timeSlider->mapToGlobal(p), text);
+  _timeSliderCurrentValue = value;
+}
+
+void PolarManager::_timeSliderReleased() {
+
+  _keepFixedAngle = true;
+  //_ppi->setStartOfSweep(true);
+  //_rhi->setStartOfSweep(true);
+    //_goBack1();
+  _archiveStartTime = _archiveIntermediateTime; // -= 1 * _archiveScanIntervalSecs;
+  _currentArchiveScanIdx = _timeSliderCurrentValue - _nArchiveScans; // -= 1;
+
+  //_setArchiveRetrievalPending();
+  // set the event to NULL ???
+  //_handleArchiveData(NULL);
+  _commitToTime();
+
+
+  _currentArchiveScanIdx = 0;
+  // center the slider handle
+  _timeSliderCurrentValue = _nArchiveScans;
+  _setGuiFromStartTime();
+
+
+}
+
+// update the GUI, as needed, but don't change the data displayed in plot
+// Actions that should use this ...
+// hot-keys (left and right arrow)
+// handle moving on time slider
+// start time editor
+// "> 1", "< 1", "> NScans", "< NScans" buttons
+//
+// maybe this is just _setGuiFromStartTime????
+void PolarManager::_speculateOnTime() { // int newValue) {
+  // update class variables
+  //_setStartTimeFromGui(const QDateTime &datetime1);
+  // update time slider
+  //_updateTimePanel();
+  // update TimeControllerDialog
+  //_setGuiFromStartTime();
+
+}
+
+// go ahead and change the data displayed in the plot
+// and update the GUI as needed
+// Actions that should use this ..
+// "Go" button clicked
+// mouse released on time slider
+void PolarManager::_commitToTime() { // int newValue) {
+  // use class variables to retrieve new data 
+  //_getArchiveData();
+  // plot new data
+  //_plotArchiveData();
+
+  _setArchiveRetrievalPending();
+  // set the event to NULL ???
+  _handleArchiveData(NULL);
+  // update the GUI as needed
+
+}
+
+///////////////////////////////////////////////////////
+// create the file chooser dialog
+//
+// This allows the user to choose an archive file to open
+
+void PolarManager::_openFile()
+{
+  // seed with files for the day currently in view
+  // generate like this: *yyyymmdd*
+  string pattern = _archiveStartTime.getDateStrPlain();
+  QString finalPattern = "All files (*";
+  finalPattern.append(pattern.c_str());
+  finalPattern.append("*)");
+
+  QString inputPath = QDir::currentPath();
+  // get the path of the current file, if available 
+  if (_inputFileList.size() > 0) {
+    QDir temp(_inputFileList[0].c_str());
+    inputPath = temp.absolutePath();
+  } 
+
+  QString filename =  QFileDialog::getOpenFileName(
+          this,
+          "Open Document",
+          inputPath, finalPattern);  //QDir::currentPath(),
+  //"All files (*.*)");
+ 
+    if( !filename.isNull() )
+    {
+      QByteArray qb = filename.toUtf8();
+      const char *name = qb.constData();
+      cerr << "selected file path : " << name << endl;
+
+      // trying this ...  TODO: put into separate method
+      _setArchiveRetrievalPending();
+      vector<string> list;
+      list.push_back(name);
+      setInputFileList(list);
+      _keepFixedAngle = true;
+      _getArchiveData();
+    }
+}
+
+
+void PolarManager::_createFileChooserDialog()
+{
+  _refreshFileChooserDialog();
+  
+}
+
+///////////////////////////////////////////////////////
+// set the state on the time controller dialog
+
+void PolarManager::_refreshFileChooserDialog()
+{
+  
+
+}
+
+/////////////////////////////////////
+// show the time controller dialog
+
+void PolarManager::_showFileChooserDialog()
+{
+
+}
+
+
+//-------
+
+
 ////////////////////////////////////////////////////////
 // change modes for retrieving the data
 
@@ -1877,6 +2272,8 @@ void PolarManager::_setArchiveScanConfig()
   _nArchiveScans = nArchiveScans;
 
   _computeArchiveStopTime();
+  //_updateTimePanel();
+  _speculateOnTime();
   
   if (_archiveMode) {
     _setArchiveRetrievalPending();
@@ -1919,6 +2316,7 @@ void PolarManager::_setStartTimeFromGui(const QDateTime &datetime1)
   _archiveStartTime.set(date.year(), date.month(), date.day(),
                         time.hour(), time.minute(), time.second());
   _computeArchiveStopTime();
+  _updateTimePanel();
 }
 
 ////////////////////////////////////////////////////////
@@ -1934,6 +2332,7 @@ void PolarManager::_setGuiFromStartTime()
              _archiveStartTime.getSec());
   QDateTime datetime(date, time);
   _archiveStartTimeEdit->setDateTime(datetime);
+  _updateTimePanel();
 }
 
 ////////////////////////////////////////////////////////
@@ -1984,6 +2383,25 @@ void PolarManager::_computeArchiveStopTime()
   if (_archiveStopTimeEcho) {
     _archiveStopTimeEcho->setText(_archiveStopTime.asString(0).c_str());
   }
+
+}
+
+////////////////////////////////////////////////////////
+// set intermediate time displayed on time slider tool tips
+// use class variables for start time, nscans and interval
+
+void PolarManager::_computeArchiveIntervalTime(int value)
+
+{
+  // value goes from 0 ... 2*_nArchiveScans
+
+  _archiveIntermediateTime =
+    _archiveStartTime + _archiveScanIntervalSecs * (value - _nArchiveScans);
+  if (_params.debug) {
+    cerr << "computeArchiveIntervalTime: value= " << value <<
+      " converted to " << value - _nArchiveScans << endl;
+    cerr << "corresponds to " << _archiveIntermediateTime << endl;
+  } 
 
 }
 
@@ -2201,24 +2619,28 @@ void PolarManager::_howto()
 void PolarManager::_goBack1()
 {
   _archiveStartTime -= 1 * _archiveScanIntervalSecs;
+  _currentArchiveScanIdx -= 1;
   _setGuiFromStartTime();
 }
 
 void PolarManager::_goBackNScans()
 {
   _archiveStartTime -= _nArchiveScans * _archiveScanIntervalSecs;
+  _currentArchiveScanIdx -= _nArchiveScans;
   _setGuiFromStartTime();
 }
 
 void PolarManager::_goFwd1()
 {
   _archiveStartTime += 1 * _archiveScanIntervalSecs;
+  _currentArchiveScanIdx += 1;
   _setGuiFromStartTime();
 }
 
 void PolarManager::_goFwdNScans()
 {
   _archiveStartTime += _nArchiveScans * _archiveScanIntervalSecs;
+  _currentArchiveScanIdx += _nArchiveScans;
   _setGuiFromStartTime();
 }
 

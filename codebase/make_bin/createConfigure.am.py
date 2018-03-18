@@ -236,12 +236,15 @@ def searchDir(dir):
           (pathToks[ntoks-2] == "src")):
         # app directory
         # create makefile.am for app
-        if (options.shared == True):
-            createScript = "createMakefile.am.app." + options.pkg + ".py"
-        else:
-            createScript = "createMakefile.am.app.py"
-        cmd = os.path.join(thisScriptDir, createScript) + \
-                           " --dir " + absDir + debugStr
+        createScript = "createMakefile.am.app." + options.pkg + ".py"
+        if (os.path.exists(createScript) == False):
+            createScript = "createMakefile.am.app.lrose.py"
+        # if (options.shared == True):
+        #    createScript = "createMakefile.am.app." + options.pkg + ".py"
+        # else:
+        #    createScript = "createMakefile.am.app.py"
+        cmd = os.path.join(thisScriptDir, createScript)
+        cmd += " --dir " + absDir + debugStr
         cmd += " --libList " + libList
         runCommand(cmd)
         makefileCreateList.append(makefileCreatePath)

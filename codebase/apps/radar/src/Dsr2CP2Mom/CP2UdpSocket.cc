@@ -260,7 +260,7 @@ CP2UdpSocket::errorMsg() {
 std::string
 CP2UdpSocket::toString()
 {
-  return _hostAddress.toString().toAscii().constData();
+  return _hostAddress.toString().toUtf8().constData();
 }
 
 ///////////////////////////////////////////////////////////

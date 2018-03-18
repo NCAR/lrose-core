@@ -65,6 +65,7 @@ class QGridLayout;
 class QDateTime;
 class QDateTimeEdit;
 class ColorBar;
+class QFileDialog;
 class DisplayField;
 class PpiWidget;
 class RhiWidget;
@@ -172,6 +173,7 @@ private:
   QAction *_showRhiAct;
   
   QAction *_timeControllerAct;
+  QAction *_openFileAct;
   QAction *_saveImageAct;
 
   // time controller settings dialog
@@ -184,6 +186,7 @@ private:
 
   QLineEdit *_nArchiveScansEdit;
   int _nArchiveScans;
+  int _currentArchiveScanIdx;
 
   // archive mode
 
@@ -200,6 +203,13 @@ private:
   QLabel *_archiveStopTimeEcho;
   RadxTime _archiveStopTime;
   
+  // values for time slider view
+  RadxTime _archiveIntermediateTime;
+  int _timeSliderCurrentValue;
+  RadxTime _startDisplayTime;
+  RadxTime _currentDisplayTime;  // is this needed??
+  RadxTime _endDisplayTime;
+
   RadxTime _imagesArchiveStartTime;
   RadxTime _imagesArchiveEndTime;
 
@@ -208,6 +218,13 @@ private:
   // saving images in real time mode
 
   RadxTime _imagesScheduledTime;
+
+  // open File 
+
+  QFileDialog *_openFileDialog;
+  void _openFile();
+
+  void _moveUpDown();
 
   // set top bar
 
@@ -228,8 +245,11 @@ private:
   void _plotArchiveData();
   void _setupVolRead(RadxFile &file);
 
+
+
   void _setSweepIndex(double fixedAngle);
   void _setFixedAngle(int sweepIndex);
+  void _setSweepIndex(size_t i);
 
   // draw beam
 
@@ -264,6 +284,9 @@ private slots:
   virtual void _unzoom();
   virtual void _refresh();
   virtual void _changeField(int fieldId, bool guiMode = true);
+  
+
+  void _changeElevation(bool value);
 
   // local
 
@@ -286,12 +309,26 @@ private slots:
   void _setArchiveStartTimeToDefault();
   void _setArchiveStartTime(const RadxTime &rtime);
   void _computeArchiveStopTime();
+  void _computeArchiveIntervalTime(int value);
   void _goBack1();
   void _goFwd1();
   void _goBackNScans();
   void _goFwdNScans();
+  void _commitToTime(); // int newValue);
+  void _speculateOnTime(); // int newValue);
 
   void _setArchiveRetrievalPending();
+
+
+  // time slider
+  //void _createTimePanel();
+  void _updateTimePanel();
+  void _timeSliderActionTriggered(int action);
+  void _timeSliderValueChanged(int value);
+  bool _timeSliderEvent(QEvent *event);
+  void _timeSliderReleased();
+  void _setTimeSliderToolTip(int value);
+  //void _updateSliderHandle();
 
   // time controller
 
@@ -306,6 +343,13 @@ private slots:
   void _createArchiveImageFiles();
   void _createImageFilesAllSweeps();
   void _createImageFiles();
+
+  // open file 
+
+  void _createFileChooserDialog();
+  void _refreshFileChooserDialog();
+  void _showFileChooserDialog();
+
 
 };
 

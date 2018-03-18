@@ -61,12 +61,15 @@ class QDialog;
 class QLabel;
 class QGroupBox;
 class QGridLayout;
+class QHBoxLayout;
 class QVBoxLayout;
 class QLineEdit;
+class QSlider;
 class QWidget;
 
 class ColorBar;
 class DisplayField;
+class DisplayElevation;
 class Reader;
 
 class DisplayManager : public QMainWindow {
@@ -143,10 +146,14 @@ protected:
   int _beamTimerId;
   bool _frozen;
 
+
   // data fields
 
   const vector<DisplayField *> &_fields;
   bool _haveFilteredFields;
+
+  // elevations
+  vector<float> *_elevations;
 
   // colors
   
@@ -167,6 +174,7 @@ protected:
   QAction *_howtoAct;
   QAction *_aboutAct;
   QAction *_aboutQtAct;
+  QAction *_openFileAct;
 
   // status panel
 
@@ -239,6 +247,45 @@ protected:
   int _fieldNum;
   int _prevFieldNum;
 
+  // elevation panel
+  
+  QVBoxLayout *_elevationVBoxLayout;
+  QGroupBox *_elevationPanel;
+  QGroupBox *_elevationSubPanel;
+  QGridLayout *_elevationsLayout;
+  QLabel *_selectedElevationLabelWidget;
+  QButtonGroup *_elevationGroup;
+  vector<QRadioButton *> *_elevationRButtons;
+  DisplayElevation *_selectedElevation;
+  int _selectedElevationIndex;
+  //string _selectedElevationLabel;
+  //string _selectedElevationUnits;
+  QLabel *_elevationValueLabel;
+  int _elevationNum;
+  int _prevElevationNum;
+  void _createNewRadioButtons(vector<float> *newElevations);
+  void _resetElevationText(vector<float> *newElevations);
+  void _updateElevationPanel(vector<float> *newElevations);
+  void _clearRadioButtons();
+  //  virtual void _changeElevation();
+
+  // time panel
+  
+  QGroupBox *_timePanel;
+  QHBoxLayout *_timesLayout;
+  QLabel *_startTimeLabel;
+  QLabel *_stopTimeLabel;
+  QSlider *_timeSlider;
+  QButtonGroup *_timeGroup;
+  vector<QRadioButton *> _timeButtons;
+  //DisplayTime *_selectedTime;
+  string _selectedTimeName;
+  string _selectedTimeLabel;
+  //string _selectedTimeUnits;
+  QLabel *_timeValueLabel;
+  int _timeNum;
+  int _prevTimeNum;
+
   // click location report dialog
 
   QDialog *_clickReportDialog;
@@ -264,6 +311,9 @@ protected:
   
   void _createStatusPanel();
   void _createFieldPanel();
+  void _createElevationPanel();
+  void _createTimePanel();
+  void _updateTimePanel();
   void _createClickReportDialog();
   void _updateStatusPanel(const RadxRay *ray);
   double _getInstHtKm(const RadxRay *ray);
@@ -317,6 +367,15 @@ protected slots:
   virtual void _unzoom() = 0;
   virtual void _refresh() = 0;
   virtual void _changeField(int fieldId, bool guiMode = true) = 0;
+  virtual void _openFile();
+
+  virtual void _changeElevation(bool value);
+  void _changeElevationRadioButton(int value);
+
+  void _timeSliderActionTriggered(int action);
+  void _timeSliderValueChanged(int value);
+  bool _timeSliderEvent(QEvent *event);
+  void _timeSliderReleased();
   
 };
 
