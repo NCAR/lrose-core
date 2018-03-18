@@ -31,7 +31,6 @@
  * @author Automatically generated
  *
  */
-using namespace std;
 
 #include "ParamsFuzzyFunction.hh"
 #include <cstring>
