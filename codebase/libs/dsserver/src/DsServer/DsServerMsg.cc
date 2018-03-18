@@ -100,7 +100,7 @@ DsServerMsg &DsServerMsg::operator=(const DsServerMsg &rhs)
 //               one of the valid categories.
 //           0 Otherwise.          
 // Virtual.
-int DsServerMsg::decodeHeader(const void *in_msg, const int msg_len /* = -1*/ )
+int DsServerMsg::decodeHeader(const void *in_msg, ssize_t msg_len /* = -1*/ )
 {
   int status = DsMessage::decodeHeader(in_msg, msg_len);
   if (status < 0) {

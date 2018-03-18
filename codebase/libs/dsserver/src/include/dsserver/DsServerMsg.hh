@@ -174,7 +174,7 @@ public:
   //               one of the valid categories.
   //           0 Otherwise.          
     
-  virtual int decodeHeader(const void *in_msg, const int msg_len = -1);
+  virtual int decodeHeader(const void *in_msg, ssize_t msg_len = -1);
 
   // get category
   // 
@@ -233,12 +233,12 @@ public:
   //////////////////////////////////////////
   // print out main header and parts headers
 
-  virtual void print(ostream &out, const char *spacer) const;
+  virtual void print(ostream &out, const char *spacer = "") const;
 
   // print out the message header
   // 
-  virtual void printHeader(ostream &out, const char *spacer) const;
-  virtual void printHeader(ostream *out, const char *spacer) const;
+  virtual void printHeader(ostream &out, const char *spacer = "") const;
+  virtual void printHeader(ostream *out, const char *spacer = "") const;
 
   // check that a url is secure
   //
@@ -254,7 +254,7 @@ public:
     
 protected:
 
-  virtual DsServerMsg &_copy(const DsServerMsg &rhs);
+  DsServerMsg &_copy(const DsServerMsg &rhs);
 
 private:
 

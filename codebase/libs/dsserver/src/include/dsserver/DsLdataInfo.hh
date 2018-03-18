@@ -277,7 +277,7 @@ public:
   //    0 on success, -1 on failure.
   
   virtual int readForced(int max_valid_age = -1,
-				      bool update_prev_mod_time = true);
+                         bool update_prev_mod_time = true);
   
   /////////////////////////////////////////////////////////////
   // write()

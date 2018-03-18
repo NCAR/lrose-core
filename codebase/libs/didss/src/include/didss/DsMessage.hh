@@ -248,18 +248,18 @@ public:
   //////////////////////////////////////////
   // print out main header and parts headers
 
-  virtual void print(ostream &out, const char *spacer) const;
+  virtual void print(ostream &out, const char *spacer = "") const;
 
   ////////////////////////////////
   // print out the message header
 
-  virtual void printHeader(ostream &out, const char *spacer) const;
+  virtual void printHeader(ostream &out, const char *spacer = "") const;
 
   /////////////////////
   // print part headers
   // using IDs printed out simply as integers
   
-  void printPartHeaders(ostream &out, const char *spacer) const;
+  void printPartHeaders(ostream &out, const char *spacer = "") const;
 
   ///////////////////////////////////////////////////////////////
   // print part headers, using strings to label IDs as appropriate
@@ -275,7 +275,7 @@ public:
   // print out the message header
   // Backward-compatibility
   
-  virtual void printHeader(ostream *out, const char *spacer) const;
+  virtual void printHeader(ostream *out, const char *spacer = "") const;
 
   // debugging
 
