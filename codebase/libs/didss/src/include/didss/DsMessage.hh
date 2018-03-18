@@ -101,7 +101,7 @@ public:
   // Returns: -1 If msg_len is set and is smaller than a DsMsgHdr_t.
   //           0 Otherwise.
 
-  virtual int decodeHeader(const void *in_msg, const ssize_t msg_len = -1);
+  virtual int decodeHeader(const void *in_msg, ssize_t msg_len = -1);
 
   ////////////////////////////////////////////////////
   // disassemble a message into parts, store in
@@ -314,7 +314,7 @@ protected:
 
   // copy this object
   
-  virtual DsMessage &_copy(const DsMessage &rhs);
+  DsMessage &_copy(const DsMessage &rhs);
   
 private:
 

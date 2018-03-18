@@ -579,7 +579,7 @@ char *DSINP_get_closest_blocking(DSINP_handle_t *handle,
     if (LDATA_info_read(&handle->last_data, handle->input_dir,
 			handle->max_age) == 0)
     {
-      if (abs(handle->last_data.info.latest_time - search_time) <
+      if (labs(handle->last_data.info.latest_time - search_time) <
 	  max_time_offset)
       {
 	*data_time = handle->last_data.info.latest_time;
@@ -1425,10 +1425,10 @@ time_t DSINP_get_data_time(DSINP_handle_t *handle,
 #endif
   
   char file_path_copy[MAX_PATH_LEN];
-  char *filename = '\0';
-  char *date_string = '\0';
-  char *g_string = '\0';
-  char *slash_posn = '\0';
+  char *filename = NULL;
+  char *date_string = NULL;
+  char *g_string = NULL;
+  char *slash_posn = NULL;
     
   /** Copy the filename */
   STRcopy(file_path_copy, file_path, MAX_PATH_LEN);
