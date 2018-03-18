@@ -540,8 +540,6 @@ int write_cc_file(const char *class_name, const TDRPtable *t_entries,
 	  " */\n"
 	  "#include \"%s.hh\"\n"
 	  "#include <cstring>\n"
-	  "\n"
-	  "using namespace std;\n"
 	  "\n",
 	  class_name);
   
