@@ -354,7 +354,6 @@ private:
   // input message
 
   DsMessage _msg;
-  DsMsgPart *_part;
   int _nParts;
   int _pos;
 

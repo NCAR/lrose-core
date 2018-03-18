@@ -2129,7 +2129,7 @@ void iwrf_packet_info_print(FILE *out,
   fprintf(out, "  seq_num: %lld\n", (long long) copy.seq_num);
   fprintf(out, "  version_num: %d\n", copy.version_num);
   fprintf(out, "  radar_id: %d\n", copy.radar_id);
-  fprintf(out, "  time_secs_utc: %ld\n", copy.time_secs_utc);
+  fprintf(out, "  time_secs_utc: %lld\n", copy.time_secs_utc);
   fprintf(out, "  time_nano_secs: %d\n", copy.time_nano_secs);
   
   time_t ptime = copy.time_secs_utc;
@@ -2781,7 +2781,7 @@ void iwrf_pulse_header_print(FILE *out,
     iwrf_platform_georef_t gcopy = *georef;
     iwrf_platform_georef_swap(gcopy);
     fprintf(out, "  Pulse is using georef:\n");
-    fprintf(out, "    georef time_secs_utc: %ld\n", gcopy.packet.time_secs_utc);
+    fprintf(out, "    georef time_secs_utc: %lld\n", gcopy.packet.time_secs_utc);
     fprintf(out, "    georef time_nano_secs: %d\n", gcopy.packet.time_nano_secs);
     fprintf(out, "    georef unit_num: %d\n", gcopy.unit_num);
     fprintf(out, "    georef unit_id: %d\n", gcopy.unit_id);

@@ -62,7 +62,7 @@ double DpolFilter::constrainZdrFromDbz(double wavelengthCm,
   double zdrLower = exp(3.12e-4 * dbzIn * dbzIn
 			+ 6.48e-2 * dbzIn
 			- 3.87);
-  if (finite(zdrLower) && zdrIn < zdrLower) {
+  if (isfinite(zdrLower) && zdrIn < zdrLower) {
     return zdrLower;
   }
 
@@ -72,7 +72,7 @@ double DpolFilter::constrainZdrFromDbz(double wavelengthCm,
 			+ 2.38e-1 * dbzIn
 			- 3.44);
 
-  if (finite(zdrUpper) && zdrIn > zdrUpper) {
+  if (isfinite(zdrUpper) && zdrIn > zdrUpper) {
     return zdrUpper;
   }
 
