@@ -190,7 +190,7 @@ void DoradeBlockRdat::decodeIntegerData(const int binaryFormat,RayIntegers * con
 
     if((binaryFormat < 1) || (binaryFormat > 5)){
 	char msg[2048];
-	sprintf(msg,"DoradeBlockRdat::decodeIntegerData : binary_format value of %d is invalid. \n");
+	sprintf(msg,"DoradeBlockRdat::decodeIntegerData : binary_format value of %d is invalid.\n", binaryFormat);
 	throw Fault(msg);
     }
 
@@ -264,7 +264,7 @@ void DoradeBlockRdat::encode(Buffer &buffer, const int binaryFormat,RayIntegers 
 
     if((binaryFormat < 1) || (binaryFormat > 5)){
 	char msg[2048];
-	sprintf(msg,"DoradeBlockRdat::encode : binary_format value of %d is invalid. \n");
+	sprintf(msg,"DoradeBlockRdat::encode : binary_format value of %d is invalid.\n", binaryFormat);
 	throw Fault(msg);
     }
 
@@ -290,7 +290,7 @@ void DoradeBlockRdat::encode(Buffer &buffer, const int binaryFormat,RayIntegers 
 
     try {
 
-	unsigned char *data = buffer.new_data(blockSize);
+        buffer.new_data(blockSize);
 
 	buffer.set_string           ( 0,id_,4);
 	buffer.set_four_byte_integer( 4,blockSize);
@@ -331,7 +331,7 @@ void DoradeBlockRdat::encode(Buffer &buffer, const int binaryFormat,RayDoubles &
 
     if((binaryFormat < 1) || (binaryFormat > 5)){
 	char msg[2048];
-	sprintf(msg,"DoradeBlockRdat::encode : binary_format value of %d is invalid. \n");
+	sprintf(msg,"DoradeBlockRdat::encode : binary_format value of %d is invalid.\n", binaryFormat);
 	throw Fault(msg);
     }
 
@@ -350,7 +350,7 @@ void DoradeBlockRdat::encode(Buffer &buffer, const int binaryFormat,RayDoubles &
 
     try {
 
-	unsigned char *data = buffer.new_data(blockSize);
+        buffer.new_data(blockSize);
 
 	buffer.set_string           ( 0,id_,4);
 	buffer.set_four_byte_integer( 4,blockSize);
