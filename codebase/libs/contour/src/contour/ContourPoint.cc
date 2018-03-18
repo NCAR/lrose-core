@@ -47,7 +47,9 @@ ContourPoint::ContourPoint(const double& x, const double& y,
   _x(x),
   _y(y)
 {
-  // Do nothing
+  if (_debugFlag) {
+    std::cerr << "In debug mode" << std::endl;
+  }
 }
 
 

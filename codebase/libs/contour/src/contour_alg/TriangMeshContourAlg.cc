@@ -218,8 +218,8 @@ Contour *TriangMeshContourAlg::generateContour(float **d,
 	      
 	      if (case_value != 0)
 	      {
-		double x1, y1;
-		double x2, y2;
+		double x1 = 0, y1 = 0;
+		double x2 = 0, y2 = 0;
 		
 		switch (case_value)
 		{
