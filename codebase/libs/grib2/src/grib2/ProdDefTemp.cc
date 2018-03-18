@@ -3061,13 +3061,13 @@ void ProdDefTemp::_printDerivedForecastType(FILE *stream, int derivedId) const
     fprintf(stream, "Unweighted Mode of All Members\n");
     break;
   case 193:
-    fprintf(stream, "Percentile value (10%) of All Members\n");
+    fprintf(stream, "Percentile value (10%%) of All Members\n");
     break;
   case 194:
-    fprintf(stream, "Percentile value (50%) of All Members\n");
+    fprintf(stream, "Percentile value (50%%) of All Members\n");
     break;
   case 195:
-    fprintf(stream, "Percentile value (90%) of All Members\n");
+    fprintf(stream, "Percentile value (90%%) of All Members\n");
     break;
   case 196:
     fprintf(stream, "Statistically decided weights for each ensemble member\n");

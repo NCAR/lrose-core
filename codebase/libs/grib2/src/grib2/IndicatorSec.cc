@@ -106,7 +106,7 @@ IndicatorSec::print(FILE *stream) const
   fprintf(stream, "\n\n");
   fprintf(stream, "Indicator section:\n");
   fprintf(stream, "----------------------------------------------------\n");
-  fprintf(stream, "Message Length %ld\n", _numMsgBytes);
+  fprintf(stream, "Message Length %lld\n", _numMsgBytes);
   fprintf(stream, "Discipline Number %d\n", _disciplineNum);
   fprintf(stream, "Edition %d\n\n", _editionNum);
 
