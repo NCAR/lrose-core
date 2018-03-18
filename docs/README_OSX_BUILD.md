@@ -32,9 +32,34 @@ You will need to register for a free Apple id, no credit card is required.
 
 Install [homebrew](http://mxcl.github.com/homebrew/)
 
-Homebrew allows you to install libraries needed to build Radx.
+It is recommended to install homebrew in the user's home directory.
 
-### Manual LROSE install
+```
+  cd
+  git clone https://github.com/mxcl/homebrew.git
+```
+
+Add brew to your path, based on the login shell you use.
+Generally you will do this by editing your shell startup scripts.
+
+If you use bash, add the following to .bashrc:
+```
+  export PATH=${HOME}/homebrew/bin:${PATH}
+```
+
+If you use tcsh, add the following to .cshrc:
+```
+  set path = ( ${HOME}/homebrew/bin ${path} )
+  source ~/.cshrc
+```
+
+Then run:
+
+```
+  brew update
+```
+
+### Install required libraries
 
 ```
   brew install szip
