@@ -466,7 +466,7 @@ string Path::computeTmpPath(const char *tmp_name /* = NULL*/ )
   struct timeval tv;
   gettimeofday(&tv, NULL);
   char timeStr[128];
-  sprintf(timeStr, "%ld.%ld_", tv.tv_sec, tv.tv_usec);
+  sprintf(timeStr, "%ld.%ld_", tv.tv_sec, (long) tv.tv_usec);
 
   // get PID and make a string from it
   

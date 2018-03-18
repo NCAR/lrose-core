@@ -137,7 +137,7 @@ void LogMsg::log(const std::string &fname, const int line,
 //----------------------------------------------------------------
 void LogMsg::logf(const std::string &fname, const int line,
 		   const string &method,const  Severity_t severity, 
-		   const string &format,...)
+		   string format, ...)
 {
   if (!pSeverityEnabled[static_cast<int>(severity)])
   {
@@ -217,7 +217,7 @@ void LogMsg::accumulate(const string &msg) const
 }
 
 //----------------------------------------------------------------
-void LogMsg::accumulatef(const string &format, ...) const
+void LogMsg::accumulatef(string format, ...) const
 {
   va_list args;
   va_start( args, format );

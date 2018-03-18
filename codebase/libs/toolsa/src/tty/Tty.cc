@@ -115,6 +115,7 @@ int Tty::openPort(const char *input_device,
 
   if (_debug) {
     cerr << "Tty::openPort" << endl;
+    cerr << "  prog_name: " << _progName << endl;
     cerr << "  device name: " << input_device << endl;
     cerr << "  baud rate: " << _speedStr(baud_rate) << endl;
     if (twoStopBits) {

@@ -559,7 +559,7 @@ private:
   /**
    * True to put severity key strings into logged messages for all types
    */
-  bool _logShowAllKeys;
+  // bool _logShowAllKeys;
 
   /**
    * Constructor, no class name (class is the empty string.)
