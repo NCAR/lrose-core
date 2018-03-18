@@ -121,7 +121,7 @@ class Map
 
   inline MapObject *getObject(const size_t index)
   {
-    if (index < 0 || index >= _objectList.size())
+    if (index >= _objectList.size())
       return 0;
     
     return _objectList[index];

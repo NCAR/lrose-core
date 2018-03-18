@@ -43,11 +43,11 @@
  *
  *********************************************************************/
 
-using namespace std;
-
 #include <cstdio>
 
 #include <rapformats/MapPoint.hh>
+
+using namespace std;
 
 const double MapPoint::PEN_UP = -1000.0;
 

@@ -43,11 +43,11 @@
  *
  *********************************************************************/
 
-using namespace std;
-
 #include <cstdio>
 
 #include <rapformats/MapObject.hh>
+
+using namespace std;
 
 
 const int MapObject::MAX_TOKENS = 10;

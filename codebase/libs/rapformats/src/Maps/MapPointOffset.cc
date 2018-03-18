@@ -44,11 +44,11 @@
  *
  *********************************************************************/
 
-using namespace std;
-
 #include <cstdio>
 
 #include <rapformats/MapPointOffset.hh>
+
+using namespace std;
 
 
 // Define constants

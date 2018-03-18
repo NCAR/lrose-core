@@ -43,12 +43,11 @@
  *
  *********************************************************************/
 
-using namespace std;
-
 #include <cstdio>
 
 #include <rapformats/MapIconPoint.hh>
 
+using namespace std;
 
 // Define globals
 

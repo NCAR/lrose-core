@@ -3734,9 +3734,10 @@ static ubool isPtendency(char *string, Decoded_METAR *Mptr, int *NDEX)
 
    if(strlen(string) != 5)
       return FALSE;
-   else if(*string == '5' && ('0' <= *(string+1) <= '8') &&
-             (nisdigit(string+2,3) || strncmp(string+2,"///",3)
-                                             == 0) )
+   else if( (*string == '5') &&
+            ('0' <= *(string+1)) &&
+            (*(string+1) <= '8') &&
+            (nisdigit(string+2,3) || strncmp(string+2,"///",3) == 0) )
    {
       if( !(nisdigit(string+2,3)) )
       {
