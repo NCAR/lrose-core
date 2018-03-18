@@ -27,9 +27,9 @@ public:
   bool isAnotherNode();
 
 private:
-  unsigned char _f;
-  unsigned char _x;
-  unsigned char _y;
+  // unsigned char _f;
+  // unsigned char _x;
+  // unsigned char _y;
   unsigned short _key;
 
   bool _debug;

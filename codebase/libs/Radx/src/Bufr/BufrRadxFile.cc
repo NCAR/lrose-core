@@ -1922,7 +1922,7 @@ int BufrRadxFile::_addFl32FieldToRays(RadxSweep *sweep, int dataSection,
   string name = _file.getTypeOfProductForSweep(dataSection);
   // if the name didn't come from the data section, then
   // use the field name extracted from the file name
-  if (name.size() < 0)
+  if (name.size() < 1)
     name = someName;
   // set missing value
 

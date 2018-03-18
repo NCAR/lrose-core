@@ -67,7 +67,9 @@ void BufrProduct_gsi::ConstructDescriptor(string &desF,
   string &des_fieldName, char *line) {
 
   //char line[2048];
-  char f; string x; string y;
+  char f = 0;
+  string x;
+  string y;
   if (value.size() >=6) {
     f = value.at(0);
     x = value.substr(1,2);
