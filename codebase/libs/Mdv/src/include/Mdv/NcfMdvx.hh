@@ -97,9 +97,7 @@ protected:
 
   // functions
 
-  // overload copy method
-
-  virtual NcfMdvx &_copy(const NcfMdvx &rhs);
+  NcfMdvx &_copy(const NcfMdvx &rhs);
 
 private:
 
