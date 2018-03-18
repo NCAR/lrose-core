@@ -93,13 +93,13 @@ public:
    //
    // Put: initialization
    //
-   virtual void init( vector< string* >& urls, 
-                      source_t sourceId, const char *sourceFmt, 
-                      int siteId = 0, const char *siteName = NULL,
-                      double lat = 0.0, double lon = 0.0, 
-                      double altOfSite = 0.0, double missingVal = DBL_MAX )
-                    { assert( false ); }
-
+  //  void init( vector< string* >& urls, 
+  //             source_t sourceId, const char *sourceFmt, 
+  //             int siteId = 0, const char *siteName = NULL,
+  //             double lat = 0.0, double lon = 0.0, 
+  //             double altOfSite = 0.0, double missingVal = DBL_MAX )
+  // { assert( false ); }
+  
    //
    // Put: Set descriptive info
    //
@@ -145,9 +145,9 @@ public:
    //
    // Put: Write sounding to spdb
    //
-   virtual int writeSounding( time_t validTime, time_t expireTime,
-                              int leadSecs = 0 )
-                            { assert( false ); }
+   // virtual int writeSounding( time_t validTime, time_t expireTime,
+   //                            int leadSecs = 0 )
+   //                          { assert( false ); }
 
    /////////////////////////////////////////////////////////////////////////////
    // GET methods are overloaded by SoundingGet class
@@ -155,10 +155,10 @@ public:
    //
    // Get: initialization
    //
-   virtual void init( const char* url, time_t margin = 0,
-                      double minWindsAlt = -1.0, double maxWindsAlt = -1.0,
-                      double avgU = 0.0, double avgV = 0.0 )
-                    { assert( false ); }
+  //  void init( const char* url, time_t margin = 0,
+  //             double minWindsAlt = -1.0, double maxWindsAlt = -1.0,
+  //             double avgU = 0.0, double avgV = 0.0 )
+  // { assert( false ); }
 
    //
    // Get: Examine state and descriptive info
@@ -175,8 +175,8 @@ public:
    // 
    // Get: Reading sounding from spdb
    //
-   virtual int            readSounding( time_t when, int whichSiteId = 0 )
-                                      { assert( false ); }
+   // int                    readSounding( time_t when, int whichSiteId = 0 )
+   //                                    { assert( false ); }
 
    virtual void           loadProduct( int productIndex )
                                      { assert( false ); }

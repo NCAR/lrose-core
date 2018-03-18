@@ -269,10 +269,10 @@ protected:
 
   // overload communicate
 
-  virtual int _communicateGet(DsSpdbMsg &msg,
-			      void *buf,
-			      int buflen,
-			      DsURL &url);
+  int _communicateGet(DsSpdbMsg &msg,
+                      void *buf,
+                      int buflen,
+                      DsURL &url);
 
   int _prepareThread();
   void _tidyThread(int ret_val);
