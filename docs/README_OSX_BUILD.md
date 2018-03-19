@@ -30,9 +30,19 @@ You will need to register for a free Apple id, no credit card is required.
 
 ### Install homebrew
 
-Install [homebrew](http://mxcl.github.com/homebrew/)
+The default location for homebrew is /usr/local. So you need write permission
+to /usr/local to perform the install.
 
-It is recommended to install homebrew in the user's home directory.
+Run the following ruby script:
+
+```
+  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  /usr/local/bin/brew update
+```
+
+### Optional homebrew install in home directory
+
+If access is not available to /usr/local, you can install in your home directory instead.
 
 ```
   cd
@@ -72,7 +82,7 @@ Then run:
   make install
 ```
 
-### Automated LROSE install
+### Automated LROSE install (Not yet available)
 
 ```
   brew install https://github.com/NCAR/lrose-core/releases/download/lrose-yyyymmdd/lrose.rb
