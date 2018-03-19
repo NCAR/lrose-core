@@ -188,7 +188,7 @@ public:
   
   // print
   
-  void print(ostream &out);
+  virtual void print(ostream &out, const char *spacer = "") const;
   
   // get methods
   

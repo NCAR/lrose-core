@@ -101,7 +101,7 @@ public:
   // Returns: -1 If msg_len is set and is smaller than a DsMsgHdr_t.
   //           0 Otherwise.
 
-  virtual int decodeHeader(const void *in_msg, const ssize_t msg_len = -1);
+  virtual int decodeHeader(const void *in_msg, ssize_t msg_len = -1);
 
   ////////////////////////////////////////////////////
   // disassemble a message into parts, store in
@@ -248,18 +248,18 @@ public:
   //////////////////////////////////////////
   // print out main header and parts headers
 
-  virtual void print(ostream &out, const char *spacer) const;
+  virtual void print(ostream &out, const char *spacer = "") const;
 
   ////////////////////////////////
   // print out the message header
 
-  virtual void printHeader(ostream &out, const char *spacer) const;
+  virtual void printHeader(ostream &out, const char *spacer = "") const;
 
   /////////////////////
   // print part headers
   // using IDs printed out simply as integers
   
-  void printPartHeaders(ostream &out, const char *spacer) const;
+  void printPartHeaders(ostream &out, const char *spacer = "") const;
 
   ///////////////////////////////////////////////////////////////
   // print part headers, using strings to label IDs as appropriate
@@ -275,7 +275,7 @@ public:
   // print out the message header
   // Backward-compatibility
   
-  virtual void printHeader(ostream *out, const char *spacer) const;
+  virtual void printHeader(ostream *out, const char *spacer = "") const;
 
   // debugging
 
@@ -314,7 +314,7 @@ protected:
 
   // copy this object
   
-  virtual DsMessage &_copy(const DsMessage &rhs);
+  DsMessage &_copy(const DsMessage &rhs);
   
 private:
 

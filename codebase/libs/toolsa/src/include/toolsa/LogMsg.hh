@@ -267,7 +267,7 @@ public:
    */
   void logf(const std::string &fname, const int line,
 	    const std::string &method, const Severity_t severity,
-	    const std::string &format, ... );
+	    const std::string format, ... );
 
   /**
    * Set severity status for the debugging states, and set other state variables
@@ -331,7 +331,7 @@ public:
    * a formatted argument list
    * @param[in] format  The format for the variable args
    */
-  void accumulatef(const std::string &format, ...) const;
+  void accumulatef(std::string format, ...) const;
 
   /**
    * Accumulate input information into a local string without logging,

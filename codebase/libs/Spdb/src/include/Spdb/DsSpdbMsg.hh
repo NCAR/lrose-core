@@ -661,7 +661,7 @@ public:
 
   // print object
 
-  void print(ostream &out) const;
+  virtual void print(ostream &out, const char *spacer = "") const;
 
   // byte swapping
 

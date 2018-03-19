@@ -52,50 +52,48 @@ void tstorm_spdb_load_centroid(tstorm_spdb_header_t *header,
      
 {
 
-  double forecast_lat, forecast_lon;
-  double forecast_x, forecast_y;
-  double centroid_x, centroid_y;
-  double delta_x, delta_y;
-  double dist, dirn_in_rad;
-  titan_grid_comps_t comps;
-
-  /*
-   * initialize projection computations
-   */
-  
-  if (header->grid.proj_type == TITAN_PROJ_FLAT) {
-    TITAN_init_flat(header->grid.proj_origin_lat,
-		  header->grid.proj_origin_lon, 0, &comps);
-  }
-
   /*
    * compute forecast centroid position
    */
 
-  dist = entry->speed * lead_time / 3600.0;
-  dirn_in_rad = entry->direction * DEG_TO_RAD;
+  double dist = entry->speed * lead_time / 3600.0;
 
   if (header->grid.proj_type == TITAN_PROJ_FLAT) {
     
-    delta_x = dist * sin(dirn_in_rad);
-    delta_y = dist * cos(dirn_in_rad);
+    /*
+     * initialize projection computations
+     */
+    
+    titan_grid_comps_t comps;
+    TITAN_init_flat(header->grid.proj_origin_lat,
+                    header->grid.proj_origin_lon, 0, &comps);
 
+    double dirn_in_rad = entry->direction * DEG_TO_RAD;
+    double delta_x = dist * sin(dirn_in_rad);
+    double delta_y = dist * cos(dirn_in_rad);
+    
+    double centroid_x, centroid_y;
     TITAN_latlon2xy(&comps, entry->latitude, entry->longitude,
-		  &centroid_x, &centroid_y);
+                    &centroid_x, &centroid_y);
 
-    forecast_x = centroid_x + delta_x;
-    forecast_y = centroid_y + delta_y;
+    double forecast_x = centroid_x + delta_x;
+    double forecast_y = centroid_y + delta_y;
+
+    *lat_p = forecast_y;
+    *lon_p = forecast_x;
 
   } else {
 
+    double forecast_lat, forecast_lon;
+    
     PJGLatLonPlusRTheta(entry->latitude, entry->longitude,
 			dist, entry->direction,
 			&forecast_lat, &forecast_lon);
+    
+    *lat_p = forecast_lat;
+    *lon_p = forecast_lon;
 
   }
-
-  *lat_p = forecast_lat;
-  *lon_p = forecast_lon;
 
 }
 

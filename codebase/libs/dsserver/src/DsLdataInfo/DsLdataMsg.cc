@@ -526,89 +526,89 @@ int DsLdataMsg::disassemble(const void *inMsg, int msgLen)
 // print message
 //
 
-void DsLdataMsg::print(ostream &out)
+void DsLdataMsg::print(ostream &out, const char *spacer) const
 
 {
 
   if (_urlStr.size() > 0) {
-    out << "  urlStr: " << _urlStr << endl;
+    out << spacer << "  urlStr: " << _urlStr << endl;
   }
 
   switch (_mode) {
     case DS_LDATA_OPEN:
-      out << "Message mode: DS_LDATA_OPEN" << endl;
-      out << "  displacedDirPath: " << _displacedDirPath << endl;
-      out << "  fileName: " << _ldataFileName << endl;
-      out << "  useXml: " << (_useXml?"y":"n") << endl;
-      out << "  useAscii: " << (_useAscii?"y":"n") << endl;
-      out << "  saveLatestReadInfo: " << (_saveLatestReadInfo?"y":"n") << endl;
-      out << "  useFmq: " << (_useFmq?"y":"n") << endl;
-      out << "  fmqNSlots: " << _fmqNSlots << endl;
-      out << "  readFmqFromStart: " << (_readFmqFromStart?"y":"n") << endl;
+      out << spacer << "Message mode: DS_LDATA_OPEN" << endl;
+      out << spacer << "  displacedDirPath: " << _displacedDirPath << endl;
+      out << spacer << "  fileName: " << _ldataFileName << endl;
+      out << spacer << "  useXml: " << (_useXml?"y":"n") << endl;
+      out << spacer << "  useAscii: " << (_useAscii?"y":"n") << endl;
+      out << spacer << "  saveLatestReadInfo: " << (_saveLatestReadInfo?"y":"n") << endl;
+      out << spacer << "  useFmq: " << (_useFmq?"y":"n") << endl;
+      out << spacer << "  fmqNSlots: " << _fmqNSlots << endl;
+      out << spacer << "  readFmqFromStart: " << (_readFmqFromStart?"y":"n") << endl;
       break;
     case DS_LDATA_SET_DISPLACED_DIR_PATH:
-      out << "Message mode: DS_LDATA_SET_DISPLACED_DIR_PATH" << endl;
-      out << "  displacedDirPath: " << _displacedDirPath << endl;
+      out << spacer << "Message mode: DS_LDATA_SET_DISPLACED_DIR_PATH" << endl;
+      out << spacer << "  displacedDirPath: " << _displacedDirPath << endl;
       break;
     case DS_LDATA_SET_LDATA_FILE_NAME:
-      out << "Message mode: DS_LDATA_SET_LDATA_FILE_NAME" << endl;
-      out << "  fileName: " << _ldataFileName << endl;
+      out << spacer << "Message mode: DS_LDATA_SET_LDATA_FILE_NAME" << endl;
+      out << spacer << "  fileName: " << _ldataFileName << endl;
       break;
     case DS_LDATA_SET_USE_XML:
-      out << "Message mode: DS_LDATA_SET_USE_XML" << endl;
-      out << "  useXml: " << (_useXml?"y":"n") << endl;
+      out << spacer << "Message mode: DS_LDATA_SET_USE_XML" << endl;
+      out << spacer << "  useXml: " << (_useXml?"y":"n") << endl;
       break;
     case DS_LDATA_SET_USE_ASCII:
-      out << "Message mode: DS_LDATA_SET_USE_ASCII" << endl;
-      out << "  useAscii: " << (_useAscii?"y":"n") << endl;
+      out << spacer << "Message mode: DS_LDATA_SET_USE_ASCII" << endl;
+      out << spacer << "  useAscii: " << (_useAscii?"y":"n") << endl;
       break;
     case DS_LDATA_SET_SAVE_LATEST_READ_INFO:
-      out << "Message mode: DS_LDATA_SET_SAVE_LATEST_READ_INFO" << endl;
-      out << "  saveLatestReadInfo: " << (_saveLatestReadInfo?"y":"n") << endl;
+      out << spacer << "Message mode: DS_LDATA_SET_SAVE_LATEST_READ_INFO" << endl;
+      out << spacer << "  saveLatestReadInfo: " << (_saveLatestReadInfo?"y":"n") << endl;
       break;
     case DS_LDATA_SET_USE_FMQ:
-      out << "Message mode: DS_LDATA_SET_USE_FMQ" << endl;
-      out << "  useFmq: " << (_useFmq?"y":"n") << endl;
+      out << spacer << "Message mode: DS_LDATA_SET_USE_FMQ" << endl;
+      out << spacer << "  useFmq: " << (_useFmq?"y":"n") << endl;
       break;
     case DS_LDATA_SET_FMQ_NSLOTS:
-      out << "Message mode: DS_LDATA_SET_FMQ_NSLOTS" << endl;
-      out << "  fmqNSlots: " << _fmqNSlots << endl;
+      out << spacer << "Message mode: DS_LDATA_SET_FMQ_NSLOTS" << endl;
+      out << spacer << "  fmqNSlots: " << _fmqNSlots << endl;
       break;
     case DS_LDATA_SET_READ_FMQ_FROM_START:
-      out << "Message mode: DS_LDATA_SET_READ_FMQ_FROM_START" << endl;
-      out << "  readFmqFromStart: " << (_readFmqFromStart?"y":"n") << endl;
+      out << spacer << "Message mode: DS_LDATA_SET_READ_FMQ_FROM_START" << endl;
+      out << spacer << "  readFmqFromStart: " << (_readFmqFromStart?"y":"n") << endl;
       break;
     case DS_LDATA_READ:
-      out << "Message mode: DS_LDATA_READ" << endl;
-      out << "  readForced: " << (_readForced?"y":"n") << endl;
-      out << "  maxValidAge: " << _maxValidAge << endl;
+      out << spacer << "Message mode: DS_LDATA_READ" << endl;
+      out << spacer << "  readForced: " << (_readForced?"y":"n") << endl;
+      out << spacer << "  maxValidAge: " << _maxValidAge << endl;
       break;
     case DS_LDATA_WRITE:
-      out << "Message mode: DS_LDATA_WRITE" << endl;
-      out << "  writeFmqOnly: " << (_writeFmqOnly?"y":"n") << endl;
+      out << spacer << "Message mode: DS_LDATA_WRITE" << endl;
+      out << spacer << "  writeFmqOnly: " << (_writeFmqOnly?"y":"n") << endl;
       break;
     case DS_LDATA_REPLY:
-      out << "Message mode: DS_LDATA_REPLY" << endl;
+      out << spacer << "Message mode: DS_LDATA_REPLY" << endl;
       break;
     case DS_LDATA_CLOSE:
-      out << "Message mode: DS_LDATA_CLOSE" << endl;
+      out << spacer << "Message mode: DS_LDATA_CLOSE" << endl;
       break;
     default: {}
   }
 
   if (_argsXml.size() > 0) {
-    out << "  Args XML:" << endl;
-    out << _argsXml << endl;
+    out << spacer << "  Args XML:" << endl;
+    out << spacer << _argsXml << endl;
   }
   
   if (_ldataXml.size() > 0) {
-    out << "  Ldata XML:" << endl;
-    out << _ldataXml << endl;
+    out << spacer << "  Ldata XML:" << endl;
+    out << spacer << _ldataXml << endl;
   }
   
   if (_errorOccurred) {
-    out << "  Error occurred" << endl;
-    out << "  Error str: " << _errStr << endl;
+    out << spacer << "  Error occurred" << endl;
+    out << spacer << "  Error str: " << _errStr << endl;
   }
 
   DsServerMsg::print(out, "");

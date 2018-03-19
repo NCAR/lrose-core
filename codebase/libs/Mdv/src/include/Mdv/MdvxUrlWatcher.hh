@@ -217,10 +217,10 @@ private :
   int              _max_valid;
 
   // special flag for forecast data that comes in over a long period
-  bool             _init_nowait;
+  // bool             _init_nowait;
 
   //! gen time on startup, when using init_nowait flag.
-  time_t           _init_gt;
+  // time_t           _init_gt;
 
 
   bool _fcst_getdata(void);

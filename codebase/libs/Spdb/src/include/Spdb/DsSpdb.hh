@@ -625,8 +625,8 @@ protected:
 
   int _setUrl(const string &url_str);
 
-  virtual int _communicateGet(const DsSpdbMsg &inMsg,
-			      const DsURL &url);
+  int _communicateGet(const DsSpdbMsg &inMsg,
+                      const DsURL &url);
 
   int _communicatePut(const DsSpdbMsg &inMsg,
 		      const DsURL &url,

@@ -1424,7 +1424,7 @@ static ubool isAltimStng( char *token, Decoded_METAR *Mptr, int *NDEX )
   int val;
   char tmpstr[8];
 
-  ubool foundQA = FALSE; 
+  // ubool foundQA = FALSE; 
   
   if(token == NULL) {
     return FALSE;

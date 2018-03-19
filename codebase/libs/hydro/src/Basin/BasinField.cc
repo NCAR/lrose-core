@@ -52,6 +52,10 @@ BasinField::BasinField(const DBFHandle dbf_handle,
   _debugFlag(debug_flag),
   _fieldNumber(field_num)
 {
+
+  if (_debugFlag) {
+    cerr << "BasinField: debug mode" << endl;
+  }
   // Get the field information from the file
 
   char field_name[BUFSIZ];

@@ -119,8 +119,8 @@ private:
   char *_bufPtr;  // pointer to buffer segment
   char *_ptr[N_IDENT];
 
-  off_t _statOffset; // current offset in status segment
-  off_t _bufOffset; // current offset in buf segment
+  // off_t _statOffset; // current offset in status segment
+  // off_t _bufOffset; // current offset in buf segment
   off_t _offset[N_IDENT];
 
   // lock file for synchronization

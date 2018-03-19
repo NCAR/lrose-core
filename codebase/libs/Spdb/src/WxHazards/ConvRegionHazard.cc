@@ -57,6 +57,9 @@ ConvRegionHazard::ConvRegionHazard(double top,
 				   bool debug_flag) :
   WxHazard(WxHazard::CONVECTIVE_REGION_HAZARD, debug_flag)
 {
+
+  _debugFlag = debug_flag;
+  
   // Create the polygon object
 
   _polygon = new WorldPolygon2D();
@@ -167,6 +170,9 @@ int ConvRegionHazard::getSpdbNumBytes(void) const
 void ConvRegionHazard::print(FILE *stream) const
 {
   fprintf(stream, "Convective Region Hazard:\n");
+  if (_debugFlag) {
+    fprintf(stream, "   debugging on\n");
+  }
   fprintf(stream, "   top = %f feet\n", _top);
   fprintf(stream, "   speed = %f\n", _speed);
   fprintf(stream, "   direction = %f\n", _direction);

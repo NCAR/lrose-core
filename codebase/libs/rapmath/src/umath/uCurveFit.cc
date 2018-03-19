@@ -119,7 +119,7 @@ int uExponentialFit(long n, double *x, double *y, double *a,
   long mOrder = 3;
   long n_iterations;
 
-  double chisq, prev_chisq;
+  double chisq = 0, prev_chisq = 0;
   double ldiff, prev_ldiff, delta_ldiff;
   double chisq_change;
   double *xp, *yp, xval, yval;
@@ -530,7 +530,7 @@ int uPolyFit(long n, double *x, double *y, double *a,
   long mOrder;
   long n_iterations;
 
-  double chisq, prev_chisq;
+  double chisq = 0, prev_chisq = 0;
   double ldiff, prev_ldiff, delta_ldiff;
   double chisq_change;
   double *sdev;

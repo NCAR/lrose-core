@@ -111,7 +111,7 @@ bool DoradeBlockCsfd::decode(Buffer &buffer) throw(Fault){
 	integerValues_["number_of_cell_segments"] = num_segments;
 	doubleValues_ ["meters_to_first_cell"]    = buffer.get_four_byte_float  (12);
 
-	char   key[48];
+	// char   key[48];
 	int    loc;	
 	int    number_cells(0);
 	int    number_segment_cells;

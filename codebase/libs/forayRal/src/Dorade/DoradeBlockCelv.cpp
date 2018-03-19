@@ -214,7 +214,7 @@ void DoradeBlockCelv::validate() throw (Fault){
 	char msg[2048];
 	sprintf(msg,"DoradeBlockCelv::validate : number_of_cells value of %d is not the same as doubleVector size of %d \n",
 		numberCells,
-		doubleVector_.size());
+		(int) doubleVector_.size());
 	throw Fault(msg);
 
     }

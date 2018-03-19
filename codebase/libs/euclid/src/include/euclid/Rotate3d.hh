@@ -36,9 +36,9 @@
 #ifndef Rotate3d_hh
 #define Rotate3d_hh
 
-using namespace std;
 #include <iostream>
 #include <euclid/sincos.h>
+using namespace std;
 
 class Rotate3d
 {

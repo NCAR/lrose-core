@@ -76,7 +76,7 @@ void DataAtt::print(void) const
 /*----------------------------------------------------------------*/
 void DataAtt::print(FILE *fp) const
 {
-  fprintf(fp, sprint().c_str());
+  fprintf(fp, "%s", sprint().c_str());
 }
 
 /*----------------------------------------------------------------*/

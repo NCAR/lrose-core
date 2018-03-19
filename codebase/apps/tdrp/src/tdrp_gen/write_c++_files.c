@@ -136,8 +136,6 @@ int write_hh_file(const char *class_name, const TDRPtable *t_entries,
   fprintf(hfile, "#ifndef %s_hh\n", class_name);
   fprintf(hfile, "#define %s_hh\n", class_name);
   fprintf(hfile, "\n");
-  fprintf(hfile, "using namespace std;\n");
-  fprintf(hfile, "\n");
   fprintf(hfile, "#include <tdrp/tdrp.h>\n");
   fprintf(hfile, "#include <iostream>\n");
   fprintf(hfile, "#include <cstdio>\n");
@@ -145,6 +143,8 @@ int write_hh_file(const char *class_name, const TDRPtable *t_entries,
   fprintf(hfile, "#include <cstring>\n");
   fprintf(hfile, "#include <climits>\n");
   fprintf(hfile, "#include <cfloat>\n");
+  fprintf(hfile, "\n");
+  fprintf(hfile, "using namespace std;\n");
   fprintf(hfile, "\n");
 
   /*
@@ -538,8 +538,6 @@ int write_cc_file(const char *class_name, const TDRPtable *t_entries,
 	  " * @author Automatically generated\n"
 	  " *\n"
 	  " */\n"
-	  "using namespace std;\n"
-	  "\n"
 	  "#include \"%s.hh\"\n"
 	  "#include <cstring>\n"
 	  "\n",

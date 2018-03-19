@@ -43,14 +43,13 @@
  *
  *********************************************************************/
 
-using namespace std;
-
 #include <iostream>
 #include <cstdlib>
 
 #include <rapformats/Map.hh>
 #include <rapformats/MapSimpleLabel.hh>
 
+using namespace std;
 
 /**********************************************************************
  * Constructors

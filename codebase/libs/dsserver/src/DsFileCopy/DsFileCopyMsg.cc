@@ -513,58 +513,58 @@ int DsFileCopyMsg::disassemble(void *inMsg, const int msgLen)
 // print message
 //
 
-void DsFileCopyMsg::print(ostream &out)
+void DsFileCopyMsg::print(ostream &out, const char *spacer) const
 
 {
 
-  out << "  dataUrl: " << _dataUrl.getURLStr() << endl;
+  out << spacer << "  dataUrl: " << _dataUrl.getURLStr() << endl;
 
   switch (_subType) {
     
   case DS_FILECOPY_ENQUIRE_FOR_PUT:
-    out << "Message subType: DS_FILECOPY_ENQUIRE_FOR_PUT" << endl;
-    out << "  file name: " << _fileName << endl;
-    out << "  file size: " << _fileInfo.size << endl;
-    out << "  file mod time: " << utimstr(_fileInfo.mod_time) << endl;
-    out << "  overwrite age: " << _fileInfo.overwrite_age << endl;
+    out << spacer << "Message subType: DS_FILECOPY_ENQUIRE_FOR_PUT" << endl;
+    out << spacer << "  file name: " << _fileName << endl;
+    out << spacer << "  file size: " << _fileInfo.size << endl;
+    out << spacer << "  file mod time: " << utimstr(_fileInfo.mod_time) << endl;
+    out << spacer << "  overwrite age: " << _fileInfo.overwrite_age << endl;
     break;
 
   case DS_FILECOPY_PUT_AFTER_ENQUIRE:
-    out << "Message subType: DS_FILECOPY_PUT_AFTER_ENQUIRE" << endl;
-    out << "  File buf len: " << _fileLen << endl;
-    out << "LdataInfo:" << endl;
+    out << spacer << "Message subType: DS_FILECOPY_PUT_AFTER_ENQUIRE" << endl;
+    out << spacer << "  File buf len: " << _fileLen << endl;
+    out << spacer << "LdataInfo:" << endl;
     _ldataInfo.printFull(out);
     break;
 
   case DS_FILECOPY_PUT_FORCED:
-    out << "Message subType: DS_FILECOPY_PUT_FORCED" << endl;
-    out << "  file name: " << _fileName << endl;
-    out << "  file size: " << _fileInfo.size << endl;
-    out << "  file mod time: " << utimstr(_fileInfo.mod_time) << endl;
+    out << spacer << "Message subType: DS_FILECOPY_PUT_FORCED" << endl;
+    out << spacer << "  file name: " << _fileName << endl;
+    out << spacer << "  file size: " << _fileInfo.size << endl;
+    out << spacer << "  file mod time: " << utimstr(_fileInfo.mod_time) << endl;
     break;
 
   case DS_FILECOPY_RETURN:
 
-    out << "Message subType: DS_FILECOPY_RETURN" << endl;
+    out << spacer << "Message subType: DS_FILECOPY_RETURN" << endl;
 
     switch (_mode) {
       
     case DS_FILECOPY_ENQUIRE_FOR_PUT:
     case DS_FILECOPY_ENQUIRE_RETURN: // deprecated
-      out << "  Request type: DS_FILECOPY_ENQUIRE_FOR_PUT" << endl;
+      out << spacer << "  Request type: DS_FILECOPY_ENQUIRE_FOR_PUT" << endl;
       if (_flags == DS_FILECOPY_YES_PUT) {
-	out << "    YES_PUT" << endl;
+	out << spacer << "    YES_PUT" << endl;
       } else {
-	out << "    NO_PUT" << endl;
+	out << spacer << "    NO_PUT" << endl;
       }
       break;
       
     case DS_FILECOPY_PUT_AFTER_ENQUIRE:
-      out << "  Request type: DS_FILECOPY_PUT_AFTER_ENQUIRE" << endl;
+      out << spacer << "  Request type: DS_FILECOPY_PUT_AFTER_ENQUIRE" << endl;
       break;
       
     case DS_FILECOPY_PUT_FORCED:
-      out << "  Request type: DS_FILECOPY_PUT_FORCED" << endl;
+      out << spacer << "  Request type: DS_FILECOPY_PUT_FORCED" << endl;
       break;
       
     default:
@@ -573,8 +573,8 @@ void DsFileCopyMsg::print(ostream &out)
     } // switch (_mode)
     
     if (getError()) {
-      out << "ERROR OCCURRED" << endl;
-      out << _errStr;
+      out << spacer << "ERROR OCCURRED" << endl;
+      out << spacer << _errStr;
     }
       
     break;

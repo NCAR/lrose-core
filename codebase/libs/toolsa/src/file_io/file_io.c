@@ -30,6 +30,8 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <sys/param.h>
+#include <sys/mount.h>
 
 #if defined(__linux)
 #include <sys/vfs.h>

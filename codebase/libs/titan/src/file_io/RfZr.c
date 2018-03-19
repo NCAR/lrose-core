@@ -174,7 +174,7 @@ int RfGetZrClosest(char *zr_dir,
   
   entry = Entries;
   for (i = 0; i < Header.n_entries; i++, entry++) {
-    time_diff = abs(req_time - entry->time);
+    time_diff = labs(req_time - entry->time);
     if (time_diff < min_diff) {
       min_diff = time_diff;
       index = i;

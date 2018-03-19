@@ -58,9 +58,6 @@
  *
  */
 
-static char rcsid[] = 
-  "$Id: shptreedump.c,v 1.1 2000/06/28 13:37:02 rehak Exp $";
-
 #include "shapefil.h"
 
 #include <assert.h>

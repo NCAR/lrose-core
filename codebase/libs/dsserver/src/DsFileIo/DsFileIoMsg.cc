@@ -632,109 +632,109 @@ int DsFileIoMsg::disassemble(void *in_msg, const int msg_len)
 // print message
 //
 
-void DsFileIoMsg::print(ostream &out)
+void DsFileIoMsg::print(ostream &out, const char *spacer) const
 
 {
   switch (_subType) {
     
   case DS_FILEIO_FOPEN:
-    out << "Message subType: DS_FILEIO_FOPEN" << endl;
-    out << "  url: " << _urlStr << endl;
-    out << "  mode: " << _modeStr << endl;
+    out << spacer << "Message subType: DS_FILEIO_FOPEN" << endl;
+    out << spacer << "  url: " << _urlStr << endl;
+    out << spacer << "  mode: " << _modeStr << endl;
     break;
 
   case DS_FILEIO_FCLOSE:
-    out << "Message subType: DS_FILEIO_FCLOSE" << endl;
+    out << spacer << "Message subType: DS_FILEIO_FCLOSE" << endl;
     break;
 
   case DS_FILEIO_FWRITE:
-    out << "Message subType: DS_FILEIO_FWRITE" << endl;
-    out << "  size: " << _info.size << endl;
-    out << "  nelements: " << _info.nelements << endl;
+    out << spacer << "Message subType: DS_FILEIO_FWRITE" << endl;
+    out << spacer << "  size: " << _info.size << endl;
+    out << spacer << "  nelements: " << _info.nelements << endl;
     break;
 
   case DS_FILEIO_FREAD:
-    out << "Message subType: DS_FILEIO_FREAD" << endl;
-    out << "  size: " << _info.size << endl;
-    out << "  nelements: " << _info.nelements << endl;
+    out << spacer << "Message subType: DS_FILEIO_FREAD" << endl;
+    out << spacer << "  size: " << _info.size << endl;
+    out << spacer << "  nelements: " << _info.nelements << endl;
     break;
 
   case DS_FILEIO_FPUTS:
-    out << "Message subType: DS_FILEIO_FPUTS" << endl;
+    out << spacer << "Message subType: DS_FILEIO_FPUTS" << endl;
     break;
 
   case DS_FILEIO_FGETS:
-    out << "Message subType: DS_FILEIO_FGETS" << endl;
-    out << "  size: " << _info.size << endl;
+    out << spacer << "Message subType: DS_FILEIO_FGETS" << endl;
+    out << spacer << "  size: " << _info.size << endl;
     break;
 
   case DS_FILEIO_FSEEK:
-    out << "Message subType: DS_FILEIO_FSEEK" << endl;
-    out << "  offset: " << _info.offset << endl;
+    out << spacer << "Message subType: DS_FILEIO_FSEEK" << endl;
+    out << spacer << "  offset: " << _info.offset << endl;
     if (_info.whence == DS_FILEIO_SEEK_SET) {
-      out << "  whence: SEEK_SET" << endl;
+      out << spacer << "  whence: SEEK_SET" << endl;
     } else if (_info.whence == DS_FILEIO_SEEK_CUR) {
-      out << "  whence: SEEK_CUR" << endl;
+      out << spacer << "  whence: SEEK_CUR" << endl;
     } else if (_info.whence == DS_FILEIO_SEEK_END) {
-      out << "  whence: SEEK_END" << endl;
+      out << spacer << "  whence: SEEK_END" << endl;
     } 
     break;
 
   case DS_FILEIO_FTELL:
-    out << "Message subType: DS_FILEIO_FTELL" << endl;
+    out << spacer << "Message subType: DS_FILEIO_FTELL" << endl;
     break;
 
   case DS_FILEIO_FSTAT:
-    out << "Message subType: DS_FILEIO_FSTAT" << endl;
+    out << spacer << "Message subType: DS_FILEIO_FSTAT" << endl;
     break;
 
   case DS_FILEIO_RETURN:
 
-    out << "Message subType: DS_FILEIO_RETURN" << endl;
+    out << spacer << "Message subType: DS_FILEIO_RETURN" << endl;
 
     switch (_mode) {
     
     case DS_FILEIO_FOPEN:
-      out << "  Request type: DS_FILEIO_FOPEN" << endl;
+      out << spacer << "  Request type: DS_FILEIO_FOPEN" << endl;
       break;
       
     case DS_FILEIO_FCLOSE:
-      out << "  Request type: DS_FILEIO_FCLOSE" << endl;
+      out << spacer << "  Request type: DS_FILEIO_FCLOSE" << endl;
       break;
       
     case DS_FILEIO_FWRITE:
-      out << "  Request type: DS_FILEIO_FWRITE" << endl;
-      out << "    nwritten: " << _info.nelements << endl;
+      out << spacer << "  Request type: DS_FILEIO_FWRITE" << endl;
+      out << spacer << "    nwritten: " << _info.nelements << endl;
       break;
       
     case DS_FILEIO_FREAD:
-      out << "  Request type: DS_FILEIO_FREAD" << endl;
-      out << "    nread: " << _info.nelements << endl;
+      out << spacer << "  Request type: DS_FILEIO_FREAD" << endl;
+      out << spacer << "    nread: " << _info.nelements << endl;
       break;
       
     case DS_FILEIO_FPUTS:
-      out << "  Request type: DS_FILEIO_FPUTS" << endl;
+      out << spacer << "  Request type: DS_FILEIO_FPUTS" << endl;
       break;
       
     case DS_FILEIO_FGETS:
-      out << "  Request type: DS_FILEIO_FGETS" << endl;
+      out << spacer << "  Request type: DS_FILEIO_FGETS" << endl;
       break;
       
     case DS_FILEIO_FSEEK:
-      out << "  Request type: DS_FILEIO_FSEEK" << endl;
+      out << spacer << "  Request type: DS_FILEIO_FSEEK" << endl;
       break;
       
     case DS_FILEIO_FTELL:
-      out << "  Request type: DS_FILEIO_FTELL" << endl;
-      out << "    filepos: " << _info.filepos << endl;
+      out << spacer << "  Request type: DS_FILEIO_FTELL" << endl;
+      out << spacer << "    filepos: " << _info.filepos << endl;
       break;
 
     case DS_FILEIO_FSTAT:
-      out << "  Request type: DS_FILEIO_FSTAT" << endl;
-      out << "    stat_size: " << _info.stat_size << endl;
-      out << "    stat_atime: " << utimstr(_info.stat_atime) << endl;
-      out << "    stat_mtime: " << utimstr(_info.stat_mtime) << endl;
-      out << "    stat_ctime: " << utimstr(_info.stat_ctime) << endl;
+      out << spacer << "  Request type: DS_FILEIO_FSTAT" << endl;
+      out << spacer << "    stat_size: " << _info.stat_size << endl;
+      out << spacer << "    stat_atime: " << utimstr(_info.stat_atime) << endl;
+      out << spacer << "    stat_mtime: " << utimstr(_info.stat_mtime) << endl;
+      out << spacer << "    stat_ctime: " << utimstr(_info.stat_ctime) << endl;
       break;
 
     default:
@@ -743,8 +743,8 @@ void DsFileIoMsg::print(ostream &out)
     } // switch (_mode)
 
     if (getFlags()) {
-      out << "ERROR OCCURRED" << endl;
-      out << _errStr;
+      out << spacer << "ERROR OCCURRED" << endl;
+      out << spacer << _errStr;
     }
       
     break;

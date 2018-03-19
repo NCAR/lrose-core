@@ -167,7 +167,7 @@ Endpts Endpts::average(const Endpts &i) const
 /*----------------------------------------------------------------*/
 void Endpts::print(FILE *fp) const
 {
-  fprintf(fp, sprint().c_str());
+  fprintf(fp, "%s", sprint().c_str());
 }
 
 /*----------------------------------------------------------------*/

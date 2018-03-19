@@ -112,9 +112,6 @@
  * Added header.
  */
 
-static char rcsid[] = 
-  "$Id: dbfopen.c,v 1.2 2001/11/17 21:36:43 dixon Exp $";
-
 #include "shapefil.h"
 
 #include <math.h>
@@ -629,7 +626,8 @@ static void *DBFReadAttribute(DBFHandle psDBF, int hEntity, int iField,
 /* -------------------------------------------------------------------- */
 /*	Extract the requested field.					*/
 /* -------------------------------------------------------------------- */
-    strncpy( pszStringField, pabyRec+psDBF->panFieldOffset[iField],
+    strncpy( pszStringField,
+             (const char *) pabyRec+psDBF->panFieldOffset[iField],
 	     psDBF->panFieldSize[iField] );
     pszStringField[psDBF->panFieldSize[iField]] = '\0';
 

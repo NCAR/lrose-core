@@ -63,7 +63,7 @@ void KM_fix_header_time(time_t file_time,
    * time, assume there is a problem and fix it.
    */
 
-  if (abs(file_time - header->time.unix_time) > SECS_IN_12HRS)
+  if (labs(file_time - header->time.unix_time) > SECS_IN_12HRS)
   {
     /*
      * Change the day of the header time until it is within 12 hours

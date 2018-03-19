@@ -165,7 +165,7 @@ protected:
 private:
   
   FILE *_filep;
-  bool _errorOccurred;
+  // bool _errorOccurred;
   string _errStr;
   string _urlStr;
   string _modeStr;
