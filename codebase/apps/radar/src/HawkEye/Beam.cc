@@ -27,7 +27,7 @@
 #include <fstream>
 #include <toolsa/toolsa_macros.h>
 
-#include <qtimer.h>
+#include <QTimer>
 #include <QBrush>
 #include <QPalette>
 #include <QPaintEngine>
