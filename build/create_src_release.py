@@ -324,6 +324,9 @@ def createTarFile():
         name = "build_and_install_netcdf"
         os.rename(os.path.join(netcdfDir, name),
                   os.path.join(netcdfSubDir, name))
+        name = "build_and_install_netcdf.osx"
+        os.rename(os.path.join(netcdfDir, name),
+                  os.path.join(netcdfSubDir, name))
 
     for name in [ "README.md", "tar_files" ]:
         os.rename(os.path.join(netcdfDir, name),
