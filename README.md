@@ -24,7 +24,7 @@ To download LROSE, run:
 git clone https://github.com/NCAR/lrose-core
 ```
 
-### NEWS :exclamation::exclamation:
+### :exclamation::exclamation: NOTES :exclamation::exclamation:
 
 LROSE now depends on QT5, not QT4. You will need to install QT5 to build LROSE on your host.
 
