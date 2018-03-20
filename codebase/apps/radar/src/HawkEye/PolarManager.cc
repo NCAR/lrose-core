@@ -2156,6 +2156,7 @@ void PolarManager::_openFile()
   QString finalPattern = "All files (*";
   finalPattern.append(pattern.c_str());
   finalPattern.append("*)");
+  finalPattern.append(";;All files (*.*)");
 
   QString inputPath = QDir::currentPath();
   // get the path of the current file, if available 
