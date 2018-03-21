@@ -334,7 +334,7 @@ def createTarFile():
 
     # create the tar file
 
-    shellCmd("tar cvfz " + tarName + " " + releaseName)
+    shellCmd("tar cvfzh " + tarName + " " + releaseName)
     
 ########################################################################
 # create the brew formula for OSX builds
