@@ -168,7 +168,7 @@ def main():
               
     # delete the tmp dir
 
-    # shutil.rmtree(tmpDir)
+    shutil.rmtree(tmpDir)
 
     sys.exit(0)
 
@@ -314,9 +314,10 @@ def createTarFile():
     os.chdir(coreDir)
     os.makedirs(tarDir)
 
-    # copy in script to make binary release
+    # copy some scripts into tar directory
 
     shellCmd("cp build/create_bin_release.py " + tarDir)
+    shellCmd("cp build/configure_and_build " + tarDir)
 
     # move lrose contents into tar dir
 
