@@ -213,7 +213,7 @@ JAVA_MAKE_JAR = $(RAP_BIN_DIR)/make_jar
 #
 # Qt
 #
-PKG_CONFIG_PATH = $(PKG_CONFIG_PATH):/usr/local/opt/qt/lib/pkgconfig:$(HOME)/homebrew/opt/qt/lib/pkgconfig
+PKG_CONFIG_PATH = /usr/local/opt/qt/lib/pkgconfig:$(HOME)/homebrew/opt/qt/lib/pkgconfig
 
 QT_INCLUDES = $(shell pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui)
 
