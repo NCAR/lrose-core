@@ -143,7 +143,13 @@ def main():
     
     createReleaseInfoFile()
 
+    # run qmake for QT apps to create moc_ files
+
+    hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
+    createQtMocFiles(hawkEyeDir)
+
     # prune any empty directories
+
     prune(codebaseDir)
 
     # create the tar file
@@ -264,6 +270,16 @@ def setupAutoconf():
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base.shared --shared" +
                  " --pkg " + options.package + debugStr)
+
+########################################################################
+# Run qmake for QT apps such as HawkEye to create _moc files
+
+def createQtMocFiles(appDir):
+    
+    os.chdir(appDir)
+    shellCmd("rm -f moc*");
+    shellCmd("qmake-qt5 -o Makefile.qmake");
+    shellCmd("make -f Makefile.qmake mocables");
 
 ########################################################################
 # write release information file
