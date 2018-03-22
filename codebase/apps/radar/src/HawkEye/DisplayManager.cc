@@ -474,6 +474,9 @@ void DisplayManager::_createFieldPanel()
     _fieldsLayout->addWidget(key, row, 1, alignCenter);
     _fieldsLayout->addWidget(rawButton, row, 2, alignCenter);
     _fieldGroup->addButton(rawButton, ifield);
+    // connect slot for field change
+    connect(rawButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
+
     _fieldButtons.push_back(rawButton);
     if (filtField != NULL) {
       QRadioButton *filtButton = new QRadioButton(_fieldPanel);
@@ -481,6 +484,8 @@ void DisplayManager::_createFieldPanel()
       _fieldsLayout->addWidget(filtButton, row, 3, alignCenter);
       _fieldGroup->addButton(filtButton, ifield + 1);
       _fieldButtons.push_back(filtButton);
+      // connect slot for field change
+      connect(filtButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
     }
 
     if (filtField != NULL) {
@@ -495,13 +500,24 @@ void DisplayManager::_createFieldPanel()
   _fieldsLayout->setRowStretch(row, 1);
   row++;
 
-  // connect slot for field change
-
-  connect(_fieldGroup, SIGNAL(buttonClicked(int)),
-          this, SLOT(_changeField(int)));
-
 }
 
+void DisplayManager::_changeFieldVariable(bool value) {
+
+  if (_params.debug) {
+    cerr << "DisplayManager:: the field variable was changed ";
+    cerr << endl;
+  }
+  if (value) {
+    for (size_t i = 0; i < _fieldButtons.size(); i++) {
+      if (_fieldButtons.at(i)->isChecked()) {
+        if (_params.debug) cout << "_fieldButton " << i << " is checked" << endl;
+	_changeField(i, true);
+      }
+    }
+  }
+
+}
 
 //////////////////////////////////////////////
 // create the elevation panel
