@@ -317,7 +317,7 @@ def createTarFile():
     # copy some scripts into tar directory
 
     shellCmd("cp build/create_bin_release.py " + tarDir)
-    shellCmd("cp build/configure_and_build " + tarDir)
+    shellCmd("cp build/build_src_release " + tarDir)
 
     # move lrose contents into tar dir
 
