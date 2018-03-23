@@ -185,24 +185,10 @@ paramdef boolean {
   p_descr = "If true, write the custom variables for primary data set.";
 } print_primary_custom_variables;
 
-paramdef string {
-  p_default = { "custom0", "custom1", "custom2", "custom3", "custom4",
-                "custom5", "custom6", "custom7", "custom8", "custom9" };
-  p_descr = "Labels for primary custom variables.";
-  p_help = "If the label is left empty, the variable is not printed.";
-} primary_custom_labels[10];
-
 paramdef boolean {
   p_default = false;
   p_descr = "If true, write the custom variables for secondary data set.";
 } print_secondary_custom_variables;
-
-paramdef string {
-  p_default = { "custom0", "custom1", "custom2", "custom3", "custom4",
-                "custom5", "custom6", "custom7", "custom8", "custom9" };
-  p_descr = "Labels for secondary custom variables.";
-  p_help = "If the label is left empty, the variable is not printed.";
-} secondary_custom_labels[10];
 
 paramdef boolean {
   p_default = false;
@@ -216,3 +202,20 @@ paramdef int {
   p_help = "The surface velocity will be in the secondary data set.";
 } surface_velocity_custom_index;
 
+commentdef {
+  p_header = "Specify the custom field labels";
+};
+
+paramdef string {
+  p_default = { "custom0", "custom1", "custom2", "custom3", "custom4",
+                "custom5", "custom6", "custom7", "custom8", "custom9" };
+  p_descr = "Labels for primary custom variables.";
+  p_help = "If the label is left empty, the variable is not printed.";
+} primary_custom_labels[10];
+
+paramdef string {
+  p_default = { "custom0Sec", "custom1Sec", "custom2Sec", "custom3Sec", "custom4Sec",
+                "custom5Sec", "custom6Sec", "custom7Sec", "custom8Sec", "custom9Sec" };
+  p_descr = "Labels for secondary custom variables.";
+  p_help = "If the label is left empty, the variable is not printed.";
+} secondary_custom_labels[10];
