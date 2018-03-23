@@ -1095,16 +1095,16 @@ void AcGeorefCompare::_printCommentedHeader(FILE *out)
   fprintf(out, "accelLat%s", delim);
   fprintf(out, "accelLon%s", delim);
 
-  fprintf(out, "custom0%s", delim);
-  fprintf(out, "custom1%s", delim);
-  fprintf(out, "custom2%s", delim);
-  fprintf(out, "custom3%s", delim);
-  fprintf(out, "custom4%s", delim);
-  fprintf(out, "custom5%s", delim);
-  fprintf(out, "custom6%s", delim);
-  fprintf(out, "custom7%s", delim);
-  fprintf(out, "custom8%s", delim);
-  fprintf(out, "custom9%s", delim);
+  fprintf(out, "%s%s", _params._primary_custom_labels[0], delim);
+  fprintf(out, "%s%s", _params._primary_custom_labels[1], delim);
+  fprintf(out, "%s%s", _params._primary_custom_labels[2], delim);
+  fprintf(out, "%s%s", _params._primary_custom_labels[3], delim);
+  fprintf(out, "%s%s", _params._primary_custom_labels[4], delim);
+  fprintf(out, "%s%s", _params._primary_custom_labels[5], delim);
+  fprintf(out, "%s%s", _params._primary_custom_labels[6], delim);
+  fprintf(out, "%s%s", _params._primary_custom_labels[7], delim);
+  fprintf(out, "%s%s", _params._primary_custom_labels[8], delim);
+  fprintf(out, "%s%s", _params._primary_custom_labels[9], delim);
 
   fprintf(out, "lonSec%s", delim);
   fprintf(out, "latSec%s", delim);
@@ -1119,16 +1119,16 @@ void AcGeorefCompare::_printCommentedHeader(FILE *out)
   fprintf(out, "vertVelSec%s", delim);
 
   fprintf(out, "tempSec%s", delim);
-  fprintf(out, "custom0Sec%s", delim);
-  fprintf(out, "custom1Sec%s", delim);
-  fprintf(out, "custom2Sec%s", delim);
-  fprintf(out, "custom3Sec%s", delim);
-  fprintf(out, "custom4Sec%s", delim);
-  fprintf(out, "custom5Sec%s", delim);
-  fprintf(out, "custom6Sec%s", delim);
-  fprintf(out, "custom7Sec%s", delim);
-  fprintf(out, "custom8Sec%s", delim);
-  fprintf(out, "custom9Sec%s", delim);
+  fprintf(out, "%s%s", _params._secondary_custom_labels[0], delim);
+  fprintf(out, "%s%s", _params._secondary_custom_labels[1], delim);
+  fprintf(out, "%s%s", _params._secondary_custom_labels[2], delim);
+  fprintf(out, "%s%s", _params._secondary_custom_labels[3], delim);
+  fprintf(out, "%s%s", _params._secondary_custom_labels[4], delim);
+  fprintf(out, "%s%s", _params._secondary_custom_labels[5], delim);
+  fprintf(out, "%s%s", _params._secondary_custom_labels[6], delim);
+  fprintf(out, "%s%s", _params._secondary_custom_labels[7], delim);
+  fprintf(out, "%s%s", _params._secondary_custom_labels[8], delim);
+  fprintf(out, "%s%s", _params._secondary_custom_labels[9], delim);
 
   fprintf(out, "lonDiff%s", delim);
   fprintf(out, "latDiff%s", delim);
