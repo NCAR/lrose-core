@@ -83,6 +83,7 @@
 #include <radar/RadarComplex.hh>
 #include <Radx/RadxFile.hh>
 #include <Radx/RadxSweep.hh>
+#include <Radx/RadxTime.hh>
 
 using namespace std;
 using namespace H5;
@@ -900,8 +901,23 @@ int PolarManager::_getArchiveData()
   if (_inputFileList.size() > 0) {
 
     // files were specified on the command line
-
     string inputPath = _inputFileList[0];
+
+    // try it as a directory 
+    RadxTimeList listOfFiles;
+    RadxTime start_time(RadxTime::ZERO);
+    RadxTime stop_time(RadxTime::NOW);
+    listOfFiles.setDir(inputPath);
+    listOfFiles.setModeInterval(start_time, stop_time);
+    cerr << " looking for data files ...\n";
+    listOfFiles.compile();
+
+    vector<string> pathList = listOfFiles.getPathList();
+    if (pathList.size() > 0) 
+      inputPath = pathList[0];
+
+    cerr << " reading data files\n";
+    
     if (file.readFromPath(inputPath, _vol)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
       errMsg += "PolarManager::_getArchiveData\n";
@@ -915,7 +931,7 @@ int PolarManager::_getArchiveData()
         errorDialog.exec();
       }
       return -1;
-    }
+    } 
 
     _archiveStartTime.set(_vol.getStartTimeSecs());
     _setGuiFromStartTime();
