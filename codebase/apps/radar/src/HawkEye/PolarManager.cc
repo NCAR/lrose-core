@@ -48,6 +48,7 @@
 #include <string>
 #include <cmath>
 #include <iostream>
+#include <H5Cpp.h>
 #include <QActionGroup>
 #include <QApplication>
 #include <QButtonGroup>
@@ -84,6 +85,7 @@
 #include <Radx/RadxSweep.hh>
 
 using namespace std;
+using namespace H5;
 
 // Constructor
 
@@ -835,8 +837,9 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
   _timeControllerDialog->setCursor(Qt::WaitCursor);
 
   // get data
-  
-  if (_getArchiveData()) {
+  try {
+    _getArchiveData();
+  } catch (FileIException ex) {
     this->setCursor(Qt::ArrowCursor);
     _timeControllerDialog->setCursor(Qt::ArrowCursor);
     return;
@@ -2153,6 +2156,7 @@ void PolarManager::_openFile()
   QString finalPattern = "All files (*";
   finalPattern.append(pattern.c_str());
   finalPattern.append("*)");
+  finalPattern.append(";;All files (*.*)");
 
   QString inputPath = QDir::currentPath();
   // get the path of the current file, if available 
@@ -2167,20 +2171,27 @@ void PolarManager::_openFile()
           inputPath, finalPattern);  //QDir::currentPath(),
   //"All files (*.*)");
  
-    if( !filename.isNull() )
-    {
-      QByteArray qb = filename.toUtf8();
-      const char *name = qb.constData();
-      cerr << "selected file path : " << name << endl;
+  if( !filename.isNull() )
+  {
+    QByteArray qb = filename.toUtf8();
+    const char *name = qb.constData();
+    cerr << "selected file path : " << name << endl;
 
-      // trying this ...  TODO: put into separate method
-      _setArchiveRetrievalPending();
-      vector<string> list;
-      list.push_back(name);
-      setInputFileList(list);
-      _keepFixedAngle = true;
+    // trying this ... 
+    _setArchiveRetrievalPending();
+    vector<string> list;
+    list.push_back(name);
+    setInputFileList(list);
+    _keepFixedAngle = true;
+
+    try {
       _getArchiveData();
+    } catch (FileIException ex) {
+      this->setCursor(Qt::ArrowCursor);
+      _timeControllerDialog->setCursor(Qt::ArrowCursor);
+      return;
     }
+  }
 }
 
 

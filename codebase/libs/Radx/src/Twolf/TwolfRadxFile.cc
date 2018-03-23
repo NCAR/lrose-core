@@ -277,8 +277,10 @@ int TwolfRadxFile::readFromPath(const string &path,
 
   // is this an RHI
 
+  _rhiMode = false;
   if (RadxAngleHist::checkIsRhi(_rays)) {
 
+    _rhiMode = true;
     double startAz = _rays[0]->getAzimuthDeg();
     for (size_t ii = 0; ii < _rays.size(); ii++) {
       RadxRay *ray = _rays[ii];

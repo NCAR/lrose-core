@@ -113,7 +113,7 @@ DsMessage &DsMessage::operator=(const DsMessage &rhs)
 // Returns: -1 If msg_len is set and is smaller than a DsMsgHdr_t.
 //           0 Otherwise.
 // Virtual.
-int DsMessage::decodeHeader(const void *in_msg, const ssize_t msg_len /* = -1*/ )
+int DsMessage::decodeHeader(const void *in_msg, ssize_t msg_len /* = -1*/ )
 
 {
 

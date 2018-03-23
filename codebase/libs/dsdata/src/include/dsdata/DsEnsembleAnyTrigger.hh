@@ -243,8 +243,8 @@ private:
   //------------------------- archive mode state ----------------------------
 
   bool _archive_mode;
-  time_t _archive_t0;
-  time_t _archive_t1;
+  // time_t _archive_t0;
+  // time_t _archive_t1;
   std::vector<AnyTriggerData> _archive_events; 
   int _archive_index;   /**< Index to Last gen time returned in archivemode */
   std::vector<std::string> _urls;

@@ -16,6 +16,7 @@ from datetime import datetime
 from datetime import date
 from datetime import timedelta
 import glob
+from sys import platform
 
 def main():
 
@@ -365,7 +366,10 @@ def buildNetcdf():
     if (package == "cidd"):
         shellCmd("./build_and_install_netcdf.m32 -x " + tmpDir)
     else:
-        shellCmd("./build_and_install_netcdf -x " + tmpDir)
+        if platform == "darwin":
+            shellCmd("./build_and_install_netcdf.osx -x " + tmpDir)
+        else:
+            shellCmd("./build_and_install_netcdf -x " + tmpDir)
 
 ########################################################################
 # build package

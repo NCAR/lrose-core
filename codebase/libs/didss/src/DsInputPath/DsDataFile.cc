@@ -796,8 +796,8 @@ size_t DsDataFile::getTimeDiff(const DateTime & t1, const DateTime & t2)
     }
 
     if (t1.isForecastTime()) {
-        size_t diff = t1.getLeadDeltaTime()->getDurationInSeconds() -
-                      t2.getLeadDeltaTime()->getDurationInSeconds();
+        ssize_t diff = t1.getLeadDeltaTime()->getDurationInSeconds() -
+          t2.getLeadDeltaTime()->getDurationInSeconds();
         return labs(diff);
     }
     else {

@@ -48,10 +48,13 @@ KD_real **KD_read_input_file(char *filename, int *dimension, int *numpoints)
   for (k=0; k < *numpoints; k++)
     A[k] = new KD_real[*dimension];
 
+  double val;
   for (k=0; k<*numpoints; k++)
     {
-      for (j=0; j < *dimension; j++)
-	fscanf(fp, "%g", &A[k][j]);
+      for (j=0; j < *dimension; j++) {
+	fscanf(fp, "%lg", &val);
+	A[k][j] = val;
+      }
     }
 
   fclose(fp);

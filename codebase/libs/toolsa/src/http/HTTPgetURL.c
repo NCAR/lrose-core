@@ -53,7 +53,7 @@ HTTPgetURL(char* url, size_t timeout_msec, char **resource, int * resource_len)
 {
     int infd;
     int  port;
-    int status;
+    long status;
 
     int header_complete;
     char * cur_pos;
@@ -62,7 +62,7 @@ HTTPgetURL(char* url, size_t timeout_msec, char **resource, int * resource_len)
     int len_read;
     int total_read;
     int header_len;
-    int res_len;
+    long res_len;
     int target_size;
     char *start,*end,*ptr;
 

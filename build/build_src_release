@@ -1,0 +1,139 @@
+#! /bin/bash
+#
+# Building LROSE from a source release, using configure
+# =====================================================
+#
+# Steps:
+#  (a) untar the src release
+#  (b) cd to the top of the un-tarred release
+#  (c) run this script
+#
+# By default the libraries and applications will be installed in:
+#
+#   ${HOME}/lrose/include
+#   ${HOME}/lrose/lib
+#   ${HOME}/lrose/bin
+#
+# You can change the install location by specifying it as
+# an argument to this script.
+#
+# For example:
+#
+#   build_src_release -x /usr/local/lrose
+#
+# will install in:
+#
+#   /usr/local/lrose/include
+#   /usr/local/lrose/lib
+#   /usr/local/lrose/bin
+
+################################################################################
+
+# set the path
+
+export PATH=.:/bin:./make_bin:/usr/bin:/sbin:/usr/sbin:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:$HOME/bin
+
+# save starting location and script name
+
+runDir=`pwd`
+scriptName=$(basename $0)
+
+# defaults
+
+prefix=${HOME}/lrose
+debug=true
+scripts=false
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Configure and build lrose from a source release"
+    echo
+    echo "Usage: $scriptName [options below]"
+    echo "  -h   :  produce this usage list"
+    echo "  -d   :  turn debugging on"
+    echo "  -x ? :  set prefix"
+    echo "           default is '${HOME}/lrose'"
+    echo
+}
+
+# Parse command line options.
+while getopts hdx: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        x)
+            prefix=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" == "true" ]
+then
+  echo "Running $scriptName to build and install lrose release"
+  echo "  installing in prefix: $prefix"
+fi
+
+# Remove the switches we parsed above.
+shift `expr $OPTIND - 1`
+
+#######################################################
+# get run time
+
+year=`date +'%Y'`
+month=`date +'%m'`
+day=`date +'%d'`
+hour=`date +'%H'`
+min=`date +'%M'`
+sec=`date +'%S'`
+
+#--------------------------------------------------------------------
+
+echo
+echo "*********************************************************************"
+echo
+echo "  Building ${package} package from src release"
+echo
+echo "  NCAR, Boulder, CO, USA"
+echo
+echo "  $year/$month/$day $hour:$min:$sec"
+echo
+echo "*********************************************************************"
+echo
+
+mkdir -p $prefix
+
+cd /tmp
+tar xvfz ~/releases/lrose-blaze/lrose-blaze-20180322.src.tgz
+cd lrose-blaze-20180322.src/lrose-netcdf
+./build_and_install_netcdf -x $prefix
+cd ../codebase
+./configure --prefix=${prefix} --with-hdf5=${prefix} --with-netcdf=${prefix}
+make -j 4
+make install
+
+#--------------------------------------------------------------------
+# done
+
+echo
+echo "  **************************************************"
+echo "  *** Done building from src release ***"
+echo "  *** bin dir is ${prefix}/bin"
+echo "  **************************************************"
+echo
+
+exit 0

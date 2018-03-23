@@ -27,7 +27,7 @@
 #include <toolsa/toolsa_macros.h>
 #include <Radx/RadxGeoref.hh>
 
-#include <qtimer.h>
+#include <QTimer>
 #include <QBrush>
 #include <QPalette>
 #include <QPaintEngine>

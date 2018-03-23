@@ -181,7 +181,7 @@ int BMS::pack(ui08 *bmsPtr)
        if(num > 0) 
        {
 	 int rem[8];
-	 int val = 0;
+	 // int val = 0;
 	 for(int i = 0; i < num; i++)
 	   rem[i] = _bitMap[ind + i];
 	 for(int i = num; i < 8; i++)

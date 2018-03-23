@@ -48,9 +48,6 @@
  *
  */
 
-static char rcsid[] = 
-  "$Id: dbfcreate.c,v 1.1 2000/06/28 13:36:59 rehak Exp $";
-
 #include "shapefil.h"
 
 int main( int argc, char ** argv )

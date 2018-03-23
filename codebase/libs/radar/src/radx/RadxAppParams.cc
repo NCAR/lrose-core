@@ -31,6 +31,7 @@
  * @author Automatically generated
  *
  */
+#include <iostream>
 using namespace std;
 
 #include "RadxAppParams.hh"

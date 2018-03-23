@@ -151,7 +151,7 @@ void PhidpProc::computePhidpSdev(size_t nGatesData,
     double sumxx = 0.0;
     double sumyy = 0.0;
     
-    for (size_t jj = igate - nGatesHalf; jj <= igate + nGatesHalf; jj++) {
+    for (ssize_t jj = igate - nGatesHalf; jj <= igate + nGatesHalf; jj++) {
       if (jj < 0 || jj >= _nGatesData) {
         continue;
       }
@@ -193,7 +193,7 @@ void PhidpProc::computePhidpSdev(size_t nGatesData,
     double sum = 0.0;
     double sumSq = 0.0;
     
-    for (size_t jj = igate - nGatesHalf; jj <= igate + nGatesHalf; jj++) {
+    for (ssize_t jj = igate - nGatesHalf; jj <= igate + nGatesHalf; jj++) {
       
       if (jj < 0 || jj >= _nGatesData) {
         continue;

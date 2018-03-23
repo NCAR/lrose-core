@@ -26,11 +26,11 @@
 #   /usr/local/lrose/lib
 #   /usr/local/lrose/bin
 
-# Delend on HDF5, NETCDF and UDUNITS
-# ----------------------------------
+# Depends on HDF5 and NETCDF
+# --------------------------
 # Before running this,
 # checkout https://github.com/NCAR/lrose-netcdf
-# build and install hdf5, netcdf, udunits
+# build and install hdf5 and netcdf
 
 ################################################################################
 
@@ -69,7 +69,7 @@ function usage() {
 }
 
 # Parse command line options.
-while getopts hdp:x: OPT; do
+while getopts hdsp:x: OPT; do
     case "$OPT" in
         h)
             usage

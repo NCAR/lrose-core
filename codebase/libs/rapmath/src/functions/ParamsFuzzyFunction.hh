@@ -30,8 +30,6 @@
 #ifndef ParamsFuzzyFunction_hh
 #define ParamsFuzzyFunction_hh
 
-using namespace std;
-
 #include <tdrp/tdrp.h>
 #include <iostream>
 #include <cstdio>
@@ -39,6 +37,8 @@ using namespace std;
 #include <cstring>
 #include <climits>
 #include <cfloat>
+
+using namespace std;
 
 // Class definition
 

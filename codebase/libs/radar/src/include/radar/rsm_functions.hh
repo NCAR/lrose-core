@@ -37,7 +37,7 @@
  *********************************************************************/
 
 #ifndef _RSM_FUNCTIONS_HH_
-#define _RMS_FUNCTIONS_HH_
+#define _RSM_FUNCTIONS_HH_
 
 #include <cstdio>
 #include <string>

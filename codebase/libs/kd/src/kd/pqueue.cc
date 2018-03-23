@@ -23,7 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
 #include "pqueue.hh"
-
+#include <iostream>
 using namespace std;
 
 //  Code to implement the abstract data type priority queue for use in j nearest     

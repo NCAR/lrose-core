@@ -54,7 +54,7 @@ HTTPgetURL_via_proxy(const char* proxy_url, const char* url, size_t timeout_msec
 
     int infd;
     int  port;
-    int status;
+    long status;
 
     int header_complete;
     char * cur_pos;
@@ -63,7 +63,7 @@ HTTPgetURL_via_proxy(const char* proxy_url, const char* url, size_t timeout_msec
     int len_read;
     int total_read;
     int header_len;
-    int res_len;
+    long res_len;
     int target_size;
     char *start,*end,*ptr;
 

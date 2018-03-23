@@ -51,8 +51,8 @@ DsEnsembleAnyTrigger::DsEnsembleAnyTrigger(void) :
   ThreadAny(),
   _sleepSeconds(ensembleAnyTrigger::defaultSleepSeconds),
   _archive_mode(false),
-  _archive_t0(-1),
-  _archive_t1(-1),
+  // _archive_t0(-1),
+  // _archive_t1(-1),
   _archive_index(-1)
 {
   ThreadAny::setContext(this);
@@ -68,8 +68,8 @@ DsEnsembleAnyTrigger(const vector<string> &url,
   ThreadAny(),
   _sleepSeconds(ensembleAnyTrigger::defaultSleepSeconds),
   _archive_mode(false),
-  _archive_t0(-1),
-  _archive_t1(-1),
+  // _archive_t0(-1),
+  // _archive_t1(-1),
   _archive_index(-1),
   _urls(url)
 {
@@ -95,8 +95,8 @@ DsEnsembleAnyTrigger(const time_t &t0, const time_t &t1,
   ThreadAny(),
   _sleepSeconds(ensembleAnyTrigger::defaultSleepSeconds),
   _archive_mode(true),
-  _archive_t0(t0),
-  _archive_t1(t1),
+  // _archive_t0(t0),
+  // _archive_t1(t1),
   _archive_index(-1),
   _urls(url)
 {

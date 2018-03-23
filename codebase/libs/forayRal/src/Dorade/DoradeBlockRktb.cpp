@@ -261,7 +261,7 @@ void DoradeBlockRktb::validate() throw(Fault){
 //////////////////////////////////////////////////////////////////////
 void DoradeBlockRktb::calculate_index_queue() throw(Fault){
 
-    int indexQueueOffset = get_integer("index_queue_offset");
+    // int indexQueueOffset = get_integer("index_queue_offset");
     int numberOfRays     = get_integer("number_of_rays");
 
     map<double,int>angleQueue;

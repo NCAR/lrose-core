@@ -132,8 +132,8 @@ protected:
   pthread_mutex_t _mutex;
   pthread_t _thread;
 
-  virtual int _communicate(DsURL &url, DsMdvxMsg &msg,
-			   const void *msgBuf, const ssize_t msgLen);
+  int _communicate(DsURL &url, DsMdvxMsg &msg,
+                   const void *msgBuf, const ssize_t msgLen);
 
   int _prepareThread();
   void _tidyThread(int ret_val);

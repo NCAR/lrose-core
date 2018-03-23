@@ -30,11 +30,46 @@ You will need to register for a free Apple id, no credit card is required.
 
 ### Install homebrew
 
-Install [homebrew](http://mxcl.github.com/homebrew/)
+The default location for homebrew is /usr/local. So you need write permission
+to /usr/local to perform the install.
 
-Homebrew allows you to install libraries needed to build Radx.
+Run the following ruby script:
 
-### Manual LROSE install
+```
+  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  /usr/local/bin/brew update
+```
+
+### Optional homebrew install in home directory
+
+If access is not available to /usr/local, you can install in your home directory instead.
+
+```
+  cd
+  git clone https://github.com/mxcl/homebrew.git
+```
+
+Add brew to your path, based on the login shell you use.
+Generally you will do this by editing your shell startup scripts.
+
+If you use bash, add the following to .bashrc:
+```
+  export PATH=${HOME}/homebrew/bin:${PATH}
+```
+
+If you use tcsh, add the following to .cshrc:
+```
+  set path = ( ${HOME}/homebrew/bin ${path} )
+  source ~/.cshrc
+```
+
+Then run:
+
+```
+  brew update
+```
+
+### Install required libraries
 
 ```
   brew install szip
@@ -47,7 +82,7 @@ Homebrew allows you to install libraries needed to build Radx.
   make install
 ```
 
-### Automated LROSE install
+### Automated LROSE install (Not yet available)
 
 ```
   brew install https://github.com/NCAR/lrose-core/releases/download/lrose-yyyymmdd/lrose.rb

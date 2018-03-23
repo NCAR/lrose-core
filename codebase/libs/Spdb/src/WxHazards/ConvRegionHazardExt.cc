@@ -64,6 +64,9 @@ ConvRegionHazardExt::ConvRegionHazardExt(double top,
 				   bool debug_flag) :
   WxHazard(WxHazard::CONVECTIVE_REGION_HAZARD_EXTENDED, debug_flag)
 {
+
+  _debugFlag = debug_flag;
+
   // Create the polygon object
 
   _polygon = new WorldPolygon2D();

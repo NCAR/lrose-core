@@ -241,7 +241,7 @@ private:
 
     static const int         angle_ndx_size;
     int               max_rays;
-    int               sizeof_rotang_table;
+  // int               sizeof_rotang_table;
     int               min_rays_per_sweep;
     int               swp_ray_num;
     int               swp_count_out;
@@ -257,7 +257,7 @@ private:
     int               produce_CSFD;
     int               csfd_gate_skip;
     int               csfd_num_gates;
-    float             csfd_distToFirst;
+  // float             csfd_distToFirst;
     float scale8[64];
     float bias8[64];
 
@@ -369,10 +369,10 @@ public:
 class dd_mem_sweepfile {	// manages the writing of a memory sweepfile
 
 private:
-    char 	      dir_name[192];
-    char 	      filename[128];
-    char 	      tmp_filename[128];
-    char              permanent_name[256];
+  // char 	      dir_name[192];
+  // char 	      filename[128];
+  //  char 	      tmp_filename[128];
+  //  char              permanent_name[256];
     generic_descriptor * null_des;
     char 	    * local_buf;
     char 	    * free_at;
@@ -394,19 +394,18 @@ private:
     // and portable to Sun CC
     static const int         angle_ndx_size;
     int               max_rays;
-    int               sizeof_rotang_table;
+  // int               sizeof_rotang_table;
     int               min_rays_per_sweep;
     int               swp_ray_num;
     int               swp_count_out;
 
 
     char            * mem_sweepfile;
-    char            * data_buf;
+  // char            * data_buf;
     int               the_max_file_size;
     int               current_offset;
-  int               offset_to_cfac;
-  int               offset_to_swib;
-
+    int               offset_to_cfac;
+    int               offset_to_swib;
 
     // c...mark
 

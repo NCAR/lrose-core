@@ -216,11 +216,12 @@ private:
   bool _gateSpacingIsConstant;
   RadxRangeGeom _geom;
   RadxRemap _remap;
+
   // if next field has  more ranges, then nextFieldNRanges > 0
   // if next field has fewer ranges, then nextFieldNRanges < 0
   // if next field has the same number of ranges, then nextFieldRanges = 0;
-  int nextFieldNRanges;
-
+  // int nextFieldNRanges;
+  
 
   // georef variables
   
@@ -251,30 +252,30 @@ private:
 
   // global attributes
   
-  int _ADC_bits_per_sample_attr;
-  int _ADC_channels_attr;
-  int _delay_clocks_attr;
-  int _experiment_id_attr;
-  int _file_number_attr;
-  int _pulses_per_daq_cycle_attr;
-  int _pulses_per_ray_attr;
-  int _samples_per_pulse_attr;
-  int _scan_number_attr;
+  // int _ADC_bits_per_sample_attr;
+  // int _ADC_channels_attr;
+  // int _delay_clocks_attr;
+  // int _experiment_id_attr;
+  // int _file_number_attr;
+  // int _pulses_per_daq_cycle_attr;
+  // int _pulses_per_ray_attr;
+  // int _samples_per_pulse_attr;
+  // int _scan_number_attr;
   int _year_attr;
   int _month_attr;
   int _day_attr;
 
 
   float _cable_losses_attr;
-  float _extra_attenuation_attr;
-  float _max_angle_attr;
-  float _max_range_attr;
-  float _min_angle_attr;
-  float _min_range_attr;
+  // float _extra_attenuation_attr;
+  // float _max_angle_attr;
+  // float _max_range_attr;
+  // float _min_angle_attr;
+  // float _min_range_attr;
   float _radar_constant_attr;
   float _receiver_gain_attr;
-  float _scan_angle_attr;
-  float _scan_velocity_attr;
+  // float _scan_angle_attr;
+  // float _scan_velocity_attr;
 
   string _British_National_Grid_Reference_attr;
   string _Conventions_attr;

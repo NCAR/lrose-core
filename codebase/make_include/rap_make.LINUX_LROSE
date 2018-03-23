@@ -197,15 +197,16 @@ NETCDF_LDFLAGS=$(NETCDF4_LDFLAGS)
 
 # QT
 
-QT_INCLUDES = $(shell PKG_CONFIG_PATH=$(QT_PKG_CONFIG_PATH) pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui Qt5Network)
+PKG_CONFIG_PATH = /usr/local/opt/qt/lib/pkgconfig
 
-QT_LDFLAGS = -L$(shell PKG_CONFIG_PATH=$(QT_PKG_CONFIG_PATH) pkg-config --variable=libdir Qt5Gui)
+QT_INCLUDES = $(shell pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui Qt5Network)
 
-QT_LIBS = $(shell PKG_CONFIG_PATH=$(QT_PKG_CONFIG_PATH) pkg-config --libs Qt5Core Qt5Widgets Qt5Gui Qt5Network)
+QT_LDFLAGS = -L$(shell pkg-config --variable=libdir Qt5Gui)
 
-QT_CPPC_CFLAGS = -fPIC
+QT_LIBS = $(shell pkg-config --libs Qt5Core Qt5Widgets Qt5Gui Qt5Network)
 
-QT_EXEC_PATH=$(shell PKG_CONFIG_PATH=$(QT_PKG_CONFIG_PATH) pkg-config --variable=exec_prefix Qt5Core)
+QT_CPPC_CFLAGS = -fPIC -std=c++11
+
 
 # Jasper
 

@@ -143,7 +143,13 @@ def main():
     
     createReleaseInfoFile()
 
+    # run qmake for QT apps to create moc_ files
+
+    hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
+    createQtMocFiles(hawkEyeDir)
+
     # prune any empty directories
+
     prune(codebaseDir)
 
     # create the tar file
@@ -162,7 +168,7 @@ def main():
               
     # delete the tmp dir
 
-    # shutil.rmtree(tmpDir)
+    shutil.rmtree(tmpDir)
 
     sys.exit(0)
 
@@ -266,6 +272,16 @@ def setupAutoconf():
                  " --pkg " + options.package + debugStr)
 
 ########################################################################
+# Run qmake for QT apps such as HawkEye to create _moc files
+
+def createQtMocFiles(appDir):
+    
+    os.chdir(appDir)
+    shellCmd("rm -f moc*");
+    shellCmd("qmake-qt5 -o Makefile.qmake");
+    shellCmd("make -f Makefile.qmake mocables");
+
+########################################################################
 # write release information file
 
 def createReleaseInfoFile():
@@ -298,9 +314,10 @@ def createTarFile():
     os.chdir(coreDir)
     os.makedirs(tarDir)
 
-    # copy in script to make binary release
+    # copy some scripts into tar directory
 
     shellCmd("cp build/create_bin_release.py " + tarDir)
+    shellCmd("cp build/build_src_release " + tarDir)
 
     # move lrose contents into tar dir
 
@@ -324,6 +341,9 @@ def createTarFile():
         name = "build_and_install_netcdf"
         os.rename(os.path.join(netcdfDir, name),
                   os.path.join(netcdfSubDir, name))
+        name = "build_and_install_netcdf.osx"
+        os.rename(os.path.join(netcdfDir, name),
+                  os.path.join(netcdfSubDir, name))
 
     for name in [ "README.md", "tar_files" ]:
         os.rename(os.path.join(netcdfDir, name),
@@ -331,7 +351,7 @@ def createTarFile():
 
     # create the tar file
 
-    shellCmd("tar cvfz " + tarName + " " + releaseName)
+    shellCmd("tar cvfzh " + tarName + " " + releaseName)
     
 ########################################################################
 # create the brew formula for OSX builds

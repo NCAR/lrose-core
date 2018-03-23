@@ -56,6 +56,9 @@ VectorsAdvector::VectorsAdvector(const double vector_spacing,
   _soundingUComp(0),
   _soundingVComp(0)
 {
+  if (_debugFlag) {
+    cerr << "In debug mode" << endl;
+  }
   _mbuf = MEMbufCreate();
   _nVectors = 0;
   _vectors = (vectors_t *) MEMbufPtr(_mbuf);
