@@ -30,6 +30,7 @@ include $(RAP_MAKE_INC_DIR)/rap_make_cf_recursive_targets
 # QT meta object compiler
 #
 
+QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt5Core)
 moc: $(MOC_SRCS)
 	$(QT_EXEC_PATH)/bin/qmake -o Makefile.qmake
 	make -f Makefile.qmake $(MOC_OUTPUT)
