@@ -90,6 +90,7 @@ DisplayManager::DisplayManager(const Params &params,
                                bool haveFilteredFields) :
         QMainWindow(NULL),
         _params(params),
+        _sweepManager(params),
         _reader(reader),
         _initialRay(true),
         _fields(fields),
@@ -1467,7 +1468,7 @@ void DisplayManager::_updateElevationPanel(vector<float> *newElevations)
   } else {
     if (newElevations == NULL) {
     // delete the radio buttons
-      _clearRadioButtons();
+      _clearElevationRadioButtons();
     } else {
     // if the number of elevations is the same, we can reuse the QGroupBox
     // otherwise, we need to add or remove radio buttons
@@ -1475,7 +1476,7 @@ void DisplayManager::_updateElevationPanel(vector<float> *newElevations)
         // reset the text on existing buttons
         _resetElevationText(newElevations);
       } else {
-        _clearRadioButtons();
+        _clearElevationRadioButtons();
         _createNewRadioButtons(newElevations);
       }
     }
@@ -1504,7 +1505,6 @@ void DisplayManager::_createNewRadioButtons(vector<float> *newElevations) {
     }
 
     _elevationRButtons->push_back(radio1);
-
     _elevationVBoxLayout->addWidget(radio1);
 
     // connect slot for elevation change
@@ -1527,7 +1527,7 @@ void DisplayManager::_resetElevationText(vector<float> *newElevations) {
   }
 }
 
-void DisplayManager::_clearRadioButtons() {
+void DisplayManager::_clearElevationRadioButtons() {
 
   QLayoutItem* child;
   while (_elevationVBoxLayout->count() !=0) {

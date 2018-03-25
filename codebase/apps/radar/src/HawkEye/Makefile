@@ -38,10 +38,11 @@ TARGET_FILE = HawkEye
 
 LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
-LOC_LIBS = -lradar -lrapformats -lFmq -lRadx \
-	-ldsserver -ldidss -leuclid -ltoolsa \
-	-ldataport -ltdrp $(QT_LIBS) \
-	$(NETCDF4_LIBS) -lbz2 -lz -lpthread -lm
+LOC_LIBS = -lSpdb -lradar -lrapformats -lFmq -lRadx \
+	-ldsserver -ldidss -leuclid -lphysics \
+	-lrapmath -ltoolsa -ldataport -ltdrp \
+	$(QT_LIBS) $(NETCDF4_LIBS) \
+	-lfftw3 -lbz2 -lz -lpthread -lm
 
 LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
 
@@ -56,7 +57,6 @@ HDRS = \
 	BscanWidget.hh \
 	ColorBar.hh \
 	ColorMap.hh \
-	DisplayField.hh \
 	DisplayManager.hh \
 	FieldRenderer.hh \
 	HawkEye.hh \
@@ -70,6 +70,7 @@ HDRS = \
 	RhiWidget.hh \
 	RhiWindow.hh \
 	ScaledLabel.hh \
+	SweepManager.hh \
 	WorldPlot.hh
 
 NORM_SRCS = \
@@ -85,6 +86,7 @@ NORM_SRCS = \
 	Reader.cc \
 	RhiBeam.cc \
 	ScaledLabel.cc \
+	SweepManager.cc \
 	WorldPlot.cc \
 	AllocCheck.cc
 

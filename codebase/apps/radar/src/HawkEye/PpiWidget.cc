@@ -476,8 +476,14 @@ void PpiWidget::_setGridSpacing()
     _ringSpacing = 5.0;
   } else if (diagonal <= 200.0) {
     _ringSpacing = 10.0;
-  } else {
+  } else if (diagonal <= 300.0) {
     _ringSpacing = 20.0;
+  } else if (diagonal <= 400.0) {
+    _ringSpacing = 25.0;
+  } else if (diagonal <= 500.0) {
+    _ringSpacing = 50.0;
+  } else {
+    _ringSpacing = 50.0;
   }
 
 }

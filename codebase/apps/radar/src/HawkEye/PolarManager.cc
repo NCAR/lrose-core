@@ -849,16 +849,13 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
   //----------
   
   const vector<RadxSweep *> &sweeps = _vol.getSweeps();
-  //if (sweeps.size() < 1) {
-  //  _fixedAngleDeg = -8888.0;
-  //  return;
-  //}
 
+  _sweepManager.set(_vol);
   vector<float> *newElevations =  new vector<float>();
   for (size_t i=0; i<sweeps.size(); i++) {
     const RadxSweep *sweep = sweeps[i];
-    _fixedAngleDeg = sweep->getFixedAngleDeg();
-    newElevations->push_back(_fixedAngleDeg);
+    double fixedAngleDeg = sweep->getFixedAngleDeg();
+    newElevations->push_back(fixedAngleDeg);
   }
   _updateElevationPanel(newElevations);
   if (!_keepFixedAngle)

@@ -52,6 +52,7 @@
 #include <Radx/RadxField.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxGeoref.hh>
+#include "SweepManager.hh"
 
 class QApplication;
 class QButtonGroup;
@@ -69,7 +70,6 @@ class QWidget;
 
 class ColorBar;
 class DisplayField;
-class DisplayElevation;
 class Reader;
 
 class DisplayManager : public QMainWindow {
@@ -79,11 +79,11 @@ class DisplayManager : public QMainWindow {
 public:
 
   // constructor
-
+  
   DisplayManager(const Params &params,
-             Reader *reader,
-             const vector<DisplayField *> &fields,
-             bool haveFilteredFields);
+                 Reader *reader,
+                 const vector<DisplayField *> &fields,
+                 bool haveFilteredFields);
   
   // destructor
   
@@ -130,6 +130,11 @@ protected:
   
   const Params &_params;
   
+  // sweeps
+
+  SweepManager _sweepManager;
+  vector<float> *_elevations;
+
   // reading data in
   
   Reader *_reader;
@@ -151,9 +156,6 @@ protected:
 
   const vector<DisplayField *> &_fields;
   bool _haveFilteredFields;
-
-  // elevations
-  vector<float> *_elevations;
 
   // colors
   
@@ -256,7 +258,7 @@ protected:
   QLabel *_selectedElevationLabelWidget;
   QButtonGroup *_elevationGroup;
   vector<QRadioButton *> *_elevationRButtons;
-  DisplayElevation *_selectedElevation;
+  // DisplayElevation *_selectedElevation;
   int _selectedElevationIndex;
   //string _selectedElevationLabel;
   //string _selectedElevationUnits;
@@ -266,7 +268,7 @@ protected:
   void _createNewRadioButtons(vector<float> *newElevations);
   void _resetElevationText(vector<float> *newElevations);
   void _updateElevationPanel(vector<float> *newElevations);
-  void _clearRadioButtons();
+  void _clearElevationRadioButtons();
   //  virtual void _changeElevation();
 
   // time panel
