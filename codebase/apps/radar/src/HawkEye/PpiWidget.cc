@@ -202,9 +202,9 @@ void PpiWidget::addBeam(const RadxRay *ray,
   // Normalize the start and stop angles.  I'm not convinced that this works
   // for negative angles, but leave it for now.
 
-  float n_start_angle = start_angle - ((int)(start_angle/360.0))*360.0;
-  float n_stop_angle = stop_angle - ((int)(stop_angle/360.0))*360.0;
-  
+  double n_start_angle = start_angle - ((int)(start_angle/360.0))*360.0;
+  double n_stop_angle = stop_angle - ((int)(stop_angle/360.0))*360.0;
+
   if (n_start_angle <= n_stop_angle) {
 
     // This beam does not cross the 0 degree angle.  Just add the beam to
@@ -515,7 +515,6 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
   // painter.setWindow(_zoomWindow);
   
-  painter.setPen(_gridRingsColor);
 
   // Draw rings
 
@@ -525,6 +524,15 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
     painter.save();
     painter.setTransform(_zoomTransform);
+
+    // set color
+    painter.setPen(_gridRingsColor);
+
+    // set narrow line width
+    QPen pen = painter.pen();
+    pen.setWidth(0);
+    painter.setPen(pen);
+
     double ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
       QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);

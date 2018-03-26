@@ -1277,8 +1277,8 @@ void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
   if (ray->getIsIndexed())
   {
     double half_angle = ray->getAngleResDeg() / 2.0;
-    _startAz = az - half_angle;
-    _endAz = az + half_angle;
+    _startAz = az - half_angle - 0.1;
+    _endAz = az + half_angle + 0.1;
   }
   else
   {
@@ -1295,8 +1295,8 @@ void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
 	prev_offset = half_az_diff;
     }
       
-    _startAz = az - prev_offset;
-    _endAz = az + max_half_angle;
+    _startAz = az - prev_offset - 0.1;
+    _endAz = az + max_half_angle + 0.1;
   }
     
   // store
