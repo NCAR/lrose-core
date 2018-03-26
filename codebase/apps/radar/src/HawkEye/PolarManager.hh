@@ -133,18 +133,13 @@ private:
 
   SweepManager _sweepManager;
 
-  QVBoxLayout *_elevationVBoxLayout;
-  QGroupBox *_elevationPanel;
-  QGroupBox *_elevationSubPanel;
-  QGridLayout *_elevationsLayout;
-  QLabel *_selectedElevationLabelWidget;
-  QButtonGroup *_elevationGroup;
-  vector<QRadioButton *> *_elevationRButtons;
-
-  void _createElevationPanel();
-  void _createElevationRadioButtons();
-  void _clearElevationRadioButtons();
-  void _changeElevationRadioButton(int value);
+  QVBoxLayout *_sweepVBoxLayout;
+  QGroupBox *_sweepPanel;
+  QGroupBox *_sweepSubPanel;
+  QGridLayout *_sweepsLayout;
+  QLabel *_selectedSweepLabelWidget;
+  QButtonGroup *_sweepGroup;
+  vector<QRadioButton *> *_sweepRButtons;
 
   // windows
 
@@ -288,8 +283,14 @@ private slots:
   virtual void _unzoom();
   virtual void _refresh();
   virtual void _changeField(int fieldId, bool guiMode = true);
-  
-  void _changeElevation(bool value);
+
+  // sweeps
+
+  void _createSweepPanel();
+  void _createSweepRadioButtons();
+  void _clearSweepRadioButtons();
+  void _changeSweepRadioButton(int value);
+  void _changeSweep(bool value);
 
   // local
 

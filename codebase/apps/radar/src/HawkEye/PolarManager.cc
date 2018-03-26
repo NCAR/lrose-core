@@ -400,7 +400,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       // _setFixedAngle(_sweepIndex + 1); // (_sweepIndex);
       _ppi->setStartOfSweep(true);
       _rhi->setStartOfSweep(true);
-      _changeElevationRadioButton(-1);
+      _changeSweepRadioButton(-1);
 
     }
 
@@ -415,7 +415,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       // _setFixedAngle(_sweepIndex-1);
       _ppi->setStartOfSweep(true);
       _rhi->setStartOfSweep(true);
-      _changeElevationRadioButton(+1);
+      _changeSweepRadioButton(+1);
 
     }
 
@@ -493,7 +493,7 @@ void PolarManager::_setupWindows()
   // _colorBar = new ColorBar(_params.color_scale_width,
   //                          &_fields[0]->getColorMap(), _main);
 
-  _createElevationPanel();
+  _createSweepPanel();
 
   //if (_archiveMode) 
     _createTimePanel();
@@ -514,7 +514,7 @@ void PolarManager::_setupWindows()
   column++;
   mainLayout->addWidget(_ppiFrame, row, column);
   column++;
-  mainLayout->addWidget(_elevationPanel, row, column);
+  mainLayout->addWidget(_sweepPanel, row, column);
   column++;
   row++;
   column = 2;
@@ -529,7 +529,7 @@ void PolarManager::_setupWindows()
   mainLayout->addWidget(_statusPanel);
   mainLayout->addWidget(_fieldPanel);
   mainLayout->addWidget(_ppiFrame);
-  mainLayout->addWidget(_elevationPanel);
+  mainLayout->addWidget(_sweepPanel);
   mainLayout->addWidget(_timePanel);
   */
   // mainLayout->addWidget(_colorBar);
@@ -707,9 +707,9 @@ void PolarManager::_createMenus()
 }
 
 //////////////////////////////////////////////
-// create the elevation panel
+// create the sweep panel
 
-void PolarManager::_createElevationPanel()
+void PolarManager::_createSweepPanel()
 {
   
   Qt::Alignment alignCenter(Qt::AlignCenter);
@@ -720,38 +720,38 @@ void PolarManager::_createElevationPanel()
   //int fsize4 = _params.label_font_size + 4;
   //int fsize6 = _params.label_font_size + 6;
 
-  _elevationPanel = new QGroupBox(_main);
-  // _elevationGroup = new QButtonGroup;
-  _elevationsLayout = new QGridLayout(_elevationPanel);
-  _elevationsLayout->setVerticalSpacing(1);
+  _sweepPanel = new QGroupBox(_main);
+  // _sweepGroup = new QButtonGroup;
+  _sweepsLayout = new QGridLayout(_sweepPanel);
+  _sweepsLayout->setVerticalSpacing(1);
 
   int row = 0;
 
-  QLabel *elevationHeader = new QLabel("SWEEP", _elevationPanel);
-  //elevationHeader->setFont(font);
-  _elevationsLayout->addWidget(elevationHeader, row, 0); // , 0, nCols, alignCenter);
+  QLabel *sweepHeader = new QLabel("SWEEP", _sweepPanel);
+  //sweepHeader->setFont(font);
+  _sweepsLayout->addWidget(sweepHeader, row, 0); // , 0, nCols, alignCenter);
   row++;
   
   
-  //QGroupBox *groupBox = new QGroupBox(tr("Elevations"));
-  _elevationSubPanel = new QGroupBox(tr("Angles"));
-  _elevationVBoxLayout = new QVBoxLayout;
-  _elevationRButtons = new vector<QRadioButton *>(); // _elevations->size());
+  //QGroupBox *groupBox = new QGroupBox(tr("Sweeps"));
+  _sweepSubPanel = new QGroupBox(tr("Angles"));
+  _sweepVBoxLayout = new QVBoxLayout;
+  _sweepRButtons = new vector<QRadioButton *>(); // _sweeps->size());
 
-  //_elevationVBoxLayout->addStretch(1);
-  _elevationSubPanel->setLayout(_elevationVBoxLayout);
-  _elevationsLayout->addWidget(_elevationSubPanel, row, 0); //, 1, nCols, alignCenter);
+  //_sweepVBoxLayout->addStretch(1);
+  _sweepSubPanel->setLayout(_sweepVBoxLayout);
+  _sweepsLayout->addWidget(_sweepSubPanel, row, 0); //, 1, nCols, alignCenter);
   row++;
-  QLabel *spacerRow = new QLabel("", _elevationPanel);
-  _elevationsLayout->addWidget(spacerRow, row, 0);
-  _elevationsLayout->setRowStretch(row, 1);
+  QLabel *spacerRow = new QLabel("", _sweepPanel);
+  _sweepsLayout->addWidget(spacerRow, row, 0);
+  _sweepsLayout->setRowStretch(row, 1);
   
 }
 
-void PolarManager::_changeElevation(bool value) {
+void PolarManager::_changeSweep(bool value) {
 
   if (_params.debug) {
-    cerr << "From PolarManager: the elevation was changed ";
+    cerr << "From PolarManager: the sweep was changed ";
     cerr << endl;
   }
 
@@ -759,10 +759,10 @@ void PolarManager::_changeElevation(bool value) {
     return;
   }
 
-  for (size_t ii = 0; ii < _elevationRButtons->size(); ii++) {
-    if (_elevationRButtons->at(ii)->isChecked()) {
+  for (size_t ii = 0; ii < _sweepRButtons->size(); ii++) {
+    if (_sweepRButtons->at(ii)->isChecked()) {
       if (_params.debug) {
-        cerr << "elevationRButton " << ii << " is checked" << endl;
+        cerr << "sweepRButton " << ii << " is checked" << endl;
         cerr << "  moving to sweep index " << ii << endl;
       }
       _sweepManager.setGuiIndex(ii);
@@ -781,16 +781,16 @@ void PolarManager::_changeElevation(bool value) {
 // the slot that receives the signal will increase the sweepIndex
 // value = +1 move forward
 // value = -1 move backward in sweeps
-void PolarManager::_changeElevationRadioButton(int increment)
+void PolarManager::_changeSweepRadioButton(int increment)
 {
   
   if (_params.debug) {
-    cerr << "-->> changing elevation index by increment: " << increment << endl;
+    cerr << "-->> changing sweep index by increment: " << increment << endl;
   }
   
   if (increment != 0) {
     _sweepManager.changeSelectedIndex(increment);
-    _elevationRButtons->at(_sweepManager.getGuiIndex())->setChecked(true);
+    _sweepRButtons->at(_sweepManager.getGuiIndex())->setChecked(true);
   }
 
 }
@@ -799,10 +799,10 @@ void PolarManager::_changeElevationRadioButton(int increment)
 // create radio buttons
 // this requires that _sweepManager is up to date with sweep info
 
-void PolarManager::_createElevationRadioButtons() {
+void PolarManager::_createSweepRadioButtons() {
 
   char buf[256];
-  _elevationRButtons = new vector<QRadioButton *>();
+  _sweepRButtons = new vector<QRadioButton *>();
 
   for (int ielev = 0; ielev < (int) _sweepManager.getNSweeps(); ielev++) {
     
@@ -813,21 +813,21 @@ void PolarManager::_createElevationRadioButtons() {
       radio1->setChecked(true);
     }
     
-    _elevationRButtons->push_back(radio1);
-    _elevationVBoxLayout->addWidget(radio1);
+    _sweepRButtons->push_back(radio1);
+    _sweepVBoxLayout->addWidget(radio1);
     
-    // connect slot for elevation change
-    connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeElevation(bool)));
+    // connect slot for sweep change
+    connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeSweep(bool)));
   }
 
 }
 
-void PolarManager::_clearElevationRadioButtons() 
+void PolarManager::_clearSweepRadioButtons() 
 {
 
   QLayoutItem* child;
-  while (_elevationVBoxLayout->count() !=0) {
-    child = _elevationVBoxLayout->takeAt(0);
+  while (_sweepVBoxLayout->count() !=0) {
+    child = _sweepVBoxLayout->takeAt(0);
     if (child->widget() !=0) {
       delete child->widget();
     }
@@ -931,8 +931,8 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
 
   // set up sweep GUI
 
-  _clearElevationRadioButtons();
-  _createElevationRadioButtons();
+  _clearSweepRadioButtons();
+  _createSweepRadioButtons();
   
   if (_vol.checkIsRhi()) {
     _rhiMode = true;
@@ -973,14 +973,18 @@ int PolarManager::_getArchiveData()
     RadxTime stop_time(RadxTime::NOW);
     listOfFiles.setDir(inputPath);
     listOfFiles.setModeInterval(start_time, stop_time);
-    cerr << " looking for data files ...\n";
+    if(_params.debug) {
+      cerr << " looking for data files ..." << endl;
+    }
     listOfFiles.compile();
 
     vector<string> pathList = listOfFiles.getPathList();
     if (pathList.size() > 0) 
       inputPath = pathList[0];
 
-    cerr << " reading data files\n";
+    if(_params.debug) {
+      cerr << " reading data files" << endl;
+    }
     
     if (file.readFromPath(inputPath, _vol)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
