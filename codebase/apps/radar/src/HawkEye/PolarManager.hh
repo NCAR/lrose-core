@@ -128,13 +128,23 @@ private:
   
   RadxTime _readerRayTime;
   RadxVol _vol;
-  bool _firstVol;
 
-  bool _moveToHighSweep;
-  int _sweepIndex;
-  
-  bool _keepFixedAngle;
-  double _fixedAngleDeg;
+  // sweeps
+
+  SweepManager _sweepManager;
+
+  QVBoxLayout *_elevationVBoxLayout;
+  QGroupBox *_elevationPanel;
+  QGroupBox *_elevationSubPanel;
+  QGridLayout *_elevationsLayout;
+  QLabel *_selectedElevationLabelWidget;
+  QButtonGroup *_elevationGroup;
+  vector<QRadioButton *> *_elevationRButtons;
+
+  void _createElevationPanel();
+  void _createElevationRadioButtons();
+  void _clearElevationRadioButtons();
+  void _changeElevationRadioButton(int value);
 
   // windows
 
@@ -204,26 +214,26 @@ private:
   RadxTime _archiveStopTime;
   
   // values for time slider view
+
   RadxTime _archiveIntermediateTime;
   int _timeSliderCurrentValue;
   RadxTime _startDisplayTime;
   RadxTime _currentDisplayTime;  // is this needed??
   RadxTime _endDisplayTime;
-
   RadxTime _imagesArchiveStartTime;
   RadxTime _imagesArchiveEndTime;
-
   vector<string> _inputFileList;
   
   // saving images in real time mode
 
   RadxTime _imagesScheduledTime;
 
+  //////////////////////////////
+  // private methods
+
   // open File 
 
-  QFileDialog *_openFileDialog;
   void _openFile();
-
   void _moveUpDown();
 
   // set top bar
@@ -244,12 +254,6 @@ private:
   int _getArchiveData();
   void _plotArchiveData();
   void _setupVolRead(RadxFile &file);
-
-
-
-  void _setSweepIndex(double fixedAngle);
-  void _setFixedAngle(int sweepIndex);
-  void _setSweepIndex(size_t i);
 
   // draw beam
 
@@ -285,7 +289,6 @@ private slots:
   virtual void _refresh();
   virtual void _changeField(int fieldId, bool guiMode = true);
   
-
   void _changeElevation(bool value);
 
   // local

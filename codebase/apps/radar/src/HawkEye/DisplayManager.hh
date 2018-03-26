@@ -130,11 +130,6 @@ protected:
   
   const Params &_params;
   
-  // sweeps
-
-  SweepManager _sweepManager;
-  vector<float> *_elevations;
-
   // reading data in
   
   Reader *_reader;
@@ -249,28 +244,6 @@ protected:
   int _fieldNum;
   int _prevFieldNum;
 
-  // elevation panel
-  
-  QVBoxLayout *_elevationVBoxLayout;
-  QGroupBox *_elevationPanel;
-  QGroupBox *_elevationSubPanel;
-  QGridLayout *_elevationsLayout;
-  QLabel *_selectedElevationLabelWidget;
-  QButtonGroup *_elevationGroup;
-  vector<QRadioButton *> *_elevationRButtons;
-  // DisplayElevation *_selectedElevation;
-  int _selectedElevationIndex;
-  //string _selectedElevationLabel;
-  //string _selectedElevationUnits;
-  QLabel *_elevationValueLabel;
-  int _elevationNum;
-  int _prevElevationNum;
-  void _createNewRadioButtons(vector<float> *newElevations);
-  void _resetElevationText(vector<float> *newElevations);
-  void _updateElevationPanel(vector<float> *newElevations);
-  void _clearElevationRadioButtons();
-  //  virtual void _changeElevation();
-
   // time panel
   
   QGroupBox *_timePanel;
@@ -313,7 +286,6 @@ protected:
   
   void _createStatusPanel();
   void _createFieldPanel();
-  void _createElevationPanel();
   void _createTimePanel();
   void _updateTimePanel();
   void _createClickReportDialog();
@@ -370,9 +342,6 @@ protected slots:
   virtual void _refresh() = 0;
   virtual void _changeField(int fieldId, bool guiMode) = 0;
   virtual void _openFile();
-
-  virtual void _changeElevation(bool value);
-  void _changeElevationRadioButton(int value);
 
   void _changeFieldVariable(bool value);
 

@@ -52,6 +52,18 @@ class SweepManager {
   
 public:
 
+  class GuiSweep {
+  public:
+    RadxSweep *radx;
+    int indexInFile;
+    int indexInGui;
+    GuiSweep() {
+      radx = NULL;
+      indexInFile = 0;
+      indexInGui = 0;
+    }
+  };
+
   // constructor
   
   SweepManager(const Params &params);
@@ -62,35 +74,50 @@ public:
 
   // set from volume
 
-  void set(const RadxVol &vol,
-           double selectedAngle = NAN);
+  void set(const RadxVol &vol);
   
-  // set the selected index from the angle
+  // set the angle
+  // size effect: sets the selected index
 
-  void setSelectedIndex(double selectedAngle);
+  void setAngle(double selectedAngle);
+
+  // set the index for the GUI
+
+  void setGuiIndex(int index);
+
+  // set the index for the file
+
+  void setFileIndex(int index);
+
+  // change selected index by the specified increment
+
+  void changeSelectedIndex(int increment);
 
   // get methods
 
-  int getSelectedIndex() const { return _selectedIndex; }
+  size_t getNSweeps() const { return _sweeps.size(); }
+  const vector<GuiSweep> &getGuiSweeps() const { return _sweeps; }
+  const GuiSweep getSelectedSweep() const { return _sweeps[_guiIndex]; }
+
+  int getGuiIndex() const { return _guiIndex; }
+  int getFileIndex() const { return _sweeps[_guiIndex].indexInFile; }
   int getSelectedAngle() const { return _selectedAngle; }
-  const RadxSweep *getSelectedSweep() const { return _sweeps[_selectedIndex]; }
+  double getFixedAngleDeg(ssize_t sweepIndex = -1) const;
+  bool getReversedInGui() const { return _reversedInGui; }
   
 private:
   
   const Params &_params;
   
-  // sweep angles
+  // sweeps
 
-  vector<RadxSweep *> _sweeps;
-  bool _reversed;
+  vector<GuiSweep> _sweeps;
+  bool _reversedInGui;
 
   // selection
 
-  int _selectedIndex;
+  int _guiIndex;
   double _selectedAngle;
-  int _sweepNum;
-
-  // methods
 
 };
 

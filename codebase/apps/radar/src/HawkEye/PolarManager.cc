@@ -41,7 +41,6 @@
 #include "PpiWidget.hh"
 #include "RhiWidget.hh"
 #include "RhiWindow.hh"
-// #include "ColorBar.hh"
 #include "Params.hh"
 #include "Reader.hh"
 
@@ -95,6 +94,7 @@ PolarManager::PolarManager(const Params &params,
                            const vector<DisplayField *> &fields,
                            bool haveFilteredFields) :
         DisplayManager(params, reader, fields, haveFilteredFields),
+        _sweepManager(params),
 	_rhiWindowDisplayed(false)
 {
 
@@ -106,12 +106,6 @@ PolarManager::PolarManager(const Params &params,
   _endAz = -9999.0;
   _ppiRays = NULL;
   _rhiMode = false;
-  _sweepIndex = 0;
-
-  _firstVol = true;
-  _moveToHighSweep = false;
-  _keepFixedAngle = false;
-  _fixedAngleDeg = -9999.0;
 
   // initialize geometry
   
@@ -369,19 +363,16 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
   }
 
-  // check for back or forward in time
-  // or up/down in sweep number
+  // check for up/down in sweeps
 
-  bool moveUpDown = false;
-  _keepFixedAngle = false;
-  int sweepMovement = 0;
+  // _keepFixedAngle = false;
   
   if (key == Qt::Key_Left) {
 
     if (_params.debug) {
       cerr << "Clicked left arrow, go back in time" << endl;
     }
-    _keepFixedAngle = true;
+    // _keepFixedAngle = true;
     _ppi->setStartOfSweep(true);
     _rhi->setStartOfSweep(true);
     _goBack1();
@@ -392,7 +383,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
     if (_params.debug) {
       cerr << "Clicked right arrow, go forward in time" << endl;
     }
-    _keepFixedAngle = true;
+    // _keepFixedAngle = true;
     _ppi->setStartOfSweep(true);
     _rhi->setStartOfSweep(true);
     _goFwd1();
@@ -400,85 +391,45 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
     
   } else if (key == Qt::Key_Up) {
 
-    if (_sweepIndex < (int) _vol.getNSweeps() - 1) {
-
-      //_sweepIndex++;
-      sweepMovement = 1;
-      moveUpDown = true;
-      _keepFixedAngle = false;
-      _setFixedAngle(_sweepIndex+1); // (_sweepIndex);
-      _ppi->setStartOfSweep(true);
-      _rhi->setStartOfSweep(true);
-
-    } else {
+    if (_sweepManager.getGuiIndex() > 0) {
 
       if (_params.debug) {
-        cerr << "Clicked up arrow, moving forward in time" << endl;
+        cerr << "Clicked up arrow, go up a sweep" << endl;
       }
-      _moveToHighSweep = false; // start with low sweep of next volume
-      _keepFixedAngle = false;
-      _setFixedAngle(_sweepIndex);
-      _goFwd1();
+      // _keepFixedAngle = false;
+      // _setFixedAngle(_sweepIndex + 1); // (_sweepIndex);
       _ppi->setStartOfSweep(true);
       _rhi->setStartOfSweep(true);
-      _setArchiveRetrievalPending();
+      _changeElevationRadioButton(-1);
 
     }
 
   } else if (key == Qt::Key_Down) {
 
-    if (_sweepIndex > 0) {
-
-      //_sweepIndex--;
-      sweepMovement = -1;
-      _keepFixedAngle = false;
-      _setFixedAngle(_sweepIndex-1); // (_sweepIndex);
-      moveUpDown = true;
-      _ppi->setStartOfSweep(true);
-      _rhi->setStartOfSweep(true);
-
-    } else {
+    if (_sweepManager.getGuiIndex() < (int) _sweepManager.getNSweeps() - 1) {
 
       if (_params.debug) {
-        cerr << "Clicked down arrow, go back in time" << endl;
+        cerr << "Clicked down arrow, go down a sweep" << endl;
       }
-      _keepFixedAngle = false;
-      _moveToHighSweep = true;
-      _setFixedAngle(_sweepIndex);
-      _goBack1();
+      // _keepFixedAngle = false;
+      // _setFixedAngle(_sweepIndex-1);
       _ppi->setStartOfSweep(true);
       _rhi->setStartOfSweep(true);
-      _setArchiveRetrievalPending();
+      _changeElevationRadioButton(+1);
 
     }
 
   }
 
-  if (moveUpDown) {
-    if (_params.debug) {
-      cerr << "Clicked up/down arrow, change to sweep num: " 
-           << _sweepIndex << endl;
-    }
-    /*
-    this->setCursor(Qt::WaitCursor);
-    _timeControllerDialog->setCursor(Qt::WaitCursor);
-    _plotArchiveData();
-    this->setCursor(Qt::ArrowCursor);
-    _timeControllerDialog->setCursor(Qt::ArrowCursor);
-    */
-    //_moveUpDown();
-    //bool fromHotKey = true;
-    _changeElevationRadioButton(sweepMovement); // _sweepIndex);
-  }
-  
 }
 
-void PolarManager::_moveUpDown() {
-    this->setCursor(Qt::WaitCursor);
-    _timeControllerDialog->setCursor(Qt::WaitCursor);
-    _plotArchiveData();
-    this->setCursor(Qt::ArrowCursor);
-    _timeControllerDialog->setCursor(Qt::ArrowCursor);
+void PolarManager::_moveUpDown() 
+{
+  this->setCursor(Qt::WaitCursor);
+  _timeControllerDialog->setCursor(Qt::WaitCursor);
+  _plotArchiveData();
+  this->setCursor(Qt::ArrowCursor);
+  _timeControllerDialog->setCursor(Qt::ArrowCursor);
 }
 
 //////////////////////////////////////////////////
@@ -568,8 +519,9 @@ void PolarManager::_setupWindows()
   row++;
   column = 2;
 
-  if (_archiveMode)
+  if (_archiveMode) {
     mainLayout->addWidget(_timePanel, row, column, rowSpan, columnSpan); // , rowSpan, columnSpan);
+  }
   
   /*
   QHBoxLayout *mainLayout = new QHBoxLayout(_main);
@@ -754,6 +706,136 @@ void PolarManager::_createMenus()
 
 }
 
+//////////////////////////////////////////////
+// create the elevation panel
+
+void PolarManager::_createElevationPanel()
+{
+  
+  Qt::Alignment alignCenter(Qt::AlignCenter);
+  Qt::Alignment alignRight(Qt::AlignRight);
+  
+  //int fsize = _params.label_font_size;
+  //int fsize2 = _params.label_font_size + 2;
+  //int fsize4 = _params.label_font_size + 4;
+  //int fsize6 = _params.label_font_size + 6;
+
+  _elevationPanel = new QGroupBox(_main);
+  // _elevationGroup = new QButtonGroup;
+  _elevationsLayout = new QGridLayout(_elevationPanel);
+  _elevationsLayout->setVerticalSpacing(1);
+
+  int row = 0;
+
+  QLabel *elevationHeader = new QLabel("SWEEP", _elevationPanel);
+  //elevationHeader->setFont(font);
+  _elevationsLayout->addWidget(elevationHeader, row, 0); // , 0, nCols, alignCenter);
+  row++;
+  
+  
+  //QGroupBox *groupBox = new QGroupBox(tr("Elevations"));
+  _elevationSubPanel = new QGroupBox(tr("Angles"));
+  _elevationVBoxLayout = new QVBoxLayout;
+  _elevationRButtons = new vector<QRadioButton *>(); // _elevations->size());
+
+  //_elevationVBoxLayout->addStretch(1);
+  _elevationSubPanel->setLayout(_elevationVBoxLayout);
+  _elevationsLayout->addWidget(_elevationSubPanel, row, 0); //, 1, nCols, alignCenter);
+  row++;
+  QLabel *spacerRow = new QLabel("", _elevationPanel);
+  _elevationsLayout->addWidget(spacerRow, row, 0);
+  _elevationsLayout->setRowStretch(row, 1);
+  
+}
+
+void PolarManager::_changeElevation(bool value) {
+
+  if (_params.debug) {
+    cerr << "From PolarManager: the elevation was changed ";
+    cerr << endl;
+  }
+
+  if (!value) {
+    return;
+  }
+
+  for (size_t ii = 0; ii < _elevationRButtons->size(); ii++) {
+    if (_elevationRButtons->at(ii)->isChecked()) {
+      if (_params.debug) {
+        cerr << "elevationRButton " << ii << " is checked" << endl;
+        cerr << "  moving to sweep index " << ii << endl;
+      }
+      _sweepManager.setGuiIndex(ii);
+      _ppi->setStartOfSweep(true);
+      _rhi->setStartOfSweep(true);
+      _moveUpDown();
+      return;
+    }
+  } // ii
+
+}
+
+// only set the sweepIndex in one place;
+// here, just move the radio button up or down one step
+// when the radio button is changed, a signal is emitted and
+// the slot that receives the signal will increase the sweepIndex
+// value = +1 move forward
+// value = -1 move backward in sweeps
+void PolarManager::_changeElevationRadioButton(int increment)
+{
+  
+  if (_params.debug) {
+    cerr << "-->> changing elevation index by increment: " << increment << endl;
+  }
+  
+  if (increment != 0) {
+    _sweepManager.changeSelectedIndex(increment);
+    _elevationRButtons->at(_sweepManager.getGuiIndex())->setChecked(true);
+  }
+
+}
+
+/////////////////////////////////////////////////////////////////////
+// create radio buttons
+// this requires that _sweepManager is up to date with sweep info
+
+void PolarManager::_createElevationRadioButtons() {
+
+  char buf[256];
+  _elevationRButtons = new vector<QRadioButton *>();
+
+  for (int ielev = 0; ielev < (int) _sweepManager.getNSweeps(); ielev++) {
+    
+    std::snprintf(buf, 256, "%.2f", _sweepManager.getFixedAngleDeg(ielev));
+    QRadioButton *radio1 = new QRadioButton(buf); 
+    
+    if (ielev == _sweepManager.getGuiIndex()) {
+      radio1->setChecked(true);
+    }
+    
+    _elevationRButtons->push_back(radio1);
+    _elevationVBoxLayout->addWidget(radio1);
+    
+    // connect slot for elevation change
+    connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeElevation(bool)));
+  }
+
+}
+
+void PolarManager::_clearElevationRadioButtons() 
+{
+
+  QLayoutItem* child;
+  while (_elevationVBoxLayout->count() !=0) {
+    child = _elevationVBoxLayout->takeAt(0);
+    if (child->widget() !=0) {
+      delete child->widget();
+    }
+    delete child;
+  }
+ 
+}
+
 /////////////////////////////
 // get data in realtime mode
 
@@ -845,24 +927,12 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
     _timeControllerDialog->setCursor(Qt::ArrowCursor);
     return;
   }
-
-  //----------
-  
-  const vector<RadxSweep *> &sweeps = _vol.getSweeps();
-
-  _sweepManager.set(_vol);
-  vector<float> *newElevations =  new vector<float>();
-  for (size_t i=0; i<sweeps.size(); i++) {
-    const RadxSweep *sweep = sweeps[i];
-    double fixedAngleDeg = sweep->getFixedAngleDeg();
-    newElevations->push_back(fixedAngleDeg);
-  }
-  _updateElevationPanel(newElevations);
-  if (!_keepFixedAngle)
-    _changeElevationRadioButton(10000); // essentially setting it to 0
-  //----------
-  
   _activateArchiveRendering();
+
+  // set up sweep GUI
+
+  _clearElevationRadioButtons();
+  _createElevationRadioButtons();
   
   if (_vol.checkIsRhi()) {
     _rhiMode = true;
@@ -877,9 +947,6 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
   _timeControllerDialog->setCursor(Qt::ArrowCursor);
 
 }
-
-
-
 
 /////////////////////////////
 // get data in archive mode
@@ -962,33 +1029,43 @@ int PolarManager::_getArchiveData()
   
   _vol.computeFixedAnglesFromRays();
 
+  // load the sweep manager
+  
+  _sweepManager.set(_vol);
+
   // for first retrieval, start with sweepIndex of 0
 
-  if (_firstVol) {
-    _sweepIndex = 0;
-    _setFixedAngle(_sweepIndex);
-  }
-  _firstVol = false;
+  // if (_firstVol) {
+  //   _sweepIndex = _sweepManager.getNSweeps() - 1;
+  //   _setFixedAngle(_sweepIndex);
+  // }
+  // _sweepIndex = _sweepManager.getSelectedIndex();
+  // _setFixedAngle(_sweepIndex);
+  // _firstVol = false;
   
   // condition sweep number
   
-  if (_keepFixedAngle) {
-    _setSweepIndex(_fixedAngleDeg);
-  } else if (_moveToHighSweep) {
-    _sweepIndex = _vol.getNSweeps() - 1;
-    _setFixedAngle(_sweepIndex);
-  } else {
-    _sweepIndex = 0;
-    _setFixedAngle(_sweepIndex);
-  }
+  // _sweepManager.setAngle(_fixedAngleDeg);
+  // _fixedAngleDeg = _sweepManager.getFixedAngleDeg();
+
+  // if (_keepFixedAngle) {
+  //   _setSweepIndex(_fixedAngleDeg);
+  // } else if (_moveToHighSweep) {
+  //   _sweepIndex = _vol.getNSweeps() - 1;
+  //   _setFixedAngle(_sweepIndex);
+  // } else {
+  //   _sweepIndex = 0;
+  //   _setFixedAngle(_sweepIndex);
+  // }
   
   if (_params.debug) {
     cerr << "----------------------------------------------------" << endl;
     cerr << "perform archive retrieval" << endl;
     cerr << "  read file: " << _vol.getPathInUse() << endl;
     cerr << "  nSweeps: " << _vol.getNSweeps() << endl;
-    cerr << "  _sweepIndex, _fixedAngleDeg: " 
-         << _sweepIndex << ", " << _fixedAngleDeg << endl;
+    cerr << "  guiIndex, fixedAngle: " 
+         << _sweepManager.getGuiIndex() << ", "
+         << _sweepManager.getSelectedAngle() << endl;
     cerr << "----------------------------------------------------" << endl;
   }
   
@@ -996,50 +1073,6 @@ int PolarManager::_getArchiveData()
 
   return 0;
 
-}
-
-/////////////////////////////////////////
-// set the sweep index from fixed angle
-
-void PolarManager::_setSweepIndex(double fixedAngle)
-{
-  const vector<RadxSweep *> &sweeps = _vol.getSweeps();
-  if (sweeps.size() < 1) {
-    _sweepIndex = 0;
-    return;
-  }
-  double minDiff = 9999.0;
-  int bestIndex = 0;
-  for (size_t ii = 0; ii < sweeps.size(); ii++) {
-    const RadxSweep *sweep = sweeps[ii];
-    double diff = 
-      fabs(Radx::computeAngleDiff(fixedAngle, sweep->getFixedAngleDeg()));
-    if (diff < minDiff) {
-      minDiff = diff;
-      bestIndex = ii;
-    }
-  } // ii
-  _sweepIndex = bestIndex;
-}
-
-////////////////////////////////////////////
-// set the fixed angle from the sweep index
-
-void PolarManager::_setFixedAngle(int sweepNum)
-{
-  const vector<RadxSweep *> &sweeps = _vol.getSweeps();
-  if (sweeps.size() < 1) {
-    _fixedAngleDeg = -8888.0;
-    return;
-  }
-  if (sweepNum < 0) {
-    sweepNum = 0;
-  }
-  if (sweepNum > (int) sweeps.size() - 1) {
-    sweepNum = sweeps.size() - 1;
-  }
-  const RadxSweep *sweep = sweeps[sweepNum];
-  _fixedAngleDeg = sweep->getFixedAngleDeg();
 }
 
 /////////////////////////////
@@ -1075,66 +1108,20 @@ void PolarManager::_plotArchiveData()
     return;
   }
 
-  if (_sweepIndex > (int) sweeps.size()) {
-    _sweepIndex = (int) sweeps.size() - 1;
-  }
-
   // clear the canvas
 
   _clear();
 
   // handle the rays
 
-  for (size_t ii = sweeps[_sweepIndex]->getStartRayIndex();
-       ii <= sweeps[_sweepIndex]->getEndRayIndex(); ii++) {
+  const SweepManager::GuiSweep &gsweep = _sweepManager.getSelectedSweep();
+  for (size_t ii = gsweep.radx->getStartRayIndex();
+       ii <= gsweep.radx->getEndRayIndex(); ii++) {
     RadxRay *ray = rays[ii];
     _handleRay(_platform, ray);
-  }
-
-  // signal an update of elevations
-  //  emit elevationsChanged(sweeps); 
-  // update the status panel
-  
-  _updateStatusPanel(rays[sweeps[_sweepIndex]->getStartRayIndex()]);
-    
-}
-
-void PolarManager::_setSweepIndex(size_t i) {
-  const vector<RadxSweep *> &sweeps = _vol.getSweeps();
-  size_t max = sweeps.size();
-  size_t newIdx = i;
-  if (newIdx > max)
-    newIdx = max -1;
-  else if (newIdx < 0)
-    newIdx = 0;
-  _sweepIndex = newIdx;
-}
-
-void PolarManager::_changeElevation(bool value) {
-
-  if (_params.debug) {
-    cerr << "From PolarManager: the elevation was changed ";
-    cerr << endl;
-  }
-
-  if (value) {
-    size_t i = 0;
-    bool found = false;
-    while (( i < _elevationRButtons->size() ) && (!found)) {
-      if (_elevationRButtons->at(i)->isChecked()) {
-        if (_params.debug) cout << "elevationRButton " << i << " is checked" << endl;
-        _selectedElevationIndex = i;
-        _setSweepIndex(i);
-        if (_params.debug) cerr << "moving to sweep " << _sweepIndex << endl;
-        _keepFixedAngle = false;
-        _setFixedAngle(_sweepIndex);
-        _ppi->setStartOfSweep(true);
-        _rhi->setStartOfSweep(true);
-        _moveUpDown();
-        found = true;
-      }
-      i++;
-    } // end while
+    if (ii == 0) {
+      _updateStatusPanel(ray);
+    }
   }
 
 }
@@ -1159,10 +1146,6 @@ void PolarManager::_setupVolRead(RadxFile &file)
   }
 
   file.setReadModeClosest(_archiveStartTime, _archiveMarginSecs);
-
-  // if (_params.max_range_km > 0) {
-  //   file.setReadMaxRangeKm(_params.max_range_km);
-  // }
 
 }
 
@@ -2099,7 +2082,7 @@ void PolarManager::_timeSliderValueChanged(int value) {
 
 void PolarManager::_timeSliderReleased() {
 
-  _keepFixedAngle = true;
+  // _keepFixedAngle = true;
   //_ppi->setStartOfSweep(true);
   //_rhi->setStartOfSweep(true);
     //_goBack1();
@@ -2195,7 +2178,7 @@ void PolarManager::_openFile()
     vector<string> list;
     list.push_back(name);
     setInputFileList(list);
-    _keepFixedAngle = true;
+    // _keepFixedAngle = true;
 
     try {
       _getArchiveData();
@@ -2534,7 +2517,7 @@ void PolarManager::_createImageFilesAllSweeps()
     for (int ii = 0; ii < _params.images_sweep_index_list_n; ii++) {
       int index = _params._images_sweep_index_list[ii];
       if (index >= 0 && index < (int) _vol.getNSweeps()) {
-        _sweepIndex = index;
+        _sweepManager.setFileIndex(index);
         _createImageFiles();
       }
     }
@@ -2542,7 +2525,7 @@ void PolarManager::_createImageFilesAllSweeps()
   } else {
 
     for (size_t index = 0; index < _vol.getNSweeps(); index++) {
-      _sweepIndex = index;
+      _sweepManager.setFileIndex(index);
       _createImageFiles();
     }
 

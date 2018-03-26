@@ -52,9 +52,9 @@ SweepManager::SweepManager(const Params &params) :
         
 {
 
-  _reversed = false;
-  _selectedIndex = -1;
-  _selectedAngle = NAN;
+  _reversedInGui = false;
+  _guiIndex = 0;
+  _selectedAngle = 0.0;
 
 }
 
@@ -70,71 +70,164 @@ SweepManager::~SweepManager()
 /////////////////////////////////////////////////////////////
 // set from a volume
 
-void SweepManager::set(const RadxVol &vol,
-                       double selectedAngle /* = NAN */)
+void SweepManager::set(const RadxVol &vol)
   
 {
+
+  // first time?
+
+  bool init = false;
+  if (_sweeps.size() == 0) {
+    init = true;
+  }
 
   // init
 
   _sweeps.clear();
-  _reversed = false;
-  _selectedIndex = -1;
-  _selectedAngle = selectedAngle;
+  _reversedInGui = false;
 
-  const vector<RadxSweep *> sweeps = vol.getSweeps();
+  const vector<RadxSweep *> sweepsInVol = vol.getSweeps();
 
   // zero length case
   
-  if (sweeps.size() == 0) {
+  if (sweepsInVol.size() == 0) {
     return;
   }
 
   // check if angles are in ascending or descending order
-  // if ascending, reverse because the angle widget is rendered top down
+  // if ascending, reverse so that they are descending in this object
+  // that matches a top-down rendering of the angles in the widget
 
-  if (sweeps[0]->getFixedAngleDeg() < sweeps[sweeps.size()-1]->getFixedAngleDeg()) {
-    _reversed = true;
-  }
-  if (_reversed) {
-    for (ssize_t ii = sweeps.size() - 1; ii >= 0; ii--) {
-      _sweeps.push_back(sweeps[ii]);
-    } // ii
-  } else {
-    for (ssize_t ii = 0; ii < (ssize_t) sweeps.size(); ii++) {
-      _sweeps.push_back(sweeps[ii]);
-    } // ii
+  if (sweepsInVol[0]->getFixedAngleDeg() < 
+      sweepsInVol[sweepsInVol.size()-1]->getFixedAngleDeg()) {
+    _reversedInGui = true;
   }
 
-  if (isfinite(_selectedAngle)) {
-    setSelectedIndex(_selectedAngle);
+  for (ssize_t ii = 0; ii < (ssize_t) sweepsInVol.size(); ii++) {
+    ssize_t jj = ii;
+    if (_reversedInGui) {
+      jj = sweepsInVol.size() - 1 - ii;
+    }
+    GuiSweep gsweep;
+    gsweep.radx = sweepsInVol[jj];
+    gsweep.indexInFile = jj;
+    gsweep.indexInGui = ii;
+    _sweeps.push_back(gsweep);
   }
-  
+
+  // initialize sweep index if needed
+
+  if (init) {
+    setGuiIndex(_sweeps.size() - 1);
+  }
+
+  // set selected angle
+
+  _selectedAngle = _sweeps[_guiIndex].radx->getFixedAngleDeg();
+
 }
 
 /////////////////////////////////////////////////////////////
-// set selected index from angle
+// set angle
+// size effect: sets the selected index
 
-void SweepManager::setSelectedIndex(double selectedAngle)
+void SweepManager::setAngle(double angle)
   
 {
-
-  _selectedAngle = selectedAngle;
-  _selectedIndex = -1;
-
+  
+  _selectedAngle = angle;
+  _guiIndex = 0;
+  
   if (_sweeps.size() == 0) {
     return;
   }
 
   double minDiff = 1.0e99;
   for (size_t ii = 0; ii < _sweeps.size(); ii++) {
-    double angle = _sweeps[ii]->getFixedAngleDeg();
+    double angle = _sweeps[ii].radx->getFixedAngleDeg();
     double diff = fabs(angle - _selectedAngle);
     if (diff < minDiff) {
-      _selectedIndex = ii;
+      _guiIndex = ii;
       minDiff = diff;
     }
   } // ii
 
+  _selectedAngle = _sweeps[_guiIndex].radx->getFixedAngleDeg();
+
 }
 
+/////////////////////////////////////////////////////////////
+// set selected gui index
+
+void SweepManager::setGuiIndex(int index) 
+{
+
+  _guiIndex = index;
+  if (_guiIndex < 0) {
+    _guiIndex = 0;
+  } else if (_guiIndex > (int) _sweeps.size() - 1) {
+    _guiIndex = _sweeps.size() - 1;
+  }
+  _selectedAngle = _sweeps[_guiIndex].radx->getFixedAngleDeg();
+
+}
+
+
+/////////////////////////////////////////////////////////////
+// set selected file index
+
+void SweepManager::setFileIndex(int index) 
+{
+
+  for (size_t ii = 0; ii < _sweeps.size(); ii++) {
+    if (_sweeps[ii].indexInFile == index) {
+      setGuiIndex(index);
+    }
+  }
+
+}
+
+
+/////////////////////////////////////////////////////////////
+// change selected index by the specified value
+
+void SweepManager::changeSelectedIndex(int increment) 
+{
+
+  _guiIndex += increment;
+  if (_guiIndex < 0) {
+    _guiIndex = 0;
+  } else if (_guiIndex > (int) _sweeps.size() - 1) {
+    _guiIndex = _sweeps.size() - 1;
+  }
+  _selectedAngle = _sweeps[_guiIndex].radx->getFixedAngleDeg();
+
+}
+
+
+/////////////////////////////////////////////////////////////
+// get the fixed angle, optionally specifying an index
+
+double SweepManager::getFixedAngleDeg(ssize_t sweepIndex /* = -1*/) const 
+{
+  
+  if (sweepIndex < 0) {
+
+    if (_guiIndex < 0) {
+      return 0.0;
+    } else {
+      return _sweeps[_guiIndex].radx->getFixedAngleDeg();
+    }
+
+  } 
+
+  if (sweepIndex < (ssize_t) _sweeps.size()) {
+    return _sweeps[sweepIndex].radx->getFixedAngleDeg();
+  }
+
+
+  return _sweeps[_sweeps.size()-1].radx->getFixedAngleDeg();
+
+}
+
+  
