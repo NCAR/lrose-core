@@ -116,6 +116,8 @@ signals:
 
 private:
 
+  bool _firstTime;
+
   // beam geometry
   
   int _nGates;

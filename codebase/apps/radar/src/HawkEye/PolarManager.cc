@@ -64,6 +64,7 @@
 #include <QPushButton>
 #include <QRadioButton>
 #include <QStatusBar>
+#include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QDateTime>
 #include <QDateTimeEdit>
@@ -72,6 +73,7 @@
 #include <QFileDialog>
 #include <QSlider>
 #include <QToolTip>
+#include <QGroupBox>
 
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pmu.h>
@@ -98,6 +100,8 @@ PolarManager::PolarManager(const Params &params,
 	_rhiWindowDisplayed(false)
 {
 
+  _firstTime = true;
+  
   _ppi = NULL;
   _rhi = NULL;
   _prevAz = -9999.0;
@@ -365,14 +369,11 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
   // check for up/down in sweeps
 
-  // _keepFixedAngle = false;
-  
   if (key == Qt::Key_Left) {
 
     if (_params.debug) {
       cerr << "Clicked left arrow, go back in time" << endl;
     }
-    // _keepFixedAngle = true;
     _ppi->setStartOfSweep(true);
     _rhi->setStartOfSweep(true);
     _goBack1();
@@ -383,7 +384,6 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
     if (_params.debug) {
       cerr << "Clicked right arrow, go forward in time" << endl;
     }
-    // _keepFixedAngle = true;
     _ppi->setStartOfSweep(true);
     _rhi->setStartOfSweep(true);
     _goFwd1();
@@ -396,8 +396,6 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       if (_params.debug) {
         cerr << "Clicked up arrow, go up a sweep" << endl;
       }
-      // _keepFixedAngle = false;
-      // _setFixedAngle(_sweepIndex + 1); // (_sweepIndex);
       _ppi->setStartOfSweep(true);
       _rhi->setStartOfSweep(true);
       _changeSweepRadioButton(-1);
@@ -411,8 +409,6 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       if (_params.debug) {
         cerr << "Clicked down arrow, go down a sweep" << endl;
       }
-      // _keepFixedAngle = false;
-      // _setFixedAngle(_sweepIndex-1);
       _ppi->setStartOfSweep(true);
       _rhi->setStartOfSweep(true);
       _changeSweepRadioButton(+1);
@@ -450,9 +446,31 @@ void PolarManager::_setupWindows()
   // set up windows
 
   _main = new QFrame(this);
-  setCentralWidget(_main);
+  QVBoxLayout *mainLayout = new QVBoxLayout;
+  _main->setLayout(mainLayout);
+  mainLayout->setSpacing(5);
+  mainLayout->setContentsMargins(3,3,3,3);
+  // mainLayout->setAlignment(Qt::AlignTop);
   
-  // ppi - main window
+  setCentralWidget(_main);
+
+  _upperMain = new QFrame(_main);
+  QHBoxLayout *upperLayout = new QHBoxLayout;
+  upperLayout->setSpacing(5);
+  upperLayout->setContentsMargins(3,3,3,3);
+  // upperLayout->setAlignment(Qt::AlignTop);
+  _upperMain->setLayout(upperLayout);
+  
+  _lowerMain = new QFrame(_main);
+  QVBoxLayout *lowerLayout = new QVBoxLayout;
+  lowerLayout->setSpacing(5);
+  lowerLayout->setContentsMargins(3,3,3,3);
+  // lowerLayout->setAlignment(Qt::AlignBottom);
+  _lowerMain->setLayout(lowerLayout);
+  
+  mainLayout->addWidget(_upperMain);
+
+  // ppi window
 
   _ppiFrame = new QFrame(_main);
   _ppiFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -488,52 +506,25 @@ void PolarManager::_setupWindows()
   
   _createFieldPanel();
 
-  // color bar to right
-  
-  // _colorBar = new ColorBar(_params.color_scale_width,
-  //                          &_fields[0]->getColorMap(), _main);
+  // add widgets
+
+  upperLayout->addWidget(_statusPanel);
+  upperLayout->addWidget(_fieldPanel);
+  upperLayout->addWidget(_ppiFrame);
+
+  // sweep panel
 
   _createSweepPanel();
-
-  //if (_archiveMode) 
-    _createTimePanel();
-
-  
-  // main window layout
-  
-  QGridLayout *mainLayout = new QGridLayout(_main);
-  mainLayout->setMargin(3);
-  int row = 0;
-  int column = 0;
-  int rowSpan = 1;
-  int columnSpan = 1;
-
-  mainLayout->addWidget(_statusPanel, row, column);
-  column++;
-  mainLayout->addWidget(_fieldPanel, row, column);
-  column++;
-  mainLayout->addWidget(_ppiFrame, row, column);
-  column++;
-  mainLayout->addWidget(_sweepPanel, row, column);
-  column++;
-  row++;
-  column = 2;
-
   if (_archiveMode) {
-    mainLayout->addWidget(_timePanel, row, column, rowSpan, columnSpan); // , rowSpan, columnSpan);
+    upperLayout->addWidget(_sweepPanel);
   }
   
-  /*
-  QHBoxLayout *mainLayout = new QHBoxLayout(_main);
-  mainLayout->setMargin(3);
-  mainLayout->addWidget(_statusPanel);
-  mainLayout->addWidget(_fieldPanel);
-  mainLayout->addWidget(_ppiFrame);
-  mainLayout->addWidget(_sweepPanel);
-  mainLayout->addWidget(_timePanel);
-  */
-  // mainLayout->addWidget(_colorBar);
-
+  _createTimePanel();
+  if (_archiveMode) {
+    lowerLayout->addWidget(_timePanel);
+    mainLayout->addWidget(_lowerMain);
+  }
+  
   _createActions();
   _createMenus();
 
@@ -946,6 +937,10 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
   this->setCursor(Qt::ArrowCursor);
   _timeControllerDialog->setCursor(Qt::ArrowCursor);
 
+  if (_firstTime) {
+    _firstTime = false;
+  }
+  
 }
 
 /////////////////////////////
@@ -1037,31 +1032,6 @@ int PolarManager::_getArchiveData()
   
   _sweepManager.set(_vol);
 
-  // for first retrieval, start with sweepIndex of 0
-
-  // if (_firstVol) {
-  //   _sweepIndex = _sweepManager.getNSweeps() - 1;
-  //   _setFixedAngle(_sweepIndex);
-  // }
-  // _sweepIndex = _sweepManager.getSelectedIndex();
-  // _setFixedAngle(_sweepIndex);
-  // _firstVol = false;
-  
-  // condition sweep number
-  
-  // _sweepManager.setAngle(_fixedAngleDeg);
-  // _fixedAngleDeg = _sweepManager.getFixedAngleDeg();
-
-  // if (_keepFixedAngle) {
-  //   _setSweepIndex(_fixedAngleDeg);
-  // } else if (_moveToHighSweep) {
-  //   _sweepIndex = _vol.getNSweeps() - 1;
-  //   _setFixedAngle(_sweepIndex);
-  // } else {
-  //   _sweepIndex = 0;
-  //   _setFixedAngle(_sweepIndex);
-  // }
-  
   if (_params.debug) {
     cerr << "----------------------------------------------------" << endl;
     cerr << "perform archive retrieval" << endl;
@@ -1127,7 +1097,7 @@ void PolarManager::_plotArchiveData()
       _updateStatusPanel(ray);
     }
   }
-
+  
 }
 
 //////////////////////////////////////////////////
