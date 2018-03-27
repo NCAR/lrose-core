@@ -599,8 +599,8 @@ string Path::getPathRelToExec(const string &relPath)
 
   // combine the base with the rel path
   
-  string absPath = execPath.getBase();
-  absPath += delimiter;
+  string absPath = execPath.getDirectory();
+  absPath += UNIX_FILE_DELIMITER;
   absPath += relPath;
 
   return absPath;
