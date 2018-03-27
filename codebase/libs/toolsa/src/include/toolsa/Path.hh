@@ -160,6 +160,15 @@ public:
 
   static void stripDir(const string &dir, const string &path, string &file);
 
+  // Get the path of the executable binary that is running
+
+  string getExecPath();
+
+  // Get the path of a file relative to the
+  // executable binary that is running
+  
+  string getPathRelToExec(const string &relPath);
+
 private:
 
    string delimiter;
