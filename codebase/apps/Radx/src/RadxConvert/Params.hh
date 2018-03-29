@@ -1,9 +1,26 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c)
-// ** University Corporation for Atmospheric Research(UCAR)
-// ** National Center for Atmospheric Research(NCAR)
-// ** Boulder, Colorado, USA
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // Params.hh
 //
@@ -32,8 +49,6 @@
 #ifndef Params_hh
 #define Params_hh
 
-using namespace std;
-
 #include <tdrp/tdrp.h>
 #include <iostream>
 #include <cstdio>
@@ -41,6 +56,8 @@ using namespace std;
 #include <cstring>
 #include <climits>
 #include <cfloat>
+
+using namespace std;
 
 // Class definition
 
@@ -62,6 +79,34 @@ public:
     ARCHIVE = 1,
     FILELIST = 2
   } mode_t;
+
+  typedef enum {
+    INSTRUMENT_RADAR = 0,
+    INSTRUMENT_LIDAR = 1
+  } instrument_type_t;
+
+  typedef enum {
+    PLATFORM_FIXED = 1,
+    PLATFORM_VEHICLE = 2,
+    PLATFORM_SHIP = 3,
+    PLATFORM_AIRCRAFT_FORE = 5,
+    PLATFORM_AIRCRAFT_AFT = 6,
+    PLATFORM_AIRCRAFT_TAIL = 7,
+    PLATFORM_AIRCRAFT_BELLY = 8,
+    PLATFORM_AIRCRAFT_ROOF = 9,
+    PLATFORM_AIRCRAFT_NOSE = 10,
+    PLATFORM_SATELLITE_ORBIT = 11,
+    PLATFORM_SATELLITE_GEOSTAT = 12
+  } platform_type_t;
+
+  typedef enum {
+    PRIMARY_AXIS_Z = 0,
+    PRIMARY_AXIS_Y = 1,
+    PRIMARY_AXIS_X = 2,
+    PRIMARY_AXIS_Z_PRIME = 3,
+    PRIMARY_AXIS_Y_PRIME = 4,
+    PRIMARY_AXIS_X_PRIME = 5
+  } primary_axis_t;
 
   typedef enum {
     ATTR_STRING = 0,
@@ -569,6 +614,18 @@ public:
 
   double elevation_offset;
 
+  tdrp_bool_t override_instrument_type;
+
+  instrument_type_t instrument_type;
+
+  tdrp_bool_t override_platform_type;
+
+  platform_type_t platform_type;
+
+  tdrp_bool_t override_primary_axis;
+
+  primary_axis_t primary_axis;
+
   tdrp_bool_t reload_sweep_info_from_rays;
 
   tdrp_bool_t reload_volume_info_from_rays;
@@ -722,7 +779,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[159];
+  mutable TDRPtable _table[166];
 
   const char *_className;
 

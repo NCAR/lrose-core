@@ -528,6 +528,18 @@ int RadxConvert::_readFile(const string &readPath,
     }
   }
 
+  // if requested, change some of the characteristics
+
+  if (_params.override_instrument_type) {
+    vol.setInstrumentType((Radx::InstrumentType_t) _params.instrument_type);
+  }
+  if (_params.override_platform_type) {
+    vol.setPlatformType((Radx::PlatformType_t) _params.platform_type);
+  }
+  if (_params.override_primary_axis) {
+    vol.setPrimaryAxis((Radx::PrimaryAxis_t) _params.primary_axis);
+  }
+
   return 0;
 
 }
