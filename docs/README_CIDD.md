@@ -68,13 +68,13 @@ On Debian, you need to run the following:
 
 ```
   /usr/bin/dpkg --add-architecture i386
-  aptitude update
+  apt-get update
 ```
 
 and use apt-get to install the following:
 
 ```
-  aptitude install libx11-6:i386 \
+  apt-get install libx11-6:i386 \
                    libstdc++-4.9-dev:i386 \
                    libpng12-dev:i386 \
                    libx11-dev:i386 \
