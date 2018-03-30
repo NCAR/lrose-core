@@ -101,6 +101,12 @@ paramdef string {
   p_help = "In archive mode, data retrieval starts at this time.";
 } archive_start_time;
 
+paramdef double {
+  p_default = 900;
+  p_descr = "Time span in ARCHIVE mode (secs).";
+  p_help = "Archive end time = archive_start_time + archive_time_span.";
+} archive_time_span_secs;
+
 paramdef int {
   p_default = 300;
   p_descr = "Time between scans in archive mode (secs).";

@@ -220,6 +220,8 @@ int Args::parse (const int argc, const char **argv)
       if (i < argc - 1) {
         sprintf(tmp_str, "bscan_time_span_secs = %s;", argv[++i]);
         TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "archive_time_span_secs = %s;", argv[i]);
+        TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
       }
@@ -300,7 +302,9 @@ void Args::_usage(ostream &out)
       << "       [ -tcp_host ?] set TCP server host\n"
       << "       [ -tcp_port ?] set TCP server port\n"
       << "       [ -time_span ?]\n"
-      << "            time span for bscan (secs)\n"
+      << "            set time span (secs)\n"
+      << "            applies to bscan time width\n"
+      << "            or archive mode time span\n"
       << "       [ -v, -verbose ] print verbose debug messages\n"
       << "       [ -vv, -extra ] print extra verbose debug messages\n"
       << endl;

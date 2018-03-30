@@ -246,23 +246,6 @@ protected:
   int _fieldNum;
   int _prevFieldNum;
 
-  // time panel
-  
-  QGroupBox *_timePanel;
-  QHBoxLayout *_timesLayout;
-  QLabel *_startTimeLabel;
-  QLabel *_stopTimeLabel;
-  QSlider *_timeSlider;
-  QButtonGroup *_timeGroup;
-  vector<QRadioButton *> _timeButtons;
-  //DisplayTime *_selectedTime;
-  string _selectedTimeName;
-  string _selectedTimeLabel;
-  //string _selectedTimeUnits;
-  QLabel *_timeValueLabel;
-  int _timeNum;
-  int _prevTimeNum;
-
   // click location report dialog
 
   QDialog *_clickReportDialog;
@@ -288,8 +271,6 @@ protected:
   
   void _createStatusPanel();
   void _createFieldPanel();
-  void _createTimePanel();
-  void _updateTimePanel();
   void _createClickReportDialog();
   void _updateStatusPanel(const RadxRay *ray);
   double _getInstHtKm(const RadxRay *ray);
@@ -347,11 +328,6 @@ protected slots:
 
   void _changeFieldVariable(bool value);
 
-  void _timeSliderActionTriggered(int action);
-  void _timeSliderValueChanged(int value);
-  bool _timeSliderEvent(QEvent *event);
-  void _timeSliderReleased();
-  
 };
 
 #endif

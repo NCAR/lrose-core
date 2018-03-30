@@ -518,218 +518,6 @@ void DisplayManager::_changeFieldVariable(bool value) {
 
 }
 
-//////////////////////////////////////////////
-// create the time panel
-
-void DisplayManager::_createTimePanel()
-{
-  
-  Qt::Alignment alignCenter(Qt::AlignCenter);
-  Qt::Alignment alignRight(Qt::AlignRight);
-  
-  //int fsize = _params.label_font_size;
-  //int fsize2 = _params.label_font_size + 2;
-  //int fsize4 = _params.label_font_size + 4;
-  //int fsize6 = _params.label_font_size + 6;
-
-   _timePanel = new QGroupBox(_lowerMain);
-  // _timeGroup = new QButtonGroup;
-  _timesLayout = new QHBoxLayout(_timePanel); //QGridLayout(_timePanel);
-  // _timesLayout->setVerticalSpacing(5);
-
-  int row = 0;
-
-  //_selectedTime = _times[0];
-  //_selectedTimeLabel = _times[0]->getLabel();
-  //_selectedTimeName = _times[0]->getName();
-  //_selectedTimeLabelWidget = new QLabel(_selectedTimeLabel.c_str(),
-  //                                           _timePanel);
-  //QFont font6 = _selectedTimeLabelWidget->font();
-  //font6.setPixelSize(fsize6);
-  //_selectedTimeLabelWidget->setFont(font6);
-  //_timesLayout->addWidget(_selectedTimeLabelWidget, row, 0, 1, nCols, alignCenter);
-  //row++;
-
-  //QFont font4 = _selectedTimeLabelWidget->font();
-  //font4.setPixelSize(fsize4);
-  //QFont font2 = _selectedTimeLabelWidget->font();
-  //font2.setPixelSize(fsize2);
-  //QFont font = _selectedTimeLabelWidget->font();
-  //font.setPixelSize(fsize);
-
-  //_timeValueLabel = new QLabel("ELEV", _timePanel);
-  //_timeValueLabel->setFont(font);
-  //_timesLayout->addWidget(_timeValueLabel, row, 0, 1, nCols, alignCenter);
-  //row++;
-
-  //QLabel *timeHeader = new QLabel("TIME", _timePanel);
-  //timeHeader->setFont(font);
-  // _timesLayout->addWidget(timeHeader); // , row, 0, 1, nCols, alignCenter);
-  row++;
-  /*
-  QLabel *nameHeader = new QLabel("Name", _fieldPanel);
-  nameHeader->setFont(font);
-  _fieldsLayout->addWidget(nameHeader, row, 0, alignCenter);
-  QLabel *keyHeader = new QLabel("HotKey", _fieldPanel);
-  keyHeader->setFont(font);
-  _fieldsLayout->addWidget(keyHeader, row, 1, alignCenter);
-  if (_haveFilteredFields) {
-    QLabel *rawHeader = new QLabel("Raw", _fieldPanel);
-    rawHeader->setFont(font);
-    _fieldsLayout->addWidget(rawHeader, row, 2, alignCenter);
-    QLabel *filtHeader = new QLabel("Filt", _fieldPanel);
-    filtHeader->setFont(font);
-    _fieldsLayout->addWidget(filtHeader, row, 3, alignCenter);
-  }
-  row++;
-  */
-
-    int stretch = 0;
-
-  // add the start time
-  
-  _startTimeLabel = new QLabel("hh:mm:ss", _timePanel);
-  //timeHeader->setFont(font);
-  _timesLayout->addWidget(_startTimeLabel, stretch, alignRight);
-
-  /*   As a Slider ... */
-  //QSlider *slider;
-  // horizontalSliders = new SlidersGroup(Qt::Horizontal, tr("Horizontal"));
-
-    _timeSlider = new QSlider(Qt::Horizontal);
-    _timeSlider->setFocusPolicy(Qt::StrongFocus);
-    //_timeSlider->setTickPosition(QSlider::TicksBothSides);
-    _timeSlider->setTickInterval(10);
-    _timeSlider->setSingleStep(1);
-    //QSize qSize(500,50);
-    _timeSlider->setFixedWidth(300); // works
-    //_timeSlider->sizeHint(qSize);
-    // use Dave Smith's fancy qslider
-    _timeSlider->setStyleSheet("QSlider::groove:horizontal {\
-border: 1px solid #bbb;\
-background: white;\
-height: 10px;\
-border-radius: 4px;\
-}\
-QSlider::sub-page:horizontal {\
-background: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,\
-    stop: 0 #66e, stop: 1 #bbf);\
-background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,\
-    stop: 0 #bbf, stop: 1 #55f);\
-border: 1px solid #777;\
-height: 10px;\
-border-radius: 4px;\
-}\
-\
-QSlider::add-page:horizontal {\
-background: #fff;\
-border: 1px solid #777;\
-height: 10px;\
-border-radius: 4px;\
-}\
-\
-QSlider::handle:horizontal {\
-background: qlineargradient(x1:0, y1:0, x2:1, y2:1,\
-    stop:0 #eee, stop:1 #ccc);\
-border: 1px solid #777;\
-width: 13px;\
-margin-top: -2px;\
-margin-bottom: -2px;\
-border-radius: 4px;\
-}\
-\
-QSlider::handle:horizontal:hover {\
-background: qlineargradient(x1:0, y1:0, x2:1, y2:1,\
-    stop:0 #fff, stop:1 #ddd);\
-border: 1px solid #444;\
-border-radius: 4px;\
-}\
-\
-QSlider::sub-page:horizontal:disabled {\
-background: #bbb;\
-border-color: #999;\
-}\
-\
-QSlider::add-page:horizontal:disabled {\
-background: #eee;\
-border-color: #999;\
-}\
-\
-QSlider::handle:horizontal:disabled {\
-background: #eee;\
-border: 1px solid #aaa;\
-border-radius: 4px;\
-}\
-");
-
-
-    _timesLayout->addWidget(_timeSlider, stretch,  alignCenter);
-  //_timesLayout->addWidget(_timeSlider, row, 0, 1, nCols, alignCenter);
-    
-/* */
-
-  // consider using this ... it's pretty nice ...
-  // http://tutorialcoding.com/qt/basic/unit012/index.html
-
-  /*  As a ScrollBar ...
-  QScrollBar *scrollBar;
-
-    scrollBar = new QScrollBar(Qt::Horizontal);
-    scrollBar->setMinimum(0);
-    scrollBar->setMaximum(100);
-    //_timeSlider->setFocusPolicy(Qt::StrongFocus);
-    //_timeSlider->setTickPosition(QSlider::TicksBothSides);
-    //_timeSlider->setTickInterval(10);
-    //_timeSlider->setSingleStep(1);
-
-  _timesLayout->addWidget(scrollBar, row, 0, 1, nCols, alignCenter);
-  */
-
-  // add the end time
-  
-  _stopTimeLabel = new QLabel("hh:mm:ss", _timePanel);
-  //timeHeader->setFont(font);
-  _timesLayout->addWidget(_stopTimeLabel);
-  //_timePanel->setLayout(vbox);
-
-
-  //_timeSlider->setStatusTip("this is status tip");
-
-  // connect slot for time change
-
-  connect(_timeSlider, SIGNAL(actionTriggered(int)),
-           this, SLOT(_timeSliderActionTriggered(int)));
-
-  connect(_timeSlider, SIGNAL(valueChanged(int)),
-            this, SLOT(_timeSliderValueChanged(int)));
-
-  connect(_timeSlider, SIGNAL(sliderReleased()),
-          this, SLOT(_timeSliderReleased()));
-
-}
-
-bool DisplayManager::_timeSliderEvent(QEvent *event) {
-  return true;
-}
-
-void DisplayManager::_timeSliderReleased() {
-
-}
-
-
-void DisplayManager::_updateTimePanel() {
-  // cerr << "in DisplayManager, updateTimePanel called" << endl;
-}
-
-void DisplayManager::_timeSliderActionTriggered(int action) {
-
-} 
-
-void DisplayManager::_timeSliderValueChanged(int value) {
-  // cerr << " from DisplayManager::_timeSliderValueChanged " << endl;
-}
-
-
 void DisplayManager::_openFile() {
 }
 
@@ -927,12 +715,10 @@ QLineEdit *DisplayManager::_addInputRow(QWidget *parent,
   QLabel *left = new QLabel(frame);
   left->setText(leftLabel.c_str());
   horiz->addWidget(left);
-  // layout->addWidget(left, row, 0, Qt::AlignLeft);
   
   QLineEdit *right = new QLineEdit(frame);
   right->setText(rightContent.c_str());
   horiz->addWidget(right);
-  // layout->addWidget(right, row, 1, 1, 2, Qt::AlignCenter);
 
   layout->addWidget(frame);
   
@@ -1398,6 +1184,7 @@ void DisplayManager::_howto()
 void DisplayManager::_about()
 {
   QMessageBox::about(this, tr("About Menu"),
-		     tr("DisplayManager is an engineering display for beam-by-beam radar data."));
+		     tr("DisplayManager is an engineering display "
+                        "for beam-by-beam radar data."));
 }
 

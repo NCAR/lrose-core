@@ -110,8 +110,13 @@ public:
 
   // input file list for archive mode
 
-  void setInputFileList(const vector<string> &list) { _inputFileList = list; }
+  void setArchiveFileList(const vector<string> &list);
   
+  // load archive file list by searching for files
+  // returns 0 on success, -1 on failure
+  
+  int loadArchiveFileList();
+
 signals:
 
 private:
@@ -183,20 +188,8 @@ private:
   QAction *_openFileAct;
   QAction *_saveImageAct;
 
-  // time controller settings dialog
-  
-  QDialog *_timeControllerDialog;
-  QLabel *_timeControllerInfo;
-
-  QLineEdit *_archiveScanIntervalEdit;
-  double _archiveScanIntervalSecs;
-
-  QLineEdit *_nArchiveScansEdit;
-  int _nArchiveScans;
-  int _currentArchiveScanIdx;
-
   // archive mode
-
+  
   bool _archiveMode;
   bool _archiveRetrievalPending;
   QRadioButton *_realtimeModeButton;
@@ -209,17 +202,37 @@ private:
 
   QLabel *_archiveStopTimeEcho;
   RadxTime _archiveStopTime;
+
+  // time controller settings dialog
   
-  // values for time slider view
+  QDialog *_timeControllerDialog;
+  QLabel *_timeControllerInfo;
+
+  QLineEdit *_archiveScanIntervalEdit;
+  double _archiveScanIntervalSecs;
+
+  QLineEdit *_nArchiveScansEdit;
+
+  int _nArchiveScans;
+  vector<string> _archiveFileList;
+  int _archiveScanIndex;
+
+  // time slider
+  
+  QGroupBox *_timePanel;
+  QHBoxLayout *_timesLayout;
+  QLabel *_startTimeLabel;
+  QLabel *_stopTimeLabel;
+  QSlider *_timeSlider;
 
   RadxTime _archiveIntermediateTime;
+
   int _timeSliderCurrentValue;
   RadxTime _startDisplayTime;
   RadxTime _currentDisplayTime;  // is this needed??
   RadxTime _endDisplayTime;
   RadxTime _imagesArchiveStartTime;
   RadxTime _imagesArchiveEndTime;
-  vector<string> _inputFileList;
   
   // saving images in real time mode
 
@@ -268,6 +281,11 @@ private:
   void _setArchiveMode(bool state);
   void _activateRealtimeRendering();
   void _activateArchiveRendering();
+
+  // time slider
+
+  void _createTimePanel();
+  void _updateTimePanel();
 
   // override howto
 
@@ -320,21 +338,10 @@ private slots:
   void _goFwd1();
   void _goBackNScans();
   void _goFwdNScans();
-  void _commitToTime(); // int newValue);
-  void _speculateOnTime(); // int newValue);
+  void _commitToTime();
+  void _speculateOnTime();
 
   void _setArchiveRetrievalPending();
-
-
-  // time slider
-  //void _createTimePanel();
-  void _updateTimePanel();
-  void _timeSliderActionTriggered(int action);
-  void _timeSliderValueChanged(int value);
-  bool _timeSliderEvent(QEvent *event);
-  void _timeSliderReleased();
-  void _setTimeSliderToolTip(int value);
-  //void _updateSliderHandle();
 
   // time controller
 
@@ -342,6 +349,14 @@ private slots:
   void _refreshTimeControllerDialog();
   void _showTimeControllerDialog();
 
+  // time slider
+
+  void _timeSliderActionTriggered(int action);
+  void _timeSliderValueChanged(int value);
+  bool _timeSliderEvent(QEvent *event);
+  void _timeSliderReleased();
+  void _setTimeSliderToolTip(int value);
+  
   // images
 
   void _saveImageToFile(bool interactive = true);

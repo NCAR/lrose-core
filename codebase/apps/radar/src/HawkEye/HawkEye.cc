@@ -176,10 +176,18 @@ int HawkEye::Run(QApplication &app)
                                      _displayFields, _haveFilteredFields);
 
     if (_args.inputFileList.size() > 0) {
-      _polarManager->setInputFileList(_args.inputFileList);
+      _polarManager->setArchiveFileList(_args.inputFileList);
       // override archive data url from input file
       string url = _getArchiveUrl(_args.inputFileList[0]);
       TDRP_str_replace(&_params.archive_data_url, url.c_str());
+    } else if (_params.begin_in_archive_mode) {
+      if (_polarManager->loadArchiveFileList()) {
+        cerr << "ERROR - hawkEye" << endl;
+        cerr << "  Cannot find archive files within specified time limits" 
+             << endl;
+        cerr << "  url: " << _params.archive_data_url << endl;
+        return -1;
+      }
     }
 
     return _polarManager->run(app);

@@ -736,6 +736,18 @@
     tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
     tt++;
     
+    // Parameter 'archive_time_span_secs'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("archive_time_span_secs");
+    tt->descr = tdrpStrDup("Time span in ARCHIVE mode (secs).");
+    tt->help = tdrpStrDup("Archive end time = archive_start_time + archive_time_span.");
+    tt->val_offset = (char *) &archive_time_span_secs - &_start_;
+    tt->single_val.d = 900;
+    tt++;
+    
     // Parameter 'archive_scan_interval_secs'
     // ctype is 'int'
     

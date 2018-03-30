@@ -468,6 +468,8 @@ public:
 
   char* archive_start_time;
 
+  double archive_time_span_secs;
+
   int archive_scan_interval_secs;
 
   int archive_n_scans;
@@ -715,7 +717,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[155];
+  mutable TDRPtable _table[156];
 
   const char *_className;
 
