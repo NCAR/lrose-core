@@ -353,8 +353,8 @@ color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
 
 fields = {
   {
-    label = "DBZ",
-    raw_name = "DBZ",
+    label = "REF",
+    raw_name = "REF",
     filtered_name = "",
     units = "dBZ",
     color_map = "dbz.colors",
@@ -371,8 +371,8 @@ fields = {
   }
   ,
   {
-    label = "WIDTH",
-    raw_name = "WIDTH",
+    label = "SW",
+    raw_name = "SW",
     filtered_name = "",
     units = "m/s",
     color_map = "width.colors",

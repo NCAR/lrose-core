@@ -202,16 +202,19 @@ private:
   QRadioButton *_archiveModeButton;
 
   QGroupBox *_archiveTimeBox;
-  QDateTimeEdit *_archiveStartTimeEdit;
-  RadxTime _archiveStartTime;
-  int _archiveMarginSecs;
 
+  QDateTimeEdit *_archiveStartTimeEdit;
+  RadxTime _guiStartTime;
+  RadxTime _archiveStartTime;
+  
   QDateTimeEdit *_archiveEndTimeEdit;
-  QLabel *_archiveEndTimeEcho;
+  RadxTime _guiEndTime;
   RadxTime _archiveEndTime;
 
-  QLineEdit *_archiveTimeSpanEdit;
-  int _archiveTimeSpanSecs;
+  // int _archiveMarginSecs;
+
+  // QLineEdit *_archiveTimeSpanEdit;
+  // int _archiveTimeSpanSecs;
 
   QLabel *_plotTimeLabel;
 
@@ -302,10 +305,16 @@ private:
   void _activateRealtimeRendering();
   void _activateArchiveRendering();
 
+  // archive mode
+
+  void _setGuiFromArchiveStartTime();
+  void _setGuiFromArchiveEndTime();
+  void _setArchiveTimesToDefaults();
+
   // time slider
 
   void _createTimePanel();
-  void _updateTimePanel();
+  // void _updateTimePanel();
 
   // override howto
 
@@ -345,21 +354,22 @@ private slots:
 
   // archive mode
   
-  void _setDataRetrievalMode();
+  // void _setDataRetrievalMode();
   void _setArchiveScanConfig();
   void _resetArchiveScanConfigToDefault();
-  void _setStartTimeFromGui(const QDateTime &datetime1);
-  void _setEndTimeFromGui(const QDateTime &datetime1);
-  void _setGuiFromStartTime();
-  void _setArchiveStartTimeToDefault();
   void _setArchiveStartTime(const RadxTime &rtime);
-  void _computeArchiveEndTime();
-  void _computeArchiveIntervalTime(int value);
+  void _setArchiveEndTime(const RadxTime &rtime);
+  void _setArchiveStartTimeFromGui(const QDateTime &qdt);
+  void _setArchiveEndTimeFromGui(const QDateTime &qdt);
+  void _acceptGuiTimes();
+  void _cancelGuiTimes();
+
   void _goBack1();
   void _goFwd1();
   void _goBackPeriod();
   void _goFwdPeriod();
-  void _commitToTime();
+
+  // void _commitToTime();
 
   void _setArchiveRetrievalPending();
 
@@ -376,7 +386,7 @@ private slots:
   bool _timeSliderEvent(QEvent *event);
   void _timeSliderReleased();
   void _timeSliderPressed();
-  void _setTimeSliderToolTip(int value);
+  // void _setTimeSliderToolTip(int value);
   
   // images
 
