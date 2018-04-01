@@ -85,10 +85,14 @@ class DLL_EXPORT TimeScaleWidget : public QWidget
 
   virtual ~TimeScaleWidget();
 
+  // set the time range
+  
+  void setTimes(const RadxTime &startTime,
+                const RadxTime &endTime);
+
   // configure the axes
   
-  void configureAxes(RadxTime &startTime,
-                     RadxTime &endTime);
+  void configureAxes();
 
   /**
    * @brief Specify the background color.
@@ -104,11 +108,6 @@ class DLL_EXPORT TimeScaleWidget : public QWidget
 
   const WorldPlot &getWorld() const { return _world; }
   
-  // set the time range
-  
-  void setTimes(const RadxTime &startTime,
-                const RadxTime &endTime);
-
   // set mouse click point from external routine, to simulate and actual
   // mouse release event
 
@@ -182,6 +181,7 @@ class DLL_EXPORT TimeScaleWidget : public QWidget
   RadxTime _startTime;
   RadxTime _endTime;
   double _timeSpanSecs;
+  bool _timesPending;
 
   /**
    * @brief Last X,Y location of the mouse during mouse move events; used for
@@ -252,7 +252,7 @@ class DLL_EXPORT TimeScaleWidget : public QWidget
    * @param[in] event   The repaint event.
    */
 
-  void paintEvent(QPaintEvent *event);
+  virtual void paintEvent(QPaintEvent *event);
 
   /**
    * @brief Handle a resize event. A timer is used to prevent refreshes until

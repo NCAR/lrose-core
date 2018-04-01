@@ -24,6 +24,7 @@ HEADERS += PpiWidget.hh
 HEADERS += RhiWidget.hh
 HEADERS += RhiWindow.hh
 HEADERS += ScaledLabel.hh
+HEADERS += TimeScaleWidget.hh
 
 SOURCES += Args.cc
 SOURCES += BscanManager.cc
@@ -41,6 +42,7 @@ SOURCES += PpiWidget.cc
 SOURCES += RhiWidget.cc
 SOURCES += RhiWindow.cc
 SOURCES += ScaledLabel.cc
+SOURCES += TimeScaleWidget.cc
 
 DEFINES += _BSD_TYPES
 DEFINES += F_UNDERSCORE2

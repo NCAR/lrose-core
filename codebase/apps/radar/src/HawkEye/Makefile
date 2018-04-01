@@ -71,6 +71,7 @@ HDRS = \
 	RhiWindow.hh \
 	ScaledLabel.hh \
 	SweepManager.hh \
+	TimeScaleWidget.hh \
 	WorldPlot.hh
 
 NORM_SRCS = \
@@ -100,7 +101,8 @@ MOC_SRCS = \
 	PolarWidget.cc \
 	PpiWidget.cc \
 	RhiWidget.cc \
-	RhiWindow.cc
+	RhiWindow.cc \
+	TimeScaleWidget.cc \
 
 MOC_OUTPUT = \
 	moc_BscanManager.cpp \
@@ -112,7 +114,8 @@ MOC_OUTPUT = \
 	moc_PolarWidget.cpp \
 	moc_PpiWidget.cpp \
 	moc_RhiWidget.cpp \
-	moc_RhiWindow.cpp
+	moc_RhiWindow.cpp \
+	moc_TimeScaleWidget.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
 CPP_SRCS = $(MOC_OUTPUT)

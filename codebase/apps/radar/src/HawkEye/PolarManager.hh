@@ -57,6 +57,7 @@ class QApplication;
 class QActionGroup;
 class QButtonGroup;
 class QRadioButton;
+class QPushButton;
 class QFrame;
 class QDialog;
 class QLabel;
@@ -72,6 +73,10 @@ class RhiWidget;
 class RhiWindow;
 class Reader;
 class RadxPlatform;
+class TimeScaleWidget;
+
+class QGraphicsScene;
+class QGraphicsAnchorLayout;
 
 class PolarManager : public DisplayManager {
   
@@ -110,7 +115,8 @@ public:
 
   // input file list for archive mode
 
-  void setArchiveFileList(const vector<string> &list);
+  void setArchiveFileList(const vector<string> &list,
+                          bool fromCommandLine = true);
   
   // load archive file list by searching for files
   // returns 0 on success, -1 on failure
@@ -184,7 +190,7 @@ private:
   QAction *_azLinesAct;
   QAction *_showRhiAct;
   
-  QAction *_timeControllerAct;
+  // QAction *_timeControllerAct;
   QAction *_openFileAct;
   QAction *_saveImageAct;
 
@@ -200,13 +206,24 @@ private:
   RadxTime _archiveStartTime;
   int _archiveMarginSecs;
 
-  QLabel *_archiveStopTimeEcho;
-  RadxTime _archiveStopTime;
+  QDateTimeEdit *_archiveEndTimeEdit;
+  QLabel *_archiveEndTimeEcho;
+  RadxTime _archiveEndTime;
+
+  QLineEdit *_archiveTimeSpanEdit;
+  int _archiveTimeSpanSecs;
+
+  QLabel *_plotTimeLabel;
+
+  QPushButton *_back1;
+  QPushButton *_fwd1;
+  QPushButton *_backPeriod;
+  QPushButton *_fwdPeriod;
 
   // time controller settings dialog
   
-  QDialog *_timeControllerDialog;
-  QLabel *_timeControllerInfo;
+  // QDialog *_timeControllerDialog;
+  // QLabel *_timeControllerInfo;
 
   QLineEdit *_archiveScanIntervalEdit;
   double _archiveScanIntervalSecs;
@@ -216,13 +233,13 @@ private:
   int _nArchiveScans;
   vector<string> _archiveFileList;
   int _archiveScanIndex;
+  bool _archiveFilesHaveDayDir;
 
   // time slider
-  
-  QGroupBox *_timePanel;
-  QHBoxLayout *_timesLayout;
-  QLabel *_startTimeLabel;
-  QLabel *_stopTimeLabel;
+
+  QFrame *_timePanel;
+  QVBoxLayout *_timeLayout;
+
   QSlider *_timeSlider;
 
   RadxTime _archiveIntermediateTime;
@@ -233,6 +250,9 @@ private:
   RadxTime _endDisplayTime;
   RadxTime _imagesArchiveStartTime;
   RadxTime _imagesArchiveEndTime;
+
+  // QFrame *_timeScaleFrame;
+  // TimeScaleWidget *_timeScale;
   
   // saving images in real time mode
 
@@ -321,7 +341,7 @@ private slots:
   void _locationClicked(double xkm, double ykm,
                         RayLoc *ray_loc, const RadxRay *ray);
 
-  void _cancelTimeControllerChanges();
+  // void _cancelTimeControllerChanges();
 
   // archive mode
   
@@ -329,25 +349,25 @@ private slots:
   void _setArchiveScanConfig();
   void _resetArchiveScanConfigToDefault();
   void _setStartTimeFromGui(const QDateTime &datetime1);
+  void _setEndTimeFromGui(const QDateTime &datetime1);
   void _setGuiFromStartTime();
   void _setArchiveStartTimeToDefault();
   void _setArchiveStartTime(const RadxTime &rtime);
-  void _computeArchiveStopTime();
+  void _computeArchiveEndTime();
   void _computeArchiveIntervalTime(int value);
   void _goBack1();
   void _goFwd1();
-  void _goBackNScans();
-  void _goFwdNScans();
+  void _goBackPeriod();
+  void _goFwdPeriod();
   void _commitToTime();
-  void _speculateOnTime();
 
   void _setArchiveRetrievalPending();
 
   // time controller
 
-  void _createTimeControllerDialog();
-  void _refreshTimeControllerDialog();
-  void _showTimeControllerDialog();
+  // void _createTimeControllerDialog();
+  // void _refreshTimeControllerDialog();
+  // void _showTimeControllerDialog();
 
   // time slider
 
@@ -355,6 +375,7 @@ private slots:
   void _timeSliderValueChanged(int value);
   bool _timeSliderEvent(QEvent *event);
   void _timeSliderReleased();
+  void _timeSliderPressed();
   void _setTimeSliderToolTip(int value);
   
   // images

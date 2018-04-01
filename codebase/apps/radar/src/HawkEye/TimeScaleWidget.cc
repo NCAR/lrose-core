@@ -55,6 +55,10 @@ TimeScaleWidget::TimeScaleWidget(QWidget* parent,
 
 {
 
+  _startTime.set(0);  
+  _endTime.set(1);
+  _timeSpanSecs = 1;
+  _timesPending = false;
   _pointClicked = false;
   
   // Set up the background color
@@ -73,7 +77,7 @@ TimeScaleWidget::TimeScaleWidget(QWidget* parent,
   
   // Allow the size_t type to be passed to slots
   
-  qRegisterMetaType<size_t>("size_t");
+  // qRegisterMetaType<size_t>("size_t");
 
   cerr << "1111111111111111111111111111" << endl;
 
@@ -91,20 +95,28 @@ TimeScaleWidget::~TimeScaleWidget()
 }
 
 
+//////////////////////////////////
+// set the plot times
+
+void TimeScaleWidget::setTimes(const RadxTime &startTime,
+                               const RadxTime &endTime)
+{
+  
+  _startTime = startTime;
+  _endTime = endTime;
+  _timeSpanSecs = _endTime - _startTime;
+  _pointClicked = false;
+  _timesPending = true;
+
+}
+
 /*************************************************************************
  * configure the axes
  */
 
-void TimeScaleWidget::configureAxes(RadxTime &startTime,
-                                    RadxTime &endTime)
+void TimeScaleWidget::configureAxes()
 
 {
-
-  cerr << "2222222222222222222222222" << endl;
-
-  _startTime = startTime;
-  _endTime = endTime;
-  _timeSpanSecs = endTime - startTime;
 
   // set bottom margin - increase this if we are plotting the distance labels and ticks
   
@@ -125,10 +137,6 @@ void TimeScaleWidget::configureAxes(RadxTime &startTime,
 
   _transform = _world.getTransform();
 
-  // refresh
-  
-  _refresh();
-
 }
 
 /*************************************************************************
@@ -137,17 +145,25 @@ void TimeScaleWidget::configureAxes(RadxTime &startTime,
 
 void TimeScaleWidget::refresh()
 {
+  cerr << "wwwwwwwwwwwwwwwwwwwwwww" << endl;
   _refresh();
 }
 
 void TimeScaleWidget::_refresh()
 {
+  if (_timesPending) {
+    configureAxes();
+    _timesPending = false;
+  }
   cerr << "1111111111111113333333333" << endl;
-  QPainter painter;
-  painter.begin(this);
+  QPainter painter(this);
+  QPaintDevice *device = painter.device();
+  if (device == 0) {
+    cerr << "uuuuuuuuuuuuuuuuuuuuuuuu - painter device not active" << endl;
+    return;
+  }
   cerr << "xxxxxxxxxxxxxxxxxxxxxxx" << endl;
   _drawOverlays(painter);
-  painter.end();
 }
 
 /*************************************************************************
@@ -163,7 +179,7 @@ void TimeScaleWidget::setBackgroundColor(const QColor &color)
   new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
   setPalette(new_palette);
   
-  _refresh();
+  // _refresh();
 
 }
 
@@ -180,7 +196,7 @@ void TimeScaleWidget::mousePressEvent(QMouseEvent *e)
 {
 
   cerr << "4444444444444444444444444" << endl;
-
+  
   _mousePressX = e->x();
   _mousePressY = e->y();
   
@@ -236,6 +252,11 @@ void TimeScaleWidget::paintEvent(QPaintEvent *event)
   cerr << "6666666666666666666666666" << endl;
 
   QPainter painter(this);
+  QPaintDevice *device = painter.device();
+  if (device == 0) {
+    cerr << "vvvvvvvvvvvvvvvvvvvvvvvv - painter device not active" << endl;
+    return;
+  }
   painter.save();
   painter.eraseRect(0, 0, width(), height());
   _world.setClippingOn(painter);
@@ -256,8 +277,24 @@ void TimeScaleWidget::resizeEvent(QResizeEvent * e)
   cerr << "width, height: " << width() << ", " << height() << endl;
 
   _resetWorld(width(), height());
-  _refresh();
+  configureAxes();
+
+  if (_timesPending) {
+    _timesPending = false;
+  }
+
+  cerr << "pppppppppppppppppppppppppppp" << endl;
+  QPainter painter(this);
+  QPaintDevice *device = painter.device();
+  cerr << "zzzzzzzzzzzzzzzzz - painter device: " << device << endl;
+  if (device == 0) {
+    cerr << "wwwwwwwwwwwwwwwwwwwwwwwwwwww - painter device not active " << endl;
+    return;
+  }
+  _drawOverlays(painter);
   update();
+  
+  cerr << "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhh" << endl;
 
 }
 
@@ -271,7 +308,7 @@ void TimeScaleWidget::resize(int width, int height)
 
   setGeometry(0, 0, width, height);
   _resetWorld(width, height);
-
+  
 }
 
 //////////////////////////////////////////////////////////////
@@ -292,7 +329,7 @@ void TimeScaleWidget::_resetWorld(int width, int height)
  */
 
 void TimeScaleWidget::setMouseClickPoint(double worldX,
-                                     double worldY)
+                                         double worldY)
 {
 
   if (_pointClicked) {
@@ -323,10 +360,16 @@ void TimeScaleWidget::setMouseClickPoint(double worldX,
 void TimeScaleWidget::_drawOverlays(QPainter &painter)
 {
 
+  QPaintDevice *device = painter.device();
+  if (device == 0) {
+    cerr << "88888888888888888888 - painter device not active" << endl;
+    return;
+  }
+
   cerr << "99999999999999999999999999" << endl;
 
   // save painter state
-
+  
   painter.save();
 
   // store font
@@ -385,21 +428,6 @@ void TimeScaleWidget::_drawOverlays(QPainter &painter)
   painter.restore();
 
   cerr << "000000000000000000000000000" << endl;
-
-}
-
-//////////////////////////////////
-// initalize the plot start time
-
-void TimeScaleWidget::setTimes(const RadxTime &startTime,
-                               const RadxTime &endTime)
-{
-  
-  _startTime = startTime;
-  _endTime = endTime;
-  _pointClicked = false;
-
-  _refresh();
 
 }
 

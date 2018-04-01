@@ -171,7 +171,7 @@ int HawkEye::Run(QApplication &app)
   _reader->signalRunToStart();
   
   if (_params.display_mode == Params::POLAR_DISPLAY) {
-    
+
     _polarManager = new PolarManager(_params, _reader,
                                      _displayFields, _haveFilteredFields);
 

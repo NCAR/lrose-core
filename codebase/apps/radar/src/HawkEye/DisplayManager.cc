@@ -809,9 +809,9 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
           rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
   _dateVal->setText(text);
 
-  sprintf(text, "%.2d:%.2d:%.2d.%.6d",
+  sprintf(text, "%.2d:%.2d:%.2d.%.3d",
           rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
-          ((int) ray->getNanoSecs() / 1000));
+          ((int) ray->getNanoSecs() / 1000000));
   _timeVal->setText(text);
   
   if (_volNumVal) {

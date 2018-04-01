@@ -686,7 +686,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
     // time legend
 
-    sprintf(text, "Start time: %s", _plotStartTime.asString(3).c_str());
+    sprintf(text, "Start time: %s", _plotStartTime.asString(0).c_str());
     legends.push_back(text);
     
     // radar and site name legend

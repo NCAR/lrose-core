@@ -402,6 +402,7 @@ codebase/apps/radar/src/HawkEye/moc_PolarWidget.cpp
 codebase/apps/radar/src/HawkEye/moc_PpiWidget.cpp
 codebase/apps/radar/src/HawkEye/moc_RhiWidget.cpp
 codebase/apps/radar/src/HawkEye/moc_RhiWindow.cpp
+codebase/apps/radar/src/HawkEye/moc_TimeScaleWidget.cpp
 codebase/apps/radar/src/HawkEye/moc_predefs.h
 
 codebase/apps/radar/src/HcrVelCorrect/HcrVelCorrect
