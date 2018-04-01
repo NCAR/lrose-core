@@ -353,6 +353,15 @@ color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
 
 fields = {
   {
+    label = "DBZ",
+    raw_name = "DBZ",
+    filtered_name = "",
+    units = "dBZ",
+    color_map = "dbz.colors",
+    shortcut = "1"
+  }
+  ,
+  {
     label = "REF",
     raw_name = "REF",
     filtered_name = "",
@@ -368,6 +377,15 @@ fields = {
     units = "m/s",
     color_map = "vel.colors",
     shortcut = "2"
+  }
+  ,
+  {
+    label = "WIDTH",
+    raw_name = "WIDTH",
+    filtered_name = "",
+    units = "m/s",
+    color_map = "width.colors",
+    shortcut = "3"
   }
   ,
   {
@@ -552,7 +570,7 @@ main_window_width = 1050;
 // Type: int
 //
 
-main_window_height = 800;
+main_window_height = 635;
 
 ///////////// main_window_start_x /////////////////////
 //

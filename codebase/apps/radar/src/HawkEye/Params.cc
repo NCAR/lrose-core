@@ -2612,6 +2612,18 @@
     tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
     tt++;
     
+    // Parameter 'images_scan_interval_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("images_scan_interval_secs");
+    tt->descr = tdrpStrDup("Time between scans in archive mode (secs).");
+    tt->help = tdrpStrDup("Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.");
+    tt->val_offset = (char *) &images_scan_interval_secs - &_start_;
+    tt->single_val.i = 300;
+    tt++;
+    
     // Parameter 'images_set_sweep_index_list'
     // ctype is 'tdrp_bool_t'
     

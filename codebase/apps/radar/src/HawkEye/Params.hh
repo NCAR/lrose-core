@@ -697,6 +697,8 @@ public:
 
   char* images_archive_end_time;
 
+  int images_scan_interval_secs;
+
   tdrp_bool_t images_set_sweep_index_list;
 
   int *_images_sweep_index_list;
@@ -717,7 +719,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[156];
+  mutable TDRPtable _table[157];
 
   const char *_className;
 

@@ -67,6 +67,7 @@ class QDateTime;
 class QDateTimeEdit;
 class ColorBar;
 class QFileDialog;
+
 class DisplayField;
 class PpiWidget;
 class RhiWidget;
@@ -74,9 +75,6 @@ class RhiWindow;
 class Reader;
 class RadxPlatform;
 class TimeScaleWidget;
-
-class QGraphicsScene;
-class QGraphicsAnchorLayout;
 
 class PolarManager : public DisplayManager {
   
@@ -135,7 +133,7 @@ private:
   double _maxRangeKm;
 
   RayLoc* _ppiRayLoc; // for use, allows negative indices at north line
-  RayLoc* _ppiRays; // for new and delete
+  RayLoc* _ppiRays;   // for new and delete
 
   // input data
   
@@ -145,13 +143,8 @@ private:
   // sweeps
 
   SweepManager _sweepManager;
-
   QVBoxLayout *_sweepVBoxLayout;
   QGroupBox *_sweepPanel;
-  QGroupBox *_sweepSubPanel;
-  QGridLayout *_sweepsLayout;
-  QLabel *_selectedSweepLabelWidget;
-  QButtonGroup *_sweepGroup;
   vector<QRadioButton *> *_sweepRButtons;
 
   // windows
@@ -180,17 +173,20 @@ private:
   // menus
 
   QMenu *_fileMenu;
+  QMenu *_timeMenu;
   QMenu *_overlaysMenu;
   QMenu *_helpMenu;
 
   // actions
 
+  QAction *_realtimeAct;
+  QAction *_showTimeControlAct;
   QAction *_ringsAct;
   QAction *_gridsAct;
   QAction *_azLinesAct;
   QAction *_showRhiAct;
   
-  // QAction *_timeControllerAct;
+  QAction *_timeControllerAct;
   QAction *_openFileAct;
   QAction *_saveImageAct;
 
@@ -198,10 +194,6 @@ private:
   
   bool _archiveMode;
   bool _archiveRetrievalPending;
-  QRadioButton *_realtimeModeButton;
-  QRadioButton *_archiveModeButton;
-
-  QGroupBox *_archiveTimeBox;
 
   QDateTimeEdit *_archiveStartTimeEdit;
   RadxTime _guiStartTime;
@@ -210,11 +202,6 @@ private:
   QDateTimeEdit *_archiveEndTimeEdit;
   RadxTime _guiEndTime;
   RadxTime _archiveEndTime;
-
-  // int _archiveMarginSecs;
-
-  // QLineEdit *_archiveTimeSpanEdit;
-  // int _archiveTimeSpanSecs;
 
   QLabel *_plotTimeLabel;
 
@@ -225,13 +212,7 @@ private:
 
   // time controller settings dialog
   
-  // QDialog *_timeControllerDialog;
-  // QLabel *_timeControllerInfo;
-
-  QLineEdit *_archiveScanIntervalEdit;
-  double _archiveScanIntervalSecs;
-
-  QLineEdit *_nArchiveScansEdit;
+  QDialog *_timeControl;
 
   int _nArchiveScans;
   vector<string> _archiveFileList;
@@ -247,16 +228,13 @@ private:
 
   RadxTime _archiveIntermediateTime;
 
-  int _timeSliderCurrentValue;
   RadxTime _startDisplayTime;
   RadxTime _currentDisplayTime;  // is this needed??
   RadxTime _endDisplayTime;
   RadxTime _imagesArchiveStartTime;
   RadxTime _imagesArchiveEndTime;
+  int _imagesScanIntervalSecs;
 
-  // QFrame *_timeScaleFrame;
-  // TimeScaleWidget *_timeScale;
-  
   // saving images in real time mode
 
   RadxTime _imagesScheduledTime;
@@ -313,8 +291,7 @@ private:
 
   // time slider
 
-  void _createTimePanel();
-  // void _updateTimePanel();
+  void _createTimeControl();
 
   // override howto
 
@@ -338,8 +315,8 @@ private slots:
   void _createSweepPanel();
   void _createSweepRadioButtons();
   void _clearSweepRadioButtons();
-  void _changeSweepRadioButton(int value);
   void _changeSweep(bool value);
+  void _changeSweepRadioButton(int value);
 
   // local
 
@@ -350,13 +327,12 @@ private slots:
   void _locationClicked(double xkm, double ykm,
                         RayLoc *ray_loc, const RadxRay *ray);
 
-  // void _cancelTimeControllerChanges();
+  // modes
+  
+  void _setRealtime(bool enabled);
 
   // archive mode
   
-  // void _setDataRetrievalMode();
-  void _setArchiveScanConfig();
-  void _resetArchiveScanConfigToDefault();
   void _setArchiveStartTime(const RadxTime &rtime);
   void _setArchiveEndTime(const RadxTime &rtime);
   void _setArchiveStartTimeFromGui(const QDateTime &qdt);
@@ -369,24 +345,20 @@ private slots:
   void _goBackPeriod();
   void _goFwdPeriod();
 
-  // void _commitToTime();
-
   void _setArchiveRetrievalPending();
 
   // time controller
 
-  // void _createTimeControllerDialog();
-  // void _refreshTimeControllerDialog();
-  // void _showTimeControllerDialog();
+  void _showTimeControl();
 
   // time slider
 
   void _timeSliderActionTriggered(int action);
   void _timeSliderValueChanged(int value);
-  bool _timeSliderEvent(QEvent *event);
   void _timeSliderReleased();
   void _timeSliderPressed();
-  // void _setTimeSliderToolTip(int value);
+  bool _timeSliderEvent(QEvent *event);
+  void _setTimeSliderToolTip(int pos);
   
   // images
 

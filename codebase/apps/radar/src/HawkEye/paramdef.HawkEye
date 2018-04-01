@@ -954,6 +954,12 @@ paramdef string {
   p_help = "Only applicable for image generation.";
 } images_archive_end_time;
 
+paramdef int {
+  p_default = 300;
+  p_descr = "Time between scans in archive mode (secs).";
+  p_help = "Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.";
+} images_scan_interval_secs;
+
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to specify the sweep indexes for the image generation.";

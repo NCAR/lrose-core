@@ -111,7 +111,7 @@ void AllocCheck::doPrint(bool force)
     return;
   }
 
-  if (force || ((_nAlloc + _nFree) % 200 == 0)) {
+  if (force || ((_nAlloc + _nFree) % 1000 == 0)) {
     if (force) {
       cerr << "=================================" << endl;
     }
