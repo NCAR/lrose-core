@@ -214,6 +214,7 @@ private:
   // time controller settings dialog
   
   QDialog *_timeControl;
+  bool _timeControlPlaced;
 
   int _nArchiveScans;
   vector<string> _archiveFileList;
@@ -352,6 +353,7 @@ private slots:
   // time controller
 
   void _showTimeControl();
+  void _placeTimeControl();
 
   // time slider
 

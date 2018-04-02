@@ -140,6 +140,7 @@ PolarManager::PolarManager(const Params &params,
   _fwdPeriod = NULL;
 
   _timeControl = NULL;
+  _timeControlPlaced = false;
   _timeLayout = NULL;
   _timeSlider = NULL;
 
@@ -269,6 +270,10 @@ void PolarManager::timerEvent(QTimerEvent *event)
       _handleRealtimeData(event);
     }
 
+  }
+
+  if (!_timeControlPlaced) {
+    _placeTimeControl();
   }
 
   // check for image creation
@@ -589,7 +594,8 @@ void PolarManager::_createActions()
 
   _showTimeControlAct = new QAction(tr("Show time control window"), this);
   _showTimeControlAct->setStatusTip(tr("Show time control window"));
-  connect(_showTimeControlAct, SIGNAL(triggered()), _timeControl, SLOT(show()));
+  connect(_showTimeControlAct, SIGNAL(triggered()), _timeControl,
+          SLOT(show()));
 
   // realtime mode
 
@@ -1775,13 +1781,13 @@ void PolarManager::_createTimeControl()
   timeUpperLayout->setSpacing(10);
   timeUpper->setLayout(timeUpperLayout);
   
-  QFrame *timeMiddle = new QFrame(_timePanel);
-  QHBoxLayout *timeMiddleLayout = new QHBoxLayout;
-  timeMiddleLayout->setSpacing(10);
-  timeMiddle->setLayout(timeMiddleLayout);
+  QFrame *timeLower = new QFrame(_timePanel);
+  QHBoxLayout *timeLowerLayout = new QHBoxLayout;
+  timeLowerLayout->setSpacing(10);
+  timeLower->setLayout(timeLowerLayout);
 
   _timeLayout->addWidget(timeUpper);
-  _timeLayout->addWidget(timeMiddle);
+  _timeLayout->addWidget(timeLower);
   
   // create slider
   
@@ -1793,6 +1799,7 @@ void PolarManager::_createTimeControl()
   _timeSlider->setSingleStep(1);
   _timeSlider->setPageStep(0);
   _timeSlider->setFixedWidth(400);
+  _timeSlider->setToolTip("Drag to change time selection");
   
   // active time
 
@@ -1802,6 +1809,7 @@ void PolarManager::_createTimeControl()
   QPalette pal = _selectedTimeLabel->palette();
   pal.setColor(QPalette::Active, QPalette::Button, Qt::cyan);
   _selectedTimeLabel->setPalette(pal);
+  _selectedTimeLabel->setToolTip("This is the selected data time");
 
   // time editing
 
@@ -1817,6 +1825,7 @@ void PolarManager::_createTimeControl()
   _archiveStartTimeEdit->setDateTime(startDateTime);
   connect(_archiveStartTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
           this, SLOT(_setArchiveStartTimeFromGui(const QDateTime &)));
+  _archiveStartTimeEdit->setToolTip("Start time of archive period");
   
   _archiveEndTimeEdit = new QDateTimeEdit(timeUpper);
   _archiveEndTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
@@ -1830,24 +1839,29 @@ void PolarManager::_createTimeControl()
   _archiveEndTimeEdit->setDateTime(endDateTime);
   connect(_archiveEndTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
           this, SLOT(_setArchiveEndTimeFromGui(const QDateTime &)));
+  _archiveEndTimeEdit->setToolTip("End time of archive period");
   
   // fwd and back buttons
 
-  _back1 = new QPushButton(timeMiddle);
+  _back1 = new QPushButton(timeLower);
   _back1->setText("<");
   connect(_back1, SIGNAL(clicked()), this, SLOT(_goBack1()));
+  _back1->setToolTip("Go back by 1 file");
   
-  _fwd1 = new QPushButton(timeMiddle);
+  _fwd1 = new QPushButton(timeLower);
   _fwd1->setText(">");
   connect(_fwd1, SIGNAL(clicked()), this, SLOT(_goFwd1()));
+  _fwd1->setToolTip("Go forward by 1 file");
     
-  _backPeriod = new QPushButton(timeMiddle);
+  _backPeriod = new QPushButton(timeLower);
   _backPeriod->setText("<<");
   connect(_backPeriod, SIGNAL(clicked()), this, SLOT(_goBackPeriod()));
+  _backPeriod->setToolTip("Go back by the archive time period");
   
-  _fwdPeriod = new QPushButton(timeMiddle);
+  _fwdPeriod = new QPushButton(timeLower);
   _fwdPeriod->setText(">>");
   connect(_fwdPeriod, SIGNAL(clicked()), this, SLOT(_goFwdPeriod()));
+  _fwdPeriod->setToolTip("Go forward by the archive time period");
 
   // accept cancel buttons
 
@@ -1857,6 +1871,7 @@ void PolarManager::_createTimeControl()
   acceptPalette.setColor(QPalette::Active, QPalette::Button, Qt::green);
   acceptButton->setPalette(acceptPalette);
   connect(acceptButton, SIGNAL(clicked()), this, SLOT(_acceptGuiTimes()));
+  acceptButton->setToolTip("Accept the selected start and end times");
 
   QPushButton *cancelButton = new QPushButton(timeUpper);
   cancelButton->setText("Cancel");
@@ -1864,6 +1879,7 @@ void PolarManager::_createTimeControl()
   cancelPalette.setColor(QPalette::Active, QPalette::Button, Qt::red);
   cancelButton->setPalette(cancelPalette);
   connect(cancelButton, SIGNAL(clicked()), this, SLOT(_cancelGuiTimes()));
+  cancelButton->setToolTip("Cancel the selected start and end times");
     
   // add time widgets to layout
   
@@ -1874,11 +1890,11 @@ void PolarManager::_createTimeControl()
   timeUpperLayout->addWidget(_archiveEndTimeEdit, stretch, Qt::AlignLeft);
   timeUpperLayout->addWidget(acceptButton, stretch, Qt::AlignLeft);
   
-  timeMiddleLayout->addWidget(_backPeriod, stretch, Qt::AlignRight);
-  timeMiddleLayout->addWidget(_back1, stretch, Qt::AlignRight);
-  timeMiddleLayout->addWidget(_timeSlider, stretch, Qt::AlignCenter);
-  timeMiddleLayout->addWidget(_fwd1, stretch, Qt::AlignLeft);
-  timeMiddleLayout->addWidget(_fwdPeriod, stretch, Qt::AlignLeft);
+  timeLowerLayout->addWidget(_backPeriod, stretch, Qt::AlignRight);
+  timeLowerLayout->addWidget(_back1, stretch, Qt::AlignRight);
+  timeLowerLayout->addWidget(_timeSlider, stretch, Qt::AlignCenter);
+  timeLowerLayout->addWidget(_fwd1, stretch, Qt::AlignLeft);
+  timeLowerLayout->addWidget(_fwdPeriod, stretch, Qt::AlignLeft);
 
   // connect slots for time slider
   
@@ -1906,16 +1922,37 @@ void PolarManager::_showTimeControl()
     if (_timeControl->isVisible()) {
       _timeControl->setVisible(false);
     } else {
-      if (_timeControl->x() == 0 &&
-          _timeControl->y() == 0) {
+      if (!_timeControlPlaced) {
         _timeControl->setVisible(true);
         QPoint pos;
-        pos.setX(x() + width() / 2 - _timeControl->width() / 2);
-        pos.setY(y() + (height()));
+        pos.setX(x() + 
+                 (frameGeometry().width() / 2) -
+                 (_timeControl->width() / 2));
+        pos.setY(y() + frameGeometry().height());
         _timeControl->move(pos);
       }
       _timeControl->setVisible(true);
       _timeControl->raise();
+    }
+  }
+}
+
+/////////////////////////////////////
+// place the time controller dialog
+
+void PolarManager::_placeTimeControl()
+{
+
+  if (_timeControl) {
+    if (!_timeControlPlaced) {
+      int topFrameWidth = _timeControl->geometry().y() - _timeControl->y();
+      QPoint pos;
+      pos.setX(x() + 
+               (frameGeometry().width() / 2) -
+               (_timeControl->width() / 2));
+      pos.setY(y() + frameGeometry().height() + topFrameWidth);
+      _timeControl->move(pos);
+      _timeControlPlaced = true;
     }
   }
 }
