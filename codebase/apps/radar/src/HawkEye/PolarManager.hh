@@ -288,7 +288,6 @@ private:
 
   void _setGuiFromArchiveStartTime();
   void _setGuiFromArchiveEndTime();
-  void _setArchiveTimesToDefaults();
   void _setGuiFromSelectedTime();
 
   // time slider

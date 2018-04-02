@@ -2211,23 +2211,6 @@ void PolarManager::_setGuiFromSelectedTime()
 }
 
 ////////////////////////////////////////////////////////
-// set archive times to defaults
-
-void PolarManager::_setArchiveTimesToDefaults()
-
-{
-
-  _archiveStartTime.set(_params.archive_start_time);
-  if (!_archiveStartTime.isValid()) {
-    _archiveStartTime.set(RadxTime::NOW);
-  }
-  _archiveEndTime = _archiveStartTime + _params.archive_time_span_secs;
-  _setGuiFromArchiveStartTime();
-  _setGuiFromArchiveEndTime();
-
-}
-
-////////////////////////////////////////////////////////
 // set archive start time
 
 void PolarManager::_setArchiveStartTime(const RadxTime &rtime)
@@ -2466,7 +2449,7 @@ void PolarManager::_createArchiveImageFiles()
       
       while (_archiveStartTime <= _imagesArchiveEndTime) {
         _createImageFilesAllSweeps();
-        _archiveStartTime += _params.archive_scan_interval_secs;
+        _archiveStartTime += _imagesScanIntervalSecs;
       }
       
     }

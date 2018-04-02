@@ -470,13 +470,7 @@ public:
 
   double archive_time_span_secs;
 
-  int archive_scan_interval_secs;
-
-  int archive_n_scans;
-
   char* archive_data_url;
-
-  int archive_search_margin_secs;
 
   show_status_t show_status_in_gui;
 
@@ -719,7 +713,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[157];
+  mutable TDRPtable _table[154];
 
   const char *_className;
 

@@ -745,31 +745,7 @@
     tt->descr = tdrpStrDup("Time span in ARCHIVE mode (secs).");
     tt->help = tdrpStrDup("Archive end time = archive_start_time + archive_time_span.");
     tt->val_offset = (char *) &archive_time_span_secs - &_start_;
-    tt->single_val.d = 900;
-    tt++;
-    
-    // Parameter 'archive_scan_interval_secs'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("archive_scan_interval_secs");
-    tt->descr = tdrpStrDup("Time between scans in archive mode (secs).");
-    tt->help = tdrpStrDup("Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.");
-    tt->val_offset = (char *) &archive_scan_interval_secs - &_start_;
-    tt->single_val.i = 300;
-    tt++;
-    
-    // Parameter 'archive_n_scans'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("archive_n_scans");
-    tt->descr = tdrpStrDup("Number of scans in archive mode.");
-    tt->help = tdrpStrDup("Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.");
-    tt->val_offset = (char *) &archive_n_scans - &_start_;
-    tt->single_val.i = 12;
+    tt->single_val.d = 3600;
     tt++;
     
     // Parameter 'archive_data_url'
@@ -781,19 +757,7 @@
     tt->descr = tdrpStrDup("URL for archive data files.");
     tt->help = tdrpStrDup("This should point to a CfRadial moments data set.");
     tt->val_offset = (char *) &archive_data_url - &_start_;
-    tt->single_val.s = tdrpStrDup("/scr/eldora1/hcr-test/cfradial/moments/wband");
-    tt++;
-    
-    // Parameter 'archive_search_margin_secs'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("archive_search_margin_secs");
-    tt->descr = tdrpStrDup("Time margin for search in archive mode (secs).");
-    tt->help = tdrpStrDup("We search for data within this margin, on either side of the required time.");
-    tt->val_offset = (char *) &archive_search_margin_secs - &_start_;
-    tt->single_val.i = 600;
+    tt->single_val.s = tdrpStrDup("/data/cfradial/kddc");
     tt++;
     
     // Parameter 'Comment 4'
@@ -964,7 +928,7 @@
       tt->struct_vals[0].b = pTRUE;
       tt->struct_vals[1].b = pTRUE;
       tt->struct_vals[2].b = pTRUE;
-      tt->struct_vals[3].b = pTRUE;
+      tt->struct_vals[3].b = pFALSE;
       tt->struct_vals[4].b = pTRUE;
       tt->struct_vals[5].b = pTRUE;
       tt->struct_vals[6].b = pTRUE;
@@ -975,15 +939,15 @@
       tt->struct_vals[11].b = pTRUE;
       tt->struct_vals[12].b = pTRUE;
       tt->struct_vals[13].b = pTRUE;
-      tt->struct_vals[14].b = pTRUE;
-      tt->struct_vals[15].b = pTRUE;
-      tt->struct_vals[16].b = pTRUE;
+      tt->struct_vals[14].b = pFALSE;
+      tt->struct_vals[15].b = pFALSE;
+      tt->struct_vals[16].b = pFALSE;
       tt->struct_vals[17].b = pTRUE;
       tt->struct_vals[18].b = pTRUE;
       tt->struct_vals[19].b = pTRUE;
       tt->struct_vals[20].b = pTRUE;
       tt->struct_vals[21].b = pTRUE;
-      tt->struct_vals[22].b = pTRUE;
+      tt->struct_vals[22].b = pFALSE;
       tt->struct_vals[23].b = pTRUE;
       tt->struct_vals[24].b = pTRUE;
       tt->struct_vals[25].b = pFALSE;
@@ -1025,7 +989,7 @@
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(field_t);
-    tt->array_n = 3;
+    tt->array_n = 8;
     tt->struct_def.name = tdrpStrDup("field_t");
     tt->struct_def.nfields = 6;
     tt->struct_def.fields = (struct_field_t *)
@@ -1060,27 +1024,57 @@
       tt->struct_def.fields[5].ptype = STRING_TYPE;
       tt->struct_def.fields[5].rel_offset = 
         (char *) &_fields->shortcut - (char *) _fields;
-    tt->n_struct_vals = 18;
+    tt->n_struct_vals = 48;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("DBZ");
       tt->struct_vals[1].s = tdrpStrDup("DBZ");
-      tt->struct_vals[2].s = tdrpStrDup("DBZ_F");
+      tt->struct_vals[2].s = tdrpStrDup("");
       tt->struct_vals[3].s = tdrpStrDup("dBZ");
       tt->struct_vals[4].s = tdrpStrDup("dbz.colors");
       tt->struct_vals[5].s = tdrpStrDup("1");
-      tt->struct_vals[6].s = tdrpStrDup("VEL");
-      tt->struct_vals[7].s = tdrpStrDup("VEL");
-      tt->struct_vals[8].s = tdrpStrDup("VEL_F");
-      tt->struct_vals[9].s = tdrpStrDup("m/s");
-      tt->struct_vals[10].s = tdrpStrDup("vel.colors");
+      tt->struct_vals[6].s = tdrpStrDup("REF");
+      tt->struct_vals[7].s = tdrpStrDup("REF");
+      tt->struct_vals[8].s = tdrpStrDup("");
+      tt->struct_vals[9].s = tdrpStrDup("dBZ");
+      tt->struct_vals[10].s = tdrpStrDup("dbz.colors");
       tt->struct_vals[11].s = tdrpStrDup("2");
-      tt->struct_vals[12].s = tdrpStrDup("WIDTH");
-      tt->struct_vals[13].s = tdrpStrDup("WIDTH");
-      tt->struct_vals[14].s = tdrpStrDup("WIDTH_F");
+      tt->struct_vals[12].s = tdrpStrDup("VEL");
+      tt->struct_vals[13].s = tdrpStrDup("VEL");
+      tt->struct_vals[14].s = tdrpStrDup("");
       tt->struct_vals[15].s = tdrpStrDup("m/s");
-      tt->struct_vals[16].s = tdrpStrDup("width.colors");
+      tt->struct_vals[16].s = tdrpStrDup("vel.colors");
       tt->struct_vals[17].s = tdrpStrDup("3");
+      tt->struct_vals[18].s = tdrpStrDup("WIDTH");
+      tt->struct_vals[19].s = tdrpStrDup("WIDTH");
+      tt->struct_vals[20].s = tdrpStrDup("");
+      tt->struct_vals[21].s = tdrpStrDup("m/s");
+      tt->struct_vals[22].s = tdrpStrDup("width.colors");
+      tt->struct_vals[23].s = tdrpStrDup("4");
+      tt->struct_vals[24].s = tdrpStrDup("SW");
+      tt->struct_vals[25].s = tdrpStrDup("SW");
+      tt->struct_vals[26].s = tdrpStrDup("");
+      tt->struct_vals[27].s = tdrpStrDup("m/s");
+      tt->struct_vals[28].s = tdrpStrDup("width.colors");
+      tt->struct_vals[29].s = tdrpStrDup("5");
+      tt->struct_vals[30].s = tdrpStrDup("ZDR");
+      tt->struct_vals[31].s = tdrpStrDup("ZDR");
+      tt->struct_vals[32].s = tdrpStrDup("");
+      tt->struct_vals[33].s = tdrpStrDup("dB");
+      tt->struct_vals[34].s = tdrpStrDup("zdr.colors");
+      tt->struct_vals[35].s = tdrpStrDup("6");
+      tt->struct_vals[36].s = tdrpStrDup("PHIDP");
+      tt->struct_vals[37].s = tdrpStrDup("PHIDP");
+      tt->struct_vals[38].s = tdrpStrDup("");
+      tt->struct_vals[39].s = tdrpStrDup("deg");
+      tt->struct_vals[40].s = tdrpStrDup("phidp.colors");
+      tt->struct_vals[41].s = tdrpStrDup("7");
+      tt->struct_vals[42].s = tdrpStrDup("RHOHV");
+      tt->struct_vals[43].s = tdrpStrDup("RHOHV");
+      tt->struct_vals[44].s = tdrpStrDup("");
+      tt->struct_vals[45].s = tdrpStrDup("unitless");
+      tt->struct_vals[46].s = tdrpStrDup("rhohv.colors");
+      tt->struct_vals[47].s = tdrpStrDup("8");
     tt++;
     
     // Parameter 'background_render_mins'
@@ -1127,7 +1121,7 @@
     tt->descr = tdrpStrDup("Max range for the display (km).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &max_range_km - &_start_;
-    tt->single_val.d = 150;
+    tt->single_val.d = 225;
     tt++;
     
     // Parameter 'Comment 7'
@@ -1246,7 +1240,7 @@
     tt->descr = tdrpStrDup("Startup width of main window (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &main_window_width - &_start_;
-    tt->single_val.i = 1000;
+    tt->single_val.i = 1050;
     tt++;
     
     // Parameter 'main_window_height'
@@ -1258,7 +1252,7 @@
     tt->descr = tdrpStrDup("Startup height of main window (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &main_window_height - &_start_;
-    tt->single_val.i = 800;
+    tt->single_val.i = 635;
     tt++;
     
     // Parameter 'main_window_start_x'
@@ -1294,7 +1288,7 @@
     tt->descr = tdrpStrDup("Width of color scale (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &color_scale_width - &_start_;
-    tt->single_val.i = 80;
+    tt->single_val.i = 40;
     tt++;
     
     // Parameter 'label_font_size'
@@ -1500,7 +1494,7 @@
     tt->descr = tdrpStrDup("Startup X for RHI window (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &rhi_window_start_x - &_start_;
-    tt->single_val.i = 1000;
+    tt->single_val.i = 1100;
     tt++;
     
     // Parameter 'rhi_window_start_y'
@@ -1680,7 +1674,7 @@
     tt->descr = tdrpStrDup("Set RHI range rings overlay on at startup.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &rhi_range_rings_on_at_startup - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'rhi_elevation_lines_on_at_startup'
@@ -1786,7 +1780,7 @@
     tt->descr = tdrpStrDup("What fraction of the existing data to save when moving the plot to the left.");
     tt->help = tdrpStrDup("When we reach the right-hand side of the display, we need to move the plot to the left. This is the fraction of the plot that is saved after the move has taken place.");
     tt->val_offset = (char *) &bscan_realtime_fraction_saved - &_start_;
-    tt->single_val.d = 0.75;
+    tt->single_val.d = 0.5;
     tt++;
     
     // Parameter 'bscan_min_secs_between_reading_beams'
@@ -1798,7 +1792,7 @@
     tt->descr = tdrpStrDup("Min time between incoming beams (secs).");
     tt->help = tdrpStrDup("If beams arrive too fast, we discard some so that the time between the beams is at least this long.");
     tt->val_offset = (char *) &bscan_min_secs_between_reading_beams - &_start_;
-    tt->single_val.d = 0.03;
+    tt->single_val.d = 0.01;
     tt++;
     
     // Parameter 'bscan_min_secs_between_rendering_beams'
@@ -1810,7 +1804,7 @@
     tt->descr = tdrpStrDup("Min time between rendering (secs).");
     tt->help = tdrpStrDup("Setting this higher makes the display less smooth, but prevents the display from taking up too much CPU and/or GPU.");
     tt->val_offset = (char *) &bscan_min_secs_between_rendering_beams - &_start_;
-    tt->single_val.d = 0.03;
+    tt->single_val.d = 0;
     tt++;
     
     // Parameter 'Comment 14'
@@ -1831,7 +1825,7 @@
     tt->descr = tdrpStrDup("Specify the min and max range when in range mode.");
     tt->help = tdrpStrDup("If false, we will use the start range and max range in the data.");
     tt->val_offset = (char *) &bscan_specify_range_limits - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'bscan_min_range_km'
@@ -1867,7 +1861,7 @@
     tt->descr = tdrpStrDup("Min altitude plotted (km).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &bscan_min_altitude_km - &_start_;
-    tt->single_val.d = 0;
+    tt->single_val.d = -0.5;
     tt++;
     
     // Parameter 'bscan_max_altitude_km'
@@ -1982,7 +1976,7 @@
     tt->descr = tdrpStrDup("Margin of data plotted beyond the surface (km).");
     tt->help = tdrpStrDup("We will censor the data beyond the surface gate, plus this range margin.");
     tt->val_offset = (char *) &bscan_surface_range_margin_km - &_start_;
-    tt->single_val.d = 0.05;
+    tt->single_val.d = 0.2;
     tt++;
     
     // Parameter 'bscan_max_field_val_below_surface'
@@ -2015,7 +2009,7 @@
     tt->descr = tdrpStrDup("Height of top margin in BSCAN mode (pixels).");
     tt->help = tdrpStrDup("Titles go in the top margin.");
     tt->val_offset = (char *) &bscan_top_margin - &_start_;
-    tt->single_val.i = 20;
+    tt->single_val.i = 40;
     tt++;
     
     // Parameter 'bscan_bottom_margin'
@@ -2027,7 +2021,7 @@
     tt->descr = tdrpStrDup("Height of bottom margin in BSCAN mode (pixels).");
     tt->help = tdrpStrDup("Time scale goes in the bottom margin.");
     tt->val_offset = (char *) &bscan_bottom_margin - &_start_;
-    tt->single_val.i = 20;
+    tt->single_val.i = 45;
     tt++;
     
     // Parameter 'bscan_left_margin'
@@ -2039,7 +2033,7 @@
     tt->descr = tdrpStrDup("Width of left margin in BSCAN mode (pixels).");
     tt->help = tdrpStrDup("Height scale goes in the left margin.");
     tt->val_offset = (char *) &bscan_left_margin - &_start_;
-    tt->single_val.i = 20;
+    tt->single_val.i = 50;
     tt++;
     
     // Parameter 'bscan_right_margin'
@@ -2051,7 +2045,7 @@
     tt->descr = tdrpStrDup("Width of right margin in BSCAN mode (pixels).");
     tt->help = tdrpStrDup("Height scale goes in the right margin.");
     tt->val_offset = (char *) &bscan_right_margin - &_start_;
-    tt->single_val.i = 20;
+    tt->single_val.i = 40;
     tt++;
     
     // Parameter 'bscan_axis_tick_len'
@@ -2063,7 +2057,7 @@
     tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &bscan_axis_tick_len - &_start_;
-    tt->single_val.i = 7;
+    tt->single_val.i = 6;
     tt++;
     
     // Parameter 'bscan_n_ticks_ideal'
@@ -2075,7 +2069,7 @@
     tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &bscan_n_ticks_ideal - &_start_;
-    tt->single_val.i = 7;
+    tt->single_val.i = 10;
     tt++;
     
     // Parameter 'bscan_text_margin'
@@ -2108,7 +2102,7 @@
     tt->descr = tdrpStrDup("Font size of center title (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &bscan_title_font_size - &_start_;
-    tt->single_val.i = 14;
+    tt->single_val.i = 12;
     tt++;
     
     // Parameter 'bscan_axis_label_font_size'
@@ -2120,7 +2114,7 @@
     tt->descr = tdrpStrDup("Font size of axis labels in bscan (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &bscan_axis_label_font_size - &_start_;
-    tt->single_val.i = 12;
+    tt->single_val.i = 10;
     tt++;
     
     // Parameter 'bscan_axis_values_font_size'
@@ -2132,7 +2126,7 @@
     tt->descr = tdrpStrDup("Font size of axis values (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &bscan_axis_values_font_size - &_start_;
-    tt->single_val.i = 10;
+    tt->single_val.i = 8;
     tt++;
     
     // Parameter 'bscan_axes_color'
@@ -2168,7 +2162,7 @@
     tt->descr = tdrpStrDup("Color of labels in bscan.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &bscan_labels_color - &_start_;
-    tt->single_val.s = tdrpStrDup("yellow");
+    tt->single_val.s = tdrpStrDup("white");
     tt++;
     
     // Parameter 'bscan_draw_time_grid_lines'
@@ -2180,7 +2174,7 @@
     tt->descr = tdrpStrDup("Option to draw grid lines across plot at regular time intervals.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &bscan_draw_time_grid_lines - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'bscan_draw_range_grid_lines'
@@ -2192,7 +2186,7 @@
     tt->descr = tdrpStrDup("Option to draw grid lines across plot at regular range intervals.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &bscan_draw_range_grid_lines - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'bscan_draw_instrument_height_line'
@@ -2204,7 +2198,7 @@
     tt->descr = tdrpStrDup("Option to draw a line for the instrument location.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &bscan_draw_instrument_height_line - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'bscan_instrument_height_color'
@@ -2237,7 +2231,7 @@
     tt->descr = tdrpStrDup("Option to plot distance as well as time on the time axis.");
     tt->help = tdrpStrDup("If true, extra tick marks will show the distance in km along the time axis, in addition to the time.");
     tt->val_offset = (char *) &bscan_add_distance_to_time_axis - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'bscan_n_segments_for_computing_distance'
@@ -2249,7 +2243,7 @@
     tt->descr = tdrpStrDup("Number of segments to be used for computing distance.");
     tt->help = tdrpStrDup("We divide the rays into this number of segments and then compute the distance travelled during each segment using the change in lat/lon position. We keep the number of segments reasonably small to avoid unnecessary CPU usage.");
     tt->val_offset = (char *) &bscan_n_segments_for_computing_distance - &_start_;
-    tt->single_val.i = 100;
+    tt->single_val.i = 50;
     tt++;
     
     // Parameter 'Comment 19'
@@ -2270,7 +2264,7 @@
     tt->descr = tdrpStrDup("Option to plot the starting lat/lon position as a legend.");
     tt->help = tdrpStrDup("This helps in geolocating the data from a mobile system.");
     tt->val_offset = (char *) &bscan_plot_starting_latlon_as_legend - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'bscan_starting_latlon_legend_pos'
@@ -2306,7 +2300,7 @@
     tt->descr = tdrpStrDup("Option to plot the mean track and speed in a legend.");
     tt->help = tdrpStrDup("This helps in geolocating the data from a mobile system.");
     tt->val_offset = (char *) &bscan_plot_mean_track_and_speed_as_legend - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'bscan_mean_track_and_speed_legend_pos'
@@ -2363,7 +2357,7 @@
     tt->descr = tdrpStrDup("Specified dwell time for archive mode (secs).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &bscan_archive_dwell_secs - &_start_;
-    tt->single_val.d = 0.25;
+    tt->single_val.d = 0.1;
     tt++;
     
     // Parameter 'bscan_dwell_stats'
@@ -2446,7 +2440,7 @@
     tt->descr = tdrpStrDup("Set the platform string.");
     tt->help = tdrpStrDup("If empty, no platform will be included.");
     tt->val_offset = (char *) &images_file_name_platform - &_start_;
-    tt->single_val.s = tdrpStrDup("HawkEye");
+    tt->single_val.s = tdrpStrDup("NSF_NCAR_GV_HCR");
     tt++;
     
     // Parameter 'images_file_name_extension'
@@ -2494,7 +2488,7 @@
     tt->descr = tdrpStrDup("Normally the time part include the seconds: YYYYMMDDHHMMSS.");
     tt->help = tdrpStrDup("If FALSE, the SS will be excluuded from the time part.");
     tt->val_offset = (char *) &images_include_seconds_in_time_part - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'images_include_field_label_in_file_name'
@@ -2518,7 +2512,7 @@
     tt->descr = tdrpStrDup("Option to write latest_data_info files when an image is created.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &images_write_latest_data_info - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'Comment 22'
@@ -2675,7 +2669,7 @@
     tt->descr = tdrpStrDup("Number of milliseconds to sleep between beams in simulated input mode.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &sim_sleep_msecs - &_start_;
-    tt->single_val.i = 20;
+    tt->single_val.i = 50;
     tt++;
     
     // Parameter 'sim_n_gates'

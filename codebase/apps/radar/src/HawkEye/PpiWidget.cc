@@ -700,7 +700,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
       siteName = _params.site_name;
     }
     string radarSiteLabel = radarName;
-    if (siteName.size() > 0) {
+    if (siteName.size() > 0 && siteName != radarName) {
       radarSiteLabel += "/";
       radarSiteLabel += siteName;
     }
