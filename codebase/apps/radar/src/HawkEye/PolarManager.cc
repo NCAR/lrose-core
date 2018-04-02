@@ -925,8 +925,17 @@ void PolarManager::setArchiveFileList(const vector<string> &list,
 {
 
   if (fromCommandLine && list.size() > 0) {
-    NcfRadxFile::getTimeFromPath(list[0], _archiveStartTime);
-    NcfRadxFile::getTimeFromPath(list[list.size()-1], _archiveEndTime);
+    // determine start and end time from file list
+    RadxTime startTime, endTime;
+    NcfRadxFile::getTimeFromPath(list[0], startTime);
+    NcfRadxFile::getTimeFromPath(list[list.size()-1], endTime);
+    // round to nearest five minutes
+    time_t startTimeSecs = startTime.utime();
+    startTimeSecs =  (startTimeSecs / 300) * 300;
+    time_t endTimeSecs = endTime.utime();
+    endTimeSecs =  (endTimeSecs / 300) * 300 + 300;
+    _archiveStartTime.set(startTimeSecs);
+    _archiveEndTime.set(endTimeSecs);
     _archiveScanIndex = 0;
   }
 
