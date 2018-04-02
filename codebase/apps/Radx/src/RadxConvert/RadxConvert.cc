@@ -538,6 +538,10 @@ int RadxConvert::_readFile(const string &readPath,
   }
   if (_params.override_primary_axis) {
     vol.setPrimaryAxis((Radx::PrimaryAxis_t) _params.primary_axis);
+    // if we change the primary axis, we need to reapply the georefs
+    if (_params.apply_georeference_corrections) {
+      vol.applyGeorefs();
+    }
   }
 
   return 0;
