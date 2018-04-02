@@ -162,6 +162,17 @@ public:
   static int makeDir(const char *path);
   static int makeDirRecurse(const char *path);
 
+  // Get the path of the executable binary that is running
+
+  static string getExecPath();
+
+  // Get the path of a file relative to the
+  // executable binary that is running
+  
+  static string getPathRelToExec(const string &relPath);
+
+  // constants
+
   static const int RADX_MAX_PATH_LEN = 1024;
   static const char *RADX_PATH_DELIM;
 
