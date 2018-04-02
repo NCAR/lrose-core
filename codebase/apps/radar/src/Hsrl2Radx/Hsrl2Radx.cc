@@ -787,6 +787,7 @@
    if (_params.override_site_name) {
      vol.setSiteName(_params.site_name);
    }
+   vol.setPrimaryAxis(Radx::PRIMARY_AXIS_Y_PRIME);
 
    // override start range and/or gate spacing
 
