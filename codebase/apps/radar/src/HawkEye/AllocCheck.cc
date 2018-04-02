@@ -107,7 +107,7 @@ void AllocCheck::doPrint(bool force)
 {
   
   if (_params != NULL &&
-      _params->debug < Params::DEBUG_EXTRA) {
+      _params->debug < Params::DEBUG_VERBOSE) {
     return;
   }
 
