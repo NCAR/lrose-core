@@ -203,7 +203,8 @@ private:
   RadxTime _guiEndTime;
   RadxTime _archiveEndTime;
 
-  QLabel *_plotTimeLabel;
+  QPushButton *_selectedTimeLabel;
+  RadxTime _selectedTime;
 
   QPushButton *_back1;
   QPushButton *_fwd1;
@@ -288,6 +289,7 @@ private:
   void _setGuiFromArchiveStartTime();
   void _setGuiFromArchiveEndTime();
   void _setArchiveTimesToDefaults();
+  void _setGuiFromSelectedTime();
 
   // time slider
 
@@ -357,8 +359,6 @@ private slots:
   void _timeSliderValueChanged(int value);
   void _timeSliderReleased();
   void _timeSliderPressed();
-  bool _timeSliderEvent(QEvent *event);
-  void _setTimeSliderToolTip(int pos);
   
   // images
 

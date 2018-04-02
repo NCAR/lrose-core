@@ -132,7 +132,7 @@ PolarManager::PolarManager(const Params &params,
   _archiveStartTimeEdit = NULL;
   _archiveEndTimeEdit = NULL;
 
-  _plotTimeLabel = NULL;
+  _selectedTimeLabel = NULL;
   
   _back1 = NULL;
   _fwd1 = NULL;
@@ -1107,7 +1107,7 @@ int PolarManager::_getArchiveData()
            _plotStartTime.getMin(),
            _plotStartTime.getSec());
 
-  _plotTimeLabel->setText(text);
+  _selectedTimeLabel->setText(text);
 
   // compute the fixed angles from the rays
   // so that we reflect reality
@@ -1789,16 +1789,19 @@ void PolarManager::_createTimeControl()
   _timeSlider->setFocusPolicy(Qt::StrongFocus);
   _timeSlider->setTickPosition(QSlider::TicksBothSides);
   _timeSlider->setTickInterval(1);
-  _timeSlider->setTracking(false);
+  _timeSlider->setTracking(true);
   _timeSlider->setSingleStep(1);
-  _timeSlider->setPageStep(1);
+  _timeSlider->setPageStep(0);
   _timeSlider->setFixedWidth(400);
   
   // active time
 
-  _plotTimeLabel = new QLabel("yyyy/MM/dd hh:mm:ss", _timePanel);
-  QPalette pal = _plotTimeLabel->palette();
-  pal.setColor(QPalette::WindowText, Qt::red);
+  // _selectedTimeLabel = new QLabel("yyyy/MM/dd hh:mm:ss", _timePanel);
+  _selectedTimeLabel = new QPushButton(_timePanel);
+  _selectedTimeLabel->setText("yyyy/MM/dd hh:mm:ss");
+  QPalette pal = _selectedTimeLabel->palette();
+  pal.setColor(QPalette::Active, QPalette::Button, Qt::cyan);
+  _selectedTimeLabel->setPalette(pal);
 
   // time editing
 
@@ -1851,16 +1854,14 @@ void PolarManager::_createTimeControl()
   QPushButton *acceptButton = new QPushButton(timeUpper);
   acceptButton->setText("Accept");
   QPalette acceptPalette = acceptButton->palette();
-  QColor acceptColor(0, 210, 0); // green
-  acceptPalette.setColor(QPalette::Active, QPalette::Button, acceptColor);
+  acceptPalette.setColor(QPalette::Active, QPalette::Button, Qt::green);
   acceptButton->setPalette(acceptPalette);
   connect(acceptButton, SIGNAL(clicked()), this, SLOT(_acceptGuiTimes()));
 
   QPushButton *cancelButton = new QPushButton(timeUpper);
   cancelButton->setText("Cancel");
   QPalette cancelPalette = cancelButton->palette();
-  QColor cancelColor(210, 0, 0); // red
-  cancelPalette.setColor(QPalette::Active, QPalette::Button, cancelColor);
+  cancelPalette.setColor(QPalette::Active, QPalette::Button, Qt::red);
   cancelButton->setPalette(cancelPalette);
   connect(cancelButton, SIGNAL(clicked()), this, SLOT(_cancelGuiTimes()));
     
@@ -1869,7 +1870,7 @@ void PolarManager::_createTimeControl()
   int stretch = 0;
   timeUpperLayout->addWidget(cancelButton, stretch, Qt::AlignRight);
   timeUpperLayout->addWidget(_archiveStartTimeEdit, stretch, Qt::AlignRight);
-  timeUpperLayout->addWidget(_plotTimeLabel, stretch, Qt::AlignCenter);
+  timeUpperLayout->addWidget(_selectedTimeLabel, stretch, Qt::AlignCenter);
   timeUpperLayout->addWidget(_archiveEndTimeEdit, stretch, Qt::AlignLeft);
   timeUpperLayout->addWidget(acceptButton, stretch, Qt::AlignLeft);
   
@@ -1920,19 +1921,6 @@ void PolarManager::_showTimeControl()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// time slider events
-
-bool PolarManager::_timeSliderEvent(QEvent *event) {
-  cerr << "11111111 time slider event, type: " << event->type() << endl;
-  // if (event->type() == QEvent::ToolTip) {
-  //   QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
-  //   QToolTip::showText(helpEvent->globalPos(), "johhny");
-  //   return true;
-  // }
-  return QWidget::event(event);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // print time slider actions for debugging
 
 void PolarManager::_timeSliderActionTriggered(int action) {
@@ -1971,45 +1959,52 @@ void PolarManager::_timeSliderActionTriggered(int action) {
 
 void PolarManager::_timeSliderValueChanged(int value) 
 {
-  // cerr << "5555555555555555 value: " << value << endl;
-  // _archiveScanIndex = _timeSlider->value();
-  _archiveScanIndex = value;
-  _setArchiveRetrievalPending();
+  if (value < 0 || value > (int) _archiveFileList.size() - 1) {
+    return;
+  }
+  // get path for this value
+  string path = _archiveFileList[value];
+  // get time for this path
+  RadxTime pathTime;
+  NcfRadxFile::getTimeFromPath(path, pathTime);
+  // set selected time
+  _selectedTime = pathTime;
+  _setGuiFromSelectedTime();
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Time slider changed, value: " << value << endl;
+  }
 }
 
 void PolarManager::_timeSliderReleased() 
 {
-  // int value = _timeSlider->value();
-  // QPoint pp = _timeSlider->pos();
-  // cerr << "6666666666666666 value: " << value << endl;
-  // cerr << "6666666666666666 pos x: " << pp.x() << endl;
-  // cerr << "6666666666666666 value: " << _timeSlider->value() << endl;
+  int value = _timeSlider->value();
+  if (value < 0 || value > (int) _archiveFileList.size() - 1) {
+    return;
+  }
+  // get path for this value
+  string path = _archiveFileList[value];
+  // get time for this path
+  RadxTime pathTime;
+  NcfRadxFile::getTimeFromPath(path, pathTime);
+  // set selected time
+  _selectedTime = pathTime;
+  _setGuiFromSelectedTime();
+  // request data
+  if (_archiveScanIndex != value) {
+    _archiveScanIndex = value;
+    _setArchiveRetrievalPending();
+  }
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Time slider released, value: " << value << endl;
+  }
 }
 
 void PolarManager::_timeSliderPressed() 
 {
-
-  // int value = _timeSlider->value();
-  // QPoint pp = _timeSlider->pos();
-  // cerr << "7777777777777777777 value: " << value << endl;
-  // cerr << "7777777777777777777 pos x: " << pp.x() << endl;
-  // cerr << "7777777777777777777 value: " << _timeSlider->value() << endl;
-
-}
-
-
-void PolarManager::_setTimeSliderToolTip(int pos)
-{
-
-  if (pos < 0 || pos > (int) _archiveFileList.size() - 1) {
-    return;
+  int value = _timeSlider->value();
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Time slider released, value: " << value << endl;
   }
-  RadxTime pathTime;
-  NcfRadxFile::getTimeFromPath(_archiveFileList[pos], pathTime);
-  char text[1024];
-  snprintf(text, 1024, "%.2d:%.2d:%.2d",
-           pathTime.getHour(), pathTime.getMin(), pathTime.getSec());
-  _timeSlider->setToolTip(text);
 }
 
 ////////////////////////////////////////////////////
@@ -2051,7 +2046,6 @@ void PolarManager::_openFile()
     vector<string> list;
     list.push_back(name);
     setArchiveFileList(list, false);
-    // _keepFixedAngle = true;
 
     try {
       _getArchiveData();
@@ -2152,6 +2146,22 @@ void PolarManager::_setGuiFromArchiveEndTime()
   QDateTime datetime(date, time);
   _archiveEndTimeEdit->setDateTime(datetime);
   _guiEndTime = _archiveEndTime;
+}
+
+////////////////////////////////////////////////////////
+// set gui selected time label
+
+void PolarManager::_setGuiFromSelectedTime()
+{
+  char text[128];
+  snprintf(text, 128, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
+           _selectedTime.getYear(),
+           _selectedTime.getMonth(),
+           _selectedTime.getDay(),
+           _selectedTime.getHour(),
+           _selectedTime.getMin(),
+           _selectedTime.getSec());
+  _selectedTimeLabel->setText(text);
 }
 
 ////////////////////////////////////////////////////////
