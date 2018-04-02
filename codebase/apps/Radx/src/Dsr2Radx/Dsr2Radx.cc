@@ -795,6 +795,22 @@ int Dsr2Radx::_processVol()
     _vol.applyElevationOffset(_params.elevation_offset);
   }
 
+  // if requested, change some of the characteristics
+  
+  if (_params.override_instrument_type) {
+    _vol.setInstrumentType((Radx::InstrumentType_t) _params.instrument_type);
+  }
+  if (_params.override_platform_type) {
+    _vol.setPlatformType((Radx::PlatformType_t) _params.platform_type);
+  }
+  if (_params.override_primary_axis) {
+    _vol.setPrimaryAxis((Radx::PrimaryAxis_t) _params.primary_axis);
+    // if we change the primary axis, we need to reapply the georefs
+    if (_params.apply_georeference_corrections) {
+      _vol.applyGeorefs();
+    }
+  }
+
   // write the files
 
   if (_doWrite()) {
