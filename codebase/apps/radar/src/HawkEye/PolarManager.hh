@@ -65,7 +65,6 @@ class QGroupBox;
 class QGridLayout;
 class QDateTime;
 class QDateTimeEdit;
-class ColorBar;
 class QFileDialog;
 
 class DisplayField;

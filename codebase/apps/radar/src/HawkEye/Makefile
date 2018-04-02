@@ -55,7 +55,6 @@ HDRS = \
 	BscanBeam.hh \
 	BscanManager.hh \
 	BscanWidget.hh \
-	ColorBar.hh \
 	ColorMap.hh \
 	DisplayManager.hh \
 	FieldRenderer.hh \
@@ -94,7 +93,6 @@ NORM_SRCS = \
 MOC_SRCS = \
 	BscanManager.cc \
 	BscanWidget.cc \
-	ColorBar.cc \
 	FieldRenderer.cc \
 	DisplayManager.cc \
 	PolarManager.cc \
@@ -107,7 +105,6 @@ MOC_SRCS = \
 MOC_OUTPUT = \
 	moc_BscanManager.cpp \
 	moc_BscanWidget.cpp \
-	moc_ColorBar.cpp \
 	moc_DisplayManager.cpp \
 	moc_FieldRenderer.cpp \
 	moc_PolarManager.cpp \

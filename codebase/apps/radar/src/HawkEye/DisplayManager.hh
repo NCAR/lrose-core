@@ -68,7 +68,6 @@ class QLineEdit;
 class QSlider;
 class QWidget;
 
-class ColorBar;
 class DisplayField;
 class Reader;
 
@@ -151,10 +150,6 @@ protected:
 
   const vector<DisplayField *> &_fields;
   bool _haveFilteredFields;
-
-  // colors
-  
-  ColorBar *_colorBar;
 
   // windows
 

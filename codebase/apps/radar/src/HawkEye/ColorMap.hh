@@ -46,8 +46,7 @@ using namespace std;
 
 /// A color map manager. It holds the RGB values for each entry in the
 /// color map, and will map a data value into the color map. It will also
-/// provide the complete color tables, which is useful to clients such
-/// as plotlib::ColorBar. 
+/// provide the complete color tables, which is useful to clients.
 /// If a color is referenced as an int, it will hae the range 0-255. If it is 
 /// referenced as a float or a double, it will be in the range 0-1. 
 /// The internal tables are stored in the range of 0-255, so when float values

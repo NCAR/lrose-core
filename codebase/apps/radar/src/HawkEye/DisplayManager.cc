@@ -40,7 +40,6 @@
 #include "DisplayField.hh"
 #include "DisplayElevation.hh"
 #include "ColorMap.hh"
-#include "ColorBar.hh" 
 #include "Params.hh"
 #include "Reader.hh"
 
