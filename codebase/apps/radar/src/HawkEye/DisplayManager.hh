@@ -148,7 +148,7 @@ protected:
 
   // data fields
 
-  const vector<DisplayField *> &_fields;
+  vector<DisplayField *> _fields;
   bool _haveFilteredFields;
 
   // windows

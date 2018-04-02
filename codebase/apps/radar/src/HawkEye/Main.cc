@@ -33,11 +33,13 @@
 
 #include "HawkEye.hh"
 #include <QApplication>
+#include <toolsa/uusleep.h>
 
 // file scope
 
 static void tidy_and_exit (int sig);
 static HawkEye *Prog;
+static QApplication *app;
 
 // override QApplication exception handling
 // via notify
@@ -62,7 +64,7 @@ int main(int argc, char **argv)
 
   try {
     
-    QApplication app(argc, argv);
+    app = new QApplication(argc, argv);
     HawkEye *Prog;
     Prog = new HawkEye(argc, argv);
     if (!Prog->OK) {
@@ -71,7 +73,7 @@ int main(int argc, char **argv)
     
     // run it
     
-    int iret = Prog->Run(app);
+    int iret = Prog->Run(*app);
     
     // clean up
     
@@ -79,7 +81,7 @@ int main(int argc, char **argv)
     return (iret);
     
   } catch (std::bad_alloc &a) {
-    cerr << "MMMMMMMMMMMMMMMmm bad alloc: " << a.what() << endl;
+    cerr << ">>>>> bad alloc: " << a.what() << endl;
   }
 
 }
@@ -89,6 +91,8 @@ int main(int argc, char **argv)
 static void tidy_and_exit (int sig)
 
 {
+  app->exit();
   delete(Prog);
+  umsleep(1000);
   exit(sig);
 }

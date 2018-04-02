@@ -1007,9 +1007,9 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("color_scale_dir");
     tt->descr = tdrpStrDup("Directory for color scales");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.");
     tt->val_offset = (char *) &color_scale_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("./colorscales");
+    tt->single_val.s = tdrpStrDup("../share/color_scales");
     tt++;
     
     // Parameter 'fields'

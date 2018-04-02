@@ -44,6 +44,7 @@
 #include "Params.hh"
 #include "Reader.hh"
 #include "AllocCheck.hh"
+#include <Radx/RadxPath.hh>
 
 #include <string>
 #include <iostream>
@@ -273,6 +274,27 @@ int HawkEye::_setupReader()
 int HawkEye::_setupDisplayFields()
 {
 
+  // check for color map location
+  
+  string colorMapDir = _params.color_scale_dir;
+  RadxPath mapDir(_params.color_scale_dir);
+  if (!mapDir.dirExists()) {
+    colorMapDir = RadxPath::getPathRelToExec(_params.color_scale_dir);
+    mapDir.setPath(colorMapDir);
+    if (!mapDir.dirExists()) {
+      cerr << "ERROR - HawkEye" << endl;
+      cerr << "  Cannot find color scale directory" << endl;
+      cerr << "  Primary is: " << _params.color_scale_dir << endl;
+      cerr << "  Secondary is relative to binary: " << colorMapDir << endl;
+      return -1;
+    }
+    if (_params.debug) {
+      cerr << "NOTE - using color scales relative to executable location" << endl;
+      cerr << "  Exec path: " << RadxPath::getExecPath() << endl;
+      cerr << "  Color scale dir:: " << colorMapDir << endl;
+    }
+  }
+
   // we interleave unfiltered fields and filtered fields
 
   for (int ifield = 0; ifield < _params.fields_n; ifield++) {
@@ -296,10 +318,10 @@ int HawkEye::_setupDisplayFields()
       cerr << "  Ignoring" << endl;
       continue;
     }
-    
-    // create color map
 
-    string colorMapPath = _params.color_scale_dir;
+    // create color map
+    
+    string colorMapPath = colorMapDir;
     colorMapPath += PATH_DELIM;
     colorMapPath += pfld.color_map;
     ColorMap map;
