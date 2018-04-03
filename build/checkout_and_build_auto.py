@@ -46,7 +46,7 @@ def main():
 
     usage = "usage: %prog [options]"
     homeDir = os.environ['HOME']
-    prefixDirDefault = os.path.join(homeDir, 'lrose_auto')
+    prefixDirDefault = os.path.join(homeDir, 'lrose')
     buildDirDefault = '/tmp/lrose_build'
     parser = OptionParser(usage)
     parser.add_option('--clean',
