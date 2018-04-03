@@ -1,20 +1,31 @@
-## Building using AUTOMAKE and CONFIGURE
+## Building LROSE using AUTOMAKE and CONFIGURE
 
-### Choose your install directory (prefix)
+This documents how to check out and build an LROSE release
+using automake and configure.
 
-The default is: `${HOME}/lrose`
-
-### Check out lrose core
+This uses the script:
 
 ```
+  checkout_and_build_auto.py
+```
+
+### 1. Choose your install directory (prefix)
+
+The default install location is: `${HOME}/lrose`
+
+### 2. Check out lrose core
+
+```
+  mkdir ~/git
+  cd ~/git
   git clone https://github.com/NCAR/lrose-core
 ```
 
-### Get the usage
+### 3. Check the usage
 
 ```
-  cd lrose-core
-  ./build/checkout_and_build_autp.py --help
+  cd ~/git/lrose-core
+  ./build/checkout_and_build_auto.py --help
 ```
 
 `package` defaults to `lrose`
@@ -27,19 +38,19 @@ Available packages are:
   lrose lrose-blaze radx titan cidd
 ```
 
-### Run the auto checkout and build
+### 4. Run the checkout and auto build
 
-The following example is for the lrose-blaze release:
+The following example installs the lrose-blaze release in `~/lrose`:
 
 ```
-  cd lrose-core
+  cd ~/git/lrose-core
   ./build/checkout_and_build_autp.py --debug --prefix ~/lrose --package lrose-blaze
 ```
 
-Another example - build lrose and install in /usr/local/lrose:
+Another example - build lrose and install in `/usr/local/lrose`:
 
 ```
-  cd lrose-core
+  cd ~/git/lrose-core
   ./build/checkout_and_build_autp.py --debug --prefix /usr/local/lrose --package lrose
 ```
 
