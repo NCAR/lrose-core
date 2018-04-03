@@ -26,6 +26,8 @@ def main():
     thisScriptName = os.path.basename(__file__)
 
     global options
+    global package
+    global prefix
     global releaseName
     global netcdfDir
     global displaysDir
@@ -57,10 +59,10 @@ def main():
                       help='Set verbose debugging on')
     parser.add_option('--package',
                       dest='package', default='lrose',
-                      help='Package name. Options are: " +
-                      "lrose (default), cidd, radx, titan, lrose-blaze')
+                      help='Package name. Options are: ' + \
+                      'lrose (default), cidd, radx, titan, lrose-blaze')
     parser.add_option('--prefix',
-                      dest='prefixDir', default=prefixDirDefault,
+                      dest='prefix', default=prefixDirDefault,
                       help='Install directory')
     parser.add_option('--buildDir',
                       dest='buildDir', default=buildDirDefault,
@@ -89,6 +91,9 @@ def main():
     elif (options.debug):
         debugStr = " --debug "
 
+    package = options.package
+    prefix = options.prefix
+
     # runtime
 
     now = time.gmtime()
@@ -106,14 +111,14 @@ def main():
     releaseName = options.package + "-" + versionStr + ".src"
     
     tmpBinDir = os.path.join(tmpDir, 'bin')
-    binDir = os.path.join(options.prefixDir, 'bin')
-    libDir = os.path.join(options.prefixDir, 'lib')
-    includeDir = os.path.join(options.prefixDir, 'include')
-    shareDir = os.path.join(options.prefixDir, 'share')
+    binDir = os.path.join(prefix, 'bin')
+    libDir = os.path.join(prefix, 'lib')
+    includeDir = os.path.join(prefix, 'include')
+    shareDir = os.path.join(prefix, 'share')
     
     if (options.debug == True):
         print >>sys.stderr, "Running %s:" % thisScriptName
-        print >>sys.stderr, "  package: ", options.package
+        print >>sys.stderr, "  package: ", package
         print >>sys.stderr, "  releaseName: ", releaseName
         print >>sys.stderr, "  static: ", options.static
         print >>sys.stderr, "  buildDir: ", options.buildDir
@@ -121,67 +126,72 @@ def main():
         print >>sys.stderr, "  codebaseDir: ", codebaseDir
         print >>sys.stderr, "  displaysDir: ", displaysDir
         print >>sys.stderr, "  netcdfDir: ", netcdfDir
-        print >>sys.stderr, "  prefixDir: ", options.prefixDir
+        print >>sys.stderr, "  prefixDir: ", prefix
         print >>sys.stderr, "  binDir: ", binDir
         print >>sys.stderr, "  libDir: ", libDir
         print >>sys.stderr, "  includeDir: ", includeDir
         print >>sys.stderr, "  shareDir: ", shareDir
 
-    os.exit(0)
-        
     # create build dir
     
-    createBuildDir()
+    # createBuildDir()
 
     # make tmp dirs
 
-    os.makedirs(tmpDir)
-    os.makedirs(tmpBinDir)
+    try:
+        os.makedirs(tmpDir)
+        os.makedirs(tmpBinDir)
+    except:
+        print >>sys.stderr, "  note - dirs already exist"
 
     # get repos from git
 
-    gitCheckout()
+    # gitCheckout()
 
     # install the distribution-specific makefiles
 
-    os.chdir(codebaseDir)
-    shellCmd("./make_bin/install_package_makefiles.py --package " + 
-               options.package + " --codedir .")
+    #os.chdir(codebaseDir)
+    #shellCmd("./make_bin/install_package_makefiles.py --package " + 
+    #           package + " --codedir .")
 
     # trim libs and apps to those required by distribution makefiles
 
-    if (options.package != "lrose"):
-        trimToMakefiles("libs")
-        trimToMakefiles("apps")
+    #if (package != "lrose"):
+    #    trimToMakefiles("libs")
+    #    trimToMakefiles("apps")
 
     # set up autoconf
 
-    setupAutoconf()
+    #setupAutoconf()
 
     # create the release information file
     
-    createReleaseInfoFile()
+    #createReleaseInfoFile()
 
     # run qmake for QT apps to create moc_ files
 
-    hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
-    createQtMocFiles(hawkEyeDir)
+    #hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
+    #createQtMocFiles(hawkEyeDir)
 
     # prune any empty directories
 
-    prune(codebaseDir)
+    #prune(codebaseDir)
 
     # build netcdf support
     
-    buildNetcdf()
+    #buildNetcdf()
 
     # build the package
 
-    buildPackage()
+    # buildPackage()
 
     # perform the install
 
-    doInstall();
+    # doInstall();
+
+    # check the install
+
+    checkInstall()
 
     # delete the tmp dir
 
@@ -240,15 +250,15 @@ def setupAutoconf():
     shutil.copy("../build/Makefile.top", "Makefile")
 
     if (options.static):
-        if (options.package == "cidd"):
+        if (package == "cidd"):
              shutil.copy("../build/configure.base.cidd", "./configure.base")
         else:
              shutil.copy("../build/configure.base", "./configure.base")
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base" +
-                 " --pkg " + options.package + debugStr)
+                 " --pkg " + package + debugStr)
     else:
-        if (options.package == "cidd"):
+        if (package == "cidd"):
             shutil.copy("../build/configure.base.shared.cidd",
                         "./configure.base.shared")
         else:
@@ -256,7 +266,7 @@ def setupAutoconf():
                         "./configure.base.shared")
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base.shared --shared" +
-                 " --pkg " + options.package + debugStr)
+                 " --pkg " + package + debugStr)
 
 ########################################################################
 # Run qmake for QT apps such as HawkEye to create _moc files
@@ -284,7 +294,7 @@ def createReleaseInfoFile():
 
     # write release info
 
-    info.write("package:" + options.package + "\n")
+    info.write("package:" + package + "\n")
     info.write("version:" + versionStr + "\n")
     info.write("release:" + releaseName + "\n")
 
@@ -399,7 +409,7 @@ def trimToMakefiles(subDir):
 def buildNetcdf():
 
     os.chdir(netcdfDir)
-    if (options.package == "cidd"):
+    if (package == "cidd"):
         shellCmd("./build_and_install_netcdf.m32 -x " + tmpDir)
     else:
         if platform == "darwin":
@@ -413,12 +423,12 @@ def buildNetcdf():
 def buildPackage():
 
     os.chdir(coreDir)
-    if (options.installScripts):
-        shellCmd("./build/build_lrose -s -x " + tmpDir + 
-                 " -p " + options.package)
-    else:
-        shellCmd("./build/build_lrose -x " + tmpDir +
-                 " -p " + options.package)
+    # if (options.installScripts):
+    #     shellCmd("./build/build_lrose -s -x " + tmpDir + 
+    #              " -p " + package)
+    # else:
+    #     shellCmd("./build/build_lrose -x " + tmpDir +
+    #              " -p " + package)
 
     # detect which dynamic libs are needed
     # copy the dynamic libraries into runtime area:
@@ -427,7 +437,7 @@ def buildPackage():
     os.chdir(coreDir)
     shellCmd("./codebase/make_bin/installOriginLibFiles.py " + \
              " --binDir " + tmpBinDir +
-             "--relDir " + package + "_runtime_libs --debug")
+             " --relDir " + package + "_runtime_libs --debug")
 
 ########################################################################
 # perform install
@@ -436,22 +446,25 @@ def doInstall():
 
     # make target dirs
 
-    os.makedirs(binDir)
-    os.makedirs(libDir)
-    os.makedirs(includeDir)
-    os.makedirs(shareDir)
+    try:
+        os.makedirs(binDir)
+        os.makedirs(libDir)
+        os.makedirs(includeDir)
+        os.makedirs(shareDir)
+    except:
+        print >>sys.stderr, "  note - dirs already exist"
     
     # install docs etc
     
     os.chdir(coreDir)
 
-    shellCmd("rsync -av LICENSE.txt " + prefixDir)
-    shellCmd("rsync -av release_notes " + prefixDir)
-    shellCmd("rsync -av docs " + prefixDir)
+    shellCmd("rsync -av LICENSE.txt " + prefix)
+    shellCmd("rsync -av release_notes " + prefix)
+    shellCmd("rsync -av docs " + prefix)
 
     if (package == "cidd"):
         shellCmd("rsync -av ./codebase/apps/cidd/src/CIDD/example_scripts " +
-                 options.prefixDir)
+                 options.prefix)
 
     # install color scales
 
@@ -462,9 +475,33 @@ def doInstall():
 
     os.chdir(tmpDir)
 
-    shellCmd("rsync -av bin " + prefixDir)
-    shellCmd("rsync -av lib " + prefixDir)
-    shellCmd("rsync -av include " + prefixDir)
+    shellCmd("rsync -av bin " + prefix)
+    shellCmd("rsync -av lib " + prefix)
+    shellCmd("rsync -av include " + prefix)
+
+########################################################################
+# check the install
+
+def checkInstall():
+
+    os.chdir(coreDir)
+    print("============= Checking libs for " + package + " =============")
+    shellCmd("./codebase/make_bin/check_libs.py " + \
+             "--listPath ./build/libs_check_list." + package + " " + \
+             "--libDir " + prefix + "/lib " + \
+             "--label " + package + " --maxAge 3600")
+    print("====================================================")
+    print("============= Checking apps for " + package + " =============")
+    shellCmd("./codebase/make_bin/check_apps.py " + \
+             "--listPath ./build/apps_check_list." + package + " " + \
+             "--appDir " + prefix + "/bin " + \
+             "--label " + package + " --maxAge 3600")
+    print("====================================================")
+    
+    print("  **************************************************")
+    print("  *** Done building auto release ***")
+    print("  *** installed in dir: " + prefix + " ***")
+    print("  **************************************************")
 
 ########################################################################
 # prune empty dirs
