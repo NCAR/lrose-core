@@ -154,8 +154,6 @@ protected:
   // windows
 
   QFrame *_main;
-  QFrame *_upperMain;
-  QFrame *_lowerMain;
 
   // actions
   

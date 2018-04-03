@@ -128,7 +128,7 @@ void DisplayManager::_createStatusPanel()
 
   // status panel - rows of label value pairs
   
-  _statusPanel = new QGroupBox(_upperMain);
+  _statusPanel = new QGroupBox(_main);
   _statusLayout = new QGridLayout(_statusPanel);
   _statusLayout->setVerticalSpacing(5);
 
@@ -371,7 +371,7 @@ void DisplayManager::_createFieldPanel()
   int fsize4 = _params.label_font_size + 4;
   int fsize6 = _params.label_font_size + 6;
 
-  _fieldPanel = new QGroupBox(_upperMain);
+  _fieldPanel = new QGroupBox(_main);
   _fieldGroup = new QButtonGroup;
   _fieldsLayout = new QGridLayout(_fieldPanel);
   _fieldsLayout->setVerticalSpacing(5);

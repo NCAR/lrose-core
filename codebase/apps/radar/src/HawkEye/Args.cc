@@ -106,6 +106,15 @@ int Args::parse (const int argc, const char **argv)
       sprintf(tmp_str, "input_mode = DSR_FMQ_INPUT;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-color_scales")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "color_scale_dir = \"%s\";", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
     } else if (!strcmp(argv[i], "-fmq_url")) {
       
       if (i < argc - 1) {
@@ -281,6 +290,7 @@ void Args::_usage(ostream &out)
       << "       [ --, -h, -help, -man ] produce this list.\n"
       << "       [ -archive_url ?] URL for data in archive mode\n"
       << "       [ -bscan ] run in BSCAN mode\n"
+      << "       [ -color_scales ? ] specify color scale directory\n"
       << "       [ -debug, -d ] print debug messages\n"
       << "       [ -f ? ?] list of files to process in archive mode\n"
       << "       [ -fmq_mode] set forces DSR_FMQ_INPUT mode\n"

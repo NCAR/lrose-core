@@ -458,29 +458,11 @@ void PolarManager::_setupWindows()
   // set up windows
 
   _main = new QFrame(this);
-  QVBoxLayout *mainLayout = new QVBoxLayout;
+  QHBoxLayout *mainLayout = new QHBoxLayout;
   _main->setLayout(mainLayout);
   mainLayout->setSpacing(5);
   mainLayout->setContentsMargins(3,3,3,3);
-  // mainLayout->setAlignment(Qt::AlignTop);
-  
   setCentralWidget(_main);
-
-  _upperMain = new QFrame(_main);
-  QHBoxLayout *upperLayout = new QHBoxLayout;
-  upperLayout->setSpacing(5);
-  upperLayout->setContentsMargins(3,3,3,3);
-  // upperLayout->setAlignment(Qt::AlignTop);
-  _upperMain->setLayout(upperLayout);
-  
-  _lowerMain = new QFrame(_main);
-  QVBoxLayout *lowerLayout = new QVBoxLayout;
-  lowerLayout->setSpacing(5);
-  lowerLayout->setContentsMargins(3,3,3,3);
-  // lowerLayout->setAlignment(Qt::AlignBottom);
-  _lowerMain->setLayout(lowerLayout);
-  
-  mainLayout->addWidget(_upperMain);
 
   // ppi window
 
@@ -521,15 +503,15 @@ void PolarManager::_setupWindows()
 
   // add widgets
 
-  upperLayout->addWidget(_statusPanel);
-  upperLayout->addWidget(_fieldPanel);
-  upperLayout->addWidget(_ppiFrame);
+  mainLayout->addWidget(_statusPanel);
+  mainLayout->addWidget(_fieldPanel);
+  mainLayout->addWidget(_ppiFrame);
 
   // sweep panel
 
   _createSweepPanel();
   if (_archiveMode) {
-    upperLayout->addWidget(_sweepPanel);
+    mainLayout->addWidget(_sweepPanel);
   }
 
   // time panel
