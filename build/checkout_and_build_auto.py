@@ -16,6 +16,7 @@ from datetime import datetime
 from datetime import date
 from datetime import timedelta
 import glob
+from sys import platform
 
 def main():
 
@@ -25,10 +26,17 @@ def main():
     thisScriptName = os.path.basename(__file__)
 
     global options
-    global releaseDir
-    global tmpDir
+    global releaseName
+    global netcdfDir
+    global displaysDir
     global coreDir
     global codebaseDir
+    global tmpDir
+    global tmpBinDir
+    global binDir
+    global libDir
+    global includeDir
+    global shareDir
     global versionStr
     global debugStr
 
@@ -36,7 +44,8 @@ def main():
 
     usage = "usage: %prog [options]"
     homeDir = os.environ['HOME']
-    buildDirDefault = os.path.join('/tmp/lrose_build')
+    prefixDirDefault = os.path.join(homeDir, 'lrose_auto')
+    buildDirDefault = '/tmp/lrose_build'
     parser = OptionParser(usage)
     parser.add_option('--debug',
                       dest='debug', default=True,
@@ -48,14 +57,22 @@ def main():
                       help='Set verbose debugging on')
     parser.add_option('--package',
                       dest='package', default='lrose',
-                      help='Package name. Options are lrose (default), cidd, radx, titan, lrose-blaze')
+                      help='Package name. Options are: " +
+                      "lrose (default), cidd, radx, titan, lrose-blaze')
+    parser.add_option('--prefix',
+                      dest='prefixDir', default=prefixDirDefault,
+                      help='Install directory')
     parser.add_option('--buildDir',
                       dest='buildDir', default=buildDirDefault,
                       help='Temporary build dir')
     parser.add_option('--static',
                       dest='static', default=False,
                       action="store_true",
-                      help='produce distribution for static linking, default is dynamic')
+                      help='use static linking, default is dynamic')
+    parser.add_option('--scripts',
+                      dest='installScripts', default=False,
+                      action="store_true",
+                      help='Install scripts as well as binaries')
 
     (options, args) = parser.parse_args()
     
@@ -80,19 +97,46 @@ def main():
     versionStr = nowTime.strftime("%Y%m%d")
 
     # set directories
-
-    coreDir = os.path.join(buildDir, "lrose-core")
+    
+    tmpDir = os.path.join(options.buildDir, 'tmp')
+    coreDir = os.path.join(options.buildDir, "lrose-core")
+    displaysDir = os.path.join(options.buildDir, "lrose-displays")
+    netcdfDir = os.path.join(options.buildDir, "lrose-netcdf")
     codebaseDir = os.path.join(coreDir, "codebase")
-
+    releaseName = options.package + "-" + versionStr + ".src"
+    
+    tmpBinDir = os.path.join(tmpDir, 'bin')
+    binDir = os.path.join(options.prefixDir, 'bin')
+    libDir = os.path.join(options.prefixDir, 'lib')
+    includeDir = os.path.join(options.prefixDir, 'include')
+    shareDir = os.path.join(options.prefixDir, 'share')
+    
     if (options.debug == True):
         print >>sys.stderr, "Running %s:" % thisScriptName
         print >>sys.stderr, "  package: ", options.package
-        print >>sys.stderr, "  buildDir: ", buildDir
+        print >>sys.stderr, "  releaseName: ", releaseName
         print >>sys.stderr, "  static: ", options.static
+        print >>sys.stderr, "  buildDir: ", options.buildDir
+        print >>sys.stderr, "  coreDir: ", coreDir
+        print >>sys.stderr, "  codebaseDir: ", codebaseDir
+        print >>sys.stderr, "  displaysDir: ", displaysDir
+        print >>sys.stderr, "  netcdfDir: ", netcdfDir
+        print >>sys.stderr, "  prefixDir: ", options.prefixDir
+        print >>sys.stderr, "  binDir: ", binDir
+        print >>sys.stderr, "  libDir: ", libDir
+        print >>sys.stderr, "  includeDir: ", includeDir
+        print >>sys.stderr, "  shareDir: ", shareDir
+
+    os.exit(0)
         
     # create build dir
     
     createBuildDir()
+
+    # make tmp dirs
+
+    os.makedirs(tmpDir)
+    os.makedirs(tmpBinDir)
 
     # get repos from git
 
@@ -127,9 +171,21 @@ def main():
 
     prune(codebaseDir)
 
+    # build netcdf support
+    
+    buildNetcdf()
+
+    # build the package
+
+    buildPackage()
+
+    # perform the install
+
+    doInstall();
+
     # delete the tmp dir
 
-    # shutil.rmtree(tmpDir)
+    # shutil.rmtree(options.buildDir)
 
     sys.exit(0)
 
@@ -140,11 +196,12 @@ def createBuildDir():
 
     # check if exists already
 
-    if (os.path.isdir(buildDir)):
+    if (os.path.isdir(options.buildDir)):
 
-        print("WARNING: you are about to remove all contents in dir: " + buildDir)
+        print("WARNING: you are about to remove all contents in dir: " + 
+              options.buildDir)
         print("===============================================")
-        contents = os.listdir(buildDir)
+        contents = os.listdir(options.buildDir)
         for filename in contents:
             print("  " + filename)
         print("===============================================")
@@ -155,20 +212,21 @@ def createBuildDir():
                 
         # remove it
 
-        shutil.rmtree(buildDir)
+        shutil.rmtree(options.buildDir)
 
     # make it clean
 
-    os.makedirs(buildDir)
+    os.makedirs(options.buildDir)
 
 ########################################################################
 # check out repos from git
 
 def gitCheckout():
 
-    os.chdir(buildDir)
+    os.chdir(options.buildDir)
     shellCmd("git clone https://github.com/NCAR/lrose-core")
     shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
+    shellCmd("git clone https://github.com/NCAR/lrose-displays")
 
 ########################################################################
 # set up autoconf for configure etc
@@ -191,9 +249,11 @@ def setupAutoconf():
                  " --pkg " + options.package + debugStr)
     else:
         if (options.package == "cidd"):
-            shutil.copy("../build/configure.base.shared.cidd", "./configure.base.shared")
+            shutil.copy("../build/configure.base.shared.cidd",
+                        "./configure.base.shared")
         else:
-            shutil.copy("../build/configure.base.shared", "./configure.base.shared")
+            shutil.copy("../build/configure.base.shared",
+                        "./configure.base.shared")
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base.shared --shared" +
                  " --pkg " + options.package + debugStr)
@@ -214,7 +274,8 @@ def createQtMocFiles(appDir):
 def createReleaseInfoFile():
 
     # go to core dir
-    os.chdir(coreDir)
+
+    os.chdir(tmpDir)
 
     # open info file
 
@@ -248,7 +309,6 @@ def getValueListForKey(path, key):
     except IOError as e:
         print >>sys.stderr, "ERROR - ", thisScriptName
         print >>sys.stderr, "  Cannot open file:", path
-#        print >>sys.stderr, "  dir: ", options.dir
         return valueList
 
     lines = fp.readlines()
@@ -334,28 +394,78 @@ def trimToMakefiles(subDir):
                 trimToMakefiles(os.path.join(subDir, entry))
 
 ########################################################################
-# Run a command in a shell, wait for it to complete
+# build netCDF
 
-def shellCmd(cmd):
+def buildNetcdf():
 
-    if (options.debug):
-        print >>sys.stderr, "running cmd:", cmd, " ....."
-    
-    try:
-        retcode = subprocess.check_call(cmd, shell=True)
-        if retcode != 0:
-            print >>sys.stderr, "Child exited with code: ", retcode
-            sys.exit(1)
+    os.chdir(netcdfDir)
+    if (options.package == "cidd"):
+        shellCmd("./build_and_install_netcdf.m32 -x " + tmpDir)
+    else:
+        if platform == "darwin":
+            shellCmd("./build_and_install_netcdf.osx -x " + tmpDir)
         else:
-            if (options.verbose):
-                print >>sys.stderr, "Child returned code: ", retcode
-    except OSError, e:
-        print >>sys.stderr, "Execution failed:", e
-        sys.exit(1)
+            shellCmd("./build_and_install_netcdf -x " + tmpDir)
 
-    if (options.debug):
-        print >>sys.stderr, ".... done"
+########################################################################
+# build package
+
+def buildPackage():
+
+    os.chdir(coreDir)
+    if (options.installScripts):
+        shellCmd("./build/build_lrose -s -x " + tmpDir + 
+                 " -p " + options.package)
+    else:
+        shellCmd("./build/build_lrose -x " + tmpDir +
+                 " -p " + options.package)
+
+    # detect which dynamic libs are needed
+    # copy the dynamic libraries into runtime area:
+    #     $prefix/bin/${package}_runtime_libs
+
+    os.chdir(coreDir)
+    shellCmd("./codebase/make_bin/installOriginLibFiles.py " + \
+             " --binDir " + tmpBinDir +
+             "--relDir " + package + "_runtime_libs --debug")
+
+########################################################################
+# perform install
+
+def doInstall():
+
+    # make target dirs
+
+    os.makedirs(binDir)
+    os.makedirs(libDir)
+    os.makedirs(includeDir)
+    os.makedirs(shareDir)
     
+    # install docs etc
+    
+    os.chdir(coreDir)
+
+    shellCmd("rsync -av LICENSE.txt " + prefixDir)
+    shellCmd("rsync -av release_notes " + prefixDir)
+    shellCmd("rsync -av docs " + prefixDir)
+
+    if (package == "cidd"):
+        shellCmd("rsync -av ./codebase/apps/cidd/src/CIDD/example_scripts " +
+                 options.prefixDir)
+
+    # install color scales
+
+    os.chdir(displaysDir)
+    shellCmd("rsync -av color_scales " + shareDir)
+
+    # install binaries and libs
+
+    os.chdir(tmpDir)
+
+    shellCmd("rsync -av bin " + prefixDir)
+    shellCmd("rsync -av lib " + prefixDir)
+    shellCmd("rsync -av include " + prefixDir)
+
 ########################################################################
 # prune empty dirs
 
@@ -386,6 +496,29 @@ def prune(tree):
                 shutil.rmtree(tree)
 
 
+########################################################################
+# Run a command in a shell, wait for it to complete
+
+def shellCmd(cmd):
+
+    if (options.debug):
+        print >>sys.stderr, "running cmd:", cmd, " ....."
+    
+    try:
+        retcode = subprocess.check_call(cmd, shell=True)
+        if retcode != 0:
+            print >>sys.stderr, "Child exited with code: ", retcode
+            sys.exit(1)
+        else:
+            if (options.verbose):
+                print >>sys.stderr, "Child returned code: ", retcode
+    except OSError, e:
+        print >>sys.stderr, "Execution failed:", e
+        sys.exit(1)
+
+    if (options.debug):
+        print >>sys.stderr, ".... done"
+    
 ########################################################################
 # Run - entry point
 
