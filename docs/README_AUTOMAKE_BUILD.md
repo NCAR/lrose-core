@@ -13,7 +13,7 @@ This uses the script:
 
 The default install location is: `${HOME}/lrose`
 
-### 2. Check out lrose core
+### 2. Check out `lrose-core`
 
 ```
   mkdir ~/git
@@ -44,13 +44,13 @@ The following example installs the lrose-blaze release in `~/lrose`:
 
 ```
   cd ~/git/lrose-core
-  ./build/checkout_and_build_autp.py --debug --prefix ~/lrose --package lrose-blaze
+  ./build/checkout_and_build_auto.py --debug --prefix ~/lrose --package lrose-blaze
 ```
 
 Another example - build lrose and install in `/usr/local/lrose`:
 
 ```
   cd ~/git/lrose-core
-  ./build/checkout_and_build_autp.py --debug --prefix /usr/local/lrose --package lrose
+  ./build/checkout_and_build_auto.py --debug --prefix /usr/local/lrose --package lrose
 ```
 
