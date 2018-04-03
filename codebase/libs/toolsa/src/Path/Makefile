@@ -49,6 +49,9 @@ HDRS = \
 CPPC_SRCS = \
 	Path.cc
 
+SRCS = \
+	cpath.c
+
 #
 # general targets
 #

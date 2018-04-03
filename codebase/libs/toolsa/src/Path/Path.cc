@@ -545,6 +545,28 @@ void Path::stripDir(const string &dir, const string &path, string &file)
 }
 
 //////////////////////////////////////////////////////////////////
+// getExecPath()
+// For apple osx, for now we need to use the C-function in cpath.c
+// because of some problems with the includes in a C++ compile
+
+//////////////////////////////////////////////////////////////////
+// Get the path of the executable binary that is running
+
+extern char *get_exec_path();
+
+string Path::getExecPath()
+{
+
+  char *epath = get_exec_path();
+  string execPath(epath);
+  delete[] epath;
+  return execPath;
+
+}
+
+#ifdef NOTNOW
+
+//////////////////////////////////////////////////////////////////
 // Get the path of the executable binary that is running
 
 string Path::getExecPath()
@@ -585,6 +607,8 @@ string Path::getExecPath()
 #endif
 
 }
+
+#endif
 
 //////////////////////////////////////////////////////////////////
 // Get the path of a file relative to the
