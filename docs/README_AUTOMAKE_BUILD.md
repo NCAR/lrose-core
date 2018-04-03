@@ -26,6 +26,19 @@ The default install location is: `${HOME}/lrose`
 ```
   cd ~/git/lrose-core
   ./build/checkout_and_build_auto.py --help
+
+  Usage: checkout_and_build_auto.py [options]
+  Options:
+    -h, --help           show this help message and exit
+    --clean              Cleanup tmp build dir
+    --debug              Set debugging on
+    --verbose            Set verbose debugging on
+    --package=PACKAGE    Package name. Options are: lrose (default), cidd, radx,
+                         titan, lrose-blaze
+    --prefix=PREFIX      Install directory
+    --buildDir=BUILDDIR  Temporary build dir
+    --static             use static linking, default is dynamic
+    --scripts            Install scripts as well as binaries
 ```
 
 `package` defaults to `lrose`
