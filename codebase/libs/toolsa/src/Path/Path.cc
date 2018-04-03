@@ -552,7 +552,9 @@ void Path::stripDir(const string &dir, const string &path, string &file)
 //////////////////////////////////////////////////////////////////
 // Get the path of the executable binary that is running
 
-extern char *get_exec_path();
+extern "C" {
+  extern char *get_exec_path();
+}
 
 string Path::getExecPath()
 {
