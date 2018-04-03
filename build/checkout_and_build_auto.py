@@ -49,6 +49,10 @@ def main():
     prefixDirDefault = os.path.join(homeDir, 'lrose_auto')
     buildDirDefault = '/tmp/lrose_build'
     parser = OptionParser(usage)
+    parser.add_option('--clean',
+                      dest='clean', default=False,
+                      action="store_true",
+                      help='Cleanup tmp build dir')
     parser.add_option('--debug',
                       dest='debug', default=True,
                       action="store_true",
@@ -134,7 +138,7 @@ def main():
 
     # create build dir
     
-    # createBuildDir()
+    createBuildDir()
 
     # make tmp dirs
 
@@ -146,48 +150,48 @@ def main():
 
     # get repos from git
 
-    # gitCheckout()
+    gitCheckout()
 
     # install the distribution-specific makefiles
 
-    #os.chdir(codebaseDir)
-    #shellCmd("./make_bin/install_package_makefiles.py --package " + 
-    #           package + " --codedir .")
+    os.chdir(codebaseDir)
+    shellCmd("./make_bin/install_package_makefiles.py --package " + 
+             package + " --codedir .")
 
     # trim libs and apps to those required by distribution makefiles
 
-    #if (package != "lrose"):
-    #    trimToMakefiles("libs")
-    #    trimToMakefiles("apps")
+    if (package != "lrose"):
+        trimToMakefiles("libs")
+        trimToMakefiles("apps")
 
     # set up autoconf
 
-    #setupAutoconf()
+    setupAutoconf()
 
     # create the release information file
     
-    #createReleaseInfoFile()
+    createReleaseInfoFile()
 
     # run qmake for QT apps to create moc_ files
 
-    #hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
-    #createQtMocFiles(hawkEyeDir)
+    hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
+    createQtMocFiles(hawkEyeDir)
 
     # prune any empty directories
 
-    #prune(codebaseDir)
+    prune(codebaseDir)
 
     # build netcdf support
     
-    #buildNetcdf()
+    buildNetcdf()
 
     # build the package
 
-    # buildPackage()
+    buildPackage()
 
     # perform the install
 
-    # doInstall();
+    doInstall();
 
     # check the install
 
@@ -195,7 +199,8 @@ def main():
 
     # delete the tmp dir
 
-    # shutil.rmtree(options.buildDir)
+    if (options.clean):
+        shutil.rmtree(options.buildDir)
 
     sys.exit(0)
 
@@ -423,12 +428,12 @@ def buildNetcdf():
 def buildPackage():
 
     os.chdir(coreDir)
-    # if (options.installScripts):
-    #     shellCmd("./build/build_lrose -s -x " + tmpDir + 
-    #              " -p " + package)
-    # else:
-    #     shellCmd("./build/build_lrose -x " + tmpDir +
-    #              " -p " + package)
+    if (options.installScripts):
+        shellCmd("./build/build_lrose -s -x " + tmpDir + 
+                 " -p " + package)
+    else:
+        shellCmd("./build/build_lrose -x " + tmpDir +
+                 " -p " + package)
 
     # detect which dynamic libs are needed
     # copy the dynamic libraries into runtime area:
@@ -498,10 +503,10 @@ def checkInstall():
              "--label " + package + " --maxAge 3600")
     print("====================================================")
     
-    print("  **************************************************")
-    print("  *** Done building auto release ***")
-    print("  *** installed in dir: " + prefix + " ***")
-    print("  **************************************************")
+    print("**************************************************")
+    print("*** Done building auto release *******************")
+    print("*** Installed in dir: " + prefix + " ***")
+    print("**************************************************")
 
 ########################################################################
 # prune empty dirs
