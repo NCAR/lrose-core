@@ -125,6 +125,12 @@ void SweepManager::set(const RadxVol &vol)
 
   _selectedAngle = _sweeps[_guiIndex].radx->getFixedAngleDeg();
 
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (_reversedInGui) {
+      cerr << "INFO - SweepManager: sweep list is reversed in GUI" << endl;
+    }
+  }
+
 }
 
 /////////////////////////////////////////////////////////////

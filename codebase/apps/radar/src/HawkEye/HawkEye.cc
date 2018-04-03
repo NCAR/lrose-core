@@ -44,7 +44,7 @@
 #include "Params.hh"
 #include "Reader.hh"
 #include "AllocCheck.hh"
-#include <Radx/RadxPath.hh>
+#include <toolsa/Path.hh>
 
 #include <string>
 #include <iostream>
@@ -55,9 +55,7 @@ using namespace std;
 // Constructor
 
 HawkEye::HawkEye(int argc, char **argv) :
-        _args("HawkEye"),
-        _argc(argc),
-        _argv(argv)
+        _args("HawkEye")
 
 {
 
@@ -277,9 +275,9 @@ int HawkEye::_setupDisplayFields()
   // check for color map location
   
   string colorMapDir = _params.color_scale_dir;
-  RadxPath mapDir(_params.color_scale_dir);
+  Path mapDir(_params.color_scale_dir);
   if (!mapDir.dirExists()) {
-    colorMapDir = RadxPath::getPathRelToExec(_params.color_scale_dir);
+    colorMapDir = Path::getPathRelToExec(_params.color_scale_dir);
     mapDir.setPath(colorMapDir);
     if (!mapDir.dirExists()) {
       cerr << "ERROR - HawkEye" << endl;
@@ -290,7 +288,7 @@ int HawkEye::_setupDisplayFields()
     }
     if (_params.debug) {
       cerr << "NOTE - using color scales relative to executable location" << endl;
-      cerr << "  Exec path: " << RadxPath::getExecPath() << endl;
+      cerr << "  Exec path: " << Path::getExecPath() << endl;
       cerr << "  Color scale dir:: " << colorMapDir << endl;
     }
   }
