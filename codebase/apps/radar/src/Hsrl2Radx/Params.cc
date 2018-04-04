@@ -1294,18 +1294,6 @@ using namespace std;
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'threshold_override_start_range'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("threshold_override_start_range");
-    tt->descr = tdrpStrDup("Option to override the start range.");
-    tt->help = tdrpStrDup("If true, the specified start range in this file will be used. If not, the start range in the data file will be used.");
-    tt->val_offset = (char *) &threshold_override_start_range - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'combined_high_count_threshold_for_backscat_coeff'
     // ctype is 'int'
     

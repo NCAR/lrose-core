@@ -476,8 +476,6 @@ public:
 
   int speckle_filter_len;
 
-  tdrp_bool_t threshold_override_start_range;
-
   int combined_high_count_threshold_for_backscat_coeff;
 
   int combined_high_count_threshold_for_vol_depol_ratio;
@@ -563,7 +561,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[110];
+  mutable TDRPtable _table[109];
 
   const char *_className;
 

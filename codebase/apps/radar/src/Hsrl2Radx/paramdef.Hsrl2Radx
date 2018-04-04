@@ -395,12 +395,6 @@ commentdef {
   p_header = "COMPUTING DERIVED FIELDS";
 }
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the start range.";
-  p_help = "If true, the specified start range in this file will be used. If not, the start range in the data file will be used.";
-} threshold_override_start_range;
-
 paramdef int {
   p_default = 2;
   p_descr = "SNR threshold for backscatter coefficient (counts).";
