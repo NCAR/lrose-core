@@ -243,8 +243,21 @@ void DerFieldCalcs::computeDerived(size_t nGates,
   }
 
   // set all zero vals to missing
-
+  
   _setZeroValsToMissing();
+
+  // perform thresholding
+
+  for(size_t igate = 0; igate < _nGates; igate++) {
+    if (_hiData[igate] < _params.combined_high_count_threshold_for_backscat_coeff) {
+      _backscatCoeff[igate] = Radx::missingFl32;
+    }
+    if (_hiData[igate] < _params.combined_high_count_threshold_for_vol_depol_ratio) {
+      _volDepol[igate] = Radx::missingFl32;
+    }
+  }
+
+
 
 }
 

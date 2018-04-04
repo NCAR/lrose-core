@@ -476,6 +476,12 @@ public:
 
   int speckle_filter_len;
 
+  tdrp_bool_t threshold_override_start_range;
+
+  int combined_high_count_threshold_for_backscat_coeff;
+
+  int combined_high_count_threshold_for_vol_depol_ratio;
+
   tdrp_bool_t read_temp_and_pressure_profile_from_model_files;
 
   char* model_temperature_field_name;
@@ -557,7 +563,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[106];
+  mutable TDRPtable _table[110];
 
   const char *_className;
 

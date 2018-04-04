@@ -1290,6 +1290,51 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("COMPUTING DERIVED FIELDS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'threshold_override_start_range'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("threshold_override_start_range");
+    tt->descr = tdrpStrDup("Option to override the start range.");
+    tt->help = tdrpStrDup("If true, the specified start range in this file will be used. If not, the start range in the data file will be used.");
+    tt->val_offset = (char *) &threshold_override_start_range - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'combined_high_count_threshold_for_backscat_coeff'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("combined_high_count_threshold_for_backscat_coeff");
+    tt->descr = tdrpStrDup("SNR threshold for backscatter coefficient (counts).");
+    tt->help = tdrpStrDup("If the combined high count is less than this, the backscatter coefficient is set to missing.");
+    tt->val_offset = (char *) &combined_high_count_threshold_for_backscat_coeff - &_start_;
+    tt->single_val.i = 2;
+    tt++;
+    
+    // Parameter 'combined_high_count_threshold_for_vol_depol_ratio'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("combined_high_count_threshold_for_vol_depol_ratio");
+    tt->descr = tdrpStrDup("SNR threshold for volume depolarization ratio (counts).");
+    tt->help = tdrpStrDup("If the combined high count is less than this, the volume depolarization ratio is set to missing.");
+    tt->val_offset = (char *) &combined_high_count_threshold_for_vol_depol_ratio - &_start_;
+    tt->single_val.i = 2;
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("READING TEMPERATURE AND PRESSURE PROFILE FROM MODEL FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1394,11 +1439,11 @@ using namespace std;
     tt->single_val.i = 7200;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OUTPUT FMQ DETAILS");
     tt->comment_text = tdrpStrDup("REALTIME_FMQ mode only");
     tt++;
@@ -1488,11 +1533,11 @@ using namespace std;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1593,11 +1638,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1662,11 +1707,11 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
