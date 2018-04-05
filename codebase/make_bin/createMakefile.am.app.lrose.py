@@ -49,6 +49,10 @@ def main():
                       dest='verbose', default='False',
                       action="store_true",
                       help='Set verbose debugging on')
+    parser.add_option('--osx',
+                      dest='osx', default='False',
+                      action="store_true",
+                      help='Configure for MAC OSX')
     parser.add_option('--dir',
                       dest='dir', default=".",
                       help='Path of app directory')
@@ -69,6 +73,7 @@ def main():
         print >>sys.stderr, "Running %s:" % thisScriptName
         print >>sys.stderr, "  App dir:", options.dir
         print >>sys.stderr, "  Lib list: ", options.libList
+        print >>sys.stderr, "  osx: ", options.osx
 
     # go to the app dir
 
@@ -527,25 +532,39 @@ def getLoadLibList():
             loadLibList.append(lib)
 
     # extend the lib list with required standard libs
-    
-    extendLibs = [ 'Ncxx',
-                   'netcdf_c++',
-                   'netcdf',
-                   'hdf5_cpp',
-                   'hdf5_hl',
-                   'hdf5',
-                   'udunits2',
-                   'expat',
-                   'jasper',
-                   'fl',
-                   'X11',
-                   'Xext',
-                   'pthread',
-                   'png',
-                   'z',
-                   'bz2',
-                   'm',
-                   'gfortran' ]
+
+    if (options.osx):
+        extendLibs = [ 'Ncxx',
+                       'netcdf_c++',
+                       'netcdf',
+                       'hdf5_cpp',
+                       'hdf5_hl',
+                       'hdf5',
+                       'expat',
+                       'jasper',
+                       'fl',
+                       'pthread',
+                       'z',
+                       'bz2',
+                       'm' ]
+    else:
+        extendLibs = [ 'Ncxx',
+                       'netcdf_c++',
+                       'netcdf',
+                       'hdf5_cpp',
+                       'hdf5_hl',
+                       'hdf5',
+                       'expat',
+                       'jasper',
+                       'fl',
+                       'X11',
+                       'Xext',
+                       'pthread',
+                       'png',
+                       'z',
+                       'bz2',
+                       'm',
+                       'gfortran' ]
     
     for lib in extendLibs:
         if (lib not in loadLibList):

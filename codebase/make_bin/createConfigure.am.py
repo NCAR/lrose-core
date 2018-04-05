@@ -40,6 +40,10 @@ def main():
                       dest='verbose', default='False',
                       action="store_true",
                       help='Set verbose debugging on')
+    parser.add_option('--osx',
+                      dest='osx', default='False',
+                      action="store_true",
+                      help='Configure for MAC OSX')
     parser.add_option('--dir',
                       dest='dir', default=".",
                       help='Path of top level directory')
@@ -65,6 +69,7 @@ def main():
         print >>sys.stderr, "  Base file name: ", options.baseName
         print >>sys.stderr, "  shared: ", options.shared
         print >>sys.stderr, "  pkg: ", options.pkg
+        print >>sys.stderr, "  osx: ", options.osx
 
     # go to the dir
 
@@ -236,16 +241,16 @@ def searchDir(dir):
           (pathToks[ntoks-2] == "src")):
         # app directory
         # create makefile.am for app
+        # use package version if available
         createScript = "createMakefile.am.app." + options.pkg + ".py"
         if (os.path.exists(createScript) == False):
+            # no package version, use default
             createScript = "createMakefile.am.app.lrose.py"
-        # if (options.shared == True):
-        #    createScript = "createMakefile.am.app." + options.pkg + ".py"
-        # else:
-        #    createScript = "createMakefile.am.app.py"
         cmd = os.path.join(thisScriptDir, createScript)
         cmd += " --dir " + absDir + debugStr
         cmd += " --libList " + libList
+        if (options.osx):
+            cmd += " --osx "
         runCommand(cmd)
         makefileCreateList.append(makefileCreatePath)
         return

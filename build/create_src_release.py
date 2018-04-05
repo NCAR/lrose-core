@@ -31,6 +31,7 @@ def main():
     global codebaseDir
     global versionStr
     global debugStr
+    global argsStr
     global releaseName
     global tarName
     global tarDir
@@ -49,6 +50,10 @@ def main():
                       dest='verbose', default=False,
                       action="store_true",
                       help='Set verbose debugging on')
+    parser.add_option('--osx',
+                      dest='osx', default='False',
+                      action="store_true",
+                      help='Configure for MAC OSX')
     parser.add_option('--package',
                       dest='package', default='lrose',
                       help='Package name. Options are lrose (default), radx, cidd, hcr, hsrl, titan, lrose-blaze')
@@ -78,6 +83,10 @@ def main():
         debugStr = " --verbose "
     elif (options.debug):
         debugStr = " --debug "
+    if (options.osx):
+        argsStr = debugStr + " --osx "
+    else:
+        argsStr = debugStr
 
     # runtime
 
@@ -94,14 +103,18 @@ def main():
     codebaseDir = os.path.join(coreDir, "codebase")
 
     # compute release name and dir name
-    
-    releaseName = options.package + "-" + versionStr + ".src"
+
+    if (options.osx):
+        releaseName = options.package + "-" + versionStr + ".osx.src"
+    else:
+        releaseName = options.package + "-" + versionStr + ".src"
     tarName = releaseName + ".tgz"
     tarDir = os.path.join(coreDir, releaseName)
 
     if (options.debug == True):
         print >>sys.stderr, "Running %s:" % thisScriptName
         print >>sys.stderr, "  package: ", options.package
+        print >>sys.stderr, "  osx: ", options.osx
         print >>sys.stderr, "  releaseTopDir: ", options.releaseTopDir
         print >>sys.stderr, "  releaseDir: ", releaseDir
         print >>sys.stderr, "  tmpDir: ", tmpDir
@@ -261,7 +274,7 @@ def setupAutoconf():
              shutil.copy("../build/configure.base", "./configure.base")
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base" +
-                 " --pkg " + options.package + debugStr)
+                 " --pkg " + options.package + argsStr)
     else:
         if (options.package == "cidd"):
             shutil.copy("../build/configure.base.shared.cidd", "./configure.base.shared")
@@ -269,7 +282,7 @@ def setupAutoconf():
             shutil.copy("../build/configure.base.shared", "./configure.base.shared")
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base.shared --shared" +
-                 " --pkg " + options.package + debugStr)
+                 " --pkg " + options.package + argsStr)
 
 ########################################################################
 # Run qmake for QT apps such as HawkEye to create _moc files
@@ -404,7 +417,6 @@ def getValueListForKey(path, key):
     except IOError as e:
         print >>sys.stderr, "ERROR - ", thisScriptName
         print >>sys.stderr, "  Cannot open file:", path
-#        print >>sys.stderr, "  dir: ", options.dir
         return valueList
 
     lines = fp.readlines()

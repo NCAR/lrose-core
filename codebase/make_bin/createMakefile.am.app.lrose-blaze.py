@@ -49,6 +49,10 @@ def main():
                       dest='verbose', default='False',
                       action="store_true",
                       help='Set verbose debugging on')
+    parser.add_option('--osx',
+                      dest='osx', default='False',
+                      action="store_true",
+                      help='Configure for MAC OSX')
     parser.add_option('--dir',
                       dest='dir', default=".",
                       help='Path of app directory')
@@ -69,6 +73,7 @@ def main():
         print >>sys.stderr, "Running %s:" % thisScriptName
         print >>sys.stderr, "  App dir:", options.dir
         print >>sys.stderr, "  Lib list: ", options.libList
+        print >>sys.stderr, "  osx: ", options.osx
 
     # go to the app dir
 
@@ -447,15 +452,6 @@ def getLibLinkOrder():
                   'trmm_rsl',
                   'forayRal']
     
-    ################ deprecated ####################
-    #             'mdv',
-    #             'rdi',
-    #             'spdb',
-    #             'spdbFormats',
-    #             'symprod',
-    #             'SpdbServer',
-    ################################################
-
     return linkOrder
     
 ########################################################################
@@ -549,6 +545,13 @@ def getLoadLibList():
     if ("radar" in loadLibList and "fftw3" not in loadLibList):
         loadLibList.append("fftw3")
 
+    if (needQt == True):
+        if (options.osx):
+            loadLibList.append("QtCore")
+            loadLibList.append("QtGui")
+            loadLibList.append("QtWidgets")
+            loadLibList.append("QtNetwork")
+
     return loadLibList
 
 ########################################################################
@@ -579,6 +582,12 @@ def writeMakefileAm():
     if (needQt == True):
         fo.write("AM_CFLAGS += -fPIC $(QT_CFLAGS)\n")
         fo.write("AM_CFLAGS += $(QT_INCLUDES)\n")
+        if (options.osx):
+            fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include\n")
+            fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include/QtCore\n")
+            fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include/QtGui\n")
+            fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include/QtWidgets\n")
+            fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include/QtNetwork\n")
     fo.write("\n")
     fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
     fo.write("\n")
@@ -591,6 +600,8 @@ def writeMakefileAm():
     if (needQt == True):
         fo.write("AM_LDFLAGS += $(QT_LDFLAGS)\n")
         fo.write("AM_LDFLAGS += $(QT_LIBS)\n")
+        if (options.osx):
+            fo.write("AM_LDFLAGS += -L/usr/local/opt/qt/lib\n")
     fo.write("\n")
 
     if (len(loadLibList) > 0):
