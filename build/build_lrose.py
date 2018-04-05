@@ -229,7 +229,10 @@ def createQtMocFiles(appDir):
     
     os.chdir(appDir)
     shellCmd("rm -f moc*");
-    shellCmd("qmake-qt5 -o Makefile.qmake");
+    if (platform == "darwin"):
+        shellCmd("/usr/local/opt/qt/bin/qmake -o Makefile.qmake");
+    else:
+        shellCmd("qmake-qt5 -o Makefile.qmake");
     shellCmd("make -f Makefile.qmake mocables");
 
 ########################################################################
