@@ -437,7 +437,7 @@ def buildPackage():
     if (options.installScripts):
         args = args + " --scripts "
 
-    shellCmd("./build/build_lrose.py " + args
+    shellCmd("./build/build_lrose.py " + args)
 
     # detect which dynamic libs are needed
     # copy the dynamic libraries into runtime area:
