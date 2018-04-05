@@ -175,18 +175,24 @@ def main():
         except:
             print >>sys.stderr, "Dir exists: " + perl5Dir
 
-        os.chdir(os.path.join(codebasePath, "libs/perl5/src"))
-        shellCmd("rsync -av *pm " + perl5Dir)
+        perl5LibDir = os.path.join(codebasePath, "libs/perl5/src")
+        if (os.path.isdir(perl5LibDir)):
+            os.chdir(os.path.join(codebasePath, "libs/perl5/src"))
+            shellCmd("rsync -av *pm " + perl5Dir)
 
         # procmap
 
-        os.chdir(os.path.join(codebasePath, "/apps/procmap/src/scripts"))
-        shellCmd("./install_scripts.lrose " + prefix + "bin")
+        procmapScriptsDir = os.path.join(codebasePath, "apps/procmap/src/scripts")
+        if (os.path.isdir(procmapScriptsDir)):
+            os.chdir(procmapScriptsDir)
+            shellCmd("./install_scripts.lrose " + prefix + "bin")
 
         # general
 
-        os.chdir(os.path.join(codebasePath, "/apps/scripts/src"))
-        shellCmd("./install_scripts.lrose " + prefix + "bin")
+        generalScriptsDir = os.path.join(codebasePath, "apps/scripts/src")
+        if (os.path.isdir(generalScriptsDir)):
+            os.chdir(generalScriptsDir)
+            shellCmd("./install_scripts.lrose " + prefix + "bin")
 
     # check the install
 
