@@ -432,8 +432,8 @@ def buildPackage():
     # perform the build
 
     args = ""
-    args = args + "--prefix " + tmpDir
-    args = args + "--package " + package
+    args = args + " --prefix " + tmpDir
+    args = args + " --package " + package
     if (options.installScripts):
         args = args + " --scripts "
 
