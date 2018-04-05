@@ -34,6 +34,8 @@
 #include <QResizeEvent>
 #include <QStylePainter>
 
+#include <Radx/Radx.hh>
+
 #include "PolarBeam.hh"
 
 using namespace std;
@@ -63,8 +65,8 @@ PolarBeam::PolarBeam(const Params &params,
   double sin1, cos1;
   double sin2, cos2;
   
-  sincos(start_angle * DEG_TO_RAD, &sin1, &cos1);
-  sincos(stop_angle * DEG_TO_RAD, &sin2, &cos2);
+  Radx::sincos(start_angle * DEG_TO_RAD, sin1, cos1);
+  Radx::sincos(stop_angle * DEG_TO_RAD, sin2, cos2);
   
   // Now calculate the vertex values to be used for all fields.  We negate
   // the y values because the display coordinate system has y increasing down.
