@@ -366,7 +366,7 @@ def buildNetcdf():
     if (package == "cidd"):
         shellCmd("./build_and_install_netcdf.m32 -x " + tmpDir)
     else:
-        if platform == "darwin":
+        if (platform == "darwin"):
             shellCmd("./build_and_install_netcdf.osx -x " + tmpDir)
         else:
             shellCmd("./build_and_install_netcdf -x " + tmpDir)
@@ -377,10 +377,14 @@ def buildNetcdf():
 def buildPackage():
 
     os.chdir(runDir)
+
+    args = ""
     if (options.installScripts):
-        shellCmd("./build/build_lrose -s -x " + tmpDir + " -p " + package)
-    else:
-        shellCmd("./build/build_lrose -x " + tmpDir + " -p " + package)
+        args = args + " --scripts "
+
+    shellCmd("./build/build_lrose.py " + args + \
+             " --prefix " + tmpDir + \
+             " --package " + package)
 
 ########################################################################
 # create the tar file

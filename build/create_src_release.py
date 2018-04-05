@@ -105,7 +105,7 @@ def main():
     # compute release name and dir name
 
     if (options.osx):
-        releaseName = options.package + "-" + versionStr + ".osx.src"
+        releaseName = options.package + "-" + versionStr + ".macosx_64.src"
     else:
         releaseName = options.package + "-" + versionStr + ".src"
     tarName = releaseName + ".tgz"
