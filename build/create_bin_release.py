@@ -379,12 +379,12 @@ def buildPackage():
     os.chdir(runDir)
 
     args = ""
+    args = args + " --prefix " + tmpDir
+    args = args + " --package " + package
     if (options.installScripts):
         args = args + " --scripts "
 
-    shellCmd("./build/build_lrose.py " + args + \
-             " --prefix " + tmpDir + \
-             " --package " + package)
+    shellCmd("./build/build_lrose.py " + args)
 
 ########################################################################
 # create the tar file

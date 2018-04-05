@@ -428,12 +428,16 @@ def buildNetcdf():
 def buildPackage():
 
     os.chdir(coreDir)
+
+    # perform the build
+
+    args = ""
+    args = args + "--prefix " + tmpDir
+    args = args + "--package " + package
     if (options.installScripts):
-        shellCmd("./build/build_lrose -s -x " + tmpDir + 
-                 " -p " + package)
-    else:
-        shellCmd("./build/build_lrose -x " + tmpDir +
-                 " -p " + package)
+        args = args + " --scripts "
+
+    shellCmd("./build/build_lrose.py " + args
 
     # detect which dynamic libs are needed
     # copy the dynamic libraries into runtime area:
