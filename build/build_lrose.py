@@ -55,20 +55,12 @@ def main():
     thisScriptName = os.path.basename(__file__)
 
     global options
-    global runDir
-    global releaseDir
-    global tmpDir
-    global coreDir
-    global codebaseDir
+    global codebasePath
     global dateStr
     global timeStr
     global debugStr
-    global releaseName
-    global tarName
-    global tarDir
-
     global package
-    global ostype
+    global prefix
 
     # parse the command line
 
@@ -107,6 +99,7 @@ def main():
         debugStr = " --debug "
 
     package = options.package
+    prefix = options.prefix
 
     # runtime
 
@@ -120,21 +113,16 @@ def main():
     
     # check we are in the correct place
 
-    coreDir = os.path.basename(corePath)
-    if (coreDir != "lrose-core"):
+    codebasePath = os.path.join(corePath, "codebase")
+    if (os.path.isdir(codebasePath) == False):
         print >>sys.stderr, "ERROR - script: ", thisScriptName
         print >>sys.stderr, "  Incorrect run directory: ", corePath
-        print >>sys.stderr, "  Must be run from lrose-core top level"
+        print >>sys.stderr, "  Must be run just above codebase dir"
         sys.exit(1)
-    codebaseDir = os.path.join(coreDir, "codebase")
-
-    # get the OS type - x86_64, i686, macosx_64
-    
-    getOsType()
 
     # run qmake for QT apps to create moc_ files
 
-    hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
+    hawkEyeDir = os.path.join(codebasePath, "apps/radar/src/HawkEye")
     createQtMocFiles(hawkEyeDir)
 
     # set the environment
@@ -157,19 +145,19 @@ def main():
 
     # do the build and install
 
-    os.chdir(codebaseDir)
+    os.chdir(codebasePath)
     cmd = "./configure --with-hdf5=" + prefix + \
           " --with-netcdf=" + prefix + \
           " --prefix=" + prefix
     shellCmd(cmd)
 
-    os.chdir(os.path.join(codebaseDir, "libs"))
+    os.chdir(os.path.join(codebasePath, "libs"))
     cmd = "make -k -j 8"
     shellCmd(cmd)
     cmd = "make -k install-strip"
     shellCmd(cmd)
 
-    os.chdir(os.path.join(codebaseDir, "apps"))
+    os.chdir(os.path.join(codebasePath, "apps"))
     cmd = "make -k -j 8"
     shellCmd(cmd)
     cmd = "make -k install-strip"
@@ -177,7 +165,7 @@ def main():
 
     # optionally install the scripts
 
-    if (options.installScrips):
+    if (options.installScripts):
 
         # install perl5
         
@@ -187,17 +175,17 @@ def main():
         except:
             print >>sys.stderr, "Dir exists: " + perl5Dir
 
-        os.chdir(os.path.join(codebaseDir, "libs/perl5/src"))
+        os.chdir(os.path.join(codebasePath, "libs/perl5/src"))
         shellCmd("rsync -av *pm " + perl5Dir)
 
         # procmap
 
-        os.chdir(os.path.join(codebaseDir, "/apps/procmap/src/scripts"))
+        os.chdir(os.path.join(codebasePath, "/apps/procmap/src/scripts"))
         shellCmd("./install_scripts.lrose " + prefix + "bin")
 
         # general
 
-        os.chdir(os.path.join(codebaseDir, "/apps/scripts/src"))
+        os.chdir(os.path.join(codebasePath, "/apps/scripts/src"))
         shellCmd("./install_scripts.lrose " + prefix + "bin")
 
     # check the install
@@ -224,7 +212,7 @@ def checkInstall(corePath):
     print("====================================================")
     
     print("**************************************************")
-    print("*** Done building auto release *******************")
+    print("*** Done building package: " + package)
     print("*** Installed in dir: " + prefix + " ***")
     print("**************************************************")
 
@@ -238,36 +226,6 @@ def createQtMocFiles(appDir):
     shellCmd("qmake-qt5 -o Makefile.qmake");
     shellCmd("make -f Makefile.qmake mocables");
 
-########################################################################
-# get the OS type
-
-def getOsType():
-
-    global ostype
-    ostype = "x86_64"
-    tmpFile = os.path.join("/tmp", "ostype." + timeStr + ".txt")
-
-    shellCmd("uname -a > " + tmpFile)
-    f = open(tmpFile, 'r')
-    lines = f.readlines()
-    f.close()
-
-    if (len(lines) < 1):
-        print >>sys.stderr, "ERROR getting OS type"
-        print >>sys.stderr, "  'uname -a' call did not succeed"
-        sys.exit(1)
-
-    for line in lines:
-        line = line.strip()
-        if (options.verbose):
-            print >>sys.stderr, "  line: ", line
-        if (line.find("x86_64") > 0):
-            ostype = "x86_64"
-        elif (line.find("Darwin") > 0):
-            ostype = "macosx_64"
-        elif (line.find("i686") > 0):
-            ostype = "i686"
-            
 ########################################################################
 # Run a command in a shell, wait for it to complete
 
