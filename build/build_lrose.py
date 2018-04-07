@@ -127,9 +127,8 @@ def main():
 
     # set the environment
 
-    os.environ["LDFLAGS"] = "-L" + prefix + \
-                            "/lib -Wl,-rpath,'\$\$ORIGIN'/" + \
-                            package + "_runtime_libs:" + \
+    os.environ["LDFLAGS"] = "-L" + prefix + "/lib " + \
+                            " -Wl,-rpath,'\$\$ORIGIN'/" + package + "_runtime_libs:" + \
                             prefix + "/lib"
     os.environ["FC"] = "gfortran"
     os.environ["F77"] = "gfortran"
