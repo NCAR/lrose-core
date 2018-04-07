@@ -319,7 +319,7 @@ protected slots:
   virtual void _changeField(int fieldId, bool guiMode) = 0;
   virtual void _openFile();
 
-  void _changeFieldVariable(bool value);
+  //   void _changeFieldVariable(bool value);
 
 };
 
