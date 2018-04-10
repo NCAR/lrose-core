@@ -514,6 +514,11 @@ def decodeLibLine(line):
             libs.append("netcdff")
         elif (thisTok.find("TDRP_LIBS") >= 0):
             libs.append("tdrp")
+        elif (thisTok.find("QT_LIBS") >= 0):
+            libs.append("QtCore")
+            libs.append("QtGui")
+            libs.append("QtWidgets")
+            libs.append("QtNetwork")
 
     return libs
 
@@ -542,7 +547,6 @@ def getLoadLibList():
                        'hdf5',
                        'expat',
                        'jasper',
-                       'fl',
                        'pthread',
                        'z',
                        'bz2',
