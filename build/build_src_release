@@ -118,8 +118,8 @@ echo
 mkdir -p $prefix
 
 cd /tmp
-tar xvfz ~/releases/lrose-blaze/lrose-blaze-20180322.src.tgz
-cd lrose-blaze-20180322.src/lrose-netcdf
+tar xvfz ~/releases/lrose-blaze/lrose-blaze-????????.src.tgz
+cd lrose-blaze-????????.src/lrose-netcdf
 ./build_and_install_netcdf -x $prefix
 cd ../codebase
 ./configure --prefix=${prefix} --with-hdf5=${prefix} --with-netcdf=${prefix}

@@ -538,7 +538,7 @@ def getLoadLibList():
 
     # extend the lib list with required standard libs
 
-    if (options.osx):
+    if (options.osx == True):
         extendLibs = [ 'Ncxx',
                        'netcdf_c++',
                        'netcdf',
@@ -606,7 +606,7 @@ def writeMakefileAm():
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
     if (needQt == True):
         fo.write("AM_CFLAGS += -fPIC\n")
-        if (options.osx):
+        if (options.osx == True):
             fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include\n")
             fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include/QtCore\n")
             fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include/QtGui\n")
@@ -624,7 +624,7 @@ def writeMakefileAm():
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
     if (needQt == True):
-        if (options.osx):
+        if (options.osx == True):
             fo.write("AM_LDFLAGS += -L/usr/local/opt/qt/lib\n")
         else:
             fo.write("AM_LDFLAGS += $(QT_LDFLAGS)\n")
