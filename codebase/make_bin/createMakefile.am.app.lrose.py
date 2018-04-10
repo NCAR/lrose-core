@@ -605,7 +605,15 @@ def writeMakefileAm():
     for lib in compiledLibList:
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
     if (needQt == True):
-        fo.write("AM_CFLAGS += -fPIC $(QT_CFLAGS)\n")
+        fo.write("AM_CFLAGS += -fPIC\n")
+        if (options.osx):
+            fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include\n")
+            fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include/QtCore\n")
+            fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include/QtGui\n")
+            fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include/QtWidgets\n")
+            fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include/QtNetwork\n")
+        else:
+            fo.write("AM_CFLAGS += $(QT_CFLAGS)\n")
     fo.write("\n")
     fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
     fo.write("\n")
@@ -616,7 +624,10 @@ def writeMakefileAm():
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
     if (needQt == True):
-        fo.write("AM_LDFLAGS += $(QT_LIBS)\n")
+        if (options.osx):
+            fo.write("AM_LDFLAGS += -L/usr/local/opt/qt/lib\n")
+        else:
+            fo.write("AM_LDFLAGS += $(QT_LDFLAGS)\n")
     fo.write("\n")
 
     if (len(loadLibList) > 0):
