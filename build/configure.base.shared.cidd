@@ -32,7 +32,7 @@ AC_MSG_NOTICE([checking user options])
 # Compile and link in 32-bit mode and large file support
 
 CFLAGS="${CFLAGS} -m32 -O -D_FILE_OFFSET_BITS=64 "
-CPPFLAGS="${CPPFLAGS} -m32 -O -D_FILE_OFFSET_BITS=64 "
+CXXFLAGS="${CXXFLAGS} -m32 -O -D_FILE_OFFSET_BITS=64 "
 LDFLAGS="${LDFLAGS} -m32 -O -D_FILE_OFFSET_BITS=64 "
 
 # Did the user specify a location for the HDF5 library?

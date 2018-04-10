@@ -139,7 +139,7 @@ fi
 # Build lrose - libraries and binaries
 # ------------------------------------
 
-export CPPFLAGS=" -std=c++11 "
+export CXXFLAGS=" -std=c++11 "
 
 export FC gfortran
 export F77 gfortran
