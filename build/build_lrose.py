@@ -135,7 +135,7 @@ def main():
     os.environ["F90"] = "gfortran"
 
     if (platform != "darwin"):
-        os.environ["CPPFLAGS"] = " -std=c++11 "
+        os.environ["CXXFLAGS"] = " -std=c++11 "
 
     cmd = "env"
     print >>sys.stderr, "========================================="
