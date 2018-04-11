@@ -596,6 +596,9 @@ def writeMakefileAm():
     fo.write("#\n")
     fo.write("# created %s\n" % datetime.now())
     fo.write("#\n")
+    fo.write("# dir: %s\n" % options.dir)
+    fo.write("# libList: %s\n" % options.libList)
+    fo.write("# osx: %s\n" % options.osx)
     fo.write("###############################################\n")
     fo.write("\n")
 
