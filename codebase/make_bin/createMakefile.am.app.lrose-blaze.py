@@ -547,13 +547,6 @@ def getLoadLibList():
     if ("radar" in loadLibList and "fftw3" not in loadLibList):
         loadLibList.append("fftw3")
 
-    if (needQt == True):
-        if (options.osx):
-            loadLibList.append("Qt5Core")
-            loadLibList.append("Qt5Gui")
-            loadLibList.append("Qt5Widgets")
-            loadLibList.append("Qt5Network")
-
     return loadLibList
 
 ########################################################################
@@ -583,6 +576,10 @@ def writeMakefileAm():
     fo.write("\n")
     fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
     fo.write("\n")
+
+    if (needQt == True):
+        fo.write("PKG_CONFIG_PATH += /usr/local/opt/qt/lib/pkgconfig\n")
+
     fo.write("AM_CFLAGS = -I.\n")
     for lib in compiledLibList:
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
@@ -613,6 +610,14 @@ def writeMakefileAm():
             else:
                 fo.write("LDADD += -l%s\n" % loadLib)
         fo.write("\n")
+
+    if (needQt == True):
+        fo.write("# qt libs\n")
+        fo.write("\n")
+        fo.write("LDADD += $(shell pkg-config --libs Qt5Core)\n")
+        fo.write("LDADD += $(shell pkg-config --libs Qt5Gui)\n")
+        fo.write("LDADD += $(shell pkg-config --libs Qt5Widgets)\n")
+        fo.write("LDADD += $(shell pkg-config --libs Qt5Network)\n")
 
     fo.write("# set app name\n")
     fo.write("\n")
