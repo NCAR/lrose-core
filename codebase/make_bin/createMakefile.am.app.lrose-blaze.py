@@ -161,6 +161,10 @@ def main():
             print >>sys.stderr, "  makefile lib: %s" % lib
         print >>sys.stderr, "=========================================="
 
+    # check if we need Qt support
+
+    needQt = checkForQt()
+
     # set list of libs to be loaded
     # this will be the ordered lib list, plus any libs from the makefile
     # that are not included in the ordered libs
@@ -171,10 +175,6 @@ def main():
         for lib in loadLibList:
             print >>sys.stderr, "  load lib: -l%s" % lib
         print >>sys.stderr, "======================================"
-
-    # check if we need Qt support
-
-    needQt = checkForQt()
 
     # write out makefile.am
             
