@@ -618,6 +618,10 @@ def writeMakefileAm():
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
     if (needQt == True):
         fo.write("AM_LDFLAGS += -L$(shell pkg-config --variable=libdir Qt5Gui)\n")
+        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Core)\n")
+        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Gui)\n")
+        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Widgets)\n")
+        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Network)\n")
     fo.write("\n")
 
     if (len(loadLibList) > 0):
@@ -630,13 +634,14 @@ def writeMakefileAm():
                 fo.write("LDADD += -l%s\n" % loadLib)
         fo.write("\n")
 
-    if (needQt == True):
-        fo.write("# qt libs\n")
-        fo.write("\n")
-        fo.write("LDADD += $(shell pkg-config --libs Qt5Core)\n")
-        fo.write("LDADD += $(shell pkg-config --libs Qt5Gui)\n")
-        fo.write("LDADD += $(shell pkg-config --libs Qt5Widgets)\n")
-        fo.write("LDADD += $(shell pkg-config --libs Qt5Network)\n")
+    #if (needQt == True):
+    #    fo.write("# qt libs\n")
+    #    fo.write("\n")
+    #    fo.write("LDADD += $(shell pkg-config --libs Qt5Core)\n")
+    #    fo.write("LDADD += $(shell pkg-config --libs Qt5Gui)\n")
+    #    fo.write("LDADD += $(shell pkg-config --libs Qt5Widgets)\n")
+    #    fo.write("LDADD += $(shell pkg-config --libs Qt5Network)\n")
+    #    fo.write("\n")
 
     fo.write("# set app name\n")
     fo.write("\n")
