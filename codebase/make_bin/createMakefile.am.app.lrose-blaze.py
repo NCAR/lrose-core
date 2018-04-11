@@ -305,8 +305,6 @@ def checkForQt():
     for line in lines:
         if (line.find("QT") >= 0):
             return True
-        if (line.find("-lQtCore") >= 0):
-            return True
 
     return False
     
@@ -535,7 +533,6 @@ def getLoadLibList():
                    'hdf5_cpp',
                    'hdf5_hl',
                    'hdf5',
-                   'udunits2',
                    'expat',
                    'z',
                    'bz2',
@@ -552,10 +549,10 @@ def getLoadLibList():
 
     if (needQt == True):
         if (options.osx):
-            loadLibList.append("QtCore")
-            loadLibList.append("QtGui")
-            loadLibList.append("QtWidgets")
-            loadLibList.append("QtNetwork")
+            loadLibList.append("Qt5Core")
+            loadLibList.append("Qt5Gui")
+            loadLibList.append("Qt5Widgets")
+            loadLibList.append("Qt5Network")
 
     return loadLibList
 
@@ -576,6 +573,9 @@ def writeMakefileAm():
     fo.write("#\n")
     fo.write("# created %s\n" % datetime.now())
     fo.write("#\n")
+    fo.write("# dir: %s\n" % options.dir)
+    fo.write("# libList: %s\n" % options.libList)
+    fo.write("# osx: %s\n" % options.osx)
     fo.write("###############################################\n")
     fo.write("\n")
 

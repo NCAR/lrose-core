@@ -305,8 +305,6 @@ def checkForQt():
     for line in lines:
         if (line.find("QT") >= 0):
             return True
-        if (line.find("-lQtCore") >= 0):
-            return True
 
     return False
     
@@ -567,6 +565,13 @@ def getLoadLibList():
 
     if ("radar" in loadLibList and "fftw3" not in loadLibList):
         loadLibList.append("fftw3")
+
+    if (needQt == True):
+        if (options.osx):
+            loadLibList.append("Qt5Core")
+            loadLibList.append("Qt5Gui")
+            loadLibList.append("Qt5Widgets")
+            loadLibList.append("Qt5Network")
 
     return loadLibList
 
