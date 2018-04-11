@@ -473,7 +473,7 @@ void DisplayManager::_createFieldPanel()
     _fieldsLayout->addWidget(rawButton, row, 2, alignCenter);
     _fieldGroup->addButton(rawButton, ifield);
     // connect slot for field change
-    // connect(rawButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
+    connect(rawButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
 
     _fieldButtons.push_back(rawButton);
     if (filtField != NULL) {
@@ -483,7 +483,7 @@ void DisplayManager::_createFieldPanel()
       _fieldGroup->addButton(filtButton, ifield + 1);
       _fieldButtons.push_back(filtButton);
       // connect slot for field change
-      // connect(filtButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
+      connect(filtButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
     }
 
     if (filtField != NULL) {
@@ -500,27 +500,27 @@ void DisplayManager::_createFieldPanel()
 
   // connect slot for field change
   
-  connect(_fieldGroup, SIGNAL(buttonClicked(int)),
-          this, SLOT(_changeField(int)));
+  //connect(_fieldGroup, SIGNAL(buttonClicked(int)),
+  //        this, SLOT(_changeField(int)));
 
 }
 
-// void DisplayManager::_changeFieldVariable(bool value) {
+void DisplayManager::_changeFieldVariable(bool value) {
 
-//   if (_params.debug) {
-//     cerr << "DisplayManager:: the field variable was changed ";
-//     cerr << endl;
-//   }
-//   if (value) {
-//     for (size_t i = 0; i < _fieldButtons.size(); i++) {
-//       if (_fieldButtons.at(i)->isChecked()) {
-//         if (_params.debug) cout << "_fieldButton " << i << " is checked" << endl;
-// 	_changeField(i, true);
-//       }
-//     }
-//   }
+  if (_params.debug) {
+    cerr << "DisplayManager:: the field variable was changed ";
+    cerr << endl;
+  }
+  if (value) {
+    for (size_t i = 0; i < _fieldButtons.size(); i++) {
+      if (_fieldButtons.at(i)->isChecked()) {
+        if (_params.debug) cout << "_fieldButton " << i << " is checked" << endl;
+ 	_changeField(i, true);
+      }
+    }
+  }
 
-// }
+}
 
 void DisplayManager::_openFile() {
 }
