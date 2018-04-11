@@ -452,15 +452,6 @@ def getLibLinkOrder():
                   'trmm_rsl',
                   'forayRal']
     
-    ################ deprecated ####################
-    #             'mdv',
-    #             'rdi',
-    #             'spdb',
-    #             'spdbFormats',
-    #             'symprod',
-    #             'SpdbServer',
-    ################################################
-
     return linkOrder
     
 ########################################################################
@@ -602,23 +593,20 @@ def writeMakefileAm():
     fo.write("###############################################\n")
     fo.write("\n")
 
-    fo.write("# compile flags - includes\n")
+    fo.write("# compile flags\n")
+    fo.write("\n")
+    fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
     fo.write("\n")
     fo.write("AM_CFLAGS = -I.\n")
     for lib in compiledLibList:
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
     if (needQt == True):
         fo.write("AM_CFLAGS += -fPIC\n")
-        if (options.osx == True):
-            fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include\n")
-            fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include/QtCore\n")
-            fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include/QtGui\n")
-            fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include/QtWidgets\n")
-            fo.write("AM_CFLAGS += -I/usr/local/opt/qt/include/QtNetwork\n")
-        else:
-            fo.write("AM_CFLAGS += $(QT_CFLAGS)\n")
-    fo.write("\n")
-    fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
+        fo.write("AM_CFLAGS += -std=c++11\n")
+        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Core)\n")
+        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Gui)\n")
+        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Widgets)\n")
+        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Network)\n")
     fo.write("\n")
 
     fo.write("# load flags\n")
@@ -627,10 +615,7 @@ def writeMakefileAm():
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
     if (needQt == True):
-        if (options.osx == True):
-            fo.write("AM_LDFLAGS += -L/usr/local/opt/qt/lib\n")
-        else:
-            fo.write("AM_LDFLAGS += $(QT_LDFLAGS)\n")
+        fo.write("AM_LDFLAGS += -L$(shell pkg-config --variable=libdir Qt5Gui)\n")
     fo.write("\n")
 
     if (len(loadLibList) > 0):
