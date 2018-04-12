@@ -431,12 +431,18 @@ def buildPackage():
 
     # perform the build
 
+    # args = ""
+    # args = args + " -x " + tmpDir
+    # args = args + " -p " + package
+    # if (options.installScripts):
+    #     args = args + " --scripts "
+    # shellCmd("./build/build_lrose " + args)
+
     args = ""
     args = args + " --prefix " + tmpDir
     args = args + " --package " + package
     if (options.installScripts):
         args = args + " --scripts "
-
     shellCmd("./build/build_lrose.py " + args)
 
     # detect which dynamic libs are needed
