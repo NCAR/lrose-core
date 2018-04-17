@@ -138,6 +138,8 @@ include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
 #
 # local targets
 #
+SiiTest_Main: ColorMap.o SiiPalette.o SiiTest_Main.o SoloDefaultColorWrapper.o PaletteManager.o ColorTableManager.o
+	g++ -o SiiTest_Main SiiPalette.o SiiTest_main.o SoloDefaultColorWrapper.o PaletteManager.o ColorTableManager.o ColorMap.o -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp  -L/usr/local/Cellar/qt/5.10.1/lib -F/usr/local/Cellar/qt/5.10.1/lib -framework QtWidgets -F/usr/local/Cellar/qt/5.10.1/lib -framework QtGui -F/usr/local/Cellar/qt/5.10.1/lib -framework QtCore -lz -lm -g
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
