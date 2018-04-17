@@ -249,7 +249,7 @@ def searchDir(dir):
         cmd = os.path.join(thisScriptDir, createScript)
         cmd += " --dir " + absDir + debugStr
         cmd += " --libList " + libList
-        if (options.osx):
+        if (options.osx == True):
             cmd += " --osx "
         runCommand(cmd)
         makefileCreateList.append(makefileCreatePath)

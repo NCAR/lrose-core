@@ -272,9 +272,9 @@ void PolarManager::timerEvent(QTimerEvent *event)
 
   }
 
-  if (!_timeControlPlaced) {
-    _placeTimeControl();
-  }
+  //if (!_timeControlPlaced) {
+  //  _placeTimeControl();
+  //}
 
   // check for image creation
   
@@ -932,7 +932,10 @@ void PolarManager::setArchiveFileList(const vector<string> &list,
 
   if (_timeSlider) {
     _timeSlider->setMinimum(0);
-    _timeSlider->setMaximum(_archiveFileList.size() - 1);
+    if (_archiveFileList.size() <= 1)
+      _timeSlider->setMaximum(1);
+    else
+      _timeSlider->setMaximum(_archiveFileList.size() - 1);
     _timeSlider->setSliderPosition(_archiveScanIndex);
   }
 

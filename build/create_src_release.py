@@ -83,7 +83,7 @@ def main():
         debugStr = " --verbose "
     elif (options.debug):
         debugStr = " --debug "
-    if (options.osx):
+    if (options.osx == True):
         argsStr = debugStr + " --osx "
     else:
         argsStr = debugStr
@@ -104,7 +104,7 @@ def main():
 
     # compute release name and dir name
 
-    if (options.osx):
+    if (options.osx == True):
         releaseName = options.package + "-" + versionStr + ".macosx_64.src"
     else:
         releaseName = options.package + "-" + versionStr + ".src"
