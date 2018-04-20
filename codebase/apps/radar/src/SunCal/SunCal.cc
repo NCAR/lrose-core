@@ -3346,7 +3346,7 @@ void SunCal::_computeSunCentroid(power_channel_t channel)
   // if possible, fit parabola to elevation at solar peak
   // to refine the azimuth centroid
 
-  _validCentroid = true;
+  _validCentroid = false;
   
   vector<double> azArray;
   vector<double> azDbm;
@@ -3384,9 +3384,8 @@ void SunCal::_computeSunCentroid(power_channel_t channel)
       sunCentroidAzOffset = (root1 + root2) / 2.0;
       if (rootTerm2 >= 0) {
         widthAz3Db = -(sqrt(rootTerm2) / _aaAz);
+        _validCentroid = true;
       }
-    } else {
-      _validCentroid = false;
     }
   }
   
@@ -3431,9 +3430,8 @@ void SunCal::_computeSunCentroid(power_channel_t channel)
       sunCentroidElOffset = (root1 + root2) / 2.0;
       if (rootTerm2 >= 0) {
         widthEl3Db = -(sqrt(rootTerm2) / _aaEl);
+        _validCentroid = true;
       }
-    } else {
-      _validCentroid = false;
     }
   }
 
