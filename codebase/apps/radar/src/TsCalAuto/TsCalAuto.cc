@@ -200,29 +200,16 @@ int TsCalAuto::_runFmqMode()
 
   int iret = 0;
 
-  // suspend the test pulse as required
-
-  FILE *pid_file = NULL;
-  int util_pid = 0;
-
   if (_params.suspend_test_pulse) {
-    if((pid_file = fopen(_params.TestPulse_pid_file,"r")) != NULL ) {
-      int numf = fscanf(pid_file,"%d\n",&util_pid);
-      if(numf == 1 && util_pid != 0) {
-        kill(util_pid,SIGUSR1);  // Tell the utility to Suspend.
-        if (_params.debug) {
-          cerr << "Suspending Test Pulse Manager Utility Ops" << endl;
-        }
-        // Wait for the Test Pulse Manager Utility to sut off modulation
-        umsleep(_params.siggen_cmd_delay * 10);
-      }
-    }
+    _suspendTestPulse();
   }
 
   // Turn on the Siggen and  loop through the siggen power settings
 
   _setSiggenRF(true);
-  if(_params.set_sig_freq) _setSiggenFreq(_params.siggen_frequency);
+  if(_params.set_sig_freq) {
+    _setSiggenFreq(_params.siggen_frequency);
+  }
 
   double powerDbm = 0.0;
 
@@ -233,6 +220,8 @@ int TsCalAuto::_runFmqMode()
     for (int jj = 0; jj < _params.siggen_power_sequence_n; jj++) {
       powerDbm = _params._siggen_power_sequence[jj];
       _setSiggenPower(powerDbm);
+      umsleep(500);
+
       // get received powers
       if (_sampleReceivedPowers(powerDbm)) {
         return -1;
@@ -247,7 +236,8 @@ int TsCalAuto::_runFmqMode()
     while (powerDbm >= _params.siggen_min_power) {
     
       _setSiggenPower(powerDbm);
-      
+      umsleep(500);
+
       // get received powers
       
       if (_sampleReceivedPowers(powerDbm)) {
@@ -305,13 +295,20 @@ int TsCalAuto::_runFmqMode()
     iret = -1;
   }
 
-  // resume test pulse
+  // reset siggen if requested
 
-  if(util_pid != 0) {
-    kill(util_pid,SIGUSR2);  // Tell the utility to Resume
-    if (_params.debug) {
-      cerr << "Resuming Test Pulse Manager Utility Ops " << endl;
+  if (_params.reset_siggen_power_after_cal) {
+
+    if(_params.set_sig_freq) {
+      _setSiggenFreq(_params.siggen_frequency);
     }
+    _setSiggenPower(_params.siggen_power_val_after_cal);
+    _setSiggenRF(true);
+
+  }
+
+  if (_params.suspend_test_pulse) {
+    _resumeTestPulse();
   }
 
   return iret;
@@ -1605,4 +1602,48 @@ void TsCalAuto::_conditionGateRange(const IwrfTsPulse &pulse)
   }
 
 }
-    
+
+/////////////////////////////////////////////////    
+// suspend the test pulse while cal proceeds
+
+void TsCalAuto::_suspendTestPulse()
+  
+{
+  
+  _testPulsePid = 0;
+  FILE *pidFile = NULL;
+  
+  if((pidFile = fopen(_params.TestPulse_pid_file,"r")) != NULL ) {
+    int numf = fscanf(pidFile, "%d\n", &_testPulsePid);
+    if(numf == 1 && _testPulsePid != 0) {
+      kill(_testPulsePid, SIGUSR1);  // Tell the utility to Suspend.
+      if (_params.debug) {
+        cerr << "Suspending Test Pulse Manager Utility Ops" << endl;
+      }
+      // Wait for the Test Pulse Manager Utility to sut off modulation
+      umsleep(_params.siggen_cmd_delay * 10);
+    }
+  }
+
+}
+
+//////////////////////////////////////////////////
+// resume test pulse
+
+void TsCalAuto::_resumeTestPulse()
+
+{
+ 
+  if(_testPulsePid != 0) {
+    kill(_testPulsePid, SIGUSR2);  // Tell the utility to Resume
+    if (_params.debug) {
+      cerr << "Resuming Test Pulse Manager Utility Ops " << endl;
+    }
+  }
+
+  _testPulsePid = 0;
+
+}
+
+
+

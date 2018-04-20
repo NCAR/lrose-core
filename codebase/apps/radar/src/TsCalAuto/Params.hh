@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c)
+// ** Copyright UCAR (c) 1992 - 2018
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -391,6 +391,10 @@ public:
 
   char* TestPulse_pid_file;
 
+  tdrp_bool_t reset_siggen_power_after_cal;
+
+  double siggen_power_val_after_cal;
+
   char* radarName;
 
   double radar_frequency;
@@ -458,7 +462,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[63];
+  mutable TDRPtable _table[65];
 
   const char *_className;
 

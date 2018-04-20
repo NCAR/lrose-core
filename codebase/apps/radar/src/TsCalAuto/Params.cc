@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-// ** Copyright UCAR (c)
+// ** Copyright UCAR (c) 1992 - 2018
 // ** University Corporation for Atmospheric Research(UCAR)
 // ** National Center for Atmospheric Research(NCAR)
 // ** Boulder, Colorado, USA
@@ -894,6 +894,30 @@ using namespace std;
     tt->help = tdrpStrDup("On Startup, this program suspends the operation of TestPulse by sending it a SIGUSR1. After Finishing, it restores TestPulse operation by sending it a SIGUSR2");
     tt->val_offset = (char *) &TestPulse_pid_file - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/TestPulse.pid");
+    tt++;
+    
+    // Parameter 'reset_siggen_power_after_cal'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("reset_siggen_power_after_cal");
+    tt->descr = tdrpStrDup("Option to reset the siggen power after the cal is completed.");
+    tt->help = tdrpStrDup("If set, after the cal the siggen will be set to the specified power and the RF will be turned on.");
+    tt->val_offset = (char *) &reset_siggen_power_after_cal - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'siggen_power_val_after_cal'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("siggen_power_val_after_cal");
+    tt->descr = tdrpStrDup("Siggen power after calibration complete (dBm)");
+    tt->help = tdrpStrDup("See 'reset_siggen_power_after_cal'.");
+    tt->val_offset = (char *) &siggen_power_val_after_cal - &_start_;
+    tt->single_val.d = -50;
     tt++;
     
     // Parameter 'Comment 4'

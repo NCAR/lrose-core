@@ -162,6 +162,18 @@ paramdef string {
   p_help = "On Startup, this program suspends the operation of TestPulse by sending it a SIGUSR1. After Finishing, it restores TestPulse operation by sending it a SIGUSR2";
 } TestPulse_pid_file;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to reset the siggen power after the cal is completed.";
+  p_help = "If set, after the cal the siggen will be set to the specified power and the RF will be turned on.";
+} reset_siggen_power_after_cal;
+
+paramdef double {
+  p_default = -50.0;
+  p_descr = "Siggen power after calibration complete (dBm)";
+  p_help = "See 'reset_siggen_power_after_cal'.";
+} siggen_power_val_after_cal;
+
 commentdef {
   p_header = "CALIBRATION PROCEDURE PARAMETERS";
 };
