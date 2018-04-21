@@ -36,6 +36,7 @@
 #include "Names.hh"
 #include <Radx/Radx.hh>
 #include <Radx/RadxVol.hh>
+#include <Radx/RadxSweep.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxGeoref.hh>

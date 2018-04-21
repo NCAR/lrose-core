@@ -927,8 +927,10 @@ int RawFile::_createRays(const string &path)
     ray->setEstimatedNoiseDbmHc(_polAngle[ii]);
 
     
-    ray->setNSamples(2000);
     // hard coded 2000 as replacement for DATA_shot_count from raw file
+
+    ray->setNSamples(2000);
+    ray->setPrtSec(1.0 / 4000.0);
     
     // add to ray vector
     
@@ -1003,7 +1005,7 @@ void RawFile::_loadReadVolume()
   // load the sweep information from the rays
 
   _readVol->loadSweepInfoFromRays();
-  
+
   // load the volume information from the rays
 
   _readVol->loadVolumeInfoFromRays();
@@ -1295,10 +1297,14 @@ int RawFile::readGeorefFromSpdb(string georefUrl,
   const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
   size_t nChunks = chunks.size();
   if (nChunks <= 0) {
-    cerr << "ERROR - Hsrl2Radx::_readGeorefFromSpdb" << endl;
-    cerr << "  Cannot read georef data from URL: "
-         << georefUrl << endl;
-    cerr << "No chunks returned" << endl;
+    if (debug) {
+      cerr << "ERROR - Hsrl2Radx::_readGeorefFromSpdb" << endl;
+      cerr << "  Cannot read georef data from URL: "
+           << georefUrl << endl;
+      cerr << "  searchTime: " << RadxTime::strm(searchTime) << endl;
+      cerr << "  searchMarginSecs: " << searchMarginSecs << endl;
+      cerr << "  No chunks returned" << endl;
+    }
     return -1;
   }
   
