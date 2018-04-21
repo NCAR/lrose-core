@@ -962,6 +962,7 @@
 
    file.setWriteCompressed(true);
    file.setCompressionLevel(_params.compression_level);
+   file.setWriteLdataInfo(true);
 
    // set output format
 
@@ -972,8 +973,15 @@
      file.setWriteFileNamePrefix(_params.output_filename_prefix);
    }
 
-   file.setWriteInstrNameInFileName(_params.include_instrument_name_in_file_name);
+   file.setWriteInstrNameInFileName
+     (_params.include_instrument_name_in_file_name);
+
+   file.setWriteSiteNameInFileName(false);
+   file.setWriteScanTypeInFileName(false);
+   file.setWriteVolNumInFileName(false);
+
    file.setWriteSubsecsInFileName(_params.include_subsecs_in_file_name);
+
    file.setWriteHyphenInDateTime(_params.use_hyphen_in_file_name_datetime_part);
 
  }
