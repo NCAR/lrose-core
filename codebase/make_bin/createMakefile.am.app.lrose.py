@@ -558,7 +558,11 @@ def getLoadLibList():
                        'hdf5',
                        'expat',
                        'jasper',
+                       'fl',
+                       'X11',
+                       'Xext',
                        'pthread',
+                       'png',
                        'z',
                        'bz2',
                        'm' ]
@@ -624,9 +628,12 @@ def writeMakefileAm():
     fo.write("AM_CFLAGS = -I.\n")
     for lib in compiledLibList:
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
-    if (needX11 == True):
-        fo.write("AM_CFLAGS += -I/usr/X11R6/include -I/opt/X11/include\n")
+    if (options.osx == True):
+        fo.write("# for OSX\n")
+        fo.write("AM_CFLAGS += -I/opt/X11/include\n")
+        fo.write("AM_CFLAGS += -I/usr/local/opt/flex/include\n")
     if (needQt == True):
+        fo.write("# for QT\n")
         fo.write("AM_CFLAGS += -fPIC\n")
         fo.write("AM_CFLAGS += -std=c++11\n")
         fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Core)\n")
@@ -640,9 +647,12 @@ def writeMakefileAm():
     fo.write("AM_LDFLAGS = -L.\n")
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
-    if (needX11 == True):
+    if (options.osx == True):
+        fo.write("# for OSX\n")
         fo.write("AM_LDFLAGS += -L/opt/X11/lib\n")
+        fo.write("AM_LDFLAGS += -L/usr/local/opt/flex/lib\n")
     if (needQt == True):
+        fo.write("# for QT\n")
         fo.write("AM_LDFLAGS += -L$(shell pkg-config --variable=libdir Qt5Gui)\n")
         fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Core)\n")
         fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Gui)\n")
