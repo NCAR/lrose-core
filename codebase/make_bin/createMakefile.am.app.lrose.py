@@ -641,7 +641,7 @@ def writeMakefileAm():
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
     if (needX11 == True):
-        fo.write("AM_LDLAGS += -L/opt/X11/lib\n")
+        fo.write("AM_LDFLAGS += -L/opt/X11/lib\n")
     if (needQt == True):
         fo.write("AM_LDFLAGS += -L$(shell pkg-config --variable=libdir Qt5Gui)\n")
         fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Core)\n")
