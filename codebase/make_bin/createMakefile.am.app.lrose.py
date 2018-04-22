@@ -32,6 +32,7 @@ def main():
     global makefileLibList
     global loadLibList
     global needQt
+    global needX11
 
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
@@ -164,7 +165,8 @@ def main():
     # check if we need Qt support
 
     needQt = checkForQt()
-
+    needX11 = checkForX11()
+    
     # set list of libs to be loaded
     # this will be the ordered lib list, plus any libs from the makefile
     # that are not included in the ordered libs
@@ -304,6 +306,27 @@ def checkForQt():
 
     for line in lines:
         if (line.find("QT") >= 0):
+            return True
+
+    return False
+    
+########################################################################
+# check for dependence on X11
+
+def checkForX11():
+                    
+    try:
+        fp = open(makefileName, 'r')
+    except IOError as e:
+        print >>sys.stderr, "ERROR - ", thisScriptName
+        print >>sys.stderr, "  Cannot open: ", makefileName
+        exit(1)
+
+    lines = fp.readlines()
+    fp.close()
+
+    for line in lines:
+        if (line.find("X11") >= 0):
             return True
 
     return False
@@ -601,6 +624,8 @@ def writeMakefileAm():
     fo.write("AM_CFLAGS = -I.\n")
     for lib in compiledLibList:
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
+    if (needX11 == True):
+        fo.write("AM_CFLAGS += -I/usr/X11R6/include -I/opt/X11/include\n")
     if (needQt == True):
         fo.write("AM_CFLAGS += -fPIC\n")
         fo.write("AM_CFLAGS += -std=c++11\n")
@@ -615,6 +640,8 @@ def writeMakefileAm():
     fo.write("AM_LDFLAGS = -L.\n")
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
+    if (needX11 == True):
+        fo.write("AM_LDLAGS += -L/opt/X11/lib\n")
     if (needQt == True):
         fo.write("AM_LDFLAGS += -L$(shell pkg-config --variable=libdir Qt5Gui)\n")
         fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Core)\n")
