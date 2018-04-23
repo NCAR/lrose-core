@@ -140,7 +140,7 @@ def main():
 
     os.chdir(codebaseDir)
     cmd = "./make_bin/install_package_makefiles.py --package " + \
-          options.package + " --codedir .")
+          options.package + " --codedir . "
     if (options.osx == True):
         cmd = cmd + " --osx "
     shellCmd(cmd)
