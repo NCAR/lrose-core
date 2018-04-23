@@ -325,6 +325,8 @@ int HawkEye::_setupDisplayFields()
     ColorMap map;
     map.setName(pfld.label);
     map.setUnits(pfld.units);
+    // TODO: add call here for smart color map; look up the field name/label and
+    // see if it is a usual parameter for a known color map
     if (map.readMap(colorMapPath)) {
       cerr << "ERROR - HawkEye::_setupDisplayFields()" << endl;
       cerr << "  Cannot read in color map file: " << colorMapPath << endl;

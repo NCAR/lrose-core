@@ -62,6 +62,15 @@ int main(int argc, char **argv)
   colorMap = sd.lookupColorTable("theodore16");
   colorMap.print(cout);
 
+  vector<double> bounds = sd._minMaxValue(0, 3, 10);
+  cout << "bounds (min,max) for (center=0, ncolors=3, width=10): " << bounds[0] << ", " << bounds[1] << endl;
+
+  colorMap = sd.ColorMapForUsualParm["AV"];
+  colorMap.print(cout);
+
+  colorMap = sd.ColorMapForUsualParm["KAC"];
+  colorMap.print(cout);
+
 /*
   vector<unsigned int> *rgbValues = sd.ToRGB( "   0.539   0.066   0.559");
   cout << "rgb for 0.539   0.066   0.559 ... ";
