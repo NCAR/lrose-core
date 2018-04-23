@@ -43,6 +43,7 @@
 #include <deque>
 #include <vector>
 #include <Spdb/DsSpdb.hh>
+#include <Ncxx/NcxxDim.hh>
 #include <didss/DsInputPath.hh>
 #include "Args.hh"
 #include "Params.hh"
@@ -85,7 +86,7 @@ private:
   NcfWrapper _ncf;
   DsInputPath *_input;
 
-  NcDim _timeDim;
+  NcxxDim _timeDim;
   size_t _nTimes;
 
   vector<time_t> _time;
