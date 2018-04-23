@@ -75,14 +75,22 @@ def doInstall():
         for dir in dirs:
             if (dir == "_makefiles"):
                 dirPath = os.path.join(root, dir)
-                makefilePath = os.path.join(root, "makefile")
+                makefilePathLower = os.path.join(root, "makefile")
+                makefilePathUpper = os.path.join(root, "Makefile")
                 # check if package makefile exists
                 packageMakefilePath = os.path.join(dirPath, packageMakefileName)
                 if (os.path.isfile(packageMakefilePath)):
+                    # remove makefile in the target dir
+                    if (os.path.isfile(makefilePathLower) == True):
+                        os.remove(makefilePathLower)
+                    if (os.path.isfile(makefilePathUpper) == True):
+                        os.remove(makefilePathUpper)
                     # copy the package makefile to the root/makefile
                     if (options.debug):
-                        print >>sys.stderr, "Copying " + packageMakefilePath + " to " + makefilePath
-                    shutil.copy(packageMakefilePath, makefilePath)
+                        print >>sys.stderr, \
+                            "Copying " + packageMakefilePath + \
+                            " to " + makefilePathLower
+                    shutil.copy(packageMakefilePath, makefilePathLower)
 
     return
 
