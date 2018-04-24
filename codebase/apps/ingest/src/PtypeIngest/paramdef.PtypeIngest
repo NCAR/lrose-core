@@ -1,0 +1,293 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.PtypeIngest
+ *
+ * This file contains the TDRP parameter definitions for
+ * PtypeIngest
+ */
+
+commentdef
+{
+  p_header = "PtypeIngest";
+  p_text = "This program converts the HRRR 15 minute netCDF files "
+           "into MDV format.";
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_default = false;
+} verbose;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  FILE_LIST,
+  INPUT_DIR,
+  INPUT_DIR_RECURSE,
+  LATEST_DATA
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "\tIn FILE_LIST mode, the program operates on the files specified "
+           "on the command line.\n"
+           "\tIn INPUT_DIR mode, the program will process new files as they "
+           "appear in the input_dir directory.\n"
+           "\tIn INPUT_DIR_RECURSE mode, the program will process new files "
+           "as they appear in the input_dir directory or in any "
+           "subdirectory.\n"
+           "\tIn LATEST_DATA mode, the program will process new files as they "
+           "appear in the _latest_data_info file in the input_dir directory.\n";
+  p_default = "FILE_LIST";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "Input directory";
+  p_default = "$(RAP_DATA_DIR)/raw/hrrr";
+} input_dir;
+
+paramdef string
+{
+  p_descr = "Input filename substring";
+  p_help = "Used only if trigger_mode is set to INPUT_DIR or INPUT_DIR_RECURSE. "
+           "The program will only process files whose name contains "
+           "this substring. "
+           "Set to \"\" to process all files in the input directory.\n";
+  p_default = "";
+} input_substring;
+
+paramdef string
+{
+  p_descr = "Input filename exclude substring";
+  p_help = "Used only if trigger_mode is set to INPUT_DIR or INPUT_DIR_RECURSE. "
+           "The program will not process files whose name contains "
+           "this substring. "
+           "Set to \"\" to process all files in the input directory.\n";
+  p_default = "";
+} exclude_substring;
+
+paramdef int
+{
+  p_descr = "The forecast interval for the forecasts in the netCDF file "
+            "in seconds.";
+  p_default = 900;
+} forecast_interval;
+
+paramdef boolean
+{
+  p_descr = "Parameter to indicate if all forecasts are contained in one file.";
+  p_default = false;
+} all_forecasts_in_file;
+
+paramdef long
+{
+  p_descr = "Maximum number of seconds input files are valid.";
+  p_help = "Used only if trigger_mode is set to LATEST_DATA.";
+  p_default = 600;
+} max_valid_secs;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::mdv/seviri";
+} output_url;
+
+typedef struct
+{
+  string nc_field_name;
+  double nc_missing_data_value;
+  boolean transform_data;
+  double transform_multiplier;
+  double transform_constant;
+  string transform_units;
+  boolean replace_data;
+  double replace_nc_value;
+  double replace_mdv_value;
+} output_field_t;
+
+paramdef struct output_field_t
+{
+  p_descr = "List of fields to process in the netCDF file.";
+  p_help = "\tnc_field_name - The name of the field as it appears in the "
+           "netCDF file. "
+           "This will also be used as the field name in the MDV file.\n"
+           "\tnc_missing_data_value - The missing data value in the netCDF "
+           "file.\n"
+           "\ttransform_data - Flag indicating whether to transform the "
+           "data before putting it in the MDV file. "
+           "If true, the MDV value will be set to:\n"
+           "\t\t(nc_value * transform_multiplier) + transform_constant\n"
+           "\ttransform_multiplier - See above.\n"
+           "\ttransform_constant - See above.\n"
+           "\ttransform_units - Units label to use for the MDV data if a "
+           "transform was applied. "
+           "Used only if transform_data is set to true.\n"
+           "\treplace_data - Flag indicating whether to replace the specified "
+           "data value in the netCDF file with the specified MDV data value.\n"
+           "\treplace_nc_value - The value in the netCDF file that should be "
+           "replaced with a new value in the MDV file. "
+           "Data transformations are not applied to replacement values.\n"
+           "\treplace_mdv_value - The value to use in the MDV file in place "
+           "of the replace_nc_value values from the netCDF file.\n";
+  p_default = { { "VIL", -99999.0, false, 1.0, 0.0, "", false, 0.0, 0.0 },
+                { "RADARVIL", -99999.0, false, 1.0, 0.0, "", false, 0.0, 0.0 },
+                { "ECHOTOP", -99999.0, true, 0.001, 0.0, "km", true, -999.0, 0.0 } };
+} output_fields[];
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to remap the output to a new projection.";
+  p_default = false;
+} remap_output;
+
+typedef enum
+{
+  PROJ_LATLON,
+  PROJ_FLAT,
+  PROJ_LC2
+} proj_type_t;
+
+typedef struct
+{
+  proj_type_t proj_type;
+  int nx;
+  int ny;
+  double dx;
+  double dy;
+  double minx;
+  double miny;
+  double origin_lat;
+  double origin_lon;
+  double rotation;
+  double lat1;
+  double lat2;
+} remap_proj_t;
+
+paramdef struct remap_proj_t
+{
+  p_descr = "Projection to use for remapping the data on output";
+  p_help = "Only used if remap_output is set to true.";
+  p_default = { PROJ_LATLON, 0, 0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0 };
+} remap_proj;
+
+typedef enum
+{
+  COMPRESSION_NONE,
+  COMPRESSION_RLE,
+  COMPRESSION_LZO,
+  COMPRESSION_ZLIB,
+  COMPRESSION_BZIP,
+  COMPRESSION_GZIP,
+  COMPRESSION_GZIP_VOL
+} compression_type_t;
+
+paramdef enum compression_type_t
+{
+  p_descr = "Type of compression to use when storing the fields to the "
+            "MDV file.";
+  p_default = COMPRESSION_BZIP;
+} output_compression_type;
+
+typedef enum
+{
+  SCALING_NONE,
+  SCALING_ROUNDED,
+  SCALING_INTEGRAL,
+  SCALING_DYNAMIC,
+  SCALING_SPECIFIED
+} scaling_type_t;
+
+typedef struct
+{
+  scaling_type_t type;
+  double scale;
+  double bias;
+} scaling_info_t;
+
+paramdef struct scaling_info_t
+{
+  p_descr = "Information about how to scale the data on output";
+  p_help = "\tSCALING_NONE - No scaling is performed and the data is output "
+           "as 32-bit floats.\n"
+           "\tSCALING_ROUNDED - The scale and bias are calcuated dynamically, "
+           "but these values are then constrained to round to 0.2, 0.5 or "
+           "1.0 multiplied by a power of 10.\n"
+           "\tSCALING_INTEGRAL - The scale and bias are calculated "
+           "dynamically, but these values are then constrained to integral "
+           "values.\n"
+           "\tSCALING_DYNAMIC - The scale and bias are calculated "
+           "dynamically, based on the data values in the field.\n"
+           "\tSCALING_SPECIFIED - The scale and bias are specified in the "
+           "scale and bias fields of this structure.\n";
+  p_default = { SCALING_DYNAMIC, 1.0, 0.0 };
+} output_scaling_info;
