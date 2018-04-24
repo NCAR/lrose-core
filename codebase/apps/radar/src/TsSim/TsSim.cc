@@ -38,7 +38,6 @@
 
 #include "TsSim.hh"
 #include <string>
-#include <malloc.h>
 #include <iostream>
 #include <iomanip>
 #include <toolsa/uusleep.h>
