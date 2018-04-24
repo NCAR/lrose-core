@@ -38,6 +38,7 @@
 #include <unistd.h>
 #include <cmath>
 #include <vector>
+#include <toolsa/sincos.h>
 #include <radar/RadarComplex.hh>
 #include "QuadratureTest.hh"
 
@@ -184,13 +185,13 @@ int QuadratureTest::Run ()
     RadarComplex_t iqVal;
     double sinVal, cosVal;
 
-    sincos(phase11 * DEG_TO_RAD, &sinVal, &cosVal);
+    ta_sincos(phase11 * DEG_TO_RAD, &sinVal, &cosVal);
     iqVal.re = mag1 * sinVal;
     iqVal.im = mag1 * cosVal;
     iq[count] = iqVal;
     count++;
 
-    sincos(phase22 * DEG_TO_RAD, &sinVal, &cosVal);
+    ta_sincos(phase22 * DEG_TO_RAD, &sinVal, &cosVal);
     iqVal.re = mag2 * sinVal;
     iqVal.im = mag2 * cosVal;
     iq[count] = iqVal;

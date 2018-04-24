@@ -428,6 +428,7 @@ int SunCal::_runForTimeSeries()
       _volCount++;
       break;
     }
+    const IwrfTsInfo &info = _tsReader->getOpsInfo();
 
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       if (pulse->getPulseSeqNum() % 10000 == 0) {
@@ -439,6 +440,7 @@ int SunCal::_runForTimeSeries()
       }
     }
 
+
     if (_params.invert_hv_flag) {
       pulse->setInvertHvFlag();
     }
@@ -446,14 +448,25 @@ int SunCal::_runForTimeSeries()
     _volNum = pulse->getVolNum();
 
     if (_params.get_location_from_data) {
-      const IwrfTsInfo &info = _tsReader->getOpsInfo();
       _radarLat = info.get_radar_latitude_deg();
       _radarLon = info.get_radar_longitude_deg();
       _radarAltKm = info.get_radar_altitude_m() / 1000.0;
       _sunPosn.setLocation(_radarLat, _radarLon, _radarAltKm / 1000.0);
     }
-    
-    _processPulse(pulse);
+
+    bool useThisPulse = true;
+    if (_params.check_scan_segment_name) {
+      const iwrf_scan_segment_t &scanSeg = info.getScanSegment();
+      string segName = scanSeg.segment_name;
+      string requestedSegName = _params.scan_segment_name;
+      if (segName != requestedSegName) {
+        useThisPulse = false;
+      }
+    }
+
+    if (useThisPulse) {
+      _processPulse(pulse);
+    }
 
     // process data if end of vol
     
