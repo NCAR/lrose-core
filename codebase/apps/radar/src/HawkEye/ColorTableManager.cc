@@ -259,7 +259,7 @@ void ColorTableManager::_addTable(const char **at, int nn)
   strncpy(firstLine, at[0], 255);
 
   char *token;
-  token = std::strtok(firstLine, " ");
+  token = strtok(firstLine, " ");
 
   if (token == NULL) {
     cerr << "Error reading internal color table " << at[0] << endl;
@@ -268,7 +268,7 @@ void ColorTableManager::_addTable(const char **at, int nn)
   }
 
   // get the next token, which should be the table name 
-  token = std::strtok(NULL, " ");
+  token = strtok(NULL, " ");
 
   if (token == NULL) {
     cerr << "Error reading internal color table " << at[0] << endl;
