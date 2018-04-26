@@ -98,6 +98,8 @@ def main():
     # set directories
 
     releaseDir = os.path.join(options.releaseTopDir, options.package)
+    if (options.osx == True):
+        releaseDir = os.path.join(releaseDir, "osx")
     tmpDir = os.path.join(releaseDir, "tmp")
     coreDir = os.path.join(tmpDir, "lrose-core")
     codebaseDir = os.path.join(coreDir, "codebase")
