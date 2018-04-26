@@ -136,6 +136,7 @@ def main():
 
     if (platform != "darwin"):
         os.environ["CXXFLAGS"] = " -std=c++11 "
+        os.environ["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
 
     cmd = "env"
     print >>sys.stderr, "========================================="
