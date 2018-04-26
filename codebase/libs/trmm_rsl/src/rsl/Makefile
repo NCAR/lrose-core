@@ -54,6 +54,7 @@ SRCS = \
 	mcgill_to_radar.c \
 	nsig.c \
 	nsig_to_radar.c \
+	nsig2_to_radar.c \
 	prune.c \
 	radar.c \
 	radar_to_hdf_1.c \
