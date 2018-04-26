@@ -92,7 +92,7 @@ NetcdfField::~NetcdfField()
  * createMdvField()
  */
 
-MdvxField *NetcdfField::createMdvField(const NcFile &nc_file,
+MdvxField *NetcdfField::createMdvField(const NcxxFile &nc_file,
 				       const MdvxProj &input_proj,
 				       const int forecast_index,
 				       const int forecast_secs,
@@ -102,10 +102,8 @@ MdvxField *NetcdfField::createMdvField(const NcFile &nc_file,
   
   // Get a pointer to the variable in the netCDF file
 
-  NcVar *var;
-  
-  if ((var = nc_file.get_var(_ncFieldName.c_str())) == 0)
-  {
+  NcxxVar var = nc_file.getVar(_ncFieldName);
+  if (var.isNull()) {
     cerr << "ERROR: " << method_name << endl;
     cerr << "Error getting " << _ncFieldName
 	 << " variable from netCDF file" << endl;
@@ -113,17 +111,9 @@ MdvxField *NetcdfField::createMdvField(const NcFile &nc_file,
     return 0;
   }
   
-  // Make sure the variable is valid and is of the type we expect
+  // Make sure the variable is of the type we expect
 
-  if (!var->is_valid())
-  {
-    cerr << "ERROR: " << method_name << endl;
-    cerr << _ncFieldName << " variable in netCDF file isn't valid." << endl;
-    
-    return 0;
-  }
-
-  if (var->type() != ncByte)
+  if (var.getType() != ncxxByte)
   {
     cerr << "ERROR: " << method_name << endl;
     cerr << _ncFieldName << " variable is not of type ncFloat." << endl;
@@ -134,8 +124,7 @@ MdvxField *NetcdfField::createMdvField(const NcFile &nc_file,
 
   // Get the needed variable attributes
 
-  string field_name_long = _getVarAttAsString(*var, LONG_FIELD_NAME_ATT_NAME);
-  
+  string field_name_long = _getVarAttAsString(var, LONG_FIELD_NAME_ATT_NAME);
   if (field_name_long == "")
   {
     cerr << "ERROR: " << method_name << endl;
@@ -145,8 +134,7 @@ MdvxField *NetcdfField::createMdvField(const NcFile &nc_file,
     return 0;
   }
   
-  string units = _getVarAttAsString(*var, UNITS_ATT_NAME);
-  
+  string units = _getVarAttAsString(var, UNITS_ATT_NAME);
   if (units == "")
   {
     cerr << "ERROR: " << method_name << endl;

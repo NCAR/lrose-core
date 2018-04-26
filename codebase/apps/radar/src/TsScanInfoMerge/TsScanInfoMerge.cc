@@ -570,7 +570,7 @@ int TsScanInfoMerge::_readSlave()
       // pulse type
       // determine the pulse sequence number
       
-      IwrfTsInfo info = _slaveReader->getOpsInfo();
+      IwrfTsInfo &info = _slaveReader->getOpsInfo();
       IwrfTsPulse *pulse = new IwrfTsPulse(info);
       if (pulse->setFromBuffer((void *) msgBuf, msgLen, true) == 0) {
         _slaveSeqNum = pulse->get_pulse_seq_num();

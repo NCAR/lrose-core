@@ -139,8 +139,11 @@ def main():
     # install the distribution-specific makefiles
 
     os.chdir(codebaseDir)
-    shellCmd("./make_bin/install_package_makefiles.py --package " + 
-               options.package + " --codedir .")
+    cmd = "./make_bin/install_package_makefiles.py --package " + \
+          options.package + " --codedir . "
+    if (options.osx == True):
+        cmd = cmd + " --osx "
+    shellCmd(cmd)
 
     # trim libs and apps to those required by distribution makefiles
 

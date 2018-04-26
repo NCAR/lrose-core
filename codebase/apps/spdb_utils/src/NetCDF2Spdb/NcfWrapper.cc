@@ -55,7 +55,7 @@ NcfWrapper::NcfWrapper()
   
 {
 
-  _ncFormat = NcFile::classic;
+  _ncFormat = NcxxFile::classic;
   _ncFile = NULL;
   clear();
 
@@ -91,7 +91,7 @@ int NcfWrapper::openRead(const string &path)
 
   close();
   _pathInUse = path;
-  _ncFile = new NcFile(path, NcFile::read);
+  _ncFile = new NcxxFile(path, NcxxFile::read);
 
   // Check that constructor succeeded
   
@@ -118,14 +118,14 @@ int NcfWrapper::openRead(const string &path)
 /// Returns 0 on success, -1 on failure
 
 int NcfWrapper::openWrite(const string &path,
-                          NcFile::FileFormat format) 
+                          NcxxFile::FileFormat format) 
 
 {
   
   close();
   _pathInUse = path;
   _ncFormat = format;
-  _ncFile = new NcFile(path, NcFile::replace, _ncFormat);
+  _ncFile = new NcxxFile(path, NcxxFile::replace, _ncFormat);
   
   if (!_ncFile || !_ncFile->isNull()) {
     _addErrStr("ERROR - NcfWrapper::openWrite");
@@ -163,7 +163,7 @@ int NcfWrapper::addGlobAttr(const string &name, const string &val)
 {
   try {
     _ncFile->putAtt(name, val);
-  } catch (NcException& e) {
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::addGlobalAttributes");
     _addErrStr("  Cannot add global attr name: ", name);
     _addErrStr("  val: ", val);
@@ -180,10 +180,10 @@ int NcfWrapper::addGlobAttr(const string &name, const string &val)
 
 int NcfWrapper::addGlobAttr(const string &name, int val)
 {
-  NcInt xtype;
+  NcxxInt xtype;
   try {
     _ncFile->putAtt(name, xtype, val);
-  } catch (NcException& e) {
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::addGlobAttr");
     _addErrStr("  Cannot add global attr name: ", name);
     _addErrInt("  val: ", val);
@@ -200,10 +200,10 @@ int NcfWrapper::addGlobAttr(const string &name, int val)
 
 int NcfWrapper::addGlobAttr(const string &name, float val)
 {
-  NcFloat xtype;
+  NcxxFloat xtype;
   try {
     _ncFile->putAtt(name, xtype, val);
-  } catch (NcException& e) {
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::addGlobAttr");
     _addErrStr("  Cannot add global attr name: ", name);
     _addErrDbl("  val: ", val, "%g");
@@ -220,7 +220,7 @@ int NcfWrapper::addGlobAttr(const string &name, float val)
 
 int NcfWrapper::readGlobAttr(const string &name, string &val)
 {
-  NcGroupAtt att = _ncFile->getAtt(name);
+  NcxxGroupAtt att = _ncFile->getAtt(name);
   if (att.isNull()) {
     _addErrStr("ERROR - NcfWrapper::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
@@ -229,7 +229,7 @@ int NcfWrapper::readGlobAttr(const string &name, string &val)
   }
   try {
     att.getValues(val);
-  } catch (NcException& e) {
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
     _addErrStr("  file: ", _pathInUse);
@@ -242,7 +242,7 @@ int NcfWrapper::readGlobAttr(const string &name, string &val)
 
 int NcfWrapper::readGlobAttr(const string &name, int &val)
 {
-  NcGroupAtt att = _ncFile->getAtt(name);
+  NcxxGroupAtt att = _ncFile->getAtt(name);
   if (att.isNull()) {
     _addErrStr("ERROR - NcfWrapper::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
@@ -260,7 +260,7 @@ int NcfWrapper::readGlobAttr(const string &name, int &val)
   int *vals = new int[nvals];
   try {
     att.getValues(vals);
-  } catch (NcException& e) {
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
     _addErrStr("  file: ", _pathInUse);
@@ -276,7 +276,7 @@ int NcfWrapper::readGlobAttr(const string &name, int &val)
 
 int NcfWrapper::readGlobAttr(const string &name, float &val)
 {
-  NcGroupAtt att = _ncFile->getAtt(name);
+  NcxxGroupAtt att = _ncFile->getAtt(name);
   if (att.isNull()) {
     _addErrStr("ERROR - NcfWrapper::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
@@ -294,7 +294,7 @@ int NcfWrapper::readGlobAttr(const string &name, float &val)
   float *vals = new float[nvals];
   try {
     att.getValues(vals);
-  } catch (NcException& e) {
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
     _addErrStr("  file: ", _pathInUse);
@@ -310,7 +310,7 @@ int NcfWrapper::readGlobAttr(const string &name, float &val)
 
 int NcfWrapper::readGlobAttr(const string &name, double &val)
 {
-  NcGroupAtt att = _ncFile->getAtt(name);
+  NcxxGroupAtt att = _ncFile->getAtt(name);
   if (att.isNull()) {
     _addErrStr("ERROR - NcfWrapper::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
@@ -328,7 +328,7 @@ int NcfWrapper::readGlobAttr(const string &name, double &val)
   double *vals = new double[nvals];
   try {
     att.getValues(vals);
-  } catch (NcException& e) {
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::readGlobAttr");
     _addErrStr("  Cannot read global attr name: ", name);
     _addErrStr("  file: ", _pathInUse);
@@ -346,11 +346,11 @@ int NcfWrapper::readGlobAttr(const string &name, double &val)
 // add string attribute
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::addAttr(NcVar &var, const string &name, const string &val)
+int NcfWrapper::addAttr(NcxxVar &var, const string &name, const string &val)
 {
   try {
     var.putAtt(name.c_str(), val.c_str());
-  } catch (NcException& e) {
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::addAttr");
     _addErrStr("  Cannot add string var attr, name: ", name);
     _addErrStr("  val: ", val);
@@ -366,12 +366,12 @@ int NcfWrapper::addAttr(NcVar &var, const string &name, const string &val)
 // add double attribute
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::addAttr(NcVar &var, const string &name, double val)
+int NcfWrapper::addAttr(NcxxVar &var, const string &name, double val)
 {
   try {
-    NcType vtype(NcType::nc_DOUBLE);
+    NcxxType vtype(NcxxType::nc_DOUBLE);
     var.putAtt(name.c_str(), vtype, 1, &val);
-  } catch (NcException& e) {
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::addAttr");
     _addErrStr("  Cannot add double var attr, name: ", name);
     _addErrDbl("  val: ", val, "%g");
@@ -387,12 +387,12 @@ int NcfWrapper::addAttr(NcVar &var, const string &name, double val)
 // add float attribute
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::addAttr(NcVar &var, const string &name, float val)
+int NcfWrapper::addAttr(NcxxVar &var, const string &name, float val)
 {
   try {
-    NcType vtype(NcType::nc_FLOAT);
+    NcxxType vtype(NcxxType::nc_FLOAT);
     var.putAtt(name.c_str(), vtype, 1, &val);
-  } catch (NcException& e) {
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::addAttr");
     _addErrStr("  Cannot add float var attr, name: ", name);
     _addErrDbl("  val: ", val, "%g");
@@ -408,12 +408,12 @@ int NcfWrapper::addAttr(NcVar &var, const string &name, float val)
 // add int attribute
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::addAttr(NcVar &var, const string &name, int val)
+int NcfWrapper::addAttr(NcxxVar &var, const string &name, int val)
 {
   try {
-    NcType vtype(NcType::nc_INT);
+    NcxxType vtype(NcxxType::nc_INT);
     var.putAtt(name.c_str(), vtype, 1, &val);
-  } catch (NcException& e) {
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::addAttr");
     _addErrStr("  Cannot add int var attr, name: ", name);
     _addErrDbl("  val: ", val, "%d");
@@ -429,12 +429,12 @@ int NcfWrapper::addAttr(NcVar &var, const string &name, int val)
 // add long attribute
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::addAttr(NcVar &var, const string &name, int64_t val)
+int NcfWrapper::addAttr(NcxxVar &var, const string &name, int64_t val)
 {
   try {
-    NcType vtype(NcType::nc_INT64);
+    NcxxType vtype(NcxxType::nc_INT64);
     var.putAtt(name.c_str(), vtype, 1, &val);
-  } catch (NcException& e) {
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::addAttr");
     _addErrStr("  Cannot add int64_t var attr, name: ", name);
     _addErrDbl("  val: ", val, "%ld");
@@ -450,12 +450,12 @@ int NcfWrapper::addAttr(NcVar &var, const string &name, int64_t val)
 // add short attribute
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::addAttr(NcVar &var, const string &name, short val)
+int NcfWrapper::addAttr(NcxxVar &var, const string &name, short val)
 {
   try {
-    NcType vtype(NcType::nc_SHORT);
+    NcxxType vtype(NcxxType::nc_SHORT);
     var.putAtt(name.c_str(), vtype, 1, &val);
-  } catch (NcException& e) {
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::addAttr");
     _addErrStr("  Cannot add short var attr, name: ", name);
     _addErrDbl("  val: ", (int) val, "%d");
@@ -471,12 +471,12 @@ int NcfWrapper::addAttr(NcVar &var, const string &name, short val)
 // add ncbyte attribute
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::addAttr(NcVar &var, const string &name, unsigned char val)
+int NcfWrapper::addAttr(NcxxVar &var, const string &name, unsigned char val)
 {
   try {
-    NcType vtype(NcType::nc_UBYTE);
+    NcxxType vtype(NcxxType::nc_UBYTE);
     var.putAtt(name.c_str(), vtype, 1, &val);
-  } catch (NcException& e) {
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::addAttr");
     _addErrStr("  Cannot add byte var attr, name: ", name);
     _addErrDbl("  val: ", (int) val, "%d");
@@ -493,7 +493,7 @@ int NcfWrapper::addAttr(NcVar &var, const string &name, unsigned char val)
 // Returns 0 on success, -1 on failure
 // Side effect: dim arg is updated
 
-int NcfWrapper::addDim(NcDim &dim, const string &name, int size)
+int NcfWrapper::addDim(NcxxDim &dim, const string &name, int size)
 {
   if (size < 1) {
     dim = _ncFile->addDim(name);
@@ -514,7 +514,7 @@ int NcfWrapper::addDim(NcDim &dim, const string &name, int size)
 // Returns 0 on success, -1 on failure
 // Side effect: dim arg is set
 
-int NcfWrapper::readDim(const string &name, NcDim &dim)
+int NcfWrapper::readDim(const string &name, NcxxDim &dim)
 
 {
   dim = _ncFile->getDim(name);
@@ -532,16 +532,16 @@ int NcfWrapper::readDim(const string &name, NcDim &dim)
 // Returns 0 on success, -1 on failure
 // Side effect: var is set
 
-int NcfWrapper::addVar(NcVar &var,
+int NcfWrapper::addVar(NcxxVar &var,
                        const string &name, 
                        const string &standardName,
                        const string &longName,
-                       NcType ncType, 
+                       NcxxType ncType, 
                        const string &units /* = "" */)
   
 {
   
-  vector<NcDim> dims; // 0 length - for scalar
+  vector<NcxxDim> dims; // 0 length - for scalar
 
   return addVar(var, name, standardName, longName,
                 ncType, dims, units);
@@ -553,17 +553,17 @@ int NcfWrapper::addVar(NcVar &var,
 // Returns 0 on success, -1 on failure
 // Side effect: var is set
 
-int NcfWrapper::addVar(NcVar &var, 
+int NcfWrapper::addVar(NcxxVar &var, 
                        const string &name, 
                        const string &standardName,
                        const string &longName,
-                       NcType ncType, 
-                       NcDim &dim, 
+                       NcxxType ncType, 
+                       NcxxDim &dim, 
                        const string &units /* = "" */)
   
 {
   
-  vector<NcDim> dims;
+  vector<NcxxDim> dims;
   dims.push_back(dim);
 
   return addVar(var, name, standardName, longName,
@@ -576,17 +576,17 @@ int NcfWrapper::addVar(NcVar &var,
 // Returns 0 on success, -1 on failure
 // Side effect: var is set
 
-int NcfWrapper::addVar(NcVar &var, 
+int NcfWrapper::addVar(NcxxVar &var, 
                        const string &name,
                        const string &standardName,
                        const string &longName,
-                       NcType ncType,
-                       NcDim &dim0,
-                       NcDim &dim1,
+                       NcxxType ncType,
+                       NcxxDim &dim0,
+                       NcxxDim &dim1,
                        const string &units /* = "" */)
 {
 
-  vector<NcDim> dims;
+  vector<NcxxDim> dims;
   dims.push_back(dim0);
   dims.push_back(dim1);
 
@@ -600,12 +600,12 @@ int NcfWrapper::addVar(NcVar &var,
 // Returns 0 on success, -1 on failure
 // Side effect: var is set
 
-int NcfWrapper::addVar(NcVar &var, 
+int NcfWrapper::addVar(NcxxVar &var, 
                        const string &name,
                        const string &standardName,
                        const string &longName,
-                       NcType ncType,
-                       vector<NcDim> &dims,
+                       NcxxType ncType,
+                       vector<NcxxDim> &dims,
                        const string &units /* = "" */)
 {
 
@@ -642,11 +642,11 @@ int NcfWrapper::addVar(NcVar &var,
 // this is the product of the dimension sizes
 // and is 1 for a scalar (i.e. no dimensions)
 
-int64_t NcfWrapper::numVals(NcVar &var)
+int64_t NcfWrapper::numVals(NcxxVar &var)
   
 {
 
-  std::vector<NcDim> dims = var.getDims();
+  std::vector<NcxxDim> dims = var.getDims();
   int64_t prod = 1;
   for (size_t ii = 0; ii < dims.size(); ii++) {
     prod *=  var.getDim(ii).getSize();
@@ -659,7 +659,7 @@ int64_t NcfWrapper::numVals(NcVar &var)
 // read int variable, set var and val
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::readIntVar(NcVar &var, const string &name,
+int NcfWrapper::readIntVar(NcxxVar &var, const string &name,
                            int &val, int missingVal, bool required)
   
 {
@@ -689,7 +689,7 @@ int NcfWrapper::readIntVar(NcVar &var, const string &name,
 
   vector<size_t> index;
   index.push_back(0);
-  var.getVar(index, &val);
+  var.getVal(index, &val);
   
   return 0;
   
@@ -706,7 +706,7 @@ int NcfWrapper::readIntVal(const string &name,
   
   val = missingVal;
   
-  NcVar var = _ncFile->getVar(name);
+  NcxxVar var = _ncFile->getVar(name);
   if (var.isNull()) {
     if (required) {
       _addErrStr("ERROR - NcfWrapper::_readIntVal");
@@ -730,7 +730,7 @@ int NcfWrapper::readIntVal(const string &name,
 
   vector<size_t> index;
   index.push_back(0);
-  var.getVar(index, &val);
+  var.getVal(index, &val);
 
   return 0;
   
@@ -740,7 +740,7 @@ int NcfWrapper::readIntVal(const string &name,
 // read float variable
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::readFloatVar(NcVar &var, const string &name,
+int NcfWrapper::readFloatVar(NcxxVar &var, const string &name,
                              float &val, 
                              float missingVal, bool required)
 
@@ -771,7 +771,7 @@ int NcfWrapper::readFloatVar(NcVar &var, const string &name,
 
   vector<size_t> index;
   index.push_back(0);
-  var.getVar(index, &val);
+  var.getVal(index, &val);
   
   return 0;
   
@@ -789,7 +789,7 @@ int NcfWrapper::readFloatVal(const string &name,
   
   val = missingVal;
   
-  NcVar var = _ncFile->getVar(name);
+  NcxxVar var = _ncFile->getVar(name);
   if (var.isNull()) {
     if (required) {
       _addErrStr("ERROR - NcfWrapper::_readIntVal");
@@ -813,7 +813,7 @@ int NcfWrapper::readFloatVal(const string &name,
 
   vector<size_t> index;
   index.push_back(0);
-  var.getVar(index, &val);
+  var.getVal(index, &val);
 
   return 0;
   
@@ -823,7 +823,7 @@ int NcfWrapper::readFloatVal(const string &name,
 // read double variable
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::readDoubleVar(NcVar &var, const string &name,
+int NcfWrapper::readDoubleVar(NcxxVar &var, const string &name,
                               double &val, 
                               double missingVal, bool required)
   
@@ -854,7 +854,7 @@ int NcfWrapper::readDoubleVar(NcVar &var, const string &name,
 
   vector<size_t> index;
   index.push_back(0);
-  var.getVar(index, &val);
+  var.getVal(index, &val);
   
   return 0;
   
@@ -872,7 +872,7 @@ int NcfWrapper::readDoubleVal(const string &name,
   
   val = missingVal;
   
-  NcVar var = _ncFile->getVar(name);
+  NcxxVar var = _ncFile->getVar(name);
   if (var.isNull()) {
     if (required) {
       _addErrStr("ERROR - NcfWrapper::_readIntVal");
@@ -896,7 +896,7 @@ int NcfWrapper::readDoubleVal(const string &name,
 
   vector<size_t> index;
   index.push_back(0);
-  var.getVar(index, &val);
+  var.getVal(index, &val);
 
   return 0;
   
@@ -906,7 +906,7 @@ int NcfWrapper::readDoubleVal(const string &name,
 // read a scalar string variable
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::readStringVar(NcVar &var, const string &name, string &val)
+int NcfWrapper::readStringVar(NcxxVar &var, const string &name, string &val)
 
 {
   
@@ -922,7 +922,7 @@ int NcfWrapper::readStringVar(NcVar &var, const string &name, string &val)
 
   // check dimension
   
-  std::vector<NcDim> dims = var.getDims();
+  std::vector<NcxxDim> dims = var.getDims();
   int64_t prod = 1;
   for (size_t ii = 0; ii < dims.size(); ii++) {
     prod *=  var.getDim(ii).getSize();
@@ -937,7 +937,7 @@ int NcfWrapper::readStringVar(NcVar &var, const string &name, string &val)
     return -1;
   }
 
-  NcDim stringLenDim = dims[0];
+  NcxxDim stringLenDim = dims[0];
   if (stringLenDim.isNull()) {
     _addErrStr("ERROR - NcfWrapper::readStringVar");
     _addErrStr("  variable name: ", name);
@@ -963,7 +963,7 @@ int NcfWrapper::readStringVar(NcVar &var, const string &name, string &val)
   char *cvalues = new char[stringLen+1];
   vector<size_t> index;
   index.push_back(stringLen);
-  var.getVar(index, cvalues);
+  var.getVal(index, cvalues);
 
   // ensure null termination
   cvalues[stringLen] = '\0';
@@ -991,7 +991,7 @@ int NcfWrapper::readInt32Array(const string &name,
 
   // val = missingVal;
   
-  NcVar var = _ncFile->getVar(name);
+  NcxxVar var = _ncFile->getVar(name);
   if (var.isNull()) {
     if (required) {
       _addErrStr("ERROR - NcfWrapper::_readInt32Array");
@@ -1014,89 +1014,89 @@ int NcfWrapper::readInt32Array(const string &name,
     return -1;
   }
 
-  NcType varType = var.getType();
+  NcxxType varType = var.getType();
   switch (varType.getId()) {
 
-    case NcType::nc_BYTE: {
+    case NcxxType::nc_BYTE: {
       TaArray<int8_t> vals_;
       int8_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int32_t) vals[ii]);
       }
       break;
     }
-    case NcType::nc_UBYTE: {
+    case NcxxType::nc_UBYTE: {
       TaArray<u_int8_t> vals_;
       u_int8_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int32_t) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_SHORT: {
+    case  NcxxType::nc_SHORT: {
       TaArray<int16_t> vals_;
       int16_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int32_t) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_USHORT: {
+    case  NcxxType::nc_USHORT: {
       TaArray<u_int16_t> vals_;
       u_int16_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int32_t) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_INT: {
+    case  NcxxType::nc_INT: {
       TaArray<int32_t> vals_;
       int32_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int32_t) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_UINT: {
+    case  NcxxType::nc_UINT: {
       TaArray<u_int32_t> vals_;
       u_int32_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int32_t) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_FLOAT: {
+    case  NcxxType::nc_FLOAT: {
       TaArray<float> vals_;
       float *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int32_t) floor(vals[ii] + 0.5));
       }
       break;
     }
-    case  NcType::nc_DOUBLE: {
+    case  NcxxType::nc_DOUBLE: {
       TaArray<double> vals_;
       double *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int32_t) floor(vals[ii] + 0.5));
       }
       break;
     }
-    case  NcType::nc_CHAR:
-    case  NcType::nc_INT64:
-    case  NcType::nc_UINT64:
-    case  NcType::nc_STRING:
-    case  NcType::nc_VLEN:
-    case  NcType::nc_OPAQUE:
-    case  NcType::nc_ENUM:
-    case  NcType::nc_COMPOUND:
+    case  NcxxType::nc_CHAR:
+    case  NcxxType::nc_INT64:
+    case  NcxxType::nc_UINT64:
+    case  NcxxType::nc_STRING:
+    case  NcxxType::nc_VLEN:
+    case  NcxxType::nc_OPAQUE:
+    case  NcxxType::nc_ENUM:
+    case  NcxxType::nc_COMPOUND:
     default:
       _addErrStr("ERROR - NcfWrapper::_readInt32Array");
       _addErrStr("  Bad type for array: ", varType.getName());
@@ -1108,15 +1108,15 @@ int NcfWrapper::readInt32Array(const string &name,
 
   // get the fill value, first using _FillValue and then missingValue
 
-  NcVarAtt fillValAtt;
+  NcxxVarAtt fillValAtt;
   try {
     fillValAtt = var.getAtt("_FillValue");
   }
-  catch (netCDF::exceptions::NcException e) {
+  catch (NcxxException e) {
     try {
       fillValAtt = var.getAtt("missingValue");
     }
-    catch (netCDF::exceptions::NcException e) {
+    catch (NcxxException e) {
     }
   }
   
@@ -1156,7 +1156,7 @@ int NcfWrapper::readInt64Array(const string &name,
 
   // val = missingVal;
   
-  NcVar var = _ncFile->getVar(name);
+  NcxxVar var = _ncFile->getVar(name);
   if (var.isNull()) {
     if (required) {
       _addErrStr("ERROR - NcfWrapper::_readInt64Array");
@@ -1179,105 +1179,105 @@ int NcfWrapper::readInt64Array(const string &name,
     return -1;
   }
 
-  NcType varType = var.getType();
+  NcxxType varType = var.getType();
   switch (varType.getId()) {
 
-    case NcType::nc_BYTE: {
+    case NcxxType::nc_BYTE: {
       TaArray<int8_t> vals_;
       int8_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int64_t) vals[ii]);
       }
       break;
     }
-    case NcType::nc_UBYTE: {
+    case NcxxType::nc_UBYTE: {
       TaArray<u_int8_t> vals_;
       u_int8_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int64_t) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_SHORT: {
+    case  NcxxType::nc_SHORT: {
       TaArray<int16_t> vals_;
       int16_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int64_t) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_USHORT: {
+    case  NcxxType::nc_USHORT: {
       TaArray<u_int16_t> vals_;
       u_int16_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int64_t) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_INT: {
+    case  NcxxType::nc_INT: {
       TaArray<int32_t> vals_;
       int32_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int64_t) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_UINT: {
+    case  NcxxType::nc_UINT: {
       TaArray<u_int32_t> vals_;
       u_int32_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int64_t) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_INT64: {
+    case  NcxxType::nc_INT64: {
       TaArray<int64_t> vals_;
       int64_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int64_t) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_UINT64: {
+    case  NcxxType::nc_UINT64: {
       TaArray<u_int64_t> vals_;
       u_int64_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int64_t) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_FLOAT: {
+    case  NcxxType::nc_FLOAT: {
       TaArray<float> vals_;
       float *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int64_t) floor(vals[ii] + 0.5));
       }
       break;
     }
-    case  NcType::nc_DOUBLE: {
+    case  NcxxType::nc_DOUBLE: {
       TaArray<double> vals_;
       double *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((int64_t) floor(vals[ii] + 0.5));
       }
       break;
     }
-    case  NcType::nc_CHAR:
-    case  NcType::nc_STRING:
-    case  NcType::nc_VLEN:
-    case  NcType::nc_OPAQUE:
-    case  NcType::nc_ENUM:
-    case  NcType::nc_COMPOUND:
+    case  NcxxType::nc_CHAR:
+    case  NcxxType::nc_STRING:
+    case  NcxxType::nc_VLEN:
+    case  NcxxType::nc_OPAQUE:
+    case  NcxxType::nc_ENUM:
+    case  NcxxType::nc_COMPOUND:
     default:
       _addErrStr("ERROR - NcfWrapper::_readInt64Array");
       _addErrStr("  Bad type for array: ", varType.getName());
@@ -1289,15 +1289,15 @@ int NcfWrapper::readInt64Array(const string &name,
 
   // get the fill value, first using _FillValue and then missingValue
 
-  NcVarAtt fillValAtt;
+  NcxxVarAtt fillValAtt;
   try {
     fillValAtt = var.getAtt("_FillValue");
   }
-  catch (netCDF::exceptions::NcException e) {
+  catch (NcxxException e) {
     try {
       fillValAtt = var.getAtt("missingValue");
     }
-    catch (netCDF::exceptions::NcException e) {
+    catch (NcxxException e) {
     }
   }
   
@@ -1336,7 +1336,7 @@ int NcfWrapper::readDoubleArray(const string &name,
 
   // val = missingVal;
   
-  NcVar var = _ncFile->getVar(name);
+  NcxxVar var = _ncFile->getVar(name);
   if (var.isNull()) {
     if (required) {
       _addErrStr("ERROR - NcfWrapper::_readDoubleArray");
@@ -1359,105 +1359,105 @@ int NcfWrapper::readDoubleArray(const string &name,
     return -1;
   }
   
-  NcType varType = var.getType();
+  NcxxType varType = var.getType();
   switch (varType.getId()) {
 
-    case NcType::nc_BYTE: {
+    case NcxxType::nc_BYTE: {
       TaArray<int8_t> vals_;
       int8_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((double) vals[ii]);
       }
       break;
     }
-    case NcType::nc_UBYTE: {
+    case NcxxType::nc_UBYTE: {
       TaArray<u_int8_t> vals_;
       u_int8_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((double) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_SHORT: {
+    case  NcxxType::nc_SHORT: {
       TaArray<int16_t> vals_;
       int16_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((double) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_USHORT: {
+    case  NcxxType::nc_USHORT: {
       TaArray<u_int16_t> vals_;
       u_int16_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((double) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_INT: {
+    case  NcxxType::nc_INT: {
       TaArray<int32_t> vals_;
       int32_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((double) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_UINT: {
+    case  NcxxType::nc_UINT: {
       TaArray<u_int32_t> vals_;
       u_int32_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((double) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_INT64: {
+    case  NcxxType::nc_INT64: {
       TaArray<int64_t> vals_;
       int64_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((double) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_UINT64: {
+    case  NcxxType::nc_UINT64: {
       TaArray<u_int64_t> vals_;
       u_int64_t *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((double) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_FLOAT: {
+    case  NcxxType::nc_FLOAT: {
       TaArray<float> vals_;
       float *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back((double) vals[ii]);
       }
       break;
     }
-    case  NcType::nc_DOUBLE: {
+    case  NcxxType::nc_DOUBLE: {
       TaArray<double> vals_;
       double *vals = vals_.alloc(nVals);
-      var.getVar(vals);
+      var.getVal(vals);
       for (size_t ii = 0; ii < nVals; ii++) {
         array.push_back(vals[ii]);
       }
       break;
     }
-    case  NcType::nc_CHAR:
-    case  NcType::nc_STRING:
-    case  NcType::nc_VLEN:
-    case  NcType::nc_OPAQUE:
-    case  NcType::nc_ENUM:
-    case  NcType::nc_COMPOUND:
+    case  NcxxType::nc_CHAR:
+    case  NcxxType::nc_STRING:
+    case  NcxxType::nc_VLEN:
+    case  NcxxType::nc_OPAQUE:
+    case  NcxxType::nc_ENUM:
+    case  NcxxType::nc_COMPOUND:
     default:
       _addErrStr("ERROR - NcfWrapper::_readDoubleArray");
       _addErrStr("  Bad type for array: ", varType.getName());
@@ -1469,15 +1469,15 @@ int NcfWrapper::readDoubleArray(const string &name,
 
   // get the fill value, first using _FillValue and then missingValue
 
-  NcVarAtt fillValAtt;
+  NcxxVarAtt fillValAtt;
   try {
     fillValAtt = var.getAtt("_FillValue");
   }
-  catch (netCDF::exceptions::NcException e) {
+  catch (NcxxException e) {
     try {
       fillValAtt = var.getAtt("missingValue");
     }
-    catch (netCDF::exceptions::NcException e) {
+    catch (NcxxException e) {
     }
   }
   
@@ -1505,7 +1505,7 @@ int NcfWrapper::readDoubleArray(const string &name,
 // write a scalar double variable
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::writeVar(NcVar &var, double val)
+int NcfWrapper::writeVar(NcxxVar &var, double val)
   
 {
   
@@ -1527,8 +1527,8 @@ int NcfWrapper::writeVar(NcVar &var, double val)
   vector<size_t> index;
   index.push_back(0);
   try {
-    var.putVar(index, val);
-  } catch (NcException& e) {
+    var.putVal(index, val);
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::writeVar");
     _addErrStr("  Cannot write scalar double var, name: ", var.getName());
     _addErrStr("  file: ", _pathInUse);
@@ -1544,7 +1544,7 @@ int NcfWrapper::writeVar(NcVar &var, double val)
 // write a scalar float variable
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::writeVar(NcVar &var, float val)
+int NcfWrapper::writeVar(NcxxVar &var, float val)
   
 {
   
@@ -1566,8 +1566,8 @@ int NcfWrapper::writeVar(NcVar &var, float val)
   vector<size_t> index;
   index.push_back(0);
   try {
-    var.putVar(index, val);
-  } catch (NcException& e) {
+    var.putVal(index, val);
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::writeVar");
     _addErrStr("  Cannot write scalar float var, name: ", var.getName());
     _addErrStr("  file: ", _pathInUse);
@@ -1583,7 +1583,7 @@ int NcfWrapper::writeVar(NcVar &var, float val)
 // write a scalar int variable
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::writeVar(NcVar &var, int val)
+int NcfWrapper::writeVar(NcxxVar &var, int val)
   
 {
   
@@ -1605,8 +1605,8 @@ int NcfWrapper::writeVar(NcVar &var, int val)
   vector<size_t> index;
   index.push_back(0);
   try {
-    var.putVar(index, val);
-  } catch (NcException& e) {
+    var.putVal(index, val);
+  } catch (NcxxException& e) {
     _addErrStr("ERROR - NcfWrapper::writeVar");
     _addErrStr("  Cannot write scalar int var, name: ", var.getName());
     _addErrStr("  file: ", _pathInUse);
@@ -1623,7 +1623,7 @@ int NcfWrapper::writeVar(NcVar &var, int val)
 // number of elements specified in dimension
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::writeVar(NcVar &var, const NcDim &dim, const void *data)
+int NcfWrapper::writeVar(NcxxVar &var, const NcxxDim &dim, const void *data)
   
 {
   return writeVar(var, dim, dim.getSize(), data);
@@ -1634,8 +1634,8 @@ int NcfWrapper::writeVar(NcVar &var, const NcDim &dim, const void *data)
 // number of elements specified in arguments
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::writeVar(NcVar &var, 
-                         const NcDim &dim, size_t count, 
+int NcfWrapper::writeVar(NcxxVar &var, 
+                         const NcxxDim &dim, size_t count, 
                          const void *data)
   
 {
@@ -1656,8 +1656,8 @@ int NcfWrapper::writeVar(NcVar &var,
   switch (vtype) {
     case NC_DOUBLE: {
       try {
-        var.putVar(starts, counts, (double *) data);
-      } catch (NcException& e) {
+        var.putVal(starts, counts, (double *) data);
+      } catch (NcxxException& e) {
         _addErrStr("  exception: ", e.what());
         iret = -1;
       }
@@ -1665,8 +1665,8 @@ int NcfWrapper::writeVar(NcVar &var,
     }
     case NC_INT: {
       try {
-        var.putVar(starts, counts, (int *) data);
-      } catch (NcException& e) {
+        var.putVal(starts, counts, (int *) data);
+      } catch (NcxxException& e) {
         _addErrStr("  exception: ", e.what());
         iret = -1;
       }
@@ -1674,8 +1674,8 @@ int NcfWrapper::writeVar(NcVar &var,
     }
     case NC_SHORT: {
       try {
-        var.putVar(starts, counts, (short *) data);
-      } catch (NcException& e) {
+        var.putVal(starts, counts, (short *) data);
+      } catch (NcxxException& e) {
         _addErrStr("  exception: ", e.what());
         iret = -1;
       }
@@ -1683,8 +1683,8 @@ int NcfWrapper::writeVar(NcVar &var,
     }
     case NC_UBYTE: {
       try {
-        var.putVar(starts, counts, (unsigned char *) data);
-      } catch (NcException& e) {
+        var.putVal(starts, counts, (unsigned char *) data);
+      } catch (NcxxException& e) {
         _addErrStr("  exception: ", e.what());
         iret = -1;
       }
@@ -1693,8 +1693,8 @@ int NcfWrapper::writeVar(NcVar &var,
     case NC_FLOAT:
     default: {
       try {
-        var.putVar(starts, counts, (float *) data);
-      } catch (NcException& e) {
+        var.putVal(starts, counts, (float *) data);
+      } catch (NcxxException& e) {
         _addErrStr("  exception: ", e.what());
         iret = -1;
       }
@@ -1720,7 +1720,7 @@ int NcfWrapper::writeVar(NcVar &var,
 // write a string variable
 // Returns 0 on success, -1 on failure
 
-int NcfWrapper::writeStringVar(NcVar &var, const void *str)
+int NcfWrapper::writeStringVar(NcxxVar &var, const void *str)
   
 {
   
@@ -1731,7 +1731,7 @@ int NcfWrapper::writeStringVar(NcVar &var, const void *str)
     return -1;
   }
   
-  std::vector<NcDim> dims = var.getDims();
+  std::vector<NcxxDim> dims = var.getDims();
   size_t nDims = dims.size();
   if (nDims < 1) {
     _addErrStr("ERROR - NcfWrapper::writeStringVar");
@@ -1745,7 +1745,7 @@ int NcfWrapper::writeStringVar(NcVar &var, const void *str)
 
     // single dimension
 
-    NcDim &dim0 = dims[0];
+    NcxxDim &dim0 = dims[0];
     if (dim0.isNull()) {
       _addErrStr("ERROR - NcfWrapper::writeStringVar");
       _addErrStr("  Canont write var, name: ", var.getName());
@@ -1758,8 +1758,8 @@ int NcfWrapper::writeStringVar(NcVar &var, const void *str)
     starts.push_back(0);
     counts.push_back(dim0.getSize());
     try {
-      var.putVar(starts, counts, (char *) str);
-    } catch (NcException& e) {
+      var.putVal(starts, counts, (char *) str);
+    } catch (NcxxException& e) {
       _addErrStr("ERROR - NcfWrapper::writeStringVar");
       _addErrStr("  Canont write var, name: ", var.getName());
       _addErrStr("  file: ", _pathInUse);
@@ -1775,7 +1775,7 @@ int NcfWrapper::writeStringVar(NcVar &var, const void *str)
 
     // two dimensions
 
-    NcDim &dim0 = dims[0];
+    NcxxDim &dim0 = dims[0];
     if (dim0.isNull()) {
       _addErrStr("ERROR - NcfWrapper::writeStringVar");
       _addErrStr("  Canont write var, name: ", var.getName());
@@ -1784,7 +1784,7 @@ int NcfWrapper::writeStringVar(NcVar &var, const void *str)
       return -1;
     }
 
-    NcDim &dim1 = dims[1];
+    NcxxDim &dim1 = dims[1];
     if (dim1.isNull()) {
       _addErrStr("ERROR - NcfWrapper::writeStringVar");
       _addErrStr("  Canont write var, name: ", var.getName());
@@ -1797,8 +1797,8 @@ int NcfWrapper::writeStringVar(NcVar &var, const void *str)
     starts.push_back(0);
     counts.push_back(dim0.getSize() * dim1.getSize());
     try {
-      var.putVar(starts, counts, (char *) str);
-    } catch (NcException& e) {
+      var.putVal(starts, counts, (char *) str);
+    } catch (NcxxException& e) {
       _addErrStr("ERROR - NcfWrapper::writeStringVar");
       _addErrStr("  Canont write var, name: ", var.getName());
       _addErrStr("  file: ", _pathInUse);
@@ -1823,11 +1823,11 @@ int NcfWrapper::writeStringVar(NcVar &var, const void *str)
 ///////////////////////////////////////////////////////////////////////////
 // compress a variable
 
-int NcfWrapper::compressVar(NcVar &var, int compressionLevel)
+int NcfWrapper::compressVar(NcxxVar &var, int compressionLevel)
 {
   
-  if (_ncFormat == NcFile::classic ||
-      _ncFormat == NcFile::classic64) {
+  if (_ncFormat == NcxxFile::classic ||
+      _ncFormat == NcxxFile::classic64) {
     // cannot compress
     return 0;
   }
@@ -1882,7 +1882,7 @@ string NcfWrapper::ncTypeToStr(nc_type nctype)
 ////////////////////////////////////////
 // convert var type string
 
-string NcfWrapper::varTypeToStr(const NcVar &var)
+string NcfWrapper::varTypeToStr(const NcxxVar &var)
   
 {
   nc_type vtype = var.getType().getId();
@@ -1892,7 +1892,7 @@ string NcfWrapper::varTypeToStr(const NcVar &var)
 ///////////////////////////////////////////
 // get string representation of component
 
-string NcfWrapper::asString(const NcAtt *att)
+string NcfWrapper::asString(const NcxxAtt *att)
   
 {
   
@@ -1952,7 +1952,7 @@ void NcfWrapper::_addErrStr(string label, string strarg, bool cr)
 ////////////////////////////////////////
 // set fill value
 
-void NcfWrapper::_setFillvalue(NcVar &var)
+void NcfWrapper::_setFillvalue(NcxxVar &var)
 
 {
 

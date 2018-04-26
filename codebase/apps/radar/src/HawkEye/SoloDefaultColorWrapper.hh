@@ -48,30 +48,36 @@ class SoloDefaultColorWrapper{ //  : public SiiPalette { // , public ColorTableM
 
   ~SoloDefaultColorWrapper();
   
-
-  //  SiiPalette *lookup(string name);
-  //SiiPalette *lookupByUsualName(string parm);
-
-
-  //                                                                                                                   
   // Find the ColorMap by the palette name                                                                            
-  // e.g. lookupColorTable("carbone17");                                                                               
+  // e.g. lookupColorTable("carbone17");                                               
   ColorMap lookupColorTable(string parm);
 
   //ColorMap ToColorMap(vector<string> &colors);
   ColorMap ToColorMap(vector<string> colors); 
-  int ToSomething(vector<string> colors); 
-//  vector<unsigned int> *ToRGB(string colorStr, double saturation=1.0);
+
   vector<float> ToRGB(string colorStr);
 
   // map <usual parm, palette name>   _usualParmToPaletteName;
-  map<string, string> _usualParmToPaletteName;
+  //map<string, string> _usualParmToPaletteName;
+  map<string, ColorMap> ColorMapForUsualParm;  // keep
 
   // map <palette name, color table name> _paletteNameToColorTable;
   map<string, string> _paletteNameToColorTable;
 
-  // map< color table name, string containing color definitions > _asciiColorTables;        
-  map<string, ColorMap> _SoloColorTableToHawkEyeColorMap;
+  // map <color table name, string containing color definitions > _asciiColorTables;   
+  map<string, ColorMap> _SoloColorTableToHawkEyeColorMap; // keep
+
+  // map <color table name, string containing color definitions > _asciiColorTables;   
+  map<string, vector< vector<float> > > _colorTableNameToRgbList; // keep
+
+  // map <palette name, ColorMap> 
+  map<string, ColorMap> _paletteToHawkEyeColorMap;
+
+  vector<double> _minMaxValue(double _centerDataValue, int  _numColors, double _colorWidth);
+
+  ColorMap constructColorMap(double center, double width, string colorTableName);
+
+  void makeAssociations();
 
   //private:
   void ImportSoloPalettes();

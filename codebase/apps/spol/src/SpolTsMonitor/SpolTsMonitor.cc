@@ -382,10 +382,25 @@ void SpolTsMonitor::_monitorTestPulse(IwrfTsPulse &pulse,
   double startRange = pulse.get_start_range_km();
   double gateSpacing = pulse.get_gate_spacing_km();
 
-  int gateNum = (int)
-    ((_params.test_pulse_range_km - startRange) / gateSpacing + 0.5);
-  if (gateNum < 0) gateNum = 0;
-  if (gateNum > nGates - 1) gateNum = nGates - 1;
+  int gateNumHc = (int)
+    ((_params.test_pulse_range_km_hc - startRange) / gateSpacing + 0.5);
+  if (gateNumHc < 0) gateNumHc = 0;
+  if (gateNumHc > nGates - 1) gateNumHc = nGates - 1;
+  
+  int gateNumHx = (int)
+    ((_params.test_pulse_range_km_hx - startRange) / gateSpacing + 0.5);
+  if (gateNumHx < 0) gateNumHx = 0;
+  if (gateNumHx > nGates - 1) gateNumHx = nGates - 1;
+  
+  int gateNumVc = (int)
+    ((_params.test_pulse_range_km_vc - startRange) / gateSpacing + 0.5);
+  if (gateNumVc < 0) gateNumVc = 0;
+  if (gateNumVc > nGates - 1) gateNumVc = nGates - 1;
+  
+  int gateNumVx = (int)
+    ((_params.test_pulse_range_km_vx - startRange) / gateSpacing + 0.5);
+  if (gateNumVx < 0) gateNumVx = 0;
+  if (gateNumVx > nGates - 1) gateNumVx = nGates - 1;
   
   // load IQ values for test pulse
   
@@ -393,24 +408,24 @@ void SpolTsMonitor::_monitorTestPulse(IwrfTsPulse &pulse,
     bool isHoriz = pulse.isHoriz();
     if (_params.dual_pol_switching_receivers) {
       if (isHoriz) {
-        _loadTestPulseIq(pulse, 0, gateNum, _testIqHc);
-        _loadTestPulseIq(pulse, 1, gateNum, _testIqVx);
+        _loadTestPulseIq(pulse, 0, gateNumHc, _testIqHc);
+        _loadTestPulseIq(pulse, 1, gateNumVx, _testIqVx);
       } else {
-        _loadTestPulseIq(pulse, 0, gateNum, _testIqVc);
-        _loadTestPulseIq(pulse, 1, gateNum, _testIqHx);
+        _loadTestPulseIq(pulse, 0, gateNumVc, _testIqVc);
+        _loadTestPulseIq(pulse, 1, gateNumHx, _testIqHx);
       }
     } else {
       if (isHoriz) {
-        _loadTestPulseIq(pulse, 0, gateNum, _testIqHc);
-        _loadTestPulseIq(pulse, 1, gateNum, _testIqVx);
+        _loadTestPulseIq(pulse, 0, gateNumHc, _testIqHc);
+        _loadTestPulseIq(pulse, 1, gateNumVx, _testIqVx);
       } else {
-        _loadTestPulseIq(pulse, 1, gateNum, _testIqVc);
-        _loadTestPulseIq(pulse, 0, gateNum, _testIqHx);
+        _loadTestPulseIq(pulse, 1, gateNumVc, _testIqVc);
+        _loadTestPulseIq(pulse, 0, gateNumHx, _testIqHx);
       }
     }
   } else {
-    _loadTestPulseIq(pulse, 0, gateNum, _testIqHc);
-    _loadTestPulseIq(pulse, 1, gateNum, _testIqVc);
+    _loadTestPulseIq(pulse, 0, gateNumHc, _testIqHc);
+    _loadTestPulseIq(pulse, 1, gateNumVc, _testIqVc);
   }
   _nSamplesTestPulse++;
 
@@ -482,8 +497,14 @@ void SpolTsMonitor::_monitorTestPulse(IwrfTsPulse &pulse,
   _testPulseXml.clear();
   _testPulseXml += TaXml::writeStartTag(_params.test_pulse_xml_tag, 0);
   _testPulseXml += TaXml::writeTime("Time", 1, _testPulseLatestTime);
-  _testPulseXml += TaXml::writeDouble("RangeKm", 1, _params.test_pulse_range_km);
-  _testPulseXml += TaXml::writeInt("GateNum", 1, gateNum);
+  _testPulseXml += TaXml::writeDouble("RangeKmHc", 1, _params.test_pulse_range_km_hc);
+  _testPulseXml += TaXml::writeInt("GateNumHc", 1, gateNumHc);
+  _testPulseXml += TaXml::writeDouble("RangeKmHx", 1, _params.test_pulse_range_km_hx);
+  _testPulseXml += TaXml::writeInt("GateNumHx", 1, gateNumHx);
+  _testPulseXml += TaXml::writeDouble("RangeKmVc", 1, _params.test_pulse_range_km_vc);
+  _testPulseXml += TaXml::writeInt("GateNumVc", 1, gateNumVc);
+  _testPulseXml += TaXml::writeDouble("RangeKmVx", 1, _params.test_pulse_range_km_vx);
+  _testPulseXml += TaXml::writeInt("GateNumVx", 1, gateNumVx);
 
   if (_testPowerDbHc > -9990) {
     _testPulseXml +=

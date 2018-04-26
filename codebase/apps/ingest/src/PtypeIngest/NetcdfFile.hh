@@ -39,7 +39,7 @@
 #include <string>
 #include <vector>
 
-#include <netcdf.hh>
+#include <Ncxx/Ncxx.hh>
 
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
@@ -269,7 +269,7 @@ protected:
    * @brief The netCDF file object.
    */
 
-  NcFile _ncFile;
+  NcxxFile _ncFile;
   
 
   /**
@@ -347,14 +347,11 @@ protected:
 
   inline int _getDimension(const string &dim_name) const
   {
-    NcDim *dim;
-
-    if ((dim = _ncFile.get_dim(dim_name.c_str())) == 0)
-    {
+    NcxxDim dim = _ncFile.getDim(dim_name);
+    if(dim.isNull()) {
       return -1;
     }
-  
-    return dim->size();
+    return dim.getSize();
   }
   
   /**
@@ -377,17 +374,14 @@ protected:
 
   float _getGlobalAttAsFloat(const string &att_name) const
   {
-    NcAtt *att;
-  
-    if ((att = _ncFile.get_att(att_name.c_str())) == 0)
-    {
+    try {
+      NcxxGroupAtt att = _ncFile.getAtt(att_name);
+      float val;
+      att.getValues(&val);
+      return val;
+    } catch (NcxxException& e) {
       return NC_FILL_FLOAT;
     }
-  
-    float float_value = att->as_float(0);
-    delete att;
-    
-    return float_value;
   }
   
   /**
@@ -401,17 +395,14 @@ protected:
 
   int _getGlobalAttAsInt(const string &att_name) const
   {
-    NcAtt *att;
-  
-    if ((att = _ncFile.get_att(att_name.c_str())) == 0)
-    {
+    try {
+      NcxxGroupAtt att = _ncFile.getAtt(att_name);
+      int val;
+      att.getValues(&val);
+      return val;
+    } catch (NcxxException& e) {
       return NC_FILL_INT;
     }
-  
-    int int_value = att->as_int(0);
-    delete att;
-    
-    return int_value;
   }
   
   /**
@@ -423,19 +414,16 @@ protected:
    * @return Returns the attribute value on success, "" on failure.
    */
 
-  string _getVarAttAsString(const NcVar &var, const string &att_name) const
+  string _getVarAttAsString(const NcxxVar &var, const string &att_name) const
   {
-    NcAtt *att;
-  
-    if ((att = var.get_att(att_name.c_str())) == 0)
-    {
+    try {
+      NcxxGroupAtt att = _ncFile.getAtt(att_name);
+      string val;
+      att.getValues(val);
+      return val;
+    } catch (NcxxException& e) {
       return "";
     }
-  
-    string string_value = att->as_string(0);
-    delete att;
-    
-    return string_value;
   }
   
   /**

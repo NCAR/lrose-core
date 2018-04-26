@@ -56,9 +56,11 @@ HDRS = \
 	BscanManager.hh \
 	BscanWidget.hh \
 	ColorMap.hh \
+	ColorTableManager.hh \
 	DisplayManager.hh \
 	FieldRenderer.hh \
 	HawkEye.hh \
+	PaletteManager.hh \
 	Params.hh \
 	PpiBeam.hh \
 	PolarManager.hh \
@@ -69,6 +71,8 @@ HDRS = \
 	RhiWidget.hh \
 	RhiWindow.hh \
 	ScaledLabel.hh \
+	SiiPalette.hh \
+	SoloDefaultColorWrapper.hh \
 	SweepManager.hh \
 	TimeScaleWidget.hh \
 	WorldPlot.hh
@@ -79,13 +83,17 @@ NORM_SRCS = \
 	Beam.cc \
 	BscanBeam.cc \
 	ColorMap.cc \
+	ColorTableManager.cc \
 	DisplayField.cc \
 	HawkEye.cc \
 	Main.cc \
+	PaletteManager.cc \
 	PpiBeam.cc \
 	Reader.cc \
 	RhiBeam.cc \
 	ScaledLabel.cc \
+	SiiPalette.cc \
+	SoloDefaultColorWrapper.cc \
 	SweepManager.cc \
 	WorldPlot.cc \
 	AllocCheck.cc
@@ -138,8 +146,18 @@ include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
 #
 # local targets
 #
+# in order to build SiiTest_Main, comment any calls to Qt and QBrush, etc. in ColorMap.cc/.hh
+#
 SiiTest_Main: ColorMap.o SiiPalette.o SiiTest_Main.o SoloDefaultColorWrapper.o PaletteManager.o ColorTableManager.o
-	g++ -o SiiTest_Main SiiPalette.o SiiTest_main.o SoloDefaultColorWrapper.o PaletteManager.o ColorTableManager.o ColorMap.o -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp  -L/usr/local/Cellar/qt/5.10.1/lib -F/usr/local/Cellar/qt/5.10.1/lib -framework QtWidgets -F/usr/local/Cellar/qt/5.10.1/lib -framework QtGui -F/usr/local/Cellar/qt/5.10.1/lib -framework QtCore -lz -lm -g
+	g++ -o SiiTest_Main SiiPalette.o SiiTest_Main.o SoloDefaultColorWrapper.o PaletteManager.o ColorTableManager.o ColorMap.o -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp  -L/usr/local/Cellar/qt/5.10.1/lib -F/usr/local/Cellar/qt/5.10.1/lib -framework QtWidgets -F/usr/local/Cellar/qt/5.10.1/lib -framework QtGui -F/usr/local/Cellar/qt/5.10.1/lib -framework QtCore -lz -lm -g
+
+#SiiTest_MainNoQt: ColorMap.o SiiPalette.o SiiTest_Main.o SoloDefaultColorWrapper.o PaletteManager.o ColorTableManager.o
+	#g++ -o SiiTest_Main SiiPalette.o SiiTest_Main.o SoloDefaultColorWrapper.o PaletteManager.o ColorTableManager.o ColorMap.o -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp -lz -lm -g
+
+SiiTest_MainNoQt: 
+	g++ -o SiiTest_Main SiiPalette.cc SiiTest_Main.cc SoloDefaultColorWrapper.cc PaletteManager.cc ColorTableManager.cc ColorMap.cc -I/Users/brenda/lrose/include -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp -lz -lm -g
+
+#	g++ -o SiiTest_Main SiiPalette.cc SiiTest_Main.cc SoloDefaultColorWrapper.cc PaletteManager.cc ColorTableManager.cc ColorMap.cc -I/Users/brenda/lrose/include -L/Users/brenda/lrose/lib -ltoolsa -ldataport -ltdrp -lz -lm -g
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

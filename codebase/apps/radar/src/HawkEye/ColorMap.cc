@@ -323,7 +323,7 @@ ColorMap::ColorMap
     green.push_back((int) (colors[i][1] * 255 + 0.5));
     blue.push_back((int) (colors[i][2] * 255 + 0.5));
   }
-  setMap(rangeMin, rangeMax, red, blue, green);
+  setMap(rangeMin, rangeMax, red, green, blue);
 }
 
 /**********************************************************/
@@ -469,7 +469,7 @@ void
     igreen.push_back((int) (green[i] * 255 + 0.5));
     iblue.push_back((int) (blue[i] * 255 + 0.5));
   }
-  setMap(rangeMin, rangeMax, red, blue, green);
+  setMap(rangeMin, rangeMax, red, green, blue);
   
 }
 

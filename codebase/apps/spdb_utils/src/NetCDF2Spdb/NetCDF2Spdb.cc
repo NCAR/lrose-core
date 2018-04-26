@@ -246,14 +246,14 @@ int NetCDF2Spdb::_readTimes()
 
   // get time var
 
-  NcFile *file = _ncf.getNcFile();
-  NcVar timeVar = file->getVar(_params.time_var_name);
+  NcxxFile *file = _ncf.getNcFile();
+  NcxxVar timeVar = file->getVar(_params.time_var_name);
 
   _timeDim = timeVar.getDim(0);
   _nTimes = _timeDim.getSize();
 
-  NcVarAtt timeUnitsAtt = timeVar.getAtt("units");
-  NcType unitsAttType = timeUnitsAtt.getType();
+  NcxxVarAtt timeUnitsAtt = timeVar.getAtt("units");
+  NcxxType unitsAttType = timeUnitsAtt.getType();
 
   // get base time from units if possible
   // defaults to Jan 1 1970
@@ -269,10 +269,10 @@ int NetCDF2Spdb::_readTimes()
   }
   time_t btime = baseTime.utime();
     
-  NcType timeVarType = timeVar.getType();
-  if (timeVarType.getId() == NcType::nc_INT ||
-      timeVarType.getId() == NcType::nc_UINT ||
-      timeVarType.getId() == NcType::nc_INT64) {
+  NcxxType timeVarType = timeVar.getType();
+  if (timeVarType.getId() == NcxxType::nc_INT ||
+      timeVarType.getId() == NcxxType::nc_UINT ||
+      timeVarType.getId() == NcxxType::nc_INT64) {
 
     vector<int64_t> itimes;
     if (_ncf.readInt64Array(_params.time_var_name, itimes, 0, true)) {
@@ -373,8 +373,8 @@ int NetCDF2Spdb::_readVar(const char *varName,
 
   // make sure the array has time dimension
 
-  NcVar var = _ncf.getNcFile()->getVar(varName);
-  NcDim varDim = var.getDim(0);
+  NcxxVar var = _ncf.getNcFile()->getVar(varName);
+  NcxxDim varDim = var.getDim(0);
   if (varDim != _timeDim) {
     loc.clear();
     for (size_t ii = 0; ii < _nTimes; ii++) {

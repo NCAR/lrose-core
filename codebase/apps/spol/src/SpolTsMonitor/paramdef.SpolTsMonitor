@@ -162,10 +162,28 @@ paramdef string {
 } test_pulse_xml_tag;
 
 paramdef double {
-  p_default = 145.0;
-  p_descr = "Range to test pulse (km).";
-  p_help = "We compute the gate number from this range. The power at this gate is averaged over the monitoring interval.";
-} test_pulse_range_km;
+  p_default = 148.7;
+  p_descr = "Range to test pulse for HC channel (km).";
+  p_help = "We compute the gate number from this range.";
+} test_pulse_range_km_hc;
+
+paramdef double {
+  p_default = 148.7;
+  p_descr = "Range to test pulse for HX channel (km).";
+  p_help = "We compute the gate number from this range.";
+} test_pulse_range_km_hx;
+
+paramdef double {
+  p_default = 149.0;
+  p_descr = "Range to test pulse for VC channel (km).";
+  p_help = "We compute the gate number from this range.";
+} test_pulse_range_km_vc;
+
+paramdef double {
+  p_default = 149.0;
+  p_descr = "Range to test pulse for VX channel (km).";
+  p_help = "We compute the gate number from this range.";
+} test_pulse_range_km_vx;
 
 paramdef int {
   p_default = 5000;

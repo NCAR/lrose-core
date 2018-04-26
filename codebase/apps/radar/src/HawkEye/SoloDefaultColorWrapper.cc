@@ -131,37 +131,290 @@ ColorMap SoloDefaultColorWrapper::ToColorMap(vector<string> colors) {
   return colorMap;
 }
 
-
-int  SoloDefaultColorWrapper::ToSomething(vector<string> colors) {
-  // try to create a CMapEntry from the list of colors
-  //colorMap->
-  /*
-  std::vector<std::vector<float> > numericColors;
-
-  for (vector<string>::iterator it=colors.begin(); it != colors.end(); it++) {
-    vector<float> *rgb = ToRGB(*it);
-    numericColors.push_back(*rgb);
-    
-    ColorMap::CmapEntry *cme = new ColorMap::CmapEntry(0.0, 100.0, colorNumbers);
-    int r,g,b;
-    r = g = b = 0;
-    // will need to convert unsigned int to int
-    r = (int) rgb->at(0);
-    g = (int) rgb->at(1);
-    b = (int) rgb->at(2);
-    cme->setColor(r,g,b);
-    
-  }
-
-  ColorMap colorMap(0.0, 100.0, numericColors);
-  */
-  return 3;
+  // set min and max value for associated ColorMap
+vector<double> SoloDefaultColorWrapper::_minMaxValue(double _centerDataValue, int  _numColors, double _colorWidth){
+  vector<double> minMax;
+  minMax.push_back( _centerDataValue - 0.5 * _numColors * _colorWidth);
+  minMax.push_back( _centerDataValue + 0.5 * _numColors * _colorWidth);
+  return minMax;
 }
+
+
+ColorMap SoloDefaultColorWrapper::constructColorMap(double center, double width, string colorTableName) {
+
+  vector< vector <float> >  baseColorTable;
+
+  baseColorTable = _colorTableNameToRgbList[colorTableName];
+  // const vector<ColorMap::CmapEntry> colors = colorMap.getEntries();
+  vector<double> bounds = _minMaxValue(center, baseColorTable.size(), width);
+  // colorMap.setRange(bounds[0], bounds[1]);
+  ColorMap colorMap(bounds[0], bounds[1], baseColorTable); 
+  return colorMap;
+}
+
+/*
+For each (usual parms, center, width, color table name):
+  ColorMap ConstructColorMap(center, width, color table name)
+  For each parm in usual parms:
+      Dictionary[parm] = ColorMap
+  End For
+End For
+*/
+
+
+void SoloDefaultColorWrapper::makeAssociations() {
+
+  /* 
+SiiPalette(const string &palette_name,
+             const string &usual_parms,
+             const double center_data_value, const double color_width,
+             const string &color_table_name);
+  */
+
+  ColorMap colorMap;
+  // set min and max value for associated ColorMap
+  //  _minValue(_centerDataValue - 0.5 * _numColors * _colorWidth),
+  //_maxValue(_centerDataValue + _numColors * _colorWidth),
+
+  //SiiPalette * pal;
+
+  // create dictionary to query by usual parms                                                                    
+  // map <usual parm, palette name>   _usualParmToPaletteName;                                                       
+  // map<string, string> _usualParmToPaletteName;
+
+  // map <palette name, color table name> _paletteNameToColorTable;                                         
+  // map<string, string> _paletteNameToColorTable;
+
+  //pal = new SiiPalette("p_ahav", "AH,AV,", 0.0, 22.0, "carbone17");
+  colorMap = constructColorMap(0.0, 22.0, "carbone17");
+  colorMap.setName("p_ahav");
+  // colorMap.setRange(0.0, 33.0); // I bet this doesn't recalculate CmapEntry min & max
+  ColorMapForUsualParm["AH"] = colorMap;
+  ColorMapForUsualParm["AV"] = colorMap;
+  //_paletteNameToColorTable["p_ahav"] = "carbone17";
+  //
+  //>>>>>>
+  /*
+  colorMap = _SoloColorTableToHawkEyeColorMap["carbone17"];
+          //   _SoloColorTableToHawkEyeColorMap[key] = colorMap;
+  vector<double> bounds = _minMaxValue(0.0, 17, 22.0);
+  colorMap.setRange(bounds[0], bounds[1]);
+  _paletteToHawkEyeColorMap["p_ahav"] = colorMap;  
+  */
+
+  //pal = new SiiPalette("p_chcv", "CH,CV,", 0.5, 0.1, "carbone17");
+  //colorMap = constructColorMap(0.5, 0.1, "carbone17");
+  //ColorMapForUsualParm["CH"] = colorMap;
+  //ColorMapForUsualParm["CV"] = colorMap;
+  // _paletteNameToColorTable["p_chcv"] = "carbone17";
+
+  //pal = new SiiPalette("p_pdesc", "PD,WPD,HYDID,", 9.0, 1.0, "pd17");
+  colorMap = constructColorMap(9.0, 1.0, "pd17");
+  colorMap.setName("p_pdesc");
+  ColorMapForUsualParm["PD"] = colorMap; // "p_pdesc";
+  ColorMapForUsualParm["WPD"] = colorMap; // "p_pdesc";
+  ColorMapForUsualParm["HYDID"] = colorMap; // "p_pdesc";
+  // _paletteNameToColorTable["p_pdesc"] = "pd17";
+
+  //pal = new SiiPalette("p_raccum", "KAC,ZAC,DAC,HAC,NAC,GAC,",
+		       //50.0, 10.0, "bluebrown10");
+  colorMap = constructColorMap(50.0, 10.0, "bluebrown10");
+  colorMap.setName("p_raccum");
+  ColorMapForUsualParm["KAC"] = colorMap; // "p_raccum";
+  ColorMapForUsualParm["ZAC"] = colorMap; // "p_raccum";
+  ColorMapForUsualParm["DAC"] = colorMap; // "p_raccum";
+  ColorMapForUsualParm["HAC"] = colorMap; // "p_raccum";
+  ColorMapForUsualParm["NAC"] = colorMap; // "p_raccum";
+  ColorMapForUsualParm["GAC"] = colorMap; // "p_raccum";
+  // _paletteNameToColorTable["p_raccum"] = "bluebrown10";
+
+  //pal = new SiiPalette("p_chcv", "CH,CV,", 0.5, 0.1, "carbone17");
+  colorMap = constructColorMap(0.5, 0.1, "carbone17");
+  colorMap.setName("p_chcv");
+  ColorMapForUsualParm["CH"] = colorMap;
+  ColorMapForUsualParm["CV"] = colorMap;
+  // _paletteNameToColorTable["p_chcv"] = "carbone17";
+
+  //pal = new SiiPalette("p_rho", "RHOHV,RHO,RH,RX,", 0.5, 0.1, "carbone17");
+  colorMap = constructColorMap(0.5, 0.1, "carbone17");
+  colorMap.setName("p_rho");
+  ColorMapForUsualParm["RHOHV"] = colorMap; // "p_rho";
+  ColorMapForUsualParm["RHO"] = colorMap; // "p_rho";
+  ColorMapForUsualParm["RH"] = colorMap; // "p_rho";
+  ColorMapForUsualParm["RX"] = colorMap; // "p_rho";
+  // _paletteNameToColorTable["p_rho"] = "carbone17";
+
+  //pal = new SiiPalette("p_kdp", "KDP,CKDP,NKDP,MKDP,DKD_DSD,",
+		       //0.7, 0.12, "carbone17");
+  colorMap = constructColorMap(0.7, 0.12, "carbone17");
+  colorMap.setName("p_kdp");
+  ColorMapForUsualParm["KDP"] = colorMap;//"p_kdp";
+  ColorMapForUsualParm["CKDP"] = colorMap;//"p_kdp";
+  ColorMapForUsualParm["NKDP"] = colorMap;//"p_kdp";
+  ColorMapForUsualParm["MKDP"] = colorMap;//"p_kdp";
+  ColorMapForUsualParm["DKD_DSD"] = colorMap;//"p_kdp";
+  // _paletteNameToColorTable["p_kdp"] = colorMap;//"carbone17";
+
+  //pal = new SiiPalette("p_res", "RES_DSD,", 5.0, 0.6, "carbone17");
+  colorMap = constructColorMap(5.0, 0.6, "carbone17");
+  colorMap.setName("p_res");
+  ColorMapForUsualParm["RES_DSD"] = colorMap;//"p_res";
+  // _paletteNameToColorTable["p_res"] = colorMap;//"carbone17";
+
+  // pal = new SiiPalette("p_d0", "D0_DSD,", 2.0, 0.25, "carbone17");
+  colorMap = constructColorMap(2.0, 0.25, "carbone17");
+  colorMap.setName("p_d0");
+  ColorMapForUsualParm["D0_DSD"] = colorMap;//"p_d0";
+  // _paletteNameToColorTable["p_d0"] = colorMap;//"carbone17";
+
+  // pal = new SiiPalette("p_lam", "LAM_DSD,", 5.0, 0.6, "carbone17");
+  colorMap = constructColorMap(5.0, 0.6, "carbone17");
+  colorMap.setName("p_lam");
+  ColorMapForUsualParm["LAM_DSD"] = colorMap;//"p_lam";
+  // _paletteNameToColorTable["p_lam"] = colorMap;//"carbone17";
+
+  // pal = new SiiPalette("p_lwd", "LWC_DSD,", 0.8, 0.1, "carbone17");
+  colorMap = constructColorMap(0.8, 0.1, "carbone17");
+  colorMap.setName("p_lwd");
+  ColorMapForUsualParm["LWC_DSD"] = colorMap;//"p_lwd";
+  // _paletteNameToColorTable["p_lwd"] = colorMap;//"carbone17";
+
+  // pal = new SiiPalette("p_mu", "MU_DSD,", 5.0, 0.6, "carbone17");
+  colorMap = constructColorMap(5.0, 0.6, "carbone17");
+  colorMap.setName("p_mu");
+  ColorMapForUsualParm["MU_DSD"] = colorMap;//"p_mu";
+  // _paletteNameToColorTable["p_mu"] = colorMap;//"carbone17";
+
+  // pal = new SiiPalette("p_n0", "N0_DSD,", 4.0, 0.5, "carbone17");
+  colorMap = constructColorMap(4.0, 0.5, "carbone17");
+  colorMap.setName("p_n0");
+  ColorMapForUsualParm["N0_DSD"] = colorMap;//"p_n0";
+  // _paletteNameToColorTable["p_n0"] = colorMap;//"carbone17";
+
+  // pal = new SiiPalette("p_phi", "PHIDP,PHI,PH,DP,NPHI,CPHI",
+		       // 70.0, 10.0, "carbone17");
+  colorMap = constructColorMap(70.0, 10.0, "carbone17");
+  colorMap.setName("p_phi");
+  ColorMapForUsualParm["PHIDP"] = colorMap;//"p_phi";
+  ColorMapForUsualParm["PHI"] = colorMap;//"p_phi";
+  ColorMapForUsualParm["PH"] = colorMap;//"p_phi";
+  ColorMapForUsualParm["DP"] = colorMap;//"p_phi";
+  ColorMapForUsualParm["NPHI"] = colorMap;//"p_phi";
+  ColorMapForUsualParm["CPHI"] = colorMap;//"p_phi";
+  //_paletteNameToColorTable["p_phi"] = colorMap;//"carbone17";
+
+  // pal = new SiiPalette("p_zdr", "ZDR,ZD,DR,UZDR,", 4.0, 0.7, "carbone17");
+  colorMap = constructColorMap(4.0, 0.7, "carbone17");
+  colorMap.setName("p_zdr");
+  colorMap.setUnits("dB");
+  ColorMapForUsualParm["ZDR"] = colorMap;//"p_zdr";
+  ColorMapForUsualParm["ZD"] = colorMap;//"p_zdr";
+  ColorMapForUsualParm["DR"] = colorMap;//"p_zdr";
+  ColorMapForUsualParm["UZDR"] = colorMap;//"p_zdr";
+  //_paletteNameToColorTable["p_zdr"] = colorMap;//"carbone17";
+
+  // pal = new SiiPalette("p_ldr", "LDR,TLDR,ULDR,LVDR,LH,LV",
+		       // -6.0, 4.0, "carbone17");
+  colorMap = constructColorMap(-6.0, 4.0, "carbone17");
+  colorMap.setName("p_ldr");
+  ColorMapForUsualParm["LDR"] = colorMap;//"p_ldr";
+  ColorMapForUsualParm["TLDR"] = colorMap;//"p_ldr";
+  ColorMapForUsualParm["ULDR"] = colorMap;//"p_ldr";
+  ColorMapForUsualParm["LVDR"] = colorMap;//"p_ldr";
+  ColorMapForUsualParm["LH"] = colorMap;//"p_ldr";
+  ColorMapForUsualParm["LV"] = colorMap;//"p_ldr";
+  //_paletteNameToColorTable["p_ldr"] = colorMap;//"carbone17";
+
+  // pal = new SiiPalette("p_dBm", "DM,LM,XM,XL,DL,DX", -80.0, 5.0, "carbone17");
+  colorMap = constructColorMap(-80.0, 5.0, "carbone17");
+  colorMap.setName("p_dBm");
+  ColorMapForUsualParm["DM"] = colorMap;//"p_dBm";
+  ColorMapForUsualParm["LM"] = colorMap;//"p_dBm";
+  ColorMapForUsualParm["XM"] = colorMap;//"p_dBm";
+  ColorMapForUsualParm["XL"] = colorMap;//"p_dBm";
+  ColorMapForUsualParm["DL"] = colorMap;//"p_dBm";
+  ColorMapForUsualParm["DX"] = colorMap;//"p_dBm";
+  //_paletteNameToColorTable["p_dBm"] = colorMap;//"carbone17";
+
+  // pal = new SiiPalette("p_dBz", "DBZ,DZ,XZ,DB,Z,UDBZ,CDZ,DCZ,",
+		       // 15.0, 5.0, "carbone17");
+  colorMap = constructColorMap(15.0, 5.0, "carbone17");
+  colorMap.setName("p_dBz");
+  ColorMapForUsualParm["DBZ"] = colorMap;//"p_dBz";
+  ColorMapForUsualParm["DZ"] = colorMap;//"p_dBz";
+  ColorMapForUsualParm["XZ"] = colorMap;//"p_dBz";
+  ColorMapForUsualParm["DB"] = colorMap;//"p_dBz";
+  ColorMapForUsualParm["Z"] = colorMap;//"p_dBz";
+  ColorMapForUsualParm["UDBZ"] = colorMap;//"p_dBz";
+  ColorMapForUsualParm["CDZ"] = colorMap;//"p_dBz";
+  ColorMapForUsualParm["DCZ"] = colorMap;//"p_dBz";
+  //_paletteNameToColorTable["p_dBz"] = colorMap;//"carbone17";
+
+  // pal = new SiiPalette("p_spectral", "SR,SW,S1,S2", 8.0, 1.0, "carbone17");
+  colorMap = constructColorMap(8.0, 1.0, "carbone17");
+  colorMap.setName("p_spectral");
+  ColorMapForUsualParm["SR"] = colorMap;//"p_spectral";
+  ColorMapForUsualParm["SW"] = colorMap;//"p_spectral";
+  ColorMapForUsualParm["S1"] = colorMap;//"p_spectral";
+  ColorMapForUsualParm["S2"] = colorMap;//"p_spectral";
+  //_paletteNameToColorTable["p_spectral"] = colorMap;//"carbone17";
+
+  // pal = new SiiPalette("p_ncp", "NCP,NC,", 0.5, 0.1, "carbone17");
+  colorMap = constructColorMap(0.5, 0.1, "carbone17");
+  colorMap.setName("p_ncp");
+  ColorMapForUsualParm["NCP"] = colorMap;//"p_ncp";
+  ColorMapForUsualParm["NC"] = colorMap;//"p_ncp";
+  //_paletteNameToColorTable["p_ncp"] = colorMap;//"carbone17";
+
+  // pal = new SiiPalette("p_vel", "VR,VF,VG,VH,VN,VE,VU,VT,V1,V2,VELOCITY,",
+		       // 0.0, 3.0, "carbone17");
+  colorMap = constructColorMap(0.0, 3.0, "carbone17");
+  colorMap.setName("p_vel");
+  colorMap.setUnits("m/s");
+  ColorMapForUsualParm["VR"] = colorMap;//"p_vel";
+  ColorMapForUsualParm["VF"] = colorMap;//"p_vel";
+  ColorMapForUsualParm["VG"] = colorMap;//"p_vel";
+  ColorMapForUsualParm["VH"] = colorMap;//"p_vel";
+  ColorMapForUsualParm["VN"] = colorMap;//"p_vel";
+  ColorMapForUsualParm["VE"] = colorMap;//"p_vel";
+  ColorMapForUsualParm["VU"] = colorMap;//"p_vel";
+  ColorMapForUsualParm["VT"] = colorMap;//"p_vel";
+  ColorMapForUsualParm["V1"] = colorMap;//"p_vel";
+  ColorMapForUsualParm["V2"] = colorMap;//"p_vel";
+  ColorMapForUsualParm["VELOCITY"] = colorMap;//"p_vel";
+  //_paletteNameToColorTable["p_vel"] = colorMap; //colorMap;//"carbone17";
+
+  // pal = new SiiPalette("p_rrate", "RR_DSD,RNX,RZD,RKD,", 0.0, 0.4, "rrate11");
+  colorMap = constructColorMap(0.0, 0.4, "rrate11");
+  colorMap.setName("p_rrate");
+  ColorMapForUsualParm["RR_DSD"] = colorMap; //"p_rrate";
+  ColorMapForUsualParm["RNX"] = colorMap; //"p_rrate";
+  ColorMapForUsualParm["RZD"] = colorMap; //"p_rrate";
+  ColorMapForUsualParm["RKD"] = colorMap; //"p_rrate";
+  //_paletteNameToColorTable["p_rrate"] = colorMap; //"rrate11";
+
+  // pal = new SiiPalette("p_niq", "NIQ,", -60.0, 7.0, "carbone17");
+  colorMap = constructColorMap(-60.0, 7.0, "carbone17");
+  colorMap.setName("p_niq");
+  ColorMapForUsualParm["NIQ"] = colorMap; //"p_niq";
+  //_paletteNameToColorTable["p_niq"] = colorMap; //"carbone17";
+
+  // pal = new SiiPalette("p_aiq", "AIQ,", 0.0, 22.0, "carbone17");
+  colorMap = constructColorMap(0.0, 22.0, "carbone17");
+  colorMap.setName("p_aiq");
+  ColorMapForUsualParm["AIQ"] = colorMap; //"p_aiq";
+  //_paletteNameToColorTable["p_aiq"] = colorMap; //"carbone17";
+
+}
+
+
 
 void SoloDefaultColorWrapper::ImportSoloPalettes() {
   
   // create dictionary to query by usual parms
-
+  // map <usual parm, palette name>   _usualParmToPaletteName;                              
+  // map <palette name, color table name> _paletteNameToColorTable;                         
+ 
   // create dictionary to query by color table name and get ColorMap returned
 
   //vector <string> *SoloColorTable;
@@ -182,11 +435,7 @@ void SoloDefaultColorWrapper::ImportSoloPalettes() {
     //    ColorMap colorMap;
     vector<string> colors;
     colors = it->second;
-    // colorMap = ToColorMap(listOfColors);
-    int varthing;
-    //    varthing = ToSomething(listOfColors);
 
-    //-----
     std::vector<std::vector<float> > numericColors;
 
     for (vector<string>::iterator it=colors.begin(); it != colors.end(); ++it) {
@@ -199,17 +448,25 @@ void SoloDefaultColorWrapper::ImportSoloPalettes() {
       }
     }
 
+// ok, constructing as a ColorMap doesn't work, because the min and max values
+// are not recalulated when the range is changed.  
+// Instead, store the color table as a vector < vector <float> > for each
+// string name
 
     ColorMap colorMap(0.0, 100.0, numericColors);
-
-  //---------
 
     cout << "key is " << key << endl;
 
     _SoloColorTableToHawkEyeColorMap[key] = colorMap;
+   // map<string, vector< vector <float> > _colorTableNameToRgbList; 
+   _colorTableNameToRgbList[key] = numericColors;
+
     cout << " after colorMap insert into dictionary " << endl;
   }
-  
+ 
+  makeAssociations();
+ 
+ 
 }
 
 /*
