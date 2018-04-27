@@ -134,9 +134,10 @@ def main():
     os.environ["F77"] = "gfortran"
     os.environ["F90"] = "gfortran"
 
-    if (platform != "darwin"):
-        os.environ["CXXFLAGS"] = " -std=c++11 "
+    if (platform == "darwin"):
         os.environ["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
+    else:
+        os.environ["CXXFLAGS"] = " -std=c++11 "
 
     cmd = "env"
     print >>sys.stderr, "========================================="
