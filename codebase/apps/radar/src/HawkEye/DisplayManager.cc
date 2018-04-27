@@ -1193,7 +1193,7 @@ void DisplayManager::_about()
   
   text += "HawkEye is an LROSE application for engineering and research display of radar data. \n\n";
   text += "Get help with HawkEye ...  \n ";
-  text += "\nReport an issue ... \n ";
+  text += "\nReport an issue https://github.com/NCAR/lrose-core/issues \n ";
   text += "\nHawkEye Version ... \n ";  
   text += "\nCopyright UCAR (c) 1990 - 2018  ";  
   text += "\nUniversity Corporation for Atmospheric Research (UCAR)  ";  
