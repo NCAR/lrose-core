@@ -802,6 +802,11 @@ void  nsig2_get_extended_header_info(NSIG_Sweep **nsig_sweep, int xh_size, int i
 
 /** Main code **/
 
+Radar * RSL_nsig_to_radar(char *filename)
+{
+  return RSL_nsig2_to_radar(filename);
+}
+
 Radar * RSL_nsig2_to_radar(char *filename)
 {
   FILE *fp;
