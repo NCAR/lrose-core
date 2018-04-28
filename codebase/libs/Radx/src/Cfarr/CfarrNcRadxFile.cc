@@ -267,7 +267,7 @@ int CfarrNcRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
   
   cerr << "WARNING - CfarrNcRadxFile::writeToDir" << endl;
-  cerr << "  Writing CfarrNc raw format files not supported" << endl;
+  cerr << "  Writing CfarrNc format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
   
   // set up NcfRadxFile object
@@ -307,7 +307,7 @@ int CfarrNcRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - CfarrNcRadxFile::writeToPath" << endl;
-  cerr << "  Writing CfarrNc raw format files not supported" << endl;
+  cerr << "  Writing CfarrNc format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object

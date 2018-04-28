@@ -113,7 +113,8 @@ public:
     FILE_FORMAT_NCXX,         ///< NetCDF CF RADIAL using Ncxx Classes
     FILE_FORMAT_CFRADIAL2,    ///< NetCDF CF RADIAL2
     FILE_FORMAT_CFARR,        ///< Chilbolton radars
-    FILE_FORMAT_NIMROD        ///< UK Met Office Polar NIMROD
+    FILE_FORMAT_NIMROD,       ///< UK Met Office Polar NIMROD
+    FILE_FORMAT_NOAA_FSL      ///< NOAA Forecast Systems Lab NetCDF
   } file_format_t;
 
   /// write format for CfRadial

@@ -697,7 +697,7 @@ int TwolfRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - TwolfRadxFile::writeToDir" << endl;
-  cerr << "  Writing TWOLF raw format files not supported" << endl;
+  cerr << "  Writing TWOLF format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
@@ -736,7 +736,7 @@ int TwolfRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - TwolfRadxFile::writeToPath" << endl;
-  cerr << "  Writing Twolf raw format files not supported" << endl;
+  cerr << "  Writing Twolf format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object

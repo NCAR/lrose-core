@@ -202,7 +202,7 @@ int RapicRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - RapicRadxFile::writeToDir" << endl;
-  cerr << "  Writing RAPIC raw format files not supported" << endl;
+  cerr << "  Writing RAPIC format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
@@ -242,7 +242,7 @@ int RapicRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - RapicRadxFile::writeToPath" << endl;
-  cerr << "  Writing RAPIC raw format files not supported" << endl;
+  cerr << "  Writing RAPIC format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object

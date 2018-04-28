@@ -26,7 +26,7 @@
 //
 // HrdRadxFile object
 //
-// Support for radial data in HRD raw format
+// Support for radial data in HRD format
 //
 // Mike Dixon, RAP, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -211,7 +211,7 @@ int HrdRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - HrdRadxFile::writeToDir" << endl;
-  cerr << "  Writing HRD raw format files not supported" << endl;
+  cerr << "  Writing HRD format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
@@ -252,7 +252,7 @@ int HrdRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - HrdRadxFile::writeToPath" << endl;
-  cerr << "  Writing HRD raw format files not supported" << endl;
+  cerr << "  Writing HRD format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
