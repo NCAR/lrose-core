@@ -1172,7 +1172,7 @@ void BufrFile::MoveToNextByteBoundary() {
 string BufrFile::ExtractText(unsigned int nBits) {
 
   string val;
-  unsigned char character;
+  unsigned char character = 0;
 
   val.clear();
 
@@ -2445,7 +2445,7 @@ int BufrFile::_descend(DNode *tree) {
 
   if (_very_verbose) _verbosePrintTree(tree);
 
-  unsigned short des;
+  unsigned short des = 0;
   DNode *p;
   p = tree;
   bool compressionStart = false;

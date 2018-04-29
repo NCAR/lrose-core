@@ -31,7 +31,7 @@
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Nov 2015
+// April 2018
 //
 ///////////////////////////////////////////////////////////////
 
@@ -45,6 +45,7 @@
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxXml.hh>
+#include <Radx/RadxRcalib.hh>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
@@ -104,94 +105,12 @@ void NoaaFslRadxFile::clear()
   _nRangeInFile = 0;
   _gateSpacingIsConstant = true;
 
-  _azimuthVar = NULL;
-  _elevationVar = NULL;
-  // _gateWidthVar = NULL;
-  // _startRangeVar = NULL;
-
   _azimuth.clear();
   _elevation.clear();
-  // _gateWidth.clear();
-  // _startRangeInt.clear();
-  // _startRange.clear();
-
-  // _startGateVar = NULL;
-  // _gcfStateVar = NULL;
-  // _polarizationModeVar = NULL;
-  // _prtModeVar = NULL;
-
-  // _startGate.clear();
-  // _gcfState.clear();
-  // _polarizationMode.clear();
-  // _prtMode.clear();
-  
-  // _txFreqShortVar = NULL;
-  // _txFreqMediumVar = NULL;
-  // _txLengthShortVar = NULL;
-  // _txLengthMediumVar = NULL;
-  
-  // _txFreqShort.clear();
-  // _txFreqMedium.clear();
-  // _txLengthShort.clear();
-  // _txLengthMedium.clear();
-  
-  // _txPowerHShortVar = NULL;
-  // _txPowerHMediumVar = NULL;
-  // _txPowerVShortVar = NULL;
-  // _txPowerVMediumVar = NULL;
-
-  // _txPowerHShort.clear();
-  // _txPowerHMedium.clear();
-  // _txPowerVShort.clear();
-  // _txPowerVMedium.clear();
-
-  // _txPhaseHShortVar = NULL;
-  // _txPhaseHMediumVar = NULL;
-  // _txPhaseVShortVar = NULL;
-  // _txPhaseVMediumVar = NULL;
-  
-  // _txPhaseHShort.clear();
-  // _txPhaseHMedium.clear();
-  // _txPhaseVShort.clear();
-  // _txPhaseVMedium.clear();
-
-  // _noiseSourcePowerHShortVar = NULL;
-  // _noiseSourcePowerVShortVar = NULL;
-
-  // _noiseSourcePowerHShort.clear();
-  // _noiseSourcePowerVShort.clear();
-
-  // _rxGainHShortVar = NULL;
-  // _rxGainHMediumVar = NULL;
-  // _rxGainVShortVar = NULL;
-  // _rxGainVMediumVar = NULL;
-  
-  // _rxGainHShort.clear();
-  // _rxGainHMedium.clear();
-  // _rxGainVShort.clear();
-  // _rxGainVMedium.clear();
-  
-  // _zdrBiasAppliedShortVar = NULL;
-  // _zdrBiasAppliedMediumVar = NULL;
-  
-  // _zdrBiasAppliedShort.clear();
-  // _zdrBiasAppliedMedium.clear();
-
-  // global attributes
-
-  // _netcdfRevision.clear();
-  // _gmaptdRevision.clear();
-  // _configRevision.clear();
-  // _campaignName.clear();
-  // _radarName.clear();
-  
   _latitudeDeg = 0;
   _longitudeDeg = 0;
   _altitudeM = 0;
 
-  // _numGates = 0;
-  // _scanId = 0;
-  // _scanType = 0;
   _sweepNumber = 0;
 
   // _refTimeSecsFile = 0;
@@ -203,11 +122,6 @@ void NoaaFslRadxFile::clear()
   _history.clear();
   _comment.clear();
   _statusXml.clear();
-  
-  // _siteName.clear();
-  // _scanName.clear();
-  // int _scanId;
-  // _instrumentName.clear();
   
   _instrumentType = Radx::INSTRUMENT_TYPE_RADAR;
   _platformType = Radx::PLATFORM_TYPE_FIXED;
@@ -458,11 +372,6 @@ void NoaaFslRadxFile::print(ostream &out) const
   out << "  history: " << _history << endl;
   out << "  comment: " << _comment << endl;
   out << "  statusXml: " << _statusXml << endl;
-  // out << "  siteName: " << _siteName << endl;
-  // out << "  scanName: " << _scanName << endl;
-  // out << "  scanId: " << _scanId << endl;
-  // out << "  instrumentName: " << _instrumentName << endl;
-  // out << "  refTime: " << RadxTime::strm((time_t) _refTimeSecsFile) << endl;
   out << "  volumeNumber: " << _volumeNumber << endl;
   out << "  instrumentType: " 
       << Radx::instrumentTypeToStr(_instrumentType) << endl;
@@ -471,12 +380,10 @@ void NoaaFslRadxFile::print(ostream &out) const
   out << "  latitudeDeg: " << _latitudeDeg << endl;
   out << "  longitudeDeg: " << _longitudeDeg << endl;
   out << "  altitudeM: " << _altitudeM << endl;
-  // if (_txFreqShort.size() > 0) {
-  //   out << "  frequencyGhz: " << _txFreqShort[0] / 1.0e9 << endl;
-  // }
   out << "  startRangeKm: " << _remap.getStartRangeKm() << endl;
   out << "  gateSpacingKm: " << _remap.getGateSpacingKm() << endl;
   out << "  gateSpacingIsConstant: " << _gateSpacingIsConstant << endl;
+  out << "  nyquistVel: " << _nyquistVel << endl;
   out << "===========================================" << endl;
 
 }
@@ -633,6 +540,13 @@ int NoaaFslRadxFile::_readFile(const string &path)
     return -1;
   }
 
+  // read the sweep angles
+
+  if (_readSweepAngles()) {
+    _addErrStr(errStr);
+    return -1;
+  }
+
   // read time variable now if that is all that is needed
   
   if (_readTimesOnly) {
@@ -748,7 +662,7 @@ void NoaaFslRadxFile::_getVolumePaths(const string &path,
   // find '.'
   
   size_t dotPos = fileName.find('.');
-  string rootName(fileName.substr(dotPos));
+  string rootName(fileName.substr(0, dotPos));
 
   // find all files in this dir with same root
 
@@ -836,7 +750,7 @@ int NoaaFslRadxFile::_readScalars()
 
   // sweep number
 
-  if (_file.readIntVal("elevationNumber", _sweepNum, Radx::missingMetaInt)) {
+  if (_file.readIntVal("elevationNumber", _sweepNumber, Radx::missingMetaInt)) {
     iret = -1;
   }
 
@@ -982,6 +896,52 @@ int NoaaFslRadxFile::_readGlobalAttributes()
 }
 
 ///////////////////////////////////
+// read the sweep angles
+
+int NoaaFslRadxFile::_readSweepAngles()
+
+{
+
+  Nc3Var *anglesVar = _file.getNc3File()->get_var("elevationList");
+  if (anglesVar == NULL) {
+    _addErrStr("ERROR - NoaaFslRadxFile::_readSweepAngles");
+    _addErrStr("  Cannot find sweep angles variable, name: ", "elevationList");
+    _addErrStr(_file.getNc3Error()->get_errmsg());
+    return -1;
+  }
+  
+  if (anglesVar->num_dims() < 1) {
+    _addErrStr("ERROR - NoaaFslRadxFile::_readSweepAngles");
+    _addErrStr("  elevationList variable has no dimensions");
+    return -1;
+  }
+  Nc3Dim *sweepDim = anglesVar->get_dim(0);
+  if (sweepDim != _sweepDim) {
+    _addErrStr("ERROR - NoaaFslRadxFile::_readSweepAngles");
+    _addErrStr("  elevationList has incorrect dimension, name: ", sweepDim->name());
+    return -1;
+  }
+
+  // read the angles array
+  
+  RadxArray<double> angles_;
+  double *angles = angles_.alloc(_nSweeps);
+  if (anglesVar->get(angles, _nSweeps) == 0) {
+    _addErrStr("ERROdR - NoaaFslRadxFile::_readSweepAngles");
+    _addErrStr("  Candnot read elevationList variable");
+    return -1;
+  }
+  _elevList.clear();
+  for (size_t ii = 0; ii < _nSweeps; ii++) {
+    _elevList.push_back(angles[ii]);
+  }
+  
+  return 0;
+
+}
+
+  
+///////////////////////////////////
 // read the times
 
 int NoaaFslRadxFile::_readTimes()
@@ -1012,7 +972,7 @@ int NoaaFslRadxFile::_readTimes()
   
   // get units attribute
   
-  Nc3Att* unitsAtt = timeVar->get_att("Units");
+  Nc3Att* unitsAtt = timeVar->get_att("units");
   if (unitsAtt == NULL) {
     _addErrStr("ERROR - NoaaFslRadxFile::_readTimes");
     _addErrStr("  Time has no units");
@@ -1054,39 +1014,6 @@ void NoaaFslRadxFile::_clearRayVariables()
 
   _azimuth.clear();
   _elevation.clear();
-  // _gateWidth.clear();
-  // _startRange.clear();
-
-  // _startGate.clear();
-  // _gcfState.clear();
-  // _polarizationMode.clear();
-  // _prtMode.clear();
-  
-  // _txFreqShort.clear();
-  // _txFreqMedium.clear();
-  // _txLengthShort.clear();
-  // _txLengthMedium.clear();
-  
-  // _txPowerHShort.clear();
-  // _txPowerHMedium.clear();
-  // _txPowerVShort.clear();
-  // _txPowerVMedium.clear();
-
-  // _txPhaseHShort.clear();
-  // _txPhaseHMedium.clear();
-  // _txPhaseVShort.clear();
-  // _txPhaseVMedium.clear();
-
-  // _noiseSourcePowerHShort.clear();
-  // _noiseSourcePowerVShort.clear();
-
-  // _rxGainHShort.clear();
-  // _rxGainHMedium.clear();
-  // _rxGainVShort.clear();
-  // _rxGainVMedium.clear();
-  
-  // _zdrBiasAppliedShort.clear();
-  // _zdrBiasAppliedMedium.clear();
 
 }
 
@@ -1112,57 +1039,6 @@ int NoaaFslRadxFile::_readRayVariables()
     iret = -1;
   }
   
-  // _readRayVar(_gcfStateVar, "GcfState", _gcfState, false);
-  // _readRayVar(_polarizationModeVar, "PolarizationMode", _polarizationMode, false);
-  // _readRayVar(_prtModeVar, "PRTMode", _prtMode, false);
-  
-  // _readRayVar(_txFreqShortVar, "TxFrequency_Short",
-  //             _txFreqShortUnits, _txFreqShort, false);
-  // _readRayVar(_txFreqMediumVar, "TxFrequency_Medium",
-  //             _txFreqMediumUnits, _txFreqMedium, false);
-
-  // _readRayVar(_txLengthShortVar, "TxLength_Short",
-  //             _txLengthShortUnits, _txLengthShort, false);
-  // _readRayVar(_txLengthMediumVar, "TxLength_Medium",
-  //             _txLengthMediumUnits, _txLengthMedium, false);
-  
-  // _readRayVar(_txPowerHShortVar, "TxPowerH_Short",
-  //             _txPowerHShortUnits, _txPowerHShort, false);
-  // _readRayVar(_txPowerHMediumVar, "TxPowerH_Medium",
-  //             _txPowerHMediumUnits, _txPowerHMedium, false);
-  // _readRayVar(_txPowerVShortVar, "TxPowerV_Short",
-  //             _txPowerVShortUnits, _txPowerVShort, false);
-  // _readRayVar(_txPowerVMediumVar, "TxPowerV_Medium",
-  //             _txPowerVMediumUnits, _txPowerVMedium, false);
-
-  // _readRayVar(_txPhaseHShortVar, "TxPhaseH_Short",
-  //             _txPhaseHShortUnits, _txPhaseHShort, false);
-  // _readRayVar(_txPhaseHMediumVar, "TxPhaseH_Medium",
-  //             _txPhaseHMediumUnits, _txPhaseHMedium, false);
-  // _readRayVar(_txPhaseVShortVar, "TxPhaseV_Short",
-  //             _txPhaseVShortUnits, _txPhaseVShort, false);
-  // _readRayVar(_txPhaseVMediumVar, "TxPhaseV_Medium",
-  //             _txPhaseVMediumUnits, _txPhaseVMedium, false);
-
-  // _readRayVar(_noiseSourcePowerHShortVar, "NoiseSourcePowerH_Short",
-  //             _noiseSourcePowerHShortUnits, _noiseSourcePowerHShort, false);
-  // _readRayVar(_noiseSourcePowerVShortVar, "NoiseSourcePowerV_Short",
-  //             _noiseSourcePowerVShortUnits, _noiseSourcePowerVShort, false);
-
-  // _readRayVar(_rxGainHShortVar, "TxPowerH_Short",
-  //             _rxGainHShortUnits, _rxGainHShort, false);
-  // _readRayVar(_rxGainHMediumVar, "TxPowerH_Medium",
-  //             _rxGainHMediumUnits, _rxGainHMedium, false);
-  // _readRayVar(_rxGainVShortVar, "TxPowerV_Short",
-  //             _rxGainVShortUnits, _rxGainVShort, false);
-  // _readRayVar(_rxGainVMediumVar, "TxPowerV_Medium",
-  //             _rxGainVMediumUnits, _rxGainVMedium, false);
-
-  // _readRayVar(_zdrBiasAppliedShortVar, "ZDRBiasApplied_Short",
-  //             _zdrBiasAppliedShortUnits, _zdrBiasAppliedShort, false);
-  // _readRayVar(_zdrBiasAppliedMediumVar, "ZDRBiasApplied_Medium",
-  //             _zdrBiasAppliedMediumUnits, _zdrBiasAppliedMedium, false);
-
   if (iret) {
     _addErrStr("ERROR - NoaaFslRadxFile::_readRayVariables");
     return -1;
@@ -1206,16 +1082,8 @@ int NoaaFslRadxFile::_createRays(const string &path)
     ray->setElevationDeg(_elevation[rayIndex]);
     
     ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
-    ray->setPolarizationMode(Radx::POL_MODE_HV_SIM);
+    // ray->setPolarizationMode(Radx::POL_MODE_HV_SIM);
     ray->setPrtMode(Radx::PRT_MODE_FIXED);
-    
-    // if (_noiseSourcePowerHShort.size() > rayIndex) {
-    //   ray->setEstimatedNoiseDbmHc(_noiseSourcePowerHShort[rayIndex]);
-    // }
-    
-    // if (_noiseSourcePowerVShort.size() > rayIndex) {
-    //   ray->setEstimatedNoiseDbmVc(_noiseSourcePowerVShort[rayIndex]);
-    // }
     
     // add to ray vector
 
@@ -1258,15 +1126,15 @@ int NoaaFslRadxFile::_readFieldVariables(bool metaOnly)
     // check the type
     string fieldName = var->name();
     Nc3Type ftype = var->type();
-    if (ftype != nc3Double && ftype != nc3Float) {
-      // not a valid type
-      if (_verbose) {
-        cerr << "DEBUG - NoaaFslRadxFile::_readFieldVariables" << endl;
-        cerr << "  -->> rejecting field: " << fieldName << endl;
-        cerr << "  -->> Should be float or double: " << fieldName << endl;
-      }
-      continue;
-    }
+    // if (ftype != nc3Double && ftype != nc3Float) {
+    //   // not a valid type
+    //   if (_verbose) {
+    //     cerr << "DEBUG - NoaaFslRadxFile::_readFieldVariables" << endl;
+    //     cerr << "  -->> rejecting field: " << fieldName << endl;
+    //     cerr << "  -->> Should be float or double: " << fieldName << endl;
+    //   }
+    //   continue;
+    // }
 
     // check that we need this field
 
@@ -1287,13 +1155,6 @@ int NoaaFslRadxFile::_readFieldVariables(bool metaOnly)
     
     string name = var->name();
     
-    string standardName;
-    Nc3Att *standardNameAtt = var->get_att("standard_name");
-    if (standardNameAtt != NULL) {
-      standardName = Nc3xFile::asString(standardNameAtt);
-      delete standardNameAtt;
-    }
-    
     string longName;
     Nc3Att *longNameAtt = var->get_att("long_name");
     if (longNameAtt != NULL) {
@@ -1301,11 +1162,34 @@ int NoaaFslRadxFile::_readFieldVariables(bool metaOnly)
       delete longNameAtt;
     }
 
+    string standardName;
+    Nc3Att *standardNameAtt = var->get_att("standard_name");
+    if (standardNameAtt != NULL) {
+      standardName = Nc3xFile::asString(standardNameAtt);
+      delete standardNameAtt;
+    }
+    
     string units;
     Nc3Att *unitsAtt = var->get_att("units");
     if (unitsAtt != NULL) {
       units = Nc3xFile::asString(unitsAtt);
       delete unitsAtt;
+    }
+
+    // scale, offset
+    
+    double scaleFactor = 1.0;
+    Nc3Att *scaleAtt = var->get_att("scale_factor");
+    if (scaleAtt != NULL) {
+      scaleFactor = scaleAtt->values()[0].as_double(0);
+      delete scaleAtt;
+    }
+
+    double addOffset = 0.0;
+    Nc3Att *offsetAtt = var->get_att("add_offset");
+    if (offsetAtt != NULL) {
+      addOffset = offsetAtt->values()[0].as_double(0);
+      delete offsetAtt;
     }
 
     // if metadata only, don't read in fields
@@ -1328,24 +1212,42 @@ int NoaaFslRadxFile::_readFieldVariables(bool metaOnly)
     }
 
     int iret = 0;
-    bool isDiscrete = false;
-    bool fieldFolds = false;
-    double foldLimitLower = 0.0;
-    double foldLimitUpper = 0.0;
     
-    switch (var->type()) {
+    switch (ftype) {
       case nc3Double: {
-        if (_addFl64FieldToRays(var, name, units, standardName, longName,
-                                isDiscrete, fieldFolds,
-                                foldLimitLower, foldLimitUpper)) {
+        if (_addFl64FieldToRays(var, name, units,
+                                standardName, longName)) {
           iret = -1;
         }
         break;
       }
       case nc3Float: {
-        if (_addFl32FieldToRays(var, name, units, standardName, longName,
-                                isDiscrete, fieldFolds,
-                                foldLimitLower, foldLimitUpper)) {
+        if (_addFl32FieldToRays(var, name, units,
+                                standardName, longName)) {
+          iret = -1;
+        }
+        break;
+      }
+      case nc3Int: {
+        if (_addSi32FieldToRays(var, name, units,
+                                standardName, longName,
+                                scaleFactor, addOffset)) {
+          iret = -1;
+        }
+        break;
+      }
+      case nc3Short: {
+        if (_addSi16FieldToRays(var, name, units,
+                                standardName, longName,
+                                scaleFactor, addOffset)) {
+          iret = -1;
+        }
+        break;
+      }
+      case nc3Byte: {
+        if (_addSi08FieldToRays(var, name, units,
+                                standardName, longName,
+                                scaleFactor, addOffset)) {
           iret = -1;
         }
         break;
@@ -1356,7 +1258,7 @@ int NoaaFslRadxFile::_readFieldVariables(bool metaOnly)
       }
 
     } // switch
-    
+
     if (iret) {
       _addErrStr("ERROR - NoaaFslRadxFile::_readFieldVariables");
       _addErrStr("  cannot read field name: ", name);
@@ -1491,11 +1393,7 @@ int NoaaFslRadxFile::_addFl64FieldToRays(Nc3Var* var,
                                          const string &name,
                                          const string &units,
                                          const string &standardName,
-                                         const string &longName,
-                                         bool isDiscrete,
-                                         bool fieldFolds,
-                                         float foldLimitLower,
-                                         float foldLimitUpper)
+                                         const string &longName)
   
 {
 
@@ -1512,16 +1410,10 @@ int NoaaFslRadxFile::_addFl64FieldToRays(Nc3Var* var,
   // set missing value
 
   Radx::fl64 missingVal = Radx::missingFl64;
-  Nc3Att *missingValueAtt = var->get_att("missing_value");
+  Nc3Att *missingValueAtt = var->get_att("_FillValue");
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
-  } else {
-    for (size_t ii = 0; ii < nGatesTot; ii++) {
-      if (!isfinite(data[ii])) {
-        data[ii] = missingVal;
-      }
-    }
   }
 
   // load field on rays
@@ -1529,9 +1421,9 @@ int NoaaFslRadxFile::_addFl64FieldToRays(Nc3Var* var,
   for (size_t ii = 0; ii < _raysFile.size(); ii++) {
     
     size_t rayIndex = ii;
-
+    
     if (rayIndex > _nTimesInFile - 1) {
-      cerr << "WARNING - NoaaFslRadxFile::_addSi16FieldToRays" << endl;
+      cerr << "WARNING - NoaaFslRadxFile::_addFl64FieldToRays" << endl;
       cerr << "  Trying to access ray beyond data" << endl;
       cerr << "  Trying to read ray index: " << rayIndex << endl;
       cerr << "  nTimesInFile: " << _nTimesInFile << endl;
@@ -1552,15 +1444,6 @@ int NoaaFslRadxFile::_addFl64FieldToRays(Nc3Var* var,
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
     
-    if (fieldFolds &&
-        foldLimitLower != Radx::missingMetaFloat &&
-        foldLimitUpper != Radx::missingMetaFloat) {
-      field->setFieldFolds(foldLimitLower, foldLimitUpper);
-    }
-    if (isDiscrete) {
-      field->setIsDiscrete(true);
-    }
-
   }
   
   delete[] data;
@@ -1577,11 +1460,7 @@ int NoaaFslRadxFile::_addFl32FieldToRays(Nc3Var* var,
                                          const string &name,
                                          const string &units,
                                          const string &standardName,
-                                         const string &longName,
-                                         bool isDiscrete,
-                                         bool fieldFolds,
-                                         float foldLimitLower,
-                                         float foldLimitUpper)
+                                         const string &longName)
   
 {
 
@@ -1598,16 +1477,10 @@ int NoaaFslRadxFile::_addFl32FieldToRays(Nc3Var* var,
   // set missing value
   
   Radx::fl32 missingVal = Radx::missingFl32;
-  Nc3Att *missingValueAtt = var->get_att("missing_value");
+  Nc3Att *missingValueAtt = var->get_att("_FillValue");
   if (missingValueAtt != NULL) {
     missingVal = missingValueAtt->as_double(0);
     delete missingValueAtt;
-  } else {
-    for (size_t ii = 0; ii < nGatesTot; ii++) {
-      if (!isfinite(data[ii])) {
-        data[ii] = missingVal;
-      }
-    }
   }
   
   // load field on rays
@@ -1617,7 +1490,7 @@ int NoaaFslRadxFile::_addFl32FieldToRays(Nc3Var* var,
     size_t rayIndex = ii;
 
     if (rayIndex > _nTimesInFile - 1) {
-      cerr << "WARNING - NoaaFslRadxFile::_addSi16FieldToRays" << endl;
+      cerr << "WARNING - NoaaFslRadxFile::_addFl32FieldToRays" << endl;
       cerr << "  Trying to access ray beyond data" << endl;
       cerr << "  Trying to read ray index: " << rayIndex << endl;
       cerr << "  nTimesInFile: " << _nTimesInFile << endl;
@@ -1638,14 +1511,215 @@ int NoaaFslRadxFile::_addFl32FieldToRays(Nc3Var* var,
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
 
-    if (fieldFolds &&
-        foldLimitLower != Radx::missingMetaFloat &&
-        foldLimitUpper != Radx::missingMetaFloat) {
-      field->setFieldFolds(foldLimitLower, foldLimitUpper);
+  }
+  
+  delete[] data;
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////////////////
+// Add si32 fields to _raysFromFile
+// The _raysFromFile array has previously been set up by _createRays()
+// Returns 0 on success, -1 on failure
+
+int NoaaFslRadxFile::_addSi32FieldToRays(Nc3Var* var,
+                                         const string &name,
+                                         const string &units,
+                                         const string &standardName,
+                                         const string &longName,
+                                         double scaleFactor,
+                                         double addOffset)
+  
+{
+
+  // get data from array
+  
+  size_t nGatesTot = _nTimesInFile * _nRangeInFile;
+  Radx::si32 *data = new Radx::si32[nGatesTot];
+  int iret = !var->get(data, _nTimesInFile, _nRangeInFile);
+  if (iret) {
+    delete[] data;
+    return -1;
+  }
+
+  // set missing value
+  
+  Radx::si32 missingVal = Radx::missingSi32;
+  Nc3Att *missingValueAtt = var->get_att("_FillValue");
+  if (missingValueAtt != NULL) {
+    missingVal = missingValueAtt->as_double(0);
+    delete missingValueAtt;
+  }
+  
+  // load field on rays
+
+  for (size_t ii = 0; ii < _raysFile.size(); ii++) {
+    
+    size_t rayIndex = ii;
+
+    if (rayIndex > _nTimesInFile - 1) {
+      cerr << "WARNING - NoaaFslRadxFile::_addSi32FieldToRays" << endl;
+      cerr << "  Trying to access ray beyond data" << endl;
+      cerr << "  Trying to read ray index: " << rayIndex << endl;
+      cerr << "  nTimesInFile: " << _nTimesInFile << endl;
+      cerr << "  skipping ...." << endl;
+      continue;
     }
-    if (isDiscrete) {
-      field->setIsDiscrete(true);
+    
+    int nGates = _nRangeInFile;
+    int startIndex = rayIndex * _nRangeInFile;
+    
+    RadxField *field =
+      _raysFile[ii]->addField(name, units, nGates,
+			      missingVal,
+			      data + startIndex,
+                              scaleFactor, addOffset,
+			      true);
+    
+    field->setStandardName(standardName);
+    field->setLongName(longName);
+    field->copyRangeGeom(_geom);
+
+  }
+  
+  delete[] data;
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////////////////
+// Add si16 fields to _raysFromFile
+// The _raysFromFile array has previously been set up by _createRays()
+// Returns 0 on success, -1 on failure
+
+int NoaaFslRadxFile::_addSi16FieldToRays(Nc3Var* var,
+                                         const string &name,
+                                         const string &units,
+                                         const string &standardName,
+                                         const string &longName,
+                                         double scaleFactor,
+                                         double addOffset)
+  
+{
+
+  // get data from array
+  
+  size_t nGatesTot = _nTimesInFile * _nRangeInFile;
+  Radx::si16 *data = new Radx::si16[nGatesTot];
+  int iret = !var->get(data, _nTimesInFile, _nRangeInFile);
+  if (iret) {
+    delete[] data;
+    return -1;
+  }
+
+  // set missing value
+  
+  Radx::si16 missingVal = Radx::missingSi16;
+  Nc3Att *missingValueAtt = var->get_att("_FillValue");
+  if (missingValueAtt != NULL) {
+    missingVal = missingValueAtt->as_double(0);
+    delete missingValueAtt;
+  }
+  
+  // load field on rays
+
+  for (size_t ii = 0; ii < _raysFile.size(); ii++) {
+    
+    size_t rayIndex = ii;
+
+    if (rayIndex > _nTimesInFile - 1) {
+      cerr << "WARNING - NoaaFslRadxFile::_addSi16FieldToRays" << endl;
+      cerr << "  Trying to access ray beyond data" << endl;
+      cerr << "  Trying to read ray index: " << rayIndex << endl;
+      cerr << "  nTimesInFile: " << _nTimesInFile << endl;
+      cerr << "  skipping ...." << endl;
+      continue;
     }
+    
+    int nGates = _nRangeInFile;
+    int startIndex = rayIndex * _nRangeInFile;
+    
+    RadxField *field =
+      _raysFile[ii]->addField(name, units, nGates,
+			      missingVal,
+			      data + startIndex,
+                              scaleFactor, addOffset,
+			      true);
+    
+    field->setStandardName(standardName);
+    field->setLongName(longName);
+    field->copyRangeGeom(_geom);
+
+  }
+  
+  delete[] data;
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////////////////
+// Add si08 fields to _raysFromFile
+// The _raysFromFile array has previously been set up by _createRays()
+// Returns 0 on success, -1 on failure
+
+int NoaaFslRadxFile::_addSi08FieldToRays(Nc3Var* var,
+                                         const string &name,
+                                         const string &units,
+                                         const string &standardName,
+                                         const string &longName,
+                                         double scaleFactor,
+                                         double addOffset)
+  
+{
+
+  // get data from array
+  
+  size_t nGatesTot = _nTimesInFile * _nRangeInFile;
+  Radx::si08 *data = new Radx::si08[nGatesTot];
+  int iret = !var->get((ncbyte *) data, _nTimesInFile, _nRangeInFile);
+  if (iret) {
+    delete[] data;
+    return -1;
+  }
+
+  // set missing value
+  
+  Radx::si08 missingVal = Radx::missingSi08;
+  Nc3Att *missingValueAtt = var->get_att("_FillValue");
+  if (missingValueAtt != NULL) {
+    missingVal = missingValueAtt->as_double(0);
+    delete missingValueAtt;
+  }
+  
+  // load field on rays
+
+  for (size_t ii = 0; ii < _raysFile.size(); ii++) {
+    
+    size_t rayIndex = ii;
+
+    if (rayIndex > _nTimesInFile - 1) {
+      cerr << "WARNING - NoaaFslRadxFile::_addSi08FieldToRays" << endl;
+      cerr << "  Trying to access ray beyond data" << endl;
+      cerr << "  Trying to read ray index: " << rayIndex << endl;
+      cerr << "  nTimesInFile: " << _nTimesInFile << endl;
+      cerr << "  skipping ...." << endl;
+      continue;
+    }
+    
+    int nGates = _nRangeInFile;
+    int startIndex = rayIndex * _nRangeInFile;
+    
+    RadxField *field =
+      _raysFile[ii]->addField(name, units, nGates,
+			      missingVal,
+			      data + startIndex,
+                              scaleFactor, addOffset,
+			      true);
+    
+    field->setStandardName(standardName);
+    field->setLongName(longName);
+    field->copyRangeGeom(_geom);
 
   }
   
@@ -1663,18 +1737,11 @@ int NoaaFslRadxFile::_loadReadVolume()
 
   // set metadata
 
-  _readVol->setOrigFormat("D3R");
+  _readVol->setOrigFormat("NOAAFSL");
   _readVol->setVolumeNumber(_volumeNumber);
   _readVol->setInstrumentType(_instrumentType);
   _readVol->setPlatformType(_platformType);
   _readVol->setPrimaryAxis(_primaryAxis);
-
-  // if (_txFreqShort.size() > 0) {
-  //   _readVol->addFrequencyHz(_txFreqShort[0]);
-  // }
-  // if (_txFreqMedium.size() > 0) {
-  //   _readVol->addFrequencyHz(_txFreqMedium[0]);
-  // }
 
   _readVol->setTitle(_title);
   _readVol->setSource(_source);
@@ -1683,36 +1750,26 @@ int NoaaFslRadxFile::_loadReadVolume()
   _readVol->setReferences(_references);
   _readVol->setComment(_comment);
   _readVol->setStatusXml(_statusXml);
-  // _readVol->setSiteName(_siteName);
-  // _readVol->setScanName(_scanName);
-  // _readVol->setScanId(_scanId);
-  // _readVol->setInstrumentName(_instrumentName);
 
   _readVol->setLatitudeDeg(_latitudeDeg);
   _readVol->setLongitudeDeg(_longitudeDeg);
   _readVol->setAltitudeKm(_altitudeM / 1000.0);
 
+  _readVol->setRadarBeamWidthDegH(_beamWidthH);
+  _readVol->setRadarBeamWidthDegV(_beamWidthV);
+  _readVol->setRadarReceiverBandwidthMhz(_bandWidthHertz / 1.0e6);
+
   _readVol->copyRangeGeom(_geom);
 
   for (int ii = 0; ii < (int) _raysVol.size(); ii++) {
     _raysVol[ii]->setVolumeNumber(_volumeNumber);
+    _raysVol[ii]->setPulseWidthUsec(_pulseWidthUsec);
+    _raysVol[ii]->setNyquistMps(_nyquistVel);
   }
 
   // add rays to vol - they will be freed by vol
 
   for (size_t ii = 0; ii < _raysVol.size(); ii++) {
-
-    // fake angles for testing
-    // double el = 0.5;
-    // double az = ii * 0.5;
-    // while (az > 360) {
-    //   az -= 360;
-    // }
-    // _raysValid[ii]->setElevationDeg(el);
-    // _raysValid[ii]->setAzimuthDeg(az);
-    // _raysValid[ii]->setFixedAngleDeg(el);
-    // _raysValid[ii]->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
-
     _readVol->addRay(_raysVol[ii]);
   }
 
@@ -1750,6 +1807,12 @@ int NoaaFslRadxFile::_loadReadVolume()
       return -1;
     }
   }
+
+  // calibration
+
+  RadxRcalib *calib = new RadxRcalib;
+  calib->setRadarConstantH(_radarConst);
+  _readVol->addCalib(calib);
 
   // load the volume information from the rays
 

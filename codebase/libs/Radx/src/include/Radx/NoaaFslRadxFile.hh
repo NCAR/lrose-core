@@ -211,9 +211,7 @@ private:
 
   // sweep
 
-  int _nSweeps;
-  int _sweepNum;
-  double _fixedAngle;
+  size_t _nSweeps;
   vector<double> _elevList;
 
   // scalars
@@ -245,116 +243,12 @@ private:
 
   // ray variables
   
-  Nc3Var *_azimuthVar;
-  Nc3Var *_elevationVar;
-  // Nc3Var *_gateWidthVar;
-  // Nc3Var *_startRangeVar;
-
   vector<double> _azimuth;
   vector<double> _elevation;
   string _azimuthUnits, _elevationUnits;
 
-  // vector<double> _gateWidth;
-  // vector<double> _startRangeInt;
-  // vector<double> _startRange;
+  // instrument
 
-  // string _azimuthUnits, _elevationUnits;
-  // string _gateWidthUnits, _startRangeUnits;
-
-  // Nc3Var *_startGateVar;
-  // Nc3Var *_gcfStateVar;
-  // Nc3Var *_polarizationModeVar;
-  // Nc3Var *_prtModeVar;
-
-  // vector<int> _startGate;
-  // vector<int> _gcfState;
-  // vector<int> _polarizationMode;
-  // vector<int> _prtMode;
-  
-  // Nc3Var *_txFreqShortVar;
-  // Nc3Var *_txFreqMediumVar;
-  // Nc3Var *_txLengthShortVar;
-  // Nc3Var *_txLengthMediumVar;
-  
-  // vector<double> _txFreqShort;
-  // vector<double> _txFreqMedium;
-  // vector<double> _txLengthShort;
-  // vector<double> _txLengthMedium;
-
-  // string _txFreqShortUnits, _txFreqMediumUnits;
-  // string _txLengthShortUnits, _txLengthMediumUnits;
-  
-  // Nc3Var *_txPowerHShortVar;
-  // Nc3Var *_txPowerHMediumVar;
-  // Nc3Var *_txPowerVShortVar;
-  // Nc3Var *_txPowerVMediumVar;
-
-  // vector<double> _txPowerHShort;
-  // vector<double> _txPowerHMedium;
-  // vector<double> _txPowerVShort;
-  // vector<double> _txPowerVMedium;
-
-  // string _txPowerHShortUnits, _txPowerHMediumUnits;
-  // string _txPowerVShortUnits, _txPowerVMediumUnits;
-
-  // Nc3Var *_txPhaseHShortVar;
-  // Nc3Var *_txPhaseHMediumVar;
-  // Nc3Var *_txPhaseVShortVar;
-  // Nc3Var *_txPhaseVMediumVar;
-  
-  // vector<double> _txPhaseHShort;
-  // vector<double> _txPhaseHMedium;
-  // vector<double> _txPhaseVShort;
-  // vector<double> _txPhaseVMedium;
-
-  // string _txPhaseHShortUnits, _txPhaseHMediumUnits;
-  // string _txPhaseVShortUnits, _txPhaseVMediumUnits;
-
-  // Nc3Var *_noiseSourcePowerHShortVar;
-  // Nc3Var *_noiseSourcePowerVShortVar;
-
-  // vector<double> _noiseSourcePowerHShort;
-  // vector<double> _noiseSourcePowerVShort;
-
-  // string _noiseSourcePowerHShortUnits, _noiseSourcePowerVShortUnits;
-
-  // Nc3Var *_rxGainHShortVar;
-  // Nc3Var *_rxGainHMediumVar;
-  // Nc3Var *_rxGainVShortVar;
-  // Nc3Var *_rxGainVMediumVar;
-  
-  // vector<double> _rxGainHShort;
-  // vector<double> _rxGainHMedium;
-  // vector<double> _rxGainVShort;
-  // vector<double> _rxGainVMedium;
-  
-  // string _rxGainHShortUnits, _rxGainHMediumUnits;
-  // string _rxGainVShortUnits, _rxGainVMediumUnits;
-
-  // Nc3Var *_zdrBiasAppliedShortVar;
-  // Nc3Var *_zdrBiasAppliedMediumVar;
-  
-  // vector<double> _zdrBiasAppliedShort;
-  // vector<double> _zdrBiasAppliedMedium;
-
-  // string _zdrBiasAppliedShortUnits, _zdrBiasAppliedMediumUnits;
-
-  // global attributes
-
-  // string _netcdfRevision;
-  // string _gmaptdRevision;
-  // string _configRevision;
-  // string _campaignName;
-  // string _radarName;
-  
-  // int _numGates;
-  // int _scanId;
-  // int _scanType;
-
-  // string _siteName;
-  // string _scanName;
-  // string _instrumentName;
-  
   static int _volumeNumber;
   Radx::InstrumentType_t _instrumentType;
   Radx::PlatformType_t _platformType;
@@ -375,6 +269,7 @@ private:
   int _readDimensions();
   int _readGlobalAttributes();
   int _readScalars();
+  int _readSweepAngles();
   int _readTimes();
   void _clearRayVariables();
   int _readRayVariables();
@@ -388,14 +283,35 @@ private:
 
   int _addFl64FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
-                          const string &standardName, const string &longName,
-                          bool isDiscrete, bool fieldFolds,
-                          float foldLimitLower, float foldLimitUpper);
+                          const string &standardName, const string &longName);
+
   int _addFl32FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
-                          const string &standardName, const string &longName,
-                          bool isDiscrete, bool fieldFolds,
-                          float foldLimitLower, float foldLimitUpper);
+                          const string &standardName, const string &longName);
+
+  int _addSi32FieldToRays(Nc3Var* var,
+                          const string &name,
+                          const string &units,
+                          const string &standardName,
+                          const string &longName,
+                          double scaleFactor,
+                          double addOffset);
+
+  int _addSi16FieldToRays(Nc3Var* var,
+                          const string &name,
+                          const string &units,
+                          const string &standardName,
+                          const string &longName,
+                          double scaleFactor,
+                          double addOffset);
+
+  int _addSi08FieldToRays(Nc3Var* var,
+                          const string &name,
+                          const string &units,
+                          const string &standardName,
+                          const string &longName,
+                          double scaleFactor,
+                          double addOffset);
 
   int _loadReadVolume();
   void _computeFixedAngles();
