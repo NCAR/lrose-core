@@ -351,10 +351,12 @@ def copyLibToRelDir(libName, libPath):
 
     # copy in lib file
     
-    try:
-        shutil.copy2(libPath, destDir)
-    except (shutil.Error, IOError), err:
-        print >>sys.stderr, "===>>> WARNING: ", err
+    shellCmd("rsync -av " + libPath + " " + destDir)
+
+    # try:
+    #     shutil.copy2(libPath, destDir)
+    # except (shutil.Error, IOError), err:
+    #     print >>sys.stderr, "===>>> WARNING: ", err
 
 ########################################################################
 # Modify a library dependency paths in an executable file
