@@ -2,7 +2,7 @@
 
 #===========================================================================
 #
-# Install a binary release
+# Build and install binaries from a src release
 # Should be run from within the untarred directory
 #
 #===========================================================================
@@ -60,7 +60,7 @@ def main():
                       help='Directory for installation')
 
     (options, args) = parser.parse_args()
-
+    
     if (options.verbose):
         options.debug = True
         
@@ -95,7 +95,7 @@ def main():
     print >>sys.stderr, "****************************************************"
     print >>sys.stderr, "  Running " + thisScriptName
     print >>sys.stderr, ""
-    print >>sys.stderr, "  Installing " + package + " binary release"
+    print >>sys.stderr, "  Building and installing " + package + " release"
     print >>sys.stderr, "  OS type: " + ostype
     print >>sys.stderr, ""
     print >>sys.stderr, "  NCAR, Boulder, CO, USA"
@@ -118,25 +118,19 @@ def main():
     if (os.path.isdir(installDir) == False):
         os.makedirs(installDir)
 
-    # do the install
-    
-    if (os.path.isdir("bin")):
-        shellCmd("rsync -av bin " + installDir)
+    # build netcdf support
 
-    if (os.path.isdir("lib")):
-        shellCmd("rsync -av lib " + installDir)
+    buildNetcdf()
 
-    if (os.path.isdir("include")):
-        shellCmd("rsync -av include " + installDir)
+    # build and install the package
 
-    if (os.path.isdir("share")):
-        shellCmd("rsync -av share " + installDir)
+    buildPackage()
 
     #--------------------------------------------------------------------
     # done
     
     print("  **************************************************")
-    print("  *** Done installing binary release ***")
+    print("  *** Done building and installing src release ***")
     print("  *** installed in dir: " + installDir + " ***")
     print("  **************************************************")
 
@@ -228,6 +222,36 @@ def getOsType():
         elif (line.find("i686") > 0):
             ostype = "i686"
             
+########################################################################
+# build netCDF
+
+def buildNetcdf():
+
+    netcdfDir = os.path.join(runDir, "lrose-netcdf")
+    os.chdir(netcdfDir)
+    if (package == "cidd"):
+        shellCmd("./build_and_install_netcdf.m32 -x " + installDir)
+    else:
+        if (platform == "darwin"):
+            shellCmd("./build_and_install_netcdf.osx -x " + installDir)
+        else:
+            shellCmd("./build_and_install_netcdf -x " + installDir)
+
+########################################################################
+# build package
+
+def buildPackage():
+
+    os.chdir(runDir)
+
+    args = ""
+    args = args + " --prefix " + installDir
+    args = args + " --package " + package
+    if (options.installScripts):
+        args = args + " --scripts "
+
+    shellCmd("./build/build_lrose.py " + args)
+
 ########################################################################
 # Run a command in a shell, wait for it to complete
 

@@ -175,12 +175,15 @@ def main():
     #     $prefix/bin/${package}_runtime_libs
 
     os.chdir(runDir)
-    shellCmd("./codebase/make_bin/installOriginLibFiles.py --binDir " + \
-             tmpDir + "/bin " + \
-             "--relDir " + package + "_runtime_libs --debug")
+
+    if (platform != "darwin"):
+        shellCmd("./codebase/make_bin/installOriginLibFiles.py --binDir " + \
+                 tmpDir + "/bin " + \
+                 "--relDir " + package + "_runtime_libs --debug")
 
     # copy the required files and directories into the tar directory
     
+    os.chdir(runDir)
     shellCmd("/bin/cp -f LICENSE.txt " + tarDir)
     shellCmd("/bin/cp -f ReleaseInfo.txt " + tarDir)
     shellCmd("/bin/cp -rf release_notes " + tarDir)

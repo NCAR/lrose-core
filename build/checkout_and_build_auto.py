@@ -256,18 +256,18 @@ def setupAutoconf():
 
     if (options.static):
         if (package == "cidd"):
-             shutil.copy("../build/configure.base.cidd", "./configure.base")
+             shutil.copy("../build/autoconf/configure.base.cidd", "./configure.base")
         else:
-             shutil.copy("../build/configure.base", "./configure.base")
+             shutil.copy("../build/autoconf/configure.base", "./configure.base")
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base" +
                  " --pkg " + package + debugStr)
     else:
         if (package == "cidd"):
-            shutil.copy("../build/configure.base.shared.cidd",
+            shutil.copy("../build/autoconf/configure.base.shared.cidd",
                         "./configure.base.shared")
         else:
-            shutil.copy("../build/configure.base.shared",
+            shutil.copy("../build/autoconf/configure.base.shared",
                         "./configure.base.shared")
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base.shared --shared" +
