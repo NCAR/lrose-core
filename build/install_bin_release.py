@@ -113,7 +113,8 @@ def main():
 
     # create the install dir
 
-    os.makedirs(options.prefix)
+    if (os.path.isdir(options.prefix) == False):
+        os.makedirs(options.prefix)
 
     # do the install
     
@@ -129,7 +130,7 @@ def main():
     
     print("  **************************************************")
     print("  *** Done installing binary release ***")
-    print("  *** installed in run dir: " + runDir + " ***")
+    print("  *** installed in dir: " + options.prefix + " ***")
     print("  **************************************************")
 
     sys.exit(0)
