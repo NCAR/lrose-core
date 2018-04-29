@@ -20,13 +20,13 @@ from sys import platform
 
 def main():
 
-    global progName
     global options
     global debug
     global ignoreList
 
-    progName = os.path.basename(sys.argv[0])
-    
+    global thisScriptName
+    thisScriptName = os.path.basename(__file__)
+
     # parse the command line
 
     usage = "usage: %prog [options]: prints catalog to stdout"
@@ -64,14 +64,15 @@ def main():
         options.debug = True
 
     if (options.debug == True):
-        print >>sys.stderr, "Options:"
-        print >>sys.stderr, "  Debug: ", options.debug
-        print >>sys.stderr, "  Verbose: ", options.verbose
-        print >>sys.stderr, "  binDir: ", options.binDir
-        print >>sys.stderr, "  relDir: ", options.relDir
-        print >>sys.stderr, "  platform: ", platform
-        print >>sys.stderr, "  ignore: ", options.ignore
-        print >>sys.stderr, "  ignoreList: ", ignoreList
+        print >>sys.stderr, "  Running " + thisScriptName
+        print >>sys.stderr, "    platform: ", platform
+        print >>sys.stderr, "  Options:"
+        print >>sys.stderr, "    debug: ", options.debug
+        print >>sys.stderr, "    verbose: ", options.verbose
+        print >>sys.stderr, "    binDir: ", options.binDir
+        print >>sys.stderr, "    relDir: ", options.relDir
+        print >>sys.stderr, "    ignore: ", options.ignore
+        print >>sys.stderr, "    ignoreList: ", ignoreList
 
     # create list of binaries in install dir
     
@@ -169,7 +170,7 @@ def main():
 
     # for LINUX we are done
 
-    if (platform == "darwin"):
+    if (platform != "darwin"):
         sys.exit(0)
 
     # for OSX, modify the binaries so that their
