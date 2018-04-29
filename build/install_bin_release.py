@@ -42,6 +42,8 @@ def main():
 
     usage = "usage: %prog [options]"
     homeDir = os.environ['HOME']
+    prefixDefault = '/usr/local/lrose'
+
     parser = OptionParser(usage)
     parser.add_option('--debug',
                       dest='debug', default=False,
@@ -52,7 +54,7 @@ def main():
                       action="store_true",
                       help='Set verbose debugging on')
     parser.add_option('--prefix',
-                      dest='prefix', default='not-set',
+                      dest='prefix', default=prefixDefault,
                       help='Directory for installation')
     parser.add_option('--devel',
                       dest='devel', default=False,
