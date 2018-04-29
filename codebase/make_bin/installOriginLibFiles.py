@@ -16,6 +16,7 @@ import sys
 import subprocess
 from optparse import OptionParser
 import shutil
+from sys import platform
 
 def main():
 
@@ -50,10 +51,6 @@ def main():
                       'Any lib containing these strings will not be ' +
                       'included in the install. Default is: ' +
                       ignoreDefault)
-    parser.add_option('--osx',
-                      dest='isOsx', default=False,
-                      action="store_true",
-                      help='Set to OSX (default is LINUX)')
     parser.add_option('--verbose',
                       dest='verbose', default=False,
                       action="store_true",
@@ -72,7 +69,7 @@ def main():
         print >>sys.stderr, "  Verbose: ", options.verbose
         print >>sys.stderr, "  binDir: ", options.binDir
         print >>sys.stderr, "  relDir: ", options.relDir
-        print >>sys.stderr, "  isOsx: ", options.isOsx
+        print >>sys.stderr, "  platform: ", platform
         print >>sys.stderr, "  ignore: ", options.ignore
         print >>sys.stderr, "  ignoreList: ", ignoreList
 
@@ -172,7 +169,7 @@ def main():
 
     # for LINUX we are done
 
-    if (options.isOsx == False):
+    if (platform == "darwin"):
         sys.exit(0)
 
     # for OSX, modify the binaries so that their
@@ -211,7 +208,7 @@ def findLibsForFile(filePath, validLibs):
 
     # get list of dynamic libs
     
-    if (options.isOsx):
+    if (platform == "darwin"):
         # OSX
         cmd = 'otool -L '
     else:
@@ -233,7 +230,7 @@ def findLibsForFile(filePath, validLibs):
         libName = ''
         libPath = ''
 
-        if (options.isOsx):
+        if (platform == "darwin"):
 
             # OSX
 
@@ -305,7 +302,7 @@ def fileIsBinary(filePath):
     lines = pipe.readlines()
     isExecFile = False
 
-    if (options.isOsx):
+    if (platform == "darwin"):
 
         # MAC OSX
 

@@ -14,9 +14,14 @@ class LroseBlaze < Formula
   sha256 '{2}'
 
   depends_on 'hdf5' => 'enable-cxx'
-  depends_on 'udunits'
   depends_on 'netcdf' => 'enable-cxx-compat'
+  depends_on 'udunits'
   depends_on 'fftw'
+  depends_on 'flex'
+  depends_on 'jasper'
+  depends_on 'jpeg'
+  depends_on 'qt'
+  depends_on 'szip'
 
   def install
     system "./configure", "--disable-dependency-tracking", "--prefix=#{{prefix}}"

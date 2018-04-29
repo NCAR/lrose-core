@@ -431,13 +431,6 @@ def buildPackage():
 
     # perform the build
 
-    # args = ""
-    # args = args + " -x " + tmpDir
-    # args = args + " -p " + package
-    # if (options.installScripts):
-    #     args = args + " --scripts "
-    # shellCmd("./build/build_lrose " + args)
-
     args = ""
     args = args + " --prefix " + tmpDir
     args = args + " --package " + package
@@ -508,7 +501,7 @@ def checkInstall():
     print("====================================================")
     print("============= Checking apps for " + package + " =============")
     shellCmd("./codebase/make_bin/check_apps.py " + \
-             "--listPath ./build/apps_check_list." + package + " " + \
+             "--listPath ./build/checklists/apps_check_list." + package + " " + \
              "--appDir " + prefix + "/bin " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")

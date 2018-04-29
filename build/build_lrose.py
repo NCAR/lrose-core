@@ -213,7 +213,7 @@ def checkInstall(corePath):
     print("====================================================")
     print("============= Checking apps for " + package + " =============")
     shellCmd("./codebase/make_bin/check_apps.py " + \
-             "--listPath ./build/apps_check_list." + package + " " + \
+             "--listPath ./build/checklists/apps_check_list." + package + " " + \
              "--appDir " + prefix + "/bin " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")

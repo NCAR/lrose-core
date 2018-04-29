@@ -107,7 +107,7 @@ def main():
     # compute release name and dir name
 
     if (options.osx == True):
-        releaseName = options.package + "-" + versionStr + ".macosx_64.src"
+        releaseName = options.package + "-" + versionStr + ".src.mac_osx"
     else:
         releaseName = options.package + "-" + versionStr + ".src"
     tarName = releaseName + ".tgz"
@@ -383,7 +383,7 @@ def createBrewFormula():
     tarUrl = "https://github.com/NCAR/lrose-core/releases/download/" + \
              options.package + "-" + versionStr + "/" + tarName
     formulaName = options.package + ".rb"
-    scriptName = "build_" + options.package + "_formula"
+    scriptName = "formulas/build_" + options.package + "_formula"
     buildDirPath = os.path.join(tarDir, "build")
     scriptPath = os.path.join(buildDirPath, scriptName)
 

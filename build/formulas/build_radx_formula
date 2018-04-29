@@ -17,6 +17,7 @@ class Radx < Formula
   depends_on 'udunits'
   depends_on 'netcdf' => 'enable-cxx-compat'
   depends_on 'fftw'
+  depends_on 'szip'
 
   def install
     system "./configure", "--disable-dependency-tracking", "--prefix=#{{prefix}}"

@@ -120,7 +120,7 @@ def main():
 
     # compute release name and dir name
     
-    releaseName = package + "-" + dateStr + "." + ostype
+    releaseName = package + "-" + dateStr + ".bin." + ostype
     tarName = releaseName + ".tgz"
     tarDir = os.path.join(tmpDir, releaseName)
     
@@ -216,7 +216,7 @@ def main():
     print("====================================================")
     print("============= Checking apps for " + package + " =============")
     shellCmd("./codebase/make_bin/check_apps.py " + \
-             "--listPath ./build/apps_check_list." + package + " " + \
+             "--listPath ./build/checklists/apps_check_list." + package + " " + \
              "--appDir " + tmpDir + "/bin " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
@@ -293,7 +293,7 @@ def getOsType():
     global ostype
 
     if (platform == "darwin"):
-        ostype = "macosx_64"
+        ostype = "mac_osx"
         return
 
     ostype = "x86_64"
