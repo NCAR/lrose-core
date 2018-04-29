@@ -137,6 +137,7 @@ def main():
     print >>sys.stderr, "*********************************************************************"
     print >>sys.stderr, "  dateStr: ", dateStr
     print >>sys.stderr, "  timeStr: ", timeStr
+    print >>sys.stderr, "  platform: ", platform
     print >>sys.stderr, "  prefix: ", options.prefix
     print >>sys.stderr, "  package: ", package
     print >>sys.stderr, "  version: ", version
@@ -146,7 +147,6 @@ def main():
     print >>sys.stderr, "  tarName: ", tarName
     print >>sys.stderr, "  tarDir: ", tarDir
     print >>sys.stderr, "  installScripts: ", options.installScripts
-    print >>sys.stderr, "  platform: ", platform
     print >>sys.stderr, "*********************************************************************"
 
     # create tmp dir for staging area

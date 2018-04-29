@@ -58,6 +58,10 @@ def main():
     parser.add_option('--prefix',
                       dest='prefix', default=prefixDefault,
                       help='Directory for installation')
+    parser.add_option('--scripts',
+                      dest='installScripts', default=False,
+                      action="store_true",
+                      help='Install scripts as well as binaries')
 
     (options, args) = parser.parse_args()
     
@@ -105,12 +109,13 @@ def main():
     print >>sys.stderr, "****************************************************"
     print >>sys.stderr, "  dateStr: ", dateStr
     print >>sys.stderr, "  timeStr: ", timeStr
+    print >>sys.stderr, "  platform: ", platform
     print >>sys.stderr, "  runDir: ", runDir
     print >>sys.stderr, "  installDir: ", installDir
-    print >>sys.stderr, "  platform: ", platform
     print >>sys.stderr, "  package: ", package
     print >>sys.stderr, "  version: ", version
     print >>sys.stderr, "  srcRelease: ", srcRelease
+    print >>sys.stderr, "  installScripts: ", options.installScripts
     print >>sys.stderr, "****************************************************"
 
     # create the install dir
