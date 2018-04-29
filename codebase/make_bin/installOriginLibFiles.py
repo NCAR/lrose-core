@@ -31,7 +31,16 @@ def main():
 
     usage = "usage: %prog [options]: prints catalog to stdout"
     #ignoreDefault = 'libc.so,libpthread.so,libdl.so,libX11.so'
-    ignoreDefault = 'libc.so,libpthread.so,libdl.so'
+    if (platform == "darwin"):
+        # OSX
+        ignoreDefault = 'libapple,libc++,libcache,libclosured' + \
+                        ',libcommon,libcompiler,libcopy,libcore' + \
+                        ',libcrypto,libdispatch,libdyld,libkeymgr' + \
+                        ',libobjc,libremovefile,libsystem,libunwind' + \
+                        ',libpthread,libdl,libX'
+    else:
+        # LINUX
+        ignoreDefault = 'libc.so,libpthread.so,libdl.so'
 
     parser = OptionParser(usage)
     parser.add_option('--debug',
