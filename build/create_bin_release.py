@@ -210,7 +210,7 @@ def main():
     os.chdir(runDir)
     print("============= Checking libs for " + package + " =============")
     shellCmd("./codebase/make_bin/check_libs.py " + \
-             "--listPath ./build/libs_check_list." + package + " " + \
+             "--listPath ./build/checklists/libs_check_list." + package + " " + \
              "--libDir " + tmpDir + "/lib " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")

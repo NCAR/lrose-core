@@ -207,7 +207,7 @@ def checkInstall(corePath):
     os.chdir(corePath)
     print("============= Checking libs for " + package + " =============")
     shellCmd("./codebase/make_bin/check_libs.py " + \
-             "--listPath ./build/libs_check_list." + package + " " + \
+             "--listPath ./build/checklists/libs_check_list." + package + " " + \
              "--libDir " + prefix + "/lib " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")

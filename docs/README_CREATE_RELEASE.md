@@ -2,24 +2,23 @@
 
 ### Available packages
 
-You can create an LROSE release for the following packages:
+LROSE has the following package options:
 
 | Package       | Comments      |
 | ------------- |:-------------:|
 | lrose         | standard full package - the default |
+| lrose-blaze   | blaze release - tested and documented |
 | radx          | Radx apps only |
 | titan         | Titan distribution |
-| hcr           | HCR (HIAPER Cloud Radar) package |
-| hsrl          | HSRL (High Spectral Resolition Lidar) package |
 | cidd          | CIDD display apps only, 32-bit build |
 
 `lrose` is the standard build, which includes all of the libraries and applications in lrose, except for the `cidd` display and its related applications.
 
+`lrose-blaze` is the first of the offical releases from the NSF SI2 LROSE project.
+
 `radx` is a sub package that only includes the `Radx` applications.
 
 `titan` is a sub package that supercedes the old Titan distribution for applications.
-
-`hcr` is a sub package that only includes the applications required for the HIAPER Cloud Radar.
 
 `cidd` is a special package, that must be built using 32-bit emulation, because the applications are based on the `xview` library that has no 64-bit port. This package includes the CIDD display, and other applications that depend on `xview`.
 
