@@ -181,11 +181,22 @@ private:
 
   Nc3Dim *_timeDim;  // "radial"
   Nc3Dim *_rangeDim; // "bin"
+  Nc3Dim *_sweepDim; // "sweep"
+
+  // global att
+
+  string _title;
+  string _institution;
+  string _references;
+  string _source;
+  string _history;
+  string _comment;
+  string _statusXml;
   
   // times
   
-  Nc3Var *_timeVar;
-  vector<double> _rayTimes;
+  double _refTimeSecsFile;
+  vector<time_t> _rayTimes;
   vector<double> _dTimes;
   bool _rayTimesIncrease;
   size_t _nTimesInFile;
@@ -200,134 +211,149 @@ private:
 
   // sweep
 
+  int _nSweeps;
   int _sweepNum;
   double _fixedAngle;
+  vector<double> _elevList;
+
+  // scalars
+
+  int _sweepNumber;
+  double _elevationAngle;
+  double _latitudeDeg;
+  double _longitudeDeg;
+  double _altitudeM;
+  double _startRangeM;
+  double _gateSpacingM;
+  double _nyquistVel;
+  double _calibConst;
+  double _radarConst;
+  double _beamWidthH;
+  double _beamWidthV;
+  double _pulseWidthUsec;
+  double _bandWidthHertz;
+
+  double _sqiThresh;
+  double _logThresh;
+  double _sigThresh;
+  double _csrThresh;
+
+  int _dbtThreshFlag;
+  int _dbzThreshFlag;
+  int _velThreshFlag;
+  int _widThreshFlag;
 
   // ray variables
   
   Nc3Var *_azimuthVar;
   Nc3Var *_elevationVar;
-  Nc3Var *_gateWidthVar;
-  Nc3Var *_startRangeVar;
+  // Nc3Var *_gateWidthVar;
+  // Nc3Var *_startRangeVar;
 
   vector<double> _azimuth;
   vector<double> _elevation;
-  vector<double> _gateWidth;
-  vector<double> _startRangeInt;
-  vector<double> _startRange;
-
   string _azimuthUnits, _elevationUnits;
-  string _gateWidthUnits, _startRangeUnits;
 
-  Nc3Var *_startGateVar;
-  Nc3Var *_gcfStateVar;
-  Nc3Var *_polarizationModeVar;
-  Nc3Var *_prtModeVar;
+  // vector<double> _gateWidth;
+  // vector<double> _startRangeInt;
+  // vector<double> _startRange;
 
-  vector<int> _startGate;
-  vector<int> _gcfState;
-  vector<int> _polarizationMode;
-  vector<int> _prtMode;
+  // string _azimuthUnits, _elevationUnits;
+  // string _gateWidthUnits, _startRangeUnits;
+
+  // Nc3Var *_startGateVar;
+  // Nc3Var *_gcfStateVar;
+  // Nc3Var *_polarizationModeVar;
+  // Nc3Var *_prtModeVar;
+
+  // vector<int> _startGate;
+  // vector<int> _gcfState;
+  // vector<int> _polarizationMode;
+  // vector<int> _prtMode;
   
-  Nc3Var *_txFreqShortVar;
-  Nc3Var *_txFreqMediumVar;
-  Nc3Var *_txLengthShortVar;
-  Nc3Var *_txLengthMediumVar;
+  // Nc3Var *_txFreqShortVar;
+  // Nc3Var *_txFreqMediumVar;
+  // Nc3Var *_txLengthShortVar;
+  // Nc3Var *_txLengthMediumVar;
   
-  vector<double> _txFreqShort;
-  vector<double> _txFreqMedium;
-  vector<double> _txLengthShort;
-  vector<double> _txLengthMedium;
+  // vector<double> _txFreqShort;
+  // vector<double> _txFreqMedium;
+  // vector<double> _txLengthShort;
+  // vector<double> _txLengthMedium;
 
-  string _txFreqShortUnits, _txFreqMediumUnits;
-  string _txLengthShortUnits, _txLengthMediumUnits;
+  // string _txFreqShortUnits, _txFreqMediumUnits;
+  // string _txLengthShortUnits, _txLengthMediumUnits;
   
-  Nc3Var *_txPowerHShortVar;
-  Nc3Var *_txPowerHMediumVar;
-  Nc3Var *_txPowerVShortVar;
-  Nc3Var *_txPowerVMediumVar;
+  // Nc3Var *_txPowerHShortVar;
+  // Nc3Var *_txPowerHMediumVar;
+  // Nc3Var *_txPowerVShortVar;
+  // Nc3Var *_txPowerVMediumVar;
 
-  vector<double> _txPowerHShort;
-  vector<double> _txPowerHMedium;
-  vector<double> _txPowerVShort;
-  vector<double> _txPowerVMedium;
+  // vector<double> _txPowerHShort;
+  // vector<double> _txPowerHMedium;
+  // vector<double> _txPowerVShort;
+  // vector<double> _txPowerVMedium;
 
-  string _txPowerHShortUnits, _txPowerHMediumUnits;
-  string _txPowerVShortUnits, _txPowerVMediumUnits;
+  // string _txPowerHShortUnits, _txPowerHMediumUnits;
+  // string _txPowerVShortUnits, _txPowerVMediumUnits;
 
-  Nc3Var *_txPhaseHShortVar;
-  Nc3Var *_txPhaseHMediumVar;
-  Nc3Var *_txPhaseVShortVar;
-  Nc3Var *_txPhaseVMediumVar;
+  // Nc3Var *_txPhaseHShortVar;
+  // Nc3Var *_txPhaseHMediumVar;
+  // Nc3Var *_txPhaseVShortVar;
+  // Nc3Var *_txPhaseVMediumVar;
   
-  vector<double> _txPhaseHShort;
-  vector<double> _txPhaseHMedium;
-  vector<double> _txPhaseVShort;
-  vector<double> _txPhaseVMedium;
+  // vector<double> _txPhaseHShort;
+  // vector<double> _txPhaseHMedium;
+  // vector<double> _txPhaseVShort;
+  // vector<double> _txPhaseVMedium;
 
-  string _txPhaseHShortUnits, _txPhaseHMediumUnits;
-  string _txPhaseVShortUnits, _txPhaseVMediumUnits;
+  // string _txPhaseHShortUnits, _txPhaseHMediumUnits;
+  // string _txPhaseVShortUnits, _txPhaseVMediumUnits;
 
-  Nc3Var *_noiseSourcePowerHShortVar;
-  Nc3Var *_noiseSourcePowerVShortVar;
+  // Nc3Var *_noiseSourcePowerHShortVar;
+  // Nc3Var *_noiseSourcePowerVShortVar;
 
-  vector<double> _noiseSourcePowerHShort;
-  vector<double> _noiseSourcePowerVShort;
+  // vector<double> _noiseSourcePowerHShort;
+  // vector<double> _noiseSourcePowerVShort;
 
-  string _noiseSourcePowerHShortUnits, _noiseSourcePowerVShortUnits;
+  // string _noiseSourcePowerHShortUnits, _noiseSourcePowerVShortUnits;
 
-  Nc3Var *_rxGainHShortVar;
-  Nc3Var *_rxGainHMediumVar;
-  Nc3Var *_rxGainVShortVar;
-  Nc3Var *_rxGainVMediumVar;
+  // Nc3Var *_rxGainHShortVar;
+  // Nc3Var *_rxGainHMediumVar;
+  // Nc3Var *_rxGainVShortVar;
+  // Nc3Var *_rxGainVMediumVar;
   
-  vector<double> _rxGainHShort;
-  vector<double> _rxGainHMedium;
-  vector<double> _rxGainVShort;
-  vector<double> _rxGainVMedium;
+  // vector<double> _rxGainHShort;
+  // vector<double> _rxGainHMedium;
+  // vector<double> _rxGainVShort;
+  // vector<double> _rxGainVMedium;
   
-  string _rxGainHShortUnits, _rxGainHMediumUnits;
-  string _rxGainVShortUnits, _rxGainVMediumUnits;
+  // string _rxGainHShortUnits, _rxGainHMediumUnits;
+  // string _rxGainVShortUnits, _rxGainVMediumUnits;
 
-  Nc3Var *_zdrBiasAppliedShortVar;
-  Nc3Var *_zdrBiasAppliedMediumVar;
+  // Nc3Var *_zdrBiasAppliedShortVar;
+  // Nc3Var *_zdrBiasAppliedMediumVar;
   
-  vector<double> _zdrBiasAppliedShort;
-  vector<double> _zdrBiasAppliedMedium;
+  // vector<double> _zdrBiasAppliedShort;
+  // vector<double> _zdrBiasAppliedMedium;
 
-  string _zdrBiasAppliedShortUnits, _zdrBiasAppliedMediumUnits;
+  // string _zdrBiasAppliedShortUnits, _zdrBiasAppliedMediumUnits;
 
   // global attributes
 
-  string _netcdfRevision;
-  string _gmaptdRevision;
-  string _configRevision;
-  string _campaignName;
-  string _radarName;
+  // string _netcdfRevision;
+  // string _gmaptdRevision;
+  // string _configRevision;
+  // string _campaignName;
+  // string _radarName;
   
-  double _latitudeDeg;
-  double _longitudeDeg;
-  double _altitudeKm;
-
-  int _numGates;
-  int _scanId;
-  int _scanType;
-  int _sweepNumber;
-  static int _prevSweepNumber;
-  double _refTimeSecsFile;
-  
-  string _title;
-  string _institution;
-  string _references;
-  string _source;
-  string _history;
-  string _comment;
-  string _statusXml;
-  
-  string _siteName;
-  string _scanName;
+  // int _numGates;
   // int _scanId;
-  string _instrumentName;
+  // int _scanType;
+
+  // string _siteName;
+  // string _scanName;
+  // string _instrumentName;
   
   static int _volumeNumber;
   Radx::InstrumentType_t _instrumentType;
@@ -347,21 +373,16 @@ private:
   void _getVolumePaths(const string &path, vector<string> &paths);
 
   int _readDimensions();
-  int _readSweepNumber();
   int _readGlobalAttributes();
+  int _readScalars();
   int _readTimes();
-  int _readRangeVariables();
   void _clearRayVariables();
   int _readRayVariables();
   int _createRays(const string &path);
   int _readFieldVariables(bool metaOnly);
   
-  int _readRayVar(Nc3Var* &var, const string &name, string &units,
+  int _readRayVar(const string &name, string &units,
                   vector<double> &vals, bool required = true);
-  int _readRayVar(Nc3Var* &var, const string &name, string &units,
-                  vector<int> &vals, bool required = true);
-  int _readRayVar(Nc3Var* &var, const string &name,
-                  vector<int> &vals, bool required = true);
   
   Nc3Var* _getRayVar(const string &name, bool required);
 

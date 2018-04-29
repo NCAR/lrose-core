@@ -53,7 +53,6 @@
 #include <dirent.h>
 using namespace std;
 
-int NoaaFslRadxFile::_prevSweepNumber = -1;
 int NoaaFslRadxFile::_volumeNumber = -1;
 
 //////////////
@@ -92,7 +91,7 @@ void NoaaFslRadxFile::clear()
   _timeDim = NULL;
   _rangeDim = NULL;
 
-  _timeVar = NULL;
+  // _timeVar = NULL;
   _rayTimes.clear();
   _dTimes.clear();
   _rayTimesIncrease = true;
@@ -107,95 +106,95 @@ void NoaaFslRadxFile::clear()
 
   _azimuthVar = NULL;
   _elevationVar = NULL;
-  _gateWidthVar = NULL;
-  _startRangeVar = NULL;
+  // _gateWidthVar = NULL;
+  // _startRangeVar = NULL;
 
   _azimuth.clear();
   _elevation.clear();
-  _gateWidth.clear();
-  _startRangeInt.clear();
-  _startRange.clear();
+  // _gateWidth.clear();
+  // _startRangeInt.clear();
+  // _startRange.clear();
 
-  _startGateVar = NULL;
-  _gcfStateVar = NULL;
-  _polarizationModeVar = NULL;
-  _prtModeVar = NULL;
+  // _startGateVar = NULL;
+  // _gcfStateVar = NULL;
+  // _polarizationModeVar = NULL;
+  // _prtModeVar = NULL;
 
-  _startGate.clear();
-  _gcfState.clear();
-  _polarizationMode.clear();
-  _prtMode.clear();
+  // _startGate.clear();
+  // _gcfState.clear();
+  // _polarizationMode.clear();
+  // _prtMode.clear();
   
-  _txFreqShortVar = NULL;
-  _txFreqMediumVar = NULL;
-  _txLengthShortVar = NULL;
-  _txLengthMediumVar = NULL;
+  // _txFreqShortVar = NULL;
+  // _txFreqMediumVar = NULL;
+  // _txLengthShortVar = NULL;
+  // _txLengthMediumVar = NULL;
   
-  _txFreqShort.clear();
-  _txFreqMedium.clear();
-  _txLengthShort.clear();
-  _txLengthMedium.clear();
+  // _txFreqShort.clear();
+  // _txFreqMedium.clear();
+  // _txLengthShort.clear();
+  // _txLengthMedium.clear();
   
-  _txPowerHShortVar = NULL;
-  _txPowerHMediumVar = NULL;
-  _txPowerVShortVar = NULL;
-  _txPowerVMediumVar = NULL;
+  // _txPowerHShortVar = NULL;
+  // _txPowerHMediumVar = NULL;
+  // _txPowerVShortVar = NULL;
+  // _txPowerVMediumVar = NULL;
 
-  _txPowerHShort.clear();
-  _txPowerHMedium.clear();
-  _txPowerVShort.clear();
-  _txPowerVMedium.clear();
+  // _txPowerHShort.clear();
+  // _txPowerHMedium.clear();
+  // _txPowerVShort.clear();
+  // _txPowerVMedium.clear();
 
-  _txPhaseHShortVar = NULL;
-  _txPhaseHMediumVar = NULL;
-  _txPhaseVShortVar = NULL;
-  _txPhaseVMediumVar = NULL;
+  // _txPhaseHShortVar = NULL;
+  // _txPhaseHMediumVar = NULL;
+  // _txPhaseVShortVar = NULL;
+  // _txPhaseVMediumVar = NULL;
   
-  _txPhaseHShort.clear();
-  _txPhaseHMedium.clear();
-  _txPhaseVShort.clear();
-  _txPhaseVMedium.clear();
+  // _txPhaseHShort.clear();
+  // _txPhaseHMedium.clear();
+  // _txPhaseVShort.clear();
+  // _txPhaseVMedium.clear();
 
-  _noiseSourcePowerHShortVar = NULL;
-  _noiseSourcePowerVShortVar = NULL;
+  // _noiseSourcePowerHShortVar = NULL;
+  // _noiseSourcePowerVShortVar = NULL;
 
-  _noiseSourcePowerHShort.clear();
-  _noiseSourcePowerVShort.clear();
+  // _noiseSourcePowerHShort.clear();
+  // _noiseSourcePowerVShort.clear();
 
-  _rxGainHShortVar = NULL;
-  _rxGainHMediumVar = NULL;
-  _rxGainVShortVar = NULL;
-  _rxGainVMediumVar = NULL;
+  // _rxGainHShortVar = NULL;
+  // _rxGainHMediumVar = NULL;
+  // _rxGainVShortVar = NULL;
+  // _rxGainVMediumVar = NULL;
   
-  _rxGainHShort.clear();
-  _rxGainHMedium.clear();
-  _rxGainVShort.clear();
-  _rxGainVMedium.clear();
+  // _rxGainHShort.clear();
+  // _rxGainHMedium.clear();
+  // _rxGainVShort.clear();
+  // _rxGainVMedium.clear();
   
-  _zdrBiasAppliedShortVar = NULL;
-  _zdrBiasAppliedMediumVar = NULL;
+  // _zdrBiasAppliedShortVar = NULL;
+  // _zdrBiasAppliedMediumVar = NULL;
   
-  _zdrBiasAppliedShort.clear();
-  _zdrBiasAppliedMedium.clear();
+  // _zdrBiasAppliedShort.clear();
+  // _zdrBiasAppliedMedium.clear();
 
   // global attributes
 
-  _netcdfRevision.clear();
-  _gmaptdRevision.clear();
-  _configRevision.clear();
-  _campaignName.clear();
-  _radarName.clear();
+  // _netcdfRevision.clear();
+  // _gmaptdRevision.clear();
+  // _configRevision.clear();
+  // _campaignName.clear();
+  // _radarName.clear();
   
   _latitudeDeg = 0;
   _longitudeDeg = 0;
-  _altitudeKm = 0;
+  _altitudeM = 0;
 
-  _numGates = 0;
-  _scanId = 0;
-  _scanType = 0;
+  // _numGates = 0;
+  // _scanId = 0;
+  // _scanType = 0;
   _sweepNumber = 0;
 
-  _refTimeSecsFile = 0;
+  // _refTimeSecsFile = 0;
   
   _title.clear();
   _institution.clear();
@@ -205,10 +204,10 @@ void NoaaFslRadxFile::clear()
   _comment.clear();
   _statusXml.clear();
   
-  _siteName.clear();
-  _scanName.clear();
+  // _siteName.clear();
+  // _scanName.clear();
   // int _scanId;
-  _instrumentName.clear();
+  // _instrumentName.clear();
   
   _instrumentType = Radx::INSTRUMENT_TYPE_RADAR;
   _platformType = Radx::PLATFORM_TYPE_FIXED;
@@ -459,22 +458,22 @@ void NoaaFslRadxFile::print(ostream &out) const
   out << "  history: " << _history << endl;
   out << "  comment: " << _comment << endl;
   out << "  statusXml: " << _statusXml << endl;
-  out << "  siteName: " << _siteName << endl;
-  out << "  scanName: " << _scanName << endl;
-  out << "  scanId: " << _scanId << endl;
-  out << "  instrumentName: " << _instrumentName << endl;
-  out << "  refTime: " << RadxTime::strm((time_t) _refTimeSecsFile) << endl;
+  // out << "  siteName: " << _siteName << endl;
+  // out << "  scanName: " << _scanName << endl;
+  // out << "  scanId: " << _scanId << endl;
+  // out << "  instrumentName: " << _instrumentName << endl;
+  // out << "  refTime: " << RadxTime::strm((time_t) _refTimeSecsFile) << endl;
   out << "  volumeNumber: " << _volumeNumber << endl;
   out << "  instrumentType: " 
       << Radx::instrumentTypeToStr(_instrumentType) << endl;
   out << "  platformType: " << Radx::platformTypeToStr(_platformType) << endl;
   out << "  primaryAxis: " << Radx::primaryAxisToStr(_primaryAxis) << endl;
-  out << "  latitude: " << _latitudeDeg << endl;
-  out << "  longitude: " << _longitudeDeg << endl;
-  out << "  altitude: " << _altitudeKm << endl;
-  if (_txFreqShort.size() > 0) {
-    out << "  frequencyGhz: " << _txFreqShort[0] / 1.0e9 << endl;
-  }
+  out << "  latitudeDeg: " << _latitudeDeg << endl;
+  out << "  longitudeDeg: " << _longitudeDeg << endl;
+  out << "  altitudeM: " << _altitudeM << endl;
+  // if (_txFreqShort.size() > 0) {
+  //   out << "  frequencyGhz: " << _txFreqShort[0] / 1.0e9 << endl;
+  // }
   out << "  startRangeKm: " << _remap.getStartRangeKm() << endl;
   out << "  gateSpacingKm: " << _remap.getGateSpacingKm() << endl;
   out << "  gateSpacingIsConstant: " << _gateSpacingIsConstant << endl;
@@ -483,7 +482,7 @@ void NoaaFslRadxFile::print(ostream &out) const
 }
 
 ////////////////////////////////////////////////////////////
-// Print native data in uf file
+// Print native data
 // Returns 0 on success, -1 on failure
 // Use getErrStr() if error occurs
 
@@ -571,8 +570,6 @@ int NoaaFslRadxFile::_readAggregatePaths(const string &path)
   
 {
 
-  // cerr << "11111111111 path: " << path << endl;
-  
   // get the list of paths which make up this volume
 
   vector<string> paths;
@@ -622,9 +619,16 @@ int NoaaFslRadxFile::_readFile(const string &path)
     return -1;
   }
 
-  // read sweep number
+  // read global attributes
+  
+  if (_readGlobalAttributes()) {
+    _addErrStr(errStr);
+    return -1;
+  }
+  
+  // read the scalars
 
-  if (_readSweepNumber()) {
+  if (_readScalars()) {
     _addErrStr(errStr);
     return -1;
   }
@@ -639,13 +643,6 @@ int NoaaFslRadxFile::_readFile(const string &path)
     return 0;
   }
   
-  // read global attributes
-  
-  if (_readGlobalAttributes()) {
-    _addErrStr(errStr);
-    return -1;
-  }
-  
   // read time variable
   
   if (_readTimes()) {
@@ -653,15 +650,6 @@ int NoaaFslRadxFile::_readFile(const string &path)
     return -1;
   }
 
-  // read range variable
-  // the range array size will be the max of the arrays found in
-  // the files
-  
-  if (_readRangeVariables()) {
-    _addErrStr(errStr);
-    return -1;
-  }
-  
   // read in ray variables
 
   if (_readRayVariables()) {
@@ -821,6 +809,12 @@ int NoaaFslRadxFile::_readDimensions()
     _nRangeInFile = _rangeDim->size();
   }
   
+  _nSweeps = 0;
+  iret |= _file.readDim("sweep", _sweepDim);
+  if (iret == 0) {
+    _nSweeps = _sweepDim->size();
+  }
+  
   if (iret) {
     _addErrStr("ERROR - NoaaFslRadxFile::_file.readDimensions");
     return -1;
@@ -831,23 +825,141 @@ int NoaaFslRadxFile::_readDimensions()
 }
 
 ///////////////////////////////////
-// read the sweep number
+// read the scalars
 
-int NoaaFslRadxFile::_readSweepNumber()
+int NoaaFslRadxFile::_readScalars()
 
 {
-  short sweepNum = -1;
-  Nc3Var *var = _file.getNc3File()->get_var("elevationNumber");
-  if (var != NULL) {
-    return false;
+
+  int iret = 0;
+  string units;
+
+  // sweep number
+
+  if (_file.readIntVal("elevationNumber", _sweepNum, Radx::missingMetaInt)) {
+    iret = -1;
   }
-  if (var->get(&sweepNum) == 0) {
-    _addErrStr("ERROR - NoaaFslRadxFile::_readSweepNumber");
-    _addErrStr("  Cannot read elevationNumber variable");
-    return -1;
+
+  // elevation angle
+  
+  if (_file.readDoubleVal("elevationAngle", _elevationAngle, Radx::missingMetaDouble)) {
+    iret = -1;
   }
-  _sweepNum = sweepNum;
-  return 0;
+
+  // lat, lon, alt
+
+  if (_file.readDoubleVal("siteLat", _latitudeDeg, Radx::missingMetaDouble)) {
+    iret = -1;
+  }
+
+  if (_file.readDoubleVal("siteLon", _longitudeDeg, Radx::missingMetaDouble)) {
+    iret = -1;
+  }
+
+  if (_file.readDoubleVal("siteAlt", _altitudeM,
+                          units, Radx::missingMetaDouble)) {
+    iret = -1;
+  }
+  if (units == "km") {
+    _altitudeM *= 1000.0;
+  }
+
+  // start range, gate spacing
+
+  if (_file.readDoubleVal("gateSize", _gateSpacingM,
+                          units, Radx::missingMetaDouble)) {
+    iret = -1;
+  }
+  if (units == "km") {
+    _gateSpacingM *= 1000.0;
+  }
+
+  if (_file.readDoubleVal("firstGateRange", _startRangeM,
+                          units, Radx::missingMetaDouble)) {
+    iret = -1;
+  }
+  if (units == "km") {
+    _startRangeM *= 1000.0;
+  }
+
+  // set start range to center of first gate
+
+  _startRangeM += _gateSpacingM / 2.0;
+
+  // nyquist
+
+  _file.readDoubleVal("nyquist", _nyquistVel, Radx::missingMetaDouble);
+
+  // calibration
+
+  _file.readDoubleVal("calibConst", _calibConst, Radx::missingMetaDouble);
+  _file.readDoubleVal("radarConst", _radarConst, Radx::missingMetaDouble);
+
+  // beam width
+
+  _file.readDoubleVal("beamWidthHori", _beamWidthH, Radx::missingMetaDouble);
+  _file.readDoubleVal("beamWidthVert", _beamWidthV, Radx::missingMetaDouble);
+
+  // pulse width
+
+  _file.readDoubleVal("pulseWidth", _pulseWidthUsec, units, Radx::missingMetaDouble);
+  if (units == "sec" || units == "s") {
+    _pulseWidthUsec *= 1.0e6;
+  }
+  
+  // band width
+
+  _file.readDoubleVal("bandWidth", _bandWidthHertz, units, Radx::missingMetaDouble);
+  if (units.find("mega") != string::npos) {
+    _bandWidthHertz *= 1.0e6;
+  } else if (units.find("giga") != string::npos) {
+    _bandWidthHertz *= 1.0e9;
+  }
+
+  // thresholds
+
+  _file.readDoubleVal("SQIThresh", _sqiThresh, Radx::missingMetaDouble);
+  _file.readDoubleVal("LOGThresh", _logThresh, Radx::missingMetaDouble);
+  _file.readDoubleVal("SIGThresh", _sigThresh, Radx::missingMetaDouble);
+  _file.readDoubleVal("CSRThresh", _csrThresh, Radx::missingMetaDouble);
+
+  _file.readIntVal("DBTThreshFlag", _dbtThreshFlag, Radx::missingMetaDouble);
+  _file.readIntVal("DBZThreshFlag", _dbzThreshFlag, Radx::missingMetaDouble);
+  _file.readIntVal("VELThreshFlag", _velThreshFlag, Radx::missingMetaDouble);
+  _file.readIntVal("WIDThreshFlag", _widThreshFlag, Radx::missingMetaDouble);
+
+  // set the status XML from the thresholds
+
+  _statusXml.clear();
+  _statusXml += RadxXml::writeStartTag("Thresholds", 0);
+  _statusXml += RadxXml::writeDouble("SQIThresh", 1, _sqiThresh);
+  _statusXml += RadxXml::writeDouble("LOGThresh", 1, _logThresh);
+  _statusXml += RadxXml::writeDouble("SIGThresh", 1, _sigThresh);
+  _statusXml += RadxXml::writeDouble("CSRThresh", 1, _csrThresh);
+  _statusXml += RadxXml::writeInt("DBTThreshFlag", 1, _dbtThreshFlag);
+  _statusXml += RadxXml::writeInt("DBZThreshFlag", 1, _dbzThreshFlag);
+  _statusXml += RadxXml::writeInt("VELThreshFlag", 1, _velThreshFlag);
+  _statusXml += RadxXml::writeInt("WIDThreshFlag", 1, _widThreshFlag);
+  _statusXml += RadxXml::writeEndTag("Thresholds", 0);
+
+  // set range vector
+
+  _rangeKm.clear();
+  for (size_t ii = 0; ii < _nRangeInFile; ii++) {
+    _rangeKm.push_back((_startRangeM + ii * _gateSpacingM) / 1000.0);
+  }
+  
+  // set the geometry from the range vector
+  
+  _gateSpacingIsConstant = true;
+  _geom.setRangeGeom(_startRangeM / 1000.0, _gateSpacingM / 1000.0);
+
+  if (iret) {
+    _addErrStr("ERROR - NoaaFslRadxFile::_readScalars");
+  }
+
+  return iret;
+
 }
 
 ///////////////////////////////////
@@ -857,50 +969,14 @@ int NoaaFslRadxFile::_readGlobalAttributes()
 
 {
 
-  _file.readGlobAttr("NetCDFRevision", _netcdfRevision);
-  _file.readGlobAttr("GMAPTDRevision", _gmaptdRevision);
-  _file.readGlobAttr("ConfigRevision", _configRevision);
-  _file.readGlobAttr("CampaignName", _campaignName);
-  _file.readGlobAttr("RadarName", _radarName);
-  _file.readGlobAttr("Latitude", _latitudeDeg);
-  _file.readGlobAttr("Longitude", _longitudeDeg);
-  _file.readGlobAttr("Altitude", _altitudeKm);
-  _altitudeKm /= 1000.0; // meters to km
-  _file.readGlobAttr("NumGates", _numGates);
-  _file.readGlobAttr("ScanId", _scanId);
-  _file.readGlobAttr("ScanType", _scanType);
-  _file.readGlobAttr("ScanType", _scanName);
-  _file.readGlobAttr("SweepNumber", _sweepNumber);
-  _file.readGlobAttr("Time", _refTimeSecsFile);
+  _file.readGlobAttr("Content", _comment);
+  _file.readGlobAttr("history", _history);
+  _file.readGlobAttr("title", _title);
+  _file.readGlobAttr("Conventions", _references);
 
-  _prevSweepNumber = _sweepNumber;
-
-  _title = _netcdfRevision;
-  _institution = "CSU/NASA";
-  _references = _configRevision;
-  _source = _radarName;
-  _history = _campaignName;
-  // _comment = "";
-  _siteName = _campaignName;
-  _instrumentName = _radarName;
+  _institution = "NOAA";
+  _source.clear();
   
-  // set the status XML from the attributes
-
-  _statusXml.clear();
-  _statusXml += RadxXml::writeStartTag("STATUS", 0);
-  for (int ii = 0; ii < _file.getNc3File()->num_atts(); ii++) {
-    Nc3Att *att = _file.getNc3File()->get_att(ii);
-    if (att != NULL) {
-      const char* strc = att->as_string(0);
-      string val(strc);
-      delete[] strc;
-      string name(att->name());
-      delete att;
-      _statusXml += RadxXml::writeString(name, 1, val);
-    }
-  }
-  _statusXml += RadxXml::writeEndTag("STATUS", 0);
-
   return 0;
 
 }
@@ -913,29 +989,30 @@ int NoaaFslRadxFile::_readTimes()
 {
 
   // read the time variable
-
-  _timeVar = _file.getNc3File()->get_var("Time");
-  if (_timeVar == NULL) {
+  
+  Nc3Var *timeVar = _file.getNc3File()->get_var("radialTime");
+  if (timeVar == NULL) {
     _addErrStr("ERROR - NoaaFslRadxFile::_readTimes");
-    _addErrStr("  Cannot find time variable, name: ", "Time");
+    _addErrStr("  Cannot find time variable, name: ", "radialTime");
     _addErrStr(_file.getNc3Error()->get_errmsg());
     return -1;
   }
-  if (_timeVar->num_dims() < 1) {
+  
+  if (timeVar->num_dims() < 1) {
     _addErrStr("ERROR - NoaaFslRadxFile::_readTimes");
     _addErrStr("  time variable has no dimensions");
     return -1;
   }
-  Nc3Dim *timeDim = _timeVar->get_dim(0);
+  Nc3Dim *timeDim = timeVar->get_dim(0);
   if (timeDim != _timeDim) {
     _addErrStr("ERROR - NoaaFslRadxFile::_readTimes");
     _addErrStr("  Time has incorrect dimension, name: ", timeDim->name());
     return -1;
   }
-
+  
   // get units attribute
   
-  Nc3Att* unitsAtt = _timeVar->get_att("Units");
+  Nc3Att* unitsAtt = timeVar->get_att("Units");
   if (unitsAtt == NULL) {
     _addErrStr("ERROR - NoaaFslRadxFile::_readTimes");
     _addErrStr("  Time has no units");
@@ -951,99 +1028,19 @@ int NoaaFslRadxFile::_readTimes()
   
   // set the time array
   
-  RadxArray<int> itimes_;
-  int *itimes = itimes_.alloc(_nTimesInFile);
-  if (_timeVar->get(itimes, _nTimesInFile) == 0) {
-    _addErrStr("ERROR - NoaaFslRadxFile::_readTimes");
-    _addErrStr("  Cannot read Time variable");
+  RadxArray<double> dtimes_;
+  double *dtimes = dtimes_.alloc(_nTimesInFile);
+  if (timeVar->get(dtimes, _nTimesInFile) == 0) {
+    _addErrStr("ERROdR - NoaaFslRadxFile::_readTimes");
+    _addErrStr("  Candnot read Time variable");
     return -1;
   }
   _dTimes.clear();
   for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-    _rayTimes.push_back(itimes[ii]);
-    _dTimes.push_back(itimes[ii]);
+    _rayTimes.push_back((time_t) dtimes[ii]);
+    _dTimes.push_back(dtimes[ii]);
   }
   
-  return 0;
-
-}
-
-///////////////////////////////////
-// read the range-related variables
-
-int NoaaFslRadxFile::_readRangeVariables()
-
-{
-  
-  // start range in km
-
-  if (_readRayVar(_startRangeVar, "StartRange", _startRangeUnits, _startRangeInt, true)) {
-    _addErrStr("ERROR - NoaaFslRadxFile::_readRangeVariable");
-    _addErrStr("  Cannot read StartRange");
-    _addErrStr(_file.getNc3Error()->get_errmsg());
-    return -1;
-  }
-  
-  double kmPerUnitStartRange = 1.0; // default - units in km
-  for (size_t ii = 0; ii < _startRangeUnits.size(); ii++) {
-    _startRangeUnits[ii] = tolower(_startRangeUnits[ii]);
-  }
-  if (_startRangeUnits == "m" || _startRangeUnits == "meters") {
-    kmPerUnitStartRange = 0.001;
-  } else if (_startRangeUnits == "mm" || _startRangeUnits == "millimeters") {
-    kmPerUnitStartRange = 0.000001;
-  }
-
-  for (size_t ii = 0; ii < _startRangeInt.size(); ii++) {
-    _startRange.push_back(_startRangeInt[ii] * kmPerUnitStartRange);
-  }
-  
-  // gate width in km
-  
-  if (_readRayVar(_gateWidthVar, "GateWidth", _gateWidthUnits, _gateWidth, true)) {
-    _addErrStr("ERROR - NoaaFslRadxFile::_readRangeVariable");
-    _addErrStr("  Cannot read GateWidth");
-    _addErrStr(_file.getNc3Error()->get_errmsg());
-    return -1;
-  }
-  
-  double kmPerUnitGateWidth = 1.0; // default - units in km
-  for (size_t ii = 0; ii < _gateWidthUnits.size(); ii++) {
-    _gateWidthUnits[ii] = tolower(_gateWidthUnits[ii]);
-  }
-  if (_gateWidthUnits == "m" || _gateWidthUnits == "meters") {
-    kmPerUnitGateWidth = 0.001;
-  } else if (_gateWidthUnits == "mm" || _gateWidthUnits == "millimeters") {
-    kmPerUnitGateWidth = 0.000001;
-  }
-
-  for (size_t ii = 0; ii < _gateWidth.size(); ii++) {
-    _gateWidth[ii] *= kmPerUnitGateWidth;
-  }
-  
-  // start gate
-  
-  if (_readRayVar(_startGateVar, "StartGate", _startGate, true)) {
-    _startGate.clear();
-    for (size_t ii = 0; ii < _startRange.size(); ii++) {
-      _startGate[ii] = 1;
-    }
-  }
-
-  // set range vector
-
-  _rangeKm.clear();
-  double gateSpacingKm = _gateWidth[0];
-  double startRangeKm = _startRange[0] + gateSpacingKm * (_startGate[0] - 1);
-  for (size_t ii = 0; ii < _nRangeInFile; ii++) {
-    _rangeKm.push_back(startRangeKm + ii * gateSpacingKm);
-  }
-  
-  // set the geometry from the range vector
-  
-  _gateSpacingIsConstant = true;
-  _geom.setRangeGeom(startRangeKm, gateSpacingKm);
-
   return 0;
 
 }
@@ -1057,39 +1054,39 @@ void NoaaFslRadxFile::_clearRayVariables()
 
   _azimuth.clear();
   _elevation.clear();
-  _gateWidth.clear();
-  _startRange.clear();
+  // _gateWidth.clear();
+  // _startRange.clear();
 
-  _startGate.clear();
-  _gcfState.clear();
-  _polarizationMode.clear();
-  _prtMode.clear();
+  // _startGate.clear();
+  // _gcfState.clear();
+  // _polarizationMode.clear();
+  // _prtMode.clear();
   
-  _txFreqShort.clear();
-  _txFreqMedium.clear();
-  _txLengthShort.clear();
-  _txLengthMedium.clear();
+  // _txFreqShort.clear();
+  // _txFreqMedium.clear();
+  // _txLengthShort.clear();
+  // _txLengthMedium.clear();
   
-  _txPowerHShort.clear();
-  _txPowerHMedium.clear();
-  _txPowerVShort.clear();
-  _txPowerVMedium.clear();
+  // _txPowerHShort.clear();
+  // _txPowerHMedium.clear();
+  // _txPowerVShort.clear();
+  // _txPowerVMedium.clear();
 
-  _txPhaseHShort.clear();
-  _txPhaseHMedium.clear();
-  _txPhaseVShort.clear();
-  _txPhaseVMedium.clear();
+  // _txPhaseHShort.clear();
+  // _txPhaseHMedium.clear();
+  // _txPhaseVShort.clear();
+  // _txPhaseVMedium.clear();
 
-  _noiseSourcePowerHShort.clear();
-  _noiseSourcePowerVShort.clear();
+  // _noiseSourcePowerHShort.clear();
+  // _noiseSourcePowerVShort.clear();
 
-  _rxGainHShort.clear();
-  _rxGainHMedium.clear();
-  _rxGainVShort.clear();
-  _rxGainVMedium.clear();
+  // _rxGainHShort.clear();
+  // _rxGainHMedium.clear();
+  // _rxGainVShort.clear();
+  // _rxGainVMedium.clear();
   
-  _zdrBiasAppliedShort.clear();
-  _zdrBiasAppliedMedium.clear();
+  // _zdrBiasAppliedShort.clear();
+  // _zdrBiasAppliedMedium.clear();
 
 }
 
@@ -1103,68 +1100,68 @@ int NoaaFslRadxFile::_readRayVariables()
   _clearRayVariables();
   int iret = 0;
 
-  _readRayVar(_azimuthVar, "Azimuth", _azimuthUnits, _azimuth);
+  _readRayVar("radialAzim", _azimuthUnits, _azimuth);
   if ((int) _azimuth.size() != _timeDim->size()) {
-    _addErrStr("ERROR - Azimuth variable required");
+    _addErrStr("ERROR - radialAzim variable required");
     iret = -1;
   }
   
-  _readRayVar(_elevationVar, "Elevation", _elevationUnits, _elevation);
+  _readRayVar("radialElev", _elevationUnits, _elevation);
   if ((int) _elevation.size() != _timeDim->size()) {
     _addErrStr("ERROR - Elevation variable required");
     iret = -1;
   }
-
-  _readRayVar(_gcfStateVar, "GcfState", _gcfState, false);
-  _readRayVar(_polarizationModeVar, "PolarizationMode", _polarizationMode, false);
-  _readRayVar(_prtModeVar, "PRTMode", _prtMode, false);
   
-  _readRayVar(_txFreqShortVar, "TxFrequency_Short",
-	      _txFreqShortUnits, _txFreqShort, false);
-  _readRayVar(_txFreqMediumVar, "TxFrequency_Medium",
-	      _txFreqMediumUnits, _txFreqMedium, false);
-
-  _readRayVar(_txLengthShortVar, "TxLength_Short",
-	      _txLengthShortUnits, _txLengthShort, false);
-  _readRayVar(_txLengthMediumVar, "TxLength_Medium",
-	      _txLengthMediumUnits, _txLengthMedium, false);
+  // _readRayVar(_gcfStateVar, "GcfState", _gcfState, false);
+  // _readRayVar(_polarizationModeVar, "PolarizationMode", _polarizationMode, false);
+  // _readRayVar(_prtModeVar, "PRTMode", _prtMode, false);
   
-  _readRayVar(_txPowerHShortVar, "TxPowerH_Short",
-	      _txPowerHShortUnits, _txPowerHShort, false);
-  _readRayVar(_txPowerHMediumVar, "TxPowerH_Medium",
-	      _txPowerHMediumUnits, _txPowerHMedium, false);
-  _readRayVar(_txPowerVShortVar, "TxPowerV_Short",
-	      _txPowerVShortUnits, _txPowerVShort, false);
-  _readRayVar(_txPowerVMediumVar, "TxPowerV_Medium",
-	      _txPowerVMediumUnits, _txPowerVMedium, false);
+  // _readRayVar(_txFreqShortVar, "TxFrequency_Short",
+  //             _txFreqShortUnits, _txFreqShort, false);
+  // _readRayVar(_txFreqMediumVar, "TxFrequency_Medium",
+  //             _txFreqMediumUnits, _txFreqMedium, false);
 
-  _readRayVar(_txPhaseHShortVar, "TxPhaseH_Short",
-	      _txPhaseHShortUnits, _txPhaseHShort, false);
-  _readRayVar(_txPhaseHMediumVar, "TxPhaseH_Medium",
-	      _txPhaseHMediumUnits, _txPhaseHMedium, false);
-  _readRayVar(_txPhaseVShortVar, "TxPhaseV_Short",
-	      _txPhaseVShortUnits, _txPhaseVShort, false);
-  _readRayVar(_txPhaseVMediumVar, "TxPhaseV_Medium",
-	      _txPhaseVMediumUnits, _txPhaseVMedium, false);
+  // _readRayVar(_txLengthShortVar, "TxLength_Short",
+  //             _txLengthShortUnits, _txLengthShort, false);
+  // _readRayVar(_txLengthMediumVar, "TxLength_Medium",
+  //             _txLengthMediumUnits, _txLengthMedium, false);
+  
+  // _readRayVar(_txPowerHShortVar, "TxPowerH_Short",
+  //             _txPowerHShortUnits, _txPowerHShort, false);
+  // _readRayVar(_txPowerHMediumVar, "TxPowerH_Medium",
+  //             _txPowerHMediumUnits, _txPowerHMedium, false);
+  // _readRayVar(_txPowerVShortVar, "TxPowerV_Short",
+  //             _txPowerVShortUnits, _txPowerVShort, false);
+  // _readRayVar(_txPowerVMediumVar, "TxPowerV_Medium",
+  //             _txPowerVMediumUnits, _txPowerVMedium, false);
 
-  _readRayVar(_noiseSourcePowerHShortVar, "NoiseSourcePowerH_Short",
-	      _noiseSourcePowerHShortUnits, _noiseSourcePowerHShort, false);
-  _readRayVar(_noiseSourcePowerVShortVar, "NoiseSourcePowerV_Short",
-	      _noiseSourcePowerVShortUnits, _noiseSourcePowerVShort, false);
+  // _readRayVar(_txPhaseHShortVar, "TxPhaseH_Short",
+  //             _txPhaseHShortUnits, _txPhaseHShort, false);
+  // _readRayVar(_txPhaseHMediumVar, "TxPhaseH_Medium",
+  //             _txPhaseHMediumUnits, _txPhaseHMedium, false);
+  // _readRayVar(_txPhaseVShortVar, "TxPhaseV_Short",
+  //             _txPhaseVShortUnits, _txPhaseVShort, false);
+  // _readRayVar(_txPhaseVMediumVar, "TxPhaseV_Medium",
+  //             _txPhaseVMediumUnits, _txPhaseVMedium, false);
 
-  _readRayVar(_rxGainHShortVar, "TxPowerH_Short",
-	      _rxGainHShortUnits, _rxGainHShort, false);
-  _readRayVar(_rxGainHMediumVar, "TxPowerH_Medium",
-	      _rxGainHMediumUnits, _rxGainHMedium, false);
-  _readRayVar(_rxGainVShortVar, "TxPowerV_Short",
-	      _rxGainVShortUnits, _rxGainVShort, false);
-  _readRayVar(_rxGainVMediumVar, "TxPowerV_Medium",
-	      _rxGainVMediumUnits, _rxGainVMedium, false);
+  // _readRayVar(_noiseSourcePowerHShortVar, "NoiseSourcePowerH_Short",
+  //             _noiseSourcePowerHShortUnits, _noiseSourcePowerHShort, false);
+  // _readRayVar(_noiseSourcePowerVShortVar, "NoiseSourcePowerV_Short",
+  //             _noiseSourcePowerVShortUnits, _noiseSourcePowerVShort, false);
 
-  _readRayVar(_zdrBiasAppliedShortVar, "ZDRBiasApplied_Short",
-	      _zdrBiasAppliedShortUnits, _zdrBiasAppliedShort, false);
-  _readRayVar(_zdrBiasAppliedMediumVar, "ZDRBiasApplied_Medium",
-	      _zdrBiasAppliedMediumUnits, _zdrBiasAppliedMedium, false);
+  // _readRayVar(_rxGainHShortVar, "TxPowerH_Short",
+  //             _rxGainHShortUnits, _rxGainHShort, false);
+  // _readRayVar(_rxGainHMediumVar, "TxPowerH_Medium",
+  //             _rxGainHMediumUnits, _rxGainHMedium, false);
+  // _readRayVar(_rxGainVShortVar, "TxPowerV_Short",
+  //             _rxGainVShortUnits, _rxGainVShort, false);
+  // _readRayVar(_rxGainVMediumVar, "TxPowerV_Medium",
+  //             _rxGainVMediumUnits, _rxGainVMedium, false);
+
+  // _readRayVar(_zdrBiasAppliedShortVar, "ZDRBiasApplied_Short",
+  //             _zdrBiasAppliedShortUnits, _zdrBiasAppliedShort, false);
+  // _readRayVar(_zdrBiasAppliedMediumVar, "ZDRBiasApplied_Medium",
+  //             _zdrBiasAppliedMediumUnits, _zdrBiasAppliedMedium, false);
 
   if (iret) {
     _addErrStr("ERROR - NoaaFslRadxFile::_readRayVariables");
@@ -1191,9 +1188,8 @@ int NoaaFslRadxFile::_createRays(const string &path)
     
     RadxRay *ray = new RadxRay;
     
-    double gateSpacingKm = _gateWidth[rayIndex];
-    double startRangeKm =
-      _startRange[rayIndex] + gateSpacingKm * (_startGate[rayIndex] - 1);
+    double gateSpacingKm = _gateSpacingM / 1000.0;
+    double startRangeKm = _startRangeM / 1000.0;
     ray->setRangeGeom(startRangeKm, gateSpacingKm);
 
     // set time
@@ -1213,13 +1209,13 @@ int NoaaFslRadxFile::_createRays(const string &path)
     ray->setPolarizationMode(Radx::POL_MODE_HV_SIM);
     ray->setPrtMode(Radx::PRT_MODE_FIXED);
     
-    if (_noiseSourcePowerHShort.size() > rayIndex) {
-      ray->setEstimatedNoiseDbmHc(_noiseSourcePowerHShort[rayIndex]);
-    }
+    // if (_noiseSourcePowerHShort.size() > rayIndex) {
+    //   ray->setEstimatedNoiseDbmHc(_noiseSourcePowerHShort[rayIndex]);
+    // }
     
-    if (_noiseSourcePowerVShort.size() > rayIndex) {
-      ray->setEstimatedNoiseDbmVc(_noiseSourcePowerVShort[rayIndex]);
-    }
+    // if (_noiseSourcePowerVShort.size() > rayIndex) {
+    //   ray->setEstimatedNoiseDbmVc(_noiseSourcePowerVShort[rayIndex]);
+    // }
     
     // add to ray vector
 
@@ -1306,7 +1302,7 @@ int NoaaFslRadxFile::_readFieldVariables(bool metaOnly)
     }
 
     string units;
-    Nc3Att *unitsAtt = var->get_att("Units");
+    Nc3Att *unitsAtt = var->get_att("units");
     if (unitsAtt != NULL) {
       units = Nc3xFile::asString(unitsAtt);
       delete unitsAtt;
@@ -1377,19 +1373,18 @@ int NoaaFslRadxFile::_readFieldVariables(bool metaOnly)
 ///////////////////////////////////
 // read a ray variable - double
 
-int NoaaFslRadxFile::_readRayVar(Nc3Var* &var,
-                                 const string &name,
+int NoaaFslRadxFile::_readRayVar(const string &name,
                                  string &units,
                                  vector<double> &vals,
                                  bool required)
   
 {
-
+  
   vals.clear();
 
   // get var
   
-  var = _getRayVar(name, required);
+  Nc3Var *var = _getRayVar(name, required);
   if (var == NULL) {
     if (!required) {
       for (size_t ii = 0; ii < _nTimesInFile; ii++) {
@@ -1429,7 +1424,7 @@ int NoaaFslRadxFile::_readRayVar(Nc3Var* &var,
 
   // get units
 
-  Nc3Att* unitsAtt = var->get_att("Units");
+  Nc3Att* unitsAtt = var->get_att("units");
   if (unitsAtt != NULL) {
     units = Nc3xFile::asString(unitsAtt);
     delete unitsAtt;
@@ -1439,86 +1434,6 @@ int NoaaFslRadxFile::_readRayVar(Nc3Var* &var,
   
   return iret;
 
-}
-
-////////////////////////////////////////////
-// read a ray variable - integer with units
-
-int NoaaFslRadxFile::_readRayVar(Nc3Var* &var,
-                                 const string &name,
-                                 string &units,
-                                 vector<int> &vals,
-                                 bool required)
-
-{
-
-  vals.clear();
-
-  // get var
-  
-  var = _getRayVar(name, required);
-  if (var == NULL) {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaInt);
-      }
-      clearErrStr();
-      return 0;
-    } else {
-      _addErrStr("ERROR - NoaaFslRadxFile::_readRayVar");
-      return -1;
-    }
-  }
-
-  // load up data
-
-  int *data = new int[_nTimesInFile];
-  int *dd = data;
-  int iret = 0;
-  if (var->get(data, _nTimesInFile)) {
-    for (size_t ii = 0; ii < _nTimesInFile; ii++, dd++) {
-      vals.push_back(*dd);
-    }
-  } else {
-    if (!required) {
-      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-        vals.push_back(Radx::missingMetaInt);
-      }
-      clearErrStr();
-    } else {
-      _addErrStr("ERROR - NoaaFslRadxFile::_readRayVar");
-      _addErrStr("  Cannot read variable: ", name);
-      _addErrStr(_file.getNc3Error()->get_errmsg());
-      iret = -1;
-    }
-  }
-  delete[] data;
-
-  // get units
-  
-  Nc3Att* unitsAtt = var->get_att("Units");
-  if (unitsAtt != NULL) {
-    units = Nc3xFile::asString(unitsAtt);
-    delete unitsAtt;
-  } else {
-    units.clear();
-  }
-  
-  return iret;
-
-}
-
-////////////////////////////////////////////
-// read a ray variable - integer without units
-
-int NoaaFslRadxFile::_readRayVar(Nc3Var* &var,
-                                 const string &name,
-                                 vector<int> &vals,
-                                 bool required)
-
-{
-  string units;
-  return _readRayVar(var, name, units, vals, required);
 }
 
 ///////////////////////////////////
@@ -1754,12 +1669,12 @@ int NoaaFslRadxFile::_loadReadVolume()
   _readVol->setPlatformType(_platformType);
   _readVol->setPrimaryAxis(_primaryAxis);
 
-  if (_txFreqShort.size() > 0) {
-    _readVol->addFrequencyHz(_txFreqShort[0]);
-  }
-  if (_txFreqMedium.size() > 0) {
-    _readVol->addFrequencyHz(_txFreqMedium[0]);
-  }
+  // if (_txFreqShort.size() > 0) {
+  //   _readVol->addFrequencyHz(_txFreqShort[0]);
+  // }
+  // if (_txFreqMedium.size() > 0) {
+  //   _readVol->addFrequencyHz(_txFreqMedium[0]);
+  // }
 
   _readVol->setTitle(_title);
   _readVol->setSource(_source);
@@ -1768,14 +1683,14 @@ int NoaaFslRadxFile::_loadReadVolume()
   _readVol->setReferences(_references);
   _readVol->setComment(_comment);
   _readVol->setStatusXml(_statusXml);
-  _readVol->setSiteName(_siteName);
-  _readVol->setScanName(_scanName);
-  _readVol->setScanId(_scanId);
-  _readVol->setInstrumentName(_instrumentName);
+  // _readVol->setSiteName(_siteName);
+  // _readVol->setScanName(_scanName);
+  // _readVol->setScanId(_scanId);
+  // _readVol->setInstrumentName(_instrumentName);
 
   _readVol->setLatitudeDeg(_latitudeDeg);
   _readVol->setLongitudeDeg(_longitudeDeg);
-  _readVol->setAltitudeKm(_altitudeKm);
+  _readVol->setAltitudeKm(_altitudeM / 1000.0);
 
   _readVol->copyRangeGeom(_geom);
 
