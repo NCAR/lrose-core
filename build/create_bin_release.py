@@ -203,7 +203,7 @@ def main():
     # copy into release dir if it exists
 
     if (os.path.isdir(releaseDir)):
-        shellCmd("cp " + tarName + "  " + releaseDir)
+        shellCmd("rsync -av " + tarName + "  " + releaseDir)
 
     # check the build
     
