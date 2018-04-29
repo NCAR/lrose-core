@@ -349,9 +349,9 @@ def copyLibToRelDir(libName, libPath):
     if not os.path.exists(destDir):
         os.makedirs(destDir)
 
-    # copy in lib file
+    # copy in lib file, converting links into files
     
-    cmd = "rsync -av " + libPath + " " + destDir
+    cmd = "rsync -avL " + libPath + " " + destDir
     runCommand(cmd)
 
     # try:
