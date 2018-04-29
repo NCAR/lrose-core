@@ -56,7 +56,7 @@ def main():
                       help='Configure for MAC OSX')
     parser.add_option('--package',
                       dest='package', default='lrose',
-                      help='Package name. Options are lrose (default), radx, cidd, hcr, hsrl, titan, lrose-blaze')
+                      help='Package name. Options are lrose, lrose-blaze, radx, cidd, titan')
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')

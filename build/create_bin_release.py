@@ -60,7 +60,7 @@ def main():
                       help='Set verbose debugging on')
     parser.add_option('--prefix',
                       dest='prefix', default='not-set',
-                      help='Prefix name for install location')
+                      help='Temporary directory for build')
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')
@@ -182,10 +182,10 @@ def main():
     # copy the required files and directories into the tar directory
     
     shellCmd("/bin/cp -f LICENSE.txt " + tarDir)
+    shellCmd("/bin/cp -f ReleaseInfo.txt " + tarDir)
     shellCmd("/bin/cp -rf release_notes " + tarDir)
     shellCmd("/bin/cp -f docs/README_INSTALL_BIN.txt " + tarDir)
-    shellCmd("/bin/cp -f ./build/install_bin_release " + tarDir)
-    shellCmd("/bin/cp -f ./build/install_devel_release " + tarDir)
+    shellCmd("/bin/cp -f ./build/install_bin_release.py " + tarDir)
     shellCmd("/bin/cp -rf " + tmpDir + "/bin " + tarDir)
     shellCmd("/bin/cp -rf " + tmpDir + "/lib " + tarDir)
     shellCmd("/bin/cp -rf " + tmpDir + "/include " + tarDir)
