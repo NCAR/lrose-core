@@ -146,6 +146,7 @@ def main():
     print >>sys.stderr, "  tarName: ", tarName
     print >>sys.stderr, "  tarDir: ", tarDir
     print >>sys.stderr, "  installScripts: ", options.installScripts
+    print >>sys.stderr, "  platform: ", platform
     print >>sys.stderr, "*********************************************************************"
 
     # create tmp dir for staging area
@@ -290,6 +291,11 @@ def readReleaseInfoFile():
 def getOsType():
 
     global ostype
+
+    if (platform == "darwin"):
+        ostype = "macosx_64"
+        return
+
     ostype = "x86_64"
     tmpFile = os.path.join("/tmp", "ostype." + timeStr + ".txt")
 
@@ -309,8 +315,6 @@ def getOsType():
             print >>sys.stderr, "  line: ", line
         if (line.find("x86_64") > 0):
             ostype = "x86_64"
-        elif (line.find("Darwin") > 0):
-            ostype = "macosx_64"
         elif (line.find("i686") > 0):
             ostype = "i686"
             

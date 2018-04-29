@@ -243,7 +243,7 @@ int EdgeNcRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
   
   cerr << "WARNING - EdgeNcRadxFile::writeToDir" << endl;
-  cerr << "  Writing EdgeNc raw format files not supported" << endl;
+  cerr << "  Writing EdgeNc format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
   
   // set up NcfRadxFile object
@@ -283,7 +283,7 @@ int EdgeNcRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - EdgeNcRadxFile::writeToPath" << endl;
-  cerr << "  Writing EdgeNc raw format files not supported" << endl;
+  cerr << "  Writing EdgeNc format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object

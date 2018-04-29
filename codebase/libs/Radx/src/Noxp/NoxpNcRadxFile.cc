@@ -245,7 +245,7 @@ int NoxpNcRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
   
   cerr << "WARNING - NoxpNcRadxFile::writeToDir" << endl;
-  cerr << "  Writing NoxpNc raw format files not supported" << endl;
+  cerr << "  Writing NoxpNc format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
   
   // set up NcfRadxFile object
@@ -285,7 +285,7 @@ int NoxpNcRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - NoxpNcRadxFile::writeToPath" << endl;
-  cerr << "  Writing NoxpNc raw format files not supported" << endl;
+  cerr << "  Writing NoxpNc format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
