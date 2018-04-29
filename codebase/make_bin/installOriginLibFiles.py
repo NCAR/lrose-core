@@ -351,7 +351,8 @@ def copyLibToRelDir(libName, libPath):
 
     # copy in lib file
     
-    shellCmd("rsync -av " + libPath + " " + destDir)
+    cmd = "rsync -av " + libPath + " " + destDir
+    runCommand(cmd)
 
     # try:
     #     shutil.copy2(libPath, destDir)
