@@ -3462,6 +3462,30 @@ void SunCal::_computeSunCentroid(power_channel_t channel)
     cerr << "  parabolaWidthRatio: " << widthRatio << endl;
   }
 
+  // add in check for parabola fit
+  // typical parabola width is 4.75
+
+  if (widthAz3Db < 2.5 || widthAz3Db > 7.5) {
+    _validCentroid = false;
+    if (_params.debug) {
+      cerr << "ERROR - SunCal::_computeSunCentroid" << endl;
+      cerr << "  Parabola width Az out of limits: "
+           << widthAz3Db << endl;
+      cerr << "  Should be within 2.5 to 7.5 deg" << endl;
+      cerr << "  Setting centroid invalid" << endl;
+    }
+  }
+  if (widthEl3Db < 2.5 || widthEl3Db > 7.5) {
+    _validCentroid = false;
+    if (_params.debug) {
+      cerr << "ERROR - SunCal::_computeSunCentroid" << endl;
+      cerr << "  Parabola width El out of limits: "
+           << widthEl3Db << endl;
+      cerr << "  Should be within 2.5 to 7.5 deg" << endl;
+      cerr << "  Setting centroid invalid" << endl;
+    }
+  }
+
   double quadPowerDbm = (_ccAz + _ccEl) / 2.0 - 200.0;
 
   switch (channel) {
@@ -3491,7 +3515,7 @@ void SunCal::_computeSunCentroid(power_channel_t channel)
     _sunCentroidElOffset = sunCentroidElOffset;
     break;
   }
-
+  
 }
 
 ////////////////////////////////////////////
