@@ -181,7 +181,7 @@ then
   cd $codebaseDir
   cd libs/perl5/src
   mkdir -p ${prefix}/lib/perl5
-  /bin/cp *pm ${prefix}/lib/perl5
+  rsync -av *pm ${prefix}/lib/perl5
 fi
 
 # Install scripts
@@ -203,7 +203,7 @@ fi
 
 cd $codebaseDir
 ./make_bin/createPkgConfig.py ${prefix}
-cp $codebaseDir/make_bin/lrose-config.template ${prefix}/bin
+rsync -av $codebaseDir/make_bin/lrose-config.template ${prefix}/bin
 chmod u+x ${prefix}/bin/lrose-config
 
 # Checking the build

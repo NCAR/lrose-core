@@ -184,17 +184,17 @@ def main():
     # copy the required files and directories into the tar directory
     
     os.chdir(runDir)
-    shellCmd("/bin/cp -f LICENSE.txt " + tarDir)
-    shellCmd("/bin/cp -f ReleaseInfo.txt " + tarDir)
-    shellCmd("/bin/cp -rf release_notes " + tarDir)
-    shellCmd("/bin/cp -f docs/README_INSTALL_BIN.txt " + tarDir)
-    shellCmd("/bin/cp -f ./build/install_bin_release.py " + tarDir)
-    shellCmd("/bin/cp -rf " + tmpDir + "/bin " + tarDir)
-    shellCmd("/bin/cp -rf " + tmpDir + "/lib " + tarDir)
-    shellCmd("/bin/cp -rf " + tmpDir + "/include " + tarDir)
+    shellCmd("rsync -av LICENSE.txt " + tarDir)
+    shellCmd("rsync -av ReleaseInfo.txt " + tarDir)
+    shellCmd("rsync -av release_notes " + tarDir)
+    shellCmd("rsync -av docs/README_INSTALL_BIN.txt " + tarDir)
+    shellCmd("rsync -av ./build/install_bin_release.py " + tarDir)
+    shellCmd("rsync -av " + tmpDir + "/bin " + tarDir)
+    shellCmd("rsync -av " + tmpDir + "/lib " + tarDir)
+    shellCmd("rsync -av " + tmpDir + "/include " + tarDir)
 
     if (package == "cidd"):
-        shellCmd("/bin/cp -rf ./codebase/apps/cidd/src/CIDD/example_scripts " + tarDir)
+        shellCmd("rsync -av ./codebase/apps/cidd/src/CIDD/example_scripts " + tarDir)
 
     # make the tar file, copy into run dir
 

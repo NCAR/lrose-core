@@ -334,8 +334,8 @@ def createTarFile():
 
     # copy some scripts into tar directory
 
-    shellCmd("cp build/create_bin_release.py " + tarDir)
-    shellCmd("cp build/build_src_release " + tarDir)
+    shellCmd("rsync -av build/create_bin_release.py " + tarDir)
+    shellCmd("rsync -av build/build_src_release.py " + tarDir)
 
     # move lrose contents into tar dir
 
