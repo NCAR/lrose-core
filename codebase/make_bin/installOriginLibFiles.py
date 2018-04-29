@@ -37,7 +37,7 @@ def main():
                         ',libcommon,libcompiler,libcopy,libcore' + \
                         ',libcrypto,libdispatch,libdyld,libkeymgr' + \
                         ',libobjc,libremovefile,libsystem,libunwind' + \
-                        ',libpthread,libdl,libX'
+                        ',libpthread,libdl,libX,libxpc'
     else:
         # LINUX
         ignoreDefault = 'libc.so,libpthread.so,libdl.so'
