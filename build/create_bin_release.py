@@ -108,7 +108,10 @@ def main():
     # ensure there is space available for the rename
 
     if (platform == "darwin"):
-        buildDir = options.prefix
+        if (options.prefix == "not-set"):
+            buildDir = "/usr/local/lrose"
+        else:
+            buildDir = options.prefix
     else:
         if (options.prefix == "not-set"):
             buildDir = os.path.join("/tmp", package + "_prepare_release_bin_directory")
