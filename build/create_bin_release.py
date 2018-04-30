@@ -155,9 +155,9 @@ def main():
     print >>sys.stderr, "  installScripts: ", options.installScripts
     print >>sys.stderr, "*********************************************************************"
 
-    # create tmp dir for staging area
+    # create build dir for staging area
 
-    createTmpDir()
+    createBuildDir()
 
     # For full LROSE package, copy in CIDD binaries if they are available
 
@@ -332,9 +332,14 @@ def getOsType():
             ostype = "i686"
             
 ########################################################################
-# create the tmp dir
+# create the build dir
 
-def createTmpDir():
+def createBuildDir():
+
+    # only do this for directories in /tmp
+
+    if (("/tmp" in buildDir) == False):
+        return
 
     # check if exists already
 
