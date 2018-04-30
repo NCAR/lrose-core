@@ -89,4 +89,15 @@ i.e. in a subdirectory of the bin directory.
 For LINUX:
 #### This application failed to start because it could not find or load the Qt platform plugin "xcb" in "".  Reinstalling the application may fix this problem.
 
-Make sure Qt5 is installed. 
+Make sure Qt5 is installed
+
+yum install Qt5
+
+-------------
+
+For Mac OSX:
+#### dyld: Library not loaded: /usr/local/opt/netcdf/lib/libnetcdf.13.dylib. Referenced from: /usr/local/lrose/bin/RadxPrint Reason: image not found
+
+Make sure netcdf is installed
+
+brew install ...
