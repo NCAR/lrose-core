@@ -28,7 +28,7 @@ def main():
     global options
     global runDir
     global releaseDir
-    global tmpDir
+    global buildDir
     global coreDir
     global codebaseDir
     global dateStr
@@ -102,27 +102,30 @@ def main():
     
     getOsType()
 
-    # set tmpDir temporary staging area
+    # set buildDir temporary staging area
     # this is set to a very long name because on macosx
     # we need to reset the library paths and we need to
     # ensure there is space available for the rename
 
-    if (options.prefix == "not-set"):
-        tmpDir = os.path.join("/tmp", package + "_prepare_release_bin_directory")
+    if (platform == "darwin"):
+        buildDir = options.prefix
     else:
-        tmpDir = options.prefix
+        if (options.prefix == "not-set"):
+            buildDir = os.path.join("/tmp", package + "_prepare_release_bin_directory")
+        else:
+            buildDir = options.prefix
 
     # set directories
 
     releaseDir = os.path.join(options.releaseTopDir, package)
-    coreDir = os.path.join(tmpDir, "lrose-core")
+    coreDir = os.path.join(buildDir, "lrose-core")
     codebaseDir = os.path.join(coreDir, "codebase")
 
     # compute release name and dir name
     
     releaseName = package + "-" + dateStr + ".bin." + ostype
     tarName = releaseName + ".tgz"
-    tarDir = os.path.join(tmpDir, releaseName)
+    tarDir = os.path.join(buildDir, releaseName)
     
     print >>sys.stderr, "*********************************************************************"
     print >>sys.stderr, "  Running " + thisScriptName
@@ -142,7 +145,7 @@ def main():
     print >>sys.stderr, "  package: ", package
     print >>sys.stderr, "  version: ", version
     print >>sys.stderr, "  srcRelease: ", srcRelease
-    print >>sys.stderr, "  tmpDir: ", tmpDir
+    print >>sys.stderr, "  buildDir: ", buildDir
     print >>sys.stderr, "  releaseName: ", releaseName
     print >>sys.stderr, "  tarName: ", tarName
     print >>sys.stderr, "  tarDir: ", tarDir
@@ -179,7 +182,7 @@ def main():
 
     if (platform != "darwin"):
         shellCmd("./codebase/make_bin/installOriginLibFiles.py --binDir " + \
-                 tmpDir + "/bin " + \
+                 buildDir + "/bin " + \
                  "--relDir " + package + "_runtime_libs --debug")
 
     # copy the required files and directories into the tar directory
@@ -190,16 +193,16 @@ def main():
     shellCmd("rsync -av release_notes " + tarDir)
     shellCmd("rsync -av docs/README_INSTALL_BIN.txt " + tarDir)
     shellCmd("rsync -av ./build/install_bin_release.py " + tarDir)
-    shellCmd("rsync -av " + tmpDir + "/bin " + tarDir)
-    shellCmd("rsync -av " + tmpDir + "/lib " + tarDir)
-    shellCmd("rsync -av " + tmpDir + "/include " + tarDir)
+    shellCmd("rsync -av " + buildDir + "/bin " + tarDir)
+    shellCmd("rsync -av " + buildDir + "/lib " + tarDir)
+    shellCmd("rsync -av " + buildDir + "/include " + tarDir)
 
     if (package == "cidd"):
         shellCmd("rsync -av ./codebase/apps/cidd/src/CIDD/example_scripts " + tarDir)
 
     # make the tar file, copy into run dir
 
-    os.chdir(tmpDir)
+    os.chdir(buildDir)
     shellCmd("tar cvfz " + tarName + " " + releaseName)
     shellCmd("mv " + tarName + "  " + runDir)
     os.chdir(runDir)
@@ -215,13 +218,13 @@ def main():
     print("============= Checking libs for " + package + " =============")
     shellCmd("./codebase/make_bin/check_libs.py " + \
              "--listPath ./build/checklists/libs_check_list." + package + " " + \
-             "--libDir " + tmpDir + "/lib " + \
+             "--libDir " + buildDir + "/lib " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
     print("============= Checking apps for " + package + " =============")
     shellCmd("./codebase/make_bin/check_apps.py " + \
              "--listPath ./build/checklists/apps_check_list." + package + " " + \
-             "--appDir " + tmpDir + "/bin " + \
+             "--appDir " + buildDir + "/bin " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
     
@@ -329,14 +332,14 @@ def createTmpDir():
 
     # check if exists already
 
-    if (os.path.isdir(tmpDir)):
+    if (os.path.isdir(buildDir)):
 
         if (options.force == False):
             print("\n===============================================")
             print("WARNING: you are about to remove all contents in dir:")
-            print("    " + tmpDir)
+            print("    " + buildDir)
             print("Contents:")
-            contents = os.listdir(tmpDir)
+            contents = os.listdir(buildDir)
             for filename in contents:
                 print("  " + filename)
             answer = raw_input("Do you wish to proceed (y/n)? ")
@@ -346,11 +349,11 @@ def createTmpDir():
                 
         # remove it
 
-        shutil.rmtree(tmpDir)
+        shutil.rmtree(buildDir)
 
     # make it clean
 
-    os.makedirs(tmpDir)
+    os.makedirs(buildDir)
 
 ########################################################################
 # copy in CIDD binaries if they exist
@@ -362,7 +365,7 @@ def copyCiddBinaries():
         if (options.debug):
             print >>sys.stderr, "Copying in CIDD binaries from: "
             print >>sys.stderr, "  " + ciddBinDir
-        shellCmd("rsync -av " + ciddBinDir + " " + tmpDir)
+        shellCmd("rsync -av " + ciddBinDir + " " + buildDir)
 
 ########################################################################
 # build netCDF
@@ -372,12 +375,12 @@ def buildNetcdf():
     netcdfDir = os.path.join(runDir, "lrose-netcdf")
     os.chdir(netcdfDir)
     if (package == "cidd"):
-        shellCmd("./build_and_install_netcdf.m32 -x " + tmpDir)
+        shellCmd("./build_and_install_netcdf.m32 -x " + buildDir)
     else:
         if (platform == "darwin"):
-            shellCmd("./build_and_install_netcdf.osx -x " + tmpDir)
+            shellCmd("./build_and_install_netcdf.osx -x " + buildDir)
         else:
-            shellCmd("./build_and_install_netcdf -x " + tmpDir)
+            shellCmd("./build_and_install_netcdf -x " + buildDir)
 
 ########################################################################
 # build package
@@ -387,7 +390,7 @@ def buildPackage():
     os.chdir(runDir)
 
     args = ""
-    args = args + " --prefix " + tmpDir
+    args = args + " --prefix " + buildDir
     args = args + " --package " + package
     if (options.installScripts):
         args = args + " --scripts "
@@ -416,7 +419,7 @@ def createTarFile():
 
     if (platform != "darwin"):
 
-        netcdfDir = os.path.join(tmpDir, "lrose-netcdf")
+        netcdfDir = os.path.join(buildDir, "lrose-netcdf")
         netcdfSubDir = os.path.join(tarDir, "lrose-netcdf")
         os.makedirs(netcdfSubDir)
     
