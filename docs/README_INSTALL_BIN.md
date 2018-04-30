@@ -2,7 +2,7 @@
 
 ### Choose your install directory (prefix location)
 
-The default is: `${HOME}/lrose`
+The default is: `/usr/local/lrose`
 
 ### Download the LROSE binary release
 
