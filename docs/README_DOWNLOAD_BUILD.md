@@ -1,4 +1,4 @@
-## Building from downloaded source distribution
+## LINUX build from downloaded source distribution
 
 ### Choose your install directory (prefix location)
 
