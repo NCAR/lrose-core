@@ -125,7 +125,8 @@ def main():
 
     # build netcdf support
 
-    buildNetcdf()
+    if (platform != "darwin"):
+        buildNetcdf()
 
     # build and install the package
 

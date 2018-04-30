@@ -164,7 +164,8 @@ def main():
 
     # build netcdf support
 
-    buildNetcdf()
+    if (platform != "darwin"):
+        buildNetcdf()
 
     # build the package
 
@@ -411,15 +412,17 @@ def createTarFile():
     for dirName in [ "build", "codebase", "docs", "release_notes" ]:
         os.rename(dirName, os.path.join(tarDir, dirName))
 
-    # move netcdf support into tar dir
+    # for LINUX, move netcdf support into tar dir
 
-    netcdfDir = os.path.join(tmpDir, "lrose-netcdf")
-    netcdfSubDir = os.path.join(tarDir, "lrose-netcdf")
-    os.makedirs(netcdfSubDir)
+    if (platform != "darwin"):
+
+        netcdfDir = os.path.join(tmpDir, "lrose-netcdf")
+        netcdfSubDir = os.path.join(tarDir, "lrose-netcdf")
+        os.makedirs(netcdfSubDir)
     
-    for name in [ "README.md", "build_and_install_netcdf", "tar_files" ]:
-        os.rename(os.path.join(netcdfDir, name),
-                  os.path.join(netcdfSubDir, name))
+        for name in [ "README.md", "build_and_install_netcdf", "tar_files" ]:
+            os.rename(os.path.join(netcdfDir, name),
+                      os.path.join(netcdfSubDir, name))
 
     # create the tar file
 
