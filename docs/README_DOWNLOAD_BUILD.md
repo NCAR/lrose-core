@@ -49,15 +49,17 @@ The distribution will be unpacked into a subdirectory:
 
 ```
   cd lrose_build/lrose-20160823.src
-  ./build_lrose -x prefix
+  ./build_lrose.py --prefix installDir
 ```
+
+The default prefix is $HOME/lrose.
 
 This will install in:
 
 ```
-  prefix/include
-  prefix/lib
-  prefix/bin
+  installDir/include
+  installDir/lib
+  installDir/bin
 ```
 
 ### Checking the build
@@ -69,8 +71,8 @@ However, you also can run the checks independently:
 After the build, you can check the build as follows:
 
 ```
-  ./build/check_libs -x prefix
-  ./build/check_apps -x prefix
+  ./build/check_libs -x installDir
+  ./build/check_apps -x installDir
 ```
 
 ### Handling build errors

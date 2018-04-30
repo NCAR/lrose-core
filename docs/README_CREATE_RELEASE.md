@@ -44,8 +44,9 @@ Options:
   -h, --help            show this help message and exit
   --debug               Set debugging on
   --verbose             Set verbose debugging on
-  --package=PACKAGE     Package name. Options are lrose (default), radx, titan,
-                        cidd, hcr, hsrl
+  --osx                 Configure for MAC OSX
+  --package=PACKAGE     Package name. Options are lrose, lrose-blaze, radx,
+                        cidd, titan
   --releaseDir=RELEASETOPDIR
                         Top-level release dir
   --force               force, do not request user to check it is OK to
@@ -120,7 +121,7 @@ By default a binary release will be saved in:
 The release will be saved as:
 
 ```
-  releaseDir/package-yyyymmdd.x86_64.tgz
+  releaseDir/package-yyyymmdd.bin.x86_64.tgz
 ```
 
 for a 64-bit LINUX build.
@@ -129,12 +130,12 @@ Here `package` is the package name.
 
 For a 32-bit build the name will be:
 ```
-  releaseDir/package-yyyymmdd.i686.tgz
+  releaseDir/package-yyyymmdd.bin.i686.tgz
 ```
 
 For a Mac OSX 64-bit build the name will be:
 ```
-  releaseDir/package-yyyymmdd.macosx_64.tgz
+  releaseDir/package-yyyymmdd.bin.mac_osx.tgz
 ```
 
 
