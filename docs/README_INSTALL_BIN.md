@@ -25,6 +25,12 @@ For a 64-bit LINUX system, a typical binary release would be:
   lrose-20180430.bin.x84_64.tgz
 ```
 
+For a Mac OSX system, a typical binary release would be:
+
+```
+  lrose-20180430.bin.mac_osx.tgz
+```
+
 ### Untar the release
 
 ```
@@ -49,7 +55,7 @@ So go there:
 If you run:
 
 ```
-  ./install_bin_release.py --prefix ~/lrose
+  ./install_bin_release.py
 ```
 
 it will install into the default location:
@@ -58,7 +64,7 @@ it will install into the default location:
   /usr/local/lrose/bin
 ```
 
-You can specify where to perform the install:
+You can specify where to perform the install (on Linux only):
 
 ```
   ./install_bin_release.py --prefix ~/lrose
