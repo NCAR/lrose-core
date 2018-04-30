@@ -209,6 +209,9 @@ def main():
 
     # copy into release dir if it exists
 
+    if (os.path.isdir(releaseDir) == False):
+        os.makedirs(releaseDir)
+
     if (os.path.isdir(releaseDir)):
         shellCmd("rsync -av " + tarName + "  " + releaseDir)
 
