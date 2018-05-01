@@ -176,4 +176,7 @@ Alternatively, run
 
 and then inspect the make.log file.
 
+## Troubleshooting
+
+[Make sure your environment is ready for installation.](./README_OSX_PREPARE_ENVIRONMENT.md)
 
