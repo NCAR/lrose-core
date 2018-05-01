@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////
 
 #include "Args.hh"
+#include "Params.hh"
 #include <cstring>
 #include <cstdlib>
 #include <toolsa/DateTime.hh>
@@ -188,5 +189,7 @@ void Args::usage(string &prog_name, ostream &out)
       << "       [ -vv, -extra ]  print extra verbose debug messages\n"
       << endl;
   
+  Params::usage(out);
+
 }
 
