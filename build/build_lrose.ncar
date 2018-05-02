@@ -167,7 +167,7 @@ then
   cd $codebaseDir
   cd libs/perl5/src
   mkdir -p ${prefix}/lib/perl5
-  /bin/cp *pm ${prefix}/lib/perl5
+  rsync -av *pm ${prefix}/lib/perl5
 fi
 
 # Install scripts
@@ -190,7 +190,7 @@ fi
 
 cd $codebaseDir
 ./make_bin/createPkgConfig.py ${prefix}
-cp $codebaseDir/make_bin/lrose-config.template ${prefix}/bin
+rsync -av $codebaseDir/make_bin/lrose-config.template ${prefix}/bin
 chmod u+x ${prefix}/bin/lrose-config
 
 
@@ -202,7 +202,7 @@ echo
 echo "============= Checking libs for $package ============="
 
 ./codebase/make_bin/check_libs.py \
-  --listPath ./build/libs_check_list.${package} \
+  --listPath ./build/checklists/libs_check_list.${package} \
   --libDir ${prefix}/lib \
   --label $package --maxAge 3600
 
@@ -212,7 +212,7 @@ echo
 echo "============= checking apps for $package ============="
 
 ./codebase/make_bin/check_apps.py \
-  --listPath ./build/apps_check_list.${package} \
+  --listPath ./build/checklists/apps_check_list.${package} \
   --appDir ${prefix}/bin \
   --label $package --maxAge 3600
 

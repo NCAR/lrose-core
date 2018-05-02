@@ -229,7 +229,7 @@ int BufrRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
   
   cerr << "WARNING - BufrRadxFile::writeToDir" << endl;
-  cerr << "  Writing Bufr raw format files not supported" << endl;
+  cerr << "  Writing Bufr format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
   
   // set up NcfRadxFile object
@@ -270,7 +270,7 @@ int BufrRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - BufrRadxFile::writeToPath" << endl;
-  cerr << "  Writing Bufr raw format files not supported" << endl;
+  cerr << "  Writing Bufr format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object

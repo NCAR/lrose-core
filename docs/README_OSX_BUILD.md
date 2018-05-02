@@ -69,7 +69,7 @@ Then run:
   brew update
 ```
 
-### Install required libraries
+### Install required packages, using brew
 
 ```
   brew install szip
@@ -77,19 +77,106 @@ Then run:
   brew install --enable-cxx-compat netcdf
   brew install udunits
   brew install fftw
+  brew install flex
+  brew install jasper
+  brew install jpeg
+  brew install qt
   tar xvf <path-to-lrose>.src.tgz
   ./configure
   make install
 ```
 
-### Automated LROSE install (Not yet available)
+### Prepare build directory
+
+Create a directory for the distribution:
 
 ```
-  brew install https://github.com/NCAR/lrose-core/releases/download/lrose-yyyymmdd/lrose.rb
+  cd
+  mkdir lrose_build
+  cd lrose_build
 ```
 
-where you replace `yyyymmdd` with the relevant LROSE release date.
+### Download source release for OSX
 
+Download the source tar file from:
 
+```
+  https://github.com/NCAR/lrose-core/releases
+```
 
+A typical source release would be:
+
+```
+  lrose-20160823.src.osx.tgz
+```
+
+### Untar the distribution
+
+```
+  cd lrose_build
+  tar xvfz lrose-20160823.src.osx.tgz
+```
+
+The distribution will be unpacked into a subdirectory:
+
+```
+  lrose_build/lrose-20160823.src.osx
+```
+
+### Run the build scripts:
+
+```
+  cd lrose_build/lrose-20160823.src
+  ./build_lrose.py --prefix installDir
+```
+
+The default prefix is $HOME/lrose.
+
+This will install in:
+
+```
+  installDir/include
+  installDir/lib
+  installDir/bin
+```
+
+### Checking the build
+
+The build checks are run automatically at the end of the build script.
+
+However, you also can run the checks independently:
+
+After the build, you can check the build as follows:
+
+```
+  ./build/check_libs -x installDir
+  ./build/check_apps -x installDir
+```
+
+### Handling build errors
+
+If the build does not complete successfully, you will need to
+track down the errors. It is the first errors in the build that
+are the most important.
+
+If you get errors, go into the directory giving problems, and
+run the make as follows:
+
+```
+  make |& less
+```
+
+and scroll for errors.
+
+Alternatively, run
+
+```
+  make >& make.log
+```
+
+and then inspect the make.log file.
+
+## Troubleshooting
+
+[Make sure your environment is ready for installation.](./README_OSX_PREPARE_ENVIRONMENT.md)
 

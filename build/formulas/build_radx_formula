@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-
+#!/usr/bin/python
 import subprocess
 import sys
 import os
@@ -7,8 +6,8 @@ import os
 template = """
 require 'formula'
 
-class Lrose < Formula
-  homepage 'https://www.eol.ucar.edu/content/lrose'
+class Radx < Formula
+  homepage 'http://www.ral.ucar.edu/projects/titan/docs/radial_formats/radx.html'
 
   url '{0}'
   version '{1}'
@@ -18,6 +17,7 @@ class Lrose < Formula
   depends_on 'udunits'
   depends_on 'netcdf' => 'enable-cxx-compat'
   depends_on 'fftw'
+  depends_on 'szip'
 
   def install
     system "./configure", "--disable-dependency-tracking", "--prefix=#{{prefix}}"
@@ -45,8 +45,8 @@ if "check_output" not in dir( subprocess ): # duck punch it in!
         return output
     subprocess.check_output = f
 
-def build_lrose_formula(tar_url, tar_name, formula_name):
-    """ build a Homebrew forumula file for lrose """	
+def build_radx_formula(tar_url, tar_name, formula_name):
+    """ build a Homebrew forumula file for radx """	
     dash = tar_name.find('-')
     period = tar_name.find('.', dash)
     version = tar_name[dash+1:period]
@@ -59,6 +59,6 @@ def build_lrose_formula(tar_url, tar_name, formula_name):
 
 if __name__ == '__main__':
     if len(sys.argv) == 4:
-	build_lrose_formula(sys.argv[1], sys.argv[2], sys.argv[3])
+	build_radx_formula(sys.argv[1], sys.argv[2], sys.argv[3])
     else:
 	print "usage: {0} ftp_dir tar_name formula_name".format(sys.argv[0])

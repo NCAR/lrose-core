@@ -56,7 +56,7 @@ def main():
                       help='Configure for MAC OSX')
     parser.add_option('--package',
                       dest='package', default='lrose',
-                      help='Package name. Options are lrose (default), radx, cidd, hcr, hsrl, titan, lrose-blaze')
+                      help='Package name. Options are lrose, lrose-blaze, radx, cidd, titan')
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')
@@ -107,7 +107,7 @@ def main():
     # compute release name and dir name
 
     if (options.osx == True):
-        releaseName = options.package + "-" + versionStr + ".macosx_64.src"
+        releaseName = options.package + "-" + versionStr + ".src.mac_osx"
     else:
         releaseName = options.package + "-" + versionStr + ".src"
     tarName = releaseName + ".tgz"
@@ -274,17 +274,17 @@ def setupAutoconf():
 
     if (options.static):
         if (options.package == "cidd"):
-             shutil.copy("../build/configure.base.cidd", "./configure.base")
+             shutil.copy("../build/autoconf/configure.base.cidd", "./configure.base")
         else:
-             shutil.copy("../build/configure.base", "./configure.base")
+             shutil.copy("../build/autoconf/configure.base", "./configure.base")
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base" +
                  " --pkg " + options.package + argsStr)
     else:
         if (options.package == "cidd"):
-            shutil.copy("../build/configure.base.shared.cidd", "./configure.base.shared")
+            shutil.copy("../build/autoconf/configure.base.shared.cidd", "./configure.base.shared")
         else:
-            shutil.copy("../build/configure.base.shared", "./configure.base.shared")
+            shutil.copy("../build/autoconf/configure.base.shared", "./configure.base.shared")
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base.shared --shared" +
                  " --pkg " + options.package + argsStr)
@@ -334,8 +334,8 @@ def createTarFile():
 
     # copy some scripts into tar directory
 
-    shellCmd("cp build/create_bin_release.py " + tarDir)
-    shellCmd("cp build/build_src_release " + tarDir)
+    shellCmd("rsync -av build/create_bin_release.py " + tarDir)
+    shellCmd("rsync -av build/build_src_release.py " + tarDir)
 
     # move lrose contents into tar dir
 
@@ -383,7 +383,7 @@ def createBrewFormula():
     tarUrl = "https://github.com/NCAR/lrose-core/releases/download/" + \
              options.package + "-" + versionStr + "/" + tarName
     formulaName = options.package + ".rb"
-    scriptName = "build_" + options.package + "_formula"
+    scriptName = "formulas/build_" + options.package + "_formula"
     buildDirPath = os.path.join(tarDir, "build")
     scriptPath = os.path.join(buildDirPath, scriptName)
 

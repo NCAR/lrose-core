@@ -26,7 +26,7 @@
 //
 // SigmetRadxFile object
 //
-// Support for radial data in SIGMET raw format
+// Support for radial data in SIGMET format
 //
 // Mike Dixon, RAP, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -207,7 +207,7 @@ int SigmetRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - SigmetRadxFile::writeToDir" << endl;
-  cerr << "  Writing SIGMET raw format files not supported" << endl;
+  cerr << "  Writing SIGMET format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
@@ -247,7 +247,7 @@ int SigmetRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - SigmetRadxFile::writeToPath" << endl;
-  cerr << "  Writing SIGMET raw format files not supported" << endl;
+  cerr << "  Writing SIGMET format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object

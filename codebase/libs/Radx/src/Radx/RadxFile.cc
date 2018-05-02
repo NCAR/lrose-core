@@ -51,6 +51,7 @@
 #include <Radx/NexradCmdRadxFile.hh>
 #include <Radx/NexradRadxFile.hh>
 #include <Radx/NidsRadxFile.hh>
+#include <Radx/NoaaFslRadxFile.hh>
 #include <Radx/NoxpNcRadxFile.hh>
 #include <Radx/NsslMrdRadxFile.hh>
 #include <Radx/OdimHdf5RadxFile.hh>
@@ -188,6 +189,14 @@ bool RadxFile::_isSupportedNetCDF(const string &path)
     }
   }
   
+  // try EEC Edge netcdf
+  {
+    EdgeNcRadxFile file;
+    if (file.isEdgeNc(path)) {
+      return true;
+    }
+  }
+ 
   // try NOXP netcdf
   {
     NoxpNcRadxFile file;
@@ -212,14 +221,14 @@ bool RadxFile::_isSupportedNetCDF(const string &path)
     }
   }
   
-  // try EEC Edge netcdf
+  // try NOAA FSL netcdf
   {
-    EdgeNcRadxFile file;
-    if (file.isEdgeNc(path)) {
+    NoaaFslRadxFile file;
+    if (file.isNoaaFsl(path)) {
       return true;
     }
   }
- 
+  
   // try Cfarr netcdf
   {
     CfarrNcRadxFile file;
@@ -536,6 +545,7 @@ int RadxFile::writeToDir(const RadxVol &vol,
       _fileFormat == FILE_FORMAT_DOE_NC ||
       _fileFormat == FILE_FORMAT_NOXP_NC ||
       _fileFormat == FILE_FORMAT_D3R_NC ||
+      _fileFormat == FILE_FORMAT_NOAA_FSL ||
       _fileFormat == FILE_FORMAT_NEXRAD_CMD ||
       _fileFormat == FILE_FORMAT_LEOSPHERE ||
       _fileFormat == FILE_FORMAT_TWOLF ||
@@ -831,6 +841,7 @@ int RadxFile::writeToPath(const RadxVol &vol,
       _fileFormat == FILE_FORMAT_DOE_NC ||
       _fileFormat == FILE_FORMAT_NOXP_NC ||
       _fileFormat == FILE_FORMAT_D3R_NC ||
+      _fileFormat == FILE_FORMAT_NOAA_FSL ||
       _fileFormat == FILE_FORMAT_NEXRAD_CMD ||
       _fileFormat == FILE_FORMAT_LEOSPHERE ||
       _fileFormat == FILE_FORMAT_TWOLF ||
@@ -1254,6 +1265,29 @@ int RadxFile::_readFromPathNetCDF(const string &path,
         if (_debug) {
           cerr << "INFO: RadxFile::readFromPath" << endl;
           cerr << "  Read D3R NC file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
+  // try NOAA FSL netcdf next
+
+  {
+    NoaaFslRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isNoaaFsl(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read NOAA FSL NC file, path: " << _pathInUse << endl;
         }
       }
       return iret;
@@ -2549,6 +2583,8 @@ string RadxFile::getFileFormatAsString() const
     return "TWOLF";
   } else if (_fileFormat == FILE_FORMAT_D3R_NC) {
     return "D3R_NC";
+  } else if (_fileFormat == FILE_FORMAT_NOAA_FSL) {
+    return "NOAA_FSL";
   } else if (_fileFormat == FILE_FORMAT_NOXP_NC) {
     return "NOXP_NC";
   } else if (_fileFormat == FILE_FORMAT_CFARR) {
@@ -2674,6 +2710,19 @@ int RadxFile::_printNativeNetCDF(const string &path, ostream &out,
     D3rNcRadxFile file;
     file.copyReadDirectives(*this);
     if (file.isD3rNc(path)) {
+      int iret = file.printNative(path, out, printRays, printData);
+      if (iret) {
+        _errStr = file.getErrStr();
+      }
+      return iret;
+    }
+  }
+  
+  // try NOAA FSL netcdf next
+  {
+    NoaaFslRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isNoaaFsl(path)) {
       int iret = file.printNative(path, out, printRays, printData);
       if (iret) {
         _errStr = file.getErrStr();

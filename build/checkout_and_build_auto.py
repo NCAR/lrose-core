@@ -256,18 +256,18 @@ def setupAutoconf():
 
     if (options.static):
         if (package == "cidd"):
-             shutil.copy("../build/configure.base.cidd", "./configure.base")
+             shutil.copy("../build/autoconf/configure.base.cidd", "./configure.base")
         else:
-             shutil.copy("../build/configure.base", "./configure.base")
+             shutil.copy("../build/autoconf/configure.base", "./configure.base")
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base" +
                  " --pkg " + package + debugStr)
     else:
         if (package == "cidd"):
-            shutil.copy("../build/configure.base.shared.cidd",
+            shutil.copy("../build/autoconf/configure.base.shared.cidd",
                         "./configure.base.shared")
         else:
-            shutil.copy("../build/configure.base.shared",
+            shutil.copy("../build/autoconf/configure.base.shared",
                         "./configure.base.shared")
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base.shared --shared" +
@@ -431,13 +431,6 @@ def buildPackage():
 
     # perform the build
 
-    # args = ""
-    # args = args + " -x " + tmpDir
-    # args = args + " -p " + package
-    # if (options.installScripts):
-    #     args = args + " --scripts "
-    # shellCmd("./build/build_lrose " + args)
-
     args = ""
     args = args + " --prefix " + tmpDir
     args = args + " --package " + package
@@ -502,13 +495,13 @@ def checkInstall():
     os.chdir(coreDir)
     print("============= Checking libs for " + package + " =============")
     shellCmd("./codebase/make_bin/check_libs.py " + \
-             "--listPath ./build/libs_check_list." + package + " " + \
+             "--listPath ./build/checklists/libs_check_list." + package + " " + \
              "--libDir " + prefix + "/lib " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
     print("============= Checking apps for " + package + " =============")
     shellCmd("./codebase/make_bin/check_apps.py " + \
-             "--listPath ./build/apps_check_list." + package + " " + \
+             "--listPath ./build/checklists/apps_check_list." + package + " " + \
              "--appDir " + prefix + "/bin " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")

@@ -28,7 +28,7 @@ def main():
     global options
     global runDir
     global releaseDir
-    global tmpDir
+    global buildDir
     global coreDir
     global codebaseDir
     global dateStr
@@ -60,7 +60,7 @@ def main():
                       help='Set verbose debugging on')
     parser.add_option('--prefix',
                       dest='prefix', default='not-set',
-                      help='Prefix name for install location')
+                      help='Temporary directory for build')
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')
@@ -102,27 +102,33 @@ def main():
     
     getOsType()
 
-    # set tmpDir temporary staging area
+    # set buildDir temporary staging area
     # this is set to a very long name because on macosx
     # we need to reset the library paths and we need to
     # ensure there is space available for the rename
 
-    if (options.prefix == "not-set"):
-        tmpDir = os.path.join("/tmp", package + "_prepare_release_bin_directory")
+    if (platform == "darwin"):
+        if (options.prefix == "not-set"):
+            buildDir = "/usr/local/lrose"
+        else:
+            buildDir = options.prefix
     else:
-        tmpDir = options.prefix
+        if (options.prefix == "not-set"):
+            buildDir = os.path.join("/tmp", package + "_prepare_release_bin_directory")
+        else:
+            buildDir = options.prefix
 
     # set directories
 
     releaseDir = os.path.join(options.releaseTopDir, package)
-    coreDir = os.path.join(tmpDir, "lrose-core")
+    coreDir = os.path.join(buildDir, "lrose-core")
     codebaseDir = os.path.join(coreDir, "codebase")
 
     # compute release name and dir name
     
-    releaseName = package + "-" + dateStr + "." + ostype
+    releaseName = package + "-" + dateStr + ".bin." + ostype
     tarName = releaseName + ".tgz"
-    tarDir = os.path.join(tmpDir, releaseName)
+    tarDir = os.path.join(buildDir, releaseName)
     
     print >>sys.stderr, "*********************************************************************"
     print >>sys.stderr, "  Running " + thisScriptName
@@ -137,20 +143,21 @@ def main():
     print >>sys.stderr, "*********************************************************************"
     print >>sys.stderr, "  dateStr: ", dateStr
     print >>sys.stderr, "  timeStr: ", timeStr
+    print >>sys.stderr, "  platform: ", platform
     print >>sys.stderr, "  prefix: ", options.prefix
     print >>sys.stderr, "  package: ", package
     print >>sys.stderr, "  version: ", version
     print >>sys.stderr, "  srcRelease: ", srcRelease
-    print >>sys.stderr, "  tmpDir: ", tmpDir
+    print >>sys.stderr, "  buildDir: ", buildDir
     print >>sys.stderr, "  releaseName: ", releaseName
     print >>sys.stderr, "  tarName: ", tarName
     print >>sys.stderr, "  tarDir: ", tarDir
     print >>sys.stderr, "  installScripts: ", options.installScripts
     print >>sys.stderr, "*********************************************************************"
 
-    # create tmp dir for staging area
+    # create build dir for staging area
 
-    createTmpDir()
+    createBuildDir()
 
     # For full LROSE package, copy in CIDD binaries if they are available
 
@@ -163,7 +170,8 @@ def main():
 
     # build netcdf support
 
-    buildNetcdf()
+    if (platform != "darwin"):
+        buildNetcdf()
 
     # build the package
 
@@ -174,49 +182,55 @@ def main():
     #     $prefix/bin/${package}_runtime_libs
 
     os.chdir(runDir)
-    shellCmd("./codebase/make_bin/installOriginLibFiles.py --binDir " + \
-             tmpDir + "/bin " + \
-             "--relDir " + package + "_runtime_libs --debug")
+
+    if (platform != "darwin"):
+        shellCmd("./codebase/make_bin/installOriginLibFiles.py --binDir " + \
+                 buildDir + "/bin " + \
+                 "--relDir " + package + "_runtime_libs --debug")
 
     # copy the required files and directories into the tar directory
     
-    shellCmd("/bin/cp -f LICENSE.txt " + tarDir)
-    shellCmd("/bin/cp -rf release_notes " + tarDir)
-    shellCmd("/bin/cp -f docs/README_INSTALL_BIN.txt " + tarDir)
-    shellCmd("/bin/cp -f ./build/install_bin_release " + tarDir)
-    shellCmd("/bin/cp -f ./build/install_devel_release " + tarDir)
-    shellCmd("/bin/cp -rf " + tmpDir + "/bin " + tarDir)
-    shellCmd("/bin/cp -rf " + tmpDir + "/lib " + tarDir)
-    shellCmd("/bin/cp -rf " + tmpDir + "/include " + tarDir)
+    os.chdir(runDir)
+    shellCmd("rsync -av LICENSE.txt " + tarDir)
+    shellCmd("rsync -av ReleaseInfo.txt " + tarDir)
+    shellCmd("rsync -av release_notes " + tarDir)
+    shellCmd("rsync -av docs/README_INSTALL_BIN.txt " + tarDir)
+    shellCmd("rsync -av ./build/install_bin_release.py " + tarDir)
+    shellCmd("rsync -av " + buildDir + "/bin " + tarDir)
+    shellCmd("rsync -av " + buildDir + "/lib " + tarDir)
+    shellCmd("rsync -av " + buildDir + "/include " + tarDir)
 
     if (package == "cidd"):
-        shellCmd("/bin/cp -rf ./codebase/apps/cidd/src/CIDD/example_scripts " + tarDir)
+        shellCmd("rsync -av ./codebase/apps/cidd/src/CIDD/example_scripts " + tarDir)
 
     # make the tar file, copy into run dir
 
-    os.chdir(tmpDir)
+    os.chdir(buildDir)
     shellCmd("tar cvfz " + tarName + " " + releaseName)
     shellCmd("mv " + tarName + "  " + runDir)
     os.chdir(runDir)
 
     # copy into release dir if it exists
 
+    if (os.path.isdir(releaseDir) == False):
+        os.makedirs(releaseDir)
+
     if (os.path.isdir(releaseDir)):
-        shellCmd("cp " + tarName + "  " + releaseDir)
+        shellCmd("rsync -av " + tarName + "  " + releaseDir)
 
     # check the build
     
     os.chdir(runDir)
     print("============= Checking libs for " + package + " =============")
     shellCmd("./codebase/make_bin/check_libs.py " + \
-             "--listPath ./build/libs_check_list." + package + " " + \
-             "--libDir " + tmpDir + "/lib " + \
+             "--listPath ./build/checklists/libs_check_list." + package + " " + \
+             "--libDir " + buildDir + "/lib " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
     print("============= Checking apps for " + package + " =============")
     shellCmd("./codebase/make_bin/check_apps.py " + \
-             "--listPath ./build/apps_check_list." + package + " " + \
-             "--appDir " + tmpDir + "/bin " + \
+             "--listPath ./build/checklists/apps_check_list." + package + " " + \
+             "--appDir " + buildDir + "/bin " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
     
@@ -290,6 +304,11 @@ def readReleaseInfoFile():
 def getOsType():
 
     global ostype
+
+    if (platform == "darwin"):
+        ostype = "mac_osx"
+        return
+
     ostype = "x86_64"
     tmpFile = os.path.join("/tmp", "ostype." + timeStr + ".txt")
 
@@ -309,26 +328,29 @@ def getOsType():
             print >>sys.stderr, "  line: ", line
         if (line.find("x86_64") > 0):
             ostype = "x86_64"
-        elif (line.find("Darwin") > 0):
-            ostype = "macosx_64"
         elif (line.find("i686") > 0):
             ostype = "i686"
             
 ########################################################################
-# create the tmp dir
+# create the build dir
 
-def createTmpDir():
+def createBuildDir():
+
+    # only do this for directories in /tmp
+
+    if (("/tmp" in buildDir) == False):
+        return
 
     # check if exists already
 
-    if (os.path.isdir(tmpDir)):
+    if (os.path.isdir(buildDir)):
 
         if (options.force == False):
             print("\n===============================================")
             print("WARNING: you are about to remove all contents in dir:")
-            print("    " + tmpDir)
+            print("    " + buildDir)
             print("Contents:")
-            contents = os.listdir(tmpDir)
+            contents = os.listdir(buildDir)
             for filename in contents:
                 print("  " + filename)
             answer = raw_input("Do you wish to proceed (y/n)? ")
@@ -338,11 +360,11 @@ def createTmpDir():
                 
         # remove it
 
-        shutil.rmtree(tmpDir)
+        shutil.rmtree(buildDir)
 
     # make it clean
 
-    os.makedirs(tmpDir)
+    os.makedirs(buildDir)
 
 ########################################################################
 # copy in CIDD binaries if they exist
@@ -354,7 +376,7 @@ def copyCiddBinaries():
         if (options.debug):
             print >>sys.stderr, "Copying in CIDD binaries from: "
             print >>sys.stderr, "  " + ciddBinDir
-        shellCmd("rsync -av " + ciddBinDir + " " + tmpDir)
+        shellCmd("rsync -av " + ciddBinDir + " " + buildDir)
 
 ########################################################################
 # build netCDF
@@ -364,12 +386,12 @@ def buildNetcdf():
     netcdfDir = os.path.join(runDir, "lrose-netcdf")
     os.chdir(netcdfDir)
     if (package == "cidd"):
-        shellCmd("./build_and_install_netcdf.m32 -x " + tmpDir)
+        shellCmd("./build_and_install_netcdf.m32 -x " + buildDir)
     else:
         if (platform == "darwin"):
-            shellCmd("./build_and_install_netcdf.osx -x " + tmpDir)
+            shellCmd("./build_and_install_netcdf.osx -x " + buildDir)
         else:
-            shellCmd("./build_and_install_netcdf -x " + tmpDir)
+            shellCmd("./build_and_install_netcdf -x " + buildDir)
 
 ########################################################################
 # build package
@@ -379,7 +401,7 @@ def buildPackage():
     os.chdir(runDir)
 
     args = ""
-    args = args + " --prefix " + tmpDir
+    args = args + " --prefix " + buildDir
     args = args + " --package " + package
     if (options.installScripts):
         args = args + " --scripts "
@@ -404,15 +426,17 @@ def createTarFile():
     for dirName in [ "build", "codebase", "docs", "release_notes" ]:
         os.rename(dirName, os.path.join(tarDir, dirName))
 
-    # move netcdf support into tar dir
+    # for LINUX, move netcdf support into tar dir
 
-    netcdfDir = os.path.join(tmpDir, "lrose-netcdf")
-    netcdfSubDir = os.path.join(tarDir, "lrose-netcdf")
-    os.makedirs(netcdfSubDir)
+    if (platform != "darwin"):
+
+        netcdfDir = os.path.join(buildDir, "lrose-netcdf")
+        netcdfSubDir = os.path.join(tarDir, "lrose-netcdf")
+        os.makedirs(netcdfSubDir)
     
-    for name in [ "README.md", "build_and_install_netcdf", "tar_files" ]:
-        os.rename(os.path.join(netcdfDir, name),
-                  os.path.join(netcdfSubDir, name))
+        for name in [ "README.md", "build_and_install_netcdf", "tar_files" ]:
+            os.rename(os.path.join(netcdfDir, name),
+                      os.path.join(netcdfSubDir, name))
 
     # create the tar file
 

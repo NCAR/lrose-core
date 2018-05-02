@@ -2,7 +2,7 @@
 
 #--------------------------------------------------------------------
 #
-# Run autoconf on LROSE source tree to prepare for configure
+# Run autoconf on CIDD source tree to prepare for configure
 #
 # Mike Dixon, EOL, NCAR, Boulder, CO, USA
 # August 2016
@@ -27,8 +27,6 @@ function usage() {
     echo "Usage: $scriptName [options below]"
     echo "  -h:  produce this usage list"
     echo "  -d:  turn debugging on"
-    echo "  -p ? :  set package"
-    echo "           default is 'lrose'"
     echo "  -s:  statically-linked release"
     echo "       default is dynamic linking"
     echo "  -v:  turn verbose on"
@@ -39,13 +37,13 @@ function usage() {
 
 # defaults
 
-package=lrose
+package=cidd
 debug=true
 verbose=false
-static=false
+static=true
 
 # Parse command line options.
-while getopts hdsvp: OPT; do
+while getopts hdsv OPT; do
     case "$OPT" in
         h)
             usage
@@ -59,9 +57,6 @@ while getopts hdsvp: OPT; do
             ;;
         s)
             static=true
-            ;;
-        p)
-            package=$OPTARG
             ;;
         \?)
             # getopts issues an error message
@@ -116,17 +111,9 @@ startingDir=`pwd`
 # copy in top-level template files
 
 cd codebase
-/bin/cp ../build/configure.base .
-/bin/cp ../build/configure.base.shared .
+/bin/cp ../build/autoconf/configure.base.cidd ./configure.base
+/bin/cp ../build/autoconf/configure.base.shared.cidd ./configure.base.shared
 /bin/cp ../build/Makefile.top ./Makefile
-
-if [ "$package" == "cidd" ]
-then
-# for CIDD, we need m32 build
-  /bin/cp ../build/configure.base.cidd ./configure.base
-  /bin/cp ../build/configure.base.shared.cidd ./configure.base.shared
-fi
-
 
 # create project-specific makefiles
 

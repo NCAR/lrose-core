@@ -330,7 +330,7 @@ int D3rNcRadxFile::writeToDir(const RadxVol &vol,
   // therefore write in CF Radial format instead
   
   cerr << "WARNING - D3rNcRadxFile::writeToDir" << endl;
-  cerr << "  Writing D3rNc raw format files not supported" << endl;
+  cerr << "  Writing D3rNc format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
   
   // set up NcfRadxFile object
@@ -370,7 +370,7 @@ int D3rNcRadxFile::writeToPath(const RadxVol &vol,
   // therefore write in CF Radial format instead
 
   cerr << "WARNING - D3rNcRadxFile::writeToPath" << endl;
-  cerr << "  Writing D3rNc raw format files not supported" << endl;
+  cerr << "  Writing D3rNc format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
