@@ -301,6 +301,20 @@ void ColorTableManager::_initDefaultTables()
   
   int nn;
   
+  // test1
+
+  const char * test1[] = {
+    "colortable test1",
+    "	0.0	0.0	0.",
+    "	0.5	0.5	0.5",
+    "	1.0	1.0	1.0",
+    "endtable",
+  };
+
+  nn = sizeof(test1)/sizeof(char *);
+  _addTable(test1, nn);
+
+
   // carbone17
 
   const char * carbone17[] = {

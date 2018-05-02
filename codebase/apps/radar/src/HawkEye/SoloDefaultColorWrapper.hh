@@ -38,16 +38,28 @@ using namespace std;
 
 class SoloDefaultColorWrapper{ //  : public SiiPalette { // , public ColorTableManager {
 
- public:
+public:
 
+  static SoloDefaultColorWrapper& getInstance() {
+    static SoloDefaultColorWrapper instance;
+    return instance;
+  }
+
+private: 
   // color map entries
   // these define the color scale colos, values and limits
   SoloDefaultColorWrapper();
 
+  bool _debug;
+
+public: 
+
   /// Destructor
 
   ~SoloDefaultColorWrapper();
-  
+ 
+  //  static SoloDefaultColorWrapper *_instance;
+
   // Find the ColorMap by the palette name                                                                            
   // e.g. lookupColorTable("carbone17");                                               
   ColorMap lookupColorTable(string parm);
@@ -79,8 +91,11 @@ class SoloDefaultColorWrapper{ //  : public SiiPalette { // , public ColorTableM
 
   void makeAssociations();
 
+  void PrintColorScales();
+
   //private:
   void ImportSoloPalettes();
+
 };
 
 #endif
