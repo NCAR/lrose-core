@@ -136,7 +136,7 @@ The distribution will be unpacked into a subdirectory:
   ./build_lrose.py --prefix installDir
 ```
 
-The default prefix is $HOME/lrose.
+The default prefix is /usr/local/lrose.
 
 This will install in:
 
@@ -157,8 +157,8 @@ However, you also can run the checks independently:
 After the build, you can check the build as follows:
 
 ```
-  ./build/check_libs -x installDir
-  ./build/check_apps -x installDir
+  ./installDir/bin/RadxPrint -h
+  ./installDir/bin/RadxConvert -h
 ```
 
 ## When Something Goes Wrong ...
