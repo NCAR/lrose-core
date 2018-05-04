@@ -1,9 +1,13 @@
-# So You Want To Dowload LROSE? Let's get started ...
+## So You Want To Download LROSE? Let's get started ...
 
-## Linux
-[binary](docs/README_binary_linux.md)
+## Which Release?
+
+### LROSE-Blaze
+
+#### Linux
+[binary](docs/README_binary_linux.md) or 
 [source](docs/README_source_linux.md)
 
-## OSX (Mac, Darwin)
-[binary](docs/README_binary_mac.md)
+#### Mac
+[binary](docs/README_binary_mac.md) or
 [source](docs/README_source_mac.md)
