@@ -81,7 +81,6 @@ i.e. in a subdirectory of the bin directory.
 
 ### Troubleshooting
 
-For LINUX:
 #### This application failed to start because it could not find or load the Qt platform plugin "xcb" in "".  Reinstalling the application may fix this problem.
 
 Make sure Qt5 is installed
