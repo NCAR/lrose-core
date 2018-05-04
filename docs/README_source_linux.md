@@ -1,4 +1,10 @@
-## LINUX build from downloaded source distribution
+## Installing an LROSE Source Release (Linux)
+
+1. [prepare](#prepare)
+2. [install](#install)
+3. [verify](#verify)
+
+<a name="prepare"/>
 
 ### Choose your install directory (prefix location)
 
@@ -10,7 +16,10 @@ See [README_NETCDF_BUILD.md](./README_NETCDF_BUILD.md)
 
 Install into the chosen prefix location.
 
-### Download LROSE
+
+<a name="install"/>
+
+### Prepare build directory
 
 Create a directory for the distribution:
 
@@ -19,6 +28,8 @@ Create a directory for the distribution:
   mkdir lrose_build
   cd lrose_build
 ```
+
+### Download source release for Linux
 
 Download the source tar file from:
 
@@ -32,7 +43,7 @@ A typical source release would be:
   lrose-20160823.src.tgz
 ```
 
-### Untar the distribution
+### Untar it
 
 ```
   cd lrose_build
@@ -61,8 +72,9 @@ This will install in:
   installDir/lib
   installDir/bin
 ```
+<a name="verify"/>
 
-### Checking the build
+### Verify the installation
 
 The build checks are run automatically at the end of the build script.
 
