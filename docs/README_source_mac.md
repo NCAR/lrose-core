@@ -1,10 +1,18 @@
-## Building LROSE for OS X
+
+## Installing an LROSE Source Release (Mac)
+
+[prepare](#prepare)
+[install](#install)
+[verify](#verify)
+
+
+<a name="prepare"/>
 
 ### Install Apple's compilers
 
 Install either the XCode development environment or a stand-alone version of the
-XCode command lines tools.  If you intend to do lots of Apple development and
-want to use Apple's IDE, install XCode.
+XCode command line tools.  If you intend to do lots of Apple development and
+want to use Apple's IDE, then install XCode.
 
 #### Installing complete XCode
 
@@ -85,7 +93,7 @@ Then run:
   ./configure
   make install
 ```
-
+<a name="install"/>
 ### Prepare build directory
 
 Create a directory for the distribution:
