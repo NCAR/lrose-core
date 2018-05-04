@@ -89,9 +89,6 @@ Then run:
   brew install jasper
   brew install jpeg
   brew install qt
-  tar xvf <path-to-lrose>.src.tgz
-  ./configure
-  make install
 ```
 <a name="install"/>
 
