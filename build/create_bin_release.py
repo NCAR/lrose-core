@@ -194,7 +194,7 @@ def main():
     shellCmd("rsync -av LICENSE.txt " + tarDir)
     shellCmd("rsync -av ReleaseInfo.txt " + tarDir)
     shellCmd("rsync -av release_notes " + tarDir)
-    shellCmd("rsync -av docs/README_INSTALL_BIN.txt " + tarDir)
+    # shellCmd("rsync -av docs/README_INSTALL_BIN.txt " + tarDir)
     shellCmd("rsync -av ./build/install_bin_release.py " + tarDir)
     shellCmd("rsync -av " + buildDir + "/bin " + tarDir)
     shellCmd("rsync -av " + buildDir + "/lib " + tarDir)
