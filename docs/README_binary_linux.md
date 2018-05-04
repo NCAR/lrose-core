@@ -1,6 +1,5 @@
-## INSTALLING an LROSE binary release
+## Install an LROSE binary release (Linux)
 
-NOTE for Mac OSX: [Make sure your environment is ready for installation.](./README_OSX_PREPARE_ENVIRONMENT.md)
 
 ### Choose your install directory (prefix location)
 
@@ -21,16 +20,10 @@ Download the binary tar file from:
   https://github.com/NCAR/lrose-core/releases
 ```
 
-For a 64-bit LINUX system, a typical binary release would be:
+A typical binary release would be:
 
 ```
   lrose-20180430.bin.x84_64.tgz
-```
-
-For a Mac OSX system, a typical binary release would be:
-
-```
-  lrose-20180430.bin.mac_osx.tgz
 ```
 
 ### Untar the release
@@ -66,7 +59,7 @@ it will install into the default location:
   /usr/local/lrose/bin
 ```
 
-You can specify where to perform the install (on Linux only):
+You can specify where to perform the install:
 
 ```
   ./install_bin_release.py --prefix ~/lrose
@@ -78,7 +71,7 @@ will install into
   ${HOME}/lrose/bin
 ```
 
-For LINUX, the dynamic run-time libraries will be found in:
+The dynamic run-time libraries will be found in:
 
 ```
   ..../bin/lrose_runtime_libs
@@ -95,11 +88,3 @@ Make sure Qt5 is installed
 
 yum install Qt5
 
--------------
-
-For Mac OSX:
-#### dyld: Library not loaded: /usr/local/opt/netcdf/lib/libnetcdf.13.dylib. Referenced from: /usr/local/lrose/bin/RadxPrint Reason: image not found
-
-Make sure netcdf is installed
-
-brew install ...
