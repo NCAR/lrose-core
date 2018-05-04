@@ -1,18 +1,18 @@
 
 ## Installing an LROSE Source Release (Mac)
 
-[prepare](#prepare)
-[install](#install)
-[verify](#verify)
+1. [prepare](#prepare)
+2. [install](#install)
+3. [verify](#verify)
 
 
 <a name="prepare"/>
 
-### Install Apple's compilers
+### Install XCode
 
 Install either the XCode development environment or a stand-alone version of the
 XCode command line tools.  If you intend to do lots of Apple development and
-want to use Apple's IDE, then install XCode.
+want to use an IDE, then install XCode.
 
 #### Installing complete XCode
 
@@ -48,7 +48,7 @@ Run the following ruby script:
   /usr/local/bin/brew update
 ```
 
-### Optional homebrew install in home directory
+#### Optional homebrew install in home directory
 
 If access is not available to /usr/local, you can install in your home directory instead.
 
@@ -82,7 +82,7 @@ Then run:
 ```
   brew install szip
   brew install hdf5 --enable-cxx
-  brew install --enable-cxx-compat netcdf
+  brew install netcdf
   brew install udunits
   brew install fftw
   brew install flex
@@ -94,6 +94,7 @@ Then run:
   make install
 ```
 <a name="install"/>
+
 ### Prepare build directory
 
 Create a directory for the distribution:
@@ -118,7 +119,7 @@ A typical source release would be:
   lrose-20160823.src.osx.tgz
 ```
 
-### Untar the distribution
+### Untar it
 
 ```
   cd lrose_build
@@ -148,7 +149,9 @@ This will install in:
   installDir/bin
 ```
 
-### Checking the build
+<a name="verify"/>
+
+### Verify the installation
 
 The build checks are run automatically at the end of the build script.
 
@@ -160,6 +163,10 @@ After the build, you can check the build as follows:
   ./build/check_libs -x installDir
   ./build/check_apps -x installDir
 ```
+
+## When Something Goes Wrong ...
+
+[Make sure your environment is ready for installation.](dev/README_OSX_PREPARE_ENVIRONMENT.md)
 
 ### Handling build errors
 
@@ -184,7 +191,7 @@ Alternatively, run
 
 and then inspect the make.log file.
 
-## Troubleshooting
 
-[Make sure your environment is ready for installation.](./README_OSX_PREPARE_ENVIRONMENT.md)
+
+
 
