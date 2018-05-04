@@ -6,15 +6,15 @@
 
 <a name="prepare"/>
 
-### Choose your install directory (prefix location)
+### Choose an install directory (prefix location)
 
-The default is: `${HOME}/lrose`
+The default is: `/usr/local/lrose`
 
-### Check out, build and install **netcdf** support
+### Check out, build and install **netcdf** 
 
-See [README_NETCDF_BUILD.md](./README_NETCDF_BUILD.md)
+See [README_NETCDF_BUILD.md](./dev/README_NETCDF_BUILD.md)
 
-Install into the chosen prefix location.
+Install netcdf into the prefix location.
 
 
 <a name="install"/>
@@ -83,8 +83,8 @@ However, you also can run the checks independently:
 After the build, you can check the build as follows:
 
 ```
-  ./build/check_libs -x installDir
-  ./build/check_apps -x installDir
+  ./installDir/bin/RadxPrint -h
+  ./installDir/bin/RadxConvert -h
 ```
 
 ### Handling build errors
