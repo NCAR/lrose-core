@@ -31,7 +31,7 @@ class LroseBlaze < Formula
     system "./configure", "--disable-dependency-tracking", "--prefix=#{{prefix}}"
     system "make install"
     Dir.chdir("..")
-    system "rsync", "-av", "share", "#{prefix}"
+    system "rsync", "-av", "share", "#{{prefix}}"
   end
 
   def test
