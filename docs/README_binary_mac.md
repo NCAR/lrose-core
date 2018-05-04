@@ -1,6 +1,6 @@
 ## Install an LROSE binary release (Mac)
 
-[Make sure your environment is ready for installation.](./README_OSX_PREPARE_ENVIRONMENT.md)
+[Make sure your environment is ready for installation.](./dev/README_OSX_PREPARE_ENVIRONMENT.md)
 
 ### Choose your install directory (prefix location)
 
