@@ -1,16 +1,25 @@
-## LINUX build from downloaded source distribution
+## Installing an LROSE Source Release (Linux)
 
-### Choose your install directory (prefix location)
+1. [prepare](#prepare)
+2. [install](#install)
+3. [verify](#verify)
 
-The default is: `${HOME}/lrose`
+<a name="prepare"/>
 
-### Check out, build and install **netcdf** support
+### Choose an install directory (prefix location)
 
-See [README_NETCDF_BUILD.md](./README_NETCDF_BUILD.md)
+The default is: `/usr/local/lrose`
 
-Install into the chosen prefix location.
+### Check out, build and install **netcdf** 
 
-### Download LROSE
+See [README_NETCDF_BUILD.md](./dev/README_NETCDF_BUILD.md)
+
+Install netcdf into the prefix location.
+
+
+<a name="install"/>
+
+### Prepare build directory
 
 Create a directory for the distribution:
 
@@ -19,6 +28,8 @@ Create a directory for the distribution:
   mkdir lrose_build
   cd lrose_build
 ```
+
+### Download source release for Linux
 
 Download the source tar file from:
 
@@ -32,7 +43,7 @@ A typical source release would be:
   lrose-20160823.src.tgz
 ```
 
-### Untar the distribution
+### Untar it
 
 ```
   cd lrose_build
@@ -52,7 +63,7 @@ The distribution will be unpacked into a subdirectory:
   ./build_lrose.py --prefix installDir
 ```
 
-The default prefix is $HOME/lrose.
+The default prefix is /usr/local/lrose.
 
 This will install in:
 
@@ -61,8 +72,9 @@ This will install in:
   installDir/lib
   installDir/bin
 ```
+<a name="verify"/>
 
-### Checking the build
+### Verify the installation
 
 The build checks are run automatically at the end of the build script.
 
@@ -71,8 +83,8 @@ However, you also can run the checks independently:
 After the build, you can check the build as follows:
 
 ```
-  ./build/check_libs -x installDir
-  ./build/check_apps -x installDir
+  ./installDir/bin/RadxPrint -h
+  ./installDir/bin/RadxConvert -h
 ```
 
 ### Handling build errors
