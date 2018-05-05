@@ -467,9 +467,10 @@ int SunCal::_runForTimeSeries()
     if (useThisPulse) {
       _processPulse(pulse);
     } else {
-      if (pulse->removeClient() == 0) {
-        delete pulse;
-      }
+      // delete pulse by adding to queue and then
+      // clearing the queue
+      _addPulseToQueue(pulse);
+      _clearPulseQueue();
     }
 
     // process data if end of vol
@@ -638,6 +639,8 @@ int SunCal::_processPulse(const IwrfTsPulse *pulse)
       if (_params.debug) {
         cerr << "Starting new analysis" << endl;
       }
+      // add to queue for next analysis
+      _addPulseToQueue(pulse);
       return 0;
     }
   }
@@ -645,7 +648,7 @@ int SunCal::_processPulse(const IwrfTsPulse *pulse)
   _endTime = pulseTime;
 
   // add the pulse to the queue
-
+  
   _addPulseToQueue(pulse);
   _totalPulseCount++;
   
@@ -1829,6 +1832,7 @@ int SunCal::_performAnalysis(bool force)
 {
 
   PMU_auto_register("performAnalysis");
+  int iret = 0;
 
   // check if we are ready
 
@@ -2056,10 +2060,10 @@ int SunCal::_performAnalysis(bool force)
 
     if (_params.write_text_files) {
       if (_writeGriddedTextFiles()) {
-        return -1;
+        iret = -1;
       }
       if (_writeSummaryText()) {
-        return -1;
+        iret = -1;
       }
       if (_params.test_nexrad_processing) {
         nexradSolarWriteGriddedTextFiles(_params.nexrad_text_output_dir);
@@ -2072,7 +2076,7 @@ int SunCal::_performAnalysis(bool force)
     
     if (_params.write_mdv_files) {
       if (_writeToMdv()) {
-        return -1;
+        iret = -1;
       }
       if (_params.test_nexrad_processing) {
         _writeNexradToMdv();
@@ -2081,7 +2085,7 @@ int SunCal::_performAnalysis(bool force)
     
     if (_params.write_summary_to_spdb) {
       if (_writeSummaryToSpdb()) {
-        return -1;
+        iret = -1;
       }
       if (_params.test_nexrad_processing) {
         _writeNexradSummaryToSpdb();
@@ -2095,7 +2099,7 @@ int SunCal::_performAnalysis(bool force)
   _initForAnalysis();
   _clearPulseQueue();
 
-  return 0;
+  return iret;
 
 }
 
