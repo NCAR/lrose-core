@@ -466,6 +466,10 @@ int SunCal::_runForTimeSeries()
 
     if (useThisPulse) {
       _processPulse(pulse);
+    } else {
+      if (pulse->removeClient() == 0) {
+        delete pulse;
+      }
     }
 
     // process data if end of vol
@@ -477,7 +481,7 @@ int SunCal::_runForTimeSeries()
       _endOfVol = false;
     }
 
-  }
+  } // while
 
   // process any remaining data
 
