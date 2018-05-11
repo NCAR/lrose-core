@@ -248,7 +248,6 @@ int Ts2NetCDF::Run ()
       }
     }
 
-
     if (_params.filter_antenna_transitions &&
         pulse != NULL &&
         pulse->get_antenna_transition()) {
@@ -483,7 +482,7 @@ int Ts2NetCDF::_handlePulse(IwrfTsPulse &pulse)
   _nGates = pulse.getNGates();
   _pulseTimeSecs = pulse.getTime();
   _pulseTime = pulse.getFTime();
-  _prt = pulse.getPrt();
+  _prt = pulse.get_prt_next();
   _el = pulse.getEl();
   _az = pulse.getAz();
   _phaseDiff = pulse.getPhaseDiff0();
