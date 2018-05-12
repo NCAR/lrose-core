@@ -291,7 +291,7 @@ paramdef boolean {
 } alternating_mode;
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Does the receiver switch?";
   p_help = "If true, then there is a co-pol receiver path and a cross-pol receiver path. If false, there is an H and V receiver path.";
 } switching_receivers;

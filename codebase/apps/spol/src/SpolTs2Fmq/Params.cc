@@ -1141,7 +1141,7 @@
     tt->descr = tdrpStrDup("Does the receiver switch?");
     tt->help = tdrpStrDup("If true, then there is a co-pol receiver path and a cross-pol receiver path. If false, there is an H and V receiver path.");
     tt->val_offset = (char *) &switching_receivers - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'Comment 10'
