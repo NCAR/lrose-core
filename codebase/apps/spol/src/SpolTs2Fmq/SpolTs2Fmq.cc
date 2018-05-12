@@ -88,10 +88,12 @@ SpolTs2Fmq::SpolTs2Fmq(int argc, char **argv)
   _sweepNumAzOld = 0;
   _sweepNumTransDirn = 0;
 
+  _xmitRcvMode = IWRF_ALT_HV_CO_CROSS;
   iwrf_radar_info_init(_tsRadarInfo);
   iwrf_scan_segment_init(_tsScanSeg);
   iwrf_ts_processing_init(_tsTsProc);
   iwrf_xmit_power_init(_tsXmitPower);
+  iwrf_xmit_info_init(_tsXmitInfo);
 
   iwrf_radar_info_init(_sysconRadarInfo);
   iwrf_scan_segment_init(_sysconScanSeg);
@@ -208,6 +210,14 @@ SpolTs2Fmq::SpolTs2Fmq(int argc, char **argv)
       isOK = false;
       return;
     }
+  }
+
+  // set startup xmit-rcv mode
+
+  if (_params.alternating_mode) {
+    _xmitRcvMode = IWRF_ALT_HV_CO_CROSS;
+  } else {
+    _xmitRcvMode = IWRF_SIM_HV_FIXED_HV;
   }
 
   return;
@@ -772,6 +782,21 @@ void SpolTs2Fmq::_handlePacket()
     // add to FMQ
     
     _writeXmitPowerToFmq(_tsXmitPower);
+    
+  } else if (_packetId == IWRF_XMIT_INFO_ID) {
+    
+    // xmit power - make local copy
+    
+    _tsXmitInfo = *((iwrf_xmit_info_t *) _msgBuf.getPtr());
+    if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS) {
+      _tsXmitInfo.pol_mode = IWRF_POL_MODE_HV_ALT;
+    } else if (_xmitRcvMode == IWRF_SIM_HV_FIXED_HV) {
+      _tsXmitInfo.pol_mode = IWRF_POL_MODE_HV_SIM;
+    }
+    
+    // add to FMQ
+    
+    _writeXmitInfoToFmq(_tsXmitInfo);
     
   } else if (_packetId == IWRF_STATUS_XML_ID) {
     
@@ -1972,6 +1997,15 @@ void SpolTs2Fmq::_writeTsProcessingToFmq()
     // use time series
     proc = _tsTsProc;
   }
+
+  // override xmit-rcv mode using XML from monitoring
+
+  proc.xmit_rcv_mode = (int) _xmitRcvMode;
+  if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS) {
+    proc.pol_mode = IWRF_POL_MODE_HV_ALT;
+  } else if (_xmitRcvMode == IWRF_SIM_HV_FIXED_HV) {
+    proc.pol_mode = IWRF_POL_MODE_HV_SIM;
+  }
   _info.setTsProcessing(proc);
  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -2027,6 +2061,29 @@ void SpolTs2Fmq::_writeXmitPowerToFmq(const iwrf_xmit_power_t &powerPkt)
     }
 
   }
+  
+}
+
+/////////////////////////////////////////////
+// write info info to FMQ
+
+void SpolTs2Fmq::_writeXmitInfoToFmq(const iwrf_xmit_info_t &infoPkt)
+  
+{
+  
+  if (_params.debug) {
+    cerr << "Writing xmit_info to FMQ" << endl;
+  }
+  
+  _info.setXmitInfo(infoPkt);
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    iwrf_xmit_info_print(stderr, infoPkt);
+  }
+
+  // write to FMQ
+  
+  _outputMsg.addPart(IWRF_XMIT_INFO_ID, sizeof(infoPkt), &infoPkt);
   
 }
 
@@ -2135,53 +2192,72 @@ void SpolTs2Fmq::_modifyPulseHeaderFromSyscon(iwrf_pulse_header_t &pHdr)
 
 }
 
-/////////////////////////////////////////////
-// monitor test pulse characteristics
+/////////////////////////////
+// monitor the test pulse
 
 void SpolTs2Fmq::_monitorTestPulse()
 
 {
-  
+
   // create pulse object, load from buffer
 
   IwrfTsPulse pulse(_info);
   pulse.setFromBuffer(_msgBuf.getPtr(), _msgBuf.getLen(), false);
   
   // compute gate number
-  
+
   int nGates = pulse.getNGates();
   double startRange = _info.get_proc_start_range_km();
   double gateSpacing = _info.get_proc_gate_spacing_km();
+  // double startRange = pulse.get_start_range_km();
+  // double gateSpacing = pulse.get_gate_spacing_km();
 
-  int gateNum = (int)
-    ((_params.test_pulse_range_km - startRange) / gateSpacing + 0.5);
-  if (gateNum < 0) gateNum = 0;
-  if (gateNum > nGates - 1) gateNum = nGates - 1;
-
-  // load IQ values for test pulse
+  int gateNumHc = (int)
+    ((_params.test_pulse_range_km_hc - startRange) / gateSpacing + 0.5);
+  if (gateNumHc < 0) gateNumHc = 0;
+  if (gateNumHc > nGates - 1) gateNumHc = nGates - 1;
   
-  if (_params.dual_pol_alternating_mode) {
+  int gateNumHx = (int)
+    ((_params.test_pulse_range_km_hx - startRange) / gateSpacing + 0.5);
+  if (gateNumHx < 0) gateNumHx = 0;
+  if (gateNumHx > nGates - 1) gateNumHx = nGates - 1;
+  
+  int gateNumVc = (int)
+    ((_params.test_pulse_range_km_vc - startRange) / gateSpacing + 0.5);
+  if (gateNumVc < 0) gateNumVc = 0;
+  if (gateNumVc > nGates - 1) gateNumVc = nGates - 1;
+  
+  int gateNumVx = (int)
+    ((_params.test_pulse_range_km_vx - startRange) / gateSpacing + 0.5);
+  if (gateNumVx < 0) gateNumVx = 0;
+  if (gateNumVx > nGates - 1) gateNumVx = nGates - 1;
+  
+  // load IQ values for test pulse
+
+  if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS) {
     bool isHoriz = pulse.isHoriz();
-    if (_params.dual_pol_switching_receivers) {
+    if (_params.switching_receivers) {
       if (isHoriz) {
-        _loadTestPulseIq(pulse, 0, gateNum, _testIqHc);
-        _loadTestPulseIq(pulse, 1, gateNum, _testIqVx);
+        _loadTestPulseIq(pulse, 0, gateNumHc, _testIqHc);
+        _loadTestPulseIq(pulse, 1, gateNumVx, _testIqVx);
       } else {
-        _loadTestPulseIq(pulse, 0, gateNum, _testIqVc);
-        _loadTestPulseIq(pulse, 1, gateNum, _testIqHx);
+        _loadTestPulseIq(pulse, 0, gateNumVc, _testIqVc);
+        _loadTestPulseIq(pulse, 1, gateNumHx, _testIqHx);
       }
     } else {
       if (isHoriz) {
-        _loadTestPulseIq(pulse, 0, gateNum, _testIqHc);
-        _loadTestPulseIq(pulse, 1, gateNum, _testIqVx);
+        _loadTestPulseIq(pulse, 0, gateNumHc, _testIqHc);
+        _loadTestPulseIq(pulse, 1, gateNumVx, _testIqVx);
       } else {
-        _loadTestPulseIq(pulse, 1, gateNum, _testIqVc);
-        _loadTestPulseIq(pulse, 0, gateNum, _testIqHx);
+        _loadTestPulseIq(pulse, 1, gateNumVc, _testIqVc);
+        _loadTestPulseIq(pulse, 0, gateNumHx, _testIqHx);
       }
     }
   } else {
-    _loadTestPulseIq(pulse, 0, gateNum, _testIqHc);
-    _loadTestPulseIq(pulse, 1, gateNum, _testIqVc);
+    _loadTestPulseIq(pulse, 0, gateNumHc, _testIqHc);
+    _loadTestPulseIq(pulse, 0, gateNumHc, _testIqHx);
+    _loadTestPulseIq(pulse, 1, gateNumVc, _testIqVc);
+    _loadTestPulseIq(pulse, 1, gateNumVc, _testIqVx);
   }
   _nSamplesTestPulse++;
 
@@ -2192,7 +2268,7 @@ void SpolTs2Fmq::_monitorTestPulse()
   }
 
   int nSamples = _nSamplesTestPulse;
-  if (_params.dual_pol_alternating_mode) {
+  if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS) {
     nSamples /= 2;
   }
   double meanPowerHc = RadarComplex::meanPower(_testIqHc, nSamples);
@@ -2233,7 +2309,7 @@ void SpolTs2Fmq::_monitorTestPulse()
 
   double wavelengthM = _info.get_radar_wavelength_cm() / 100.0;
   double prt = pulse.getPrt();
-  if (_params.dual_pol_alternating_mode) {
+  if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS) {
     prt *= 2;
   }
   double nyquist = (wavelengthM / prt) / 4.0;
@@ -2243,6 +2319,38 @@ void SpolTs2Fmq::_monitorTestPulse()
   _testVelVc = (argVelVc / M_PI) * nyquist;
   _testVelVx = (argVelVx / M_PI) * nyquist;
 
+  if (_xmitRcvMode == IWRF_SIM_HV_FIXED_HV) {
+    _testPowerDbHx = -9999.0;
+    _testPowerDbVx = -9999.0;
+    _testVelHx = -9999.0;
+    _testVelVx = -9999.0;
+  }
+
+  if (_params.debug >= Params::DEBUG_NORM) {
+    cerr << "============= TEST PULSE POWERS ==========================" << endl;
+    if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS) {
+      cerr << "  Alternating mode" << endl;
+    } else if (_xmitRcvMode == IWRF_SIM_HV_FIXED_HV) {
+      cerr << "  Simultaneous mode" << endl;
+    }
+    cerr << "     nGates: " << nGates << endl;
+    cerr << "     startRange: " << startRange << endl;
+    cerr << "     gateSpacing: " << gateSpacing << endl;
+    cerr << "     hcRange: " << _params.test_pulse_range_km_hc << endl;
+    cerr << "     vcRange: " << _params.test_pulse_range_km_vc << endl;
+    cerr << "     hxRange: " << _params.test_pulse_range_km_hx << endl;
+    cerr << "     vxRange: " << _params.test_pulse_range_km_vx << endl;
+    cerr << "     hcGateNum: " << gateNumHc << endl;
+    cerr << "     vcGateNum: " << gateNumVc << endl;
+    cerr << "     hxGateNum: " << gateNumHx << endl;
+    cerr << "     vxGateNum: " << gateNumVx << endl;
+    cerr << "     testPowerDbHc: " << _testPowerDbHc << endl;
+    cerr << "     testPowerDbVc: " << _testPowerDbVc << endl;
+    cerr << "     testPowerDbHx: " << _testPowerDbHx << endl;
+    cerr << "     testPowerDbVx: " << _testPowerDbVx << endl;
+    cerr << "==========================================================" << endl;
+  }
+  
   // clear the test pulse stats to prepare for next average
 
   _nSamplesTestPulse = 0;
@@ -2253,11 +2361,15 @@ void SpolTs2Fmq::_monitorTestPulse()
   _testPulseXml.clear();
   _testPulseXml += TaXml::writeStartTag(_params.test_pulse_xml_tag, 0);
   _testPulseXml += TaXml::writeTime("Time", 1, _testPulseLatestTime);
-  _testPulseXml += TaXml::writeDouble("RangeKm", 1, _params.test_pulse_range_km);
-  _testPulseXml += TaXml::writeInt("GateNum", 1, gateNum);
-  _testPulseXml += TaXml::writeDouble("StartRangeKm", 1, startRange);
-  _testPulseXml += TaXml::writeDouble("GateSpacingKm", 1, gateSpacing);
-  
+  _testPulseXml += TaXml::writeDouble("RangeKmHc", 1, _params.test_pulse_range_km_hc);
+  _testPulseXml += TaXml::writeInt("GateNumHc", 1, gateNumHc);
+  _testPulseXml += TaXml::writeDouble("RangeKmHx", 1, _params.test_pulse_range_km_hx);
+  _testPulseXml += TaXml::writeInt("GateNumHx", 1, gateNumHx);
+  _testPulseXml += TaXml::writeDouble("RangeKmVc", 1, _params.test_pulse_range_km_vc);
+  _testPulseXml += TaXml::writeInt("GateNumVc", 1, gateNumVc);
+  _testPulseXml += TaXml::writeDouble("RangeKmVx", 1, _params.test_pulse_range_km_vx);
+  _testPulseXml += TaXml::writeInt("GateNumVx", 1, gateNumVx);
+
   if (_testPowerDbHc > -9990) {
     _testPulseXml +=
       TaXml::writeDouble("TestPulsePowerDbHc", 1, _testPowerDbHc);
@@ -2267,7 +2379,7 @@ void SpolTs2Fmq::_monitorTestPulse()
       TaXml::writeDouble("TestPulsePowerDbVc", 1, _testPowerDbVc);
   }
 
-  if (_params.dual_pol_alternating_mode) {
+  if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS) {
     if (_testPowerDbHx > -9990) {
       _testPulseXml +=
         TaXml::writeDouble("TestPulsePowerDbHx", 1, _testPowerDbHx);
@@ -2284,7 +2396,7 @@ void SpolTs2Fmq::_monitorTestPulse()
   if (_testPowerDbVc > -9990) {
     _testPulseXml += TaXml::writeDouble("TestPulseVelVc", 1, _testVelVc);
   }
-  if (_params.dual_pol_alternating_mode) {
+  if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS) {
     if (_testPowerDbHx > -9990) {
       _testPulseXml += TaXml::writeDouble("TestPulseVelHx", 1, _testVelHx);
     }
@@ -2315,7 +2427,7 @@ void SpolTs2Fmq::_loadTestPulseIq(IwrfTsPulse &pulse,
   fl32 ival, qval;
   pulse.getIq(channelNum, gateNum, ival, qval);
   int index = _nSamplesTestPulse;
-  if (_params.dual_pol_alternating_mode) {
+  if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS) {
     index /= 2;
   }
   iq[index].re = ival;
@@ -2352,7 +2464,7 @@ void SpolTs2Fmq::_handleStatusXml()
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     iwrf_status_xml_print(stderr, *statusHdr, xmlStr);
   }
-  
+
   // augment as required
   
   if (_params.augment_status_xml) {
@@ -2589,6 +2701,20 @@ int SpolTs2Fmq::_readSecondaryStatusFromFmq()
   }
   if (gotPower) {
     _writeXmitPowerToFmq(powerPkt);
+  }
+
+  // check for xmit-rcv mode
+
+  string transmitStatusStr;
+  if (TaXml::readString(_secondaryStatusXml, "SpolTransmitStatus", transmitStatusStr) == 0) {
+    string xmitModeStr;
+    if (TaXml::readString(transmitStatusStr, "XmitMode", xmitModeStr) == 0) {
+      if (xmitModeStr == "Alternating") {
+        _xmitRcvMode = IWRF_ALT_HV_CO_CROSS;
+      } else if (xmitModeStr == "Simultaneous") {
+        _xmitRcvMode = IWRF_SIM_HV_FIXED_HV;
+      }
+    }
   }
 
   return 0;
