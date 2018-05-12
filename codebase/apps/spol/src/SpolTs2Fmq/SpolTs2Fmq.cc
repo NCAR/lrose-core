@@ -2706,7 +2706,8 @@ int SpolTs2Fmq::_readSecondaryStatusFromFmq()
   // check for xmit-rcv mode
 
   string transmitStatusStr;
-  if (TaXml::readString(_secondaryStatusXml, "SpolTransmitStatus", transmitStatusStr) == 0) {
+  if (TaXml::readString(_secondaryStatusXml,
+                        "SpolTransmitStatus", transmitStatusStr) == 0) {
     string xmitModeStr;
     if (TaXml::readString(transmitStatusStr, "XmitMode", xmitModeStr) == 0) {
       if (xmitModeStr == "Alternating") {
