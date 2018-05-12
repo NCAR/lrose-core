@@ -24,10 +24,11 @@ class Lrose < Formula
   depends_on 'qt'
   depends_on 'szip'
   depends_on 'pkg-config'
+  depends on :x11
 
   def install
     ENV["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
-    ENV["PATH"] = "/usr/local/bin:/usr/bin:/bin"
+    Dir.chdir("codebase")
     system "./configure", "--disable-dependency-tracking", "--prefix=#{{prefix}}"
     system "make install"
     Dir.chdir("..")
