@@ -75,6 +75,7 @@ SpolTsMonitor::SpolTsMonitor(int argc, char **argv)
   _moveCheckEl = -999;
 
   _nSamplesTestPulse = 0;
+  _xmitRcvMode = IWRF_ALT_HV_CO_CROSS;
 
   _testIqHc = NULL;
   _testIqHx = NULL;
@@ -160,6 +161,14 @@ SpolTsMonitor::SpolTsMonitor(int argc, char **argv)
 
   if (_params.monitor_g0_velocity) {
     _g0IqHc = new RadarComplex_t[_params.g0_velocity_n_samples];
+  }
+
+  // set startup xmit-rcv mode
+
+  if (_params.alternating_mode) {
+    _xmitRcvMode = IWRF_ALT_HV_CO_CROSS;
+  } else {
+    _xmitRcvMode = IWRF_SIM_HV_FIXED_HV;
   }
 
   return;
@@ -376,6 +385,22 @@ void SpolTsMonitor::_monitorTestPulse(IwrfTsPulse &pulse,
 
 {
 
+  // get xmit/rcv mode
+
+  string statusXml = info.getStatusXmlStr();
+  string transmitStatusStr;
+  if (TaXml::readString(statusXml, "SpolTransmitStatus",
+                        transmitStatusStr) == 0) {
+    string xmitModeStr;
+    if (TaXml::readString(transmitStatusStr, "XmitMode", xmitModeStr) == 0) {
+      if (xmitModeStr == "Alternating") {
+        _xmitRcvMode = IWRF_ALT_HV_CO_CROSS;
+      } else if (xmitModeStr == "Simultaneous") {
+        _xmitRcvMode = IWRF_SIM_HV_FIXED_HV;
+      }
+    }
+  }
+
   // compute gate number
 
   int nGates = pulse.getNGates();
@@ -404,9 +429,9 @@ void SpolTsMonitor::_monitorTestPulse(IwrfTsPulse &pulse,
   
   // load IQ values for test pulse
   
-  if (_params.dual_pol_alternating_mode) {
+  if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS) {
     bool isHoriz = pulse.isHoriz();
-    if (_params.dual_pol_switching_receivers) {
+    if (_params.switching_receivers) {
       if (isHoriz) {
         _loadTestPulseIq(pulse, 0, gateNumHc, _testIqHc);
         _loadTestPulseIq(pulse, 1, gateNumVx, _testIqVx);
@@ -436,7 +461,7 @@ void SpolTsMonitor::_monitorTestPulse(IwrfTsPulse &pulse,
   }
 
   int nSamples = _nSamplesTestPulse;
-  if (_params.dual_pol_alternating_mode) {
+  if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS) {
     nSamples /= 2;
   }
   double meanPowerHc = RadarComplex::meanPower(_testIqHc, nSamples);
@@ -477,7 +502,7 @@ void SpolTsMonitor::_monitorTestPulse(IwrfTsPulse &pulse,
 
   double wavelengthM = info.get_radar_wavelength_cm() / 100.0;
   double prt = pulse.getPrt();
-  if (_params.dual_pol_alternating_mode) {
+  if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS) {
     prt *= 2;
   }
   double nyquist = (wavelengthM / prt) / 4.0;
@@ -515,7 +540,7 @@ void SpolTsMonitor::_monitorTestPulse(IwrfTsPulse &pulse,
       TaXml::writeDouble("TestPulsePowerDbVc", 1, _testPowerDbVc);
   }
 
-  if (_params.dual_pol_alternating_mode) {
+  if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS) {
     if (_testPowerDbHx > -9990) {
       _testPulseXml +=
         TaXml::writeDouble("TestPulsePowerDbHx", 1, _testPowerDbHx);
@@ -532,7 +557,7 @@ void SpolTsMonitor::_monitorTestPulse(IwrfTsPulse &pulse,
   if (_testPowerDbVc > -9990) {
     _testPulseXml += TaXml::writeDouble("TestPulseVelVc", 1, _testVelVc);
   }
-  if (_params.dual_pol_alternating_mode) {
+  if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS) {
     if (_testPowerDbHx > -9990) {
       _testPulseXml += TaXml::writeDouble("TestPulseVelHx", 1, _testVelHx);
     }
@@ -542,6 +567,31 @@ void SpolTsMonitor::_monitorTestPulse(IwrfTsPulse &pulse,
   }
 
   _testPulseXml += TaXml::writeEndTag(_params.test_pulse_xml_tag, 0);
+  
+  if (_params.debug >= Params::DEBUG_NORM) {
+    cerr << "============= TEST PULSE POWERS ==========================" << endl;
+    if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS) {
+      cerr << "  Alternating mode" << endl;
+    } else if (_xmitRcvMode == IWRF_SIM_HV_FIXED_HV) {
+      cerr << "  Simultaneous mode" << endl;
+    }
+    cerr << "     nGates: " << nGates << endl;
+    cerr << "     startRange: " << startRange << endl;
+    cerr << "     gateSpacing: " << gateSpacing << endl;
+    cerr << "     hcRange: " << _params.test_pulse_range_km_hc << endl;
+    cerr << "     vcRange: " << _params.test_pulse_range_km_vc << endl;
+    cerr << "     hxRange: " << _params.test_pulse_range_km_hx << endl;
+    cerr << "     vxRange: " << _params.test_pulse_range_km_vx << endl;
+    cerr << "     hcGateNum: " << gateNumHc << endl;
+    cerr << "     vcGateNum: " << gateNumVc << endl;
+    cerr << "     hxGateNum: " << gateNumHx << endl;
+    cerr << "     vxGateNum: " << gateNumVx << endl;
+    cerr << "     testPowerDbHc: " << _testPowerDbHc << endl;
+    cerr << "     testPowerDbVc: " << _testPowerDbVc << endl;
+    cerr << "     testPowerDbHx: " << _testPowerDbHx << endl;
+    cerr << "     testPowerDbVx: " << _testPowerDbVx << endl;
+    cerr << "==========================================================" << endl;
+  }
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "======================================" << endl;
@@ -563,7 +613,7 @@ void SpolTsMonitor::_loadTestPulseIq(IwrfTsPulse &pulse,
   fl32 ival, qval;
   pulse.getIq(channelNum, gateNum, ival, qval);
   int index = _nSamplesTestPulse;
-  if (_params.dual_pol_alternating_mode) {
+  if (_xmitRcvMode == IWRF_ALT_HV_CO_CROSS) {
     index /= 2;
   }
   iq[index].re = ival;

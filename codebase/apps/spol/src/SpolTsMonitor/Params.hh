@@ -410,9 +410,9 @@ public:
 
   int test_pulse_n_samples;
 
-  tdrp_bool_t dual_pol_alternating_mode;
+  tdrp_bool_t alternating_mode;
 
-  tdrp_bool_t dual_pol_switching_receivers;
+  tdrp_bool_t switching_receivers;
 
   tdrp_bool_t monitor_g0_velocity;
 
