@@ -41,7 +41,6 @@
 #include <iostream>
 #include <toolsa/uusleep.h>
 #include <toolsa/mem.h>
-// #include <QMutexLocker>
 #include <Radx/RadxGeoref.hh>
 using namespace std;
 
@@ -70,7 +69,6 @@ RadxRay *Reader::getNextRay(RadxPlatform &platform)
 {
 
   TaThread::LockForScope locker;
-  // QMutexLocker locker(&_mutex);
 
   if (_rayQueue.size() == 0) {
     return NULL;
@@ -87,14 +85,16 @@ RadxRay *Reader::getNextRay(RadxPlatform &platform)
 ///////////////////////////////////////////////////////
 // add ray
 
-void Reader::addRay(RadxRay *ray)
+void Reader::_addRay(RadxRay *ray)
 
 {
 
   TaThread::LockForScope locker;
-  //   QMutexLocker locker(&_mutex);
 
+  // keep the queue below max size
+  
   if ((int) _rayQueue.size() >= _maxQueueSize) {
+    // pop the oldest ray
     RadxRay *ray = _rayQueue.back();
     delete ray;
     AllocCheck::inst().addFree();
@@ -102,6 +102,7 @@ void Reader::addRay(RadxRay *ray)
   }
 
   _rayQueue.push_front(ray);
+  AllocCheck::inst().addAlloc();
 
 }
 
@@ -271,7 +272,7 @@ void SimReader::_simulatePpiBeam(double elev, double az,
 
   // add ray to queue
 
-  addRay(ray);
+  _addRay(ray);
 
 }
 
@@ -298,7 +299,6 @@ void SimReader::_simulateVertBeam(double elev, double az,
   ray->setFixedAngleDeg(elev);
   ray->setIsIndexed(true);
   ray->setIsIndexed(false);
-//  ray->setAngleResDeg(1.0);
   ray->setNSamples(128);
   ray->setPulseWidthUsec(1.0);
   ray->setPrtSec(0.001);
@@ -361,7 +361,7 @@ void SimReader::_simulateVertBeam(double elev, double az,
 
   // add ray to queue
 
-  addRay(ray);
+  _addRay(ray);
 
 }
 
@@ -485,7 +485,7 @@ void SimRhiReader::_simulateBeam(double elev, double az,
 
   // add ray to queue
 
-  addRay(ray);
+  _addRay(ray);
 
 }
 
@@ -548,7 +548,7 @@ void IwrfReader::run()
           TaThread::LockForScope locker;
           _platform = reader->getPlatform();
         }
-        addRay(ray);
+        _addRay(ray);
       } else {
         cerr << "ERROR - IwrfReader::run" << endl;
         cerr << "  Cannot read ray" << endl;
@@ -556,7 +556,7 @@ void IwrfReader::run()
       }
       
     } catch (std::bad_alloc &a) {
-      cerr << "AAAAAAA bad alloc: " << a.what() << endl;
+      cerr << "==>> IwrfReader::run() - bad alloc: " << a.what() << endl;
     }
 
     count++;

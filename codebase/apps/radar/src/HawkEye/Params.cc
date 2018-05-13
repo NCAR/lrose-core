@@ -584,6 +584,18 @@
     tt->single_val.e = DEBUG_OFF;
     tt++;
     
+    // Parameter 'check_ray_alloc'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_ray_alloc");
+    tt->descr = tdrpStrDup("Print out checks on ray memory allocation.");
+    tt->help = tdrpStrDup("If TRUE, the app will keep track of the number of rays allocated and freed, and print out that information every 100 rays.");
+    tt->val_offset = (char *) &check_ray_alloc - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'register_with_procmap'
     // ctype is 'tdrp_bool_t'
     
@@ -1711,6 +1723,18 @@
       tt->enum_def.fields[3].name = tdrpStrDup("LEGEND_BOTTOM_RIGHT");
       tt->enum_def.fields[3].val = LEGEND_BOTTOM_RIGHT;
     tt->single_val.e = LEGEND_TOP_LEFT;
+    tt++;
+    
+    // Parameter 'rhi_beam_queue_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("rhi_beam_queue_size");
+    tt->descr = tdrpStrDup("Size of the queue for RHI beams.");
+    tt->help = tdrpStrDup("After the queue reaches this size, older beams are discarded.");
+    tt->val_offset = (char *) &rhi_beam_queue_size - &_start_;
+    tt->single_val.i = 360;
     tt++;
     
     // Parameter 'Comment 12'

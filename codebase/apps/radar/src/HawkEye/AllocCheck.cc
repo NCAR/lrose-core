@@ -107,11 +107,11 @@ void AllocCheck::doPrint(bool force)
 {
   
   if (_params != NULL &&
-      _params->debug < Params::DEBUG_VERBOSE) {
+      _params->check_ray_alloc == FALSE) {
     return;
   }
 
-  if (force || ((_nAlloc + _nFree) % 1000 == 0)) {
+  if (force || ((_nAlloc + _nFree) % 500 == 0)) {
     if (force) {
       cerr << "=================================" << endl;
     }

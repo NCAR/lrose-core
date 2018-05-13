@@ -96,6 +96,11 @@ int Args::parse (const int argc, const char **argv)
       sprintf(tmp_str, "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-check_ray_alloc")) {
+      
+      sprintf(tmp_str, "check_ray_alloc = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-sim_mode")) {
       
       sprintf(tmp_str, "input_mode = SIMULATED_INPUT;");
@@ -290,6 +295,8 @@ void Args::_usage(ostream &out)
       << "       [ --, -h, -help, -man ] produce this list.\n"
       << "       [ -archive_url ?] URL for data in archive mode\n"
       << "       [ -bscan ] run in BSCAN mode\n"
+      << "       [ -check_ray_alloc ]\n"
+      << "         print out checks on number of ray allocation and frees\n"
       << "       [ -color_scales ? ] specify color scale directory\n"
       << "       [ -debug, -d ] print debug messages\n"
       << "       [ -f ? ?] list of files to process in archive mode\n"

@@ -67,7 +67,7 @@ protected:
 
   // add a ray
   
-  void addRay(RadxRay *ray);
+  void _addRay(RadxRay *ray);
   
   // data members
 
