@@ -5114,7 +5114,11 @@ void Beam::_setNoiseFields()
   const vector<double> &phaseChangeError = _noise->getPhaseChangeError();
   const vector<double> &dbmSdev = _noise->getDbmSdev();
   const vector<double> &ncpMean = _noise->getNcpMean();
-  
+
+  if ((int) noiseFlag.size() < _nGates) {
+    return;
+  }
+
   for (int igate = 0; igate < _nGates; igate++) {
     GateData *gate = _gateData[igate];
     MomentsFields &fields = gate->fields;

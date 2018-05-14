@@ -157,10 +157,12 @@ private:
 
   // radar info etc from time series
   
+  iwrf_xmit_rcv_mode _xmitRcvMode;
   iwrf_radar_info _tsRadarInfo;
   iwrf_scan_segment _tsScanSeg;
   iwrf_ts_processing _tsTsProc;
   iwrf_xmit_power _tsXmitPower;
+  iwrf_xmit_info _tsXmitInfo;
   
   // FMQ for syscon information
   // This info is written by SpolSysconRelay
@@ -337,6 +339,7 @@ private:
   void _writeScanSegmentToFmq();
   void _writeTsProcessingToFmq();
   void _writeXmitPowerToFmq(const iwrf_xmit_power_t &power);
+  void _writeXmitInfoToFmq(const iwrf_xmit_info_t &info);
   void _writeSysconEventToFmq(const iwrf_event_notice_t &event);
   void _modifyPulseHeaderFromSyscon(iwrf_pulse_header_t &pHdr);
   void _monitorTestPulse();

@@ -228,6 +228,9 @@ def checkInstall(corePath):
 
 def createQtMocFiles(appDir):
     
+    if (os.path.isdir(appDir) == False):
+        return
+    
     os.chdir(appDir)
     shellCmd("rm -f moc*");
     if (platform == "darwin"):

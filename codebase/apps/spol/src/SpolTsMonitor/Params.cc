@@ -815,7 +815,7 @@
     tt->descr = tdrpStrDup("Tag to delineate test pulse block in output XML.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &test_pulse_xml_tag - &_start_;
-    tt->single_val.s = tdrpStrDup("KaBandTestPulse");
+    tt->single_val.s = tdrpStrDup("SBandTestPulse");
     tt++;
     
     // Parameter 'test_pulse_range_km_hc'
@@ -878,28 +878,28 @@
     tt->single_val.i = 5000;
     tt++;
     
-    // Parameter 'dual_pol_alternating_mode'
+    // Parameter 'alternating_mode'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("dual_pol_alternating_mode");
-    tt->descr = tdrpStrDup("If this is a dual-polarization system, is it operating in fast alternating mode?");
+    tt->param_name = tdrpStrDup("alternating_mode");
+    tt->descr = tdrpStrDup("Is it operating in fast alternating mode");
     tt->help = tdrpStrDup("If true, the HV flag is used to determine which receiver path to use.");
-    tt->val_offset = (char *) &dual_pol_alternating_mode - &_start_;
+    tt->val_offset = (char *) &alternating_mode - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'dual_pol_switching_receivers'
+    // Parameter 'switching_receivers'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("dual_pol_switching_receivers");
-    tt->descr = tdrpStrDup("If this is a dual-polarization system, does it have switching receivers?");
+    tt->param_name = tdrpStrDup("switching_receivers");
+    tt->descr = tdrpStrDup("Does it have switching receivers");
     tt->help = tdrpStrDup("If true, then there is a co-pol receiver path and a cross-pol receiver path. If false, there is an H and V receiver path.");
-    tt->val_offset = (char *) &dual_pol_switching_receivers - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->val_offset = (char *) &switching_receivers - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'Comment 5'

@@ -43,6 +43,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <ctime>
+#include <toolsa/Path.hh>
 #include <toolsa/DateTime.hh>
 #include <toolsa/uusleep.h>
 #include <toolsa/file_io.h>
@@ -890,6 +891,24 @@ int TsSmartSave::_closeFile()
     if (ldata.write(_outputTime)) {
       cerr << "ERROR - cannot write LdataInfo" << endl;
       cerr << " outputDir: " << _outputDir << endl;
+    }
+
+    if (_params.write_ldata_info_to_proxy_path) {
+      DsLdataInfo proxy(_params.ldata_info_proxy_path,
+                        _params.debug >= Params::DEBUG_VERBOSE);
+      proxy.setLatestTime(_outputTime);
+      string relDir;
+      Path::stripDir(_params.ldata_info_proxy_path, _outputDir, relDir);
+      string relPath(relDir);
+      relPath += PATH_DELIM;
+      relPath += _relPath;
+      proxy.setRelDataPath(relPath);
+      proxy.setWriter("TsSmartSave");
+      proxy.setDataType("iwrf_ts");
+      if (proxy.write(_outputTime)) {
+        cerr << "ERROR - cannot write LdataInfo" << endl;
+        cerr << " outputDir: " << _params.ldata_info_proxy_path << endl;
+      }
     }
    
     return 0;

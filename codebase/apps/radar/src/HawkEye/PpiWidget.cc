@@ -178,6 +178,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
                         const std::vector< std::vector< double > > &beam_data,
                         const std::vector< DisplayField* > &fields)
 {
+
   // add a new beam to the display. 
   // The steps are:
   // 1. preallocate mode: find the beam to be drawn, or dynamic mode:
@@ -256,6 +257,11 @@ void PpiWidget::addBeam(const RadxRay *ray,
     
   } // if (newBeams.size() > 0) 
 
+
+  if (_params.debug >= Params::DEBUG_VERBOSE &&
+      _ppiBeams.size() % 10 == 0) {
+    cerr << "==>> _ppiBeams.size(): " << _ppiBeams.size() << endl;
+  }
 
   // newBeams has pointers to all of the newly added beams.  Render the
   // beam data.

@@ -17,8 +17,8 @@
 
 | LROSE code        | URL      |
 | -------------     |:-------------:|
-| libs       | https://github.com/NCAR/lrose-core/blob/master/docs/lrose-libs-summary.pdf |
-| apps       | https://github.com/NCAR/lrose-core/blob/master/docs/lrose-apps-summary.pdf |
+| libs       | https://github.com/NCAR/lrose-core/blob/master/docs/dev/lrose-libs-summary.pdf |
+| apps       | https://github.com/NCAR/lrose-core/blob/master/docs/dev/lrose-apps-summary.pdf |
 
 ## TDRP
 

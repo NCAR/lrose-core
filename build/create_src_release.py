@@ -260,6 +260,7 @@ def gitCheckout():
     os.chdir(tmpDir)
     shellCmd("git clone https://github.com/NCAR/lrose-core")
     shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
+    shellCmd("git clone https://github.com/NCAR/lrose-displays")
 
 ########################################################################
 # set up autoconf for configure etc
@@ -293,6 +294,9 @@ def setupAutoconf():
 # Run qmake for QT apps such as HawkEye to create _moc files
 
 def createQtMocFiles(appDir):
+    
+    if (os.path.isdir(appDir) == False):
+        return
     
     os.chdir(appDir)
     shellCmd("rm -f moc*");
@@ -350,6 +354,13 @@ def createTarFile():
     netcdfDir = os.path.join(tmpDir, "lrose-netcdf")
     netcdfSubDir = os.path.join(tarDir, "lrose-netcdf")
     os.makedirs(netcdfSubDir)
+
+    # Copy the color-scales dir from lrose-displays into tar dir (under share)
+    
+    displaysDir = os.path.join(tmpDir, "lrose-displays/color_scales")
+    displaysSubDir = os.path.join(tarDir, "share/")
+    os.makedirs(displaysSubDir)
+    shellCmd("rsync -av " + displaysDir + " " + displaysSubDir)
     
     if (options.package == "cidd"):
         name = "build_and_install_netcdf.m32"

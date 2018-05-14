@@ -1367,7 +1367,6 @@ void BscanManager::_handleRealtimeData()
     if (ray == NULL) {
       return; // no pending rays
     }
-    AllocCheck::inst().addAlloc();
     
     if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "  Got a ray, time, el, az: "
@@ -1378,8 +1377,8 @@ void BscanManager::_handleRealtimeData()
     
     RadxTime thisRayTime = ray->getRadxTime();
     double timeSincePrev = thisRayTime - _readerRayTime;
-    if (timeSincePrev > 0 &&
-        timeSincePrev < (_params.bscan_min_secs_between_reading_beams)) {
+    if ((timeSincePrev > 0) &&
+        (timeSincePrev < _params.bscan_min_secs_between_reading_beams)) {
       // discard
       if (_params.debug >= Params::DEBUG_EXTRA) {
         cerr << "  Discarding ray, not enough elapsed time" << endl;
@@ -1444,7 +1443,6 @@ void BscanManager::_handleRealtimeDataForImages()
     if (ray == NULL) {
       return; // no pending rays
     }
-    AllocCheck::inst().addAlloc();
     
     if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "  Got a ray, time, el, az: "

@@ -29,6 +29,12 @@ paramdef enum debug_t {
 
 paramdef boolean {
   p_default = FALSE;
+  p_descr = "Print out checks on ray memory allocation.";
+  p_help = "If TRUE, the app will keep track of the number of rays allocated and freed, and print out that information every 100 rays.";
+} check_ray_alloc;
+
+paramdef boolean {
+  p_default = FALSE;
   p_descr = "Option to register this process with the process mapper (procmap).";
   p_help = "If TRUE, every minute this process will register a heartbeat with procmap. If the process hangs, it will be restared by the auto_restarter.";
 } register_with_procmap;
@@ -585,6 +591,12 @@ paramdef enum legend_pos_t {
   p_descr = "Position of main legend in the RHI plot window";
   p_help = "This include time, field name and elevation angle.";
 } rhi_main_legend_pos;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Size of the queue for RHI beams.";
+  p_help = "After the queue reaches this size, older beams are discarded.";
+} rhi_beam_queue_size;
 
 commentdef {
   p_header = "BSCAN TIME LIMITS";

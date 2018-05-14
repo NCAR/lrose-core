@@ -1267,19 +1267,6 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 
     _rhiMode = true;
 
-    // Store the ray location using the elevation angle and the RHI location
-    // table
-
-    // double el = 90.0 - ray->getElevationDeg();
-    // if (el < 0.0)
-    //   el += 360.0;
-    // _storeRayLoc(ray, el, platform.getRadarBeamWidthDegV(), _rhiRayLoc);
-
-    // Save the angle information for the next iteration
-
-    // _prevEl = el;
-    // _prevAz = -9999.0;
-    
     // If this is the first RHI beam we've encountered, automatically open
     // the RHI window.  After this, opening and closing the window will be
     // left to the user.
@@ -1295,7 +1282,6 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
     _rhi->addBeam(ray, fieldData, _fields);
     _rhiWindow->setAzimuth(ray->getAzimuthDeg());
     _rhiWindow->setElevation(ray->getElevationDeg());
-    AllocCheck::inst().addAlloc();
     
   } else {
 
@@ -1315,7 +1301,6 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
     // Add the beam to the display
     
     _ppi->addBeam(ray, _startAz, _endAz, fieldData, _fields);
-    AllocCheck::inst().addAlloc();
 
   }
   
@@ -1369,7 +1354,7 @@ void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
   for (int ii = startIndex; ii <= endIndex; ii++) {
     ray_loc[ii].ray = ray;
     ray_loc[ii].active = true;
-    ray_loc[ii].master = false;
+    // ray_loc[ii].master = false;
     ray_loc[ii].startIndex = startIndex;
     ray_loc[ii].endIndex = endIndex;
   }
@@ -1377,9 +1362,8 @@ void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
   // indicate which ray is the master
   // i.e. it is responsible for ray memory
     
-  int midIndex = (int) (az * RayLoc::RAY_LOC_RES);
-  ray_loc[midIndex].master = true;
-  ray->addClient();
+  // int midIndex = (int) (az * RayLoc::RAY_LOC_RES);
+  // ray_loc[midIndex].master = true;
 
 }
 
@@ -1419,12 +1403,12 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
 	// If the master is in the overlap area, then it needs to be moved
 	// outside of this area
 
-	if (ray_loc[j].master)
-	  ray_loc[start_index-1].master = true;
+	// if (ray_loc[j].master)
+	//   ray_loc[start_index-1].master = true;
 	
 	ray_loc[j].ray = NULL;
 	ray_loc[j].active = false;
-	ray_loc[j].master = false;
+	// ray_loc[j].master = false;
       }
 
       // Update the end indices for the remaining locations in the current
@@ -1451,11 +1435,11 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
       for (int j = loc_start_index; j <= end_index; ++j) {
 	// If the master is in the overlap area, then it needs to be moved
 	// outside of this area
-	if (ray_loc[j].master)
-	  ray_loc[end_index+1].master = true;
+	// if (ray_loc[j].master)
+	//   ray_loc[end_index+1].master = true;
 	ray_loc[j].ray = NULL;
 	ray_loc[j].active = false;
-	ray_loc[j].master = false;
+	// ray_loc[j].master = false;
       }
 
       // Update the start indices for the remaining locations in the current
@@ -1598,7 +1582,7 @@ void PolarManager::_ppiLocationClicked(double xkm, double ykm,
     if (_params.debug) {
       cerr << "    No ray data yet..." << endl;
       cerr << "      active = " << _ppiRayLoc[rayIndex].active << endl;
-      cerr << "      master = " << _ppiRayLoc[rayIndex].master << endl;
+      // cerr << "      master = " << _ppiRayLoc[rayIndex].master << endl;
       cerr << "      startIndex = " << _ppiRayLoc[rayIndex].startIndex << endl;
       cerr << "      endIndex = " << _ppiRayLoc[rayIndex].endIndex << endl;
     }

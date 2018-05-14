@@ -229,11 +229,6 @@ paramdef boolean {
   p_descr = "Note: monitor_test_pulse must be set to TRUE for this to be available.";
 } append_test_pulse_to_status_xml;
 
-paramdef string {
-  p_default = "SBandTestPulse";
-  p_descr = "Tag to delineate test pulse block in output XML.";
-} test_pulse_xml_tag;
-
 paramdef boolean {
   p_default = false;
   p_descr = "Option to augment status XML with secondary data from an FMQ.";
@@ -255,11 +250,34 @@ paramdef boolean {
   p_descr = "Option to compute test pulse power and add to monitoring.";
 } monitor_test_pulse;
 
+paramdef string {
+  p_default = "SBandTestPulse";
+  p_descr = "Tag to delineate test pulse block in output XML.";
+} test_pulse_xml_tag;
+
 paramdef double {
-  p_default = 145.0;
-  p_descr = "Range to test pulse (km).";
-  p_help = "We compute the gate number from this range. The power at this gate is averaged over the monitoring interval.";
-} test_pulse_range_km;
+  p_default = 148.7;
+  p_descr = "Range to test pulse for HC channel (km).";
+  p_help = "We compute the gate number from this range.";
+} test_pulse_range_km_hc;
+
+paramdef double {
+  p_default = 148.7;
+  p_descr = "Range to test pulse for HX channel (km).";
+  p_help = "We compute the gate number from this range.";
+} test_pulse_range_km_hx;
+
+paramdef double {
+  p_default = 149.0;
+  p_descr = "Range to test pulse for VC channel (km).";
+  p_help = "We compute the gate number from this range.";
+} test_pulse_range_km_vc;
+
+paramdef double {
+  p_default = 149.0;
+  p_descr = "Range to test pulse for VX channel (km).";
+  p_help = "We compute the gate number from this range.";
+} test_pulse_range_km_vx;
 
 paramdef int {
   p_default = 5000;
@@ -267,16 +285,16 @@ paramdef int {
 } test_pulse_n_samples;
 
 paramdef boolean {
-  p_default = false;
-  p_descr = "If this is a dual-polarization system, is it operating in fast alternating mode?";
+  p_default = true;
+  p_descr = "Are we running in alternating mode?";
   p_help = "If true, the HV flag is used to determine which receiver path to use.";
-} dual_pol_alternating_mode;
+} alternating_mode;
 
 paramdef boolean {
-  p_default = false;
-  p_descr = "If this is a dual-polarization system, does it have switching receivers?";
+  p_default = true;
+  p_descr = "Does the receiver switch?";
   p_help = "If true, then there is a co-pol receiver path and a cross-pol receiver path. If false, there is an H and V receiver path.";
-} dual_pol_switching_receivers;
+} switching_receivers;
 
 commentdef {
   p_header = "SWEEP NUMBER";
