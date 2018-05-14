@@ -36,7 +36,7 @@ using namespace std;
 
 /// Wraps the internal default color scales from Solo3 code.
 
-class SoloDefaultColorWrapper{ //  : public SiiPalette { // , public ColorTableManager {
+class SoloDefaultColorWrapper{
 
 public:
 
@@ -47,7 +47,7 @@ public:
 
 private: 
   // color map entries
-  // these define the color scale colos, values and limits
+  // these define the color scale colors, values and limits
   SoloDefaultColorWrapper();
 
   bool _debug;
@@ -58,8 +58,6 @@ public:
 
   ~SoloDefaultColorWrapper();
  
-  //  static SoloDefaultColorWrapper *_instance;
-
   // Find the ColorMap by the palette name                                                                            
   // e.g. lookupColorTable("carbone17");                                               
   ColorMap lookupColorTable(string parm);

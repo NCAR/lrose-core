@@ -336,33 +336,29 @@ int HawkEye::_setupDisplayFields()
     ColorMap map;
     map.setName(pfld.label);
     map.setUnits(pfld.units);
-    // check here for smart color scale; look up by field name/label and
-    // see if the name is a usual parameter for a known color map
-    SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
-    ColorMap colorMap;
 
 #ifdef SMART_COLOR_SCALES    
 
-    try {
-      colorMap = sd.ColorMapForUsualParm.at(pfld.label);
-      if (_params.debug) {
-        cerr << " retrieved using " <<  pfld.label  << endl;
-        if (_params.debug) colorMap.print(cout);
-      }
-
-      map = colorMap;
-      // HERE: What is missing from the ColorMap object??? 
-    } catch (std::out_of_range ex) {
-      cerr << "WARNING - did not find default color table for parameter " 
-        << pfld.label << ", looking for external color scale\n";
-        
-      if (map.readMap(colorMapPath)) {
-        cerr << "ERROR - HawkEye::_setupDisplayFields()" << endl;
+    if (map.readMap(colorMapPath)) {
+        cerr << "WARNING - HawkEye::_setupDisplayFields()" << endl;
         cerr << "  Cannot read in color map file: " << colorMapPath << endl;
-        return -1;
-      }
-    
-      if (_params.debug) map.print(cout);
+        cerr << "  Looking for default color map for field " << pfld.label << endl; 
+
+        try {
+          // check here for smart color scale; look up by field name/label and
+          // see if the name is a usual parameter for a known color map
+          SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
+          ColorMap colorMap = sd.ColorMapForUsualParm.at(pfld.label);
+          if (_params.debug) {
+            cerr << "  found default color map for " <<  pfld.label  << endl;
+            if (_params.debug) colorMap.print(cout);
+          }
+          map = colorMap;
+          // HERE: What is missing from the ColorMap object??? 
+        } catch (std::out_of_range ex) {
+          cerr << "ERROR - did not find default color map for field" << endl;
+          return -1;
+        }
     }
 
 #endif 

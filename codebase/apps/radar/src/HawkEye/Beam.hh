@@ -54,11 +54,11 @@
 #include "DisplayField.hh"
 #include "Params.hh"
 
-#if defined(OSX_LROSE) && !defined(SINCOS_DEFN)
-#define SINCOS_DEFN
-#define sincosf(x, s, c) __sincosf(x, s, c)
-#define sincos(x, s, c) __sincos(x, s, c)
-#endif
+//#if defined(OSX_LROSE) && !defined(SINCOS_DEFN)
+//#define SINCOS_DEFN
+//#define sincosf(x, s, c) __sincosf(x, s, c)
+//#define sincos(x, s, c) __sincos(x, s, c)
+//#endif
 
 /////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
