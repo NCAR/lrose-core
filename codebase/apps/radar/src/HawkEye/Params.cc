@@ -636,10 +636,10 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("input_mode");
     tt->descr = tdrpStrDup("Method for reading the input data");
-    tt->help = tdrpStrDup("\tIWRF_FMQ_INPUT: read IWRF moments from an FMQ.\n\tIWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.\n\tSIMULATED_INPUT: internally-generated test pattern data.\n\tSIMULATED_RHI_INPUT: internally-generated test pattern data for RHIs.\n\tDSR_FMQ_INPUT: deprecated.");
+    tt->help = tdrpStrDup("\tIWRF_FMQ_INPUT: read IWRF moments from an FMQ.\n\tIWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.\n\tSIMULATED_INPUT: internally-generated test pattern data.\n\tDSR_FMQ_INPUT: deprecated.");
     tt->val_offset = (char *) &input_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("input_mode_t");
-    tt->enum_def.nfields = 5;
+    tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("IWRF_FMQ_INPUT");
@@ -648,10 +648,8 @@
       tt->enum_def.fields[1].val = IWRF_TCP_INPUT;
       tt->enum_def.fields[2].name = tdrpStrDup("SIMULATED_INPUT");
       tt->enum_def.fields[2].val = SIMULATED_INPUT;
-      tt->enum_def.fields[3].name = tdrpStrDup("SIMULATED_RHI_INPUT");
-      tt->enum_def.fields[3].val = SIMULATED_RHI_INPUT;
-      tt->enum_def.fields[4].name = tdrpStrDup("DSR_FMQ_INPUT");
-      tt->enum_def.fields[4].val = DSR_FMQ_INPUT;
+      tt->enum_def.fields[3].name = tdrpStrDup("DSR_FMQ_INPUT");
+      tt->enum_def.fields[3].val = DSR_FMQ_INPUT;
     tt->single_val.e = IWRF_FMQ_INPUT;
     tt++;
     
@@ -2693,7 +2691,7 @@
     tt->descr = tdrpStrDup("Number of milliseconds to sleep between beams in simulated input mode.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &sim_sleep_msecs - &_start_;
-    tt->single_val.i = 50;
+    tt->single_val.i = 10;
     tt++;
     
     // Parameter 'sim_n_gates'

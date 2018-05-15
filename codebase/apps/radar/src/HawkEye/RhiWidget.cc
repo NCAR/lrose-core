@@ -95,7 +95,7 @@ RhiWidget::~RhiWidget()
   // delete all of the dynamically created beams
 
   for (size_t i = 0; i < _rhiBeams.size(); ++i) {
-    delete _rhiBeams[i];
+    Beam::deleteIfUnused(_rhiBeams[i]);
   }
   _rhiBeams.clear();
 
@@ -121,14 +121,17 @@ void RhiWidget::addBeam(const RadxRay *ray,
   _storeRayLoc(ray);
 
   // Add the beam to the beam list
-
+  
   RhiBeam* beam = new RhiBeam(_params, ray,
                               _manager.getPlatform().getAltitudeKm(),
                               _fields.size(), _startElev, _endElev);
+  beam->addClient();
+
   // ray->addClient();
   if ((int) _rhiBeams.size() == _params.rhi_beam_queue_size) {
     RhiBeam *oldBeam = _rhiBeams.front();
     delete oldBeam;
+    Beam::deleteIfUnused(oldBeam);
     _rhiBeams.pop_front();
   }
   _rhiBeams.push_back(beam);
@@ -837,7 +840,7 @@ void RhiWidget::clear()
   // Clear out the beam array
   
   for (size_t i = 0; i < _rhiBeams.size(); i++) {
-    delete _rhiBeams[i];
+    Beam::deleteIfUnused(_rhiBeams[i]);
   }
   _rhiBeams.clear();
   _pointClicked = false;
