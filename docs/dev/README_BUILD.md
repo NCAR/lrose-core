@@ -135,6 +135,20 @@ Xvfb xorg-x11-fonts-misc xorg-x11-fonts-75dpi xorg-x11-fonts-100dpi \
 gnuplot ImageMagick-devel ImageMagick-c++-devel
 ```
 
+On Debian-based hosts you can install the packages required to build the lrose-blaze formula with these commands:
+(The debian packages don't install qmake-qt5. I worked around the problem with a symbolic link)
+
+```
+sudo apt-get update 
+sudo apt-get install -y  \
+    libbz2-dev libx11-dev libpng12-dev libfftw3-dev \
+    libjasper-dev qtbase5-dev git \
+    gcc g++ gfortran libfl-dev \
+    automake make libtool pkg-config libexpat1-dev python
+
+sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake /usr/bin/qmake-qt5
+```
+
 ### Required LINUX packages for the CIDD build
 
 See: [README_CIDD.md](./README_CIDD.md).
