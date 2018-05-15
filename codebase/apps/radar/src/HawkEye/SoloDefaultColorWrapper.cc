@@ -39,7 +39,6 @@ using namespace std;
 
 SoloDefaultColorWrapper::SoloDefaultColorWrapper() 
 {
-  //static SoloDefaultColorWrapper _instance;
   _debug = false;
 
   ImportSoloPalettes();
@@ -55,7 +54,8 @@ SoloDefaultColorWrapper::~SoloDefaultColorWrapper()
 // It throws out_of_range if parm is not recognized.
 ColorMap SoloDefaultColorWrapper::lookupColorTable(string parm) 
 {
-  cerr << "looking for " << parm << endl;
+  if (_debug)
+    cerr << "looking for " << parm << endl;
   return _SoloColorTableToHawkEyeColorMap[parm];
 }
 
@@ -114,7 +114,7 @@ End For
 
 void SoloDefaultColorWrapper::makeAssociations() {
 
-  /* 
+  /*  keep this ... it helps document the notation below 
 SiiPalette(const string &palette_name,
              const string &usual_parms,
              const double center_data_value, const double color_width,
@@ -122,19 +122,7 @@ SiiPalette(const string &palette_name,
   */
 
   ColorMap colorMap;
-  // set min and max value for associated ColorMap
-  //  _minValue(_centerDataValue - 0.5 * _numColors * _colorWidth),
-  //_maxValue(_centerDataValue + _numColors * _colorWidth),
-
-  //SiiPalette * pal;
-
-  // create dictionary to query by usual parms                                                                    
-  // map <usual parm, palette name>   _usualParmToPaletteName;                                                       
-  // map<string, string> _usualParmToPaletteName;
-
-  // map <palette name, color table name> _paletteNameToColorTable;                                         
-  // map<string, string> _paletteNameToColorTable;
-
+  // set min and max value for ColorMap, along with the color table
 
   //pal = new SiiPalette("p_ahav", "AH,AV,", 0.0, 22.0, "carbone17");
   colorMap = constructColorMap(0.0, 22.0, "carbone17");

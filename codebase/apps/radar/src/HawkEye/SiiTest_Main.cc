@@ -35,13 +35,82 @@
 #include "SoloDefaultColorWrapper.hh"
 #include "SiiPalette.hh"
 
+
+bool Test_Exception() {
+  bool result = false;
+
+  SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
+  ColorMap colorMap;
+
+  try {
+    colorMap = sd.ColorMapForUsualParm.at("NOTIN");
+  } catch (out_of_range ex) {
+    //cerr << "exception caught " << ex << endl;
+    result = true;
+  }
+
+  return result;
+}
+
+bool Test_Rounding() {
+  bool result = false;
+
+  return result;
+
+}
+
+bool Test_UsualParmFound() {
+  bool result = true;
+
+  SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
+  ColorMap colorMap;
+
+  colorMap = sd.ColorMapForUsualParm.at("AV");
+  if (colorMap.getName().compare("p_ahav") != 0) {
+    cerr << "retrieving AV failed\n";
+    result = false;
+  }
+    
+  colorMap = sd.ColorMapForUsualParm.at("KAC");
+  if (colorMap.getName().compare("p_raccum") != 0) {
+    cerr << "retrieving KAC failed\n";
+    result = false;
+  }
+
+  return result;
+
+}
+
 // main
 
 int main(int argc, char **argv)
 
 {
 
-  SoloDefaultColorWrapper sd;
+  if (!Test_Exception()) {
+    cerr << "Test_Exception failed\n";
+    exit(1);
+  } else {
+    cerr << "Test_Exception passed\n";
+  }
+
+  if (!Test_Rounding()) {
+    cerr << "Test_Rounding failed\n";
+    exit(1);
+  } else {
+    cerr << "Test_Rounding passed\n";
+  }
+
+  if (!Test_UsualParmFound()) {
+    cerr << "Test_UsualParmFound failed\n";
+    exit(1);
+  } else {
+    cerr << "Test_UsualParmFound passed\n";
+  }
+
+
+/* 
+  SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
   string param;
   param = "RHO";
   //  SiiPalette *sp = sd.lookupByUsualName(param); // eventually, this would return ColorMap
@@ -74,8 +143,11 @@ int main(int argc, char **argv)
     colorMap = sd.ColorMapForUsualParm["NOTIN"];
     colorMap.print(cout);
   } catch (out_of_range ex) {
-    cerr << "exception caught " << ex << endl;
+    // cerr << "exception caught " << ex << endl;
   }
+*/
+
+
 /*
   vector<unsigned int> *rgbValues = sd.ToRGB( "   0.539   0.066   0.559");
   cout << "rgb for 0.539   0.066   0.559 ... ";
