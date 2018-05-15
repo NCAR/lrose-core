@@ -127,10 +127,8 @@ void RhiWidget::addBeam(const RadxRay *ray,
                               _fields.size(), _startElev, _endElev);
   beam->addClient();
 
-  // ray->addClient();
   if ((int) _rhiBeams.size() == _params.rhi_beam_queue_size) {
     RhiBeam *oldBeam = _rhiBeams.front();
-    delete oldBeam;
     Beam::deleteIfUnused(oldBeam);
     _rhiBeams.pop_front();
   }
