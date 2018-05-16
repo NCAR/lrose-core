@@ -62,8 +62,9 @@
 #include <Radx/UfRadxFile.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
-#include <Ncxx/Hdf5xx.hh>
 #include <Radx/RadxSweep.hh>
+#include <Radx/RadxPath.hh>
+#include <Ncxx/Hdf5xx.hh>
 #include <unistd.h>
 #include <cstring>
 #include <cstdio>
@@ -2015,9 +2016,9 @@ int RadxFile::makeDirRecurse(const string &dir)
 //
 // The tmp path is in the same directory as the final path.
 //
-// If tmp_file_name is non-null, it is used for the file name.
-// If it is NULL, the name is 'tmp.pid.tmp', where pid is
-// determined using the getpid() function.
+// If tmpFileName is non-empty, it is used for the file name.
+// If it is empty, the name is 'tmp.pid.timesec.timeusec.tmp',
+// where pid is determined using the getpid() function.
 
 string RadxFile::tmpPathFromDir(const string &dir,
                                 const string &tmpFileName)
@@ -2056,23 +2057,22 @@ string RadxFile::tmpPathFromDir(const string &dir,
 //
 // The tmp path is in the same directory as the final file.
 //
-// If tmp_file_name is non-null, it is used for the file name.
-// If it is NULL, the name is 'tmp.pid.tmp', where pid is
-// determined using the getpid() function.
+// If tmpFileName is non-empty, it is used for the file name.
+// If it is empty, the name is 'tmp.pid.timesec.timeusec.tmp',
+// where pid is determined using the getpid() function.
 
 string RadxFile::tmpPathFromFilePath(const string &finalFilePath,
                                      const string &tmpFileName)
 
 {
 
-  // get the dir by stripping off the last delimiter
+  // get the dir
 
-  size_t delimPos = finalFilePath.find_last_of(PATH_SEPARATOR);
-  if (delimPos == string::npos) {
+  RadxPath path(finalFilePath);
+  if (path.isDir()) {
     return tmpPathFromDir(finalFilePath, tmpFileName);
   } else {
-    string dir(finalFilePath, 0, delimPos);
-    return tmpPathFromDir(dir, tmpFileName);
+    return tmpPathFromDir(path.getDirectory(), tmpFileName);
   }
 
 }

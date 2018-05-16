@@ -806,9 +806,9 @@ public:
   /// The intended use is to provide a tmp file path to which a file
   /// is written prior to renaming to the final name.
   /// The tmp path is in the same directory as the final path.
-  /// If tmp_file_name is non-empty, it is used for the file name.
-  /// If it is empty, the name is 'tmp.pid.tmp', where pid is
-  /// determined using the getpid() function.
+  /// If tmpFileName is non-empty, it is used for the file name.
+  /// If it is empty, the name is 'tmp.pid.timesec.timeusec.tmp',
+  /// where pid is determined using the getpid() function.
   
   static string tmpPathFromDir(const string &dir,
                                const string &tmpFileName);
@@ -819,9 +819,9 @@ public:
   /// The intended use is to provide a tmp file path to which a file
   /// is written prior to renaming to the final name.
   /// The tmp path is in the same directory as the final file.
-  /// If tmp_file_name is non-empty, it is used for the file name.
-  /// If it is empty, the name is 'tmp.pid.tmp', where pid is
-  /// determined using the getpid() function.
+  /// If tmpFileName is non-empty, it is used for the file name.
+  /// If it is empty, the name is 'tmp.pid.timesec.timeusec.tmp',
+  /// where pid is determined using the getpid() function.
   
   static string tmpPathFromFilePath(const string &finalFilePath,
                                     const string &tmpFileName);
