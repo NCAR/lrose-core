@@ -310,6 +310,14 @@ int NcxxRadxFile::_writeSweepToDir(const RadxVol &vol,
             scanType.c_str());
   }
   
+  // make sure the file name is valid - i.e. no / or whitespace
+
+  for (size_t ii = 0; ii < strlen(fileName); ii++) {
+    if (isspace(fileName[ii]) || fileName[ii] == '/') {
+      fileName[ii] = '_';
+    }
+  }
+
   char outPath[BUFSIZ];
   sprintf(outPath, "%s%s%s",
           outDir.c_str(), PATH_SEPARATOR,  fileName);
