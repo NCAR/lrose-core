@@ -7,21 +7,28 @@ template = """
 require 'formula'
 
 class Radx < Formula
-  homepage 'http://www.ral.ucar.edu/projects/titan/docs/radial_formats/radx.html'
+  homepage 'https://ncar.github.io/lrose-core'
 
   url '{0}'
   version '{1}'
   sha256 '{2}'
 
   depends_on 'hdf5' => 'enable-cxx'
-  depends_on 'udunits'
   depends_on 'netcdf' => 'enable-cxx-compat'
+  depends_on 'udunits'
   depends_on 'fftw'
+  depends_on 'flex'
+  depends_on 'jasper'
+  depends_on 'jpeg'
   depends_on 'szip'
+  depends_on 'pkg-config'
 
   def install
+    Dir.chdir("codebase")
     system "./configure", "--disable-dependency-tracking", "--prefix=#{{prefix}}"
     system "make install"
+    Dir.chdir("..")
+    system "rsync", "-av", "share", "#{{prefix}}"
   end
 
   def test
@@ -62,3 +69,4 @@ if __name__ == '__main__':
 	build_radx_formula(sys.argv[1], sys.argv[2], sys.argv[3])
     else:
 	print "usage: {0} ftp_dir tar_name formula_name".format(sys.argv[0])
+
