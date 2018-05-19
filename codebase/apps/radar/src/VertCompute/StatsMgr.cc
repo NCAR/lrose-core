@@ -384,35 +384,35 @@ void StatsMgr::printResults360(FILE *out)
     return;
   }
   
-  time_t fileTime = (time_t) _startTime;
+  time_t startTime = (time_t) _startTime360;
   
-  fprintf(out, "========================================\n");
-  fprintf(out, "Vertical-pointing ZDR calibration\n");
-  fprintf(out, "  Time: %s\n", DateTime::strm(fileTime).c_str());
-  fprintf(out, "  n samples             : %d\n", _params.n_samples);
-  fprintf(out, "  min snr (dB)          : %g\n", _params.min_snr);
-  fprintf(out, "  max snr (dB)          : %g\n", _params.max_snr);
-  fprintf(out, "  min vel (m/s)         : %g\n", _params.min_vel);
-  fprintf(out, "  max vel (m/s)         : %g\n", _params.max_vel);
-  fprintf(out, "  min rhohv             : %g\n", _params.min_rhohv);
-  fprintf(out, "  max ldr               : %g\n", _params.max_ldr);
-  fprintf(out, "  zdr_n_sdev            : %g\n", _params.zdr_n_sdev);
-  fprintf(out, "  min ht for stats (km) : %g\n", _params.min_ht_for_stats);
-  fprintf(out, "  max ht for stats (km) : %g\n", _params.max_ht_for_stats);
-  fprintf(out, "  mean elevation (deg)  : %g\n", _meanEl);
-  fprintf(out, "  mean ZDRm (dB)        : %g\n", _meanZdrm);
-  fprintf(out, "  sdev ZDRm (dB)        : %g\n", _sdevZdrm);
-  fprintf(out, "  n for sdev ZDRm stats : %g\n", _countZdrm);
-  
-  fprintf(out, "========================================\n");
-  fprintf(out, "%10s%10s%10s%10s%10s%10s%10s%10s%10s\n",
+  fprintf(out, " ==========================================================================================\n");
+  fprintf(out, " Vertical-pointing ZDR calibration\n");
+  fprintf(out, "   Time: %s\n", DateTime::strm(startTime).c_str());
+  fprintf(out, "   n samples             : %8d\n", _params.n_samples);
+  fprintf(out, "   n rotations           : %8d\n", (int) (_countZdrm + 0.5));
+  fprintf(out, "   min snr (dB)          : %8.3f\n", _params.min_snr);
+  fprintf(out, "   max snr (dB)          : %8.3f\n", _params.max_snr);
+  fprintf(out, "   min vel (m/s)         : %8.3f\n", _params.min_vel);
+  fprintf(out, "   max vel (m/s)         : %8.3f\n", _params.max_vel);
+  fprintf(out, "   min rhohv             : %8.3f\n", _params.min_rhohv);
+  fprintf(out, "   max ldr               : %8.3f\n", _params.max_ldr);
+  fprintf(out, "   zdr_n_sdev            : %8.3f\n", _params.zdr_n_sdev);
+  fprintf(out, "   min ht for stats (km) : %8.3f\n", _params.min_ht_for_stats);
+  fprintf(out, "   max ht for stats (km) : %8.3f\n", _params.max_ht_for_stats);
+  fprintf(out, "   mean elevation (deg)  : %8.3f\n", _meanEl);
+  fprintf(out, "   mean ZDRm (dB)        : %8.3f\n", _meanZdrm);
+  fprintf(out, "   sdev ZDRm (dB)        : %8.3f\n", _sdevZdrm);
+  fprintf(out, "   ZDR correction (dB)   : %8.3f\n", _meanZdrm * -1.0);
+  fprintf(out, " ==========================================================================================\n");
+  fprintf(out, " %10s%10s%10s%10s%10s%10s%10s%10s%10s\n",
           "Ht", "npts", "snr", "dBZ", "vel", "zdr_m",
           "ldrh", "ldrv", "rhohv");
   for (int ii = 0; ii < (int) _layers.size(); ii++) {
     const LayerStats &layer = *(_layers[ii]);
     if (layer.getMean().snr > -9990) {
       fprintf(out,
-              "%10.2f%10d%10.3f%10.3f%10.1f%10.3f%10.3f%10.3f%10.3f\n",
+              " %10.2f%10d%10.3f%10.3f%10.1f%10.3f%10.3f%10.3f%10.3f\n",
               layer.getMeanHt(),
               layer.getNValid(),
               layer.getMean().snr,
@@ -574,36 +574,33 @@ void StatsMgr::printGlobalResults(FILE *out)
   time_t startTime = (time_t) _startTime;
   time_t endTime = (time_t) _endTime;
 
-  fprintf(out, "========================================\n");
-  fprintf(out, "Vertical-pointing ZDR calibration - global\n");
-  fprintf(out, "Start time: %s\n", DateTime::strm(startTime).c_str());
-  fprintf(out, "End time  : %s\n", DateTime::strm(endTime).c_str());
-  fprintf(out, "  n samples             : %d\n", _params.n_samples);
-  fprintf(out, "  n complete rotations  : %d\n", _nRotations);
-  fprintf(out, "  min snr (dB)          : %g\n", _params.min_snr);
-  fprintf(out, "  max snr (dB)          : %g\n", _params.max_snr);
-  fprintf(out, "  min vel (m/s)         : %g\n", _params.min_vel);
-  fprintf(out, "  max vel (m/s)         : %g\n", _params.max_vel);
-  fprintf(out, "  min rhohv             : %g\n", _params.min_rhohv);
-  fprintf(out, "  max ldr               : %g\n", _params.max_ldr);
-  fprintf(out, "  zdr_n_sdev            : %g\n", _params.zdr_n_sdev);
-  fprintf(out, "  min ht for stats (km) : %g\n", _params.min_ht_for_stats);
-  fprintf(out, "  max ht for stats (km) : %g\n", _params.max_ht_for_stats);
-  fprintf(out, "  mean elevation (deg)  : %g\n", _globalMeanEl);
-  fprintf(out, "  mean ZDRm (dB)        : %g\n", _globalMeanZdrm);
-  fprintf(out, "  sdev ZDRm (dB)        : %g\n", _globalSdevZdrm);
-  fprintf(out, "  sdev of mean ZDRm (dB): %g\n", _globalMeanOfSdevZdrm);
-  fprintf(out, "  n for sdev ZDRm stats : %g\n", _globalCountZdrm);
-
-  fprintf(out, "========================================\n");
-  fprintf(out, "%10s%10s%10s%10s%10s%10s%10s%10s%10s\n",
+  fprintf(out, " ==========================================================================================\n");
+  fprintf(out, " Vertical-pointing ZDR calibration - global\n");
+  fprintf(out, " Start time: %s\n", DateTime::strm(startTime).c_str());
+  fprintf(out, " End time  : %s\n", DateTime::strm(endTime).c_str());
+  fprintf(out, "   n samples             : %8d\n", _params.n_samples);
+  fprintf(out, "   n complete rotations  : %8d\n", _nRotations);
+  fprintf(out, "   min snr (dB)          : %8.3f\n", _params.min_snr);
+  fprintf(out, "   max snr (dB)          : %8.3f\n", _params.max_snr);
+  fprintf(out, "   min vel (m/s)         : %8.3f\n", _params.min_vel);
+  fprintf(out, "   max vel (m/s)         : %8.3f\n", _params.max_vel);
+  fprintf(out, "   min rhohv             : %8.3f\n", _params.min_rhohv);
+  fprintf(out, "   max ldr               : %8.3f\n", _params.max_ldr);
+  fprintf(out, "   min ht for stats (km) : %8.3f\n", _params.min_ht_for_stats);
+  fprintf(out, "   max ht for stats (km) : %8.3f\n", _params.max_ht_for_stats);
+  fprintf(out, "   mean elevation (deg)  : %8.3f\n", _globalMeanEl);
+  fprintf(out, "   mean ZDRm (dB)        : %8.3f\n", _globalMeanZdrm);
+  fprintf(out, "   sdev ZDRm (dB)        : %8.3f\n", _globalSdevZdrm);
+  fprintf(out, "   ZDR correction (dB)   : %8.3f\n", _globalMeanZdrm * -1.0);
+  fprintf(out, " ==========================================================================================\n");
+  fprintf(out, " %10s%10s%10s%10s%10s%10s%10s%10s%10s\n",
           "Ht", "npts", "snr", "dBZ", "vel", "zdr_m",
           "ldrh", "ldrv", "rhohv");
   for (int ii = 0; ii < (int) _layers.size(); ii++) {
     const LayerStats &layer = *(_layers[ii]);
     if (layer.getMean().snr > -9990) {
       fprintf(out,
-              "%10.2f%10d%10.3f%10.3f%10.1f%10.3f%10.3f%10.3f%10.3f\n",
+              " %10.2f%10d%10.3f%10.3f%10.1f%10.3f%10.3f%10.3f%10.3f\n",
               layer.getMeanHt(),
               layer.getGlobalNValid(),
               layer.getGlobalMean().snr,
