@@ -514,6 +514,16 @@ int StatsMgr::writeGlobalResults()
 
   printGlobalResults(stdout);
 
+  // create the directory for the output files, if needed
+
+  if (ta_makedir_recurse(_params.output_dir)) {
+    int errNum = errno;
+    cerr << "ERROR - StatsMgr::writeGlobalResults";
+    cerr << "  Cannot create output dir: " << _params.output_dir << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+  
   // compute output file path
 
   time_t startTime = (time_t) _startTime;
