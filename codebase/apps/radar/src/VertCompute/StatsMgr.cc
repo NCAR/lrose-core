@@ -311,6 +311,10 @@ int StatsMgr::writeResults360()
 
 {
 
+  // print to stdout
+
+  printResults360(stdout);
+
   // create the directory for the output files, if needed
 
   if (ta_makedir_recurse(_params.output_dir)) {
@@ -347,9 +351,6 @@ int StatsMgr::writeResults360()
   }
 
   printResults360(out);
-  if (_params.debug) {
-    printResults360(stderr);
-  }
 
   if (_params.debug) {
     cerr << "-->> Writing 360 results file: " << outPath << endl;
@@ -510,7 +511,9 @@ int StatsMgr::writeResults360ToSpdb()
 int StatsMgr::writeGlobalResults()
 
 {
-  
+
+  printGlobalResults(stdout);
+
   // compute output file path
 
   time_t startTime = (time_t) _startTime;
@@ -539,9 +542,6 @@ int StatsMgr::writeGlobalResults()
   // print to file
 
   printGlobalResults(out);
-  if (_params.debug) {
-    printGlobalResults(stderr);
-  }
 
   if (_params.debug) {
     cerr << "-->> Writing global results file: " << outPath << endl;
