@@ -64,7 +64,7 @@ public:
   void setStartTime(double start_time) { _startTime = start_time; }
   void setEndTime(double end_time) { _endTime = end_time; }
   void setPrt(double prt) { _prt = prt; }
-  void setEl(double el) { _el = el; }
+  void setEl(double el);
   void setAz(double az);
 
   // add data for a point
@@ -104,7 +104,7 @@ private:
   
   int _nGates;
 
-  // analysis times
+  // analysis
 
   double _startTime;
   double _endTime;
@@ -115,6 +115,15 @@ private:
   double _prevAz;
   double _azMoved;
   int _nRotations;
+
+  // elevation
+
+  double _sumEl;
+  double _nEl;
+  double _meanEl;
+  double _globalSumEl;
+  double _globalNEl;
+  double _globalMeanEl;
 
   // layers
 

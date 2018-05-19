@@ -75,6 +75,13 @@ StatsMgr::StatsMgr(const string &prog_name,
   _azMoved = 0;
   _nRotations = 0;
 
+  _sumEl = 0.0;
+  _nEl = 0.0;
+  _meanEl = 0.0;
+  _globalSumEl = 0.0;
+  _globalNEl = 0.0;
+  _globalMeanEl = -9999;
+
   _globalCountZdrm = 0;
   _globalSumZdrm = 0;
   _globalSumSqZdrm = 0;
@@ -110,6 +117,21 @@ StatsMgr::~StatsMgr()
 
 }
 
+////////////////////
+// set the elevation
+
+void StatsMgr::setEl(double el) {
+
+  _el = el;
+
+  _sumEl += _el;
+  _nEl++;
+
+  _globalSumEl += _el;
+  _globalNEl++;
+
+}
+ 
 ////////////////////
 // set the azimuth
 
@@ -188,6 +210,8 @@ void StatsMgr::clearStats360()
   for (int ii = 0; ii < (int) _layers.size(); ii++) {
     _layers[ii]->clearData();
   }
+  _sumEl = 0.0;
+  _nEl = 0.0;
 }
   
 /////////////////////////
@@ -224,6 +248,8 @@ void StatsMgr::computeStats360()
     }
   }
 
+  _meanEl = _sumEl / _nEl;
+
   _countZdrm = sumValid;
   _meanZdrm = -9999;
   _sdevZdrm = -9999;
@@ -252,7 +278,9 @@ void StatsMgr::computeStats360()
 void StatsMgr::computeGlobalStats()
   
 {
-  
+
+  _globalMeanEl = _globalSumEl / _globalNEl;
+
   for (int ii = 0; ii < (int) _layers.size(); ii++) {
     _layers[ii]->computeGlobalStats();
   }
@@ -370,6 +398,7 @@ void StatsMgr::printResults360(FILE *out)
   fprintf(out, "  zdr_n_sdev            : %g\n", _params.zdr_n_sdev);
   fprintf(out, "  min ht for stats (km) : %g\n", _params.min_ht_for_stats);
   fprintf(out, "  max ht for stats (km) : %g\n", _params.max_ht_for_stats);
+  fprintf(out, "  mean elevation (deg)  : %g\n", _meanEl);
   fprintf(out, "  mean ZDRm (dB)        : %g\n", _meanZdrm);
   fprintf(out, "  sdev ZDRm (dB)        : %g\n", _sdevZdrm);
   fprintf(out, "  n for sdev ZDRm stats : %g\n", _countZdrm);
@@ -424,6 +453,7 @@ int StatsMgr::writeResults360ToSpdb()
 
   xml += TaXml::writeStartTag("VertPointingResults", 0);
 
+  xml += TaXml::writeDouble("meanElevation", 1, _meanEl);
   xml += TaXml::writeDouble("meanZdrm", 1, _meanZdrm);
   xml += TaXml::writeDouble("sdevZdrm", 1, _sdevZdrm);
   xml += TaXml::writeDouble("countZdrm", 1, _countZdrm);
@@ -549,6 +579,7 @@ void StatsMgr::printGlobalResults(FILE *out)
   fprintf(out, "  zdr_n_sdev            : %g\n", _params.zdr_n_sdev);
   fprintf(out, "  min ht for stats (km) : %g\n", _params.min_ht_for_stats);
   fprintf(out, "  max ht for stats (km) : %g\n", _params.max_ht_for_stats);
+  fprintf(out, "  mean elevation (deg)  : %g\n", _globalMeanEl);
   fprintf(out, "  mean ZDRm (dB)        : %g\n", _globalMeanZdrm);
   fprintf(out, "  sdev ZDRm (dB)        : %g\n", _globalSdevZdrm);
   fprintf(out, "  sdev of mean ZDRm (dB): %g\n", _globalMeanOfSdevZdrm);
